@@ -1,0 +1,32 @@
+{
+  "name": "com.bw.sw.sj.stub",
+  "description": "Stub module by BW",
+  "version": "0.1",
+  "author": "Ksenia Mikhaleva",
+  "license": "Apache 2.0",
+  "inputs": {
+    "cardinality": [
+      1,
+      1
+    ],
+    "types": [
+      "stream.kafka"
+    ]
+  },
+  "outputs": {
+    "cardinality": [
+      1,
+      1
+    ],
+    "types": [
+      "console"
+    ]
+  },
+  "module-type": "regular",
+  "engine": "spark-streaming",
+  "options": {
+
+  },
+  "validator-class": "com.bwsw.sj.stub.Validator",
+  "executor-class": "com.bw-sw.sj.stub.Executor"
+}
