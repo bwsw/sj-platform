@@ -2,10 +2,9 @@ package com.bwsw.sj.crud.rest
 
 import java.io._
 import java.util.jar.JarFile
-
-import com.bwsw.common.DAL.FileMetadataDAO
-import com.bwsw.common.fileUtils.FilesStorage
+import com.bwsw.common.file.utils.FilesStorage
 import com.bwsw.common.traits.Serializer
+import com.bwsw.sj.common.DAL.FileMetadataDAO
 import com.typesafe.config.Config
 import org.everit.json.schema.loader.SchemaLoader
 import org.json.{JSONTokener, JSONObject}

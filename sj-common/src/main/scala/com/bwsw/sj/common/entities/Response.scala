@@ -1,3 +1,3 @@
 package com.bwsw.sj.common.entities
 
-case class Response(statusCode: String, key: String, message: String)
+case class Response(statusCode: Int, key: String, message: String)

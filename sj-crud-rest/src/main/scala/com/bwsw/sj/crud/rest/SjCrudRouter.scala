@@ -15,31 +15,34 @@ import org.everit.json.schema.ValidationException
   * Created: 04/06/16
   * @author Kseniya Tomskikh
   */
-trait SjCrudRouter extends Directives with SjModulesApi with SjCommonApi {
+trait SjCrudRouter extends Directives
+  with SjModulesApi
+  with SjCommonApi {
+
   implicit val materializer: Materializer
 
   val exceptionHandler = ExceptionHandler {
     case BadRecord(msg) =>
       complete(HttpResponse(
         BadRequest,
-        entity = HttpEntity(`application/json`, serializer.serialize(Response("400", null, msg)))
+        entity = HttpEntity(`application/json`, serializer.serialize(Response(400, null, msg)))
       ))
     case BadRecordWithKey(msg, key) =>
       complete(HttpResponse(
         BadRequest,
-        entity = HttpEntity(`application/json`, serializer.serialize(Response("400", key, msg)))
+        entity = HttpEntity(`application/json`, serializer.serialize(Response(400, key, msg)))
       ))
     case ex: ValidationException =>
       complete(HttpResponse(
-        entity = HttpEntity(`application/json`, serializer.serialize(Response("500", null, "Specification.json is invalid: " + ex.getMessage)))
+        entity = HttpEntity(`application/json`, serializer.serialize(Response(500, null, "Specification.json is invalid")))
       ))
     case ex: EntityStreamSizeException =>
       complete(HttpResponse(
-        entity = HttpEntity(`application/json`, serializer.serialize(Response("500", null, "File is very large!")))
+        entity = HttpEntity(`application/json`, serializer.serialize(Response(500, null, "File is very large")))
       ))
-    case e: Exception =>
+    case ex: Exception =>
       complete(HttpResponse(
-        entity = HttpEntity(`application/json`, serializer.serialize(Response("500", null, "Internal server error: " + e.getMessage)))
+        entity = HttpEntity(`application/json`, serializer.serialize(Response(500, null, "Internal server error: " + ex.getMessage)))
       ))
   }
 

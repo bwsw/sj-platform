@@ -21,7 +21,6 @@ import scala.io.StdIn
 
 /**
   * Run object of CRUD Rest-API
-  *
   * Created: 04/06/16
   * @author Kseniya Tomskikh
   */
@@ -71,6 +70,6 @@ object SjCrudRestService extends App with SjCrudRouter {
   println(s"Server online at http://$host:$port/\nPress ENTER to stop...")
   StdIn.readLine()
   serverBinding.flatMap(_.unbind())
-    .onComplete(_ => system.terminate())
+    .onComplete(_ => system.shutdown())
 
 }

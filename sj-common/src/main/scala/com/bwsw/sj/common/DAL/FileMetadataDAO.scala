@@ -3,7 +3,7 @@ package com.bwsw.sj.common.DAL
 import com.bwsw.common.DAL.GenericMongoDAO
 import com.bwsw.common.exceptions.BadRecordWithKey
 import com.bwsw.common.traits.Serializer
-import com.bwsw.sj.common.module.entities.FileMetadata
+import com.bwsw.sj.common.entities.FileMetadata
 import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.MongoCollection
 

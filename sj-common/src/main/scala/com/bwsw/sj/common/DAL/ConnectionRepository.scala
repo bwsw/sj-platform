@@ -27,7 +27,7 @@ object ConnectionRepository {
 }
 
 object ConfigConstants {
-  val host = sys.env("MONGO_HOST")
+  val host = "localhost"//sys.env("MONGO_HOST")
   val port = sys.env("MONGO_PORT").toInt
 
   val databaseName = "stream_juggler"

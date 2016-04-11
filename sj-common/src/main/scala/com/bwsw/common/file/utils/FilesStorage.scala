@@ -2,8 +2,6 @@ package com.bwsw.common.file.utils
 
 import java.io.File
 
-import com.bwsw.sj.common.entities.Specification
-
 trait FilesStorage {
   def put(file: File, fileName: String)
 

@@ -1,9 +1,10 @@
 package com.bwsw.common.file.utils
 
 import java.io.File
+
 import com.bwsw.common.exceptions.BadRecordWithKey
-import com.bwsw.sj.common.entities.Specification
 import org.apache.commons.io.FileUtils
+
 import scala.reflect.io.{Directory, Path}
 
 class LocalStorage(pathToLocalStorage: String) extends FilesStorage {

@@ -6,11 +6,11 @@ import akka.http.scaladsl.model.Multipart.FormData
 import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Disposition`}
 import akka.http.scaladsl.model.{HttpResponse, HttpEntity}
 import akka.http.scaladsl.model.MediaTypes._
-import akka.http.scaladsl.server.{RequestContext, Directives}
+import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.stream.scaladsl.Source
 import com.bwsw.common.exceptions.BadRecordWithKey
-import com.bwsw.sj.common.entities.{Specification, TypedStream, Response}
+import com.bwsw.sj.common.entities.Response
 import com.bwsw.sj.crud.rest.SjCrudValidator
 import org.apache.commons.io.FileUtils
 
@@ -44,7 +44,7 @@ trait SjCommonApi extends Directives with SjCrudValidator {
                 if (storage.delete(filename)) {
                   complete(HttpEntity(
                     `application/json`,
-                    serializer.serialize(Response("200", null, s"Jar by name $name and version $version has been deleted"))
+                    serializer.serialize(Response(200, null, s"Jar by name $name and version $version has been deleted"))
                   ))
                 } else {
                   throw new BadRecordWithKey(s"Jar name $name and version $version hasn't been found", name)
@@ -64,7 +64,7 @@ trait SjCommonApi extends Directives with SjCrudValidator {
                 storage.put(uploadingFile, metadata.fileName, null, "custom")
                 complete(HttpEntity(
                   `application/json`,
-                  serializer.serialize(Response("200", null, s"Ok"))
+                  serializer.serialize(Response(200, null, s"Ok"))
                 ))
             }
           }
@@ -79,7 +79,7 @@ trait SjCommonApi extends Directives with SjCrudValidator {
           }
           complete(HttpEntity(
             `application/json`,
-            serializer.serialize(Response("200", null, msg))
+            serializer.serialize(Response(200, null, msg))
           ))
         }
       }

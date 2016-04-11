@@ -14,6 +14,11 @@ import org.apache.commons.io.FileUtils
 
 import akka.stream.scaladsl._
 
+/**
+  * Rest-api for module-jars
+  * Created: 04/08/2016
+  * @author Kseniya Tomskikh
+  */
 trait SjModulesApi extends Directives with SjCrudValidator {
 
   val modulesApi = {
@@ -29,7 +34,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                 storage.put(uploadingFile, metadata.fileName, specification, "module")
                 complete(HttpEntity(
                   `application/json`,
-                  serializer.serialize(Response("200", null, "Jar file has been uploaded"))
+                  serializer.serialize(Response(200, null, "Jar file has been uploaded"))
                 ))
               } else {
                 file.delete()
@@ -47,7 +52,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
           }
           complete(HttpEntity(
             `application/json`,
-            serializer.serialize(Response("200", null, msg))
+            serializer.serialize(Response(200, null, msg))
           ))
         }
       } ~
@@ -60,7 +65,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                   //todo validating module
                   ctx.complete(HttpEntity(
                     `application/json`,
-                    serializer.serialize(Response("200", null, s"Module validated"))
+                    serializer.serialize(Response(200, null, s"Module validated"))
                   ))
                 }
               } ~
@@ -69,10 +74,23 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                     //todo executing module
                     complete(HttpEntity(
                       `application/json`,
-                      serializer.serialize(Response("200", null, s"Module validated"))
+                      serializer.serialize(Response(200, null, s"Module executed"))
                     ))
                   }
-                } ~
+              } ~
+              pathSuffix("specification") {
+                pathEndOrSingleSlash {
+                  val fileMetadata = fileMetadataDAO.retrieve(name, typeName, version)
+                  validate(fileMetadata != null, s"Module not found") {
+                    get {
+                      complete(HttpEntity(
+                        `application/json`,
+                        serializer.serialize(fileMetadata.metadata.get("metadata").get)
+                      ))
+                    }
+                  }
+                }
+              } ~
               pathEndOrSingleSlash {
                 val fileMetadata = fileMetadataDAO.retrieve(name, typeName, version)
                 validate(fileMetadata != null, s"Module not found") {
@@ -92,7 +110,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                     if (storage.delete(filename)) {
                       complete(HttpEntity(
                         `application/json`,
-                        serializer.serialize(Response("200", null, s"Module $name for type $typeName has been deleted"))
+                        serializer.serialize(Response(200, null, s"Module $name for type $typeName has been deleted"))
                       ))
                     } else {
                       throw new BadRecordWithKey(s"Module $name hasn't been found", name)
@@ -106,13 +124,13 @@ trait SjModulesApi extends Directives with SjCrudValidator {
             val files = fileMetadataDAO.retrieveAllByModuleType(typeName)
             var msg = ""
             if (files.nonEmpty) {
-              msg = s"Uploaded modules for type $typeName: ${files.map(_.metadata.get("metadata").get.name).mkString(", ")}"
+              msg = s"Uploaded modules for type $typeName: ${files.map(_.metadata.get("metadata").get.name).mkString(",\n")}"
             } else {
               msg = s"Uploaded modules for type $typeName have not been found "
             }
             complete(HttpEntity(
               `application/json`,
-              serializer.serialize(Response("200", null, msg))
+              serializer.serialize(Response(200, null, msg))
             ))
           }
         }
