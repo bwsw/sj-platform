@@ -1,21 +1,26 @@
 package com.bwsw.sj.crud.rest.api
 
-import java.io.File
+import java.io.{FileNotFoundException, File}
 
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.server.{RequestContext, Directives}
 import akka.http.scaladsl.server.directives.FileInfo
 import com.bwsw.common.exceptions.BadRecordWithKey
-import com.bwsw.sj.common.entities.Response
+import com.bwsw.sj.common.entities.{FileMetadata, Response}
+import com.bwsw.sj.common.module.SparkStreamingValidator
+import com.bwsw.sj.common.module.entities.LaunchParameters
 import com.bwsw.sj.crud.rest.SjCrudValidator
 import akka.http.scaladsl.model.headers._
 import org.apache.commons.io.FileUtils
 
 import akka.stream.scaladsl._
 
+import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
+
 /**
   * Rest-api for module-jars
+  *
   * Created: 04/08/2016
   * @author Kseniya Tomskikh
   */
@@ -60,41 +65,54 @@ trait SjModulesApi extends Directives with SjCrudValidator {
         validate(checkModuleType(typeName), s"Module type $typeName is not exist") {
           pathPrefix(Segment) { (name: String) =>
             pathPrefix(Segment) { (version: String) =>
-              pathSuffix("instance") {
-                post { (ctx: RequestContext) =>
-                  //todo validating module
-                  ctx.complete(HttpEntity(
-                    `application/json`,
-                    serializer.serialize(Response(200, null, s"Module validated"))
-                  ))
-                }
-              } ~
-              pathSuffix("execute") {
-                  post {
-                    //todo executing module
-                    complete(HttpEntity(
+              val fileMetadata: FileMetadata = fileMetadataDAO.retrieve(name, typeName, version)
+              validate(fileMetadata != null, s"Module not found") {
+                val specification = fileMetadata.metadata.get("metadata").get
+                val filename = fileMetadata.filename
+
+                pathSuffix("instance") {
+                  post { (ctx: RequestContext) =>
+                    val options = serializer.deserialize[LaunchParameters](getEntityFromContext(ctx))
+                    val validatorClassName = specification.validateClass
+                    val jarFile = storage.get(filename, s"tmp/$filename")
+
+                    var msg = ""
+                    if (jarFile != null && jarFile.exists()) {
+                      if (moduleInstance(jarFile, validatorClassName, options)) {
+                        msg = s"Module is instance"
+                      } else {
+                        msg = s"Cannot instance of module"
+                      }
+                    } else {
+                      throw new FileNotFoundException("Jar not found in storage")
+                    }
+
+                    ctx.complete(HttpEntity(
                       `application/json`,
-                      serializer.serialize(Response(200, null, s"Module executed"))
+                      serializer.serialize(Response(200, null, msg))
                     ))
                   }
-              } ~
-              pathSuffix("specification") {
-                pathEndOrSingleSlash {
-                  val fileMetadata = fileMetadataDAO.retrieve(name, typeName, version)
-                  validate(fileMetadata != null, s"Module not found") {
+                } ~
+                pathSuffix("execute") {
+                    post {
+                      //todo executing module
+                      complete(HttpEntity(
+                        `application/json`,
+                        serializer.serialize(Response(200, null, s"Module executed"))
+                      ))
+                    }
+                  } ~
+                pathSuffix("specification") {
+                  pathEndOrSingleSlash {
                     get {
                       complete(HttpEntity(
                         `application/json`,
-                        serializer.serialize(fileMetadata.metadata.get("metadata").get)
+                        serializer.serialize(specification)
                       ))
                     }
                   }
-                }
-              } ~
-              pathEndOrSingleSlash {
-                val fileMetadata = fileMetadataDAO.retrieve(name, typeName, version)
-                validate(fileMetadata != null, s"Module not found") {
-                  val filename = fileMetadata.filename
+                } ~
+                pathEndOrSingleSlash {
                   get {
                     val jarFile = storage.get(filename, s"tmp/$filename")
                     if (jarFile != null && jarFile.exists()) {
@@ -135,6 +153,28 @@ trait SjModulesApi extends Directives with SjCrudValidator {
           }
         }
       }
+    }
+  }
+
+  /**
+    * Create instance of module
+    *
+    * @param file - jar-file
+    * @param validateClassName - validator classname of module
+    * @param options - start options for module
+    * @return - true, if options for module is valid
+    */
+  def moduleInstance(file: File, validateClassName: String, options: LaunchParameters) = {
+    try {
+      val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
+      val clazz = loader.loadClass(validateClassName)
+      val inst = clazz.newInstance()
+      val validator = inst.asInstanceOf[SparkStreamingValidator]
+      validator.validate(options)
+    } catch {
+      case ex: Exception =>
+        println(ex)
+        false
     }
   }
 }

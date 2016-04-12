@@ -1,10 +1,11 @@
 package com.bwsw.sj.crud.rest
 
+import java.io.FileNotFoundException
+
 import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model.{EntityStreamSizeException, HttpEntity, HttpResponse}
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.{ExceptionHandler, Directives}
-import akka.stream.Materializer
 import com.bwsw.common.exceptions.{BadRecordWithKey, BadRecord}
 import com.bwsw.sj.common.entities.Response
 import com.bwsw.sj.crud.rest.api.{SjCommonApi, SjModulesApi}
@@ -18,8 +19,6 @@ import org.everit.json.schema.ValidationException
 trait SjCrudRouter extends Directives
   with SjModulesApi
   with SjCommonApi {
-
-  implicit val materializer: Materializer
 
   val exceptionHandler = ExceptionHandler {
     case BadRecord(msg) =>
@@ -39,6 +38,11 @@ trait SjCrudRouter extends Directives
     case ex: EntityStreamSizeException =>
       complete(HttpResponse(
         entity = HttpEntity(`application/json`, serializer.serialize(Response(500, null, "File is very large")))
+      ))
+    case ex: FileNotFoundException =>
+      complete(HttpResponse(
+        BadRequest,
+        entity = HttpEntity(`application/json`, serializer.serialize(Response(400, null, "Jar-file for module is not found in storage")))
       ))
     case ex: Exception =>
       complete(HttpResponse(

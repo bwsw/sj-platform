@@ -2,6 +2,8 @@ package com.bwsw.sj.crud.rest
 
 import java.io._
 import java.util.jar.JarFile
+import akka.http.scaladsl.server.RequestContext
+import akka.stream.Materializer
 import com.bwsw.common.file.utils.FilesStorage
 import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.DAL.FileMetadataDAO
@@ -9,12 +11,18 @@ import com.typesafe.config.Config
 import org.everit.json.schema.loader.SchemaLoader
 import org.json.{JSONTokener, JSONObject}
 
+import scala.concurrent.Await
+
 /**
   * Trait for validation of crud-rest-api
+  * and contains common methods for routes
+  *
   * Created: 04/06/2016
+  *
   * @author Kseniya Tomskikh
   */
 trait SjCrudValidator {
+  implicit val materializer: Materializer
   val conf: Config
   val serializer: Serializer
   val fileMetadataDAO: FileMetadataDAO
@@ -23,16 +31,29 @@ trait SjCrudValidator {
   private val moduleTypes = Array("windowed", "regular")
 
   /**
+    * Getting entity from HTTP-request
+    *
+    * @param ctx - request context
+    * @return - entity from http-request as string
+    */
+  def getEntityFromContext(ctx: RequestContext): String = {
+    import scala.concurrent.duration._
+    Await.result(ctx.request.entity.toStrict(1.second), 1.seconds).data.decodeString("UTF-8")
+  }
+
+  /**
     * Check String object
+    *
     * @param value - input string
-    * @return boolean result of checking
+    * @return - boolean result of checking
     */
   def isEmptyOrNullString(value: String): Boolean = value == null || value.isEmpty
 
   /**
     * Check specification of uploading jar file
+    *
     * @param jarFile - input jar file
-    * @return content of specification.json
+    * @return - content of specification.json
     */
   def checkJarFile(jarFile: File) = {
     val json = getSpecificationFromJar(jarFile)
@@ -45,8 +66,9 @@ trait SjCrudValidator {
 
   /**
     * Return content of specification.json file from root of jar
+    *
     * @param file - Input jar file
-    * @return json-string from specification.json
+    * @return - json-string from specification.json
     */
   private def getSpecificationFromJar(file: File): String = {
     val builder = new StringBuilder
@@ -72,9 +94,10 @@ trait SjCrudValidator {
 
   /**
     * Validate json for such schema
-    * @param json input json
-    * @param schemaStream schema
-    * @return schema is valid
+    *
+    * @param json - input json
+    * @param schemaStream - schema
+    * @return - true, if schema is valid
     */
   def schemaValidate(json: String, schemaStream: InputStream): Boolean = {
     if (schemaStream != null) {
@@ -89,8 +112,9 @@ trait SjCrudValidator {
 
   /**
     * Check existing such type of modules
-    * @param typeName name type of module
-    * @return true if module type is exist, else false
+    *
+    * @param typeName - name type of module
+    * @return - true, if module type is exist, else false
     */
   def checkModuleType(typeName: String) = {
     moduleTypes.contains(typeName)
