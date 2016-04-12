@@ -7,9 +7,8 @@ package com.bwsw.sj.common.module.entities
  */
 
 case class LaunchParameters(instanceName: String,
-                            instanceType: InstanceType,
                             description: String,
                             inputs: List[String],
                             outputs: List[String],
-                            batchInterval: Int,
-                            options: Map[String, Any])
+                            options: Map[String, Any],
+                             stateStorage: String)
