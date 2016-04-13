@@ -1,7 +1,7 @@
 package com.bwsw.sj.common.module
 
 
-import com.bwsw.sj.common.module.state.DefaultModuleStateStorage
+import com.bwsw.sj.common.module.state.ModuleStateStorage
 
 import scala.collection.mutable
 
@@ -11,15 +11,14 @@ import scala.collection.mutable
  * @author Kseniya Mikhaleva
  */
 
-class ModuleEnvironmentManager(stateStorage: String, outputs: List[String], temporaryOutput: mutable.Map[String, mutable.MutableList[Array[Byte]]]) {
+class ModuleEnvironmentManager(val options: Map[String, Any],
+                               stateStorage: ModuleStateStorage,
+                               outputs: List[String],
+                               temporaryOutput: mutable.Map[String, mutable.MutableList[Array[Byte]]]) {
 
-  private val state = stateStorage match {
-    case "RAM" => new DefaultModuleStateStorage()
-  }
+  def getState() = stateStorage.getState()
 
-  def getState = state.getState()
-
-  def setState(variables: Map[String, Any]) = state.setState(variables)
+  def setState(variables: mutable.Map[String, Any]) = stateStorage.setState(variables)
 
   def getOutput(streamName: String) = temporaryOutput(streamName)
 }

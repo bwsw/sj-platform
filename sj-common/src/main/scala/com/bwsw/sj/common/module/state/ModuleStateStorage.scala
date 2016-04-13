@@ -5,11 +5,11 @@ package com.bwsw.sj.common.module.state
  * Created: 12/04/2016
  * @author Kseniya Mikhaleva
  */
-
+import scala.collection._
 trait ModuleStateStorage {
-  protected var variables: Map[String, Any]
+  protected var variables: mutable.Map[String, Any]
 
-  def getState(): Map[String, Any]
+  def getState(): mutable.Map[String, Any]
 
-  def setState(newVariables: Map[String, Any])
+  def setState(newVariables: mutable.Map[String, Any])
 }
