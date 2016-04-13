@@ -8,8 +8,8 @@ import com.bwsw.sj.common.entities.WindowedInstanceMetadata
   *
   * @author Kseniya Tomskikh
   */
-class StreamingWindowedValidator extends StreamingModuleValidator {
-  def validate(options: WindowedInstanceMetadata) = {
-    super.validate(options)
+class TimeWindowedStreamingValidator extends StreamingModuleValidator {
+  def validate(options: WindowedInstanceMetadata, collectionName: String) = {
+    super.validate(options, collectionName)
   }
 }

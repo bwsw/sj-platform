@@ -3,7 +3,7 @@ package com.bwsw.common.DAL
 trait EntityDAO[T] {
   def create(entity: T): String
 
-  def retrieve(name: String): T
+  def retrieve(name: String): Option[T]
 
   def update(entity: T): Boolean
 

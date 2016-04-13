@@ -45,12 +45,12 @@ class GenericMongoDAO[T <: Entity : Manifest](entityCollection: MongoCollection,
     entityCollection.findAndRemove("name" $eq name).isDefined
   }
 
-  override def retrieve(name: String): T = {
+  override def retrieve(name: String): Option[T] = {
     val entityOption = entityCollection.findOne("name" $eq name).map(_.toString)
     if (entityOption.isDefined) {
-      jsonSerializer.deserialize[T](entityOption.get)
+      Some(jsonSerializer.deserialize[T](entityOption.get))
     }
-    else throw new BadRecordWithKey(s"Entity satisfying the key: $name has not been found", name)
+    else None
   }
 }
 

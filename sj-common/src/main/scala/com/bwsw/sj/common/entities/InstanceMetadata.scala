@@ -8,8 +8,10 @@ import com.bwsw.common.DAL.Entity
   * @author Kseniya Tomskikh
   */
 abstract class InstanceMetadata extends Entity {
-  var name: String
   var uuid: String
+  var moduleName: String
+  var moduleVersion: String
+  var name: String
   var description: String
   var inputs: List[String]
   var outputs: List[String]
@@ -20,6 +22,9 @@ abstract class InstanceMetadata extends Entity {
   var parallelism: Int
   var options: Map[String, Any]
   var startFrom: Any
+  var perExecutorCores: Int
+  var perExecutorRam: Int
+  var jvmOptions: Map[String, Any]
 }
 
 

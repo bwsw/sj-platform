@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model.{EntityStreamSizeException, HttpEntity, HttpResponse}
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.{ExceptionHandler, Directives}
-import com.bwsw.common.exceptions.{BadRecordWithKey, BadRecord}
+import com.bwsw.common.exceptions.{InstanceException, BadRecordWithKey, BadRecord}
 import com.bwsw.sj.common.entities.Response
 import com.bwsw.sj.crud.rest.api.{SjCommonApi, SjModulesApi}
 import org.everit.json.schema.ValidationException
@@ -14,6 +14,7 @@ import org.everit.json.schema.ValidationException
 /**
   * Router trait for CRUD Rest-API
   * Created: 04/06/16
+  *
   * @author Kseniya Tomskikh
   */
 trait SjCrudRouter extends Directives
@@ -31,6 +32,11 @@ trait SjCrudRouter extends Directives
         BadRequest,
         entity = HttpEntity(`application/json`, serializer.serialize(Response(400, key, msg)))
       ))
+    case InstanceException(msg, key) =>
+      complete(HttpResponse(
+        BadRequest,
+        entity = HttpEntity(`application/json`, serializer.serialize(Response(400, key, msg)))
+      ))
     case ex: ValidationException =>
       complete(HttpResponse(
         entity = HttpEntity(`application/json`, serializer.serialize(Response(500, null, "Specification.json is invalid")))
@@ -42,7 +48,7 @@ trait SjCrudRouter extends Directives
     case ex: FileNotFoundException =>
       complete(HttpResponse(
         BadRequest,
-        entity = HttpEntity(`application/json`, serializer.serialize(Response(400, null, "Jar-file for module is not found in storage")))
+        entity = HttpEntity(`application/json`, serializer.serialize(Response(400, null, ex.getMessage)))
       ))
     case ex: Exception =>
       complete(HttpResponse(

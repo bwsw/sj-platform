@@ -1,5 +1,6 @@
 package com.bwsw.sj.crud.rest.validator
 
+import com.bwsw.common.exceptions.BadRecordWithKey
 import com.bwsw.sj.common.DAL.ConnectionRepository
 import com.bwsw.sj.common.entities.InstanceMetadata
 
@@ -14,13 +15,13 @@ import scala.collection.mutable.ArrayBuffer
 abstract class StreamingModuleValidator {
   private val startFromOptions = Set("oldest", "newest")
   private val stateManagementOptions = Set("oldest", "newest")
-  val instanceDAO = ConnectionRepository.getInstanceDAO
 
-  def validate(options: InstanceMetadata) = {
+  def validate(options: InstanceMetadata, collectionName: String) = {
+    val instanceDAO = ConnectionRepository.getInstanceDAO(collectionName)
     val errors = new ArrayBuffer[String]()
 
-    if (instanceDAO.retrieve(options.name) != null) {
-      errors += s"Instance for name: ${options.name} is exist."
+    instanceDAO.retrieve(options.name) match {
+      case None => errors += s"Instance for name: ${options.name} is exist."
     }
 
     if (!stateManagementOptions.contains(options.stateManagement)) {
