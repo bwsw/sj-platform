@@ -20,7 +20,8 @@ object RegularTaskRunner extends App {
   val taskEnvironmentManager = new TaskEnvironmentManager()
   val temporaryOutput = mutable.Map(taskParameters.outputs.map(x => (x, mutable.MutableList[Array[Byte]]())): _*)
   val moduleEnvironmentManager = new ModuleEnvironmentManager(
-    taskParameters.stateStorage,
+    Map(),
+    taskEnvironmentManager.getStateStorage(taskParameters.stateStorage),
     taskParameters.outputs,
     temporaryOutput
   )
@@ -35,13 +36,23 @@ object RegularTaskRunner extends App {
 
   executor.init()
 
-  //если бы было можно подписаться на consumer, то по появлению новой транзакции - вызывался бы executor.run
+  //если бы было можно подписаться на consumer, то по появлению новой транзакции - выполнялось следующее:
   while (true) {
     consumers.foreach(x => {
       val maybeTransaction = x.getTransaction
       if (maybeTransaction.isDefined) {
         executor.run(Transaction(x.stream.getName, maybeTransaction.get.getAll()))
-        temporaryOutput.filter(x => x._2.nonEmpty).foreach(x => producers(x._1).newTransaction(true))
+        temporaryOutput.filter(x => x._2.nonEmpty).foreach(x => {
+          /*
+          *
+          * 1) создать транзакцию
+          * 2) отправить массив байт
+          * 3) GroupCheckpoint или по времени (зависит от настройки)
+          * 4) executor.onCheckpoint()
+          * 5) обнуляем temporaryOutput (вторую составляющую)
+          *
+          * */
+        })
       }
     })
   }

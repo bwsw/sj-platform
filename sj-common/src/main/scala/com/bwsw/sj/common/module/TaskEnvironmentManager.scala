@@ -2,6 +2,7 @@ package com.bwsw.sj.common.module
 
 import java.net.{URL, URLClassLoader}
 
+import com.bwsw.sj.common.module.state.DefaultModuleStateStorage
 import com.bwsw.tstreams.agents.consumer.BasicConsumer
 import com.bwsw.tstreams.agents.producer.BasicProducer
 
@@ -19,6 +20,11 @@ class TaskEnvironmentManager() {
     new URLClassLoader(classLoaderUrls)
 
   }
+
+  def getStateStorage(stateStorage: String) = stateStorage match {
+    case "RAM" => new DefaultModuleStateStorage()
+  }
+
 
   def createConsumer(streamName: String, partitions: List[Int]): BasicConsumer[Array[Byte], Array[Byte]] = {
 
