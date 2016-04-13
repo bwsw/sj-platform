@@ -1,7 +1,7 @@
 package com.bwsw.sj.common.module.entities
 
 /**
- * Class represents a structure of module specification json
+ * Class representing a structure of module specification json
  * Created: 11/04/2016
  * @author Kseniya Mikhaleva
  */
