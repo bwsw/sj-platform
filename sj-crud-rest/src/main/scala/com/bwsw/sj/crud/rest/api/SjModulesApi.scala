@@ -1,0 +1,240 @@
+package com.bwsw.sj.crud.rest.api
+
+import java.io.{FileNotFoundException, File}
+
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.MediaTypes._
+import akka.http.scaladsl.server.{RequestContext, Directives}
+import akka.http.scaladsl.server.directives.FileInfo
+import com.bwsw.common.exceptions.BadRecordWithKey
+import com.bwsw.sj.common.DAL.ConnectionRepository
+import com.bwsw.sj.common.entities.{InstanceMetadata, FileMetadata, Response}
+import com.bwsw.sj.common.module.StreamingValidator
+import com.bwsw.sj.crud.rest.SjCrudValidator
+import akka.http.scaladsl.model.headers._
+import com.bwsw.sj.crud.rest.validator.StreamingModuleValidator
+import org.apache.commons.io.FileUtils
+
+import akka.stream.scaladsl._
+
+import scala.reflect.internal.util.ScalaClassLoader
+import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
+
+/**
+  * Rest-api for module-jars
+  *
+  * Created: 04/08/2016
+ *
+  * @author Kseniya Tomskikh
+  */
+trait SjModulesApi extends Directives with SjCrudValidator {
+
+  val modulesApi = {
+    pathPrefix("modules") {
+      pathEndOrSingleSlash {
+        post {
+          uploadedFile("jar") {
+            case (metadata: FileInfo, file: File) =>
+              if (metadata.fileName.endsWith(".jar")) {
+                val specification = checkJarFile(file)
+                val uploadingFile = new File(metadata.fileName)
+                FileUtils.copyFile(file, uploadingFile)
+                storage.put(uploadingFile, metadata.fileName, specification, "module")
+                complete(HttpEntity(
+                  `application/json`,
+                  serializer.serialize(Response(200, null, "Jar file has been uploaded"))
+                ))
+              } else {
+                file.delete()
+                throw new BadRecordWithKey(s"File: ${metadata.fileName} hasn't the .jar extension", metadata.fileName)
+              }
+          }
+        } ~
+        get {
+          val files = fileMetadataDAO.retrieveAllByFiletype("module")
+          var msg = ""
+          if (files.nonEmpty) {
+            msg = s"Uploaded modules: ${files.map(_.metadata.get("metadata").get.name).mkString(", ")}"
+          } else {
+            msg = s"Uploaded modules have not been found "
+          }
+          complete(HttpEntity(
+            `application/json`,
+            serializer.serialize(Response(200, null, msg))
+          ))
+        }
+      } ~
+      pathPrefix(Segment) { (typeName: String) =>
+        validate(checkModuleType(typeName), s"Module type $typeName is not exist") {
+          pathPrefix(Segment) { (name: String) =>
+            pathPrefix(Segment) { (version: String) =>
+              val fileMetadata: FileMetadata = fileMetadataDAO.retrieve(name, typeName, version)
+              validate(fileMetadata != null, s"Module not found") {
+                val specification = fileMetadata.metadata.get("metadata").get
+                val filename = fileMetadata.filename
+
+                pathPrefix("instance") {
+                  pathEndOrSingleSlash {
+                    post { (ctx: RequestContext) =>
+                      val options = deserializeOptions(getEntityFromContext(ctx), typeName)
+                      val errors = validateOptions(options, typeName)
+                      if (errors.nonEmpty) {
+                        val validatorClassName = specification.validateClass
+                        val jarFile = storage.get(filename, s"tmp/$filename")
+                        var msg = ""
+                        if (jarFile != null && jarFile.exists()) {
+                          if (moduleValidate(jarFile, validatorClassName, options.options)) {
+                            msg = s"Module is instanced"
+
+                          } else {
+                            msg = s"Cannot instancing of module"
+                          }
+                        } else {
+                          throw new FileNotFoundException("Jar not found in storage")
+                        }
+
+                        ctx.complete(HttpEntity(
+                          `application/json`,
+                          serializer.serialize(Response(200, null, msg))
+                        ))
+                      } else {
+                        ctx.complete(HttpEntity(
+                          `application/json`,
+                          serializer.serialize(Response(400, null, errors.mkString("\n")))
+                        ))
+                      }
+                    } ~
+                    get {
+                      complete(HttpEntity(
+                        `application/json`,
+                        serializer.serialize(Response(200, null, "Ok"))
+                      ))
+                    }
+                  } ~
+                  path(Segment) { (instanceName: String) =>
+                    pathSuffix("start") {
+                      get {
+                        //todo
+                        complete(HttpEntity(
+                          `application/json`,
+                          serializer.serialize(Response(200, null, "Ok"))
+                        ))
+                      }
+                    } ~
+                    pathSuffix("stop") {
+                      get {
+                        //todo
+                        complete(HttpEntity(
+                          `application/json`,
+                          serializer.serialize(Response(200, null, "Ok"))
+                        ))
+                      }
+                    } ~
+                    get {
+                      //todo get this instance
+                      complete(HttpEntity(
+                        `application/json`,
+                        serializer.serialize(Response(200, null, "Ok"))
+                      ))
+                    } ~
+                    delete {
+                      //todo delete this instance
+                      complete(HttpEntity(
+                        `application/json`,
+                        serializer.serialize(Response(200, null, "Ok"))
+                      ))
+                    }
+
+                  }
+                } ~
+                pathSuffix("specification") {
+                  pathEndOrSingleSlash {
+                    get {
+                      complete(HttpEntity(
+                        `application/json`,
+                        serializer.serialize(specification)
+                      ))
+                    }
+                  }
+                } ~
+                pathEndOrSingleSlash {
+                  get {
+                    val jarFile = storage.get(filename, s"tmp/$filename")
+                    if (jarFile != null && jarFile.exists()) {
+                      complete(HttpResponse(
+                        headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> filename))),
+                        entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
+                      ))
+                    } else {
+                      throw new BadRecordWithKey(s"Jar '$name' not found", name)
+                    }
+                  } ~
+                  delete {
+                    if (storage.delete(filename)) {
+                      complete(HttpEntity(
+                        `application/json`,
+                        serializer.serialize(Response(200, null, s"Module $name for type $typeName has been deleted"))
+                      ))
+                    } else {
+                      throw new BadRecordWithKey(s"Module $name hasn't been found", name)
+                    }
+                  }
+                }
+              }
+            }
+          } ~
+          get {
+            val files = fileMetadataDAO.retrieveAllByModuleType(typeName)
+            var msg = ""
+            if (files.nonEmpty) {
+              msg = s"Uploaded modules for type $typeName: ${files.map(_.metadata.get("metadata").get.name).mkString(",\n")}"
+            } else {
+              msg = s"Uploaded modules for type $typeName have not been found "
+            }
+            complete(HttpEntity(
+              `application/json`,
+              serializer.serialize(Response(200, null, msg))
+            ))
+          }
+        }
+      }
+    }
+  }
+
+  def deserializeOptions(options: String, moduleType: String) = {
+    val entityClassName = conf.getString("modules." + moduleType + ".entity-class")
+    val entityClazz = Class.forName(entityClassName)
+    serializer.deserialize[entityClazz.type](options).asInstanceOf[InstanceMetadata]
+  }
+
+  def validateOptions(options: InstanceMetadata, moduleType: String) = {
+    val validatorClassName = conf.getString("modules." + moduleType + ".validator-class")
+    val validatorClazz = Class.forName(validatorClassName)
+    val validator = validatorClazz.newInstance().asInstanceOf[StreamingModuleValidator]
+    validator.validate(options)
+  }
+
+  def saveInstance(options: InstanceMetadata, moduleType: String) = {
+    val collectionName = conf.getString("modules." + moduleType + ".collection-name")
+    val entityClassName = conf.getString("modules." + moduleType + ".entity-class")
+    val entityClazz = Class.forName(entityClassName)
+    val instanceDAO = ConnectionRepository.getCollectionDAO(collectionName, entityClazz)
+    options.uuid = java.util.UUID.randomUUID().toString
+   // instanceDAO.create(options)
+  }
+
+  /**
+    * Create instance of module
+    *
+    * @param file - jar-file
+    * @param validateClassName - validator classname of module
+    * @param options - start options for module
+    * @return - true, if options for module is valid
+    */
+  def moduleValidate(file: File, validateClassName: String, options: Map[String, Any]) = {
+    val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
+    val clazz = loader.loadClass(validateClassName)
+    val validator = clazz.newInstance().asInstanceOf[StreamingValidator]
+    validator.validate(options)
+  }
+}
