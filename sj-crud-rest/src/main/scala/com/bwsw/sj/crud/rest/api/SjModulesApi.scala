@@ -7,10 +7,12 @@ import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.server.{RequestContext, Directives}
 import akka.http.scaladsl.server.directives.FileInfo
 import com.bwsw.common.exceptions.BadRecordWithKey
-import com.bwsw.sj.common.entities.{FileMetadata, Response}
+import com.bwsw.sj.common.DAL.ConnectionRepository
+import com.bwsw.sj.common.entities.{InstanceMetadata, FileMetadata, Response}
 import com.bwsw.sj.common.module.StreamingValidator
-import com.bwsw.sj.crud.rest.{ModuleValidator, SjCrudValidator}
+import com.bwsw.sj.crud.rest.SjCrudValidator
 import akka.http.scaladsl.model.headers._
+import com.bwsw.sj.crud.rest.validator.StreamingModuleValidator
 import org.apache.commons.io.FileUtils
 
 import akka.stream.scaladsl._
@@ -74,26 +76,33 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                 pathPrefix("instance") {
                   pathEndOrSingleSlash {
                     post { (ctx: RequestContext) =>
-                      val options = serializer.deserialize[Map[String, Any]](getEntityFromContext(ctx))
-                      val validatorClassName = specification.validateClass
-                      val jarFile = storage.get(filename, s"tmp/$filename")
+                      val options = deserializeOptions(getEntityFromContext(ctx), typeName)
+                      val errors = validateOptions(options, typeName)
+                      if (errors.nonEmpty) {
+                        val validatorClassName = specification.validateClass
+                        val jarFile = storage.get(filename, s"tmp/$filename")
+                        var msg = ""
+                        if (jarFile != null && jarFile.exists()) {
+                          if (moduleValidate(jarFile, validatorClassName, options.options)) {
+                            msg = s"Module is instanced"
 
-                      var msg = ""
-                      if (jarFile != null && jarFile.exists()) {
-                        if (paramsValidate(options, typeName)
-                          && moduleValidate(jarFile, validatorClassName, options.get("options").get.asInstanceOf[Map[String, Any]])) {
-                          msg = s"Module is instanced"
+                          } else {
+                            msg = s"Cannot instancing of module"
+                          }
                         } else {
-                          msg = s"Cannot instancing of module"
+                          throw new FileNotFoundException("Jar not found in storage")
                         }
-                      } else {
-                        throw new FileNotFoundException("Jar not found in storage")
-                      }
 
-                      ctx.complete(HttpEntity(
-                        `application/json`,
-                        serializer.serialize(Response(200, null, msg))
-                      ))
+                        ctx.complete(HttpEntity(
+                          `application/json`,
+                          serializer.serialize(Response(200, null, msg))
+                        ))
+                      } else {
+                        ctx.complete(HttpEntity(
+                          `application/json`,
+                          serializer.serialize(Response(400, null, errors.mkString("\n")))
+                        ))
+                      }
                     } ~
                     get {
                       complete(HttpEntity(
@@ -192,12 +201,26 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     }
   }
 
-  def paramsValidate(options: Map[String, Any], moduleType: String) = {
-    val validatorClassName = conf.getString("modules.validator." + moduleType + ".scala")
-    val clazz = Class.forName(validatorClassName)
-    val validator = clazz.newInstance().asInstanceOf[ModuleValidator]
-    val errors = validator.validate(options)
-    errors.isEmpty
+  def deserializeOptions(options: String, moduleType: String) = {
+    val entityClassName = conf.getString("modules." + moduleType + ".entity-class")
+    val entityClazz = Class.forName(entityClassName)
+    serializer.deserialize[entityClazz.type](options).asInstanceOf[InstanceMetadata]
+  }
+
+  def validateOptions(options: InstanceMetadata, moduleType: String) = {
+    val validatorClassName = conf.getString("modules." + moduleType + ".validator-class")
+    val validatorClazz = Class.forName(validatorClassName)
+    val validator = validatorClazz.newInstance().asInstanceOf[StreamingModuleValidator]
+    validator.validate(options)
+  }
+
+  def saveInstance(options: InstanceMetadata, moduleType: String) = {
+    val collectionName = conf.getString("modules." + moduleType + ".collection-name")
+    val entityClassName = conf.getString("modules." + moduleType + ".entity-class")
+    val entityClazz = Class.forName(entityClassName)
+    val instanceDAO = ConnectionRepository.getCollectionDAO(collectionName, entityClazz)
+    options.uuid = java.util.UUID.randomUUID().toString
+   // instanceDAO.create(options)
   }
 
   /**

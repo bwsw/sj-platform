@@ -8,7 +8,7 @@ package com.bwsw.sj.common.module
 
 trait StreamingValidator {
 
-  protected def validate(options: Map[String, Any]): Boolean = {
+  def validate(options: Map[String, Any]): Boolean = {
     true
   }
 }

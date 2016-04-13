@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.DAL
 
-import com.bwsw.common.DAL.GenericMongoDAO
+import com.bwsw.common.DAL.{Entity, GenericMongoDAO}
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.mongodb.casbah.MongoClient
@@ -18,14 +18,12 @@ object ConnectionRepository {
 
   private lazy val fileMetadataDAO = new FileMetadataDAO(mongoConnection(databaseName)(fileMetadataCollection), serializer)
 
-  private lazy val instanceDAO = new GenericMongoDAO[Map[String, Any]](mongoConnection(databaseName)(instanceCollection), serializer)
-
   def getFileMetadataDAO = {
     fileMetadataDAO
   }
 
-  def getInstanceDAO = {
-    instanceDAO
+  def getCollectionDAO(collectionName: String, T : Class[_]) = {
+    new GenericMongoDAO[T.type](mongoConnection(databaseName)(collectionName), serializer)
   }
 
   def getFileStorage = {
