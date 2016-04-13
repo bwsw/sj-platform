@@ -7,8 +7,10 @@ import com.fasterxml.jackson.annotation.JsonProperty
   * Created:  13/04/2016
   * @author Kseniya Tomskikh
   */
-case class WindowedInstanceMetadata(var name: String,
-                                    var uuid: String,
+case class WindowedInstanceMetadata(var uuid: String,
+                                    @JsonProperty("module-name") var moduleName: String,
+                                    @JsonProperty("module-version") var moduleVersion: String,
+                                    var name: String,
                                     var description: String,
                                     var inputs: List[String],
                                     var outputs: List[String],
@@ -19,5 +21,8 @@ case class WindowedInstanceMetadata(var name: String,
                                     var parallelism: Int,
                                     var options: Map[String, Any],
                                     @JsonProperty("start-from") var startFrom: Any,
+                                    @JsonProperty("per-executor-cores") var perExecutorCores: Int,
+                                    @JsonProperty("per-executor-ram") var perExecutorRam: Int,
+                                    @JsonProperty("jvm-options") var jvmOptions: Map[String, Any],
                                     @JsonProperty("time-windowed") var timeWindowed: Int,
                                     @JsonProperty("window-full-max") var windowFullMax: Int) extends InstanceMetadata

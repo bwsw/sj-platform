@@ -27,10 +27,9 @@ trait SjCrudValidator {
   val conf: Config
   val serializer: Serializer
   val fileMetadataDAO: FileMetadataDAO
-  val instanceDAO: EntityDAO[Map[String, Any]]
   val storage: FilesStorage
 
-  private val moduleTypes = Array("windowed", "regular")
+  private val moduleTypes = Array("time-windowed-streaming", "regular-streaming")
 
   /**
     * Getting entity from HTTP-request

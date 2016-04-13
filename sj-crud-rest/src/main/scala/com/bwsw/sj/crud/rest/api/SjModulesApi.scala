@@ -2,13 +2,14 @@ package com.bwsw.sj.crud.rest.api
 
 import java.io.{FileNotFoundException, File}
 
+
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.server.{RequestContext, Directives}
 import akka.http.scaladsl.server.directives.FileInfo
-import com.bwsw.common.exceptions.BadRecordWithKey
+import com.bwsw.common.exceptions.{InstanceException, BadRecordWithKey}
 import com.bwsw.sj.common.DAL.ConnectionRepository
-import com.bwsw.sj.common.entities.{InstanceMetadata, FileMetadata, Response}
+import com.bwsw.sj.common.entities._
 import com.bwsw.sj.common.module.StreamingValidator
 import com.bwsw.sj.crud.rest.SjCrudValidator
 import akka.http.scaladsl.model.headers._
@@ -17,7 +18,8 @@ import org.apache.commons.io.FileUtils
 
 import akka.stream.scaladsl._
 
-import scala.reflect.internal.util.ScalaClassLoader
+import scala.reflect.ManifestFactory
+import scala.reflect.runtime.universe
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 /**
@@ -69,7 +71,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
           pathPrefix(Segment) { (name: String) =>
             pathPrefix(Segment) { (version: String) =>
               val fileMetadata: FileMetadata = fileMetadataDAO.retrieve(name, typeName, version)
-              validate(fileMetadata != null, s"Module not found") {
+              validate(fileMetadata != null, s"Module $typeName-$name-$version not found") {
                 val specification = fileMetadata.metadata.get("metadata").get
                 val filename = fileMetadata.filename
 
@@ -81,27 +83,21 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                       if (errors.nonEmpty) {
                         val validatorClassName = specification.validateClass
                         val jarFile = storage.get(filename, s"tmp/$filename")
-                        var msg = ""
                         if (jarFile != null && jarFile.exists()) {
                           if (moduleValidate(jarFile, validatorClassName, options.options)) {
-                            msg = s"Module is instanced"
-
+                            val nameInstance = saveInstance(options, typeName, name, version)
+                            ctx.complete(HttpEntity(
+                              `application/json`,
+                              serializer.serialize(Response(200, nameInstance, s"Instance for module $typeName-$name-$version is created"))
+                            ))
                           } else {
-                            msg = s"Cannot instancing of module"
+                            throw new InstanceException(s"Cannot create instance of module. Request has incrorrect options attrubute", s"$typeName-$name-$version")
                           }
                         } else {
-                          throw new FileNotFoundException("Jar not found in storage")
+                          throw new FileNotFoundException(s"Jar for module $typeName-$name-$version not found in storage")
                         }
-
-                        ctx.complete(HttpEntity(
-                          `application/json`,
-                          serializer.serialize(Response(200, null, msg))
-                        ))
                       } else {
-                        ctx.complete(HttpEntity(
-                          `application/json`,
-                          serializer.serialize(Response(400, null, errors.mkString("\n")))
-                        ))
+                        throw new InstanceException(s"Cannot create instance of module. Errors: ${errors.mkString("\n")}", s"$typeName-$name-$version")
                       }
                     } ~
                     get {
@@ -201,26 +197,55 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     }
   }
 
+  /**
+    * Deserialization json string to object
+    *
+    * @param options - json-string
+    * @param moduleType - type name of module
+    * @return - json as object InstanceMetadata
+    */
   def deserializeOptions(options: String, moduleType: String) = {
-    val entityClassName = conf.getString("modules." + moduleType + ".entity-class")
-    val entityClazz = Class.forName(entityClassName)
-    serializer.deserialize[entityClazz.type](options).asInstanceOf[InstanceMetadata]
+    /*val entityClassName = conf.getString("modules." + moduleType + ".entity-class")
+    val mirror = universe.runtimeMirror(getClass.getClassLoader)
+    val entityClazz = Class.forName(entityClassName)*/
+    if (moduleType.equals("regular-streaming")) {
+      serializer.deserialize[RegularInstanceMetadata](options)
+    } else {
+      serializer.deserialize[WindowedInstanceMetadata](options)
+    }
   }
 
+  /**
+    * Validation of options for created module instance
+    *
+    * @param options - options for instance
+    * @param moduleType - type name of module
+    * @return - list of errors
+    */
   def validateOptions(options: InstanceMetadata, moduleType: String) = {
     val validatorClassName = conf.getString("modules." + moduleType + ".validator-class")
+    val collectionName = conf.getString("modules." + moduleType + ".collection-name")
     val validatorClazz = Class.forName(validatorClassName)
     val validator = validatorClazz.newInstance().asInstanceOf[StreamingModuleValidator]
-    validator.validate(options)
+    validator.validate(options, collectionName)
   }
 
-  def saveInstance(options: InstanceMetadata, moduleType: String) = {
+  /**
+    * Save instance of module to mongo db
+    *
+    * @param options - options for instance
+    * @param moduleType - type name of module
+    * @param moduleName - name of module
+    * @param moduleVersion - version of module
+    * @return - name of created entity
+    */
+  def saveInstance(options: InstanceMetadata, moduleType: String, moduleName: String, moduleVersion: String) = {
     val collectionName = conf.getString("modules." + moduleType + ".collection-name")
-    val entityClassName = conf.getString("modules." + moduleType + ".entity-class")
-    val entityClazz = Class.forName(entityClassName)
-    val instanceDAO = ConnectionRepository.getCollectionDAO(collectionName, entityClazz)
+    val instanceDAO = ConnectionRepository.getInstanceDAO(collectionName)
     options.uuid = java.util.UUID.randomUUID().toString
-   // instanceDAO.create(options)
+    options.moduleName = moduleName
+    options.moduleVersion = moduleVersion
+    instanceDAO.create(options)
   }
 
   /**
