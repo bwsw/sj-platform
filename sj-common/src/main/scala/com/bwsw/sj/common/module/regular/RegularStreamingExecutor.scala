@@ -1,5 +1,6 @@
-package com.bwsw.sj.common.module
+package com.bwsw.sj.common.module.regular
 
+import com.bwsw.sj.common.module.ModuleEnvironmentManager
 import com.bwsw.sj.common.module.entities.Transaction
 
 /**
@@ -21,14 +22,3 @@ abstract class RegularStreamingExecutor(moduleEnvironmentManager: ModuleEnvironm
   def onTimer(): Unit
 
 }
-
-/**
- * Class that contains an execution logic of windowed module
- * Created: 11/04/2016
- * @author Kseniya Mikhaleva
- */
-
-abstract class WindowedStreamingExecutor() {
-
-}
-

@@ -1,31 +1,25 @@
 package com.bwsw.sj.common.module
 
 
-import com.bwsw.sj.common.module.entities.{DefaultModuleStateStorage, LaunchParameters}
+import com.bwsw.sj.common.module.state.DefaultModuleStateStorage
 
 import scala.collection.mutable
 
 /**
- * Class allows to manage environment of module
- * Created: 07/04/2016
+ * Class allowing to manage environment of module
+ * Created: 12/04/2016
  * @author Kseniya Mikhaleva
  */
 
-class ModuleEnvironmentManager(launchParameters: LaunchParameters) {
+class ModuleEnvironmentManager(stateStorage: String, outputs: List[String], temporaryOutput: mutable.Map[String, mutable.MutableList[Array[Byte]]]) {
 
-  private val state = launchParameters.stateStorage match {
+  private val state = stateStorage match {
     case "RAM" => new DefaultModuleStateStorage()
   }
-
-  private val temporaryOutput: mutable.Map[String, List[Array[Byte]]] = mutable.Map(launchParameters.outputs.map(x => (x, List[Array[Byte]]())): _*)
 
   def getState = state.getState()
 
   def setState(variables: Map[String, Any]) = state.setState(variables)
 
   def getOutput(streamName: String) = temporaryOutput(streamName)
-
-  def setOutput(streamName: String, data: List[Array[Byte]]) = {
-    temporaryOutput(streamName) = data
-  }
 }
