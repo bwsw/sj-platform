@@ -1,5 +1,6 @@
 package com.bwsw.sj.common.DAL
 
+import com.bwsw.common.DAL.GenericMongoDAO
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.mongodb.casbah.MongoClient
@@ -17,8 +18,14 @@ object ConnectionRepository {
 
   private lazy val fileMetadataDAO = new FileMetadataDAO(mongoConnection(databaseName)(fileMetadataCollection), serializer)
 
+  private lazy val instanceDAO = new GenericMongoDAO[Map[String, Any]](mongoConnection(databaseName)(instanceCollection), serializer)
+
   def getFileMetadataDAO = {
     fileMetadataDAO
+  }
+
+  def getInstanceDAO = {
+    instanceDAO
   }
 
   def getFileStorage = {
@@ -32,4 +39,5 @@ object ConfigConstants {
 
   val databaseName = "stream_juggler"
   lazy val fileMetadataCollection = "fs.files"
+  lazy val instanceCollection = "instances"
 }

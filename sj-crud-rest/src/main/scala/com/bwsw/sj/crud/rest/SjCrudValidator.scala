@@ -4,6 +4,7 @@ import java.io._
 import java.util.jar.JarFile
 import akka.http.scaladsl.server.RequestContext
 import akka.stream.Materializer
+import com.bwsw.common.DAL.EntityDAO
 import com.bwsw.common.file.utils.FilesStorage
 import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.DAL.FileMetadataDAO
@@ -26,6 +27,7 @@ trait SjCrudValidator {
   val conf: Config
   val serializer: Serializer
   val fileMetadataDAO: FileMetadataDAO
+  val instanceDAO: EntityDAO[Map[String, Any]]
   val storage: FilesStorage
 
   private val moduleTypes = Array("windowed", "regular")

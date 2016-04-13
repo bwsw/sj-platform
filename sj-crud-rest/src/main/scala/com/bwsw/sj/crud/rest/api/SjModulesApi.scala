@@ -8,20 +8,21 @@ import akka.http.scaladsl.server.{RequestContext, Directives}
 import akka.http.scaladsl.server.directives.FileInfo
 import com.bwsw.common.exceptions.BadRecordWithKey
 import com.bwsw.sj.common.entities.{FileMetadata, Response}
-import com.bwsw.sj.common.module.SparkStreamingValidator
-import com.bwsw.sj.common.module.entities.LaunchParameters
-import com.bwsw.sj.crud.rest.SjCrudValidator
+import com.bwsw.sj.common.module.StreamingValidator
+import com.bwsw.sj.crud.rest.{ModuleValidator, SjCrudValidator}
 import akka.http.scaladsl.model.headers._
 import org.apache.commons.io.FileUtils
 
 import akka.stream.scaladsl._
 
+import scala.reflect.internal.util.ScalaClassLoader
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 /**
   * Rest-api for module-jars
   *
   * Created: 04/08/2016
+ *
   * @author Kseniya Tomskikh
   */
 trait SjModulesApi extends Directives with SjCrudValidator {
@@ -70,38 +71,73 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                 val specification = fileMetadata.metadata.get("metadata").get
                 val filename = fileMetadata.filename
 
-                pathSuffix("instance") {
-                  post { (ctx: RequestContext) =>
-                    val options = serializer.deserialize[LaunchParameters](getEntityFromContext(ctx))
-                    val validatorClassName = specification.validateClass
-                    val jarFile = storage.get(filename, s"tmp/$filename")
+                pathPrefix("instance") {
+                  pathEndOrSingleSlash {
+                    post { (ctx: RequestContext) =>
+                      val options = serializer.deserialize[Map[String, Any]](getEntityFromContext(ctx))
+                      val validatorClassName = specification.validateClass
+                      val jarFile = storage.get(filename, s"tmp/$filename")
 
-                    var msg = ""
-                    if (jarFile != null && jarFile.exists()) {
-                      if (moduleInstance(jarFile, validatorClassName, options)) {
-                        msg = s"Module is instance"
+                      var msg = ""
+                      if (jarFile != null && jarFile.exists()) {
+                        if (paramsValidate(options, typeName)
+                          && moduleValidate(jarFile, validatorClassName, options.get("options").get.asInstanceOf[Map[String, Any]])) {
+                          msg = s"Module is instanced"
+                        } else {
+                          msg = s"Cannot instancing of module"
+                        }
                       } else {
-                        msg = s"Cannot instance of module"
+                        throw new FileNotFoundException("Jar not found in storage")
                       }
-                    } else {
-                      throw new FileNotFoundException("Jar not found in storage")
-                    }
 
-                    ctx.complete(HttpEntity(
-                      `application/json`,
-                      serializer.serialize(Response(200, null, msg))
-                    ))
-                  }
-                } ~
-                pathSuffix("execute") {
-                    post {
-                      //todo executing module
+                      ctx.complete(HttpEntity(
+                        `application/json`,
+                        serializer.serialize(Response(200, null, msg))
+                      ))
+                    } ~
+                    get {
                       complete(HttpEntity(
                         `application/json`,
-                        serializer.serialize(Response(200, null, s"Module executed"))
+                        serializer.serialize(Response(200, null, "Ok"))
                       ))
                     }
                   } ~
+                  path(Segment) { (instanceName: String) =>
+                    pathSuffix("start") {
+                      get {
+                        //todo
+                        complete(HttpEntity(
+                          `application/json`,
+                          serializer.serialize(Response(200, null, "Ok"))
+                        ))
+                      }
+                    } ~
+                    pathSuffix("stop") {
+                      get {
+                        //todo
+                        complete(HttpEntity(
+                          `application/json`,
+                          serializer.serialize(Response(200, null, "Ok"))
+                        ))
+                      }
+                    } ~
+                    get {
+                      //todo get this instance
+                      complete(HttpEntity(
+                        `application/json`,
+                        serializer.serialize(Response(200, null, "Ok"))
+                      ))
+                    } ~
+                    delete {
+                      //todo delete this instance
+                      complete(HttpEntity(
+                        `application/json`,
+                        serializer.serialize(Response(200, null, "Ok"))
+                      ))
+                    }
+
+                  }
+                } ~
                 pathSuffix("specification") {
                   pathEndOrSingleSlash {
                     get {
@@ -156,6 +192,14 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     }
   }
 
+  def paramsValidate(options: Map[String, Any], moduleType: String) = {
+    val validatorClassName = conf.getString("modules.validator." + moduleType + ".scala")
+    val clazz = Class.forName(validatorClassName)
+    val validator = clazz.newInstance().asInstanceOf[ModuleValidator]
+    val errors = validator.validate(options)
+    errors.isEmpty
+  }
+
   /**
     * Create instance of module
     *
@@ -164,17 +208,10 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @param options - start options for module
     * @return - true, if options for module is valid
     */
-  def moduleInstance(file: File, validateClassName: String, options: LaunchParameters) = {
-    try {
-      val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
-      val clazz = loader.loadClass(validateClassName)
-      val inst = clazz.newInstance()
-      val validator = inst.asInstanceOf[SparkStreamingValidator]
-      validator.validate(options)
-    } catch {
-      case ex: Exception =>
-        println(ex)
-        false
-    }
+  def moduleValidate(file: File, validateClassName: String, options: Map[String, Any]) = {
+    val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
+    val clazz = loader.loadClass(validateClassName)
+    val validator = clazz.newInstance().asInstanceOf[StreamingValidator]
+    validator.validate(options)
   }
 }
