@@ -6,7 +6,7 @@ package com.bwsw.sj.common.module.windowed
  * @author Kseniya Mikhaleva
  */
 
-abstract class WindowedStreamingExecutor() {
+abstract class TimeWindowedStreamingExecutor() {
 
 }
 

@@ -26,6 +26,8 @@ class TaskEnvironmentManager() {
   }
 
 
+  //todo: use an Ivan REST to retrieve metadata for creating a consumer/producer
+
   def createConsumer(streamName: String, partitions: List[Int]): BasicConsumer[Array[Byte], Array[Byte]] = {
 
     new BasicConsumer("consumer for " + streamName, null, null)

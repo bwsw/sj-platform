@@ -1,5 +1,7 @@
 package com.bwsw.sj.common.module.entities
 
+import com.bwsw.sj.common.entities.InstanceMetadata
+
 /**
  * Class representing a structure of parameters run the task
  * Created: 13/04/2016
@@ -9,5 +11,6 @@ package com.bwsw.sj.common.module.entities
 case class TaskParameters(pathToJar: String,
                           pathToExecutor: String,
                           inputsWithPartitions: Map[String, List[Int]],
-                          outputs: List[String],
-                          stateStorage: String)
+                          queueSize: Int,
+                          transactionTimeout: Int,
+                          instanceMetadata: InstanceMetadata)
