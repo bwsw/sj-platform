@@ -11,13 +11,13 @@ import akka.http.scaladsl.server.directives.FileInfo
 import akka.stream.scaladsl.Source
 import com.bwsw.common.exceptions.BadRecordWithKey
 import com.bwsw.sj.common.entities.Response
-import com.bwsw.sj.crud.rest.SjCrudValidator
+import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import org.apache.commons.io.FileUtils
 
 /**
   * Rest-api for common jars
   *
-  * Created: 04/08/16
+  * Created: 08/04/2016
   * @author Kseniya Tomskikh
   */
 trait SjCommonApi extends Directives with SjCrudValidator {

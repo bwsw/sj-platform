@@ -22,5 +22,7 @@ case class RegularInstanceMetadata(var name: String,
                                    @JsonProperty("per-executor-ram") var perExecutorRam: Int,
                                    @JsonProperty("jvm-options") var jvmOptions: Map[String, Any],
                                    var uuid: String,
+                                   @JsonProperty("module-type") var moduleType: String,
                                    @JsonProperty("module-name") var moduleName: String,
-                                   @JsonProperty("module-version") var moduleVersion: String) extends InstanceMetadata
+                                   @JsonProperty("module-version") var moduleVersion: String,
+                                   var status: String) extends InstanceMetadata

@@ -22,7 +22,7 @@
       "console"
     ]
   },
-  "module-type": "regular-streaming",
+  "module-type": "time-windowed-streaming",
   "engine": "spark-streaming",
   "options": {
 
