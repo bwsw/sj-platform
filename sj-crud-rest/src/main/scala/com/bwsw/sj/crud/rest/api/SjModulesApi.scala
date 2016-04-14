@@ -11,25 +11,24 @@ import com.bwsw.common.exceptions.{InstanceException, BadRecordWithKey}
 import com.bwsw.sj.common.DAL.ConnectionRepository
 import com.bwsw.sj.common.entities._
 import com.bwsw.sj.common.module.StreamingValidator
-import com.bwsw.sj.crud.rest.SjCrudValidator
 import akka.http.scaladsl.model.headers._
-import com.bwsw.sj.crud.rest.validator.StreamingModuleValidator
+import com.bwsw.sj.crud.rest.validator.SjCrudValidator
+import com.bwsw.sj.crud.rest.validator.module.StreamingModuleValidator
 import org.apache.commons.io.FileUtils
 
 import akka.stream.scaladsl._
 
-import scala.reflect.ManifestFactory
-import scala.reflect.runtime.universe
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 /**
   * Rest-api for module-jars
   *
-  * Created: 04/08/2016
- *
+  * Created: 08/04/2016
+  *
   * @author Kseniya Tomskikh
   */
 trait SjModulesApi extends Directives with SjCrudValidator {
+  import com.bwsw.sj.common.module.ModuleConstants._
 
   val modulesApi = {
     pathPrefix("modules") {
@@ -66,45 +65,51 @@ trait SjModulesApi extends Directives with SjCrudValidator {
           ))
         }
       } ~
-      pathPrefix(Segment) { (typeName: String) =>
-        validate(checkModuleType(typeName), s"Module type $typeName is not exist") {
-          pathPrefix(Segment) { (name: String) =>
-            pathPrefix(Segment) { (version: String) =>
-              val fileMetadata: FileMetadata = fileMetadataDAO.retrieve(name, typeName, version)
-              validate(fileMetadata != null, s"Module $typeName-$name-$version not found") {
+      pathPrefix(Segment) { (moduleType: String) =>
+        validate(checkModuleType(moduleType), s"Module type $moduleType is not exist") {
+          pathPrefix(Segment) { (moduleName: String) =>
+            pathPrefix(Segment) { (moduleVersion: String) =>
+              val fileMetadata: FileMetadata = fileMetadataDAO.retrieve(moduleName, moduleType, moduleVersion)
+
+              validate(fileMetadata != null, s"Module $moduleType-$moduleName-$moduleVersion not found") {
                 val specification = fileMetadata.metadata.get("metadata").get
                 val filename = fileMetadata.filename
 
                 pathPrefix("instance") {
                   pathEndOrSingleSlash {
                     post { (ctx: RequestContext) =>
-                      val options = deserializeOptions(getEntityFromContext(ctx), typeName)
-                      val errors = validateOptions(options, typeName)
+                      val options = deserializeOptions(getEntityFromContext(ctx), moduleType)
+                      val errors = validateOptions(options, moduleType)
                       if (errors.nonEmpty) {
                         val validatorClassName = specification.validateClass
                         val jarFile = storage.get(filename, s"tmp/$filename")
                         if (jarFile != null && jarFile.exists()) {
                           if (moduleValidate(jarFile, validatorClassName, options.options)) {
-                            val nameInstance = saveInstance(options, typeName, name, version)
+                            val nameInstance = saveInstance(options, moduleType, moduleName, moduleVersion)
                             ctx.complete(HttpEntity(
                               `application/json`,
-                              serializer.serialize(Response(200, nameInstance, s"Instance for module $typeName-$name-$version is created"))
+                              serializer.serialize(Response(200, nameInstance, s"Instance for module $moduleType-$moduleName-$moduleVersion is created"))
                             ))
                           } else {
-                            throw new InstanceException(s"Cannot create instance of module. Request has incrorrect options attrubute", s"$typeName-$name-$version")
+                            throw new InstanceException(s"Cannot create instance of module. Request has incrorrect options attrubute", s"$moduleType-$moduleName-$moduleVersion")
                           }
                         } else {
-                          throw new FileNotFoundException(s"Jar for module $typeName-$name-$version not found in storage")
+                          throw new FileNotFoundException(s"Jar for module $moduleType-$moduleName-$moduleVersion not found in storage")
                         }
                       } else {
-                        throw new InstanceException(s"Cannot create instance of module. Errors: ${errors.mkString("\n")}", s"$typeName-$name-$version")
+                        throw new InstanceException(s"Cannot create instance of module. Errors: ${errors.mkString("\n")}", s"$moduleType-$moduleName-$moduleVersion")
                       }
                     } ~
                     get {
-                      complete(HttpEntity(
-                        `application/json`,
-                        serializer.serialize(Response(200, null, "Ok"))
-                      ))
+                      val instancies = instanceDAO.retrieveByModule(moduleName, moduleVersion, moduleType)
+                      var msg = ""
+                      if (instancies.nonEmpty) {
+                        msg = serializer.serialize(instancies)
+                      } else {
+                        msg =  serializer.serialize(Response(200, s"$moduleType-$moduleName-$moduleVersion",
+                          s"Instancies for $moduleType-$moduleName-$moduleVersion not found"))
+                      }
+                      complete(HttpEntity(`application/json`, msg))
                     }
                   } ~
                   path(Segment) { (instanceName: String) =>
@@ -127,20 +132,25 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                       }
                     } ~
                     get {
-                      //todo get this instance
-                      complete(HttpEntity(
-                        `application/json`,
-                        serializer.serialize(Response(200, null, "Ok"))
-                      ))
+                      val instance = instanceDAO.retrieve(instanceName)
+                      instance match {
+                        case Some(inst) => complete(HttpEntity(
+                          `application/json`,
+                          serializer.serialize(inst)
+                        ))
+                        case None => throw BadRecordWithKey(s"Instance with name $instanceName is not found", instanceName)
+                      }
                     } ~
                     delete {
-                      //todo delete this instance
-                      complete(HttpEntity(
-                        `application/json`,
-                        serializer.serialize(Response(200, null, "Ok"))
-                      ))
+                      if (instanceDAO.delete(instanceName)) {
+                        complete(HttpEntity(
+                          `application/json`,
+                          serializer.serialize(Response(200, instanceName, s"Instance $instanceName has been deleted"))
+                        ))
+                      } else {
+                        throw new BadRecordWithKey(s"Instance $instanceName hasn't been found", instanceName)
+                      }
                     }
-
                   }
                 } ~
                 pathSuffix("specification") {
@@ -162,17 +172,22 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                         entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
                       ))
                     } else {
-                      throw new BadRecordWithKey(s"Jar '$name' not found", name)
+                      throw new BadRecordWithKey(s"Jar '$moduleName' not found", moduleName)
                     }
                   } ~
                   delete {
-                    if (storage.delete(filename)) {
-                      complete(HttpEntity(
-                        `application/json`,
-                        serializer.serialize(Response(200, null, s"Module $name for type $typeName has been deleted"))
-                      ))
+                    val instancies = instanceDAO.retrieveByModule(moduleName, moduleVersion, moduleType)
+                    if (instancies.nonEmpty) {
+                      if (storage.delete(filename)) {
+                        complete(HttpEntity(
+                          `application/json`,
+                          serializer.serialize(Response(200, s"$moduleType-$moduleName-$moduleVersion", s"Module $moduleName for type $moduleType has been deleted"))
+                        ))
+                      } else {
+                        throw new BadRecordWithKey(s"Module $moduleName hasn't been found", s"$moduleType-$moduleName-$moduleVersion")
+                      }
                     } else {
-                      throw new BadRecordWithKey(s"Module $name hasn't been found", name)
+                      throw new BadRecordWithKey(s"Cannot delete module $moduleName. Module has instancies", s"$moduleType-$moduleName-$moduleVersion")
                     }
                   }
                 }
@@ -180,18 +195,33 @@ trait SjModulesApi extends Directives with SjCrudValidator {
             }
           } ~
           get {
-            val files = fileMetadataDAO.retrieveAllByModuleType(typeName)
+            val files = fileMetadataDAO.retrieveAllByModuleType(moduleType)
             var msg = ""
             if (files.nonEmpty) {
-              msg = s"Uploaded modules for type $typeName: ${files.map(_.metadata.get("metadata").get.name).mkString(",\n")}"
+              msg = s"Uploaded modules for type $moduleType: ${files.map(_.metadata.get("metadata").get.name).mkString(",\n")}"
             } else {
-              msg = s"Uploaded modules for type $typeName have not been found "
+              msg = s"Uploaded modules for type $moduleType have not been found "
             }
             complete(HttpEntity(
               `application/json`,
               serializer.serialize(Response(200, null, msg))
             ))
           }
+        }
+      } ~
+      pathSuffix("instances") {
+        get {
+          val allInstancies = instanceDAO.retrieveAll()
+          if (allInstancies.isEmpty) {
+            complete(HttpEntity(
+              `application/json`,
+              serializer.serialize(Response(200, null, "Instancies have not been found"))
+            ))
+          }
+          complete(HttpEntity(
+            `application/json`,
+            serializer.serialize(allInstancies.map(x => ShortInstanceMetadata(x.name, x.moduleType, x.moduleName, x.moduleVersion, x.description, x.status)))
+          ))
         }
       }
     }
@@ -205,13 +235,10 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @return - json as object InstanceMetadata
     */
   def deserializeOptions(options: String, moduleType: String) = {
-    /*val entityClassName = conf.getString("modules." + moduleType + ".entity-class")
-    val mirror = universe.runtimeMirror(getClass.getClassLoader)
-    val entityClazz = Class.forName(entityClassName)*/
-    if (moduleType.equals("regular-streaming")) {
-      serializer.deserialize[RegularInstanceMetadata](options)
+    if (moduleType.equals(timeWindowedType)) {
+      serializer.deserialize[TimeWindowedInstanceMetadata](options)
     } else {
-      serializer.deserialize[WindowedInstanceMetadata](options)
+      serializer.deserialize[RegularInstanceMetadata](options)
     }
   }
 
@@ -224,10 +251,9 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     */
   def validateOptions(options: InstanceMetadata, moduleType: String) = {
     val validatorClassName = conf.getString("modules." + moduleType + ".validator-class")
-    val collectionName = conf.getString("modules." + moduleType + ".collection-name")
     val validatorClazz = Class.forName(validatorClassName)
     val validator = validatorClazz.newInstance().asInstanceOf[StreamingModuleValidator]
-    validator.validate(options, collectionName)
+    validator.validate(options)
   }
 
   /**
@@ -240,11 +266,11 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @return - name of created entity
     */
   def saveInstance(options: InstanceMetadata, moduleType: String, moduleName: String, moduleVersion: String) = {
-    val collectionName = conf.getString("modules." + moduleType + ".collection-name")
-    val instanceDAO = ConnectionRepository.getInstanceDAO(collectionName)
     options.uuid = java.util.UUID.randomUUID().toString
     options.moduleName = moduleName
     options.moduleVersion = moduleVersion
+    options.moduleType = moduleType
+    options.status = started
     instanceDAO.create(options)
   }
 
