@@ -14,11 +14,14 @@ import scala.collection.mutable
 class ModuleEnvironmentManager(val options: Map[String, Any],
                                stateStorage: ModuleStateStorage,
                                outputs: List[String],
-                               temporaryOutput: mutable.Map[String, mutable.MutableList[Array[Byte]]]) {
+                               temporaryOutput: mutable.Map[String, mutable.MutableList[Array[Byte]]],
+                                moduleTimer: ModuleTimer) {
 
   def getState() = stateStorage.getState()
 
   def setState(variables: mutable.Map[String, Any]) = stateStorage.setState(variables)
 
   def getOutput(streamName: String) = temporaryOutput(streamName)
+
+  def setTimer(delay: Long) = moduleTimer.setTimer(delay)
 }

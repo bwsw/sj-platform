@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit._
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.entities.RegularInstanceMetadata
 import com.bwsw.sj.common.module.entities.{TaskParameters, Transaction}
-import com.bwsw.sj.common.module.{ModuleEnvironmentManager, TaskEnvironmentManager}
+import com.bwsw.sj.common.module.{ModuleTimer, ModuleEnvironmentManager, TaskEnvironmentManager}
 
 import scala.collection.mutable
 
@@ -24,13 +24,15 @@ object RegularTaskRunner extends App {
   val simpleInstanceMetadata = taskParameters.instanceMetadata.asInstanceOf[RegularInstanceMetadata]
 
   val taskEnvironmentManager = new TaskEnvironmentManager()
-  val temporaryOutput = mutable.Map(simpleInstanceMetadata.outputs.map(x => (x, mutable.MutableList[Array[Byte]]())): _*
-  )
+
+  val temporaryOutput = mutable.Map(simpleInstanceMetadata.outputs.map(x => (x, mutable.MutableList[Array[Byte]]())): _*)
+  val moduleTimer = new ModuleTimer()
   val moduleEnvironmentManager = new ModuleEnvironmentManager(
     simpleInstanceMetadata.options,
     taskEnvironmentManager.getStateStorage(simpleInstanceMetadata.stateManagement),
     simpleInstanceMetadata.outputs,
-    temporaryOutput
+    temporaryOutput,
+    moduleTimer
   )
 
   val consumers = taskParameters.inputsWithPartitions.map(x => taskEnvironmentManager.createConsumer(x._1, x._2)).toVector
@@ -74,8 +76,9 @@ object RegularTaskRunner extends App {
       executor.onCheckpoint()
       temporaryOutput.foreach(x => x._2.clear())
     }
-    if (true) {
+    if (moduleTimer.isTime) {
       executor.onTimer()
+      moduleTimer.resetTimer()
     }
   }
 
