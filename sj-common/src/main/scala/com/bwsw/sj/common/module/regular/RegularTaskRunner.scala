@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit._
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.entities.RegularInstanceMetadata
 import com.bwsw.sj.common.module.entities.{TaskParameters, Transaction}
-import com.bwsw.sj.common.module.{ModuleTimer, ModuleEnvironmentManager, TaskEnvironmentManager}
+import com.bwsw.sj.common.module.{ModuleEnvironmentManager, ModuleTimer, TaskEnvironmentManager}
 
 import scala.collection.mutable
 
@@ -20,7 +20,7 @@ import scala.collection.mutable
 object RegularTaskRunner extends App {
 
   val serializer = new JsonSerializer()
-  val taskParameters = serializer.deserialize[TaskParameters](args(0))
+  val taskParameters = serializer.deserialize[TaskParameters](args(0)) //обращаться к ксюшиному ресту для получения
   val simpleInstanceMetadata = taskParameters.instanceMetadata.asInstanceOf[RegularInstanceMetadata]
 
   val taskEnvironmentManager = new TaskEnvironmentManager()
@@ -83,3 +83,22 @@ object RegularTaskRunner extends App {
   }
 
 }
+
+
+//object TEST extends App {
+//val serializer = new ObjectSerializer()
+//  val someObject1 = Map("test" -> new test(), "sum" -> 0, "put" -> Some("hello"))
+//  val a = serializer.serialize(someObject1)
+//val b = serializer.deserialize(a).asInstanceOf[Map[String, Any]]
+//
+//  println(b("test").asInstanceOf[test].a.sd)
+//}
+//
+//class test extends java.io.Serializable {
+//  val s = 5
+//  val a = new test1()
+//}
+//
+//class test1 extends java.io.Serializable {
+//  val sd = 6
+//}
