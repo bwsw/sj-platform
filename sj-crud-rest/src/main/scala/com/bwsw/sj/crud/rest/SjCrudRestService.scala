@@ -21,7 +21,7 @@ import scala.io.StdIn
 
 /**
   * Run object of CRUD Rest-API
-  * Created: 04/06/16
+  * Created: 06/04/2016
   * @author Kseniya Tomskikh
   */
 object SjCrudRestService extends App with SjCrudRouter {
@@ -57,6 +57,7 @@ object SjCrudRestService extends App with SjCrudRouter {
   val serializer = new JsonSerializer()
   val storage = ConnectionRepository.getFileStorage
   val fileMetadataDAO = ConnectionRepository.getFileMetadataDAO
+  val instanceDAO = ConnectionRepository.getInstanceDAO
 
   val routeLogged = logRequestResult(Logging.InfoLevel, route())
 

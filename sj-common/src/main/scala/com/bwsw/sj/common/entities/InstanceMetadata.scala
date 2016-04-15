@@ -9,8 +9,10 @@ import com.bwsw.common.DAL.Entity
   */
 abstract class InstanceMetadata extends Entity {
   var uuid: String
+  var moduleType: String
   var moduleName: String
   var moduleVersion: String
+  var status: String
   var name: String
   var description: String
   var inputs: List[String]

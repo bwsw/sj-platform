@@ -1,16 +1,17 @@
-package com.bwsw.sj.crud.rest
+package com.bwsw.sj.crud.rest.validator
 
 import java.io._
 import java.util.jar.JarFile
+
 import akka.http.scaladsl.server.RequestContext
 import akka.stream.Materializer
-import com.bwsw.common.DAL.EntityDAO
 import com.bwsw.common.file.utils.FilesStorage
 import com.bwsw.common.traits.Serializer
-import com.bwsw.sj.common.DAL.FileMetadataDAO
+import com.bwsw.sj.common.DAL.{InstanceMetadataDAO, FileMetadataDAO}
+import com.bwsw.sj.common.module.ModuleConstants
 import com.typesafe.config.Config
 import org.everit.json.schema.loader.SchemaLoader
-import org.json.{JSONTokener, JSONObject}
+import org.json.{JSONObject, JSONTokener}
 
 import scala.concurrent.Await
 
@@ -18,7 +19,7 @@ import scala.concurrent.Await
   * Trait for validation of crud-rest-api
   * and contains common methods for routes
   *
-  * Created: 04/06/2016
+  * Created: 06/04/2016
   *
   * @author Kseniya Tomskikh
   */
@@ -28,8 +29,9 @@ trait SjCrudValidator {
   val serializer: Serializer
   val fileMetadataDAO: FileMetadataDAO
   val storage: FilesStorage
+  val instanceDAO: InstanceMetadataDAO
 
-  private val moduleTypes = Array("time-windowed-streaming", "regular-streaming")
+  import ModuleConstants._
 
   /**
     * Getting entity from HTTP-request
