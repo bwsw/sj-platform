@@ -28,11 +28,15 @@ abstract class StreamingModuleValidator {
     }
 
     if (listHasDoubles(parameters.inputs)) {
-      errors += s"Inputs is not unique"
+      errors += s"Inputs is not unique."
+    }
+
+    if (parameters.inputs.exists(s => !s.endsWith("/full") && !s.endsWith("/split"))) {
+      errors += s"Inputs has incorrect name."
     }
 
     if (listHasDoubles(parameters.outputs)) {
-      errors += s"Outputs is not unique"
+      errors += s"Outputs is not unique."
     }
 
     if (!stateManagementModes.contains(parameters.stateManagement)) {
@@ -69,4 +73,5 @@ abstract class StreamingModuleValidator {
   def listHasDoubles(list: List[String]): Boolean = {
     list.map(x => (x, 1)).groupBy(_._1).map(x => x._2.reduce { (a, b) => (a._1, a._2 + b._2) }).exists(x => x._2 > 1)
   }
+
 }

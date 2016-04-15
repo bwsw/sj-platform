@@ -18,15 +18,16 @@ abstract class InstanceMetadata extends Entity {
   var inputs: List[String]
   var outputs: List[String]
   var checkpointMode: String
-  var checkpointInterval: Int
+  var checkpointInterval: Long
   var stateManagement: String
-  var checkpointFullInterval: Int
+  var stateFullCheckpoint: Int
   var parallelism: Int
   var options: Map[String, Any]
   var startFrom: Any
   var perExecutorCores: Int
   var perExecutorRam: Int
   var jvmOptions: Map[String, Any]
+  var executionPlan: ExecutionPlan
 }
 
 
