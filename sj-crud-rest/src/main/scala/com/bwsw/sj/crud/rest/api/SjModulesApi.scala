@@ -18,6 +18,8 @@ import org.apache.commons.io.FileUtils
 
 import akka.stream.scaladsl._
 
+import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 /**
@@ -259,19 +261,20 @@ trait SjModulesApi extends Directives with SjCrudValidator {
   /**
     * Save instance of module to mongo db
     *
-    * @param options - options for instance
+    * @param parameters - options for instance
     * @param moduleType - type name of module
     * @param moduleName - name of module
     * @param moduleVersion - version of module
     * @return - name of created entity
     */
-  def saveInstance(options: InstanceMetadata, moduleType: String, moduleName: String, moduleVersion: String) = {
-    options.uuid = java.util.UUID.randomUUID().toString
-    options.moduleName = moduleName
-    options.moduleVersion = moduleVersion
-    options.moduleType = moduleType
-    options.status = started
-    instanceDAO.create(options)
+  def saveInstance(parameters: InstanceMetadata, moduleType: String, moduleName: String, moduleVersion: String) = {
+    parameters.uuid = java.util.UUID.randomUUID().toString
+    parameters.moduleName = moduleName
+    parameters.moduleVersion = moduleVersion
+    parameters.moduleType = moduleType
+    parameters.status = started
+    parameters.executionPlan = createExecutionPlan(parameters)
+    instanceDAO.create(parameters)
   }
 
   /**
@@ -287,5 +290,39 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     val clazz = loader.loadClass(validateClassName)
     val validator = clazz.newInstance().asInstanceOf[StreamingValidator]
     validator.validate(options)
+  }
+
+  def createExecutionPlan(parameters: InstanceMetadata): ExecutionPlan = {
+    val tasks = mutable.Map[String, Task]()
+
+    for (i <- 0 until parameters.parallelism) {
+      val taskId = s"${parameters.uuid}_task$i"
+      val taskInputs = mutable.Map[String, List[Int]]()
+      for (input: String <- parameters.inputs) {
+        val inputs = new ArrayBuffer[Int]()
+
+        val countOfPartitions = getPartitionsCount(input)
+        var taskPartitionsCount = countOfPartitions
+        var res = 0
+        if (input.endsWith("/split")) {
+          if (taskPartitionsCount % parameters.parallelism > 0) {
+            res = taskPartitionsCount % parameters.parallelism
+          }
+          taskPartitionsCount /= parameters.parallelism
+        }
+
+
+
+        taskInputs += input.replaceAll("/split|/full", "") -> inputs.toList
+      }
+      tasks += taskId -> Task(taskInputs)
+    }
+
+    ExecutionPlan(tasks)
+  }
+
+  //todo get partitions by stream-name
+  def getPartitionsCount(name: String) = {
+    10
   }
 }
