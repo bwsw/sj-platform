@@ -16,7 +16,7 @@ import scala.collection.mutable
 
 class DefaultModuleStateStorage(producer: BasicProducer[Array[Byte], Array[Byte]],
                                 consumer: BasicConsumer[Array[Byte], Array[Byte]]) extends ModuleStateStorage {
-  
+
   override protected var stateVariables: mutable.Map[String, Any] = loadLastState()
   override protected val stateChanges: mutable.Map[String, (String, Any)] = mutable.Map[String, (String, Any)]()
 
@@ -25,7 +25,24 @@ class DefaultModuleStateStorage(producer: BasicProducer[Array[Byte], Array[Byte]
   private val middleVariables: mutable.Map[String, Any] = stateVariables.clone()
 
   private def loadLastState(): mutable.Map[String, Any] = {
-    mutable.Map[String, Any]() //todo: загрузить из базы checkpoints и сделать replay and fill lastFullTxnUUID
+    val loadedTransaction: Object = null //consumer gets the newest transaction and deserialize
+    if (loadedTransaction.isInstanceOf[mutable.Map[String, Any]]) {
+      //lastFullTxnUUID = loadedTransaction.getUUUID()
+      //return serializer.deserialize(loadedTransaction.getBytes()).asInstanceOf[mutable.Map[String, Any]]
+      loadedTransaction.asInstanceOf[mutable.Map[String, Any]]
+    } else {
+      val (uuid, partialState) = loadedTransaction.asInstanceOf[(UUID, mutable.Map[String, (String, Any)])]
+        val fullState = mutable.Map[String, Any]() //get UUID-transaction
+        applyPartialChanges(fullState, partialState) //apply changes in a loop
+        fullState
+    }
+  }
+
+  private def applyPartialChanges(fullState: mutable.Map[String, Any], partialState: mutable.Map[String, (String, Any)]) = {
+    partialState.foreach {
+      case (key, ("set", value)) => fullState(key) = value
+      case (key, ("delete", _)) => fullState.remove(key)
+    }
   }
 
   private def sendState(state: mutable.Map[String, Any]): UUID = {

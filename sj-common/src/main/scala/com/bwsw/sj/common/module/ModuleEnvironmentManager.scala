@@ -19,8 +19,6 @@ class ModuleEnvironmentManager(val options: Map[String, Any],
 
   def getState() = stateStorage.getState()
 
-  def setState(variables: mutable.Map[String, Any]) = stateStorage.setState(variables)
-
   def getOutput(streamName: String) = temporaryOutput(streamName)
 
   def setTimer(delay: Long) = moduleTimer.setTimer(delay)

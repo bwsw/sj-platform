@@ -22,7 +22,9 @@ class TaskEnvironmentManager() {
   }
 
   def getStateStorage(stateStorage: String) = stateStorage match {
-    case "RAM" => new DefaultModuleStateStorage()
+    case "RAM" => new DefaultModuleStateStorage(
+      new BasicProducer[Array[Byte], Array[Byte]]("stub producer", null, null),
+      new BasicConsumer[Array[Byte], Array[Byte]]("stub consumer", null, null))
   }
 
 
