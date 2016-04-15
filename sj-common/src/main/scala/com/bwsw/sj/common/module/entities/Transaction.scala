@@ -9,3 +9,4 @@ import java.util.UUID
  */
 
 case class Transaction(stream: String, partition: Int, txnUUID: UUID, consumerID: String, data: List[Array[Byte]])
+

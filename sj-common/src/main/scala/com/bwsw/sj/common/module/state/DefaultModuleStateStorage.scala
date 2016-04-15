@@ -46,14 +46,14 @@ class DefaultModuleStateStorage(producer: BasicProducer[Array[Byte], Array[Byte]
   }
 
   private def sendState(state: mutable.Map[String, Any]): UUID = {
-    val transaction: BasicProducerTransaction[Array[Byte], Array[Byte]] = producer.newTransaction(true)
+    val transaction: BasicProducerTransaction[Array[Byte], Array[Byte]] = producer.newTransaction(null)
     transaction.send(serializer.serialize(state))
     transaction.close()
     transaction.getTxnUUID
   }
 
   private def sendChanges(changes: (UUID, mutable.Map[String, (String, Any)])) = {
-    val transaction: BasicProducerTransaction[Array[Byte], Array[Byte]] = producer.newTransaction(true)
+    val transaction: BasicProducerTransaction[Array[Byte], Array[Byte]] = producer.newTransaction(null)
     transaction.send(serializer.serialize(changes))
     transaction.close()
   }

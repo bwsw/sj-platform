@@ -2,7 +2,6 @@ package com.bwsw.sj.common.module
 
 import java.net.{URL, URLClassLoader}
 
-import com.bwsw.sj.common.module.state.DefaultModuleStateStorage
 import com.bwsw.tstreams.agents.consumer.BasicConsumer
 import com.bwsw.tstreams.agents.producer.BasicProducer
 
@@ -20,13 +19,6 @@ class TaskEnvironmentManager() {
     new URLClassLoader(classLoaderUrls)
 
   }
-
-  def getStateStorage(stateStorage: String) = stateStorage match {
-    case "RAM" => new DefaultModuleStateStorage(
-      new BasicProducer[Array[Byte], Array[Byte]]("stub producer", null, null),
-      new BasicConsumer[Array[Byte], Array[Byte]]("stub consumer", null, null))
-  }
-
 
   //todo: use an Ivan REST to retrieve metadata for creating a consumer/producer
 
