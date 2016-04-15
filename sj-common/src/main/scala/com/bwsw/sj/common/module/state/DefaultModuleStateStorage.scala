@@ -49,7 +49,7 @@ class DefaultModuleStateStorage(producer: BasicProducer[Array[Byte], Array[Byte]
     val transaction: BasicProducerTransaction[Array[Byte], Array[Byte]] = producer.newTransaction(true)
     transaction.send(serializer.serialize(state))
     transaction.close()
-    UUID.randomUUID() //todo: replace on monday
+    transaction.getTxnUUID
   }
 
   private def sendChanges(changes: (UUID, mutable.Map[String, (String, Any)])) = {

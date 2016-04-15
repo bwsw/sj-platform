@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.module.environment
 
-import com.bwsw.sj.common.module.ModuleTimer
+import com.bwsw.sj.common.module.SjTimer
 
 import scala.collection.mutable
 
@@ -13,7 +13,7 @@ import scala.collection.mutable
 class ModuleEnvironmentManager(val options: Map[String, Any],
                                outputs: List[String],
                                temporaryOutput: mutable.Map[String, mutable.MutableList[Array[Byte]]],
-                               moduleTimer: ModuleTimer) {
+                               moduleTimer: SjTimer) {
 
   def getOutput(streamName: String) = temporaryOutput(streamName)
 

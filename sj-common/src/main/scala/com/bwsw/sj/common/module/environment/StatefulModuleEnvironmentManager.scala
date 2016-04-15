@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.module.environment
 
-import com.bwsw.sj.common.module.ModuleTimer
+import com.bwsw.sj.common.module.SjTimer
 import com.bwsw.sj.common.module.state.ModuleStateStorage
 import scala.collection.mutable
 
@@ -14,7 +14,7 @@ class StatefulModuleEnvironmentManager(stateStorage: ModuleStateStorage,
                                        options: Map[String, Any],
                                        outputs: List[String],
                                        temporaryOutput: mutable.Map[String, mutable.MutableList[Array[Byte]]],
-                                       moduleTimer: ModuleTimer) extends ModuleEnvironmentManager(options, outputs, temporaryOutput, moduleTimer) {
+                                       moduleTimer: SjTimer) extends ModuleEnvironmentManager(options, outputs, temporaryOutput, moduleTimer) {
 
   override def getState() = stateStorage.getState()
 }

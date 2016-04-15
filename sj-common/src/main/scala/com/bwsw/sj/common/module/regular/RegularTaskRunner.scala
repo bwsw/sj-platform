@@ -7,8 +7,8 @@ import java.util.concurrent.TimeUnit._
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.entities.RegularInstanceMetadata
 import com.bwsw.sj.common.module.entities.{TaskParameters, Transaction}
-import com.bwsw.sj.common.module.environment.{StatefulModuleEnvironmentManager, ModuleEnvironmentManager}
-import com.bwsw.sj.common.module.{ModuleTimer, TaskEnvironmentManager}
+import com.bwsw.sj.common.module.environment.{ModuleEnvironmentManager, StatefulModuleEnvironmentManager}
+import com.bwsw.sj.common.module.{SjTimer, TaskEnvironmentManager}
 
 import scala.collection.mutable
 
@@ -28,23 +28,9 @@ object RegularTaskRunner extends App {
   val taskEnvironmentManager = new TaskEnvironmentManager()
 
   val temporaryOutput = mutable.Map(regularInstanceMetadata.outputs.map(x => (x, mutable.MutableList[Array[Byte]]())): _*)
-  val moduleTimer = new ModuleTimer()
-  val moduleEnvironmentManager = regularInstanceMetadata.stateManagement match {
-    case "none" => new ModuleEnvironmentManager(
-      regularInstanceMetadata.options,
-      regularInstanceMetadata.outputs,
-      temporaryOutput,
-      moduleTimer
-    )
-
-    case "ram" => new StatefulModuleEnvironmentManager(
-      taskEnvironmentManager.getStateStorage(regularInstanceMetadata.stateManagement),
-      regularInstanceMetadata.options,
-      regularInstanceMetadata.outputs,
-      temporaryOutput,
-      moduleTimer
-    )
-  }
+  val moduleTimer = new SjTimer()
+  val moduleEnvironmentManager = chooseModuleEnvironmentManager(regularInstanceMetadata.stateManagement)
+  val transactionQueue = new ArrayBlockingQueue[Transaction](taskParameters.queueSize, true)
 
   val consumers = taskParameters.inputsWithPartitionRange.map(x => taskEnvironmentManager.createConsumer(x._1, x._2)).toVector
   val producers = regularInstanceMetadata.outputs.map(x => (x, taskEnvironmentManager.createProducer(x))).toMap
@@ -55,8 +41,6 @@ object RegularTaskRunner extends App {
     .newInstance(moduleEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
 
   executor.init()
-
-  val transactionQueue = new ArrayBlockingQueue[Transaction](taskParameters.queueSize, true)
 
   new Thread(new Runnable {
     def run() {
@@ -69,30 +53,71 @@ object RegularTaskRunner extends App {
     }
   }).start()
 
-  //если бы было можно подписаться на consumer, то по появлению новой транзакции - выполнялось следующее:
-  while (true) {
-    /*
-    *
-    * 1) создать транзакцию
-    * 2) отправить массив байт
-    * 3) GroupCheckpoint или по времени (зависит от настройки)
-    * 4) executor.onCheckpoint()
-    * 5) обнуляем temporaryOutput (вторую составляющую)
-    *
-    * */
-    val transaction: Transaction = transactionQueue.poll(taskParameters.transactionTimeout, MILLISECONDS)
-    if (transaction != null) {
-      executor.run(transaction)
-      temporaryOutput.foreach(x => println(s"producer: ${x._1}, numder of elements: ${x._2.length}"))
-      executor.onCheckpoint()
-      temporaryOutput.foreach(x => x._2.clear())
-    }
-    if (moduleTimer.isTime) {
-      executor.onTimer()
-      moduleTimer.resetTimer()
+  private def runModule() = {
+    regularInstanceMetadata.checkpointMode match {
+      case "time-interval" =>
+        val checkpointTimer = new SjTimer()
+        checkpointTimer.setTimer(regularInstanceMetadata.checkpointInterval)
+        //если бы было можно подписаться на consumer, то по появлению новой транзакции - выполнялось следующее:
+        while (true) {
+          val transaction: Transaction = transactionQueue.poll(taskParameters.transactionTimeout, MILLISECONDS)
+          if (transaction != null) {
+            executor.run(transaction)
+            temporaryOutput.foreach(x => println(s"producer: ${x._1}, number of elements: ${x._2.length}"))
+            if (checkpointTimer.isTime) {
+              //GroupCheckpoint
+              executor.onCheckpoint()
+              checkpointTimer.resetTimer()
+              checkpointTimer.setTimer(regularInstanceMetadata.checkpointInterval)
+            }
+            temporaryOutput.foreach(x => x._2.clear())
+          }
+          if (moduleTimer.isTime) {
+            executor.onTimer()
+            moduleTimer.resetTimer()
+          }
+        }
+      case "every-nth" =>
+        var countOfTransaction = 0
+        while (true) {
+          val transaction: Transaction = transactionQueue.poll(taskParameters.transactionTimeout, MILLISECONDS)
+          if (transaction != null) {
+            countOfTransaction += 1
+            executor.run(transaction)
+            temporaryOutput.foreach(x => println(s"producer: ${x._1}, number of elements: ${x._2.length}"))
+            if (countOfTransaction == regularInstanceMetadata.checkpointInterval) {
+              //GroupCheckpoint
+              executor.onCheckpoint()
+              countOfTransaction = 0
+            }
+            temporaryOutput.foreach(x => x._2.clear())
+          }
+          if (moduleTimer.isTime) {
+            executor.onTimer()
+            moduleTimer.resetTimer()
+          }
+        }
     }
   }
 
+  private def chooseModuleEnvironmentManager(stateManagement: String) = {
+    stateManagement match {
+      case "none" => new ModuleEnvironmentManager(
+        regularInstanceMetadata.options,
+        regularInstanceMetadata.outputs,
+        temporaryOutput,
+        moduleTimer
+      )
+
+      case "ram" => new StatefulModuleEnvironmentManager(
+        taskEnvironmentManager.getStateStorage(regularInstanceMetadata.stateManagement),
+        regularInstanceMetadata.options,
+        regularInstanceMetadata.outputs,
+        temporaryOutput,
+        moduleTimer
+      )
+    }
+  }
 }
 
 

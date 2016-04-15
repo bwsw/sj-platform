@@ -3,12 +3,12 @@ package com.bwsw.sj.common.module
 import java.util.{Timer, TimerTask}
 
 /**
- * Class representing a timer that can used in module
+ * Class representing a timer
  * Created: 14/04/2016
  * @author Kseniya Mikhaleva
  */
 
-class ModuleTimer {
+class SjTimer {
 
   private var isTimerWentOut = false
   private var timer: Timer = null
