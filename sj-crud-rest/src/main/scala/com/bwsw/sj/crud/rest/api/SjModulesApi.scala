@@ -292,37 +292,65 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     validator.validate(options)
   }
 
-  def createExecutionPlan(parameters: InstanceMetadata): ExecutionPlan = {
-    val tasks = mutable.Map[String, Task]()
+  /**
+    * Create execution plan for instance of module
+    * @param instance - instance for module
+    * @return - execution plan of instance
+    */
+  def createExecutionPlan(instance: InstanceMetadata) = {
+    val inputs = instance.inputs.map { input =>
+      val mode = getStreamMode(input)
+      val name = input.replaceAll("/split|/full", "")
+      InputStream(name, mode, getPartitionCount(name))
+    }
+    val tasks = (0 until instance.parallelism)
+      .map(x => instance.uuid + "_task" + x)
+      .map(x => x -> inputs)
 
-    for (i <- 0 until parameters.parallelism) {
-      val taskId = s"${parameters.uuid}_task$i"
-      val taskInputs = mutable.Map[String, List[Int]]()
-      for (input: String <- parameters.inputs) {
-        val inputs = new ArrayBuffer[Int]()
+    val executionPlan = mutable.Map[String, Task]()
+    val streams = mutable.Map(inputs.map(x => x.name -> StreamProcess(0, x.partitionsCount)).toSeq: _*)
 
-        val countOfPartitions = getPartitionsCount(input)
-        var taskPartitionsCount = countOfPartitions
-        var res = 0
-        if (input.endsWith("/split")) {
-          if (taskPartitionsCount % parameters.parallelism > 0) {
-            res = taskPartitionsCount % parameters.parallelism
-          }
-          taskPartitionsCount /= parameters.parallelism
+    var tasksNotProcessed = tasks.size
+    tasks.foreach { task =>
+      val list = task._2.map { inputStream =>
+        val stream = streams.get(inputStream.name).get
+        val countFreePartitions = stream.countFreePartitions
+        val startPartition = stream.currentPartition
+        var endPartition = startPartition + countFreePartitions
+        inputStream.mode match {
+          case "full" => endPartition = startPartition + countFreePartitions
+          case "split" =>
+            val cntTaskStreamPartitions = countFreePartitions / tasksNotProcessed
+            streams.update(inputStream.name, StreamProcess(startPartition + cntTaskStreamPartitions, countFreePartitions - cntTaskStreamPartitions))
+            if (Math.abs(cntTaskStreamPartitions - countFreePartitions) >= cntTaskStreamPartitions) {
+              endPartition = startPartition + cntTaskStreamPartitions
+            }
         }
 
-
-
-        taskInputs += input.replaceAll("/split|/full", "") -> inputs.toList
+        inputStream.name -> List(startPartition, endPartition - 1)
       }
-      tasks += taskId -> Task(taskInputs)
+      tasksNotProcessed -= 1
+      executionPlan.put(task._1, Task(mutable.Map(list.toSeq: _*)))
     }
-
-    ExecutionPlan(tasks)
+    ExecutionPlan(executionPlan)
   }
 
-  //todo get partitions by stream-name
-  def getPartitionsCount(name: String) = {
-    10
+  /**
+    * Get mode from stream-name
+    * @param name - name of stream
+    * @return - mode of stream
+    */
+  def getStreamMode(name: String) = {
+    name.substring(name.lastIndexOf("/") + 1)
   }
+
+  //todo потом доделать
+  def getPartitionCount(name: String) = {
+    val map = Map("s1" -> 11, "s2" -> 12, "s3" -> 15)
+    map.get(name).get
+  }
+
+  case class InputStream(name: String, mode: String, partitionsCount: Int)
+
+  case class StreamProcess(currentPartition: Int, countFreePartitions: Int)
 }
