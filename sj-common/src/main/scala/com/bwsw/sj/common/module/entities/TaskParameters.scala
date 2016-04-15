@@ -10,7 +10,7 @@ import com.bwsw.sj.common.entities.InstanceMetadata
 
 case class TaskParameters(pathToJar: String,
                           pathToExecutor: String,
-                          inputsWithPartitions: Map[String, List[Int]],
+                          inputsWithPartitionRange: Map[String, List[Int]],
                           queueSize: Int,
                           transactionTimeout: Int,
                           instanceMetadata: InstanceMetadata)

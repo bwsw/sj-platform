@@ -7,7 +7,8 @@ import java.util.concurrent.TimeUnit._
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.entities.RegularInstanceMetadata
 import com.bwsw.sj.common.module.entities.{TaskParameters, Transaction}
-import com.bwsw.sj.common.module.{ModuleEnvironmentManager, ModuleTimer, TaskEnvironmentManager}
+import com.bwsw.sj.common.module.environment.{StatefulModuleEnvironmentManager, ModuleEnvironmentManager}
+import com.bwsw.sj.common.module.{ModuleTimer, TaskEnvironmentManager}
 
 import scala.collection.mutable
 
@@ -20,23 +21,33 @@ import scala.collection.mutable
 object RegularTaskRunner extends App {
 
   val serializer = new JsonSerializer()
-  val taskParameters = serializer.deserialize[TaskParameters](args(0)) //обращаться к ксюшиному ресту для получения
-  val simpleInstanceMetadata = taskParameters.instanceMetadata.asInstanceOf[RegularInstanceMetadata]
+  val taskParameters = serializer.deserialize[TaskParameters](args(0))
+  //обращаться к ксюшиному ресту для получения
+  val regularInstanceMetadata = taskParameters.instanceMetadata.asInstanceOf[RegularInstanceMetadata]
 
   val taskEnvironmentManager = new TaskEnvironmentManager()
 
-  val temporaryOutput = mutable.Map(simpleInstanceMetadata.outputs.map(x => (x, mutable.MutableList[Array[Byte]]())): _*)
+  val temporaryOutput = mutable.Map(regularInstanceMetadata.outputs.map(x => (x, mutable.MutableList[Array[Byte]]())): _*)
   val moduleTimer = new ModuleTimer()
-  val moduleEnvironmentManager = new ModuleEnvironmentManager(
-    simpleInstanceMetadata.options,
-    taskEnvironmentManager.getStateStorage(simpleInstanceMetadata.stateManagement),
-    simpleInstanceMetadata.outputs,
-    temporaryOutput,
-    moduleTimer
-  )
+  val moduleEnvironmentManager = regularInstanceMetadata.stateManagement match {
+    case "none" => new ModuleEnvironmentManager(
+      regularInstanceMetadata.options,
+      regularInstanceMetadata.outputs,
+      temporaryOutput,
+      moduleTimer
+    )
 
-  val consumers = taskParameters.inputsWithPartitions.map(x => taskEnvironmentManager.createConsumer(x._1, x._2)).toVector
-  val producers = simpleInstanceMetadata.outputs.map(x => (x, taskEnvironmentManager.createProducer(x))).toMap
+    case "ram" => new StatefulModuleEnvironmentManager(
+      taskEnvironmentManager.getStateStorage(regularInstanceMetadata.stateManagement),
+      regularInstanceMetadata.options,
+      regularInstanceMetadata.outputs,
+      temporaryOutput,
+      moduleTimer
+    )
+  }
+
+  val consumers = taskParameters.inputsWithPartitionRange.map(x => taskEnvironmentManager.createConsumer(x._1, x._2)).toVector
+  val producers = regularInstanceMetadata.outputs.map(x => (x, taskEnvironmentManager.createProducer(x))).toMap
 
   val classLoader = taskEnvironmentManager.getClassLoader(taskParameters.pathToJar)
   val executor = classLoader.loadClass(taskParameters.pathToExecutor)

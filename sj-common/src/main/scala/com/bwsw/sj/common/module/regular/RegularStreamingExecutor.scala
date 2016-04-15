@@ -1,7 +1,7 @@
 package com.bwsw.sj.common.module.regular
 
-import com.bwsw.sj.common.module.ModuleEnvironmentManager
 import com.bwsw.sj.common.module.entities.Transaction
+import com.bwsw.sj.common.module.environment.ModuleEnvironmentManager
 
 /**
  * Class that contains an execution logic of regular module

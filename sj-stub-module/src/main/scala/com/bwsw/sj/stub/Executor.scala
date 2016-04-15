@@ -1,7 +1,7 @@
 package com.bwsw.sj.stub
 
-import com.bwsw.sj.common.module.ModuleEnvironmentManager
 import com.bwsw.sj.common.module.entities.Transaction
+import com.bwsw.sj.common.module.environment.ModuleEnvironmentManager
 import com.bwsw.sj.common.module.regular.RegularStreamingExecutor
 import scala.collection._
 

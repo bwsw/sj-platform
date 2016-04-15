@@ -1,7 +1,6 @@
-package com.bwsw.sj.common.module
+package com.bwsw.sj.common.module.environment
 
-
-import com.bwsw.sj.common.module.state.ModuleStateStorage
+import com.bwsw.sj.common.module.ModuleTimer
 
 import scala.collection.mutable
 
@@ -12,14 +11,17 @@ import scala.collection.mutable
  */
 
 class ModuleEnvironmentManager(val options: Map[String, Any],
-                               stateStorage: ModuleStateStorage,
                                outputs: List[String],
                                temporaryOutput: mutable.Map[String, mutable.MutableList[Array[Byte]]],
-                                moduleTimer: ModuleTimer) {
-
-  def getState() = stateStorage.getState()
+                               moduleTimer: ModuleTimer) {
 
   def getOutput(streamName: String) = temporaryOutput(streamName)
 
   def setTimer(delay: Long) = moduleTimer.setTimer(delay)
+
+  def getState(): mutable.Map[String, Any] = throw new Exception("Module has no state")
 }
+
+
+
+
