@@ -16,7 +16,8 @@ class RegularStreamingValidator extends StreamingModuleValidator {
     * @return - List of errors
     */
   def validate(parameters: RegularInstanceMetadata) = {
-    super.validate(parameters).toList
+    val validateResult = super.validate(parameters)
+    (validateResult._1.toList, validateResult._2)
   }
 
 }

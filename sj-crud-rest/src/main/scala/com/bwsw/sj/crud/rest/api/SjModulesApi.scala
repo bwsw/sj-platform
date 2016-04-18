@@ -57,7 +57,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
           val files = fileMetadataDAO.retrieveAllByFiletype("module")
           var msg = ""
           if (files.nonEmpty) {
-            msg = s"Uploaded modules: ${files.map(_.metadata.get("metadata").get.name).mkString(", ")}"
+            msg = s"Uploaded modules: ${files.map(_.metadata("metadata").name).mkString(", ")}"
           } else {
             msg = s"Uploaded modules have not been found "
           }
@@ -74,20 +74,21 @@ trait SjModulesApi extends Directives with SjCrudValidator {
               val fileMetadata: FileMetadata = fileMetadataDAO.retrieve(moduleName, moduleType, moduleVersion)
 
               validate(fileMetadata != null, s"Module $moduleType-$moduleName-$moduleVersion not found") {
-                val specification = fileMetadata.metadata.get("metadata").get
+                val specification = fileMetadata.metadata("metadata")
                 val filename = fileMetadata.filename
 
                 pathPrefix("instance") {
                   pathEndOrSingleSlash {
                     post { (ctx: RequestContext) =>
                       val options = deserializeOptions(getEntityFromContext(ctx), moduleType)
-                      val errors = validateOptions(options, moduleType)
+                      val validateResult = validateOptions(options, moduleType)
+                      val errors = validateResult._1
                       if (errors.nonEmpty) {
                         val validatorClassName = specification.validateClass
                         val jarFile = storage.get(filename, s"tmp/$filename")
                         if (jarFile != null && jarFile.exists()) {
                           if (moduleValidate(jarFile, validatorClassName, options.options)) {
-                            val nameInstance = saveInstance(options, moduleType, moduleName, moduleVersion)
+                            val nameInstance = saveInstance(options, moduleType, moduleName, moduleVersion, validateResult._2)
                             ctx.complete(HttpEntity(
                               `application/json`,
                               serializer.serialize(Response(200, nameInstance, s"Instance for module $moduleType-$moduleName-$moduleVersion is created"))
@@ -200,7 +201,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
             val files = fileMetadataDAO.retrieveAllByModuleType(moduleType)
             var msg = ""
             if (files.nonEmpty) {
-              msg = s"Uploaded modules for type $moduleType: ${files.map(_.metadata.get("metadata").get.name).mkString(",\n")}"
+              msg = s"Uploaded modules for type $moduleType: ${files.map(_.metadata("metadata").name).mkString(",\n")}"
             } else {
               msg = s"Uploaded modules for type $moduleType have not been found "
             }
@@ -267,13 +268,13 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @param moduleVersion - version of module
     * @return - name of created entity
     */
-  def saveInstance(parameters: InstanceMetadata, moduleType: String, moduleName: String, moduleVersion: String) = {
+  def saveInstance(parameters: InstanceMetadata, moduleType: String, moduleName: String, moduleVersion: String, partitionsCount: Map[String, Int]) = {
     parameters.uuid = java.util.UUID.randomUUID().toString
     parameters.moduleName = moduleName
     parameters.moduleVersion = moduleVersion
     parameters.moduleType = moduleType
     parameters.status = started
-    parameters.executionPlan = createExecutionPlan(parameters)
+    parameters.executionPlan = createExecutionPlan(parameters, partitionsCount)
     instanceDAO.create(parameters)
   }
 
@@ -292,37 +293,59 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     validator.validate(options)
   }
 
-  def createExecutionPlan(parameters: InstanceMetadata): ExecutionPlan = {
-    val tasks = mutable.Map[String, Task]()
+  /**
+    * Create execution plan for instance of module
+    * @param instance - instance for module
+    * @return - execution plan of instance
+    */
+  def createExecutionPlan(instance: InstanceMetadata, partitionsCount: Map[String, Int]) = {
+    val inputs = instance.inputs.map { input =>
+      val mode = getStreamMode(input)
+      val name = input.replaceAll("/split|/full", "")
+      InputStream(name, mode, partitionsCount(name))
+    }
+    val tasks = (0 until instance.parallelism)
+      .map(x => instance.uuid + "_task" + x)
+      .map(x => x -> inputs)
 
-    for (i <- 0 until parameters.parallelism) {
-      val taskId = s"${parameters.uuid}_task$i"
-      val taskInputs = mutable.Map[String, List[Int]]()
-      for (input: String <- parameters.inputs) {
-        val inputs = new ArrayBuffer[Int]()
+    val executionPlan = mutable.Map[String, Task]()
+    val streams = mutable.Map(inputs.map(x => x.name -> StreamProcess(0, x.partitionsCount)).toSeq: _*)
 
-        val countOfPartitions = getPartitionsCount(input)
-        var taskPartitionsCount = countOfPartitions
-        var res = 0
-        if (input.endsWith("/split")) {
-          if (taskPartitionsCount % parameters.parallelism > 0) {
-            res = taskPartitionsCount % parameters.parallelism
-          }
-          taskPartitionsCount /= parameters.parallelism
+    var tasksNotProcessed = tasks.size
+    tasks.foreach { task =>
+      val list = task._2.map { inputStream =>
+        val stream = streams(inputStream.name)
+        val countFreePartitions = stream.countFreePartitions
+        val startPartition = stream.currentPartition
+        var endPartition = startPartition + countFreePartitions
+        inputStream.mode match {
+          case "full" => endPartition = startPartition + countFreePartitions
+          case "split" =>
+            val cntTaskStreamPartitions = countFreePartitions / tasksNotProcessed
+            streams.update(inputStream.name, StreamProcess(startPartition + cntTaskStreamPartitions, countFreePartitions - cntTaskStreamPartitions))
+            if (Math.abs(cntTaskStreamPartitions - countFreePartitions) >= cntTaskStreamPartitions) {
+              endPartition = startPartition + cntTaskStreamPartitions
+            }
         }
 
-
-
-        taskInputs += input.replaceAll("/split|/full", "") -> inputs.toList
+        inputStream.name -> List(startPartition, endPartition - 1)
       }
-      tasks += taskId -> Task(taskInputs)
+      tasksNotProcessed -= 1
+      executionPlan.put(task._1, Task(mutable.Map(list.toSeq: _*)))
     }
-
-    ExecutionPlan(tasks)
+    ExecutionPlan(executionPlan)
   }
 
-  //todo get partitions by stream-name
-  def getPartitionsCount(name: String) = {
-    10
+  /**
+    * Get mode from stream-name
+    * @param name - name of stream
+    * @return - mode of stream
+    */
+  def getStreamMode(name: String) = {
+    name.substring(name.lastIndexOf("/") + 1)
   }
+
+  case class InputStream(name: String, mode: String, partitionsCount: Int)
+
+  case class StreamProcess(currentPartition: Int, countFreePartitions: Int)
 }

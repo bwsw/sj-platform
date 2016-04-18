@@ -18,14 +18,15 @@ class TimeWindowedStreamingValidator extends StreamingModuleValidator {
     * @return - List of errors
     */
   def validate(parameters: TimeWindowedInstanceMetadata, collectionName: String) = {
-    var errors: ArrayBuffer[String] = super.validate(parameters)
+    val validateResult = super.validate(parameters)
+    var errors = validateResult._1
     if (parameters.timeWindowed <= 0) {
       errors += s"Time-windowed attribute must be > 0"
     }
     if (parameters.windowFullMax <= 0) {
       errors += s"Window-full-max attribute must be > 0"
     }
-    errors.toList
+    (errors.toList, validateResult._2)
   }
 
 }
