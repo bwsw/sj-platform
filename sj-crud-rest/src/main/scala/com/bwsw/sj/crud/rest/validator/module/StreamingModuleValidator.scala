@@ -39,6 +39,13 @@ abstract class StreamingModuleValidator {
       errors += s"Outputs is not unique."
     }
 
+    val partitions = getPartitionForStreams(parameters.inputs)
+    val minPartitionCount = partitions.values.min
+
+    if (parameters.parallelism > minPartitionCount) {
+      errors += s"Parallelism (${parameters.parallelism}) > minimum of partition count ($minPartitionCount) in all input stream."
+    }
+
     if (!stateManagementModes.contains(parameters.stateManagement)) {
       errors += s"Unknown value of state-management attribute: ${parameters.stateManagement}. " +
         s"State-management must be 'none' or 'ram' or 'rocks'."
@@ -62,7 +69,7 @@ abstract class StreamingModuleValidator {
       }
     }
 
-    errors
+    (errors, partitions)
   }
 
   /**
@@ -72,6 +79,15 @@ abstract class StreamingModuleValidator {
     */
   def listHasDoubles(list: List[String]): Boolean = {
     list.map(x => (x, 1)).groupBy(_._1).map(x => x._2.reduce { (a, b) => (a._1, a._2 + b._2) }).exists(x => x._2 > 1)
+  }
+
+  //todo потом доделать
+  /**
+    * Get count of partition for streams
+    * @return - count of partition for each stream
+    */
+  def getPartitionForStreams(streams: List[String]) = {
+    Map("s1" -> 11, "s2" -> 12, "s3" -> 15)
   }
 
 }

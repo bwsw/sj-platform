@@ -24,8 +24,8 @@ abstract class InstanceMetadata extends Entity {
   var parallelism: Int
   var options: Map[String, Any]
   var startFrom: Any
-  var perExecutorCores: Int
-  var perExecutorRam: Int
+  var perTaskCores: Int
+  var perTaskRam: Int
   var jvmOptions: Map[String, Any]
   var executionPlan: ExecutionPlan
 }
