@@ -57,7 +57,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
           val files = fileMetadataDAO.retrieveAllByFiletype("module")
           var msg = ""
           if (files.nonEmpty) {
-            msg = s"Uploaded modules: ${files.map(_.metadata.get("metadata").get.name).mkString(", ")}"
+            msg = s"Uploaded modules: ${files.map(_.metadata("metadata").name).mkString(", ")}"
           } else {
             msg = s"Uploaded modules have not been found "
           }
@@ -74,20 +74,21 @@ trait SjModulesApi extends Directives with SjCrudValidator {
               val fileMetadata: FileMetadata = fileMetadataDAO.retrieve(moduleName, moduleType, moduleVersion)
 
               validate(fileMetadata != null, s"Module $moduleType-$moduleName-$moduleVersion not found") {
-                val specification = fileMetadata.metadata.get("metadata").get
+                val specification = fileMetadata.metadata("metadata")
                 val filename = fileMetadata.filename
 
                 pathPrefix("instance") {
                   pathEndOrSingleSlash {
                     post { (ctx: RequestContext) =>
                       val options = deserializeOptions(getEntityFromContext(ctx), moduleType)
-                      val errors = validateOptions(options, moduleType)
+                      val validateResult = validateOptions(options, moduleType)
+                      val errors = validateResult._1
                       if (errors.nonEmpty) {
                         val validatorClassName = specification.validateClass
                         val jarFile = storage.get(filename, s"tmp/$filename")
                         if (jarFile != null && jarFile.exists()) {
                           if (moduleValidate(jarFile, validatorClassName, options.options)) {
-                            val nameInstance = saveInstance(options, moduleType, moduleName, moduleVersion)
+                            val nameInstance = saveInstance(options, moduleType, moduleName, moduleVersion, validateResult._2)
                             ctx.complete(HttpEntity(
                               `application/json`,
                               serializer.serialize(Response(200, nameInstance, s"Instance for module $moduleType-$moduleName-$moduleVersion is created"))
@@ -200,7 +201,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
             val files = fileMetadataDAO.retrieveAllByModuleType(moduleType)
             var msg = ""
             if (files.nonEmpty) {
-              msg = s"Uploaded modules for type $moduleType: ${files.map(_.metadata.get("metadata").get.name).mkString(",\n")}"
+              msg = s"Uploaded modules for type $moduleType: ${files.map(_.metadata("metadata").name).mkString(",\n")}"
             } else {
               msg = s"Uploaded modules for type $moduleType have not been found "
             }
@@ -267,13 +268,13 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @param moduleVersion - version of module
     * @return - name of created entity
     */
-  def saveInstance(parameters: InstanceMetadata, moduleType: String, moduleName: String, moduleVersion: String) = {
+  def saveInstance(parameters: InstanceMetadata, moduleType: String, moduleName: String, moduleVersion: String, partitionsCount: Map[String, Int]) = {
     parameters.uuid = java.util.UUID.randomUUID().toString
     parameters.moduleName = moduleName
     parameters.moduleVersion = moduleVersion
     parameters.moduleType = moduleType
     parameters.status = started
-    parameters.executionPlan = createExecutionPlan(parameters)
+    parameters.executionPlan = createExecutionPlan(parameters, partitionsCount)
     instanceDAO.create(parameters)
   }
 
@@ -297,11 +298,11 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @param instance - instance for module
     * @return - execution plan of instance
     */
-  def createExecutionPlan(instance: InstanceMetadata) = {
+  def createExecutionPlan(instance: InstanceMetadata, partitionsCount: Map[String, Int]) = {
     val inputs = instance.inputs.map { input =>
       val mode = getStreamMode(input)
       val name = input.replaceAll("/split|/full", "")
-      InputStream(name, mode, getPartitionCount(name))
+      InputStream(name, mode, partitionsCount(name))
     }
     val tasks = (0 until instance.parallelism)
       .map(x => instance.uuid + "_task" + x)
@@ -313,7 +314,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     var tasksNotProcessed = tasks.size
     tasks.foreach { task =>
       val list = task._2.map { inputStream =>
-        val stream = streams.get(inputStream.name).get
+        val stream = streams(inputStream.name)
         val countFreePartitions = stream.countFreePartitions
         val startPartition = stream.currentPartition
         var endPartition = startPartition + countFreePartitions
@@ -342,12 +343,6 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     */
   def getStreamMode(name: String) = {
     name.substring(name.lastIndexOf("/") + 1)
-  }
-
-  //todo потом доделать
-  def getPartitionCount(name: String) = {
-    val map = Map("s1" -> 11, "s2" -> 12, "s3" -> 15)
-    map.get(name).get
   }
 
   case class InputStream(name: String, mode: String, partitionsCount: Int)
