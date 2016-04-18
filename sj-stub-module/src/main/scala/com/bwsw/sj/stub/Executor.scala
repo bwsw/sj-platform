@@ -3,23 +3,27 @@ package com.bwsw.sj.stub
 import com.bwsw.sj.common.module.entities.Transaction
 import com.bwsw.sj.common.module.environment.ModuleEnvironmentManager
 import com.bwsw.sj.common.module.regular.RegularStreamingExecutor
-import scala.collection._
 
 class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor(manager) {
-  override def init(): Unit = {
-    manager.setState(mutable.Map("sumElement" -> 0))
-  }
 
-  override def finish(): Unit = ???
+    override def init(): Unit = {
+      println("init")
+    }
 
-  override def onCheckpoint(): Unit = {
-    println(s"Checkpoint done! Sum of element = ${manager.getState()("sum")}")
-  }
+    override def finish(): Unit = ???
 
-  override def run(transaction: Transaction): Unit = {
-    val state = manager.getState()
-    state("sum") = state("sum").asInstanceOf[Int] + transaction.data.length
-  }
+    override def onCheckpoint(): Unit = {
+      println("onCheckpoint")
+    }
 
-  override def onTimer(): Unit = ???
+    override def run(transaction: Transaction): Unit = {
+      val output = manager.getOutput("s3")
+      manager.setTimer(1000)
+      transaction.data.foreach(x => output += x)
+      println("in run")
+    }
+
+    override def onTimer(): Unit = {
+      println("onTimer")
+    }
 }
