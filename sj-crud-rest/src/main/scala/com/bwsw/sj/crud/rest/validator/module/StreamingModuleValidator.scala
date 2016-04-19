@@ -23,8 +23,9 @@ abstract class StreamingModuleValidator {
     val instanceDAO = ConnectionRepository.getInstanceDAO
     val errors = new ArrayBuffer[String]()
 
-    instanceDAO.retrieve(parameters.name) match {
-      case None => errors += s"Instance for name: ${parameters.name} is exist."
+    val instance = instanceDAO.retrieve(parameters.name)
+    instance match {
+      case Some(_) => errors += s"Instance for name: ${parameters.name} is exist."
     }
 
     if (listHasDoubles(parameters.inputs)) {

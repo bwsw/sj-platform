@@ -12,5 +12,5 @@ class Specification(var name: String,
                     @JsonProperty("module-type") var moduleType: String,
                     var engine: String,
                     var options: Map[String, Any],
-                    @JsonProperty("validator-class") var validateClass: String,
-                    @JsonProperty("executor-class") executorClass: String)
+                    @JsonProperty("validator-class") val validateClass: String,
+                    @JsonProperty("executor-class") val executorClass: String)
