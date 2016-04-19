@@ -83,7 +83,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                       val options = deserializeOptions(getEntityFromContext(ctx), moduleType)
                       val validateResult = validateOptions(options, moduleType)
                       val errors = validateResult._1
-                      if (errors.nonEmpty) {
+                      if (errors.isEmpty) {
                         val validatorClassName = specification.validateClass
                         val jarFile = storage.get(filename, s"tmp/$filename")
                         if (jarFile != null && jarFile.exists()) {
@@ -273,7 +273,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     parameters.moduleName = moduleName
     parameters.moduleVersion = moduleVersion
     parameters.moduleType = moduleType
-    parameters.status = started
+    parameters.status = ready
     parameters.executionPlan = createExecutionPlan(parameters, partitionsCount)
     instanceDAO.create(parameters)
   }

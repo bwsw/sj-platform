@@ -28,4 +28,5 @@ case class TimeWindowedInstanceMetadata(var uuid: String,
                                         @JsonProperty("time-windowed") var timeWindowed: Int,
                                         @JsonProperty("window-full-max") var windowFullMax: Int,
                                         var status: String,
-                                        @JsonProperty("execution-plan") var executionPlan: ExecutionPlan) extends InstanceMetadata
+                                        @JsonProperty("execution-plan") var executionPlan: ExecutionPlan,
+                                        var tags: String) extends InstanceMetadata
