@@ -1,5 +1,5 @@
 {
-  "name": "com.bw.sw.sj.stub",
+  "name": "com.bwsw.sj.stub",
   "description": "Stub module by BW",
   "version": "0.1",
   "author": "Ksenia Mikhaleva",
@@ -10,7 +10,7 @@
       1
     ],
     "types": [
-      "stream.kafka"
+      "stream.t-stream"
     ]
   },
   "outputs": {
@@ -19,14 +19,14 @@
       1
     ],
     "types": [
-      "console"
+      "stream.t-stream"
     ]
   },
-  "module-type": "time-windowed-streaming",
-  "engine": "spark-streaming",
+  "module-type": "regular-streaming",
+  "engine": "streaming",
   "options": {
-
+    "opt": 1
   },
   "validator-class": "com.bwsw.sj.stub.Validator",
-  "executor-class": "com.bw-sw.sj.stub.Executor"
+  "executor-class": "com.bwsw.sj.stub.Executor"
 }

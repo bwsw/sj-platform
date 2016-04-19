@@ -5,11 +5,17 @@ package com.bwsw.sj.common.module.state
  * Created: 12/04/2016
  * @author Kseniya Mikhaleva
  */
+
 import scala.collection._
+
 trait ModuleStateStorage {
-  protected var variables: mutable.Map[String, Any]
+  protected var stateVariables: mutable.Map[String, Any]
+
+  protected val stateChanges: mutable.Map[String, (String, Any)]
 
   def getState(): mutable.Map[String, Any]
 
-  def setState(newVariables: mutable.Map[String, Any])
+  def checkpoint()
+
+  def fullCheckpoint()
 }
