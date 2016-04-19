@@ -16,7 +16,7 @@ object StreamJugglerBuild extends Build {
   lazy val sj = Project(id = "sj",
     base = file("."),
     settings = commonSettings) aggregate(common,
-    stub, crudRest)
+    stub, crudRest, transactionGenerator)
 
 
   lazy val common = Project(id = "sj-common",
@@ -27,6 +27,9 @@ object StreamJugglerBuild extends Build {
 
   lazy val crudRest = Project(id = "sj-crud-rest",
     base = file("sj-crud-rest")).enablePlugins(JavaAppPackaging).dependsOn(common)
+
+  lazy val transactionGenerator = Project(id = "sj-transaction-generator",
+    base = file("sj-transaction-generator")).enablePlugins(JavaAppPackaging).dependsOn(common)
 
   //////////////////////////////////////////////////////////////////////////////
   // PROJECT INFO

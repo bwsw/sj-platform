@@ -6,7 +6,8 @@ import java.net.{ServerSocket, Socket}
 import com.datastax.driver.core.utils.UUIDs
 
 /**
-  * Created: 4/18/16
+  * TCP-Server for transaction generating
+  * Created: 18/04/2016
   *
   * @author Kseniya Tomskikh
   */
@@ -18,9 +19,9 @@ class TcpServer(port: Int) {
     val clientSocket = serverSocket.accept()
     while (true) {
       val request = readSocket(clientSocket)
-      if (request != null && !request.equals("")) {
+      if (request != null && request.equals("GET TRANSACTION")) {
         val newUuid = getNewTransaction.toString
-        println(newUuid)
+        //println(newUuid)
         writeSocket(clientSocket, newUuid)
       }
     }
@@ -31,13 +32,13 @@ class TcpServer(port: Int) {
     bufferedReader.readLine()
   }
 
-  private def writeSocket(socket: Socket, string: String) {
+  private def writeSocket(socket: Socket, message: String) {
     val out: PrintWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream))
-    out.println(string)
+    out.println(message)
     out.flush()
   }
 
-  private def getNewTransaction = {
+  def getNewTransaction = {
     UUIDs.timeBased()
   }
 

@@ -4,7 +4,8 @@ import java.io.{BufferedReader, InputStreamReader, OutputStreamWriter, PrintWrit
 import java.net.Socket
 
 /**
-  * Created: 4/18/16
+  * Client for transaction generating
+  * Created: 18/04/2016
   *
   * @author Kseniya Tomskikh
   */
@@ -24,14 +25,14 @@ class TcpClient(host: String, port: Int) {
     readSocket()
   }
 
-  def readSocket(): String = {
+  private def readSocket(): String = {
     val bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream))
     bufferedReader.readLine()
   }
 
-  def writeSocket(string: String) {
+  private def writeSocket(message: String) {
     val out: PrintWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream))
-    out.println(string)
+    out.println(message)
     out.flush()
   }
 
