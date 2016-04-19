@@ -26,6 +26,7 @@ abstract class StreamingModuleValidator {
     val instance = instanceDAO.retrieve(parameters.name)
     instance match {
       case Some(_) => errors += s"Instance for name: ${parameters.name} is exist."
+      case None =>
     }
 
     if (listHasDoubles(parameters.inputs)) {

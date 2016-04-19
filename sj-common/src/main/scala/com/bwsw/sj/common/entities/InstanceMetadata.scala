@@ -28,6 +28,7 @@ abstract class InstanceMetadata extends Entity {
   var perTaskRam: Int
   var jvmOptions: Map[String, Any]
   var executionPlan: ExecutionPlan
+  var tags: String
 }
 
 
