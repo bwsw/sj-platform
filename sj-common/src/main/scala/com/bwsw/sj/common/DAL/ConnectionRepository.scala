@@ -35,8 +35,8 @@ object ConnectionRepository {
 
 object ConnectionConstants {
   val conf = ConfigLoader.load()
-  val host = "localhost"//sys.env("MONGO_HOST")
-  val port = sys.env("MONGO_PORT").toInt
+  val host = System.getenv("MONGO_HOST")
+  val port = System.getenv("MONGO_PORT").toInt
 
   val databaseName = "stream_juggler"
   lazy val fileMetadataCollection = "fs.files"
