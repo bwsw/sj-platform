@@ -8,7 +8,7 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.entities.RegularInstanceMetadata
 import com.bwsw.sj.common.module.entities.Transaction
 import com.bwsw.sj.common.module.environment.{ModuleEnvironmentManager, StatefulModuleEnvironmentManager}
-import com.bwsw.sj.common.module.state.DefaultModuleStateStorage
+import com.bwsw.sj.common.module.state.RAMStateService
 import com.bwsw.sj.common.module.{PersistentBlockingQueue, SjTimer, TaskEnvironmentManager}
 import com.bwsw.tstreams.agents.consumer.Offsets.{IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerTransaction, ProducerPolicies}
@@ -161,7 +161,7 @@ object RegularTaskRunner {
         var countOfCheckpoints = 0
         val taskName = System.getenv("TASK_NAME")
 
-        val moduleStateStorage = new DefaultModuleStateStorage(
+        val moduleStateStorage = new RAMStateService(
           manager.createProducer(taskName),
           manager.createConsumer(taskName, List(0, 0), Newest))
 
