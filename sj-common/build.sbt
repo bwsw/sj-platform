@@ -15,3 +15,7 @@ libraryDependencies += "org.apache.commons" % "commons-io" % "1.3.2"
 libraryDependencies += "com.typesafe" % "config" % "1.3.0"
 
 libraryDependencies += "org.apache.httpcomponents" % "httpclient" % "4.5.2"
+
+libraryDependencies += "net.openhft" % "chronicle-queue" % "4.2.6"
+
+

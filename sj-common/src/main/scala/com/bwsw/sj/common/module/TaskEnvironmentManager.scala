@@ -1,9 +1,11 @@
 package com.bwsw.sj.common.module
 
-import java.io.File
-import java.net.{InetSocketAddress, URLClassLoader}
+import java.io.{InputStreamReader, BufferedReader, File}
+import java.net.{URL, InetSocketAddress, URLClassLoader}
 
 import com.aerospike.client.Host
+import com.bwsw.common.JsonSerializer
+import com.bwsw.sj.common.entities.{Specification, RegularInstanceMetadata}
 import com.bwsw.tstreams.agents.consumer.Offsets.IOffset
 import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions}
 import com.bwsw.tstreams.agents.producer.InsertionType.BatchInsert
@@ -15,7 +17,12 @@ import com.bwsw.tstreams.generator.LocalTimeUuidGenerator
 import com.bwsw.tstreams.metadata.MetadataStorageFactory
 import com.bwsw.tstreams.policy.RoundRobinPolicy
 import com.bwsw.tstreams.streams.BasicStream
+import org.apache.commons.io.FileUtils
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.impl.client.HttpClientBuilder
 import org.redisson.{Config, Redisson}
+
+import scala.collection.mutable
 
 /**
  * Class allowing to manage environment of task
@@ -25,6 +32,11 @@ import org.redisson.{Config, Redisson}
 
 class TaskEnvironmentManager() {
 
+  private val moduleType = System.getenv("MODULE_TYPE")
+  private val moduleName = System.getenv("MODULE_NAME")
+  private val moduleVersion = System.getenv("MODULE_VERSION")
+  private val instanceName = System.getenv("INSTANCE_NAME")
+  private val moduleRest = getModuleRestAddress
   private val randomKeyspace = "test"
 
   //metadata/data factories
@@ -67,6 +79,50 @@ class TaskEnvironmentManager() {
 
     new URLClassLoader(classLoaderUrls)
 
+  }
+
+  private def getModuleRestAddress = {
+    //todo replace this stub
+    "192.168.1.180:8887"
+  }
+
+  private def sendHttpGetRequest(url: String) = {
+
+    val client = HttpClientBuilder.create().build()
+    val request = new HttpGet(url)
+
+    val response = client.execute(request)
+
+    System.out.println("Response Code : "
+      + response.getStatusLine.getStatusCode)
+
+    val rd = new BufferedReader(
+      new InputStreamReader(response.getEntity.getContent))
+
+    val result = new StringBuffer()
+    var line: String = rd.readLine()
+    while (line != null) {
+      result.append(line)
+      line = rd.readLine()
+    }
+
+    result.toString
+  }
+
+  def downloadModuleJar(moduleJar: File) = {
+    FileUtils.copyURLToFile(new URL(s"http://$moduleRest/v1/modules/$moduleType/$moduleName/$moduleVersion"), moduleJar)
+  }
+
+  def getRegularInstanceMetadata(serializer: JsonSerializer) = {
+    serializer.deserialize[RegularInstanceMetadata](sendHttpGetRequest(s"http://$moduleRest/v1/modules/$moduleType/$moduleName/$moduleVersion/instance/$instanceName"))
+  }
+
+  def getSpecification(serializer: JsonSerializer) = {
+    serializer.deserialize[Specification](sendHttpGetRequest(s"http://$moduleRest/v1/modules/$moduleType/$moduleName/$moduleVersion/specification"))
+  }
+
+  def getTemporaryOutput(outputs: List[String]) = {
+    mutable.Map(outputs.map(x => (x, mutable.MutableList[Array[Byte]]())): _*)
   }
 
   //todo: use an Ivan REST to retrieve metadata for creating a consumer/producer

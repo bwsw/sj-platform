@@ -9,10 +9,16 @@ import com.bwsw.sj.common.module.environment.ModuleEnvironmentManager
  * @author Kseniya Mikhaleva
  */
 
-abstract class RegularStreamingExecutor(moduleEnvironmentManager: ModuleEnvironmentManager) {
-
+abstract class RegularStreamingExecutor(env: ModuleEnvironmentManager) {
+  /**
+   * Will invoke only once at the beginning of launch of module
+   */
   def init(): Unit
 
+  /**
+   *
+   * @param transaction
+   */
   def run(transaction: Transaction): Unit
 
   def finish(): Unit

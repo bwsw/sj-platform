@@ -161,9 +161,9 @@ object asd {
     val aerospikeInstForConsumer = storageFactory.getInstance(aerospikeOptions)
 
     //metadata storage instances
-    val metadataStorageInstForProducer = metadataStorageFactory.getInstance(
-      cassandraHosts = List(new InetSocketAddress("localhost", 9042)),
-      keyspace = randomKeyspace)
+//    val metadataStorageInstForProducer = metadataStorageFactory.getInstance(
+//      cassandraHosts = List(new InetSocketAddress("localhost", 9042)),
+//      keyspace = randomKeyspace)
     val metadataStorageInstForConsumer = metadataStorageFactory.getInstance(
       cassandraHosts = List(new InetSocketAddress("localhost", 9042)),
       keyspace = randomKeyspace)
@@ -175,14 +175,14 @@ object asd {
     val coordinator = new Coordinator("some_path", redissonClient)
 
     //stream instances for producer/consumer
-    //    val streamForProducer: BasicStream[Array[Byte]] = new BasicStream[Array[Byte]](
-    //      name = "test_stream",
-    //      partitions = 3,
-    //      metadataStorage = metadataStorageInstForProducer,
-    //      dataStorage = aerospikeInstForProducer,
-    //      coordinator = coordinator,
-    //      ttl = 60 * 10,
-    //      description = "some_description")
+//    val streamForProducer: BasicStream[Array[Byte]] = new BasicStream[Array[Byte]](
+//      name = "s3",
+//      partitions = 3,
+//      metadataStorage = metadataStorageInstForProducer,
+//      dataStorage = aerospikeInstForProducer,
+//      coordinator = coordinator,
+//      ttl = 60 * 10,
+//      description = "some_description")
 
     val streamForConsumer = new BasicStream[Array[Byte]](
       name = "s3",
@@ -193,21 +193,21 @@ object asd {
       ttl = 60 * 10,
       description = "some_description")
 
-    //    val policyForProducer = new RoundRobinPolicy(streamForProducer, List(0, 1, 2))
-    //    val generatorForProducer = new LocalTimeUuidGenerator
+//    val policyForProducer = new RoundRobinPolicy(streamForProducer, List(0, 1, 2))
+//    val generatorForProducer = new LocalTimeUuidGenerator
     ///
     val policyForConsumer = new RoundRobinPolicy(streamForConsumer, List(0, 1, 2))
     val generatorForConsumer = new LocalTimeUuidGenerator
 
     //producer/consumer options
-    //    val producerOptions = new BasicProducerOptions[String, Array[Byte]](
-    //      transactionTTL = 6,
-    //      transactionKeepAliveInterval = 2,
-    //      producerKeepAliveInterval = 1,
-    //      policyForProducer,
-    //      BatchInsert(5),
-    //      generatorForProducer,
-    //      stringToArrayByteConverter)
+//    val producerOptions = new BasicProducerOptions[String, Array[Byte]](
+//      transactionTTL = 6,
+//      transactionKeepAliveInterval = 2,
+//      producerKeepAliveInterval = 1,
+//      policyForProducer,
+//      BatchInsert(5),
+//      generatorForProducer,
+//      stringToArrayByteConverter)
 
     val consumerOptions = new BasicConsumerOptions[Array[Byte], String](
       transactionsPreload = 10,
@@ -219,8 +219,8 @@ object asd {
       generatorForConsumer,
       useLastOffset = true)
 
-    //val producer = new BasicProducer("test_producer", streamForProducer, producerOptions)
-    val consumer = new BasicConsumer("test_consumer", streamForConsumer, consumerOptions)
+    //    val producer = new BasicProducer("test_producer", streamForProducer, producerOptions)
+    val consumer = new BasicConsumer("test9", streamForConsumer, consumerOptions)
 
     //    val txn = producer.newTransaction(ProducerPolicies.errorIfOpen)
     //    txn.send("kjdsjaldjlak")
@@ -228,8 +228,8 @@ object asd {
 
     var i = 0
     while (i < 20) {
-      var maybeTransaction = consumer.getTransaction
-      var retrievedTxn = maybeTransaction.get
+      val maybeTransaction = consumer.getTransaction
+      val retrievedTxn = maybeTransaction.get
       println(retrievedTxn.getAll())
       i = i + 1
     }
