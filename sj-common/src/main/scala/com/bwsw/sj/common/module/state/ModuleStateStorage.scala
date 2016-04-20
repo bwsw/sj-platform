@@ -1,19 +1,19 @@
 package com.bwsw.sj.common.module.state
 
+import scala.collection.mutable
+
 /**
- * Trait representing state of module
+ * Trait representing storage for state of module
  * Created: 12/04/2016
  * @author Kseniya Mikhaleva
  */
 
-import scala.collection._
-
 trait ModuleStateStorage {
-  protected var stateVariables: mutable.Map[String, Any]
 
+  protected val stateVariables: mutable.Map[String, Any]
   protected val stateChanges: mutable.Map[String, (String, Any)]
 
-  def getState(): mutable.Map[String, Any]
+  def getState: State
 
   def checkpoint()
 

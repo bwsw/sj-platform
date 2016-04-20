@@ -11,6 +11,9 @@ libraryDependencies ++= Seq(
   "org.everit.json" % "org.everit.json.schema" % "1.2.0"
 )
 
+libraryDependencies += "com.typesafe.akka" % "akka-slf4j_2.11" % "2.4.4"
+
+
 dependencyOverrides ++= Set("com.typesafe.akka" %% "akka-actor" % "2.4.1")
 
 assemblyMergeStrategy in assembly := {
@@ -26,3 +29,4 @@ assemblyMergeStrategy in assembly := {
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
 }
+

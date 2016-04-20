@@ -16,5 +16,5 @@ class StatefulModuleEnvironmentManager(stateStorage: ModuleStateStorage,
                                        temporaryOutput: mutable.Map[String, mutable.MutableList[Array[Byte]]],
                                        moduleTimer: SjTimer) extends ModuleEnvironmentManager(options, outputs, temporaryOutput, moduleTimer) {
 
-  override def getState() = stateStorage.getState()
+  override def getState = stateStorage.getState
 }

@@ -1,6 +1,7 @@
 package com.bwsw.sj.common.module.environment
 
 import com.bwsw.sj.common.module.SjTimer
+import com.bwsw.sj.common.module.state.State
 
 import scala.collection.mutable
 
@@ -19,7 +20,7 @@ class ModuleEnvironmentManager(val options: Map[String, Any],
 
   def setTimer(delay: Long) = moduleTimer.setTimer(delay)
 
-  def getState(): mutable.Map[String, Any] = throw new Exception("Module has no state")
+  def getState(): State = throw new Exception("Module has no state")
 }
 
 

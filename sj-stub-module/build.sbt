@@ -4,8 +4,6 @@ version := "0.1"
 
 scalaVersion := "2.11.7"
 
-unmanagedJars in Compile += file("lib/t-streams.jar")
-
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.first
   case PathList("scala", xs@_*) => MergeStrategy.first
