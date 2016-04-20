@@ -121,8 +121,8 @@ class TaskEnvironmentManager() {
     serializer.deserialize[Specification](sendHttpGetRequest(s"http://$moduleRest/v1/modules/$moduleType/$moduleName/$moduleVersion/specification"))
   }
 
-  def getTemporaryOutput(outputs: List[String]) = {
-    mutable.Map(outputs.map(x => (x, mutable.MutableList[Array[Byte]]())): _*)
+  def getTemporaryOutput = {
+     mutable.Map[String, (String, Any)]()
   }
 
   //todo: use an Ivan REST to retrieve metadata for creating a consumer/producer

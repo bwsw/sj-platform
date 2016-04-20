@@ -185,7 +185,7 @@ object asd {
 //      description = "some_description")
 
     val streamForConsumer = new BasicStream[Array[Byte]](
-      name = "s3",
+      name = "63b8fb48-ab91-4406-a677-2f4d1b2b7ae7_task1",
       partitions = 3,
       metadataStorage = metadataStorageInstForConsumer,
       dataStorage = aerospikeInstForConsumer,

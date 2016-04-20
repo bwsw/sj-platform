@@ -8,8 +8,6 @@ package com.bwsw.sj.common.module.state
 
 trait IStateService {
 
-  def getState: StateStorage
-
   def get(key: String): Any
 
   def set(key: String, value: Any): Unit

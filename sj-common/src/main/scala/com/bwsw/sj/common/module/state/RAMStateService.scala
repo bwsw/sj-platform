@@ -22,14 +22,27 @@ import scala.collection.mutable
 class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
                       consumer: BasicConsumer[Array[Byte], Array[Byte]]) extends IStateService {
 
-  protected val stateVariables: mutable.Map[String, Any] = loadLastState()
-  protected val stateChanges: mutable.Map[String, (String, Any)] = mutable.Map[String, (String, Any)]()
-
   private var lastFullTxnUUID: UUID = null
   private val serializer: ObjectSerializer = new ObjectSerializer()
-  private val state = new StateStorage(this)
+  val stateVariables: mutable.Map[String, Any] = loadLastState()
+  protected val stateChanges: mutable.Map[String, (String, Any)] = mutable.Map[String, (String, Any)]()
 
-  override def getState: StateStorage = state
+  override def get(key: String): Any = {
+    stateVariables(key)
+  }
+
+  override def set(key: String, value: Any): Unit = {
+
+    stateVariables(key) = value
+  }
+
+  override def delete(key: String): Unit = {
+    stateVariables.remove(key)
+  }
+
+  override def setChange(key: String, value: Any): Unit = stateChanges(key) = ("set", value)
+
+  override def deleteChange(key: String): Unit = stateChanges(key) = ("delete", stateVariables(key))
 
   override def checkpoint(): Unit = {
     if (stateChanges.nonEmpty) {
@@ -44,9 +57,9 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
   }
 
   private def loadLastState(): mutable.Map[String, Any] = {
-    val maybeTransaction = consumer.getTransaction
+    val maybeTransaction = consumer.getLastTransaction(0)
     if (maybeTransaction.nonEmpty) {
-      val lastTransaction: BasicConsumerTransaction[Array[Byte], Array[Byte]] = null //consumer gets the newest transaction
+      val lastTransaction: BasicConsumerTransaction[Array[Byte], Array[Byte]] = maybeTransaction.get
       val stateData = serializer.deserialize(lastTransaction.next())
       if (stateData.isInstanceOf[mutable.Map[String, Any]]) {
         lastFullTxnUUID = lastTransaction.getTxnUUID
@@ -94,23 +107,5 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
     transaction.send(serializer.serialize(changes))
     transaction.close()
   }
-
-  override def get(key: String): Any = {
-    stateVariables(key)
-  }
-
-  override def set(key: String, value: Any): Unit = {
-
-    stateVariables(key) = value
-  }
-
-  override def delete(key: String): Unit = {
-    stateVariables.remove(key)
-  }
-
-  override def setChange(key: String, value: Any): Unit = stateChanges(key) = ("set", value)
-
-  override def deleteChange(key: String): Unit = stateChanges(key) = ("delete", stateVariables(key))
-
 }
 

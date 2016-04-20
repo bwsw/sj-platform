@@ -7,7 +7,16 @@ import com.bwsw.sj.common.module.regular.RegularStreamingExecutor
 class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor(manager) {
 
     override def init(): Unit = {
-      println("init")
+      try {
+        val state = manager.getState
+
+        println(s"getting state")
+        state.set("sum", 0)
+      } catch {
+        case _: java.lang.Exception => println("exception")
+      }
+
+      println("new init")
     }
 
     override def finish(): Unit = ???
@@ -17,9 +26,12 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
     }
 
     override def run(transaction: Transaction): Unit = {
-      val output = manager.getOutput("s3")
-      manager.setTimer(1000)
-      transaction.data.foreach(x => output += x)
+      val output = manager.getRoundRobinOutput("s3")
+      val state = manager.getState
+      var sum = state.get("sum").asInstanceOf[Int]
+      transaction.data.foreach(x => output.put(x))
+      sum += 1
+      state.set("sum", sum)
       println("in run")
     }
 

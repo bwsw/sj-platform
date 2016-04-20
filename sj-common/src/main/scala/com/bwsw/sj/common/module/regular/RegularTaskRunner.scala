@@ -8,10 +8,10 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.entities.RegularInstanceMetadata
 import com.bwsw.sj.common.module.entities.Transaction
 import com.bwsw.sj.common.module.environment.{ModuleEnvironmentManager, StatefulModuleEnvironmentManager}
-import com.bwsw.sj.common.module.state.RAMStateService
+import com.bwsw.sj.common.module.state.{StateStorage, RAMStateService}
 import com.bwsw.sj.common.module.{PersistentBlockingQueue, SjTimer, TaskEnvironmentManager}
 import com.bwsw.tstreams.agents.consumer.Offsets.{IOffset, Newest, Oldest}
-import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerTransaction, ProducerPolicies}
+import com.bwsw.tstreams.agents.producer.{BasicProducer, ProducerPolicies}
 
 import scala.collection.mutable
 
@@ -30,11 +30,13 @@ object RegularTaskRunner {
 
     val manager = new TaskEnvironmentManager()
 
+    manager.downloadModuleJar(moduleJar)
+
     val regularInstanceMetadata = manager.getRegularInstanceMetadata(serializer)
 
     val specification = manager.getSpecification(serializer)
 
-    val temporaryOutput = manager.getTemporaryOutput(regularInstanceMetadata.outputs)
+    val temporaryOutput = manager.getTemporaryOutput
     val moduleTimer = new SjTimer()
 
     val consumers = regularInstanceMetadata.executionPlan.tasks(taskName).inputs
@@ -50,7 +52,7 @@ object RegularTaskRunner {
     new Thread(new Runnable {
       def run() {
         var i = 0
-        while (i < 5) {
+        while (i < 7) {
           Thread.sleep(1000)
           blockingQueue.put(serializer.serialize(Transaction("s1", 0, UUID.randomUUID(), "test_consumer",
             List("wow!".getBytes,
@@ -73,10 +75,29 @@ object RegularTaskRunner {
       manager)
   }
 
+  private def sendData(output: (String, (String, Any)), producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]]) {
+    output._2._1 match {
+      case "partitioned" =>
+        val partitionedData = output._2._2.asInstanceOf[mutable.Map[Int, mutable.MutableList[Array[Byte]]]]
+        partitionedData.foreach(y => {
+          val transaction = producers(output._1).newTransaction(ProducerPolicies.errorIfOpen, y._1)
+          y._2.foreach(transaction.send)
+          transaction.close()
+          println(s"stream: ${output._1}, number of elements: ${y._2.length}")
+        })
+      case "roundrobin" =>
+        val transaction = producers(output._1).newTransaction(ProducerPolicies.errorIfOpen)
+        val data = output._2._2.asInstanceOf[mutable.MutableList[Array[Byte]]]
+        data.foreach(transaction.send)
+        transaction.close()
+        println(s"stream: ${output._1}, number of elements: ${data.length}")
+    }
+  }
+
   private def runModule(moduleTimer: SjTimer,
                         regularInstanceMetadata: RegularInstanceMetadata,
                         blockingQueue: PersistentBlockingQueue,
-                        temporaryOutput: mutable.Map[String, mutable.MutableList[Array[Byte]]],
+                        temporaryOutput: mutable.Map[String, (String, Any)],
                         classLoader: URLClassLoader,
                         pathToExecutor: String,
                         producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]],
@@ -86,7 +107,6 @@ object RegularTaskRunner {
       case "none" =>
         val moduleEnvironmentManager = new ModuleEnvironmentManager(
           regularInstanceMetadata.options,
-          regularInstanceMetadata.outputs,
           temporaryOutput,
           moduleTimer
         )
@@ -107,13 +127,8 @@ object RegularTaskRunner {
 
               executor.run(transaction)
 
-              temporaryOutput.filter(_._2.nonEmpty).foreach(x => {
-                val transaction: BasicProducerTransaction[Array[Byte], Array[Byte]] = producers(x._1).newTransaction(ProducerPolicies.errorIfOpen)
-                x._2.foreach(transaction.send)
-                transaction.close()
-                println(s"stream: ${x._1}, number of elements: ${x._2.length}")
-              })
-              temporaryOutput.foreach(x => x._2.clear())
+              if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
+              temporaryOutput.clear()
 
               if (checkpointTimer.isTime) {
                 //todo GroupCheckpoint
@@ -136,13 +151,8 @@ object RegularTaskRunner {
 
               executor.run(transaction)
 
-              temporaryOutput.filter(_._2.nonEmpty).foreach(x => {
-                val transaction = producers(x._1).newTransaction(ProducerPolicies.errorIfOpen)
-                x._2.foreach(transaction.send)
-                transaction.close()
-                println(s"stream: ${x._1}, number of elements: ${x._2.length}")
-              })
-              temporaryOutput.foreach(x => x._2.clear())
+              if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
+              temporaryOutput.clear()
 
               if (countOfTransaction == regularInstanceMetadata.checkpointInterval) {
                 //todo GroupCheckpoint
@@ -161,23 +171,26 @@ object RegularTaskRunner {
         var countOfCheckpoints = 0
         val taskName = System.getenv("TASK_NAME")
 
-        val moduleStateStorage = new RAMStateService(
+        val stateService = new RAMStateService(
           manager.createProducer(taskName),
           manager.createConsumer(taskName, List(0, 0), Newest))
 
         val moduleEnvironmentManager = new StatefulModuleEnvironmentManager(
-          moduleStateStorage,
+          new StateStorage(stateService),
           regularInstanceMetadata.options,
-          regularInstanceMetadata.outputs,
           temporaryOutput,
           moduleTimer
         )
 
-        val executor = classLoader.loadClass(pathToExecutor)
-          .getConstructor(classOf[ModuleEnvironmentManager])
-          .newInstance(moduleEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
+//        val executor = classLoader.loadClass(pathToExecutor)
+//          .getConstructor(classOf[ModuleEnvironmentManager])
+//          .newInstance(moduleEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
+
+        val executor = new Executor(moduleEnvironmentManager)
 
         executor.init()
+//        val a = stateService.stateVariables.foreach(x => println(x._1 + " " + x._2.toString))
+//        val t = 1
 
         regularInstanceMetadata.checkpointMode match {
           case "time-interval" =>
@@ -189,21 +202,19 @@ object RegularTaskRunner {
 
               executor.run(transaction)
 
-              temporaryOutput.filter(_._2.nonEmpty).foreach(x => {
-                val transaction = producers(x._1).newTransaction(ProducerPolicies.errorIfOpen)
-                x._2.foreach(transaction.send)
-                transaction.close()
-                println(s"stream: ${x._1}, number of elements: ${x._2.length}")
-              })
-              temporaryOutput.foreach(x => x._2.clear())
+              if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
+              temporaryOutput.clear()
+
+              val b = stateService.get("sum").asInstanceOf[Int]
+              println(b)
 
               if (checkpointTimer.isTime) {
                 // todo GroupCheckpoint
                 if (countOfCheckpoints != regularInstanceMetadata.stateFullCheckpoint) {
-                  moduleStateStorage.checkpoint()
+                  stateService.checkpoint()
                   countOfCheckpoints += 1
                 } else {
-                  moduleStateStorage.fullCheckpoint()
+                  stateService.fullCheckpoint()
                   countOfCheckpoints = 0
                 }
                 executor.onCheckpoint()
@@ -225,21 +236,16 @@ object RegularTaskRunner {
 
               executor.run(transaction)
 
-              temporaryOutput.filter(_._2.nonEmpty).foreach(x => {
-                val transaction = producers(x._1).newTransaction(ProducerPolicies.errorIfOpen)
-                x._2.foreach(transaction.send)
-                transaction.close()
-                println(s"stream: ${x._1}, number of elements: ${x._2.length}")
-              })
-              temporaryOutput.foreach(x => x._2.clear())
+              if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
+              temporaryOutput.clear()
 
               if (countOfTransaction == regularInstanceMetadata.checkpointInterval) {
                 //todo GroupCheckpoint
                 if (countOfCheckpoints != regularInstanceMetadata.stateFullCheckpoint) {
-                  moduleStateStorage.checkpoint()
+                  stateService.checkpoint()
                   countOfCheckpoints += 1
                 } else {
-                  moduleStateStorage.fullCheckpoint()
+                  stateService.fullCheckpoint()
                   countOfCheckpoints = 0
                 }
                 executor.onCheckpoint()
@@ -262,5 +268,45 @@ object RegularTaskRunner {
       case "newest" => Newest
       //todo add two cases for date and UUID
     }
+  }
+}
+
+class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor(manager) {
+
+  override def init(): Unit = {
+    try {
+      val state = manager.getState
+
+      println(s"getting state")
+      state.set("sum", 0)
+    } catch {
+      case _: java.lang.Exception => println("exception")
+    }
+
+    println("new init")
+  }
+
+  override def finish(): Unit = ???
+
+  override def onCheckpoint(): Unit = {
+    println("onCheckpoint")
+  }
+
+  override def run(transaction: Transaction): Unit = {
+    val output = manager.getPartitionedOutput("s3")
+    val state = manager.getState
+    var sum = state.get("sum").asInstanceOf[Int]
+    transaction.data.foreach(x => {
+      output.put(x, 0)
+      output.put(x, 1)
+      output.put(x, 2)
+    })
+    sum += 1
+    state.set("sum", sum)
+    println("in run")
+  }
+
+  override def onTimer(): Unit = {
+    println("onTimer")
   }
 }

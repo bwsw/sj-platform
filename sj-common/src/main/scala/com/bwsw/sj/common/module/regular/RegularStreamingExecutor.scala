@@ -9,7 +9,7 @@ import com.bwsw.sj.common.module.environment.ModuleEnvironmentManager
  * @author Kseniya Mikhaleva
  */
 
-abstract class RegularStreamingExecutor(env: ModuleEnvironmentManager) {
+abstract class RegularStreamingExecutor(manager: ModuleEnvironmentManager) {
   /**
    * Will invoke only once at the beginning of launch of module
    */
