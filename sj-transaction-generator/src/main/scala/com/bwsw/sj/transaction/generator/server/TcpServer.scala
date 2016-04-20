@@ -1,9 +1,13 @@
 package com.bwsw.sj.transaction.generator.server
 
 import java.io.{BufferedReader, InputStreamReader, OutputStreamWriter, PrintWriter}
-import java.net.{ServerSocket, Socket}
+import java.net.{InetSocketAddress, ServerSocket, Socket}
+import java.util
 
 import com.datastax.driver.core.utils.UUIDs
+import com.twitter.common.quantity.{Time, Amount}
+import com.twitter.common.zookeeper.DistributedLock.LockingException
+import com.twitter.common.zookeeper.{DistributedLock, ZooKeeperClient}
 
 /**
   * TCP-Server for transaction generating
@@ -11,11 +15,21 @@ import com.datastax.driver.core.utils.UUIDs
   *
   * @author Kseniya Tomskikh
   */
-class TcpServer(port: Int) {
+class TcpServer(distributedLock: DistributedLock, host: String, port: Int) {
 
-  val serverSocket = new ServerSocket(port)
+  var serverSocket: ServerSocket = null
 
   def listen() = {
+    var isMaster = false
+    while (!isMaster) {
+      try {
+        distributedLock.lock()
+        serverSocket = new ServerSocket(port)
+        isMaster = true
+      } catch {
+        case e: LockingException => Thread.sleep(500)
+      }
+    }
     val clientSocket = serverSocket.accept()
     while (true) {
       val request = readSocket(clientSocket)

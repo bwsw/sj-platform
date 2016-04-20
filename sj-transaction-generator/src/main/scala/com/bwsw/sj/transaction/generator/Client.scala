@@ -16,6 +16,8 @@ object Client {
   val conf = ConfigLoader.load()
 
   def main(args: Array[String]) = {
+    val zkServers = System.getenv("ZK_SERVERS").split(";").map(x => (x.split(":")(0), x.split(":")(1).toInt))
+
     val host = conf.getString("generator-server.host")
     val port = conf.getInt("generator-server.port")
 
