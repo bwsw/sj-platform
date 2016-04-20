@@ -71,6 +71,6 @@ object SjCrudRestService extends App with SjCrudRouter {
   println(s"Server online at http://$host:$port/\nPress ENTER to stop...")
   StdIn.readLine()
   serverBinding.flatMap(_.unbind())
-    .onComplete(_ => system.shutdown())
+    .onComplete(_ => system.terminate())
 
 }
