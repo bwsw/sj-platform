@@ -40,5 +40,5 @@ object ConnectionConstants {
 
   val databaseName = "stream_juggler"
   lazy val fileMetadataCollection = "fs.files"
-  lazy val instanceCollection = "instancies"
+  lazy val instanceCollection = "instances"
 }
