@@ -36,9 +36,9 @@ class InstanceMetadataDAO(entityCollection: MongoCollection, serializer: Seriali
   }
 
   /**
-    * Retrieve all instancies from storage
+    * Retrieve all instances from storage
     * every record deserializing to object by module-type
-    * @return - Set of instancies
+    * @return - Set of instances
     */
   override def retrieveAll() = {
     entityCollection.map{ o =>
@@ -50,11 +50,11 @@ class InstanceMetadataDAO(entityCollection: MongoCollection, serializer: Seriali
   }
 
   /**
-    * Retrieve all instancies for such module-type
+    * Retrieve all instances for such module-type
     * @param moduleName - name of module
     * @param moduleVersion - version of module
     * @param moduleType - name of module type
-    * @return - Set of instancies for such module-type
+    * @return - Set of instances for such module-type
     */
   def retrieveByModule(moduleName: String, moduleVersion: String, moduleType: String) = {
     serializer.setIgnoreUnknown(true)

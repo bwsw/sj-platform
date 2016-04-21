@@ -57,11 +57,15 @@ abstract class StreamingModuleValidator {
       errors += s"Unknown value of checkpoint-mode attribute: ${parameters.checkpointMode}."
     }
 
+    if (parameters.options.isEmpty) {
+      errors += "Options attribute is empty."
+    }
+
     if (parameters.jvmOptions.isEmpty) {
       errors += "Jvm-options attribute is empty."
     }
 
-    val startFrom = parameters.startFrom.asInstanceOf[String]
+    val startFrom = parameters.startFrom
     if (!startFromModes.contains(startFrom)) {
       try {
         startFrom.toLong
