@@ -41,7 +41,7 @@ abstract class StreamingModuleValidator {
       errors += s"Outputs is not unique."
     }
 
-    val partitions = getPartitionForStreams(parameters.inputs)
+    val partitions = getPartitionForStreams(parameters.inputs.map(_.replaceAll("/split|/full", "")))
     val minPartitionCount = partitions.values.min
 
     if (parameters.parallelism > minPartitionCount) {
@@ -87,13 +87,21 @@ abstract class StreamingModuleValidator {
     list.map(x => (x, 1)).groupBy(_._1).map(x => x._2.reduce { (a, b) => (a._1, a._2 + b._2) }).exists(x => x._2 > 1)
   }
 
-  //todo потом доделать
   /**
     * Get count of partition for streams
+    *
     * @return - count of partition for each stream
     */
-  def getPartitionForStreams(streams: List[String]) = {
-    Map("s1" -> 11, "s2" -> 12, "s3" -> 15)
+  def getPartitionForStreams(streams: List[String]): Map[String, Int] = {
+    //Map("s1" -> 11, "s2" -> 12, "s3" -> 15)
+    val streamsDAO = ConnectionRepository.getStreamsDAO
+    Map(streams.map { name =>
+      val stream = streamsDAO.retrieve(name)
+      stream match {
+        case Some(s) => name -> s.partitions.size
+        case None => name -> 0
+      }
+    }.toSeq: _*)
   }
 
 }
