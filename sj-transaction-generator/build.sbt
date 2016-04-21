@@ -8,8 +8,7 @@ resolvers += "Twitter Repository" at "http://maven.twttr.com"
 
 libraryDependencies ++= Seq("com.datastax.cassandra" % "cassandra-driver-core" % "3.0.0",
   "org.scalatest" % "scalatest_2.11" % "3.0.0-M15",
-  "com.twitter.common.zookeeper" % "lock" % "0.0.40",
-  "com.twitter.common.zookeeper" % "candidate" % "0.0.84"
+  "com.twitter.common.zookeeper" % "lock" % "0.0.40"
 )
 
 assemblyMergeStrategy in assembly := {

@@ -12,8 +12,8 @@ import org.scalatest._
   * @author Kseniya Tomskikh
   */
 class Test extends FlatSpec with Matchers {
-  val client = new TcpClient("192.168.1.180", 8885)
-  val server = new TcpServer(null, "192.168.1.180", 8885)
+  val client = new TcpClient(null)
+  val server = new TcpServer(null, null, "192.168.1.180", 8885)
 
   "TcpClient" should "connecting to server" in {
     client.open()

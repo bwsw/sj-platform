@@ -180,7 +180,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                   } ~
                   delete {
                     val instancies = instanceDAO.retrieveByModule(moduleName, moduleVersion, moduleType)
-                    if (instancies.nonEmpty) {
+                    if (instancies.isEmpty) {
                       if (storage.delete(filename)) {
                         complete(HttpEntity(
                           `application/json`,

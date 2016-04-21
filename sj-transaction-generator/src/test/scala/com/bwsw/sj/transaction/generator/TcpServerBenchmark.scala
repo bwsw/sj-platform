@@ -14,7 +14,7 @@ import com.bwsw.sj.transaction.generator.client.TcpClient
 object TcpServerBenchmark {
 
   def main(args: Array[String]) = {
-    val client = new TcpClient("192.168.1.180", 8885)
+    val client = new TcpClient(null)
     client.open()
     var i = 0
     println(s"Start time: ${Calendar.getInstance().getTime.toString}")

@@ -1,11 +1,11 @@
 package com.bwsw.sj.transaction.generator.client
 
-import java.io.{BufferedReader, InputStreamReader, OutputStreamWriter, PrintWriter}
-import java.net.{InetSocketAddress, Socket}
+import java.io._
+import java.net._
 import java.util
 
 import com.twitter.common.quantity.{Time, Amount}
-import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
+import com.twitter.common.zookeeper.ZooKeeperClient
 
 /**
   * Client for transaction generating
@@ -13,25 +13,30 @@ import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
   *
   * @author Kseniya Tomskikh
   */
-class TcpClient(host: String, port: Int) {
+class TcpClient(options: TcpClientOptions) {
   var socket: Socket = null
 
   val zooKeeperServers = new util.ArrayList[InetSocketAddress]()
-  zooKeeperServers.add(new InetSocketAddress(2181))
-  val zkClient = new ZooKeeperClient(Amount.of(0, Time.DAYS), zooKeeperServers)
-
-  val retryPeriod = 500
-  val retryCount = 10
+  options.zkServers.map(x => (x.split(":")(0), x.split(":")(1).toInt))
+    .foreach(zkServer => zooKeeperServers.add(new InetSocketAddress(zkServer._1, zkServer._2)))
+  val zkClient = new ZooKeeperClient(Amount.of(500, Time.MILLISECONDS), zooKeeperServers)
 
   def open() = {
     var isConnected = false
-    while (!isConnected) {
-      val master = zkClient.get().getChildren("/zk_servers/lock", null)
-      if (master.size() > 0) {
-        socket = new Socket(host, port)
-        isConnected = true
+    while (!isConnected && options.retryCount > 0) {
+      try {
+        isConnected = connect()
+        if (!isConnected) {
+          delay()
+        }
+      } catch {
+        case ex: Exception => delay()
       }
-      Thread.sleep(500)
+    }
+    if (!isConnected) {
+      println("Could not connect to server")
+    } else {
+      println("Connected to server")
     }
   }
 
@@ -40,12 +45,51 @@ class TcpClient(host: String, port: Int) {
   }
 
   def get() = {
-    writeSocket("GET TRANSACTION")
-    readSocket()
+    var serverIsNotAvailable = true
+    var response = "Server is not available"
+    while (serverIsNotAvailable && options.retryCount > 0) {
+      try {
+        writeSocket("TXN")
+        val fromSocket = readSocket()
+        if (fromSocket != null) {
+          response = fromSocket
+          serverIsNotAvailable = false
+        } else {
+          reconnect()
+        }
+      } catch {
+        case ex: Exception => reconnect()
+      }
+    }
+
+    response
+  }
+
+  private def connect() = {
+    try {
+      val master = getMasterServer()
+      socket = new Socket(master(0), master(1).toInt)
+      socket.setSoTimeout(500)
+      true
+    } catch {
+      case ex: ConnectException => false
+    }
+  }
+
+  private def delay() = {
+    Thread.sleep(options.retryPeriod)
+    options.retryCount -= 1
+  }
+
+  private def reconnect() = {
+    close()
+    delay()
+    connect()
   }
 
   private def readSocket(): String = {
-    val bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream))
+    val stream = socket.getInputStream
+    val bufferedReader = new BufferedReader(new InputStreamReader(stream))
     bufferedReader.readLine()
   }
 
@@ -55,9 +99,10 @@ class TcpClient(host: String, port: Int) {
     out.flush()
   }
 
-  private def getMaster() = {
-    val master = zkClient.get().getChildren("/zk_servers/lock", null)
-    master
+  private def getMasterServer() = {
+    val master = new String(zkClient.get().getData(s"/${options.prefix}/master", null, null), "UTF-8")
+    println(s"Master server: $master")
+    master.split(":")
   }
 
 }
