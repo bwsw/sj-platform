@@ -110,7 +110,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                         msg = serializer.serialize(instances)
                       } else {
                         msg =  serializer.serialize(Response(200, s"$moduleType-$moduleName-$moduleVersion",
-                          s"Instancies for $moduleType-$moduleName-$moduleVersion not found"))
+                          s"Instances for $moduleType-$moduleName-$moduleVersion not found"))
                       }
                       complete(HttpEntity(`application/json`, msg))
                     }
@@ -214,16 +214,16 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       } ~
       pathSuffix("instances") {
         get {
-          val allInstancies = instanceDAO.retrieveAll()
-          if (allInstancies.isEmpty) {
+          val allInstances = instanceDAO.retrieveAll()
+          if (allInstances.isEmpty) {
             complete(HttpEntity(
               `application/json`,
-              serializer.serialize(Response(200, null, "Instancies have not been found"))
+              serializer.serialize(Response(200, null, "Instances have not been found"))
             ))
           }
           complete(HttpEntity(
             `application/json`,
-            serializer.serialize(allInstancies.map(x => ShortInstanceMetadata(x.name, x.moduleType, x.moduleName, x.moduleVersion, x.description, x.status)))
+            serializer.serialize(allInstances.map(x => ShortInstanceMetadata(x.name, x.moduleType, x.moduleName, x.moduleVersion, x.description, x.status)))
           ))
         }
       }
