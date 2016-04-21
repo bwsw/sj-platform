@@ -4,7 +4,7 @@ package com.bwsw.sj.transaction.generator
 import java.util.concurrent.TimeUnit
 import java.util.Calendar
 
-import com.bwsw.sj.transaction.generator.client.TcpClient
+import com.bwsw.sj.transaction.generator.client.{TcpClientOptions, TcpClient}
 
 /**
   * Created: 18/04/2016
@@ -14,7 +14,13 @@ import com.bwsw.sj.transaction.generator.client.TcpClient
 object TcpServerBenchmark {
 
   def main(args: Array[String]) = {
-    val client = new TcpClient(null)
+
+    val client = new TcpClient(new TcpClientOptions()
+      .setZkServers(Array("127.0.0.1:2181"))
+      .setPrefix("servers")
+      .setRetryPeriod(500)
+      .setRetryCount(10)
+    )
     client.open()
     var i = 0
     println(s"Start time: ${Calendar.getInstance().getTime.toString}")

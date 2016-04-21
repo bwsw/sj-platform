@@ -39,7 +39,7 @@ class TcpServer(prefix: String, zkClient: ZooKeeperClient, host: String, port: I
         val request = readSocket(clientSocket)
         if (request != null && request.equals("TXN")) {
           val newUuid = getNewTransaction.toString
-          println(newUuid)
+          //println(newUuid)
           writeSocket(clientSocket, newUuid)
         }
       } catch {
