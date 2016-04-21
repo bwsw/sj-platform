@@ -15,6 +15,7 @@ import com.twitter.common.zookeeper.ZooKeeperClient
   */
 class TcpClient(options: TcpClientOptions) {
   var socket: Socket = null
+  private var retryCount = options.retryCount
 
   val zooKeeperServers = new util.ArrayList[InetSocketAddress]()
   options.zkServers.map(x => (x.split(":")(0), x.split(":")(1).toInt))
@@ -23,7 +24,7 @@ class TcpClient(options: TcpClientOptions) {
 
   def open() = {
     var isConnected = false
-    while (!isConnected && options.retryCount > 0) {
+    while (!isConnected && retryCount > 0) {
       try {
         isConnected = connect()
         if (!isConnected) {
@@ -47,13 +48,14 @@ class TcpClient(options: TcpClientOptions) {
   def get() = {
     var serverIsNotAvailable = true
     var response = "Server is not available"
-    while (serverIsNotAvailable && options.retryCount > 0) {
+    while (serverIsNotAvailable && retryCount > 0) {
       try {
         writeSocket("TXN")
         val fromSocket = readSocket()
         if (fromSocket != null) {
           response = fromSocket
           serverIsNotAvailable = false
+          retryCount = options.retryCount
         } else {
           reconnect()
         }
@@ -78,7 +80,7 @@ class TcpClient(options: TcpClientOptions) {
 
   private def delay() = {
     Thread.sleep(options.retryPeriod)
-    options.retryCount -= 1
+    retryCount -= 1
   }
 
   private def reconnect() = {

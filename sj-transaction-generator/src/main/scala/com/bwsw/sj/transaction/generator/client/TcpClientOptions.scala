@@ -8,7 +8,7 @@ package com.bwsw.sj.transaction.generator.client
   */
 
 class TcpClientOptions() {
-  var zkServers = Array(s"zk127.0.0.1:2181")
+  var zkServers = Array(s"127.0.0.1:2181")
   var prefix = ""
   var retryPeriod: Long = 500
   var retryCount: Int = 3
