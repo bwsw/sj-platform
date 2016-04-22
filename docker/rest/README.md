@@ -7,33 +7,36 @@ In simple case (for local use) MongoDB can be started with command:
     docker run -d --name=mongo --net=host mongo
 Create dbs (if needed):
     docker exec -it mongo mongo
-    Common db:
-        > use stream_juggler
-    Frontend db:
-        > use sj-api
+    > use stream_juggler
 
 USAGE
+#TODO: docker-compose to be tested
+Quick start with docker-compose:
+    cd Juggler/docker
+    docker-compose up
+(@see how to install docker-compose: https://docs.docker.com/compose/install/ )
+
 To build REST docker image:
-cd Juggler/docker && \
-docker build -t juggler/rest --file=Dockerfile_rest ..
+    cd Juggler/docker && \
+    docker build -t sj/rest --file=Dockerfile_rest ..
 
 To run container:
-docker run -d --name=rest -e MONGO_HOST=<MONGO_IP> -p 8080:8080 -v /tmp/sj-rest-log:/var/log/rest juggler/rest
+    docker run -d --name=rest -e MONGO_HOST=<MONGO_IP> -p 8080:8080 -v /tmp/sj-rest-log:/var/log/rest sj/rest
 
 Parameters (to be passed with -e on docker run)
-MONGO_HOST (required) - The ip or hostname of Mongo DB
-MONGO_PORT (default: 27017) - The port of Mongo DB to connect to
-REST_PORT (default: 8080) - The port on which the REST will be available
+    MONGO_HOST (*required) - The ip or hostname of Mongo DB
+    MONGO_PORT (default: 27017) - The port of Mongo DB to connect to
+    REST_PORT (default: 8080) - The port on which the REST will be available
 
 Logs
 All logs are available in /var/log/rest inside of container.
 As an example, the log dir is volumed to /tmp/sj-rest-log on the host in the `docker run` command above.
 Log files available:
-supervisor.log (combinded stdout and stderr)
-nginx.log
-nginx_error.log
-nginx_access.log
-rest.log
-rest_error.log
-rest_nodejs.log
-rest_nodejs_error.log
+    supervisor.log (combinded stdout and stderr)
+    nginx.log
+    nginx_error.log
+    nginx_access.log
+    rest.log
+    rest_error.log
+    rest_nodejs.log
+    rest_nodejs_error.log

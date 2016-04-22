@@ -9,7 +9,7 @@
     "db": {
       "ip": "localhost",
       "port": 27017,
-      "name": "sj-api"
+      "name": "stream_juggler"
     }
   }
 }

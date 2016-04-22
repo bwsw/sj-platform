@@ -22,6 +22,9 @@ else
    echo "REST is starting on $REST_PORT port..."
 fi
 
+# Cfg nginx proxy
+sed -i 's/listen 8080/listen '"$REST_PORT"'/g' /etc/nginx/conf.d/rest-nginx.conf
+
 # Cfg for scala REST
 export PORT=3002
 export HOST=0.0.0.0
