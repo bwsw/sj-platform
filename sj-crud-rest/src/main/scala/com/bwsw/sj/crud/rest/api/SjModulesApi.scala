@@ -8,7 +8,6 @@ import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.server.{RequestContext, Directives}
 import akka.http.scaladsl.server.directives.FileInfo
 import com.bwsw.common.exceptions.{InstanceException, BadRecordWithKey}
-import com.bwsw.sj.common.DAL.ConnectionRepository
 import com.bwsw.sj.common.entities._
 import com.bwsw.sj.common.module.StreamingValidator
 import akka.http.scaladsl.model.headers._
@@ -19,7 +18,6 @@ import org.apache.commons.io.FileUtils
 import akka.stream.scaladsl._
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 /**
@@ -112,7 +110,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                         msg = serializer.serialize(instances)
                       } else {
                         msg =  serializer.serialize(Response(200, s"$moduleType-$moduleName-$moduleVersion",
-                          s"Instancies for $moduleType-$moduleName-$moduleVersion not found"))
+                          s"Instances for $moduleType-$moduleName-$moduleVersion not found"))
                       }
                       complete(HttpEntity(`application/json`, msg))
                     }
@@ -216,16 +214,16 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       } ~
       pathSuffix("instances") {
         get {
-          val allInstancies = instanceDAO.retrieveAll()
-          if (allInstancies.isEmpty) {
+          val allInstances = instanceDAO.retrieveAll()
+          if (allInstances.isEmpty) {
             complete(HttpEntity(
               `application/json`,
-              serializer.serialize(Response(200, null, "Instancies have not been found"))
+              serializer.serialize(Response(200, null, "Instances have not been found"))
             ))
           }
           complete(HttpEntity(
             `application/json`,
-            serializer.serialize(allInstancies.map(x => ShortInstanceMetadata(x.name, x.moduleType, x.moduleName, x.moduleVersion, x.description, x.status)))
+            serializer.serialize(allInstances.map(x => ShortInstanceMetadata(x.name, x.moduleType, x.moduleName, x.moduleVersion, x.description, x.status)))
           ))
         }
       }

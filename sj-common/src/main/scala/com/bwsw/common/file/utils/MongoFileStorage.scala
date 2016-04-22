@@ -49,4 +49,8 @@ class MongoFileStorage(mongoDB: MongoDB) extends FilesStorage {
       true
     } else false
   }
+
+  override def exists(fileName: String): Boolean = {
+    gridFS.findOne(fileName).isDefined
+  }
 }

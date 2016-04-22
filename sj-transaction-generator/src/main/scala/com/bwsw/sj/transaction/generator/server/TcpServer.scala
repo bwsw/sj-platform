@@ -1,9 +1,13 @@
 package com.bwsw.sj.transaction.generator.server
 
-import java.io.{BufferedReader, InputStreamReader, OutputStreamWriter, PrintWriter}
-import java.net.{ServerSocket, Socket}
+import java.io._
+import java.net.{URI, SocketException, ServerSocket, Socket}
 
 import com.datastax.driver.core.utils.UUIDs
+import com.twitter.common.zookeeper.DistributedLock.LockingException
+import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
+import org.apache.log4j.Logger
+import org.apache.zookeeper.{CreateMode, ZooDefs}
 
 /**
   * TCP-Server for transaction generating
@@ -11,20 +15,42 @@ import com.datastax.driver.core.utils.UUIDs
   *
   * @author Kseniya Tomskikh
   */
-class TcpServer(port: Int) {
+class TcpServer(prefix: String, zkClient: ZooKeeperClient, host: String, port: Int) {
+  private val logger = Logger.getLogger(getClass)
 
-  val serverSocket = new ServerSocket(port)
+  var serverSocket: ServerSocket = null
 
   def listen() = {
-    val clientSocket = serverSocket.accept()
-    while (true) {
-      val request = readSocket(clientSocket)
-      if (request != null && request.equals("GET TRANSACTION")) {
-        val newUuid = getNewTransaction.toString
-        //println(newUuid)
-        writeSocket(clientSocket, newUuid)
+    var isMaster = false
+    val zkLockNode = new URI(s"/$prefix/lock").normalize()
+    val distributedLock = new DistributedLockImpl(zkClient, zkLockNode.toString)
+    while (!isMaster) {
+      try {
+        distributedLock.lock()
+        serverSocket = new ServerSocket(port)
+        updateMaster()
+        isMaster = true
+      } catch {
+        case e: LockingException => Thread.sleep(500)
       }
     }
+    logger.info(s"Server $host:$port is started")
+    val clientSocket = serverSocket.accept()
+    var isWorked = true
+    while (isWorked) {
+      try {
+        val request = readSocket(clientSocket)
+        if (request != null && request.equals("TXN")) {
+          val newUuid = getNewTransaction.toString
+          logger.debug(s"Generated new transaction: $newUuid")
+          writeSocket(clientSocket, newUuid)
+        }
+      } catch {
+        case ex: SocketException => isWorked = false
+        case ex: IOException => isWorked = false
+      }
+    }
+    logger.info(s"Server $host:$port is stopped")
   }
 
   private def readSocket(socket: Socket): String = {
@@ -40,6 +66,17 @@ class TcpServer(port: Int) {
 
   def getNewTransaction = {
     UUIDs.timeBased()
+  }
+
+  private def updateMaster() = {
+    val node = new URI(s"/$prefix/master").normalize().toString
+    val value = s"$host:$port".getBytes("UTF-8")
+    if (zkClient.get.exists(node, null) != null) {
+      zkClient.get().setData(node, value, -1)
+    } else {
+      zkClient.get().create(node, value, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT)
+    }
+    logger.debug("Master server updated")
   }
 
 }

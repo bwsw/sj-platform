@@ -29,7 +29,7 @@ object StreamJugglerBuild extends Build {
     base = file("sj-crud-rest")).enablePlugins(JavaAppPackaging).dependsOn(common)
 
   lazy val transactionGenerator = Project(id = "sj-transaction-generator",
-    base = file("sj-transaction-generator")).enablePlugins(JavaAppPackaging).dependsOn(common)
+    base = file("sj-transaction-generator")).enablePlugins(JavaAppPackaging)
 
   //////////////////////////////////////////////////////////////////////////////
   // PROJECT INFO
