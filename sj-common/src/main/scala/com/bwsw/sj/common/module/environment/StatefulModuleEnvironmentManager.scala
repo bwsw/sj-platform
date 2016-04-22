@@ -9,6 +9,11 @@ import scala.collection.mutable
  * Class allowing to manage environment of module that has state
  * Created: 15/04/2016
  * @author Kseniya Mikhaleva
+ *
+ * @param stateStorage
+ * @param options User defined options from instance parameters
+ * @param temporaryOutput Provides a store for each output stream from instance parameters
+ * @param moduleTimer
  */
 
 class StatefulModuleEnvironmentManager(stateStorage: StateStorage,

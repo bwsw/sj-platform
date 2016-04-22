@@ -16,8 +16,7 @@ abstract class RegularStreamingExecutor(manager: ModuleEnvironmentManager) {
   def init(): Unit
 
   /**
-   *
-   * @param transaction
+   *Used for processing one transaction. Will invoke for every transaction
    */
   def run(transaction: Transaction): Unit
 

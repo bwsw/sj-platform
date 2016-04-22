@@ -13,81 +13,161 @@ import scala.collection.mutable
  * Created: 12/04/2016
  * @author Kseniya Mikhaleva
  *
- * @param producer
- * @param consumer
- * *@param stateVariables Provides key/value storage to keeping state
- * *@param stateChanges Provides key/value storage to keeping state changes. It's used for partial checkpoints.
+ * @param producer Producer responsible for saving a partial changes of state or a full state
+ * @param consumer Consumer responsible for retrieving a partial or full state
  */
 
 class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
                       consumer: BasicConsumer[Array[Byte], Array[Byte]]) extends IStateService {
 
+  /**
+   * Number of a last transaction that saved a state. Used for saving partial changes of state
+   */
   private var lastFullTxnUUID: UUID = null
+
+  /**
+   * Provides a serialization from a transaction data to a state variable or state change
+   */
   private val serializer: ObjectSerializer = new ObjectSerializer()
-  val stateVariables: mutable.Map[String, Any] = loadLastState()
+
+  /**
+   * Provides key/value storage to keeping state
+   */
+  private val stateVariables: mutable.Map[String, Any] = loadLastState()
+
+  /**
+   * Provides key/value storage to keeping state changes. It's used to do checkpoint of partial changes of state
+   */
   protected val stateChanges: mutable.Map[String, (String, Any)] = mutable.Map[String, (String, Any)]()
 
+  /**
+   * Gets a value of the state variable by key
+   * @param key State variable name
+   * @return Value of the state variable
+   */
   override def get(key: String): Any = {
     stateVariables(key)
   }
 
+  /**
+   * Puts a value of the state variable by key
+   * @param key State variable name
+   * @param value Value of the state variable
+   */
   override def set(key: String, value: Any): Unit = {
 
     stateVariables(key) = value
   }
 
+  /**
+   * Delete a state variable by key
+   * @param key State variable name
+   */
   override def delete(key: String): Unit = {
     stateVariables.remove(key)
   }
 
+  /**
+   * Indicates that a state variable has changed
+   * @param key State variable name
+   * @param value Value of the state variable
+   */
   override def setChange(key: String, value: Any): Unit = stateChanges(key) = ("set", value)
 
+  /**
+   * Indicates that a state variable has deleted
+   * @param key State variable name
+   */
   override def deleteChange(key: String): Unit = stateChanges(key) = ("delete", stateVariables(key))
 
+  /**
+   * Saves a partial state changes
+   */
   override def checkpoint(): Unit = {
     if (stateChanges.nonEmpty) {
-      sendChanges((lastFullTxnUUID, stateChanges))
+      sendChanges(lastFullTxnUUID, stateChanges)
       stateChanges.clear()
     }
   }
 
+  /**
+   * Saves a state
+   */
   override def fullCheckpoint(): Unit = {
     lastFullTxnUUID = sendState(stateVariables)
     stateChanges.clear()
   }
 
+  /**
+   * Allow getting a state by gathering together all data from transaction
+   * @param initialState State from which to need start
+   * @param transaction Transaction containing a state
+   */
+  private def fillFullState(initialState: mutable.Map[String, Any], transaction: BasicConsumerTransaction[Array[Byte], Array[Byte]]) = {
+    var value: Object = null
+    var variable: (String, Any) = null
+
+    while (transaction.hasNext()) {
+      value = serializer.deserialize(transaction.next())
+      variable = value.asInstanceOf[(String, Any)]
+      initialState(variable._1) = variable._2
+    }
+  }
+
+  /**
+   * Allows getting last state. Needed for recovering after crashing
+   * @return State variables
+   */
   private def loadLastState(): mutable.Map[String, Any] = {
-    val maybeTransaction = consumer.getLastTransaction(0)
-    if (maybeTransaction.nonEmpty) {
-      val lastTransaction: BasicConsumerTransaction[Array[Byte], Array[Byte]] = maybeTransaction.get
-      val stateData = serializer.deserialize(lastTransaction.next())
-      if (stateData.isInstanceOf[mutable.Map[String, Any]]) {
-        lastFullTxnUUID = lastTransaction.getTxnUUID
+    val initialState = mutable.Map[String, Any]()
+    val maybeTxn = consumer.getLastTransaction(0)
+    if (maybeTxn.nonEmpty) {
+      val lastTxn: BasicConsumerTransaction[Array[Byte], Array[Byte]] = maybeTxn.get
+      var value = serializer.deserialize(lastTxn.next())
+      if (value.isInstanceOf[(String, Any)]) {
+        lastFullTxnUUID = lastTxn.getTxnUUID
+        val variable = value.asInstanceOf[(String, Any)]
+        initialState(variable._1) = variable._2
+        fillFullState(initialState, lastTxn)
 
-        stateData.asInstanceOf[mutable.Map[String, Any]]
+        initialState
       } else {
-        val (uuid, _) = stateData.asInstanceOf[(UUID, Any)]
-        val lastFullStateTransaction = consumer.getTransactionById(0, uuid).get
-        val fullState = serializer.deserialize(lastFullStateTransaction.next()).asInstanceOf[mutable.Map[String, Any]]
-        consumer.setLocalOffset(0, lastFullStateTransaction.getTxnUUID)
+        val uuid = value.asInstanceOf[UUID]
+        lastFullTxnUUID = uuid
+        val lastFullStateTxn = consumer.getTransactionById(0, uuid).get
+        fillFullState(initialState, lastFullStateTxn)
+        consumer.setLocalOffset(0, lastFullStateTxn.getTxnUUID)
 
-        var maybeTransaction = consumer.getTransaction
-        while (maybeTransaction.nonEmpty) {
-          val partialState = serializer.deserialize(maybeTransaction.get.next()).asInstanceOf[mutable.Map[String, (String, Any)]]
-          applyPartialChanges(fullState, partialState)
-          maybeTransaction = consumer.getTransaction
+        var maybeTxn = consumer.getTransaction
+        while (maybeTxn.nonEmpty) {
+          val partialState = mutable.Map[String, (String, Any)]()
+          val partialStateTxn = maybeTxn.get
+
+          println(serializer.deserialize(partialStateTxn.next()).asInstanceOf[UUID].compareTo(lastFullTxnUUID))
+          assert(serializer.deserialize(partialStateTxn.next()).asInstanceOf[UUID] == lastFullTxnUUID)
+          while (partialStateTxn.hasNext()) {
+            value = serializer.deserialize(partialStateTxn.next())
+            val variable = value.asInstanceOf[(String, (String, Any))]
+            partialState(variable._1) = variable._2
+          }
+          applyPartialChanges(initialState, partialState)
+          maybeTxn = consumer.getTransaction
         }
 
-        fullState
+        initialState
       }
     } else {
-      val initialState = mutable.Map[String, Any]()
       lastFullTxnUUID = sendState(initialState)
 
       initialState
     }
   }
 
+  /**
+   * Allows recovering a state consistently applying all partial changes of state
+   * @param fullState Last state that has been saved
+   * @param partialState Partial changes of state
+   */
   private def applyPartialChanges(fullState: mutable.Map[String, Any], partialState: mutable.Map[String, (String, Any)]) = {
     partialState.foreach {
       case (key, ("set", value)) => fullState(key) = value
@@ -95,17 +175,28 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
     }
   }
 
+  /**
+   * Does checkpoint of state
+   * @param state State variables
+   * @return UUID of transaction
+   */
   private def sendState(state: mutable.Map[String, Any]): UUID = {
     val transaction = producer.newTransaction(ProducerPolicies.errorIfOpen)
-    transaction.send(serializer.serialize(state))
-    transaction.close()
+    state.foreach((x: (String, Any)) => transaction.send(serializer.serialize(x)))
+    transaction.checkpoint()
     transaction.getTxnUUID
   }
 
-  private def sendChanges(changes: (UUID, mutable.Map[String, (String, Any)])) = {
+  /**
+   * Does checkpoint of changes of state
+   * @param uuid Transaction UUID for which a changes was applied
+   * @param changes State changes
+   */
+  private def sendChanges(uuid: UUID, changes: mutable.Map[String, (String, Any)]) = {
     val transaction = producer.newTransaction(ProducerPolicies.errorIfOpen)
-    transaction.send(serializer.serialize(changes))
-    transaction.close()
+    transaction.send(serializer.serialize(uuid))
+    changes.foreach((x: (String, (String, Any))) => transaction.send(serializer.serialize(x)))
+    transaction.checkpoint()
   }
 }
 

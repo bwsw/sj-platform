@@ -6,6 +6,10 @@ import java.util.concurrent.locks._
 
 import net.openhft.chronicle.queue.ChronicleQueueBuilder
 
+/**
+ * Provides a blocking queue to keep Transactions from sub. consumers and than pass them into module run function
+ * @param path Temporary directory path for queue
+ */
 class PersistentBlockingQueue(path: String) {
 
   private val tempDirectory: Path = Files.createTempDirectory(path)

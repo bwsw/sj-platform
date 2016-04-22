@@ -1,13 +1,13 @@
 package com.bwsw.sj.common.module
 
-import java.io.{InputStreamReader, BufferedReader, File}
-import java.net.{URL, InetSocketAddress, URLClassLoader}
+import java.io.{BufferedReader, File, InputStreamReader}
+import java.net.{InetSocketAddress, URL, URLClassLoader}
 
 import com.aerospike.client.Host
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.entities.{Specification, RegularInstanceMetadata}
+import com.bwsw.sj.common.entities.{RegularInstanceMetadata, Specification}
 import com.bwsw.tstreams.agents.consumer.Offsets.IOffset
-import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions}
+import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions, BasicConsumerWithSubscribe}
 import com.bwsw.tstreams.agents.producer.InsertionType.BatchInsert
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions}
 import com.bwsw.tstreams.converter.IConverter
@@ -54,14 +54,10 @@ class TaskEnvironmentManager() {
     new Host("localhost", 3002),
     new Host("localhost", 3003))
   private val aerospikeOptions = new AerospikeStorageOptions("test", hosts)
-  private val aerospikeInstForProducer = storageFactory.getInstance(aerospikeOptions)
-  private val aerospikeInstForConsumer = storageFactory.getInstance(aerospikeOptions)
+  val aerospikeInst = storageFactory.getInstance(aerospikeOptions)
 
   //metadata storage instances
-  private val metadataStorageInstForProducer = metadataStorageFactory.getInstance(
-    cassandraHosts = List(new InetSocketAddress("localhost", 9042)),
-    keyspace = randomKeyspace)
-  private val metadataStorageInstForConsumer = metadataStorageFactory.getInstance(
+  val metadataStorage = metadataStorageFactory.getInstance(
     cassandraHosts = List(new InetSocketAddress("localhost", 9042)),
     keyspace = randomKeyspace)
 
@@ -72,6 +68,8 @@ class TaskEnvironmentManager() {
   private val coordinator = new Coordinator("some_path", redissonClient)
 
   private val timeUuidGenerator = new LocalTimeUuidGenerator
+
+
 
 
   def getClassLoader(pathToJar: String) = {
@@ -122,23 +120,23 @@ class TaskEnvironmentManager() {
   }
 
   def getTemporaryOutput = {
-     mutable.Map[String, (String, Any)]()
+    mutable.Map[String, (String, Any)]()
   }
 
   //todo: use an Ivan REST to retrieve metadata for creating a consumer/producer
 
-  def createConsumer(streamName: String, partitionRange: List[Int], offsetPolicy: IOffset): BasicConsumer[Array[Byte], Array[Byte]] = {
+  def createConsumer(streamName: String, partitionRange: List[Int], offsetPolicy: IOffset, blockingQueue: PersistentBlockingQueue) = {
 
-//    val stream: BasicStream[Array[Byte]] =
-//      BasicStreamService.loadStream(streamName, metadataStorageInstForProducer, aerospikeInstForProducer, coordinator)
+    //    val stream: BasicStream[Array[Byte]] =
+    //      BasicStreamService.loadStream(streamName, metadataStorageInstForProducer, aerospikeInstForProducer, coordinator)
 
     val stream = new BasicStream[Array[Byte]](
       name = streamName,
-      partitions = 20,
-      metadataStorage = metadataStorageInstForConsumer,
-      dataStorage = aerospikeInstForConsumer,
+      partitions = 3,
+      metadataStorage = metadataStorage,
+      dataStorage = aerospikeInst,
       coordinator = coordinator,
-      ttl = 60 * 10,
+      ttl = 60 * 30,
       description = "some_description")
 
     val roundRobinPolicy = new RoundRobinPolicy(stream, (partitionRange.head to partitionRange.tail.head).toList)
@@ -153,7 +151,11 @@ class TaskEnvironmentManager() {
       timeUuidGenerator,
       useLastOffset = true)
 
-    new BasicConsumer[Array[Byte], Array[Byte]]("consumer for " + streamName, stream, options)
+    val callback = new QueueConsumerCallback[Array[Byte], Array[Byte]](blockingQueue)
+    //todo
+    val path = "test"
+
+    new BasicConsumerWithSubscribe[Array[Byte], Array[Byte]]("consumer for " + streamName, stream, options, callback, path)
   }
 
   def createProducer(streamName: String) = {
@@ -164,13 +166,72 @@ class TaskEnvironmentManager() {
     val stream: BasicStream[Array[Byte]] = new BasicStream[Array[Byte]](
       name = streamName,
       partitions = 3,
-      metadataStorage = metadataStorageInstForProducer,
-      dataStorage = aerospikeInstForProducer,
+      metadataStorage = metadataStorage,
+      dataStorage = aerospikeInst,
       coordinator = coordinator,
-      ttl = 60 * 10,
-      description =  "some_description")
+      ttl = 60 * 30,
+      description = "some_description")
 
     val roundRobinPolicy = new RoundRobinPolicy(stream, (0 until 3).toList)
+
+    val options = new BasicProducerOptions[Array[Byte], Array[Byte]](
+      transactionTTL = 6,
+      transactionKeepAliveInterval = 2,
+      producerKeepAliveInterval = 1,
+      roundRobinPolicy,
+      BatchInsert(5),
+      timeUuidGenerator,
+      converter)
+
+    new BasicProducer[Array[Byte], Array[Byte]]("producer for " + streamName, stream, options)
+  }
+
+  //todo only for testing. Delete
+
+  def createStateConsumer(streamName: String, offsetPolicy: IOffset): BasicConsumer[Array[Byte], Array[Byte]] = {
+
+    //    val stream: BasicStream[Array[Byte]] =
+    //      BasicStreamService.loadStream(streamName, metadataStorageInstForProducer, aerospikeInstForProducer, coordinator)
+
+    val stream = new BasicStream[Array[Byte]](
+      name = streamName,
+      partitions = 1,
+      metadataStorage = metadataStorage,
+      dataStorage = aerospikeInst,
+      coordinator = coordinator,
+      ttl = 60 * 30,
+      description = "some_description")
+
+    val roundRobinPolicy = new RoundRobinPolicy(stream, (0 to 0).toList)
+
+    val options = new BasicConsumerOptions[Array[Byte], Array[Byte]](
+      transactionsPreload = 10,
+      dataPreload = 7,
+      consumerKeepAliveInterval = 5,
+      converter,
+      roundRobinPolicy,
+      offsetPolicy,
+      timeUuidGenerator,
+      useLastOffset = true)
+
+    new BasicConsumer[Array[Byte], Array[Byte]]("consumer for " + streamName, stream, options)
+  }
+
+  def createStateProducer(streamName: String) = {
+
+    //        val stream: BasicStream[Array[Byte]] =
+    //          BasicStreamService.loadStream(streamName, metadataStorageInstForProducer, aerospikeInstForProducer, coordinator)
+
+    val stream: BasicStream[Array[Byte]] = new BasicStream[Array[Byte]](
+      name = streamName,
+      partitions = 1,
+      metadataStorage = metadataStorage,
+      dataStorage = aerospikeInst,
+      coordinator = coordinator,
+      ttl = 60 * 30,
+      description = "some_description")
+
+    val roundRobinPolicy = new RoundRobinPolicy(stream, (0 to 0).toList)
 
     val options = new BasicProducerOptions[Array[Byte], Array[Byte]](
       transactionTTL = 6,
