@@ -175,7 +175,8 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                         entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
                       ))
                     } else {
-                      throw new BadRecordWithKey(s"Jar '$moduleName' not found", moduleName)
+                      throw new BadRecordWithKey(s"Jar '$moduleType-$moduleName-$moduleVersion' not found",
+                        s"$moduleType - $moduleName - $moduleVersion")
                     }
                   } ~
                   delete {
@@ -184,13 +185,16 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                       if (storage.delete(filename)) {
                         complete(HttpEntity(
                           `application/json`,
-                          serializer.serialize(Response(200, s"$moduleType-$moduleName-$moduleVersion", s"Module $moduleName for type $moduleType has been deleted"))
+                          serializer.serialize(Response(200, s"$moduleType-$moduleName-$moduleVersion",
+                            s"Module $moduleName-$moduleVersion for type $moduleType has been deleted"))
                         ))
                       } else {
-                        throw new BadRecordWithKey(s"Module $moduleName hasn't been found", s"$moduleType-$moduleName-$moduleVersion")
+                        throw new BadRecordWithKey(s"Module $moduleType-$moduleName-$moduleVersion hasn't been found",
+                          s"$moduleType-$moduleName-$moduleVersion")
                       }
                     } else {
-                      throw new BadRecordWithKey(s"Cannot delete module $moduleName. Module has instances", s"$moduleType-$moduleName-$moduleVersion")
+                      throw new BadRecordWithKey(s"Cannot delete module $moduleType-$moduleName-$moduleVersion. Module has instances",
+                        s"$moduleType-$moduleName-$moduleVersion")
                     }
                   }
                 }
@@ -201,7 +205,9 @@ trait SjModulesApi extends Directives with SjCrudValidator {
             val files = fileMetadataDAO.retrieveAllByModuleType(moduleType)
             var msg = ""
             if (files.nonEmpty) {
-              msg = s"Uploaded modules for type $moduleType: ${files.map(_.metadata("metadata").name).mkString(",\n")}"
+              msg = s"Uploaded modules for type $moduleType: ${files.map(
+                s => s"${s.metadata("metadata").name}-${s.metadata("metadata").version}"
+              ).mkString(",\n")}"
             } else {
               msg = s"Uploaded modules for type $moduleType have not been found "
             }
