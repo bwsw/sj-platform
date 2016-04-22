@@ -8,7 +8,6 @@ import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.server.{RequestContext, Directives}
 import akka.http.scaladsl.server.directives.FileInfo
 import com.bwsw.common.exceptions.{InstanceException, BadRecordWithKey}
-import com.bwsw.sj.common.DAL.ConnectionRepository
 import com.bwsw.sj.common.entities._
 import com.bwsw.sj.common.module.StreamingValidator
 import akka.http.scaladsl.model.headers._
@@ -19,7 +18,6 @@ import org.apache.commons.io.FileUtils
 import akka.stream.scaladsl._
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 /**

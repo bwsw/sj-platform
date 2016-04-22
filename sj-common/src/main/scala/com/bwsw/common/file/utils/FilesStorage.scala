@@ -13,4 +13,6 @@ trait FilesStorage {
 
   def getContent(path: String = null): Seq[String]
 
+  def exists(fileName: String): Boolean
+
 }
