@@ -8,7 +8,6 @@ import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.server.{RequestContext, Directives}
 import akka.http.scaladsl.server.directives.FileInfo
 import com.bwsw.common.exceptions.{InstanceException, BadRecordWithKey}
-import com.bwsw.sj.common.DAL.ConnectionRepository
 import com.bwsw.sj.common.entities._
 import com.bwsw.sj.common.module.StreamingValidator
 import akka.http.scaladsl.model.headers._
@@ -19,7 +18,6 @@ import org.apache.commons.io.FileUtils
 import akka.stream.scaladsl._
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 /**
@@ -112,7 +110,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                         msg = serializer.serialize(instances)
                       } else {
                         msg =  serializer.serialize(Response(200, s"$moduleType-$moduleName-$moduleVersion",
-                          s"Instancies for $moduleType-$moduleName-$moduleVersion not found"))
+                          s"Instances for $moduleType-$moduleName-$moduleVersion not found"))
                       }
                       complete(HttpEntity(`application/json`, msg))
                     }
@@ -177,7 +175,8 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                         entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
                       ))
                     } else {
-                      throw new BadRecordWithKey(s"Jar '$moduleName' not found", moduleName)
+                      throw new BadRecordWithKey(s"Jar '$moduleType-$moduleName-$moduleVersion' not found",
+                        s"$moduleType - $moduleName - $moduleVersion")
                     }
                   } ~
                   delete {
@@ -186,13 +185,16 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                       if (storage.delete(filename)) {
                         complete(HttpEntity(
                           `application/json`,
-                          serializer.serialize(Response(200, s"$moduleType-$moduleName-$moduleVersion", s"Module $moduleName for type $moduleType has been deleted"))
+                          serializer.serialize(Response(200, s"$moduleType-$moduleName-$moduleVersion",
+                            s"Module $moduleName-$moduleVersion for type $moduleType has been deleted"))
                         ))
                       } else {
-                        throw new BadRecordWithKey(s"Module $moduleName hasn't been found", s"$moduleType-$moduleName-$moduleVersion")
+                        throw new BadRecordWithKey(s"Module $moduleType-$moduleName-$moduleVersion hasn't been found",
+                          s"$moduleType-$moduleName-$moduleVersion")
                       }
                     } else {
-                      throw new BadRecordWithKey(s"Cannot delete module $moduleName. Module has instances", s"$moduleType-$moduleName-$moduleVersion")
+                      throw new BadRecordWithKey(s"Cannot delete module $moduleType-$moduleName-$moduleVersion. Module has instances",
+                        s"$moduleType-$moduleName-$moduleVersion")
                     }
                   }
                 }
@@ -203,7 +205,9 @@ trait SjModulesApi extends Directives with SjCrudValidator {
             val files = fileMetadataDAO.retrieveAllByModuleType(moduleType)
             var msg = ""
             if (files.nonEmpty) {
-              msg = s"Uploaded modules for type $moduleType: ${files.map(_.metadata("metadata").name).mkString(",\n")}"
+              msg = s"Uploaded modules for type $moduleType: ${files.map(
+                s => s"${s.metadata("metadata").name}-${s.metadata("metadata").version}"
+              ).mkString(",\n")}"
             } else {
               msg = s"Uploaded modules for type $moduleType have not been found "
             }
@@ -216,16 +220,16 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       } ~
       pathSuffix("instances") {
         get {
-          val allInstancies = instanceDAO.retrieveAll()
-          if (allInstancies.isEmpty) {
+          val allInstances = instanceDAO.retrieveAll()
+          if (allInstances.isEmpty) {
             complete(HttpEntity(
               `application/json`,
-              serializer.serialize(Response(200, null, "Instancies have not been found"))
+              serializer.serialize(Response(200, null, "Instances have not been found"))
             ))
           }
           complete(HttpEntity(
             `application/json`,
-            serializer.serialize(allInstancies.map(x => ShortInstanceMetadata(x.name, x.moduleType, x.moduleName, x.moduleVersion, x.description, x.status)))
+            serializer.serialize(allInstances.map(x => ShortInstanceMetadata(x.name, x.moduleType, x.moduleName, x.moduleVersion, x.description, x.status)))
           ))
         }
       }

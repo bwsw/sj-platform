@@ -2,7 +2,7 @@ package com.bwsw.sj.transaction.generator
 
 import java.util.UUID
 
-import com.bwsw.sj.transaction.generator.client.TcpClient
+import com.bwsw.sj.transaction.generator.client.{TcpClientOptions, TcpClient}
 import com.bwsw.sj.transaction.generator.server.TcpServer
 import org.scalatest._
 
@@ -12,8 +12,13 @@ import org.scalatest._
   * @author Kseniya Tomskikh
   */
 class Test extends FlatSpec with Matchers {
-  val client = new TcpClient("192.168.1.180", 8885)
-  val server = new TcpServer(8885)
+  val options = new TcpClientOptions()
+    .setZkServers(Array("127.0.0.1:2181"))
+    .setPrefix("servers")
+    .setRetryPeriod(500)
+    .setRetryCount(10)
+  val client = new TcpClient(options)
+  val server = new TcpServer(null, null, "192.168.1.180", 8885)
 
   "TcpClient" should "connecting to server" in {
     client.open()
