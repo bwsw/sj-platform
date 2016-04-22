@@ -39,4 +39,9 @@ class LocalStorage(pathToLocalStorage: String) extends FilesStorage {
   override def put(file: File, fileName: String, specification: Map[String, Any], filetype: String) = {
     put(file, fileName)
   }
+
+  override def exists(fileName: String): Boolean = {
+    val file = new File(pathToLocalStorage + fileName)
+    file.exists
+  }
 }

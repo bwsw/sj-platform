@@ -1,8 +1,10 @@
 package com.bwsw.sj.common.DAL
 
+import com.bwsw.common.DAL.GenericMongoDAO
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.sj.common.ConfigLoader
+import com.bwsw.sj.common.entities.Streams
 import com.mongodb.casbah.MongoClient
 
 /**
@@ -20,6 +22,8 @@ object ConnectionRepository {
 
   private lazy val instanceDAO = new InstanceMetadataDAO(mongoConnection(databaseName)(instanceCollection), serializer)
 
+  private lazy val streamsDAO = new GenericMongoDAO[Streams](mongoConnection(databaseName)(streamsCollection), serializer)
+
   def getFileMetadataDAO = {
     fileMetadataDAO
   }
@@ -31,6 +35,10 @@ object ConnectionRepository {
   def getFileStorage = {
     new MongoFileStorage(mongoConnection(databaseName))
   }
+
+  def getStreamsDAO = {
+    streamsDAO
+  }
 }
 
 object ConnectionConstants {
@@ -40,5 +48,6 @@ object ConnectionConstants {
 
   val databaseName = "stream_juggler"
   lazy val fileMetadataCollection = "fs.files"
-  lazy val instanceCollection = "instancies"
+  lazy val instanceCollection = "instances"
+  lazy val streamsCollection = "streams"
 }
