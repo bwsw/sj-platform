@@ -1,10 +1,12 @@
 package com.bwsw.sj.transaction.generator
 
 
+import java.net.{URL, URI}
 import java.util.concurrent.TimeUnit
 import java.util.Calendar
 
 import com.bwsw.sj.transaction.generator.client.{TcpClientOptions, TcpClient}
+import org.apache.zookeeper.common.PathUtils
 
 /**
   * Created: 18/04/2016

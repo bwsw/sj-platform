@@ -1,11 +1,12 @@
 package com.bwsw.sj.transaction.generator.server
 
 import java.io._
-import java.net.{SocketException, ServerSocket, Socket}
+import java.net.{URI, SocketException, ServerSocket, Socket}
 
 import com.datastax.driver.core.utils.UUIDs
 import com.twitter.common.zookeeper.DistributedLock.LockingException
 import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
+import org.apache.log4j.Logger
 import org.apache.zookeeper.{CreateMode, ZooDefs}
 
 /**
@@ -15,12 +16,14 @@ import org.apache.zookeeper.{CreateMode, ZooDefs}
   * @author Kseniya Tomskikh
   */
 class TcpServer(prefix: String, zkClient: ZooKeeperClient, host: String, port: Int) {
+  private val logger = Logger.getLogger(getClass)
 
   var serverSocket: ServerSocket = null
 
   def listen() = {
     var isMaster = false
-    val distributedLock = new DistributedLockImpl(zkClient, s"$prefix/lock")
+    val zkLockNode = new URI(s"/$prefix/lock").normalize()
+    val distributedLock = new DistributedLockImpl(zkClient, zkLockNode.toString)
     while (!isMaster) {
       try {
         distributedLock.lock()
@@ -31,7 +34,7 @@ class TcpServer(prefix: String, zkClient: ZooKeeperClient, host: String, port: I
         case e: LockingException => Thread.sleep(500)
       }
     }
-    println(s"Server $host:$port is started")
+    logger.info(s"Server $host:$port is started")
     val clientSocket = serverSocket.accept()
     var isWorked = true
     while (isWorked) {
@@ -39,7 +42,7 @@ class TcpServer(prefix: String, zkClient: ZooKeeperClient, host: String, port: I
         val request = readSocket(clientSocket)
         if (request != null && request.equals("TXN")) {
           val newUuid = getNewTransaction.toString
-          //println(newUuid)
+          logger.debug(s"Generated new transaction: $newUuid")
           writeSocket(clientSocket, newUuid)
         }
       } catch {
@@ -47,7 +50,7 @@ class TcpServer(prefix: String, zkClient: ZooKeeperClient, host: String, port: I
         case ex: IOException => isWorked = false
       }
     }
-    println(s"Server $host:$port is stopped")
+    logger.info(s"Server $host:$port is stopped")
   }
 
   private def readSocket(socket: Socket): String = {
@@ -66,13 +69,14 @@ class TcpServer(prefix: String, zkClient: ZooKeeperClient, host: String, port: I
   }
 
   private def updateMaster() = {
-    val node = s"$prefix/master"
+    val node = new URI(s"/$prefix/master").normalize().toString
     val value = s"$host:$port".getBytes("UTF-8")
     if (zkClient.get.exists(node, null) != null) {
       zkClient.get().setData(node, value, -1)
     } else {
       zkClient.get().create(node, value, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT)
     }
+    logger.debug("Master server updated")
   }
 
 }

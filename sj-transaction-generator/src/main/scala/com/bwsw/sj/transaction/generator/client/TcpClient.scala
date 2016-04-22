@@ -6,6 +6,7 @@ import java.util
 
 import com.twitter.common.quantity.{Time, Amount}
 import com.twitter.common.zookeeper.ZooKeeperClient
+import org.apache.log4j.Logger
 
 /**
   * Client for transaction generating
@@ -14,6 +15,7 @@ import com.twitter.common.zookeeper.ZooKeeperClient
   * @author Kseniya Tomskikh
   */
 class TcpClient(options: TcpClientOptions) {
+  private val logger = Logger.getLogger(getClass)
   var socket: Socket = null
   private var retryCount = options.retryCount
 
@@ -35,9 +37,9 @@ class TcpClient(options: TcpClientOptions) {
       }
     }
     if (!isConnected) {
-      println("Could not connect to server")
+      logger.info("Could not connect to server")
     } else {
-      println("Connected to server")
+      logger.info("Connected to server")
     }
   }
 
@@ -60,7 +62,8 @@ class TcpClient(options: TcpClientOptions) {
           reconnect()
         }
       } catch {
-        case ex: Exception => reconnect()
+        case ex: Exception => logger.info("Reconnect...")
+          reconnect()
       }
     }
 
@@ -102,8 +105,9 @@ class TcpClient(options: TcpClientOptions) {
   }
 
   private def getMasterServer() = {
-    val master = new String(zkClient.get().getData(s"/${options.prefix}/master", null, null), "UTF-8")
-    println(s"Master server: $master")
+    val zkNode = new URI(s"/${options.prefix}/master").normalize()
+    val master = new String(zkClient.get().getData(zkNode.toString, null, null), "UTF-8")
+    logger.debug(s"Master server: $master")
     master.split(":")
   }
 
