@@ -109,33 +109,30 @@ abstract class StreamingModuleValidator {
     }
 
     if (service.isDefined) {
-      val metadataService = serviceDAO.retrieve(service.get.metadataService).get
-      val metadataProvider = providerDAO.retrieve(metadataService.provider).get
+      val metadataProvider = providerDAO.retrieve(service.get.metadataProvider).get
       val hosts = metadataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt))
-      val metadataStorage = (new MetadataStorageFactory).getInstance(hosts, metadataService.keyspace)
+      val metadataStorage = (new MetadataStorageFactory).getInstance(hosts, service.get.metadataNamespace)
 
-      val dataService = serviceDAO.retrieve(service.get.dataService).get
-      val dataProvider = providerDAO.retrieve(dataService.provider).get
+      val dataProvider = providerDAO.retrieve(service.get.dataProvider).get
       var dataStorage: IStorage[Array[Byte]] = null
       if (dataProvider.providerType.equals("cassandra")) {
         val options = new CassandraStorageOptions(
           dataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)),
-          dataService.keyspace
+          service.get.dataNamespace
         )
         dataStorage = (new CassandraStorageFactory).getInstance(options)
       } else if (dataProvider.providerType.equals("aerospike")) {
         val options = new AerospikeStorageOptions(
-          dataService.namespace,
+          service.get.dataNamespace,
           dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt))
         )
         dataStorage = (new AerospikeStorageFactory).getInstance(options)
       }
 
-      val lockService = serviceDAO.retrieve(service.get.lockService).get
-      val lockProvider = providerDAO.retrieve(lockService.provider).get
+      val lockProvider = providerDAO.retrieve(service.get.lockProvider).get
       val redisConfig = new Config()
       redisConfig.useSingleServer().setAddress(lockProvider.hosts.head)
-      val coordinator = new Coordinator(lockService.namespace, Redisson.create(redisConfig))
+      val coordinator = new Coordinator(service.get.lockNamespace, Redisson.create(redisConfig))
 
       allStreams.foreach { (stream: Streams) =>
         val generatorType = stream.generator.head
