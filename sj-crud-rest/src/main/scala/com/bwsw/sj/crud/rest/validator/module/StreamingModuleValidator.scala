@@ -5,11 +5,13 @@ import java.net.{InetSocketAddress, URI}
 import com.aerospike.client.Host
 import com.bwsw.sj.common.DAL.ConnectionRepository
 import com.bwsw.sj.common.entities.{Streams, InstanceMetadata}
+import com.bwsw.tstreams.coordination.Coordinator
 import com.bwsw.tstreams.data.IStorage
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorageOptions, AerospikeStorageFactory}
 import com.bwsw.tstreams.data.cassandra.{CassandraStorageFactory, CassandraStorageOptions}
 import com.bwsw.tstreams.metadata.MetadataStorageFactory
 import com.bwsw.tstreams.services.BasicStreamService
+import org.redisson.{Redisson, Config}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -129,7 +131,11 @@ abstract class StreamingModuleValidator {
         dataStorage = (new AerospikeStorageFactory).getInstance(options)
       }
 
-      val coordinator = ConnectionRepository.getCoordinator
+      val lockService = serviceDAO.retrieve(service.get.lockService).get
+      val lockProvider = providerDAO.retrieve(lockService.provider).get
+      val redisConfig = new Config()
+      redisConfig.useSingleServer().setAddress(lockProvider.hosts.head)
+      val coordinator = new Coordinator(lockService.namespace, Redisson.create(redisConfig))
 
       allStreams.foreach { (stream: Streams) =>
         val generatorType = stream.generator.head

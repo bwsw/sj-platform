@@ -30,8 +30,6 @@ object ConnectionRepository {
 
   private lazy val providerDAO = new GenericMongoDAO[Provider](mongoConnection(databaseName)(providerCollection), serializer)
 
-  private lazy val coordinator = new Coordinator(coordPath, Redisson.create(redisConfig))
-
   def getFileMetadataDAO = {
     fileMetadataDAO
   }
@@ -56,9 +54,6 @@ object ConnectionRepository {
     providerDAO
   }
 
-  def getCoordinator = {
-    coordinator
-  }
 }
 
 object ConnectionConstants {
@@ -73,7 +68,4 @@ object ConnectionConstants {
   lazy val serviceCollection = "services"
   lazy val providerCollection = "providers"
 
-  lazy val redisConfig = new Config()
-  redisConfig.useSingleServer().setAddress("localhost:6379")
-  lazy val coordPath = "some_path"
 }
