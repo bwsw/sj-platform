@@ -52,6 +52,7 @@ trait SjCrudRouter extends Directives
       ))
     case ex: Exception =>
       complete(HttpResponse(
+        InternalServerError,
         entity = HttpEntity(`application/json`, serializer.serialize(Response(500, null, "Internal server error: " + ex.getMessage)))
       ))
   }
