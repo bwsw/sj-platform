@@ -1,0 +1,15 @@
+{
+  "api": {
+    "port": 3001,
+    "pm2": {
+      "name": "sj-api",
+      "script": "./api/server.js",
+      "max_memory_restart": "100M"
+    },
+    "db": {
+      "ip": "localhost",
+      "port": 27017,
+      "name": "stream_juggler"
+    }
+  }
+}
