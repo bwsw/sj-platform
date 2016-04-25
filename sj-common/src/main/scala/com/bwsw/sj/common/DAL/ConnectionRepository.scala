@@ -5,9 +5,7 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.sj.common.ConfigLoader
 import com.bwsw.sj.common.entities.{Provider, Service, Streams}
-import com.bwsw.tstreams.coordination.Coordinator
 import com.mongodb.casbah.MongoClient
-import org.redisson.{Redisson, Config}
 
 /**
   * Repository for connection to MongoDB and file storage (GridFS)
