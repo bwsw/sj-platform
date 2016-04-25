@@ -1,9 +1,18 @@
 package com.bwsw.sj.crud.rest.validator.module
 
+import java.net.{InetSocketAddress, URI}
+
+import com.aerospike.client.Host
 import com.bwsw.sj.common.DAL.ConnectionRepository
-import com.bwsw.sj.common.entities.InstanceMetadata
+import com.bwsw.sj.common.entities.{Streams, InstanceMetadata}
+import com.bwsw.tstreams.data.IStorage
+import com.bwsw.tstreams.data.aerospike.{AerospikeStorageOptions, AerospikeStorageFactory}
+import com.bwsw.tstreams.data.cassandra.{CassandraStorageFactory, CassandraStorageOptions}
+import com.bwsw.tstreams.metadata.MetadataStorageFactory
+import com.bwsw.tstreams.services.BasicStreamService
 
 import scala.collection.mutable.ArrayBuffer
+
 
 /**
   * Trait of validator for modules
@@ -16,11 +25,15 @@ abstract class StreamingModuleValidator {
 
   /**
     * Validating input parameters for streaming module
+    *
     * @param parameters - input parameters for running module
     * @return - List of errors
     */
   def validate(parameters: InstanceMetadata) = {
     val instanceDAO = ConnectionRepository.getInstanceDAO
+    val serviceDAO = ConnectionRepository.getServiceDAO
+    val providerDAO = ConnectionRepository.getProviderDAO
+
     val errors = new ArrayBuffer[String]()
 
     val instance = instanceDAO.retrieve(parameters.name)
@@ -41,7 +54,25 @@ abstract class StreamingModuleValidator {
       errors += s"Outputs is not unique."
     }
 
-    val partitions = getPartitionForStreams(parameters.inputs.map(_.replaceAll("/split|/full", "")))
+    val inputStreams = getStreams(parameters.inputs.map(_.replaceAll("/split|/full", "")))
+    val outputStreams = getStreams(parameters.outputs)
+    val allStreams: Seq[Streams] = inputStreams.union(outputStreams)
+    val streamsService = checkStreams(allStreams)
+    val serviceName = streamsService.head
+    val service = serviceDAO.retrieve(serviceName)
+    if (streamsService.size != 1) {
+      errors += s"All streams should have the same service."
+    } else {
+      service match {
+        case Some(s) =>
+          if (!s.serviceType.equals("TstrQ")) {
+            errors += s"Service for streams must be 'TstrQ'."
+          }
+        case None => errors += s"Service $serviceName not found."
+      }
+    }
+
+    val partitions = getPartitionForStreams(inputStreams)
     val minPartitionCount = partitions.values.min
 
     if (parameters.parallelism > minPartitionCount) {
@@ -75,11 +106,89 @@ abstract class StreamingModuleValidator {
       }
     }
 
+    if (service.isDefined) {
+      val metadataService = serviceDAO.retrieve(service.get.metadataService).get
+      val metadataProvider = providerDAO.retrieve(metadataService.provider).get
+      val hosts = metadataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt))
+      val metadataStorage = (new MetadataStorageFactory).getInstance(hosts, metadataService.keyspace)
+
+      val dataService = serviceDAO.retrieve(service.get.dataService).get
+      val dataProvider = providerDAO.retrieve(dataService.provider).get
+      var dataStorage: IStorage[Array[Byte]] = null
+      if (dataProvider.providerType.equals("cassandra")) {
+        val options = new CassandraStorageOptions(
+          dataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)),
+          dataService.keyspace
+        )
+        dataStorage = (new CassandraStorageFactory).getInstance(options)
+      } else if (dataProvider.providerType.equals("aerospike")) {
+        val options = new AerospikeStorageOptions(
+          dataService.namespace,
+          dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt))
+        )
+        dataStorage = (new AerospikeStorageFactory).getInstance(options)
+      }
+
+      val coordinator = ConnectionRepository.getCoordinator
+
+      allStreams.foreach { (stream: Streams) =>
+        val generatorType = stream.generator.head
+        if (generatorType.equals("global") || generatorType.equals("per-stream")) {
+          val generatorUrl = new URI(stream.generator(1))
+          if (!generatorUrl.getScheme.equals("service-zk")) {
+            errors += s"Generator have unknown service type: ${generatorUrl.getScheme}. Must be 'service-zk'."
+          }
+          val service = serviceDAO.retrieve(generatorUrl.getAuthority)
+          service match {
+            case Some(s) =>
+              if (!s.serviceType.equals("ZKCoord")) {
+                errors += s"Service for streams must be 'ZKCoord'."
+              }
+            case None => errors += s"Service ${generatorUrl.getHost} not found."
+          }
+
+          val n = stream.generator(2).toInt
+          if (n < 0) {
+            errors += s"Count instances of generator ($n) must be more than 1."
+          }
+        } else {
+          if (!generatorType.equals("local")) {
+            errors += s"Unknown generator type $generatorType for stream ${stream.name}."
+          }
+        }
+
+        if (BasicStreamService.isExist(stream.name, metadataStorage)) {
+          val tStream = BasicStreamService.loadStream[Array[Byte]](
+            stream.name,
+            metadataStorage,
+            dataStorage,
+            coordinator
+          )
+          if (tStream.getPartitions != stream.partitions.size) {
+            errors += s"Partitions count mismatch"
+          }
+        } else {
+          if (errors.isEmpty) {
+            BasicStreamService.createStream(
+              stream.name,
+              stream.partitions.size,
+              5000,
+              "", metadataStorage,
+              dataStorage,
+              coordinator
+            )
+          }
+        }
+
+      }
+    }
+
     (errors, partitions)
   }
 
   /**
     * Check doubles in list
+    *
     * @param list - list for checking
     * @return - true, if list contain doubles
     */
@@ -92,16 +201,31 @@ abstract class StreamingModuleValidator {
     *
     * @return - count of partition for each stream
     */
-  def getPartitionForStreams(streams: List[String]): Map[String, Int] = {
-    //Map("s1" -> 11, "s2" -> 12, "s3" -> 15)
+  def getPartitionForStreams(streams: Seq[Streams]): Map[String, Int] = {
+    Map(streams.map { stream =>
+      stream.name -> stream.partitions.size
+    }: _*)
+  }
+
+  /**
+    * Getting streams for such names
+    *
+    * @param streamNames Names of streams
+    * @return Seq of streams
+    */
+  def getStreams(streamNames: List[String]) = {
     val streamsDAO = ConnectionRepository.getStreamsDAO
-    Map(streams.map { name =>
-      val stream = streamsDAO.retrieve(name)
-      stream match {
-        case Some(s) => name -> s.partitions.size
-        case None => name -> 0
-      }
-    }.toSeq: _*)
+    streamsDAO.retrieveAll().filter(s => streamNames.contains(s.name))
+  }
+
+  /**
+    * Getting service names for all streams (must be one element in list)
+    *
+    * @param streams All streams
+    * @return List of service-names
+    */
+  def checkStreams(streams: Seq[Streams]) = {
+    streams.map(s => (s.service, 1)).groupBy(_._1).keys.toList
   }
 
 }

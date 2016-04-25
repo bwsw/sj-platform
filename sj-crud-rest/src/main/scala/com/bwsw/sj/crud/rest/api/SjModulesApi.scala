@@ -94,13 +94,15 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                               serializer.serialize(Response(200, nameInstance, s"Instance for module $moduleType-$moduleName-$moduleVersion is created"))
                             ))
                           } else {
-                            throw new InstanceException(s"Cannot create instance of module. Request has incrorrect options attrubute", s"$moduleType-$moduleName-$moduleVersion")
+                            throw new InstanceException(s"Cannot create instance of module. Request has incrorrect options attrubute",
+                              s"$moduleType-$moduleName-$moduleVersion")
                           }
                         } else {
                           throw new FileNotFoundException(s"Jar for module $moduleType-$moduleName-$moduleVersion not found in storage")
                         }
                       } else {
-                        throw new InstanceException(s"Cannot create instance of module. Errors: ${errors.mkString("\n")}", s"$moduleType-$moduleName-$moduleVersion")
+                        throw new InstanceException(s"Cannot create instance of module. Errors: ${errors.mkString("\n")}",
+                          s"$moduleType-$moduleName-$moduleVersion")
                       }
                     } ~
                     get {
@@ -116,9 +118,11 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                     }
                   } ~
                   path(Segment) { (instanceName: String) =>
+                    val instance = instanceDAO.retrieve(instanceName).get
                     pathSuffix("start") {
                       get {
                         //todo
+                        startInstance(instance)
                         complete(HttpEntity(
                           `application/json`,
                           serializer.serialize(Response(200, null, "Ok"))
@@ -128,6 +132,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                     pathSuffix("stop") {
                       get {
                         //todo
+                        stopInstance(instance)
                         complete(HttpEntity(
                           `application/json`,
                           serializer.serialize(Response(200, null, "Ok"))
@@ -354,4 +359,14 @@ trait SjModulesApi extends Directives with SjCrudValidator {
   case class InputStream(name: String, mode: String, partitionsCount: Int)
 
   case class StreamProcess(currentPartition: Int, countFreePartitions: Int)
+
+  //todo start
+  def startInstance(instance: InstanceMetadata) = {
+
+  }
+
+  //todo stop
+  def stopInstance(instance: InstanceMetadata) = {
+
+  }
 }
