@@ -15,16 +15,17 @@ import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import org.apache.commons.io.FileUtils
 
 /**
-  * Rest-api for common jars
+  * Rest-api for custom jars
   *
   * Created: 08/04/2016
+  *
   * @author Kseniya Tomskikh
   */
-trait SjCommonApi extends Directives with SjCrudValidator {
+trait SjCustomApi extends Directives with SjCrudValidator {
 
-  val commonApi = {
-    pathPrefix("common") {
-      path(Segment) { (name: String) =>
+  val customApi = {
+    pathPrefix("custom") {
+      pathPrefix(Segment) { (name: String) =>
         pathSuffix(Segment) { (version: String) =>
           pathEndOrSingleSlash {
             val fileMetadata = fileMetadataDAO.retrieve(name, version)
@@ -57,15 +58,26 @@ trait SjCommonApi extends Directives with SjCrudValidator {
       } ~
       pathEndOrSingleSlash {
         post {
-          entity(as[FormData]) { formData =>
+          entity(as[FormData]) { (formData: FormData) =>
+            val parts = formData.asInstanceOf[Product].productElement(0)
+            var name = ""
+            var version = ""
+            for (part <- parts.asInstanceOf[Vector[FormData.BodyPart.Strict]]) {
+              if (part.name.equals("name")) {
+                name = part.entity.data.decodeString("UTF-8")
+              } else if (part.name.equals("version")) {
+                version = part.entity.data.decodeString("UTF-8")
+              }
+            }
             uploadedFile("jar") {
               case (metadata: FileInfo, file: File) =>
+                val customSpec = Map("name" -> name, "version" -> version)
                 val uploadingFile = new File(metadata.fileName)
                 FileUtils.copyFile(file, uploadingFile)
-                storage.put(uploadingFile, metadata.fileName, null, "custom")
+                storage.put(uploadingFile, metadata.fileName, customSpec, "custom")
                 complete(HttpEntity(
                   `application/json`,
-                  serializer.serialize(Response(200, null, s"Ok"))
+                  serializer.serialize(Response(200, null, s"Custom jar is uploaded."))
                 ))
             }
           }
