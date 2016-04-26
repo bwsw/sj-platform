@@ -27,7 +27,7 @@ class StateStorage(stateService: IStateService) {
    */
   def set(key: String, value: Any): Unit = {
     stateService.setChange(key, value)
-    stateService.set(key,value)
+    stateService.set(key, value)
   }
 
   /**
@@ -37,6 +37,15 @@ class StateStorage(stateService: IStateService) {
   def delete(key: String): Unit = {
     stateService.deleteChange(key)
     stateService.delete(key)
+  }
+
+  /**
+   * Removes all state variables. After this operation has completed,
+   *  the state will be empty.
+   */
+  def clear(): Unit = {
+    stateService.clearChange()
+    stateService.clear()
   }
 
 }

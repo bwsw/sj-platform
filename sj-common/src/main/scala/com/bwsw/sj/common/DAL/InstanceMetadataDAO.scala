@@ -37,7 +37,7 @@ class InstanceMetadataDAO(entityCollection: MongoCollection, serializer: Seriali
 
   /**
     * Retrieve all instances from storage
-    * every record deserializing to object by module-type
+    * every record is deserialized to object by module-type
     * @return - Set of instances
     */
   override def retrieveAll() = {

@@ -34,5 +34,6 @@ class QueueConsumerCallback[DATATYPE, USERTYPE](blockingQueue: PersistentBlockin
         "callback_consumer",
         transaction.getAll().asInstanceOf[List[Array[Byte]]]
       )))
+    subscriber.setLocalOffset(partition, transactionUuid)
   }
 }

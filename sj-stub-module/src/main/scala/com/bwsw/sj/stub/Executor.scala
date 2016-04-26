@@ -21,7 +21,7 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
 
     override def finish(): Unit = ???
 
-    override def onCheckpoint(): Unit = {
+    override def onAfterCheckpoint(): Unit = {
       println("onCheckpoint")
     }
 
@@ -38,4 +38,8 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
     override def onTimer(): Unit = {
       println("onTimer")
     }
+
+  override def onAfterStateSave(isFull: Boolean): Unit = {
+    println("onStateSave")
+  }
 }

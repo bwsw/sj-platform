@@ -2,18 +2,23 @@ package utils
 
 
 import java.net.InetSocketAddress
+import java.util.UUID
+import java.util.concurrent.locks.ReentrantLock
 
 import com.aerospike.client.Host
+import com.bwsw.sj.common.module.PersistentBlockingQueue
 import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
-import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions}
-import com.bwsw.tstreams.converter.{ArrayByteToStringConverter, StringToArrayByteConverter}
+import com.bwsw.tstreams.agents.consumer.{BasicConsumerCallback, BasicConsumerOptions, BasicConsumerWithSubscribe}
+import com.bwsw.tstreams.agents.producer.InsertionType.BatchInsert
+import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions, ProducerPolicies}
+import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.Coordinator
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStorageOptions}
 import com.bwsw.tstreams.generator.LocalTimeUuidGenerator
 import com.bwsw.tstreams.metadata.MetadataStorageFactory
 import com.bwsw.tstreams.policy.RoundRobinPolicy
 import com.bwsw.tstreams.streams.BasicStream
-import com.datastax.driver.core.{Cluster, Session}
+import com.datastax.driver.core.Session
 import org.redisson.{Config, Redisson}
 
 object helper {
@@ -135,20 +140,21 @@ object helper {
 
 object asd {
   def main(args: Array[String]) {
-    val randomKeyspace = "test"
-        val cluster = Cluster.builder().addContactPoint("localhost").build()
-        val session = cluster.connect()
-        helper.createKeyspace(session, randomKeyspace)
-        helper.createMetadataTables(session, randomKeyspace)
-        helper.createDataTable(session, randomKeyspace)
+    val randomKeyspace = "random1"
+//    val cluster = Cluster.builder().addContactPoint("localhost").build()
+//    val session = cluster.connect()
+//    helper.createKeyspace(session, randomKeyspace)
+//    helper.createMetadataTables(session, randomKeyspace)
+//    helper.createDataTable(session, randomKeyspace)
 
     //metadata/data factories
     val metadataStorageFactory = new MetadataStorageFactory
     val storageFactory = new AerospikeStorageFactory
 
     //converters to convert usertype->storagetype; storagetype->usertype
-    val arrayByteToStringConverter = new ArrayByteToStringConverter
-    val stringToArrayByteConverter = new StringToArrayByteConverter
+    val converter = new IConverter[Array[Byte],Array[Byte]] {
+      override def convert(obj: Array[Byte]): Array[Byte] = obj
+    }
 
     //aerospike storage instances
     val hosts = List(
@@ -157,14 +163,10 @@ object asd {
       new Host("localhost", 3002),
       new Host("localhost", 3003))
     val aerospikeOptions = new AerospikeStorageOptions("test", hosts)
-    val aerospikeInstForProducer = storageFactory.getInstance(aerospikeOptions)
-    val aerospikeInstForConsumer = storageFactory.getInstance(aerospikeOptions)
+    val aerospikeStorage = storageFactory.getInstance(aerospikeOptions)
 
     //metadata storage instances
-    //    val metadataStorageInstForProducer = metadataStorageFactory.getInstance(
-    //      cassandraHosts = List(new InetSocketAddress("localhost", 9042)),
-    //      keyspace = randomKeyspace)
-    val metadataStorageInstForConsumer = metadataStorageFactory.getInstance(
+    val metadataStorage = metadataStorageFactory.getInstance(
       cassandraHosts = List(new InetSocketAddress("localhost", 9042)),
       keyspace = randomKeyspace)
 
@@ -175,63 +177,97 @@ object asd {
     val coordinator = new Coordinator("some_path", redissonClient)
 
     //stream instances for producer/consumer
-    //    val streamForProducer: BasicStream[Array[Byte]] = new BasicStream[Array[Byte]](
-    //      name = "s3",
-    //      partitions = 3,
-    //      metadataStorage = metadataStorageInstForProducer,
-    //      dataStorage = aerospikeInstForProducer,
-    //      coordinator = coordinator,
-    //      ttl = 60 * 10,
-    //      description = "some_description")
-
-    val streamForConsumer = new BasicStream[Array[Byte]](
-      name = "63b8fb48-ab91-4406-a677-2f4d1b2b7ae7_task1",
+    val streamForProducer: BasicStream[Array[Byte]] = new BasicStream[Array[Byte]](
+      name = "debug",
       partitions = 3,
-      metadataStorage = metadataStorageInstForConsumer,
-      dataStorage = aerospikeInstForConsumer,
+      metadataStorage = metadataStorage,
+      dataStorage = aerospikeStorage,
       coordinator = coordinator,
       ttl = 60 * 10,
       description = "some_description")
 
-    //    val policyForProducer = new RoundRobinPolicy(streamForProducer, List(0, 1, 2))
-    //    val generatorForProducer = new LocalTimeUuidGenerator
+    val streamForConsumer = new BasicStream[Array[Byte]](
+      name = "debug",
+      partitions = 3,
+      metadataStorage = metadataStorage,
+      dataStorage = aerospikeStorage,
+      coordinator = coordinator,
+      ttl = 60 * 10,
+      description = "some_description")
+
+    val policyForProducer = new RoundRobinPolicy(streamForProducer, List(0, 1, 2))
+    val generatorForProducer = new LocalTimeUuidGenerator
     ///
     val policyForConsumer = new RoundRobinPolicy(streamForConsumer, List(0, 1, 2))
     val generatorForConsumer = new LocalTimeUuidGenerator
 
     //producer/consumer options
-    //    val producerOptions = new BasicProducerOptions[String, Array[Byte]](
-    //      transactionTTL = 6,
-    //      transactionKeepAliveInterval = 2,
-    //      producerKeepAliveInterval = 1,
-    //      policyForProducer,
-    //      BatchInsert(5),
-    //      generatorForProducer,
-    //      stringToArrayByteConverter)
+    val producerOptions = new BasicProducerOptions[Array[Byte], Array[Byte]](
+      transactionTTL = 6,
+      transactionKeepAliveInterval = 2,
+      producerKeepAliveInterval = 1,
+      policyForProducer,
+      BatchInsert(5),
+      generatorForProducer,
+      converter)
 
-    val consumerOptions = new BasicConsumerOptions[Array[Byte], String](
+    val consumerOptions = new BasicConsumerOptions[Array[Byte], Array[Byte]](
       transactionsPreload = 10,
       dataPreload = 7,
       consumerKeepAliveInterval = 5,
-      arrayByteToStringConverter,
+      converter,
       policyForConsumer,
       Oldest,
       generatorForConsumer,
-      useLastOffset = true)
+      useLastOffset = false)
 
-    //    val producer = new BasicProducer("test_producer", streamForProducer, producerOptions)
-    val consumer = new BasicConsumer("test9", streamForConsumer, consumerOptions)
 
-    //    val txn = producer.newTransaction(ProducerPolicies.errorIfOpen)
-    //    txn.send("kjdsjaldjlak")
-    //    txn.close()
+    //val a = BasicStreamService.isExist("s2", metadataStorage)
+    val producer = new BasicProducer("name", streamForProducer, producerOptions)
+
+    val lock = new ReentrantLock(true)
+    val q = new PersistentBlockingQueue("queue_path")
+//    val q = scala.collection.mutable.Queue[String]()
+    var cnt = 0
+
+    val callback = new BasicConsumerCallback[Array[Byte], Array[Byte]] {
+      override def onEvent(subscriber: BasicConsumerWithSubscribe[Array[Byte], Array[Byte]], partition: Int, transactionUuid: UUID): Unit = {
+        lock.lock()
+        println(cnt)
+        cnt += 1
+        lock.unlock()
+        q.put(transactionUuid.toString)
+      }
+      override val frequency: Int = 1
+    }
+
+    val consumer = new BasicConsumerWithSubscribe("test9", streamForConsumer, consumerOptions, callback, "path_queue_test")
+
+    (0 until 8000) foreach { x =>
+      val txn = producer.newTransaction(ProducerPolicies.errorIfOpen)
+      (0 until 100) foreach { _ =>
+        val a = Array[Byte]()
+        txn.send(a)
+      }
+      if (x == 1000)
+        consumer.start()
+      if (x == 4000)
+        Thread.sleep(10000)
+      if (x == 7997)
+        Thread.sleep(60000)
+
+      txn.checkpoint()
+      println("sended="+x)
+    }
+
+
+    println("total="+cnt)
 
     var i = 0
-    while (i < 20) {
-      val maybeTransaction = consumer.getTransaction
-      val retrievedTxn = maybeTransaction.get
-      println(retrievedTxn.getAll())
-      i = i + 1
+    while(true){
+      q.get()
+      println("receivedpart=" + i)
+      i+=1
     }
   }
 }

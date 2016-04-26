@@ -9,7 +9,7 @@ import com.bwsw.tstreams.agents.producer.{BasicProducer, ProducerPolicies}
 import scala.collection.mutable
 
 /**
- * Сlass representing storage for default state that keeps in RAM and use t-stream for checkpoints
+ * Class representing storage for default state that keeps in RAM and use t-stream for checkpoints
  * Created: 12/04/2016
  * @author Kseniya Mikhaleva
  *
@@ -68,6 +68,14 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
   }
 
   /**
+   * Removes all state variables. After this operation has completed,
+   *  the state will be empty.
+   */
+  override def clear(): Unit = {
+    stateVariables.clear()
+  }
+
+  /**
    * Indicates that a state variable has changed
    * @param key State variable name
    * @param value Value of the state variable
@@ -79,6 +87,13 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
    * @param key State variable name
    */
   override def deleteChange(key: String): Unit = stateChanges(key) = ("delete", stateVariables(key))
+
+  /**
+   * Indicates that all state variables have deleted
+   */
+  override def clearChange(): Unit = {
+    stateVariables.foreach(x => deleteChange(x._1))
+  }
 
   /**
    * Saves a partial state changes
@@ -132,19 +147,17 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
 
         initialState
       } else {
-        val uuid = value.asInstanceOf[UUID]
-        lastFullTxnUUID = uuid
-        val lastFullStateTxn = consumer.getTransactionById(0, uuid).get
+        lastFullTxnUUID = value.asInstanceOf[UUID]
+        val lastFullStateTxn = consumer.getTransactionById(0, lastFullTxnUUID).get
         fillFullState(initialState, lastFullStateTxn)
-        consumer.setLocalOffset(0, lastFullStateTxn.getTxnUUID)
+        consumer.setLocalOffset(0, lastFullTxnUUID)
 
         var maybeTxn = consumer.getTransaction
         while (maybeTxn.nonEmpty) {
           val partialState = mutable.Map[String, (String, Any)]()
           val partialStateTxn = maybeTxn.get
 
-          println(serializer.deserialize(partialStateTxn.next()).asInstanceOf[UUID].compareTo(lastFullTxnUUID))
-          assert(serializer.deserialize(partialStateTxn.next()).asInstanceOf[UUID] == lastFullTxnUUID)
+          partialStateTxn.next()
           while (partialStateTxn.hasNext()) {
             value = serializer.deserialize(partialStateTxn.next())
             val variable = value.asInstanceOf[(String, (String, Any))]

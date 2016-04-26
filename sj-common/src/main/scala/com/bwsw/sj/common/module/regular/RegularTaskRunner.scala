@@ -8,7 +8,8 @@ import com.bwsw.sj.common.entities.RegularInstanceMetadata
 import com.bwsw.sj.common.module.entities.Transaction
 import com.bwsw.sj.common.module.environment.{ModuleEnvironmentManager, StatefulModuleEnvironmentManager}
 import com.bwsw.sj.common.module.state.{RAMStateService, StateStorage}
-import com.bwsw.sj.common.module.{PersistentBlockingQueue, SjTimer, TaskEnvironmentManager}
+import com.bwsw.sj.common.module.utils.SjTimer
+import com.bwsw.sj.common.module.{PersistentBlockingQueue, TaskManager}
 import com.bwsw.tstreams.agents.consumer.Offsets.{IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.{BasicProducer, ProducerPolicies}
@@ -28,7 +29,7 @@ object RegularTaskRunner {
     val taskName = System.getenv("TASK_NAME")
     val moduleJar = new File(s"${System.getenv("MODULE_NAME")}.jar")
 
-    val manager = new TaskEnvironmentManager()
+    val manager = new TaskManager()
 
     manager.downloadModuleJar(moduleJar)
 
@@ -48,24 +49,23 @@ object RegularTaskRunner {
     //    consumerWithSubscribes.foreach(x => checkpointGroup.add(x.name, x))
     //    consumerWithSubscribes.foreach(_.start())
 
-    val consumerWithSubscribes = manager.createConsumer("s2", List(0, 2), chooseOffsetPolicy(regularInstanceMetadata.startFrom), blockingQueue)
+    val consumerWithSubscribes = manager.createConsumer("s2", List(0, 2), chooseOffset(regularInstanceMetadata.startFrom), blockingQueue)
     consumerWithSubscribes.start()
     checkpointGroup.add(consumerWithSubscribes.name, consumerWithSubscribes)
-
-//        new Thread(new Runnable {
-//          def run() = {
-//            val producer = manager.createProducer("s2")
-//            val s = System.nanoTime
-//            (0 until 10000) foreach { x =>
-//              val txn = producer.newTransaction(ProducerPolicies.errorIfOpen)
-//              (0 until 100) foreach { _ =>
-//                txn.send(Array[Byte]())
-//              }
-//              txn.checkpoint()
-//            }
-//            println(s"producer time: ${(System.nanoTime - s) / 1000000}")
-//          }
-//        }).run()
+    //        new Thread(new Runnable {
+    //          def run() = {
+    //            val producer = manager.createProducer("s2")
+    //            val s = System.nanoTime
+    //            (0 until 10000) foreach { x =>
+    //              val txn = producer.newTransaction(ProducerPolicies.errorIfOpen)
+    //              (0 until 100) foreach { _ =>
+    //                txn.send(Array[Byte]())
+    //              }
+    //              txn.checkpoint()
+    //            }
+    //            println(s"producer time: ${(System.nanoTime - s) / 1000000}")
+    //          }
+    //        }).run()
 
     val producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]] =
       regularInstanceMetadata.outputs
@@ -87,6 +87,11 @@ object RegularTaskRunner {
       checkpointGroup)
   }
 
+  /**
+   * Transmits an user-modified data from temporary output using t-streams producers
+   * @param output Temporary output that available into module
+   * @param producers T-streams producers for each output stream of instance parameters
+   */
   private def sendData(output: (String, (String, Any)), producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]]) {
     output._2._1 match {
       case "partitioned" =>
@@ -106,6 +111,19 @@ object RegularTaskRunner {
     }
   }
 
+  /**
+   * Provides an imitation of streaming processing using blocking queue
+   * @param moduleTimer Provides a timer inside module
+   * @param regularInstanceMetadata Launch parameters of module
+   * @param blockingQueue Queue for keeping transaction
+   * @param temporaryOutput Provides a wrapper for each output stream
+   * @param classLoader Allows loading an executor class
+   * @param pathToExecutor Absolute class path to module class that implemented RegularStreamingExecutor
+   * @param producers T-streams producers for sending data to output streams
+   * @param serializer Json serializer for deserialization of transaction
+   * @param manager Allows managing an environment of task
+   * @param checkpointGroup Group of producers and consumers which should do a checkpoint at the same time
+   */
   private def runModule(moduleTimer: SjTimer,
                         regularInstanceMetadata: RegularInstanceMetadata,
                         blockingQueue: PersistentBlockingQueue,
@@ -114,7 +132,7 @@ object RegularTaskRunner {
                         pathToExecutor: String,
                         producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]],
                         serializer: JsonSerializer,
-                        manager: TaskEnvironmentManager,
+                        manager: TaskManager,
                         checkpointGroup: CheckpointGroup) = {
     regularInstanceMetadata.stateManagement match {
       case "none" =>
@@ -144,8 +162,9 @@ object RegularTaskRunner {
               temporaryOutput.clear()
 
               if (checkpointTimer.isTime) {
+                executor.onBeforeCheckpoint()
                 checkpointGroup.commit()
-                executor.onCheckpoint()
+                executor.onAfterCheckpoint()
                 checkpointTimer.reset()
                 checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
               }
@@ -168,8 +187,9 @@ object RegularTaskRunner {
               temporaryOutput.clear()
 
               if (countOfTransaction == regularInstanceMetadata.checkpointInterval) {
+                executor.onBeforeCheckpoint()
                 checkpointGroup.commit()
-                executor.onCheckpoint()
+                executor.onAfterCheckpoint()
                 countOfTransaction = 0
               }
 
@@ -181,7 +201,7 @@ object RegularTaskRunner {
         }
 
       case "ram" =>
-        var countOfCheckpoints = 0
+        var countOfCheckpoints = 1
         val taskName = System.getenv("TASK_NAME")
         val stateProducer = manager.createStateProducer(taskName)
         val stateConsumer = manager.createStateConsumer(taskName, Oldest)
@@ -204,19 +224,17 @@ object RegularTaskRunner {
 
         val executor = new Executor(moduleEnvironmentManager)
 
-        //executor.init()
+        executor.init()
 
         regularInstanceMetadata.checkpointMode match {
           case "time-interval" =>
             val checkpointTimer = new SjTimer()
             checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
-            var i = 0
-            val s = System.nanoTime
-            while (i < 1000) {
+
+            while (true) {
 
               val transaction = serializer.deserialize[Transaction](blockingQueue.get())
 
-              i += 1
               executor.run(transaction)
 
               if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
@@ -224,14 +242,21 @@ object RegularTaskRunner {
 
               if (checkpointTimer.isTime) {
                 if (countOfCheckpoints != regularInstanceMetadata.stateFullCheckpoint) {
+                  executor.onBeforeStateSave(false)
                   stateService.checkpoint()
+                  executor.onAfterStateSave(false)
                   countOfCheckpoints += 1
                 } else {
+                  executor.onBeforeStateSave(true)
                   stateService.fullCheckpoint()
+                  executor.onAfterStateSave(true)
                   countOfCheckpoints = 0
                 }
+
+                executor.onBeforeCheckpoint()
                 checkpointGroup.commit()
-                executor.onCheckpoint()
+                executor.onAfterCheckpoint()
+
                 checkpointTimer.reset()
                 checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
               }
@@ -241,13 +266,10 @@ object RegularTaskRunner {
                 moduleTimer.reset()
               }
             }
-            val txnCount = stateService.get("txnCount").asInstanceOf[Int]
-            println(s"count of txn = $txnCount")
-            val elementCount = stateService.get("elementCount").asInstanceOf[Int]
-            println(s"count of element = $elementCount")
-            println(s"consumer time: ${(System.nanoTime - s) / 1000000}. Count = $i")
+
           case "every-nth" =>
             var countOfTransaction = 0
+
             while (true) {
 
               val transaction = serializer.deserialize[Transaction](blockingQueue.get())
@@ -261,13 +283,18 @@ object RegularTaskRunner {
               if (countOfTransaction == regularInstanceMetadata.checkpointInterval) {
                 if (countOfCheckpoints != regularInstanceMetadata.stateFullCheckpoint) {
                   stateService.checkpoint()
+                  executor.onAfterStateSave(false)
                   countOfCheckpoints += 1
                 } else {
                   stateService.fullCheckpoint()
-                  countOfCheckpoints = 0
+                  executor.onAfterStateSave(true)
+                  countOfCheckpoints = 1
                 }
+
+                executor.onBeforeCheckpoint()
                 checkpointGroup.commit()
-                executor.onCheckpoint()
+                executor.onAfterCheckpoint()
+
                 countOfTransaction = 0
               }
 
@@ -275,13 +302,19 @@ object RegularTaskRunner {
                 executor.onTimer()
                 moduleTimer.reset()
               }
+
             }
         }
     }
 
   }
 
-  def chooseOffsetPolicy(startFrom: String): IOffset = {
+  /**
+   * Chooses offset policy for t-streams consumers
+   * @param startFrom Offset policy name or specific date or transaction UUID
+   * @return Offset
+   */
+  private def chooseOffset(startFrom: String): IOffset = {
     startFrom match {
       case "oldest" => Oldest
       case "newest" => Newest
@@ -293,30 +326,32 @@ object RegularTaskRunner {
 
 class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor(manager) {
 
+  val state = manager.getState
+
   override def init(): Unit = {
-    manager.getState.set("txnCount", 0)
-    manager.getState.set("elementCount", 0)
     println("new init")
   }
 
   override def finish(): Unit = ???
 
-  override def onCheckpoint(): Unit = {
-    println("onCheckpoint")
+  override def onAfterCheckpoint(): Unit = {
+    //println("onCheckpoint")
   }
 
   override def run(transaction: Transaction): Unit = {
- //   val output = manager.getRoundRobinOutput("s3")
-    val state = manager.getState
-    var elementCount = state.get("elementCount").asInstanceOf[Int]
-    var txnCount = state.get("txnCount").asInstanceOf[Int]
-    elementCount += transaction.data.length
-    txnCount += 1
-    state.set("txnCount", txnCount)
-    state.set("elementCount", elementCount)
+    //   val output = manager.getRoundRobinOutput("s3")
+    //var elementCount = state.get("elementCount").asInstanceOf[Int]
+    //    var txnCount = state.get(transaction.txnUUID.toString).asInstanceOf[Int]
+    //elementCount += transaction.data.length
+    state.set(transaction.txnUUID.toString, transaction.data.length)
+    //state.set("elementCount", elementCount)
   }
 
   override def onTimer(): Unit = {
     println("onTimer")
+  }
+
+  override def onAfterStateSave(isFull: Boolean): Unit = {
+    if (isFull) state.clear()
   }
 }

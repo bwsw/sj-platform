@@ -29,6 +29,12 @@ trait IStateService {
   def delete(key: String): Unit
 
   /**
+   * Removes all state variables. After this operation has completed,
+   *  the state will be empty.
+   */
+  def clear(): Unit
+
+  /**
    * Indicates that a state variable has changed
    * @param key State variable name
    * @param value Value of the state variable
@@ -40,6 +46,11 @@ trait IStateService {
    * @param key State variable name
    */
   def deleteChange(key: String): Unit
+
+  /**
+   * Indicates that all state variables have deleted
+   */
+  def clearChange(): Unit
 
   /**
    * Saves a partial state changes

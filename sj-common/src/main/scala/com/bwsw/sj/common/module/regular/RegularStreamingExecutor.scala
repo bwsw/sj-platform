@@ -22,8 +22,26 @@ abstract class RegularStreamingExecutor(manager: ModuleEnvironmentManager) {
 
   def finish(): Unit
 
-  def onCheckpoint(): Unit
+  def onBeforeCheckpoint(): Unit
+  
+  def onAfterCheckpoint(): Unit
 
   def onTimer(): Unit
+  
+  def onIdle(): Unit
+
+  def onMessage(): Unit
+
+  /**
+   * Handler triggered before save state
+   * @param isFullState Flag denotes that full state (true) or partial changes of state (false) will be saved
+   */
+  def onBeforeStateSave(isFullState: Boolean): Unit
+
+  /**
+   * Handler triggered after save state
+   * @param isFullState Flag denotes that there was save of full state (true) or partial changes of state(false)
+   */
+  def onAfterStateSave(isFullState: Boolean): Unit
 
 }
