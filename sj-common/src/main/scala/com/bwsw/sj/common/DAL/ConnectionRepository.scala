@@ -4,7 +4,7 @@ import com.bwsw.common.DAL.GenericMongoDAO
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.sj.common.ConfigLoader
-import com.bwsw.sj.common.entities.Streams
+import com.bwsw.sj.common.entities.{Provider, Service, Streams}
 import com.mongodb.casbah.MongoClient
 
 /**
@@ -24,6 +24,10 @@ object ConnectionRepository {
 
   private lazy val streamsDAO = new GenericMongoDAO[Streams](mongoConnection(databaseName)(streamsCollection), serializer)
 
+  private lazy val serviceDAO = new GenericMongoDAO[Service](mongoConnection(databaseName)(serviceCollection), serializer)
+
+  private lazy val providerDAO = new GenericMongoDAO[Provider](mongoConnection(databaseName)(providerCollection), serializer)
+
   def getFileMetadataDAO = {
     fileMetadataDAO
   }
@@ -39,6 +43,15 @@ object ConnectionRepository {
   def getStreamsDAO = {
     streamsDAO
   }
+
+  def getServiceDAO = {
+    serviceDAO
+  }
+
+  def getProviderDAO = {
+    providerDAO
+  }
+
 }
 
 object ConnectionConstants {
@@ -50,4 +63,7 @@ object ConnectionConstants {
   lazy val fileMetadataCollection = "fs.files"
   lazy val instanceCollection = "instances"
   lazy val streamsCollection = "streams"
+  lazy val serviceCollection = "services"
+  lazy val providerCollection = "providers"
+
 }

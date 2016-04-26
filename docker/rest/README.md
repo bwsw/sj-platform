@@ -4,13 +4,14 @@ available on one common port (proxied by nginx basing on rests uri path prefixes
 PREREQUISITES
 Stream Juggler REST requires MongoDB.
 In simple case (for local use) MongoDB can be started with command:
-    docker run -d --name=mongo --net=host mongo
+    docker run -d --name=mongo --net=host -v /tmp/Juggler/sj-mongo-storage:/data/db mongo
+where -v dir:dir is for preventing the db data to lost when restarting container
+
 Create dbs (if needed):
     docker exec -it mongo mongo
     > use stream_juggler
 
 USAGE
-#TODO: docker-compose to be tested
 Quick start with docker-compose:
     cd Juggler/docker
     docker-compose up

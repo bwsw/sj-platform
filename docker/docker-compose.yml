@@ -8,13 +8,18 @@ services:
     ports:
      - "8080:8080"
     volumes:
-     - /tmp/sj-rest-log:/var/log/rest
+     - /tmp/Juggler/sj-rest-log:/var/log/rest
     depends_on:
      - mongo
     links:
      - mongo
     environment:
       - MONGO_HOST=mongo
+    restart: always
   mongo:
     image: mongo
-    network_mode: "host"
+    ports:
+     - "27017:27017"
+    volumes:
+     - /tmp/Juggler/sj-mongo-storage:/data/db
+    restart: always
