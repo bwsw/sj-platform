@@ -33,7 +33,7 @@ object RegularTaskRunner {
 
     manager.downloadModuleJar(moduleJar)
 
-    val regularInstanceMetadata = manager.getRegularInstanceMetadata(serializer)
+    val regularInstanceMetadata: RegularInstanceMetadata = manager.getRegularInstanceMetadata(serializer)
 
     val specification = manager.getSpecification(serializer)
 
@@ -154,48 +154,56 @@ object RegularTaskRunner {
             checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
             while (true) {
 
-              val transaction = serializer.deserialize[Transaction](blockingQueue.get())
+              val transaction = serializer.deserialize[Transaction](blockingQueue.get(regularInstanceMetadata.idle))
 
-              executor.run(transaction)
+              if (transaction == null) {
+                executor.onIdle()
+              } else {
+                executor.onTxn(transaction)
 
-              if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
-              temporaryOutput.clear()
+                if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
+                temporaryOutput.clear()
 
-              if (checkpointTimer.isTime) {
-                executor.onBeforeCheckpoint()
-                checkpointGroup.commit()
-                executor.onAfterCheckpoint()
-                checkpointTimer.reset()
-                checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
-              }
+                if (checkpointTimer.isTime) {
+                  executor.onBeforeCheckpoint()
+                  checkpointGroup.commit()
+                  executor.onAfterCheckpoint()
+                  checkpointTimer.reset()
+                  checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
+                }
 
-              if (moduleTimer.isTime) {
-                executor.onTimer()
-                moduleTimer.reset()
+                if (moduleTimer.isTime) {
+                  executor.onTimer(System.currentTimeMillis() - moduleTimer.responseTime)
+                  moduleTimer.reset()
+                }
               }
             }
           case "every-nth" =>
             var countOfTransaction = 0
             while (true) {
 
-              val transaction = serializer.deserialize[Transaction](blockingQueue.get())
-              countOfTransaction += 1
+              val transaction = serializer.deserialize[Transaction](blockingQueue.get(regularInstanceMetadata.idle))
+              if (transaction == null) {
+                executor.onIdle()
+              } else {
+                countOfTransaction += 1
 
-              executor.run(transaction)
+                executor.onTxn(transaction)
 
-              if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
-              temporaryOutput.clear()
+                if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
+                temporaryOutput.clear()
 
-              if (countOfTransaction == regularInstanceMetadata.checkpointInterval) {
-                executor.onBeforeCheckpoint()
-                checkpointGroup.commit()
-                executor.onAfterCheckpoint()
-                countOfTransaction = 0
-              }
+                if (countOfTransaction == regularInstanceMetadata.checkpointInterval) {
+                  executor.onBeforeCheckpoint()
+                  checkpointGroup.commit()
+                  executor.onAfterCheckpoint()
+                  countOfTransaction = 0
+                }
 
-              if (moduleTimer.isTime) {
-                executor.onTimer()
-                moduleTimer.reset()
+                if (moduleTimer.isTime) {
+                  executor.onTimer(System.currentTimeMillis() - moduleTimer.responseTime)
+                  moduleTimer.reset()
+                }
               }
             }
         }
@@ -233,37 +241,41 @@ object RegularTaskRunner {
 
             while (true) {
 
-              val transaction = serializer.deserialize[Transaction](blockingQueue.get())
+              val transaction = serializer.deserialize[Transaction](blockingQueue.get(regularInstanceMetadata.idle))
 
-              executor.run(transaction)
+              if (transaction == null) {
+                executor.onIdle()
+              } else {
+                executor.onTxn(transaction)
 
-              if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
-              temporaryOutput.clear()
+                if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
+                temporaryOutput.clear()
 
-              if (checkpointTimer.isTime) {
-                if (countOfCheckpoints != regularInstanceMetadata.stateFullCheckpoint) {
-                  executor.onBeforeStateSave(false)
-                  stateService.checkpoint()
-                  executor.onAfterStateSave(false)
-                  countOfCheckpoints += 1
-                } else {
-                  executor.onBeforeStateSave(true)
-                  stateService.fullCheckpoint()
-                  executor.onAfterStateSave(true)
-                  countOfCheckpoints = 0
+                if (checkpointTimer.isTime) {
+                  if (countOfCheckpoints != regularInstanceMetadata.stateFullCheckpoint) {
+                    executor.onBeforeStateSave(false)
+                    stateService.checkpoint()
+                    executor.onAfterStateSave(false)
+                    countOfCheckpoints += 1
+                  } else {
+                    executor.onBeforeStateSave(true)
+                    stateService.fullCheckpoint()
+                    executor.onAfterStateSave(true)
+                    countOfCheckpoints = 0
+                  }
+
+                  executor.onBeforeCheckpoint()
+                  checkpointGroup.commit()
+                  executor.onAfterCheckpoint()
+
+                  checkpointTimer.reset()
+                  checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
                 }
 
-                executor.onBeforeCheckpoint()
-                checkpointGroup.commit()
-                executor.onAfterCheckpoint()
-
-                checkpointTimer.reset()
-                checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
-              }
-
-              if (moduleTimer.isTime) {
-                executor.onTimer()
-                moduleTimer.reset()
+                if (moduleTimer.isTime) {
+                  executor.onTimer(System.currentTimeMillis() - moduleTimer.responseTime)
+                  moduleTimer.reset()
+                }
               }
             }
 
@@ -272,37 +284,40 @@ object RegularTaskRunner {
 
             while (true) {
 
-              val transaction = serializer.deserialize[Transaction](blockingQueue.get())
-              countOfTransaction += 1
+              val transaction = serializer.deserialize[Transaction](blockingQueue.get(regularInstanceMetadata.idle))
+              if (transaction == null) {
+                executor.onIdle()
+              } else {
+                countOfTransaction += 1
 
-              executor.run(transaction)
+                executor.onTxn(transaction)
 
-              if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
-              temporaryOutput.clear()
+                if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
+                temporaryOutput.clear()
 
-              if (countOfTransaction == regularInstanceMetadata.checkpointInterval) {
-                if (countOfCheckpoints != regularInstanceMetadata.stateFullCheckpoint) {
-                  stateService.checkpoint()
-                  executor.onAfterStateSave(false)
-                  countOfCheckpoints += 1
-                } else {
-                  stateService.fullCheckpoint()
-                  executor.onAfterStateSave(true)
-                  countOfCheckpoints = 1
+                if (countOfTransaction == regularInstanceMetadata.checkpointInterval) {
+                  if (countOfCheckpoints != regularInstanceMetadata.stateFullCheckpoint) {
+                    stateService.checkpoint()
+                    executor.onAfterStateSave(false)
+                    countOfCheckpoints += 1
+                  } else {
+                    stateService.fullCheckpoint()
+                    executor.onAfterStateSave(true)
+                    countOfCheckpoints = 1
+                  }
+
+                  executor.onBeforeCheckpoint()
+                  checkpointGroup.commit()
+                  executor.onAfterCheckpoint()
+
+                  countOfTransaction = 0
                 }
 
-                executor.onBeforeCheckpoint()
-                checkpointGroup.commit()
-                executor.onAfterCheckpoint()
-
-                countOfTransaction = 0
+                if (moduleTimer.isTime) {
+                  executor.onTimer(System.currentTimeMillis() - moduleTimer.responseTime)
+                  moduleTimer.reset()
+                }
               }
-
-              if (moduleTimer.isTime) {
-                executor.onTimer()
-                moduleTimer.reset()
-              }
-
             }
         }
     }
@@ -338,7 +353,7 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
     //println("onCheckpoint")
   }
 
-  override def run(transaction: Transaction): Unit = {
+  override def onTxn(transaction: Transaction): Unit = {
     //   val output = manager.getRoundRobinOutput("s3")
     //var elementCount = state.get("elementCount").asInstanceOf[Int]
     //    var txnCount = state.get(transaction.txnUUID.toString).asInstanceOf[Int]
@@ -347,11 +362,23 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
     //state.set("elementCount", elementCount)
   }
 
-  override def onTimer(): Unit = {
+  override def onTimer(jitter: Long): Unit = {
     println("onTimer")
   }
 
   override def onAfterStateSave(isFull: Boolean): Unit = {
     if (isFull) state.clear()
   }
+
+  override def onBeforeCheckpoint(): Unit = ???
+
+  override def onIdle(): Unit = ???
+
+  override def onMessage(): Unit = ???
+
+  /**
+   * Handler triggered before save state
+   * @param isFullState Flag denotes that full state (true) or partial changes of state (false) will be saved
+   */
+  override def onBeforeStateSave(isFullState: Boolean): Unit = ???
 }

@@ -3,10 +3,10 @@ package com.bwsw.sj.common.entities
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
-  * Entity for windowed instance-json
-  * Created:  13/04/2016
-  * @author Kseniya Tomskikh
-  */
+ * Entity for windowed instance-json
+ * Created:  13/04/2016
+ * @author Kseniya Tomskikh
+ */
 case class TimeWindowedInstanceMetadata(var uuid: String,
                                         @JsonProperty("module-type") var moduleType: String,
                                         @JsonProperty("module-name") var moduleName: String,
@@ -29,4 +29,5 @@ case class TimeWindowedInstanceMetadata(var uuid: String,
                                         @JsonProperty("window-full-max") var windowFullMax: Int,
                                         var status: String,
                                         @JsonProperty("execution-plan") var executionPlan: ExecutionPlan,
-                                        var tags: String) extends InstanceMetadata
+                                        var tags: String,
+                                        var idle: Long) extends InstanceMetadata

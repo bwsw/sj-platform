@@ -29,6 +29,7 @@ abstract class InstanceMetadata extends Entity {
   var jvmOptions: Map[String, Any]
   var executionPlan: ExecutionPlan
   var tags: String
+  var idle: Long
 }
 
 

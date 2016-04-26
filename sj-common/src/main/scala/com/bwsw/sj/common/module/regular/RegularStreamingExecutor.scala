@@ -18,7 +18,7 @@ abstract class RegularStreamingExecutor(manager: ModuleEnvironmentManager) {
   /**
    *Used for processing one transaction. Will invoke for every transaction
    */
-  def run(transaction: Transaction): Unit
+  def onTxn(txn: Transaction): Unit
 
   def finish(): Unit
 
@@ -26,7 +26,7 @@ abstract class RegularStreamingExecutor(manager: ModuleEnvironmentManager) {
   
   def onAfterCheckpoint(): Unit
 
-  def onTimer(): Unit
+  def onTimer(jitter: Long): Unit
   
   def onIdle(): Unit
 

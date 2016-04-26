@@ -265,7 +265,7 @@ object asd {
 
     var i = 0
     while(true){
-      q.get()
+      q.get(8)
       println("receivedpart=" + i)
       i+=1
     }

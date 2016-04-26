@@ -27,4 +27,5 @@ case class RegularInstanceMetadata(var name: String,
                                    @JsonProperty("module-version") var moduleVersion: String,
                                    var status: String,
                                    @JsonProperty("execution-plan") var executionPlan: ExecutionPlan,
-                                   var tags: String) extends InstanceMetadata
+                                   var tags: String,
+                                    var idle: Long) extends InstanceMetadata

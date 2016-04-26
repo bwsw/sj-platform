@@ -18,6 +18,12 @@ class SjTimer {
   private var timer: Timer = null
 
   /**
+   * Time when timer is went out. Needed for computing lag between a real response time
+   * and an invoke of time handler
+   */
+  var responseTime = 0L
+
+  /**
    * Sets a timer handler that changes flag on true value when time is went out
    * @param delay
    */
@@ -26,6 +32,7 @@ class SjTimer {
     timer.schedule(new TimerTask {
       def run() {
         isTimerWentOut = true
+        responseTime = System.currentTimeMillis()
       }
     }, delay)
   }
@@ -44,5 +51,6 @@ class SjTimer {
   def reset() = {
     timer.cancel()
     isTimerWentOut = false
+    responseTime = 0
   }
 }

@@ -25,7 +25,7 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
       println("onCheckpoint")
     }
 
-    override def run(transaction: Transaction): Unit = {
+    override def onTxn(transaction: Transaction): Unit = {
       val output = manager.getRoundRobinOutput("s3")
       val state = manager.getState
       var sum = state.get("sum").asInstanceOf[Int]
@@ -35,11 +35,23 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
       println("in run")
     }
 
-    override def onTimer(): Unit = {
+    override def onTimer(jitter: Long): Unit = {
       println("onTimer")
     }
 
   override def onAfterStateSave(isFull: Boolean): Unit = {
     println("onStateSave")
   }
+
+  override def onBeforeCheckpoint(): Unit = ???
+
+  override def onIdle(): Unit = ???
+
+  override def onMessage(): Unit = ???
+
+  /**
+   * Handler triggered before save state
+   * @param isFullState Flag denotes that full state (true) or partial changes of state (false) will be saved
+   */
+  override def onBeforeStateSave(isFullState: Boolean): Unit = ???
 }
