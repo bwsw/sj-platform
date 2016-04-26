@@ -7,13 +7,14 @@ import com.aerospike.client.Host
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.entities.{RegularInstanceMetadata, Specification}
 import com.bwsw.tstreams.agents.consumer.Offsets.IOffset
-import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions, BasicConsumerWithSubscribe}
+import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
+import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions}
 import com.bwsw.tstreams.agents.producer.InsertionType.BatchInsert
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions}
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.Coordinator
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStorageOptions}
-import com.bwsw.tstreams.generator.LocalTimeUuidGenerator
+import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.metadata.MetadataStorageFactory
 import com.bwsw.tstreams.policy.RoundRobinPolicy
 import com.bwsw.tstreams.streams.BasicStream
@@ -67,7 +68,7 @@ class TaskManager() {
   private val redissonClient = Redisson.create(config)
   private val coordinator = new Coordinator("some_path", redissonClient)
 
-  private val timeUuidGenerator = new LocalTimeUuidGenerator
+  private val timeUuidGenerator = new LocalTimeUUIDGenerator
 
 
   /**
@@ -158,7 +159,7 @@ class TaskManager() {
     //todo
     val path = "test"
 
-    new BasicConsumerWithSubscribe[Array[Byte], Array[Byte]]("consumer for " + streamName, stream, options, callback, path)
+    new BasicSubscribingConsumer[Array[Byte], Array[Byte]]("consumer for " + streamName, stream, options, callback, path)
   }
 
   def createProducer(streamName: String) = {

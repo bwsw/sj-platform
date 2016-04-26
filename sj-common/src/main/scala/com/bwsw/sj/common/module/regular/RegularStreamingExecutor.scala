@@ -16,21 +16,32 @@ abstract class RegularStreamingExecutor(manager: ModuleEnvironmentManager) {
   def init(): Unit
 
   /**
-   *Used for processing one transaction. Will invoke for every transaction
+   * Used for processing one transaction. Will invoke for every transaction
    */
   def onTxn(txn: Transaction): Unit
 
-  def finish(): Unit
-
+  /**
+   * Handler triggered before every checkpoint
+   */
   def onBeforeCheckpoint(): Unit
-  
+
+  /**
+   * Handler triggered after every checkpoint
+   */
   def onAfterCheckpoint(): Unit
 
+  /**
+   * Will invoke every time when a set timer went out
+   *
+   * @param jitter Delay between a real response time and an invoke this handler
+   */
   def onTimer(jitter: Long): Unit
-  
-  def onIdle(): Unit
 
-  def onMessage(): Unit
+  /**
+   * Handler triggered if idle timeout went out but new txns haven't appeared.
+   * Nothing to execute
+   */
+  def onIdle(): Unit
 
   /**
    * Handler triggered before save state

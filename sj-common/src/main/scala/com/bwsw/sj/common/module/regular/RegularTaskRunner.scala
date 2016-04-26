@@ -154,11 +154,12 @@ object RegularTaskRunner {
             checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
             while (true) {
 
-              val transaction = serializer.deserialize[Transaction](blockingQueue.get(regularInstanceMetadata.idle))
+              val maybeTxn = blockingQueue.get(regularInstanceMetadata.idle)
 
-              if (transaction == null) {
+              if (maybeTxn == null) {
                 executor.onIdle()
               } else {
+                val transaction = serializer.deserialize[Transaction](maybeTxn)
                 executor.onTxn(transaction)
 
                 if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
@@ -182,10 +183,12 @@ object RegularTaskRunner {
             var countOfTransaction = 0
             while (true) {
 
-              val transaction = serializer.deserialize[Transaction](blockingQueue.get(regularInstanceMetadata.idle))
-              if (transaction == null) {
+              val maybeTxn = blockingQueue.get(regularInstanceMetadata.idle)
+
+              if (maybeTxn == null) {
                 executor.onIdle()
               } else {
+                val transaction = serializer.deserialize[Transaction](maybeTxn)
                 countOfTransaction += 1
 
                 executor.onTxn(transaction)
@@ -241,11 +244,12 @@ object RegularTaskRunner {
 
             while (true) {
 
-              val transaction = serializer.deserialize[Transaction](blockingQueue.get(regularInstanceMetadata.idle))
+              val maybeTxn = blockingQueue.get(regularInstanceMetadata.idle)
 
-              if (transaction == null) {
+              if (maybeTxn == null) {
                 executor.onIdle()
               } else {
+                val transaction = serializer.deserialize[Transaction](maybeTxn)
                 executor.onTxn(transaction)
 
                 if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
@@ -284,10 +288,12 @@ object RegularTaskRunner {
 
             while (true) {
 
-              val transaction = serializer.deserialize[Transaction](blockingQueue.get(regularInstanceMetadata.idle))
-              if (transaction == null) {
+              val maybeTxn = blockingQueue.get(regularInstanceMetadata.idle)
+
+              if (maybeTxn == null) {
                 executor.onIdle()
               } else {
+                val transaction = serializer.deserialize[Transaction](maybeTxn)
                 countOfTransaction += 1
 
                 executor.onTxn(transaction)
@@ -347,10 +353,8 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
     println("new init")
   }
 
-  override def finish(): Unit = ???
-
   override def onAfterCheckpoint(): Unit = {
-    //println("onCheckpoint")
+    println("on after checkpoint")
   }
 
   override def onTxn(transaction: Transaction): Unit = {
@@ -370,15 +374,19 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
     if (isFull) state.clear()
   }
 
-  override def onBeforeCheckpoint(): Unit = ???
+  override def onBeforeCheckpoint(): Unit = {
+    println("on before checkpoint")
+  }
 
-  override def onIdle(): Unit = ???
-
-  override def onMessage(): Unit = ???
+  override def onIdle(): Unit = {
+    println("on Idle")
+  }
 
   /**
    * Handler triggered before save state
    * @param isFullState Flag denotes that full state (true) or partial changes of state (false) will be saved
    */
-  override def onBeforeStateSave(isFullState: Boolean): Unit = ???
+  override def onBeforeStateSave(isFullState: Boolean): Unit = {
+    println("on before state save")
+  }
 }

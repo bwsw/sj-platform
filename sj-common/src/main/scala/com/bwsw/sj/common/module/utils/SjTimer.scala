@@ -18,7 +18,7 @@ class SjTimer {
   private var timer: Timer = null
 
   /**
-   * Time when timer is went out. Needed for computing lag between a real response time
+   * Time when timer went out. Needed for computing lag between a real response time
    * and an invoke of time handler
    */
   var responseTime = 0L
