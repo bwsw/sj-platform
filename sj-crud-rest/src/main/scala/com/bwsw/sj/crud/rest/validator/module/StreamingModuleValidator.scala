@@ -77,8 +77,17 @@ abstract class StreamingModuleValidator {
     val partitions = getPartitionForStreams(inputStreams)
     val minPartitionCount = partitions.values.min
 
-    if (parameters.parallelism > minPartitionCount) {
-      errors += s"Parallelism (${parameters.parallelism}) > minimum of partition count ($minPartitionCount) in all input stream."
+    parameters.parallelism match {
+      case parallelism: Int =>
+        if (parallelism > minPartitionCount) {
+          errors += s"Parallelism (${parameters.parallelism}) > minimum of partition count ($minPartitionCount) in all input stream."
+        }
+      case s: String =>
+        if (!s.equals("max")) {
+          errors += s"Parallelism must be int value or string 'max'."
+        }
+      case _ =>
+        errors += "Unknown type of 'parallelism' parameter. Must be Int or String."
     }
 
     if (!stateManagementModes.contains(parameters.stateManagement)) {

@@ -315,7 +315,13 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       val name = input.replaceAll("/split|/full", "")
       InputStream(name, mode, partitionsCount(name))
     }
-    val tasks = (0 until instance.parallelism)
+    val minPartitionCount = partitionsCount.values.min
+    var parallelism = 0
+    instance.parallelism match {
+      case i: Int => parallelism = i
+      case s: String => parallelism = minPartitionCount
+    }
+    val tasks = (0 until parallelism)
       .map(x => instance.uuid + "_task" + x)
       .map(x => x -> inputs)
 

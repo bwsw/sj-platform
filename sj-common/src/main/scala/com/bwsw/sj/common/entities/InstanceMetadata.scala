@@ -21,7 +21,7 @@ abstract class InstanceMetadata extends Entity {
   var checkpointInterval: Long
   var stateManagement: String
   var stateFullCheckpoint: Int
-  var parallelism: Int
+  var parallelism: Any
   var options: Map[String, Any]
   var startFrom: String
   var perTaskCores: Int
