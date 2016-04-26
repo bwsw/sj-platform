@@ -19,7 +19,6 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
       println("new init")
     }
 
-    override def finish(): Unit = ???
 
     override def onAfterCheckpoint(): Unit = {
       println("onCheckpoint")
@@ -46,8 +45,6 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
   override def onBeforeCheckpoint(): Unit = ???
 
   override def onIdle(): Unit = ???
-
-  override def onMessage(): Unit = ???
 
   /**
    * Handler triggered before save state

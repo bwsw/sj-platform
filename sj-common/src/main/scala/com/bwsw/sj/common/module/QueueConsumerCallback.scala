@@ -4,7 +4,8 @@ import java.util.UUID
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.module.entities.Transaction
-import com.bwsw.tstreams.agents.consumer.{BasicConsumerCallback, BasicConsumerWithSubscribe}
+import com.bwsw.tstreams.agents.consumer.subscriber.{BasicSubscriberCallback, BasicSubscribingConsumer}
+
 
 /**
  * Provides a handler for sub. consumer that puts a transaction in a persistent blocking queue
@@ -14,7 +15,7 @@ import com.bwsw.tstreams.agents.consumer.{BasicConsumerCallback, BasicConsumerWi
  * @param blockingQueue Persistent blocking queue for storing transactions
  */
 
-class QueueConsumerCallback[DATATYPE, USERTYPE](blockingQueue: PersistentBlockingQueue) extends BasicConsumerCallback[DATATYPE, USERTYPE] {
+class QueueConsumerCallback[DATATYPE, USERTYPE](blockingQueue: PersistentBlockingQueue) extends BasicSubscriberCallback[DATATYPE, USERTYPE] {
   /**
    * Provides a serialization from Transaction to String in order to put in queue
    */
@@ -25,7 +26,7 @@ class QueueConsumerCallback[DATATYPE, USERTYPE](blockingQueue: PersistentBlockin
    */
   override val frequency: Int = 1
 
-  override def onEvent(subscriber: BasicConsumerWithSubscribe[DATATYPE, USERTYPE], partition: Int, transactionUuid: UUID): Unit = {
+  override def onEvent(subscriber: BasicSubscribingConsumer[DATATYPE, USERTYPE], partition: Int, transactionUuid: UUID): Unit = {
     val transaction = subscriber.getTransactionById(partition, transactionUuid).get
     blockingQueue.put(serializer.serialize(
       Transaction(subscriber.stream.getName,
