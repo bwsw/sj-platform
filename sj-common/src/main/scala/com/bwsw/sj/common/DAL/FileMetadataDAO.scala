@@ -1,6 +1,5 @@
 package com.bwsw.sj.common.DAL
 
-import com.bwsw.common.DAL.GenericMongoDAO
 import com.bwsw.common.exceptions.BadRecordWithKey
 import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.entities.FileMetadata
@@ -17,7 +16,7 @@ import com.mongodb.casbah.MongoCollection
   * @param jsonSerializer Serializer for parse json
   */
 class FileMetadataDAO(entityCollection: MongoCollection, jsonSerializer: Serializer)
-  extends GenericMongoDAO[FileMetadata](entityCollection, jsonSerializer) {
+   {
 
   /**
     * Return name of file for uploaded module with such type, name and version

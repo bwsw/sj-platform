@@ -1,31 +1,36 @@
 package com.bwsw.sj.common.entities
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import org.mongodb.morphia.annotations.{Embedded, Entity, Id}
 
 /**
-  * Entity for simple instance-json
-  * Created:  13/04/2016
-  * @author Kseniya Tomskikh
-  */
-case class RegularInstanceMetadata(var name: String,
-                                   var description: String,
-                                   var inputs: List[String],
-                                   var outputs: List[String],
-                                   @JsonProperty("checkpoint-mode") var checkpointMode: String,
-                                   @JsonProperty("checkpoint-interval") var checkpointInterval: Long,
-                                   @JsonProperty("state-management") var stateManagement: String,
-                                   @JsonProperty("state-full-checkpoint") var stateFullCheckpoint: Int,
-                                   var parallelism: Any,
-                                   var options: Map[String, Any],
-                                   @JsonProperty("start-from") var startFrom: String,
-                                   @JsonProperty("per-task-cores") var perTaskCores: Int,
-                                   @JsonProperty("per-task-ram") var perTaskRam: Int,
-                                   @JsonProperty("jvm-options") var jvmOptions: Map[String, Any],
-                                   var uuid: String,
-                                   @JsonProperty("module-type") var moduleType: String,
-                                   @JsonProperty("module-name") var moduleName: String,
-                                   @JsonProperty("module-version") var moduleVersion: String,
-                                   var status: String,
-                                   @JsonProperty("execution-plan") var executionPlan: ExecutionPlan,
-                                   var tags: String,
-                                    var idle: Long) extends InstanceMetadata
+ * Entity for base instance-json
+ * Created:  13/04/2016
+ * @author Kseniya Tomskikh
+ */
+@Entity("instances")
+class RegularInstanceMetadata {
+  var `module-type`: String = null
+  var `module-name`: String = null
+  var `module-version`: String = null
+  var status: String = null
+  @Id var name: String = null
+  var description: String = null
+  var inputs: List[String] = null
+  var outputs: List[String] = null
+  var `checkpoint-mode`: String = null
+  var `checkpoint-interval`: Long = 0
+  var `state-management`: String = null
+  var `state-full-checkpoint`: Int = 0
+  var parallelism: Any = null
+  var options: Map[String, Any] = null
+  var `start-from`: String = null
+  var `per-task-cores`: Int = 0
+  var `per-task-ram`: Int = 0
+  var `jvm-options`: Map[String, Any] = null
+  @Embedded var `execution-plan`: ExecutionPlan = null
+  var tags: String = null
+  var idle: Long = 0
+}
+
+
+

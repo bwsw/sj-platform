@@ -1,17 +1,13 @@
 package com.bwsw.sj.common.entities
 
-import com.bwsw.common.DAL.Entity
-import com.fasterxml.jackson.annotation.JsonProperty
+import org.mongodb.morphia.annotations.{Entity, Id}
 
-/**
-  * Entity for provider
-  * Created: 22/04/2016
-  *
-  * @author Kseniya Tomskikh
-  */
-case class Provider(var name: String,
-                    description: String,
-                    hosts: List[String],
-                    login: String,
-                    password: String,
-                    @JsonProperty("type") providerType: String) extends Entity
+@Entity("providers")
+class Provider {
+  @Id var name: String = null
+  var description: String = null
+  var hosts: List[String] = null
+  var login: String = null
+  var password: String = null
+  var `provider-type`: String = null
+}

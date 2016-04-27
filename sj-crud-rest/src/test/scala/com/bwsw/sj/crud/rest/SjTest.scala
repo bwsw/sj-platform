@@ -1,7 +1,7 @@
 package com.bwsw.sj.crud.rest
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.entities.{InstanceMetadata, RegularInstanceMetadata, Task, ExecutionPlan}
+import com.bwsw.sj.common.entities.{RegularInstanceMetadata, Task}
 
 import scala.collection.immutable.IndexedSeq
 import scala.collection.mutable
@@ -43,7 +43,7 @@ object SjTest {
 
   case class StreamProcess(currentPartition: Int, countFreePartitions: Int)
 
-  def createPlan(instance: InstanceMetadata): InstanceMetadata = {
+  def createPlan(instance: RegularInstanceMetadata): RegularInstanceMetadata = {
     val inputs = instance.inputs.map { input =>
       val mode = getStreamMode(input)
       val name = input.replaceAll("/split|/full", "")

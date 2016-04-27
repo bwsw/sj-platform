@@ -1,10 +1,16 @@
 package com.bwsw.sj.common.entities
 
-import scala.collection._
+import org.mongodb.morphia.annotations.Embedded
+
+import scala.collection.mutable
+
 /**
   * Entity for execution plan of module instance
   * Created: 14/04/2016
   *
   * @author Kseniya Tomskikh
   */
-case class ExecutionPlan(tasks: mutable.Map[String, Task])
+@Embedded
+class ExecutionPlan() {
+  var tasks: mutable.Map[String, Task] = null
+}

@@ -1,10 +1,9 @@
 package com.bwsw.sj.common.DAL
 
-import com.bwsw.common.DAL.GenericMongoDAO
 import com.bwsw.common.traits.Serializer
-import com.bwsw.sj.common.entities.{TimeWindowedInstanceMetadata, RegularInstanceMetadata, ShortInstanceMetadata, InstanceMetadata}
-import com.mongodb.casbah.MongoCollection
+import com.bwsw.sj.common.entities.{RegularInstanceMetadata, ShortInstanceMetadata, TimeWindowedInstanceMetadata}
 import com.mongodb.casbah.Imports._
+import com.mongodb.casbah.MongoCollection
 
 /**
   * DAO for working with instance collection
@@ -15,8 +14,7 @@ import com.mongodb.casbah.Imports._
   * @param entityCollection - mongo db collection
   * @param serializer - data serializer
   */
-class InstanceMetadataDAO(entityCollection: MongoCollection, serializer: Serializer)
-  extends GenericMongoDAO[InstanceMetadata](entityCollection, serializer) {
+class InstanceMetadataDAO(entityCollection: MongoCollection, serializer: Serializer) {
 
   /**
     * Retrieving record from storage by such name
@@ -24,7 +22,7 @@ class InstanceMetadataDAO(entityCollection: MongoCollection, serializer: Seriali
     * @param name - value of name record
     * @return - Some(record) if record for such name exist, else None
     */
-  override def retrieve(name: String) = {
+   def retrieve(name: String) = {
     val entityOption = entityCollection.findOne("name" $eq name)
     if (entityOption.isDefined) {
       entityOption.get("module-type").asInstanceOf[String] match {
@@ -40,7 +38,7 @@ class InstanceMetadataDAO(entityCollection: MongoCollection, serializer: Seriali
     * every record is deserialized to object by module-type
     * @return - Set of instances
     */
-  override def retrieveAll() = {
+   def retrieveAll() = {
     entityCollection.map{ o =>
       o.get("module-type").asInstanceOf[String] match {
         case "time-windowed-streaming" => serializer.deserialize[TimeWindowedInstanceMetadata](o.toString)
