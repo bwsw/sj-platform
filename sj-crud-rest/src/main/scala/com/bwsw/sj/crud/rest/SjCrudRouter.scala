@@ -8,7 +8,7 @@ import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.{ExceptionHandler, Directives}
 import com.bwsw.common.exceptions.{InstanceException, BadRecordWithKey, BadRecord}
 import com.bwsw.sj.common.entities.Response
-import com.bwsw.sj.crud.rest.api.{SjCommonApi, SjModulesApi}
+import com.bwsw.sj.crud.rest.api.{SjCustomApi, SjModulesApi}
 import org.everit.json.schema.ValidationException
 
 /**
@@ -19,7 +19,7 @@ import org.everit.json.schema.ValidationException
   */
 trait SjCrudRouter extends Directives
   with SjModulesApi
-  with SjCommonApi {
+  with SjCustomApi {
 
   val exceptionHandler = ExceptionHandler {
     case BadRecord(msg) =>
@@ -61,7 +61,7 @@ trait SjCrudRouter extends Directives
     handleExceptions(exceptionHandler) {
       pathPrefix("v1") {
         modulesApi ~
-        commonApi
+        customApi
       }
     }
   }

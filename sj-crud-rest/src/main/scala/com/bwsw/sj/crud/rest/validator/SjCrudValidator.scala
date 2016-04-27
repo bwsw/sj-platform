@@ -5,9 +5,11 @@ import java.util.jar.JarFile
 
 import akka.http.scaladsl.server.RequestContext
 import akka.stream.Materializer
+import com.bwsw.common.DAL.GenericMongoDAO
 import com.bwsw.common.file.utils.FilesStorage
 import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.DAL.{InstanceMetadataDAO, FileMetadataDAO}
+import com.bwsw.sj.common.entities.{Provider, Streams, Service}
 import com.bwsw.sj.common.module.ModuleConstants
 import com.typesafe.config.Config
 import org.everit.json.schema.loader.SchemaLoader
@@ -30,6 +32,9 @@ trait SjCrudValidator {
   val fileMetadataDAO: FileMetadataDAO
   val storage: FilesStorage
   val instanceDAO: InstanceMetadataDAO
+  val serviceDAO: GenericMongoDAO[Service]
+  val streamDAO: GenericMongoDAO[Streams]
+  val providerDAO: GenericMongoDAO[Provider]
 
   import ModuleConstants._
 
@@ -64,6 +69,21 @@ trait SjCrudValidator {
       throw new FileNotFoundException(s"Specification.json for ${jarFile.getName} is not found!")
     }
     schemaValidate(json, getClass.getClassLoader.getResourceAsStream("schema.json"))
+    serializer.deserialize[Map[String, Any]](json)
+  }
+
+  /**
+    * Check specification of uploading custom jar file
+    *
+    * @param jarFile - input jar file
+    * @return - content of specification.json
+    */
+  def checkCustomJarFile(jarFile: File) = {
+    val json = getSpecificationFromJar(jarFile)
+    if (isEmptyOrNullString(json)) {
+      throw new FileNotFoundException(s"Specification.json for ${jarFile.getName} is not found!")
+    }
+    schemaValidate(json, getClass.getClassLoader.getResourceAsStream("customschema.json"))
     serializer.deserialize[Map[String, Any]](json)
   }
 

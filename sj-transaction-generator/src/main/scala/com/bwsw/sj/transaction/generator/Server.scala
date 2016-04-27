@@ -20,7 +20,9 @@ object Server {
   private val logger = Logger.getLogger(getClass)
 
   def main(args: Array[String]) = {
+    println("Hello")
     val zkServers = System.getenv("ZK_SERVERS")
+    println("step 2")
     val host = System.getenv("HOST")
     val port = System.getenv("PORT").toInt
     val prefix = System.getenv("PREFIX")
