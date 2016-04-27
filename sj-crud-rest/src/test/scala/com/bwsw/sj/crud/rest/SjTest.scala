@@ -1,11 +1,13 @@
 package com.bwsw.sj.crud.rest
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.entities.{InstanceMetadata, RegularInstanceMetadata, Task, ExecutionPlan}
+import com.bwsw.sj.common.entities._
+import com.mongodb.casbah.MongoClient
 
 import scala.collection.immutable.IndexedSeq
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
+import com.mongodb.casbah.Imports._
 
 /**
   * Created: 4/14/16
@@ -33,11 +35,37 @@ object SjTest {
     "\"per-task-ram\" : 128,\n  " +
     "\"jvm-options\" : {\"a\" : \"dsf\"}\n}"
 
+  serializer.setIgnoreUnknown(true)
+
+  val mongoConnection = MongoClient("192.168.1.180", 27017)
+
+  val collection = mongoConnection("stream_juggler")("instances")
+
   def main(args: Array[String]) = {
-    val instance = serializer.deserialize[RegularInstanceMetadata](instanceJson)
-    val newInstance = serializer.serialize(createPlan(instance))
+
+    val allElems = collection.map(o => serializer.deserialize[RegularInstanceMetadata](o.toString)).toSeq
+    /*allElems.foreach(println)
+    val elems = collection.find("parallelism" $eq "10").map(_.toString).map(serializer.deserialize[ShortInstanceMetadata])
+    if (elems.nonEmpty) {
+      elems.foreach(println)
+    } else {
+      println("fail")
+    }*/
+    val res = retrieve(Map("parallelism" -> 10, "module-type" -> "regular-streaming"))
+    res.foreach(println)
+    /*val instance = serializer.deserialize[RegularInstanceMetadata](instanceJson)
+    val newInstance = serializer.serialize(createPlan(instance))*/
     //println(newInstance)
   }
+
+
+  case class Parameter(name: String, value: Any)
+
+  def retrieve(parameters: Map[String, Any]) = {
+    //parameters.map(x => (x.name $eq x.value))
+    collection.find(new MongoDBObject(parameters)).map(o => serializer.deserialize[ShortInstanceMetadata](o.toString)).toSeq
+  }
+
 
   case class InputStream(name: String, mode: String, partitionsCount: Int)
 
@@ -49,7 +77,12 @@ object SjTest {
       val name = input.replaceAll("/split|/full", "")
       InputStream(name, mode, getPartitionCount(name))
     }
-    val tasks = (0 until instance.parallelism)
+    var parallelism = 0
+    instance.parallelism match {
+      case i: Int => parallelism = i
+      case s: String => parallelism = 0
+    }
+    val tasks = (0 until parallelism)
       .map(x => instance.uuid + "_task" + x)
       .map(x => x -> inputs)
     val executionPlan = mutable.Map[String, Task]()
