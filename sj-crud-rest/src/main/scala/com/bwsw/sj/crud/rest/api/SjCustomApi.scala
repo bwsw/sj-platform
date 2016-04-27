@@ -2,9 +2,8 @@ package com.bwsw.sj.crud.rest.api
 
 import java.io.File
 
-import akka.http.scaladsl.model.Multipart.FormData
 import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Disposition`}
-import akka.http.scaladsl.model.{HttpResponse, HttpEntity}
+import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
@@ -58,28 +57,16 @@ trait SjCustomApi extends Directives with SjCrudValidator {
       } ~
       pathEndOrSingleSlash {
         post {
-          entity(as[FormData]) { (formData: FormData) =>
-            val parts = formData.asInstanceOf[Product].productElement(0)
-            var name = ""
-            var version = ""
-            for (part <- parts.asInstanceOf[Vector[FormData.BodyPart.Strict]]) {
-              if (part.name.equals("name")) {
-                name = part.entity.data.decodeString("UTF-8")
-              } else if (part.name.equals("version")) {
-                version = part.entity.data.decodeString("UTF-8")
-              }
-            }
-            uploadedFile("jar") {
-              case (metadata: FileInfo, file: File) =>
-                val customSpec = Map("name" -> name, "version" -> version)
-                val uploadingFile = new File(metadata.fileName)
-                FileUtils.copyFile(file, uploadingFile)
-                storage.put(uploadingFile, metadata.fileName, customSpec, "custom")
-                complete(HttpEntity(
-                  `application/json`,
-                  serializer.serialize(Response(200, null, s"Custom jar is uploaded."))
-                ))
-            }
+          uploadedFile("jar") {
+            case (metadata: FileInfo, file: File) =>
+              val specification = checkCustomJarFile(file)
+              val uploadingFile = new File(metadata.fileName)
+              FileUtils.copyFile(file, uploadingFile)
+              storage.put(uploadingFile, metadata.fileName, specification, "custom")
+              complete(HttpEntity(
+                `application/json`,
+                serializer.serialize(Response(200, null, s"Custom jar is uploaded."))
+              ))
           }
         } ~
         get {

@@ -1,6 +1,7 @@
 package com.bwsw.sj.crud.rest.api
 
 import java.io.{FileNotFoundException, File}
+import java.net.URI
 
 
 import akka.http.scaladsl.model._
@@ -306,6 +307,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
 
   /**
     * Create execution plan for instance of module
+    *
     * @param instance - instance for module
     * @return - execution plan of instance
     */
@@ -355,6 +357,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
 
   /**
     * Get mode from stream-name
+    *
     * @param name - name of stream
     * @return - mode of stream
     */
@@ -366,8 +369,30 @@ trait SjModulesApi extends Directives with SjCrudValidator {
 
   case class StreamProcess(currentPartition: Int, countFreePartitions: Int)
 
-  //todo start
+  case class Generator(generatorType: String, zkServers: List[String], prefix: String, count: Int)
+
   def startInstance(instance: InstanceMetadata) = {
+
+    instance.inputs.map(_.replaceAll("/split|/full", "")).foreach { streamName =>
+      val stream = streamDAO.retrieve(streamName).get
+      if (!stream.generator.head.equals("local")) {
+        startGenerator(stream)
+      }
+    }
+
+    //todo start instance
+
+  }
+
+  def startGenerator(stream: Streams) = {
+    val generatorUrl = new URI(stream.generator(1))
+    val generatorService = serviceDAO.retrieve(generatorUrl.getAuthority).get
+    val generatorProvider = providerDAO.retrieve(generatorService.provider).get
+    var prefix = generatorService.namespace
+    if (stream.generator.head.equals("per-stream")) {
+      prefix += s"/${stream.name}"
+    }
+    val generator = Generator(stream.generator.head, generatorProvider.hosts, prefix, stream.generator(2).toInt)
 
   }
 

@@ -1,0 +1,32 @@
+{
+  "name": "com.bwsw.sj.stub",
+  "description": "Stub module by BW",
+  "version": "0.1",
+  "author": "Ksenia Mikhaleva",
+  "license": "Apache 2.0",
+  "inputs": {
+    "cardinality": [
+      1,
+      1
+    ],
+    "types": [
+      "stream.t-stream"
+    ]
+  },
+  "outputs": {
+    "cardinality": [
+      1,
+      1
+    ],
+    "types": [
+      "stream.t-stream"
+    ]
+  },
+  "module-type": "regular-streaming",
+  "engine": "streaming",
+  "options": {
+    "opt": 1
+  },
+  "validator-class": "com.bwsw.sj.stub.Validator",
+  "executor-class": "com.bwsw.sj.stub.Executor"
+}
