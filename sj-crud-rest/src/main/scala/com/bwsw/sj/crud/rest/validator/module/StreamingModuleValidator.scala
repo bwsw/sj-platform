@@ -33,7 +33,7 @@ abstract class StreamingModuleValidator {
     * @return - List of errors
     */
   def validate(parameters: RegularInstanceMetadata) = {
-    val instanceDAO = ConnectionRepository.getInstanceDAO
+    val instanceDAO = ConnectionRepository.getInstanceService
     val serviceDAO = ConnectionRepository.getServiceManager
     val providerDAO = ConnectionRepository.getProviderService
 

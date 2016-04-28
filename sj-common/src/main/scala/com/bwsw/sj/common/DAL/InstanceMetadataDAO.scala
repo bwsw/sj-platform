@@ -6,23 +6,23 @@ import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.MongoCollection
 
 /**
-  * DAO for working with instance collection
-  *
-  * Created: 13/04/2016
-  *
-  * @author Kseniya Tomskikh
-  * @param entityCollection - mongo db collection
-  * @param serializer - data serializer
-  */
+ * DAO for working with instance collection
+ *
+ * Created: 13/04/2016
+ *
+ * @author Kseniya Tomskikh
+ * @param entityCollection - mongo db collection
+ * @param serializer - data serializer
+ */
 class InstanceMetadataDAO(entityCollection: MongoCollection, serializer: Serializer) {
 
   /**
-    * Retrieving record from storage by such name
-    * record deserializing to object by module-type params
-    * @param name - value of name record
-    * @return - Some(record) if record for such name exist, else None
-    */
-   def retrieve(name: String) = {
+   * Retrieving record from storage by such name
+   * record deserializing to object by module-type params
+   * @param name - value of name record
+   * @return - Some(record) if record for such name exist, else None
+   */
+  def retrieve(name: String) = {
     val entityOption = entityCollection.findOne("name" $eq name)
     if (entityOption.isDefined) {
       entityOption.get("module-type").asInstanceOf[String] match {
@@ -34,12 +34,12 @@ class InstanceMetadataDAO(entityCollection: MongoCollection, serializer: Seriali
   }
 
   /**
-    * Retrieve all instances from storage
-    * every record is deserialized to object by module-type
-    * @return - Set of instances
-    */
-   def retrieveAll() = {
-    entityCollection.map{ o =>
+   * Retrieve all instances from storage
+   * every record is deserialized to object by module-type
+   * @return - Set of instances
+   */
+  def retrieveAll() = {
+    entityCollection.map { o =>
       o.get("module-type").asInstanceOf[String] match {
         case "time-windowed-streaming" => serializer.deserialize[TimeWindowedInstanceMetadata](o.toString)
         case _ => serializer.deserialize[RegularInstanceMetadata](o.toString)
@@ -48,12 +48,12 @@ class InstanceMetadataDAO(entityCollection: MongoCollection, serializer: Seriali
   }
 
   /**
-    * Retrieve all instances for such module-type
-    * @param moduleName - name of module
-    * @param moduleVersion - version of module
-    * @param moduleType - name of module type
-    * @return - Set of instances for such module-type
-    */
+   * Retrieve all instances for such module-type
+   * @param moduleName - name of module
+   * @param moduleVersion - version of module
+   * @param moduleType - name of module type
+   * @return - Set of instances for such module-type
+   */
   def retrieveByModule(moduleName: String, moduleVersion: String, moduleType: String) = {
     serializer.setIgnoreUnknown(true)
 

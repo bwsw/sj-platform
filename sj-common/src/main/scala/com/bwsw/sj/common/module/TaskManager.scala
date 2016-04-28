@@ -5,7 +5,7 @@ import java.net.{InetSocketAddress, URL, URLClassLoader}
 
 import com.aerospike.client.Host
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.entities.{RegularInstanceMetadata, Specification}
+import com.bwsw.sj.common.DAL.ConnectionRepository
 import com.bwsw.tstreams.agents.consumer.Offsets.IOffset
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions}
@@ -39,6 +39,9 @@ class TaskManager() {
   private val instanceName = System.getenv("INSTANCE_NAME")
   private val moduleRest = getModuleRestAddress
   private val randomKeyspace = "test"
+
+  private val instanceService = ConnectionRepository.getInstanceService
+  private val fileMetadataService = ConnectionRepository.getFileMetadataService
 
   //metadata/data factories
   private val metadataStorageFactory = new MetadataStorageFactory
@@ -116,11 +119,13 @@ class TaskManager() {
   }
 
   def getRegularInstanceMetadata(serializer: JsonSerializer) = {
-    serializer.deserialize[RegularInstanceMetadata](sendHttpGetRequest(s"http://$moduleRest/v1/modules/$moduleType/$moduleName/$moduleVersion/instance/$instanceName"))
+    //serializer.deserialize[RegularInstanceMetadata](sendHttpGetRequest(s"http://$moduleRest/v1/modules/$moduleType/$moduleName/$moduleVersion/instance/$instanceName"))
+    instanceService.get(instanceName)
   }
 
   def getSpecification(serializer: JsonSerializer) = {
-    serializer.deserialize[Specification](sendHttpGetRequest(s"http://$moduleRest/v1/modules/$moduleType/$moduleName/$moduleVersion/specification"))
+    //serializer.deserialize[Specification](sendHttpGetRequest(s"http://$moduleRest/v1/modules/$moduleType/$moduleName/$moduleVersion/specification"))
+    fileMetadataService.get()
   }
 
   def getTemporaryOutput = {

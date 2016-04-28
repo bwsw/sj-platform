@@ -80,7 +80,7 @@ object RegularTaskRunner {
       blockingQueue,
       temporaryOutput,
       classLoader,
-      specification.executorClass,
+      specification.metadata("metadata").executorClass,
       producers,
       serializer,
       manager,

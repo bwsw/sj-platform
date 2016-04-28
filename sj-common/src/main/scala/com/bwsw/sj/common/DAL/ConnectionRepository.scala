@@ -3,7 +3,7 @@ package com.bwsw.sj.common.DAL
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.sj.common.ConfigLoader
-import com.bwsw.sj.common.entities.{RegularInstanceMetadata, Provider, Service, SjStream}
+import com.bwsw.sj.common.entities._
 import com.mongodb.MongoClient
 import org.mongodb.morphia.Morphia
 import org.mongodb.morphia.dao.BasicDAO
@@ -28,7 +28,7 @@ object ConnectionRepository {
 
   private lazy val mongoConnection = com.mongodb.casbah.MongoClient(host, port)
 
-  private lazy val fileMetadataDAO = new FileMetadataDAO(mongoConnection(databaseName)(fileMetadataCollection), serializer)
+  private lazy val fileMetadataService = new GenericMongoService[FileMetadata]()
 
   private lazy val instanceService = new GenericMongoService[RegularInstanceMetadata]()
 
@@ -38,11 +38,11 @@ object ConnectionRepository {
 
   private lazy val providerService = new GenericMongoService[Provider]()
 
-  def getFileMetadataDAO = {
-    fileMetadataDAO
+  def getFileMetadataService = {
+    fileMetadataService
   }
 
-  def getInstanceDAO = {
+  def getInstanceService = {
     instanceService
   }
 
