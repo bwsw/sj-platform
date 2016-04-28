@@ -4,7 +4,7 @@ import java.net.{InetSocketAddress, URI}
 
 import com.aerospike.client.Host
 import com.bwsw.sj.common.DAL.ConnectionRepository
-import com.bwsw.sj.common.entities.{SjStream, RegularInstanceMetadata}
+import com.bwsw.sj.common.entities.{Service, SjStream, RegularInstanceMetadata}
 import com.bwsw.tstreams.coordination.Coordinator
 import com.bwsw.tstreams.data.IStorage
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorageOptions, AerospikeStorageFactory}
@@ -13,6 +13,7 @@ import com.bwsw.tstreams.metadata.MetadataStorageFactory
 import com.bwsw.tstreams.services.BasicStreamService
 import org.redisson.{Redisson, Config}
 
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 
@@ -60,7 +61,7 @@ abstract class StreamingModuleValidator {
     val outputStreams = getStreams(parameters.outputs)
     val allStreams = inputStreams.union(outputStreams)
     val streamsService = checkStreams(allStreams)
-    val serviceName = streamsService.head
+    val serviceName: Service = streamsService.head
     val service = serviceDAO.get(serviceName)
     if (streamsService.size != 1) {
       errors += s"All streams should have the same service."
@@ -213,7 +214,7 @@ abstract class StreamingModuleValidator {
     *
     * @return - count of partition for each stream
     */
-  def getPartitionForStreams(streams: Seq[Streams]): Map[String, Int] = {
+  def getPartitionForStreams(streams: Seq[SjStream]): Map[String, Int] = {
     Map(streams.map { stream =>
       stream.name -> stream.partitions.size
     }: _*)
@@ -225,7 +226,7 @@ abstract class StreamingModuleValidator {
     * @param streamNames Names of streams
     * @return Seq of streams
     */
-  def getStreams(streamNames: List[String]) = {
+  def getStreams(streamNames: List[String]): mutable.Buffer[SjStream] = {
     val streamsDAO = ConnectionRepository.getStreamService
     streamsDAO.getAll.filter(s => streamNames.contains(s.name))
   }
@@ -236,7 +237,7 @@ abstract class StreamingModuleValidator {
     * @param streams All streams
     * @return List of service-names
     */
-  def checkStreams(streams: Seq[Streams]) = {
+  def checkStreams(streams: Seq[SjStream]) = {
     streams.map(s => (s.service, 1)).groupBy(_._1).keys.toList
   }
 
