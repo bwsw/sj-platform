@@ -21,7 +21,8 @@ object Server {
 
   def main(args: Array[String]) = {
     println("Hello")
-    val zkServers = System.getenv("ZK_SERVERS")
+    println(System.getenv())
+    /*val zkServers = System.getenv("ZK_SERVERS")
     println("step 2")
     val host = System.getenv("HOST")
     val port = System.getenv("PORT").toInt
@@ -38,7 +39,7 @@ object Server {
       server.listen()
     } catch {
       case ex: IOException => logger.debug(s"Error: ${ex.getMessage}")
-    }
+    }*/
 
   }
 
