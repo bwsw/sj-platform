@@ -405,12 +405,12 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       case "ZKCoord" => zkService = generatorService.asInstanceOf[ZKService]
       case _ => throw new Exception("Unknown")
     }
-    val generatorProvider = generatorService.provider
+    /*val generatorProvider = generatorService.provider
     var prefix = zkService.namespace
     if (stream.generator.head.equals("per-stream")) {
       prefix += s"/${stream.name}"
     }
-    val generator = Generator(stream.generator.head, generatorProvider.hosts, prefix, stream.generator(2).toInt)
+    val generator = Generator(stream.generator.head, generatorProvider.hosts, prefix, stream.generator(2).toInt)*/
 
   }
 

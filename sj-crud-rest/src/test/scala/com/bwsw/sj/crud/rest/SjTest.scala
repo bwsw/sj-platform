@@ -1,7 +1,7 @@
 package com.bwsw.sj.crud.rest
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.DAL.ConnectionRepository
+import com.bwsw.sj.common.DAL.{GenericMongoService, ConnectionRepository}
 import com.bwsw.sj.common.entities._
 import com.mongodb.casbah.MongoClient
 
@@ -37,116 +37,150 @@ object SjTest {
     "\"per-task-ram\" : 128,\n  " +
     "\"jvm-options\" : {\"a\" : \"dsf\"}\n}"
 
-  private val spec = "{\n  \"name\": \"com.bwsw.sj.stub\",\n  \"description\": \"Stub module by BW\",\n  \"version\": \"0.1\",\n  \"author\": \"Ksenia Mikhaleva\",\n  \"license\": \"Apache 2.0\",\n  \"inputs\": {\n    \"cardinality\": [\n      1,\n      1\n    ],\n    \"types\": [\n      \"stream.t-stream\"\n    ]\n  },\n  \"outputs\": {\n    \"cardinality\": [\n      1,\n      1\n    ],\n    \"types\": [\n      \"stream.t-stream\"\n    ]\n  },\n  \"module-type\": \"regular-streaming\",\n  \"engine\": \"streaming\",\n  \"options\": {\n    \"opt\": 1\n  },\n  \"validator-class\": \"com.bwsw.sj.stub.Validator\",\n  \"executor-class\": \"com.bwsw.sj.stub.Executor\"\n}"
+  private val spec = "{\n  \"name\": \"com.bwsw.sj.stub\",\n  " +
+    "\"description\": \"Stub module by BW\",\n  " +
+    "\"version\": \"0.1\",\n  " +
+    "\"author\": \"Ksenia Mikhaleva\",\n  " +
+    "\"license\": \"Apache 2.0\",\n  " +
+    "\"inputs\": {\n    \"cardinality\": [\n      1,\n      1\n    ],\n    \"types\": [\n      \"stream.t-stream\"\n    ]\n  },\n  " +
+    "\"outputs\": {\n    \"cardinality\": [\n      1,\n      1\n    ],\n    \"types\": [\n      \"stream.t-stream\"\n    ]\n  },\n  " +
+    "\"module-type\": \"regular-streaming\",\n  " +
+    "\"engine\": \"streaming\",\n  " +
+    "\"options\": {\n    \"opt\": 1\n  },\n  " +
+    "\"validator-class\": \"com.bwsw.sj.stub.Validator\",\n  " +
+    "\"executor-class\": \"com.bwsw.sj.stub.Executor\"\n}"
 
   serializer.setIgnoreUnknown(true)
 
 
   def main(args: Array[String]) = {
-    /*val stream = new SjStream
-    stream.name = "s1"
-    stream.description = ""
-    stream.partitions = Array("1", "2", "3", "4", "5")
-    stream.generator = Array("global", "service-zk://zk_service", "3")
-    val dao = ConnectionRepository.getStreamService
-    dao.save(stream)
-    val res = dao.getAll
-    println(serializer.serialize(res))*/
-    val dao = ConnectionRepository.getFileMetadataService
-    val res = dao.getAll
-    println(serializer.serialize(res))
+    //createData()
   }
 
-  def tt() = {
-    val specification = serializer.deserialize[Specification](spec)
-    println(specification.moduleType)
-
-    /*val allElems = collection.map(o => serializer.deserialize[RegularInstanceMetadata](o.toString)).toSeq
-    /*allElems.foreach(println)
-    val elems = collection.find("parallelism" $eq "10").map(_.toString).map(serializer.deserialize[ShortInstanceMetadata])
-    if (elems.nonEmpty) {
-      elems.foreach(println)
-    } else {
-      println("fail")
-    }*/
-    val res = retrieve(Map("parallelism" -> 10, "module-type" -> "regular-streaming"))
-    res.foreach(println)*/
-    /*val instance = serializer.deserialize[RegularInstanceMetadata](instanceJson)
-    val newInstance = serializer.serialize(createPlan(instance))*/
-    //println(newInstance)
+  def createData() = {
+    val serviceDAO = ConnectionRepository.getServiceManager
+    val providerDAO = ConnectionRepository.getProviderService
+    createProviders(providerDAO)
+    createServices(serviceDAO, providerDAO)
+    val tService = serviceDAO.get("tstrq_service")
+    createStreams(tService)
   }
 
+  def createServices(serviceDAO: GenericMongoService[Service], providerDAO: GenericMongoService[Provider]) = {
+    val cassService = new CassandraService
+    val cassProv = providerDAO.get("cass_prov")
+    cassService.keyspace = "test_keyspace"
+    cassService.name = "cass_service"
+    cassService.description = "cassandra test service"
+    cassService.provider = cassProv
+    cassService.serviceType = "CassDB"
+    serviceDAO.save(cassService)
 
-  case class Parameter(name: String, value: Any)
+    val zkService = new ZKService
+    val zkProv = providerDAO.get("zk_prov")
+    zkService.namespace = "zk_test"
+    zkService.name = "zk_service"
+    zkService.description = "zookeeper test service"
+    zkService.provider = zkProv
+    zkService.serviceType = "ZKCoord"
+    serviceDAO.save(zkService)
 
-  def retrieve(parameters: Map[String, Any]) = {
-    //parameters.map(x => (x.name $eq x.value))
-    //collection.find(new MongoDBObject(parameters)).map(o => serializer.deserialize[ShortInstanceMetadata](o.toString)).toSeq
+    val aeroService = new AerospikeService
+    val aeroProv = providerDAO.get("aero_prov")
+    aeroService.namespace = "test"
+    aeroService.name = "aero_service"
+    aeroService.description = "aerospike test service"
+    aeroService.provider = aeroProv
+    aeroService.serviceType = "ArspkDB"
+    serviceDAO.save(aeroService)
+
+    val redisService = new RedisService
+    val redisProv = providerDAO.get("redis_prov")
+    redisService.namespace = "test"
+    redisService.name = "rd_service"
+    redisService.description = "redis test service"
+    redisService.provider = redisProv
+    redisService.serviceType = "RdsCoord"
+    serviceDAO.save(redisService)
+
+    val tstrqService = new TStreamService
+    tstrqService.namespace = "test"
+    tstrqService.name = "tstrq_service"
+    tstrqService.metadataProvider = cassProv
+    tstrqService.metadataNamespace = "test_keyspace"
+    tstrqService.dataProvider = aeroProv
+    tstrqService.dataNamespace = "test"
+    tstrqService.lockProvider = zkProv
+    tstrqService.lockNamespace = "zk_test"
+    serviceDAO.save(tstrqService)
   }
 
+  def createProviders(providerDAO: GenericMongoService[Provider]) = {
+    val cassProv = new Provider
+    cassProv.providerType = "cassandra"
+    cassProv.name = "cass_prov"
+    cassProv.login = ""
+    cassProv.password = ""
+    cassProv.description = "cassandra provider test"
+    cassProv.hosts = Array("127.0.0.1:9042")
+    providerDAO.save(cassProv)
 
-  case class InputStream(name: String, mode: String, partitionsCount: Int)
+    val aeroProv = new Provider
+    aeroProv.providerType = "aerospike"
+    aeroProv.name = "aero_prov"
+    aeroProv.login = ""
+    aeroProv.password = ""
+    aeroProv.description = "aerospike provider test"
+    aeroProv.hosts = Array("127.0.0.1:3000", "127.0.0.1:3001")
+    providerDAO.save(aeroProv)
 
-  case class StreamProcess(currentPartition: Int, countFreePartitions: Int)
+    val redisProv = new Provider
+    redisProv.providerType = "redis"
+    redisProv.name = "redis_prov"
+    redisProv.login = ""
+    redisProv.password = ""
+    redisProv.description = "redis provider test"
+    redisProv.hosts = Array("127.0.0.1:6379")
+    providerDAO.save(redisProv)
 
-  /*def createPlan(instance: RegularInstanceMetadata): RegularInstanceMetadata = {
-    val inputs = instance.inputs.map { input =>
-      val mode = getStreamMode(input)
-      val name = input.replaceAll("/split|/full", "")
-      InputStream(name, mode, getPartitionCount(name))
-    }
-    var parallelism = 0
-    instance.parallelism match {
-      case i: Int => parallelism = i
-      case s: String => parallelism = 0
-    }
-    val tasks = (0 until parallelism)
-      .map(x => instance.uuid + "_task" + x)
-      .map(x => x -> inputs)
-    val executionPlan = mutable.Map[String, Task]()
-    val streams: mutable.Map[String, StreamProcess] = mutable.Map(inputs.map(x => x.name -> StreamProcess(0, x.partitionsCount)).toSeq: _*)
-
-    var tasksNotProcessed = tasks.size
-    tasks.foreach { task =>
-      val list = task._2.map { inputStream =>
-        val stream = streams.get(inputStream.name).get
-        val countFreePartitions = stream.countFreePartitions
-        val startPartition = stream.currentPartition
-        var endPartition = startPartition + countFreePartitions
-        inputStream.mode match {
-          case "full" => endPartition = startPartition + countFreePartitions
-          case "split" =>
-            val cntTaskStreamPartitions = countFreePartitions / tasksNotProcessed
-            streams.update(inputStream.name, StreamProcess(startPartition + cntTaskStreamPartitions, countFreePartitions - cntTaskStreamPartitions))
-            if (Math.abs(cntTaskStreamPartitions - countFreePartitions) >= cntTaskStreamPartitions) {
-              endPartition = startPartition + cntTaskStreamPartitions
-            }
-        }
-
-        inputStream.name -> List(startPartition, endPartition - 1)
-      }
-      tasksNotProcessed -= 1
-      executionPlan.put(task._1, Task(mutable.Map(list.toSeq: _*)))
-    }
-    executionPlan.foreach(println)
-    instance.executionPlan = ExecutionPlan(executionPlan)
-    instance
+    val zkProv = new Provider
+    zkProv.providerType = "zookeeper"
+    zkProv.name = "zk_prov"
+    zkProv.login = ""
+    zkProv.password = ""
+    zkProv.description = "zookeeper provider test"
+    zkProv.hosts = Array("127.0.0.1:2181")
+    providerDAO.save(zkProv)
   }
 
-  def getStreamMode(name: String) = {
-    name.substring(name.lastIndexOf("/") + 1)
-  }
+  def createStreams(tService: Service) = {
+    val sjStreamDAO = ConnectionRepository.getStreamService
+    val s1 = new SjStream
+    s1.name = "s1"
+    s1.description = "s1 stream"
+    s1.partitions = 7
+    s1.service = tService
+    s1.tags = "TAG"
+    s1.generator = Array("global", "service-zk://zk_service", "2")
+    sjStreamDAO.save(s1)
 
-  def getPartitionCount(name: String) = {
-    val map = Map("s1" -> 11, "s2" -> 12, "s3" -> 15)
-    map.get(name).get
-  }
+    val s2 = new SjStream
+    s2.name = "s2"
+    s2.description = "s2 stream"
+    s2.partitions = 10
+    s2.service = tService
+    s2.tags = "TAG"
+    s2.generator = Array("per-stream", "service-zk://zk_service", "3")
+    sjStreamDAO.save(s2)
 
-  def checkJsonOfExecutionPlan() = {
-    val tasks = mutable.Map("instance_task_0" -> Task(mutable.Map("s1" -> List(1, 2), "s2" -> List(3, 4))))
-    val executionPlan = ExecutionPlan(tasks)
-    val json = serializer.serialize(executionPlan)
-    println(json)
-  }*/
+    val s3 = new SjStream
+    s3.name = "s3"
+    s3.description = "s3 stream"
+    s3.partitions = 10
+    s3.service = tService
+    s3.tags = "TAG"
+    s3.generator = Array("global", "service-zk://zk_service", "3")
+    sjStreamDAO.save(s3)
+  }
 
 }
