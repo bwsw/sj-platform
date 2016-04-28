@@ -1,6 +1,5 @@
 package com.bwsw.sj.common.module.regular
 
-import java.io.File
 import java.net.URLClassLoader
 
 import com.bwsw.common.JsonSerializer
@@ -27,11 +26,10 @@ object RegularTaskRunner {
   def main(args: Array[String]) {
     val serializer = new JsonSerializer()
     val taskName = System.getenv("TASK_NAME")
-    val moduleJar = new File(s"${System.getenv("MODULE_NAME")}.jar")
 
     val manager = new TaskManager()
 
-    manager.downloadModuleJar(moduleJar)
+    val moduleJar = manager.downloadModuleJar()
 
     val regularInstanceMetadata: RegularInstanceMetadata = manager.getRegularInstanceMetadata(serializer)
 

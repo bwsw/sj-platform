@@ -1,12 +1,11 @@
 package com.bwsw.sj.common.module
 
 import java.io.{BufferedReader, File, InputStreamReader}
-import java.net.{InetSocketAddress, URL, URLClassLoader}
+import java.net.{InetSocketAddress, URLClassLoader}
 
 import com.aerospike.client.Host
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.ConnectionRepository
-import com.bwsw.sj.common.entities.Specification
 import com.bwsw.tstreams.agents.consumer.Offsets.IOffset
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions}
@@ -19,7 +18,6 @@ import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.metadata.MetadataStorageFactory
 import com.bwsw.tstreams.policy.RoundRobinPolicy
 import com.bwsw.tstreams.streams.BasicStream
-import org.apache.commons.io.FileUtils
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.HttpClientBuilder
 import org.redisson.{Config, Redisson}
@@ -44,6 +42,11 @@ class TaskManager() {
 
   private val instanceService = ConnectionRepository.getInstanceService
   private val fileMetadataService = ConnectionRepository.getFileMetadataService
+  private val storage = ConnectionRepository.getFileStorage
+
+  private val fileMetadata = fileMetadataService.getByParameters(Map("specification.name" -> moduleName,
+    "specification.module-type" -> moduleType,
+    "specification.version" -> moduleVersion)).head
 
   //metadata/data factories
   private val metadataStorageFactory = new MetadataStorageFactory
@@ -78,7 +81,7 @@ class TaskManager() {
 
   /**
    * Return class loader for retrieving classes from jar
- *
+   *
    * @param pathToJar Absolute path to jar file
    * @return Class loader
    */
@@ -117,8 +120,10 @@ class TaskManager() {
     result.toString
   }
 
-  def downloadModuleJar(moduleJar: File) = {
-    FileUtils.copyURLToFile(new URL(s"http://$moduleRest/v1/modules/$moduleType/$moduleName/$moduleVersion"), moduleJar)
+  def downloadModuleJar(): File = {
+    //FileUtils.copyURLToFile(new URL(s"http://$moduleRest/v1/modules/$moduleType/$moduleName/$moduleVersion"), moduleJar)
+    val filename = fileMetadata.filename
+    storage.get(filename, s"tmp/$moduleName")
   }
 
   def getRegularInstanceMetadata(serializer: JsonSerializer) = {
@@ -127,8 +132,8 @@ class TaskManager() {
   }
 
   def getSpecification(serializer: JsonSerializer) = {
-    serializer.deserialize[Specification](sendHttpGetRequest(s"http://$moduleRest/v1/modules/$moduleType/$moduleName/$moduleVersion/specification"))
-    //fileMetadataService.get()
+    //serializer.deserialize[Specification](sendHttpGetRequest(s"http://$moduleRest/v1/modules/$moduleType/$moduleName/$moduleVersion/specification"))
+    fileMetadata.specification
   }
 
   def getTemporaryOutput = {

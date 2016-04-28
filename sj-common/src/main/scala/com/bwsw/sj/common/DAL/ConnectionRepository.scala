@@ -7,7 +7,6 @@ import com.bwsw.sj.common.entities._
 import com.mongodb.MongoClient
 import org.mongodb.morphia.Morphia
 import org.mongodb.morphia.dao.BasicDAO
-import org.mongodb.morphia.mapping.MapperOptions
 
 import scala.reflect.ClassTag
 
@@ -21,7 +20,7 @@ object ConnectionRepository {
   private val serializer = new JsonSerializer()
   serializer.setIgnoreUnknown(true)
 
-  private lazy val mongoClient = new MongoClient("192.168.1.180", 27017) //new MongoClient(host, port)
+  private lazy val mongoClient = new MongoClient(host, port)
 
   private lazy val morphia = new Morphia()
 
