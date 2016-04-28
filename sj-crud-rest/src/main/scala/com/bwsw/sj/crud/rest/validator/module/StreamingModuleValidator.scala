@@ -4,7 +4,7 @@ import java.net.{InetSocketAddress, URI}
 
 import com.aerospike.client.Host
 import com.bwsw.sj.common.DAL.ConnectionRepository
-import com.bwsw.sj.common.entities.{Streams, InstanceMetadata}
+import com.bwsw.sj.common.entities.{SjStream, RegularInstanceMetadata}
 import com.bwsw.tstreams.coordination.Coordinator
 import com.bwsw.tstreams.data.IStorage
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorageOptions, AerospikeStorageFactory}
@@ -31,14 +31,14 @@ abstract class StreamingModuleValidator {
     * @param parameters - input parameters for running module
     * @return - List of errors
     */
-  def validate(parameters: InstanceMetadata) = {
+  def validate(parameters: RegularInstanceMetadata) = {
     val instanceDAO = ConnectionRepository.getInstanceDAO
-    val serviceDAO = ConnectionRepository.getServiceDAO
-    val providerDAO = ConnectionRepository.getProviderDAO
+    val serviceDAO = ConnectionRepository.getServiceManager
+    val providerDAO = ConnectionRepository.getProviderService
 
     val errors = new ArrayBuffer[String]()
 
-    val instance = instanceDAO.retrieve(parameters.name)
+    val instance = instanceDAO.get(parameters.name)
     instance match {
       case Some(_) => errors += s"Instance for name: ${parameters.name} is exist."
       case None =>
@@ -58,10 +58,10 @@ abstract class StreamingModuleValidator {
 
     val inputStreams = getStreams(parameters.inputs.map(_.replaceAll("/split|/full", "")))
     val outputStreams = getStreams(parameters.outputs)
-    val allStreams: Seq[Streams] = inputStreams.union(outputStreams)
+    val allStreams = inputStreams.union(outputStreams)
     val streamsService = checkStreams(allStreams)
     val serviceName = streamsService.head
-    val service = serviceDAO.retrieve(serviceName)
+    val service = serviceDAO.get(serviceName)
     if (streamsService.size != 1) {
       errors += s"All streams should have the same service."
     } else {
@@ -90,20 +90,20 @@ abstract class StreamingModuleValidator {
         errors += "Unknown type of 'parallelism' parameter. Must be Int or String."
     }
 
-    if (!stateManagementModes.contains(parameters.stateManagement)) {
-      errors += s"Unknown value of state-management attribute: ${parameters.stateManagement}. " +
+    if (!stateManagementModes.contains(parameters.`state-management`)) {
+      errors += s"Unknown value of state-management attribute: ${parameters.`state-management`}. " +
         s"State-management must be 'none' or 'ram' or 'rocks'."
     }
 
-    if (!checkpointModes.contains(parameters.checkpointMode)) {
-      errors += s"Unknown value of checkpoint-mode attribute: ${parameters.checkpointMode}."
+    if (!checkpointModes.contains(parameters.`checkpoint-mode`)) {
+      errors += s"Unknown value of checkpoint-mode attribute: ${parameters.`checkpoint-mode`}."
     }
 
     if (parameters.options.isEmpty) {
       errors += "Options attribute is empty."
     }
 
-    if (parameters.jvmOptions.isEmpty) {
+    if (parameters.`jvm-options`.isEmpty) {
       errors += "Jvm-options attribute is empty."
     }
 
@@ -226,8 +226,8 @@ abstract class StreamingModuleValidator {
     * @return Seq of streams
     */
   def getStreams(streamNames: List[String]) = {
-    val streamsDAO = ConnectionRepository.getStreamsDAO
-    streamsDAO.retrieveAll().filter(s => streamNames.contains(s.name))
+    val streamsDAO = ConnectionRepository.getStreamService
+    streamsDAO.getAll.filter(s => streamNames.contains(s.name))
   }
 
   /**
