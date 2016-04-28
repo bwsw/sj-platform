@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.entities
 
-import org.mongodb.morphia.annotations.{Entity, Id}
+import org.mongodb.morphia.annotations.{Property, Entity, Id}
 
 @Entity("providers")
 class Provider {
@@ -9,5 +9,5 @@ class Provider {
   var hosts: Array[String] = null
   var login: String = null
   var password: String = null
-  var `provider-type`: String = null
+  @Property("provider-type") var providerType: String = null
 }

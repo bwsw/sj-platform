@@ -4,7 +4,7 @@ import java.net.{InetSocketAddress, URI}
 
 import com.aerospike.client.Host
 import com.bwsw.sj.common.DAL.ConnectionRepository
-import com.bwsw.sj.common.entities.{Service, SjStream, RegularInstanceMetadata}
+import com.bwsw.sj.common.entities._
 import com.bwsw.tstreams.coordination.Coordinator
 import com.bwsw.tstreams.data.IStorage
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorageOptions, AerospikeStorageFactory}
@@ -35,7 +35,6 @@ abstract class StreamingModuleValidator {
   def validate(parameters: RegularInstanceMetadata): (ArrayBuffer[String], Map[String, Int]) = {
     val instanceDAO = ConnectionRepository.getInstanceService
     val serviceDAO = ConnectionRepository.getServiceManager
-    val providerDAO = ConnectionRepository.getProviderService
 
     val errors = new ArrayBuffer[String]()
 
@@ -59,15 +58,18 @@ abstract class StreamingModuleValidator {
     val inputStreams = getStreams(parameters.inputs.toList.map(_.replaceAll("/split|/full", "")))
     val outputStreams = getStreams(parameters.outputs.toList)
     val allStreams = inputStreams.union(outputStreams)
-    val streamsService = checkStreams(allStreams)
-    val serviceName: Service = streamsService.head
-    val service = serviceDAO.get(serviceName.name)
-    if (streamsService.size != 1) {
+    val streamsServices = checkStreams(allStreams)
+    val serviceName: Service = streamsServices.head
+    val streamService = serviceDAO.get(serviceName.name)
+    var service: TStreamService = null
+    if (streamsServices.size != 1) {
       errors += s"All streams should have the same service."
     } else {
-      if (service != null) {
-        if (!service.serviceType.equals("TstrQ")) {
+      if (streamService != null) {
+        if (!streamService.isInstanceOf[TStreamService]) {
           errors += s"Service for streams must be 'TstrQ'."
+        } else {
+          service = streamService.asInstanceOf[TStreamService]
         }
       } else {
         errors += s"Service $serviceName not found."
@@ -107,7 +109,7 @@ abstract class StreamingModuleValidator {
       errors += "Jvm-options attribute is empty."
     }
 
-    /*val startFrom = parameters.startFrom
+    val startFrom = parameters.startFrom
     if (!startFromModes.contains(startFrom)) {
       try {
         startFrom.toLong
@@ -117,46 +119,46 @@ abstract class StreamingModuleValidator {
       }
     }
 
-    if (service.isDefined) {
-      val metadataProvider = providerDAO.retrieve(service.get.metadataProvider).get
+    if (service != null) {
+      val metadataProvider = service.metadataProvider
       val hosts = metadataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt))
-      val metadataStorage = (new MetadataStorageFactory).getInstance(hosts, service.get.metadataNamespace)
+      val metadataStorage = (new MetadataStorageFactory).getInstance(hosts.toList, service.metadataNamespace)
 
-      val dataProvider = providerDAO.retrieve(service.get.dataProvider).get
+      val dataProvider = service.dataProvider
       var dataStorage: IStorage[Array[Byte]] = null
       if (dataProvider.providerType.equals("cassandra")) {
         val options = new CassandraStorageOptions(
-          dataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)),
-          service.get.dataNamespace
+          dataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList,
+          service.dataNamespace
         )
         dataStorage = (new CassandraStorageFactory).getInstance(options)
       } else if (dataProvider.providerType.equals("aerospike")) {
         val options = new AerospikeStorageOptions(
-          service.get.dataNamespace,
-          dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt))
+          service.dataNamespace,
+          dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toList
         )
         dataStorage = (new AerospikeStorageFactory).getInstance(options)
       }
 
-      val lockProvider = providerDAO.retrieve(service.get.lockProvider).get
+      val lockProvider = service.lockProvider
       val redisConfig = new Config()
       redisConfig.useSingleServer().setAddress(lockProvider.hosts.head)
-      val coordinator = new Coordinator(service.get.lockNamespace, Redisson.create(redisConfig))
+      val coordinator = new Coordinator(service.lockNamespace, Redisson.create(redisConfig))
 
-      allStreams.foreach { (stream: Streams) =>
+      allStreams.foreach { (stream: SjStream) =>
         val generatorType = stream.generator.head
         if (generatorType.equals("global") || generatorType.equals("per-stream")) {
           val generatorUrl = new URI(stream.generator(1))
           if (!generatorUrl.getScheme.equals("service-zk")) {
             errors += s"Generator have unknown service type: ${generatorUrl.getScheme}. Must be 'service-zk'."
           }
-          val service = serviceDAO.retrieve(generatorUrl.getAuthority)
-          service match {
-            case Some(s) =>
-              if (!s.serviceType.equals("ZKCoord")) {
-                errors += s"Service for streams must be 'ZKCoord'."
-              }
-            case None => errors += s"Service ${generatorUrl.getHost} not found."
+          val coordService = serviceDAO.get(generatorUrl.getAuthority)
+          if (coordService != null) {
+            if (coordService.isInstanceOf[ZKService]) {
+              errors += s"Service for streams must be 'ZKCoord'."
+            }
+          } else {
+            errors += s"Service ${generatorUrl.getHost} not found."
           }
 
           val n = stream.generator(2).toInt
@@ -176,14 +178,14 @@ abstract class StreamingModuleValidator {
             dataStorage,
             coordinator
           )
-          if (tStream.getPartitions != stream.partitions.size) {
+          if (tStream.getPartitions != stream.partitions) {
             errors += s"Partitions count mismatch"
           }
         } else {
           if (errors.isEmpty) {
             BasicStreamService.createStream(
               stream.name,
-              stream.partitions.size,
+              stream.partitions,
               5000,
               "", metadataStorage,
               dataStorage,
@@ -193,7 +195,7 @@ abstract class StreamingModuleValidator {
         }
 
       }
-    }*/
+    }
 
     (errors, partitions)
   }
@@ -215,7 +217,7 @@ abstract class StreamingModuleValidator {
     */
   def getPartitionForStreams(streams: Seq[SjStream]): Map[String, Int] = {
     Map(streams.map { stream =>
-      stream.name -> stream.partitions.size
+      stream.name -> stream.partitions
     }: _*)
   }
 
