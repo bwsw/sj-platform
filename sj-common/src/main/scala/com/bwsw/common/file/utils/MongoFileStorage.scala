@@ -22,7 +22,7 @@ class MongoFileStorage(mongoDB: MongoDB) extends FilesStorage {
   override def put(file: File, fileName: String, specification: Map[String, Any], filetype: String) = {
     if (gridFS.findOne(fileName).isEmpty) {
       if (gridFS(file) { file =>
-        file.put("metadata", new BasicDBObject("metadata", specification))
+        file.put("specification", specification)
         file.put("filetype", filetype)
       }.isEmpty) throw BadRecordWithKey(s"MongoFileStorage.put $fileName failed", fileName)
     } else throw BadRecordWithKey(s"$fileName already exists", fileName)

@@ -1,6 +1,7 @@
 package com.bwsw.sj.crud.rest
 
 import com.bwsw.common.JsonSerializer
+import com.bwsw.sj.common.DAL.ConnectionRepository
 import com.bwsw.sj.common.entities._
 import com.mongodb.casbah.MongoClient
 
@@ -36,15 +37,31 @@ object SjTest {
     "\"per-task-ram\" : 128,\n  " +
     "\"jvm-options\" : {\"a\" : \"dsf\"}\n}"
 
+  private val spec = "{\n  \"name\": \"com.bwsw.sj.stub\",\n  \"description\": \"Stub module by BW\",\n  \"version\": \"0.1\",\n  \"author\": \"Ksenia Mikhaleva\",\n  \"license\": \"Apache 2.0\",\n  \"inputs\": {\n    \"cardinality\": [\n      1,\n      1\n    ],\n    \"types\": [\n      \"stream.t-stream\"\n    ]\n  },\n  \"outputs\": {\n    \"cardinality\": [\n      1,\n      1\n    ],\n    \"types\": [\n      \"stream.t-stream\"\n    ]\n  },\n  \"module-type\": \"regular-streaming\",\n  \"engine\": \"streaming\",\n  \"options\": {\n    \"opt\": 1\n  },\n  \"validator-class\": \"com.bwsw.sj.stub.Validator\",\n  \"executor-class\": \"com.bwsw.sj.stub.Executor\"\n}"
+
   serializer.setIgnoreUnknown(true)
 
-  val mongoConnection = MongoClient("192.168.1.180", 27017)
-
-  val collection = mongoConnection("stream_juggler")("instances")
 
   def main(args: Array[String]) = {
+    /*val stream = new SjStream
+    stream.name = "s1"
+    stream.description = ""
+    stream.partitions = Array("1", "2", "3", "4", "5")
+    stream.generator = Array("global", "service-zk://zk_service", "3")
+    val dao = ConnectionRepository.getStreamService
+    dao.save(stream)
+    val res = dao.getAll
+    println(serializer.serialize(res))*/
+    val dao = ConnectionRepository.getFileMetadataService
+    val res = dao.getAll
+    println(serializer.serialize(res))
+  }
 
-    val allElems = collection.map(o => serializer.deserialize[RegularInstanceMetadata](o.toString)).toSeq
+  def tt() = {
+    val specification = serializer.deserialize[Specification](spec)
+    println(specification.moduleType)
+
+    /*val allElems = collection.map(o => serializer.deserialize[RegularInstanceMetadata](o.toString)).toSeq
     /*allElems.foreach(println)
     val elems = collection.find("parallelism" $eq "10").map(_.toString).map(serializer.deserialize[ShortInstanceMetadata])
     if (elems.nonEmpty) {
@@ -53,7 +70,7 @@ object SjTest {
       println("fail")
     }*/
     val res = retrieve(Map("parallelism" -> 10, "module-type" -> "regular-streaming"))
-    res.foreach(println)
+    res.foreach(println)*/
     /*val instance = serializer.deserialize[RegularInstanceMetadata](instanceJson)
     val newInstance = serializer.serialize(createPlan(instance))*/
     //println(newInstance)
@@ -64,7 +81,7 @@ object SjTest {
 
   def retrieve(parameters: Map[String, Any]) = {
     //parameters.map(x => (x.name $eq x.value))
-    collection.find(new MongoDBObject(parameters)).map(o => serializer.deserialize[ShortInstanceMetadata](o.toString)).toSeq
+    //collection.find(new MongoDBObject(parameters)).map(o => serializer.deserialize[ShortInstanceMetadata](o.toString)).toSeq
   }
 
 
@@ -72,7 +89,7 @@ object SjTest {
 
   case class StreamProcess(currentPartition: Int, countFreePartitions: Int)
 
-  def createPlan(instance: RegularInstanceMetadata): RegularInstanceMetadata = {
+  /*def createPlan(instance: RegularInstanceMetadata): RegularInstanceMetadata = {
     val inputs = instance.inputs.map { input =>
       val mode = getStreamMode(input)
       val name = input.replaceAll("/split|/full", "")
@@ -130,6 +147,6 @@ object SjTest {
     val executionPlan = ExecutionPlan(tasks)
     val json = serializer.serialize(executionPlan)
     println(json)
-  }
+  }*/
 
 }

@@ -6,7 +6,7 @@ import org.mongodb.morphia.annotations.{Entity, Id}
 class Provider {
   @Id var name: String = null
   var description: String = null
-  var hosts: List[String] = null
+  var hosts: Array[String] = null
   var login: String = null
   var password: String = null
   var `provider-type`: String = null

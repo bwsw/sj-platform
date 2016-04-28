@@ -12,12 +12,13 @@ class RegularStreamingValidator extends StreamingModuleValidator {
 
   /**
     * Validating input parameters for 'regular-streaming' module
+ *
     * @param parameters - input parameters for running module
     * @return - List of errors
     */
-  def validate(parameters: RegularInstanceMetadata) = {
+  override def validate(parameters: RegularInstanceMetadata) = {
     val validateResult = super.validate(parameters)
-    (validateResult._1.toList, validateResult._2)
+    (validateResult._1, validateResult._2)
   }
 
 }

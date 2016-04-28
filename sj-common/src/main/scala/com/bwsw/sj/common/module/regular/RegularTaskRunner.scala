@@ -49,7 +49,7 @@ object RegularTaskRunner {
     //    consumerWithSubscribes.foreach(x => checkpointGroup.add(x.name, x))
     //    consumerWithSubscribes.foreach(_.start())
 
-    val consumerWithSubscribes = manager.createConsumer("s2", List(0, 2), chooseOffset(regularInstanceMetadata.`start-from`), blockingQueue)
+    val consumerWithSubscribes = manager.createConsumer("s2", List(0, 2), chooseOffset(regularInstanceMetadata.startFrom), blockingQueue)
     consumerWithSubscribes.start()
     checkpointGroup.add(consumerWithSubscribes.name, consumerWithSubscribes)
     //        new Thread(new Runnable {
@@ -80,7 +80,7 @@ object RegularTaskRunner {
       blockingQueue,
       temporaryOutput,
       classLoader,
-      specification.metadata("metadata").executorClass,
+      specification.executorClass,
       producers,
       serializer,
       manager,
@@ -134,7 +134,7 @@ object RegularTaskRunner {
                         serializer: JsonSerializer,
                         manager: TaskManager,
                         checkpointGroup: CheckpointGroup) = {
-    regularInstanceMetadata.`state-management` match {
+    regularInstanceMetadata.stateManagement match {
       case "none" =>
         val moduleEnvironmentManager = new ModuleEnvironmentManager(
           regularInstanceMetadata.options,
@@ -148,10 +148,10 @@ object RegularTaskRunner {
 
         executor.init()
 
-        regularInstanceMetadata.`checkpoint-mode` match {
+        regularInstanceMetadata.checkpointMode match {
           case "time-interval" =>
             val checkpointTimer = new SjTimer()
-            checkpointTimer.set(regularInstanceMetadata.`checkpoint-interval`)
+            checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
             while (true) {
 
               val maybeTxn = blockingQueue.get(regularInstanceMetadata.idle)
@@ -170,7 +170,7 @@ object RegularTaskRunner {
                   checkpointGroup.commit()
                   executor.onAfterCheckpoint()
                   checkpointTimer.reset()
-                  checkpointTimer.set(regularInstanceMetadata.`checkpoint-interval`)
+                  checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
                 }
 
                 if (moduleTimer.isTime) {
@@ -196,7 +196,7 @@ object RegularTaskRunner {
                 if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
                 temporaryOutput.clear()
 
-                if (countOfTransaction == regularInstanceMetadata.`checkpoint-interval`) {
+                if (countOfTransaction == regularInstanceMetadata.checkpointInterval) {
                   executor.onBeforeCheckpoint()
                   checkpointGroup.commit()
                   executor.onAfterCheckpoint()
@@ -237,10 +237,10 @@ object RegularTaskRunner {
 
         executor.init()
 
-        regularInstanceMetadata.`checkpoint-mode` match {
+        regularInstanceMetadata.checkpointMode match {
           case "time-interval" =>
             val checkpointTimer = new SjTimer()
-            checkpointTimer.set(regularInstanceMetadata.`checkpoint-interval`)
+            checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
 
             while (true) {
 
@@ -256,7 +256,7 @@ object RegularTaskRunner {
                 temporaryOutput.clear()
 
                 if (checkpointTimer.isTime) {
-                  if (countOfCheckpoints != regularInstanceMetadata.`state-full-checkpoint`) {
+                  if (countOfCheckpoints != regularInstanceMetadata.stateFullCheckpoint) {
                     executor.onBeforeStateSave(false)
                     stateService.checkpoint()
                     executor.onAfterStateSave(false)
@@ -273,7 +273,7 @@ object RegularTaskRunner {
                   executor.onAfterCheckpoint()
 
                   checkpointTimer.reset()
-                  checkpointTimer.set(regularInstanceMetadata.`checkpoint-interval`)
+                  checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
                 }
 
                 if (moduleTimer.isTime) {
@@ -301,8 +301,8 @@ object RegularTaskRunner {
                 if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
                 temporaryOutput.clear()
 
-                if (countOfTransaction == regularInstanceMetadata.`checkpoint-interval`) {
-                  if (countOfCheckpoints != regularInstanceMetadata.`state-full-checkpoint`) {
+                if (countOfTransaction == regularInstanceMetadata.checkpointInterval) {
+                  if (countOfCheckpoints != regularInstanceMetadata.stateFullCheckpoint) {
                     stateService.checkpoint()
                     executor.onAfterStateSave(false)
                     countOfCheckpoints += 1

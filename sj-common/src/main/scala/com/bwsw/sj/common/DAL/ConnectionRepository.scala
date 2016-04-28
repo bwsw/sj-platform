@@ -7,6 +7,7 @@ import com.bwsw.sj.common.entities._
 import com.mongodb.MongoClient
 import org.mongodb.morphia.Morphia
 import org.mongodb.morphia.dao.BasicDAO
+import org.mongodb.morphia.mapping.MapperOptions
 
 import scala.reflect.ClassTag
 

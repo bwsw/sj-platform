@@ -1,16 +1,22 @@
 package com.bwsw.sj.common.entities
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.mongodb.morphia.annotations.{Property, Embedded}
 
-class Specification(val name: String,
-                    val description: String,
-                    val version: String,
-                    val author: String,
-                    val license: String,
-                    val inputs: IOstream,
-                    val outputs: IOstream,
-                    @JsonProperty("module-type") val moduleType: String,
-                    val engine: String,
-                    val options: Map[String, Any],
-                    @JsonProperty("validator-class") val validateClass: String,
-                    @JsonProperty("executor-class") val executorClass: String)
+import scala.collection.immutable.HashMap
+
+@Embedded
+class Specification {
+  val name: String = null
+  val description: String = null
+  val version: String = null
+  val author: String = null
+  val license: String = null
+  @Embedded val inputs: IOstream = null
+  @Embedded val outputs: IOstream = null
+  @Property("module-type") @JsonProperty("module-type") val moduleType: String = null
+  val engine: String = null
+  @Embedded val options: HashMap[String, Any] = null
+  @Property("validator-class") @JsonProperty("validator-class") val validateClass: String = null
+  @Property("executor-class") @JsonProperty("executor-class") val executorClass: String = null
+}

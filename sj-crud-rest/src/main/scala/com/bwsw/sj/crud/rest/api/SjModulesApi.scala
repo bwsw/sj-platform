@@ -53,11 +53,11 @@ trait SjModulesApi extends Directives with SjCrudValidator {
           }
         } ~
         get {
-          val files = fileMetadataDAO.retrieveAllByFiletype("module")
+          val files = fileMetadataDAO.getByParameters(Map("filetype" -> "module"))
           var msg = ""
           if (files.nonEmpty) {
             msg = s"Uploaded modules: ${files.map(
-              s => s"${s.metadata("metadata").moduleType} - ${s.metadata("metadata").name} - ${s.metadata("metadata").version}"
+              s => s"${s.specification.moduleType} - ${s.specification.name} - ${s.specification.version}"
             ).mkString(",\n")}"
           } else {
             msg = s"Uploaded modules have not been found "
@@ -72,10 +72,14 @@ trait SjModulesApi extends Directives with SjCrudValidator {
         validate(checkModuleType(moduleType), s"Module type $moduleType is not exist") {
           pathPrefix(Segment) { (moduleName: String) =>
             pathPrefix(Segment) { (moduleVersion: String) =>
-              val fileMetadata: FileMetadata = fileMetadataDAO.retrieve(moduleName, moduleType, moduleVersion)
+              val fileMetadatas = fileMetadataDAO.getByParameters(Map("specification.name" -> moduleName,
+                "specification.module-type" -> moduleType,
+                "specification.version" -> moduleVersion)
+              )
+              val fileMetadata = fileMetadatas.head
 
               validate(fileMetadata != null, s"Module $moduleType-$moduleName-$moduleVersion not found") {
-                val specification = fileMetadata.metadata("metadata")
+                val specification = fileMetadata.specification
                 val filename = fileMetadata.filename
 
                 pathPrefix("instance") {
@@ -107,7 +111,10 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                       }
                     } ~
                     get {
-                      val instances = instanceDAO.retrieveByModule(moduleName, moduleVersion, moduleType)
+                      val instances = instanceDAO.getByParameters(Map("module-name" -> moduleName,
+                        "module-type" -> moduleType,
+                        "module-version" -> moduleVersion)
+                      )
                       var msg = ""
                       if (instances.nonEmpty) {
                         msg = serializer.serialize(instances)
@@ -119,7 +126,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                     }
                   } ~
                   path(Segment) { (instanceName: String) =>
-                    val instance = instanceDAO.retrieve(instanceName).get
+                    val instance = instanceDAO.get(instanceName)
                     pathSuffix("start") {
                       get {
                         //todo
@@ -141,24 +148,25 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                       }
                     } ~
                     get {
-                      val instance = instanceDAO.retrieve(instanceName)
-                      instance match {
-                        case Some(inst) => complete(HttpEntity(
+                      val instance = instanceDAO.get(instanceName)
+                      if (instance != null) {
+                        complete(HttpEntity(
                           `application/json`,
-                          serializer.serialize(inst)
+                          serializer.serialize(instance)
                         ))
-                        case None => throw BadRecordWithKey(s"Instance with name $instanceName is not found", instanceName)
+                      } else {
+                        throw BadRecordWithKey(s"Instance with name $instanceName is not found", instanceName)
                       }
                     } ~
                     delete {
-                      if (instanceDAO.delete(instanceName)) {
+                      instanceDAO.delete(instanceName)
                         complete(HttpEntity(
                           `application/json`,
                           serializer.serialize(Response(200, instanceName, s"Instance $instanceName has been deleted"))
                         ))
-                      } else {
+                      /*} else {
                         throw new BadRecordWithKey(s"Instance $instanceName hasn't been found", instanceName)
-                      }
+                      }*/
                     }
                   }
                 } ~
@@ -186,7 +194,10 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                     }
                   } ~
                   delete {
-                    val instances = instanceDAO.retrieveByModule(moduleName, moduleVersion, moduleType)
+                    val instances = instanceDAO.getByParameters(Map("module-name" -> moduleName,
+                      "module-type" -> moduleType,
+                      "module-version" -> moduleVersion)
+                    )
                     if (instances.nonEmpty) {
                       if (storage.delete(filename)) {
                         complete(HttpEntity(
@@ -208,11 +219,11 @@ trait SjModulesApi extends Directives with SjCrudValidator {
             }
           } ~
           get {
-            val files = fileMetadataDAO.retrieveAllByModuleType(moduleType)
+            val files = fileMetadataDAO.getByParameters(Map("specification.module-type" -> moduleType))
             var msg = ""
             if (files.nonEmpty) {
               msg = s"Uploaded modules for type $moduleType: ${files.map(
-                s => s"${s.metadata("metadata").name}-${s.metadata("metadata").version}"
+                s => s"${s.specification.name}-${s.specification.version}"
               ).mkString(",\n")}"
             } else {
               msg = s"Uploaded modules for type $moduleType have not been found "
@@ -226,7 +237,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       } ~
       pathSuffix("instances") {
         get {
-          val allInstances = instanceDAO.retrieveAll()
+          val allInstances = instanceDAO.getAll
           if (allInstances.isEmpty) {
             complete(HttpEntity(
               `application/json`,
@@ -264,7 +275,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @param moduleType - type name of module
     * @return - list of errors
     */
-  def validateOptions(options: InstanceMetadata, moduleType: String) = {
+  def validateOptions(options: RegularInstanceMetadata, moduleType: String) = {
     val validatorClassName = conf.getString("modules." + moduleType + ".validator-class")
     val validatorClazz = Class.forName(validatorClassName)
     val validator = validatorClazz.newInstance().asInstanceOf[StreamingModuleValidator]
@@ -280,14 +291,14 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @param moduleVersion - version of module
     * @return - name of created entity
     */
-  def saveInstance(parameters: InstanceMetadata, moduleType: String, moduleName: String, moduleVersion: String, partitionsCount: Map[String, Int]) = {
-    parameters.uuid = java.util.UUID.randomUUID().toString
+  def saveInstance(parameters: RegularInstanceMetadata, moduleType: String, moduleName: String, moduleVersion: String, partitionsCount: Map[String, Int]) = {
     parameters.moduleName = moduleName
     parameters.moduleVersion = moduleVersion
     parameters.moduleType = moduleType
     parameters.status = ready
     parameters.executionPlan = createExecutionPlan(parameters, partitionsCount)
-    instanceDAO.create(parameters)
+    instanceDAO.save(parameters)
+    parameters.name
   }
 
   /**
@@ -311,7 +322,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @param instance - instance for module
     * @return - execution plan of instance
     */
-  def createExecutionPlan(instance: InstanceMetadata, partitionsCount: Map[String, Int]) = {
+  def createExecutionPlan(instance: RegularInstanceMetadata, partitionsCount: Map[String, Int]) = {
     val inputs = instance.inputs.map { input =>
       val mode = getStreamMode(input)
       val name = input.replaceAll("/split|/full", "")
@@ -324,7 +335,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       case s: String => parallelism = minPartitionCount
     }
     val tasks = (0 until parallelism)
-      .map(x => instance.uuid + "_task" + x)
+      .map(x => instance.name + "_task" + x)
       .map(x => x -> inputs)
 
     val executionPlan = mutable.Map[String, Task]()
@@ -352,7 +363,9 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       tasksNotProcessed -= 1
       executionPlan.put(task._1, Task(mutable.Map(list.toSeq: _*)))
     }
-    ExecutionPlan(executionPlan)
+    val execPlan = new ExecutionPlan()
+    execPlan.tasks = executionPlan
+    execPlan
   }
 
   /**
@@ -369,12 +382,12 @@ trait SjModulesApi extends Directives with SjCrudValidator {
 
   case class StreamProcess(currentPartition: Int, countFreePartitions: Int)
 
-  case class Generator(generatorType: String, zkServers: List[String], prefix: String, count: Int)
+  case class Generator(generatorType: String, zkServers: Array[String], prefix: String, count: Int)
 
-  def startInstance(instance: InstanceMetadata) = {
+  def startInstance(instance: RegularInstanceMetadata) = {
 
     instance.inputs.map(_.replaceAll("/split|/full", "")).foreach { streamName =>
-      val stream = streamDAO.retrieve(streamName).get
+      val stream = streamDAO.get(streamName)
       if (!stream.generator.head.equals("local")) {
         startGenerator(stream)
       }
@@ -384,11 +397,16 @@ trait SjModulesApi extends Directives with SjCrudValidator {
 
   }
 
-  def startGenerator(stream: Streams) = {
+  def startGenerator(stream: SjStream) = {
     val generatorUrl = new URI(stream.generator(1))
-    val generatorService = serviceDAO.retrieve(generatorUrl.getAuthority).get
-    val generatorProvider = providerDAO.retrieve(generatorService.provider).get
-    var prefix = generatorService.namespace
+    val generatorService = serviceDAO.get(generatorUrl.getAuthority)
+    var zkService: ZKService = null
+    generatorService.serviceType match {
+      case "ZKCoord" => zkService = generatorService.asInstanceOf[ZKService]
+      case _ => throw new Exception("Unknown")
+    }
+    val generatorProvider = generatorService.provider
+    var prefix = zkService.namespace
     if (stream.generator.head.equals("per-stream")) {
       prefix += s"/${stream.name}"
     }
@@ -397,7 +415,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
   }
 
   //todo stop
-  def stopInstance(instance: InstanceMetadata) = {
+  def stopInstance(instance: RegularInstanceMetadata) = {
 
   }
 }

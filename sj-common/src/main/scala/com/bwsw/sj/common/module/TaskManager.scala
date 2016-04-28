@@ -6,6 +6,7 @@ import java.net.{InetSocketAddress, URL, URLClassLoader}
 import com.aerospike.client.Host
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.ConnectionRepository
+import com.bwsw.sj.common.entities.Specification
 import com.bwsw.tstreams.agents.consumer.Offsets.IOffset
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions}
@@ -28,6 +29,7 @@ import scala.collection.mutable
 /**
  * Class allowing to manage an environment of task
  * Created: 13/04/2016
+ *
  * @author Kseniya Mikhaleva
  */
 
@@ -76,6 +78,7 @@ class TaskManager() {
 
   /**
    * Return class loader for retrieving classes from jar
+ *
    * @param pathToJar Absolute path to jar file
    * @return Class loader
    */
@@ -124,8 +127,8 @@ class TaskManager() {
   }
 
   def getSpecification(serializer: JsonSerializer) = {
-    //serializer.deserialize[Specification](sendHttpGetRequest(s"http://$moduleRest/v1/modules/$moduleType/$moduleName/$moduleVersion/specification"))
-    fileMetadataService.get()
+    serializer.deserialize[Specification](sendHttpGetRequest(s"http://$moduleRest/v1/modules/$moduleType/$moduleName/$moduleVersion/specification"))
+    //fileMetadataService.get()
   }
 
   def getTemporaryOutput = {

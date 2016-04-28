@@ -32,7 +32,7 @@ abstract class StreamingModuleValidator {
     * @param parameters - input parameters for running module
     * @return - List of errors
     */
-  def validate(parameters: RegularInstanceMetadata) = {
+  def validate(parameters: RegularInstanceMetadata): (ArrayBuffer[String], Map[String, Int]) = {
     val instanceDAO = ConnectionRepository.getInstanceService
     val serviceDAO = ConnectionRepository.getServiceManager
     val providerDAO = ConnectionRepository.getProviderService
@@ -40,12 +40,11 @@ abstract class StreamingModuleValidator {
     val errors = new ArrayBuffer[String]()
 
     val instance = instanceDAO.get(parameters.name)
-    instance match {
-      case Some(_) => errors += s"Instance for name: ${parameters.name} is exist."
-      case None =>
+    if (instance == null) {
+      errors += s"Instance for name: ${parameters.name} is exist."
     }
 
-    if (listHasDoubles(parameters.inputs)) {
+    if (listHasDoubles(parameters.inputs.toList)) {
       errors += s"Inputs is not unique."
     }
 
@@ -53,25 +52,25 @@ abstract class StreamingModuleValidator {
       errors += s"Inputs has incorrect name."
     }
 
-    if (listHasDoubles(parameters.outputs)) {
+    if (listHasDoubles(parameters.outputs.toList)) {
       errors += s"Outputs is not unique."
     }
 
-    val inputStreams = getStreams(parameters.inputs.map(_.replaceAll("/split|/full", "")))
-    val outputStreams = getStreams(parameters.outputs)
+    val inputStreams = getStreams(parameters.inputs.toList.map(_.replaceAll("/split|/full", "")))
+    val outputStreams = getStreams(parameters.outputs.toList)
     val allStreams = inputStreams.union(outputStreams)
     val streamsService = checkStreams(allStreams)
     val serviceName: Service = streamsService.head
-    val service = serviceDAO.get(serviceName)
+    val service = serviceDAO.get(serviceName.name)
     if (streamsService.size != 1) {
       errors += s"All streams should have the same service."
     } else {
-      service match {
-        case Some(s) =>
-          if (!s.serviceType.equals("TstrQ")) {
-            errors += s"Service for streams must be 'TstrQ'."
-          }
-        case None => errors += s"Service $serviceName not found."
+      if (service != null) {
+        if (!service.serviceType.equals("TstrQ")) {
+          errors += s"Service for streams must be 'TstrQ'."
+        }
+      } else {
+        errors += s"Service $serviceName not found."
       }
     }
 
@@ -91,24 +90,24 @@ abstract class StreamingModuleValidator {
         errors += "Unknown type of 'parallelism' parameter. Must be Int or String."
     }
 
-    if (!stateManagementModes.contains(parameters.`state-management`)) {
-      errors += s"Unknown value of state-management attribute: ${parameters.`state-management`}. " +
+    if (!stateManagementModes.contains(parameters.stateManagement)) {
+      errors += s"Unknown value of state-management attribute: ${parameters.stateManagement}. " +
         s"State-management must be 'none' or 'ram' or 'rocks'."
     }
 
-    if (!checkpointModes.contains(parameters.`checkpoint-mode`)) {
-      errors += s"Unknown value of checkpoint-mode attribute: ${parameters.`checkpoint-mode`}."
+    if (!checkpointModes.contains(parameters.checkpointMode)) {
+      errors += s"Unknown value of checkpoint-mode attribute: ${parameters.checkpointMode}."
     }
 
     if (parameters.options.isEmpty) {
       errors += "Options attribute is empty."
     }
 
-    if (parameters.`jvm-options`.isEmpty) {
+    if (parameters.jvmOptions.isEmpty) {
       errors += "Jvm-options attribute is empty."
     }
 
-    val startFrom = parameters.startFrom
+    /*val startFrom = parameters.startFrom
     if (!startFromModes.contains(startFrom)) {
       try {
         startFrom.toLong
@@ -194,7 +193,7 @@ abstract class StreamingModuleValidator {
         }
 
       }
-    }
+    }*/
 
     (errors, partitions)
   }
