@@ -4,7 +4,6 @@ import java.io.{BufferedReader, File, InputStreamReader}
 import java.net.{InetSocketAddress, URLClassLoader}
 
 import com.aerospike.client.Host
-import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.ConnectionRepository
 import com.bwsw.tstreams.agents.consumer.Offsets.IOffset
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
@@ -37,14 +36,13 @@ class TaskManager() {
   private val moduleName = System.getenv("MODULE_NAME")
   private val moduleVersion = System.getenv("MODULE_VERSION")
   private val instanceName = System.getenv("INSTANCE_NAME")
-  private val moduleRest = getModuleRestAddress
+  val taskName = System.getenv("TASK_NAME")
   private val randomKeyspace = "test"
 
   private val instanceService = ConnectionRepository.getInstanceService
-  private val fileMetadataService = ConnectionRepository.getFileMetadataService
   private val storage = ConnectionRepository.getFileStorage
 
-  private val fileMetadata = fileMetadataService.getByParameters(Map("specification.name" -> moduleName,
+  private val fileMetadata = ConnectionRepository.getFileMetadataService.getByParameters(Map("specification.name" -> moduleName,
     "specification.module-type" -> moduleType,
     "specification.version" -> moduleVersion)).head
 
@@ -92,11 +90,6 @@ class TaskManager() {
 
   }
 
-  private def getModuleRestAddress = {
-    //todo replace this stub
-    "192.168.1.180:8887"
-  }
-
   private def sendHttpGetRequest(url: String) = {
 
     val client = HttpClientBuilder.create().build()
@@ -122,16 +115,15 @@ class TaskManager() {
 
   def downloadModuleJar(): File = {
     //FileUtils.copyURLToFile(new URL(s"http://$moduleRest/v1/modules/$moduleType/$moduleName/$moduleVersion"), moduleJar)
-    val filename = fileMetadata.filename
-    storage.get(filename, s"tmp/$moduleName")
+    storage.get(fileMetadata.filename, s"tmp/$moduleName")
   }
 
-  def getRegularInstanceMetadata(serializer: JsonSerializer) = {
+  def getRegularInstanceMetadata = {
     //serializer.deserialize[RegularInstanceMetadata](sendHttpGetRequest(s"http://$moduleRest/v1/modules/$moduleType/$moduleName/$moduleVersion/instance/$instanceName"))
     instanceService.get(instanceName)
   }
 
-  def getSpecification(serializer: JsonSerializer) = {
+  def getSpecification = {
     //serializer.deserialize[Specification](sendHttpGetRequest(s"http://$moduleRest/v1/modules/$moduleType/$moduleName/$moduleVersion/specification"))
     fileMetadata.specification
   }

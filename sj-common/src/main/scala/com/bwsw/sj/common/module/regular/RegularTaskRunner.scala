@@ -25,23 +25,23 @@ object RegularTaskRunner {
 
   def main(args: Array[String]) {
     val serializer = new JsonSerializer()
-    val taskName = System.getenv("TASK_NAME")
 
     val manager = new TaskManager()
 
     val moduleJar = manager.downloadModuleJar()
 
-    val regularInstanceMetadata: RegularInstanceMetadata = manager.getRegularInstanceMetadata(serializer)
+    val regularInstanceMetadata: RegularInstanceMetadata = manager.getRegularInstanceMetadata
 
-    val specification = manager.getSpecification(serializer)
+    val specification = manager.getSpecification
 
     val temporaryOutput = manager.getTemporaryOutput
+
     val moduleTimer = new SjTimer()
 
     val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue("temp")
     val checkpointGroup = new CheckpointGroup()
 
-    //    val consumerWithSubscribes = regularInstanceMetadata.executionPlan.tasks(taskName).inputs
+    //    val consumerWithSubscribes = regularInstanceMetadata.executionPlan.tasks(manager.taskName).inputs
     //      .map(x => manager.createConsumer(x._1, x._2, chooseOffsetPolicy(regularInstanceMetadata.startFrom), blockingQueue)).toVector
     //
     //    consumerWithSubscribes.foreach(x => checkpointGroup.add(x.name, x))
