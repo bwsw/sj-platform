@@ -5,7 +5,8 @@ version := "0.1"
 scalaVersion := "2.11.7"
 
 libraryDependencies ++= Seq(
-  "org.mongodb" % "casbah_2.11" % "3.0.0"
+  "org.mongodb" % "casbah_2.11" % "3.0.0",
+  "org.mongodb.morphia" % "morphia" % "1.1.1"
 )
 
 libraryDependencies += "com.fasterxml.jackson.module" % "jackson-module-scala_2.11" % "2.7.2"

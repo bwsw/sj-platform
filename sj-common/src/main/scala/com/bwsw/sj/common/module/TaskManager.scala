@@ -1,11 +1,10 @@
 package com.bwsw.sj.common.module
 
 import java.io.{BufferedReader, File, InputStreamReader}
-import java.net.{InetSocketAddress, URL, URLClassLoader}
+import java.net.{InetSocketAddress, URLClassLoader}
 
 import com.aerospike.client.Host
-import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.entities.{RegularInstanceMetadata, Specification}
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.tstreams.agents.consumer.Offsets.IOffset
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions}
@@ -18,7 +17,6 @@ import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.metadata.MetadataStorageFactory
 import com.bwsw.tstreams.policy.RoundRobinPolicy
 import com.bwsw.tstreams.streams.BasicStream
-import org.apache.commons.io.FileUtils
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.HttpClientBuilder
 import org.redisson.{Config, Redisson}
@@ -28,6 +26,7 @@ import scala.collection.mutable
 /**
  * Class allowing to manage an environment of task
  * Created: 13/04/2016
+ *
  * @author Kseniya Mikhaleva
  */
 
@@ -37,8 +36,15 @@ class TaskManager() {
   private val moduleName = System.getenv("MODULE_NAME")
   private val moduleVersion = System.getenv("MODULE_VERSION")
   private val instanceName = System.getenv("INSTANCE_NAME")
-  private val moduleRest = getModuleRestAddress
+  val taskName = System.getenv("TASK_NAME")
   private val randomKeyspace = "test"
+
+  private val instanceService = ConnectionRepository.getInstanceService
+  private val storage = ConnectionRepository.getFileStorage
+
+  private val fileMetadata = ConnectionRepository.getFileMetadataService.getByParameters(Map("specification.name" -> moduleName,
+    "specification.module-type" -> moduleType,
+    "specification.version" -> moduleVersion)).head
 
   //metadata/data factories
   private val metadataStorageFactory = new MetadataStorageFactory
@@ -73,6 +79,7 @@ class TaskManager() {
 
   /**
    * Return class loader for retrieving classes from jar
+   *
    * @param pathToJar Absolute path to jar file
    * @return Class loader
    */
@@ -81,11 +88,6 @@ class TaskManager() {
 
     new URLClassLoader(classLoaderUrls)
 
-  }
-
-  private def getModuleRestAddress = {
-    //todo replace this stub
-    "192.168.1.180:8887"
   }
 
   private def sendHttpGetRequest(url: String) = {
@@ -111,23 +113,23 @@ class TaskManager() {
     result.toString
   }
 
-  def downloadModuleJar(moduleJar: File) = {
-    FileUtils.copyURLToFile(new URL(s"http://$moduleRest/v1/modules/$moduleType/$moduleName/$moduleVersion"), moduleJar)
+  def downloadModuleJar(): File = {
+    storage.get(fileMetadata.filename, s"tmp/$moduleName")
   }
 
-  def getRegularInstanceMetadata(serializer: JsonSerializer) = {
-    serializer.deserialize[RegularInstanceMetadata](sendHttpGetRequest(s"http://$moduleRest/v1/modules/$moduleType/$moduleName/$moduleVersion/instance/$instanceName"))
+  def getRegularInstanceMetadata = {
+    instanceService.get(instanceName)
   }
 
-  def getSpecification(serializer: JsonSerializer) = {
-    serializer.deserialize[Specification](sendHttpGetRequest(s"http://$moduleRest/v1/modules/$moduleType/$moduleName/$moduleVersion/specification"))
+  def getSpecification = {
+    fileMetadata.specification
   }
 
   def getTemporaryOutput = {
     mutable.Map[String, (String, Any)]()
   }
 
-  //todo: use an Ivan REST to retrieve metadata for creating a consumer/producer
+  //todo: use services to retrieve metadata for creating a consumer/producer
 
   def createConsumer(streamName: String, partitionRange: List[Int], offsetPolicy: IOffset, blockingQueue: PersistentBlockingQueue) = {
 

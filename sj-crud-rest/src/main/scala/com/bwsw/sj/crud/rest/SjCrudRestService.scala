@@ -13,7 +13,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.ConfigLoader
-import com.bwsw.sj.common.DAL.ConnectionRepository
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.typesafe.config.Config
 
 import scala.concurrent.Future
@@ -56,11 +56,11 @@ object SjCrudRestService extends App with SjCrudRouter {
 
   val serializer = new JsonSerializer()
   val storage = ConnectionRepository.getFileStorage
-  val fileMetadataDAO = ConnectionRepository.getFileMetadataDAO
-  val instanceDAO = ConnectionRepository.getInstanceDAO
-  val serviceDAO = ConnectionRepository.getServiceDAO
-  val providerDAO = ConnectionRepository.getProviderDAO
-  val streamDAO = ConnectionRepository.getStreamsDAO
+  val fileMetadataDAO = ConnectionRepository.getFileMetadataService
+  val instanceDAO = ConnectionRepository.getInstanceService
+  val serviceDAO = ConnectionRepository.getServiceManager
+  val providerDAO = ConnectionRepository.getProviderService
+  val streamDAO = ConnectionRepository.getStreamService
 
   val routeLogged = logRequestResult(Logging.InfoLevel, route())
 

@@ -9,7 +9,7 @@ import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.stream.scaladsl.Source
 import com.bwsw.common.exceptions.BadRecordWithKey
-import com.bwsw.sj.common.entities.Response
+import com.bwsw.sj.crud.rest.entities.Response
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import org.apache.commons.io.FileUtils
 
@@ -27,7 +27,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
       pathPrefix(Segment) { (name: String) =>
         pathSuffix(Segment) { (version: String) =>
           pathEndOrSingleSlash {
-            val fileMetadata = fileMetadataDAO.retrieve(name, version)
+            val fileMetadata = fileMetadataDAO.getByParameters(Map("specification.name" -> name, "specification.version" -> version)).head
             validate(fileMetadata != null, s"Jar not found") {
               val filename = fileMetadata.filename
               get {
@@ -70,10 +70,10 @@ trait SjCustomApi extends Directives with SjCrudValidator {
           }
         } ~
         get {
-          val files = fileMetadataDAO.retrieveAllByFiletype("custom")
+          val files = fileMetadataDAO.getByParameters(Map("filetype" -> "custom"))
           var msg = ""
           if (files.nonEmpty) {
-            msg = s"Uploaded custom jars: ${files.map(_.metadata.get("metadata").get.name).mkString(", ")}"
+            msg = s"Uploaded custom jars: ${files.map(_.specification.name).mkString(", ")}"
           } else {
             msg = s"Uploaded custom jars have not been found "
           }

@@ -1,10 +1,9 @@
 package com.bwsw.sj.common.module.regular
 
-import java.io.File
 import java.net.URLClassLoader
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.entities.RegularInstanceMetadata
+import com.bwsw.sj.common.DAL.model.RegularInstance
 import com.bwsw.sj.common.module.entities.Transaction
 import com.bwsw.sj.common.module.environment.{ModuleEnvironmentManager, StatefulModuleEnvironmentManager}
 import com.bwsw.sj.common.module.state.{RAMStateService, StateStorage}
@@ -26,24 +25,23 @@ object RegularTaskRunner {
 
   def main(args: Array[String]) {
     val serializer = new JsonSerializer()
-    val taskName = System.getenv("TASK_NAME")
-    val moduleJar = new File(s"${System.getenv("MODULE_NAME")}.jar")
 
     val manager = new TaskManager()
 
-    manager.downloadModuleJar(moduleJar)
+    val moduleJar = manager.downloadModuleJar()
 
-    val regularInstanceMetadata: RegularInstanceMetadata = manager.getRegularInstanceMetadata(serializer)
+    val regularInstanceMetadata: RegularInstance = manager.getRegularInstanceMetadata
 
-    val specification = manager.getSpecification(serializer)
+    val specification = manager.getSpecification
 
     val temporaryOutput = manager.getTemporaryOutput
+
     val moduleTimer = new SjTimer()
 
     val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue("temp")
     val checkpointGroup = new CheckpointGroup()
 
-    //    val consumerWithSubscribes = regularInstanceMetadata.executionPlan.tasks(taskName).inputs
+    //    val consumerWithSubscribes = regularInstanceMetadata.executionPlan.tasks(manager.taskName).inputs
     //      .map(x => manager.createConsumer(x._1, x._2, chooseOffsetPolicy(regularInstanceMetadata.startFrom), blockingQueue)).toVector
     //
     //    consumerWithSubscribes.foreach(x => checkpointGroup.add(x.name, x))
@@ -125,7 +123,7 @@ object RegularTaskRunner {
    * @param checkpointGroup Group of producers and consumers which should do a checkpoint at the same time
    */
   private def runModule(moduleTimer: SjTimer,
-                        regularInstanceMetadata: RegularInstanceMetadata,
+                        regularInstanceMetadata: RegularInstance,
                         blockingQueue: PersistentBlockingQueue,
                         temporaryOutput: mutable.Map[String, (String, Any)],
                         classLoader: URLClassLoader,
@@ -137,7 +135,7 @@ object RegularTaskRunner {
     regularInstanceMetadata.stateManagement match {
       case "none" =>
         val moduleEnvironmentManager = new ModuleEnvironmentManager(
-          regularInstanceMetadata.options,
+          serializer.deserialize[Map[String, Any]](regularInstanceMetadata.options),
           temporaryOutput,
           moduleTimer
         )
@@ -224,7 +222,7 @@ object RegularTaskRunner {
 
         val moduleEnvironmentManager = new StatefulModuleEnvironmentManager(
           new StateStorage(stateService),
-          regularInstanceMetadata.options,
+          serializer.deserialize[Map[String, Any]](regularInstanceMetadata.options),
           temporaryOutput,
           moduleTimer
         )

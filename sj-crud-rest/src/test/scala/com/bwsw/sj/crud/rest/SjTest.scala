@@ -1,13 +1,10 @@
 package com.bwsw.sj.crud.rest
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.entities._
-import com.mongodb.casbah.MongoClient
-
-import scala.collection.immutable.IndexedSeq
-import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
-import com.mongodb.casbah.Imports._
+import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.DAL.service.GenericMongoService
+import com.datastax.driver.core.{Cluster, Session}
 
 /**
   * Created: 4/14/16
@@ -35,100 +32,283 @@ object SjTest {
     "\"per-task-ram\" : 128,\n  " +
     "\"jvm-options\" : {\"a\" : \"dsf\"}\n}"
 
+  private val spec = "{\n  \"name\": \"com.bwsw.sj.stub\",\n  " +
+    "\"description\": \"Stub module by BW\",\n  " +
+    "\"version\": \"0.1\",\n  " +
+    "\"author\": \"Ksenia Mikhaleva\",\n  " +
+    "\"license\": \"Apache 2.0\",\n  " +
+    "\"inputs\": {\n    \"cardinality\": [\n      1,\n      1\n    ],\n    \"types\": [\n      \"stream.t-stream\"\n    ]\n  },\n  " +
+    "\"outputs\": {\n    \"cardinality\": [\n      1,\n      1\n    ],\n    \"types\": [\n      \"stream.t-stream\"\n    ]\n  },\n  " +
+    "\"module-type\": \"regular-streaming\",\n  " +
+    "\"engine\": \"streaming\",\n  " +
+    "\"options\": {\n    \"opt\": 1\n  },\n  " +
+    "\"validator-class\": \"com.bwsw.sj.stub.Validator\",\n  " +
+    "\"executor-class\": \"com.bwsw.sj.stub.Executor\"\n}"
+
   serializer.setIgnoreUnknown(true)
 
-  val mongoConnection = MongoClient("192.168.1.180", 27017)
-
-  val collection = mongoConnection("stream_juggler")("instances")
 
   def main(args: Array[String]) = {
+    //createData()
+    //prepareCassandra()
+    println("Ok")
+  }
 
-    val allElems = collection.map(o => serializer.deserialize[RegularInstanceMetadata](o.toString)).toSeq
-    /*allElems.foreach(println)
-    val elems = collection.find("parallelism" $eq "10").map(_.toString).map(serializer.deserialize[ShortInstanceMetadata])
-    if (elems.nonEmpty) {
-      elems.foreach(println)
-    } else {
-      println("fail")
-    }*/
-    val res = retrieve(Map("parallelism" -> 10, "module-type" -> "regular-streaming"))
-    res.foreach(println)
-    /*val instance = serializer.deserialize[RegularInstanceMetadata](instanceJson)
-    val newInstance = serializer.serialize(createPlan(instance))*/
-    //println(newInstance)
+  def prepareCassandra() = {
+    val cluster = Cluster.builder().addContactPoint("127.0.0.1").build()
+    val session = cluster.connect()
+    createKeyspace(session, "test_keyspace")
+    createMetadataTables(session, "test_keyspace")
+    createDataTable(session, "test_keyspace")
+  }
+
+  def createData() = {
+    val serviceDAO = ConnectionRepository.getServiceManager
+    val providerDAO = ConnectionRepository.getProviderService
+    createProviders(providerDAO)
+    createServices(serviceDAO, providerDAO)
+    val tService = serviceDAO.get("tstrq_service")
+    createStreams(tService)
+  }
+
+  def createServices(serviceDAO: GenericMongoService[Service], providerDAO: GenericMongoService[Provider]) = {
+    val cassService = new CassandraService
+    val cassProv = providerDAO.get("cass_prov")
+    cassService.keyspace = "test_keyspace"
+    cassService.name = "cass_service"
+    cassService.description = "cassandra test service"
+    cassService.provider = cassProv
+    cassService.serviceType = "CassDB"
+    serviceDAO.save(cassService)
+
+    val zkService = new ZKService
+    val zkProv = providerDAO.get("zk_prov")
+    zkService.namespace = "zk_test"
+    zkService.name = "zk_service"
+    zkService.description = "zookeeper test service"
+    zkService.provider = zkProv
+    zkService.serviceType = "ZKCoord"
+    serviceDAO.save(zkService)
+
+    val aeroService = new AerospikeService
+    val aeroProv = providerDAO.get("aero_prov")
+    aeroService.namespace = "test"
+    aeroService.name = "aero_service"
+    aeroService.description = "aerospike test service"
+    aeroService.provider = aeroProv
+    aeroService.serviceType = "ArspkDB"
+    serviceDAO.save(aeroService)
+
+    val redisService = new RedisService
+    val redisProv = providerDAO.get("redis_prov")
+    redisService.namespace = "test"
+    redisService.name = "rd_service"
+    redisService.description = "redis test service"
+    redisService.provider = redisProv
+    redisService.serviceType = "RdsCoord"
+    serviceDAO.save(redisService)
+
+    val tstrqService = new TStreamService
+    tstrqService.namespace = "test"
+    tstrqService.name = "tstrq_service"
+    tstrqService.metadataProvider = cassProv
+    tstrqService.metadataNamespace = "test_keyspace"
+    tstrqService.dataProvider = aeroProv
+    tstrqService.dataNamespace = "test"
+    tstrqService.lockProvider = zkProv
+    tstrqService.lockNamespace = "zk_test"
+    serviceDAO.save(tstrqService)
+  }
+
+  def createProviders(providerDAO: GenericMongoService[Provider]) = {
+    val cassProv = new Provider
+    cassProv.providerType = "cassandra"
+    cassProv.name = "cass_prov"
+    cassProv.login = ""
+    cassProv.password = ""
+    cassProv.description = "cassandra provider test"
+    cassProv.hosts = Array("127.0.0.1:9042")
+    providerDAO.save(cassProv)
+
+    val aeroProv = new Provider
+    aeroProv.providerType = "aerospike"
+    aeroProv.name = "aero_prov"
+    aeroProv.login = ""
+    aeroProv.password = ""
+    aeroProv.description = "aerospike provider test"
+    aeroProv.hosts = Array("127.0.0.1:3000", "127.0.0.1:3001")
+    providerDAO.save(aeroProv)
+
+    val redisProv = new Provider
+    redisProv.providerType = "redis"
+    redisProv.name = "redis_prov"
+    redisProv.login = ""
+    redisProv.password = ""
+    redisProv.description = "redis provider test"
+    redisProv.hosts = Array("127.0.0.1:6379")
+    providerDAO.save(redisProv)
+
+    val zkProv = new Provider
+    zkProv.providerType = "zookeeper"
+    zkProv.name = "zk_prov"
+    zkProv.login = ""
+    zkProv.password = ""
+    zkProv.description = "zookeeper provider test"
+    zkProv.hosts = Array("127.0.0.1:2181")
+    providerDAO.save(zkProv)
+  }
+
+  def createStreams(tService: Service) = {
+    val sjStreamDAO = ConnectionRepository.getStreamService
+    val s1 = new SjStream
+    s1.name = "s1"
+    s1.description = "s1 stream"
+    s1.partitions = 7
+    s1.service = tService
+    s1.tags = "TAG"
+    s1.generator = Array("global", "service-zk://zk_service", "2")
+    sjStreamDAO.save(s1)
+
+    val s2 = new SjStream
+    s2.name = "s2"
+    s2.description = "s2 stream"
+    s2.partitions = 10
+    s2.service = tService
+    s2.tags = "TAG"
+    s2.generator = Array("per-stream", "service-zk://zk_service", "3")
+    sjStreamDAO.save(s2)
+
+    val s3 = new SjStream
+    s3.name = "s3"
+    s3.description = "s3 stream"
+    s3.partitions = 10
+    s3.service = tService
+    s3.tags = "TAG"
+    s3.generator = Array("global", "service-zk://zk_service", "3")
+    sjStreamDAO.save(s3)
+  }
+
+  /**
+    * Keyspace creator helper
+ *
+    * @param session Session instance which will be used for keyspace creation
+    * @param keyspace Keyspace name
+    */
+  def createKeyspace(session: Session, keyspace: String) = session.execute(s"CREATE KEYSPACE $keyspace WITH replication = " +
+    s" {'class': 'SimpleStrategy', 'replication_factor': '1'} " +
+    s" AND durable_writes = true")
+
+  /**
+    * Metadata tables creator helper
+ *
+    * @param session Session
+    * @param keyspace Keyspace name
+    */
+  def createMetadataTables(session: Session, keyspace: String) = {
+
+    session.execute(s"CREATE TABLE $keyspace.stream_commit_last (" +
+      s"stream text, " +
+      s"partition int, " +
+      s"transaction timeuuid, " +
+      s"PRIMARY KEY (stream, partition))")
+
+    session.execute(s"CREATE TABLE $keyspace.consumers (" +
+      s"name text, " +
+      s"stream text, " +
+      s"partition int, " +
+      s"last_transaction timeuuid, " +
+      s"PRIMARY KEY (name, stream, partition))")
+
+
+    session.execute(s"CREATE TABLE $keyspace.streams (" +
+      s"stream_name text PRIMARY KEY, " +
+      s"partitions int," +
+      s"ttl int, " +
+      s"description text)")
+
+
+    session.execute(s"CREATE TABLE $keyspace.commit_log (" +
+      s"stream text, " +
+      s"partition int, " +
+      s"transaction timeuuid, " +
+      s"cnt int, " +
+      s"PRIMARY KEY (stream, partition, transaction))")
+
+
+    session.execute(s"CREATE TABLE $keyspace.generators (" +
+      s"name text, " +
+      s"time timeuuid, " +
+      s"PRIMARY KEY (name))")
+
+  }
+
+  /**
+    * Cassandra data table creator helper
+ *
+    * @param session Session
+    * @param keyspace Keyspace name
+    */
+  def createDataTable(session: Session, keyspace: String) = {
+
+    session.execute(s"CREATE TABLE $keyspace.data_queue ( " +
+      s"stream text, " +
+      s"partition int, " +
+      s"transaction timeuuid, " +
+      s"seq int, " +
+      s"data blob, " +
+      s"PRIMARY KEY ((stream, partition), transaction, seq))")
+  }
+
+  /**
+    * Cassandra storage table dropper helper
+ *
+    * @param session Session
+    * @param keyspace Keyspace name
+    */
+  def dropDataTable(session: Session, keyspace: String) = {
+    session.execute(s"DROP TABLE $keyspace.data_queue")
+  }
+
+  /**
+    * Cassandra metadata storage table dropper helper
+ *
+    * @param session Session
+    * @param keyspace Keyspace name
+    */
+  def dropMetadataTables(session: Session, keyspace: String) = {
+    session.execute(s"DROP TABLE $keyspace.stream_commit_last")
+
+    session.execute(s"DROP TABLE $keyspace.consumers")
+
+    session.execute(s"DROP TABLE $keyspace.streams")
+
+    session.execute(s"DROP TABLE $keyspace.commit_log")
+
+    session.execute(s"DROP TABLE $keyspace.generators")
+  }
+
+  /**
+    * Metadata table flushing helper
+ *
+    * @param session  Session
+    * @param keyspace Keyspace name
+    */
+  def clearMetadataTables(session: Session, keyspace: String) = {
+    dropMetadataTables(session, keyspace)
+    createMetadataTables(session, keyspace)
   }
 
 
-  case class Parameter(name: String, value: Any)
-
-  def retrieve(parameters: Map[String, Any]) = {
-    //parameters.map(x => (x.name $eq x.value))
-    collection.find(new MongoDBObject(parameters)).map(o => serializer.deserialize[ShortInstanceMetadata](o.toString)).toSeq
+  /**
+    * Cassandra data table creator helper
+ *
+    * @param session Session
+    * @param keyspace Keyspace name
+    */
+  def clearDataTable(session: Session, keyspace: String) = {
+    dropDataTable(session, keyspace)
+    createDataTable(session, keyspace)
   }
 
-
-  case class InputStream(name: String, mode: String, partitionsCount: Int)
-
-  case class StreamProcess(currentPartition: Int, countFreePartitions: Int)
-
-  def createPlan(instance: InstanceMetadata): InstanceMetadata = {
-    val inputs = instance.inputs.map { input =>
-      val mode = getStreamMode(input)
-      val name = input.replaceAll("/split|/full", "")
-      InputStream(name, mode, getPartitionCount(name))
-    }
-    var parallelism = 0
-    instance.parallelism match {
-      case i: Int => parallelism = i
-      case s: String => parallelism = 0
-    }
-    val tasks = (0 until parallelism)
-      .map(x => instance.uuid + "_task" + x)
-      .map(x => x -> inputs)
-    val executionPlan = mutable.Map[String, Task]()
-    val streams: mutable.Map[String, StreamProcess] = mutable.Map(inputs.map(x => x.name -> StreamProcess(0, x.partitionsCount)).toSeq: _*)
-
-    var tasksNotProcessed = tasks.size
-    tasks.foreach { task =>
-      val list = task._2.map { inputStream =>
-        val stream = streams.get(inputStream.name).get
-        val countFreePartitions = stream.countFreePartitions
-        val startPartition = stream.currentPartition
-        var endPartition = startPartition + countFreePartitions
-        inputStream.mode match {
-          case "full" => endPartition = startPartition + countFreePartitions
-          case "split" =>
-            val cntTaskStreamPartitions = countFreePartitions / tasksNotProcessed
-            streams.update(inputStream.name, StreamProcess(startPartition + cntTaskStreamPartitions, countFreePartitions - cntTaskStreamPartitions))
-            if (Math.abs(cntTaskStreamPartitions - countFreePartitions) >= cntTaskStreamPartitions) {
-              endPartition = startPartition + cntTaskStreamPartitions
-            }
-        }
-
-        inputStream.name -> List(startPartition, endPartition - 1)
-      }
-      tasksNotProcessed -= 1
-      executionPlan.put(task._1, Task(mutable.Map(list.toSeq: _*)))
-    }
-    executionPlan.foreach(println)
-    instance.executionPlan = ExecutionPlan(executionPlan)
-    instance
-  }
-
-  def getStreamMode(name: String) = {
-    name.substring(name.lastIndexOf("/") + 1)
-  }
-
-  def getPartitionCount(name: String) = {
-    val map = Map("s1" -> 11, "s2" -> 12, "s3" -> 15)
-    map.get(name).get
-  }
-
-  def checkJsonOfExecutionPlan() = {
-    val tasks = mutable.Map("instance_task_0" -> Task(mutable.Map("s1" -> List(1, 2), "s2" -> List(3, 4))))
-    val executionPlan = ExecutionPlan(tasks)
-    val json = serializer.serialize(executionPlan)
-    println(json)
-  }
 
 }

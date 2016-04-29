@@ -1,8 +1,7 @@
 package com.bwsw.sj.crud.rest.validator.module
 
-import com.bwsw.sj.common.entities.TimeWindowedInstanceMetadata
 
-import scala.collection.mutable.ArrayBuffer
+import com.bwsw.sj.crud.rest.entities.{TimeWindowedInstanceMetadata, InstanceMetadata}
 
 /**
   * Validator for Stream-processing-windowed module type
@@ -14,10 +13,11 @@ class TimeWindowedStreamingValidator extends StreamingModuleValidator {
 
   /**
     * Validating input parameters for 'time-windowed-streaming' module
+ *
     * @param parameters - input parameters for running module
     * @return - List of errors
     */
-  def validate(parameters: TimeWindowedInstanceMetadata, collectionName: String) = {
+  def validate(parameters: TimeWindowedInstanceMetadata) = {
     val validateResult = super.validate(parameters)
     var errors = validateResult._1
     if (parameters.timeWindowed <= 0) {
@@ -26,7 +26,7 @@ class TimeWindowedStreamingValidator extends StreamingModuleValidator {
     if (parameters.windowFullMax <= 0) {
       errors += s"Window-full-max attribute must be > 0"
     }
-    (errors.toList, validateResult._2)
+    (errors, validateResult._2, validateResult._3)
   }
 
 }
