@@ -1,9 +1,10 @@
 package com.bwsw.sj.common.module
 
-import java.io.{BufferedReader, File, InputStreamReader}
+import java.io.File
 import java.net.{InetSocketAddress, URLClassLoader}
 
 import com.aerospike.client.Host
+import com.bwsw.sj.common.DAL.model.{FileMetadata, TStreamService}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.tstreams.agents.consumer.Offsets.IOffset
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
@@ -12,13 +13,13 @@ import com.bwsw.tstreams.agents.producer.InsertionType.BatchInsert
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions}
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.Coordinator
+import com.bwsw.tstreams.data.IStorage
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStorageOptions}
+import com.bwsw.tstreams.data.cassandra.{CassandraStorageFactory, CassandraStorageOptions}
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
-import com.bwsw.tstreams.metadata.MetadataStorageFactory
+import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.policy.RoundRobinPolicy
 import com.bwsw.tstreams.streams.BasicStream
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.impl.client.HttpClientBuilder
 import org.redisson.{Config, Redisson}
 
 import scala.collection.mutable
@@ -37,51 +38,90 @@ class TaskManager() {
   private val moduleVersion = System.getenv("MODULE_VERSION")
   private val instanceName = System.getenv("INSTANCE_NAME")
   val taskName = System.getenv("TASK_NAME")
-  private val randomKeyspace = "test"
 
-  private val instanceService = ConnectionRepository.getInstanceService
+  private val instanceMetadata = ConnectionRepository.getInstanceService.get(instanceName)
   private val storage = ConnectionRepository.getFileStorage
 
-  private val fileMetadata = ConnectionRepository.getFileMetadataService.getByParameters(Map("specification.name" -> moduleName,
+  private val fileMetadata: FileMetadata = ConnectionRepository.getFileMetadataService.getByParameters(Map("specification.name" -> moduleName,
     "specification.module-type" -> moduleType,
     "specification.version" -> moduleVersion)).head
 
-  //metadata/data factories
-  private val metadataStorageFactory = new MetadataStorageFactory
-  private val storageFactory = new AerospikeStorageFactory
-
+  /**
+   * Converter to convert usertype->storagetype; storagetype->usertype
+   */
   private val converter = new IConverter[Array[Byte], Array[Byte]] {
     override def convert(obj: Array[Byte]): Array[Byte] = obj
   }
 
-  //aerospike storage instances
-  private val hosts = List(
-    new Host("localhost", 3000),
-    new Host("localhost", 3001),
-    new Host("localhost", 3002),
-    new Host("localhost", 3003))
-  private val aerospikeOptions = new AerospikeStorageOptions("test", hosts)
-  val aerospikeInst = storageFactory.getInstance(aerospikeOptions)
-
-  //metadata storage instances
-  val metadataStorage = metadataStorageFactory.getInstance(
-    cassandraHosts = List(new InetSocketAddress("localhost", 9042)),
-    keyspace = randomKeyspace)
-
-  //coordinator for coordinating producer/consumer
-  private val config = new Config()
-  config.useSingleServer().setAddress("localhost:6379")
-  private val redissonClient = Redisson.create(config)
-  private val coordinator = new Coordinator("some_path", redissonClient)
-
-  private val timeUuidGenerator = new LocalTimeUUIDGenerator
-
+  /**
+   * An auxiliary service to retrieve settings of TStream providers
+   */
+  private val service = ConnectionRepository.getStreamService.get(instanceMetadata.outputs.head).service.asInstanceOf[TStreamService]
 
   /**
-   * Return class loader for retrieving classes from jar
+   * Metadata storage instance
+   */
+  private val metadataStorage: MetadataStorage = createMetadataStorage()
+
+  /**
+   * Data storage instance
+   */
+  private val dataStorage: IStorage[Array[Byte]] = createDataStorage()
+
+  /**
+   * Coordinator for coordinating producer/consumer
+   */
+  private val coordinator: Coordinator = createCoordanator()
+
+  /**
+   * Creates metadata storage for producer/consumer settings
+   */
+  private def createMetadataStorage() = {
+    val hosts = service.metadataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList
+    (new MetadataStorageFactory).getInstance(
+      cassandraHosts = hosts,
+      keyspace = service.metadataNamespace)
+  }
+
+  /**
+   * Creates data storage for producer/consumer settings
+   */
+  private def createDataStorage() = {
+    service.dataProvider.providerType match {
+      case "aerospike" =>
+        val options = new AerospikeStorageOptions(
+          service.dataNamespace,
+          service.dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toList)
+        (new AerospikeStorageFactory).getInstance(options)
+
+      case _ =>
+        val options = new CassandraStorageOptions(
+          service.dataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList,
+          service.dataNamespace
+        )
+
+        (new CassandraStorageFactory).getInstance(options)
+    }
+  }
+
+  /**
+   * Creates coordinator for coordinating producer/consumer
+   */
+  private def createCoordanator() = {
+    val config = new Config()
+    config.useSingleServer().setAddress(service.lockProvider.hosts.head)
+    val redissonClient = Redisson.create(config)
+    new Coordinator(service.lockNamespace, redissonClient)
+  }
+
+  //todo choose from generator field and use txns generator
+  private val timeUuidGenerator = new LocalTimeUUIDGenerator
+
+  /**
+   * Returns class loader for retrieving classes from jar
    *
    * @param pathToJar Absolute path to jar file
-   * @return Class loader
+   * @return Class loader for retrieving classes from jar
    */
   def getClassLoader(pathToJar: String) = {
     val classLoaderUrls = Array(new File(pathToJar).toURI.toURL)
@@ -90,47 +130,39 @@ class TaskManager() {
 
   }
 
-  private def sendHttpGetRequest(url: String) = {
-
-    val client = HttpClientBuilder.create().build()
-    val request = new HttpGet(url)
-
-    val response = client.execute(request)
-
-    System.out.println("Response Code : "
-      + response.getStatusLine.getStatusCode)
-
-    val rd = new BufferedReader(
-      new InputStreamReader(response.getEntity.getContent))
-
-    val result = new StringBuffer()
-    var line: String = rd.readLine()
-    while (line != null) {
-      result.append(line)
-      line = rd.readLine()
-    }
-
-    result.toString
-  }
-
-  def downloadModuleJar(): File = {
+  /**
+   * Returns file contains uploaded module jar
+   * @return Local file contains uploaded module jar
+   */
+  def getModuleJar: File = {
     storage.get(fileMetadata.filename, s"tmp/$moduleName")
   }
 
-  def getRegularInstanceMetadata = {
-    instanceService.get(instanceName)
+  /**
+   * Returns instance metadata to launch a module
+   * @return An instance metadata to launch a module
+   */
+  def getInstanceMetadata = {
+    instanceMetadata
   }
 
-  def getSpecification = {
-    fileMetadata.specification
+  /**
+   * Returns an absolute path to executor class of module
+   * @return An absolute path to executor class of module
+   */
+  def getExecutorClass = {
+    fileMetadata.specification.executorClass
   }
 
+  /**
+   * Returns output to temporarily store the data intended for output streams
+   * @return
+   */
   def getTemporaryOutput = {
     mutable.Map[String, (String, Any)]()
   }
 
-  //todo: use services to retrieve metadata for creating a consumer/producer
-
+  //todo: use BasicStreamService to retrieve metadata for retrieving streams
   def createConsumer(streamName: String, partitionRange: List[Int], offsetPolicy: IOffset, blockingQueue: PersistentBlockingQueue) = {
 
     //    val stream: BasicStream[Array[Byte]] =
@@ -140,7 +172,7 @@ class TaskManager() {
       name = streamName,
       partitions = 3,
       metadataStorage = metadataStorage,
-      dataStorage = aerospikeInst,
+      dataStorage = dataStorage,
       coordinator = coordinator,
       ttl = 60 * 30,
       description = "some_description")
@@ -173,7 +205,7 @@ class TaskManager() {
       name = streamName,
       partitions = 3,
       metadataStorage = metadataStorage,
-      dataStorage = aerospikeInst,
+      dataStorage = dataStorage,
       coordinator = coordinator,
       ttl = 60 * 30,
       description = "some_description")
@@ -203,7 +235,7 @@ class TaskManager() {
       name = streamName,
       partitions = 1,
       metadataStorage = metadataStorage,
-      dataStorage = aerospikeInst,
+      dataStorage = dataStorage,
       coordinator = coordinator,
       ttl = 60 * 30,
       description = "some_description")
@@ -232,7 +264,7 @@ class TaskManager() {
       name = streamName,
       partitions = 1,
       metadataStorage = metadataStorage,
-      dataStorage = aerospikeInst,
+      dataStorage = dataStorage,
       coordinator = coordinator,
       ttl = 60 * 30,
       description = "some_description")
