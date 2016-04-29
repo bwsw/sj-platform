@@ -10,4 +10,5 @@ class SjStream() {
   @Reference(value = "service", `lazy` = true) var service: Service = null
   var tags: String = null
   var generator: Array[String] = null
+
 }
