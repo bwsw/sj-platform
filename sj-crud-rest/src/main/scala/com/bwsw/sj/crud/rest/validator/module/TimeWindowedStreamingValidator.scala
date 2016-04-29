@@ -1,6 +1,7 @@
 package com.bwsw.sj.crud.rest.validator.module
 
-import com.bwsw.sj.common.entities.TimeWindowedInstanceMetadata
+
+import com.bwsw.sj.common.DAL.model.TimeWindowedInstance
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -17,7 +18,7 @@ class TimeWindowedStreamingValidator extends StreamingModuleValidator {
     * @param parameters - input parameters for running module
     * @return - List of errors
     */
-  def validate(parameters: TimeWindowedInstanceMetadata, collectionName: String) = {
+  def validate(parameters: TimeWindowedInstance, collectionName: String) = {
     val validateResult = super.validate(parameters)
     var errors = validateResult._1
     if (parameters.timeWindowed <= 0) {

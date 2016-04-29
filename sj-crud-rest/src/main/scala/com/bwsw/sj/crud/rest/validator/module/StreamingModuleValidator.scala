@@ -3,19 +3,19 @@ package com.bwsw.sj.crud.rest.validator.module
 import java.net.{InetSocketAddress, URI}
 
 import com.aerospike.client.Host
-import com.bwsw.sj.common.DAL.{GenericMongoService, ConnectionRepository}
-import com.bwsw.sj.common.entities._
+import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.tstreams.coordination.Coordinator
 import com.bwsw.tstreams.data.IStorage
-import com.bwsw.tstreams.data.aerospike.{AerospikeStorageOptions, AerospikeStorageFactory}
+import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStorageOptions}
 import com.bwsw.tstreams.data.cassandra.{CassandraStorageFactory, CassandraStorageOptions}
 import com.bwsw.tstreams.metadata.MetadataStorageFactory
 import com.bwsw.tstreams.services.BasicStreamService
-import org.redisson.{Redisson, Config}
+import org.redisson.{Config, Redisson}
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
-
 
 /**
   * Trait of validator for modules
@@ -27,7 +27,7 @@ abstract class StreamingModuleValidator {
   import com.bwsw.sj.common.module.ModuleConstants._
 
   var serviceDAO: GenericMongoService[Service] = null
-  var instanceDAO: GenericMongoService[RegularInstanceMetadata] = null
+  var instanceDAO: GenericMongoService[RegularInstance] = null
 
   /**
     * Validating input parameters for streaming module
@@ -35,7 +35,7 @@ abstract class StreamingModuleValidator {
     * @param parameters - input parameters for running module
     * @return - List of errors
     */
-  def validate(parameters: RegularInstanceMetadata) = {
+  def validate(parameters: RegularInstance) = {
     instanceDAO = ConnectionRepository.getInstanceService
     serviceDAO = ConnectionRepository.getServiceManager
 

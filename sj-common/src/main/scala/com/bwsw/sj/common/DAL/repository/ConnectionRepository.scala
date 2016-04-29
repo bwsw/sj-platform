@@ -1,9 +1,11 @@
-package com.bwsw.sj.common.DAL
+package com.bwsw.sj.common.DAL.repository
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.sj.common.ConfigLoader
-import com.bwsw.sj.common.entities._
+import com.bwsw.sj.common.DAL.ConnectionConstants
+import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.mongodb.MongoClient
 import org.mongodb.morphia.Morphia
 import org.mongodb.morphia.dao.BasicDAO
@@ -30,7 +32,7 @@ object ConnectionRepository {
 
   private lazy val fileMetadataService = new GenericMongoService[FileMetadata]()
 
-  private lazy val instanceService = new GenericMongoService[RegularInstanceMetadata]()
+  private lazy val instanceService = new GenericMongoService[RegularInstance]()
 
   private lazy val streamService = new GenericMongoService[SjStream]()
 
@@ -70,16 +72,3 @@ object ConnectionRepository {
 
 }
 
-object ConnectionConstants {
-  val conf = ConfigLoader.load()
-  val host = System.getenv("MONGO_HOST")
-  val port = System.getenv("MONGO_PORT").toInt
-
-  val databaseName = "stream_juggler"
-  lazy val fileMetadataCollection = "fs.files"
-  lazy val instanceCollection = "instances"
-  lazy val streamCollection = "streams"
-  lazy val serviceCollection = "services"
-  lazy val providerCollection = "providers"
-
-}

@@ -13,7 +13,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.ConfigLoader
-import com.bwsw.sj.common.DAL.ConnectionRepository
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.typesafe.config.Config
 
 import scala.concurrent.Future

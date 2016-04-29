@@ -1,4 +1,4 @@
-package com.bwsw.sj.common.entities
+package com.bwsw.sj.common.DAL.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.mongodb.morphia.annotations._
@@ -12,7 +12,7 @@ import scala.collection.immutable.HashMap
  * @author Kseniya Tomskikh
  */
 @Entity("instances")
-class RegularInstanceMetadata {
+class RegularInstance {
   @Property("module-type")
   @JsonProperty("module-type") var moduleType: String = null
   @Property("module-name")

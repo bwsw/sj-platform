@@ -1,7 +1,9 @@
 package com.bwsw.sj.crud.rest
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.DAL.{GenericMongoService, ConnectionRepository}
+import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.entities._
 import com.mongodb.casbah.MongoClient
 

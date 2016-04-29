@@ -1,4 +1,4 @@
-package com.bwsw.sj.common.DAL
+package com.bwsw.sj.common.DAL.service
 
 import scala.collection.mutable
 

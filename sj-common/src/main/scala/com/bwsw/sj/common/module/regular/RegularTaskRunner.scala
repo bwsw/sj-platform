@@ -3,7 +3,7 @@ package com.bwsw.sj.common.module.regular
 import java.net.URLClassLoader
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.entities.RegularInstanceMetadata
+import com.bwsw.sj.common.DAL.model.RegularInstance
 import com.bwsw.sj.common.module.entities.Transaction
 import com.bwsw.sj.common.module.environment.{ModuleEnvironmentManager, StatefulModuleEnvironmentManager}
 import com.bwsw.sj.common.module.state.{RAMStateService, StateStorage}
@@ -30,7 +30,7 @@ object RegularTaskRunner {
 
     val moduleJar = manager.downloadModuleJar()
 
-    val regularInstanceMetadata: RegularInstanceMetadata = manager.getRegularInstanceMetadata
+    val regularInstanceMetadata: RegularInstance = manager.getRegularInstanceMetadata
 
     val specification = manager.getSpecification
 
@@ -123,7 +123,7 @@ object RegularTaskRunner {
    * @param checkpointGroup Group of producers and consumers which should do a checkpoint at the same time
    */
   private def runModule(moduleTimer: SjTimer,
-                        regularInstanceMetadata: RegularInstanceMetadata,
+                        regularInstanceMetadata: RegularInstance,
                         blockingQueue: PersistentBlockingQueue,
                         temporaryOutput: mutable.Map[String, (String, Any)],
                         classLoader: URLClassLoader,

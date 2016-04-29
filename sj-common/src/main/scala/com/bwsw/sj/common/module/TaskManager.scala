@@ -4,7 +4,7 @@ import java.io.{BufferedReader, File, InputStreamReader}
 import java.net.{InetSocketAddress, URLClassLoader}
 
 import com.aerospike.client.Host
-import com.bwsw.sj.common.DAL.ConnectionRepository
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.tstreams.agents.consumer.Offsets.IOffset
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions}

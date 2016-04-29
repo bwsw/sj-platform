@@ -1,4 +1,6 @@
-package com.bwsw.sj.common.DAL
+package com.bwsw.sj.common.DAL.service
+
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 
 import scala.reflect.ClassTag
 

@@ -1,4 +1,4 @@
-package com.bwsw.sj.common.entities
+package com.bwsw.sj.common.DAL.model
 
 import scala.collection._
 

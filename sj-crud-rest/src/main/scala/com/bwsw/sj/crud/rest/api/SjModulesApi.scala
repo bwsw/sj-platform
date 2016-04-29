@@ -9,6 +9,7 @@ import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.server.{RequestContext, Directives}
 import akka.http.scaladsl.server.directives.FileInfo
 import com.bwsw.common.exceptions.{InstanceException, BadRecordWithKey}
+import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.entities._
 import com.bwsw.sj.common.module.StreamingValidator
 import akka.http.scaladsl.model.headers._
@@ -262,9 +263,9 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     */
   def deserializeOptions(options: String, moduleType: String) = {
     if (moduleType.equals(timeWindowedType)) {
-      serializer.deserialize[TimeWindowedInstanceMetadata](options)
+      serializer.deserialize[TimeWindowedInstance](options)
     } else {
-      serializer.deserialize[RegularInstanceMetadata](options)
+      serializer.deserialize[RegularInstance](options)
     }
   }
 
@@ -275,7 +276,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @param moduleType - type name of module
     * @return - list of errors
     */
-  def validateOptions(options: RegularInstanceMetadata, moduleType: String) = {
+  def validateOptions(options: RegularInstance, moduleType: String) = {
     val validatorClassName = conf.getString("modules." + moduleType + ".validator-class")
     val validatorClazz = Class.forName(validatorClassName)
     val validator = validatorClazz.newInstance().asInstanceOf[StreamingModuleValidator]
@@ -291,7 +292,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @param moduleVersion - version of module
     * @return - name of created entity
     */
-  def saveInstance(parameters: RegularInstanceMetadata, moduleType: String, moduleName: String, moduleVersion: String, partitionsCount: Map[String, Int]) = {
+  def saveInstance(parameters: RegularInstance, moduleType: String, moduleName: String, moduleVersion: String, partitionsCount: Map[String, Int]) = {
     parameters.moduleName = moduleName
     parameters.moduleVersion = moduleVersion
     parameters.moduleType = moduleType
@@ -322,7 +323,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @param instance - instance for module
     * @return - execution plan of instance
     */
-  def createExecutionPlan(instance: RegularInstanceMetadata, partitionsCount: Map[String, Int]) = {
+  def createExecutionPlan(instance: RegularInstance, partitionsCount: Map[String, Int]) = {
     val inputs = instance.inputs.map { input =>
       val mode = getStreamMode(input)
       val name = input.replaceAll("/split|/full", "")
@@ -384,7 +385,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
 
   case class Generator(generatorType: String, zkServers: Array[String], prefix: String, count: Int)
 
-  def startInstance(instance: RegularInstanceMetadata) = {
+  def startInstance(instance: RegularInstance) = {
 
     instance.inputs.map(_.replaceAll("/split|/full", "")).foreach { streamName =>
       val stream = streamDAO.get(streamName)
@@ -415,7 +416,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
   }
 
   //todo stop
-  def stopInstance(instance: RegularInstanceMetadata) = {
+  def stopInstance(instance: RegularInstance) = {
 
   }
 }

@@ -1,6 +1,6 @@
-package com.bwsw.sj.common.entities
+package com.bwsw.sj.common.DAL.model
 
-import org.mongodb.morphia.annotations.{Property, Entity, Id}
+import org.mongodb.morphia.annotations.{Entity, Id, Property}
 
 @Entity("providers")
 class Provider {

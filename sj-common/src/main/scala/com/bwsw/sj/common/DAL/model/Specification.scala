@@ -1,7 +1,7 @@
-package com.bwsw.sj.common.entities
+package com.bwsw.sj.common.DAL.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.mongodb.morphia.annotations.{Property, Embedded}
+import org.mongodb.morphia.annotations.{Embedded, Property}
 
 import scala.collection.immutable.HashMap
 
@@ -16,7 +16,7 @@ class Specification {
   @Embedded val outputs: IOstream = null
   @Property("module-type") @JsonProperty("module-type") val moduleType: String = null
   val engine: String = null
-  @Embedded val options: HashMap[String, Any] = null
+  @Embedded val options: HashMap[String, Any] = null //todo string
   @Property("validator-class") @JsonProperty("validator-class") val validateClass: String = null
   @Property("executor-class") @JsonProperty("executor-class") val executorClass: String = null
 }

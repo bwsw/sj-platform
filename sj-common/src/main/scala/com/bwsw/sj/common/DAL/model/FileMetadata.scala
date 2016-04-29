@@ -1,7 +1,7 @@
-package com.bwsw.sj.common.entities
+package com.bwsw.sj.common.DAL.model
 
 import org.bson.types.ObjectId
-import org.mongodb.morphia.annotations.{Embedded, Id, Entity}
+import org.mongodb.morphia.annotations.{Embedded, Entity, Id}
 
 @Entity("fs.files")
 class FileMetadata() {
