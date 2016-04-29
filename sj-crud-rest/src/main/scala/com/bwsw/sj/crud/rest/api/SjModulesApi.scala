@@ -413,15 +413,15 @@ trait SjModulesApi extends Directives with SjCrudValidator {
             }
         }
 
-        inputStream.name -> List(startPartition, endPartition - 1)
+        inputStream.name -> Array(startPartition, endPartition - 1)
       }
       tasksNotProcessed -= 1
       val planTask = new Task
-      planTask.inputs = Map(list.toSeq: _*)
+      planTask.inputs = mapAsJavaMap(Map(list.toSeq: _*))
       executionPlan.put(task._1, planTask)
     }
     val execPlan = new ExecutionPlan
-    execPlan.tasks = executionPlan
+    execPlan.tasks = mapAsJavaMap(executionPlan)
     execPlan
   }
 

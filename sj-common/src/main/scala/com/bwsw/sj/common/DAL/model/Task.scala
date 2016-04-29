@@ -7,5 +7,5 @@ package com.bwsw.sj.common.DAL.model
  * @author Kseniya Tomskikh
  */
 class Task() {
-  var inputs: java.util.Map[String, List[Int]] = null
+  var inputs: java.util.Map[String, Array[Int]] = null
 }

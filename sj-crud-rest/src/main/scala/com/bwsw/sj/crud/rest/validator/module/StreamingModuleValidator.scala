@@ -163,8 +163,8 @@ abstract class StreamingModuleValidator {
         }
         val coordService = serviceDAO.get(generatorUrl.getAuthority)
         if (coordService != null) {
-          if (coordService.isInstanceOf[ZKService]) {
-            errors += s"Service for streams must be 'ZKCoord'."
+          if (!coordService.isInstanceOf[ZKService]) {
+            errors += s"Generator service for streams must be 'ZKCoord'."
           }
         } else {
           errors += s"Service ${generatorUrl.getHost} not found."
