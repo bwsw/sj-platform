@@ -9,7 +9,7 @@ import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.stream.scaladsl.Source
 import com.bwsw.common.exceptions.BadRecordWithKey
-import com.bwsw.sj.common.entities.Response
+import com.bwsw.sj.crud.rest.entities.Response
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import org.apache.commons.io.FileUtils
 

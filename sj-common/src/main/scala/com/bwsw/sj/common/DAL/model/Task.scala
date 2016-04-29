@@ -1,11 +1,11 @@
 package com.bwsw.sj.common.DAL.model
 
-import scala.collection._
-
 /**
  * Entity for task of execution plan
- * Created: 4/14/16
+ * Created: 14/04/2016
  *
  * @author Kseniya Tomskikh
  */
-case class Task(inputs: mutable.Map[String, List[Int]])
+class Task() {
+  var inputs: java.util.Map[String, List[Int]] = null
+}

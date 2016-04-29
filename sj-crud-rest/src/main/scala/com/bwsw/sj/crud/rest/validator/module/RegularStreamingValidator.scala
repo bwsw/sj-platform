@@ -1,6 +1,6 @@
 package com.bwsw.sj.crud.rest.validator.module
 
-import com.bwsw.sj.common.DAL.model.RegularInstance
+import com.bwsw.sj.crud.rest.entities.InstanceMetadata
 
 /**
   * Validator for Stream-processing-simple module type
@@ -16,9 +16,8 @@ class RegularStreamingValidator extends StreamingModuleValidator {
     * @param parameters - input parameters for running module
     * @return - List of errors
     */
-  override def validate(parameters: RegularInstance) = {
-    val validateResult = super.validate(parameters)
-    (validateResult._1, validateResult._2)
+  override def validate(parameters: InstanceMetadata) = {
+    super.validate(parameters)
   }
 
 }

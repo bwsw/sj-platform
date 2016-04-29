@@ -7,9 +7,8 @@ import akka.http.scaladsl.server.RequestContext
 import akka.stream.Materializer
 import com.bwsw.common.file.utils.FilesStorage
 import com.bwsw.common.traits.Serializer
-import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.model.{RegularInstance, FileMetadata}
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.entities._
 import com.bwsw.sj.common.module.ModuleConstants
 import com.typesafe.config.Config
 import org.everit.json.schema.loader.SchemaLoader
@@ -32,9 +31,9 @@ trait SjCrudValidator {
   val fileMetadataDAO: GenericMongoService[FileMetadata]
   val storage: FilesStorage
   val instanceDAO: GenericMongoService[RegularInstance]
-  val serviceDAO: GenericMongoService[Service]
+  /*val serviceDAO: GenericMongoService[Service]
   val streamDAO: GenericMongoService[SjStream]
-  val providerDAO: GenericMongoService[Provider]
+  val providerDAO: GenericMongoService[Provider]*/
 
   import ModuleConstants._
 

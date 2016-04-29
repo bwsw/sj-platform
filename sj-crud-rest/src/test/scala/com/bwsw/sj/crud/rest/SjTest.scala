@@ -4,14 +4,6 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.entities._
-import com.mongodb.casbah.MongoClient
-
-
-import scala.collection.immutable.IndexedSeq
-import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
-import com.mongodb.casbah.Imports._
 
 /**
   * Created: 4/14/16

@@ -6,6 +6,7 @@ import com.aerospike.client.Host
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
+import com.bwsw.sj.crud.rest.entities.InstanceMetadata
 import com.bwsw.tstreams.coordination.Coordinator
 import com.bwsw.tstreams.data.IStorage
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStorageOptions}
@@ -35,7 +36,8 @@ abstract class StreamingModuleValidator {
     * @param parameters - input parameters for running module
     * @return - List of errors
     */
-  def validate(parameters: RegularInstance) = {
+  def validate(parameters: InstanceMetadata) = {
+    val validateParameters = parameters
     instanceDAO = ConnectionRepository.getInstanceService
     serviceDAO = ConnectionRepository.getServiceManager
 
@@ -118,11 +120,12 @@ abstract class StreamingModuleValidator {
         if (!s.equals("max")) {
           errors += s"Parallelism must be int value or string 'max'."
         }
+        validateParameters.parallelism = minPartitionCount
       case _ =>
         errors += "Unknown type of 'parallelism' parameter. Must be Int or String."
     }
 
-    (errors, partitions)
+    (errors, partitions, validateParameters)
   }
 
   def checkAndCreateStreams(errors: ArrayBuffer[String], service: TStreamService, allStreams: mutable.Buffer[SjStream]) = {

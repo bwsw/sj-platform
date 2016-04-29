@@ -25,12 +25,12 @@ class RegularInstance {
   @Property("state-management") var stateManagement: String = null
   @Property("state-full-checkpoint") var stateFullCheckpoint: Int = 0
   var parallelism: Int = 0
-  var options: HashMap[String, Any] = null
+  var options: String = null
   @Property("start-from") var startFrom: String = null
   @Property("per-task-cores") var perTaskCores: Int = 0
   @Property("per-task-ram") var perTaskRam: Int = 0
-  @Embedded(value = "jvm-options") var jvmOptions: HashMap[String, String] = null
-  @Embedded(value = "execution-plan") var executionPlan: ExecutionPlan = null
+  @Embedded("jvm-options") var jvmOptions: java.util.Map[String, String] = null
+  @Embedded("execution-plan") var executionPlan: ExecutionPlan = null
   var tags: String = null
   var idle: Long = 0
 }
