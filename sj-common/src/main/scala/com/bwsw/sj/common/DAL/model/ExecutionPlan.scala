@@ -2,7 +2,7 @@ package com.bwsw.sj.common.DAL.model
 
 import org.mongodb.morphia.annotations.Embedded
 
-import scala.collection.mutable
+import scala.collection.immutable.HashMap
 
 /**
  * Entity for execution plan of module instance
@@ -12,5 +12,5 @@ import scala.collection.mutable
  */
 @Embedded
 class ExecutionPlan() {
-  var tasks: mutable.Map[String, Task] = null
+  var tasks: HashMap[String, Task] = null
 }

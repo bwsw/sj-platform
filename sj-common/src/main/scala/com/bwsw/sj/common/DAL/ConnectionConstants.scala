@@ -2,9 +2,6 @@ package com.bwsw.sj.common.DAL
 
 import com.bwsw.sj.common.ConfigLoader
 
-/**
- * Created by mikhaleva_ka on 29.04.16.
- */
 object ConnectionConstants {
    val conf = ConfigLoader.load()
    val host = System.getenv("MONGO_HOST")
