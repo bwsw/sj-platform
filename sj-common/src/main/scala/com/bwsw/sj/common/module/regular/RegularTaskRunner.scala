@@ -135,7 +135,7 @@ object RegularTaskRunner {
     regularInstanceMetadata.stateManagement match {
       case "none" =>
         val moduleEnvironmentManager = new ModuleEnvironmentManager(
-          regularInstanceMetadata.options,
+          serializer.deserialize[Map[String, Any]](regularInstanceMetadata.options),
           temporaryOutput,
           moduleTimer
         )
@@ -222,7 +222,7 @@ object RegularTaskRunner {
 
         val moduleEnvironmentManager = new StatefulModuleEnvironmentManager(
           new StateStorage(stateService),
-          regularInstanceMetadata.options,
+          serializer.deserialize[Map[String, Any]](regularInstanceMetadata.options),
           temporaryOutput,
           moduleTimer
         )
