@@ -1,7 +1,7 @@
 package com.bwsw.sj.crud.rest.validator.module
 
 
-import com.bwsw.sj.crud.rest.entities.InstanceMetadata
+import com.bwsw.sj.crud.rest.entities.{TimeWindowedInstanceMetadata, InstanceMetadata}
 
 /**
   * Validator for Stream-processing-windowed module type
@@ -13,10 +13,11 @@ class TimeWindowedStreamingValidator extends StreamingModuleValidator {
 
   /**
     * Validating input parameters for 'time-windowed-streaming' module
+ *
     * @param parameters - input parameters for running module
     * @return - List of errors
     */
-  override def validate(parameters: InstanceMetadata) = {
+  def validate(parameters: TimeWindowedInstanceMetadata) = {
     val validateResult = super.validate(parameters)
     var errors = validateResult._1
     if (parameters.timeWindowed <= 0) {
