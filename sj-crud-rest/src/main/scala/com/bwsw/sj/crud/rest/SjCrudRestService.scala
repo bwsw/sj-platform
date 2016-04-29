@@ -57,10 +57,10 @@ object SjCrudRestService extends App with SjCrudRouter {
   val serializer = new JsonSerializer()
   val storage = ConnectionRepository.getFileStorage
   val fileMetadataDAO = ConnectionRepository.getFileMetadataService
-  /*val instanceDAO = ConnectionRepository.getInstanceService
+  val instanceDAO = ConnectionRepository.getInstanceService
   val serviceDAO = ConnectionRepository.getServiceManager
   val providerDAO = ConnectionRepository.getProviderService
-  val streamDAO = ConnectionRepository.getStreamService*/
+  val streamDAO = ConnectionRepository.getStreamService
 
   val routeLogged = logRequestResult(Logging.InfoLevel, route())
 
