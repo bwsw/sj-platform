@@ -9,7 +9,7 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.server.{RequestContext, Directives}
 import akka.http.scaladsl.server.directives.FileInfo
-import com.bwsw.common.exceptions.{BadRecord, InstanceException, BadRecordWithKey}
+import com.bwsw.common.exceptions.{InstanceException, BadRecordWithKey}
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.crud.rest.entities._
 import com.bwsw.sj.common.module.StreamingValidator
@@ -33,6 +33,7 @@ import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 trait SjModulesApi extends Directives with SjCrudValidator {
   import com.bwsw.sj.common.module.ModuleConstants._
   import scala.collection.JavaConversions._
+  import scala.collection.JavaConverters._
 
   val modulesApi = {
     pathPrefix("modules") {
@@ -110,7 +111,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                         val jarFile = storage.get(filename, s"tmp/$filename")
                         if (jarFile != null && jarFile.exists()) {
                           if (moduleValidate(jarFile, validatorClassName, validatedInstance.options)) {
-                            val nameInstance = saveInstance(validatedInstance, moduleType, moduleName, moduleVersion, partitions)
+                            val nameInstance = createInstance(validatedInstance, moduleType, moduleName, moduleVersion, partitions)
                             ctx.complete(HttpEntity(
                               `application/json`,
                               serializer.serialize(Response(200, nameInstance, s"Instance for module $moduleType-$moduleName-$moduleVersion is created"))
@@ -134,7 +135,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                       )
                       var msg = ""
                       if (instances.nonEmpty) {
-                        msg = serializer.serialize(instances)
+                        msg = serializer.serialize(instances.map(i => convertToApiInstance(i)))
                       } else {
                         msg =  serializer.serialize(Response(200, s"$moduleType-$moduleName-$moduleVersion",
                           s"Instances for $moduleType-$moduleName-$moduleVersion not found"))
@@ -144,46 +145,41 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                   } ~
                   path(Segment) { (instanceName: String) =>
                     val instance = instanceDAO.get(instanceName)
-                    pathSuffix("start") {
+                    validate(instance != null, s"Instance for name $instanceName has not been found!") {
+                      pathSuffix("start") {
+                        get {
+                          //todo
+                          startInstance(instance)
+                          complete(HttpEntity(
+                            `application/json`,
+                            serializer.serialize(Response(200, null, "Ok"))
+                          ))
+                        }
+                      } ~
+                      pathSuffix("stop") {
+                        get {
+                          //todo
+                          stopInstance(instance)
+                          complete(HttpEntity(
+                            `application/json`,
+                            serializer.serialize(Response(200, null, "Ok"))
+                          ))
+                        }
+                      } ~
                       get {
-                        //todo
-                        startInstance(instance)
                         complete(HttpEntity(
                           `application/json`,
-                          serializer.serialize(Response(200, null, "Ok"))
+                          serializer.serialize(convertToApiInstance(instance))
                         ))
-                      }
-                    } ~
-                    pathSuffix("stop") {
-                      get {
-                        //todo
-                        stopInstance(instance)
-                        complete(HttpEntity(
-                          `application/json`,
-                          serializer.serialize(Response(200, null, "Ok"))
-                        ))
-                      }
-                    } ~
-                    get {
-                      val instance = instanceDAO.get(instanceName)
-                      if (instance != null) {
-                        complete(HttpEntity(
-                          `application/json`,
-                          serializer.serialize(instance)
-                        ))
-                      } else {
-                        throw BadRecordWithKey(s"Instance with name $instanceName is not found", instanceName)
-                      }
-                    } ~
-                    delete {
-                      instanceDAO.delete(instanceName)
+                      } ~
+                      delete {
+                        //todo add checking
+                        instanceDAO.delete(instanceName)
                         complete(HttpEntity(
                           `application/json`,
                           serializer.serialize(Response(200, instanceName, s"Instance $instanceName has been deleted"))
                         ))
-                      /*} else {
-                        throw new BadRecordWithKey(s"Instance $instanceName hasn't been found", instanceName)
-                      }*/
+                      }
                     }
                   }
                 } ~
@@ -209,7 +205,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                       throw new BadRecordWithKey(s"Jar '$moduleType-$moduleName-$moduleVersion' not found",
                         s"$moduleType - $moduleName - $moduleVersion")
                     }
-                  }/* ~
+                  } ~
                   delete {
                     val instances = instanceDAO.getByParameters(Map("module-name" -> moduleName,
                       "module-type" -> moduleType,
@@ -230,7 +226,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                       throw new BadRecordWithKey(s"Cannot delete module $moduleType-$moduleName-$moduleVersion. Module has instances",
                         s"$moduleType-$moduleName-$moduleVersion")
                     }
-                  }*/
+                  }
                 }
               }
             }
@@ -251,7 +247,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
             ))
           }
         }
-      }/* ~
+      } ~
       pathSuffix("instances") {
         get {
           val allInstances = instanceDAO.getAll
@@ -263,10 +259,15 @@ trait SjModulesApi extends Directives with SjCrudValidator {
           }
           complete(HttpEntity(
             `application/json`,
-            serializer.serialize(allInstances.map(x => ShortInstanceMetadata(x.name, x.moduleType, x.moduleName, x.moduleVersion, x.description, x.status)))
+            serializer.serialize(allInstances.map(x => ShortInstanceMetadata(x.name,
+              x.moduleType,
+              x.moduleName,
+              x.moduleVersion,
+              x.description,
+              x.status)))
           ))
         }
-      }*/
+      }
     }
   }
 
@@ -278,18 +279,11 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @return - json as object InstanceMetadata
     */
   def deserializeOptions(options: String, moduleType: String) = {
-    val instance = serializer.deserialize[InstanceMetadata](options)
-    if (!moduleType.equals(timeWindowedType)) {
-      var msg = ""
-      if (instance.timeWindowed > 0) {
-        msg += s"Instance metadata for $moduleType cannot be contains 'time-windowed' parameters.\n"
-      }
-      if (instance.windowFullMax > 0) {
-        msg += s"Instance metadata for $moduleType cannot be contains 'window-full-max' parameters.\n"
-      }
-      if (!msg.equals("")) throw new BadRecord(msg)
+    if (moduleType.equals(timeWindowedType)) {
+      serializer.deserialize[TimeWindowedInstanceMetadata](options)
+    } else {
+      serializer.deserialize[InstanceMetadata](options)
     }
-    instance
   }
 
   /**
@@ -306,54 +300,47 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     validator.validate(options)
   }
 
+
+  def createInstance(parameters: InstanceMetadata,
+                     moduleType: String,
+                     moduleName: String,
+                     moduleVersion: String,
+                     partitionsCount: Map[String, Int]) = {
+    val executionPlan = createExecutionPlan(parameters, partitionsCount)
+    if (moduleType.equals(timeWindowedType)) {
+      val instance = convertToModelInstance(new TimeWindowedInstance, parameters).asInstanceOf[TimeWindowedInstance]
+      val twParameters = parameters.asInstanceOf[TimeWindowedInstanceMetadata]
+      instance.timeWindowed = twParameters.timeWindowed
+      instance.windowFullMax = twParameters.windowFullMax
+      saveInstance(instance, moduleType, moduleName, moduleVersion, executionPlan)
+    } else {
+      val instance = convertToModelInstance(new RegularInstance, parameters)
+      saveInstance(instance, moduleType, moduleName, moduleVersion, executionPlan)
+    }
+  }
+
   /**
-    * Save instance of module to mongo db
+    * Save instance of module to db
     *
-    * @param parameters - options for instance
+    * @param instance - entity of instance, which saving to db
     * @param moduleType - type name of module
     * @param moduleName - name of module
     * @param moduleVersion - version of module
+    * @param executionPlan - execution plan for instance of module
     * @return - name of created entity
     */
-  def saveInstance(parameters: InstanceMetadata,
-                   moduleType: String, moduleName:
-                   String, moduleVersion: String,
-                   partitionsCount: Map[String, Int]
-                  ) = {
-
-    val instance = new RegularInstance
-    instance.name = parameters.name
-    instance.description = parameters.description
-    instance.inputs = parameters.inputs
-    instance.outputs = parameters.outputs
-    instance.checkpointMode = parameters.checkpointMode
-    instance.checkpointInterval = parameters.checkpointInterval
-    instance.stateFullCheckpoint = parameters.stateFullCheckpoint
-    instance.stateManagement = parameters.stateManagement
-    instance.parallelism = parameters.parallelism.asInstanceOf[Int]
-    instance.options = serializer.serialize(parameters.options)
-    instance.startFrom = parameters.startFrom
-    instance.perTaskCores = parameters.perTaskCores
-    instance.perTaskRam = parameters.perTaskRam
-    instance.jvmOptions = mapAsJavaMap(parameters.jvmOptions)
-    instance.tags = parameters.tags
-    instance.idle = parameters.idle
+  def saveInstance(instance: RegularInstance,
+                     moduleType: String,
+                     moduleName: String,
+                     moduleVersion: String,
+                     executionPlan: ExecutionPlan) = {
     instance.moduleName = moduleName
     instance.moduleVersion = moduleVersion
     instance.moduleType = moduleType
     instance.status = ready
-    instance.executionPlan = createExecutionPlan(parameters, partitionsCount)
-
-    if (moduleType.equals(timeWindowedType)) {
-      val timeWindowedInstance = instance.asInstanceOf[TimeWindowedInstance]
-      timeWindowedInstance.timeWindowed = parameters.timeWindowed
-      timeWindowedInstance.windowFullMax = parameters.windowFullMax
-      instanceDAO.save(timeWindowedInstance)
-    } else {
-      instanceDAO.save(instance)
-    }
-
-    parameters.name
+    instance.executionPlan = executionPlan
+    instanceDAO.save(instance)
+    instance.name
   }
 
   /**
@@ -474,5 +461,74 @@ trait SjModulesApi extends Directives with SjCrudValidator {
   //todo stop
   def stopInstance(instance: RegularInstance) = {
 
+  }
+
+  def convertToApiInstance(instance: RegularInstance) = {
+    instance match {
+      case timeWindowedInstance: TimeWindowedInstance =>
+        val apiInstance = convert(new TimeWindowedInstanceMetadata, instance).asInstanceOf[TimeWindowedInstanceMetadata]
+        apiInstance.timeWindowed = timeWindowedInstance.timeWindowed
+        apiInstance.windowFullMax = timeWindowedInstance.windowFullMax
+        apiInstance
+      case _ => convert(new InstanceMetadata, instance)
+    }
+  }
+
+  /**
+    * Convert model instance object to API instance
+    *
+    * @param instance - object of model instance
+    * @return - API instance object
+    */
+  def convert(apiInstance: InstanceMetadata, instance: RegularInstance): InstanceMetadata = {
+    val executionPlan = Map(
+      "tasks" -> instance.executionPlan.tasks.map(t => t._1 -> Map("inputs" -> t._2.inputs))
+    )
+    apiInstance.status = instance.status
+    apiInstance.name = instance.name
+    apiInstance.description = instance.description
+    apiInstance.inputs = instance.inputs
+    apiInstance.outputs = instance.outputs
+    apiInstance.checkpointMode = instance.checkpointMode
+    apiInstance.checkpointInterval = instance.checkpointInterval
+    apiInstance.stateManagement = instance.stateManagement
+    apiInstance.stateFullCheckpoint = instance.stateFullCheckpoint
+    apiInstance.parallelism = instance.parallelism
+    apiInstance.options = serializer.deserialize[Map[String, Any]](instance.options)
+    apiInstance.startFrom = instance.startFrom
+    apiInstance.perTaskCores = instance.perTaskCores
+    apiInstance.perTaskRam = instance.perTaskRam
+    apiInstance.jvmOptions = Map(instance.jvmOptions.asScala.toList: _*)
+    apiInstance.tags = instance.tags
+    apiInstance.idle = instance.idle
+    apiInstance.executionPlan = executionPlan
+    apiInstance
+  }
+
+  /**
+    * Convert api instance to db-model instance
+    *
+    * @param modelInstance - dst object of model instance
+    * @param apiInstance - api object of instance
+    * @return - object of model instance
+    */
+  def convertToModelInstance(modelInstance: RegularInstance, apiInstance: InstanceMetadata) = {
+    modelInstance.name = apiInstance.name
+    modelInstance.description = apiInstance.description
+    modelInstance.inputs = apiInstance.inputs
+    modelInstance.outputs = apiInstance.outputs
+    modelInstance.checkpointMode = apiInstance.checkpointMode
+    modelInstance.checkpointInterval = apiInstance.checkpointInterval
+    modelInstance.stateFullCheckpoint = apiInstance.stateFullCheckpoint
+    modelInstance.stateManagement = apiInstance.stateManagement
+    modelInstance.parallelism = apiInstance.parallelism.asInstanceOf[Int]
+    modelInstance.options = serializer.serialize(apiInstance.options)
+    modelInstance.startFrom = apiInstance.startFrom
+    modelInstance.perTaskCores = apiInstance.perTaskCores
+    modelInstance.perTaskRam = apiInstance.perTaskRam
+    modelInstance.jvmOptions = mapAsJavaMap(apiInstance.jvmOptions)
+    modelInstance.tags = apiInstance.tags
+    modelInstance.idle = apiInstance.idle
+    modelInstance
   }
 }
