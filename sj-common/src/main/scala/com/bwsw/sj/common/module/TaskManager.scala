@@ -114,17 +114,14 @@ class TaskManager() {
   }
 
   def downloadModuleJar(): File = {
-    //FileUtils.copyURLToFile(new URL(s"http://$moduleRest/v1/modules/$moduleType/$moduleName/$moduleVersion"), moduleJar)
     storage.get(fileMetadata.filename, s"tmp/$moduleName")
   }
 
   def getRegularInstanceMetadata = {
-    //serializer.deserialize[RegularInstanceMetadata](sendHttpGetRequest(s"http://$moduleRest/v1/modules/$moduleType/$moduleName/$moduleVersion/instance/$instanceName"))
     instanceService.get(instanceName)
   }
 
   def getSpecification = {
-    //serializer.deserialize[Specification](sendHttpGetRequest(s"http://$moduleRest/v1/modules/$moduleType/$moduleName/$moduleVersion/specification"))
     fileMetadata.specification
   }
 
@@ -132,7 +129,7 @@ class TaskManager() {
     mutable.Map[String, (String, Any)]()
   }
 
-  //todo: use an Ivan REST to retrieve metadata for creating a consumer/producer
+  //todo: use services to retrieve metadata for creating a consumer/producer
 
   def createConsumer(streamName: String, partitionRange: List[Int], offsetPolicy: IOffset, blockingQueue: PersistentBlockingQueue) = {
 
