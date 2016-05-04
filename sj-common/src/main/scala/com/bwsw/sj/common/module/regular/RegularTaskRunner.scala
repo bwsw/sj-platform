@@ -242,7 +242,7 @@ object RegularTaskRunner {
 
             while (true) {
 
-              val maybeTxn = blockingQueue.get(regularInstanceMetadata.idle)
+              val maybeTxn = blockingQueue.get(10)
 
               if (maybeTxn == null) {
                 executor.onIdle()
