@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.DAL.model
 
-import org.mongodb.morphia.annotations.{Reference, Entity, Id}
+import org.mongodb.morphia.annotations.{Embedded, Entity, Id, Reference}
 
 @Entity("streams")
 class SjStream() {
