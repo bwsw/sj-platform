@@ -51,6 +51,10 @@ object SjTest {
   def main(args: Array[String]) = {
     //createData()
     //prepareCassandra()
+    /*val dao = ConnectionRepository.getStreamService
+    val streams = dao.getAll
+    val stream = streams.filter(s => s.name.equals("s1")).head
+    println(stream.service.name)*/
     println("Ok")
   }
 

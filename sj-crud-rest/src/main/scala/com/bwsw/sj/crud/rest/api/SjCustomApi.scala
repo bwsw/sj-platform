@@ -25,6 +25,19 @@ trait SjCustomApi extends Directives with SjCrudValidator {
   val customApi = {
     pathPrefix("custom") {
       pathPrefix(Segment) { (name: String) =>
+        pathEndOrSingleSlash {
+          get {
+            val jarFile = storage.get(name, s"tmp/rest/$name")
+            if (jarFile != null && jarFile.exists()) {
+              complete(HttpResponse(
+                headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> name))),
+                entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
+              ))
+            } else {
+              throw new BadRecordWithKey(s"Jar '$name' not found", name)
+            }
+          }
+        } ~
         pathSuffix(Segment) { (version: String) =>
           pathEndOrSingleSlash {
             val fileMetadata = fileMetadataDAO.getByParameters(Map("specification.name" -> name, "specification.version" -> version)).head
