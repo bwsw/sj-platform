@@ -9,5 +9,5 @@ class SjStream() {
   var partitions: Int = 0
   @Reference var service: Service = null
   var tags: String = null
-  var generator: Array[String] = null
+  @Embedded("generator") var generator: Generator = null
 }
