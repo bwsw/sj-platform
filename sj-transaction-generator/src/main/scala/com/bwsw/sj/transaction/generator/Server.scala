@@ -16,16 +16,12 @@ import org.apache.log4j.Logger
   * @author Kseniya Tomskikh
   */
 object Server {
-
   private val logger = Logger.getLogger(getClass)
 
   def main(args: Array[String]) = {
-    println("Hello")
-    println(System.getenv())
-    /*val zkServers = System.getenv("ZK_SERVERS")
-    println("step 2")
+    val zkServers = System.getenv("ZK_SERVERS")
     val host = System.getenv("HOST")
-    val port = System.getenv("PORT").toInt
+    val port = System.getenv("PORT0").toInt
     val prefix = System.getenv("PREFIX")
 
     try {
@@ -39,7 +35,7 @@ object Server {
       server.listen()
     } catch {
       case ex: IOException => logger.debug(s"Error: ${ex.getMessage}")
-    }*/
+    }
 
   }
 
