@@ -2,7 +2,6 @@ package com.bwsw.sj.common.DAL.repository
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.MongoFileStorage
-import com.bwsw.sj.common.ConfigLoader
 import com.bwsw.sj.common.DAL.ConnectionConstants
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.service.GenericMongoService
@@ -25,6 +24,7 @@ object ConnectionRepository {
   private lazy val mongoClient = new MongoClient(host, port)
 
   private lazy val morphia = new Morphia()
+  morphia.map(classOf[SjStream],classOf[Service], classOf[Provider])
 
   private lazy val datastore = morphia.createDatastore(mongoClient, databaseName)
 

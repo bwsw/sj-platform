@@ -28,11 +28,11 @@ object RegularTaskRunner {
 
     val manager = new TaskManager()
 
-    val moduleJar = manager.downloadModuleJar()
+    val moduleJar = manager.getModuleJar
 
-    val regularInstanceMetadata: RegularInstance = manager.getRegularInstanceMetadata
+    val regularInstanceMetadata: RegularInstance = manager.getInstanceMetadata
 
-    val specification = manager.getSpecification
+    val executorClass = manager.getExecutorClass
 
     val temporaryOutput = manager.getTemporaryOutput
 
@@ -78,7 +78,7 @@ object RegularTaskRunner {
       blockingQueue,
       temporaryOutput,
       classLoader,
-      specification.executorClass,
+      executorClass,
       producers,
       serializer,
       manager,

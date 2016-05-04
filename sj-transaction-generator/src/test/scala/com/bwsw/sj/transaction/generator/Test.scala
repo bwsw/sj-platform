@@ -2,7 +2,7 @@ package com.bwsw.sj.transaction.generator
 
 import java.util.UUID
 
-import com.bwsw.sj.transaction.generator.client.{TcpClientOptions, TcpClient}
+import com.bwsw.common.client.{TcpClientOptions, TcpClient}
 import com.bwsw.sj.transaction.generator.server.TcpServer
 import org.scalatest._
 

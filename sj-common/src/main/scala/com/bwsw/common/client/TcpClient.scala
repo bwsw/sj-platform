@@ -1,4 +1,4 @@
-package com.bwsw.sj.transaction.generator.client
+package com.bwsw.common.client
 
 import java.io._
 import java.net._
