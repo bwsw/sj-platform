@@ -455,7 +455,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     } else {
       prefix += "/global"
     }
-    val generator = Generator(stream.generator.generatorType, generatorProvider.hosts, prefix, stream.generator.instanceСount)
+    val generator = Generator(stream.generator.generatorType, generatorProvider.hosts, prefix, stream.generator.instanceCount)
 
     val marathonRequest = MarathonRequest(s"task_tg_${stream.name}",
       "java -jar sj-transaction-generator-assembly-1.0.jar $PORT",
