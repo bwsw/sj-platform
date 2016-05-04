@@ -1,7 +1,7 @@
-package com.bwsw.sj.transaction.generator
+package com.bwsw.common.client
 
 import java.io._
-import com.bwsw.sj.transaction.generator.client.{TcpClientOptions, TcpClient}
+
 import org.apache.log4j.Logger
 
 /**

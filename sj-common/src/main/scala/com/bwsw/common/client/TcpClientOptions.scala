@@ -1,4 +1,4 @@
-package com.bwsw.sj.transaction.generator.client
+package com.bwsw.common.client
 
 /**
   * Options for TcpClient
