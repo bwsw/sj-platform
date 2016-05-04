@@ -14,4 +14,6 @@ object ConnectionConstants {
    lazy val serviceCollection = "services"
    lazy val providerCollection = "providers"
 
+   val retryInterval = 5000
+   val retryCount = 10
  }

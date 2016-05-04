@@ -4,9 +4,9 @@ import java.io.File
 import java.net.{InetSocketAddress, URLClassLoader}
 
 import com.aerospike.client.Host
-import com.bwsw.sj.common.DAL.model.{FileMetadata, TStreamService}
+import com.bwsw.common.tstream.GlobalTimeUUIDGenerator
+import com.bwsw.sj.common.DAL.model.{ZKService, FileMetadata, TStreamService}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.GlobalTimeUUIDGenerator
 import com.bwsw.tstreams.agents.consumer.Offsets.IOffset
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions}
@@ -22,7 +22,7 @@ import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.policy.RoundRobinPolicy
 import com.bwsw.tstreams.streams.BasicStream
 import org.redisson.{Config, Redisson}
-
+import com.bwsw.sj.common.DAL.ConnectionConstants._
 import scala.collection.mutable
 
 /**
@@ -55,14 +55,9 @@ class TaskManager() {
   }
 
   /**
-   * An auxiliary stream to retrieve settings of txns generator
-   */
-  private val stream = ConnectionRepository.getStreamService.get(instanceMetadata.outputs.head)
-
-  /**
    * An auxiliary service to retrieve settings of TStream providers
    */
-  private val service = stream.service.asInstanceOf[TStreamService]
+  private val service = ConnectionRepository.getStreamService.get(instanceMetadata.outputs.head).service.asInstanceOf[TStreamService]
 
   /**
    * Metadata storage instance
@@ -120,19 +115,6 @@ class TaskManager() {
     new Coordinator(service.lockNamespace, redisClient)
   }
 
-  //todo choose from generator field and use txns generator
-  private val timeUuidGenerator = stream.generator match {
-    case Array(_, zkService, _) =>
-      val zkServers = Array("127.0.0.1:2181")
-      val prefix = "servers"
-      val retryPeriod = 500
-      val retryCount = 10
-
-      new GlobalTimeUUIDGenerator(zkServers, prefix, retryPeriod, retryCount)
-
-    case Array("local") => new LocalTimeUUIDGenerator
-  }
-
   /**
    * Returns class loader for retrieving classes from jar
    *
@@ -184,7 +166,7 @@ class TaskManager() {
     //    val stream: BasicStream[Array[Byte]] =
     //      BasicStreamService.loadStream(streamName, metadataStorageInstForProducer, aerospikeInstForProducer, coordinator)
 
-    val stream = new BasicStream[Array[Byte]](
+    val basicStream = new BasicStream[Array[Byte]](
       name = streamName,
       partitions = 3,
       metadataStorage = metadataStorage,
@@ -193,7 +175,22 @@ class TaskManager() {
       ttl = 60 * 30,
       description = "some_description")
 
-    val roundRobinPolicy = new RoundRobinPolicy(stream, (partitionRange.head to partitionRange.tail.head).toList)
+    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (partitionRange.head to partitionRange.tail.head).toList)
+
+    val stream = ConnectionRepository.getStreamService.get(streamName)
+
+    val timeUuidGenerator = stream.generator.generatorType match {
+      case "local" => new LocalTimeUUIDGenerator
+      case _type =>
+        val service = stream.generator.service.asInstanceOf[ZKService]
+        val zkHosts = service.provider.hosts
+        val prefix = service.namespace + "/" + {
+          if (_type == "global") _type else streamName
+        }
+
+        new GlobalTimeUUIDGenerator(zkHosts, prefix, retryInterval, retryCount)
+
+    }
 
     val options = new BasicConsumerOptions[Array[Byte], Array[Byte]](
       transactionsPreload = 10,
@@ -209,7 +206,7 @@ class TaskManager() {
     //todo
     val path = "test"
 
-    new BasicSubscribingConsumer[Array[Byte], Array[Byte]]("consumer for " + streamName, stream, options, callback, path)
+    new BasicSubscribingConsumer[Array[Byte], Array[Byte]]("consumer for " + streamName, basicStream, options, callback, path)
   }
 
   def createProducer(streamName: String) = {
@@ -217,7 +214,7 @@ class TaskManager() {
     //        val stream: BasicStream[Array[Byte]] =
     //          BasicStreamService.loadStream(streamName, metadataStorageInstForProducer, aerospikeInstForProducer, coordinator)
 
-    val stream: BasicStream[Array[Byte]] = new BasicStream[Array[Byte]](
+    val basicStream: BasicStream[Array[Byte]] = new BasicStream[Array[Byte]](
       name = streamName,
       partitions = 3,
       metadataStorage = metadataStorage,
@@ -226,7 +223,22 @@ class TaskManager() {
       ttl = 60 * 30,
       description = "some_description")
 
-    val roundRobinPolicy = new RoundRobinPolicy(stream, (0 until 3).toList)
+    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until 3).toList)
+
+    val stream = ConnectionRepository.getStreamService.get(streamName)
+
+    val timeUuidGenerator = stream.generator.generatorType match {
+      case "local" => new LocalTimeUUIDGenerator
+      case _type =>
+        val service = stream.generator.service.asInstanceOf[ZKService]
+        val zkServers = service.provider.hosts
+        val prefix = service.namespace + "/" + {
+          if (_type == "global") _type else streamName
+        }
+
+        new GlobalTimeUUIDGenerator(zkServers, prefix, retryInterval, retryCount)
+
+    }
 
     val options = new BasicProducerOptions[Array[Byte], Array[Byte]](
       transactionTTL = 6,
@@ -237,7 +249,7 @@ class TaskManager() {
       timeUuidGenerator,
       converter)
 
-    new BasicProducer[Array[Byte], Array[Byte]]("producer for " + streamName, stream, options)
+    new BasicProducer[Array[Byte], Array[Byte]]("producer for " + streamName, basicStream, options)
   }
 
   //todo only for testing. Delete
@@ -247,7 +259,7 @@ class TaskManager() {
     //    val stream: BasicStream[Array[Byte]] =
     //      BasicStreamService.loadStream(streamName, metadataStorageInstForProducer, aerospikeInstForProducer, coordinator)
 
-    val stream = new BasicStream[Array[Byte]](
+    val basicStream = new BasicStream[Array[Byte]](
       name = streamName,
       partitions = 1,
       metadataStorage = metadataStorage,
@@ -256,7 +268,11 @@ class TaskManager() {
       ttl = 60 * 30,
       description = "some_description")
 
-    val roundRobinPolicy = new RoundRobinPolicy(stream, (0 to 0).toList)
+    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 to 0).toList)
+
+
+    val timeUuidGenerator = new LocalTimeUUIDGenerator
+
 
     val options = new BasicConsumerOptions[Array[Byte], Array[Byte]](
       transactionsPreload = 10,
@@ -268,7 +284,7 @@ class TaskManager() {
       timeUuidGenerator,
       useLastOffset = true)
 
-    new BasicConsumer[Array[Byte], Array[Byte]]("consumer for " + streamName, stream, options)
+    new BasicConsumer[Array[Byte], Array[Byte]]("consumer for " + streamName, basicStream, options)
   }
 
   def createStateProducer(streamName: String) = {
@@ -276,7 +292,7 @@ class TaskManager() {
     //        val stream: BasicStream[Array[Byte]] =
     //          BasicStreamService.loadStream(streamName, metadataStorageInstForProducer, aerospikeInstForProducer, coordinator)
 
-    val stream: BasicStream[Array[Byte]] = new BasicStream[Array[Byte]](
+    val basicStream: BasicStream[Array[Byte]] = new BasicStream[Array[Byte]](
       name = streamName,
       partitions = 1,
       metadataStorage = metadataStorage,
@@ -285,7 +301,11 @@ class TaskManager() {
       ttl = 60 * 30,
       description = "some_description")
 
-    val roundRobinPolicy = new RoundRobinPolicy(stream, (0 to 0).toList)
+    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 to 0).toList)
+
+
+    val timeUuidGenerator =  new LocalTimeUUIDGenerator
+
 
     val options = new BasicProducerOptions[Array[Byte], Array[Byte]](
       transactionTTL = 6,
@@ -296,6 +316,6 @@ class TaskManager() {
       timeUuidGenerator,
       converter)
 
-    new BasicProducer[Array[Byte], Array[Byte]]("producer for " + streamName, stream, options)
+    new BasicProducer[Array[Byte], Array[Byte]]("producer for " + streamName, basicStream, options)
   }
 }
