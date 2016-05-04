@@ -34,6 +34,9 @@ trait SjCrudValidator {
   val serviceDAO: GenericMongoService[Service]
   val streamDAO: GenericMongoService[SjStream]
   val providerDAO: GenericMongoService[Provider]
+  val host: String
+  val port: Int
+  val marathonConnect: String
 
   import ModuleConstants._
 

@@ -430,32 +430,46 @@ trait SjModulesApi extends Directives with SjCrudValidator {
 
   def startInstance(instance: RegularInstance) = {
 
-    /*instance.inputs.map(_.replaceAll("/split|/full", "")).foreach { streamName =>
+    instance.inputs.map(_.replaceAll("/split|/full", "")).foreach { streamName =>
       val stream = streamDAO.get(streamName)
-      if (!stream.generator.head.equals("local")) {
+      if (!stream.generator.generatorType.equals("local")) {
         startGenerator(stream)
       }
-    }*/
+    }
 
     //todo start instance
 
   }
 
   def startGenerator(stream: SjStream) = {
-    /*val generatorUrl = new URI(stream.generator(1))
-    val generatorService = serviceDAO.get(generatorUrl.getAuthority)
+    val generatorService = stream.generator.service
     var zkService: ZKService = null
     generatorService.serviceType match {
       case "ZKCoord" => zkService = generatorService.asInstanceOf[ZKService]
       case _ => throw new Exception("Unknown")
-    }*/
-    /*val generatorProvider = generatorService.provider
-    var prefix = zkService.namespace
-    if (stream.generator.head.equals("per-stream")) {
-      prefix += s"/${stream.name}"
     }
-    val generator = Generator(stream.generator.head, generatorProvider.hosts, prefix, stream.generator(2).toInt)*/
+    val generatorProvider = generatorService.provider
+    var prefix = zkService.namespace
+    if (stream.generator.generatorType.equals("per-stream")) {
+      prefix += s"/${stream.name}"
+    } else {
+      prefix += "/global"
+    }
+    val generator = Generator(stream.generator.generatorType, generatorProvider.hosts, prefix, stream.generator.instanceCount)
 
+    val marathonRequest = MarathonRequest(s"task_tg_${stream.name}",
+      "java -jar sj-transaction-generator-assembly-1.0.jar $PORT",
+      generator.count,
+      Map("ZK_SERVERS" -> generator.zkServers.mkString(";"), "PREFIX" -> prefix),
+      List(s"http://$host:$port/v1/custom/sj-transaction-generator-assembly-1.0.jar"))
+
+    startApplication(marathonRequest)
+
+
+  }
+
+  private def startApplication(request: MarathonRequest) = {
+    val uri = Uri()
   }
 
   //todo stop

@@ -95,16 +95,11 @@ abstract class StreamingModuleValidator {
     if (streamsServices.size != 1) {
       errors += s"All streams should have the same service."
     } else {
-      val serviceName = streamsServices.head
-      val service = serviceDAO.get(serviceName)
-      if (service != null) {
-        if (!service.isInstanceOf[TStreamService]) {
-          errors += s"Service for streams must be 'TstrQ'."
-        } else {
-          errors.appendAll(checkAndCreateStreams(errors, service.asInstanceOf[TStreamService], allStreams))
-        }
+      val service = allStreams.head.service
+      if (!service.isInstanceOf[TStreamService]) {
+        errors += s"Service for streams must be 'TstrQ'."
       } else {
-        errors += s"Service $serviceName not found."
+        errors.appendAll(checkAndCreateStreams(errors, service.asInstanceOf[TStreamService], allStreams))
       }
     }
 
@@ -155,31 +150,6 @@ abstract class StreamingModuleValidator {
     val coordinator = new Coordinator(service.lockNamespace, Redisson.create(redisConfig))
 
     allStreams.foreach { (stream: SjStream) =>
-      val generatorType = stream.generator.head
-      if (generatorType.equals("global") || generatorType.equals("per-stream")) {
-        val generatorUrl = new URI(stream.generator(1))
-        if (!generatorUrl.getScheme.equals("service-zk")) {
-          errors += s"Generator have unknown service type: ${generatorUrl.getScheme}. Must be 'service-zk'."
-        }
-        val coordService = serviceDAO.get(generatorUrl.getAuthority)
-        if (coordService != null) {
-          if (!coordService.isInstanceOf[ZKService]) {
-            errors += s"Generator service for streams must be 'ZKCoord'."
-          }
-        } else {
-          errors += s"Service ${generatorUrl.getHost} not found."
-        }
-
-        val n = stream.generator(2).toInt
-        if (n < 0) {
-          errors += s"Count instances of generator ($n) must be more than 1."
-        }
-      } else {
-        if (!generatorType.equals("local")) {
-          errors += s"Unknown generator type $generatorType for stream ${stream.name}."
-        }
-      }
-
       if (BasicStreamService.isExist(stream.name, metadataStorage)) {
         val tStream = BasicStreamService.loadStream[Array[Byte]](
           stream.name,
