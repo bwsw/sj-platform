@@ -6,6 +6,7 @@ import java.net.{InetSocketAddress, URLClassLoader}
 import com.aerospike.client.Host
 import com.bwsw.sj.common.DAL.model.{FileMetadata, TStreamService}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.GlobalTimeUUIDGenerator
 import com.bwsw.tstreams.agents.consumer.Offsets.IOffset
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions}
@@ -54,9 +55,14 @@ class TaskManager() {
   }
 
   /**
+   * An auxiliary stream to retrieve settings of txns generator
+   */
+  private val stream = ConnectionRepository.getStreamService.get(instanceMetadata.outputs.head)
+
+  /**
    * An auxiliary service to retrieve settings of TStream providers
    */
-  private val service = ConnectionRepository.getStreamService.get(instanceMetadata.outputs.head).service.asInstanceOf[TStreamService]
+  private val service = stream.service.asInstanceOf[TStreamService]
 
   /**
    * Metadata storage instance
@@ -71,7 +77,7 @@ class TaskManager() {
   /**
    * Coordinator for coordinating producer/consumer
    */
-  private val coordinator: Coordinator = createCoordanator()
+  private val coordinator: Coordinator = createCoordinator()
 
   /**
    * Creates metadata storage for producer/consumer settings
@@ -107,15 +113,25 @@ class TaskManager() {
   /**
    * Creates coordinator for coordinating producer/consumer
    */
-  private def createCoordanator() = {
+  private def createCoordinator() = {
     val config = new Config()
     config.useSingleServer().setAddress(service.lockProvider.hosts.head)
-    val redissonClient = Redisson.create(config)
-    new Coordinator(service.lockNamespace, redissonClient)
+    val redisClient = Redisson.create(config)
+    new Coordinator(service.lockNamespace, redisClient)
   }
 
   //todo choose from generator field and use txns generator
-  private val timeUuidGenerator = new LocalTimeUUIDGenerator
+  private val timeUuidGenerator = stream.generator match {
+    case Array(_, zkService, _) =>
+      val zkServers = Array("127.0.0.1:2181")
+      val prefix = "servers"
+      val retryPeriod = 500
+      val retryCount = 10
+
+      new GlobalTimeUUIDGenerator(zkServers, prefix, retryPeriod, retryCount)
+
+    case Array("local") => new LocalTimeUUIDGenerator
+  }
 
   /**
    * Returns class loader for retrieving classes from jar
