@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.DAL.model
 
-import org.mongodb.morphia.annotations.{Reference, Entity, Id}
+import org.mongodb.morphia.annotations.{Embedded, Entity, Id, Reference}
 
 @Entity("streams")
 class SjStream() {
@@ -9,5 +9,5 @@ class SjStream() {
   var partitions: Int = 0
   @Reference var service: Service = null
   var tags: String = null
-  var generator: Array[String] = null
+  @Embedded("generator") var generator: Generator = null
 }
