@@ -2,6 +2,7 @@ package com.bwsw.sj.common.DAL.model
 
 import org.mongodb.morphia.annotations.{Embedded, Reference, Entity, Id}
 
+
 @Entity("streams")
 class SjStream() {
   @Id var name: String = null
