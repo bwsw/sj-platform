@@ -16,15 +16,12 @@ import org.apache.log4j.Logger
   * @author Kseniya Tomskikh
   */
 object Server {
-
   private val logger = Logger.getLogger(getClass)
 
   def main(args: Array[String]) = {
-    println("Hello")
     val zkServers = System.getenv("ZK_SERVERS")
-    println("step 2")
     val host = System.getenv("HOST")
-    val port = System.getenv("PORT").toInt
+    val port = System.getenv("PORT0").toInt
     val prefix = System.getenv("PREFIX")
 
     try {

@@ -51,8 +51,9 @@ object SjCrudRestService extends App with SjCrudRouter {
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher //for work with future
 
-  val host = System.getenv("HOST")
-  val port = System.getenv("PORT").toInt
+  val host = System.getenv("CRUD_REST_HOST")
+  val port = System.getenv("CRUD_REST_PORT").toInt
+  val marathonConnect = System.getenv("MINIMESOS_MARATHON")
 
   val serializer = new JsonSerializer()
   val storage = ConnectionRepository.getFileStorage
