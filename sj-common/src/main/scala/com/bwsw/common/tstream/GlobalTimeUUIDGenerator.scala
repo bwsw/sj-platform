@@ -1,33 +1,41 @@
-package com.bwsw.sj.common
+package com.bwsw.common.tstream
 
 import java.util.UUID
 
 import com.bwsw.common.client.{TcpClient, TcpClientOptions}
 import com.bwsw.tstreams.generator.IUUIDGenerator
+import com.datastax.driver.core.utils.UUIDs
 
 /**
- * Provides a generator of txn UUID for TStreams through Tcp client
+ * Provides an entity for generating new txn time UUID through Tcp client
  * @param zkServers Set of host + port of zookeeper
  * @param prefix Zookeeper path to generator (master of Tcp servers)
- * @param retryPeriod Delay time for reconnect to generator
- * @param retryCount Count of attempt to connect to generator
+ * @param retryInterval Delay time between reconnecting attempts to connect to generator
+ * @param retryCount Count of attempt to reconnect to generator
  */
+
 class GlobalTimeUUIDGenerator(zkServers: Array[String],
                               prefix: String,
-                              retryPeriod: Long,
+                              retryInterval: Long,
                               retryCount: Int) extends IUUIDGenerator {
 
   private val options = new TcpClientOptions()
     .setZkServers(zkServers)
     .setPrefix(prefix)
-    .setRetryPeriod(retryPeriod)
+    .setRetryPeriod(retryInterval)
     .setRetryCount(retryCount)
 
   private val client = new TcpClient(options)
   client.open()
 
+  /**
+   * @return Transaction UUID
+   */
   override def getTimeUUID(): UUID = UUID.fromString(client.get())
 
-  override def getTimeUUID(timestamp: Long): UUID = ???
+  /**
+   * @return UUID based on timestamp
+   */
+  override def getTimeUUID(timestamp: Long): UUID = UUIDs.startOf(timestamp)
 
 }
