@@ -3,6 +3,8 @@ package com.bwsw.sj.crud.rest.validator
 import java.io._
 import java.util.jar.JarFile
 
+import akka.actor.ActorSystem
+import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.server.RequestContext
 import akka.stream.Materializer
 import com.bwsw.common.file.utils.FilesStorage
@@ -26,6 +28,7 @@ import scala.concurrent.Await
   */
 trait SjCrudValidator {
   implicit val materializer: Materializer
+  implicit val system: ActorSystem
   val conf: Config
   val serializer: Serializer
   val fileMetadataDAO: GenericMongoService[FileMetadata]
@@ -47,8 +50,12 @@ trait SjCrudValidator {
     * @return - entity from http-request as string
     */
   def getEntityFromContext(ctx: RequestContext): String = {
+    getEntityAsString(ctx.request.entity)
+  }
+
+  def getEntityAsString(entity: HttpEntity): String = {
     import scala.concurrent.duration._
-    Await.result(ctx.request.entity.toStrict(1.second), 1.seconds).data.decodeString("UTF-8")
+    Await.result(entity.toStrict(1.second), 1.seconds).data.decodeString("UTF-8")
   }
 
   /**

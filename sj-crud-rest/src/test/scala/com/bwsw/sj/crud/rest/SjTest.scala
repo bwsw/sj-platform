@@ -72,7 +72,11 @@ object SjTest {
     createProviders(providerDAO)
     createServices(serviceDAO, providerDAO)
     val tService = serviceDAO.get("tstrq_service")
-    createStreams(tService)
+    val generator = new Generator
+    generator.generatorType = "global"
+    generator.instanceCount = 2
+    generator.service = serviceDAO.get("zk_service")
+    createStreams(tService, generator)
   }
 
   def createServices(serviceDAO: GenericMongoService[Service], providerDAO: GenericMongoService[Provider]) = {
@@ -158,11 +162,11 @@ object SjTest {
     zkProv.login = ""
     zkProv.password = ""
     zkProv.description = "zookeeper provider test"
-    zkProv.hosts = Array("127.0.0.1:2181")
+    zkProv.hosts = Array("192.168.1.180:2181")
     providerDAO.save(zkProv)
   }
 
-  def createStreams(tService: Service) = {
+  def createStreams(tService: Service, generator: Generator) = {
     val sjStreamDAO = ConnectionRepository.getStreamService
     val s1 = new SjStream
     s1.name = "s1"
@@ -170,7 +174,7 @@ object SjTest {
     s1.partitions = 7
     s1.service = tService
     s1.tags = "TAG"
-    //s1.generator = Array("global", "service-zk://zk_service", "2")
+    s1.generator = generator
     sjStreamDAO.save(s1)
 
     val s2 = new SjStream
@@ -179,7 +183,7 @@ object SjTest {
     s2.partitions = 10
     s2.service = tService
     s2.tags = "TAG"
-   // s2.generator = Array("per-stream", "service-zk://zk_service", "3")
+    s2.generator = generator
     sjStreamDAO.save(s2)
 
     val s3 = new SjStream
@@ -188,7 +192,7 @@ object SjTest {
     s3.partitions = 10
     s3.service = tService
     s3.tags = "TAG"
-   // s3.generator = Array("global", "service-zk://zk_service", "3")
+    s3.generator = generator
     sjStreamDAO.save(s3)
   }
 

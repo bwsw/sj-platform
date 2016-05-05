@@ -1,26 +1,28 @@
 package com.bwsw.sj.crud.rest.api
 
 import java.io.{FileNotFoundException, File}
-import java.net.URI
-import java.util
 
-
+import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.server.{RequestContext, Directives}
 import akka.http.scaladsl.server.directives.FileInfo
 import com.bwsw.common.exceptions.{InstanceException, BadRecordWithKey}
 import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.crud.rest.entities._
 import com.bwsw.sj.common.module.StreamingValidator
+import com.bwsw.sj.crud.rest.entities._
 import akka.http.scaladsl.model.headers._
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.module.StreamingModuleValidator
 import org.apache.commons.io.FileUtils
 
 import akka.stream.scaladsl._
+import akka.http.scaladsl.model.HttpMethods._
+import akka.http.scaladsl.model.StatusCodes._
 
 import scala.collection.mutable
+import scala.concurrent.Await
+import scala.concurrent.duration._
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 /**
@@ -143,42 +145,48 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                       complete(HttpEntity(`application/json`, msg))
                     }
                   } ~
-                  path(Segment) { (instanceName: String) =>
+                  pathPrefix(Segment) { (instanceName: String) =>
                     val instance = instanceDAO.get(instanceName)
                     validate(instance != null, s"Instance for name $instanceName has not been found!") {
-                      pathSuffix("start") {
+                      pathEndOrSingleSlash {
                         get {
-                          //todo
-                          startInstance(instance)
                           complete(HttpEntity(
                             `application/json`,
-                            serializer.serialize(Response(200, null, "Ok"))
+                            serializer.serialize(convertToApiInstance(instance))
+                          ))
+                        } ~
+                        delete {
+                          //todo add checking
+                          instanceDAO.delete(instanceName)
+                          complete(HttpEntity(
+                            `application/json`,
+                            serializer.serialize(Response(200, instanceName, s"Instance $instanceName has been deleted"))
                           ))
                         }
                       } ~
-                      pathSuffix("stop") {
-                        get {
-                          //todo
-                          stopInstance(instance)
-                          complete(HttpEntity(
-                            `application/json`,
-                            serializer.serialize(Response(200, null, "Ok"))
-                          ))
+                      path("start") {
+                        pathEndOrSingleSlash {
+                          get {
+                            //todo
+                            startInstance(instance)
+                            complete(HttpEntity(
+                              `application/json`,
+                              serializer.serialize(Response(200, null, "Ok"))
+                            ))
+                          }
                         }
                       } ~
-                      get {
-                        complete(HttpEntity(
-                          `application/json`,
-                          serializer.serialize(convertToApiInstance(instance))
-                        ))
-                      } ~
-                      delete {
-                        //todo add checking
-                        instanceDAO.delete(instanceName)
-                        complete(HttpEntity(
-                          `application/json`,
-                          serializer.serialize(Response(200, instanceName, s"Instance $instanceName has been deleted"))
-                        ))
+                      path("stop") {
+                        pathEndOrSingleSlash {
+                          get {
+                            //todo
+                            stopInstance(instance)
+                            complete(HttpEntity(
+                              `application/json`,
+                              serializer.serialize(Response(200, null, "Ok"))
+                            ))
+                          }
+                        }
                       }
                     }
                   }
@@ -231,20 +239,24 @@ trait SjModulesApi extends Directives with SjCrudValidator {
               }
             }
           } ~
-          get {
-            val files = fileMetadataDAO.getByParameters(Map("specification.module-type" -> moduleType))
-            var msg = ""
-            if (files.nonEmpty) {
-              msg = s"Uploaded modules for type $moduleType: ${files.map(
-                s => s"${s.specification.name}-${s.specification.version}"
-              ).mkString(",\n")}"
-            } else {
-              msg = s"Uploaded modules for type $moduleType have not been found "
+          pathEndOrSingleSlash {
+            get {
+              val files = fileMetadataDAO.getByParameters(Map("specification.module-type" -> moduleType))
+              var msg = ""
+              if (files.nonEmpty) {
+                msg = s"Uploaded modules for type $moduleType: ${
+                  files.map(
+                    s => s"${s.specification.name}-${s.specification.version}"
+                  ).mkString(",\n")
+                }"
+              } else {
+                msg = s"Uploaded modules for type $moduleType have not been found "
+              }
+              complete(HttpEntity(
+                `application/json`,
+                serializer.serialize(Response(200, null, msg))
+              ))
             }
-            complete(HttpEntity(
-              `application/json`,
-              serializer.serialize(Response(200, null, msg))
-            ))
           }
         }
       } ~
@@ -457,19 +469,31 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     }
     val generator = Generator(stream.generator.generatorType, generatorProvider.hosts, prefix, stream.generator.instanceCount)
 
-    val marathonRequest = MarathonRequest(s"task_tg_${stream.name}",
+    val marathonRequest = MarathonRequest(s"task-tg-${stream.name}",
       "java -jar sj-transaction-generator-assembly-1.0.jar $PORT",
       generator.count,
       Map("ZK_SERVERS" -> generator.zkServers.mkString(";"), "PREFIX" -> prefix),
       List(s"http://$host:$port/v1/custom/sj-transaction-generator-assembly-1.0.jar"))
 
-    startApplication(marathonRequest)
-
+   startApplication(marathonRequest)
 
   }
 
   private def startApplication(request: MarathonRequest) = {
-    val uri = Uri()
+
+    val marathonUri = Uri(s"http://$marathonConnect/v2/apps")
+    val res = Http().singleRequest(HttpRequest(method = POST, uri = marathonUri,
+        entity = HttpEntity(ContentTypes.`application/json`, serializer.serialize(request))
+      )
+    )
+
+    val response = {
+      Await.result(res, 15.seconds)
+    }
+
+    if (!response.status.equals(Created)) {
+      throw new Exception("Cannot start of transaction generator")
+    }
   }
 
   //todo stop
