@@ -1,13 +1,14 @@
 package com.bwsw.sj.crud.rest.entities
 
-import com.bwsw.common.DAL.Entity
+
 
 /**
-  * Entity for stream
+  * Stream data case class
   */
-case class SjStreamData(var name: String,
+case class SjStreamData(name: String,
                         description: String,
                         partitions: Int,
                         service: String,
+                        streamType: String,
                         tags: String,
-                        generator: Array[String]) extends Entity
+                        generator: GeneratorData)
