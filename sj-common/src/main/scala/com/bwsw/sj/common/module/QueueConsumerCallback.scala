@@ -3,7 +3,7 @@ package com.bwsw.sj.common.module
 import java.util.UUID
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.module.entities.Transaction
+import com.bwsw.sj.common.module.entities.TStreamEnvelope
 import com.bwsw.tstreams.agents.consumer.subscriber.{BasicSubscriberCallback, BasicSubscribingConsumer}
 
 
@@ -29,7 +29,7 @@ class QueueConsumerCallback[DATATYPE, USERTYPE](blockingQueue: PersistentBlockin
   override def onEvent(subscriber: BasicSubscribingConsumer[DATATYPE, USERTYPE], partition: Int, transactionUuid: UUID): Unit = {
     val transaction = subscriber.getTransactionById(partition, transactionUuid).get
     blockingQueue.put(serializer.serialize(
-      Transaction(subscriber.stream.getName,
+      TStreamEnvelope(subscriber.stream.getName,
         partition,
         transactionUuid,
         "callback_consumer",

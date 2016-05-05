@@ -4,7 +4,7 @@ import java.net.URLClassLoader
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.RegularInstance
-import com.bwsw.sj.common.module.entities.Transaction
+import com.bwsw.sj.common.module.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.common.module.environment.{ModuleEnvironmentManager, StatefulModuleEnvironmentManager}
 import com.bwsw.sj.common.module.state.{RAMStateService, StateStorage}
 import com.bwsw.sj.common.module.utils.SjTimer
@@ -157,8 +157,8 @@ object RegularTaskRunner {
               if (maybeTxn == null) {
                 executor.onIdle()
               } else {
-                val transaction = serializer.deserialize[Transaction](maybeTxn)
-                executor.onTxn(transaction)
+                val transaction = serializer.deserialize[TStreamEnvelope](maybeTxn)
+                executor.onMessage(transaction)
 
                 if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
                 temporaryOutput.clear()
@@ -186,10 +186,10 @@ object RegularTaskRunner {
               if (maybeTxn == null) {
                 executor.onIdle()
               } else {
-                val transaction = serializer.deserialize[Transaction](maybeTxn)
+                val transaction = serializer.deserialize[TStreamEnvelope](maybeTxn)
                 countOfTransaction += 1
 
-                executor.onTxn(transaction)
+                executor.onMessage(transaction)
 
                 if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
                 temporaryOutput.clear()
@@ -247,8 +247,8 @@ object RegularTaskRunner {
               if (maybeTxn == null) {
                 executor.onIdle()
               } else {
-                val transaction = serializer.deserialize[Transaction](maybeTxn)
-                executor.onTxn(transaction)
+                val transaction = serializer.deserialize[TStreamEnvelope](maybeTxn)
+                executor.onMessage(transaction)
 
                 if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
                 temporaryOutput.clear()
@@ -291,10 +291,10 @@ object RegularTaskRunner {
               if (maybeTxn == null) {
                 executor.onIdle()
               } else {
-                val transaction = serializer.deserialize[Transaction](maybeTxn)
+                val transaction = serializer.deserialize[TStreamEnvelope](maybeTxn)
                 countOfTransaction += 1
 
-                executor.onTxn(transaction)
+                executor.onMessage(transaction)
 
                 if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
                 temporaryOutput.clear()
@@ -355,12 +355,13 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
     println("on after checkpoint")
   }
 
-  override def onTxn(transaction: Transaction): Unit = {
+  override def onMessage(envelope: Envelope): Unit = {
     //   val output = manager.getRoundRobinOutput("s3")
     //var elementCount = state.get("elementCount").asInstanceOf[Int]
     //    var txnCount = state.get(transaction.txnUUID.toString).asInstanceOf[Int]
     //elementCount += transaction.data.length
-    state.set(transaction.txnUUID.toString, transaction.data.length)
+    val e = envelope.asInstanceOf[TStreamEnvelope]
+    state.set(e.txnUUID.toString, e.data.length)
     //state.set("elementCount", elementCount)
   }
 

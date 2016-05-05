@@ -1,6 +1,6 @@
 package com.bwsw.sj.stub
 
-import com.bwsw.sj.common.module.entities.Transaction
+import com.bwsw.sj.common.module.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.common.module.environment.ModuleEnvironmentManager
 import com.bwsw.sj.common.module.regular.RegularStreamingExecutor
 
@@ -24,11 +24,11 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
       println("onCheckpoint")
     }
 
-    override def onTxn(transaction: Transaction): Unit = {
+    override def onMessage(envelope: Envelope): Unit = {
       val output = manager.getRoundRobinOutput("s3")
       val state = manager.getState
       var sum = state.get("sum").asInstanceOf[Int]
-      transaction.data.foreach(x => output.put(x))
+      envelope.asInstanceOf[TStreamEnvelope].data.foreach(x => output.put(x))
       sum += 1
       state.set("sum", sum)
       println("in run")
