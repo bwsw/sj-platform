@@ -42,9 +42,54 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
             throw new KeyAlreadyExists(s"Cannot create stream. Errors: ${errors.mkString("\n")}",
               s"${options.name}")
           }
+        } ~
+        get {
+          val streams = streamDAO.getAll
+          var msg = ""
+          if (streams.nonEmpty) {
+            msg =  serializer.serialize(streams.map(s => streamToStreamData(s)))
+          } else {
+            msg = serializer.serialize(Response(200, null, s"No streams found"))
+          }
+          complete(HttpEntity(`application/json`, msg))
+
         }
+      } ~
+      path(Segment) { (streamName: String) =>
+        val stream = streamDAO.get(streamName)
+        var msg = ""
+        if (stream != null) {
+          msg =  serializer.serialize(streamToStreamData(stream))
+        } else {
+          msg = serializer.serialize(Response(200, null, s"Stream '$streamName' not found"))
+        }
+        complete(HttpEntity(`application/json`, msg))
       }
     }
+  }
+
+  /**
+    * Represent SjStream object as SjStreamData object
+    *
+    * @param stream - SjStream object
+    * @return - SjStreamData object
+    */
+  def streamToStreamData(stream: SjStream) = {
+
+    val streamData = new SjStreamData(
+      stream.name,
+      stream.description,
+      stream.partitions,
+      stream.service.name,
+      stream.streamType,
+      stream.tags,
+      new GeneratorData(
+        stream.generator.generatorType,
+        stream.generator.service.name,
+        stream.generator.instanceCount
+      )
+    )
+    streamData
   }
 
   /**
