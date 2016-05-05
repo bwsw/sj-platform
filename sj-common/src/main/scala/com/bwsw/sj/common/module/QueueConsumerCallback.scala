@@ -8,7 +8,7 @@ import com.bwsw.tstreams.agents.consumer.subscriber.{BasicSubscriberCallback, Ba
 
 
 /**
- * Provides a handler for sub. consumer that puts a transaction in a persistent blocking queue
+ * Provides a handler for sub. consumer that puts a t-stream envelope in a persistent blocking queue
  * Created: 21/04/2016
  * @author Kseniya Mikhaleva
 
