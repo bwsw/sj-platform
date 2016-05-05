@@ -1,20 +1,14 @@
 package com.bwsw.sj.crud.rest.api
 
-import java.io.{File, FileNotFoundException}
 import java.net.URI
 
 import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers._
-import akka.http.scaladsl.server.directives.FileInfo
 import akka.http.scaladsl.server.{Directives, RequestContext}
-import akka.stream.scaladsl._
 import com.bwsw.common.exceptions.KeyAlreadyExists
 import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.GeneratorConstants._
-import com.bwsw.sj.crud.rest.entities._
-import com.bwsw.sj.crud.rest.entities.SjStreamData
+import com.bwsw.sj.crud.rest.entities.{SjStreamData, _}
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.stream.StreamValidator
 
