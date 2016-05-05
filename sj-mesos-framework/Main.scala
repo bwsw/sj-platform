@@ -1,10 +1,7 @@
 import mesosphere.mesos.util.FrameworkInfo
 import org.apache.mesos.MesosSchedulerDriver
+import scala.util.Properties
 
-
-/**
- * @author Tobi Knaup
- */
 
 object Main extends App {
 
@@ -12,7 +9,7 @@ object Main extends App {
 
   val scheduler = new ScalaScheduler
 
-  val mesosURL = "zk://172.17.0.3:2181/mesos"
+  val mesosURL = Properties.envOrElse("MASTER_ZK_PATH", "zk://172.17.0.3:2181/mesos")
 
   val driver = new MesosSchedulerDriver(scheduler, framework.toProto, mesosURL)
   driver.start()

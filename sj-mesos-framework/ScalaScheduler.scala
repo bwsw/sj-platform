@@ -6,19 +6,30 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.immutable
 import scala.util.Properties
-import org.mongodb.
 
 import com.mongodb.casbah.Imports._
-import Common._
+import com.mongodb.DBObject
 
 import org.slf4j._
 import org.slf4j.LoggerFactory
 
+import play.api.libs.json._
+
+import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
+import com.twitter.common.quantity.{Amount, Time}
+
+import java.net.InetSocketAddress
+import java.net.InetAddress
+
+
 
 class ScalaScheduler extends Scheduler {
-  var envVar = immutable.Map[String, Option[String]]()
 
+  var tasksLaunched = List[String]()
+  var tasksToLaunch = List[String]()
+  var params = immutable.Map[String, String]()
   val logger = LoggerFactory.getLogger(classOf[Scheduler])
+  var instance: JsValue = _
 
   def error(driver: SchedulerDriver, message: String) {
     logger.error(s"Got error message: $message")
@@ -36,30 +47,108 @@ class ScalaScheduler extends Scheduler {
   }
 
   def statusUpdate(driver: SchedulerDriver, status: TaskStatus) {
-    logger.info(s"Received status update")
+    logger.info(s"Received status update $status")
     logger.debug(s"$status")
   }
 
   def offerRescinded(driver: SchedulerDriver, offerId: OfferID) {
   }
 
+
+  def howMuchTasksOnSlave(perTaskCores: Double, perTaskRam: Double, tasksCount: Int, offers: util.List[Offer]):List[Map[String, Any]]={
+    /**
+      * This method give list of slaves id and how many tasks we can launch on each slave.
+      */
+    var over_cpus = 0.0
+    var over_mem = 0.0
+    val req_cpus = perTaskCores*tasksCount
+    val req_mem = perTaskRam*tasksCount
+    var tasksNumber: List[Map[String, Any]] = List()
+    for (offer <- offers.asScala) {
+      tasksNumber = tasksNumber.:::(List(Map(
+        ("id", offer.getSlaveId.getValue),
+        ("tasksCount", java.lang.Math.min(
+          getResource(offer, "cpus") / perTaskCores,
+          getResource(offer, "mem") / perTaskRam
+        ).floor.toInt
+          ))))
+      over_cpus += getResource(offer, "cpus")
+      over_mem += getResource(offer, "mem")
+    }
+
+    logger.info(s"Have resources: ${over_cpus} cpus, ${over_mem} mem")
+    logger.info(s"Resource requirements: ${req_cpus} cpus, ${req_mem} mem")
+    return tasksNumber
+  }
+
+
+  def getResource(offer: Offer, name: String): Double = {
+    /**
+      * This method give how much resource of type <name> we have on <offer>
+      */
+    val res = offer.getResourcesList
+    for (r <- res.asScala if r.getName == name) {
+      return r.getScalar.getValue
+    }
+    throw new IllegalArgumentException("No resource called " + name + " in " + res)
+  }
+
+  def filterTasks(): Unit = {
+    val tasks = Json.parse((this.instance \ "execution-plan" \ "tasks").toString).as[JsObject].value
+
+    for (task <- tasks) {
+      if (this.tasksLaunched.contains(task._1)){
+        logger.info(s"Task ID: ${task._1}")
+      } else {
+        this.tasksToLaunch :::= (List(task._1))
+      }
+    }
+    logger.info(s"${this.tasksToLaunch}")
+  }
+
+
   override def resourceOffers(driver: SchedulerDriver, offers: util.List[Offer]) {
     logger.info(s"Got resource offers")
     logger.debug(s"$offers")
 
+    filterTasks()
+    logger.info(s"TASKS TO LAUNCH: ${this.tasksToLaunch}")
+
+    val cores = (this.instance \ "per-task-cores").toString.toDouble
+    val ram = (this.instance \ "per-task-ram").toString.toDouble
+    val tasksCount = Json.parse((this.instance \ "execution-plan" \ "tasks").toString).as[JsObject].value.size
+    val tasksOnSlaves = howMuchTasksOnSlave(cores, ram, tasksCount, offers)
+
+    var overTasks = 0
+    for (slave <- tasksOnSlaves) {
+      overTasks += slave{"tasksCount"}.toString.toInt
+    }
+    logger.info(s"Number of tasks must be launched: $tasksCount")
+    logger.info(s"Number of tasks can be launched: $overTasks")
+    if (tasksCount > overTasks) {
+      logger.info(s"Can not run tasks: no required resources")
+    }
+
+
+
+
+//    logger.debug(s"INSTANCE: ${Json.prettyPrint(this.instance)}")
+
+//    val str = Json.prettyPrint(inst)
+//    println(str)
+
     for (offer <- offers.asScala) {
 
       val cmd = CommandInfo.newBuilder
-        .addUris(CommandInfo.URI.newBuilder.setValue("file:///home/diryavkin_dn/IdeaProjects/sss.sh"))
-        .addUris(CommandInfo.URI.newBuilder.setValue("file:///home/diryavkin_dn/IdeaProjects/install"))
-        .addUris(CommandInfo.URI.newBuilder.setValue("http://www-eu.apache.org/dist/spark/spark-1.6.1/spark-1.6.1.tgz"))
-        .setValue("sh sss.sh")
+        .addUris(CommandInfo.URI.newBuilder.setValue("http://192.168.1.225:8000/testScript.sh"))
+        .setValue("sh testScript.sh")
 
-      val attributes = offer.getAttributesList()
-      logger.debug(s"Offer ${offer.getId.getValue()} got attributes: $attributes")
+//      val attributes = offer.getAttributesList()
+//      logger.debug(s"Offer ${offer.getId.getValue()} got attributes: $attributes")
 
-      val cpus = ScalarResource("cpus", 0.1)
-      val mem = ScalarResource("mem", 32)
+
+      val cpus = ScalarResource("cpus", cores)
+      val mem = ScalarResource("mem", ram)
       val task_id = "task" + offer.getSlaveId.getValue()
 
       val task = TaskInfo.newBuilder
@@ -75,36 +164,70 @@ class ScalaScheduler extends Scheduler {
       listTasks += task
 
       driver.launchTasks(offer.getId, listTasks.asJava)
+
+
       logger.info(s"Launched tasks ")
       logger.debug(s"$listTasks ")
       logger.info(s"on slave ${offer.getSlaveId.getValue}")
 
+
+//      driver.declineOffer(offer.getId)
+
     }
+
+
+//    while (true) {
+//      logger.info("loop")
+//      Thread.sleep(5000)
+//    }
+//      for (offer <- offers.asScala){
+//        logger.info("WAIT")
+//        Thread.sleep(5000)
+//      }
     // @todo remove stop()
 //    driver.stop()
   }
 
   def launchTask(driver: SchedulerDriver, taskInfo: TaskInfo) {
-
+    logger.info(s"Launched Task: $taskInfo")
   }
 
-  def reregistered(driver: SchedulerDriver, masterInfo: MasterInfo) {}
+  def reregistered(driver: SchedulerDriver, masterInfo: MasterInfo) {
+    logger.info(s"New master ${masterInfo}")
+  }
 
   def registered(driver: SchedulerDriver, frameworkId: FrameworkID, masterInfo: MasterInfo) {
-    logger.info(s"Registered framework $frameworkId")
-    this.envVar = immutable.Map(
-      ("instanceId", Properties.envOrNone("INSTANCE_ID")),
-      ("zkPrefix", Properties.envOrNone("ZK_PREFIX")),
-      ("zkHosts", Properties.envOrNone("ZK_SECRET")),
-      ("zkMesosPrefix", Properties.envOrNone("ZK_MESOS_PREFIX")),
-      ("mongodbHost", Properties.envOrNone("MONGODB_HOST")),
-      ("mongodbUser", Properties.envOrNone("MONGODB_USER")),
-      ("mongodbPassword", Properties.envOrNone("MONGODB_PASSWORD")),
-      ("restService", Properties.envOrNone("REST_SERVICE"))
+    logger.info(s"Registered framework as: ${frameworkId.getValue}")
+    this.params = immutable.Map(
+      ("instanceId", Properties.envOrElse("INSTANCE_ID", "00000000-0000-0000-0000-000000000000")),
+      ("zkPrefix", Properties.envOrElse("ZK_PREFIX", "zk")),
+      ("zkHosts", Properties.envOrElse("ZK_HOSTS", "127.0.0.1")),
+      ("zkSecret", Properties.envOrElse("ZK_SECRET", "")),
+      ("zkMesosPrefix", Properties.envOrElse("ZK_MESOS_PREFIX", "mesos")),
+      ("mongodbHost", Properties.envOrElse("MONGODB_HOST", "127.0.0.1")),
+      ("mongodbUser", Properties.envOrElse("MONGODB_USER", "")),
+      ("mongodbPassword", Properties.envOrElse("MONGODB_PASSWORD", "")),
+      ("restService", Properties.envOrElse("REST_SERVICE", "127.0.0.1")),
+      ("jarUri", Properties.envOrElse("JAR_URI", ""))
     )
-    logger.debug(s"Got environment variable: ${this.envVar}")
+    logger.info(s"Got environment variable: ${this.params}")
+
+    val zkhost = new InetSocketAddress(InetAddress.getByName(this.params{"zkHosts"}), 2181)
+    val zkClient = new ZooKeeperClient(Amount.of(60, Time.MINUTES), zkhost)
+    val lockPath = s"/${this.params{"zkPrefix"}}/${this.params{"instanceId"}}/lock"
+    val dli = new DistributedLockImpl(zkClient, lockPath)
+    dli.lock()
+    logger.info("Framework locked")
+
+    val dbName = "stream_juggler"
+    val collName = "instances"
+    val dbHost = this.params{"mongodbHost"}
+    val entityCollection = MongoClient(dbHost)(dbName)(collName)
+    val obj = MongoDBObject("uuid" -> this.params{"instanceId"})
+    entityCollection += obj
+    this.instance = Json.parse(s"""${entityCollection.findOne().map(_.toString).get}""")
+    logger.debug(s"Find instance: ${this.instance}")
+
   }
-
-
 }
 
