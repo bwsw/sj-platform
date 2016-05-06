@@ -9,6 +9,7 @@ class SjStream() {
   var description: String = null
   var partitions: Int = 0
   @Reference var service: Service = null
+  var streamType: String = null
   var tags: String = null
   @Embedded var generator: Generator = null
 }
