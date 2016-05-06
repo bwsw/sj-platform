@@ -312,7 +312,15 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     validator.validate(options)
   }
 
-
+  /**
+    *
+    * @param parameters
+    * @param moduleType
+    * @param moduleName
+    * @param moduleVersion
+    * @param partitionsCount
+    * @return
+    */
   def createInstance(parameters: InstanceMetadata,
                      moduleType: String,
                      moduleName: String,
@@ -389,7 +397,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       case s: String => parallelism = minPartitionCount
     }
     val tasks = (0 until parallelism)
-      .map(x => instance.name + "_task" + x)
+      .map(x => instance.name + "-task" + x)
       .map(x => x -> inputs)
 
     val executionPlan = mutable.Map[String, Task]()
@@ -438,11 +446,10 @@ trait SjModulesApi extends Directives with SjCrudValidator {
 
   case class StreamProcess(currentPartition: Int, countFreePartitions: Int)
 
-  case class Generator(generatorType: String, zkServers: Array[String], prefix: String, count: Int)
-
   def startInstance(instance: RegularInstance) = {
 
-    instance.inputs.map(_.replaceAll("/split|/full", "")).foreach { streamName =>
+    val allStreams = instance.inputs.map(_.replaceAll("/split|/full", "")).union(instance.outputs)
+    allStreams.foreach { streamName =>
       val stream = streamDAO.get(streamName)
       if (!stream.generator.generatorType.equals("local")) {
         startGenerator(stream)
@@ -450,55 +457,121 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     }
 
     //todo start instance
-
+    instance.status = started
+    instanceDAO.save(instance)
   }
 
   def startGenerator(stream: SjStream) = {
-    val generatorService = stream.generator.service
-    var zkService: ZKService = null
-    generatorService.serviceType match {
-      case "ZKCoord" => zkService = generatorService.asInstanceOf[ZKService]
-      case _ => throw new Exception("Unknown")
-    }
-    val generatorProvider = generatorService.provider
+    val zkService = stream.generator.service.asInstanceOf[ZKService]
+    val generatorProvider = zkService.provider
     var prefix = zkService.namespace
+    var taskId = ""
     if (stream.generator.generatorType.equals("per-stream")) {
       prefix += s"/${stream.name}"
+      taskId = s"${stream.generator.service.name}-${stream.name}-tg"
     } else {
       prefix += "/global"
+      taskId = s"${stream.generator.service.name}-global-tg"
     }
-    val generator = Generator(stream.generator.generatorType, generatorProvider.hosts, prefix, stream.generator.instanceCount)
 
-    val marathonRequest = MarathonRequest(s"task-tg-${stream.name}",
+    val marathonRequest = MarathonRequest(taskId.replaceAll("_", "-"),
       "java -jar sj-transaction-generator-assembly-1.0.jar $PORT",
-      generator.count,
-      Map("ZK_SERVERS" -> generator.zkServers.mkString(";"), "PREFIX" -> prefix),
+      stream.generator.instanceCount,
+      Map("ZK_SERVERS" -> generatorProvider.hosts.mkString(";"), "PREFIX" -> prefix),
       List(s"http://$host:$port/v1/custom/sj-transaction-generator-assembly-1.0.jar"))
 
-   startApplication(marathonRequest)
+    startApplication(marathonRequest)
 
   }
 
   private def startApplication(request: MarathonRequest) = {
-
-    val marathonUri = Uri(s"http://$marathonConnect/v2/apps")
-    val res = Http().singleRequest(HttpRequest(method = POST, uri = marathonUri,
+    val taskResponse = getTaskInfo(request.id)
+    if (taskResponse.status.equals(OK)) {
+      serializer.setIgnoreUnknown(true)
+      val resp = serializer.deserialize[MarathonRequest](getEntityAsString(taskResponse.entity))
+      if (resp.instances < request.instances) {
+        scaleApplication(request.id, request.instances)
+      }
+    } else if (taskResponse.status.equals(NotFound)) {
+      val marathonUri = Uri(s"$marathonConnect/v2/apps")
+      val res = Http().singleRequest(HttpRequest(method = POST, uri = marathonUri,
         entity = HttpEntity(ContentTypes.`application/json`, serializer.serialize(request))
-      )
-    )
+      ))
+
+      val response = {
+        Await.result(res, 30.seconds)
+      }
+
+      if (!response.status.equals(Created)) {
+        throw new Exception("Cannot start of transaction generator")
+      }
+    }
+  }
+
+  private def getTaskInfo(taskId: String) = {
+    val marathonUri = Uri(s"$marathonConnect/v2/apps/$taskId")
+    val res = Http().singleRequest(HttpRequest(method = GET, uri = marathonUri))
+
+    Await.result(res, 15.seconds)
+
+  }
+
+  private def scaleApplication(taskId: String, count: Int) = {
+    val marathonUri = Uri(s"$marathonConnect/v2/apps/$taskId?force=true")
+    val res = Http().singleRequest(HttpRequest(method = PUT, uri = marathonUri,
+      entity = HttpEntity(ContentTypes.`application/json`, serializer.serialize(Map("instances" -> count)))
+    ))
 
     val response = {
       Await.result(res, 15.seconds)
     }
 
-    if (!response.status.equals(Created)) {
-      throw new Exception("Cannot start of transaction generator")
+    if (!response.status.equals(OK)) {
+      throw new Exception("Cannot scaling of transaction generator")
     }
   }
 
   //todo stop
   def stopInstance(instance: RegularInstance) = {
 
+    //todo instance stopped
+    stopGenerators(instance)
+    instance.status = stopped
+    instanceDAO.save(instance)
+  }
+
+  private def stopGenerators(instance: RegularInstance) = {
+    val allStreams = instance.inputs.map(_.replaceAll("/split|/full", "")).union(instance.outputs)
+    val startedInstances = instanceDAO.getByParameters(Map("status" -> started))
+    allStreams.foreach { streamName =>
+      val stream = streamDAO.get(streamName)
+      if (!stream.generator.generatorType.equals("local")) {
+        var taskId = ""
+        if (stream.generator.generatorType.equals("per-stream")) {
+          taskId = s"${stream.generator.service.name}-${stream.name}-tg"
+        } else {
+          taskId = s"${stream.generator.service.name}-global-tg"
+        }
+        //todo check using this generator from another streams
+        if (!startedInstances.exists(instance => instance.inputs.contains(streamName) ||
+          instance.outputs.contains(streamName))) {
+          stopGenerator(taskId.replaceAll("_", "-"))
+        }
+      }
+    }
+  }
+
+  private def stopGenerator(taskId: String) = {
+    val marathonUri = Uri(s"$marathonConnect/v2/apps/$taskId")
+    val res = Http().singleRequest(HttpRequest(method = DELETE, uri = marathonUri))
+
+    val response = {
+      Await.result(res, 15.seconds)
+    }
+
+    if (!response.status.equals(Created)) {
+      throw new Exception("Cannot destroing of transaction generator")
+    }
   }
 
   def convertToApiInstance(instance: RegularInstance) = {
