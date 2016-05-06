@@ -80,8 +80,7 @@ class StreamValidator {
         errors += s"'streamType' is required"
       case _ =>
         if (params.streamType == "Tstream") {
-          val validatorClass = Class.forName("com.bwsw.sj.crud.rest.validator.stream.GeneratorValidator")
-          val validator = validatorClass.newInstance().asInstanceOf[GeneratorValidator]
+          val validator = new GeneratorValidator
           errors ++= validator.validate(params.generator, initialData.generator)
         }
     }
