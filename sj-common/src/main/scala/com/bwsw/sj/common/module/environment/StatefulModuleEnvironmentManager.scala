@@ -1,20 +1,28 @@
 package com.bwsw.sj.common.module.environment
 
-import com.bwsw.sj.common.module.SjTimer
-import com.bwsw.sj.common.module.state.ModuleStateStorage
+import com.bwsw.sj.common.module.state.StateStorage
+import com.bwsw.sj.common.module.utils.SjTimer
+
 import scala.collection.mutable
 
 /**
  * Class allowing to manage environment of module that has state
  * Created: 15/04/2016
  * @author Kseniya Mikhaleva
+ *
+ * @param stateStorage
+ * @param options User defined options from instance parameters
+ * @param temporaryOutput Provides a store for each output stream from instance parameters
+ * @param moduleTimer
  */
 
-class StatefulModuleEnvironmentManager(stateStorage: ModuleStateStorage,
+class StatefulModuleEnvironmentManager(stateStorage: StateStorage,
                                        options: Map[String, Any],
-                                       outputs: List[String],
-                                       temporaryOutput: mutable.Map[String, mutable.MutableList[Array[Byte]]],
-                                       moduleTimer: SjTimer) extends ModuleEnvironmentManager(options, outputs, temporaryOutput, moduleTimer) {
-
-  override def getState() = stateStorage.getState()
+                                       temporaryOutput: mutable.Map[String, (String, Any)],
+                                       moduleTimer: SjTimer) extends ModuleEnvironmentManager(options, temporaryOutput, moduleTimer) {
+  /**
+   * Returns specific state of module
+   * @return Module state
+   */
+  override def getState: StateStorage = stateStorage
 }

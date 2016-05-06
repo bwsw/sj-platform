@@ -13,7 +13,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.ConfigLoader
-import com.bwsw.sj.common.DAL.ConnectionRepository
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.typesafe.config.Config
 
 import scala.concurrent.Future
@@ -51,13 +51,17 @@ object SjCrudRestService extends App with SjCrudRouter {
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher //for work with future
 
-  val host = conf.getString("crud-rest.host")
-  val port = conf.getInt("crud-rest.port")
+  val host = System.getenv("CRUD_REST_HOST")
+  val port = System.getenv("CRUD_REST_PORT").toInt
+  val marathonConnect = System.getenv("MINIMESOS_MARATHON")
 
   val serializer = new JsonSerializer()
   val storage = ConnectionRepository.getFileStorage
-  val fileMetadataDAO = ConnectionRepository.getFileMetadataDAO
-  val instanceDAO = ConnectionRepository.getInstanceDAO
+  val fileMetadataDAO = ConnectionRepository.getFileMetadataService
+  val instanceDAO = ConnectionRepository.getInstanceService
+  val serviceDAO = ConnectionRepository.getServiceManager
+  val providerDAO = ConnectionRepository.getProviderService
+  val streamDAO = ConnectionRepository.getStreamService
 
   val routeLogged = logRequestResult(Logging.InfoLevel, route())
 

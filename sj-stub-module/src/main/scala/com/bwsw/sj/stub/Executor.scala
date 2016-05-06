@@ -7,23 +7,48 @@ import com.bwsw.sj.common.module.regular.RegularStreamingExecutor
 class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor(manager) {
 
     override def init(): Unit = {
-      println("init")
+      try {
+        val state = manager.getState
+
+        println(s"getting state")
+        state.set("sum", 0)
+      } catch {
+        case _: java.lang.Exception => println("exception")
+      }
+
+      println("new init")
     }
 
-    override def finish(): Unit = ???
 
-    override def onCheckpoint(): Unit = {
+    override def onAfterCheckpoint(): Unit = {
       println("onCheckpoint")
     }
 
-    override def run(transaction: Transaction): Unit = {
-      val output = manager.getOutput("s3")
-      manager.setTimer(1000)
-      transaction.data.foreach(x => output += x)
+    override def onTxn(transaction: Transaction): Unit = {
+      val output = manager.getRoundRobinOutput("s3")
+      val state = manager.getState
+      var sum = state.get("sum").asInstanceOf[Int]
+      transaction.data.foreach(x => output.put(x))
+      sum += 1
+      state.set("sum", sum)
       println("in run")
     }
 
-    override def onTimer(): Unit = {
+    override def onTimer(jitter: Long): Unit = {
       println("onTimer")
     }
+
+  override def onAfterStateSave(isFull: Boolean): Unit = {
+    println("onStateSave")
+  }
+
+  override def onBeforeCheckpoint(): Unit = ???
+
+  override def onIdle(): Unit = ???
+
+  /**
+   * Handler triggered before save state
+   * @param isFullState Flag denotes that full state (true) or partial changes of state (false) will be saved
+   */
+  override def onBeforeStateSave(isFullState: Boolean): Unit = ???
 }
