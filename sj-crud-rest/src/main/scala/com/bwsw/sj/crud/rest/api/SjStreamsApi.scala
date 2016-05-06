@@ -69,7 +69,14 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
     * @return - SjStreamData object
     */
   def streamToStreamData(stream: SjStream) = {
-
+    var generator: GeneratorData = null
+    if (stream.generator != null) {
+      generator = new GeneratorData(
+        stream.generator.generatorType,
+        stream.generator.service.name,
+        stream.generator.instanceCount
+      )
+    }
     val streamData = new SjStreamData(
       stream.name,
       stream.description,
@@ -77,11 +84,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
       stream.service.name,
       stream.streamType,
       stream.tags,
-      new GeneratorData(
-        stream.generator.generatorType,
-        stream.generator.service.name,
-        stream.generator.instanceCount
-      )
+      generator
     )
     streamData
   }

@@ -1,8 +1,8 @@
 package com.bwsw.sj.crud.rest.validator.stream
 
-import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.crud.rest.entities._
 
 import scala.collection.mutable.ArrayBuffer
@@ -65,6 +65,12 @@ class StreamValidator {
       case None =>
         errors += s"'service' is required"
       case _ =>
+        if (params.streamType == "Tstream" && params.service.serviceType != "TstrQ") {
+          errors += s"Service for 'Tstream' stream must be of TstrQ type. '${params.service.name}' is not of type TstrQ"
+        }
+        else if (params.streamType == "kafka" && params.service.serviceType != "KfkQ") {
+            errors += s"Service for 'kafka' stream must be of KfkQ type. '${params.service.name}' is not of type KfkQ"
+        }
     }
 
     Option(params.streamType) match {
