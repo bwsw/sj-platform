@@ -25,8 +25,9 @@ import java.net.InetAddress
 
 class ScalaScheduler extends Scheduler {
 
-  var tasksLaunched = List[String]()
-  var tasksToLaunch = List[String]()
+  var cores: Double = 0.0
+  var ram: Double = 0.0
+  var tasksToLaunch = List[Tuple2[String, JsValue]]()
   var params = immutable.Map[String, String]()
   val logger = LoggerFactory.getLogger(classOf[Scheduler])
   var instance: JsValue = _
@@ -47,15 +48,27 @@ class ScalaScheduler extends Scheduler {
   }
 
   def statusUpdate(driver: SchedulerDriver, status: TaskStatus) {
-    logger.info(s"Received status update $status")
-    logger.debug(s"$status")
+    logger.info(s"STATUS UPDATE")
+    if (status != null) {
+      logger.info(s"Task: ${status.getTaskId.getValue}")
+      logger.info(s"Status: ${status.getState}")
+      val tasks = Json.parse((this.instance \ "execution-plan" \ "tasks").toString).as[JsObject].value
+      if (status.getState.toString == "TASK_FAILED") {
+        this.tasksToLaunch = this.tasksToLaunch.:::(
+          List(Tuple2(status.getTaskId.getValue,
+            tasks {
+              status.getTaskId.getValue
+            })))
+        logger.info("ADDED TASK TO LAUNCH")
+      }
+    }
   }
 
   def offerRescinded(driver: SchedulerDriver, offerId: OfferID) {
   }
 
 
-  def howMuchTasksOnSlave(perTaskCores: Double, perTaskRam: Double, tasksCount: Int, offers: util.List[Offer]):List[Map[String, Any]]={
+  def howMuchTasksOnSlave(perTaskCores: Double, perTaskRam: Double, tasksCount: Int, offers: util.List[Offer]):List[Tuple2[Offer, Int]]={
     /**
       * This method give list of slaves id and how many tasks we can launch on each slave.
       */
@@ -63,21 +76,20 @@ class ScalaScheduler extends Scheduler {
     var over_mem = 0.0
     val req_cpus = perTaskCores*tasksCount
     val req_mem = perTaskRam*tasksCount
-    var tasksNumber: List[Map[String, Any]] = List()
+    var tasksNumber: List[Tuple2[Offer, Int]] = List()
     for (offer <- offers.asScala) {
-      tasksNumber = tasksNumber.:::(List(Map(
-        ("id", offer.getSlaveId.getValue),
-        ("tasksCount", java.lang.Math.min(
+      tasksNumber = tasksNumber.:::(List(Tuple2(
+        offer, java.lang.Math.min(
           getResource(offer, "cpus") / perTaskCores,
           getResource(offer, "mem") / perTaskRam
         ).floor.toInt
-          ))))
+          )))
       over_cpus += getResource(offer, "cpus")
       over_mem += getResource(offer, "mem")
     }
 
-    logger.info(s"Have resources: ${over_cpus} cpus, ${over_mem} mem")
-    logger.info(s"Resource requirements: ${req_cpus} cpus, ${req_mem} mem")
+    logger.debug(s"Have resources: ${over_cpus} cpus, ${over_mem} mem")
+    logger.debug(s"Resource requirements: ${req_cpus} cpus, ${req_mem} mem")
     return tasksNumber
   }
 
@@ -90,66 +102,61 @@ class ScalaScheduler extends Scheduler {
     for (r <- res.asScala if r.getName == name) {
       return r.getScalar.getValue
     }
-    throw new IllegalArgumentException("No resource called " + name + " in " + res)
+    return 0.0
   }
 
-  def filterTasks(): Unit = {
-    val tasks = Json.parse((this.instance \ "execution-plan" \ "tasks").toString).as[JsObject].value
 
-    for (task <- tasks) {
-      if (this.tasksLaunched.contains(task._1)){
-        logger.info(s"Task ID: ${task._1}")
-      } else {
-        this.tasksToLaunch :::= (List(task._1))
-      }
-    }
-    logger.info(s"${this.tasksToLaunch}")
+  def filterOffers(offers: util.List[Offer], filters: List[String]): Unit = {
+
   }
-
 
   override def resourceOffers(driver: SchedulerDriver, offers: util.List[Offer]) {
-    logger.info(s"Got resource offers")
+    logger.info(s"RESOURCE OFFERS")
     logger.debug(s"$offers")
 
-    filterTasks()
-    logger.info(s"TASKS TO LAUNCH: ${this.tasksToLaunch}")
+    for (offer <- offers.asScala){
+      logger.info(s"Offer ID: ${offer.getId.getValue}")
+      logger.info(s"Slave ID: ${offer.getSlaveId.getValue}")
+    }
 
-    val cores = (this.instance \ "per-task-cores").toString.toDouble
-    val ram = (this.instance \ "per-task-ram").toString.toDouble
-    val tasksCount = Json.parse((this.instance \ "execution-plan" \ "tasks").toString).as[JsObject].value.size
-    val tasksOnSlaves = howMuchTasksOnSlave(cores, ram, tasksCount, offers)
+    logger.info(s"Tasks to launch: ${this.tasksToLaunch}")
+
+    val tasksCount = this.tasksToLaunch.size
+    var tasksOnSlaves = howMuchTasksOnSlave(this.cores, this.ram, tasksCount, offers)
 
     var overTasks = 0
     for (slave <- tasksOnSlaves) {
-      overTasks += slave{"tasksCount"}.toString.toInt
+      overTasks += slave._2
     }
-    logger.info(s"Number of tasks must be launched: $tasksCount")
     logger.info(s"Number of tasks can be launched: $overTasks")
+    logger.info(s"Number of tasks must be launched: $tasksCount")
     if (tasksCount > overTasks) {
-      logger.info(s"Can not run tasks: no required resources")
+      logger.info(s"Can not launch tasks: no required resources")
+      for (offer <- offers.asScala) {
+        driver.declineOffer(offer.getId)
+      }
+      return
     }
 
-
-
-
-//    logger.debug(s"INSTANCE: ${Json.prettyPrint(this.instance)}")
-
-//    val str = Json.prettyPrint(inst)
-//    println(str)
-
-    for (offer <- offers.asScala) {
+    var i = 0
+    var launchedTasks: Map[OfferID, List[TaskInfo]] = Map()
+    for (task_temp <- this.tasksToLaunch) {
 
       val cmd = CommandInfo.newBuilder
         .addUris(CommandInfo.URI.newBuilder.setValue("http://192.168.1.225:8000/testScript.sh"))
         .setValue("sh testScript.sh")
 
-//      val attributes = offer.getAttributesList()
-//      logger.debug(s"Offer ${offer.getId.getValue()} got attributes: $attributes")
+      val cpus = ScalarResource("cpus", this.cores)
+      val mem = ScalarResource("mem", this.ram)
+      val task_id = task_temp._1
 
-
-      val cpus = ScalarResource("cpus", cores)
-      val mem = ScalarResource("mem", ram)
-      val task_id = "task" + offer.getSlaveId.getValue()
+      while (tasksOnSlaves(i)._2 == 0) {
+        tasksOnSlaves = tasksOnSlaves.filterNot(elem => elem == tasksOnSlaves(i))
+      }
+      val currentOffer = tasksOnSlaves(i)
+      if (i >= offers.size - 1) {i = 0} else {i += 1}
+      logger.info(s"Current task: ${task_temp._1}")
+      logger.info(s"Current slave: ${currentOffer._1.getId.getValue}")
 
       val task = TaskInfo.newBuilder
         .setCommand(cmd)
@@ -157,44 +164,34 @@ class ScalaScheduler extends Scheduler {
         .setTaskId(TaskID.newBuilder.setValue(task_id))
         .addResources(cpus.toProto)
         .addResources(mem.toProto)
-        .setSlaveId(offer.getSlaveId)
+        .setSlaveId(currentOffer._1.getSlaveId)
         .build
+      var listTasks: List[TaskInfo] = List()
+      listTasks :::= (List(task))
 
-      val listTasks = mutable.MutableList[TaskInfo]()
-      listTasks += task
+      if (launchedTasks.contains(currentOffer._1.getId)){
+          launchedTasks += (currentOffer._1.getId -> launchedTasks {currentOffer._1.getId}.:::(listTasks))
+        } else {
+        launchedTasks += (currentOffer._1.getId -> listTasks)
+      }
 
-      driver.launchTasks(offer.getId, listTasks.asJava)
-
-
-      logger.info(s"Launched tasks ")
-      logger.debug(s"$listTasks ")
-      logger.info(s"on slave ${offer.getSlaveId.getValue}")
-
-
-//      driver.declineOffer(offer.getId)
+      tasksOnSlaves.updated(tasksOnSlaves.indexOf(currentOffer), Tuple2(currentOffer._1, currentOffer._2-1))
+      this.tasksToLaunch = this.tasksToLaunch.filterNot(elem => elem == task_temp)
 
     }
-
-
-//    while (true) {
-//      logger.info("loop")
-//      Thread.sleep(5000)
-//    }
-//      for (offer <- offers.asScala){
-//        logger.info("WAIT")
-//        Thread.sleep(5000)
-//      }
-    // @todo remove stop()
-//    driver.stop()
+    for (task <- launchedTasks) {
+      driver.launchTasks(task._1, task._2.asJava)
+    }
+    for (offer <- offers.asScala) {
+      driver.declineOffer(offer.getId)
+    }
   }
 
-  def launchTask(driver: SchedulerDriver, taskInfo: TaskInfo) {
-    logger.info(s"Launched Task: $taskInfo")
-  }
 
   def reregistered(driver: SchedulerDriver, masterInfo: MasterInfo) {
     logger.info(s"New master ${masterInfo}")
   }
+
 
   def registered(driver: SchedulerDriver, frameworkId: FrameworkID, masterInfo: MasterInfo) {
     logger.info(s"Registered framework as: ${frameworkId.getValue}")
@@ -228,6 +225,15 @@ class ScalaScheduler extends Scheduler {
     this.instance = Json.parse(s"""${entityCollection.findOne().map(_.toString).get}""")
     logger.debug(s"Find instance: ${this.instance}")
 
+    this.cores = (this.instance \ "per-task-cores").toString.toDouble
+    this.ram = (this.instance \ "per-task-ram").toString.toDouble
+
+    val tasks = Json.parse((this.instance \ "execution-plan" \ "tasks").toString).as[JsObject].value
+    logger.info(s"Got tasks")
+    for (task <- tasks) {
+      this.tasksToLaunch :::= List(task)
+      logger.info(s"$task")
+    }
   }
 }
 
