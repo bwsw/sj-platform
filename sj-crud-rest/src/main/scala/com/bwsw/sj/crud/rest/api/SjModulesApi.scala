@@ -204,7 +204,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                       "module-type" -> moduleType,
                       "module-version" -> moduleVersion)
                     )
-                    if (instances.nonEmpty) {
+                    if (instances.isEmpty) {
                       if (storage.delete(filename)) {
                         complete(HttpEntity(
                           `application/json`,
@@ -292,9 +292,11 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     */
   def validateOptions(options: InstanceMetadata, moduleType: String) = {
     val validatorClassName = conf.getString("modules." + moduleType + ".validator-class")
-    val validatorClazz = Class.forName(validatorClassName)
-    val validator = validatorClazz.newInstance().asInstanceOf[StreamingModuleValidator]
-    validator.validate(options)
+    val instanceClassName = conf.getString("modules." + moduleType + ".entity-class")
+    val validatorClass = Class.forName(validatorClassName)
+    val validator = validatorClass.newInstance().asInstanceOf[StreamingModuleValidator]
+    val instanceClass = Class.forName(instanceClassName)
+    validator.validate(options, instanceClass.newInstance().asInstanceOf[RegularInstance])
   }
 
   /**
@@ -453,7 +455,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     val res = Http().singleRequest(HttpRequest(method = DELETE, uri = marathonUri))
 
     val response = {
-      Await.result(res, 15.seconds)
+      Await.result(res, 30.seconds)
     }
 
     if (!response.status.equals(OK)) {
@@ -497,7 +499,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     apiInstance.perTaskCores = instance.perTaskCores
     apiInstance.perTaskRam = instance.perTaskRam
     apiInstance.jvmOptions = Map(instance.jvmOptions.asScala.toList: _*)
-    apiInstance.tags = instance.tags
+    apiInstance.attributes = Map(instance.attributes.asScala.toList: _*)
     apiInstance.idle = instance.idle
     apiInstance.executionPlan = executionPlan
     apiInstance

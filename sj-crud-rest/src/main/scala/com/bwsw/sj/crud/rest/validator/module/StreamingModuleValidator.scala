@@ -44,9 +44,8 @@ abstract class StreamingModuleValidator {
     * @param partitionsCount - partitions count of input streams
     * @return
     */
-  def createInstance(parameters: InstanceMetadata, partitionsCount: Map[String, Int]) = {
+  def createInstance(parameters: InstanceMetadata, partitionsCount: Map[String, Int], instance: RegularInstance) = {
     val executionPlan = createExecutionPlan(parameters, partitionsCount)
-    val instance = new RegularInstance
     convertToModelInstance(instance, parameters)
     instance.executionPlan = executionPlan
     instance
@@ -58,7 +57,7 @@ abstract class StreamingModuleValidator {
     * @param parameters - input parameters for running module
     * @return - List of errors
     */
-  def validate(parameters: InstanceMetadata) = {
+  def validate(parameters: InstanceMetadata, validatedInstance: RegularInstance) = {
     val validateParameters = parameters
     instanceDAO = ConnectionRepository.getInstanceService
     serviceDAO = ConnectionRepository.getServiceManager
@@ -142,7 +141,7 @@ abstract class StreamingModuleValidator {
         errors += "Unknown type of 'parallelism' parameter. Must be Int or String."
     }
 
-    val validatedInstance = createInstance(validateParameters, partitions)
+    createInstance(validateParameters, partitions, validatedInstance)
     (errors, validatedInstance)
   }
 
@@ -323,7 +322,7 @@ abstract class StreamingModuleValidator {
     modelInstance.perTaskCores = apiInstance.perTaskCores
     modelInstance.perTaskRam = apiInstance.perTaskRam
     modelInstance.jvmOptions = mapAsJavaMap(apiInstance.jvmOptions)
-    modelInstance.tags = apiInstance.tags
+    modelInstance.attributes = mapAsJavaMap(apiInstance.attributes)
     modelInstance.idle = apiInstance.idle
     modelInstance
   }
