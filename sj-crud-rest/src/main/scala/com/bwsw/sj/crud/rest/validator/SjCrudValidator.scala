@@ -3,13 +3,14 @@ package com.bwsw.sj.crud.rest.validator
 import java.io._
 import java.util.jar.JarFile
 
+import akka.actor.ActorSystem
+import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.server.RequestContext
 import akka.stream.Materializer
 import com.bwsw.common.file.utils.FilesStorage
 import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.module.ModuleConstants
 import com.typesafe.config.Config
 import org.everit.json.schema.loader.SchemaLoader
 import org.json.{JSONObject, JSONTokener}
@@ -26,6 +27,7 @@ import scala.concurrent.Await
   */
 trait SjCrudValidator {
   implicit val materializer: Materializer
+  implicit val system: ActorSystem
   val conf: Config
   val serializer: Serializer
   val fileMetadataDAO: GenericMongoService[FileMetadata]
@@ -38,8 +40,7 @@ trait SjCrudValidator {
   val port: Int
   val marathonConnect: String
 
-  import ModuleConstants._
-
+  import com.bwsw.sj.common.ModuleConstants._
   /**
     * Getting entity from HTTP-request
     *
@@ -47,8 +48,12 @@ trait SjCrudValidator {
     * @return - entity from http-request as string
     */
   def getEntityFromContext(ctx: RequestContext): String = {
+    getEntityAsString(ctx.request.entity)
+  }
+
+  def getEntityAsString(entity: HttpEntity): String = {
     import scala.concurrent.duration._
-    Await.result(ctx.request.entity.toStrict(1.second), 1.seconds).data.decodeString("UTF-8")
+    Await.result(entity.toStrict(1.second), 1.seconds).data.decodeString("UTF-8")
   }
 
   /**

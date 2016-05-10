@@ -9,6 +9,9 @@ import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
 import org.apache.log4j.Logger
 import org.apache.zookeeper.{CreateMode, ZooDefs}
 
+import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
+
 /**
   * TCP-Server for transaction generating
   * Created: 18/04/2016
@@ -35,9 +38,9 @@ class TcpServer(prefix: String, zkClient: ZooKeeperClient, host: String, port: I
       }
     }
     logger.info(s"Server $host:$port is started")
-    val clientSocket = serverSocket.accept()
     var isWorked = true
     while (isWorked) {
+      val clientSocket = serverSocket.accept()
       try {
         val request = readSocket(clientSocket)
         if (request != null && request.equals("TXN")) {

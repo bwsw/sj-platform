@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
   *
   * @author Kseniya Tomskikh
   */
-class TimeWindowedInstanceMetadata extends InstanceMetadata {
+class WindowedInstanceMetadata extends InstanceMetadata {
   @JsonProperty("time-windowed") var timeWindowed: Int = 0
   @JsonProperty("window-full-max") var windowFullMax: Int = 0
 }

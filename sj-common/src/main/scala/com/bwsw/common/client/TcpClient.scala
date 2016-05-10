@@ -48,6 +48,7 @@ class TcpClient(options: TcpClientOptions) {
   }
 
   def get() = {
+    retryCount = options.retryCount
     var serverIsNotAvailable = true
     var response = "Server is not available"
     while (serverIsNotAvailable && retryCount > 0) {
@@ -66,7 +67,6 @@ class TcpClient(options: TcpClientOptions) {
           reconnect()
       }
     }
-
     response
   }
 
