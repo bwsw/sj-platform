@@ -20,6 +20,7 @@ import java.net.InetAddress
 
 import com.bwsw.common.client.Client._
 import com.bwsw.sj.common.DAL.model.RegularInstance
+import com.bwsw.sj.common.DAL.model.Task
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import org.apache.log4j.Logger
 
@@ -29,10 +30,10 @@ class ScalaScheduler extends Scheduler {
 
   var cores: Double = 0.0
   var ram: Double = 0.0
-  var tasksToLaunch = List[Tuple2[String, JsValue]]()
+  var tasksToLaunch = List[Tuple2[String, Task]]()
   var params = immutable.Map[String, String]()
   private val logger = Logger.getLogger(getClass)
-  var instance: JsValue = _
+  var instance: RegularInstance = _
 
   def error(driver: SchedulerDriver, message: String) {
     logger.error(s"Got error message: $message")
@@ -54,11 +55,11 @@ class ScalaScheduler extends Scheduler {
     if (status != null) {
       logger.info(s"Task: ${status.getTaskId.getValue}")
       logger.info(s"Status: ${status.getState}")
-      val tasks = Json.parse((this.instance \ "execution-plan" \ "tasks").toString).as[JsObject].value
+      val tasks = this.instance.executionPlan.tasks
       if (status.getState.toString == "TASK_FAILED") {
         this.tasksToLaunch = this.tasksToLaunch.:::(
           List(Tuple2(status.getTaskId.getValue,
-            tasks {
+            tasks.asScala{
               status.getTaskId.getValue
             })))
         logger.info("ADDED TASK TO LAUNCH")
@@ -100,7 +101,7 @@ class ScalaScheduler extends Scheduler {
       return
     }
 
-    var i = 0
+    var offerNumber = 0
     var launchedTasks: Map[OfferID, List[TaskInfo]] = Map()
     for (task_temp <- this.tasksToLaunch) {
 
@@ -122,12 +123,15 @@ class ScalaScheduler extends Scheduler {
         build
 
       val task_id = task_temp._1
-
-      while (tasksOnSlaves(i)._2 == 0) {
-        tasksOnSlaves = tasksOnSlaves.filterNot(elem => elem == tasksOnSlaves(i))
+      logger.info(s"SLAVES: ${tasksOnSlaves.size}")
+      logger.info(s"INDEX: $offerNumber")
+      if (offerNumber >= tasksOnSlaves.size) {offerNumber=0}
+      while (tasksOnSlaves(offerNumber)._2 == 0) {
+        tasksOnSlaves = tasksOnSlaves.filterNot(elem => elem == tasksOnSlaves(offerNumber))
       }
-      val currentOffer = tasksOnSlaves(i)
-      if (i >= tasksOnSlaves.size - 1) {i = 0} else {i += 1}
+      val currentOffer = tasksOnSlaves(offerNumber)
+      offerNumber += 1
+
       logger.info(s"Current task: ${task_temp._1}")
       logger.info(s"Current slave: ${currentOffer._1.getId.getValue}")
 
@@ -149,6 +153,7 @@ class ScalaScheduler extends Scheduler {
       }
 
       tasksOnSlaves.updated(tasksOnSlaves.indexOf(currentOffer), Tuple2(currentOffer._1, currentOffer._2-1))
+      logger.info(s"Task on slave: ${tasksOnSlaves}")
       this.tasksToLaunch = this.tasksToLaunch.filterNot(elem => elem == task_temp)
 
     }
@@ -183,35 +188,32 @@ class ScalaScheduler extends Scheduler {
     logger.debug(s"Got environment variable: ${this.params}")
 
     val zkhost = new InetSocketAddress(InetAddress.getByName(this.params{"zkHosts"}), 2181)
-    val zkClient = new ZooKeeperClient(Amount.of(60, Time.MINUTES), zkhost)
+    val zkClient = new ZooKeeperClient(Amount.of(1, Time.MINUTES), zkhost)
     val lockPath = s"/${this.params{"zkPrefix"}}/${this.params{"instanceId"}}/lock"
     val dli = new DistributedLockImpl(zkClient, lockPath)
     dli.lock()
     logger.info("Framework locked")
 
-//    val dbName = "stream_juggler"
-//    val collName = "instances"
-//    val dbHost = this.params{"mongodbHost"}
-//    val entityCollection = MongoClient(dbHost)(dbName)(collName)
-//    val obj = MongoDBObject("uuid" -> this.params{"instanceId"})
-//    entityCollection += obj
-//    this.instance = Json.parse(s"""${entityCollection.findOne().map(_.toString).get}""")
-//    logger.debug(s"Find instance: ${this.instance}")
-
+    this.instance = ConnectionRepository.getInstanceService.get(this.params{"instanceId"})
     val instance = ConnectionRepository.getInstanceService.get(this.params{"instanceId"})
     logger.info(s"Got cores: ${instance.perTaskCores}")
     logger.info(s"Got ram: ${instance.perTaskRam}")
+    logger.info(s"Got tasks: ${instance.executionPlan.tasks}")
+    for (task <- instance.executionPlan.tasks.asScala) {
+      logger.info(s"Got task name: ${task._1}")
+      logger.info(s"Got task inputs: ${task._2.inputs}")
+    }
 
+    this.cores = instance.perTaskCores
+    this.ram = instance.perTaskRam
 
-    this.cores = (this.instance \ "per-task-cores").toString.toDouble
-    this.ram = (this.instance \ "per-task-ram").toString.toDouble
-
-    val tasks = Json.parse((this.instance \ "execution-plan" \ "tasks").toString).as[JsObject].value
+    val tasks = instance.executionPlan.tasks
     logger.info(s"Got tasks")
-    for (task <- tasks) {
+    for (task <- tasks.asScala) {
       this.tasksToLaunch :::= List(task)
       logger.info(s"$task")
     }
+    logger.info(s"Got custom task: ${tasks.asScala{"instance-test-reg_task2"}}")
   }
 
   def howMuchTasksOnSlave(perTaskCores: Double, perTaskRam: Double, tasksCount: Int, offers: util.List[Offer]):List[Tuple2[Offer, Int]]={
@@ -256,13 +258,9 @@ class ScalaScheduler extends Scheduler {
 
   }
 
-//  def getModuleUrl(instance: RegularInstance): String = {
-//    return "http://192.168.1.225:8000/testScript.sh"
-//  }
-
-  // TODO: remove this
-  def getModuleUrl(instance: JsValue): String = {
+  def getModuleUrl(instance: RegularInstance): String = {
     return "http://192.168.1.225:8000/testScript.sh"
   }
+
 }
 
