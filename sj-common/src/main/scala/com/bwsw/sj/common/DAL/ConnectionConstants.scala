@@ -3,7 +3,7 @@ package com.bwsw.sj.common.DAL
 import com.bwsw.sj.common.ConfigLoader
 
 object ConnectionConstants {
-   val conf = ConfigLoader.load()
+   //val conf = ConfigLoader.load()
    val host = System.getenv("MONGO_HOST")
    val port = System.getenv("MONGO_PORT").toInt
 

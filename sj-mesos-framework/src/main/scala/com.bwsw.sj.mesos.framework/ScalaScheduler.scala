@@ -1,25 +1,27 @@
+package com.bwsw.sj.mesos.framework
+
 import java.util
-import mesosphere.mesos.util.ScalarResource
+
 import org.apache.mesos.Protos._
-import org.apache.mesos.{SchedulerDriver, Scheduler}
+import org.apache.mesos.{Scheduler, SchedulerDriver}
+
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.immutable
 import scala.util.Properties
-
 import com.mongodb.casbah.Imports._
 import com.mongodb.DBObject
-
-import org.slf4j._
-import org.slf4j.LoggerFactory
-
+import org.apache.log4j.Logger
 import play.api.libs.json._
-
 import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
 import com.twitter.common.quantity.{Amount, Time}
-
 import java.net.InetSocketAddress
 import java.net.InetAddress
+
+import com.bwsw.common.client.Client._
+import com.bwsw.sj.common.DAL.model.RegularInstance
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import org.apache.log4j.Logger
 
 
 
@@ -29,7 +31,7 @@ class ScalaScheduler extends Scheduler {
   var ram: Double = 0.0
   var tasksToLaunch = List[Tuple2[String, JsValue]]()
   var params = immutable.Map[String, String]()
-  val logger = LoggerFactory.getLogger(classOf[Scheduler])
+  private val logger = Logger.getLogger(getClass)
   var instance: JsValue = _
 
   def error(driver: SchedulerDriver, message: String) {
@@ -68,47 +70,7 @@ class ScalaScheduler extends Scheduler {
   }
 
 
-  def howMuchTasksOnSlave(perTaskCores: Double, perTaskRam: Double, tasksCount: Int, offers: util.List[Offer]):List[Tuple2[Offer, Int]]={
-    /**
-      * This method give list of slaves id and how many tasks we can launch on each slave.
-      */
-    var over_cpus = 0.0
-    var over_mem = 0.0
-    val req_cpus = perTaskCores*tasksCount
-    val req_mem = perTaskRam*tasksCount
-    var tasksNumber: List[Tuple2[Offer, Int]] = List()
-    for (offer <- offers.asScala) {
-      tasksNumber = tasksNumber.:::(List(Tuple2(
-        offer, java.lang.Math.min(
-          getResource(offer, "cpus") / perTaskCores,
-          getResource(offer, "mem") / perTaskRam
-        ).floor.toInt
-          )))
-      over_cpus += getResource(offer, "cpus")
-      over_mem += getResource(offer, "mem")
-    }
 
-    logger.debug(s"Have resources: ${over_cpus} cpus, ${over_mem} mem")
-    logger.debug(s"Resource requirements: ${req_cpus} cpus, ${req_mem} mem")
-    return tasksNumber
-  }
-
-
-  def getResource(offer: Offer, name: String): Double = {
-    /**
-      * This method give how much resource of type <name> we have on <offer>
-      */
-    val res = offer.getResourcesList
-    for (r <- res.asScala if r.getName == name) {
-      return r.getScalar.getValue
-    }
-    return 0.0
-  }
-
-
-  def filterOffers(offers: util.List[Offer], filters: List[String]): Unit = {
-
-  }
 
   override def resourceOffers(driver: SchedulerDriver, offers: util.List[Offer]) {
     logger.info(s"RESOURCE OFFERS")
@@ -143,18 +105,29 @@ class ScalaScheduler extends Scheduler {
     for (task_temp <- this.tasksToLaunch) {
 
       val cmd = CommandInfo.newBuilder
-        .addUris(CommandInfo.URI.newBuilder.setValue("http://192.168.1.225:8000/testScript.sh"))
+        .addUris(CommandInfo.URI.newBuilder.setValue(getModuleUrl(this.instance)))
         .setValue("sh testScript.sh")
 
-      val cpus = ScalarResource("cpus", this.cores)
-      val mem = ScalarResource("mem", this.ram)
+      val cpus = Resource.newBuilder.
+        setType(org.apache.mesos.Protos.Value.Type.SCALAR).
+        setName("cpus").
+        setScalar(org.apache.mesos.Protos.Value.
+          Scalar.newBuilder.setValue(this.cores)).
+        build
+      val mem = Resource.newBuilder.
+        setType(org.apache.mesos.Protos.Value.Type.SCALAR).
+        setName("mem").
+        setScalar(org.apache.mesos.Protos.Value.
+          Scalar.newBuilder.setValue(this.ram)).
+        build
+
       val task_id = task_temp._1
 
       while (tasksOnSlaves(i)._2 == 0) {
         tasksOnSlaves = tasksOnSlaves.filterNot(elem => elem == tasksOnSlaves(i))
       }
       val currentOffer = tasksOnSlaves(i)
-      if (i >= offers.size - 1) {i = 0} else {i += 1}
+      if (i >= tasksOnSlaves.size - 1) {i = 0} else {i += 1}
       logger.info(s"Current task: ${task_temp._1}")
       logger.info(s"Current slave: ${currentOffer._1.getId.getValue}")
 
@@ -162,8 +135,8 @@ class ScalaScheduler extends Scheduler {
         .setCommand(cmd)
         .setName(task_id)
         .setTaskId(TaskID.newBuilder.setValue(task_id))
-        .addResources(cpus.toProto)
-        .addResources(mem.toProto)
+        .addResources(cpus)
+        .addResources(mem)
         .setSlaveId(currentOffer._1.getSlaveId)
         .build
       var listTasks: List[TaskInfo] = List()
@@ -207,7 +180,7 @@ class ScalaScheduler extends Scheduler {
       ("restService", Properties.envOrElse("REST_SERVICE", "127.0.0.1")),
       ("jarUri", Properties.envOrElse("JAR_URI", ""))
     )
-    logger.info(s"Got environment variable: ${this.params}")
+    logger.debug(s"Got environment variable: ${this.params}")
 
     val zkhost = new InetSocketAddress(InetAddress.getByName(this.params{"zkHosts"}), 2181)
     val zkClient = new ZooKeeperClient(Amount.of(60, Time.MINUTES), zkhost)
@@ -216,14 +189,19 @@ class ScalaScheduler extends Scheduler {
     dli.lock()
     logger.info("Framework locked")
 
-    val dbName = "stream_juggler"
-    val collName = "instances"
-    val dbHost = this.params{"mongodbHost"}
-    val entityCollection = MongoClient(dbHost)(dbName)(collName)
-    val obj = MongoDBObject("uuid" -> this.params{"instanceId"})
-    entityCollection += obj
-    this.instance = Json.parse(s"""${entityCollection.findOne().map(_.toString).get}""")
-    logger.debug(s"Find instance: ${this.instance}")
+//    val dbName = "stream_juggler"
+//    val collName = "instances"
+//    val dbHost = this.params{"mongodbHost"}
+//    val entityCollection = MongoClient(dbHost)(dbName)(collName)
+//    val obj = MongoDBObject("uuid" -> this.params{"instanceId"})
+//    entityCollection += obj
+//    this.instance = Json.parse(s"""${entityCollection.findOne().map(_.toString).get}""")
+//    logger.debug(s"Find instance: ${this.instance}")
+
+    val instance = ConnectionRepository.getInstanceService.get(this.params{"instanceId"})
+    logger.info(s"Got cores: ${instance.perTaskCores}")
+    logger.info(s"Got ram: ${instance.perTaskRam}")
+
 
     this.cores = (this.instance \ "per-task-cores").toString.toDouble
     this.ram = (this.instance \ "per-task-ram").toString.toDouble
@@ -234,6 +212,57 @@ class ScalaScheduler extends Scheduler {
       this.tasksToLaunch :::= List(task)
       logger.info(s"$task")
     }
+  }
+
+  def howMuchTasksOnSlave(perTaskCores: Double, perTaskRam: Double, tasksCount: Int, offers: util.List[Offer]):List[Tuple2[Offer, Int]]={
+    /**
+      * This method give list of slaves id and how many tasks we can launch on each slave.
+      */
+    var over_cpus = 0.0
+    var over_mem = 0.0
+    val req_cpus = perTaskCores*tasksCount
+    val req_mem = perTaskRam*tasksCount
+    var tasksNumber: List[Tuple2[Offer, Int]] = List()
+    for (offer <- offers.asScala) {
+      tasksNumber = tasksNumber.:::(List(Tuple2(
+        offer, java.lang.Math.min(
+          getResource(offer, "cpus") / perTaskCores,
+          getResource(offer, "mem") / perTaskRam
+        ).floor.toInt
+      )))
+      over_cpus += getResource(offer, "cpus")
+      over_mem += getResource(offer, "mem")
+    }
+
+    logger.debug(s"Have resources: ${over_cpus} cpus, ${over_mem} mem")
+    logger.debug(s"Resource requirements: ${req_cpus} cpus, ${req_mem} mem")
+    return tasksNumber
+  }
+
+
+  def getResource(offer: Offer, name: String): Double = {
+    /**
+      * This method give how much resource of type <name> we have on <offer>
+      */
+    val res = offer.getResourcesList
+    for (r <- res.asScala if r.getName == name) {
+      return r.getScalar.getValue
+    }
+    return 0.0
+  }
+
+
+  def filterOffers(offers: util.List[Offer], filters: List[String]): Unit = {
+
+  }
+
+//  def getModuleUrl(instance: RegularInstance): String = {
+//    return "http://192.168.1.225:8000/testScript.sh"
+//  }
+
+  // TODO: remove this
+  def getModuleUrl(instance: JsValue): String = {
+    return "http://192.168.1.225:8000/testScript.sh"
   }
 }
 
