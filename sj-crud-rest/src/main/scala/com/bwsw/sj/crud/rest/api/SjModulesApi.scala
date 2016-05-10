@@ -346,6 +346,15 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     }
 
     //todo start instance
+
+    val request = new MarathonRequest(instance.name,
+      "java -jar sj-transaction-generator-assembly-1.0.jar $PORT",
+      1,
+      Map("" -> ""),
+      List(s"http://$host:$port/v1/custom/sj-transaction-generator-assembly-1.0.jar"))
+
+    startApplication(request)
+
     instance.status = started
     instanceDAO.save(instance)
   }
@@ -369,31 +378,31 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       Map("ZK_SERVERS" -> generatorProvider.hosts.mkString(";"), "PREFIX" -> prefix),
       List(s"http://$host:$port/v1/custom/sj-transaction-generator-assembly-1.0.jar"))
 
-    startApplication(marathonRequest)
-
-  }
-
-  private def startApplication(request: MarathonRequest) = {
-    val taskResponse = getTaskInfo(request.id)
+    val taskResponse = getTaskInfo(marathonRequest.id)
     if (taskResponse.status.equals(OK)) {
       serializer.setIgnoreUnknown(true)
       val resp = serializer.deserialize[MarathonRequest](getEntityAsString(taskResponse.entity))
-      if (resp.instances < request.instances) {
-        scaleApplication(request.id, request.instances)
+      if (resp.instances < marathonRequest.instances) {
+        scaleApplication(marathonRequest.id, marathonRequest.instances)
       }
     } else if (taskResponse.status.equals(NotFound)) {
-      val marathonUri = Uri(s"$marathonConnect/v2/apps")
-      val res = Http().singleRequest(HttpRequest(method = POST, uri = marathonUri,
-        entity = HttpEntity(ContentTypes.`application/json`, serializer.serialize(request))
-      ))
+      startApplication(marathonRequest)
+    }
 
-      val response = {
-        Await.result(res, 30.seconds)
-      }
+  }
 
-      if (!response.status.equals(Created)) {
-        throw new Exception("Cannot start of transaction generator")
-      }
+  def startApplication(request: MarathonRequest) = {
+    val marathonUri = Uri(s"$marathonConnect/v2/apps")
+    val res = Http().singleRequest(HttpRequest(method = POST, uri = marathonUri,
+      entity = HttpEntity(ContentTypes.`application/json`, serializer.serialize(request))
+    ))
+
+    val response = {
+      Await.result(res, 30.seconds)
+    }
+
+    if (!response.status.equals(Created)) {
+      throw new Exception("Cannot start of transaction generator")
     }
   }
 
