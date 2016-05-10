@@ -65,7 +65,7 @@
       "type": "string",
       "enum": [
         "regular-streaming",
-        "time-windowed-streaming"
+        "windowed-streaming"
       ]
     },
     "engine": {

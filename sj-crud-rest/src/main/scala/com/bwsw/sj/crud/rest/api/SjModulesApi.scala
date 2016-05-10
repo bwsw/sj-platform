@@ -20,7 +20,6 @@ import akka.stream.scaladsl._
 import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model.StatusCodes._
 
-import scala.collection.mutable
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
@@ -33,9 +32,9 @@ import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
   * @author Kseniya Tomskikh
   */
 trait SjModulesApi extends Directives with SjCrudValidator {
-  import com.bwsw.sj.common.module.ModuleConstants._
   import scala.collection.JavaConversions._
   import scala.collection.JavaConverters._
+  import com.bwsw.sj.common.ModuleConstants._
 
   val modulesApi = {
     pathPrefix("modules") {
@@ -86,34 +85,20 @@ trait SjModulesApi extends Directives with SjCrudValidator {
 
               validate(fileMetadata != null, s"Module $moduleType-$moduleName-$moduleVersion not found") {
                 val fileSpecification = fileMetadata.specification
-                val specification = Specification(fileSpecification.name,
-                  fileSpecification.description,
-                  fileSpecification.version,
-                  fileSpecification.author,
-                  fileSpecification.license,
-                  Map("cardinality" -> fileSpecification.inputs.cardinality,
-                    "types" -> fileSpecification.inputs.types),
-                  Map("cardinality" -> fileSpecification.outputs.cardinality,
-                    "types" -> fileSpecification.outputs.types),
-                  fileSpecification.moduleType,
-                  fileSpecification.engine,
-                  serializer.deserialize[Map[String, Any]](fileSpecification.options),
-                  fileSpecification.validateClass,
-                  fileSpecification.executorClass)
-
+                val specification = specificationToSpecificationData(fileSpecification)
                 val filename = fileMetadata.filename
 
                 pathPrefix("instance") {
                   pathEndOrSingleSlash {
                     post { (ctx: RequestContext) =>
                       val instanceMetadata = deserializeOptions(getEntityFromContext(ctx), moduleType)
-                      val (errors, partitions, validatedInstance) = validateOptions(instanceMetadata, moduleType)
+                      val (errors, validatedInstance) = validateOptions(instanceMetadata, moduleType)
                       if (errors.isEmpty) {
                         val validatorClassName = specification.validateClass
                         val jarFile = storage.get(filename, s"tmp/$filename")
                         if (jarFile != null && jarFile.exists()) {
                           if (moduleValidate(jarFile, validatorClassName, validatedInstance.options)) {
-                            val nameInstance = createInstance(validatedInstance, moduleType, moduleName, moduleVersion, partitions)
+                            val nameInstance = saveInstance(validatedInstance, moduleType, moduleName, moduleVersion)
                             ctx.complete(HttpEntity(
                               `application/json`,
                               serializer.serialize(Response(200, nameInstance, s"Instance for module $moduleType-$moduleName-$moduleVersion is created"))
@@ -137,7 +122,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                       )
                       var msg = ""
                       if (instances.nonEmpty) {
-                        msg = serializer.serialize(instances.map(i => convertToApiInstance(i)))
+                        msg = serializer.serialize(instances.map(i => instanceToInstanceMetadata(i)))
                       } else {
                         msg =  serializer.serialize(Response(200, s"$moduleType-$moduleName-$moduleVersion",
                           s"Instances for $moduleType-$moduleName-$moduleVersion not found"))
@@ -152,7 +137,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                         get {
                           complete(HttpEntity(
                             `application/json`,
-                            serializer.serialize(convertToApiInstance(instance))
+                            serializer.serialize(instanceToInstanceMetadata(instance))
                           ))
                         } ~
                         delete {
@@ -291,8 +276,8 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @return - json as object InstanceMetadata
     */
   def deserializeOptions(options: String, moduleType: String) = {
-    if (moduleType.equals(timeWindowedType)) {
-      serializer.deserialize[TimeWindowedInstanceMetadata](options)
+    if (moduleType.equals(windowedType)) {
+      serializer.deserialize[WindowedInstanceMetadata](options)
     } else {
       serializer.deserialize[InstanceMetadata](options)
     }
@@ -313,52 +298,22 @@ trait SjModulesApi extends Directives with SjCrudValidator {
   }
 
   /**
-    *
-    * @param parameters
-    * @param moduleType
-    * @param moduleName
-    * @param moduleVersion
-    * @param partitionsCount
-    * @return
-    */
-  def createInstance(parameters: InstanceMetadata,
-                     moduleType: String,
-                     moduleName: String,
-                     moduleVersion: String,
-                     partitionsCount: Map[String, Int]) = {
-    val executionPlan = createExecutionPlan(parameters, partitionsCount)
-    if (moduleType.equals(timeWindowedType)) {
-      val instance = convertToModelInstance(new TimeWindowedInstance, parameters).asInstanceOf[TimeWindowedInstance]
-      val twParameters = parameters.asInstanceOf[TimeWindowedInstanceMetadata]
-      instance.timeWindowed = twParameters.timeWindowed
-      instance.windowFullMax = twParameters.windowFullMax
-      saveInstance(instance, moduleType, moduleName, moduleVersion, executionPlan)
-    } else {
-      val instance = convertToModelInstance(new RegularInstance, parameters)
-      saveInstance(instance, moduleType, moduleName, moduleVersion, executionPlan)
-    }
-  }
-
-  /**
     * Save instance of module to db
     *
     * @param instance - entity of instance, which saving to db
     * @param moduleType - type name of module
     * @param moduleName - name of module
     * @param moduleVersion - version of module
-    * @param executionPlan - execution plan for instance of module
     * @return - name of created entity
     */
   def saveInstance(instance: RegularInstance,
                      moduleType: String,
                      moduleName: String,
-                     moduleVersion: String,
-                     executionPlan: ExecutionPlan) = {
+                     moduleVersion: String) = {
     instance.moduleName = moduleName
     instance.moduleVersion = moduleVersion
     instance.moduleType = moduleType
     instance.status = ready
-    instance.executionPlan = executionPlan
     instanceDAO.save(instance)
     instance.name
   }
@@ -371,80 +326,12 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @param options - start options for module
     * @return - true, if options for module is valid
     */
-  def moduleValidate(file: File, validateClassName: String, options: Map[String, Any]) = {
+  def moduleValidate(file: File, validateClassName: String, options: String) = {
     val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
     val clazz = loader.loadClass(validateClassName)
     val validator = clazz.newInstance().asInstanceOf[StreamingValidator]
-    validator.validate(options)
+    validator.validate(serializer.deserialize[Map[String, Any]](options))
   }
-
-  /**
-    * Create execution plan for instance of module
-    *
-    * @param instance - instance for module
-    * @return - execution plan of instance
-    */
-  def createExecutionPlan(instance: InstanceMetadata, partitionsCount: Map[String, Int]) = {
-    val inputs = instance.inputs.map { input =>
-      val mode = getStreamMode(input)
-      val name = input.replaceAll("/split|/full", "")
-      InputStream(name, mode, partitionsCount(name))
-    }
-    val minPartitionCount = partitionsCount.values.min
-    var parallelism = 0
-    instance.parallelism match {
-      case i: Int => parallelism = i
-      case s: String => parallelism = minPartitionCount
-    }
-    val tasks = (0 until parallelism)
-      .map(x => instance.name + "-task" + x)
-      .map(x => x -> inputs)
-
-    val executionPlan = mutable.Map[String, Task]()
-    val streams = mutable.Map(inputs.map(x => x.name -> StreamProcess(0, x.partitionsCount)).toSeq: _*)
-
-    var tasksNotProcessed = tasks.size
-    tasks.foreach { task =>
-      val list = task._2.map { inputStream =>
-        val stream = streams(inputStream.name)
-        val countFreePartitions = stream.countFreePartitions
-        val startPartition = stream.currentPartition
-        var endPartition = startPartition + countFreePartitions
-        inputStream.mode match {
-          case "full" => endPartition = startPartition + countFreePartitions
-          case "split" =>
-            val cntTaskStreamPartitions = countFreePartitions / tasksNotProcessed
-            streams.update(inputStream.name, StreamProcess(startPartition + cntTaskStreamPartitions, countFreePartitions - cntTaskStreamPartitions))
-            if (Math.abs(cntTaskStreamPartitions - countFreePartitions) >= cntTaskStreamPartitions) {
-              endPartition = startPartition + cntTaskStreamPartitions
-            }
-        }
-
-        inputStream.name -> Array(startPartition, endPartition - 1)
-      }
-      tasksNotProcessed -= 1
-      val planTask = new Task
-      planTask.inputs = mapAsJavaMap(Map(list.toSeq: _*))
-      executionPlan.put(task._1, planTask)
-    }
-    val execPlan = new ExecutionPlan
-    execPlan.tasks = mapAsJavaMap(executionPlan)
-    execPlan
-  }
-
-  /**
-    * Get mode from stream-name
-    *
-    * @param name - name of stream
-    * @return - mode of stream
-    */
-  def getStreamMode(name: String) = {
-    name.substring(name.lastIndexOf("/") + 1)
-  }
-
-  case class InputStream(name: String, mode: String, partitionsCount: Int)
-
-  case class StreamProcess(currentPartition: Int, countFreePartitions: Int)
 
   def startInstance(instance: RegularInstance) = {
 
@@ -569,19 +456,19 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       Await.result(res, 15.seconds)
     }
 
-    if (!response.status.equals(Created)) {
-      throw new Exception("Cannot destroing of transaction generator")
+    if (!response.status.equals(OK)) {
+      throw new Exception("Cannot destroying of transaction generator")
     }
   }
 
-  def convertToApiInstance(instance: RegularInstance) = {
+  def instanceToInstanceMetadata(instance: RegularInstance) = {
     instance match {
-      case timeWindowedInstance: TimeWindowedInstance =>
-        val apiInstance = convert(new TimeWindowedInstanceMetadata, instance).asInstanceOf[TimeWindowedInstanceMetadata]
+      case timeWindowedInstance: WindowedInstance =>
+        val apiInstance = instanceMetadataToInstance(new WindowedInstanceMetadata, instance).asInstanceOf[WindowedInstanceMetadata]
         apiInstance.timeWindowed = timeWindowedInstance.timeWindowed
         apiInstance.windowFullMax = timeWindowedInstance.windowFullMax
         apiInstance
-      case _ => convert(new InstanceMetadata, instance)
+      case _ => instanceMetadataToInstance(new InstanceMetadata, instance)
     }
   }
 
@@ -591,7 +478,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @param instance - object of model instance
     * @return - API instance object
     */
-  def convert(apiInstance: InstanceMetadata, instance: RegularInstance): InstanceMetadata = {
+  def instanceMetadataToInstance(apiInstance: InstanceMetadata, instance: RegularInstance): InstanceMetadata = {
     val executionPlan = Map(
       "tasks" -> instance.executionPlan.tasks.map(t => t._1 -> Map("inputs" -> t._2.inputs))
     )
@@ -616,30 +503,22 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     apiInstance
   }
 
-  /**
-    * Convert api instance to db-model instance
-    *
-    * @param modelInstance - dst object of model instance
-    * @param apiInstance - api object of instance
-    * @return - object of model instance
-    */
-  def convertToModelInstance(modelInstance: RegularInstance, apiInstance: InstanceMetadata) = {
-    modelInstance.name = apiInstance.name
-    modelInstance.description = apiInstance.description
-    modelInstance.inputs = apiInstance.inputs
-    modelInstance.outputs = apiInstance.outputs
-    modelInstance.checkpointMode = apiInstance.checkpointMode
-    modelInstance.checkpointInterval = apiInstance.checkpointInterval
-    modelInstance.stateFullCheckpoint = apiInstance.stateFullCheckpoint
-    modelInstance.stateManagement = apiInstance.stateManagement
-    modelInstance.parallelism = apiInstance.parallelism.asInstanceOf[Int]
-    modelInstance.options = serializer.serialize(apiInstance.options)
-    modelInstance.startFrom = apiInstance.startFrom
-    modelInstance.perTaskCores = apiInstance.perTaskCores
-    modelInstance.perTaskRam = apiInstance.perTaskRam
-    modelInstance.jvmOptions = mapAsJavaMap(apiInstance.jvmOptions)
-    modelInstance.tags = apiInstance.tags
-    modelInstance.idle = apiInstance.idle
-    modelInstance
+  def specificationToSpecificationData(fileSpecification: Specification) = {
+    ModuleSpecification(fileSpecification.name,
+      fileSpecification.description,
+      fileSpecification.version,
+      fileSpecification.author,
+      fileSpecification.license,
+      Map("cardinality" -> fileSpecification.inputs.cardinality,
+        "types" -> fileSpecification.inputs.types),
+      Map("cardinality" -> fileSpecification.outputs.cardinality,
+        "types" -> fileSpecification.outputs.types),
+      fileSpecification.moduleType,
+      fileSpecification.engine,
+      serializer.deserialize[Map[String, Any]](fileSpecification.options),
+      fileSpecification.validateClass,
+      fileSpecification.executorClass)
   }
+
+
 }

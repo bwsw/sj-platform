@@ -27,7 +27,7 @@ class RegularInstance {
   var parallelism: Int = 0
   var options: String = null
   @Property("start-from") var startFrom: String = null
-  @Property("per-task-cores") var perTaskCores: Int = 0
+  @Property("per-task-cores") var perTaskCores: Double = 0.0
   @Property("per-task-ram") var perTaskRam: Int = 0
   @Embedded("jvm-options") var jvmOptions: java.util.Map[String, String] = null
   @Embedded("execution-plan") var executionPlan: ExecutionPlan = null

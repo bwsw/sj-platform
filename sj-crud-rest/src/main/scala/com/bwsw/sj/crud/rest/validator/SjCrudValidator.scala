@@ -11,7 +11,6 @@ import com.bwsw.common.file.utils.FilesStorage
 import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.module.ModuleConstants
 import com.typesafe.config.Config
 import org.everit.json.schema.loader.SchemaLoader
 import org.json.{JSONObject, JSONTokener}
@@ -41,8 +40,7 @@ trait SjCrudValidator {
   val port: Int
   val marathonConnect: String
 
-  import ModuleConstants._
-
+  import com.bwsw.sj.common.ModuleConstants._
   /**
     * Getting entity from HTTP-request
     *
