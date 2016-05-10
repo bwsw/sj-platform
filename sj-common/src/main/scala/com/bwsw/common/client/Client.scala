@@ -15,8 +15,8 @@ object Client {
   private val logger = Logger.getLogger(getClass)
 
   def main(args: Array[String]) = {
-    val zkServers = Array("172.17.0.15:2181")
-    val prefix = "testtt"
+    val zkServers = Array("176.120.25.19:2181")
+    val prefix = "zk_test/global"
     val retryPeriod = 500
     val retryCount = 10
 

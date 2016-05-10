@@ -19,5 +19,4 @@ class RegularStreamingValidator extends StreamingModuleValidator {
   override def validate(parameters: InstanceMetadata) = {
     super.validate(parameters)
   }
-
 }

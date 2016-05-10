@@ -20,7 +20,7 @@ class InstanceMetadata {
   var parallelism: Any = null
   var options: Map[String, Any] = null
   @JsonProperty("start-from") var startFrom: String = null
-  @JsonProperty("per-task-cores") var perTaskCores: Int = 0
+  @JsonProperty("per-task-cores") var perTaskCores: Double = 0.0
   @JsonProperty("per-task-ram") var perTaskRam: Int = 0
   @JsonProperty("jvm-options") var jvmOptions: Map[String, String] = null
   var tags: String = null

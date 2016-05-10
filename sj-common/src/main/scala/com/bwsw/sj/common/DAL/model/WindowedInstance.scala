@@ -5,7 +5,7 @@ package com.bwsw.sj.common.DAL.model
  * Created:  13/04/2016
  * @author Kseniya Tomskikh
  */
-class TimeWindowedInstance() extends RegularInstance {
+class WindowedInstance() extends RegularInstance {
   var timeWindowed: Int = 0
   var windowFullMax: Int = 0
 }
