@@ -322,7 +322,7 @@ abstract class StreamingModuleValidator {
     modelInstance.perTaskCores = apiInstance.perTaskCores
     modelInstance.perTaskRam = apiInstance.perTaskRam
     modelInstance.jvmOptions = mapAsJavaMap(apiInstance.jvmOptions)
-    modelInstance.tags = apiInstance.tags
+    modelInstance.attributes = mapAsJavaMap(apiInstance.attributes)
     modelInstance.idle = apiInstance.idle
     modelInstance
   }

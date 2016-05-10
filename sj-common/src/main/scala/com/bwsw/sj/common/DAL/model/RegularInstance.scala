@@ -31,7 +31,7 @@ class RegularInstance {
   @Property("per-task-ram") var perTaskRam: Int = 0
   @Embedded("jvm-options") var jvmOptions: java.util.Map[String, String] = null
   @Embedded("execution-plan") var executionPlan: ExecutionPlan = null
-  var tags: String = null
+  var attributes: java.util.Map[String, String] = null
   var idle: Long = 0
 }
 

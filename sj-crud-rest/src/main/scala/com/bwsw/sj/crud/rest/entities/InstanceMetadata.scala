@@ -23,7 +23,7 @@ class InstanceMetadata {
   @JsonProperty("per-task-cores") var perTaskCores: Double = 0.0
   @JsonProperty("per-task-ram") var perTaskRam: Int = 0
   @JsonProperty("jvm-options") var jvmOptions: Map[String, String] = null
-  var tags: String = null
+  var attributes: Map[String, String] = null
   var idle: Long = 0
   @JsonProperty("execution-plan") var executionPlan: Map[String, Any] = null
 }
