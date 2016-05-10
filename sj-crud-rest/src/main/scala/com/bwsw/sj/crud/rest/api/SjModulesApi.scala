@@ -499,7 +499,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     apiInstance.perTaskCores = instance.perTaskCores
     apiInstance.perTaskRam = instance.perTaskRam
     apiInstance.jvmOptions = Map(instance.jvmOptions.asScala.toList: _*)
-    apiInstance.tags = instance.tags
+    apiInstance.attributes = Map(instance.attributes.asScala.toList: _*)
     apiInstance.idle = instance.idle
     apiInstance.executionPlan = executionPlan
     apiInstance
