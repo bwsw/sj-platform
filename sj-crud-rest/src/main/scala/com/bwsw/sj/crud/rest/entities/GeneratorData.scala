@@ -1,8 +1,10 @@
 package com.bwsw.sj.crud.rest.entities
 
+import com.fasterxml.jackson.annotation.JsonProperty
+
 /**
   * Generator data case class
   */
-case class GeneratorData(generatorType: String,
+case class GeneratorData(@JsonProperty("generator-type") generatorType: String,
                          service: String,
-                         instanceCount: Int)
+                         @JsonProperty("instance-count") instanceCount: Int)

@@ -49,15 +49,17 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
 
         }
       } ~
-      path(Segment) { (streamName: String) =>
-        val stream = streamDAO.get(streamName)
-        var msg = ""
-        if (stream != null) {
-          msg =  serializer.serialize(streamToStreamData(stream))
-        } else {
-          msg = serializer.serialize(Response(200, null, s"Stream '$streamName' not found"))
+      pathPrefix(Segment) { (streamName: String) =>
+        pathEndOrSingleSlash {
+          val stream = streamDAO.get(streamName)
+          var msg = ""
+          if (stream != null) {
+            msg = serializer.serialize(streamToStreamData(stream))
+          } else {
+            msg = serializer.serialize(Response(200, null, s"Stream '$streamName' not found"))
+          }
+          complete(HttpEntity(`application/json`, msg))
         }
-        complete(HttpEntity(`application/json`, msg))
       }
     }
   }
@@ -148,9 +150,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
     * @return - list of errors
     */
   def validateStream(stream: SjStream, initialStreamData: SjStreamData) = {
-    val validatorClassName = conf.getString("streams.validator-class")
-    val validatorClass = Class.forName(validatorClassName)
-    val validator = validatorClass.newInstance().asInstanceOf[StreamValidator]
+    val validator = new StreamValidator
     validator.validate(stream, initialStreamData)
   }
 
