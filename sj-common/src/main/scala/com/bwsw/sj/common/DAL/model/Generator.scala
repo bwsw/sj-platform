@@ -1,9 +1,9 @@
 package com.bwsw.sj.common.DAL.model
 
-import org.mongodb.morphia.annotations.Reference
+import org.mongodb.morphia.annotations.{Property, Reference}
 
 class Generator() {
-  var generatorType: String = null
+  @Property("generator-type") var generatorType: String = null
   @Reference var service: Service = null
-  var instanceCount: Int = 0
+  @Property("instance-count") var instanceCount: Int = 0
 }

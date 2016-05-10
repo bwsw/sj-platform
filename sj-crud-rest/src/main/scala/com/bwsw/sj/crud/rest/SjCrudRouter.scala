@@ -6,9 +6,9 @@ import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model.{EntityStreamSizeException, HttpEntity, HttpResponse}
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.{ExceptionHandler, Directives}
-import com.bwsw.common.exceptions.{InstanceException, BadRecordWithKey, BadRecord}
+import com.bwsw.common.exceptions.{InstanceException, BadRecordWithKey, BadRecord, KeyAlreadyExists}
 import com.bwsw.sj.crud.rest.entities.Response
-import com.bwsw.sj.crud.rest.api.{SjCustomApi, SjModulesApi}
+import com.bwsw.sj.crud.rest.api.{SjCustomApi, SjModulesApi, SjStreamsApi}
 import org.everit.json.schema.ValidationException
 
 /**
@@ -19,7 +19,8 @@ import org.everit.json.schema.ValidationException
   */
 trait SjCrudRouter extends Directives
   with SjModulesApi
-  with SjCustomApi {
+  with SjCustomApi
+  with SjStreamsApi {
 
   val exceptionHandler = ExceptionHandler {
     case BadRecord(msg) =>
@@ -33,6 +34,11 @@ trait SjCrudRouter extends Directives
         entity = HttpEntity(`application/json`, serializer.serialize(Response(400, key, msg)))
       ))
     case InstanceException(msg, key) =>
+      complete(HttpResponse(
+        BadRequest,
+        entity = HttpEntity(`application/json`, serializer.serialize(Response(400, key, msg)))
+      ))
+    case KeyAlreadyExists(msg, key) =>
       complete(HttpResponse(
         BadRequest,
         entity = HttpEntity(`application/json`, serializer.serialize(Response(400, key, msg)))
@@ -61,7 +67,8 @@ trait SjCrudRouter extends Directives
     handleExceptions(exceptionHandler) {
       pathPrefix("v1") {
         modulesApi ~
-        customApi
+        customApi ~
+        streamsApi
       }
     }
   }
