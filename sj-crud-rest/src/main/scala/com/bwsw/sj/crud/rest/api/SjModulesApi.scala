@@ -1,6 +1,6 @@
 package com.bwsw.sj.crud.rest.api
 
-import java.io.{FileNotFoundException, File}
+import java.io.{IOException, FileNotFoundException, File}
 
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
@@ -20,7 +20,7 @@ import akka.stream.scaladsl._
 import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model.StatusCodes._
 
-import scala.concurrent.Await
+import scala.concurrent.{Future, Await}
 import scala.concurrent.duration._
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
@@ -379,53 +379,52 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       List(s"http://$host:$port/v1/custom/sj-transaction-generator-assembly-1.0.jar"))
 
     val taskResponse = getTaskInfo(marathonRequest.id)
-    if (taskResponse.status.equals(OK)) {
-      serializer.setIgnoreUnknown(true)
-      val resp = serializer.deserialize[MarathonRequest](getEntityAsString(taskResponse.entity))
-      if (resp.instances < marathonRequest.instances) {
-        scaleApplication(marathonRequest.id, marathonRequest.instances)
-      }
-    } else if (taskResponse.status.equals(NotFound)) {
-      startApplication(marathonRequest)
+    taskResponse.map {
+      case Left(instances) =>
+        serializer.setIgnoreUnknown(true)
+        if (instances < marathonRequest.instances) {
+          scaleApplication(marathonRequest.id, marathonRequest.instances)
+        } else {
+          Future.successful(Right(s"Generator is started"))
+        }
+      case Right => startApplication(marathonRequest)
     }
-
   }
 
   def startApplication(request: MarathonRequest) = {
     val marathonUri = Uri(s"$marathonConnect/v2/apps")
-    val res = Http().singleRequest(HttpRequest(method = POST, uri = marathonUri,
+    Http().singleRequest(HttpRequest(method = POST, uri = marathonUri,
       entity = HttpEntity(ContentTypes.`application/json`, serializer.serialize(request))
-    ))
-
-    val response = {
-      Await.result(res, 30.seconds)
-    }
-
-    if (!response.status.equals(Created)) {
-      throw new Exception("Cannot start of transaction generator")
+    )).flatMap { response =>
+      response.status match {
+        case OK => Future.successful(response)
+        case Created => Future.successful(response)
+        case _ => Future.failed(new IOException(s"Cannot starting application by id: ${request.id}"))
+      }
     }
   }
 
   private def getTaskInfo(taskId: String) = {
     val marathonUri = Uri(s"$marathonConnect/v2/apps/$taskId")
-    val res = Http().singleRequest(HttpRequest(method = GET, uri = marathonUri))
-
-    Await.result(res, 15.seconds)
-
+    Http().singleRequest(HttpRequest(method = GET, uri = marathonUri)).flatMap { response =>
+      response.status match {
+        case OK => Future.successful(Left(serializer.deserialize[MarathonRequest](getEntityAsString(response.entity)).instances))
+        case NotFound => Future.successful(Right(NotFound))
+        case _ => Future.failed(new IOException(s"Cannot getting info for task by id: $taskId"))
+      }
+    }
   }
 
   private def scaleApplication(taskId: String, count: Int) = {
     val marathonUri = Uri(s"$marathonConnect/v2/apps/$taskId?force=true")
-    val res = Http().singleRequest(HttpRequest(method = PUT, uri = marathonUri,
+    Http().singleRequest(HttpRequest(method = PUT, uri = marathonUri,
       entity = HttpEntity(ContentTypes.`application/json`, serializer.serialize(Map("instances" -> count)))
-    ))
-
-    val response = {
-      Await.result(res, 15.seconds)
-    }
-
-    if (!response.status.equals(OK)) {
-      throw new Exception("Cannot scaling of transaction generator")
+    )).flatMap { response =>
+      response.status match {
+        case OK => Future.successful(Left(OK))
+        case Created => Future.successful(Left(Created))
+        case _ => Future.failed(new IOException(s"Cannot scaling to application by id: $taskId"))
+      }
     }
   }
 
@@ -472,6 +471,11 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     }
   }
 
+  /**
+    *
+    * @param instance
+    * @return
+    */
   def instanceToInstanceMetadata(instance: RegularInstance) = {
     instance match {
       case timeWindowedInstance: WindowedInstance =>
@@ -514,6 +518,11 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     apiInstance
   }
 
+  /**
+    *
+    * @param fileSpecification
+    * @return
+    */
   def specificationToSpecificationData(fileSpecification: Specification) = {
     ModuleSpecification(fileSpecification.name,
       fileSpecification.description,
