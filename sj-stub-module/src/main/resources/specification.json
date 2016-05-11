@@ -22,7 +22,7 @@
       "stream.t-stream"
     ]
   },
-  "module-type": "time-windowed-streaming",
+  "module-type": "windowed-streaming",
   "engine": "streaming",
   "options": {
     "opt": 1

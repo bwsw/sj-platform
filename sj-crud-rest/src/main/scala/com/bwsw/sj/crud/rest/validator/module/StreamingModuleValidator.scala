@@ -1,8 +1,10 @@
 package com.bwsw.sj.crud.rest.validator.module
 
-import java.net.{InetSocketAddress, URI}
+import java.net.InetSocketAddress
 
 import com.aerospike.client.Host
+import com.bwsw.common.JsonSerializer
+import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
@@ -15,6 +17,7 @@ import com.bwsw.tstreams.metadata.MetadataStorageFactory
 import com.bwsw.tstreams.services.BasicStreamService
 import org.redisson.{Config, Redisson}
 
+import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
@@ -25,10 +28,28 @@ import scala.collection.mutable.ArrayBuffer
   * @author Kseniya Tomskikh
   */
 abstract class StreamingModuleValidator {
-  import com.bwsw.sj.common.module.ModuleConstants._
 
+  import com.bwsw.sj.common.ModuleConstants._
   var serviceDAO: GenericMongoService[Service] = null
   var instanceDAO: GenericMongoService[RegularInstance] = null
+  val serializer: Serializer = new JsonSerializer
+
+  case class InputStream(name: String, mode: String, partitionsCount: Int)
+
+  case class StreamProcess(currentPartition: Int, countFreePartitions: Int)
+
+  /**
+    * Create entity of instance for saving to database
+    * @param parameters - metadata of instance
+    * @param partitionsCount - partitions count of input streams
+    * @return
+    */
+  def createInstance(parameters: InstanceMetadata, partitionsCount: Map[String, Int], instance: RegularInstance) = {
+    val executionPlan = createExecutionPlan(parameters, partitionsCount)
+    convertToModelInstance(instance, parameters)
+    instance.executionPlan = executionPlan
+    instance
+  }
 
   /**
     * Validating input parameters for streaming module
@@ -36,7 +57,7 @@ abstract class StreamingModuleValidator {
     * @param parameters - input parameters for running module
     * @return - List of errors
     */
-  def validate(parameters: InstanceMetadata) = {
+  def validate(parameters: InstanceMetadata, validatedInstance: RegularInstance) = {
     val validateParameters = parameters
     instanceDAO = ConnectionRepository.getInstanceService
     serviceDAO = ConnectionRepository.getServiceManager
@@ -120,7 +141,8 @@ abstract class StreamingModuleValidator {
         errors += "Unknown type of 'parallelism' parameter. Must be Int or String."
     }
 
-    (errors, partitions, validateParameters)
+    createInstance(validateParameters, partitions, validatedInstance)
+    (errors, validatedInstance)
   }
 
   def checkAndCreateStreams(errors: ArrayBuffer[String], service: TStreamService, allStreams: mutable.Buffer[SjStream]) = {
@@ -217,6 +239,92 @@ abstract class StreamingModuleValidator {
     */
   def getStreamServices(streams: Seq[SjStream]) = {
     streams.map(s => (s.service.name, 1)).groupBy(_._1).keys.toList
+  }
+
+  /**
+    * Create execution plan for instance of module
+    *
+    * @param instance - instance for module
+    * @return - execution plan of instance
+    */
+  def createExecutionPlan(instance: InstanceMetadata, partitionsCount: Map[String, Int]) = {
+    val inputs = instance.inputs.map { input =>
+      val mode = getStreamMode(input)
+      val name = input.replaceAll("/split|/full", "")
+      InputStream(name, mode, partitionsCount(name))
+    }
+    val parallelism = instance.parallelism.asInstanceOf[Int]
+    val tasks = (0 until parallelism)
+      .map(x => instance.name + "-task" + x)
+      .map(x => x -> inputs)
+
+    val executionPlan = mutable.Map[String, Task]()
+    val streams = mutable.Map(inputs.map(x => x.name -> StreamProcess(0, x.partitionsCount)).toSeq: _*)
+
+    var tasksNotProcessed = tasks.size
+    tasks.foreach { task =>
+      val list = task._2.map { inputStream =>
+        val stream = streams(inputStream.name)
+        val countFreePartitions = stream.countFreePartitions
+        val startPartition = stream.currentPartition
+        var endPartition = startPartition + countFreePartitions
+        inputStream.mode match {
+          case "full" => endPartition = startPartition + countFreePartitions
+          case "split" =>
+            val cntTaskStreamPartitions = countFreePartitions / tasksNotProcessed
+            streams.update(inputStream.name, StreamProcess(startPartition + cntTaskStreamPartitions, countFreePartitions - cntTaskStreamPartitions))
+            if (Math.abs(cntTaskStreamPartitions - countFreePartitions) >= cntTaskStreamPartitions) {
+              endPartition = startPartition + cntTaskStreamPartitions
+            }
+        }
+
+        inputStream.name -> Array(startPartition, endPartition - 1)
+      }
+      tasksNotProcessed -= 1
+      val planTask = new Task
+      planTask.inputs = mapAsJavaMap(Map(list.toSeq: _*))
+      executionPlan.put(task._1, planTask)
+    }
+    val execPlan = new ExecutionPlan
+    execPlan.tasks = mapAsJavaMap(executionPlan)
+    execPlan
+  }
+
+  /**
+    * Get mode from stream-name
+    *
+    * @param name - name of stream
+    * @return - mode of stream
+    */
+  def getStreamMode(name: String) = {
+    name.substring(name.lastIndexOf("/") + 1)
+  }
+
+  /**
+    * Convert api instance to db-model instance
+    *
+    * @param modelInstance - dst object of model instance
+    * @param apiInstance - api object of instance
+    * @return - object of model instance
+    */
+  def convertToModelInstance(modelInstance: RegularInstance, apiInstance: InstanceMetadata) = {
+    modelInstance.name = apiInstance.name
+    modelInstance.description = apiInstance.description
+    modelInstance.inputs = apiInstance.inputs
+    modelInstance.outputs = apiInstance.outputs
+    modelInstance.checkpointMode = apiInstance.checkpointMode
+    modelInstance.checkpointInterval = apiInstance.checkpointInterval
+    modelInstance.stateFullCheckpoint = apiInstance.stateFullCheckpoint
+    modelInstance.stateManagement = apiInstance.stateManagement
+    modelInstance.parallelism = apiInstance.parallelism.asInstanceOf[Int]
+    modelInstance.options = serializer.serialize(apiInstance.options)
+    modelInstance.startFrom = apiInstance.startFrom
+    modelInstance.perTaskCores = apiInstance.perTaskCores
+    modelInstance.perTaskRam = apiInstance.perTaskRam
+    modelInstance.jvmOptions = mapAsJavaMap(apiInstance.jvmOptions)
+    modelInstance.attributes = mapAsJavaMap(apiInstance.attributes)
+    modelInstance.idle = apiInstance.idle
+    modelInstance
   }
 
 }
