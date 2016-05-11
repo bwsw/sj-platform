@@ -1,9 +1,12 @@
 package com.bwsw.sj.common
 
 /**
-  * Object with constants
-  */
+ * Object with constants
+ */
 object ModuleConstants {
+  val persistentQueuePath = "persistentQueuePath"
+  val persistentBlockingQueue = "persistentBlockingQueue"
+
   val windowedType = "windowed-streaming"
   val regularStreamingType = "regular-streaming"
 
@@ -16,6 +19,7 @@ object ModuleConstants {
   val started = "started"
   val stopped = "stopped"
   val instanceStatusModes = Set(started, stopped, ready)
+
 }
 
 object StreamConstants {

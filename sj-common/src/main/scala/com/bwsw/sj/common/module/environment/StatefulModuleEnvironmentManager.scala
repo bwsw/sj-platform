@@ -2,6 +2,7 @@ package com.bwsw.sj.common.module.environment
 
 import com.bwsw.sj.common.module.state.StateStorage
 import com.bwsw.sj.common.module.utils.SjTimer
+import com.bwsw.tstreams.agents.producer.BasicProducer
 
 import scala.collection.mutable
 
@@ -12,14 +13,16 @@ import scala.collection.mutable
  *
  * @param stateStorage
  * @param options User defined options from instance parameters
- * @param temporaryOutput Provides a store for each output stream from instance parameters
+ * @param producers T-streams producers for each output stream of instance parameters
+ * @param outputTags Keeps a tag (partitioned or round-robin output) corresponding to the output for each output stream
  * @param moduleTimer
  */
 
 class StatefulModuleEnvironmentManager(stateStorage: StateStorage,
                                        options: Map[String, Any],
-                                       temporaryOutput: mutable.Map[String, (String, Any)],
-                                       moduleTimer: SjTimer) extends ModuleEnvironmentManager(options, temporaryOutput, moduleTimer) {
+                                       producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]],
+                                       outputTags: mutable.Map[String, (String, Any)],
+                                       moduleTimer: SjTimer) extends ModuleEnvironmentManager(options, producers, outputTags, moduleTimer) {
   /**
    * Returns specific state of module
    * @return Module state

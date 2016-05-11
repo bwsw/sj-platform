@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.module.regular
 
-import com.bwsw.sj.common.module.entities.Transaction
+import com.bwsw.sj.common.module.entities.Envelope
 import com.bwsw.sj.common.module.environment.ModuleEnvironmentManager
 
 /**
@@ -16,9 +16,9 @@ abstract class RegularStreamingExecutor(manager: ModuleEnvironmentManager) {
   def init(): Unit
 
   /**
-   * Used for processing one transaction. Will invoke for every transaction
+   * Used for processing one envelope. Will invoke for every message from kafka stream or t-stream
    */
-  def onTxn(txn: Transaction): Unit
+  def onMessage(envelope: Envelope): Unit
 
   /**
    * Handler triggered before every checkpoint

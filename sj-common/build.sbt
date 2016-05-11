@@ -22,4 +22,7 @@ libraryDependencies += "org.apache.httpcomponents" % "httpclient" % "4.5.2"
 
 libraryDependencies += "net.openhft" % "chronicle-queue" % "4.2.6"
 
+libraryDependencies += "org.apache.kafka" % "kafka_2.11" % "0.9.0.1"
+
+
 
