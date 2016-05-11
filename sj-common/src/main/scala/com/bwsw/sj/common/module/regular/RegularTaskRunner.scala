@@ -83,13 +83,15 @@ object RegularTaskRunner {
             records.asScala.foreach(x => {
               val stream = ConnectionRepository.getStreamService.get(x.topic())
 
-              blockingQueue.put(serializer.serialize(
-                new KafkaEnvelope(stream.name,
-                  x.partition(),
-                  x.value(),
-                  x.offset(),
-                  stream.tags
-                )))
+              blockingQueue.put(serializer.serialize({
+                val envelope = new KafkaEnvelope()
+                envelope.stream = stream.name
+                envelope.partition = x.partition()
+                envelope.data = x.value()
+                envelope.offset = x.offset()
+                envelope.tags = stream.tags
+                envelope
+              }))
             })
           }
         }
@@ -185,14 +187,15 @@ object RegularTaskRunner {
 
                 envelope.streamType match {
                   case "t-stream" =>
-                    val tStreamEnvelope = serializer.deserialize[TStreamEnvelope](maybeEnvelope)
+                    val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
                     consumers(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
-                    executor.onMessage(tStreamEnvelope)
                   case "kafka-stream" =>
-                    val kafkaEnvelope = serializer.deserialize[KafkaEnvelope](maybeEnvelope)
+                    val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
                     manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
-                    executor.onMessage(kafkaEnvelope)
+
                 }
+
+                executor.onMessage(envelope)
 
                 if (checkpointTimer.isTime) {
                   executor.onBeforeCheckpoint()
@@ -225,14 +228,15 @@ object RegularTaskRunner {
 
                 envelope.streamType match {
                   case "t-stream" =>
-                    val tStreamEnvelope = serializer.deserialize[TStreamEnvelope](maybeEnvelope)
+                    val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
                     consumers(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
-                    executor.onMessage(tStreamEnvelope)
                   case "kafka-stream" =>
-                    val kafkaEnvelope = serializer.deserialize[KafkaEnvelope](maybeEnvelope)
+                    val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
                     manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
-                    executor.onMessage(kafkaEnvelope)
+
                 }
+
+                executor.onMessage(envelope)
 
                 if (countOfEnvelopes == regularInstanceMetadata.checkpointInterval) {
                   executor.onBeforeCheckpoint()
@@ -293,14 +297,15 @@ object RegularTaskRunner {
 
                 envelope.streamType match {
                   case "t-stream" =>
-                    val tStreamEnvelope = serializer.deserialize[TStreamEnvelope](maybeEnvelope)
+                    val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
                     consumers(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
-                    executor.onMessage(tStreamEnvelope)
                   case "kafka-stream" =>
-                    val kafkaEnvelope = serializer.deserialize[KafkaEnvelope](maybeEnvelope)
+                    val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
                     manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
-                    executor.onMessage(kafkaEnvelope)
+
                 }
+
+                executor.onMessage(envelope)
 
                 if (checkpointTimer.isTime) {
                   if (countOfCheckpoints != regularInstanceMetadata.stateFullCheckpoint) {
@@ -348,14 +353,15 @@ object RegularTaskRunner {
 
                 envelope.streamType match {
                   case "t-stream" =>
-                    val tStreamEnvelope = serializer.deserialize[TStreamEnvelope](maybeEnvelope)
+                    val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
                     consumers(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
-                    executor.onMessage(tStreamEnvelope)
                   case "kafka-stream" =>
-                    val kafkaEnvelope = serializer.deserialize[KafkaEnvelope](maybeEnvelope)
+                    val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
                     manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
-                    executor.onMessage(kafkaEnvelope)
+
                 }
+
+                executor.onMessage(envelope)
 
                 if (countOfEnvelopes == regularInstanceMetadata.checkpointInterval) {
                   if (countOfCheckpoints != regularInstanceMetadata.stateFullCheckpoint) {
