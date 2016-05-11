@@ -5,8 +5,6 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.datastax.driver.core.{Cluster, Session}
-import org.redisson.{Redisson, Config}
-import org.redisson.client.RedisClient
 
 /**
   * Created: 4/14/16
@@ -53,10 +51,11 @@ object SjTest {
   def main(args: Array[String]) = {
     //createData()
     //prepareCassandra()
-    /*val dao = ConnectionRepository.getStreamService
+    val dao = ConnectionRepository.getStreamService
     val streams = dao.getAll
     val stream = streams.filter(s => s.name.equals("s1")).head
-    println(stream.service.name)*/
+    println(stream.service.name)
+    println(ConnectionRepository.getServiceManager.get(stream.service.name).asInstanceOf[TStreamService].dataProvider.name)
     println("Ok")
   }
 

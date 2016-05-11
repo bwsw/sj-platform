@@ -1,54 +1,52 @@
 package com.bwsw.sj.stub
 
-import com.bwsw.sj.common.module.entities.{Envelope, TStreamEnvelope}
+import com.bwsw.sj.common.module.entities.Envelope
 import com.bwsw.sj.common.module.environment.ModuleEnvironmentManager
 import com.bwsw.sj.common.module.regular.RegularStreamingExecutor
 
+
 class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor(manager) {
 
-    override def init(): Unit = {
-      try {
-        val state = manager.getState
+  val state = manager.getState
 
-        println(s"getting state")
-        state.set("sum", 0)
-      } catch {
-        case _: java.lang.Exception => println("exception")
-      }
-
-      println("new init")
-    }
-
-
-    override def onAfterCheckpoint(): Unit = {
-      println("onCheckpoint")
-    }
-
-    override def onMessage(envelope: Envelope): Unit = {
-      val output = manager.getRoundRobinOutput("s3")
-      val state = manager.getState
-      var sum = state.get("sum").asInstanceOf[Int]
-      envelope.asInstanceOf[TStreamEnvelope].data.foreach(x => output.put(x))
-      sum += 1
-      state.set("sum", sum)
-      println("in run")
-    }
-
-    override def onTimer(jitter: Long): Unit = {
-      println("onTimer")
-    }
-
-  override def onAfterStateSave(isFull: Boolean): Unit = {
-    println("onStateSave")
+  override def init(): Unit = {
+    println("new init")
   }
 
-  override def onBeforeCheckpoint(): Unit = ???
+  override def onAfterCheckpoint(): Unit = {
+    println("on after checkpoint")
+  }
 
-  override def onIdle(): Unit = ???
+  override def onMessage(envelope: Envelope): Unit = {
+    //   val output = manager.getRoundRobinOutput("s3")
+    //var elementCount = state.get("elementCount").asInstanceOf[Int]
+    //    var txnCount = state.get(transaction.txnUUID.toString).asInstanceOf[Int]
+    //elementCount += transaction.data.length
+    println("stream type = " + envelope.streamType)
+    //state.set("elementCount", elementCount)
+  }
+
+  override def onTimer(jitter: Long): Unit = {
+    println("onTimer")
+  }
+
+  override def onAfterStateSave(isFull: Boolean): Unit = {
+    if (isFull) state.clear()
+  }
+
+  override def onBeforeCheckpoint(): Unit = {
+    println("on before checkpoint")
+  }
+
+  override def onIdle(): Unit = {
+    println("on Idle")
+  }
 
   /**
    * Handler triggered before save state
    * @param isFullState Flag denotes that full state (true) or partial changes of state (false) will be saved
    */
-  override def onBeforeStateSave(isFullState: Boolean): Unit = ???
+  override def onBeforeStateSave(isFullState: Boolean): Unit = {
+    println("on before state save")
+  }
 }

@@ -11,8 +11,7 @@ import akka.http.scaladsl.server._
 import akka.http.scaladsl.server.directives.{LoggingMagnet, DebuggingDirectives, LogEntry}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
-import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.ConfigLoader
+import com.bwsw.common.{ConfigLoader, JsonSerializer}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.typesafe.config.Config
 

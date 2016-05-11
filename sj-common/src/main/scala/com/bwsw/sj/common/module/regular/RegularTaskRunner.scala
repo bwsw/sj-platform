@@ -1,16 +1,18 @@
 package com.bwsw.sj.common.module.regular
 
 import java.net.URLClassLoader
+import java.util.Date
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.RegularInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.{ModuleConstants, StreamConstants}
 import com.bwsw.sj.common.module.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.module.environment.{ModuleEnvironmentManager, StatefulModuleEnvironmentManager}
 import com.bwsw.sj.common.module.state.{RAMStateService, StateStorage}
 import com.bwsw.sj.common.module.utils.SjTimer
 import com.bwsw.sj.common.module.{PersistentBlockingQueue, TaskManager}
-import com.bwsw.tstreams.agents.consumer.Offsets.{IOffset, Newest, Oldest}
+import com.bwsw.tstreams.agents.consumer.Offsets.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.{BasicProducer, ProducerPolicies}
@@ -39,7 +41,7 @@ object RegularTaskRunner {
 
     val moduleTimer = new SjTimer()
 
-    val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue("temp")
+    val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(ModuleConstants.persistentBlockingQueue)
     val checkpointGroup = new CheckpointGroup()
 
     val inputs = regularInstanceMetadata.executionPlan.tasks.get(manager.taskName).inputs.asScala
@@ -49,73 +51,56 @@ object RegularTaskRunner {
       (service.get(x._1), x._2)
     })
 
+    var consumersWithSubscribes: Map[String, BasicSubscribingConsumer[Array[Byte], Array[Byte]]] = null
 
-    val consumerWithSubscribes: Map[String, BasicSubscribingConsumer[Array[Byte], Array[Byte]]] = List(manager.createTStreamConsumer(
-      ConnectionRepository.getStreamService.get("s2"),
-      List(0, 2),
-      chooseOffset(regularInstanceMetadata.startFrom),
-      blockingQueue
-    )).map(x => (x.name, x)).toMap
-    //
-    //        val consumerWithSubscribes = inputs.filter(x => x._1.streamType == "Tstream").map({
-    //          x => manager.createTStreamConsumer(x._1, x._2.toList, chooseOffset(regularInstanceMetadata.startFrom), blockingQueue)
-    //        }).map(x => (x.name, x)).toMap
+    if (inputs.exists(x => x._1.streamType == StreamConstants.streamTypes.head)) {
+      consumersWithSubscribes = inputs.filter(x => x._1.streamType == StreamConstants.streamTypes.head).map({
+        x => manager.createSubscribingConsumer(x._1, x._2.toList, chooseOffset(regularInstanceMetadata.startFrom), blockingQueue)
+      }).map(x => (x.name, x)).toMap
 
-    consumerWithSubscribes.foreach(x => checkpointGroup.add(x._1, x._2))
-    consumerWithSubscribes.foreach(_._2.start())
+      consumersWithSubscribes.foreach(x => checkpointGroup.add(x._1, x._2))
+      consumersWithSubscribes.foreach(_._2.start())
 
-    val kafkaConsumer = manager.createKafkaConsumer(List(("test", List(0, 1, 2, 3))))
+    }
 
-
-    //    val kafkaConsumer = manager.createKafkaConsumer(inputs
-    //          .filter(x => x._1.streamType == "kafka")
-    //          .map(x => (x._1.name, x._2.toList)).toList
-    //        )
-
-
-    new Thread(new Runnable {
-      def run() = {
-        val serializer = new JsonSerializer()
-
-        while (true) {
-          val records = kafkaConsumer.poll(10)
-          records.asScala.foreach(x => {
-            val stream = ConnectionRepository.getStreamService.get(x.topic())
-
-            blockingQueue.put(serializer.serialize(
-              new KafkaEnvelope(stream.name,
-                x.partition(),
-                x.value(),
-                x.offset(),
-                stream.tags
-              )))
-          })
+    if (inputs.exists(x => x._1.streamType == StreamConstants.streamTypes.last)) {
+      val kafkaInputs = inputs.filter(x => x._1.streamType == StreamConstants.streamTypes.last)
+      val kafkaConsumer = manager.createKafkaConsumer(kafkaInputs
+        .map(x => (x._1.name, x._2.toList)).toList,
+        kafkaInputs.flatMap(_._1.service.provider.hosts).toList,
+        regularInstanceMetadata.startFrom match {
+          case "oldest" => "earliest"
+          case _ => "latest"
         }
-      }
-    }).start()
+      )
 
+      new Thread(new Runnable {
+        def run() = {
+          val serializer = new JsonSerializer()
 
-    //            new Thread(new Runnable {
-    //              def run() = {
-    //                val stream = new SjStream()
-    //                stream.name = "s2"
-    //                val producer = manager.createTStreamProducer(stream)
-    //                val s = System.nanoTime
-    //                (0 until 10) foreach { x =>
-    //                  val txn = producer.newTransaction(ProducerPolicies.errorIfOpen)
-    //                  (0 until 100) foreach { _ =>
-    //                    txn.send(Array[Byte]())
-    //                  }
-    //                  txn.checkpoint()
-    //                }
-    //                println(s"producer time: ${(System.nanoTime - s) / 1000000}")
-    //              }
-    //            }).run()
+          while (true) {
+            val records = kafkaConsumer.poll(10)
+            records.asScala.foreach(x => {
+              val stream = ConnectionRepository.getStreamService.get(x.topic())
+
+              blockingQueue.put(serializer.serialize(
+                new KafkaEnvelope(stream.name,
+                  x.partition(),
+                  x.value(),
+                  x.offset(),
+                  stream.tags
+                )))
+            })
+          }
+        }
+      }).start()
+
+    }
 
     val producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]] =
       regularInstanceMetadata.outputs
         .map(x => (x, ConnectionRepository.getStreamService.get(x)))
-        .map(x => (x._1, manager.createTStreamProducer(x._2))).toMap
+        .map(x => (x._1, manager.createProducer(x._2))).toMap
 
     val offsetProducer = manager.createOffsetProducer()
 
@@ -131,7 +116,7 @@ object RegularTaskRunner {
       classLoader,
       executorClass,
       producers,
-      consumerWithSubscribes,
+      consumersWithSubscribes,
       manager,
       offsetProducer,
       checkpointGroup)
@@ -198,14 +183,16 @@ object RegularTaskRunner {
               } else {
                 val envelope = serializer.deserialize[Envelope](maybeEnvelope)
 
-                envelope match {
-                  case tStreamEnvelope: TStreamEnvelope =>
+                envelope.streamType match {
+                  case "t-stream" =>
+                    val tStreamEnvelope = serializer.deserialize[TStreamEnvelope](maybeEnvelope)
                     consumers(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
-                  case kafkaEnvelope: KafkaEnvelope =>
+                    executor.onMessage(tStreamEnvelope)
+                  case "kafka-stream" =>
+                    val kafkaEnvelope = serializer.deserialize[KafkaEnvelope](maybeEnvelope)
                     manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
+                    executor.onMessage(kafkaEnvelope)
                 }
-
-                executor.onMessage(envelope)
 
                 if (checkpointTimer.isTime) {
                   executor.onBeforeCheckpoint()
@@ -234,17 +221,18 @@ object RegularTaskRunner {
                 executor.onIdle()
               } else {
                 val envelope = serializer.deserialize[Envelope](maybeEnvelope)
-
-                envelope match {
-                  case tStreamEnvelope: TStreamEnvelope =>
-                    consumers(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
-                  case kafkaEnvelope: KafkaEnvelope =>
-                    manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
-                }
-
                 countOfEnvelopes += 1
 
-                executor.onMessage(envelope)
+                envelope.streamType match {
+                  case "t-stream" =>
+                    val tStreamEnvelope = serializer.deserialize[TStreamEnvelope](maybeEnvelope)
+                    consumers(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
+                    executor.onMessage(tStreamEnvelope)
+                  case "kafka-stream" =>
+                    val kafkaEnvelope = serializer.deserialize[KafkaEnvelope](maybeEnvelope)
+                    manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
+                    executor.onMessage(kafkaEnvelope)
+                }
 
                 if (countOfEnvelopes == regularInstanceMetadata.checkpointInterval) {
                   executor.onBeforeCheckpoint()
@@ -266,9 +254,9 @@ object RegularTaskRunner {
 
       case "ram" =>
         var countOfCheckpoints = 1
-        val taskName = System.getenv("TASK_NAME")
-        val stateProducer = manager.createStateProducer(taskName)
-        val stateConsumer = manager.createStateConsumer(taskName, Oldest)
+        val streamForState = ConnectionRepository.getStreamService.get(manager.taskName)
+        val stateProducer = manager.createProducer(streamForState)
+        val stateConsumer = manager.createConsumer(streamForState, List(0, streamForState.partitions), Oldest)
 
         checkpointGroup.add(stateConsumer.name, stateConsumer)
         checkpointGroup.add(stateProducer.name, stateProducer)
@@ -283,11 +271,9 @@ object RegularTaskRunner {
           moduleTimer
         )
 
-        //        val executor = classLoader.loadClass(pathToExecutor)
-        //          .getConstructor(classOf[ModuleEnvironmentManager])
-        //          .newInstance(moduleEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
-
-        val executor = new Executor(moduleEnvironmentManager)
+        val executor = classLoader.loadClass(pathToExecutor)
+          .getConstructor(classOf[ModuleEnvironmentManager])
+          .newInstance(moduleEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
 
         executor.init()
 
@@ -358,17 +344,18 @@ object RegularTaskRunner {
                 executor.onIdle()
               } else {
                 val envelope = serializer.deserialize[Envelope](maybeEnvelope)
-
-                envelope match {
-                  case tStreamEnvelope: TStreamEnvelope =>
-                    consumers(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
-                  case kafkaEnvelope: KafkaEnvelope =>
-                    manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
-                }
-
                 countOfEnvelopes += 1
 
-                executor.onMessage(envelope)
+                envelope.streamType match {
+                  case "t-stream" =>
+                    val tStreamEnvelope = serializer.deserialize[TStreamEnvelope](maybeEnvelope)
+                    consumers(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
+                    executor.onMessage(tStreamEnvelope)
+                  case "kafka-stream" =>
+                    val kafkaEnvelope = serializer.deserialize[KafkaEnvelope](maybeEnvelope)
+                    manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
+                    executor.onMessage(kafkaEnvelope)
+                }
 
                 if (countOfEnvelopes == regularInstanceMetadata.checkpointInterval) {
                   if (countOfCheckpoints != regularInstanceMetadata.stateFullCheckpoint) {
@@ -404,61 +391,14 @@ object RegularTaskRunner {
 
   /**
    * Chooses offset policy for t-streams consumers
-   * @param startFrom Offset policy name or specific date or transaction UUID
+   * @param startFrom Offset policy name or specific date
    * @return Offset
    */
   private def chooseOffset(startFrom: String): IOffset = {
     startFrom match {
       case "oldest" => Oldest
       case "newest" => Newest
-      //todo add two cases for date and UUID
+      case time => DateTime(new Date(time.toLong * 1000))
     }
-  }
-
-}
-
-class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor(manager) {
-
-  val state = manager.getState
-
-  override def init(): Unit = {
-    println("new init")
-  }
-
-  override def onAfterCheckpoint(): Unit = {
-    println("on after checkpoint")
-  }
-
-  override def onMessage(envelope: Envelope): Unit = {
-    //   val output = manager.getRoundRobinOutput("s3")
-    //var elementCount = state.get("elementCount").asInstanceOf[Int]
-    //    var txnCount = state.get(transaction.txnUUID.toString).asInstanceOf[Int]
-    //elementCount += transaction.data.length
-    println("stream type = " + envelope.streamType)
-    //state.set("elementCount", elementCount)
-  }
-
-  override def onTimer(jitter: Long): Unit = {
-    println("onTimer")
-  }
-
-  override def onAfterStateSave(isFull: Boolean): Unit = {
-    if (isFull) state.clear()
-  }
-
-  override def onBeforeCheckpoint(): Unit = {
-    println("on before checkpoint")
-  }
-
-  override def onIdle(): Unit = {
-    println("on Idle")
-  }
-
-  /**
-   * Handler triggered before save state
-   * @param isFullState Flag denotes that full state (true) or partial changes of state (false) will be saved
-   */
-  override def onBeforeStateSave(isFullState: Boolean): Unit = {
-    println("on before state save")
   }
 }

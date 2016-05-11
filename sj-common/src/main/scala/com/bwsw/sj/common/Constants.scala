@@ -5,6 +5,7 @@ package com.bwsw.sj.common
  */
 object ModuleConstants {
   val persistentQueuePath = "persistentQueuePath"
+  val persistentBlockingQueue = "persistentBlockingQueue"
 
   val windowedType = "windowed-streaming"
   val regularStreamingType = "regular-streaming"

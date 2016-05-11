@@ -1,4 +1,4 @@
-package com.bwsw.sj.common
+package com.bwsw.common
 
 import java.io.File
 
