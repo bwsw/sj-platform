@@ -2,17 +2,20 @@ package com.bwsw.sj.common.module.regular
 
 import java.net.URLClassLoader
 
-import com.bwsw.common.JsonSerializer
+import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.RegularInstance
-import com.bwsw.sj.common.module.entities.{Envelope, TStreamEnvelope}
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.module.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.module.environment.{ModuleEnvironmentManager, StatefulModuleEnvironmentManager}
 import com.bwsw.sj.common.module.state.{RAMStateService, StateStorage}
 import com.bwsw.sj.common.module.utils.SjTimer
 import com.bwsw.sj.common.module.{PersistentBlockingQueue, TaskManager}
 import com.bwsw.tstreams.agents.consumer.Offsets.{IOffset, Newest, Oldest}
+import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.{BasicProducer, ProducerPolicies}
 
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 /**
@@ -24,8 +27,6 @@ import scala.collection.mutable
 object RegularTaskRunner {
 
   def main(args: Array[String]) {
-    val serializer = new JsonSerializer()
-
     val manager = new TaskManager()
 
     val moduleJar = manager.getModuleJar
@@ -34,109 +35,147 @@ object RegularTaskRunner {
 
     val executorClass = manager.getExecutorClass
 
-    val temporaryOutput = manager.getTemporaryOutput
+    val outputTags = manager.getOutputTags
 
     val moduleTimer = new SjTimer()
 
     val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue("temp")
     val checkpointGroup = new CheckpointGroup()
 
-    //    val consumerWithSubscribes = regularInstanceMetadata.executionPlan.tasks(manager.taskName).inputs
-    //      .map(x => manager.createConsumer(x._1, x._2, chooseOffsetPolicy(regularInstanceMetadata.startFrom), blockingQueue)).toVector
-    //
-    //    consumerWithSubscribes.foreach(x => checkpointGroup.add(x.name, x))
-    //    consumerWithSubscribes.foreach(_.start())
+    val inputs = regularInstanceMetadata.executionPlan.tasks.get(manager.taskName).inputs.asScala
+      .map(x => {
+      val service = ConnectionRepository.getStreamService
 
-    val consumerWithSubscribes = manager.createConsumer("s2", List(0, 2), chooseOffset(regularInstanceMetadata.startFrom), blockingQueue)
-    consumerWithSubscribes.start()
-    checkpointGroup.add(consumerWithSubscribes.name, consumerWithSubscribes)
-    //        new Thread(new Runnable {
-    //          def run() = {
-    //            val producer = manager.createProducer("s2")
-    //            val s = System.nanoTime
-    //            (0 until 10000) foreach { x =>
-    //              val txn = producer.newTransaction(ProducerPolicies.errorIfOpen)
-    //              (0 until 100) foreach { _ =>
-    //                txn.send(Array[Byte]())
+      (service.get(x._1), x._2)
+    })
+
+
+    val consumerWithSubscribes: Map[String, BasicSubscribingConsumer[Array[Byte], Array[Byte]]] = List(manager.createTStreamConsumer(
+      ConnectionRepository.getStreamService.get("s2"),
+      List(0, 2),
+      chooseOffset(regularInstanceMetadata.startFrom),
+      blockingQueue
+    )).map(x => (x.name, x)).toMap
+    //
+    //        val consumerWithSubscribes = inputs.filter(x => x._1.streamType == "Tstream").map({
+    //          x => manager.createTStreamConsumer(x._1, x._2.toList, chooseOffset(regularInstanceMetadata.startFrom), blockingQueue)
+    //        }).map(x => (x.name, x)).toMap
+
+    consumerWithSubscribes.foreach(x => checkpointGroup.add(x._1, x._2))
+    consumerWithSubscribes.foreach(_._2.start())
+
+    val kafkaConsumer = manager.createKafkaConsumer(List(("test", List(0, 1, 2, 3))))
+
+
+    //    val kafkaConsumer = manager.createKafkaConsumer(inputs
+    //          .filter(x => x._1.streamType == "kafka")
+    //          .map(x => (x._1.name, x._2.toList)).toList
+    //        )
+
+
+    new Thread(new Runnable {
+      def run() = {
+        val serializer = new JsonSerializer()
+
+        while (true) {
+          val records = kafkaConsumer.poll(10)
+          records.asScala.foreach(x => {
+            val stream = ConnectionRepository.getStreamService.get(x.topic())
+
+            blockingQueue.put(serializer.serialize(
+              new KafkaEnvelope(stream.name,
+                x.partition(),
+                x.value(),
+                x.offset(),
+                stream.tags
+              )))
+          })
+        }
+      }
+    }).start()
+
+
+    //            new Thread(new Runnable {
+    //              def run() = {
+    //                val stream = new SjStream()
+    //                stream.name = "s2"
+    //                val producer = manager.createTStreamProducer(stream)
+    //                val s = System.nanoTime
+    //                (0 until 10) foreach { x =>
+    //                  val txn = producer.newTransaction(ProducerPolicies.errorIfOpen)
+    //                  (0 until 100) foreach { _ =>
+    //                    txn.send(Array[Byte]())
+    //                  }
+    //                  txn.checkpoint()
+    //                }
+    //                println(s"producer time: ${(System.nanoTime - s) / 1000000}")
     //              }
-    //              txn.checkpoint()
-    //            }
-    //            println(s"producer time: ${(System.nanoTime - s) / 1000000}")
-    //          }
-    //        }).run()
+    //            }).run()
 
     val producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]] =
       regularInstanceMetadata.outputs
-        .map(x => (x, manager.createProducer(x))).toMap
+        .map(x => (x, ConnectionRepository.getStreamService.get(x)))
+        .map(x => (x._1, manager.createTStreamProducer(x._2))).toMap
+
+    val offsetProducer = manager.createOffsetProducer()
 
     producers.foreach(x => checkpointGroup.add(x._2.name, x._2))
+    checkpointGroup.add(offsetProducer.name, offsetProducer)
 
     val classLoader = manager.getClassLoader(moduleJar.getAbsolutePath)
 
     runModule(moduleTimer,
       regularInstanceMetadata,
       blockingQueue,
-      temporaryOutput,
+      outputTags,
       classLoader,
       executorClass,
       producers,
-      serializer,
+      consumerWithSubscribes,
       manager,
+      offsetProducer,
       checkpointGroup)
-  }
-
-  /**
-   * Transmits an user-modified data from temporary output using t-streams producers
-   * @param output Temporary output that available into module
-   * @param producers T-streams producers for each output stream of instance parameters
-   */
-  private def sendData(output: (String, (String, Any)), producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]]) {
-    output._2._1 match {
-      case "partitioned" =>
-        val partitionedData = output._2._2.asInstanceOf[mutable.Map[Int, mutable.MutableList[Array[Byte]]]]
-        partitionedData.foreach(y => {
-          val transaction = producers(output._1).newTransaction(ProducerPolicies.errorIfOpen, y._1)
-          y._2.foreach(transaction.send)
-          transaction.checkpoint()
-          println(s"stream: ${output._1}, number of elements: ${y._2.length}")
-        })
-      case "round-robin" =>
-        val transaction = producers(output._1).newTransaction(ProducerPolicies.errorIfOpen)
-        val data = output._2._2.asInstanceOf[mutable.MutableList[Array[Byte]]]
-        data.foreach(transaction.send)
-        transaction.checkpoint()
-        println(s"stream: ${output._1}, number of elements: ${data.length}")
-    }
   }
 
   /**
    * Provides an imitation of streaming processing using blocking queue
    * @param moduleTimer Provides a timer inside module
    * @param regularInstanceMetadata Launch parameters of module
-   * @param blockingQueue Queue for keeping transaction
-   * @param temporaryOutput Provides a wrapper for each output stream
+   * @param blockingQueue Queue for keeping envelope
+   * @param outputTags Keeps a tag (partitioned or round-robin output) corresponding to the output for each output stream
    * @param classLoader Allows loading an executor class
    * @param pathToExecutor Absolute class path to module class that implemented RegularStreamingExecutor
-   * @param producers T-streams producers for sending data to output streams
-   * @param serializer Json serializer for deserialization of transaction
+   * @param producers T-stream producers for sending data to output streams
+   * @param consumers T-stream consumers to set local offset after fetching an envelope from queue
    * @param manager Allows managing an environment of task
+   * @param offsetProducer T-stream producer to commit the offsets of last messages
+   *                       that has successfully processed for each topic for each partition
    * @param checkpointGroup Group of producers and consumers which should do a checkpoint at the same time
    */
   private def runModule(moduleTimer: SjTimer,
                         regularInstanceMetadata: RegularInstance,
                         blockingQueue: PersistentBlockingQueue,
-                        temporaryOutput: mutable.Map[String, (String, Any)],
+                        outputTags: mutable.Map[String, (String, Any)],
                         classLoader: URLClassLoader,
                         pathToExecutor: String,
                         producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]],
-                        serializer: JsonSerializer,
+                        consumers: Map[String, BasicSubscribingConsumer[Array[Byte], Array[Byte]]],
                         manager: TaskManager,
+                        offsetProducer: BasicProducer[Array[Byte], Array[Byte]],
                         checkpointGroup: CheckpointGroup) = {
+    /**
+     * Json serializer for deserialization of envelope
+     */
+    val serializer = new JsonSerializer()
+    serializer.setIgnoreUnknown(true)
+    val objectSerializer = new ObjectSerializer()
+
     regularInstanceMetadata.stateManagement match {
       case "none" =>
         val moduleEnvironmentManager = new ModuleEnvironmentManager(
           serializer.deserialize[Map[String, Any]](regularInstanceMetadata.options),
-          temporaryOutput,
+          producers,
+          outputTags,
           moduleTimer
         )
 
@@ -152,20 +191,28 @@ object RegularTaskRunner {
             checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
             while (true) {
 
-              val maybeTxn = blockingQueue.get(regularInstanceMetadata.idle)
+              val maybeEnvelope = blockingQueue.get(regularInstanceMetadata.idle)
 
-              if (maybeTxn == null) {
+              if (maybeEnvelope == null) {
                 executor.onIdle()
               } else {
-                val transaction = serializer.deserialize[TStreamEnvelope](maybeTxn)
-                executor.onMessage(transaction)
+                val envelope = serializer.deserialize[Envelope](maybeEnvelope)
 
-                if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
-                temporaryOutput.clear()
+                envelope match {
+                  case tStreamEnvelope: TStreamEnvelope =>
+                    consumers(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
+                  case kafkaEnvelope: KafkaEnvelope =>
+                    manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
+                }
+
+                executor.onMessage(envelope)
 
                 if (checkpointTimer.isTime) {
                   executor.onBeforeCheckpoint()
+                  offsetProducer.newTransaction(ProducerPolicies.errorIfOpen)
+                    .send(objectSerializer.serialize(manager.kafkaOffsetsStorage))
                   checkpointGroup.commit()
+                  outputTags.clear()
                   executor.onAfterCheckpoint()
                   checkpointTimer.reset()
                   checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
@@ -178,27 +225,35 @@ object RegularTaskRunner {
               }
             }
           case "every-nth" =>
-            var countOfTransaction = 0
+            var countOfEnvelopes = 0
             while (true) {
 
-              val maybeTxn = blockingQueue.get(regularInstanceMetadata.idle)
+              val maybeEnvelope = blockingQueue.get(regularInstanceMetadata.idle)
 
-              if (maybeTxn == null) {
+              if (maybeEnvelope == null) {
                 executor.onIdle()
               } else {
-                val transaction = serializer.deserialize[TStreamEnvelope](maybeTxn)
-                countOfTransaction += 1
+                val envelope = serializer.deserialize[Envelope](maybeEnvelope)
 
-                executor.onMessage(transaction)
+                envelope match {
+                  case tStreamEnvelope: TStreamEnvelope =>
+                    consumers(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
+                  case kafkaEnvelope: KafkaEnvelope =>
+                    manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
+                }
 
-                if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
-                temporaryOutput.clear()
+                countOfEnvelopes += 1
 
-                if (countOfTransaction == regularInstanceMetadata.checkpointInterval) {
+                executor.onMessage(envelope)
+
+                if (countOfEnvelopes == regularInstanceMetadata.checkpointInterval) {
                   executor.onBeforeCheckpoint()
+                  offsetProducer.newTransaction(ProducerPolicies.errorIfOpen)
+                    .send(objectSerializer.serialize(manager.kafkaOffsetsStorage))
                   checkpointGroup.commit()
+                  outputTags.clear()
                   executor.onAfterCheckpoint()
-                  countOfTransaction = 0
+                  countOfEnvelopes = 0
                 }
 
                 if (moduleTimer.isTime) {
@@ -223,7 +278,8 @@ object RegularTaskRunner {
         val moduleEnvironmentManager = new StatefulModuleEnvironmentManager(
           new StateStorage(stateService),
           serializer.deserialize[Map[String, Any]](regularInstanceMetadata.options),
-          temporaryOutput,
+          producers,
+          outputTags,
           moduleTimer
         )
 
@@ -242,16 +298,23 @@ object RegularTaskRunner {
 
             while (true) {
 
-              val maybeTxn = blockingQueue.get(10)
+              val maybeEnvelope = blockingQueue.get(regularInstanceMetadata.idle)
 
-              if (maybeTxn == null) {
+              if (maybeEnvelope == null) {
                 executor.onIdle()
               } else {
-                val transaction = serializer.deserialize[TStreamEnvelope](maybeTxn)
-                executor.onMessage(transaction)
+                val envelope = serializer.deserialize[Envelope](maybeEnvelope)
 
-                if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
-                temporaryOutput.clear()
+                envelope.streamType match {
+                  case "t-stream" =>
+                    val tStreamEnvelope = serializer.deserialize[TStreamEnvelope](maybeEnvelope)
+                    consumers(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
+                    executor.onMessage(tStreamEnvelope)
+                  case "kafka-stream" =>
+                    val kafkaEnvelope = serializer.deserialize[KafkaEnvelope](maybeEnvelope)
+                    manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
+                    executor.onMessage(kafkaEnvelope)
+                }
 
                 if (checkpointTimer.isTime) {
                   if (countOfCheckpoints != regularInstanceMetadata.stateFullCheckpoint) {
@@ -267,7 +330,10 @@ object RegularTaskRunner {
                   }
 
                   executor.onBeforeCheckpoint()
+                  offsetProducer.newTransaction(ProducerPolicies.errorIfOpen)
+                    .send(objectSerializer.serialize(manager.kafkaOffsetsStorage))
                   checkpointGroup.commit()
+                  outputTags.clear()
                   executor.onAfterCheckpoint()
 
                   checkpointTimer.reset()
@@ -282,24 +348,29 @@ object RegularTaskRunner {
             }
 
           case "every-nth" =>
-            var countOfTransaction = 0
+            var countOfEnvelopes = 0
 
             while (true) {
 
-              val maybeTxn = blockingQueue.get(regularInstanceMetadata.idle)
+              val maybeEnvelope = blockingQueue.get(regularInstanceMetadata.idle)
 
-              if (maybeTxn == null) {
+              if (maybeEnvelope == null) {
                 executor.onIdle()
               } else {
-                val transaction = serializer.deserialize[TStreamEnvelope](maybeTxn)
-                countOfTransaction += 1
+                val envelope = serializer.deserialize[Envelope](maybeEnvelope)
 
-                executor.onMessage(transaction)
+                envelope match {
+                  case tStreamEnvelope: TStreamEnvelope =>
+                    consumers(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
+                  case kafkaEnvelope: KafkaEnvelope =>
+                    manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
+                }
 
-                if (temporaryOutput.nonEmpty) temporaryOutput.foreach(x => sendData(x, producers))
-                temporaryOutput.clear()
+                countOfEnvelopes += 1
 
-                if (countOfTransaction == regularInstanceMetadata.checkpointInterval) {
+                executor.onMessage(envelope)
+
+                if (countOfEnvelopes == regularInstanceMetadata.checkpointInterval) {
                   if (countOfCheckpoints != regularInstanceMetadata.stateFullCheckpoint) {
                     stateService.checkpoint()
                     executor.onAfterStateSave(false)
@@ -311,10 +382,13 @@ object RegularTaskRunner {
                   }
 
                   executor.onBeforeCheckpoint()
+                  offsetProducer.newTransaction(ProducerPolicies.errorIfOpen)
+                    .send(objectSerializer.serialize(manager.kafkaOffsetsStorage))
                   checkpointGroup.commit()
+                  outputTags.clear()
                   executor.onAfterCheckpoint()
 
-                  countOfTransaction = 0
+                  countOfEnvelopes = 0
                 }
 
                 if (moduleTimer.isTime) {
@@ -360,8 +434,7 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
     //var elementCount = state.get("elementCount").asInstanceOf[Int]
     //    var txnCount = state.get(transaction.txnUUID.toString).asInstanceOf[Int]
     //elementCount += transaction.data.length
-    val e = envelope.asInstanceOf[TStreamEnvelope]
-    state.set(e.txnUUID.toString, e.data.length)
+    println("stream type = " + envelope.streamType)
     //state.set("elementCount", elementCount)
   }
 

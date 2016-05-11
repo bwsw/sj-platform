@@ -2,8 +2,9 @@ package com.bwsw.sj.common.module.environment
 
 import com.bwsw.sj.common.module.state.StateStorage
 import com.bwsw.sj.common.module.utils.SjTimer
+import com.bwsw.tstreams.agents.producer.BasicProducer
 
-import scala.collection.mutable
+import scala.collection._
 
 /**
  * Provides for user methods that can be used in a module
@@ -11,11 +12,13 @@ import scala.collection.mutable
  * @author Kseniya Mikhaleva
  *
  * @param options User defined options from instance parameters
- * @param temporaryOutput Provides a store for each output stream from instance parameters
+ * @param producers T-streams producers for each output stream of instance parameters
+ * @param outputTags Keeps a tag (partitioned or round-robin output) corresponding to the output for each output stream
  * @param moduleTimer Provides a possibility to set a timer inside a module
  */
 class ModuleEnvironmentManager(val options: Map[String, Any],
-                               temporaryOutput: mutable.Map[String, (String, Any)],
+                               producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]],
+                               outputTags: mutable.Map[String, (String, Any)],
                                moduleTimer: SjTimer) {
 
   /**
@@ -24,17 +27,17 @@ class ModuleEnvironmentManager(val options: Map[String, Any],
    * @return Partitioned output that wrapping output stream
    */
   def getPartitionedOutput(streamName: String) = {
-    if (temporaryOutput.contains(streamName)) {
-      if (temporaryOutput(streamName)._1 == "partitioned") {
-        new PartitionedOutput(temporaryOutput(streamName)._2.asInstanceOf[mutable.Map[Int, mutable.MutableList[Array[Byte]]]])
+    if (outputTags.contains(streamName)) {
+      if (outputTags(streamName)._1 == "partitioned") {
+        outputTags(streamName)._2.asInstanceOf[PartitionedOutput]
       }
       else {
         throw new Exception("For this output stream is set partitioned output")
       }
     } else {
-      temporaryOutput(streamName) = ("partitioned", mutable.Map[Int, mutable.MutableList[Array[Byte]]]())
+      outputTags(streamName) = ("partitioned", new PartitionedOutput(producers(streamName)))
 
-      new PartitionedOutput(temporaryOutput(streamName)._2.asInstanceOf[mutable.Map[Int, mutable.MutableList[Array[Byte]]]])
+      outputTags(streamName)._2.asInstanceOf[PartitionedOutput]
     }
   }
 
@@ -44,17 +47,17 @@ class ModuleEnvironmentManager(val options: Map[String, Any],
    * @return Round-robin output that wrapping output stream
    */
   def getRoundRobinOutput(streamName: String) = {
-    if (temporaryOutput.contains(streamName)) {
-      if (temporaryOutput(streamName)._1 == "round-robin") {
-        new RoundRobinOutput(temporaryOutput(streamName)._2.asInstanceOf[mutable.MutableList[Array[Byte]]])
+    if (outputTags.contains(streamName)) {
+      if (outputTags(streamName)._1 == "round-robin") {
+        outputTags(streamName)._2.asInstanceOf[RoundRobinOutput]
       }
       else {
         throw new Exception("For this output stream is set round-robin output")
       }
     } else {
-      temporaryOutput(streamName) = ("round-robin", mutable.MutableList[Array[Byte]]())
+      outputTags(streamName) = ("round-robin", new RoundRobinOutput(producers(streamName)))
 
-      new RoundRobinOutput(temporaryOutput(streamName)._2.asInstanceOf[mutable.MutableList[Array[Byte]]])
+      outputTags(streamName)._2.asInstanceOf[RoundRobinOutput]
     }
   }
 

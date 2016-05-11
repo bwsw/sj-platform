@@ -2,15 +2,16 @@ package com.bwsw.sj.common.module
 
 import java.io.File
 import java.net.{InetSocketAddress, URLClassLoader}
+import java.util.Properties
 
 import com.aerospike.client.Host
-import com.bwsw.common.tstream.GlobalTimeUUIDGenerator
-import com.bwsw.sj.common.DAL.model.{ZKService, FileMetadata, TStreamService}
+import com.bwsw.common.ObjectSerializer
+import com.bwsw.sj.common.DAL.model.{FileMetadata, SjStream, TStreamService}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.tstreams.agents.consumer.Offsets.IOffset
+import com.bwsw.tstreams.agents.consumer.Offsets.{IOffset, Newest}
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions}
-import com.bwsw.tstreams.agents.producer.InsertionType.BatchInsert
+import com.bwsw.tstreams.agents.producer.InsertionType.{BatchInsert, SingleElementInsert}
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions}
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.Coordinator
@@ -20,9 +21,13 @@ import com.bwsw.tstreams.data.cassandra.{CassandraStorageFactory, CassandraStora
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.policy.RoundRobinPolicy
+import com.bwsw.tstreams.services.BasicStreamService
 import com.bwsw.tstreams.streams.BasicStream
+import com.bwsw.sj.common.ModuleConstants._
+import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.common.TopicPartition
 import org.redisson.{Config, Redisson}
-import com.bwsw.sj.common.DAL.ConnectionConstants._
+
 import scala.collection.mutable
 
 /**
@@ -39,6 +44,7 @@ class TaskManager() {
   private val moduleVersion = System.getenv("MODULE_VERSION")
   private val instanceName = System.getenv("INSTANCE_NAME")
   val taskName = System.getenv("TASK_NAME")
+  val kafkaOffsetsStorage = mutable.Map[(String, Int), Long]() //todo: create a class with mutex
 
   private val instanceMetadata = ConnectionRepository.getInstanceService.get(instanceName)
   private val storage = ConnectionRepository.getFileStorage
@@ -153,21 +159,108 @@ class TaskManager() {
   }
 
   /**
-   * Returns output to temporarily store the data intended for output streams
+   * Returns tags for each output stream
    * @return
    */
-  def getTemporaryOutput = {
+  def getOutputTags = {
     mutable.Map[String, (String, Any)]()
   }
 
+  /**
+   * Creates a kafka consumer for all input streams of kafka type.
+   * If there was a checkpoint with offsets of last consumed messages for each topic/partition
+   * then consumer will fetch from this offsets otherwise
+   * @param topics Set of kafka topic names and range of partitions relatively
+   * @return Kafka consumer subscribed to topics
+   */
+  def createKafkaConsumer(topics: List[(String, List[Int])], hosts: Array[String], offset: String): KafkaConsumer[Array[Byte], Array[Byte]] = {
+    import collection.JavaConverters._
+    val objectSerializer = new ObjectSerializer()
+
+    val props = new Properties()
+    props.put("bootstrap.servers", hosts.mkString(","))
+    props.put("enable.auto.commit", "false")
+    props.put("session.timeout.ms", "30000")
+    props.put("auto.offset.reset", offset)
+    props.put("key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
+    props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
+    val consumer = new KafkaConsumer[Array[Byte], Array[Byte]](props)
+
+    if (BasicStreamService.isExist(taskName, metadataStorage)) {
+      val stream = BasicStreamService.loadStream(taskName, metadataStorage, dataStorage, coordinator)
+      val roundRobinPolicy = new RoundRobinPolicy(stream, (0 to 0).toList)
+      val timeUuidGenerator = new LocalTimeUUIDGenerator
+      val options = new BasicConsumerOptions[Array[Byte], Array[Byte]](
+        transactionsPreload = 10,
+        dataPreload = 7,
+        consumerKeepAliveInterval = 5,
+        converter,
+        roundRobinPolicy,
+        Newest,
+        timeUuidGenerator,
+        useLastOffset = true)
+
+      val offsetConsumer = new BasicConsumer[Array[Byte], Array[Byte]]("consumer for offsets of " + taskName, stream, options)
+      val lastTxn = offsetConsumer.getLastTransaction(0)
+
+      if (lastTxn.isDefined) {
+        val offsets = objectSerializer.deserialize(lastTxn.get.next()).asInstanceOf[mutable.Map[(String, Int), Long]]
+        offsets.foreach(x => consumer.seek(new TopicPartition(x._1._1, x._1._2), x._2))
+      }
+    }
+
+    val topicPartitions = topics.flatMap(x => {
+      x._2.map(y => new TopicPartition(x._1, y))
+    }).asJava
+
+    consumer.assign(topicPartitions)
+
+    consumer
+  }
+
+  /**
+   * Returns T-stream producer responsible for committing the offsets of last messages
+   * that has successfully processed for each topic for each partition
+   * @return T-stream producer responsible for committing the offsets of last messages
+   *         that has successfully processed for each topic for each partition
+   */
+  def createOffsetProducer() = {
+    var stream: BasicStream[Array[Byte]] = null
+
+    if (BasicStreamService.isExist(taskName, metadataStorage)) {
+      stream = BasicStreamService.loadStream(taskName, metadataStorage, dataStorage, coordinator)
+    } else {
+      stream = BasicStreamService.createStream(
+        taskName,
+        1,
+        Int.MaxValue,
+        "stream to store kafka offsets of input streams",
+        metadataStorage,
+        dataStorage,
+        coordinator
+      )
+    }
+
+    val options = new BasicProducerOptions[Array[Byte], Array[Byte]](
+      transactionTTL = 6,
+      transactionKeepAliveInterval = 2,
+      producerKeepAliveInterval = 1,
+      new RoundRobinPolicy(stream, (0 to 0).toList),
+      SingleElementInsert,
+      new LocalTimeUUIDGenerator,
+      converter)
+
+    new BasicProducer[Array[Byte], Array[Byte]]("producer for " + stream.name, stream, options)
+  }
+
   //todo: use BasicStreamService to retrieve metadata for retrieving streams
-  def createConsumer(streamName: String, partitionRange: List[Int], offsetPolicy: IOffset, blockingQueue: PersistentBlockingQueue) = {
+  def createTStreamConsumer(stream: SjStream, partitionRange: List[Int], offsetPolicy: IOffset, blockingQueue: PersistentBlockingQueue) = {
 
     //    val stream: BasicStream[Array[Byte]] =
     //      BasicStreamService.loadStream(streamName, metadataStorageInstForProducer, aerospikeInstForProducer, coordinator)
 
     val basicStream = new BasicStream[Array[Byte]](
-      name = streamName,
+      name = stream.name,
       partitions = 3,
       metadataStorage = metadataStorage,
       dataStorage = dataStorage,
@@ -177,20 +270,18 @@ class TaskManager() {
 
     val roundRobinPolicy = new RoundRobinPolicy(basicStream, (partitionRange.head to partitionRange.tail.head).toList)
 
-    val stream = ConnectionRepository.getStreamService.get(streamName)
-
-    val timeUuidGenerator = stream.generator.generatorType match {
-      case "local" => new LocalTimeUUIDGenerator
-      case _type =>
-        val service = stream.generator.service.asInstanceOf[ZKService]
-        val zkHosts = service.provider.hosts
-        val prefix = service.namespace + "/" + {
-          if (_type == "global") _type else streamName
-        }
-
-        new GlobalTimeUUIDGenerator(zkHosts, prefix, retryInterval, retryCount)
-
-    }
+    val timeUuidGenerator = new LocalTimeUUIDGenerator
+//      stream.generator.generatorType match {
+//      case "local" => new LocalTimeUUIDGenerator
+//      case _type =>
+//        val service = stream.generator.service.asInstanceOf[ZKService]
+//        val zkHosts = service.provider.hosts
+//        val prefix = service.namespace + "/" + {
+//          if (_type == "global") _type else stream.name
+//        }
+//
+//        new NetworkTimeUUIDGenerator(zkHosts, prefix, retryInterval, retryCount)
+//    }
 
     val options = new BasicConsumerOptions[Array[Byte], Array[Byte]](
       transactionsPreload = 10,
@@ -203,19 +294,17 @@ class TaskManager() {
       useLastOffset = true)
 
     val callback = new QueueConsumerCallback[Array[Byte], Array[Byte]](blockingQueue)
-    //todo
-    val path = "test"
 
-    new BasicSubscribingConsumer[Array[Byte], Array[Byte]]("consumer for " + streamName, basicStream, options, callback, path)
+    new BasicSubscribingConsumer[Array[Byte], Array[Byte]]("consumer for " + stream.name, basicStream, options, callback, persistentQueuePath)
   }
 
-  def createProducer(streamName: String) = {
+  def createTStreamProducer(stream: SjStream) = {
 
     //        val stream: BasicStream[Array[Byte]] =
     //          BasicStreamService.loadStream(streamName, metadataStorageInstForProducer, aerospikeInstForProducer, coordinator)
 
     val basicStream: BasicStream[Array[Byte]] = new BasicStream[Array[Byte]](
-      name = streamName,
+      name = stream.name,
       partitions = 3,
       metadataStorage = metadataStorage,
       dataStorage = dataStorage,
@@ -225,20 +314,19 @@ class TaskManager() {
 
     val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until 3).toList)
 
-    val stream = ConnectionRepository.getStreamService.get(streamName)
-
-    val timeUuidGenerator = stream.generator.generatorType match {
-      case "local" => new LocalTimeUUIDGenerator
-      case _type =>
-        val service = stream.generator.service.asInstanceOf[ZKService]
-        val zkServers = service.provider.hosts
-        val prefix = service.namespace + "/" + {
-          if (_type == "global") _type else streamName
-        }
-
-        new GlobalTimeUUIDGenerator(zkServers, prefix, retryInterval, retryCount)
-
-    }
+    val timeUuidGenerator = new LocalTimeUUIDGenerator
+//      stream.generator.generatorType match {
+//      case "local" => new LocalTimeUUIDGenerator
+//      case _type =>
+//        val service = stream.generator.service.asInstanceOf[ZKService]
+//        val zkServers = service.provider.hosts
+//        val prefix = service.namespace + "/" + {
+//          if (_type == "global") _type else stream.name
+//        }
+//
+//        new NetworkTimeUUIDGenerator(zkServers, prefix, retryInterval, retryCount)
+//
+//    }
 
     val options = new BasicProducerOptions[Array[Byte], Array[Byte]](
       transactionTTL = 6,
@@ -249,7 +337,7 @@ class TaskManager() {
       timeUuidGenerator,
       converter)
 
-    new BasicProducer[Array[Byte], Array[Byte]]("producer for " + streamName, basicStream, options)
+    new BasicProducer[Array[Byte], Array[Byte]]("producer for " + stream.name, basicStream, options)
   }
 
   //todo only for testing. Delete
@@ -260,7 +348,7 @@ class TaskManager() {
     //      BasicStreamService.loadStream(streamName, metadataStorageInstForProducer, aerospikeInstForProducer, coordinator)
 
     val basicStream = new BasicStream[Array[Byte]](
-      name = streamName,
+      name = "consumer for state " + streamName,
       partitions = 1,
       metadataStorage = metadataStorage,
       dataStorage = dataStorage,
@@ -284,7 +372,7 @@ class TaskManager() {
       timeUuidGenerator,
       useLastOffset = true)
 
-    new BasicConsumer[Array[Byte], Array[Byte]]("consumer for " + streamName, basicStream, options)
+    new BasicConsumer[Array[Byte], Array[Byte]](basicStream.name, basicStream, options)
   }
 
   def createStateProducer(streamName: String) = {
@@ -293,7 +381,7 @@ class TaskManager() {
     //          BasicStreamService.loadStream(streamName, metadataStorageInstForProducer, aerospikeInstForProducer, coordinator)
 
     val basicStream: BasicStream[Array[Byte]] = new BasicStream[Array[Byte]](
-      name = streamName,
+      name = "producer for state  " + streamName,
       partitions = 1,
       metadataStorage = metadataStorage,
       dataStorage = dataStorage,
@@ -304,7 +392,7 @@ class TaskManager() {
     val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 to 0).toList)
 
 
-    val timeUuidGenerator =  new LocalTimeUUIDGenerator
+    val timeUuidGenerator = new LocalTimeUUIDGenerator
 
 
     val options = new BasicProducerOptions[Array[Byte], Array[Byte]](
@@ -316,6 +404,6 @@ class TaskManager() {
       timeUuidGenerator,
       converter)
 
-    new BasicProducer[Array[Byte], Array[Byte]]("producer for " + streamName, basicStream, options)
+    new BasicProducer[Array[Byte], Array[Byte]](basicStream.name, basicStream, options)
   }
 }

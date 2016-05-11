@@ -14,7 +14,7 @@ import com.datastax.driver.core.utils.UUIDs
  * @param retryCount Count of attempt to reconnect to generator
  */
 
-class GlobalTimeUUIDGenerator(zkServers: Array[String],
+class NetworkTimeUUIDGenerator(zkServers: Array[String],
                               prefix: String,
                               retryInterval: Long,
                               retryCount: Int) extends IUUIDGenerator {

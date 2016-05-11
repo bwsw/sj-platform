@@ -3,6 +3,7 @@ package com.bwsw.sj.common.module
 import java.util.UUID
 
 import com.bwsw.common.JsonSerializer
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.module.entities.TStreamEnvelope
 import com.bwsw.tstreams.agents.consumer.subscriber.{BasicSubscriberCallback, BasicSubscribingConsumer}
 
@@ -28,13 +29,14 @@ class QueueConsumerCallback[DATATYPE, USERTYPE](blockingQueue: PersistentBlockin
 
   override def onEvent(subscriber: BasicSubscribingConsumer[DATATYPE, USERTYPE], partition: Int, transactionUuid: UUID): Unit = {
     val transaction = subscriber.getTransactionById(partition, transactionUuid).get
+    val stream = ConnectionRepository.getStreamService.get(subscriber.stream.getName)
     blockingQueue.put(serializer.serialize(
-      TStreamEnvelope(subscriber.stream.getName,
+      new TStreamEnvelope(stream.name,
         partition,
         transactionUuid,
-        "callback_consumer",
-        transaction.getAll().asInstanceOf[List[Array[Byte]]]
+        subscriber.name,
+        transaction.getAll().asInstanceOf[List[Array[Byte]]],
+        stream.tags
       )))
-    subscriber.setLocalOffset(partition, transactionUuid)
   }
 }
