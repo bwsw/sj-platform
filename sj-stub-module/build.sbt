@@ -28,3 +28,5 @@ assemblyMergeStrategy in assembly := {
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
 }
+
+assemblyJarName in assembly := "sj-stub-module-test.jar"

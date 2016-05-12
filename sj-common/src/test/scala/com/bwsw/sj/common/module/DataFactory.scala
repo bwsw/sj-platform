@@ -1,19 +1,27 @@
 package com.bwsw.sj.common.module
 
-import java.io.{InputStreamReader, BufferedReader, File}
+import java.io.{BufferedReader, File, InputStreamReader}
 import java.net.InetSocketAddress
 import java.util.jar.JarFile
 
 import com.aerospike.client.Host
-import com.bwsw.common.JsonSerializer
+import com.bwsw.common.{ObjectSerializer, JsonSerializer}
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.utils.CassandraHelper._
+import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
+import com.bwsw.tstreams.agents.consumer.{BasicConsumerOptions, BasicConsumer}
+import com.bwsw.tstreams.agents.producer.InsertionType.BatchInsert
+import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions, ProducerPolicies}
+import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.Coordinator
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStorageOptions}
+import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
+import com.bwsw.tstreams.policy.RoundRobinPolicy
 import com.bwsw.tstreams.services.BasicStreamService
+import com.bwsw.tstreams.streams.BasicStream
 import com.datastax.driver.core.Cluster
 import org.redisson.{Config, Redisson}
 
@@ -24,8 +32,13 @@ object DataFactory {
   private val redisHosts = System.getenv("REDIS_HOSTS").split(",")
   private val testNamespace = "test"
   private val serializer = new JsonSerializer()
+  private val objectSerializer = new ObjectSerializer()
   private val cluster = Cluster.builder().addContactPoint(cassandraHost).build()
   private val session = cluster.connect()
+
+  private val converter = new IConverter[Array[Byte], Array[Byte]] {
+    override def convert(obj: Array[Byte]): Array[Byte] = obj
+  }
 
   private val hosts = aerospikeHosts.map(x => {
     val hostPort = x.split(":")
@@ -248,11 +261,77 @@ object DataFactory {
     }
 
     val specification = serializer.deserialize[Map[String, Any]](builder.toString())
-  
+
     storage.put(file, file.getName, specification, "module")
   }
 
   def deleteModule(storage: FileStorage, filename: String) = {
     storage.delete(filename)
+  }
+
+  def createData(countTxns: Int, countElements: Int, streamService: GenericMongoService[SjStream]) = {
+    val producer = createProducer(streamService.get("test_tstream1"))
+    val s = System.nanoTime
+    (0 until countTxns) foreach { (x: Int) =>
+      val txn = producer.newTransaction(ProducerPolicies.errorIfOpen)
+      (0 until countElements) foreach { (y: Int) =>
+        val number = (x + y).toString
+        txn.send(objectSerializer.serialize(number))
+      }
+      txn.checkpoint()
+    }
+
+    println(s"producer time: ${(System.nanoTime - s) / 1000000}")
+  }
+
+  def createInputConsumer(streamService: GenericMongoService[SjStream]) = {
+    createConsumer("test_tstream1", streamService)
+  }
+
+  def createOutputConsumer(streamService: GenericMongoService[SjStream]) = {
+    createConsumer("test_tstream2", streamService)
+  }
+
+  private def createProducer(stream: SjStream) = {
+    val basicStream: BasicStream[Array[Byte]] =
+      BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage, lockService)
+
+    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.partitions).toList)
+
+    val timeUuidGenerator = new LocalTimeUUIDGenerator
+
+    val options = new BasicProducerOptions[Array[Byte], Array[Byte]](
+      transactionTTL = 6,
+      transactionKeepAliveInterval = 2,
+      producerKeepAliveInterval = 1,
+      roundRobinPolicy,
+      BatchInsert(5),
+      timeUuidGenerator,
+      converter)
+
+    new BasicProducer[Array[Byte], Array[Byte]]("producer for " + basicStream.name, basicStream, options)
+  }
+
+  private def createConsumer(streamName: String, streamService: GenericMongoService[SjStream]): BasicConsumer[Array[Byte], Array[Byte]] = {
+    val stream = streamService.get(streamName)
+
+    val basicStream: BasicStream[Array[Byte]] =
+      BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage, lockService)
+
+    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.partitions).toList)
+
+    val timeUuidGenerator = new LocalTimeUUIDGenerator
+
+    val options = new BasicConsumerOptions[Array[Byte], Array[Byte]](
+      transactionsPreload = 10,
+      dataPreload = 7,
+      consumerKeepAliveInterval = 5,
+      converter,
+      roundRobinPolicy,
+      Oldest,
+      timeUuidGenerator,
+      useLastOffset = true)
+
+    new BasicConsumer[Array[Byte], Array[Byte]](basicStream.name, basicStream, options)
   }
 }
