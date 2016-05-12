@@ -1,14 +1,26 @@
 package com.bwsw.sj.crud.rest
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type
+import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo, JsonProperty}
 
 /**
   * Stream data case class
   */
-case class SjStreamData(name: String,
-                        description: String,
-                        partitions: Int,
-                        service: String,
-                        @JsonProperty("stream-type") streamType: String,
-                        tags: String,
-                        generator: GeneratorData)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "stream-type")
+@JsonSubTypes(Array(new Type(value = classOf[CassStream], name = "cassandra"),
+  new Type(value = classOf[TestStream], name = "test")
+))
+class SjStreamTest {
+  var name: String = null
+  var description: String = null
+  @JsonProperty("stream-type") var streamType: String = null
+}
+
+class CassStream extends  SjStreamTest {
+  var keyspace: String = null
+}
+
+class TestStream extends SjStreamTest {
+  var ttt: Int = 0
+}
+
