@@ -4,6 +4,7 @@ import java.io.File
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.module.DataFactory._
+import com.bwsw.sj.common.module.regular.RegularTaskRunner
 
 object SjModuleTest extends App {
 
@@ -23,14 +24,19 @@ object SjModuleTest extends App {
   createTStreams()
   createInstance(instanceService)
 
-  deleteStreams(streamService)
-  deleteServices(serviceManager)
-  deleteProviders(providerService)
-  deleteInstance(instanceService)
-  deleteTStreams()
-  deleteModule(fileStorage, module.getName)
-  close()
+  try {
+    RegularTaskRunner.main(Array())
+  } finally {
+    deleteStreams(streamService)
+    deleteServices(serviceManager)
+    deleteProviders(providerService)
+    deleteInstance(instanceService)
+    deleteTStreams()
+    deleteModule(fileStorage, module.getName)
 
-  ConnectionRepository.close()
-  println("DONE")
+    close()
+    ConnectionRepository.close()
+
+    println("DONE")
+  }
 }

@@ -42,7 +42,8 @@ object DataFactory {
 
   private val config = new Config()
   config.useSingleServer().setAddress(redisHosts(0))
-  private lazy val lockService = new Coordinator(testNamespace, Redisson.create(config))
+  private lazy val redissonClient = Redisson.create(config)
+  private lazy val lockService = new Coordinator(testNamespace, redissonClient)
 
   def cassandraSetup() = {
     createKeyspace(session, cassandraTestKeyspace)
@@ -52,6 +53,7 @@ object DataFactory {
   def close() = {
     aerospikeStorageFactory.closeFactory()
     metadataStorageFactory.closeFactory()
+    redissonClient.shutdown()
     session.execute(s"DROP KEYSPACE $cassandraTestKeyspace")
     session.close()
     cluster.close()
@@ -205,16 +207,15 @@ object DataFactory {
     instance.stateManagement = "none"
     instance.stateFullCheckpoint = 0
     instance.parallelism = 0
-    instance.options = ""
+    instance.options = """{"hey": "hey"}"""
     instance.startFrom = "oldest"
     instance.perTaskCores = 0
     instance.perTaskRam = 0
-    instance.options = null
 
     val executionPlan = new ExecutionPlan()
     val task = new Task()
     task.inputs = Map(("test_tstream1", Array(0, 0))).asJava
-    executionPlan.tasks = Map(("test instance-for-task0", task)).asJava
+    executionPlan.tasks = Map(("test instance-task0", task)).asJava
     instance.executionPlan = executionPlan
 
     instance.idle = 10

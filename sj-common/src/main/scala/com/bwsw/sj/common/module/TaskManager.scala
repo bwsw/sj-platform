@@ -338,7 +338,7 @@ class TaskManager() {
     val basicStream: BasicStream[Array[Byte]] =
       BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage, coordinator)
 
-    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 to stream.partitions).toList)
+    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.partitions).toList)
 
     val timeUuidGenerator =
       stream.generator.generatorType match {

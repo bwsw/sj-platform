@@ -60,7 +60,6 @@ object RegularTaskRunner {
 
       consumersWithSubscribes.foreach(x => checkpointGroup.add(x._1, x._2))
       consumersWithSubscribes.foreach(_._2.start())
-
     }
 
     if (inputs.exists(x => x._1.streamType == StreamConstants.streamTypes.last)) {
@@ -96,7 +95,6 @@ object RegularTaskRunner {
           }
         }
       }).start()
-
     }
 
     val producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]] =

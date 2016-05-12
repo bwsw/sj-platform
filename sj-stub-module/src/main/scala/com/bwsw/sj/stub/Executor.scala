@@ -7,8 +7,6 @@ import com.bwsw.sj.common.module.regular.RegularStreamingExecutor
 
 class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor(manager) {
 
-  val state = manager.getState
-
   override def init(): Unit = {
     println("new init")
   }
@@ -31,7 +29,7 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
   }
 
   override def onAfterStateSave(isFull: Boolean): Unit = {
-    if (isFull) state.clear()
+    if (isFull) {}
   }
 
   override def onBeforeCheckpoint(): Unit = {
