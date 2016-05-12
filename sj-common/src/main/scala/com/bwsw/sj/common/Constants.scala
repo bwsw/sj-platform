@@ -30,3 +30,18 @@ object GeneratorConstants {
   val generatorTypes = Set("global", "local", "per-stream")
   val generatorTypesWithService = Set("global", "per-stream")
 }
+
+object ServiceConstants {
+  val serviceTypes = Set("CassDB", "ESInd", "KfkQ", "TstrQ", "ZKCoord", "RdsCoord", "ArspkDB")
+  val fieldServiceTypes = Map(
+    ("provider", Set("CassDB", "ESInd", "KfkQ", "ZKCoord", "RdsCoord", "ArspkDB"))
+  )
+  val serviceTypeProviders = Map(
+    "CassDB" -> "cassandra",
+    "ESInd" -> "ES",
+    "KfkQ" -> "kafka",
+    "ZKCoord" -> "zookeeper",
+    "RdsCoord" -> "redis",
+    "ArspkDB" -> "aerospike"
+  )
+}

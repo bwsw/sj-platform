@@ -48,13 +48,8 @@ class StreamValidator {
     }
 
 
-    params.partitions match {
-      case partitions: Int =>
-        if (partitions <= 0) {
-          errors += s"'partitions' must be a positive integer"
-        }
-      case _ =>
-        errors += "Unknown type of 'partitions' parameter. Must be Int"
+    if (params.partitions <= 0) {
+      errors += s"'partitions' must be a positive integer"
     }
 
     Option(initialData.service) match {
@@ -75,9 +70,9 @@ class StreamValidator {
 
     Option(params.streamType) match {
       case Some(t) if !streamTypes.contains(t) =>
-        errors += s"Unknown 'streamType' provided. Must be one of: $streamTypes"
+        errors += s"Unknown 'stream-type' provided. Must be one of: $streamTypes"
       case None =>
-        errors += s"'streamType' is required"
+        errors += s"'stream-type' is required"
       case _ =>
         if (params.streamType == "Tstream") {
           val validator = new GeneratorValidator

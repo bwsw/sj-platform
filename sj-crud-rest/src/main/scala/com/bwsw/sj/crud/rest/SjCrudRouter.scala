@@ -3,12 +3,12 @@ package com.bwsw.sj.crud.rest
 import java.io.FileNotFoundException
 
 import akka.http.scaladsl.model.MediaTypes._
-import akka.http.scaladsl.model.{EntityStreamSizeException, HttpEntity, HttpResponse}
 import akka.http.scaladsl.model.StatusCodes._
-import akka.http.scaladsl.server.{ExceptionHandler, Directives}
-import com.bwsw.common.exceptions.{InstanceException, BadRecordWithKey, BadRecord, KeyAlreadyExists}
+import akka.http.scaladsl.model.{EntityStreamSizeException, HttpEntity, HttpResponse}
+import akka.http.scaladsl.server.{Directives, ExceptionHandler}
+import com.bwsw.common.exceptions.{BadRecord, BadRecordWithKey, InstanceException, KeyAlreadyExists}
+import com.bwsw.sj.crud.rest.api.{SjCustomApi, SjModulesApi, SjServiceApi, SjStreamsApi}
 import com.bwsw.sj.crud.rest.entities.Response
-import com.bwsw.sj.crud.rest.api.{SjCustomApi, SjModulesApi, SjStreamsApi}
 import org.everit.json.schema.ValidationException
 
 /**
@@ -20,7 +20,8 @@ import org.everit.json.schema.ValidationException
 trait SjCrudRouter extends Directives
   with SjModulesApi
   with SjCustomApi
-  with SjStreamsApi {
+  with SjStreamsApi
+  with SjServiceApi {
 
   val exceptionHandler = ExceptionHandler {
     case BadRecord(msg) =>
@@ -68,7 +69,8 @@ trait SjCrudRouter extends Directives
       pathPrefix("v1") {
         modulesApi ~
         customApi ~
-        streamsApi
+        streamsApi ~
+        serviceApi
       }
     }
   }
