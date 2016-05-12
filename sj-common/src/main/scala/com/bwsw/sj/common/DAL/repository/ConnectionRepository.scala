@@ -64,11 +64,15 @@ object ConnectionRepository {
     providerService
   }
 
+  def close() = {
+    mongoConnection.close()
+    mongoClient.close()
+  }
+
   private[DAL] def getGenericDAO[T: ClassTag] = {
     import scala.reflect.classTag
     val clazz: Class[T] = classTag[T].runtimeClass.asInstanceOf[Class[T]]
     new BasicDAO[T, String](clazz, datastore)
   }
-
 }
 

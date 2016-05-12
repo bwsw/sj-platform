@@ -7,7 +7,7 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.server.RequestContext
 import akka.stream.Materializer
-import com.bwsw.common.file.utils.FilesStorage
+import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.service.GenericMongoService
@@ -31,7 +31,7 @@ trait SjCrudValidator {
   val conf: Config
   val serializer: Serializer
   val fileMetadataDAO: GenericMongoService[FileMetadata]
-  val storage: FilesStorage
+  val storage: FileStorage
   val instanceDAO: GenericMongoService[RegularInstance]
   val serviceDAO: GenericMongoService[Service]
   val streamDAO: GenericMongoService[SjStream]

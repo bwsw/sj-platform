@@ -1,7 +1,7 @@
 package com.bwsw.sj.common.module.environment
 
 import com.bwsw.sj.common.module.state.StateStorage
-import com.bwsw.sj.common.module.utils.SjTimer
+import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.tstreams.agents.producer.BasicProducer
 
 import scala.collection.mutable

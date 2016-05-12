@@ -1,4 +1,4 @@
-package com.bwsw.sj.common.module.utils
+package com.bwsw.sj.common.utils
 
 import java.util.{Timer, TimerTask}
 

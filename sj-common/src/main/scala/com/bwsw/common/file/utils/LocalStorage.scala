@@ -7,7 +7,7 @@ import org.apache.commons.io.FileUtils
 
 import scala.reflect.io.{Directory, Path}
 
-class LocalStorage(pathToLocalStorage: String) extends FilesStorage {
+class LocalStorage(pathToLocalStorage: String) extends FileStorage {
   override def put(file: File, fileName: String): Unit = {
     val storageFile = new File(pathToLocalStorage + fileName)
     if (!storageFile.exists) {

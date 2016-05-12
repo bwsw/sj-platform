@@ -6,11 +6,11 @@ import java.util.Date
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.RegularInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.sj.common.{ModuleConstants, StreamConstants}
 import com.bwsw.sj.common.module.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.module.environment.{ModuleEnvironmentManager, StatefulModuleEnvironmentManager}
 import com.bwsw.sj.common.module.state.{RAMStateService, StateStorage}
-import com.bwsw.sj.common.module.utils.SjTimer
 import com.bwsw.sj.common.module.{PersistentBlockingQueue, TaskManager}
 import com.bwsw.tstreams.agents.consumer.Offsets.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer

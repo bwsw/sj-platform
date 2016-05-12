@@ -1,5 +1,5 @@
 {
-  "name": "com.bwsw.sj.stub",
+  "name": "test stub",
   "description": "Stub module by BW",
   "version": "0.1",
   "author": "Ksenia Mikhaleva",
@@ -22,7 +22,7 @@
       "stream.t-stream"
     ]
   },
-  "module-type": "windowed-streaming",
+  "module-type": "regular-streaming",
   "engine": "streaming",
   "options": {
     "opt": 1
