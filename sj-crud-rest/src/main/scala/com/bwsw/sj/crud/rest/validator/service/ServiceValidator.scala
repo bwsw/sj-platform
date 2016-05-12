@@ -264,7 +264,7 @@ class ServiceValidator {
       val providerErrors = new ArrayBuffer[String]()
       var providerObj: Provider = null
       serviceType match {
-        case _ if fieldServiceTypes("provider").contains(serviceType) =>
+        case _ if serviceTypesWithProvider.contains(serviceType) =>
           Option(provider) match {
             case None =>
               providerErrors += s"'provider' is required for '$serviceType' service"

@@ -33,9 +33,7 @@ object GeneratorConstants {
 
 object ServiceConstants {
   val serviceTypes = Set("CassDB", "ESInd", "KfkQ", "TstrQ", "ZKCoord", "RdsCoord", "ArspkDB")
-  val fieldServiceTypes = Map(
-    ("provider", Set("CassDB", "ESInd", "KfkQ", "ZKCoord", "RdsCoord", "ArspkDB"))
-  )
+  val serviceTypesWithProvider = Set("CassDB", "ESInd", "KfkQ", "ZKCoord", "RdsCoord", "ArspkDB")
   val serviceTypeProviders = Map(
     "CassDB" -> "cassandra",
     "ESInd" -> "ES",
