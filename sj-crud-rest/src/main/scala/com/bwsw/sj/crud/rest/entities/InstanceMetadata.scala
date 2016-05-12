@@ -26,5 +26,6 @@ class InstanceMetadata {
   var attributes: Map[String, String] = null
   var idle: Long = 0
   @JsonProperty("execution-plan") var executionPlan: Map[String, Any] = null
+  var environments: Map[String, String] = null
 }
 
