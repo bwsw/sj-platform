@@ -4,14 +4,14 @@ import java.net.URLClassLoader
 import java.util.Date
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.common.DAL.model.RegularInstance
+import com.bwsw.sj.common.DAL.model.{RegularInstance, ZKService}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.SjTimer
-import com.bwsw.sj.common.{ModuleConstants, StreamConstants}
 import com.bwsw.sj.common.module.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.module.environment.{ModuleEnvironmentManager, StatefulModuleEnvironmentManager}
 import com.bwsw.sj.common.module.state.{RAMStateService, StateStorage}
 import com.bwsw.sj.common.module.{PersistentBlockingQueue, TaskManager}
+import com.bwsw.sj.common.{ModuleConstants, StreamConstants}
 import com.bwsw.tstreams.agents.consumer.Offsets.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.group.CheckpointGroup
@@ -66,7 +66,7 @@ object RegularTaskRunner {
       val kafkaInputs = inputs.filter(x => x._1.streamType == StreamConstants.streamTypes.last)
       val kafkaConsumer = manager.createKafkaConsumer(kafkaInputs
         .map(x => (x._1.name, x._2.toList)).toList,
-        kafkaInputs.flatMap(_._1.service.provider.hosts).toList,
+        kafkaInputs.flatMap(_._1.service.asInstanceOf[ZKService].provider.hosts).toList,
         regularInstanceMetadata.startFrom match {
           case "oldest" => "earliest"
           case _ => "latest"
