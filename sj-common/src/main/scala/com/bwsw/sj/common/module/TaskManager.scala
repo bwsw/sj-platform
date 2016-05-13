@@ -236,7 +236,7 @@ class TaskManager() {
       stream = BasicStreamService.createStream(
         taskName,
         1,
-        Int.MaxValue,
+        1000 * 60,
         "stream to store kafka offsets of input streams",
         metadataStorage,
         dataStorage,
