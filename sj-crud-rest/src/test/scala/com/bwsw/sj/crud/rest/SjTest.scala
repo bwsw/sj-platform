@@ -48,14 +48,21 @@ object SjTest {
   serializer.setIgnoreUnknown(true)
 
 
+  val cassStreamJson = "{\n\t\"name\" : \"cass\",\n\t\"description\" : \"dasgf\",\n\t\"stream-type\" : \"cassandra\",\n\t\"keyspace\" : \"testing\"\n}"
+  val testJson = "{\n\t\"name\" : \"tst\",\n\t\"description\" : \"fdsgff\",\n\t\"stream-type\" : \"test\",\n\t\"ttt\" : 26\n}"
+
   def main(args: Array[String]) = {
     //createData()
     //prepareCassandra()
-    val dao = ConnectionRepository.getStreamService
+    /*val dao = ConnectionRepository.getStreamService
     val streams = dao.getAll
     val stream = streams.filter(s => s.name.equals("s1")).head
     println(stream.service.name)
-    println(ConnectionRepository.getServiceManager.get(stream.service.name).asInstanceOf[TStreamService].dataProvider.name)
+    println(ConnectionRepository.getServiceManager.get(stream.service.name).asInstanceOf[TStreamService].dataProvider.name)*/
+    val cass = serializer.deserialize[SjStreamTest](cassStreamJson)
+    println(cass.getClass.toString)
+    val test = serializer.deserialize[SjStreamTest](testJson)
+    println(test.getClass.toString)
     println("Ok")
   }
 

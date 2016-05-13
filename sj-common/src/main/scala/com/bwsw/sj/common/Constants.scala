@@ -43,3 +43,9 @@ object ServiceConstants {
     "ArspkDB" -> "aerospike"
   )
 }
+
+object JarConstants {
+  val transactionGeneratorJar = "sj-transaction-generator-assembly-1.0.jar"
+  val frameworkJar = "ScalaMesos-assembly-1.0.jar"
+  val taskRunnerJar = ""
+}

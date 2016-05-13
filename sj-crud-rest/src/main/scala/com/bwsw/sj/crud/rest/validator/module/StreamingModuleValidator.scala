@@ -28,8 +28,9 @@ import scala.collection.mutable.ArrayBuffer
   * @author Kseniya Tomskikh
   */
 abstract class StreamingModuleValidator {
-
   import com.bwsw.sj.common.ModuleConstants._
+  import com.bwsw.sj.crud.rest.utils.ConvertUtil._
+
   var serviceDAO: GenericMongoService[Service] = null
   var instanceDAO: GenericMongoService[RegularInstance] = null
   val serializer: Serializer = new JsonSerializer
@@ -84,6 +85,10 @@ abstract class StreamingModuleValidator {
 
     if (parameters.jvmOptions.isEmpty) {
       errors += "Jvm-options attribute is empty."
+    }
+
+    if (parameters.coordinationService.isEmpty) {
+      errors += "Coordination service attribute is empty."
     }
 
     val startFrom = parameters.startFrom
@@ -298,33 +303,6 @@ abstract class StreamingModuleValidator {
     */
   def getStreamMode(name: String) = {
     name.substring(name.lastIndexOf("/") + 1)
-  }
-
-  /**
-    * Convert api instance to db-model instance
-    *
-    * @param modelInstance - dst object of model instance
-    * @param apiInstance - api object of instance
-    * @return - object of model instance
-    */
-  def convertToModelInstance(modelInstance: RegularInstance, apiInstance: InstanceMetadata) = {
-    modelInstance.name = apiInstance.name
-    modelInstance.description = apiInstance.description
-    modelInstance.inputs = apiInstance.inputs
-    modelInstance.outputs = apiInstance.outputs
-    modelInstance.checkpointMode = apiInstance.checkpointMode
-    modelInstance.checkpointInterval = apiInstance.checkpointInterval
-    modelInstance.stateFullCheckpoint = apiInstance.stateFullCheckpoint
-    modelInstance.stateManagement = apiInstance.stateManagement
-    modelInstance.parallelism = apiInstance.parallelism.asInstanceOf[Int]
-    modelInstance.options = serializer.serialize(apiInstance.options)
-    modelInstance.startFrom = apiInstance.startFrom
-    modelInstance.perTaskCores = apiInstance.perTaskCores
-    modelInstance.perTaskRam = apiInstance.perTaskRam
-    modelInstance.jvmOptions = mapAsJavaMap(apiInstance.jvmOptions)
-    modelInstance.attributes = mapAsJavaMap(apiInstance.attributes)
-    modelInstance.idle = apiInstance.idle
-    modelInstance
   }
 
 }
