@@ -50,7 +50,6 @@ object StreamJugglerBuild extends Build {
 
   val TYPESAFE_CONFIG_VERSION = "1.3.0"
   val SCALATEST_VERSION       = "2.2.4"
-  val SLF4J_VERSION           = "1.7.13"
   val SPARK_VERSION = "1.6.1"
 
 
@@ -70,7 +69,6 @@ object StreamJugglerBuild extends Build {
 
     libraryDependencies ++= Seq(
       "com.typesafe"     % "config"          % TYPESAFE_CONFIG_VERSION,
-      "org.slf4j"        % "slf4j-log4j12"   % SLF4J_VERSION,
       "org.scalatest"   %% "scalatest"       % SCALATEST_VERSION % "test"
     ),
 

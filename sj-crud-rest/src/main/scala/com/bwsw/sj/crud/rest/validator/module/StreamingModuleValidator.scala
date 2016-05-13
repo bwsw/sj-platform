@@ -87,6 +87,10 @@ abstract class StreamingModuleValidator {
       errors += "Jvm-options attribute is empty."
     }
 
+    if (parameters.coordinationService.isEmpty) {
+      errors += "Coordination service attribute is empty."
+    }
+
     val startFrom = parameters.startFrom
     if (!startFromModes.contains(startFrom)) {
       try {

@@ -22,8 +22,7 @@ import akka.stream.scaladsl._
 import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model.StatusCodes._
 
-import scala.collection.mutable
-import scala.concurrent.{Future, Await}
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
@@ -35,7 +34,6 @@ import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
   * @author Kseniya Tomskikh
   */
 trait SjModulesApi extends Directives with SjCrudValidator {
-  import scala.collection.JavaConversions._
   import scala.collection.JavaConverters._
   import com.bwsw.sj.common.ModuleConstants._
   import com.bwsw.sj.common.JarConstants._
@@ -162,7 +160,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                                 case Right(resp) =>
                                   instance.status = started
                                   instanceDAO.save(instance)
-                                  serializer.serialize(Response(200, null, "Instance is started"))
+                                  HttpEntity(`application/json`, serializer.serialize(Response(200, null, "Instance is started")))
                                 case Left(errorMsg) => BadRequest -> errorMsg
                               }
                             }
@@ -177,7 +175,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                                 case Right(resp) =>
                                   instance.status = stopped
                                   instanceDAO.save(instance)
-                                  serializer.serialize(Response(200, null, "Instance is stopped"))
+                                  HttpEntity(`application/json`, serializer.serialize(Response(200, null, "Instance is stopped")))
                                 case Left(errorMsg) => BadRequest -> errorMsg
                               }
                             }
@@ -187,11 +185,15 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                       path("destroy") {
                         pathEndOrSingleSlash {
                           get {
-                            //todo
-                            complete(HttpEntity(
-                              `application/json`,
-                              serializer.serialize(Response(200, null, "Ok"))
-                            ))
+                            complete {
+                              destroyInstance(instance).map[ToResponseMarshallable] {
+                                case Right(resp) =>
+                                  instance.status = ready
+                                  instanceDAO.save(instance)
+                                  HttpEntity(`application/json`, serializer.serialize(Response(200, null, "Instance is destroying")))
+                                case Left(errorMsg) => BadRequest -> errorMsg
+                              }
+                            }
                           }
                         }
                       }
@@ -365,31 +367,48 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     */
   def startInstance(instance: RegularInstance) = {
     val allStreams = instance.inputs.map(_.replaceAll("/split|/full", "")).union(instance.outputs)
-    allStreams.map(name => streamDAO.get(name))
+      .map(name => streamDAO.get(name))
       .filter(stream => !stream.generator.generatorType.equals("local"))
-      .map(startGenerator)
+    val generatorsFuture = Future sequence startGenerators(allStreams.toSet)
 
-    val applicationEnvs = mutable.Map(instance.environments.asScala.toList: _*)
-    applicationEnvs.add("MONGO_HOST" -> ConnectionConstants.host)
-    applicationEnvs.add("MONGO_PORT" -> ConnectionConstants.port.toString)
-    applicationEnvs.add("INSTANCE_ID" -> instance.name)
+    generatorsFuture.flatMap { generators =>
+      val restUrl = Uri(s"http://$host:$port/v1/custom/$frameworkJar")
+      val taskResponse = getTaskInfo(instance.name)
+      taskResponse.flatMap {
+        case Right(taskInfo) =>
+          if (taskInfo.instances < 1) {
+            scaleApplication(instance.name, 1)
+          } else {
+            logger.info(s"Instance ${instance.name} already started")
+            Future.successful(Left(s"Instance ${instance.name} already started"))
+          }
+        case Left(msg) =>
+          getMesosInfo.flatMap {
+            case Left(entity) =>
+              var applicationEnvs = Map(
+                "MONGO_HOST" -> ConnectionConstants.host,
+                "MONGO_PORT" -> s"${ConnectionConstants.port}",
+                "INSTANCE_ID" -> instance.name,
+                "MESOS_MASTER" -> entity)
+              if (instance.environments != null) {
+                applicationEnvs = applicationEnvs ++ Map(instance.environments.asScala.toList: _*)
+              }
+              val request = new MarathonRequest(instance.name,
+                "java -jar " + frameworkJar + " $PORT",
+                1,
+                Map(applicationEnvs.toList: _*),
+                List(restUrl.toString()))
 
-    getMesosInfo.flatMap {
-      case Left(entity) =>
-        applicationEnvs.add("MASTER_ZK_PATH" -> entity)
-        val request = new MarathonRequest(instance.name,
-          "java -jar " + frameworkJar + " $PORT",
-          1,
-          Map(applicationEnvs.toList: _*),
-          List(s"http://$host:$port/v1/custom/$frameworkJar"))
-
-        startApplication(request)
-      case _ => Future.failed(new IOException(s"Cannot starting application"))
+              startApplication(request)
+            case _ => Future.failed(new IOException(s"Cannot starting application"))
+          }
+      }
     }
   }
 
   /**
     * Getting mesos master on Zookeeper from marathon
+    *
     * @return - Mesos master path
     */
   def getMesosInfo = {
@@ -400,9 +419,23 @@ trait SjModulesApi extends Directives with SjCrudValidator {
           val mesosInfo = serializer.deserialize[Map[String, Any]](getEntityAsString(response.entity))
           val mesosMaster = mesosInfo.get("marathon_config").get.asInstanceOf[Map[String, Any]].get("master").get.asInstanceOf[String]
           Future.successful(Left(mesosMaster))
-        case NotFound => Future.successful(Right(NotFound))
-        case _ => Future.failed(new IOException(s"Cannot getting info of mesos"))
+        case NotFound =>
+          Future.successful(Right(NotFound))
+        case _ =>
+          Future.failed(new IOException(s"Cannot getting info of mesos"))
       }
+    }
+  }
+
+  /**
+    * Starting generators for streams of instance
+    * @param streams - Streams
+    * @return - Future of started generators
+    */
+  def startGenerators(streams: Set[SjStream]) = {
+    logger.debug("Starting generators")
+    streams.map { stream =>
+      startGenerator(stream)
     }
   }
 
@@ -434,14 +467,15 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       List(restUrl.toString()))
 
     val taskResponse = getTaskInfo(marathonRequest.id)
-    taskResponse.map {
+    taskResponse.flatMap {
       case Right(taskInfo) =>
         if (taskInfo.instances < marathonRequest.instances) {
           scaleApplication(marathonRequest.id, marathonRequest.instances)
         } else {
-          Future.successful(Left(s"Generator already started"))
+          logger.debug(s"Generator ${marathonRequest.id} already started")
+          Future.successful(Left(s"Generator ${marathonRequest.id} already started"))
         }
-      case Left => startApplication(marathonRequest)
+      case Left(msg) => startApplication(marathonRequest)
     }
   }
 
@@ -457,8 +491,12 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       entity = HttpEntity(ContentTypes.`application/json`, serializer.serialize(request))
     )).flatMap { response =>
       response.status match {
-        case Created => Future.successful(Right(response))
-        case _ => Future.successful(Left(s"Cannot starting application by id: ${request.id}"))
+        case Created =>
+          logger.debug(s"Application ${request.id} is started")
+          Future.successful(Right(response))
+        case _ =>
+          logger.debug(s"Cannot starting application by id: ${request.id}")
+          Future.successful(Left(s"Cannot starting application by id: ${request.id}"))
       }
     }
   }
@@ -475,7 +513,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     Http().singleRequest(HttpRequest(method = GET, uri = marathonUri)).flatMap { response =>
       response.status match {
         case OK => Future.successful(Right(serializer.deserialize[MarathonRequest](getEntityAsString(response.entity))))
-        case NotFound => Future.successful(Left(NotFound))
+        case NotFound => Future.successful(Left(s"Application by id: $taskId i snot started"))
         case _ => Future.failed(new IOException(s"Cannot getting info for task by id: $taskId"))
       }
     }
@@ -494,8 +532,12 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       entity = HttpEntity(ContentTypes.`application/json`, serializer.serialize(Map("instances" -> count)))
     )).flatMap { response =>
       response.status match {
-        case OK => Future.successful(Right(s"Application is scaled"))
-        case BadRequest => Future.successful(Left(s"Application cannot scaling"))
+        case OK =>
+          logger.debug(s"Application $taskId is scaled")
+          Future.successful(Right(s"Application is scaled"))
+        case BadRequest =>
+          logger.debug(s"Application $taskId cannot scaling")
+          Future.successful(Left(s"Application cannot scaling"))
         case _ => Future.failed(new IOException(s"Cannot scaling to application by id: $taskId"))
       }
     }
@@ -508,21 +550,31 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @return - Message about successful scaling
     */
   private def descaleApplication(taskId: String) = {
+    logger.debug(s"Descaling application $taskId")
     scaleApplication(taskId, 0)
   }
 
 
   /**
     * Stopping instance application on mesos
+    *
     * @param instance - Instance for stopping
     * @return - Message about successful stopping
     */
   def stopInstance(instance: RegularInstance) = {
+    logger.debug("Stopping generators")
     stopGenerators(instance)
     descaleApplication(instance.name)
   }
 
-  private def stopGenerators(instance: RegularInstance) = {
+  /**
+    * Stopping all running generators for streams of instance,
+    * if generators is not using any streams of started instances
+    *
+    * @param instance - Instance for stopping
+    * @return - Response from marathon
+    */
+  def stopGenerators(instance: RegularInstance) = {
     val allStreams = instance.inputs.map(_.replaceAll("/split|/full", "")).union(instance.outputs).map(streamDAO.get)
     val startedInstances = instanceDAO.getByParameters(Map("status" -> started))
     allStreams.filter { stream: SjStream =>
@@ -536,7 +588,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       } else {
         taskId = s"${stream.generator.service.name}-global-tg"
       }
-      stopGenerator(taskId.replaceAll("_", "-"))
+      stopApplication(taskId.replaceAll("_", "-"))
     }
   }
 
@@ -546,9 +598,24 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @param taskId - Generator task id on mesos
     * @return
     */
-  private def stopGenerator(taskId: String) = {
+  private def stopApplication(taskId: String) = {
     val marathonUri = Uri(s"$marathonConnect/v2/apps/$taskId")
     Http().singleRequest(HttpRequest(method = DELETE, uri = marathonUri))
+  }
+
+  /**
+    * Destroying application on mesos
+    *
+    * @param instance - Instanse for destroying
+    * @return - Message of destroying instance
+    */
+  def destroyInstance(instance: RegularInstance) = {
+    stopApplication(instance.name).flatMap { response =>
+      response.status match {
+        case OK => Future.successful(Right(s"Application destroying"))
+        case _ => Future.successful(Left(s"Application cannot destroy"))
+      }
+    }
   }
 
 }

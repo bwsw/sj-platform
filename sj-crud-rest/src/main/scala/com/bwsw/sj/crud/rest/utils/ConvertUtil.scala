@@ -5,6 +5,8 @@ import com.bwsw.sj.common.DAL.model.{WindowedInstance, Specification, RegularIns
 import com.bwsw.sj.crud.rest.entities.{WindowedInstanceMetadata, ModuleSpecification, InstanceMetadata}
 
 /**
+  * Methods for converting protocol entity to model entity
+  * and model entity to protocol entity
   * Created: 12/05/2016
   *
   * @author Kseniya Tomskikh
@@ -57,10 +59,14 @@ object ConvertUtil {
     apiInstance.perTaskCores = instance.perTaskCores
     apiInstance.perTaskRam = instance.perTaskRam
     apiInstance.jvmOptions = Map(instance.jvmOptions.asScala.toList: _*)
-    apiInstance.attributes = Map(instance.attributes.asScala.toList: _*)
+    if (instance.attributes != null) {
+      apiInstance.attributes = Map(instance.attributes.asScala.toList: _*)
+    }
     apiInstance.idle = instance.idle
     apiInstance.executionPlan = executionPlan
-    apiInstance.environments = Map(instance.environments.asScala.toList: _*)
+    if (instance.environments != null) {
+      apiInstance.environments = Map(instance.environments.asScala.toList: _*)
+    }
     apiInstance
   }
 
@@ -109,9 +115,13 @@ object ConvertUtil {
     modelInstance.perTaskCores = apiInstance.perTaskCores
     modelInstance.perTaskRam = apiInstance.perTaskRam
     modelInstance.jvmOptions = mapAsJavaMap(apiInstance.jvmOptions)
-    modelInstance.attributes = mapAsJavaMap(apiInstance.attributes)
+    if (apiInstance.environments != null) {
+      modelInstance.attributes = mapAsJavaMap(apiInstance.attributes)
+    }
     modelInstance.idle = apiInstance.idle
-    modelInstance.environments = mapAsJavaMap(apiInstance.environments)
+    if (apiInstance.environments != null) {
+      modelInstance.environments = mapAsJavaMap(apiInstance.environments)
+    }
     modelInstance
   }
 
