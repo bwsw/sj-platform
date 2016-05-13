@@ -6,6 +6,7 @@ scalaVersion := "2.11.7"
 
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.first
+  case PathList("scala-xml.properties") => MergeStrategy.first
   case PathList("scala", xs@_*) => MergeStrategy.first
   case PathList("com", "fasterxml", "jackson", xs@_*) => MergeStrategy.first
   case PathList("com", xs@_*) => MergeStrategy.first

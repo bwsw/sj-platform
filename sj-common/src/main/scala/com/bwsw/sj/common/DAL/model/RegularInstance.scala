@@ -2,8 +2,6 @@ package com.bwsw.sj.common.DAL.model
 
 import org.mongodb.morphia.annotations._
 
-import scala.collection.immutable.HashMap
-
 /**
  * Entity for base instance-json
  * Created:  13/04/2016

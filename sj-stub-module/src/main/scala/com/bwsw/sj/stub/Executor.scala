@@ -1,6 +1,6 @@
 package com.bwsw.sj.stub
 
-import com.bwsw.sj.common.module.entities.Envelope
+import com.bwsw.sj.common.module.entities.{TStreamEnvelope, Envelope}
 import com.bwsw.sj.common.module.environment.ModuleEnvironmentManager
 import com.bwsw.sj.common.module.regular.RegularStreamingExecutor
 
@@ -16,10 +16,12 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
   }
 
   override def onMessage(envelope: Envelope): Unit = {
-    //   val output = manager.getRoundRobinOutput("s3")
+    val output = manager.getRoundRobinOutput("test_tstream2")
     //var elementCount = state.get("elementCount").asInstanceOf[Int]
     //    var txnCount = state.get(transaction.txnUUID.toString).asInstanceOf[Int]
     //elementCount += transaction.data.length
+    val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
+    tStreamEnvelope.data.foreach(output.put)
     println("stream type = " + envelope.streamType)
     //state.set("elementCount", elementCount)
   }

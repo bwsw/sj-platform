@@ -2,11 +2,9 @@ package com.bwsw.sj.common.module
 
 import java.io.File
 
-import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.module.DataFactory._
 import com.bwsw.sj.common.module.regular.RegularTaskRunner
-import org.scalatest.{Matchers, FlatSpec}
 
 object SjModuleSetup extends App {
 
@@ -53,6 +51,7 @@ object SjModuleDestroy extends App {
   deleteInstance(instanceService)
   deleteTStreams()
   deleteModule(fileStorage, module.getName)
+  cassandraDestroy()
 
   close()
   ConnectionRepository.close()
@@ -60,67 +59,3 @@ object SjModuleDestroy extends App {
   println("DONE")
 }
 
-object SjModuleTest extends FlatSpec with App with Matchers {
-  val streamService = ConnectionRepository.getStreamService
-  val objectSerializer = new ObjectSerializer()
-
-  "Count of all txns elements that are consumed from output stream" should "equals count of all txns elements that are consumed from input stream" in {
-    val inputConsumer = createInputConsumer(streamService)
-    val outputConsumer = createOutputConsumer(streamService)
-
-    var totalInputElements = 0
-    var totalOutputElements = 0
-
-    var maybeTxn = inputConsumer.getTransaction
-    while (maybeTxn.isDefined) {
-      val txn = maybeTxn.get
-      while (txn.hasNext()) {
-        txn.next()
-        totalInputElements += 1
-      }
-      maybeTxn = inputConsumer.getTransaction
-    }
-
-    maybeTxn = outputConsumer.getTransaction
-    while (maybeTxn.isDefined) {
-      val txn = maybeTxn.get
-      while (txn.hasNext()) {
-        txn.next()
-        totalOutputElements += 1
-      }
-      maybeTxn = outputConsumer.getTransaction
-    }
-
-    totalInputElements shouldEqual totalOutputElements
-  }
-
-  "All txns elements that are consumed from output stream" should "equals all txns elements that are consumed from input stream" in {
-    val inputConsumer = createInputConsumer(streamService)
-    val outputConsumer = createOutputConsumer(streamService)
-
-    var inputElements = scala.collection.mutable.ArrayBuffer[Int]()
-    var outputElements = scala.collection.mutable.ArrayBuffer[Int]()
-
-    var maybeTxn = inputConsumer.getTransaction
-    while (maybeTxn.isDefined) {
-      val txn = maybeTxn.get
-      while (txn.hasNext()) {
-        val element = objectSerializer.deserialize(txn.next()).asInstanceOf[String].toInt
-        inputElements.+=(element)
-      }
-      maybeTxn = inputConsumer.getTransaction
-    }
-
-    maybeTxn = outputConsumer.getTransaction
-    while (maybeTxn.isDefined) {
-      val txn = maybeTxn.get
-      while (txn.hasNext()) {
-        val element = objectSerializer.deserialize(txn.next()).asInstanceOf[String].toInt
-        outputElements.+=(element)
-      }
-      maybeTxn = outputConsumer.getTransaction
-    }
-
-    inputElements should contain theSameElementsAs outputElements
-  }
-}

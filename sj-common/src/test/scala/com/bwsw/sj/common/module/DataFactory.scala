@@ -63,11 +63,14 @@ object DataFactory {
     createMetadataTables(session, cassandraTestKeyspace)
   }
 
+  def cassandraDestroy() = {
+    session.execute(s"DROP KEYSPACE $cassandraTestKeyspace")
+  }
+
   def close() = {
     aerospikeStorageFactory.closeFactory()
     metadataStorageFactory.closeFactory()
     redissonClient.shutdown()
-    session.execute(s"DROP KEYSPACE $cassandraTestKeyspace")
     session.close()
     cluster.close()
   }
@@ -164,27 +167,14 @@ object DataFactory {
   }
 
   def createStreams(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service]) = {
-    val localGenerator = new Generator
-    localGenerator.generatorType = "local"
+    val localGenerator = new Generator("local")
 
     val tService = serviceManager.get("tstream test service")
 
-    val s1 = new SjStream
-    s1.name = "test_tstream1"
-    s1.description = "test_tstream1"
-    s1.partitions = 1
-    s1.service = tService
-    s1.tags = "some tags"
-    s1.generator = localGenerator
+    val s1 = new SjStream("test_tstream1", "test_tstream1", 1, tService, "Tstream", "some tags", localGenerator)
     sjStreamService.save(s1)
 
-    val s2 = new SjStream
-    s2.name = "test_tstream2"
-    s2.description = "test_tstream2"
-    s2.partitions = 1
-    s2.service = tService
-    s2.tags = "some tags"
-    s2.generator = localGenerator
+    val s2 = new SjStream("test_tstream2", "test_tstream2", 1, tService, "Tstream", "some tags", localGenerator)
     sjStreamService.save(s2)
   }
 
@@ -225,11 +215,8 @@ object DataFactory {
     instance.perTaskCores = 0
     instance.perTaskRam = 0
 
-    val executionPlan = new ExecutionPlan()
-    val task = new Task()
-    task.inputs = Map(("test_tstream1", Array(0, 0))).asJava
-    executionPlan.tasks = Map(("test instance-task0", task)).asJava
-    instance.executionPlan = executionPlan
+    val task = new Task(Map(("test_tstream1", Array(0, 0))).asJava)
+    instance.executionPlan = new ExecutionPlan(Map(("test instance-task0", task)).asJava)
 
     instance.idle = 10
 
@@ -271,12 +258,13 @@ object DataFactory {
 
   def createData(countTxns: Int, countElements: Int, streamService: GenericMongoService[SjStream]) = {
     val producer = createProducer(streamService.get("test_tstream1"))
+    var number = 0
     val s = System.nanoTime
     (0 until countTxns) foreach { (x: Int) =>
       val txn = producer.newTransaction(ProducerPolicies.errorIfOpen)
       (0 until countElements) foreach { (y: Int) =>
-        val number = (x + y).toString
-        txn.send(objectSerializer.serialize(number))
+        number += 1
+        txn.send(objectSerializer.serialize(number.asInstanceOf[Object]))
       }
       txn.checkpoint()
     }
