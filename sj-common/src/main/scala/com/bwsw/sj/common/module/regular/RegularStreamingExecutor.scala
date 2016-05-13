@@ -33,7 +33,7 @@ abstract class RegularStreamingExecutor(manager: ModuleEnvironmentManager) {
   /**
    * Will invoke every time when a set timer went out
    *
-   * @param jitter Delay between a real response time and an invoke this handler
+   * @param jitter Delay between a real response time and an invocation this handler
    */
   def onTimer(jitter: Long): Unit
 

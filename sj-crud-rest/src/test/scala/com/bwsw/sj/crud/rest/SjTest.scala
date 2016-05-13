@@ -121,7 +121,6 @@ object SjTest {
     serviceDAO.save(redisService)
 
     val tstrqService = new TStreamService
-    tstrqService.namespace = "test"
     tstrqService.name = "tstrq_service"
     tstrqService.metadataProvider = cassProv
     tstrqService.metadataNamespace = "test_keyspace"

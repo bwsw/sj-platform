@@ -28,9 +28,9 @@ class GeneratorValidator {
 
     Option(params.generatorType) match {
       case Some(t) if !generatorTypes.contains(t) =>
-        errors += s"Unknown 'generatorType' provided. Must be one of: $generatorTypes"
+        errors += s"Unknown 'generator-type' provided. Must be one of: $generatorTypes"
       case None =>
-        errors += s"'streamType' is required"
+        errors += s"'generator-type' is required"
       case _ =>
     }
 
@@ -39,7 +39,7 @@ class GeneratorValidator {
       case Some(s) if s.isEmpty=>
         errors += s"Generator 'service' can not be empty"
       case None =>
-        errors += s"Generator 'streamType' is required"
+        errors += s"Generator 'stream-type' is required"
       case _ =>
         if (initialData.service contains "://") {
           val generatorUrl = new URI(initialData.service)
@@ -56,13 +56,8 @@ class GeneratorValidator {
         }
     }
 
-    params.instanceCount match {
-      case partitions: Int =>
-        if (partitions <= 0) {
-          errors += s"Generator 'instanceCount' must be a positive integer"
-        }
-      case _ =>
-        errors += "Unknown type of 'instanceCount' parameter. Must be Int"
+    if (params.instanceCount <= 0) {
+      errors += s"Generator 'instance-count' must be a positive integer"
     }
 
     errors

@@ -1,9 +1,8 @@
 package com.bwsw.sj.common.DAL.model
 
-import org.mongodb.morphia.annotations.{Reference, Property}
+import org.mongodb.morphia.annotations.{Property, Reference}
 
 class TStreamService extends Service {
-  var namespace: String = null
   @Reference(value = "metadata_provider") var metadataProvider: Provider = null
   @Property("metadata_namespace") var metadataNamespace: String = null
   @Reference(value = "data_provider") var dataProvider: Provider = null

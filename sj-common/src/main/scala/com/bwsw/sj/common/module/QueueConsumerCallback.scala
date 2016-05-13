@@ -31,12 +31,16 @@ class QueueConsumerCallback[DATATYPE, USERTYPE](blockingQueue: PersistentBlockin
     val transaction = subscriber.getTransactionById(partition, transactionUuid).get
     val stream = ConnectionRepository.getStreamService.get(subscriber.stream.getName)
     blockingQueue.put(serializer.serialize(
-      new TStreamEnvelope(stream.name,
-        partition,
-        transactionUuid,
-        subscriber.name,
-        transaction.getAll().asInstanceOf[List[Array[Byte]]],
-        stream.tags
-      )))
+    {
+      val envelope = new TStreamEnvelope()
+      envelope.stream = stream.name
+      envelope.partition = partition
+      envelope.txnUUID = transactionUuid
+      envelope.consumerName = subscriber.name
+      envelope.data = transaction.getAll().asInstanceOf[List[Array[Byte]]]
+      envelope.tags = stream.tags
+      envelope
+    }
+    ))
   }
 }
