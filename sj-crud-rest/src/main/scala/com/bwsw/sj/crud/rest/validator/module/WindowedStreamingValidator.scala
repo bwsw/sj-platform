@@ -13,7 +13,7 @@ class WindowedStreamingValidator extends StreamingModuleValidator {
 
   /**
     * Validating input parameters for 'windowed-streaming' module
- *
+    *
     * @param instanceParameters - input parameters for running module
     * @return - List of errors
     */

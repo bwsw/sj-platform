@@ -31,6 +31,8 @@ class RegularInstance {
   @Embedded("execution-plan") var executionPlan: ExecutionPlan = null
   var attributes: java.util.Map[String, String] = null
   var idle: Long = 0
+  @Embedded("coordination-service") var coordinationService: ZKService = null
+  var environments: java.util.Map[String, String] = null
 }
 
 

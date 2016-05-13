@@ -48,7 +48,7 @@ object SjCrudRestService extends App with SjCrudRouter {
 
   implicit val system = ActorSystem("sj-crud-rest-server")
   implicit val materializer = ActorMaterializer()
-  implicit val executionContext = system.dispatcher //for work with future
+  implicit val executor = system.dispatcher //for work with future
 
   val host = System.getenv("CRUD_REST_HOST")
   val port = System.getenv("CRUD_REST_PORT").toInt
@@ -63,6 +63,7 @@ object SjCrudRestService extends App with SjCrudRouter {
   val streamDAO = ConnectionRepository.getStreamService
 
   val routeLogged = logRequestResult(Logging.InfoLevel, route())
+  val logger = Logging(system, getClass)
 
   val serverBinding: Future[ServerBinding] = Http().bindAndHandle(routeLogged, interface = host, port = port)
 

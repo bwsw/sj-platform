@@ -4,6 +4,8 @@ import java.io._
 import java.util.jar.JarFile
 
 import akka.actor.ActorSystem
+import akka.event.LoggingAdapter
+import akka.event.slf4j.Logger
 import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.server.RequestContext
 import akka.stream.Materializer
@@ -15,7 +17,7 @@ import com.typesafe.config.Config
 import org.everit.json.schema.loader.SchemaLoader
 import org.json.{JSONObject, JSONTokener}
 
-import scala.concurrent.Await
+import scala.concurrent.{ExecutionContextExecutor, Await}
 
 /**
   * Trait for validation of crud-rest-api
@@ -26,8 +28,12 @@ import scala.concurrent.Await
   * @author Kseniya Tomskikh
   */
 trait SjCrudValidator {
+  val logger: LoggingAdapter
+
   implicit val materializer: Materializer
   implicit val system: ActorSystem
+  implicit def executor: ExecutionContextExecutor
+
   val conf: Config
   val serializer: Serializer
   val fileMetadataDAO: GenericMongoService[FileMetadata]
