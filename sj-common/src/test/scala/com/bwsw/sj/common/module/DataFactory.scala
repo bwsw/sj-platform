@@ -76,40 +76,16 @@ object DataFactory {
   }
 
   def createProviders(providerService: GenericMongoService[Provider]) = {
-    val cassandraProvider = new Provider
-    cassandraProvider.providerType = "cassandra"
-    cassandraProvider.name = "cassandra test provider"
-    cassandraProvider.login = ""
-    cassandraProvider.password = ""
-    cassandraProvider.description = "cassandra provider"
-    cassandraProvider.hosts = Array(s"$cassandraHost:9042")
+    val cassandraProvider = new Provider("cassandra test provider", "cassandra provider", Array(s"$cassandraHost:9042"), "", "", "cassandra")
     providerService.save(cassandraProvider)
 
-    val aerospikeProvider = new Provider
-    aerospikeProvider.providerType = "aerospike"
-    aerospikeProvider.name = "aerospike test provider"
-    aerospikeProvider.login = ""
-    aerospikeProvider.password = ""
-    aerospikeProvider.description = "aerospike provider"
-    aerospikeProvider.hosts = aerospikeHosts
+    val aerospikeProvider = new Provider("aerospike test provider", "aerospike provider", aerospikeHosts, "", "", "aerospike")
     providerService.save(aerospikeProvider)
 
-    val redisProvider = new Provider
-    redisProvider.providerType = "redis"
-    redisProvider.name = "redis test provider"
-    redisProvider.login = ""
-    redisProvider.password = ""
-    redisProvider.description = "redis provider"
-    redisProvider.hosts = redisHosts
+    val redisProvider = new Provider("redis test provider", "redis provider", redisHosts, "", "", "redis")
     providerService.save(redisProvider)
 
-    val zookeeperProvider = new Provider
-    zookeeperProvider.providerType = "zookeeper"
-    zookeeperProvider.name = "zookeeper test provider"
-    zookeeperProvider.login = ""
-    zookeeperProvider.password = ""
-    zookeeperProvider.description = "zookeeper provider"
-    zookeeperProvider.hosts = zookeeperHosts
+    val zookeeperProvider = new Provider("zookeeper test provider", "zookeeper provider", zookeeperHosts, "", "", "zookeeper")
     providerService.save(zookeeperProvider)
   }
 
@@ -121,41 +97,20 @@ object DataFactory {
   }
 
   def createServices(serviceManager: GenericMongoService[Service], providerService: GenericMongoService[Provider]) = {
-    val cassService = new CassandraService
     val cassProv = providerService.get("cassandra test provider")
-    cassService.keyspace = cassandraTestKeyspace
-    cassService.name = "cassandra test service"
-    cassService.description = "cassandra test service"
-    cassService.provider = cassProv
-    cassService.serviceType = "CassDB"
+    val cassService = new CassandraService("cassandra test service", "CassDB", "cassandra test service", cassProv, cassandraTestKeyspace)
     serviceManager.save(cassService)
 
-    val aeroService = new AerospikeService
     val aeroProv = providerService.get("aerospike test provider")
-    aeroService.namespace = testNamespace
-    aeroService.name = "aerospike test service"
-    aeroService.description = "aerospike test service"
-    aeroService.provider = aeroProv
-    aeroService.serviceType = "ArspkDB"
+    val aeroService = new AerospikeService("aerospike test service", "ArspkDB", "aerospike test service", aeroProv, testNamespace)
     serviceManager.save(aeroService)
 
-    val redisService = new RedisService
     val redisProv = providerService.get("redis test provider")
-    redisService.namespace = testNamespace
-    redisService.name = "redis test service"
-    redisService.description = "redis test service"
-    redisService.provider = redisProv
-    redisService.serviceType = "RdsCoord"
+    val redisService = new RedisService("redis test service", "RdsCoord", "redis test service", redisProv, testNamespace)
     serviceManager.save(redisService)
 
-    val tstrqService = new TStreamService
-    tstrqService.name = "tstream test service"
-    tstrqService.metadataProvider = cassProv
-    tstrqService.metadataNamespace = cassandraTestKeyspace
-    tstrqService.dataProvider = aeroProv
-    tstrqService.dataNamespace = testNamespace
-    tstrqService.lockProvider = redisProv
-    tstrqService.lockNamespace = testNamespace
+    val tstrqService = new TStreamService("tstream test service", "TstrQ", "tstream test service",
+      cassProv, cassandraTestKeyspace, aeroProv, testNamespace, redisProv, testNamespace)
     serviceManager.save(tstrqService)
   }
 
