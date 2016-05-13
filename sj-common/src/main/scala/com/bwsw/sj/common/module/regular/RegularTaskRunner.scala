@@ -51,15 +51,16 @@ object RegularTaskRunner {
       (service.get(x._1), x._2)
     })
 
-    var consumersWithSubscribes: Map[String, BasicSubscribingConsumer[Array[Byte], Array[Byte]]] = null
+    var consumersWithSubscribes: Option[Map[String, BasicSubscribingConsumer[Array[Byte], Array[Byte]]]] = None
+    var offsetProducer: Option[BasicProducer[Array[Byte], Array[Byte]]] = None
 
     if (inputs.exists(x => x._1.streamType == StreamConstants.streamTypes.head)) {
-      consumersWithSubscribes = inputs.filter(x => x._1.streamType == StreamConstants.streamTypes.head).map({
+      consumersWithSubscribes = Some(inputs.filter(x => x._1.streamType == StreamConstants.streamTypes.head).map({
         x => manager.createSubscribingConsumer(x._1, x._2.toList, chooseOffset(regularInstanceMetadata.startFrom), blockingQueue)
-      }).map(x => (x.name, x)).toMap
+      }).map(x => (x.name, x)).toMap)
 
-      consumersWithSubscribes.foreach(x => checkpointGroup.add(x._1, x._2))
-      consumersWithSubscribes.foreach(_._2.start())
+      consumersWithSubscribes.get.foreach(x => checkpointGroup.add(x._1, x._2))
+      consumersWithSubscribes.get.foreach(_._2.start())
     }
 
     if (inputs.exists(x => x._1.streamType == StreamConstants.streamTypes.last)) {
@@ -95,6 +96,9 @@ object RegularTaskRunner {
           }
         }
       }).start()
+
+      offsetProducer = Some(manager.createOffsetProducer())
+      checkpointGroup.add(offsetProducer.get.name, offsetProducer.get)
     }
 
     val producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]] =
@@ -102,10 +106,8 @@ object RegularTaskRunner {
         .map(x => (x, ConnectionRepository.getStreamService.get(x)))
         .map(x => (x._1, manager.createProducer(x._2))).toMap
 
-    val offsetProducer = manager.createOffsetProducer()
-
     producers.foreach(x => checkpointGroup.add(x._2.name, x._2))
-    checkpointGroup.add(offsetProducer.name, offsetProducer)
+
 
     val classLoader = manager.getClassLoader(moduleJar.getAbsolutePath)
 
@@ -144,9 +146,9 @@ object RegularTaskRunner {
                         classLoader: URLClassLoader,
                         pathToExecutor: String,
                         producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]],
-                        consumers: Map[String, BasicSubscribingConsumer[Array[Byte], Array[Byte]]],
+                        consumers: Option[Map[String, BasicSubscribingConsumer[Array[Byte], Array[Byte]]]],
                         manager: TaskManager,
-                        offsetProducer: BasicProducer[Array[Byte], Array[Byte]],
+                        offsetProducer: Option[BasicProducer[Array[Byte], Array[Byte]]],
                         checkpointGroup: CheckpointGroup) = {
     /**
      * Json serializer for deserialization of envelope
@@ -186,7 +188,7 @@ object RegularTaskRunner {
                 envelope.streamType match {
                   case "t-stream" =>
                     val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
-                    consumers(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
+                    consumers.get(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
                   case "kafka-stream" =>
                     val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
                     manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
@@ -197,7 +199,7 @@ object RegularTaskRunner {
 
                 if (checkpointTimer.isTime) {
                   executor.onBeforeCheckpoint()
-                  offsetProducer.newTransaction(ProducerPolicies.errorIfOpen)
+                  if (offsetProducer.isDefined) offsetProducer.get.newTransaction(ProducerPolicies.errorIfOpen)
                     .send(objectSerializer.serialize(manager.kafkaOffsetsStorage))
                   checkpointGroup.commit()
                   outputTags.clear()
@@ -227,7 +229,7 @@ object RegularTaskRunner {
                 envelope.streamType match {
                   case "t-stream" =>
                     val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
-                    consumers(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
+                    consumers.get(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
                   case "kafka-stream" =>
                     val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
                     manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
@@ -238,7 +240,7 @@ object RegularTaskRunner {
 
                 if (countOfEnvelopes == regularInstanceMetadata.checkpointInterval) {
                   executor.onBeforeCheckpoint()
-                  offsetProducer.newTransaction(ProducerPolicies.errorIfOpen)
+                  if (offsetProducer.isDefined) offsetProducer.get.newTransaction(ProducerPolicies.errorIfOpen)
                     .send(objectSerializer.serialize(manager.kafkaOffsetsStorage))
                   checkpointGroup.commit()
                   outputTags.clear()
@@ -296,7 +298,7 @@ object RegularTaskRunner {
                 envelope.streamType match {
                   case "t-stream" =>
                     val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
-                    consumers(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
+                    consumers.get(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
                   case "kafka-stream" =>
                     val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
                     manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
@@ -319,7 +321,7 @@ object RegularTaskRunner {
                   }
 
                   executor.onBeforeCheckpoint()
-                  offsetProducer.newTransaction(ProducerPolicies.errorIfOpen)
+                  if (offsetProducer.isDefined) offsetProducer.get.newTransaction(ProducerPolicies.errorIfOpen)
                     .send(objectSerializer.serialize(manager.kafkaOffsetsStorage))
                   checkpointGroup.commit()
                   outputTags.clear()
@@ -352,7 +354,7 @@ object RegularTaskRunner {
                 envelope.streamType match {
                   case "t-stream" =>
                     val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
-                    consumers(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
+                    consumers.get(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
                   case "kafka-stream" =>
                     val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
                     manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
@@ -373,7 +375,7 @@ object RegularTaskRunner {
                   }
 
                   executor.onBeforeCheckpoint()
-                  offsetProducer.newTransaction(ProducerPolicies.errorIfOpen)
+                  if (offsetProducer.isDefined) offsetProducer.get.newTransaction(ProducerPolicies.errorIfOpen)
                     .send(objectSerializer.serialize(manager.kafkaOffsetsStorage))
                   checkpointGroup.commit()
                   outputTags.clear()

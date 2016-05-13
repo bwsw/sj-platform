@@ -23,6 +23,7 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
     //var elementCount = state.get("elementCount").asInstanceOf[Int]
     //    var txnCount = state.get(transaction.txnUUID.toString).asInstanceOf[Int]
     //elementCount += transaction.data.length
+    if (scala.util.Random.nextInt(100) < 20) throw new Exception("it happened")
     val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
     println("length = " + tStreamEnvelope.data.length + ", elements: " +
       tStreamEnvelope.data.map(x => objectSerializer.deserialize(x).asInstanceOf[Int]).mkString(","))

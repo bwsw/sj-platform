@@ -121,15 +121,15 @@ object DataFactory {
     serviceManager.delete("tstream test service")
   }
 
-  def createStreams(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service]) = {
+  def createStreams(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int) = {
     val localGenerator = new Generator("local")
 
     val tService = serviceManager.get("tstream test service")
 
-    val s1 = new SjStream("test_tstream1", "test_tstream1", 1, tService, "Tstream", "some tags", localGenerator)
+    val s1 = new SjStream("test_tstream1", "test_tstream1", partitions, tService, "Tstream", "some tags", localGenerator)
     sjStreamService.save(s1)
 
-    val s2 = new SjStream("test_tstream2", "test_tstream2", 1, tService, "Tstream", "some tags", localGenerator)
+    val s2 = new SjStream("test_tstream2", "test_tstream2", partitions, tService, "Tstream", "some tags", localGenerator)
     sjStreamService.save(s2)
   }
 
@@ -138,9 +138,9 @@ object DataFactory {
     streamService.delete("test_tstream2")
   }
 
-  def createTStreams() = {
-    BasicStreamService.createStream("test_tstream1", 1, 1000 * 60, "description of test tstream1", metadataStorage, dataStorage, lockService)
-    BasicStreamService.createStream("test_tstream2", 1, 1000 * 60, "description of test tstream2", metadataStorage, dataStorage, lockService)
+  def createTStreams(partitions: Int) = {
+    BasicStreamService.createStream("test_tstream1", partitions, 1000 * 60, "description of test tstream1", metadataStorage, dataStorage, lockService)
+    BasicStreamService.createStream("test_tstream2", partitions, 1000 * 60, "description of test tstream2", metadataStorage, dataStorage, lockService)
   }
 
   def deleteTStreams() = {
@@ -148,7 +148,10 @@ object DataFactory {
     BasicStreamService.deleteStream("test_tstream2", metadataStorage)
   }
 
-  def createInstance(instanceService: GenericMongoService[RegularInstance]) = {
+  def createInstance(instanceService: GenericMongoService[RegularInstance],
+                     checkpointInterval: Int,
+                     partitionRange: Array[Int],
+                     checkpointMode: String = "every-nth") = {
     import scala.collection.JavaConverters._
 
     val instance = new RegularInstance()
@@ -160,8 +163,8 @@ object DataFactory {
     instance.description = "some description of test instance"
     instance.inputs = Array("test_tstream1/split")
     instance.outputs = Array("test_tstream2")
-    instance.checkpointMode = "every-nth"
-    instance.checkpointInterval = 1
+    instance.checkpointMode = checkpointMode
+    instance.checkpointInterval = checkpointInterval
     instance.stateManagement = "none"
     instance.stateFullCheckpoint = 0
     instance.parallelism = 0
@@ -170,7 +173,7 @@ object DataFactory {
     instance.perTaskCores = 0
     instance.perTaskRam = 0
 
-    val task = new Task(Map(("test_tstream1", Array(0, 0))).asJava)
+    val task = new Task(Map(("test_tstream1", partitionRange)).asJava)
     instance.executionPlan = new ExecutionPlan(Map(("test instance-task0", task)).asJava)
 
     instance.idle = 10

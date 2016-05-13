@@ -4,15 +4,7 @@ import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.module.DataFactory._
 
-object SjModuleTest extends App {
-
-  System.setProperty("MONGO_HOST", "192.168.1.180")
-  System.setProperty("MONGO_PORT", "27017")
-  System.setProperty("AEROSPIKE_HOSTS", "127.0.0.1:3000,127.0.0.1:3001,127.0.0.1:3002,127.0.0.1:3003")
-  System.setProperty("ZOOKEEPER_HOSTS", "192.168.1.174:2181")
-  System.setProperty("REDIS_HOSTS", "127.0.0.1:6379")
-  System.setProperty("CASSANDRA_HOST", "127.0.0.1")
-  System.setProperty("CASSANDRA_PORT", "9042")
+object SjModuleStatelessChecker extends App {
 
   val streamService = ConnectionRepository.getStreamService
   val objectSerializer = new ObjectSerializer()
@@ -51,7 +43,7 @@ object SjModuleTest extends App {
   assert(totalInputElements == totalOutputElements,
     "Count of all txns elements that are consumed from output stream should equals count of all txns elements that are consumed from input stream")
 
-  assert(inputElements == outputElements,
+  assert(inputElements.forall(x => outputElements.contains(x)) && outputElements.forall(x => inputElements.contains(x)),
     "All txns elements that are consumed from output stream should equals all txns elements that are consumed from input stream")
 
   close()
@@ -59,7 +51,14 @@ object SjModuleTest extends App {
 
   println("DONE")
 
-  //  "All txns elements that are consumed from output stream" should "equals all txns elements that are consumed from input stream" in {
+  //   System.setProperty("MONGO_HOST", "192.168.1.180")
+  //  System.setProperty("MONGO_PORT", "27017")
+  //  System.setProperty("AEROSPIKE_HOSTS", "127.0.0.1:3000,127.0.0.1:3001,127.0.0.1:3002,127.0.0.1:3003")
+  //  System.setProperty("ZOOKEEPER_HOSTS", "192.168.1.174:2181")
+  //  System.setProperty("REDIS_HOSTS", "127.0.0.1:6379")
+  //  System.setProperty("CASSANDRA_HOST", "127.0.0.1")
+  //  System.setProperty("CASSANDRA_PORT", "9042")
+  // "All txns elements that are consumed from output stream" should "equals all txns elements that are consumed from input stream" in {
   //    val streamService = ConnectionRepository.getStreamService
   //    val objectSerializer = new ObjectSerializer()
   //
