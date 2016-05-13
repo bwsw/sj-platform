@@ -9,17 +9,16 @@ object Main extends App {
 
   val framework = FrameworkInfo.newBuilder.
     setName("JugglerFramework").
-    setUser("").
+    setUser("root").
     setRole("*").
     setCheckpoint(false).
     setFailoverTimeout(0.0d).
     build()
 
   val scheduler = new ScalaScheduler
+  val master_path = Properties.envOrElse("MESOS_MASTER", "zk://127.0.0.1:2181/mesos")
 
-  val mesosURL = Properties.envOrElse("MASTER_ZK_PATH", "zk://172.17.0.3:2181/mesos")
-
-  val driver = new MesosSchedulerDriver(scheduler, framework, mesosURL)
+  val driver = new MesosSchedulerDriver(scheduler, framework, master_path)
 
   driver.start()
   driver.join()
