@@ -16,6 +16,11 @@ class RoundRobinOutput(producer: BasicProducer[Array[Byte], Array[Byte]]) {
   private var txn: Option[BasicProducerTransaction[Array[Byte], Array[Byte]]] = None
 
   def put(data: Array[Byte]) =
-    if (txn.isDefined) txn.get.send(data)
-    else txn = Some(producer.newTransaction(ProducerPolicies.errorIfOpen))
+    if (txn.isDefined) {
+      txn.get.send(data)
+    }
+    else {
+      txn = Some(producer.newTransaction(ProducerPolicies.errorIfOpen))
+      txn.get.send(data)
+    }
 }
