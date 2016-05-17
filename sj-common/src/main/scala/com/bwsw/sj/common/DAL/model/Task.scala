@@ -8,4 +8,9 @@ package com.bwsw.sj.common.DAL.model
  */
 class Task() {
   var inputs: java.util.Map[String, Array[Int]] = null
+
+  def this(inputs: java.util.Map[String, Array[Int]]) = {
+    this()
+    this.inputs = inputs
+  }
 }

@@ -47,6 +47,29 @@ trait SjServiceApi extends Directives with SjCrudValidator {
               s"${data.name}"
             )
           }
+        } ~
+        get {
+          val services = serviceDAO.getAll
+          var msg = ""
+          if (services.nonEmpty) {
+            msg =  serializer.serialize(services.map(s => serviceToServiceData(s)))
+          } else {
+            msg = serializer.serialize(s"No services found")
+          }
+          complete(HttpResponse(200, entity=HttpEntity(msg)))
+
+        }
+      } ~
+      pathPrefix(Segment) { (serviceName: String) =>
+        pathEndOrSingleSlash {
+          val service = serviceDAO.get(serviceName)
+          var msg = ""
+          if (service != null) {
+            msg = serializer.serialize(serviceToServiceData(service))
+          } else {
+            msg = serializer.serialize(s"Service '$serviceName' not found")
+          }
+          complete(HttpResponse(200, entity=HttpEntity(msg)))
         }
       }
     }
@@ -73,5 +96,59 @@ trait SjServiceApi extends Directives with SjCrudValidator {
   def saveService(service: Service) = {
     serviceDAO.save(service)
     service.name
+  }
+
+
+  def serviceToServiceData(service: Service) = {
+    var serviceData: ServiceData = null
+    service match {
+      case s: CassandraService =>
+        serviceData = new CassDBServiceData
+        serviceData.name = s.name
+        serviceData.description = s.description
+        serviceData.asInstanceOf[CassDBServiceData].provider = s.provider.name
+        serviceData.asInstanceOf[CassDBServiceData].keyspace = s.keyspace
+      case s: ESService =>
+        serviceData = new EsIndServiceData
+        serviceData.name = s.name
+        serviceData.description = s.description
+        serviceData.asInstanceOf[EsIndServiceData].provider = s.provider.name
+        serviceData.asInstanceOf[EsIndServiceData].index = s.index
+      case s: KafkaService =>
+        serviceData = new KfkQServiceData
+        serviceData.name = s.name
+        serviceData.description = s.description
+        serviceData.asInstanceOf[KfkQServiceData].provider = s.provider.name
+      case s: TStreamService =>
+        serviceData = new TstrQServiceData
+        serviceData.name = s.name
+        serviceData.description = s.description
+        serviceData.asInstanceOf[TstrQServiceData].metadataProvider = s.metadataProvider.name
+        serviceData.asInstanceOf[TstrQServiceData].metadataNamespace = s.metadataNamespace
+        serviceData.asInstanceOf[TstrQServiceData].dataProvider = s.dataProvider.name
+        serviceData.asInstanceOf[TstrQServiceData].dataNamespace = s.dataNamespace
+        serviceData.asInstanceOf[TstrQServiceData].lockProvider = s.lockProvider.name
+        serviceData.asInstanceOf[TstrQServiceData].lockNamespace = s.lockNamespace
+      case s: ZKService =>
+        serviceData = new ZKCoordServiceData
+        serviceData.name = s.name
+        serviceData.description = s.description
+        serviceData.asInstanceOf[ZKCoordServiceData].namespace = s.namespace
+        serviceData.asInstanceOf[ZKCoordServiceData].provider = s.provider.name
+      case s: RedisService =>
+        serviceData = new RDSCoordServiceData
+        serviceData.name = s.name
+        serviceData.description = s.description
+        serviceData.asInstanceOf[RDSCoordServiceData].namespace = s.namespace
+        serviceData.asInstanceOf[RDSCoordServiceData].provider = s.provider.name
+      case s: AerospikeService =>
+        serviceData = new ArspkDBServiceData
+        serviceData.name = s.name
+        serviceData.description = s.description
+        serviceData.asInstanceOf[ArspkDBServiceData].namespace = s.namespace
+        serviceData.asInstanceOf[ArspkDBServiceData].provider = s.provider.name
+      case _ =>
+    }
+    serviceData
   }
 }

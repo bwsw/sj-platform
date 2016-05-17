@@ -3,11 +3,10 @@ package com.bwsw.common.file.utils
 import java.io.File
 
 import com.bwsw.common.exceptions.BadRecordWithKey
-import com.mongodb.BasicDBObject
 import com.mongodb.casbah.MongoDB
 import com.mongodb.casbah.gridfs.Imports._
 
-class MongoFileStorage(mongoDB: MongoDB) extends FilesStorage {
+class MongoFileStorage(mongoDB: MongoDB) extends FileStorage {
 
   private val gridFS = GridFS(mongoDB)
 

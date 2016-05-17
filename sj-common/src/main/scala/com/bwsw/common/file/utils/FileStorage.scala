@@ -2,7 +2,7 @@ package com.bwsw.common.file.utils
 
 import java.io.File
 
-trait FilesStorage {
+trait FileStorage {
   def put(file: File, fileName: String)
 
   def put(file: File, fileName: String, specification: Map[String, Any], filetype: String)

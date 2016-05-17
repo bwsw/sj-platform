@@ -236,7 +236,7 @@ class TaskManager() {
       stream = BasicStreamService.createStream(
         taskName,
         1,
-        Int.MaxValue,
+        1000 * 60,
         "stream to store kafka offsets of input streams",
         metadataStorage,
         dataStorage,
@@ -338,7 +338,7 @@ class TaskManager() {
     val basicStream: BasicStream[Array[Byte]] =
       BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage, coordinator)
 
-    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 to stream.partitions).toList)
+    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.partitions).toList)
 
     val timeUuidGenerator =
       stream.generator.generatorType match {

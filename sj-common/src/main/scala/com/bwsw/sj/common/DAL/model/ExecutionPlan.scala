@@ -8,4 +8,9 @@ package com.bwsw.sj.common.DAL.model
  */
 class ExecutionPlan {
   var tasks: java.util.Map[String, Task] = null
+  
+  def this(tasks: java.util.Map[String, Task]) = {
+    this()
+    this.tasks = tasks
+  }
 }

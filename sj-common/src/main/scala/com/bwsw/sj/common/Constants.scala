@@ -1,10 +1,12 @@
 package com.bwsw.sj.common
 
+import java.util.UUID
+
 /**
  * Object with constants
  */
 object ModuleConstants {
-  val persistentQueuePath = "persistentQueuePath"
+  val persistentQueuePath = UUID.randomUUID().toString //todo: until t-strems can't remove persistent queue
   val persistentBlockingQueue = "persistentBlockingQueue"
 
   val windowedType = "windowed-streaming"
