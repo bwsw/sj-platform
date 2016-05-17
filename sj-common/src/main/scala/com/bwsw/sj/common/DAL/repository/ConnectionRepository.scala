@@ -21,14 +21,14 @@ object ConnectionRepository {
   private val serializer = new JsonSerializer()
   serializer.setIgnoreUnknown(true)
 
-  private lazy val mongoClient = new MongoClient(host, port)
+  private lazy val mongoClient = new MongoClient(mongoHost, mongoPort)
 
   private lazy val morphia = new Morphia()
   morphia.map(classOf[SjStream],classOf[Service], classOf[Provider])
 
   private lazy val datastore = morphia.createDatastore(mongoClient, databaseName)
 
-  private lazy val mongoConnection = com.mongodb.casbah.MongoClient(host, port)
+  private lazy val mongoConnection = com.mongodb.casbah.MongoClient(mongoHost, mongoPort)
 
   private lazy val fileMetadataService = new GenericMongoService[FileMetadata]()
 

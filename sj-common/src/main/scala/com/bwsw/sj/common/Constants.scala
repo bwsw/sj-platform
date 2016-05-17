@@ -16,9 +16,25 @@ object ModuleConstants {
   val startFromModes = Set("oldest", "newest")
 
   val ready = "ready"
+  val starting = "starting"
   val started = "started"
+  val stopping = "stopping"
   val stopped = "stopped"
-  val instanceStatusModes = Set(started, stopped, ready)
+  val deleting = "deleting"
+  val deleted = "deleted"
+  val failed = "failed"
+  val instanceStatusModes = Set(starting,
+    started,
+    stopping,
+    stopped,
+    ready,
+    deleting,
+    deleted,
+    failed
+  )
+
+  val toHandle = "to-handle"
+  val generatorStatusModes = Set(starting, started, failed, toHandle)
 
 }
 

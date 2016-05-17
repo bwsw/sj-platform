@@ -4,6 +4,7 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
+import com.bwsw.sj.crud.rest.entities.SjStreamData
 import com.datastax.driver.core.{Cluster, Session}
 
 /**
@@ -59,10 +60,11 @@ object SjTest {
     val stream = streams.filter(s => s.name.equals("s1")).head
     println(stream.service.name)
     println(ConnectionRepository.getServiceManager.get(stream.service.name).asInstanceOf[TStreamService].dataProvider.name)*/
-    val cass = serializer.deserialize[SjStreamTest](cassStreamJson)
+
+    /*val cass = serializer.deserialize[SjStreamTest](cassStreamJson)
     println(cass.getClass.toString)
     val test = serializer.deserialize[SjStreamTest](testJson)
-    println(test.getClass.toString)
+    println(test.getClass.toString)*/
     println("Ok")
   }
 

@@ -9,7 +9,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" % "akka-http-experimental_2.11" % "2.0-M2",
   "com.google.re2j" % "re2j" % "1.1",
   "org.everit.json" % "org.everit.json.schema" % "1.2.0",
-  "com.typesafe.akka" % "akka-slf4j_2.11" % "2.4.4"
+  "com.typesafe.akka" % "akka-slf4j_2.11" % "2.4.4",
+  "org.apache.httpcomponents" % "httpclient" % "4.5.2"
 )
 
 dependencyOverrides ++= Set("com.typesafe.akka" %% "akka-actor" % "2.4.1")
