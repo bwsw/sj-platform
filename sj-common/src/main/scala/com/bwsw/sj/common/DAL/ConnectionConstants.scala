@@ -1,8 +1,8 @@
 package com.bwsw.sj.common.DAL
 
 object ConnectionConstants {
-   val host = System.getenv("MONGO_HOST")
-   val port = System.getenv("MONGO_PORT").toInt
+   val mongoHost = System.getenv("MONGO_HOST")
+   val mongoPort = System.getenv("MONGO_PORT").toInt
 
    val databaseName = "stream_juggler"
    lazy val fileMetadataCollection = "fs.files"

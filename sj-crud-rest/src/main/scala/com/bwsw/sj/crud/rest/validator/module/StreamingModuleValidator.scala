@@ -1,6 +1,7 @@
 package com.bwsw.sj.crud.rest.validator.module
 
 import java.net.InetSocketAddress
+import java.util.Calendar
 
 import com.aerospike.client.Host
 import com.bwsw.common.JsonSerializer
@@ -41,14 +42,29 @@ abstract class StreamingModuleValidator {
 
   /**
     * Create entity of instance for saving to database
+    *
     * @param parameters - metadata of instance
     * @param partitionsCount - partitions count of input streams
     * @return
     */
-  def createInstance(parameters: InstanceMetadata, partitionsCount: Map[String, Int], instance: RegularInstance) = {
+  def createInstance(parameters: InstanceMetadata, partitionsCount: Map[String, Int], instance: RegularInstance, streams: Set[SjStream]) = {
     val executionPlan = createExecutionPlan(parameters, partitionsCount)
     convertToModelInstance(instance, parameters)
     instance.executionPlan = executionPlan
+    val stages = scala.collection.mutable.Map[String, InstanceStage]()
+    streams.foreach { stream =>
+      val instanceStartTask = new InstanceStage
+      instanceStartTask.state = toHandle
+      instanceStartTask.datetime = Calendar.getInstance().getTime
+      instanceStartTask.duration = 0
+      stages.put(stream.name, instanceStartTask)
+    }
+    val instanceTask = new InstanceStage
+    instanceTask.state = toHandle
+    instanceTask.datetime = Calendar.getInstance().getTime
+    instanceTask.duration = 0
+    stages.put(instance.name, instanceTask)
+    instance.stages = mapAsJavaMap(stages)
     instance
   }
 
@@ -117,6 +133,7 @@ abstract class StreamingModuleValidator {
     val outputStreams = getStreams(parameters.outputs.toList)
 
     val allStreams = inputStreams.union(outputStreams)
+
     val streamsServices = getStreamServices(allStreams)
     if (streamsServices.size != 1) {
       errors += s"All streams should have the same service."
@@ -146,7 +163,7 @@ abstract class StreamingModuleValidator {
         errors += "Unknown type of 'parallelism' parameter. Must be Int or String."
     }
 
-    createInstance(validateParameters, partitions, validatedInstance)
+    createInstance(validateParameters, partitions, validatedInstance, allStreams.toSet)
     (errors, validatedInstance)
   }
 

@@ -33,7 +33,10 @@ class RegularInstance {
   var idle: Long = 0
   @Embedded("coordination-service") var coordinationService: ZKService = null
   var environments: java.util.Map[String, String] = null
+  var stages: java.util.Map[String, InstanceStage] = null
 }
+
+
 
 
 

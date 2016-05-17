@@ -5,7 +5,6 @@ import java.util.jar.JarFile
 
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
-import akka.event.slf4j.Logger
 import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.server.RequestContext
 import akka.stream.Materializer
@@ -42,8 +41,8 @@ trait SjCrudValidator {
   val serviceDAO: GenericMongoService[Service]
   val streamDAO: GenericMongoService[SjStream]
   val providerDAO: GenericMongoService[Provider]
-  val host: String
-  val port: Int
+  val restHost: String
+  val restPort: Int
   val marathonConnect: String
 
   import com.bwsw.sj.common.ModuleConstants._

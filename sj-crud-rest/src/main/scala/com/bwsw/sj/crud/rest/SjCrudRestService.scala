@@ -50,8 +50,8 @@ object SjCrudRestService extends App with SjCrudRouter {
   implicit val materializer = ActorMaterializer()
   implicit val executor = system.dispatcher //for work with future
 
-  val host = System.getenv("CRUD_REST_HOST")
-  val port = System.getenv("CRUD_REST_PORT").toInt
+  val restHost = System.getenv("CRUD_REST_HOST")
+  val restPort = System.getenv("CRUD_REST_PORT").toInt
   val marathonConnect = System.getenv("MARATHON_CONNECT")
 
   val serializer = new JsonSerializer()
@@ -65,14 +65,14 @@ object SjCrudRestService extends App with SjCrudRouter {
   val routeLogged = logRequestResult(Logging.InfoLevel, route())
   val logger = Logging(system, getClass)
 
-  val serverBinding: Future[ServerBinding] = Http().bindAndHandle(routeLogged, interface = host, port = port)
+  val serverBinding: Future[ServerBinding] = Http().bindAndHandle(routeLogged, interface = restHost, port = restPort)
 
   serverBinding onFailure {
     case ex: Exception =>
-      println("Failed to bind to {}:{}!", host, port)
+      println("Failed to bind to {}:{}!", restHost, restPort)
   }
 
-  println(s"Server online at http://$host:$port/\nPress ENTER to stop...")
+  println(s"Server online at http://$restHost:$restPort/\nPress ENTER to stop...")
   StdIn.readLine()
   serverBinding.flatMap(_.unbind())
     .onComplete(_ => system.terminate())
