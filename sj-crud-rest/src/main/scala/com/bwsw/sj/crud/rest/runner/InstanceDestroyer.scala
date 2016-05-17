@@ -32,9 +32,19 @@ class InstanceDestroyer(instance: RegularInstance, delay: Long) extends Runnable
     val startedInstances = instanceDAO.getByParameters(Map("status" -> started))
     val startingInstance = startedInstances.union(instanceDAO.getByParameters(Map("status" -> starting)))
     val streamsToStopping = allStreams.filter { stream: SjStream =>
+      val stage = instance.stages.get(stream.name)
       !stream.generator.generatorType.equals("local") &&
-        !startingInstance.exists(instance => instance.inputs.contains(stream.name) ||
-          instance.outputs.contains(stream.name))
+        (stage.state.equals(failed) ||
+          !startingInstance.exists { instance =>
+            val streamGeneratorName = createGeneratorTaskName(stream)
+            val instanceStreamGenerators = instance.inputs.map(_.replaceAll("/split|/full", ""))
+              .union(instance.outputs)
+              .map { streamName =>
+                val sjStream = streamDAO.get(streamName)
+                createGeneratorTaskName(sjStream)
+            }
+            instanceStreamGenerators.contains(streamGeneratorName)
+          })
     }
     streamsToStopping.foreach { stream =>
       var isTaskDeleted = false

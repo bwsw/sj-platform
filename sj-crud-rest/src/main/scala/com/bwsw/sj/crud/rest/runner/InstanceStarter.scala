@@ -29,25 +29,23 @@ class InstanceStarter(instance: RegularInstance, delay: Long) extends Runnable {
 
     val stages = Map(instance.stages.asScala.toList: _*)
     if (!stages.exists(s => !s._1.equals(instance.name) && s._2.state.equals(failed))) {
-      instanceStart
+      instanceStart()
     } else {
       instance.status = failed
-      instanceDAO.save(instance)
     }
+    instanceDAO.save(instance)
   }
 
-  def instanceStart = {
+  /**
+    * Starting of instance if all generators is started
+    */
+  def instanceStart() = {
     stageUpdate(instance, instance.name, starting)
     val startFrameworkResult = frameworkStart
-    var frameworkResponse: CloseableHttpResponse = null
-    startFrameworkResult match {
-      case Right(response) => frameworkResponse = response
-      case Left(msg) => frameworkResponse = null
-    }
     var isStarted = false
-    if (frameworkResponse != null) {
-      if (frameworkResponse.getStatusLine.getStatusCode.equals(OK) ||
-        frameworkResponse.getStatusLine.getStatusCode.equals(Created)) {
+    startFrameworkResult match {
+      case Right(response) => if (response.getStatusLine.getStatusCode.equals(OK) ||
+        response.getStatusLine.getStatusCode.equals(Created)) {
 
         while (!isStarted) {
           Thread.sleep(delay)
@@ -65,14 +63,23 @@ class InstanceStarter(instance: RegularInstance, delay: Long) extends Runnable {
           }
         }
       }
-    } else {
-      //todo what doing?
-      //println("Cannot starting of instance")
-      instance.status = failed
-      stageUpdate(instance, instance.name, failed)
+      case Left(isRunning) =>
+        if (!isRunning) {
+          instance.status = failed
+          stageUpdate(instance, instance.name, failed)
+        } else {
+          instance.status = started
+          stageUpdate(instance, instance.name, started)
+        }
     }
   }
 
+  /**
+    * Running framework on mesos
+    *
+    * @return - Response from marathon or flag of running framework
+    *         (true, if framework running on mesos)
+    */
   def frameworkStart = {
     val restUrl = new URI(s"$restAddress/v1/custom/$frameworkJar")
     val taskInfoResponse = getTaskInfo(instance.name)
@@ -84,7 +91,7 @@ class InstanceStarter(instance: RegularInstance, delay: Long) extends Runnable {
       if (entity.instances < 1) {
         Right(scaleApplication(instance.name, 1))
       } else {
-        Left(s"Framework ${instance.name} is already created")
+        Left(true)
       }
     } else {
       val mesosInfoResponse = getMesosInfo
@@ -108,8 +115,8 @@ class InstanceStarter(instance: RegularInstance, delay: Long) extends Runnable {
 
         Right(startApplication(request))
       } else {
-        //todo
-        Left("error")
+        //todo what doing?
+        Left(false)
       }
     }
   }
@@ -121,43 +128,37 @@ class InstanceStarter(instance: RegularInstance, delay: Long) extends Runnable {
     * @return - Future of started generators
     */
   def startGenerators(streams: Set[SjStream]) = {
-    //logger.debug("Starting generators")
     streams.foreach { stream =>
+      //logger.debug(s"Try starting generator $generatorName")
       val generatorName = stream.name
       val stage = instance.stages.get(generatorName)
       if (stage.state.equals(toHandle) || stage.state.equals(failed)) {
         var isStarted = false
-        //logger.debug(s"Start generator $generatorName")
         stageUpdate(instance, stream.name, starting)
         val startGeneratorResult = startGenerator(stream)
-        var generatorResponse: CloseableHttpResponse = null
         startGeneratorResult match {
-          case Right(response) => generatorResponse = response
-          case Left(msg) => generatorResponse = null
-        }
-
-        if (generatorResponse != null) {
-          if (generatorResponse.getStatusLine.getStatusCode.equals(OK) ||
-            generatorResponse.getStatusLine.getStatusCode.equals(Created)) {
-            while (!isStarted) {
-              Thread.sleep(delay)
-              val taskInfoResponse = getTaskInfo(createGeneratorTaskName(stream))
-              if (taskInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
-                val entity = serializer.deserialize[Map[String, Any]](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
-                val tasksRunning = entity("app").asInstanceOf[Map[String, Any]]("tasksRunning").asInstanceOf[Int]
-                if (tasksRunning == stream.generator.instanceCount) {
-                  stageUpdate(instance, stream.name, started)
-                  isStarted = true
-                } else {
-                  stageUpdate(instance, stream.name, starting)
+          case Right(response) =>
+            if (response.getStatusLine.getStatusCode.equals(OK) ||
+              response.getStatusLine.getStatusCode.equals(Created)) {
+              while (!isStarted) {
+                Thread.sleep(delay)
+                val taskInfoResponse = getTaskInfo(createGeneratorTaskName(stream))
+                if (taskInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
+                  val entity = serializer.deserialize[Map[String, Any]](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
+                  val tasksRunning = entity("app").asInstanceOf[Map[String, Any]]("tasksRunning").asInstanceOf[Int]
+                  if (tasksRunning == stream.generator.instanceCount) {
+                    stageUpdate(instance, stream.name, started)
+                    isStarted = true
+                  } else {
+                    stageUpdate(instance, stream.name, starting)
+                  }
                 }
               }
+            } else {
+              stageUpdate(instance, stream.name, failed)
             }
-          } else {
-            stageUpdate(instance, stream.name, failed)
-          }
-        } else {
-          stageUpdate(instance, stream.name, failed)
+
+          case Left(msg) => stageUpdate(instance, stream.name, failed)
         }
       }
       updateInstanceStages(instance)

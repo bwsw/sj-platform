@@ -137,17 +137,16 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                         } ~
                         delete {
                           var msg = ""
-                          if (instance.status.equals(stopped)) {
+                          if (instance.status.equals(stopped) || instance.status.equals(failed)) {
                             instance.status = deleting
                             instanceDAO.save(instance)
                             destroyInstance(instance)
-                            instanceDAO.delete(instanceName)
                             msg = s"Instance $instanceName is deleting"
                           } else if (instance.status.equals(ready)) {
                             instanceDAO.delete(instanceName)
                             msg = s"Instance $instanceName has been deleted"
                           } else {
-                            msg = "Cannot deleting of instance. Instance is not stopped or ready."
+                            msg = "Cannot deleting of instance. Instance is not stopped, failed or ready."
                           }
                           complete(HttpEntity(
                             `application/json`,
@@ -158,12 +157,20 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                       path("start") {
                         pathEndOrSingleSlash {
                           get {
-                            instance.status = starting
-                            instanceDAO.save(instance)
-                            startInstance(instance)
+                            var msg = ""
+                            if (instance.status.equals(ready) ||
+                              instance.status.equals(stopped) ||
+                              instance.status.equals(failed)) {
+                              instance.status = starting
+                              instanceDAO.save(instance)
+                              startInstance(instance)
+                              msg = "Instance is starting"
+                            } else {
+                              msg = "Cannot starting of instance. Instance already started."
+                            }
                             complete(HttpEntity(
                               `application/json`,
-                              serializer.serialize(Response(200, null, "Instance is starting"))
+                              serializer.serialize(Response(200, null, msg))
                             ))
                           }
                         }
@@ -171,20 +178,19 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                       path("stop") {
                         pathEndOrSingleSlash {
                           get {
+                            var msg = ""
                             if (instance.status.equals(started)) {
                               instance.status = stopping
                               instanceDAO.save(instance)
                               stopInstance(instance)
-                              complete(HttpEntity(
-                                `application/json`,
-                                serializer.serialize(Response(200, null, "Instance is stopping"))
-                              ))
+                              msg = "Instance is stopping"
                             } else {
-                              complete(HttpEntity(
-                                `application/json`,
-                                serializer.serialize(Response(200, null, "Cannot stopping of instance. Instance is not started."))
-                              ))
+                              msg = "Cannot stopping of instance. Instance is not started."
                             }
+                            complete(HttpEntity(
+                              `application/json`,
+                              serializer.serialize(Response(200, null, msg))
+                            ))
                           }
                         }
                       }
