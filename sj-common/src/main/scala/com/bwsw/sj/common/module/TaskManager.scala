@@ -29,6 +29,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.TopicPartition
 import org.redisson.{Config, Redisson}
 import com.bwsw.sj.common.DAL.ConnectionConstants._
+import org.slf4j.LoggerFactory
 import scala.collection.mutable
 
 /**
@@ -40,6 +41,7 @@ import scala.collection.mutable
 
 class TaskManager() {
 
+  private val logger = LoggerFactory.getLogger(this.getClass)
   private val moduleType = System.getenv("MODULE_TYPE")
   private val moduleName = System.getenv("MODULE_NAME")
   private val moduleVersion = System.getenv("MODULE_VERSION")
@@ -60,7 +62,10 @@ class TaskManager() {
    * Converter to convert usertype->storagetype; storagetype->usertype
    */
   private val converter = new IConverter[Array[Byte], Array[Byte]] {
-    override def convert(obj: Array[Byte]): Array[Byte] = obj
+    override def convert(obj: Array[Byte]): Array[Byte] = {
+      logger.debug(s"Converter is invoked\n")
+      obj
+    }
   }
 
   /**
@@ -82,6 +87,7 @@ class TaskManager() {
    * Creates metadata storage for producer/consumer settings
    */
   private def createMetadataStorage() = {
+    logger.debug(s"Create metadata storage for producer/consumer settings\n")
     val hosts = service.metadataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList
     (new MetadataStorageFactory).getInstance(
       cassandraHosts = hosts,
@@ -94,12 +100,14 @@ class TaskManager() {
   private def createDataStorage() = {
     service.dataProvider.providerType match {
       case "aerospike" =>
+        logger.debug(s"Create aerospike data storage for producer/consumer settings\n")
         val options = new AerospikeStorageOptions(
           service.dataNamespace,
           service.dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toList)
         (new AerospikeStorageFactory).getInstance(options)
 
       case _ =>
+        logger.debug(s"Create cassandra data storage for producer/consumer settings\n")
         val options = new CassandraStorageOptions(
           service.dataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList,
           service.dataNamespace
@@ -113,6 +121,7 @@ class TaskManager() {
    * Creates coordinator for coordinating producer/consumer
    */
   private def createCoordinator() = {
+    logger.debug(s"Create coordinator for coordinating producer/consumer\n")
     val config = new Config()
     config.useSingleServer().setAddress(service.lockProvider.hosts.head)
     val redisClient = Redisson.create(config)
@@ -126,6 +135,7 @@ class TaskManager() {
    * @return Class loader for retrieving classes from jar
    */
   def getClassLoader(pathToJar: String) = {
+    logger.debug(s"Get class loader for class: $pathToJar\n")
     val classLoaderUrls = Array(new File(pathToJar).toURI.toURL)
 
     new URLClassLoader(classLoaderUrls)
@@ -137,6 +147,7 @@ class TaskManager() {
    * @return Local file contains uploaded module jar
    */
   def getModuleJar: File = {
+    logger.debug(s"Get file contains uploaded module: $moduleName jar\n")
     storage.get(fileMetadata.filename, s"tmp/$moduleName")
   }
 
@@ -145,6 +156,7 @@ class TaskManager() {
    * @return An instance metadata to launch a module
    */
   def getInstanceMetadata = {
+    logger.info(s"Get instance metadata\n")
     instanceMetadata
   }
 
@@ -153,6 +165,7 @@ class TaskManager() {
    * @return An absolute path to executor class of module
    */
   def getExecutorClass = {
+    logger.debug(s"Get an absolute path to executor class of module\n")
     fileMetadata.specification.executorClass
   }
 
@@ -161,6 +174,7 @@ class TaskManager() {
    * @return
    */
   def getOutputTags = {
+    logger.debug(s"Get tags for each output stream\n")
     mutable.Map[String, (String, Any)]()
   }
 
@@ -175,6 +189,8 @@ class TaskManager() {
    */
   def createKafkaConsumer(topics: List[(String, List[Int])], hosts: List[String], offset: String): KafkaConsumer[Array[Byte], Array[Byte]] = {
     import collection.JavaConverters._
+    logger.debug(s"Create kafka consumer for topics (with partitions): " +
+      s"${topics.map(x => s"topic name: ${x._1}, " + s"partitions: ${x._2.mkString(",")}").mkString(",")}\n")
     val objectSerializer = new ObjectSerializer()
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
 

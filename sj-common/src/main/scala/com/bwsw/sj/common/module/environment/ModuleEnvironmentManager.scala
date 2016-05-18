@@ -4,6 +4,7 @@ import com.bwsw.sj.common.DAL.model.SjStream
 import com.bwsw.sj.common.module.state.StateStorage
 import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.tstreams.agents.producer.BasicProducer
+import org.slf4j.LoggerFactory
 
 import scala.collection._
 
@@ -23,6 +24,7 @@ class ModuleEnvironmentManager(val options: Map[String, Any],
                                outputs: Array[SjStream],
                                outputTags: mutable.Map[String, (String, Any)],
                                moduleTimer: SjTimer) {
+  protected val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
    * Allows getting partitioned output for specific output stream
@@ -30,20 +32,25 @@ class ModuleEnvironmentManager(val options: Map[String, Any],
    * @return Partitioned output that wrapping output stream
    */
   def getPartitionedOutput(streamName: String) = {
+    logger.info(s"Get partitioned output for stream: $streamName\n")
     if (producers.contains(streamName)) {
       if (outputTags.contains(streamName)) {
         if (outputTags(streamName)._1 == "partitioned") {
           outputTags(streamName)._2.asInstanceOf[PartitionedOutput]
         }
         else {
-          throw new Exception("For this output stream is set partitioned output")
+          logger.error(s"For output stream: $streamName partitioned output is set")
+          throw new Exception(s"For output stream: $streamName partitioned output is set")
         }
       } else {
         outputTags(streamName) = ("partitioned", new PartitionedOutput(producers(streamName)))
 
         outputTags(streamName)._2.asInstanceOf[PartitionedOutput]
       }
-    } else throw new IllegalArgumentException(s"There is no output for name $streamName")
+    } else {
+      logger.error(s"There is no output for name $streamName")
+      throw new IllegalArgumentException(s"There is no output for name $streamName")
+    }
   }
 
   /**
@@ -52,20 +59,25 @@ class ModuleEnvironmentManager(val options: Map[String, Any],
    * @return Round-robin output that wrapping output stream
    */
   def getRoundRobinOutput(streamName: String) = {
+    logger.info(s"Get round-robin output for stream: $streamName\n")
     if (producers.contains(streamName)) {
       if (outputTags.contains(streamName)) {
         if (outputTags(streamName)._1 == "round-robin") {
           outputTags(streamName)._2.asInstanceOf[RoundRobinOutput]
         }
         else {
-          throw new Exception("For this output stream is set round-robin output")
+          logger.error(s"For output stream: $streamName partitioned output is set")
+          throw new Exception(s"For output stream: $streamName partitioned output is set")
         }
       } else {
         outputTags(streamName) = ("round-robin", new RoundRobinOutput(producers(streamName)))
 
         outputTags(streamName)._2.asInstanceOf[RoundRobinOutput]
       }
-    } else throw new IllegalArgumentException(s"There is no output for name $streamName")
+    } else {
+      logger.error(s"There is no output for name $streamName")
+      throw new IllegalArgumentException(s"There is no output for name $streamName")
+    }
   }
 
   /**
@@ -78,9 +90,18 @@ class ModuleEnvironmentManager(val options: Map[String, Any],
    * Provides a default method for getting state of module. Must be overridden in stateful module
    * @return Module state
    */
-  def getState: StateStorage = throw new Exception("Module has no state")
+  def getState: StateStorage = {
+    logger.error("Module has no state")
+    throw new Exception("Module has no state")
+  }
 
+  /**
+   * Returns set of names of the streams according to the set of tags
+   * @param tags Set of tags
+   * @return Set of names of the streams according to the set of tags
+   */
   def getStreamsByTags(tags: Array[String]) = {
+    logger.info(s"Get names of the streams that have set of tags: ${tags.mkString(",")}\n")
     outputs.filter(x => tags.forall(x.tags.contains)).map(_.name)
   }
 }

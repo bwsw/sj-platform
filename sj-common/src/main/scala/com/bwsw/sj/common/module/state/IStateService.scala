@@ -1,5 +1,7 @@
 package com.bwsw.sj.common.module.state
 
+import org.slf4j.LoggerFactory
+
 /**
  * Trait representing service to manage a state of module that has checkpoints (partial and full)
  * Created: 12/04/2016
@@ -8,6 +10,7 @@ package com.bwsw.sj.common.module.state
 
 trait IStateService {
 
+  protected val logger = LoggerFactory.getLogger(this.getClass)
   /**
    * Check whether a state variable with specific key exists or not
    * @param key State variable name
