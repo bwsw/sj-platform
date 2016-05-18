@@ -163,6 +163,9 @@ object RegularTaskRunner {
         val moduleEnvironmentManager = new ModuleEnvironmentManager(
           serializer.deserialize[Map[String, Any]](regularInstanceMetadata.options),
           producers,
+          regularInstanceMetadata.outputs
+            .map(ConnectionRepository.getStreamService.get)
+            .filter(_.tags != null),
           outputTags,
           moduleTimer
         )
@@ -271,6 +274,9 @@ object RegularTaskRunner {
           new StateStorage(stateService),
           serializer.deserialize[Map[String, Any]](regularInstanceMetadata.options),
           producers,
+          regularInstanceMetadata.outputs
+            .map(ConnectionRepository.getStreamService.get)
+            .filter(_.tags != null),
           outputTags,
           moduleTimer
         )

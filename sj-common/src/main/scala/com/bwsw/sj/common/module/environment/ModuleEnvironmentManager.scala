@@ -1,5 +1,6 @@
 package com.bwsw.sj.common.module.environment
 
+import com.bwsw.sj.common.DAL.model.SjStream
 import com.bwsw.sj.common.module.state.StateStorage
 import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.tstreams.agents.producer.BasicProducer
@@ -13,11 +14,13 @@ import scala.collection._
  *
  * @param options User defined options from instance parameters
  * @param producers T-streams producers for each output stream of instance parameters
+ * @param outputs Set of output streams of instance parameters that have tags
  * @param outputTags Keeps a tag (partitioned or round-robin output) corresponding to the output for each output stream
  * @param moduleTimer Provides a possibility to set a timer inside a module
  */
 class ModuleEnvironmentManager(val options: Map[String, Any],
                                producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]],
+                               outputs: Array[SjStream],
                                outputTags: mutable.Map[String, (String, Any)],
                                moduleTimer: SjTimer) {
 
@@ -76,6 +79,10 @@ class ModuleEnvironmentManager(val options: Map[String, Any],
    * @return Module state
    */
   def getState: StateStorage = throw new Exception("Module has no state")
+
+  def getStreamsByTags(tags: Array[String]) = {
+    outputs.filter(x => tags.forall(x.tags.contains)).map(_.name)
+  }
 }
 
 

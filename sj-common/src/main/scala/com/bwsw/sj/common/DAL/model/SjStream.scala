@@ -9,7 +9,7 @@ class SjStream() {
   var partitions: Int = 0
   @Reference var service: Service = null
   @Property("stream-type") var streamType: String = null
-  var tags: String = null
+  var tags: Array[String] = null
   @Embedded var generator: Generator = null
 
   def this(name: String,
@@ -28,7 +28,7 @@ class SjStream() {
            partitions: Int,
            service: Service,
            streamType: String,
-           tags: String,
+           tags: Array[String],
            generator: Generator) = {
     this(name, description, partitions, generator)
     this.service = service

@@ -187,7 +187,7 @@ object DataFactory {
 
     val tService = serviceManager.get("tstream test service")
 
-    val s1 = new SjStream("test_input_tstream", "test_input_tstream", partitions, tService, "Tstream", "some tags", localGenerator)
+    val s1 = new SjStream("test_input_tstream", "test_input_tstream", partitions, tService, "Tstream", Array("input"), localGenerator)
     sjStreamService.save(s1)
 
     BasicStreamService.createStream("test_input_tstream", partitions, 1000 * 60, "description of test input tstream", metadataStorage, dataStorage, lockService)
@@ -198,7 +198,7 @@ object DataFactory {
 
     val tService = serviceManager.get("tstream test service")
 
-    val s2 = new SjStream("test_output_tstream", "test_output_tstream", partitions, tService, "Tstream", "some tags", localGenerator)
+    val s2 = new SjStream("test_output_tstream", "test_output_tstream", partitions, tService, "Tstream", Array("output", "some tags"), localGenerator)
     sjStreamService.save(s2)
 
     BasicStreamService.createStream("test_output_tstream", partitions, 1000 * 60, "description of test output tstream", metadataStorage, dataStorage, lockService)
@@ -217,7 +217,7 @@ object DataFactory {
   private def createKafkaStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int) = {
     val kService = serviceManager.get("kafka test service")
 
-    val s1 = new SjStream("test_kafka_input1", "test_kafka_input1", partitions, kService, "kafka", "some tags", null)
+    val s1 = new SjStream("test_kafka_input1", "test_kafka_input1", partitions, kService, "kafka", Array("kafka input"), null)
     sjStreamService.save(s1)
   }
 

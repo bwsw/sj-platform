@@ -19,7 +19,7 @@ class Envelope() {
   var streamType: String = null
   var stream: String = null
   var partition: Int = 0
-  var tags: String = null
+  var tags: Array[String] = null
 }
 
 /**
