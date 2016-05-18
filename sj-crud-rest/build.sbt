@@ -4,13 +4,16 @@ version := "1.0"
 
 scalaVersion := "2.11.7"
 
+resolvers += "Twitter Repository" at "http://maven.twttr.com"
+
 libraryDependencies ++= Seq(
   "com.typesafe.akka" % "akka-http-core-experimental_2.11" % "2.0-M2",
   "com.typesafe.akka" % "akka-http-experimental_2.11" % "2.0-M2",
   "com.google.re2j" % "re2j" % "1.1",
   "org.everit.json" % "org.everit.json.schema" % "1.2.0",
   "com.typesafe.akka" % "akka-slf4j_2.11" % "2.4.4",
-  "org.apache.httpcomponents" % "httpclient" % "4.5.2"
+  "org.apache.httpcomponents" % "httpclient" % "4.5.2",
+  "com.twitter.common.zookeeper" % "lock" % "0.0.40"
 )
 
 dependencyOverrides ++= Set("com.typesafe.akka" %% "akka-actor" % "2.4.1")
