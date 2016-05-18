@@ -10,5 +10,6 @@ case class SjStreamData(name: String,
                         partitions: Int,
                         service: String,
                         @JsonProperty("stream-type") streamType: String,
-                        tags: String,
-                        generator: GeneratorData)
+                        tags: Array[String],
+                        generator: GeneratorData
+                       )
