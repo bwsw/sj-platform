@@ -23,7 +23,7 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
   /**
    * Number of a last transaction that saved a state. Used for saving partial changes of state
    */
-  private var lastFullTxnUUID: UUID = null
+  private var lastFullTxnUUID: Option[UUID] = None
 
   /**
    * Provides a serialization from a transaction data to a state variable or state change
@@ -39,6 +39,13 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
    * Provides key/value storage to keeping state changes. It's used to do checkpoint of partial changes of state
    */
   protected val stateChanges: mutable.Map[String, (String, Any)] = mutable.Map[String, (String, Any)]()
+
+  /**
+   * Check whether a state variable with specific key exists or not
+   * @param key State variable name
+   * @return True or false
+   */
+  override def isExist(key: String): Boolean = stateVariables.contains(key)
 
   /**
    * Gets a value of the state variable by key
@@ -100,8 +107,10 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
    */
   override def checkpoint(): Unit = {
     if (stateChanges.nonEmpty) {
-      sendChanges(lastFullTxnUUID, stateChanges)
-      stateChanges.clear()
+      if (lastFullTxnUUID.isDefined) {
+        sendChanges(lastFullTxnUUID.get, stateChanges)
+        stateChanges.clear()
+      } else fullCheckpoint()
     }
   }
 
@@ -109,7 +118,7 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
    * Saves a state
    */
   override def fullCheckpoint(): Unit = {
-    lastFullTxnUUID = sendState(stateVariables)
+    lastFullTxnUUID = Some(sendState(stateVariables))
     stateChanges.clear()
   }
 
@@ -137,20 +146,20 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
     val initialState = mutable.Map[String, Any]()
     val maybeTxn = consumer.getLastTransaction(0)
     if (maybeTxn.nonEmpty) {
-      val lastTxn: BasicConsumerTransaction[Array[Byte], Array[Byte]] = maybeTxn.get
+      val lastTxn = maybeTxn.get
       var value = serializer.deserialize(lastTxn.next())
       if (value.isInstanceOf[(String, Any)]) {
-        lastFullTxnUUID = lastTxn.getTxnUUID
+        lastFullTxnUUID = Some(lastTxn.getTxnUUID)
         val variable = value.asInstanceOf[(String, Any)]
         initialState(variable._1) = variable._2
         fillFullState(initialState, lastTxn)
 
         initialState
       } else {
-        lastFullTxnUUID = value.asInstanceOf[UUID]
-        val lastFullStateTxn = consumer.getTransactionById(0, lastFullTxnUUID).get
+        lastFullTxnUUID = Some(value.asInstanceOf[UUID])
+        val lastFullStateTxn = consumer.getTransactionById(0, lastFullTxnUUID.get).get
         fillFullState(initialState, lastFullStateTxn)
-        consumer.setLocalOffset(0, lastFullTxnUUID)
+        consumer.setLocalOffset(0, lastFullTxnUUID.get)
 
         var maybeTxn = consumer.getTransaction
         while (maybeTxn.nonEmpty) {
@@ -170,8 +179,6 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
         initialState
       }
     } else {
-      lastFullTxnUUID = sendState(initialState)
-
       initialState
     }
   }
@@ -212,4 +219,3 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
     transaction.checkpoint()
   }
 }
-

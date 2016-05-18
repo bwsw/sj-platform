@@ -9,6 +9,13 @@ package com.bwsw.sj.common.module.state
 trait IStateService {
 
   /**
+   * Check whether a state variable with specific key exists or not
+   * @param key State variable name
+   * @return True or false
+   */
+  def isExist(key: String): Boolean
+
+  /**
    * Gets a value of the state variable by key
    * @param key State variable name
    * @return Value of the state variable
@@ -30,7 +37,7 @@ trait IStateService {
 
   /**
    * Removes all state variables. After this operation has completed,
-   *  the state will be empty.
+   * the state will be empty.
    */
   def clear(): Unit
 

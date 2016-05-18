@@ -27,6 +27,15 @@ object CassandraHelper {
    */
   def createMetadataTables(session : Session, keyspace : String) = {
 
+    session.execute(s"CREATE TABLE $keyspace.data_queue ( " +
+      s"stream text, " +
+      s"partition int, " +
+      s"transaction timeuuid, " +
+      s"seq int, " +
+      s"data blob, " +
+      s"PRIMARY KEY ((stream, partition), transaction, seq))")
+
+
     session.execute(s"CREATE TABLE $keyspace.stream_commit_last (" +
       s"stream text, " +
       s"partition int, " +

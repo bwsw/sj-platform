@@ -4,13 +4,13 @@ import java.net.URLClassLoader
 import java.util.Date
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.common.DAL.model.{RegularInstance, ZKService}
+import com.bwsw.sj.common.DAL.model.{KafkaService, RegularInstance}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.sj.common.module.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.module.environment.{ModuleEnvironmentManager, StatefulModuleEnvironmentManager}
 import com.bwsw.sj.common.module.state.{RAMStateService, StateStorage}
 import com.bwsw.sj.common.module.{PersistentBlockingQueue, TaskManager}
+import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.sj.common.{ModuleConstants, StreamConstants}
 import com.bwsw.tstreams.agents.consumer.Offsets.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
@@ -29,6 +29,7 @@ import scala.collection.mutable
 object RegularTaskRunner {
 
   def main(args: Array[String]) {
+
     val manager = new TaskManager()
 
     val moduleJar = manager.getModuleJar
@@ -67,7 +68,7 @@ object RegularTaskRunner {
       val kafkaInputs = inputs.filter(x => x._1.streamType == StreamConstants.streamTypes.last)
       val kafkaConsumer = manager.createKafkaConsumer(kafkaInputs
         .map(x => (x._1.name, x._2.toList)).toList,
-        kafkaInputs.flatMap(_._1.service.asInstanceOf[ZKService].provider.hosts).toList,
+        kafkaInputs.flatMap(_._1.service.asInstanceOf[KafkaService].provider.hosts).toList,
         regularInstanceMetadata.startFrom match {
           case "oldest" => "earliest"
           case _ => "latest"
@@ -79,7 +80,7 @@ object RegularTaskRunner {
           val serializer = new JsonSerializer()
 
           while (true) {
-            val records = kafkaConsumer.poll(10)
+            val records = kafkaConsumer.poll(5)
             records.asScala.foreach(x => {
               val stream = ConnectionRepository.getStreamService.get(x.topic())
 
@@ -170,7 +171,7 @@ object RegularTaskRunner {
           .getConstructor(classOf[ModuleEnvironmentManager])
           .newInstance(moduleEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
 
-        executor.init()
+        executor.onInit()
 
         regularInstanceMetadata.checkpointMode match {
           case "time-interval" =>
@@ -233,7 +234,6 @@ object RegularTaskRunner {
                   case "kafka-stream" =>
                     val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
                     manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
-
                 }
 
                 executor.onMessage(envelope)
@@ -258,9 +258,9 @@ object RegularTaskRunner {
 
       case "ram" =>
         var countOfCheckpoints = 1
-        val streamForState = ConnectionRepository.getStreamService.get(manager.taskName)
+        val streamForState = manager.getStateStream
         val stateProducer = manager.createProducer(streamForState)
-        val stateConsumer = manager.createConsumer(streamForState, List(0, streamForState.partitions), Oldest)
+        val stateConsumer = manager.createConsumer(streamForState, List(0, 0), Oldest)
 
         checkpointGroup.add(stateConsumer.name, stateConsumer)
         checkpointGroup.add(stateProducer.name, stateProducer)
@@ -279,7 +279,7 @@ object RegularTaskRunner {
           .getConstructor(classOf[ModuleEnvironmentManager])
           .newInstance(moduleEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
 
-        executor.init()
+        executor.onInit()
 
         regularInstanceMetadata.checkpointMode match {
           case "time-interval" =>
@@ -308,6 +308,8 @@ object RegularTaskRunner {
                 executor.onMessage(envelope)
 
                 if (checkpointTimer.isTime) {
+                  executor.onBeforeCheckpoint()
+
                   if (countOfCheckpoints != regularInstanceMetadata.stateFullCheckpoint) {
                     executor.onBeforeStateSave(false)
                     stateService.checkpoint()
@@ -317,10 +319,9 @@ object RegularTaskRunner {
                     executor.onBeforeStateSave(true)
                     stateService.fullCheckpoint()
                     executor.onAfterStateSave(true)
-                    countOfCheckpoints = 0
+                    countOfCheckpoints = 1
                   }
 
-                  executor.onBeforeCheckpoint()
                   if (offsetProducer.isDefined) offsetProducer.get.newTransaction(ProducerPolicies.errorIfOpen)
                     .send(objectSerializer.serialize(manager.kafkaOffsetsStorage))
                   checkpointGroup.commit()
@@ -364,17 +365,20 @@ object RegularTaskRunner {
                 executor.onMessage(envelope)
 
                 if (countOfEnvelopes == regularInstanceMetadata.checkpointInterval) {
+                  executor.onBeforeCheckpoint()
+
                   if (countOfCheckpoints != regularInstanceMetadata.stateFullCheckpoint) {
+                    executor.onBeforeStateSave(false)
                     stateService.checkpoint()
                     executor.onAfterStateSave(false)
                     countOfCheckpoints += 1
                   } else {
+                    executor.onBeforeStateSave(true)
                     stateService.fullCheckpoint()
                     executor.onAfterStateSave(true)
                     countOfCheckpoints = 1
                   }
 
-                  executor.onBeforeCheckpoint()
                   if (offsetProducer.isDefined) offsetProducer.get.newTransaction(ProducerPolicies.errorIfOpen)
                     .send(objectSerializer.serialize(manager.kafkaOffsetsStorage))
                   checkpointGroup.commit()

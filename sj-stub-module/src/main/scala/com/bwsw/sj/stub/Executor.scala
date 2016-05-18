@@ -1,16 +1,19 @@
 package com.bwsw.sj.stub
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.common.module.entities.{TStreamEnvelope, Envelope}
+import com.bwsw.sj.common.module.entities.{TStreamEnvelope, Envelope, KafkaEnvelope}
 import com.bwsw.sj.common.module.environment.ModuleEnvironmentManager
 import com.bwsw.sj.common.module.regular.RegularStreamingExecutor
+import com.bwsw.sj.common.module.state.StateStorage
 
 
 class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor(manager) {
 
   val objectSerializer = new ObjectSerializer()
+  val state: StateStorage = manager.getState
 
-  override def init(): Unit = {
+  override def onInit(): Unit = {
+    if (!state.isExist("sum")) state.set("sum", 0)
     println("new init")
   }
 
@@ -19,17 +22,28 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
   }
 
   override def onMessage(envelope: Envelope): Unit = {
-    val output = manager.getRoundRobinOutput("test_tstream2")
-    //var elementCount = state.get("elementCount").asInstanceOf[Int]
-    //    var txnCount = state.get(transaction.txnUUID.toString).asInstanceOf[Int]
-    //elementCount += transaction.data.length
+    val output = manager.getRoundRobinOutput("test_output_tstream")
+    var sum = state.get("sum").asInstanceOf[Int]
+
     if (scala.util.Random.nextInt(100) < 20) throw new Exception("it happened")
-    val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
-    println("length = " + tStreamEnvelope.data.length + ", elements: " +
-      tStreamEnvelope.data.map(x => objectSerializer.deserialize(x).asInstanceOf[Int]).mkString(","))
-    tStreamEnvelope.data.foreach(output.put)
+    envelope match {
+      case kafkaEnvelope: KafkaEnvelope =>
+        println("element: " +
+          objectSerializer.deserialize(kafkaEnvelope.data).asInstanceOf[Int])
+        output.put(kafkaEnvelope.data)
+        sum += objectSerializer.deserialize(kafkaEnvelope.data).asInstanceOf[Int]
+        state.set("sum", sum)
+      case tstreamEnvelope: TStreamEnvelope =>
+        println("elements: " +
+          tstreamEnvelope.data.map(x => objectSerializer.deserialize(x).asInstanceOf[Int]).mkString(","))
+
+        tstreamEnvelope.data.foreach(x => {
+          sum += objectSerializer.deserialize(x).asInstanceOf[Int]
+        })
+        tstreamEnvelope.data.foreach(output.put)
+        state.set("sum", sum)
+    }
     println("stream type = " + envelope.streamType)
-    //state.set("elementCount", elementCount)
   }
 
   override def onTimer(jitter: Long): Unit = {

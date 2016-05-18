@@ -15,14 +15,22 @@ class SjStream() {
   def this(name: String,
            description: String,
            partitions: Int,
-           service: Service,
-           streamType: String,
-           tags: String,
-           generator: Generator) = {
+            generator: Generator) = {
     this()
     this.name = name
     this.description = description
     this.partitions = partitions
+    this.generator = generator
+  }
+
+  def this(name: String,
+           description: String,
+           partitions: Int,
+           service: Service,
+           streamType: String,
+           tags: String,
+           generator: Generator) = {
+    this(name, description, partitions, generator)
     this.service = service
     this.streamType = streamType
     this.tags = tags

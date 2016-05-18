@@ -27,18 +27,20 @@ class ModuleEnvironmentManager(val options: Map[String, Any],
    * @return Partitioned output that wrapping output stream
    */
   def getPartitionedOutput(streamName: String) = {
-    if (outputTags.contains(streamName)) {
-      if (outputTags(streamName)._1 == "partitioned") {
+    if (producers.contains(streamName)) {
+      if (outputTags.contains(streamName)) {
+        if (outputTags(streamName)._1 == "partitioned") {
+          outputTags(streamName)._2.asInstanceOf[PartitionedOutput]
+        }
+        else {
+          throw new Exception("For this output stream is set partitioned output")
+        }
+      } else {
+        outputTags(streamName) = ("partitioned", new PartitionedOutput(producers(streamName)))
+
         outputTags(streamName)._2.asInstanceOf[PartitionedOutput]
       }
-      else {
-        throw new Exception("For this output stream is set partitioned output")
-      }
-    } else {
-      outputTags(streamName) = ("partitioned", new PartitionedOutput(producers(streamName)))
-
-      outputTags(streamName)._2.asInstanceOf[PartitionedOutput]
-    }
+    } else throw new IllegalArgumentException(s"There is no output for name $streamName")
   }
 
   /**
@@ -47,18 +49,20 @@ class ModuleEnvironmentManager(val options: Map[String, Any],
    * @return Round-robin output that wrapping output stream
    */
   def getRoundRobinOutput(streamName: String) = {
-    if (outputTags.contains(streamName)) {
-      if (outputTags(streamName)._1 == "round-robin") {
+    if (producers.contains(streamName)) {
+      if (outputTags.contains(streamName)) {
+        if (outputTags(streamName)._1 == "round-robin") {
+          outputTags(streamName)._2.asInstanceOf[RoundRobinOutput]
+        }
+        else {
+          throw new Exception("For this output stream is set round-robin output")
+        }
+      } else {
+        outputTags(streamName) = ("round-robin", new RoundRobinOutput(producers(streamName)))
+
         outputTags(streamName)._2.asInstanceOf[RoundRobinOutput]
       }
-      else {
-        throw new Exception("For this output stream is set round-robin output")
-      }
-    } else {
-      outputTags(streamName) = ("round-robin", new RoundRobinOutput(producers(streamName)))
-
-      outputTags(streamName)._2.asInstanceOf[RoundRobinOutput]
-    }
+    } else throw new IllegalArgumentException(s"There is no output for name $streamName")
   }
 
   /**
