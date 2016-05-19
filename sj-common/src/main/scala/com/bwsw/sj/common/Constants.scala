@@ -62,6 +62,10 @@ object ServiceConstants {
   )
 }
 
+object ProviderConstants {
+  val providerTypes = Set("cassandra", "aerospike", "zookeeper", "kafka", "ES", "redis")
+}
+
 object JarConstants {
   val transactionGeneratorJar = "sj-transaction-generator-assembly-1.0.jar"
   val frameworkJar = "ScalaMesos-assembly-1.0.jar"

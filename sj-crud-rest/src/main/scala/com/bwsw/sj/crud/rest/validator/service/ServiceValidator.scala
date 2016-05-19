@@ -20,7 +20,8 @@ class ServiceValidator {
     * Validating input parameters for service and filling-in the service object
     *
     * @param initialData - input parameters for service being validated
-    * @return - (errors, service)
+    * @param service - service object to fill
+    * @return - errors
     */
   def validate(initialData: ServiceData, service: Service) = {
     val errors = new ArrayBuffer[String]()
@@ -43,8 +44,8 @@ class ServiceValidator {
         if (x.isEmpty) {
           errors += s"'name' can not be empty"
         } else {
-          if (serviceDAO.get(initialData.name) != null) {
-            errors += s"Service with name ${initialData.name} already exists"
+          if (serviceDAO.get(x) != null) {
+            errors += s"Service with name $x already exists"
           }
         }
     }
