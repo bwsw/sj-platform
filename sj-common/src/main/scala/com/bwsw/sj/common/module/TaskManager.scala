@@ -63,7 +63,7 @@ class TaskManager() {
    */
   private val converter = new IConverter[Array[Byte], Array[Byte]] {
     override def convert(obj: Array[Byte]): Array[Byte] = {
-      logger.debug(s"Converter is invoked\n")
+      logger.debug(s"Instance name: $instanceName, task name: $taskName. Converter is invoked\n")
       obj
     }
   }
@@ -87,7 +87,9 @@ class TaskManager() {
    * Creates metadata storage for producer/consumer settings
    */
   private def createMetadataStorage() = {
-    logger.debug(s"Create metadata storage for producer/consumer settings\n")
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. Create metadata storage " +
+      s"(namespace: ${service.metadataNamespace}, hosts: ${service.metadataProvider.hosts.mkString(",")}) " +
+      s"for producer/consumer settings\n")
     val hosts = service.metadataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList
     (new MetadataStorageFactory).getInstance(
       cassandraHosts = hosts,
@@ -100,14 +102,18 @@ class TaskManager() {
   private def createDataStorage() = {
     service.dataProvider.providerType match {
       case "aerospike" =>
-        logger.debug(s"Create aerospike data storage for producer/consumer settings\n")
+        logger.debug(s"Instance name: $instanceName, task name: $taskName. Create aerospike data storage " +
+          s"(namespace: ${service.dataNamespace}, hosts: ${service.dataProvider.hosts.mkString(",")}) " +
+          s"for producer/consumer settings\n")
         val options = new AerospikeStorageOptions(
           service.dataNamespace,
           service.dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toList)
         (new AerospikeStorageFactory).getInstance(options)
 
       case _ =>
-        logger.debug(s"Create cassandra data storage for producer/consumer settings\n")
+        logger.debug(s"Instance name: $instanceName, task name: $taskName. Create cassandra data storage " +
+          s"(namespace: ${service.dataNamespace}, hosts: ${service.dataProvider.hosts.mkString(",")}) " +
+          s"for producer/consumer settings\n")
         val options = new CassandraStorageOptions(
           service.dataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList,
           service.dataNamespace
@@ -121,7 +127,9 @@ class TaskManager() {
    * Creates coordinator for coordinating producer/consumer
    */
   private def createCoordinator() = {
-    logger.debug(s"Create coordinator for coordinating producer/consumer\n")
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. Create coordinator " +
+      s"(namespace: ${service.lockNamespace}, hosts: ${service.lockProvider.hosts.mkString(",")}) " +
+      s"for coordinating producer/consumer\n")
     val config = new Config()
     config.useSingleServer().setAddress(service.lockProvider.hosts.head)
     val redisClient = Redisson.create(config)
@@ -135,7 +143,7 @@ class TaskManager() {
    * @return Class loader for retrieving classes from jar
    */
   def getClassLoader(pathToJar: String) = {
-    logger.debug(s"Get class loader for class: $pathToJar\n")
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get class loader for class: $pathToJar\n")
     val classLoaderUrls = Array(new File(pathToJar).toURI.toURL)
 
     new URLClassLoader(classLoaderUrls)
@@ -147,7 +155,7 @@ class TaskManager() {
    * @return Local file contains uploaded module jar
    */
   def getModuleJar: File = {
-    logger.debug(s"Get file contains uploaded module: $moduleName jar\n")
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '$moduleName' module jar\n")
     storage.get(fileMetadata.filename, s"tmp/$moduleName")
   }
 
@@ -156,7 +164,7 @@ class TaskManager() {
    * @return An instance metadata to launch a module
    */
   def getInstanceMetadata = {
-    logger.info(s"Get instance metadata\n")
+    logger.info(s"Instance name: $instanceName, task name: $taskName. Get instance metadata\n")
     instanceMetadata
   }
 
@@ -165,7 +173,7 @@ class TaskManager() {
    * @return An absolute path to executor class of module
    */
   def getExecutorClass = {
-    logger.debug(s"Get an absolute path to executor class of module\n")
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get an absolute path to executor class of module\n")
     fileMetadata.specification.executorClass
   }
 
@@ -174,7 +182,7 @@ class TaskManager() {
    * @return
    */
   def getOutputTags = {
-    logger.debug(s"Get tags for each output stream\n")
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get tags for each output stream\n")
     mutable.Map[String, (String, Any)]()
   }
 
@@ -189,7 +197,7 @@ class TaskManager() {
    */
   def createKafkaConsumer(topics: List[(String, List[Int])], hosts: List[String], offset: String): KafkaConsumer[Array[Byte], Array[Byte]] = {
     import collection.JavaConverters._
-    logger.debug(s"Create kafka consumer for topics (with partitions): " +
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. Create kafka consumer for topics (with their partitions): " +
       s"${topics.map(x => s"topic name: ${x._1}, " + s"partitions: ${x._2.mkString(",")}").mkString(",")}\n")
     val objectSerializer = new ObjectSerializer()
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
@@ -227,6 +235,7 @@ class TaskManager() {
       val lastTxn = offsetConsumer.getLastTransaction(0)
 
       if (lastTxn.isDefined) {
+        logger.debug(s"Instance name: $instanceName, task name: $taskName. Get saved offsets for kafka consumer and apply their\n")
         val offsets = objectSerializer.deserialize(lastTxn.get.next()).asInstanceOf[mutable.Map[(String, Int), Long]]
         offsets.foreach(x => consumer.seek(new TopicPartition(x._1._1, x._1._2), x._2 + 1))
       }
@@ -242,12 +251,15 @@ class TaskManager() {
    *         that has successfully processed for each topic for each partition
    */
   def createOffsetProducer() = {
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. Create t-stream producer to write kafka offsets\n")
     var stream: BasicStream[Array[Byte]] = null
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
 
     if (BasicStreamService.isExist(kafkaOffsetsStream, metadataStorage)) {
+      logger.debug(s"Instance name: $instanceName, task name: $taskName. Load t-stream: $kafkaOffsetsStream for kafka offsets\n")
       stream = BasicStreamService.loadStream(kafkaOffsetsStream, metadataStorage, dataStorage, coordinator)
     } else {
+      logger.debug(s"Instance name: $instanceName, task name: $taskName. Create t-stream: $kafkaOffsetsStream for kafka offsets\n")
       stream = BasicStreamService.createStream(
         kafkaOffsetsStream,
         1,
@@ -280,6 +292,8 @@ class TaskManager() {
    * @return T-stream subscribing consumer
    */
   def createSubscribingConsumer(stream: SjStream, partitions: List[Int], offset: IOffset, queue: PersistentBlockingQueue) = {
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
+      s"Create subscribing consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
 
     val basicStream: BasicStream[Array[Byte]] =
@@ -329,6 +343,8 @@ class TaskManager() {
    * @return Basic t-stream consumer
    */
   def createConsumer(stream: SjStream, partitions: List[Int], offset: IOffset): BasicConsumer[Array[Byte], Array[Byte]] = {
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
+      s"Create basic consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
 
     val basicStream: BasicStream[Array[Byte]] =
@@ -361,6 +377,8 @@ class TaskManager() {
    * @return Basic t-stream producer
    */
   def createProducer(stream: SjStream) = {
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
+      s"Create basic producer for stream: ${stream.name}\n")
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
 
     val basicStream: BasicStream[Array[Byte]] =
@@ -407,8 +425,12 @@ class TaskManager() {
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
 
     if (BasicStreamService.isExist(stateStream, metadataStorage)) {
+      logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
+        s"Load t-stream: $stateStream to store state of module\n")
       stream = BasicStreamService.loadStream(stateStream, metadataStorage, dataStorage, coordinator)
     } else {
+      logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
+        s"Create t-stream: $stateStream to store state of module\n")
       stream = BasicStreamService.createStream(
         stateStream,
         1,
