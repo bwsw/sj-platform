@@ -38,7 +38,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
 
             ctx.complete(HttpEntity(
               `application/json`,
-              serializer.serialize(Response(200, "name", s"Provider '$providerName' is created"))
+              serializer.serialize(Response(200, providerName, s"Provider '$providerName' is created"))
             ))
           } else {
             throw new BadRecordWithKey(
@@ -68,6 +68,18 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
             msg = serializer.serialize(s"Provider '$providerName' not found")
           }
           complete(HttpResponse(200, entity=HttpEntity(`application/json`, msg)))
+        }
+        pathPrefix("connection") {
+          pathEndOrSingleSlash {
+            val provider = providerDAO.get(providerName)
+            var msg = ""
+            if (provider != null) {
+              // TODO:
+            } else {
+              msg = serializer.serialize(s"Provider '$providerName' not found")
+            }
+            complete(HttpResponse(200, entity=HttpEntity(`application/json`, msg)))
+          }
         }
       }
     }
