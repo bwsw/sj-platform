@@ -4,7 +4,6 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.crud.rest.entities.SjStreamData
 import com.datastax.driver.core.{Cluster, Session}
 
 /**
@@ -172,46 +171,46 @@ object SjTest {
   }
 
   def createStreams(tService: Service, service: ZKService) = {
-    val generator1 = new Generator
-    generator1.generatorType = "global"
-    generator1.instanceCount = 1
-    generator1.service = service
-
-    val sjStreamDAO = ConnectionRepository.getStreamService
-    val s1 = new SjStream
-    s1.name = "s1"
-    s1.description = "s1 stream"
-    s1.partitions = 7
-    s1.service = tService
-    s1.tags = "TAG"
-    s1.generator = generator1
-    sjStreamDAO.save(s1)
-
-    val generator2 = new Generator
-    generator2.generatorType = "global"
-    generator2.instanceCount = 2
-    generator2.service = service
-    val s2 = new SjStream
-    s2.name = "s2"
-    s2.description = "s2 stream"
-    s2.partitions = 10
-    s2.service = tService
-    s2.tags = "TAG"
-    s2.generator = generator2
-    sjStreamDAO.save(s2)
-
-    val generator3 = new Generator
-    generator3.generatorType = "global"
-    generator3.instanceCount = 3
-    generator3.service = service
-    val s3 = new SjStream
-    s3.name = "s3"
-    s3.description = "s3 stream"
-    s3.partitions = 10
-    s3.service = tService
-    s3.tags = "TAG"
-    s3.generator = generator3
-    sjStreamDAO.save(s3)
+//    val generator1 = new Generator
+//    generator1.generatorType = "global"
+//    generator1.instanceCount = 1
+//    generator1.service = service
+//
+//    val sjStreamDAO = ConnectionRepository.getStreamService
+//    val s1 = new SjStream
+//    s1.name = "s1"
+//    s1.description = "s1 stream"
+//    s1.partitions = 7
+//    s1.service = tService
+//    s1.tags = "TAG"
+//    s1.generator = generator1
+//    sjStreamDAO.save(s1)
+//
+//    val generator2 = new Generator
+//    generator2.generatorType = "global"
+//    generator2.instanceCount = 2
+//    generator2.service = service
+//    val s2 = new SjStream
+//    s2.name = "s2"
+//    s2.description = "s2 stream"
+//    s2.partitions = 10
+//    s2.service = tService
+//    s2.tags = "TAG"
+//    s2.generator = generator2
+//    sjStreamDAO.save(s2)
+//
+//    val generator3 = new Generator
+//    generator3.generatorType = "global"
+//    generator3.instanceCount = 3
+//    generator3.service = service
+//    val s3 = new SjStream
+//    s3.name = "s3"
+//    s3.description = "s3 stream"
+//    s3.partitions = 10
+//    s3.service = tService
+//    s3.tags = "TAG"
+//    s3.generator = generator3
+//    sjStreamDAO.save(s3)
   }
 
   /**
