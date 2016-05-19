@@ -6,7 +6,7 @@ import java.util.UUID
  * Object with constants
  */
 object ModuleConstants {
-  val persistentQueuePath = UUID.randomUUID().toString //todo: until t-strems can't remove persistent queue
+  val persistentQueuePath = UUID.randomUUID().toString //todo: until t-streams can't remove persistent queue
   val persistentBlockingQueue = "persistentBlockingQueue"
 
   val windowedType = "windowed-streaming"

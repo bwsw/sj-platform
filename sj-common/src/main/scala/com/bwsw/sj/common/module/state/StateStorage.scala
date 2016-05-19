@@ -12,6 +12,15 @@ package com.bwsw.sj.common.module.state
 class StateStorage(stateService: IStateService) {
 
   /**
+   * Check whether a state variable with specific key exists or not
+   * @param key State variable name
+   * @return True or false
+   */
+  def isExist(key: String): Boolean = {
+    stateService.isExist(key)
+  }
+
+  /**
    * Gets a value of the state variable by key
    * @param key State variable name
    * @return Value of the state variable

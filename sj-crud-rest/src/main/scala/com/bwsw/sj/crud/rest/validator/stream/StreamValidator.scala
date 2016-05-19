@@ -81,8 +81,11 @@ class StreamValidator {
     }
 
     Option(params.tags) match {
-      case Some(t) if t.isEmpty =>
-        errors += s"'tags' can not be empty"
+      case Some(t) =>
+        if (t.isEmpty)
+          errors += s"'tags' can not be empty"
+        else if (t.contains(""))
+          errors += s"Tag in 'tags' can not be empty string"
       case None =>
         errors += s"'tags' is required"
       case _ =>

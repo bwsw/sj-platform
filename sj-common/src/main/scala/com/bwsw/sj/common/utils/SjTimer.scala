@@ -2,6 +2,8 @@ package com.bwsw.sj.common.utils
 
 import java.util.{Timer, TimerTask}
 
+import org.slf4j.LoggerFactory
+
 /**
  * Class representing a wrapper for java.util.Timer
  * Created: 14/04/2016
@@ -10,6 +12,7 @@ import java.util.{Timer, TimerTask}
 
 class SjTimer {
 
+  private val logger = LoggerFactory.getLogger(this.getClass)
   /**
    * Flag defines the timer time went out or not
    */
@@ -28,6 +31,7 @@ class SjTimer {
    * @param delay
    */
   def set(delay: Long) = {
+    logger.info(s"Set a timer to $delay\n")
     timer = new Timer()
     timer.schedule(new TimerTask {
       def run() {
@@ -42,6 +46,7 @@ class SjTimer {
    * @return The result of checking
    */
   def isTime: Boolean = {
+    logger.debug(s"Chech whether a timer has went out or not\n")
     isTimerWentOut
   }
 
@@ -49,6 +54,7 @@ class SjTimer {
    * Allows resetting a timer 
    */
   def reset() = {
+    logger.debug(s"Reset a timer\n")
     timer.cancel()
     isTimerWentOut = false
     responseTime = 0

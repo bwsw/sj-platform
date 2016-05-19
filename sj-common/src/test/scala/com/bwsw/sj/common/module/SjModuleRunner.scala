@@ -15,7 +15,9 @@ object SjModuleSetup extends App {
   val fileStorage = ConnectionRepository.getFileStorage
   val partitions = 3
   val checkpointInterval = 4
-  val checkpointMode = "time-interval" //todo define more exactly
+  val stateManagement = "ram"
+  val stateFullCheckpoint = 3
+  val _type = "both"
 
   val module = new File("/home/mikhaleva_ka/Juggler/sj-stub-module/target/scala-2.11/sj-stub-module-test.jar")
 
@@ -23,11 +25,10 @@ object SjModuleSetup extends App {
   loadModule(module, fileStorage)
   createProviders(providerService)
   createServices(serviceManager, providerService)
-  createStreams(streamService, serviceManager, partitions)
-  createTStreams(partitions)
-  createInstance(instanceService, checkpointInterval, (0 until partitions).toArray)
+  createStreams(streamService, serviceManager, partitions, _type)
+  createInstance(instanceService, checkpointInterval, stateManagement, stateFullCheckpoint)
 
-  createData(12, 3, streamService)
+  createData(32, 4, streamService, _type)
 
   close()
   ConnectionRepository.close()
@@ -45,14 +46,14 @@ object SjModuleDestroy extends App {
   val providerService = ConnectionRepository.getProviderService
   val instanceService = ConnectionRepository.getInstanceService
   val fileStorage = ConnectionRepository.getFileStorage
+  val _type = "both"
 
   val module = new File("/home/mikhaleva_ka/Juggler/sj-stub-module/target/scala-2.11/sj-stub-module-test.jar")
 
-  deleteStreams(streamService)
+  deleteStreams(streamService, _type)
   deleteServices(serviceManager)
   deleteProviders(providerService)
   deleteInstance(instanceService)
-  deleteTStreams()
   deleteModule(fileStorage, module.getName)
   cassandraDestroy()
 

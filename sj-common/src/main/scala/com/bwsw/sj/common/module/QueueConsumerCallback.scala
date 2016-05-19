@@ -6,6 +6,7 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.module.entities.TStreamEnvelope
 import com.bwsw.tstreams.agents.consumer.subscriber.{BasicSubscriberCallback, BasicSubscribingConsumer}
+import org.slf4j.LoggerFactory
 
 
 /**
@@ -17,6 +18,7 @@ import com.bwsw.tstreams.agents.consumer.subscriber.{BasicSubscriberCallback, Ba
  */
 
 class QueueConsumerCallback[DATATYPE, USERTYPE](blockingQueue: PersistentBlockingQueue) extends BasicSubscriberCallback[DATATYPE, USERTYPE] {
+  private val logger = LoggerFactory.getLogger(this.getClass)
   /**
    * Provides a serialization from Transaction to String in order to put in queue
    */
@@ -28,6 +30,7 @@ class QueueConsumerCallback[DATATYPE, USERTYPE](blockingQueue: PersistentBlockin
   override val frequency: Int = 1
 
   override def onEvent(subscriber: BasicSubscribingConsumer[DATATYPE, USERTYPE], partition: Int, transactionUuid: UUID): Unit = {
+    logger.debug(s"onEvent handler was invoked by subscriber: ${subscriber.name}\n")
     val transaction = subscriber.getTransactionById(partition, transactionUuid).get
     val stream = ConnectionRepository.getStreamService.get(subscriber.stream.getName)
     blockingQueue.put(serializer.serialize(
