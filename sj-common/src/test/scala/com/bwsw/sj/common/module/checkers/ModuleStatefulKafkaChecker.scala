@@ -12,7 +12,7 @@ object ModuleStatefulKafkaChecker extends App{
   val objectSerializer = new ObjectSerializer()
 
   val inputConsumer = createInputKafkaConsumer(streamService)
-  val outputConsumer = createOutputConsumer(streamService)
+  val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(streamService, x.toString))
 
   var totalInputElements = 0
   var totalOutputElements = 0
@@ -29,16 +29,19 @@ object ModuleStatefulKafkaChecker extends App{
     totalInputElements += 1
   })
 
-  var maybeTxn = outputConsumer.getTransaction
-  while (maybeTxn.isDefined) {
-    val txn = maybeTxn.get
-    while (txn.hasNext()) {
-      val element = objectSerializer.deserialize(txn.next()).asInstanceOf[Int]
-      outputElements.+=(element)
-      totalOutputElements += 1
+  outputConsumers.foreach(outputConsumer => {
+    var maybeTxn = outputConsumer.getTransaction
+
+    while (maybeTxn.isDefined) {
+      val txn = maybeTxn.get
+      while (txn.hasNext()) {
+        val element = objectSerializer.deserialize(txn.next()).asInstanceOf[Int]
+        outputElements.+=(element)
+        totalOutputElements += 1
+      }
+      maybeTxn = outputConsumer.getTransaction
     }
-    maybeTxn = outputConsumer.getTransaction
-  }
+  })
 
   val consumer: BasicConsumer[Array[Byte], Array[Byte]] = createStateConsumer(streamService)
   val initialState = StateHelper.getState(consumer, objectSerializer)

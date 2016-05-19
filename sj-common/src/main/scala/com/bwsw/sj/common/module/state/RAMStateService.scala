@@ -94,7 +94,7 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
    * @param value Value of the state variable
    */
   override def setChange(key: String, value: Any): Unit = {
-    logger.info(s"Indicate that a state variable: $key value changed from ${stateVariables(key)} to $value\n")
+    logger.info(s"Indicate that a state variable: $key value changed to $value\n")
     stateChanges(key) = ("set", value)
   }
 

@@ -22,7 +22,8 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
   }
 
   override def onMessage(envelope: Envelope): Unit = {
-    val output = manager.getRoundRobinOutput("test_output_tstream")
+    val outputs = manager.getStreamsByTags(Array("output"))
+    val output = manager.getRoundRobinOutput(outputs(scala.util.Random.nextInt(outputs.length)))
     var sum = state.get("sum").asInstanceOf[Int]
 
     if (scala.util.Random.nextInt(100) < 20) throw new Exception("it happened")

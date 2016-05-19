@@ -4,7 +4,6 @@ import java.util.UUID
 
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
-import org.slf4j.LoggerFactory
 
 /**
  * Represents a message envelope that is received by an Executor for each message
@@ -17,8 +16,6 @@ import org.slf4j.LoggerFactory
   new Type(value = classOf[KafkaEnvelope], name = "kafka-stream")
 ))
 class Envelope() {
-  protected val logger = LoggerFactory.getLogger(this.getClass)
-
   var streamType: String = null
   var stream: String = null
   var partition: Int = 0
@@ -32,8 +29,6 @@ class Envelope() {
  */
 
 class TStreamEnvelope() extends Envelope() {
-  logger.info(s"Create t-stream envelope\n")
-
   var txnUUID: UUID = null
   var consumerName: String = null
   var data: List[Array[Byte]] = null
@@ -44,8 +39,6 @@ class TStreamEnvelope() extends Envelope() {
  * Provides a wrapper for kafka message.
  */
 class KafkaEnvelope() extends Envelope() {
-  logger.info(s"Create kafka envelope\n")
-
   var data: Array[Byte] = null
   var offset: Long = 0
   streamType = "kafka-stream"

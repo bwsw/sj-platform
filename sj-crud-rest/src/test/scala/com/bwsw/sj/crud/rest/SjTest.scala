@@ -4,7 +4,6 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.crud.rest.entities.SjStreamData
 import com.datastax.driver.core.{Cluster, Session}
 
 /**
@@ -183,7 +182,7 @@ object SjTest {
     s1.description = "s1 stream"
     s1.partitions = 7
     s1.service = tService
-    s1.tags = "TAG"
+    s1.tags = Array("TAG")
     s1.generator = generator1
     sjStreamDAO.save(s1)
 
@@ -196,7 +195,7 @@ object SjTest {
     s2.description = "s2 stream"
     s2.partitions = 10
     s2.service = tService
-    s2.tags = "TAG"
+    s2.tags = Array("TAG")
     s2.generator = generator2
     sjStreamDAO.save(s2)
 
@@ -209,7 +208,7 @@ object SjTest {
     s3.description = "s3 stream"
     s3.partitions = 10
     s3.service = tService
-    s3.tags = "TAG"
+    s3.tags = Array("TAG")
     s3.generator = generator3
     sjStreamDAO.save(s3)
   }

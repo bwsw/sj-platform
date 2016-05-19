@@ -39,13 +39,15 @@ object DataFactory {
   private val kafkaHosts = System.getenv("KAFKA_HOSTS").split(",")
   private val testNamespace = "test"
   private val instanceName = "test-instance"
-  private var instanceInputs: Array[String] = null
-  private var instanceOutputs: Array[String] = null
-  private var task: Task = null
+  private var instanceInputs: Array[String] = Array()
+  private var instanceOutputs: Array[String] = Array()
+  private val task: Task = new Task(new java.util.HashMap[String, Array[Int]]())
   private val serializer = new JsonSerializer()
   private val objectSerializer = new ObjectSerializer()
   private val cluster = Cluster.builder().addContactPoint(cassandraHost).build()
   private val session = cluster.connect()
+  val inputCount = 2
+  val outputCount = 2
 
   private val converter = new IConverter[Array[Byte], Array[Byte]] {
     override def convert(obj: Array[Byte]): Array[Byte] = obj
@@ -141,77 +143,110 @@ object DataFactory {
     serviceManager.delete("tstream test service")
   }
 
-  def createStreams(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, _type: String) = {
+  def createStreams(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service],
+                    partitions: Int, _type: String, inputCount: Int, outputCount: Int) = {
     _type match {
       case "tstreams" =>
-        createInputTStream(sjStreamService, serviceManager, partitions)
-        createOutputTStream(sjStreamService, serviceManager, partitions)
-        instanceInputs = Array("test_input_tstream/split")
-        instanceOutputs = Array("test_output_tstream")
-        task = new Task(Map(("test_input_tstream", (0 until partitions).toArray)).asJava)
+        (1 to inputCount).foreach(x => {
+          createInputTStream(sjStreamService, serviceManager, partitions, x.toString)
+          instanceInputs = instanceInputs :+ s"test_input_tstream$x/split"
+          task.inputs.put(s"test_input_tstream$x", (0 until partitions).toArray)
+        })
+        (1 to outputCount).foreach(x => {
+          createOutputTStream(sjStreamService, serviceManager, partitions, x.toString)
+          instanceOutputs = instanceOutputs :+ s"test_output_tstream$x"
+        })
       case "kafka" =>
         createKafkaStream(sjStreamService, serviceManager, partitions)
-        createOutputTStream(sjStreamService, serviceManager, partitions)
-        instanceInputs = Array("test_kafka_input1/split")
-        instanceOutputs = Array("test_output_tstream")
-        task = new Task(Map(("test_kafka_input1", (0 until partitions).toArray)).asJava)
+        (1 to outputCount).foreach(x => {
+          createOutputTStream(sjStreamService, serviceManager, partitions, x.toString)
+          instanceOutputs = instanceOutputs :+ s"test_output_tstream$x"
+        })
+        instanceInputs = instanceInputs :+ "test_kafka_input1/split"
+        task.inputs.put(s"test_kafka_input1", (0 until partitions).toArray)
+        instanceInputs = instanceInputs :+ "test_kafka_input2/split"
+        task.inputs.put(s"test_kafka_input2", (0 until partitions).toArray)
       case "both" =>
-        createInputTStream(sjStreamService, serviceManager, partitions)
+        (1 to inputCount).foreach(x => {
+          createInputTStream(sjStreamService, serviceManager, partitions, x.toString)
+          instanceInputs = instanceInputs :+ s"test_input_tstream$x/split"
+          task.inputs.put(s"test_input_tstream$x", (0 until partitions).toArray)
+        })
         createKafkaStream(sjStreamService, serviceManager, partitions)
-        createOutputTStream(sjStreamService, serviceManager, partitions)
-        instanceInputs = Array("test_input_tstream/split", "test_kafka_input1/split")
-        instanceOutputs = Array("test_output_tstream")
-        task = new Task(Map(("test_input_tstream", (0 until partitions).toArray), ("test_kafka_input1", (0 until partitions).toArray)).asJava)
+        (1 to outputCount).foreach(x => {
+          createOutputTStream(sjStreamService, serviceManager, partitions, x.toString)
+          instanceOutputs = instanceOutputs :+ s"test_output_tstream$x"
+        })
+        instanceInputs = instanceInputs :+ "test_kafka_input1/split"
+        task.inputs.put(s"test_kafka_input1", (0 until partitions).toArray)
+        instanceInputs = instanceInputs :+ "test_kafka_input2/split"
+        task.inputs.put(s"test_kafka_input2", (0 until partitions).toArray)
       case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: 'tstreams', 'kafka', 'both'")
     }
   }
 
-  def deleteStreams(streamService: GenericMongoService[SjStream], _type: String) = {
+  def deleteStreams(streamService: GenericMongoService[SjStream], _type: String, inputCount: Int, outputCount: Int) = {
     _type match {
       case "tstreams" =>
-        deleteInputTStream(streamService)
-        deleteOutputTStream(streamService)
+        (1 to inputCount).foreach(x => deleteInputTStream(streamService, x.toString))
+        (1 to outputCount).foreach(x => deleteOutputTStream(streamService, x.toString))
       case "kafka" =>
         deleteKafkaStream(streamService)
-        deleteOutputTStream(streamService)
+        (1 to outputCount).foreach(x => deleteOutputTStream(streamService, x.toString))
       case "both" =>
         deleteKafkaStream(streamService)
-        deleteInputTStream(streamService)
-        deleteOutputTStream(streamService)
+        (1 to inputCount).foreach(x => deleteInputTStream(streamService, x.toString))
+        (1 to outputCount).foreach(x => deleteOutputTStream(streamService, x.toString))
       case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: 'tstreams', 'kafka', 'both'")
     }
   }
 
-  private def createInputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int) = {
+  private def createInputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
     val localGenerator = new Generator("local")
 
     val tService = serviceManager.get("tstream test service")
 
-    val s1 = new SjStream("test_input_tstream", "test_input_tstream", partitions, tService, "Tstream", Array("input"), localGenerator)
+    val s1 = new SjStream("test_input_tstream" + suffix, "test_input_tstream", partitions, tService, "Tstream", Array("input"), localGenerator)
     sjStreamService.save(s1)
 
-    BasicStreamService.createStream("test_input_tstream", partitions, 1000 * 60, "description of test input tstream", metadataStorage, dataStorage, lockService)
+    BasicStreamService.createStream(
+      "test_input_tstream" + suffix,
+      partitions,
+      1000 * 60,
+      "description of test input tstream",
+      metadataStorage,
+      dataStorage,
+      lockService
+    )
   }
 
-  private def createOutputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int) = {
+  private def createOutputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
     val localGenerator = new Generator("local")
 
     val tService = serviceManager.get("tstream test service")
 
-    val s2 = new SjStream("test_output_tstream", "test_output_tstream", partitions, tService, "Tstream", Array("output", "some tags"), localGenerator)
+    val s2 = new SjStream("test_output_tstream" + suffix, "test_output_tstream", partitions, tService, "Tstream", Array("output", "some tags"), localGenerator)
     sjStreamService.save(s2)
 
-    BasicStreamService.createStream("test_output_tstream", partitions, 1000 * 60, "description of test output tstream", metadataStorage, dataStorage, lockService)
+    BasicStreamService.createStream(
+      "test_output_tstream" + suffix,
+      partitions,
+      1000 * 60,
+      "description of test output tstream",
+      metadataStorage,
+      dataStorage,
+      lockService
+    )
   }
 
-  private def deleteInputTStream(streamService: GenericMongoService[SjStream]) = {
-    streamService.delete("test_input_tstream")
-    BasicStreamService.deleteStream("test_input_tstream", metadataStorage)
+  private def deleteInputTStream(streamService: GenericMongoService[SjStream], suffix: String) = {
+    streamService.delete("test_input_tstream" + suffix)
+    BasicStreamService.deleteStream("test_input_tstream" + suffix, metadataStorage)
   }
 
-  private def deleteOutputTStream(streamService: GenericMongoService[SjStream]) = {
-    streamService.delete("test_output_tstream")
-    BasicStreamService.deleteStream("test_output_tstream", metadataStorage)
+  private def deleteOutputTStream(streamService: GenericMongoService[SjStream], suffix: String) = {
+    streamService.delete("test_output_tstream" + suffix)
+    BasicStreamService.deleteStream("test_output_tstream" + suffix, metadataStorage)
   }
 
   private def createKafkaStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int) = {
@@ -219,10 +254,14 @@ object DataFactory {
 
     val s1 = new SjStream("test_kafka_input1", "test_kafka_input1", partitions, kService, "kafka", Array("kafka input"), null)
     sjStreamService.save(s1)
+
+    val s2 = new SjStream("test_kafka_input2", "test_kafka_input2", partitions, kService, "kafka", Array("kafka input"), null)
+    sjStreamService.save(s2)
   }
 
   private def deleteKafkaStream(streamService: GenericMongoService[SjStream]) = {
     streamService.delete("test_kafka_input1")
+    streamService.delete("test_kafka_input2")
   }
 
 
@@ -291,21 +330,21 @@ object DataFactory {
     storage.delete(filename)
   }
 
-  def createData(countTxns: Int, countElements: Int, streamService: GenericMongoService[SjStream], _type: String) = {
+  def createData(countTxns: Int, countElements: Int, streamService: GenericMongoService[SjStream], _type: String, count: Int) = {
     _type match {
       case "tstreams" =>
-        createTstreamData(countTxns, countElements, streamService)
+        (1 to count).foreach(x => createTstreamData(countTxns, countElements, streamService, x.toString))
       case "kafka" =>
       //createKafkaData(countTxns, countElements) //needed only one because of kafka doesn't allow delete topics
       case "both" =>
-        createTstreamData(countTxns, countElements, streamService)
-      //createKafkaData(countTxns, countElements) //needed only one because of kafka doesn't allow delete topics
+        (1 to count).foreach(x => createTstreamData(countTxns, countElements, streamService, x.toString))
+        //createKafkaData(countTxns, countElements) //needed only one because of kafka doesn't allow delete topics
       case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: 'tstreams', 'kafka', 'both'")
     }
   }
 
-  private def createTstreamData(countTxns: Int, countElements: Int, streamService: GenericMongoService[SjStream]) = {
-    val producer = createProducer(streamService.get("test_input_tstream"))
+  private def createTstreamData(countTxns: Int, countElements: Int, streamService: GenericMongoService[SjStream], suffix: String) = {
+    val producer = createProducer(streamService.get("test_input_tstream" + suffix))
     var number = 0
     val s = System.nanoTime
     (0 until countTxns) foreach { (x: Int) =>
@@ -332,7 +371,7 @@ object DataFactory {
     (0 until countTxns) foreach { (x: Int) =>
       (0 until countElements) foreach { (y: Int) =>
         number += 1
-        val record = new ProducerRecord[Array[Byte], Array[Byte]]("test_kafka_input1", Array[Byte](100), objectSerializer.serialize(number.asInstanceOf[Object]))
+        val record = new ProducerRecord[Array[Byte], Array[Byte]]("test_kafka_input2", Array[Byte](100), objectSerializer.serialize(number.asInstanceOf[Object]))
         producer.send(record)
       }
     }
@@ -341,8 +380,8 @@ object DataFactory {
     producer.close()
   }
 
-  def createInputTstreamConsumer(streamService: GenericMongoService[SjStream]) = {
-    createConsumer("test_input_tstream", streamService)
+  def createInputTstreamConsumer(streamService: GenericMongoService[SjStream], suffix: String) = {
+    createConsumer("test_input_tstream" + suffix, streamService)
   }
 
   def createStateConsumer(streamService: GenericMongoService[SjStream]) = {
@@ -381,15 +420,32 @@ object DataFactory {
     props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
     val consumer = new KafkaConsumer[Array[Byte], Array[Byte]](props)
 
-    val topicPartitions = (0 until partitions).map(y => new TopicPartition("test_kafka_input1", y)).asJava
+    val topicPartitions = (0 until partitions).flatMap(y => {
+      Array(new TopicPartition("test_kafka_input1", y), new TopicPartition("test_kafka_input2", y))
+    }).asJava
 
     consumer.assign(topicPartitions)
 
     consumer
   }
 
-  def createOutputConsumer(streamService: GenericMongoService[SjStream]) = {
-    createConsumer("test_output_tstream", streamService)
+  def createInputKafkaConsumer2(streamService: GenericMongoService[SjStream]) = {
+    val partitions = 4
+
+    val props = new Properties()
+    props.put("bootstrap.servers", System.getenv("KAFKA_HOSTS"))
+    props.put("enable.auto.commit", "false")
+    props.put("session.timeout.ms", "30000")
+    props.put("auto.offset.reset", "earliest")
+    props.put("key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
+    props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
+    val consumer = new KafkaConsumer[Array[Byte], Array[Byte]](props)
+
+
+  }
+
+  def createOutputConsumer(streamService: GenericMongoService[SjStream], suffix: String) = {
+    createConsumer("test_output_tstream" + suffix, streamService)
   }
 
   private def createProducer(stream: SjStream) = {

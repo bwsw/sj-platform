@@ -13,7 +13,7 @@ object SjModuleSetup extends App {
   val providerService = ConnectionRepository.getProviderService
   val instanceService = ConnectionRepository.getInstanceService
   val fileStorage = ConnectionRepository.getFileStorage
-  val partitions = 3
+  val partitions = 4
   val checkpointInterval = 4
   val stateManagement = "ram"
   val stateFullCheckpoint = 3
@@ -25,10 +25,10 @@ object SjModuleSetup extends App {
   loadModule(module, fileStorage)
   createProviders(providerService)
   createServices(serviceManager, providerService)
-  createStreams(streamService, serviceManager, partitions, _type)
+  createStreams(streamService, serviceManager, partitions, _type, inputCount, outputCount)
   createInstance(instanceService, checkpointInterval, stateManagement, stateFullCheckpoint)
 
-  createData(32, 4, streamService, _type)
+  createData(12, 4, streamService, _type, inputCount)
 
   close()
   ConnectionRepository.close()
@@ -50,7 +50,7 @@ object SjModuleDestroy extends App {
 
   val module = new File("/home/mikhaleva_ka/Juggler/sj-stub-module/target/scala-2.11/sj-stub-module-test.jar")
 
-  deleteStreams(streamService, _type)
+  deleteStreams(streamService, _type, inputCount, outputCount)
   deleteServices(serviceManager)
   deleteProviders(providerService)
   deleteInstance(instanceService)
