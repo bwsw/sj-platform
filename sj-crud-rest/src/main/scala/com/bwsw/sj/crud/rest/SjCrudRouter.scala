@@ -7,7 +7,7 @@ import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.{EntityStreamSizeException, HttpEntity, HttpResponse}
 import akka.http.scaladsl.server.{Directives, ExceptionHandler}
 import com.bwsw.common.exceptions.{BadRecord, BadRecordWithKey, InstanceException, KeyAlreadyExists}
-import com.bwsw.sj.crud.rest.api.{SjCustomApi, SjModulesApi, SjServiceApi, SjStreamsApi}
+import com.bwsw.sj.crud.rest.api._
 import com.bwsw.sj.crud.rest.entities.ProtocolResponse
 import org.everit.json.schema.ValidationException
 
@@ -21,7 +21,8 @@ trait SjCrudRouter extends Directives
   with SjModulesApi
   with SjCustomApi
   with SjStreamsApi
-  with SjServiceApi {
+  with SjServicesApi
+  with SjProvidersApi {
 
   val exceptionHandler = ExceptionHandler {
     case BadRecord(msg) =>
@@ -70,7 +71,8 @@ trait SjCrudRouter extends Directives
         modulesApi ~
         customApi ~
         streamsApi ~
-        serviceApi
+        servicesApi ~
+        providersApi
       }
     }
   }

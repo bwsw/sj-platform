@@ -10,10 +10,23 @@ libraryDependencies ++= Seq(
   "com.google.re2j" % "re2j" % "1.1",
   "org.everit.json" % "org.everit.json.schema" % "1.2.0",
   "com.typesafe.akka" % "akka-slf4j_2.11" % "2.4.4",
-  "org.apache.httpcomponents" % "httpclient" % "4.5.2"
+  "org.apache.httpcomponents" % "httpclient" % "4.5.2",
+  "com.datastax.cassandra" % "cassandra-driver-core" % "3.0.1",
+  "com.aerospike" % "aerospike-client" % "3.0.22",
+  "org.apache.zookeeper" % "zookeeper" % "3.4.6",
+  "org.elasticsearch" % "elasticsearch" % "2.3.2",
+  "com.google.guava" % "guava" % "18.0",
+  "org.apache.kafka" % "kafka_2.11" % "0.9.0.1"
+      exclude("javax.jms", "jms")
+      exclude("com.sun.jdmk", "jmxtools")
+      exclude("com.sun.jmx", "jmxri")
+      exclude("org.slf4j", "slf4j-simple")
 )
 
-dependencyOverrides ++= Set("com.typesafe.akka" %% "akka-actor" % "2.4.1")
+dependencyOverrides ++= Set(
+  "com.typesafe.akka" %% "akka-actor" % "2.4.1",
+  "com.google.guava" % "guava" % "18.0"
+)
 
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.first
