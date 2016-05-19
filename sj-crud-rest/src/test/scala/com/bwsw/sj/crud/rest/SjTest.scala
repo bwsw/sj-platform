@@ -93,7 +93,7 @@ object SjTest {
 
     val provider = new Provider()
     provider.name = "kafka"
-    provider.hosts = Array("192.168.1.180:9092")
+    provider.hosts = Array("localhost:9092")
     provider.providerType = "kafka"
     providerDAO.save(provider)
 

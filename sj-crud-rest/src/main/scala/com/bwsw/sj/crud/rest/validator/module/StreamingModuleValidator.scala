@@ -1,7 +1,7 @@
 package com.bwsw.sj.crud.rest.validator.module
 
 import java.net.InetSocketAddress
-import java.util.Calendar
+import java.util.{Properties, Calendar}
 
 import com.aerospike.client.Host
 import com.bwsw.common.JsonSerializer
@@ -10,12 +10,17 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.crud.rest.entities.InstanceMetadata
+import com.bwsw.sj.crud.rest.utils.StreamUtil
 import com.bwsw.tstreams.coordination.Coordinator
 import com.bwsw.tstreams.data.IStorage
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStorageOptions}
 import com.bwsw.tstreams.data.cassandra.{CassandraStorageFactory, CassandraStorageOptions}
 import com.bwsw.tstreams.metadata.MetadataStorageFactory
 import com.bwsw.tstreams.services.BasicStreamService
+import kafka.admin.AdminUtils
+import kafka.common.TopicExistsException
+import kafka.utils.ZkUtils
+import org.I0Itec.zkclient.ZkConnection
 import org.redisson.{Config, Redisson}
 
 import scala.collection.JavaConversions._
@@ -186,63 +191,29 @@ abstract class StreamingModuleValidator {
   }
 
   def checkAndCreateTStreams(errors: ArrayBuffer[String], service: TStreamService, allTStreams: mutable.Buffer[SjStream]) = {
-    val metadataProvider = service.metadataProvider
-    val hosts = metadataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt))
-    val metadataStorage = (new MetadataStorageFactory).getInstance(hosts.toList, service.metadataNamespace)
-
-    val dataProvider = service.dataProvider
-    var dataStorage: IStorage[Array[Byte]] = null
-    if (dataProvider.providerType.equals("cassandra")) {
-      val options = new CassandraStorageOptions(
-        dataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList,
-        service.dataNamespace
-      )
-      dataStorage = (new CassandraStorageFactory).getInstance(options)
-    } else if (dataProvider.providerType.equals("aerospike")) {
-      val options = new AerospikeStorageOptions(
-        service.dataNamespace,
-        dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toList
-      )
-      dataStorage = (new AerospikeStorageFactory).getInstance(options)
-    }
-
-    val lockProvider = service.lockProvider
-    val redisConfig = new Config()
-    redisConfig.useSingleServer().setAddress(lockProvider.hosts.head)
-    val coordinator = new Coordinator(service.lockNamespace, Redisson.create(redisConfig))
-
     allTStreams.foreach { (stream: SjStream) =>
-      if (BasicStreamService.isExist(stream.name, metadataStorage)) {
-        val tStream = BasicStreamService.loadStream[Array[Byte]](
-          stream.name,
-          metadataStorage,
-          dataStorage,
-          coordinator
-        )
-        if (tStream.getPartitions != stream.partitions) {
-          errors += s"Partitions count mismatch"
-        }
-      } else {
-        if (errors.isEmpty) {
-          BasicStreamService.createStream(
-            stream.name,
-            stream.partitions,
-            5000,
-            "", metadataStorage,
-            dataStorage,
-            coordinator
-          )
+      if (errors.isEmpty) {
+        val streamCheckResult = StreamUtil.checkAndCreateTStream(stream)
+        streamCheckResult match {
+          case Left(err) => errors += err
         }
       }
-
     }
     errors
   }
 
   def checkAndCreateKafkaStreams(errors: ArrayBuffer[String], allKafkaStreams: mutable.Buffer[SjStream]) = {
     allKafkaStreams.foreach { (stream: SjStream) =>
-      val service = stream.service.asInstanceOf[KafkaService]
-
+      if (errors.isEmpty) {
+        try {
+          val streamCheckResult = StreamUtil.checkAndCreateKafkaTopic(stream)
+          streamCheckResult match {
+            case Left(err) => errors += err
+          }
+        } catch {
+          case e: TopicExistsException => errors += s"Cannot create kafka topic: ${e.getMessage}"
+        }
+      }
     }
     errors
   }
