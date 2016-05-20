@@ -42,9 +42,10 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                 val uploadingFile = new File(metadata.fileName)
                 FileUtils.copyFile(file, uploadingFile)
                 storage.put(uploadingFile, metadata.fileName, specification, "module")
+                val response = ProtocolResponse(200, Map("message" -> "Jar file has been uploaded"))
                 complete(HttpEntity(
                   `application/json`,
-                  serializer.serialize(Response(200, null, "Jar file has been uploaded"))
+                  serializer.serialize(response)
                 ))
               } else {
                 file.delete()
@@ -54,17 +55,18 @@ trait SjModulesApi extends Directives with SjCrudValidator {
         } ~
         get {
           val files = fileMetadataDAO.getByParameters(Map("filetype" -> "module"))
-          var msg = ""
+          var response: ProtocolResponse = null
           if (files.nonEmpty) {
-            msg = s"Uploaded modules: ${files.map(
-              s => s"${s.specification.moduleType} - ${s.specification.name} - ${s.specification.version}"
-            ).mkString(",\n")}"
+            val entity = Map("modules" -> files.map(f => Map("module-type" -> f.specification.moduleType,
+              "module-name" -> f.specification.name,
+              "module-version" -> f.specification.version)))
+            response = ProtocolResponse(200, entity)
           } else {
-            msg = s"Uploaded modules have not been found "
+            response = ProtocolResponse(200, Map("message" -> s"Uploaded modules have not been found"))
           }
           complete(HttpEntity(
             `application/json`,
-            serializer.serialize(Response(200, null, msg))
+            serializer.serialize(response)
           ))
         }
       } ~
@@ -94,9 +96,12 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                         if (jarFile != null && jarFile.exists()) {
                           if (moduleValidate(jarFile, validatorClassName, validatedInstance.options)) {
                             val nameInstance = saveInstance(validatedInstance, moduleType, moduleName, moduleVersion)
+                            val response = ProtocolResponse(200,
+                              Map("message" -> s"Instance $nameInstance for module $moduleType-$moduleName-$moduleVersion is created")
+                            )
                             ctx.complete(HttpEntity(
                               `application/json`,
-                              serializer.serialize(Response(200, nameInstance, s"Instance for module $moduleType-$moduleName-$moduleVersion is created"))
+                              serializer.serialize(response)
                             ))
                           } else {
                             throw new InstanceException(s"Cannot create instance of module. Request has incrorrect options attrubute",
@@ -115,14 +120,13 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                         "module-type" -> moduleType,
                         "module-version" -> moduleVersion)
                       )
-                      var msg = ""
+                      var response: ProtocolResponse = null
                       if (instances.nonEmpty) {
-                        msg = serializer.serialize(instances.map(i => convertModelInstanceToApiInstance(i)))
+                        response = ProtocolResponse(200, Map("instances" -> instances.map(i => convertModelInstanceToApiInstance(i))))
                       } else {
-                        msg =  serializer.serialize(Response(200, s"$moduleType-$moduleName-$moduleVersion",
-                          s"Instances for $moduleType-$moduleName-$moduleVersion not found"))
+                        response = ProtocolResponse(200, Map("message" -> s"Instances for $moduleType-$moduleName-$moduleVersion not found"))
                       }
-                      complete(HttpEntity(`application/json`, msg))
+                      complete(HttpEntity(`application/json`, serializer.serialize(response)))
                     }
                   } ~
                   pathPrefix(Segment) { (instanceName: String) =>
@@ -130,9 +134,10 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                     validate(instance != null, s"Instance for name $instanceName has not been found!") {
                       pathEndOrSingleSlash {
                         get {
+                          val response = new ProtocolResponse(200, Map("instance" -> convertModelInstanceToApiInstance(instance)))
                           complete(HttpEntity(
                             `application/json`,
-                            serializer.serialize(convertModelInstanceToApiInstance(instance))
+                            serializer.serialize(response)
                           ))
                         } ~
                         delete {
@@ -150,7 +155,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                           }
                           complete(HttpEntity(
                             `application/json`,
-                            serializer.serialize(Response(200, instanceName, msg))
+                            serializer.serialize(ProtocolResponse(200, Map("message" -> msg)))
                           ))
                         }
                       } ~
@@ -170,7 +175,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                             }
                             complete(HttpEntity(
                               `application/json`,
-                              serializer.serialize(Response(200, null, msg))
+                              serializer.serialize(ProtocolResponse(200, Map("message" -> msg)))
                             ))
                           }
                         }
@@ -189,7 +194,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                             }
                             complete(HttpEntity(
                               `application/json`,
-                              serializer.serialize(Response(200, null, msg))
+                              serializer.serialize(ProtocolResponse(200, Map("message" -> msg)))
                             ))
                           }
                         }
@@ -202,7 +207,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                     get {
                       complete(HttpEntity(
                         `application/json`,
-                        serializer.serialize(specification)
+                        serializer.serialize(ProtocolResponse(200, Map("specification" -> specification)))
                       ))
                     }
                   }
@@ -227,10 +232,10 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                     )
                     if (instances.isEmpty) {
                       if (storage.delete(filename)) {
+                        val response = ProtocolResponse(200, Map("message" -> s"Module $moduleName-$moduleVersion for type $moduleType has been deleted"))
                         complete(HttpEntity(
                           `application/json`,
-                          serializer.serialize(Response(200, s"$moduleType-$moduleName-$moduleVersion",
-                            s"Module $moduleName-$moduleVersion for type $moduleType has been deleted"))
+                          serializer.serialize(response)
                         ))
                       } else {
                         throw new BadRecordWithKey(s"Module $moduleType-$moduleName-$moduleVersion hasn't been found",
@@ -248,19 +253,19 @@ trait SjModulesApi extends Directives with SjCrudValidator {
           pathEndOrSingleSlash {
             get {
               val files = fileMetadataDAO.getByParameters(Map("specification.module-type" -> moduleType))
-              var msg = ""
+              var response: ProtocolResponse = null
               if (files.nonEmpty) {
-                msg = s"Uploaded modules for type $moduleType: ${
-                  files.map(
-                    s => s"${s.specification.name}-${s.specification.version}"
-                  ).mkString(",\n")
-                }"
+                val entity = Map("message" -> s"Uploaded modules for type $moduleType",
+                  "modules" -> files.map(f => Map("module-type" -> f.specification.moduleType,
+                    "module-name" -> f.specification.name,
+                    "module-version" -> f.specification.version)))
+                response = ProtocolResponse(200, entity)
               } else {
-                msg = s"Uploaded modules for type $moduleType have not been found "
+                response = ProtocolResponse(200, Map("message" -> s"Uploaded modules for type $moduleType have not been found"))
               }
               complete(HttpEntity(
                 `application/json`,
-                serializer.serialize(Response(200, null, msg))
+                serializer.serialize(response)
               ))
             }
           }
@@ -269,20 +274,22 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       pathSuffix("instances") {
         get {
           val allInstances = instanceDAO.getAll
+
+          var response: ProtocolResponse = null
           if (allInstances.isEmpty) {
-            complete(HttpEntity(
-              `application/json`,
-              serializer.serialize(Response(200, null, "Instances have not been found"))
-            ))
+            response = ProtocolResponse(200, Map("message" -> "Instances have not been found"))
+          } else {
+            val entity = Map("instances" -> allInstances.map(x => ShortInstanceMetadata(x.name,
+                x.moduleType,
+                x.moduleName,
+                x.moduleVersion,
+                x.description,
+                x.status)))
+            response = ProtocolResponse(200, entity)
           }
           complete(HttpEntity(
             `application/json`,
-            serializer.serialize(allInstances.map(x => ShortInstanceMetadata(x.name,
-              x.moduleType,
-              x.moduleName,
-              x.moduleVersion,
-              x.description,
-              x.status)))
+            serializer.serialize(response)
           ))
         }
       }

@@ -78,6 +78,10 @@ class StreamValidator {
           val validator = new GeneratorValidator
           errors ++= validator.validate(params.generator, initialData.generator)
         }
+        else {
+          if (Option(initialData.generator).isDefined)
+            errors += s"'generator' is not supported for streams of type '${params.streamType}"
+        }
     }
 
     Option(params.tags) match {

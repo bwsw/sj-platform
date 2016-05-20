@@ -14,9 +14,9 @@ import com.bwsw.sj.crud.rest.validator.service.ServiceValidator
   *
   * Created by mendelbaum_nm
   */
-trait SjServiceApi extends Directives with SjCrudValidator {
+trait SjServicesApi extends Directives with SjCrudValidator {
 
-  val serviceApi = {
+  val servicesApi = {
     pathPrefix("services") {
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>
@@ -56,7 +56,7 @@ trait SjServiceApi extends Directives with SjCrudValidator {
           } else {
             msg = serializer.serialize(s"No services found")
           }
-          complete(HttpResponse(200, entity=HttpEntity(msg)))
+          complete(HttpResponse(200, entity=HttpEntity(`application/json`, msg)))
 
         }
       } ~
@@ -69,7 +69,7 @@ trait SjServiceApi extends Directives with SjCrudValidator {
           } else {
             msg = serializer.serialize(s"Service '$serviceName' not found")
           }
-          complete(HttpResponse(200, entity=HttpEntity(msg)))
+          complete(HttpResponse(200, entity=HttpEntity(`application/json`, msg)))
         }
       }
     }
