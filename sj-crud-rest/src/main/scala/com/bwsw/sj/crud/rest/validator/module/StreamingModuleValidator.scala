@@ -1,22 +1,15 @@
 package com.bwsw.sj.crud.rest.validator.module
 
-import java.net.InetSocketAddress
 import java.util.Calendar
 
-import com.aerospike.client.Host
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.crud.rest.entities.InstanceMetadata
-import com.bwsw.tstreams.coordination.Coordinator
-import com.bwsw.tstreams.data.IStorage
-import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStorageOptions}
-import com.bwsw.tstreams.data.cassandra.{CassandraStorageFactory, CassandraStorageOptions}
-import com.bwsw.tstreams.metadata.MetadataStorageFactory
-import com.bwsw.tstreams.services.BasicStreamService
-import org.redisson.{Config, Redisson}
+import com.bwsw.sj.crud.rest.utils.StreamUtil
+import kafka.common.TopicExistsException
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -30,6 +23,7 @@ import scala.collection.mutable.ArrayBuffer
   */
 abstract class StreamingModuleValidator {
   import com.bwsw.sj.common.ModuleConstants._
+  import com.bwsw.sj.common.StreamConstants._
   import com.bwsw.sj.crud.rest.utils.ConvertUtil._
 
   var serviceDAO: GenericMongoService[Service] = null
@@ -107,16 +101,6 @@ abstract class StreamingModuleValidator {
       errors += "Coordination service attribute is empty."
     }
 
-    val startFrom = parameters.startFrom
-    if (!startFromModes.contains(startFrom)) {
-      try {
-        startFrom.toLong
-      } catch {
-        case ex: NumberFormatException =>
-          errors += s"Start-from attribute is not 'oldest' or 'newest' or timestamp."
-      }
-    }
-
     if (listHasDoubles(parameters.inputs.toList)) {
       errors += s"Inputs is not unique."
     }
@@ -131,18 +115,45 @@ abstract class StreamingModuleValidator {
 
     val inputStreams = getStreams(parameters.inputs.toList.map(_.replaceAll("/split|/full", "")))
     val outputStreams = getStreams(parameters.outputs.toList)
+    if (outputStreams.exists(s => !s.streamType.equals(tStream))) {
+      errors += s"Output streams must be only Tstream."
+    }
 
     val allStreams = inputStreams.union(outputStreams)
 
-    val streamsServices = getStreamServices(allStreams)
-    if (streamsServices.size != 1) {
-      errors += s"All streams should have the same service."
+    val startFrom = parameters.startFrom
+    if (!startFromModes.contains(startFrom)) {
+      if (allStreams.exists(s => s.streamType.equals(kafka))) {
+        errors += s"Start-from attribute must be 'oldest' or 'newest', if instance have kafka-streams."
+      } else {
+        try {
+          startFrom.toLong
+        } catch {
+          case ex: NumberFormatException =>
+            errors += s"Start-from attribute is not 'oldest' or 'newest' or timestamp."
+        }
+      }
+    }
+
+    val tStreamsServices = getStreamServices(allStreams.filter { s =>
+      s.streamType.equals(tStream)
+    })
+    if (tStreamsServices.size != 1) {
+      errors += s"All t-streams should have the same service."
     } else {
       val service = allStreams.head.service
       if (!service.isInstanceOf[TStreamService]) {
-        errors += s"Service for streams must be 'TstrQ'."
+        errors += s"Service for t-streams must be 'TstrQ'."
       } else {
-        errors.appendAll(checkAndCreateStreams(errors, service.asInstanceOf[TStreamService], allStreams))
+        checkTStreams(errors, allStreams.filter(s => s.streamType.equals(tStream)))
+      }
+    }
+    val kafkaStreams = allStreams.filter(s => s.streamType.equals(kafka))
+    if (kafkaStreams.nonEmpty) {
+      if (kafkaStreams.exists(s => !s.service.isInstanceOf[KafkaService])) {
+        errors += s"Service for kafka-streams must be 'KfkQ'."
+      } else {
+        checkKafkaStreams(errors, allStreams.filter(s => s.streamType.equals(kafka)))
       }
     }
 
@@ -163,62 +174,46 @@ abstract class StreamingModuleValidator {
         errors += "Unknown type of 'parallelism' parameter. Must be Int or String."
     }
 
-    createInstance(validateParameters, partitions, validatedInstance, allStreams.toSet)
+    createInstance(validateParameters, partitions, validatedInstance, allStreams.filter(s => s.streamType.equals(tStream)).toSet)
     (errors, validatedInstance)
   }
 
-  def checkAndCreateStreams(errors: ArrayBuffer[String], service: TStreamService, allStreams: mutable.Buffer[SjStream]) = {
-    val metadataProvider = service.metadataProvider
-    val hosts = metadataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt))
-    val metadataStorage = (new MetadataStorageFactory).getInstance(hosts.toList, service.metadataNamespace)
-
-    val dataProvider = service.dataProvider
-    var dataStorage: IStorage[Array[Byte]] = null
-    if (dataProvider.providerType.equals("cassandra")) {
-      val options = new CassandraStorageOptions(
-        dataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList,
-        service.dataNamespace
-      )
-      dataStorage = (new CassandraStorageFactory).getInstance(options)
-    } else if (dataProvider.providerType.equals("aerospike")) {
-      val options = new AerospikeStorageOptions(
-        service.dataNamespace,
-        dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toList
-      )
-      dataStorage = (new AerospikeStorageFactory).getInstance(options)
-    }
-
-    val lockProvider = service.lockProvider
-    val redisConfig = new Config()
-    redisConfig.useSingleServer().setAddress(lockProvider.hosts.head)
-    val coordinator = new Coordinator(service.lockNamespace, Redisson.create(redisConfig))
-
-    allStreams.foreach { (stream: SjStream) =>
-      if (BasicStreamService.isExist(stream.name, metadataStorage)) {
-        val tStream = BasicStreamService.loadStream[Array[Byte]](
-          stream.name,
-          metadataStorage,
-          dataStorage,
-          coordinator
-        )
-        if (tStream.getPartitions != stream.partitions) {
-          errors += s"Partitions count mismatch"
-        }
-      } else {
-        if (errors.isEmpty) {
-          BasicStreamService.createStream(
-            stream.name,
-            stream.partitions,
-            5000,
-            "", metadataStorage,
-            dataStorage,
-            coordinator
-          )
+  /**
+    * Checking and creating t-streams, if streams is not exists
+    * @param errors - List of all errors
+    * @param allTStreams - all t-streams of instance
+    */
+  def checkTStreams(errors: ArrayBuffer[String], allTStreams: mutable.Buffer[SjStream]) = {
+    allTStreams.foreach { (stream: SjStream) =>
+      if (errors.isEmpty) {
+        val streamCheckResult = StreamUtil.checkAndCreateTStream(stream)
+        streamCheckResult match {
+          case Left(err) => errors += err
+          case _ =>
         }
       }
-
     }
-    errors
+  }
+
+  /**
+    * Checking and creating kafka topics, if it's not exists
+    * @param errors - list of all errors
+    * @param allKafkaStreams - all kafka streams of instance
+    */
+  def checkKafkaStreams(errors: ArrayBuffer[String], allKafkaStreams: mutable.Buffer[SjStream]) = {
+    allKafkaStreams.foreach { (stream: SjStream) =>
+      if (errors.isEmpty) {
+        try {
+          val streamCheckResult = StreamUtil.checkAndCreateKafkaTopic(stream)
+          streamCheckResult match {
+            case Left(err) => errors += err
+            case _ =>
+          }
+        } catch {
+          case e: TopicExistsException => errors += s"Cannot create kafka topic: ${e.getMessage}"
+        }
+      }
+    }
   }
 
   /**

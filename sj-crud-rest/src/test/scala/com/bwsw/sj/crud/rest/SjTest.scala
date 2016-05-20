@@ -64,6 +64,7 @@ object SjTest {
     println(cass.getClass.toString)
     val test = serializer.deserialize[SjStreamTest](testJson)
     println(test.getClass.toString)*/
+    //createKafkaData()
     println("Ok")
   }
 
@@ -82,6 +83,33 @@ object SjTest {
     createServices(serviceDAO, providerDAO)
     val tService = serviceDAO.get("tstrq_service")
     createStreams(tService, serviceDAO.get("zk_service").asInstanceOf[ZKService])
+  }
+
+  def createKafkaData() = {
+    val providerDAO = ConnectionRepository.getProviderService
+    val serviceDAO = ConnectionRepository.getServiceManager
+    val streamDAO = ConnectionRepository.getStreamService
+
+    val provider = new Provider()
+    provider.name = "kafka"
+    provider.hosts = Array("localhost:9092")
+    provider.providerType = "kafka"
+    providerDAO.save(provider)
+
+    val service = new KafkaService()
+    service.provider = provider
+    service.name = "kafka_service"
+    service.serviceType = "KfkQ"
+    serviceDAO.save(service)
+
+    val stream = new SjStream()
+    stream.name = "s5"
+    stream.generator = null
+    stream.partitions = 3
+    stream.service = service
+    stream.streamType = "kafka"
+    stream.tags = Array("test")
+    streamDAO.save(stream)
   }
 
   def createServices(serviceDAO: GenericMongoService[Service], providerDAO: GenericMongoService[Provider]) = {
@@ -182,6 +210,7 @@ object SjTest {
     s1.description = "s1 stream"
     s1.partitions = 7
     s1.service = tService
+    s1.streamType = "Tstream"
     s1.tags = Array("TAG")
     s1.generator = generator1
     sjStreamDAO.save(s1)
@@ -195,6 +224,7 @@ object SjTest {
     s2.description = "s2 stream"
     s2.partitions = 10
     s2.service = tService
+    s2.streamType = "Tstream"
     s2.tags = Array("TAG")
     s2.generator = generator2
     sjStreamDAO.save(s2)
@@ -208,6 +238,7 @@ object SjTest {
     s3.description = "s3 stream"
     s3.partitions = 10
     s3.service = tService
+    s3.streamType = "Tstream"
     s3.tags = Array("TAG")
     s3.generator = generator3
     sjStreamDAO.save(s3)

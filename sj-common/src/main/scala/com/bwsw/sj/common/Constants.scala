@@ -15,7 +15,9 @@ object ModuleConstants {
   val moduleTypes = Set(windowedType, regularStreamingType)
   val checkpointModes = Set("every-nth", "time-interval")
   val stateManagementModes = Set("none", "ram", "rocks")
-  val startFromModes = Set("oldest", "newest")
+  val oldest = "oldest"
+  val newest = "newest"
+  val startFromModes = Set(oldest, newest)
 
   val ready = "ready"
   val starting = "starting"
@@ -41,7 +43,9 @@ object ModuleConstants {
 }
 
 object StreamConstants {
-  val streamTypes = Set("Tstream", "kafka")
+  val tStream = "Tstream"
+  val kafka = "kafka"
+  val streamTypes = Set(tStream, kafka)
 }
 
 object GeneratorConstants {

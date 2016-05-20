@@ -4,6 +4,8 @@ version := "1.0"
 
 scalaVersion := "2.11.7"
 
+resolvers += "Twitter Repository" at "http://maven.twttr.com"
+
 libraryDependencies ++= Seq(
   "com.typesafe.akka" % "akka-http-core-experimental_2.11" % "2.0-M2",
   "com.typesafe.akka" % "akka-http-experimental_2.11" % "2.0-M2",
@@ -11,6 +13,7 @@ libraryDependencies ++= Seq(
   "org.everit.json" % "org.everit.json.schema" % "1.2.0",
   "com.typesafe.akka" % "akka-slf4j_2.11" % "2.4.4",
   "org.apache.httpcomponents" % "httpclient" % "4.5.2",
+  "com.twitter.common.zookeeper" % "lock" % "0.0.40",
   "com.datastax.cassandra" % "cassandra-driver-core" % "3.0.1",
   "com.aerospike" % "aerospike-client" % "3.0.22",
   "org.apache.zookeeper" % "zookeeper" % "3.4.6",

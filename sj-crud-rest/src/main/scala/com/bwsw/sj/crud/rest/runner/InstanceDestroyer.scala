@@ -1,6 +1,7 @@
 package com.bwsw.sj.crud.rest.runner
 
 import com.bwsw.sj.common.DAL.model.{SjStream, RegularInstance}
+import com.bwsw.sj.common.StreamConstants
 
 /**
   * One-thread deleting object for instance
@@ -31,20 +32,22 @@ class InstanceDestroyer(instance: RegularInstance, delay: Long) extends Runnable
     val allStreams = instance.inputs.map(_.replaceAll("/split|/full", "")).union(instance.outputs).map(streamDAO.get)
     val startedInstances = instanceDAO.getByParameters(Map("status" -> started))
     val startingInstance = startedInstances.union(instanceDAO.getByParameters(Map("status" -> starting)))
-    val streamsToStopping = allStreams.filter { stream: SjStream =>
-      val stage = instance.stages.get(stream.name)
-      !stream.generator.generatorType.equals("local") &&
-        (stage.state.equals(failed) ||
-          !startingInstance.exists { instance =>
-            val streamGeneratorName = createGeneratorTaskName(stream)
-            val instanceStreamGenerators = instance.inputs.map(_.replaceAll("/split|/full", ""))
-              .union(instance.outputs)
-              .map { streamName =>
-                val sjStream = streamDAO.get(streamName)
-                createGeneratorTaskName(sjStream)
-            }
-            instanceStreamGenerators.contains(streamGeneratorName)
-          })
+    val streamsToStopping = allStreams
+      .filter { stream: SjStream =>
+        if (stream.streamType.equals(StreamConstants.tStream)) {
+          val stage = instance.stages.get(stream.name)
+          !stream.generator.generatorType.equals("local") &&
+            (stage.state.equals(failed) ||
+              !startingInstance.exists { instance =>
+                val streamGeneratorName = createGeneratorTaskName(stream)
+                val instanceStreamGenerators = instance.inputs.map(_.replaceAll("/split|/full", ""))
+                  .union(instance.outputs)
+                  .map(name => streamDAO.get(name))
+                  .filter(s => s.streamType.equals(StreamConstants.tStream))
+                  .map(sjStream => createGeneratorTaskName(sjStream))
+                instanceStreamGenerators.contains(streamGeneratorName)
+              })
+        } else false
     }
     streamsToStopping.foreach { stream =>
       var isTaskDeleted = false
