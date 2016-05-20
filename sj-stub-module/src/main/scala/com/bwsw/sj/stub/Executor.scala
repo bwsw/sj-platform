@@ -52,7 +52,9 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
   }
 
   override def onAfterStateSave(isFull: Boolean): Unit = {
-    if (isFull) {}
+    if (isFull) {
+      println("on after full state saving")
+    } else println("on after partial state saving")
   }
 
   override def onBeforeCheckpoint(): Unit = {
@@ -68,6 +70,6 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
    * @param isFullState Flag denotes that full state (true) or partial changes of state (false) will be saved
    */
   override def onBeforeStateSave(isFullState: Boolean): Unit = {
-    println("on before state save")
+    println("on before state saving")
   }
 }

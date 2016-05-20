@@ -2,7 +2,7 @@ package com.bwsw.sj.common.module.state
 
 /**
  * Сlass representing storage of state of module.
- * State may be used to keeping some global module variables related to processing
+ * State can be used to keeping some global module variables related to processing
  * Created: 19/04/2016
  * @author Kseniya Mikhaleva
  *
