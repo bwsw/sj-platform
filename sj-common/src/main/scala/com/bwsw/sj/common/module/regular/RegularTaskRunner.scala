@@ -32,9 +32,8 @@ object RegularTaskRunner {
   private val logger = LoggerFactory.getLogger(this.getClass)
   def main(args: Array[String]) {
 
-    logger.info(s"Start preparing of task runner for regular module\n")
-
     val manager = new TaskManager()
+    logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for regular module\n")
 
     val moduleJar = manager.getModuleJar
 
@@ -60,41 +59,41 @@ object RegularTaskRunner {
     var offsetProducer: Option[BasicProducer[Array[Byte], Array[Byte]]] = None
 
     if (inputs.exists(x => x._1.streamType == StreamConstants.streamTypes.head)) {
-      logger.debug(s"Start creating subscribing consumers\n")
+      logger.debug(s"Task: ${manager.taskName}. Start creating subscribing consumers\n")
       consumersWithSubscribes = Some(inputs.filter(x => x._1.streamType == StreamConstants.streamTypes.head).map({
         x => manager.createSubscribingConsumer(x._1, x._2.toList, chooseOffset(regularInstanceMetadata.startFrom), blockingQueue)
       }).map(x => (x.name, x)).toMap)
-      logger.debug(s"Creation of subscribing consumers is finished\n")
+      logger.debug(s"Task: ${manager.taskName}. Creation of subscribing consumers is finished\n")
 
-      logger.debug(s"Start adding subscribing consumers to checkpoint group\n")
+      logger.debug(s"Task: ${manager.taskName}. Start adding subscribing consumers to checkpoint group\n")
       consumersWithSubscribes.get.foreach(x => checkpointGroup.add(x._1, x._2))
-      logger.debug(s"Adding subscribing consumers to checkpoint group is finished\n")
-      logger.debug(s"Launch subscribing consumers\n")
+      logger.debug(s"Task: ${manager.taskName}. Adding subscribing consumers to checkpoint group is finished\n")
+      logger.debug(s"Task: ${manager.taskName}. Launch subscribing consumers\n")
       consumersWithSubscribes.get.foreach(_._2.start())
-      logger.debug(s"Subscribing consumers are launched\n")
+      logger.debug(s"Task: ${manager.taskName}. Subscribing consumers are launched\n")
     }
 
     if (inputs.exists(x => x._1.streamType == StreamConstants.streamTypes.last)) {
       val kafkaInputs = inputs.filter(x => x._1.streamType == StreamConstants.streamTypes.last)
-      logger.debug(s"Start creating kafka consumers\n")
-      val kafkaConsumer = manager.createKafkaConsumer(kafkaInputs
-        .map(x => (x._1.name, x._2.toList)).toList,
+      logger.debug(s"Task: ${manager.taskName}. Start creating kafka consumers\n")
+      val kafkaConsumer = manager.createKafkaConsumer(
+        kafkaInputs.map(x => (x._1.name, x._2.toList)).toList,
         kafkaInputs.flatMap(_._1.service.asInstanceOf[KafkaService].provider.hosts).toList,
         regularInstanceMetadata.startFrom match {
           case "oldest" => "earliest"
           case _ => "latest"
         }
       )
-      logger.debug(s"Creation of kafka consumers is finished\n")
+      logger.debug(s"Task: ${manager.taskName}. Creation of kafka consumers is finished\n")
 
-      logger.debug(s"Launch kafka consumers that put consumed message, that are wrapped in envelope, into common queue \n")
+      logger.debug(s"Task: ${manager.taskName}. Launch kafka consumers that put consumed message, that are wrapped in envelope, into common queue \n")
       new Thread(new Runnable {
         def run() = {
           val serializer = new JsonSerializer()
           val timeout = 5
 
           while (true) {
-            logger.debug(s"Waiting for records that consumed from kafka for $timeout milliseconds\n")
+            logger.debug(s"Task: ${manager.taskName}. Waiting for records that consumed from kafka for $timeout milliseconds\n")
             val records = kafkaConsumer.poll(timeout)
             records.asScala.foreach(x => {
               val stream = ConnectionRepository.getStreamService.get(x.topic())
@@ -113,28 +112,28 @@ object RegularTaskRunner {
         }
       }).start()
 
-      logger.debug(s"Start creating a t-stream producer to record kafka offsets\n")
+      logger.debug(s"Task: ${manager.taskName}. Start creating a t-stream producer to record kafka offsets\n")
       offsetProducer = Some(manager.createOffsetProducer())
-      logger.debug(s"Creation of t-stream producer is finished\n")
-      logger.debug(s"Start adding the t-stream producer to checkpoint group\n")
+      logger.debug(s"Task: ${manager.taskName}. Creation of t-stream producer is finished\n")
+      logger.debug(s"Task: ${manager.taskName}. Start adding the t-stream producer to checkpoint group\n")
       checkpointGroup.add(offsetProducer.get.name, offsetProducer.get)
-      logger.debug(s"The t-stream producer is added to checkpoint group\n")
+      logger.debug(s"Task: ${manager.taskName}. The t-stream producer is added to checkpoint group\n")
     }
 
-    logger.debug(s"Start creating t-stream producers for each output stream\n")
+    logger.debug(s"Task: ${manager.taskName}. Start creating t-stream producers for each output stream\n")
     val producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]] =
       regularInstanceMetadata.outputs
         .map(x => (x, ConnectionRepository.getStreamService.get(x)))
         .map(x => (x._1, manager.createProducer(x._2))).toMap
-    logger.debug(s"T-stream producers for each output stream are created\n")
+    logger.debug(s"Task: ${manager.taskName}. T-stream producers for each output stream are created\n")
 
-    logger.debug(s"Start adding t-stream producers to checkpoint group\n")
+    logger.debug(s"Task: ${manager.taskName}. Start adding t-stream producers to checkpoint group\n")
     producers.foreach(x => checkpointGroup.add(x._2.name, x._2))
-    logger.debug(s"The t-stream producers are added to checkpoint group\n")
+    logger.debug(s"Task: ${manager.taskName}. The t-stream producers are added to checkpoint group\n")
 
     val classLoader = manager.getClassLoader(moduleJar.getAbsolutePath)
 
-    logger.info(s"Preparing finished. Launch task\n")
+    logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
 
     runModule(moduleTimer,
       regularInstanceMetadata,
@@ -184,7 +183,7 @@ object RegularTaskRunner {
 
     regularInstanceMetadata.stateManagement match {
       case "none" =>
-        logger.debug(s"Start preparing of regular module without state\n")
+        logger.debug(s"Task: ${manager.taskName}. Start preparing of regular module without state\n")
         val moduleEnvironmentManager = new ModuleEnvironmentManager(
           serializer.deserialize[Map[String, Any]](regularInstanceMetadata.options),
           producers,
@@ -195,19 +194,19 @@ object RegularTaskRunner {
           moduleTimer
         )
 
-        logger.debug(s"Start loading of executor class from module jar\n")
+        logger.debug(s"Task: ${manager.taskName}. Start loading of executor class from module jar\n")
         val executor = classLoader.loadClass(pathToExecutor)
           .getConstructor(classOf[ModuleEnvironmentManager])
           .newInstance(moduleEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
-        logger.debug(s"Create instance of executor class\n")
+        logger.debug(s"Task: ${manager.taskName}. Create instance of executor class\n")
 
-        logger.debug(s"Invoke onInit() handler\n")
+        logger.debug(s"Task: ${manager.taskName}. Invoke onInit() handler\n")
         executor.onInit()
 
-        logger.debug(s"Preparation of regular module without state is finished\n")
+        logger.debug(s"Task: ${manager.taskName}. Preparation of regular module without state is finished\n")
         regularInstanceMetadata.checkpointMode match {
           case "time-interval" =>
-            logger.debug(s"Start a regular module without state with time-interval checkpoint mode\n")
+            logger.debug(s"Task: ${manager.taskName}. Start a regular module without state with time-interval checkpoint mode\n")
             val checkpointTimer = new SjTimer()
             checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
             while (true) {
@@ -215,109 +214,111 @@ object RegularTaskRunner {
               val maybeEnvelope = blockingQueue.get(regularInstanceMetadata.idle)
 
               if (maybeEnvelope == null) {
-                logger.debug(s"Idle timeout: ${regularInstanceMetadata.idle} went out and nothing was received\n")
-                logger.debug(s"Invoke onIdle() handler\n")
+                logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${regularInstanceMetadata.idle} went out and nothing was received\n")
+                logger.debug(s"Task: ${manager.taskName}. Invoke onIdle() handler\n")
                 executor.onIdle()
               } else {
                 val envelope = serializer.deserialize[Envelope](maybeEnvelope)
 
                 envelope.streamType match {
                   case "t-stream" =>
-                    logger.info(s"T-stream envelope is received\n")
+                    logger.info(s"Task: ${manager.taskName}. T-stream envelope is received\n")
                     val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
-                    logger.debug(s"Change local offset of consumer: ${tStreamEnvelope.consumerName}\n")
+                    logger.debug(s"Task: ${manager.taskName}. " +
+                      s"Change local offset of consumer: ${tStreamEnvelope.consumerName} to txn: ${tStreamEnvelope.txnUUID}\n")
                     consumers.get(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
                   case "kafka-stream" =>
-                    logger.info(s"Kafka envelope is received\n")
+                    logger.info(s"Task: ${manager.taskName}. Kafka envelope is received\n")
                     val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
-                    logger.debug(s"Change offset for stream: ${kafkaEnvelope.stream} " +
-                      s"for partition: ${kafkaEnvelope.partition} to ${kafkaEnvelope.stream}\n")
+                    logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${kafkaEnvelope.stream} " +
+                      s"for partition: ${kafkaEnvelope.partition} to ${kafkaEnvelope.offset}\n")
                     manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
                 }
 
-                logger.debug(s"Invoke onMessage() handler\n")
+                logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
                 executor.onMessage(envelope)
 
                 if (checkpointTimer.isTime) {
-                  logger.info(s"It's time to checkpoint\n")
-                  logger.debug(s"Invoke onBeforeCheckpoint() handler\n")
+                  logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
+                  logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeCheckpoint() handler\n")
                   executor.onBeforeCheckpoint()
                   if (offsetProducer.isDefined) {
-                    logger.debug(s"Save kafka offsets for each kafka input\n")
+                    logger.debug(s"Task: ${manager.taskName}. Save kafka offsets for each kafka input\n")
                     offsetProducer.get.newTransaction(ProducerPolicies.errorIfOpen)
                       .send(objectSerializer.serialize(manager.kafkaOffsetsStorage))
                   }
-                  logger.debug(s"Do group checkpoint\n")
+                  logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
                   checkpointGroup.commit()
                   outputTags.clear()
-                  logger.debug(s"Invoke onAfterCheckpoint() handler\n")
+                  logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
                   executor.onAfterCheckpoint()
-                  logger.debug(s"Prepare a checkpoint timer for next cycle\n")
+                  logger.debug(s"Task: ${manager.taskName}. Prepare a checkpoint timer for next cycle\n")
                   checkpointTimer.reset()
                   checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
                 }
 
                 if (moduleTimer.isTime) {
-                  logger.debug(s"Invoke onTimer() handler\n")
+                  logger.debug(s"Task: ${manager.taskName}. Invoke onTimer() handler\n")
                   executor.onTimer(System.currentTimeMillis() - moduleTimer.responseTime)
                   moduleTimer.reset()
                 }
               }
             }
           case "every-nth" =>
-            logger.debug(s"Start a regular module without state with every-nth checkpoint mode\n")
-            logger.debug(s"Set a counter of envelopes to 0\n")
+            logger.debug(s"Task: ${manager.taskName}. Start a regular module without state with every-nth checkpoint mode\n")
+            logger.debug(s"Task: ${manager.taskName}. Set a counter of envelopes to 0\n")
             var countOfEnvelopes = 0
             while (true) {
 
               val maybeEnvelope = blockingQueue.get(regularInstanceMetadata.idle)
 
               if (maybeEnvelope == null) {
-                logger.debug(s"Idle timeout: ${regularInstanceMetadata.idle} went out and nothing was received\n")
-                logger.debug(s"Invoke onIdle() handler\n")
+                logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${regularInstanceMetadata.idle} went out and nothing was received\n")
+                logger.debug(s"Task: ${manager.taskName}. Invoke onIdle() handler\n")
                 executor.onIdle()
               } else {
                 val envelope = serializer.deserialize[Envelope](maybeEnvelope)
                 countOfEnvelopes += 1
-                logger.debug(s"Increase count of envelopes to: $countOfEnvelopes\n")
+                logger.debug(s"Task: ${manager.taskName}. Increase count of envelopes to: $countOfEnvelopes\n")
 
                 envelope.streamType match {
                   case "t-stream" =>
-                    logger.info(s"T-stream envelope is received\n")
+                    logger.info(s"Task: ${manager.taskName}. T-stream envelope is received\n")
                     val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
-                    logger.debug(s"Change local offset of consumer: ${tStreamEnvelope.consumerName}\n")
+                    logger.debug(s"Task: ${manager.taskName}. " +
+                      s"Change local offset of consumer: ${tStreamEnvelope.consumerName} to txn: ${tStreamEnvelope.txnUUID}\n")
                     consumers.get(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
                   case "kafka-stream" =>
-                    logger.info(s"Kafka envelope is received\n")
+                    logger.info(s"Task: ${manager.taskName}. Kafka envelope is received\n")
                     val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
-                    logger.debug(s"Change offset for stream: ${kafkaEnvelope.stream} " +
-                      s"for partition: ${kafkaEnvelope.partition} to ${kafkaEnvelope.stream}\n")
+                    logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${kafkaEnvelope.stream} " +
+                      s"for partition: ${kafkaEnvelope.partition} to ${kafkaEnvelope.offset}\n")
                     manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
                 }
 
-                logger.debug(s"Invoke onMessage() handler\n")
+                logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
                 executor.onMessage(envelope)
 
                 if (countOfEnvelopes == regularInstanceMetadata.checkpointInterval) {
-                  logger.info(s"It's time to checkpoint\n")
-                  logger.debug(s"Invoke onBeforeCheckpoint() handler\n")
+                  logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
+                  logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeCheckpoint() handler\n")
                   executor.onBeforeCheckpoint()
                   if (offsetProducer.isDefined) {
-                    logger.debug(s"Save kafka offsets for each kafka input\n")
+                    logger.debug(s"Task: ${manager.taskName}. Save kafka offsets for each kafka input\n")
                     offsetProducer.get.newTransaction(ProducerPolicies.errorIfOpen)
                       .send(objectSerializer.serialize(manager.kafkaOffsetsStorage))
                   }
-                  logger.debug(s"Do group checkpoint\n")
+                  logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
                   checkpointGroup.commit()
                   outputTags.clear()
-                  logger.debug(s"Invoke onAfterCheckpoint() handler\n")
+                  logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
                   executor.onAfterCheckpoint()
-                  logger.debug(s"Reset a counter of envelopes to 0\n")
+                  logger.debug(s"Task: ${manager.taskName}. Reset a counter of envelopes to 0\n")
                   countOfEnvelopes = 0
                 }
 
                 if (moduleTimer.isTime) {
-                  logger.debug(s"Invoke onTimer() handler\n")
+                  logger.debug(s"Task: ${manager.taskName}. Invoke onTimer() handler\n")
                   executor.onTimer(System.currentTimeMillis() - moduleTimer.responseTime)
                   moduleTimer.reset()
                 }
@@ -326,16 +327,16 @@ object RegularTaskRunner {
         }
 
       case "ram" =>
-        logger.debug(s"Start preparing of regular module with state which is stored in RAM\n")
+        logger.debug(s"Task: ${manager.taskName}. Start preparing of regular module with state which is stored in RAM\n")
         var countOfCheckpoints = 1
         val streamForState = manager.getStateStream
         val stateProducer = manager.createProducer(streamForState)
         val stateConsumer = manager.createConsumer(streamForState, List(0, 0), Oldest)
 
-        logger.debug(s"Start adding state consumer and producer to checkpoint group\n")
+        logger.debug(s"Task: ${manager.taskName}. Start adding state consumer and producer to checkpoint group\n")
         checkpointGroup.add(stateConsumer.name, stateConsumer)
         checkpointGroup.add(stateProducer.name, stateProducer)
-        logger.debug(s"Adding state consumer and producer to checkpoint group is finished\n")
+        logger.debug(s"Task: ${manager.taskName}. Adding state consumer and producer to checkpoint group is finished\n")
 
         val stateService = new RAMStateService(stateProducer, stateConsumer)
 
@@ -350,19 +351,19 @@ object RegularTaskRunner {
           moduleTimer
         )
 
-        logger.debug(s"Start loading of executor class from module jar\n")
+        logger.debug(s"Task: ${manager.taskName}. Start loading of executor class from module jar\n")
         val executor = classLoader.loadClass(pathToExecutor)
           .getConstructor(classOf[ModuleEnvironmentManager])
           .newInstance(moduleEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
-        logger.debug(s"Create instance of executor class\n")
+        logger.debug(s"Task: ${manager.taskName}. Instance of executor class is created\n")
 
-        logger.debug(s"Invoke onInit() handler\n")
+        logger.debug(s"Task: ${manager.taskName}. Invoke onInit() handler\n")
         executor.onInit()
 
-        logger.debug(s"Preparation of regular module with state is finished\n")
+        logger.debug(s"Task: ${manager.taskName}. Preparation of regular module with state is finished\n")
         regularInstanceMetadata.checkpointMode match {
           case "time-interval" =>
-            logger.debug(s"Start a regular module with state with time-interval checkpoint mode\n")
+            logger.debug(s"Task: ${manager.taskName}. Start a regular module with state with time-interval checkpoint mode\n")
             val checkpointTimer = new SjTimer()
             checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
 
@@ -371,70 +372,71 @@ object RegularTaskRunner {
               val maybeEnvelope = blockingQueue.get(regularInstanceMetadata.idle)
 
               if (maybeEnvelope == null) {
-                logger.debug(s"Idle timeout: ${regularInstanceMetadata.idle} went out and nothing was received\n")
-                logger.debug(s"Invoke onIdle() handler\n")
+                logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${regularInstanceMetadata.idle} went out and nothing was received\n")
+                logger.debug(s"Task: ${manager.taskName}. Invoke onIdle() handler\n")
                 executor.onIdle()
               } else {
                 val envelope = serializer.deserialize[Envelope](maybeEnvelope)
 
                 envelope.streamType match {
                   case "t-stream" =>
-                    logger.info(s"T-stream envelope is received\n")
+                    logger.info(s"Task: ${manager.taskName}. T-stream envelope is received\n")
                     val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
-                    logger.debug(s"Change local offset of consumer: ${tStreamEnvelope.consumerName}\n")
+                    logger.debug(s"Task: ${manager.taskName}. " +
+                      s"Change local offset of consumer: ${tStreamEnvelope.consumerName} to txn: ${tStreamEnvelope.txnUUID}\n")
                     consumers.get(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
                   case "kafka-stream" =>
-                    logger.info(s"Kafka envelope is received\n")
+                    logger.info(s"Task: ${manager.taskName}. Kafka envelope is received\n")
                     val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
-                    logger.debug(s"Change offset for stream: ${kafkaEnvelope.stream} " +
-                      s"for partition: ${kafkaEnvelope.partition} to ${kafkaEnvelope.stream}\n")
+                    logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${kafkaEnvelope.stream} " +
+                      s"for partition: ${kafkaEnvelope.partition} to ${kafkaEnvelope.offset}\n")
                     manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
 
                 }
 
-                logger.debug(s"Invoke onMessage() handler\n")
+                logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
                 executor.onMessage(envelope)
 
                 if (checkpointTimer.isTime) {
-                  logger.info(s"It's time to checkpoint\n")
-                  logger.debug(s"Invoke onBeforeCheckpoint() handler\n")
+                  logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
+                  logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeCheckpoint() handler\n")
                   executor.onBeforeCheckpoint()
 
                   if (countOfCheckpoints != regularInstanceMetadata.stateFullCheckpoint) {
-                    logger.info(s"It's time to checkpoint of a part of state\n")
-                    logger.debug(s"Invoke onBeforeStateSave() handler\n")
+                    logger.info(s"Task: ${manager.taskName}. It's time to checkpoint of a part of state\n")
+                    logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeStateSave() handler\n")
                     executor.onBeforeStateSave(false)
                     stateService.checkpoint()
-                    logger.debug(s"Invoke onAfterStateSave() handler\n")
+                    logger.debug(s"Task: ${manager.taskName}. Invoke onAfterStateSave() handler\n")
                     executor.onAfterStateSave(false)
                     countOfCheckpoints += 1
                   } else {
-                    logger.info(s"It's time to checkpoint of full state\n")
-                    logger.debug(s"Invoke onBeforeStateSave() handler\n")
+                    logger.info(s"Task: ${manager.taskName}. It's time to checkpoint of full state\n")
+                    logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeStateSave() handler\n")
                     executor.onBeforeStateSave(true)
                     stateService.fullCheckpoint()
-                    logger.debug(s"Invoke onAfterStateSave() handler\n")
+                    logger.debug(s"Task: ${manager.taskName}. Invoke onAfterStateSave() handler\n")
                     executor.onAfterStateSave(true)
                     countOfCheckpoints = 1
                   }
 
                   if (offsetProducer.isDefined) {
-                    logger.debug(s"Save kafka offsets for each kafka input\n")
+                    logger.debug(s"Task: ${manager.taskName}. Save kafka offsets for each kafka input\n")
                     offsetProducer.get.newTransaction(ProducerPolicies.errorIfOpen)
                       .send(objectSerializer.serialize(manager.kafkaOffsetsStorage))
                   }
-                  logger.debug(s"Do group checkpoint\n")
+                  logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
                   checkpointGroup.commit()
                   outputTags.clear()
-                  logger.debug(s"Invoke onAfterCheckpoint() handler\n")
+                  logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
                   executor.onAfterCheckpoint()
-                  logger.debug(s"Prepare a checkpoint timer for next cycle\n")
+                  logger.debug(s"Task: ${manager.taskName}. Prepare a checkpoint timer for next cycle\n")
                   checkpointTimer.reset()
                   checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
                 }
 
                 if (moduleTimer.isTime) {
-                  logger.debug(s"Invoke onTimer() handler\n")
+                  logger.debug(s"Task: ${manager.taskName}. Invoke onTimer() handler\n")
                   executor.onTimer(System.currentTimeMillis() - moduleTimer.responseTime)
                   moduleTimer.reset()
                 }
@@ -442,8 +444,8 @@ object RegularTaskRunner {
             }
 
           case "every-nth" =>
-            logger.debug(s"Start a regular module with state with every-nth checkpoint mode\n")
-            logger.debug(s"Set a counter of envelopes to 0\n")
+            logger.debug(s"Task: ${manager.taskName}. Start a regular module with state with every-nth checkpoint mode\n")
+            logger.debug(s"Task: ${manager.taskName}. Set a counter of envelopes to 0\n")
             var countOfEnvelopes = 0
 
             while (true) {
@@ -451,71 +453,71 @@ object RegularTaskRunner {
               val maybeEnvelope = blockingQueue.get(regularInstanceMetadata.idle)
 
               if (maybeEnvelope == null) {
-                logger.debug(s"Idle timeout: ${regularInstanceMetadata.idle} went out and nothing was received\n")
-                logger.debug(s"Invoke onIdle() handler\n")
+                logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${regularInstanceMetadata.idle} went out and nothing was received\n")
+                logger.debug(s"Task: ${manager.taskName}. Invoke onIdle() handler\n")
                 executor.onIdle()
               } else {
                 val envelope = serializer.deserialize[Envelope](maybeEnvelope)
                 countOfEnvelopes += 1
-                logger.debug(s"Increase count of envelopes to: $countOfEnvelopes\n")
+                logger.debug(s"Task: ${manager.taskName}. Increase count of envelopes to: $countOfEnvelopes\n")
 
                 envelope.streamType match {
                   case "t-stream" =>
-                    logger.info(s"T-stream envelope is received\n")
+                    logger.info(s"Task: ${manager.taskName}. T-stream envelope is received\n")
                     val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
-                    logger.debug(s"Change local offset of consumer: ${tStreamEnvelope.consumerName}\n")
+                    logger.debug(s"Task: ${manager.taskName}. " +
+                      s"Change local offset of consumer: ${tStreamEnvelope.consumerName} to txn: ${tStreamEnvelope.txnUUID}\n")
                     consumers.get(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
                   case "kafka-stream" =>
-                    logger.info(s"Kafka envelope is received\n")
+                    logger.info(s"Task: ${manager.taskName}. Kafka envelope is received\n")
                     val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
-                    logger.debug(s"Change offset for stream: ${kafkaEnvelope.stream} " +
-                      s"for partition: ${kafkaEnvelope.partition} to ${kafkaEnvelope.stream}\n")
+                    logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${kafkaEnvelope.stream} " +
+                      s"for partition: ${kafkaEnvelope.partition} to ${kafkaEnvelope.offset}\n")
                     manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
-
                 }
 
-                logger.debug(s"Invoke onMessage() handler\n")
+                logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
                 executor.onMessage(envelope)
 
                 if (countOfEnvelopes == regularInstanceMetadata.checkpointInterval) {
-                  logger.info(s"It's time to checkpoint\n")
-                  logger.debug(s"Invoke onBeforeCheckpoint() handler\n")
+                  logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
+                  logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeCheckpoint() handler\n")
                   executor.onBeforeCheckpoint()
 
                   if (countOfCheckpoints != regularInstanceMetadata.stateFullCheckpoint) {
-                    logger.info(s"It's time to checkpoint of a part of state\n")
-                    logger.debug(s"Invoke onBeforeStateSave() handler\n")
+                    logger.info(s"Task: ${manager.taskName}. It's time to checkpoint of a part of state\n")
+                    logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeStateSave() handler\n")
                     executor.onBeforeStateSave(false)
                     stateService.checkpoint()
-                    logger.debug(s"Invoke onAfterStateSave() handler\n")
+                    logger.debug(s"Task: ${manager.taskName}. Invoke onAfterStateSave() handler\n")
                     executor.onAfterStateSave(false)
                     countOfCheckpoints += 1
                   } else {
-                    logger.info(s"It's time to checkpoint of full state\n")
-                    logger.debug(s"Invoke onBeforeStateSave() handler\n")
+                    logger.info(s"Task: ${manager.taskName}. It's time to checkpoint of full state\n")
+                    logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeStateSave() handler\n")
                     executor.onBeforeStateSave(true)
                     stateService.fullCheckpoint()
-                    logger.debug(s"Invoke onAfterStateSave() handler\n")
+                    logger.debug(s"Task: ${manager.taskName}. Invoke onAfterStateSave() handler\n")
                     executor.onAfterStateSave(true)
                     countOfCheckpoints = 1
                   }
 
                   if (offsetProducer.isDefined) {
-                    logger.debug(s"Save kafka offsets for each kafka input\n")
+                    logger.debug(s"Task: ${manager.taskName}. Save kafka offsets for each kafka input\n")
                     offsetProducer.get.newTransaction(ProducerPolicies.errorIfOpen)
                       .send(objectSerializer.serialize(manager.kafkaOffsetsStorage))
                   }
-                  logger.debug(s"Do group checkpoint\n")
+                  logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
                   checkpointGroup.commit()
                   outputTags.clear()
-                  logger.debug(s"Invoke onAfterCheckpoint() handler\n")
+                  logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
                   executor.onAfterCheckpoint()
-                  logger.debug(s"Reset the counter of envelopes to 0\n")
+                  logger.debug(s"Task: ${manager.taskName}. Reset the counter of envelopes to 0\n")
                   countOfEnvelopes = 0
                 }
 
                 if (moduleTimer.isTime) {
-                  logger.debug(s"Invoke onTimer() handler\n")
+                  logger.debug(s"Task: ${manager.taskName}. Invoke onTimer() handler\n")
                   executor.onTimer(System.currentTimeMillis() - moduleTimer.responseTime)
                   moduleTimer.reset()
                 }

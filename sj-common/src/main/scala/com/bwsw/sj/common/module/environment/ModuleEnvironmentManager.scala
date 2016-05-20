@@ -96,7 +96,7 @@ class ModuleEnvironmentManager(val options: Map[String, Any],
   }
 
   /**
-   * Returns set of names of the streams according to the set of tags
+   * Returns set of names of the output streams according to the set of tags
    * @param tags Set of tags
    * @return Set of names of the streams according to the set of tags
    */

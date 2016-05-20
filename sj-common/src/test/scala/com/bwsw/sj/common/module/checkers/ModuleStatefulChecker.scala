@@ -12,9 +12,9 @@ object ModuleStatefulChecker extends App {
   val streamService = ConnectionRepository.getStreamService
   val objectSerializer: ObjectSerializer = new ObjectSerializer()
 
-  val inputTstreamConsumer = createInputTstreamConsumer(streamService)
+  val inputTstreamConsumers = (1 to inputCount).map(x => createInputTstreamConsumer(streamService, x.toString))
   val inputKafkaConsumer = createInputKafkaConsumer(streamService)
-  val outputConsumer = createOutputConsumer(streamService)
+  val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(streamService, x.toString))
 
   var totalInputElements = 0
   var totalOutputElements = 0
@@ -22,16 +22,19 @@ object ModuleStatefulChecker extends App {
   var inputElements = scala.collection.mutable.ArrayBuffer[Int]()
   var outputElements = scala.collection.mutable.ArrayBuffer[Int]()
 
-  var maybeTxn = inputTstreamConsumer.getTransaction
-  while (maybeTxn.isDefined) {
-    val txn = maybeTxn.get
-    while (txn.hasNext()) {
-      val element = objectSerializer.deserialize(txn.next()).asInstanceOf[Int]
-      inputElements.+=(element)
-      totalInputElements += 1
+  inputTstreamConsumers.foreach(inputTstreamConsumer => {
+    var maybeTxn = inputTstreamConsumer.getTransaction
+
+    while (maybeTxn.isDefined) {
+      val txn = maybeTxn.get
+      while (txn.hasNext()) {
+        val element = objectSerializer.deserialize(txn.next()).asInstanceOf[Int]
+        inputElements.+=(element)
+        totalInputElements += 1
+      }
+      maybeTxn = inputTstreamConsumer.getTransaction
     }
-    maybeTxn = inputTstreamConsumer.getTransaction
-  }
+  })
 
   var records = inputKafkaConsumer.poll(100 * 60)
   records.asScala.foreach(x => {
@@ -41,16 +44,19 @@ object ModuleStatefulChecker extends App {
     totalInputElements += 1
   })
 
-  maybeTxn = outputConsumer.getTransaction
-  while (maybeTxn.isDefined) {
-    val txn = maybeTxn.get
-    while (txn.hasNext()) {
-      val element = objectSerializer.deserialize(txn.next()).asInstanceOf[Int]
-      outputElements.+=(element)
-      totalOutputElements += 1
+  outputConsumers.foreach(outputConsumer => {
+    var maybeTxn = outputConsumer.getTransaction
+
+    while (maybeTxn.isDefined) {
+      val txn = maybeTxn.get
+      while (txn.hasNext()) {
+        val element = objectSerializer.deserialize(txn.next()).asInstanceOf[Int]
+        outputElements.+=(element)
+        totalOutputElements += 1
+      }
+      maybeTxn = outputConsumer.getTransaction
     }
-    maybeTxn = outputConsumer.getTransaction
-  }
+  })
 
 
   val consumer: BasicConsumer[Array[Byte], Array[Byte]] = createStateConsumer(streamService)

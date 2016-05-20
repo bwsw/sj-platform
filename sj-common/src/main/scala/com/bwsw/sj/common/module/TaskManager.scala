@@ -47,7 +47,7 @@ class TaskManager() {
   private val moduleVersion = System.getenv("MODULE_VERSION")
   private val instanceName = System.getenv("INSTANCE_NAME")
   val taskName = System.getenv("TASK_NAME")
-  val kafkaOffsetsStorage = mutable.Map[(String, Int), Long]()
+  var kafkaOffsetsStorage = mutable.Map[(String, Int), Long]()
   private val kafkaOffsetsStream = taskName + "_kafka_offsets"
   private val stateStream = taskName + "_state"
 
@@ -94,7 +94,7 @@ class TaskManager() {
     (new MetadataStorageFactory).getInstance(
       cassandraHosts = hosts,
       keyspace = service.metadataNamespace)
-  }
+  }//todo: check all alternatives
 
   /**
    * Creates data storage for producer/consumer settings
@@ -121,7 +121,7 @@ class TaskManager() {
 
         (new CassandraStorageFactory).getInstance(options)
     }
-  }
+  }//todo: check all alternatives
 
   /**
    * Creates coordinator for coordinating producer/consumer
@@ -134,7 +134,7 @@ class TaskManager() {
     config.useSingleServer().setAddress(service.lockProvider.hosts.head)
     val redisClient = Redisson.create(config)
     new Coordinator(service.lockNamespace, redisClient)
-  }
+  } //todo: check all alternatives
 
   /**
    * Returns class loader for retrieving classes from jar
@@ -236,8 +236,8 @@ class TaskManager() {
 
       if (lastTxn.isDefined) {
         logger.debug(s"Instance name: $instanceName, task name: $taskName. Get saved offsets for kafka consumer and apply their\n")
-        val offsets = objectSerializer.deserialize(lastTxn.get.next()).asInstanceOf[mutable.Map[(String, Int), Long]]
-        offsets.foreach(x => consumer.seek(new TopicPartition(x._1._1, x._1._2), x._2 + 1))
+        kafkaOffsetsStorage = objectSerializer.deserialize(lastTxn.get.next()).asInstanceOf[mutable.Map[(String, Int), Long]]
+        kafkaOffsetsStorage.foreach(x => consumer.seek(new TopicPartition(x._1._1, x._1._2), x._2 + 1))
       }
     }
 

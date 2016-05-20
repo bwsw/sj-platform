@@ -22,7 +22,8 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
   }
 
   override def onMessage(envelope: Envelope): Unit = {
-    val output = manager.getRoundRobinOutput("test_output_tstream")
+    val outputs = manager.getStreamsByTags(Array("output"))
+    val output = manager.getRoundRobinOutput(outputs(scala.util.Random.nextInt(outputs.length)))
     var sum = state.get("sum").asInstanceOf[Int]
 
     if (scala.util.Random.nextInt(100) < 20) throw new Exception("it happened")
@@ -51,7 +52,9 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
   }
 
   override def onAfterStateSave(isFull: Boolean): Unit = {
-    if (isFull) {}
+    if (isFull) {
+      println("on after full state saving")
+    } else println("on after partial state saving")
   }
 
   override def onBeforeCheckpoint(): Unit = {
@@ -67,6 +70,6 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
    * @param isFullState Flag denotes that full state (true) or partial changes of state (false) will be saved
    */
   override def onBeforeStateSave(isFullState: Boolean): Unit = {
-    println("on before state save")
+    println("on before state saving")
   }
 }
