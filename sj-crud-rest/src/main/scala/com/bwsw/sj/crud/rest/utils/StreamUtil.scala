@@ -23,6 +23,13 @@ import org.redisson.{Redisson, Config}
   */
 object StreamUtil {
 
+  /**
+    * Check t-stream for exists
+    * If stream is not exists, then it created
+    * Else compare count of partitions
+    * @param stream - T-stream for checking
+    * @return - Error, if cannot creating stream or stream is incorrect
+    */
   def checkAndCreateTStream(stream: SjStream) = {
     val service = stream.service.asInstanceOf[TStreamService]
     val metadataProvider = service.metadataProvider
@@ -60,20 +67,28 @@ object StreamUtil {
       if (tStream.getPartitions != stream.partitions) {
         Left(s"Partitions count of stream ${stream.name} mismatch")
       } else {
-        Right(tStream)
+        Right(true)
       }
     } else {
-      Right(BasicStreamService.createStream(
+      BasicStreamService.createStream(
         stream.name,
         stream.partitions,
         5000,
         "", metadataStorage,
         dataStorage,
         coordinator
-      ))
+      )
+      Right(true)
     }
   }
 
+  /**
+    * Check kafka topic for exists
+    * If kafka topic is not exists, then it creating
+    * Else compare count of partitions
+    * @param stream - Kafka topic (stream)
+    * @return - Error, if topic is incorrect or cannot creating it
+    */
   def checkAndCreateKafkaTopic(stream: SjStream) = {
     val service = stream.service.asInstanceOf[KafkaService]
     val brokers = service.provider.hosts

@@ -1,9 +1,7 @@
 package com.bwsw.sj.crud.rest.validator.module
 
-import java.net.InetSocketAddress
-import java.util.{Properties, Calendar}
+import java.util.Calendar
 
-import com.aerospike.client.Host
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.DAL.model._
@@ -11,17 +9,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.crud.rest.entities.InstanceMetadata
 import com.bwsw.sj.crud.rest.utils.StreamUtil
-import com.bwsw.tstreams.coordination.Coordinator
-import com.bwsw.tstreams.data.IStorage
-import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStorageOptions}
-import com.bwsw.tstreams.data.cassandra.{CassandraStorageFactory, CassandraStorageOptions}
-import com.bwsw.tstreams.metadata.MetadataStorageFactory
-import com.bwsw.tstreams.services.BasicStreamService
-import kafka.admin.AdminUtils
 import kafka.common.TopicExistsException
-import kafka.utils.ZkUtils
-import org.I0Itec.zkclient.ZkConnection
-import org.redisson.{Config, Redisson}
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -157,7 +145,7 @@ abstract class StreamingModuleValidator {
       if (!service.isInstanceOf[TStreamService]) {
         errors += s"Service for t-streams must be 'TstrQ'."
       } else {
-        errors.appendAll(checkAndCreateTStreams(errors, service.asInstanceOf[TStreamService], allStreams))
+        checkTStreams(errors, allStreams.filter(s => s.streamType.equals(tStream)))
       }
     }
     val kafkaStreams = allStreams.filter(s => s.streamType.equals(kafka))
@@ -165,7 +153,7 @@ abstract class StreamingModuleValidator {
       if (kafkaStreams.exists(s => !s.service.isInstanceOf[KafkaService])) {
         errors += s"Service for kafka-streams must be 'KfkQ'."
       } else {
-        errors.appendAll(checkAndCreateKafkaStreams(errors, allStreams.filter(s => s.streamType.equals(kafka))))
+        checkKafkaStreams(errors, allStreams.filter(s => s.streamType.equals(kafka)))
       }
     }
 
@@ -190,32 +178,42 @@ abstract class StreamingModuleValidator {
     (errors, validatedInstance)
   }
 
-  def checkAndCreateTStreams(errors: ArrayBuffer[String], service: TStreamService, allTStreams: mutable.Buffer[SjStream]) = {
+  /**
+    * Checking and creating t-streams, if streams is not exists
+    * @param errors - List of all errors
+    * @param allTStreams - all t-streams of instance
+    */
+  def checkTStreams(errors: ArrayBuffer[String], allTStreams: mutable.Buffer[SjStream]) = {
     allTStreams.foreach { (stream: SjStream) =>
       if (errors.isEmpty) {
         val streamCheckResult = StreamUtil.checkAndCreateTStream(stream)
         streamCheckResult match {
           case Left(err) => errors += err
+          case _ =>
         }
       }
     }
-    errors
   }
 
-  def checkAndCreateKafkaStreams(errors: ArrayBuffer[String], allKafkaStreams: mutable.Buffer[SjStream]) = {
+  /**
+    * Checking and creating kafka topics, if it's not exists
+    * @param errors - list of all errors
+    * @param allKafkaStreams - all kafka streams of instance
+    */
+  def checkKafkaStreams(errors: ArrayBuffer[String], allKafkaStreams: mutable.Buffer[SjStream]) = {
     allKafkaStreams.foreach { (stream: SjStream) =>
       if (errors.isEmpty) {
         try {
           val streamCheckResult = StreamUtil.checkAndCreateKafkaTopic(stream)
           streamCheckResult match {
             case Left(err) => errors += err
+            case _ =>
           }
         } catch {
           case e: TopicExistsException => errors += s"Cannot create kafka topic: ${e.getMessage}"
         }
       }
     }
-    errors
   }
 
   /**
