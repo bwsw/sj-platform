@@ -98,7 +98,12 @@ trait SjServicesApi extends Directives with SjCrudValidator {
     service.name
   }
 
-
+  /**
+    * Convert service entity to service data entity
+    *
+    * @param service - service entity
+    * @return - service data entity
+    */
   def serviceToServiceData(service: Service) = {
     var serviceData: ServiceData = null
     service match {
