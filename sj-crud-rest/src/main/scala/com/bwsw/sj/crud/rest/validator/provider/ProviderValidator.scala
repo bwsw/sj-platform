@@ -114,7 +114,22 @@ class ProviderValidator {
     errors
   }
 
-  def validateHost (hostString: String, providerType: String) = {
+  /**
+    * Check provider hosts availability
+    *
+    * @param provider - provider entity
+    * @return - errors array
+    */
+  def checkProviderConnection(provider: Provider) = {
+    var errors = ArrayBuffer[String]()
+    for (host <- provider.hosts) {
+      val (hostErrors, _) = validateHost(host, provider.providerType)
+      errors ++= hostErrors
+    }
+    errors
+  }
+
+  def validateHost (hostString: String, providerType: String): (ArrayBuffer[String], Int) = {
     val errors = ArrayBuffer[String]()
     var hostname : String = null
     var port : Int = -1
@@ -204,7 +219,7 @@ class ProviderValidator {
 
   def checkKafkaConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
     val kafkaPort = if (port == -1) 9092 else port
-    val consumer = new SimpleConsumer(hostname, kafkaPort, 100000, 64 * 1024, "connectionTest")
+    val consumer = new SimpleConsumer(hostname, kafkaPort, 500, 64 * 1024, "connectionTest")
     val topics = Collections.singletonList("test_connection")
     val req = new TopicMetadataRequest(topics)
     var resp: TopicMetadataResponse = null
@@ -228,4 +243,5 @@ class ProviderValidator {
     if (client.connectedNodes().size() < 1)
       errors += s"Can not establish connection to ElasticSearch on '$hostname:$esPort'"
   }
+
 }

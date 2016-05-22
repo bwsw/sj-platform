@@ -74,7 +74,11 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
             val provider = providerDAO.get(providerName)
             var msg = ""
             if (provider != null) {
-              // TODO:
+              val validator = new ProviderValidator
+              val errors = validator.checkProviderConnection(provider)
+              if (errors.nonEmpty) {
+                msg = serializer.serialize(errors)
+              }
             } else {
               msg = serializer.serialize(s"Provider '$providerName' not found")
             }
@@ -97,8 +101,14 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
   }
 
 
+  /**
+    * Convert provider entity to provider data entity
+    *
+    * @param provider - provider entity
+    * @return - provider data entity
+    */
   def providerToProviderData(provider: Provider) = {
-    var providerData = new ProviderData(
+    val providerData = new ProviderData(
       provider.name,
       provider.description,
       provider.login,
@@ -108,4 +118,5 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
     )
     providerData
   }
+
 }
