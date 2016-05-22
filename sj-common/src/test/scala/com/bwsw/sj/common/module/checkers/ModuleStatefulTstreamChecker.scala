@@ -63,6 +63,8 @@ object ModuleStatefulTstreamChecker extends App {
 
   close()
   ConnectionRepository.close()
+  inputTstreamConsumers.foreach(_.stop())
+  outputConsumers.foreach(_.stop())
 
   println("DONE")
 }

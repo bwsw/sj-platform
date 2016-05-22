@@ -12,11 +12,11 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.utils.CassandraHelper._
 import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
-import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions}
+import com.bwsw.tstreams.agents.consumer.{ConsumerCoordinationSettings, BasicConsumer, BasicConsumerOptions}
 import com.bwsw.tstreams.agents.producer.InsertionType.BatchInsert
-import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions, ProducerPolicies}
+import com.bwsw.tstreams.agents.producer.{ProducerCoordinationSettings, BasicProducer, BasicProducerOptions, ProducerPolicies}
 import com.bwsw.tstreams.converter.IConverter
-import com.bwsw.tstreams.coordination.Coordinator
+import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStorageOptions}
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
@@ -27,7 +27,6 @@ import com.datastax.driver.core.Cluster
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import org.apache.kafka.common.TopicPartition
-import org.redisson.{Config, Redisson}
 
 import scala.collection.JavaConverters._
 
@@ -59,17 +58,11 @@ object DataFactory {
   }).toList
   private lazy val aerospikeOptions = new AerospikeStorageOptions(testNamespace, hosts)
   private lazy val aerospikeStorageFactory = new AerospikeStorageFactory()
-  private lazy val dataStorage = aerospikeStorageFactory.getInstance(aerospikeOptions)
 
   private lazy val metadataStorageFactory: MetadataStorageFactory = new MetadataStorageFactory()
   private lazy val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(
     cassandraHosts = List(new InetSocketAddress(cassandraHost, cassandraPort)),
     keyspace = cassandraTestKeyspace)
-
-  private val config = new Config()
-  config.useSingleServer().setAddress(redisHosts(0))
-  private lazy val redissonClient = Redisson.create(config)
-  private lazy val lockService = new Coordinator(testNamespace, redissonClient)
 
   def cassandraSetup() = {
     createKeyspace(session, cassandraTestKeyspace)
@@ -83,7 +76,6 @@ object DataFactory {
   def close() = {
     aerospikeStorageFactory.closeFactory()
     metadataStorageFactory.closeFactory()
-    redissonClient.shutdown()
     session.close()
     cluster.close()
   }
@@ -130,8 +122,10 @@ object DataFactory {
     val kafkaService = new KafkaService("kafka test service", "KfkQ", "kafka test service", kafkaProv)
     serviceManager.save(kafkaService)
 
+    val zkProv = providerService.get("zookeeper test provider")
+
     val tstrqService = new TStreamService("tstream test service", "TstrQ", "tstream test service",
-      cassProv, cassandraTestKeyspace, aeroProv, testNamespace, redisProv, testNamespace)
+      cassProv, cassandraTestKeyspace, aeroProv, testNamespace, zkProv, "/unit")
     serviceManager.save(tstrqService)
   }
 
@@ -146,7 +140,7 @@ object DataFactory {
   def createStreams(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service],
                     partitions: Int, _type: String, inputCount: Int, outputCount: Int) = {
     _type match {
-      case "tstreams" =>
+      case "tstream" =>
         (1 to inputCount).foreach(x => {
           createInputTStream(sjStreamService, serviceManager, partitions, x.toString)
           instanceInputs = instanceInputs :+ s"test_input_tstream$x/split"
@@ -181,13 +175,13 @@ object DataFactory {
         task.inputs.put(s"test_kafka_input1", (0 until partitions).toArray)
         instanceInputs = instanceInputs :+ "test_kafka_input2/split"
         task.inputs.put(s"test_kafka_input2", (0 until partitions).toArray)
-      case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: 'tstreams', 'kafka', 'both'")
+      case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: 'tstream', 'kafka', 'both'")
     }
   }
 
   def deleteStreams(streamService: GenericMongoService[SjStream], _type: String, inputCount: Int, outputCount: Int) = {
     _type match {
-      case "tstreams" =>
+      case "tstream" =>
         (1 to inputCount).foreach(x => deleteInputTStream(streamService, x.toString))
         (1 to outputCount).foreach(x => deleteOutputTStream(streamService, x.toString))
       case "kafka" =>
@@ -197,7 +191,7 @@ object DataFactory {
         deleteKafkaStream(streamService)
         (1 to inputCount).foreach(x => deleteInputTStream(streamService, x.toString))
         (1 to outputCount).foreach(x => deleteOutputTStream(streamService, x.toString))
-      case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: 'tstreams', 'kafka', 'both'")
+      case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: 'tstream', 'kafka', 'both'")
     }
   }
 
@@ -215,8 +209,7 @@ object DataFactory {
       1000 * 60,
       "description of test input tstream",
       metadataStorage,
-      dataStorage,
-      lockService
+      aerospikeStorageFactory.getInstance(aerospikeOptions)
     )
   }
 
@@ -234,8 +227,7 @@ object DataFactory {
       1000 * 60,
       "description of test output tstream",
       metadataStorage,
-      dataStorage,
-      lockService
+      aerospikeStorageFactory.getInstance(aerospikeOptions)
     )
   }
 
@@ -332,14 +324,14 @@ object DataFactory {
 
   def createData(countTxns: Int, countElements: Int, streamService: GenericMongoService[SjStream], _type: String, count: Int) = {
     _type match {
-      case "tstreams" =>
+      case "tstream" =>
         (1 to count).foreach(x => createTstreamData(countTxns, countElements, streamService, x.toString))
       case "kafka" =>
       //createKafkaData(countTxns, countElements) //needed only one because of kafka doesn't allow delete topics
       case "both" =>
         (1 to count).foreach(x => createTstreamData(countTxns, countElements, streamService, x.toString))
-        //createKafkaData(countTxns, countElements) //needed only one because of kafka doesn't allow delete topics
-      case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: 'tstreams', 'kafka', 'both'")
+      //createKafkaData(countTxns, countElements) //needed only one because of kafka doesn't allow delete topics
+      case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: 'tstream', 'kafka', 'both'")
     }
   }
 
@@ -357,6 +349,8 @@ object DataFactory {
     }
 
     println(s"producer time: ${(System.nanoTime - s) / 1000000}")
+
+    producer.stop()
   }
 
   private def createKafkaData(countTxns: Int, countElements: Int) = {
@@ -381,15 +375,22 @@ object DataFactory {
   }
 
   def createInputTstreamConsumer(streamService: GenericMongoService[SjStream], suffix: String) = {
-    createConsumer("test_input_tstream" + suffix, streamService)
+    createConsumer("test_input_tstream" + suffix, streamService, "localhost:804" + suffix)
   }
 
   def createStateConsumer(streamService: GenericMongoService[SjStream]) = {
     val name = instanceName + "-task0" + "_state"
     val partitions = 1
 
+    val coordinationSettings = new ConsumerCoordinationSettings(
+      "localhost:8050",
+      "/unit",
+      List(new InetSocketAddress("localhost", 2181)),
+      7000
+    )
+
     val basicStream: BasicStream[Array[Byte]] =
-      BasicStreamService.loadStream(name, metadataStorage, dataStorage, lockService)
+      BasicStreamService.loadStream(name, metadataStorage, aerospikeStorageFactory.getInstance(aerospikeOptions))
 
     val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until partitions).toList)
 
@@ -401,6 +402,7 @@ object DataFactory {
       consumerKeepAliveInterval = 5,
       converter,
       roundRobinPolicy,
+      coordinationSettings,
       Oldest,
       timeUuidGenerator,
       useLastOffset = true)
@@ -429,28 +431,22 @@ object DataFactory {
     consumer
   }
 
-  def createInputKafkaConsumer2(streamService: GenericMongoService[SjStream]) = {
-    val partitions = 4
-
-    val props = new Properties()
-    props.put("bootstrap.servers", System.getenv("KAFKA_HOSTS"))
-    props.put("enable.auto.commit", "false")
-    props.put("session.timeout.ms", "30000")
-    props.put("auto.offset.reset", "earliest")
-    props.put("key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
-    props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
-    val consumer = new KafkaConsumer[Array[Byte], Array[Byte]](props)
-
-
-  }
-
   def createOutputConsumer(streamService: GenericMongoService[SjStream], suffix: String) = {
-    createConsumer("test_output_tstream" + suffix, streamService)
+    createConsumer("test_output_tstream" + suffix, streamService, "localhost:805" + suffix)
   }
 
   private def createProducer(stream: SjStream) = {
     val basicStream: BasicStream[Array[Byte]] =
-      BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage, lockService)
+      BasicStreamService.loadStream(stream.name, metadataStorage, aerospikeStorageFactory.getInstance(aerospikeOptions))
+
+    val coordinationSettings = new ProducerCoordinationSettings(
+      agentAddress = s"localhost:8030",
+      zkHosts = List(new InetSocketAddress("localhost", 2181)),
+      zkRootPath = "/unit",
+      zkTimeout = 7000,
+      isLowPriorityToBeMaster = false,
+      transport = new TcpTransport,
+      transportTimeout = 5)
 
     val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.partitions).toList)
 
@@ -463,16 +459,24 @@ object DataFactory {
       roundRobinPolicy,
       BatchInsert(5),
       timeUuidGenerator,
+      coordinationSettings,
       converter)
 
     new BasicProducer[Array[Byte], Array[Byte]]("producer for " + basicStream.name, basicStream, options)
   }
 
-  private def createConsumer(streamName: String, streamService: GenericMongoService[SjStream]): BasicConsumer[Array[Byte], Array[Byte]] = {
+  private def createConsumer(streamName: String, streamService: GenericMongoService[SjStream], address: String): BasicConsumer[Array[Byte], Array[Byte]] = {
     val stream = streamService.get(streamName)
 
     val basicStream: BasicStream[Array[Byte]] =
-      BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage, lockService)
+      BasicStreamService.loadStream(stream.name, metadataStorage, aerospikeStorageFactory.getInstance(aerospikeOptions))
+
+    val coordinationSettings = new ConsumerCoordinationSettings(
+      address,
+      "/unit",
+      List(new InetSocketAddress("localhost", 2181)),
+      7000
+    )
 
     val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.partitions).toList)
 
@@ -484,6 +488,7 @@ object DataFactory {
       consumerKeepAliveInterval = 5,
       converter,
       roundRobinPolicy,
+      coordinationSettings,
       Oldest,
       timeUuidGenerator,
       useLastOffset = true)

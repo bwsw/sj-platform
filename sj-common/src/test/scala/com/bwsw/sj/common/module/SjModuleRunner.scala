@@ -1,13 +1,14 @@
 package com.bwsw.sj.common.module
 
 import java.io.File
+import java.util.logging.LogManager
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.module.DataFactory._
 import com.bwsw.sj.common.module.regular.RegularTaskRunner
 
 object SjModuleSetup extends App {
-
+ LogManager.getLogManager.reset()
   val streamService = ConnectionRepository.getStreamService
   val serviceManager = ConnectionRepository.getServiceManager
   val providerService = ConnectionRepository.getProviderService
@@ -37,10 +38,12 @@ object SjModuleSetup extends App {
 }
 
 object SjModuleRunner extends App {
+  LogManager.getLogManager.reset()
   RegularTaskRunner.main(Array())
 }
 
 object SjModuleDestroy extends App {
+   LogManager.getLogManager.reset()
   val streamService = ConnectionRepository.getStreamService
   val serviceManager = ConnectionRepository.getServiceManager
   val providerService = ConnectionRepository.getProviderService
