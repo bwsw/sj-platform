@@ -161,6 +161,8 @@ class ProviderValidator {
           checkESConnection(errors, hostname, port)
         case "redis" =>
           // TODO: remove redis in future. So returning no errors for now.
+        case "JDBC" =>
+          checkJdbcConnection(errors, hostname, port)
         case _ =>
           errors += s"host checking for provider type '$providerType' is not implemented"
       }
@@ -203,13 +205,13 @@ class ProviderValidator {
       client = new ZooKeeper(s"$hostname:$zookeeperPort", 500, null)
       val deadline = 1.seconds.fromNow
       var connected: Boolean = false
-      while (!connected && deadline.hasTimeLeft){
-        connected = client.getState.isConnected
+      while (!connected && deadline.hasTimeLeft) {
+        connected = client.getState.isAlive //todo fixed for working
       }
       if (!connected)
         errors += s"Can not access Zookeeper on '$hostname:$zookeeperPort'"
-    }
-    catch {
+
+    } catch {
       case ex: Throwable =>
         errors += s"Wrong zookeeper host"
     }
@@ -242,6 +244,10 @@ class ProviderValidator {
     client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(hostname), esPort))
     if (client.connectedNodes().size() < 1)
       errors += s"Can not establish connection to ElasticSearch on '$hostname:$esPort'"
+  }
+
+  def checkJdbcConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
+
   }
 
 }

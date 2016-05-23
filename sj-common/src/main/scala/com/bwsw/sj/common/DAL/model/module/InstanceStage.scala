@@ -1,4 +1,4 @@
-package com.bwsw.sj.common.DAL.model
+package com.bwsw.sj.common.DAL.model.module
 
 import java.util.Date
 

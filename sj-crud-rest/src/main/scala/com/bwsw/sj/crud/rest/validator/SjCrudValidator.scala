@@ -11,6 +11,7 @@ import akka.stream.Materializer
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.typesafe.config.Config
 import org.everit.json.schema.loader.SchemaLoader
@@ -37,7 +38,7 @@ trait SjCrudValidator {
   val serializer: Serializer
   val fileMetadataDAO: GenericMongoService[FileMetadata]
   val storage: FileStorage
-  val instanceDAO: GenericMongoService[RegularInstance]
+  val instanceDAO: GenericMongoService[Instance]
   val serviceDAO: GenericMongoService[Service]
   val streamDAO: GenericMongoService[SjStream]
   val providerDAO: GenericMongoService[Provider]
@@ -46,6 +47,8 @@ trait SjCrudValidator {
   val marathonConnect: String
 
   import com.bwsw.sj.common.ModuleConstants._
+  import com.bwsw.sj.common.StreamConstants._
+
   /**
     * Getting entity from HTTP-request
     *
@@ -81,7 +84,26 @@ trait SjCrudValidator {
       throw new FileNotFoundException(s"Specification.json for ${jarFile.getName} is not found!")
     }
     schemaValidate(json, getClass.getClassLoader.getResourceAsStream("schema.json"))
-    serializer.deserialize[Map[String, Any]](json)
+    val specification = serializer.deserialize[Map[String, Any]](json)
+    val moduleType = specification("module-type").asInstanceOf[String]
+    if (moduleType.equals(outputStreamingType)) {
+      val inputs = specification("inputs").asInstanceOf[Map[String, Any]]
+      val inputTypes = inputs("types").asInstanceOf[Array[String]]
+      val inputCardinalites = inputs("cardinality").asInstanceOf[Array[Int]]
+
+      val outputs = specification("outputs").asInstanceOf[Map[String, Any]]
+      val outputTypes = outputs("types").asInstanceOf[Array[String]]
+      val outputCardinalites = outputs("cardinality").asInstanceOf[Array[Int]]
+
+      if (inputTypes.length > 1 ||
+        !inputTypes.head.equals(tStream) || (inputCardinalites(0) != 1 || inputCardinalites(1) != 1) ||
+        !(outputTypes.contains(jdbcOutput) || outputTypes.contains(esOutput)) ||
+        (outputCardinalites(0) != 1 || outputCardinalites(1) != 1)
+      ) {
+        throw new Exception("Specification.json for output-streaming has incorrect params!")
+      }
+    }
+    specification
   }
 
   /**

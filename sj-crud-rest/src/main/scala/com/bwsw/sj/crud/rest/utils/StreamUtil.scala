@@ -4,8 +4,7 @@ import java.net.InetSocketAddress
 import java.util.Properties
 
 import com.aerospike.client.Host
-import com.bwsw.sj.common.DAL.model.{TStreamService, KafkaService, SjStream}
-import com.bwsw.tstreams.coordination.Coordinator
+import com.bwsw.sj.common.DAL.model._
 import com.bwsw.tstreams.data.IStorage
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStorageOptions}
 import com.bwsw.tstreams.data.cassandra.{CassandraStorageFactory, CassandraStorageOptions}
@@ -14,7 +13,6 @@ import com.bwsw.tstreams.services.BasicStreamService
 import kafka.admin.AdminUtils
 import kafka.utils.ZkUtils
 import org.I0Itec.zkclient.ZkConnection
-import org.redisson.{Redisson, Config}
 
 /**
   * Created: 19/05/2016
@@ -27,6 +25,7 @@ object StreamUtil {
     * Check t-stream for exists
     * If stream is not exists, then it created
     * Else compare count of partitions
+    *
     * @param stream - T-stream for checking
     * @return - Error, if cannot creating stream or stream is incorrect
     */
@@ -52,17 +51,11 @@ object StreamUtil {
       dataStorage = (new AerospikeStorageFactory).getInstance(options)
     }
 
-    val lockProvider = service.lockProvider
-    val redisConfig = new Config()
-    redisConfig.useSingleServer().setAddress(lockProvider.hosts.head)
-    val coordinator = new Coordinator(service.lockNamespace, Redisson.create(redisConfig))
-
     if (BasicStreamService.isExist(stream.name, metadataStorage)) {
       val tStream = BasicStreamService.loadStream[Array[Byte]](
         stream.name,
         metadataStorage,
-        dataStorage,
-        coordinator
+        dataStorage
       )
       if (tStream.getPartitions != stream.partitions) {
         Left(s"Partitions count of stream ${stream.name} mismatch")
@@ -75,8 +68,7 @@ object StreamUtil {
         stream.partitions,
         5000,
         "", metadataStorage,
-        dataStorage,
-        coordinator
+        dataStorage
       )
       Right(true)
     }
@@ -86,6 +78,7 @@ object StreamUtil {
     * Check kafka topic for exists
     * If kafka topic is not exists, then it creating
     * Else compare count of partitions
+    *
     * @param stream - Kafka topic (stream)
     * @return - Error, if topic is incorrect or cannot creating it
     */
@@ -107,6 +100,24 @@ object StreamUtil {
       } else {
         Right(s"Topic ${stream.name} is exists")
       }
+    }
+  }
+
+  def checkAndCreateEsStream(stream: SjStream) = {
+    val service = stream.service.asInstanceOf[ESService]
+    if (true) {
+      Right("yes")
+    } else {
+      Left("fail")
+    }
+  }
+
+  def checkAndCreateJdbcStream(stream: SjStream) = {
+    val service = stream.service.asInstanceOf[JDBCService]
+    if (true) {
+      Right("yes")
+    } else {
+      Left("fail")
     }
   }
 

@@ -1,5 +1,6 @@
 package com.bwsw.sj.common.DAL.model
 
+import com.bwsw.sj.common.DAL.model.module.Specification
 import org.bson.types.ObjectId
 import org.mongodb.morphia.annotations.{Entity, Id}
 

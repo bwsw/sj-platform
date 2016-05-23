@@ -1,15 +1,16 @@
-package com.bwsw.sj.common.DAL.model
+package com.bwsw.sj.common.DAL.model.module
 
-import org.mongodb.morphia.annotations._
+import com.bwsw.sj.common.DAL.model.ZKService
+import org.mongodb.morphia.annotations.{Embedded, Entity, Id, Property}
 
 /**
- * Entity for base instance-json
- * Created:  13/04/2016
- *
- * @author Kseniya Tomskikh
- */
+  * Entity for base instance-json
+  * Created: 5/23/16
+  *
+  * @author Kseniya Tomskikh
+  */
 @Entity("instances")
-class RegularInstance {
+class Instance {
   @Property("module-type") var moduleType: String = null
   @Property("module-name") var moduleName: String = null
   @Property("module-version") var moduleVersion: String = null
@@ -20,8 +21,6 @@ class RegularInstance {
   var outputs: Array[String] = null
   @Property("checkpoint-mode") var checkpointMode: String = null
   @Property("checkpoint-interval") var checkpointInterval: Long = 0
-  @Property("state-management") var stateManagement: String = null
-  @Property("state-full-checkpoint") var stateFullCheckpoint: Int = 0
   var parallelism: Int = 0
   var options: String = null
   @Property("start-from") var startFrom: String = null
@@ -29,14 +28,9 @@ class RegularInstance {
   @Property("per-task-ram") var perTaskRam: Int = 0
   @Embedded("jvm-options") var jvmOptions: java.util.Map[String, String] = null
   @Embedded("execution-plan") var executionPlan: ExecutionPlan = null
-  var attributes: java.util.Map[String, String] = null
-  var idle: Long = 0
+  @Property("node-attributes") var nodeAttributes: java.util.Map[String, String] = null
+  @Property("event-wait-time") var eventWaitTime: Long = 0
   @Embedded("coordination-service") var coordinationService: ZKService = null
-  var environments: java.util.Map[String, String] = null
+  @Property("environment-variables") var environmentVariables: java.util.Map[String, String] = null
   var stages: java.util.Map[String, InstanceStage] = null
 }
-
-
-
-
-

@@ -1,16 +1,16 @@
 package com.bwsw.sj.crud.rest.runner
 
-import java.net.{InetSocketAddress, ServerSocket, URI}
+import java.net.{InetSocketAddress, URI}
 import java.util
 
 import com.bwsw.sj.common.DAL.ConnectionConstants
-import com.bwsw.sj.common.DAL.model.{RegularInstance, SjStream, ZKService}
+import com.bwsw.sj.common.DAL.model.module.Instance
+import com.bwsw.sj.common.DAL.model.{SjStream, ZKService}
 import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.crud.rest.entities.MarathonRequest
 import com.twitter.common.quantity.{Time, Amount}
 import com.twitter.common.zookeeper.DistributedLock.LockingException
 import com.twitter.common.zookeeper.{ZooKeeperClient, DistributedLockImpl}
-import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.util.EntityUtils
 
 /**
@@ -20,7 +20,7 @@ import org.apache.http.util.EntityUtils
   *
   * @author Kseniya Tomskikh
   */
-class InstanceStarter(instance: RegularInstance, delay: Long) extends Runnable {
+class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
   import scala.collection.JavaConverters._
   import com.bwsw.sj.common.ModuleConstants._
   import InstanceMethods._
@@ -131,8 +131,8 @@ class InstanceStarter(instance: RegularInstance, delay: Long) extends Runnable {
         "INSTANCE_ID" -> instance.name,
         "MESOS_MASTER" -> mesosMaster
       )
-      if (instance.environments != null) {
-        applicationEnvs = applicationEnvs ++ Map(instance.environments.asScala.toList: _*)
+      if (instance.environmentVariables != null) {
+        applicationEnvs = applicationEnvs ++ Map(instance.environmentVariables.asScala.toList: _*)
       }
       val request = new MarathonRequest(instance.name,
         "java -jar " + frameworkJar + " $PORT",

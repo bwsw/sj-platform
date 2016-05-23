@@ -1,4 +1,4 @@
-package com.bwsw.sj.crud.rest.entities
+package com.bwsw.sj.crud.rest.entities.module
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
@@ -15,18 +15,16 @@ class InstanceMetadata {
   var outputs: Array[String] = null
   @JsonProperty("checkpoint-mode") var checkpointMode: String = null
   @JsonProperty("checkpoint-interval") var checkpointInterval: Long = 0
-  @JsonProperty("state-management") var stateManagement: String = null
-  @JsonProperty("state-full-checkpoint") var stateFullCheckpoint: Int = 0
   var parallelism: Any = null
   var options: Map[String, Any] = null
   @JsonProperty("start-from") var startFrom: String = null
   @JsonProperty("per-task-cores") var perTaskCores: Double = 0.0
   @JsonProperty("per-task-ram") var perTaskRam: Int = 0
   @JsonProperty("jvm-options") var jvmOptions: Map[String, String] = null
-  var attributes: Map[String, String] = null
-  var idle: Long = 0
+  @JsonProperty("node-attributes") var nodeAttributes: Map[String, String] = null
+  @JsonProperty("event-wait-time") var eventWaitTime: Long = 0
   @JsonProperty("execution-plan") var executionPlan: Map[String, Any] = null
   @JsonProperty("coordination-service") var coordinationService: String = null
-  var environments: Map[String, String] = null
+  @JsonProperty("environment-variables") var environmentVariables: Map[String, String] = null
 }
 

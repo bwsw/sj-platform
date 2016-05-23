@@ -5,7 +5,8 @@ import java.util.Calendar
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.traits.Serializer
-import com.bwsw.sj.common.DAL.model.{RegularInstance, SjStream}
+import com.bwsw.sj.common.DAL.model.SjStream
+import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.crud.rest.entities.MarathonRequest
@@ -23,7 +24,7 @@ object InstanceMethods {
   import scala.collection.JavaConversions._
 
   val serializer: Serializer = new JsonSerializer
-  val instanceDAO: GenericMongoService[RegularInstance] = ConnectionRepository.getInstanceService
+  val instanceDAO: GenericMongoService[Instance] = ConnectionRepository.getInstanceService
   val streamDAO: GenericMongoService[SjStream] = ConnectionRepository.getStreamService
 
   val OK: Int = 200
@@ -154,7 +155,7 @@ object InstanceMethods {
     * @param stageName - stage name
     * @param state - New (or old) state for stage
     */
-  def stageUpdate(instance: RegularInstance, stageName: String, state: String) = {
+  def stageUpdate(instance: Instance, stageName: String, state: String) = {
     val stage = instance.stages.get(stageName)
     if (stage.state.equals(state)) {
       stage.duration = Calendar.getInstance().getTime.getTime - stage.datetime.getTime
@@ -172,7 +173,7 @@ object InstanceMethods {
     *
     * @param instance - Instance for updating
     */
-  def updateInstanceStages(instance: RegularInstance) = {
+  def updateInstanceStages(instance: Instance) = {
     instance.stages.keySet().foreach { key =>
       val stage = instance.stages.get(key)
       stageUpdate(instance, key, stage.state)

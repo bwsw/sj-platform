@@ -4,7 +4,8 @@ import java.net.URLClassLoader
 import java.util.Date
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.common.DAL.model.{KafkaService, RegularInstance}
+import com.bwsw.sj.common.DAL.model.KafkaService
+import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.module.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.common.module.environment.{ModuleEnvironmentManager, StatefulModuleEnvironmentManager}
@@ -24,6 +25,7 @@ import scala.collection.mutable
 /**
  * Object responsible for running a task of job that launches regular module
  * Created: 13/04/2016
+ *
  * @author Kseniya Mikhaleva
  */
 
@@ -37,7 +39,7 @@ object RegularTaskRunner {
 
     val moduleJar = manager.getModuleJar
 
-    val regularInstanceMetadata: RegularInstance = manager.getInstanceMetadata
+    val regularInstanceMetadata: RegularInstance = manager.getInstanceMetadata.asInstanceOf[RegularInstance]
 
     val executorClass = manager.getExecutorClass
 
@@ -150,6 +152,7 @@ object RegularTaskRunner {
 
   /**
    * Provides an imitation of streaming processing using blocking queue
+ *
    * @param moduleTimer Provides a timer inside module
    * @param regularInstanceMetadata Launch parameters of module
    * @param blockingQueue Queue for keeping envelope
@@ -211,10 +214,10 @@ object RegularTaskRunner {
             checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
             while (true) {
 
-              val maybeEnvelope = blockingQueue.get(regularInstanceMetadata.idle)
+              val maybeEnvelope = blockingQueue.get(regularInstanceMetadata.eventWaitTime)
 
               if (maybeEnvelope == null) {
-                logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${regularInstanceMetadata.idle} went out and nothing was received\n")
+                logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${regularInstanceMetadata.eventWaitTime} went out and nothing was received\n")
                 logger.debug(s"Task: ${manager.taskName}. Invoke onIdle() handler\n")
                 executor.onIdle()
               } else {
@@ -270,10 +273,10 @@ object RegularTaskRunner {
             var countOfEnvelopes = 0
             while (true) {
 
-              val maybeEnvelope = blockingQueue.get(regularInstanceMetadata.idle)
+              val maybeEnvelope = blockingQueue.get(regularInstanceMetadata.eventWaitTime)
 
               if (maybeEnvelope == null) {
-                logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${regularInstanceMetadata.idle} went out and nothing was received\n")
+                logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${regularInstanceMetadata.eventWaitTime} went out and nothing was received\n")
                 logger.debug(s"Task: ${manager.taskName}. Invoke onIdle() handler\n")
                 executor.onIdle()
               } else {
@@ -369,10 +372,10 @@ object RegularTaskRunner {
 
             while (true) {
 
-              val maybeEnvelope = blockingQueue.get(regularInstanceMetadata.idle)
+              val maybeEnvelope = blockingQueue.get(regularInstanceMetadata.eventWaitTime)
 
               if (maybeEnvelope == null) {
-                logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${regularInstanceMetadata.idle} went out and nothing was received\n")
+                logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${regularInstanceMetadata.eventWaitTime} went out and nothing was received\n")
                 logger.debug(s"Task: ${manager.taskName}. Invoke onIdle() handler\n")
                 executor.onIdle()
               } else {
@@ -450,10 +453,10 @@ object RegularTaskRunner {
 
             while (true) {
 
-              val maybeEnvelope = blockingQueue.get(regularInstanceMetadata.idle)
+              val maybeEnvelope = blockingQueue.get(regularInstanceMetadata.eventWaitTime)
 
               if (maybeEnvelope == null) {
-                logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${regularInstanceMetadata.idle} went out and nothing was received\n")
+                logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${regularInstanceMetadata.eventWaitTime} went out and nothing was received\n")
                 logger.debug(s"Task: ${manager.taskName}. Invoke onIdle() handler\n")
                 executor.onIdle()
               } else {
@@ -530,6 +533,7 @@ object RegularTaskRunner {
 
   /**
    * Chooses offset policy for t-streams consumers
+ *
    * @param startFrom Offset policy name or specific date
    * @return Offset
    */

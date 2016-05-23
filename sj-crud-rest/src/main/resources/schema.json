@@ -20,7 +20,13 @@
           "description": "The enumeration of types of inputs",
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "t-stream",
+              "kafka",
+              "elasticsearch-output",
+              "jdbc-output"
+            ]
           }
         }
       },
@@ -65,7 +71,8 @@
       "type": "string",
       "enum": [
         "regular-streaming",
-        "windowed-streaming"
+        "windowed-streaming",
+        "output-streaming"
       ]
     },
     "engine": {

@@ -1,6 +1,6 @@
 package com.bwsw.sj.crud.rest.runner
 
-import com.bwsw.sj.common.DAL.model.RegularInstance
+import com.bwsw.sj.common.DAL.model.module.Instance
 import org.apache.http.util.EntityUtils
 
 /**
@@ -10,7 +10,7 @@ import org.apache.http.util.EntityUtils
   *
   * @author Kseniya Tomskikh
   */
-class InstanceStopper(instance: RegularInstance, delay: Long) extends Runnable {
+class InstanceStopper(instance: Instance, delay: Long) extends Runnable {
   import com.bwsw.sj.common.ModuleConstants._
   import InstanceMethods._
 

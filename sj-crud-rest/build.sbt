@@ -9,6 +9,7 @@ resolvers += "Twitter Repository" at "http://maven.twttr.com"
 libraryDependencies ++= Seq(
   "com.typesafe.akka" % "akka-http-core-experimental_2.11" % "2.0-M2",
   "com.typesafe.akka" % "akka-http-experimental_2.11" % "2.0-M2",
+  "org.apache.zookeeper" % "zookeeper" % "3.4.6",
   "com.google.re2j" % "re2j" % "1.1",
   "org.everit.json" % "org.everit.json.schema" % "1.2.0",
   "com.typesafe.akka" % "akka-slf4j_2.11" % "2.4.4",
@@ -16,9 +17,9 @@ libraryDependencies ++= Seq(
   "com.twitter.common.zookeeper" % "lock" % "0.0.40",
   "com.datastax.cassandra" % "cassandra-driver-core" % "3.0.1",
   "com.aerospike" % "aerospike-client" % "3.0.22",
-  "org.apache.zookeeper" % "zookeeper" % "3.4.6",
   "org.elasticsearch" % "elasticsearch" % "2.3.2",
   "com.google.guava" % "guava" % "18.0",
+  "org.redisson" % "redisson" % "2.2.13",
   "org.apache.kafka" % "kafka_2.11" % "0.9.0.1"
       exclude("javax.jms", "jms")
       exclude("com.sun.jdmk", "jmxtools")
@@ -28,7 +29,8 @@ libraryDependencies ++= Seq(
 
 dependencyOverrides ++= Set(
   "com.typesafe.akka" %% "akka-actor" % "2.4.1",
-  "com.google.guava" % "guava" % "18.0"
+  "com.google.guava" % "guava" % "18.0",
+  "org.apache.zookeeper" % "zookeeper" % "3.4.6"
 )
 
 assemblyMergeStrategy in assembly := {

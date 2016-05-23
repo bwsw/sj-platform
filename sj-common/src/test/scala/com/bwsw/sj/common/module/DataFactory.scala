@@ -9,6 +9,7 @@ import com.aerospike.client.Host
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.model.module.{Instance, ExecutionPlan, RegularInstance, Task}
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.utils.CassandraHelper._
 import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
@@ -257,7 +258,7 @@ object DataFactory {
   }
 
 
-  def createInstance(instanceService: GenericMongoService[RegularInstance],
+  def createInstance(instanceService: GenericMongoService[Instance],
                      checkpointInterval: Int,
                      stateManagement: String = "none",
                      stateFullCheckpoint: Int = 0
@@ -284,12 +285,12 @@ object DataFactory {
     instance.perTaskRam = 0
     instance.executionPlan = new ExecutionPlan(Map((instanceName + "-task0", task)).asJava)
 
-    instance.idle = 10
+    instance.eventWaitTime = 10
 
     instanceService.save(instance)
   }
 
-  def deleteInstance(instanceService: GenericMongoService[RegularInstance]) = {
+  def deleteInstance(instanceService: GenericMongoService[Instance]) = {
     instanceService.delete(instanceName)
   }
 
