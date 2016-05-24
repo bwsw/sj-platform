@@ -19,7 +19,6 @@ libraryDependencies ++= Seq(
   "com.aerospike" % "aerospike-client" % "3.0.22",
   "org.elasticsearch" % "elasticsearch" % "2.3.2",
   "com.google.guava" % "guava" % "18.0",
-  "org.redisson" % "redisson" % "2.2.13",
   "org.apache.kafka" % "kafka_2.11" % "0.9.0.1"
       exclude("javax.jms", "jms")
       exclude("com.sun.jdmk", "jmxtools")

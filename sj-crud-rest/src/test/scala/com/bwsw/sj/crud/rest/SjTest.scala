@@ -65,6 +65,7 @@ object SjTest {
     val test = serializer.deserialize[SjStreamTest](testJson)
     println(test.getClass.toString)*/
     //createKafkaData()
+    //createEsData()
     println("Ok")
   }
 
@@ -108,6 +109,60 @@ object SjTest {
     stream.partitions = 3
     stream.service = service
     stream.streamType = "kafka"
+    stream.tags = Array("test")
+    streamDAO.save(stream)
+  }
+
+  def createEsData() = {
+    val providerDAO = ConnectionRepository.getProviderService
+    val serviceDAO = ConnectionRepository.getServiceManager
+    val streamDAO = ConnectionRepository.getStreamService
+
+    val provider = new Provider()
+    provider.name = "es_prov"
+    provider.hosts = Array("localhost:9200")
+    provider.providerType = "ES"
+    providerDAO.save(provider)
+
+    val service = new ESService()
+    service.provider = provider
+    service.name = "es_service"
+    service.serviceType = "ESInd"
+    serviceDAO.save(service)
+
+    val stream = new SjStream()
+    stream.name = "es1"
+    stream.generator = null
+    stream.partitions = 3
+    stream.service = service
+    stream.streamType = "elasticsearch-output"
+    stream.tags = Array("test")
+    streamDAO.save(stream)
+  }
+
+  def createJdbcData() = {
+    val providerDAO = ConnectionRepository.getProviderService
+    val serviceDAO = ConnectionRepository.getServiceManager
+    val streamDAO = ConnectionRepository.getStreamService
+
+    val provider = new Provider()
+    provider.name = "jdbc_prov"
+    provider.hosts = Array("localhost:9092")
+    provider.providerType = "JDBC"
+    providerDAO.save(provider)
+
+    val service = new JDBCService()
+    service.provider = provider
+    service.name = "jdbc_service"
+    service.serviceType = "JDBC"
+    serviceDAO.save(service)
+
+    val stream = new SjStream()
+    stream.name = "tbl1"
+    stream.generator = null
+    stream.partitions = 3
+    stream.service = service
+    stream.streamType = "jdbc-output"
     stream.tags = Array("test")
     streamDAO.save(stream)
   }

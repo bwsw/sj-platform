@@ -13,6 +13,12 @@ import com.bwsw.tstreams.services.BasicStreamService
 import kafka.admin.AdminUtils
 import kafka.utils.ZkUtils
 import org.I0Itec.zkclient.ZkConnection
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequest
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest
+import org.elasticsearch.action.admin.indices.settings.get.GetSettingsRequest
+import org.elasticsearch.client.transport.TransportClient
+import org.elasticsearch.common.settings.Settings
+import org.elasticsearch.common.transport.InetSocketTransportAddress
 
 /**
   * Created: 19/05/2016
@@ -103,17 +109,47 @@ object StreamUtil {
     }
   }
 
+  /**
+    * Check elasticsearch index for exists
+    * If ES index is not exists, then it creating
+    * Else compare count of partitions
+    *
+    * @param stream - ES index (stream)
+    * @return - Error, if index is incorrect or cannot creating it
+    */
   def checkAndCreateEsStream(stream: SjStream) = {
     val service = stream.service.asInstanceOf[ESService]
-    if (true) {
-      Right("yes")
+    val hosts: Array[InetSocketTransportAddress] = service.provider.hosts.map { s =>
+      val (host, port) = s.split(":")
+      new InetSocketTransportAddress(host, port)
+    }
+    val client = TransportClient.builder().build().addTransportAddresses(hosts.head)
+    if (!client.admin().indices().exists(new IndicesExistsRequest(stream.name)).actionGet().isExists) {
+      val settings = Map("settings" -> Map("number_of_shards" -> stream.partitions.toString))
+      client.admin().indices().create(new CreateIndexRequest(stream.name, new Settings(settings))).actionGet()
+      Right(s"Index ${stream.name} is created")
     } else {
-      Left("fail")
+      val indexSettings = client.admin().indices().getSettings(new GetSettingsRequest().indices(stream.name)).actionGet()
+      val partitions = indexSettings.getSetting(stream.name, "index.number_of_shards").toInt
+      if (partitions != stream.partitions) {
+        Left(s"Partitions count of stream ${stream.name} mismatch")
+      } else {
+        Right(s"Index ${stream.name} is exists")
+      }
     }
   }
 
+  /**
+    * Check sql table for exists
+    * If table is not exists, then it creating
+    * Else compare count of partitions
+    *
+    * @param stream - SQL table (stream)
+    * @return - Error, if table is incorrect or cannot creating it
+    */
   def checkAndCreateJdbcStream(stream: SjStream) = {
     val service = stream.service.asInstanceOf[JDBCService]
+    //todo add jdbc support
     if (true) {
       Right("yes")
     } else {

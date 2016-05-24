@@ -206,7 +206,7 @@ class ProviderValidator {
       val deadline = 1.seconds.fromNow
       var connected: Boolean = false
       while (!connected && deadline.hasTimeLeft) {
-        connected = client.getState.isAlive //todo fixed for working
+        connected = client.getState.isConnected
       }
       if (!connected)
         errors += s"Can not access Zookeeper on '$hostname:$zookeeperPort'"
