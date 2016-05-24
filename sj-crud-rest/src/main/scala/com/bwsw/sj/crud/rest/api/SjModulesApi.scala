@@ -11,7 +11,7 @@ import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.module.StreamingValidator
 import com.bwsw.sj.crud.rest.entities._
 import akka.http.scaladsl.model.headers._
-import com.bwsw.sj.crud.rest.entities.module.{WindowedInstanceMetadata, InstanceMetadata, ShortInstanceMetadata, ModuleSpecification}
+import com.bwsw.sj.crud.rest.entities.module._
 import com.bwsw.sj.crud.rest.runner.{InstanceDestroyer, InstanceStopper, InstanceStarter}
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.module.StreamingModuleValidator
@@ -91,7 +91,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                     post { (ctx: RequestContext) =>
                       val instanceMetadata = deserializeOptions(getEntityFromContext(ctx), moduleType)
                       val (errors, validatedInstance) = validateOptions(instanceMetadata, specification, moduleType)
-                      if (errors.isEmpty) {
+                      if (errors.isEmpty && validatedInstance != null) {
                         val validatorClassName = specification.validateClass
                         val jarFile = storage.get(filename, s"tmp/$filename")
                         if (jarFile != null && jarFile.exists()) {
@@ -307,6 +307,10 @@ trait SjModulesApi extends Directives with SjCrudValidator {
   def deserializeOptions(options: String, moduleType: String) = {
     if (moduleType.equals(windowedStreamingType)) {
       serializer.deserialize[WindowedInstanceMetadata](options)
+    } else if (moduleType.equals(regularStreamingType)) {
+      serializer.deserialize[RegularInstanceMetadata](options)
+    } else if (moduleType.equals(outputStreamingType)) {
+      serializer.deserialize[OutputInstanceMetadata](options)
     } else {
       serializer.deserialize[InstanceMetadata](options)
     }
@@ -325,7 +329,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     val validatorClass = Class.forName(validatorClassName)
     val validator = validatorClass.newInstance().asInstanceOf[StreamingModuleValidator]
     val instanceClass = Class.forName(instanceClassName)
-    validator.validate(options, specification, instanceClass.newInstance().asInstanceOf[Instance])
+    validator.validate(options, specification)
   }
 
   /**

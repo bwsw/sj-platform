@@ -11,8 +11,8 @@ class InstanceMetadata {
   var status: String = null
   var name: String = null
   var description: String = null
-  var inputs: Array[String] = null
-  var outputs: Array[String] = null
+  @JsonProperty(required = false) var inputs: Array[String] = null
+  @JsonProperty(required = false) var outputs: Array[String] = null
   @JsonProperty("checkpoint-mode") var checkpointMode: String = null
   @JsonProperty("checkpoint-interval") var checkpointInterval: Long = 0
   var parallelism: Any = null
@@ -22,7 +22,6 @@ class InstanceMetadata {
   @JsonProperty("per-task-ram") var perTaskRam: Int = 0
   @JsonProperty("jvm-options") var jvmOptions: Map[String, String] = null
   @JsonProperty("node-attributes") var nodeAttributes: Map[String, String] = null
-  @JsonProperty("event-wait-time") var eventWaitTime: Long = 0
   @JsonProperty("execution-plan") var executionPlan: Map[String, Any] = null
   @JsonProperty("coordination-service") var coordinationService: String = null
   @JsonProperty("environment-variables") var environmentVariables: Map[String, String] = null

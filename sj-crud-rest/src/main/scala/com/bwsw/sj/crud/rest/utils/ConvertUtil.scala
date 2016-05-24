@@ -1,7 +1,9 @@
 package com.bwsw.sj.crud.rest.utils
 
 import com.bwsw.common.JsonSerializer
+import com.bwsw.sj.common.DAL.model.ZKService
 import com.bwsw.sj.common.DAL.model.module._
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.crud.rest.entities.module._
 
 /**
@@ -31,14 +33,22 @@ object ConvertUtil {
         apiInstance.windowFullMax = timeWindowedInstance.windowFullMax
         apiInstance.stateManagement = timeWindowedInstance.stateManagement
         apiInstance.stateFullCheckpoint = timeWindowedInstance.stateFullCheckpoint
+        apiInstance.eventWaitTime = timeWindowedInstance.eventWaitTime
+        apiInstance.inputs = timeWindowedInstance.inputs
+        apiInstance.outputs = timeWindowedInstance.outputs
         apiInstance
       case regularInstance: RegularInstance =>
-        val apiInstance = instanceToInstanceMetadata(new RegularInstanceMetadata, instance).asInstanceOf[RegularInstance]
+        val apiInstance = instanceToInstanceMetadata(new RegularInstanceMetadata, instance).asInstanceOf[RegularInstanceMetadata]
         apiInstance.stateManagement = regularInstance.stateManagement
         apiInstance.stateFullCheckpoint = regularInstance.stateFullCheckpoint
+        apiInstance.eventWaitTime = regularInstance.eventWaitTime
+        apiInstance.inputs = regularInstance.inputs
+        apiInstance.outputs = regularInstance.outputs
         apiInstance
       case outputInstance: OutputInstance =>
-        val apiInstance = instanceToInstanceMetadata(new OutputInstanceMetadata, instance).asInstanceOf[OutputInstance]
+        val apiInstance = instanceToInstanceMetadata(new OutputInstanceMetadata, instance).asInstanceOf[OutputInstanceMetadata]
+        apiInstance.input = outputInstance.inputs.head
+        apiInstance.output = outputInstance.outputs.head
         apiInstance
       case _ => instanceToInstanceMetadata(new InstanceMetadata, instance)
     }
@@ -47,6 +57,7 @@ object ConvertUtil {
   /**
     * Convert model instance object to API instance
     *
+    * @param apiInstance - protocol object of instance
     * @param instance - object of model instance
     * @return - API instance object
     */
@@ -57,8 +68,6 @@ object ConvertUtil {
     apiInstance.status = instance.status
     apiInstance.name = instance.name
     apiInstance.description = instance.description
-    apiInstance.inputs = instance.inputs
-    apiInstance.outputs = instance.outputs
     apiInstance.checkpointMode = instance.checkpointMode
     apiInstance.checkpointInterval = instance.checkpointInterval
     apiInstance.parallelism = instance.parallelism
@@ -70,11 +79,11 @@ object ConvertUtil {
     if (instance.nodeAttributes != null) {
       apiInstance.nodeAttributes = Map(instance.nodeAttributes.asScala.toList: _*)
     }
-    apiInstance.eventWaitTime = instance.eventWaitTime
     apiInstance.executionPlan = executionPlan
     if (instance.environmentVariables != null) {
       apiInstance.environmentVariables = Map(instance.environmentVariables.asScala.toList: _*)
     }
+    apiInstance.coordinationService = instance.coordinationService.name
     apiInstance
   }
 
@@ -104,15 +113,48 @@ object ConvertUtil {
   /**
     * Convert api instance to db-model instance
     *
-    * @param modelInstance - dst object of model instance
     * @param apiInstance - api object of instance
     * @return - object of model instance
     */
-  def convertToModelInstance(modelInstance: Instance, apiInstance: InstanceMetadata) = {
+  def convertToModelInstance(apiInstance: InstanceMetadata) = {
+    apiInstance match {
+      case windowedInstanceMetadata: WindowedInstanceMetadata =>
+        val modelInstance = instanceMetadataToInstance(new WindowedInstance, windowedInstanceMetadata).asInstanceOf[WindowedInstance]
+        modelInstance.timeWindowed = windowedInstanceMetadata.timeWindowed
+        modelInstance.windowFullMax = windowedInstanceMetadata.windowFullMax
+        modelInstance.stateManagement = windowedInstanceMetadata.stateManagement
+        modelInstance.stateFullCheckpoint = windowedInstanceMetadata.stateFullCheckpoint
+        modelInstance.eventWaitTime = windowedInstanceMetadata.eventWaitTime
+        modelInstance.inputs = windowedInstanceMetadata.inputs
+        modelInstance.outputs = windowedInstanceMetadata.outputs
+        modelInstance
+      case regularInstanceMetadata: RegularInstanceMetadata =>
+        val modelInstance = instanceMetadataToInstance(new RegularInstance, regularInstanceMetadata).asInstanceOf[RegularInstance]
+        modelInstance.stateManagement = regularInstanceMetadata.stateManagement
+        modelInstance.stateFullCheckpoint = regularInstanceMetadata.stateFullCheckpoint
+        modelInstance.eventWaitTime = regularInstanceMetadata.eventWaitTime
+        modelInstance.inputs = regularInstanceMetadata.inputs
+        modelInstance.outputs = regularInstanceMetadata.outputs
+        modelInstance
+      case outputInstanceMetadata: OutputInstanceMetadata =>
+        val modelInstance = instanceMetadataToInstance(new OutputInstance, outputInstanceMetadata).asInstanceOf[OutputInstance]
+        modelInstance.inputs = Array(outputInstanceMetadata.input)
+        modelInstance.outputs = Array(outputInstanceMetadata.output)
+        modelInstance
+      case _ => instanceMetadataToInstance(new Instance, apiInstance)
+    }
+  }
+
+  /**
+    * Convert API instance object to model instance
+    *
+    * @param modelInstance - object of model instance
+    * @param apiInstance - protocol object of instance
+    * @return - Model instance object
+    */
+  def instanceMetadataToInstance(modelInstance: Instance, apiInstance: InstanceMetadata) = {
     modelInstance.name = apiInstance.name
     modelInstance.description = apiInstance.description
-    modelInstance.inputs = apiInstance.inputs
-    modelInstance.outputs = apiInstance.outputs
     modelInstance.checkpointMode = apiInstance.checkpointMode
     modelInstance.checkpointInterval = apiInstance.checkpointInterval
     modelInstance.parallelism = apiInstance.parallelism.asInstanceOf[Int]
@@ -124,9 +166,15 @@ object ConvertUtil {
     if (apiInstance.nodeAttributes != null) {
       modelInstance.nodeAttributes = mapAsJavaMap(apiInstance.nodeAttributes)
     }
-    modelInstance.eventWaitTime = apiInstance.eventWaitTime
     if (apiInstance.environmentVariables != null) {
       modelInstance.environmentVariables = mapAsJavaMap(apiInstance.environmentVariables)
+    }
+    val serviceDAO = ConnectionRepository.getServiceManager
+    if (apiInstance.coordinationService != null) {
+      val service = serviceDAO.get(apiInstance.coordinationService)
+      if (service != null && service.isInstanceOf[ZKService]) {
+        modelInstance.coordinationService = service.asInstanceOf[ZKService]
+      }
     }
     modelInstance
   }

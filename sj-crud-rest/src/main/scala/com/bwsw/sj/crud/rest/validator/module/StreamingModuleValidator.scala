@@ -27,8 +27,8 @@ abstract class StreamingModuleValidator {
   import com.bwsw.sj.common.StreamConstants._
   import com.bwsw.sj.crud.rest.utils.ConvertUtil._
 
-  var serviceDAO: GenericMongoService[Service] = null
-  var instanceDAO: GenericMongoService[Instance] = null
+  var serviceDAO: GenericMongoService[Service] = ConnectionRepository.getServiceManager
+  var instanceDAO: GenericMongoService[Instance] = ConnectionRepository.getInstanceService
   val serializer: Serializer = new JsonSerializer
 
   case class InputStream(name: String, mode: String, partitionsCount: Int)
@@ -42,9 +42,9 @@ abstract class StreamingModuleValidator {
     * @param partitionsCount - partitions count of input streams
     * @return
     */
-  def createInstance(parameters: InstanceMetadata, partitionsCount: Map[String, Int], instance: Instance, streams: Set[SjStream]) = {
+  def createInstance(parameters: InstanceMetadata, partitionsCount: Map[String, Int], streams: Set[SjStream]) = {
     val executionPlan = createExecutionPlan(parameters, partitionsCount)
-    convertToModelInstance(instance, parameters)
+    val instance = convertToModelInstance(parameters)
     instance.executionPlan = executionPlan
     val stages = scala.collection.mutable.Map[String, InstanceStage]()
     streams.foreach { stream =>
@@ -63,17 +63,7 @@ abstract class StreamingModuleValidator {
     instance
   }
 
-  /**
-    * Validating input parameters for streaming module
-    *
-    * @param parameters - input parameters for running module
-    * @return - List of errors
-    */
-  def validate(parameters: InstanceMetadata, specification: ModuleSpecification, validatedInstance: Instance) = {
-    val validateParameters = parameters
-    instanceDAO = ConnectionRepository.getInstanceService
-    serviceDAO = ConnectionRepository.getServiceManager
-
+  def generalOptionsValidate(parameters: InstanceMetadata) = {
     val errors = new ArrayBuffer[String]()
 
     val instance = instanceDAO.get(parameters.name)
@@ -95,17 +85,30 @@ abstract class StreamingModuleValidator {
 
     if (parameters.coordinationService.isEmpty) {
       errors += "Coordination service attribute is empty."
+    } else {
+      val coordService = serviceDAO.get(parameters.coordinationService)
+      if (coordService != null) {
+        if (!coordService.isInstanceOf[ZKService]) {
+          errors += s"Coordination service ${parameters.coordinationService} is not ZKCoord."
+        }
+      } else {
+        errors += s"Coordination service ${parameters.coordinationService} is not exists."
+      }
     }
 
+    errors
+  }
+
+  def streamOptionsValidate(parameters: InstanceMetadata, specification: ModuleSpecification, errors: ArrayBuffer[String]) = {
     val inputModes = parameters.inputs.map(i => getStreamMode(i))
     if (inputModes.exists(m => !streamModes.contains(m))) {
       errors += s"Unknown stream modes. Input streams must have modes 'split' or 'full'."
     }
     val inputsCardinality = specification.inputs("cardinality").asInstanceOf[Array[Int]]
-    if (parameters.inputs.length < inputsCardinality(0)) {
+    if ( parameters.inputs.length < inputsCardinality(0)) {
       errors += s"Count of inputs cannot be less than ${inputsCardinality(0)}."
     }
-    if (parameters.inputs.length > inputsCardinality(1)) {
+    if ( parameters.inputs.length > inputsCardinality(1)) {
       errors += s"Count of inputs cannot be more than ${inputsCardinality(1)}."
     }
     if (listHasDoubles(parameters.inputs.toList)) {
@@ -172,43 +175,42 @@ abstract class StreamingModuleValidator {
       }
     }
 
-    val esStreams = allStreams.filter(s => s.streamType.equals(esOutput))
-    if (esStreams.nonEmpty) {
-      if (esStreams.exists(s => !s.service.isInstanceOf[ESService])) {
-        errors += s"Service for kafka-streams must be 'KfkQ'."
-      } else {
-        checkEsStreams(errors, esStreams)
-      }
-    }
-
-    val jdbcStreams = allStreams.filter(s => s.streamType.equals(jdbcOutput))
-    if (jdbcStreams.nonEmpty) {
-      if (jdbcStreams.exists(s => !s.service.isInstanceOf[JDBCService])) {
-        errors += s"Service for kafka-streams must be 'KfkQ'."
-      } else {
-        checkJdbcStreams(errors, jdbcStreams)
-      }
-    }
-
     val partitions = getPartitionForStreams(inputStreams)
     val minPartitionCount = partitions.values.min
 
-    parameters.parallelism match {
-      case parallelism: Int =>
-        if (parallelism > minPartitionCount) {
-          errors += s"Parallelism (${parameters.parallelism}) > minimum of partition count ($minPartitionCount) in all input stream."
+    parameters.parallelism = checkParallelism(parameters.parallelism, minPartitionCount, errors)
+
+    val validatedInstance = createInstance(parameters, partitions, allStreams.filter(s => s.streamType.equals(tStream)).toSet)
+    (errors, validatedInstance)
+  }
+
+  def checkParallelism(parallelism: Any, partitions: Int, errors: ArrayBuffer[String]) = {
+    parallelism match {
+      case dig: Int =>
+        if (dig > partitions) {
+          errors += s"Parallelism ($dig) > minimum of partition count ($partitions) in all input stream."
         }
+        dig
       case s: String =>
         if (!s.equals("max")) {
           errors += s"Parallelism must be int value or string 'max'."
         }
-        validateParameters.parallelism = minPartitionCount
+        partitions
       case _ =>
         errors += "Unknown type of 'parallelism' parameter. Must be Int or String."
+        null
     }
+  }
 
-    createInstance(validateParameters, partitions, validatedInstance, allStreams.filter(s => s.streamType.equals(tStream)).toSet)
-    (errors, validatedInstance)
+  /**
+    * Validating input parameters for streaming module
+    *
+    * @param parameters - input parameters for running module
+    * @return - List of errors
+    */
+  def validate(parameters: InstanceMetadata, specification: ModuleSpecification) = {
+    val errors = generalOptionsValidate(parameters)
+    streamOptionsValidate(parameters, specification, errors)
   }
 
   /**
@@ -257,7 +259,7 @@ abstract class StreamingModuleValidator {
     * @param errors - list of all errors
     * @param allEsStreams - all elasticsearch streams of instance
     */
-  def checkEsStreams(errors: ArrayBuffer[String], allEsStreams: mutable.Buffer[SjStream]) = {
+  def checkEsStreams(errors: ArrayBuffer[String], allEsStreams: List[SjStream]) = {
     allEsStreams.foreach { (stream: SjStream) =>
       if (errors.isEmpty) {
         val streamCheckResult = StreamUtil.checkAndCreateEsStream(stream)
@@ -275,7 +277,7 @@ abstract class StreamingModuleValidator {
     * @param errors - list of all errors
     * @param allJdbcStreams - all jdbc streams of instance
     */
-  def checkJdbcStreams(errors: ArrayBuffer[String], allJdbcStreams: mutable.Buffer[SjStream]) = {
+  def checkJdbcStreams(errors: ArrayBuffer[String], allJdbcStreams: List[SjStream]) = {
     allJdbcStreams.foreach { (stream: SjStream) =>
       if (errors.isEmpty) {
         val streamCheckResult = StreamUtil.checkAndCreateJdbcStream(stream)
@@ -320,6 +322,17 @@ abstract class StreamingModuleValidator {
   }
 
   /**
+    * Getting stream for such name
+    *
+    * @param streamName Name of stream
+    * @return SjStream object
+    */
+  def getStream(streamName: String) = {
+    val streamsDAO = ConnectionRepository.getStreamService
+    streamsDAO.get(streamName)
+  }
+
+  /**
     * Getting service names for all streams (must be one element in list)
     *
     * @param streams All streams
@@ -336,7 +349,14 @@ abstract class StreamingModuleValidator {
     * @return - execution plan of instance
     */
   def createExecutionPlan(instance: InstanceMetadata, partitionsCount: Map[String, Int]) = {
-    val inputs = instance.inputs.map { input =>
+    var inputStreams: Array[String] = null
+    instance.inputs match {
+      case inputStreamArray: Array[String] =>
+        inputStreams = inputStreamArray
+      case _ =>
+        inputStreams = Array(instance.inputs.asInstanceOf[String])
+    }
+    val inputs = inputStreams.map { input =>
       val mode = getStreamMode(input)
       val name = input.replaceAll("/split|/full", "")
       InputStream(name, mode, partitionsCount(name))

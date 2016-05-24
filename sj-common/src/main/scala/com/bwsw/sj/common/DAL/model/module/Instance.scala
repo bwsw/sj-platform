@@ -29,7 +29,6 @@ class Instance {
   @Embedded("jvm-options") var jvmOptions: java.util.Map[String, String] = null
   @Embedded("execution-plan") var executionPlan: ExecutionPlan = null
   @Property("node-attributes") var nodeAttributes: java.util.Map[String, String] = null
-  @Property("event-wait-time") var eventWaitTime: Long = 0
   @Embedded("coordination-service") var coordinationService: ZKService = null
   @Property("environment-variables") var environmentVariables: java.util.Map[String, String] = null
   var stages: java.util.Map[String, InstanceStage] = null

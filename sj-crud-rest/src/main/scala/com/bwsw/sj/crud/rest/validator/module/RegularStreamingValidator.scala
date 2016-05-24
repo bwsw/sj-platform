@@ -18,9 +18,9 @@ class RegularStreamingValidator extends StreamingModuleValidator {
     * @param instanceParameters - input parameters for running module
     * @return - List of errors
     */
-  override def validate(instanceParameters: InstanceMetadata, specification: ModuleSpecification, validatedInstance: Instance) = {
+  override def validate(instanceParameters: InstanceMetadata, specification: ModuleSpecification) = {
     val parameters = instanceParameters.asInstanceOf[RegularInstanceMetadata]
-    val result = super.validate(instanceParameters, specification, validatedInstance)
+    val result = super.validate(instanceParameters, specification)
     val errors = result._1
 
     if (!stateManagementModes.contains(parameters.stateManagement)) {
@@ -28,10 +28,6 @@ class RegularStreamingValidator extends StreamingModuleValidator {
         s"State-management must be 'none' or 'ram' or 'rocks'."
     }
 
-    var instance = new RegularInstance
-    instance = validatedInstance.asInstanceOf[RegularInstance]
-    instance.stateFullCheckpoint = parameters.stateFullCheckpoint
-    instance.stateManagement = parameters.stateManagement
-    (errors, instance)
+    (errors, result._2)
   }
 }

@@ -11,6 +11,7 @@ import org.mongodb.morphia.annotations._
 class RegularInstance() extends Instance {
   @Property("state-management") var stateManagement: String = null
   @Property("state-full-checkpoint") var stateFullCheckpoint: Int = 0
+  @Property("event-wait-time") var eventWaitTime: Long = 0
 }
 
 

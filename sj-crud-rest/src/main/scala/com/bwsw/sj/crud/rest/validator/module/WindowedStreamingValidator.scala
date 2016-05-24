@@ -18,9 +18,9 @@ class WindowedStreamingValidator extends StreamingModuleValidator {
     * @param instanceParameters - input parameters for running module
     * @return - List of errors
     */
-  override def validate(instanceParameters: InstanceMetadata, specification: ModuleSpecification, validatedInstance: Instance) = {
+  override def validate(instanceParameters: InstanceMetadata, specification: ModuleSpecification) = {
     val parameters = instanceParameters.asInstanceOf[WindowedInstanceMetadata]
-    val result = super.validate(instanceParameters, specification, validatedInstance)
+    val result = super.validate(instanceParameters, specification)
     val errors = result._1
 
     if (!stateManagementModes.contains(parameters.stateManagement)) {
@@ -33,14 +33,7 @@ class WindowedStreamingValidator extends StreamingModuleValidator {
     if (parameters.windowFullMax <= 0) {
       errors += s"Window-full-max attribute must be > 0"
     }
-
-    var instance = new WindowedInstance
-    instance = validatedInstance.asInstanceOf[WindowedInstance]
-    instance.timeWindowed = parameters.timeWindowed
-    instance.windowFullMax = parameters.windowFullMax
-    instance.stateFullCheckpoint = parameters.stateFullCheckpoint
-    instance.stateManagement = parameters.stateManagement
-    (errors, instance)
+    (errors, result._2)
   }
 
 }

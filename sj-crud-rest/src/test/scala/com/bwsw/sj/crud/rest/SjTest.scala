@@ -12,6 +12,7 @@ import com.datastax.driver.core.{Cluster, Session}
   * @author Kseniya Tomskikh
   */
 object SjTest {
+  import com.bwsw.sj.common.StreamConstants._
 
   val serializer = new JsonSerializer
 
@@ -108,7 +109,7 @@ object SjTest {
     stream.generator = null
     stream.partitions = 3
     stream.service = service
-    stream.streamType = "kafka"
+    stream.streamType = kafka
     stream.tags = Array("test")
     streamDAO.save(stream)
   }
@@ -128,6 +129,7 @@ object SjTest {
     service.provider = provider
     service.name = "es_service"
     service.serviceType = "ESInd"
+    service.index = "sj"
     serviceDAO.save(service)
 
     val stream = new SjStream()
@@ -135,7 +137,7 @@ object SjTest {
     stream.generator = null
     stream.partitions = 3
     stream.service = service
-    stream.streamType = "elasticsearch-output"
+    stream.streamType = esOutput
     stream.tags = Array("test")
     streamDAO.save(stream)
   }
@@ -162,7 +164,7 @@ object SjTest {
     stream.generator = null
     stream.partitions = 3
     stream.service = service
-    stream.streamType = "jdbc-output"
+    stream.streamType = jdbcOutput
     stream.tags = Array("test")
     streamDAO.save(stream)
   }
@@ -265,7 +267,7 @@ object SjTest {
     s1.description = "s1 stream"
     s1.partitions = 7
     s1.service = tService
-    s1.streamType = "Tstream"
+    s1.streamType = tStream
     s1.tags = Array("TAG")
     s1.generator = generator1
     sjStreamDAO.save(s1)
@@ -279,7 +281,7 @@ object SjTest {
     s2.description = "s2 stream"
     s2.partitions = 10
     s2.service = tService
-    s2.streamType = "Tstream"
+    s2.streamType = tStream
     s2.tags = Array("TAG")
     s2.generator = generator2
     sjStreamDAO.save(s2)
@@ -293,7 +295,7 @@ object SjTest {
     s3.description = "s3 stream"
     s3.partitions = 10
     s3.service = tService
-    s3.streamType = "Tstream"
+    s3.streamType = tStream
     s3.tags = Array("TAG")
     s3.generator = generator3
     sjStreamDAO.save(s3)

@@ -88,17 +88,17 @@ trait SjCrudValidator {
     val moduleType = specification("module-type").asInstanceOf[String]
     if (moduleType.equals(outputStreamingType)) {
       val inputs = specification("inputs").asInstanceOf[Map[String, Any]]
-      val inputTypes = inputs("types").asInstanceOf[Array[String]]
-      val inputCardinalites = inputs("cardinality").asInstanceOf[Array[Int]]
+      val inputTypes = inputs("types").asInstanceOf[List[String]]
+      val inputCardinalites = inputs("cardinality").asInstanceOf[List[Int]]
 
       val outputs = specification("outputs").asInstanceOf[Map[String, Any]]
-      val outputTypes = outputs("types").asInstanceOf[Array[String]]
-      val outputCardinalites = outputs("cardinality").asInstanceOf[Array[Int]]
+      val outputTypes = outputs("types").asInstanceOf[List[String]]
+      val outputCardinalites = outputs("cardinality").asInstanceOf[List[Int]]
 
       if (inputTypes.length > 1 ||
-        !inputTypes.head.equals(tStream) || (inputCardinalites(0) != 1 || inputCardinalites(1) != 1) ||
+        !inputTypes.head.equals(tStream) || (inputCardinalites.head != 1 || inputCardinalites(1) != 1) ||
         !(outputTypes.contains(jdbcOutput) || outputTypes.contains(esOutput)) ||
-        (outputCardinalites(0) != 1 || outputCardinalites(1) != 1)
+        (outputCardinalites.head != 1 || outputCardinalites(1) != 1)
       ) {
         throw new Exception("Specification.json for output-streaming has incorrect params!")
       }

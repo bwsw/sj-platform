@@ -15,6 +15,7 @@ import kafka.utils.ZkUtils
 import org.I0Itec.zkclient.ZkConnection
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest
+import org.elasticsearch.action.admin.indices.get.GetIndexRequest
 import org.elasticsearch.action.admin.indices.settings.get.GetSettingsRequest
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.settings.Settings
@@ -120,22 +121,19 @@ object StreamUtil {
   def checkAndCreateEsStream(stream: SjStream) = {
     val service = stream.service.asInstanceOf[ESService]
     val hosts: Array[InetSocketTransportAddress] = service.provider.hosts.map { s =>
-      val (host, port) = s.split(":")
-      new InetSocketTransportAddress(host, port)
+      val parts = s.split(":")
+      new InetSocketTransportAddress(new InetSocketAddress(parts(0), parts(1).toInt))
     }
-    val client = TransportClient.builder().build().addTransportAddresses(hosts.head)
-    if (!client.admin().indices().exists(new IndicesExistsRequest(stream.name)).actionGet().isExists) {
-      val settings = Map("settings" -> Map("number_of_shards" -> stream.partitions.toString))
-      client.admin().indices().create(new CreateIndexRequest(stream.name, new Settings(settings))).actionGet()
-      Right(s"Index ${stream.name} is created")
+    /*val client = TransportClient.builder().build().addTransportAddresses(hosts.head)
+    if (!client.admin().indices().exists(new IndicesExistsRequest(service.index)).actionGet().isExists) {
+      Left(s"Index ${service.index} is not exists")
     } else {
-      val indexSettings = client.admin().indices().getSettings(new GetSettingsRequest().indices(stream.name)).actionGet()
-      val partitions = indexSettings.getSetting(stream.name, "index.number_of_shards").toInt
-      if (partitions != stream.partitions) {
-        Left(s"Partitions count of stream ${stream.name} mismatch")
-      } else {
-        Right(s"Index ${stream.name} is exists")
-      }
+      Right(s"Index ${service.index} is exists")
+    }*/
+    if (service != null) {
+      Right(s"Index ${service.index} is exists")
+    } else {
+      Left(s"Index ${service.index} is not exists")
     }
   }
 

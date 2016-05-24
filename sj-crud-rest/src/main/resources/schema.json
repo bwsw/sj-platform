@@ -22,8 +22,8 @@
           "items": {
             "type": "string",
             "enum": [
-              "t-stream",
-              "kafka",
+              "stream.t-stream",
+              "stream.kafka",
               "elasticsearch-output",
               "jdbc-output"
             ]
