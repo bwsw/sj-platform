@@ -15,34 +15,25 @@ import com.twitter.common.quantity.{Amount, Time}
 import java.net.InetSocketAddress
 import java.net.InetAddress
 
+
 import com.bwsw.common.client.Client._
 import com.bwsw.sj.common.DAL.model.RegularInstance
-import com.bwsw.sj.common.DAL.model.Task
+import com.bwsw.sj.common.DAL.model.{Task => ormTask}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import org.apache.log4j.Logger
 
-import scala.util.matching.Regex
-
-
-//object RegexUtils {
-//  class RichRegex(underlying: Regex) {
-//    def matches(s: String) = underlying.pattern.matcher(s).matches
-//  }
-//  implicit def regexToRichRegex(r: Regex) = new RichRegex(r)
-//}
-
 
 class ScalaScheduler extends Scheduler {
-
   var cores: Double = 0.0
   var ram: Double = 0.0
-  var tasksToLaunch = List[Tuple2[String, Task]]()
   var params = immutable.Map[String, String]()
   private val logger = Logger.getLogger(getClass)
   var instance: RegularInstance = null
 
   def error(driver: SchedulerDriver, message: String) {
     logger.error(s"Got error message: $message")
+    TasksList.message = s"Got error message: $message"
+
   }
 
   def executorLost(driver: SchedulerDriver, executorId: ExecutorID, slaveId: SlaveID, status: Int) {}
@@ -54,21 +45,26 @@ class ScalaScheduler extends Scheduler {
   def frameworkMessage(driver: SchedulerDriver, executorId: ExecutorID, slaveId: SlaveID, data: Array[Byte]) {
     logger.info(s"Got framework message")
     logger.debug(s"$data")
+    TasksList.message = s"Got framework message: $data"
   }
 
   def statusUpdate(driver: SchedulerDriver, status: TaskStatus) {
-
     logger.info(s"STATUS UPDATE")
     if (status != null) {
+      TasksList(status.getTaskId.getValue).foreach(x => x.update(
+        state = status.getState.toString,
+        state_changed = (status.getTimestamp.toLong*1000).toString,
+        last_node = if (x.node != "") x.node else x.last_node, node = status.getSlaveId.getValue, reason = ""
+      ))
       logger.info(s"Task: ${status.getTaskId.getValue}")
       logger.info(s"Status: ${status.getState}")
-      if (status.getState.toString == "TASK_FAILED") {
+      if (status.getState.toString == "TASK_FAILED" || status.getState.toString == "TASK_ERROR") {
+        TasksList(status.getTaskId.getValue).foreach(x => x.update(
+          node = "", reason = status.getMessage
+        ))
         logger.info(s"Error: ${status.getMessage}")
-        this.tasksToLaunch = this.tasksToLaunch.:::(
-          List(Tuple2(status.getTaskId.getValue,
-            this.instance.executionPlan.tasks.asScala {
-              status.getTaskId.getValue
-            })))
+
+        TasksList.addToLaunch(status.getTaskId.getValue)
         logger.info("Added task to launch")
       }
     }
@@ -85,36 +81,36 @@ class ScalaScheduler extends Scheduler {
       for (offer <- offers.asScala) {
         driver.declineOffer(offer.getId)
       }
+      TasksList.message = "No one node selected"
       return
     }
-
 
     for (offer <- filteredOffers.asScala) {
       logger.debug(s"Offer ID: ${offer.getId.getValue}")
       logger.debug(s"Slave ID: ${offer.getSlaveId.getValue}")
     }
 
-
-    val tasksCount = this.tasksToLaunch.size
+    val tasksCount = TasksList.toLaunch.size //this.tasksToLaunch.size
     var tasksOnSlaves = howMuchTasksOnSlave(this.cores, this.ram, tasksCount, filteredOffers)
 
     var overTasks = 0
-    for (slave <- tasksOnSlaves) {
-      overTasks += slave._2
-    }
+    for (slave <- tasksOnSlaves) {overTasks += slave._2}
     logger.info(s"Count tasks can be launched: $overTasks")
     logger.info(s"Count tasks must be launched: $tasksCount")
     if (tasksCount > overTasks) {
       logger.info(s"Can not launch tasks: no required resources")
+      TasksList.message = "Can not launch tasks: no required resources"
       for (offer <- offers.asScala) {
         driver.declineOffer(offer.getId)
       }
       return
     }
-    logger.info(s"Tasks to lauch: $tasksToLaunch")
+
+    logger.info(s"Tasks to launch: ${TasksList.toLaunch}")
+
     var offerNumber = 0
     var launchedTasks: Map[OfferID, List[TaskInfo]] = Map()
-    for (task_temp <- this.tasksToLaunch) {
+    for (curr_task <- TasksList.toLaunch) {
 
       val cmd = CommandInfo.newBuilder
         .addUris(CommandInfo.URI.newBuilder.setValue(getModuleUrl(this.instance)))
@@ -134,7 +130,6 @@ class ScalaScheduler extends Scheduler {
           Scalar.newBuilder.setValue(this.ram)).
         build
 
-      val task_id = task_temp._1
       while (tasksOnSlaves(offerNumber)._2 == 0) {
         tasksOnSlaves = tasksOnSlaves.filterNot(elem => elem == tasksOnSlaves(offerNumber))
         if (offerNumber > tasksOnSlaves.size - 1) {
@@ -148,13 +143,13 @@ class ScalaScheduler extends Scheduler {
         offerNumber += 1
       }
 
-      logger.info(s"Current task: ${task_temp._1}")
+      logger.info(s"Current task: $curr_task")
       logger.info(s"Current slave: ${currentOffer._1.getSlaveId.getValue}")
 
       val task = TaskInfo.newBuilder
         .setCommand(cmd)
-        .setName(task_id)
-        .setTaskId(TaskID.newBuilder.setValue(task_id))
+        .setName(curr_task)
+        .setTaskId(TaskID.newBuilder.setValue(curr_task))
         .addResources(cpus)
         .addResources(mem)
         .setSlaveId(currentOffer._1.getSlaveId)
@@ -171,7 +166,7 @@ class ScalaScheduler extends Scheduler {
       }
 
       tasksOnSlaves.updated(tasksOnSlaves.indexOf(currentOffer), Tuple2(currentOffer._1, currentOffer._2 - 1))
-      this.tasksToLaunch = this.tasksToLaunch.filterNot(elem => elem == task_temp)
+      TasksList.launched(curr_task)
 
     }
 
@@ -182,26 +177,29 @@ class ScalaScheduler extends Scheduler {
     for (offer <- offers.asScala) {
       driver.declineOffer(offer.getId)
     }
+    TasksList.message = "Tasks launched"
   }
 
 
   def reregistered(driver: SchedulerDriver, masterInfo: MasterInfo) {
     logger.info(s"New master $masterInfo")
+    TasksList.message = s"New master $masterInfo"
   }
 
 
   def registered(driver: SchedulerDriver, frameworkId: FrameworkID, masterInfo: MasterInfo) {
     logger.info(s"Registered framework as: ${frameworkId.getValue}")
+
     this.params = immutable.Map(
       ("instanceId", Properties.envOrElse("INSTANCE_ID", "00000000-0000-0000-0000-000000000000")),
       ("zkPrefix", Properties.envOrElse("ZK_PREFIX", "zk")),
       ("zkHosts", Properties.envOrElse("ZK_HOSTS", "127.0.0.1")),
-      ("zkSecret", Properties.envOrElse("ZK_SECRET", "")),
-      ("zkMesosPrefix", Properties.envOrElse("ZK_MESOS_PREFIX", "zk:/mesos")),
-      ("mongodbHost", Properties.envOrElse("MONGODB_HOST", "127.0.0.1")),
-      ("mongodbUser", Properties.envOrElse("MONGODB_USER", "")),
-      ("mongodbPassword", Properties.envOrElse("MONGODB_PASSWORD", "")),
-      ("restService", Properties.envOrElse("REST_SERVICE", "127.0.0.1"))
+//      ("zkSecret", Properties.envOrElse("ZK_SECRET", "")),
+//      ("zkMesosPrefix", Properties.envOrElse("ZK_MESOS_PREFIX", "zk:/mesos")),
+      ("mongodbHost", Properties.envOrElse("MONGODB_HOST", "127.0.0.1"))
+//      ("mongodbUser", Properties.envOrElse("MONGODB_USER", "")),
+//      ("mongodbPassword", Properties.envOrElse("MONGODB_PASSWORD", "")),
+//      ("restService", Properties.envOrElse("REST_SERVICE", "127.0.0.1"))
     )
     logger.debug(s"Got environment variable: ${this.params}")
 
@@ -209,6 +207,7 @@ class ScalaScheduler extends Scheduler {
     if (this.instance == null) {
       logger.error(s"Not found instance")
       driver.stop()
+      TasksList.message = "Framework shut down: not found instance."
       return
     }
     this.cores = instance.perTaskCores
@@ -216,18 +215,11 @@ class ScalaScheduler extends Scheduler {
     logger.info(s"Got instance")
     logger.debug(s"${this.instance}")
 
-    val zkhost = new InetSocketAddress(InetAddress.getByName(this.params {"zkHosts"}), 2181)
+    //lock framework
+    val zkhost = new InetSocketAddress(InetAddress.getByName(this.params{"zkHosts"}), 2181)
 //    val zkhost = new InetSocketAddress(InetAddress.getByName(this.instance.coordinationService.provider.hosts(1)), 2181)
     val zkClient = new ZooKeeperClient(Amount.of(1, Time.MINUTES), zkhost)
-    val lockPath = s"/${
-      this.params {
-        "zkPrefix"
-      }
-    }/${
-      this.params {
-        "instanceId"
-      }
-    }/lock"
+    val lockPath = s"/${this.params {"zkPrefix"}}/${this.params {"instanceId"}}/lock"
 //    val lockPath = s"/${this.instance.coordinationService.namespace}/${this.params{"instanceId"}}/lock"
     val dli = new DistributedLockImpl(zkClient, lockPath)
     dli.lock()
@@ -236,9 +228,10 @@ class ScalaScheduler extends Scheduler {
     val tasks = instance.executionPlan.tasks
     logger.info(s"Got tasks")
     for (task <- tasks.asScala) {
-      this.tasksToLaunch :::= List(task)
+      TasksList.newTask(task._1)
       logger.info(s"$task")
     }
+    TasksList.message = s"Registered framework as: ${frameworkId.getValue}"
   }
 
   def howMuchTasksOnSlave(perTaskCores: Double, perTaskRam: Double, tasksCount: Int, offers: util.List[Offer]): List[Tuple2[Offer, Int]] = {
@@ -260,10 +253,9 @@ class ScalaScheduler extends Scheduler {
       over_cpus += getResource(offer, "cpus")
       over_mem += getResource(offer, "mem")
     }
-
     logger.debug(s"Have resources: $over_cpus cpus, $over_mem mem")
     logger.debug(s"Required resources: $req_cpus cpus, $req_mem mem")
-    return tasksNumber
+    tasksNumber
   }
 
 
@@ -275,14 +267,15 @@ class ScalaScheduler extends Scheduler {
     for (r <- res.asScala if r.getName == name) {
       return r.getScalar.getValue
     }
-    return 0.0
+    0.0
   }
 
 
   def filterOffers(offers: util.List[Offer], filters: java.util.Map[String, String]): util.List[Offer] = {
+
     logger.info(s"FILTER OFFERS")
     var result: List[Offer] = List()
-    if (filters.size > 0) {
+    if (filters != null) {
       for (offer <- offers.asScala) {
         for (filter <- filters.asScala) {
           if (filter._1.matches("""\+.+""".r.toString)) {
@@ -300,17 +293,17 @@ class ScalaScheduler extends Scheduler {
                 result = result.filterNot(elem => elem == offer)
               }
             }
-
           }
         }
       }
     } else return offers
-    return result.asJava
+    result.asJava
   }
 
   def getModuleUrl(instance: RegularInstance): String = {
     //    return "http://192.168.1.225:8000/sj-common-assembly-0.1.jar"
-    return "http://192.168.1.225:8000/testScript.sh"
+    "http://192.168.1.225:8000/testScript.sh"
   }
 
 }
+
