@@ -1,11 +1,10 @@
-# Using ubuntu 14.04 due to npm aerospike plugin could not be installed on debian:jessie
-FROM ubuntu:14.04
+FROM ubuntu:trusty
 
 MAINTAINER BITWORKS mendelbaum_nm@bw-sw.com
 
 # Install Oracle JDK 8
-RUN echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main" | tee /etc/apt/sources.list.d/webupd8team-java.list && \
-    echo "deb-src http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main" | tee -a /etc/apt/sources.list.d/webupd8team-java.list && \
+RUN echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main" | tee /etc/apt/sources.list.d/webupd8team-java.list && \
+    echo "deb-src http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main" | tee -a /etc/apt/sources.list.d/webupd8team-java.list && \
     apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys EEA14886 && \
     apt-get update && \
     echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | debconf-set-selections && \
@@ -14,28 +13,21 @@ RUN echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main" | te
 RUN echo "deb http://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list.d/sbt.list && \
     apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 642AC823 && \
     apt-get update && \
-    apt-get install -y npm && \
-    ln -s /usr/bin/nodejs /usr/bin/node && \
-    apt-get install -y --no-install-recommends nginx supervisor sbt wget && \
+    apt-get install -y --no-install-recommends nginx supervisor sbt && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # see .dockerignore in root dir
 COPY ./project /opt/bin/juggler/project
-
 COPY ./sj-common /opt/bin/juggler/sj-common
-
 COPY ./sj-crud-rest /opt/bin/juggler/sj-crud-rest
 
 WORKDIR /opt/bin/juggler
 
+RUN mkdir -p /root/.sbt/0.13 && \
+    echo 'scalacOptions ++= Seq("-Xmax-classfile-name","100")' > /root/.sbt/0.13/local.sbt
+
 RUN sbt sj-crud-rest/assembly
-
-COPY ./sj-crud-rest-nodejs /opt/bin/juggler/sj-crud-rest-nodejs
-
-RUN (cd sj-crud-rest-nodejs && \
-    npm install -g gulp pm2 && \
-    npm install)
 
 COPY ./docker/rest /opt/bin/juggler/docker/rest
 
