@@ -1,6 +1,7 @@
 package com.bwsw.sj.crud.rest.entities.module
 
 /**
+  * Protocol entity for instance of output module
   * Created: 23/05/2016
   *
   * @author Kseniya Tomskikh

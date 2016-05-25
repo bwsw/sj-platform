@@ -60,11 +60,14 @@ class StreamValidator {
       case None =>
         errors += s"'service' is required"
       case _ =>
-        if (params.streamType == "Tstream" && params.service.serviceType != "TstrQ") {
-          errors += s"Service for 'Tstream' stream must be of TstrQ type. '${params.service.name}' is not of type TstrQ"
-        }
-        else if (params.streamType == "kafka" && params.service.serviceType != "KfkQ") {
-            errors += s"Service for 'kafka' stream must be of KfkQ type. '${params.service.name}' is not of type KfkQ"
+        if (params.streamType == tStream && params.service.serviceType != "TstrQ") {
+          errors += s"Service for 'stream.t-stream' stream must be of TstrQ type. '${params.service.name}' is not of type TstrQ"
+        } else if (params.streamType == kafka && params.service.serviceType != "KfkQ") {
+            errors += s"Service for 'stream.kafka' stream must be of KfkQ type. '${params.service.name}' is not of type KfkQ"
+        } else if (params.streamType == esOutput && params.service.serviceType != "ESInd") {
+          errors += s"Service for 'elasticsearch-output' stream must be of ESInd type. '${params.service.name}' is not of type ESInd"
+        } else if (params.streamType == jdbcOutput && params.service.serviceType != "JDBC") {
+          errors += s"Service for 'jdbc-output' stream must be of JDBC type. '${params.service.name}' is not of type JDBC"
         }
     }
 
@@ -77,8 +80,7 @@ class StreamValidator {
         if (params.streamType == "Tstream") {
           val validator = new GeneratorValidator
           errors ++= validator.validate(params.generator, initialData.generator)
-        }
-        else {
+        } else {
           if (Option(initialData.generator).isDefined)
             errors += s"'generator' is not supported for streams of type '${params.streamType}"
         }

@@ -1,6 +1,5 @@
 package com.bwsw.sj.crud.rest.validator.module
 
-import com.bwsw.sj.common.DAL.model.module.{Instance, RegularInstance}
 import com.bwsw.sj.common.ModuleConstants._
 import com.bwsw.sj.crud.rest.entities.module.{RegularInstanceMetadata, ModuleSpecification, InstanceMetadata}
 
@@ -14,7 +13,7 @@ class RegularStreamingValidator extends StreamingModuleValidator {
 
   /**
     * Validating input parameters for 'regular-streaming' module
- *
+    *
     * @param instanceParameters - input parameters for running module
     * @return - List of errors
     */

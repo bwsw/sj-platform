@@ -247,7 +247,7 @@ class ProviderValidator {
   }
 
   def checkJdbcConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
-
+    true
   }
 
 }

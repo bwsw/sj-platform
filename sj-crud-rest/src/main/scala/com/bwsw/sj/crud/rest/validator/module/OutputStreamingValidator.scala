@@ -16,11 +16,12 @@ import scala.collection.mutable.ArrayBuffer
 class OutputStreamingValidator extends StreamingModuleValidator {
 
   /**
+    * Validating options of streams of instance for module
     *
-    * @param parameters
-    * @param specification
-    * @param errors
-    * @return
+    * @param parameters - Input instance parameters
+    * @param specification - Specification of module
+    * @param errors - List of validating errors
+    * @return - List of errors and validating instance (null, if errors non empty)
     */
   override def streamOptionsValidate(parameters: InstanceMetadata, specification: ModuleSpecification, errors: ArrayBuffer[String]) = {
     var inputStream: SjStream = null

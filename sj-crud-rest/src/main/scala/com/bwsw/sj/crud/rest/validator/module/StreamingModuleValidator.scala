@@ -75,6 +75,12 @@ abstract class StreamingModuleValidator {
     streamOptionsValidate(parameters, specification, errors)
   }
 
+  /**
+    * Validation base instance options
+    *
+    * @param parameters - Instance parameters
+    * @return - List of errors
+    */
   def generalOptionsValidate(parameters: InstanceMetadata) = {
     val errors = new ArrayBuffer[String]()
 
@@ -111,6 +117,14 @@ abstract class StreamingModuleValidator {
     errors
   }
 
+  /**
+    * Validating options of streams of instance for module
+    *
+    * @param parameters - Input instance parameters
+    * @param specification - Specification of module
+    * @param errors - List of validating errors
+    * @return - List of errors and validating instance (null, if errors non empty)
+    */
   def streamOptionsValidate(parameters: InstanceMetadata, specification: ModuleSpecification, errors: ArrayBuffer[String]) = {
     val inputModes = parameters.inputs.map(i => getStreamMode(i))
     if (inputModes.exists(m => !streamModes.contains(m))) {
@@ -196,6 +210,14 @@ abstract class StreamingModuleValidator {
     (errors, validatedInstance)
   }
 
+  /**
+    * Validating 'parallelism' parameters of instance
+    *
+    * @param parallelism - Parallelism value
+    * @param partitions - Min count of partitions of input streams
+    * @param errors - List of errors
+    * @return - Validated value of parallelism
+    */
   def checkParallelism(parallelism: Any, partitions: Int, errors: ArrayBuffer[String]) = {
     parallelism match {
       case dig: Int =>

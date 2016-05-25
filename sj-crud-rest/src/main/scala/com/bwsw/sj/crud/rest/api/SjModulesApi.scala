@@ -37,7 +37,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       pathEndOrSingleSlash {
         post {
           uploadedFile("jar") {
-            case (metadata: FileInfo, file: File) =>S
+            case (metadata: FileInfo, file: File) =>
               if (metadata.fileName.endsWith(".jar")) {
                 val specification = checkJarFile(file)
                 val uploadingFile = new File(metadata.fileName)

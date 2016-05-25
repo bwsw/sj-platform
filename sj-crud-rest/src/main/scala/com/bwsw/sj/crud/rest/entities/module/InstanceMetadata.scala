@@ -3,6 +3,7 @@ package com.bwsw.sj.crud.rest.entities.module
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
+  * Base protocol entity for instance of module
   * Created: 29/04/2016
   *
   * @author Kseniya Tomskikh

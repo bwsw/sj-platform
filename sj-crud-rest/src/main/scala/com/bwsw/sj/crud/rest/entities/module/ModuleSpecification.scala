@@ -3,6 +3,7 @@ package com.bwsw.sj.crud.rest.entities.module
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
+  * Entity for specification of module
   * Created: 29/04/2016
   *
   * @author Kseniya Tomskikh

@@ -1,6 +1,5 @@
 package com.bwsw.sj.crud.rest.validator.module
 
-import com.bwsw.sj.common.DAL.model.module.{Instance, WindowedInstance}
 import com.bwsw.sj.common.ModuleConstants._
 import com.bwsw.sj.crud.rest.entities.module.{WindowedInstanceMetadata, InstanceMetadata, ModuleSpecification}
 
