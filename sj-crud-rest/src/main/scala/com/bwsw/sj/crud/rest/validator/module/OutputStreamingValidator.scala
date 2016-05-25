@@ -1,7 +1,7 @@
 package com.bwsw.sj.crud.rest.validator.module
 
 import com.bwsw.sj.common.DAL.model.module.Instance
-import com.bwsw.sj.common.DAL.model.{SjStream, JDBCService, ESService}
+import com.bwsw.sj.common.DAL.model.{TStreamService, SjStream}
 import com.bwsw.sj.common.ModuleConstants._
 import com.bwsw.sj.common.StreamConstants._
 import com.bwsw.sj.crud.rest.entities.module.{OutputInstanceMetadata, ModuleSpecification, InstanceMetadata}
@@ -15,6 +15,13 @@ import scala.collection.mutable.ArrayBuffer
   */
 class OutputStreamingValidator extends StreamingModuleValidator {
 
+  /**
+    *
+    * @param parameters
+    * @param specification
+    * @param errors
+    * @return
+    */
   override def streamOptionsValidate(parameters: InstanceMetadata, specification: ModuleSpecification, errors: ArrayBuffer[String]) = {
     var inputStream: SjStream = null
     if (parameters.inputs != null) {
@@ -62,22 +69,11 @@ class OutputStreamingValidator extends StreamingModuleValidator {
     if (inputStream != null && outputStream != null) {
       val allStreams = Array(inputStream, outputStream)
 
-      val esStreams = allStreams.filter(s => s.streamType.equals(esOutput))
-      if (esStreams.nonEmpty) {
-        if (esStreams.exists(s => !s.service.isInstanceOf[ESService])) {
-          errors += s"Service for kafka-streams must be 'KfkQ'."
-        } else {
-          checkEsStreams(errors, esStreams.toList)
-        }
-      }
-
-      val jdbcStreams = allStreams.filter(s => s.streamType.equals(jdbcOutput))
-      if (jdbcStreams.nonEmpty) {
-        if (jdbcStreams.exists(s => !s.service.isInstanceOf[JDBCService])) {
-          errors += s"Service for kafka-streams must be 'KfkQ'."
-        } else {
-          checkJdbcStreams(errors, jdbcStreams.toList)
-        }
+      val service = allStreams.head.service
+      if (!service.isInstanceOf[TStreamService]) {
+        errors += s"Service for t-streams must be 'TstrQ'."
+      } else {
+        checkTStreams(errors, allStreams.filter(s => s.streamType.equals(tStream)).toBuffer)
       }
 
       parameters.parallelism = checkParallelism(parameters.parallelism, inputStream.partitions, errors)
@@ -89,6 +85,13 @@ class OutputStreamingValidator extends StreamingModuleValidator {
     (errors, validatedInstance)
   }
 
+  /**
+    * Validating input parameters for 'output-streaming' module
+    *
+    * @param parameters - input parameters for running module
+    * @param specification - specification of module
+    * @return - List of errors
+    */
   override def validate(parameters: InstanceMetadata, specification: ModuleSpecification) = {
     val errors = super.generalOptionsValidate(parameters)
     streamOptionsValidate(parameters, specification, errors)

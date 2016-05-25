@@ -63,6 +63,18 @@ abstract class StreamingModuleValidator {
     instance
   }
 
+
+  /**
+    * Validating input parameters for streaming module
+    *
+    * @param parameters - input parameters for running module
+    * @return - List of errors
+    */
+  def validate(parameters: InstanceMetadata, specification: ModuleSpecification) = {
+    val errors = generalOptionsValidate(parameters)
+    streamOptionsValidate(parameters, specification, errors)
+  }
+
   def generalOptionsValidate(parameters: InstanceMetadata) = {
     val errors = new ArrayBuffer[String]()
 
@@ -200,17 +212,6 @@ abstract class StreamingModuleValidator {
         errors += "Unknown type of 'parallelism' parameter. Must be Int or String."
         null
     }
-  }
-
-  /**
-    * Validating input parameters for streaming module
-    *
-    * @param parameters - input parameters for running module
-    * @return - List of errors
-    */
-  def validate(parameters: InstanceMetadata, specification: ModuleSpecification) = {
-    val errors = generalOptionsValidate(parameters)
-    streamOptionsValidate(parameters, specification, errors)
   }
 
   /**
