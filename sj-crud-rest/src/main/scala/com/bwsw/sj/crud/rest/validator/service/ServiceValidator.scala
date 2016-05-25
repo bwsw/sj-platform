@@ -226,6 +226,26 @@ class ServiceValidator {
           service.asInstanceOf[AerospikeService].provider = providerObj
           service.asInstanceOf[AerospikeService].namespace = arspkServiceData.namespace
         }
+
+      case "JDBC" =>
+        val jdbcServiceData = initialData.asInstanceOf[JDBCServiceData]
+
+        // 'provider' field
+        val (providerErrors, providerObj) = validateProvider(jdbcServiceData.provider, initialData.serviceType)
+        errors ++= providerErrors
+
+        // 'index' field
+        errors ++= validateStringFieldRequired(jdbcServiceData.namespace, "namespace")
+        errors ++= validateStringFieldRequired(jdbcServiceData.login, "login")
+        errors ++= validateStringFieldRequired(jdbcServiceData.password, "password")
+
+        // filling-in service object serviceType-dependent extra fields
+        if (errors.isEmpty) {
+          service.asInstanceOf[JDBCService].provider = providerObj
+          service.asInstanceOf[JDBCService].namespace = jdbcServiceData.namespace
+          service.asInstanceOf[JDBCService].login = jdbcServiceData.login
+          service.asInstanceOf[JDBCService].password = jdbcServiceData.password
+        }
     }
 
     // filling-in service object common fields

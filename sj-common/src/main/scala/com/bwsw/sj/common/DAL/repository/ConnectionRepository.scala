@@ -4,6 +4,7 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.sj.common.DAL.ConnectionConstants
 import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.mongodb.MongoClient
 import org.mongodb.morphia.Morphia
@@ -32,7 +33,7 @@ object ConnectionRepository {
 
   private lazy val fileMetadataService = new GenericMongoService[FileMetadata]()
 
-  private lazy val instanceService = new GenericMongoService[RegularInstance]()
+  private lazy val instanceService = new GenericMongoService[Instance]()
 
   private lazy val streamService = new GenericMongoService[SjStream]()
 

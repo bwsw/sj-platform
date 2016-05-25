@@ -31,6 +31,7 @@ trait SjServicesApi extends Directives with SjCrudValidator {
             case "ZKCoord" => service = new ZKService
             case "RDSCoord" => service = new RedisService
             case "ArspkDB" => service = new AerospikeService
+            case "JDBC" => service = new JDBCService
           }
 
           val errors = validateService(data, service)
@@ -152,6 +153,14 @@ trait SjServicesApi extends Directives with SjCrudValidator {
         serviceData.description = s.description
         serviceData.asInstanceOf[ArspkDBServiceData].namespace = s.namespace
         serviceData.asInstanceOf[ArspkDBServiceData].provider = s.provider.name
+      case s: JDBCService =>
+        serviceData = new JDBCServiceData
+        serviceData.name = s.name
+        serviceData.description = s.description
+        serviceData.asInstanceOf[JDBCServiceData].namespace = s.namespace
+        serviceData.asInstanceOf[JDBCServiceData].provider = s.provider.name
+        serviceData.asInstanceOf[JDBCServiceData].login = s.login
+        serviceData.asInstanceOf[JDBCServiceData].password = s.provider.password
       case _ =>
     }
     serviceData

@@ -7,10 +7,11 @@ import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.server.{RequestContext, Directives}
 import akka.http.scaladsl.server.directives.FileInfo
 import com.bwsw.common.exceptions.{InstanceException, BadRecordWithKey}
-import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.module.StreamingValidator
 import com.bwsw.sj.crud.rest.entities._
 import akka.http.scaladsl.model.headers._
+import com.bwsw.sj.crud.rest.entities.module._
 import com.bwsw.sj.crud.rest.runner.{InstanceDestroyer, InstanceStopper, InstanceStarter}
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.module.StreamingModuleValidator
@@ -89,8 +90,8 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                   pathEndOrSingleSlash {
                     post { (ctx: RequestContext) =>
                       val instanceMetadata = deserializeOptions(getEntityFromContext(ctx), moduleType)
-                      val (errors, validatedInstance) = validateOptions(instanceMetadata, moduleType)
-                      if (errors.isEmpty) {
+                      val (errors, validatedInstance) = validateOptions(instanceMetadata, specification, moduleType)
+                      if (errors.isEmpty && validatedInstance != null) {
                         val validatorClassName = specification.validateClass
                         val jarFile = storage.get(filename, s"tmp/$filename")
                         if (jarFile != null && jarFile.exists()) {
@@ -304,8 +305,12 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @return - json as object InstanceMetadata
     */
   def deserializeOptions(options: String, moduleType: String) = {
-    if (moduleType.equals(windowedType)) {
+    if (moduleType.equals(windowedStreamingType)) {
       serializer.deserialize[WindowedInstanceMetadata](options)
+    } else if (moduleType.equals(regularStreamingType)) {
+      serializer.deserialize[RegularInstanceMetadata](options)
+    } else if (moduleType.equals(outputStreamingType)) {
+      serializer.deserialize[OutputInstanceMetadata](options)
     } else {
       serializer.deserialize[InstanceMetadata](options)
     }
@@ -318,13 +323,13 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @param moduleType - type name of module
     * @return - list of errors
     */
-  def validateOptions(options: InstanceMetadata, moduleType: String) = {
+  def validateOptions(options: InstanceMetadata, specification: ModuleSpecification, moduleType: String) = {
     val validatorClassName = conf.getString(s"modules.$moduleType.validator-class")
     val instanceClassName = conf.getString(s"modules.$moduleType.entity-class")
     val validatorClass = Class.forName(validatorClassName)
     val validator = validatorClass.newInstance().asInstanceOf[StreamingModuleValidator]
     val instanceClass = Class.forName(instanceClassName)
-    validator.validate(options, instanceClass.newInstance().asInstanceOf[RegularInstance])
+    validator.validate(options, specification)
   }
 
   /**
@@ -336,7 +341,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @param moduleVersion - version of module
     * @return - name of created entity
     */
-  def saveInstance(instance: RegularInstance,
+  def saveInstance(instance: Instance,
                      moduleType: String,
                      moduleName: String,
                      moduleVersion: String) = {
@@ -369,7 +374,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @param instance - Starting instance
     * @return
     */
-  def startInstance(instance: RegularInstance) = {
+  def startInstance(instance: Instance) = {
     logger.debug(s"Starting application of instance ${instance.name}")
     new Thread(new InstanceStarter(instance, 1000)).start()
   }
@@ -380,7 +385,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @param instance - Instance for stopping
     * @return - Message about successful stopping
     */
-  def stopInstance(instance: RegularInstance) = {
+  def stopInstance(instance: Instance) = {
     logger.debug(s"Stopping application of instance ${instance.name}")
     new Thread(new InstanceStopper(instance, 1000)).start()
   }
@@ -391,7 +396,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @param instance - Instance for destroying
     * @return - Message of destroying instance
     */
-  def destroyInstance(instance: RegularInstance) = {
+  def destroyInstance(instance: Instance) = {
     logger.debug(s"Destroying application of instance ${instance.name}")
     new Thread(new InstanceDestroyer(instance, 1000)).start()
   }

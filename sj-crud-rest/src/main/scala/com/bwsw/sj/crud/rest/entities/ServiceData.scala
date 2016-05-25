@@ -12,7 +12,8 @@ import com.fasterxml.jackson.annotation.{JsonProperty, JsonSubTypes, JsonTypeInf
   new Type(value = classOf[TstrQServiceData], name = "TstrQ"),
   new Type(value = classOf[ZKCoordServiceData], name = "ZKCoord"),
   new Type(value = classOf[RDSCoordServiceData], name = "RDSCoord"),
-  new Type(value = classOf[ArspkDBServiceData], name = "ArspkDB")
+  new Type(value = classOf[ArspkDBServiceData], name = "ArspkDB"),
+  new Type(value = classOf[JDBCServiceData], name = "JDBC")
 ))
 class ServiceData() {
   @JsonProperty("type") var serviceType: String = null
@@ -63,6 +64,14 @@ class ArspkDBServiceData() extends ServiceData() {
   serviceType = "ArspkDB"
   var namespace: String = null
   var provider: String = null
+}
+
+class JDBCServiceData() extends ServiceData() {
+  serviceType = "JDBC"
+  var namespace: String = null
+  var provider: String = null
+  var login: String = null
+  var password: String = null
 }
 
 // TODO: try to use case classes instead to use class constructors in API

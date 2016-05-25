@@ -1,7 +1,7 @@
 package com.bwsw.sj.crud.rest.validator.module
 
-import com.bwsw.sj.common.DAL.model.{RegularInstance, WindowedInstance}
-import com.bwsw.sj.crud.rest.entities.{InstanceMetadata, WindowedInstanceMetadata}
+import com.bwsw.sj.common.ModuleConstants._
+import com.bwsw.sj.crud.rest.entities.module.{WindowedInstanceMetadata, InstanceMetadata, ModuleSpecification}
 
 /**
   * Validator for Stream-processing-windowed module type
@@ -17,22 +17,22 @@ class WindowedStreamingValidator extends StreamingModuleValidator {
     * @param instanceParameters - input parameters for running module
     * @return - List of errors
     */
-  override def validate(instanceParameters: InstanceMetadata, validatedInstance: RegularInstance) = {
+  override def validate(instanceParameters: InstanceMetadata, specification: ModuleSpecification) = {
     val parameters = instanceParameters.asInstanceOf[WindowedInstanceMetadata]
-    val result = super.validate(instanceParameters, validatedInstance)
+    val result = super.validate(instanceParameters, specification)
     val errors = result._1
 
+    if (!stateManagementModes.contains(parameters.stateManagement)) {
+      errors += s"Unknown value of state-management attribute: ${parameters.stateManagement}. " +
+        s"State-management must be 'none' or 'ram' or 'rocks'."
+    }
     if (parameters.timeWindowed <= 0) {
       errors += s"Time-windowed attribute must be > 0"
     }
     if (parameters.windowFullMax <= 0) {
       errors += s"Window-full-max attribute must be > 0"
     }
-    var instance = new WindowedInstance
-    instance = validatedInstance.asInstanceOf[WindowedInstance]
-    instance.timeWindowed = parameters.timeWindowed
-    instance.windowFullMax = parameters.windowFullMax
-    (errors, instance)
+    (errors, result._2)
   }
 
 }

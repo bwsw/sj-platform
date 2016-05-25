@@ -1,7 +1,13 @@
-package com.bwsw.sj.common.DAL.model
+package com.bwsw.sj.common.DAL.model.module
 
 import org.mongodb.morphia.annotations.Property
 
+/**
+  * Entity for specification-json of module
+  * Created:  28/04/2016
+  *
+  * @author Kseniya Tomskikh
+  */
 class Specification {
   val name: String = null
   val description: String = null

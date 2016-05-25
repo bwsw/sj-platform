@@ -2,23 +2,17 @@ package com.bwsw.sj.mesos.framework
 
 import java.util
 
+import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import org.apache.mesos.Protos._
-import org.apache.mesos.{Protos, Scheduler, SchedulerDriver}
+import org.apache.mesos.{Scheduler, SchedulerDriver}
 
 import scala.collection.JavaConverters._
-import scala.collection.mutable
 import scala.collection.immutable
 import scala.util.Properties
-import org.apache.log4j.Logger
 import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
 import com.twitter.common.quantity.{Amount, Time}
 import java.net.InetSocketAddress
 import java.net.InetAddress
-
-
-import com.bwsw.common.client.Client._
-import com.bwsw.sj.common.DAL.model.RegularInstance
-import com.bwsw.sj.common.DAL.model.{Task => ormTask}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import org.apache.log4j.Logger
 
@@ -76,7 +70,7 @@ class ScalaScheduler extends Scheduler {
   override def resourceOffers(driver: SchedulerDriver, offers: util.List[Offer]) {
     logger.info(s"RESOURCE OFFERS")
 
-    val filteredOffers = filterOffers(offers, this.instance.attributes)
+    val filteredOffers = filterOffers(offers, this.instance.nodeAttributes)
     if (filteredOffers.size == 0) {
       for (offer <- offers.asScala) {
         driver.declineOffer(offer.getId)
@@ -203,7 +197,7 @@ class ScalaScheduler extends Scheduler {
     )
     logger.debug(s"Got environment variable: ${this.params}")
 
-    this.instance = ConnectionRepository.getInstanceService.get(this.params("instanceId"))
+    this.instance = ConnectionRepository.getInstanceService.get(this.params("instanceId")).asInstanceOf[RegularInstance]
     if (this.instance == null) {
       logger.error(s"Not found instance")
       driver.stop()

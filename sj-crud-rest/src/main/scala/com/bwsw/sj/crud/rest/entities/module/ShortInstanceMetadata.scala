@@ -1,10 +1,11 @@
-package com.bwsw.sj.crud.rest.entities
+package com.bwsw.sj.crud.rest.entities.module
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
  * Entity for preview short data of instance
  * Created: 13/04/2016
+ *
  * @author Kseniya Tomskikh
  */
 case class ShortInstanceMetadata(var name: String,

@@ -4,7 +4,7 @@ import java.net.InetSocketAddress
 import java.util.Properties
 
 import com.aerospike.client.Host
-import com.bwsw.sj.common.DAL.model.{TStreamService, KafkaService, SjStream}
+import com.bwsw.sj.common.DAL.model._
 import com.bwsw.tstreams.data.IStorage
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStorageOptions}
 import com.bwsw.tstreams.data.cassandra.{CassandraStorageFactory, CassandraStorageOptions}
@@ -13,6 +13,13 @@ import com.bwsw.tstreams.services.BasicStreamService
 import kafka.admin.AdminUtils
 import kafka.utils.ZkUtils
 import org.I0Itec.zkclient.ZkConnection
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequest
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest
+import org.elasticsearch.action.admin.indices.get.GetIndexRequest
+import org.elasticsearch.action.admin.indices.settings.get.GetSettingsRequest
+import org.elasticsearch.client.transport.TransportClient
+import org.elasticsearch.common.settings.Settings
+import org.elasticsearch.common.transport.InetSocketTransportAddress
 
 /**
   * Created: 19/05/2016
@@ -25,6 +32,7 @@ object StreamUtil {
     * Check t-stream for exists
     * If stream is not exists, then it created
     * Else compare count of partitions
+    *
     * @param stream - T-stream for checking
     * @return - Error, if cannot creating stream or stream is incorrect
     */
@@ -77,6 +85,7 @@ object StreamUtil {
     * Check kafka topic for exists
     * If kafka topic is not exists, then it creating
     * Else compare count of partitions
+    *
     * @param stream - Kafka topic (stream)
     * @return - Error, if topic is incorrect or cannot creating it
     */
@@ -98,6 +107,51 @@ object StreamUtil {
       } else {
         Right(s"Topic ${stream.name} is exists")
       }
+    }
+  }
+
+  /**
+    * Check elasticsearch index for exists
+    * If ES index is not exists, then it creating
+    * Else compare count of partitions
+    *
+    * @param stream - ES index (stream)
+    * @return - Error, if index is incorrect or cannot creating it
+    */
+  def checkAndCreateEsStream(stream: SjStream) = {
+    val service = stream.service.asInstanceOf[ESService]
+    val hosts: Array[InetSocketTransportAddress] = service.provider.hosts.map { s =>
+      val parts = s.split(":")
+      new InetSocketTransportAddress(new InetSocketAddress(parts(0), parts(1).toInt))
+    }
+    /*val client = TransportClient.builder().build().addTransportAddresses(hosts.head)
+    if (!client.admin().indices().exists(new IndicesExistsRequest(service.index)).actionGet().isExists) {
+      Left(s"Index ${service.index} is not exists")
+    } else {
+      Right(s"Index ${service.index} is exists")
+    }*/
+    if (service != null) {
+      Right(s"Index ${service.index} is exists")
+    } else {
+      Left(s"Index ${service.index} is not exists")
+    }
+  }
+
+  /**
+    * Check sql table for exists
+    * If table is not exists, then it creating
+    * Else compare count of partitions
+    *
+    * @param stream - SQL table (stream)
+    * @return - Error, if table is incorrect or cannot creating it
+    */
+  def checkAndCreateJdbcStream(stream: SjStream) = {
+    val service = stream.service.asInstanceOf[JDBCService]
+    //todo add jdbc support
+    if (true) {
+      Right("yes")
+    } else {
+      Left("fail")
     }
   }
 

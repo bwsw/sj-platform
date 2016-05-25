@@ -9,6 +9,7 @@ resolvers += "Twitter Repository" at "http://maven.twttr.com"
 libraryDependencies ++= Seq(
   "com.typesafe.akka" % "akka-http-core-experimental_2.11" % "2.0-M2",
   "com.typesafe.akka" % "akka-http-experimental_2.11" % "2.0-M2",
+  "org.apache.zookeeper" % "zookeeper" % "3.4.6",
   "com.google.re2j" % "re2j" % "1.1",
   "org.everit.json" % "org.everit.json.schema" % "1.2.0",
   "com.typesafe.akka" % "akka-slf4j_2.11" % "2.4.4",
@@ -28,7 +29,8 @@ libraryDependencies ++= Seq(
 
 dependencyOverrides ++= Set(
   "com.typesafe.akka" %% "akka-actor" % "2.4.1",
-  "com.google.guava" % "guava" % "18.0"
+  "com.google.guava" % "guava" % "18.0",
+  "org.apache.zookeeper" % "zookeeper" % "3.4.6"
 )
 
 

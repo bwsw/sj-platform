@@ -3,6 +3,7 @@ package com.bwsw.common
 import java.lang.reflect.{ParameterizedType, Type}
 
 import com.bwsw.common.traits.Serializer
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.`type`.TypeReference
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
@@ -10,12 +11,14 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 /**
  * Class represents a json serializer
  * Created: 11/04/2016
+ *
  * @author Kseniya Mikhaleva
  */
 
 class JsonSerializer extends Serializer {
   val mapper = new ObjectMapper()
   mapper.registerModule(DefaultScalaModule)
+  mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
   def serialize(value: Any): String = {
     import java.io.StringWriter

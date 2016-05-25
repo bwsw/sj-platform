@@ -1,6 +1,7 @@
 package com.bwsw.sj.crud.rest.runner
 
-import com.bwsw.sj.common.DAL.model.{SjStream, RegularInstance}
+import com.bwsw.sj.common.DAL.model.SjStream
+import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.StreamConstants
 
 /**
@@ -10,7 +11,7 @@ import com.bwsw.sj.common.StreamConstants
   *
   * @author Kseniya Tomskikh
   */
-class InstanceDestroyer(instance: RegularInstance, delay: Long) extends Runnable {
+class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable {
   import com.bwsw.sj.common.ModuleConstants._
   import InstanceMethods._
 
@@ -28,7 +29,7 @@ class InstanceDestroyer(instance: RegularInstance, delay: Long) extends Runnable
     * @param instance - Instance for stopping
     * @return - Response from marathon
     */
-  def deleteGenerators(instance: RegularInstance) = {
+  def deleteGenerators(instance: Instance) = {
     val allStreams = instance.inputs.map(_.replaceAll("/split|/full", "")).union(instance.outputs).map(streamDAO.get)
     val startedInstances = instanceDAO.getByParameters(Map("status" -> started))
     val startingInstance = startedInstances.union(instanceDAO.getByParameters(Map("status" -> starting)))
@@ -82,7 +83,7 @@ class InstanceDestroyer(instance: RegularInstance, delay: Long) extends Runnable
     *
     * @param instance - Instance for deleting
     */
-  def deleteInstance(instance: RegularInstance) = {
+  def deleteInstance(instance: Instance) = {
     var isInstanceDeleted = false
     //todo maybe add timeout and retry count?
     while (!isInstanceDeleted) {

@@ -26,7 +26,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
           val errors = validator.validate(data)
 
           if (errors.isEmpty) {
-            var provider = new Provider(
+            val provider = new Provider(
               data.name,
               data.description,
               data.hosts,

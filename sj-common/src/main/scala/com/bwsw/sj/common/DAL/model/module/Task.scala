@@ -1,4 +1,4 @@
-package com.bwsw.sj.common.DAL.model
+package com.bwsw.sj.common.DAL.model.module
 
 /**
  * Entity for task of execution plan

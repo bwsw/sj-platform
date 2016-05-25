@@ -1,0 +1,20 @@
+package com.bwsw.sj.common.DAL.model.module
+
+import org.mongodb.morphia.annotations._
+
+/**
+ * Entity for base regular-json
+ * Created:  13/04/2016
+ *
+ * @author Kseniya Tomskikh
+ */
+class RegularInstance() extends Instance {
+  @Property("state-management") var stateManagement: String = null
+  @Property("state-full-checkpoint") var stateFullCheckpoint: Int = 0
+  @Property("event-wait-time") var eventWaitTime: Long = 0
+}
+
+
+
+
+

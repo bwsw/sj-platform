@@ -9,10 +9,11 @@ object ModuleConstants {
   def persistentQueuePath = UUID.randomUUID().toString //todo: until t-streams can't remove persistent queue
   val persistentBlockingQueue = "persistentBlockingQueue"
 
-  val windowedType = "windowed-streaming"
+  val outputStreamingType = "output-streaming"
+  val windowedStreamingType = "windowed-streaming"
   val regularStreamingType = "regular-streaming"
 
-  val moduleTypes = Set(windowedType, regularStreamingType)
+  val moduleTypes = Set(windowedStreamingType, regularStreamingType, outputStreamingType)
   val checkpointModes = Set("every-nth", "time-interval")
   val stateManagementModes = Set("none", "ram", "rocks")
   val oldest = "oldest"
@@ -39,13 +40,15 @@ object ModuleConstants {
 
   val toHandle = "to-handle"
   val generatorStatusModes = Set(starting, started, failed, toHandle)
-
+  val streamModes = Array("split", "full")
 }
 
 object StreamConstants {
-  val tStream = "Tstream"
-  val kafka = "kafka"
-  val streamTypes = Set(tStream, kafka)
+  val tStream = "stream.t-stream"
+  val kafka = "stream.kafka"
+  val esOutput = "elasticsearch-output"
+  val jdbcOutput = "jdbc-output"
+  val streamTypes = Set(tStream, kafka, esOutput, jdbcOutput)
 }
 
 object GeneratorConstants {
@@ -54,20 +57,21 @@ object GeneratorConstants {
 }
 
 object ServiceConstants {
-  val serviceTypes = Set("CassDB", "ESInd", "KfkQ", "TstrQ", "ZKCoord", "RdsCoord", "ArspkDB")
-  val serviceTypesWithProvider = Set("CassDB", "ESInd", "KfkQ", "ZKCoord", "RdsCoord", "ArspkDB")
+  val serviceTypes = Set("CassDB", "ESInd", "KfkQ", "TstrQ", "ZKCoord", "RdsCoord", "ArspkDB", "JDBC")
+  val serviceTypesWithProvider = Set("CassDB", "ESInd", "KfkQ", "ZKCoord", "RdsCoord", "ArspkDB", "JDBC")
   val serviceTypeProviders = Map(
     "CassDB" -> "cassandra",
     "ESInd" -> "ES",
     "KfkQ" -> "kafka",
     "ZKCoord" -> "zookeeper",
     "RdsCoord" -> "redis",
-    "ArspkDB" -> "aerospike"
+    "ArspkDB" -> "aerospike",
+    "JDBC" -> "JDBC"
   )
 }
 
 object ProviderConstants {
-  val providerTypes = Set("cassandra", "aerospike", "zookeeper", "kafka", "ES", "redis")
+  val providerTypes = Set("cassandra", "aerospike", "zookeeper", "kafka", "ES", "redis", "JDBC")
 }
 
 object JarConstants {
