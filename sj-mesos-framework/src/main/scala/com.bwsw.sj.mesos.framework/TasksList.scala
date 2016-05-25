@@ -1,7 +1,6 @@
 package com.bwsw.sj.mesos.framework
 
-import com.bwsw.sj.common.DAL.model.Task
-import com.bwsw.sj.common.DAL.model.{Task => ormTask}
+import com.bwsw.sj.common.DAL.model.module.{Task => ormTask}
 
 import scala.collection.mutable
 
