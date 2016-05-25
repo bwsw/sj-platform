@@ -16,8 +16,9 @@ libraryDependencies ++= Seq(
   "org.apache.httpcomponents" % "httpclient" % "4.5.2",
   "com.twitter.common.zookeeper" % "lock" % "0.0.40",
   "com.datastax.cassandra" % "cassandra-driver-core" % "3.0.1",
-  "com.aerospike" % "aerospike-client" % "3.0.22",
-  "org.elasticsearch" % "elasticsearch" % "2.3.2",
+  "com.aerospike" % "aerospike-client" % "3.0.22" % "provided",
+  "org.apache.zookeeper" % "zookeeper" % "3.4.6",
+  "org.elasticsearch" % "elasticsearch" % "2.3.2" % "provided",
   "com.google.guava" % "guava" % "18.0",
   "org.apache.kafka" % "kafka_2.11" % "0.9.0.1"
       exclude("javax.jms", "jms")
@@ -32,28 +33,25 @@ dependencyOverrides ++= Set(
   "org.apache.zookeeper" % "zookeeper" % "3.4.6"
 )
 
+
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.first
+  case PathList("scala-xml.properties") => MergeStrategy.first
   case PathList("scala", xs@_*) => MergeStrategy.first
   case PathList("com", "fasterxml", "jackson", xs@_*) => MergeStrategy.first
-  case PathList("com", xs@_*) => MergeStrategy.first
+  case PathList("com", "datastax", xs@_*) => MergeStrategy.first
+  case PathList("com", "google", "common", xs@_*) => MergeStrategy.first
+  case PathList("com", "google", "thirdparty", xs@_*) => MergeStrategy.first
+  case PathList("com", "google", "guava", xs@_*) => MergeStrategy.first
+  case PathList("com", "thoughtworks", xs@_*) => MergeStrategy.first
   case PathList("org", "apache", "commons", xs@_*) => MergeStrategy.first
-  case PathList("org", "apache", "spark", xs@_*) => MergeStrategy.first
   case PathList("org", "apache", "log4j", xs@_*) => MergeStrategy.first
-  case PathList("com", "esotericsoftware", xs@_*) => MergeStrategy.first
-  case PathList("org", "apache", "hadoop", xs@_*) => MergeStrategy.first
   case PathList("org", "slf4j", xs@_*) => MergeStrategy.first
   case PathList("io", "netty", xs@_*) => MergeStrategy.first
-  case PathList("io", "dropwizard", xs@_*) => MergeStrategy.first
-  case PathList("com", "codahale", xs@_*) => MergeStrategy.first
-  case PathList("javax", xs@_*) => MergeStrategy.first
-  case PathList(ps@_*) if ps.last endsWith ".html" => MergeStrategy.first
-  case "application.conf" => MergeStrategy.concat
-  case "library.properties" => MergeStrategy.concat
+  case PathList("org", "luaj", xs@_*) => MergeStrategy.first
   case "log4j.properties" => MergeStrategy.concat
-  case "unwanted.txt" => MergeStrategy.discard
+  case "library.properties" => MergeStrategy.concat
   case x =>
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
 }
-

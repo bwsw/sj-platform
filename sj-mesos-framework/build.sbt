@@ -13,6 +13,11 @@ libraryDependencies += "com.twitter.common.zookeeper" % "lock" % "0.0.40"
 libraryDependencies += "org.apache.mesos" % "mesos" % "0.28.1"
 libraryDependencies += "log4j" % "log4j" % "1.2.17"
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.21"
+libraryDependencies += "com.typesafe.play" % "play_2.11" % "2.5.3"
+libraryDependencies += "net.databinder" % "unfiltered-jetty_2.11" % "0.8.4"
+libraryDependencies += "net.databinder" % "unfiltered-filter_2.11" % "0.8.4"
+libraryDependencies += "org.json4s" % "json4s-native_2.11" % "3.3.0"
+
 
 scalacOptions += "-Ylog-classpath"
 
