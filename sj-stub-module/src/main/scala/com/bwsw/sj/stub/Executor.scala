@@ -67,6 +67,7 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
 
   /**
    * Handler triggered before save state
+ *
    * @param isFullState Flag denotes that full state (true) or partial changes of state (false) will be saved
    */
   override def onBeforeStateSave(isFullState: Boolean): Unit = {

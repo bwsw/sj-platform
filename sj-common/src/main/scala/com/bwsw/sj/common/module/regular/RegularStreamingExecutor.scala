@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.regular
+package com.bwsw.sj.common.module.regular
 
 import com.bwsw.sj.common.module.entities.Envelope
 import com.bwsw.sj.common.module.environment.ModuleEnvironmentManager
