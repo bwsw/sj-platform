@@ -4,8 +4,9 @@ import com.bwsw.sj.common.module.entities.Envelope
 import com.bwsw.sj.common.module.environment.ModuleEnvironmentManager
 
 /**
- * Class that contains an execution logic of regular module
+  * Class that contains an execution logic of regular module
  * Created: 11/04/2016
+ *
  * @author Kseniya Mikhaleva
  */
 
@@ -45,13 +46,15 @@ class RegularStreamingExecutor(manager: ModuleEnvironmentManager) {
 
   /**
    * Handler triggered before save state
-   * @param isFullState Flag denotes that full state (true) or partial changes of state (false) will be saved
+    *
+    * @param isFullState Flag denotes that full state (true) or partial changes of state (false) will be saved
    */
   def onBeforeStateSave(isFullState: Boolean): Unit = {}
 
   /**
    * Handler triggered after save state
-   * @param isFullState Flag denotes that there was save of full state (true) or partial changes of state(false)
+    *
+    * @param isFullState Flag denotes that there was save of full state (true) or partial changes of state(false)
    */
   def onAfterStateSave(isFullState: Boolean): Unit = {}
 

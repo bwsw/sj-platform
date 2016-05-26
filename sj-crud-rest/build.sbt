@@ -18,7 +18,7 @@ libraryDependencies ++= Seq(
   "com.datastax.cassandra" % "cassandra-driver-core" % "3.0.1",
   "com.aerospike" % "aerospike-client" % "3.0.22" % "provided",
   "org.apache.zookeeper" % "zookeeper" % "3.4.6",
-  "org.elasticsearch" % "elasticsearch" % "2.3.2" % "provided",
+  "org.elasticsearch" % "elasticsearch" % "2.3.2",
   "com.google.guava" % "guava" % "18.0",
   "org.apache.kafka" % "kafka_2.11" % "0.9.0.1"
       exclude("javax.jms", "jms")
