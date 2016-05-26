@@ -16,7 +16,8 @@ object StreamJugglerBuild extends Build {
   lazy val sj = Project(id = "sj",
     base = file("."),
     settings = commonSettings) aggregate(common,
-    stub, crudRest, transactionGenerator, mesos)
+    stub, crudRest, transactionGenerator, mesos,
+    outputStreamingEngine, regularStreamingEngine, windowedStreamingEngine)
 
 
   lazy val common = Project(id = "sj-common",
@@ -31,8 +32,17 @@ object StreamJugglerBuild extends Build {
   lazy val transactionGenerator = Project(id = "sj-transaction-generator",
     base = file("sj-transaction-generator")).enablePlugins(JavaAppPackaging).dependsOn(common)
 
-    lazy val mesos = Project(id = "sj-mesos-framework",
+  lazy val mesos = Project(id = "sj-mesos-framework",
     base = file("sj-mesos-framework")).enablePlugins(JavaAppPackaging).dependsOn(common)
+
+  lazy val outputStreamingEngine = Project(id = "sj-output-streaming-engine",
+    base = file("sj-output-streaming-engine")).enablePlugins(JavaAppPackaging).dependsOn(common)
+
+  lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
+    base = file("sj-regular-streaming-engine")).enablePlugins(JavaAppPackaging).dependsOn(common)
+
+  lazy val windowedStreamingEngine = Project(id = "sj-windowed-streaming-engine",
+    base = file("sj-windowed-streaming-engine")).enablePlugins(JavaAppPackaging).dependsOn(common)
 
   //////////////////////////////////////////////////////////////////////////////
   // PROJECT INFO
