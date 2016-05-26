@@ -5,6 +5,8 @@ package com.bwsw.sj.engine.output.consumer
   *
   * @author Kseniya Tomskikh
   */
-class TStreamConsumer {
+class TStreamConsumer(streamName: String) {
+
+
 
 }
