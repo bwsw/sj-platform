@@ -10,7 +10,7 @@ import com.bwsw.sj.common.DAL.model.SjStream
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
 import com.bwsw.tstreams.agents.consumer.subscriber.{BasicSubscriberCallback, BasicSubscribingConsumer}
-import com.bwsw.tstreams.agents.consumer.{BasicConsumerTransaction, ConsumerCoordinationSettings, BasicConsumerOptions, BasicConsumer}
+import com.bwsw.tstreams.agents.consumer.{ConsumerCoordinationSettings, BasicConsumerOptions}
 import com.bwsw.tstreams.converter.{IConverter, ArrayByteToStringConverter}
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorageOptions, AerospikeStorageFactory}
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
@@ -72,6 +72,7 @@ object OutputTaskRunner {
     val lock = new ReentrantLock()
     var acc = 0
     val callback = new BasicSubscriberCallback[Array[Byte], Array[Byte]] {
+      //todo тут вызывать onTransaction
       override def onEvent(subscriber : BasicSubscribingConsumer[Array[Byte], Array[Byte]], partition: Int, transactionUuid: UUID): Unit = {
         lock.lock()
         acc += 1
@@ -88,26 +89,7 @@ object OutputTaskRunner {
       persistentQueuePath
     )
 
-    val consumer = new BasicConsumer[Array[Byte], Array[Byte]](
-      stream.name,
-      stream,
-      consumerOptions)
-
     subscribeConsumer.start()
-
-    var totalInputElements = 0
-    var inputElements = scala.collection.mutable.ArrayBuffer[Int]()
-
-    var nextTxn: Option[BasicConsumerTransaction[Array[Byte], Array[Byte]]] = consumer.getTransaction
-    while (nextTxn.isDefined) {
-      val txn = nextTxn.get
-      while (txn.hasNext()) {
-        val element = objectSerializer.deserialize(txn.next()).asInstanceOf[Int]
-        inputElements.+=(element)
-        totalInputElements += 1
-      }
-      nextTxn = consumer.getTransaction
-    }
 
   }
 

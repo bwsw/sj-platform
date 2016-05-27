@@ -16,7 +16,7 @@ object StreamJugglerBuild extends Build {
   lazy val sj = Project(id = "sj",
     base = file("."),
     settings = commonSettings) aggregate(common,
-    stub, crudRest, transactionGenerator, mesos,
+    stub, stubOutput, crudRest, transactionGenerator, mesos,
     outputStreamingEngine, regularStreamingEngine, windowedStreamingEngine)
 
 
@@ -25,6 +25,9 @@ object StreamJugglerBuild extends Build {
 
   lazy val stub = Project(id = "sj-stub-module",
     base = file("sj-stub-module")).enablePlugins(JavaAppPackaging).dependsOn(common)
+
+  lazy val stubOutput = Project(id = "sj-stub-output-module",
+    base = file("sj-stub-output-module")).enablePlugins(JavaAppPackaging).dependsOn(common)
 
   lazy val crudRest = Project(id = "sj-crud-rest",
     base = file("sj-crud-rest")).enablePlugins(JavaAppPackaging).dependsOn(common)
