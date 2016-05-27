@@ -49,6 +49,10 @@ assemblyMergeStrategy in assembly := {
   case PathList("org", "slf4j", xs@_*) => MergeStrategy.first
   case PathList("io", "netty", xs@_*) => MergeStrategy.first
   case PathList("org", "luaj", xs@_*) => MergeStrategy.first
+
+  case PathList("org", "jboss", xs@_*) => MergeStrategy.first
+  case PathList("org", "joda", xs@_*) => MergeStrategy.first
+
   case "log4j.properties" => MergeStrategy.concat
   case "library.properties" => MergeStrategy.concat
   case x =>
