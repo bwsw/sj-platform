@@ -67,8 +67,8 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
           } else {
             msg = serializer.serialize(s"Provider '$providerName' not found")
           }
-          complete(HttpResponse(200, entity=HttpEntity(`application/json`, msg)))
-        }
+          complete(HttpResponse(200, entity = HttpEntity(`application/json`, msg)))
+        } ~
         pathPrefix("connection") {
           pathEndOrSingleSlash {
             val provider = providerDAO.get(providerName)
