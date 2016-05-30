@@ -1,6 +1,6 @@
 package com.bwsw.sj.module.output.data
 
-import com.bwsw.sj.common.module.output.model.EsEntity
+import com.bwsw.sj.engine.core.entities.EsEntity
 
 /**
   * Created: 5/27/16

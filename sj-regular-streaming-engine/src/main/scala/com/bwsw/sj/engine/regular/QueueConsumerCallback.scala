@@ -4,7 +4,8 @@ import java.util.UUID
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.module.entities.TStreamEnvelope
+import com.bwsw.sj.engine.core.entities.TStreamEnvelope
+import com.bwsw.sj.engine.core.PersistentBlockingQueue
 import com.bwsw.tstreams.agents.consumer.subscriber.{BasicSubscriberCallback, BasicSubscribingConsumer}
 import org.slf4j.LoggerFactory
 

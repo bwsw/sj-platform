@@ -11,6 +11,7 @@ import com.bwsw.sj.common.DAL.ConnectionConstants._
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.ModuleConstants._
+import com.bwsw.sj.engine.core.PersistentBlockingQueue
 import com.bwsw.tstreams.agents.consumer.Offsets.{IOffset, Newest}
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions, ConsumerCoordinationSettings}

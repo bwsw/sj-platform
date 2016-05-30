@@ -1,23 +1,23 @@
 package com.bwsw.sj.engine.output
 
-import java.net.InetSocketAddress
-import java.util.UUID
-import java.util.concurrent.locks.ReentrantLock
+import java.io.File
+import java.net.InetAddress
+import java.util.concurrent.ArrayBlockingQueue
 
-import com.aerospike.client.Host
-import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.common.DAL.model.SjStream
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
-import com.bwsw.tstreams.agents.consumer.subscriber.{BasicSubscriberCallback, BasicSubscribingConsumer}
-import com.bwsw.tstreams.agents.consumer.{ConsumerCoordinationSettings, BasicConsumerOptions}
-import com.bwsw.tstreams.converter.{IConverter, ArrayByteToStringConverter}
-import com.bwsw.tstreams.data.aerospike.{AerospikeStorageOptions, AerospikeStorageFactory}
-import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
-import com.bwsw.tstreams.metadata.MetadataStorageFactory
-import com.bwsw.tstreams.policy.RoundRobinPolicy
-import com.bwsw.tstreams.services.BasicStreamService
-import com.bwsw.sj.common.ModuleConstants._
+import com.bwsw.common.JsonSerializer
+import com.bwsw.common.traits.Serializer
+import com.bwsw.sj.engine.core.utils.EngineUtils._
+import com.bwsw.sj.common.DAL.model.{ESService, FileMetadata, SjStream}
+import com.bwsw.sj.common.DAL.model.module.OutputInstance
+import com.bwsw.sj.engine.core.entities.{EsEntity, OutputEnvelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.output.OutputStreamingHandler
+import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
+import org.elasticsearch.action.index.IndexRequestBuilder
+import org.elasticsearch.client.transport.TransportClient
+import org.elasticsearch.common.transport.InetSocketTransportAddress
+
+import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 /**
   * Created: 26/05/2016
@@ -25,71 +25,73 @@ import com.bwsw.sj.common.ModuleConstants._
   * @author Kseniya Tomskikh
   */
 object OutputTaskRunner {
-
-  val streamDAO = ConnectionRepository.getStreamService
-  val objectSerializer = new ObjectSerializer()
-
-  val metadataStorageFactory = new MetadataStorageFactory
-  val metadataStorage = metadataStorageFactory.getInstance(
-    cassandraHosts = List(new InetSocketAddress("localhost", 9042)),
-    keyspace = "test")
-
-  val aerospikeStorageFactory = new AerospikeStorageFactory
-  val hosts = List(
-    new Host("localhost",3000),
-    new Host("localhost",3001),
-    new Host("localhost",3002),
-    new Host("localhost",3003))
-  val aerospikeOptions = new AerospikeStorageOptions("test", hosts)
-  val aerospikeStorage = aerospikeStorageFactory.getInstance(aerospikeOptions)
-
-  val arrayByteToStringConverter = new ArrayByteToStringConverter
-
-  val converter = new IConverter[Array[Byte], Array[Byte]] {
-    override def convert(obj: Array[Byte]): Array[Byte] = {
-      obj
-    }
-  }
+  val serializer: Serializer = new JsonSerializer
 
   def main(args: Array[String]) = {
 
-    val inputSream: SjStream = streamDAO.get("s1")
+    val taskManager: OutputTaskManager = new OutputTaskManager
+    val instance: OutputInstance = taskManager.getOutputInstance
+    val task: mutable.Map[String, Array[Int]] = instance.executionPlan.tasks.get(taskManager.taskName).inputs.asScala
+    val inputStream: SjStream = taskManager.getInputStream(instance)
+    val outputStream: SjStream = taskManager.getOutputStream(instance)
 
-    val stream = BasicStreamService.loadStream("s1", metadataStorage, aerospikeStorage)
-    val roundRobinPolicy = new RoundRobinPolicy(stream, (0 until inputSream.partitions).toList)
-    val timeUuidGenerator = new LocalTimeUUIDGenerator
-    val consumerOptions = new BasicConsumerOptions[Array[Byte], Array[Byte]](
-      transactionsPreload = 10,
-      dataPreload = 7,
-      consumerKeepAliveInterval = 5,
-      converter,
-      roundRobinPolicy,
-      new ConsumerCoordinationSettings("localhost:8588", "/unit", List(new InetSocketAddress("localhost", 2181)), 7000),
-      Oldest,
-      timeUuidGenerator,
-      useLastOffset = true)
-
-    val lock = new ReentrantLock()
-    var acc = 0
-    val callback = new BasicSubscriberCallback[Array[Byte], Array[Byte]] {
-      //todo тут вызывать onTransaction
-      override def onEvent(subscriber : BasicSubscribingConsumer[Array[Byte], Array[Byte]], partition: Int, transactionUuid: UUID): Unit = {
-        lock.lock()
-        acc += 1
-        lock.unlock()
-      }
-      override val frequency: Int = 1
-    }
-
-    val subscribeConsumer = new BasicSubscribingConsumer[Array[Byte], Array[Byte]](
-      "test_cons",
-      stream,
-      consumerOptions,
-      callback,
-      persistentQueuePath
+    val taskPartitions: Array[Int] = task.get(inputStream.name).get
+    val blockingQueue: ArrayBlockingQueue[String] = new ArrayBlockingQueue[String](1000)
+    val subscribeConsumer = taskManager.createSubscribingConsumer(
+      inputStream,
+      taskPartitions.toList,
+      chooseOffset(instance.startFrom),
+      blockingQueue
     )
+    val moduleJar: File = taskManager.getModuleJar(instance)
+    val moduleMetadata: FileMetadata = taskManager.getFileMetadata(instance)
+    val handler: OutputStreamingHandler = taskManager.getModuleHandler(moduleJar, moduleMetadata.specification.executorClass)
+
+    runModule(instance,
+      blockingQueue,
+      subscribeConsumer,
+      taskManager,
+      handler,
+      outputStream)
+
+  }
+
+  def runModule(instance: OutputInstance,
+                persistentQueue: ArrayBlockingQueue[String],
+                subscribeConsumer: BasicSubscribingConsumer[Array[Byte], Array[Byte]],
+                taskManager: OutputTaskManager,
+                handler: OutputStreamingHandler,
+                outputStream: SjStream) = {
 
     subscribeConsumer.start()
+
+    val esService: ESService = outputStream.service.asInstanceOf[ESService]
+
+    val client: TransportClient = TransportClient.builder().build()
+    esService.provider.hosts.foreach { host =>
+      val parts = host.split(":")
+      client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(parts(0)), parts(1).toInt))
+    }
+
+    while(true) {
+      val tStreamEnvelope = serializer.deserialize[TStreamEnvelope](persistentQueue.take())
+
+      val outputEnvelopes: List[OutputEnvelope] = handler.onTransaction(tStreamEnvelope)
+      val entities = outputEnvelopes.map { (outputEnvelope: OutputEnvelope) =>
+        outputEnvelope.data.asInstanceOf[EsEntity]
+      }.foreach(entity => writeToElasticsearch(esService.index, outputStream.name, entity, client))
+
+
+    }
+
+  }
+
+  def writeToElasticsearch(index: String, documentType: String, entity: EsEntity, client: TransportClient) = {
+    val esData: String = serializer.serialize(entity)
+
+    val request: IndexRequestBuilder = client.prepareIndex(index, documentType)
+    request.setSource(esData)
+    request.execute().actionGet()
 
   }
 

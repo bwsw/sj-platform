@@ -1,8 +1,7 @@
 package com.bwsw.sj.module.output
 
-import com.bwsw.sj.common.module.entities.TStreamEnvelope
-import com.bwsw.sj.common.module.output.OutputStreamingHandler
-import com.bwsw.sj.common.module.output.model.OutputEnvelope
+import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.output.OutputStreamingHandler
 import com.bwsw.sj.module.output.data.StubEsData
 
 /**
@@ -13,7 +12,7 @@ import com.bwsw.sj.module.output.data.StubEsData
 class StubOutputHandler extends OutputStreamingHandler {
 
   def onTransaction(envelope: TStreamEnvelope): List[OutputEnvelope] = {
-    val data = new StubEsData
+    val data: StubEsData = new StubEsData
     data.txn = envelope.txnUUID.toString
     val outputEnvelope = new OutputEnvelope
     outputEnvelope.data = data

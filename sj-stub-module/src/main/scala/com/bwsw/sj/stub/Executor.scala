@@ -1,10 +1,10 @@
 package com.bwsw.sj.stub
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.common.module.entities.{TStreamEnvelope, Envelope, KafkaEnvelope}
-import com.bwsw.sj.common.module.environment.ModuleEnvironmentManager
-import com.bwsw.sj.common.module.regular.RegularStreamingExecutor
-import com.bwsw.sj.common.module.state.StateStorage
+import com.bwsw.sj.engine.core.entities.{TStreamEnvelope, Envelope, KafkaEnvelope}
+import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
+import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
+import com.bwsw.sj.engine.core.state.StateStorage
 
 
 class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor(manager) {

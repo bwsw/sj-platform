@@ -1,19 +1,20 @@
 package com.bwsw.sj.engine.regular
 
 import java.net.URLClassLoader
-import java.util.Date
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.KafkaService
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.module.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
-import com.bwsw.sj.common.module.environment.{ModuleEnvironmentManager, StatefulModuleEnvironmentManager}
-import com.bwsw.sj.common.module.regular.RegularStreamingExecutor
-import com.bwsw.sj.common.module.state.{RAMStateService, StateStorage}
+import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.environment.{ModuleEnvironmentManager, StatefulModuleEnvironmentManager}
+import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
+import com.bwsw.sj.engine.core.state.{RAMStateService, StateStorage}
 import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.sj.common.{ModuleConstants, StreamConstants}
-import com.bwsw.tstreams.agents.consumer.Offsets.{DateTime, IOffset, Newest, Oldest}
+import com.bwsw.sj.engine.core.PersistentBlockingQueue
+import com.bwsw.sj.engine.core.utils.EngineUtils._
+import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.{BasicProducer, ProducerPolicies}
@@ -531,18 +532,4 @@ object RegularTaskRunner {
 
   }
 
-  /**
-   * Chooses offset policy for t-streams consumers
- *
-   * @param startFrom Offset policy name or specific date
-   * @return Offset
-   */
-  private def chooseOffset(startFrom: String): IOffset = {
-    logger.debug(s"Choose offset policy for t-streams consumer\n")
-    startFrom match {
-      case "oldest" => Oldest
-      case "newest" => Newest
-      case time => DateTime(new Date(time.toLong * 1000))
-    }
-  }
 }
