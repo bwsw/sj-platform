@@ -3,7 +3,6 @@ import com.typesafe.sbt.packager.Keys._
 import com.typesafe.sbt.packager.archetypes.JavaAppPackaging
 import sbt.Keys._
 import sbt._
-import sbtassembly.AssemblyPlugin.autoImport._
 
 object StreamJugglerBuild extends Build {
 
@@ -76,43 +75,29 @@ object StreamJugglerBuild extends Build {
     organization := ORGANIZATION,
     scalaVersion := SCALA_VERSION,
 
-    libraryDependencies ++= Seq(
+//    libraryDependencies ++= Seq(
 //      "com.typesafe"     % "config"          % TYPESAFE_CONFIG_VERSION,
 //      "org.scalatest"   %% "scalatest"       % SCALATEST_VERSION % "test"
-    ),
-
-    dependencyOverrides ++= Set(
+//    ),
+//
+//    dependencyOverrides ++= Set(
 //      "com.typesafe.akka" %% "akka-actor" % "2.4.1",
 //      "org.apache.kafka" % "kafka-clients" % "0.8.2.2",
 //      "org.apache.kafka" % "kafka_2.11" % "0.8.2.2",
 //      "com.fasterxml.jackson.module" % "jackson-module-scala_2.11" % "2.6.3"
-    ),
-
-    dependencyOverrides ++= Set(
+//    ),
+//
+//    dependencyOverrides ++= Set(
 //      "org.scala-lang" %  "scala-library"  % scalaVersion.value,
 //      "org.scala-lang" %  "scala-reflect"  % scalaVersion.value,
 //      "org.scala-lang" %  "scala-compiler" % scalaVersion.value
-    ),
-
-    assemblyMergeStrategy in assembly := {
-//      case PathList("com", "google", "common", xs @ _*) => MergeStrategy.first
-//      case PathList("org", "apache", "commons", xs @ _*) => MergeStrategy.first
-//      case PathList("org", "apache", "spark", xs @ _*) => MergeStrategy.first
-//      case PathList("org", "apache", "log4j", xs @ _*) => MergeStrategy.first
-//      case PathList("com", "esotericsoftware", xs @ _*) => MergeStrategy.first
-//      case PathList("org", "apache", "hadoop", xs @ _*) => MergeStrategy.first
-//      case PathList("io", "netty", xs @ _*) => MergeStrategy.first
-//      case PathList("io", "dropwizard", xs @ _*) => MergeStrategy.first
-//      case PathList("com", "codahale", xs @ _*) => MergeStrategy.first
-//      case PathList("javax", xs @ _*)         => MergeStrategy.first
-//      case PathList(ps @ _*) if ps.last endsWith ".html" => MergeStrategy.first
-//      case "application.conf"                            => MergeStrategy.concat
-//      case "log4j.properties"                            => MergeStrategy.concat
-//      case "unwanted.txt"                                => MergeStrategy.discard
-      case x =>
-        val oldStrategy = (assemblyMergeStrategy in assembly).value
-        oldStrategy(x)
-    },
+//    ),
+//
+//    assemblyMergeStrategy in assembly := {
+//      case x =>
+//        val oldStrategy = (assemblyMergeStrategy in assembly).value
+//        oldStrategy(x)
+//    },
 
 
     scalacOptions in Compile ++= Seq(
