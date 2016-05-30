@@ -6,10 +6,11 @@ import java.util.concurrent.ArrayBlockingQueue
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.traits.Serializer
+import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.sj.engine.core.utils.EngineUtils._
 import com.bwsw.sj.common.DAL.model.{ESService, FileMetadata, SjStream}
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
-import com.bwsw.sj.engine.core.entities.{JdbcEntity, EsEntity, OutputEnvelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.entities.{EsEntity, OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import org.elasticsearch.action.index.IndexRequestBuilder
@@ -66,31 +67,61 @@ object OutputTaskRunner {
     subscribeConsumer.start()
 
     val esService: ESService = outputStream.service.asInstanceOf[ESService]
-
     val client: TransportClient = TransportClient.builder().build()
     esService.provider.hosts.foreach { host =>
       val parts = host.split(":")
       client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(parts(0)), parts(1).toInt))
     }
-
-    while(true) {
-      val nextEnvelope: String = persistentQueue.take()
-      if (nextEnvelope != null && !nextEnvelope.equals("")) {
-        val tStreamEnvelope = serializer.deserialize[TStreamEnvelope](nextEnvelope)
-        subscribeConsumer.setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
-        val outputEnvelopes: List[OutputEnvelope] = handler.onTransaction(tStreamEnvelope)
-        outputEnvelopes.foreach { (outputEnvelope: OutputEnvelope) =>
-          outputEnvelope.streamType match {
-            case "elasticsearch-output" =>
-              val entity = outputEnvelope.data.asInstanceOf[EsEntity]
-              writeToElasticsearch(esService.index, outputStream.name, entity, client)
-            case "jdbc-output" => writeToJdbc(outputEnvelope)
-            case _ =>
+    instance.checkpointMode match {
+      case "time-interval" =>
+        val checkpointTimer = new SjTimer()
+        checkpointTimer.set(instance.checkpointInterval)
+        while(true) {
+          processTransaction(persistentQueue, subscribeConsumer, handler, outputStream, client, esService)
+          if (checkpointTimer.isTime) {
+            subscribeConsumer.checkpoint()
+            checkpointTimer.reset()
+            checkpointTimer.set(instance.checkpointInterval)
           }
+        }
+      case "every-nth" =>
+        var countOfTxn = 0
+        while (true) {
+          processTransaction(persistentQueue, subscribeConsumer, handler, outputStream, client, esService)
+          if (countOfTxn == instance.checkpointInterval) {
+            subscribeConsumer.checkpoint()
+            countOfTxn = 0
+          } else {
+            countOfTxn += 1
+          }
+        }
+    }
+
+
+  }
+
+  def processTransaction(queue: ArrayBlockingQueue[String],
+                         subscribeConsumer: BasicSubscribingConsumer[Array[Byte], Array[Byte]],
+                         handler: OutputStreamingHandler,
+                         outputStream: SjStream,
+                         client: TransportClient,
+                         esService: ESService) = {
+
+    val nextEnvelope: String = queue.take()
+    if (nextEnvelope != null && !nextEnvelope.equals("")) {
+      val tStreamEnvelope = serializer.deserialize[TStreamEnvelope](nextEnvelope)
+      subscribeConsumer.setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
+      val outputEnvelopes: List[OutputEnvelope] = handler.onTransaction(tStreamEnvelope)
+      outputEnvelopes.foreach { (outputEnvelope: OutputEnvelope) =>
+        outputEnvelope.streamType match {
+          case "elasticsearch-output" =>
+            val entity = outputEnvelope.data.asInstanceOf[EsEntity]
+            writeToElasticsearch(esService.index, outputStream.name, entity, client)
+          case "jdbc-output" => writeToJdbc(outputEnvelope)
+          case _ =>
         }
       }
     }
-
   }
 
   def writeToElasticsearch(index: String, documentType: String, entity: EsEntity, client: TransportClient) = {
