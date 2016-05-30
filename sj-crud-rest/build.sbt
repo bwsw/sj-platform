@@ -13,7 +13,8 @@ libraryDependencies ++= Seq(
       exclude("javax.jms", "jms")
       exclude("com.sun.jdmk", "jmxtools")
       exclude("com.sun.jmx", "jmxri")
-      exclude("org.slf4j", "slf4j-simple")
+      exclude("org.slf4j", "slf4j-simple"),
+  "com.typesafe.akka" % "akka-slf4j_2.11" % "2.4.4"
 //  UNUSED OR COVERED WITH TSTREAMS OR THIRD PARTY
 //  "com.twitter.common.zookeeper" % "lock" % "0.0.40",
 //  "com.datastax.cassandra" % "cassandra-driver-core" % "3.0.1",
@@ -21,7 +22,6 @@ libraryDependencies ++= Seq(
 //  "org.apache.zookeeper" % "zookeeper" % "3.4.6",
 //  "com.typesafe.akka" % "akka-http-core-experimental_2.11" % "2.0-M2",
 //  "com.google.re2j" % "re2j" % "1.1",
-//  "com.typesafe.akka" % "akka-slf4j_2.11" % "2.4.4",
 )
 
 //resolvers += "Twitter Repository" at "http://maven.twttr.com"
