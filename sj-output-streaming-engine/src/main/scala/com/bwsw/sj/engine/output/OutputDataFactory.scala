@@ -1,44 +1,64 @@
 package com.bwsw.sj.engine.output
 
+import java.io.File
 import java.net.InetSocketAddress
 
 import com.aerospike.client.Host
-import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.common.DAL.model.{TStreamService, SjStream}
+import com.bwsw.common.file.utils.MongoFileStorage
+import com.bwsw.sj.common.DAL.model.module.{OutputInstance, Instance}
+import com.bwsw.sj.common.DAL.model.{FileMetadata, TStreamService, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.tstreams.converter.ArrayByteToStringConverter
-import com.bwsw.tstreams.data.aerospike.{AerospikeStorageOptions, AerospikeStorageFactory}
-import com.bwsw.tstreams.metadata.MetadataStorageFactory
+import com.bwsw.tstreams.data.aerospike.{AerospikeStorage, AerospikeStorageOptions, AerospikeStorageFactory}
+import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 
 /**
+  * Data factory of output streaming engine
   * Created: 5/26/16
   *
   * @author Kseniya Tomskikh
   */
 object OutputDataFactory {
 
-  val streamDAO: GenericMongoService[SjStream] = ConnectionRepository.getStreamService
-  val streamName: String = "s1"
-  val tStream: SjStream = streamDAO.get(streamName)
-  val service: TStreamService = tStream.service.asInstanceOf[TStreamService]
+  val instanceName: String = System.getenv("INSTANCE_NAME")
+  val taskName: String = System.getenv("TASK_NAME")
 
-  val aerospikeHosts = service.dataProvider.hosts.map { address =>
-    val parts = address.split(":")
-    new Host(parts(0), parts(1).toInt)
+  private val instanceDAO: GenericMongoService[Instance] = ConnectionRepository.getInstanceService
+  private val fileMetadataDAO: GenericMongoService[FileMetadata] = ConnectionRepository.getFileMetadataService
+  private val fileStorage: MongoFileStorage = ConnectionRepository.getFileStorage
+  private val streamDAO = ConnectionRepository.getStreamService
+
+  val instance: OutputInstance = instanceDAO.get(instanceName).asInstanceOf[OutputInstance]
+
+  val inputStream: SjStream = streamDAO.get(instance.inputs.head)
+  val outputStream: SjStream = streamDAO.get(instance.outputs.head)
+
+  val inputStreamService = inputStream.service.asInstanceOf[TStreamService]
+
+  private val metadataStorageFactory = new MetadataStorageFactory
+  private val metadataStorageHosts = inputStreamService.metadataProvider.hosts.map { addr =>
+    val parts = addr.split(":")
+    new InetSocketAddress(parts(0), parts(1).toInt)
   }.toList
+  val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(metadataStorageHosts, inputStreamService.metadataNamespace)
 
-  val objectSerializer = new ObjectSerializer()
+  private val dataStorageFactory = new AerospikeStorageFactory
+  private val dataStorageHosts = inputStreamService.dataProvider.hosts.map {addr =>
+      val parts = addr.split(":")
+      new Host(parts(0), parts(1).toInt)
+    }.toList
+  private  val options = new AerospikeStorageOptions(inputStreamService.dataNamespace, dataStorageHosts)
+  val dataStorage: AerospikeStorage = dataStorageFactory.getInstance(options)
 
-  val metadataStorageFactory = new MetadataStorageFactory
-  val metadataStorage = metadataStorageFactory.getInstance(
-    cassandraHosts = List(new InetSocketAddress("localhost", 9042)),
-    keyspace = "test")
+  def getFileMetadata: FileMetadata = {
+    fileMetadataDAO.getByParameters(Map("specification.name" -> instance.moduleName,
+      "specification.module-type" -> instance.moduleType,
+      "specification.version" -> instance.moduleVersion)).head
+  }
 
-  val aerospikeStorageFactory = new AerospikeStorageFactory
-  val aerospikeOptions = new AerospikeStorageOptions("test", aerospikeHosts)
-  val aerospikeStorage = aerospikeStorageFactory.getInstance(aerospikeOptions)
-
-  val arrayByteToStringConverter = new ArrayByteToStringConverter
+  def getModuleJar: File = {
+    val fileMetadata = getFileMetadata
+    fileStorage.get(fileMetadata.filename, s"tmp/${instance.moduleName}")
+  }
 
 }

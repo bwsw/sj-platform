@@ -9,6 +9,7 @@ import akka.http.scaladsl.server.{Directives, ExceptionHandler}
 import com.bwsw.common.exceptions.{BadRecord, BadRecordWithKey, InstanceException, KeyAlreadyExists}
 import com.bwsw.sj.crud.rest.api._
 import com.bwsw.sj.crud.rest.entities.ProtocolResponse
+import com.bwsw.sj.crud.rest.utils.CorsSupport
 import org.everit.json.schema.ValidationException
 
 /**
@@ -18,6 +19,7 @@ import org.everit.json.schema.ValidationException
   * @author Kseniya Tomskikh
   */
 trait SjCrudRouter extends Directives
+  with CorsSupport
   with SjModulesApi
   with SjCustomApi
   with SjStreamsApi
@@ -67,12 +69,14 @@ trait SjCrudRouter extends Directives
 
   def route() = {
     handleExceptions(exceptionHandler) {
-      pathPrefix("v1") {
-        modulesApi ~
-        customApi ~
-        streamsApi ~
-        servicesApi ~
-        providersApi
+      corsHandler {
+        pathPrefix("v1") {
+          modulesApi ~
+          customApi ~
+          streamsApi ~
+          servicesApi ~
+          providersApi
+        }
       }
     }
   }

@@ -5,10 +5,14 @@ version := "1.0"
 scalaVersion := "2.11.7"
 
 libraryDependencies ++= Seq(
-  "org.elasticsearch" % "elasticsearch" % "2.3.2",
-  "com.google.guava" % "guava" % "18.0"
+  "org.elasticsearch" % "elasticsearch" % "2.3.2"
 )
-
-dependencyOverrides ++= Set(
-  "com.google.guava" % "guava" % "18.0"
-)
+assemblyMergeStrategy in assembly := {
+  case PathList("org", "slf4j", xs@_*) => MergeStrategy.first
+  case PathList("scala", xs@_*) => MergeStrategy.first
+  case "log4j.properties" => MergeStrategy.concat
+  case "library.properties" => MergeStrategy.concat
+  case x =>
+    val oldStrategy = (assemblyMergeStrategy in assembly).value
+    oldStrategy(x)
+}
