@@ -3,7 +3,7 @@ package com.bwsw.sj.module.output.data
 import com.bwsw.sj.engine.core.entities.EsEntity
 
 /**
-  * Created: 5/27/16
+  * Created: 27/05/2016
   *
   * @author Kseniya Tomskikh
   */

@@ -9,7 +9,7 @@ import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.engine.core.utils.EngineUtils._
 import com.bwsw.sj.common.DAL.model.{ESService, FileMetadata, SjStream}
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
-import com.bwsw.sj.engine.core.entities.{EsEntity, OutputEnvelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.entities.{JdbcEntity, EsEntity, OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import org.elasticsearch.action.index.IndexRequestBuilder
@@ -74,14 +74,21 @@ object OutputTaskRunner {
     }
 
     while(true) {
-      val tStreamEnvelope = serializer.deserialize[TStreamEnvelope](persistentQueue.take())
-
-      val outputEnvelopes: List[OutputEnvelope] = handler.onTransaction(tStreamEnvelope)
-      val entities = outputEnvelopes.map { (outputEnvelope: OutputEnvelope) =>
-        outputEnvelope.data.asInstanceOf[EsEntity]
-      }.foreach(entity => writeToElasticsearch(esService.index, outputStream.name, entity, client))
-
-
+      val nextEnvelope: String = persistentQueue.take()
+      if (nextEnvelope != null && !nextEnvelope.equals("")) {
+        val tStreamEnvelope = serializer.deserialize[TStreamEnvelope](nextEnvelope)
+        subscribeConsumer.setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
+        val outputEnvelopes: List[OutputEnvelope] = handler.onTransaction(tStreamEnvelope)
+        outputEnvelopes.foreach { (outputEnvelope: OutputEnvelope) =>
+          outputEnvelope.streamType match {
+            case "elasticsearch-output" =>
+              val entity = outputEnvelope.data.asInstanceOf[EsEntity]
+              writeToElasticsearch(esService.index, outputStream.name, entity, client)
+            case "jdbc-output" => writeToJdbc(outputEnvelope)
+            case _ =>
+          }
+        }
+      }
     }
 
   }
@@ -92,6 +99,10 @@ object OutputTaskRunner {
     val request: IndexRequestBuilder = client.prepareIndex(index, documentType)
     request.setSource(esData)
     request.execute().actionGet()
+
+  }
+
+  def writeToJdbc(envelope: OutputEnvelope) = {
 
   }
 

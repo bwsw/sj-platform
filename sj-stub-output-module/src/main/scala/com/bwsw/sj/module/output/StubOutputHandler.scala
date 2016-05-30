@@ -16,6 +16,7 @@ class StubOutputHandler extends OutputStreamingHandler {
     data.txn = envelope.txnUUID.toString
     val outputEnvelope = new OutputEnvelope
     outputEnvelope.data = data
+    outputEnvelope.streamType = "elasticsearch-output"
     val list = List(outputEnvelope)
     list
   }
