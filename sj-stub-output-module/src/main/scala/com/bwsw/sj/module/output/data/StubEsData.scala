@@ -8,5 +8,5 @@ import com.bwsw.sj.engine.core.entities.EsEntity
   * @author Kseniya Tomskikh
   */
 class StubEsData extends EsEntity {
-
+  var str: String = null
 }

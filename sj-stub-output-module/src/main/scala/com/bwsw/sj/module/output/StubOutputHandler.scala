@@ -21,12 +21,15 @@ class StubOutputHandler extends OutputStreamingHandler {
     * @return List of output envelopes
     */
   def onTransaction(envelope: TStreamEnvelope): List[OutputEnvelope] = {
-    val data: StubEsData = new StubEsData
-    data.txn = envelope.txnUUID.toString
-    val outputEnvelope = new OutputEnvelope
-    outputEnvelope.data = data
-    outputEnvelope.streamType = "elasticsearch-output"
-    val list = List(outputEnvelope)
+    val list = envelope.data.map { row =>
+      val data: StubEsData = new StubEsData
+      data.txn = envelope.txnUUID.toString
+      data.str = new String(row)
+      val outputEnvelope = new OutputEnvelope
+      outputEnvelope.data = data
+      outputEnvelope.streamType = "elasticsearch-output"
+      outputEnvelope
+    }
     list
   }
 

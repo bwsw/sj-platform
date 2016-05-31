@@ -1,5 +1,5 @@
 {
-  "name": "test.out.stub",
+  "name": "com.bwsw.stub.output",
   "description": "Stub output-module by BW",
   "version": "0.1",
   "author": "Kseniya Tomskikh",
@@ -27,6 +27,6 @@
   "options": {
     "opt": 1
   },
-  "validator-class": "com.bwsw.sj.stub.Validator",
-  "executor-class": "com.bwsw.sj.stub.Executor"
+  "validator-class": "com.bwsw.sj.module.output.StubOutputValidator",
+  "executor-class": "com.bwsw.sj.module.output.StubOutputHandler"
 }
