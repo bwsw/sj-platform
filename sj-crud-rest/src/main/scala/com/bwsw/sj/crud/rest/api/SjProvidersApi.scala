@@ -3,7 +3,7 @@ package com.bwsw.sj.crud.rest.api
 import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.{Directives, RequestContext}
-import com.bwsw.common.exceptions.BadRecordWithKey
+import com.bwsw.common.exceptions.{BadRecordWithKey, NotFoundException}
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.crud.rest.entities._
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
@@ -35,11 +35,8 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
               data.providerType
             )
             val providerName = saveProvider(provider)
-
-            ctx.complete(HttpEntity(
-              `application/json`,
-              serializer.serialize(Response(200, providerName, s"Provider '$providerName' is created"))
-            ))
+            val response = ProtocolResponse(200, Map("message" -> s"Provider '$providerName' is created"))
+            ctx.complete(HttpEntity(`application/json`, serializer.serialize(response)))
           } else {
             throw new BadRecordWithKey(
               s"Cannot create provider. Errors: ${errors.mkString("\n")}",
@@ -49,40 +46,52 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
         } ~
         get {
           val providers = providerDAO.getAll
-          var msg = ""
+          var response: ProtocolResponse = null
           if (providers.nonEmpty) {
-            msg = serializer.serialize(providers.map(p => providerToProviderData(p)))
+            val entity = Map("providers" -> providers.map(p => providerToProviderData(p)))
+            response = ProtocolResponse(200, entity)
           } else {
-            msg = serializer.serialize(Response(200, null, s"No providers found"))
+            response = ProtocolResponse(200, Map("message" -> "No providers found"))
           }
-          complete(HttpResponse(200, entity=HttpEntity(`application/json`, msg)))
+          complete(HttpEntity(`application/json`, serializer.serialize(response)))
         }
       } ~
       pathPrefix(Segment) { (providerName: String) =>
         pathEndOrSingleSlash {
           val provider = providerDAO.get(providerName)
-          var msg = ""
+          var response: ProtocolResponse = null
           if (provider != null) {
-            msg = serializer.serialize(providerToProviderData(provider))
+            val entity = Map("providers" -> providerToProviderData(provider))
+            response = ProtocolResponse(200, entity)
           } else {
-            msg = serializer.serialize(s"Provider '$providerName' not found")
+            response = ProtocolResponse(200, Map("message" -> s"Provider '$providerName' not found"))
           }
-          complete(HttpResponse(200, entity = HttpEntity(`application/json`, msg)))
+          complete(HttpEntity(`application/json`, serializer.serialize(response)))
         } ~
         pathPrefix("connection") {
           pathEndOrSingleSlash {
             val provider = providerDAO.get(providerName)
-            var msg = ""
+            var response: ProtocolResponse = null
             if (provider != null) {
               val validator = new ProviderValidator
               val errors = validator.checkProviderConnection(provider)
-              if (errors.nonEmpty) {
-                msg = serializer.serialize(errors)
+              if (errors.isEmpty) {
+                response = ProtocolResponse(200, Map("connection" -> true))
               }
-            } else {
-              msg = serializer.serialize(s"Provider '$providerName' not found")
+              else {
+                response = ProtocolResponse(200, Map(
+                  "connection" -> false,
+                  "errors" -> errors.mkString("\n")
+                ))
+              }
+              complete(HttpEntity(`application/json`, serializer.serialize(response)))
             }
-            complete(HttpResponse(200, entity=HttpEntity(`application/json`, msg)))
+            else {
+              throw new NotFoundException(
+                s"Provider not found.",
+                providerName
+              )
+            }
           }
         }
       }

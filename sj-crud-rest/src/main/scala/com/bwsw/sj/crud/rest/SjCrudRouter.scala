@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.{EntityStreamSizeException, HttpEntity, HttpResponse}
 import akka.http.scaladsl.server.{Directives, ExceptionHandler}
-import com.bwsw.common.exceptions.{BadRecord, BadRecordWithKey, InstanceException, KeyAlreadyExists}
+import com.bwsw.common.exceptions._
 import com.bwsw.sj.crud.rest.api._
 import com.bwsw.sj.crud.rest.entities.ProtocolResponse
 import com.bwsw.sj.crud.rest.utils.CorsSupport
@@ -33,6 +33,11 @@ trait SjCrudRouter extends Directives
         entity = HttpEntity(`application/json`, serializer.serialize(ProtocolResponse(400, Map("message" -> msg))))
       ))
     case BadRecordWithKey(msg, key) =>
+      complete(HttpResponse(
+        BadRequest,
+        entity = HttpEntity(`application/json`, serializer.serialize(ProtocolResponse(400, Map("message" -> msg))))
+      ))
+    case NotFoundException(msg, key) =>
       complete(HttpResponse(
         BadRequest,
         entity = HttpEntity(`application/json`, serializer.serialize(ProtocolResponse(400, Map("message" -> msg))))
