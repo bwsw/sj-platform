@@ -15,6 +15,7 @@ import kafka.javaapi.consumer.SimpleConsumer
 import kafka.javaapi.{TopicMetadataRequest, TopicMetadataResponse}
 import org.apache.zookeeper.ZooKeeper
 import org.elasticsearch.client.transport.TransportClient
+import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.InetSocketTransportAddress
 
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
@@ -240,7 +241,8 @@ class ProviderValidator {
 
   def checkESConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
     val esPort = if (port == -1) 9300 else port
-    val client = TransportClient.builder().build()
+    val settings = Settings.settingsBuilder().put("client.transport.ping_timeout", "2s").build()
+    val client = TransportClient.builder().settings(settings).build()
     client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(hostname), esPort))
     if (client.connectedNodes().size() < 1)
       errors += s"Can not establish connection to ElasticSearch on '$hostname:$esPort'"
