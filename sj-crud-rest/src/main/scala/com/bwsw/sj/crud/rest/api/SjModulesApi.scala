@@ -105,7 +105,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                               serializer.serialize(response)
                             ))
                           } else {
-                            throw new InstanceException(s"Cannot create instance of module. Request has incrorrect options attrubute",
+                            throw new InstanceException(s"Cannot create instance of module. Request has incorrect options attribute",
                               s"$moduleType-$moduleName-$moduleVersion")
                           }
                         } else {
@@ -325,10 +325,8 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     */
   def validateOptions(options: InstanceMetadata, specification: ModuleSpecification, moduleType: String) = {
     val validatorClassName = conf.getString(s"modules.$moduleType.validator-class")
-    val instanceClassName = conf.getString(s"modules.$moduleType.entity-class")
     val validatorClass = Class.forName(validatorClassName)
     val validator = validatorClass.newInstance().asInstanceOf[StreamingModuleValidator]
-    val instanceClass = Class.forName(instanceClassName)
     validator.validate(options, specification)
   }
 

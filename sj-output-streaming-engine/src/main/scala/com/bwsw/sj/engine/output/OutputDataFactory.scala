@@ -14,7 +14,7 @@ import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 
 /**
   * Data factory of output streaming engine
-  * Created: 5/26/16
+  * Created: 26/05/2016
   *
   * @author Kseniya Tomskikh
   */
@@ -35,27 +35,37 @@ object OutputDataFactory {
 
   val inputStreamService = inputStream.service.asInstanceOf[TStreamService]
 
-  private val metadataStorageFactory = new MetadataStorageFactory
-  private val metadataStorageHosts = inputStreamService.metadataProvider.hosts.map { addr =>
+  private val metadataStorageFactory: MetadataStorageFactory = new MetadataStorageFactory
+  private val metadataStorageHosts: List[InetSocketAddress] = inputStreamService.metadataProvider.hosts.map { addr =>
     val parts = addr.split(":")
     new InetSocketAddress(parts(0), parts(1).toInt)
   }.toList
   val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(metadataStorageHosts, inputStreamService.metadataNamespace)
 
-  private val dataStorageFactory = new AerospikeStorageFactory
-  private val dataStorageHosts = inputStreamService.dataProvider.hosts.map {addr =>
+  private val dataStorageFactory: AerospikeStorageFactory = new AerospikeStorageFactory
+  private val dataStorageHosts: List[Host] = inputStreamService.dataProvider.hosts.map { addr =>
       val parts = addr.split(":")
       new Host(parts(0), parts(1).toInt)
     }.toList
   private  val options = new AerospikeStorageOptions(inputStreamService.dataNamespace, dataStorageHosts)
   val dataStorage: AerospikeStorage = dataStorageFactory.getInstance(options)
 
+  /**
+    * Get metadata of module file
+    *
+    * @return FileMetadata entity
+    */
   def getFileMetadata: FileMetadata = {
     fileMetadataDAO.getByParameters(Map("specification.name" -> instance.moduleName,
       "specification.module-type" -> instance.moduleType,
       "specification.version" -> instance.moduleVersion)).head
   }
 
+  /**
+    * Get file for module
+    *
+    * @return Jar of module
+    */
   def getModuleJar: File = {
     val fileMetadata = getFileMetadata
     fileStorage.get(fileMetadata.filename, s"tmp/${instance.moduleName}")

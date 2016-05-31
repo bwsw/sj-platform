@@ -16,6 +16,7 @@ import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import org.elasticsearch.action.index.IndexRequestBuilder
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.transport.InetSocketTransportAddress
+import org.slf4j.{LoggerFactory, Logger}
 
 /**
   * Runner object for engine of output-streaming module
@@ -24,28 +25,37 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress
   * @author Kseniya Tomskikh
   */
 object OutputTaskRunner {
+  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
+
   val serializer: Serializer = new JsonSerializer
 
   def main(args: Array[String]) = {
 
     val instance: OutputInstance = OutputDataFactory.instance
     val taskManager: OutputTaskManager = new OutputTaskManager(OutputDataFactory.taskName, instance)
+    logger.info(s"Task: ${OutputDataFactory.taskName}. Start preparing of task runner for output module.")
 
     val inputStream: SjStream = OutputDataFactory.inputStream
     val outputStream: SjStream = OutputDataFactory.outputStream
 
     val taskPartitions: Array[Int] = taskManager.task.get(inputStream.name).get
     val blockingQueue: ArrayBlockingQueue[String] = new ArrayBlockingQueue[String](1000)
+
+    logger.debug(s"Task: ${OutputDataFactory.taskName}. Start creating subscribing consumer.")
     val subscribeConsumer = taskManager.createSubscribingConsumer(
       inputStream,
       taskPartitions.toList,
       chooseOffset(instance.startFrom),
       blockingQueue
     )
+    logger.debug(s"Task: ${OutputDataFactory.taskName}. Creation of subscribing consumer is finished.")
+
+    logger.debug(s"Task: ${OutputDataFactory.taskName}. Start loading of executor (handler) class from module jar.")
     val moduleJar: File = OutputDataFactory.getModuleJar
     val moduleMetadata: FileMetadata = OutputDataFactory.getFileMetadata
     val handler: OutputStreamingHandler = taskManager.getModuleHandler(moduleJar, moduleMetadata.specification.executorClass)
 
+    logger.info(s"Task: ${OutputDataFactory.taskName}. Preparing finished. Launch task.")
     runModule(instance,
       blockingQueue,
       subscribeConsumer,
@@ -62,7 +72,7 @@ object OutputTaskRunner {
     * @param subscribeConsumer Subscribe consumer for read messages from t-stream
     * @param taskManager Task manager for control task of this module
     * @param handler User handler (executor) of output-streaming module
-    * @param outputStream Output stream for transorm data
+    * @param outputStream Output stream for transform data
     */
   def runModule(instance: OutputInstance,
                 blockingQueue: ArrayBlockingQueue[String],
@@ -70,13 +80,14 @@ object OutputTaskRunner {
                 taskManager: OutputTaskManager,
                 handler: OutputStreamingHandler,
                 outputStream: SjStream) = {
-
+    logger.debug(s"Task: ${OutputDataFactory.taskName}. Launch subscribing consumer\n")
     subscribeConsumer.start()
 
     val (client, esService) = openDbConnection(outputStream)
 
     instance.checkpointMode match {
       case "time-interval" =>
+        println("start reading time-interval")
         val checkpointTimer = new SjTimer()
         checkpointTimer.set(instance.checkpointInterval)
         while(true) {
@@ -90,6 +101,7 @@ object OutputTaskRunner {
       case "every-nth" =>
         var countOfTxn = 0
         while (true) {
+          println("start reading every-nth")
           processTransaction(blockingQueue, subscribeConsumer, handler, outputStream, client, esService)
           if (countOfTxn == instance.checkpointInterval) {
             subscribeConsumer.checkpoint()
@@ -105,7 +117,7 @@ object OutputTaskRunner {
 
   /**
     * Read and transform transaction
-    * writin to output datasource
+    * writing to output datasource
     *
     * @param queue Queue with t-stream transactions
     * @param subscribeConsumer Subscribe consumer for read messages from t-stream
@@ -120,9 +132,10 @@ object OutputTaskRunner {
                          outputStream: SjStream,
                          client: TransportClient,
                          esService: ESService) = {
-
+    logger.info("")
     val nextEnvelope: String = queue.take()
     if (nextEnvelope != null && !nextEnvelope.equals("")) {
+      println("envelope processing...")
       val tStreamEnvelope = serializer.deserialize[TStreamEnvelope](nextEnvelope)
       subscribeConsumer.setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
       val outputEnvelopes: List[OutputEnvelope] = handler.onTransaction(tStreamEnvelope)
@@ -145,6 +158,7 @@ object OutputTaskRunner {
     * @return ES Transport client and ES service of stream
     */
   def openDbConnection(outputStream: SjStream): (TransportClient, ESService) = {
+    logger.info(s"Task: ${OutputDataFactory.taskName}. Open output elasticsearch connection.\n")
     val esService: ESService = outputStream.service.asInstanceOf[ESService]
     val client: TransportClient = TransportClient.builder().build()
     esService.provider.hosts.foreach { host =>
@@ -171,8 +185,13 @@ object OutputTaskRunner {
     request.execute().actionGet()
   }
 
+  /**
+    * Writing entity to JDBC
+    *
+    * @param envelope Output envelope for writing to sql database
+    */
   def writeToJdbc(envelope: OutputEnvelope) = {
-
+    //todo
   }
 
 }

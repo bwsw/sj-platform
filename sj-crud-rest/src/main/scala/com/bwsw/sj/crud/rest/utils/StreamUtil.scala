@@ -13,12 +13,6 @@ import com.bwsw.tstreams.services.BasicStreamService
 import kafka.admin.AdminUtils
 import kafka.utils.ZkUtils
 import org.I0Itec.zkclient.ZkConnection
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequest
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest
-import org.elasticsearch.action.admin.indices.get.GetIndexRequest
-import org.elasticsearch.action.admin.indices.settings.get.GetSettingsRequest
-import org.elasticsearch.client.transport.TransportClient
-import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.InetSocketTransportAddress
 
 /**
@@ -153,6 +147,22 @@ object StreamUtil {
     } else {
       Left("fail")
     }
+  }
+
+  /**
+    * Generating name of task for stream generator
+    *
+    * @param stream - SjStream object
+    * @return - Task name for transaction generator application
+    */
+  def createGeneratorTaskName(stream: SjStream) = {
+    var name = ""
+    if (stream.generator.generatorType.equals("per-stream")) {
+      name = s"${stream.generator.service.name}-${stream.name}-tg"
+    } else {
+      name = s"${stream.generator.service.name}-global-tg"
+    }
+    name.replaceAll("_", "-")
   }
 
 }

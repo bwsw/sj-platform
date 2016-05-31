@@ -428,11 +428,12 @@ abstract class StreamingModuleValidator {
     * @return - mode of stream
     */
   def getStreamMode(name: String) = {
-    val mode = name.substring(name.lastIndexOf("/") + 1)
-    if (mode == null || mode.equals("")) {
+    if (name.contains("/split")) {
       "split"
+    } else if (name.contains("/full")) {
+      "full"
     } else {
-      mode
+      "split"
     }
   }
 

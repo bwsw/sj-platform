@@ -39,22 +39,6 @@ object InstanceMethods {
   val restAddress = new URI(s"http://$restHost:$restPort").toString
 
   /**
-    * Generating name of task for stream generator
-    *
-    * @param stream - SjStream object
-    * @return - Task name for transaction generator application
-    */
-  def createGeneratorTaskName(stream: SjStream) = {
-    var name = ""
-    if (stream.generator.generatorType.equals("per-stream")) {
-      name = s"${stream.generator.service.name}-${stream.name}-tg"
-    } else {
-      name = s"${stream.generator.service.name}-global-tg"
-    }
-    name.replaceAll("_", "-")
-  }
-
-  /**
     * Getting mesos master on Zookeeper from marathon
     *
     * @return - Response from marathon
