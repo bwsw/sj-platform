@@ -31,6 +31,8 @@ class EsIndServiceData() extends ServiceData() {
   serviceType = "ESInd"
   var provider: String = null
   var index: String = null
+  var login: String = null
+  var password: String = null
 }
 
 class KfkQServiceData() extends ServiceData() {

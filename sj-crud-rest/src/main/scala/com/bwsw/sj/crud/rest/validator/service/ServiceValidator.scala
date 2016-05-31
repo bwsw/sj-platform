@@ -78,8 +78,10 @@ class ServiceValidator {
         val (providerErrors, providerObj) = validateProvider(esindServiceData.provider, initialData.serviceType)
         errors ++= providerErrors
 
-        // 'index' field
+        // 'index', 'login', 'password' fields
         errors ++= validateStringFieldRequired(esindServiceData.index, "index")
+        errors ++= validateStringFieldRequired(esindServiceData.login, "login")
+        errors ++= validateStringFieldRequired(esindServiceData.password, "password")
 
         // filling-in service object serviceType-dependent extra fields
         if (errors.isEmpty) {
@@ -234,7 +236,7 @@ class ServiceValidator {
         val (providerErrors, providerObj) = validateProvider(jdbcServiceData.provider, initialData.serviceType)
         errors ++= providerErrors
 
-        // 'index' field
+        // 'namespace', 'login', 'password' fields
         errors ++= validateStringFieldRequired(jdbcServiceData.namespace, "namespace")
         errors ++= validateStringFieldRequired(jdbcServiceData.login, "login")
         errors ++= validateStringFieldRequired(jdbcServiceData.password, "password")
