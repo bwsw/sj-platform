@@ -28,10 +28,8 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
           val errors = validateStream(stream, options)
           if (errors.isEmpty) {
             val nameStream = saveStream(stream)
-            ctx.complete(HttpEntity(
-              `application/json`,
-              serializer.serialize(Response(200, nameStream, s"Stream '$nameStream' is created"))
-            ))
+            val response = ProtocolResponse(200, Map("message" -> s"Stream '$nameStream' is created"))
+            ctx.complete(HttpEntity(`application/json`, serializer.serialize(response)))
           } else {
             throw new BadRecordWithKey(
               s"Cannot create stream. Errors: ${errors.mkString("\n")}",
@@ -41,26 +39,28 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
         } ~
         get {
           val streams = streamDAO.getAll
-          var msg = ""
+          var response: ProtocolResponse = null
           if (streams.nonEmpty) {
-            msg =  serializer.serialize(streams.map(s => streamToStreamData(s)))
+            val entity = Map("streams" -> streams.map(s => streamToStreamData(s)))
+            response = ProtocolResponse(200, entity)
           } else {
-            msg = serializer.serialize(Response(200, null, s"No streams found"))
+            response = ProtocolResponse(200, Map("message" -> "No streams found"))
           }
-          complete(HttpEntity(`application/json`, msg))
+          complete(HttpEntity(`application/json`, serializer.serialize(response)))
 
         }
       } ~
       pathPrefix(Segment) { (streamName: String) =>
         pathEndOrSingleSlash {
           val stream = streamDAO.get(streamName)
-          var msg = ""
+          var response: ProtocolResponse = null
           if (stream != null) {
-            msg = serializer.serialize(streamToStreamData(stream))
+            val entity = Map("streams" -> streamToStreamData(stream))
+            response = ProtocolResponse(200, entity)
           } else {
-            msg = serializer.serialize(Response(200, null, s"Stream '$streamName' not found"))
+            response = ProtocolResponse(200, Map("message" -> s"Stream '$streamName' not found"))
           }
-          complete(HttpEntity(`application/json`, msg))
+          complete(HttpEntity(`application/json`, serializer.serialize(response)))
         }
       }
     }

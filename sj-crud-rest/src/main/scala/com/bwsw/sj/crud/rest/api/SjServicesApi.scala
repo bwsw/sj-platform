@@ -38,10 +38,8 @@ trait SjServicesApi extends Directives with SjCrudValidator {
 
           if (errors.isEmpty) {
             val serviceName = saveService(service)
-            ctx.complete(HttpEntity(
-              `application/json`,
-              serializer.serialize(Response(200, serviceName, s"Service '$serviceName' is created"))
-            ))
+            val response = ProtocolResponse(200, Map("message" -> s"Service '$serviceName' is created"))
+            ctx.complete(HttpEntity(`application/json`, serializer.serialize(response)))
           } else {
             throw new BadRecordWithKey(
               s"Cannot create service. Errors: ${errors.mkString("\n")}",
@@ -51,26 +49,28 @@ trait SjServicesApi extends Directives with SjCrudValidator {
         } ~
         get {
           val services = serviceDAO.getAll
-          var msg = ""
+          var response: ProtocolResponse = null
           if (services.nonEmpty) {
-            msg =  serializer.serialize(services.map(s => serviceToServiceData(s)))
+            val entity = Map("services" -> services.map(s => serviceToServiceData(s)))
+            response = ProtocolResponse(200, entity)
           } else {
-            msg = serializer.serialize(s"No services found")
+            response = ProtocolResponse(200, Map("message" -> "No services found"))
           }
-          complete(HttpResponse(200, entity=HttpEntity(`application/json`, msg)))
+          complete(HttpEntity(`application/json`, serializer.serialize(response)))
 
         }
       } ~
       pathPrefix(Segment) { (serviceName: String) =>
         pathEndOrSingleSlash {
           val service = serviceDAO.get(serviceName)
-          var msg = ""
+          var response: ProtocolResponse = null
           if (service != null) {
-            msg = serializer.serialize(serviceToServiceData(service))
+            val entity = Map("services" -> serviceToServiceData(service))
+            response = ProtocolResponse(200, entity)
           } else {
-            msg = serializer.serialize(s"Service '$serviceName' not found")
+            response = ProtocolResponse(200, Map("message" -> "Service '$serviceName' not found"))
           }
-          complete(HttpResponse(200, entity=HttpEntity(`application/json`, msg)))
+          complete(HttpEntity(`application/json`, serializer.serialize(response)))
         }
       }
     }
