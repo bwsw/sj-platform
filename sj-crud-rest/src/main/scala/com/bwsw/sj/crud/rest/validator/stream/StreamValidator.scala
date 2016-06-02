@@ -3,6 +3,7 @@ package com.bwsw.sj.crud.rest.validator.stream
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
+import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.crud.rest.entities._
 
 import scala.collection.mutable.ArrayBuffer
@@ -11,7 +12,6 @@ import scala.collection.mutable.ArrayBuffer
   * Created by mendelbaum_nm
   */
 class StreamValidator {
-  import com.bwsw.sj.common.StreamConstants._
 
   var streamDAO: GenericMongoService[SjStream] = null
 
@@ -60,28 +60,31 @@ class StreamValidator {
       case None =>
         errors += s"'service' is required"
       case _ =>
-        if (params.streamType == tStream && params.service.serviceType != "TstrQ") {
+        if (params.streamType == StreamConstants.tStream && params.service.serviceType != "TstrQ") {
           errors += s"Service for 'stream.t-stream' stream must be of TstrQ type. '${params.service.name}' is not of type TstrQ"
-        } else if (params.streamType == kafka && params.service.serviceType != "KfkQ") {
+        } else if (params.streamType == StreamConstants.kafka && params.service.serviceType != "KfkQ") {
             errors += s"Service for 'stream.kafka' stream must be of KfkQ type. '${params.service.name}' is not of type KfkQ"
-        } else if (params.streamType == esOutput && params.service.serviceType != "ESInd") {
+        } else if (params.streamType == StreamConstants.esOutput && params.service.serviceType != "ESInd") {
           errors += s"Service for 'elasticsearch-output' stream must be of ESInd type. '${params.service.name}' is not of type ESInd"
-        } else if (params.streamType == jdbcOutput && params.service.serviceType != "JDBC") {
+        } else if (params.streamType == StreamConstants.jdbcOutput && params.service.serviceType != "JDBC") {
           errors += s"Service for 'jdbc-output' stream must be of JDBC type. '${params.service.name}' is not of type JDBC"
         }
     }
 
     Option(params.streamType) match {
-      case Some(t) if !streamTypes.contains(t) =>
-        errors += s"Unknown 'stream-type' provided. Must be one of: $streamTypes"
+      case Some(t) if !StreamConstants.streamTypes.contains(t) =>
+        errors += s"Unknown 'stream-type' provided. Must be one of: ${StreamConstants.streamTypes}"
       case None =>
         errors += s"'stream-type' is required"
       case _ =>
-        if (params.streamType == "Tstream") {
+        if (params.streamType == StreamConstants.tStream) {
           val validator = new GeneratorValidator
-          errors ++= validator.validate(params.generator, initialData.generator)
+          errors ++= validator.validate(
+            params.asInstanceOf[TStreamSjStream].generator,
+            initialData.asInstanceOf[TStreamSjStreamData].generator
+          )
         } else {
-          if (Option(initialData.generator).isDefined)
+          if (Option(initialData.asInstanceOf[TStreamSjStreamData].generator).isDefined)
             errors += s"'generator' is not supported for streams of type '${params.streamType}"
         }
     }

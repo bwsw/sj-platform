@@ -5,12 +5,12 @@ import java.util.Calendar
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.traits.Serializer
-import com.bwsw.sj.common.DAL.model.SjStream
 import com.bwsw.sj.common.DAL.model.module.Instance
+import com.bwsw.sj.common.DAL.model.{SjStream, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.crud.rest.entities.MarathonRequest
-import org.apache.http.client.methods.{HttpDelete, HttpPut, HttpPost, HttpGet}
+import org.apache.http.client.methods.{HttpDelete, HttpGet, HttpPost, HttpPut}
 import org.apache.http.entity.StringEntity
 
 /**
@@ -39,12 +39,12 @@ object InstanceMethods {
   val restAddress = new URI(s"http://$restHost:$restPort").toString
 
   /**
-    * Generating name of task for stream generator
+    * Generating name of task for t-streams stream generator
     *
     * @param stream - SjStream object
     * @return - Task name for transaction generator application
     */
-  def createGeneratorTaskName(stream: SjStream) = {
+  def createGeneratorTaskName(stream: TStreamSjStream) = {
     var name = ""
     if (stream.generator.generatorType.equals("per-stream")) {
       name = s"${stream.generator.service.name}-${stream.name}-tg"

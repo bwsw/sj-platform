@@ -34,30 +34,43 @@ class GeneratorValidator {
       case _ =>
     }
 
-
-    Option(initialData.service) match {
-      case Some(s) if s.isEmpty=>
-        errors += s"Generator 'service' can not be empty"
-      case None =>
-        errors += s"Generator 'stream-type' is required"
-      case _ =>
-        if (initialData.service contains "://") {
-          val generatorUrl = new URI(initialData.service)
-          if (!generatorUrl.getScheme.equals("service-zk")) {
-            errors += s"Generator 'service' uri protocol prefix must be 'service-zk://'. Or use plain service name instead"
+    if (params.generatorType != "local") {
+      Option(initialData.service) match {
+        case Some(s) if s.isEmpty =>
+          errors += s"Generator 'service' can not be empty"
+        case None =>
+          errors += s"Generator 'service' is required for non-'local' generator-type"
+        case _ =>
+          if (initialData.service contains "://") {
+            val generatorUrl = new URI(initialData.service)
+            if (!generatorUrl.getScheme.equals("service-zk")) {
+              errors += s"Generator 'service' uri protocol prefix must be 'service-zk://'. Or use plain service name instead"
+            }
           }
-        }
-        if (params.service == null) {
-          errors += s"Unknown generator 'service' provided"
-        } else {
-          if (params.service.serviceType != "ZKCoord") {
-            errors += s"Provided 'service' is not of type ZKCoord"
+          if (params.service == null) {
+            errors += s"Unknown generator 'service' provided"
+          } else {
+            if (params.service.serviceType != "ZKCoord") {
+              errors += s"Provided 'service' is not of type ZKCoord"
+            }
           }
-        }
+      }
+    }
+    else {
+      if (Option(initialData.service).isDefined) {
+        errors += s"Generator 'service' must be null for 'local' generator-type"
+      }
     }
 
-    if (params.instanceCount <= 0) {
-      errors += s"Generator 'instance-count' must be a positive integer"
+    if (params.generatorType != "local") {
+      if (params.instanceCount <= 0) {
+        errors += s"Generator 'instance-count' must be a positive integer for non-'local' generator-type"
+      }
+    }
+    else {
+      if (params.instanceCount > 0) {
+        errors += s"Generator 'instance-count' must be null or 0 for 'local' generator-type"
+      }
     }
 
     errors

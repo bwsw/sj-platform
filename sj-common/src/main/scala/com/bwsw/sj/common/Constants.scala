@@ -44,10 +44,10 @@ object ModuleConstants {
 }
 
 object StreamConstants {
-  val tStream = "stream.t-stream"
-  val kafka = "stream.kafka"
-  val esOutput = "elasticsearch-output"
-  val jdbcOutput = "jdbc-output"
+  final val tStream = "stream.t-stream"
+  final val kafka = "stream.kafka"
+  final val esOutput = "elasticsearch-output"
+  final val jdbcOutput = "jdbc-output"
   val streamTypes = Set(tStream, kafka, esOutput, jdbcOutput)
 }
 

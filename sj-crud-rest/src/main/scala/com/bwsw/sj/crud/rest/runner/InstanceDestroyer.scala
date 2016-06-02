@@ -1,7 +1,7 @@
 package com.bwsw.sj.crud.rest.runner
 
-import com.bwsw.sj.common.DAL.model.SjStream
 import com.bwsw.sj.common.DAL.model.module.Instance
+import com.bwsw.sj.common.DAL.model.{SjStream, TStreamSjStream}
 import com.bwsw.sj.common.StreamConstants
 
 /**
@@ -12,8 +12,8 @@ import com.bwsw.sj.common.StreamConstants
   * @author Kseniya Tomskikh
   */
 class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable {
-  import com.bwsw.sj.common.ModuleConstants._
   import InstanceMethods._
+  import com.bwsw.sj.common.ModuleConstants._
 
   def run() = {
     stageUpdate(instance, instance.name, deleting)
@@ -33,27 +33,27 @@ class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable {
     val allStreams = instance.inputs.map(_.replaceAll("/split|/full", "")).union(instance.outputs).map(streamDAO.get)
     val startedInstances = instanceDAO.getByParameters(Map("status" -> started))
     val startingInstance = startedInstances.union(instanceDAO.getByParameters(Map("status" -> starting)))
-    val streamsToStopping = allStreams
+    val tStreamStreamsToStop = allStreams
       .filter { stream: SjStream =>
         if (stream.streamType.equals(StreamConstants.tStream)) {
           val stage = instance.stages.get(stream.name)
-          !stream.generator.generatorType.equals("local") &&
+          !stream.asInstanceOf[TStreamSjStream].generator.generatorType.equals("local") &&
             (stage.state.equals(failed) ||
               !startingInstance.exists { instance =>
-                val streamGeneratorName = createGeneratorTaskName(stream)
+                val streamGeneratorName = createGeneratorTaskName(stream.asInstanceOf[TStreamSjStream])
                 val instanceStreamGenerators = instance.inputs.map(_.replaceAll("/split|/full", ""))
                   .union(instance.outputs)
                   .map(name => streamDAO.get(name))
                   .filter(s => s.streamType.equals(StreamConstants.tStream))
-                  .map(sjStream => createGeneratorTaskName(sjStream))
+                  .map(sjStream => createGeneratorTaskName(sjStream.asInstanceOf[TStreamSjStream]))
                 instanceStreamGenerators.contains(streamGeneratorName)
               })
         } else false
     }
-    streamsToStopping.foreach { stream =>
+    tStreamStreamsToStop.foreach { stream =>
       var isTaskDeleted = false
       stageUpdate(instance, stream.name, deleting)
-      val taskId = createGeneratorTaskName(stream)
+      val taskId = createGeneratorTaskName(stream.asInstanceOf[TStreamSjStream])
       val taskInfoResponse = getTaskInfo(taskId)
       if (taskInfoResponse.getStatusLine.getStatusCode != NotFound) {
         val stopResponse = destroyApplication(taskId)

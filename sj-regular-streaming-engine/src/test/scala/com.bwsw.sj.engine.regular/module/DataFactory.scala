@@ -9,13 +9,13 @@ import com.aerospike.client.Host
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.common.DAL.model.module.{Instance, ExecutionPlan, RegularInstance, Task}
+import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, Instance, RegularInstance, Task}
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.engine.regular.utils.CassandraHelper._
 import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
-import com.bwsw.tstreams.agents.consumer.{ConsumerCoordinationSettings, BasicConsumer, BasicConsumerOptions}
+import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions, ConsumerCoordinationSettings}
 import com.bwsw.tstreams.agents.producer.InsertionType.BatchInsert
-import com.bwsw.tstreams.agents.producer.{ProducerCoordinationSettings, BasicProducer, BasicProducerOptions, ProducerPolicies}
+import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions, ProducerCoordinationSettings, ProducerPolicies}
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStorageOptions}
@@ -201,7 +201,7 @@ object DataFactory {
 
     val tService = serviceManager.get("tstream test service")
 
-    val s1 = new SjStream("test_input_tstream" + suffix, "test_input_tstream", partitions, tService, "Tstream", Array("input"), localGenerator)
+    val s1 = new TStreamSjStream("test_input_tstream" + suffix, "test_input_tstream", partitions, tService, "Tstream", Array("input"), localGenerator)
     sjStreamService.save(s1)
 
     BasicStreamService.createStream(
@@ -219,7 +219,7 @@ object DataFactory {
 
     val tService = serviceManager.get("tstream test service")
 
-    val s2 = new SjStream("test_output_tstream" + suffix, "test_output_tstream", partitions, tService, "Tstream", Array("output", "some tags"), localGenerator)
+    val s2 = new TStreamSjStream("test_output_tstream" + suffix, "test_output_tstream", partitions, tService, "Tstream", Array("output", "some tags"), localGenerator)
     sjStreamService.save(s2)
 
     BasicStreamService.createStream(
@@ -245,10 +245,10 @@ object DataFactory {
   private def createKafkaStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int) = {
     val kService = serviceManager.get("kafka test service")
 
-    val s1 = new SjStream("test_kafka_input1", "test_kafka_input1", partitions, kService, "kafka", Array("kafka input"), null)
+    val s1 = new KafkaSjStream("test_kafka_input1", "test_kafka_input1", partitions, kService, "kafka", Array("kafka input"))
     sjStreamService.save(s1)
 
-    val s2 = new SjStream("test_kafka_input2", "test_kafka_input2", partitions, kService, "kafka", Array("kafka input"), null)
+    val s2 = new KafkaSjStream("test_kafka_input2", "test_kafka_input2", partitions, kService, "kafka", Array("kafka input"))
     sjStreamService.save(s2)
   }
 

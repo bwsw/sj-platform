@@ -320,10 +320,10 @@ class TaskManager() {
     val roundRobinPolicy = new RoundRobinPolicy(basicStream, (partitions.head to partitions.tail.head).toList)
 
     val timeUuidGenerator =
-      stream.generator.generatorType match {
+      stream.asInstanceOf[TStreamSjStream].generator.generatorType match {
         case "local" => new LocalTimeUUIDGenerator
         case _type =>
-          val service = stream.generator.service.asInstanceOf[ZKService]
+          val service = stream.asInstanceOf[TStreamSjStream].generator.service.asInstanceOf[ZKService]
           val zkHosts = service.provider.hosts
           val prefix = service.namespace + "/" + {
             if (_type == "global") _type else stream.name
@@ -428,10 +428,10 @@ class TaskManager() {
     val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.partitions).toList)
 
     val timeUuidGenerator =
-      stream.generator.generatorType match {
+      stream.asInstanceOf[TStreamSjStream].generator.generatorType match {
         case "local" => new LocalTimeUUIDGenerator
         case _type =>
-          val service = stream.generator.service.asInstanceOf[ZKService]
+          val service = stream.asInstanceOf[TStreamSjStream].generator.service.asInstanceOf[ZKService]
           val zkServers = service.provider.hosts
           val prefix = service.namespace + "/" + {
             if (_type == "global") _type else basicStream.name
@@ -484,6 +484,6 @@ class TaskManager() {
       )
     }
 
-    new SjStream(stream.getName, stream.getDescriptions, stream.getPartitions, new Generator("local"))
+    new TStreamSjStream(stream.getName, stream.getDescriptions, stream.getPartitions, new Generator("local"))
   }
 }

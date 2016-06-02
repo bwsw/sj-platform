@@ -68,7 +68,7 @@ trait SjServicesApi extends Directives with SjCrudValidator {
             val entity = Map("services" -> serviceToServiceData(service))
             response = ProtocolResponse(200, entity)
           } else {
-            response = ProtocolResponse(200, Map("message" -> "Service '$serviceName' not found"))
+            response = ProtocolResponse(200, Map("message" -> s"Service '$serviceName' not found"))
           }
           complete(HttpEntity(`application/json`, serializer.serialize(response)))
         }
