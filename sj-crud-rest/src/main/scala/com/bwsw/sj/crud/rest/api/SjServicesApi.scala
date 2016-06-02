@@ -62,15 +62,17 @@ trait SjServicesApi extends Directives with SjCrudValidator {
       } ~
       pathPrefix(Segment) { (serviceName: String) =>
         pathEndOrSingleSlash {
-          val service = serviceDAO.get(serviceName)
-          var response: ProtocolResponse = null
-          if (service != null) {
-            val entity = Map("services" -> serviceToServiceData(service))
-            response = ProtocolResponse(200, entity)
-          } else {
-            response = ProtocolResponse(200, Map("message" -> s"Service '$serviceName' not found"))
+          get {
+            val service = serviceDAO.get(serviceName)
+            var response: ProtocolResponse = null
+            if (service != null) {
+              val entity = Map("services" -> serviceToServiceData(service))
+              response = ProtocolResponse(200, entity)
+            } else {
+              response = ProtocolResponse(200, Map("message" -> s"Service '$serviceName' not found"))
+            }
+            complete(HttpEntity(`application/json`, serializer.serialize(response)))
           }
-          complete(HttpEntity(`application/json`, serializer.serialize(response)))
         }
       }
     }

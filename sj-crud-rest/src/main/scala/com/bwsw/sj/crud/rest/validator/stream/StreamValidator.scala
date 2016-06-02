@@ -77,16 +77,6 @@ class StreamValidator {
       case None =>
         errors += s"'stream-type' is required"
       case _ =>
-        if (params.streamType == StreamConstants.tStream) {
-          val validator = new GeneratorValidator
-          errors ++= validator.validate(
-            params.asInstanceOf[TStreamSjStream].generator,
-            initialData.asInstanceOf[TStreamSjStreamData].generator
-          )
-        } else {
-          if (Option(initialData.asInstanceOf[TStreamSjStreamData].generator).isDefined)
-            errors += s"'generator' is not supported for streams of type '${params.streamType}"
-        }
     }
 
     Option(params.tags) match {
@@ -97,6 +87,18 @@ class StreamValidator {
           errors += s"Tag in 'tags' can not be empty string"
       case None =>
         errors += s"'tags' is required"
+      case _ =>
+    }
+
+    // streamType-specific validations
+    params.streamType match {
+      case StreamConstants.tStream =>
+        // Generator
+        val validator = new GeneratorValidator
+        errors ++= validator.validate(
+          params.asInstanceOf[TStreamSjStream].generator,
+          initialData.asInstanceOf[TStreamSjStreamData].generator
+        )
       case _ =>
     }
 

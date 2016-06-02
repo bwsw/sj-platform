@@ -58,39 +58,43 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
       } ~
       pathPrefix(Segment) { (providerName: String) =>
         pathEndOrSingleSlash {
-          val provider = providerDAO.get(providerName)
-          var response: ProtocolResponse = null
-          if (provider != null) {
-            val entity = Map("providers" -> providerToProviderData(provider))
-            response = ProtocolResponse(200, entity)
-          } else {
-            response = ProtocolResponse(200, Map("message" -> s"Provider '$providerName' not found"))
-          }
-          complete(HttpEntity(`application/json`, serializer.serialize(response)))
-        } ~
-        pathPrefix("connection") {
-          pathEndOrSingleSlash {
+          get {
             val provider = providerDAO.get(providerName)
             var response: ProtocolResponse = null
             if (provider != null) {
-              val validator = new ProviderValidator
-              val errors = validator.checkProviderConnection(provider)
-              if (errors.isEmpty) {
-                response = ProtocolResponse(200, Map("connection" -> true))
+              val entity = Map("providers" -> providerToProviderData(provider))
+              response = ProtocolResponse(200, entity)
+            } else {
+              response = ProtocolResponse(200, Map("message" -> s"Provider '$providerName' not found"))
+            }
+            complete(HttpEntity(`application/json`, serializer.serialize(response)))
+          }
+        } ~
+        pathPrefix("connection") {
+          pathEndOrSingleSlash {
+            get {
+              val provider = providerDAO.get(providerName)
+              var response: ProtocolResponse = null
+              if (provider != null) {
+                val validator = new ProviderValidator
+                val errors = validator.checkProviderConnection(provider)
+                if (errors.isEmpty) {
+                  response = ProtocolResponse(200, Map("connection" -> true))
+                }
+                else {
+                  response = ProtocolResponse(200, Map(
+                    "connection" -> false,
+                    "errors" -> errors.mkString("\n")
+                  ))
+                }
+                complete(HttpEntity(`application/json`, serializer.serialize(response)))
               }
               else {
-                response = ProtocolResponse(200, Map(
-                  "connection" -> false,
-                  "errors" -> errors.mkString("\n")
-                ))
+                throw new NotFoundException(
+                  s"Provider not found.",
+                  providerName
+                )
               }
-              complete(HttpEntity(`application/json`, serializer.serialize(response)))
-            }
-            else {
-              throw new NotFoundException(
-                s"Provider not found.",
-                providerName
-              )
             }
           }
         }

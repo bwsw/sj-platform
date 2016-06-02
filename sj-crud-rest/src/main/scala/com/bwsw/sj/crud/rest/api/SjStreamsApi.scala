@@ -52,15 +52,17 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
       } ~
       pathPrefix(Segment) { (streamName: String) =>
         pathEndOrSingleSlash {
-          val stream = streamDAO.get(streamName)
-          var response: ProtocolResponse = null
-          if (stream != null) {
-            val entity = Map("streams" -> streamToStreamData(stream))
-            response = ProtocolResponse(200, entity)
-          } else {
-            response = ProtocolResponse(200, Map("message" -> s"Stream '$streamName' not found"))
+          get {
+            val stream = streamDAO.get(streamName)
+            var response: ProtocolResponse = null
+            if (stream != null) {
+              val entity = Map("streams" -> streamToStreamData(stream))
+              response = ProtocolResponse(200, entity)
+            } else {
+              response = ProtocolResponse(200, Map("message" -> s"Stream '$streamName' not found"))
+            }
+            complete(HttpEntity(`application/json`, serializer.serialize(response)))
           }
-          complete(HttpEntity(`application/json`, serializer.serialize(response)))
         }
       }
     }
