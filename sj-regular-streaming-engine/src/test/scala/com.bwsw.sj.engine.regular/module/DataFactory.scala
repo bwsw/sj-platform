@@ -119,11 +119,11 @@ object DataFactory {
     val redisService = new RedisService("redis test service", "RdsCoord", "redis test service", redisProv, testNamespace)
     serviceManager.save(redisService)
 
-    val kafkaProv = providerService.get("kafka test provider")
-    val kafkaService = new KafkaService("kafka test service", "KfkQ", "kafka test service", kafkaProv)
-    serviceManager.save(kafkaService)
-
     val zkProv = providerService.get("zookeeper test provider")
+
+    val kafkaProv = providerService.get("kafka test provider")
+    val kafkaService = new KafkaService("kafka test service", "KfkQ", "kafka test service", kafkaProv, zkProv, testNamespace)
+    serviceManager.save(kafkaService)
 
     val tstrqService = new TStreamService("tstream test service", "TstrQ", "tstream test service",
       cassProv, cassandraTestKeyspace, aeroProv, testNamespace, zkProv, "/unit")
@@ -245,10 +245,10 @@ object DataFactory {
   private def createKafkaStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int) = {
     val kService = serviceManager.get("kafka test service")
 
-    val s1 = new KafkaSjStream("test_kafka_input1", "test_kafka_input1", partitions, kService, "kafka", Array("kafka input"))
+    val s1 = new KafkaSjStream("test_kafka_input1", "test_kafka_input1", partitions, kService, "kafka", Array("kafka input"), 1)
     sjStreamService.save(s1)
 
-    val s2 = new KafkaSjStream("test_kafka_input2", "test_kafka_input2", partitions, kService, "kafka", Array("kafka input"))
+    val s2 = new KafkaSjStream("test_kafka_input2", "test_kafka_input2", partitions, kService, "kafka", Array("kafka input"), 1)
     sjStreamService.save(s2)
   }
 
