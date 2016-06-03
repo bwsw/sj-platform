@@ -34,7 +34,7 @@ trait SjServicesApi extends Directives with SjCrudValidator {
             case "JDBC" => service = new JDBCService
           }
 
-          val errors = validateService(data, service)
+          val errors = ServiceValidator.validate(data, service)
 
           if (errors.isEmpty) {
             val serviceName = saveService(service)
@@ -78,17 +78,6 @@ trait SjServicesApi extends Directives with SjCrudValidator {
     }
   }
 
-  /**
-    * Validation of data for service being created and filling in the service object
-    *
-    * @param serviceData - stream
-    * @return - errors
-    */
-  def validateService(serviceData: ServiceData, service: Service) = {
-    // Using common validator for all service types
-    val validator = new ServiceValidator
-    validator.validate(serviceData, service)
-  }
 
   /**
     * Save service of any type to db
@@ -127,6 +116,8 @@ trait SjServicesApi extends Directives with SjCrudValidator {
         serviceData.name = s.name
         serviceData.description = s.description
         serviceData.asInstanceOf[KfkQServiceData].provider = s.provider.name
+        serviceData.asInstanceOf[KfkQServiceData].zkProvider = s.zkProvider.name
+        serviceData.asInstanceOf[KfkQServiceData].zkNamespace = s.zkNamespace
       case s: TStreamService =>
         serviceData = new TstrQServiceData
         serviceData.name = s.name

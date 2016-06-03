@@ -28,6 +28,7 @@ class TStreamSjStreamData() extends SjStreamData() {
 
 class KafkaSjStreamData() extends SjStreamData() {
   streamType = StreamConstants.kafka
+  @JsonProperty("replication-factor") var replicationFactor: Int = 0
 }
 
 class ESSjStreamData() extends SjStreamData() {
@@ -37,14 +38,3 @@ class ESSjStreamData() extends SjStreamData() {
 class JDBCSjStreamData() extends SjStreamData() {
   streamType = StreamConstants.jdbcOutput
 }
-///**
-//  * Stream data case class
-//  */
-//case class SjStreamData(name: String,
-//                        description: String,
-//                        partitions: Int,
-//                        service: String,
-//                        @JsonProperty("stream-type") streamType: String,
-//                        tags: Array[String],
-//                        generator: GeneratorData
-//                       )

@@ -1,12 +1,16 @@
 package com.bwsw.sj.common.DAL.model
 
 class KafkaSjStream() extends SjStream {
+
+  var replicationFactor: Int = 0
+
   def this(name: String,
            description: String,
            partitions: Int,
            service: Service,
            streamType: String,
-           tags: Array[String]) = {
+           tags: Array[String],
+           replicationFactor: Int) = {
     this()
     this.name = name
     this.description = description
@@ -14,5 +18,6 @@ class KafkaSjStream() extends SjStream {
     this.service = service
     this.streamType = streamType
     this.tags = tags
+    this.replicationFactor = replicationFactor
   }
 }

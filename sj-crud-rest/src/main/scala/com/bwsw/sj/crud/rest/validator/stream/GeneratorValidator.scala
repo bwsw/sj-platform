@@ -12,7 +12,7 @@ import scala.collection.mutable.ArrayBuffer
   * Created by mendelbaum_nm on 05.05.16.
   */
 
-class GeneratorValidator {
+object GeneratorValidator {
   import com.bwsw.sj.common.GeneratorConstants._
 
   /**

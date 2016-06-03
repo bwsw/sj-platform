@@ -25,7 +25,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
         post { (ctx: RequestContext) =>
           val options = serializer.deserialize[SjStreamData](getEntityFromContext(ctx))
           val stream = generateStreamEntity(options)
-          val errors = validateStream(stream, options)
+          val errors = StreamValidator.validate(stream, options)
           if (errors.isEmpty) {
             val nameStream = saveStream(stream)
             val response = ProtocolResponse(200, Map("message" -> s"Stream '$nameStream' is created"))
@@ -75,24 +75,6 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
     * @return - SjStreamData object
     */
   def streamToStreamData(stream: SjStream) = {
-//    var generator: GeneratorData = null
-//    if (stream.streamType == StreamConstants.tStream && stream.asInstanceOf[TStreamSjStream].generator != null) {
-//      generator = new GeneratorData(
-//        stream.asInstanceOf[TStreamSjStream].generator.generatorType,
-//        stream.asInstanceOf[TStreamSjStream].generator.service.name,
-//        stream.asInstanceOf[TStreamSjStream].generator.instanceCount
-//      )
-//    }
-//    val streamData = new SjStreamData(
-//      stream.name,
-//      stream.description,
-//      stream.partitions,
-//      stream.service.name,
-//      stream.streamType,
-//      stream.tags,
-//      generator
-//    )
-//    streamData
     var streamData: SjStreamData = null
     stream match {
       case s: TStreamSjStream =>
@@ -106,6 +88,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
         streamData.asInstanceOf[TStreamSjStreamData].generator = generator
       case s: KafkaSjStream =>
         streamData = new KafkaSjStreamData
+        streamData.asInstanceOf[KafkaSjStreamData].replicationFactor = stream.asInstanceOf[KafkaSjStream].replicationFactor
       case s: ESSjStream =>
         streamData = new ESSjStreamData
       case s: JDBCSjStream =>
@@ -131,9 +114,10 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
     initialData.streamType match {
       case StreamConstants.tStream =>
         stream = new TStreamSjStream
-        stream.asInstanceOf[TStreamSjStream].generator = generateGeneratorEntity(initialData)
+        stream.asInstanceOf[TStreamSjStream].generator = generateGeneratorEntity(initialData.asInstanceOf[TStreamSjStreamData])
       case StreamConstants.kafka =>
         stream = new KafkaSjStream
+        stream.asInstanceOf[KafkaSjStream].replicationFactor = initialData.asInstanceOf[KafkaSjStreamData].replicationFactor
       case StreamConstants.jdbcOutput =>
         stream = new JDBCSjStream
       case StreamConstants.esOutput =>
@@ -149,47 +133,31 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
   }
 
   /**
-    * Generate generator entity from generator data
+    * Generate Tstreams stream generator entity from generator data
     *
-    * @param streamInitialData - options for stream
+    * @param streamInitialData - TStreamSjStreamData object
     * @return - generated generator entity
     */
-  def generateGeneratorEntity(streamInitialData: SjStreamData) = {
-    var generator: Generator = null
-    streamInitialData.streamType match {
-      case StreamConstants.tStream =>
-        generator = new Generator
-        generator.generatorType = streamInitialData.asInstanceOf[TStreamSjStreamData].generator.generatorType
-        generator.generatorType match {
-          case t: String if GeneratorConstants.generatorTypesWithService.contains(t) =>
-            var serviceName: String = null
-            if (streamInitialData.asInstanceOf[TStreamSjStreamData].generator.service contains "://") {
-              val generatorUrl = new URI(streamInitialData.asInstanceOf[TStreamSjStreamData].generator.service)
-              if (generatorUrl.getScheme.equals("service-zk")) {
-                serviceName = generatorUrl.getAuthority
-              }
-            } else {
-              serviceName = streamInitialData.asInstanceOf[TStreamSjStreamData].generator.service
-            }
-            generator.service = serviceDAO.get(serviceName)
-          case _ =>
-            generator.service = null
+  def generateGeneratorEntity(streamInitialData: TStreamSjStreamData) = {
+    val generator = new Generator
+    generator.generatorType = streamInitialData.generator.generatorType
+    generator.generatorType match {
+      case t: String if GeneratorConstants.generatorTypesWithService.contains(t) =>
+        var serviceName: String = null
+        if (streamInitialData.generator.service contains "://") {
+          val generatorUrl = new URI(streamInitialData.generator.service)
+          if (generatorUrl.getScheme.equals("service-zk")) {
+            serviceName = generatorUrl.getAuthority
+          }
+        } else {
+          serviceName = streamInitialData.generator.service
         }
-        generator.instanceCount = streamInitialData.asInstanceOf[TStreamSjStreamData].generator.instanceCount
+        generator.service = serviceDAO.get(serviceName)
       case _ =>
+        generator.service = null
     }
+    generator.instanceCount = streamInitialData.generator.instanceCount
     generator
-  }
-
-  /**
-    * Stream validation
-    *
-    * @param stream - stream
-    * @return - list of errors
-    */
-  def validateStream(stream: SjStream, initialStreamData: SjStreamData) = {
-    val validator = new StreamValidator
-    validator.validate(stream, initialStreamData)
   }
 
   /**

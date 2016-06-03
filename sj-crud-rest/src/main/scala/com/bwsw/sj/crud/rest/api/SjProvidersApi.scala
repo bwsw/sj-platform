@@ -22,8 +22,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
         post { (ctx: RequestContext) =>
           val data = serializer.deserialize[ProviderData](getEntityFromContext(ctx))
 
-          val validator = new ProviderValidator
-          val errors = validator.validate(data)
+          val errors = ProviderValidator.validate(data)
 
           if (errors.isEmpty) {
             val provider = new Provider(
@@ -76,8 +75,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
               val provider = providerDAO.get(providerName)
               var response: ProtocolResponse = null
               if (provider != null) {
-                val validator = new ProviderValidator
-                val errors = validator.checkProviderConnection(provider)
+                val errors = ProviderValidator.checkProviderConnection(provider)
                 if (errors.isEmpty) {
                   response = ProtocolResponse(200, Map("connection" -> true))
                 }

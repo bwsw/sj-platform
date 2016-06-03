@@ -5,15 +5,17 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.crud.rest.entities._
+import com.bwsw.sj.crud.rest.validator.provider.ProviderValidator
 
 import scala.collection.mutable.ArrayBuffer
 
 /**
   * Created by mendelbaum_nm
   */
-class StreamValidator {
+object StreamValidator {
 
   var streamDAO: GenericMongoService[SjStream] = null
+  var providerDAO: GenericMongoService[Provider] = null
 
   /**
     * Validating input parameters for stream
@@ -24,6 +26,8 @@ class StreamValidator {
     */
   def validate(params: SjStream, initialData: SjStreamData) = {
     streamDAO = ConnectionRepository.getStreamService
+    providerDAO = ConnectionRepository.getProviderService
+
     val errors = new ArrayBuffer[String]()
 
     Option(params.name) match {
@@ -94,11 +98,32 @@ class StreamValidator {
     params.streamType match {
       case StreamConstants.tStream =>
         // Generator
-        val validator = new GeneratorValidator
-        errors ++= validator.validate(
+        errors ++= GeneratorValidator.validate(
           params.asInstanceOf[TStreamSjStream].generator,
           initialData.asInstanceOf[TStreamSjStreamData].generator
         )
+      case StreamConstants.kafka =>
+        //replicationFactor
+        val rFactor = params.asInstanceOf[KafkaSjStream].replicationFactor
+        if (rFactor <= 0) {
+          errors += s"'replication-factor' is required for '${StreamConstants.kafka}' stream and must be a positive integer"
+        }
+        else {
+          val zkHostsNumber = params.service.asInstanceOf[KafkaService].zkProvider.hosts.length
+
+          if (rFactor > zkHostsNumber) {
+            errors += s"'replication-factor' can not be greater than service's zk-provider hosts number"
+          }
+          else {
+            val zkHostsConnectionErrors = ProviderValidator.checkProviderConnection(params.service.asInstanceOf[KafkaService].zkProvider)
+            if (rFactor > (zkHostsNumber - zkHostsConnectionErrors.length)) {
+              errors += s"Some service's zk-provider hosts are unreachable. There is not enough alive hosts for 'replication-factor' provided"
+              errors ++= zkHostsConnectionErrors
+
+            }
+          }
+        }
+
       case _ =>
     }
 

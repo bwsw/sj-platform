@@ -24,7 +24,7 @@ import scala.concurrent.duration._
 /**
   * Created by mendelbaum_nm on 13.05.16.
   */
-class ProviderValidator {
+object ProviderValidator {
   import com.bwsw.sj.common.ProviderConstants._
 
   var providerDAO: GenericMongoService[Provider] = null
