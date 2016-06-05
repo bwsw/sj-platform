@@ -13,12 +13,6 @@ import com.bwsw.tstreams.services.BasicStreamService
 import kafka.admin.AdminUtils
 import kafka.utils.ZkUtils
 import org.I0Itec.zkclient.ZkConnection
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequest
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest
-import org.elasticsearch.action.admin.indices.get.GetIndexRequest
-import org.elasticsearch.action.admin.indices.settings.get.GetSettingsRequest
-import org.elasticsearch.client.transport.TransportClient
-import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.InetSocketTransportAddress
 
 /**
@@ -64,7 +58,7 @@ object StreamUtil {
         metadataStorage,
         dataStorage
       )
-      if (tStream.getPartitions != stream.partitions) {
+      if (tStream.getPartitions != stream.asInstanceOf[TStreamSjStream].partitions) {
         Left(s"Partitions count of stream ${stream.name} mismatch")
       } else {
         Right(true)
@@ -72,7 +66,7 @@ object StreamUtil {
     } else {
       BasicStreamService.createStream(
         stream.name,
-        stream.partitions,
+        stream.asInstanceOf[TStreamSjStream].partitions,
         5000,
         "", metadataStorage,
         dataStorage
@@ -98,11 +92,11 @@ object StreamUtil {
     val zkClient = ZkUtils.createZkClient(zkHost, 30000, 30000)
     val zkUtils = new ZkUtils(zkClient, zkConnect, false)
     if (!AdminUtils.topicExists(zkUtils, stream.name)) {
-      AdminUtils.createTopic(zkUtils, stream.name, stream.partitions, replications, new Properties())
+      AdminUtils.createTopic(zkUtils, stream.name, stream.asInstanceOf[KafkaSjStream].partitions, replications, new Properties())
       Right(s"Topic ${stream.name} is created")
     } else {
       val topicMetadata = AdminUtils.fetchTopicMetadataFromZk(stream.name, zkUtils)
-      if (topicMetadata.partitionsMetadata.size != stream.partitions) {
+      if (topicMetadata.partitionsMetadata.size != stream.asInstanceOf[KafkaSjStream].partitions) {
         Left(s"Partitions count of stream ${stream.name} mismatch")
       } else {
         Right(s"Topic ${stream.name} is exists")

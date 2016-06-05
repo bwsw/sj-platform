@@ -16,18 +16,19 @@ class SjStreamData() {
   @JsonProperty("stream-type") var streamType: String = null
   var name: String = null
   var description: String = null
-  var partitions: Int = 0
   var service: String = null
   var tags: Array[String] = null
 }
 
 class TStreamSjStreamData() extends SjStreamData() {
   streamType = StreamConstants.tStream
+  var partitions: Int = 0
   var generator: GeneratorData = null
 }
 
 class KafkaSjStreamData() extends SjStreamData() {
   streamType = StreamConstants.kafka
+  var partitions: Int = 0
   @JsonProperty("replication-factor") var replicationFactor: Int = 0
 }
 

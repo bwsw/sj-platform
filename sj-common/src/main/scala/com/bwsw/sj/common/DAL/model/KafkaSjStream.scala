@@ -2,6 +2,7 @@ package com.bwsw.sj.common.DAL.model
 
 class KafkaSjStream() extends SjStream {
 
+  var partitions: Int = 0
   var replicationFactor: Int = 0
 
   def this(name: String,

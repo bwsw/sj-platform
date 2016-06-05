@@ -51,11 +51,6 @@ object StreamValidator {
       case _ =>
     }
 
-
-    if (params.partitions <= 0) {
-      errors += s"'partitions' must be a positive integer"
-    }
-
     Option(initialData.service) match {
       case Some(s) if s.isEmpty =>
         errors += s"'service' can not be empty"
@@ -97,12 +92,22 @@ object StreamValidator {
     // streamType-specific validations
     params.streamType match {
       case StreamConstants.tStream =>
-        // Generator
+        //partitions
+        if (params.asInstanceOf[TStreamSjStream].partitions <= 0) {
+          errors += s"'partitions' is required and must be a positive integer"
+        }
+
+        //generator
         errors ++= GeneratorValidator.validate(
           params.asInstanceOf[TStreamSjStream].generator,
           initialData.asInstanceOf[TStreamSjStreamData].generator
         )
       case StreamConstants.kafka =>
+        //partitions
+        if (params.asInstanceOf[KafkaSjStream].partitions <= 0) {
+          errors += s"'partitions' is required and must be a positive integer"
+        }
+
         //replicationFactor
         val rFactor = params.asInstanceOf[KafkaSjStream].replicationFactor
         if (rFactor <= 0) {

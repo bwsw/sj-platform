@@ -133,7 +133,6 @@ object SjTest {
 
     val stream = new ESSjStream()
     stream.name = "es1"
-    stream.partitions = 3
     stream.service = service
     stream.streamType = esOutput
     stream.tags = Array("test")
@@ -159,7 +158,6 @@ object SjTest {
 
     val stream = new JDBCSjStream()
     stream.name = "tbl1"
-    stream.partitions = 3
     stream.service = service
     stream.streamType = jdbcOutput
     stream.tags = Array("test")

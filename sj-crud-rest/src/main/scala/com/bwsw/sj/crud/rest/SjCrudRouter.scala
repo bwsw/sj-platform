@@ -10,6 +10,7 @@ import com.bwsw.common.exceptions._
 import com.bwsw.sj.crud.rest.api._
 import com.bwsw.sj.crud.rest.entities.ProtocolResponse
 import com.bwsw.sj.crud.rest.utils.CorsSupport
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
 import org.everit.json.schema.ValidationException
 
 /**
@@ -64,6 +65,11 @@ trait SjCrudRouter extends Directives
       complete(HttpResponse(
         BadRequest,
         entity = HttpEntity(`application/json`, serializer.serialize(ProtocolResponse(400, Map("message" -> ex.getMessage))))
+      ))
+    case ex: UnrecognizedPropertyException =>
+      complete(HttpResponse(
+        BadRequest,
+        entity = HttpEntity(`application/json`, serializer.serialize(ProtocolResponse(500, Map("message" -> s"Unknown property '${ex.getPropertyName}' for the data provided in the request. ${ex.getKnownPropertyIds} are expected."))))
       ))
     case ex: Exception =>
       complete(HttpResponse(

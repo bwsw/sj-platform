@@ -1,10 +1,10 @@
 package com.bwsw.sj.crud.rest.validator.module
 
 import com.bwsw.sj.common.DAL.model.module.Instance
-import com.bwsw.sj.common.DAL.model.{TStreamService, SjStream}
+import com.bwsw.sj.common.DAL.model.{SjStream, TStreamService, TStreamSjStream}
 import com.bwsw.sj.common.ModuleConstants._
 import com.bwsw.sj.common.StreamConstants._
-import com.bwsw.sj.crud.rest.entities.module.{OutputInstanceMetadata, ModuleSpecification, InstanceMetadata}
+import com.bwsw.sj.crud.rest.entities.module.{InstanceMetadata, ModuleSpecification, OutputInstanceMetadata}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -77,7 +77,7 @@ class OutputStreamingValidator extends StreamingModuleValidator {
         checkTStreams(errors, allStreams.filter(s => s.streamType.equals(tStream)).toBuffer)
       }
 
-      parameters.parallelism = checkParallelism(parameters.parallelism, inputStream.partitions, errors)
+      parameters.parallelism = checkParallelism(parameters.parallelism, inputStream.asInstanceOf[TStreamSjStream].partitions, errors)
       val partitions = getPartitionForStreams(Array(inputStream))
 
       parameters.inputs = Array(parameters.asInstanceOf[OutputInstanceMetadata].input)

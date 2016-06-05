@@ -85,9 +85,11 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
           if (generatorType != "local") stream.asInstanceOf[TStreamSjStream].generator.service.name else null,
           if (generatorType != "local") stream.asInstanceOf[TStreamSjStream].generator.instanceCount else 0
         )
+        streamData.asInstanceOf[TStreamSjStreamData].partitions = stream.asInstanceOf[TStreamSjStream].partitions
         streamData.asInstanceOf[TStreamSjStreamData].generator = generator
       case s: KafkaSjStream =>
         streamData = new KafkaSjStreamData
+        streamData.asInstanceOf[KafkaSjStreamData].partitions = stream.asInstanceOf[KafkaSjStream].partitions
         streamData.asInstanceOf[KafkaSjStreamData].replicationFactor = stream.asInstanceOf[KafkaSjStream].replicationFactor
       case s: ESSjStream =>
         streamData = new ESSjStreamData
@@ -96,7 +98,6 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
     }
     streamData.name = stream.name
     streamData.description = stream.description
-    streamData.partitions = stream.partitions
     streamData.service = stream.service.name
     streamData.streamType = stream.streamType
     streamData.tags = stream.tags
@@ -114,9 +115,11 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
     initialData.streamType match {
       case StreamConstants.tStream =>
         stream = new TStreamSjStream
+        stream.asInstanceOf[TStreamSjStream].partitions = initialData.asInstanceOf[TStreamSjStreamData].partitions
         stream.asInstanceOf[TStreamSjStream].generator = generateGeneratorEntity(initialData.asInstanceOf[TStreamSjStreamData])
       case StreamConstants.kafka =>
         stream = new KafkaSjStream
+        stream.asInstanceOf[KafkaSjStream].partitions = initialData.asInstanceOf[KafkaSjStreamData].partitions
         stream.asInstanceOf[KafkaSjStream].replicationFactor = initialData.asInstanceOf[KafkaSjStreamData].replicationFactor
       case StreamConstants.jdbcOutput =>
         stream = new JDBCSjStream
@@ -126,7 +129,6 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
     stream.service = serviceDAO.get(initialData.service)
     stream.name = initialData.name
     stream.description = initialData.description
-    stream.partitions = initialData.partitions
     stream.tags = initialData.tags
     stream.streamType = initialData.streamType
     stream

@@ -449,7 +449,7 @@ object DataFactory {
       transport = new TcpTransport,
       transportTimeout = 5)
 
-    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.partitions).toList)
+    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
 
     val timeUuidGenerator = new LocalTimeUUIDGenerator
 
@@ -479,7 +479,7 @@ object DataFactory {
       7000
     )
 
-    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.partitions).toList)
+    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
 
     val timeUuidGenerator = new LocalTimeUUIDGenerator
 
