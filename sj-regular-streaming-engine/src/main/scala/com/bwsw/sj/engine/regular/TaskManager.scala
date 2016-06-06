@@ -11,6 +11,7 @@ import com.bwsw.sj.common.DAL.ConnectionConstants._
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.ModuleConstants._
+import com.bwsw.sj.common.StreamConstants
 import com.bwsw.tstreams.agents.consumer.Offsets.{IOffset, Newest}
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions, ConsumerCoordinationSettings}
@@ -136,8 +137,8 @@ class TaskManager() {
 
   /**
    * Returns file contains uploaded module jar
-    *
-    * @return Local file contains uploaded module jar
+   *
+   * @return Local file contains uploaded module jar
    */
   def getModuleJar: File = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '$moduleName' module jar\n")
@@ -146,8 +147,8 @@ class TaskManager() {
 
   /**
    * Returns instance metadata to launch a module
-    *
-    * @return An instance metadata to launch a module
+   *
+   * @return An instance metadata to launch a module
    */
   def getInstanceMetadata = {
     logger.info(s"Instance name: $instanceName, task name: $taskName. Get instance metadata\n")
@@ -156,8 +157,8 @@ class TaskManager() {
 
   /**
    * Returns an absolute path to executor class of module
-    *
-    * @return An absolute path to executor class of module
+   *
+   * @return An absolute path to executor class of module
    */
   def getExecutorClass = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Get an absolute path to executor class of module\n")
@@ -166,8 +167,8 @@ class TaskManager() {
 
   /**
    * Returns tags for each output stream
-    *
-    * @return
+   *
+   * @return
    */
   def getOutputTags = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Get tags for each output stream\n")
@@ -178,8 +179,8 @@ class TaskManager() {
    * Creates a kafka consumer for all input streams of kafka type.
    * If there was a checkpoint with offsets of last consumed messages for each topic/partition
    * then consumer will fetch from this offsets otherwise in accordance with offset parameter
-    *
-    * @param topics Set of kafka topic names and range of partitions relatively
+   *
+   * @param topics Set of kafka topic names and range of partitions relatively
    * @param hosts Addresses of kafka brokers in host:port format
    * @param offset Default policy for kafka consumer (earliest/latest)
    * @return Kafka consumer subscribed to topics
@@ -197,7 +198,7 @@ class TaskManager() {
       zkHosts,
       7000
     )
-    tempCounter +=1 //todo адрес консумера
+    tempCounter += 1 //todo адрес консумера
 
     val props = new Properties()
     props.put("bootstrap.servers", hosts.mkString(","))
@@ -245,8 +246,8 @@ class TaskManager() {
   /**
    * Returns T-stream producer responsible for committing the offsets of last messages
    * that has successfully processed for each topic for each partition
-    *
-    * @return T-stream producer responsible for committing the offsets of last messages
+   *
+   * @return T-stream producer responsible for committing the offsets of last messages
    *         that has successfully processed for each topic for each partition
    */
   def createOffsetProducer() = {
@@ -294,8 +295,8 @@ class TaskManager() {
 
   /**
    * Creates a t-stream consumer with pub/sub property
-    *
-    * @param stream SjStream from which massages are consumed
+   *
+   * @param stream SjStream from which massages are consumed
    * @param partitions Range of stream partition
    * @param offset Offset policy that describes where a consumer starts
    * @param queue Queue which keeps consumed messages
@@ -357,8 +358,8 @@ class TaskManager() {
 
   /**
    * Creates an ordinary t-stream consumer
-    *
-    * @param stream SjStream from which massages are consumed
+   *
+   * @param stream SjStream from which massages are consumed
    * @param partitions Range of stream partition
    * @param offset Offset policy that describes where a consumer starts
    * @return Basic t-stream consumer
@@ -403,8 +404,8 @@ class TaskManager() {
 
   /**
    * Creates a t-stream producer for recording messages
-    *
-    * @param stream SjStream to which messages are written
+   *
+   * @param stream SjStream to which messages are written
    * @return Basic t-stream producer
    */
   def createProducer(stream: SjStream) = {
@@ -460,8 +461,8 @@ class TaskManager() {
 
   /**
    * Creates t-stream to keep a module state or loads an existing t-stream
-    *
-    * @return SjStream used for keeping a module state
+   *
+   * @return SjStream used for keeping a module state
    */
   def getStateStream = {
     var stream: BasicStream[Array[Byte]] = null
@@ -484,6 +485,14 @@ class TaskManager() {
       )
     }
 
-    new TStreamSjStream(stream.getName, stream.getDescriptions, stream.getPartitions, new Generator("local"))
+    new TStreamSjStream(
+      stream.getName,
+      stream.getDescriptions,
+      stream.getPartitions,
+      service,
+      StreamConstants.tStream,
+      Array("state"),
+      new Generator("local")
+    )
   }
 }
