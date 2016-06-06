@@ -14,9 +14,9 @@ import com.bwsw.sj.common.ModuleConstants._
 import com.bwsw.sj.common.StreamConstants
 import com.bwsw.tstreams.agents.consumer.Offsets.{IOffset, Newest}
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
-import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions, ConsumerCoordinationSettings}
+import com.bwsw.tstreams.agents.consumer.{SubscriberCoordinationOptions, BasicConsumer, BasicConsumerOptions}
 import com.bwsw.tstreams.agents.producer.InsertionType.{BatchInsert, SingleElementInsert}
-import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions, ProducerCoordinationSettings}
+import com.bwsw.tstreams.agents.producer.{ProducerCoordinationOptions, BasicProducer, BasicProducerOptions}
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
 import com.bwsw.tstreams.data.IStorage
@@ -47,11 +47,13 @@ class TaskManager() {
   private val moduleName = System.getenv("MODULE_NAME")
   private val moduleVersion = System.getenv("MODULE_VERSION")
   private val instanceName = System.getenv("INSTANCE_NAME")
+  private val agentsHost = System.getenv("AGENTS_HOST")
+  private val agentsPorts = System.getenv("AGENTS_PORTS").split(",")
   val taskName = System.getenv("TASK_NAME")
   var kafkaOffsetsStorage = mutable.Map[(String, Int), Long]()
   private val kafkaOffsetsStream = taskName + "_kafka_offsets"
   private val stateStream = taskName + "_state"
-  private var tempCounter = 8000
+  private var currentPortNumber = 0
   private val instanceMetadata = ConnectionRepository.getInstanceService.get(instanceName)
   private val storage = ConnectionRepository.getFileStorage
 
@@ -192,14 +194,6 @@ class TaskManager() {
     val objectSerializer = new ObjectSerializer()
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
 
-    val coordinatorSettings = new ConsumerCoordinationSettings(
-      "localhost:" + tempCounter.toString,
-      service.lockNamespace,
-      zkHosts,
-      7000
-    )
-    tempCounter += 1 //todo адрес консумера
-
     val props = new Properties()
     props.put("bootstrap.servers", hosts.mkString(","))
     props.put("enable.auto.commit", "false")
@@ -225,7 +219,6 @@ class TaskManager() {
         consumerKeepAliveInterval = 5,
         converter,
         roundRobinPolicy,
-        coordinatorSettings,
         Newest,
         timeUuidGenerator,
         useLastOffset = true)
@@ -255,15 +248,15 @@ class TaskManager() {
     var stream: BasicStream[Array[Byte]] = null
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
 
-    val coordinatorSettings = new ProducerCoordinationSettings(
-      agentAddress = s"localhost:" + tempCounter.toString,
+    val coordinationOptions = new ProducerCoordinationOptions(
+      agentAddress = agentsHost + ":" + agentsPorts(currentPortNumber),
       zkHosts,
       service.lockNamespace,
       zkTimeout = 7000,
       isLowPriorityToBeMaster = false,
       transport = new TcpTransport,
       transportTimeout = 5)
-    tempCounter += 1 //todo
+    currentPortNumber += 1
 
     if (BasicStreamService.isExist(kafkaOffsetsStream, metadataStorage)) {
       logger.debug(s"Instance name: $instanceName, task name: $taskName. Load t-stream: $kafkaOffsetsStream for kafka offsets\n")
@@ -287,7 +280,7 @@ class TaskManager() {
       new RoundRobinPolicy(stream, (0 to 0).toList),
       SingleElementInsert,
       new LocalTimeUUIDGenerator,
-      coordinatorSettings,
+      coordinationOptions,
       converter)
 
     new BasicProducer[Array[Byte], Array[Byte]](stream.name, stream, options)
@@ -307,13 +300,13 @@ class TaskManager() {
       s"Create subscribing consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
 
-    val coordinatorSettings = new ConsumerCoordinationSettings(
-      "localhost:" + tempCounter.toString,
+    val coordinatorSettings = new SubscriberCoordinationOptions(
+      agentsHost + ":" + agentsPorts(currentPortNumber),
       service.lockNamespace,
       zkHosts,
       7000
     )
-    tempCounter += 1 //todo адрес консумера
+    currentPortNumber += 1
 
     val basicStream: BasicStream[Array[Byte]] =
       BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
@@ -339,10 +332,8 @@ class TaskManager() {
       consumerKeepAliveInterval = 5,
       converter,
       roundRobinPolicy,
-      coordinatorSettings,
       offset,
       timeUuidGenerator,
-
       useLastOffset = true)
 
     val callback = new QueueConsumerCallback[Array[Byte], Array[Byte]](queue)
@@ -351,6 +342,7 @@ class TaskManager() {
       "consumer for " + taskName + "_" + stream.name,
       basicStream,
       options,
+      coordinatorSettings,
       callback,
       persistentQueuePath
     )
@@ -369,14 +361,6 @@ class TaskManager() {
       s"Create basic consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
 
-    val coordinatorSettings = new ConsumerCoordinationSettings(
-      "localhost:" + tempCounter.toString,
-      service.lockNamespace,
-      zkHosts,
-      7000
-    )
-    tempCounter += 1 //todo
-
     val basicStream: BasicStream[Array[Byte]] =
       BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
 
@@ -390,7 +374,6 @@ class TaskManager() {
       consumerKeepAliveInterval = 5,
       converter,
       roundRobinPolicy,
-      coordinatorSettings,
       offset,
       timeUuidGenerator,
       useLastOffset = true)
@@ -413,15 +396,16 @@ class TaskManager() {
       s"Create basic producer for stream: ${stream.name}\n")
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
 
-    val coordinatorSettings = new ProducerCoordinationSettings(
-      agentAddress = s"localhost:" + tempCounter.toString,
+
+    val coordinationOptions = new ProducerCoordinationOptions(
+      agentAddress = agentsHost + ":" + agentsPorts(currentPortNumber),
       zkHosts,
       service.lockNamespace,
       zkTimeout = 7000,
       isLowPriorityToBeMaster = false,
       transport = new TcpTransport,
       transportTimeout = 5)
-    tempCounter += 1 //todo
+    currentPortNumber += 1
 
     val basicStream: BasicStream[Array[Byte]] =
       BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
@@ -448,7 +432,7 @@ class TaskManager() {
       roundRobinPolicy,
       BatchInsert(5),
       timeUuidGenerator,
-      coordinatorSettings,
+      coordinationOptions,
       converter)
 
     new BasicProducer[Array[Byte], Array[Byte]](
