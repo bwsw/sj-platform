@@ -22,14 +22,6 @@ assemblyMergeStrategy in assembly := {
   case PathList("org", "apache", "log4j", xs@_*) => MergeStrategy.first
   case "library.properties" => MergeStrategy.concat
   case "log4j.properties" => MergeStrategy.concat
-//  case PathList("com", "google", "guava", xs@_*) => MergeStrategy.last
-//  case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.first
-//  case PathList("com", "fasterxml", "jackson", xs@_*) => MergeStrategy.first
-//  case PathList("com", "thoughtworks", xs@_*) => MergeStrategy.first
-//  case PathList("org", "apache", "commons", xs@_*) => MergeStrategy.first
-//  case PathList("org", "apache", "log4j", xs@_*) => MergeStrategy.first
-//  case PathList("org", "apache", "hadoop", xs@_*) => MergeStrategy.first
-//  case PathList("io", "netty", xs@_*) => MergeStrategy.first
   case x =>
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
