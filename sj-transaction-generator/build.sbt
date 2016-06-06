@@ -12,7 +12,7 @@ libraryDependencies ++= Seq(
 //  "org.scalatest" % "scalatest_2.11" % "3.0.0-M15",
 )
 
-//resolvers += "Twitter Repository" at "http://maven.twttr.com"
+resolvers += "Twitter Repository" at "http://maven.twttr.com"
 
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.first
