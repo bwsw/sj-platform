@@ -60,9 +60,9 @@ object RegularTaskRunner {
     var consumersWithSubscribes: Option[Map[String, BasicSubscribingConsumer[Array[Byte], Array[Byte]]]] = None
     var offsetProducer: Option[BasicProducer[Array[Byte], Array[Byte]]] = None
 
-    if (inputs.exists(x => x._1.streamType == StreamConstants.streamTypes.head)) {
+    if (inputs.exists(x => x._1.streamType == StreamConstants.tStream)) {
       logger.debug(s"Task: ${manager.taskName}. Start creating subscribing consumers\n")
-      consumersWithSubscribes = Some(inputs.filter(x => x._1.streamType == StreamConstants.streamTypes.head).map({
+      consumersWithSubscribes = Some(inputs.filter(x => x._1.streamType == StreamConstants.tStream).map({
         x => manager.createSubscribingConsumer(x._1, x._2.toList, chooseOffset(regularInstanceMetadata.startFrom), blockingQueue)
       }).map(x => (x.name, x)).toMap)
       logger.debug(s"Task: ${manager.taskName}. Creation of subscribing consumers is finished\n")
@@ -75,8 +75,8 @@ object RegularTaskRunner {
       logger.debug(s"Task: ${manager.taskName}. Subscribing consumers are launched\n")
     }
 
-    if (inputs.exists(x => x._1.streamType == StreamConstants.streamTypes.last)) {
-      val kafkaInputs = inputs.filter(x => x._1.streamType == StreamConstants.streamTypes.last)
+    if (inputs.exists(x => x._1.streamType == StreamConstants.kafka)) {
+      val kafkaInputs = inputs.filter(x => x._1.streamType == StreamConstants.kafka)
       logger.debug(s"Task: ${manager.taskName}. Start creating kafka consumers\n")
       val kafkaConsumer = manager.createKafkaConsumer(
         kafkaInputs.map(x => (x._1.name, x._2.toList)).toList,
@@ -224,13 +224,13 @@ object RegularTaskRunner {
                 val envelope = serializer.deserialize[Envelope](maybeEnvelope)
 
                 envelope.streamType match {
-                  case "t-stream" =>
+                  case StreamConstants.tStream =>
                     logger.info(s"Task: ${manager.taskName}. T-stream envelope is received\n")
                     val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
                     logger.debug(s"Task: ${manager.taskName}. " +
                       s"Change local offset of consumer: ${tStreamEnvelope.consumerName} to txn: ${tStreamEnvelope.txnUUID}\n")
                     consumers.get(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
-                  case "kafka-stream" =>
+                  case StreamConstants.kafka =>
                     logger.info(s"Task: ${manager.taskName}. Kafka envelope is received\n")
                     val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
                     logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${kafkaEnvelope.stream} " +
@@ -285,13 +285,13 @@ object RegularTaskRunner {
                 logger.debug(s"Task: ${manager.taskName}. Increase count of envelopes to: $countOfEnvelopes\n")
 
                 envelope.streamType match {
-                  case "t-stream" =>
+                  case StreamConstants.tStream =>
                     logger.info(s"Task: ${manager.taskName}. T-stream envelope is received\n")
                     val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
                     logger.debug(s"Task: ${manager.taskName}. " +
                       s"Change local offset of consumer: ${tStreamEnvelope.consumerName} to txn: ${tStreamEnvelope.txnUUID}\n")
                     consumers.get(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
-                  case "kafka-stream" =>
+                  case StreamConstants.kafka =>
                     logger.info(s"Task: ${manager.taskName}. Kafka envelope is received\n")
                     val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
                     logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${kafkaEnvelope.stream} " +
@@ -382,13 +382,13 @@ object RegularTaskRunner {
                 val envelope = serializer.deserialize[Envelope](maybeEnvelope)
 
                 envelope.streamType match {
-                  case "t-stream" =>
+                  case StreamConstants.tStream =>
                     logger.info(s"Task: ${manager.taskName}. T-stream envelope is received\n")
                     val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
                     logger.debug(s"Task: ${manager.taskName}. " +
                       s"Change local offset of consumer: ${tStreamEnvelope.consumerName} to txn: ${tStreamEnvelope.txnUUID}\n")
                     consumers.get(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
-                  case "kafka-stream" =>
+                  case StreamConstants.kafka =>
                     logger.info(s"Task: ${manager.taskName}. Kafka envelope is received\n")
                     val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
                     logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${kafkaEnvelope.stream} " +
@@ -465,13 +465,13 @@ object RegularTaskRunner {
                 logger.debug(s"Task: ${manager.taskName}. Increase count of envelopes to: $countOfEnvelopes\n")
 
                 envelope.streamType match {
-                  case "t-stream" =>
+                  case StreamConstants.tStream =>
                     logger.info(s"Task: ${manager.taskName}. T-stream envelope is received\n")
                     val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
                     logger.debug(s"Task: ${manager.taskName}. " +
                       s"Change local offset of consumer: ${tStreamEnvelope.consumerName} to txn: ${tStreamEnvelope.txnUUID}\n")
                     consumers.get(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
-                  case "kafka-stream" =>
+                  case StreamConstants.kafka =>
                     logger.info(s"Task: ${manager.taskName}. Kafka envelope is received\n")
                     val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
                     logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${kafkaEnvelope.stream} " +

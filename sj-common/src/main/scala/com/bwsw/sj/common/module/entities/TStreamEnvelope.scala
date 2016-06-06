@@ -2,6 +2,7 @@ package com.bwsw.sj.common.module.entities
 
 import java.util.UUID
 
+import com.bwsw.sj.common.StreamConstants
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
 
@@ -12,8 +13,8 @@ import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "streamType")
 @JsonSubTypes(Array(
-  new Type(value = classOf[TStreamEnvelope], name = "t-stream"),
-  new Type(value = classOf[KafkaEnvelope], name = "kafka-stream")
+  new Type(value = classOf[TStreamEnvelope], name = StreamConstants.tStream),
+  new Type(value = classOf[KafkaEnvelope], name = StreamConstants.kafka)
 ))
 class Envelope() {
   var streamType: String = null
@@ -32,7 +33,7 @@ class TStreamEnvelope() extends Envelope() {
   var txnUUID: UUID = null
   var consumerName: String = null
   var data: List[Array[Byte]] = null
-  streamType = "t-stream"
+  streamType = StreamConstants.tStream
 }
 
 /**
@@ -41,6 +42,6 @@ class TStreamEnvelope() extends Envelope() {
 class KafkaEnvelope() extends Envelope() {
   var data: Array[Byte] = null
   var offset: Long = 0
-  streamType = "kafka-stream"
+  streamType = StreamConstants.kafka
 
 }

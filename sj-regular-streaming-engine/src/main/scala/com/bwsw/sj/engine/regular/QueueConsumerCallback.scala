@@ -26,9 +26,9 @@ class QueueConsumerCallback[DATATYPE, USERTYPE](blockingQueue: PersistentBlockin
   private val serializer = new JsonSerializer()
 
   /**
-   * How much times onEvent handler is invoked
+   * Interval between checking new updates in stream/partition in ms
    */
-  override val pollingFrequency: Int = 1
+  override val pollingFrequency: Int = 10
 
   override def onEvent(subscriber: BasicSubscribingConsumer[DATATYPE, USERTYPE], partition: Int, transactionUuid: UUID): Unit = {
     logger.debug(s"onEvent handler was invoked by subscriber: ${subscriber.name}\n")
