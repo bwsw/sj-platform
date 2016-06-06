@@ -4,7 +4,6 @@ import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.engine.regular.module.DataFactory._
 import com.bwsw.sj.engine.regular.utils.StateHelper
-import com.bwsw.sj.engine.regular.utils.StateHelper
 import com.bwsw.tstreams.agents.consumer.BasicConsumer
 
 object ModuleStatefulTstreamChecker extends App {
@@ -64,8 +63,6 @@ object ModuleStatefulTstreamChecker extends App {
 
   close()
   ConnectionRepository.close()
-  inputTstreamConsumers.foreach(_.stop())
-  outputConsumers.foreach(_.stop())
 
   println("DONE")
 }

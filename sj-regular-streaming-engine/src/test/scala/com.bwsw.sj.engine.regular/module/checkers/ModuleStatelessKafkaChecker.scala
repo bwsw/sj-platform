@@ -50,7 +50,6 @@ object ModuleStatelessKafkaChecker extends App {
 
   close()
   ConnectionRepository.close()
-  outputConsumers.foreach(_.stop())
 
   println("DONE")
 }

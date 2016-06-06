@@ -28,7 +28,7 @@ class QueueConsumerCallback[DATATYPE, USERTYPE](blockingQueue: PersistentBlockin
   /**
    * How much times onEvent handler is invoked
    */
-  override val frequency: Int = 1
+  override val pollingFrequency: Int = 1
 
   override def onEvent(subscriber: BasicSubscribingConsumer[DATATYPE, USERTYPE], partition: Int, transactionUuid: UUID): Unit = {
     logger.debug(s"onEvent handler was invoked by subscriber: ${subscriber.name}\n")

@@ -13,9 +13,9 @@ import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, Instance, RegularInst
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.engine.regular.utils.CassandraHelper._
 import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
-import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions, ConsumerCoordinationSettings}
+import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions}
 import com.bwsw.tstreams.agents.producer.InsertionType.BatchInsert
-import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions, ProducerCoordinationSettings, ProducerPolicies}
+import com.bwsw.tstreams.agents.producer._
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStorageOptions}
@@ -383,13 +383,6 @@ object DataFactory {
     val name = instanceName + "-task0" + "_state"
     val partitions = 1
 
-    val coordinationSettings = new ConsumerCoordinationSettings(
-      "localhost:8050",
-      "/unit",
-      List(new InetSocketAddress("localhost", 2181)),
-      7000
-    )
-
     val basicStream: BasicStream[Array[Byte]] =
       BasicStreamService.loadStream(name, metadataStorage, aerospikeStorageFactory.getInstance(aerospikeOptions))
 
@@ -403,7 +396,6 @@ object DataFactory {
       consumerKeepAliveInterval = 5,
       converter,
       roundRobinPolicy,
-      coordinationSettings,
       Oldest,
       timeUuidGenerator,
       useLastOffset = true)
@@ -440,7 +432,7 @@ object DataFactory {
     val basicStream: BasicStream[Array[Byte]] =
       BasicStreamService.loadStream(stream.name, metadataStorage, aerospikeStorageFactory.getInstance(aerospikeOptions))
 
-    val coordinationSettings = new ProducerCoordinationSettings(
+    val coordinationSettings = new ProducerCoordinationOptions(
       agentAddress = s"localhost:8030",
       zkHosts = List(new InetSocketAddress("localhost", 2181)),
       zkRootPath = "/unit",
@@ -472,13 +464,6 @@ object DataFactory {
     val basicStream: BasicStream[Array[Byte]] =
       BasicStreamService.loadStream(stream.name, metadataStorage, aerospikeStorageFactory.getInstance(aerospikeOptions))
 
-    val coordinationSettings = new ConsumerCoordinationSettings(
-      address,
-      "/unit",
-      List(new InetSocketAddress("localhost", 2181)),
-      7000
-    )
-
     val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
 
     val timeUuidGenerator = new LocalTimeUUIDGenerator
@@ -489,7 +474,6 @@ object DataFactory {
       consumerKeepAliveInterval = 5,
       converter,
       roundRobinPolicy,
-      coordinationSettings,
       Oldest,
       timeUuidGenerator,
       useLastOffset = true)
