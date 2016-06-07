@@ -284,6 +284,7 @@ object DataFactory {
     instance.startFrom = "oldest"
     instance.perTaskCores = 0
     instance.perTaskRam = 0
+    instance.performanceReportingInterval = 10000
     instance.executionPlan = new ExecutionPlan(Map((instanceName + "-task0", task)).asJava)
 
     instance.eventWaitTime = 10

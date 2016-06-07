@@ -71,4 +71,9 @@ trait IStateService {
    * Saves a state
    */
   def fullCheckpoint()
+
+  /*
+  todo
+   */
+  def getNumberOfVariables: Int
 }

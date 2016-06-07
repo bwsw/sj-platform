@@ -43,11 +43,8 @@ import scala.collection.mutable
 class TaskManager() {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val moduleType = System.getenv("MODULE_TYPE")
-  private val moduleName = System.getenv("MODULE_NAME")
-  private val moduleVersion = System.getenv("MODULE_VERSION")
   private val instanceName = System.getenv("INSTANCE_NAME")
-  private val agentsHost = System.getenv("AGENTS_HOST")
+  val agentsHost = System.getenv("AGENTS_HOST")
   private val agentsPorts = System.getenv("AGENTS_PORTS").split(",")
   val taskName = System.getenv("TASK_NAME")
   var kafkaOffsetsStorage = mutable.Map[(String, Int), Long]()
@@ -57,9 +54,11 @@ class TaskManager() {
   private val instanceMetadata = ConnectionRepository.getInstanceService.get(instanceName)
   private val storage = ConnectionRepository.getFileStorage
 
-  private val fileMetadata: FileMetadata = ConnectionRepository.getFileMetadataService.getByParameters(Map("specification.name" -> moduleName,
-    "specification.module-type" -> moduleType,
-    "specification.version" -> moduleVersion)).head
+  private val fileMetadata: FileMetadata = ConnectionRepository.getFileMetadataService.getByParameters(
+    Map("specification.name" -> instanceMetadata.moduleName,
+    "specification.module-type" -> instanceMetadata.moduleType,
+    "specification.version" -> instanceMetadata.moduleVersion)
+  ).head
 
   /**
    * Converter to convert usertype->storagetype; storagetype->usertype
@@ -143,8 +142,8 @@ class TaskManager() {
    * @return Local file contains uploaded module jar
    */
   def getModuleJar: File = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '$moduleName' module jar\n")
-    storage.get(fileMetadata.filename, s"tmp/$moduleName")
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '${instanceMetadata.moduleName}' module jar\n")
+    storage.get(fileMetadata.filename, s"tmp/${instanceMetadata.moduleName}")
   }
 
   /**
