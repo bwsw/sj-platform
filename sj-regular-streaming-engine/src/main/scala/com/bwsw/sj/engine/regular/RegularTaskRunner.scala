@@ -254,7 +254,7 @@ object RegularTaskRunner {
                     consumers.get(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
                     performanceMetrics.addEnvelopeToInputStream(
                       tStreamEnvelope.stream,
-                      tStreamEnvelope.data.map(_.length * 4)
+                      tStreamEnvelope.data.map(_.length)
                     )
                   case StreamConstants.kafka =>
                     logger.info(s"Task: ${manager.taskName}. Kafka envelope is received\n")
@@ -264,7 +264,7 @@ object RegularTaskRunner {
                     manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
                     performanceMetrics.addEnvelopeToInputStream(
                       kafkaEnvelope.stream,
-                      List(kafkaEnvelope.data.length * 4)
+                      List(kafkaEnvelope.data.length)
                     )
                 }
 
@@ -325,7 +325,7 @@ object RegularTaskRunner {
                     consumers.get(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
                     performanceMetrics.addEnvelopeToInputStream(
                       tStreamEnvelope.stream,
-                      tStreamEnvelope.data.map(_.length * 4)
+                      tStreamEnvelope.data.map(_.length)
                     )
                   case StreamConstants.kafka =>
                     logger.info(s"Task: ${manager.taskName}. Kafka envelope is received\n")
@@ -335,7 +335,7 @@ object RegularTaskRunner {
                     manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
                     performanceMetrics.addEnvelopeToInputStream(
                       kafkaEnvelope.stream,
-                      List(kafkaEnvelope.data.length * 4)
+                      List(kafkaEnvelope.data.length)
                     )
                 }
 
@@ -481,10 +481,6 @@ object RegularTaskRunner {
                   checkpointGroup.commit()
                   logger.info(s"Set a number of state variables to ${stateService.getNumberOfVariables}\n")
                   performanceMetrics.setNumberOfStateVariables(stateService.getNumberOfVariables)
-                  outputTags.performanceMetrics.addEnvelopeToInputStream(
-                    kafkaEnvelope.stream,
-                    List(kafkaEnvelope.data.length)
-                  )
                   outputTags.clear()
                   logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
                   executor.onAfterCheckpoint()
