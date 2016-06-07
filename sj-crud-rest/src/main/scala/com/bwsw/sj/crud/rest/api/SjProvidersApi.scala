@@ -6,6 +6,7 @@ import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.common.exceptions.{BadRecordWithKey, NotFoundException}
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.crud.rest.entities._
+import com.bwsw.sj.crud.rest.utils.ConvertUtil.providerToProviderData
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.provider.ProviderValidator
 
@@ -33,8 +34,8 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
               data.password,
               data.providerType
             )
-            val providerName = saveProvider(provider)
-            val response = ProtocolResponse(200, Map("message" -> s"Provider '$providerName' is created"))
+            providerDAO.save(provider)
+            val response = ProtocolResponse(200, Map("message" -> s"Provider '${provider.name}' is created"))
             ctx.complete(HttpEntity(`application/json`, serializer.serialize(response)))
           } else {
             throw new BadRecordWithKey(
@@ -99,35 +100,4 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
       }
     }
   }
-
-  /**
-    * Save provider to db
-    *
-    * @param provider - provider entity
-    * @return - name of saved entity
-    */
-  def saveProvider(provider: Provider) = {
-    providerDAO.save(provider)
-    provider.name
-  }
-
-
-  /**
-    * Convert provider entity to provider data entity
-    *
-    * @param provider - provider entity
-    * @return - provider data entity
-    */
-  def providerToProviderData(provider: Provider) = {
-    val providerData = new ProviderData(
-      provider.name,
-      provider.description,
-      provider.login,
-      provider.password,
-      provider.providerType,
-      provider.hosts
-    )
-    providerData
-  }
-
 }

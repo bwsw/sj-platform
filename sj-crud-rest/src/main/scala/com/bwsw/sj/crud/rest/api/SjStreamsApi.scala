@@ -7,6 +7,7 @@ import com.bwsw.common.exceptions.BadRecordWithKey
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.crud.rest.entities._
+import com.bwsw.sj.crud.rest.utils.ConvertUtil.streamToStreamData
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.stream.StreamValidator
 
@@ -40,8 +41,8 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
           }
           val errors = StreamValidator.validate(data, stream)
           if (errors.isEmpty) {
-            val nameStream = saveStream(stream)
-            val response = ProtocolResponse(200, Map("message" -> s"Stream '$nameStream' is created"))
+            streamDAO.save(stream)
+            val response = ProtocolResponse(200, Map("message" -> s"Stream '${stream.name}' is created"))
             ctx.complete(HttpEntity(`application/json`, serializer.serialize(response)))
           } else {
             throw new BadRecordWithKey(
@@ -79,52 +80,5 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
         }
       }
     }
-  }
-
-  /**
-    * Represent SjStream object as SjStreamData object
-    *
-    * @param stream - SjStream object
-    * @return - SjStreamData object
-    */
-  def streamToStreamData(stream: SjStream) = {
-    var streamData: SjStreamData = null
-    stream match {
-      case s: TStreamSjStream =>
-        streamData = new TStreamSjStreamData
-        val generatorType = stream.asInstanceOf[TStreamSjStream].generator.generatorType
-        val generator = new GeneratorData(
-          generatorType,
-          if (generatorType != "local") stream.asInstanceOf[TStreamSjStream].generator.service.name else null,
-          if (generatorType != "local") stream.asInstanceOf[TStreamSjStream].generator.instanceCount else 0
-        )
-        streamData.asInstanceOf[TStreamSjStreamData].partitions = stream.asInstanceOf[TStreamSjStream].partitions
-        streamData.asInstanceOf[TStreamSjStreamData].generator = generator
-      case s: KafkaSjStream =>
-        streamData = new KafkaSjStreamData
-        streamData.asInstanceOf[KafkaSjStreamData].partitions = stream.asInstanceOf[KafkaSjStream].partitions
-        streamData.asInstanceOf[KafkaSjStreamData].replicationFactor = stream.asInstanceOf[KafkaSjStream].replicationFactor
-      case s: ESSjStream =>
-        streamData = new ESSjStreamData
-      case s: JDBCSjStream =>
-        streamData = new JDBCSjStreamData
-    }
-    streamData.name = stream.name
-    streamData.description = stream.description
-    streamData.service = stream.service.name
-    streamData.streamType = stream.streamType
-    streamData.tags = stream.tags
-    streamData
-  }
-
-  /**
-    * Save stream to db
-    *
-    * @param stream - stream entity
-    * @return - name of saved entity
-    */
-  def saveStream(stream: SjStream) = {
-    streamDAO.save(stream)
-    stream.name
   }
 }
