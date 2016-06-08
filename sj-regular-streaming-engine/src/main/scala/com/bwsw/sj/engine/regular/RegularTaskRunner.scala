@@ -227,7 +227,8 @@ object RegularTaskRunner {
             .map(ConnectionRepository.getStreamService.get)
             .filter(_.tags != null),
           outputTags,
-          moduleTimer
+          moduleTimer,
+          performanceMetrics
         )
 
         logger.debug(s"Task: ${manager.taskName}. Start loading of executor class from module jar\n")
@@ -295,7 +296,6 @@ object RegularTaskRunner {
                   }
                   logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
                   checkpointGroup.commit()
-                  outputTags.foreach(x => performanceMetrics.addEnvelopeToOutputStream(x._1, x._2._2.messagesSize))
                   outputTags.clear()
                   logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
                   executor.onAfterCheckpoint()
@@ -367,7 +367,6 @@ object RegularTaskRunner {
                   }
                   logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
                   checkpointGroup.commit()
-                  outputTags.foreach(x => performanceMetrics.addEnvelopeToOutputStream(x._1, x._2._2.messagesSize))
                   outputTags.clear()
                   logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
                   executor.onAfterCheckpoint()
@@ -406,7 +405,8 @@ object RegularTaskRunner {
             .map(ConnectionRepository.getStreamService.get)
             .filter(_.tags != null),
           outputTags,
-          moduleTimer
+          moduleTimer,
+          performanceMetrics
         )
 
         logger.debug(s"Task: ${manager.taskName}. Start loading of executor class from module jar\n")
@@ -496,7 +496,6 @@ object RegularTaskRunner {
                   checkpointGroup.commit()
                   logger.info(s"Set a number of state variables to ${stateService.getNumberOfVariables}\n")
                   performanceMetrics.setNumberOfStateVariables(stateService.getNumberOfVariables)
-                  outputTags.foreach(x => performanceMetrics.addEnvelopeToOutputStream(x._1, x._2._2.messagesSize))
                   outputTags.clear()
                   logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
                   executor.onAfterCheckpoint()
@@ -591,7 +590,6 @@ object RegularTaskRunner {
                   checkpointGroup.commit()
                   logger.info(s"Set a number of state variables to ${stateService.getNumberOfVariables}\n")
                   performanceMetrics.setNumberOfStateVariables(stateService.getNumberOfVariables)
-                  outputTags.foreach(x => performanceMetrics.addEnvelopeToOutputStream(x._1, x._2._2.messagesSize))
                   outputTags.clear()
                   logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
                   executor.onAfterCheckpoint()

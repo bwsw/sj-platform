@@ -1,6 +1,7 @@
 package com.bwsw.sj.common.module.environment
 
 import com.bwsw.sj.common.DAL.model.SjStream
+import com.bwsw.sj.common.module.PerformanceMetrics
 import com.bwsw.sj.common.module.state.StateStorage
 import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.tstreams.agents.producer.BasicProducer
@@ -23,7 +24,8 @@ class ModuleEnvironmentManager(val options: Map[String, Any],
                                producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]],
                                outputs: Array[SjStream],
                                outputTags: mutable.Map[String, (String, ModuleOutput)],
-                               moduleTimer: SjTimer) {
+                               moduleTimer: SjTimer,
+                               performanceMetrics: PerformanceMetrics) {
   protected val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
@@ -43,7 +45,7 @@ class ModuleEnvironmentManager(val options: Map[String, Any],
           throw new Exception(s"For output stream: $streamName partitioned output is set")
         }
       } else {
-        outputTags(streamName) = ("partitioned", new PartitionedOutput(producers(streamName)))
+        outputTags(streamName) = ("partitioned", new PartitionedOutput(producers(streamName), performanceMetrics))
 
         outputTags(streamName)._2.asInstanceOf[PartitionedOutput]
       }
@@ -70,7 +72,7 @@ class ModuleEnvironmentManager(val options: Map[String, Any],
           throw new Exception(s"For output stream: $streamName partitioned output is set")
         }
       } else {
-        outputTags(streamName) = ("round-robin", new RoundRobinOutput(producers(streamName)))
+        outputTags(streamName) = ("round-robin", new RoundRobinOutput(producers(streamName), performanceMetrics))
 
         outputTags(streamName)._2.asInstanceOf[RoundRobinOutput]
       }

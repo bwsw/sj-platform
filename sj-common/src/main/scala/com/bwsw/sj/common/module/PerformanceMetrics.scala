@@ -11,12 +11,13 @@ import java.util.concurrent.locks.ReentrantLock
 import com.bwsw.common.JsonSerializer
 import org.slf4j.LoggerFactory
 import scala.collection._
+
 class PerformanceMetrics(taskId: String, host: String, streamNames: Array[String]) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val mutex = new ReentrantLock(true)
   private val serializer = new JsonSerializer()
   private var inputEnvelopesPerStream = mutable.Map(streamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
-  private var outputEnvelopesPerStream = mutable.Map(streamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
+  private var outputEnvelopesPerStream = mutable.Map(streamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
   private var totalIdleTime = 0L
   private var numberOfStateVariables = 0
   private val startTime = System.currentTimeMillis()
@@ -61,18 +62,42 @@ class PerformanceMetrics(taskId: String, host: String, streamNames: Array[String
   }
 
   /**
-   * Invokes when a new envelope is sent to some output stream
+   * Invokes when a new txn is created for some output stream
    * @param name Stream name
+   * @param envelopeID Id of envelope of output stream
    * @param elementsSize Set of sizes of elements
    */
-  def addEnvelopeToOutputStream(name: String, elementsSize: List[Int]) = {
+  def addEnvelopeToOutputStream(name: String, envelopeID: String, elementsSize: mutable.ListBuffer[Int]) = {
     mutex.lock()
-    logger.debug(s"Indicate that a new envelope is received from output stream: $name\n")
+    logger.debug(s"Indicate that a new txn: $envelopeID is created for output stream: $name\n")
     if (outputEnvelopesPerStream.contains(name)) {
-      outputEnvelopesPerStream(name) += elementsSize
+      outputEnvelopesPerStream(name) += (envelopeID -> elementsSize)
     } else {
-      logger.error(s"Input stream with name: $name doesn't exist\n")
-      throw new Exception(s"Input stream with name: $name doesn't exist")
+      logger.error(s"Output stream with name: $name doesn't exist\n")
+      throw new Exception(s"Output stream with name: $name doesn't exist")
+    }
+    mutex.unlock()
+  }
+
+  /**
+   * Invokes when a new element is sent to txn of some output stream
+   * @param name Stream name
+   * @param envelopeID Id of envelope of output stream
+   * @param elementSize Size of appended element
+   */
+  def addElementToOutputEnvelope(name: String, envelopeID: String, elementSize: Int) = {
+    mutex.lock()
+    logger.debug(s"Indicate that a new element is sent to txn: $envelopeID of output stream: $name\n")
+    if (outputEnvelopesPerStream.contains(name)) {
+      if (outputEnvelopesPerStream(name).contains(envelopeID)) {
+        outputEnvelopesPerStream(name)(envelopeID) += elementSize
+      } else {
+        logger.error(s"Output stream with name: $name doesn't contain txn: $envelopeID\n")
+        throw new Exception(s"Output stream with name: $name doesn't contain txn: $envelopeID")
+      }
+    } else {
+      logger.error(s"Output stream with name: $name doesn't exist\n")
+      throw new Exception(s"Output stream with name: $name doesn't exist")
     }
     mutex.unlock()
   }
@@ -87,15 +112,22 @@ class PerformanceMetrics(taskId: String, host: String, streamNames: Array[String
     val numberOfInputEnvelopesPerStream = inputEnvelopesPerStream.map(x => (x._1, x._2.size))
     val numberOfOutputEnvelopesPerStream = outputEnvelopesPerStream.map(x => (x._1, x._2.size))
     val numberOfInputElementsPerStream = inputEnvelopesPerStream.map(x => (x._1, x._2.map(_.size).sum))
-    val numberOfOutputElementsPerStream = outputEnvelopesPerStream.map(x => (x._1, x._2.map(_.size).sum))
+    val numberOfOutputElementsPerStream = outputEnvelopesPerStream.map(x => (x._1, x._2.map(_._2.size).sum))
     val bytesOfInputEnvelopesPerStream = inputEnvelopesPerStream.map(x => (x._1, x._2.map(_.sum).sum))
-    val bytesOfOutputEnvelopesPerStream = outputEnvelopesPerStream.map(x => (x._1, x._2.map(_.sum).sum))
+    val bytesOfOutputEnvelopesPerStream = outputEnvelopesPerStream.map(x => (x._1, x._2.map(_._2.sum).sum))
     val inputEnvelopesTotalNumber = numberOfInputEnvelopesPerStream.values.sum
     val inputElementsTotalNumber = numberOfInputElementsPerStream.values.sum
     val outputEnvelopesTotalNumber = numberOfOutputEnvelopesPerStream.values.sum
     val outputElementsTotalNumber = numberOfOutputElementsPerStream.values.sum
     val inputEnvelopesSize = inputEnvelopesPerStream.flatMap(x => x._2.map(_.size))
-    val outputEnvelopesSize = outputEnvelopesPerStream.flatMap(x => x._2.map(_.size))
+    val outputEnvelopesSize = outputEnvelopesPerStream.flatMap(x => x._2.map(_._2.size))
+
+
+    logger.debug(s"Reset variables for performance report for next reporting\n")
+    inputEnvelopesPerStream = mutable.Map(streamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
+    outputEnvelopesPerStream = mutable.Map(streamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
+    totalIdleTime = 0L
+    numberOfStateVariables = 0
 
     val performanceReport =
     s"""{
@@ -128,11 +160,6 @@ class PerformanceMetrics(taskId: String, host: String, streamNames: Array[String
       }
     """.stripMargin
 
-    logger.debug(s"Reset variables for performance report for next reporting\n")
-    inputEnvelopesPerStream = mutable.Map(streamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
-    outputEnvelopesPerStream = mutable.Map(streamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
-    totalIdleTime = 0L
-    numberOfStateVariables = 0
 
     mutex.unlock()
 
