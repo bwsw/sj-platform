@@ -2,6 +2,7 @@ package com.bwsw.sj.engine.regular
 
 import java.net.URLClassLoader
 import java.util.Date
+import java.util.concurrent.Executors
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.KafkaService
@@ -9,7 +10,7 @@ import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.module.PerformanceMetrics
 import com.bwsw.sj.common.module.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
-import com.bwsw.sj.common.module.environment.{ModuleOutput, ModuleEnvironmentManager, StatefulModuleEnvironmentManager}
+import com.bwsw.sj.common.module.environment.{ModuleEnvironmentManager, ModuleOutput, StatefulModuleEnvironmentManager}
 import com.bwsw.sj.common.module.regular.RegularStreamingExecutor
 import com.bwsw.sj.common.module.state.{RAMStateService, StateStorage}
 import com.bwsw.sj.common.utils.SjTimer
@@ -17,7 +18,7 @@ import com.bwsw.sj.common.{ModuleConstants, StreamConstants}
 import com.bwsw.tstreams.agents.consumer.Offsets.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.group.CheckpointGroup
-import com.bwsw.tstreams.agents.producer.{BasicProducerTransaction, BasicProducer, ProducerPolicies}
+import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerTransaction, ProducerPolicies}
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
@@ -33,11 +34,17 @@ import scala.collection.mutable
 object RegularTaskRunner {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
+  private val executorService = Executors.newCachedThreadPool()
 
   def main(args: Array[String]) {
 
     val manager = new TaskManager()
     logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for regular module\n")
+
+    logger.debug(s"Task: ${manager.taskName}. Start creating a t-stream producer to record performance reports\n")
+    val reportStream = manager.getReportStream
+    val reportProducer = manager.createProducer(reportStream)
+    logger.debug(s"Task: ${manager.taskName}. Creation of t-stream producer is finished\n")
 
     val moduleJar = manager.getModuleJar
 
@@ -91,7 +98,7 @@ object RegularTaskRunner {
       logger.debug(s"Task: ${manager.taskName}. Creation of kafka consumers is finished\n")
 
       logger.debug(s"Task: ${manager.taskName}. Launch kafka consumers that put consumed message, which are wrapped in envelope, into common queue \n")
-      new Thread(new Runnable {
+      executorService.execute(new Runnable() {
         def run() = {
           val serializer = new JsonSerializer()
           val timeout = 5
@@ -114,7 +121,7 @@ object RegularTaskRunner {
             })
           }
         }
-      }).start()
+      })
 
       logger.debug(s"Task: ${manager.taskName}. Start creating a t-stream producer to record kafka offsets\n")
       val streamForOffsets = manager.getOffsetStream
@@ -143,11 +150,10 @@ object RegularTaskRunner {
       manager.agentsHost,
       inputs.map(_._1.name).toArray ++ regularInstanceMetadata.outputs
     )
+
     logger.debug(s"Task: ${manager.taskName}. Launch a new thread to report performance metrics \n")
-    new Thread(new Runnable {
+    executorService.execute(new Runnable() {
       def run() = {
-        val reportStream = manager.getReportStream
-        val reportProducer = manager.createProducer(reportStream)
         val taskNumber = manager.taskName.replace(s"${manager.instanceName}-task", "").toInt
         var report: String = null
         var reportTxn: BasicProducerTransaction[Array[Byte], Array[Byte]] = null
@@ -164,21 +170,30 @@ object RegularTaskRunner {
           reportProducer.checkpoint()
         }
       }
-    }).start()
+    })
 
     logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
-    runModule(moduleTimer,
-      regularInstanceMetadata,
-      blockingQueue,
-      outputTags,
-      classLoader,
-      executorClass,
-      producers,
-      consumersWithSubscribes,
-      manager,
-      offsetProducer,
-      checkpointGroup,
-      performanceMetrics)
+    try {
+      runModule(moduleTimer,
+        regularInstanceMetadata,
+        blockingQueue,
+        outputTags,
+        classLoader,
+        executorClass,
+        producers,
+        consumersWithSubscribes,
+        manager,
+        offsetProducer,
+        checkpointGroup,
+        performanceMetrics)
+    }
+    catch {
+      case exception: Exception => {
+        exception.printStackTrace()
+        executorService.shutdownNow()
+        System.exit(-1)
+      }
+    }
   }
 
   /**

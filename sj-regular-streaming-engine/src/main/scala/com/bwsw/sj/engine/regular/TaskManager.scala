@@ -56,6 +56,9 @@ class TaskManager() {
   private val instanceMetadata = ConnectionRepository.getInstanceService.get(instanceName)
   private val storage = ConnectionRepository.getFileStorage
 
+  assert(agentsPorts.length == (instanceMetadata.inputs.length + instanceMetadata.outputs.length + 3),
+    "Not enough ports for t-stream consumers/producers ")
+
   private val fileMetadata: FileMetadata = ConnectionRepository.getFileMetadataService.getByParameters(
     Map("specification.name" -> instanceMetadata.moduleName,
     "specification.module-type" -> instanceMetadata.moduleType,
