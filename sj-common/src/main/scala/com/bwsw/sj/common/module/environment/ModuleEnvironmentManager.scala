@@ -22,7 +22,7 @@ import scala.collection._
 class ModuleEnvironmentManager(val options: Map[String, Any],
                                producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]],
                                outputs: Array[SjStream],
-                               outputTags: mutable.Map[String, (String, Any)],
+                               outputTags: mutable.Map[String, (String, ModuleOutput)],
                                moduleTimer: SjTimer) {
   protected val logger = LoggerFactory.getLogger(this.getClass)
 

@@ -11,11 +11,12 @@ import com.bwsw.tstreams.agents.producer.{ProducerPolicies, BasicProducerTransac
  * @param producer Producer for specific output of stream
  */
 
-class RoundRobinOutput(producer: BasicProducer[Array[Byte], Array[Byte]]) {
+class RoundRobinOutput(producer: BasicProducer[Array[Byte], Array[Byte]]) extends ModuleOutput{
 
   private var txn: Option[BasicProducerTransaction[Array[Byte], Array[Byte]]] = None
 
-  def put(data: Array[Byte]) =
+  def put(data: Array[Byte]) = {
+    messagesSize = data.length :: messagesSize
     if (txn.isDefined) {
       txn.get.send(data)
     }
@@ -23,4 +24,5 @@ class RoundRobinOutput(producer: BasicProducer[Array[Byte], Array[Byte]]) {
       txn = Some(producer.newTransaction(ProducerPolicies.errorIfOpen))
       txn.get.send(data)
     }
+  }
 }

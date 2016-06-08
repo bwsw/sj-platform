@@ -12,11 +12,12 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.ModuleConstants._
 import com.bwsw.sj.common.StreamConstants
+import com.bwsw.sj.common.module.environment.ModuleOutput
 import com.bwsw.tstreams.agents.consumer.Offsets.{IOffset, Newest}
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
-import com.bwsw.tstreams.agents.consumer.{SubscriberCoordinationOptions, BasicConsumer, BasicConsumerOptions}
-import com.bwsw.tstreams.agents.producer.InsertionType.{BatchInsert, SingleElementInsert}
-import com.bwsw.tstreams.agents.producer.{ProducerCoordinationOptions, BasicProducer, BasicProducerOptions}
+import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions, SubscriberCoordinationOptions}
+import com.bwsw.tstreams.agents.producer.InsertionType.BatchInsert
+import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions, ProducerCoordinationOptions}
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
 import com.bwsw.tstreams.data.IStorage
@@ -43,13 +44,14 @@ import scala.collection.mutable
 class TaskManager() {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val instanceName = System.getenv("INSTANCE_NAME")
+  val instanceName = System.getenv("INSTANCE_NAME")
   val agentsHost = System.getenv("AGENTS_HOST")
   private val agentsPorts = System.getenv("AGENTS_PORTS").split(",")
   val taskName = System.getenv("TASK_NAME")
   var kafkaOffsetsStorage = mutable.Map[(String, Int), Long]()
   private val kafkaOffsetsStream = taskName + "_kafka_offsets"
   private val stateStream = taskName + "_state"
+  private val reportStream = instanceName + "_report"
   private var currentPortNumber = 0
   private val instanceMetadata = ConnectionRepository.getInstanceService.get(instanceName)
   private val storage = ConnectionRepository.getFileStorage
@@ -167,13 +169,13 @@ class TaskManager() {
   }
 
   /**
-   * Returns tags for each output stream
+   * Returns tags for each output stream. Stream name -> ((partitioned or round-robin tag) -> output)
    *
    * @return
    */
   def getOutputTags = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Get tags for each output stream\n")
-    mutable.Map[String, (String, Any)]()
+    mutable.Map[String, (String, ModuleOutput)]()
   }
 
   /**
@@ -233,56 +235,6 @@ class TaskManager() {
     }
 
     consumer
-  }
-
-  /**
-   * Returns T-stream producer responsible for committing the offsets of last messages
-   * that has successfully processed for each topic for each partition
-   *
-   * @return T-stream producer responsible for committing the offsets of last messages
-   *         that has successfully processed for each topic for each partition
-   */
-  def createOffsetProducer() = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. Create t-stream producer to write kafka offsets\n")
-    var stream: BasicStream[Array[Byte]] = null
-    val dataStorage: IStorage[Array[Byte]] = createDataStorage()
-
-    val coordinationOptions = new ProducerCoordinationOptions(
-      agentAddress = agentsHost + ":" + agentsPorts(currentPortNumber),
-      zkHosts,
-      service.lockNamespace,
-      zkTimeout = 7000,
-      isLowPriorityToBeMaster = false,
-      transport = new TcpTransport,
-      transportTimeout = 5)
-    currentPortNumber += 1
-
-    if (BasicStreamService.isExist(kafkaOffsetsStream, metadataStorage)) {
-      logger.debug(s"Instance name: $instanceName, task name: $taskName. Load t-stream: $kafkaOffsetsStream for kafka offsets\n")
-      stream = BasicStreamService.loadStream(kafkaOffsetsStream, metadataStorage, dataStorage)
-    } else {
-      logger.debug(s"Instance name: $instanceName, task name: $taskName. Create t-stream: $kafkaOffsetsStream for kafka offsets\n")
-      stream = BasicStreamService.createStream(
-        kafkaOffsetsStream,
-        1,
-        1000 * 60,
-        "stream to store kafka offsets of input streams",
-        metadataStorage,
-        dataStorage
-      )
-    }
-
-    val options = new BasicProducerOptions[Array[Byte], Array[Byte]](
-      transactionTTL = 6,
-      transactionKeepAliveInterval = 2,
-      producerKeepAliveInterval = 1,
-      new RoundRobinPolicy(stream, (0 to 0).toList),
-      SingleElementInsert,
-      new LocalTimeUUIDGenerator,
-      coordinationOptions,
-      converter)
-
-    new BasicProducer[Array[Byte], Array[Byte]](stream.name, stream, options)
   }
 
   /**
@@ -395,7 +347,6 @@ class TaskManager() {
       s"Create basic producer for stream: ${stream.name}\n")
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
 
-
     val coordinationOptions = new ProducerCoordinationOptions(
       agentAddress = agentsHost + ":" + agentsPorts(currentPortNumber),
       zkHosts,
@@ -448,21 +399,51 @@ class TaskManager() {
    * @return SjStream used for keeping a module state
    */
   def getStateStream = {
+    getTStream(stateStream, "store state of module", Array("state"), 1)
+  }
+
+  /**
+   * Creates t-stream or loads an existing t-stream responsible for committing the offsets of last messages
+   * that has successfully processed for each topic for each partition
+   *
+   * @return t-stream responsible for committing the offsets of last messages
+   *         that has successfully processed for each topic for each partition
+   */
+  def getOffsetStream = {
+    getTStream(kafkaOffsetsStream, "store kafka offsets of input streams", Array("offsets"), 1)
+  }
+
+  /**
+   * Creates t-stream or loads an existing t-stream to keep the reports of module performance.
+   * For each task there is specific partition (task number = partition number).
+   *
+   * @return SjStream used for keeping the reports of module performance
+   */
+  def getReportStream = {
+    getTStream(
+      reportStream,
+      "store reports of performance metrics",
+      Array("report", "performance"),
+      instanceMetadata.parallelism
+    )
+  }
+
+  private def getTStream(name: String, description: String, tags: Array[String], partitions: Int) = {
     var stream: BasicStream[Array[Byte]] = null
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
 
-    if (BasicStreamService.isExist(stateStream, metadataStorage)) {
+    if (BasicStreamService.isExist(name, metadataStorage)) {
       logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-        s"Load t-stream: $stateStream to store state of module\n")
-      stream = BasicStreamService.loadStream(stateStream, metadataStorage, dataStorage)
+        s"Load t-stream: $name to $description\n")
+      stream = BasicStreamService.loadStream(name, metadataStorage, dataStorage)
     } else {
       logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-        s"Create t-stream: $stateStream to store state of module\n")
+        s"Create t-stream: $name to $description\n")
       stream = BasicStreamService.createStream(
-        stateStream,
-        1,
+        name,
+        partitions,
         1000 * 60,
-        "stream to store state of module",
+        description,
         metadataStorage,
         dataStorage
       )
@@ -474,7 +455,7 @@ class TaskManager() {
       stream.getPartitions,
       service,
       StreamConstants.tStream,
-      Array("state"),
+      tags,
       new Generator("local")
     )
   }

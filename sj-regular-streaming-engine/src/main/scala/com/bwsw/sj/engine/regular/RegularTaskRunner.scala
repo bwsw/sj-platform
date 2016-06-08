@@ -9,7 +9,7 @@ import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.module.PerformanceMetrics
 import com.bwsw.sj.common.module.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
-import com.bwsw.sj.common.module.environment.{ModuleEnvironmentManager, StatefulModuleEnvironmentManager}
+import com.bwsw.sj.common.module.environment.{ModuleOutput, ModuleEnvironmentManager, StatefulModuleEnvironmentManager}
 import com.bwsw.sj.common.module.regular.RegularStreamingExecutor
 import com.bwsw.sj.common.module.state.{RAMStateService, StateStorage}
 import com.bwsw.sj.common.utils.SjTimer
@@ -17,7 +17,7 @@ import com.bwsw.sj.common.{ModuleConstants, StreamConstants}
 import com.bwsw.tstreams.agents.consumer.Offsets.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.group.CheckpointGroup
-import com.bwsw.tstreams.agents.producer.{BasicProducer, ProducerPolicies}
+import com.bwsw.tstreams.agents.producer.{BasicProducerTransaction, BasicProducer, ProducerPolicies}
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
@@ -117,7 +117,8 @@ object RegularTaskRunner {
       }).start()
 
       logger.debug(s"Task: ${manager.taskName}. Start creating a t-stream producer to record kafka offsets\n")
-      offsetProducer = Some(manager.createOffsetProducer())
+      val streamForOffsets = manager.getOffsetStream
+      offsetProducer = Some(manager.createProducer(streamForOffsets))
       logger.debug(s"Task: ${manager.taskName}. Creation of t-stream producer is finished\n")
       logger.debug(s"Task: ${manager.taskName}. Start adding the t-stream producer to checkpoint group\n")
       checkpointGroup.add(offsetProducer.get.name, offsetProducer.get)
@@ -145,10 +146,22 @@ object RegularTaskRunner {
     logger.debug(s"Task: ${manager.taskName}. Launch a new thread to report performance metrics \n")
     new Thread(new Runnable {
       def run() = {
+        val reportStream = manager.getReportStream
+        val reportProducer = manager.createProducer(reportStream)
+        val taskNumber = manager.taskName.replace(s"${manager.instanceName}-task", "").toInt
+        var report: String = null
+        var reportTxn: BasicProducerTransaction[Array[Byte], Array[Byte]] = null
         while (true) {
           logger.info(s"Task: ${manager.taskName}. Wait ${regularInstanceMetadata.performanceReportingInterval} to report performance metrics\n")
           Thread.sleep(regularInstanceMetadata.performanceReportingInterval)
-          logger.info(s"Task: ${manager.taskName}. Performance metrics: ${performanceMetrics.getReport} \n")
+          report = performanceMetrics.getReport
+          logger.info(s"Task: ${manager.taskName}. Performance metrics: $report \n")
+          logger.debug(s"Task: ${manager.taskName}. Create a new txn for sending performance metrics\n")
+          reportTxn = reportProducer.newTransaction(ProducerPolicies.errorIfOpen, taskNumber)
+          logger.debug(s"Task: ${manager.taskName}. Send performance metrics\n")
+          reportTxn.send(report.getBytes)
+          logger.debug(s"Task: ${manager.taskName}. Do checkpoint of producer for performance reporting\n")
+          reportProducer.checkpoint()
         }
       }
     }).start()
@@ -188,7 +201,7 @@ object RegularTaskRunner {
   private def runModule(moduleTimer: SjTimer,
                         regularInstanceMetadata: RegularInstance,
                         blockingQueue: PersistentBlockingQueue,
-                        outputTags: mutable.Map[String, (String, Any)],
+                        outputTags: mutable.Map[String, (String, ModuleOutput)],
                         classLoader: URLClassLoader,
                         pathToExecutor: String,
                         producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]],
@@ -282,6 +295,7 @@ object RegularTaskRunner {
                   }
                   logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
                   checkpointGroup.commit()
+                  outputTags.foreach(x => performanceMetrics.addEnvelopeToOutputStream(x._1, x._2._2.messagesSize))
                   outputTags.clear()
                   logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
                   executor.onAfterCheckpoint()
@@ -353,6 +367,7 @@ object RegularTaskRunner {
                   }
                   logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
                   checkpointGroup.commit()
+                  outputTags.foreach(x => performanceMetrics.addEnvelopeToOutputStream(x._1, x._2._2.messagesSize))
                   outputTags.clear()
                   logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
                   executor.onAfterCheckpoint()
@@ -481,6 +496,7 @@ object RegularTaskRunner {
                   checkpointGroup.commit()
                   logger.info(s"Set a number of state variables to ${stateService.getNumberOfVariables}\n")
                   performanceMetrics.setNumberOfStateVariables(stateService.getNumberOfVariables)
+                  outputTags.foreach(x => performanceMetrics.addEnvelopeToOutputStream(x._1, x._2._2.messagesSize))
                   outputTags.clear()
                   logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
                   executor.onAfterCheckpoint()
@@ -575,6 +591,7 @@ object RegularTaskRunner {
                   checkpointGroup.commit()
                   logger.info(s"Set a number of state variables to ${stateService.getNumberOfVariables}\n")
                   performanceMetrics.setNumberOfStateVariables(stateService.getNumberOfVariables)
+                  outputTags.foreach(x => performanceMetrics.addEnvelopeToOutputStream(x._1, x._2._2.messagesSize))
                   outputTags.clear()
                   logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
                   executor.onAfterCheckpoint()

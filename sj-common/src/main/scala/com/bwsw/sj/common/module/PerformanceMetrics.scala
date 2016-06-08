@@ -11,7 +11,6 @@ import java.util.concurrent.locks.ReentrantLock
 import com.bwsw.common.JsonSerializer
 import org.slf4j.LoggerFactory
 import scala.collection._
-//todo documentation and logging
 class PerformanceMetrics(taskId: String, host: String, streamNames: Array[String]) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val mutex = new ReentrantLock(true)
@@ -22,31 +21,68 @@ class PerformanceMetrics(taskId: String, host: String, streamNames: Array[String
   private var numberOfStateVariables = 0
   private val startTime = System.currentTimeMillis()
 
+  /**
+   * Increases time when there are no messages (envelopes)
+   * @param idle How long waiting was a new envelope
+   */
   def increaseTotalIdleTime(idle: Long) = {
     mutex.lock()
+    logger.debug(s"Increase total idle time on $idle ms\n")
     totalIdleTime += idle
     mutex.unlock()
   }
 
+  /**
+   * Sets an amount of how many state variables are
+   * @param amount Number of state variables
+   */
   def setNumberOfStateVariables(amount: Int) = {
     mutex.lock()
-    numberOfStateVariables += amount
+    logger.debug(s"Set number of state varibles to $amount\n")
+    numberOfStateVariables = amount
     mutex.unlock()
   }
 
-  def addEnvelopeToInputStream(name: String, elements: List[Int]) = {
+  /**
+   * Invokes when a new envelope from some input stream is received
+   * @param name Stream name
+   * @param elementsSize Set of sizes of elements
+   */
+  def addEnvelopeToInputStream(name: String, elementsSize: List[Int]) = {
     mutex.lock()
+    logger.debug(s"Indicate that a new envelope is received from input stream: $name\n")
     if (inputEnvelopesPerStream.contains(name)) {
-      inputEnvelopesPerStream(name) += elements
+      inputEnvelopesPerStream(name) += elementsSize
     } else {
-      logger.error(s"Steam with name: $name doesn't exist\n")
-      throw new Exception(s"Steam with name: $name doesn't exist")
+      logger.error(s"Input stream with name: $name doesn't exist\n")
+      throw new Exception(s"Input stream with name: $name doesn't exist")
     }
     mutex.unlock()
   }
 
+  /**
+   * Invokes when a new envelope is sent to some output stream
+   * @param name Stream name
+   * @param elementsSize Set of sizes of elements
+   */
+  def addEnvelopeToOutputStream(name: String, elementsSize: List[Int]) = {
+    mutex.lock()
+    logger.debug(s"Indicate that a new envelope is received from output stream: $name\n")
+    if (outputEnvelopesPerStream.contains(name)) {
+      outputEnvelopesPerStream(name) += elementsSize
+    } else {
+      logger.error(s"Input stream with name: $name doesn't exist\n")
+      throw new Exception(s"Input stream with name: $name doesn't exist")
+    }
+    mutex.unlock()
+  }
+
+  /**
+   * Constructs a report of performance metrics of task's work
+   * @return Constructed performance report
+   */
   def getReport = {
-    logger.info(s"Start preparing report of performance for task: $taskId of regular module\n")
+    logger.info(s"Start preparing a report of performance for task: $taskId of regular module\n")
     mutex.lock()
     val numberOfInputEnvelopesPerStream = inputEnvelopesPerStream.map(x => (x._1, x._2.size))
     val numberOfOutputEnvelopesPerStream = outputEnvelopesPerStream.map(x => (x._1, x._2.size))
@@ -67,9 +103,9 @@ class PerformanceMetrics(taskId: String, host: String, streamNames: Array[String
     |"task-id" : "$taskId",
     |"host" : "$host",
     |"total-idle-time" : "$totalIdleTime",
-    |"total-input-envelopes" : "${inputEnvelopesTotalNumber}",
+    |"total-input-envelopes" : "$inputEnvelopesTotalNumber",
     |"input-envelopes-per-stream" : ${serializer.serialize(numberOfInputEnvelopesPerStream)},
-    |"total-input-elements" : "${inputElementsTotalNumber}",
+    |"total-input-elements" : "$inputElementsTotalNumber",
     |"input-elements-per-stream" : ${serializer.serialize(numberOfInputElementsPerStream)},
     |"total-input-bytes" : "${bytesOfInputEnvelopesPerStream.values.sum}",
     |"input-bytes-per-stream" : ${serializer.serialize(bytesOfInputEnvelopesPerStream)},
@@ -77,9 +113,9 @@ class PerformanceMetrics(taskId: String, host: String, streamNames: Array[String
     |"max-size-input-envelope" : "${if (inputEnvelopesSize.nonEmpty) inputEnvelopesSize.max else 0}",
     |"min-size-input-envelope" : "${if (inputEnvelopesSize.nonEmpty) inputEnvelopesSize.min else 0}",
     |"average-size-input-element" : "${if (inputElementsTotalNumber != 0) bytesOfInputEnvelopesPerStream.values.sum / inputElementsTotalNumber else 0}",
-    |"total-output-envelopes" : "${outputEnvelopesTotalNumber}",
+    |"total-output-envelopes" : "$outputEnvelopesTotalNumber",
     |"output-envelopes-per-stream" : ${serializer.serialize(numberOfOutputEnvelopesPerStream)},
-    |"total-output-elements" : "${outputElementsTotalNumber}",
+    |"total-output-elements" : "$outputElementsTotalNumber",
     |"output-elements-per-stream" : ${serializer.serialize(numberOfOutputElementsPerStream)},
     |"total-output-bytes" : "${bytesOfOutputEnvelopesPerStream.values.sum}",
     |"output-bytes-per-stream" : ${serializer.serialize(bytesOfOutputEnvelopesPerStream)},
@@ -92,6 +128,7 @@ class PerformanceMetrics(taskId: String, host: String, streamNames: Array[String
       }
     """.stripMargin
 
+    logger.debug(s"Reset variables for performance report for next reporting\n")
     inputEnvelopesPerStream = mutable.Map(streamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
     outputEnvelopesPerStream = mutable.Map(streamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
     totalIdleTime = 0L

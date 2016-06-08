@@ -279,7 +279,7 @@ object DataFactory {
     instance.checkpointInterval = checkpointInterval
     instance.stateManagement = stateManagement
     instance.stateFullCheckpoint = stateFullCheckpoint
-    instance.parallelism = 0
+    instance.parallelism = 1
     instance.options = """{"hey": "hey"}"""
     instance.startFrom = "oldest"
     instance.perTaskCores = 0

@@ -242,8 +242,8 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
     transaction.checkpoint()
   }
 
-  /*
-  todo
+  /**
+   * Returns the number of state variables
    */
   override def getNumberOfVariables: Int = {
     stateVariables.size

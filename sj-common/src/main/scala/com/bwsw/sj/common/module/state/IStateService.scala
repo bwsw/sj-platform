@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory
 trait IStateService {
 
   protected val logger = LoggerFactory.getLogger(this.getClass)
+
   /**
    * Check whether a state variable with specific key exists or not
    * @param key State variable name
@@ -72,8 +73,8 @@ trait IStateService {
    */
   def fullCheckpoint()
 
-  /*
-  todo
+  /**
+   * Returns the number of state variables
    */
   def getNumberOfVariables: Int
 }
