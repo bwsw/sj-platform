@@ -53,7 +53,6 @@ object StreamConstants {
 
 object GeneratorConstants {
   val generatorTypes = Set("global", "local", "per-stream")
-  val generatorTypesWithService = Set("global", "per-stream")
 }
 
 object ServiceConstants {

@@ -1,9 +1,10 @@
 package com.bwsw.sj.crud.rest.validator.stream
 
-
 import java.net.URI
 
 import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.GeneratorConstants._
 import com.bwsw.sj.crud.rest.entities._
 
 import scala.collection.mutable.ArrayBuffer
@@ -13,66 +14,79 @@ import scala.collection.mutable.ArrayBuffer
   */
 
 object GeneratorValidator {
-  import com.bwsw.sj.common.GeneratorConstants._
 
   /**
-    * Validating input parameters for generator
+    * Validating stream generator data
     *
-    * @param params - parameters of stream generator being validated
-    * @param initialData - input parameters for stream generator being validated
+    * @param generatorData - input parameters for stream generator being validated
+    * @param generator - stream generator to fulfill data
     * @return - List of errors
     */
-  def validate(params: Generator, initialData: GeneratorData) = {
-
+  def validate(generatorData: GeneratorData, generator: Generator) = {
+    val serviceDAO = ConnectionRepository.getServiceManager
     val errors = new ArrayBuffer[String]()
 
-    Option(params.generatorType) match {
+    var serviceObj: Service = null
+    Option(generatorData.generatorType) match {
       case Some(t) if !generatorTypes.contains(t) =>
         errors += s"Unknown 'generator-type' provided. Must be one of: $generatorTypes"
       case None =>
         errors += s"'generator-type' is required"
       case _ =>
-    }
+        if (generatorData.generatorType != "local") {
+          //service
+          Option(generatorData.service) match {
+            case Some(s) if s.isEmpty =>
+              errors += s"Generator 'service' can not be empty"
+            case None =>
+              errors += s"Generator 'service' is required for non-'local' generator-type"
+            case _ =>
+              if (generatorData.service contains "://") {
+                val generatorUrl = new URI(generatorData.service)
+                if (!generatorUrl.getScheme.equals("service-zk")) {
+                  errors += s"Generator 'service' uri protocol prefix must be 'service-zk://'. Or use plain service name instead"
+                }
+              }
+              var serviceName: String = null
+              if (generatorData.service contains "://") {
+                val generatorUrl = new URI(generatorData.service)
+                if (generatorUrl.getScheme.equals("service-zk")) {
+                  serviceName = generatorUrl.getAuthority
+                }
+              } else {
+                serviceName = generatorData.service
+              }
+              serviceObj = serviceDAO.get(serviceName)
 
-    if (params.generatorType != "local") {
-      Option(initialData.service) match {
-        case Some(s) if s.isEmpty =>
-          errors += s"Generator 'service' can not be empty"
-        case None =>
-          errors += s"Generator 'service' is required for non-'local' generator-type"
-        case _ =>
-          if (initialData.service contains "://") {
-            val generatorUrl = new URI(initialData.service)
-            if (!generatorUrl.getScheme.equals("service-zk")) {
-              errors += s"Generator 'service' uri protocol prefix must be 'service-zk://'. Or use plain service name instead"
-            }
+
+              if (serviceObj == null) {
+                errors += s"Unknown generator 'service' provided"
+              } else {
+                if (serviceObj.serviceType != "ZKCoord") {
+                  errors += s"Provided generator service '${serviceObj.name}' is not of type ZKCoord"
+                }
+              }
           }
-          if (params.service == null) {
-            errors += s"Unknown generator 'service' provided"
-          } else {
-            if (params.service.serviceType != "ZKCoord") {
-              errors += s"Provided 'service' is not of type ZKCoord"
-            }
-          }
-      }
-    }
-    else {
-      if (Option(initialData.service).isDefined) {
-        errors += s"Generator 'service' must be null for 'local' generator-type"
-      }
+          //instacneCount
+          if (generatorData.instanceCount <= 0)
+            errors += s"Generator 'instance-count' must be a positive integer for non-'local' generator-type"
+        }
+        else {
+          //service
+          if (Option(generatorData.service).isDefined)
+            errors += s"Generator 'service' must be null for 'local' generator-type"
+
+          //instacneCount
+          if (generatorData.instanceCount > 0)
+            errors += s"Generator 'instance-count' must be null for 'local' generator-type"
+        }
     }
 
-    if (params.generatorType != "local") {
-      if (params.instanceCount <= 0) {
-        errors += s"Generator 'instance-count' must be a positive integer for non-'local' generator-type"
-      }
+    if (errors.isEmpty) {
+      generator.generatorType = generatorData.generatorType
+      generator.service = serviceObj
+      generator.instanceCount = generatorData.instanceCount
     }
-    else {
-      if (params.instanceCount > 0) {
-        errors += s"Generator 'instance-count' must be null or 0 for 'local' generator-type"
-      }
-    }
-
     errors
   }
 }
