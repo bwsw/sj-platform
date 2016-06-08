@@ -8,8 +8,10 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.crud.rest.entities._
 import com.bwsw.sj.crud.rest.utils.ConvertUtil.streamToStreamData
+import com.bwsw.sj.crud.rest.utils.StreamUtil
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.stream.StreamValidator
+import kafka.common.TopicExistsException
 
 /**
   * Rest-api for streams
@@ -40,6 +42,38 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
               stream.streamType = StreamConstants.jdbcOutput
           }
           val errors = StreamValidator.validate(data, stream)
+          if (errors.isEmpty) {
+            stream match {
+              case s: TStreamSjStream =>
+                val streamCheckResult = StreamUtil.checkAndCreateTStream(s)
+                streamCheckResult match {
+                  case Left(err) => errors += err
+                  case _ =>
+                }
+              case s: KafkaSjStream =>
+                try {
+                  val streamCheckResult = StreamUtil.checkAndCreateKafkaTopic(s)
+                  streamCheckResult match {
+                    case Left(err) => errors += err
+                    case _ =>
+                  }
+                } catch {
+                  case e: TopicExistsException => errors += s"Cannot create kafka topic: ${e.getMessage}"
+                }
+              case s: ESSjStream =>
+                  val streamCheckResult = StreamUtil.checkAndCreateEsStream(s)
+                  streamCheckResult match {
+                    case Left(err) => errors += err
+                    case _ =>
+                  }
+              case s: JDBCSjStream =>
+                val streamCheckResult = StreamUtil.checkAndCreateJdbcStream(s)
+                streamCheckResult match {
+                  case Left(err) => errors += err
+                  case _ =>
+                }
+            }
+          }
           if (errors.isEmpty) {
             streamDAO.save(stream)
             val response = ProtocolResponse(200, Map("message" -> s"Stream '${stream.name}' is created"))
