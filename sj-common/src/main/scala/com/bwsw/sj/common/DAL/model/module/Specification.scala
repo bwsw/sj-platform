@@ -17,7 +17,8 @@ class Specification {
   val inputs: IOstream = null
   val outputs: IOstream = null
   @Property("module-type") val moduleType: String = null
-  val engine: String = null
+  @Property("engine-name")var engineName: String = null
+  @Property("engine-version")var engineVersion: String = null
   val options: String = null
   @Property("validator-class") val validateClass: String = null
   @Property("executor-class") val executorClass: String = null

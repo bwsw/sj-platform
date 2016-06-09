@@ -9,6 +9,7 @@ import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.stream.scaladsl.Source
 import com.bwsw.common.exceptions.BadRecordWithKey
+import com.bwsw.sj.common.DAL.model.ConfigElement
 import com.bwsw.sj.crud.rest.entities.Response
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import org.apache.commons.io.FileUtils
@@ -76,6 +77,11 @@ trait SjCustomApi extends Directives with SjCrudValidator {
               val uploadingFile = new File(metadata.fileName)
               FileUtils.copyFile(file, uploadingFile)
               storage.put(uploadingFile, metadata.fileName, specification, "custom")
+              val customJarConfigElement = new ConfigElement(
+                specification("name").toString + "-" + specification("version").toString,
+                metadata.fileName
+              )
+              configFileService.save(customJarConfigElement)
               complete(HttpEntity(
                 `application/json`,
                 serializer.serialize(Response(200, null, s"Custom jar is uploaded."))

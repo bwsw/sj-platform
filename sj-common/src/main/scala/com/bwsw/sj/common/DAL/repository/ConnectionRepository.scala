@@ -5,7 +5,7 @@ import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.sj.common.DAL.ConnectionConstants
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.Instance
-import com.bwsw.sj.common.DAL.service.GenericMongoService
+import com.bwsw.sj.common.DAL.service.{ConfigFileService, GenericMongoService}
 import com.mongodb.MongoClient
 import org.mongodb.morphia.Morphia
 import org.mongodb.morphia.dao.BasicDAO
@@ -31,6 +31,8 @@ object ConnectionRepository {
 
   private lazy val mongoConnection = com.mongodb.casbah.MongoClient(mongoHost, mongoPort)
 
+  private lazy val fileStorage: MongoFileStorage = new MongoFileStorage(mongoConnection(databaseName))
+
   private lazy val fileMetadataService = new GenericMongoService[FileMetadata]()
 
   private lazy val instanceService = new GenericMongoService[Instance]()
@@ -41,8 +43,14 @@ object ConnectionRepository {
 
   private lazy val providerService = new GenericMongoService[Provider]()
 
+  private lazy val configFileService = new ConfigFileService(fileStorage)
+
   def getFileMetadataService = {
     fileMetadataService
+  }
+
+  def getConfigFileService = {
+    configFileService
   }
 
   def getInstanceService = {
@@ -50,7 +58,7 @@ object ConnectionRepository {
   }
 
   def getFileStorage = {
-    new MongoFileStorage(mongoConnection(databaseName))
+    fileStorage
   }
 
   def getStreamService = {

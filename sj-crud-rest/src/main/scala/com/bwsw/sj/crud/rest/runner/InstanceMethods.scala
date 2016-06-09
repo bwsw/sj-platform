@@ -8,7 +8,7 @@ import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{SjStream, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.DAL.service.GenericMongoService
+import com.bwsw.sj.common.DAL.service.{ConfigFileService, GenericMongoService}
 import com.bwsw.sj.crud.rest.entities.MarathonRequest
 import org.apache.http.client.methods.{HttpDelete, HttpGet, HttpPost, HttpPut}
 import org.apache.http.entity.StringEntity
@@ -26,6 +26,7 @@ object InstanceMethods {
   val serializer: Serializer = new JsonSerializer
   val instanceDAO: GenericMongoService[Instance] = ConnectionRepository.getInstanceService
   val streamDAO: GenericMongoService[SjStream] = ConnectionRepository.getStreamService
+  val configFileService: ConfigFileService = ConnectionRepository.getConfigFileService
 
   val OK: Int = 200
   val Created: Int = 201

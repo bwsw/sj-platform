@@ -22,7 +22,7 @@ import org.apache.http.util.EntityUtils
   */
 class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
   import InstanceMethods._
-  import com.bwsw.sj.common.JarConstants._
+  import com.bwsw.sj.common.ConfigConstants._
   import com.bwsw.sj.common.ModuleConstants._
 
   import scala.collection.JavaConverters._
@@ -113,7 +113,8 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
     *         (true, if framework running on mesos)
     */
   def frameworkStart(mesosMaster: String) = {
-    val restUrl = new URI(s"$restAddress/v1/custom/$frameworkJar")
+    val frameworkJarName = configFileService.get(configFileService.get(frameworkTag).value).value
+    val restUrl = new URI(s"$restAddress/v1/custom/$frameworkJarName")
     val taskInfoResponse = getTaskInfo(instance.name)
     if (taskInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
       val ignore = serializer.getIgnoreUnknown()
@@ -136,7 +137,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
         applicationEnvs = applicationEnvs ++ Map(instance.environmentVariables.asScala.toList: _*)
       }
       val request = new MarathonRequest(instance.name,
-        "java -jar " + frameworkJar + " $PORT",
+        "java -jar " + frameworkJarName + " $PORT",
         1,
         Map(applicationEnvs.toList: _*),
         List(restUrl.toString))
@@ -196,6 +197,9 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
     * @return - Future with response from request to marathon
     */
   def startGenerator(stream: TStreamSjStream) = {
+    val transactionGeneratorJar = configFileService.get(
+      configFileService.get(transactionGeneratorTag).value
+    ).value
     val zkService = stream.generator.service.asInstanceOf[ZKService]
     val generatorProvider = zkService.provider
     var prefix = zkService.namespace

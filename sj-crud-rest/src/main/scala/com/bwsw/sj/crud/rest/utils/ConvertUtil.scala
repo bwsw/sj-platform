@@ -8,24 +8,25 @@ import com.bwsw.sj.crud.rest.entities._
 import com.bwsw.sj.crud.rest.entities.module._
 
 /**
-  * Methods for converting protocol entity to model entity
-  * and model entity to protocol entity
-  * Created: 12/05/2016
-  *
-  * @author Kseniya Tomskikh
-  */
+ * Methods for converting protocol entity to model entity
+ * and model entity to protocol entity
+ * Created: 12/05/2016
+ *
+ * @author Kseniya Tomskikh
+ */
 object ConvertUtil {
+
   import scala.collection.JavaConversions._
   import scala.collection.JavaConverters._
 
   val serializer = new JsonSerializer
 
   /**
-    * Convert model instance to protocol instance for such module type
-    *
-    * @param instance - Model instance object
-    * @return - API instance object for such module type
-    */
+   * Convert model instance to protocol instance for such module type
+   *
+   * @param instance - Model instance object
+   * @return - API instance object for such module type
+   */
   def convertModelInstanceToApiInstance(instance: Instance) = {
     instance match {
       case timeWindowedInstance: WindowedInstance =>
@@ -56,12 +57,12 @@ object ConvertUtil {
   }
 
   /**
-    * Convert model instance object to API instance
-    *
-    * @param apiInstance - protocol object of instance
-    * @param instance - object of model instance
-    * @return - API instance object
-    */
+   * Convert model instance object to API instance
+   *
+   * @param apiInstance - protocol object of instance
+   * @param instance - object of model instance
+   * @return - API instance object
+   */
   def instanceToInstanceMetadata(apiInstance: InstanceMetadata, instance: Instance): InstanceMetadata = {
     val executionPlan = Map(
       "tasks" -> instance.executionPlan.tasks.map(t => t._1 -> Map("inputs" -> t._2.inputs))
@@ -89,11 +90,11 @@ object ConvertUtil {
   }
 
   /**
-    * Convert model file specification to protocol file specification
-    *
-    * @param specification - Model file specification object
-    * @return - API file specification object
-    */
+   * Convert model file specification to protocol file specification
+   *
+   * @param specification - Model file specification object
+   * @return - API file specification object
+   */
   def specificationToSpecificationData(specification: Specification) = {
     ModuleSpecification(specification.name,
       specification.description,
@@ -105,18 +106,19 @@ object ConvertUtil {
       Map("cardinality" -> specification.outputs.cardinality,
         "types" -> specification.outputs.types),
       specification.moduleType,
-      specification.engine,
+      specification.engineName,
+      specification.engineVersion,
       serializer.deserialize[Map[String, Any]](specification.options),
       specification.validateClass,
       specification.executorClass)
   }
 
   /**
-    * Convert api instance to db-model instance
-    *
-    * @param apiInstance - api object of instance
-    * @return - object of model instance
-    */
+   * Convert api instance to db-model instance
+   *
+   * @param apiInstance - api object of instance
+   * @return - object of model instance
+   */
   def convertToModelInstance(apiInstance: InstanceMetadata) = {
     apiInstance match {
       case windowedInstanceMetadata: WindowedInstanceMetadata =>
@@ -147,12 +149,12 @@ object ConvertUtil {
   }
 
   /**
-    * Convert API instance object to model instance
-    *
-    * @param modelInstance - object of model instance
-    * @param apiInstance - protocol object of instance
-    * @return - Model instance object
-    */
+   * Convert API instance object to model instance
+   *
+   * @param modelInstance - object of model instance
+   * @param apiInstance - protocol object of instance
+   * @return - Model instance object
+   */
   def instanceMetadataToInstance(modelInstance: Instance, apiInstance: InstanceMetadata) = {
     modelInstance.name = apiInstance.name
     modelInstance.description = apiInstance.description
@@ -181,11 +183,11 @@ object ConvertUtil {
   }
 
   /**
-    * Convert SjStream entity object to SjStreamData API object
-    *
-    * @param stream - SjStream object
-    * @return - SjStreamData object
-    */
+   * Convert SjStream entity object to SjStreamData API object
+   *
+   * @param stream - SjStream object
+   * @return - SjStreamData object
+   */
   def streamToStreamData(stream: SjStream) = {
     var streamData: SjStreamData = null
     stream match {
@@ -217,11 +219,11 @@ object ConvertUtil {
   }
 
   /**
-    * Convert Service entity object to ServiceData API object
-    *
-    * @param service - service entity
-    * @return - service data entity
-    */
+   * Convert Service entity object to ServiceData API object
+   *
+   * @param service - service entity
+   * @return - service data entity
+   */
   def serviceToServiceData(service: Service) = {
     var serviceData: ServiceData = null
     service match {
@@ -286,11 +288,11 @@ object ConvertUtil {
   }
 
   /**
-    * Convert Provider entity object to ProviderData API object
-    *
-    * @param provider - provider entity
-    * @return - provider data entity
-    */
+   * Convert Provider entity object to ProviderData API object
+   *
+   * @param provider - provider entity
+   * @return - provider data entity
+   */
   def providerToProviderData(provider: Provider) = {
     val providerData = new ProviderData(
       provider.name,
