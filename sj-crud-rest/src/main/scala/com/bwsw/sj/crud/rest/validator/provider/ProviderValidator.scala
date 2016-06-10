@@ -7,7 +7,6 @@ import java.util.Collections
 import com.aerospike.client.AerospikeClient
 import com.bwsw.sj.common.DAL.model.Provider
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.crud.rest.entities._
 import com.datastax.driver.core.Cluster
 import com.datastax.driver.core.exceptions.NoHostAvailableException
@@ -27,8 +26,6 @@ import scala.concurrent.duration._
 object ProviderValidator {
   import com.bwsw.sj.common.ProviderConstants._
 
-  var providerDAO: GenericMongoService[Provider] = null
-
   /**
     * Validating input parameters for provider
     *
@@ -39,7 +36,7 @@ object ProviderValidator {
 
     val errors = new ArrayBuffer[String]()
 
-    providerDAO = ConnectionRepository.getProviderService
+    val providerDAO = ConnectionRepository.getProviderService
 
     // 'name' field
     Option(initialData.name) match {

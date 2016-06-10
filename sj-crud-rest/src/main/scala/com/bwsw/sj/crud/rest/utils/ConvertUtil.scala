@@ -309,4 +309,17 @@ object ConvertUtil {
     providerData
   }
 
+  /**
+   * Convert ConfigElement entity object to ConfigElementData API object
+   *
+   * @param configElement - config element entity
+   * @return - config element data entity
+   */
+  def configElementToConfigElementData(configElement: ConfigElement) = {
+    new ConfigElement(
+      configElement.name,
+      configElement.value
+    )
+  }
+
 }

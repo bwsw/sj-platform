@@ -6,7 +6,7 @@ import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.common.exceptions.{BadRecordWithKey, NotFoundException}
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.crud.rest.entities._
-import com.bwsw.sj.crud.rest.utils.ConvertUtil.providerToProviderData
+import com.bwsw.sj.crud.rest.utils.ConvertUtil.configElementToConfigElemetData
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.provider.ProviderValidator
 
@@ -48,7 +48,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
           val providers = providerDAO.getAll
           var response: ProtocolResponse = null
           if (providers.nonEmpty) {
-            val entity = Map("providers" -> providers.map(p => providerToProviderData(p)))
+            val entity = Map("providers" -> providers.map(p => configElementToConfigElemetData(p)))
             response = ProtocolResponse(200, entity)
           } else {
             response = ProtocolResponse(200, Map("message" -> "No providers found"))
@@ -62,7 +62,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
             val provider = providerDAO.get(providerName)
             var response: ProtocolResponse = null
             if (provider != null) {
-              val entity = Map("providers" -> providerToProviderData(provider))
+              val entity = Map("providers" -> configElementToConfigElemetData(provider))
               response = ProtocolResponse(200, entity)
             } else {
               response = ProtocolResponse(200, Map("message" -> s"Provider '$providerName' not found"))
