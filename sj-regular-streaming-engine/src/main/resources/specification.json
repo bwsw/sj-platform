@@ -3,6 +3,5 @@
   "description": "Regular streaming engine by BW",
   "version": "0.1",
   "author": "Ksenia Mikhaleva",
-  "license": "Apache 2.0",
-  "executor-class": "com.bwsw.sj.engine.regular.RegularTaskRunner"
+  "license": "Apache 2.0"
 }

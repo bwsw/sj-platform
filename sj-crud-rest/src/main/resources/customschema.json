@@ -27,10 +27,6 @@
     "options": {
       "description": "The json-schema for some optional parameters",
       "type": "object"
-    },
-    "executor-class": {
-      "description": "The absolute path to class that is responsible for a running of custom jar if it's possible",
-      "type": "string"
     }
   },
   "required": [

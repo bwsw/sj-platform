@@ -77,12 +77,7 @@
     },
     "engine-name": {
       "description": "The name of the computing core of a module",
-      "type": "string",
-      "enum": [
-        "regular-streaming",
-        "windowed-streaming",
-        "output-streaming"
-      ]
+      "type": "string"
     },
     "engine-version": {
       "description": "The version of the computing core of a module",

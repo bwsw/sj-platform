@@ -18,5 +18,5 @@ object TempHelperForConfigSetup extends App{
   configFileService.save(new ConfigElement("windowed-streaming-validator-class", "com.bwsw.sj.crud.rest.validator.module.WindowedStreamingValidator"))
   configFileService.save(new ConfigElement("output-streaming-validator-class", "com.bwsw.sj.crud.rest.validator.module.OutputStreamingValidator"))
 
-  configFileService.save(new ConfigElement(ConfigConstants.marathonTag, ))
+  configFileService.save(new ConfigElement(ConfigConstants.marathonTag, "http://stream-juggler.z1.netpoint-dc.com:8080"))
 }
