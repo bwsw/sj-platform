@@ -15,7 +15,6 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.DAL.model.ConfigElement
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.DAL.service.ConfigFileService
 
 import scala.concurrent.Future
 import scala.io.StdIn
@@ -60,7 +59,7 @@ object SjCrudRestService extends App with SjCrudRouter {
   val serviceDAO = ConnectionRepository.getServiceManager
   val providerDAO = ConnectionRepository.getProviderService
   val streamDAO = ConnectionRepository.getStreamService
-  val configFileService: ConfigFileService = ConnectionRepository.getConfigFileService
+  val configFileService = ConnectionRepository.getConfigFileService
 
   val routeLogged = logRequestResult(Logging.InfoLevel, route())
   val logger = Logging(system, getClass)

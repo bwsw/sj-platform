@@ -5,7 +5,7 @@ import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.sj.common.DAL.ConnectionConstants
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.Instance
-import com.bwsw.sj.common.DAL.service.{ConfigFileService, GenericMongoService}
+import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.mongodb.MongoClient
 import org.mongodb.morphia.Morphia
 import org.mongodb.morphia.dao.BasicDAO
@@ -43,7 +43,7 @@ object ConnectionRepository {
 
   private lazy val providerService = new GenericMongoService[Provider]()
 
-  private lazy val configFileService = new ConfigFileService(fileStorage)
+  private lazy val configFileService = new GenericMongoService[ConfigElement]()
 
   def getFileMetadataService = {
     fileMetadataService
