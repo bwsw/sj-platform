@@ -43,7 +43,6 @@ trait SjCrudValidator {
   val configFileService: ConfigFileService
   val restHost: String
   val restPort: Int
-  val marathonConnect: String
 
   import com.bwsw.sj.common.ModuleConstants._
   import com.bwsw.sj.common.StreamConstants._

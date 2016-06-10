@@ -5,6 +5,7 @@ import java.util.Calendar
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.traits.Serializer
+import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{SjStream, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
@@ -32,9 +33,9 @@ object InstanceMethods {
   val Created: Int = 201
   val NotFound: Int = 404
 
-  lazy val restHost = System.getenv("CRUD_REST_HOST")
-  lazy val restPort = System.getenv("CRUD_REST_PORT").toInt
-  lazy val marathonConnect = System.getenv("MARATHON_CONNECT")
+  lazy val restHost = configFileService.get(ConfigConstants.hostOfCrudRestTag).value
+  lazy val restPort = configFileService.get(ConfigConstants.portOfCrudRestTag).value.toInt
+  lazy val marathonConnect = configFileService.get(ConfigConstants.marathonTag).value
   val timeout = 60000
 
   val restAddress = new URI(s"http://$restHost:$restPort").toString

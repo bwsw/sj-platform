@@ -52,7 +52,6 @@ object SjCrudRestService extends App with SjCrudRouter {
 
   val restHost = System.getenv("CRUD_REST_HOST")
   val restPort = System.getenv("CRUD_REST_PORT").toInt
-  val marathonConnect = System.getenv("MARATHON_CONNECT")
 
   val serializer = new JsonSerializer()
   val storage = ConnectionRepository.getFileStorage

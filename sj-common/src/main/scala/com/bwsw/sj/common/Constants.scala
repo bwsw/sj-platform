@@ -78,4 +78,5 @@ object ConfigConstants {
   val frameworkTag = "current-framework"
   val hostOfCrudRestTag = "crud-rest-host"
   val portOfCrudRestTag = "crud-rest-port"
+  val marathonTag = "marathon-connect"
 }
