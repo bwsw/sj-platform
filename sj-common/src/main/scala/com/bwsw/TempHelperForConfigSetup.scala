@@ -1,8 +1,8 @@
 package com.bwsw
 
+import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.DAL.model.ConfigElement
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.ConfigConstants
 
 object TempHelperForConfigSetup extends App{
 
@@ -13,6 +13,9 @@ object TempHelperForConfigSetup extends App{
 
   configFileService.save(new ConfigElement("com.bwsw.mf-0.1", "ScalaMesos-assembly-1.0.jar"))
   configFileService.save(new ConfigElement(ConfigConstants.frameworkTag, "com.bwsw.mf-0.1"))
+
+  configFileService.save(new ConfigElement("com.bwsw.regular.streaming.engine-0.1", "sj-regular-streaming-engine-assembly-1.0.jar"))
+  configFileService.save(new ConfigElement(ConfigConstants.regularEngineTag, "com.bwsw.regular.streaming.engine-0.1"))
 
   configFileService.save(new ConfigElement("regular-streaming-validator-class", "com.bwsw.sj.crud.rest.validator.module.RegularStreamingValidator"))
   configFileService.save(new ConfigElement("windowed-streaming-validator-class", "com.bwsw.sj.crud.rest.validator.module.WindowedStreamingValidator"))

@@ -76,6 +76,9 @@ object ProviderConstants {
 object ConfigConstants {
   val transactionGeneratorTag = "current-transaction-generator" 
   val frameworkTag = "current-framework"
+  val regularEngineTag = "current-regular-engine"
+  val windowedEngineTag = "current-windowed-engine"
+  val outputEngineTag = "current-output-engine"
   val hostOfCrudRestTag = "crud-rest-host"
   val portOfCrudRestTag = "crud-rest-port"
   val marathonTag = "marathon-connect"

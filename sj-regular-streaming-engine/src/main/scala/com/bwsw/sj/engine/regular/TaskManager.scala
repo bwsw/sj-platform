@@ -53,16 +53,16 @@ class TaskManager() {
   private val stateStream = taskName + "_state"
   private val reportStream = instanceName + "_report"
   private var currentPortNumber = 0
-  private val instanceMetadata = ConnectionRepository.getInstanceService.get(instanceName)
+  private val instance = ConnectionRepository.getInstanceService.get(instanceName)
   private val storage = ConnectionRepository.getFileStorage
 
-  assert(agentsPorts.length == (instanceMetadata.inputs.length + instanceMetadata.outputs.length + 3),
+  assert(agentsPorts.length == (instance.inputs.length + instance.outputs.length + 3),
     "Not enough ports for t-stream consumers/producers ")
 
   private val fileMetadata: FileMetadata = ConnectionRepository.getFileMetadataService.getByParameters(
-    Map("specification.name" -> instanceMetadata.moduleName,
-    "specification.module-type" -> instanceMetadata.moduleType,
-    "specification.version" -> instanceMetadata.moduleVersion)
+    Map("specification.name" -> instance.moduleName,
+    "specification.module-type" -> instance.moduleType,
+    "specification.version" -> instance.moduleVersion)
   ).head
 
   /**
@@ -78,7 +78,7 @@ class TaskManager() {
   /**
    * An auxiliary service to retrieve settings of TStream providers
    */
-  private val service = ConnectionRepository.getStreamService.get(instanceMetadata.outputs.head).service.asInstanceOf[TStreamService]
+  private val service = ConnectionRepository.getStreamService.get(instance.outputs.head).service.asInstanceOf[TStreamService]
 
   private val zkHosts = service.lockProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList
 
@@ -147,8 +147,8 @@ class TaskManager() {
    * @return Local file contains uploaded module jar
    */
   def getModuleJar: File = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '${instanceMetadata.moduleName}' module jar\n")
-    storage.get(fileMetadata.filename, s"tmp/${instanceMetadata.moduleName}")
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '${instance.moduleName}' module jar\n")
+    storage.get(fileMetadata.filename, s"tmp/${instance.moduleName}")
   }
 
   /**
@@ -158,7 +158,7 @@ class TaskManager() {
    */
   def getInstanceMetadata = {
     logger.info(s"Instance name: $instanceName, task name: $taskName. Get instance metadata\n")
-    instanceMetadata
+    instance
   }
 
   /**
@@ -427,7 +427,7 @@ class TaskManager() {
       reportStream,
       "store reports of performance metrics",
       Array("report", "performance"),
-      instanceMetadata.parallelism
+      instance.parallelism
     )
   }
 

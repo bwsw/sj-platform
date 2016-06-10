@@ -98,6 +98,10 @@ abstract class StreamingModuleValidator {
       errors += "Options attribute is empty."
     }
 
+    if (parameters.performanceReportingInterval <= 0) {
+      errors += "Performance reporting interval attribute must be greater than zero."
+    }
+
     if (parameters.jvmOptions.isEmpty) {
       errors += "Jvm-options attribute is empty."
     }

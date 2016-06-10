@@ -76,6 +76,8 @@ object ConvertUtil {
     apiInstance.options = serializer.deserialize[Map[String, Any]](instance.options)
     apiInstance.startFrom = instance.startFrom
     apiInstance.perTaskCores = instance.perTaskCores
+    apiInstance.performanceReportingInterval = instance.performanceReportingInterval
+    apiInstance.engine = instance.engine
     apiInstance.perTaskRam = instance.perTaskRam
     apiInstance.jvmOptions = Map(instance.jvmOptions.asScala.toList: _*)
     if (instance.nodeAttributes != null) {
@@ -165,6 +167,8 @@ object ConvertUtil {
     modelInstance.startFrom = apiInstance.startFrom
     modelInstance.perTaskCores = apiInstance.perTaskCores
     modelInstance.perTaskRam = apiInstance.perTaskRam
+    modelInstance.performanceReportingInterval = apiInstance.performanceReportingInterval
+    modelInstance.engine = apiInstance.engine
     modelInstance.jvmOptions = mapAsJavaMap(apiInstance.jvmOptions)
     if (apiInstance.nodeAttributes != null) {
       modelInstance.nodeAttributes = mapAsJavaMap(apiInstance.nodeAttributes)
