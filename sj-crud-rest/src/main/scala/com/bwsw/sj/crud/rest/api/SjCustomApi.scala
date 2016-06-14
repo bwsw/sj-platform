@@ -83,7 +83,8 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                 storage.put(uploadingFile, metadata.fileName, specification, "custom")
                 val customJarConfigElement = new ConfigSetting(
                   specification("name").toString + "-" + specification("version").toString,
-                  metadata.fileName
+                  metadata.fileName,
+                  "system"
                 )
                 configService.save(customJarConfigElement)
                 val response = ProtocolResponse(200, Map("message" -> s"Custom jar is uploaded."))

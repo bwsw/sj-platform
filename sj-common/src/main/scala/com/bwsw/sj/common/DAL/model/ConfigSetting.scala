@@ -11,10 +11,12 @@ import org.mongodb.morphia.annotations.{Id, Entity}
 class ConfigSetting {
   @Id var name: String = null
   var value: String = null
+  var domain: String = null
 
-  def this(name: String, value: String) = {
+  def this(name: String, value: String, domain: String) = {
     this()
     this.name = name
     this.value = value
+    this.domain = domain
   }
 }

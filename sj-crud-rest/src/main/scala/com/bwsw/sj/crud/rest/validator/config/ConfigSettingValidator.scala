@@ -22,7 +22,7 @@ object ConfigSettingValidator {
           errors += s"'name' can not be empty"
         } else {
           if (configService.get(x) != null) {
-            errors += s"Config element with name $x already exists"
+            errors += s"Config setting with name $x already exists"
           }
         }
     }

@@ -74,6 +74,7 @@ object ProviderConstants {
 }
 
 object ConfigConstants {
+  val domains = Array("system", "t-streams", "kafka", "ES")
   val transactionGeneratorTag = "current-transaction-generator" 
   val frameworkTag = "current-framework"
   val regularEngineTag = "current-regular-engine"
