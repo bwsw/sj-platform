@@ -80,14 +80,14 @@ object OutputTaskRunner {
                 taskManager: OutputTaskManager,
                 handler: OutputStreamingHandler,
                 outputStream: SjStream) = {
-    logger.debug(s"Task: ${OutputDataFactory.taskName}. Launch subscribing consumer\n")
+    logger.debug(s"Task: ${OutputDataFactory.taskName}. Launch subscribing consumer.")
     subscribeConsumer.start()
 
     val (client, esService) = openDbConnection(outputStream)
 
     instance.checkpointMode match {
       case "time-interval" =>
-        println("start reading time-interval")
+        logger.debug(s"Task: ${OutputDataFactory.taskName}. Start a output module  with time-interval checkpoint mode.")
         val checkpointTimer = new SjTimer()
         checkpointTimer.set(instance.checkpointInterval)
         while(true) {
@@ -101,7 +101,7 @@ object OutputTaskRunner {
       case "every-nth" =>
         var countOfTxn = 0
         while (true) {
-          println("start reading every-nth")
+          logger.debug(s"Task: ${OutputDataFactory.taskName}. Start a output module with time-interval checkpoint mode.")
           processTransaction(blockingQueue, subscribeConsumer, handler, outputStream, client, esService)
           if (countOfTxn == instance.checkpointInterval) {
             subscribeConsumer.checkpoint()
