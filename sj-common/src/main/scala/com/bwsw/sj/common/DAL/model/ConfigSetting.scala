@@ -3,12 +3,12 @@ package com.bwsw.sj.common.DAL.model
 import org.mongodb.morphia.annotations.{Id, Entity}
 
 /**
- * Entity for one element from configuration file.
- * Configuration file is a whole collection in mongo,
- * collection element is configuration file element.
+ * Entity for one element from configuration settings.
+ * Configuration settings is a whole collection in mongo,
+ * collection element is one configuration setting.
  */
-@Entity("config.file")
-class ConfigElement {
+@Entity("config")
+class ConfigSetting {
   @Id var name: String = null
   var value: String = null
 

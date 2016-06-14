@@ -40,7 +40,7 @@ trait SjCrudValidator {
   val serviceDAO: GenericMongoService[Service]
   val streamDAO: GenericMongoService[SjStream]
   val providerDAO: GenericMongoService[Provider]
-  val configFileService: GenericMongoService[ConfigElement]
+  val configService: GenericMongoService[ConfigSetting]
   val restHost: String
   val restPort: Int
 
