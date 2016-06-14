@@ -4,7 +4,6 @@ import com.bwsw.sj.common.DAL.model.SjStream
 
 import com.bwsw.sj.common.module.PerformanceMetrics
 import com.bwsw.sj.common.utils.SjTimer
-import com.bwsw.sj.engine.core.environment.ModuleOutput
 import com.bwsw.sj.engine.core.state.StateStorage
 import com.bwsw.tstreams.agents.producer.BasicProducer
 import org.slf4j.LoggerFactory

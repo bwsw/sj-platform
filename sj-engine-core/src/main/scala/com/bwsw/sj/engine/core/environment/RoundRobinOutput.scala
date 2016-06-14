@@ -1,7 +1,6 @@
 package com.bwsw.sj.engine.core.environment
 
 import com.bwsw.sj.common.module.PerformanceMetrics
-import com.bwsw.sj.engine.core.environment.ModuleOutput
 import com.bwsw.tstreams.agents.producer.{ProducerPolicies, BasicProducerTransaction, BasicProducer}
 
 import scala.collection.mutable
