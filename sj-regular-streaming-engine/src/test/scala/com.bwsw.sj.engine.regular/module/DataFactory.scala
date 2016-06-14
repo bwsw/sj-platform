@@ -36,7 +36,6 @@ object DataFactory {
 
   private val aerospikeHosts: Array[String] = System.getenv("AEROSPIKE_HOSTS").split(",")
   private val zookeeperHosts = System.getenv("ZOOKEEPER_HOSTS").split(",")
-  private val redisHosts = System.getenv("REDIS_HOSTS").split(",")
   private val kafkaHosts = System.getenv("KAFKA_HOSTS").split(",")
   private val testNamespace = "test"
   private val instanceName = "test-instance"
@@ -89,9 +88,6 @@ object DataFactory {
     val aerospikeProvider = new Provider("aerospike test provider", "aerospike provider", aerospikeHosts, "", "", "aerospike")
     providerService.save(aerospikeProvider)
 
-    val redisProvider = new Provider("redis test provider", "redis provider", redisHosts, "", "", "redis")
-    providerService.save(redisProvider)
-
     val kafkaProvider = new Provider("kafka test provider", "kafka provider", kafkaHosts, "", "", "kafka")
     providerService.save(kafkaProvider)
 
@@ -102,7 +98,6 @@ object DataFactory {
   def deleteProviders(providerService: GenericMongoService[Provider]) = {
     providerService.delete("cassandra test provider")
     providerService.delete("aerospike test provider")
-    providerService.delete("redis test provider")
     providerService.delete("kafka test provider")
     providerService.delete("zookeeper test provider")
   }
@@ -115,10 +110,6 @@ object DataFactory {
     val aeroProv = providerService.get("aerospike test provider")
     val aeroService = new AerospikeService("aerospike test service", "ArspkDB", "aerospike test service", aeroProv, testNamespace)
     serviceManager.save(aeroService)
-
-    val redisProv = providerService.get("redis test provider")
-    val redisService = new RedisService("redis test service", "RdsCoord", "redis test service", redisProv, testNamespace)
-    serviceManager.save(redisService)
 
     val zkProv = providerService.get("zookeeper test provider")
 
@@ -134,7 +125,6 @@ object DataFactory {
   def deleteServices(serviceManager: GenericMongoService[Service]) = {
     serviceManager.delete("cassandra test service")
     serviceManager.delete("aerospike test service")
-    serviceManager.delete("redis test service")
     serviceManager.delete("kafka test service")
     serviceManager.delete("tstream test service")
   }
@@ -437,7 +427,7 @@ object DataFactory {
 
     val coordinationSettings = new ProducerCoordinationOptions(
       agentAddress = s"localhost:8030",
-      zkHosts = List(new InetSocketAddress("localhost", 2181)),
+      zkHosts = zookeeperHosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList,
       zkRootPath = "/unit",
       zkTimeout = 7000,
       isLowPriorityToBeMaster = false,

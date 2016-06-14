@@ -308,4 +308,17 @@ object ConvertUtil {
     )
     providerData
   }
+
+  /**
+   * Convert ConfigSetting entity object to ConfigSettingData API object
+   *
+   * @param configElement - config setting entity
+   * @return - config setting data entity
+   */
+  def configSettingToConfigSettingData(configElement: ConfigSetting) = {
+    new ConfigSettingData(
+      configElement.name.replace(configElement.domain + ".", ""),
+      configElement.value
+    )
+  }
 }

@@ -79,7 +79,7 @@ object SjCrudRestService extends App with SjCrudRouter {
     .onComplete(_ => system.terminate())
 
   private def putRestSettingsToConfigFile() = {
-    configService.save(new ConfigSetting(ConfigConstants.hostOfCrudRestTag, restHost))
-    configService.save(new ConfigSetting(ConfigConstants.portOfCrudRestTag, restPort.toString))
+    configService.save(new ConfigSetting(ConfigConstants.hostOfCrudRestTag, restHost, "system"))
+    configService.save(new ConfigSetting(ConfigConstants.portOfCrudRestTag, restPort.toString, "system"))
   }
 }
