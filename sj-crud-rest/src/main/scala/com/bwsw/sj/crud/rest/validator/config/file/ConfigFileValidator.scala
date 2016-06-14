@@ -24,6 +24,9 @@ object ConfigFileValidator {
           if (configFileService.get(x) != null) {
             errors += s"Config element with name $x already exists"
           }
+          if (x.contains("")) {
+            errors += s"Name $x of config element contains spaces"
+          }
         }
     }
 
