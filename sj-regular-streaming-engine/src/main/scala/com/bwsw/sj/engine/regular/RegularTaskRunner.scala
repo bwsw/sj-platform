@@ -10,12 +10,11 @@ import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 
 import com.bwsw.sj.common.module.PerformanceMetrics
-import com.bwsw.sj.common.module.environment.ModuleOutput
 import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.sj.common.{ModuleConstants, StreamConstants}
 import com.bwsw.sj.engine.core.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.{KafkaEnvelope, Envelope, TStreamEnvelope}
-import com.bwsw.sj.engine.core.environment.{StatefulModuleEnvironmentManager, ModuleEnvironmentManager}
+import com.bwsw.sj.engine.core.environment.{ModuleOutput, StatefulModuleEnvironmentManager, ModuleEnvironmentManager}
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.state.{StateStorage, RAMStateService}
 import com.bwsw.tstreams.agents.consumer.Offsets.{DateTime, Newest, IOffset, Oldest}

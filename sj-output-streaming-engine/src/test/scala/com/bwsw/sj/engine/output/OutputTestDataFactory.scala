@@ -4,11 +4,11 @@ import java.net.InetSocketAddress
 
 import com.aerospike.client.Host
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.common.DAL.model.{TStreamService, SjStream}
+import com.bwsw.sj.common.DAL.model.{TStreamSjStream, TStreamService, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.tstreams.agents.producer.InsertionType.BatchInsert
-import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions, ProducerCoordinationSettings, ProducerPolicies}
+import com.bwsw.tstreams.agents.producer._
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorage, AerospikeStorageOptions, AerospikeStorageFactory}
@@ -26,7 +26,7 @@ import com.bwsw.tstreams.streams.BasicStream
 object OutputTestDataFactory {
 
   private val streamDAO: GenericMongoService[SjStream] = ConnectionRepository.getStreamService
-  val stream: SjStream = streamDAO.get("s10")
+  val stream: TStreamSjStream = streamDAO.get("s10").asInstanceOf[TStreamSjStream]
   private val objectSerializer = new ObjectSerializer()
 
   val inputStreamService = stream.service.asInstanceOf[TStreamService]
@@ -77,7 +77,7 @@ object OutputTestDataFactory {
     val basicStream: BasicStream[Array[Byte]] =
       BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
 
-    val coordinationSettings = new ProducerCoordinationSettings(
+    val coordinationSettings = new ProducerCoordinationOptions(
       agentAddress = s"localhost:8030",
       zkHosts = List(new InetSocketAddress("localhost", 2181)),
       zkRootPath = "/unit",

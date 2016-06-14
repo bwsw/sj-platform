@@ -193,11 +193,11 @@ abstract class StreamingModuleValidator {
       if (!service.isInstanceOf[TStreamService]) {
         errors += s"Service for t-streams must be 'TstrQ'."
       } else {
-        checkTStreams(errors, allStreams.filter(s => s.streamType.equals(tStream)))
+        checkTStreams(errors, allStreams.filter(s => s.streamType.equals(tStream)).map(_.asInstanceOf[TStreamSjStream]))
       }
     }
 
-    val kafkaStreams = allStreams.filter(s => s.streamType.equals(kafka))
+    val kafkaStreams = allStreams.filter(s => s.streamType.equals(kafka)).map(_.asInstanceOf[KafkaSjStream])
     if (kafkaStreams.nonEmpty) {
       if (kafkaStreams.exists(s => !s.service.isInstanceOf[KafkaService])) {
         errors += s"Service for kafka-streams must be 'KfkQ'."
@@ -247,8 +247,8 @@ abstract class StreamingModuleValidator {
     * @param errors - List of all errors
     * @param allTStreams - all t-streams of instance
     */
-  def checkTStreams(errors: ArrayBuffer[String], allTStreams: mutable.Buffer[SjStream]) = {
-    allTStreams.foreach { (stream: SjStream) =>
+  def checkTStreams(errors: ArrayBuffer[String], allTStreams: mutable.Buffer[TStreamSjStream]) = {
+    allTStreams.foreach { (stream: TStreamSjStream) =>
       if (errors.isEmpty) {
         val streamCheckResult = StreamUtil.checkAndCreateTStream(stream)
         streamCheckResult match {
@@ -265,8 +265,8 @@ abstract class StreamingModuleValidator {
     * @param errors - list of all errors
     * @param allKafkaStreams - all kafka streams of instance
     */
-  def checkKafkaStreams(errors: ArrayBuffer[String], allKafkaStreams: mutable.Buffer[SjStream]) = {
-    allKafkaStreams.foreach { (stream: SjStream) =>
+  def checkKafkaStreams(errors: ArrayBuffer[String], allKafkaStreams: mutable.Buffer[KafkaSjStream]) = {
+    allKafkaStreams.foreach { (stream: KafkaSjStream) =>
       if (errors.isEmpty) {
         try {
           val streamCheckResult = StreamUtil.checkAndCreateKafkaTopic(stream)
@@ -287,8 +287,8 @@ abstract class StreamingModuleValidator {
     * @param errors - list of all errors
     * @param allEsStreams - all elasticsearch streams of instance
     */
-  def checkEsStreams(errors: ArrayBuffer[String], allEsStreams: List[SjStream]) = {
-    allEsStreams.foreach { (stream: SjStream) =>
+  def checkEsStreams(errors: ArrayBuffer[String], allEsStreams: List[ESSjStream]) = {
+    allEsStreams.foreach { (stream: ESSjStream) =>
       if (errors.isEmpty) {
         val streamCheckResult = StreamUtil.checkAndCreateEsStream(stream)
         streamCheckResult match {
@@ -305,8 +305,8 @@ abstract class StreamingModuleValidator {
     * @param errors - list of all errors
     * @param allJdbcStreams - all jdbc streams of instance
     */
-  def checkJdbcStreams(errors: ArrayBuffer[String], allJdbcStreams: List[SjStream]) = {
-    allJdbcStreams.foreach { (stream: SjStream) =>
+  def checkJdbcStreams(errors: ArrayBuffer[String], allJdbcStreams: List[JDBCSjStream]) = {
+    allJdbcStreams.foreach { (stream: JDBCSjStream) =>
       if (errors.isEmpty) {
         val streamCheckResult = StreamUtil.checkAndCreateJdbcStream(stream)
         streamCheckResult match {

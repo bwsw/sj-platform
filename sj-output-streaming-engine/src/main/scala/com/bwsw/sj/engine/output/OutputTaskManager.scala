@@ -4,14 +4,14 @@ import java.io.File
 import java.net.InetSocketAddress
 import java.util.concurrent.ArrayBlockingQueue
 
-import com.bwsw.sj.common.DAL.model.{SjStream, TStreamService}
+import com.bwsw.sj.common.DAL.model.{TStreamSjStream, SjStream, TStreamService}
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
 import com.bwsw.sj.engine.core.utils.EngineUtils
 import com.bwsw.sj.engine.output.subscriber.OutputSubscriberCallback
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
-import com.bwsw.tstreams.agents.consumer.{BasicConsumerOptions, ConsumerCoordinationSettings}
+import com.bwsw.tstreams.agents.consumer.{SubscriberCoordinationOptions, BasicConsumerOptions}
 import com.bwsw.tstreams.agents.consumer.Offsets.IOffset
 import com.bwsw.tstreams.data.IStorage
 import com.bwsw.tstreams.generator.IUUIDGenerator
@@ -66,7 +66,7 @@ class OutputTaskManager(taskName: String, instance: OutputInstance) {
     val agentAddress = s"${if (agentHost != null && !agentHost.equals("")) agentHost else "localhost"}" +
       s":${if (agentPort != null && !agentPort.equals("")) agentPort else "8889"}"
 
-    val coordinatorSettings = new ConsumerCoordinationSettings(
+    val coordinatorSettings = new SubscriberCoordinationOptions(
       agentAddress,
       s"/${service.lockNamespace}",
       zkHosts,
@@ -77,7 +77,7 @@ class OutputTaskManager(taskName: String, instance: OutputInstance) {
 
     val roundRobinPolicy = new RoundRobinPolicy(basicStream, (partitions.head to partitions.tail.head).toList)
 
-    val timeUuidGenerator: IUUIDGenerator = EngineUtils.getUUIDGenerator(stream)
+    val timeUuidGenerator: IUUIDGenerator = EngineUtils.getUUIDGenerator(stream.asInstanceOf[TStreamSjStream])
 
     val callback = new OutputSubscriberCallback(queue)
 
@@ -87,7 +87,6 @@ class OutputTaskManager(taskName: String, instance: OutputInstance) {
       consumerKeepAliveInterval = 5,
       converter,
       roundRobinPolicy,
-      coordinatorSettings,
       offset,
       timeUuidGenerator,
       useLastOffset = true)
@@ -96,6 +95,7 @@ class OutputTaskManager(taskName: String, instance: OutputInstance) {
       s"consumer-$taskName-${stream.name}",
       basicStream,
       options,
+      coordinatorSettings,
       callback,
       persistentQueuePath
     )

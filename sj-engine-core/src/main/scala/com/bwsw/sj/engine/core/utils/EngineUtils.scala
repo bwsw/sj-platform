@@ -4,8 +4,7 @@ import java.util.Date
 
 import com.bwsw.common.tstream.NetworkTimeUUIDGenerator
 import com.bwsw.sj.common.DAL.ConnectionConstants._
-import com.bwsw.sj.common.DAL.model.{SjStream, ZKService}
-import com.bwsw.sj.crud.rest.utils.StreamUtil
+import com.bwsw.sj.common.DAL.model.{TStreamSjStream, ZKService}
 import com.bwsw.tstreams.agents.consumer.Offsets.{DateTime, Newest, Oldest, IOffset}
 import com.bwsw.tstreams.generator.{LocalTimeUUIDGenerator, IUUIDGenerator}
 
@@ -36,7 +35,7 @@ object EngineUtils {
     * @param stream T-stream object
     * @return UUID generator
     */
-  def getUUIDGenerator(stream: SjStream) : IUUIDGenerator = {
+  def getUUIDGenerator(stream: TStreamSjStream) : IUUIDGenerator = {
     stream.generator.generatorType match {
       case "local" => new LocalTimeUUIDGenerator
       case generatorType =>

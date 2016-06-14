@@ -1,6 +1,7 @@
 package com.bwsw.sj.engine.core.environment
 
 import com.bwsw.sj.common.module.PerformanceMetrics
+import com.bwsw.sj.engine.core.environment.ModuleOutput
 import com.bwsw.tstreams.agents.producer.{ProducerPolicies, BasicProducerTransaction, BasicProducer}
 
 import scala.collection.mutable
@@ -9,8 +10,8 @@ import scala.collection.mutable
  * Provides an output stream that defined for stream in whole.
  * Recording of transaction occurs with the use of round-robin policy
  * Created: 20/04/2016
- * @author Kseniya Mikhaleva
  *
+ * @author Kseniya Mikhaleva
  * @param producer Producer for specific output of stream
  */
 

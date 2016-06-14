@@ -55,5 +55,5 @@ class OutputSubscriberCallback(blockingQueue: ArrayBlockingQueue[String])
   /**
     * How much times onEvent handler is invoked
     */
-  override val frequency: Int = 1
+  override val pollingFrequency: Int = 1
 }

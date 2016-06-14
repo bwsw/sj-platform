@@ -1,6 +1,7 @@
 package com.bwsw.sj.engine.core.environment
 
 import com.bwsw.sj.common.module.PerformanceMetrics
+import com.bwsw.sj.engine.core.environment.ModuleOutput
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerTransaction, ProducerPolicies}
 
 import scala.collection._
@@ -8,8 +9,8 @@ import scala.collection._
 /**
  * Provides an output stream that defined for each partition
  * Created: 20/04/2016
- * @author Kseniya Mikhaleva
  *
+ * @author Kseniya Mikhaleva
  * @param producer Producer for specific output of stream
  */
 
