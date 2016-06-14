@@ -61,8 +61,8 @@ class OutputTaskManager(taskName: String, instance: OutputInstance) {
       new InetSocketAddress(parts(0), parts(1).toInt)
     }.toList
 
-    val agentHost = System.getenv("AGENT_HOST")
-    val agentPort = System.getenv("PORT0")
+    val agentHost = OutputDataFactory.agentHost
+    val agentPort = OutputDataFactory.agentPort
     val agentAddress = s"${if (agentHost != null && !agentHost.equals("")) agentHost else "localhost"}" +
       s":${if (agentPort != null && !agentPort.equals("")) agentPort else "8889"}"
 

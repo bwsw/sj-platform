@@ -8,10 +8,16 @@ libraryDependencies ++= Seq(
   "org.elasticsearch" % "elasticsearch" % "2.3.2"
 )
 assemblyMergeStrategy in assembly := {
-  case PathList("org", "slf4j", xs@_*) => MergeStrategy.first
+  case PathList("scala-xml.properties") => MergeStrategy.first
   case PathList("scala", xs@_*) => MergeStrategy.first
-  case "log4j.properties" => MergeStrategy.concat
+  case PathList("org", "slf4j", xs@_*) => MergeStrategy.first
+  case PathList("org", "apache", "log4j", xs@_*) => MergeStrategy.first
+  case PathList("io", "netty", xs@_*) => MergeStrategy.first
+  case PathList("org", "jboss", xs@_*) => MergeStrategy.first
+  case PathList("org", "joda", xs@_*) => MergeStrategy.first
+  case PathList("com", "fasterxml", "jackson", xs@_*) => MergeStrategy.first
   case "library.properties" => MergeStrategy.concat
+  case "log4j.properties" => MergeStrategy.concat
   case x =>
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
