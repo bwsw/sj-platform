@@ -24,6 +24,9 @@ object ConfigSettingValidator {
           if (configService.get(x) != null) {
             errors += s"Config setting with name $x already exists"
           }
+          if (x.contains("")) {
+            errors += s"Name $x of config element contains spaces"
+          }
         }
     }
 
