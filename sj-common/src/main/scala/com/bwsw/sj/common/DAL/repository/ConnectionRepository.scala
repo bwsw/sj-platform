@@ -43,14 +43,14 @@ object ConnectionRepository {
 
   private lazy val providerService = new GenericMongoService[Provider]()
 
-  private lazy val configFileService = new GenericMongoService[ConfigElement]()
+  private lazy val configService = new GenericMongoService[ConfigSetting]()
 
   def getFileMetadataService = {
     fileMetadataService
   }
 
-  def getConfigFileService = {
-    configFileService
+  def getConfigService = {
+    configService
   }
 
   def getInstanceService = {

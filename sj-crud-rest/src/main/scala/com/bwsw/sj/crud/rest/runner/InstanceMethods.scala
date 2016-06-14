@@ -27,15 +27,15 @@ object InstanceMethods {
   val serializer: Serializer = new JsonSerializer
   val instanceDAO: GenericMongoService[Instance] = ConnectionRepository.getInstanceService
   val streamDAO: GenericMongoService[SjStream] = ConnectionRepository.getStreamService
-  val configFileService = ConnectionRepository.getConfigFileService
+  val configService = ConnectionRepository.getConfigService
 
   val OK: Int = 200
   val Created: Int = 201
   val NotFound: Int = 404
 
-  lazy val restHost = configFileService.get(ConfigConstants.hostOfCrudRestTag).value
-  lazy val restPort = configFileService.get(ConfigConstants.portOfCrudRestTag).value.toInt
-  lazy val marathonConnect = configFileService.get(ConfigConstants.marathonTag).value
+  lazy val restHost = configService.get(ConfigConstants.hostOfCrudRestTag).value
+  lazy val restPort = configService.get(ConfigConstants.portOfCrudRestTag).value.toInt
+  lazy val marathonConnect = configService.get(ConfigConstants.marathonTag).value
   val timeout = 60000
 
   val restAddress = new URI(s"http://$restHost:$restPort").toString

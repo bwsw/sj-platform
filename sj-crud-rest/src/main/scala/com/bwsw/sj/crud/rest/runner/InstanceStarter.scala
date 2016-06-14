@@ -113,7 +113,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
     *         (true, if framework running on mesos)
     */
   def frameworkStart(mesosMaster: String) = {
-    val frameworkJarName = configFileService.get(configFileService.get(frameworkTag).value).value
+    val frameworkJarName = configService.get(configService.get(frameworkTag).value).value
     val restUrl = new URI(s"$restAddress/v1/custom/$frameworkJarName")
     val taskInfoResponse = getTaskInfo(instance.name)
     if (taskInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
@@ -197,8 +197,8 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
     * @return - Future with response from request to marathon
     */
   def startGenerator(stream: TStreamSjStream) = {
-    val transactionGeneratorJar = configFileService.get(
-      configFileService.get(transactionGeneratorTag).value
+    val transactionGeneratorJar = configService.get(
+      configService.get(transactionGeneratorTag).value
     ).value
     val zkService = stream.generator.service.asInstanceOf[ZKService]
     val generatorProvider = zkService.provider
