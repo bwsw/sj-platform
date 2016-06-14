@@ -23,7 +23,8 @@
     ]
   },
   "module-type": "output-streaming",
-  "engine": "output-streaming-engine",
+  "engine-name": "com.bwsw.output.streaming.engine",
+  "engine-version": "0.1",
   "options": {
     "opt": 1
   },

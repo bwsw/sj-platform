@@ -11,7 +11,7 @@ object TempHelperForConfigSetup extends App{
   configService.save(new ConfigSetting("com.bwsw.tg-0.1", "sj-transaction-generator-assembly-1.0.jar"))
   configService.save(new ConfigSetting(ConfigConstants.transactionGeneratorTag, "com.bwsw.tg-0.1"))
 
-  configService.save(new ConfigSetting("com.bwsw.mf-0.1", "ScalaMesos-assembly-1.0.jar"))
+  configService.save(new ConfigSetting("com.bwsw.mf-0.1", "mesos-framework.jar"))
   configService.save(new ConfigSetting(ConfigConstants.frameworkTag, "com.bwsw.mf-0.1"))
 
   configService.save(new ConfigSetting("com.bwsw.regular.streaming.engine-0.1", "sj-regular-streaming-engine-assembly-1.0.jar"))
