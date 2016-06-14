@@ -29,5 +29,7 @@ sed -i 's/listen 8080/listen '"$REST_PORT"'/g' /etc/nginx/conf.d/rest-nginx.conf
 export CRUD_REST_PORT=3001
 export CRUD_REST_HOST=0.0.0.0
 
+mkdir -p /var/log/rest
+touch /var/log/rest/supervisor.log
 echo "Running. See logs in /var/log/rest"
 supervisord -n > /var/log/rest/supervisor.log 2>&1

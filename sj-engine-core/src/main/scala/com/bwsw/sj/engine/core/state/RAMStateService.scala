@@ -241,4 +241,11 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
     changes.foreach((x: (String, (String, Any))) => transaction.send(serializer.serialize(x)))
     transaction.checkpoint()
   }
+
+  /**
+   * Returns the number of state variables
+   */
+  override def getNumberOfVariables: Int = {
+    stateVariables.size
+  }
 }

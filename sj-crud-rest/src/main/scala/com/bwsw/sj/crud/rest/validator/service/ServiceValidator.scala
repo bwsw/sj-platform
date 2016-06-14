@@ -10,7 +10,7 @@ import scala.collection.mutable.ArrayBuffer
 /**
   * Created by mendelbaum_nm
   */
-class ServiceValidator {
+object ServiceValidator {
   import com.bwsw.sj.common.ServiceConstants._
 
   var serviceDAO: GenericMongoService[Service] = null
@@ -78,8 +78,10 @@ class ServiceValidator {
         val (providerErrors, providerObj) = validateProvider(esindServiceData.provider, initialData.serviceType)
         errors ++= providerErrors
 
-        // 'index' field
+        // 'index', 'login', 'password' fields
         errors ++= validateStringFieldRequired(esindServiceData.index, "index")
+        errors ++= validateStringFieldRequired(esindServiceData.login, "login")
+        errors ++= validateStringFieldRequired(esindServiceData.password, "password")
 
         // filling-in service object serviceType-dependent extra fields
         if (errors.isEmpty) {
@@ -95,9 +97,36 @@ class ServiceValidator {
         val (providerErrors, providerObj) = validateProvider(kfkqServiceData.provider, initialData.serviceType)
         errors ++= providerErrors
 
+        // 'zkProvider' field
+        var zkProviderObj: Provider = null
+        Option(kfkqServiceData.zkProvider) match {
+          case None =>
+            errors += s"'zk-provider' is required for 'KfkQ' service"
+          case Some(p) =>
+            if (p.isEmpty) {
+              errors += s"'zk-provider' can not be empty"
+            }
+            else {
+              zkProviderObj = providerDAO.get(p)
+              if (zkProviderObj == null) {
+                errors += s"Zookeeper provider '$p' does not exist"
+              }
+              else if (zkProviderObj.providerType != "zookeeper") {
+                errors += s"'zk-provider' must be of type 'zookeeper' " +
+                  s"('${zkProviderObj.providerType}' is given instead)"
+              }
+            }
+        }
+
+        // 'zkNamespace' field
+        errors ++= validateStringFieldRequired(kfkqServiceData.zkNamespace, "zk-namespace")
+
         // filling-in service object serviceType-dependent extra fields
         if (errors.isEmpty) {
           service.asInstanceOf[KafkaService].provider = providerObj
+          service.asInstanceOf[KafkaService].zkProvider = zkProviderObj
+          service.asInstanceOf[KafkaService].zkNamespace = kfkqServiceData.zkNamespace
+
         }
 
       case "TstrQ" =>
@@ -234,7 +263,7 @@ class ServiceValidator {
         val (providerErrors, providerObj) = validateProvider(jdbcServiceData.provider, initialData.serviceType)
         errors ++= providerErrors
 
-        // 'index' field
+        // 'namespace', 'login', 'password' fields
         errors ++= validateStringFieldRequired(jdbcServiceData.namespace, "namespace")
         errors ++= validateStringFieldRequired(jdbcServiceData.login, "login")
         errors ++= validateStringFieldRequired(jdbcServiceData.password, "password")
@@ -275,10 +304,10 @@ class ServiceValidator {
     }
 
     /**
-      * Simple validation for required string field
+      * Service provider validation by provider name and service type
       *
-      * @param provider - data from field to validate
-      * @param serviceType - field name in json
+      * @param provider - provider name
+      * @param serviceType - service type
       * @return - (provider errors, loaded provider object) pair
       */
     def validateProvider(provider: String, serviceType: String) = {

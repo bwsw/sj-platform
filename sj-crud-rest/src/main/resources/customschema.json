@@ -1,67 +1,36 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "Run Module Specification",
-  "description": "Common specification for stream-juggler modules that can be run",
-  "definitions": {
-    "source": {
-      "type": "object",
-      "properties": {
-        "cardinality": {
-          "description": "The boundary of interval in that a number of inputs can change",
-          "type": "array",
-          "items": {
-            "type": "number",
-            "minimum": 0
-          },
-          "minItems": 2,
-          "maxItems": 2
-        },
-        "types": {
-          "description": "The enumeration of types of inputs",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "required": [
-        "cardinality",
-        "types"
-      ]
-    }
-  },
+  "title": "Custom jar Specification",
+  "description": "Common specification for jars that can be uploaded by user. Also for stream-juggler engines, transaction generators and frameworks",
   "type": "object",
   "properties": {
     "name": {
-      "description": "The unique name for a module",
+      "description": "The unique name for a custom jar",
       "type": "string"
     },
     "description": {
-      "description": "The description for a module",
+      "description": "The description for a custom jar",
       "type": "string"
     },
     "version": {
-      "description": "The module version",
+      "description": "The custom jar version",
       "type": "string"
     },
     "author": {
-      "description": "The module author",
+      "description": "The custom jar author",
       "type": "string"
     },
     "license": {
-      "description": "The software license type for a module",
+      "description": "The software license type for a custom jar",
       "type": "string"
     },
     "options": {
       "description": "The json-schema for some optional parameters",
       "type": "object"
-    },
-    "executor-class": {
-      "description": "The absolute path to class that is responsible for a running of module",
-      "type": "string"
     }
   },
   "required": [
-    "name"
+    "name",
+    "version"
   ]
 }

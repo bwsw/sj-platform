@@ -1,28 +1,29 @@
 package com.bwsw.sj.crud.rest
 
 import akka.actor.ActorSystem
-import akka.event.{LoggingAdapter, Logging}
 import akka.event.Logging.LogLevel
+import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.model.{HttpEntity, HttpRequest}
 import akka.http.scaladsl.server.RouteResult.Complete
 import akka.http.scaladsl.server._
-import akka.http.scaladsl.server.directives.{LoggingMagnet, DebuggingDirectives, LogEntry}
+import akka.http.scaladsl.server.directives.{DebuggingDirectives, LogEntry, LoggingMagnet}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
-import com.bwsw.common.{ConfigLoader, JsonSerializer}
+import com.bwsw.common.JsonSerializer
+import com.bwsw.sj.common.ConfigConstants
+import com.bwsw.sj.common.DAL.model.ConfigElement
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.typesafe.config.Config
 
 import scala.concurrent.Future
 import scala.io.StdIn
 
 /**
-  * Run object of CRUD Rest-API
-  * Created: 06/04/2016
-  * @author Kseniya Tomskikh
-  */
+ * Run object of CRUD Rest-API
+ * Created: 06/04/2016
+ * @author Kseniya Tomskikh
+ */
 object SjCrudRestService extends App with SjCrudRouter {
 
   def logRequestResult(level: LogLevel, route: Route) = {
@@ -44,15 +45,12 @@ object SjCrudRestService extends App with SjCrudRouter {
       .runWith(Sink.head)
   }
 
-  val conf: Config = ConfigLoader.load()
-
   implicit val system = ActorSystem("sj-crud-rest-server")
   implicit val materializer = ActorMaterializer()
   implicit val executor = system.dispatcher //for work with future
 
   val restHost = System.getenv("CRUD_REST_HOST")
   val restPort = System.getenv("CRUD_REST_PORT").toInt
-  val marathonConnect = System.getenv("MARATHON_CONNECT")
 
   val serializer = new JsonSerializer()
   val storage = ConnectionRepository.getFileStorage
@@ -61,9 +59,12 @@ object SjCrudRestService extends App with SjCrudRouter {
   val serviceDAO = ConnectionRepository.getServiceManager
   val providerDAO = ConnectionRepository.getProviderService
   val streamDAO = ConnectionRepository.getStreamService
+  val configFileService = ConnectionRepository.getConfigFileService
 
   val routeLogged = logRequestResult(Logging.InfoLevel, route())
   val logger = Logging(system, getClass)
+
+  putRestSettingsToConfigFile()
 
   val serverBinding: Future[ServerBinding] = Http().bindAndHandle(routeLogged, interface = restHost, port = restPort)
 
@@ -77,4 +78,8 @@ object SjCrudRestService extends App with SjCrudRouter {
   serverBinding.flatMap(_.unbind())
     .onComplete(_ => system.terminate())
 
+  private def putRestSettingsToConfigFile() = {
+    configFileService.save(new ConfigElement(ConfigConstants.hostOfCrudRestTag, restHost))
+    configFileService.save(new ConfigElement(ConfigConstants.portOfCrudRestTag, restPort.toString))
+  }
 }

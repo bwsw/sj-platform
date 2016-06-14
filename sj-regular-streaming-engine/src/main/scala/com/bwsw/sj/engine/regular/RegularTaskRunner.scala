@@ -1,23 +1,27 @@
 package com.bwsw.sj.engine.regular
 
 import java.net.URLClassLoader
+import java.util.Date
+import java.util.concurrent.Executors
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.KafkaService
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
-import com.bwsw.sj.engine.core.environment.{ModuleEnvironmentManager, StatefulModuleEnvironmentManager}
-import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
-import com.bwsw.sj.engine.core.state.{RAMStateService, StateStorage}
+
+import com.bwsw.sj.common.module.PerformanceMetrics
+import com.bwsw.sj.common.module.environment.ModuleOutput
 import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.sj.common.{ModuleConstants, StreamConstants}
 import com.bwsw.sj.engine.core.PersistentBlockingQueue
-import com.bwsw.sj.engine.core.utils.EngineUtils._
-import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
+import com.bwsw.sj.engine.core.entities.{KafkaEnvelope, Envelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.environment.{StatefulModuleEnvironmentManager, ModuleEnvironmentManager}
+import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
+import com.bwsw.sj.engine.core.state.{StateStorage, RAMStateService}
+import com.bwsw.tstreams.agents.consumer.Offsets.{DateTime, Newest, IOffset, Oldest}
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.group.CheckpointGroup
-import com.bwsw.tstreams.agents.producer.{BasicProducer, ProducerPolicies}
+import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerTransaction, ProducerPolicies}
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
@@ -33,10 +37,17 @@ import scala.collection.mutable
 object RegularTaskRunner {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
+  private val executorService = Executors.newCachedThreadPool()
+
   def main(args: Array[String]) {
 
     val manager = new TaskManager()
     logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for regular module\n")
+
+    logger.debug(s"Task: ${manager.taskName}. Start creating a t-stream producer to record performance reports\n")
+    val reportStream = manager.getReportStream
+    val reportProducer = manager.createProducer(reportStream)
+    logger.debug(s"Task: ${manager.taskName}. Creation of t-stream producer is finished\n")
 
     val moduleJar = manager.getModuleJar
 
@@ -61,9 +72,9 @@ object RegularTaskRunner {
     var consumersWithSubscribes: Option[Map[String, BasicSubscribingConsumer[Array[Byte], Array[Byte]]]] = None
     var offsetProducer: Option[BasicProducer[Array[Byte], Array[Byte]]] = None
 
-    if (inputs.exists(x => x._1.streamType == StreamConstants.streamTypes.head)) {
+    if (inputs.exists(x => x._1.streamType == StreamConstants.tStream)) {
       logger.debug(s"Task: ${manager.taskName}. Start creating subscribing consumers\n")
-      consumersWithSubscribes = Some(inputs.filter(x => x._1.streamType == StreamConstants.streamTypes.head).map({
+      consumersWithSubscribes = Some(inputs.filter(x => x._1.streamType == StreamConstants.tStream).map({
         x => manager.createSubscribingConsumer(x._1, x._2.toList, chooseOffset(regularInstanceMetadata.startFrom), blockingQueue)
       }).map(x => (x.name, x)).toMap)
       logger.debug(s"Task: ${manager.taskName}. Creation of subscribing consumers is finished\n")
@@ -76,8 +87,8 @@ object RegularTaskRunner {
       logger.debug(s"Task: ${manager.taskName}. Subscribing consumers are launched\n")
     }
 
-    if (inputs.exists(x => x._1.streamType == StreamConstants.streamTypes.last)) {
-      val kafkaInputs = inputs.filter(x => x._1.streamType == StreamConstants.streamTypes.last)
+    if (inputs.exists(x => x._1.streamType == StreamConstants.kafka)) {
+      val kafkaInputs = inputs.filter(x => x._1.streamType == StreamConstants.kafka)
       logger.debug(s"Task: ${manager.taskName}. Start creating kafka consumers\n")
       val kafkaConsumer = manager.createKafkaConsumer(
         kafkaInputs.map(x => (x._1.name, x._2.toList)).toList,
@@ -89,8 +100,8 @@ object RegularTaskRunner {
       )
       logger.debug(s"Task: ${manager.taskName}. Creation of kafka consumers is finished\n")
 
-      logger.debug(s"Task: ${manager.taskName}. Launch kafka consumers that put consumed message, that are wrapped in envelope, into common queue \n")
-      new Thread(new Runnable {
+      logger.debug(s"Task: ${manager.taskName}. Launch kafka consumers that put consumed message, which are wrapped in envelope, into common queue \n")
+      executorService.execute(new Runnable() {
         def run() = {
           val serializer = new JsonSerializer()
           val timeout = 5
@@ -113,10 +124,11 @@ object RegularTaskRunner {
             })
           }
         }
-      }).start()
+      })
 
       logger.debug(s"Task: ${manager.taskName}. Start creating a t-stream producer to record kafka offsets\n")
-      offsetProducer = Some(manager.createOffsetProducer())
+      val streamForOffsets = manager.getOffsetStream
+      offsetProducer = Some(manager.createProducer(streamForOffsets))
       logger.debug(s"Task: ${manager.taskName}. Creation of t-stream producer is finished\n")
       logger.debug(s"Task: ${manager.taskName}. Start adding the t-stream producer to checkpoint group\n")
       checkpointGroup.add(offsetProducer.get.name, offsetProducer.get)
@@ -136,24 +148,60 @@ object RegularTaskRunner {
 
     val classLoader = manager.getClassLoader(moduleJar.getAbsolutePath)
 
-    logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
+    val performanceMetrics = new PerformanceMetrics(
+      manager.taskName,
+      manager.agentsHost,
+      inputs.map(_._1.name).toArray ++ regularInstanceMetadata.outputs
+    )
 
-    runModule(moduleTimer,
-      regularInstanceMetadata,
-      blockingQueue,
-      outputTags,
-      classLoader,
-      executorClass,
-      producers,
-      consumersWithSubscribes,
-      manager,
-      offsetProducer,
-      checkpointGroup)
+    logger.debug(s"Task: ${manager.taskName}. Launch a new thread to report performance metrics \n")
+    executorService.execute(new Runnable() {
+      def run() = {
+        val taskNumber = manager.taskName.replace(s"${manager.instanceName}-task", "").toInt
+        var report: String = null
+        var reportTxn: BasicProducerTransaction[Array[Byte], Array[Byte]] = null
+        while (true) {
+          logger.info(s"Task: ${manager.taskName}. Wait ${regularInstanceMetadata.performanceReportingInterval} to report performance metrics\n")
+          Thread.sleep(regularInstanceMetadata.performanceReportingInterval)
+          report = performanceMetrics.getReport
+          logger.info(s"Task: ${manager.taskName}. Performance metrics: $report \n")
+          logger.debug(s"Task: ${manager.taskName}. Create a new txn for sending performance metrics\n")
+          reportTxn = reportProducer.newTransaction(ProducerPolicies.errorIfOpen, taskNumber)
+          logger.debug(s"Task: ${manager.taskName}. Send performance metrics\n")
+          reportTxn.send(report.getBytes)
+          logger.debug(s"Task: ${manager.taskName}. Do checkpoint of producer for performance reporting\n")
+          reportProducer.checkpoint()
+        }
+      }
+    })
+
+    logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
+    try {
+      runModule(moduleTimer,
+        regularInstanceMetadata,
+        blockingQueue,
+        outputTags,
+        classLoader,
+        executorClass,
+        producers,
+        consumersWithSubscribes,
+        manager,
+        offsetProducer,
+        checkpointGroup,
+        performanceMetrics)
+    }
+    catch {
+      case exception: Exception => {
+        exception.printStackTrace()
+        executorService.shutdownNow()
+        System.exit(-1)
+      }
+    }
   }
 
   /**
    * Provides an imitation of streaming processing using blocking queue
- *
+   *
    * @param moduleTimer Provides a timer inside module
    * @param regularInstanceMetadata Launch parameters of module
    * @param blockingQueue Queue for keeping envelope
@@ -166,18 +214,20 @@ object RegularTaskRunner {
    * @param offsetProducer T-stream producer to commit the offsets of last messages
    *                       that has successfully processed for each topic for each partition
    * @param checkpointGroup Group of producers and consumers which should do a checkpoint at the same time
+   * @param performanceMetrics Set of metrics that characterize performance of module
    */
   private def runModule(moduleTimer: SjTimer,
                         regularInstanceMetadata: RegularInstance,
                         blockingQueue: PersistentBlockingQueue,
-                        outputTags: mutable.Map[String, (String, Any)],
+                        outputTags: mutable.Map[String, (String, ModuleOutput)],
                         classLoader: URLClassLoader,
                         pathToExecutor: String,
                         producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]],
                         consumers: Option[Map[String, BasicSubscribingConsumer[Array[Byte], Array[Byte]]]],
                         manager: TaskManager,
                         offsetProducer: Option[BasicProducer[Array[Byte], Array[Byte]]],
-                        checkpointGroup: CheckpointGroup) = {
+                        checkpointGroup: CheckpointGroup,
+                        performanceMetrics: PerformanceMetrics) = {
     /**
      * Json serializer for deserialization of envelope
      */
@@ -195,7 +245,8 @@ object RegularTaskRunner {
             .map(ConnectionRepository.getStreamService.get)
             .filter(_.tags != null),
           outputTags,
-          moduleTimer
+          moduleTimer,
+          performanceMetrics
         )
 
         logger.debug(s"Task: ${manager.taskName}. Start loading of executor class from module jar\n")
@@ -219,24 +270,34 @@ object RegularTaskRunner {
 
               if (maybeEnvelope == null) {
                 logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${regularInstanceMetadata.eventWaitTime} went out and nothing was received\n")
+                logger.debug(s"Task: ${manager.taskName}. Increase total idle time\n")
+                performanceMetrics.increaseTotalIdleTime(regularInstanceMetadata.eventWaitTime)
                 logger.debug(s"Task: ${manager.taskName}. Invoke onIdle() handler\n")
                 executor.onIdle()
               } else {
                 val envelope = serializer.deserialize[Envelope](maybeEnvelope)
 
                 envelope.streamType match {
-                  case "t-stream" =>
+                  case StreamConstants.tStream =>
                     logger.info(s"Task: ${manager.taskName}. T-stream envelope is received\n")
                     val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
                     logger.debug(s"Task: ${manager.taskName}. " +
                       s"Change local offset of consumer: ${tStreamEnvelope.consumerName} to txn: ${tStreamEnvelope.txnUUID}\n")
                     consumers.get(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
-                  case "kafka-stream" =>
+                    performanceMetrics.addEnvelopeToInputStream(
+                      tStreamEnvelope.stream,
+                      tStreamEnvelope.data.map(_.length)
+                    )
+                  case StreamConstants.kafka =>
                     logger.info(s"Task: ${manager.taskName}. Kafka envelope is received\n")
                     val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
                     logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${kafkaEnvelope.stream} " +
                       s"for partition: ${kafkaEnvelope.partition} to ${kafkaEnvelope.offset}\n")
                     manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
+                    performanceMetrics.addEnvelopeToInputStream(
+                      kafkaEnvelope.stream,
+                      List(kafkaEnvelope.data.length)
+                    )
                 }
 
                 logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
@@ -278,6 +339,8 @@ object RegularTaskRunner {
 
               if (maybeEnvelope == null) {
                 logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${regularInstanceMetadata.eventWaitTime} went out and nothing was received\n")
+                logger.debug(s"Task: ${manager.taskName}. Increase total idle time\n")
+                performanceMetrics.increaseTotalIdleTime(regularInstanceMetadata.eventWaitTime)
                 logger.debug(s"Task: ${manager.taskName}. Invoke onIdle() handler\n")
                 executor.onIdle()
               } else {
@@ -286,18 +349,26 @@ object RegularTaskRunner {
                 logger.debug(s"Task: ${manager.taskName}. Increase count of envelopes to: $countOfEnvelopes\n")
 
                 envelope.streamType match {
-                  case "t-stream" =>
+                  case StreamConstants.tStream =>
                     logger.info(s"Task: ${manager.taskName}. T-stream envelope is received\n")
                     val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
                     logger.debug(s"Task: ${manager.taskName}. " +
                       s"Change local offset of consumer: ${tStreamEnvelope.consumerName} to txn: ${tStreamEnvelope.txnUUID}\n")
                     consumers.get(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
-                  case "kafka-stream" =>
+                    performanceMetrics.addEnvelopeToInputStream(
+                      tStreamEnvelope.stream,
+                      tStreamEnvelope.data.map(_.length)
+                    )
+                  case StreamConstants.kafka =>
                     logger.info(s"Task: ${manager.taskName}. Kafka envelope is received\n")
                     val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
                     logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${kafkaEnvelope.stream} " +
                       s"for partition: ${kafkaEnvelope.partition} to ${kafkaEnvelope.offset}\n")
                     manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
+                    performanceMetrics.addEnvelopeToInputStream(
+                      kafkaEnvelope.stream,
+                      List(kafkaEnvelope.data.length)
+                    )
                 }
 
                 logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
@@ -352,7 +423,8 @@ object RegularTaskRunner {
             .map(ConnectionRepository.getStreamService.get)
             .filter(_.tags != null),
           outputTags,
-          moduleTimer
+          moduleTimer,
+          performanceMetrics
         )
 
         logger.debug(s"Task: ${manager.taskName}. Start loading of executor class from module jar\n")
@@ -377,25 +449,34 @@ object RegularTaskRunner {
 
               if (maybeEnvelope == null) {
                 logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${regularInstanceMetadata.eventWaitTime} went out and nothing was received\n")
+                logger.debug(s"Task: ${manager.taskName}. Increase total idle time\n")
+                performanceMetrics.increaseTotalIdleTime(regularInstanceMetadata.eventWaitTime)
                 logger.debug(s"Task: ${manager.taskName}. Invoke onIdle() handler\n")
                 executor.onIdle()
               } else {
                 val envelope = serializer.deserialize[Envelope](maybeEnvelope)
 
                 envelope.streamType match {
-                  case "t-stream" =>
+                  case StreamConstants.tStream =>
                     logger.info(s"Task: ${manager.taskName}. T-stream envelope is received\n")
                     val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
                     logger.debug(s"Task: ${manager.taskName}. " +
                       s"Change local offset of consumer: ${tStreamEnvelope.consumerName} to txn: ${tStreamEnvelope.txnUUID}\n")
                     consumers.get(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
-                  case "kafka-stream" =>
+                    performanceMetrics.addEnvelopeToInputStream(
+                      tStreamEnvelope.stream,
+                      tStreamEnvelope.data.map(_.length)
+                    )
+                  case StreamConstants.kafka =>
                     logger.info(s"Task: ${manager.taskName}. Kafka envelope is received\n")
                     val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
                     logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${kafkaEnvelope.stream} " +
                       s"for partition: ${kafkaEnvelope.partition} to ${kafkaEnvelope.offset}\n")
                     manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
-
+                    performanceMetrics.addEnvelopeToInputStream(
+                      kafkaEnvelope.stream,
+                      List(kafkaEnvelope.data.length)
+                    )
                 }
 
                 logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
@@ -431,6 +512,8 @@ object RegularTaskRunner {
                   }
                   logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
                   checkpointGroup.commit()
+                  logger.info(s"Set a number of state variables to ${stateService.getNumberOfVariables}\n")
+                  performanceMetrics.setNumberOfStateVariables(stateService.getNumberOfVariables)
                   outputTags.clear()
                   logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
                   executor.onAfterCheckpoint()
@@ -458,6 +541,8 @@ object RegularTaskRunner {
 
               if (maybeEnvelope == null) {
                 logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${regularInstanceMetadata.eventWaitTime} went out and nothing was received\n")
+                logger.debug(s"Task: ${manager.taskName}. Increase total idle time\n")
+                performanceMetrics.increaseTotalIdleTime(regularInstanceMetadata.eventWaitTime)
                 logger.debug(s"Task: ${manager.taskName}. Invoke onIdle() handler\n")
                 executor.onIdle()
               } else {
@@ -466,18 +551,26 @@ object RegularTaskRunner {
                 logger.debug(s"Task: ${manager.taskName}. Increase count of envelopes to: $countOfEnvelopes\n")
 
                 envelope.streamType match {
-                  case "t-stream" =>
+                  case StreamConstants.tStream =>
                     logger.info(s"Task: ${manager.taskName}. T-stream envelope is received\n")
                     val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
                     logger.debug(s"Task: ${manager.taskName}. " +
                       s"Change local offset of consumer: ${tStreamEnvelope.consumerName} to txn: ${tStreamEnvelope.txnUUID}\n")
                     consumers.get(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
-                  case "kafka-stream" =>
+                    performanceMetrics.addEnvelopeToInputStream(
+                      tStreamEnvelope.stream,
+                      tStreamEnvelope.data.map(_.length)
+                    )
+                  case StreamConstants.kafka =>
                     logger.info(s"Task: ${manager.taskName}. Kafka envelope is received\n")
                     val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
                     logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${kafkaEnvelope.stream} " +
                       s"for partition: ${kafkaEnvelope.partition} to ${kafkaEnvelope.offset}\n")
                     manager.kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
+                    performanceMetrics.addEnvelopeToInputStream(
+                      kafkaEnvelope.stream,
+                      List(kafkaEnvelope.data.length)
+                    )
                 }
 
                 logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
@@ -513,6 +606,8 @@ object RegularTaskRunner {
                   }
                   logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
                   checkpointGroup.commit()
+                  logger.info(s"Set a number of state variables to ${stateService.getNumberOfVariables}\n")
+                  performanceMetrics.setNumberOfStateVariables(stateService.getNumberOfVariables)
                   outputTags.clear()
                   logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
                   executor.onAfterCheckpoint()
@@ -532,4 +627,18 @@ object RegularTaskRunner {
 
   }
 
+  /**
+   * Chooses offset policy for t-streams consumers
+   *
+   * @param startFrom Offset policy name or specific date
+   * @return Offset
+   */
+  private def chooseOffset(startFrom: String): IOffset = {
+    logger.debug(s"Choose offset policy for t-streams consumer\n")
+    startFrom match {
+      case "oldest" => Oldest
+      case "newest" => Newest
+      case time => DateTime(new Date(time.toLong * 1000))
+    }
+  }
 }

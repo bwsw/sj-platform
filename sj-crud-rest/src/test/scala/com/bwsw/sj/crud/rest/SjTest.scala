@@ -104,9 +104,8 @@ object SjTest {
     service.serviceType = "KfkQ"
     serviceDAO.save(service)
 
-    val stream = new SjStream()
+    val stream = new KafkaSjStream()
     stream.name = "s5"
-    stream.generator = null
     stream.partitions = 3
     stream.service = service
     stream.streamType = kafka
@@ -132,10 +131,8 @@ object SjTest {
     service.index = "sj"
     serviceDAO.save(service)
 
-    val stream = new SjStream()
+    val stream = new ESSjStream()
     stream.name = "es10"
-    stream.generator = null
-    stream.partitions = 3
     stream.service = service
     stream.streamType = esOutput
     stream.tags = Array("test")
@@ -159,10 +156,8 @@ object SjTest {
     service.serviceType = "JDBC"
     serviceDAO.save(service)
 
-    val stream = new SjStream()
+    val stream = new JDBCSjStream()
     stream.name = "tbl1"
-    stream.generator = null
-    stream.partitions = 3
     stream.service = service
     stream.streamType = jdbcOutput
     stream.tags = Array("test")
@@ -271,7 +266,7 @@ object SjTest {
     generator1.service = service
 
     val sjStreamDAO = ConnectionRepository.getStreamService
-    val s1 = new SjStream
+    val s1 = new TStreamSjStream
     s1.name = "s1"
     s1.description = "s1 stream"
     s1.partitions = 7
@@ -285,7 +280,7 @@ object SjTest {
     generator2.generatorType = "global"
     generator2.instanceCount = 2
     generator2.service = service
-    val s2 = new SjStream
+    val s2 = new TStreamSjStream
     s2.name = "s2"
     s2.description = "s2 stream"
     s2.partitions = 10
@@ -299,7 +294,7 @@ object SjTest {
     generator3.generatorType = "global"
     generator3.instanceCount = 3
     generator3.service = service
-    val s3 = new SjStream
+    val s3 = new TStreamSjStream
     s3.name = "s3"
     s3.description = "s3 stream"
     s3.partitions = 10
@@ -311,7 +306,7 @@ object SjTest {
 
     val generator10 = new Generator
     generator10.generatorType = "local"
-    val s10 = new SjStream
+    val s10 = new TStreamSjStream
     s10.name = "s10"
     s10.description = "s10 stream"
     s10.partitions = 5

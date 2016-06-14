@@ -32,4 +32,6 @@ class Instance {
   @Embedded("coordination-service") var coordinationService: ZKService = null
   @Property("environment-variables") var environmentVariables: java.util.Map[String, String] = null
   var stages: java.util.Map[String, InstanceStage] = null
+  @Property("performance-reporting-interval") var performanceReportingInterval: Long = 0
+  var engine: String = null
 }

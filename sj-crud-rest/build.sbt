@@ -27,8 +27,7 @@ libraryDependencies ++= Seq(
 //resolvers += "Twitter Repository" at "http://maven.twttr.com"
 
 dependencyOverrides ++= Set(
-  "com.typesafe.akka" %% "akka-actor" % "2.4.1",
-  "com.google.guava" % "guava" % "18.0"
+  "com.typesafe.akka" %% "akka-actor" % "2.4.1"
 )
 
 assemblyMergeStrategy in assembly := {
@@ -45,8 +44,8 @@ assemblyMergeStrategy in assembly := {
   case "library.properties" => MergeStrategy.concat
 //  case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.first
 //  case PathList("com", "datastax", xs@_*) => MergeStrategy.first
-//  case PathList("com", "google", "common", xs@_*) => MergeStrategy.first
-//  case PathList("com", "google", "thirdparty", xs@_*) => MergeStrategy.first
+  case PathList("com", "google", "common", xs@_*) => MergeStrategy.first
+  case PathList("com", "google", "thirdparty", xs@_*) => MergeStrategy.first
 //  case PathList("com", "thoughtworks", xs@_*) => MergeStrategy.first
 //  case PathList("org", "luaj", xs@_*) => MergeStrategy.first
   case x =>

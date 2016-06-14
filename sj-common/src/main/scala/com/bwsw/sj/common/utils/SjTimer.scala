@@ -14,7 +14,7 @@ class SjTimer {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   /**
-   * Flag defines the timer time went out or not
+   * Flag defines the timer went out or not
    */
   private var isTimerWentOut = false
 
@@ -28,7 +28,7 @@ class SjTimer {
 
   /**
    * Sets a timer handler that changes flag on true value when time is went out
-   * @param delay
+   * @param delay delay in milliseconds before timer task is to be executed
    */
   def set(delay: Long) = {
     logger.info(s"Set a timer to $delay\n")
@@ -46,7 +46,7 @@ class SjTimer {
    * @return The result of checking
    */
   def isTime: Boolean = {
-    logger.debug(s"Chech whether a timer has went out or not\n")
+    logger.debug(s"Check whether a timer has went out or not\n")
     isTimerWentOut
   }
 

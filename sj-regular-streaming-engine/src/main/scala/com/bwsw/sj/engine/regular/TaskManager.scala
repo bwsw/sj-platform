@@ -11,13 +11,15 @@ import com.bwsw.sj.common.DAL.ConnectionConstants._
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.ModuleConstants._
+import com.bwsw.sj.common.StreamConstants
+import com.bwsw.sj.common.module.environment.ModuleOutput
 import com.bwsw.sj.engine.core.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
 import com.bwsw.tstreams.agents.consumer.Offsets.{IOffset, Newest}
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
-import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions, ConsumerCoordinationSettings}
-import com.bwsw.tstreams.agents.producer.InsertionType.{BatchInsert, SingleElementInsert}
-import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions, ProducerCoordinationSettings}
+import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions, SubscriberCoordinationOptions}
+import com.bwsw.tstreams.agents.producer.InsertionType.{SingleElementInsert, BatchInsert}
+import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions, ProducerCoordinationOptions}
 import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
 import com.bwsw.tstreams.data.IStorage
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStorageOptions}
@@ -40,23 +42,28 @@ import scala.collection.mutable
   * @author Kseniya Mikhaleva
   */
 class TaskManager() {
-
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val moduleType = System.getenv("MODULE_TYPE")
-  private val moduleName = System.getenv("MODULE_NAME")
-  private val moduleVersion = System.getenv("MODULE_VERSION")
-  private val instanceName = System.getenv("INSTANCE_NAME")
+
+  val instanceName = System.getenv("INSTANCE_NAME")
+  val agentsHost = System.getenv("AGENTS_HOST")
+  private val agentsPorts = System.getenv("AGENTS_PORTS").split(",")
   val taskName = System.getenv("TASK_NAME")
   var kafkaOffsetsStorage = mutable.Map[(String, Int), Long]()
   private val kafkaOffsetsStream = taskName + "_kafka_offsets"
   private val stateStream = taskName + "_state"
-  private var tempCounter = 8000
-  private val instanceMetadata = ConnectionRepository.getInstanceService.get(instanceName)
+  private val reportStream = instanceName + "_report"
+  private var currentPortNumber = 0
+  private val instance = ConnectionRepository.getInstanceService.get(instanceName)
   private val storage = ConnectionRepository.getFileStorage
 
-  private val fileMetadata: FileMetadata = ConnectionRepository.getFileMetadataService.getByParameters(Map("specification.name" -> moduleName,
-    "specification.module-type" -> moduleType,
-    "specification.version" -> moduleVersion)).head
+  assert(agentsPorts.length == (instance.inputs.length + instance.outputs.length + 3),
+    "Not enough ports for t-stream consumers/producers ")
+
+  private val fileMetadata: FileMetadata = ConnectionRepository.getFileMetadataService.getByParameters(
+    Map("specification.name" -> instance.moduleName,
+    "specification.module-type" -> instance.moduleType,
+    "specification.version" -> instance.moduleVersion)
+  ).head
 
   /**
     * Converter to convert usertype->storagetype; storagetype->usertype
@@ -66,7 +73,7 @@ class TaskManager() {
   /**
     * An auxiliary service to retrieve settings of TStream providers
     */
-  private val service = ConnectionRepository.getStreamService.get(instanceMetadata.outputs.head).service.asInstanceOf[TStreamService]
+  private val service = ConnectionRepository.getStreamService.get(instance.outputs.head).service.asInstanceOf[TStreamService]
 
   private val zkHosts = service.lockProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList
 
@@ -135,8 +142,8 @@ class TaskManager() {
     * @return Local file contains uploaded module jar
     */
   def getModuleJar: File = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '$moduleName' module jar\n")
-    storage.get(fileMetadata.filename, s"tmp/$moduleName")
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '${instance.moduleName}' module jar\n")
+    storage.get(fileMetadata.filename, s"tmp/${instance.moduleName}")
   }
 
   /**
@@ -146,13 +153,13 @@ class TaskManager() {
     */
   def getInstanceMetadata = {
     logger.info(s"Instance name: $instanceName, task name: $taskName. Get instance metadata\n")
-    instanceMetadata
+    instance
   }
 
   /**
    * Returns an absolute path to executor class of module
-    *
-    * @return An absolute path to executor class of module
+   *
+   * @return An absolute path to executor class of module
    */
   def getExecutorClass = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Get an absolute path to executor class of module\n")
@@ -166,7 +173,7 @@ class TaskManager() {
     */
   def getOutputTags = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Get tags for each output stream\n")
-    mutable.Map[String, (String, Any)]()
+    mutable.Map[String, (String, ModuleOutput)]()
   }
 
   /**
@@ -185,14 +192,6 @@ class TaskManager() {
       s"${topics.map(x => s"topic name: ${x._1}, " + s"partitions: ${x._2.mkString(",")}").mkString(",")}\n")
     val objectSerializer = new ObjectSerializer()
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
-
-    val coordinatorSettings = new ConsumerCoordinationSettings(
-      "localhost:" + tempCounter.toString,
-      service.lockNamespace,
-      zkHosts,
-      7000
-    )
-    tempCounter +=1 //todo адрес консумера
 
     val props = new Properties()
     props.put("bootstrap.servers", hosts.mkString(","))
@@ -219,7 +218,6 @@ class TaskManager() {
         consumerKeepAliveInterval = 5,
         converter,
         roundRobinPolicy,
-        coordinatorSettings,
         Newest,
         timeUuidGenerator,
         useLastOffset = true)
@@ -238,56 +236,6 @@ class TaskManager() {
   }
 
   /**
-    * Returns T-stream producer responsible for committing the offsets of last messages
-    * that has successfully processed for each topic for each partition
-    *
-    * @return T-stream producer responsible for committing the offsets of last messages
-    *         that has successfully processed for each topic for each partition
-    */
-  def createOffsetProducer() = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. Create t-stream producer to write kafka offsets\n")
-    var stream: BasicStream[Array[Byte]] = null
-    val dataStorage: IStorage[Array[Byte]] = createDataStorage()
-
-    val coordinatorSettings = new ProducerCoordinationSettings(
-      agentAddress = s"localhost:" + tempCounter.toString,
-      zkHosts,
-      service.lockNamespace,
-      zkTimeout = 7000,
-      isLowPriorityToBeMaster = false,
-      transport = new TcpTransport,
-      transportTimeout = 5)
-    tempCounter += 1 //todo
-
-    if (BasicStreamService.isExist(kafkaOffsetsStream, metadataStorage)) {
-      logger.debug(s"Instance name: $instanceName, task name: $taskName. Load t-stream: $kafkaOffsetsStream for kafka offsets\n")
-      stream = BasicStreamService.loadStream(kafkaOffsetsStream, metadataStorage, dataStorage)
-    } else {
-      logger.debug(s"Instance name: $instanceName, task name: $taskName. Create t-stream: $kafkaOffsetsStream for kafka offsets\n")
-      stream = BasicStreamService.createStream(
-        kafkaOffsetsStream,
-        1,
-        1000 * 60,
-        "stream to store kafka offsets of input streams",
-        metadataStorage,
-        dataStorage
-      )
-    }
-
-    val options = new BasicProducerOptions[Array[Byte], Array[Byte]](
-      transactionTTL = 6,
-      transactionKeepAliveInterval = 2,
-      producerKeepAliveInterval = 1,
-      new RoundRobinPolicy(stream, (0 to 0).toList),
-      SingleElementInsert,
-      new LocalTimeUUIDGenerator,
-      coordinatorSettings,
-      converter)
-
-    new BasicProducer[Array[Byte], Array[Byte]](stream.name, stream, options)
-  }
-
-  /**
     * Creates a t-stream consumer with pub/sub property
     *
     * @param stream SjStream from which massages are consumed
@@ -301,13 +249,13 @@ class TaskManager() {
       s"Create subscribing consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
 
-    val coordinatorSettings = new ConsumerCoordinationSettings(
-      "localhost:" + tempCounter.toString,
+    val coordinatorSettings = new SubscriberCoordinationOptions(
+      agentsHost + ":" + agentsPorts(currentPortNumber),
       service.lockNamespace,
       zkHosts,
       7000
     )
-    tempCounter += 1 //todo адрес консумера
+    currentPortNumber += 1
 
     val basicStream: BasicStream[Array[Byte]] =
       BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
@@ -315,10 +263,10 @@ class TaskManager() {
     val roundRobinPolicy = new RoundRobinPolicy(basicStream, (partitions.head to partitions.tail.head).toList)
 
     val timeUuidGenerator =
-      stream.generator.generatorType match {
+      stream.asInstanceOf[TStreamSjStream].generator.generatorType match {
         case "local" => new LocalTimeUUIDGenerator
         case _type =>
-          val service = stream.generator.service.asInstanceOf[ZKService]
+          val service = stream.asInstanceOf[TStreamSjStream].generator.service.asInstanceOf[ZKService]
           val zkHosts = service.provider.hosts
           val prefix = service.namespace + "/" + {
             if (_type == "global") _type else stream.name
@@ -333,10 +281,8 @@ class TaskManager() {
       consumerKeepAliveInterval = 5,
       converter,
       roundRobinPolicy,
-      coordinatorSettings,
       offset,
       timeUuidGenerator,
-
       useLastOffset = true)
 
     val callback = new QueueConsumerCallback[Array[Byte], Array[Byte]](queue)
@@ -345,6 +291,7 @@ class TaskManager() {
       "consumer for " + taskName + "_" + stream.name,
       basicStream,
       options,
+      coordinatorSettings,
       callback,
       persistentQueuePath
     )
@@ -363,14 +310,6 @@ class TaskManager() {
       s"Create basic consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
 
-    val coordinatorSettings = new ConsumerCoordinationSettings(
-      "localhost:" + tempCounter.toString,
-      service.lockNamespace,
-      zkHosts,
-      7000
-    )
-    tempCounter += 1 //todo
-
     val basicStream: BasicStream[Array[Byte]] =
       BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
 
@@ -384,7 +323,6 @@ class TaskManager() {
       consumerKeepAliveInterval = 5,
       converter,
       roundRobinPolicy,
-      coordinatorSettings,
       offset,
       timeUuidGenerator,
       useLastOffset = true)
@@ -407,26 +345,26 @@ class TaskManager() {
       s"Create basic producer for stream: ${stream.name}\n")
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
 
-    val coordinatorSettings = new ProducerCoordinationSettings(
-      agentAddress = s"localhost:" + tempCounter.toString,
+    val coordinationOptions = new ProducerCoordinationOptions(
+      agentAddress = agentsHost + ":" + agentsPorts(currentPortNumber),
       zkHosts,
       service.lockNamespace,
       zkTimeout = 7000,
       isLowPriorityToBeMaster = false,
       transport = new TcpTransport,
       transportTimeout = 5)
-    tempCounter += 1 //todo
+    currentPortNumber += 1
 
     val basicStream: BasicStream[Array[Byte]] =
       BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
 
-    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.partitions).toList)
+    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
 
     val timeUuidGenerator =
-      stream.generator.generatorType match {
+      stream.asInstanceOf[TStreamSjStream].generator.generatorType match {
         case "local" => new LocalTimeUUIDGenerator
         case _type =>
-          val service = stream.generator.service.asInstanceOf[ZKService]
+          val service = stream.asInstanceOf[TStreamSjStream].generator.service.asInstanceOf[ZKService]
           val zkServers = service.provider.hosts
           val prefix = service.namespace + "/" + {
             if (_type == "global") _type else basicStream.name
@@ -442,7 +380,7 @@ class TaskManager() {
       roundRobinPolicy,
       BatchInsert(5),
       timeUuidGenerator,
-      coordinatorSettings,
+      coordinationOptions,
       converter)
 
     new BasicProducer[Array[Byte], Array[Byte]](
@@ -459,26 +397,64 @@ class TaskManager() {
     * @return SjStream used for keeping a module state
     */
   def getStateStream = {
+    getTStream(stateStream, "store state of module", Array("state"), 1)
+  }
+
+  /**
+   * Creates t-stream or loads an existing t-stream responsible for committing the offsets of last messages
+   * that has successfully processed for each topic for each partition
+   *
+   * @return t-stream responsible for committing the offsets of last messages
+   *         that has successfully processed for each topic for each partition
+   */
+  def getOffsetStream = {
+    getTStream(kafkaOffsetsStream, "store kafka offsets of input streams", Array("offsets"), 1)
+  }
+
+  /**
+   * Creates t-stream or loads an existing t-stream to keep the reports of module performance.
+   * For each task there is specific partition (task number = partition number).
+   *
+   * @return SjStream used for keeping the reports of module performance
+   */
+  def getReportStream = {
+    getTStream(
+      reportStream,
+      "store reports of performance metrics",
+      Array("report", "performance"),
+      instance.parallelism
+    )
+  }
+
+  private def getTStream(name: String, description: String, tags: Array[String], partitions: Int) = {
     var stream: BasicStream[Array[Byte]] = null
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
 
-    if (BasicStreamService.isExist(stateStream, metadataStorage)) {
+    if (BasicStreamService.isExist(name, metadataStorage)) {
       logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-        s"Load t-stream: $stateStream to store state of module\n")
-      stream = BasicStreamService.loadStream(stateStream, metadataStorage, dataStorage)
+        s"Load t-stream: $name to $description\n")
+      stream = BasicStreamService.loadStream(name, metadataStorage, dataStorage)
     } else {
       logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-        s"Create t-stream: $stateStream to store state of module\n")
+        s"Create t-stream: $name to $description\n")
       stream = BasicStreamService.createStream(
-        stateStream,
-        1,
+        name,
+        partitions,
         1000 * 60,
-        "stream to store state of module",
+        description,
         metadataStorage,
         dataStorage
       )
     }
 
-    new SjStream(stream.getName, stream.getDescriptions, stream.getPartitions, new Generator("local"))
+    new TStreamSjStream(
+      stream.getName,
+      stream.getDescriptions,
+      stream.getPartitions,
+      service,
+      StreamConstants.tStream,
+      tags,
+      new Generator("local")
+    )
   }
 }

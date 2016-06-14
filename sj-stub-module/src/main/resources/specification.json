@@ -23,7 +23,8 @@
     ]
   },
   "module-type": "regular-streaming",
-  "engine": "streaming",
+  "engine-name": "regular-streaming",
+  "engine-version": "0.1",
   "options": {
     "opt": 1
   },

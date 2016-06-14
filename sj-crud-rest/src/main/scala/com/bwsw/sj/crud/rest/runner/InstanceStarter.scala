@@ -5,13 +5,13 @@ import java.util
 
 import com.bwsw.sj.common.DAL.ConnectionConstants
 import com.bwsw.sj.common.DAL.model.module.Instance
-import com.bwsw.sj.common.DAL.model.{SjStream, ZKService}
+import com.bwsw.sj.common.DAL.model.{TStreamSjStream, ZKService}
 import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.crud.rest.entities.MarathonRequest
 import com.bwsw.sj.crud.rest.utils.StreamUtil
-import com.twitter.common.quantity.{Time, Amount}
+import com.twitter.common.quantity.{Amount, Time}
 import com.twitter.common.zookeeper.DistributedLock.LockingException
-import com.twitter.common.zookeeper.{ZooKeeperClient, DistributedLockImpl}
+import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
 import org.apache.http.util.EntityUtils
 
 /**
@@ -22,10 +22,11 @@ import org.apache.http.util.EntityUtils
   * @author Kseniya Tomskikh
   */
 class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
-  import scala.collection.JavaConverters._
-  import com.bwsw.sj.common.ModuleConstants._
   import InstanceMethods._
-  import com.bwsw.sj.common.JarConstants._
+  import com.bwsw.sj.common.ConfigConstants._
+  import com.bwsw.sj.common.ModuleConstants._
+
+  import scala.collection.JavaConverters._
 
   def run() = {
     val mesosInfoResponse = getMesosInfo
@@ -53,8 +54,8 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
       val streams = instance.inputs.map(_.replaceAll("/split|/full", "")).union(instance.outputs)
         .map(name => streamDAO.get(name))
         .filter(stream => stream.streamType.equals(StreamConstants.tStream))
-        .filter(stream => !stream.generator.generatorType.equals("local"))
-      startGenerators(streams.toSet)
+        .filter(stream => !stream.asInstanceOf[TStreamSjStream].generator.generatorType.equals("local"))
+      startGenerators(streams.map(stream => stream.asInstanceOf[TStreamSjStream]).toSet)
 
       val stages = Map(instance.stages.asScala.toList: _*)
       if (!stages.exists(s => !s._1.equals(instance.name) && s._2.state.equals(failed))) {
@@ -113,7 +114,8 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
     *         (true, if framework running on mesos)
     */
   def frameworkStart(mesosMaster: String) = {
-    val restUrl = new URI(s"$restAddress/v1/custom/$frameworkJar")
+    val frameworkJarName = configFileService.get(configFileService.get(frameworkTag).value).value
+    val restUrl = new URI(s"$restAddress/v1/custom/$frameworkJarName")
     val taskInfoResponse = getTaskInfo(instance.name)
     if (taskInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
       val ignore = serializer.getIgnoreUnknown()
@@ -136,7 +138,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
         applicationEnvs = applicationEnvs ++ Map(instance.environmentVariables.asScala.toList: _*)
       }
       val request = new MarathonRequest(instance.name,
-        "java -jar " + frameworkJar + " $PORT",
+        "java -jar " + frameworkJarName + " $PORT",
         1,
         Map(applicationEnvs.toList: _*),
         List(restUrl.toString))
@@ -151,7 +153,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
     * @param streams - Streams
     * @return - Future of started generators
     */
-  def startGenerators(streams: Set[SjStream]) = {
+  def startGenerators(streams: Set[TStreamSjStream]) = {
     streams.foreach { stream =>
       //logger.debug(s"Try starting generator $generatorName")
       val generatorName = stream.name
@@ -195,7 +197,10 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
     * @param stream - Stream for running generator
     * @return - Future with response from request to marathon
     */
-  def startGenerator(stream: SjStream) = {
+  def startGenerator(stream: TStreamSjStream) = {
+    val transactionGeneratorJar = configFileService.get(
+      configFileService.get(transactionGeneratorTag).value
+    ).value
     val zkService = stream.generator.service.asInstanceOf[ZKService]
     val generatorProvider = zkService.provider
     var prefix = zkService.namespace

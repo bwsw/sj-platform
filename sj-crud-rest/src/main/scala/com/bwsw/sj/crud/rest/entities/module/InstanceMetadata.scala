@@ -26,5 +26,7 @@ class InstanceMetadata {
   @JsonProperty("execution-plan") var executionPlan: Map[String, Any] = null
   @JsonProperty("coordination-service") var coordinationService: String = null
   @JsonProperty("environment-variables") var environmentVariables: Map[String, String] = null
+  @JsonProperty("performance-reporting-interval") var performanceReportingInterval: Long = 0L
+  var engine: String = null
 }
 

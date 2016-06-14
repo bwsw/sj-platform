@@ -8,7 +8,8 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.crud.rest.entities.module.{ModuleSpecification, InstanceMetadata}
+import com.bwsw.sj.common.StreamConstants
+import com.bwsw.sj.crud.rest.entities.module.{InstanceMetadata, ModuleSpecification}
 import com.bwsw.sj.crud.rest.utils.StreamUtil
 import kafka.common.TopicExistsException
 
@@ -95,6 +96,10 @@ abstract class StreamingModuleValidator {
 
     if (parameters.options.isEmpty) {
       errors += "Options attribute is empty."
+    }
+
+    if (parameters.performanceReportingInterval <= 0) {
+      errors += "Performance reporting interval attribute must be greater than zero."
     }
 
     if (parameters.jvmOptions.isEmpty) {
@@ -329,7 +334,13 @@ abstract class StreamingModuleValidator {
     */
   def getPartitionForStreams(streams: Seq[SjStream]): Map[String, Int] = {
     Map(streams.map { stream =>
-      stream.name -> stream.partitions
+      stream.streamType match {
+        case StreamConstants.tStream =>
+          stream.name -> stream.asInstanceOf[TStreamSjStream].partitions
+        case StreamConstants.kafka =>
+          stream.name -> stream.asInstanceOf[KafkaSjStream].partitions
+      }
+
     }: _*)
   }
 

@@ -1,8 +1,12 @@
 package com.bwsw.sj.engine.core.environment
 
 import com.bwsw.sj.common.DAL.model.SjStream
-import com.bwsw.sj.engine.core.state.StateStorage
+
+import com.bwsw.sj.common.module.PerformanceMetrics
+import com.bwsw.sj.common.module.environment.ModuleOutput
+
 import com.bwsw.sj.common.utils.SjTimer
+import com.bwsw.sj.engine.core.state.StateStorage
 import com.bwsw.tstreams.agents.producer.BasicProducer
 
 import scala.collection.mutable
@@ -10,9 +14,9 @@ import scala.collection.mutable
 /**
  * Class allowing to manage environment of module that has state
  * Created: 15/04/2016
- * @author Kseniya Mikhaleva
- *
- * @param stateStorage Storage of state of module
+  *
+  * @author Kseniya Mikhaleva
+  * @param stateStorage Storage of state of module
  * @param options User defined options from instance parameters
  * @param producers T-streams producers for each output stream of instance parameters
  * @param outputs Set of output streams of instance parameters that have tags
@@ -24,11 +28,14 @@ class StatefulModuleEnvironmentManager(stateStorage: StateStorage,
                                        options: Map[String, Any],
                                        producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]],
                                        outputs: Array[SjStream],
-                                       outputTags: mutable.Map[String, (String, Any)],
-                                       moduleTimer: SjTimer) extends ModuleEnvironmentManager(options, producers, outputs, outputTags, moduleTimer) {
+                                       outputTags: mutable.Map[String, (String, ModuleOutput)],
+                                       moduleTimer: SjTimer,
+                                       performanceMetrics: PerformanceMetrics)
+  extends ModuleEnvironmentManager(options, producers, outputs, outputTags, moduleTimer,performanceMetrics) {
   /**
    * Returns specific state of module
-   * @return Module state
+    *
+    * @return Module state
    */
   override def getState: StateStorage = {
     logger.info(s"Get a storage where a state is\n")

@@ -44,16 +44,15 @@ object ModuleConstants {
 }
 
 object StreamConstants {
-  val tStream = "stream.t-stream"
-  val kafka = "stream.kafka"
-  val esOutput = "elasticsearch-output"
-  val jdbcOutput = "jdbc-output"
+  final val tStream = "stream.t-stream"
+  final val kafka = "stream.kafka"
+  final val esOutput = "elasticsearch-output"
+  final val jdbcOutput = "jdbc-output"
   val streamTypes = Set(tStream, kafka, esOutput, jdbcOutput)
 }
 
 object GeneratorConstants {
   val generatorTypes = Set("global", "local", "per-stream")
-  val generatorTypesWithService = Set("global", "per-stream")
 }
 
 object ServiceConstants {
@@ -74,8 +73,13 @@ object ProviderConstants {
   val providerTypes = Set("cassandra", "aerospike", "zookeeper", "kafka", "ES", "redis", "JDBC")
 }
 
-object JarConstants {
-  val transactionGeneratorJar = "sj-transaction-generator-assembly-1.0.jar"
-  val frameworkJar = "ScalaMesos-assembly-1.0.jar"
-  val taskRunnerJar = ""
+object ConfigConstants {
+  val transactionGeneratorTag = "current-transaction-generator" 
+  val frameworkTag = "current-framework"
+  val regularEngineTag = "current-regular-engine"
+  val windowedEngineTag = "current-windowed-engine"
+  val outputEngineTag = "current-output-engine"
+  val hostOfCrudRestTag = "crud-rest-host"
+  val portOfCrudRestTag = "crud-rest-port"
+  val marathonTag = "marathon-connect"
 }

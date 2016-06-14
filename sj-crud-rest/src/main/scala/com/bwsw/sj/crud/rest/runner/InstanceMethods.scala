@@ -5,12 +5,13 @@ import java.util.Calendar
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.traits.Serializer
-import com.bwsw.sj.common.DAL.model.SjStream
+import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.DAL.model.module.Instance
+import com.bwsw.sj.common.DAL.model.{SjStream, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.crud.rest.entities.MarathonRequest
-import org.apache.http.client.methods.{HttpDelete, HttpPut, HttpPost, HttpGet}
+import org.apache.http.client.methods.{HttpDelete, HttpGet, HttpPost, HttpPut}
 import org.apache.http.entity.StringEntity
 
 /**
@@ -26,19 +27,38 @@ object InstanceMethods {
   val serializer: Serializer = new JsonSerializer
   val instanceDAO: GenericMongoService[Instance] = ConnectionRepository.getInstanceService
   val streamDAO: GenericMongoService[SjStream] = ConnectionRepository.getStreamService
+  val configFileService = ConnectionRepository.getConfigFileService
 
   val OK: Int = 200
   val Created: Int = 201
   val NotFound: Int = 404
 
-  lazy val restHost = System.getenv("CRUD_REST_HOST")
-  lazy val restPort = System.getenv("CRUD_REST_PORT").toInt
-  lazy val marathonConnect = System.getenv("MARATHON_CONNECT")
+  lazy val restHost = configFileService.get(ConfigConstants.hostOfCrudRestTag).value
+  lazy val restPort = configFileService.get(ConfigConstants.portOfCrudRestTag).value.toInt
+  lazy val marathonConnect = configFileService.get(ConfigConstants.marathonTag).value
   val timeout = 60000
 
   val restAddress = new URI(s"http://$restHost:$restPort").toString
 
   /**
+    *
+    * Generating name of task for t-streams stream generator
+    *
+    * @param stream - SjStream object
+    * @return - Task name for transaction generator application
+    */
+  def createGeneratorTaskName(stream: TStreamSjStream) = {
+    var name = ""
+    if (stream.generator.generatorType.equals("per-stream")) {
+      name = s"${stream.generator.service.name}-${stream.name}-tg"
+    } else {
+      name = s"${stream.generator.service.name}-global-tg"
+    }
+    name.replaceAll("_", "-")
+  }
+
+  /**
+    *
     * Getting mesos master on Zookeeper from marathon
     *
     * @return - Response from marathon

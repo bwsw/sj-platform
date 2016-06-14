@@ -13,11 +13,10 @@ import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.typesafe.config.Config
 import org.everit.json.schema.loader.SchemaLoader
 import org.json.{JSONObject, JSONTokener}
 
-import scala.concurrent.{ExecutionContextExecutor, Await}
+import scala.concurrent.{Await, ExecutionContextExecutor}
 
 /**
   * Trait for validation of crud-rest-api
@@ -34,7 +33,6 @@ trait SjCrudValidator {
   implicit val system: ActorSystem
   implicit def executor: ExecutionContextExecutor
 
-  val conf: Config
   val serializer: Serializer
   val fileMetadataDAO: GenericMongoService[FileMetadata]
   val storage: FileStorage
@@ -42,9 +40,9 @@ trait SjCrudValidator {
   val serviceDAO: GenericMongoService[Service]
   val streamDAO: GenericMongoService[SjStream]
   val providerDAO: GenericMongoService[Provider]
+  val configFileService: GenericMongoService[ConfigElement]
   val restHost: String
   val restPort: Int
-  val marathonConnect: String
 
   import com.bwsw.sj.common.ModuleConstants._
   import com.bwsw.sj.common.StreamConstants._
