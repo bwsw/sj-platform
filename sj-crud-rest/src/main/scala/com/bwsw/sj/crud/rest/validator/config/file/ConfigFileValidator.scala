@@ -1,7 +1,7 @@
 package com.bwsw.sj.crud.rest.validator.config.file
 
+import com.bwsw.sj.common.DAL.model.ConfigElement
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.crud.rest.entities.ConfigElementData
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -9,7 +9,7 @@ object ConfigFileValidator {
 
   val configFileService = ConnectionRepository.getConfigFileService
 
-  def validate(initialData: ConfigElementData) = {
+  def validate(initialData: ConfigElement) = {
 
     val errors = new ArrayBuffer[String]()
 

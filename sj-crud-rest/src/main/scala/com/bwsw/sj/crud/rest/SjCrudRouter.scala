@@ -14,18 +14,19 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
 import org.everit.json.schema.ValidationException
 
 /**
-  * Router trait for CRUD Rest-API
-  * Created: 06/04/2016
-  *
-  * @author Kseniya Tomskikh
-  */
+ * Router trait for CRUD Rest-API
+ * Created: 06/04/2016
+ *
+ * @author Kseniya Tomskikh
+ */
 trait SjCrudRouter extends Directives
-  with CorsSupport
-  with SjModulesApi
-  with SjCustomApi
-  with SjStreamsApi
-  with SjServicesApi
-  with SjProvidersApi {
+with CorsSupport
+with SjModulesApi
+with SjCustomApi
+with SjStreamsApi
+with SjServicesApi
+with SjProvidersApi
+with SjConfigFileApi {
 
   val exceptionHandler = ExceptionHandler {
     case BadRecord(msg) =>
@@ -83,10 +84,11 @@ trait SjCrudRouter extends Directives
       corsHandler {
         pathPrefix("v1") {
           modulesApi ~
-          customApi ~
-          streamsApi ~
-          servicesApi ~
-          providersApi
+            customApi ~
+            streamsApi ~
+            servicesApi ~
+            providersApi ~
+            configFileApi
         }
       }
     }
