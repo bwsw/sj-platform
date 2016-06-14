@@ -8,7 +8,7 @@ import scala.collection.mutable
   * Created by diryavkin_dn on 18.05.16.
   */
 object TasksList{
-  class Task(task_id: String){
+  class Task(task_id: String, inputs:mutable.Map[String,Array[Int]]){
     val id: String = task_id
     var state: String = "TASK_STAGING"
     var state_changed: String = ""
@@ -16,6 +16,7 @@ object TasksList{
     var node: String = ""
     var last_node: String = ""
     val description: ormTask = null
+    val input:mutable.Map[String,Array[Int]] = inputs
 
     def update(state: String = state,
                state_changed: String = state_changed,
@@ -39,8 +40,8 @@ object TasksList{
   private val listTasks : mutable.Map[String, Task] = mutable.Map()
   var message: String = "Initialization"
 
-  def newTask(taskId: String) = {
-    val task = new Task(taskId)
+  def newTask(taskId: String, inputs:mutable.Map[String,Array[Int]]) = {
+    val task = new Task(taskId, inputs)
     listTasks += taskId -> task
     tasksToLaunch += taskId
   }
@@ -49,8 +50,8 @@ object TasksList{
     listTasks.values
   }
 
-  def getTask(taskId: String): Option[Task] = {
-    listTasks.get(taskId)
+  def getTask(taskId: String): Task = {
+    listTasks(taskId)
   }
 
   def addToLaunch(taskId: String) = {
