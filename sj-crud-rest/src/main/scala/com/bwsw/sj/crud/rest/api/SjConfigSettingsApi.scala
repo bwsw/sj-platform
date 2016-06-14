@@ -6,7 +6,7 @@ import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.common.exceptions.BadRecordWithKey
 import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.DAL.model.ConfigSetting
-import com.bwsw.sj.crud.rest.entities.ProtocolResponse
+import com.bwsw.sj.crud.rest.entities.{ConfigSettingData, ProtocolResponse}
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.config.ConfigSettingValidator
 import com.bwsw.sj.crud.rest.utils.ConvertUtil._
@@ -27,23 +27,23 @@ trait SjConfigSettingsApi extends Directives with SjCrudValidator {
           )
           pathEndOrSingleSlash {
             post { (ctx: RequestContext) =>
-              val data = serializer.deserialize[ConfigSetting](getEntityFromContext(ctx))
+              val data = serializer.deserialize[ConfigSettingData](getEntityFromContext(ctx))
 
               val errors = ConfigSettingValidator.validate(data)
 
               if (errors.isEmpty) {
                 val configElement = new ConfigSetting(
-                  data.name,
+                  domain + "." + data.name,
                   data.value,
                   domain
                 )
                 configService.save(configElement)
-                val response = ProtocolResponse(200, Map("message" -> s"$domain config setting '${configElement.name}' is created"))
+                val response = ProtocolResponse(200, Map("message" -> s"$domain config setting '${data.name}' is created"))
                 ctx.complete(HttpEntity(`application/json`, serializer.serialize(response)))
               } else {
                 throw new BadRecordWithKey(
-                  s"Cannot create config setting. Errors: ${errors.mkString("\n")}",
-                  s"$domain.${data.name}"
+                  s"Cannot create $domain config setting. Errors: ${errors.mkString("\n")}",
+                  s"${data.name}"
                 )
               }
             } ~
@@ -51,7 +51,7 @@ trait SjConfigSettingsApi extends Directives with SjCrudValidator {
                 val configElements = configService.getByParameters(Map("domain" -> domain))
                 var response: Option[ProtocolResponse] = None
                 if (configElements.nonEmpty) {
-                  val entity = Map("config-settings" -> configElements.map(x => configSettingToConfigSettingData(x)))
+                  val entity = Map(s"$domain-config-settings" -> configElements.map(x => configSettingToConfigSettingData(x)))
                   response = Some(ProtocolResponse(200, entity))
                 } else {
                   response = Some(ProtocolResponse(200, Map("message" -> ("There are no " + domain + " config settings"))))
@@ -65,10 +65,10 @@ trait SjConfigSettingsApi extends Directives with SjCrudValidator {
             pathPrefix(Segment) { (name: String) =>
               pathEndOrSingleSlash {
                 get {
-                  val configElement = configService.getByParameters(Map("domain" -> domain, "name" -> name))
+                  val configElement = configService.get(domain + "." + name)
                   var response: Option[ProtocolResponse] = None
-                  if (configElement.nonEmpty) {
-                    val entity = Map("config-settings" -> configSettingToConfigSettingData(configElement.head))
+                  if (configElement != null) {
+                    val entity = Map(s"$domain-config-settings" -> configSettingToConfigSettingData(configElement))
                     response = Some(ProtocolResponse(200, entity))
                   } else {
                     response = Some(ProtocolResponse(200, Map("message" -> s"$domain config setting '$name' has not found")))
@@ -80,7 +80,7 @@ trait SjConfigSettingsApi extends Directives with SjCrudValidator {
                 } ~
                   delete {
                     var response: Option[ProtocolResponse] = None
-                    if (configService.getByParameters(Map("domain" -> domain, "name" -> name)).nonEmpty) {
+                    if (configService.get(domain + "." + name) != null) {
                       val entity = Map("message" -> s"$domain config setting '$name' has been deleted")
                       response = Some(ProtocolResponse(200, entity))
                       configService.delete(name)
@@ -99,7 +99,7 @@ trait SjConfigSettingsApi extends Directives with SjCrudValidator {
             val configElements = configService.getAll
             var response: Option[ProtocolResponse] = None
             if (configElements.nonEmpty) {
-              val entity = Map("config-settings" -> configElements.map(x => configSettingToConfigSettingData(x)))
+              val entity = Map("config-settings" -> configElements.map(x => (x.domain, configSettingToConfigSettingData(x))).toMap)
               response = Some(ProtocolResponse(200, entity))
             } else {
               response = Some(ProtocolResponse(200, Map("message" -> "There are no config settings")))

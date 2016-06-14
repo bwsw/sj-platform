@@ -317,7 +317,7 @@ object ConvertUtil {
    */
   def configSettingToConfigSettingData(configElement: ConfigSetting) = {
     new ConfigSettingData(
-      configElement.domain + "." + configElement.name,
+      configElement.name.replace(configElement.domain + ".", ""),
       configElement.value
     )
   }

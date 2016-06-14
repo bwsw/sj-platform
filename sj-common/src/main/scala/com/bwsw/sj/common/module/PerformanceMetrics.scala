@@ -39,7 +39,7 @@ class PerformanceMetrics(taskId: String, host: String, streamNames: Array[String
    */
   def setNumberOfStateVariables(amount: Int) = {
     mutex.lock()
-    logger.debug(s"Set number of state varibles to $amount\n")
+    logger.debug(s"Set number of state variables to $amount\n")
     numberOfStateVariables = amount
     mutex.unlock()
   }
@@ -122,13 +122,6 @@ class PerformanceMetrics(taskId: String, host: String, streamNames: Array[String
     val inputEnvelopesSize = inputEnvelopesPerStream.flatMap(x => x._2.map(_.size))
     val outputEnvelopesSize = outputEnvelopesPerStream.flatMap(x => x._2.map(_._2.size))
 
-
-    logger.debug(s"Reset variables for performance report for next reporting\n")
-    inputEnvelopesPerStream = mutable.Map(streamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
-    outputEnvelopesPerStream = mutable.Map(streamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
-    totalIdleTime = 0L
-    numberOfStateVariables = 0
-
     val performanceReport =
     s"""{
     |"datetime" : "${LocalDateTime.now()}"
@@ -160,6 +153,11 @@ class PerformanceMetrics(taskId: String, host: String, streamNames: Array[String
       }
     """.stripMargin
 
+    logger.debug(s"Reset variables for performance report for next reporting\n")
+    inputEnvelopesPerStream = mutable.Map(streamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
+    outputEnvelopesPerStream = mutable.Map(streamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
+    totalIdleTime = 0L
+    numberOfStateVariables = 0
 
     mutex.unlock()
 

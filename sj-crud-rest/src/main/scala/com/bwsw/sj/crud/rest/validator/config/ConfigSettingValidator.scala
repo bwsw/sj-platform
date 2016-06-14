@@ -1,7 +1,7 @@
 package com.bwsw.sj.crud.rest.validator.config
 
-import com.bwsw.sj.common.DAL.model.ConfigSetting
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.crud.rest.entities.ConfigSettingData
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -9,7 +9,7 @@ object ConfigSettingValidator {
 
   val configService = ConnectionRepository.getConfigService
 
-  def validate(initialData: ConfigSetting) = {
+  def validate(initialData: ConfigSettingData) = {
 
     val errors = new ArrayBuffer[String]()
 
@@ -24,8 +24,8 @@ object ConfigSettingValidator {
           if (configService.get(x) != null) {
             errors += s"Config setting with name $x already exists"
           }
-          if (x.contains("")) {
-            errors += s"Name $x of config element contains spaces"
+          if (x.contains(" ")) {
+            errors += s"Name $x of config setting contains spaces"
           }
         }
     }

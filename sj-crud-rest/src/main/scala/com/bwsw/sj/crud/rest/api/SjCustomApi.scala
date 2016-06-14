@@ -82,7 +82,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                 FileUtils.copyFile(file, uploadingFile)
                 storage.put(uploadingFile, metadata.fileName, specification, "custom")
                 val customJarConfigElement = new ConfigSetting(
-                  specification("name").toString + "-" + specification("version").toString,
+                  "system" + "." + specification("name").toString + "-" + specification("version").toString,
                   metadata.fileName,
                   "system"
                 )

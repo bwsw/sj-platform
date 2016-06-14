@@ -7,16 +7,17 @@ import java.util.Properties
 import com.aerospike.client.Host
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.common.tstream.NetworkTimeUUIDGenerator
+import com.bwsw.sj.common.ConfigConstants._
 import com.bwsw.sj.common.DAL.ConnectionConstants._
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.ModuleConstants._
-import com.bwsw.sj.common.StreamConstants
+import com.bwsw.sj.common.StreamConstants._
 import com.bwsw.sj.common.module.environment.ModuleOutput
 import com.bwsw.tstreams.agents.consumer.Offsets.{IOffset, Newest}
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions, SubscriberCoordinationOptions}
-import com.bwsw.tstreams.agents.producer.InsertionType.BatchInsert
+import com.bwsw.tstreams.agents.producer.InsertionType.SingleElementInsert
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions, ProducerCoordinationOptions}
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
@@ -55,14 +56,44 @@ class TaskManager() {
   private var currentPortNumber = 0
   private val instance = ConnectionRepository.getInstanceService.get(instanceName)
   private val storage = ConnectionRepository.getFileStorage
+  private val configService = ConnectionRepository.getConfigService
+
+  private val txnPreload = configService.getByParameters(
+    Map("domain" -> "t-streams", "name" -> txnPreloadTag)
+  ).head.value.toInt
+  private val dataPreload = configService.getByParameters(
+    Map("domain" -> "t-streams", "name" -> dataPreloadTag)
+  ).head.value.toInt
+  private val consumerKeepAliveInterval = configService.getByParameters(
+    Map("domain" -> "t-streams", "name" -> consumerKeepAliveInternalTag)
+  ).head.value.toInt
+  private val transportTimeout = configService.getByParameters(
+    Map("domain" -> "t-streams", "name" -> transportTimeoutTag)
+  ).head.value.toInt
+  private val txnTTL = configService.getByParameters(
+    Map("domain" -> "t-streams", "name" -> txnTTLTag)
+  ).head.value.toInt
+  private val txnKeepAliveInterval = configService.getByParameters(
+    Map("domain" -> "t-streams", "name" -> txnKeepAliveIntervalTag)
+  ).head.value.toInt
+  private val producerKeepAliveInterval = configService.getByParameters(
+    Map("domain" -> "t-streams", "name" -> producerKeepAliveIntervalTag)
+  ).head.value.toInt
+  private val streamTTL = configService.getByParameters(
+    Map("domain" -> "t-streams", "name" -> streamTTLTag)
+  ).head.value.toInt
+
+  private val zkTimeout = configService.getByParameters(
+    Map("domain" -> "zk", "name" -> zkSessionTimeoutTag)
+  ).head.value.toInt
 
   assert(agentsPorts.length == (instance.inputs.length + instance.outputs.length + 3),
     "Not enough ports for t-stream consumers/producers ")
 
   private val fileMetadata: FileMetadata = ConnectionRepository.getFileMetadataService.getByParameters(
     Map("specification.name" -> instance.moduleName,
-    "specification.module-type" -> instance.moduleType,
-    "specification.version" -> instance.moduleVersion)
+      "specification.module-type" -> instance.moduleType,
+      "specification.version" -> instance.moduleVersion)
   ).head
 
   /**
@@ -201,10 +232,11 @@ class TaskManager() {
     val props = new Properties()
     props.put("bootstrap.servers", hosts.mkString(","))
     props.put("enable.auto.commit", "false")
-    props.put("session.timeout.ms", "30000")
     props.put("auto.offset.reset", offset)
     props.put("key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
     props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
+    configService.getByParameters(Map("domain" -> "kafka")).foreach(x => props.put(x.name.replace(x.domain + ".", ""), x.value))
+
     val consumer = new KafkaConsumer[Array[Byte], Array[Byte]](props)
 
     val topicPartitions = topics.flatMap(x => {
@@ -218,9 +250,9 @@ class TaskManager() {
       val roundRobinPolicy = new RoundRobinPolicy(stream, (0 to 0).toList)
       val timeUuidGenerator = new LocalTimeUUIDGenerator
       val options = new BasicConsumerOptions[Array[Byte], Array[Byte]](
-        transactionsPreload = 10,
-        dataPreload = 7,
-        consumerKeepAliveInterval = 5,
+        txnPreload,
+        dataPreload,
+        consumerKeepAliveInterval,
         converter,
         roundRobinPolicy,
         Newest,
@@ -258,7 +290,7 @@ class TaskManager() {
       agentsHost + ":" + agentsPorts(currentPortNumber),
       service.lockNamespace,
       zkHosts,
-      7000
+      zkTimeout
     )
     currentPortNumber += 1
 
@@ -281,9 +313,9 @@ class TaskManager() {
       }
 
     val options = new BasicConsumerOptions[Array[Byte], Array[Byte]](
-      transactionsPreload = 10,
-      dataPreload = 7,
-      consumerKeepAliveInterval = 5,
+      txnPreload,
+      dataPreload,
+      consumerKeepAliveInterval,
       converter,
       roundRobinPolicy,
       offset,
@@ -323,9 +355,9 @@ class TaskManager() {
     val timeUuidGenerator = new LocalTimeUUIDGenerator
 
     val options = new BasicConsumerOptions[Array[Byte], Array[Byte]](
-      transactionsPreload = 10,
-      dataPreload = 7,
-      consumerKeepAliveInterval = 5,
+      txnPreload,
+      dataPreload,
+      consumerKeepAliveInterval,
       converter,
       roundRobinPolicy,
       offset,
@@ -354,10 +386,11 @@ class TaskManager() {
       agentAddress = agentsHost + ":" + agentsPorts(currentPortNumber),
       zkHosts,
       service.lockNamespace,
-      zkTimeout = 7000,
+      zkTimeout,
       isLowPriorityToBeMaster = false,
       transport = new TcpTransport,
-      transportTimeout = 5)
+      transportTimeout
+    )
     currentPortNumber += 1
 
     val basicStream: BasicStream[Array[Byte]] =
@@ -379,11 +412,11 @@ class TaskManager() {
       }
 
     val options = new BasicProducerOptions[Array[Byte], Array[Byte]](
-      transactionTTL = 6,
-      transactionKeepAliveInterval = 2,
-      producerKeepAliveInterval = 1,
+      txnTTL,
+      txnKeepAliveInterval,
+      producerKeepAliveInterval,
       roundRobinPolicy,
-      BatchInsert(5),
+      SingleElementInsert,
       timeUuidGenerator,
       coordinationOptions,
       converter)
@@ -445,7 +478,7 @@ class TaskManager() {
       stream = BasicStreamService.createStream(
         name,
         partitions,
-        1000 * 60,
+        streamTTL,
         description,
         metadataStorage,
         dataStorage
@@ -457,7 +490,7 @@ class TaskManager() {
       stream.getDescriptions,
       stream.getPartitions,
       service,
-      StreamConstants.tStream,
+      tStream,
       tags,
       new Generator("local")
     )
