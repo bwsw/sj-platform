@@ -335,7 +335,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
    * @return - list of errors
    */
   def validateOptions(options: InstanceMetadata, specification: ModuleSpecification, moduleType: String) = {
-    val validatorClassName = configFileService.get(s"$moduleType-validator-class").value
+    val validatorClassName = configService.get(s"$moduleType-validator-class").value
     val validatorClass = Class.forName(validatorClassName)
     val validator = validatorClass.newInstance().asInstanceOf[StreamingModuleValidator]
     validator.validate(options, specification)

@@ -13,7 +13,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.ConfigConstants
-import com.bwsw.sj.common.DAL.model.ConfigElement
+import com.bwsw.sj.common.DAL.model.ConfigSetting
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 
 import scala.concurrent.Future
@@ -59,7 +59,7 @@ object SjCrudRestService extends App with SjCrudRouter {
   val serviceDAO = ConnectionRepository.getServiceManager
   val providerDAO = ConnectionRepository.getProviderService
   val streamDAO = ConnectionRepository.getStreamService
-  val configFileService = ConnectionRepository.getConfigFileService
+  val configService = ConnectionRepository.getConfigService
 
   val routeLogged = logRequestResult(Logging.InfoLevel, route())
   val logger = Logging(system, getClass)
@@ -79,7 +79,7 @@ object SjCrudRestService extends App with SjCrudRouter {
     .onComplete(_ => system.terminate())
 
   private def putRestSettingsToConfigFile() = {
-    configFileService.save(new ConfigElement(ConfigConstants.hostOfCrudRestTag, restHost))
-    configFileService.save(new ConfigElement(ConfigConstants.portOfCrudRestTag, restPort.toString))
+    configService.save(new ConfigSetting(ConfigConstants.hostOfCrudRestTag, restHost))
+    configService.save(new ConfigSetting(ConfigConstants.portOfCrudRestTag, restPort.toString))
   }
 }

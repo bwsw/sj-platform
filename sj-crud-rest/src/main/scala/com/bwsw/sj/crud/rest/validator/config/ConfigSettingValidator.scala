@@ -1,15 +1,15 @@
-package com.bwsw.sj.crud.rest.validator.config.file
+package com.bwsw.sj.crud.rest.validator.config
 
-import com.bwsw.sj.common.DAL.model.ConfigElement
+import com.bwsw.sj.common.DAL.model.ConfigSetting
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 
 import scala.collection.mutable.ArrayBuffer
 
-object ConfigFileValidator {
+object ConfigSettingValidator {
 
-  val configFileService = ConnectionRepository.getConfigFileService
+  val configService = ConnectionRepository.getConfigService
 
-  def validate(initialData: ConfigElement) = {
+  def validate(initialData: ConfigSetting) = {
 
     val errors = new ArrayBuffer[String]()
 
@@ -21,7 +21,7 @@ object ConfigFileValidator {
         if (x.isEmpty) {
           errors += s"'name' can not be empty"
         } else {
-          if (configFileService.get(x) != null) {
+          if (configService.get(x) != null) {
             errors += s"Config element with name $x already exists"
           }
           if (x.contains("")) {

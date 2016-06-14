@@ -26,7 +26,7 @@ with SjCustomApi
 with SjStreamsApi
 with SjServicesApi
 with SjProvidersApi
-with SjConfigFileApi {
+with SjConfigSettingsApi {
 
   val exceptionHandler = ExceptionHandler {
     case BadRecord(msg) =>
@@ -88,7 +88,7 @@ with SjConfigFileApi {
             streamsApi ~
             servicesApi ~
             providersApi ~
-            configFileApi
+            configSettingsApi
         }
       }
     }
