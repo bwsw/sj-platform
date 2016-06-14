@@ -4,19 +4,19 @@ import java.util.UUID
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.module.entities.TStreamEnvelope
+import com.bwsw.sj.engine.core.entities.TStreamEnvelope
+import com.bwsw.sj.engine.core.PersistentBlockingQueue
 import com.bwsw.tstreams.agents.consumer.subscriber.{BasicSubscriberCallback, BasicSubscribingConsumer}
 import org.slf4j.LoggerFactory
 
 
 /**
- * Provides a handler for sub. consumer that puts a t-stream envelope in a persistent blocking queue
- * Created: 21/04/2016
+  * Provides a handler for sub. consumer that puts a t-stream envelope in a persistent blocking queue
+  * Created: 21/04/2016
   *
   * @author Kseniya Mikhaleva
-
- * @param blockingQueue Persistent blocking queue for storing transactions
- */
+  * @param blockingQueue Persistent blocking queue for storing transactions
+  */
 
 class QueueConsumerCallback[DATATYPE, USERTYPE](blockingQueue: PersistentBlockingQueue) extends BasicSubscriberCallback[DATATYPE, USERTYPE] {
   private val logger = LoggerFactory.getLogger(this.getClass)

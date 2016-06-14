@@ -41,6 +41,7 @@ object InstanceMethods {
   val restAddress = new URI(s"http://$restHost:$restPort").toString
 
   /**
+    *
     * Generating name of task for t-streams stream generator
     *
     * @param stream - SjStream object
@@ -57,6 +58,7 @@ object InstanceMethods {
   }
 
   /**
+    *
     * Getting mesos master on Zookeeper from marathon
     *
     * @return - Response from marathon

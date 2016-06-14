@@ -12,13 +12,14 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.ModuleConstants._
 import com.bwsw.sj.common.StreamConstants
-import com.bwsw.sj.common.module.environment.ModuleOutput
+import com.bwsw.sj.engine.core.PersistentBlockingQueue
+import com.bwsw.sj.engine.core.converter.ArrayByteConverter
+import com.bwsw.sj.engine.core.environment.ModuleOutput
 import com.bwsw.tstreams.agents.consumer.Offsets.{IOffset, Newest}
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions, SubscriberCoordinationOptions}
-import com.bwsw.tstreams.agents.producer.InsertionType.BatchInsert
+import com.bwsw.tstreams.agents.producer.InsertionType.{SingleElementInsert, BatchInsert}
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions, ProducerCoordinationOptions}
-import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
 import com.bwsw.tstreams.data.IStorage
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStorageOptions}
@@ -35,15 +36,14 @@ import org.slf4j.LoggerFactory
 import scala.collection.mutable
 
 /**
- * Class allowing to manage an environment of task
- * Created: 13/04/2016
- *
- * @author Kseniya Mikhaleva
- */
-
+  * Class allowing to manage an environment of task
+  * Created: 13/04/2016
+  *
+  * @author Kseniya Mikhaleva
+  */
 class TaskManager() {
-
   private val logger = LoggerFactory.getLogger(this.getClass)
+
   val instanceName = System.getenv("INSTANCE_NAME")
   val agentsHost = System.getenv("AGENTS_HOST")
   private val agentsPorts = System.getenv("AGENTS_PORTS").split(",")
@@ -66,30 +66,25 @@ class TaskManager() {
   ).head
 
   /**
-   * Converter to convert usertype->storagetype; storagetype->usertype
-   */
-  private val converter = new IConverter[Array[Byte], Array[Byte]] {
-    override def convert(obj: Array[Byte]): Array[Byte] = {
-      logger.debug(s"Instance name: $instanceName, task name: $taskName. Converter is invoked\n")
-      obj
-    }
-  }
+    * Converter to convert usertype->storagetype; storagetype->usertype
+    */
+  private val converter = new ArrayByteConverter
 
   /**
-   * An auxiliary service to retrieve settings of TStream providers
-   */
+    * An auxiliary service to retrieve settings of TStream providers
+    */
   private val service = ConnectionRepository.getStreamService.get(instance.outputs.head).service.asInstanceOf[TStreamService]
 
   private val zkHosts = service.lockProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList
 
   /**
-   * Metadata storage instance
-   */
+    * Metadata storage instance
+    */
   private val metadataStorage: MetadataStorage = createMetadataStorage()
 
   /**
-   * Creates metadata storage for producer/consumer settings
-   */
+    * Creates metadata storage for producer/consumer settings
+    */
   private def createMetadataStorage() = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Create metadata storage " +
       s"(namespace: ${service.metadataNamespace}, hosts: ${service.metadataProvider.hosts.mkString(",")}) " +
@@ -101,8 +96,8 @@ class TaskManager() {
   }
 
   /**
-   * Creates data storage for producer/consumer settings
-   */
+    * Creates data storage for producer/consumer settings
+    */
   private def createDataStorage() = {
     service.dataProvider.providerType match {
       case "aerospike" =>
@@ -128,11 +123,11 @@ class TaskManager() {
   }
 
   /**
-   * Returns class loader for retrieving classes from jar
-   *
-   * @param pathToJar Absolute path to jar file
-   * @return Class loader for retrieving classes from jar
-   */
+    * Returns class loader for retrieving classes from jar
+    *
+    * @param pathToJar Absolute path to jar file
+    * @return Class loader for retrieving classes from jar
+    */
   def getClassLoader(pathToJar: String) = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Get class loader for class: $pathToJar\n")
     val classLoaderUrls = Array(new File(pathToJar).toURI.toURL)
@@ -142,20 +137,20 @@ class TaskManager() {
   }
 
   /**
-   * Returns file contains uploaded module jar
-   *
-   * @return Local file contains uploaded module jar
-   */
+    * Returns file contains uploaded module jar
+    *
+    * @return Local file contains uploaded module jar
+    */
   def getModuleJar: File = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '${instance.moduleName}' module jar\n")
     storage.get(fileMetadata.filename, s"tmp/${instance.moduleName}")
   }
 
   /**
-   * Returns instance metadata to launch a module
-   *
-   * @return An instance metadata to launch a module
-   */
+    * Returns instance metadata to launch a module
+    *
+    * @return An instance metadata to launch a module
+    */
   def getInstanceMetadata = {
     logger.info(s"Instance name: $instanceName, task name: $taskName. Get instance metadata\n")
     instance
@@ -172,25 +167,25 @@ class TaskManager() {
   }
 
   /**
-   * Returns tags for each output stream. Stream name -> ((partitioned or round-robin tag) -> output)
-   *
-   * @return
-   */
+    * Returns tags for each output stream
+    *
+    * @return
+    */
   def getOutputTags = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Get tags for each output stream\n")
     mutable.Map[String, (String, ModuleOutput)]()
   }
 
   /**
-   * Creates a kafka consumer for all input streams of kafka type.
-   * If there was a checkpoint with offsets of last consumed messages for each topic/partition
-   * then consumer will fetch from this offsets otherwise in accordance with offset parameter
-   *
-   * @param topics Set of kafka topic names and range of partitions relatively
-   * @param hosts Addresses of kafka brokers in host:port format
-   * @param offset Default policy for kafka consumer (earliest/latest)
-   * @return Kafka consumer subscribed to topics
-   */
+    * Creates a kafka consumer for all input streams of kafka type.
+    * If there was a checkpoint with offsets of last consumed messages for each topic/partition
+    * then consumer will fetch from this offsets otherwise in accordance with offset parameter
+    *
+    * @param topics Set of kafka topic names and range of partitions relatively
+    * @param hosts Addresses of kafka brokers in host:port format
+    * @param offset Default policy for kafka consumer (earliest/latest)
+    * @return Kafka consumer subscribed to topics
+    */
   def createKafkaConsumer(topics: List[(String, List[Int])], hosts: List[String], offset: String): KafkaConsumer[Array[Byte], Array[Byte]] = {
     import collection.JavaConverters._
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Create kafka consumer for topics (with their partitions): " +
@@ -241,14 +236,14 @@ class TaskManager() {
   }
 
   /**
-   * Creates a t-stream consumer with pub/sub property
-   *
-   * @param stream SjStream from which massages are consumed
-   * @param partitions Range of stream partition
-   * @param offset Offset policy that describes where a consumer starts
-   * @param queue Queue which keeps consumed messages
-   * @return T-stream subscribing consumer
-   */
+    * Creates a t-stream consumer with pub/sub property
+    *
+    * @param stream SjStream from which massages are consumed
+    * @param partitions Range of stream partition
+    * @param offset Offset policy that describes where a consumer starts
+    * @param queue Queue which keeps consumed messages
+    * @return T-stream subscribing consumer
+    */
   def createSubscribingConsumer(stream: SjStream, partitions: List[Int], offset: IOffset, queue: PersistentBlockingQueue) = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create subscribing consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
@@ -303,13 +298,13 @@ class TaskManager() {
   }
 
   /**
-   * Creates an ordinary t-stream consumer
-   *
-   * @param stream SjStream from which massages are consumed
-   * @param partitions Range of stream partition
-   * @param offset Offset policy that describes where a consumer starts
-   * @return Basic t-stream consumer
-   */
+    * Creates an ordinary t-stream consumer
+    *
+    * @param stream SjStream from which massages are consumed
+    * @param partitions Range of stream partition
+    * @param offset Offset policy that describes where a consumer starts
+    * @return Basic t-stream consumer
+    */
   def createConsumer(stream: SjStream, partitions: List[Int], offset: IOffset): BasicConsumer[Array[Byte], Array[Byte]] = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create basic consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
@@ -340,11 +335,11 @@ class TaskManager() {
   }
 
   /**
-   * Creates a t-stream producer for recording messages
-   *
-   * @param stream SjStream to which messages are written
-   * @return Basic t-stream producer
-   */
+    * Creates a t-stream producer for recording messages
+    *
+    * @param stream SjStream to which messages are written
+    * @return Basic t-stream producer
+    */
   def createProducer(stream: SjStream) = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create basic producer for stream: ${stream.name}\n")
@@ -397,10 +392,10 @@ class TaskManager() {
 
 
   /**
-   * Creates t-stream to keep a module state or loads an existing t-stream
-   *
-   * @return SjStream used for keeping a module state
-   */
+    * Creates t-stream to keep a module state or loads an existing t-stream
+    *
+    * @return SjStream used for keeping a module state
+    */
   def getStateStream = {
     getTStream(stateStream, "store state of module", Array("state"), 1)
   }

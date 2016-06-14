@@ -53,8 +53,8 @@ object SjTest {
   val testJson = "{\n\t\"name\" : \"tst\",\n\t\"description\" : \"fdsgff\",\n\t\"stream-type\" : \"test\",\n\t\"ttt\" : 26\n}"
 
   def main(args: Array[String]) = {
-    //createData()
-    //prepareCassandra()
+    createData()
+    prepareCassandra()
     /*val dao = ConnectionRepository.getStreamService
     val streams = dao.getAll
     val stream = streams.filter(s => s.name.equals("s1")).head
@@ -66,7 +66,7 @@ object SjTest {
     val test = serializer.deserialize[SjStreamTest](testJson)
     println(test.getClass.toString)*/
     //createKafkaData()
-    //createEsData()
+    createEsData()
     println("Ok")
   }
 
@@ -120,7 +120,7 @@ object SjTest {
 
     val provider = new Provider()
     provider.name = "es_prov"
-    provider.hosts = Array("localhost:9200")
+    provider.hosts = Array("localhost:9300")
     provider.providerType = "ES"
     providerDAO.save(provider)
 
@@ -132,7 +132,7 @@ object SjTest {
     serviceDAO.save(service)
 
     val stream = new ESSjStream()
-    stream.name = "es1"
+    stream.name = "es10"
     stream.service = service
     stream.streamType = esOutput
     stream.tags = Array("test")
@@ -201,13 +201,22 @@ object SjTest {
     redisService.serviceType = "RdsCoord"
     serviceDAO.save(redisService)
 
+    val zkService1 = new ZKService
+    val zk1Prov = providerDAO.get("zk1_prov")
+    zkService1.namespace = "zk_test1"
+    zkService1.name = "zk1_service"
+    zkService1.description = "zookeeper test service"
+    zkService1.provider = zk1Prov
+    zkService1.serviceType = "ZKCoord"
+    serviceDAO.save(zkService1)
+
     val tstrqService = new TStreamService
     tstrqService.name = "tstrq_service"
     tstrqService.metadataProvider = cassProv
     tstrqService.metadataNamespace = "test_keyspace"
     tstrqService.dataProvider = aeroProv
     tstrqService.dataNamespace = "test"
-    tstrqService.lockProvider = redisProv
+    tstrqService.lockProvider = zk1Prov
     tstrqService.lockNamespace = "test"
     serviceDAO.save(tstrqService)
   }
@@ -232,12 +241,12 @@ object SjTest {
     providerDAO.save(aeroProv)
 
     val redisProv = new Provider
-    redisProv.providerType = "redis"
-    redisProv.name = "redis_prov"
+    redisProv.providerType = "zookeeper"
+    redisProv.name = "zk1_prov"
     redisProv.login = ""
     redisProv.password = ""
-    redisProv.description = "redis provider test"
-    redisProv.hosts = Array("127.0.0.1:6379")
+    redisProv.description = "zk provider test"
+    redisProv.hosts = Array("127.0.0.1:2181")
     providerDAO.save(redisProv)
 
     val zkProv = new Provider
@@ -294,6 +303,18 @@ object SjTest {
     s3.tags = Array("TAG")
     s3.generator = generator3
     sjStreamDAO.save(s3)
+
+    val generator10 = new Generator
+    generator10.generatorType = "local"
+    val s10 = new TStreamSjStream
+    s10.name = "s10"
+    s10.description = "s10 stream"
+    s10.partitions = 5
+    s10.service = tService
+    s10.streamType = tStream
+    s10.tags = Array("TAG")
+    s10.generator = generator10
+    sjStreamDAO.save(s10)
   }
 
   /**

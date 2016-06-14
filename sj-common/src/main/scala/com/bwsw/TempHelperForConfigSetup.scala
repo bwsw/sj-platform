@@ -17,6 +17,9 @@ object TempHelperForConfigSetup extends App{
   configService.save(new ConfigSetting("com.bwsw.regular.streaming.engine-0.1", "sj-regular-streaming-engine-assembly-1.0.jar"))
   configService.save(new ConfigSetting(ConfigConstants.regularEngineTag, "com.bwsw.regular.streaming.engine-0.1"))
 
+  configService.save(new ConfigSetting("com.bwsw.output.streaming.engine-0.1", "sj-output-streaming-engine-assembly-1.0.jar"))
+  configService.save(new ConfigSetting(ConfigConstants.outputEngineTag, "com.bwsw.output.streaming.engine-0.1"))
+
   configService.save(new ConfigSetting("regular-streaming-validator-class", "com.bwsw.sj.crud.rest.validator.module.RegularStreamingValidator"))
   configService.save(new ConfigSetting("windowed-streaming-validator-class", "com.bwsw.sj.crud.rest.validator.module.WindowedStreamingValidator"))
   configService.save(new ConfigSetting("output-streaming-validator-class", "com.bwsw.sj.crud.rest.validator.module.OutputStreamingValidator"))
