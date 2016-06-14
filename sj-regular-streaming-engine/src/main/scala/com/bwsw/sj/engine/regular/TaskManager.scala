@@ -58,34 +58,16 @@ class TaskManager() {
   private val storage = ConnectionRepository.getFileStorage
   private val configService = ConnectionRepository.getConfigService
 
-  private val txnPreload = configService.getByParameters(
-    Map("domain" -> "t-streams", "name" -> txnPreloadTag)
-  ).head.value.toInt
-  private val dataPreload = configService.getByParameters(
-    Map("domain" -> "t-streams", "name" -> dataPreloadTag)
-  ).head.value.toInt
-  private val consumerKeepAliveInterval = configService.getByParameters(
-    Map("domain" -> "t-streams", "name" -> consumerKeepAliveInternalTag)
-  ).head.value.toInt
-  private val transportTimeout = configService.getByParameters(
-    Map("domain" -> "t-streams", "name" -> transportTimeoutTag)
-  ).head.value.toInt
-  private val txnTTL = configService.getByParameters(
-    Map("domain" -> "t-streams", "name" -> txnTTLTag)
-  ).head.value.toInt
-  private val txnKeepAliveInterval = configService.getByParameters(
-    Map("domain" -> "t-streams", "name" -> txnKeepAliveIntervalTag)
-  ).head.value.toInt
-  private val producerKeepAliveInterval = configService.getByParameters(
-    Map("domain" -> "t-streams", "name" -> producerKeepAliveIntervalTag)
-  ).head.value.toInt
-  private val streamTTL = configService.getByParameters(
-    Map("domain" -> "t-streams", "name" -> streamTTLTag)
-  ).head.value.toInt
+  private val txnPreload = configService.get(txnPreloadTag).value.toInt
+  private val dataPreload = configService.get(dataPreloadTag).value.toInt
+  private val consumerKeepAliveInterval = configService.get(consumerKeepAliveInternalTag).value.toInt
+  private val transportTimeout = configService.get(transportTimeoutTag).value.toInt
+  private val txnTTL = configService.get(txnTTLTag).value.toInt
+  private val txnKeepAliveInterval = configService.get(txnKeepAliveIntervalTag).value.toInt
+  private val producerKeepAliveInterval = configService.get(producerKeepAliveIntervalTag).value.toInt
+  private val streamTTL = configService.get(streamTTLTag).value.toInt
 
-  private val zkTimeout = configService.getByParameters(
-    Map("domain" -> "zk", "name" -> zkSessionTimeoutTag)
-  ).head.value.toInt
+  private val zkTimeout = configService.get(zkSessionTimeoutTag).value.toInt
 
   assert(agentsPorts.length == (instance.inputs.length + instance.outputs.length + 3),
     "Not enough ports for t-stream consumers/producers ")
