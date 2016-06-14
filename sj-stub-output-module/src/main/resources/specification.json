@@ -1,0 +1,32 @@
+{
+  "name": "com.bwsw.stub.output",
+  "description": "Stub output-module by BW",
+  "version": "0.1",
+  "author": "Kseniya Tomskikh",
+  "license": "Apache 2.0",
+  "inputs": {
+    "cardinality": [
+      1,
+      1
+    ],
+    "types": [
+      "stream.t-stream"
+    ]
+  },
+  "outputs": {
+    "cardinality": [
+      1,
+      1
+    ],
+    "types": [
+      "elasticsearch-output"
+    ]
+  },
+  "module-type": "output-streaming",
+  "engine": "output-streaming-engine",
+  "options": {
+    "opt": 1
+  },
+  "validator-class": "com.bwsw.sj.module.output.StubOutputValidator",
+  "executor-class": "com.bwsw.sj.module.output.StubOutputHandler"
+}

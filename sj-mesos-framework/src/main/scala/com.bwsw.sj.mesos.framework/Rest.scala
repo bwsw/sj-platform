@@ -14,14 +14,14 @@ object Rest {
     case GET (Path("/")) => ResponseString(getResponse)
   }
 
-  val rest: java.lang.Thread = new Thread(new Runnable {
+  def rest(port:Int): java.lang.Thread = new Thread(new Runnable {
     override def run(): Unit = {
-      unfiltered.jetty.Server.http(8080).plan(echo).run()
+      unfiltered.jetty.Server.http(port).plan(echo).run()
     }
   })
 
-  def start() = {
-    rest.start()
+  def start(port:Int) = {
+    rest(port).start()
   }
 
   def getResponse: String = {

@@ -30,7 +30,7 @@ object StreamUtil {
     * @param stream - T-stream for checking
     * @return - Error, if cannot creating stream or stream is incorrect
     */
-  def checkAndCreateTStream(stream: SjStream) = {
+  def checkAndCreateTStream(stream: TStreamSjStream) = {
     val service = stream.service.asInstanceOf[TStreamService]
     val metadataProvider = service.metadataProvider
     val hosts = metadataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt))
@@ -83,7 +83,7 @@ object StreamUtil {
     * @param stream - Kafka topic (stream)
     * @return - Error, if topic is incorrect or cannot creating it
     */
-  def checkAndCreateKafkaTopic(stream: SjStream) = {
+  def checkAndCreateKafkaTopic(stream: KafkaSjStream) = {
     val service = stream.service.asInstanceOf[KafkaService]
     val brokers = service.provider.hosts
     val replications = brokers.length
@@ -112,7 +112,7 @@ object StreamUtil {
     * @param stream - ES index (stream)
     * @return - Error, if index is incorrect or cannot creating it
     */
-  def checkAndCreateEsStream(stream: SjStream) = {
+  def checkAndCreateEsStream(stream: ESSjStream) = {
     val service = stream.service.asInstanceOf[ESService]
     val hosts: Array[InetSocketTransportAddress] = service.provider.hosts.map { s =>
       val parts = s.split(":")
@@ -139,7 +139,7 @@ object StreamUtil {
     * @param stream - SQL table (stream)
     * @return - Error, if table is incorrect or cannot creating it
     */
-  def checkAndCreateJdbcStream(stream: SjStream) = {
+  def checkAndCreateJdbcStream(stream: JDBCSjStream) = {
     val service = stream.service.asInstanceOf[JDBCService]
     //todo add jdbc support
     if (true) {
@@ -147,6 +147,22 @@ object StreamUtil {
     } else {
       Left("fail")
     }
+  }
+
+  /**
+    * Generating name of task for stream generator
+    *
+    * @param stream - SjStream object
+    * @return - Task name for transaction generator application
+    */
+  def createGeneratorTaskName(stream: TStreamSjStream) = {
+    var name = ""
+    if (stream.generator.generatorType.equals("per-stream")) {
+      name = s"${stream.generator.service.name}-${stream.name}-tg"
+    } else {
+      name = s"${stream.generator.service.name}-global-tg"
+    }
+    name.replaceAll("_", "-")
   }
 
 }

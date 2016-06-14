@@ -8,6 +8,7 @@ import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{TStreamSjStream, ZKService}
 import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.crud.rest.entities.MarathonRequest
+import com.bwsw.sj.crud.rest.utils.StreamUtil
 import com.twitter.common.quantity.{Amount, Time}
 import com.twitter.common.zookeeper.DistributedLock.LockingException
 import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
@@ -167,7 +168,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
               response.getStatusLine.getStatusCode.equals(Created)) {
               while (!isStarted) {
                 Thread.sleep(delay)
-                val taskInfoResponse = getTaskInfo(createGeneratorTaskName(stream))
+                val taskInfoResponse = getTaskInfo(StreamUtil.createGeneratorTaskName(stream))
                 if (taskInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
                   val entity = serializer.deserialize[Map[String, Any]](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
                   val tasksRunning = entity("app").asInstanceOf[Map[String, Any]]("tasksRunning").asInstanceOf[Int]
@@ -203,7 +204,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
     val zkService = stream.generator.service.asInstanceOf[ZKService]
     val generatorProvider = zkService.provider
     var prefix = zkService.namespace
-    val taskId = createGeneratorTaskName(stream)
+    val taskId = StreamUtil.createGeneratorTaskName(stream)
     if (stream.generator.generatorType.equals("per-stream")) {
       prefix += s"/${stream.name}"
     } else {

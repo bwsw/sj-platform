@@ -20,9 +20,13 @@ object Main extends App {
 
   val driver = new MesosSchedulerDriver(scheduler, framework, master_path)
 
+  override def main(args: Array[String]) = {
+    println("SOME")
+    Rest.start(args(0).toInt)
 
-  Rest.start()
+    driver.start()
+    driver.join()
+  }
 
-  driver.start()
-  driver.join()
+
 }

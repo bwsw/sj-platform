@@ -21,6 +21,9 @@ object TempHelperForConfigSetup extends App{
   configService.save(new ConfigSetting("system" + "." + "windowed-streaming-validator-class", "com.bwsw.sj.crud.rest.validator.module.WindowedStreamingValidator", "system"))
   configService.save(new ConfigSetting("system" + "." + "output-streaming-validator-class", "com.bwsw.sj.crud.rest.validator.module.OutputStreamingValidator", "system"))
 
+  configService.save(new ConfigSetting("system" + "." + "com.bwsw.output.streaming.engine-0.1", "sj-output-streaming-engine-assembly-1.0.jar", "system"))
+  configService.save(new ConfigSetting(ConfigConstants.outputEngineTag, "com.bwsw.output.streaming.engine-0.1", "system"))
+
   configService.save(new ConfigSetting(ConfigConstants.marathonTag, "http://stream-juggler.z1.netpoint-dc.com:8080", "system"))
 
   configService.save(new ConfigSetting(ConfigConstants.zkSessionTimeoutTag, "7000", "zk"))

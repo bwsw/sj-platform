@@ -118,7 +118,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                               serializer.serialize(response)
                             ))
                           } else {
-                            throw new InstanceException(s"Cannot create instance of module. Request has incrorrect options attrubute",
+                            throw new InstanceException(s"Cannot create instance of module. Request has incorrect options attribute",
                               s"$moduleType-$moduleName-$moduleVersion")
                           }
                         } else {
