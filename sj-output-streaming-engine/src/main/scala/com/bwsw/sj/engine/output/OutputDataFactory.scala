@@ -25,7 +25,7 @@ object OutputDataFactory {
   val taskName: String = System.getenv("TASK_NAME")
   private val agentHost: String = System.getenv("AGENTS_HOST")
   private val agentsPorts: Array[String] = System.getenv("AGENTS_PORTS").split(",")
-  assert(agentsPorts.length == 1, "Not enough ports for t-stream consumers/producers ")
+  assert(agentsPorts.length > 0, "Not enough ports for t-stream consumers/producers ")
   private val agentPort: Int = agentsPorts.head.toInt
   val agentAddress = OutputDataFactory.agentHost + ":" + OutputDataFactory.agentPort.toString
 
