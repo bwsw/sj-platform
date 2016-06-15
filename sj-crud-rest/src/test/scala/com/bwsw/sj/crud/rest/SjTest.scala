@@ -54,7 +54,7 @@ object SjTest {
 
   def main(args: Array[String]) = {
     createData()
-    prepareCassandra()
+    //prepareCassandra()
     /*val dao = ConnectionRepository.getStreamService
     val streams = dao.getAll
     val stream = streams.filter(s => s.name.equals("s1")).head
@@ -66,12 +66,12 @@ object SjTest {
     val test = serializer.deserialize[SjStreamTest](testJson)
     println(test.getClass.toString)*/
     //createKafkaData()
-    createEsData()
+    //createEsData()
     println("Ok")
   }
 
   def prepareCassandra() = {
-    val cluster = Cluster.builder().addContactPoint("127.0.0.1").build()
+    val cluster = Cluster.builder().addContactPoint("http://stream-juggler.z1.netpoint-dc.com/").build()
     val session = cluster.connect()
     createKeyspace(session, "test_keyspace")
     createMetadataTables(session, "test_keyspace")
@@ -228,7 +228,7 @@ object SjTest {
     cassProv.login = ""
     cassProv.password = ""
     cassProv.description = "cassandra provider test"
-    cassProv.hosts = Array("127.0.0.1:9042")
+    cassProv.hosts = Array("stream-juggler.z1.netpoint-dc.com:9042")
     providerDAO.save(cassProv)
 
     val aeroProv = new Provider
@@ -237,7 +237,7 @@ object SjTest {
     aeroProv.login = ""
     aeroProv.password = ""
     aeroProv.description = "aerospike provider test"
-    aeroProv.hosts = Array("127.0.0.1:3000", "127.0.0.1:3001")
+    aeroProv.hosts = Array("stream-juggler.z1.netpoint-dc.com:3000", "stream-juggler.z1.netpoint-dc.com:3001")
     providerDAO.save(aeroProv)
 
     val redisProv = new Provider
@@ -246,7 +246,7 @@ object SjTest {
     redisProv.login = ""
     redisProv.password = ""
     redisProv.description = "zk provider test"
-    redisProv.hosts = Array("127.0.0.1:2181")
+    redisProv.hosts = Array("stream-juggler.z1.netpoint-dc.com:2181")
     providerDAO.save(redisProv)
 
     val zkProv = new Provider
