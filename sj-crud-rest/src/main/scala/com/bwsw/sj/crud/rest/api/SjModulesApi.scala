@@ -154,24 +154,24 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                               serializer.serialize(response)
                             ))
                           } ~
-                            delete {
-                              var msg = ""
-                              if (instance.status.equals(stopped) || instance.status.equals(failed)) {
-                                instance.status = deleting
-                                instanceDAO.save(instance)
-                                destroyInstance(instance)
-                                msg = s"Instance $instanceName is deleting"
-                              } else if (instance.status.equals(ready)) {
-                                instanceDAO.delete(instanceName)
-                                msg = s"Instance $instanceName has been deleted"
-                              } else {
-                                msg = "Cannot deleting of instance. Instance is not stopped, failed or ready."
-                              }
-                              complete(HttpEntity(
-                                `application/json`,
-                                serializer.serialize(ProtocolResponse(200, Map("message" -> msg)))
-                              ))
+                          delete {
+                            var msg = ""
+                            if (instance.status.equals(stopped) || instance.status.equals(failed)) {
+                              instance.status = deleting
+                              instanceDAO.save(instance)
+                              destroyInstance(instance)
+                              msg = s"Instance $instanceName is deleting"
+                            } else if (instance.status.equals(ready)) {
+                              instanceDAO.delete(instanceName)
+                              msg = s"Instance $instanceName has been deleted"
+                            } else {
+                              msg = "Cannot deleting of instance. Instance is not stopped, failed or ready."
                             }
+                            complete(HttpEntity(
+                              `application/json`,
+                              serializer.serialize(ProtocolResponse(200, Map("message" -> msg)))
+                            ))
+                          }
                         } ~
                           path("start") {
                             pathEndOrSingleSlash {

@@ -110,6 +110,17 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
               response = ProtocolResponse(200, Map("message" -> s"Stream '$streamName' not found"))
             }
             complete(HttpEntity(`application/json`, serializer.serialize(response)))
+          } ~
+          delete {
+            val stream = streamDAO.get(streamName)
+            var response: ProtocolResponse = null
+            if (stream != null) {
+              streamDAO.delete(streamName)
+              response = ProtocolResponse(200, Map("message" -> s"Stream '$streamName' has been deleted"))
+            } else {
+              response = ProtocolResponse(200, Map("message" -> s"Stream '$streamName' not found"))
+            }
+            complete(HttpEntity(`application/json`, serializer.serialize(response)))
           }
         }
       }
