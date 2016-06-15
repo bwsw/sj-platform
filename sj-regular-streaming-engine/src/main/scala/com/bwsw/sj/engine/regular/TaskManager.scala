@@ -59,6 +59,7 @@ class TaskManager() {
   private val storage = ConnectionRepository.getFileStorage
   private val configService = ConnectionRepository.getConfigService
 
+  val kafkaSubscriberTimeout = configService.get(kafkaSubscriberTimeoutTag).value.toInt
   private val txnPreload = configService.get(txnPreloadTag).value.toInt
   private val dataPreload = configService.get(dataPreloadTag).value.toInt
   private val consumerKeepAliveInterval = configService.get(consumerKeepAliveInternalTag).value.toInt

@@ -5,6 +5,7 @@ import java.nio.channels.ClosedChannelException
 import java.util.Collections
 
 import com.aerospike.client.AerospikeClient
+import com.bwsw.sj.common.ConfigConstants._
 import com.bwsw.sj.common.DAL.model.Provider
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.crud.rest.entities._
@@ -25,6 +26,9 @@ import scala.concurrent.duration._
   */
 object ProviderValidator {
   import com.bwsw.sj.common.ProviderConstants._
+
+  private val configService = ConnectionRepository.getConfigService
+  private val zkTimeout = configService.get(zkSessionTimeoutTag).value.toInt
 
   /**
     * Validating input parameters for provider
@@ -200,7 +204,7 @@ object ProviderValidator {
     val zookeeperPort = if (port == -1) 2181 else port
     var client: ZooKeeper = null
     try {
-      client = new ZooKeeper(s"$hostname:$zookeeperPort", 500, null)
+      client = new ZooKeeper(s"$hostname:$zookeeperPort", zkTimeout, null)
       val deadline = 1.seconds.fromNow
       var connected: Boolean = false
       while (!connected && deadline.hasTimeLeft) {

@@ -40,4 +40,9 @@ object TempHelperForConfigSetup extends App{
   //configService.save(new ConfigSetting("session.timeout.ms", "30000", "kafka")) e.g. for kafka domain
   configService.save(new ConfigSetting(ConfigConstants.esTimeoutTag, "6000", "es"))
   configService.save(new ConfigSetting(ConfigConstants.jdbcTimeoutTag, "6000", "jdbc"))
+
+  configService.save(new ConfigSetting(ConfigConstants.tgClientRetryPeriodTag, "500", "system"))
+  configService.save(new ConfigSetting(ConfigConstants.tgServerRetryPeriodTag, "500", "system"))
+  configService.save(new ConfigSetting(ConfigConstants.tgRetryCountTag, "10", "system"))
+  configService.save(new ConfigSetting(ConfigConstants.kafkaSubscriberTimeoutTag, "10", "system"))
 }

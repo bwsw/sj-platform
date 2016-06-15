@@ -94,4 +94,8 @@ object ConfigConstants {
   val streamTTLTag = "t-streams.stream-ttl"
   val esTimeoutTag = "es.timeout"
   val jdbcTimeoutTag = "jdbc.timeout"
+  val tgClientRetryPeriodTag = "system.transaction-generator-client-retry-period"
+  val tgServerRetryPeriodTag = "system.transaction-generator-server-retry-period"
+  val tgRetryCountTag = "system.transaction-generator-retry-count"
+  val kafkaSubscriberTimeoutTag = "system.kafka-subscriber-timeout"
 }
