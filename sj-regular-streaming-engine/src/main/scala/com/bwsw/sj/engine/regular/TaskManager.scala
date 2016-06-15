@@ -16,6 +16,7 @@ import com.bwsw.sj.common.StreamConstants._
 import com.bwsw.sj.engine.core.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
 import com.bwsw.sj.engine.core.environment.ModuleOutput
+import com.bwsw.sj.engine.regular.subscriber.RegularConsumerCallback
 import com.bwsw.tstreams.agents.consumer.Offsets.{IOffset, Newest}
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions, SubscriberCoordinationOptions}
@@ -299,7 +300,7 @@ class TaskManager() {
       timeUuidGenerator,
       useLastOffset = true)
 
-    val callback = new QueueConsumerCallback[Array[Byte], Array[Byte]](queue)
+    val callback = new RegularConsumerCallback[Array[Byte], Array[Byte]](queue)
 
     new BasicSubscribingConsumer[Array[Byte], Array[Byte]](
       "consumer for " + taskName + "_" + stream.name,

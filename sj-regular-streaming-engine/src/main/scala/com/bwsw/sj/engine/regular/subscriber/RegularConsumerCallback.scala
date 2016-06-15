@@ -1,11 +1,11 @@
-package com.bwsw.sj.engine.regular
+package com.bwsw.sj.engine.regular.subscriber
 
 import java.util.UUID
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.engine.core.PersistentBlockingQueue
+import com.bwsw.sj.engine.core.entities.TStreamEnvelope
 import com.bwsw.tstreams.agents.consumer.subscriber.{BasicSubscriberCallback, BasicSubscribingConsumer}
 import org.slf4j.LoggerFactory
 
@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory
   * @param blockingQueue Persistent blocking queue for storing transactions
   */
 
-class QueueConsumerCallback[DATATYPE, USERTYPE](blockingQueue: PersistentBlockingQueue) extends BasicSubscriberCallback[DATATYPE, USERTYPE] {
+class RegularConsumerCallback[DATATYPE, USERTYPE](blockingQueue: PersistentBlockingQueue) extends BasicSubscriberCallback[DATATYPE, USERTYPE] {
   private val logger = LoggerFactory.getLogger(this.getClass)
   /**
    * Provides a serialization from Transaction to String in order to put in queue
