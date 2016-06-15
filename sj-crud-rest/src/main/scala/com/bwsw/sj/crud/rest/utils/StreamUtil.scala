@@ -4,7 +4,9 @@ import java.net.InetSocketAddress
 import java.util.Properties
 
 import com.aerospike.client.Host
+import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.tstreams.data.IStorage
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStorageOptions}
 import com.bwsw.tstreams.data.cassandra.{CassandraStorageFactory, CassandraStorageOptions}
@@ -21,6 +23,7 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress
   * @author Kseniya Tomskikh
   */
 object StreamUtil {
+  private val configService = ConnectionRepository.getConfigService
 
   /**
     * Check t-stream for exists
@@ -67,7 +70,7 @@ object StreamUtil {
       BasicStreamService.createStream(
         stream.name,
         stream.asInstanceOf[TStreamSjStream].partitions,
-        5000,
+        configService.get(ConfigConstants.streamTTLTag).value.toInt,
         "", metadataStorage,
         dataStorage
       )
@@ -89,7 +92,8 @@ object StreamUtil {
     val replications = brokers.length
     val zkHost = "127.0.0.1:2181"//todo
     val zkConnect = new ZkConnection(zkHost)
-    val zkClient = ZkUtils.createZkClient(zkHost, 30000, 30000)
+    val zkTimeout = configService.get(ConfigConstants.zkSessionTimeoutTag).value.toInt
+    val zkClient = ZkUtils.createZkClient(zkHost, zkTimeout, zkTimeout)
     val zkUtils = new ZkUtils(zkClient, zkConnect, false)
     if (!AdminUtils.topicExists(zkUtils, stream.name)) {
       AdminUtils.createTopic(zkUtils, stream.name, stream.asInstanceOf[KafkaSjStream].partitions, replications, new Properties())

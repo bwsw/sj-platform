@@ -11,7 +11,4 @@ object ConnectionConstants {
    lazy val serviceCollection = "services"
    lazy val providerCollection = "providers"
    lazy val configCollection = "config.file"
-
-   val retryInterval = 5000
-   val retryCount = 10
  }

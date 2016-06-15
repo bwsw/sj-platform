@@ -36,7 +36,7 @@ object InstanceMethods {
   lazy val restHost = configService.get(ConfigConstants.hostOfCrudRestTag).value
   lazy val restPort = configService.get(ConfigConstants.portOfCrudRestTag).value.toInt
   lazy val marathonConnect = configService.get(ConfigConstants.marathonTag).value
-  val timeout = 60000
+  lazy val marathonTimeout = configService.get(ConfigConstants.marathonTimeoutTag).value.toInt
 
   val restAddress = new URI(s"http://$restHost:$restPort").toString
 
@@ -64,7 +64,7 @@ object InstanceMethods {
     * @return - Response from marathon
     */
   def getMesosInfo = {
-    val client = new HttpClient(timeout).client
+    val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/info")
     val httpGet = new HttpGet(url.toString)
     client.execute(httpGet)
@@ -77,7 +77,7 @@ object InstanceMethods {
     * @return - Response from marathon
     */
   def startApplication(request: MarathonRequest) = {
-    val client = new HttpClient(timeout).client
+    val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/apps")
     val httpPost = new HttpPost(url.toString)
     httpPost.addHeader("Content-Type", "application/json")
@@ -94,7 +94,7 @@ object InstanceMethods {
     */
   def getTaskInfo(taskId: String) = {
     //logger.debug(s"getting task info $taskId")
-    val client = new HttpClient(timeout).client
+    val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/apps/$taskId?force=true")
     val httpGet = new HttpGet(url.toString)
     client.execute(httpGet)
@@ -109,7 +109,7 @@ object InstanceMethods {
     */
   def scaleApplication(taskId: String, count: Int) = {
     //logger.debug(s"scale task $taskId to count $count")
-    val client = new HttpClient(timeout).client
+    val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/apps/$taskId?force=true")
     val httpPut = new HttpPut(url.toString)
     httpPut.addHeader("Content-Type", "application/json")
@@ -136,7 +136,7 @@ object InstanceMethods {
     * @return - Response from marathon
     */
   def destroyApplication(taskId: String) = {
-    val client = new HttpClient(timeout).client
+    val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/apps/$taskId")
     val httpDelete = new HttpDelete(url.toString)
     client.execute(httpDelete)

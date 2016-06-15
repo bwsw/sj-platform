@@ -8,7 +8,6 @@ import com.aerospike.client.Host
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.common.tstream.NetworkTimeUUIDGenerator
 import com.bwsw.sj.common.ConfigConstants._
-import com.bwsw.sj.common.DAL.ConnectionConstants._
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.ModuleConstants._
@@ -38,11 +37,11 @@ import org.slf4j.LoggerFactory
 import scala.collection.mutable
 
 /**
-  * Class allowing to manage an environment of task
-  * Created: 13/04/2016
-  *
-  * @author Kseniya Mikhaleva
-  */
+ * Class allowing to manage an environment of task
+ * Created: 13/04/2016
+ *
+ * @author Kseniya Mikhaleva
+ */
 class TaskManager() {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -59,6 +58,7 @@ class TaskManager() {
   private val storage = ConnectionRepository.getFileStorage
   private val configService = ConnectionRepository.getConfigService
 
+  val kafkaSubscriberTimeout = configService.get(kafkaSubscriberTimeoutTag).value.toInt
   private val txnPreload = configService.get(txnPreloadTag).value.toInt
   private val dataPreload = configService.get(dataPreloadTag).value.toInt
   private val consumerKeepAliveInterval = configService.get(consumerKeepAliveInternalTag).value.toInt
@@ -67,7 +67,8 @@ class TaskManager() {
   private val txnKeepAliveInterval = configService.get(txnKeepAliveIntervalTag).value.toInt
   private val producerKeepAliveInterval = configService.get(producerKeepAliveIntervalTag).value.toInt
   private val streamTTL = configService.get(streamTTLTag).value.toInt
-
+  private val retryPeriod = configService.get(tgClientRetryPeriodTag).value.toInt
+  private val retryCount = configService.get(tgRetryCountTag).value.toInt
   private val zkTimeout = configService.get(zkSessionTimeoutTag).value.toInt
 
   assert(agentsPorts.length == (instance.inputs.length + instance.outputs.length + 3),
@@ -80,25 +81,25 @@ class TaskManager() {
   ).head
 
   /**
-    * Converter to convert usertype->storagetype; storagetype->usertype
-    */
+   * Converter to convert usertype->storagetype; storagetype->usertype
+   */
   private val converter = new ArrayByteConverter
 
   /**
-    * An auxiliary service to retrieve settings of TStream providers
-    */
+   * An auxiliary service to retrieve settings of TStream providers
+   */
   private val service = ConnectionRepository.getStreamService.get(instance.outputs.head).service.asInstanceOf[TStreamService]
 
   private val zkHosts = service.lockProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList
 
   /**
-    * Metadata storage instance
-    */
+   * Metadata storage instance
+   */
   private val metadataStorage: MetadataStorage = createMetadataStorage()
 
   /**
-    * Creates metadata storage for producer/consumer settings
-    */
+   * Creates metadata storage for producer/consumer settings
+   */
   private def createMetadataStorage() = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Create metadata storage " +
       s"(namespace: ${service.metadataNamespace}, hosts: ${service.metadataProvider.hosts.mkString(",")}) " +
@@ -110,8 +111,8 @@ class TaskManager() {
   }
 
   /**
-    * Creates data storage for producer/consumer settings
-    */
+   * Creates data storage for producer/consumer settings
+   */
   private def createDataStorage() = {
     service.dataProvider.providerType match {
       case "aerospike" =>
@@ -137,11 +138,11 @@ class TaskManager() {
   }
 
   /**
-    * Returns class loader for retrieving classes from jar
-    *
-    * @param pathToJar Absolute path to jar file
-    * @return Class loader for retrieving classes from jar
-    */
+   * Returns class loader for retrieving classes from jar
+   *
+   * @param pathToJar Absolute path to jar file
+   * @return Class loader for retrieving classes from jar
+   */
   def getClassLoader(pathToJar: String) = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Get class loader for class: $pathToJar\n")
     val classLoaderUrls = Array(new File(pathToJar).toURI.toURL)
@@ -151,20 +152,20 @@ class TaskManager() {
   }
 
   /**
-    * Returns file contains uploaded module jar
-    *
-    * @return Local file contains uploaded module jar
-    */
+   * Returns file contains uploaded module jar
+   *
+   * @return Local file contains uploaded module jar
+   */
   def getModuleJar: File = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '${instance.moduleName}' module jar\n")
     storage.get(fileMetadata.filename, s"tmp/${instance.moduleName}")
   }
 
   /**
-    * Returns instance metadata to launch a module
-    *
-    * @return An instance metadata to launch a module
-    */
+   * Returns instance metadata to launch a module
+   *
+   * @return An instance metadata to launch a module
+   */
   def getInstanceMetadata = {
     logger.info(s"Instance name: $instanceName, task name: $taskName. Get instance metadata\n")
     instance
@@ -181,25 +182,25 @@ class TaskManager() {
   }
 
   /**
-    * Returns tags for each output stream
-    *
-    * @return
-    */
+   * Returns tags for each output stream
+   *
+   * @return
+   */
   def getOutputTags = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Get tags for each output stream\n")
     mutable.Map[String, (String, ModuleOutput)]()
   }
 
   /**
-    * Creates a kafka consumer for all input streams of kafka type.
-    * If there was a checkpoint with offsets of last consumed messages for each topic/partition
-    * then consumer will fetch from this offsets otherwise in accordance with offset parameter
-    *
-    * @param topics Set of kafka topic names and range of partitions relatively
-    * @param hosts Addresses of kafka brokers in host:port format
-    * @param offset Default policy for kafka consumer (earliest/latest)
-    * @return Kafka consumer subscribed to topics
-    */
+   * Creates a kafka consumer for all input streams of kafka type.
+   * If there was a checkpoint with offsets of last consumed messages for each topic/partition
+   * then consumer will fetch from this offsets otherwise in accordance with offset parameter
+   *
+   * @param topics Set of kafka topic names and range of partitions relatively
+   * @param hosts Addresses of kafka brokers in host:port format
+   * @param offset Default policy for kafka consumer (earliest/latest)
+   * @return Kafka consumer subscribed to topics
+   */
   def createKafkaConsumer(topics: List[(String, List[Int])], hosts: List[String], offset: String): KafkaConsumer[Array[Byte], Array[Byte]] = {
     import collection.JavaConverters._
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Create kafka consumer for topics (with their partitions): " +
@@ -251,14 +252,14 @@ class TaskManager() {
   }
 
   /**
-    * Creates a t-stream consumer with pub/sub property
-    *
-    * @param stream SjStream from which massages are consumed
-    * @param partitions Range of stream partition
-    * @param offset Offset policy that describes where a consumer starts
-    * @param queue Queue which keeps consumed messages
-    * @return T-stream subscribing consumer
-    */
+   * Creates a t-stream consumer with pub/sub property
+   *
+   * @param stream SjStream from which massages are consumed
+   * @param partitions Range of stream partition
+   * @param offset Offset policy that describes where a consumer starts
+   * @param queue Queue which keeps consumed messages
+   * @return T-stream subscribing consumer
+   */
   def createSubscribingConsumer(stream: SjStream, partitions: List[Int], offset: IOffset, queue: PersistentBlockingQueue) = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create subscribing consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
@@ -287,7 +288,7 @@ class TaskManager() {
             if (_type == "global") _type else stream.name
           }
 
-          new NetworkTimeUUIDGenerator(zkHosts, prefix, retryInterval, retryCount)
+          new NetworkTimeUUIDGenerator(zkHosts, prefix, retryPeriod, retryCount)
       }
 
     val options = new BasicConsumerOptions[Array[Byte], Array[Byte]](
@@ -313,13 +314,13 @@ class TaskManager() {
   }
 
   /**
-    * Creates an ordinary t-stream consumer
-    *
-    * @param stream SjStream from which massages are consumed
-    * @param partitions Range of stream partition
-    * @param offset Offset policy that describes where a consumer starts
-    * @return Basic t-stream consumer
-    */
+   * Creates an ordinary t-stream consumer
+   *
+   * @param stream SjStream from which massages are consumed
+   * @param partitions Range of stream partition
+   * @param offset Offset policy that describes where a consumer starts
+   * @return Basic t-stream consumer
+   */
   def createConsumer(stream: SjStream, partitions: List[Int], offset: IOffset): BasicConsumer[Array[Byte], Array[Byte]] = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create basic consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
@@ -350,11 +351,11 @@ class TaskManager() {
   }
 
   /**
-    * Creates a t-stream producer for recording messages
-    *
-    * @param stream SjStream to which messages are written
-    * @return Basic t-stream producer
-    */
+   * Creates a t-stream producer for recording messages
+   *
+   * @param stream SjStream to which messages are written
+   * @return Basic t-stream producer
+   */
   def createProducer(stream: SjStream) = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create basic producer for stream: ${stream.name}\n")
@@ -386,7 +387,7 @@ class TaskManager() {
             if (_type == "global") _type else basicStream.name
           }
 
-          new NetworkTimeUUIDGenerator(zkServers, prefix, retryInterval, retryCount)
+          new NetworkTimeUUIDGenerator(zkServers, prefix, retryPeriod, retryCount)
       }
 
     val options = new BasicProducerOptions[Array[Byte], Array[Byte]](
@@ -408,10 +409,10 @@ class TaskManager() {
 
 
   /**
-    * Creates t-stream to keep a module state or loads an existing t-stream
-    *
-    * @return SjStream used for keeping a module state
-    */
+   * Creates t-stream to keep a module state or loads an existing t-stream
+   *
+   * @return SjStream used for keeping a module state
+   */
   def getStateStream = {
     getTStream(stateStream, "store state of module", Array("state"), 1)
   }

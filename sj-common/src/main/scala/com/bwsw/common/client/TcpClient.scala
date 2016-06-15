@@ -4,6 +4,8 @@ import java.io._
 import java.net._
 import java.util
 
+import com.bwsw.sj.common.ConfigConstants
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.twitter.common.quantity.{Time, Amount}
 import com.twitter.common.zookeeper.ZooKeeperClient
 import org.apache.log4j.Logger
@@ -18,11 +20,13 @@ class TcpClient(options: TcpClientOptions) {
   private val logger = Logger.getLogger(getClass)
   var socket: Socket = null
   private var retryCount = options.retryCount
+  private  val configService = ConnectionRepository.getConfigService
+  private val zkSessionTimeout = configService.get(ConfigConstants.zkSessionTimeoutTag).value.toInt
 
   val zooKeeperServers = new util.ArrayList[InetSocketAddress]()
   options.zkServers.map(x => (x.split(":")(0), x.split(":")(1).toInt))
     .foreach(zkServer => zooKeeperServers.add(new InetSocketAddress(zkServer._1, zkServer._2)))
-  val zkClient = new ZooKeeperClient(Amount.of(500, Time.MILLISECONDS), zooKeeperServers)
+  val zkClient = new ZooKeeperClient(Amount.of(zkSessionTimeout, Time.MILLISECONDS), zooKeeperServers)
 
   def open() = {
     var isConnected = false
@@ -74,7 +78,7 @@ class TcpClient(options: TcpClientOptions) {
     try {
       val master = getMasterServer()
       socket = new Socket(master(0), master(1).toInt)
-      socket.setSoTimeout(500)
+      socket.setSoTimeout(zkSessionTimeout)
       true
     } catch {
       case ex: ConnectException => false

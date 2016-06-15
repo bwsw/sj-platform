@@ -61,16 +61,11 @@ class OutputTaskManager(taskName: String, instance: OutputInstance) {
       new InetSocketAddress(parts(0), parts(1).toInt)
     }.toList
 
-    val agentHost = OutputDataFactory.agentHost
-    val agentPort = OutputDataFactory.agentPort
-    val agentAddress = s"${if (agentHost != null && !agentHost.equals("")) agentHost else "localhost"}" +
-      s":${if (agentPort != null && !agentPort.equals("")) agentPort else "8889"}"
-
     val coordinatorSettings = new SubscriberCoordinationOptions(
-      agentAddress,
+      OutputDataFactory.agentAddress,
       s"/${service.lockNamespace}",
       zkHosts,
-      7000 //todo
+      OutputDataFactory.zkTimeout
     )
 
     val basicStream = BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
@@ -82,9 +77,9 @@ class OutputTaskManager(taskName: String, instance: OutputInstance) {
     val callback = new OutputSubscriberCallback(queue)
 
     val options = new BasicConsumerOptions[Array[Byte], Array[Byte]](
-      transactionsPreload = 10,
-      dataPreload = 7,
-      consumerKeepAliveInterval = 5,
+      OutputDataFactory.txnPreload,
+      OutputDataFactory.dataPreload,
+      OutputDataFactory.consumerKeepAliveInterval,
       converter,
       roundRobinPolicy,
       offset,

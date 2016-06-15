@@ -1,16 +1,15 @@
 package com.bwsw.sj.transaction.generator.server
 
 import java.io._
-import java.net.{URI, SocketException, ServerSocket, Socket}
+import java.net.{ServerSocket, Socket, SocketException, URI}
 
+import com.bwsw.sj.common.ConfigConstants
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.datastax.driver.core.utils.UUIDs
 import com.twitter.common.zookeeper.DistributedLock.LockingException
 import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
 import org.apache.log4j.Logger
 import org.apache.zookeeper.{CreateMode, ZooDefs}
-
-import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 
 /**
   * TCP-Server for transaction generating
@@ -20,6 +19,8 @@ import scala.collection.mutable.ArrayBuffer
   */
 class TcpServer(prefix: String, zkClient: ZooKeeperClient, host: String, port: Int) {
   private val logger = Logger.getLogger(getClass)
+  private val configService = ConnectionRepository.getConfigService
+  private val retryPeriod = configService.get(ConfigConstants.tgServerRetryPeriodTag).value.toInt
 
   var serverSocket: ServerSocket = null
 
@@ -34,7 +35,7 @@ class TcpServer(prefix: String, zkClient: ZooKeeperClient, host: String, port: I
         updateMaster()
         isMaster = true
       } catch {
-        case e: LockingException => Thread.sleep(500)
+        case e: LockingException => Thread.sleep(retryPeriod)
       }
     }
     logger.info(s"Server $host:$port is started")

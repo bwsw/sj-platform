@@ -3,10 +3,11 @@ package com.bwsw.sj.engine.core.utils
 import java.util.Date
 
 import com.bwsw.common.tstream.NetworkTimeUUIDGenerator
-import com.bwsw.sj.common.DAL.ConnectionConstants._
+import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.DAL.model.{TStreamSjStream, ZKService}
-import com.bwsw.tstreams.agents.consumer.Offsets.{DateTime, Newest, Oldest, IOffset}
-import com.bwsw.tstreams.generator.{LocalTimeUUIDGenerator, IUUIDGenerator}
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.tstreams.agents.consumer.Offsets.{DateTime, IOffset, Newest, Oldest}
+import com.bwsw.tstreams.generator.{IUUIDGenerator, LocalTimeUUIDGenerator}
 
 /**
   * Created: 27/05/2016
@@ -14,6 +15,10 @@ import com.bwsw.tstreams.generator.{LocalTimeUUIDGenerator, IUUIDGenerator}
   * @author Kseniya Tomskikh
   */
 object EngineUtils {
+
+  private val configService = ConnectionRepository.getConfigService
+  private val retryPeriod = configService.get(ConfigConstants.tgClientRetryPeriodTag).value.toInt
+  private val retryCount = configService.get(ConfigConstants.tgRetryCountTag).value.toInt
 
   /**
     * Chooses offset policy for t-streams consumers
@@ -47,7 +52,7 @@ object EngineUtils {
         } else {
           prefix += "/global"
         }
-        new NetworkTimeUUIDGenerator(zkHosts, prefix, retryInterval, retryCount)
+        new NetworkTimeUUIDGenerator(zkHosts, prefix, retryPeriod, retryCount)
     }
   }
 
