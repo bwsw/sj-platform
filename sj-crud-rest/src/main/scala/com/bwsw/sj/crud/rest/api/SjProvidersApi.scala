@@ -68,6 +68,17 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
               response = ProtocolResponse(200, Map("message" -> s"Provider '$providerName' not found"))
             }
             complete(HttpEntity(`application/json`, serializer.serialize(response)))
+          } ~
+          delete {
+            val provider = providerDAO.get(providerName)
+            var response: ProtocolResponse = null
+            if (provider != null) {
+              providerDAO.delete(providerName)
+              response = ProtocolResponse(200, Map("message" -> s"Provider '$providerName' has been deleted"))
+            } else {
+              response = ProtocolResponse(200, Map("message" -> s"Provider '$providerName' not found"))
+            }
+            complete(HttpEntity(`application/json`, serializer.serialize(response)))
           }
         } ~
         pathPrefix("connection") {

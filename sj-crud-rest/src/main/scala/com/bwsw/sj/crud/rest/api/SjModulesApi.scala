@@ -154,24 +154,24 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                               serializer.serialize(response)
                             ))
                           } ~
-                            delete {
-                              var msg = ""
-                              if (instance.status.equals(stopped) || instance.status.equals(failed)) {
-                                instance.status = deleting
-                                instanceDAO.save(instance)
-                                destroyInstance(instance)
-                                msg = s"Instance $instanceName is deleting"
-                              } else if (instance.status.equals(ready)) {
-                                instanceDAO.delete(instanceName)
-                                msg = s"Instance $instanceName has been deleted"
-                              } else {
-                                msg = "Cannot deleting of instance. Instance is not stopped, failed or ready."
-                              }
-                              complete(HttpEntity(
-                                `application/json`,
-                                serializer.serialize(ProtocolResponse(200, Map("message" -> msg)))
-                              ))
+                          delete {
+                            var msg = ""
+                            if (instance.status.equals(stopped) || instance.status.equals(failed)) {
+                              instance.status = deleting
+                              instanceDAO.save(instance)
+                              destroyInstance(instance)
+                              msg = s"Instance $instanceName is deleting"
+                            } else if (instance.status.equals(ready)) {
+                              instanceDAO.delete(instanceName)
+                              msg = s"Instance $instanceName has been deleted"
+                            } else {
+                              msg = "Cannot deleting of instance. Instance is not stopped, failed or ready."
                             }
+                            complete(HttpEntity(
+                              `application/json`,
+                              serializer.serialize(ProtocolResponse(200, Map("message" -> msg)))
+                            ))
+                          }
                         } ~
                           path("start") {
                             pathEndOrSingleSlash {
@@ -335,7 +335,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
    * @return - list of errors
    */
   def validateOptions(options: InstanceMetadata, specification: ModuleSpecification, moduleType: String) = {
-    val validatorClassName = configService.get(s"$moduleType-validator-class").value
+    val validatorClassName = configService.get(s"system.$moduleType-validator-class").value
     val validatorClass = Class.forName(validatorClassName)
     val validator = validatorClass.newInstance().asInstanceOf[StreamingModuleValidator]
     validator.validate(options, specification)

@@ -73,6 +73,17 @@ trait SjServicesApi extends Directives with SjCrudValidator {
               response = ProtocolResponse(200, Map("message" -> s"Service '$serviceName' not found"))
             }
             complete(HttpEntity(`application/json`, serializer.serialize(response)))
+          } ~
+          delete {
+            val service = serviceDAO.get(serviceName)
+            var response: ProtocolResponse = null
+            if (service != null) {
+              serviceDAO.delete(serviceName)
+              response = ProtocolResponse(200, Map("message" -> s"Service '$serviceName' has been deleted"))
+            } else {
+              response = ProtocolResponse(200, Map("message" -> s"Service '$serviceName' not found"))
+            }
+            complete(HttpEntity(`application/json`, serializer.serialize(response)))
           }
         }
       }

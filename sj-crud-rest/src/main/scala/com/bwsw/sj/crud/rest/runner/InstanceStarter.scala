@@ -118,7 +118,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
     *         (true, if framework running on mesos)
     */
   def frameworkStart(mesosMaster: String) = {
-    val frameworkJarName = configService.get(configService.get(frameworkTag).value).value
+    val frameworkJarName = configService.get("system" + "." + configService.get(frameworkTag).value).value
     val restUrl = new URI(s"$restAddress/v1/custom/$frameworkJarName")
     val taskInfoResponse = getTaskInfo(instance.name)
     if (taskInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
