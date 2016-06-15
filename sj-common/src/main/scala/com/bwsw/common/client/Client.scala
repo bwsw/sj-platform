@@ -2,6 +2,8 @@ package com.bwsw.common.client
 
 import java.io._
 
+import com.bwsw.sj.common.ConfigConstants
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import org.apache.log4j.Logger
 
 /**
@@ -17,8 +19,9 @@ object Client {
   def main(args: Array[String]) = {
     val zkServers = Array("176.120.25.19:2181")
     val prefix = "zk_test/global"
-    val retryPeriod = 500
-    val retryCount = 10
+    val configService = ConnectionRepository.getConfigService
+    val retryPeriod = configService.get(ConfigConstants.tgClientRetryPeriodTag).value.toInt
+    val retryCount = configService.get(ConfigConstants.tgRetryCountTag).value.toInt
 
     val options = new TcpClientOptions()
       .setZkServers(zkServers)

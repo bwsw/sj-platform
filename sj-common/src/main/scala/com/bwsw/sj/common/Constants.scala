@@ -77,12 +77,10 @@ object ConfigConstants {
   val domains = Array("system", "t-streams", "kafka", "es", "zk", "jdbc")
   val transactionGeneratorTag = "system.current-transaction-generator"
   val frameworkTag = "system.current-framework"
-  val regularEngineTag = "system.current-regular-engine"
-  val windowedEngineTag = "system.current-windowed-engine"
-  val outputEngineTag = "system.current-output-engine"
   val hostOfCrudRestTag = "system.crud-rest-host"
   val portOfCrudRestTag = "system.crud-rest-port"
   val marathonTag = "system.marathon-connect"
+  val marathonTimeoutTag = "system.marathon-connect-timeout"
   val zkSessionTimeoutTag= "zk.session.timeout"
   val txnPreloadTag = "t-streams.txn-preload"
   val dataPreloadTag = "t-streams.data-preload"
@@ -94,4 +92,8 @@ object ConfigConstants {
   val streamTTLTag = "t-streams.stream-ttl"
   val esTimeoutTag = "es.timeout"
   val jdbcTimeoutTag = "jdbc.timeout"
+  val tgClientRetryPeriodTag = "system.transaction-generator-client-retry-period"
+  val tgServerRetryPeriodTag = "system.transaction-generator-server-retry-period"
+  val tgRetryCountTag = "system.transaction-generator-retry-count"
+  val kafkaSubscriberTimeoutTag = "system.kafka-subscriber-timeout"
 }

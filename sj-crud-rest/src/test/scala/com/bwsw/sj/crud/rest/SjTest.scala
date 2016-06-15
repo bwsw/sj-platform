@@ -65,8 +65,8 @@ object SjTest {
     println(cass.getClass.toString)
     val test = serializer.deserialize[SjStreamTest](testJson)
     println(test.getClass.toString)*/
-   // createKafkaData()
-   // createEsData()
+    //createKafkaData()
+    //createEsData()
     println("Ok")
   }
 

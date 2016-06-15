@@ -5,11 +5,12 @@ import java.net.InetSocketAddress
 
 import com.aerospike.client.Host
 import com.bwsw.common.file.utils.MongoFileStorage
-import com.bwsw.sj.common.DAL.model.module.{OutputInstance, Instance}
-import com.bwsw.sj.common.DAL.model.{FileMetadata, TStreamService, SjStream}
+import com.bwsw.sj.common.ConfigConstants._
+import com.bwsw.sj.common.DAL.model.module.{Instance, OutputInstance}
+import com.bwsw.sj.common.DAL.model.{FileMetadata, SjStream, TStreamService}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.tstreams.data.aerospike.{AerospikeStorage, AerospikeStorageOptions, AerospikeStorageFactory}
+import com.bwsw.tstreams.data.aerospike.{AerospikeStorage, AerospikeStorageFactory, AerospikeStorageOptions}
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 
 /**
@@ -22,10 +23,11 @@ object OutputDataFactory {
 
   val instanceName: String = System.getenv("INSTANCE_NAME")
   val taskName: String = System.getenv("TASK_NAME")
-  val agentHost: String = System.getenv("AGENTS_HOST")
+  private val agentHost: String = System.getenv("AGENTS_HOST")
   private val agentsPorts: Array[String] = System.getenv("AGENTS_PORTS").split(",")
   assert(agentsPorts.length == 1, "Not enough ports for t-stream consumers/producers ")
-  val agentPort: Int = agentsPorts.head.toInt
+  private val agentPort: Int = agentsPorts.head.toInt
+  val agentAddress = OutputDataFactory.agentHost + ":" + OutputDataFactory.agentPort.toString
 
   private val instanceDAO: GenericMongoService[Instance] = ConnectionRepository.getInstanceService
   private val fileMetadataDAO: GenericMongoService[FileMetadata] = ConnectionRepository.getFileMetadataService
@@ -54,6 +56,12 @@ object OutputDataFactory {
   private  val options = new AerospikeStorageOptions(inputStreamService.dataNamespace, dataStorageHosts)
   val dataStorage: AerospikeStorage = dataStorageFactory.getInstance(options)
 
+  private val configService = ConnectionRepository.getConfigService
+
+  val txnPreload = configService.get(txnPreloadTag).value.toInt
+  val dataPreload = configService.get(dataPreloadTag).value.toInt
+  val consumerKeepAliveInterval = configService.get(consumerKeepAliveInternalTag).value.toInt
+  val zkTimeout = configService.get(zkSessionTimeoutTag).value.toInt
   /**
     * Get metadata of module file
     *

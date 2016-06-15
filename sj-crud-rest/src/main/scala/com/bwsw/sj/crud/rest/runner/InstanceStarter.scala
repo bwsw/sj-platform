@@ -6,7 +6,8 @@ import java.util
 import com.bwsw.sj.common.DAL.ConnectionConstants
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{TStreamSjStream, ZKService}
-import com.bwsw.sj.common.StreamConstants
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.{ConfigConstants, StreamConstants}
 import com.bwsw.sj.crud.rest.entities.MarathonRequest
 import com.bwsw.sj.crud.rest.utils.StreamUtil
 import com.twitter.common.quantity.{Amount, Time}
@@ -28,6 +29,9 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
 
   import scala.collection.JavaConverters._
 
+  private  val configService = ConnectionRepository.getConfigService
+  private val zkSessionTimeout = configService.get(ConfigConstants.zkSessionTimeoutTag).value.toInt
+
   def run() = {
     val mesosInfoResponse = getMesosInfo
     if (mesosInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
@@ -37,7 +41,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
       val mesosMasterUrl = new URI(mesosMaster)
       val zooKeeperServers = new util.ArrayList[InetSocketAddress]()
       zooKeeperServers.add(new InetSocketAddress(mesosMasterUrl.getHost, mesosMasterUrl.getPort))
-      val zkClient = new ZooKeeperClient(Amount.of(500, Time.MILLISECONDS), zooKeeperServers)
+      val zkClient = new ZooKeeperClient(Amount.of(zkSessionTimeout, Time.MILLISECONDS), zooKeeperServers)
 
       var isMaster = false
       val zkLockNode = new URI(s"/instance/lock").normalize()
@@ -114,7 +118,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
     *         (true, if framework running on mesos)
     */
   def frameworkStart(mesosMaster: String) = {
-    val frameworkJarName = configService.get(configService.get(frameworkTag).value).value
+    val frameworkJarName = configService.get("system" + "." + configService.get(frameworkTag).value).value
     val restUrl = new URI(s"$restAddress/v1/custom/$frameworkJarName")
     val taskInfoResponse = getTaskInfo(instance.name)
     if (taskInfoResponse.getStatusLine.getStatusCode.equals(OK)) {

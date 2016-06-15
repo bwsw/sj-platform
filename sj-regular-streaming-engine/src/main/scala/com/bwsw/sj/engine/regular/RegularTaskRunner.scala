@@ -103,7 +103,7 @@ object RegularTaskRunner {
       executorService.execute(new Runnable() {
         def run() = {
           val serializer = new JsonSerializer()
-          val timeout = 5
+          val timeout = manager.kafkaSubscriberTimeout
 
           while (true) {
             logger.debug(s"Task: ${manager.taskName}. Waiting for records that consumed from kafka for $timeout milliseconds\n")
