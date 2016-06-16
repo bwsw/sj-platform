@@ -90,10 +90,10 @@ object StreamUtil {
     val service = stream.service.asInstanceOf[KafkaService]
     val brokers = service.provider.hosts
     val replications = brokers.length
-    val zkHost = "127.0.0.1:2181"//todo
-    val zkConnect = new ZkConnection(zkHost)
+    val zkHost = service.zkProvider.hosts
+    val zkConnect = new ZkConnection(zkHost.mkString(";"))
     val zkTimeout = configService.get(ConfigConstants.zkSessionTimeoutTag).value.toInt
-    val zkClient = ZkUtils.createZkClient(zkHost, zkTimeout, zkTimeout)
+    val zkClient = ZkUtils.createZkClient(zkHost.mkString(";"), zkTimeout, zkTimeout)
     val zkUtils = new ZkUtils(zkClient, zkConnect, false)
     if (!AdminUtils.topicExists(zkUtils, stream.name)) {
       AdminUtils.createTopic(zkUtils, stream.name, stream.asInstanceOf[KafkaSjStream].partitions, replications, new Properties())
