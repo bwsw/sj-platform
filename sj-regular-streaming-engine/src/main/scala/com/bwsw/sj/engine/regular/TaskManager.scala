@@ -11,6 +11,7 @@ import com.bwsw.sj.common.ConfigConstants._
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.ModuleConstants._
+import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.common.StreamConstants._
 import com.bwsw.sj.engine.core.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
@@ -35,7 +36,7 @@ import org.apache.kafka.common.TopicPartition
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
-
+import scala.collection.JavaConverters._
 /**
  * Class allowing to manage an environment of task
  * Created: 13/04/2016
@@ -71,7 +72,15 @@ class TaskManager() {
   private val retryCount = configService.get(tgRetryCountTag).value.toInt
   private val zkTimeout = configService.get(zkSessionTimeoutTag).value.toInt
 
-  assert(agentsPorts.length == (instance.inputs.length + instance.outputs.length + 3),
+  val inputs = instance.executionPlan.tasks.get(taskName).inputs.asScala
+    .map(x => {
+    val service = ConnectionRepository.getStreamService
+
+    (service.get(x._1), x._2)
+  })
+
+  assert(agentsPorts.length >
+    (inputs.count(x => x._1.streamType == StreamConstants.tStream) + instance.outputs.length + 3),
     "Not enough ports for t-stream consumers/producers ")
 
   private val fileMetadata: FileMetadata = ConnectionRepository.getFileMetadataService.getByParameters(

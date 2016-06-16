@@ -10,7 +10,7 @@ object CassandraHelper {
   val cassandraHost = System.getenv("CASSANDRA_HOST")
   val cassandraPort = System.getenv("CASSANDRA_PORT").toInt
 
-  val cassandraTestKeyspace = "test_keyspace"
+  val cassandraTestKeyspace = "test_keyspace_for_regular_engine"
   /**
    * Keyspace creator helper
    * @param session Session instance which will be used for keyspace creation

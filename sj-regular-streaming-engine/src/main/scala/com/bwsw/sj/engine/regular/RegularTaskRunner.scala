@@ -61,12 +61,7 @@ object RegularTaskRunner {
     val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(ModuleConstants.persistentBlockingQueue)
     val checkpointGroup = new CheckpointGroup()
 
-    val inputs = regularInstanceMetadata.executionPlan.tasks.get(manager.taskName).inputs.asScala
-      .map(x => {
-      val service = ConnectionRepository.getStreamService
-
-      (service.get(x._1), x._2)
-    })
+    val inputs = manager.inputs
 
     var consumersWithSubscribes: Option[Map[String, BasicSubscribingConsumer[Array[Byte], Array[Byte]]]] = None
     var offsetProducer: Option[BasicProducer[Array[Byte], Array[Byte]]] = None

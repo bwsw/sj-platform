@@ -14,7 +14,7 @@
 *.bak
 *.cache
 *.ilk
-*.log
+*.log*
 [Bb]in
 [Dd]ebug*/
 *.lib
