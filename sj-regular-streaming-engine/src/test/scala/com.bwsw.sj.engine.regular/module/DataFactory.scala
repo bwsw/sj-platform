@@ -38,7 +38,7 @@ object DataFactory {
   private val zookeeperHosts = System.getenv("ZOOKEEPER_HOSTS").split(",")
   private val kafkaHosts = System.getenv("KAFKA_HOSTS").split(",")
   private val testNamespace = "test"
-  private val instanceName = "test-instance"
+  private val instanceName = "test-instance-for-regular-engine"
   private var instanceInputs: Array[String] = Array()
   private var instanceOutputs: Array[String] = Array()
   private val task: Task = new Task(new java.util.HashMap[String, Array[Int]]())
