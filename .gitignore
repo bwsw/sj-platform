@@ -26,3 +26,4 @@ _ReSharper*/
 .idea
 *.iml
 target
+*.jar

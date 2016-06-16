@@ -112,6 +112,8 @@ object DataFactory {
     serviceManager.save(aeroService)
 
     val zkProv = providerService.get("zookeeper test provider")
+    val zkService = new ZKService("zookeeper test service", "ZKCoord", "zookeeper test service", zkProv, testNamespace)
+    serviceManager.save(zkService)
 
     val kafkaProv = providerService.get("kafka test provider")
     val kafkaService = new KafkaService("kafka test service", "KfkQ", "kafka test service", kafkaProv, zkProv, testNamespace)
@@ -126,6 +128,7 @@ object DataFactory {
     serviceManager.delete("cassandra test service")
     serviceManager.delete("aerospike test service")
     serviceManager.delete("kafka test service")
+    serviceManager.delete("zookeeper test service")
     serviceManager.delete("tstream test service")
   }
 
@@ -249,7 +252,8 @@ object DataFactory {
   }
 
 
-  def createInstance(instanceService: GenericMongoService[Instance],
+  def createInstance(serviceManager: GenericMongoService[Service],
+                     instanceService: GenericMongoService[Instance],
                      checkpointInterval: Int,
                      stateManagement: String = "none",
                      stateFullCheckpoint: Int = 0
@@ -272,14 +276,15 @@ object DataFactory {
     instance.parallelism = 1
     instance.options = """{"hey": "hey"}"""
     instance.startFrom = "oldest"
-    instance.perTaskCores = 0
-    instance.perTaskRam = 0
+    instance.perTaskCores = 0.1
+    instance.perTaskRam = 64
     instance.performanceReportingInterval = 10000
     instance.executionPlan = new ExecutionPlan(Map((instanceName + "-task0", task)).asJava)
-
+    instance.engine = "com.bwsw.regular.streaming.engine-0.1"
     instance.eventWaitTime = 10
+    instance.coordinationService = serviceManager.get("zookeeper test service").asInstanceOf[ZKService]
 
-    instanceService.save(instance)
+      instanceService.save(instance)
   }
 
   def deleteInstance(instanceService: GenericMongoService[Instance]) = {
