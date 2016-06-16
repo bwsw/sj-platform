@@ -53,8 +53,8 @@ object SjTest {
   val testJson = "{\n\t\"name\" : \"tst\",\n\t\"description\" : \"fdsgff\",\n\t\"stream-type\" : \"test\",\n\t\"ttt\" : 26\n}"
 
   def main(args: Array[String]) = {
-    createData()
-    //prepareCassandra()
+   // createData()
+   // prepareCassandra()
     /*val dao = ConnectionRepository.getStreamService
     val streams = dao.getAll
     val stream = streams.filter(s => s.name.equals("s1")).head
@@ -71,7 +71,7 @@ object SjTest {
   }
 
   def prepareCassandra() = {
-    val cluster = Cluster.builder().addContactPoint("http://stream-juggler.z1.netpoint-dc.com/").build()
+    val cluster = Cluster.builder().addContactPoint("stream-juggler.z1.netpoint-dc.com").build()
     val session = cluster.connect()
     createKeyspace(session, "test_keyspace")
     createMetadataTables(session, "test_keyspace")
@@ -94,7 +94,7 @@ object SjTest {
 
     val provider = new Provider()
     provider.name = "kafka"
-    provider.hosts = Array("localhost:9092")
+    provider.hosts = Array("stream-juggler.z1.netpoint-dc.com:9092")
     provider.providerType = "kafka"
     providerDAO.save(provider)
 

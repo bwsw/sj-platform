@@ -42,33 +42,34 @@ trait SjCustomApi extends Directives with SjCrudValidator {
           pathSuffix(Segment) { (version: String) =>
             pathEndOrSingleSlash {
               val fileMetadata = fileMetadataDAO.getByParameters(Map("specification.name" -> name, "specification.version" -> version)).head
-              validate(fileMetadata != null, s"Jar '$name' not found") {
-                val filename = fileMetadata.filename
-                get {
-                  val jarFile = storage.get(filename, s"tmp/$filename")
-                  if (jarFile != null && jarFile.exists()) {
-                    complete(HttpResponse(
-                      headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> filename))),
-                      entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
-                    ))
-                  } else {
-                    throw new BadRecordWithKey(s"Jar '$name' not found", name)
-                  }
-                } ~
-                  delete {
-                    if (storage.delete(filename)) {
-                      val response = ProtocolResponse(
-                        200,
-                        Map("message" -> s"Jar by name $name and version $version has been deleted")
-                      )
-                      complete(HttpEntity(
-                        `application/json`,
-                        serializer.serialize(response)
-                      ))
-                    } else {
-                      throw new BadRecordWithKey(s"Jar name $name and version $version hasn't been found", name)
-                    }
-                  }
+              if (fileMetadata == null) {
+                throw new BadRecordWithKey(s"Jar '$name' not found", name)
+              }
+              val filename = fileMetadata.filename
+              get {
+                val jarFile = storage.get(filename, s"tmp/$filename")
+                if (jarFile != null && jarFile.exists()) {
+                  complete(HttpResponse(
+                    headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> filename))),
+                    entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
+                  ))
+                } else {
+                  throw new BadRecordWithKey(s"Jar '$name' not found", name)
+                }
+              } ~
+              delete {
+                if (storage.delete(filename)) {
+                  val response = ProtocolResponse(
+                    200,
+                    Map("message" -> s"Jar by name $name and version $version has been deleted")
+                  )
+                  complete(HttpEntity(
+                    `application/json`,
+                    serializer.serialize(response)
+                  ))
+                } else {
+                  throw new BadRecordWithKey(s"Jar name $name and version $version hasn't been found", name)
+                }
               }
             }
           }
