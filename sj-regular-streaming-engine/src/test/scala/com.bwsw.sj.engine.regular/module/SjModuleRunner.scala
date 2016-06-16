@@ -27,7 +27,7 @@ object SjModuleSetup extends App {
   createProviders(providerService)
   createServices(serviceManager, providerService)
   createStreams(streamService, serviceManager, partitions, _type, inputCount, outputCount)
-  createInstance(instanceService, checkpointInterval, stateManagement, stateFullCheckpoint)
+  createInstance(serviceManager, instanceService, checkpointInterval, stateManagement, stateFullCheckpoint)
 
   createData(12, 4, streamService, _type, inputCount)
 
