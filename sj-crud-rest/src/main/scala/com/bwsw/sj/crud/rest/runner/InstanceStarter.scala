@@ -33,42 +33,48 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
   private val zkSessionTimeout = configService.get(ConfigConstants.zkSessionTimeoutTag).value.toInt
 
   def run() = {
-    val mesosInfoResponse = getMesosInfo
-    if (mesosInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
-      val entity = serializer.deserialize[Map[String, Any]](EntityUtils.toString(mesosInfoResponse.getEntity, "UTF-8"))
-      val mesosMaster = entity.get("marathon_config").get.asInstanceOf[Map[String, Any]].get("master").get.asInstanceOf[String]
+    try {
+      val mesosInfoResponse = getMesosInfo
+      if (mesosInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
+        val entity = serializer.deserialize[Map[String, Any]](EntityUtils.toString(mesosInfoResponse.getEntity, "UTF-8"))
+        val mesosMaster = entity.get("marathon_config").get.asInstanceOf[Map[String, Any]].get("master").get.asInstanceOf[String]
 
-      val mesosMasterUrl = new URI(mesosMaster)
-      val zooKeeperServers = new util.ArrayList[InetSocketAddress]()
-      zooKeeperServers.add(new InetSocketAddress(mesosMasterUrl.getHost, mesosMasterUrl.getPort))
-      val zkClient = new ZooKeeperClient(Amount.of(zkSessionTimeout, Time.MILLISECONDS), zooKeeperServers)
+        val mesosMasterUrl = new URI(mesosMaster)
+        val zooKeeperServers = new util.ArrayList[InetSocketAddress]()
+        zooKeeperServers.add(new InetSocketAddress(mesosMasterUrl.getHost, mesosMasterUrl.getPort))
+        val zkClient = new ZooKeeperClient(Amount.of(zkSessionTimeout, Time.MILLISECONDS), zooKeeperServers)
 
-      var isMaster = false
-      val zkLockNode = new URI(s"/instance/lock").normalize()
-      val distributedLock = new DistributedLockImpl(zkClient, zkLockNode.toString)
-      while (!isMaster) {
-        try {
-          distributedLock.lock()
-          isMaster = true
-        } catch {
-          case e: LockingException => Thread.sleep(delay)
+        var isMaster = false
+        val zkLockNode = new URI(s"/rest/instance/lock").normalize()
+        val distributedLock = new DistributedLockImpl(zkClient, zkLockNode.toString)
+        while (!isMaster) {
+          try {
+            distributedLock.lock()
+            isMaster = true
+          } catch {
+            case e: LockingException => Thread.sleep(delay)
+          }
         }
-      }
 
-      val streams = instance.inputs.map(_.replaceAll("/split|/full", "")).union(instance.outputs)
-        .map(name => streamDAO.get(name))
-        .filter(stream => stream.streamType.equals(StreamConstants.tStream))
-        .filter(stream => !stream.asInstanceOf[TStreamSjStream].generator.generatorType.equals("local"))
-      startGenerators(streams.map(stream => stream.asInstanceOf[TStreamSjStream]).toSet)
 
-      val stages = Map(instance.stages.asScala.toList: _*)
-      if (!stages.exists(s => !s._1.equals(instance.name) && s._2.state.equals(failed))) {
-        instanceStart(mesosMaster)
+        val streams = instance.inputs.map(_.replaceAll("/split|/full", "")).union(instance.outputs)
+          .map(name => streamDAO.get(name))
+          .filter(stream => stream.streamType.equals(StreamConstants.tStream))
+          .filter(stream => !stream.asInstanceOf[TStreamSjStream].generator.generatorType.equals("local"))
+        startGenerators(streams.map(stream => stream.asInstanceOf[TStreamSjStream]).toSet)
+
+        val stages = Map(instance.stages.asScala.toList: _*)
+        if (!stages.exists(s => !s._1.equals(instance.name) && s._2.state.equals(failed))) {
+          instanceStart(mesosMaster)
+        } else {
+          instance.status = failed
+        }
+        distributedLock.unlock()
       } else {
         instance.status = failed
       }
-    } else {
-      instance.status = failed
+    } catch {
+      case e: Exception => instance.status = failed
     }
     instanceDAO.save(instance)
   }
