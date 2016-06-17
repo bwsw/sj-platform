@@ -13,10 +13,14 @@ object StatusHandler {
 
   def handle(status: TaskStatus) = {
     logger.info(s"STATUS UPDATE")
+
     if (status != null) {
+      if (status.getState.toString != "TASK_RUNNING") {
+        TasksList.usedPorts(status.getSlaveId.getValue).remove(status.getTaskId.getValue)
+      }
       TasksList(status.getTaskId.getValue).foreach(task => task.update(
         state = status.getState.toString,
-        state_changed = (status.getTimestamp.toLong * 1000).toString,
+        state_changed = status.getTimestamp.toLong * 1000,
         last_node = if (task.node != "") task.node else task.last_node, node = status.getSlaveId.getValue, reason = ""
       ))
       logger.info(s"Task: ${status.getTaskId.getValue}")
