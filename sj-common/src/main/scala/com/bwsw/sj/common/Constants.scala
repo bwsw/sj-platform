@@ -96,4 +96,6 @@ object ConfigConstants {
   val tgServerRetryPeriodTag = "system.transaction-generator-server-retry-period"
   val tgRetryCountTag = "system.transaction-generator-retry-count"
   val kafkaSubscriberTimeoutTag = "system.kafka-subscriber-timeout"
+  val geoIpAsNum = "system.geo-ip-as-num"
+  val geoIpAsNumv6 = "system.geo-ip-as-num-v6"
 }

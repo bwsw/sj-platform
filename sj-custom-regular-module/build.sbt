@@ -1,4 +1,4 @@
-name := "sj-stub-module"
+name := "sj-custom-regular-module"
 
 version := "0.1"
 
@@ -14,4 +14,6 @@ assemblyMergeStrategy in assembly := {
     oldStrategy(x)
 }
 
-assemblyJarName in assembly := "sj-stub-module-test.jar"
+libraryDependencies += "com.maxmind.geoip" % "geoip-api" % "1.3.1"
+
+assemblyJarName in assembly := "sj-custom-regular-module-test.jar"

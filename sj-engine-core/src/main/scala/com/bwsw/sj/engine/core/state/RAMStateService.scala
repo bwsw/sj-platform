@@ -118,20 +118,20 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
   /**
    * Saves a partial state changes
    */
-  override def checkpoint(): Unit = {
+  override def savePartialState(): Unit = {
     logger.debug(s"Do checkpoint of a part of state\n")
     if (stateChanges.nonEmpty) {
       if (lastFullTxnUUID.isDefined) {
         sendChanges(lastFullTxnUUID.get, stateChanges)
         stateChanges.clear()
-      } else fullCheckpoint()
+      } else saveFullState()
     }
   }
 
   /**
    * Saves a state
    */
-  override def fullCheckpoint(): Unit = {
+  override def saveFullState(): Unit = {
     logger.debug(s"Do checkpoint of a full state\n")
     lastFullTxnUUID = Some(sendState(stateVariables))
     stateChanges.clear()
@@ -225,7 +225,6 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
     logger.debug(s"Save a full state in t-stream intended for storing/restoring a state\n")
     val transaction = producer.newTransaction(ProducerPolicies.errorIfOpen)
     state.foreach((x: (String, Any)) => transaction.send(serializer.serialize(x)))
-    transaction.checkpoint()
     transaction.getTxnUUID
   }
 
@@ -239,7 +238,6 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
     val transaction = producer.newTransaction(ProducerPolicies.errorIfOpen)
     transaction.send(serializer.serialize(uuid))
     changes.foreach((x: (String, (String, Any))) => transaction.send(serializer.serialize(x)))
-    transaction.checkpoint()
   }
 
   /**
