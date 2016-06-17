@@ -66,12 +66,12 @@ trait IStateService {
   /**
    * Saves a partial state changes
    */
-  def checkpoint()
+  def savePartialState()
 
   /**
    * Saves a state
    */
-  def fullCheckpoint()
+  def saveFullState()
 
   /**
    * Returns the number of state variables

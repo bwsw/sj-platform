@@ -27,3 +27,4 @@ _ReSharper*/
 *.iml
 target
 *.jar
+*.dat

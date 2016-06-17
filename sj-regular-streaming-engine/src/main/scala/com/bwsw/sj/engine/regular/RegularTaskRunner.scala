@@ -485,7 +485,7 @@ object RegularTaskRunner {
                     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint of a part of state\n")
                     logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeStateSave() handler\n")
                     executor.onBeforeStateSave(false)
-                    stateService.checkpoint()
+                    stateService.savePartialState()
                     logger.debug(s"Task: ${manager.taskName}. Invoke onAfterStateSave() handler\n")
                     executor.onAfterStateSave(false)
                     countOfCheckpoints += 1
@@ -493,7 +493,7 @@ object RegularTaskRunner {
                     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint of full state\n")
                     logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeStateSave() handler\n")
                     executor.onBeforeStateSave(true)
-                    stateService.fullCheckpoint()
+                    stateService.saveFullState()
                     logger.debug(s"Task: ${manager.taskName}. Invoke onAfterStateSave() handler\n")
                     executor.onAfterStateSave(true)
                     countOfCheckpoints = 1
@@ -579,7 +579,7 @@ object RegularTaskRunner {
                     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint of a part of state\n")
                     logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeStateSave() handler\n")
                     executor.onBeforeStateSave(false)
-                    stateService.checkpoint()
+                    stateService.savePartialState()
                     logger.debug(s"Task: ${manager.taskName}. Invoke onAfterStateSave() handler\n")
                     executor.onAfterStateSave(false)
                     countOfCheckpoints += 1
@@ -587,7 +587,7 @@ object RegularTaskRunner {
                     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint of full state\n")
                     logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeStateSave() handler\n")
                     executor.onBeforeStateSave(true)
-                    stateService.fullCheckpoint()
+                    stateService.saveFullState()
                     logger.debug(s"Task: ${manager.taskName}. Invoke onAfterStateSave() handler\n")
                     executor.onAfterStateSave(true)
                     countOfCheckpoints = 1

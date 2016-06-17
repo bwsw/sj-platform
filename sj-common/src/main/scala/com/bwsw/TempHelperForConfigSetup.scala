@@ -1,10 +1,15 @@
 package com.bwsw
 
+import java.io.File
+
 import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.DAL.model.ConfigSetting
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 
 object TempHelperForConfigSetup extends App{
+
+  ConnectionRepository.getFileStorage.put(new File("GeoIPASNum.dat"), "GeoIPASNum.dat")
+  ConnectionRepository.getFileStorage.put(new File("GeoIPASNumv6.dat"), "GeoIPASNumv6.dat")
 
   val configService = ConnectionRepository.getConfigService
 
@@ -36,7 +41,7 @@ object TempHelperForConfigSetup extends App{
   configService.save(new ConfigSetting(ConfigConstants.producerKeepAliveIntervalTag, "1", "t-streams"))
   configService.save(new ConfigSetting(ConfigConstants.streamTTLTag, "60000", "t-streams"))
 
-  //configService.save(new ConfigSetting("session.timeout.ms", "30000", "kafka")) e.g. for kafka domain
+  //configService.save(new ConfigSetting("session.timeout.ms", "30000", "kafka")) // for kafka domain
   configService.save(new ConfigSetting(ConfigConstants.esTimeoutTag, "6000", "es"))
   configService.save(new ConfigSetting(ConfigConstants.jdbcTimeoutTag, "6000", "jdbc"))
 
@@ -44,4 +49,7 @@ object TempHelperForConfigSetup extends App{
   configService.save(new ConfigSetting(ConfigConstants.tgServerRetryPeriodTag, "500", "system"))
   configService.save(new ConfigSetting(ConfigConstants.tgRetryCountTag, "10", "system"))
   configService.save(new ConfigSetting(ConfigConstants.kafkaSubscriberTimeoutTag, "10", "system"))
+
+  configService.save(new ConfigSetting(ConfigConstants.geoIpAsNum, "GeoIPASNum.dat", "system"))
+  configService.save(new ConfigSetting(ConfigConstants.geoIpAsNumv6, "GeoIPASNumv6.dat", "system"))
 }
