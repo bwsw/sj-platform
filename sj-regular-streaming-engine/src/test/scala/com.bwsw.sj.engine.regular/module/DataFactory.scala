@@ -279,7 +279,7 @@ object DataFactory {
     instance.perTaskCores = 0.1
     instance.perTaskRam = 64
     instance.performanceReportingInterval = 10000
-    instance.executionPlan = new ExecutionPlan(Map((instanceName + "-task0", task)).asJava)
+    instance.executionPlan = new ExecutionPlan(Map((instanceName + "-task0", task), (instanceName + "-task1", task)).asJava)
     instance.engine = "com.bwsw.regular.streaming.engine-0.1"
     instance.eventWaitTime = 10
     instance.coordinationService = serviceManager.get("zookeeper test service").asInstanceOf[ZKService]

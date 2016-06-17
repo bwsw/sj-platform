@@ -24,7 +24,7 @@ class PerformanceMetrics(taskId: String, host: String, streamNames: Array[String
 
   /**
    * Increases time when there are no messages (envelopes)
-   * @param idle How long waiting was a new envelope
+   * @param idle How long waiting a new envelope was
    */
   def increaseTotalIdleTime(idle: Long) = {
     mutex.lock()
