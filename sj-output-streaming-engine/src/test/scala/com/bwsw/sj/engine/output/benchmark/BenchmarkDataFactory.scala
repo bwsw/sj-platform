@@ -1,0 +1,423 @@
+package com.bwsw.sj.engine.output.benchmark
+
+import java.io.{InputStreamReader, BufferedReader, File}
+import java.net.{InetAddress, InetSocketAddress}
+import java.util.jar.JarFile
+
+import com.aerospike.client.Host
+import com.bwsw.common.file.utils.MongoFileStorage
+import com.bwsw.common.traits.Serializer
+import com.bwsw.common.{JsonSerializer, ObjectSerializer}
+import com.bwsw.sj.common.ConfigConstants
+import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, OutputInstance, Task}
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.DAL.service.GenericMongoService
+import com.bwsw.sj.engine.core.entities.EsEntity
+import com.bwsw.sj.engine.core.utils.CassandraHelper._
+import com.bwsw.tstreams.agents.producer.InsertionType.BatchInsert
+import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions, ProducerCoordinationOptions, ProducerPolicies}
+import com.bwsw.tstreams.converter.IConverter
+import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
+import com.bwsw.tstreams.data.aerospike.{AerospikeStorage, AerospikeStorageFactory, AerospikeStorageOptions}
+import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
+import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
+import com.bwsw.tstreams.policy.RoundRobinPolicy
+import com.bwsw.tstreams.services.BasicStreamService
+import com.bwsw.tstreams.streams.BasicStream
+import com.datastax.driver.core.Cluster
+import org.elasticsearch.action.index.IndexRequestBuilder
+import org.elasticsearch.client.transport.TransportClient
+import org.elasticsearch.common.transport.InetSocketTransportAddress
+
+import scala.collection.JavaConverters._
+
+/**
+  * Created: 20/06/2016
+  *
+  * @author Kseniya Tomskikh
+  */
+object BenchmarkDataFactory {
+  val metadataProviderName: String = "test-metprov-1"
+  val metadataNamespace: String = "bench"
+  val dataProviderName: String = "test-dataprov-1"
+  val dataNamespace: String = "bench"
+  val lockProviderName: String = "test-lockprov-1"
+  val lockNamespace: String = "bench"
+  val tServiceName: String = "test-tserv-1"
+  val tStreamName: String = "test-tstr-1"
+
+  val esProviderName: String = "test-esprov-1"
+  val esServiceName: String = "test-esserv-1"
+  val esStreamName: String = "test-es-1"
+  val esChkStreamName: String = "test-es-chk"
+
+  val zkServiceName: String = "test-zkserv-1"
+
+  val streamService = ConnectionRepository.getStreamService
+  val serviceManager = ConnectionRepository.getServiceManager
+  val providerService = ConnectionRepository.getProviderService
+  val instanceService = ConnectionRepository.getInstanceService
+  val fileStorage: MongoFileStorage = ConnectionRepository.getFileStorage
+  val configService: GenericMongoService[ConfigSetting] = ConnectionRepository.getConfigService
+
+  private val objectSerializer = new ObjectSerializer()
+  private val serializer: Serializer = new JsonSerializer
+
+  private val converter = new IConverter[Array[Byte], Array[Byte]] {
+    override def convert(obj: Array[Byte]): Array[Byte] = obj
+  }
+
+  private val cluster = Cluster.builder().addContactPoint(cassandraHost).build()
+  private val session = cluster.connect()
+
+  def createData(countTxns: Int, countElements: Int) = {
+    val tStream: TStreamSjStream = streamService.get(tStreamName).asInstanceOf[TStreamSjStream]
+    val tStreamService = tStream.service.asInstanceOf[TStreamService]
+    val metadataStorageFactory = new MetadataStorageFactory
+    val metadataStorageHosts = tStreamService.metadataProvider.hosts.map { addr =>
+      val parts = addr.split(":")
+      new InetSocketAddress(parts(0), parts(1).toInt)
+    }.toList
+    val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(metadataStorageHosts, tStreamService.metadataNamespace)
+
+    val dataStorageFactory = new AerospikeStorageFactory
+    val dataStorageHosts = tStreamService.dataProvider.hosts.map {addr =>
+      val parts = addr.split(":")
+      new Host(parts(0), parts(1).toInt)
+    }.toList
+    val options = new AerospikeStorageOptions(tStreamService.dataNamespace, dataStorageHosts)
+    val dataStorage: AerospikeStorage = dataStorageFactory.getInstance(options)
+
+    val esStream = streamService.get(esChkStreamName).asInstanceOf[ESSjStream]
+    val (client, esService) = openDbConnection(esStream)
+
+    val producer = createProducer(metadataStorage, dataStorage, tStream.partitions)
+
+    val s = System.nanoTime
+
+    writeData(countTxns,
+      countElements,
+      producer,
+      esService.index,
+      esStream.name,
+      client)
+
+    println(s"producer time: ${(System.nanoTime - s) / 1000000}")
+
+    producer.stop()
+
+    dataStorageFactory.closeFactory()
+    metadataStorageFactory.closeFactory()
+    client.close()
+  }
+
+  private def writeData(countTxns: Int,
+                        countElements: Int,
+                        producer: BasicProducer[Array[Byte], Array[Byte]],
+                        index: String,
+                        esStreamName: String,
+                        client: TransportClient) = {
+    var number = 0
+    (0 until countTxns) foreach { (x: Int) =>
+      val txn = producer.newTransaction(ProducerPolicies.errorIfOpen)
+      (0 until countElements) foreach { (y: Int) =>
+        number += 1
+        println("write data " + number)
+        val msg = objectSerializer.serialize(number.asInstanceOf[Object])
+        txn.send(msg)
+
+        val outputEntity = new EsEntity
+        outputEntity.txn = txn.getTxnUUID.toString
+        outputEntity.str = new String(msg)
+        val entity = outputEntity.asInstanceOf[EsEntity]
+        writeToElasticsearch(index, esStreamName, entity, client)
+      }
+      txn.checkpoint()
+    }
+  }
+
+  def openDbConnection(outputStream: SjStream): (TransportClient, ESService) = {
+    val esService: ESService = outputStream.service.asInstanceOf[ESService]
+    val client: TransportClient = TransportClient.builder().build()
+    esService.provider.hosts.foreach { host =>
+      val parts = host.split(":")
+      client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(parts(0)), parts(1).toInt))
+    }
+    (client, esService)
+  }
+
+  private def writeToElasticsearch(index: String, documentType: String, entity: EsEntity, client: TransportClient) = {
+    val esData: String = serializer.serialize(entity)
+
+    val request: IndexRequestBuilder = client.prepareIndex(index, documentType)
+    request.setSource(esData)
+    request.execute().actionGet()
+  }
+
+
+  private def createProducer(metadataStorage: MetadataStorage, dataStorage: AerospikeStorage, partitions: Int) = {
+    val basicStream: BasicStream[Array[Byte]] =
+      BasicStreamService.loadStream(tStreamName, metadataStorage, dataStorage)
+
+    val coordinationSettings = new ProducerCoordinationOptions(
+      agentAddress = s"localhost:8030",
+      zkHosts = List(new InetSocketAddress("localhost", 2181)),
+      zkRootPath = "/unit",
+      zkTimeout = 7000,
+      isLowPriorityToBeMaster = false,
+      transport = new TcpTransport,
+      transportTimeout = 5)
+
+    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until partitions).toList)
+
+    val timeUuidGenerator = new LocalTimeUUIDGenerator
+
+    val producerOptions = new BasicProducerOptions[Array[Byte], Array[Byte]](
+      transactionTTL = 6,
+      transactionKeepAliveInterval = 2,
+      producerKeepAliveInterval = 1,
+      roundRobinPolicy,
+      BatchInsert(5),
+      timeUuidGenerator,
+      coordinationSettings,
+      converter)
+
+    new BasicProducer[Array[Byte], Array[Byte]]("producer for " + basicStream.name, basicStream, producerOptions)
+  }
+
+  def prepareCassandra(keyspace: String) = {
+    createKeyspace(session, keyspace)
+    createMetadataTables(session, keyspace)
+  }
+
+  def createProviders() = {
+    val esProvider = new Provider()
+    esProvider.name = esProviderName
+    esProvider.hosts = Array("127.0.0.1:9300")
+    esProvider.providerType = "ES"
+    esProvider.login = ""
+    esProvider.password = ""
+    providerService.save(esProvider)
+
+    val metadataProvider = new Provider()
+    metadataProvider.name = metadataProviderName
+    metadataProvider.hosts = Array("127.0.0.1:9042")
+    metadataProvider.providerType = "cassandra"
+    metadataProvider.login = ""
+    metadataProvider.password = ""
+    providerService.save(metadataProvider)
+
+    val dataProvider = new Provider()
+    dataProvider.name = dataProviderName
+    dataProvider.hosts = Array("127.0.0.1:3000", "127.0.0.1:3001")
+    dataProvider.providerType = "aerospike"
+    dataProvider.login = ""
+    dataProvider.password = ""
+    providerService.save(dataProvider)
+
+    val lockProvider = new Provider()
+    lockProvider.name = lockProviderName
+    lockProvider.hosts = Array("127.0.0.1:2181")
+    lockProvider.providerType = "zookeeper"
+    lockProvider.login = ""
+    lockProvider.password = ""
+    providerService.save(lockProvider)
+  }
+
+  def createServices() = {
+    val esProv: Provider = providerService.get(esProviderName)
+    val esService: ESService = new ESService()
+    esService.name = esServiceName
+    esService.serviceType = "ESInd"
+    esService.description = "es service for benchmarks"
+    esService.provider = esProv
+    esService.index = "bench"
+    esService.login = ""
+    esService.password = ""
+    serviceManager.save(esService)
+
+    val metadataProvider: Provider = providerService.get(metadataProviderName)
+    val dataProvider: Provider = providerService.get(dataProviderName)
+    val lockProvider: Provider = providerService.get(lockProviderName)
+    val tStreamService: TStreamService = new TStreamService()
+    tStreamService.name = tServiceName
+    tStreamService.serviceType = "TstrQ"
+    tStreamService.description = "t-streams service for benchmarks"
+    tStreamService.metadataProvider = metadataProvider
+    tStreamService.metadataNamespace = metadataNamespace
+    tStreamService.dataProvider = dataProvider
+    tStreamService.dataNamespace = dataNamespace
+    tStreamService.lockProvider = lockProvider
+    tStreamService.lockNamespace = lockNamespace
+    serviceManager.save(tStreamService)
+
+    val zkService = new ZKService()
+    zkService.name = zkServiceName
+    zkService.serviceType = "ZKCoord"
+    zkService.description = "zk service for benchmarks"
+    zkService.provider = lockProvider
+    zkService.namespace = "bench"
+    serviceManager.save(zkService)
+  }
+
+  def createStreams(partitions: Int) = {
+    val esService: ESService = serviceManager.get(esServiceName).asInstanceOf[ESService]
+    val esStream: ESSjStream = new ESSjStream()
+    esStream.name = esStreamName
+    esStream.description = "es stream for benchmarks"
+    esStream.streamType = "elasticsearch-output"
+    esStream.service = esService
+    esStream.tags = Array("tag1")
+    streamService.save(esStream)
+
+    val esChkStream: ESSjStream = new ESSjStream()
+    esChkStream.name = esChkStreamName
+    esChkStream.description = "es stream for benchmarks - checker stream"
+    esChkStream.streamType = "elasticsearch-output"
+    esChkStream.service = esService
+    esChkStream.tags = Array("tag1")
+    streamService.save(esChkStream)
+
+    val tService: TStreamService = serviceManager.get(tServiceName).asInstanceOf[TStreamService]
+    val tStream: TStreamSjStream = new TStreamSjStream()
+    tStream.name = tStreamName
+    tStream.description = "t-stream for benchmarks"
+    tStream.streamType = "stream.t-stream"
+    tStream.service = tService
+    tStream.tags = Array("tag1")
+    tStream.partitions = partitions
+    tStream.generator = new Generator("local")
+    streamService.save(tStream)
+
+    val metadataStorageFactory = new MetadataStorageFactory
+    val metadataStorageHosts = tService.metadataProvider.hosts.map { addr =>
+      val parts = addr.split(":")
+      new InetSocketAddress(parts(0), parts(1).toInt)
+    }.toList
+    val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(metadataStorageHosts, tService.metadataNamespace)
+
+    val dataStorageFactory = new AerospikeStorageFactory
+    val dataStorageHosts = tService.dataProvider.hosts.map {addr =>
+      val parts = addr.split(":")
+      new Host(parts(0), parts(1).toInt)
+    }.toList
+    val options = new AerospikeStorageOptions(tService.dataNamespace, dataStorageHosts)
+    val dataStorage: AerospikeStorage = dataStorageFactory.getInstance(options)
+
+    BasicStreamService.createStream(tStreamName,
+      partitions,
+      configService.get(ConfigConstants.streamTTLTag).value.toInt,
+      "", metadataStorage,
+      dataStorage)
+
+    metadataStorageFactory.closeFactory()
+    dataStorageFactory.closeFactory()
+  }
+
+  def createInstance(instanceName: String, checkpointMode: String, checkpointInterval: Long) = {
+
+    val task1 = new Task()
+    task1.inputs = Map(tStreamName -> Array(0, 1)).asJava
+    val task2 = new Task()
+    task2.inputs = Map(tStreamName -> Array(2, 4)).asJava
+    val executionPlan = new ExecutionPlan(Map((instanceName + "-task0", task1), (instanceName + "-task1", task2)).asJava)
+
+    val instance = new OutputInstance()
+    instance.name = instanceName
+    instance.moduleType = "output-streaming"
+    instance.moduleName = "com.bwsw.stub.output-test"
+    instance.moduleVersion = "0.1"
+    instance.status = "started"
+    instance.description = "some description of test instance"
+    instance.inputs = Array(tStreamName)
+    instance.outputs = Array(esStreamName)
+    instance.checkpointMode = checkpointMode
+    instance.checkpointInterval = checkpointInterval
+    instance.parallelism = 2
+    instance.options = """{"hey": "hey"}"""
+    instance.startFrom = "oldest"
+    instance.perTaskCores = 0.1
+    instance.perTaskRam = 64
+    instance.performanceReportingInterval = 10000
+    instance.executionPlan = executionPlan
+    instance.engine = "com.bwsw.output.streaming.engine-0.1"
+    instance.coordinationService = serviceManager.get(zkServiceName).asInstanceOf[ZKService]
+
+    instanceService.save(instance)
+  }
+
+  def deleteInstance(instanceName: String) = {
+    instanceService.delete(instanceName)
+  }
+
+  def deleteStreams() = {
+    val tStream = streamService.get(tStreamName).asInstanceOf[TStreamSjStream]
+    val tService = tStream.service.asInstanceOf[TStreamService]
+    val metadataStorageFactory = new MetadataStorageFactory
+    val metadataStorageHosts = tService.metadataProvider.hosts.map { addr =>
+      val parts = addr.split(":")
+      new InetSocketAddress(parts(0), parts(1).toInt)
+    }.toList
+    val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(metadataStorageHosts, tService.metadataNamespace)
+
+    BasicStreamService.deleteStream(tStreamName, metadataStorage)
+
+    streamService.delete(esStreamName)
+    streamService.delete(tStreamName)
+
+    metadataStorageFactory.closeFactory()
+  }
+
+  def deleteServices() = {
+    serviceManager.delete(esServiceName)
+    serviceManager.delete(tServiceName)
+    serviceManager.delete(zkServiceName)
+  }
+
+  def deleteProviders() = {
+    providerService.delete(dataProviderName)
+    providerService.delete(metadataProviderName)
+    providerService.delete(lockProviderName)
+    providerService.delete(esProviderName)
+  }
+
+  def close() = {
+    session.close()
+    cluster.close()
+  }
+
+  def cassandraDestroy(keyspace: String) = {
+    session.execute(s"DROP KEYSPACE $keyspace")
+  }
+
+  def uploadModule(moduleJar: File) = {
+    val builder = new StringBuilder
+    val jar = new JarFile(moduleJar)
+    val enu = jar.entries()
+    while (enu.hasMoreElements) {
+      val entry = enu.nextElement
+      if (entry.getName.equals("specification.json")) {
+        val reader = new BufferedReader(new InputStreamReader(jar.getInputStream(entry), "UTF-8"))
+        try {
+          var line = reader.readLine
+          while (line != null) {
+            builder.append(line + "\n")
+            line = reader.readLine
+          }
+        } finally {
+          reader.close()
+        }
+      }
+    }
+
+    val specification = serializer.deserialize[Map[String, Any]](builder.toString())
+
+    fileStorage.put(moduleJar, moduleJar.getName, specification, "module")
+  }
+
+  def deleteModule(filename: String) = {
+    fileStorage.delete(filename)
+  }
+
+}

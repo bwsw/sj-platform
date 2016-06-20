@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.regular.utils
+package com.bwsw.sj.engine.core.utils
 
 import com.datastax.driver.core.Session
 
