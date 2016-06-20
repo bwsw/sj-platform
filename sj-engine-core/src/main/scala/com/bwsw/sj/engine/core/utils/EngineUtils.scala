@@ -56,4 +56,18 @@ object EngineUtils {
     }
   }
 
+  def portIsOpen(address:String, port:Int): Boolean = {
+    var closed = true
+    val socket = new java.net.Socket()
+    try {
+      socket.setReuseAddress(true)
+      socket.connect(new java.net.InetSocketAddress(address, port), 5)
+      socket.close()
+      closed = false
+    } catch {
+      case e:Exception =>
+    }
+    !closed
+  }
+
 }
