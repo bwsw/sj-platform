@@ -59,6 +59,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
               } ~
               delete {
                 if (storage.delete(filename)) {
+                  configService.delete("system" + "." + name + "-" + version)
                   val response = ProtocolResponse(
                     200,
                     Map("message" -> s"Jar by name $name and version $version has been deleted")

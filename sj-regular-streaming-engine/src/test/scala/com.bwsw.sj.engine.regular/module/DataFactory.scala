@@ -82,54 +82,54 @@ object DataFactory {
   }
 
   def createProviders(providerService: GenericMongoService[Provider]) = {
-    val cassandraProvider = new Provider("cassandra test provider", "cassandra provider", Array(s"$cassandraHost:9042"), "", "", "cassandra")
+    val cassandraProvider = new Provider("cassandra_test_provider", "cassandra provider", Array(s"$cassandraHost:9042"), "", "", "cassandra")
     providerService.save(cassandraProvider)
 
-    val aerospikeProvider = new Provider("aerospike test provider", "aerospike provider", aerospikeHosts, "", "", "aerospike")
+    val aerospikeProvider = new Provider("aerospike_test_provider", "aerospike provider", aerospikeHosts, "", "", "aerospike")
     providerService.save(aerospikeProvider)
 
-    val kafkaProvider = new Provider("kafka test provider", "kafka provider", kafkaHosts, "", "", "kafka")
+    val kafkaProvider = new Provider("kafka_test_provider", "kafka provider", kafkaHosts, "", "", "kafka")
     providerService.save(kafkaProvider)
 
-    val zookeeperProvider = new Provider("zookeeper test provider", "zookeeper provider", zookeeperHosts, "", "", "zookeeper")
+    val zookeeperProvider = new Provider("zookeeper_test_provider", "zookeeper provider", zookeeperHosts, "", "", "zookeeper")
     providerService.save(zookeeperProvider)
   }
 
   def deleteProviders(providerService: GenericMongoService[Provider]) = {
-    providerService.delete("cassandra test provider")
-    providerService.delete("aerospike test provider")
-    providerService.delete("kafka test provider")
-    providerService.delete("zookeeper test provider")
+    providerService.delete("cassandra_test_provider")
+    providerService.delete("aerospike_test_provider")
+    providerService.delete("kafka_test_provider")
+    providerService.delete("zookeeper_test_provider")
   }
 
   def createServices(serviceManager: GenericMongoService[Service], providerService: GenericMongoService[Provider]) = {
-    val cassProv = providerService.get("cassandra test provider")
-    val cassService = new CassandraService("cassandra test service", "CassDB", "cassandra test service", cassProv, cassandraTestKeyspace)
+    val cassProv = providerService.get("cassandra_test_provider")
+    val cassService = new CassandraService("cassandra_test_service", "CassDB", "cassandra test service", cassProv, cassandraTestKeyspace)
     serviceManager.save(cassService)
 
-    val aeroProv = providerService.get("aerospike test provider")
-    val aeroService = new AerospikeService("aerospike test service", "ArspkDB", "aerospike test service", aeroProv, testNamespace)
+    val aeroProv = providerService.get("aerospike_test_provider")
+    val aeroService = new AerospikeService("aerospike_test_service", "ArspkDB", "aerospike test service", aeroProv, testNamespace)
     serviceManager.save(aeroService)
 
-    val zkProv = providerService.get("zookeeper test provider")
-    val zkService = new ZKService("zookeeper test service", "ZKCoord", "zookeeper test service", zkProv, testNamespace)
+    val zkProv = providerService.get("zookeeper_test_provider")
+    val zkService = new ZKService("zookeeper_test_service", "ZKCoord", "zookeeper test service", zkProv, testNamespace)
     serviceManager.save(zkService)
 
-    val kafkaProv = providerService.get("kafka test provider")
-    val kafkaService = new KafkaService("kafka test service", "KfkQ", "kafka test service", kafkaProv, zkProv, testNamespace)
+    val kafkaProv = providerService.get("kafka_test_provider")
+    val kafkaService = new KafkaService("kafka_test_service", "KfkQ", "kafka test service", kafkaProv, zkProv, testNamespace)
     serviceManager.save(kafkaService)
 
-    val tstrqService = new TStreamService("tstream test service", "TstrQ", "tstream test service",
+    val tstrqService = new TStreamService("tstream_test_service", "TstrQ", "tstream test service",
       cassProv, cassandraTestKeyspace, aeroProv, testNamespace, zkProv, "/unit")
     serviceManager.save(tstrqService)
   }
 
   def deleteServices(serviceManager: GenericMongoService[Service]) = {
-    serviceManager.delete("cassandra test service")
-    serviceManager.delete("aerospike test service")
-    serviceManager.delete("kafka test service")
-    serviceManager.delete("zookeeper test service")
-    serviceManager.delete("tstream test service")
+    serviceManager.delete("cassandra_test_service")
+    serviceManager.delete("aerospike_test_service")
+    serviceManager.delete("kafka_test_service")
+    serviceManager.delete("zookeeper_test_service")
+    serviceManager.delete("tstream_test_service")
   }
 
   def createStreams(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service],

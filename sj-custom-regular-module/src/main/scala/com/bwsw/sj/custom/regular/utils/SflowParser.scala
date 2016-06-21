@@ -5,7 +5,7 @@ import com.bwsw.common.ObjectSerializer
 object SflowParser {
 
   private val objectSerializer = new ObjectSerializer()
-  private val fieldNames = Array("ts", "name", "agentAddress", "inputPort", "outputPort", "srcMAC",
+  private val fieldNames = Array("name", "agentAddress", "inputPort", "outputPort", "srcMAC",
     "dstMAC", "ethernetType", "inVlan", "outVlan", "srcIP", "dstIP", "ipProtocol", "ipTos", "ipTtl",
     "udpSrcPort", "udpDstPort", "tcpFlags", "packetSize", "ipSize", "samplingRate")
 
