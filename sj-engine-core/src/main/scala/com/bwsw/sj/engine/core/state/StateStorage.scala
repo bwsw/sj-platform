@@ -29,6 +29,10 @@ class StateStorage(stateService: IStateService) {
     stateService.get(key)
   }
 
+  def getAll = {
+    stateService.getAll
+  }
+
   /**
    * Puts a value of the state variable by key
    * @param key State variable name
@@ -50,11 +54,10 @@ class StateStorage(stateService: IStateService) {
 
   /**
    * Removes all state variables. After this operation has completed,
-   *  the state will be empty.
+   * the state will be empty.
    */
   def clear(): Unit = {
     stateService.clear()
     stateService.clearChange()
   }
-
 }

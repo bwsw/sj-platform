@@ -8,22 +8,23 @@ import com.mongodb.casbah.gridfs.Imports._
 
 class MongoFileStorage(mongoDB: MongoDB) extends FileStorage {
 
-  private val gridFS = GridFS(mongoDB)
+  private val gridFS: GridFS = GridFS(mongoDB)
 
   override def put(file: File, fileName: String): Unit = {
     if (gridFS.findOne(fileName).isEmpty) {
-      if (gridFS(file) { file =>
-        file.filename = fileName
-      }.isEmpty) throw BadRecordWithKey(s"MongoFileStorage.put $fileName failed", fileName)
+      val gridFsFile = gridFS.createFile(file)
+      gridFsFile.filename = fileName
+      gridFsFile.save()
     } else throw BadRecordWithKey(s"$fileName already exists", fileName)
   }
 
   override def put(file: File, fileName: String, specification: Map[String, Any], filetype: String) = {
     if (gridFS.findOne(fileName).isEmpty) {
-      if (gridFS(file) { file =>
-        file.put("specification", specification)
-        file.put("filetype", filetype)
-      }.isEmpty) throw BadRecordWithKey(s"MongoFileStorage.put $fileName failed", fileName)
+      val gridFsFile = gridFS.createFile(file)
+      gridFsFile.put("specification", specification)
+      gridFsFile.put("filetype", filetype)
+      gridFsFile.save()
+      //gridFsFile.validate() sometimes mongodb can't get executor for query and fail as no md5 returned from server
     } else throw BadRecordWithKey(s"$fileName already exists", fileName)
   }
 
