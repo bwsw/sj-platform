@@ -246,4 +246,10 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
   override def getNumberOfVariables: Int = {
     stateVariables.size
   }
+
+  /**
+   * Gets all state variables
+   * @return Set of all state variables with keys
+   */
+  override def getAll: Map[String, Any] = stateVariables.toMap
 }

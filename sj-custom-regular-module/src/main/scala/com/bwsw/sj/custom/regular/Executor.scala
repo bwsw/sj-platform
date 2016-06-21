@@ -1,7 +1,9 @@
 package com.bwsw.sj.custom.regular
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.engine.core.entities.{TStreamEnvelope, Envelope, KafkaEnvelope}
+import com.bwsw.sj.custom.regular.udf.GeoIp
+import com.bwsw.sj.custom.regular.utils.SflowParser
+import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.state.StateStorage
@@ -13,8 +15,7 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
   val state: StateStorage = manager.getState
 
   override def onInit(): Unit = {
-    if (!state.isExist("sum")) state.set("sum", 0)
-    println("new init")
+    println("onInit")
   }
 
   override def onAfterCheckpoint(): Unit = {
@@ -22,27 +23,29 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
   }
 
   override def onMessage(envelope: Envelope): Unit = {
-    val output = manager.getRoundRobinOutput("as-51740")
-    var sum = state.get("sum").asInstanceOf[Int]
 
     envelope match {
       case kafkaEnvelope: KafkaEnvelope =>
-        println("element: " +
-          objectSerializer.deserialize(kafkaEnvelope.data).asInstanceOf[Int])
-        output.put(kafkaEnvelope.data)
-        sum += objectSerializer.deserialize(kafkaEnvelope.data).asInstanceOf[Int]
-        state.set("sum", sum)
-      case tstreamEnvelope: TStreamEnvelope =>
-        println("elements: " +
-          tstreamEnvelope.data.map(x => objectSerializer.deserialize(x).asInstanceOf[Int]).mkString(","))
+        val sflow = SflowParser.parse(kafkaEnvelope.data)
+        val srcAs = GeoIp.resolveAs(sflow("srcIP"))
+        val dstAs = GeoIp.resolveAs(sflow("dstIP"))
+        var prefixAsToAs = s"$srcAs-$dstAs"
+        if (!state.isExist(s"traffic-sum-$srcAs")) state.set(s"traffic-sum-$srcAs", 0)
+        if (state.isExist(s"traffic-sum-between-$dstAs-$srcAs")) prefixAsToAs = s"$dstAs-$srcAs"
+        else if (!state.isExist(s"traffic-sum-between-$srcAs-$dstAs")) state.set(s"traffic-sum-between-$srcAs-$dstAs", 0)
 
-        tstreamEnvelope.data.foreach(x => {
-          sum += objectSerializer.deserialize(x).asInstanceOf[Int]
-        })
-        tstreamEnvelope.data.foreach(output.put)
-        state.set("sum", sum)
+        var trafficSum = state.get(s"traffic-sum-$srcAs").asInstanceOf[Int]
+        trafficSum += sflow("packetSize").asInstanceOf[Int] * sflow("samplingRate").asInstanceOf[Int]
+        state.set(s"traffic-sum-$srcAs", trafficSum)
+
+        var trafficSumBetweenAs = state.get(s"traffic-sum-between-$prefixAsToAs").asInstanceOf[Int]
+        trafficSumBetweenAs += sflow("packetSize").asInstanceOf[Int] * sflow("samplingRate").asInstanceOf[Int]
+        state.set(s"traffic-sum-between-$prefixAsToAs", trafficSumBetweenAs)
+
+      case tstreamEnvelope: TStreamEnvelope =>
+        println("t-stream envelope is received")
     }
-    println("stream type = " + envelope.streamType)
+
   }
 
   override def onTimer(jitter: Long): Unit = {
@@ -57,6 +60,13 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
 
   override def onBeforeCheckpoint(): Unit = {
     println("on before checkpoint")
+    val output = manager.getRoundRobinOutput("src-as-traffic-sum")
+    val timestamp = System.currentTimeMillis / 1000
+    val (sourceAsTrafficSum, sourceAsToAsTrafficSum) = state.getAll.partition(x => !x._1.contains("traffic-sum-between"))
+    sourceAsTrafficSum.map(x => timestamp + "," + x._1.replace("traffic-sum-", "") + "," + x._2.toString).foreach(x => output.put(objectSerializer.serialize(x)))
+    sourceAsToAsTrafficSum
+      .map(x => timestamp + "," + x._1.replace("traffic-sum-between-", "").split("-").mkString(",") + "," + x._2.toString)
+      .foreach(x => output.put(objectSerializer.serialize(x)))
   }
 
   override def onIdle(): Unit = {
@@ -64,11 +74,12 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
   }
 
   /**
-   * Handler triggered before save state
- *
+   * Handler triggered before persisting a state
+   *
    * @param isFullState Flag denotes that full state (true) or partial changes of state (false) will be saved
    */
   override def onBeforeStateSave(isFullState: Boolean): Unit = {
     println("on before state saving")
+    state.clear()
   }
 }
