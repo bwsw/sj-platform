@@ -13,8 +13,9 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, OutputInstance, Task}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.engine.core.entities.EsEntity
 import com.bwsw.sj.engine.core.utils.CassandraHelper._
+import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
+import com.bwsw.tstreams.agents.consumer.{BasicConsumerOptions, BasicConsumer}
 import com.bwsw.tstreams.agents.producer.InsertionType.BatchInsert
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions, ProducerCoordinationOptions, ProducerPolicies}
 import com.bwsw.tstreams.converter.IConverter
@@ -26,7 +27,6 @@ import com.bwsw.tstreams.policy.RoundRobinPolicy
 import com.bwsw.tstreams.services.BasicStreamService
 import com.bwsw.tstreams.streams.BasicStream
 import com.datastax.driver.core.Cluster
-import org.elasticsearch.action.index.IndexRequestBuilder
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.transport.InetSocketTransportAddress
 
@@ -41,7 +41,7 @@ object BenchmarkDataFactory {
   val metadataProviderName: String = "test-metprov-1"
   val metadataNamespace: String = "bench"
   val dataProviderName: String = "test-dataprov-1"
-  val dataNamespace: String = "bench"
+  val dataNamespace: String = "test"
   val lockProviderName: String = "test-lockprov-1"
   val lockNamespace: String = "bench"
   val tServiceName: String = "test-tserv-1"
@@ -61,7 +61,7 @@ object BenchmarkDataFactory {
   val fileStorage: MongoFileStorage = ConnectionRepository.getFileStorage
   val configService: GenericMongoService[ConfigSetting] = ConnectionRepository.getConfigService
 
-  private val objectSerializer = new ObjectSerializer()
+  val objectSerializer = new ObjectSerializer()
   private val serializer: Serializer = new JsonSerializer
 
   private val converter = new IConverter[Array[Byte], Array[Byte]] {
@@ -89,19 +89,13 @@ object BenchmarkDataFactory {
     val options = new AerospikeStorageOptions(tStreamService.dataNamespace, dataStorageHosts)
     val dataStorage: AerospikeStorage = dataStorageFactory.getInstance(options)
 
-    val esStream = streamService.get(esChkStreamName).asInstanceOf[ESSjStream]
-    val (client, esService) = openDbConnection(esStream)
-
     val producer = createProducer(metadataStorage, dataStorage, tStream.partitions)
 
     val s = System.nanoTime
 
     writeData(countTxns,
       countElements,
-      producer,
-      esService.index,
-      esStream.name,
-      client)
+      producer)
 
     println(s"producer time: ${(System.nanoTime - s) / 1000000}")
 
@@ -109,15 +103,11 @@ object BenchmarkDataFactory {
 
     dataStorageFactory.closeFactory()
     metadataStorageFactory.closeFactory()
-    client.close()
   }
 
   private def writeData(countTxns: Int,
                         countElements: Int,
-                        producer: BasicProducer[Array[Byte], Array[Byte]],
-                        index: String,
-                        esStreamName: String,
-                        client: TransportClient) = {
+                        producer: BasicProducer[Array[Byte], Array[Byte]]) = {
     var number = 0
     (0 until countTxns) foreach { (x: Int) =>
       val txn = producer.newTransaction(ProducerPolicies.errorIfOpen)
@@ -126,13 +116,8 @@ object BenchmarkDataFactory {
         println("write data " + number)
         val msg = objectSerializer.serialize(number.asInstanceOf[Object])
         txn.send(msg)
-
-        val outputEntity = new EsEntity
-        outputEntity.txn = txn.getTxnUUID.toString
-        outputEntity.str = new String(msg)
-        val entity = outputEntity.asInstanceOf[EsEntity]
-        writeToElasticsearch(index, esStreamName, entity, client)
       }
+      println("checkpoint")
       txn.checkpoint()
     }
   }
@@ -146,15 +131,6 @@ object BenchmarkDataFactory {
     }
     (client, esService)
   }
-
-  private def writeToElasticsearch(index: String, documentType: String, entity: EsEntity, client: TransportClient) = {
-    val esData: String = serializer.serialize(entity)
-
-    val request: IndexRequestBuilder = client.prepareIndex(index, documentType)
-    request.setSource(esData)
-    request.execute().actionGet()
-  }
-
 
   private def createProducer(metadataStorage: MetadataStorage, dataStorage: AerospikeStorage, partitions: Int) = {
     val basicStream: BasicStream[Array[Byte]] =
@@ -184,6 +160,31 @@ object BenchmarkDataFactory {
       converter)
 
     new BasicProducer[Array[Byte], Array[Byte]]("producer for " + basicStream.name, basicStream, producerOptions)
+  }
+
+  def createConsumer(stream: TStreamSjStream,
+                     address: String,
+                     metadataStorage: MetadataStorage,
+                     dataStorage: AerospikeStorage): BasicConsumer[Array[Byte], Array[Byte]] = {
+
+    val basicStream: BasicStream[Array[Byte]] =
+      BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
+
+    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
+
+    val timeUuidGenerator = new LocalTimeUUIDGenerator
+
+    val options = new BasicConsumerOptions[Array[Byte], Array[Byte]](
+      transactionsPreload = 10,
+      dataPreload = 7,
+      consumerKeepAliveInterval = 5,
+      converter,
+      roundRobinPolicy,
+      Oldest,
+      timeUuidGenerator,
+      useLastOffset = true)
+
+    new BasicConsumer[Array[Byte], Array[Byte]](basicStream.name, basicStream, options)
   }
 
   def prepareCassandra(keyspace: String) = {
@@ -326,7 +327,7 @@ object BenchmarkDataFactory {
     val instance = new OutputInstance()
     instance.name = instanceName
     instance.moduleType = "output-streaming"
-    instance.moduleName = "com.bwsw.stub.output-test"
+    instance.moduleName = "com.bwsw.stub.output-bench-test"
     instance.moduleVersion = "0.1"
     instance.status = "started"
     instance.description = "some description of test instance"
@@ -352,21 +353,8 @@ object BenchmarkDataFactory {
   }
 
   def deleteStreams() = {
-    val tStream = streamService.get(tStreamName).asInstanceOf[TStreamSjStream]
-    val tService = tStream.service.asInstanceOf[TStreamService]
-    val metadataStorageFactory = new MetadataStorageFactory
-    val metadataStorageHosts = tService.metadataProvider.hosts.map { addr =>
-      val parts = addr.split(":")
-      new InetSocketAddress(parts(0), parts(1).toInt)
-    }.toList
-    val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(metadataStorageHosts, tService.metadataNamespace)
-
-    BasicStreamService.deleteStream(tStreamName, metadataStorage)
-
     streamService.delete(esStreamName)
     streamService.delete(tStreamName)
-
-    metadataStorageFactory.closeFactory()
   }
 
   def deleteServices() = {

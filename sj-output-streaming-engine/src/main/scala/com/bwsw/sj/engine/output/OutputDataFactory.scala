@@ -25,7 +25,7 @@ object OutputDataFactory {
   val taskName: String = System.getenv("TASK_NAME")
   val agentHost: String = System.getenv("AGENTS_HOST")
   val agentsPorts: Array[String] = System.getenv("AGENTS_PORTS").split(",")
-  assert(agentsPorts.length == 2, "Not enough ports for t-stream consumers/producers ")
+  assert(agentsPorts.length > 0 , "Not enough ports for t-stream consumers/producers ")
 
   private val instanceDAO: GenericMongoService[Instance] = ConnectionRepository.getInstanceService
   private val fileMetadataDAO: GenericMongoService[FileMetadata] = ConnectionRepository.getFileMetadataService

@@ -12,7 +12,7 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, Instance, RegularInstance, Task}
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.StreamConstants
-import com.bwsw.sj.engine.regular.utils.CassandraHelper._
+import com.bwsw.sj.engine.core.utils.CassandraHelper._
 import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
 import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions}
 import com.bwsw.tstreams.agents.producer.InsertionType.BatchInsert
