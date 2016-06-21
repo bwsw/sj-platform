@@ -41,11 +41,11 @@ trait SjCustomApi extends Directives with SjCrudValidator {
         } ~
           pathSuffix(Segment) { (version: String) =>
             pathEndOrSingleSlash {
-              val fileMetadata = fileMetadataDAO.getByParameters(Map("specification.name" -> name, "specification.version" -> version)).head
-              if (fileMetadata == null) {
+              val fileMetadatas = fileMetadataDAO.getByParameters(Map("specification.name" -> name, "specification.version" -> version))
+              if (fileMetadatas.isEmpty) {
                 throw new BadRecordWithKey(s"Jar '$name' not found", name)
               }
-              val filename = fileMetadata.filename
+              val filename = fileMetadatas.head.filename
               get {
                 val jarFile = storage.get(filename, s"tmp/$filename")
                 if (jarFile != null && jarFile.exists()) {
