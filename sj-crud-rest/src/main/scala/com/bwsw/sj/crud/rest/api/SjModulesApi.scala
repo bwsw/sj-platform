@@ -44,7 +44,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                 val uploadingFile = new File(metadata.fileName)
                 FileUtils.copyFile(file, uploadingFile)
                 storage.put(uploadingFile, metadata.fileName, specification, "module")
-                val response = ProtocolResponse(200, Map("message" -> "Jar file has been uploaded"))
+                val response = ProtocolResponse(200, Map("message" -> "Jar file of module has been uploaded"))
                 complete(HttpEntity(
                   `application/json`,
                   serializer.serialize(response)

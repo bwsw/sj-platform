@@ -34,12 +34,14 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
         if (state.isExist(s"traffic-sum-between-$dstAs-$srcAs")) prefixAsToAs = s"$dstAs-$srcAs"
         else if (!state.isExist(s"traffic-sum-between-$srcAs-$dstAs")) state.set(s"traffic-sum-between-$srcAs-$dstAs", 0)
 
+        val bandwidth = sflow("packetSize").toInt * sflow("samplingRate").toInt
+
         var trafficSum = state.get(s"traffic-sum-$srcAs").asInstanceOf[Int]
-        trafficSum += sflow("packetSize").asInstanceOf[Int] * sflow("samplingRate").asInstanceOf[Int]
+        trafficSum += bandwidth
         state.set(s"traffic-sum-$srcAs", trafficSum)
 
         var trafficSumBetweenAs = state.get(s"traffic-sum-between-$prefixAsToAs").asInstanceOf[Int]
-        trafficSumBetweenAs += sflow("packetSize").asInstanceOf[Int] * sflow("samplingRate").asInstanceOf[Int]
+        trafficSumBetweenAs += bandwidth
         state.set(s"traffic-sum-between-$prefixAsToAs", trafficSumBetweenAs)
 
       case tstreamEnvelope: TStreamEnvelope =>
@@ -60,13 +62,18 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
 
   override def onBeforeCheckpoint(): Unit = {
     println("on before checkpoint")
-    val output = manager.getRoundRobinOutput("src-as-traffic-sum")
+    val outputForAs = manager.getRoundRobinOutput("src-as-traffic-sum")
+    val outputForAsToAs = manager.getRoundRobinOutput("src-as-to-as-traffic-sum")
     val timestamp = System.currentTimeMillis / 1000
     val (sourceAsTrafficSum, sourceAsToAsTrafficSum) = state.getAll.partition(x => !x._1.contains("traffic-sum-between"))
-    sourceAsTrafficSum.map(x => timestamp + "," + x._1.replace("traffic-sum-", "") + "," + x._2.toString).foreach(x => output.put(objectSerializer.serialize(x)))
+    sourceAsTrafficSum.map(x => timestamp + "," + x._1.replace("traffic-sum-", "") + "," + x._2.toString).foreach(println)
     sourceAsToAsTrafficSum
       .map(x => timestamp + "," + x._1.replace("traffic-sum-between-", "").split("-").mkString(",") + "," + x._2.toString)
-      .foreach(x => output.put(objectSerializer.serialize(x)))
+      .foreach(println)
+    //    sourceAsTrafficSum.map(x => timestamp + "," + x._1.replace("traffic-sum-", "") + "," + x._2.toString).foreach(x => outputForAs.put(objectSerializer.serialize(x)))
+    //    sourceAsToAsTrafficSum
+    //      .map(x => timestamp + "," + x._1.replace("traffic-sum-between-", "").split("-").mkString(",") + "," + x._2.toString)
+    //      .foreach(x => outputForAsToAs.put(objectSerializer.serialize(x)))
   }
 
   override def onIdle(): Unit = {

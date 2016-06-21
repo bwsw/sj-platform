@@ -155,7 +155,7 @@ object RegularTaskRunner {
         var report: String = null
         var reportTxn: BasicProducerTransaction[Array[Byte], Array[Byte]] = null
         while (true) {
-          logger.info(s"Task: ${manager.taskName}. Wait ${regularInstanceMetadata.performanceReportingInterval} to report performance metrics\n")
+          logger.info(s"Task: ${manager.taskName}. Wait ${regularInstanceMetadata.performanceReportingInterval} ms to report performance metrics\n")
           Thread.sleep(regularInstanceMetadata.performanceReportingInterval)
           report = performanceMetrics.getReport
           logger.info(s"Task: ${manager.taskName}. Performance metrics: $report \n")

@@ -228,7 +228,7 @@ class TaskManager() {
     val consumer = new KafkaConsumer[Array[Byte], Array[Byte]](props)
 
     val topicPartitions = topics.flatMap(x => {
-      x._2.map(y => new TopicPartition(x._1, y))
+      (x._2.head to x._2.tail.head).map(y => new TopicPartition(x._1, y))
     }).asJava
 
     consumer.assign(topicPartitions)
