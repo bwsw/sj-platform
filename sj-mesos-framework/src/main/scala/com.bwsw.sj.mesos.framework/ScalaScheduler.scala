@@ -2,35 +2,21 @@ package com.bwsw.sj.mesos.framework
 
 import java.io.{PrintWriter, StringWriter}
 import java.util
-
 import com.bwsw.sj.common.DAL.model.module.Instance
 import org.apache.mesos.Protos._
 import org.apache.mesos.{Scheduler, SchedulerDriver}
-
 import scala.collection.JavaConverters._
 import scala.collection.immutable
 import scala.util.Properties
 import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
 import com.twitter.common.quantity.{Amount, Time}
 import java.net.{InetAddress, InetSocketAddress, URI}
-
-import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import org.apache.log4j.Logger
 
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration._
-import scala.util.Try
-import scala.concurrent._
-import java.util.concurrent.Executors
-//
-//import com.bwsw.tstreams.agents.consumer.Offsets.DateTime
-
-
-import com.github.nscala_time.time.Imports._
-
 
 class ScalaScheduler extends Scheduler {
+
   var driver: SchedulerDriver = null
   var cores: Double = 0.0
   var ram: Double = 0.0
@@ -39,6 +25,7 @@ class ScalaScheduler extends Scheduler {
   var instance: Instance = null
   val configFileService = ConnectionRepository.getConfigService
   var jarName: String = null
+  val availablePortsForOneInstance: collection.mutable.ListBuffer[Long] = collection.mutable.ListBuffer()
 
 
   def error(driver: SchedulerDriver, message: String) {
@@ -66,15 +53,23 @@ class ScalaScheduler extends Scheduler {
   def offerRescinded(driver: SchedulerDriver, offerId: OfferID) {
   }
 
+
+
+  /**
+    * Obtaining slaves
+    */
   override def resourceOffers(driver: SchedulerDriver, offers: util.List[Offer]) {
-    /**
-      * Obtaining slaves
-      */
     // TODO : REMOVE THIS
     logger.info(s"RESOURCE OFFERS")
+
+    /** set availablePortsForOneInstance to empty for new Instance */
+    availablePortsForOneInstance.remove(0, availablePortsForOneInstance.length)
+
     for (offer <- offers.asScala) {
       logger.info(s"PORTS RESOURCE: ${offer.getResources(3)}")
     }
+
+
 
 
     // TODO : add filter
@@ -123,15 +118,36 @@ class ScalaScheduler extends Scheduler {
       }
 
 
-      //Choose ports for agents
-      val agentPorts = getPorts(currentOffer._1, curr_task)
+
+      // Task Resources
+      val cpus = Resource.newBuilder.
+        setType(org.apache.mesos.Protos.Value.Type.SCALAR).
+        setName("cpus").
+        setScalar(org.apache.mesos.Protos.Value.
+          Scalar.newBuilder.setValue(this.cores)).
+        build
+      val mem = Resource.newBuilder.
+        setType(org.apache.mesos.Protos.Value.Type.SCALAR).
+        setName("mem").
+        setScalar(org.apache.mesos.Protos.Value.
+          Scalar.newBuilder.setValue(this.ram)).
+        build
+      val ports = getPorts(currentOffer._1, curr_task)
+
+      var agentPorts:String = ""
+      ports.getRanges.getRangeList.asScala.foreach(agentPorts += _.getBegin.toString+",")
+      agentPorts.dropRight(1)
+      logger.info(s"PORTS: $ports")
+      logger.info(s"AGENT PORTS: $agentPorts")
+
+
 
       val cmd = CommandInfo.newBuilder()
       try {
          cmd
           .addUris(CommandInfo.URI.newBuilder.setValue(getModuleUrl(this.instance)))
-          //.setValue("java -jar " + jarName)
-             .setValue("sh testScript.sh")
+          .setValue("java -jar " + jarName)
+//             .setValue("sh testScript.sh")
           .setEnvironment(Environment.newBuilder
             .addVariables(Environment.Variable.newBuilder.setName("MONGO_HOST").setValue(params {
               "mongodbHost"
@@ -150,34 +166,6 @@ class ScalaScheduler extends Scheduler {
         case e: Exception => handleSchedulerException(e)
       }
 
-
-
-      // Task Resources
-      val cpus = Resource.newBuilder.
-        setType(org.apache.mesos.Protos.Value.Type.SCALAR).
-        setName("cpus").
-        setScalar(org.apache.mesos.Protos.Value.
-          Scalar.newBuilder.setValue(this.cores)).
-        build
-      val mem = Resource.newBuilder.
-        setType(org.apache.mesos.Protos.Value.Type.SCALAR).
-        setName("mem").
-        setScalar(org.apache.mesos.Protos.Value.
-          Scalar.newBuilder.setValue(this.ram)).
-        build
-      val rnd = new scala.util.Random
-      val range = 31000 to 32000
-      val port = range(rnd.nextInt(range length))
-      val ports = Resource.newBuilder
-        .setName("ports")
-        .setType(Value.Type.RANGES)
-        .setRanges(
-          Value.Ranges
-            .newBuilder
-            .addRange(Value.Range.newBuilder.setBegin(port).setEnd(port)))
-        .build
-
-      logger.info(s"PORTS: ${ports}")
 
 
       while (tasksOnSlaves(offerNumber)._2 == 0) {
@@ -227,19 +215,23 @@ class ScalaScheduler extends Scheduler {
   }
 
 
+
+  /**
+    * Reregistering framework
+    */
   def reregistered(driver: SchedulerDriver, masterInfo: MasterInfo) {
-    /**
-      * Reregistering framework
-      */
+
     logger.info(s"New master $masterInfo")
     TasksList.message = s"New master $masterInfo"
   }
 
 
+
+  /**
+    * Registering framework
+    */
   def registered(driver: SchedulerDriver, frameworkId: FrameworkID, masterInfo: MasterInfo) {
-    /**
-      * Registering framework
-      */
+
     logger.info(s"Registered framework as: ${frameworkId.getValue}")
 
     this.driver = driver
@@ -284,6 +276,9 @@ class ScalaScheduler extends Scheduler {
     TasksList.message = s"Registered framework as: ${frameworkId.getValue}"
   }
 
+
+
+
   def howMuchTasksOnSlave(perTaskCores: Double, perTaskRam: Double, tasksCount: Int, offers: util.List[Offer]): List[Tuple2[Offer, Int]] = {
     /**
       * This method give list of offer and how many tasks we can launch on each slave.
@@ -309,6 +304,8 @@ class ScalaScheduler extends Scheduler {
   }
 
 
+
+
   def getResource(offer: Offer, name: String): Double = {
     /**
       * This method give how much resource of type <name> we have on <offer>
@@ -319,6 +316,8 @@ class ScalaScheduler extends Scheduler {
     }
     0.0
   }
+
+
 
 
   def filterOffers(offers: util.List[Offer], filters: java.util.Map[String, String]): util.List[Offer] = {
@@ -353,75 +352,74 @@ class ScalaScheduler extends Scheduler {
   }
 
 
+
+
   /**
     * Get jar URI for framework
     */
   def getModuleUrl(instance: Instance): String = {
     // TODO:return back get host
-    lazy val restHost = "192.168.1.180" // configFileService.get(ConfigConstants.hostOfCrudRestTag).value
-    lazy val restPort = 8887 // configFileService.get(ConfigConstants.portOfCrudRestTag).value.toInt
+    lazy val restHost = "192.168.1.174" // configFileService.get(ConfigConstants.hostOfCrudRestTag).value
+    lazy val restPort = 8000 // configFileService.get(ConfigConstants.portOfCrudRestTag).value.toInt
     val restAddress = new URI(s"http://$restHost:$restPort/v1/custom/").toString
     jarName = configFileService.get("system." + instance.engine).value
     logger.info(s"URI: ${restAddress + jarName}")
     restAddress + jarName
-    "http://192.168.1.225:8000/testScript.sh"
+//    "http://192.168.1.225:8000/testScript.sh"
   }
 
-  def getPorts(offer:Offer, task:String):String = {
-    /**
-      * Get random unused ports
-      */
 
-//    val discovery = DiscoveryInfo.newBuilder.setPorts()
-
-    val portsResource = offer.getResources(3).getRanges.getRangeList.asScala
-    var ports:collection.mutable.ListBuffer[Long] = collection.mutable.ListBuffer()
-    for (range <- portsResource) {
-      val availablePorts = (range.getBegin to range.getEnd).toSet
-      for (port <- availablePorts) {
-        ports.append(port)
+  def getPortsResource(offer:Offer): Resource = {
+    var portsResource: Resource = Resource.newBuilder
+      .setName("ports")
+      .setType(Value.Type.RANGES)
+      .build
+    for (resource <- offer.getResourcesList.asScala) {
+      if (resource.getName == "ports") {
+        portsResource = resource
       }
     }
+    portsResource
+  }
+
+
+
+  /**
+    * Get random unused ports
+    */
+  def getPorts(offer:Offer, task:String):Resource = {
     var portsCount = 0
     instance.moduleType match {
-      case "output-streaming" => portsCount = 1
+      case "output-streaming" => portsCount = 10
       case "regular-streaming" => portsCount = instance.outputs.length + TasksList.getTask(task).input.toList.length + 4
     }
 
-//    var availablePorts = (portsResource.getBegin to portsResource.getEnd).toSet
-
-    if (!TasksList.usedPorts.exists(_._1 == offer.getSlaveId.getValue)) {
-val end   = 200
-      TasksList.usedPorts += offer.getSlaveId.getValue -> collection.mutable.Map()
-    }
-    if (!TasksList.usedPorts(offer.getSlaveId.getValue).exists(_._1 == task)) {
-      TasksList.usedPorts(offer.getSlaveId.getValue) += task -> collection.mutable.ListBuffer()
+    val portsResource: Resource = getPortsResource(offer)
+    for (range <- portsResource.getRanges.getRangeList.asScala) {
+      availablePortsForOneInstance ++= (range.getBegin to range.getEnd).to[collection.mutable.ListBuffer]
     }
 
-    val resultPorts: collection.mutable.ListBuffer[Long] = collection.mutable.ListBuffer()
+    val agentPorts: collection.mutable.ListBuffer[Long] = availablePortsForOneInstance.take(portsCount)
+    availablePortsForOneInstance.remove(0, portsCount)
 
-
-    while (resultPorts.size < portsCount) {
-      val currentPort = ports.head
-      if (closedPort(offer.getHostname, currentPort.toInt)) {
-        resultPorts.append(currentPort)
-      }
-
-//      var used = false
-//      for (taskPorts <- TasksList.usedPorts(offer.getSlaveId.getValue)){
-//        if (taskPorts._2.contains(availablePorts.head)) used=true}
-//      if (!used) {
-//        resultPorts.append(availablePorts.head)
-//        TasksList.usedPorts(offer.getSlaveId.getValue)(task).append(availablePorts.head)
-//      }
-      ports = scala.util.Random.shuffle(ports.tail)
+    val ranges = Value.Ranges.newBuilder
+    for (port <- agentPorts) {
+      ranges.addRange(Value.Range.newBuilder.setBegin(port).setEnd(port))
     }
 
-    var agentPorts:String = ""
-    resultPorts.foreach(agentPorts += _.toString+",")
-    agentPorts.dropRight(1)
+    Resource.newBuilder
+      .setName("ports")
+      .setType(Value.Type.RANGES)
+      .setRanges(ranges)
+      .build
   }
 
+
+
+  /**
+    * Handler for Scheduler Exception
+    *
+    */
   def handleSchedulerException(e:Exception) = {
     val sw = new StringWriter
     e.printStackTrace(new PrintWriter(sw))
@@ -430,25 +428,5 @@ val end   = 200
     driver.stop()
     System.exit(1)
   }
-
-
-  implicit val ec = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(100))
-
-  def closedPort(address:String, port:Int): Boolean = {
-    val timeStart = DateTime.now.getMillis
-    var closed = true
-    val socket = new java.net.Socket()
-    try {
-      socket.setReuseAddress(true)
-      socket.connect(new java.net.InetSocketAddress(address, port), 5)
-      socket.close()
-      closed = false
-    } catch {
-      case e:Exception =>
-    }
-    val timeEnd = DateTime.now.getMillis
-    closed
-  }
-
 }
 
