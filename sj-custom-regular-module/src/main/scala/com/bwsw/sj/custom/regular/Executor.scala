@@ -34,12 +34,14 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
         if (state.isExist(s"traffic-sum-between-$dstAs-$srcAs")) prefixAsToAs = s"$dstAs-$srcAs"
         else if (!state.isExist(s"traffic-sum-between-$srcAs-$dstAs")) state.set(s"traffic-sum-between-$srcAs-$dstAs", 0)
 
+        val bandwidth = sflow("packetSize").toInt * sflow("samplingRate").toInt
+
         var trafficSum = state.get(s"traffic-sum-$srcAs").asInstanceOf[Int]
-        trafficSum += sflow("packetSize").asInstanceOf[Int] * sflow("samplingRate").asInstanceOf[Int]
+        trafficSum += bandwidth
         state.set(s"traffic-sum-$srcAs", trafficSum)
 
         var trafficSumBetweenAs = state.get(s"traffic-sum-between-$prefixAsToAs").asInstanceOf[Int]
-        trafficSumBetweenAs += sflow("packetSize").asInstanceOf[Int] * sflow("samplingRate").asInstanceOf[Int]
+        trafficSumBetweenAs += bandwidth
         state.set(s"traffic-sum-between-$prefixAsToAs", trafficSumBetweenAs)
 
       case tstreamEnvelope: TStreamEnvelope =>
