@@ -63,7 +63,7 @@ object OutputTaskRunner {
     val reportProducer = taskManager.createProducer(reportStream)
     logger.debug(s"Task: ${OutputDataFactory.taskName}. Creation of t-stream producer is finished\n")
 
-    val performanceMetrics = new OutputStreamingPerformanceMetrics(
+    val performanceMetrics: OutputStreamingPerformanceMetrics = new OutputStreamingPerformanceMetrics(
       OutputDataFactory.taskName,
       OutputDataFactory.agentHost,
       inputStream.name,
@@ -97,7 +97,8 @@ object OutputTaskRunner {
       subscribeConsumer,
       taskManager,
       handler,
-      outputStream)
+      outputStream,
+      performanceMetrics)
 
   }
 
@@ -115,7 +116,8 @@ object OutputTaskRunner {
                 subscribeConsumer: BasicSubscribingConsumer[Array[Byte], Array[Byte]],
                 taskManager: OutputTaskManager,
                 handler: OutputStreamingHandler,
-                outputStream: SjStream) = {
+                outputStream: SjStream,
+                performanceMetrics: OutputStreamingPerformanceMetrics) = {
     logger.debug(s"Task: ${OutputDataFactory.taskName}. Launch subscribing consumer.")
     subscribeConsumer.start()
 
@@ -123,11 +125,11 @@ object OutputTaskRunner {
 
     instance.checkpointMode match {
       case "time-interval" =>
-        logger.debug(s"Task: ${OutputDataFactory.taskName}. Start a output module  with time-interval checkpoint mode.")
+        logger.debug(s"Task: ${OutputDataFactory.taskName}. Start an output module  with time-interval checkpoint mode.")
         val checkpointTimer = new SjTimer()
         checkpointTimer.set(instance.checkpointInterval)
         while (true) {
-          processTransaction(blockingQueue, subscribeConsumer, handler, outputStream, client, esService)
+          processTransaction(blockingQueue, subscribeConsumer, handler, outputStream, client, esService, performanceMetrics)
           if (checkpointTimer.isTime) {
             subscribeConsumer.checkpoint()
             checkpointTimer.reset()
@@ -137,8 +139,8 @@ object OutputTaskRunner {
       case "every-nth" =>
         var countOfTxn = 0
         while (true) {
-          logger.debug(s"Task: ${OutputDataFactory.taskName}. Start a output module with time-interval checkpoint mode.")
-          processTransaction(blockingQueue, subscribeConsumer, handler, outputStream, client, esService)
+          logger.debug(s"Task: ${OutputDataFactory.taskName}. Start an output module with time-interval checkpoint mode.")
+          processTransaction(blockingQueue, subscribeConsumer, handler, outputStream, client, esService, performanceMetrics)
           if (countOfTxn == instance.checkpointInterval) {
             subscribeConsumer.checkpoint()
             countOfTxn = 0
@@ -167,15 +169,25 @@ object OutputTaskRunner {
                          handler: OutputStreamingHandler,
                          outputStream: SjStream,
                          client: TransportClient,
-                         esService: ESService) = {
+                         esService: ESService,
+                         performanceMetrics: OutputStreamingPerformanceMetrics) = {
     logger.info("")
     val nextEnvelope: String = queue.take()
     if (nextEnvelope != null && !nextEnvelope.equals("")) {
       println("envelope processing...")
       val tStreamEnvelope = serializer.deserialize[TStreamEnvelope](nextEnvelope)
       subscribeConsumer.setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
+      performanceMetrics.addEnvelopeToInputStream(
+        tStreamEnvelope.stream,
+        tStreamEnvelope.data.map(_.length)
+      )
       val outputEnvelopes: List[OutputEnvelope] = handler.onTransaction(tStreamEnvelope)
       outputEnvelopes.foreach { (outputEnvelope: OutputEnvelope) =>
+        performanceMetrics.addElementToOutputEnvelope(
+          outputEnvelope.stream,
+          tStreamEnvelope.txnUUID.toString,
+          outputEnvelope.data.txn.getBytes("UTF8").length
+        )
         outputEnvelope.streamType match {
           case "elasticsearch-output" =>
             val entity = outputEnvelope.data.asInstanceOf[EsEntity]

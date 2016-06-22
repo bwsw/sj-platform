@@ -20,21 +20,17 @@ class PartitionedOutput(producer: BasicProducer[Array[Byte], Array[Byte]],
 
   def put(data: Array[Byte], partition: Int) = {
     if (txns.contains(partition)) {
-      performanceMetrics.addElementToOutputEnvelope(
-        producer.stream.getName,
-        txns(partition).getTxnUUID.toString,
-        data.length
-      )
       txns(partition).send(data)
     }
     else {
       txns(partition) = producer.newTransaction(ProducerPolicies.errorIfOpen, partition)
-      performanceMetrics.addEnvelopeToOutputStream(
-        producer.stream.getName,
-        txns(partition).getTxnUUID.toString,
-        mutable.ListBuffer(data.length)
-      )
       txns(partition).send(data)
     }
+
+    performanceMetrics.addElementToOutputEnvelope(
+      producer.stream.getName,
+      txns(partition).getTxnUUID.toString,
+      data.length
+    )
   }
 }

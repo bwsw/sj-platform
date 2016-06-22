@@ -44,24 +44,6 @@ abstract class PerformanceMetrics(taskId: String, host: String, inputStreamNames
   }
 
   /**
-   * Invokes when a new txn is created for some output stream
-   * @param name Stream name
-   * @param envelopeID Id of envelope of output stream
-   * @param elementsSize Set of sizes of elements
-   */
-  def addEnvelopeToOutputStream(name: String, envelopeID: String, elementsSize: mutable.ListBuffer[Int]) = {
-    mutex.lock()
-    logger.debug(s"Indicate that a new txn: $envelopeID is created for output stream: $name\n")
-    if (outputEnvelopesPerStream.contains(name)) {
-      outputEnvelopesPerStream(name) += (envelopeID -> elementsSize)
-    } else {
-      logger.error(s"Output stream with name: $name doesn't exist\n")
-      throw new Exception(s"Output stream with name: $name doesn't exist")
-    }
-    mutex.unlock()
-  }
-
-  /**
    * Invokes when a new element is sent to txn of some output stream
    * @param name Stream name
    * @param envelopeID Id of envelope of output stream

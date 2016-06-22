@@ -1,9 +1,7 @@
 package com.bwsw.sj.engine.core.environment
 
 import com.bwsw.sj.common.module.RegularStreamingPerformanceMetrics
-import com.bwsw.tstreams.agents.producer.{ProducerPolicies, BasicProducerTransaction, BasicProducer}
-
-import scala.collection.mutable
+import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerTransaction, ProducerPolicies}
 
 /**
  * Provides an output stream that defined for stream in whole.
@@ -21,21 +19,17 @@ class RoundRobinOutput(producer: BasicProducer[Array[Byte], Array[Byte]],
 
   def put(data: Array[Byte]) = {
     if (txn.isDefined) {
-      performanceMetrics.addElementToOutputEnvelope(
-        producer.stream.getName,
-        txn.get.getTxnUUID.toString,
-        data.length
-      )
       txn.get.send(data)
     }
     else {
       txn = Some(producer.newTransaction(ProducerPolicies.errorIfOpen))
-      performanceMetrics.addEnvelopeToOutputStream(
-        producer.stream.getName,
-        txn.get.getTxnUUID.toString,
-        mutable.ListBuffer(data.length)
-      )
       txn.get.send(data)
     }
+
+    performanceMetrics.addElementToOutputEnvelope(
+      producer.stream.getName,
+      txn.get.getTxnUUID.toString,
+      data.length
+    )
   }
 }
