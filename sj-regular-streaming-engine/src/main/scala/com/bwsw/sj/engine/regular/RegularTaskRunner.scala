@@ -9,7 +9,7 @@ import com.bwsw.sj.common.DAL.model.KafkaService
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 
-import com.bwsw.sj.common.module.PerformanceMetrics
+import com.bwsw.sj.common.module.RegularStreamingPerformanceMetrics
 import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.sj.common.{ModuleConstants, StreamConstants}
 import com.bwsw.sj.engine.core.PersistentBlockingQueue
@@ -142,10 +142,11 @@ object RegularTaskRunner {
 
     val classLoader = manager.getClassLoader(moduleJar.getAbsolutePath)
 
-    val performanceMetrics = new PerformanceMetrics(
+    val performanceMetrics = new RegularStreamingPerformanceMetrics(
       manager.taskName,
       manager.agentsHost,
-      inputs.map(_._1.name).toArray ++ regularInstanceMetadata.outputs
+      inputs.map(_._1.name).toArray,
+      regularInstanceMetadata.outputs
     )
 
     logger.debug(s"Task: ${manager.taskName}. Launch a new thread to report performance metrics \n")
@@ -155,7 +156,7 @@ object RegularTaskRunner {
         var report: String = null
         var reportTxn: BasicProducerTransaction[Array[Byte], Array[Byte]] = null
         while (true) {
-          logger.info(s"Task: ${manager.taskName}. Wait ${regularInstanceMetadata.performanceReportingInterval} to report performance metrics\n")
+          logger.info(s"Task: ${manager.taskName}. Wait ${regularInstanceMetadata.performanceReportingInterval} ms to report performance metrics\n")
           Thread.sleep(regularInstanceMetadata.performanceReportingInterval)
           report = performanceMetrics.getReport
           logger.info(s"Task: ${manager.taskName}. Performance metrics: $report \n")
@@ -221,7 +222,7 @@ object RegularTaskRunner {
                         manager: TaskManager,
                         offsetProducer: Option[BasicProducer[Array[Byte], Array[Byte]]],
                         checkpointGroup: CheckpointGroup,
-                        performanceMetrics: PerformanceMetrics) = {
+                        performanceMetrics: RegularStreamingPerformanceMetrics) = {
     /**
      * Json serializer for deserialization of envelope
      */

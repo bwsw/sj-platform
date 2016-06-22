@@ -27,6 +27,12 @@ trait IStateService {
   def get(key: String): Any
 
   /**
+   * Gets all state variables
+   * @return Set of all state variables with keys
+   */
+  def getAll: Map[String, Any]
+
+  /**
    * Puts a value of the state variable by key
    * @param key State variable name
    * @param value Value of the state variable

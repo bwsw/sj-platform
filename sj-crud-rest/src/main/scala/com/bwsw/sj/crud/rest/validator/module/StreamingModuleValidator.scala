@@ -146,6 +146,12 @@ abstract class StreamingModuleValidator {
       errors += s"Inputs is not unique."
     }
     val inputStreams = getStreams(parameters.inputs.toList.map(_.replaceAll("/split|/full", "")))
+    parameters.inputs.toList.map(_.replaceAll("/split|/full", "")).foreach { streamName =>
+      if (!inputStreams.exists(s => s.name == streamName)) {
+        errors += s"Input stream '$streamName' is not exists."
+      }
+    }
+
     val inputTypes = specification.inputs("types").asInstanceOf[Array[String]]
     if (inputStreams.exists(s => !inputTypes.contains(s.streamType))) {
       errors += s"Input streams must be in: ${inputTypes.mkString(", ")}.."
@@ -162,57 +168,67 @@ abstract class StreamingModuleValidator {
       errors += s"Outputs is not unique."
     }
     val outputStreams = getStreams(parameters.outputs.toList)
+    parameters.outputs.toList.foreach { streamName =>
+      if (!outputStreams.exists(s => s.name == streamName)) {
+        errors += s"Output stream '$streamName' is not exists."
+      }
+    }
     val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
     if (outputStreams.exists(s => !outputTypes.contains(s.streamType))) {
       errors += s"Output streams must be in: ${outputTypes.mkString(", ")}."
     }
 
-    val allStreams = inputStreams.union(outputStreams)
+    if (errors.isEmpty) {
+      val allStreams = inputStreams.union(outputStreams)
 
-    val startFrom = parameters.startFrom
-    if (!startFromModes.contains(startFrom)) {
-      if (allStreams.exists(s => s.streamType.equals(kafka))) {
-        errors += s"Start-from attribute must be 'oldest' or 'newest', if instance have kafka-streams."
-      } else {
-        try {
-          startFrom.toLong
-        } catch {
-          case ex: NumberFormatException =>
-            errors += s"Start-from attribute is not 'oldest' or 'newest' or timestamp."
+      val startFrom = parameters.startFrom
+      if (!startFromModes.contains(startFrom)) {
+        if (allStreams.exists(s => s.streamType.equals(kafka))) {
+          errors += s"Start-from attribute must be 'oldest' or 'newest', if instance have kafka-streams."
+        } else {
+          try {
+            startFrom.toLong
+          } catch {
+            case ex: NumberFormatException =>
+              errors += s"Start-from attribute is not 'oldest' or 'newest' or timestamp."
+          }
         }
       }
-    }
 
-    val tStreamsServices = getStreamServices(allStreams.filter { s =>
-      s.streamType.equals(tStream)
-    })
-    if (tStreamsServices.size != 1) {
-      errors += s"All t-streams should have the same service."
+      val tStreamsServices = getStreamServices(allStreams.filter { s =>
+        s.streamType.equals(tStream)
+      })
+      if (tStreamsServices.size != 1) {
+        errors += s"All t-streams should have the same service."
+      } else {
+        val service = serviceDAO.get(tStreamsServices.head)
+        if (!service.isInstanceOf[TStreamService]) {
+          errors += s"Service for t-streams must be 'TstrQ'."
+        } else {
+          checkTStreams(errors, allStreams.filter(s => s.streamType.equals(tStream)).map(_.asInstanceOf[TStreamSjStream]))
+        }
+      }
+
+      val kafkaStreams = allStreams.filter(s => s.streamType.equals(kafka)).map(_.asInstanceOf[KafkaSjStream])
+      if (kafkaStreams.nonEmpty) {
+        if (kafkaStreams.exists(s => !s.service.isInstanceOf[KafkaService])) {
+          errors += s"Service for kafka-streams must be 'KfkQ'."
+        } else {
+          checkKafkaStreams(errors, kafkaStreams)
+        }
+      }
+
+      val partitions = getPartitionForStreams(inputStreams)
+      val minPartitionCount = if (partitions.nonEmpty) partitions.values.min else 0
+
+      parameters.parallelism = checkParallelism(parameters.parallelism, minPartitionCount, errors)
+
+      val validatedInstance = createInstance(parameters, partitions, allStreams.filter(s => s.streamType.equals(tStream)).toSet)
+      (errors, validatedInstance)
     } else {
-      val service = allStreams.head.service
-      if (!service.isInstanceOf[TStreamService]) {
-        errors += s"Service for t-streams must be 'TstrQ'."
-      } else {
-        checkTStreams(errors, allStreams.filter(s => s.streamType.equals(tStream)).map(_.asInstanceOf[TStreamSjStream]))
-      }
+      (errors, null)
     }
 
-    val kafkaStreams = allStreams.filter(s => s.streamType.equals(kafka)).map(_.asInstanceOf[KafkaSjStream])
-    if (kafkaStreams.nonEmpty) {
-      if (kafkaStreams.exists(s => !s.service.isInstanceOf[KafkaService])) {
-        errors += s"Service for kafka-streams must be 'KfkQ'."
-      } else {
-        checkKafkaStreams(errors, kafkaStreams)
-      }
-    }
-
-    val partitions = getPartitionForStreams(inputStreams)
-    val minPartitionCount = partitions.values.min
-
-    parameters.parallelism = checkParallelism(parameters.parallelism, minPartitionCount, errors)
-
-    val validatedInstance = createInstance(parameters, partitions, allStreams.filter(s => s.streamType.equals(tStream)).toSet)
-    (errors, validatedInstance)
   }
 
   /**
