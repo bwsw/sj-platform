@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.core.environment
 
 import com.bwsw.sj.common.DAL.model.SjStream
 
-import com.bwsw.sj.common.module.PerformanceMetrics
+import com.bwsw.sj.common.module.RegularStreamingPerformanceMetrics
 import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.sj.engine.core.state.StateStorage
 import com.bwsw.tstreams.agents.producer.BasicProducer
@@ -26,7 +26,7 @@ class ModuleEnvironmentManager(val options: Map[String, Any],
                                outputs: Array[SjStream],
                                outputTags: mutable.Map[String, (String, ModuleOutput)],
                                moduleTimer: SjTimer,
-                               performanceMetrics: PerformanceMetrics) {
+                               performanceMetrics: RegularStreamingPerformanceMetrics) {
   protected val logger = LoggerFactory.getLogger(this.getClass)
 
   /**

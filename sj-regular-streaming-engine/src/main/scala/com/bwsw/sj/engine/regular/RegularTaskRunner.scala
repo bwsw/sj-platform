@@ -9,7 +9,7 @@ import com.bwsw.sj.common.DAL.model.KafkaService
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 
-import com.bwsw.sj.common.module.PerformanceMetrics
+import com.bwsw.sj.common.module.RegularStreamingPerformanceMetrics
 import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.sj.common.{ModuleConstants, StreamConstants}
 import com.bwsw.sj.engine.core.PersistentBlockingQueue
@@ -142,7 +142,7 @@ object RegularTaskRunner {
 
     val classLoader = manager.getClassLoader(moduleJar.getAbsolutePath)
 
-    val performanceMetrics = new PerformanceMetrics(
+    val performanceMetrics = new RegularStreamingPerformanceMetrics(
       manager.taskName,
       manager.agentsHost,
       inputs.map(_._1.name).toArray ++ regularInstanceMetadata.outputs
@@ -221,7 +221,7 @@ object RegularTaskRunner {
                         manager: TaskManager,
                         offsetProducer: Option[BasicProducer[Array[Byte], Array[Byte]]],
                         checkpointGroup: CheckpointGroup,
-                        performanceMetrics: PerformanceMetrics) = {
+                        performanceMetrics: RegularStreamingPerformanceMetrics) = {
     /**
      * Json serializer for deserialization of envelope
      */
