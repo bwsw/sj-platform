@@ -18,8 +18,9 @@ import org.apache.log4j.Logger
 class ScalaScheduler extends Scheduler {
 
   var driver: SchedulerDriver = null
-  var cores: Double = 0.0
-  var ram: Double = 0.0
+  var perTaskCores: Double = 0.0
+  var perTaskMem: Double = 0.0
+  var perTaskPortsCount: Int = 0
   var params = immutable.Map[String, String]()
   private val logger = Logger.getLogger(getClass)
   var instance: Instance = null
@@ -89,7 +90,7 @@ class ScalaScheduler extends Scheduler {
     }
 
     val tasksCount = TasksList.toLaunch.size
-    var tasksOnSlaves = howMuchTasksOnSlave(this.cores, this.ram, tasksCount, filteredOffers)
+    var tasksOnSlaves = howMuchTasksOnSlave(this.perTaskCores, this.perTaskMem, this.perTaskPortsCount, tasksCount, filteredOffers)
 
     var overTasks = 0
     for (slave <- tasksOnSlaves) {overTasks += slave._2}
@@ -124,13 +125,13 @@ class ScalaScheduler extends Scheduler {
         setType(org.apache.mesos.Protos.Value.Type.SCALAR).
         setName("cpus").
         setScalar(org.apache.mesos.Protos.Value.
-          Scalar.newBuilder.setValue(this.cores)).
+          Scalar.newBuilder.setValue(this.perTaskCores)).
         build
       val mem = Resource.newBuilder.
         setType(org.apache.mesos.Protos.Value.Type.SCALAR).
         setName("mem").
         setScalar(org.apache.mesos.Protos.Value.
-          Scalar.newBuilder.setValue(this.ram)).
+          Scalar.newBuilder.setValue(this.perTaskMem)).
         build
       val ports = getPorts(currentOffer._1, curr_task)
 
@@ -250,8 +251,12 @@ class ScalaScheduler extends Scheduler {
       TasksList.message = "Framework shut down: not found instance."
       return
     }
-    this.cores = instance.perTaskCores
-    this.ram = instance.perTaskRam
+    this.perTaskCores = instance.perTaskCores
+    this.perTaskMem = instance.perTaskRam
+    instance.moduleType match {
+      case "output-streaming" => perTaskPortsCount = 1
+      case "regular-streaming" => perTaskPortsCount = instance.inputs.length+instance.outputs.length+4
+    }
     logger.info(s"Got instance")
     logger.debug(s"${this.instance}")
 
@@ -278,28 +283,41 @@ class ScalaScheduler extends Scheduler {
 
 
 
-
-  def howMuchTasksOnSlave(perTaskCores: Double, perTaskRam: Double, tasksCount: Int, offers: util.List[Offer]): List[Tuple2[Offer, Int]] = {
-    /**
-      * This method give list of offer and how many tasks we can launch on each slave.
-      */
+  /**
+    * This method give list of offer and how many tasks we can launch on each slave.
+    */
+  def howMuchTasksOnSlave(perTaskCores: Double, perTaskRam: Double, perTaskPortsCount: Int, offers: util.List[Offer]): List[Tuple2[Offer, Int]] = {
     var over_cpus = 0.0
     var over_mem = 0.0
-    val req_cpus = perTaskCores * tasksCount
-    val req_mem = perTaskRam * tasksCount
+    var over_ports = 0
+
+    val req_cpus = perTaskCores * instance.parallelism
+    val req_mem = perTaskRam * instance.parallelism
+    val req_ports = perTaskPortsCount * instance.parallelism
+
+
+
     var tasksNumber: List[Tuple2[Offer, Int]] = List()
     for (offer <- offers.asScala) {
+      val portsResource = getPortsResource(offer)
+      var offerPorts = 0
+      for (range <- portsResource.getRanges.getRangeList.asScala){
+        over_ports += (range.getEnd-range.getBegin+1).toInt
+        offerPorts += (range.getEnd-range.getBegin+1).toInt
+      }
       tasksNumber = tasksNumber.:::(List(Tuple2(
-        offer, java.lang.Math.min(
+
+        offer, List[Double](
           getResource(offer, "cpus") / perTaskCores,
-          getResource(offer, "mem") / perTaskRam
-        ).floor.toInt
+          getResource(offer, "mem") / perTaskRam,
+          offerPorts / perTaskPortsCount
+        ).min.floor.toInt
       )))
       over_cpus += getResource(offer, "cpus")
       over_mem += getResource(offer, "mem")
     }
-    logger.debug(s"Have resources: $over_cpus cpus, $over_mem mem")
-    logger.debug(s"Required resources: $req_cpus cpus, $req_mem mem")
+    logger.info(s"Have resources: $over_cpus cpus, $over_mem mem, $over_ports ports")
+    logger.info(s"Required resources: $req_cpus cpus, $req_mem mem, $req_ports ports")
     tasksNumber
   }
 
@@ -388,19 +406,13 @@ class ScalaScheduler extends Scheduler {
     * Get random unused ports
     */
   def getPorts(offer:Offer, task:String):Resource = {
-    var portsCount = 0
-    instance.moduleType match {
-      case "output-streaming" => portsCount = 10
-      case "regular-streaming" => portsCount = instance.outputs.length + TasksList.getTask(task).input.toList.length + 4
-    }
-
     val portsResource: Resource = getPortsResource(offer)
     for (range <- portsResource.getRanges.getRangeList.asScala) {
       availablePortsForOneInstance ++= (range.getBegin to range.getEnd).to[collection.mutable.ListBuffer]
     }
 
-    val agentPorts: collection.mutable.ListBuffer[Long] = availablePortsForOneInstance.take(portsCount)
-    availablePortsForOneInstance.remove(0, portsCount)
+    val agentPorts: collection.mutable.ListBuffer[Long] = availablePortsForOneInstance.take(this.perTaskPortsCount)
+    availablePortsForOneInstance.remove(0, this.perTaskPortsCount)
 
     val ranges = Value.Ranges.newBuilder
     for (port <- agentPorts) {
