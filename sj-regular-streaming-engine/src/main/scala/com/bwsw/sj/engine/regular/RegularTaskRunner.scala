@@ -145,7 +145,8 @@ object RegularTaskRunner {
     val performanceMetrics = new RegularStreamingPerformanceMetrics(
       manager.taskName,
       manager.agentsHost,
-      inputs.map(_._1.name).toArray ++ regularInstanceMetadata.outputs
+      inputs.map(_._1.name).toArray,
+      regularInstanceMetadata.outputs
     )
 
     logger.debug(s"Task: ${manager.taskName}. Launch a new thread to report performance metrics \n")
