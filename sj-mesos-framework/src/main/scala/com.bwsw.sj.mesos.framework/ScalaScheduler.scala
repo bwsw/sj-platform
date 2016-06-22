@@ -90,7 +90,7 @@ class ScalaScheduler extends Scheduler {
     }
 
     val tasksCount = TasksList.toLaunch.size
-    var tasksOnSlaves = howMuchTasksOnSlave(this.perTaskCores, this.perTaskMem, this.perTaskPortsCount, tasksCount, filteredOffers)
+    var tasksOnSlaves = howMuchTasksOnSlave(this.perTaskCores, this.perTaskMem, this.perTaskPortsCount, taskCount, filteredOffers)
 
     var overTasks = 0
     for (slave <- tasksOnSlaves) {overTasks += slave._2}
@@ -286,14 +286,14 @@ class ScalaScheduler extends Scheduler {
   /**
     * This method give list of offer and how many tasks we can launch on each slave.
     */
-  def howMuchTasksOnSlave(perTaskCores: Double, perTaskRam: Double, perTaskPortsCount: Int, offers: util.List[Offer]): List[Tuple2[Offer, Int]] = {
+  def howMuchTasksOnSlave(perTaskCores: Double, perTaskRam: Double, perTaskPortsCount: Int, taskCount: Int, offers: util.List[Offer]): List[Tuple2[Offer, Int]] = {
     var over_cpus = 0.0
     var over_mem = 0.0
     var over_ports = 0
 
-    val req_cpus = perTaskCores * instance.parallelism
-    val req_mem = perTaskRam * instance.parallelism
-    val req_ports = perTaskPortsCount * instance.parallelism
+    val req_cpus = perTaskCores * taskCount
+    val req_mem = perTaskRam * taskCount
+    val req_ports = perTaskPortsCount * taskCount
 
 
 
