@@ -90,7 +90,7 @@ class ScalaScheduler extends Scheduler {
     }
 
     val tasksCount = TasksList.toLaunch.size
-    var tasksOnSlaves = howMuchTasksOnSlave(this.perTaskCores, this.perTaskMem, this.perTaskPortsCount, taskCount, filteredOffers)
+    var tasksOnSlaves = howMuchTasksOnSlave(this.perTaskCores, this.perTaskMem, this.perTaskPortsCount, tasksCount, filteredOffers)
 
     var overTasks = 0
     for (slave <- tasksOnSlaves) {overTasks += slave._2}
@@ -377,8 +377,8 @@ class ScalaScheduler extends Scheduler {
     */
   def getModuleUrl(instance: Instance): String = {
     // TODO:return back get host
-    lazy val restHost = "192.168.1.174" // configFileService.get(ConfigConstants.hostOfCrudRestTag).value
-    lazy val restPort = 8000 // configFileService.get(ConfigConstants.portOfCrudRestTag).value.toInt
+    lazy val restHost = "176.120.25.19" // configFileService.get(ConfigConstants.hostOfCrudRestTag).value
+    lazy val restPort = 18080 // configFileService.get(ConfigConstants.portOfCrudRestTag).value.toInt
     val restAddress = new URI(s"http://$restHost:$restPort/v1/custom/").toString
     jarName = configFileService.get("system." + instance.engine).value
     logger.info(s"URI: ${restAddress + jarName}")
