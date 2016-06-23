@@ -71,8 +71,6 @@ class ScalaScheduler extends Scheduler {
     }
 
 
-
-
     // TODO : add filter
     // val filteredOffers = filterOffers(offers, this.instance.nodeAttributes)
     val filteredOffers = offers
@@ -323,11 +321,10 @@ class ScalaScheduler extends Scheduler {
 
 
 
-
+  /**
+    * This method give how much resource of type <name> we have on <offer>
+    */
   def getResource(offer: Offer, name: String): Double = {
-    /**
-      * This method give how much resource of type <name> we have on <offer>
-      */
     val res = offer.getResourcesList
     for (r <- res.asScala if r.getName == name) {
       return r.getScalar.getValue
@@ -337,11 +334,10 @@ class ScalaScheduler extends Scheduler {
 
 
 
-
+  /**
+    * Filter offered slaves
+    */
   def filterOffers(offers: util.List[Offer], filters: java.util.Map[String, String]): util.List[Offer] = {
-    /**
-      * Filter offered slaves
-      */
     logger.info(s"FILTER OFFERS")
     var result: List[Offer] = List()
     if (filters != null) {
@@ -430,7 +426,6 @@ class ScalaScheduler extends Scheduler {
 
   /**
     * Handler for Scheduler Exception
-    *
     */
   def handleSchedulerException(e:Exception) = {
     val sw = new StringWriter
