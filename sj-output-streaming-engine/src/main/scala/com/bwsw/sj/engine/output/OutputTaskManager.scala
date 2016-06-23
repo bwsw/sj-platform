@@ -64,7 +64,7 @@ class OutputTaskManager(taskName: String, instance: OutputInstance) {
       val parts = s.split(":")
       new InetSocketAddress(parts(0), parts(1).toInt)
     }.toList
-    
+
     val agentPort: Int = OutputDataFactory.agentsPorts.head.toInt
 
     val agentAddress = OutputDataFactory.agentHost + ":" + agentPort.toString
