@@ -9,7 +9,6 @@ import org.joda.time.DateTime
   * Created by diryavkin_dn on 18.05.16.
   */
 object TasksList{
-  val usedPorts:collection.mutable.Map[String, mutable.Map[String, collection.mutable.ListBuffer[Long]]] = collection.mutable.Map()
   private val tasksToLaunch: mutable.ListBuffer[String] = mutable.ListBuffer()
   private val listTasks : mutable.Map[String, Task] = mutable.Map()
   var message: String = "Initialization"

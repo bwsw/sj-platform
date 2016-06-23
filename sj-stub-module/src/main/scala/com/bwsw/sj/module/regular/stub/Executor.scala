@@ -1,4 +1,4 @@
-package com.bwsw.sj.stub
+package com.bwsw.sj.module.regular.stub
 
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.engine.core.entities.{TStreamEnvelope, Envelope, KafkaEnvelope}

@@ -4,26 +4,30 @@ import java.io.File
 import java.net.InetSocketAddress
 import java.util.concurrent.ArrayBlockingQueue
 
-import com.bwsw.sj.common.DAL.model.{TStreamSjStream, SjStream, TStreamService}
+import com.bwsw.common.tstream.NetworkTimeUUIDGenerator
+import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
+import com.bwsw.sj.common.ModuleConstants._
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
 import com.bwsw.sj.engine.core.utils.EngineUtils
 import com.bwsw.sj.engine.output.subscriber.OutputSubscriberCallback
-import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
-import com.bwsw.tstreams.agents.consumer.{SubscriberCoordinationOptions, BasicConsumerOptions}
 import com.bwsw.tstreams.agents.consumer.Offsets.IOffset
+import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
+import com.bwsw.tstreams.agents.consumer.{BasicConsumerOptions, SubscriberCoordinationOptions}
+import com.bwsw.tstreams.agents.producer.InsertionType.SingleElementInsert
+import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions, ProducerCoordinationOptions}
+import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
 import com.bwsw.tstreams.data.IStorage
-import com.bwsw.tstreams.generator.IUUIDGenerator
-
-import com.bwsw.sj.common.ModuleConstants._
+import com.bwsw.tstreams.generator.{IUUIDGenerator, LocalTimeUUIDGenerator}
 import com.bwsw.tstreams.policy.RoundRobinPolicy
 import com.bwsw.tstreams.services.BasicStreamService
-import org.slf4j.{LoggerFactory, Logger}
+import com.bwsw.tstreams.streams.BasicStream
+import org.slf4j.{Logger, LoggerFactory}
 
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
-import scala.collection.JavaConverters._
 
 /**
   * Task manager for working with streams of output-streaming module
@@ -53,28 +57,15 @@ class OutputTaskManager(taskName: String, instance: OutputInstance) {
                                 queue: ArrayBlockingQueue[String]) = {
     logger.info(s"Creating subscribe consumer for stream: ${stream.name} of instance: ${instance.name}.")
     val service = stream.service.asInstanceOf[TStreamService]
-    val dataStorage: IStorage[Array[Byte]] = OutputDataFactory.dataStorage
+    val dataStorage: IStorage[Array[Byte]] = OutputDataFactory.createDataStorage()
     val metadataStorage = OutputDataFactory.metadataStorage
 
     val zkHosts = service.lockProvider.hosts.map { s =>
       val parts = s.split(":")
       new InetSocketAddress(parts(0), parts(1).toInt)
     }.toList
-
-    //val startPort: Int = OutputDataFactory.agentsPorts.head.toInt
-    //val endPort: Int = OutputDataFactory.agentsPorts(1).toInt
+    
     val agentPort: Int = OutputDataFactory.agentsPorts.head.toInt
-    /*val ports: List[Int] = startPort until endPort toList
-    var portIsFound = false
-    var i = 0
-    while (!portIsFound) {
-      val checkPort = ports(i)
-      if (!EngineUtils.portIsOpen(OutputDataFactory.agentHost, checkPort)) {
-        agentPort = checkPort
-        portIsFound = true
-      }
-      i += 1
-    }*/
 
     val agentAddress = OutputDataFactory.agentHost + ":" + agentPort.toString
 
@@ -114,6 +105,63 @@ class OutputTaskManager(taskName: String, instance: OutputInstance) {
   }
 
   /**
+   * Creates a t-stream producer for recording messages
+   *
+   * @param stream SjStream to which messages are written
+   * @return Basic t-stream producer
+   */
+  def createProducer(stream: SjStream) = {
+    logger.debug(s"Instance name: ${instance.name}, task name: $taskName. " +
+      s"Create basic producer for stream: ${stream.name}\n")
+    val dataStorage: IStorage[Array[Byte]] = OutputDataFactory.createDataStorage()
+    val service = stream.service.asInstanceOf[TStreamService]
+
+    val coordinationOptions = new ProducerCoordinationOptions(
+      agentAddress = OutputDataFactory.agentHost + ":" + OutputDataFactory.agentsPorts(1), //todo: number of agent port
+      OutputDataFactory.zkHosts,
+      service.lockNamespace,
+      OutputDataFactory.zkTimeout,
+      isLowPriorityToBeMaster = false,
+      transport = new TcpTransport,
+      OutputDataFactory.transportTimeout
+    )
+
+    val basicStream: BasicStream[Array[Byte]] =
+      BasicStreamService.loadStream(stream.name, OutputDataFactory.metadataStorage, dataStorage)
+
+    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
+
+    val timeUuidGenerator =
+      stream.asInstanceOf[TStreamSjStream].generator.generatorType match {
+        case "local" => new LocalTimeUUIDGenerator
+        case _type =>
+          val service = stream.asInstanceOf[TStreamSjStream].generator.service.asInstanceOf[ZKService]
+          val zkServers = service.provider.hosts
+          val prefix = service.namespace + "/" + {
+            if (_type == "global") _type else basicStream.name
+          }
+
+          new NetworkTimeUUIDGenerator(zkServers, prefix, OutputDataFactory.retryPeriod, OutputDataFactory.retryCount)
+      }
+
+    val options = new BasicProducerOptions[Array[Byte], Array[Byte]](
+      OutputDataFactory.txnTTL,
+      OutputDataFactory.txnKeepAliveInterval,
+      OutputDataFactory.producerKeepAliveInterval,
+      roundRobinPolicy,
+      SingleElementInsert,
+      timeUuidGenerator,
+      coordinationOptions,
+      converter)
+
+    new BasicProducer[Array[Byte], Array[Byte]](
+      "producer for " + taskName + "_" + stream.name,
+      basicStream,
+      options
+    )
+  }
+
+  /**
     * Getting instance of handler object from module jar
     *
     * @param file Jar of module
@@ -126,5 +174,4 @@ class OutputTaskManager(taskName: String, instance: OutputInstance) {
     val clazz = loader.loadClass(handlerClassName)
     clazz.newInstance().asInstanceOf[OutputStreamingHandler]
   }
-
 }

@@ -3,32 +3,36 @@ package com.bwsw.sj.engine.output
 import java.io.File
 import java.net.InetAddress
 import java.util.UUID
-import java.util.concurrent.ArrayBlockingQueue
+
+import java.util.concurrent.{ArrayBlockingQueue, Executors}
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.traits.Serializer
-import com.bwsw.sj.engine.core.utils.EngineUtils._
-import com.bwsw.sj.common.DAL.model.{ESService, FileMetadata, SjStream}
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
+import com.bwsw.sj.common.DAL.model.{ESService, FileMetadata, SjStream}
+import com.bwsw.sj.common.module.OutputStreamingPerformanceMetrics
 import com.bwsw.sj.engine.core.entities.{EsEntity, OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
+import com.bwsw.sj.engine.core.utils.EngineUtils._
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
+import com.bwsw.tstreams.agents.producer.{ProducerPolicies, BasicProducerTransaction}
 import com.datastax.driver.core.utils.UUIDs
 import org.elasticsearch.action.index.IndexRequestBuilder
 import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse}
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.transport.InetSocketTransportAddress
 import org.elasticsearch.index.query.QueryBuilders
-import org.slf4j.{LoggerFactory, Logger}
+import org.slf4j.{Logger, LoggerFactory}
 
 /**
-  * Runner object for engine of output-streaming module
-  * Created: 26/05/2016
-  *
-  * @author Kseniya Tomskikh
-  */
+ * Runner object for engine of output-streaming module
+ * Created: 26/05/2016
+ *
+ * @author Kseniya Tomskikh
+ */
 object OutputTaskRunner {
   private val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  private val executorService = Executors.newCachedThreadPool()
 
   val serializer: Serializer = new JsonSerializer
 
@@ -58,31 +62,66 @@ object OutputTaskRunner {
     val moduleMetadata: FileMetadata = OutputDataFactory.getFileMetadata
     val handler: OutputStreamingHandler = taskManager.getModuleHandler(moduleJar, moduleMetadata.specification.executorClass)
 
+    logger.debug(s"Task: ${OutputDataFactory.taskName}. Start creating a t-stream producer to record performance reports\n")
+    val reportStream = OutputDataFactory.getReportStream
+    val reportProducer = taskManager.createProducer(reportStream)
+    logger.debug(s"Task: ${OutputDataFactory.taskName}. Creation of t-stream producer is finished\n")
+
+    val performanceMetrics: OutputStreamingPerformanceMetrics = new OutputStreamingPerformanceMetrics(
+      OutputDataFactory.taskName,
+      OutputDataFactory.agentHost,
+      inputStream.name,
+      outputStream.name
+    )
+
+    logger.debug(s"Task: ${OutputDataFactory.taskName}. Launch a new thread to report performance metrics \n")
+    executorService.execute(new Runnable() {
+      def run() = {
+        val taskNumber = OutputDataFactory.taskName.replace(s"${OutputDataFactory.instanceName}-task", "").toInt
+        var report: String = null
+        var reportTxn: BasicProducerTransaction[Array[Byte], Array[Byte]] = null
+        while (true) {
+          logger.info(s"Task: ${OutputDataFactory.taskName}. Wait ${instance.performanceReportingInterval} ms to report performance metrics\n")
+          Thread.sleep(instance.performanceReportingInterval)
+          report = performanceMetrics.getReport
+          logger.info(s"Task: ${OutputDataFactory.taskName}. Performance metrics: $report \n")
+          logger.debug(s"Task: ${OutputDataFactory.taskName}. Create a new txn for sending performance metrics\n")
+          reportTxn = reportProducer.newTransaction(ProducerPolicies.errorIfOpen, taskNumber)
+          logger.debug(s"Task: ${OutputDataFactory.taskName}. Send performance metrics\n")
+          reportTxn.send(report.getBytes)
+          logger.debug(s"Task: ${OutputDataFactory.taskName}. Do checkpoint of producer for performance reporting\n")
+          reportProducer.checkpoint()
+        }
+      }
+    })
+
     logger.info(s"Task: ${OutputDataFactory.taskName}. Preparing finished. Launch task.")
     runModule(instance,
       blockingQueue,
       subscribeConsumer,
       taskManager,
       handler,
-      outputStream)
+      outputStream,
+      performanceMetrics)
 
   }
 
   /**
-    *
-    * @param instance Instance of output streaming module
-    * @param blockingQueue Queue with transactions from t-stream
-    * @param subscribeConsumer Subscribe consumer for read messages from t-stream
-    * @param taskManager Task manager for control task of this module
-    * @param handler User handler (executor) of output-streaming module
-    * @param outputStream Output stream for transform data
-    */
+   *
+   * @param instance Instance of output streaming module
+   * @param blockingQueue Queue with transactions from t-stream
+   * @param subscribeConsumer Subscribe consumer for read messages from t-stream
+   * @param taskManager Task manager for control task of this module
+   * @param handler User handler (executor) of output-streaming module
+   * @param outputStream Output stream for transform data
+   */
   def runModule(instance: OutputInstance,
                 blockingQueue: ArrayBlockingQueue[String],
                 subscribeConsumer: BasicSubscribingConsumer[Array[Byte], Array[Byte]],
                 taskManager: OutputTaskManager,
                 handler: OutputStreamingHandler,
-                outputStream: SjStream) = {
+                outputStream: SjStream,
+                performanceMetrics: OutputStreamingPerformanceMetrics) = {
     logger.debug(s"Task: ${OutputDataFactory.taskName}. Launch subscribing consumer.")
     subscribeConsumer.start()
 
@@ -98,22 +137,30 @@ object OutputTaskRunner {
 
           logger.info(s"Task: ${OutputDataFactory.taskName}. Get t-stream envelope.")
           val nextEnvelope: String = blockingQueue.take()
+
           if (nextEnvelope != null && !nextEnvelope.equals("")) {
             println("envelope processing...")
             val tStreamEnvelope = serializer.deserialize[TStreamEnvelope](nextEnvelope)
-
             subscribeConsumer.setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
 
             if (!isFirstCheckpoint) {
               deleteTransactionFromES(tStreamEnvelope.txnUUID, esService.index, outputStream.name, client)
             }
 
+            performanceMetrics.addEnvelopeToInputStream(
+              tStreamEnvelope.stream,
+              tStreamEnvelope.data.map(_.length)
+            )
             val outputEnvelopes: List[OutputEnvelope] = handler.onTransaction(tStreamEnvelope)
             outputEnvelopes.foreach { (outputEnvelope: OutputEnvelope) =>
+              performanceMetrics.addElementToOutputEnvelope(
+                outputEnvelope.stream,
+                tStreamEnvelope.txnUUID.toString,
+                UUIDs.startOf(outputEnvelope.data.txn).toString.getBytes("UTF8").length
+              )
               outputEnvelope.streamType match {
                 case "elasticsearch-output" =>
                   val entity = outputEnvelope.data.asInstanceOf[EsEntity]
-                  println(serializer.serialize(entity))
                   writeToElasticsearch(esService.index, outputStream.name, entity, client)
                 case "jdbc-output" => writeToJdbc(outputEnvelope)
                 case _ =>
@@ -159,16 +206,15 @@ object OutputTaskRunner {
       val id = hit.getId
       client.prepareDelete(index, documentType, id).execute().actionGet()
     }
-
   }
 
   /**
-    * Open elasticsearch connection
-    *
-    * @param outputStream Output ES stream
-    * @return ES Transport client and ES service of stream
-    */
-  def openDbConnection(outputStream: SjStream) = {
+   * Open elasticsearch connection
+   *
+   * @param outputStream Output ES stream
+   * @return ES Transport client and ES service of stream
+   */
+  def openDbConnection(outputStream: SjStream): (TransportClient, ESService) = {
     logger.info(s"Task: ${OutputDataFactory.taskName}. Open output elasticsearch connection.\n")
     val esService: ESService = outputStream.service.asInstanceOf[ESService]
     val client: TransportClient = TransportClient.builder().build()
@@ -180,25 +226,16 @@ object OutputTaskRunner {
   }
 
   /**
-    * Writing entity to ES
-    *
-    * @param index ES index
-    * @param documentType ES document type (name of stream)
-    * @param entity ES entity (data row)
-    * @param client ES Transport client
-    * @return Response from ES
-    */
+   * Writing entity to ES
+   *
+   * @param index ES index
+   * @param documentType ES document type (name of stream)
+   * @param entity ES entity (data row)
+   * @param client ES Transport client
+   * @return Response from ES
+   */
   def writeToElasticsearch(index: String, documentType: String, entity: EsEntity, client: TransportClient) = {
     val esData: String = serializer.serialize(entity)
-    //val result = client.execute(new Index.Builder(esData).index(index).`type`(documentType).build())
-
-    /*val esMap: Map[String, Any] = serializer.deserialize[Map[String, Any]](esData)
-
-    val mapping = esMap.map { (elem: (String, Any)) =>
-      elem._1 -> elem._2.getClass.toString
-    }
-
-    val source = Map(documentType -> Map("properties" -> mapping, "source" -> esMap))*/
 
     val request: IndexRequestBuilder = client.prepareIndex(index, documentType, UUID.randomUUID().toString)
     request.setSource(esData)
@@ -207,10 +244,10 @@ object OutputTaskRunner {
   }
 
   /**
-    * Writing entity to JDBC
-    *
-    * @param envelope Output envelope for writing to sql database
-    */
+   * Writing entity to JDBC
+   *
+   * @param envelope Output envelope for writing to sql database
+   */
   def writeToJdbc(envelope: OutputEnvelope) = {
     //todo
   }

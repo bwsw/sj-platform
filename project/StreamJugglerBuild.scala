@@ -16,6 +16,7 @@ object StreamJugglerBuild extends Build {
     settings = commonSettings) aggregate(common, engineCore,
     stub, stubOutput, crudRest, transactionGenerator, mesos,
     outputStreamingEngine, regularStreamingEngine, windowedStreamingEngine,
+    stubOutputRegularPM,
     customRegularModule)
 
   lazy val common = Project(id = "sj-common",
@@ -47,6 +48,9 @@ object StreamJugglerBuild extends Build {
 
   lazy val stubOutput = Project(id = "sj-stub-output-module",
     base = file("sj-stub-output-module")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
+
+  lazy val stubOutputRegularPM = Project(id = "sj-output-module-for-regular-pm",
+    base = file("sj-output-module-for-regular-pm")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
 
   lazy val customRegularModule = Project(id = "sj-custom-regular-module",
     base = file("sj-custom-regular-module")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)

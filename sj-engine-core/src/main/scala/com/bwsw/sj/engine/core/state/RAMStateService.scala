@@ -133,8 +133,10 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
    */
   override def saveFullState(): Unit = {
     logger.debug(s"Do checkpoint of a full state\n")
-    lastFullTxnUUID = Some(sendState(stateVariables))
-    stateChanges.clear()
+    if (stateVariables.nonEmpty) {
+      lastFullTxnUUID = Some(sendState(stateVariables))
+      stateChanges.clear()
+    }
   }
 
   /**
