@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.output.benchmark
 
 import java.io.{InputStreamReader, BufferedReader, File}
-import java.net.{InetAddress, InetSocketAddress}
+import java.net.{URI, InetAddress, InetSocketAddress}
 import java.util.jar.JarFile
 
 import com.aerospike.client.Host
@@ -27,6 +27,7 @@ import com.bwsw.tstreams.policy.RoundRobinPolicy
 import com.bwsw.tstreams.services.BasicStreamService
 import com.bwsw.tstreams.streams.BasicStream
 import com.datastax.driver.core.Cluster
+import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.transport.InetSocketTransportAddress
 
@@ -50,7 +51,6 @@ object BenchmarkDataFactory {
   val esProviderName: String = "test-esprov-1"
   val esServiceName: String = "test-esserv-1"
   val esStreamName: String = "test-es-1"
-  val esChkStreamName: String = "test-es-chk"
 
   val zkServiceName: String = "test-zkserv-1"
 
@@ -130,6 +130,23 @@ object BenchmarkDataFactory {
       client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(parts(0)), parts(1).toInt))
     }
     (client, esService)
+  }
+
+  def clearEsStream() = {
+    val stream = streamService.get(esStreamName).asInstanceOf[ESSjStream]
+    val (client, service) = openDbConnection(stream)
+    val esRequest: SearchResponse = client
+      .prepareSearch(service.index)
+      .setTypes(stream.name)
+      .setSize(2000)
+      .execute()
+      .get()
+    val outputData = esRequest.getHits
+
+    outputData.getHits.foreach { hit =>
+      val id = hit.getId
+      client.prepareDelete(service.index, stream.name, id).execute().actionGet()
+    }
   }
 
   private def createProducer(metadataStorage: MetadataStorage, dataStorage: AerospikeStorage, partitions: Int) = {
@@ -238,6 +255,14 @@ object BenchmarkDataFactory {
     esService.password = ""
     serviceManager.save(esService)
 
+    val client: TransportClient = TransportClient.builder().build()
+    esService.provider.hosts.foreach { host =>
+      val parts = host.split(":")
+      client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(parts(0)), parts(1).toInt))
+    }
+    val createIndexRequest = client.admin().indices().prepareCreate(esService.index)
+    createIndexRequest.execute().actionGet()
+
     val metadataProvider: Provider = providerService.get(metadataProviderName)
     val dataProvider: Provider = providerService.get(dataProviderName)
     val lockProvider: Provider = providerService.get(lockProviderName)
@@ -271,14 +296,6 @@ object BenchmarkDataFactory {
     esStream.service = esService
     esStream.tags = Array("tag1")
     streamService.save(esStream)
-
-    val esChkStream: ESSjStream = new ESSjStream()
-    esChkStream.name = esChkStreamName
-    esChkStream.description = "es stream for benchmarks - checker stream"
-    esChkStream.streamType = "elasticsearch-output"
-    esChkStream.service = esService
-    esChkStream.tags = Array("tag1")
-    streamService.save(esChkStream)
 
     val tService: TStreamService = serviceManager.get(tServiceName).asInstanceOf[TStreamService]
     val tStream: TStreamSjStream = new TStreamSjStream()
@@ -321,7 +338,7 @@ object BenchmarkDataFactory {
     val task1 = new Task()
     task1.inputs = Map(tStreamName -> Array(0, 1)).asJava
     val task2 = new Task()
-    task2.inputs = Map(tStreamName -> Array(2, 4)).asJava
+    task2.inputs = Map(tStreamName -> Array(2, 3)).asJava
     val executionPlan = new ExecutionPlan(Map((instanceName + "-task0", task1), (instanceName + "-task1", task2)).asJava)
 
     val instance = new OutputInstance()

@@ -4,6 +4,7 @@ import java.io.File
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.engine.output.benchmark.BenchmarkDataFactory._
+import com.bwsw.sj.engine.output.benchmark.BenchmarkDataPrepare._
 
 /**
   * Created: 20/06/2016
@@ -12,8 +13,9 @@ import com.bwsw.sj.engine.output.benchmark.BenchmarkDataFactory._
   */
 object BenchmarkDestroyer extends App {
   val instanceName: String = "test-bench-instance"
-  val module = new File("/home/tomskikh_ka/work/Juggler/sj-stub-output-module/target/scala-2.11/sj-stub-output-bench-test.jar")
+  val module = new File(getClass.getClassLoader.getResource("sj-stub-output-bench-test.jar").getPath)
 
+  clearEsStream()
   deleteStreams()
   deleteServices()
   deleteProviders()

@@ -7,4 +7,5 @@ package com.bwsw.sj.engine.core.entities
   */
 
 class EsEntity extends OutputEntity {
+
 }
