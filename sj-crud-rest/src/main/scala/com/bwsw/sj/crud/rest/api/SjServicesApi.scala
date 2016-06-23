@@ -75,15 +75,20 @@ trait SjServicesApi extends Directives with SjCrudValidator {
             complete(HttpEntity(`application/json`, serializer.serialize(response)))
           } ~
           delete {
-            val service = serviceDAO.get(serviceName)
-            var response: ProtocolResponse = null
-            if (service != null) {
-              serviceDAO.delete(serviceName)
-              response = ProtocolResponse(200, Map("message" -> s"Service '$serviceName' has been deleted"))
+            val streams = streamDAO.getAll.filter(s => s.service.name.equals(serviceName))
+            if (streams.isEmpty) {
+              val service = serviceDAO.get(serviceName)
+              var response: ProtocolResponse = null
+              if (service != null) {
+                serviceDAO.delete(serviceName)
+                response = ProtocolResponse(200, Map("message" -> s"Service '$serviceName' has been deleted"))
+              } else {
+                response = ProtocolResponse(200, Map("message" -> s"Service '$serviceName' not found"))
+              }
+              complete(HttpEntity(`application/json`, serializer.serialize(response)))
             } else {
-              response = ProtocolResponse(200, Map("message" -> s"Service '$serviceName' not found"))
+              throw new BadRecordWithKey(s"Cannot delete service $serviceName. Service usage in streams", serviceName)
             }
-            complete(HttpEntity(`application/json`, serializer.serialize(response)))
           }
         }
       }
