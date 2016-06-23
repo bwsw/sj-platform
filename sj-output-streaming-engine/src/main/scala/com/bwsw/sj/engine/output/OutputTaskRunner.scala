@@ -2,6 +2,8 @@ package com.bwsw.sj.engine.output
 
 import java.io.File
 import java.net.InetAddress
+import java.util.UUID
+
 import java.util.concurrent.{ArrayBlockingQueue, Executors}
 
 import com.bwsw.common.JsonSerializer
@@ -9,15 +11,17 @@ import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.DAL.model.{ESService, FileMetadata, SjStream}
 import com.bwsw.sj.common.module.OutputStreamingPerformanceMetrics
-import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.sj.engine.core.entities.{EsEntity, OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
 import com.bwsw.sj.engine.core.utils.EngineUtils._
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
-import com.bwsw.tstreams.agents.producer.{BasicProducerTransaction, ProducerPolicies}
+import com.bwsw.tstreams.agents.producer.{ProducerPolicies, BasicProducerTransaction}
+import com.datastax.driver.core.utils.UUIDs
 import org.elasticsearch.action.index.IndexRequestBuilder
+import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse}
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.transport.InetSocketTransportAddress
+import org.elasticsearch.index.query.QueryBuilders
 import org.slf4j.{Logger, LoggerFactory}
 
 /**
@@ -124,78 +128,83 @@ object OutputTaskRunner {
     val (client, esService) = openDbConnection(outputStream)
 
     instance.checkpointMode match {
-      case "time-interval" =>
-        logger.debug(s"Task: ${OutputDataFactory.taskName}. Start an output module  with time-interval checkpoint mode.")
-        val checkpointTimer = new SjTimer()
-        checkpointTimer.set(instance.checkpointInterval)
-        while (true) {
-          processTransaction(blockingQueue, subscribeConsumer, handler, outputStream, client, esService, performanceMetrics)
-          if (checkpointTimer.isTime) {
-            subscribeConsumer.checkpoint()
-            checkpointTimer.reset()
-            checkpointTimer.set(instance.checkpointInterval)
-          }
-        }
+      //todo пока так
       case "every-nth" =>
         var countOfTxn = 0
+        var isFirstCheckpoint = false
         while (true) {
-          logger.debug(s"Task: ${OutputDataFactory.taskName}. Start an output module with time-interval checkpoint mode.")
-          processTransaction(blockingQueue, subscribeConsumer, handler, outputStream, client, esService, performanceMetrics)
+          logger.debug(s"Task: ${OutputDataFactory.taskName}. Start a output module with every-nth checkpoint mode.")
+
+          logger.info(s"Task: ${OutputDataFactory.taskName}. Get t-stream envelope.")
+          val nextEnvelope: String = blockingQueue.take()
+
+          if (nextEnvelope != null && !nextEnvelope.equals("")) {
+            println("envelope processing...")
+            val tStreamEnvelope = serializer.deserialize[TStreamEnvelope](nextEnvelope)
+            subscribeConsumer.setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
+
+            if (!isFirstCheckpoint) {
+              deleteTransactionFromES(tStreamEnvelope.txnUUID, esService.index, outputStream.name, client)
+            }
+
+            performanceMetrics.addEnvelopeToInputStream(
+              tStreamEnvelope.stream,
+              tStreamEnvelope.data.map(_.length)
+            )
+            val outputEnvelopes: List[OutputEnvelope] = handler.onTransaction(tStreamEnvelope)
+            outputEnvelopes.foreach { (outputEnvelope: OutputEnvelope) =>
+              performanceMetrics.addElementToOutputEnvelope(
+                outputEnvelope.stream,
+                tStreamEnvelope.txnUUID.toString,
+                UUIDs.startOf(outputEnvelope.data.txn).toString.getBytes("UTF8").length
+              )
+              outputEnvelope.streamType match {
+                case "elasticsearch-output" =>
+                  val entity = outputEnvelope.data.asInstanceOf[EsEntity]
+                  writeToElasticsearch(esService.index, outputStream.name, entity, client)
+                case "jdbc-output" => writeToJdbc(outputEnvelope)
+                case _ =>
+              }
+            }
+          }
+
           if (countOfTxn == instance.checkpointInterval) {
+            logger.debug(s"Task: ${OutputDataFactory.taskName}. Checkpoint.")
             subscribeConsumer.checkpoint()
             countOfTxn = 0
+            isFirstCheckpoint = true
           } else {
             countOfTxn += 1
           }
         }
     }
 
-
   }
 
   /**
-   * Read and transform transaction
-   * writing to output datasource
-   *
-   * @param queue Queue with t-stream transactions
-   * @param subscribeConsumer Subscribe consumer for read messages from t-stream
-   * @param handler User handler (executor) of output-streaming module
-   * @param outputStream Output stream
-   * @param client elasticsearch transport client
-   * @param esService elasticsearch service of output stream
-   */
-  def processTransaction(queue: ArrayBlockingQueue[String],
-                         subscribeConsumer: BasicSubscribingConsumer[Array[Byte], Array[Byte]],
-                         handler: OutputStreamingHandler,
-                         outputStream: SjStream,
-                         client: TransportClient,
-                         esService: ESService,
-                         performanceMetrics: OutputStreamingPerformanceMetrics) = {
-    logger.info("")
-    val nextEnvelope: String = queue.take()
-    if (nextEnvelope != null && !nextEnvelope.equals("")) {
-      println("envelope processing...")
-      val tStreamEnvelope = serializer.deserialize[TStreamEnvelope](nextEnvelope)
-      subscribeConsumer.setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
-      performanceMetrics.addEnvelopeToInputStream(
-        tStreamEnvelope.stream,
-        tStreamEnvelope.data.map(_.length)
-      )
-      val outputEnvelopes: List[OutputEnvelope] = handler.onTransaction(tStreamEnvelope)
-      outputEnvelopes.foreach { (outputEnvelope: OutputEnvelope) =>
-        performanceMetrics.addElementToOutputEnvelope(
-          outputEnvelope.stream,
-          tStreamEnvelope.txnUUID.toString,
-          outputEnvelope.data.txn.getBytes("UTF8").length
-        )
-        outputEnvelope.streamType match {
-          case "elasticsearch-output" =>
-            val entity = outputEnvelope.data.asInstanceOf[EsEntity]
-            writeToElasticsearch(esService.index, outputStream.name, entity, client)
-          case "jdbc-output" => writeToJdbc(outputEnvelope)
-          case _ =>
-        }
-      }
+    * Delete transactions from ES stream
+    * from last checkpoint
+    *
+    * @param txn Transaction UUID
+    * @param index ES index
+    * @param documentType ES Stream name
+    * @param client ES Transport client
+    */
+  def deleteTransactionFromES(txn: UUID, index: String, documentType: String, client: TransportClient) = {
+    logger.info(s"Task: ${OutputDataFactory.taskName}. Delete transaction $txn from ES stream.")
+
+    val txnTmstp = UUIDs.unixTimestamp(txn)
+    val request: SearchRequestBuilder = client
+      .prepareSearch(index)
+      .setTypes(documentType)
+      .setQuery(QueryBuilders.matchQuery("txn", txnTmstp))
+      .setSize(2000)
+    val response: SearchResponse = request.execute().get()
+    val outputData = response.getHits
+
+    outputData.getHits.foreach { hit =>
+      val id = hit.getId
+      client.prepareDelete(index, documentType, id).execute().actionGet()
     }
   }
 
@@ -228,9 +237,10 @@ object OutputTaskRunner {
   def writeToElasticsearch(index: String, documentType: String, entity: EsEntity, client: TransportClient) = {
     val esData: String = serializer.serialize(entity)
 
-    val request: IndexRequestBuilder = client.prepareIndex(index, documentType)
+    val request: IndexRequestBuilder = client.prepareIndex(index, documentType, UUID.randomUUID().toString)
     request.setSource(esData)
     request.execute().actionGet()
+
   }
 
   /**

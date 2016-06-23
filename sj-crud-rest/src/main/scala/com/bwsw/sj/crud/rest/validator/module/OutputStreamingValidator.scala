@@ -24,6 +24,10 @@ class OutputStreamingValidator extends StreamingModuleValidator {
     * @return - List of errors and validating instance (null, if errors non empty)
     */
   override def streamOptionsValidate(parameters: InstanceMetadata, specification: ModuleSpecification, errors: ArrayBuffer[String]) = {
+    if (!parameters.checkpointMode.equals("every-nth")) {
+      errors += s"Checkpoint-mode attribute for output-streaming module must be only 'every-nth'."
+    }
+
     var inputStream: SjStream = null
     if (parameters.inputs != null) {
       errors += s"Unknown attribute 'inputs'."
@@ -34,12 +38,17 @@ class OutputStreamingValidator extends StreamingModuleValidator {
         errors += s"Unknown stream mode. Input stream must have modes 'split'."
       }
 
-      inputStream = getStream(parameters.asInstanceOf[OutputInstanceMetadata].input.replaceAll("/split", ""))
-      if (!inputStream.streamType.equals(tStream)) {
-        errors += s"Input streams must be T-stream."
+      val inputStreamName = parameters.asInstanceOf[OutputInstanceMetadata].input.replaceAll("/split", "")
+      inputStream = getStream(inputStreamName)
+      if (inputStream == null) {
+        errors += s"Input stream '$inputStreamName' is not exists."
+      } else {
+        if (!inputStream.streamType.equals(tStream)) {
+          errors += s"Input streams must be T-stream."
+        }
       }
     } else {
-
+      errors += s"Input stream attribute is empty."
     }
 
     var outputStream: SjStream = null
@@ -48,9 +57,13 @@ class OutputStreamingValidator extends StreamingModuleValidator {
     }
     if (parameters.asInstanceOf[OutputInstanceMetadata].output != null) {
       outputStream = getStream(parameters.asInstanceOf[OutputInstanceMetadata].output)
-      val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
-      if (!outputTypes.contains(outputStream.streamType)) {
-        errors += s"Output streams must be in: ${outputTypes.mkString(", ")}."
+      if (inputStream == null) {
+        errors += s"Input stream '${parameters.asInstanceOf[OutputInstanceMetadata].output}' is not exists."
+      } else {
+        val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
+        if (!outputTypes.contains(outputStream.streamType)) {
+          errors += s"Output streams must be in: ${outputTypes.mkString(", ")}."
+        }
       }
     } else {
       errors += s"Output stream attribute is empty."

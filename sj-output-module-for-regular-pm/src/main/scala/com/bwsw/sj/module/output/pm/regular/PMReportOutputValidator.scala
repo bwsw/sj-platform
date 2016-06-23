@@ -3,11 +3,11 @@ package com.bwsw.sj.module.output.pm.regular
 import com.bwsw.sj.common.module.StreamingValidator
 
 /**
-  * Created: 27/05/16
+  * Created: 23/06/16
   *
-  * @author Kseniya Tomskikh
+  * @author Kseniya Mikhaleva
   */
-class StubOutputValidator extends StreamingValidator {
+class PMReportOutputValidator extends StreamingValidator {
   override def validate(options: Map[String, Any]): Boolean = {
     options.nonEmpty
   }
