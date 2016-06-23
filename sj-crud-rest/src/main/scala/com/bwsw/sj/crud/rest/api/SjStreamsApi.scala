@@ -5,6 +5,7 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.common.exceptions.BadRecordWithKey
 import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.crud.rest.entities._
 import com.bwsw.sj.crud.rest.utils.ConvertUtil.streamToStreamData
@@ -112,15 +113,25 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
             complete(HttpEntity(`application/json`, serializer.serialize(response)))
           } ~
           delete {
-            val stream = streamDAO.get(streamName)
-            var response: ProtocolResponse = null
-            if (stream != null) {
-              streamDAO.delete(streamName)
-              response = ProtocolResponse(200, Map("message" -> s"Stream '$streamName' has been deleted"))
-            } else {
-              response = ProtocolResponse(200, Map("message" -> s"Stream '$streamName' not found"))
+
+            val instances = instanceDAO.getAll.filter { (inst: Instance) =>
+              inst.inputs.map(_.replaceAll("/split|/full", "")).contains(streamName) || inst.outputs.contains(streamName)
             }
-            complete(HttpEntity(`application/json`, serializer.serialize(response)))
+
+            if (instances.isEmpty) {
+              val stream = streamDAO.get(streamName)
+
+              var response: ProtocolResponse = null
+              if (stream != null) {
+                streamDAO.delete(streamName)
+                response = ProtocolResponse(200, Map("message" -> s"Stream '$streamName' has been deleted"))
+              } else {
+                response = ProtocolResponse(200, Map("message" -> s"Stream '$streamName' not found"))
+              }
+              complete(HttpEntity(`application/json`, serializer.serialize(response)))
+            } else {
+              throw new BadRecordWithKey(s"Cannot delete stream $streamName. Stream usage in instances", streamName)
+            }
           }
         }
       }
