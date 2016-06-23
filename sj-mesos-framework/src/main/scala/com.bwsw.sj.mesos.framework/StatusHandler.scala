@@ -15,9 +15,7 @@ object StatusHandler {
     logger.info(s"STATUS UPDATE")
 
     if (status != null) {
-      if (status.getState.toString != "TASK_RUNNING") {
-        TasksList.usedPorts(status.getSlaveId.getValue).remove(status.getTaskId.getValue)
-      }
+
       TasksList(status.getTaskId.getValue).foreach(task => task.update(
         state = status.getState.toString,
         state_changed = status.getTimestamp.toLong * 1000,
