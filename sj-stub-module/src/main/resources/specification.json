@@ -28,6 +28,6 @@
   "options": {
     "opt": 1
   },
-  "validator-class": "com.bwsw.sj.stub.Validator",
-  "executor-class": "com.bwsw.sj.stub.Executor"
+  "validator-class": "com.bwsw.sj.module.regular.stub.Validator",
+  "executor-class": "com.bwsw.sj.module.regular.stub.Executor"
 }
