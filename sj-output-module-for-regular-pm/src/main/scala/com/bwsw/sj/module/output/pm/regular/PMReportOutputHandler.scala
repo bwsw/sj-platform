@@ -7,12 +7,11 @@ import com.bwsw.sj.module.output.pm.regular.data.PerformanceMetrics
 import com.datastax.driver.core.utils.UUIDs
 
 /**
-  * Handler for work with t-stream envelopes
-  * Executor trait for output-streaming module
+  * Handler for work with performance metrics t-stream envelopes
   *
-  * Created: 27/05/16
+  * Created: 23/06/2016
   *
-  * @author Kseniya Tomskikh
+  * @author Kseniya Mikhaleva
   */
 class PMReportOutputHandler extends OutputStreamingHandler {
   val jsonSerializer = new JsonSerializer()
