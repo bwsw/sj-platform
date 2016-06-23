@@ -206,7 +206,7 @@ class RegularStreamingPerformanceMetrics(taskId: String, host: String, inputStre
 
     logger.debug(s"Reset variables for performance report for next reporting\n")
     inputEnvelopesPerStream = mutable.Map(inputStreamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
-    outputEnvelopesPerStream = mutable.Map(inputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
+    outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
     totalIdleTime = 0L
     numberOfStateVariables = 0
 
