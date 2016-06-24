@@ -11,6 +11,7 @@ import java.util.concurrent.locks.ReentrantLock
 import com.bwsw.common.JsonSerializer
 import org.slf4j.LoggerFactory
 import scala.collection._
+import scala.collection.mutable.ListBuffer
 
 abstract class PerformanceMetrics(taskId: String, host: String, inputStreamNames: Array[String], outputStreamNames: Array[String]) {
   protected val logger = LoggerFactory.getLogger(this.getClass)
@@ -56,8 +57,8 @@ abstract class PerformanceMetrics(taskId: String, host: String, inputStreamNames
       if (outputEnvelopesPerStream(name).contains(envelopeID)) {
         outputEnvelopesPerStream(name)(envelopeID) += elementSize
       } else {
-        logger.error(s"Output stream with name: $name doesn't contain txn: $envelopeID\n")
-        throw new Exception(s"Output stream with name: $name doesn't contain txn: $envelopeID")
+        logger.debug(s"Output stream with name: $name doesn't contain txn: $envelopeID\n")
+        outputEnvelopesPerStream(name) += (envelopeID -> ListBuffer(elementSize))
       }
     } else {
       logger.error(s"Output stream with name: $name doesn't exist\n")

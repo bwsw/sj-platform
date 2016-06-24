@@ -1,4 +1,4 @@
-package com.bwsw.sj.module.output.pm.regular.data
+package com.bwsw.sj.module.output.pm.data
 
 import com.bwsw.sj.engine.core.entities.EsEntity
 import com.fasterxml.jackson.annotation.JsonProperty
