@@ -293,7 +293,7 @@ class TaskManager() {
         case _type =>
           val service = stream.asInstanceOf[TStreamSjStream].generator.service.asInstanceOf[ZKService]
           val zkHosts = service.provider.hosts
-          val prefix = service.namespace + "/" + {
+          val prefix = service.namespace + "/" + { //todo: make a decision
             if (_type == "global") _type else stream.name
           }
 
@@ -392,7 +392,7 @@ class TaskManager() {
         case _type =>
           val service = stream.asInstanceOf[TStreamSjStream].generator.service.asInstanceOf[ZKService]
           val zkServers = service.provider.hosts
-          val prefix = service.namespace + "/" + {
+          val prefix = service.namespace + "/" + { //todo: make a decision
             if (_type == "global") _type else basicStream.name
           }
 

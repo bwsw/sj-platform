@@ -28,6 +28,6 @@
   "options": {
     "opt": 1
   },
-  "validator-class": "com.bwsw.sj.module.output.pm.regular.StubOutputValidator",
-  "executor-class": "com.bwsw.sj.module.output.pm.regular.StubOutputHandler"
+  "validator-class": "com.bwsw.sj.module.output.pm.regular.PMReportOutputValidator",
+  "executor-class": "com.bwsw.sj.module.output.pm.regular.PMReportOutputHandler"
 }
