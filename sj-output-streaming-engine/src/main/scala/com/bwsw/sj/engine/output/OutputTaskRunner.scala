@@ -152,7 +152,7 @@ object OutputTaskRunner {
             subscribeConsumer.setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
 
             if (!isFirstCheckpoint) {
-              deleteTransactionFromES(tStreamEnvelope.txnUUID, esService.index, outputStream.name, client)
+              deleteTransactionFromES(tStreamEnvelope.txnUUID.toString.replaceAll("-", ""), esService.index, outputStream.name, client)
             }
 
             performanceMetrics.addEnvelopeToInputStream(
@@ -169,6 +169,9 @@ object OutputTaskRunner {
               outputEnvelope.streamType match {
                 case "elasticsearch-output" =>
                   val entity = outputEnvelope.data.asInstanceOf[EsEntity]
+                  entity.txn = tStreamEnvelope.txnUUID.toString.replaceAll("-", "")
+                  entity.stream = tStreamEnvelope.stream
+                  entity.partition = tStreamEnvelope.partition
                   writeToElasticsearch(esService.index, outputStream.name, entity, client)
                 case "jdbc-output" => writeToJdbc(outputEnvelope)
                 case _ =>
@@ -198,17 +201,15 @@ object OutputTaskRunner {
    * @param documentType ES Stream name
    * @param client ES Transport client
    */
-  def deleteTransactionFromES(txn: UUID, index: String, documentType: String, client: TransportClient) = {
+  def deleteTransactionFromES(txn: String, index: String, documentType: String, client: TransportClient) = {
     logger.info(s"Task: ${OutputDataFactory.taskName}. Delete transaction $txn from ES stream.")
 
     val isIndexExist = client.admin().indices().prepareExists(index).execute().actionGet()
     if (isIndexExist.isExists) {
-
-      val txnTmstp = UUIDs.unixTimestamp(txn)
       val request: SearchRequestBuilder = client
         .prepareSearch(index)
         .setTypes(documentType)
-        .setQuery(QueryBuilders.matchQuery("txn", txnTmstp))
+        .setQuery(QueryBuilders.matchQuery("txn", txn))
         .setSize(2000)
       val response: SearchResponse = request.execute().get()
       val outputData = response.getHits

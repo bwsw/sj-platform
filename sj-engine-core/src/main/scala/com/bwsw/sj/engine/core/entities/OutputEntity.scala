@@ -7,6 +7,8 @@ package com.bwsw.sj.engine.core.entities
   */
 class OutputEntity extends Serializable{
 
-  var txn: Long = 0
+  var txn: String = null
+  var stream: String = null
+  var partition: Int = 0
 
 }

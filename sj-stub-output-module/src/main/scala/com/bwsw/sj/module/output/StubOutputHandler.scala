@@ -27,8 +27,6 @@ class StubOutputHandler extends OutputStreamingHandler {
   def onTransaction(envelope: TStreamEnvelope): List[OutputEnvelope] = {
     val list = envelope.data.map { row =>
       val data: StubEsData = new StubEsData
-      val txnUUID = UUIDs.unixTimestamp(envelope.txnUUID)
-      data.txn = txnUUID
 
       val value = objectSerializer.deserialize(row).asInstanceOf[Int]
       data.value = value
