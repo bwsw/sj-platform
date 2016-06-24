@@ -184,8 +184,7 @@ object RegularTaskRunner {
         offsetProducer,
         checkpointGroup,
         performanceMetrics)
-    }
-    catch {
+    } catch {
       case exception: Exception => {
         exception.printStackTrace()
         executorService.shutdownNow()
