@@ -201,19 +201,23 @@ object OutputTaskRunner {
   def deleteTransactionFromES(txn: UUID, index: String, documentType: String, client: TransportClient) = {
     logger.info(s"Task: ${OutputDataFactory.taskName}. Delete transaction $txn from ES stream.")
 
-    val txnTmstp = UUIDs.unixTimestamp(txn)
-    val request: SearchRequestBuilder = client
-      .prepareSearch(index)
-      .setTypes(documentType)
-      .setQuery(QueryBuilders.matchQuery("txn", txnTmstp))
-      .setSize(2000)
-    val response: SearchResponse = request.execute().get()
-    val outputData = response.getHits
+    val isIndexExist = client.admin().indices().prepareExists(index).execute().actionGet()
+    if (isIndexExist.isExists) {
 
-    outputData.getHits.foreach { hit =>
-      val id = hit.getId
-      client.prepareDelete(index, documentType, id).execute().actionGet()
+      val txnTmstp = UUIDs.unixTimestamp(txn)
+      val request: SearchRequestBuilder = client
+        .prepareSearch(index)
+        .setTypes(documentType)
+        .setQuery(QueryBuilders.matchQuery("txn", txnTmstp))
+        .setSize(2000)
+      val response: SearchResponse = request.execute().get()
+      val outputData = response.getHits
 
+      outputData.getHits.foreach { hit =>
+        val id = hit.getId
+        client.prepareDelete(index, documentType, id).execute().actionGet()
+
+      }
     }
   }
 
