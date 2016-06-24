@@ -147,7 +147,7 @@ object OutputTaskRunner {
           val nextEnvelope: String = blockingQueue.take()
 
           if (nextEnvelope != null && !nextEnvelope.equals("")) {
-            println("envelope processing...")
+            logger.debug(s"Task: ${OutputDataFactory.taskName}. Envelope processing...")
             val tStreamEnvelope = serializer.deserialize[TStreamEnvelope](nextEnvelope)
             subscribeConsumer.setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
 
