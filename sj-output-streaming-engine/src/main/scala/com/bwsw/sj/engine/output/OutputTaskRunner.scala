@@ -4,7 +4,7 @@ import java.io.File
 import java.net.InetAddress
 import java.util.concurrent.{ArrayBlockingQueue, Executors}
 
-import com.bwsw.common.JsonSerializer
+import com.bwsw.common.{ObjectSerializer, JsonSerializer}
 import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.DAL.model.{ESService, FileMetadata, SjStream}
@@ -29,6 +29,7 @@ import org.slf4j.{Logger, LoggerFactory}
 object OutputTaskRunner {
   private val logger: Logger = LoggerFactory.getLogger(this.getClass)
   private val executorService = Executors.newCachedThreadPool()
+  private val objectSerializer = new ObjectSerializer()
 
   val serializer: Serializer = new JsonSerializer
 
@@ -185,8 +186,8 @@ object OutputTaskRunner {
       outputEnvelopes.foreach { (outputEnvelope: OutputEnvelope) =>
         performanceMetrics.addElementToOutputEnvelope(
           outputEnvelope.stream,
-          tStreamEnvelope.txnUUID.toString,
-          outputEnvelope.data.txn.getBytes("UTF8").length
+          outputEnvelope.data.txn.toString,
+          objectSerializer.serialize(outputEnvelope.data).length
         )
         outputEnvelope.streamType match {
           case "elasticsearch-output" =>
