@@ -72,26 +72,28 @@ trait SjModulesApi extends Directives with SjCrudValidator {
           ))
         }
       } ~
-      pathSuffix("instances") {
-        get {
-          val allInstances = instanceDAO.getAll
+      pathPrefix("instances") {
+        pathEndOrSingleSlash {
+          get {
+            val allInstances = instanceDAO.getAll
 
-          var response: ProtocolResponse = null
-          if (allInstances.isEmpty) {
-            response = ProtocolResponse(200, Map("message" -> "Instances have not been found"))
-          } else {
-            val entity = Map("instances" -> allInstances.map(x => ShortInstanceMetadata(x.name,
-              x.moduleType,
-              x.moduleName,
-              x.moduleVersion,
-              x.description,
-              x.status)))
-            response = ProtocolResponse(200, entity)
+            var response: ProtocolResponse = null
+            if (allInstances.isEmpty) {
+              response = ProtocolResponse(200, Map("message" -> "Instances have not been found"))
+            } else {
+              val entity = Map("instances" -> allInstances.map(x => ShortInstanceMetadata(x.name,
+                x.moduleType,
+                x.moduleName,
+                x.moduleVersion,
+                x.description,
+                x.status)))
+              response = ProtocolResponse(200, entity)
+            }
+            complete(HttpEntity(
+              `application/json`,
+              serializer.serialize(response)
+            ))
           }
-          complete(HttpEntity(
-            `application/json`,
-            serializer.serialize(response)
-          ))
         }
       } ~
       pathPrefix(Segment) { (moduleType: String) =>

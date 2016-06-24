@@ -163,7 +163,7 @@ object OutputTaskRunner {
             outputEnvelopes.foreach { (outputEnvelope: OutputEnvelope) =>
               performanceMetrics.addElementToOutputEnvelope(
                 outputStream.name,
-                outputEnvelope.data.txn.toString,
+                tStreamEnvelope.txnUUID.toString,
                 objectSerializer.serialize(outputEnvelope.data).length
               )
               outputEnvelope.streamType match {
