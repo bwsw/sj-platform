@@ -10,7 +10,7 @@ import com.bwsw.common.{ObjectSerializer, JsonSerializer}
 import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.DAL.model.{ESService, FileMetadata, SjStream}
-import com.bwsw.sj.common.module.OutputStreamingPerformanceMetrics
+import com.bwsw.sj.common.module.{OutputStreamingPerformanceMetrics}
 import com.bwsw.sj.engine.core.entities.{EsEntity, OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
 import com.bwsw.sj.engine.core.utils.EngineUtils._
@@ -255,3 +255,4 @@ object OutputTaskRunner {
   }
 
 }
+

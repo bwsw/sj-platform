@@ -5,7 +5,7 @@ package com.bwsw.sj.engine.core.entities
   *
   * @author Kseniya Tomskikh
   */
-class OutputEntity {
+class OutputEntity extends Serializable{
 
   var txn: Long = 0
 
