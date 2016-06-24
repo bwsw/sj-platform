@@ -162,7 +162,7 @@ object OutputTaskRunner {
             val outputEnvelopes: List[OutputEnvelope] = handler.onTransaction(tStreamEnvelope)
             outputEnvelopes.foreach { (outputEnvelope: OutputEnvelope) =>
               performanceMetrics.addElementToOutputEnvelope(
-                outputEnvelope.stream,
+                outputStream.name,
                 outputEnvelope.data.txn.toString,
                 objectSerializer.serialize(outputEnvelope.data).length
               )

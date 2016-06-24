@@ -1,4 +1,4 @@
-package com.bwsw.sj.module.output.pm.regular
+package com.bwsw.sj.module.output.pm
 
 import com.bwsw.sj.common.module.StreamingValidator
 
