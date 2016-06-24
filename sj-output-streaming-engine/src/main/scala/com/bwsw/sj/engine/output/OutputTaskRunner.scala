@@ -97,13 +97,20 @@ object OutputTaskRunner {
     })
 
     logger.info(s"Task: ${OutputDataFactory.taskName}. Preparing finished. Launch task.")
-    runModule(instance,
-      blockingQueue,
-      subscribeConsumer,
-      taskManager,
-      handler,
-      outputStream,
-      performanceMetrics)
+    try {
+      runModule(instance,
+        blockingQueue,
+        subscribeConsumer,
+        taskManager,
+        handler,
+        outputStream,
+        performanceMetrics)
+    } catch {
+      case e: Exception =>
+        e.printStackTrace()
+        executorService.shutdownNow()
+        System.exit(-1)
+    }
 
   }
 
