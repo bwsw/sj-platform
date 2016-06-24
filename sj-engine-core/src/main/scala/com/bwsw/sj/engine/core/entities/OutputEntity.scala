@@ -1,11 +1,11 @@
 package com.bwsw.sj.engine.core.entities
 
 /**
-  * Created: 5/27/16
+  * Created: 27/05/2016
   *
   * @author Kseniya Tomskikh
   */
-class OutputEntity extends Serializable{
+class OutputEntity extends Serializable {
 
   var txn: String = null
   var stream: String = null
