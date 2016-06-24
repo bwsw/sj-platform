@@ -5,7 +5,8 @@ version := "1.0"
 scalaVersion := "2.11.7"
 
 libraryDependencies ++= Seq(
-  "org.elasticsearch" % "elasticsearch" % "2.3.2"
+  "org.elasticsearch" % "elasticsearch" % "2.3.2",
+  "org.slf4j" % "slf4j-simple" % "1.7.21"
 )
 assemblyMergeStrategy in assembly := {
   case PathList("scala-xml.properties") => MergeStrategy.first
