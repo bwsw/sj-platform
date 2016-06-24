@@ -353,7 +353,7 @@ class TaskManager() {
       useLastOffset = true)
 
     new BasicConsumer[Array[Byte], Array[Byte]](
-      "consumer for " + taskName + "_" + stream.name,
+      "consumer_for_" + taskName + "_" + stream.name,
       basicStream,
       options
     )
