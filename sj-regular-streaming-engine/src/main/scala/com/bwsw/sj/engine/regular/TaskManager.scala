@@ -313,7 +313,7 @@ class TaskManager() {
     val callback = new RegularConsumerCallback[Array[Byte], Array[Byte]](queue)
 
     new BasicSubscribingConsumer[Array[Byte], Array[Byte]](
-      "consumer for " + taskName + "_" + stream.name,
+      "consumer_for_" + taskName + "_" + stream.name,
       basicStream,
       options,
       coordinatorSettings,
@@ -410,7 +410,7 @@ class TaskManager() {
       converter)
 
     new BasicProducer[Array[Byte], Array[Byte]](
-      "producer for " + taskName + "_" + stream.name,
+      "producer_for_" + taskName + "_" + stream.name,
       basicStream,
       options
     )
