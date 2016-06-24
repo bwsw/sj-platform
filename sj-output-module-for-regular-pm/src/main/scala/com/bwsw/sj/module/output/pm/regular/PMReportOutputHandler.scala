@@ -4,16 +4,16 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
 import com.bwsw.sj.module.output.pm.regular.data.PerformanceMetrics
+import com.datastax.driver.core.utils.UUIDs
 
 /**
-  * Handler for work with t-stream envelopes
-  * Executor trait for output-streaming module
+  * Handler for work with performance metrics t-stream envelopes
   *
-  * Created: 27/05/16
+  * Created: 23/06/2016
   *
-  * @author Kseniya Tomskikh
+  * @author Kseniya Mikhaleva
   */
-class StubOutputHandler extends OutputStreamingHandler {
+class PMReportOutputHandler extends OutputStreamingHandler {
   val jsonSerializer = new JsonSerializer()
 
   /**
@@ -25,7 +25,7 @@ class StubOutputHandler extends OutputStreamingHandler {
   def onTransaction(envelope: TStreamEnvelope): List[OutputEnvelope] = {
     val list = envelope.data.map { rawPM =>
       val data: PerformanceMetrics = jsonSerializer.deserialize[PerformanceMetrics](new String(rawPM))
-      data.txn = envelope.txnUUID.toString
+      data.txn = UUIDs.unixTimestamp(envelope.txnUUID)
       val outputEnvelope = new OutputEnvelope
       outputEnvelope.data = data
       outputEnvelope.streamType = "elasticsearch-output"

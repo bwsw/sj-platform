@@ -31,3 +31,4 @@ assemblyMergeStrategy in assembly := {
 }
 
 assemblyJarName in assembly := "mesos-framework.jar"
+target in assembly := file("/home/diryavkin_dn/toserve")

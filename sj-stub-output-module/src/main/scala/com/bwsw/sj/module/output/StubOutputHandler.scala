@@ -1,8 +1,10 @@
 package com.bwsw.sj.module.output
 
+import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
 import com.bwsw.sj.module.output.data.StubEsData
+import com.datastax.driver.core.utils.UUIDs
 
 /**
   * Handler for work with t-stream envelopes
@@ -14,6 +16,8 @@ import com.bwsw.sj.module.output.data.StubEsData
   */
 class StubOutputHandler extends OutputStreamingHandler {
 
+  val objectSerializer = new ObjectSerializer()
+
   /**
     * Transform t-stream transaction to output entities
     *
@@ -23,8 +27,12 @@ class StubOutputHandler extends OutputStreamingHandler {
   def onTransaction(envelope: TStreamEnvelope): List[OutputEnvelope] = {
     val list = envelope.data.map { row =>
       val data: StubEsData = new StubEsData
-      data.txn = envelope.txnUUID.toString
-      data.str = new String(row)
+      val txnUUID = UUIDs.unixTimestamp(envelope.txnUUID)
+      data.txn = txnUUID
+
+      val value = objectSerializer.deserialize(row).asInstanceOf[Int]
+      data.value = value
+
       val outputEnvelope = new OutputEnvelope
       outputEnvelope.data = data
       outputEnvelope.streamType = "elasticsearch-output"

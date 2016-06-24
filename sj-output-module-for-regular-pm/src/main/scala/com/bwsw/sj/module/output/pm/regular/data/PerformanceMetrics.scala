@@ -4,9 +4,9 @@ import com.bwsw.sj.engine.core.entities.EsEntity
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
-  * Created: 27/05/2016
+  * Created: 23/06/2016
   *
-  * @author Kseniya Tomskikh
+  * @author Kseniya Mikhaleva
   */
 class PerformanceMetrics extends EsEntity {
   var datetime: String = null

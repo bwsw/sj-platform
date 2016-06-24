@@ -7,6 +7,6 @@ package com.bwsw.sj.engine.core.entities
   */
 class OutputEntity {
 
-  var txn: String = null
+  var txn: Long = 0
 
 }

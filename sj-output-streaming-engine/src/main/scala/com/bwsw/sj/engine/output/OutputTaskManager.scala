@@ -65,20 +65,7 @@ class OutputTaskManager(taskName: String, instance: OutputInstance) {
       new InetSocketAddress(parts(0), parts(1).toInt)
     }.toList
 
-    val startPort: Int = OutputDataFactory.agentsPorts.head.toInt
-    val endPort: Int = OutputDataFactory.agentsPorts(1).toInt
-    var agentPort: Int = 0
-    val ports: List[Int] = startPort until endPort toList
-    var portIsFound = false
-    var i = 0
-    while (!portIsFound) {
-      val checkPort = ports(i)
-      if (!EngineUtils.portIsOpen(OutputDataFactory.agentHost, checkPort)) {
-        agentPort = checkPort
-        portIsFound = true
-      }
-      i += 1
-    }
+    val agentPort: Int = OutputDataFactory.agentsPorts.head.toInt
 
     val agentAddress = OutputDataFactory.agentHost + ":" + agentPort.toString
 
@@ -130,7 +117,7 @@ class OutputTaskManager(taskName: String, instance: OutputInstance) {
     val service = stream.service.asInstanceOf[TStreamService]
 
     val coordinationOptions = new ProducerCoordinationOptions(
-      agentAddress = OutputDataFactory.agentHost + ":" + OutputDataFactory.agentsPorts(2), //todo: number of agent port
+      agentAddress = OutputDataFactory.agentHost + ":" + OutputDataFactory.agentsPorts(1), //todo: number of agent port
       OutputDataFactory.zkHosts,
       service.lockNamespace,
       OutputDataFactory.zkTimeout,
