@@ -6,7 +6,7 @@ import java.util.UUID
 
 import java.util.concurrent.{ArrayBlockingQueue, Executors}
 
-import com.bwsw.common.JsonSerializer
+import com.bwsw.common.{ObjectSerializer, JsonSerializer}
 import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.DAL.model.{ESService, FileMetadata, SjStream}
@@ -33,6 +33,7 @@ import org.slf4j.{Logger, LoggerFactory}
 object OutputTaskRunner {
   private val logger: Logger = LoggerFactory.getLogger(this.getClass)
   private val executorService = Executors.newCachedThreadPool()
+  private val objectSerializer = new ObjectSerializer()
 
   val serializer: Serializer = new JsonSerializer
 
@@ -162,8 +163,8 @@ object OutputTaskRunner {
             outputEnvelopes.foreach { (outputEnvelope: OutputEnvelope) =>
               performanceMetrics.addElementToOutputEnvelope(
                 outputEnvelope.stream,
-                tStreamEnvelope.txnUUID.toString,
-                UUIDs.startOf(outputEnvelope.data.txn).toString.getBytes("UTF8").length
+                outputEnvelope.data.txn.toString,
+                objectSerializer.serialize(outputEnvelope.data).length
               )
               outputEnvelope.streamType match {
                 case "elasticsearch-output" =>
@@ -189,14 +190,14 @@ object OutputTaskRunner {
   }
 
   /**
-    * Delete transactions from ES stream
-    * from last checkpoint
-    *
-    * @param txn Transaction UUID
-    * @param index ES index
-    * @param documentType ES Stream name
-    * @param client ES Transport client
-    */
+   * Delete transactions from ES stream
+   * from last checkpoint
+   *
+   * @param txn Transaction UUID
+   * @param index ES index
+   * @param documentType ES Stream name
+   * @param client ES Transport client
+   */
   def deleteTransactionFromES(txn: UUID, index: String, documentType: String, client: TransportClient) = {
     logger.info(s"Task: ${OutputDataFactory.taskName}. Delete transaction $txn from ES stream.")
 
@@ -212,6 +213,7 @@ object OutputTaskRunner {
     outputData.getHits.foreach { hit =>
       val id = hit.getId
       client.prepareDelete(index, documentType, id).execute().actionGet()
+
     }
   }
 
