@@ -35,7 +35,7 @@ object BenchmarkDataPrepare extends App {
 
   println("create test data")
   Thread.sleep(30000)
-  createData(6, 5)
+  createData(50, 20)
 
   println("close connections")
   close()

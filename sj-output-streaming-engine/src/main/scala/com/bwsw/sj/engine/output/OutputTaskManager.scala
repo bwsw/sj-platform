@@ -71,7 +71,7 @@ class OutputTaskManager(taskName: String, instance: OutputInstance) {
 
     val coordinatorSettings = new SubscriberCoordinationOptions(
       agentAddress,
-      s"${service.lockNamespace}", //todo: make a decision
+      s"/${service.lockNamespace}", //todo: make a decision
       zkHosts,
       OutputDataFactory.zkTimeout
     )
@@ -119,7 +119,7 @@ class OutputTaskManager(taskName: String, instance: OutputInstance) {
     val coordinationOptions = new ProducerCoordinationOptions(
       agentAddress = OutputDataFactory.agentHost + ":" + OutputDataFactory.agentsPorts(1), //todo: number of agent port
       OutputDataFactory.zkHosts,
-      service.lockNamespace,
+      "/" + service.lockNamespace,
       OutputDataFactory.zkTimeout,
       isLowPriorityToBeMaster = false,
       transport = new TcpTransport,
@@ -137,7 +137,7 @@ class OutputTaskManager(taskName: String, instance: OutputInstance) {
         case _type =>
           val service = stream.asInstanceOf[TStreamSjStream].generator.service.asInstanceOf[ZKService]
           val zkServers = service.provider.hosts
-          val prefix = service.namespace + "/" + {
+          val prefix = "/" + service.namespace + "/" + {
             if (_type == "global") _type else basicStream.name
           }
 

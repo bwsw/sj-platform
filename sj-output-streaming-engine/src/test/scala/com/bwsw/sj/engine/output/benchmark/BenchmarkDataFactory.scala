@@ -255,14 +255,6 @@ object BenchmarkDataFactory {
     esService.password = ""
     serviceManager.save(esService)
 
-    val client: TransportClient = TransportClient.builder().build()
-    esService.provider.hosts.foreach { host =>
-      val parts = host.split(":")
-      client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(parts(0)), parts(1).toInt))
-    }
-    val createIndexRequest = client.admin().indices().prepareCreate(esService.index)
-    createIndexRequest.execute().actionGet()
-
     val metadataProvider: Provider = providerService.get(metadataProviderName)
     val dataProvider: Provider = providerService.get(dataProviderName)
     val lockProvider: Provider = providerService.get(lockProviderName)
