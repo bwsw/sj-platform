@@ -31,8 +31,7 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
         val dstAs = GeoIp.resolveAs(sflow("dstIP"))
         var prefixAsToAs = s"$srcAs-$dstAs"
         if (!state.isExist(s"traffic-sum-$srcAs")) state.set(s"traffic-sum-$srcAs", 0)
-        if (state.isExist(s"traffic-sum-between-$dstAs-$srcAs")) prefixAsToAs = s"$dstAs-$srcAs"
-        else if (!state.isExist(s"traffic-sum-between-$srcAs-$dstAs")) state.set(s"traffic-sum-between-$srcAs-$dstAs", 0)
+        if (!state.isExist(s"traffic-sum-between-$srcAs-$dstAs")) state.set(s"traffic-sum-between-$srcAs-$dstAs", 0)
 
         val bandwidth = sflow("packetSize").toInt * sflow("samplingRate").toInt
 
