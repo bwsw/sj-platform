@@ -3,20 +3,18 @@ package com.bwsw.sj.engine.output
 import java.io.File
 import java.net.InetAddress
 import java.util.UUID
-
 import java.util.concurrent.{ArrayBlockingQueue, Executors}
 
-import com.bwsw.common.{ObjectSerializer, JsonSerializer}
 import com.bwsw.common.traits.Serializer
+import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.DAL.model.{ESService, FileMetadata, SjStream}
-import com.bwsw.sj.common.module.{OutputStreamingPerformanceMetrics}
+import com.bwsw.sj.common.module.OutputStreamingPerformanceMetrics
 import com.bwsw.sj.engine.core.entities.{EsEntity, OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
 import com.bwsw.sj.engine.core.utils.EngineUtils._
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
-import com.bwsw.tstreams.agents.producer.{ProducerPolicies, BasicProducerTransaction}
-import com.datastax.driver.core.utils.UUIDs
+import com.bwsw.tstreams.agents.producer.{BasicProducerTransaction, ProducerPolicies}
 import org.elasticsearch.action.index.IndexRequestBuilder
 import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse}
 import org.elasticsearch.client.transport.TransportClient
@@ -143,10 +141,11 @@ object OutputTaskRunner {
         while (true) {
           logger.debug(s"Task: ${OutputDataFactory.taskName}. Start a output module with every-nth checkpoint mode.")
 
-          logger.info(s"Task: ${OutputDataFactory.taskName}. Get t-stream envelope.")
           val nextEnvelope: String = blockingQueue.take()
 
           if (nextEnvelope != null && !nextEnvelope.equals("")) {
+            logger.info(s"Task: ${OutputDataFactory.taskName}. Get t-stream envelope.")
+            countOfTxn += 1
             logger.debug(s"Task: ${OutputDataFactory.taskName}. Envelope processing...")
             val tStreamEnvelope = serializer.deserialize[TStreamEnvelope](nextEnvelope)
             subscribeConsumer.setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
@@ -184,8 +183,6 @@ object OutputTaskRunner {
             subscribeConsumer.checkpoint()
             countOfTxn = 0
             isFirstCheckpoint = true
-          } else {
-            countOfTxn += 1
           }
         }
     }

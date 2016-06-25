@@ -293,7 +293,7 @@ class TaskManager() {
         case _type =>
           val service = stream.asInstanceOf[TStreamSjStream].generator.service.asInstanceOf[ZKService]
           val zkHosts = service.provider.hosts
-          val prefix = service.namespace + "/" + { //todo: make a decision
+          val prefix = "/" + service.namespace + "/" + {
             if (_type == "global") _type else stream.name
           }
 
@@ -373,7 +373,7 @@ class TaskManager() {
     val coordinationOptions = new ProducerCoordinationOptions(
       agentAddress = agentsHost + ":" + agentsPorts(currentPortNumber),
       zkHosts,
-      service.lockNamespace,
+      "/" + service.lockNamespace,
       zkTimeout,
       isLowPriorityToBeMaster = false,
       transport = new TcpTransport,
@@ -392,7 +392,7 @@ class TaskManager() {
         case _type =>
           val service = stream.asInstanceOf[TStreamSjStream].generator.service.asInstanceOf[ZKService]
           val zkServers = service.provider.hosts
-          val prefix = service.namespace + "/" + { //todo: make a decision
+          val prefix = "/" + service.namespace + "/" + {
             if (_type == "global") _type else basicStream.name
           }
 

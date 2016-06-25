@@ -71,7 +71,7 @@ class OutputTaskManager(taskName: String, instance: OutputInstance) {
 
     val coordinatorSettings = new SubscriberCoordinationOptions(
       agentAddress,
-      s"/${service.lockNamespace}", //todo: make a decision
+      s"/${service.lockNamespace}",
       zkHosts,
       OutputDataFactory.zkTimeout
     )

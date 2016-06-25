@@ -120,7 +120,7 @@ object DataFactory {
     serviceManager.save(kafkaService)
 
     val tstrqService = new TStreamService("tstream_test_service", "TstrQ", "tstream test service",
-      cassProv, cassandraTestKeyspace, cassProv, cassandraTestKeyspace, zkProv, "/unit")
+      cassProv, cassandraTestKeyspace, cassProv, cassandraTestKeyspace, zkProv, "unit")
     serviceManager.save(tstrqService)
   }
 
