@@ -2,6 +2,7 @@ package com.bwsw.sj.crud.rest.runner
 
 import com.bwsw.sj.common.DAL.model.module.Instance
 import org.apache.http.util.EntityUtils
+import org.slf4j.LoggerFactory
 
 /**
   * One-thread stopper object for instance
@@ -11,10 +12,13 @@ import org.apache.http.util.EntityUtils
   * @author Kseniya Tomskikh
   */
 class InstanceStopper(instance: Instance, delay: Long) extends Runnable {
+  private val logger = LoggerFactory.getLogger(getClass.getName)
+
   import com.bwsw.sj.common.ModuleConstants._
   import InstanceMethods._
 
   def run() = {
+    logger.debug(s"Instance: ${instance.name}. Stop instance.")
     stageUpdate(instance, instance.name, stopping)
     val stopResult = stopApplication(instance.name)
     if (stopResult.getStatusLine.getStatusCode == OK) {
@@ -36,6 +40,7 @@ class InstanceStopper(instance: Instance, delay: Long) extends Runnable {
           //todo error?
         }
       }
+      logger.debug(s"Instance: ${instance.name}. Instance is stopped.")
     } else {
       //todo error?
     }

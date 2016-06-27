@@ -13,6 +13,7 @@ import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.crud.rest.entities.MarathonRequest
 import org.apache.http.client.methods.{HttpDelete, HttpGet, HttpPost, HttpPut}
 import org.apache.http.entity.StringEntity
+import org.slf4j.LoggerFactory
 
 /**
   * Instance methods for starting/stopping/scaling/destroying
@@ -22,6 +23,8 @@ import org.apache.http.entity.StringEntity
   * @author Kseniya Tomskikh
   */
 object InstanceMethods {
+  private val logger = LoggerFactory.getLogger(getClass.getName)
+
   import scala.collection.JavaConversions._
 
   val serializer: Serializer = new JsonSerializer
@@ -64,6 +67,7 @@ object InstanceMethods {
     * @return - Response from marathon
     */
   def getMesosInfo = {
+    logger.debug(s"Getting ZK mesos master")
     val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/info")
     val httpGet = new HttpGet(url.toString)
@@ -77,6 +81,7 @@ object InstanceMethods {
     * @return - Response from marathon
     */
   def startApplication(request: MarathonRequest) = {
+    logger.debug(s"Start application on mesos. Request: ${serializer.serialize(request)}")
     val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/apps")
     val httpPost = new HttpPost(url.toString)
@@ -93,7 +98,7 @@ object InstanceMethods {
     * @return - Response from marathon
     */
   def getTaskInfo(taskId: String) = {
-    //logger.debug(s"getting task info $taskId")
+    logger.debug(s"Getting task info $taskId")
     val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/apps/$taskId?force=true")
     val httpGet = new HttpGet(url.toString)
@@ -108,7 +113,7 @@ object InstanceMethods {
     * @return - Response from marathon
     */
   def scaleApplication(taskId: String, count: Int) = {
-    //logger.debug(s"scale task $taskId to count $count")
+    logger.debug(s"Scale task $taskId to count $count")
     val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/apps/$taskId?force=true")
     val httpPut = new HttpPut(url.toString)
@@ -125,7 +130,7 @@ object InstanceMethods {
     * @return - Response from marathon
     */
   def descaleApplication(taskId: String) = {
-    //logger.debug(s"Descaling application $taskId")
+    logger.debug(s"Descaling application $taskId")
     scaleApplication(taskId, 0)
   }
 
@@ -136,6 +141,7 @@ object InstanceMethods {
     * @return - Response from marathon
     */
   def destroyApplication(taskId: String) = {
+    logger.debug(s"Destroying application $taskId")
     val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/apps/$taskId")
     val httpDelete = new HttpDelete(url.toString)
@@ -149,6 +155,7 @@ object InstanceMethods {
     * @return - Response from marathon
     */
   def stopApplication(taskId: String) = {
+    logger.debug(s"Stopping application $taskId")
     descaleApplication(taskId)
   }
 
@@ -160,6 +167,7 @@ object InstanceMethods {
     * @param state - New (or old) state for stage
     */
   def stageUpdate(instance: Instance, stageName: String, state: String) = {
+    logger.debug(s"Update stage $stageName of instance ${instance.name} to state $state")
     val stage = instance.stages.get(stageName)
     if (stage.state.equals(state)) {
       stage.duration = Calendar.getInstance().getTime.getTime - stage.datetime.getTime
@@ -178,6 +186,7 @@ object InstanceMethods {
     * @param instance - Instance for updating
     */
   def updateInstanceStages(instance: Instance) = {
+    logger.debug(s"Update stages of instance ${instance.name}")
     instance.stages.keySet().foreach { key =>
       val stage = instance.stages.get(key)
       stageUpdate(instance, key, stage.state)

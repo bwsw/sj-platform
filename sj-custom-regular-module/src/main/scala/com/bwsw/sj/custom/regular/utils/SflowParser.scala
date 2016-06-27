@@ -8,7 +8,16 @@ object SflowParser {
 
   def parse(serializedSflow: Array[Byte])= {
     val maybeSflow = new String(serializedSflow).split(",")
-    if (maybeSflow.length == fieldNames.length) Some(fieldNames.zip(maybeSflow).toMap)
-    else None
+    if (maybeSflow.length == fieldNames.length) {
+      val sflowRec = fieldNames.zip(maybeSflow).toMap
+      val srcIP = sflowRec.get("srcIP").get
+      val dstIP = sflowRec.get("dstIP").get
+
+      if (srcIP.matches(""".*?(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3}).*""") &&
+        dstIP.matches(""".*?(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3}).*""")) {
+        Some(sflowRec)
+      } else None
+
+    } else None
   }
 }

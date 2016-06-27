@@ -3,6 +3,7 @@ package com.bwsw.sj.crud.rest.runner
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{SjStream, TStreamSjStream}
 import com.bwsw.sj.common.StreamConstants
+import org.slf4j.LoggerFactory
 
 /**
   * One-thread deleting object for instance
@@ -12,14 +13,18 @@ import com.bwsw.sj.common.StreamConstants
   * @author Kseniya Tomskikh
   */
 class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable {
+  private val logger = LoggerFactory.getLogger(getClass.getName)
+
   import InstanceMethods._
   import com.bwsw.sj.common.ModuleConstants._
 
   def run() = {
+    logger.debug(s"Instance: ${instance.name}. Destroy instance.")
     stageUpdate(instance, instance.name, deleting)
     deleteGenerators(instance)
     deleteInstance(instance)
     instanceDAO.delete(instance.name)
+    logger.debug(s"Instance: ${instance.name}. Instance is deleted.")
   }
 
   /**
@@ -30,6 +35,7 @@ class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable {
     * @return - Response from marathon
     */
   def deleteGenerators(instance: Instance) = {
+    logger.debug(s"Instance: ${instance.name}. Deleting generators.")
     val allStreams = instance.inputs.map(_.replaceAll("/split|/full", "")).union(instance.outputs).map(streamDAO.get)
     val startedInstances = instanceDAO.getByParameters(Map("status" -> started))
     val startingInstance = startedInstances.union(instanceDAO.getByParameters(Map("status" -> starting)))
@@ -56,6 +62,7 @@ class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable {
       val taskId = createGeneratorTaskName(stream.asInstanceOf[TStreamSjStream])
       val taskInfoResponse = getTaskInfo(taskId)
       if (taskInfoResponse.getStatusLine.getStatusCode != NotFound) {
+        logger.debug(s"Instance: ${instance.name}. Delete generator: $taskId.")
         val stopResponse = destroyApplication(taskId)
         if (stopResponse.getStatusLine.getStatusCode == OK) {
           while (!isTaskDeleted) {
@@ -84,6 +91,7 @@ class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable {
     * @param instance - Instance for deleting
     */
   def deleteInstance(instance: Instance) = {
+    logger.debug(s"Instance: ${instance.name}. Delete instance application.")
     var isInstanceDeleted = false
     //todo maybe add timeout and retry count?
     while (!isInstanceDeleted) {

@@ -14,6 +14,7 @@ import com.twitter.common.quantity.{Amount, Time}
 import com.twitter.common.zookeeper.DistributedLock.LockingException
 import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
 import org.apache.http.util.EntityUtils
+import org.slf4j.LoggerFactory
 
 /**
   * One-thread starting object for instance
@@ -29,10 +30,12 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
 
   import scala.collection.JavaConverters._
 
-  private  val configService = ConnectionRepository.getConfigService
+  private val logger = LoggerFactory.getLogger(getClass.getName)
+  private val configService = ConnectionRepository.getConfigService
   private val zkSessionTimeout = configService.get(ConfigConstants.zkSessionTimeoutTag).value.toInt
 
   def run() = {
+    logger.debug(s"Instance: ${instance.name}. Start instance.")
     try {
       val mesosInfoResponse = getMesosInfo
       if (mesosInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
@@ -66,15 +69,21 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
         val stages = Map(instance.stages.asScala.toList: _*)
         if (!stages.exists(s => !s._1.equals(instance.name) && s._2.state.equals(failed))) {
           instanceStart(mesosMaster)
+          logger.debug(s"Instance: ${instance.name}. Instance is started.")
         } else {
+          logger.debug(s"Instance: ${instance.name}. Failed instance.")
           instance.status = failed
         }
         distributedLock.unlock()
       } else {
+        logger.debug(s"Instance: ${instance.name}. Failed instance.")
         instance.status = failed
       }
     } catch {
-      case e: Exception => instance.status = failed
+      case e: Exception =>
+        logger.debug(s"Instance: ${instance.name}. Failed instance.")
+        logger.debug(e.getMessage)
+        instance.status = failed
     }
     instanceDAO.save(instance)
   }
@@ -83,6 +92,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
     * Starting of instance if all generators is started
     */
   def instanceStart(mesosMaster: String) = {
+    logger.debug(s"Instance: ${instance.name}. Instance is starting.")
     stageUpdate(instance, instance.name, starting)
     val startFrameworkResult = frameworkStart(mesosMaster)
     var isStarted = false
@@ -105,6 +115,9 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
             stageUpdate(instance, instance.name, starting)
           }
         }
+      } else {
+        instance.status = failed
+        stageUpdate(instance, instance.name, failed)
       }
       case Left(isRunning) =>
         if (!isRunning) {
@@ -124,6 +137,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
     *         (true, if framework running on mesos)
     */
   def frameworkStart(mesosMaster: String) = {
+    logger.debug(s"Instance: ${instance.name}. Start framework for instance.")
     val frameworkJarName = configService.get("system" + "." + configService.get(frameworkTag).value).value
     val restUrl = new URI(s"$restAddress/v1/custom/$frameworkJarName")
     val taskInfoResponse = getTaskInfo(instance.name)
@@ -165,8 +179,8 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
     */
   def startGenerators(streams: Set[TStreamSjStream]) = {
     streams.foreach { stream =>
-      //logger.debug(s"Try starting generator $generatorName")
       val generatorName = stream.name
+      logger.debug(s"Instance: ${instance.name}. Try starting generator $generatorName.")
       val stage = instance.stages.get(generatorName)
       if (stage.state.equals(toHandle) || stage.state.equals(failed)) {
         var isStarted = false
@@ -208,6 +222,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
     * @return - Future with response from request to marathon
     */
   def startGenerator(stream: TStreamSjStream) = {
+    logger.debug(s"Instance: ${instance.name}. Start generator for stream ${stream.name}.")
     val transactionGeneratorJar = configService.get(
       configService.get(transactionGeneratorTag).value
     ).value
@@ -236,12 +251,14 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
       val entity = serializer.deserialize[MarathonRequest](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
       serializer.setIgnoreUnknown(ignore)
       if (entity.instances < marathonRequest.instances) {
+        logger.debug(s"Instance: ${instance.name}. Scaling generator ${marathonRequest.id}.")
         Right(scaleApplication(marathonRequest.id, marathonRequest.instances))
       } else {
-        //logger.debug(s"Generator ${marathonRequest.id} already started")
+        logger.debug(s"Instance: ${instance.name}. Generator ${marathonRequest.id} already started.")
         Left(s"Generator $taskId is already created")
       }
     } else {
+      logger.debug(s"Instance: ${instance.name}. Generator ${marathonRequest.id} is starting.")
       Right(startApplication(marathonRequest))
     }
   }
