@@ -3,7 +3,7 @@ package com.bwsw.sj.custom.regular
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.custom.regular.udf.GeoIp
 import com.bwsw.sj.custom.regular.utils.SflowParser
-import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.entities.{TStreamEnvelope, Envelope, KafkaEnvelope}
 import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.state.StateStorage
@@ -26,23 +26,25 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
 
     envelope match {
       case kafkaEnvelope: KafkaEnvelope =>
-        val sflow = SflowParser.parse(kafkaEnvelope.data)
-        val srcAs = GeoIp.resolveAs(sflow("srcIP"))
-        val dstAs = GeoIp.resolveAs(sflow("dstIP"))
-        val prefixAsToAs = s"$srcAs-$dstAs"
-        if (!state.isExist(s"traffic-sum-$srcAs")) state.set(s"traffic-sum-$srcAs", 0)
-        if (!state.isExist(s"traffic-sum-between-$srcAs-$dstAs")) state.set(s"traffic-sum-between-$srcAs-$dstAs", 0)
+        val maybeSflow = SflowParser.parse(kafkaEnvelope.data)
+        if (maybeSflow.isDefined) {
+          val sflow = maybeSflow.get
+          val srcAs = GeoIp.resolveAs(sflow("srcIP"))
+          val dstAs = GeoIp.resolveAs(sflow("dstIP"))
+          val prefixAsToAs = s"$srcAs-$dstAs"
+          if (!state.isExist(s"traffic-sum-$srcAs")) state.set(s"traffic-sum-$srcAs", 0)
+          if (!state.isExist(s"traffic-sum-between-$srcAs-$dstAs")) state.set(s"traffic-sum-between-$srcAs-$dstAs", 0)
 
-        val bandwidth = sflow("packetSize").toInt * sflow("samplingRate").toInt
+          val bandwidth = sflow("packetSize").toInt * sflow("samplingRate").toInt
 
-        var trafficSum = state.get(s"traffic-sum-$srcAs").asInstanceOf[Int]
-        trafficSum += bandwidth
-        state.set(s"traffic-sum-$srcAs", trafficSum)
+          var trafficSum = state.get(s"traffic-sum-$srcAs").asInstanceOf[Int]
+          trafficSum += bandwidth
+          state.set(s"traffic-sum-$srcAs", trafficSum)
 
-        var trafficSumBetweenAs = state.get(s"traffic-sum-between-$prefixAsToAs").asInstanceOf[Int]
-        trafficSumBetweenAs += bandwidth
-        state.set(s"traffic-sum-between-$prefixAsToAs", trafficSumBetweenAs)
-
+          var trafficSumBetweenAs = state.get(s"traffic-sum-between-$prefixAsToAs").asInstanceOf[Int]
+          trafficSumBetweenAs += bandwidth
+          state.set(s"traffic-sum-between-$prefixAsToAs", trafficSumBetweenAs)
+        }
       case tstreamEnvelope: TStreamEnvelope =>
         println("t-stream envelope is received")
     }
