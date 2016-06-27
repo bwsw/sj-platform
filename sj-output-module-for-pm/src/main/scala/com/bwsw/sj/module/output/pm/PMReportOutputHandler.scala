@@ -1,6 +1,6 @@
 package com.bwsw.sj.module.output.pm
 
-import com.bwsw.common.JsonSerializer
+import com.bwsw.common.{ObjectSerializer, JsonSerializer}
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
 import com.bwsw.sj.module.output.pm.data.PerformanceMetrics
@@ -14,6 +14,7 @@ import com.bwsw.sj.module.output.pm.data.PerformanceMetrics
  */
 class PMReportOutputHandler extends OutputStreamingHandler {
   val jsonSerializer = new JsonSerializer()
+  val objectSerializer = new ObjectSerializer()
 
   /**
    * Transform t-stream transaction to output entities
@@ -23,7 +24,8 @@ class PMReportOutputHandler extends OutputStreamingHandler {
    */
   def onTransaction(envelope: TStreamEnvelope): List[OutputEnvelope] = {
     val list = envelope.data.map { rawPM =>
-      val data: PerformanceMetrics = jsonSerializer.deserialize[PerformanceMetrics](new String(rawPM))
+      val performanceMetrics = objectSerializer.deserialize(rawPM).asInstanceOf[String]
+      val data: PerformanceMetrics = jsonSerializer.deserialize[PerformanceMetrics](performanceMetrics)
       val outputEnvelope = new OutputEnvelope
       outputEnvelope.data = data
       outputEnvelope.streamType = "elasticsearch-output"

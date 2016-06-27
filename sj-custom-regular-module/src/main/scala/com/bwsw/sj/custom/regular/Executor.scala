@@ -29,7 +29,7 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
         val sflow = SflowParser.parse(kafkaEnvelope.data)
         val srcAs = GeoIp.resolveAs(sflow("srcIP"))
         val dstAs = GeoIp.resolveAs(sflow("dstIP"))
-        var prefixAsToAs = s"$srcAs-$dstAs"
+        val prefixAsToAs = s"$srcAs-$dstAs"
         if (!state.isExist(s"traffic-sum-$srcAs")) state.set(s"traffic-sum-$srcAs", 0)
         if (!state.isExist(s"traffic-sum-between-$srcAs-$dstAs")) state.set(s"traffic-sum-between-$srcAs-$dstAs", 0)
 
@@ -65,14 +65,10 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
     val outputForAsToAs = manager.getRoundRobinOutput("src-as-to-as-traffic-sum")
     val timestamp = System.currentTimeMillis / 1000
     val (sourceAsTrafficSum, sourceAsToAsTrafficSum) = state.getAll.partition(x => !x._1.contains("traffic-sum-between"))
-    sourceAsTrafficSum.map(x => timestamp + "," + x._1.replace("traffic-sum-", "") + "," + x._2.toString).foreach(println)
+    sourceAsTrafficSum.map(x => timestamp + "," + x._1.replace("traffic-sum-", "") + "," + x._2.toString).foreach(x => outputForAs.put(objectSerializer.serialize(x)))
     sourceAsToAsTrafficSum
       .map(x => timestamp + "," + x._1.replace("traffic-sum-between-", "").split("-").mkString(",") + "," + x._2.toString)
-      .foreach(println)
-    //    sourceAsTrafficSum.map(x => timestamp + "," + x._1.replace("traffic-sum-", "") + "," + x._2.toString).foreach(x => outputForAs.put(objectSerializer.serialize(x)))
-    //    sourceAsToAsTrafficSum
-    //      .map(x => timestamp + "," + x._1.replace("traffic-sum-between-", "").split("-").mkString(",") + "," + x._2.toString)
-    //      .foreach(x => outputForAsToAs.put(objectSerializer.serialize(x)))
+      .foreach(x => outputForAsToAs.put(objectSerializer.serialize(x)))
   }
 
   override def onIdle(): Unit = {

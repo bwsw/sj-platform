@@ -75,6 +75,7 @@ object OutputTaskRunner {
 
     logger.debug(s"Task: ${OutputDataFactory.taskName}. Launch a new thread to report performance metrics \n")
     executorService.execute(new Runnable() {
+      val objectSerializer = new ObjectSerializer()
       def run() = {
         val taskNumber = OutputDataFactory.taskName.replace(s"${OutputDataFactory.instanceName}-task", "").toInt
         var report: String = null
@@ -87,7 +88,7 @@ object OutputTaskRunner {
           logger.debug(s"Task: ${OutputDataFactory.taskName}. Create a new txn for sending performance metrics\n")
           reportTxn = reportProducer.newTransaction(ProducerPolicies.errorIfOpen, taskNumber)
           logger.debug(s"Task: ${OutputDataFactory.taskName}. Send performance metrics\n")
-          reportTxn.send(report.getBytes)
+          reportTxn.send(objectSerializer.serialize(report))
           logger.debug(s"Task: ${OutputDataFactory.taskName}. Do checkpoint of producer for performance reporting\n")
           reportProducer.checkpoint()
         }
