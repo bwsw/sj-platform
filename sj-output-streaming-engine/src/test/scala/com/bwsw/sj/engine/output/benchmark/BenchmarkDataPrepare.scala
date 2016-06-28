@@ -13,7 +13,7 @@ import com.bwsw.sj.engine.output.benchmark.BenchmarkDataFactory._
 object BenchmarkDataPrepare extends App {
 
   val instanceName: String = "test-bench-instance"
-  val checkpointInterval = 2
+  val checkpointInterval = 3
   val checkpointMode = "every-nth"
   val partitions = 4
 
@@ -23,7 +23,6 @@ object BenchmarkDataPrepare extends App {
 
   println("cassandra prepare")
   prepareCassandra("bench")
-  Thread.sleep(30000)
   println("create providers")
   createProviders()
   println("create services")
@@ -34,7 +33,6 @@ object BenchmarkDataPrepare extends App {
   createInstance(instanceName, checkpointMode, checkpointInterval)
 
   println("create test data")
-  Thread.sleep(30000)
   createData(50, 20)
 
   println("close connections")

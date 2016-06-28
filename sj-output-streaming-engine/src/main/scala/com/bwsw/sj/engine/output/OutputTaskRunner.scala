@@ -2,7 +2,8 @@ package com.bwsw.sj.engine.output
 
 import java.io.File
 import java.net.InetAddress
-import java.util.UUID
+import java.time.{ZoneOffset, LocalDateTime}
+import java.util.{Calendar, UUID}
 import java.util.concurrent.{ArrayBlockingQueue, Executors}
 
 import com.bwsw.common.traits.Serializer
@@ -10,11 +11,12 @@ import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.DAL.model.{ESService, FileMetadata, SjStream}
 import com.bwsw.sj.common.module.OutputStreamingPerformanceMetrics
-import com.bwsw.sj.engine.core.entities.{EsEntity, OutputEnvelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.entities.{OutputEntity, EsEntity, OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
 import com.bwsw.sj.engine.core.utils.EngineUtils._
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.producer.{BasicProducerTransaction, ProducerPolicies}
+import com.datastax.driver.core.utils.UUIDs
 import org.elasticsearch.action.index.IndexRequestBuilder
 import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse}
 import org.elasticsearch.client.transport.TransportClient
@@ -61,6 +63,8 @@ object OutputTaskRunner {
     val moduleMetadata: FileMetadata = OutputDataFactory.getFileMetadata
     val handler: OutputStreamingHandler = taskManager.getModuleHandler(moduleJar, moduleMetadata.specification.executorClass)
 
+    val entity: OutputEntity = taskManager.getOutputModuleEntity(moduleJar, moduleMetadata.specification.entityClass)
+
     logger.debug(s"Task: ${OutputDataFactory.taskName}. Start creating a t-stream producer to record performance reports\n")
     val reportStream = OutputDataFactory.getReportStream
     val reportProducer = taskManager.createProducer(reportStream)
@@ -102,6 +106,7 @@ object OutputTaskRunner {
         subscribeConsumer,
         taskManager,
         handler,
+        entity,
         outputStream,
         performanceMetrics)
     } catch {
@@ -127,12 +132,14 @@ object OutputTaskRunner {
                 subscribeConsumer: BasicSubscribingConsumer[Array[Byte], Array[Byte]],
                 taskManager: OutputTaskManager,
                 handler: OutputStreamingHandler,
+                outputModuleEntity: OutputEntity,
                 outputStream: SjStream,
                 performanceMetrics: OutputStreamingPerformanceMetrics) = {
     logger.debug(s"Task: ${OutputDataFactory.taskName}. Launch subscribing consumer.")
     subscribeConsumer.start()
 
     val (client, esService) = openDbConnection(outputStream)
+    createEsStream(esService.index, outputStream.name, outputModuleEntity, client)
 
     instance.checkpointMode match {
       //todo пока так
@@ -169,6 +176,8 @@ object OutputTaskRunner {
               outputEnvelope.streamType match {
                 case "elasticsearch-output" =>
                   val entity = outputEnvelope.data.asInstanceOf[EsEntity]
+                  entity.outputDateTime = s"${Calendar.getInstance().getTimeInMillis}"
+                  entity.txnDateTime = s"${UUIDs.unixTimestamp(tStreamEnvelope.txnUUID)}"
                   entity.txn = tStreamEnvelope.txnUUID.toString.replaceAll("-", "")
                   entity.stream = tStreamEnvelope.stream
                   entity.partition = tStreamEnvelope.partition
@@ -253,6 +262,43 @@ object OutputTaskRunner {
     request.setSource(esData)
     request.execute().actionGet()
 
+  }
+
+  /**
+    * Create document type with mapping in elasticsearch
+    *
+    * @param index ES service index
+    * @param streamName ES document type
+    * @param entity User module output entity object
+    * @param client ES Transport client
+    * @return ES Response
+    */
+  def createEsStream(index: String, streamName: String, entity: OutputEntity, client: TransportClient) = {
+    println(entity.getDateFields().mkString(", "))
+
+    val isIndexExist = client.admin().indices().prepareExists(index).execute().actionGet()
+    if (!isIndexExist.isExists) {
+      client.admin().indices().prepareCreate(index).execute().actionGet()
+    }
+
+
+    val fields = scala.collection.mutable.Map("txn" -> Map("type" -> "string"),
+      "stream" -> Map("type" -> "string"),
+      "partition" -> Map("type" -> "integer"))
+    val dateFields: Array[String] = entity.getDateFields()
+    dateFields.foreach { field =>
+      fields.put(field, Map("type" -> "date", "format" -> "epoch_millis"))
+    }
+    val mapping = Map("properties" -> fields)
+    val mappingJson = serializer.serialize(mapping)
+    println(mappingJson)
+
+    client.admin().indices()
+      .preparePutMapping(index)
+      .setType(streamName)
+      .setSource(mappingJson)
+      .execute()
+      .actionGet()
   }
 
   /**

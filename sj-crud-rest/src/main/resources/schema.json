@@ -94,6 +94,10 @@
     "executor-class": {
       "description": "The absolute path to class that is responsible for a running of module",
       "type": "string"
+    },
+    "entity-class": {
+      "description": "The absolute path to class that is responsible for a data entity of module",
+      "type": "string"
     }
   },
   "required": [
