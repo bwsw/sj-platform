@@ -2,7 +2,8 @@ package com.bwsw.sj.engine.output
 
 import java.io.File
 import java.net.InetAddress
-import java.util.UUID
+import java.time.{ZoneOffset, LocalDateTime}
+import java.util.{Calendar, UUID}
 import java.util.concurrent.{ArrayBlockingQueue, Executors}
 
 import com.bwsw.common.traits.Serializer
@@ -169,6 +170,7 @@ object OutputTaskRunner {
               outputEnvelope.streamType match {
                 case "elasticsearch-output" =>
                   val entity = outputEnvelope.data.asInstanceOf[EsEntity]
+                  entity.txnDateTime = s"${Calendar.getInstance().getTimeInMillis}"
                   entity.txn = tStreamEnvelope.txnUUID.toString.replaceAll("-", "")
                   entity.stream = tStreamEnvelope.stream
                   entity.partition = tStreamEnvelope.partition
