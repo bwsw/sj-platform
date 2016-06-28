@@ -252,7 +252,7 @@ class ScalaScheduler extends Scheduler {
     this.perTaskCores = instance.perTaskCores
     this.perTaskMem = instance.perTaskRam
     instance.moduleType match {
-      case "output-streaming" => perTaskPortsCount = 1
+      case "output-streaming" => perTaskPortsCount = 2
       case "regular-streaming" => perTaskPortsCount = instance.inputs.length+instance.outputs.length+4
     }
     logger.info(s"Got instance")
