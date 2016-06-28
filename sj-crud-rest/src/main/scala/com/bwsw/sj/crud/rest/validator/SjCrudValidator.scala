@@ -100,6 +100,10 @@ trait SjCrudValidator {
       ) {
         throw new Exception("Specification.json for output-streaming has incorrect params!")
       }
+
+      if (specification.get("entity-class").isEmpty) {
+        throw new Exception("Specification.json for output-streaming hasn't 'entity-class' param!")
+      }
     }
     specification
   }
