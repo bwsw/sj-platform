@@ -1,6 +1,9 @@
 package com.bwsw.sj.module.output.data
 
+import java.util.Date
+
 import com.bwsw.sj.engine.core.entities.EsEntity
+import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
   * Created: 27/05/2016
@@ -8,5 +11,12 @@ import com.bwsw.sj.engine.core.entities.EsEntity
   * @author Kseniya Tomskikh
   */
 class StubEsData extends EsEntity {
+  @JsonProperty("test-date") var testDate: Date = null
   var value: Int = 0
+
+  override def getDateFields(): Array[String] = {
+    val fields = super.getDateFields().toBuffer
+    fields.append("test-date")
+    fields.toArray
+  }
 }

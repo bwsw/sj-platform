@@ -9,6 +9,7 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.ModuleConstants._
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
+import com.bwsw.sj.engine.core.entities.OutputEntity
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
 import com.bwsw.sj.engine.core.utils.EngineUtils
 import com.bwsw.sj.engine.output.subscriber.OutputSubscriberCallback
@@ -173,5 +174,19 @@ class OutputTaskManager(taskName: String, instance: OutputInstance) {
     val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
     val clazz = loader.loadClass(handlerClassName)
     clazz.newInstance().asInstanceOf[OutputStreamingHandler]
+  }
+
+  /**
+    * Getting instance of entity object from output module jar
+    *
+    * @param file Jar of module
+    * @param entityClassName Classname of entity class of module
+    * @return Entity instance from jar
+    */
+  def getOutputModuleEntity(file: File, entityClassName: String) = {
+    logger.info(s"Getting entity object from jar of file: ${instance.moduleType}-${instance.moduleName}-${instance.moduleVersion}")
+    val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
+    val clazz = loader.loadClass(entityClassName)
+    clazz.newInstance().asInstanceOf[OutputEntity]
   }
 }

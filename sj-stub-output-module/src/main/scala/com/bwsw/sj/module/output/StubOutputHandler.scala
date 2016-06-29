@@ -1,5 +1,7 @@
 package com.bwsw.sj.module.output
 
+import java.util.Calendar
+
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
@@ -30,6 +32,7 @@ class StubOutputHandler extends OutputStreamingHandler {
 
       val value = objectSerializer.deserialize(row).asInstanceOf[Int]
       data.value = value
+      data.testDate = Calendar.getInstance().getTime
 
       val outputEnvelope = new OutputEnvelope
       outputEnvelope.data = data
