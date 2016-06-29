@@ -12,8 +12,10 @@ import com.bwsw.sj.common.module.reporting.RegularStreamingPerformanceMetrics
 import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.sj.common.{ModuleConstants, StreamConstants}
 import com.bwsw.sj.engine.core.PersistentBlockingQueue
-import com.bwsw.sj.engine.core.entities.KafkaEnvelope
-import com.bwsw.sj.engine.core.environment.ModuleOutput
+import com.bwsw.sj.engine.core.entities.{TStreamEnvelope, Envelope, KafkaEnvelope}
+import com.bwsw.sj.engine.core.environment.{StatefulModuleEnvironmentManager, ModuleEnvironmentManager, ModuleOutput}
+import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
+import com.bwsw.sj.engine.core.state.{StateStorage, RAMStateService}
 import com.bwsw.tstreams.agents.consumer.Offsets.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.group.CheckpointGroup
