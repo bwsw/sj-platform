@@ -1,4 +1,4 @@
-package com.bwsw.sj.common.module
+package com.bwsw.sj.common.module.reporting
 
 /**
  * Class represents a set of metrics that characterize performance of module
@@ -6,10 +6,12 @@ package com.bwsw.sj.common.module
  * @author Kseniya Mikhaleva
  */
 
-import java.time.LocalDateTime
+import java.util.Calendar
 import java.util.concurrent.locks.ReentrantLock
+
 import com.bwsw.common.JsonSerializer
 import org.slf4j.LoggerFactory
+
 import scala.collection._
 import scala.collection.mutable.ListBuffer
 
@@ -91,7 +93,7 @@ class OutputStreamingPerformanceMetrics(taskId: String, host: String, inputStrea
 
     val performanceReport =
       s"""{
-         |"datetime" : "${LocalDateTime.now()}",
+         |"pm-datetime" : "${Calendar.getInstance().getTimeInMillis}",
          |"task-id" : "$taskId",
          |"host" : "$host",
          |"input-stream-name" : "$inputStreamName",
@@ -176,7 +178,7 @@ class RegularStreamingPerformanceMetrics(taskId: String, host: String, inputStre
 
     val performanceReport =
       s"""{
-         |"datetime" : "${LocalDateTime.now()}",
+         |"pm-datetime" : "${Calendar.getInstance().getTime}",
          |"task-id" : "$taskId",
          |"host" : "$host",
          |"total-idle-time" : $totalIdleTime,
