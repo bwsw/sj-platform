@@ -1,6 +1,8 @@
 package com.bwsw.sj.module.output.sflow
 
-import com.bwsw.common.{ObjectSerializer, JsonSerializer}
+import java.util.Date
+
+import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
 import com.bwsw.sj.module.output.sflow.data.TrafficMetrics
@@ -26,11 +28,11 @@ class SflowOutputHandler extends OutputStreamingHandler {
     val list = envelope.data.map { bytes =>
       val data = new TrafficMetrics()
       val rawData = objectSerializer.deserialize(bytes).asInstanceOf[String].split(",")
-      data.ts = rawData(0).toLong
+      data.ts = new Date(rawData(0).toLong)
       data.srcAs = rawData(1).toInt
       data.trafficSum = rawData.last.toLong
       if (rawData.length == 4) {
-         data.dstAs = rawData(2).toInt
+        data.dstAs = rawData(2)
       }
       val outputEnvelope = new OutputEnvelope
       outputEnvelope.data = data
