@@ -139,7 +139,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
   def frameworkStart(mesosMaster: String) = {
     logger.debug(s"Instance: ${instance.name}. Start framework for instance.")
     val frameworkJarName = configService.get("system" + "." + configService.get(frameworkTag).value).value
-    val restUrl = new URI(s"$restAddress/v1/custom/$frameworkJarName")
+    val restUrl = new URI(s"$restAddress/v1/custom/jars/$frameworkJarName")
     val taskInfoResponse = getTaskInfo(instance.name)
     if (taskInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
       val ignore = serializer.getIgnoreUnknown()
@@ -236,7 +236,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
       prefix += "/global"
     }
 
-    val restUrl = new URI(s"$restAddress/v1/custom/$transactionGeneratorJar")
+    val restUrl = new URI(s"$restAddress/v1/custom/jars/$transactionGeneratorJar")
 
     val marathonRequest = MarathonRequest(taskId,
       "java -jar " + transactionGeneratorJar + " $PORT",

@@ -1,18 +1,23 @@
 package com.bwsw.sj.crud.rest.api
 
-import java.io.File
+import java.io.{FileOutputStream, File}
 
+import akka.http.scaladsl.model.Multipart.FormData.BodyPart
 import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Disposition`}
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.stream.scaladsl.Source
+import akka.util.ByteString
 import com.bwsw.common.exceptions.BadRecordWithKey
 import com.bwsw.sj.common.DAL.model.ConfigSetting
 import com.bwsw.sj.crud.rest.entities.ProtocolResponse
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import org.apache.commons.io.FileUtils
+
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
 /**
  * Rest-api for custom jars
@@ -25,20 +30,21 @@ trait SjCustomApi extends Directives with SjCrudValidator {
 
   val customApi = {
     pathPrefix("custom") {
-      pathPrefix(Segment) { (name: String) =>
-        pathEndOrSingleSlash {
-          get {
-            val jarFile = storage.get(name, s"tmp/rest/$name")
-            if (jarFile != null && jarFile.exists()) {
-              complete(HttpResponse(
-                headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> name))),
-                entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
-              ))
-            } else {
-              throw new BadRecordWithKey(s"Jar '$name' not found", name)
+      pathPrefix("jars") {
+        pathPrefix(Segment) { (name: String) =>
+          pathEndOrSingleSlash {
+            get {
+              val jarFile = storage.get(name, s"tmp/rest/$name")
+              if (jarFile != null && jarFile.exists()) {
+                complete(HttpResponse(
+                  headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> name))),
+                  entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
+                ))
+              } else {
+                throw new BadRecordWithKey(s"Jar '$name' not found", name)
+              }
             }
-          }
-        } ~
+          } ~
           pathSuffix(Segment) { (version: String) =>
             pathEndOrSingleSlash {
               val fileMetadatas = fileMetadataDAO.getByParameters(Map("specification.name" -> name, "specification.version" -> version))
@@ -74,7 +80,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
               }
             }
           }
-      } ~
+        } ~
         pathEndOrSingleSlash {
           post {
             uploadedFile("jar") {
@@ -96,24 +102,116 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                 ))
             }
           } ~
-            get {
-              val files = fileMetadataDAO.getByParameters(Map("filetype" -> "custom"))
-              var response: ProtocolResponse = null
-              if (files.nonEmpty) {
-                val entity = Map("custom-jars" -> files.map(metadata =>
-                  Map("name" -> metadata.specification.name,
+          get {
+            val files = fileMetadataDAO.getByParameters(Map("filetype" -> "custom"))
+            var response: ProtocolResponse = null
+            if (files.nonEmpty) {
+              val entity = Map("custom-jars" -> files.map(metadata =>
+                Map("name" -> metadata.specification.name,
                   "version" -> metadata.specification.version))
-                )
-                response = ProtocolResponse(200, entity)
-              } else {
-                response = ProtocolResponse(200, Map("message" -> s"Uploaded custom jars have not been found."))
+              )
+              response = ProtocolResponse(200, entity)
+            } else {
+              response = ProtocolResponse(200, Map("message" -> s"Uploaded custom jars have not been found."))
+            }
+            complete(HttpEntity(
+              `application/json`,
+              serializer.serialize(response)
+            ))
+          }
+        }
+      } ~
+      pathPrefix("files") {
+        pathEndOrSingleSlash {
+          post {
+            entity(as[Multipart.FormData]) { (entity: Multipart.FormData) =>
+              val parts: Source[BodyPart, Any] = entity.parts
+              var filename = ""
+              var description = ""
+              val partsResult = parts.runForeach { (part: BodyPart) =>
+                if (part.name.equals("file")) {
+                  filename = part.filename.get
+                  val fileOutput = new FileOutputStream(filename)
+                  val bytes = part.entity.dataBytes
+
+                  def writeFileOnLocal(array: Array[Byte], byteString: ByteString): Array[Byte] = {
+                    val byteArray: Array[Byte] = byteString.toArray
+                    fileOutput.write(byteArray)
+                    array ++ byteArray
+                  }
+
+                  val future = bytes.runFold(Array[Byte]())(writeFileOnLocal)
+                  Await.result(future, 30.seconds)
+                  fileOutput.close()
+                } else if (part.name.equals("description")) {
+                  val bytes = part.entity.dataBytes
+
+                  def writeContent(array: Array[Byte], byteString: ByteString): Array[Byte] = {
+                    val byteArray: Array[Byte] = byteString.toArray
+                    description = new String(byteArray)
+                    array ++ byteArray
+                  }
+
+                  val future = bytes.runFold(Array[Byte]())(writeContent)
+                  Await.result(future, 30.seconds)
+                }
               }
+              Await.result(partsResult, 30.seconds)
+
+              val uploadingFile = new File(filename)
+              val spec = Map("description" -> description)
+              storage.put(uploadingFile, filename, spec, "custom-file")
+              uploadingFile.delete()
+
+              val response = ProtocolResponse(200, Map("message" -> s"Custom file is uploaded."))
               complete(HttpEntity(
                 `application/json`,
                 serializer.serialize(response)
               ))
             }
+          } ~
+          get {
+            val files = fileMetadataDAO.getByParameters(Map("filetype" -> "custom-file"))
+            var response: ProtocolResponse = null
+            if (files.nonEmpty) {
+              val entity = Map("custom-files" -> files.map(metadata =>
+                Map("name" -> metadata.filename,
+                  "description" -> metadata.specification.description,
+                  "upload-date" -> metadata.uploadDate.toString))
+              )
+              response = ProtocolResponse(200, entity)
+            } else {
+              response = ProtocolResponse(200, Map("message" -> s"Uploaded custom files have not been found."))
+            }
+            complete(HttpEntity(
+              `application/json`,
+              serializer.serialize(response)
+            ))
+          }
+        } ~
+        pathPrefix(Segment) { (name: String) =>
+          val file = storage.get(name, s"tmp/rest/$name")
+          if (file == null || !file.exists()) {
+            throw new BadRecordWithKey(s"Custom file '$name' not found", name)
+          }
+          pathEndOrSingleSlash {
+            get {
+              complete(HttpResponse(
+                headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> name))),
+                entity = HttpEntity.Chunked.fromData(`application/x-www-form-urlencoded`, Source.file(file))
+              ))
+            } ~
+            delete {
+              storage.delete(name)
+              val response = ProtocolResponse(200, Map("message" -> s"Custom file is deleted."))
+              complete(HttpEntity(
+                `application/json`,
+                serializer.serialize(response)
+              ))
+            }
+          }
         }
+      }
     }
   }
 }
