@@ -13,6 +13,7 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
 
   val objectSerializer = new ObjectSerializer()
   val state: StateStorage = manager.getState
+  var lastTs: Long = 0
 
   override def onInit(): Unit = {
     println("onInit")
@@ -29,19 +30,20 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
         val maybeSflow = SflowParser.parse(kafkaEnvelope.data)
         if (maybeSflow.isDefined) {
           val sflow = maybeSflow.get
+          lastTs = sflow("ts").toLong * 1000
           val srcAs = GeoIp.resolveAs(sflow("srcIP"))
           val dstAs = GeoIp.resolveAs(sflow("dstIP"))
           val prefixAsToAs = s"$srcAs-$dstAs"
-          if (!state.isExist(s"traffic-sum-$srcAs")) state.set(s"traffic-sum-$srcAs", 0)
-          if (!state.isExist(s"traffic-sum-between-$srcAs-$dstAs")) state.set(s"traffic-sum-between-$srcAs-$dstAs", 0)
+          if (!state.isExist(s"traffic-sum-$srcAs")) state.set(s"traffic-sum-$srcAs", 0L)
+          if (!state.isExist(s"traffic-sum-between-$srcAs-$dstAs")) state.set(s"traffic-sum-between-$srcAs-$dstAs", 0L)
 
           val bandwidth = sflow("packetSize").toInt * sflow("samplingRate").toInt
 
-          var trafficSum = state.get(s"traffic-sum-$srcAs").asInstanceOf[Int]
+          var trafficSum = state.get(s"traffic-sum-$srcAs").asInstanceOf[Long]
           trafficSum += bandwidth
           state.set(s"traffic-sum-$srcAs", trafficSum)
 
-          var trafficSumBetweenAs = state.get(s"traffic-sum-between-$prefixAsToAs").asInstanceOf[Int]
+          var trafficSumBetweenAs = state.get(s"traffic-sum-between-$prefixAsToAs").asInstanceOf[Long]
           trafficSumBetweenAs += bandwidth
           state.set(s"traffic-sum-between-$prefixAsToAs", trafficSumBetweenAs)
         }
@@ -65,11 +67,10 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
     println("on before checkpoint")
     val outputForAs = manager.getRoundRobinOutput("src-as-traffic-sum")
     val outputForAsToAs = manager.getRoundRobinOutput("src-as-to-as-traffic-sum")
-    val timestamp = System.currentTimeMillis / 1000
     val (sourceAsTrafficSum, sourceAsToAsTrafficSum) = state.getAll.partition(x => !x._1.contains("traffic-sum-between"))
-    sourceAsTrafficSum.map(x => timestamp + "," + x._1.replace("traffic-sum-", "") + "," + x._2.toString).foreach(x => outputForAs.put(objectSerializer.serialize(x)))
+    sourceAsTrafficSum.map(x => lastTs.toString + "," + x._1.replace("traffic-sum-", "") + "," + x._2.toString).foreach(x => outputForAs.put(objectSerializer.serialize(x)))
     sourceAsToAsTrafficSum
-      .map(x => timestamp + "," + x._1.replace("traffic-sum-between-", "").split("-").mkString(",") + "," + x._2.toString)
+      .map(x => lastTs.toString + "," + x._1.replace("traffic-sum-between-", "").split("-").mkString(",") + "," + x._2.toString)
       .foreach(x => outputForAsToAs.put(objectSerializer.serialize(x)))
   }
 
