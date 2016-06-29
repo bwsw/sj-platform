@@ -2,10 +2,10 @@ package com.bwsw.sj.module.output.sflow
 
 import java.util.Date
 
-import com.bwsw.common.{ObjectSerializer, JsonSerializer}
-import com.bwsw.sj.engine.core.entities.{EsEntity, OutputEnvelope, TStreamEnvelope}
+import com.bwsw.common.{JsonSerializer, ObjectSerializer}
+import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
-import com.bwsw.sj.module.output.sflow.data.{TrafficMetricsForSrcAs, TrafficMetricsForPerAs}
+import com.bwsw.sj.module.output.sflow.data.TrafficMetrics
 
 /**
  * Handler for work with performance metrics t-stream envelopes
@@ -26,22 +26,13 @@ class SflowOutputHandler extends OutputStreamingHandler {
    */
   def onTransaction(envelope: TStreamEnvelope): List[OutputEnvelope] = {
     val list = envelope.data.map { bytes =>
-      var data: EsEntity = null
+      val data = new TrafficMetrics()
       val rawData = objectSerializer.deserialize(bytes).asInstanceOf[String].split(",")
-      println(rawData(0))
+      data.ts = new Date(rawData(0).toLong)
+      data.srcAs = rawData(1).toInt
+      data.trafficSum = rawData.last.toLong
       if (rawData.length == 4) {
-        val trafficMetrics = new TrafficMetricsForPerAs()
-        trafficMetrics.ts = new Date(rawData(0).toLong)
-        trafficMetrics.srcAs = rawData(1).toInt
-        trafficMetrics.trafficSum = rawData.last.toLong
-        trafficMetrics.dstAs = rawData(2).toInt
-        data = trafficMetrics
-      } else {
-        val trafficMetrics = new TrafficMetricsForSrcAs()
-        trafficMetrics.ts = new Date(rawData(0).toLong)
-        trafficMetrics.srcAs = rawData(1).toInt
-        trafficMetrics.trafficSum = rawData.last.toLong
-        data = trafficMetrics
+        data.dstAs = rawData(2)
       }
       val outputEnvelope = new OutputEnvelope
       outputEnvelope.data = data

@@ -108,6 +108,7 @@ object OutputDataFactory {
           OutputDataFactory.tstreamService.dataNamespace
         )
 
+
         (new CassandraStorageFactory).getInstance(options)
     }
   }

@@ -2,16 +2,15 @@ package com.bwsw.sj.engine.output
 
 import java.io.File
 import java.net.InetAddress
-import java.time.{ZoneOffset, LocalDateTime}
-import java.util.{Calendar, UUID}
 import java.util.concurrent.{ArrayBlockingQueue, Executors}
+import java.util.{Calendar, UUID}
 
 import com.bwsw.common.traits.Serializer
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.DAL.model.{ESService, FileMetadata, SjStream}
-import com.bwsw.sj.common.module.OutputStreamingPerformanceMetrics
-import com.bwsw.sj.engine.core.entities.{OutputEntity, EsEntity, OutputEnvelope, TStreamEnvelope}
+import com.bwsw.sj.common.module.reporting.OutputStreamingPerformanceMetrics
+import com.bwsw.sj.engine.core.entities.{EsEntity, OutputEntity, OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
 import com.bwsw.sj.engine.core.utils.EngineUtils._
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer

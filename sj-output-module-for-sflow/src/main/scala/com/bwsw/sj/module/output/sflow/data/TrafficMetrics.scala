@@ -10,15 +10,15 @@ import com.fasterxml.jackson.annotation.JsonProperty
   *
   * @author Kseniya Mikhaleva
   */
-class TrafficMetricsForSrcAs extends EsEntity {
+class TrafficMetrics extends EsEntity {
   var ts: Date = null
   @JsonProperty("src-as") var srcAs: Int= 0
+  @JsonProperty("dst-as") var dstAs: String= null
   @JsonProperty("sum-of-traffic") var trafficSum: Long= 0
-}
 
-class TrafficMetricsForPerAs extends EsEntity {
-  var ts: Date = null
-  @JsonProperty("src-as") var srcAs: Int= 0
-  @JsonProperty("dst-as") var dstAs: Int= 0
-  @JsonProperty("sum-of-traffic") var trafficSum: Long= 0
+  override def getDateFields(): Array[String] = {
+    val fields = super.getDateFields().toBuffer
+    fields.append("ts")
+    fields.toArray
+  }
 }

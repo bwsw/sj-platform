@@ -1,5 +1,7 @@
 package com.bwsw.sj.module.output.pm.data
 
+import java.util.Date
+
 import com.bwsw.sj.engine.core.entities.EsEntity
 import com.fasterxml.jackson.annotation.JsonProperty
 
@@ -9,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
   * @author Kseniya Mikhaleva
   */
 class PerformanceMetrics extends EsEntity {
-  var datetime: String = null
+  @JsonProperty("pm-datetime") var pmDatetime: Date = null
   @JsonProperty("task-id") var taskId: String= null
   var host: String = null
   @JsonProperty("total-input-envelopes") var totalInputEnvelopes: Int = 0
@@ -39,4 +41,10 @@ class PerformanceMetrics extends EsEntity {
 
   @JsonProperty("input-stream-name") var inputStreamName: String = null
   @JsonProperty("output-stream-name") var outputStreamName:  String = null
+
+  override def getDateFields(): Array[String] = {
+    val fields = super.getDateFields().toBuffer
+    fields.append("pm-datetime")
+    fields.toArray
+  }
 }
