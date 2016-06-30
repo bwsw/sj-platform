@@ -28,6 +28,8 @@ abstract class StreamingModuleValidator {
   import com.bwsw.sj.common.StreamConstants._
   import com.bwsw.sj.crud.rest.utils.ConvertUtil._
 
+  val instanceNamePattern = "^[a-zA-Z0-9-]$".r
+
   var serviceDAO: GenericMongoService[Service] = ConnectionRepository.getServiceManager
   var instanceDAO: GenericMongoService[Instance] = ConnectionRepository.getInstanceService
   val serializer: Serializer = new JsonSerializer
@@ -84,6 +86,10 @@ abstract class StreamingModuleValidator {
     */
   def generalOptionsValidate(parameters: InstanceMetadata) = {
     val errors = new ArrayBuffer[String]()
+
+    if (!parameters.name.matches("""^([a-zA-Z][a-zA-Z0-9-]+)$""")) {
+      errors += s"Instance has incorrect name: ${parameters.name}. Name of instance must be contain digits, letters or hyphens. First symbol must be letter."
+    }
 
     val instance = instanceDAO.get(parameters.name)
     if (instance != null) {

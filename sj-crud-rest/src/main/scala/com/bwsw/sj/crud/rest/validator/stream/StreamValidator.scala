@@ -35,6 +35,10 @@ object StreamValidator {
           errors += s"'name' can not be empty"
     }
 
+    if (!initialData.name.matches("""^([a-zA-Z][a-zA-Z0-9-]+)$""")) {
+      errors += s"Stream has incorrect name: ${initialData.name}. Name of stream must be contain digits, letters or hyphens. First symbol must be letter."
+    }
+
     val streamObj = streamDAO.get(initialData.name)
     if (streamObj != null) {
       errors += s"Stream with name ${streamObj.name} already exists"
