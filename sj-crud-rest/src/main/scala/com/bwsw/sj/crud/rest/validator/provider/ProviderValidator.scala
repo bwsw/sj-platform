@@ -56,6 +56,10 @@ object ProviderValidator {
         }
     }
 
+    if (!initialData.name.matches("""^([a-zA-Z][a-zA-Z0-9-]+)$""")) {
+      errors += s"Provider has incorrect name: ${initialData.name}. Name of provider must be contain digits, letters or hyphens. First symbol must be letter."
+    }
+
     // 'description' field
     Option(initialData.description) match {
       case None =>
