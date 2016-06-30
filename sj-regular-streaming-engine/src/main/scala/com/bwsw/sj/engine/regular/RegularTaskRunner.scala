@@ -98,20 +98,20 @@ object RegularTaskRunner {
         def run() = {
           val serializer = new JsonSerializer()
           val timeout = manager.kafkaSubscriberTimeout
+          val inputKafkaSjStreams = kafkaInputs.map(x => (x._1.name, x._1.tags)).toMap
 
           while (true) {
             logger.debug(s"Task: ${manager.taskName}. Waiting for records that consumed from kafka for $timeout milliseconds\n")
             val records = kafkaConsumer.poll(timeout)
             records.asScala.foreach(x => {
-              val stream = ConnectionRepository.getStreamService.get(x.topic())
 
               blockingQueue.put(serializer.serialize({
                 val envelope = new KafkaEnvelope()
-                envelope.stream = stream.name
+                envelope.stream = x.topic()
                 envelope.partition = x.partition()
                 envelope.data = x.value()
                 envelope.offset = x.offset()
-                envelope.tags = stream.tags
+                envelope.tags = inputKafkaSjStreams(x.topic())
                 envelope
               }))
             })
@@ -570,6 +570,7 @@ object RegularTaskRunner {
                   }
 
                   logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
+                  println(s"Task: ${manager.taskName}. Invoke onMessage() handler\n") //todo for testing
                   executor.onMessage(envelope)
 
                   if (countOfEnvelopes == regularInstanceMetadata.checkpointInterval) {
