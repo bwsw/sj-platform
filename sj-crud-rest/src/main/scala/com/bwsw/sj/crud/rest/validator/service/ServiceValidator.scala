@@ -49,6 +49,11 @@ object ServiceValidator {
           }
         }
     }
+
+    if (!initialData.name.matches("""^([a-zA-Z][a-zA-Z0-9-]+)$""")) {
+      errors += s"Service has incorrect name: ${initialData.name}. Name of service must be contain digits, letters or hyphens. First symbol must be letter."
+    }
+
     // 'description' field
     errors ++= validateStringFieldRequired(initialData.description, "description")
 

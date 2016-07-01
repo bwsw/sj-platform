@@ -53,6 +53,17 @@ object SjTest {
   val testJson = "{\n\t\"name\" : \"tst\",\n\t\"description\" : \"fdsgff\",\n\t\"stream-type\" : \"test\",\n\t\"ttt\" : 26\n}"
 
   def main(args: Array[String]) = {
+    /*val name1 = "AdsfsfdS-f00ds"//"f_sfdsgf-da9-dsa"
+    val name2 = "sdf_saf_dsfds"
+    val name3 = "dasfd-4fs-ds"
+    val name4 = "s9ds?saf_ds"
+
+    if (name1.matches("""^([a-zA-Z][a-zA-Z0-9-]+)$""")) {
+      println("name 1 OK")
+    } else {
+      println("name 1 NOT OK")
+    }*/
+
    // createData()
    // prepareCassandra()
     /*val dao = ConnectionRepository.getStreamService
