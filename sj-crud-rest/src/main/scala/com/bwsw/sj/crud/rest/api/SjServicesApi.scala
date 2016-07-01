@@ -39,8 +39,8 @@ trait SjServicesApi extends Directives with SjCrudValidator {
           val errors = ServiceValidator.validate(data, service)
 
           if (errors.isEmpty) {
-            serviceDAO.save(service)
             ServiceUtil.prepareService(service) //todo or when running instance?
+            serviceDAO.save(service)
             val response = ProtocolResponse(200, Map("message" -> s"Service '${service.name}' is created"))
             ctx.complete(HttpEntity(`application/json`, serializer.serialize(response)))
           } else {

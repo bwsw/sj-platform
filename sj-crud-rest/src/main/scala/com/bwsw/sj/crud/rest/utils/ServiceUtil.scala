@@ -69,14 +69,10 @@ object ServiceUtil {
     createMetatables(tStreamService.metadataNamespace, session)
 
     if (tStreamService.dataProvider.providerType.equals("cassandra")) {
-      if (!tStreamService.dataProvider.name.equals(tStreamService.metadataProvider.name)) {
-        val dataSession = openCassandraSession(tStreamService.dataProvider)
-        createKeyspace(tStreamService.dataNamespace, dataSession)
-        createMetatables(tStreamService.dataNamespace, dataSession)
-        closeCassandraSession(dataSession)
-      } else if (!tStreamService.dataNamespace.equals(tStreamService.metadataNamespace)) {
-        createMetatables(tStreamService.dataNamespace, session)
-      }
+      val dataSession = openCassandraSession(tStreamService.dataProvider)
+      createKeyspace(tStreamService.dataNamespace, dataSession)
+      createMetatables(tStreamService.dataNamespace, dataSession)
+      closeCassandraSession(dataSession)
     }
     closeCassandraSession(session)
   }
@@ -151,7 +147,10 @@ object ServiceUtil {
     * @return New cassandra session
     */
   private def openCassandraSession(provider: Provider) : Session = {
-    val cassandraHosts = provider.hosts.map(host => InetAddress.getByName(host)).toList.asJava
+    val cassandraHosts = provider.hosts.map { host =>
+      val parts = host.split(":")
+      InetAddress.getByName(parts(0))
+    }.toList.asJava
     val cluster = Cluster.builder().addContactPoints(cassandraHosts).build()
     cluster.connect()
   }
