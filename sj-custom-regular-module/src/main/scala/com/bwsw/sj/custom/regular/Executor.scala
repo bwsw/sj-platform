@@ -3,7 +3,7 @@ package com.bwsw.sj.custom.regular
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.custom.regular.udf.GeoIp
 import com.bwsw.sj.custom.regular.utils.SflowParser
-import com.bwsw.sj.engine.core.entities.{TStreamEnvelope, Envelope, KafkaEnvelope}
+import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.state.StateStorage

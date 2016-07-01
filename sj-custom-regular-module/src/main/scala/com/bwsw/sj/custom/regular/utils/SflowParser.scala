@@ -6,9 +6,10 @@ object SflowParser {
     "dstMAC", "ethernetType", "inVlan", "outVlan", "srcIP", "dstIP", "ipProtocol", "ipTos", "ipTtl",
     "udpSrcPort", "udpDstPort", "tcpFlags", "packetSize", "ipSize", "samplingRate")
 
+  private val countOfparameters = fieldNames.length
   def parse(serializedSflow: Array[Byte])= {
     val maybeSflow = new String(serializedSflow).split(",")
-    if (maybeSflow.length == fieldNames.length) {
+    if (maybeSflow.length == countOfparameters) {
       val sflowRec = fieldNames.zip(maybeSflow).toMap
       val srcIP = sflowRec.get("srcIP").get
       val dstIP = sflowRec.get("dstIP").get
