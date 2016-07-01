@@ -7,6 +7,7 @@ import com.bwsw.common.exceptions.BadRecordWithKey
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.crud.rest.entities._
 import com.bwsw.sj.crud.rest.utils.ConvertUtil.serviceToServiceData
+import com.bwsw.sj.crud.rest.utils.ServiceUtil
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.service.ServiceValidator
 
@@ -38,6 +39,7 @@ trait SjServicesApi extends Directives with SjCrudValidator {
           val errors = ServiceValidator.validate(data, service)
 
           if (errors.isEmpty) {
+            ServiceUtil.prepareService(service) //todo or when running instance?
             serviceDAO.save(service)
             val response = ProtocolResponse(200, Map("message" -> s"Service '${service.name}' is created"))
             ctx.complete(HttpEntity(`application/json`, serializer.serialize(response)))
