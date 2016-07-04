@@ -1,0 +1,18 @@
+FROM nshou/elasticsearch-kibana
+
+USER root
+
+RUN mkdir /opt/jdk && \
+    cd /opt && \
+    wget --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u5-b13/jdk-8u5-linux-x64.tar.gz && \
+    tar -zxf jdk-8u5-linux-x64.tar.gz -C /opt/jdk && \
+    update-alternatives --install /usr/bin/java java /opt/jdk/jdk1.8.0_05/bin/java 1100 && \
+    update-alternatives --install /usr/bin/javac javac /opt/jdk/jdk1.8.0_05/bin/javac 1100
+
+USER elasticsearch
+
+RUN elasticsearch/bin/plugin install lmenezes/elasticsearch-kopf
+
+EXPOSE 5601/tcp 9200/tcp 9300
+
+CMD ["/bin/sh","-c","elasticsearch/bin/elasticsearch -Des.logger.level=OFF --network.host 0.0.0.0 & kibana/bin/kibana -q"]

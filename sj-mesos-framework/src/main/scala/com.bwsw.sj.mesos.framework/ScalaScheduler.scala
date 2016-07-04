@@ -72,8 +72,8 @@ class ScalaScheduler extends Scheduler {
 
 
     // TODO : add filter
-    // val filteredOffers = filterOffers(offers, this.instance.nodeAttributes)
-    val filteredOffers = offers
+    val filteredOffers = filterOffers(offers, this.instance.nodeAttributes)
+//    val filteredOffers = offers
     if (filteredOffers.size == 0) {
       for (offer <- offers.asScala) {
         driver.declineOffer(offer.getId)
