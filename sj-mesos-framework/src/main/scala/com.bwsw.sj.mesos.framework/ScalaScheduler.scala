@@ -341,8 +341,8 @@ class ScalaScheduler extends Scheduler {
     logger.info(s"FILTER OFFERS")
     var result: List[Offer] = List()
     if (filters != null) {
-      for (offer <- offers.asScala) {
-        for (filter <- filters.asScala) {
+      for (filter <- filters.asScala) {
+        for (offer <- offers.asScala) {
           if (filter._1.matches("""\+.+""".r.toString)) {
             for (attribute <- offer.getAttributesList.asScala) {
               if (filter._1.toString.substring(1) == attribute.getName &
