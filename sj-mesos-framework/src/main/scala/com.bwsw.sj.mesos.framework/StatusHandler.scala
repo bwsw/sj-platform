@@ -19,7 +19,7 @@ object StatusHandler {
       TasksList(status.getTaskId.getValue).foreach(task => task.update(
         state = status.getState.toString,
         state_changed = status.getTimestamp.toLong * 1000,
-        last_node = if (task.node != "") task.node else task.last_node, node = status.getSlaveId.getValue, reason = ""
+        last_node = if (task.node != "") task.node else task.last_node, node = status.getSlaveId.getValue
       ))
       logger.info(s"Task: ${status.getTaskId.getValue}")
       logger.info(s"Status: ${status.getState}")

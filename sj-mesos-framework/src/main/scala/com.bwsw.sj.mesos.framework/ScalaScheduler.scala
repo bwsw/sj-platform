@@ -252,7 +252,7 @@ class ScalaScheduler extends Scheduler {
     this.perTaskCores = instance.perTaskCores
     this.perTaskMem = instance.perTaskRam
     instance.moduleType match {
-      case "output-streaming" => perTaskPortsCount = 1
+      case "output-streaming" => perTaskPortsCount = 2
       case "regular-streaming" => perTaskPortsCount = instance.inputs.length+instance.outputs.length+4
     }
     logger.info(s"Got instance")
@@ -375,7 +375,7 @@ class ScalaScheduler extends Scheduler {
     // TODO:return back get host
     lazy val restHost = "176.120.25.19" // configFileService.get(ConfigConstants.hostOfCrudRestTag).value
     lazy val restPort = 18080 // configFileService.get(ConfigConstants.portOfCrudRestTag).value.toInt
-    val restAddress = new URI(s"http://$restHost:$restPort/v1/custom/").toString
+    val restAddress = new URI(s"http://$restHost:$restPort/v1/custom/jars/").toString
     jarName = configFileService.get("system." + instance.engine).value
     logger.info(s"URI: ${restAddress + jarName}")
     restAddress + jarName
