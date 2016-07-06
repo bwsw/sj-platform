@@ -284,7 +284,7 @@ object DataFactory {
     instance.eventWaitTime = 10
     instance.coordinationService = serviceManager.get("zookeeper test service").asInstanceOf[ZKService]
 
-      instanceService.save(instance)
+    instanceService.save(instance)
   }
 
   def deleteInstance(instanceService: GenericMongoService[Instance]) = {
@@ -434,10 +434,11 @@ object DataFactory {
       agentAddress = s"localhost:8030",
       zkHosts = zookeeperHosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList,
       zkRootPath = "/unit",
-      zkTimeout = 7000,
+      zkConnectionTimeout = 7000,
       isLowPriorityToBeMaster = false,
       transport = new TcpTransport,
-      transportTimeout = 5)
+      transportTimeout = 5,
+      zkSessionTimeout = 7000)
 
     val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
 

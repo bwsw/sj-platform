@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.output.benchmark
 
-import java.io.{InputStreamReader, BufferedReader, File}
-import java.net.{URI, InetAddress, InetSocketAddress}
+import java.io.{BufferedReader, File, InputStreamReader}
+import java.net.{InetAddress, InetSocketAddress}
 import java.util.jar.JarFile
 
 import com.aerospike.client.Host
@@ -15,7 +15,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.engine.core.utils.CassandraHelper._
 import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
-import com.bwsw.tstreams.agents.consumer.{BasicConsumerOptions, BasicConsumer}
+import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions}
 import com.bwsw.tstreams.agents.producer.InsertionType.BatchInsert
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions, ProducerCoordinationOptions, ProducerPolicies}
 import com.bwsw.tstreams.converter.IConverter
@@ -34,10 +34,10 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress
 import scala.collection.JavaConverters._
 
 /**
-  * Created: 20/06/2016
-  *
-  * @author Kseniya Tomskikh
-  */
+ * Created: 20/06/2016
+ *
+ * @author Kseniya Tomskikh
+ */
 object BenchmarkDataFactory {
   val metadataProviderName: String = "test-metprov-1"
   val metadataNamespace: String = "bench"
@@ -82,7 +82,7 @@ object BenchmarkDataFactory {
     val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(metadataStorageHosts, tStreamService.metadataNamespace)
 
     val dataStorageFactory = new AerospikeStorageFactory
-    val dataStorageHosts = tStreamService.dataProvider.hosts.map {addr =>
+    val dataStorageHosts = tStreamService.dataProvider.hosts.map { addr =>
       val parts = addr.split(":")
       new Host(parts(0), parts(1).toInt)
     }.toList
@@ -157,10 +157,11 @@ object BenchmarkDataFactory {
       agentAddress = s"localhost:8030",
       zkHosts = List(new InetSocketAddress("localhost", 2181)),
       zkRootPath = "/unit",
-      zkTimeout = 7000,
+      zkSessionTimeout = 7000,
       isLowPriorityToBeMaster = false,
       transport = new TcpTransport,
-      transportTimeout = 5)
+      transportTimeout = 5,
+      zkConnectionTimeout = 7000)
 
     val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until partitions).toList)
 
@@ -308,7 +309,7 @@ object BenchmarkDataFactory {
     val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(metadataStorageHosts, tService.metadataNamespace)
 
     val dataStorageFactory = new AerospikeStorageFactory
-    val dataStorageHosts = tService.dataProvider.hosts.map {addr =>
+    val dataStorageHosts = tService.dataProvider.hosts.map { addr =>
       val parts = addr.split(":")
       new Host(parts(0), parts(1).toInt)
     }.toList

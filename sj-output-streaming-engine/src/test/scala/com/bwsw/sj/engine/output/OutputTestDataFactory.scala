@@ -19,10 +19,10 @@ import com.bwsw.tstreams.services.BasicStreamService
 import com.bwsw.tstreams.streams.BasicStream
 
 /**
-  * Created: 5/31/16
-  *
-  * @author Kseniya Tomskikh
-  */
+ * Created: 5/31/16
+ *
+ * @author Kseniya Tomskikh
+ */
 object OutputTestDataFactory {
 
   private val streamDAO: GenericMongoService[SjStream] = ConnectionRepository.getStreamService
@@ -39,11 +39,11 @@ object OutputTestDataFactory {
   val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(metadataStorageHosts, inputStreamService.metadataNamespace)
 
   private val dataStorageFactory = new AerospikeStorageFactory
-  private val dataStorageHosts = inputStreamService.dataProvider.hosts.map {addr =>
+  private val dataStorageHosts = inputStreamService.dataProvider.hosts.map { addr =>
     val parts = addr.split(":")
     new Host(parts(0), parts(1).toInt)
   }.toList
-  private  val options = new AerospikeStorageOptions(inputStreamService.dataNamespace, dataStorageHosts)
+  private val options = new AerospikeStorageOptions(inputStreamService.dataNamespace, dataStorageHosts)
   val dataStorage: AerospikeStorage = dataStorageFactory.getInstance(options)
 
   private val converter = new IConverter[Array[Byte], Array[Byte]] {
@@ -81,10 +81,11 @@ object OutputTestDataFactory {
       agentAddress = s"localhost:8030",
       zkHosts = List(new InetSocketAddress("localhost", 2181)),
       zkRootPath = "/unit",
-      zkTimeout = 7000,
+      zkSessionTimeout = 7000,
       isLowPriorityToBeMaster = false,
       transport = new TcpTransport,
-      transportTimeout = 5)
+      transportTimeout = 5,
+      zkConnectionTimeout = 7000)
 
     val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.partitions).toList)
 
@@ -102,7 +103,6 @@ object OutputTestDataFactory {
 
     new BasicProducer[Array[Byte], Array[Byte]]("producer for " + basicStream.name, basicStream, options)
   }
-
 
 
 }

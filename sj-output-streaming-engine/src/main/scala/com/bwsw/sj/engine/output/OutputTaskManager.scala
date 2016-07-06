@@ -31,11 +31,11 @@ import scala.collection.mutable
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 /**
-  * Task manager for working with streams of output-streaming module
-  * Created: 27/05/2016
-  *
-  * @author Kseniya Tomskikh
-  */
+ * Task manager for working with streams of output-streaming module
+ * Created: 27/05/2016
+ *
+ * @author Kseniya Tomskikh
+ */
 class OutputTaskManager(taskName: String, instance: OutputInstance) {
   private val logger: Logger = LoggerFactory.getLogger(getClass)
 
@@ -44,14 +44,14 @@ class OutputTaskManager(taskName: String, instance: OutputInstance) {
   private val converter = new ArrayByteConverter
 
   /**
-    * Creates a t-stream consumer with pub/sub property
-    *
-    * @param stream SjStream from which massages are consumed
-    * @param partitions Range of stream partition
-    * @param offset Offset policy that describes where a consumer starts
-    * @param queue Queue which keeps consumed messages
-    * @return T-stream subscribing consumer
-    */
+   * Creates a t-stream consumer with pub/sub property
+   *
+   * @param stream SjStream from which massages are consumed
+   * @param partitions Range of stream partition
+   * @param offset Offset policy that describes where a consumer starts
+   * @param queue Queue which keeps consumed messages
+   * @return T-stream subscribing consumer
+   */
   def createSubscribingConsumer(stream: SjStream,
                                 partitions: List[Int],
                                 offset: IOffset,
@@ -74,7 +74,8 @@ class OutputTaskManager(taskName: String, instance: OutputInstance) {
       agentAddress,
       s"/${service.lockNamespace}",
       zkHosts,
-      OutputDataFactory.zkTimeout
+      OutputDataFactory.zkSessionTimeout,
+      OutputDataFactory.zkConnectionTimeout
     )
 
     val basicStream = BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
@@ -121,10 +122,11 @@ class OutputTaskManager(taskName: String, instance: OutputInstance) {
       agentAddress = OutputDataFactory.agentHost + ":" + OutputDataFactory.agentsPorts(1), //todo: number of agent port
       OutputDataFactory.zkHosts,
       "/" + service.lockNamespace,
-      OutputDataFactory.zkTimeout,
+      OutputDataFactory.zkSessionTimeout,
       isLowPriorityToBeMaster = false,
       transport = new TcpTransport,
-      OutputDataFactory.transportTimeout
+      transportTimeout = OutputDataFactory.transportTimeout,
+      zkConnectionTimeout = OutputDataFactory.zkConnectionTimeout
     )
 
     val basicStream: BasicStream[Array[Byte]] =
@@ -163,12 +165,12 @@ class OutputTaskManager(taskName: String, instance: OutputInstance) {
   }
 
   /**
-    * Getting instance of handler object from module jar
-    *
-    * @param file Jar of module
-    * @param handlerClassName Classname of handler class of module
-    * @return Handler instance from jar
-    */
+   * Getting instance of handler object from module jar
+   *
+   * @param file Jar of module
+   * @param handlerClassName Classname of handler class of module
+   * @return Handler instance from jar
+   */
   def getModuleHandler(file: File, handlerClassName: String) = {
     logger.info(s"Getting handler object from jar of file: ${instance.moduleType}-${instance.moduleName}-${instance.moduleVersion}")
     val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
@@ -177,12 +179,12 @@ class OutputTaskManager(taskName: String, instance: OutputInstance) {
   }
 
   /**
-    * Getting instance of entity object from output module jar
-    *
-    * @param file Jar of module
-    * @param entityClassName Classname of entity class of module
-    * @return Entity instance from jar
-    */
+   * Getting instance of entity object from output module jar
+   *
+   * @param file Jar of module
+   * @param entityClassName Classname of entity class of module
+   * @return Entity instance from jar
+   */
   def getOutputModuleEntity(file: File, entityClassName: String) = {
     logger.info(s"Getting entity object from jar of file: ${instance.moduleType}-${instance.moduleName}-${instance.moduleVersion}")
     val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)

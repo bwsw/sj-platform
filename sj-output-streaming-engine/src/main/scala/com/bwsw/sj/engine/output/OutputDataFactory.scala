@@ -60,7 +60,8 @@ object OutputDataFactory {
   val txnPreload = configService.get(txnPreloadTag).value.toInt
   val dataPreload = configService.get(dataPreloadTag).value.toInt
   val consumerKeepAliveInterval = configService.get(consumerKeepAliveInternalTag).value.toInt
-  val zkTimeout = configService.get(zkSessionTimeoutTag).value.toInt
+  val zkSessionTimeout = configService.get(zkSessionTimeoutTag).value.toInt
+  val zkConnectionTimeout = configService.get(zkConnectionTimeoutTag).value.toInt
   val zkHosts = tstreamService.lockProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList
   val transportTimeout = configService.get(transportTimeoutTag).value.toInt
   val retryPeriod = configService.get(tgClientRetryPeriodTag).value.toInt
