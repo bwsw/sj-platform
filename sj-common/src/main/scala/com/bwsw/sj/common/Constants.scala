@@ -82,6 +82,7 @@ object ConfigConstants {
   val marathonTag = "system.marathon-connect"
   val marathonTimeoutTag = "system.marathon-connect-timeout"
   val zkSessionTimeoutTag= "zk.session.timeout"
+  val zkConnectionTimeoutTag= "zk.connection.timeout"
   val txnPreloadTag = "t-streams.txn-preload"
   val dataPreloadTag = "t-streams.data-preload"
   val consumerKeepAliveInternalTag = "t-streams.consumer-keep-alive-internal"

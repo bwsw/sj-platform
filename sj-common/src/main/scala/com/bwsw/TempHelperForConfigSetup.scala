@@ -15,7 +15,7 @@ object TempHelperForConfigSetup extends App{
 
   configService.save(new ConfigSetting("system" + "." + "com.bwsw.tg-0.1", "sj-transaction-generator-assembly-1.0.jar", "system"))
   configService.save(new ConfigSetting(ConfigConstants.transactionGeneratorTag, "com.bwsw.tg-0.1", "system"))
-  
+
   configService.save(new ConfigSetting("system" + "." + "com.bwsw.mf-0.1", "mesos-framework.jar", "system"))
   configService.save(new ConfigSetting(ConfigConstants.frameworkTag, "com.bwsw.mf-0.1", "system"))
 
@@ -31,6 +31,7 @@ object TempHelperForConfigSetup extends App{
   configService.save(new ConfigSetting(ConfigConstants.marathonTimeoutTag, "60000", "system"))
 
   configService.save(new ConfigSetting(ConfigConstants.zkSessionTimeoutTag, "7000", "zk"))
+  configService.save(new ConfigSetting(ConfigConstants.zkConnectionTimeoutTag, "7000", "zk"))
 
   configService.save(new ConfigSetting(ConfigConstants.txnPreloadTag, "10", "t-streams"))
   configService.save(new ConfigSetting(ConfigConstants.dataPreloadTag, "7", "t-streams"))

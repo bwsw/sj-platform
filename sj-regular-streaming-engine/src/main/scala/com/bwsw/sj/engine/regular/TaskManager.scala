@@ -70,7 +70,8 @@ class TaskManager() {
   private val streamTTL = configService.get(streamTTLTag).value.toInt
   private val retryPeriod = configService.get(tgClientRetryPeriodTag).value.toInt
   private val retryCount = configService.get(tgRetryCountTag).value.toInt
-  private val zkTimeout = configService.get(zkSessionTimeoutTag).value.toInt
+  private val zkSessionTimeout = configService.get(zkSessionTimeoutTag).value.toInt
+  private val zkConnectionTimeout = configService.get(zkConnectionTimeoutTag).value.toInt
 
   val inputs = instance.executionPlan.tasks.get(taskName).inputs.asScala
     .map(x => {
@@ -278,7 +279,8 @@ class TaskManager() {
       agentsHost + ":" + agentsPorts(currentPortNumber),
       service.lockNamespace,
       zkHosts,
-      zkTimeout
+      zkSessionTimeout,
+      zkConnectionTimeout
     )
     currentPortNumber += 1
 
@@ -374,10 +376,11 @@ class TaskManager() {
       agentAddress = agentsHost + ":" + agentsPorts(currentPortNumber),
       zkHosts,
       "/" + service.lockNamespace,
-      zkTimeout,
+      zkSessionTimeout,
       isLowPriorityToBeMaster = false,
       transport = new TcpTransport,
-      transportTimeout
+      transportTimeout =transportTimeout,
+      zkConnectionTimeout = zkConnectionTimeout
     )
     currentPortNumber += 1
 

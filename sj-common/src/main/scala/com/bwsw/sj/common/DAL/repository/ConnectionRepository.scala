@@ -25,7 +25,7 @@ object ConnectionRepository {
   private lazy val mongoClient = new MongoClient(mongoHost, mongoPort)
 
   private lazy val morphia = new Morphia()
-  morphia.map(classOf[SjStream],classOf[Service], classOf[Provider])
+  morphia.map(classOf[SjStream],classOf[Service], classOf[Provider], classOf[ConfigSetting])
 
   private lazy val datastore = morphia.createDatastore(mongoClient, databaseName)
 
