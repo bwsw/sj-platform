@@ -2,28 +2,28 @@ package com.bwsw.sj.engine.regular
 
 import java.net.URLClassLoader
 import java.util.Date
-import java.util.concurrent.{TimeUnit, Executors}
-
+import java.util.concurrent.{Executors, TimeUnit}
+import scala.collection.JavaConverters._
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.common.DAL.model.KafkaService
+import com.bwsw.sj.common.DAL.model.{KafkaService, SjStream}
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.module.reporting.RegularStreamingPerformanceMetrics
 import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.sj.common.{ModuleConstants, StreamConstants}
 import com.bwsw.sj.engine.core.PersistentBlockingQueue
-import com.bwsw.sj.engine.core.entities.{TStreamEnvelope, Envelope, KafkaEnvelope}
-import com.bwsw.sj.engine.core.environment.{StatefulModuleEnvironmentManager, ModuleEnvironmentManager, ModuleOutput}
+import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.environment.{ModuleEnvironmentManager, ModuleOutput, StatefulModuleEnvironmentManager}
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
-import com.bwsw.sj.engine.core.state.{StateStorage, RAMStateService}
+import com.bwsw.sj.engine.core.state.{RAMStateService, StateStorage}
 import com.bwsw.tstreams.agents.consumer.Offsets.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerTransaction, ProducerPolicies}
 import com.google.common.util.concurrent.ThreadFactoryBuilder
+import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory
 
-import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 /**
@@ -42,15 +42,14 @@ object RegularTaskRunner {
     .build()
   private val executorService = Executors.newFixedThreadPool(2, threadFactory)
 
+  private val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(ModuleConstants.persistentBlockingQueue)
+
+  private val checkpointGroup = new CheckpointGroup()
+
   def main(args: Array[String]) {
 
     val manager = new TaskManager()
     logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for regular module\n")
-
-    logger.debug(s"Task: ${manager.taskName}. Start creating a t-stream producer to record performance reports\n")
-    val reportStream = manager.getReportStream
-    val reportProducer = manager.createProducer(reportStream)
-    logger.debug(s"Task: ${manager.taskName}. Creation of t-stream producer is finished\n")
 
     val moduleJar = manager.getModuleJar
 
@@ -62,81 +61,14 @@ object RegularTaskRunner {
 
     val moduleTimer = new SjTimer()
 
-    val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(ModuleConstants.persistentBlockingQueue)
-    val checkpointGroup = new CheckpointGroup()
+    val inputs: mutable.Map[SjStream, Array[Int]] = manager.inputs
 
-    val inputs = manager.inputs
+    val offsetProducer: Option[BasicProducer[Array[Byte], Array[Byte]]] = createOffsetProducer(manager)
 
-    var consumersWithSubscribes: Option[Map[String, BasicSubscribingConsumer[Array[Byte], Array[Byte]]]] = None
-    var offsetProducer: Option[BasicProducer[Array[Byte], Array[Byte]]] = None
+    val consumersWithSubscribes: Option[Map[String, BasicSubscribingConsumer[Array[Byte], Array[Byte]]]] =
+      createSubscribingConsumers(inputs, manager, regularInstanceMetadata.startFrom)
 
-    if (inputs.exists(x => x._1.streamType == StreamConstants.tStream)) {
-      logger.debug(s"Task: ${manager.taskName}. Start creating subscribing consumers\n")
-      consumersWithSubscribes = Some(inputs.filter(x => x._1.streamType == StreamConstants.tStream).map({
-        x => manager.createSubscribingConsumer(x._1, x._2.toList, chooseOffset(regularInstanceMetadata.startFrom), blockingQueue)
-      }).map(x => (x.name, x)).toMap)
-      logger.debug(s"Task: ${manager.taskName}. Creation of subscribing consumers is finished\n")
-
-      logger.debug(s"Task: ${manager.taskName}. Start adding subscribing consumers to checkpoint group\n")
-      consumersWithSubscribes.get.foreach(x => checkpointGroup.add(x._1, x._2))
-      logger.debug(s"Task: ${manager.taskName}. Adding subscribing consumers to checkpoint group is finished\n")
-      logger.debug(s"Task: ${manager.taskName}. Launch subscribing consumers\n")
-      consumersWithSubscribes.get.foreach(_._2.start())
-      logger.debug(s"Task: ${manager.taskName}. Subscribing consumers are launched\n")
-    }
-
-    if (inputs.exists(x => x._1.streamType == StreamConstants.kafka)) {
-      val kafkaInputs = inputs.filter(x => x._1.streamType == StreamConstants.kafka)
-      logger.debug(s"Task: ${manager.taskName}. Start creating kafka consumers\n")
-      val kafkaConsumer = manager.createKafkaConsumer(
-        kafkaInputs.map(x => (x._1.name, x._2.toList)).toList,
-        kafkaInputs.flatMap(_._1.service.asInstanceOf[KafkaService].provider.hosts).toList,
-        regularInstanceMetadata.startFrom match {
-          case "oldest" => "earliest"
-          case _ => "latest"
-        }
-      )
-      logger.debug(s"Task: ${manager.taskName}. Creation of kafka consumers is finished\n")
-
-      logger.debug(s"Task: ${manager.taskName}. Launch kafka consumers that put consumed message, which are wrapped in envelope, into common queue \n")
-      executorService.execute(new Runnable() {
-        val currentThread = Thread.currentThread()
-        currentThread.setName(s"kafka-task-${manager.taskName}")
-
-        def run() = {
-
-          val serializer = new JsonSerializer()
-          val timeout = manager.kafkaSubscriberTimeout
-          val inputKafkaSjStreams = kafkaInputs.map(x => (x._1.name, x._1.tags)).toMap
-
-
-          while (true) {
-            logger.debug(s"Task: ${manager.taskName}. Waiting for records that consumed from kafka for $timeout milliseconds\n")
-            val records = kafkaConsumer.poll(timeout)
-            records.asScala.foreach(x => {
-
-              blockingQueue.put(serializer.serialize({
-                val envelope = new KafkaEnvelope()
-                envelope.stream = x.topic()
-                envelope.partition = x.partition()
-                envelope.data = x.value()
-                envelope.offset = x.offset()
-                envelope.tags = inputKafkaSjStreams(x.topic())
-                envelope
-              }))
-            })
-          }
-        }
-      })
-
-      logger.debug(s"Task: ${manager.taskName}. Start creating a t-stream producer to record kafka offsets\n")
-      val streamForOffsets = manager.getOffsetStream
-      offsetProducer = Some(manager.createProducer(streamForOffsets))
-      logger.debug(s"Task: ${manager.taskName}. Creation of t-stream producer is finished\n")
-      logger.debug(s"Task: ${manager.taskName}. Start adding the t-stream producer to checkpoint group\n")
-      checkpointGroup.add(offsetProducer.get.name, offsetProducer.get)
-      logger.debug(s"Task: ${manager.taskName}. The t-stream producer is added to checkpoint group\n")
-    }
+    launchKafkaSubscribingConsumer(inputs, manager, regularInstanceMetadata.startFrom)
 
     logger.debug(s"Task: ${manager.taskName}. Start creating t-stream producers for each output stream\n")
     val producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]] =
@@ -158,31 +90,11 @@ object RegularTaskRunner {
       regularInstanceMetadata.outputs
     )
 
-    logger.debug(s"Task: ${manager.taskName}. Launch a new thread to report performance metrics \n")
-    executorService.execute(new Runnable() {
-      val objectSerializer = new ObjectSerializer()
-      val currentThread = Thread.currentThread()
-      currentThread.setName(s"report-task-${manager.taskName}")
-
-      def run() = {
-        val taskNumber = manager.taskName.replace(s"${manager.instanceName}-task", "").toInt
-        var report: String = null
-        var reportTxn: BasicProducerTransaction[Array[Byte], Array[Byte]] = null
-        while (true) {
-          logger.info(s"Task: ${manager.taskName}. Wait ${regularInstanceMetadata.performanceReportingInterval} ms to report performance metrics\n")
-          TimeUnit.MILLISECONDS.sleep(regularInstanceMetadata.performanceReportingInterval)
-          report = performanceMetrics.getReport
-          println(s"Performance metrics: $report \n")
-          logger.info(s"Task: ${manager.taskName}. Performance metrics: $report \n")
-          logger.debug(s"Task: ${manager.taskName}. Create a new txn for sending performance metrics\n")
-          reportTxn = reportProducer.newTransaction(ProducerPolicies.errorIfOpen, taskNumber)
-          logger.debug(s"Task: ${manager.taskName}. Send performance metrics\n")
-          reportTxn.send(objectSerializer.serialize(report))
-          logger.debug(s"Task: ${manager.taskName}. Do checkpoint of producer for performance reporting\n")
-          reportProducer.checkpoint()
-        }
-      }
-    })
+    launchPerformanceMetricsReporting(
+      manager,
+      performanceMetrics,
+      regularInstanceMetadata.performanceReportingInterval
+    )
 
     logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
     try {
@@ -270,8 +182,12 @@ object RegularTaskRunner {
         regularInstanceMetadata.checkpointMode match {
           case "time-interval" =>
             logger.debug(s"Task: ${manager.taskName}. Start a regular module without state with time-interval checkpoint mode\n")
-            val checkpointTimer = new SjTimer()
-            checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
+            var checkpointTimer: Option[SjTimer] = None
+            if (regularInstanceMetadata.checkpointInterval > 0) {
+              checkpointTimer = Some(new SjTimer())
+              checkpointTimer.get.set(regularInstanceMetadata.checkpointInterval)
+            }
+
             while (true) {
 
               val maybeEnvelope = blockingQueue.get(regularInstanceMetadata.eventWaitTime)
@@ -311,7 +227,7 @@ object RegularTaskRunner {
                 logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
                 executor.onMessage(envelope)
 
-                if (checkpointTimer.isTime) {
+                if (checkpointTimer.isDefined && checkpointTimer.get.isTime || moduleEnvironmentManager.isCheckpointInitiated) {
                   logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
                   logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeCheckpoint() handler\n")
                   executor.onBeforeCheckpoint()
@@ -326,8 +242,10 @@ object RegularTaskRunner {
                   logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
                   executor.onAfterCheckpoint()
                   logger.debug(s"Task: ${manager.taskName}. Prepare a checkpoint timer for next cycle\n")
-                  checkpointTimer.reset()
-                  checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
+                  if (checkpointTimer.isDefined) {
+                    checkpointTimer.get.reset()
+                    checkpointTimer.get.set(regularInstanceMetadata.checkpointInterval)
+                  }
                 }
 
                 if (moduleTimer.isTime) {
@@ -382,7 +300,7 @@ object RegularTaskRunner {
                 logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
                 executor.onMessage(envelope)
 
-                if (countOfEnvelopes == regularInstanceMetadata.checkpointInterval) {
+                if (countOfEnvelopes == regularInstanceMetadata.checkpointInterval || moduleEnvironmentManager.isCheckpointInitiated) {
                   logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
                   logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeCheckpoint() handler\n")
                   executor.onBeforeCheckpoint()
@@ -448,8 +366,11 @@ object RegularTaskRunner {
         regularInstanceMetadata.checkpointMode match {
           case "time-interval" =>
             logger.debug(s"Task: ${manager.taskName}. Start a regular module with state with time-interval checkpoint mode\n")
-            val checkpointTimer = new SjTimer()
-            checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
+            var checkpointTimer: Option[SjTimer] = None
+            if (regularInstanceMetadata.checkpointInterval > 0) {
+              checkpointTimer = Some(new SjTimer())
+              checkpointTimer.get.set(regularInstanceMetadata.checkpointInterval)
+            }
 
             while (true) {
 
@@ -490,7 +411,7 @@ object RegularTaskRunner {
                 logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
                 executor.onMessage(envelope)
 
-                if (checkpointTimer.isTime) {
+                if (checkpointTimer.isDefined && checkpointTimer.get.isTime || moduleEnvironmentManager.isCheckpointInitiated) {
                   logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
                   logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeCheckpoint() handler\n")
                   executor.onBeforeCheckpoint()
@@ -526,8 +447,10 @@ object RegularTaskRunner {
                   logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
                   executor.onAfterCheckpoint()
                   logger.debug(s"Task: ${manager.taskName}. Prepare a checkpoint timer for next cycle\n")
-                  checkpointTimer.reset()
-                  checkpointTimer.set(regularInstanceMetadata.checkpointInterval)
+                  if (checkpointTimer.isDefined) {
+                    checkpointTimer.get.reset()
+                    checkpointTimer.get.set(regularInstanceMetadata.checkpointInterval)
+                  }
                 }
 
                 if (moduleTimer.isTime) {
@@ -584,7 +507,7 @@ object RegularTaskRunner {
                 logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
                 executor.onMessage(envelope)
 
-                if (countOfEnvelopes == regularInstanceMetadata.checkpointInterval) {
+                if (countOfEnvelopes == regularInstanceMetadata.checkpointInterval || moduleEnvironmentManager.isCheckpointInitiated) {
                   logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
                   logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeCheckpoint() handler\n")
                   executor.onBeforeCheckpoint()
@@ -648,5 +571,128 @@ object RegularTaskRunner {
       case "newest" => Newest
       case time => DateTime(new Date(time.toLong * 1000))
     }
+  }
+
+  def createSubscribingConsumers(inputs: mutable.Map[SjStream, Array[Int]], manager: TaskManager, offset: String) = {
+
+    var consumersWithSubscribes: Option[Map[String, BasicSubscribingConsumer[Array[Byte], Array[Byte]]]] = None
+
+    if (inputs.exists(x => x._1.streamType == StreamConstants.tStream)) {
+      logger.debug(s"Task: ${manager.taskName}. Start creating subscribing consumers\n")
+      consumersWithSubscribes = Some(inputs.filter(x => x._1.streamType == StreamConstants.tStream).map({
+        x => manager.createSubscribingConsumer(x._1, x._2.toList, chooseOffset(offset), blockingQueue)
+      }).map(x => (x.name, x)).toMap)
+      logger.debug(s"Task: ${manager.taskName}. Creation of subscribing consumers is finished\n")
+
+      logger.debug(s"Task: ${manager.taskName}. Start adding subscribing consumers to checkpoint group\n")
+      consumersWithSubscribes.get.foreach(x => checkpointGroup.add(x._1, x._2))
+      logger.debug(s"Task: ${manager.taskName}. Adding subscribing consumers to checkpoint group is finished\n")
+      logger.debug(s"Task: ${manager.taskName}. Launch subscribing consumers\n")
+      consumersWithSubscribes.get.foreach(_._2.start())
+      logger.debug(s"Task: ${manager.taskName}. Subscribing consumers are launched\n")
+    }
+
+    consumersWithSubscribes
+  }
+
+  def launchKafkaSubscribingConsumer(inputs: mutable.Map[SjStream, Array[Int]], manager: TaskManager, offset: String) = {
+    if (inputs.exists(x => x._1.streamType == StreamConstants.kafka)) {
+      val kafkaInputs: mutable.Map[SjStream, Array[Int]] = inputs.filter(x => x._1.streamType == StreamConstants.kafka)
+      logger.debug(s"Task: ${manager.taskName}. Start creating kafka consumers\n")
+      val kafkaConsumer: KafkaConsumer[Array[Byte], Array[Byte]] = manager.createKafkaConsumer(
+        kafkaInputs.map(x => (x._1.name, x._2.toList)).toList,
+        kafkaInputs.flatMap(_._1.service.asInstanceOf[KafkaService].provider.hosts).toList,
+        offset match {
+          case "oldest" => "earliest"
+          case _ => "latest"
+        }
+      )
+      logger.debug(s"Task: ${manager.taskName}. Creation of kafka consumers is finished\n")
+
+      logger.debug(s"Task: ${manager.taskName}. Launch kafka consumers that put consumed message, which are wrapped in envelope, into common queue \n")
+      executorService.execute(new Runnable() {
+        val currentThread = Thread.currentThread()
+        currentThread.setName(s"kafka-task-${manager.taskName}")
+
+        def run() = {
+
+          val serializer = new JsonSerializer()
+          val timeout = manager.kafkaSubscriberTimeout
+          val inputKafkaSjStreams = kafkaInputs.map(x => (x._1.name, x._1.tags)).toMap
+
+
+          while (true) {
+            logger.debug(s"Task: ${manager.taskName}. Waiting for records that consumed from kafka for $timeout milliseconds\n")
+            val records = kafkaConsumer.poll(timeout)
+            records.asScala.foreach(x => {
+
+              blockingQueue.put(serializer.serialize({
+                val envelope = new KafkaEnvelope()
+                envelope.stream = x.topic()
+                envelope.partition = x.partition()
+                envelope.data = x.value()
+                envelope.offset = x.offset()
+                envelope.tags = inputKafkaSjStreams(x.topic())
+                envelope
+              }))
+            })
+          }
+        }
+      })
+    }
+  }
+
+  def createOffsetProducer(manager: TaskManager) = {
+    var offsetProducer: Option[BasicProducer[Array[Byte], Array[Byte]]] = None
+
+    logger.debug(s"Task: ${manager.taskName}. Start creating a t-stream producer to record kafka offsets\n")
+    val streamForOffsets = manager.getOffsetStream
+    offsetProducer = Some(manager.createProducer(streamForOffsets))
+    logger.debug(s"Task: ${manager.taskName}. Creation of t-stream producer is finished\n")
+    logger.debug(s"Task: ${manager.taskName}. Start adding the t-stream producer to checkpoint group\n")
+    checkpointGroup.add(offsetProducer.get.name, offsetProducer.get)
+    logger.debug(s"Task: ${manager.taskName}. The t-stream producer is added to checkpoint group\n")
+
+    offsetProducer
+  }
+
+  def createReportProducer(manager: TaskManager) = {
+    logger.debug(s"Task: ${manager.taskName}. Start creating a t-stream producer to record performance reports\n")
+    val reportStream = manager.getReportStream
+    val reportProducer = manager.createProducer(reportStream)
+    logger.debug(s"Task: ${manager.taskName}. Creation of t-stream producer is finished\n")
+
+    reportProducer
+  }
+
+  def launchPerformanceMetricsReporting(manager: TaskManager,
+                                        performanceMetrics: RegularStreamingPerformanceMetrics,
+                                        performanceReportingInterval: Long) = {
+    val reportProducer = createReportProducer(manager)
+    logger.debug(s"Task: ${manager.taskName}. Launch a new thread to report performance metrics \n")
+    executorService.execute(new Runnable() {
+      val objectSerializer = new ObjectSerializer()
+      val currentThread = Thread.currentThread()
+      currentThread.setName(s"report-task-${manager.taskName}")
+
+      def run() = {
+        val taskNumber = manager.taskName.replace(s"${manager.instanceName}-task", "").toInt
+        var report: String = null
+        var reportTxn: BasicProducerTransaction[Array[Byte], Array[Byte]] = null
+        while (true) {
+          logger.info(s"Task: ${manager.taskName}. Wait $performanceReportingInterval ms to report performance metrics\n")
+          TimeUnit.MILLISECONDS.sleep(performanceReportingInterval)
+          report = performanceMetrics.getReport
+          println(s"Performance metrics: $report \n")
+          logger.info(s"Task: ${manager.taskName}. Performance metrics: $report \n")
+          logger.debug(s"Task: ${manager.taskName}. Create a new txn for sending performance metrics\n")
+          reportTxn = reportProducer.newTransaction(ProducerPolicies.errorIfOpen, taskNumber)
+          logger.debug(s"Task: ${manager.taskName}. Send performance metrics\n")
+          reportTxn.send(objectSerializer.serialize(report))
+          logger.debug(s"Task: ${manager.taskName}. Do checkpoint of producer for performance reporting\n")
+          reportProducer.checkpoint()
+        }
+      }
+    })
   }
 }

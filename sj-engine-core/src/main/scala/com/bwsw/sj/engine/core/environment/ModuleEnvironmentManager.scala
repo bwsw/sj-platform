@@ -12,9 +12,9 @@ import scala.collection._
 /**
  * Provides for user methods that can be used in a module
  * Created: 12/04/2016
-  *
-  * @author Kseniya Mikhaleva
-  * @param options User defined options from instance parameters
+ *
+ * @author Kseniya Mikhaleva
+ * @param options User defined options from instance parameters
  * @param producers T-streams producers for each output stream of instance parameters
  * @param outputs Set of output streams of instance parameters that have tags
  * @param outputTags Keeps a tag (partitioned or round-robin output) corresponding to the output for each output stream
@@ -27,11 +27,16 @@ class ModuleEnvironmentManager(val options: Map[String, Any],
                                moduleTimer: SjTimer,
                                performanceMetrics: RegularStreamingPerformanceMetrics) {
   protected val logger = LoggerFactory.getLogger(this.getClass)
+  var isCheckpointInitiated: Boolean = false
+
+  def initiateCheckpoint() = {
+    isCheckpointInitiated = true
+  }
 
   /**
    * Allows getting partitioned output for specific output stream
-    *
-    * @param streamName Name of output stream
+   *
+   * @param streamName Name of output stream
    * @return Partitioned output that wrapping output stream
    */
   def getPartitionedOutput(streamName: String) = {
@@ -58,8 +63,8 @@ class ModuleEnvironmentManager(val options: Map[String, Any],
 
   /**
    * Allows getting round-robin output for specific output stream
-    *
-    * @param streamName Name of output stream
+   *
+   * @param streamName Name of output stream
    * @return Round-robin output that wrapping output stream
    */
   def getRoundRobinOutput(streamName: String) = {
@@ -86,15 +91,15 @@ class ModuleEnvironmentManager(val options: Map[String, Any],
 
   /**
    * Enables user to use a timer in a module which will invoke the time handler: onTimer
-    *
-    * @param delay Time after which the handler will call
+   *
+   * @param delay Time after which the handler will call
    */
   def setTimer(delay: Long) = moduleTimer.set(delay)
 
   /**
    * Provides a default method for getting state of module. Must be overridden in stateful module
-    *
-    * @return Module state
+   *
+   * @return Module state
    */
   def getState: StateStorage = {
     logger.error("Module has no state")
@@ -103,8 +108,8 @@ class ModuleEnvironmentManager(val options: Map[String, Any],
 
   /**
    * Returns set of names of the output streams according to the set of tags
-    *
-    * @param tags Set of tags
+   *
+   * @param tags Set of tags
    * @return Set of names of the streams according to the set of tags
    */
   def getStreamsByTags(tags: Array[String]) = {
