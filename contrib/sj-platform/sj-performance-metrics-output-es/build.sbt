@@ -1,4 +1,4 @@
-name := "sj-output-module-for-pm"
+name := "sj-performance-metrics-output-es"
 
 version := "0.1"
 
@@ -13,4 +13,4 @@ assemblyMergeStrategy in assembly := {
     oldStrategy(x)
 }
 
-assemblyJarName in assembly := "sj-output-module-for-pm.jar"
+assemblyJarName in assembly := "sj-performance-metrics-output-es.jar"

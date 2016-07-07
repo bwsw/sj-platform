@@ -16,7 +16,7 @@ object StreamJugglerBuild extends Build {
     settings = commonSettings) aggregate(common, engineCore,
     stubRegular, stubOutput, crudRest, transactionGenerator, mesos,
     outputStreamingEngine, regularStreamingEngine, windowedStreamingEngine,
-    outputPM, sflowOutput,
+    pmOutput, sflowOutput,
     sflowProcess)
 
   lazy val common = Project(id = "sj-common",
@@ -52,8 +52,8 @@ object StreamJugglerBuild extends Build {
   lazy val sflowProcess = Project(id = "sj-sflow-process",
     base = file("./contrib/examples/sflow/sj-sflow-process")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
 
-  lazy val outputPM = Project(id = "sj-output-module-for-pm",
-    base = file("sj-output-module-for-pm")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
+  lazy val pmOutput = Project(id = "sj-performance-metrics-output-es",
+    base = file("./contrib/sj-platform/sj-performance-metrics-output-es")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
 
   lazy val sflowOutput = Project(id = "sj-sflow-output",
     base = file("./contrib/examples/sflow/sj-sflow-output")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
