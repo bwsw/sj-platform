@@ -1,4 +1,4 @@
-package com.bwsw.sj.module.output.data
+package com.bwsw.sj.stubs.module.output.data
 
 import java.util.Date
 

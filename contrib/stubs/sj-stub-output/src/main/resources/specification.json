@@ -28,7 +28,7 @@
   "options": {
     "opt": 1
   },
-  "validator-class": "com.bwsw.sj.module.output.StubOutputValidator",
-  "executor-class": "com.bwsw.sj.module.output.StubOutputHandler",
-  "entity-class" : "com.bwsw.sj.module.output.data.StubEsData"
+  "validator-class": "com.bwsw.sj.stubs.module.output.StubOutputValidator",
+  "executor-class": "com.bwsw.sj.stubs.module.output.StubOutputHandler",
+  "entity-class" : "com.bwsw.sj.stubs.module.output.data.StubEsData"
 }

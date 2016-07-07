@@ -14,7 +14,7 @@ object StreamJugglerBuild extends Build {
   lazy val sj = Project(id = "sj",
     base = file("."),
     settings = commonSettings) aggregate(common, engineCore,
-    stub, stubOutput, crudRest, transactionGenerator, mesos,
+    stubRegular, stubOutput, crudRest, transactionGenerator, mesos,
     outputStreamingEngine, regularStreamingEngine, windowedStreamingEngine,
     outputPM, sflowOutput,
     sflowProcess)
@@ -43,11 +43,11 @@ object StreamJugglerBuild extends Build {
   lazy val windowedStreamingEngine = Project(id = "sj-windowed-streaming-engine",
     base = file("sj-windowed-streaming-engine")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
 
-  lazy val stub = Project(id = "sj-stub-module",
-    base = file("sj-stub-module")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
+  lazy val stubRegular = Project(id = "sj-stub-regular-streaming",
+    base = file("./contrib/stubs/sj-stub-regular-streaming")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
 
-  lazy val stubOutput = Project(id = "sj-stub-output-module",
-    base = file("sj-stub-output-module")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
+  lazy val stubOutput = Project(id = "sj-stub-output",
+    base = file("./contrib/stubs/sj-stub-output")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
 
   lazy val sflowProcess = Project(id = "sj-sflow-process",
     base = file("./contrib/examples/sflow/sj-sflow-process")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)

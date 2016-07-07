@@ -1,5 +1,4 @@
-package com.bwsw.sj.module.output
-
+package com.bwsw.sj.stubs.module.output
 import com.bwsw.sj.common.module.StreamingValidator
 
 /**

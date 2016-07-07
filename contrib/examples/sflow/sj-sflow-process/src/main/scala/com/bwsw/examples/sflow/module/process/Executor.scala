@@ -3,7 +3,6 @@ package com.bwsw.examples.sflow.module.process
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.examples.sflow.module.process.udf.GeoIp
 import com.bwsw.examples.sflow.module.process.utils.SflowParser
-import SflowParser
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor

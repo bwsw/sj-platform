@@ -1,12 +1,11 @@
-package com.bwsw.sj.module.output
+package com.bwsw.sj.stubs.module.output
 
 import java.util.Calendar
 
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
-import com.bwsw.sj.module.output.data.StubEsData
-import com.datastax.driver.core.utils.UUIDs
+import com.bwsw.sj.stubs.module.output.data.StubEsData
 
 /**
   * Handler for work with t-stream envelopes
