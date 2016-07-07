@@ -20,28 +20,28 @@ object StreamJugglerBuild extends Build {
     sflowProcess)
 
   lazy val common = Project(id = "sj-common",
-    base = file("sj-common")).enablePlugins(JavaAppPackaging)
+    base = file("./core/sj-common")).enablePlugins(JavaAppPackaging)
 
   lazy val engineCore = Project(id = "sj-engine-core",
-    base = file("sj-engine-core")).enablePlugins(JavaAppPackaging).dependsOn(common)
+    base = file("./core/sj-engine-core")).enablePlugins(JavaAppPackaging).dependsOn(common)
 
   lazy val crudRest = Project(id = "sj-crud-rest",
-    base = file("sj-crud-rest")).enablePlugins(JavaAppPackaging).dependsOn(common)
+    base = file("./core/sj-crud-rest")).enablePlugins(JavaAppPackaging).dependsOn(common)
 
   lazy val transactionGenerator = Project(id = "sj-transaction-generator",
-    base = file("sj-transaction-generator")).enablePlugins(JavaAppPackaging).dependsOn(common)
+    base = file("./core/sj-transaction-generator")).enablePlugins(JavaAppPackaging).dependsOn(common)
 
   lazy val mesos = Project(id = "sj-mesos-framework",
-    base = file("sj-mesos-framework")).enablePlugins(JavaAppPackaging).dependsOn(common)
+    base = file("./core/sj-mesos-framework")).enablePlugins(JavaAppPackaging).dependsOn(common)
 
   lazy val outputStreamingEngine = Project(id = "sj-output-streaming-engine",
-    base = file("sj-output-streaming-engine")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
+    base = file("./core/sj-output-streaming-engine")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
 
   lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
-    base = file("sj-regular-streaming-engine")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
+    base = file("./core/sj-regular-streaming-engine")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
 
   lazy val windowedStreamingEngine = Project(id = "sj-windowed-streaming-engine",
-    base = file("sj-windowed-streaming-engine")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
+    base = file("./core/sj-windowed-streaming-engine")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
 
   lazy val stubRegular = Project(id = "sj-stub-regular-streaming",
     base = file("./contrib/stubs/sj-stub-regular-streaming")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
