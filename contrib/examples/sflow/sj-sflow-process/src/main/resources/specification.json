@@ -1,0 +1,33 @@
+{
+  "name": "sflow-process",
+  "description": "Regular module for sflow processing by BW",
+  "version": "0.1",
+  "author": "Ksenia Mikhaleva",
+  "license": "Apache 2.0",
+  "inputs": {
+    "cardinality": [
+      1,
+      10
+    ],
+    "types": [
+      "stream.t-stream",
+      "stream.kafka"
+    ]
+  },
+  "outputs": {
+    "cardinality": [
+      1,
+      10
+    ],
+    "types": [
+      "stream.t-stream",
+      "stream.kafka"
+    ]
+  },
+  "module-type": "regular-streaming",
+  "engine-name": "com.bwsw.regular.streaming.engine",
+  "engine-version": "0.1",
+  "options": {},
+  "validator-class": "com.bwsw.examples.sflow.module.process.Validator",
+  "executor-class": "com.bwsw.examples.sflow.module.process.Executor"
+}
