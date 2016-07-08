@@ -1,0 +1,7 @@
+{
+  "name": "com.bwsw.input.streaming.engine",
+  "description": "Input streaming engine by BW",
+  "version": "0.1",
+  "author": "Ksenia Mikhaleva",
+  "license": "Apache 2.0"
+}

@@ -45,3 +45,6 @@ assemblyMergeStrategy in assembly := {
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
 }
+
+
+unmanagedJars in Compile += file("lib/t-streams.jar")

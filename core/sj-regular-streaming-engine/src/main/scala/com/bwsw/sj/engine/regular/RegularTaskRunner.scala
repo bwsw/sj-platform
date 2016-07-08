@@ -46,9 +46,11 @@ object RegularTaskRunner {
 
   private val checkpointGroup = new CheckpointGroup()
 
+  private val moduleTimer = new SjTimer()
+
   def main(args: Array[String]) {
 
-    val manager = new TaskManager()
+    val manager = new RegularTaskManager()
     logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for regular module\n")
 
     val moduleJar = manager.getModuleJar
@@ -59,22 +61,16 @@ object RegularTaskRunner {
 
     val outputTags = manager.getOutputTags
 
-    val moduleTimer = new SjTimer()
-
     val inputs: mutable.Map[SjStream, Array[Int]] = manager.inputs
 
-    val offsetProducer: Option[BasicProducer[Array[Byte], Array[Byte]]] = createOffsetProducer(manager)
+    val offsetProducer = createOffsetProducer(manager)
 
-    val consumersWithSubscribes: Option[Map[String, BasicSubscribingConsumer[Array[Byte], Array[Byte]]]] =
-      createSubscribingConsumers(inputs, manager, regularInstanceMetadata.startFrom)
+    val consumersWithSubscribes = createSubscribingConsumers(inputs, manager, regularInstanceMetadata.startFrom)
 
     launchKafkaSubscribingConsumer(inputs, manager, regularInstanceMetadata.startFrom)
 
     logger.debug(s"Task: ${manager.taskName}. Start creating t-stream producers for each output stream\n")
-    val producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]] =
-      regularInstanceMetadata.outputs
-        .map(x => (x, ConnectionRepository.getStreamService.get(x)))
-        .map(x => (x._1, manager.createProducer(x._2))).toMap
+    val producers = manager.createOutputProducers
     logger.debug(s"Task: ${manager.taskName}. T-stream producers for each output stream are created\n")
 
     logger.debug(s"Task: ${manager.taskName}. Start adding t-stream producers to checkpoint group\n")
@@ -144,7 +140,7 @@ object RegularTaskRunner {
                         pathToExecutor: String,
                         producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]],
                         consumers: Option[Map[String, BasicSubscribingConsumer[Array[Byte], Array[Byte]]]],
-                        manager: TaskManager,
+                        manager: RegularTaskManager,
                         offsetProducer: Option[BasicProducer[Array[Byte], Array[Byte]]],
                         checkpointGroup: CheckpointGroup,
                         performanceMetrics: RegularStreamingPerformanceMetrics) = {
@@ -573,7 +569,7 @@ object RegularTaskRunner {
     }
   }
 
-  def createSubscribingConsumers(inputs: mutable.Map[SjStream, Array[Int]], manager: TaskManager, offset: String) = {
+  def createSubscribingConsumers(inputs: mutable.Map[SjStream, Array[Int]], manager: RegularTaskManager, offset: String) = {
 
     var consumersWithSubscribes: Option[Map[String, BasicSubscribingConsumer[Array[Byte], Array[Byte]]]] = None
 
@@ -595,7 +591,7 @@ object RegularTaskRunner {
     consumersWithSubscribes
   }
 
-  def launchKafkaSubscribingConsumer(inputs: mutable.Map[SjStream, Array[Int]], manager: TaskManager, offset: String) = {
+  def launchKafkaSubscribingConsumer(inputs: mutable.Map[SjStream, Array[Int]], manager: RegularTaskManager, offset: String) = {
     if (inputs.exists(x => x._1.streamType == StreamConstants.kafka)) {
       val kafkaInputs: mutable.Map[SjStream, Array[Int]] = inputs.filter(x => x._1.streamType == StreamConstants.kafka)
       logger.debug(s"Task: ${manager.taskName}. Start creating kafka consumers\n")
@@ -642,7 +638,7 @@ object RegularTaskRunner {
     }
   }
 
-  def createOffsetProducer(manager: TaskManager) = {
+  def createOffsetProducer(manager: RegularTaskManager) = {
     var offsetProducer: Option[BasicProducer[Array[Byte], Array[Byte]]] = None
 
     logger.debug(s"Task: ${manager.taskName}. Start creating a t-stream producer to record kafka offsets\n")
@@ -656,7 +652,7 @@ object RegularTaskRunner {
     offsetProducer
   }
 
-  def createReportProducer(manager: TaskManager) = {
+  def createReportProducer(manager: RegularTaskManager) = {
     logger.debug(s"Task: ${manager.taskName}. Start creating a t-stream producer to record performance reports\n")
     val reportStream = manager.getReportStream
     val reportProducer = manager.createProducer(reportStream)
@@ -665,7 +661,7 @@ object RegularTaskRunner {
     reportProducer
   }
 
-  def launchPerformanceMetricsReporting(manager: TaskManager,
+  def launchPerformanceMetricsReporting(manager: RegularTaskManager,
                                         performanceMetrics: RegularStreamingPerformanceMetrics,
                                         performanceReportingInterval: Long) = {
     val reportProducer = createReportProducer(manager)

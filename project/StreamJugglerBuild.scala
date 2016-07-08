@@ -3,6 +3,8 @@ import com.typesafe.sbt.packager.Keys._
 import com.typesafe.sbt.packager.archetypes.JavaAppPackaging
 import sbt.Keys._
 import sbt._
+import sbtassembly.AssemblyPlugin.autoImport._
+import sbtassembly.PathList
 
 object StreamJugglerBuild extends Build {
 
@@ -13,11 +15,11 @@ object StreamJugglerBuild extends Build {
   //////////////////////////////////////////////////////////////////////////////
   lazy val sj = Project(id = "sj",
     base = file("."),
-    settings = commonSettings) aggregate(common, engineCore,
-    stubRegular, stubOutput, crudRest, transactionGenerator, mesos,
-    outputStreamingEngine, regularStreamingEngine, windowedStreamingEngine,
-    pmOutput, sflowOutput,
-    sflowProcess)
+    settings = commonSettings) aggregate(common, engineCore, crudRest, transactionGenerator, mesos,
+    outputStreamingEngine, regularStreamingEngine, windowedStreamingEngine, inputStreamingEngine,
+    pmOutput,
+    stubRegular, stubOutput,
+    sflowOutput, sflowProcess)
 
   lazy val common = Project(id = "sj-common",
     base = file("./core/sj-common")).enablePlugins(JavaAppPackaging)
@@ -42,6 +44,9 @@ object StreamJugglerBuild extends Build {
 
   lazy val windowedStreamingEngine = Project(id = "sj-windowed-streaming-engine",
     base = file("./core/sj-windowed-streaming-engine")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
+
+  lazy val inputStreamingEngine = Project(id = "sj-input-streaming-engine",
+    base = file("./core/sj-input-streaming-engine")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
 
   lazy val stubRegular = Project(id = "sj-stub-regular-streaming",
     base = file("./contrib/stubs/sj-stub-regular-streaming")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
@@ -109,12 +114,15 @@ object StreamJugglerBuild extends Build {
     //      "org.scala-lang" %  "scala-compiler" % scalaVersion.value
     //    ),
     //
-    //    assemblyMergeStrategy in assembly := {
-    //      case x =>
-    //        val oldStrategy = (assemblyMergeStrategy in assembly).value
-    //        oldStrategy(x)
-    //    },
-
+    assemblyMergeStrategy in assembly := {
+      case PathList("scala", xs@_*) => MergeStrategy.first
+      case PathList("org", "slf4j", xs@_*) => MergeStrategy.first
+      case "library.properties" => MergeStrategy.concat
+      case "log4j.properties" => MergeStrategy.concat
+      case x =>
+        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        oldStrategy(x)
+    },
 
     scalacOptions in Compile ++= Seq(
       "-unchecked",
@@ -133,4 +141,5 @@ object StreamJugglerBuild extends Build {
     maintainer in Docker := "bwsw <bwsw@bwsw.com>"
 
   )
+
 }
