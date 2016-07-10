@@ -15,7 +15,8 @@ import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.common.StreamConstants._
 import com.bwsw.sj.engine.core.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
-import com.bwsw.sj.engine.core.environment.ModuleOutput
+import com.bwsw.sj.engine.core.environment.{ModuleEnvironmentManager, ModuleOutput}
+import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.regular.subscriber.RegularConsumerCallback
 import com.bwsw.tstreams.agents.consumer.Offsets.{IOffset, Newest}
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
@@ -154,7 +155,7 @@ class RegularTaskManager() {
    * @param pathToJar Absolute path to jar file
    * @return Class loader for retrieving classes from jar
    */
-  def getClassLoader(pathToJar: String) = {
+  private def getClassLoader(pathToJar: String) = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Get class loader for class: $pathToJar\n")
     val classLoaderUrls = Array(new File(pathToJar).toURI.toURL)
 
@@ -167,7 +168,7 @@ class RegularTaskManager() {
    *
    * @return Local file contains uploaded module jar
    */
-  def getModuleJar: File = {
+  private def getModuleJar: File = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '${instance.moduleName}' module jar\n")
     storage.get(fileMetadata.filename, s"tmp/${instance.moduleName}")
   }
@@ -183,13 +184,20 @@ class RegularTaskManager() {
   }
 
   /**
-   * Returns an absolute path to executor class of module
+   * Returns instance of executor of module
    *
-   * @return An absolute path to executor class of module
+   * @return An instance of executor of module
    */
-  def getExecutorClass = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get an absolute path to executor class of module\n")
-    fileMetadata.specification.executorClass
+  def getExecutor(moduleEnvironmentManager: ModuleEnvironmentManager) = {
+    logger.debug(s"Task: $taskName. Start loading of executor class from module jar\n")
+    val moduleJar = getModuleJar
+    val classLoader = getClassLoader(moduleJar.getAbsolutePath)
+    val executor = classLoader.loadClass(fileMetadata.specification.executorClass)
+      .getConstructor(classOf[ModuleEnvironmentManager])
+      .newInstance(moduleEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
+    logger.debug(s"Task: $taskName. Create instance of executor class\n")
+
+    executor
   }
 
   /**
@@ -424,10 +432,14 @@ class RegularTaskManager() {
    * Create t-stream producers for each output stream
    * @return Map where key is stream name and value is t-stream producer
    */
-  def createOutputProducers = {
-    instance.outputs
+  def createOutputProducers() = {
+    logger.debug(s"Task: $taskName. Start creating t-stream producers for each output stream\n")
+    val producers = instance.outputs
       .map(x => (x, ConnectionRepository.getStreamService.get(x)))
       .map(x => (x._1, createProducer(x._2))).toMap
+    logger.debug(s"Task: $taskName. T-stream producers for each output stream are created\n")
+
+    producers
   }
 
   /**

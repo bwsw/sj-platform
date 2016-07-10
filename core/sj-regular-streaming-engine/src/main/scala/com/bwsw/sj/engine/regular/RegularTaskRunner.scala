@@ -1,12 +1,11 @@
 package com.bwsw.sj.engine.regular
 
-import java.net.URLClassLoader
 import java.util.Date
 import java.util.concurrent.{Executors, TimeUnit}
-import scala.collection.JavaConverters._
+
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.common.DAL.model.{KafkaService, SjStream}
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
+import com.bwsw.sj.common.DAL.model.{KafkaService, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.module.reporting.RegularStreamingPerformanceMetrics
 import com.bwsw.sj.common.utils.SjTimer
@@ -14,7 +13,6 @@ import com.bwsw.sj.common.{ModuleConstants, StreamConstants}
 import com.bwsw.sj.engine.core.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.{ModuleEnvironmentManager, ModuleOutput, StatefulModuleEnvironmentManager}
-import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.state.{RAMStateService, StateStorage}
 import com.bwsw.tstreams.agents.consumer.Offsets.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
@@ -24,6 +22,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory
 
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 /**
@@ -53,11 +52,7 @@ object RegularTaskRunner {
     val manager = new RegularTaskManager()
     logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for regular module\n")
 
-    val moduleJar = manager.getModuleJar
-
     val regularInstanceMetadata: RegularInstance = manager.getInstanceMetadata.asInstanceOf[RegularInstance]
-
-    val executorClass = manager.getExecutorClass
 
     val outputTags = manager.getOutputTags
 
@@ -69,15 +64,11 @@ object RegularTaskRunner {
 
     launchKafkaSubscribingConsumer(inputs, manager, regularInstanceMetadata.startFrom)
 
-    logger.debug(s"Task: ${manager.taskName}. Start creating t-stream producers for each output stream\n")
-    val producers = manager.createOutputProducers
-    logger.debug(s"Task: ${manager.taskName}. T-stream producers for each output stream are created\n")
+    val producers = manager.createOutputProducers()
 
     logger.debug(s"Task: ${manager.taskName}. Start adding t-stream producers to checkpoint group\n")
     producers.foreach(x => checkpointGroup.add(x._2.name, x._2))
     logger.debug(s"Task: ${manager.taskName}. The t-stream producers are added to checkpoint group\n")
-
-    val classLoader = manager.getClassLoader(moduleJar.getAbsolutePath)
 
     val performanceMetrics = new RegularStreamingPerformanceMetrics(
       manager.taskName,
@@ -98,8 +89,6 @@ object RegularTaskRunner {
         regularInstanceMetadata,
         blockingQueue,
         outputTags,
-        classLoader,
-        executorClass,
         producers,
         consumersWithSubscribes,
         manager,
@@ -122,8 +111,6 @@ object RegularTaskRunner {
    * @param regularInstanceMetadata Launch parameters of module
    * @param blockingQueue Queue for keeping envelope
    * @param outputTags Keeps a tag (partitioned or round-robin output) corresponding to the output for each output stream
-   * @param classLoader Allows loading an executor class
-   * @param pathToExecutor Absolute class path to module class that implemented RegularStreamingExecutor
    * @param producers T-stream producers for sending data to output streams
    * @param consumers T-stream consumers to set local offset after fetching an envelope from queue
    * @param manager Allows managing an environment of task
@@ -136,8 +123,6 @@ object RegularTaskRunner {
                         regularInstanceMetadata: RegularInstance,
                         blockingQueue: PersistentBlockingQueue,
                         outputTags: mutable.Map[String, (String, ModuleOutput)],
-                        classLoader: URLClassLoader,
-                        pathToExecutor: String,
                         producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]],
                         consumers: Option[Map[String, BasicSubscribingConsumer[Array[Byte], Array[Byte]]]],
                         manager: RegularTaskManager,
@@ -165,11 +150,7 @@ object RegularTaskRunner {
           performanceMetrics
         )
 
-        logger.debug(s"Task: ${manager.taskName}. Start loading of executor class from module jar\n")
-        val executor = classLoader.loadClass(pathToExecutor)
-          .getConstructor(classOf[ModuleEnvironmentManager])
-          .newInstance(moduleEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
-        logger.debug(s"Task: ${manager.taskName}. Create instance of executor class\n")
+        val executor = manager.getExecutor(moduleEnvironmentManager)
 
         logger.debug(s"Task: ${manager.taskName}. Invoke onInit() handler\n")
         executor.onInit()
@@ -349,11 +330,7 @@ object RegularTaskRunner {
           performanceMetrics
         )
 
-        logger.debug(s"Task: ${manager.taskName}. Start loading of executor class from module jar\n")
-        val executor = classLoader.loadClass(pathToExecutor)
-          .getConstructor(classOf[ModuleEnvironmentManager])
-          .newInstance(moduleEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
-        logger.debug(s"Task: ${manager.taskName}. Instance of executor class is created\n")
+        val executor = manager.getExecutor(moduleEnvironmentManager)
 
         logger.debug(s"Task: ${manager.taskName}. Invoke onInit() handler\n")
         executor.onInit()

@@ -10,7 +10,8 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.StreamConstants._
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
-import com.bwsw.sj.engine.core.environment.ModuleOutput
+import com.bwsw.sj.engine.core.environment.{InputEnvironmentManager, ModuleEnvironmentManager, ModuleOutput}
+import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.tstreams.agents.producer.InsertionType.SingleElementInsert
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions, ProducerCoordinationOptions}
 import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
@@ -129,7 +130,7 @@ class InputTaskManager() {
    * @param pathToJar Absolute path to jar file
    * @return Class loader for retrieving classes from jar
    */
-  def getClassLoader(pathToJar: String) = {
+  private def getClassLoader(pathToJar: String) = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Get class loader for class: $pathToJar\n")
     val classLoaderUrls = Array(new File(pathToJar).toURI.toURL)
 
@@ -142,7 +143,7 @@ class InputTaskManager() {
    *
    * @return Local file contains uploaded module jar
    */
-  def getModuleJar: File = {
+  private def getModuleJar: File = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '${instance.moduleName}' module jar\n")
     storage.get(fileMetadata.filename, s"tmp/${instance.moduleName}")
   }
@@ -158,13 +159,20 @@ class InputTaskManager() {
   }
 
   /**
-   * Returns an absolute path to executor class of module
+   * Returns instance of executor of module
    *
-   * @return An absolute path to executor class of module
+   * @return An instance of executor of module
    */
-  def getExecutorClass = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get an absolute path to executor class of module\n")
-    fileMetadata.specification.executorClass
+  def getExecutor(inputEnvironmentManager: InputEnvironmentManager) = {
+    logger.debug(s"Task: $taskName. Start loading of executor class from module jar\n")
+    val moduleJar = getModuleJar
+    val classLoader = getClassLoader(moduleJar.getAbsolutePath)
+    val executor = classLoader.loadClass(fileMetadata.specification.executorClass)
+      .getConstructor(classOf[ModuleEnvironmentManager])
+      .newInstance(inputEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
+    logger.debug(s"Task: $taskName. Create instance of executor class\n")
+
+    executor
   }
 
   /**

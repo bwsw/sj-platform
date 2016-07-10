@@ -1,9 +1,11 @@
-package com.bwsw.sj.engine.input.connection.tcp
+package com.bwsw.sj.engine.input.connection.tcp.server
 
 import io.netty.bootstrap.ServerBootstrap
-import io.netty.channel.{ChannelOption, EventLoopGroup}
+import io.netty.buffer.ByteBuf
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
+import io.netty.channel.{ChannelOption, EventLoopGroup}
+import io.netty.handler.logging.{LogLevel, LoggingHandler}
 
 
 /**
@@ -12,7 +14,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel
  * Than wait until the server socket is closed gracefully shut down the server.
  */
 
-class InputStreamingServer(host: String, port: Int) {
+class InputStreamingServer(host: String, port: Int, buffer: ByteBuf) {
 
   def run() = {
     val bossGroup: EventLoopGroup = new NioEventLoopGroup()
@@ -21,7 +23,8 @@ class InputStreamingServer(host: String, port: Int) {
       val bootstrapServer = new ServerBootstrap()
       bootstrapServer.group(bossGroup, workerGroup)
         .channel(classOf[NioServerSocketChannel])
-        .childHandler(new InputStreamingChannelInitializer())
+        .handler(new LoggingHandler(LogLevel.INFO))
+        .childHandler(new InputStreamingChannelInitializer(buffer))
         .option[java.lang.Boolean](ChannelOption.SO_KEEPALIVE, true)
 
       bootstrapServer.bind(host, port).sync().channel().closeFuture().sync()
