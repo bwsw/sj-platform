@@ -17,13 +17,11 @@ class Instance {
   var status: String = null
   @Id var name: String = null
   var description: String = null
-  var inputs: Array[String] = null
   var outputs: Array[String] = null
   @Property("checkpoint-mode") var checkpointMode: String = null
   @Property("checkpoint-interval") var checkpointInterval: Long = 0
   var parallelism: Int = 0
   var options: String = null
-  @Property("start-from") var startFrom: String = null
   @Property("per-task-cores") var perTaskCores: Double = 0.0
   @Property("per-task-ram") var perTaskRam: Int = 0
   @Embedded("jvm-options") var jvmOptions: java.util.Map[String, String] = null
