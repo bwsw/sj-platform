@@ -11,7 +11,7 @@ import io.netty.util.ReferenceCountUtil
 import org.slf4j.LoggerFactory
 
 /**
- * Object responsible for running a task of job that launches input module
+ * Object is responsible for running a task of job that launches input module
  * Created: 07/07/2016
  *
  * @author Kseniya Mikhaleva

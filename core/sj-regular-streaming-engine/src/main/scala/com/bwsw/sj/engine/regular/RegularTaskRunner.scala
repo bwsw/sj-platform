@@ -26,7 +26,7 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 /**
- * Object responsible for running a task of job that launches regular module
+ * Object is responsible for running a task of job that launches regular module
  * Created: 13/04/2016
  *
  * @author Kseniya Mikhaleva

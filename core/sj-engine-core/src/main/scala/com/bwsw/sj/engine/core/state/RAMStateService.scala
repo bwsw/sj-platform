@@ -13,8 +13,8 @@ import scala.collection.mutable
  * Created: 12/04/2016
  * @author Kseniya Mikhaleva
  *
- * @param producer Producer responsible for saving a partial changes of state or a full state
- * @param consumer Consumer responsible for retrieving a partial or full state
+ * @param producer Producer is responsible for saving a partial changes of state or a full state
+ * @param consumer Consumer is responsible for retrieving a partial or full state
  */
 
 class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],

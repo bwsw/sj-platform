@@ -452,10 +452,10 @@ class RegularTaskManager() {
   }
 
   /**
-   * Creates t-stream or loads an existing t-stream responsible for committing the offsets of last messages
+   * Creates t-stream or loads an existing t-stream is responsible for committing the offsets of last messages
    * that has successfully processed for each topic for each partition
    *
-   * @return t-stream responsible for committing the offsets of last messages
+   * @return t-stream is responsible for committing the offsets of last messages
    *         that has successfully processed for each topic for each partition
    */
   def getOffsetStream = {
