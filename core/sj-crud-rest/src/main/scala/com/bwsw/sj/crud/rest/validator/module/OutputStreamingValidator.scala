@@ -57,8 +57,8 @@ class OutputStreamingValidator extends StreamingModuleValidator {
     }
     if (parameters.asInstanceOf[OutputInstanceMetadata].output != null) {
       outputStream = getStream(parameters.asInstanceOf[OutputInstanceMetadata].output)
-      if (inputStream == null) {
-        errors += s"Input stream '${parameters.asInstanceOf[OutputInstanceMetadata].output}' is not exists."
+      if (outputStream == null) {
+        errors += s"Output stream '${parameters.asInstanceOf[OutputInstanceMetadata].output}' is not exists."
       } else {
         val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
         if (!outputTypes.contains(outputStream.streamType)) {

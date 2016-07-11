@@ -9,6 +9,5 @@ import org.mongodb.morphia.annotations.Property
   * @author Kseniya Tomskikh
   */
 class OutputInstance() extends Instance {
-  var inputs: Array[String] = null
   @Property("start-from") var startFrom: String = null
 }

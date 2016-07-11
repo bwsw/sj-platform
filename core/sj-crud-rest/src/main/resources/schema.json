@@ -25,7 +25,8 @@
               "stream.t-stream",
               "stream.kafka",
               "elasticsearch-output",
-              "jdbc-output"
+              "jdbc-output",
+              "input"
             ]
           }
         }
@@ -72,7 +73,8 @@
       "enum": [
         "regular-streaming",
         "windowed-streaming",
-        "output-streaming"
+        "output-streaming",
+        "input-streaming"
       ]
     },
     "engine-name": {

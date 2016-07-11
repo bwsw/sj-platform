@@ -9,6 +9,7 @@ object ModuleConstants {
   def persistentQueuePath = UUID.randomUUID().toString //todo: until t-streams can't remove persistent queue
   val persistentBlockingQueue = "persistentBlockingQueue"
 
+  val inputStreamingType = "input-streaming"
   val outputStreamingType = "output-streaming"
   val windowedStreamingType = "windowed-streaming"
   val regularStreamingType = "regular-streaming"
@@ -44,6 +45,7 @@ object ModuleConstants {
 }
 
 object StreamConstants {
+  final val input = "input"
   final val tStream = "stream.t-stream"
   final val kafka = "stream.kafka"
   final val esOutput = "elasticsearch-output"
