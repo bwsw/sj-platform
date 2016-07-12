@@ -7,11 +7,12 @@ import com.aerospike.client.Host
 import com.bwsw.common.tstream.NetworkTimeUUIDGenerator
 import com.bwsw.sj.common.ConfigConstants._
 import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.model.module.InputInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.StreamConstants._
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
-import com.bwsw.sj.engine.core.environment.{InputEnvironmentManager, ModuleEnvironmentManager, ModuleOutput}
-import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
+import com.bwsw.sj.engine.core.environment.{InputEnvironmentManager, ModuleOutput}
+import com.bwsw.sj.engine.core.input.InputStreamingExecutor
 import com.bwsw.tstreams.agents.producer.InsertionType.SingleElementInsert
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions, ProducerCoordinationOptions}
 import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
@@ -26,6 +27,7 @@ import com.bwsw.tstreams.streams.BasicStream
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
+
 /**
  * Class allowing to manage an environment of input streaming task
  * Created: 08/07/2016
@@ -155,7 +157,7 @@ class InputTaskManager() {
    */
   def getInstanceMetadata = {
     logger.info(s"Instance name: $instanceName, task name: $taskName. Get instance metadata\n")
-    instance
+    instance.asInstanceOf[InputInstance]
   }
 
   /**
@@ -168,8 +170,8 @@ class InputTaskManager() {
     val moduleJar = getModuleJar
     val classLoader = getClassLoader(moduleJar.getAbsolutePath)
     val executor = classLoader.loadClass(fileMetadata.specification.executorClass)
-      .getConstructor(classOf[ModuleEnvironmentManager])
-      .newInstance(inputEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
+      .getConstructor(classOf[InputEnvironmentManager])
+      .newInstance(inputEnvironmentManager).asInstanceOf[InputStreamingExecutor]
     logger.debug(s"Task: $taskName. Create instance of executor class\n")
 
     executor
@@ -203,7 +205,7 @@ class InputTaskManager() {
       zkSessionTimeout,
       isLowPriorityToBeMaster = false,
       transport = new TcpTransport,
-      transportTimeout =transportTimeout,
+      transportTimeout = transportTimeout,
       zkConnectionTimeout = zkConnectionTimeout
     )
     currentPortNumber += 1

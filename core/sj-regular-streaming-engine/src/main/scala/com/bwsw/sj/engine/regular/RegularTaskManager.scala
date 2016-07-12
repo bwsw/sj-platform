@@ -9,6 +9,7 @@ import com.bwsw.common.ObjectSerializer
 import com.bwsw.common.tstream.NetworkTimeUUIDGenerator
 import com.bwsw.sj.common.ConfigConstants._
 import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.ModuleConstants._
 import com.bwsw.sj.common.StreamConstants
@@ -180,7 +181,7 @@ class RegularTaskManager() {
    */
   def getInstanceMetadata = {
     logger.info(s"Instance name: $instanceName, task name: $taskName. Get instance metadata\n")
-    instance
+    instance.asInstanceOf[RegularInstance]
   }
 
   /**

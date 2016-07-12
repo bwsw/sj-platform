@@ -52,7 +52,7 @@ object RegularTaskRunner {
     val manager = new RegularTaskManager()
     logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for regular module\n")
 
-    val regularInstanceMetadata: RegularInstance = manager.getInstanceMetadata.asInstanceOf[RegularInstance]
+    val regularInstanceMetadata: RegularInstance = manager.getInstanceMetadata
 
     val outputTags = manager.getOutputTags
 

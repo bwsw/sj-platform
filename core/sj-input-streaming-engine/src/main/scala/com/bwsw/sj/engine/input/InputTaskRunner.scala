@@ -1,13 +1,11 @@
 package com.bwsw.sj.engine.input
 
-import java.nio.charset.Charset
-import java.util.concurrent.Executors
+import java.util.concurrent.{ExecutorService, Executors}
 
+import com.bwsw.sj.common.DAL.model.module.InputInstance
 import com.bwsw.sj.engine.input.connection.tcp.server.InputStreamingServer
-import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import io.netty.buffer.{ByteBuf, Unpooled}
-import io.netty.util.ReferenceCountUtil
 import org.slf4j.LoggerFactory
 
 /**
@@ -19,48 +17,42 @@ import org.slf4j.LoggerFactory
 
 object InputTaskRunner {
 
-  private val logger = LoggerFactory.getLogger(this.getClass)
-  private val threadFactory = new ThreadFactoryBuilder()
-    .setNameFormat("InputTaskRunner-%d")
-    .setDaemon(true)
-    .build()
-  private val executorService = Executors.newFixedThreadPool(1, threadFactory)
-
-  private val checkpointGroup = new CheckpointGroup()
-
-  private val buffer: ByteBuf = Unpooled.buffer()
-
   def main(args: Array[String]) {
 
-    //    val manager = new InputTaskManager()
-    //
-    //    logger.debug(s"Task: ${manager.taskName}. Start creating t-stream producers for each output stream\n")
-    //    val producers = manager.createOutputProducers
-    //    logger.debug(s"Task: ${manager.taskName}. T-stream producers for each output stream are created\n")
-    //
-    //    logger.debug(s"Task: ${manager.taskName}. Start adding t-stream producers to checkpoint group\n")
-    //    producers.foreach(x => checkpointGroup.add(x._2.name, x._2))
-    //    logger.debug(s"Task: ${manager.taskName}. The t-stream producers are added to checkpoint group\n")
-    //
-    //    new InputStreamingServer(manager.entryHost, manager.entryPort).run()
+    val logger = LoggerFactory.getLogger(this.getClass)
+    val threadFactory = new ThreadFactoryBuilder()
+      .setNameFormat("InputTaskRunner-%d")
+      .setDaemon(true)
+      .build()
+    val executorService: ExecutorService = Executors.newFixedThreadPool(1, threadFactory)
 
+    val buffer: ByteBuf = Unpooled.buffer()
 
-    executorService.execute(new Runnable {
-      override def run(): Unit = try {
-        while (true) {
-          if (buffer.isReadable(5)) {
-            println(buffer.toString(Charset.forName("UTF-8")) + "_")
-            buffer.slice(1, 5)
-            buffer.readerIndex(5)
-            buffer.discardReadBytes()
-            println(buffer.toString(Charset.forName("UTF-8")) + "_")
-          } else Thread.sleep(2000)
-        }
-      } finally {
-        ReferenceCountUtil.release(buffer)
+    val manager: InputTaskManager = new InputTaskManager()
+    logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for input module\n")
+
+    val inputInstanceMetadata = manager.getInstanceMetadata
+
+    val inputTaskEngine = createInputTaskEngine(manager, inputInstanceMetadata)
+
+    logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
+    try {
+      inputTaskEngine.runModule(executorService, buffer)
+    } catch {
+      case exception: Exception => {
+        exception.printStackTrace()
+        executorService.shutdownNow()
+        System.exit(-1)
       }
-    })
+    }
 
-    new InputStreamingServer("192.168.1.174", 8888, buffer).run()
+    new InputStreamingServer("192.168.1.174", 8888, buffer).run() //    new InputStreamingServer(manager.entryHost, manager.entryPort).run()
+  }
+
+  def createInputTaskEngine(manager: InputTaskManager, instance: InputInstance) = {
+    instance.checkpointMode match {
+      case "time-interval" => new TimeCheckpointInputTaskEngine(manager, instance)
+      case "every-nth" => new NumericalCheckpointInputTaskEngine(manager, instance)
+    }
   }
 }
