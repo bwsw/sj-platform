@@ -7,7 +7,7 @@ class TimeCheckpointInputTaskEngine(manager: InputTaskManager, inputInstanceMeta
   extends InputTaskEngine(manager) {
 
   private val checkpointTimer: Option[SjTimer] = createTimer()
-  private val isNotOnlyCustomCheckpoint = checkpointTimer.isDefined
+  val isNotOnlyCustomCheckpoint = checkpointTimer.isDefined
 
   private def createTimer() = {
     if (inputInstanceMetadata.checkpointInterval > 0) {

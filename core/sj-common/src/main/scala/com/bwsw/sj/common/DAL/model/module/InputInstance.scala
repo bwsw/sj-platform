@@ -9,7 +9,7 @@ import org.mongodb.morphia.annotations.Property
  * @author Kseniya Tomskikh
  */
 class InputInstance extends Instance {
-  @Property("lookup-history") var lookupHistory: Long = 0
-  @Property("queue-max-size") var queueMaxSize: Long = 0
+  @Property("lookup-history") var lookupHistory: Int = 0 //in seconds
+  @Property("queue-max-size") var queueMaxSize: Int = 0
   @Property("eviction-policy") var evictionPolicy: String = null
 }

@@ -16,6 +16,8 @@ libraryDependencies ++= Seq(
 //  "io.netty" % "netty-all" % "4.1.0.CR7"
 )
 
+libraryDependencies += "com.hazelcast" % "hazelcast" % "3.6.4"
+
 assemblyMergeStrategy in assembly := {
   case PathList("scala-xml.properties") => MergeStrategy.first
   case PathList("scala", xs@_*) => MergeStrategy.first

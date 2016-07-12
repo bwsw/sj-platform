@@ -27,6 +27,7 @@ abstract class InputTaskEngine(manager: InputTaskManager) {
   protected val checkpointGroup = new CheckpointGroup()
   protected val moduleEnvironmentManager = new InputEnvironmentManager()
   protected val executor: InputStreamingExecutor = manager.getExecutor(moduleEnvironmentManager)
+  protected val isNotOnlyCustomCheckpoint: Boolean
 
   addProducersToCheckpointGroup()
 
@@ -42,29 +43,49 @@ abstract class InputTaskEngine(manager: InputTaskManager) {
     println("txnCancel: UUID = " + txn)
   }
 
-  protected def envelopeProcessed(envelope: Option[InputEnvelope]) = {
-    if (envelope.isDefined) {
+  protected def envelopeProcessed(envelope: Option[InputEnvelope], isNotDuplicateOrEmpty: Boolean) = {
+    if (isNotDuplicateOrEmpty) {
       println("Envelope has been sent")
+    } else if (envelope.isDefined) {
+      println("Envelope is duplicate")
     } else {
       println("Envelope is empty")
     }
   }
 
-  protected def processEnvelope(envelope: Option[InputEnvelope]) = {
+  protected def processEnvelope(envelope: Option[InputEnvelope]): Boolean = {
     if (envelope.isDefined) {
       val inputEnvelope = envelope.get
-      inputEnvelope.outputMetadata.foreach(x => {
-        val maybeTxn = getTxn(x._1, x._2)
-        if (maybeTxn.isDefined) {
-          val txn = maybeTxn.get
-          txn.send(inputEnvelope.data)
-        } else {
-          val txn = producers(x._1).newTransaction(ProducerPolicies.errorIfOpen, x._2)
-          txn.send(inputEnvelope.data)
-          txnOpen(txn.getTxnUUID)
-        }
-      })
+      if (checkForDuplication(inputEnvelope.key, inputEnvelope.duplicateCheck, inputEnvelope.data)) {
+        inputEnvelope.outputMetadata.foreach(x => sendEnvelope(x._1, x._2, inputEnvelope.data))
+        return true
+      }
     }
+    false
+  }
+
+  protected def sendEnvelope(stream: String, partition: Int, data: Array[Byte]) = {
+    val maybeTxn = getTxn(stream, partition)
+    if (maybeTxn.isDefined) {
+      val txn = maybeTxn.get
+      txn.send(data)
+    } else {
+      val txn = producers(stream).newTransaction(ProducerPolicies.errorIfOpen, partition)
+      txn.send(data)
+      txnOpen(txn.getTxnUUID)
+    }
+  }
+
+  protected def checkForDuplication(key: String, duplicateCheck: Boolean, value: Array[Byte]): Boolean = {
+    val uniqueEnvelopes = manager.getUniqueEnvelopes
+    if (duplicateCheck) {
+      if (!uniqueEnvelopes.containsKey(key)) {
+        uniqueEnvelopes.put(key, value)
+        return false
+      }
+      else uniqueEnvelopes.replace(key, value)
+    }
+    true
   }
 
   def runModule(executorService: ExecutorService, buffer: ByteBuf) = {
@@ -79,8 +100,8 @@ abstract class InputTaskEngine(manager: InputTaskManager) {
               val inputEnvelope = executor.parse(buffer, beginIndex, endIndex)
               clearBufferAfterParsing(buffer, endIndex)
               println("after reading: " + buffer.toString(Charset.forName("UTF-8")) + "_")
-              processEnvelope(inputEnvelope)
-              envelopeProcessed(inputEnvelope)
+              val isNotDuplicateOrEmpty = processEnvelope(inputEnvelope)
+              envelopeProcessed(inputEnvelope, isNotDuplicateOrEmpty)
               doCheckpoint(moduleEnvironmentManager.isCheckpointInitiated)
             } else throw new IndexOutOfBoundsException("Method tokenize() returned end index that an input stream is not defined at")
           } else Thread.sleep(2000)
@@ -113,5 +134,4 @@ abstract class InputTaskEngine(manager: InputTaskManager) {
     producers.foreach(x => checkpointGroup.add(x._2.name, x._2))
     logger.debug(s"Task: ${manager.taskName}. The t-stream producers are added to checkpoint group\n")
   }
-
 }

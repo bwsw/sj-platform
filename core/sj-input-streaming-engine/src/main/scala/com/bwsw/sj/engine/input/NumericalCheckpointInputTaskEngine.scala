@@ -8,10 +8,10 @@ class NumericalCheckpointInputTaskEngine(manager: InputTaskManager, inputInstanc
   extends InputTaskEngine(manager) {
 
   private var countOfEnvelopes = 0
-  private val isNotOnlyCustomCheckpoint = inputInstanceMetadata.checkpointInterval > 0
+  val isNotOnlyCustomCheckpoint = inputInstanceMetadata.checkpointInterval > 0
 
   def doCheckpoint(isCheckpointInitiated: Boolean) = {
-    if ( isNotOnlyCustomCheckpoint && countOfEnvelopes == inputInstanceMetadata.checkpointInterval || moduleEnvironmentManager.isCheckpointInitiated) {
+    if (isNotOnlyCustomCheckpoint && countOfEnvelopes == inputInstanceMetadata.checkpointInterval || moduleEnvironmentManager.isCheckpointInitiated) {
       logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
       logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
       checkpointGroup.commit()
@@ -23,8 +23,10 @@ class NumericalCheckpointInputTaskEngine(manager: InputTaskManager, inputInstanc
   }
 
   override def processEnvelope(envelope: Option[InputEnvelope]) = {
-    super.processEnvelope(envelope)
-    if (envelope.isDefined) increaseCounter()
+    val isNotDuplicateOrEmpty = super.processEnvelope(envelope)
+    if (isNotDuplicateOrEmpty) increaseCounter()
+
+    isNotDuplicateOrEmpty
   }
 
   private def increaseCounter() = {
