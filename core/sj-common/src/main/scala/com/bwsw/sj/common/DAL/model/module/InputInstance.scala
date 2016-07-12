@@ -12,4 +12,5 @@ class InputInstance extends Instance {
   @Property("lookup-history") var lookupHistory: Int = 0 //in seconds
   @Property("queue-max-size") var queueMaxSize: Int = 0
   @Property("eviction-policy") var evictionPolicy: String = null
+  var tasks: java.util.Map[String, Int] = null
 }

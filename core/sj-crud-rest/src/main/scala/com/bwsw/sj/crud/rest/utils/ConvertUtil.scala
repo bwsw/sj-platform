@@ -61,6 +61,9 @@ object ConvertUtil {
         apiInstance.evictionPolicy = inputInstance.evictionPolicy
         apiInstance.lookupHistory = inputInstance.lookupHistory
         apiInstance.queueMaxSize = inputInstance.queueMaxSize
+        if (inputInstance.tasks != null) {
+          apiInstance.tasks = Map(inputInstance.tasks.asScala.toList: _*)
+        }
         apiInstance
       case _ => instanceToInstanceMetadata(new InstanceMetadata, instance)
     }
@@ -166,6 +169,9 @@ object ConvertUtil {
         modelInstance.evictionPolicy = inputInstanceMetadata.evictionPolicy
         modelInstance.lookupHistory = inputInstanceMetadata.lookupHistory
         modelInstance.queueMaxSize = inputInstanceMetadata.queueMaxSize
+        if (inputInstanceMetadata.tasks != null) {
+          modelInstance.tasks = inputInstanceMetadata.tasks
+        }
         modelInstance
       case _ => instanceMetadataToInstance(new Instance, apiInstance)
     }
