@@ -104,7 +104,21 @@ trait SjCrudValidator {
       if (specification.get("entity-class").isEmpty) {
         throw new Exception("Specification.json for output-streaming hasn't 'entity-class' param!")
       }
+    } else if (moduleType.equals(inputStreamingType)) {
+      val inputs = specification("inputs").asInstanceOf[Map[String, Any]]
+      val inputTypes = inputs("types").asInstanceOf[List[String]]
+      val inputCardinalites = inputs("cardinality").asInstanceOf[List[Int]]
+
+      val outputs = specification("outputs").asInstanceOf[Map[String, Any]]
+      val outputTypes = outputs("types").asInstanceOf[List[String]]
+
+      if ((inputTypes.size > 1 || !inputTypes.contains(input)
+        || (inputCardinalites.head != 0 && inputCardinalites(1) != 0))
+        || (outputTypes.size != 1 || !outputTypes.contains(tStream))) {
+        throw new Exception("Specification.json for input-streaming has incorrect params!")
+      }
     }
+
     specification
   }
 

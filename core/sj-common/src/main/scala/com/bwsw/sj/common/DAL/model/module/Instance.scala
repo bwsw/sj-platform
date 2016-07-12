@@ -5,7 +5,7 @@ import org.mongodb.morphia.annotations.{Embedded, Entity, Id, Property}
 
 /**
   * Entity for base instance-json
-  * Created: 5/23/16
+  * Created: 23/05/2016
   *
   * @author Kseniya Tomskikh
   */
@@ -17,6 +17,7 @@ class Instance {
   var status: String = null
   @Id var name: String = null
   var description: String = null
+  var inputs: Array[String] = null
   var outputs: Array[String] = null
   @Property("checkpoint-mode") var checkpointMode: String = null
   @Property("checkpoint-interval") var checkpointInterval: Long = 0
