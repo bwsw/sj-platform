@@ -38,6 +38,7 @@ object ConvertUtil {
         apiInstance.eventWaitTime = timeWindowedInstance.eventWaitTime
         apiInstance.inputs = timeWindowedInstance.inputs
         apiInstance.outputs = timeWindowedInstance.outputs
+        apiInstance.startFrom = timeWindowedInstance.startFrom
         apiInstance
       case regularInstance: RegularInstance =>
         val apiInstance = instanceToInstanceMetadata(new RegularInstanceMetadata, instance).asInstanceOf[RegularInstanceMetadata]
@@ -46,11 +47,20 @@ object ConvertUtil {
         apiInstance.eventWaitTime = regularInstance.eventWaitTime
         apiInstance.inputs = regularInstance.inputs
         apiInstance.outputs = regularInstance.outputs
+        apiInstance.startFrom = regularInstance.startFrom
         apiInstance
       case outputInstance: OutputInstance =>
         val apiInstance = instanceToInstanceMetadata(new OutputInstanceMetadata, instance).asInstanceOf[OutputInstanceMetadata]
         apiInstance.input = outputInstance.inputs.head
         apiInstance.output = outputInstance.outputs.head
+        apiInstance.startFrom = outputInstance.startFrom
+        apiInstance
+      case inputInstance: InputInstance =>
+        val apiInstance = instanceToInstanceMetadata(new InputInstanceMetadata, instance).asInstanceOf[InputInstanceMetadata]
+        apiInstance.outputs = inputInstance.outputs
+        apiInstance.evictionPolicy = inputInstance.evictionPolicy
+        apiInstance.lookupHistory = inputInstance.lookupHistory
+        apiInstance.queueMaxSize = inputInstance.queueMaxSize
         apiInstance
       case _ => instanceToInstanceMetadata(new InstanceMetadata, instance)
     }
@@ -64,9 +74,12 @@ object ConvertUtil {
    * @return - API instance object
    */
   def instanceToInstanceMetadata(apiInstance: InstanceMetadata, instance: Instance): InstanceMetadata = {
-    val executionPlan = Map(
-      "tasks" -> instance.executionPlan.tasks.map(t => t._1 -> Map("inputs" -> t._2.inputs))
-    )
+    if (instance.inputs != null) {
+      val executionPlan = Map(
+        "tasks" -> instance.executionPlan.tasks.map(t => t._1 -> Map("inputs" -> t._2.inputs))
+      )
+      apiInstance.executionPlan = executionPlan
+    }
     apiInstance.status = instance.status
     apiInstance.name = instance.name
     apiInstance.description = instance.description
@@ -74,7 +87,6 @@ object ConvertUtil {
     apiInstance.checkpointInterval = instance.checkpointInterval
     apiInstance.parallelism = instance.parallelism
     apiInstance.options = serializer.deserialize[Map[String, Any]](instance.options)
-    apiInstance.startFrom = instance.startFrom
     apiInstance.perTaskCores = instance.perTaskCores
     apiInstance.performanceReportingInterval = instance.performanceReportingInterval
     apiInstance.engine = instance.engine
@@ -83,7 +95,6 @@ object ConvertUtil {
     if (instance.nodeAttributes != null) {
       apiInstance.nodeAttributes = Map(instance.nodeAttributes.asScala.toList: _*)
     }
-    apiInstance.executionPlan = executionPlan
     if (instance.environmentVariables != null) {
       apiInstance.environmentVariables = Map(instance.environmentVariables.asScala.toList: _*)
     }
@@ -132,6 +143,7 @@ object ConvertUtil {
         modelInstance.eventWaitTime = windowedInstanceMetadata.eventWaitTime
         modelInstance.inputs = windowedInstanceMetadata.inputs
         modelInstance.outputs = windowedInstanceMetadata.outputs
+        modelInstance.startFrom = windowedInstanceMetadata.startFrom
         modelInstance
       case regularInstanceMetadata: RegularInstanceMetadata =>
         val modelInstance = instanceMetadataToInstance(new RegularInstance, regularInstanceMetadata).asInstanceOf[RegularInstance]
@@ -140,11 +152,20 @@ object ConvertUtil {
         modelInstance.eventWaitTime = regularInstanceMetadata.eventWaitTime
         modelInstance.inputs = regularInstanceMetadata.inputs
         modelInstance.outputs = regularInstanceMetadata.outputs
+        modelInstance.startFrom = regularInstanceMetadata.startFrom
         modelInstance
       case outputInstanceMetadata: OutputInstanceMetadata =>
         val modelInstance = instanceMetadataToInstance(new OutputInstance, outputInstanceMetadata).asInstanceOf[OutputInstance]
         modelInstance.inputs = Array(outputInstanceMetadata.input)
         modelInstance.outputs = Array(outputInstanceMetadata.output)
+        modelInstance.startFrom = outputInstanceMetadata.startFrom
+        modelInstance
+      case inputInstanceMetadata: InputInstanceMetadata =>
+        val modelInstance = instanceMetadataToInstance(new InputInstance, inputInstanceMetadata).asInstanceOf[InputInstance]
+        modelInstance.outputs = inputInstanceMetadata.outputs
+        modelInstance.evictionPolicy = inputInstanceMetadata.evictionPolicy
+        modelInstance.lookupHistory = inputInstanceMetadata.lookupHistory
+        modelInstance.queueMaxSize = inputInstanceMetadata.queueMaxSize
         modelInstance
       case _ => instanceMetadataToInstance(new Instance, apiInstance)
     }
@@ -164,7 +185,6 @@ object ConvertUtil {
     modelInstance.checkpointInterval = apiInstance.checkpointInterval
     modelInstance.parallelism = apiInstance.parallelism.asInstanceOf[Int]
     modelInstance.options = serializer.serialize(apiInstance.options)
-    modelInstance.startFrom = apiInstance.startFrom
     modelInstance.perTaskCores = apiInstance.perTaskCores
     modelInstance.perTaskRam = apiInstance.perTaskRam
     modelInstance.performanceReportingInterval = apiInstance.performanceReportingInterval

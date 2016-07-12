@@ -9,16 +9,18 @@ object ModuleConstants {
   def persistentQueuePath = UUID.randomUUID().toString //todo: until t-streams can't remove persistent queue
   val persistentBlockingQueue = "persistentBlockingQueue"
 
+  val inputStreamingType = "input-streaming"
   val outputStreamingType = "output-streaming"
   val windowedStreamingType = "windowed-streaming"
   val regularStreamingType = "regular-streaming"
 
-  val moduleTypes = Set(windowedStreamingType, regularStreamingType, outputStreamingType)
+  val moduleTypes = Set(windowedStreamingType, regularStreamingType, outputStreamingType, inputStreamingType)
   val checkpointModes = Set("every-nth", "time-interval")
   val stateManagementModes = Set("none", "ram", "rocks")
   val oldest = "oldest"
   val newest = "newest"
   val startFromModes = Set(oldest, newest)
+  val evictionPolicies = Set("LRU", "LFU")
 
   val ready = "ready"
   val starting = "starting"
@@ -44,6 +46,7 @@ object ModuleConstants {
 }
 
 object StreamConstants {
+  final val input = "input"
   final val tStream = "stream.t-stream"
   final val kafka = "stream.kafka"
   final val esOutput = "elasticsearch-output"

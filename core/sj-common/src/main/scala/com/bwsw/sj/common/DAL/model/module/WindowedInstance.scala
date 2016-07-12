@@ -9,7 +9,6 @@ import org.mongodb.morphia.annotations.Property
   * @author Kseniya Tomskikh
  */
 class WindowedInstance() extends Instance {
-  var inputs: Array[String] = null
   @Property("start-from") var startFrom: String = null
   @Property("state-management") var stateManagement: String = null
   @Property("state-full-checkpoint") var stateFullCheckpoint: Int = 0

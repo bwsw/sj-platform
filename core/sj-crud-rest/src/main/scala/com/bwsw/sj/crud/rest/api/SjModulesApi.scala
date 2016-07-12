@@ -325,6 +325,8 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       serializer.deserialize[RegularInstanceMetadata](options)
     } else if (moduleType.equals(outputStreamingType)) {
       serializer.deserialize[OutputInstanceMetadata](options)
+    } else if (moduleType.equals(inputStreamingType)) {
+      serializer.deserialize[InputInstanceMetadata](options)
     } else {
       serializer.deserialize[InstanceMetadata](options)
     }
