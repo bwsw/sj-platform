@@ -7,11 +7,12 @@ import com.aerospike.client.Host
 import com.bwsw.common.tstream.NetworkTimeUUIDGenerator
 import com.bwsw.sj.common.ConfigConstants._
 import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.model.module.InputInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.StreamConstants._
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
-import com.bwsw.sj.engine.core.environment.{InputEnvironmentManager, ModuleEnvironmentManager, ModuleOutput}
-import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
+import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
+import com.bwsw.sj.engine.core.input.InputStreamingExecutor
 import com.bwsw.tstreams.agents.producer.InsertionType.SingleElementInsert
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions, ProducerCoordinationOptions}
 import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
@@ -23,9 +24,10 @@ import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.policy.RoundRobinPolicy
 import com.bwsw.tstreams.services.BasicStreamService
 import com.bwsw.tstreams.streams.BasicStream
+import com.hazelcast.config.{EvictionPolicy, MaxSizeConfig, XmlConfigBuilder}
+import com.hazelcast.core.Hazelcast
 import org.slf4j.LoggerFactory
 
-import scala.collection.mutable
 /**
  * Class allowing to manage an environment of input streaming task
  * Created: 08/07/2016
@@ -43,7 +45,7 @@ class InputTaskManager() {
   val entryPort = System.getenv("ENTRY_PORT").toInt
   private val reportStream = instanceName + "_report"
   private var currentPortNumber = 0
-  private val instance = ConnectionRepository.getInstanceService.get(instanceName)
+  private val instance = ConnectionRepository.getInstanceService.get(instanceName).asInstanceOf[InputInstance]
   private val storage = ConnectionRepository.getFileStorage
   private val configService = ConnectionRepository.getConfigService
 
@@ -57,8 +59,23 @@ class InputTaskManager() {
   private val zkSessionTimeout = configService.get(zkSessionTimeoutTag).value.toInt
   private val zkConnectionTimeout = configService.get(zkConnectionTimeoutTag).value.toInt
 
+  private val config = createHazelcastConfig()
+
+  private val hazelcastMapName = "inputEngine"
+  private val hazelcastInstance = Hazelcast.newHazelcastInstance(config)
+
+  /**
+   * Returns hazelcast map for checking of there are duplicates (input envelopes) or not
+   * @return Hazelcast map
+   */
+  def getUniqueEnvelopes = {
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
+      s"Get hazelcast map for checking of there are duplicates (input envelopes) or not\n")
+    hazelcastInstance.getMap[String, Array[Byte]](hazelcastMapName)
+  }
+
   assert(agentsPorts.length >
-    (instance.outputs.length + 1), //todo: count ! this one for state
+    (instance.outputs.length + 1), //todo: count ! this one for pm
     "Not enough ports for t-stream consumers/producers ")
 
   private val fileMetadata: FileMetadata = ConnectionRepository.getFileMetadataService.getByParameters(
@@ -125,6 +142,46 @@ class InputTaskManager() {
   }
 
   /**
+   * Creates a Hazelcast map configuration
+   * @return Hazelcast map configuration
+   */
+  private def createHazelcastConfig() = {
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. Create a Hazelcast map configuration is named 'inputEngine'\n")
+    val config = new XmlConfigBuilder().build()
+    val evictionPolicy = createEvictionPolicy()
+    val maxSizeConfig = createMaxSizeConfig()
+
+    config.getMapConfig(hazelcastMapName)
+      .setTimeToLiveSeconds(instance.lookupHistory)
+      .setEvictionPolicy(evictionPolicy)
+      .setMaxSizeConfig(maxSizeConfig)
+
+    config
+  }
+
+  /**
+   * Creates an eviction policy for Hazelcast map configuration
+   * @return Eviction policy
+   */
+  private def createEvictionPolicy() = {
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. Create EvictionPolicy\n")
+    instance.evictionPolicy match {
+      case "LRU" => EvictionPolicy.LRU
+      case "LFU" => EvictionPolicy.LFU
+    }
+  }
+
+  /**
+   * Creates a config that defines a max size of Hazelcast map
+   * @return Max size configuration
+   */
+  private def createMaxSizeConfig() = {
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. Create MaxSizeConfig\n")
+    new MaxSizeConfig()
+      .setSize(instance.queueMaxSize)
+  }
+
+  /**
    * Returns class loader for retrieving classes from jar
    *
    * @param pathToJar Absolute path to jar file
@@ -155,7 +212,7 @@ class InputTaskManager() {
    */
   def getInstanceMetadata = {
     logger.info(s"Instance name: $instanceName, task name: $taskName. Get instance metadata\n")
-    instance
+    instance.asInstanceOf[InputInstance]
   }
 
   /**
@@ -168,21 +225,11 @@ class InputTaskManager() {
     val moduleJar = getModuleJar
     val classLoader = getClassLoader(moduleJar.getAbsolutePath)
     val executor = classLoader.loadClass(fileMetadata.specification.executorClass)
-      .getConstructor(classOf[ModuleEnvironmentManager])
-      .newInstance(inputEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
+      .getConstructor(classOf[InputEnvironmentManager])
+      .newInstance(inputEnvironmentManager).asInstanceOf[InputStreamingExecutor]
     logger.debug(s"Task: $taskName. Create instance of executor class\n")
 
     executor
-  }
-
-  /**
-   * Returns tags for each output stream
-   *
-   * @return
-   */
-  def getOutputTags = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get tags for each output stream\n")
-    mutable.Map[String, (String, ModuleOutput)]()
   }
 
   /**
@@ -203,7 +250,7 @@ class InputTaskManager() {
       zkSessionTimeout,
       isLowPriorityToBeMaster = false,
       transport = new TcpTransport,
-      transportTimeout =transportTimeout,
+      transportTimeout = transportTimeout,
       zkConnectionTimeout = zkConnectionTimeout
     )
     currentPortNumber += 1
@@ -248,19 +295,23 @@ class InputTaskManager() {
    * @return Map where key is stream name and value is t-stream producer
    */
   def createOutputProducers = {
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
+      s"Create the basic t-stream producers for each output stream\n")
     instance.outputs
       .map(x => (x, ConnectionRepository.getStreamService.get(x)))
       .map(x => (x._1, createProducer(x._2))).toMap
   }
 
   /**
-   * Creates t-stream or loads an existing t-stream to keep the reports of module performance.
+   * Creates a SjStream to keep the reports of module performance.
    * For each task there is specific partition (task number = partition number).
    *
    * @return SjStream used for keeping the reports of module performance
    */
   def getReportStream = {
-    getTStream(
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
+      s"Get stream for performance metrics\n")
+    getSjStream(
       reportStream,
       "store reports of performance metrics",
       Array("report", "performance"),
@@ -268,7 +319,16 @@ class InputTaskManager() {
     )
   }
 
-  private def getTStream(name: String, description: String, tags: Array[String], partitions: Int) = {
+  /**
+   * Creates SjStream based on t-stream which is created or loaded
+   *
+   * @param name Name of t-stream
+   * @param description Description of t-stream
+   * @param tags Tags of t-stream
+   * @param partitions Number of partitions of t-stream
+   * @return SjStream with parameters described above
+   */
+  private def getSjStream(name: String, description: String, tags: Array[String], partitions: Int) = {
     var stream: BasicStream[Array[Byte]] = null
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
 

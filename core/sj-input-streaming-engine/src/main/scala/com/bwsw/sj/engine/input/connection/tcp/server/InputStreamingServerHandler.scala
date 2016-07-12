@@ -1,6 +1,5 @@
 package com.bwsw.sj.engine.input.connection.tcp.server
 
-import java.nio.charset.Charset
 import java.util.Date
 
 import io.netty.buffer.ByteBuf
@@ -20,7 +19,7 @@ class InputStreamingServerHandler(buffer: ByteBuf) extends SimpleChannelInboundH
   }
 
   override def channelRead0(ctx: ChannelHandlerContext, msg: ByteBuf) = {
-    println(msg.toString(Charset.forName("UTF-8")) + "_")
+    //println(msg.toString(Charset.forName("UTF-8")) + "_")
     buffer.writeBytes(msg)
     //after that the msg is empty
   }

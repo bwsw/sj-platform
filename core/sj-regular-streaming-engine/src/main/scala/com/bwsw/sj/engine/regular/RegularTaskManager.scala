@@ -9,6 +9,7 @@ import com.bwsw.common.ObjectSerializer
 import com.bwsw.common.tstream.NetworkTimeUUIDGenerator
 import com.bwsw.sj.common.ConfigConstants._
 import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.ModuleConstants._
 import com.bwsw.sj.common.StreamConstants
@@ -180,7 +181,7 @@ class RegularTaskManager() {
    */
   def getInstanceMetadata = {
     logger.info(s"Instance name: $instanceName, task name: $taskName. Get instance metadata\n")
-    instance
+    instance.asInstanceOf[RegularInstance]
   }
 
   /**
@@ -429,47 +430,51 @@ class RegularTaskManager() {
   }
 
   /**
-   * Create t-stream producers for each output stream
-   * @return Map where key is stream name and value is t-stream producer
-   */
-  def createOutputProducers() = {
-    logger.debug(s"Task: $taskName. Start creating t-stream producers for each output stream\n")
-    val producers = instance.outputs
-      .map(x => (x, ConnectionRepository.getStreamService.get(x)))
-      .map(x => (x._1, createProducer(x._2))).toMap
-    logger.debug(s"Task: $taskName. T-stream producers for each output stream are created\n")
-
-    producers
-  }
-
-  /**
-   * Creates t-stream to keep a module state or loads an existing t-stream
+   * Creates SJStream to keep a module state
    *
    * @return SjStream used for keeping a module state
    */
   def getStateStream = {
-    getTStream(stateStream, "store state of module", Array("state"), 1)
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
+      s"Get stream for keeping state of module\n")
+    getSjStream(stateStream, "store state of module", Array("state"), 1)
   }
 
   /**
-   * Creates t-stream or loads an existing t-stream is responsible for committing the offsets of last messages
+   * Creates SJStream is responsible for committing the offsets of last messages
    * that has successfully processed for each topic for each partition
    *
-   * @return t-stream is responsible for committing the offsets of last messages
+   * @return SJStream is responsible for committing the offsets of last messages
    *         that has successfully processed for each topic for each partition
    */
   def getOffsetStream = {
-    getTStream(kafkaOffsetsStream, "store kafka offsets of input streams", Array("offsets"), 1)
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
+      s"Get stream for keeping kafka offsets\n")
+    getSjStream(kafkaOffsetsStream, "store kafka offsets of input streams", Array("offsets"), 1)
   }
 
   /**
-   * Creates t-stream or loads an existing t-stream to keep the reports of module performance.
+   * Create t-stream producers for each output stream
+   * @return Map where key is stream name and value is t-stream producer
+   */
+  def createOutputProducers = {
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
+      s"Create the basic t-stream producers for each output stream\n")
+    instance.outputs
+      .map(x => (x, ConnectionRepository.getStreamService.get(x)))
+      .map(x => (x._1, createProducer(x._2))).toMap
+  }
+
+  /**
+   * Creates a SjStream to keep the reports of module performance.
    * For each task there is specific partition (task number = partition number).
    *
    * @return SjStream used for keeping the reports of module performance
    */
   def getReportStream = {
-    getTStream(
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
+      s"Get stream for performance metrics\n")
+    getSjStream(
       reportStream,
       "store reports of performance metrics",
       Array("report", "performance"),
@@ -477,7 +482,16 @@ class RegularTaskManager() {
     )
   }
 
-  private def getTStream(name: String, description: String, tags: Array[String], partitions: Int) = {
+  /**
+   * Creates SjStream based on t-stream which is created or loaded
+   *
+   * @param name Name of t-stream
+   * @param description Description of t-stream
+   * @param tags Tags of t-stream
+   * @param partitions Number of partitions of t-stream
+   * @return SjStream with parameters described above
+   */
+  private def getSjStream(name: String, description: String, tags: Array[String], partitions: Int) = {
     var stream: BasicStream[Array[Byte]] = null
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
 
