@@ -17,7 +17,7 @@ class Instance {
   var status: String = null
   @Id var name: String = null
   var description: String = null
-  @Property(require(false)) var inputs: Array[String] = null
+  var inputs: Array[String] = null
   var outputs: Array[String] = null
   @Property("checkpoint-mode") var checkpointMode: String = null
   @Property("checkpoint-interval") var checkpointInterval: Long = 0

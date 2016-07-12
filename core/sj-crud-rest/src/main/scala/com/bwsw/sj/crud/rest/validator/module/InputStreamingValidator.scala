@@ -13,6 +13,7 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 
 /**
+  * Validator for input-streaming instance
   * Created: 11/07/2016
   *
   * @author Kseniya Tomskikh
@@ -106,6 +107,13 @@ class InputStreamingValidator extends StreamingModuleValidator {
   override def validate(parameters: InstanceMetadata,
                         specification: ModuleSpecification): (ArrayBuffer[String], Instance) = {
     val errors = super.generalOptionsValidate(parameters)
+
+    val evictionPolicy = parameters.asInstanceOf[InputInstanceMetadata].evictionPolicy
+    if (!evictionPolicies.contains(evictionPolicy)) {
+      errors += s"Unknown value of eviction-policy attribute: $evictionPolicy. " +
+        s"Eviction-policy must be 'LRU' or 'LFU'."
+    }
+
     streamOptionsValidate(parameters, specification, errors)
   }
 }

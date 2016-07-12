@@ -14,12 +14,13 @@ object ModuleConstants {
   val windowedStreamingType = "windowed-streaming"
   val regularStreamingType = "regular-streaming"
 
-  val moduleTypes = Set(windowedStreamingType, regularStreamingType, outputStreamingType)
+  val moduleTypes = Set(windowedStreamingType, regularStreamingType, outputStreamingType, inputStreamingType)
   val checkpointModes = Set("every-nth", "time-interval")
   val stateManagementModes = Set("none", "ram", "rocks")
   val oldest = "oldest"
   val newest = "newest"
   val startFromModes = Set(oldest, newest)
+  val evictionPolicies = Set("LRU", "LFU")
 
   val ready = "ready"
   val starting = "starting"
