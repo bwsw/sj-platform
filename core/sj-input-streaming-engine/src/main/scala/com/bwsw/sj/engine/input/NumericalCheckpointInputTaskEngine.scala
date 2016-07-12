@@ -24,16 +24,20 @@ class NumericalCheckpointInputTaskEngine(manager: InputTaskManager, inputInstanc
 
   override def processEnvelope(envelope: Option[InputEnvelope]) = {
     val isNotDuplicateOrEmpty = super.processEnvelope(envelope)
-    if (isNotDuplicateOrEmpty) increaseCounter()
+    if (isNotDuplicateOrEmpty) {
+      increaseCounter()
+    }
 
     isNotDuplicateOrEmpty
   }
 
   private def increaseCounter() = {
+    logger.debug(s"Task: ${manager.taskName}. Increase count of envelopes to: $countOfEnvelopes\n")
     countOfEnvelopes += 1
   }
 
   private def resetCounter() = {
+    logger.debug(s"Task: ${manager.taskName}. Reset a counter of envelopes to 0\n")
     countOfEnvelopes = 0
   }
 }

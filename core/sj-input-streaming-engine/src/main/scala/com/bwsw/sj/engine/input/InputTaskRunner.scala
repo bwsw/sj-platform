@@ -17,9 +17,10 @@ import org.slf4j.LoggerFactory
 
 object InputTaskRunner {
 
+  val logger = LoggerFactory.getLogger(this.getClass)
+
   def main(args: Array[String]) {
 
-    val logger = LoggerFactory.getLogger(this.getClass)
     val threadFactory = new ThreadFactoryBuilder()
       .setNameFormat("InputTaskRunner-%d")
       .setDaemon(true)
@@ -46,13 +47,18 @@ object InputTaskRunner {
       }
     }
 
-    new InputStreamingServer("192.168.1.174", 8888, buffer).run() //    new InputStreamingServer(manager.entryHost, manager.entryPort).run()
+    new InputStreamingServer("192.168.1.174", 8888, buffer).run() //new InputStreamingServer(manager.entryHost, manager.entryPort).run()
   }
 
   def createInputTaskEngine(manager: InputTaskManager, instance: InputInstance) = {
     instance.checkpointMode match {
-      case "time-interval" => new TimeCheckpointInputTaskEngine(manager, instance)
-      case "every-nth" => new NumericalCheckpointInputTaskEngine(manager, instance)
+      case "time-interval" =>
+        logger.info(s"Task: ${manager.taskName}. Input module has a 'time-interval' checkpoint mode, create an appropriate task engine\n")
+        logger.debug(s"Task: ${manager.taskName}. Create TimeCheckpointInputTaskEngine()\n")
+        new TimeCheckpointInputTaskEngine(manager, instance)
+      case "every-nth" =>
+        logger.info(s"Task: ${manager.taskName}. Input module has a 'every-nth' checkpoint mode, create an appropriate task engine\n")
+        new NumericalCheckpointInputTaskEngine(manager, instance)
     }
   }
 }

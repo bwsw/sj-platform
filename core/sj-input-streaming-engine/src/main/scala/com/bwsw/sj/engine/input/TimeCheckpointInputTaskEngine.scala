@@ -11,8 +11,12 @@ class TimeCheckpointInputTaskEngine(manager: InputTaskManager, inputInstanceMeta
 
   private def createTimer() = {
     if (inputInstanceMetadata.checkpointInterval > 0) {
+      logger.debug(s"Task: ${manager.taskName}. Create a checkpoint timer for input module\n")
       Some(new SjTimer())
-    } else None
+    } else {
+      logger.debug(s"Task: ${manager.taskName}. Input module has not programmatic checkpoint. Manually only\n")
+      None
+    }
   }
 
   private def setTimer() = {
