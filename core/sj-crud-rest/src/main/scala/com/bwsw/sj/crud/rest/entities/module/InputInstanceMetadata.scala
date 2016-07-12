@@ -11,4 +11,5 @@ class InputInstanceMetadata extends InstanceMetadata {
   @JsonProperty("lookup-history") var lookupHistory: Int = 0
   @JsonProperty("queue-max-size") var queueMaxSize: Int = 0
   @JsonProperty("eviction-policy") var evictionPolicy: String = null
+  var tasks: Map[String, Int] = null
 }
