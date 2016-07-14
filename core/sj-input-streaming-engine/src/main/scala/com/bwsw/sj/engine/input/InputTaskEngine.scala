@@ -2,8 +2,11 @@ package com.bwsw.sj.engine.input
 
 import java.nio.charset.Charset
 import java.util.UUID
-import java.util.concurrent.ExecutorService
+import java.util.concurrent.{ExecutorService, TimeUnit}
 
+import com.bwsw.common.ObjectSerializer
+import com.bwsw.sj.common.DAL.model.module.InputInstance
+import com.bwsw.sj.common.module.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.sj.engine.core.entities.InputEnvelope
 import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.engine.core.input.InputStreamingExecutor
@@ -19,7 +22,7 @@ import org.slf4j.LoggerFactory
  *
  * @author Kseniya Mikhaleva
  */
-abstract class InputTaskEngine(manager: InputTaskManager) {
+abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata: InputInstance) {
 
   protected val logger = LoggerFactory.getLogger(this.getClass)
   protected var txnsByStreamPartitions = createTxnsStorage()
@@ -28,6 +31,13 @@ abstract class InputTaskEngine(manager: InputTaskManager) {
   protected val moduleEnvironmentManager = new InputEnvironmentManager()
   protected val executor: InputStreamingExecutor = manager.getExecutor(moduleEnvironmentManager)
   protected val isNotOnlyCustomCheckpoint: Boolean
+  protected val performanceMetrics = new InputStreamingPerformanceMetrics(
+    manager.taskName,
+    manager.agentsHost,
+    manager.entryHost,
+    manager.entryPort,
+    inputInstanceMetadata.outputs
+  )
 
   addProducersToCheckpointGroup()
 
@@ -44,7 +54,8 @@ abstract class InputTaskEngine(manager: InputTaskManager) {
   }
 
   protected def envelopeProcessed(envelope: Option[InputEnvelope], isNotDuplicateOrEmpty: Boolean) = {
-    if (isNotDuplicateOrEmpty) { //todo
+    if (isNotDuplicateOrEmpty) {
+      //todo
       println("Envelope has been sent")
     } else if (envelope.isDefined) {
       println("Envelope is duplicate")
@@ -57,8 +68,11 @@ abstract class InputTaskEngine(manager: InputTaskManager) {
     if (envelope.isDefined) {
       logger.info(s"Task name: ${manager.taskName}. Envelope is defined. Process it\n")
       val inputEnvelope = envelope.get
+      performanceMetrics.addEnvelopeToInputStream(List(inputEnvelope.data.length))
       if (checkForDuplication(inputEnvelope.key, inputEnvelope.duplicateCheck, inputEnvelope.data)) {
-        inputEnvelope.outputMetadata.foreach(x => sendEnvelope(x._1, x._2, inputEnvelope.data))
+        inputEnvelope.outputMetadata.foreach(x => {
+          sendEnvelope(x._1, x._2, inputEnvelope.data)
+        })
         return true
       }
     }
@@ -68,19 +82,26 @@ abstract class InputTaskEngine(manager: InputTaskManager) {
   protected def sendEnvelope(stream: String, partition: Int, data: Array[Byte]) = {
     logger.info(s"Task name: ${manager.taskName}. Send envelope to each output stream.\n")
     val maybeTxn = getTxn(stream, partition)
+    var txn: BasicProducerTransaction[Array[Byte], Array[Byte]] = null
     if (maybeTxn.isDefined) {
-      val txn = maybeTxn.get
+      txn = maybeTxn.get
       txn.send(data)
     } else {
-      val txn = producers(stream).newTransaction(ProducerPolicies.errorIfOpen, partition)
+      txn = producers(stream).newTransaction(ProducerPolicies.errorIfOpen, partition)
       txn.send(data)
       txnOpen(txn.getTxnUUID)
     }
+
+    performanceMetrics.addElementToOutputEnvelope(
+      stream,
+      txn.getTxnUUID.toString,
+      data.length
+    )
   }
 
   protected def checkForDuplication(key: String, duplicateCheck: Boolean, value: Array[Byte]): Boolean = {
     logger.info(s"Task name: ${manager.taskName}. " +
-        s"Try to check key: $key for duplication with a setting duplicateCheck = $duplicateCheck\n")
+      s"Try to check key: $key for duplication with a setting duplicateCheck = $duplicateCheck\n")
     val uniqueEnvelopes = manager.getUniqueEnvelopes
     if (duplicateCheck) {
       logger.info(s"Task name: ${manager.taskName}. " +
@@ -99,13 +120,15 @@ abstract class InputTaskEngine(manager: InputTaskManager) {
       s"Run input task engine in a separate thread of execution service\n")
     executorService.execute(new Runnable {
       override def run(): Unit = try {
+        launchPerformanceMetricsReporting(executorService)
+
         while (true) {
           val maybeInterval = executor.tokenize(buffer)
           if (maybeInterval.isDefined) {
             val (beginIndex, endIndex) = maybeInterval.get
             if (buffer.isReadable(endIndex)) {
               println("before reading: " + buffer.toString(Charset.forName("UTF-8")) + "_") //todo: only for testing
-              val inputEnvelope = executor.parse(buffer, beginIndex, endIndex)
+              val inputEnvelope: Option[InputEnvelope] = executor.parse(buffer, beginIndex, endIndex)
               clearBufferAfterParsing(buffer, endIndex)
               println("after reading: " + buffer.toString(Charset.forName("UTF-8")) + "_") //todo: only for testing
               val isNotDuplicateOrEmpty = processEnvelope(inputEnvelope)
@@ -120,6 +143,44 @@ abstract class InputTaskEngine(manager: InputTaskManager) {
         }
       } finally {
         ReferenceCountUtil.release(buffer)
+      }
+    })
+  }
+
+  private def createReportProducer() = {
+    logger.debug(s"Task: ${manager.taskName}. Start creating a t-stream producer to record performance reports\n")
+    val reportStream = manager.getReportStream
+    val reportProducer = manager.createProducer(reportStream)
+    logger.debug(s"Task: ${manager.taskName}. Creation of t-stream producer is finished\n")
+
+    reportProducer
+  }
+
+  private def launchPerformanceMetricsReporting(executorService: ExecutorService) = {
+    val reportProducer = createReportProducer()
+    logger.debug(s"Task: ${manager.taskName}. Launch a new thread to report performance metrics \n")
+    executorService.execute(new Runnable() {
+      val objectSerializer = new ObjectSerializer()
+      val currentThread = Thread.currentThread()
+      currentThread.setName(s"report-task-${manager.taskName}")
+
+      def run() = {
+        val taskNumber = manager.taskName.replace(s"${manager.instanceName}-task", "").toInt
+        var report: String = null
+        var reportTxn: BasicProducerTransaction[Array[Byte], Array[Byte]] = null
+        while (true) {
+          logger.info(s"Task: ${manager.taskName}. Wait ${inputInstanceMetadata.performanceReportingInterval} ms to report performance metrics\n")
+          TimeUnit.MILLISECONDS.sleep(inputInstanceMetadata.performanceReportingInterval)
+          report = performanceMetrics.getReport
+          println(s"Performance metrics: $report \n")
+          logger.info(s"Task: ${manager.taskName}. Performance metrics: $report \n")
+          logger.debug(s"Task: ${manager.taskName}. Create a new txn for sending performance metrics\n")
+          reportTxn = reportProducer.newTransaction(ProducerPolicies.errorIfOpen, taskNumber)
+          logger.debug(s"Task: ${manager.taskName}. Send performance metrics\n")
+          reportTxn.send(objectSerializer.serialize(report))
+          logger.debug(s"Task: ${manager.taskName}. Do checkpoint of producer for performance reporting\n")
+          reportProducer.checkpoint()
+        }
       }
     })
   }

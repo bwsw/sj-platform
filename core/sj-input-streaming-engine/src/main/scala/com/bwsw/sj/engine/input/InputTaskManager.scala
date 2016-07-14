@@ -60,9 +60,8 @@ class InputTaskManager() {
   private val zkConnectionTimeout = configService.get(zkConnectionTimeoutTag).value.toInt
 
   private val config = createHazelcastConfig()
-
-  private val hazelcastMapName = "inputEngine"
   private val hazelcastInstance = Hazelcast.newHazelcastInstance(config)
+  private val hazelcastMapName = "inputEngine"
 
   /**
    * Returns hazelcast map for checking of there are duplicates (input envelopes) or not
