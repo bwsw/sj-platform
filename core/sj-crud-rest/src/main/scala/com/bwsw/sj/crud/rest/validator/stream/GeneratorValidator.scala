@@ -6,6 +6,8 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.GeneratorConstants._
 import com.bwsw.sj.crud.rest.entities._
+import com.bwsw.sj.crud.rest.validator.stream.StreamValidator._
+import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -15,6 +17,8 @@ import scala.collection.mutable.ArrayBuffer
 
 object GeneratorValidator {
 
+  private val logger = LoggerFactory.getLogger(getClass.getName)
+
   /**
     * Validating stream generator data
     *
@@ -23,6 +27,7 @@ object GeneratorValidator {
     * @return - List of errors
     */
   def validate(generatorData: GeneratorData, generator: Generator) = {
+    logger.debug(s"Start generator validation.")
     val serviceDAO = ConnectionRepository.getServiceManager
     val errors = new ArrayBuffer[String]()
 

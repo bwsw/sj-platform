@@ -4,6 +4,8 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.crud.rest.entities._
+import com.bwsw.sj.crud.rest.validator.stream.StreamValidator._
+import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -12,6 +14,8 @@ import scala.collection.mutable.ArrayBuffer
   */
 object ServiceValidator {
   import com.bwsw.sj.common.ServiceConstants._
+
+  private val logger = LoggerFactory.getLogger(getClass.getName)
 
   var serviceDAO: GenericMongoService[Service] = null
   var providerDAO: GenericMongoService[Provider] = null

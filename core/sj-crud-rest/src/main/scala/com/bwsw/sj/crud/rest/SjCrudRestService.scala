@@ -47,7 +47,7 @@ object SjCrudRestService extends App with SjCrudRouter {
 
   implicit val system = ActorSystem("sj-crud-rest-server")
   implicit val materializer = ActorMaterializer()
-  implicit val executor = system.dispatcher //for work with future
+  implicit val executor = system.dispatcher
 
   val restHost = System.getenv("CRUD_REST_HOST")
   val restPort = System.getenv("CRUD_REST_PORT").toInt
@@ -70,10 +70,10 @@ object SjCrudRestService extends App with SjCrudRouter {
 
   serverBinding onFailure {
     case ex: Exception =>
-      println("Failed to bind to {}:{}!", restHost, restPort)
+      logger.error("Failed to bind to {}:{}!", restHost, restPort)
   }
 
-  println(s"Server online at http://$restHost:$restPort/\nPress ENTER to stop...")
+  logger.info(s"Server online at http://$restHost:$restPort/")
   StdIn.readLine()
   serverBinding.flatMap(_.unbind())
     .onComplete(_ => system.terminate())
