@@ -4,7 +4,6 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.crud.rest.entities._
-import com.bwsw.sj.crud.rest.validator.stream.StreamValidator._
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
@@ -28,6 +27,8 @@ object ServiceValidator {
     * @return - errors
     */
   def validate(initialData: ServiceData, service: Service) = {
+    logger.debug(s"Service ${initialData.name}. Start service validation.")
+
     val errors = new ArrayBuffer[String]()
     serviceDAO = ConnectionRepository.getServiceManager
     providerDAO = ConnectionRepository.getProviderService

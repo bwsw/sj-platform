@@ -29,6 +29,7 @@ class InputStreamingValidator extends StreamingModuleValidator {
     * @return
     */
   def createInstance(parameters: InputInstanceMetadata): Instance = {
+    logger.debug(s"Instance ${parameters.name}. Create model object.")
     val instance = convertToModelInstance(parameters)
     val stages = scala.collection.mutable.Map[String, InstanceStage]()
     val instanceTask = new InstanceStage
@@ -51,6 +52,8 @@ class InputStreamingValidator extends StreamingModuleValidator {
   override def streamOptionsValidate(parameters: InstanceMetadata,
                                      specification: ModuleSpecification,
                                      errors: ArrayBuffer[String]): (ArrayBuffer[String], Instance) = {
+    logger.debug(s"Instance: ${parameters.name}. Stream options validation.")
+
     if (!parameters.checkpointMode.equals("every-nth")) {
       errors += s"Checkpoint-mode attribute for output-streaming module must be only 'every-nth'."
     }
@@ -111,10 +114,16 @@ class InputStreamingValidator extends StreamingModuleValidator {
     logger.debug(s"Instance: ${parameters.name}. Start input-streaming validation.")
     val errors = super.generalOptionsValidate(parameters)
 
-    val evictionPolicy = parameters.asInstanceOf[InputInstanceMetadata].evictionPolicy
-    if (!evictionPolicies.contains(evictionPolicy)) {
-      errors += s"Unknown value of eviction-policy attribute: $evictionPolicy. " +
+    val defaultEvictionPolicy = parameters.asInstanceOf[InputInstanceMetadata].defaultEvictionPolicy
+    if (!defaultEvictionPolicies.contains(defaultEvictionPolicy)) {
+      errors += s"Unknown value of 'default-eviction-policy' attribute: $defaultEvictionPolicy. " +
         s"Eviction-policy must be 'LRU' or 'LFU'."
+    }
+
+    val evictionPolicy = parameters.asInstanceOf[InputInstanceMetadata].evictionPolicy
+    if (!evictionPolicies.contains(defaultEvictionPolicy)) {
+      errors += s"Unknown value of 'eviction-policy' attribute: $evictionPolicy. " +
+        s"Eviction-policy must be 'fix-time' or 'expanded-time'."
     }
 
     streamOptionsValidate(parameters, specification, errors)

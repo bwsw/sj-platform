@@ -26,6 +26,7 @@ object ServiceUtil {
     * @param service Service object
     */
   def prepareService(service: Service) = {
+    logger.info(s"Prepare service ${service.name}.")
     service match {
       case esService: ESService => createIndex(esService)
 
@@ -46,6 +47,7 @@ object ServiceUtil {
     * @param esService Elasticsearch service
     */
   private def createIndex(esService: ESService) = {
+    logger.info(s"Check and create elasticsearch index ${esService.index}.")
     val client: TransportClient = TransportClient.builder().build()
     esService.provider.hosts.foreach { host =>
       val parts = host.split(":")
@@ -88,7 +90,7 @@ object ServiceUtil {
       s" {'class': 'SimpleStrategy', 'replication_factor': '1'} " +
       s" AND durable_writes = true")
 
-    logger.debug("")
+    logger.debug(s"Cassandra $keyspace for t-stream is created.")
   }
 
   /**
@@ -147,6 +149,7 @@ object ServiceUtil {
     * @return New cassandra session
     */
   private def openCassandraSession(provider: Provider) : Session = {
+    logger.debug(s"Open cassandra connection. Provider: ${provider.name}.")
     val cassandraHosts = provider.hosts.map { host =>
       val parts = host.split(":")
       InetAddress.getByName(parts(0))
@@ -161,6 +164,7 @@ object ServiceUtil {
     * @param session Cassandra session
     */
   private def closeCassandraSession(session: Session) = {
+    logger.debug(s"Close cassandra connection.")
     session.close()
   }
 

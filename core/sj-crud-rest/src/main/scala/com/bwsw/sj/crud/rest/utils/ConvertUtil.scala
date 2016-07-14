@@ -6,6 +6,7 @@ import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.crud.rest.entities._
 import com.bwsw.sj.crud.rest.entities.module._
+import org.slf4j.LoggerFactory
 
 /**
  * Methods for converting protocol entity to model entity
@@ -19,6 +20,7 @@ object ConvertUtil {
   import scala.collection.JavaConversions._
   import scala.collection.JavaConverters._
 
+  private val logger = LoggerFactory.getLogger(getClass.getName)
   val serializer = new JsonSerializer
 
   /**
@@ -28,6 +30,7 @@ object ConvertUtil {
    * @return - API instance object for such module type
    */
   def convertModelInstanceToApiInstance(instance: Instance) = {
+    logger.debug(s"Convert model instance ${instance.name} to api instance object.")
     instance match {
       case timeWindowedInstance: WindowedInstance =>
         val apiInstance = instanceToInstanceMetadata(new WindowedInstanceMetadata, instance).asInstanceOf[WindowedInstanceMetadata]
@@ -58,7 +61,8 @@ object ConvertUtil {
       case inputInstance: InputInstance =>
         val apiInstance = instanceToInstanceMetadata(new InputInstanceMetadata, instance).asInstanceOf[InputInstanceMetadata]
         apiInstance.outputs = inputInstance.outputs
-        apiInstance.evictionPolicy = inputInstance.defaultEvictionPolicy
+        apiInstance.defaultEvictionPolicy = inputInstance.defaultEvictionPolicy
+        apiInstance.evictionPolicy = inputInstance.evictionPolicy
         apiInstance.lookupHistory = inputInstance.lookupHistory
         apiInstance.queueMaxSize = inputInstance.queueMaxSize
         if (inputInstance.tasks != null) {
@@ -112,6 +116,7 @@ object ConvertUtil {
    * @return - API file specification object
    */
   def specificationToSpecificationData(specification: Specification) = {
+    logger.debug(s"Convert model specification ${specification.name} to api specification object.")
     ModuleSpecification(specification.name,
       specification.description,
       specification.version,
@@ -136,6 +141,7 @@ object ConvertUtil {
    * @return - object of model instance
    */
   def convertToModelInstance(apiInstance: InstanceMetadata) = {
+    logger.debug(s"Convert api instance ${apiInstance.name} to model instance object.")
     apiInstance match {
       case windowedInstanceMetadata: WindowedInstanceMetadata =>
         val modelInstance = instanceMetadataToInstance(new WindowedInstance, windowedInstanceMetadata).asInstanceOf[WindowedInstance]
@@ -166,7 +172,8 @@ object ConvertUtil {
       case inputInstanceMetadata: InputInstanceMetadata =>
         val modelInstance = instanceMetadataToInstance(new InputInstance, inputInstanceMetadata).asInstanceOf[InputInstance]
         modelInstance.outputs = inputInstanceMetadata.outputs
-        modelInstance.defaultEvictionPolicy = inputInstanceMetadata.evictionPolicy
+        modelInstance.defaultEvictionPolicy = inputInstanceMetadata.defaultEvictionPolicy
+        modelInstance.evictionPolicy = inputInstanceMetadata.evictionPolicy
         modelInstance.lookupHistory = inputInstanceMetadata.lookupHistory
         modelInstance.queueMaxSize = inputInstanceMetadata.queueMaxSize
         if (inputInstanceMetadata.tasks != null) {
@@ -219,6 +226,7 @@ object ConvertUtil {
    * @return - SjStreamData object
    */
   def streamToStreamData(stream: SjStream) = {
+    logger.debug(s"Convert model stream ${stream.name} to api stream object.")
     var streamData: SjStreamData = null
     stream match {
       case s: TStreamSjStream =>
@@ -255,6 +263,7 @@ object ConvertUtil {
    * @return - service data entity
    */
   def serviceToServiceData(service: Service) = {
+    logger.debug(s"Convert model service ${service.name} to api service object.")
     var serviceData: ServiceData = null
     service match {
       case s: CassandraService =>
@@ -324,6 +333,7 @@ object ConvertUtil {
    * @return - provider data entity
    */
   def providerToProviderData(provider: Provider) = {
+    logger.debug(s"Convert model provider ${provider.name} to api provider object.")
     val providerData = new ProviderData(
       provider.name,
       provider.description,
@@ -342,6 +352,7 @@ object ConvertUtil {
    * @return - config setting data entity
    */
   def configSettingToConfigSettingData(configElement: ConfigSetting) = {
+    logger.debug(s"Convert model config settings data ${configElement.name} to api config settings object.")
     new ConfigSettingData(
       configElement.name.replace(configElement.domain + ".", ""),
       configElement.value

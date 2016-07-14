@@ -6,7 +6,6 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.GeneratorConstants._
 import com.bwsw.sj.crud.rest.entities._
-import com.bwsw.sj.crud.rest.validator.stream.StreamValidator._
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer

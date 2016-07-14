@@ -142,7 +142,7 @@ abstract class StreamingModuleValidator {
     * @return - List of errors and validating instance (null, if errors non empty)
     */
   def streamOptionsValidate(parameters: InstanceMetadata, specification: ModuleSpecification, errors: ArrayBuffer[String]) = {
-    logger.debug(s"Instance: ${parameters.name}. General options validation.")
+    logger.debug(s"Instance: ${parameters.name}. Stream options validation.")
 
     val inputModes = parameters.inputs.map(i => getStreamMode(i))
     if (inputModes.exists(m => !streamModes.contains(m))) {
