@@ -5,6 +5,12 @@ import java.util.concurrent.locks.ReentrantLock
 
 import scala.collection.mutable
 
+/**
+ * Class represents a set of metrics that characterize performance of a output streaming module
+ * Created: 07/06/2016
+ * @author Kseniya Mikhaleva
+ */
+
 class OutputStreamingPerformanceMetrics(taskId: String, host: String, inputStreamName: String, outputStreamName: String)
   extends PerformanceMetrics(taskId, host, Array(inputStreamName), Array(outputStreamName)) {
 

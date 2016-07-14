@@ -4,7 +4,7 @@ import com.bwsw.sj.common.DAL.model.module.InputInstance
 import com.bwsw.sj.common.utils.SjTimer
 
 class TimeCheckpointInputTaskEngine(manager: InputTaskManager, inputInstanceMetadata: InputInstance)
-  extends InputTaskEngine(manager) {
+  extends InputTaskEngine(manager, inputInstanceMetadata) {
 
   private val checkpointTimer: Option[SjTimer] = createTimer()
   val isNotOnlyCustomCheckpoint = checkpointTimer.isDefined

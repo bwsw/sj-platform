@@ -1,0 +1,33 @@
+{
+  "name": "input-streaming-stub",
+  "description": "Stub module by BW",
+  "version": "0.1",
+  "author": "Ksenia Mikhaleva",
+  "license": "Apache 2.0",
+  "inputs": {
+    "cardinality": [
+      0,
+      0
+    ],
+    "types": [
+      "input"
+    ]
+  },
+  "outputs": {
+    "cardinality": [
+      1,
+      1
+    ],
+    "types": [
+      "stream.t-stream"
+    ]
+  },
+  "module-type": "input-streaming",
+  "engine-name": "input-streaming",
+  "engine-version": "0.1",
+  "options": {
+    "opt": 1
+  },
+  "validator-class": "com.bwsw.sj.stubs.module.input_streaming.Validator",
+  "executor-class": "com.bwsw.sj.stubs.module.input_streaming.Executor"
+}

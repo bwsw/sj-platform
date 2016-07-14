@@ -5,7 +5,7 @@ import com.bwsw.sj.engine.core.entities.InputEnvelope
 
 
 class NumericalCheckpointInputTaskEngine(manager: InputTaskManager, inputInstanceMetadata: InputInstance)
-  extends InputTaskEngine(manager) {
+  extends InputTaskEngine(manager, inputInstanceMetadata) {
 
   private var countOfEnvelopes = 0
   val isNotOnlyCustomCheckpoint = inputInstanceMetadata.checkpointInterval > 0
