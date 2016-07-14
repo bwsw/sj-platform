@@ -58,7 +58,7 @@ object ConvertUtil {
       case inputInstance: InputInstance =>
         val apiInstance = instanceToInstanceMetadata(new InputInstanceMetadata, instance).asInstanceOf[InputInstanceMetadata]
         apiInstance.outputs = inputInstance.outputs
-        apiInstance.evictionPolicy = inputInstance.evictionPolicy
+        apiInstance.evictionPolicy = inputInstance.defaultEvictionPolicy
         apiInstance.lookupHistory = inputInstance.lookupHistory
         apiInstance.queueMaxSize = inputInstance.queueMaxSize
         if (inputInstance.tasks != null) {
@@ -166,7 +166,7 @@ object ConvertUtil {
       case inputInstanceMetadata: InputInstanceMetadata =>
         val modelInstance = instanceMetadataToInstance(new InputInstance, inputInstanceMetadata).asInstanceOf[InputInstance]
         modelInstance.outputs = inputInstanceMetadata.outputs
-        modelInstance.evictionPolicy = inputInstanceMetadata.evictionPolicy
+        modelInstance.defaultEvictionPolicy = inputInstanceMetadata.evictionPolicy
         modelInstance.lookupHistory = inputInstanceMetadata.lookupHistory
         modelInstance.queueMaxSize = inputInstanceMetadata.queueMaxSize
         if (inputInstanceMetadata.tasks != null) {

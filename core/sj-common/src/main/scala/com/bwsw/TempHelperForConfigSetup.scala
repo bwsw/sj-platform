@@ -55,3 +55,11 @@ object TempHelperForConfigSetup extends App{
   configService.save(new ConfigSetting(ConfigConstants.geoIpAsNum, "GeoIPASNum.dat", "system"))
   configService.save(new ConfigSetting(ConfigConstants.geoIpAsNumv6, "GeoIPASNumv6.dat", "system"))
 }
+
+object aaa extends App {
+  val configService = ConnectionRepository.getConfigService
+
+  val answer = configService.get("system." + "com.bwsw.regular.streaming.engine-0.1")
+
+  println(answer.value)
+}

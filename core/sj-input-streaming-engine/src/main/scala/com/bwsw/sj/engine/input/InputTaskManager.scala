@@ -60,9 +60,8 @@ class InputTaskManager() {
   private val zkConnectionTimeout = configService.get(zkConnectionTimeoutTag).value.toInt
 
   private val config = createHazelcastConfig()
-
-  private val hazelcastMapName = "inputEngine"
   private val hazelcastInstance = Hazelcast.newHazelcastInstance(config)
+  private val hazelcastMapName = "inputEngine"
 
   /**
    * Returns hazelcast map for checking of there are duplicates (input envelopes) or not
@@ -165,7 +164,7 @@ class InputTaskManager() {
    */
   private def createEvictionPolicy() = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Create EvictionPolicy\n")
-    instance.evictionPolicy match {
+    instance.defaultEvictionPolicy match {
       case "LRU" => EvictionPolicy.LRU
       case "LFU" => EvictionPolicy.LFU
     }

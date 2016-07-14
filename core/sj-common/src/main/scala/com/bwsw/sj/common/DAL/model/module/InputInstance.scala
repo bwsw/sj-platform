@@ -11,6 +11,7 @@ import org.mongodb.morphia.annotations.Property
 class InputInstance extends Instance {
   @Property("lookup-history") var lookupHistory: Int = 0 //in seconds
   @Property("queue-max-size") var queueMaxSize: Int = 0
-  @Property("eviction-policy") var evictionPolicy: String = null
+  @Property("default-eviction-policy") var defaultEvictionPolicy: String = null
+  @Property("eviction-policy") var evictionPolicy: String = null //fix-time or expanded-time
   var tasks: java.util.Map[String, Int] = null
 }

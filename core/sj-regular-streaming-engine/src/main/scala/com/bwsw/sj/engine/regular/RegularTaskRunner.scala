@@ -64,7 +64,7 @@ object RegularTaskRunner {
 
     launchKafkaSubscribingConsumer(inputs, manager, regularInstanceMetadata.startFrom)
 
-    val producers = manager.createOutputProducers()
+    val producers = manager.createOutputProducers
 
     logger.debug(s"Task: ${manager.taskName}. Start adding t-stream producers to checkpoint group\n")
     producers.foreach(x => checkpointGroup.add(x._2.name, x._2))
