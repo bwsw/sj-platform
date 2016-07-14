@@ -20,7 +20,8 @@ object ModuleConstants {
   val oldest = "oldest"
   val newest = "newest"
   val startFromModes = Set(oldest, newest)
-  val evictionPolicies = Set("LRU", "LFU")
+  val defaultEvictionPolicies = Set("LRU", "LFU")
+  val evictionPolicies = Set("fix-time", "expanded-time")
 
   val ready = "ready"
   val starting = "starting"

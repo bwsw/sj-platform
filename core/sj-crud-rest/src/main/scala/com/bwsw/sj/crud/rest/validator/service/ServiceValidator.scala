@@ -4,6 +4,7 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.crud.rest.entities._
+import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -12,6 +13,8 @@ import scala.collection.mutable.ArrayBuffer
   */
 object ServiceValidator {
   import com.bwsw.sj.common.ServiceConstants._
+
+  private val logger = LoggerFactory.getLogger(getClass.getName)
 
   var serviceDAO: GenericMongoService[Service] = null
   var providerDAO: GenericMongoService[Provider] = null
@@ -24,6 +27,8 @@ object ServiceValidator {
     * @return - errors
     */
   def validate(initialData: ServiceData, service: Service) = {
+    logger.debug(s"Service ${initialData.name}. Start service validation.")
+
     val errors = new ArrayBuffer[String]()
     serviceDAO = ConnectionRepository.getServiceManager
     providerDAO = ConnectionRepository.getProviderService

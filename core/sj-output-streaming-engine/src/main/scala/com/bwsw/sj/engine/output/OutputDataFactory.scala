@@ -17,6 +17,7 @@ import com.bwsw.tstreams.data.cassandra.{CassandraStorageFactory, CassandraStora
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.services.BasicStreamService
 import com.bwsw.tstreams.streams.BasicStream
+import org.slf4j.LoggerFactory
 
 /**
  * Data factory of output streaming engine
@@ -25,6 +26,8 @@ import com.bwsw.tstreams.streams.BasicStream
  * @author Kseniya Tomskikh
  */
 object OutputDataFactory {
+
+  private val logger = LoggerFactory.getLogger(getClass.getName)
 
   val instanceName: String = System.getenv("INSTANCE_NAME")
   val taskName: String = System.getenv("TASK_NAME")
@@ -76,6 +79,7 @@ object OutputDataFactory {
    * @return FileMetadata entity
    */
   def getFileMetadata: FileMetadata = {
+    logger.debug(s"Task $taskName. Get metadata of file.")
     fileMetadataDAO.getByParameters(Map("specification.name" -> instance.moduleName,
       "specification.module-type" -> instance.moduleType,
       "specification.version" -> instance.moduleVersion)).head
@@ -87,6 +91,7 @@ object OutputDataFactory {
    * @return Jar of module
    */
   def getModuleJar: File = {
+    logger.debug(s"Task $taskName. Get jar-file of module.")
     val fileMetadata = getFileMetadata
     fileStorage.get(fileMetadata.filename, s"tmp/${instance.moduleName}")
   }
@@ -95,6 +100,7 @@ object OutputDataFactory {
    * Create data storage for producer/consumer settings
    */
   def createDataStorage() = {
+    logger.debug(s"Task $taskName. Get data storage for service ${tstreamService.name}.")
     OutputDataFactory.tstreamService.dataProvider.providerType match {
       case "aerospike" =>
         val options = new AerospikeStorageOptions(
@@ -109,7 +115,6 @@ object OutputDataFactory {
           OutputDataFactory.tstreamService.dataNamespace
         )
 
-
         (new CassandraStorageFactory).getInstance(options)
     }
   }
@@ -121,6 +126,7 @@ object OutputDataFactory {
    * @return SjStream used for keeping the reports of module performance
    */
   def getReportStream = {
+
     getTStream(
       reportStreamName,
       "store reports of performance metrics",
@@ -130,12 +136,15 @@ object OutputDataFactory {
   }
 
   private def getTStream(name: String, description: String, tags: Array[String], partitions: Int) = {
+    logger.debug(s"Task $taskName. Get t-stream $name.")
     var stream: BasicStream[Array[Byte]] = null
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
 
     if (BasicStreamService.isExist(name, metadataStorage)) {
+      logger.debug(s"Task $taskName. Load t-stream.")
       stream = BasicStreamService.loadStream(name, metadataStorage, dataStorage)
     } else {
+      logger.debug(s"Task $taskName. Create t-stream.")
       stream = BasicStreamService.createStream(
         name,
         partitions,

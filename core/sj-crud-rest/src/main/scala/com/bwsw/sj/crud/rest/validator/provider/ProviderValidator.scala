@@ -17,6 +17,7 @@ import org.apache.zookeeper.ZooKeeper
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.InetSocketTransportAddress
+import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.concurrent.duration._
@@ -26,6 +27,8 @@ import scala.concurrent.duration._
   */
 object ProviderValidator {
   import com.bwsw.sj.common.ProviderConstants._
+
+  private val logger = LoggerFactory.getLogger(getClass.getName)
 
   private val configService = ConnectionRepository.getConfigService
   private val zkTimeout = configService.get(zkSessionTimeoutTag).value.toInt
@@ -37,6 +40,7 @@ object ProviderValidator {
     * @return - errors
     */
   def validate(initialData: ProviderData) = {
+    logger.debug(s"Provider ${initialData.name}. Start provider validation.")
 
     val errors = new ArrayBuffer[String]()
 

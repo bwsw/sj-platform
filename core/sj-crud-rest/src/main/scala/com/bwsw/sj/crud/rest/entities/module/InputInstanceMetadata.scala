@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 class InputInstanceMetadata extends InstanceMetadata {
   @JsonProperty("lookup-history") var lookupHistory: Int = 0
   @JsonProperty("queue-max-size") var queueMaxSize: Int = 0
+  @JsonProperty("default-eviction-policy") var defaultEvictionPolicy: String = null
   @JsonProperty("eviction-policy") var evictionPolicy: String = null
   var tasks: Map[String, Int] = null
 }
