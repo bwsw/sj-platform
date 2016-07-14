@@ -3,6 +3,8 @@ import com.typesafe.sbt.packager.Keys._
 import com.typesafe.sbt.packager.archetypes.JavaAppPackaging
 import sbt.Keys._
 import sbt._
+import sbtassembly.AssemblyPlugin.autoImport._
+import sbtassembly.PathList
 
 object StreamJugglerBuild extends Build {
 
@@ -13,35 +15,38 @@ object StreamJugglerBuild extends Build {
   //////////////////////////////////////////////////////////////////////////////
   lazy val sj = Project(id = "sj",
     base = file("."),
-    settings = commonSettings) aggregate(common, engineCore,
-    stubRegular, stubOutput, crudRest, transactionGenerator, mesos,
-    outputStreamingEngine, regularStreamingEngine, windowedStreamingEngine,
-    outputPM, sflowOutput,
-    sflowProcess)
+    settings = commonSettings) aggregate(common, engineCore, crudRest, transactionGenerator, mesos,
+    outputStreamingEngine, regularStreamingEngine, windowedStreamingEngine, inputStreamingEngine,
+    pmOutput,
+    stubRegular, stubOutput,
+    sflowOutput, sflowProcess)
 
   lazy val common = Project(id = "sj-common",
-    base = file("sj-common")).enablePlugins(JavaAppPackaging)
+    base = file("./core/sj-common")).enablePlugins(JavaAppPackaging)
 
   lazy val engineCore = Project(id = "sj-engine-core",
-    base = file("sj-engine-core")).enablePlugins(JavaAppPackaging).dependsOn(common)
+    base = file("./core/sj-engine-core")).enablePlugins(JavaAppPackaging).dependsOn(common)
 
   lazy val crudRest = Project(id = "sj-crud-rest",
-    base = file("sj-crud-rest")).enablePlugins(JavaAppPackaging).dependsOn(common)
+    base = file("./core/sj-crud-rest")).enablePlugins(JavaAppPackaging).dependsOn(common)
 
   lazy val transactionGenerator = Project(id = "sj-transaction-generator",
-    base = file("sj-transaction-generator")).enablePlugins(JavaAppPackaging).dependsOn(common)
+    base = file("./core/sj-transaction-generator")).enablePlugins(JavaAppPackaging).dependsOn(common)
 
   lazy val mesos = Project(id = "sj-mesos-framework",
-    base = file("sj-mesos-framework")).enablePlugins(JavaAppPackaging).dependsOn(common)
+    base = file("./core/sj-mesos-framework")).enablePlugins(JavaAppPackaging).dependsOn(common)
 
   lazy val outputStreamingEngine = Project(id = "sj-output-streaming-engine",
-    base = file("sj-output-streaming-engine")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
+    base = file("./core/sj-output-streaming-engine")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
 
   lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
-    base = file("sj-regular-streaming-engine")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
+    base = file("./core/sj-regular-streaming-engine")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
 
   lazy val windowedStreamingEngine = Project(id = "sj-windowed-streaming-engine",
-    base = file("sj-windowed-streaming-engine")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
+    base = file("./core/sj-windowed-streaming-engine")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
+
+  lazy val inputStreamingEngine = Project(id = "sj-input-streaming-engine",
+    base = file("./core/sj-input-streaming-engine")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
 
   lazy val stubRegular = Project(id = "sj-stub-regular-streaming",
     base = file("./contrib/stubs/sj-stub-regular-streaming")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
@@ -52,8 +57,8 @@ object StreamJugglerBuild extends Build {
   lazy val sflowProcess = Project(id = "sj-sflow-process",
     base = file("./contrib/examples/sflow/sj-sflow-process")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
 
-  lazy val outputPM = Project(id = "sj-output-module-for-pm",
-    base = file("sj-output-module-for-pm")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
+  lazy val pmOutput = Project(id = "sj-performance-metrics-output-es",
+    base = file("./contrib/sj-platform/sj-performance-metrics-output-es")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
 
   lazy val sflowOutput = Project(id = "sj-sflow-output",
     base = file("./contrib/examples/sflow/sj-sflow-output")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
@@ -109,12 +114,15 @@ object StreamJugglerBuild extends Build {
     //      "org.scala-lang" %  "scala-compiler" % scalaVersion.value
     //    ),
     //
-    //    assemblyMergeStrategy in assembly := {
-    //      case x =>
-    //        val oldStrategy = (assemblyMergeStrategy in assembly).value
-    //        oldStrategy(x)
-    //    },
-
+    assemblyMergeStrategy in assembly := {
+      case PathList("scala", xs@_*) => MergeStrategy.first
+      case PathList("org", "slf4j", xs@_*) => MergeStrategy.first
+      case "library.properties" => MergeStrategy.concat
+      case "log4j.properties" => MergeStrategy.concat
+      case x =>
+        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        oldStrategy(x)
+    },
 
     scalacOptions in Compile ++= Seq(
       "-unchecked",
@@ -133,4 +141,5 @@ object StreamJugglerBuild extends Build {
     maintainer in Docker := "bwsw <bwsw@bwsw.com>"
 
   )
+
 }

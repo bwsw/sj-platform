@@ -6,10 +6,12 @@ import java.util.concurrent.{ExecutorService, TimeUnit}
 
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.DAL.model.module.InputInstance
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.module.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.sj.engine.core.entities.InputEnvelope
 import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.engine.core.input.InputStreamingExecutor
+import com.bwsw.sj.engine.input.eviction_policy.{ExpandedTimeEvictionPolicy, FixTimeEvictionPolicy}
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerTransaction, ProducerPolicies}
 import io.netty.buffer.ByteBuf
@@ -28,8 +30,9 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
   protected var txnsByStreamPartitions = createTxnsStorage()
   protected val producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]] = manager.createOutputProducers
   protected val checkpointGroup = new CheckpointGroup()
-  protected val moduleEnvironmentManager = new InputEnvironmentManager()
+  protected val moduleEnvironmentManager = createModuleEnvironmentManager()
   protected val executor: InputStreamingExecutor = manager.getExecutor(moduleEnvironmentManager)
+  protected val evictionPolicy = createEvictionPolicy()
   protected val isNotOnlyCustomCheckpoint: Boolean
   protected val performanceMetrics = new InputStreamingPerformanceMetrics(
     manager.taskName,
@@ -102,17 +105,11 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
   protected def checkForDuplication(key: String, duplicateCheck: Boolean, value: Array[Byte]): Boolean = {
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Try to check key: $key for duplication with a setting duplicateCheck = $duplicateCheck\n")
-    val uniqueEnvelopes = manager.getUniqueEnvelopes
     if (duplicateCheck) {
       logger.info(s"Task name: ${manager.taskName}. " +
         s"Check key: $key for duplication\n")
-      if (!uniqueEnvelopes.containsKey(key)) {
-        uniqueEnvelopes.put(key, value)
-        return false
-      }
-      else uniqueEnvelopes.replace(key, value)
-    }
-    true
+      evictionPolicy.checkForDuplication(key, value)
+    } else true
   }
 
   def runModule(executorService: ExecutorService, buffer: ByteBuf) = {
@@ -212,5 +209,20 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
     logger.debug(s"Task: ${manager.taskName}. Start adding t-stream producers to checkpoint group\n")
     producers.foreach(x => checkpointGroup.add(x._2.name, x._2))
     logger.debug(s"Task: ${manager.taskName}. The t-stream producers are added to checkpoint group\n")
+  }
+
+  private def createModuleEnvironmentManager() = {
+    val taggedOutputs = inputInstanceMetadata.outputs
+      .map(ConnectionRepository.getStreamService.get)
+      .filter(_.tags != null)
+
+    new InputEnvironmentManager(taggedOutputs)
+  }
+
+  private def createEvictionPolicy() = {
+    inputInstanceMetadata.evictionPolicy match {
+      case "fix-time" => new FixTimeEvictionPolicy(manager)
+      case "expanded-time" => new ExpandedTimeEvictionPolicy(manager)
+    }
   }
 }
