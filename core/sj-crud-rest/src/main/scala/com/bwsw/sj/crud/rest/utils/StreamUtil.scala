@@ -16,6 +16,7 @@ import kafka.admin.AdminUtils
 import kafka.utils.ZkUtils
 import org.I0Itec.zkclient.ZkConnection
 import org.elasticsearch.common.transport.InetSocketTransportAddress
+import org.slf4j.LoggerFactory
 
 /**
   * Created: 19/05/2016
@@ -24,6 +25,7 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress
   */
 object StreamUtil {
   private val configService = ConnectionRepository.getConfigService
+  private val logger = LoggerFactory.getLogger(getClass.getName)
 
   /**
     * Check t-stream for exists
@@ -34,6 +36,7 @@ object StreamUtil {
     * @return - Error, if cannot creating stream or stream is incorrect
     */
   def checkAndCreateTStream(stream: TStreamSjStream) = {
+    logger.debug(s"Stream ${stream.name}. Check and create t-stream.")
     val service = stream.service.asInstanceOf[TStreamService]
     val metadataProvider = service.metadataProvider
     val hosts = metadataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt))
@@ -62,6 +65,8 @@ object StreamUtil {
         dataStorage
       )
       if (tStream.getPartitions != stream.asInstanceOf[TStreamSjStream].partitions) {
+        logger.debug(s"Kafka stream partitions (${stream.asInstanceOf[TStreamSjStream].partitions}) " +
+          s"mismatch partitions of exists kafka topic (${tStream.getPartitions}).")
         Left(s"Partitions count of stream ${stream.name} mismatch")
       } else {
         Right(true)
@@ -74,6 +79,7 @@ object StreamUtil {
         "", metadataStorage,
         dataStorage
       )
+      logger.debug(s"Stream ${stream.name}. T-stream is creating.")
       Right(true)
     }
   }
@@ -87,6 +93,7 @@ object StreamUtil {
     * @return - Error, if topic is incorrect or cannot creating it
     */
   def checkAndCreateKafkaTopic(stream: KafkaSjStream) = {
+    logger.debug(s"Stream ${stream.name}. Check and create kafka stream.")
     val service = stream.service.asInstanceOf[KafkaService]
     val brokers = service.provider.hosts
     val replications = brokers.length
@@ -96,13 +103,17 @@ object StreamUtil {
     val zkClient = ZkUtils.createZkClient(zkHost.mkString(";"), zkTimeout, zkTimeout)
     val zkUtils = new ZkUtils(zkClient, zkConnect, false)
     if (!AdminUtils.topicExists(zkUtils, stream.name)) {
+      logger.debug(s"Try creating kafka topic with name ${stream.name}")
       AdminUtils.createTopic(zkUtils, stream.name, stream.asInstanceOf[KafkaSjStream].partitions, replications, new Properties())
       Right(s"Topic ${stream.name} is created")
     } else {
       val topicMetadata = AdminUtils.fetchTopicMetadataFromZk(stream.name, zkUtils)
       if (topicMetadata.partitionsMetadata.size != stream.asInstanceOf[KafkaSjStream].partitions) {
+        logger.debug(s"Kafka stream partitions (${stream.asInstanceOf[KafkaSjStream].partitions}) " +
+          s"mismatch partitions of exists kafka topic (${topicMetadata.partitionsMetadata.size}).")
         Left(s"Partitions count of stream ${stream.name} mismatch")
       } else {
+        logger.debug(s"Kafka topic ${stream.name} already exists.")
         Right(s"Topic ${stream.name} is exists")
       }
     }
@@ -117,6 +128,7 @@ object StreamUtil {
     * @return - Error, if index is incorrect or cannot creating it
     */
   def checkAndCreateEsStream(stream: ESSjStream) = {
+    logger.debug(s"Stream ${stream.name}. Check and create elasticsearch stream.")
     val service = stream.service.asInstanceOf[ESService]
     val hosts: Array[InetSocketTransportAddress] = service.provider.hosts.map { s =>
       val parts = s.split(":")
@@ -144,6 +156,7 @@ object StreamUtil {
     * @return - Error, if table is incorrect or cannot creating it
     */
   def checkAndCreateJdbcStream(stream: JDBCSjStream) = {
+    logger.debug(s"Stream ${stream.name}. Check and create jdbc stream.")
     val service = stream.service.asInstanceOf[JDBCService]
     //todo add jdbc support
     if (true) {

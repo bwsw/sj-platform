@@ -5,6 +5,7 @@ import com.bwsw.sj.common.DAL.model.{SjStream, TStreamService, TStreamSjStream}
 import com.bwsw.sj.common.ModuleConstants._
 import com.bwsw.sj.common.StreamConstants._
 import com.bwsw.sj.crud.rest.entities.module.{InstanceMetadata, ModuleSpecification, OutputInstanceMetadata}
+import org.slf4j.{LoggerFactory, Logger}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -14,6 +15,8 @@ import scala.collection.mutable.ArrayBuffer
   * @author Kseniya Tomskikh
   */
 class OutputStreamingValidator extends StreamingModuleValidator {
+
+  private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
   /**
     * Validating options of streams of instance for module
@@ -107,6 +110,7 @@ class OutputStreamingValidator extends StreamingModuleValidator {
     * @return - List of errors
     */
   override def validate(parameters: InstanceMetadata, specification: ModuleSpecification) = {
+    logger.debug(s"Instance: ${parameters.name}. Start output-streaming validation.")
     val errors = super.generalOptionsValidate(parameters)
     streamOptionsValidate(parameters, specification, errors)
   }

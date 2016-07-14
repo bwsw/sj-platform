@@ -12,6 +12,7 @@ import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.crud.rest.entities.module.{InstanceMetadata, ModuleSpecification}
 import com.bwsw.sj.crud.rest.utils.StreamUtil
 import kafka.common.TopicExistsException
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -27,6 +28,8 @@ abstract class StreamingModuleValidator {
   import com.bwsw.sj.common.ModuleConstants._
   import com.bwsw.sj.common.StreamConstants._
   import com.bwsw.sj.crud.rest.utils.ConvertUtil._
+
+  private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
   val instanceNamePattern = "^[a-zA-Z0-9-]$".r
 
@@ -46,6 +49,7 @@ abstract class StreamingModuleValidator {
     * @return
     */
   def createInstance(parameters: InstanceMetadata, partitionsCount: Map[String, Int], streams: Set[SjStream]) = {
+    logger.debug(s"Instance ${parameters.name}. Create model object.")
     val executionPlan = createExecutionPlan(parameters, partitionsCount)
     val instance = convertToModelInstance(parameters)
     instance.executionPlan = executionPlan
@@ -85,6 +89,7 @@ abstract class StreamingModuleValidator {
     * @return - List of errors
     */
   def generalOptionsValidate(parameters: InstanceMetadata) = {
+    logger.debug(s"Instance: ${parameters.name}. General options validation.")
     val errors = new ArrayBuffer[String]()
 
     if (!parameters.name.matches("""^([a-zA-Z][a-zA-Z0-9-]+)$""")) {
@@ -137,6 +142,8 @@ abstract class StreamingModuleValidator {
     * @return - List of errors and validating instance (null, if errors non empty)
     */
   def streamOptionsValidate(parameters: InstanceMetadata, specification: ModuleSpecification, errors: ArrayBuffer[String]) = {
+    logger.debug(s"Instance: ${parameters.name}. General options validation.")
+
     val inputModes = parameters.inputs.map(i => getStreamMode(i))
     if (inputModes.exists(m => !streamModes.contains(m))) {
       errors += s"Unknown stream modes. Input streams must have modes 'split' or 'full'."
@@ -270,6 +277,7 @@ abstract class StreamingModuleValidator {
     * @param allTStreams - all t-streams of instance
     */
   def checkTStreams(errors: ArrayBuffer[String], allTStreams: mutable.Buffer[TStreamSjStream]) = {
+    logger.debug(s"Check t-streams.")
     allTStreams.foreach { (stream: TStreamSjStream) =>
       if (errors.isEmpty) {
         val streamCheckResult = StreamUtil.checkAndCreateTStream(stream)
@@ -288,6 +296,7 @@ abstract class StreamingModuleValidator {
     * @param allKafkaStreams - all kafka streams of instance
     */
   def checkKafkaStreams(errors: ArrayBuffer[String], allKafkaStreams: mutable.Buffer[KafkaSjStream]) = {
+    logger.debug(s"Check kafka streams.")
     allKafkaStreams.foreach { (stream: KafkaSjStream) =>
       if (errors.isEmpty) {
         try {
@@ -297,7 +306,9 @@ abstract class StreamingModuleValidator {
             case _ =>
           }
         } catch {
-          case e: TopicExistsException => errors += s"Cannot create kafka topic: ${e.getMessage}"
+          case e: TopicExistsException =>
+            logger.debug(s"Stream ${stream.name}. Kafka topic already exists.")
+            errors += s"Cannot create kafka topic: ${e.getMessage}"
         }
       }
     }
@@ -310,6 +321,7 @@ abstract class StreamingModuleValidator {
     * @param allEsStreams - all elasticsearch streams of instance
     */
   def checkEsStreams(errors: ArrayBuffer[String], allEsStreams: List[ESSjStream]) = {
+    logger.debug(s"Check elasticsearch streams.")
     allEsStreams.foreach { (stream: ESSjStream) =>
       if (errors.isEmpty) {
         val streamCheckResult = StreamUtil.checkAndCreateEsStream(stream)
@@ -328,6 +340,7 @@ abstract class StreamingModuleValidator {
     * @param allJdbcStreams - all jdbc streams of instance
     */
   def checkJdbcStreams(errors: ArrayBuffer[String], allJdbcStreams: List[JDBCSjStream]) = {
+    logger.debug(s"Check jdbc streams.")
     allJdbcStreams.foreach { (stream: JDBCSjStream) =>
       if (errors.isEmpty) {
         val streamCheckResult = StreamUtil.checkAndCreateJdbcStream(stream)
@@ -405,6 +418,7 @@ abstract class StreamingModuleValidator {
     * @return - execution plan of instance
     */
   def createExecutionPlan(instance: InstanceMetadata, partitionsCount: Map[String, Int]) = {
+    logger.debug(s"Instance ${instance.name}. Create execution plan.")
     var inputStreams: Array[String] = null
     instance.inputs match {
       case inputStreamArray: Array[String] =>

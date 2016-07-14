@@ -8,6 +8,7 @@ import com.bwsw.sj.common.ModuleConstants._
 import com.bwsw.sj.common.StreamConstants._
 import com.bwsw.sj.crud.rest.entities.module.{InputInstanceMetadata, ModuleSpecification, InstanceMetadata}
 import com.bwsw.sj.crud.rest.utils.ConvertUtil._
+import org.slf4j.{LoggerFactory, Logger}
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
@@ -20,6 +21,7 @@ import scala.collection.mutable.ArrayBuffer
   */
 class InputStreamingValidator extends StreamingModuleValidator {
 
+  private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
   /**
     * Create entity of input instance for saving to database
@@ -106,6 +108,7 @@ class InputStreamingValidator extends StreamingModuleValidator {
     */
   override def validate(parameters: InstanceMetadata,
                         specification: ModuleSpecification): (ArrayBuffer[String], Instance) = {
+    logger.debug(s"Instance: ${parameters.name}. Start input-streaming validation.")
     val errors = super.generalOptionsValidate(parameters)
 
     val evictionPolicy = parameters.asInstanceOf[InputInstanceMetadata].evictionPolicy
