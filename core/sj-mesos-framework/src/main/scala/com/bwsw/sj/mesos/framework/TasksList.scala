@@ -13,7 +13,7 @@ object TasksList{
   private val listTasks : mutable.Map[String, Task] = mutable.Map()
   var message: String = "Initialization"
 
-  class Task(task_id: String, inputs:mutable.Map[String,Array[Int]]){
+  class Task(task_id: String){
     val id: String = task_id
     var state: String = "TASK_STAGING"
     var state_changed: Long = DateTime.now.getMillis
@@ -21,7 +21,6 @@ object TasksList{
     var node: String = ""
     var last_node: String = ""
     val description: ormTask = null
-    val input:mutable.Map[String,Array[Int]] = inputs
 
 
     def update(state: String = state,
@@ -45,8 +44,8 @@ object TasksList{
   }
 
 
-  def newTask(taskId: String, inputs:mutable.Map[String,Array[Int]]) = {
-    val task = new Task(taskId, inputs)
+  def newTask(taskId: String) = {
+    val task = new Task(taskId)
     listTasks += taskId -> task
     tasksToLaunch += taskId
   }
