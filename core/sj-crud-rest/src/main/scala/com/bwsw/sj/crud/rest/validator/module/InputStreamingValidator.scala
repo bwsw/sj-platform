@@ -121,7 +121,7 @@ class InputStreamingValidator extends StreamingModuleValidator {
     }
 
     val evictionPolicy = parameters.asInstanceOf[InputInstanceMetadata].evictionPolicy
-    if (!evictionPolicies.contains(evictionPolicies)) {
+    if (!evictionPolicies.contains(evictionPolicy)) {
       errors += s"Unknown value of 'eviction-policy' attribute: $evictionPolicy. " +
         s"Eviction-policy must be 'fix-time' or 'expanded-time'."
     }
