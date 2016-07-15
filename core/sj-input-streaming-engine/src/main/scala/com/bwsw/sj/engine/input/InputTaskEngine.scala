@@ -11,7 +11,7 @@ import com.bwsw.sj.common.module.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.sj.engine.core.entities.InputEnvelope
 import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.engine.core.input.InputStreamingExecutor
-import com.bwsw.sj.engine.input.eviction_policy.{ExpandedTimeEvictionPolicy, FixTimeEvictionPolicy}
+import com.bwsw.sj.engine.input.eviction_policy.ExpandedTimeEvictionPolicy
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerTransaction, ProducerPolicies}
 import io.netty.buffer.ByteBuf
@@ -27,8 +27,9 @@ import org.slf4j.LoggerFactory
 abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata: InputInstance) {
 
   protected val logger = LoggerFactory.getLogger(this.getClass)
-  protected var txnsByStreamPartitions = createTxnsStorage()
   protected val producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]] = manager.createOutputProducers
+  protected val streams = producers.keySet
+  protected var txnsByStreamPartitions = createTxnsStorage(streams)
   protected val checkpointGroup = new CheckpointGroup()
   protected val moduleEnvironmentManager = createModuleEnvironmentManager()
   protected val executor: InputStreamingExecutor = manager.getExecutor(moduleEnvironmentManager)
@@ -199,10 +200,10 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
     } else None
   }
 
-  protected def createTxnsStorage() = {
+  protected def createTxnsStorage(streams: Set[String]) = {
     logger.debug(s"Task name: ${manager.taskName}. " +
       s"Create storage for keeping txns for each partition of output streams\n")
-    producers.map(x => (x._1, Map[Int, BasicProducerTransaction[Array[Byte], Array[Byte]]]()))
+    streams.map(x => (x, Map[Int, BasicProducerTransaction[Array[Byte], Array[Byte]]]())).toMap
   }
 
   private def addProducersToCheckpointGroup() = {
@@ -220,9 +221,10 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
   }
 
   private def createEvictionPolicy() = {
-    inputInstanceMetadata.evictionPolicy match {
-      case "fix-time" => new FixTimeEvictionPolicy(manager)
-      case "expanded-time" => new ExpandedTimeEvictionPolicy(manager)
-    }
+//    inputInstanceMetadata.evictionPolicy match {
+//      case "fix-time" => new FixTimeEvictionPolicy(manager)
+//      case "expanded-time" => new ExpandedTimeEvictionPolicy(manager)
+//    } //todo for testing
+    new ExpandedTimeEvictionPolicy(manager)
   }
 }

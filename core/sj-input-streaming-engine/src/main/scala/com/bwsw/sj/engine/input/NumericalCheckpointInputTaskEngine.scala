@@ -16,7 +16,7 @@ class NumericalCheckpointInputTaskEngine(manager: InputTaskManager, inputInstanc
       logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
       checkpointGroup.commit()
       txnsByStreamPartitions.foreach(x => x._2.foreach(y => txnClose(y._2.getTxnUUID)))
-      txnsByStreamPartitions = createTxnsStorage()
+      txnsByStreamPartitions = createTxnsStorage(streams)
       logger.debug(s"Task: ${manager.taskName}. Reset a counter of envelopes to 0\n")
       resetCounter()
     }

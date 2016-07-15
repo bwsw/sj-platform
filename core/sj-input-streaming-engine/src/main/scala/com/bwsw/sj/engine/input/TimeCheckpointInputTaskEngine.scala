@@ -29,7 +29,7 @@ class TimeCheckpointInputTaskEngine(manager: InputTaskManager, inputInstanceMeta
       logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
       checkpointGroup.commit()
       txnsByStreamPartitions.foreach(x => x._2.foreach(y => txnClose(y._2.getTxnUUID)))
-      txnsByStreamPartitions = createTxnsStorage()
+      txnsByStreamPartitions = createTxnsStorage(streams)
       resetTimer()
     }
   }

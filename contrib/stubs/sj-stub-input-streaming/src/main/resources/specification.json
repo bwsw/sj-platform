@@ -23,7 +23,7 @@
     ]
   },
   "module-type": "input-streaming",
-  "engine-name": "input-streaming",
+  "engine-name": "com.bwsw.input.streaming.engine",
   "engine-version": "0.1",
   "options": {
     "opt": 1

@@ -83,7 +83,7 @@ class RegularTaskManager() {
     (service.get(x._1), x._2)
   })
 
-  assert(agentsPorts.length >
+  assert(agentsPorts.length >=
     (inputs.count(x => x._1.streamType == StreamConstants.tStream) + instance.outputs.length + 3),
     "Not enough ports for t-stream consumers/producers ")
 

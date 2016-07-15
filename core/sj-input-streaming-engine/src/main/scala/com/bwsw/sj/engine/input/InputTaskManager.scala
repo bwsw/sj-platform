@@ -59,9 +59,9 @@ class InputTaskManager() {
   private val zkSessionTimeout = configService.get(zkSessionTimeoutTag).value.toInt
   private val zkConnectionTimeout = configService.get(zkConnectionTimeoutTag).value.toInt
 
+  private val hazelcastMapName = "inputEngine"
   private val config = createHazelcastConfig()
   private val hazelcastInstance = Hazelcast.newHazelcastInstance(config)
-  private val hazelcastMapName = "inputEngine"
 
   /**
    * Returns hazelcast map for checking of there are duplicates (input envelopes) or not
@@ -73,7 +73,7 @@ class InputTaskManager() {
     hazelcastInstance.getMap[String, Array[Byte]](hazelcastMapName)
   }
 
-  assert(agentsPorts.length >
+  assert(agentsPorts.length >=
     (instance.outputs.length + 1), //todo: count ! this one for pm
     "Not enough ports for t-stream consumers/producers ")
 
@@ -145,7 +145,7 @@ class InputTaskManager() {
    * @return Hazelcast map configuration
    */
   private def createHazelcastConfig() = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. Create a Hazelcast map configuration is named 'inputEngine'\n")
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. Create a Hazelcast map configuration is named '$hazelcastMapName'\n")
     val config = new XmlConfigBuilder().build()
     val evictionPolicy = createEvictionPolicy()
     val maxSizeConfig = createMaxSizeConfig()
@@ -164,10 +164,11 @@ class InputTaskManager() {
    */
   private def createEvictionPolicy() = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Create EvictionPolicy\n")
-    instance.defaultEvictionPolicy match {
-      case "LRU" => EvictionPolicy.LRU
-      case "LFU" => EvictionPolicy.LFU
-    }
+//    instance.defaultEvictionPolicy match {
+//      case "LRU" => EvictionPolicy.LRU
+//      case "LFU" => EvictionPolicy.LFU
+//    } //todo for testing
+    EvictionPolicy.LRU
   }
 
   /**
