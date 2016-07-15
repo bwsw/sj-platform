@@ -7,6 +7,9 @@ import io.netty.channel.{ChannelHandlerContext, SimpleChannelInboundHandler}
 
 /**
  * Handles a server-side channel.
+ * It receives a new portion of bytes from the server and puts it in an auxiliary buffer
+ * because of a handler should not contain an execution logic of incoming data
+ * @param buffer An auxiliary buffer for keeping incoming bytes
  */
 
 class InputStreamingServerHandler(buffer: ByteBuf) extends SimpleChannelInboundHandler[ByteBuf] {
@@ -19,7 +22,6 @@ class InputStreamingServerHandler(buffer: ByteBuf) extends SimpleChannelInboundH
   }
 
   override def channelRead0(ctx: ChannelHandlerContext, msg: ByteBuf) = {
-    //println(msg.toString(Charset.forName("UTF-8")) + "_")
     buffer.writeBytes(msg)
     //after that the msg is empty
   }

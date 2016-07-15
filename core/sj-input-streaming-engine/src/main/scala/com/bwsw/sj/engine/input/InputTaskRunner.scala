@@ -50,6 +50,12 @@ object InputTaskRunner {
     new InputStreamingServer("192.168.1.174", 8888, buffer).run() //new InputStreamingServer(manager.entryHost, manager.entryPort).run()
   }
 
+  /**
+   * Creates InputTaskEngine is in charge of a basic execution logic of task of input module
+   * @param manager Manager of environment of task of input module
+   * @param instance Input instance is a metadata for running a task of input module
+   * @return Engine of input task
+   */
   def createInputTaskEngine(manager: InputTaskManager, instance: InputInstance) = {
     instance.checkpointMode match {
       case "time-interval" =>

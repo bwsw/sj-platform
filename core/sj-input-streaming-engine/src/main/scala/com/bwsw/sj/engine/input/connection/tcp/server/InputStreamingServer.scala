@@ -12,8 +12,10 @@ import io.netty.handler.logging.{LogLevel, LoggingHandler}
  * Input streaming server that sets up a server listening the specific host and port.
  * Bind and start to accept incoming connections.
  * Than wait until the server socket is closed gracefully shut down the server.
+ * @param host Host of server
+ * @param port Port of server
+ * @param buffer An auxiliary buffer for keeping incoming bytes
  */
-
 class InputStreamingServer(host: String, port: Int, buffer: ByteBuf) {
 
   def run() = {

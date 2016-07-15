@@ -164,11 +164,11 @@ class InputTaskManager() {
    */
   private def createEvictionPolicy() = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Create EvictionPolicy\n")
-//    instance.defaultEvictionPolicy match {
-//      case "LRU" => EvictionPolicy.LRU
-//      case "LFU" => EvictionPolicy.LFU
-//    } //todo for testing
-    EvictionPolicy.LRU
+    instance.defaultEvictionPolicy match {
+      case "LRU" => EvictionPolicy.LRU
+      case "LFU" => EvictionPolicy.LFU
+    }
+    //EvictionPolicy.LRU //todo for testing
   }
 
   /**

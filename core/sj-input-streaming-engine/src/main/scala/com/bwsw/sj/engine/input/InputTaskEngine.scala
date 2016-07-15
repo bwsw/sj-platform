@@ -11,7 +11,7 @@ import com.bwsw.sj.common.module.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.sj.engine.core.entities.InputEnvelope
 import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.engine.core.input.InputStreamingExecutor
-import com.bwsw.sj.engine.input.eviction_policy.ExpandedTimeEvictionPolicy
+import com.bwsw.sj.engine.input.eviction_policy.{FixTimeEvictionPolicy, ExpandedTimeEvictionPolicy}
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerTransaction, ProducerPolicies}
 import io.netty.buffer.ByteBuf
@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory
  * Provides methods are responsible for a basic execution logic of task of input module
  * Created: 10/07/2016
  *
+ * @param manager Manager of environment of task of input module
+ * @param inputInstanceMetadata Input instance is a metadata for running a task of input module
  * @author Kseniya Mikhaleva
  */
 abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata: InputInstance) {
@@ -45,18 +47,39 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
 
   addProducersToCheckpointGroup()
 
+  /**
+   * It is responsible for sending an answer to client about the fact that a new txn is opened
+   * Usually it will be invoked after checkpoint
+   * @param txn Transaction UUID
+   */
   protected def txnOpen(txn: UUID) = {
     println("txnOpen: UUID = " + txn) //todo
   }
 
+  /**
+   * It is responsible for sending an answer to client about the fact that a new txn is closed
+   * Usually it will be invoked after checkpoint
+   * @param txn Transaction UUID
+   */
   protected def txnClose(txn: UUID) = {
     println("txnClose: UUID = " + txn) //todo
   }
 
+  /**
+   * It is responsible for sending an answer to client about the fact that a new txn is canceled
+   * Usually it will be invoked after checkpoint
+   * @param txn Transaction UUID
+   */
   protected def txnCancel(txn: UUID) = {
     println("txnCancel: UUID = " + txn) //todo
   }
 
+  /**
+   * It is responsible for sending an answer to client about the fact that an envelope is processed
+   * @param envelope Input envelope
+   * @param isNotDuplicateOrEmpty Flag points whether a processed envelope is duplicate or empty or not.
+   *                              If it is true it means a processed envelope is duplicate or empty and false in other case
+   */
   protected def envelopeProcessed(envelope: Option[InputEnvelope], isNotDuplicateOrEmpty: Boolean) = {
     if (isNotDuplicateOrEmpty) {
       //todo
@@ -68,6 +91,13 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
     }
   }
 
+  /**
+   * It is responsible for processing of envelope:
+   * 1) checks whether an input envelope is defined and isn't duplicate or not
+   * 2) if (1) is true an input envelope is sent to output stream(s)
+   * @param envelope May be input envelope
+   * @return True if a processed envelope is processed, e.i. it is not duplicate or empty, and false in other case
+   */
   protected def processEnvelope(envelope: Option[InputEnvelope]): Boolean = {
     if (envelope.isDefined) {
       logger.info(s"Task name: ${manager.taskName}. Envelope is defined. Process it\n")
@@ -83,6 +113,12 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
     false
   }
 
+  /**
+   * Sends an input envelope to output steam
+   * @param stream Output stream name
+   * @param partition Partition of stream
+   * @param data Data for sending
+   */
   protected def sendEnvelope(stream: String, partition: Int, data: Array[Byte]) = {
     logger.info(s"Task name: ${manager.taskName}. Send envelope to each output stream.\n")
     val maybeTxn = getTxn(stream, partition)
@@ -103,6 +139,13 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
     )
   }
 
+  /**
+   * Checks whether a key is duplicate or not if it's necessary
+   * @param key Key for checking
+   * @param duplicateCheck Flag points a key has to be checked or not.
+   * @param value In case there has to update duplicate key this value will be used
+   * @return True if a processed envelope is not duplicate and false in other case
+   */
   protected def checkForDuplication(key: String, duplicateCheck: Boolean, value: Array[Byte]): Boolean = {
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Try to check key: $key for duplication with a setting duplicateCheck = $duplicateCheck\n")
@@ -113,6 +156,12 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
     } else true
   }
 
+  /**
+   * It is in charge of running a basic execution logic of input task engine
+   * @param executorService Executor service for running a basic execution logic of input task engine
+   *                        in a separate thread
+   * @param buffer Buffer for keeping incoming bytes
+   */
   def runModule(executorService: ExecutorService, buffer: ByteBuf) = {
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Run input task engine in a separate thread of execution service\n")
@@ -145,6 +194,10 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
     })
   }
 
+  /**
+   * Create t-stream producer for stream for reporting
+   * @return Producer for reporting performance metrics
+   */
   private def createReportProducer() = {
     logger.debug(s"Task: ${manager.taskName}. Start creating a t-stream producer to record performance reports\n")
     val reportStream = manager.getReportStream
@@ -154,6 +207,11 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
     reportProducer
   }
 
+  /**
+   * It is in charge of running of input module
+   * @param executorService Executor service for running an execution logic for creating report of performance metrics
+   *                        in a separate thread
+   */
   private def launchPerformanceMetricsReporting(executorService: ExecutorService) = {
     val reportProducer = createReportProducer()
     logger.debug(s"Task: ${manager.taskName}. Launch a new thread to report performance metrics \n")
@@ -183,8 +241,17 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
     })
   }
 
+  /**
+   * Does group checkpoint of t-streams consumers/producers
+   * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside input module (not on the schedule) or not.
+   */
   protected def doCheckpoint(isCheckpointInitiated: Boolean): Unit
 
+  /**
+   *
+   * @param buffer A buffer for keeping incoming bytes
+   * @param endIndex Index that was last at reading
+   */
   protected def clearBufferAfterParsing(buffer: ByteBuf, endIndex: Int) = {
     logger.debug(s"Task name: ${manager.taskName}. " +
       s"Remove a message, which have just been parsed, from input buffer\n")
@@ -192,6 +259,12 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
     buffer.discardReadBytes()
   }
 
+  /**
+   * Retrieves a txn for specific stream and partition
+   * @param stream Output stream name
+   * @param partition Partition of stream
+   * @return Current open transaction
+   */
   private def getTxn(stream: String, partition: Int) = {
     logger.debug(s"Task name: ${manager.taskName}. " +
       s"Try to get txn by stream: $stream, partition: $partition\n")
@@ -200,18 +273,31 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
     } else None
   }
 
+  /**
+   * Creates a map that keeps current open txn for each partition of output stream
+   * @param streams Set of names of output streams
+   * @return Map where a key is output stream name, a value is a map
+   *         in which key is a number of partition and value is a txn
+   */
   protected def createTxnsStorage(streams: Set[String]) = {
     logger.debug(s"Task name: ${manager.taskName}. " +
       s"Create storage for keeping txns for each partition of output streams\n")
     streams.map(x => (x, Map[Int, BasicProducerTransaction[Array[Byte], Array[Byte]]]())).toMap
   }
 
+  /**
+   * Adds producers for each output to checkpoint group
+   */
   private def addProducersToCheckpointGroup() = {
     logger.debug(s"Task: ${manager.taskName}. Start adding t-stream producers to checkpoint group\n")
     producers.foreach(x => checkpointGroup.add(x._2.name, x._2))
     logger.debug(s"Task: ${manager.taskName}. The t-stream producers are added to checkpoint group\n")
   }
 
+  /**
+   * Creates a manager of environment of input streaming module
+   * @return Manager of environment of input streaming module
+   */
   private def createModuleEnvironmentManager() = {
     val taggedOutputs = inputInstanceMetadata.outputs
       .map(ConnectionRepository.getStreamService.get)
@@ -220,11 +306,15 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
     new InputEnvironmentManager(taggedOutputs)
   }
 
+  /**
+   * Creates an eviction policy that defines a way of eviction of duplicate envelope
+   * @return Eviction policy of duplicate envelopes
+   */
   private def createEvictionPolicy() = {
-//    inputInstanceMetadata.evictionPolicy match {
-//      case "fix-time" => new FixTimeEvictionPolicy(manager)
-//      case "expanded-time" => new ExpandedTimeEvictionPolicy(manager)
-//    } //todo for testing
-    new ExpandedTimeEvictionPolicy(manager)
+    inputInstanceMetadata.evictionPolicy match {
+      case "fix-time" => new FixTimeEvictionPolicy(manager)
+      case "expanded-time" => new ExpandedTimeEvictionPolicy(manager)
+    }
+    //new ExpandedTimeEvictionPolicy(manager) //todo for testing
   }
 }

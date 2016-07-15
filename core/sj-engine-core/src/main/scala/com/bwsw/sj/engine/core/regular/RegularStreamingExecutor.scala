@@ -12,12 +12,12 @@ import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 
 class RegularStreamingExecutor(manager: ModuleEnvironmentManager) {
   /**
-   * Will invoke only once at the beginning of launch of module
+   * Will be invoked only once at the beginning of launch of module
    */
   def onInit(): Unit = {}
 
   /**
-   * Used for processing one envelope. Will invoke for every message from kafka stream or t-stream
+   * Used for processing one envelope. Will be invoked for every message from kafka stream or t-stream
    */
   def onMessage(envelope: Envelope): Unit = {}
 
@@ -32,7 +32,7 @@ class RegularStreamingExecutor(manager: ModuleEnvironmentManager) {
   def onAfterCheckpoint(): Unit = {}
 
   /**
-   * Will invoke every time when a set timer went out
+   * Will be invoked every time when a set timer went out
    *
    * @param jitter Delay between a real response time and an invocation this handler
    */

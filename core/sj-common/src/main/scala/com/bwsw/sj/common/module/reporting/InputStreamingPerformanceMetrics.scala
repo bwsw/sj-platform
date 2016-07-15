@@ -18,6 +18,10 @@ class InputStreamingPerformanceMetrics(taskId: String, host: String, entryHost: 
   private val performanceReport = new PerformanceMetricsMetadata()
   private val inputStreamName = entryHost + ":" + entryPort
 
+  /**
+   * Invokes when a new envelope from the input stream is received
+   * @param elementsSize Set of sizes of elements
+   */
   def addEnvelopeToInputStream(elementsSize: List[Int]) = {
     super.addEnvelopeToInputStream(inputStreamName, elementsSize)
   }
