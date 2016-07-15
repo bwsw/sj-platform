@@ -25,7 +25,7 @@ object InputTaskRunner {
       .setNameFormat("InputTaskRunner-%d")
       .setDaemon(true)
       .build()
-    val executorService: ExecutorService = Executors.newFixedThreadPool(1, threadFactory)
+    val executorService: ExecutorService = Executors.newFixedThreadPool(2, threadFactory)
 
     val buffer: ByteBuf = Unpooled.buffer()
 

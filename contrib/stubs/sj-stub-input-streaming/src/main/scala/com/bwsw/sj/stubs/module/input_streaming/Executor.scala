@@ -18,7 +18,7 @@ class Executor(manager: InputEnvironmentManager) extends InputStreamingExecutor(
    * @return Interval into buffer that probably contains a message or None
    */
   override def tokenize(buffer: ByteBuf): Option[(Int, Int)] = {
-    Some(0, buffer.capacity() - 1)
+    Some(0, buffer.readableBytes())
   }
 
   /**

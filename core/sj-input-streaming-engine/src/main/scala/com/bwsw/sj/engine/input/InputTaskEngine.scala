@@ -3,7 +3,7 @@ package com.bwsw.sj.engine.input
 import java.nio.charset.Charset
 import java.util.UUID
 import java.util.concurrent.{ExecutorService, TimeUnit}
-
+import scala.collection._
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.DAL.model.module.InputInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
@@ -129,6 +129,7 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
     } else {
       txn = producers(stream).newTransaction(ProducerPolicies.errorIfOpen, partition)
       txn.send(data)
+      putTxn(stream, partition, txn)
       txnOpen(txn.getTxnUUID)
     }
 
@@ -181,12 +182,13 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
               val isNotDuplicateOrEmpty = processEnvelope(inputEnvelope)
               envelopeProcessed(inputEnvelope, isNotDuplicateOrEmpty)
               doCheckpoint(moduleEnvironmentManager.isCheckpointInitiated)
+              Thread.sleep(1000) //todo: only for testing
             } else {
               logger.error(s"Task name: ${manager.taskName}. " +
                 s"Method tokenize() returned end index that an input stream is not defined at\n")
               throw new IndexOutOfBoundsException("Method tokenize() returned end index that an input stream is not defined at")
             }
-          } else Thread.sleep(2000) //todo: only for testing
+          }
         }
       } finally {
         ReferenceCountUtil.release(buffer)
@@ -274,6 +276,18 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
   }
 
   /**
+   * Retrieves a txn for specific stream and partition
+   * @param stream Output stream name
+   * @param partition Partition of stream
+   * @return Current open transaction
+   */
+  private def putTxn(stream: String, partition: Int, txn: BasicProducerTransaction[Array[Byte], Array[Byte]]) = {
+    logger.debug(s"Task name: ${manager.taskName}. " +
+      s"Put txn for stream: $stream, partition: $partition\n")
+    txnsByStreamPartitions(stream) += (partition -> txn)
+  }
+
+  /**
    * Creates a map that keeps current open txn for each partition of output stream
    * @param streams Set of names of output streams
    * @return Map where a key is output stream name, a value is a map
@@ -282,7 +296,7 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
   protected def createTxnsStorage(streams: Set[String]) = {
     logger.debug(s"Task name: ${manager.taskName}. " +
       s"Create storage for keeping txns for each partition of output streams\n")
-    streams.map(x => (x, Map[Int, BasicProducerTransaction[Array[Byte], Array[Byte]]]())).toMap
+    streams.map(x => (x, mutable.Map[Int, BasicProducerTransaction[Array[Byte], Array[Byte]]]())).toMap
   }
 
   /**
@@ -314,6 +328,7 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
     inputInstanceMetadata.evictionPolicy match {
       case "fix-time" => new FixTimeEvictionPolicy(manager)
       case "expanded-time" => new ExpandedTimeEvictionPolicy(manager)
+      case _ => new FixTimeEvictionPolicy(manager)
     }
     //new ExpandedTimeEvictionPolicy(manager) //todo for testing
   }
