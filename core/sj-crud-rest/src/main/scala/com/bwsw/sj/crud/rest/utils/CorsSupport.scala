@@ -1,9 +1,5 @@
 package com.bwsw.sj.crud.rest.utils
 
-/*
-Trait from akka-http-rest template https://github.com/ArchDev/akka-http-rest
- */
-
 import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model.HttpResponse
 import akka.http.scaladsl.model.headers._
@@ -11,6 +7,9 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Directive0, Route}
 import com.typesafe.config.ConfigFactory
 
+/**
+  * Trait from akka-http-rest template https://github.com/ArchDev/akka-http-rest
+  */
 trait CorsSupport {
   lazy val allowedOriginHeader = {
     val config = ConfigFactory.load()

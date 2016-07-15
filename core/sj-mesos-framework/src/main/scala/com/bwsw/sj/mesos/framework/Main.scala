@@ -7,7 +7,6 @@ import scala.util.Properties
 object Main extends App {
 
   override def main(args: Array[String]) = {
-    println("SOME")
     val port = if (args.nonEmpty) args(0).toInt else 8080
     Rest.start(port)
 

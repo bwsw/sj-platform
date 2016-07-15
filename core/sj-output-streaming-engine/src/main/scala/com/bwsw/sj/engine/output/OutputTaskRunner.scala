@@ -110,7 +110,7 @@ object OutputTaskRunner {
         performanceMetrics)
     } catch {
       case e: Exception =>
-        e.printStackTrace()
+        logger.error(e.getStackTrace.toString)
         executorService.shutdownNow()
         System.exit(-1)
     }
@@ -223,7 +223,6 @@ object OutputTaskRunner {
       outputData.getHits.foreach { hit =>
         val id = hit.getId
         client.prepareDelete(index, documentType, id).execute().actionGet()
-
       }
     }
   }
@@ -255,6 +254,7 @@ object OutputTaskRunner {
    * @return Response from ES
    */
   def writeToElasticsearch(index: String, documentType: String, entity: EsEntity, client: TransportClient) = {
+    logger.debug(s"Task: ${OutputDataFactory.taskName}. Write output envelope to elasticearch.")
     val esData: String = serializer.serialize(entity)
 
     val request: IndexRequestBuilder = client.prepareIndex(index, documentType, UUID.randomUUID().toString)
@@ -273,8 +273,7 @@ object OutputTaskRunner {
     * @return ES Response
     */
   def createEsStream(index: String, streamName: String, entity: OutputEntity, client: TransportClient) = {
-    println(entity.getDateFields().mkString(", "))
-
+    logger.debug(s"Task: ${OutputDataFactory.taskName}. Create elasticsearch index $index")
     val isIndexExist = client.admin().indices().prepareExists(index).execute().actionGet()
     if (!isIndexExist.isExists) {
       client.admin().indices().prepareCreate(index).execute().actionGet()
@@ -290,7 +289,6 @@ object OutputTaskRunner {
     }
     val mapping = Map("properties" -> fields)
     val mappingJson = serializer.serialize(mapping)
-    println(mappingJson)
 
     client.admin().indices()
       .preparePutMapping(index)

@@ -79,6 +79,7 @@ trait SjCrudValidator {
   def checkJarFile(jarFile: File) = {
     val json = getSpecificationFromJar(jarFile)
     if (isEmptyOrNullString(json)) {
+      logger.debug(s"File specification.json not found in module jar ${jarFile.getName}.")
       throw new FileNotFoundException(s"Specification.json for ${jarFile.getName} is not found!")
     }
     schemaValidate(json, getClass.getClassLoader.getResourceAsStream("schema.json"))

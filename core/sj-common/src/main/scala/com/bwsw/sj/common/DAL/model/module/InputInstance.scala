@@ -9,9 +9,9 @@ import org.mongodb.morphia.annotations.Property
  * @author Kseniya Tomskikh
  */
 class InputInstance extends Instance {
-  @Property("lookup-history") var lookupHistory: Int = 0 //in seconds
+  @Property("lookup-history") var lookupHistory: Int = 0
   @Property("queue-max-size") var queueMaxSize: Int = 0
   @Property("default-eviction-policy") var defaultEvictionPolicy: String = null
-  @Property("eviction-policy") var evictionPolicy: String = null //fix-time or expanded-time
+  @Property("eviction-policy") var evictionPolicy: String = null
   var tasks: java.util.Map[String, Int] = null
 }

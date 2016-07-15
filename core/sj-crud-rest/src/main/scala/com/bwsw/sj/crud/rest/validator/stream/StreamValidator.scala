@@ -5,6 +5,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.crud.rest.entities._
 import com.bwsw.sj.crud.rest.validator.provider.ProviderValidator
+import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -12,6 +13,8 @@ import scala.collection.mutable.ArrayBuffer
   * Created by mendelbaum_nm
   */
 object StreamValidator {
+
+  private val logger = LoggerFactory.getLogger(getClass.getName)
 
   /**
     * Validating input parameters for stream
@@ -21,8 +24,9 @@ object StreamValidator {
     * @return - List of errors
     */
   def validate(initialData: SjStreamData, stream: SjStream) = {
+    logger.debug(s"Stream ${initialData.name}. Start stream validation.")
+
     val streamDAO = ConnectionRepository.getStreamService
-    val providerDAO = ConnectionRepository.getProviderService
     val serviceDAO = ConnectionRepository.getServiceManager
 
     val errors = new ArrayBuffer[String]()

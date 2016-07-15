@@ -13,6 +13,7 @@ import com.twitter.common.quantity.{Amount, Time}
 import java.net.{InetAddress, InetSocketAddress, URI}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import org.apache.log4j.Logger
+import com.bwsw.sj.common.ConfigConstants
 
 
 class ScalaScheduler extends Scheduler {
@@ -198,6 +199,7 @@ class ScalaScheduler extends Scheduler {
         launchedTasks += (currentOffer._1.getId -> listTasks)
       }
 
+      // update how much tasks we can run on slave when launch current task
       tasksOnSlaves.updated(tasksOnSlaves.indexOf(currentOffer), Tuple2(currentOffer._1, currentOffer._2 - 1))
       TasksList.launched(curr_task)
 
@@ -254,6 +256,8 @@ class ScalaScheduler extends Scheduler {
     instance.moduleType match {
       case "output-streaming" => perTaskPortsCount = 2
       case "regular-streaming" => perTaskPortsCount = instance.inputs.length+instance.outputs.length+4
+      case "input-streaming" => perTaskPortsCount = instance.outputs.length+1
+      case _ => perTaskPortsCount = 0
     }
     logger.info(s"Got instance")
     logger.debug(s"${this.instance}")
@@ -270,11 +274,18 @@ class ScalaScheduler extends Scheduler {
       case e:Exception => handleSchedulerException(e)
     }
 
-    val tasks = instance.executionPlan.tasks
-    logger.info(s"Got tasks")
-    for (task <- tasks.asScala) {
-      TasksList.newTask(task._1, task._2.inputs.asScala)
-      logger.info(s"$task")
+    if (instance.moduleType == "input-streaming") {
+      for (taskNumber <- 1 to instance.parallelism) {
+        TasksList.newTask(instance.moduleName+"-task"+taskNumber)
+        logger.info(s"$taskNumber")
+      }
+    } else {
+      val tasks = instance.executionPlan.tasks
+      logger.info(s"Got tasks")
+      for (task <- tasks.asScala) {
+        TasksList.newTask(task._1)
+        logger.info(s"${task._1}")
+      }
     }
     TasksList.message = s"Registered framework as: ${frameworkId.getValue}"
   }
@@ -373,8 +384,8 @@ class ScalaScheduler extends Scheduler {
     */
   def getModuleUrl(instance: Instance): String = {
     // TODO:return back get host
-    lazy val restHost = "176.120.25.19" // configFileService.get(ConfigConstants.hostOfCrudRestTag).value
-    lazy val restPort = 18080 // configFileService.get(ConfigConstants.portOfCrudRestTag).value.toInt
+    val restHost = configFileService.get(ConfigConstants.hostOfCrudRestTag).value
+    val restPort = configFileService.get(ConfigConstants.portOfCrudRestTag).value.toInt
     val restAddress = new URI(s"http://$restHost:$restPort/v1/custom/jars/").toString
     jarName = configFileService.get("system." + instance.engine).value
     logger.info(s"URI: ${restAddress + jarName}")
@@ -435,5 +446,11 @@ class ScalaScheduler extends Scheduler {
     driver.stop()
     System.exit(1)
   }
+}
+
+object aaa extends App {
+  val configService = ConnectionRepository.getConfigService
+  val answer = configService.get("system." + "com.bwsw.regular.streaming.engine-0.1")
+  println(answer.value)
 }
 
