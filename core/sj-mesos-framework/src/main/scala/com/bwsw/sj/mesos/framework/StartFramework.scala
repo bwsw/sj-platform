@@ -4,9 +4,9 @@ import org.apache.mesos.MesosSchedulerDriver
 import org.apache.mesos.Protos.FrameworkInfo
 import scala.util.Properties
 
-object Main extends App {
+object StartFramework {
 
-  override def main(args: Array[String]) = {
+  def main(args: Array[String]): Unit = {
     val port = if (args.nonEmpty) args(0).toInt else 8080
     Rest.start(port)
 
@@ -18,7 +18,7 @@ object Main extends App {
       setFailoverTimeout(0.0d).
       build()
 
-    val scheduler = new ScalaScheduler
+    val scheduler = new FrameworkScheduler
     val master_path = Properties.envOrElse("MESOS_MASTER", "zk://127.0.0.1:2181/mesos")
     val driver = new MesosSchedulerDriver(scheduler, framework, master_path)
 

@@ -8,41 +8,46 @@ import org.joda.time.DateTime
 /**
   * Created by diryavkin_dn on 18.05.16.
   */
-object TasksList{
+object TasksList {
+
   private val tasksToLaunch: mutable.ListBuffer[String] = mutable.ListBuffer()
   private val listTasks : mutable.Map[String, Task] = mutable.Map()
   var message: String = "Initialization"
 
-  class Task(task_id: String){
-    val id: String = task_id
+  class Task(taskId: String) {
+    val id: String = taskId
     var state: String = "TASK_STAGING"
-    var state_changed: Long = DateTime.now.getMillis
+    var stateChanged: Long = DateTime.now.getMillis
     var reason: String = ""
     var node: String = ""
-    var last_node: String = ""
+    var lastNode: String = ""
     val description: ormTask = null
 
 
     def update(state: String = state,
-               state_changed: Long = state_changed,
+               stateChanged: Long = stateChanged,
                reason: String = reason,
                node: String = node,
-               last_node: String = last_node) = {
+               lastNode: String = lastNode) = {
       this.state = state
-      this.state_changed = state_changed
+      this.stateChanged = stateChanged
       this.reason = reason
       this.node = node
-      this.last_node = last_node
+      this.lastNode = lastNode
     }
 
     def toJson: Map[String, Any] = {
-      val timestamp = new Timestamp(state_changed)
-      Map(("id", id), ("state", state),
-        ("state-change", state_changed.toString), ("reason", reason),
-        ("node", node),("last-node", last_node))
+      val timestamp = new Timestamp(stateChanged)
+      Map(("id", id),
+        ("state", state),
+        ("state-change", stateChanged.toString),
+        ("reason", reason),
+        ("node", node),
+        ("last-node", lastNode)
+      )
     }
-  }
 
+  }
 
   def newTask(taskId: String) = {
     val task = new Task(taskId)
@@ -59,7 +64,7 @@ object TasksList{
   }
 
   def addToLaunch(taskId: String) = {
-    tasksToLaunch+=taskId
+    tasksToLaunch += taskId
   }
 
   def toLaunch: mutable.ListBuffer[String] = {
@@ -67,7 +72,7 @@ object TasksList{
   }
 
   def launched(taskId: String) = {
-    tasksToLaunch-=taskId
+    tasksToLaunch -= taskId
   }
 
   def toJson: Map[String, Any] = {

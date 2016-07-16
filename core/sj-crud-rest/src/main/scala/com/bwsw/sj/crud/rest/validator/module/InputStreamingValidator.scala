@@ -32,6 +32,13 @@ class InputStreamingValidator extends StreamingModuleValidator {
     logger.debug(s"Instance ${parameters.name}. Create model object.")
     val instance = convertToModelInstance(parameters)
     val stages = scala.collection.mutable.Map[String, InstanceStage]()
+    parameters.outputs.foreach { stream =>
+      val instanceStartTask = new InstanceStage
+      instanceStartTask.state = toHandle
+      instanceStartTask.datetime = Calendar.getInstance().getTime
+      instanceStartTask.duration = 0
+      stages.put(stream, instanceStartTask)
+    }
     val instanceTask = new InstanceStage
     instanceTask.state = toHandle
     instanceTask.datetime = Calendar.getInstance().getTime
@@ -114,16 +121,37 @@ class InputStreamingValidator extends StreamingModuleValidator {
     logger.debug(s"Instance: ${parameters.name}. Start input-streaming validation.")
     val errors = super.generalOptionsValidate(parameters)
 
-    val defaultEvictionPolicy = parameters.asInstanceOf[InputInstanceMetadata].defaultEvictionPolicy
-    if (!defaultEvictionPolicies.contains(defaultEvictionPolicy)) {
-      errors += s"Unknown value of 'default-eviction-policy' attribute: $defaultEvictionPolicy. " +
-        s"Eviction-policy must be 'LRU' or 'LFU'."
+    val instance = parameters.asInstanceOf[InputInstanceMetadata]
+
+    if (instance.lookupHistory > 0) {
+      if (instance.evictionPolicy == null) {
+        errors += s"Eviction policy attribute must be not null, if 'lookup-history' is greater zero."
+      }
+    } else if (instance.lookupHistory == 0) {
+      if (instance.defaultEvictionPolicy == null) {
+        errors += s"Default eviction policy attribute must be not null, if 'lookup-history' is zero."
+      }
+      if (instance.queueMaxSize == 0) {
+        errors += s"Queue max size attribute must be greater than zero, if 'lookup-history' is zero."
+      }
+    } else {
+      errors += s"Lookup history attribute must be greater than zero."
     }
 
-    val evictionPolicy = parameters.asInstanceOf[InputInstanceMetadata].evictionPolicy
-    if (!evictionPolicies.contains(evictionPolicy)) {
-      errors += s"Unknown value of 'eviction-policy' attribute: $evictionPolicy. " +
-        s"Eviction-policy must be 'fix-time' or 'expanded-time'."
+    if (instance.defaultEvictionPolicy != null) {
+      val defaultEvictionPolicy = instance.defaultEvictionPolicy
+      if (!defaultEvictionPolicies.contains(defaultEvictionPolicy)) {
+        errors += s"Unknown value of 'default-eviction-policy' attribute: $defaultEvictionPolicy. " +
+          s"Eviction-policy must be 'LRU' or 'LFU'."
+      }
+    }
+
+    if (instance.evictionPolicy != null) {
+      val evictionPolicy = instance.evictionPolicy
+      if (!evictionPolicies.contains(evictionPolicy)) {
+        errors += s"Unknown value of 'eviction-policy' attribute: $evictionPolicy. " +
+          s"Eviction-policy must be 'fix-time' or 'expanded-time'."
+      }
     }
 
     streamOptionsValidate(parameters, specification, errors)
