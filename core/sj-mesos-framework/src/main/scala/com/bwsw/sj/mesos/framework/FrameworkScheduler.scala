@@ -2,7 +2,7 @@ package com.bwsw.sj.mesos.framework
 
 import java.io.{PrintWriter, StringWriter}
 import java.util
-import com.bwsw.sj.common.DAL.model.module.Instance
+import com.bwsw.sj.common.DAL.model.module.{InputInstance, Instance}
 import org.apache.mesos.Protos._
 import org.apache.mesos.{Scheduler, SchedulerDriver}
 import scala.collection.JavaConverters._
@@ -139,7 +139,20 @@ class FrameworkScheduler extends Scheduler {
       val ports = getPorts(currentOffer._1, currTask)
 
       var agentPorts: String = ""
-      ports.getRanges.getRangeList.asScala.foreach(agentPorts += _.getBegin.toString + ",")
+      var taskPort: String = ""
+      if (!instance.moduleType.equals(ModuleConstants.inputStreamingType)) {
+        ports.getRanges.getRangeList.asScala.foreach(agentPorts += _.getBegin.toString + ",")
+      } else {
+        var isFirst = true
+        ports.getRanges.getRangeList.asScala.foreach { xxx =>
+          if (!isFirst) {
+            agentPorts += xxx.getBegin.toString + ","
+          } else {
+            taskPort = xxx.getBegin.toString
+            isFirst = false
+          }
+        }
+      }
       agentPorts.dropRight(1)
 
       logger.info(s"PORTS: $ports")
@@ -147,24 +160,27 @@ class FrameworkScheduler extends Scheduler {
 
       val cmd = CommandInfo.newBuilder()
       try {
-         cmd
+        val environments = Environment.newBuilder
+          .addVariables(Environment.Variable.newBuilder.setName("MONGO_HOST").setValue(params {"mongodbHost"}))
+          .addVariables(Environment.Variable.newBuilder.setName("MONGO_PORT").setValue(params {"mongodbPort"}))
+          .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_NAME").setValue(params {"instanceId"}))
+          .addVariables(Environment.Variable.newBuilder.setName("TASK_NAME").setValue(currTask))
+          .addVariables(Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(currentOffer._1.getHostname))
+          .addVariables(Environment.Variable.newBuilder.setName("AGENTS_PORTS").setValue(agentPorts))
+
+        if (instance.moduleType.equals(ModuleConstants.inputStreamingType)) {
+          val taskHost = currentOffer._1.getHostname
+
+          environments
+            .addVariables(Environment.Variable.newBuilder.setName("ENTRY_HOST").setValue(taskHost))
+            .addVariables(Environment.Variable.newBuilder.setName("ENTRY_PORT").setValue(taskPort))
+        }
+
+        cmd
           .addUris(CommandInfo.URI.newBuilder.setValue(getModuleUrl(this.instance)))
           .setValue("java -jar " + jarName)
 //             .setValue("sh testScript.sh")
-          .setEnvironment(Environment.newBuilder
-            .addVariables(Environment.Variable.newBuilder.setName("MONGO_HOST").setValue(params {
-              "mongodbHost"
-            }))
-            .addVariables(Environment.Variable.newBuilder.setName("MONGO_PORT").setValue(params {
-              "mongodbPort"
-            }))
-            .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_NAME").setValue(params {
-              "instanceId"
-            }))
-            .addVariables(Environment.Variable.newBuilder.setName("TASK_NAME").setValue(currTask))
-            .addVariables(Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(currentOffer._1.getHostname))
-            .addVariables(Environment.Variable.newBuilder.setName("AGENTS_PORTS").setValue(agentPorts))
-          )
+          .setEnvironment(environments)
       } catch {
         case e: Exception => handleSchedulerException(e)
       }
@@ -255,7 +271,7 @@ class FrameworkScheduler extends Scheduler {
     instance.moduleType match {
       case ModuleConstants.outputStreamingType => perTaskPortsCount = 2
       case ModuleConstants.regularStreamingType => perTaskPortsCount = instance.inputs.length + instance.outputs.length + 4
-      case ModuleConstants.inputStreamingType => perTaskPortsCount = instance.outputs.length + 1
+      case ModuleConstants.inputStreamingType => perTaskPortsCount = instance.outputs.length + 2
       case _ => perTaskPortsCount = 0
     }
     logger.info(s"Got instance")
@@ -265,7 +281,7 @@ class FrameworkScheduler extends Scheduler {
       val zkHost = this.instance.coordinationService.provider.hosts(0)
       val zkhost = new InetSocketAddress(InetAddress.getByName(zkHost.split(":")(0)), zkHost.split(":")(1).toInt)
       val zkClient = new ZooKeeperClient(Amount.of(1, Time.MINUTES), zkhost)
-      val lockPath = s"/mesos-framework/${this.instance.coordinationService.namespace}/${this.params{"instanceId"}}/lock"
+      val lockPath = s"/mesos-framework/${this.instance.coordinationService.namespace}/${this.params{"instanceId"}}/lock"//todo change to URI
       val dli = new DistributedLockImpl(zkClient, lockPath)
       dli.lock()
       logger.info("Framework locked")
@@ -274,10 +290,12 @@ class FrameworkScheduler extends Scheduler {
     }
 
     if (instance.moduleType.equals(ModuleConstants.inputStreamingType)) { //todo у нас есть константы!
-      for (taskNumber <- 1 to instance.parallelism) {
-        val taskName = s"${instance.name}-task${taskNumber - 1}"
-        TasksList.newTask(taskName)
-        logger.info(s"Instance task: $taskName")
+
+      val tasks = instance.asInstanceOf[InputInstance].tasks
+      logger.info(s"Got tasks")
+      for (task <- tasks.asScala) {
+        TasksList.newTask(task._1)
+        logger.info(s"${task._1}")
       }
     } else {
       val tasks = instance.executionPlan.tasks
@@ -407,7 +425,7 @@ class FrameworkScheduler extends Scheduler {
   /**
     * Get random unused ports
     */
-  def getPorts(offer:Offer, task:String):Resource = {
+  def getPorts(offer: Offer, task: String):Resource = {
     val portsResource: Resource = getPortsResource(offer)
     for (range <- portsResource.getRanges.getRangeList.asScala) {
       availablePortsForOneInstance ++= (range.getBegin to range.getEnd).to[collection.mutable.ListBuffer]
