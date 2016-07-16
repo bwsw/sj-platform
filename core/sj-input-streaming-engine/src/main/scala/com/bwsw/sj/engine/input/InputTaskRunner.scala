@@ -47,7 +47,7 @@ object InputTaskRunner {
       }
     }
 
-    new InputStreamingServer("192.168.1.174", 8888, buffer).run() //new InputStreamingServer(manager.entryHost, manager.entryPort).run()
+    new InputStreamingServer(manager.entryHost, manager.entryPort, buffer).run()
   }
 
   /**

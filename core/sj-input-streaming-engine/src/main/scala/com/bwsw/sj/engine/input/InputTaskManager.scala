@@ -64,8 +64,8 @@ class InputTaskManager() {
   private val hazelcastInstance = Hazelcast.newHazelcastInstance(config)
 
   /**
-   * Returns hazelcast map for checking of there are duplicates (input envelopes) or not
-   * @return Hazelcast map
+   * Returns a keys storage (Hazelcast map) for checking of there are duplicates (input envelopes) or not
+   * @return Storage of keys (Hazelcast map)
    */
   def getUniqueEnvelopes = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
@@ -74,7 +74,7 @@ class InputTaskManager() {
   }
 
   assert(agentsPorts.length >=
-    (instance.outputs.length + 1), //todo: count ! this one for pm
+    (instance.outputs.length + 1),
     "Not enough ports for t-stream consumers/producers ")
 
   private val fileMetadata: FileMetadata = ConnectionRepository.getFileMetadataService.getByParameters(
@@ -167,8 +167,8 @@ class InputTaskManager() {
     instance.defaultEvictionPolicy match {
       case "LRU" => EvictionPolicy.LRU
       case "LFU" => EvictionPolicy.LFU
+      case _ => EvictionPolicy.NONE
     }
-    //EvictionPolicy.LRU //todo for testing
   }
 
   /**
