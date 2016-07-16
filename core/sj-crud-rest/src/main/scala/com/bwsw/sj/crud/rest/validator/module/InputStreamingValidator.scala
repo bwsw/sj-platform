@@ -3,7 +3,7 @@ package com.bwsw.sj.crud.rest.validator.module
 import java.util.Calendar
 
 import com.bwsw.sj.common.DAL.model.{TStreamSjStream, TStreamService}
-import com.bwsw.sj.common.DAL.model.module.{InstanceStage, Instance}
+import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask, InstanceStage, Instance}
 import com.bwsw.sj.common.ModuleConstants._
 import com.bwsw.sj.common.StreamConstants._
 import com.bwsw.sj.crud.rest.entities.module.{InputInstanceMetadata, ModuleSpecification, InstanceMetadata}
@@ -11,6 +11,7 @@ import com.bwsw.sj.crud.rest.utils.ConvertUtil._
 import org.slf4j.{LoggerFactory, Logger}
 
 import scala.collection.JavaConversions._
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 /**
@@ -39,6 +40,7 @@ class InputStreamingValidator extends StreamingModuleValidator {
       instanceStartTask.duration = 0
       stages.put(stream, instanceStartTask)
     }
+    createTasks(instance.asInstanceOf[InputInstance])
     val instanceTask = new InstanceStage
     instanceTask.state = toHandle
     instanceTask.datetime = Calendar.getInstance().getTime
@@ -46,6 +48,23 @@ class InputStreamingValidator extends StreamingModuleValidator {
     stages.put(instance.name, instanceTask)
     instance.stages = mapAsJavaMap(stages)
     instance
+  }
+
+  /**
+    * Create tasks object for instance of input module
+    *
+    * @param instance - instance for input module
+    */
+  def createTasks(instance: InputInstance): Unit = {
+    logger.debug(s"Instance ${instance.name}. Create tasks for input instance.")
+
+    val tasks = mutable.Map[String, InputTask]()
+
+    for (i <- 0 until instance.parallelism) {
+      val task = new InputTask("", 0)
+      tasks.put(s"${instance.name}-task$i", task)
+    }
+    instance.tasks = mapAsJavaMap(tasks)
   }
 
   /**
