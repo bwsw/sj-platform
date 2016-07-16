@@ -59,12 +59,14 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
           }
         }
 
-
-        val streams = instance.inputs.map(_.replaceAll("/split|/full", "")).union(instance.outputs)
-          .map(name => streamDAO.get(name))
+        var streams: Array[String] = instance.outputs
+        if (!instance.moduleType.equals(inputStreamingType)) {
+          streams = streams.union(instance.inputs.map(_.replaceAll("/split|/full", "")))
+        }
+        val streamsToStart = streams.map(name => streamDAO.get(name))
           .filter(stream => stream.streamType.equals(StreamConstants.tStream))
           .filter(stream => !stream.asInstanceOf[TStreamSjStream].generator.generatorType.equals("local"))
-        startGenerators(streams.map(stream => stream.asInstanceOf[TStreamSjStream]).toSet)
+        startGenerators(streamsToStart.map(stream => stream.asInstanceOf[TStreamSjStream]).toSet)
 
         val stages = Map(instance.stages.asScala.toList: _*)
         if (!stages.exists(s => !s._1.equals(instance.name) && s._2.state.equals(failed))) {
@@ -83,6 +85,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
       case e: Exception =>
         logger.debug(s"Instance: ${instance.name}. Failed instance.")
         logger.debug(e.getMessage)
+        e.printStackTrace()
         instance.status = failed
     }
     instanceDAO.save(instance)
@@ -224,7 +227,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
   def startGenerator(stream: TStreamSjStream) = {
     logger.debug(s"Instance: ${instance.name}. Start generator for stream ${stream.name}.")
     val transactionGeneratorJar = configService.get(
-      configService.get(transactionGeneratorTag).value
+      "system." + configService.get(transactionGeneratorTag).value
     ).value
     val zkService = stream.generator.service.asInstanceOf[ZKService]
     val generatorProvider = zkService.provider
