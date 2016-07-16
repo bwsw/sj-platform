@@ -8,7 +8,7 @@ package com.bwsw.sj.common.DAL.model.module
   */
 class InputTask() {
   var host: String = null
-  var port: Int = null
+  var port: Int = 0
 
   def this(host: String, port: Int) = {
     this()
