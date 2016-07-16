@@ -3,7 +3,7 @@ package com.bwsw.common
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream}
 
 /**
- * Class represents a serializer from object to byte array
+ * Class represents a serializer from object to byte array and vice versa
  * Created: 14/04/2016
  * @author Kseniya Mikhaleva
  */

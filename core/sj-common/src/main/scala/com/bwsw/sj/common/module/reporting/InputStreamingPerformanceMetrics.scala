@@ -31,7 +31,7 @@ class InputStreamingPerformanceMetrics(taskId: String, host: String, entryHost: 
    * @return Constructed performance report
    */
   override def getReport: String = {
-    logger.info(s"Start preparing a report of performance for task: $taskId of regular module\n")
+    logger.info(s"Start preparing a report of performance for task: $taskId of input module\n")
     mutex.lock()
     val bytesOfInputEnvelopes = inputEnvelopesPerStream.map(x => (x._1, x._2.map(_.sum).sum)).head._2
     val inputEnvelopesTotalNumber = inputEnvelopesPerStream.map(x => (x._1, x._2.size)).head._2

@@ -1,5 +1,7 @@
 package com.bwsw.sj.common.DAL.service
 
+import org.slf4j.LoggerFactory
+
 import scala.collection.mutable
 
 /**
@@ -7,6 +9,8 @@ import scala.collection.mutable
  * @tparam T Type of collection elements
  */
 trait DatabaseService[T] {
+
+  protected val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
    * Allows adding new element or updating an element

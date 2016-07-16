@@ -77,6 +77,8 @@ class InputTaskManager() {
     (instance.outputs.length + 1),
     "Not enough ports for t-stream consumers/producers ")
 
+  addEntryPointMetadataInInstance()
+
   private val fileMetadata: FileMetadata = ConnectionRepository.getFileMetadataService.getByParameters(
     Map("specification.name" -> instance.moduleName,
       "specification.module-type" -> instance.moduleType,
@@ -138,6 +140,10 @@ class InputTaskManager() {
 
         (new CassandraStorageFactory).getInstance(options)
     }
+  }
+
+  private def addEntryPointMetadataInInstance() = {
+    instance.tasks
   }
 
   /**

@@ -9,6 +9,7 @@ import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.mongodb.MongoClient
 import org.mongodb.morphia.Morphia
 import org.mongodb.morphia.dao.BasicDAO
+import org.slf4j.LoggerFactory
 
 import scala.reflect.ClassTag
 
@@ -18,6 +19,8 @@ import scala.reflect.ClassTag
 object ConnectionRepository {
 
   import ConnectionConstants._
+
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   private val serializer = new JsonSerializer()
   serializer.setIgnoreUnknown(true)
@@ -74,12 +77,15 @@ object ConnectionRepository {
   }
 
   def close() = {
+    logger.debug("Close the mongo connections")
     mongoConnection.close()
     mongoClient.close()
   }
 
   private[DAL] def getGenericDAO[T: ClassTag] = {
     import scala.reflect.classTag
+
+    logger.debug(s"Create a basic DAO of a mongo collection of type: '${Class[T].toString}'")
     val clazz: Class[T] = classTag[T].runtimeClass.asInstanceOf[Class[T]]
     new BasicDAO[T, String](clazz, datastore)
   }
