@@ -13,10 +13,10 @@ import com.twitter.common.quantity.{Amount, Time}
 import java.net.{InetAddress, InetSocketAddress, URI}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import org.apache.log4j.Logger
-import com.bwsw.sj.common.ConfigConstants
+import com.bwsw.sj.common.{ModuleConstants, ConfigConstants}
 
 
-class ScalaScheduler extends Scheduler {
+class FrameworkScheduler extends Scheduler {
 
   var driver: SchedulerDriver = null
   var perTaskCores: Double = 0.0
@@ -33,7 +33,6 @@ class ScalaScheduler extends Scheduler {
   def error(driver: SchedulerDriver, message: String) {
     logger.error(s"Got error message: $message")
     TasksList.message = s"Got error message: $message"
-
   }
 
   def executorLost(driver: SchedulerDriver, executorId: ExecutorID, slaveId: SlaveID, status: Int) {}
@@ -80,6 +79,7 @@ class ScalaScheduler extends Scheduler {
         driver.declineOffer(offer.getId)
       }
       TasksList.message = "No one node selected"
+      logger.info("Return from resourceOffers")
       return
     }
 
@@ -92,9 +92,13 @@ class ScalaScheduler extends Scheduler {
     var tasksOnSlaves = howMuchTasksOnSlave(this.perTaskCores, this.perTaskMem, this.perTaskPortsCount, tasksCount, filteredOffers)
 
     var overTasks = 0
-    for (slave <- tasksOnSlaves) {overTasks += slave._2}
+    for (slave <- tasksOnSlaves) {
+      overTasks += slave._2
+    }
+
     logger.info(s"Count tasks can be launched: $overTasks")
     logger.info(s"Count tasks must be launched: $tasksCount")
+
     if (tasksCount > overTasks) {
       logger.info(s"Can not launch tasks: no required resources")
       TasksList.message = "Can not launch tasks: no required resources"
@@ -108,7 +112,7 @@ class ScalaScheduler extends Scheduler {
 
     var offerNumber = 0
     var launchedTasks: Map[OfferID, List[TaskInfo]] = Map()
-    for (curr_task <- TasksList.toLaunch) {
+    for (currTask <- TasksList.toLaunch) {
 
       val currentOffer = tasksOnSlaves(offerNumber)
       if (offerNumber >= tasksOnSlaves.size - 1) {
@@ -118,29 +122,28 @@ class ScalaScheduler extends Scheduler {
       }
 
 
-
       // Task Resources
-      val cpus = Resource.newBuilder.
-        setType(org.apache.mesos.Protos.Value.Type.SCALAR).
-        setName("cpus").
-        setScalar(org.apache.mesos.Protos.Value.
-          Scalar.newBuilder.setValue(this.perTaskCores)).
-        build
-      val mem = Resource.newBuilder.
-        setType(org.apache.mesos.Protos.Value.Type.SCALAR).
-        setName("mem").
-        setScalar(org.apache.mesos.Protos.Value.
-          Scalar.newBuilder.setValue(this.perTaskMem)).
-        build
-      val ports = getPorts(currentOffer._1, curr_task)
+      val cpus = Resource.newBuilder
+        .setType(org.apache.mesos.Protos.Value.Type.SCALAR)
+        .setName("cpus")
+        .setScalar(org.apache.mesos.Protos.Value
+          .Scalar.newBuilder.setValue(this.perTaskCores)
+        ).build
 
-      var agentPorts:String = ""
-      ports.getRanges.getRangeList.asScala.foreach(agentPorts += _.getBegin.toString+",")
+      val mem = Resource.newBuilder
+        .setType(org.apache.mesos.Protos.Value.Type.SCALAR)
+        .setName("mem")
+        .setScalar(org.apache.mesos.Protos.Value.
+          Scalar.newBuilder.setValue(this.perTaskMem)
+        ).build
+      val ports = getPorts(currentOffer._1, currTask)
+
+      var agentPorts: String = ""
+      ports.getRanges.getRangeList.asScala.foreach(agentPorts += _.getBegin.toString + ",")
       agentPorts.dropRight(1)
+
       logger.info(s"PORTS: $ports")
       logger.info(s"AGENT PORTS: $agentPorts")
-
-
 
       val cmd = CommandInfo.newBuilder()
       try {
@@ -158,7 +161,7 @@ class ScalaScheduler extends Scheduler {
             .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_NAME").setValue(params {
               "instanceId"
             }))
-            .addVariables(Environment.Variable.newBuilder.setName("TASK_NAME").setValue(curr_task))
+            .addVariables(Environment.Variable.newBuilder.setName("TASK_NAME").setValue(currTask))
             .addVariables(Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(currentOffer._1.getHostname))
             .addVariables(Environment.Variable.newBuilder.setName("AGENTS_PORTS").setValue(agentPorts))
           )
@@ -176,13 +179,13 @@ class ScalaScheduler extends Scheduler {
       }
 
 
-      logger.info(s"Current task: $curr_task")
+      logger.info(s"Current task: $currTask")
       logger.info(s"Current slave: ${currentOffer._1.getSlaveId.getValue}")
 
       val task = TaskInfo.newBuilder
         .setCommand(cmd)
-        .setName(curr_task)
-        .setTaskId(TaskID.newBuilder.setValue(curr_task))
+        .setName(currTask)
+        .setTaskId(TaskID.newBuilder.setValue(currTask))
         .addResources(cpus)
         .addResources(mem)
         .addResources(ports)
@@ -201,7 +204,7 @@ class ScalaScheduler extends Scheduler {
 
       // update how much tasks we can run on slave when launch current task
       tasksOnSlaves.updated(tasksOnSlaves.indexOf(currentOffer), Tuple2(currentOffer._1, currentOffer._2 - 1))
-      TasksList.launched(curr_task)
+      TasksList.launched(currTask)
 
     }
 
@@ -215,8 +218,6 @@ class ScalaScheduler extends Scheduler {
     TasksList.message = "Tasks launched"
   }
 
-
-
   /**
     * Reregistering framework
     */
@@ -225,8 +226,6 @@ class ScalaScheduler extends Scheduler {
     logger.info(s"New master $masterInfo")
     TasksList.message = s"New master $masterInfo"
   }
-
-
 
   /**
     * Registering framework
@@ -254,9 +253,9 @@ class ScalaScheduler extends Scheduler {
     this.perTaskCores = instance.perTaskCores
     this.perTaskMem = instance.perTaskRam
     instance.moduleType match {
-      case "output-streaming" => perTaskPortsCount = 2
-      case "regular-streaming" => perTaskPortsCount = instance.inputs.length+instance.outputs.length+4
-      case "input-streaming" => perTaskPortsCount = instance.outputs.length+1
+      case ModuleConstants.outputStreamingType => perTaskPortsCount = 2
+      case ModuleConstants.regularStreamingType => perTaskPortsCount = instance.inputs.length + instance.outputs.length + 4
+      case ModuleConstants.inputStreamingType => perTaskPortsCount = instance.outputs.length + 1
       case _ => perTaskPortsCount = 0
     }
     logger.info(s"Got instance")
@@ -274,10 +273,11 @@ class ScalaScheduler extends Scheduler {
       case e:Exception => handleSchedulerException(e)
     }
 
-    if (instance.moduleType == "input-streaming") {
+    if (instance.moduleType.equals(ModuleConstants.inputStreamingType)) { //todo у нас есть константы!
       for (taskNumber <- 1 to instance.parallelism) {
-        TasksList.newTask(instance.moduleName+"-task"+taskNumber)
-        logger.info(s"$taskNumber")
+        val taskName = s"${instance.name}-task${taskNumber - 1}"
+        TasksList.newTask(taskName)
+        logger.info(s"Instance task: $taskName")
       }
     } else {
       val tasks = instance.executionPlan.tasks
@@ -290,28 +290,28 @@ class ScalaScheduler extends Scheduler {
     TasksList.message = s"Registered framework as: ${frameworkId.getValue}"
   }
 
-
-
   /**
     * This method give list of offer and how many tasks we can launch on each slave.
     */
-  def howMuchTasksOnSlave(perTaskCores: Double, perTaskRam: Double, perTaskPortsCount: Int, taskCount: Int, offers: util.List[Offer]): List[Tuple2[Offer, Int]] = {
-    var over_cpus = 0.0
-    var over_mem = 0.0
-    var over_ports = 0
+  def howMuchTasksOnSlave(perTaskCores: Double,
+                          perTaskRam: Double,
+                          perTaskPortsCount: Int,
+                          taskCount: Int,
+                          offers: util.List[Offer]): List[(Offer, Int)] = {
+    var overCpus = 0.0
+    var overMem = 0.0
+    var overPorts = 0
 
-    val req_cpus = perTaskCores * taskCount
-    val req_mem = perTaskRam * taskCount
-    val req_ports = perTaskPortsCount * taskCount
+    val reqCpus = perTaskCores * taskCount
+    val reqMem = perTaskRam * taskCount
+    val reqPorts = perTaskPortsCount * taskCount
 
-
-
-    var tasksNumber: List[Tuple2[Offer, Int]] = List()
+    var tasksNumber: List[(Offer, Int)] = List()
     for (offer <- offers.asScala) {
       val portsResource = getPortsResource(offer)
       var offerPorts = 0
       for (range <- portsResource.getRanges.getRangeList.asScala){
-        over_ports += (range.getEnd-range.getBegin+1).toInt
+        overPorts += (range.getEnd-range.getBegin+1).toInt
         offerPorts += (range.getEnd-range.getBegin+1).toInt
       }
       tasksNumber = tasksNumber.:::(List(Tuple2(
@@ -322,15 +322,13 @@ class ScalaScheduler extends Scheduler {
           offerPorts / perTaskPortsCount
         ).min.floor.toInt
       )))
-      over_cpus += getResource(offer, "cpus")
-      over_mem += getResource(offer, "mem")
+      overCpus += getResource(offer, "cpus")
+      overMem += getResource(offer, "mem")
     }
-    logger.info(s"Have resources: $over_cpus cpus, $over_mem mem, $over_ports ports")
-    logger.info(s"Required resources: $req_cpus cpus, $req_mem mem, $req_ports ports")
+    logger.info(s"Have resources: $overCpus cpus, $overMem mem, $overPorts ports")
+    logger.info(s"Required resources: $reqCpus cpus, $reqMem mem, $reqPorts ports")
     tasksNumber
   }
-
-
 
   /**
     * This method give how much resource of type <name> we have on <offer>
@@ -342,8 +340,6 @@ class ScalaScheduler extends Scheduler {
     }
     0.0
   }
-
-
 
   /**
     * Filter offered slaves
@@ -357,7 +353,8 @@ class ScalaScheduler extends Scheduler {
           if (filter._1.matches("""\+.+""".r.toString)) {
             for (attribute <- offer.getAttributesList.asScala) {
               if (filter._1.toString.substring(1) == attribute.getName &
-              attribute.getText.getValue.matches(filter._2.r.toString)) {
+                attribute.getText.getValue.matches(filter._2.r.toString)) {
+
                 result ::= offer
               }
             }
@@ -366,6 +363,7 @@ class ScalaScheduler extends Scheduler {
             for (attribute <- offer.getAttributesList.asScala) {
               if (filter._1.matches(attribute.getName.r.toString) &
                 attribute.getText.getValue.matches(filter._2.r.toString)) {
+
                 result = result.filterNot(elem => elem == offer)
               }
             }
@@ -375,9 +373,6 @@ class ScalaScheduler extends Scheduler {
     } else return offers
     result.asJava
   }
-
-
-
 
   /**
     * Get jar URI for framework
@@ -399,15 +394,15 @@ class ScalaScheduler extends Scheduler {
       .setName("ports")
       .setType(Value.Type.RANGES)
       .build
+
     for (resource <- offer.getResourcesList.asScala) {
       if (resource.getName == "ports") {
         portsResource = resource
       }
     }
+
     portsResource
   }
-
-
 
   /**
     * Get random unused ports
@@ -433,8 +428,6 @@ class ScalaScheduler extends Scheduler {
       .build
   }
 
-
-
   /**
     * Handler for Scheduler Exception
     */
@@ -446,11 +439,5 @@ class ScalaScheduler extends Scheduler {
     driver.stop()
     System.exit(1)
   }
-}
-
-object aaa extends App {
-  val configService = ConnectionRepository.getConfigService
-  val answer = configService.get("system." + "com.bwsw.regular.streaming.engine-0.1")
-  println(answer.value)
 }
 
