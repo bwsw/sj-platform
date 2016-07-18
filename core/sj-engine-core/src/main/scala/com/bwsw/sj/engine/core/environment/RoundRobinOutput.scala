@@ -16,8 +16,10 @@ class RoundRobinOutput(producer: BasicProducer[Array[Byte], Array[Byte]],
                        performanceMetrics: RegularStreamingPerformanceMetrics) extends ModuleOutput(performanceMetrics) {
 
   private var txn: Option[BasicProducerTransaction[Array[Byte], Array[Byte]]] = None
+  private val streamName = producer.stream.getName
 
   def put(data: Array[Byte]) = {
+    logger.debug(s"Send a portion of data to stream: '$streamName'")
     if (txn.isDefined) {
       txn.get.send(data)
     }
@@ -26,8 +28,9 @@ class RoundRobinOutput(producer: BasicProducer[Array[Byte], Array[Byte]],
       txn.get.send(data)
     }
 
+    logger.debug(s"Add an element to output envelope of output stream:  '$streamName'")
     performanceMetrics.addElementToOutputEnvelope(
-      producer.stream.getName,
+      streamName,
       txn.get.getTxnUUID.toString,
       data.length
     )

@@ -12,9 +12,9 @@ import scala.collection.mutable
 /**
  * Class allowing to manage environment of module that has state
  * Created: 15/04/2016
-  *
-  * @author Kseniya Mikhaleva
-  * @param stateStorage Storage of state of module
+ *
+ * @author Kseniya Mikhaleva
+ * @param stateStorage Storage of state of module
  * @param options User defined options from instance parameters
  * @param producers T-streams producers for each output stream of instance parameters
  * @param outputs Set of output streams of instance parameters that have tags
@@ -29,11 +29,11 @@ class StatefulModuleEnvironmentManager(stateStorage: StateStorage,
                                        outputTags: mutable.Map[String, (String, ModuleOutput)],
                                        moduleTimer: SjTimer,
                                        performanceMetrics: RegularStreamingPerformanceMetrics)
-  extends ModuleEnvironmentManager(options, producers, outputs, outputTags, moduleTimer,performanceMetrics) {
+  extends ModuleEnvironmentManager(options, producers, outputs, outputTags, moduleTimer, performanceMetrics) {
   /**
    * Returns specific state of module
-    *
-    * @return Module state
+   *
+   * @return Module state
    */
   override def getState: StateStorage = {
     logger.info(s"Get a storage where a state is\n")

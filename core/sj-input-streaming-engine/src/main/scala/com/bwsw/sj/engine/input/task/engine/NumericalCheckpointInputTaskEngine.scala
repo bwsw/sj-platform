@@ -1,7 +1,8 @@
-package com.bwsw.sj.engine.input
+package com.bwsw.sj.engine.input.task.engine
 
 import com.bwsw.sj.common.DAL.model.module.InputInstance
 import com.bwsw.sj.engine.core.entities.InputEnvelope
+import com.bwsw.sj.engine.input.task.InputTaskManager
 
 /**
  * Provides methods are responsible for a basic execution logic of task of input module
@@ -42,6 +43,8 @@ class NumericalCheckpointInputTaskEngine(manager: InputTaskManager, inputInstanc
   override def processEnvelope(envelope: Option[InputEnvelope]) = {
     val isNotDuplicateOrEmpty = super.processEnvelope(envelope)
     if (isNotDuplicateOrEmpty) {
+      logger.debug(s"Task name: ${manager.taskName}. Processed envelope is not duplicate or empty " +
+        s"so increase a counter of input envelopes\n")
       increaseCounter()
     }
 

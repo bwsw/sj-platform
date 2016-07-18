@@ -14,11 +14,13 @@ import scala.collection._
  */
 
 class PartitionedOutput(producer: BasicProducer[Array[Byte], Array[Byte]],
-                        performanceMetrics: RegularStreamingPerformanceMetrics) extends ModuleOutput(performanceMetrics){
+                        performanceMetrics: RegularStreamingPerformanceMetrics) extends ModuleOutput(performanceMetrics) {
 
   private val txns = mutable.Map[Int, BasicProducerTransaction[Array[Byte], Array[Byte]]]()
+  private val streamName = producer.stream.getName
 
   def put(data: Array[Byte], partition: Int) = {
+    logger.debug(s"Send a portion of data to stream: '$streamName' partition with number: '$partition'")
     if (txns.contains(partition)) {
       txns(partition).send(data)
     }
@@ -27,8 +29,9 @@ class PartitionedOutput(producer: BasicProducer[Array[Byte], Array[Byte]],
       txns(partition).send(data)
     }
 
+    logger.debug(s"Add an element to output envelope of output stream:  '$streamName'")
     performanceMetrics.addElementToOutputEnvelope(
-      producer.stream.getName,
+      streamName,
       txns(partition).getTxnUUID.toString,
       data.length
     )

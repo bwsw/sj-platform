@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.input
+package com.bwsw.sj.engine.input.task.engine
 
 import java.nio.charset.Charset
 import java.util.UUID
@@ -11,12 +11,15 @@ import com.bwsw.sj.common.module.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.sj.engine.core.entities.InputEnvelope
 import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.engine.core.input.InputStreamingExecutor
-import com.bwsw.sj.engine.input.eviction_policy.{FixTimeEvictionPolicy, ExpandedTimeEvictionPolicy}
+import com.bwsw.sj.engine.input.eviction_policy.{ExpandedTimeEvictionPolicy, FixTimeEvictionPolicy}
+import com.bwsw.sj.engine.input.task.InputTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerTransaction, ProducerPolicies}
 import io.netty.buffer.ByteBuf
 import io.netty.util.ReferenceCountUtil
 import org.slf4j.LoggerFactory
+
+import scala.collection._
 
 /**
  * Provides methods are responsible for a basic execution logic of task of input module
@@ -53,6 +56,7 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
    * @param txn Transaction UUID
    */
   protected def txnOpen(txn: UUID) = {
+    logger.info(s"Task name: ${manager.taskName}. Transaction with UUID: '$txn' has opened\n")
     println("txnOpen: UUID = " + txn) //todo
   }
 
@@ -62,6 +66,7 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
    * @param txn Transaction UUID
    */
   protected def txnClose(txn: UUID) = {
+    logger.info(s"Task name: ${manager.taskName}. Transaction with UUID: '$txn' has closed\n")
     println("txnClose: UUID = " + txn) //todo
   }
 
@@ -71,6 +76,7 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
    * @param txn Transaction UUID
    */
   protected def txnCancel(txn: UUID) = {
+    logger.info(s"Task name: ${manager.taskName}. Transaction with UUID: '$txn' has canceled\n")
     println("txnCancel: UUID = " + txn) //todo
   }
 
@@ -82,11 +88,14 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
    */
   protected def envelopeProcessed(envelope: Option[InputEnvelope], isNotDuplicateOrEmpty: Boolean) = {
     if (isNotDuplicateOrEmpty) {
+      logger.info(s"Task name: ${manager.taskName}. Input envelope with key: '${envelope.get.key}' is not duplicate so it has been sent\n")
       //todo
       println("Envelope has been sent")
     } else if (envelope.isDefined) {
+      logger.info(s"Task name: ${manager.taskName}. Input envelope with key: '${envelope.get.key}' is duplicate\n")
       println("Envelope is duplicate")
     } else {
+      logger.info(s"Task name: ${manager.taskName}. Input envelope with key: '${envelope.get.key}' is emptyt\n")
       println("Envelope is empty")
     }
   }
@@ -102,14 +111,17 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
     if (envelope.isDefined) {
       logger.info(s"Task name: ${manager.taskName}. Envelope is defined. Process it\n")
       val inputEnvelope = envelope.get
+      logger.debug(s"Task name: ${manager.taskName}. Add envelope to input stream in performance metrics \n")
       performanceMetrics.addEnvelopeToInputStream(List(inputEnvelope.data.length))
       if (checkForDuplication(inputEnvelope.key, inputEnvelope.duplicateCheck, inputEnvelope.data)) {
+        logger.debug(s"Task name: ${manager.taskName}. Envelope is not duplicate so send it\n")
         inputEnvelope.outputMetadata.foreach(x => {
           sendEnvelope(x._1, x._2, inputEnvelope.data)
         })
         return true
       }
     }
+    logger.debug(s"Task name: ${manager.taskName}. Envelope hasn't been processed\n")
     false
   }
 
@@ -124,14 +136,19 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
     val maybeTxn = getTxn(stream, partition)
     var txn: BasicProducerTransaction[Array[Byte], Array[Byte]] = null
     if (maybeTxn.isDefined) {
+      logger.debug(s"Task name: ${manager.taskName}. Txn for stream/partition: '$stream/$partition' is defined\n")
       txn = maybeTxn.get
       txn.send(data)
     } else {
+      logger.debug(s"Task name: ${manager.taskName}. Txn for stream/partition: '$stream/$partition' is not defined " +
+        s"so create new txn\n")
       txn = producers(stream).newTransaction(ProducerPolicies.errorIfOpen, partition)
       txn.send(data)
+      putTxn(stream, partition, txn)
       txnOpen(txn.getTxnUUID)
     }
 
+    logger.debug(s"Task name: ${manager.taskName}. Add envelope to output stream in performance metrics \n")
     performanceMetrics.addElementToOutputEnvelope(
       stream,
       txn.getTxnUUID.toString,
@@ -148,10 +165,10 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
    */
   protected def checkForDuplication(key: String, duplicateCheck: Boolean, value: Array[Byte]): Boolean = {
     logger.info(s"Task name: ${manager.taskName}. " +
-      s"Try to check key: $key for duplication with a setting duplicateCheck = $duplicateCheck\n")
+      s"Try to check key: '$key' for duplication with a setting duplicateCheck = '$duplicateCheck'\n")
     if (duplicateCheck) {
       logger.info(s"Task name: ${manager.taskName}. " +
-        s"Check key: $key for duplication\n")
+        s"Check key: '$key' for duplication\n")
       evictionPolicy.checkForDuplication(key, value)
     } else true
   }
@@ -170,25 +187,31 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
         launchPerformanceMetricsReporting(executorService)
 
         while (true) {
+          logger.debug(s"Task name: ${manager.taskName}. Invoke tokenize() method of executor\n")
           val maybeInterval = executor.tokenize(buffer)
           if (maybeInterval.isDefined) {
+            logger.debug(s"Task name: ${manager.taskName}. Tokenize() method returned a defined interval\n")
             val (beginIndex, endIndex) = maybeInterval.get
             if (buffer.isReadable(endIndex)) {
+              logger.debug(s"Task name: ${manager.taskName}. The end index of interval is valid\n")
               println("before reading: " + buffer.toString(Charset.forName("UTF-8")) + "_") //todo: only for testing
+              logger.debug(s"Task name: ${manager.taskName}. Invoke parse() method of executor\n")
               val inputEnvelope: Option[InputEnvelope] = executor.parse(buffer, beginIndex, endIndex)
               clearBufferAfterParsing(buffer, endIndex)
               println("after reading: " + buffer.toString(Charset.forName("UTF-8")) + "_") //todo: only for testing
               val isNotDuplicateOrEmpty = processEnvelope(inputEnvelope)
               envelopeProcessed(inputEnvelope, isNotDuplicateOrEmpty)
               doCheckpoint(moduleEnvironmentManager.isCheckpointInitiated)
+              Thread.sleep(1000) //todo: only for testing
             } else {
               logger.error(s"Task name: ${manager.taskName}. " +
                 s"Method tokenize() returned end index that an input stream is not defined at\n")
               throw new IndexOutOfBoundsException("Method tokenize() returned end index that an input stream is not defined at")
             }
-          } else Thread.sleep(2000) //todo: only for testing
+          }
         }
       } finally {
+        logger.debug(s"Task name: ${manager.taskName}. Release a buffer that contains incoming bytes\n")
         ReferenceCountUtil.release(buffer)
       }
     })
@@ -274,6 +297,18 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
   }
 
   /**
+   * Retrieves a txn for specific stream and partition
+   * @param stream Output stream name
+   * @param partition Partition of stream
+   * @return Current open transaction
+   */
+  private def putTxn(stream: String, partition: Int, txn: BasicProducerTransaction[Array[Byte], Array[Byte]]) = {
+    logger.debug(s"Task name: ${manager.taskName}. " +
+      s"Put txn for stream: $stream, partition: $partition\n")
+    txnsByStreamPartitions(stream) += (partition -> txn)
+  }
+
+  /**
    * Creates a map that keeps current open txn for each partition of output stream
    * @param streams Set of names of output streams
    * @return Map where a key is output stream name, a value is a map
@@ -282,7 +317,7 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
   protected def createTxnsStorage(streams: Set[String]) = {
     logger.debug(s"Task name: ${manager.taskName}. " +
       s"Create storage for keeping txns for each partition of output streams\n")
-    streams.map(x => (x, Map[Int, BasicProducerTransaction[Array[Byte], Array[Byte]]]())).toMap
+    streams.map(x => (x, mutable.Map[Int, BasicProducerTransaction[Array[Byte], Array[Byte]]]())).toMap
   }
 
   /**
@@ -314,6 +349,7 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
     inputInstanceMetadata.evictionPolicy match {
       case "fix-time" => new FixTimeEvictionPolicy(manager)
       case "expanded-time" => new ExpandedTimeEvictionPolicy(manager)
+      case _ => new FixTimeEvictionPolicy(manager)
     }
     //new ExpandedTimeEvictionPolicy(manager) //todo for testing
   }

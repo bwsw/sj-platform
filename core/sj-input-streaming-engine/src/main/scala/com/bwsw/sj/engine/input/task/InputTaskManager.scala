@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.input
+package com.bwsw.sj.engine.input.task
 
 import java.io.File
 import java.net.{InetSocketAddress, URLClassLoader}
@@ -7,7 +7,7 @@ import com.aerospike.client.Host
 import com.bwsw.common.tstream.NetworkTimeUUIDGenerator
 import com.bwsw.sj.common.ConfigConstants._
 import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.common.DAL.model.module.InputInstance
+import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.StreamConstants._
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
@@ -64,8 +64,8 @@ class InputTaskManager() {
   private val hazelcastInstance = Hazelcast.newHazelcastInstance(config)
 
   /**
-   * Returns hazelcast map for checking of there are duplicates (input envelopes) or not
-   * @return Hazelcast map
+   * Returns a keys storage (Hazelcast map) for checking of there are duplicates (input envelopes) or not
+   * @return Storage of keys (Hazelcast map)
    */
   def getUniqueEnvelopes = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
@@ -74,8 +74,10 @@ class InputTaskManager() {
   }
 
   assert(agentsPorts.length >=
-    (instance.outputs.length + 1), //todo: count ! this one for pm
+    (instance.outputs.length + 1),
     "Not enough ports for t-stream consumers/producers ")
+
+  addEntryPointMetadataInInstance()
 
   private val fileMetadata: FileMetadata = ConnectionRepository.getFileMetadataService.getByParameters(
     Map("specification.name" -> instance.moduleName,
@@ -141,6 +143,14 @@ class InputTaskManager() {
   }
 
   /**
+   * Fills a task field in input instance with a current task name and entry host + port
+   */
+  private def addEntryPointMetadataInInstance() = {
+    instance.tasks.put(taskName, new InputTask(entryHost, entryPort))
+    ConnectionRepository.getInstanceService.save(instance)
+  }
+
+  /**
    * Creates a Hazelcast map configuration
    * @return Hazelcast map configuration
    */
@@ -167,8 +177,8 @@ class InputTaskManager() {
     instance.defaultEvictionPolicy match {
       case "LRU" => EvictionPolicy.LRU
       case "LFU" => EvictionPolicy.LFU
+      case _ => EvictionPolicy.NONE
     }
-    //EvictionPolicy.LRU //todo for testing
   }
 
   /**

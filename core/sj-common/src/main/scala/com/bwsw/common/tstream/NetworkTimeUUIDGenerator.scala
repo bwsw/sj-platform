@@ -5,6 +5,7 @@ import java.util.UUID
 import com.bwsw.common.client.{TcpClient, TcpClientOptions}
 import com.bwsw.tstreams.generator.IUUIDGenerator
 import com.datastax.driver.core.utils.UUIDs
+import org.slf4j.LoggerFactory
 
 /**
  * Provides an entity for generating new txn time UUID through Tcp client
@@ -19,6 +20,8 @@ class NetworkTimeUUIDGenerator(zkServers: Array[String],
                               retryInterval: Long,
                               retryCount: Int) extends IUUIDGenerator {
 
+  private val logger = LoggerFactory.getLogger(this.getClass)
+
   private val options = new TcpClientOptions()
     .setZkServers(zkServers)
     .setPrefix(prefix)
@@ -31,11 +34,17 @@ class NetworkTimeUUIDGenerator(zkServers: Array[String],
   /**
    * @return Transaction UUID
    */
-  override def getTimeUUID(): UUID = UUID.fromString(client.get())
+  override def getTimeUUID(): UUID = {
+    logger.debug("Create a new transaction UUID using a tcp client")
+    UUID.fromString(client.get())
+  }
 
   /**
    * @return UUID based on timestamp
    */
-  override def getTimeUUID(timestamp: Long): UUID = UUIDs.startOf(timestamp)
+  override def getTimeUUID(timestamp: Long): UUID = {
+    logger.debug("Create a new transaction UUID based on a timestamp")
+    UUIDs.startOf(timestamp)
+  }
 
 }

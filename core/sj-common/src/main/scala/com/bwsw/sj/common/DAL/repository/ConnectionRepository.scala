@@ -9,6 +9,8 @@ import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.mongodb.MongoClient
 import org.mongodb.morphia.Morphia
 import org.mongodb.morphia.dao.BasicDAO
+import org.mongodb.morphia.mapping.DefaultCreator
+import org.slf4j.LoggerFactory
 
 import scala.reflect.ClassTag
 
@@ -19,13 +21,17 @@ object ConnectionRepository {
 
   import ConnectionConstants._
 
+  private val logger = LoggerFactory.getLogger(this.getClass)
+
   private val serializer = new JsonSerializer()
   serializer.setIgnoreUnknown(true)
 
   private lazy val mongoClient = new MongoClient(mongoHost, mongoPort)
 
   private lazy val morphia = new Morphia()
-  morphia.map(classOf[SjStream],classOf[Service], classOf[Provider], classOf[ConfigSetting])
+  morphia.map(classOf[SjStream]).map(classOf[Service]).map(classOf[Provider]).map(classOf[ConfigSetting]).map(classOf[Instance])
+
+  changeGettingClassLoaderForMongo()
 
   private lazy val datastore = morphia.createDatastore(mongoClient, databaseName)
 
@@ -74,14 +80,29 @@ object ConnectionRepository {
   }
 
   def close() = {
+    logger.debug("Close the mongo connections")
     mongoConnection.close()
     mongoClient.close()
   }
 
   private[DAL] def getGenericDAO[T: ClassTag] = {
     import scala.reflect.classTag
+
+    logger.debug(s"Create a basic DAO of a mongo collection of type: '${classTag[T].toString()}'")
     val clazz: Class[T] = classTag[T].runtimeClass.asInstanceOf[Class[T]]
     new BasicDAO[T, String](clazz, datastore)
   }
-}
 
+  /**
+   * It's necessary because of when a MesosSchedulerDriver (in mesos framework) is being created a something is going wrong
+   * (probably it should be but it's not our case) and after it the all instances have a null value of class loader.
+   * May be it is a temporary measure (if we will find a different solution)
+   */
+  private def changeGettingClassLoaderForMongo() = {
+    morphia.getMapper.getOptions.setObjectFactory(new DefaultCreator() {
+      override def getClassLoaderForClass = {
+        classOf[JsonSerializer].getClassLoader
+      }
+    })
+  }
+}

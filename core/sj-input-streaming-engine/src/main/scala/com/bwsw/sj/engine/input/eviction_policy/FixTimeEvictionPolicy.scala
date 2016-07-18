@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.input.eviction_policy
 
-import com.bwsw.sj.engine.input.InputTaskManager
+import com.bwsw.sj.engine.input.task.InputTaskManager
 
 /**
  * Provides methods are responsible for a fix time eviction policy of input envelope duplicates.
