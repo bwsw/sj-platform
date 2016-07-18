@@ -90,7 +90,7 @@ class ModuleEnvironmentManager(val options: Map[String, Any],
   }
 
   /**
-   * Enables user to use a timer in a module which will invoke the time handler: onTimer
+   * Enables user to use a timer in a module which will be invoked the time handler: onTimer
    *
    * @param delay Time after which the handler will call
    */

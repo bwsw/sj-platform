@@ -191,13 +191,13 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
           val maybeInterval = executor.tokenize(buffer)
           if (maybeInterval.isDefined) {
             logger.debug(s"Task name: ${manager.taskName}. Tokenize() method returned a defined interval\n")
-            val (beginIndex, endIndex) = maybeInterval.get
-            if (buffer.isReadable(endIndex)) {
+            val interval = maybeInterval.get
+            if (buffer.isReadable(interval.finalValue)) {
               logger.debug(s"Task name: ${manager.taskName}. The end index of interval is valid\n")
               println("before reading: " + buffer.toString(Charset.forName("UTF-8")) + "_") //todo: only for testing
               logger.debug(s"Task name: ${manager.taskName}. Invoke parse() method of executor\n")
-              val inputEnvelope: Option[InputEnvelope] = executor.parse(buffer, beginIndex, endIndex)
-              clearBufferAfterParsing(buffer, endIndex)
+              val inputEnvelope: Option[InputEnvelope] = executor.parse(buffer, interval)
+              clearBufferAfterParsing(buffer, interval.finalValue)
               println("after reading: " + buffer.toString(Charset.forName("UTF-8")) + "_") //todo: only for testing
               val isNotDuplicateOrEmpty = processEnvelope(inputEnvelope)
               envelopeProcessed(inputEnvelope, isNotDuplicateOrEmpty)

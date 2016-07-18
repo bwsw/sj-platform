@@ -13,22 +13,21 @@ import io.netty.buffer.ByteBuf
 
 class InputStreamingExecutor(manager: InputEnvironmentManager) {
   /**
-   * Will invoke every time when a new part of data is received
+   * Will be invoked every time when a new part of data is received
    * @param buffer Input stream is a flow of bytes
    * @return Interval into buffer that probably contains a message or None
    */
-  def tokenize(buffer: ByteBuf): Option[(Int, Int)] = {
+  def tokenize(buffer: ByteBuf): Option[Interval] = {
     None
   }
 
   /**
-   * Will invoke after each calling tokenize method if tokenize doesn't return None
+   * Will be invoked after each calling tokenize method if tokenize doesn't return None
    * @param buffer Input stream is a flow of bytes
-   * @param beginIndex Index of the beginning of a message
-   * @param endIndex Index of the end of a message
+   * @param interval Defines the boundaries of an input envelope
    * @return Input envelope or None
    */
-  def parse(buffer: ByteBuf, beginIndex: Int, endIndex: Int): Option[InputEnvelope] = {
+  def parse(buffer: ByteBuf, interval: Interval): Option[InputEnvelope] = {
     None
   }
 }
