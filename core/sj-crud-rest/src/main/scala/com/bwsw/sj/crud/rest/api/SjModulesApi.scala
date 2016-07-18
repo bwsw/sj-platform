@@ -1,6 +1,7 @@
 package com.bwsw.sj.crud.rest.api
 
 import java.io.{FileNotFoundException, File}
+import java.text.MessageFormat
 
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.MediaTypes._
@@ -44,14 +45,21 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                 val uploadingFile = new File(metadata.fileName)
                 FileUtils.copyFile(file, uploadingFile)
                 storage.put(uploadingFile, metadata.fileName, specification, "module")
-                val response = ProtocolResponse(200, Map("message" -> "Jar file of module has been uploaded"))
+                val response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+                  messages.getString("rest.modules.module.uploaded"),
+                  metadata.fileName
+                )))
+
                 complete(HttpEntity(
                   `application/json`,
                   serializer.serialize(response)
                 ))
               } else {
                 file.delete()
-                throw new BadRecordWithKey(s"File: ${metadata.fileName} hasn't the .jar extension", metadata.fileName)
+                throw new BadRecordWithKey(MessageFormat.format(
+                  messages.getString("rest.modules.modules.extension.unknown"),
+                  metadata.fileName
+                ), metadata.fileName)
               }
           }
         } ~
@@ -64,7 +72,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
               "module-version" -> f.specification.version)))
             response = ProtocolResponse(200, entity)
           } else {
-            response = ProtocolResponse(200, Map("message" -> s"Uploaded modules have not been found"))
+            response = ProtocolResponse(200, Map("message" -> messages.getString("rest.modules.notfound")))
           }
           complete(HttpEntity(
             `application/json`,
@@ -79,7 +87,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
 
             var response: ProtocolResponse = null
             if (allInstances.isEmpty) {
-              response = ProtocolResponse(200, Map("message" -> "Instances have not been found"))
+              response = ProtocolResponse(200, Map("message" -> messages.getString("rest.modules.instances.notfound")))
             } else {
               val entity = Map("instances" -> allInstances.map(x => ShortInstanceMetadata(x.name,
                 x.moduleType,
@@ -98,7 +106,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       } ~
       pathPrefix(Segment) { (moduleType: String) =>
         if (!checkModuleType(moduleType)) {
-          throw new BadRecordWithKey(s"Module type $moduleType is not exist", moduleType)
+          throw new BadRecordWithKey(MessageFormat.format(messages.getString("rest.modules.type.unknown"), moduleType), moduleType)
         }
         pathPrefix(Segment) { (moduleName: String) =>
           pathPrefix(Segment) { (moduleVersion: String) =>
@@ -107,8 +115,10 @@ trait SjModulesApi extends Directives with SjCrudValidator {
               "specification.version" -> moduleVersion)
             )
             if (fileMetadatas.isEmpty) {
-              throw new BadRecordWithKey(s"Module '$moduleType-$moduleName-$moduleVersion' not found",
-                s"$moduleType - $moduleName - $moduleVersion")
+              throw new BadRecordWithKey(MessageFormat.format(
+                  messages.getString("rest.modules.module.notfound"),
+                  s"$moduleType-$moduleName-$moduleVersion"
+                ), s"$moduleType - $moduleName - $moduleVersion")
             }
             val fileMetadata = fileMetadatas.head
 
@@ -135,22 +145,28 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                           specification.engineVersion
                         )
                         val response = ProtocolResponse(200,
-                          Map("message" -> s"Instance $nameInstance for module $moduleType-$moduleName-$moduleVersion is created")
-                        )
+                          Map("message" -> MessageFormat.format(messages.getString("rest.modules.instances.instance.created"),
+                            nameInstance, s"$moduleType-$moduleName-$moduleVersion"
+                          )))
                         ctx.complete(HttpEntity(
                           `application/json`,
                           serializer.serialize(response)
                         ))
                       } else {
-                        throw new InstanceException(s"Cannot create instance of module. Request has incorrect options attribute",
+                        throw new InstanceException(messages.getString("rest.modules.instances.instance.create.incorrect"),
                           s"$moduleType-$moduleName-$moduleVersion")
                       }
                     } else {
-                      throw new FileNotFoundException(s"Jar for module $moduleType-$moduleName-$moduleVersion not found in storage")
+                      throw new FileNotFoundException(MessageFormat.format(
+                        messages.getString("rest.modules.module.jar.notfound"),
+                        s"$moduleType-$moduleName-$moduleVersion"
+                      ))
                     }
                   } else {
-                    throw new InstanceException(s"Cannot create instance of module. Errors: ${errors.mkString("\n")}",
-                      s"$moduleType-$moduleName-$moduleVersion")
+                    throw new InstanceException(MessageFormat.format(
+                      messages.getString("rest.modules.instances.instance.cannot.create"),
+                      errors.mkString("\n")
+                    ), s"$moduleType-$moduleName-$moduleVersion")
                   }
                 } ~
                   get {
@@ -162,7 +178,10 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                     if (instances.nonEmpty) {
                       response = ProtocolResponse(200, Map("instances" -> instances.map(i => convertModelInstanceToApiInstance(i))))
                     } else {
-                      response = ProtocolResponse(200, Map("message" -> s"Instances for $moduleType-$moduleName-$moduleVersion not found"))
+                      response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+                        messages.getString("rest.modules.module.instances.notfound"),
+                        s"$moduleType-$moduleName-$moduleVersion"
+                      )))
                     }
                     complete(HttpEntity(`application/json`, serializer.serialize(response)))
                   }
@@ -170,7 +189,10 @@ trait SjModulesApi extends Directives with SjCrudValidator {
               pathPrefix(Segment) { (instanceName: String) =>
                 val instance = instanceDAO.get(instanceName)
                 if (instance == null) {
-                  throw new BadRecordWithKey(s"Instance for name $instanceName has not been found!", instanceName)
+                  throw new BadRecordWithKey(MessageFormat.format(
+                    messages.getString("rest.modules.module.instances.instance.notfound"),
+                    instanceName
+                  ), instanceName)
                 }
                 pathEndOrSingleSlash {
                   get {
@@ -186,12 +208,12 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                       instance.status = deleting
                       instanceDAO.save(instance)
                       destroyInstance(instance)
-                      msg = s"Instance $instanceName is deleting"
+                      msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.deleting"), instanceName)
                     } else if (instance.status.equals(ready)) {
                       instanceDAO.delete(instanceName)
-                      msg = s"Instance $instanceName has been deleted"
+                      msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.deleted"), instanceName)
                     } else {
-                      msg = "Cannot deleting of instance. Instance is not stopped, failed or ready."
+                      msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.cannot.delete"), instanceName)
                     }
                     complete(HttpEntity(
                       `application/json`,
@@ -209,9 +231,9 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                         instance.status = starting
                         instanceDAO.save(instance)
                         startInstance(instance)
-                        msg = "Instance is starting"
+                        msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.starting"), instanceName)/*"Instance is starting"*/
                       } else {
-                        msg = "Cannot starting of instance. Instance already started."
+                        msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.cannot.start"), instanceName)/*"Cannot starting of instance. Instance already started."*/
                       }
                       complete(HttpEntity(
                         `application/json`,
@@ -228,9 +250,9 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                         instance.status = stopping
                         instanceDAO.save(instance)
                         stopInstance(instance)
-                        msg = "Instance is stopping"
+                        msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.stopping"), instanceName)/*"Instance is stopping"*/
                       } else {
-                        msg = "Cannot stopping of instance. Instance is not started."
+                        msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.cannot.stop"), instanceName)/*"Cannot stopping of instance. Instance is not started."*/
                       }
                       complete(HttpEntity(
                         `application/json`,
@@ -260,8 +282,10 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                     entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
                   ))
                 } else {
-                  throw new BadRecordWithKey(s"Jar '$moduleType-$moduleName-$moduleVersion' not found",
-                    s"$moduleType - $moduleName - $moduleVersion")
+                  throw new BadRecordWithKey(MessageFormat.format(
+                    messages.getString("rest.modules.module.jar.notfound"),
+                    s"$moduleName-$moduleVersion"
+                  ), s"$moduleType - $moduleName - $moduleVersion")
                 }
               } ~
               delete {
@@ -271,18 +295,26 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                 )
                 if (instances.isEmpty) {
                   if (storage.delete(filename)) {
-                    val response = ProtocolResponse(200, Map("message" -> s"Module $moduleName-$moduleVersion for type $moduleType has been deleted"))
+                    val response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+                      messages.getString("rest.modules.module.deleted"),
+                      s"$moduleName-$moduleVersion"
+                    )))
+
                     complete(HttpEntity(
                       `application/json`,
                       serializer.serialize(response)
                     ))
                   } else {
-                    throw new BadRecordWithKey(s"Module $moduleType-$moduleName-$moduleVersion hasn't been found",
-                      s"$moduleType-$moduleName-$moduleVersion")
+                    throw new BadRecordWithKey( MessageFormat.format(
+                      messages.getString("rest.modules.module.notfound"),
+                      s"$moduleName-$moduleVersion"
+                    ), s"$moduleType-$moduleName-$moduleVersion")
                   }
                 } else {
-                  throw new BadRecordWithKey(s"Cannot delete module $moduleType-$moduleName-$moduleVersion. Module has instances",
-                    s"$moduleType-$moduleName-$moduleVersion")
+                  throw new BadRecordWithKey( MessageFormat.format(
+                    messages.getString("rest.modules.module.cannot.delete"),
+                    s"$moduleName-$moduleVersion"
+                  ), s"$moduleType-$moduleName-$moduleVersion")
                 }
               }
             }
@@ -299,7 +331,9 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                   "module-version" -> f.specification.version)))
               response = ProtocolResponse(200, entity)
             } else {
-              response = ProtocolResponse(200, Map("message" -> s"Uploaded modules for type $moduleType have not been found"))
+              response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+                messages.getString("rest.modules.type.notfound"),
+                moduleType)/*s"Uploaded modules for type $moduleType have not been found"*/))
             }
             complete(HttpEntity(
               `application/json`,

@@ -1,5 +1,7 @@
 package com.bwsw.sj.crud.rest.api
 
+import java.text.MessageFormat
+
 import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.{Directives, RequestContext}
@@ -41,11 +43,16 @@ trait SjServicesApi extends Directives with SjCrudValidator {
           if (errors.isEmpty) {
             ServiceUtil.prepareService(service) //todo or when running instance?
             serviceDAO.save(service)
-            val response = ProtocolResponse(200, Map("message" -> s"Service '${service.name}' is created"))
+            val response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+              messages.getString("rest.services.service.created"),
+              service.name
+            )))
             ctx.complete(HttpEntity(`application/json`, serializer.serialize(response)))
           } else {
             throw new BadRecordWithKey(
-              s"Cannot create service. Errors: ${errors.mkString("\n")}",
+              MessageFormat.format(
+                messages.getString("rest.services.service.cannot.create"),
+                errors.mkString("\n")),
               s"${data.name}"
             )
           }
@@ -57,7 +64,7 @@ trait SjServicesApi extends Directives with SjCrudValidator {
             val entity = Map("services" -> services.map(s => serviceToServiceData(s)))
             response = ProtocolResponse(200, entity)
           } else {
-            response = ProtocolResponse(200, Map("message" -> "No services found"))
+            response = ProtocolResponse(200, Map("message" -> messages.getString("rest.services.notfound")))
           }
           complete(HttpEntity(`application/json`, serializer.serialize(response)))
 
@@ -72,7 +79,10 @@ trait SjServicesApi extends Directives with SjCrudValidator {
               val entity = Map("services" -> serviceToServiceData(service))
               response = ProtocolResponse(200, entity)
             } else {
-              response = ProtocolResponse(200, Map("message" -> s"Service '$serviceName' not found"))
+              response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+                messages.getString("rest.services.service.notfound"),
+                serviceName
+              )))
             }
             complete(HttpEntity(`application/json`, serializer.serialize(response)))
           } ~
@@ -83,13 +93,21 @@ trait SjServicesApi extends Directives with SjCrudValidator {
               var response: ProtocolResponse = null
               if (service != null) {
                 serviceDAO.delete(serviceName)
-                response = ProtocolResponse(200, Map("message" -> s"Service '$serviceName' has been deleted"))
+                response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+                  messages.getString("rest.services.service.deleted"),
+                  serviceName
+                )))
               } else {
-                response = ProtocolResponse(200, Map("message" -> s"Service '$serviceName' not found"))
+                response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+                  messages.getString("rest.services.service.notfound"),
+                  serviceName
+                )))
               }
               complete(HttpEntity(`application/json`, serializer.serialize(response)))
             } else {
-              throw new BadRecordWithKey(s"Cannot delete service $serviceName. Service usage in streams", serviceName)
+              throw new BadRecordWithKey(MessageFormat.format(
+                messages.getString("rest.services.service.cannot.delete"),
+                serviceName), serviceName)
             }
           }
         }

@@ -1,6 +1,7 @@
 package com.bwsw.sj.crud.rest.api
 
 import java.io.{FileOutputStream, File}
+import java.text.MessageFormat
 
 import akka.http.scaladsl.model.Multipart.FormData.BodyPart
 import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Disposition`}
@@ -41,7 +42,8 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                   entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
                 ))
               } else {
-                throw new BadRecordWithKey(s"Jar '$name' not found", name)
+                throw new BadRecordWithKey(MessageFormat.format(
+                  messages.getString("rest.custom.jars.file.notfound"), name), name)
               }
             }
           } ~
@@ -49,7 +51,8 @@ trait SjCustomApi extends Directives with SjCrudValidator {
             pathEndOrSingleSlash {
               val fileMetadatas = fileMetadataDAO.getByParameters(Map("specification.name" -> name, "specification.version" -> version))
               if (fileMetadatas.isEmpty) {
-                throw new BadRecordWithKey(s"Jar '$name' not found", name)
+                throw new BadRecordWithKey(MessageFormat.format(
+                  messages.getString("rest.custom.jars.file.notfound"), name), name)
               }
               val filename = fileMetadatas.head.filename
               get {
@@ -60,7 +63,8 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                     entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
                   ))
                 } else {
-                  throw new BadRecordWithKey(s"Jar '$name' not found", name)
+                  throw new BadRecordWithKey(MessageFormat.format(
+                    messages.getString("rest.custom.jars.file.notfound"), name), name)
                 }
               } ~
               delete {
@@ -68,14 +72,18 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                   configService.delete("system" + "." + name + "-" + version)
                   val response = ProtocolResponse(
                     200,
-                    Map("message" -> s"Jar by name $name and version $version has been deleted")
+                    Map("message" -> MessageFormat.format(
+                      messages.getString("rest.custom.jars.file.deleted"), name, version
+                    ))
                   )
                   complete(HttpEntity(
                     `application/json`,
                     serializer.serialize(response)
                   ))
                 } else {
-                  throw new BadRecordWithKey(s"Jar name $name and version $version hasn't been found", name)
+                  throw new BadRecordWithKey(MessageFormat.format(
+                    messages.getString("rest.custom.jars.file.cannot.delete"), name, version),
+                    name)
                 }
               }
             }
@@ -95,7 +103,11 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                   "system"
                 )
                 configService.save(customJarConfigElement)
-                val response = ProtocolResponse(200, Map("message" -> s"Custom jar is uploaded."))
+                val response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+                  messages.getString("rest.custom.jars.file.uploaded"),
+                  metadata.fileName)
+                ))
+
                 complete(HttpEntity(
                   `application/json`,
                   serializer.serialize(response)
@@ -112,7 +124,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
               )
               response = ProtocolResponse(200, entity)
             } else {
-              response = ProtocolResponse(200, Map("message" -> s"Uploaded custom jars have not been found."))
+              response = ProtocolResponse(200, Map("message" -> messages.getString("rest.custom.jars.notfound")))
             }
             complete(HttpEntity(
               `application/json`,
@@ -163,7 +175,10 @@ trait SjCustomApi extends Directives with SjCrudValidator {
               storage.put(uploadingFile, filename, spec, "custom-file")
               uploadingFile.delete()
 
-              val response = ProtocolResponse(200, Map("message" -> s"Custom file is uploaded."))
+              val response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+                messages.getString("rest.custom.files.file.uploaded"), filename
+              )))
+
               complete(HttpEntity(
                 `application/json`,
                 serializer.serialize(response)
@@ -181,7 +196,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
               )
               response = ProtocolResponse(200, entity)
             } else {
-              response = ProtocolResponse(200, Map("message" -> s"Uploaded custom files have not been found."))
+              response = ProtocolResponse(200, Map("message" -> messages.getString("rest.custom.files.notfound")))
             }
             complete(HttpEntity(
               `application/json`,
@@ -192,7 +207,9 @@ trait SjCustomApi extends Directives with SjCrudValidator {
         pathPrefix(Segment) { (name: String) =>
           val file = storage.get(name, s"tmp/rest/$name")
           if (file == null || !file.exists()) {
-            throw new BadRecordWithKey(s"Custom file '$name' not found", name)
+            throw new BadRecordWithKey(MessageFormat.format(
+              messages.getString("rest.custom.files.file.notfound"), name),
+              name)
           }
           pathEndOrSingleSlash {
             get {
@@ -203,7 +220,10 @@ trait SjCustomApi extends Directives with SjCrudValidator {
             } ~
             delete {
               storage.delete(name)
-              val response = ProtocolResponse(200, Map("message" -> s"Custom file is deleted."))
+              val response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+                messages.getString("rest.custom.files.file.deleted"), name
+              )))
+
               complete(HttpEntity(
                 `application/json`,
                 serializer.serialize(response)

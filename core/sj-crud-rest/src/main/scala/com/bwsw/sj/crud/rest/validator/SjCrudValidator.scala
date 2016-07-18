@@ -1,6 +1,7 @@
 package com.bwsw.sj.crud.rest.validator
 
 import java.io._
+import java.util.ResourceBundle
 import java.util.jar.JarFile
 
 import akka.actor.ActorSystem
@@ -27,6 +28,8 @@ import scala.concurrent.{Await, ExecutionContextExecutor}
   * @author Kseniya Tomskikh
   */
 trait SjCrudValidator {
+  val messages = ResourceBundle.getBundle("messages")
+
   val logger: LoggingAdapter
 
   implicit val materializer: Materializer
