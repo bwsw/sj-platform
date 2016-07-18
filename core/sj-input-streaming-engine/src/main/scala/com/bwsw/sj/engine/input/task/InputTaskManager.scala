@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.input
+package com.bwsw.sj.engine.input.task
 
 import java.io.File
 import java.net.{InetSocketAddress, URLClassLoader}
@@ -7,7 +7,7 @@ import com.aerospike.client.Host
 import com.bwsw.common.tstream.NetworkTimeUUIDGenerator
 import com.bwsw.sj.common.ConfigConstants._
 import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.common.DAL.model.module.{InputTask, InputInstance}
+import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.StreamConstants._
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter

@@ -1,9 +1,9 @@
-package com.bwsw.sj.engine.input
+package com.bwsw.sj.engine.input.task.engine
 
 import java.nio.charset.Charset
 import java.util.UUID
 import java.util.concurrent.{ExecutorService, TimeUnit}
-import scala.collection._
+
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.DAL.model.module.InputInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
@@ -11,12 +11,15 @@ import com.bwsw.sj.common.module.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.sj.engine.core.entities.InputEnvelope
 import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.engine.core.input.InputStreamingExecutor
-import com.bwsw.sj.engine.input.eviction_policy.{FixTimeEvictionPolicy, ExpandedTimeEvictionPolicy}
+import com.bwsw.sj.engine.input.eviction_policy.{ExpandedTimeEvictionPolicy, FixTimeEvictionPolicy}
+import com.bwsw.sj.engine.input.task.InputTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerTransaction, ProducerPolicies}
 import io.netty.buffer.ByteBuf
 import io.netty.util.ReferenceCountUtil
 import org.slf4j.LoggerFactory
+
+import scala.collection._
 
 /**
  * Provides methods are responsible for a basic execution logic of task of input module

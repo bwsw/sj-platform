@@ -1,7 +1,8 @@
-package com.bwsw.sj.engine.input
+package com.bwsw.sj.engine.input.task.engine
 
 import com.bwsw.sj.common.DAL.model.module.InputInstance
 import com.bwsw.sj.common.utils.SjTimer
+import com.bwsw.sj.engine.input.task.InputTaskManager
 
 /**
  * Provides methods are responsible for a basic execution logic of task of input module
