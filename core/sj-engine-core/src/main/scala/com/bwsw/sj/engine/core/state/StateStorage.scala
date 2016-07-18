@@ -1,18 +1,18 @@
 package com.bwsw.sj.engine.core.state
 
 /**
- * Сlass representing storage of state of module.
+ * Class representing storage of state of module that can be used only in a stateful module.
  * State can be used to keeping some global module variables related to processing
  * Created: 19/04/2016
  * @author Kseniya Mikhaleva
  *
- * @param stateService Service for state management
+ * @param stateService Service for a state management
  */
 
 class StateStorage(stateService: IStateService) {
 
   /**
-   * Check whether a state variable with specific key exists or not
+   * Check whether a state variable with a specific key exists or not
    * @param key State variable name
    * @return True or false
    */
@@ -21,7 +21,7 @@ class StateStorage(stateService: IStateService) {
   }
 
   /**
-   * Gets a value of the state variable by key
+   * Gets a value of the state variable by the key
    * @param key State variable name
    * @return Value of the state variable
    */
@@ -34,7 +34,7 @@ class StateStorage(stateService: IStateService) {
   }
 
   /**
-   * Puts a value of the state variable by key
+   * Puts a value of the state variable by the key
    * @param key State variable name
    * @param value Value of the state variable
    */
@@ -44,7 +44,7 @@ class StateStorage(stateService: IStateService) {
   }
 
   /**
-   * Delete a state variable by key
+   * Delete a state variable by the key
    * @param key State variable name
    */
   def delete(key: String): Unit = {

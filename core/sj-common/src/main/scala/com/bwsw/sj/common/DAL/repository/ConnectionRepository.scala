@@ -28,7 +28,7 @@ object ConnectionRepository {
   private lazy val mongoClient = new MongoClient(mongoHost, mongoPort)
 
   private lazy val morphia = new Morphia()
-  morphia.map(classOf[SjStream],classOf[Service], classOf[Provider], classOf[ConfigSetting])
+  morphia.map(classOf[SjStream]).map(classOf[Service]).map(classOf[Provider]).map(classOf[ConfigSetting])
 
   private lazy val datastore = morphia.createDatastore(mongoClient, databaseName)
 
@@ -85,9 +85,8 @@ object ConnectionRepository {
   private[DAL] def getGenericDAO[T: ClassTag] = {
     import scala.reflect.classTag
 
-    logger.debug(s"Create a basic DAO of a mongo collection of type: '${Class[T].toString}'")
+    logger.debug(s"Create a basic DAO of a mongo collection of type: '${classTag[T].toString()}'")
     val clazz: Class[T] = classTag[T].runtimeClass.asInstanceOf[Class[T]]
     new BasicDAO[T, String](clazz, datastore)
   }
 }
-

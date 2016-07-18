@@ -7,7 +7,7 @@ import com.aerospike.client.Host
 import com.bwsw.common.tstream.NetworkTimeUUIDGenerator
 import com.bwsw.sj.common.ConfigConstants._
 import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.common.DAL.model.module.InputInstance
+import com.bwsw.sj.common.DAL.model.module.{InputTask, InputInstance}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.StreamConstants._
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
@@ -142,8 +142,12 @@ class InputTaskManager() {
     }
   }
 
+  /**
+   * Fills a task field in input instance with a current task name and entry host + port
+   */
   private def addEntryPointMetadataInInstance() = {
-    instance.tasks
+    instance.tasks.put(taskName, new InputTask(entryHost, entryPort))
+    ConnectionRepository.getInstanceService.save(instance)
   }
 
   /**
