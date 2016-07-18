@@ -19,14 +19,12 @@ import org.slf4j.LoggerFactory
 object InputTaskRunner {
 
   val logger = LoggerFactory.getLogger(this.getClass)
+  val countOfThreads = 2
 
   def main(args: Array[String]) {
 
-    val threadFactory = new ThreadFactoryBuilder()
-      .setNameFormat("InputTaskRunner-%d")
-      .setDaemon(true)
-      .build()
-    val executorService: ExecutorService = Executors.newFixedThreadPool(2, threadFactory)
+    val threadFactory = createThreadFactory()
+    val executorService = Executors.newFixedThreadPool(countOfThreads, threadFactory)
 
     val buffer: ByteBuf = Unpooled.buffer()
 
@@ -42,12 +40,25 @@ object InputTaskRunner {
       inputTaskEngine.runModule(executorService, buffer)
     } catch {
       case exception: Exception => {
-        exception.printStackTrace()
-        executorService.shutdownNow()
-        System.exit(-1)
+        handleExceptionOfExecutorService(exception, executorService)
       }
     }
 
+    logger.info(s"Task: ${manager.taskName}. " +
+      s"Launch input streaming server on: '${manager.entryHost}:${manager.entryPort}'\n")
     new InputStreamingServer(manager.entryHost, manager.entryPort, buffer).run()
+  }
+
+  def createThreadFactory() = {
+    new ThreadFactoryBuilder()
+      .setNameFormat("InputTaskRunner-%d")
+      .setDaemon(true)
+      .build()
+  }
+
+  def handleExceptionOfExecutorService(exception: Exception, executorService: ExecutorService) = {
+    exception.printStackTrace()
+    executorService.shutdownNow()
+    System.exit(-1)
   }
 }
