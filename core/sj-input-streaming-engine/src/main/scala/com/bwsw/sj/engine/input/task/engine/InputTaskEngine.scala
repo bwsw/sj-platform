@@ -1,6 +1,5 @@
 package com.bwsw.sj.engine.input.task.engine
 
-import java.nio.charset.Charset
 import java.util.UUID
 import java.util.concurrent.{ExecutorService, TimeUnit}
 
@@ -194,19 +193,20 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
             val interval = maybeInterval.get
             if (buffer.isReadable(interval.finalValue)) {
               logger.debug(s"Task name: ${manager.taskName}. The end index of interval is valid\n")
-              println("before reading: " + buffer.toString(Charset.forName("UTF-8")) + "_") //todo: only for testing
               logger.debug(s"Task name: ${manager.taskName}. Invoke parse() method of executor\n")
               val inputEnvelope: Option[InputEnvelope] = executor.parse(buffer, interval)
               clearBufferAfterParsing(buffer, interval.finalValue)
-              println("after reading: " + buffer.toString(Charset.forName("UTF-8")) + "_") //todo: only for testing
               val isNotDuplicateOrEmpty = processEnvelope(inputEnvelope)
               envelopeProcessed(inputEnvelope, isNotDuplicateOrEmpty)
               doCheckpoint(moduleEnvironmentManager.isCheckpointInitiated)
-              Thread.sleep(1000) //todo: only for testing
+              //Thread.sleep(1) //todo: only for testing
             } else {
               logger.error(s"Task name: ${manager.taskName}. " +
-                s"Method tokenize() returned end index that an input stream is not defined at\n")
-              throw new IndexOutOfBoundsException("Method tokenize() returned end index that an input stream is not defined at")
+                s"Method tokenize() returned an interval with a final value: ${interval.finalValue} " +
+                s"that an input stream is not defined at (buffer write index: ${buffer.writerIndex()})\n")
+              throw new IndexOutOfBoundsException(s"Task name: ${manager.taskName}. " +
+                s"Method tokenize() returned an interval with a final value: ${interval.finalValue} " +
+                s"that an input stream is not defined at (buffer write index: ${buffer.writerIndex()})")
             }
           }
         }
@@ -278,7 +278,7 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
   protected def clearBufferAfterParsing(buffer: ByteBuf, endIndex: Int) = {
     logger.debug(s"Task name: ${manager.taskName}. " +
       s"Remove a message, which have just been parsed, from input buffer\n")
-    buffer.readerIndex(endIndex)
+    buffer.readerIndex(endIndex + 1)
     buffer.discardReadBytes()
   }
 
