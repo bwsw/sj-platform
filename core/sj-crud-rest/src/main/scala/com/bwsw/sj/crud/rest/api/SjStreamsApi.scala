@@ -9,6 +9,7 @@ import com.bwsw.common.exceptions.BadRecordWithKey
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.StreamConstants
+import com.bwsw.sj.common.ModuleConstants._
 import com.bwsw.sj.crud.rest.entities._
 import com.bwsw.sj.crud.rest.utils.ConvertUtil.streamToStreamData
 import com.bwsw.sj.crud.rest.utils.StreamUtil
@@ -129,7 +130,11 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
           delete {
 
             val instances = instanceDAO.getAll.filter { (inst: Instance) =>
-              inst.inputs.map(_.replaceAll("/split|/full", "")).contains(streamName) || inst.outputs.contains(streamName)
+              if (!inst.moduleType.equals(inputStreamingType)) {
+                inst.inputs.map(_.replaceAll("/split|/full", "")).contains(streamName) || inst.outputs.contains(streamName)
+              } else {
+                inst.outputs.contains(streamName)
+              }
             }
 
             if (instances.isEmpty) {
