@@ -48,14 +48,14 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
           if (errors.isEmpty) {
             stream match {
               case s: TStreamSjStream =>
-                val streamCheckResult = StreamUtil.checkAndCreateTStream(s)
+                val streamCheckResult = StreamUtil.checkAndCreateTStream(s, data.force)
                 streamCheckResult match {
                   case Left(err) => errors += err
                   case _ =>
                 }
               case s: KafkaSjStream =>
                 try {
-                  val streamCheckResult = StreamUtil.checkAndCreateKafkaTopic(s)
+                  val streamCheckResult = StreamUtil.checkAndCreateKafkaTopic(s, data.force)
                   streamCheckResult match {
                     case Left(err) => errors += err
                     case _ =>
@@ -67,13 +67,13 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
                   )
                 }
               case s: ESSjStream =>
-                  val streamCheckResult = StreamUtil.checkAndCreateEsStream(s)
+                  val streamCheckResult = StreamUtil.checkAndCreateEsStream(s, data.force)
                   streamCheckResult match {
                     case Left(err) => errors += err
                     case _ =>
                   }
               case s: JDBCSjStream =>
-                val streamCheckResult = StreamUtil.checkAndCreateJdbcStream(s)
+                val streamCheckResult = StreamUtil.checkAndCreateJdbcStream(s, data.force)
                 streamCheckResult match {
                   case Left(err) => errors += err
                   case _ =>
@@ -137,6 +137,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
 
               var response: ProtocolResponse = null
               if (stream != null) {
+                StreamUtil.deleteStream(stream)
                 streamDAO.delete(streamName)
                 response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
                   messages.getString("rest.streams.stream.deleted"),
