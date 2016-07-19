@@ -21,13 +21,13 @@ import org.everit.json.schema.ValidationException
  * @author Kseniya Tomskikh
  */
 trait SjCrudRouter extends Directives
-with CorsSupport
-with SjModulesApi
-with SjCustomApi
-with SjStreamsApi
-with SjServicesApi
-with SjProvidersApi
-with SjConfigSettingsApi {
+  with CorsSupport
+  with SjModulesApi
+  with SjCustomApi
+  with SjStreamsApi
+  with SjServicesApi
+  with SjProvidersApi
+  with SjConfigSettingsApi {
 
   val exceptionHandler = ExceptionHandler {
     case BadRecord(msg) =>
@@ -87,11 +87,11 @@ with SjConfigSettingsApi {
       corsHandler {
         pathPrefix("v1") {
           modulesApi ~
-            customApi ~
-            streamsApi ~
-            servicesApi ~
-            providersApi ~
-            configSettingsApi
+          customApi ~
+          streamsApi ~
+          servicesApi ~
+          providersApi ~
+          configSettingsApi
         }
       }
     }
