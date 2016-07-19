@@ -64,7 +64,7 @@ object SjCrudRestService extends App with SjCrudRouter {
   val routeLogged = logRequestResult(Logging.InfoLevel, route())
   val logger = Logging(system, getClass)
 
-  putRestSettingsToConfigFile()
+  //putRestSettingsToConfigFile()
 
   val serverBinding: Future[ServerBinding] = Http().bindAndHandle(routeLogged, interface = restHost, port = restPort)
 

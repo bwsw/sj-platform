@@ -1,5 +1,7 @@
 package com.bwsw.sj.crud.rest.api
 
+import java.text.MessageFormat
+
 import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.{Directives, RequestContext}
@@ -59,7 +61,10 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
                     case _ =>
                   }
                 } catch {
-                  case e: TopicExistsException => errors += s"Cannot create kafka topic: ${e.getMessage}"
+                  case e: TopicExistsException => errors += MessageFormat.format(
+                    messages.getString("rest.streams.create.kafka.cannot"),
+                    errors.mkString("\n")
+                  )
                 }
               case s: ESSjStream =>
                   val streamCheckResult = StreamUtil.checkAndCreateEsStream(s)
@@ -77,11 +82,17 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
           }
           if (errors.isEmpty) {
             streamDAO.save(stream)
-            val response = ProtocolResponse(200, Map("message" -> s"Stream '${stream.name}' is created"))
+            val response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+              messages.getString("rest.streams.stream.created"),
+              stream.name
+            )))
             ctx.complete(HttpEntity(`application/json`, serializer.serialize(response)))
           } else {
             throw new BadRecordWithKey(
-              s"Cannot create stream. Errors: ${errors.mkString("\n")}",
+              MessageFormat.format(
+                messages.getString("rest.streams.stream.cannot.create"),
+                errors.mkString("\n")
+              ),
               s"${data.name}"
             )
           }
@@ -93,7 +104,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
             val entity = Map("streams" -> streams.map(s => streamToStreamData(s)))
             response = ProtocolResponse(200, entity)
           } else {
-            response = ProtocolResponse(200, Map("message" -> "No streams found"))
+            response = ProtocolResponse(200, Map("message" -> messages.getString("rest.streams.notfound")))
           }
           complete(HttpEntity(`application/json`, serializer.serialize(response)))
 
@@ -108,7 +119,10 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
               val entity = Map("streams" -> streamToStreamData(stream))
               response = ProtocolResponse(200, entity)
             } else {
-              response = ProtocolResponse(200, Map("message" -> s"Stream '$streamName' not found"))
+              response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+                messages.getString("rest.streams.stream.notfound"),
+                streamName
+              )))
             }
             complete(HttpEntity(`application/json`, serializer.serialize(response)))
           } ~
@@ -124,13 +138,21 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
               var response: ProtocolResponse = null
               if (stream != null) {
                 streamDAO.delete(streamName)
-                response = ProtocolResponse(200, Map("message" -> s"Stream '$streamName' has been deleted"))
+                response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+                  messages.getString("rest.streams.stream.deleted"),
+                  streamName
+                )))
               } else {
-                response = ProtocolResponse(200, Map("message" -> s"Stream '$streamName' not found"))
+                response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+                  messages.getString("rest.streams.stream.notfound"),
+                  streamName
+                )))
               }
               complete(HttpEntity(`application/json`, serializer.serialize(response)))
             } else {
-              throw new BadRecordWithKey(s"Cannot delete stream $streamName. Stream usage in instances", streamName)
+              throw new BadRecordWithKey(MessageFormat.format(
+                messages.getString("rest.streams.stream.cannot.delete"),
+                streamName), streamName)
             }
           }
         }

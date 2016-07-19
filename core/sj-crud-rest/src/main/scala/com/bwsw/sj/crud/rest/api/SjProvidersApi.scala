@@ -1,5 +1,7 @@
 package com.bwsw.sj.crud.rest.api
 
+import java.text.MessageFormat
+
 import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.{Directives, RequestContext}
@@ -35,11 +37,17 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
               data.providerType
             )
             providerDAO.save(provider)
-            val response = ProtocolResponse(200, Map("message" -> s"Provider '${provider.name}' is created"))
+            val response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+              messages.getString("rest.providers.provider.created"),
+              provider.name
+            )))
             ctx.complete(HttpEntity(`application/json`, serializer.serialize(response)))
           } else {
             throw new BadRecordWithKey(
-              s"Cannot create provider. Errors: ${errors.mkString("\n")}",
+              MessageFormat.format(
+                messages.getString("rest.providers.provider.cannot.create"),
+                errors.mkString("\n")
+              ),
               s"${data.name}"
             )
           }
@@ -51,7 +59,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
             val entity = Map("providers" -> providers.map(p => providerToProviderData(p)))
             response = ProtocolResponse(200, entity)
           } else {
-            response = ProtocolResponse(200, Map("message" -> "No providers found"))
+            response = ProtocolResponse(200, Map("message" -> messages.getString("rest.providers.notfound")))
           }
           complete(HttpEntity(`application/json`, serializer.serialize(response)))
         }
@@ -65,7 +73,10 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
               val entity = Map("providers" -> providerToProviderData(provider))
               response = ProtocolResponse(200, entity)
             } else {
-              response = ProtocolResponse(200, Map("message" -> s"Provider '$providerName' not found"))
+              response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+                messages.getString("rest.providers.provider.notfound"),
+                providerName
+              )))
             }
             complete(HttpEntity(`application/json`, serializer.serialize(response)))
           } ~
@@ -93,13 +104,22 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
               var response: ProtocolResponse = null
               if (provider != null) {
                 providerDAO.delete(providerName)
-                response = ProtocolResponse(200, Map("message" -> s"Provider '$providerName' has been deleted"))
+                response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+                  messages.getString("rest.providers.provider.deleted"),
+                  providerName
+                )))
               } else {
-                response = ProtocolResponse(200, Map("message" -> s"Provider '$providerName' not found"))
+                response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+                  messages.getString("rest.providers.provider.notfound"),
+                  providerName
+                )))
               }
               complete(HttpEntity(`application/json`, serializer.serialize(response)))
             } else {
-              throw new BadRecordWithKey(s"Cannot delete provider $providerName. Provider usage in services", providerName)
+              throw new BadRecordWithKey(MessageFormat.format(
+                messages.getString("rest.providers.provider.cannot.delete"),
+                providerName
+              ), providerName)
             }
           }
         } ~
@@ -123,7 +143,9 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
               }
               else {
                 throw new NotFoundException(
-                  s"Provider not found.",
+                  MessageFormat.format(
+                    messages.getString("rest.providers.provider.notfound"),
+                    providerName),
                   providerName
                 )
               }

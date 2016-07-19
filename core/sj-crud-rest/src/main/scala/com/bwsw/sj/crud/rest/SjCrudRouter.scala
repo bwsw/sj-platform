@@ -1,6 +1,7 @@
 package com.bwsw.sj.crud.rest
 
 import java.io.FileNotFoundException
+import java.text.MessageFormat
 
 import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model.StatusCodes._
@@ -56,11 +57,11 @@ with SjConfigSettingsApi {
       ))
     case ex: ValidationException =>
       complete(HttpResponse(
-        entity = HttpEntity(`application/json`, serializer.serialize(ProtocolResponse(500, Map("message" -> "Specification.json is invalid"))))
+        entity = HttpEntity(`application/json`, serializer.serialize(ProtocolResponse(500, Map("message" -> messages.getString("rest.errors.invalid.specification")))))
       ))
     case ex: EntityStreamSizeException =>
       complete(HttpResponse(
-        entity = HttpEntity(`application/json`, serializer.serialize(ProtocolResponse(500, Map("message" -> "File is very large"))))
+        entity = HttpEntity(`application/json`, serializer.serialize(ProtocolResponse(500, Map("message" -> messages.getString("rest.errors.large_file")))))
       ))
     case ex: FileNotFoundException =>
       complete(HttpResponse(
@@ -70,12 +71,14 @@ with SjConfigSettingsApi {
     case ex: UnrecognizedPropertyException =>
       complete(HttpResponse(
         BadRequest,
-        entity = HttpEntity(`application/json`, serializer.serialize(ProtocolResponse(500, Map("message" -> s"Unknown property '${ex.getPropertyName}' for the data provided in the request. ${ex.getKnownPropertyIds} are expected."))))
+        entity = HttpEntity(`application/json`, serializer.serialize(ProtocolResponse(500, Map("message" -> MessageFormat.format(
+          messages.getString("rest.errors.unrecognized_property"), ex.getPropertyName, ex.getKnownPropertyIds)))))
       ))
     case ex: Exception =>
       complete(HttpResponse(
         InternalServerError,
-        entity = HttpEntity(`application/json`, serializer.serialize(ProtocolResponse(500, Map("message" -> s"Internal server error: ${ex.getMessage}"))))
+        entity = HttpEntity(`application/json`, serializer.serialize(ProtocolResponse(500, Map("message" -> MessageFormat.format(
+          messages.getString("rest.errors.internal_server_error"), ex.getMessage)))))
       ))
   }
 
