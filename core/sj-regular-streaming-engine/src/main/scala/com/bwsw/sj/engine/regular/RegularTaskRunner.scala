@@ -14,6 +14,7 @@ import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelop
 import com.bwsw.sj.engine.core.environment.{ModuleEnvironmentManager, ModuleOutput, StatefulModuleEnvironmentManager}
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.state.{RAMStateService, StateStorage}
+import com.bwsw.sj.engine.regular.subscriber.RegularConsumerCallback
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.consumer.Offsets.{DateTime, IOffset, Newest, Oldest}
@@ -549,8 +550,9 @@ object RegularTaskRunner {
 
     if (inputs.exists(x => x._1.streamType == StreamConstants.tStream)) {
       logger.debug(s"Task: ${manager.taskName}. Start creating subscribing consumers\n")
+      val callback = new RegularConsumerCallback[Array[Byte], Array[Byte]](blockingQueue)
       consumersWithSubscribes = Some(inputs.filter(x => x._1.streamType == StreamConstants.tStream).map({
-        x => manager.createSubscribingConsumer(x._1, x._2.toList, chooseOffset(offset), blockingQueue)
+        x => manager.createSubscribingConsumer(x._1, x._2.toList, chooseOffset(offset), callback)
       }).map(x => (x.name, x)).toMap)
       logger.debug(s"Task: ${manager.taskName}. Creation of subscribing consumers is finished\n")
 

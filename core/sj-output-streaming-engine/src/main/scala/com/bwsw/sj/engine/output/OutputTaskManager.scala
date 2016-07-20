@@ -8,8 +8,11 @@ import com.bwsw.common.tstream.NetworkTimeUUIDGenerator
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.ModuleConstants._
+import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
 import com.bwsw.sj.engine.core.entities.OutputEntity
+import com.bwsw.sj.engine.core.environment.EnvironmentManager
+import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
 import com.bwsw.sj.engine.core.utils.EngineUtils
 import com.bwsw.sj.engine.output.subscriber.OutputSubscriberCallback
@@ -36,157 +39,46 @@ import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
  *
  * @author Kseniya Tomskikh
  */
-class OutputTaskManager(taskName: String, instance: OutputInstance) {
-  private val logger: Logger = LoggerFactory.getLogger(getClass)
+class OutputTaskManager() extends TaskManager {
 
   val task: mutable.Map[String, Array[Int]] = instance.executionPlan.tasks.get(taskName).inputs.asScala
 
-  private val converter = new ArrayByteConverter
 
   /**
-   * Creates a t-stream consumer with pub/sub property
-   *
-   * @param stream SjStream from which massages are consumed
-   * @param partitions Range of stream partition
-   * @param offset Offset policy that describes where a consumer starts
-   * @param queue Queue which keeps consumed messages
-   * @return T-stream subscribing consumer
-   */
-  def createSubscribingConsumer(stream: SjStream,
-                                partitions: List[Int],
-                                offset: IOffset,
-                                queue: ArrayBlockingQueue[String]) = {
-    logger.info(s"Creating subscribe consumer for stream: ${stream.name} of instance: ${instance.name}.")
-    val service = stream.service.asInstanceOf[TStreamService]
-    val dataStorage: IStorage[Array[Byte]] = OutputDataFactory.createDataStorage()
-    val metadataStorage = OutputDataFactory.metadataStorage
+    * Returns an instance of executor of module
+    *
+    * @return An instance of executor of module
+    */
+  def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = ???
 
-    val zkHosts = service.lockProvider.hosts.map { s =>
-      val parts = s.split(":")
-      new InetSocketAddress(parts(0), parts(1).toInt)
-    }.toList
+  /**
+    * Returns instance of executor of module
+    *
+    * @return An instance of executor of module
+    */
+  def getExecutor: StreamingExecutor = {
+    logger.debug(s"Task: $taskName. Start loading of executor class from module jar\n")
+    val moduleJar = getModuleJar
+    val classLoader = getClassLoader(moduleJar.getAbsolutePath)
 
-    val agentPort: Int = OutputDataFactory.agentsPorts.head.toInt
+    logger.debug(s"Task: $taskName. Create instance of executor class\n")
+    val executor = classLoader
+      .loadClass(fileMetadata.specification.executorClass)
+      .newInstance()
+      .asInstanceOf[OutputStreamingHandler]
 
-    val agentAddress = OutputDataFactory.agentHost + ":" + agentPort.toString
-
-    val coordinatorSettings = new SubscriberCoordinationOptions(
-      agentAddress,
-      s"/${service.lockNamespace}",
-      zkHosts,
-      OutputDataFactory.zkSessionTimeout,
-      OutputDataFactory.zkConnectionTimeout
-    )
-
-    val basicStream = BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
-
-    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (partitions.head to partitions.tail.head).toList)
-
-    val timeUuidGenerator: IUUIDGenerator = EngineUtils.getUUIDGenerator(stream.asInstanceOf[TStreamSjStream])
-
-    val callback = new OutputSubscriberCallback(queue)
-
-    val options = new BasicConsumerOptions[Array[Byte], Array[Byte]](
-      OutputDataFactory.txnPreload,
-      OutputDataFactory.dataPreload,
-      OutputDataFactory.consumerKeepAliveInterval,
-      converter,
-      roundRobinPolicy,
-      offset,
-      timeUuidGenerator,
-      useLastOffset = true)
-
-    new BasicSubscribingConsumer[Array[Byte], Array[Byte]](
-      s"consumer-$taskName-${stream.name}",
-      basicStream,
-      options,
-      coordinatorSettings,
-      callback,
-      persistentQueuePath
-    )
+    executor
   }
 
   /**
-   * Creates a t-stream producer for recording messages
-   *
-   * @param stream SjStream to which messages are written
-   * @return Basic t-stream producer
-   */
-  def createProducer(stream: SjStream) = {
-    logger.debug(s"Instance name: ${instance.name}, task name: $taskName. " +
-      s"Create basic producer for stream: ${stream.name}\n")
-    val dataStorage: IStorage[Array[Byte]] = OutputDataFactory.createDataStorage()
-    val service = stream.service.asInstanceOf[TStreamService]
-
-    val coordinationOptions = new ProducerCoordinationOptions(
-      agentAddress = OutputDataFactory.agentHost + ":" + OutputDataFactory.agentsPorts(1), //todo: number of agent port
-      OutputDataFactory.zkHosts,
-      "/" + service.lockNamespace,
-      OutputDataFactory.zkSessionTimeout,
-      isLowPriorityToBeMaster = false,
-      transport = new TcpTransport,
-      transportTimeout = OutputDataFactory.transportTimeout,
-      zkConnectionTimeout = OutputDataFactory.zkConnectionTimeout
-    )
-
-    val basicStream: BasicStream[Array[Byte]] =
-      BasicStreamService.loadStream(stream.name, OutputDataFactory.metadataStorage, dataStorage)
-
-    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
-
-    val timeUuidGenerator =
-      stream.asInstanceOf[TStreamSjStream].generator.generatorType match {
-        case "local" => new LocalTimeUUIDGenerator
-        case _type =>
-          val service = stream.asInstanceOf[TStreamSjStream].generator.service.asInstanceOf[ZKService]
-          val zkServers = service.provider.hosts
-          val prefix = "/" + service.namespace + "/" + {
-            if (_type == "global") _type else basicStream.name
-          }
-
-          new NetworkTimeUUIDGenerator(zkServers, prefix, OutputDataFactory.retryPeriod, OutputDataFactory.retryCount)
-      }
-
-    val options = new BasicProducerOptions[Array[Byte], Array[Byte]](
-      OutputDataFactory.txnTTL,
-      OutputDataFactory.txnKeepAliveInterval,
-      OutputDataFactory.producerKeepAliveInterval,
-      roundRobinPolicy,
-      SingleElementInsert,
-      timeUuidGenerator,
-      coordinationOptions,
-      converter)
-
-    new BasicProducer[Array[Byte], Array[Byte]](
-      "producer for " + taskName + "_" + stream.name,
-      basicStream,
-      options
-    )
-  }
-
-  /**
-   * Getting instance of handler object from module jar
-   *
-   * @param file Jar of module
-   * @param handlerClassName Classname of handler class of module
-   * @return Handler instance from jar
-   */
-  def getModuleHandler(file: File, handlerClassName: String) = {
-    logger.info(s"Getting handler object from jar of file: ${instance.moduleType}-${instance.moduleName}-${instance.moduleVersion}")
-    val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
-    val clazz = loader.loadClass(handlerClassName)
-    clazz.newInstance().asInstanceOf[OutputStreamingHandler]
-  }
-
-  /**
-   * Getting instance of entity object from output module jar
-   *
-   * @param file Jar of module
-   * @param entityClassName Classname of entity class of module
-   * @return Entity instance from jar
-   */
+    * Getting instance of entity object from output module jar
+    *
+    * @param file Jar of module
+    * @param entityClassName Classname of entity class of module
+    * @return Entity instance from jar
+    */
   def getOutputModuleEntity(file: File, entityClassName: String) = {
-    logger.info(s"Getting entity object from jar of file: ${instance.moduleType}-${instance.moduleName}-${instance.moduleVersion}")
+    logger.info(s"Task: $taskName. Getting entity object from jar of file: ${instance.moduleType}-${instance.moduleName}-${instance.moduleVersion}")
     val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
     val clazz = loader.loadClass(entityClassName)
     clazz.newInstance().asInstanceOf[OutputEntity]

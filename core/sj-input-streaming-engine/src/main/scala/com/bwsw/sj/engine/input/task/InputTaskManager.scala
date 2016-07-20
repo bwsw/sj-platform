@@ -2,6 +2,7 @@ package com.bwsw.sj.engine.input.task
 
 import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.engine.core.environment.{EnvironmentManager, InputEnvironmentManager}
 import com.bwsw.sj.engine.core.input.InputStreamingExecutor
 import com.bwsw.sj.engine.core.managment.TaskManager
@@ -32,7 +33,8 @@ class InputTaskManager() extends TaskManager {
 
   /**
    * Returns a keys storage (Hazelcast map) for checking of there are duplicates (input envelopes) or not
-   * @return Storage of keys (Hazelcast map)
+    *
+    * @return Storage of keys (Hazelcast map)
    */
   def getUniqueEnvelopes = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
@@ -50,7 +52,8 @@ class InputTaskManager() extends TaskManager {
 
   /**
    * Creates a Hazelcast map configuration
-   * @return Hazelcast map configuration
+    *
+    * @return Hazelcast map configuration
    */
   private def createHazelcastConfig() = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Create a Hazelcast map configuration is named '$hazelcastMapName'\n")
@@ -68,7 +71,8 @@ class InputTaskManager() extends TaskManager {
 
   /**
    * Creates an eviction policy for Hazelcast map configuration
-   * @return Eviction policy
+    *
+    * @return Eviction policy
    */
   private def createEvictionPolicy() = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Create EvictionPolicy\n")
@@ -81,7 +85,8 @@ class InputTaskManager() extends TaskManager {
 
   /**
    * Creates a config that defines a max size of Hazelcast map
-   * @return Max size configuration
+    *
+    * @return Max size configuration
    */
   private def createMaxSizeConfig() = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Create MaxSizeConfig\n")
@@ -105,4 +110,11 @@ class InputTaskManager() extends TaskManager {
 
     executor
   }
+
+  /**
+    * Returns an instance of executor of module
+    *
+    * @return An instance of executor of module
+    */
+  def getExecutor: StreamingExecutor = ???
 }

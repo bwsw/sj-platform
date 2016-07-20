@@ -16,6 +16,7 @@ import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
 import com.bwsw.sj.engine.core.reporting.OutputStreamingPerformanceMetrics
 import com.bwsw.sj.engine.core.utils.EngineUtils._
+import com.bwsw.sj.engine.output.subscriber.OutputSubscriberCallback
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.producer.{BasicProducerTransaction, ProducerPolicies}
 import com.datastax.driver.core.utils.UUIDs
@@ -42,7 +43,7 @@ object OutputTaskRunner {
   def main(args: Array[String]) = {
 
     val instance: OutputInstance = OutputDataFactory.instance
-    val taskManager: OutputTaskManager = new OutputTaskManager(OutputDataFactory.taskName, instance)
+    val taskManager: OutputTaskManager = new OutputTaskManager()
     logger.info(s"Task: ${OutputDataFactory.taskName}. Start preparing of task runner for output module.")
 
     val inputStream: SjStream = OutputDataFactory.inputStream
@@ -52,18 +53,21 @@ object OutputTaskRunner {
     val blockingQueue: ArrayBlockingQueue[String] = new ArrayBlockingQueue[String](1000)
 
     logger.debug(s"Task: ${OutputDataFactory.taskName}. Start creating subscribing consumer.")
+
+    val callback = new OutputSubscriberCallback(blockingQueue)
+
     val subscribeConsumer = taskManager.createSubscribingConsumer(
       inputStream,
       taskPartitions.toList,
       chooseOffset(instance.startFrom),
-      blockingQueue
+      callback
     )
     logger.debug(s"Task: ${OutputDataFactory.taskName}. Creation of subscribing consumer is finished.")
 
     logger.debug(s"Task: ${OutputDataFactory.taskName}. Start loading of executor (handler) class from module jar.")
     val moduleJar: File = OutputDataFactory.getModuleJar
     val moduleMetadata: FileMetadata = OutputDataFactory.getFileMetadata
-    val handler: OutputStreamingHandler = taskManager.getModuleHandler(moduleJar, moduleMetadata.specification.executorClass)
+    val handler: OutputStreamingHandler = taskManager.getExecutor.asInstanceOf[OutputStreamingHandler]
 
     val entity: OutputEntity = taskManager.getOutputModuleEntity(moduleJar, moduleMetadata.specification.entityClass)
 
@@ -81,6 +85,13 @@ object OutputTaskRunner {
        * @return An instance of executor of module
        */
       override def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = ???
+
+      /**
+        * Returns an instance of executor of module
+        *
+        * @return An instance of executor of module
+        */
+      override def getExecutor: StreamingExecutor = ???
     })
 //      OutputDataFactory.taskName,
 //      OutputDataFactory.agentHost,

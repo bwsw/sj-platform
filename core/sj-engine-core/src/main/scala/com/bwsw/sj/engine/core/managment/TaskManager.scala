@@ -9,17 +9,22 @@ import com.bwsw.sj.common.ConfigConstants._
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.ModuleConstants._
 import com.bwsw.sj.common.StreamConstants._
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
 import com.bwsw.sj.engine.core.environment.EnvironmentManager
+import com.bwsw.sj.engine.core.utils.EngineUtils
+import com.bwsw.tstreams.agents.consumer.Offsets.IOffset
+import com.bwsw.tstreams.agents.consumer.subscriber.{BasicSubscriberCallback, BasicSubscribingConsumer}
+import com.bwsw.tstreams.agents.consumer.{BasicConsumerOptions, SubscriberCoordinationOptions}
 import com.bwsw.tstreams.agents.producer.InsertionType.SingleElementInsert
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions, ProducerCoordinationOptions}
 import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
 import com.bwsw.tstreams.data.IStorage
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStorageOptions}
 import com.bwsw.tstreams.data.cassandra.{CassandraStorageFactory, CassandraStorageOptions}
-import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
+import com.bwsw.tstreams.generator.{IUUIDGenerator, LocalTimeUUIDGenerator}
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.policy.RoundRobinPolicy
 import com.bwsw.tstreams.services.BasicStreamService
@@ -43,8 +48,11 @@ abstract class TaskManager() {
   protected val configService = ConnectionRepository.getConfigService
   private val transportTimeout = configService.get(transportTimeoutTag).value.toInt
   private val txnTTL = configService.get(txnTTLTag).value.toInt
+  private val txnPreload = configService.get(txnPreloadTag).value.toInt
+  private val dataPreload = configService.get(dataPreloadTag).value.toInt
   private val txnKeepAliveInterval = configService.get(txnKeepAliveIntervalTag).value.toInt
   private val producerKeepAliveInterval = configService.get(producerKeepAliveIntervalTag).value.toInt
+  private val consumerKeepAliveInterval = configService.get(consumerKeepAliveInternalTag).value.toInt
   private val streamTTL = configService.get(streamTTLTag).value.toInt
   protected val retryPeriod = configService.get(tgClientRetryPeriodTag).value.toInt
   protected val retryCount = configService.get(tgRetryCountTag).value.toInt
@@ -166,18 +174,7 @@ abstract class TaskManager() {
 
     val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
 
-    val timeUuidGenerator =
-      stream.asInstanceOf[TStreamSjStream].generator.generatorType match {
-        case "local" => new LocalTimeUUIDGenerator
-        case _type =>
-          val service = stream.asInstanceOf[TStreamSjStream].generator.service.asInstanceOf[ZKService]
-          val zkServers = service.provider.hosts
-          val prefix = "/" + service.namespace + "/" + {
-            if (_type == "global") _type else basicStream.name
-          }
-
-          new NetworkTimeUUIDGenerator(zkServers, prefix, retryPeriod, retryCount)
-      }
+    val timeUuidGenerator = EngineUtils.getUUIDGenerator(stream.asInstanceOf[TStreamSjStream])
 
     val options = new BasicProducerOptions[Array[Byte], Array[Byte]](
       txnTTL,
@@ -197,8 +194,71 @@ abstract class TaskManager() {
   }
 
   /**
+    * Creates a t-stream consumer with pub/sub property
+    *
+    * @param stream SjStream from which massages are consumed
+    * @param partitions Range of stream partition
+    * @param offset Offset policy that describes where a consumer starts
+    * @param callback Subscriber callback for t-stream consumer
+    * @return T-stream subscribing consumer
+    */
+  def createSubscribingConsumer(stream: SjStream,
+                                partitions: List[Int],
+                                offset: IOffset,
+                                callback: BasicSubscriberCallback[Array[Byte], Array[Byte]]) = {
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
+      s"Create subscribing consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
+    val service = stream.service.asInstanceOf[TStreamService]
+    val dataStorage: IStorage[Array[Byte]] = createDataStorage()
+
+    val zkHosts = service.lockProvider.hosts.map { s =>
+      val parts = s.split(":")
+      new InetSocketAddress(parts(0), parts(1).toInt)
+    }.toList
+
+    val agentPort: Int = agentsPorts.head.toInt
+
+    val agentAddress = agentsHost + ":" + agentPort.toString
+
+    val coordinatorSettings = new SubscriberCoordinationOptions(
+      agentAddress,
+      s"/${service.lockNamespace}",
+      zkHosts,
+      zkSessionTimeout,
+      zkConnectionTimeout
+    )
+
+    val basicStream = BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
+
+    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (partitions.head to partitions.tail.head).toList)
+
+    val timeUuidGenerator: IUUIDGenerator = EngineUtils.getUUIDGenerator(stream.asInstanceOf[TStreamSjStream])
+
+
+    val options = new BasicConsumerOptions[Array[Byte], Array[Byte]](
+      txnPreload,
+      dataPreload,
+      consumerKeepAliveInterval,
+      converter,
+      roundRobinPolicy,
+      offset,
+      timeUuidGenerator,
+      useLastOffset = true)
+
+    new BasicSubscribingConsumer[Array[Byte], Array[Byte]](
+      s"consumer-$taskName-${stream.name}",
+      basicStream,
+      options,
+      coordinatorSettings,
+      callback,
+      persistentQueuePath
+    )
+  }
+
+  /**
    * Create t-stream producers for each output stream
-   * @return Map where key is stream name and value is t-stream producer
+    *
+    * @return Map where key is stream name and value is t-stream producer
    */
   def createOutputProducers = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
@@ -282,6 +342,13 @@ abstract class TaskManager() {
    * @return An instance of executor of module
    */
   def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor
+
+  /**
+    * Returns an instance of executor of module
+    *
+    * @return An instance of executor of module
+    */
+  def getExecutor: StreamingExecutor
 
   //todo to make all common of managers of tasks to here
 }

@@ -74,6 +74,14 @@ class RegularTaskManager() extends TaskManager {
     executor
   }
 
+
+  /**
+    * Returns an instance of executor of module
+    *
+    * @return An instance of executor of module
+    */
+  def getExecutor: StreamingExecutor = ???
+
   /**
    * Returns tags for each output stream
    *
@@ -142,69 +150,6 @@ class RegularTaskManager() extends TaskManager {
     }
 
     consumer
-  }
-
-  /**
-   * Creates a t-stream consumer with pub/sub property
-   *
-   * @param stream SjStream from which massages are consumed
-   * @param partitions Range of stream partition
-   * @param offset Offset policy that describes where a consumer starts
-   * @param queue Queue which keeps consumed messages
-   * @return T-stream subscribing consumer
-   */
-  def createSubscribingConsumer(stream: SjStream, partitions: List[Int], offset: IOffset, queue: PersistentBlockingQueue) = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-      s"Create subscribing consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
-    val dataStorage: IStorage[Array[Byte]] = createDataStorage()
-
-    val coordinatorSettings = new SubscriberCoordinationOptions(
-      agentsHost + ":" + agentsPorts(currentPortNumber),
-      service.lockNamespace,
-      zkHosts,
-      zkSessionTimeout,
-      zkConnectionTimeout
-    )
-    currentPortNumber += 1
-
-    val basicStream: BasicStream[Array[Byte]] =
-      BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
-
-    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (partitions.head to partitions.tail.head).toList)
-
-    val timeUuidGenerator =
-      stream.asInstanceOf[TStreamSjStream].generator.generatorType match {
-        case "local" => new LocalTimeUUIDGenerator
-        case _type =>
-          val service = stream.asInstanceOf[TStreamSjStream].generator.service.asInstanceOf[ZKService]
-          val zkHosts = service.provider.hosts
-          val prefix = "/" + service.namespace + "/" + {
-            if (_type == "global") _type else stream.name
-          }
-
-          new NetworkTimeUUIDGenerator(zkHosts, prefix, retryPeriod, retryCount)
-      }
-
-    val options = new BasicConsumerOptions[Array[Byte], Array[Byte]](
-      txnPreload,
-      dataPreload,
-      consumerKeepAliveInterval,
-      converter,
-      roundRobinPolicy,
-      offset,
-      timeUuidGenerator,
-      useLastOffset = true)
-
-    val callback = new RegularConsumerCallback[Array[Byte], Array[Byte]](queue)
-
-    new BasicSubscribingConsumer[Array[Byte], Array[Byte]](
-      "consumer_for_" + taskName + "_" + stream.name,
-      basicStream,
-      options,
-      coordinatorSettings,
-      callback,
-      persistentQueuePath
-    )
   }
 
   /**
