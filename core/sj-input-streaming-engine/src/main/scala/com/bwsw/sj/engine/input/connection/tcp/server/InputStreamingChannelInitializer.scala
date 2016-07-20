@@ -12,11 +12,12 @@ import io.netty.handler.logging.{LogLevel, LoggingHandler}
  */
 class InputStreamingChannelInitializer(buffer: ByteBuf) extends ChannelInitializer[SocketChannel] {
 
+
+
   def initChannel(channel: SocketChannel) = {
     val pipeline = channel.pipeline()
 
     pipeline.addLast("logger", new LoggingHandler(LogLevel.WARN))
     pipeline.addLast("handler", new InputStreamingServerHandler(buffer))
-
   }
 }

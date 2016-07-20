@@ -18,15 +18,17 @@ import io.netty.handler.logging.{LogLevel, LoggingHandler}
  */
 class InputStreamingServer(host: String, port: Int, buffer: ByteBuf) {
 
+  protected val inputStreamingChannelInitializer = new InputStreamingChannelInitializer(buffer)
+  
   def run() = {
-    val bossGroup: EventLoopGroup = new NioEventLoopGroup(1)
+    val bossGroup: EventLoopGroup = new NioEventLoopGroup()
     val workerGroup = new NioEventLoopGroup()
     try {
       val bootstrapServer = new ServerBootstrap()
       bootstrapServer.group(bossGroup, workerGroup)
         .channel(classOf[NioServerSocketChannel])
         .handler(new LoggingHandler(LogLevel.INFO))
-        .childHandler(new InputStreamingChannelInitializer(buffer))
+        .childHandler(inputStreamingChannelInitializer)
 
       bootstrapServer.bind(host, port).sync().channel().closeFuture().sync()
     } finally {

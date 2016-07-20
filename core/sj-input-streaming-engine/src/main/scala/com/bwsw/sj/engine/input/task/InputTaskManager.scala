@@ -17,7 +17,6 @@ import com.hazelcast.core.Hazelcast
  */
 class InputTaskManager() extends TaskManager {
 
-  val entryHost = System.getenv("ENTRY_HOST")
   val entryPort = System.getenv("ENTRY_PORT").toInt
   val inputInstance = instance.asInstanceOf[InputInstance]
 
@@ -46,7 +45,7 @@ class InputTaskManager() extends TaskManager {
    * Fills a task field in input instance with a current task name and entry host + port
    */
   private def addEntryPointMetadataInInstance() = {
-    inputInstance.tasks.put(taskName, new InputTask(entryHost, entryPort))
+    inputInstance.tasks.put(taskName, new InputTask(agentsHost, entryPort))
     ConnectionRepository.getInstanceService.save(instance)
   }
 

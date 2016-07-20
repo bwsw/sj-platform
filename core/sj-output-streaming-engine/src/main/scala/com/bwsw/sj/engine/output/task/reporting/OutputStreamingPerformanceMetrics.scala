@@ -1,8 +1,9 @@
-package com.bwsw.sj.engine.core.reporting
+package com.bwsw.sj.engine.output.task.reporting
 
 import java.util.Calendar
 
-import com.bwsw.sj.engine.core.managment.TaskManager
+import com.bwsw.sj.engine.core.reporting.{PerformanceMetrics, PerformanceMetricsMetadata}
+import com.bwsw.sj.engine.output.task.OutputTaskManager
 
 import scala.collection.mutable
 
@@ -12,7 +13,7 @@ import scala.collection.mutable
  * @author Kseniya Mikhaleva
  */
 
-class OutputStreamingPerformanceMetrics(manager: TaskManager)
+class OutputStreamingPerformanceMetrics(manager: OutputTaskManager)
   extends PerformanceMetrics(manager) {
 
   private val inputStreamNames = instance.inputs

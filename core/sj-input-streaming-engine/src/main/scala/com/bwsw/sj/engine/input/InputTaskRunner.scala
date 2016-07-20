@@ -49,8 +49,8 @@ object InputTaskRunner {
     }
 
     logger.info(s"Task: ${manager.taskName}. " +
-      s"Launch input streaming server on: '${manager.entryHost}:${manager.entryPort}'\n")
-    new InputStreamingServer(manager.entryHost, manager.entryPort, buffer).run()
+      s"Launch input streaming server on: '${manager.agentsHost}:${manager.entryPort}'\n")
+    new InputStreamingServer(manager.agentsHost, manager.entryPort, buffer).run()
   }
 
   def createThreadFactory() = {

@@ -36,6 +36,5 @@ class PerformanceMetricsMetadata {
   @JsonProperty("input-stream-name") var inputStreamName: String = null
   @JsonProperty("output-stream-name") var outputStreamName:  String = null
 
-  @JsonProperty("entry-point-host") var entryPointHost: String = null
   @JsonProperty("entry-point-port") var entryPointPort: Int = 0
 }

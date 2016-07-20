@@ -1,6 +1,7 @@
 package com.bwsw.sj.engine.input.connection.tcp.server
 
 import io.netty.buffer.ByteBuf
+import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
 
 /**
@@ -10,15 +11,15 @@ import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
  * @param buffer An auxiliary buffer for keeping incoming bytes
  */
 
+@Sharable
 class InputStreamingServerHandler(buffer: ByteBuf) extends ChannelInboundHandlerAdapter {
 
   override def channelRead(ctx: ChannelHandlerContext, msg: Any) = {
     val message = msg.asInstanceOf[ByteBuf]
-    println(message.toString(io.netty.util.CharsetUtil.US_ASCII))
     val copy = message.copy()
     buffer.writeBytes(copy)
+     //after that the msg is empty
     ctx.write(message)
-    //after that the msg is empty
   }
 
   override def channelReadComplete(ctx: ChannelHandlerContext) {

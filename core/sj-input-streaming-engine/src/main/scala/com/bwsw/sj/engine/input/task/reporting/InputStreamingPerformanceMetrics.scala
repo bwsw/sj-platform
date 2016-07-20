@@ -17,7 +17,7 @@ class InputStreamingPerformanceMetrics(manager: InputTaskManager)
   extends PerformanceMetrics(manager) {
 
   private val performanceReport = new PerformanceMetricsMetadata()
-  private val inputStreamName = manager.entryHost + ":" + manager.entryPort
+  private val inputStreamName = manager.agentsHost + ":" + manager.entryPort
   private val outputStreamNames = instance.outputs
 
   override protected var inputEnvelopesPerStream = createStorageForInputEnvelopes(Array(inputStreamName))
@@ -51,8 +51,7 @@ class InputStreamingPerformanceMetrics(manager: InputTaskManager)
 
     performanceReport.pmDatetime = Calendar.getInstance().getTime
     performanceReport.taskId = taskName
-    performanceReport.host = manager.agentsHost //todo check it
-    performanceReport.entryPointHost = manager.entryHost //todo check it
+    performanceReport.host = manager.agentsHost
     performanceReport.entryPointPort = manager.entryPort
     performanceReport.totalInputEnvelopes = inputEnvelopesTotalNumber
     performanceReport.totalInputElements = inputElementsTotalNumber
