@@ -34,6 +34,8 @@ import org.slf4j.LoggerFactory
 abstract class TaskManager() {
   protected val logger = LoggerFactory.getLogger(this.getClass)
 
+  val streamDAO = ConnectionRepository.getStreamService
+
   val instanceName = System.getenv("INSTANCE_NAME")
   val agentsHost = System.getenv("AGENTS_HOST")
   protected val agentsPorts = System.getenv("AGENTS_PORTS").split(",")
@@ -58,12 +60,14 @@ abstract class TaskManager() {
   protected val retryCount = configService.get(tgRetryCountTag).value.toInt
   protected val zkSessionTimeout = configService.get(zkSessionTimeoutTag).value.toInt
   protected val zkConnectionTimeout = configService.get(zkConnectionTimeoutTag).value.toInt
+
   /**
    * An auxiliary service to retrieve settings of TStream providers
    */
-  protected val service = ConnectionRepository.getStreamService.get(instance.outputs.head).service.asInstanceOf[TStreamService]
+  val tSjStream = instance.outputs.union(instance.inputs).map(s => streamDAO.get(s)).filter(s => s.streamType.equals(tStream)).head
+  protected val tStreamService = tSjStream.service.asInstanceOf[TStreamService]
 
-  protected val zkHosts = service.lockProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList
+  protected val zkHosts = tStreamService.lockProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList
 
   protected val fileMetadata: FileMetadata = ConnectionRepository.getFileMetadataService.getByParameters(
     Map("specification.name" -> instance.moduleName,
@@ -86,35 +90,35 @@ abstract class TaskManager() {
    */
   private def createMetadataStorage() = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Create metadata storage " +
-      s"(namespace: ${service.metadataNamespace}, hosts: ${service.metadataProvider.hosts.mkString(",")}) " +
+      s"(namespace: ${tStreamService.metadataNamespace}, hosts: ${tStreamService.metadataProvider.hosts.mkString(",")}) " +
       s"for producer/consumer settings\n")
-    val hosts = service.metadataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList
+    val hosts = tStreamService.metadataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList
     (new MetadataStorageFactory).getInstance(
       cassandraHosts = hosts,
-      keyspace = service.metadataNamespace)
+      keyspace = tStreamService.metadataNamespace)
   }
 
   /**
    * Creates data storage for producer/consumer settings
    */
   protected def createDataStorage() = {
-    service.dataProvider.providerType match {
+    tStreamService.dataProvider.providerType match {
       case "aerospike" =>
         logger.debug(s"Instance name: $instanceName, task name: $taskName. Create aerospike data storage " +
-          s"(namespace: ${service.dataNamespace}, hosts: ${service.dataProvider.hosts.mkString(",")}) " +
+          s"(namespace: ${tStreamService.dataNamespace}, hosts: ${tStreamService.dataProvider.hosts.mkString(",")}) " +
           s"for producer/consumer settings\n")
         val options = new AerospikeStorageOptions(
-          service.dataNamespace,
-          service.dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toList)
+          tStreamService.dataNamespace,
+          tStreamService.dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toList)
         (new AerospikeStorageFactory).getInstance(options)
 
       case _ =>
         logger.debug(s"Instance name: $instanceName, task name: $taskName. Create cassandra data storage " +
-          s"(namespace: ${service.dataNamespace}, hosts: ${service.dataProvider.hosts.mkString(",")}) " +
+          s"(namespace: ${tStreamService.dataNamespace}, hosts: ${tStreamService.dataProvider.hosts.mkString(",")}) " +
           s"for producer/consumer settings\n")
         val options = new CassandraStorageOptions(
-          service.dataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList,
-          service.dataNamespace
+          tStreamService.dataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList,
+          tStreamService.dataNamespace
         )
 
         (new CassandraStorageFactory).getInstance(options)
@@ -160,7 +164,7 @@ abstract class TaskManager() {
     val coordinationOptions = new ProducerCoordinationOptions(
       agentAddress = agentsHost + ":" + agentsPorts(currentPortNumber),
       zkHosts,
-      "/" + service.lockNamespace,
+      "/" + tStreamService.lockNamespace,
       zkSessionTimeout,
       isLowPriorityToBeMaster = false,
       transport = new TcpTransport,
@@ -319,7 +323,7 @@ abstract class TaskManager() {
       stream.getName,
       stream.getDescriptions,
       stream.getPartitions,
-      service,
+      tStreamService,
       tStream,
       tags,
       new Generator("local")

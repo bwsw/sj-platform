@@ -22,7 +22,6 @@ class OutputTaskManager() extends TaskManager {
 
   val task: mutable.Map[String, Array[Int]] = instance.executionPlan.tasks.get(taskName).inputs.asScala
 
-
   /**
     * Returns an instance of executor of module
     *
