@@ -1,4 +1,4 @@
-package com.bwsw.sj.common.module.reporting
+package com.bwsw.sj.engine.core.reporting
 
 import java.util.Date
 

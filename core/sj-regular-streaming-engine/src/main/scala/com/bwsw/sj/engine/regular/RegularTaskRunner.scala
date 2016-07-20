@@ -7,13 +7,15 @@ import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.DAL.model.{KafkaService, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.module.reporting.RegularStreamingPerformanceMetrics
 import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.sj.common.{ModuleConstants, StreamConstants}
 import com.bwsw.sj.engine.core.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.{ModuleEnvironmentManager, ModuleOutput, StatefulModuleEnvironmentManager}
+import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.state.{RAMStateService, StateStorage}
+import com.bwsw.sj.engine.regular.task.RegularTaskManager
+import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.consumer.Offsets.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.group.CheckpointGroup
@@ -52,7 +54,7 @@ object RegularTaskRunner {
     val manager = new RegularTaskManager()
     logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for regular module\n")
 
-    val regularInstanceMetadata: RegularInstance = manager.getInstanceMetadata
+    val regularInstanceMetadata = manager.getInstanceMetadata.asInstanceOf[RegularInstance]
 
     val outputTags = manager.getOutputTags
 
@@ -70,12 +72,7 @@ object RegularTaskRunner {
     producers.foreach(x => checkpointGroup.add(x._2.name, x._2))
     logger.debug(s"Task: ${manager.taskName}. The t-stream producers are added to checkpoint group\n")
 
-    val performanceMetrics = new RegularStreamingPerformanceMetrics(
-      manager.taskName,
-      manager.agentsHost,
-      inputs.map(_._1.name).toArray,
-      regularInstanceMetadata.outputs
-    )
+    val performanceMetrics = new RegularStreamingPerformanceMetrics(manager)
 
     launchPerformanceMetricsReporting(
       manager,
@@ -150,7 +147,7 @@ object RegularTaskRunner {
           performanceMetrics
         )
 
-        val executor = manager.getExecutor(moduleEnvironmentManager)
+        val executor = manager.getExecutor(moduleEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
 
         logger.debug(s"Task: ${manager.taskName}. Invoke onInit() handler\n")
         executor.onInit()
@@ -330,7 +327,7 @@ object RegularTaskRunner {
           performanceMetrics
         )
 
-        val executor = manager.getExecutor(moduleEnvironmentManager)
+        val executor = manager.getExecutor(moduleEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
 
         logger.debug(s"Task: ${manager.taskName}. Invoke onInit() handler\n")
         executor.onInit()

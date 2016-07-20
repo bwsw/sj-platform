@@ -5,6 +5,7 @@ import java.util.concurrent.{ExecutorService, Executors}
 import com.bwsw.sj.engine.input.connection.tcp.server.InputStreamingServer
 import com.bwsw.sj.engine.input.task.InputTaskManager
 import com.bwsw.sj.engine.input.task.engine.InputTaskEngineFactory
+import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import io.netty.buffer.{ByteBuf, Unpooled}
 import org.slf4j.LoggerFactory
@@ -31,16 +32,19 @@ object InputTaskRunner {
     val manager: InputTaskManager = new InputTaskManager()
     logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for input module\n")
 
-    val inputTaskEngineFactory = new InputTaskEngineFactory(manager)
+    val performanceMetrics = new InputStreamingPerformanceMetrics(manager)
+
+    val inputTaskEngineFactory = new InputTaskEngineFactory(manager, performanceMetrics, buffer)
 
     val inputTaskEngine = inputTaskEngineFactory.createInputTaskEngine()
 
     logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
     try {
-      inputTaskEngine.runModule(executorService, buffer)
+      executorService.execute(inputTaskEngine)
+      executorService.execute(performanceMetrics)
     } catch {
       case exception: Exception => {
-        handleExceptionOfExecutorService(exception, executorService)
+        exceptionHandlerOfExecutorService(exception, executorService)
       }
     }
 
@@ -56,7 +60,7 @@ object InputTaskRunner {
       .build()
   }
 
-  def handleExceptionOfExecutorService(exception: Exception, executorService: ExecutorService) = {
+  def exceptionHandlerOfExecutorService(exception: Exception, executorService: ExecutorService) = {
     exception.printStackTrace()
     executorService.shutdownNow()
     System.exit(-1)

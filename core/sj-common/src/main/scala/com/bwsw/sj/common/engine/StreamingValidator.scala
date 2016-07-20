@@ -1,4 +1,4 @@
-package com.bwsw.sj.common.module
+package com.bwsw.sj.common.engine
 
 /**
  * Trait for validating a launch parameters of module

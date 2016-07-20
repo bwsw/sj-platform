@@ -1,8 +1,8 @@
 package com.bwsw.sj.engine.core.environment
 
-import com.bwsw.sj.common.module.reporting.RegularStreamingPerformanceMetrics
+import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import org.slf4j.LoggerFactory
 
-class ModuleOutput(performanceMetrics: RegularStreamingPerformanceMetrics) {
+class ModuleOutput(performanceMetrics: PerformanceMetrics) {
   protected val logger = LoggerFactory.getLogger(this.getClass)
 }

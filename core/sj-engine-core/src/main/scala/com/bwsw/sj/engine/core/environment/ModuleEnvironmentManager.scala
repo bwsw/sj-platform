@@ -1,8 +1,8 @@
 package com.bwsw.sj.engine.core.environment
 
 import com.bwsw.sj.common.DAL.model.SjStream
-import com.bwsw.sj.common.module.reporting.RegularStreamingPerformanceMetrics
 import com.bwsw.sj.common.utils.SjTimer
+import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.core.state.StateStorage
 import com.bwsw.tstreams.agents.producer.BasicProducer
 import org.slf4j.LoggerFactory
@@ -25,7 +25,7 @@ class ModuleEnvironmentManager(val options: Map[String, Any],
                                outputs: Array[SjStream],
                                outputTags: mutable.Map[String, (String, ModuleOutput)],
                                moduleTimer: SjTimer,
-                               performanceMetrics: RegularStreamingPerformanceMetrics) {
+                               performanceMetrics: PerformanceMetrics) extends EnvironmentManager {
   protected val logger = LoggerFactory.getLogger(this.getClass)
   var isCheckpointInitiated: Boolean = false
 

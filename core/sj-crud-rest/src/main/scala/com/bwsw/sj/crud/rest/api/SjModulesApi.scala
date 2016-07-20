@@ -9,7 +9,7 @@ import akka.http.scaladsl.server.{RequestContext, Directives}
 import akka.http.scaladsl.server.directives.FileInfo
 import com.bwsw.common.exceptions.{InstanceException, BadRecordWithKey}
 import com.bwsw.sj.common.DAL.model.module.Instance
-import com.bwsw.sj.common.module.StreamingValidator
+import com.bwsw.sj.common.engine.StreamingValidator
 import com.bwsw.sj.crud.rest.entities._
 import akka.http.scaladsl.model.headers._
 import com.bwsw.sj.crud.rest.entities.module._

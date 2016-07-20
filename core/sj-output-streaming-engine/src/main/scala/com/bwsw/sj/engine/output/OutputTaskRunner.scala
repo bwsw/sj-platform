@@ -7,11 +7,14 @@ import java.util.{Calendar, UUID}
 
 import com.bwsw.common.traits.Serializer
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.common.DAL.model.module.OutputInstance
+import com.bwsw.sj.common.DAL.model.module.{Instance, OutputInstance}
 import com.bwsw.sj.common.DAL.model.{ESService, FileMetadata, SjStream}
-import com.bwsw.sj.common.module.reporting.OutputStreamingPerformanceMetrics
+import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.engine.core.entities.{EsEntity, OutputEntity, OutputEnvelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.environment.EnvironmentManager
+import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
+import com.bwsw.sj.engine.core.reporting.OutputStreamingPerformanceMetrics
 import com.bwsw.sj.engine.core.utils.EngineUtils._
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.producer.{BasicProducerTransaction, ProducerPolicies}
@@ -69,12 +72,21 @@ object OutputTaskRunner {
     val reportProducer = taskManager.createProducer(reportStream)
     logger.debug(s"Task: ${OutputDataFactory.taskName}. Creation of t-stream producer is finished\n")
 
-    val performanceMetrics: OutputStreamingPerformanceMetrics = new OutputStreamingPerformanceMetrics(
-      OutputDataFactory.taskName,
-      OutputDataFactory.agentHost,
-      inputStream.name,
-      outputStream.name
-    )
+    val performanceMetrics: OutputStreamingPerformanceMetrics = new OutputStreamingPerformanceMetrics(new TaskManager(){
+      override protected val instance: Instance = new Instance
+
+      /**
+       * Returns an instance of executor of module
+       *
+       * @return An instance of executor of module
+       */
+      override def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = ???
+    })
+//      OutputDataFactory.taskName,
+//      OutputDataFactory.agentHost,
+//      inputStream.name,
+//      outputStream.name
+//    ) //todo
 
     logger.debug(s"Task: ${OutputDataFactory.taskName}. Launch a new thread to report performance metrics \n")
     executorService.execute(new Runnable() {

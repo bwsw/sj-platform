@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.core.environment
 
-import com.bwsw.sj.common.module.reporting.RegularStreamingPerformanceMetrics
+import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerTransaction, ProducerPolicies}
 
 import scala.collection._
@@ -14,7 +14,7 @@ import scala.collection._
  */
 
 class PartitionedOutput(producer: BasicProducer[Array[Byte], Array[Byte]],
-                        performanceMetrics: RegularStreamingPerformanceMetrics) extends ModuleOutput(performanceMetrics) {
+                        performanceMetrics: PerformanceMetrics) extends ModuleOutput(performanceMetrics) {
 
   private val txns = mutable.Map[Int, BasicProducerTransaction[Array[Byte], Array[Byte]]]()
   private val streamName = producer.stream.getName
