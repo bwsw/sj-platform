@@ -75,6 +75,7 @@ with SjConfigSettingsApi {
           messages.getString("rest.errors.unrecognized_property"), ex.getPropertyName, ex.getKnownPropertyIds)))))
       ))
     case ex: Exception =>
+      ex.printStackTrace()
       complete(HttpResponse(
         InternalServerError,
         entity = HttpEntity(`application/json`, serializer.serialize(ProtocolResponse(500, Map("message" -> MessageFormat.format(
