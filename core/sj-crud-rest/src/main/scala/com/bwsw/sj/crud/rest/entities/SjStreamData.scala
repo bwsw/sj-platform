@@ -18,6 +18,7 @@ class SjStreamData() {
   var description: String = null
   var service: String = null
   var tags: Array[String] = null
+  var force: Boolean = false
 }
 
 class TStreamSjStreamData() extends SjStreamData() {
