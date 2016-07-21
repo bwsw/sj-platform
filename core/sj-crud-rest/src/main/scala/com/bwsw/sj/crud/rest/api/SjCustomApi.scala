@@ -29,6 +29,21 @@ import scala.concurrent.duration._
  */
 trait SjCustomApi extends Directives with SjCrudValidator {
 
+  private def fileUpload(filename: String, part: BodyPart) = {
+    val fileOutput = new FileOutputStream(filename)
+    val bytes = part.entity.dataBytes
+
+    def writeFileOnLocal(array: Array[Byte], byteString: ByteString): Array[Byte] = {
+      val byteArray: Array[Byte] = byteString.toArray
+      fileOutput.write(byteArray)
+      array ++ byteArray
+    }
+
+    val future = bytes.runFold(Array[Byte]())(writeFileOnLocal)
+    Await.result(future, 30.seconds)
+    fileOutput.close()
+  }
+
   val customApi = {
     pathPrefix("custom") {
       pathPrefix("jars") {
@@ -143,18 +158,8 @@ trait SjCustomApi extends Directives with SjCrudValidator {
               val partsResult = parts.runForeach { (part: BodyPart) =>
                 if (part.name.equals("file")) {
                   filename = part.filename.get
-                  val fileOutput = new FileOutputStream(filename)
-                  val bytes = part.entity.dataBytes
-
-                  def writeFileOnLocal(array: Array[Byte], byteString: ByteString): Array[Byte] = {
-                    val byteArray: Array[Byte] = byteString.toArray
-                    fileOutput.write(byteArray)
-                    array ++ byteArray
-                  }
-
-                  val future = bytes.runFold(Array[Byte]())(writeFileOnLocal)
-                  Await.result(future, 30.seconds)
-                  fileOutput.close()
+                  fileUpload(filename, part)
+                  logger.debug(s"File $filename is uploaded")
                 } else if (part.name.equals("description")) {
                   val bytes = part.entity.dataBytes
 

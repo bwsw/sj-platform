@@ -6,7 +6,8 @@ import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.common.exceptions.BadRecordWithKey
 import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.DAL.model.ConfigSetting
-import com.bwsw.sj.crud.rest.entities.{ConfigSettingData, ProtocolResponse}
+import com.bwsw.sj.crud.rest.entities.ProtocolResponse
+import com.bwsw.sj.crud.rest.entities.config.ConfigSettingData
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.config.ConfigSettingValidator
 import com.bwsw.sj.crud.rest.utils.ConvertUtil._

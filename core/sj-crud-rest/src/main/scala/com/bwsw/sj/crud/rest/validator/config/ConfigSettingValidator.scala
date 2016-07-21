@@ -1,7 +1,7 @@
 package com.bwsw.sj.crud.rest.validator.config
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.crud.rest.entities.ConfigSettingData
+import com.bwsw.sj.crud.rest.entities.config.ConfigSettingData
 import com.bwsw.sj.crud.rest.validator.stream.StreamValidator._
 import org.slf4j.LoggerFactory
 

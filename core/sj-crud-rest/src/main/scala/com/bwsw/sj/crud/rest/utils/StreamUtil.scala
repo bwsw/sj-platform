@@ -182,11 +182,6 @@ object StreamUtil {
       }
       Right(s"Index ${service.index} is exists")
     }
-    /*if (service != null) {
-      Right(s"Index ${service.index} is exists")
-    } else {
-      Left(s"Index ${service.index} is not exists")
-    }*/
   }
 
   def deleteEsStream(stream: ESSjStream) = {

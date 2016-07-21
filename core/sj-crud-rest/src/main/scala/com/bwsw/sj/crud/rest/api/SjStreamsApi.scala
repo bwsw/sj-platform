@@ -11,6 +11,7 @@ import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.common.ModuleConstants._
 import com.bwsw.sj.crud.rest.entities._
+import com.bwsw.sj.crud.rest.entities.stream.SjStreamData
 import com.bwsw.sj.crud.rest.utils.ConvertUtil.streamToStreamData
 import com.bwsw.sj.crud.rest.utils.StreamUtil
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator

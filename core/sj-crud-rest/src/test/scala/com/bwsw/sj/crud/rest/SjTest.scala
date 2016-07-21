@@ -1,5 +1,8 @@
 package com.bwsw.sj.crud.rest
 
+import java.text.MessageFormat
+import java.util.ResourceBundle
+
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
@@ -78,6 +81,10 @@ object SjTest {
     println(test.getClass.toString)*/
     //createKafkaData()
     //createEsData()
+
+    val messages = ResourceBundle.getBundle("messages")
+    println(MessageFormat.format(messages.getString("rest.services.service.created"), "blablabla"))
+
     println("Ok")
   }
 
