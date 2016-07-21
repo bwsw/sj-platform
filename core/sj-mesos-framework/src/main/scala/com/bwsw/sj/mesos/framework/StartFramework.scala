@@ -1,5 +1,7 @@
 package com.bwsw.sj.mesos.framework
 
+import com.bwsw.sj.mesos.framework.rest.Rest
+import com.bwsw.sj.mesos.framework.schedule.FrameworkScheduler
 import org.apache.mesos.MesosSchedulerDriver
 import org.apache.mesos.Protos.FrameworkInfo
 import scala.util.Properties

@@ -20,11 +20,16 @@ class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable {
 
   def run() = {
     logger.debug(s"Instance: ${instance.name}. Destroy instance.")
-    stageUpdate(instance, instance.name, deleting)
-    deleteGenerators(instance)
-    deleteInstance(instance)
-    instanceDAO.delete(instance.name)
-    logger.debug(s"Instance: ${instance.name}. Instance is deleted.")
+    try {
+      stageUpdate(instance, instance.name, deleting)
+      deleteGenerators(instance)
+      deleteInstance(instance)
+      instanceDAO.delete(instance.name)
+      logger.debug(s"Instance: ${instance.name}. Instance is deleted.")
+    } catch {
+      case e: Exception =>
+
+    }
   }
 
   /**
@@ -79,8 +84,6 @@ class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable {
               isTaskDeleted = true
             }
           }
-        } else {
-          //todo what doing?
         }
       } else {
         stageUpdate(instance, stream.name, deleted)
@@ -112,8 +115,6 @@ class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable {
             isInstanceDeleted = true
           }
         }
-      } else {
-        //todo error?
       }
     }
   }

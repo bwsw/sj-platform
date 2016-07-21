@@ -21,38 +21,42 @@ class InstanceStopper(instance: Instance, delay: Long) extends Runnable {
 
   def run() = {
     logger.debug(s"Instance: ${instance.name}. Stop instance.")
-    stageUpdate(instance, instance.name, stopping)
-    val stopResult = stopApplication(instance.name)
-    if (stopResult.getStatusLine.getStatusCode == OK) {
-      var isInstanceStopped = false
-      while (!isInstanceStopped) {
-        val taskInfoResponse = getTaskInfo(instance.name)
-        if (taskInfoResponse.getStatusLine.getStatusCode == OK) {
-          val entity = serializer.deserialize[Map[String, Any]](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
-          val tasksRunning = entity("app").asInstanceOf[Map[String, Any]]("tasksRunning").asInstanceOf[Int]
-          if (tasksRunning == 0) {
-            instance.status = stopped
-            if (instance.moduleType.equals(inputStreamingType)) {
-              val tasks = instance.asInstanceOf[InputInstance].tasks.asScala
-              instance.asInstanceOf[InputInstance].tasks = mapAsJavaMap(tasks.map { task =>
-                task._2.host = ""
-                task._2.port = 0
-                task
-              })
+    try {
+      stageUpdate(instance, instance.name, stopping)
+      val stopResult = stopApplication(instance.name)
+      if (stopResult.getStatusLine.getStatusCode == OK) {
+        var isInstanceStopped = false
+        while (!isInstanceStopped) {
+          val taskInfoResponse = getTaskInfo(instance.name)
+          if (taskInfoResponse.getStatusLine.getStatusCode == OK) {
+            val entity = serializer.deserialize[Map[String, Any]](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
+            val tasksRunning = entity("app").asInstanceOf[Map[String, Any]]("tasksRunning").asInstanceOf[Int]
+            if (tasksRunning == 0) {
+              instance.status = stopped
+              if (instance.moduleType.equals(inputStreamingType)) {
+                val tasks = instance.asInstanceOf[InputInstance].tasks.asScala
+                instance.asInstanceOf[InputInstance].tasks = mapAsJavaMap(tasks.map { task =>
+                  task._2.host = ""
+                  task._2.port = 0
+                  task
+                })
+              }
+              stageUpdate(instance, instance.name, stopped)
+              isInstanceStopped = true
+            } else {
+              stageUpdate(instance, instance.name, stopping)
+              Thread.sleep(delay)
             }
-            stageUpdate(instance, instance.name, stopped)
-            isInstanceStopped = true
           } else {
-            stageUpdate(instance, instance.name, stopping)
-            Thread.sleep(delay)
+            //todo error?
           }
-        } else {
-          //todo error?
         }
+        logger.debug(s"Instance: ${instance.name}. Instance is stopped.")
+      } else {
+        logger.debug(s"Instance: ${instance.name}. Instance cannot stopping.")
       }
-      logger.debug(s"Instance: ${instance.name}. Instance is stopped.")
-    } else {
-      //todo error?
+    } catch {
+      case e: Exception =>
     }
   }
 
