@@ -272,7 +272,7 @@ class FrameworkScheduler extends Scheduler {
 
     perTaskPortsCount = FrameworkUtil.getCountPorts(instance)
     logger.info(s"Got instance")
-    logger.debug(s"${instance}")
+    logger.debug(s"$instance")
 
     try {
       val zkHost = this.instance.coordinationService.provider.hosts(0)
