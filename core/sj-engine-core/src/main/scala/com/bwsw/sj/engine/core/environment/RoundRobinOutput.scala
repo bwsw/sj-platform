@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.core.environment
 
-import com.bwsw.sj.common.module.reporting.RegularStreamingPerformanceMetrics
+import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerTransaction, ProducerPolicies}
 
 /**
@@ -13,7 +13,7 @@ import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerTransactio
  */
 
 class RoundRobinOutput(producer: BasicProducer[Array[Byte], Array[Byte]],
-                       performanceMetrics: RegularStreamingPerformanceMetrics) extends ModuleOutput(performanceMetrics) {
+                       performanceMetrics: PerformanceMetrics) extends ModuleOutput(performanceMetrics) {
 
   private var txn: Option[BasicProducerTransaction[Array[Byte], Array[Byte]]] = None
   private val streamName = producer.stream.getName

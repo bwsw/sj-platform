@@ -9,6 +9,7 @@ import com.bwsw.sj.common.ConfigConstants._
 import com.bwsw.sj.common.DAL.model.Provider
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.crud.rest.entities._
+import com.bwsw.sj.crud.rest.entities.provider.ProviderData
 import com.datastax.driver.core.Cluster
 import com.datastax.driver.core.exceptions.NoHostAvailableException
 import kafka.javaapi.consumer.SimpleConsumer
@@ -69,8 +70,9 @@ object ProviderValidator {
       case None =>
         errors += s"'description' is required"
       case Some(x) =>
-        if (x.isEmpty)
+        if (x.isEmpty) {
           errors += s"'description' can not be empty"
+        }
     }
 
     // 'login' field
@@ -78,8 +80,9 @@ object ProviderValidator {
       case None =>
         errors += s"'login' is required"
       case Some(x) =>
-        if (x.isEmpty)
+        if (x.isEmpty) {
           errors += s"'login' can not be empty"
+        }
     }
 
     // 'password' field
@@ -87,8 +90,9 @@ object ProviderValidator {
       case None =>
         errors += s"'description' is required"
       case Some(x) =>
-        if (x.isEmpty)
+        if (x.isEmpty) {
           errors += s"'description' can not be empty"
+        }
     }
 
     // 'providerType field
@@ -96,19 +100,18 @@ object ProviderValidator {
       case None =>
         errors += s"'type' is required"
       case Some(x) =>
-        if (!providerTypes.contains(x))
-          errors += s"Unknown 'type' provided. Must be one of: ${providerTypes.mkString("[","|","]")}"
+        if (!providerTypes.contains(x)) {
+          errors += s"Unknown 'type' provided. Must be one of: ${providerTypes.mkString("[", "|", "]")}"
+        }
     }
 
     //'hosts' field
     if (Option(initialData.hosts).isEmpty) {
       errors += s"'hosts' is required"
-    }
-    else {
+    } else {
       if (initialData.hosts.isEmpty) {
         errors += s"'hosts' must contain at least one host"
-      }
-      else {
+      } else {
         var ports = new ListBuffer[Int]()
         for (host <- initialData.hosts) {
           val (hostErrors, hostPort) = validateHost(host, initialData.providerType)
@@ -116,8 +119,9 @@ object ProviderValidator {
           ports += hostPort
         }
 
-        if (initialData.providerType == "cassandra" && ports.distinct.size > 1)
+        if (initialData.providerType == "cassandra" && ports.distinct.size > 1) {
           errors += s"Ports must be the same for all hosts of '${initialData.providerType}' provider subset"
+        }
       }
     }
 
@@ -191,8 +195,7 @@ object ProviderValidator {
       val client = builder.build()
       val metadata = client.getMetadata
       client.close()
-    }
-    catch {
+    } catch {
       case ex: NoHostAvailableException =>
         errors += s"Cannot access Cassandra on '$hostname'"
       case _: Throwable =>
@@ -203,8 +206,9 @@ object ProviderValidator {
   def checkAerospikeConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
     val aerospikePort = if (port == -1) 3000 else port
     val client = new AerospikeClient(hostname, aerospikePort)
-    if (!client.isConnected)
+    if (!client.isConnected) {
       errors += s"Cannot access Aerospike on '$hostname:$port'"
+    }
     client.close()
   }
 
@@ -218,15 +222,17 @@ object ProviderValidator {
       while (!connected && deadline.hasTimeLeft) {
         connected = client.getState.isConnected
       }
-      if (!connected)
+      if (!connected) {
         errors += s"Can not access Zookeeper on '$hostname:$zookeeperPort'"
+      }
 
     } catch {
       case ex: Throwable =>
         errors += s"Wrong zookeeper host"
     }
-    if (Option(client).isDefined)
+    if (Option(client).isDefined) {
       client.close()
+    }
   }
 
   def checkKafkaConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
@@ -237,8 +243,7 @@ object ProviderValidator {
     var resp: TopicMetadataResponse = null
     try {
       resp = consumer.send(req)
-    }
-    catch {
+    } catch {
       case ex: ClosedChannelException =>
         errors += s"'$hostname:$kafkaPort' does not respond"
       case ex: java.io.EOFException =>
@@ -253,8 +258,9 @@ object ProviderValidator {
     val settings = Settings.settingsBuilder().put("client.transport.ping_timeout", "2s").build()
     val client = TransportClient.builder().settings(settings).build()
     client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(hostname), esPort))
-    if (client.connectedNodes().size() < 1)
+    if (client.connectedNodes().size() < 1) {
       errors += s"Can not establish connection to ElasticSearch on '$hostname:$esPort'"
+    }
   }
 
   def checkJdbcConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {

@@ -1,7 +1,9 @@
-package com.bwsw.sj.common.module.reporting
+package com.bwsw.sj.engine.output.task.reporting
 
 import java.util.Calendar
-import java.util.concurrent.locks.ReentrantLock
+
+import com.bwsw.sj.engine.core.reporting.{PerformanceMetrics, PerformanceMetricsMetadata}
+import com.bwsw.sj.engine.output.task.OutputTaskManager
 
 import scala.collection.mutable
 
@@ -11,18 +13,22 @@ import scala.collection.mutable
  * @author Kseniya Mikhaleva
  */
 
-class OutputStreamingPerformanceMetrics(taskId: String, host: String, inputStreamName: String, outputStreamName: String)
-  extends PerformanceMetrics(taskId, host, Array(inputStreamName), Array(outputStreamName)) {
+class OutputStreamingPerformanceMetrics(manager: OutputTaskManager)
+  extends PerformanceMetrics(manager) {
 
-  val mutex: ReentrantLock = new ReentrantLock(true)
+  private val inputStreamNames = instance.inputs
+  private val outputStreamNames = instance.outputs
   private val performanceReport = new PerformanceMetricsMetadata()
+
+  override protected var inputEnvelopesPerStream = createStorageForInputEnvelopes(inputStreamNames)
+  override protected var outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
 
   /**
    * Constructs a report of performance metrics of task's work
    * @return Constructed performance report
    */
   def getReport = {
-    logger.info(s"Start preparing a report of performance for task: $taskId of output module\n")
+    logger.info(s"Start preparing a report of performance for task: $taskName of output module\n")
     mutex.lock()
     val bytesOfInputEnvelopes = inputEnvelopesPerStream.map(x => (x._1, x._2.map(_.sum).sum)).head._2
     val bytesOfOutputEnvelopes = outputEnvelopesPerStream.map(x => (x._1, x._2.map(_._2.sum).sum)).head._2
@@ -34,9 +40,9 @@ class OutputStreamingPerformanceMetrics(taskId: String, host: String, inputStrea
     val outputEnvelopesSize = outputEnvelopesPerStream.flatMap(x => x._2.map(_._2.size))
 
     performanceReport.pmDatetime = Calendar.getInstance().getTime
-    performanceReport.taskId = taskId
-    performanceReport.host = host
-    performanceReport.inputStreamName = inputStreamName
+    performanceReport.taskId = taskName
+    performanceReport.host = manager.agentsHost
+    performanceReport.inputStreamName = inputStreamNames.head
     performanceReport.totalInputEnvelopes = inputEnvelopesTotalNumber
     performanceReport.totalInputElements = inputElementsTotalNumber
     performanceReport.totalInputBytes = bytesOfInputEnvelopes
@@ -44,7 +50,7 @@ class OutputStreamingPerformanceMetrics(taskId: String, host: String, inputStrea
     performanceReport.maxSizeInputEnvelope = if (inputEnvelopesSize.nonEmpty) inputEnvelopesSize.max else 0
     performanceReport.minSizeInputEnvelope = if (inputEnvelopesSize.nonEmpty) inputEnvelopesSize.min else 0
     performanceReport.averageSizeInputElement = if (inputElementsTotalNumber != 0) bytesOfInputEnvelopes / inputElementsTotalNumber else 0
-    performanceReport.outputStreamName = outputStreamName
+    performanceReport.outputStreamName = outputStreamNames.head
     performanceReport.totalOutputEnvelopes = outputEnvelopesTotalNumber
     performanceReport.totalOutputElements = outputElementsTotalNumber
     performanceReport.totalOutputBytes = bytesOfOutputEnvelopes
@@ -55,12 +61,11 @@ class OutputStreamingPerformanceMetrics(taskId: String, host: String, inputStrea
     performanceReport.uptime = (System.currentTimeMillis () - startTime) / 1000
 
     logger.debug(s"Reset variables for performance report for next reporting\n")
-    inputEnvelopesPerStream = mutable.Map(inputStreamName -> mutable.ListBuffer[List[Int]]())
-    outputEnvelopesPerStream = mutable.Map(outputStreamName -> mutable.Map[String, mutable.ListBuffer[Int]]())
+    inputEnvelopesPerStream = mutable.Map(inputStreamNames.head -> mutable.ListBuffer[List[Int]]())
+    outputEnvelopesPerStream = mutable.Map(outputStreamNames.head -> mutable.Map[String, mutable.ListBuffer[Int]]())
 
     mutex.unlock()
 
     serializer.serialize(performanceReport)
   }
-
 }

@@ -1,6 +1,8 @@
 package com.bwsw.sj.engine.input.task.engine
 
 import com.bwsw.sj.engine.input.task.InputTaskManager
+import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
+import io.netty.buffer.ByteBuf
 import org.slf4j.LoggerFactory
 
 /**
@@ -11,7 +13,7 @@ import org.slf4j.LoggerFactory
  * @author Kseniya Mikhaleva
  */
 
-class InputTaskEngineFactory(manager: InputTaskManager) {
+class InputTaskEngineFactory(manager: InputTaskManager, performanceMetrics: InputStreamingPerformanceMetrics, buffer: ByteBuf) {
 
   protected val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -29,10 +31,10 @@ class InputTaskEngineFactory(manager: InputTaskManager) {
       case "time-interval" =>
         logger.info(s"Task: ${manager.taskName}. Input module has a 'time-interval' checkpoint mode, create an appropriate task engine\n")
         logger.debug(s"Task: ${manager.taskName}. Create TimeCheckpointInputTaskEngine()\n")
-        new TimeCheckpointInputTaskEngine(manager, inputInstanceMetadata)
+        new TimeCheckpointInputTaskEngine(manager, performanceMetrics, buffer)
       case "every-nth" =>
         logger.info(s"Task: ${manager.taskName}. Input module has an 'every-nth' checkpoint mode, create an appropriate task engine\n")
-        new NumericalCheckpointInputTaskEngine(manager, inputInstanceMetadata)
+        new NumericalCheckpointInputTaskEngine(manager, performanceMetrics, buffer)
 
     }
   }

@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
  *
  * @author Kseniya Mikhaleva
  */
-class InputEnvironmentManager(outputs: Array[SjStream]) {
+class InputEnvironmentManager(outputs: Array[SjStream]) extends EnvironmentManager {
 
   protected val logger = LoggerFactory.getLogger(this.getClass)
 

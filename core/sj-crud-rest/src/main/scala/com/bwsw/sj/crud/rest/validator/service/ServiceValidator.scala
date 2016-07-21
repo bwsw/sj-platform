@@ -4,6 +4,7 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.crud.rest.entities._
+import com.bwsw.sj.crud.rest.entities.service._
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer

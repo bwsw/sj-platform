@@ -1,18 +1,20 @@
 package com.bwsw.sj.engine.input.task.engine
 
-import com.bwsw.sj.common.DAL.model.module.InputInstance
 import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.sj.engine.input.task.InputTaskManager
+import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
+import io.netty.buffer.ByteBuf
 
 /**
  * Provides methods are responsible for a basic execution logic of task of input module
  * that has a checkpoint based on time
  *
  * @param manager Manager of environment of task of input module
- * @param inputInstanceMetadata Input instance is a metadata for running a task of input module
  */
-class TimeCheckpointInputTaskEngine(manager: InputTaskManager, inputInstanceMetadata: InputInstance)
-  extends InputTaskEngine(manager, inputInstanceMetadata) {
+class TimeCheckpointInputTaskEngine(manager: InputTaskManager,
+                                    performanceMetrics: InputStreamingPerformanceMetrics,
+                                    buffer: ByteBuf)
+  extends InputTaskEngine(manager, performanceMetrics, buffer) {
 
   private val checkpointTimer: Option[SjTimer] = createTimer()
   val isNotOnlyCustomCheckpoint = checkpointTimer.isDefined
@@ -22,7 +24,7 @@ class TimeCheckpointInputTaskEngine(manager: InputTaskManager, inputInstanceMeta
    * @return Timer or nothing if instance has no timer and will do checkpoints by manual
    */
   private def createTimer() = {
-    if (inputInstanceMetadata.checkpointInterval > 0) {
+    if (inputInstance.checkpointInterval > 0) {
       logger.debug(s"Task: ${manager.taskName}. Create a checkpoint timer for input module\n")
       Some(new SjTimer())
     } else {
@@ -35,7 +37,7 @@ class TimeCheckpointInputTaskEngine(manager: InputTaskManager, inputInstanceMeta
    * Sets timer on checkpoint interval
    */
   private def setTimer() = {
-    checkpointTimer.get.set(inputInstanceMetadata.checkpointInterval)
+    checkpointTimer.get.set(inputInstance.checkpointInterval)
   }
 
   /**
@@ -47,7 +49,7 @@ class TimeCheckpointInputTaskEngine(manager: InputTaskManager, inputInstanceMeta
       logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
       logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
       checkpointGroup.commit()
-      txnsByStreamPartitions.foreach(x => x._2.foreach(y => txnClose(y._2.getTxnUUID)))
+      checkpointInitiated()
       txnsByStreamPartitions = createTxnsStorage(streams)
       resetTimer()
     }

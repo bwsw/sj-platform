@@ -9,7 +9,7 @@ import akka.http.scaladsl.server.{RequestContext, Directives}
 import akka.http.scaladsl.server.directives.FileInfo
 import com.bwsw.common.exceptions.{InstanceException, BadRecordWithKey}
 import com.bwsw.sj.common.DAL.model.module.Instance
-import com.bwsw.sj.common.module.StreamingValidator
+import com.bwsw.sj.common.engine.StreamingValidator
 import com.bwsw.sj.crud.rest.entities._
 import akka.http.scaladsl.model.headers._
 import com.bwsw.sj.crud.rest.entities.module._
@@ -130,7 +130,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
               pathEndOrSingleSlash {
                 post { (ctx: RequestContext) =>
                   val instanceMetadata = deserializeOptions(getEntityFromContext(ctx), moduleType)
-                  val (errors, validatedInstance) = validateOptions(instanceMetadata, specification, moduleType)
+                  val (errors, validatedInstance) = validateInstance(instanceMetadata, specification, moduleType)
                   if (errors.isEmpty && validatedInstance != null) {
                     val validatorClassName = specification.validateClass
                     val jarFile = storage.get(filename, s"tmp/$filename")
@@ -231,9 +231,9 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                         instance.status = starting
                         instanceDAO.save(instance)
                         startInstance(instance)
-                        msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.starting"), instanceName)/*"Instance is starting"*/
+                        msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.starting"), instanceName)
                       } else {
-                        msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.cannot.start"), instanceName)/*"Cannot starting of instance. Instance already started."*/
+                        msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.cannot.start"), instanceName)
                       }
                       complete(HttpEntity(
                         `application/json`,
@@ -250,9 +250,9 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                         instance.status = stopping
                         instanceDAO.save(instance)
                         stopInstance(instance)
-                        msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.stopping"), instanceName)/*"Instance is stopping"*/
+                        msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.stopping"), instanceName)
                       } else {
-                        msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.cannot.stop"), instanceName)/*"Cannot stopping of instance. Instance is not started."*/
+                        msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.cannot.stop"), instanceName)
                       }
                       complete(HttpEntity(
                         `application/json`,
@@ -333,7 +333,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
             } else {
               response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
                 messages.getString("rest.modules.type.notfound"),
-                moduleType)/*s"Uploaded modules for type $moduleType have not been found"*/))
+                moduleType)))
             }
             complete(HttpEntity(
               `application/json`,
@@ -373,7 +373,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
    * @param moduleType - type name of module
    * @return - list of errors
    */
-  def validateOptions(options: InstanceMetadata, specification: ModuleSpecification, moduleType: String) = {
+  def validateInstance(options: InstanceMetadata, specification: ModuleSpecification, moduleType: String) = {
     val validatorClassName = configService.get(s"system.$moduleType-validator-class").value
     val validatorClass = Class.forName(validatorClassName)
     val validator = validatorClass.newInstance().asInstanceOf[StreamingModuleValidator]

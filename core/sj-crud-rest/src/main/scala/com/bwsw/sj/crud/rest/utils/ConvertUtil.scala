@@ -5,7 +5,11 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.crud.rest.entities._
+import com.bwsw.sj.crud.rest.entities.config.ConfigSettingData
 import com.bwsw.sj.crud.rest.entities.module._
+import com.bwsw.sj.crud.rest.entities.provider.ProviderData
+import com.bwsw.sj.crud.rest.entities.service._
+import com.bwsw.sj.crud.rest.entities.stream._
 import org.slf4j.LoggerFactory
 
 /**

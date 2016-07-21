@@ -1,9 +1,9 @@
 package com.bwsw.sj.engine.core.environment
 
 import com.bwsw.sj.common.DAL.model.SjStream
-import com.bwsw.sj.common.module.reporting.RegularStreamingPerformanceMetrics
 
 import com.bwsw.sj.common.utils.SjTimer
+import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.core.state.StateStorage
 import com.bwsw.tstreams.agents.producer.BasicProducer
 
@@ -28,7 +28,7 @@ class StatefulModuleEnvironmentManager(stateStorage: StateStorage,
                                        outputs: Array[SjStream],
                                        outputTags: mutable.Map[String, (String, ModuleOutput)],
                                        moduleTimer: SjTimer,
-                                       performanceMetrics: RegularStreamingPerformanceMetrics)
+                                       performanceMetrics: PerformanceMetrics)
   extends ModuleEnvironmentManager(options, producers, outputs, outputTags, moduleTimer, performanceMetrics) {
   /**
    * Returns specific state of module

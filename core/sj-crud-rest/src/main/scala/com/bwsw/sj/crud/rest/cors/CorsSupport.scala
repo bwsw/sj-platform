@@ -1,4 +1,4 @@
-package com.bwsw.sj.crud.rest.utils
+package com.bwsw.sj.crud.rest.cors
 
 import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model.HttpResponse

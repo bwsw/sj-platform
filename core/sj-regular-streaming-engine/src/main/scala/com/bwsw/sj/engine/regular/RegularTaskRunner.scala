@@ -1,23 +1,26 @@
 package com.bwsw.sj.engine.regular
 
 import java.util.Date
-import java.util.concurrent.{Executors, TimeUnit}
+import java.util.concurrent.Executors
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.DAL.model.{KafkaService, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.module.reporting.RegularStreamingPerformanceMetrics
 import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.sj.common.{ModuleConstants, StreamConstants}
 import com.bwsw.sj.engine.core.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.{ModuleEnvironmentManager, ModuleOutput, StatefulModuleEnvironmentManager}
+import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.state.{RAMStateService, StateStorage}
+import com.bwsw.sj.engine.regular.subscriber.RegularConsumerCallback
+import com.bwsw.sj.engine.regular.task.RegularTaskManager
+import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.consumer.Offsets.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.bwsw.tstreams.agents.group.CheckpointGroup
-import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerTransaction, ProducerPolicies}
+import com.bwsw.tstreams.agents.producer.{BasicProducer, ProducerPolicies}
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory
@@ -52,7 +55,7 @@ object RegularTaskRunner {
     val manager = new RegularTaskManager()
     logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for regular module\n")
 
-    val regularInstanceMetadata: RegularInstance = manager.getInstanceMetadata
+    val regularInstanceMetadata = manager.getInstanceMetadata.asInstanceOf[RegularInstance]
 
     val outputTags = manager.getOutputTags
 
@@ -70,18 +73,9 @@ object RegularTaskRunner {
     producers.foreach(x => checkpointGroup.add(x._2.name, x._2))
     logger.debug(s"Task: ${manager.taskName}. The t-stream producers are added to checkpoint group\n")
 
-    val performanceMetrics = new RegularStreamingPerformanceMetrics(
-      manager.taskName,
-      manager.agentsHost,
-      inputs.map(_._1.name).toArray,
-      regularInstanceMetadata.outputs
-    )
+    val performanceMetrics = new RegularStreamingPerformanceMetrics(manager)
 
-    launchPerformanceMetricsReporting(
-      manager,
-      performanceMetrics,
-      regularInstanceMetadata.performanceReportingInterval
-    )
+    executorService.execute(performanceMetrics)
 
     logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
     try {
@@ -150,7 +144,7 @@ object RegularTaskRunner {
           performanceMetrics
         )
 
-        val executor = manager.getExecutor(moduleEnvironmentManager)
+        val executor = manager.getExecutor(moduleEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
 
         logger.debug(s"Task: ${manager.taskName}. Invoke onInit() handler\n")
         executor.onInit()
@@ -330,7 +324,7 @@ object RegularTaskRunner {
           performanceMetrics
         )
 
-        val executor = manager.getExecutor(moduleEnvironmentManager)
+        val executor = manager.getExecutor(moduleEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
 
         logger.debug(s"Task: ${manager.taskName}. Invoke onInit() handler\n")
         executor.onInit()
@@ -552,8 +546,9 @@ object RegularTaskRunner {
 
     if (inputs.exists(x => x._1.streamType == StreamConstants.tStream)) {
       logger.debug(s"Task: ${manager.taskName}. Start creating subscribing consumers\n")
+      val callback = new RegularConsumerCallback[Array[Byte], Array[Byte]](blockingQueue)
       consumersWithSubscribes = Some(inputs.filter(x => x._1.streamType == StreamConstants.tStream).map({
-        x => manager.createSubscribingConsumer(x._1, x._2.toList, chooseOffset(offset), blockingQueue)
+        x => manager.createSubscribingConsumer(x._1, x._2.toList, chooseOffset(offset), callback)
       }).map(x => (x.name, x)).toMap)
       logger.debug(s"Task: ${manager.taskName}. Creation of subscribing consumers is finished\n")
 
@@ -627,45 +622,5 @@ object RegularTaskRunner {
     logger.debug(s"Task: ${manager.taskName}. The t-stream producer is added to checkpoint group\n")
 
     offsetProducer
-  }
-
-  def createReportProducer(manager: RegularTaskManager) = {
-    logger.debug(s"Task: ${manager.taskName}. Start creating a t-stream producer to record performance reports\n")
-    val reportStream = manager.getReportStream
-    val reportProducer = manager.createProducer(reportStream)
-    logger.debug(s"Task: ${manager.taskName}. Creation of t-stream producer is finished\n")
-
-    reportProducer
-  }
-
-  def launchPerformanceMetricsReporting(manager: RegularTaskManager,
-                                        performanceMetrics: RegularStreamingPerformanceMetrics,
-                                        performanceReportingInterval: Long) = {
-    val reportProducer = createReportProducer(manager)
-    logger.debug(s"Task: ${manager.taskName}. Launch a new thread to report performance metrics \n")
-    executorService.execute(new Runnable() {
-      val objectSerializer = new ObjectSerializer()
-      val currentThread = Thread.currentThread()
-      currentThread.setName(s"report-task-${manager.taskName}")
-
-      def run() = {
-        val taskNumber = manager.taskName.replace(s"${manager.instanceName}-task", "").toInt
-        var report: String = null
-        var reportTxn: BasicProducerTransaction[Array[Byte], Array[Byte]] = null
-        while (true) {
-          logger.info(s"Task: ${manager.taskName}. Wait $performanceReportingInterval ms to report performance metrics\n")
-          TimeUnit.MILLISECONDS.sleep(performanceReportingInterval)
-          report = performanceMetrics.getReport
-          println(s"Performance metrics: $report \n")
-          logger.info(s"Task: ${manager.taskName}. Performance metrics: $report \n")
-          logger.debug(s"Task: ${manager.taskName}. Create a new txn for sending performance metrics\n")
-          reportTxn = reportProducer.newTransaction(ProducerPolicies.errorIfOpen, taskNumber)
-          logger.debug(s"Task: ${manager.taskName}. Send performance metrics\n")
-          reportTxn.send(objectSerializer.serialize(report))
-          logger.debug(s"Task: ${manager.taskName}. Do checkpoint of producer for performance reporting\n")
-          reportProducer.checkpoint()
-        }
-      }
-    })
   }
 }

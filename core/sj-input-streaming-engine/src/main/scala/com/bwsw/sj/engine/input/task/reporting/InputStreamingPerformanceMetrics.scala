@@ -1,44 +1,34 @@
-package com.bwsw.sj.common.module.reporting
+package com.bwsw.sj.engine.input.task.reporting
 
 import java.util.Calendar
-import java.util.concurrent.locks.ReentrantLock
+
+import com.bwsw.sj.engine.core.reporting.{PerformanceMetrics, PerformanceMetricsMetadata}
+import com.bwsw.sj.engine.input.task.InputTaskManager
 
 import scala.collection.mutable
 
 /**
- * Class represents a set of metrics that characterize performance of a regular streaming module
- * Created: 07/06/2016
+ * Class represents a set of metrics that characterize performance of a input streaming module
+ * Created: 14/07/2016
  * @author Kseniya Mikhaleva
  */
 
-class RegularStreamingPerformanceMetrics(taskId: String, host: String, inputStreamNames: Array[String], outputStreamNames: Array[String])
-  extends PerformanceMetrics(taskId, host, inputStreamNames, outputStreamNames) {
+class InputStreamingPerformanceMetrics(manager: InputTaskManager)
+  extends PerformanceMetrics(manager) {
 
-  val mutex: ReentrantLock = new ReentrantLock(true)
   private val performanceReport = new PerformanceMetricsMetadata()
-  private var totalIdleTime = 0L
-  private var numberOfStateVariables = 0
+  private val inputStreamName = manager.agentsHost + ":" + manager.entryPort
+  private val outputStreamNames = instance.outputs
+
+  override protected var inputEnvelopesPerStream = createStorageForInputEnvelopes(Array(inputStreamName))
+  override protected var outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
 
   /**
-   * Increases time when there are no messages (envelopes)
-   * @param idle How long waiting a new envelope was
+   * Invokes when a new envelope from the input stream is received
+   * @param elementsSize Set of sizes of elements
    */
-  def increaseTotalIdleTime(idle: Long) = {
-    mutex.lock()
-    logger.debug(s"Increase total idle time on $idle ms\n")
-    totalIdleTime += idle
-    mutex.unlock()
-  }
-
-  /**
-   * Sets an amount of how many state variables are
-   * @param amount Number of state variables
-   */
-  def setNumberOfStateVariables(amount: Int) = {
-    mutex.lock()
-    logger.debug(s"Set number of state variables to $amount\n")
-    numberOfStateVariables = amount
-    mutex.unlock()
+  def addEnvelopeToInputStream(elementsSize: List[Int]) = {
+    super.addEnvelopeToInputStream(inputStreamName, elementsSize)
   }
 
   /**
@@ -46,35 +36,30 @@ class RegularStreamingPerformanceMetrics(taskId: String, host: String, inputStre
    * @return Constructed performance report
    */
   override def getReport: String = {
-    logger.info(s"Start preparing a report of performance for task: $taskId of regular module\n")
+    logger.info(s"Start preparing a report of performance for task: $taskName of input module\n")
     mutex.lock()
-    val numberOfInputEnvelopesPerStream = inputEnvelopesPerStream.map(x => (x._1, x._2.size))
+    val bytesOfInputEnvelopes = inputEnvelopesPerStream.map(x => (x._1, x._2.map(_.sum).sum)).head._2
+    val inputEnvelopesTotalNumber = inputEnvelopesPerStream.map(x => (x._1, x._2.size)).head._2
+    val inputElementsTotalNumber = inputEnvelopesPerStream.map(x => (x._1, x._2.map(_.size).sum)).head._2
+    val inputEnvelopesSize = inputEnvelopesPerStream.flatMap(x => x._2.map(_.size))
     val numberOfOutputEnvelopesPerStream = outputEnvelopesPerStream.map(x => (x._1, x._2.size))
-    val numberOfInputElementsPerStream = inputEnvelopesPerStream.map(x => (x._1, x._2.map(_.size).sum))
     val numberOfOutputElementsPerStream = outputEnvelopesPerStream.map(x => (x._1, x._2.map(_._2.size).sum))
-    val bytesOfInputEnvelopesPerStream = inputEnvelopesPerStream.map(x => (x._1, x._2.map(_.sum).sum))
     val bytesOfOutputEnvelopesPerStream = outputEnvelopesPerStream.map(x => (x._1, x._2.map(_._2.sum).sum))
-    val inputEnvelopesTotalNumber = numberOfInputEnvelopesPerStream.values.sum
-    val inputElementsTotalNumber = numberOfInputElementsPerStream.values.sum
     val outputEnvelopesTotalNumber = numberOfOutputEnvelopesPerStream.values.sum
     val outputElementsTotalNumber = numberOfOutputElementsPerStream.values.sum
-    val inputEnvelopesSize = inputEnvelopesPerStream.flatMap(x => x._2.map(_.size))
     val outputEnvelopesSize = outputEnvelopesPerStream.flatMap(x => x._2.map(_._2.size))
 
     performanceReport.pmDatetime = Calendar.getInstance().getTime
-    performanceReport.taskId = taskId
-    performanceReport.host = host
-    performanceReport.totalIdleTime = totalIdleTime
+    performanceReport.taskId = taskName
+    performanceReport.host = manager.agentsHost
+    performanceReport.entryPointPort = manager.entryPort
     performanceReport.totalInputEnvelopes = inputEnvelopesTotalNumber
-    performanceReport.inputEnvelopesPerStream = numberOfInputEnvelopesPerStream.toMap
     performanceReport.totalInputElements = inputElementsTotalNumber
-    performanceReport.inputElementsPerStream = numberOfInputElementsPerStream.toMap
-    performanceReport.totalInputBytes = bytesOfInputEnvelopesPerStream.values.sum
-    performanceReport.inputBytesPerStream = bytesOfInputEnvelopesPerStream.toMap
+    performanceReport.totalInputBytes = bytesOfInputEnvelopes
     performanceReport.averageSizeInputEnvelope = if (inputElementsTotalNumber != 0) inputElementsTotalNumber / inputEnvelopesTotalNumber else 0
     performanceReport.maxSizeInputEnvelope = if (inputEnvelopesSize.nonEmpty) inputEnvelopesSize.max else 0
     performanceReport.minSizeInputEnvelope = if (inputEnvelopesSize.nonEmpty) inputEnvelopesSize.min else 0
-    performanceReport.averageSizeInputElement = if (inputElementsTotalNumber != 0) bytesOfInputEnvelopesPerStream.values.sum / inputElementsTotalNumber else 0
+    performanceReport.averageSizeInputElement = if (inputElementsTotalNumber != 0) bytesOfInputEnvelopes / inputElementsTotalNumber else 0
     performanceReport.totalOutputEnvelopes = outputEnvelopesTotalNumber
     performanceReport.totalOutputElements = outputElementsTotalNumber
     performanceReport.outputEnvelopesPerStream = numberOfOutputEnvelopesPerStream.toMap
@@ -85,14 +70,11 @@ class RegularStreamingPerformanceMetrics(taskId: String, host: String, inputStre
     performanceReport.maxSizeOutputEnvelope = if (outputEnvelopesSize.nonEmpty) outputEnvelopesSize.max else 0
     performanceReport.minSizeOutputEnvelope = if (outputEnvelopesSize.nonEmpty) outputEnvelopesSize.min else 0
     performanceReport.averageSizeOutputElement = if (outputEnvelopesTotalNumber != 0) bytesOfOutputEnvelopesPerStream.values.sum / outputElementsTotalNumber else 0
-    performanceReport.stateVariablesNumber = numberOfStateVariables
     performanceReport.uptime = (System.currentTimeMillis() - startTime) / 1000
 
     logger.debug(s"Reset variables for performance report for next reporting\n")
-    inputEnvelopesPerStream = mutable.Map(inputStreamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
+    inputEnvelopesPerStream = mutable.Map(inputStreamName -> mutable.ListBuffer[List[Int]]())
     outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
-    totalIdleTime = 0L
-    numberOfStateVariables = 0
 
     mutex.unlock()
 
