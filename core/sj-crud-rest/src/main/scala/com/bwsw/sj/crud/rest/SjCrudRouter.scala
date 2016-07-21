@@ -9,8 +9,8 @@ import akka.http.scaladsl.model.{EntityStreamSizeException, HttpEntity, HttpResp
 import akka.http.scaladsl.server.{Directives, ExceptionHandler}
 import com.bwsw.common.exceptions._
 import com.bwsw.sj.crud.rest.api._
+import com.bwsw.sj.crud.rest.cors.CorsSupport
 import com.bwsw.sj.crud.rest.entities.ProtocolResponse
-import com.bwsw.sj.crud.rest.utils.CorsSupport
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
 import org.everit.json.schema.ValidationException
 
