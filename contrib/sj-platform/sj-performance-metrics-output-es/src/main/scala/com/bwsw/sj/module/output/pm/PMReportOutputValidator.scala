@@ -1,6 +1,6 @@
 package com.bwsw.sj.module.output.pm
 
-import com.bwsw.sj.common.module.StreamingValidator
+import com.bwsw.sj.common.engine.StreamingValidator
 
 /**
   * Created: 23/06/16

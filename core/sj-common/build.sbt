@@ -46,5 +46,4 @@ assemblyMergeStrategy in assembly := {
     oldStrategy(x)
 }
 
-
 unmanagedJars in Compile += file("lib/t-streams.jar")

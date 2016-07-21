@@ -1,9 +1,8 @@
 package com.bwsw.sj.engine.input.connection.tcp.server
 
-import java.util.Date
-
 import io.netty.buffer.ByteBuf
-import io.netty.channel.{ChannelHandlerContext, SimpleChannelInboundHandler}
+import io.netty.channel.ChannelHandler.Sharable
+import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
 
 /**
  * Handles a server-side channel.
@@ -12,18 +11,15 @@ import io.netty.channel.{ChannelHandlerContext, SimpleChannelInboundHandler}
  * @param buffer An auxiliary buffer for keeping incoming bytes
  */
 
-class InputStreamingServerHandler(buffer: ByteBuf) extends SimpleChannelInboundHandler[ByteBuf] {
+@Sharable
+class InputStreamingServerHandler(buffer: ByteBuf) extends ChannelInboundHandlerAdapter {
 
-
-  override def channelActive(ctx: ChannelHandlerContext) = {
-    ctx.write("Welcome to input streaming module!\r\n")
-    ctx.write("It is " + new Date() + " now.\r\n")
-    ctx.flush()
-  }
-
-  override def channelRead0(ctx: ChannelHandlerContext, msg: ByteBuf) = {
-    buffer.writeBytes(msg)
-    //after that the msg is empty
+  override def channelRead(ctx: ChannelHandlerContext, msg: Any) = {
+    val message = msg.asInstanceOf[ByteBuf]
+    val copy = message.copy()
+    buffer.writeBytes(copy)
+     //after that the msg is empty
+    ctx.write(message)
   }
 
   override def channelReadComplete(ctx: ChannelHandlerContext) {
@@ -40,4 +36,3 @@ class InputStreamingServerHandler(buffer: ByteBuf) extends SimpleChannelInboundH
     ctx.close()
   }
 }
-

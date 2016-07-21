@@ -9,12 +9,13 @@ import com.bwsw.common.traits.Serializer
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.DAL.model.{ESService, FileMetadata, SjStream}
-import com.bwsw.sj.common.module.reporting.OutputStreamingPerformanceMetrics
 import com.bwsw.sj.engine.core.entities.{EsEntity, OutputEntity, OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
 import com.bwsw.sj.engine.core.utils.EngineUtils._
+import com.bwsw.sj.engine.output.subscriber.OutputSubscriberCallback
+import com.bwsw.sj.engine.output.task.OutputTaskManager
+import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
-import com.bwsw.tstreams.agents.producer.{BasicProducerTransaction, ProducerPolicies}
 import com.datastax.driver.core.utils.UUIDs
 import org.elasticsearch.action.index.IndexRequestBuilder
 import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse}
@@ -39,7 +40,7 @@ object OutputTaskRunner {
   def main(args: Array[String]) = {
 
     val instance: OutputInstance = OutputDataFactory.instance
-    val taskManager: OutputTaskManager = new OutputTaskManager(OutputDataFactory.taskName, instance)
+    val taskManager: OutputTaskManager = new OutputTaskManager()
     logger.info(s"Task: ${OutputDataFactory.taskName}. Start preparing of task runner for output module.")
 
     val inputStream: SjStream = OutputDataFactory.inputStream
@@ -49,54 +50,28 @@ object OutputTaskRunner {
     val blockingQueue: ArrayBlockingQueue[String] = new ArrayBlockingQueue[String](1000)
 
     logger.debug(s"Task: ${OutputDataFactory.taskName}. Start creating subscribing consumer.")
+
+    val callback = new OutputSubscriberCallback(blockingQueue)
+
     val subscribeConsumer = taskManager.createSubscribingConsumer(
       inputStream,
       taskPartitions.toList,
       chooseOffset(instance.startFrom),
-      blockingQueue
+      callback
     )
     logger.debug(s"Task: ${OutputDataFactory.taskName}. Creation of subscribing consumer is finished.")
 
     logger.debug(s"Task: ${OutputDataFactory.taskName}. Start loading of executor (handler) class from module jar.")
     val moduleJar: File = OutputDataFactory.getModuleJar
     val moduleMetadata: FileMetadata = OutputDataFactory.getFileMetadata
-    val handler: OutputStreamingHandler = taskManager.getModuleHandler(moduleJar, moduleMetadata.specification.executorClass)
+    val handler: OutputStreamingHandler = taskManager.getExecutor.asInstanceOf[OutputStreamingHandler]
 
     val entity: OutputEntity = taskManager.getOutputModuleEntity(moduleJar, moduleMetadata.specification.entityClass)
 
-    logger.debug(s"Task: ${OutputDataFactory.taskName}. Start creating a t-stream producer to record performance reports\n")
-    val reportStream = OutputDataFactory.getReportStream
-    val reportProducer = taskManager.createProducer(reportStream)
-    logger.debug(s"Task: ${OutputDataFactory.taskName}. Creation of t-stream producer is finished\n")
-
-    val performanceMetrics: OutputStreamingPerformanceMetrics = new OutputStreamingPerformanceMetrics(
-      OutputDataFactory.taskName,
-      OutputDataFactory.agentHost,
-      inputStream.name,
-      outputStream.name
-    )
+    val performanceMetrics = new OutputStreamingPerformanceMetrics(taskManager)
 
     logger.debug(s"Task: ${OutputDataFactory.taskName}. Launch a new thread to report performance metrics \n")
-    executorService.execute(new Runnable() {
-      val objectSerializer = new ObjectSerializer()
-      def run() = {
-        val taskNumber = OutputDataFactory.taskName.replace(s"${OutputDataFactory.instanceName}-task", "").toInt
-        var report: String = null
-        var reportTxn: BasicProducerTransaction[Array[Byte], Array[Byte]] = null
-        while (true) {
-          logger.info(s"Task: ${OutputDataFactory.taskName}. Wait ${instance.performanceReportingInterval} ms to report performance metrics\n")
-          Thread.sleep(instance.performanceReportingInterval)
-          report = performanceMetrics.getReport
-          logger.info(s"Task: ${OutputDataFactory.taskName}. Performance metrics: $report \n")
-          logger.debug(s"Task: ${OutputDataFactory.taskName}. Create a new txn for sending performance metrics\n")
-          reportTxn = reportProducer.newTransaction(ProducerPolicies.errorIfOpen, taskNumber)
-          logger.debug(s"Task: ${OutputDataFactory.taskName}. Send performance metrics\n")
-          reportTxn.send(objectSerializer.serialize(report))
-          logger.debug(s"Task: ${OutputDataFactory.taskName}. Do checkpoint of producer for performance reporting\n")
-          reportProducer.checkpoint()
-        }
-      }
-    })
+    executorService.execute(performanceMetrics)
 
     logger.info(s"Task: ${OutputDataFactory.taskName}. Preparing finished. Launch task.")
     try {

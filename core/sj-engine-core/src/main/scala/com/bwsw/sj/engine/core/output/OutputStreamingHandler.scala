@@ -1,5 +1,6 @@
 package com.bwsw.sj.engine.core.output
 
+import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 
 /**
@@ -7,7 +8,7 @@ import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
   *
   * @author Kseniya Tomskikh
   */
-trait OutputStreamingHandler {
+trait OutputStreamingHandler extends StreamingExecutor {
 
   /**
     *

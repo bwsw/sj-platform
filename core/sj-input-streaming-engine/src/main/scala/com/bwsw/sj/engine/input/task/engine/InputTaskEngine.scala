@@ -1,18 +1,13 @@
 package com.bwsw.sj.engine.input.task.engine
 
-import java.nio.charset.Charset
-import java.util.UUID
-import java.util.concurrent.{ExecutorService, TimeUnit}
-
-import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.DAL.model.module.InputInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.module.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.sj.engine.core.entities.InputEnvelope
 import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.engine.core.input.InputStreamingExecutor
 import com.bwsw.sj.engine.input.eviction_policy.{ExpandedTimeEvictionPolicy, FixTimeEvictionPolicy}
 import com.bwsw.sj.engine.input.task.InputTaskManager
+import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerTransaction, ProducerPolicies}
 import io.netty.buffer.ByteBuf
@@ -26,58 +21,33 @@ import scala.collection._
  * Created: 10/07/2016
  *
  * @param manager Manager of environment of task of input module
- * @param inputInstanceMetadata Input instance is a metadata for running a task of input module
+ * @param buffer Buffer for keeping incoming bytes
  * @author Kseniya Mikhaleva
  */
-abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata: InputInstance) {
+abstract class InputTaskEngine(manager: InputTaskManager,
+                               performanceMetrics: InputStreamingPerformanceMetrics,
+                               buffer: ByteBuf) extends Runnable {
 
   protected val logger = LoggerFactory.getLogger(this.getClass)
   protected val producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]] = manager.createOutputProducers
   protected val streams = producers.keySet
   protected var txnsByStreamPartitions = createTxnsStorage(streams)
   protected val checkpointGroup = new CheckpointGroup()
+  protected val inputInstance = manager.getInstanceMetadata.asInstanceOf[InputInstance]
   protected val moduleEnvironmentManager = createModuleEnvironmentManager()
   protected val executor: InputStreamingExecutor = manager.getExecutor(moduleEnvironmentManager)
   protected val evictionPolicy = createEvictionPolicy()
   protected val isNotOnlyCustomCheckpoint: Boolean
-  protected val performanceMetrics = new InputStreamingPerformanceMetrics(
-    manager.taskName,
-    manager.agentsHost,
-    manager.entryHost,
-    manager.entryPort,
-    inputInstanceMetadata.outputs
-  )
 
   addProducersToCheckpointGroup()
 
   /**
-   * It is responsible for sending an answer to client about the fact that a new txn is opened
-   * Usually it will be invoked after checkpoint
-   * @param txn Transaction UUID
+   * It is responsible for sending a response to client about the fact that a checkpoint has been done
+   * It will be invoked after commit of checkpoint group
    */
-  protected def txnOpen(txn: UUID) = {
-    logger.info(s"Task name: ${manager.taskName}. Transaction with UUID: '$txn' has opened\n")
-    println("txnOpen: UUID = " + txn) //todo
-  }
-
-  /**
-   * It is responsible for sending an answer to client about the fact that a new txn is closed
-   * Usually it will be invoked after checkpoint
-   * @param txn Transaction UUID
-   */
-  protected def txnClose(txn: UUID) = {
-    logger.info(s"Task name: ${manager.taskName}. Transaction with UUID: '$txn' has closed\n")
-    println("txnClose: UUID = " + txn) //todo
-  }
-
-  /**
-   * It is responsible for sending an answer to client about the fact that a new txn is canceled
-   * Usually it will be invoked after checkpoint
-   * @param txn Transaction UUID
-   */
-  protected def txnCancel(txn: UUID) = {
-    logger.info(s"Task name: ${manager.taskName}. Transaction with UUID: '$txn' has canceled\n")
-    println("txnCancel: UUID = " + txn) //todo
+  protected def checkpointInitiated() = {
+    logger.info(s"Task name: ${manager.taskName}. Checkpoint has been done\n")
+    println(s"Task name: ${manager.taskName}. Checkpoint has been done\n") //todo
   }
 
   /**
@@ -145,7 +115,6 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
       txn = producers(stream).newTransaction(ProducerPolicies.errorIfOpen, partition)
       txn.send(data)
       putTxn(stream, partition, txn)
-      txnOpen(txn.getTxnUUID)
     }
 
     logger.debug(s"Task name: ${manager.taskName}. Add envelope to output stream in performance metrics \n")
@@ -175,93 +144,39 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
 
   /**
    * It is in charge of running a basic execution logic of input task engine
-   * @param executorService Executor service for running a basic execution logic of input task engine
-   *                        in a separate thread
-   * @param buffer Buffer for keeping incoming bytes
    */
-  def runModule(executorService: ExecutorService, buffer: ByteBuf) = {
+  override def run(): Unit = {
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Run input task engine in a separate thread of execution service\n")
-    executorService.execute(new Runnable {
-      override def run(): Unit = try {
-        launchPerformanceMetricsReporting(executorService)
-
-        while (true) {
-          logger.debug(s"Task name: ${manager.taskName}. Invoke tokenize() method of executor\n")
-          val maybeInterval = executor.tokenize(buffer)
-          if (maybeInterval.isDefined) {
-            logger.debug(s"Task name: ${manager.taskName}. Tokenize() method returned a defined interval\n")
-            val (beginIndex, endIndex) = maybeInterval.get
-            if (buffer.isReadable(endIndex)) {
-              logger.debug(s"Task name: ${manager.taskName}. The end index of interval is valid\n")
-              println("before reading: " + buffer.toString(Charset.forName("UTF-8")) + "_") //todo: only for testing
-              logger.debug(s"Task name: ${manager.taskName}. Invoke parse() method of executor\n")
-              val inputEnvelope: Option[InputEnvelope] = executor.parse(buffer, beginIndex, endIndex)
-              clearBufferAfterParsing(buffer, endIndex)
-              println("after reading: " + buffer.toString(Charset.forName("UTF-8")) + "_") //todo: only for testing
-              val isNotDuplicateOrEmpty = processEnvelope(inputEnvelope)
-              envelopeProcessed(inputEnvelope, isNotDuplicateOrEmpty)
-              doCheckpoint(moduleEnvironmentManager.isCheckpointInitiated)
-              Thread.sleep(1000) //todo: only for testing
-            } else {
-              logger.error(s"Task name: ${manager.taskName}. " +
-                s"Method tokenize() returned end index that an input stream is not defined at\n")
-              throw new IndexOutOfBoundsException("Method tokenize() returned end index that an input stream is not defined at")
-            }
+    try {
+      while (true) {
+        logger.debug(s"Task name: ${manager.taskName}. Invoke tokenize() method of executor\n")
+        val maybeInterval = executor.tokenize(buffer)
+        if (maybeInterval.isDefined) {
+          logger.debug(s"Task name: ${manager.taskName}. Tokenize() method returned a defined interval\n")
+          val interval = maybeInterval.get
+          if (buffer.isReadable(interval.finalValue)) {
+            logger.debug(s"Task name: ${manager.taskName}. The end index of interval is valid\n")
+            logger.debug(s"Task name: ${manager.taskName}. Invoke parse() method of executor\n")
+            val inputEnvelope: Option[InputEnvelope] = executor.parse(buffer, interval)
+            clearBufferAfterParsing(buffer, interval.finalValue)
+            val isNotDuplicateOrEmpty = processEnvelope(inputEnvelope)
+            envelopeProcessed(inputEnvelope, isNotDuplicateOrEmpty)
+            doCheckpoint(moduleEnvironmentManager.isCheckpointInitiated)
+          } else {
+            logger.error(s"Task name: ${manager.taskName}. " +
+              s"Method tokenize() returned an interval with a final value: ${interval.finalValue} " +
+              s"that an input stream is not defined at (buffer write index: ${buffer.writerIndex()})\n")
+            throw new IndexOutOfBoundsException(s"Task name: ${manager.taskName}. " +
+              s"Method tokenize() returned an interval with a final value: ${interval.finalValue} " +
+              s"that an input stream is not defined at (buffer write index: ${buffer.writerIndex()})")
           }
         }
-      } finally {
-        logger.debug(s"Task name: ${manager.taskName}. Release a buffer that contains incoming bytes\n")
-        ReferenceCountUtil.release(buffer)
       }
-    })
-  }
-
-  /**
-   * Create t-stream producer for stream for reporting
-   * @return Producer for reporting performance metrics
-   */
-  private def createReportProducer() = {
-    logger.debug(s"Task: ${manager.taskName}. Start creating a t-stream producer to record performance reports\n")
-    val reportStream = manager.getReportStream
-    val reportProducer = manager.createProducer(reportStream)
-    logger.debug(s"Task: ${manager.taskName}. Creation of t-stream producer is finished\n")
-
-    reportProducer
-  }
-
-  /**
-   * It is in charge of running of input module
-   * @param executorService Executor service for running an execution logic for creating report of performance metrics
-   *                        in a separate thread
-   */
-  private def launchPerformanceMetricsReporting(executorService: ExecutorService) = {
-    val reportProducer = createReportProducer()
-    logger.debug(s"Task: ${manager.taskName}. Launch a new thread to report performance metrics \n")
-    executorService.execute(new Runnable() {
-      val objectSerializer = new ObjectSerializer()
-      val currentThread = Thread.currentThread()
-      currentThread.setName(s"report-task-${manager.taskName}")
-
-      def run() = {
-        val taskNumber = manager.taskName.replace(s"${manager.instanceName}-task", "").toInt
-        var report: String = null
-        var reportTxn: BasicProducerTransaction[Array[Byte], Array[Byte]] = null
-        while (true) {
-          logger.info(s"Task: ${manager.taskName}. Wait ${inputInstanceMetadata.performanceReportingInterval} ms to report performance metrics\n")
-          TimeUnit.MILLISECONDS.sleep(inputInstanceMetadata.performanceReportingInterval)
-          report = performanceMetrics.getReport
-          println(s"Performance metrics: $report \n")
-          logger.info(s"Task: ${manager.taskName}. Performance metrics: $report \n")
-          logger.debug(s"Task: ${manager.taskName}. Create a new txn for sending performance metrics\n")
-          reportTxn = reportProducer.newTransaction(ProducerPolicies.errorIfOpen, taskNumber)
-          logger.debug(s"Task: ${manager.taskName}. Send performance metrics\n")
-          reportTxn.send(objectSerializer.serialize(report))
-          logger.debug(s"Task: ${manager.taskName}. Do checkpoint of producer for performance reporting\n")
-          reportProducer.checkpoint()
-        }
-      }
-    })
+    } finally {
+      logger.debug(s"Task name: ${manager.taskName}. Release a buffer that contains incoming bytes\n")
+      ReferenceCountUtil.release(buffer)
+    }
   }
 
   /**
@@ -278,7 +193,7 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
   protected def clearBufferAfterParsing(buffer: ByteBuf, endIndex: Int) = {
     logger.debug(s"Task name: ${manager.taskName}. " +
       s"Remove a message, which have just been parsed, from input buffer\n")
-    buffer.readerIndex(endIndex)
+    buffer.readerIndex(endIndex + 1)
     buffer.discardReadBytes()
   }
 
@@ -334,7 +249,7 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
    * @return Manager of environment of input streaming module
    */
   private def createModuleEnvironmentManager() = {
-    val taggedOutputs = inputInstanceMetadata.outputs
+    val taggedOutputs = inputInstance.outputs
       .map(ConnectionRepository.getStreamService.get)
       .filter(_.tags != null)
 
@@ -346,11 +261,10 @@ abstract class InputTaskEngine(manager: InputTaskManager, inputInstanceMetadata:
    * @return Eviction policy of duplicate envelopes
    */
   private def createEvictionPolicy() = {
-    inputInstanceMetadata.evictionPolicy match {
+    inputInstance.evictionPolicy match {
       case "fix-time" => new FixTimeEvictionPolicy(manager)
       case "expanded-time" => new ExpandedTimeEvictionPolicy(manager)
       case _ => new FixTimeEvictionPolicy(manager)
     }
-    //new ExpandedTimeEvictionPolicy(manager) //todo for testing
   }
 }
