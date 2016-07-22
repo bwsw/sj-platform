@@ -234,9 +234,9 @@ abstract class InputTaskEngine(manager: InputTaskManager,
    */
   private def createEvictionPolicy() = {
     inputInstance.evictionPolicy match {
-      case "fix-time" => new FixTimeEvictionPolicy(manager)
-      case "expanded-time" => new ExpandedTimeEvictionPolicy(manager)
-      case _ => new FixTimeEvictionPolicy(manager)
+      case "fix-time" => new FixTimeEvictionPolicy(inputInstance)
+      case "expanded-time" => new ExpandedTimeEvictionPolicy(inputInstance)
+      case _ => new FixTimeEvictionPolicy(inputInstance)
     }
   }
 }
