@@ -9,6 +9,7 @@ import org.mongodb.morphia.annotations.Property
  * @author Kseniya Tomskikh
  */
 class InputInstance extends Instance {
+  @Property("duplicate-check") var duplicateCheck: Boolean = false
   @Property("lookup-history") var lookupHistory: Int = 0
   @Property("queue-max-size") var queueMaxSize: Int = 0
   @Property("default-eviction-policy") var defaultEvictionPolicy: String = null

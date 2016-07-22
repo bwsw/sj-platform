@@ -1,5 +1,7 @@
 package com.bwsw.sj.engine.input.task.engine
 
+import java.util.concurrent.ArrayBlockingQueue
+
 import com.bwsw.sj.common.DAL.model.module.InputInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.engine.core.entities.InputEnvelope
@@ -11,7 +13,7 @@ import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerTransaction, ProducerPolicies}
 import io.netty.buffer.ByteBuf
-import io.netty.util.ReferenceCountUtil
+import io.netty.channel.ChannelHandlerContext
 import org.slf4j.LoggerFactory
 
 import scala.collection._
@@ -21,12 +23,13 @@ import scala.collection._
  * Created: 10/07/2016
  *
  * @param manager Manager of environment of task of input module
- * @param buffer Buffer for keeping incoming bytes
+ * @param performanceMetrics Set of metrics that characterize performance of a input streaming module
+ * @param tokenizedMsgQueue Queue for keeping a part of incoming bytes that will become an input envelope with the channel context
  * @author Kseniya Mikhaleva
  */
 abstract class InputTaskEngine(manager: InputTaskManager,
                                performanceMetrics: InputStreamingPerformanceMetrics,
-                               buffer: ByteBuf) extends Runnable {
+                               tokenizedMsgQueue: ArrayBlockingQueue[(ChannelHandlerContext, ByteBuf)]) extends Runnable {
 
   protected val logger = LoggerFactory.getLogger(this.getClass)
   protected val producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]] = manager.createOutputProducers
@@ -35,7 +38,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   protected val checkpointGroup = new CheckpointGroup()
   protected val inputInstance = manager.getInstanceMetadata.asInstanceOf[InputInstance]
   protected val moduleEnvironmentManager = createModuleEnvironmentManager()
-  protected val executor: InputStreamingExecutor = manager.getExecutor(moduleEnvironmentManager)
+  val executor: InputStreamingExecutor = manager.getExecutor(moduleEnvironmentManager)
   protected val evictionPolicy = createEvictionPolicy()
   protected val isNotOnlyCustomCheckpoint: Boolean
 
@@ -44,30 +47,26 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   /**
    * It is responsible for sending a response to client about the fact that a checkpoint has been done
    * It will be invoked after commit of checkpoint group
+   * @param ctx Channel context related with the input envelope,
+   *            after which checkpoint has been initiated, to send a message about this event
    */
-  protected def checkpointInitiated() = {
-    logger.info(s"Task name: ${manager.taskName}. Checkpoint has been done\n")
-    println(s"Task name: ${manager.taskName}. Checkpoint has been done\n") //todo
+  protected def checkpointInitiated(ctx: ChannelHandlerContext) = {
+    val inputStreamingResponse = executor.createCheckpointResponse()
+    if (inputStreamingResponse.isBuffered) ctx.write(inputStreamingResponse.message)
+    else ctx.writeAndFlush(inputStreamingResponse.message)
   }
 
   /**
    * It is responsible for sending an answer to client about the fact that an envelope is processed
    * @param envelope Input envelope
-   * @param isNotDuplicateOrEmpty Flag points whether a processed envelope is duplicate or empty or not.
+   * @param isNotEmptyOrDuplicate Flag points whether a processed envelope is empty or duplicate  or not.
    *                              If it is true it means a processed envelope is duplicate or empty and false in other case
+   * @param ctx Channel context related with this input envelope to send a message about this event
    */
-  protected def envelopeProcessed(envelope: Option[InputEnvelope], isNotDuplicateOrEmpty: Boolean) = {
-    if (isNotDuplicateOrEmpty) {
-      logger.info(s"Task name: ${manager.taskName}. Input envelope with key: '${envelope.get.key}' is not duplicate so it has been sent\n")
-      //todo
-      println("Envelope has been sent")
-    } else if (envelope.isDefined) {
-      logger.info(s"Task name: ${manager.taskName}. Input envelope with key: '${envelope.get.key}' is duplicate\n")
-      println("Envelope is duplicate")
-    } else {
-      logger.info(s"Task name: ${manager.taskName}. Input envelope with key: '${envelope.get.key}' is emptyt\n")
-      println("Envelope is empty")
-    }
+  protected def envelopeProcessed(envelope: Option[InputEnvelope], isNotEmptyOrDuplicate: Boolean, ctx: ChannelHandlerContext) = {
+    val inputStreamingResponse = executor.createProcessedMessageResponse(envelope, isNotEmptyOrDuplicate)
+    if (inputStreamingResponse.isBuffered) ctx.write(inputStreamingResponse.message)
+    else ctx.writeAndFlush(inputStreamingResponse.message)
   }
 
   /**
@@ -134,8 +133,9 @@ abstract class InputTaskEngine(manager: InputTaskManager,
    */
   protected def checkForDuplication(key: String, duplicateCheck: Boolean, value: Array[Byte]): Boolean = {
     logger.info(s"Task name: ${manager.taskName}. " +
-      s"Try to check key: '$key' for duplication with a setting duplicateCheck = '$duplicateCheck'\n")
-    if (duplicateCheck) {
+      s"Try to check key: '$key' for duplication with a setting duplicateCheck = '$duplicateCheck' " +
+      s"and an instance setting - 'duplicate-check' : '${inputInstance.duplicateCheck}'\n")
+    if (inputInstance.duplicateCheck || duplicateCheck) {
       logger.info(s"Task name: ${manager.taskName}. " +
         s"Check key: '$key' for duplication\n")
       evictionPolicy.checkForDuplication(key, value)
@@ -148,54 +148,26 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   override def run(): Unit = {
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Run input task engine in a separate thread of execution service\n")
-    try {
-      while (true) {
-        logger.debug(s"Task name: ${manager.taskName}. Invoke tokenize() method of executor\n")
-        val maybeInterval = executor.tokenize(buffer)
-        if (maybeInterval.isDefined) {
-          logger.debug(s"Task name: ${manager.taskName}. Tokenize() method returned a defined interval\n")
-          val interval = maybeInterval.get
-          if (buffer.isReadable(interval.finalValue)) {
-            logger.debug(s"Task name: ${manager.taskName}. The end index of interval is valid\n")
-            logger.debug(s"Task name: ${manager.taskName}. Invoke parse() method of executor\n")
-            val inputEnvelope: Option[InputEnvelope] = executor.parse(buffer, interval)
-            clearBufferAfterParsing(buffer, interval.finalValue)
-            val isNotDuplicateOrEmpty = processEnvelope(inputEnvelope)
-            envelopeProcessed(inputEnvelope, isNotDuplicateOrEmpty)
-            doCheckpoint(moduleEnvironmentManager.isCheckpointInitiated)
-          } else {
-            logger.error(s"Task name: ${manager.taskName}. " +
-              s"Method tokenize() returned an interval with a final value: ${interval.finalValue} " +
-              s"that an input stream is not defined at (buffer write index: ${buffer.writerIndex()})\n")
-            throw new IndexOutOfBoundsException(s"Task name: ${manager.taskName}. " +
-              s"Method tokenize() returned an interval with a final value: ${interval.finalValue} " +
-              s"that an input stream is not defined at (buffer write index: ${buffer.writerIndex()})")
-          }
-        }
-      }
-    } finally {
-      logger.debug(s"Task name: ${manager.taskName}. Release a buffer that contains incoming bytes\n")
-      ReferenceCountUtil.release(buffer)
+    while (true) {
+      val maybeMsg = tokenizedMsgQueue.poll()
+      if (maybeMsg != null) {
+        val (ctx, buffer) = maybeMsg
+        logger.debug(s"Task name: ${manager.taskName}. Tokenize() method returned a defined interval\n")
+        logger.debug(s"Task name: ${manager.taskName}. Invoke parse() method of executor\n")
+        val inputEnvelope: Option[InputEnvelope] = executor.parse(buffer)
+        val isNotDuplicateOrEmpty = processEnvelope(inputEnvelope)
+        envelopeProcessed(inputEnvelope, isNotDuplicateOrEmpty, ctx)
+        doCheckpoint(moduleEnvironmentManager.isCheckpointInitiated, ctx)
+      } else logger.debug(s"Task name: ${manager.taskName}. A message queue is empty\n")
     }
   }
 
   /**
    * Does group checkpoint of t-streams consumers/producers
    * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside input module (not on the schedule) or not.
+   * @param ctx Channel context related with this input envelope to send a message about this event
    */
-  protected def doCheckpoint(isCheckpointInitiated: Boolean): Unit
-
-  /**
-   *
-   * @param buffer A buffer for keeping incoming bytes
-   * @param endIndex Index that was last at reading
-   */
-  protected def clearBufferAfterParsing(buffer: ByteBuf, endIndex: Int) = {
-    logger.debug(s"Task name: ${manager.taskName}. " +
-      s"Remove a message, which have just been parsed, from input buffer\n")
-    buffer.readerIndex(endIndex + 1)
-    buffer.discardReadBytes()
-  }
+  protected def doCheckpoint(isCheckpointInitiated: Boolean, ctx: ChannelHandlerContext): Unit
 
   /**
    * Retrieves a txn for specific stream and partition
@@ -262,9 +234,9 @@ abstract class InputTaskEngine(manager: InputTaskManager,
    */
   private def createEvictionPolicy() = {
     inputInstance.evictionPolicy match {
-      case "fix-time" => new FixTimeEvictionPolicy(manager)
-      case "expanded-time" => new ExpandedTimeEvictionPolicy(manager)
-      case _ => new FixTimeEvictionPolicy(manager)
+      case "fix-time" => new FixTimeEvictionPolicy(inputInstance)
+      case "expanded-time" => new ExpandedTimeEvictionPolicy(inputInstance)
+      case _ => new FixTimeEvictionPolicy(inputInstance)
     }
   }
 }

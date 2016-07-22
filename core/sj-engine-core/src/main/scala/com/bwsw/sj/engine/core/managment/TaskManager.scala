@@ -4,7 +4,6 @@ import java.io.File
 import java.net.{InetSocketAddress, URLClassLoader}
 
 import com.aerospike.client.Host
-import com.bwsw.common.tstream.NetworkTimeUUIDGenerator
 import com.bwsw.sj.common.ConfigConstants._
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.Instance
@@ -24,7 +23,7 @@ import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
 import com.bwsw.tstreams.data.IStorage
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStorageOptions}
 import com.bwsw.tstreams.data.cassandra.{CassandraStorageFactory, CassandraStorageOptions}
-import com.bwsw.tstreams.generator.{IUUIDGenerator, LocalTimeUUIDGenerator}
+import com.bwsw.tstreams.generator.IUUIDGenerator
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.policy.RoundRobinPolicy
 import com.bwsw.tstreams.services.BasicStreamService
@@ -60,12 +59,7 @@ abstract class TaskManager() {
   protected val retryCount = configService.get(tgRetryCountTag).value.toInt
   protected val zkSessionTimeout = configService.get(zkSessionTimeoutTag).value.toInt
   protected val zkConnectionTimeout = configService.get(zkConnectionTimeoutTag).value.toInt
-
-  /**
-   * An auxiliary service to retrieve settings of TStream providers
-   */
-  val tSjStream = instance.outputs.union(instance.inputs).map(s => streamDAO.get(s)).filter(s => s.streamType.equals(tStream)).head
-  protected val tStreamService = tSjStream.service.asInstanceOf[TStreamService]
+  protected val tStreamService = getTStreamService
 
   protected val zkHosts = tStreamService.lockProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList
 
@@ -123,6 +117,15 @@ abstract class TaskManager() {
 
         (new CassandraStorageFactory).getInstance(options)
     }
+  }
+
+  /**
+   * Creates an auxiliary service to retrieve settings of TStream providers
+   */
+  private def getTStreamService = {
+    val streams = if (instance.inputs != null) instance.outputs.union(instance.inputs) else instance.outputs
+    val sjStream = streams.map(s => streamDAO.get(s)).filter(s => s.streamType.equals(tStream)).head
+    sjStream.service.asInstanceOf[TStreamService]
   }
 
   /**
@@ -198,14 +201,14 @@ abstract class TaskManager() {
   }
 
   /**
-    * Creates a t-stream consumer with pub/sub property
-    *
-    * @param stream SjStream from which massages are consumed
-    * @param partitions Range of stream partition
-    * @param offset Offset policy that describes where a consumer starts
-    * @param callback Subscriber callback for t-stream consumer
-    * @return T-stream subscribing consumer
-    */
+   * Creates a t-stream consumer with pub/sub property
+   *
+   * @param stream SjStream from which massages are consumed
+   * @param partitions Range of stream partition
+   * @param offset Offset policy that describes where a consumer starts
+   * @param callback Subscriber callback for t-stream consumer
+   * @return T-stream subscribing consumer
+   */
   def createSubscribingConsumer(stream: SjStream,
                                 partitions: List[Int],
                                 offset: IOffset,
@@ -261,8 +264,8 @@ abstract class TaskManager() {
 
   /**
    * Create t-stream producers for each output stream
-    *
-    * @return Map where key is stream name and value is t-stream producer
+   *
+   * @return Map where key is stream name and value is t-stream producer
    */
   def createOutputProducers = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
@@ -348,10 +351,10 @@ abstract class TaskManager() {
   def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor
 
   /**
-    * Returns an instance of executor of module
-    *
-    * @return An instance of executor of module
-    */
+   * Returns an instance of executor of module
+   *
+   * @return An instance of executor of module
+   */
   def getExecutor: StreamingExecutor
 
   //todo to make all common of managers of tasks to here

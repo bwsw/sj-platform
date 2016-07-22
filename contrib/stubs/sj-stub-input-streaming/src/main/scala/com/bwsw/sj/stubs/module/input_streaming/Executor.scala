@@ -1,16 +1,15 @@
 package com.bwsw.sj.stubs.module.input_streaming
 
-import java.util.UUID
-
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.engine.core.entities.InputEnvelope
 import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
-import com.bwsw.sj.engine.core.input.{Interval, InputStreamingExecutor}
+import com.bwsw.sj.engine.core.input.{InputStreamingExecutor, Interval}
 import io.netty.buffer.ByteBuf
 
 
 class Executor(manager: InputEnvironmentManager) extends InputStreamingExecutor(manager) {
 
+  var key = 1
   val objectSerializer = new ObjectSerializer()
   val outputs = manager.getStreamsByTags(Array("output"))
 
@@ -29,26 +28,22 @@ class Executor(manager: InputEnvironmentManager) extends InputStreamingExecutor(
   /**
    * Will be invoked after each calling tokenize method if tokenize doesn't return None
    * @param buffer Input stream is a flow of bytes
-   * @param interval Defines the boundaries of an input envelope
    * @return Input envelope or None
    */
-  override def parse(buffer: ByteBuf, interval: Interval): Option[InputEnvelope] = {
+  override def parse(buffer: ByteBuf): Option[InputEnvelope] = {
+
+    val data = new Array[Byte](buffer.writableBytes())
+    buffer.getBytes(0, data)
 
     val envelope = new InputEnvelope(
-      UUID.randomUUID().toString,
+      key.toString,
       Array((outputs.head, 0)),
       true,
-      buffer.slice(interval.initialValue, interval.finalValue - 1).array())
+      data
+    )
+
+    if (key != 5) key += 1 else key = 1
 
     Some(envelope)
   }
 }
-//
-//object aaa extends App {
-//  val array = Array[Byte](2, 3, 44, 5, 10, 13, 10, 13, 3, 4, 5, 5)
-//  val array1 = Array[Byte](10, 13)
-//
-//  val i = array.indexOfSlice(array1)
-//  println(i)
-//
-//}
