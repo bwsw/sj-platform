@@ -1,20 +1,25 @@
 package com.bwsw.sj.engine.input.task.engine
 
+import java.util.concurrent.ArrayBlockingQueue
+
 import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.sj.engine.input.task.InputTaskManager
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import io.netty.buffer.ByteBuf
+import io.netty.channel.ChannelHandlerContext
 
 /**
  * Provides methods are responsible for a basic execution logic of task of input module
  * that has a checkpoint based on time
  *
  * @param manager Manager of environment of task of input module
+ * @param performanceMetrics Set of metrics that characterize performance of a input streaming module
+ * @param tokenizedMsgQueue Queue for keeping a part of incoming bytes that will become an input envelope with the channel context
  */
 class TimeCheckpointInputTaskEngine(manager: InputTaskManager,
                                     performanceMetrics: InputStreamingPerformanceMetrics,
-                                    buffer: ByteBuf)
-  extends InputTaskEngine(manager, performanceMetrics, buffer) {
+                                    tokenizedMsgQueue: ArrayBlockingQueue[(ChannelHandlerContext, ByteBuf)])
+  extends InputTaskEngine(manager, performanceMetrics, tokenizedMsgQueue) {
 
   private val checkpointTimer: Option[SjTimer] = createTimer()
   val isNotOnlyCustomCheckpoint = checkpointTimer.isDefined
@@ -43,13 +48,14 @@ class TimeCheckpointInputTaskEngine(manager: InputTaskManager,
   /**
    * Does group checkpoint of t-streams consumers/producers
    * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside input module (not on the schedule) or not.
+   * @param ctx Channel context related with this input envelope to send a message about this event
    */
-  def doCheckpoint(isCheckpointInitiated: Boolean) = {
+  def doCheckpoint(isCheckpointInitiated: Boolean, ctx: ChannelHandlerContext) = {
     if (isNotOnlyCustomCheckpoint && checkpointTimer.get.isTime || isCheckpointInitiated) {
       logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
       logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
       checkpointGroup.commit()
-      checkpointInitiated()
+      checkpointInitiated(ctx)
       txnsByStreamPartitions = createTxnsStorage(streams)
       resetTimer()
     }

@@ -1,16 +1,18 @@
 package com.bwsw.sj.engine.input.eviction_policy
 
-import com.bwsw.sj.engine.input.task.InputTaskManager
+import com.bwsw.sj.common.DAL.model.module.InputInstance
 
 /**
  * Provides methods are responsible for a fix time eviction policy of input envelope duplicates.
  * In this case a specific key will be kept within fix time
  * Created: 14/07/2016
  *
+ * @param instance Input instance contains a settings of an eviction policy
+ *                 (message TTL, a default eviction policy and a maximum size of message queue)
  * @author Kseniya Mikhaleva
  */
 
-class FixTimeEvictionPolicy(manager: InputTaskManager) extends EvictionPolicy(manager) {
+class FixTimeEvictionPolicy(instance: InputInstance) extends EvictionPolicy(instance) {
 
   /**
    * Checks whether a specific key is duplicate or not
@@ -19,11 +21,14 @@ class FixTimeEvictionPolicy(manager: InputTaskManager) extends EvictionPolicy(ma
    * @return True if the key is not duplicate and false in other case
    */
   def checkForDuplication(key: String, value: Array[Byte]): Boolean = {
+    logger.debug(s"Check for duplicate key: $key")
     if (!uniqueEnvelopes.containsKey(key)) {
+      logger.debug(s"The key: $key is not duplicate")
       uniqueEnvelopes.put(key, value)
       true
     }
     else {
+      logger.debug(s"The key: $key is duplicate")
       false
     }
   }

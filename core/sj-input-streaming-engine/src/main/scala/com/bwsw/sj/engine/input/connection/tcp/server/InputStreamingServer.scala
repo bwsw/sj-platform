@@ -1,5 +1,8 @@
 package com.bwsw.sj.engine.input.connection.tcp.server
 
+import java.util.concurrent.ArrayBlockingQueue
+
+import com.bwsw.sj.engine.core.input.InputStreamingExecutor
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.buffer.ByteBuf
 import io.netty.channel._
@@ -14,12 +17,14 @@ import io.netty.handler.logging.{LogLevel, LoggingHandler}
  * Than wait until the server socket is closed gracefully shut down the server.
  * @param host Host of server
  * @param port Port of server
- * @param buffer An auxiliary buffer for keeping incoming bytes
+ * @param executor Executor of an input streaming module that is defined by a user
+ * @param tokenizedMsgQueue Queue for keeping a part of incoming bytes that will become an input envelope with the channel context
  */
-class InputStreamingServer(host: String, port: Int, buffer: ByteBuf) {
+class InputStreamingServer(host: String,
+                           port: Int,
+                           executor: InputStreamingExecutor,
+                           tokenizedMsgQueue: ArrayBlockingQueue[(ChannelHandlerContext, ByteBuf)]) {
 
-  protected val inputStreamingChannelInitializer = new InputStreamingChannelInitializer(buffer)
-  
   def run() = {
     val bossGroup: EventLoopGroup = new NioEventLoopGroup()
     val workerGroup = new NioEventLoopGroup()
@@ -28,7 +33,7 @@ class InputStreamingServer(host: String, port: Int, buffer: ByteBuf) {
       bootstrapServer.group(bossGroup, workerGroup)
         .channel(classOf[NioServerSocketChannel])
         .handler(new LoggingHandler(LogLevel.INFO))
-        .childHandler(inputStreamingChannelInitializer)
+        .childHandler(new InputStreamingChannelInitializer(executor, tokenizedMsgQueue))
 
       bootstrapServer.bind(host, port).sync().channel().closeFuture().sync()
     } finally {

@@ -1,13 +1,14 @@
 package com.bwsw.sj.engine.input
 
-import java.util.concurrent.{ExecutorService, Executors}
+import java.util.concurrent.{ArrayBlockingQueue, ExecutorService, Executors}
 
 import com.bwsw.sj.engine.input.connection.tcp.server.InputStreamingServer
 import com.bwsw.sj.engine.input.task.InputTaskManager
 import com.bwsw.sj.engine.input.task.engine.InputTaskEngineFactory
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import com.google.common.util.concurrent.ThreadFactoryBuilder
-import io.netty.buffer.{ByteBuf, Unpooled}
+import io.netty.buffer.ByteBuf
+import io.netty.channel.ChannelHandlerContext
 import org.slf4j.LoggerFactory
 
 /**
@@ -21,20 +22,21 @@ object InputTaskRunner {
 
   val logger = LoggerFactory.getLogger(this.getClass)
   val countOfThreads = 2
+  val queueSize = 1000
 
   def main(args: Array[String]) {
 
     val threadFactory = createThreadFactory()
     val executorService = Executors.newFixedThreadPool(countOfThreads, threadFactory)
 
-    val buffer: ByteBuf = Unpooled.buffer()
+    val tokenizedMsgQueue = new ArrayBlockingQueue[(ChannelHandlerContext, ByteBuf)](queueSize)
 
     val manager: InputTaskManager = new InputTaskManager()
     logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for input module\n")
 
     val performanceMetrics = new InputStreamingPerformanceMetrics(manager)
 
-    val inputTaskEngineFactory = new InputTaskEngineFactory(manager, performanceMetrics, buffer)
+    val inputTaskEngineFactory = new InputTaskEngineFactory(manager, performanceMetrics, tokenizedMsgQueue)
 
     val inputTaskEngine = inputTaskEngineFactory.createInputTaskEngine()
 
@@ -50,7 +52,7 @@ object InputTaskRunner {
 
     logger.info(s"Task: ${manager.taskName}. " +
       s"Launch input streaming server on: '${manager.agentsHost}:${manager.entryPort}'\n")
-    new InputStreamingServer(manager.agentsHost, manager.entryPort, buffer).run()
+    new InputStreamingServer(manager.agentsHost, manager.entryPort, inputTaskEngine.executor, tokenizedMsgQueue).run()
   }
 
   def createThreadFactory() = {

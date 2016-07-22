@@ -24,11 +24,31 @@ class InputStreamingExecutor(manager: InputEnvironmentManager) extends Streaming
 
   /**
    * Will be invoked after each calling tokenize method if tokenize doesn't return None
-   * @param buffer Input stream is a flow of bytes
-   * @param interval Defines the boundaries of an input envelope
+   * @param buffer A part of an input stream, which had been defined with boundaries that returned a tokenize method
    * @return Input envelope or None
    */
-  def parse(buffer: ByteBuf, interval: Interval): Option[InputEnvelope] = {
+  def parse(buffer: ByteBuf): Option[InputEnvelope] = {
     None
+  }
+
+  def createProcessedMessageResponse(envelope: Option[InputEnvelope], isNotEmptyOrDuplicate: Boolean): InputStreamingResponse = {
+    var message = ""
+    var isBuffered = true
+    if (isNotEmptyOrDuplicate) {
+      println(s"Input envelope with key: '${envelope.get.key}' has been sent\n") //todo for testing
+      message = s"Input envelope with key: '${envelope.get.key}' has been sent\n"
+      isBuffered = false
+    } else if (envelope.isDefined) {
+      println(s"Input envelope with key: '${envelope.get.key}' is duplicate\n") //todo for testing
+      message = s"Input envelope with key: '${envelope.get.key}' is duplicate\n"
+    } else {
+      println(s"Input envelope is empty\n") //todo for testing
+      message = s"Input envelope is empty\n"
+    }
+    InputStreamingResponse(message, isBuffered)
+  }
+
+  def createCheckpointResponse(): InputStreamingResponse = {
+    InputStreamingResponse(s"Checkpoint has been done\n", isBuffered = false)
   }
 }
