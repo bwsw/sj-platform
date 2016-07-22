@@ -1,4 +1,4 @@
-package com.bwsw.sj.mesos.framework
+package com.bwsw.sj.mesos.framework.task
 
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos._
@@ -27,7 +27,7 @@ object StatusHandler {
         TasksList(status.getTaskId.getValue).foreach(x => x.update(
           node = "", reason = status.getMessage
         ))
-        logger.info(s"Error: ${status.getMessage}")
+        logger.error(s"Error: ${status.getMessage}")
 
         TasksList.addToLaunch(status.getTaskId.getValue)
         logger.info("Added task to launch")

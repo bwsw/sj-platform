@@ -1,8 +1,9 @@
-package com.bwsw.sj.mesos.framework
+package com.bwsw.sj.mesos.framework.rest
 
+import com.bwsw.common.JsonSerializer
+import com.bwsw.sj.mesos.framework.task.TasksList
 import unfiltered.request._
 import unfiltered.response._
-import com.bwsw.common.JsonSerializer
 
 /**
   * Created by diryavkin_dn on 16.05.16.

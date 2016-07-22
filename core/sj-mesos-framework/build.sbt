@@ -7,14 +7,9 @@ scalaVersion := "2.11.7"
 libraryDependencies ++= Seq(
   "org.apache.mesos" % "mesos" % "0.28.1",
   "net.databinder" % "unfiltered-filter_2.11" % "0.8.4",
-  "net.databinder" % "unfiltered-jetty_2.11" % "0.8.4"
+  "net.databinder" % "unfiltered-jetty_2.11" % "0.8.4",
+  "org.slf4j" % "slf4j-simple" % "1.7.21"
 )
-
-libraryDependencies ++= Seq("org.slf4j" % "slf4j-api" % "1.7.5",
-  "org.slf4j" % "slf4j-simple" % "1.7.5",
-  "org.clapper" %% "grizzled-slf4j" % "1.0.2")
-
-resolvers += "Mesosphere Repo" at "http://downloads.mesosphere.io/maven"
 
 scalacOptions += "-Ylog-classpath"
 
