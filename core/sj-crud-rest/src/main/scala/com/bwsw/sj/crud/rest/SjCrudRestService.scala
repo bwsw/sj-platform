@@ -15,6 +15,7 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.DAL.model.ConfigSetting
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.crud.rest.utils.InstanceUtil
 
 import scala.concurrent.Future
 import scala.io.StdIn
@@ -22,6 +23,7 @@ import scala.io.StdIn
 /**
  * Run object of CRUD Rest-API
  * Created: 06/04/2016
+ *
  * @author Kseniya Tomskikh
  */
 object SjCrudRestService extends App with SjCrudRouter {
@@ -65,6 +67,8 @@ object SjCrudRestService extends App with SjCrudRouter {
   val logger = Logging(system, getClass)
 
   //putRestSettingsToConfigFile()
+
+  InstanceUtil.checkStatusInstances()
 
   val serverBinding: Future[ServerBinding] = Http().bindAndHandle(routeLogged, interface = restHost, port = restPort)
 

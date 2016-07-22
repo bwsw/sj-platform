@@ -8,6 +8,7 @@ import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.common.exceptions.{BadRecordWithKey, NotFoundException}
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.crud.rest.entities._
+import com.bwsw.sj.crud.rest.entities.provider.ProviderData
 import com.bwsw.sj.crud.rest.utils.ConvertUtil.providerToProviderData
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.provider.ProviderValidator

@@ -9,7 +9,9 @@ import com.bwsw.common.exceptions.BadRecordWithKey
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.StreamConstants
+import com.bwsw.sj.common.ModuleConstants._
 import com.bwsw.sj.crud.rest.entities._
+import com.bwsw.sj.crud.rest.entities.stream.SjStreamData
 import com.bwsw.sj.crud.rest.utils.ConvertUtil.streamToStreamData
 import com.bwsw.sj.crud.rest.utils.StreamUtil
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
@@ -48,14 +50,14 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
           if (errors.isEmpty) {
             stream match {
               case s: TStreamSjStream =>
-                val streamCheckResult = StreamUtil.checkAndCreateTStream(s)
+                val streamCheckResult = StreamUtil.checkAndCreateTStream(s, data.force)
                 streamCheckResult match {
                   case Left(err) => errors += err
                   case _ =>
                 }
               case s: KafkaSjStream =>
                 try {
-                  val streamCheckResult = StreamUtil.checkAndCreateKafkaTopic(s)
+                  val streamCheckResult = StreamUtil.checkAndCreateKafkaTopic(s, data.force)
                   streamCheckResult match {
                     case Left(err) => errors += err
                     case _ =>
@@ -67,13 +69,13 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
                   )
                 }
               case s: ESSjStream =>
-                  val streamCheckResult = StreamUtil.checkAndCreateEsStream(s)
+                  val streamCheckResult = StreamUtil.checkAndCreateEsStream(s, data.force)
                   streamCheckResult match {
                     case Left(err) => errors += err
                     case _ =>
                   }
               case s: JDBCSjStream =>
-                val streamCheckResult = StreamUtil.checkAndCreateJdbcStream(s)
+                val streamCheckResult = StreamUtil.checkAndCreateJdbcStream(s, data.force)
                 streamCheckResult match {
                   case Left(err) => errors += err
                   case _ =>
@@ -129,7 +131,11 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
           delete {
 
             val instances = instanceDAO.getAll.filter { (inst: Instance) =>
-              inst.inputs.map(_.replaceAll("/split|/full", "")).contains(streamName) || inst.outputs.contains(streamName)
+              if (!inst.moduleType.equals(inputStreamingType)) {
+                inst.inputs.map(_.replaceAll("/split|/full", "")).contains(streamName) || inst.outputs.contains(streamName)
+              } else {
+                inst.outputs.contains(streamName)
+              }
             }
 
             if (instances.isEmpty) {
@@ -137,6 +143,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
 
               var response: ProtocolResponse = null
               if (stream != null) {
+                StreamUtil.deleteStream(stream)
                 streamDAO.delete(streamName)
                 response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
                   messages.getString("rest.streams.stream.deleted"),

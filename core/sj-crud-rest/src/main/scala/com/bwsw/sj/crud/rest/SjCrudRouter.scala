@@ -9,8 +9,8 @@ import akka.http.scaladsl.model.{EntityStreamSizeException, HttpEntity, HttpResp
 import akka.http.scaladsl.server.{Directives, ExceptionHandler}
 import com.bwsw.common.exceptions._
 import com.bwsw.sj.crud.rest.api._
+import com.bwsw.sj.crud.rest.cors.CorsSupport
 import com.bwsw.sj.crud.rest.entities.ProtocolResponse
-import com.bwsw.sj.crud.rest.utils.CorsSupport
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
 import org.everit.json.schema.ValidationException
 
@@ -21,13 +21,13 @@ import org.everit.json.schema.ValidationException
  * @author Kseniya Tomskikh
  */
 trait SjCrudRouter extends Directives
-with CorsSupport
-with SjModulesApi
-with SjCustomApi
-with SjStreamsApi
-with SjServicesApi
-with SjProvidersApi
-with SjConfigSettingsApi {
+  with CorsSupport
+  with SjModulesApi
+  with SjCustomApi
+  with SjStreamsApi
+  with SjServicesApi
+  with SjProvidersApi
+  with SjConfigSettingsApi {
 
   val exceptionHandler = ExceptionHandler {
     case BadRecord(msg) =>
@@ -75,6 +75,7 @@ with SjConfigSettingsApi {
           messages.getString("rest.errors.unrecognized_property"), ex.getPropertyName, ex.getKnownPropertyIds)))))
       ))
     case ex: Exception =>
+      ex.printStackTrace()
       complete(HttpResponse(
         InternalServerError,
         entity = HttpEntity(`application/json`, serializer.serialize(ProtocolResponse(500, Map("message" -> MessageFormat.format(
@@ -87,11 +88,11 @@ with SjConfigSettingsApi {
       corsHandler {
         pathPrefix("v1") {
           modulesApi ~
-            customApi ~
-            streamsApi ~
-            servicesApi ~
-            providersApi ~
-            configSettingsApi
+          customApi ~
+          streamsApi ~
+          servicesApi ~
+          providersApi ~
+          configSettingsApi
         }
       }
     }

@@ -36,7 +36,11 @@ class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable {
     */
   def deleteGenerators(instance: Instance) = {
     logger.debug(s"Instance: ${instance.name}. Deleting generators.")
-    val allStreams = instance.inputs.map(_.replaceAll("/split|/full", "")).union(instance.outputs).map(streamDAO.get)
+    var instanceStreams = instance.outputs
+    if (!instance.moduleType.equals(inputStreamingType)) {
+      instanceStreams = instanceStreams.union(instance.inputs.map(_.replaceAll("/split|/full", "")))
+    }
+    val allStreams = instanceStreams.map(streamDAO.get)
     val startedInstances = instanceDAO.getByParameters(Map("status" -> started))
     val startingInstance = startedInstances.union(instanceDAO.getByParameters(Map("status" -> starting)))
     val tStreamStreamsToStop = allStreams

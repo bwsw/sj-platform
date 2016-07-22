@@ -4,6 +4,7 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.crud.rest.entities._
+import com.bwsw.sj.crud.rest.entities.stream.{KafkaSjStreamData, TStreamSjStreamData, SjStreamData}
 import com.bwsw.sj.crud.rest.validator.provider.ProviderValidator
 import org.slf4j.LoggerFactory
 
