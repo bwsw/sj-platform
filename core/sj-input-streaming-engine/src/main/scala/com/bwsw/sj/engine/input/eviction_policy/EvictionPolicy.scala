@@ -15,12 +15,11 @@ import org.slf4j.LoggerFactory
  */
 
 abstract class EvictionPolicy(instance: InputInstance) {
-  protected val uniqueEnvelopes = getUniqueEnvelopes
-
   protected val logger = LoggerFactory.getLogger(this.getClass)
   private val hazelcastMapName = "inputEngine"
   private val config = createHazelcastConfig()
   private val hazelcastInstance = Hazelcast.newHazelcastInstance(config)
+  protected val uniqueEnvelopes = getUniqueEnvelopes
 
   /**
    * Checks whether a specific key is duplicate or not

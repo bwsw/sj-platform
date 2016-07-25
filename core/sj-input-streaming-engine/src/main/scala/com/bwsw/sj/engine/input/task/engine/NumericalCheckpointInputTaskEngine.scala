@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.input.task.engine
 
-import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.{ConcurrentHashMap, ArrayBlockingQueue}
 
 import com.bwsw.sj.engine.core.entities.InputEnvelope
 import com.bwsw.sj.engine.input.task.InputTaskManager
@@ -8,18 +8,22 @@ import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 
+import scala.collection.concurrent
+
 /**
  * Provides methods are responsible for a basic execution logic of task of input module
  * that has an every-nth checkpoint mode
  *
  * @param manager Manager of environment of task of input module
  * @param performanceMetrics Set of metrics that characterize performance of a input streaming module
- * @param tokenizedMsgQueue Queue for keeping a part of incoming bytes that will become an input envelope with the channel context
+ * @param channelContextQueue Queue for keeping a channel context to process messages (byte buffer) in their turn
+ * @param bufferForEachContext Map for keeping a buffer containing incoming bytes with the channel context
  */
 class NumericalCheckpointInputTaskEngine(manager: InputTaskManager,
                                          performanceMetrics: InputStreamingPerformanceMetrics,
-                                         tokenizedMsgQueue: ArrayBlockingQueue[(ChannelHandlerContext, ByteBuf)])
-  extends InputTaskEngine(manager, performanceMetrics, tokenizedMsgQueue) {
+                                         channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
+                                         bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf])
+  extends InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext) {
 
   private var countOfEnvelopes = 0
   val isNotOnlyCustomCheckpoint = inputInstance.checkpointInterval > 0

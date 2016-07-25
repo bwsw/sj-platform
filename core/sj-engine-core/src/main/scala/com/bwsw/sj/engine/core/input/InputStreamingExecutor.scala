@@ -27,7 +27,7 @@ class InputStreamingExecutor(manager: InputEnvironmentManager) extends Streaming
    * @param buffer A part of an input stream, which had been defined with boundaries that returned a tokenize method
    * @return Input envelope or None
    */
-  def parse(buffer: ByteBuf): Option[InputEnvelope] = {
+  def parse(buffer: ByteBuf, interval: Interval): Option[InputEnvelope] = {
     None
   }
 

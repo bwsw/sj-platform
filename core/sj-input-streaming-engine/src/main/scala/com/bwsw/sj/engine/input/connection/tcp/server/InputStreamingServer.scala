@@ -10,6 +10,8 @@ import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.handler.logging.{LogLevel, LoggingHandler}
 
+import scala.collection.concurrent
+
 
 /**
  * Input streaming server that sets up a server listening the specific host and port.
@@ -18,12 +20,14 @@ import io.netty.handler.logging.{LogLevel, LoggingHandler}
  * @param host Host of server
  * @param port Port of server
  * @param executor Executor of an input streaming module that is defined by a user
- * @param tokenizedMsgQueue Queue for keeping a part of incoming bytes that will become an input envelope with the channel context
+ * @param channelContextQueue Queue for keeping a channel context to process messages (byte buffer) in their turn
+ * @param bufferForEachContext Map for keeping a buffer containing incoming bytes with the channel context
  */
 class InputStreamingServer(host: String,
                            port: Int,
                            executor: InputStreamingExecutor,
-                           tokenizedMsgQueue: ArrayBlockingQueue[(ChannelHandlerContext, ByteBuf)]) {
+                           channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
+                           bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf]) {
 
   def run() = {
     val bossGroup: EventLoopGroup = new NioEventLoopGroup()
@@ -33,7 +37,7 @@ class InputStreamingServer(host: String,
       bootstrapServer.group(bossGroup, workerGroup)
         .channel(classOf[NioServerSocketChannel])
         .handler(new LoggingHandler(LogLevel.INFO))
-        .childHandler(new InputStreamingChannelInitializer(executor, tokenizedMsgQueue))
+        .childHandler(new InputStreamingChannelInitializer(executor,  channelContextQueue, bufferForEachContext))
 
       bootstrapServer.bind(host, port).sync().channel().closeFuture().sync()
     } finally {

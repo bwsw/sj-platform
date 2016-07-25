@@ -24,12 +24,14 @@ import scala.collection._
  *
  * @param manager Manager of environment of task of input module
  * @param performanceMetrics Set of metrics that characterize performance of a input streaming module
- * @param tokenizedMsgQueue Queue for keeping a part of incoming bytes that will become an input envelope with the channel context
+ * @param channelContextQueue Queue for keeping a channel context to process messages (byte buffer) in their turn
+ * @param bufferForEachContext Map for keeping a buffer containing incoming bytes with the channel context
  * @author Kseniya Mikhaleva
  */
 abstract class InputTaskEngine(manager: InputTaskManager,
                                performanceMetrics: InputStreamingPerformanceMetrics,
-                               tokenizedMsgQueue: ArrayBlockingQueue[(ChannelHandlerContext, ByteBuf)]) extends Runnable {
+                               channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
+                               bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf]) extends Runnable {
 
   protected val logger = LoggerFactory.getLogger(this.getClass)
   protected val producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]] = manager.createOutputProducers
@@ -149,17 +151,49 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Run input task engine in a separate thread of execution service\n")
     while (true) {
-      val maybeMsg = tokenizedMsgQueue.poll()
-      if (maybeMsg != null) {
-        val (ctx, buffer) = maybeMsg
-        logger.debug(s"Task name: ${manager.taskName}. Tokenize() method returned a defined interval\n")
-        logger.debug(s"Task name: ${manager.taskName}. Invoke parse() method of executor\n")
-        val inputEnvelope: Option[InputEnvelope] = executor.parse(buffer)
-        val isNotDuplicateOrEmpty = processEnvelope(inputEnvelope)
-        envelopeProcessed(inputEnvelope, isNotDuplicateOrEmpty, ctx)
-        doCheckpoint(moduleEnvironmentManager.isCheckpointInitiated, ctx)
-      } else logger.debug(s"Task name: ${manager.taskName}. A message queue is empty\n")
+      var channelContext = channelContextQueue.poll()
+      if (channelContext == null) channelContext = getCtxOfNonEmptyBuffer()
+      if (channelContext != null) {
+        logger.debug(s"Task name: ${manager.taskName}. Invoke tokenize() method of executor\n")
+        val buffer = bufferForEachContext(channelContext)
+        val maybeInterval = executor.tokenize(buffer)
+        if (maybeInterval.isDefined) {
+          logger.debug(s"Task name: ${manager.taskName}. Tokenize() method returned a defined interval\n")
+          val interval = maybeInterval.get
+          if (buffer.isReadable(interval.finalValue)) {
+            logger.debug(s"Task name: ${manager.taskName}. The end index of interval is valid\n")
+            logger.debug(s"Task name: ${manager.taskName}. Invoke parse() method of executor\n")
+            val inputEnvelope: Option[InputEnvelope] = executor.parse(buffer, interval)
+            clearBufferAfterTokenize(buffer, interval.finalValue)
+            val isNotDuplicateOrEmpty = processEnvelope(inputEnvelope)
+            envelopeProcessed(inputEnvelope, isNotDuplicateOrEmpty, channelContext)
+            doCheckpoint(moduleEnvironmentManager.isCheckpointInitiated, channelContext)
+          } else {
+            logger.error(s"Task name: ${manager.taskName}. " +
+              s"Method tokenize() returned an interval with a final value: ${interval.finalValue} " +
+              s"that an input stream is not defined at (buffer write index: ${buffer.writerIndex()})\n")
+            throw new IndexOutOfBoundsException(s"Task name: ${manager.taskName}. " +
+              s"Method tokenize() returned an interval with a final value: ${interval.finalValue} " +
+              s"that an input stream is not defined at (buffer write index: ${buffer.writerIndex()})")
+          }
+        }
+      } else logger.debug(s"Task name: ${manager.taskName}. Nothing to execute because of a message queue is empty")
     }
+  }
+
+  private def getCtxOfNonEmptyBuffer() = {
+    val maybeCtx = bufferForEachContext.find(x => x._2.readableBytes() > 0)
+    if (maybeCtx.isDefined) maybeCtx.get._1 else null
+  }
+
+  /**
+   * Removes the read bytes of the byte buffer
+   * @param buffer A buffer for keeping incoming bytes
+   * @param endReadingIndex Index that was last at reading
+   */
+  private def clearBufferAfterTokenize(buffer: ByteBuf, endReadingIndex: Int) = {
+    buffer.readerIndex(endReadingIndex + 1)
+    buffer.discardReadBytes()
   }
 
   /**
