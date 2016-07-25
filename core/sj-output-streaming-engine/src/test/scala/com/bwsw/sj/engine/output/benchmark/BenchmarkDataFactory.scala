@@ -110,7 +110,7 @@ object BenchmarkDataFactory {
                         producer: BasicProducer[Array[Byte], Array[Byte]]) = {
     var number = 0
     (0 until countTxns) foreach { (x: Int) =>
-      val txn = producer.newTransaction(ProducerPolicies.errorIfOpen)
+      val txn = producer.newTransaction(ProducerPolicies.errorIfOpened)
       (0 until countElements) foreach { (y: Int) =>
         number += 1
         println("write data " + number)

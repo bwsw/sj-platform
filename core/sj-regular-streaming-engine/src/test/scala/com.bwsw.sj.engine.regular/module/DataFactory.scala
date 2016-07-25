@@ -143,13 +143,13 @@ object DataFactory {
         })
         (1 to outputCount).foreach(x => {
           createOutputTStream(sjStreamService, serviceManager, partitions, x.toString)
-          instanceOutputs = instanceOutputs :+ s"test_output_tstream$x"
+          instanceOutputs = instanceOutputs :+ s"test-output-tstream$x"
         })
       case "kafka" =>
         createKafkaStream(sjStreamService, serviceManager, partitions)
         (1 to outputCount).foreach(x => {
           createOutputTStream(sjStreamService, serviceManager, partitions, x.toString)
-          instanceOutputs = instanceOutputs :+ s"test_output_tstream$x"
+          instanceOutputs = instanceOutputs :+ s"test-output-tstream$x"
         })
         instanceInputs = instanceInputs :+ "test_kafka_input1/split"
         task.inputs.put(s"test_kafka_input1", Array(0, if (partitions > 1) partitions - 1 else 0))
@@ -164,7 +164,7 @@ object DataFactory {
         createKafkaStream(sjStreamService, serviceManager, partitions)
         (1 to outputCount).foreach(x => {
           createOutputTStream(sjStreamService, serviceManager, partitions, x.toString)
-          instanceOutputs = instanceOutputs :+ s"test_output_tstream$x"
+          instanceOutputs = instanceOutputs :+ s"test-output-tstream$x"
         })
         instanceInputs = instanceInputs :+ "test_kafka_input1/split"
         task.inputs.put(s"test_kafka_input1", Array(0, if (partitions > 1) partitions - 1 else 0))
@@ -193,7 +193,7 @@ object DataFactory {
   private def createInputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
     val localGenerator = new Generator("local")
 
-    val tService = serviceManager.get("tstream test service")
+    val tService = serviceManager.get("tstream_test_service")
 
     val s1 = new TStreamSjStream("test_input_tstream" + suffix, "test_input_tstream", partitions, tService, StreamConstants.tStream, Array("input"), localGenerator)
     sjStreamService.save(s1)
@@ -211,13 +211,13 @@ object DataFactory {
   private def createOutputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
     val localGenerator = new Generator("local")
 
-    val tService = serviceManager.get("tstream test service")
+    val tService = serviceManager.get("tstream_test_service")
 
-    val s2 = new TStreamSjStream("test_output_tstream" + suffix, "test_output_tstream", partitions, tService, StreamConstants.tStream, Array("output", "some tags"), localGenerator)
+    val s2 = new TStreamSjStream("test-output-tstream" + suffix, "test-output-tstream", partitions, tService, StreamConstants.tStream, Array("output", "some tags"), localGenerator)
     sjStreamService.save(s2)
 
     BasicStreamService.createStream(
-      "test_output_tstream" + suffix,
+      "test-output-tstream" + suffix,
       partitions,
       1000 * 60,
       "description of test output tstream",
@@ -232,8 +232,8 @@ object DataFactory {
   }
 
   private def deleteOutputTStream(streamService: GenericMongoService[SjStream], suffix: String) = {
-    streamService.delete("test_output_tstream" + suffix)
-    BasicStreamService.deleteStream("test_output_tstream" + suffix, metadataStorage)
+    streamService.delete("test-output-tstream" + suffix)
+    BasicStreamService.deleteStream("test-output-tstream" + suffix, metadataStorage)
   }
 
   private def createKafkaStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int) = {
@@ -282,7 +282,7 @@ object DataFactory {
     instance.executionPlan = new ExecutionPlan(Map((instanceName + "-task0", task), (instanceName + "-task1", task)).asJava)
     instance.engine = "com.bwsw.regular.streaming.engine-0.1"
     instance.eventWaitTime = 10
-    instance.coordinationService = serviceManager.get("zookeeper test service").asInstanceOf[ZKService]
+    instance.coordinationService = serviceManager.get("zookeeper_test_service").asInstanceOf[ZKService]
 
     instanceService.save(instance)
   }
@@ -327,7 +327,7 @@ object DataFactory {
       val producer = createProducer(streamService.get("test_input_tstream" + suffix))
       val s = System.nanoTime
       (0 until countTxns) foreach { (x: Int) =>
-        val txn = producer.newTransaction(ProducerPolicies.errorIfOpen)
+        val txn = producer.newTransaction(ProducerPolicies.errorIfOpened)
         (0 until countElements) foreach { (y: Int) =>
           number += 1
           txn.send(objectSerializer.serialize(number.asInstanceOf[Object]))
@@ -423,7 +423,7 @@ object DataFactory {
   }
 
   def createOutputConsumer(streamService: GenericMongoService[SjStream], suffix: String) = {
-    createConsumer("test_output_tstream" + suffix, streamService, "localhost:805" + suffix)
+    createConsumer("test-output-tstream" + suffix, streamService, "localhost:805" + suffix)
   }
 
   private def createProducer(stream: SjStream) = {

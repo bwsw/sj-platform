@@ -113,7 +113,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     } else {
       logger.debug(s"Task name: ${manager.taskName}. Txn for stream/partition: '$stream/$partition' is not defined " +
         s"so create new txn\n")
-      txn = producers(stream).newTransaction(ProducerPolicies.errorIfOpen, partition)
+      txn = producers(stream).newTransaction(ProducerPolicies.errorIfOpened, partition)
       txn.send(data)
       putTxn(stream, partition, txn)
     }

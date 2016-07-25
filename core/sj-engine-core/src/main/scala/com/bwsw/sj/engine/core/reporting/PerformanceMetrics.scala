@@ -96,7 +96,7 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Runnable {
       println(s"Performance metrics: $report \n")
       logger.info(s"Task: $taskName. Performance metrics: $report \n")
       logger.debug(s"Task: $taskName. Create a new txn for sending performance metrics\n")
-      reportTxn = reportProducer.newTransaction(ProducerPolicies.errorIfOpen, taskNumber)
+      reportTxn = reportProducer.newTransaction(ProducerPolicies.errorIfOpened, taskNumber)
       logger.debug(s"Task: $taskName. Send performance metrics\n")
       reportTxn.send(objectSerializer.serialize(report))
       logger.debug(s"Task: $taskName. Do checkpoint of producer for performance reporting\n")

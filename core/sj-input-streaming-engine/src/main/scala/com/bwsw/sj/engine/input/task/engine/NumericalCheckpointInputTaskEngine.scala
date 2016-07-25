@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.input.task.engine
 
-import java.util.concurrent.{ConcurrentHashMap, ArrayBlockingQueue}
+import java.util.concurrent.ArrayBlockingQueue
 
 import com.bwsw.sj.engine.core.entities.InputEnvelope
 import com.bwsw.sj.engine.input.task.InputTaskManager

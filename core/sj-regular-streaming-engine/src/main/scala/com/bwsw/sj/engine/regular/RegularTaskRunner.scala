@@ -204,7 +204,7 @@ object RegularTaskRunner {
                   executor.onBeforeCheckpoint()
                   if (offsetProducer.isDefined) {
                     logger.debug(s"Task: ${manager.taskName}. Save kafka offsets for each kafka input\n")
-                    offsetProducer.get.newTransaction(ProducerPolicies.errorIfOpen)
+                    offsetProducer.get.newTransaction(ProducerPolicies.errorIfOpened)
                       .send(objectSerializer.serialize(manager.kafkaOffsetsStorage))
                   }
                   logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
@@ -277,7 +277,7 @@ object RegularTaskRunner {
                   executor.onBeforeCheckpoint()
                   if (offsetProducer.isDefined) {
                     logger.debug(s"Task: ${manager.taskName}. Save kafka offsets for each kafka input\n")
-                    offsetProducer.get.newTransaction(ProducerPolicies.errorIfOpen)
+                    offsetProducer.get.newTransaction(ProducerPolicies.errorIfOpened)
                       .send(objectSerializer.serialize(manager.kafkaOffsetsStorage))
                   }
                   logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
@@ -403,7 +403,7 @@ object RegularTaskRunner {
 
                   if (offsetProducer.isDefined) {
                     logger.debug(s"Task: ${manager.taskName}. Save kafka offsets for each kafka input\n")
-                    offsetProducer.get.newTransaction(ProducerPolicies.errorIfOpen)
+                    offsetProducer.get.newTransaction(ProducerPolicies.errorIfOpened)
                       .send(objectSerializer.serialize(manager.kafkaOffsetsStorage))
                   }
                   logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
@@ -499,7 +499,7 @@ object RegularTaskRunner {
 
                   if (offsetProducer.isDefined) {
                     logger.debug(s"Task: ${manager.taskName}. Save kafka offsets for each kafka input\n")
-                    offsetProducer.get.newTransaction(ProducerPolicies.errorIfOpen)
+                    offsetProducer.get.newTransaction(ProducerPolicies.errorIfOpened)
                       .send(objectSerializer.serialize(manager.kafkaOffsetsStorage))
                   }
                   logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")

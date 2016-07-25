@@ -225,7 +225,7 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
    */
   private def sendState(state: mutable.Map[String, Any]): UUID = {
     logger.debug(s"Save a full state in t-stream intended for storing/restoring a state\n")
-    val transaction = producer.newTransaction(ProducerPolicies.errorIfOpen)
+    val transaction = producer.newTransaction(ProducerPolicies.errorIfOpened)
     state.foreach((x: (String, Any)) => transaction.send(serializer.serialize(x)))
     transaction.getTxnUUID
   }
@@ -237,7 +237,7 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
    */
   private def sendChanges(uuid: UUID, changes: mutable.Map[String, (String, Any)]) = {
     logger.debug(s"Save a partial state in t-stream intended for storing/restoring a state\n")
-    val transaction = producer.newTransaction(ProducerPolicies.errorIfOpen)
+    val transaction = producer.newTransaction(ProducerPolicies.errorIfOpened)
     transaction.send(serializer.serialize(uuid))
     changes.foreach((x: (String, (String, Any))) => transaction.send(serializer.serialize(x)))
   }

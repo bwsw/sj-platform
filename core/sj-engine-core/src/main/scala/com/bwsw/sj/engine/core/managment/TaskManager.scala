@@ -92,6 +92,10 @@ abstract class TaskManager() {
       keyspace = tStreamService.metadataNamespace)
   }
 
+
+  private val cassandraStorageFactory = new CassandraStorageFactory()
+  private val aerospikeStorageFactory = new AerospikeStorageFactory()
+
   /**
    * Creates data storage for producer/consumer settings
    */
@@ -104,7 +108,7 @@ abstract class TaskManager() {
         val options = new AerospikeStorageOptions(
           tStreamService.dataNamespace,
           tStreamService.dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toList)
-        (new AerospikeStorageFactory).getInstance(options)
+        aerospikeStorageFactory.getInstance(options)
 
       case _ =>
         logger.debug(s"Instance name: $instanceName, task name: $taskName. Create cassandra data storage " +
@@ -115,7 +119,7 @@ abstract class TaskManager() {
           tStreamService.dataNamespace
         )
 
-        (new CassandraStorageFactory).getInstance(options)
+        cassandraStorageFactory.getInstance(options)
     }
   }
 

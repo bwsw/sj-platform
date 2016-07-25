@@ -25,7 +25,7 @@ class PartitionedOutput(producer: BasicProducer[Array[Byte], Array[Byte]],
       txns(partition).send(data)
     }
     else {
-      txns(partition) = producer.newTransaction(ProducerPolicies.errorIfOpen, partition)
+      txns(partition) = producer.newTransaction(ProducerPolicies.errorIfOpened, partition)
       txns(partition).send(data)
     }
 

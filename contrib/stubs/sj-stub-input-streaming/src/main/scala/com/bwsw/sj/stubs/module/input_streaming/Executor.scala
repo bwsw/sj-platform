@@ -9,7 +9,6 @@ import io.netty.buffer.ByteBuf
 
 class Executor(manager: InputEnvironmentManager) extends InputStreamingExecutor(manager) {
 
-  var key = 1
   val objectSerializer = new ObjectSerializer()
   val outputs = manager.getStreamsByTags(Array("output"))
 
@@ -40,13 +39,11 @@ class Executor(manager: InputEnvironmentManager) extends InputStreamingExecutor(
     println("data into parse method " + new String(data) + ";")
 
     val envelope = new InputEnvelope(
-      key.toString,
-      Array((outputs.head, 0)),
+      new String(data),
+      outputs.map(x => (x, 0)),
       true,
       data
     )
-
-    if (key != 5) key += 1 else key = 1
 
     Some(envelope)
   }

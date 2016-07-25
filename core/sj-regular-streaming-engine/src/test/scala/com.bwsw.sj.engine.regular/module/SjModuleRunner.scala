@@ -44,7 +44,7 @@ object SjModuleRunner extends App {
 }
 
 object SjModuleDestroy extends App {
-   LogManager.getLogManager.reset()
+  LogManager.getLogManager.reset()
   val streamService = ConnectionRepository.getStreamService
   val serviceManager = ConnectionRepository.getServiceManager
   val providerService = ConnectionRepository.getProviderService

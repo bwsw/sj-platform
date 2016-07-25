@@ -24,7 +24,7 @@ class RoundRobinOutput(producer: BasicProducer[Array[Byte], Array[Byte]],
       txn.get.send(data)
     }
     else {
-      txn = Some(producer.newTransaction(ProducerPolicies.errorIfOpen))
+      txn = Some(producer.newTransaction(ProducerPolicies.errorIfOpened))
       txn.get.send(data)
     }
 
