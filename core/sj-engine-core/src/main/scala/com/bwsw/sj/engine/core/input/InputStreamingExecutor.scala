@@ -35,14 +35,11 @@ class InputStreamingExecutor(manager: InputEnvironmentManager) extends Streaming
     var message = ""
     var isBuffered = true
     if (isNotEmptyOrDuplicate) {
-      println(s"Input envelope with key: '${envelope.get.key}' has been sent\n") //todo for testing
       message = s"Input envelope with key: '${envelope.get.key}' has been sent\n"
       isBuffered = false
     } else if (envelope.isDefined) {
-      println(s"Input envelope with key: '${envelope.get.key}' is duplicate\n") //todo for testing
       message = s"Input envelope with key: '${envelope.get.key}' is duplicate\n"
     } else {
-      println(s"Input envelope is empty\n") //todo for testing
       message = s"Input envelope is empty\n"
     }
     InputStreamingResponse(message, isBuffered)
