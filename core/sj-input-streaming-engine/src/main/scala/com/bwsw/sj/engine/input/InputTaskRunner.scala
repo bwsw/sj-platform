@@ -47,7 +47,7 @@ object InputTaskRunner {
       executorService.execute(performanceMetrics)
     } catch {
       case exception: Exception => {
-        exceptionHandlerOfExecutorService(exception, executorService)
+        handleExceptionOfExecutorService(exception, executorService)
       }
     }
 
@@ -68,9 +68,9 @@ object InputTaskRunner {
       .build()
   }
 
-  def exceptionHandlerOfExecutorService(exception: Exception, executorService: ExecutorService) = {
+  def handleExceptionOfExecutorService(exception: Exception, executorService: ExecutorService) = {
     exception.printStackTrace()
     executorService.shutdownNow()
     System.exit(-1)
-  }
+  }  //todo подумать над правильностью обработки ошибок в ExecutorService
 }

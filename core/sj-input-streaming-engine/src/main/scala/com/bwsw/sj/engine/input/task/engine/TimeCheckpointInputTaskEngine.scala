@@ -26,6 +26,7 @@ class TimeCheckpointInputTaskEngine(manager: InputTaskManager,
                                     bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf])
   extends InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext) {
 
+  currentThread.setName(s"input-task-${manager.taskName}-engine-with-time-checkpoint")
   private val checkpointTimer: Option[SjTimer] = createTimer()
   val isNotOnlyCustomCheckpoint = checkpointTimer.isDefined
 
@@ -52,25 +53,26 @@ class TimeCheckpointInputTaskEngine(manager: InputTaskManager,
 
   /**
    * Does group checkpoint of t-streams consumers/producers
-   * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside input module (not on the schedule) or not.
    * @param ctx Channel context related with this input envelope to send a message about this event
    */
-  def doCheckpoint(isCheckpointInitiated: Boolean, ctx: ChannelHandlerContext) = {
-    if (isNotOnlyCustomCheckpoint && checkpointTimer.get.isTime || isCheckpointInitiated) {
-      logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
-      logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
-      checkpointGroup.commit()
-      checkpointInitiated(ctx)
-      txnsByStreamPartitions = createTxnsStorage(streams)
-      resetTimer()
-    }
+  override def doCheckpoint(ctx: ChannelHandlerContext) = {
+    super.doCheckpoint(ctx)
+    resetTimer()
+  }
+
+  /**
+   * Check whether a group checkpoint of t-streams consumers/producers have to be done or not
+   * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside input module (not on the schedule) or not.
+   */
+  override protected def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean = {
+    isNotOnlyCustomCheckpoint && checkpointTimer.get.isTime || moduleEnvironmentManager.isCheckpointInitiated
   }
 
   /**
    * Prepares a timer for next circle, e.i. reset a timer and set again
    */
   private def resetTimer() = {
-    if (checkpointTimer.isDefined) {
+    if (isNotOnlyCustomCheckpoint) {
       logger.debug(s"Task: ${manager.taskName}. Prepare a checkpoint timer for next cycle\n")
       checkpointTimer.get.reset()
       setTimer()

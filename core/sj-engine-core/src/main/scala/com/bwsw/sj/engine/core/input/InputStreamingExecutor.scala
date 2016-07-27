@@ -14,7 +14,8 @@ import io.netty.buffer.ByteBuf
 
 class InputStreamingExecutor(manager: InputEnvironmentManager) extends StreamingExecutor {
   /**
-   * Will be invoked every time when a new part of data is received
+   * Will be invoked every time when a new part of data is received.
+   * This method is dealing with
    * @param buffer Input stream is a flow of bytes
    * @return Interval into buffer that probably contains a message or None
    */
@@ -31,6 +32,14 @@ class InputStreamingExecutor(manager: InputEnvironmentManager) extends Streaming
     None
   }
 
+  /**
+   * Will be invoked after each calling parse method.
+   * It is responsible for creating an answer to client about the fact that an envelope is processed
+   * @param envelope Input envelope
+   * @param isNotEmptyOrDuplicate Flag points whether a processed envelope is empty or duplicate or not.
+   *                              If it is true it means a processed envelope is duplicate or empty and false in other case
+   * @return A response containing a relevant information about a processed envelope
+   */
   def createProcessedMessageResponse(envelope: Option[InputEnvelope], isNotEmptyOrDuplicate: Boolean): InputStreamingResponse = {
     var message = ""
     var isBuffered = true
@@ -45,6 +54,11 @@ class InputStreamingExecutor(manager: InputEnvironmentManager) extends Streaming
     InputStreamingResponse(message, isBuffered)
   }
 
+  /**
+   * Will be invoked after a checkpoint has been done.
+   * It is responsible for creating a response to client about the fact that a checkpoint has been done
+   * @return A response containing a relevant information about a done checkpoint
+   */
   def createCheckpointResponse(): InputStreamingResponse = {
     InputStreamingResponse(s"Checkpoint has been done\n", isBuffered = false)
   }

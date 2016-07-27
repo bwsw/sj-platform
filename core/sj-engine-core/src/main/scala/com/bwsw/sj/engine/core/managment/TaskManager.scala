@@ -39,12 +39,9 @@ abstract class TaskManager() {
   val agentsHost = System.getenv("AGENTS_HOST")
   protected val agentsPorts = System.getenv("AGENTS_PORTS").split(",")
   val taskName = System.getenv("TASK_NAME")
-  protected val reportStream = instanceName + "_report"
+  protected val reportStreamName = instanceName + "_report"
   protected val instance: Instance = ConnectionRepository.getInstanceService.get(instanceName)
-
-
   protected var currentPortNumber = 0
-
   private val storage = ConnectionRepository.getFileStorage
   protected val configService = ConnectionRepository.getConfigService
   private val transportTimeout = configService.get(transportTimeoutTag).value.toInt
@@ -69,15 +66,18 @@ abstract class TaskManager() {
       "specification.version" -> instance.moduleVersion)
   ).head
 
+  val outputProducers = createOutputProducers()
+  val reportStream = getReportStream()
+
   /**
    * Converter to convert usertype->storagetype; storagetype->usertype
    */
-  protected val converter = new ArrayByteConverter
+  val converter = new ArrayByteConverter
 
   /**
    * Metadata storage instance
    */
-  protected val metadataStorage: MetadataStorage = createMetadataStorage()
+  val metadataStorage: MetadataStorage = createMetadataStorage()
 
   /**
    * Creates metadata storage for producer/consumer settings
@@ -92,14 +92,13 @@ abstract class TaskManager() {
       keyspace = tStreamService.metadataNamespace)
   }
 
-
   private val cassandraStorageFactory = new CassandraStorageFactory()
   private val aerospikeStorageFactory = new AerospikeStorageFactory()
 
   /**
    * Creates data storage for producer/consumer settings
    */
-  protected def createDataStorage() = {
+  def createDataStorage() = {
     tStreamService.dataProvider.providerType match {
       case "aerospike" =>
         logger.debug(s"Instance name: $instanceName, task name: $taskName. Create aerospike data storage " +
@@ -129,6 +128,7 @@ abstract class TaskManager() {
   private def getTStreamService = {
     val streams = if (instance.inputs != null) instance.outputs.union(instance.inputs) else instance.outputs
     val sjStream = streams.map(s => streamDAO.get(s)).filter(s => s.streamType.equals(tStream)).head
+
     sjStream.service.asInstanceOf[TStreamService]
   }
 
@@ -143,7 +143,6 @@ abstract class TaskManager() {
     val classLoaderUrls = Array(new File(pathToJar).toURI.toURL)
 
     new URLClassLoader(classLoaderUrls)
-
   }
 
   /**
@@ -155,7 +154,6 @@ abstract class TaskManager() {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '${instance.moduleName}' module jar\n")
     storage.get(fileMetadata.filename, s"tmp/${instance.moduleName}")
   }
-
 
   /**
    * Creates a t-stream producer for recording messages
@@ -245,7 +243,6 @@ abstract class TaskManager() {
 
     val timeUuidGenerator: IUUIDGenerator = EngineUtils.getUUIDGenerator(stream.asInstanceOf[TStreamSjStream])
 
-
     val options = new BasicConsumerOptions[Array[Byte], Array[Byte]](
       txnPreload,
       dataPreload,
@@ -271,9 +268,10 @@ abstract class TaskManager() {
    *
    * @return Map where key is stream name and value is t-stream producer
    */
-  def createOutputProducers = {
+  private def createOutputProducers() = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create the basic t-stream producers for each output stream\n")
+
     instance.outputs
       .map(x => (x, ConnectionRepository.getStreamService.get(x)))
       .map(x => (x._1, createProducer(x._2))).toMap
@@ -285,11 +283,12 @@ abstract class TaskManager() {
    *
    * @return SjStream used for keeping the reports of module performance
    */
-  def getReportStream: TStreamSjStream = {
+  private def getReportStream(): TStreamSjStream = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Get stream for performance metrics\n")
+
     getSjStream(
-      reportStream,
+      reportStreamName,
       "store reports of performance metrics",
       Array("report", "performance"),
       instance.parallelism
@@ -305,7 +304,7 @@ abstract class TaskManager() {
    * @param partitions Number of partitions of t-stream
    * @return SjStream with parameters described above
    */
-  protected def getSjStream(name: String, description: String, tags: Array[String], partitions: Int) = {
+  def getSjStream(name: String, description: String, tags: Array[String], partitions: Int) = {
     var stream: BasicStream[Array[Byte]] = null
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
 
@@ -344,6 +343,7 @@ abstract class TaskManager() {
    */
   def getInstanceMetadata: Instance = {
     logger.info(s"Instance name: $instanceName, task name: $taskName. Get instance metadata\n")
+
     instance
   }
 
@@ -360,6 +360,4 @@ abstract class TaskManager() {
    * @return An instance of executor of module
    */
   def getExecutor: StreamingExecutor
-
-  //todo to make all common of managers of tasks to here
 }

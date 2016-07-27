@@ -1,24 +1,39 @@
-package com.bwsw.sj.engine.core.state
+package com.bwsw.sj.engine.regular.state
 
 import java.util.UUID
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerTransaction}
-import com.bwsw.tstreams.agents.producer.{BasicProducer, ProducerPolicies}
+import com.bwsw.sj.engine.core.state.IStateService
+import com.bwsw.sj.engine.regular.task.RegularTaskManager
+import com.bwsw.tstreams.agents.consumer.BasicConsumerTransaction
+import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
+import com.bwsw.tstreams.agents.group.CheckpointGroup
+import com.bwsw.tstreams.agents.producer.ProducerPolicies
 
 import scala.collection.mutable
 
 /**
- * Class representing storage for default state that keeps in RAM and use t-stream for checkpoints
+ * Class representing a service for managing by a storage for default state that is kept in RAM and use t-stream for checkpoints
  * Created: 12/04/2016
  * @author Kseniya Mikhaleva
  *
- * @param producer Producer is responsible for saving a partial changes of state or a full state
- * @param consumer Consumer is responsible for retrieving a partial or full state
+ * @param manager Manager of environment of task of regular module
+ * @param checkpointGroup Group of t-stream agents that have to make a checkpoint at the same time
  */
 
-class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
-                      consumer: BasicConsumer[Array[Byte], Array[Byte]]) extends IStateService {
+class RAMStateService(manager: RegularTaskManager, checkpointGroup: CheckpointGroup) extends IStateService {
+
+  /**
+   * Producer is responsible for saving a partial changes of state or a full state
+   */
+  private val stateProducer = manager.createProducer(manager.stateStream)
+  
+  /**
+   * Consumer is responsible for retrieving a partial or full state
+   */
+  private val stateConsumer = manager.createConsumer(manager.stateStream, List(0, 0), Oldest)
+
+  addAgentsToCheckpointGroup()
 
   /**
    * Number of a last transaction that saved a state. Used for saving partial changes of state
@@ -163,7 +178,7 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
   private def loadLastState(): mutable.Map[String, Any] = {
     logger.debug(s"Restore a state\n")
     val initialState = mutable.Map[String, Any]()
-    val maybeTxn = consumer.getLastTransaction(0)
+    val maybeTxn = stateConsumer.getLastTransaction(0)
     if (maybeTxn.nonEmpty) {
       logger.debug(s"Get txn that was last. It contains a full or partial state\n")
       val lastTxn = maybeTxn.get
@@ -178,11 +193,11 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
         case _ =>
           logger.debug(s"Last txn contains a partial state. Start restoring it\n")
           lastFullTxnUUID = Some(value.asInstanceOf[UUID])
-          val lastFullStateTxn = consumer.getTransactionById(0, lastFullTxnUUID.get).get
+          val lastFullStateTxn = stateConsumer.getTransactionById(0, lastFullTxnUUID.get).get
           fillFullState(initialState, lastFullStateTxn)
-          consumer.setLocalOffset(0, lastFullTxnUUID.get)
+          stateConsumer.setLocalOffset(0, lastFullTxnUUID.get)
 
-          var maybeTxn = consumer.getTransaction
+          var maybeTxn = stateConsumer.getTransaction
           while (maybeTxn.nonEmpty) {
             val partialState = mutable.Map[String, (String, Any)]()
             val partialStateTxn = maybeTxn.get
@@ -194,7 +209,7 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
               partialState(variable._1) = variable._2
             }
             applyPartialChanges(initialState, partialState)
-            maybeTxn = consumer.getTransaction
+            maybeTxn = stateConsumer.getTransaction
           }
           logger.debug(s"Restore of state is finished\n")
           initialState
@@ -225,7 +240,7 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
    */
   private def sendState(state: mutable.Map[String, Any]): UUID = {
     logger.debug(s"Save a full state in t-stream intended for storing/restoring a state\n")
-    val transaction = producer.newTransaction(ProducerPolicies.errorIfOpened)
+    val transaction = stateProducer.newTransaction(ProducerPolicies.errorIfOpened)
     state.foreach((x: (String, Any)) => transaction.send(serializer.serialize(x)))
     transaction.getTxnUUID
   }
@@ -237,7 +252,7 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
    */
   private def sendChanges(uuid: UUID, changes: mutable.Map[String, (String, Any)]) = {
     logger.debug(s"Save a partial state in t-stream intended for storing/restoring a state\n")
-    val transaction = producer.newTransaction(ProducerPolicies.errorIfOpened)
+    val transaction = stateProducer.newTransaction(ProducerPolicies.errorIfOpened)
     transaction.send(serializer.serialize(uuid))
     changes.foreach((x: (String, (String, Any))) => transaction.send(serializer.serialize(x)))
   }
@@ -254,4 +269,14 @@ class RAMStateService(producer: BasicProducer[Array[Byte], Array[Byte]],
    * @return Set of all state variables with keys
    */
   override def getAll: Map[String, Any] = stateVariables.toMap
+
+  /**
+   * Adds a state producer and a state consumer to checkpoint group
+   */
+  private def addAgentsToCheckpointGroup() = {
+    logger.debug(s"Task: ${manager.taskName}. Start adding state consumer and producer to checkpoint group\n")
+    checkpointGroup.add(stateConsumer.name, stateConsumer)
+    checkpointGroup.add(stateProducer.name, stateProducer)
+    logger.debug(s"Task: ${manager.taskName}. Adding state consumer and producer to checkpoint group is finished\n")
+  }
 }

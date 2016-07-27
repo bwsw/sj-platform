@@ -5,7 +5,6 @@ import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.core.state.StateStorage
 import com.bwsw.tstreams.agents.producer.BasicProducer
-import org.slf4j.LoggerFactory
 
 import scala.collection._
 
@@ -26,13 +25,6 @@ class ModuleEnvironmentManager(val options: Map[String, Any],
                                outputTags: mutable.Map[String, (String, ModuleOutput)],
                                moduleTimer: SjTimer,
                                performanceMetrics: PerformanceMetrics) extends EnvironmentManager {
-  protected val logger = LoggerFactory.getLogger(this.getClass)
-  var isCheckpointInitiated: Boolean = false
-
-  def initiateCheckpoint() = {
-    isCheckpointInitiated = true
-  }
-
   /**
    * Allows getting partitioned output for specific output stream
    *

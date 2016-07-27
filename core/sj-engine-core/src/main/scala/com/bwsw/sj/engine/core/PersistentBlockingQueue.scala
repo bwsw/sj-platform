@@ -8,7 +8,8 @@ import net.openhft.chronicle.queue.ChronicleQueueBuilder
 import org.slf4j.LoggerFactory
 
 /**
- * Provides a blocking queue to keep Transactions from sub. consumers and than pass them into module
+ * Provides a blocking queue to keep incoming envelopes that are serialized into a string,
+ * which will be retrieved into a module
  * @param path Temporary directory path for queue
  */
 class PersistentBlockingQueue(path: String) {

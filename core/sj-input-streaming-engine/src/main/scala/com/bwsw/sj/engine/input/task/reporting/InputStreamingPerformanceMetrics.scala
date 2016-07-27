@@ -16,7 +16,7 @@ import scala.collection.mutable
 class InputStreamingPerformanceMetrics(manager: InputTaskManager)
   extends PerformanceMetrics(manager) {
 
-  private val performanceReport = new PerformanceMetricsMetadata()
+  currentThread.setName(s"input-task-${manager.taskName}-performance-metrics")
   private val inputStreamName = manager.agentsHost + ":" + manager.entryPort
   private val outputStreamNames = instance.outputs
 
@@ -35,7 +35,7 @@ class InputStreamingPerformanceMetrics(manager: InputTaskManager)
    * Constructs a report of performance metrics of task's work
    * @return Constructed performance report
    */
-  override def getReport: String = {
+  override def getReport(): String = {
     logger.info(s"Start preparing a report of performance for task: $taskName of input module\n")
     mutex.lock()
     val bytesOfInputEnvelopes = inputEnvelopesPerStream.map(x => (x._1, x._2.map(_.sum).sum)).head._2
@@ -50,8 +50,6 @@ class InputStreamingPerformanceMetrics(manager: InputTaskManager)
     val outputEnvelopesSize = outputEnvelopesPerStream.flatMap(x => x._2.map(_._2.size))
 
     performanceReport.pmDatetime = Calendar.getInstance().getTime
-    performanceReport.taskId = taskName
-    performanceReport.host = manager.agentsHost
     performanceReport.entryPointPort = manager.entryPort
     performanceReport.totalInputEnvelopes = inputEnvelopesTotalNumber
     performanceReport.totalInputElements = inputElementsTotalNumber
@@ -72,12 +70,16 @@ class InputStreamingPerformanceMetrics(manager: InputTaskManager)
     performanceReport.averageSizeOutputElement = if (outputEnvelopesTotalNumber != 0) bytesOfOutputEnvelopesPerStream.values.sum / outputElementsTotalNumber else 0
     performanceReport.uptime = (System.currentTimeMillis() - startTime) / 1000
 
-    logger.debug(s"Reset variables for performance report for next reporting\n")
-    inputEnvelopesPerStream = mutable.Map(inputStreamName -> mutable.ListBuffer[List[Int]]())
-    outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
+    clear()
 
     mutex.unlock()
 
     serializer.serialize(performanceReport)
+  }
+
+  override def clear() = {
+    logger.debug(s"Reset variables for performance report for next reporting\n")
+    inputEnvelopesPerStream = mutable.Map(inputStreamName -> mutable.ListBuffer[List[Int]]())
+    outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
   }
 }

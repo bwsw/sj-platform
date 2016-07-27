@@ -33,8 +33,9 @@ abstract class InputTaskEngine(manager: InputTaskManager,
                                channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
                                bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf]) extends Runnable {
 
+  protected val currentThread = Thread.currentThread()
   protected val logger = LoggerFactory.getLogger(this.getClass)
-  protected val producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]] = manager.createOutputProducers
+  protected val producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]] = manager.outputProducers
   protected val streams = producers.keySet
   protected var txnsByStreamPartitions = createTxnsStorage(streams)
   protected val checkpointGroup = new CheckpointGroup()
@@ -167,7 +168,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
             clearBufferAfterTokenize(buffer, interval.finalValue)
             val isNotDuplicateOrEmpty = processEnvelope(inputEnvelope)
             envelopeProcessed(inputEnvelope, isNotDuplicateOrEmpty, channelContext)
-            doCheckpoint(moduleEnvironmentManager.isCheckpointInitiated, channelContext)
+            if (isItTimeToCheckpoint(moduleEnvironmentManager.isCheckpointInitiated)) doCheckpoint(channelContext)
           } else {
             logger.error(s"Task name: ${manager.taskName}. " +
               s"Method tokenize() returned an interval with a final value: ${interval.finalValue} " +
@@ -198,10 +199,21 @@ abstract class InputTaskEngine(manager: InputTaskManager,
 
   /**
    * Does group checkpoint of t-streams consumers/producers
-   * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside input module (not on the schedule) or not.
    * @param ctx Channel context related with this input envelope to send a message about this event
    */
-  protected def doCheckpoint(isCheckpointInitiated: Boolean, ctx: ChannelHandlerContext): Unit
+  protected def doCheckpoint(ctx: ChannelHandlerContext): Unit = {
+    logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
+    logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
+    checkpointGroup.commit()
+    checkpointInitiated(ctx)
+    txnsByStreamPartitions = createTxnsStorage(streams)
+  }
+
+  /**
+   * Check whether a group checkpoint of t-streams consumers/producers have to be done or not
+   * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside input module (not on the schedule) or not.
+   */
+  protected def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean
 
   /**
    * Retrieves a txn for specific stream and partition

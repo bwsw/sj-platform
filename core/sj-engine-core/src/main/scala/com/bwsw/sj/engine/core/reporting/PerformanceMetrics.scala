@@ -19,6 +19,7 @@ import scala.collection.mutable.ListBuffer
 
 abstract class PerformanceMetrics(manager: TaskManager) extends Runnable {
 
+  protected val currentThread = Thread.currentThread()
   protected val logger = LoggerFactory.getLogger(this.getClass)
   protected val mutex: ReentrantLock = new ReentrantLock(true)
   protected val serializer = new JsonSerializer()
@@ -28,12 +29,20 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Runnable {
   protected val taskName = manager.taskName
   protected val reportingInterval = manager.getInstanceMetadata.performanceReportingInterval
   protected val instance = manager.getInstanceMetadata
+  protected val performanceReport = new PerformanceMetricsMetadata()
+
+  fillStaticPerformanceMetrics()
 
   /**
    * Constructs a report of performance metrics of task's work
    * @return Constructed performance report
    */
-  def getReport: String
+  def getReport(): String
+
+  /**
+   * It's in charge of cleaning a report of performance metrics for next time
+   */
+  protected def clear(): Unit
 
   /**
    * Invokes when a new envelope from some input stream is received
@@ -92,7 +101,7 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Runnable {
     while (true) {
       logger.info(s"Task: $taskName. Wait $reportingInterval ms to report performance metrics\n")
       TimeUnit.MILLISECONDS.sleep(reportingInterval)
-      report = getReport
+      report = getReport()
       println(s"Performance metrics: $report \n")
       logger.info(s"Task: $taskName. Performance metrics: $report \n")
       logger.debug(s"Task: $taskName. Create a new txn for sending performance metrics\n")
@@ -110,7 +119,7 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Runnable {
    */
   private def createReportProducer() = {
     logger.debug(s"Task: $taskName. Start creating a t-stream producer to record performance reports\n")
-    val reportStream = manager.getReportStream
+    val reportStream = manager.reportStream
     val reportProducer = manager.createProducer(reportStream)
     logger.debug(s"Task: $taskName. Creation of t-stream producer is finished\n")
 
@@ -125,4 +134,10 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Runnable {
   protected def createStorageForOutputEnvelopes(outputStreamNames: Array[String]) = {
     mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
   }
+
+  private def fillStaticPerformanceMetrics() = {
+    performanceReport.taskId = taskName
+    performanceReport.host = manager.agentsHost
+  }
+
 }
