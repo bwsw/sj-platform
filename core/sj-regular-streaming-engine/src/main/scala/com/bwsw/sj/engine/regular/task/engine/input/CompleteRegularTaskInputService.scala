@@ -5,7 +5,7 @@ import com.bwsw.sj.engine.core.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
-import com.bwsw.sj.engine.regular.task.engine.input.RegularTaskInputService
+
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
@@ -41,7 +41,7 @@ class CompleteRegularTaskInputService(manager: RegularTaskManager,
     }
   }
 
-  def run() = kafkaRegularTaskInputService.run()
+  def call() = kafkaRegularTaskInputService.call()
 
   override def doCheckpoint() = kafkaRegularTaskInputService.doCheckpoint()
 }

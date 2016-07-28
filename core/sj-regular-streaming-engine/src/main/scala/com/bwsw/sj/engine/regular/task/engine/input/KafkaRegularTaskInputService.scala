@@ -51,6 +51,8 @@ class KafkaRegularTaskInputService(manager: RegularTaskManager,
   private var kafkaOffsetsStorage = mutable.Map[(String, Int), Long]()
   private val kafkaOffsetsStream = manager.taskName + "_kafka_offsets"
   private val offsetStream = createOffsetStream()
+
+  private val offsetProducer = createOffsetProducer()
   addOffsetProducerToCheckpointGroup()
 
   val kafkaConsumer: KafkaConsumer[Array[Byte], Array[Byte]] = createKafkaConsumer(
@@ -59,9 +61,7 @@ class KafkaRegularTaskInputService(manager: RegularTaskManager,
     chooseOffset()
   )
 
-  private val offsetProducer = createOffsetProducer()
-
-  override def run() = {
+  override def call() = {
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Run a kafka consumer for regular task in a separate thread of execution service\n")
 
@@ -166,7 +166,7 @@ class KafkaRegularTaskInputService(manager: RegularTaskManager,
     consumer.assign(topicPartitions)
 
     if (BasicStreamService.isExist(kafkaOffsetsStream, manager.metadataStorage)) {
-      //todo: think maybe common
+      //todo: think maybe this part is common
       val stream = BasicStreamService.loadStream(kafkaOffsetsStream, manager.metadataStorage, dataStorage)
       val roundRobinPolicy = new RoundRobinPolicy(stream, (0 to 0).toList)
       val timeUuidGenerator = new LocalTimeUUIDGenerator

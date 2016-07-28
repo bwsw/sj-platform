@@ -10,7 +10,7 @@ object ModuleStatelessKafkaChecker extends App {
   val streamService = ConnectionRepository.getStreamService
   val objectSerializer = new ObjectSerializer()
 
-  val inputConsumer = createInputKafkaConsumer(streamService)
+  val inputConsumer = createInputKafkaConsumer(streamService, partitions)
   val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(streamService, x.toString))
 
   var totalInputElements = 0

@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.input.task.engine
 
-import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.{Callable, ArrayBlockingQueue}
 
 import com.bwsw.sj.common.DAL.model.module.InputInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
@@ -31,7 +31,7 @@ import scala.collection._
 abstract class InputTaskEngine(manager: InputTaskManager,
                                performanceMetrics: InputStreamingPerformanceMetrics,
                                channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
-                               bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf]) extends Runnable {
+                               bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf]) extends Callable[Unit] {
 
   protected val currentThread = Thread.currentThread()
   protected val logger = LoggerFactory.getLogger(this.getClass)
@@ -148,7 +148,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   /**
    * It is in charge of running a basic execution logic of input task engine
    */
-  override def run(): Unit = {
+  override def call(): Unit = {
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Run input task engine in a separate thread of execution service\n")
     while (true) {

@@ -23,7 +23,7 @@
     ]
   },
   "module-type": "regular-streaming",
-  "engine-name": "regular-streaming",
+  "engine-name": "com.bwsw.regular.streaming.engine",
   "engine-version": "0.1",
   "options": {
     "opt": 1

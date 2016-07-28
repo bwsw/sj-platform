@@ -178,7 +178,7 @@ object DataFactory {
     val instance = new InputInstance()
     instance.name = instanceName
     instance.moduleType = "input-streaming"
-    instance.moduleName = "input-streaming-stub"
+    instance.moduleName = "com.bwsw.input.streaming.engine"
     instance.moduleVersion = "0.1"
     instance.status = "ready"
     instance.description = "some description of test instance"

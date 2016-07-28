@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.input
 
-import java.util.concurrent.{ConcurrentHashMap, ArrayBlockingQueue, ExecutorService, Executors}
+import java.util.concurrent._
 
 import com.bwsw.sj.engine.input.connection.tcp.server.InputStreamingServer
 import com.bwsw.sj.engine.input.task.InputTaskManager
@@ -24,11 +24,12 @@ object InputTaskRunner {
   val logger = LoggerFactory.getLogger(this.getClass)
   val countOfThreads = 2
   val queueSize = 1000
+  val threadFactory = createThreadFactory()
+  val threadPool = Executors.newFixedThreadPool(countOfThreads, threadFactory)
+  val executorService = new ExecutorCompletionService[Unit](threadPool)
 
   def main(args: Array[String]) {
 
-    val threadFactory = createThreadFactory()
-    val executorService = Executors.newFixedThreadPool(countOfThreads, threadFactory)
     val bufferForEachContext = (new ConcurrentHashMap[ChannelHandlerContext, ByteBuf]()).asScala
     val channelContextQueue = new ArrayBlockingQueue[ChannelHandlerContext](queueSize)
 
@@ -43,11 +44,13 @@ object InputTaskRunner {
 
     logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
     try {
-      executorService.execute(inputTaskEngine)
-      executorService.execute(performanceMetrics)
+      executorService.submit(inputTaskEngine)
+      executorService.submit(performanceMetrics)
+
+      executorService.take().get()
     } catch {
       case exception: Exception => {
-        handleExceptionOfExecutorService(exception, executorService)
+        handleExceptionOfExecutorService(exception)
       }
     }
 
@@ -68,9 +71,9 @@ object InputTaskRunner {
       .build()
   }
 
-  def handleExceptionOfExecutorService(exception: Exception, executorService: ExecutorService) = {
+  def handleExceptionOfExecutorService(exception: Exception) = {
     exception.printStackTrace()
-    executorService.shutdownNow()
+    threadPool.shutdownNow()
     System.exit(-1)
-  }  //todo подумать над правильностью обработки ошибок в ExecutorService
+  }
 }

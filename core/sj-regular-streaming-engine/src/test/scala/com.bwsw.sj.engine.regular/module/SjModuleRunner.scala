@@ -14,23 +14,21 @@ object SjModuleSetup extends App {
   val providerService = ConnectionRepository.getProviderService
   val instanceService = ConnectionRepository.getInstanceService
   val fileStorage = ConnectionRepository.getFileStorage
-  val partitions = 4
   val checkpointInterval = 4
   val stateManagement = "ram"
   val stateFullCheckpoint = 3
   val _type = "both"
 
-  val module = new File("/home/mikhaleva_ka/Juggler/sj-stub-module/target/scala-2.11/sj-stub-module-test.jar")
+  val module = new File("/home/mikhaleva_ka/Juggler/contrib/stubs/sj-stub-regular-streaming/target/scala-2.11/sj-stub-regular-streaming.jar")
 
-  cassandraDestroy()
   cassandraSetup()
-//  loadModule(module, fileStorage)
-//  createProviders(providerService)
-//  createServices(serviceManager, providerService)
-//  createStreams(streamService, serviceManager, partitions, _type, inputCount, outputCount)
-//  createInstance(serviceManager, instanceService, checkpointInterval, stateManagement, stateFullCheckpoint)
-//
-//  createData(12, 4, streamService, _type, inputCount)
+  loadModule(module, fileStorage)
+  createProviders(providerService)
+  createServices(serviceManager, providerService)
+  createStreams(streamService, serviceManager, partitions, _type, inputCount, outputCount)
+  createInstance(serviceManager, instanceService, checkpointInterval, stateManagement, stateFullCheckpoint)
+
+  createData(12, 4, streamService, _type, inputCount)
 
   close()
   ConnectionRepository.close()
@@ -52,7 +50,7 @@ object SjModuleDestroy extends App {
   val fileStorage = ConnectionRepository.getFileStorage
   val _type = "both"
 
-  val module = new File("/home/mikhaleva_ka/Juggler/sj-stub-module/target/scala-2.11/sj-stub-module-test.jar")
+  val module = new File("/home/mikhaleva_ka/Juggler/contrib/stubs/sj-stub-regular-streaming/target/scala-2.11/sj-stub-regular-streaming.jar")
 
   deleteStreams(streamService, _type, inputCount, outputCount)
   deleteServices(serviceManager)

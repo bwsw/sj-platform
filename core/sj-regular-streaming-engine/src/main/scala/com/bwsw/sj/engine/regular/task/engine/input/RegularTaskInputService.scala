@@ -1,5 +1,7 @@
 package com.bwsw.sj.engine.regular.task.engine.input
 
+import java.util.concurrent.Callable
+
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
@@ -16,7 +18,7 @@ import com.bwsw.sj.engine.regular.task.RegularTaskManager
  *
  * @param manager Manager of environment of task of regular module
  */
-abstract class RegularTaskInputService(manager: RegularTaskManager) extends Runnable {
+abstract class RegularTaskInputService(manager: RegularTaskManager) extends Callable[Unit] {
 
   protected val regularInstance = manager.getInstanceMetadata.asInstanceOf[RegularInstance]
   protected val serializer = new JsonSerializer()

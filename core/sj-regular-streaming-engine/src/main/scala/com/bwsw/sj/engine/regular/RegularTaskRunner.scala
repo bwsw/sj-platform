@@ -1,11 +1,12 @@
 package com.bwsw.sj.engine.regular
 
-import java.util.concurrent.{ExecutorService, Executors}
+import java.util.concurrent.{ExecutorCompletionService, Executors}
 
 import com.bwsw.sj.common.ModuleConstants
 import com.bwsw.sj.engine.core.PersistentBlockingQueue
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
-import com.bwsw.sj.engine.regular.task.engine.RegularTaskEngineFactory
+import com.bwsw.sj.engine.regular.task.engine.input.RegularTaskInputService
+import com.bwsw.sj.engine.regular.task.engine.{RegularTaskEngine, RegularTaskEngineFactory}
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import org.slf4j.LoggerFactory
@@ -20,8 +21,10 @@ import org.slf4j.LoggerFactory
 object RegularTaskRunner {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
+  val countOfThreads = 3
   private val threadFactory = createThreadFactory()
-  private val executorService = Executors.newFixedThreadPool(3, threadFactory)
+  private val threadPool = Executors.newFixedThreadPool(countOfThreads, threadFactory)
+  private val executorService = new ExecutorCompletionService[Unit](threadPool)
 
   private val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(ModuleConstants.persistentBlockingQueue)
 
@@ -34,33 +37,33 @@ object RegularTaskRunner {
 
     val regularTaskEngineFactory = new RegularTaskEngineFactory(manager, performanceMetrics, blockingQueue)
 
-    val regularTaskEngine = regularTaskEngineFactory.createInputTaskEngine()
+    val regularTaskEngine: RegularTaskEngine = regularTaskEngineFactory.createInputTaskEngine()
 
-    val regularTaskInputService = regularTaskEngine.regularTaskInputService
+    val regularTaskInputService: RegularTaskInputService = regularTaskEngine.regularTaskInputService
 
     logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
     try {
-      executorService.execute(regularTaskInputService)
-      executorService.execute(regularTaskEngine)
-      executorService.execute(performanceMetrics)
+      executorService.submit(regularTaskInputService)
+      executorService.submit(regularTaskEngine)
+      executorService.submit(performanceMetrics)
+
+      executorService.take().get()
     } catch {
       case exception: Exception => {
-        handleExceptionOfExecutorService(exception, executorService)
+        handleExceptionOfExecutorService(exception)
       }
     }
   }
 
-
   def createThreadFactory() = {
     new ThreadFactoryBuilder()
       .setNameFormat("RegularTaskRunner-%d")
-      .setDaemon(true)
       .build()
   }
 
-  def handleExceptionOfExecutorService(exception: Exception, executorService: ExecutorService) = {
+  def handleExceptionOfExecutorService(exception: Exception) = {
     exception.printStackTrace()
-    executorService.shutdownNow()
+    threadPool.shutdownNow()
     System.exit(-1)
-  } //todo подумать над правильностью обработки ошибок в ExecutorService
+  }
 }

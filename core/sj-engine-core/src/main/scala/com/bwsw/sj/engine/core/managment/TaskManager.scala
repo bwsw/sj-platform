@@ -66,9 +66,6 @@ abstract class TaskManager() {
       "specification.version" -> instance.moduleVersion)
   ).head
 
-  val outputProducers = createOutputProducers()
-  val reportStream = getReportStream()
-
   /**
    * Converter to convert usertype->storagetype; storagetype->usertype
    */
@@ -78,6 +75,12 @@ abstract class TaskManager() {
    * Metadata storage instance
    */
   val metadataStorage: MetadataStorage = createMetadataStorage()
+
+  private val cassandraStorageFactory = new CassandraStorageFactory()
+  private val aerospikeStorageFactory = new AerospikeStorageFactory()
+
+  val outputProducers = createOutputProducers()
+  val reportStream = getReportStream()
 
   /**
    * Creates metadata storage for producer/consumer settings
@@ -91,9 +94,6 @@ abstract class TaskManager() {
       cassandraHosts = hosts,
       keyspace = tStreamService.metadataNamespace)
   }
-
-  private val cassandraStorageFactory = new CassandraStorageFactory()
-  private val aerospikeStorageFactory = new AerospikeStorageFactory()
 
   /**
    * Creates data storage for producer/consumer settings
@@ -126,7 +126,9 @@ abstract class TaskManager() {
    * Creates an auxiliary service to retrieve settings of TStream providers
    */
   private def getTStreamService = {
-    val streams = if (instance.inputs != null) instance.outputs.union(instance.inputs) else instance.outputs
+    val streams = if (instance.inputs != null) {
+      instance.outputs.union(instance.inputs.map(x => x.takeWhile(y => y != '/')))
+    } else instance.outputs
     val sjStream = streams.map(s => streamDAO.get(s)).filter(s => s.streamType.equals(tStream)).head
 
     sjStream.service.asInstanceOf[TStreamService]
@@ -217,25 +219,24 @@ abstract class TaskManager() {
                                 callback: BasicSubscriberCallback[Array[Byte], Array[Byte]]) = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create subscribing consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
-    val service = stream.service.asInstanceOf[TStreamService]
+
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
 
-    val zkHosts = service.lockProvider.hosts.map { s =>
+    val zkHosts = tStreamService.lockProvider.hosts.map { s =>
       val parts = s.split(":")
       new InetSocketAddress(parts(0), parts(1).toInt)
     }.toList
 
-    val agentPort: Int = agentsPorts.head.toInt
-
-    val agentAddress = agentsHost + ":" + agentPort.toString
+    val agentAddress = agentsHost + ":" + agentsPorts(currentPortNumber)
 
     val coordinatorSettings = new SubscriberCoordinationOptions(
       agentAddress,
-      s"/${service.lockNamespace}",
+      s"/${tStreamService.lockNamespace}",
       zkHosts,
       zkSessionTimeout,
       zkConnectionTimeout
     )
+    currentPortNumber += 1
 
     val basicStream = BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
 
@@ -254,7 +255,7 @@ abstract class TaskManager() {
       useLastOffset = true)
 
     new BasicSubscribingConsumer[Array[Byte], Array[Byte]](
-      s"consumer-$taskName-${stream.name}",
+      s"consumer_for_${taskName}_${stream.name}",
       basicStream,
       options,
       coordinatorSettings,

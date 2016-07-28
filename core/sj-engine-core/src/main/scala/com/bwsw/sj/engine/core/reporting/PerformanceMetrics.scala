@@ -6,7 +6,7 @@ package com.bwsw.sj.engine.core.reporting
  * @author Kseniya Mikhaleva
  */
 
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.{Callable, TimeUnit}
 import java.util.concurrent.locks.ReentrantLock
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory
 import scala.collection._
 import scala.collection.mutable.ListBuffer
 
-abstract class PerformanceMetrics(manager: TaskManager) extends Runnable {
+abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
 
   protected val currentThread = Thread.currentThread()
   protected val logger = LoggerFactory.getLogger(this.getClass)
@@ -87,7 +87,7 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Runnable {
   /**
    * It is in charge of running of input module
    */
-  override def run() = {
+  override def call() = {
 
     val reportProducer = createReportProducer()
     logger.debug(s"Task: $taskName. Launch a new thread to report performance metrics \n")

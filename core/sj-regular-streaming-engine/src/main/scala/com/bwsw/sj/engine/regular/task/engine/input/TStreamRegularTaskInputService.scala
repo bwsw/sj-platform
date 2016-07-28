@@ -94,5 +94,5 @@ class TStreamRegularTaskInputService(manager: RegularTaskManager,
     )
   }
 
-  def run() = {}
+  def call() = {}
 }

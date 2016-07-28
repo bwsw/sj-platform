@@ -1,5 +1,7 @@
 package com.bwsw.sj.engine.regular.task.engine
 
+import java.util.concurrent.Callable
+
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.engine.core.PersistentBlockingQueue
@@ -27,7 +29,7 @@ import scala.collection.Map
  */
 abstract class RegularTaskEngine(manager: RegularTaskManager,
                                  performanceMetrics: RegularStreamingPerformanceMetrics,
-                                 blockingQueue: PersistentBlockingQueue) extends Runnable {
+                                 blockingQueue: PersistentBlockingQueue) extends Callable[Unit] {
 
   protected val currentThread = Thread.currentThread()
   protected val logger = LoggerFactory.getLogger(this.getClass)
@@ -81,7 +83,7 @@ abstract class RegularTaskEngine(manager: RegularTaskManager,
   /**
    * It is in charge of running a basic execution logic of regular task engine
    */
-  override def run(): Unit = {
+  override def call(): Unit = {
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Run regular task engine in a separate thread of execution service\n")
     logger.debug(s"Task: ${manager.taskName}. Invoke onInit() handler\n")
