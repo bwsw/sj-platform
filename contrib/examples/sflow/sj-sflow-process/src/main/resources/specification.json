@@ -28,6 +28,6 @@
   "engine-name": "com.bwsw.regular.streaming.engine",
   "engine-version": "0.1",
   "options": {},
-  "validator-class": "com.bwsw.examples.sflow.module.process.Validator",
-  "executor-class": "com.bwsw.examples.sflow.module.process.Executor"
+  "validator-class": "com.bwsw.sj.examples.sflow.module.process.Validator",
+  "executor-class": "com.bwsw.sj.examples.sflow.module.process.Executor"
 }

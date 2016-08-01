@@ -1,4 +1,4 @@
-package com.bwsw.examples.sflow.module.output.data
+package com.bwsw.sj.examples.sflow.module.output.data
 
 import java.util.Date
 

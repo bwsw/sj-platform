@@ -1,4 +1,4 @@
-package com.bwsw.examples.sflow.module.process.utils
+package com.bwsw.sj.examples.sflow.module.process.utils
 
 object SflowParser {
 

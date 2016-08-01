@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.input.connection.tcp.server
 
-import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.{Callable, ArrayBlockingQueue}
 
 import com.bwsw.sj.engine.core.input.InputStreamingExecutor
 import io.netty.bootstrap.ServerBootstrap
@@ -9,6 +9,7 @@ import io.netty.channel._
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.handler.logging.{LogLevel, LoggingHandler}
+import org.slf4j.LoggerFactory
 
 import scala.collection.concurrent
 
@@ -27,9 +28,12 @@ class InputStreamingServer(host: String,
                            port: Int,
                            executor: InputStreamingExecutor,
                            channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
-                           bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf]) {
+                           bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf]) extends Callable[Unit] {
 
-  def run() = {
+  private val logger = LoggerFactory.getLogger(this.getClass)
+
+  override def call() = {
+    logger.info(s"Launch input streaming server on: '$host:$port'\n")
     val bossGroup: EventLoopGroup = new NioEventLoopGroup()
     val workerGroup = new NioEventLoopGroup()
     try {

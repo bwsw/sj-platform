@@ -1,4 +1,4 @@
-package com.bwsw.examples.sflow.module.process
+package com.bwsw.sj.examples.sflow.module.process
 
 import com.bwsw.sj.common.engine.StreamingValidator
 

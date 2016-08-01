@@ -1,11 +1,11 @@
-package com.bwsw.examples.sflow.module.output
+package com.bwsw.sj.examples.sflow.module.output
 
 import java.util.Date
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.examples.sflow.module.output.data.TrafficMetrics
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
+import com.bwsw.sj.examples.sflow.module.output.data.TrafficMetrics
 
 /**
  * Handler for work with performance metrics t-stream envelopes

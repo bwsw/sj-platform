@@ -10,6 +10,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import org.slf4j.LoggerFactory
+
 import scala.collection.convert.decorateAsScala._
 
 /**
@@ -22,7 +23,7 @@ import scala.collection.convert.decorateAsScala._
 object InputTaskRunner {
 
   val logger = LoggerFactory.getLogger(this.getClass)
-  val countOfThreads = 2
+  val countOfThreads = 3
   val queueSize = 1000
   val threadFactory = createThreadFactory()
   val threadPool = Executors.newFixedThreadPool(countOfThreads, threadFactory)
@@ -30,38 +31,42 @@ object InputTaskRunner {
 
   def main(args: Array[String]) {
 
-    val bufferForEachContext = (new ConcurrentHashMap[ChannelHandlerContext, ByteBuf]()).asScala
-    val channelContextQueue = new ArrayBlockingQueue[ChannelHandlerContext](queueSize)
-
-    val manager: InputTaskManager = new InputTaskManager()
-    logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for input module\n")
-
-    val performanceMetrics = new InputStreamingPerformanceMetrics(manager)
-
-    val inputTaskEngineFactory = new InputTaskEngineFactory(manager, performanceMetrics, channelContextQueue, bufferForEachContext)
-
-    val inputTaskEngine = inputTaskEngineFactory.createInputTaskEngine()
-
-    logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
     try {
+      val bufferForEachContext = (new ConcurrentHashMap[ChannelHandlerContext, ByteBuf]()).asScala
+      val channelContextQueue = new ArrayBlockingQueue[ChannelHandlerContext](queueSize)
+
+      val manager: InputTaskManager = new InputTaskManager()
+      logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for input module\n")
+
+      val performanceMetrics = new InputStreamingPerformanceMetrics(manager)
+
+      val inputTaskEngineFactory = new InputTaskEngineFactory(manager, performanceMetrics, channelContextQueue, bufferForEachContext)
+
+      val inputTaskEngine = inputTaskEngineFactory.createInputTaskEngine()
+
+      val inputStreamingServer = new InputStreamingServer(
+        manager.agentsHost,
+        manager.entryPort,
+        inputTaskEngine.executor,
+        channelContextQueue,
+        bufferForEachContext
+      )
+
+      logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
+
       executorService.submit(inputTaskEngine)
       executorService.submit(performanceMetrics)
+      executorService.submit(inputStreamingServer)
 
       executorService.take().get()
     } catch {
+      case assertionError: Error => {
+        handleExceptionOfInputStreamingEngine(assertionError)
+      }
       case exception: Exception => {
-        handleExceptionOfExecutorService(exception)
+        handleExceptionOfInputStreamingEngine(exception)
       }
     }
-
-    logger.info(s"Task: ${manager.taskName}. " +
-      s"Launch input streaming server on: '${manager.agentsHost}:${manager.entryPort}'\n")
-    new InputStreamingServer(
-      manager.agentsHost,
-      manager.entryPort,
-      inputTaskEngine.executor,
-      channelContextQueue, bufferForEachContext
-    ).run()
   }
 
   def createThreadFactory() = {
@@ -71,7 +76,7 @@ object InputTaskRunner {
       .build()
   }
 
-  def handleExceptionOfExecutorService(exception: Exception) = {
+  def handleExceptionOfInputStreamingEngine(exception: Throwable) = {
     exception.printStackTrace()
     threadPool.shutdownNow()
     System.exit(-1)

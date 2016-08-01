@@ -28,7 +28,7 @@
   "options": {
     "opt": 1
   },
-  "validator-class": "com.bwsw.examples.sflow.module.output.SflowOutputValidator",
-  "executor-class": "com.bwsw.examples.sflow.module.output.SflowOutputHandler",
-  "entity-class" : "com.bwsw.examples.sflow.module.output.data.TrafficMetrics"
+  "validator-class": "com.bwsw.sj.examples.sflow.module.output.SflowOutputValidator",
+  "executor-class": "com.bwsw.sj.examples.sflow.module.output.SflowOutputHandler",
+  "entity-class" : "com.bwsw.sj.examples.sflow.module.output.data.TrafficMetrics"
 }

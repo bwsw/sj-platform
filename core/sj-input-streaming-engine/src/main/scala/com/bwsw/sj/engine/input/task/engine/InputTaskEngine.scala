@@ -2,6 +2,7 @@ package com.bwsw.sj.engine.input.task.engine
 
 import java.util.concurrent.{Callable, ArrayBlockingQueue}
 
+import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module.InputInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.engine.core.entities.InputEnvelope
@@ -35,6 +36,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
 
   protected val currentThread = Thread.currentThread()
   protected val logger = LoggerFactory.getLogger(this.getClass)
+  protected val serializer = new JsonSerializer()
   protected val producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]] = manager.outputProducers
   protected val streams = producers.keySet
   protected var txnsByStreamPartitions = createTxnsStorage(streams)
@@ -271,7 +273,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
       .map(ConnectionRepository.getStreamService.get)
       .filter(_.tags != null)
 
-    new InputEnvironmentManager(taggedOutputs)
+    new InputEnvironmentManager(serializer.deserialize[Map[String, Any]](inputInstance.options), taggedOutputs)
   }
 
   /**

@@ -7,16 +7,17 @@
   "inputs": {
     "cardinality": [
       1,
-      1
+      10
     ],
     "types": [
+      "stream.kafka",
       "stream.t-stream"
     ]
   },
   "outputs": {
     "cardinality": [
       1,
-      1
+      10
     ],
     "types": [
       "stream.t-stream"

@@ -1,4 +1,4 @@
-package com.bwsw.examples.sflow.module.process.udf
+package com.bwsw.sj.examples.sflow.module.process.udf
 
 import java.net.{Inet6Address, Inet4Address, InetAddress}
 

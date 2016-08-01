@@ -19,7 +19,7 @@ object StreamJugglerBuild extends Build {
     outputStreamingEngine, regularStreamingEngine, windowedStreamingEngine, inputStreamingEngine,
     pmOutput,
     stubRegular, stubOutput, stubInput,
-    sflowOutput, sflowProcess)
+    sflowOutput, sflowProcess, psInput)
 
   lazy val common = Project(id = "sj-common",
     base = file("./core/sj-common")).enablePlugins(JavaAppPackaging)
@@ -54,7 +54,6 @@ object StreamJugglerBuild extends Build {
   lazy val stubInput = Project(id = "sj-stub-input-streaming",
     base = file("./contrib/stubs/sj-stub-input-streaming")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
 
-
   lazy val stubOutput = Project(id = "sj-stub-output",
     base = file("./contrib/stubs/sj-stub-output")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
 
@@ -67,6 +66,8 @@ object StreamJugglerBuild extends Build {
   lazy val sflowOutput = Project(id = "sj-sflow-output",
     base = file("./contrib/examples/sflow/sj-sflow-output")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
 
+  lazy val psInput = Project(id = "ps-input",
+    base = file("./contrib/examples/pingstation/ps-input")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
 
   //////////////////////////////////////////////////////////////////////////////
   // PROJECT INFO
@@ -143,7 +144,6 @@ object StreamJugglerBuild extends Build {
     version in Docker := version.value,
 
     maintainer in Docker := "bwsw <bwsw@bwsw.com>"
-
   )
 
 }
