@@ -8,38 +8,42 @@ import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 
+import scala.collection.concurrent
+
 /**
  * Provides methods are responsible for a basic execution logic of task of input module
  * that has an every-nth checkpoint mode
  *
  * @param manager Manager of environment of task of input module
  * @param performanceMetrics Set of metrics that characterize performance of a input streaming module
- * @param tokenizedMsgQueue Queue for keeping a part of incoming bytes that will become an input envelope with the channel context
+ * @param channelContextQueue Queue for keeping a channel context to process messages (byte buffer) in their turn
+ * @param bufferForEachContext Map for keeping a buffer containing incoming bytes with the channel context
  */
 class NumericalCheckpointInputTaskEngine(manager: InputTaskManager,
                                          performanceMetrics: InputStreamingPerformanceMetrics,
-                                         tokenizedMsgQueue: ArrayBlockingQueue[(ChannelHandlerContext, ByteBuf)])
-  extends InputTaskEngine(manager, performanceMetrics, tokenizedMsgQueue) {
+                                         channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
+                                         bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf])
+  extends InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext) {
 
+  currentThread.setName(s"input-task-${manager.taskName}-engine-with-numerical-checkpoint")
   private var countOfEnvelopes = 0
   val isNotOnlyCustomCheckpoint = inputInstance.checkpointInterval > 0
 
   /**
    * Does group checkpoint of t-streams consumers/producers
-   * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside input module (not on the schedule) or not.
    * @param ctx Channel context related with this input envelope to send a message about this event
    */
-  def doCheckpoint(isCheckpointInitiated: Boolean, ctx: ChannelHandlerContext) = {
-    if (isNotOnlyCustomCheckpoint && countOfEnvelopes == inputInstance.checkpointInterval || moduleEnvironmentManager.isCheckpointInitiated) {
-      logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
-      logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
-      checkpointGroup.commit()
-      checkpointInitiated(ctx)
+  override def doCheckpoint(ctx: ChannelHandlerContext) = {
+    super.doCheckpoint(ctx)
+    resetCounter()
+  }
 
-      txnsByStreamPartitions = createTxnsStorage(streams)
-      logger.debug(s"Task: ${manager.taskName}. Reset a counter of envelopes to 0\n")
-      resetCounter()
-    }
+  /**
+   * Check whether a group checkpoint of t-streams consumers/producers have to be done or not
+   * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside input module (not on the schedule) or not.
+   */
+  override protected def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean = {
+    isNotOnlyCustomCheckpoint && countOfEnvelopes == inputInstance.checkpointInterval || moduleEnvironmentManager.isCheckpointInitiated
   }
 
   /**

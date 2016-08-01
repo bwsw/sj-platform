@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.regular.task.reporting
 
 import java.util.Calendar
 
-import com.bwsw.sj.engine.core.reporting.{PerformanceMetrics, PerformanceMetricsMetadata}
+import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
 
 import scala.collection.mutable
@@ -16,7 +16,7 @@ import scala.collection.mutable
 class RegularStreamingPerformanceMetrics(manager: RegularTaskManager)
   extends PerformanceMetrics(manager) {
 
-  private val performanceReport = new PerformanceMetricsMetadata()
+  currentThread.setName(s"regular-task-${manager.taskName}-performance-metrics")
   private var totalIdleTime = 0L
   private var numberOfStateVariables = 0
   private val inputStreamNames =  manager.inputs.map(_._1.name).toArray
@@ -50,7 +50,7 @@ class RegularStreamingPerformanceMetrics(manager: RegularTaskManager)
    * Constructs a report of performance metrics of task's work
    * @return Constructed performance report
    */
-  override def getReport: String = {
+  override def getReport(): String = {
     logger.info(s"Start preparing a report of performance for task: ${manager.taskName} of regular module\n")
     mutex.lock()
     val numberOfInputEnvelopesPerStream = inputEnvelopesPerStream.map(x => (x._1, x._2.size))
@@ -67,8 +67,6 @@ class RegularStreamingPerformanceMetrics(manager: RegularTaskManager)
     val outputEnvelopesSize = outputEnvelopesPerStream.flatMap(x => x._2.map(_._2.size))
 
     performanceReport.pmDatetime = Calendar.getInstance().getTime
-    performanceReport.taskId = manager.taskName
-    performanceReport.host = manager.agentsHost
     performanceReport.totalIdleTime = totalIdleTime
     performanceReport.totalInputEnvelopes = inputEnvelopesTotalNumber
     performanceReport.inputEnvelopesPerStream = numberOfInputEnvelopesPerStream.toMap
@@ -93,14 +91,18 @@ class RegularStreamingPerformanceMetrics(manager: RegularTaskManager)
     performanceReport.stateVariablesNumber = numberOfStateVariables
     performanceReport.uptime = (System.currentTimeMillis() - startTime) / 1000
 
+    clear()
+
+    mutex.unlock()
+
+    serializer.serialize(performanceReport)
+  }
+
+  override def clear() = {
     logger.debug(s"Reset variables for performance report for next reporting\n")
     inputEnvelopesPerStream = mutable.Map(inputStreamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
     outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
     totalIdleTime = 0L
     numberOfStateVariables = 0
-
-    mutex.unlock()
-
-    serializer.serialize(performanceReport)
   }
 }

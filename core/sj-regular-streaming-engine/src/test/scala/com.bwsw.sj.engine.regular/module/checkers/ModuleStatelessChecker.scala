@@ -11,7 +11,7 @@ object ModuleStatelessChecker extends App {
   val objectSerializer = new ObjectSerializer()
 
   val inputTstreamConsumers = (1 to inputCount).map(x => createInputTstreamConsumer(streamService, x.toString))
-  val inputKafkaConsumer = createInputKafkaConsumer(streamService)
+  val inputKafkaConsumer = createInputKafkaConsumer(streamService, partitions)
   val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(streamService, x.toString))
 
   var totalInputElements = 0

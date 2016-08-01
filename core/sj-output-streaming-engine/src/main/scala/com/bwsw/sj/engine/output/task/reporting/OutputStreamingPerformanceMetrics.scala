@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.output.task.reporting
 
 import java.util.Calendar
 
-import com.bwsw.sj.engine.core.reporting.{PerformanceMetrics, PerformanceMetricsMetadata}
+import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 
 import scala.collection.mutable
@@ -16,9 +16,9 @@ import scala.collection.mutable
 class OutputStreamingPerformanceMetrics(manager: OutputTaskManager)
   extends PerformanceMetrics(manager) {
 
+  currentThread.setName(s"output-task-${manager.taskName}-performance-metrics")
   private val inputStreamNames = instance.inputs
   private val outputStreamNames = instance.outputs
-  private val performanceReport = new PerformanceMetricsMetadata()
 
   override protected var inputEnvelopesPerStream = createStorageForInputEnvelopes(inputStreamNames)
   override protected var outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
@@ -27,7 +27,7 @@ class OutputStreamingPerformanceMetrics(manager: OutputTaskManager)
    * Constructs a report of performance metrics of task's work
    * @return Constructed performance report
    */
-  def getReport = {
+  override def getReport() = {
     logger.info(s"Start preparing a report of performance for task: $taskName of output module\n")
     mutex.lock()
     val bytesOfInputEnvelopes = inputEnvelopesPerStream.map(x => (x._1, x._2.map(_.sum).sum)).head._2
@@ -40,8 +40,6 @@ class OutputStreamingPerformanceMetrics(manager: OutputTaskManager)
     val outputEnvelopesSize = outputEnvelopesPerStream.flatMap(x => x._2.map(_._2.size))
 
     performanceReport.pmDatetime = Calendar.getInstance().getTime
-    performanceReport.taskId = taskName
-    performanceReport.host = manager.agentsHost
     performanceReport.inputStreamName = inputStreamNames.head
     performanceReport.totalInputEnvelopes = inputEnvelopesTotalNumber
     performanceReport.totalInputElements = inputElementsTotalNumber
@@ -55,17 +53,21 @@ class OutputStreamingPerformanceMetrics(manager: OutputTaskManager)
     performanceReport.totalOutputElements = outputElementsTotalNumber
     performanceReport.totalOutputBytes = bytesOfOutputEnvelopes
     performanceReport.averageSizeOutputEnvelope = if (outputEnvelopesTotalNumber != 0) outputElementsTotalNumber / outputEnvelopesTotalNumber else 0
-    performanceReport.maxSizeOutputEnvelope =  if (outputEnvelopesSize.nonEmpty) outputEnvelopesSize.max else 0
-    performanceReport.minSizeOutputEnvelope =  if (outputEnvelopesSize.nonEmpty) outputEnvelopesSize.min else 0
-    performanceReport.averageSizeOutputElement =  if (outputEnvelopesTotalNumber != 0) bytesOfOutputEnvelopes / outputElementsTotalNumber else 0
-    performanceReport.uptime = (System.currentTimeMillis () - startTime) / 1000
+    performanceReport.maxSizeOutputEnvelope = if (outputEnvelopesSize.nonEmpty) outputEnvelopesSize.max else 0
+    performanceReport.minSizeOutputEnvelope = if (outputEnvelopesSize.nonEmpty) outputEnvelopesSize.min else 0
+    performanceReport.averageSizeOutputElement = if (outputEnvelopesTotalNumber != 0) bytesOfOutputEnvelopes / outputElementsTotalNumber else 0
+    performanceReport.uptime = (System.currentTimeMillis() - startTime) / 1000
 
-    logger.debug(s"Reset variables for performance report for next reporting\n")
-    inputEnvelopesPerStream = mutable.Map(inputStreamNames.head -> mutable.ListBuffer[List[Int]]())
-    outputEnvelopesPerStream = mutable.Map(outputStreamNames.head -> mutable.Map[String, mutable.ListBuffer[Int]]())
+    clear()
 
     mutex.unlock()
 
     serializer.serialize(performanceReport)
+  }
+
+  override def clear() = {
+    logger.debug(s"Reset variables for performance report for next reporting\n")
+    inputEnvelopesPerStream = mutable.Map(inputStreamNames.head -> mutable.ListBuffer[List[Int]]())
+    outputEnvelopesPerStream = mutable.Map(outputStreamNames.head -> mutable.Map[String, mutable.ListBuffer[Int]]())
   }
 }

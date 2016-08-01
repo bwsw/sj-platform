@@ -1,7 +1,6 @@
 package com.bwsw.sj.engine.core.environment
 
 import com.bwsw.sj.common.DAL.model.SjStream
-import org.slf4j.LoggerFactory
 
 /**
  * Provides for user methods that can be used in an input module
@@ -10,14 +9,6 @@ import org.slf4j.LoggerFactory
  * @author Kseniya Mikhaleva
  */
 class InputEnvironmentManager(outputs: Array[SjStream]) extends EnvironmentManager {
-
-  protected val logger = LoggerFactory.getLogger(this.getClass)
-
-  var isCheckpointInitiated: Boolean = false
-
-  def initiateCheckpoint() = {
-    isCheckpointInitiated = true
-  }
 
   /**
    * Returns set of names of the output streams according to the set of tags

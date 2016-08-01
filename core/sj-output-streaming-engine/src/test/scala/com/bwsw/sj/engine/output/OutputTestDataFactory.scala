@@ -60,7 +60,7 @@ object OutputTestDataFactory {
     var number = 0
     val s = System.nanoTime
     (0 until countTxns) foreach { (x: Int) =>
-      val txn = producer.newTransaction(ProducerPolicies.errorIfOpen)
+      val txn = producer.newTransaction(ProducerPolicies.errorIfOpened)
       (0 until countElements) foreach { (y: Int) =>
         number += 1
         txn.send(objectSerializer.serialize(number.asInstanceOf[Object]))

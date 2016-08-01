@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.output
 
 import java.io.File
 import java.net.InetAddress
-import java.util.concurrent.{ArrayBlockingQueue, Executors}
+import java.util.concurrent.{ExecutorCompletionService, ExecutorService, ArrayBlockingQueue, Executors}
 import java.util.{Calendar, UUID}
 
 import com.bwsw.common.traits.Serializer
@@ -17,6 +17,7 @@ import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
 import com.datastax.driver.core.utils.UUIDs
+import com.google.common.util.concurrent.ThreadFactoryBuilder
 import org.elasticsearch.action.index.IndexRequestBuilder
 import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse}
 import org.elasticsearch.client.transport.TransportClient
@@ -32,7 +33,10 @@ import org.slf4j.{Logger, LoggerFactory}
  */
 object OutputTaskRunner {
   private val logger: Logger = LoggerFactory.getLogger(this.getClass)
-  private val executorService = Executors.newCachedThreadPool()
+  private val threadFactory = createThreadFactory()
+  private val threadPool: ExecutorService = Executors.newFixedThreadPool(3, threadFactory)
+  private val executorService: ExecutorCompletionService[Unit] = new ExecutorCompletionService[Unit](threadPool)
+
   private val objectSerializer = new ObjectSerializer()
 
   val serializer: Serializer = new JsonSerializer
@@ -71,7 +75,7 @@ object OutputTaskRunner {
     val performanceMetrics = new OutputStreamingPerformanceMetrics(taskManager)
 
     logger.debug(s"Task: ${OutputDataFactory.taskName}. Launch a new thread to report performance metrics \n")
-    executorService.execute(performanceMetrics)
+    executorService.submit(performanceMetrics)
 
     logger.info(s"Task: ${OutputDataFactory.taskName}. Preparing finished. Launch task.")
     try {
@@ -86,12 +90,16 @@ object OutputTaskRunner {
     } catch {
       case e: Exception =>
         logger.error(e.getStackTrace.toString)
-        executorService.shutdownNow()
+        threadPool.shutdownNow()
         System.exit(-1)
     }
-
   }
 
+  def createThreadFactory() = {
+    new ThreadFactoryBuilder()
+      .setNameFormat("RegularTaskRunner-%d")
+      .build()
+  }
   /**
    *
    * @param instance Instance of output streaming module

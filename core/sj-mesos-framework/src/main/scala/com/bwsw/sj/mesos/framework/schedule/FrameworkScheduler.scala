@@ -330,7 +330,7 @@ class FrameworkScheduler extends Scheduler {
     val reqPorts = perTaskPortsCount * taskCount
 
     var tasksNumber: List[(Offer, Int)] = List()
-    for (offer <- offers.asScala) {
+    for (offer: Offer <- offers.asScala) {
       val portsResource = getPortsResource(offer)
       var offerPorts = 0
       for (range <- portsResource.getRanges.getRangeList.asScala) {
@@ -359,7 +359,7 @@ class FrameworkScheduler extends Scheduler {
   def getResource(offer: Offer, name: String): Double = {
     val res = offer.getResourcesList
     for (r <- res.asScala if r.getName == name) {
-      r.getScalar.getValue
+      return r.getScalar.getValue
     }
     0.0
   }

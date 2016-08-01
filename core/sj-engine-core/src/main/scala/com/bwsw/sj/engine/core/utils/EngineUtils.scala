@@ -46,12 +46,10 @@ object EngineUtils {
       case generatorType =>
         val service = stream.generator.service.asInstanceOf[ZKService]
         val zkHosts = service.provider.hosts
-        var prefix = service.namespace
-        if (stream.generator.generatorType.equals("per-stream")) {
-          prefix += s"/${stream.name}"
-        } else {
-          prefix += "/global"
+        val prefix = "/" + service.namespace + "/" + {
+          if (generatorType == "global") generatorType else stream.name
         }
+
         new NetworkTimeUUIDGenerator(zkHosts, prefix, retryPeriod, retryCount)
     }
   }
