@@ -31,10 +31,9 @@ class NumericalCheckpointInputTaskEngine(manager: InputTaskManager,
 
   /**
    * Does group checkpoint of t-streams consumers/producers
-   * @param ctx Channel context related with this input envelope to send a message about this event
    */
-  override def doCheckpoint(ctx: ChannelHandlerContext) = {
-    super.doCheckpoint(ctx)
+  override def doCheckpoint() = {
+    super.doCheckpoint()
     resetCounter()
   }
 

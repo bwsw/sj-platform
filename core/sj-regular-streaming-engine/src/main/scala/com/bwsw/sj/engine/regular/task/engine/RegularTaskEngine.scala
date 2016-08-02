@@ -104,8 +104,9 @@ abstract class RegularTaskEngine(manager: RegularTaskManager,
         regularTaskInputService.processEnvelope(envelope, performanceMetrics)
         logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
         executor.onMessage(envelope)
-        if (isItTimeToCheckpoint(moduleEnvironmentManager.isCheckpointInitiated)) doCheckpoint()
       }
+
+      if (isItTimeToCheckpoint(moduleEnvironmentManager.isCheckpointInitiated)) doCheckpoint()
 
       if (moduleTimer.isTime) {
         logger.debug(s"Task: ${manager.taskName}. Invoke onTimer() handler\n")

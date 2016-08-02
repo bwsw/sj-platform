@@ -18,7 +18,7 @@ class SjTimer {
    */
   private var isTimerWentOut = false
 
-  private var timer: Timer = null
+  private val timer: Timer = new Timer()
 
   /**
    * Time when timer went out. Needed for computing lag between a real response time
@@ -32,7 +32,6 @@ class SjTimer {
    */
   def set(delay: Long) = {
     logger.info(s"Set a timer to $delay\n")
-    timer = new Timer()
     timer.schedule(new TimerTask {
       def run() {
         isTimerWentOut = true
@@ -55,7 +54,6 @@ class SjTimer {
    */
   def reset() = {
     logger.debug(s"Reset a timer\n")
-    timer.cancel()
     isTimerWentOut = false
     responseTime = 0
   }

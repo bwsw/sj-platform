@@ -25,6 +25,8 @@ class TimeCheckpointRegularTaskEngine(manager: RegularTaskManager,
   private val checkpointTimer: Option[SjTimer] = createTimer()
   val isNotOnlyCustomCheckpoint = checkpointTimer.isDefined
 
+  if (isNotOnlyCustomCheckpoint) setTimer()
+
   /**
    * Creates a timer for performing checkpoints
    * @return Timer or nothing if instance has no timer and will do checkpoints by manual

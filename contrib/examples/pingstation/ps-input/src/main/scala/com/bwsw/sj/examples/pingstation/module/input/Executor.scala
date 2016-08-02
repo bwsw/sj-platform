@@ -1,7 +1,7 @@
 package com.bwsw.sj.examples.pingstation.module.input
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.engine.core.entities.InputEnvelope
+import com.bwsw.sj.engine.core.entities.{UnreachableResponse, EchoResponse, InputEnvelope}
 import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.engine.core.input.{InputStreamingExecutor, Interval}
 import io.netty.buffer.ByteBuf
@@ -58,7 +58,7 @@ class Executor(manager: InputEnvironmentManager) extends InputStreamingExecutor(
         ))
       case ip =>
 
-        val response = new EchoResponse(ts, ip, fpingResponse(5))
+        val response = new EchoResponse(ts, ip, parsedResponse(5).toDouble)
         println(response + ";") //todo for testing
         val serializedResponse = objectSerializer.serialize(jsonSerializer.serialize(response))
 

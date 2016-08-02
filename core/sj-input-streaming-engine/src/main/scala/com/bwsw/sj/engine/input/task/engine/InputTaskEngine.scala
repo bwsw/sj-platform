@@ -47,18 +47,22 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   protected val evictionPolicy = createEvictionPolicy()
   protected val isNotOnlyCustomCheckpoint: Boolean
 
+  /**
+   * Set of channel contexts related with the input envelopes to send a message about an event
+   * that a checkpoint has been initiated,
+   */
+  private val ctxs = collection.mutable.Set[ChannelHandlerContext]()
+
   addProducersToCheckpointGroup()
 
   /**
    * It is responsible for sending a response to client about the fact that a checkpoint has been done
    * It will be invoked after commit of checkpoint group
-   * @param ctx Channel context related with the input envelope,
-   *            after which checkpoint has been initiated, to send a message about this event
    */
-  protected def checkpointInitiated(ctx: ChannelHandlerContext) = {
+  protected def checkpointInitiated() = {
     val inputStreamingResponse = executor.createCheckpointResponse()
-    if (inputStreamingResponse.isBuffered) ctx.write(inputStreamingResponse.message)
-    else ctx.writeAndFlush(inputStreamingResponse.message)
+    if (inputStreamingResponse.isBuffered) ctxs.foreach(x => x.write(inputStreamingResponse.message))
+    else ctxs.foreach(x => x.writeAndFlush(inputStreamingResponse.message))
   }
 
   /**
@@ -157,6 +161,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
       var channelContext = channelContextQueue.poll()
       if (channelContext == null) channelContext = getCtxOfNonEmptyBuffer()
       if (channelContext != null) {
+        ctxs.add(channelContext)
         logger.debug(s"Task name: ${manager.taskName}. Invoke tokenize() method of executor\n")
         val buffer = bufferForEachContext(channelContext)
         val maybeInterval = executor.tokenize(buffer)
@@ -170,7 +175,6 @@ abstract class InputTaskEngine(manager: InputTaskManager,
             clearBufferAfterTokenize(buffer, interval.finalValue)
             val isNotDuplicateOrEmpty = processEnvelope(inputEnvelope)
             envelopeProcessed(inputEnvelope, isNotDuplicateOrEmpty, channelContext)
-            if (isItTimeToCheckpoint(moduleEnvironmentManager.isCheckpointInitiated)) doCheckpoint(channelContext)
           } else {
             logger.error(s"Task name: ${manager.taskName}. " +
               s"Method tokenize() returned an interval with a final value: ${interval.finalValue} " +
@@ -181,6 +185,8 @@ abstract class InputTaskEngine(manager: InputTaskManager,
           }
         }
       } else logger.debug(s"Task name: ${manager.taskName}. Nothing to execute because of a message queue is empty")
+
+      if (isItTimeToCheckpoint(moduleEnvironmentManager.isCheckpointInitiated)) doCheckpoint()
     }
   }
 
@@ -201,13 +207,12 @@ abstract class InputTaskEngine(manager: InputTaskManager,
 
   /**
    * Does group checkpoint of t-streams consumers/producers
-   * @param ctx Channel context related with this input envelope to send a message about this event
    */
-  protected def doCheckpoint(ctx: ChannelHandlerContext): Unit = {
+  protected def doCheckpoint(): Unit = {
     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
     logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
     checkpointGroup.commit()
-    checkpointInitiated(ctx)
+    checkpointInitiated()
     txnsByStreamPartitions = createTxnsStorage(streams)
   }
 

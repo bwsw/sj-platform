@@ -1,0 +1,122 @@
+ps-input:
+
+1) загружаем модуль ps-input
+POST /v1/modules HTTP/1.1
+ HOST: 176.120.25.19:18080
+
+2) POST /v1/streams HTTP/1.1
+ HOST: 176.120.25.19:18080
+ content-length: 242
+ 
+{
+  "name": "unreachable-response",
+  "description": "Tstream for demo",
+  "service": "tstream_test_service",
+  "tags": [
+    "ping",
+    "station"
+  ],
+  "force": false,
+  "partitions": 1,
+  "generator": {
+    "generator-type": "local",
+    "instance-count": 0
+  },
+  "stream-type": "stream.t-stream"
+}
+
+3) POST /v1/streams HTTP/1.1
+ HOST: 176.120.25.19:18080
+ content-length: 235
+ 
+{
+  "name": "echo-response",
+  "description": "Tstream for demo",
+  "service": "tstream_test_service",
+  "tags": [
+    "ping",
+    "station"
+  ],
+  "force": false,
+  "partitions": 1,
+  "generator": {
+    "generator-type": "local",
+    "instance-count": 0
+  },
+  "stream-type": "stream.t-stream"
+}
+
+4) POST /v1/modules/input-streaming/pingstation-input/0.1/instance/ HTTP/1.1
+ HOST: 176.120.25.19:18080
+ content-length: 614
+ 
+ {
+ "name" : "pingstation-input",
+ "description" : "Input engine for ping station example",
+ "outputs" : ["echo-response", "unreachable-response"],
+ "checkpoint-mode" : "every-nth",
+ "checkpoint-interval" : 10000,
+ "parallelism" : 1,
+ "per-task-cores" : 0.1,
+ "per-task-ram" : 64,
+ "options" : {"11" : "3e2ew"},
+ "jvm-options" : {"11" : "3e2ew"},
+ "coordination-service" : "zookeeper_test_service",
+ "performance-reporting-interval" : 10000,
+ "lookup-history" : 100,
+ "queue-max-size":100,
+ "default-eviction-policy":"LRU",
+ "eviction-policy":"expanded-time"
+ }
+
+ps-process:
+
+1) загружаем модуль ps-process
+POST /v1/modules HTTP/1.1
+ HOST: 176.120.25.19:18080
+
+2) POST /v1/streams HTTP/1.1
+ HOST: 176.120.25.19:18080
+ content-length: 307
+ 
+{
+  "name": "echo-response-1m",
+  "description": "Tstream for demo",
+  "service": "tstream_test_service",
+  "tags": [
+    "echo",
+    "output"
+  ],
+  "force": false,
+  "partitions": 1,
+  "generator": {
+    "generator-type": "local",
+    "instance-count": 0
+  },
+  "stream-type": "stream.t-stream"
+}
+
+4) POST /v1/modules/regular-streaming/pingstation-process/0.1/instance HTTP/1.1
+ HOST: 176.120.25.19:18080
+ content-length: 641
+ 
+ {
+ "name" : "pingstation-process",
+ "description" : "Regular module for ping station example",
+ "inputs" : ["unreachable-response/split", "echo-response/split"],
+ "outputs" : ["echo-response-1m"],
+ "checkpoint-mode" : "time-interval",
+ "checkpoint-interval" : 60000,
+ "state-management" : "ram",
+ "state-full-checkpoint" : 5,
+ "parallelism" : 1,
+ "options" : {"11" : "3e2ew"},
+ "start-from" : "oldest",
+ "per-task-cores" : 0.1,
+ "per-task-ram" : 64,
+ "jvm-options" : {"11" : "3e2ew"},
+ "event-wait-time" : 10,
+ "coordination-service" : "zookeeper_test_service",
+ "performance-reporting-interval" : 10000 
+ }
+ 

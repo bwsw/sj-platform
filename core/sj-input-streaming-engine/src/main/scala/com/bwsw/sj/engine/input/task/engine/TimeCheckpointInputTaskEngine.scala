@@ -30,6 +30,8 @@ class TimeCheckpointInputTaskEngine(manager: InputTaskManager,
   private val checkpointTimer: Option[SjTimer] = createTimer()
   val isNotOnlyCustomCheckpoint = checkpointTimer.isDefined
 
+  if (isNotOnlyCustomCheckpoint) setTimer()
+
   /**
    * Creates a timer for performing checkpoints
    * @return Timer or nothing if instance has no timer and will do checkpoints by manual
@@ -53,10 +55,9 @@ class TimeCheckpointInputTaskEngine(manager: InputTaskManager,
 
   /**
    * Does group checkpoint of t-streams consumers/producers
-   * @param ctx Channel context related with this input envelope to send a message about this event
    */
-  override def doCheckpoint(ctx: ChannelHandlerContext) = {
-    super.doCheckpoint(ctx)
+  override def doCheckpoint() = {
+    super.doCheckpoint()
     resetTimer()
   }
 
