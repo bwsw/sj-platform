@@ -1,6 +1,5 @@
 package com.bwsw.sj.mesos.framework.schedule
 
-import java.io.{PrintWriter, StringWriter}
 import java.net.{InetAddress, InetSocketAddress, URI}
 import java.util
 
@@ -19,14 +18,9 @@ import scala.collection.immutable
 import scala.collection.mutable
 import scala.util.Properties
 
-
-/**
-  *
-  * Created: 10/05/2016
-  *
-  * @author Dmitry Diryavkin
-  */
-//todo написать понятные комментарии к методам (scaladocs) и классам
+/*
+ * Mesos scheduler implementation
+ */
 class FrameworkScheduler extends Scheduler {
 
   private val logger = Logger.getLogger(this.getClass)
@@ -65,33 +59,24 @@ class FrameworkScheduler extends Scheduler {
   def offerRescinded(driver: SchedulerDriver, offerId: OfferID) {
   }
 
+
   /**
     * Obtaining slaves
     *
-    * @param driver
-    * @param offers
+    * @param driver:SchedulerDriver
+    * @param offers:util.List[Offer]
     */
-  //todo сюда приходят offers с cpu=0.0 и mem=0.0, то есть нет ресурсов для запуска таски
   override def resourceOffers(driver: SchedulerDriver, offers: util.List[Offer]) {
-    // TODO : REMOVE THIS
     logger.debug(s"RESOURCE OFFERS")
-
     availablePortsForOneInstance.remove(0, availablePortsForOneInstance.length)
 
-    for (offer <- offers.asScala) {
-      logger.debug(s"PORTS RESOURCE: ${offer.getResources(3)}")
-    }
-
-
-    // TODO : add filter
     val filteredOffers = filterOffers(offers, this.instance.nodeAttributes)
-//    val filteredOffers = offers
     if (filteredOffers.size == 0) {
       for (offer <- offers.asScala) {
         driver.declineOffer(offer.getId)
       }
       TasksList.message = "No one node selected"
-      logger.info("Return from resourceOffers")
+      logger.info("No one node selected")
       return
     }
 
@@ -101,14 +86,14 @@ class FrameworkScheduler extends Scheduler {
     }
 
     val tasksCount = TasksList.toLaunch.size
-    var tasksOnSlaves = getOffersForSlave(perTaskCores,
+    var tasksCountOnSlaves = getOffersForSlave(perTaskCores,
       perTaskMem,
       perTaskPortsCount,
       tasksCount,
       filteredOffers)
 
     var overTasks = 0
-    for (slave <- tasksOnSlaves) {
+    for (slave <- tasksCountOnSlaves) {
       overTasks += slave._2
     }
 
@@ -127,11 +112,11 @@ class FrameworkScheduler extends Scheduler {
     logger.info(s"Tasks to launch: ${TasksList.toLaunch}")
 
     var offerNumber = 0
-    var launchedTasks: Map[OfferID, List[TaskInfo]] = Map()
+    var launchedTasks: mutable.Map[OfferID, mutable.ListBuffer[TaskInfo]] = mutable.Map()
     for (currTask <- TasksList.toLaunch) {
 
-      val currentOffer = tasksOnSlaves(offerNumber)
-      if (offerNumber >= tasksOnSlaves.size - 1) {
+      val currentOffer = tasksCountOnSlaves(offerNumber)
+      if (offerNumber >= offers.asScala.size - 1) {
         offerNumber = 0
       } else {
         offerNumber += 1
@@ -139,14 +124,11 @@ class FrameworkScheduler extends Scheduler {
 
 
       // Task Resources
-      //todo org.apache.mesos.Protos.Value >> Value, т.к. ранее выполнен импорт org.apache.mesos.Protos._
-      //можно скорректировать импорт  на "org.apache.mesos", тогда понятнее будет, что Value берется в Protos
       val cpus = Resource.newBuilder
         .setType(Value.Type.SCALAR)
         .setName("cpus")
         .setScalar(Value.Scalar.newBuilder.setValue(perTaskCores))
         .build
-
       val mem = Resource.newBuilder
         .setType(org.apache.mesos.Protos.Value.Type.SCALAR)
         .setName("mem")
@@ -157,13 +139,12 @@ class FrameworkScheduler extends Scheduler {
 
       var agentPorts: String = ""
       var taskPort: String = ""
-      if (!instance.moduleType.equals(ModuleConstants.inputStreamingType)) {
-        ports.getRanges.getRangeList.asScala.map(_.getBegin.toString).mkString(",")
-      } else {
-        val availPorts = ports.getRanges.getRangeList.asScala.map(_.getBegin.toString)
-        taskPort = availPorts.head
-        agentPorts = availPorts.remove(0).mkString(",")
+
+      var availablePorts = ports.getRanges.getRangeList.asScala.map(_.getBegin.toString)
+      if (instance.moduleType.equals(ModuleConstants.inputStreamingType)) {
+        taskPort = availablePorts.head; availablePorts = availablePorts.tail
       }
+      agentPorts = availablePorts.mkString(",")
       agentPorts.dropRight(1)
 
       logger.debug(s"Task: $currTask. Ports for task: $ports")
@@ -189,12 +170,12 @@ class FrameworkScheduler extends Scheduler {
           .setValue("java -jar " + jarName)
           .setEnvironment(environments)
       } catch {
-        case e: Exception => handleSchedulerException(e)
+        case e: Exception => FrameworkUtil.handleSchedulerException(e, driver, logger)
       }
 
-      while (tasksOnSlaves(offerNumber)._2 == 0) {
-        tasksOnSlaves = tasksOnSlaves.filterNot(elem => elem == tasksOnSlaves(offerNumber))
-        if (offerNumber > tasksOnSlaves.size - 1) {
+      while (tasksCountOnSlaves(offerNumber)._2 == 0) {
+        tasksCountOnSlaves = tasksCountOnSlaves.filterNot(_ == tasksCountOnSlaves(offerNumber))
+        if (offerNumber > tasksCountOnSlaves.size - 1) {
           offerNumber = 0
         }
       }
@@ -211,22 +192,16 @@ class FrameworkScheduler extends Scheduler {
         .addResources(ports)
         .setSlaveId(currentOffer._1.getSlaveId)
         .build()
-      var listTasks: List[TaskInfo] = List()
-      listTasks ::= task
 
       if (launchedTasks.contains(currentOffer._1.getId)) {
-        launchedTasks += (currentOffer._1.getId -> launchedTasks {
-          currentOffer._1.getId
-        }.:::(listTasks))
+        launchedTasks(currentOffer._1.getId) += task
       } else {
-        launchedTasks += (currentOffer._1.getId -> listTasks)
+        launchedTasks += (currentOffer._1.getId -> mutable.ListBuffer(task))
       }
 
       // update how much tasks we can run on slave when launch current task
-      //todo убрать строку? идея ее подчеркивает, как useless expression
-      tasksOnSlaves.updated(tasksOnSlaves.indexOf(currentOffer), Tuple2(currentOffer._1, currentOffer._2 - 1))
+      tasksCountOnSlaves.update(tasksCountOnSlaves.indexOf(currentOffer), Tuple2(currentOffer._1, currentOffer._2 - 1))
       TasksList.launched(currTask)
-
     }
 
     for (task <- launchedTasks) {
@@ -252,7 +227,6 @@ class FrameworkScheduler extends Scheduler {
     */
   def registered(driver: SchedulerDriver, frameworkId: FrameworkID, masterInfo: MasterInfo) {
     logger.info(s"Registered framework as: ${frameworkId.getValue}")
-
     this.driver = driver
 
     params = Map(
@@ -260,67 +234,59 @@ class FrameworkScheduler extends Scheduler {
       ("mongodbHost", Properties.envOrElse("MONGO_HOST", "127.0.0.1")),
       ("mongodbPort", Properties.envOrElse("MONGO_PORT", "27017"))
     )
-    logger.debug(s"Got environment variable: ${this.params}")
+    logger.debug(s"Got environment variable: $params")
 
-    this.instance = ConnectionRepository.getInstanceService.get(this.params("instanceId"))
+    instance = ConnectionRepository.getInstanceService.get(params("instanceId"))
     if (instance == null) {
       logger.error(s"Not found instance")
       driver.stop()
       TasksList.message = "Framework shut down: not found instance."
       return
     }
-    perTaskCores = instance.perTaskCores
-    perTaskMem = instance.perTaskRam
-
-    perTaskPortsCount = FrameworkUtil.getCountPorts(instance)
     logger.info(s"Got instance")
-    logger.debug(s"$instance")
+    logger.debug(s"${instance.name}")
 
+    //framework blocking
     try {
-      val zkHost = instance.coordinationService.provider.hosts(0)
-      val zkhost = new InetSocketAddress(InetAddress.getByName(zkHost.split(":")(0)), zkHost.split(":")(1).toInt)
-      val zkClient = new ZooKeeperClient(Amount.of(1, Time.MINUTES), zkhost)
-      val lockPath = s"/mesos-framework/${instance.coordinationService.namespace}/${params{"instanceId"}}/lock"//todo change to URI
+      val zkHostString = instance.coordinationService.provider.hosts(0)
+      val zkHost = new InetSocketAddress(InetAddress.getByName(zkHostString.split(":")(0)), zkHostString.split(":")(1).toInt)
+      val zkClient = new ZooKeeperClient(Amount.of(1, Time.MINUTES), zkHost)
+      val lockPath = s"/mesos-framework/${instance.coordinationService.namespace}/${params{"instanceId"}}/lock"
       val dli = new DistributedLockImpl(zkClient, lockPath)
       dli.lock()
       logger.info("Framework locked")
     } catch {
-      case e:Exception => handleSchedulerException(e)
+      case e:Exception => FrameworkUtil.handleSchedulerException(e, driver, logger)
     }
 
-    if (instance.moduleType.equals(ModuleConstants.inputStreamingType)) { //todo у нас есть константы!
-      val tasks = instance.asInstanceOf[InputInstance].tasks
-      logger.info(s"Got tasks")
-      for (task <- tasks.asScala) {
-        TasksList.newTask(task._1)
-        logger.info(s"${task._1}")
-      }
-    } else {
-      val tasks = instance.executionPlan.tasks
-      logger.info(s"Got tasks")
-      for (task <- tasks.asScala) {
-        TasksList.newTask(task._1)
-        logger.info(s"${task._1}")
-      }
-    }
+    perTaskCores = instance.perTaskCores
+    perTaskMem = instance.perTaskRam
+    perTaskPortsCount = FrameworkUtil.getCountPorts(instance)
+    val tasks = if (instance.moduleType.equals(ModuleConstants.inputStreamingType))
+                instance.asInstanceOf[InputInstance].tasks
+                else instance.executionPlan.tasks
+    tasks.asScala.foreach(task => TasksList.newTask(task._1))
+    logger.debug(s"Got tasks: $TasksList")
+
     TasksList.message = s"Registered framework as: ${frameworkId.getValue}"
   }
 
+
   /**
-    * Getting list of offers and tasks count for lunch on each slave
+    * Getting list of offers and tasks count for launch on each slave
     *
-    * @param perTaskCores
-    * @param perTaskRam
-    * @param perTaskPortsCount
-    * @param taskCount
-    * @param offers
-    * @return
+    * @param perTaskCores:Double
+    * @param perTaskRam:Double
+    * @param perTaskPortsCount:Int
+    * @param taskCount:Int
+    * @param offers:util.List[Offer]
+    * @return mutable.ListBuffer[(Offer, Int)]
     */
   def getOffersForSlave(perTaskCores: Double,
                         perTaskRam: Double,
                         perTaskPortsCount: Int,
                         taskCount: Int,
-                        offers: util.List[Offer]): List[(Offer, Int)] = {
+                        offers: util.List[Offer]): mutable.ListBuffer[(Offer, Int)] = {
     var overCpus = 0.0
     var overMem = 0.0
     var overPorts = 0
@@ -329,122 +295,96 @@ class FrameworkScheduler extends Scheduler {
     val reqMem = perTaskRam * taskCount
     val reqPorts = perTaskPortsCount * taskCount
 
-    var tasksNumber: List[(Offer, Int)] = List()
+    val tasksCountOnSlave: mutable.ListBuffer[(Offer, Int)] = mutable.ListBuffer()
     for (offer: Offer <- offers.asScala) {
-      val portsResource = getPortsResource(offer)
+      val portsResource = getResource(offer, "ports")
       var offerPorts = 0
       for (range <- portsResource.getRanges.getRangeList.asScala) {
         overPorts += (range.getEnd - range.getBegin + 1).toInt
         offerPorts += (range.getEnd - range.getBegin + 1).toInt
       }
 
-      tasksNumber = tasksNumber.:::(List(Tuple2(
-        offer, List[Double](
-          getResource(offer, "cpus") / perTaskCores,
-          getResource(offer, "mem") / perTaskRam,
-          offerPorts / perTaskPortsCount
-        ).min.floor.toInt
-      )))
-      overCpus += getResource(offer, "cpus")
-      overMem += getResource(offer, "mem")
+      tasksCountOnSlave.append(Tuple2(offer, List[Double](
+        getResource(offer, "cpus").getScalar.getValue / perTaskCores,
+        getResource(offer, "mem").getScalar.getValue / perTaskRam,
+        offerPorts / perTaskPortsCount
+      ).min.floor.toInt))
+      overCpus += getResource(offer, "cpus").getScalar.getValue
+      overMem += getResource(offer, "mem").getScalar.getValue
     }
     logger.info(s"Have resources: $overCpus cpus, $overMem mem, $overPorts ports")
-    logger.info(s"Required resources: $reqCpus cpus, $reqMem mem, $reqPorts ports")
-    tasksNumber
+    logger.info(s"Need resources: $reqCpus cpus, $reqMem mem, $reqPorts ports")
+    tasksCountOnSlave
   }
 
   /**
     * This method give how much resource of type <name> we have on <offer>
+    *
+    * @param offer:Offer
+    * @param name:String
+    * @return Double
     */
-  def getResource(offer: Offer, name: String): Double = {
-    val res = offer.getResourcesList
-    for (r <- res.asScala if r.getName == name) {
-      return r.getScalar.getValue
-    }
-    0.0
+  def getResource(offer: Offer, name: String): Resource = {
+    offer.getResourcesList.asScala.filter(_.getName.equals(name)).head
   }
 
   /**
     * Filter offered slaves
-    * @param offers
-    * @param filters
-    * @return
+    * @param offers:util.List[Offer]
+    * @param filters:util.Map[String, String]
+    * @return util.List[Offer]
     */
-  //todo оптимизировать if'ы
   def filterOffers(offers: util.List[Offer], filters: util.Map[String, String]): util.List[Offer] = {
-    logger.info(s"FILTER OFFERS")
-    var result: List[Offer] = List()
-    if (filters != null) { //todo эта проверка точно нужна? Если filters=null, то цикл просто не выполнится (проверить, что asScala не инициирует NPE)
+    logger.debug(s"FILTER OFFERS")
+    var result: mutable.Buffer[Offer] = mutable.Buffer()
+    if (filters != null) {
       for (filter <- filters.asScala) {
         for (offer <- offers.asScala) {
-          if (filter._1.matches("""\+.+""".r.toString)) {
+          if (filter._1.matches("""\+.+""")) {
             for (attribute <- offer.getAttributesList.asScala) {
               if (filter._1.toString.substring(1) == attribute.getName &
                 attribute.getText.getValue.matches(filter._2.r.toString)) {
-
-                result ::= offer
+                result += offer
               }
             }
           }
-          //todo зачем такая сложная конструкция <"""\-.+""".r.toString>? Выражения <"""\-.+""".r.toString> == <"""\-.+""">
-          if (filter._1.matches("""\-.+""".r.toString)) {
+          if (filter._1.matches("""\-.+""")) {
             for (attribute <- offer.getAttributesList.asScala) {
               if (filter._1.matches(attribute.getName.r.toString) &
                 attribute.getText.getValue.matches(filter._2.r.toString)) {
-
                 result = result.filterNot(elem => elem == offer)
               }
             }
           }
         }
       }
-    } else return offers
+    } else result = offers.asScala
     result.asJava
   }
 
   /**
     * Get jar URI for framework
-    * @param instance
-    * @return
+    * @param instance:Instance
+    * @return String
     */
   def getModuleUrl(instance: Instance): String = {
-    // TODO:return back get host
     jarName = configFileService.get("system." + instance.engine).value
     val restHost = configFileService.get(ConfigConstants.hostOfCrudRestTag).value
     val restPort = configFileService.get(ConfigConstants.portOfCrudRestTag).value.toInt
     val restAddress = new URI(s"http://$restHost:$restPort/v1/custom/jars/$jarName").toString
     logger.info(s"Engine downloading URL: $restAddress")
     restAddress
-//    "http://192.168.1.225:8000/testScript.sh"
   }
 
-  /**
-    *
-    * @param offer
-    * @return
-    */
-  def getPortsResource(offer: Offer): Resource = {
-    var portsResource: Resource = Resource.newBuilder
-      .setName("ports")
-      .setType(Value.Type.RANGES)
-      .build
-
-    for (resource <- offer.getResourcesList.asScala) {
-      if (resource.getName == "ports") {
-        portsResource = resource
-      }
-    }
-    //todo а нельзя ли сделать так? Суть та же, но код короче
-    //portsResource = offer.getResourcesList.asScala.filter(_.getName.equals("ports")).head
-
-    portsResource
-  }
 
   /**
     * Get random unused ports
+    * @param offer:Offer
+    * @param task:String
+    * @return Resource
     */
   def getPorts(offer: Offer, task: String):Resource = {
-    val portsResource: Resource = getPortsResource(offer)
+    val portsResource = getResource(offer, "ports")
     for (range <- portsResource.getRanges.getRangeList.asScala) {
       availablePortsForOneInstance ++= (range.getBegin to range.getEnd).to[mutable.ListBuffer]
     }
@@ -462,18 +402,6 @@ class FrameworkScheduler extends Scheduler {
       .setType(Value.Type.RANGES)
       .setRanges(ranges)
       .build
-  }
-
-  /**
-    * Handler for Scheduler Exception
-    */
-  def handleSchedulerException(e: Exception) = {
-    val sw = new StringWriter
-    e.printStackTrace(new PrintWriter(sw))
-    TasksList.message = e.getMessage
-    logger.error(s"Framework error: ${sw.toString}")
-    driver.stop()
-    System.exit(1)
   }
 }
 

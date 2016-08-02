@@ -12,7 +12,7 @@ import com.bwsw.sj.common.DAL.model.module.{Task => InstanceTask}
 class Task(taskId: String) {
   val id: String = taskId
   var state: String = "TASK_STAGING"
-  var stateChanged: Long = Calendar.getInstance().getTime.getTime//DateTime.now.getMillis TODO: Why org.joda.time.DateTime?
+  var stateChanged: Long = Calendar.getInstance().getTime.getTime
   var reason: String = ""
   var node: String = ""
   var lastNode: String = ""
