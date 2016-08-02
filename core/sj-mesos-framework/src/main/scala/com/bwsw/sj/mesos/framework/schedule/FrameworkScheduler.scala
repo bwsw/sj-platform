@@ -243,18 +243,18 @@ class FrameworkScheduler extends Scheduler {
     }
     logger.debug(s"Got instance ${instance.name}")
 
-    //framework blocking
-    try {
-      val zkHostString = instance.coordinationService.provider.hosts(0)
-      val zkHost = new InetSocketAddress(InetAddress.getByName(zkHostString.split(":")(0)), zkHostString.split(":")(1).toInt)
-      val zkClient = new ZooKeeperClient(Amount.of(1, Time.MINUTES), zkHost)
-      val lockPath = s"/mesos-framework/${instance.coordinationService.namespace}/${params{"instanceId"}}/lock"
-      val dli = new DistributedLockImpl(zkClient, lockPath)
-      dli.lock()
-      logger.info("Framework locked")
-    } catch {
-      case e:Exception => FrameworkUtil.handleSchedulerException(e, driver, logger)
-    }
+//    //framework blocking
+//    try {
+//      val zkHostString = instance.coordinationService.provider.hosts(0)
+//      val zkHost = new InetSocketAddress(InetAddress.getByName(zkHostString.split(":")(0)), zkHostString.split(":")(1).toInt)
+//      val zkClient = new ZooKeeperClient(Amount.of(1, Time.MINUTES), zkHost)
+//      val lockPath = s"/mesos-framework/${instance.coordinationService.namespace}/${params{"instanceId"}}/lock"
+//      val dli = new DistributedLockImpl(zkClient, lockPath)
+//      dli.lock()
+//      logger.info("Framework locked")
+//    } catch {
+//      case e:Exception => FrameworkUtil.handleSchedulerException(e, driver, logger)
+//    }
 
     perTaskCores = instance.perTaskCores
     perTaskMem = instance.perTaskRam
