@@ -1,0 +1,19 @@
+{
+  "name" : "pingstation-process",
+  "description" : "Regular module for ping station example",
+  "inputs" : ["unreachable-response/split", "echo-response/split"],
+  "outputs" : ["echo-response-1m"],
+  "checkpoint-mode" : "time-interval",
+  "checkpoint-interval" : 60000,
+  "state-management" : "ram",
+  "state-full-checkpoint" : 5,
+  "parallelism" : 1,
+  "options" : {"11" : "3e2ew"},
+  "start-from" : "oldest",
+  "per-task-cores" : 0.1,
+  "per-task-ram" : 64,
+  "jvm-options" : {"11" : "3e2ew"},
+  "event-wait-time" : 10,
+  "coordination-service" : "zookeeper_test_service",
+  "performance-reporting-interval" : 10000
+}

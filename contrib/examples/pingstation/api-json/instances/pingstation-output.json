@@ -1,0 +1,16 @@
+{
+  "name" : "pingstation-output",
+  "description" : "Output module for ping station example",
+  "input" : "echo-response-1m",
+  "output" : "es-echo-response-1m",
+  "checkpoint-mode" : "every-nth" ,
+  "checkpoint-interval" : 1000,
+  "parallelism" : 1,
+  "options" : {"d":1},
+  "start-from" : "oldest",
+  "per-task-cores" : 0.1,
+  "per-task-ram" : 64,
+  "jvm-options" : {"d":1},
+  "coordination-service" : "zookeeper_test_service",
+  "performance-reporting-interval" : 10000
+}

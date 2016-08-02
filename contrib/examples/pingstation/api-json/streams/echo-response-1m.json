@@ -1,0 +1,14 @@
+{
+  "name": "echo-response-1m",
+  "description": "Tstream for demo",
+  "service": "tstream_test_service",
+  "tags": [
+    "echo",
+    "output"
+  ],
+  "partitions": 1,
+  "generator": {
+    "generator-type": "local"
+  },
+  "stream-type": "stream.t-stream"
+}

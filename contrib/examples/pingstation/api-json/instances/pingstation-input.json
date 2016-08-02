@@ -1,0 +1,18 @@
+{
+  "name" : "pingstation-input",
+  "description" : "Input engine for ping station example",
+  "outputs" : ["echo-response", "unreachable-response"],
+  "checkpoint-mode" : "every-nth",
+  "checkpoint-interval" : 1000,
+  "parallelism" : 1,
+  "per-task-cores" : 0.1,
+  "per-task-ram" : 64,
+  "options" : {"11" : "3e2ew"},
+  "jvm-options" : {"11" : "3e2ew"},
+  "coordination-service" : "zookeeper_test_service",
+  "performance-reporting-interval" : 10000,
+  "lookup-history" : 100,
+  "queue-max-size":100,
+  "default-eviction-policy":"LRU",
+  "eviction-policy":"expanded-time"
+}

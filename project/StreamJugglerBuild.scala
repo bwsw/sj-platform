@@ -20,7 +20,7 @@ object StreamJugglerBuild extends Build {
     pmOutput,
     stubRegular, stubOutput, stubInput,
     sflowOutput, sflowProcess,
-    psInput, psProcess)
+    psInput, psProcess, psOutput)
 
   lazy val common = Project(id = "sj-common",
     base = file("./core/sj-common")).enablePlugins(JavaAppPackaging)
@@ -70,9 +70,11 @@ object StreamJugglerBuild extends Build {
   lazy val psInput = Project(id = "ps-input",
     base = file("./contrib/examples/pingstation/ps-input")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
 
-
   lazy val psProcess = Project(id = "ps-process",
     base = file("./contrib/examples/pingstation/ps-process")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
+
+  lazy val psOutput = Project(id = "ps-output",
+    base = file("./contrib/examples/pingstation/ps-output")).enablePlugins(JavaAppPackaging).dependsOn(engineCore)
 
   //////////////////////////////////////////////////////////////////////////////
   // PROJECT INFO

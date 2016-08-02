@@ -79,7 +79,7 @@ abstract class TaskManager() {
   private val cassandraStorageFactory = new CassandraStorageFactory()
   private val aerospikeStorageFactory = new AerospikeStorageFactory()
 
-  val outputProducers = createOutputProducers()
+  lazy val outputProducers = createOutputProducers()
   val reportStream = getReportStream()
 
   /**

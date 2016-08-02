@@ -39,7 +39,7 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
             val echoResponses = fpingResponses.map(jsonSerializer.deserialize[EchoResponse])
 
             echoResponses.foreach(x => {
-              println(x) //todo
+              println(x) //todo for testing
 
               if (!state.isExist(x.ip)) state.set(x.ip, PingStateVariable(0, 0, 0, 0))
 
@@ -56,7 +56,7 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
             val unreachableResponses = fpingResponses.map(jsonSerializer.deserialize[UnreachableResponse])
 
             unreachableResponses.foreach(x => {
-              println(x) //todo
+              println(x) //todo for testing
 
               if (!state.isExist(x.ip)) state.set(x.ip, PingStateVariable(0, 0, 0, 0))
 
@@ -93,7 +93,7 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
       + x._2.totalOk + ","
       + x._2.totalUnreachable
     ).foreach(x => {
-      println(x) //todo
+      println(x) //todo for testing
       output.put(objectSerializer.serialize(x))
     })
   }

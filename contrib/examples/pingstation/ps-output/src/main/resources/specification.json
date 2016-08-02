@@ -1,0 +1,32 @@
+{
+  "name": "pingstation-output",
+  "description": "Output module by BW for ping station demo",
+  "version": "0.1",
+  "author": "Kseniya Mikhaleva",
+  "license": "Apache 2.0",
+  "inputs": {
+    "cardinality": [
+      1,
+      1
+    ],
+    "types": [
+      "stream.t-stream"
+    ]
+  },
+  "outputs": {
+    "cardinality": [
+      1,
+      1
+    ],
+    "types": [
+      "elasticsearch-output"
+    ]
+  },
+  "module-type": "output-streaming",
+  "engine-name": "com.bwsw.output.streaming.engine",
+  "engine-version": "0.1",
+  "options": {},
+  "validator-class": "com.bwsw.sj.examples.pingstation.module.output.Validator",
+  "executor-class": "com.bwsw.sj.examples.pingstation.module.output.Executor",
+  "entity-class" : "com.bwsw.sj.examples.pingstation.module.output.data.PingMetrics"
+}

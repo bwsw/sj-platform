@@ -1,0 +1,9 @@
+{
+  "name": "cassandra-ps-provider",
+  "description": "Cassandra provider for demo",
+  "login": "test",
+  "type": "cassandra",
+  "hosts": [
+    "176.120.25.19:9042"
+  ]
+}

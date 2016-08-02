@@ -1,0 +1,7 @@
+{
+  "name": "cassandra-ps-service",
+  "description": "Cassandra service for demo",
+  "provider": "cassandra-ps-provider",
+  "keyspace": "ping-station-keyspace",
+  "type": "CassDB"
+}

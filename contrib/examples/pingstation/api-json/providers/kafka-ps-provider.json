@@ -1,0 +1,9 @@
+{
+  "name": "kafka-ps-provider",
+  "description": "Kafka provider for demo",
+  "login": "test",
+  "type": "kafka",
+  "hosts": [
+    "176.120.25.19:9092"
+  ]
+}
