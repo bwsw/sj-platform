@@ -47,8 +47,7 @@ class FrameworkScheduler extends Scheduler {
   def disconnected(driver: SchedulerDriver) {}
 
   def frameworkMessage(driver: SchedulerDriver, executorId: ExecutorID, slaveId: SlaveID, data: Array[Byte]) {
-    logger.info(s"Got framework message")
-    logger.debug(s"$data")
+    logger.debug(s"Got framework message: $data")
     TasksList.message = s"Got framework message: $data"
   }
 
@@ -67,7 +66,7 @@ class FrameworkScheduler extends Scheduler {
     * @param offers:util.List[Offer]
     */
   override def resourceOffers(driver: SchedulerDriver, offers: util.List[Offer]) {
-    logger.debug(s"RESOURCE OFFERS")
+    logger.info(s"RESOURCE OFFERS")
     availablePortsForOneInstance.remove(0, availablePortsForOneInstance.length)
 
     val filteredOffers = filterOffers(offers, this.instance.nodeAttributes)
@@ -97,8 +96,8 @@ class FrameworkScheduler extends Scheduler {
       overTasks += slave._2
     }
 
-    logger.info(s"Count tasks can be launched: $overTasks")
-    logger.info(s"Count tasks must be launched: $tasksCount")
+    logger.debug(s"Count tasks can be launched: $overTasks")
+    logger.debug(s"Count tasks must be launched: $tasksCount")
 
     if (tasksCount > overTasks) {
       logger.info(s"Can not launch tasks: no required resources")
@@ -109,7 +108,7 @@ class FrameworkScheduler extends Scheduler {
       return
     }
 
-    logger.info(s"Tasks to launch: ${TasksList.toLaunch}")
+    logger.debug(s"Tasks to launch: ${TasksList.toLaunch}")
 
     var offerNumber = 0
     var launchedTasks: mutable.Map[OfferID, mutable.ListBuffer[TaskInfo]] = mutable.Map()
@@ -180,8 +179,7 @@ class FrameworkScheduler extends Scheduler {
         }
       }
 
-      logger.info(s"Task: $currTask.")
-      logger.info(s"Task: $currTask. Current slave: ${currentOffer._1.getSlaveId.getValue}")
+      logger.info(s"Task: $currTask => Slave: ${currentOffer._1.getSlaveId.getValue}")
 
       val task = TaskInfo.newBuilder
         .setCommand(cmd)
@@ -218,7 +216,7 @@ class FrameworkScheduler extends Scheduler {
     * Reregistering framework
     */
   def reregistered(driver: SchedulerDriver, masterInfo: MasterInfo) {
-    logger.info(s"New master $masterInfo")
+    logger.debug(s"New master $masterInfo")
     TasksList.message = s"New master $masterInfo"
   }
 
@@ -243,8 +241,7 @@ class FrameworkScheduler extends Scheduler {
       TasksList.message = "Framework shut down: not found instance."
       return
     }
-    logger.info(s"Got instance")
-    logger.debug(s"${instance.name}")
+    logger.debug(s"Got instance ${instance.name}")
 
     //framework blocking
     try {
@@ -312,8 +309,8 @@ class FrameworkScheduler extends Scheduler {
       overCpus += getResource(offer, "cpus").getScalar.getValue
       overMem += getResource(offer, "mem").getScalar.getValue
     }
-    logger.info(s"Have resources: $overCpus cpus, $overMem mem, $overPorts ports")
-    logger.info(s"Need resources: $reqCpus cpus, $reqMem mem, $reqPorts ports")
+    logger.debug(s"Have resources: $overCpus cpus, $overMem mem, $overPorts ports")
+    logger.debug(s"Need resources: $reqCpus cpus, $reqMem mem, $reqPorts ports")
     tasksCountOnSlave
   }
 
@@ -372,7 +369,7 @@ class FrameworkScheduler extends Scheduler {
     val restHost = configFileService.get(ConfigConstants.hostOfCrudRestTag).value
     val restPort = configFileService.get(ConfigConstants.portOfCrudRestTag).value.toInt
     val restAddress = new URI(s"http://$restHost:$restPort/v1/custom/jars/$jarName").toString
-    logger.info(s"Engine downloading URL: $restAddress")
+    logger.debug(s"Engine downloading URL: $restAddress")
     restAddress
   }
 
