@@ -7,8 +7,6 @@ import com.bwsw.sj.common.DAL.model.module.{InputInstance, Instance}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.{ConfigConstants, ModuleConstants}
 import com.bwsw.sj.mesos.framework.task.{StatusHandler, TasksList}
-import com.twitter.common.quantity.{Amount, Time}
-import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos._
 import org.apache.mesos.{Scheduler, SchedulerDriver}
