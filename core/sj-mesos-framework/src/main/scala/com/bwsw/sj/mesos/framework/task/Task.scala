@@ -1,6 +1,7 @@
 package com.bwsw.sj.mesos.framework.task
 
 import java.util.Calendar
+import java.util.Date
 
 import com.bwsw.sj.common.DAL.model.module.{Task => InstanceTask}
 
@@ -35,7 +36,7 @@ class Task(taskId: String) {
     //val timestamp = new Timestamp(stateChanged)
     Map(("id", id),
       ("state", state),
-      ("state-change", stateChanged.toString),
+      ("state-change", new Date(stateChanged).toString),
       ("reason", reason),
       ("node", node),
       ("last-node", lastNode)

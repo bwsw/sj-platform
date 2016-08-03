@@ -153,7 +153,7 @@ class FrameworkScheduler extends Scheduler {
       if (instance.moduleType.equals(ModuleConstants.inputStreamingType)) {
         taskPort = availablePorts.head; availablePorts = availablePorts.tail
         val inputInstance = instance.asInstanceOf[InputInstance]
-        inputInstance.tasks.put(currTask, new InputTask(currentOffer._1.getHostname, taskPort.toInt))
+        inputInstance.tasks.put(currTask, new InputTask(currentOffer._1.getUrl.getAddress.getIp, taskPort.toInt))
         ConnectionRepository.getInstanceService.save(instance)
       }
       agentPorts = availablePorts.mkString(",")
@@ -169,7 +169,7 @@ class FrameworkScheduler extends Scheduler {
           .addVariables(Environment.Variable.newBuilder.setName("MONGO_PORT").setValue(params {"mongodbPort"}))
           .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_NAME").setValue(params {"instanceId"}))
           .addVariables(Environment.Variable.newBuilder.setName("TASK_NAME").setValue(currTask))
-          .addVariables(Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(currentOffer._1.getHostname))
+          .addVariables(Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(currentOffer._1.getUrl.getAddress.getIp))
           .addVariables(Environment.Variable.newBuilder.setName("AGENTS_PORTS").setValue(agentPorts))
 
 //        if (instance.moduleType.equals(ModuleConstants.inputStreamingType)) {
