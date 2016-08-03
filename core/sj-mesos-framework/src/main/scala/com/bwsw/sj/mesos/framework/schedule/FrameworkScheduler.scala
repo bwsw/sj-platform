@@ -1,9 +1,9 @@
 package com.bwsw.sj.mesos.framework.schedule
 
-import java.net.{InetAddress, InetSocketAddress, URI}
+import java.net.URI
 import java.util
 
-import com.bwsw.sj.common.DAL.model.module.{InputInstance, Instance}
+import com.bwsw.sj.common.DAL.model.module.{InputTask, Instance, InputInstance}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.{ConfigConstants, ModuleConstants}
 import com.bwsw.sj.mesos.framework.task.{StatusHandler, TasksList}
@@ -15,6 +15,7 @@ import scala.collection.JavaConverters._
 import scala.collection.immutable
 import scala.collection.mutable
 import scala.util.Properties
+
 
 /*
  * Mesos scheduler implementation
@@ -32,6 +33,7 @@ class FrameworkScheduler extends Scheduler {
   val configFileService = ConnectionRepository.getConfigService
   var jarName: String = null
   val availablePortsForOneInstance: collection.mutable.ListBuffer[Long] = collection.mutable.ListBuffer()
+  var uniqueHosts = false
 
   def error(driver: SchedulerDriver, message: String) {
     logger.error(s"Got error message: $message")
@@ -94,6 +96,12 @@ class FrameworkScheduler extends Scheduler {
       overTasks += slave._2
     }
 
+
+    if (uniqueHosts && tasksCountOnSlaves.length < overTasks) {
+      overTasks = tasksCountOnSlaves.length
+    }
+
+
     logger.debug(s"Count tasks can be launched: $overTasks")
     logger.debug(s"Count tasks must be launched: $tasksCount")
 
@@ -140,6 +148,9 @@ class FrameworkScheduler extends Scheduler {
       var availablePorts = ports.getRanges.getRangeList.asScala.map(_.getBegin.toString)
       if (instance.moduleType.equals(ModuleConstants.inputStreamingType)) {
         taskPort = availablePorts.head; availablePorts = availablePorts.tail
+        val inputInstance = instance.asInstanceOf[InputInstance]
+        inputInstance.tasks.put(currTask, new InputTask(currentOffer._1.getHostname, taskPort.toInt))
+        ConnectionRepository.getInstanceService.save(instance)
       }
       agentPorts = availablePorts.mkString(",")
       agentPorts.dropRight(1)
@@ -157,10 +168,10 @@ class FrameworkScheduler extends Scheduler {
           .addVariables(Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(currentOffer._1.getHostname))
           .addVariables(Environment.Variable.newBuilder.setName("AGENTS_PORTS").setValue(agentPorts))
 
-        if (instance.moduleType.equals(ModuleConstants.inputStreamingType)) {
-          logger.debug(s"Task: $currTask. Task port: $taskPort")
-          environments.addVariables(Environment.Variable.newBuilder.setName("ENTRY_PORT").setValue(taskPort))
-        }
+//        if (instance.moduleType.equals(ModuleConstants.inputStreamingType)) {
+//          logger.debug(s"Task: $currTask. Task port: $taskPort")
+//          environments.addVariables(Environment.Variable.newBuilder.setName("ENTRY_PORT").setValue(taskPort))
+//        }
 
         cmd
           .addUris(CommandInfo.URI.newBuilder.setValue(getModuleUrl(instance)))
@@ -198,6 +209,8 @@ class FrameworkScheduler extends Scheduler {
       // update how much tasks we can run on slave when launch current task
       tasksCountOnSlaves.update(tasksCountOnSlaves.indexOf(currentOffer), Tuple2(currentOffer._1, currentOffer._2 - 1))
       TasksList.launched(currTask)
+
+
     }
 
     for (task <- launchedTasks) {
@@ -258,10 +271,16 @@ class FrameworkScheduler extends Scheduler {
     perTaskMem = instance.perTaskRam
     perTaskPortsCount = FrameworkUtil.getCountPorts(instance)
     val tasks = if (instance.moduleType.equals(ModuleConstants.inputStreamingType))
-                instance.asInstanceOf[InputInstance].tasks
-                else instance.executionPlan.tasks
-    tasks.asScala.foreach(task => TasksList.newTask(task._1))
+        (0 until instance.parallelism).map(tn => instance.name+"-task"+tn)
+        else instance.executionPlan.tasks.asScala.keys
+    tasks.foreach(task => TasksList.newTask(task))
     logger.debug(s"Got tasks: $TasksList")
+
+    try {
+      uniqueHosts = Properties.envOrElse("UNIQUE_HOSTS", "false").toBoolean
+    } catch {
+      case e: Exception =>
+    }
 
     TasksList.message = s"Registered framework as: ${frameworkId.getValue}"
   }
@@ -322,6 +341,7 @@ class FrameworkScheduler extends Scheduler {
   def getResource(offer: Offer, name: String): Resource = {
     offer.getResourcesList.asScala.filter(_.getName.equals(name)).head
   }
+
 
   /**
     * Filter offered slaves
