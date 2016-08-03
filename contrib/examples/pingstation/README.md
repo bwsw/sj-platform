@@ -4,7 +4,7 @@ Assuming that all components of the SJ infrastructure is deployed.
 
 ## Preparation
 
-At the beginning you should create streams that will be used in the instances of input, process and output modules by sending several post requests to 'http://<rest-api-address>/v1/streams' with the following content:
+At the beginning you should create streams that will be used in the instances of input, process and output modules by sending several post requests to 'http://rest-api-address/v1/streams' with the following content:
 
 1. [The content](https://github.com/bwsw/sj-platform/contrib/examples/pingstation/api-json/streams/echo-response.json)
 to create an output stream of input module (consequently, an input stream of process module) that will be used for keeping an IP and average time from ICMP echo response and also timestamp of the event
@@ -18,22 +18,22 @@ to create an output stream of output module that will be used for keeping an agg
 
 Then you should create an instance for each module:
 
-1. For creating an instance of input module send a post request to 'http://<rest-api-address>/v1/modules/input-streaming/pingstation-input/0.1/instance' with the following
+1. For creating an instance of input module send a post request to 'http://rest-api-address/v1/modules/input-streaming/pingstation-input/0.1/instance' with the following
 [content](https://github.com/bwsw/sj-platform/contrib/examples/pingstation/api-json/instances/pingstation-input.json)
-2. For creating an instance of process module send a post request to 'http://<rest-api-address>/v1/modules/regular-streaming/pingstation-process/0.1/instance' with the following
+2. For creating an instance of process module send a post request to 'http://rest-api-address/v1/modules/regular-streaming/pingstation-process/0.1/instance' with the following
 [content](https://github.com/bwsw/sj-platform/contrib/examples/pingstation/api-json/instances/pingstation-process.json)
-3. For creating an instance of output module send a post request to 'http://<rest-api-address>/v1/modules/output-streaming/pingstation-output/0.1/instance' with the following
+3. For creating an instance of output module send a post request to 'http://rest-api-address/v1/modules/output-streaming/pingstation-output/0.1/instance' with the following
 [content](https://github.com/bwsw/sj-platform/contrib/examples/pingstation/api-json/instances/pingstation-output.json)
 
 ## Launching
 
 After that you can launch the every module:
 
-1. For launching the input module send a get request to 'http://<rest-api-address>/v1/modules/input-streaming/pingstation-input/0.1/instance/pingstation-input/start'
-2. For launching the process module send a get request to 'http://<rest-api-address>/v1/modules/regular-streaming/pingstation-process/0.1/instance/pingstation-process/start'
-3. For launching the output module send a get request to 'http://<rest-api-address>/v1/modules/output-streaming/pingstation-output/0.1/instance/pingstation-output/start'
+1. For launching the input module send a get request to 'http://rest-api-address/v1/modules/input-streaming/pingstation-input/0.1/instance/pingstation-input/start'
+2. For launching the process module send a get request to 'http://rest-api-address/v1/modules/regular-streaming/pingstation-process/0.1/instance/pingstation-process/start'
+3. For launching the output module send a get request to 'http://rest-api-address/v1/modules/output-streaming/pingstation-output/0.1/instance/pingstation-output/start'
 
-To get a list of listening ports of input module, send a get request to 'http://<rest-api-address>/v1/modules/input-streaming/pingstation-input/0.1/instance/pingstation-input'
+To get a list of listening ports of input module, send a get request to 'http://rest-api-address/v1/modules/input-streaming/pingstation-input/0.1/instance/pingstation-input'
 and look at field named tasks, e.g. it will look like
 > "tasks": {   
 > &nbsp;&nbsp;"pingstation-input-task0": {   
@@ -52,9 +52,9 @@ And now you can start a flow by invoking `fping -l -g 91.221.60.0/23 2>&1 | nc 1
 
 To stop the modules:
 
-1. For stopping the input module send a get request to 'http://<rest-api-address>/v1/modules/input-streaming/pingstation-input/0.1/instance/pingstation-input/stop'
-2. For stopping the process module send a get request to 'http://<rest-api-address>/v1/modules/regular-streaming/pingstation-process/0.1/instance/pingstation-process/stop'
-3. For stopping the output module send a get request to 'http://<rest-api-address>/v1/modules/output-streaming/pingstation-output/0.1/instance/pingstation-output/stop'
+1. For stopping the input module send a get request to 'http://rest-api-address/v1/modules/input-streaming/pingstation-input/0.1/instance/pingstation-input/stop'
+2. For stopping the process module send a get request to 'http://rest-api-address/v1/modules/regular-streaming/pingstation-process/0.1/instance/pingstation-process/stop'
+3. For stopping the output module send a get request to 'http://rest-api-address/v1/modules/output-streaming/pingstation-output/0.1/instance/pingstation-output/stop'
 
 ## Customization
 
@@ -67,7 +67,3 @@ If you want to change an aggregation interval:
 
 After that you can launch this instance as described above in the second point of launching section
 (don't forget to change the instance name: 'pingstation-process' -> <new instance name> in the request line).
-
-## Additionally
-
-If you decide to deploy SJ infrastructure on your own server, you should fill the database from the ground up.
