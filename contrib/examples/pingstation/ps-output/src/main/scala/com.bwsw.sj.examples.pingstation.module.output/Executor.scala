@@ -28,7 +28,7 @@ class Executor extends OutputStreamingHandler {
     val list = envelope.data.map { bytes =>
       val data = new PingMetrics()
       val rawData = objectSerializer.deserialize(bytes).asInstanceOf[String].split(",")
-      data.ts = new Date(rawData(0).toLong * 1000)
+      data.ts = new Date(rawData(0).toLong)
       data.ip = rawData(1)
       data.avgTime = rawData(2).toDouble
       data.totalOk = rawData(3).toLong

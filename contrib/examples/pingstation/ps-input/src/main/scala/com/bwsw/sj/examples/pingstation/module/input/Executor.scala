@@ -34,7 +34,7 @@ class Executor(manager: InputEnvironmentManager) extends InputStreamingExecutor(
    */
   override def parse(buffer: ByteBuf, interval: Interval): Option[InputEnvelope] = {
 
-    val ts = System.currentTimeMillis() / 1000L
+    val ts = System.currentTimeMillis()
     val rawData = buffer.slice(interval.initialValue, interval.finalValue)
 
     val data = new Array[Byte](rawData.capacity())
