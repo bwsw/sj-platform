@@ -121,10 +121,14 @@ class FrameworkScheduler extends Scheduler {
     for (currTask <- TasksList.toLaunch) {
 
       val currentOffer = tasksCountOnSlaves(offerNumber)
-      if (offerNumber >= offers.asScala.size - 1) {
+      if (offerNumber >= tasksCountOnSlaves.size - 1) {
         offerNumber = 0
       } else {
         offerNumber += 1
+      }
+
+      if (offers.asScala.contains(currentOffer._1)) {
+        offers.asScala.remove(offers.asScala.indexOf(currentOffer._1))
       }
 
 
@@ -209,8 +213,6 @@ class FrameworkScheduler extends Scheduler {
       // update how much tasks we can run on slave when launch current task
       tasksCountOnSlaves.update(tasksCountOnSlaves.indexOf(currentOffer), Tuple2(currentOffer._1, currentOffer._2 - 1))
       TasksList.launched(currTask)
-
-
     }
 
     for (task <- launchedTasks) {
