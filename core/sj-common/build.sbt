@@ -47,3 +47,5 @@ assemblyMergeStrategy in assembly := {
 }
 
 unmanagedJars in Compile += file("lib/t-streams.jar")
+
+assemblyJarName in assembly := s"${name.value}-${version.value}.jar"

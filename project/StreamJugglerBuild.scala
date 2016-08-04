@@ -108,24 +108,6 @@ object StreamJugglerBuild extends Build {
     organization := ORGANIZATION,
     scalaVersion := SCALA_VERSION,
 
-    //    libraryDependencies ++= Seq(
-    //      "com.typesafe"     % "config"          % TYPESAFE_CONFIG_VERSION,
-    //      "org.scalatest"   %% "scalatest"       % SCALATEST_VERSION % "test"
-    //    ),
-    //
-    //    dependencyOverrides ++= Set(
-    //      "com.typesafe.akka" %% "akka-actor" % "2.4.1",
-    //      "org.apache.kafka" % "kafka-clients" % "0.8.2.2",
-    //      "org.apache.kafka" % "kafka_2.11" % "0.8.2.2",
-    //      "com.fasterxml.jackson.module" % "jackson-module-scala_2.11" % "2.6.3"
-    //    ),
-    //
-    //    dependencyOverrides ++= Set(
-    //      "org.scala-lang" %  "scala-library"  % scalaVersion.value,
-    //      "org.scala-lang" %  "scala-reflect"  % scalaVersion.value,
-    //      "org.scala-lang" %  "scala-compiler" % scalaVersion.value
-    //    ),
-    //
     assemblyMergeStrategy in assembly := {
       case PathList("scala", xs@_*) => MergeStrategy.first
       case PathList("org", "slf4j", xs@_*) => MergeStrategy.first
@@ -135,6 +117,8 @@ object StreamJugglerBuild extends Build {
         val oldStrategy = (assemblyMergeStrategy in assembly).value
         oldStrategy(x)
     },
+
+    assemblyJarName in assembly := s"${name.value}-${version.value}.jar",
 
     scalacOptions in Compile ++= Seq(
       "-unchecked",

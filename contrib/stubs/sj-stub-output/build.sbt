@@ -13,4 +13,4 @@ assemblyMergeStrategy in assembly := {
     oldStrategy(x)
 }
 
-assemblyJarName in assembly := "sj-stub-output-bench-test.jar"
+assemblyJarName in assembly := s"${name.value}-${version.value}.jar"

@@ -25,5 +25,4 @@ assemblyMergeStrategy in assembly := {
     oldStrategy(x)
 }
 
-assemblyJarName in assembly := "mesos-framework.jar"
-//target in assembly := file(System.getenv("HOME") + "/toserve")
+assemblyJarName in assembly := s"${name.value}-${version.value}.jar"

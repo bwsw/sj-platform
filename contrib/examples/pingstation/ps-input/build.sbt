@@ -14,4 +14,4 @@ assemblyMergeStrategy in assembly := {
     oldStrategy(x)
 }
 
-assemblyJarName in assembly := "ps-input.jar"
+assemblyJarName in assembly := s"${name.value}-${version.value}.jar"

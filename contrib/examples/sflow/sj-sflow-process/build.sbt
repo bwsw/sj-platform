@@ -16,4 +16,4 @@ assemblyMergeStrategy in assembly := {
 
 libraryDependencies += "com.maxmind.geoip" % "geoip-api" % "1.3.1"
 
-assemblyJarName in assembly := "sj-sflow-process.jar"
+assemblyJarName in assembly := s"${name.value}-${version.value}.jar"

@@ -14,4 +14,4 @@ assemblyMergeStrategy in assembly := {
     oldStrategy(x)
 }
 
-assemblyJarName in assembly := "sj-stub-regular-streaming.jar"
+assemblyJarName in assembly := s"${name.value}-${version.value}.jar"

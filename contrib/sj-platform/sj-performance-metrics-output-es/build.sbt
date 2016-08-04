@@ -13,4 +13,4 @@ assemblyMergeStrategy in assembly := {
     oldStrategy(x)
 }
 
-assemblyJarName in assembly := "sj-performance-metrics-output-es.jar"
+assemblyJarName in assembly := s"${name.value}-${version.value}.jar"
