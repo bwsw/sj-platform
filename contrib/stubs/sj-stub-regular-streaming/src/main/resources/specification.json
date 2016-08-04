@@ -1,0 +1,34 @@
+{
+  "name": "regular-streaming-stub",
+  "description": "Stub module by BW",
+  "version": "0.1",
+  "author": "Ksenia Mikhaleva",
+  "license": "Apache 2.0",
+  "inputs": {
+    "cardinality": [
+      1,
+      10
+    ],
+    "types": [
+      "stream.kafka",
+      "stream.t-stream"
+    ]
+  },
+  "outputs": {
+    "cardinality": [
+      1,
+      10
+    ],
+    "types": [
+      "stream.t-stream"
+    ]
+  },
+  "module-type": "regular-streaming",
+  "engine-name": "com.bwsw.regular.streaming.engine",
+  "engine-version": "0.1",
+  "options": {
+    "opt": 1
+  },
+  "validator-class": "com.bwsw.sj.stubs.module.regular_streaming.Validator",
+  "executor-class": "com.bwsw.sj.stubs.module.regular_streaming.Executor"
+}

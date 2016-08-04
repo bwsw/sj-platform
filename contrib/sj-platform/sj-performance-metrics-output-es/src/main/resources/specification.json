@@ -1,0 +1,34 @@
+{
+  "name": "com.bwsw.output.pm",
+  "description": "Output-module for performance metrics by BW",
+  "version": "0.1",
+  "author": "Kseniya Mikhaleva",
+  "license": "Apache 2.0",
+  "inputs": {
+    "cardinality": [
+      1,
+      1
+    ],
+    "types": [
+      "stream.t-stream"
+    ]
+  },
+  "outputs": {
+    "cardinality": [
+      1,
+      1
+    ],
+    "types": [
+      "elasticsearch-output"
+    ]
+  },
+  "module-type": "output-streaming",
+  "engine-name": "com.bwsw.output.streaming.engine",
+  "engine-version": "0.1",
+  "options": {
+    "opt": 1
+  },
+  "validator-class": "com.bwsw.sj.module.output.pm.PMReportOutputValidator",
+  "executor-class": "com.bwsw.sj.module.output.pm.PMReportOutputHandler",
+  "entity-class" : "com.bwsw.sj.module.output.pm.data.PerformanceMetrics"
+}
