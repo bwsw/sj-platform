@@ -27,6 +27,7 @@ target
 *.jar
 *.dat
 *.log
+*~
 
 # sbt specific
 .cache
