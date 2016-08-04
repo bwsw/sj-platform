@@ -20,12 +20,12 @@ import com.bwsw.sj.engine.regular.task.RegularTaskManager
  */
 abstract class RegularTaskInputService(manager: RegularTaskManager) extends Callable[Unit] {
 
-  protected val regularInstance = manager.getInstanceMetadata.asInstanceOf[RegularInstance]
-  protected val serializer = new JsonSerializer()
+  protected val regularInstance = manager.getInstance.asInstanceOf[RegularInstance]
+  protected val envelopeSerializer = new JsonSerializer()
   protected val objectSerializer = new ObjectSerializer()
   protected val configService = ConnectionRepository.getConfigService
 
-  def processEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics)
+  def registerEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics)
 
   def doCheckpoint() = {}
 }

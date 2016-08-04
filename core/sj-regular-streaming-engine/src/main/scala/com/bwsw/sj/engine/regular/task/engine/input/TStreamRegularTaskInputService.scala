@@ -57,9 +57,9 @@ class TStreamRegularTaskInputService(manager: RegularTaskManager,
     logger.debug(s"Task: ${manager.taskName}. Start creating subscribing consumers\n")
     val inputs = manager.inputs
     val offset = regularInstance.startFrom
-    val callback = new RegularConsumerCallback[Array[Byte], Array[Byte]](blockingQueue)
+    val callback = new RegularConsumerCallback[Array[Byte]](blockingQueue)
 
-    val consumers = inputs.filter(x => x._1.streamType == StreamConstants.tStream).map({
+    val consumers = inputs.filter(x => x._1.streamType == StreamConstants.tStreamType).map({
       x => manager.createSubscribingConsumer(x._1, x._2.toList, chooseOffset(offset), callback)
     }).map(x => (x.name, x)).toMap
     logger.debug(s"Task: ${manager.taskName}. Creation of subscribing consumers is finished\n")
@@ -78,11 +78,11 @@ class TStreamRegularTaskInputService(manager: RegularTaskManager,
    */
   private def addConsumersToCheckpointGroup() = {
     logger.debug(s"Task: ${manager.taskName}. Start adding subscribing consumers to checkpoint group\n")
-    consumers.foreach(x => checkpointGroup.add(x._1, x._2))
+    consumers.foreach(x => checkpointGroup.add(x._2))
     logger.debug(s"Task: ${manager.taskName}. Adding subscribing consumers to checkpoint group is finished\n")
   }
 
-  def processEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics) = {
+  def registerEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics) = {
     logger.info(s"Task: ${manager.taskName}. T-stream envelope is received\n")
     val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
     logger.debug(s"Task: ${manager.taskName}. " +

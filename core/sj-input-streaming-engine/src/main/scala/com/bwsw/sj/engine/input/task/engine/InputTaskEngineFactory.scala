@@ -32,7 +32,7 @@ class InputTaskEngineFactory(manager: InputTaskManager,
   /**
    * Input instance is a metadata for running a task of input module
    */
-  private val inputInstanceMetadata = manager.getInstanceMetadata
+  private val inputInstanceMetadata = manager.getInstance
 
   /**
    * Creates InputTaskEngine is in charge of a basic execution logic of task of input module

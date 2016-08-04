@@ -98,8 +98,8 @@ trait SjCrudValidator {
       val outputCardinalites = outputs("cardinality").asInstanceOf[List[Int]]
 
       if (inputTypes.length > 1 ||
-        !inputTypes.head.equals(tStream) || (inputCardinalites.head != 1 || inputCardinalites(1) != 1) ||
-        !(outputTypes.contains(jdbcOutput) || outputTypes.contains(esOutput)) ||
+        !inputTypes.head.equals(tStreamType) || (inputCardinalites.head != 1 || inputCardinalites(1) != 1) ||
+        !(outputTypes.contains(jdbcOutputType) || outputTypes.contains(esOutputType)) ||
         (outputCardinalites.head != 1 || outputCardinalites(1) != 1)
       ) {
         throw new Exception("Specification.json for output-streaming has incorrect params!")
@@ -118,7 +118,7 @@ trait SjCrudValidator {
 
       if ((inputTypes.size > 1 || !inputTypes.contains(input)
         || (inputCardinalites.head != 0 && inputCardinalites(1) != 0))
-        || (outputTypes.size != 1 || !outputTypes.contains(tStream))) {
+        || (outputTypes.size != 1 || !outputTypes.contains(tStreamType))) {
         throw new Exception("Specification.json for input-streaming has incorrect params!")
       }
     }

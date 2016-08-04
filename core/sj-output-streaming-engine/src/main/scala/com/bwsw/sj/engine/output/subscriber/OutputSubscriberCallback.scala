@@ -6,7 +6,7 @@ import java.util.concurrent.ArrayBlockingQueue
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.engine.core.entities.TStreamEnvelope
-import com.bwsw.tstreams.agents.consumer.subscriber.{BasicSubscriberCallback, BasicSubscribingConsumer}
+import com.bwsw.tstreams.agents.consumer.subscriber.{SubscribingConsumer, Callback}
 import org.slf4j.{Logger, LoggerFactory}
 
 /**
@@ -19,7 +19,7 @@ import org.slf4j.{Logger, LoggerFactory}
   * @param blockingQueue Blocking Queue for saving new transaction from t-stream
   */
 class OutputSubscriberCallback(blockingQueue: ArrayBlockingQueue[String])
-  extends BasicSubscriberCallback[Array[Byte], Array[Byte]] {
+  extends Callback[Array[Byte]] {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass)
 
@@ -36,7 +36,7 @@ class OutputSubscriberCallback(blockingQueue: ArrayBlockingQueue[String])
     * @param partition Number of partition
     * @param transactionUuid Txn uuid from t-stream
     */
-  override def onEvent(subscriber: BasicSubscribingConsumer[Array[Byte], Array[Byte]],
+  override def onEvent(subscriber: SubscribingConsumer[Array[Byte]],
                        partition: Int,
                        transactionUuid: UUID): Unit = {
     logger.debug(s"onEvent handler was invoked by subscriber: ${subscriber.name}\n")
@@ -51,9 +51,4 @@ class OutputSubscriberCallback(blockingQueue: ArrayBlockingQueue[String])
     envelope.tags = stream.tags
     blockingQueue.put(serializer.serialize(envelope))
   }
-
-  /**
-    * How much times onEvent handler is invoked
-    */
-  override val pollingFrequency: Int = 1
 }

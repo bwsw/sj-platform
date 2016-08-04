@@ -20,7 +20,7 @@ class RegularStreamingPerformanceMetrics(manager: RegularTaskManager)
   private var totalIdleTime = 0L
   private var numberOfStateVariables = 0
   private val inputStreamNames =  manager.inputs.map(_._1.name).toArray
-  private val outputStreamNames = manager.getInstanceMetadata.outputs
+  private val outputStreamNames = manager.getInstance.outputs
 
   override protected var inputEnvelopesPerStream = createStorageForInputEnvelopes(inputStreamNames)
   override protected var outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)

@@ -126,7 +126,7 @@ object SjTest {
     stream.name = "s5"
     stream.partitions = 3
     stream.service = service
-    stream.streamType = kafka
+    stream.streamType = kafkaStreamType
     stream.tags = Array("test")
     streamDAO.save(stream)
   }
@@ -152,7 +152,7 @@ object SjTest {
     val stream = new ESSjStream()
     stream.name = "es10"
     stream.service = service
-    stream.streamType = esOutput
+    stream.streamType = esOutputType
     stream.tags = Array("test")
     streamDAO.save(stream)
   }
@@ -177,7 +177,7 @@ object SjTest {
     val stream = new JDBCSjStream()
     stream.name = "tbl1"
     stream.service = service
-    stream.streamType = jdbcOutput
+    stream.streamType = jdbcOutputType
     stream.tags = Array("test")
     streamDAO.save(stream)
   }
@@ -289,7 +289,7 @@ object SjTest {
     s1.description = "s1 stream"
     s1.partitions = 7
     s1.service = tService
-    s1.streamType = tStream
+    s1.streamType = tStreamType
     s1.tags = Array("TAG")
     s1.generator = generator1
     sjStreamDAO.save(s1)
@@ -303,7 +303,7 @@ object SjTest {
     s2.description = "s2 stream"
     s2.partitions = 10
     s2.service = tService
-    s2.streamType = tStream
+    s2.streamType = tStreamType
     s2.tags = Array("TAG")
     s2.generator = generator2
     sjStreamDAO.save(s2)
@@ -317,7 +317,7 @@ object SjTest {
     s3.description = "s3 stream"
     s3.partitions = 10
     s3.service = tService
-    s3.streamType = tStream
+    s3.streamType = tStreamType
     s3.tags = Array("TAG")
     s3.generator = generator3
     sjStreamDAO.save(s3)
@@ -329,7 +329,7 @@ object SjTest {
     s10.description = "s10 stream"
     s10.partitions = 5
     s10.service = tService
-    s10.streamType = tStream
+    s10.streamType = tStreamType
     s10.tags = Array("TAG")
     s10.generator = generator10
     sjStreamDAO.save(s10)

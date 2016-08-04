@@ -11,7 +11,7 @@ import java.util.concurrent.locks.ReentrantLock
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.engine.core.managment.TaskManager
-import com.bwsw.tstreams.agents.producer.{ProducerPolicies, BasicProducerTransaction}
+import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, ProducerTransaction}
 import org.slf4j.LoggerFactory
 
 import scala.collection._
@@ -27,8 +27,8 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
   protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Int]]]
   protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Int]]]
   protected val taskName = manager.taskName
-  protected val reportingInterval = manager.getInstanceMetadata.performanceReportingInterval
-  protected val instance = manager.getInstanceMetadata
+  protected val reportingInterval = manager.getInstance.performanceReportingInterval
+  protected val instance = manager.getInstance
   protected val performanceReport = new PerformanceMetricsMetadata()
 
   fillStaticPerformanceMetrics()
@@ -97,7 +97,7 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
 
     val taskNumber = taskName.replace(s"${manager.instanceName}-task", "").toInt
     var report: String = null
-    var reportTxn: BasicProducerTransaction[Array[Byte], Array[Byte]] = null
+    var reportTxn: ProducerTransaction[Array[Byte]] = null
     while (true) {
       logger.info(s"Task: $taskName. Wait $reportingInterval ms to report performance metrics\n")
       TimeUnit.MILLISECONDS.sleep(reportingInterval)
@@ -105,7 +105,7 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
       println(s"Performance metrics: $report \n")
       logger.info(s"Task: $taskName. Performance metrics: $report \n")
       logger.debug(s"Task: $taskName. Create a new txn for sending performance metrics\n")
-      reportTxn = reportProducer.newTransaction(ProducerPolicies.errorIfOpened, taskNumber)
+      reportTxn = reportProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened, taskNumber)
       logger.debug(s"Task: $taskName. Send performance metrics\n")
       reportTxn.send(objectSerializer.serialize(report))
       logger.debug(s"Task: $taskName. Do checkpoint of producer for performance reporting\n")

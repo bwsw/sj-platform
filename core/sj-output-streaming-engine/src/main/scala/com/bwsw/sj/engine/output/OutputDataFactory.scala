@@ -16,7 +16,7 @@ import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStora
 import com.bwsw.tstreams.data.cassandra.{CassandraStorageFactory, CassandraStorageOptions}
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.services.BasicStreamService
-import com.bwsw.tstreams.streams.BasicStream
+import com.bwsw.tstreams.streams.TStream
 import org.slf4j.LoggerFactory
 
 /**
@@ -62,7 +62,6 @@ object OutputDataFactory {
 
   val txnPreload = configService.get(txnPreloadTag).value.toInt
   val dataPreload = configService.get(dataPreloadTag).value.toInt
-  val consumerKeepAliveInterval = configService.get(consumerKeepAliveInternalTag).value.toInt
   val zkSessionTimeout = configService.get(zkSessionTimeoutTag).value.toInt
   val zkConnectionTimeout = configService.get(zkConnectionTimeoutTag).value.toInt
   val zkHosts = tstreamService.lockProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList
@@ -71,7 +70,6 @@ object OutputDataFactory {
   val retryCount = configService.get(tgRetryCountTag).value.toInt
   val txnTTL = configService.get(txnTTLTag).value.toInt
   val txnKeepAliveInterval = configService.get(txnKeepAliveIntervalTag).value.toInt
-  val producerKeepAliveInterval = configService.get(producerKeepAliveIntervalTag).value.toInt
 
   /**
    * Get metadata of module file
@@ -137,15 +135,15 @@ object OutputDataFactory {
 
   private def getTStream(name: String, description: String, tags: Array[String], partitions: Int) = {
     logger.debug(s"Task $taskName. Get t-stream $name.")
-    var stream: BasicStream[Array[Byte]] = null
+    var tStream: TStream[Array[Byte]] = null
     val dataStorage: IStorage[Array[Byte]] = createDataStorage()
 
     if (BasicStreamService.isExist(name, metadataStorage)) {
       logger.debug(s"Task $taskName. Load t-stream.")
-      stream = BasicStreamService.loadStream(name, metadataStorage, dataStorage)
+      tStream = BasicStreamService.loadStream(name, metadataStorage, dataStorage)
     } else {
       logger.debug(s"Task $taskName. Create t-stream.")
-      stream = BasicStreamService.createStream(
+      tStream = BasicStreamService.createStream(
         name,
         partitions,
         streamTTL,
@@ -156,11 +154,11 @@ object OutputDataFactory {
     }
 
     new TStreamSjStream(
-      stream.getName,
-      stream.getDescriptions,
-      stream.getPartitions,
+      tStream.getName,
+      tStream.getDescriptions,
+      tStream.getPartitions,
       tstreamService,
-      tStream,
+      tStreamType,
       tags,
       new Generator("local")
     )

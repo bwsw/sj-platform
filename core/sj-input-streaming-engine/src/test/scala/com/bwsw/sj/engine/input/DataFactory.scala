@@ -14,14 +14,14 @@ import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.engine.core.utils.CassandraHelper
 import com.bwsw.sj.engine.core.utils.CassandraHelper._
 import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
-import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions}
+import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerOptions}
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.data.cassandra.{CassandraStorageOptions, CassandraStorageFactory}
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.policy.RoundRobinPolicy
 import com.bwsw.tstreams.services.BasicStreamService
-import com.bwsw.tstreams.streams.BasicStream
+import com.bwsw.tstreams.streams.TStream
 import com.datastax.driver.core.Cluster
 
 object DataFactory {
@@ -152,7 +152,7 @@ object DataFactory {
 
     val tService = serviceManager.get("tstream_test_service")
 
-    val s2 = new TStreamSjStream("test-output-tstream" + suffix, "test-output-tstream", partitions, tService, StreamConstants.tStream, Array("output", "some tags"), localGenerator)
+    val s2 = new TStreamSjStream("test-output-tstream" + suffix, "test-output-tstream", partitions, tService, StreamConstants.tStreamType, Array("output", "some tags"), localGenerator)
     sjStreamService.save(s2)
 
     BasicStreamService.createStream(
@@ -239,26 +239,25 @@ object DataFactory {
     createConsumer("test-output-tstream" + suffix, streamService, "localhost:805" + suffix)
   }
 
-  private def createConsumer(streamName: String, streamService: GenericMongoService[SjStream], address: String): BasicConsumer[Array[Byte], Array[Byte]] = {
+  private def createConsumer(streamName: String, streamService: GenericMongoService[SjStream], address: String): Consumer[Array[Byte]] = {
     val stream = streamService.get(streamName)
 
-    val basicStream: BasicStream[Array[Byte]] =
+    val tStream: TStream[Array[Byte]] =
       BasicStreamService.loadStream(stream.name, metadataStorage, dataStorageFactory.getInstance(dataStorageOptions))
 
-    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
+    val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
 
     val timeUuidGenerator = new LocalTimeUUIDGenerator
 
-    val options = new BasicConsumerOptions[Array[Byte], Array[Byte]](
+    val options = new ConsumerOptions[Array[Byte]](
       transactionsPreload = 10,
       dataPreload = 7,
-      consumerKeepAliveInterval = 5,
       converter,
       roundRobinPolicy,
       Oldest,
       timeUuidGenerator,
       useLastOffset = true)
 
-    new BasicConsumer[Array[Byte], Array[Byte]](basicStream.name, basicStream, options)
+    new Consumer[Array[Byte]](tStream.name, tStream, options)
   }
 }

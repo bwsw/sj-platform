@@ -3,13 +3,13 @@ package com.bwsw.sj.engine.regular.utils
 import java.util.UUID
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerTransaction}
+import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction}
 
 import scala.collection.mutable
 
 object StateHelper {
 
-  def getState(consumer: BasicConsumer[Array[Byte], Array[Byte]], objectSerializer: ObjectSerializer) = {
+  def getState(consumer: Consumer[Array[Byte]], objectSerializer: ObjectSerializer) = {
 
     val initialState = mutable.Map[String, Any]()
     val lastTxn = consumer.getLastTransaction(0).get
@@ -43,7 +43,7 @@ object StateHelper {
     initialState
   }
 
-  def fillFullState(initialState: mutable.Map[String, Any], transaction: BasicConsumerTransaction[Array[Byte], Array[Byte]], objectSerializer: ObjectSerializer) = {
+  def fillFullState(initialState: mutable.Map[String, Any], transaction: ConsumerTransaction[Array[Byte]], objectSerializer: ObjectSerializer) = {
     var value: Object = null
     var variable: (String, Any) = null
 

@@ -5,7 +5,7 @@ import com.bwsw.sj.common.DAL.model.SjStream
 import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.core.state.StateStorage
-import com.bwsw.tstreams.agents.producer.BasicProducer
+import com.bwsw.tstreams.agents.producer.Producer
 
 import scala.collection.mutable
 
@@ -24,7 +24,7 @@ import scala.collection.mutable
 
 class StatefulModuleEnvironmentManager(stateStorage: StateStorage,
                                        options: Map[String, Any],
-                                       producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]],
+                                       producers: Map[String, Producer[Array[Byte]]],
                                        outputs: Array[SjStream],
                                        outputTags: mutable.Map[String, (String, ModuleOutput)],
                                        moduleTimer: SjTimer,

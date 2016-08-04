@@ -33,18 +33,18 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
 
           var stream = new SjStream
           data.streamType match {
-            case StreamConstants.tStream =>
+            case StreamConstants.`tStreamType` =>
               stream = new TStreamSjStream
-              stream.streamType = StreamConstants.tStream
-            case StreamConstants.kafka =>
+              stream.streamType = StreamConstants.tStreamType
+            case StreamConstants.`kafkaStreamType` =>
               stream = new KafkaSjStream
-              stream.streamType = StreamConstants.kafka
-            case StreamConstants.esOutput =>
+              stream.streamType = StreamConstants.kafkaStreamType
+            case StreamConstants.`esOutputType` =>
               stream = new ESSjStream
-              stream.streamType = StreamConstants.esOutput
-            case StreamConstants.jdbcOutput =>
+              stream.streamType = StreamConstants.esOutputType
+            case StreamConstants.`jdbcOutputType` =>
               stream = new JDBCSjStream
-              stream.streamType = StreamConstants.jdbcOutput
+              stream.streamType = StreamConstants.jdbcOutputType
           }
           val errors = StreamValidator.validate(data, stream)
           if (errors.isEmpty) {

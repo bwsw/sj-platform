@@ -5,10 +5,10 @@ import java.util.UUID
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.engine.core.state.IStateService
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
-import com.bwsw.tstreams.agents.consumer.BasicConsumerTransaction
+import com.bwsw.tstreams.agents.consumer.ConsumerTransaction
 import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
 import com.bwsw.tstreams.agents.group.CheckpointGroup
-import com.bwsw.tstreams.agents.producer.ProducerPolicies
+import com.bwsw.tstreams.agents.producer.NewTransactionProducerPolicy
 
 import scala.collection.mutable
 
@@ -159,7 +159,7 @@ class RAMStateService(manager: RegularTaskManager, checkpointGroup: CheckpointGr
    * @param initialState State from which to need start
    * @param transaction Transaction containing a state
    */
-  private def fillFullState(initialState: mutable.Map[String, Any], transaction: BasicConsumerTransaction[Array[Byte], Array[Byte]]) = {
+  private def fillFullState(initialState: mutable.Map[String, Any], transaction: ConsumerTransaction[Array[Byte]]) = {
     logger.debug(s"Fill full state\n")
     var value: Object = null
     var variable: (String, Any) = null
@@ -240,7 +240,7 @@ class RAMStateService(manager: RegularTaskManager, checkpointGroup: CheckpointGr
    */
   private def sendState(state: mutable.Map[String, Any]): UUID = {
     logger.debug(s"Save a full state in t-stream intended for storing/restoring a state\n")
-    val transaction = stateProducer.newTransaction(ProducerPolicies.errorIfOpened)
+    val transaction = stateProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
     state.foreach((x: (String, Any)) => transaction.send(serializer.serialize(x)))
     transaction.getTxnUUID
   }
@@ -252,7 +252,7 @@ class RAMStateService(manager: RegularTaskManager, checkpointGroup: CheckpointGr
    */
   private def sendChanges(uuid: UUID, changes: mutable.Map[String, (String, Any)]) = {
     logger.debug(s"Save a partial state in t-stream intended for storing/restoring a state\n")
-    val transaction = stateProducer.newTransaction(ProducerPolicies.errorIfOpened)
+    val transaction = stateProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
     transaction.send(serializer.serialize(uuid))
     changes.foreach((x: (String, (String, Any))) => transaction.send(serializer.serialize(x)))
   }
@@ -275,8 +275,8 @@ class RAMStateService(manager: RegularTaskManager, checkpointGroup: CheckpointGr
    */
   private def addAgentsToCheckpointGroup() = {
     logger.debug(s"Task: ${manager.taskName}. Start adding state consumer and producer to checkpoint group\n")
-    checkpointGroup.add(stateConsumer.name, stateConsumer)
-    checkpointGroup.add(stateProducer.name, stateProducer)
+    checkpointGroup.add(stateConsumer)
+    checkpointGroup.add(stateProducer)
     logger.debug(s"Task: ${manager.taskName}. Adding state consumer and producer to checkpoint group is finished\n")
   }
 }

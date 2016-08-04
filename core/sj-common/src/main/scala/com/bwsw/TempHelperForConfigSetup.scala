@@ -36,11 +36,9 @@ object TempHelperForConfigSetup extends App{
 
   configService.save(new ConfigSetting(ConfigConstants.txnPreloadTag, "10", "t-streams"))
   configService.save(new ConfigSetting(ConfigConstants.dataPreloadTag, "7", "t-streams"))
-  configService.save(new ConfigSetting(ConfigConstants.consumerKeepAliveInternalTag, "5", "t-streams"))
   configService.save(new ConfigSetting(ConfigConstants.txnTTLTag, "6", "t-streams"))
   configService.save(new ConfigSetting(ConfigConstants.txnKeepAliveIntervalTag, "2", "t-streams"))
   configService.save(new ConfigSetting(ConfigConstants.transportTimeoutTag, "5", "t-streams"))
-  configService.save(new ConfigSetting(ConfigConstants.producerKeepAliveIntervalTag, "1", "t-streams"))
   configService.save(new ConfigSetting(ConfigConstants.streamTTLTag, "60000", "t-streams"))
 
   //configService.save(new ConfigSetting("session.timeout.ms", "30000", "kafka")) // for kafka domain

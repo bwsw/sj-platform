@@ -7,10 +7,10 @@ import com.fasterxml.jackson.annotation.{JsonProperty, JsonSubTypes, JsonTypeInf
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "stream-type")
 @JsonSubTypes(Array(
-  new Type(value = classOf[TStreamSjStreamData], name = StreamConstants.tStream),
-  new Type(value = classOf[KafkaSjStreamData], name = StreamConstants.kafka),
-  new Type(value = classOf[ESSjStreamData], name = StreamConstants.esOutput),
-  new Type(value = classOf[JDBCSjStreamData], name = StreamConstants.jdbcOutput)
+  new Type(value = classOf[TStreamSjStreamData], name = StreamConstants.tStreamType),
+  new Type(value = classOf[KafkaSjStreamData], name = StreamConstants.kafkaStreamType),
+  new Type(value = classOf[ESSjStreamData], name = StreamConstants.esOutputType),
+  new Type(value = classOf[JDBCSjStreamData], name = StreamConstants.jdbcOutputType)
 ))
 class SjStreamData() {
   @JsonProperty("stream-type") var streamType: String = null
@@ -22,21 +22,21 @@ class SjStreamData() {
 }
 
 class TStreamSjStreamData() extends SjStreamData() {
-  streamType = StreamConstants.tStream
+  streamType = StreamConstants.tStreamType
   var partitions: Int = 0
   var generator: GeneratorData = null
 }
 
 class KafkaSjStreamData() extends SjStreamData() {
-  streamType = StreamConstants.kafka
+  streamType = StreamConstants.kafkaStreamType
   var partitions: Int = 0
   @JsonProperty("replication-factor") var replicationFactor: Int = 0
 }
 
 class ESSjStreamData() extends SjStreamData() {
-  streamType = StreamConstants.esOutput
+  streamType = StreamConstants.esOutputType
 }
 
 class JDBCSjStreamData() extends SjStreamData() {
-  streamType = StreamConstants.jdbcOutput
+  streamType = StreamConstants.jdbcOutputType
 }

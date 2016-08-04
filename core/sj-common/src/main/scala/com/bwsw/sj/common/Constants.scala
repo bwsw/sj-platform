@@ -6,7 +6,7 @@ import java.util.UUID
  * Object with constants
  */
 object ModuleConstants {
-  def persistentQueuePath = UUID.randomUUID().toString //todo: until t-streams can't remove persistent queue
+  def persistentQueuePath = UUID.randomUUID().toString //todo: yet t-streams can't remove persistent queue
   val persistentBlockingQueue = "persistentBlockingQueue"
 
   val inputStreamingType = "input-streaming"
@@ -48,11 +48,11 @@ object ModuleConstants {
 
 object StreamConstants {
   final val input = "input"
-  final val tStream = "stream.t-stream"
-  final val kafka = "stream.kafka"
-  final val esOutput = "elasticsearch-output"
-  final val jdbcOutput = "jdbc-output"
-  val streamTypes = Set(tStream, kafka, esOutput, jdbcOutput)
+  final val tStreamType = "stream.t-stream"
+  final val kafkaStreamType = "stream.kafka"
+  final val esOutputType = "elasticsearch-output"
+  final val jdbcOutputType = "jdbc-output"
+  val streamTypes = Set(tStreamType, kafkaStreamType, esOutputType, jdbcOutputType)
 }
 
 object GeneratorConstants {
@@ -89,11 +89,9 @@ object ConfigConstants {
   val zkConnectionTimeoutTag= "zk.connection.timeout"
   val txnPreloadTag = "t-streams.txn-preload"
   val dataPreloadTag = "t-streams.data-preload"
-  val consumerKeepAliveInternalTag = "t-streams.consumer-keep-alive-internal"
   val transportTimeoutTag = "t-streams.transport-timeout"
   val txnTTLTag = "t-streams.txn-ttl"
   val txnKeepAliveIntervalTag = "t-streams.txn-keep-alive-internal"
-  val producerKeepAliveIntervalTag = "t-streams.producer-keep-alive-internal"
   val streamTTLTag = "t-streams.stream-ttl"
   val esTimeoutTag = "es.timeout"
   val jdbcTimeoutTag = "jdbc.timeout"

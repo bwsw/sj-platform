@@ -70,14 +70,14 @@ object StreamValidator {
           if (serviceObj == null) {
             errors += s"Service '${initialData.service}' does not exist"
           }
-          else if (initialData.streamType == StreamConstants.tStream && serviceObj.serviceType != "TstrQ") {
-            errors += s"Service for ${StreamConstants.tStream} stream must be of TstrQ type. '${serviceObj.name}' is not of type TstrQ"
-          } else if (initialData.streamType == StreamConstants.kafka && serviceObj.serviceType != "KfkQ") {
-            errors += s"Service for '${StreamConstants.kafka}' stream must be of KfkQ type. '${serviceObj.name}' is not of type KfkQ"
-          } else if (initialData.streamType == StreamConstants.esOutput && serviceObj.serviceType != "ESInd") {
-            errors += s"Service for '${StreamConstants.esOutput}' stream must be of ESInd type. '${serviceObj.name}' is not of type ESInd"
-          } else if (initialData.streamType == StreamConstants.jdbcOutput && serviceObj.serviceType != "JDBC") {
-            errors += s"Service for '${StreamConstants.jdbcOutput}' stream must be of JDBC type. '${serviceObj.name}' is not of type JDBC"
+          else if (initialData.streamType == StreamConstants.tStreamType && serviceObj.serviceType != "TstrQ") {
+            errors += s"Service for ${StreamConstants.tStreamType} stream must be of TstrQ type. '${serviceObj.name}' is not of type TstrQ"
+          } else if (initialData.streamType == StreamConstants.kafkaStreamType && serviceObj.serviceType != "KfkQ") {
+            errors += s"Service for '${StreamConstants.kafkaStreamType}' stream must be of KfkQ type. '${serviceObj.name}' is not of type KfkQ"
+          } else if (initialData.streamType == StreamConstants.esOutputType && serviceObj.serviceType != "ESInd") {
+            errors += s"Service for '${StreamConstants.esOutputType}' stream must be of ESInd type. '${serviceObj.name}' is not of type ESInd"
+          } else if (initialData.streamType == StreamConstants.jdbcOutputType && serviceObj.serviceType != "JDBC") {
+            errors += s"Service for '${StreamConstants.jdbcOutputType}' stream must be of JDBC type. '${serviceObj.name}' is not of type JDBC"
           }
         }
     }
@@ -104,7 +104,7 @@ object StreamValidator {
 
     // streamType-specific validations
     initialData.streamType match {
-      case StreamConstants.tStream =>
+      case StreamConstants.`tStreamType` =>
         //partitions
         if (initialData.asInstanceOf[TStreamSjStreamData].partitions <= 0)
           errors += s"'partitions' is required and must be a positive integer"
@@ -113,7 +113,7 @@ object StreamValidator {
 
         //generator
         if (initialData.asInstanceOf[TStreamSjStreamData].generator == null) {
-          errors += s"'generator' is required for '${StreamConstants.tStream}'-type stream."
+          errors += s"'generator' is required for '${StreamConstants.tStreamType}'-type stream."
         }
         else {
           val generator = new Generator
@@ -126,7 +126,7 @@ object StreamValidator {
             stream.asInstanceOf[TStreamSjStream].generator = generator
         }
 
-      case StreamConstants.kafka =>
+      case StreamConstants.`kafkaStreamType` =>
         //partitions
         if (initialData.asInstanceOf[KafkaSjStreamData].partitions <= 0)
           errors += s"'partitions' is required and must be a positive integer"
@@ -136,7 +136,7 @@ object StreamValidator {
         //replicationFactor
         val rFactor = initialData.asInstanceOf[KafkaSjStreamData].replicationFactor
         if (rFactor <= 0) {
-          errors += s"'replication-factor' is required for '${StreamConstants.kafka}' stream and must be a positive integer"
+          errors += s"'replication-factor' is required for '${StreamConstants.kafkaStreamType}' stream and must be a positive integer"
         }
         else {
           if (serviceObj != null) {

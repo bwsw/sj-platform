@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.output
 
 import java.io.File
 import java.net.InetAddress
-import java.util.concurrent.{ExecutorCompletionService, ExecutorService, ArrayBlockingQueue, Executors}
+import java.util.concurrent.{ArrayBlockingQueue, ExecutorCompletionService, ExecutorService, Executors}
 import java.util.{Calendar, UUID}
 
 import com.bwsw.common.traits.Serializer
@@ -15,7 +15,7 @@ import com.bwsw.sj.engine.core.utils.EngineUtils._
 import com.bwsw.sj.engine.output.subscriber.OutputSubscriberCallback
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
-import com.bwsw.tstreams.agents.consumer.subscriber.BasicSubscribingConsumer
+import com.bwsw.tstreams.agents.consumer.subscriber.SubscribingConsumer
 import com.datastax.driver.core.utils.UUIDs
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import org.elasticsearch.action.index.IndexRequestBuilder
@@ -111,7 +111,7 @@ object OutputTaskRunner {
    */
   def runModule(instance: OutputInstance,
                 blockingQueue: ArrayBlockingQueue[String],
-                subscribeConsumer: BasicSubscribingConsumer[Array[Byte], Array[Byte]],
+                subscribeConsumer: SubscribingConsumer[Array[Byte]],
                 taskManager: OutputTaskManager,
                 handler: OutputStreamingHandler,
                 outputModuleEntity: OutputEntity,

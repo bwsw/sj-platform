@@ -46,7 +46,7 @@ class OutputStreamingValidator extends StreamingModuleValidator {
       if (inputStream == null) {
         errors += s"Input stream '$inputStreamName' is not exists."
       } else {
-        if (!inputStream.streamType.equals(tStream)) {
+        if (!inputStream.streamType.equals(tStreamType)) {
           errors += s"Input streams must be T-stream."
         }
       }
@@ -90,14 +90,14 @@ class OutputStreamingValidator extends StreamingModuleValidator {
       if (!service.isInstanceOf[TStreamService]) {
         errors += s"Service for t-streams must be 'TstrQ'."
       } else {
-        checkTStreams(errors, allStreams.filter(s => s.streamType.equals(tStream)).map(_.asInstanceOf[TStreamSjStream]).toBuffer)
+        checkTStreams(errors, allStreams.filter(s => s.streamType.equals(tStreamType)).map(_.asInstanceOf[TStreamSjStream]).toBuffer)
       }
 
       parameters.parallelism = checkParallelism(parameters.parallelism, inputStream.asInstanceOf[TStreamSjStream].partitions, errors)
       val partitions = getPartitionForStreams(Array(inputStream))
 
       parameters.inputs = Array(parameters.asInstanceOf[OutputInstanceMetadata].input)
-      validatedInstance = createInstance(parameters, partitions, allStreams.filter(s => s.streamType.equals(tStream)).toSet)
+      validatedInstance = createInstance(parameters, partitions, allStreams.filter(s => s.streamType.equals(tStreamType)).toSet)
     }
     (errors, validatedInstance)
   }

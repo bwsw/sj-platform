@@ -3,7 +3,6 @@ package com.bwsw.sj.engine.regular.task.engine.input
 import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.engine.core.PersistentBlockingQueue
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
-import com.bwsw.sj.engine.regular.task.engine.input.RegularTaskInputService
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
@@ -23,10 +22,10 @@ class RegularTaskInputServiceFactory(manager: RegularTaskManager,
                                      checkpointGroup: CheckpointGroup) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val isKafkaInputExist = manager.inputs.exists(x => x._1.streamType == StreamConstants.kafka)
-  private val isTstreamInputExist = manager.inputs.exists(x => x._1.streamType == StreamConstants.tStream)
+  private val isKafkaInputExist = manager.inputs.exists(x => x._1.streamType == StreamConstants.kafkaStreamType)
+  private val isTstreamInputExist = manager.inputs.exists(x => x._1.streamType == StreamConstants.tStreamType)
 
-  def createRegularTaskInputService(): RegularTaskInputService = {
+  def createRegularTaskInputService() = {
     (isKafkaInputExist, isTstreamInputExist) match {
       case (true, true) => new CompleteRegularTaskInputService(manager, blockingQueue, checkpointGroup)
       case (false, true) => new TStreamRegularTaskInputService(manager, blockingQueue, checkpointGroup)

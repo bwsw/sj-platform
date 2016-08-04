@@ -29,12 +29,12 @@ class CompleteRegularTaskInputService(manager: RegularTaskManager,
   private val kafkaRegularTaskInputService = new KafkaRegularTaskInputService(manager, blockingQueue, checkpointGroup)
   private val tStreamRegularTaskInputService = new TStreamRegularTaskInputService(manager, blockingQueue, checkpointGroup)
 
-  def processEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics) = {
+  def registerEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics) = {
     envelope.streamType match {
-      case StreamConstants.tStream =>
-        tStreamRegularTaskInputService.processEnvelope(envelope, performanceMetrics)
-      case StreamConstants.kafka =>
-        kafkaRegularTaskInputService.processEnvelope(envelope, performanceMetrics)
+      case StreamConstants.`tStreamType` =>
+        tStreamRegularTaskInputService.registerEnvelope(envelope, performanceMetrics)
+      case StreamConstants.`kafkaStreamType` =>
+        kafkaRegularTaskInputService.registerEnvelope(envelope, performanceMetrics)
       case _ =>
         logger.error(s"Input stream type: ${envelope.streamType} is not defined for regular streaming engine")
         throw new Exception(s"Input stream type: ${envelope.streamType} is not defined for regular streaming engine")

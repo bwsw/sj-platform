@@ -15,8 +15,8 @@ import com.bwsw.sj.common.{ConfigConstants, StreamConstants}
 import com.bwsw.sj.engine.core.utils.CassandraHelper
 import com.bwsw.sj.engine.core.utils.CassandraHelper._
 import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
-import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions}
-import com.bwsw.tstreams.agents.producer.InsertionType.BatchInsert
+import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerOptions}
+import com.bwsw.tstreams.agents.producer.DataInsertType.BatchInsert
 import com.bwsw.tstreams.agents.producer._
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
@@ -25,7 +25,6 @@ import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.policy.RoundRobinPolicy
 import com.bwsw.tstreams.services.BasicStreamService
-import com.bwsw.tstreams.streams.BasicStream
 import com.datastax.driver.core.Cluster
 import kafka.admin.AdminUtils
 import kafka.utils.ZkUtils
@@ -205,7 +204,7 @@ object DataFactory {
 
     val tService = serviceManager.get("tstream_test_service")
 
-    val s1 = new TStreamSjStream("test-input-tstream" + suffix, "test-input-tstream", partitions, tService, StreamConstants.tStream, Array("input"), localGenerator)
+    val s1 = new TStreamSjStream("test-input-tstream" + suffix, "test-input-tstream", partitions, tService, StreamConstants.tStreamType, Array("input"), localGenerator)
     sjStreamService.save(s1)
 
     BasicStreamService.createStream(
@@ -223,7 +222,7 @@ object DataFactory {
 
     val tService = serviceManager.get("tstream_test_service")
 
-    val s2 = new TStreamSjStream("test-output-tstream" + suffix, "test-output-tstream", partitions, tService, StreamConstants.tStream, Array("output", "some tags"), localGenerator)
+    val s2 = new TStreamSjStream("test-output-tstream" + suffix, "test-output-tstream", partitions, tService, StreamConstants.tStreamType, Array("output", "some tags"), localGenerator)
     sjStreamService.save(s2)
 
     BasicStreamService.createStream(
@@ -250,10 +249,10 @@ object DataFactory {
     val kService = serviceManager.get("kafka_test_service").asInstanceOf[KafkaService]
     val replicationFactor = 1
 
-    val s1 = new KafkaSjStream("kafka-input1", "kafka-input1", partitions, kService, StreamConstants.kafka, Array("kafka input"), replicationFactor)
+    val s1 = new KafkaSjStream("kafka-input1", "kafka-input1", partitions, kService, StreamConstants.kafkaStreamType, Array("kafka input"), replicationFactor)
     sjStreamService.save(s1)
 
-    val s2 = new KafkaSjStream("kafka-input2", "kafka-input2", partitions, kService, StreamConstants.kafka, Array("kafka input"), replicationFactor)
+    val s2 = new KafkaSjStream("kafka-input2", "kafka-input2", partitions, kService, StreamConstants.kafkaStreamType, Array("kafka input"), replicationFactor)
     sjStreamService.save(s2)
 
     try {
@@ -353,7 +352,7 @@ object DataFactory {
       val producer = createProducer(streamService.get("test-input-tstream" + suffix))
       val s = System.nanoTime
       (0 until countTxns) foreach { (x: Int) =>
-        val txn = producer.newTransaction(ProducerPolicies.errorIfOpened)
+        val txn = producer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
         (0 until countElements) foreach { (y: Int) =>
           number += 1
           txn.send(objectSerializer.serialize(number.asInstanceOf[Object]))
@@ -409,24 +408,23 @@ object DataFactory {
     val name = instanceName + "-task0" + "_state"
     val partitions = 1
 
-    val basicStream: BasicStream[Array[Byte]] =
+    val tStream =
       BasicStreamService.loadStream(name, metadataStorage, dataStorageFactory.getInstance(dataStorageOptions))
 
-    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until partitions).toList)
+    val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until partitions).toList)
 
     val timeUuidGenerator = new LocalTimeUUIDGenerator
 
-    val options = new BasicConsumerOptions[Array[Byte], Array[Byte]](
+    val options = new ConsumerOptions[Array[Byte]](
       transactionsPreload = 10,
       dataPreload = 7,
-      consumerKeepAliveInterval = 5,
       converter,
       roundRobinPolicy,
       Oldest,
       timeUuidGenerator,
       useLastOffset = true)
 
-    new BasicConsumer[Array[Byte], Array[Byte]](basicStream.name, basicStream, options)
+    new Consumer[Array[Byte]](tStream.name, tStream, options)
   }
 
   def createInputKafkaConsumer(streamService: GenericMongoService[SjStream], partitionNumber: Int) = {
@@ -453,7 +451,7 @@ object DataFactory {
   }
 
   private def createProducer(stream: SjStream) = {
-    val basicStream: BasicStream[Array[Byte]] =
+    val tStream =
       BasicStreamService.loadStream(stream.name, metadataStorage, dataStorageFactory.getInstance(dataStorageOptions))
 
     val coordinationSettings = new ProducerCoordinationOptions(
@@ -466,43 +464,41 @@ object DataFactory {
       transportTimeout = 5,
       zkSessionTimeout = 7000)
 
-    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
+    val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
 
     val timeUuidGenerator = new LocalTimeUUIDGenerator
 
-    val options = new BasicProducerOptions[Array[Byte], Array[Byte]](
+    val options = new ProducerOptions[Array[Byte]](
       transactionTTL = 6,
       transactionKeepAliveInterval = 2,
-      producerKeepAliveInterval = 1,
       roundRobinPolicy,
       BatchInsert(5),
       timeUuidGenerator,
       coordinationSettings,
       converter)
 
-    new BasicProducer[Array[Byte], Array[Byte]]("producer for " + basicStream.name, basicStream, options)
+    new Producer[Array[Byte]]("producer for " + tStream.name, tStream, options)
   }
 
-  private def createConsumer(streamName: String, streamService: GenericMongoService[SjStream], address: String): BasicConsumer[Array[Byte], Array[Byte]] = {
+  private def createConsumer(streamName: String, streamService: GenericMongoService[SjStream], address: String) = {
     val stream = streamService.get(streamName)
 
-    val basicStream: BasicStream[Array[Byte]] =
+    val tStream =
       BasicStreamService.loadStream(stream.name, metadataStorage, dataStorageFactory.getInstance(dataStorageOptions))
 
-    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
+    val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
 
     val timeUuidGenerator = new LocalTimeUUIDGenerator
 
-    val options = new BasicConsumerOptions[Array[Byte], Array[Byte]](
+    val options = new ConsumerOptions[Array[Byte]](
       transactionsPreload = 10,
       dataPreload = 7,
-      consumerKeepAliveInterval = 5,
       converter,
       roundRobinPolicy,
       Oldest,
       timeUuidGenerator,
       useLastOffset = true)
 
-    new BasicConsumer[Array[Byte], Array[Byte]](basicStream.name, basicStream, options)
+    new Consumer[Array[Byte]](tStream.name, tStream, options)
   }
 }

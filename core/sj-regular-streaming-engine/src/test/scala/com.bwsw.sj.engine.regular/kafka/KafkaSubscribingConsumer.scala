@@ -32,7 +32,7 @@ object KafkaSubscribingConsumer {
       (service.get(x._1), x._2)
     })
 
-    val kafkaInputs = inputs.filter(x => x._1.streamType == StreamConstants.kafka)
+    val kafkaInputs = inputs.filter(x => x._1.streamType == StreamConstants.kafkaStreamType)
 
     executorService.execute(new Runnable() {
       def run() = {

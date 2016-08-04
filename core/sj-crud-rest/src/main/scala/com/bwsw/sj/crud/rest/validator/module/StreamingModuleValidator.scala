@@ -196,7 +196,7 @@ abstract class StreamingModuleValidator {
 
       val startFrom = parameters.startFrom
       if (!startFromModes.contains(startFrom)) {
-        if (allStreams.exists(s => s.streamType.equals(kafka))) {
+        if (allStreams.exists(s => s.streamType.equals(kafkaStreamType))) {
           errors += s"Start-from attribute must be 'oldest' or 'newest', if instance have kafka-streams."
         } else {
           try {
@@ -209,7 +209,7 @@ abstract class StreamingModuleValidator {
       }
 
       val tStreamsServices = getStreamServices(allStreams.filter { s =>
-        s.streamType.equals(tStream)
+        s.streamType.equals(tStreamType)
       })
       if (tStreamsServices.size != 1) {
         errors += s"All t-streams should have the same service."
@@ -218,11 +218,11 @@ abstract class StreamingModuleValidator {
         if (!service.isInstanceOf[TStreamService]) {
           errors += s"Service for t-streams must be 'TstrQ'."
         } else {
-          checkTStreams(errors, allStreams.filter(s => s.streamType.equals(tStream)).map(_.asInstanceOf[TStreamSjStream]))
+          checkTStreams(errors, allStreams.filter(s => s.streamType.equals(tStreamType)).map(_.asInstanceOf[TStreamSjStream]))
         }
       }
 
-      val kafkaStreams = allStreams.filter(s => s.streamType.equals(kafka)).map(_.asInstanceOf[KafkaSjStream])
+      val kafkaStreams = allStreams.filter(s => s.streamType.equals(kafkaStreamType)).map(_.asInstanceOf[KafkaSjStream])
       if (kafkaStreams.nonEmpty) {
         if (kafkaStreams.exists(s => !s.service.isInstanceOf[KafkaService])) {
           errors += s"Service for kafka-streams must be 'KfkQ'."
@@ -236,7 +236,7 @@ abstract class StreamingModuleValidator {
 
       parameters.parallelism = checkParallelism(parameters.parallelism, minPartitionCount, errors)
 
-      val validatedInstance = createInstance(parameters, partitions, allStreams.filter(s => s.streamType.equals(tStream)).toSet)
+      val validatedInstance = createInstance(parameters, partitions, allStreams.filter(s => s.streamType.equals(tStreamType)).toSet)
       (errors, validatedInstance)
     } else {
       (errors, null)
@@ -370,9 +370,9 @@ abstract class StreamingModuleValidator {
   def getPartitionForStreams(streams: Seq[SjStream]): Map[String, Int] = {
     Map(streams.map { stream =>
       stream.streamType match {
-        case StreamConstants.tStream =>
+        case StreamConstants.`tStreamType` =>
           stream.name -> stream.asInstanceOf[TStreamSjStream].partitions
-        case StreamConstants.kafka =>
+        case StreamConstants.`kafkaStreamType` =>
           stream.name -> stream.asInstanceOf[KafkaSjStream].partitions
       }
 

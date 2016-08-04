@@ -12,7 +12,7 @@ import com.bwsw.sj.engine.regular.task.engine.input.RegularTaskInputServiceFacto
 import com.bwsw.sj.engine.regular.task.engine.state.{RegularTaskEngineService, StatelessRegularTaskEngineService, StatefulRegularTaskEngineService}
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
-import com.bwsw.tstreams.agents.producer.BasicProducer
+import com.bwsw.tstreams.agents.producer.Producer
 import org.slf4j.LoggerFactory
 
 import scala.collection.Map
@@ -33,9 +33,9 @@ abstract class RegularTaskEngine(manager: RegularTaskManager,
 
   protected val currentThread = Thread.currentThread()
   protected val logger = LoggerFactory.getLogger(this.getClass)
-  protected val producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]] = manager.outputProducers
+  protected val producers: Map[String, Producer[Array[Byte]]] = manager.outputProducers
   protected val checkpointGroup = new CheckpointGroup()
-  protected val regularInstance = manager.getInstanceMetadata.asInstanceOf[RegularInstance]
+  protected val regularInstance = manager.getInstance.asInstanceOf[RegularInstance]
   protected val regularTaskEngineService = createRegularTaskEngineService()
   private val moduleEnvironmentManager = regularTaskEngineService.moduleEnvironmentManager
   protected val executor: RegularStreamingExecutor = regularTaskEngineService.executor
@@ -68,7 +68,7 @@ abstract class RegularTaskEngine(manager: RegularTaskManager,
     regularTaskEngineService.doCheckpoint()
     regularTaskInputService.doCheckpoint()
     logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
-    checkpointGroup.commit()
+    checkpointGroup.checkpoint()
     outputTags.clear()
     logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
     executor.onAfterCheckpoint()
@@ -101,7 +101,7 @@ abstract class RegularTaskEngine(manager: RegularTaskManager,
       } else {
         val envelope = serializer.deserialize[Envelope](maybeEnvelope)
         afterReceivingEnvelope()
-        regularTaskInputService.processEnvelope(envelope, performanceMetrics)
+        regularTaskInputService.registerEnvelope(envelope, performanceMetrics)
         logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
         executor.onMessage(envelope)
       }
@@ -136,7 +136,7 @@ abstract class RegularTaskEngine(manager: RegularTaskManager,
    */
   private def addProducersToCheckpointGroup() = {
     logger.debug(s"Task: ${manager.taskName}. Start adding t-stream producers to checkpoint group\n")
-    producers.foreach(x => checkpointGroup.add(x._2.name, x._2))
+    producers.foreach(x => checkpointGroup.add(x._2))
     logger.debug(s"Task: ${manager.taskName}. The t-stream producers are added to checkpoint group\n")
   }
 }

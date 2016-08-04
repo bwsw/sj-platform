@@ -2,7 +2,6 @@ package com.bwsw.sj.engine.regular.task.engine.input
 
 import java.util.Properties
 
-import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.ConfigConstants._
 import com.bwsw.sj.common.DAL.model.{KafkaService, SjStream}
 import com.bwsw.sj.common.StreamConstants
@@ -11,13 +10,8 @@ import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope}
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
 import com.bwsw.tstreams.agents.consumer.Offsets.Newest
-import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions}
 import com.bwsw.tstreams.agents.group.CheckpointGroup
-import com.bwsw.tstreams.agents.producer.ProducerPolicies
-import com.bwsw.tstreams.data.IStorage
-import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
-import com.bwsw.tstreams.policy.RoundRobinPolicy
-import com.bwsw.tstreams.services.BasicStreamService
+import com.bwsw.tstreams.agents.producer.NewTransactionProducerPolicy
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.TopicPartition
 import org.slf4j.LoggerFactory
@@ -55,7 +49,7 @@ class KafkaRegularTaskInputService(manager: RegularTaskManager,
   private val offsetProducer = createOffsetProducer()
   addOffsetProducerToCheckpointGroup()
 
-  val kafkaConsumer: KafkaConsumer[Array[Byte], Array[Byte]] = createKafkaConsumer(
+  val kafkaConsumer: KafkaConsumer[Array[Byte], Array[Byte]] = createSubscribingKafkaConsumer(
     kafkaInputs.map(x => (x._1.name, x._2.toList)).toList,
     kafkaInputs.flatMap(_._1.service.asInstanceOf[KafkaService].provider.hosts).toList,
     chooseOffset()
@@ -72,7 +66,7 @@ class KafkaRegularTaskInputService(manager: RegularTaskManager,
       val records = kafkaConsumer.poll(kafkaSubscriberTimeout)
       records.asScala.foreach(x => {
 
-        blockingQueue.put(serializer.serialize({
+        blockingQueue.put(envelopeSerializer.serialize({
           val envelope = new KafkaEnvelope()
           envelope.stream = x.topic()
           envelope.partition = x.partition()
@@ -85,7 +79,7 @@ class KafkaRegularTaskInputService(manager: RegularTaskManager,
     }
   }
 
-  def processEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics) = {
+  def registerEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics) = {
     logger.info(s"Task: ${manager.taskName}. Kafka envelope is received\n")
     val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
     logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${kafkaEnvelope.stream} " +
@@ -99,7 +93,7 @@ class KafkaRegularTaskInputService(manager: RegularTaskManager,
 
   override def doCheckpoint() = {
     logger.debug(s"Task: ${manager.taskName}. Save kafka offsets for each kafka input\n")
-    offsetProducer.newTransaction(ProducerPolicies.errorIfOpened)
+    offsetProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
       .send(objectSerializer.serialize(kafkaOffsetsStorage))
   }
 
@@ -111,18 +105,15 @@ class KafkaRegularTaskInputService(manager: RegularTaskManager,
 
     offsetProducer
   }
-
-  /**
-   * Adds an offset producer to checkpoint group
-   */
+  
   private def addOffsetProducerToCheckpointGroup() = {
     logger.debug(s"Task: ${manager.taskName}. Start adding the t-stream producer to checkpoint group\n")
-    checkpointGroup.add(offsetProducer.name, offsetProducer)
+    checkpointGroup.add(offsetProducer)
     logger.debug(s"Task: ${manager.taskName}. The t-stream producer is added to checkpoint group\n")
   }
 
   private def getKafkaInputs(): mutable.Map[SjStream, Array[Int]] = {
-    manager.inputs.filter(x => x._1.streamType == StreamConstants.kafka)
+    manager.inputs.filter(x => x._1.streamType == StreamConstants.kafkaStreamType)
   }
 
   private def chooseOffset() = {
@@ -142,13 +133,19 @@ class KafkaRegularTaskInputService(manager: RegularTaskManager,
    * @param offset Default policy for kafka consumer (earliest/latest)
    * @return Kafka consumer subscribed to topics
    */
-  private def createKafkaConsumer(topics: List[(String, List[Int])], hosts: List[String], offset: String): KafkaConsumer[Array[Byte], Array[Byte]] = {
-    import collection.JavaConverters._
+  private def createSubscribingKafkaConsumer(topics: List[(String, List[Int])], hosts: List[String], offset: String): KafkaConsumer[Array[Byte], Array[Byte]] = {
     logger.debug(s"Task name: ${manager.taskName}. Create kafka consumer for topics (with their partitions): " +
       s"${topics.map(x => s"topic name: ${x._1}, " + s"partitions: ${x._2.mkString(",")}").mkString(",")}\n")
-    val objectSerializer = new ObjectSerializer()
-    val dataStorage: IStorage[Array[Byte]] = manager.createDataStorage()
+    val consumer: KafkaConsumer[Array[Byte], Array[Byte]] = createKafkaConsumer(hosts, offset)
 
+    assignKafkaConsumerOnTopics(consumer, topics)
+
+    seekKafkaConsumerOffsets(consumer)
+
+    consumer
+  }
+
+  private def createKafkaConsumer(hosts: List[String], offset: String) = {
     val props = new Properties()
     props.put("bootstrap.servers", hosts.mkString(","))
     props.put("enable.auto.commit", "false")
@@ -159,38 +156,34 @@ class KafkaRegularTaskInputService(manager: RegularTaskManager,
 
     val consumer = new KafkaConsumer[Array[Byte], Array[Byte]](props)
 
+    consumer
+  }
+
+  private def assignKafkaConsumerOnTopics(consumer: KafkaConsumer[Array[Byte], Array[Byte]], topics: List[(String, List[Int])]) = {
     val topicPartitions = topics.flatMap(x => {
       (x._2.head to x._2.tail.head).map(y => new TopicPartition(x._1, y))
     }).asJava
 
     consumer.assign(topicPartitions)
+  }
 
-    if (BasicStreamService.isExist(kafkaOffsetsStream, manager.metadataStorage)) {
-      //todo: think maybe this part is common
-      val stream = BasicStreamService.loadStream(kafkaOffsetsStream, manager.metadataStorage, dataStorage)
-      val roundRobinPolicy = new RoundRobinPolicy(stream, (0 to 0).toList)
-      val timeUuidGenerator = new LocalTimeUUIDGenerator
-      val options = new BasicConsumerOptions[Array[Byte], Array[Byte]](
-        manager.txnPreload,
-        manager.dataPreload,
-        manager.consumerKeepAliveInterval,
-        manager.converter,
-        roundRobinPolicy,
-        Newest,
-        timeUuidGenerator,
-        useLastOffset = true)
+  private def seekKafkaConsumerOffsets(consumer: KafkaConsumer[Array[Byte], Array[Byte]]) = {
+    val partition = 0
+    val partitionsRange = List(partition)
 
-      val offsetConsumer = new BasicConsumer[Array[Byte], Array[Byte]]("consumer for offsets of " + manager.taskName, stream, options)
-      val lastTxn = offsetConsumer.getLastTransaction(0)
+    val offsetConsumer = manager.createConsumer(
+      offsetStream,
+      partitionsRange,
+      Newest
+    )
 
-      if (lastTxn.isDefined) {
-        logger.debug(s"Task name: ${manager.taskName}. Get saved offsets for kafka consumer and apply their\n")
-        kafkaOffsetsStorage = objectSerializer.deserialize(lastTxn.get.next()).asInstanceOf[mutable.Map[(String, Int), Long]]
-        kafkaOffsetsStorage.foreach(x => consumer.seek(new TopicPartition(x._1._1, x._1._2), x._2 + 1))
-      }
+    val lastTxn = offsetConsumer.getLastTransaction(partition)
+
+    if (lastTxn.isDefined) {
+      logger.debug(s"Task name: ${manager.taskName}. Get saved offsets for kafka consumer and apply their\n")
+      kafkaOffsetsStorage = objectSerializer.deserialize(lastTxn.get.next()).asInstanceOf[mutable.Map[(String, Int), Long]]
+      kafkaOffsetsStorage.foreach(x => consumer.seek(new TopicPartition(x._1._1, x._1._2), x._2 + 1))
     }
-
-    consumer
   }
 
   /**
@@ -203,6 +196,12 @@ class KafkaRegularTaskInputService(manager: RegularTaskManager,
   private def createOffsetStream() = {
     logger.debug(s"Task name: ${manager.taskName}. " +
       s"Get stream for keeping kafka offsets\n")
-    manager.getSjStream(kafkaOffsetsStream, "store kafka offsets of input streams", Array("offsets"), 1)
+    val description = "store kafka offsets of input streams"
+    val tags = Array("offsets")
+    val partitions = 1
+
+    manager.createTStreamOnCluster(kafkaOffsetsStream, description, partitions)
+
+    manager.getSjStream(kafkaOffsetsStream, description, tags, partitions)
   }
 }

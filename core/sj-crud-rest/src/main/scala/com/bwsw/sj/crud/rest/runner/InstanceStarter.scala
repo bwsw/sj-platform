@@ -64,7 +64,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
           streams = streams.union(instance.inputs.map(_.replaceAll("/split|/full", "")))
         }
         val streamsToStart = streams.map(name => streamDAO.get(name))
-          .filter(stream => stream.streamType.equals(StreamConstants.tStream))
+          .filter(stream => stream.streamType.equals(StreamConstants.tStreamType))
           .filter(stream => !stream.asInstanceOf[TStreamSjStream].generator.generatorType.equals("local"))
         startGenerators(streamsToStart.map(stream => stream.asInstanceOf[TStreamSjStream]).toSet)
 

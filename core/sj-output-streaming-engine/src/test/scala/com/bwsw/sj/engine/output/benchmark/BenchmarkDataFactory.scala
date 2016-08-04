@@ -15,9 +15,9 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.engine.core.utils.CassandraHelper._
 import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
-import com.bwsw.tstreams.agents.consumer.{BasicConsumer, BasicConsumerOptions}
-import com.bwsw.tstreams.agents.producer.InsertionType.BatchInsert
-import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerOptions, ProducerCoordinationOptions, ProducerPolicies}
+import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerOptions}
+import com.bwsw.tstreams.agents.producer.DataInsertType.BatchInsert
+import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer, ProducerCoordinationOptions, ProducerOptions}
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorage, AerospikeStorageFactory, AerospikeStorageOptions}
@@ -25,7 +25,6 @@ import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.policy.RoundRobinPolicy
 import com.bwsw.tstreams.services.BasicStreamService
-import com.bwsw.tstreams.streams.BasicStream
 import com.datastax.driver.core.Cluster
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.client.transport.TransportClient
@@ -107,10 +106,10 @@ object BenchmarkDataFactory {
 
   private def writeData(countTxns: Int,
                         countElements: Int,
-                        producer: BasicProducer[Array[Byte], Array[Byte]]) = {
+                        producer: Producer[Array[Byte]]) = {
     var number = 0
     (0 until countTxns) foreach { (x: Int) =>
-      val txn = producer.newTransaction(ProducerPolicies.errorIfOpened)
+      val txn = producer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
       (0 until countElements) foreach { (y: Int) =>
         number += 1
         println("write data " + number)
@@ -150,7 +149,7 @@ object BenchmarkDataFactory {
   }
 
   private def createProducer(metadataStorage: MetadataStorage, dataStorage: AerospikeStorage, partitions: Int) = {
-    val basicStream: BasicStream[Array[Byte]] =
+    val tStream =
       BasicStreamService.loadStream(tStreamName, metadataStorage, dataStorage)
 
     val coordinationSettings = new ProducerCoordinationOptions(
@@ -163,46 +162,44 @@ object BenchmarkDataFactory {
       transportTimeout = 5,
       zkConnectionTimeout = 7000)
 
-    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until partitions).toList)
+    val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until partitions).toList)
 
     val timeUuidGenerator = new LocalTimeUUIDGenerator
 
-    val producerOptions = new BasicProducerOptions[Array[Byte], Array[Byte]](
+    val producerOptions = new ProducerOptions[Array[Byte]](
       transactionTTL = 6,
       transactionKeepAliveInterval = 2,
-      producerKeepAliveInterval = 1,
       roundRobinPolicy,
       BatchInsert(5),
       timeUuidGenerator,
       coordinationSettings,
       converter)
 
-    new BasicProducer[Array[Byte], Array[Byte]]("producer for " + basicStream.name, basicStream, producerOptions)
+    new Producer[Array[Byte]]("producer for " + tStream.name, tStream, producerOptions)
   }
 
   def createConsumer(stream: TStreamSjStream,
                      address: String,
                      metadataStorage: MetadataStorage,
-                     dataStorage: AerospikeStorage): BasicConsumer[Array[Byte], Array[Byte]] = {
+                     dataStorage: AerospikeStorage): Consumer[Array[Byte]] = {
 
-    val basicStream: BasicStream[Array[Byte]] =
+    val tStream =
       BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
 
-    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
+    val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
 
     val timeUuidGenerator = new LocalTimeUUIDGenerator
 
-    val options = new BasicConsumerOptions[Array[Byte], Array[Byte]](
+    val options = new ConsumerOptions[Array[Byte]](
       transactionsPreload = 10,
       dataPreload = 7,
-      consumerKeepAliveInterval = 5,
       converter,
       roundRobinPolicy,
       Oldest,
       timeUuidGenerator,
       useLastOffset = true)
 
-    new BasicConsumer[Array[Byte], Array[Byte]](basicStream.name, basicStream, options)
+    new Consumer[Array[Byte]](tStream.name, tStream, options)
   }
 
   def prepareCassandra(keyspace: String) = {

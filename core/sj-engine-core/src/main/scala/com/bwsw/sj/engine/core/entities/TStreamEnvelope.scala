@@ -14,7 +14,7 @@ class TStreamEnvelope() extends Envelope() {
   var txnUUID: UUID = null
   var consumerName: String = null
   var data: List[Array[Byte]] = null
-  streamType = StreamConstants.tStream
+  streamType = StreamConstants.tStreamType
 }
 
 

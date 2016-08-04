@@ -12,7 +12,7 @@ import com.bwsw.sj.engine.input.eviction_policy.{ExpandedTimeEvictionPolicy, Fix
 import com.bwsw.sj.engine.input.task.InputTaskManager
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
-import com.bwsw.tstreams.agents.producer.{BasicProducer, BasicProducerTransaction, ProducerPolicies}
+import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer, ProducerTransaction}
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import org.slf4j.LoggerFactory
@@ -37,11 +37,11 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   protected val currentThread = Thread.currentThread()
   protected val logger = LoggerFactory.getLogger(this.getClass)
   protected val serializer = new JsonSerializer()
-  protected val producers: Map[String, BasicProducer[Array[Byte], Array[Byte]]] = manager.outputProducers
+  protected val producers: Map[String, Producer[Array[Byte]]] = manager.outputProducers
   protected val streams = producers.keySet
   protected var txnsByStreamPartitions = createTxnsStorage(streams)
   protected val checkpointGroup = new CheckpointGroup()
-  protected val inputInstance = manager.getInstanceMetadata.asInstanceOf[InputInstance]
+  protected val inputInstance = manager.getInstance.asInstanceOf[InputInstance]
   protected val moduleEnvironmentManager = createModuleEnvironmentManager()
   val executor: InputStreamingExecutor = manager.getExecutor(moduleEnvironmentManager)
   protected val evictionPolicy = createEvictionPolicy()
@@ -112,7 +112,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   protected def sendEnvelope(stream: String, partition: Int, data: Array[Byte]) = {
     logger.info(s"Task name: ${manager.taskName}. Send envelope to each output stream.\n")
     val maybeTxn = getTxn(stream, partition)
-    var txn: BasicProducerTransaction[Array[Byte], Array[Byte]] = null
+    var txn: ProducerTransaction[Array[Byte]] = null
     if (maybeTxn.isDefined) {
       logger.debug(s"Task name: ${manager.taskName}. Txn for stream/partition: '$stream/$partition' is defined\n")
       txn = maybeTxn.get
@@ -120,7 +120,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     } else {
       logger.debug(s"Task name: ${manager.taskName}. Txn for stream/partition: '$stream/$partition' is not defined " +
         s"so create new txn\n")
-      txn = producers(stream).newTransaction(ProducerPolicies.errorIfOpened, partition)
+      txn = producers(stream).newTransaction(NewTransactionProducerPolicy.ErrorIfOpened, partition)
       txn.send(data)
       putTxn(stream, partition, txn)
     }
@@ -211,7 +211,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   protected def doCheckpoint(): Unit = {
     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
     logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
-    checkpointGroup.commit()
+    checkpointGroup.checkpoint()
     checkpointInitiated()
     txnsByStreamPartitions = createTxnsStorage(streams)
   }
@@ -242,7 +242,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
    * @param partition Partition of stream
    * @return Current open transaction
    */
-  private def putTxn(stream: String, partition: Int, txn: BasicProducerTransaction[Array[Byte], Array[Byte]]) = {
+  private def putTxn(stream: String, partition: Int, txn: ProducerTransaction[Array[Byte]]) = {
     logger.debug(s"Task name: ${manager.taskName}. " +
       s"Put txn for stream: $stream, partition: $partition\n")
     txnsByStreamPartitions(stream) += (partition -> txn)
@@ -257,7 +257,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   protected def createTxnsStorage(streams: Set[String]) = {
     logger.debug(s"Task name: ${manager.taskName}. " +
       s"Create storage for keeping txns for each partition of output streams\n")
-    streams.map(x => (x, mutable.Map[Int, BasicProducerTransaction[Array[Byte], Array[Byte]]]())).toMap
+    streams.map(x => (x, mutable.Map[Int, ProducerTransaction[Array[Byte]]]())).toMap
   }
 
   /**
@@ -265,7 +265,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
    */
   private def addProducersToCheckpointGroup() = {
     logger.debug(s"Task: ${manager.taskName}. Start adding t-stream producers to checkpoint group\n")
-    producers.foreach(x => checkpointGroup.add(x._2.name, x._2))
+    producers.foreach(x => checkpointGroup.add(x._2))
     logger.debug(s"Task: ${manager.taskName}. The t-stream producers are added to checkpoint group\n")
   }
 

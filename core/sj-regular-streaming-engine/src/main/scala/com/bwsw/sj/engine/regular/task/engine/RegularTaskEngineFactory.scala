@@ -26,7 +26,7 @@ class RegularTaskEngineFactory(manager: RegularTaskManager,
   /**
    * Input instance is a metadata for running a task of regular module
    */
-  private val inputInstanceMetadata = manager.getInstanceMetadata
+  private val inputInstanceMetadata = manager.getInstance
 
   /**
    * Creates RegularTaskEngine is in charge of a basic execution logic of task of regular module

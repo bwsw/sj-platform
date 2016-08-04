@@ -7,7 +7,7 @@ import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.DAL.model.{TStreamSjStream, TStreamService, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.tstreams.agents.producer.InsertionType.BatchInsert
+import com.bwsw.tstreams.agents.producer.DataInsertType.BatchInsert
 import com.bwsw.tstreams.agents.producer._
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
@@ -16,7 +16,7 @@ import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.policy.RoundRobinPolicy
 import com.bwsw.tstreams.services.BasicStreamService
-import com.bwsw.tstreams.streams.BasicStream
+import com.bwsw.tstreams.streams.TStream
 
 /**
  * Created: 5/31/16
@@ -60,7 +60,7 @@ object OutputTestDataFactory {
     var number = 0
     val s = System.nanoTime
     (0 until countTxns) foreach { (x: Int) =>
-      val txn = producer.newTransaction(ProducerPolicies.errorIfOpened)
+      val txn = producer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
       (0 until countElements) foreach { (y: Int) =>
         number += 1
         txn.send(objectSerializer.serialize(number.asInstanceOf[Object]))
@@ -74,7 +74,7 @@ object OutputTestDataFactory {
   }
 
   private def createProducer() = {
-    val basicStream: BasicStream[Array[Byte]] =
+    val tStream: TStream[Array[Byte]] =
       BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
 
     val coordinationSettings = new ProducerCoordinationOptions(
@@ -87,21 +87,20 @@ object OutputTestDataFactory {
       transportTimeout = 5,
       zkConnectionTimeout = 7000)
 
-    val roundRobinPolicy = new RoundRobinPolicy(basicStream, (0 until stream.partitions).toList)
+    val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until stream.partitions).toList)
 
     val timeUuidGenerator = new LocalTimeUUIDGenerator
 
-    val options = new BasicProducerOptions[Array[Byte], Array[Byte]](
+    val options = new ProducerOptions[Array[Byte]](
       transactionTTL = 6,
       transactionKeepAliveInterval = 2,
-      producerKeepAliveInterval = 1,
       roundRobinPolicy,
       BatchInsert(5),
       timeUuidGenerator,
       coordinationSettings,
       converter)
 
-    new BasicProducer[Array[Byte], Array[Byte]]("producer for " + basicStream.name, basicStream, options)
+    new Producer[Array[Byte]]("producer for " + tStream.name, tStream, options)
   }
 
 
