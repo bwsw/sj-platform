@@ -1,6 +1,7 @@
 package com.bwsw.sj.mesos.framework.task
 
 import java.util.Calendar
+import java.util.Date
 
 import com.bwsw.sj.common.DAL.model.module.{Task => InstanceTask}
 
@@ -12,7 +13,7 @@ import com.bwsw.sj.common.DAL.model.module.{Task => InstanceTask}
 class Task(taskId: String) {
   val id: String = taskId
   var state: String = "TASK_STAGING"
-  var stateChanged: Long = Calendar.getInstance().getTime.getTime//DateTime.now.getMillis TODO: Why org.joda.time.DateTime?
+  var stateChanged: Long = Calendar.getInstance().getTime.getTime
   var reason: String = ""
   var node: String = ""
   var lastNode: String = ""
@@ -35,7 +36,7 @@ class Task(taskId: String) {
     //val timestamp = new Timestamp(stateChanged)
     Map(("id", id),
       ("state", state),
-      ("state-change", stateChanged.toString),
+      ("state-change", new Date(stateChanged).toString),
       ("reason", reason),
       ("node", node),
       ("last-node", lastNode)

@@ -12,7 +12,7 @@ object StatusHandler {
   val logger = Logger.getLogger(getClass)
 
   def handle(status: TaskStatus) = {
-    logger.info(s"STATUS UPDATE")
+    logger.debug(s"STATUS UPDATE")
 
     if (status != null) {
 
@@ -21,7 +21,7 @@ object StatusHandler {
         stateChanged = status.getTimestamp.toLong * 1000,
         lastNode = if (task.node != "") task.node else task.lastNode, node = status.getSlaveId.getValue
       ))
-      logger.info(s"Task: ${status.getTaskId.getValue}")
+      logger.debug(s"Task: ${status.getTaskId.getValue}")
       logger.info(s"Status: ${status.getState}")
       if (status.getState.toString == "TASK_FAILED" || status.getState.toString == "TASK_ERROR") {
         TasksList(status.getTaskId.getValue).foreach(x => x.update(
@@ -30,7 +30,7 @@ object StatusHandler {
         logger.error(s"Error: ${status.getMessage}")
 
         TasksList.addToLaunch(status.getTaskId.getValue)
-        logger.info("Added task to launch")
+        logger.info(s"Added task ${status.getTaskId.getValue} to launch after failure.")
       }
     }
   }
