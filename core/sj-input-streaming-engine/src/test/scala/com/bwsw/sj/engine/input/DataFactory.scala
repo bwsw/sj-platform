@@ -111,7 +111,6 @@ object DataFactory {
 
   def deleteProviders(providerService: GenericMongoService[Provider]) = {
     providerService.delete("cassandra-test-provider")
-    providerService.delete("aerospike-test-provider")
     providerService.delete("zookeeper-test-provider")
   }
 
@@ -178,7 +177,7 @@ object DataFactory {
     val instance = new InputInstance()
     instance.name = instanceName
     instance.moduleType = "input-streaming"
-    instance.moduleName = "com.bwsw.input.streaming.engine"
+    instance.moduleName = "input-streaming-stub"
     instance.moduleVersion = "0.1"
     instance.status = "ready"
     instance.description = "some description of test instance"

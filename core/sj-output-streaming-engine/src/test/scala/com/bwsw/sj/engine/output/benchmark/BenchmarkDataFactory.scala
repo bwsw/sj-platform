@@ -17,9 +17,10 @@ import com.bwsw.sj.engine.core.utils.CassandraHelper._
 import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
 import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerOptions}
 import com.bwsw.tstreams.agents.producer.DataInsertType.BatchInsert
-import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer, ProducerCoordinationOptions, ProducerOptions}
+import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer, CoordinationOptions, Options}
 import com.bwsw.tstreams.converter.IConverter
-import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
+import com.bwsw.tstreams.coordination.producer.transport.impl.TcpTransport
+
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorage, AerospikeStorageFactory, AerospikeStorageOptions}
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
@@ -152,7 +153,7 @@ object BenchmarkDataFactory {
     val tStream =
       BasicStreamService.loadStream(tStreamName, metadataStorage, dataStorage)
 
-    val coordinationSettings = new ProducerCoordinationOptions(
+    val coordinationSettings = new CoordinationOptions(
       agentAddress = s"localhost:8030",
       zkHosts = List(new InetSocketAddress("localhost", 2181)),
       zkRootPath = "/unit",
@@ -166,7 +167,7 @@ object BenchmarkDataFactory {
 
     val timeUuidGenerator = new LocalTimeUUIDGenerator
 
-    val producerOptions = new ProducerOptions[Array[Byte]](
+    val producerOptions = new Options[Array[Byte]](
       transactionTTL = 6,
       transactionKeepAliveInterval = 2,
       roundRobinPolicy,

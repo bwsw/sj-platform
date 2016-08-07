@@ -11,7 +11,7 @@ import java.util.concurrent.locks.ReentrantLock
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.engine.core.managment.TaskManager
-import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, ProducerTransaction}
+import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Transaction}
 import org.slf4j.LoggerFactory
 
 import scala.collection._
@@ -97,7 +97,7 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
 
     val taskNumber = taskName.replace(s"${manager.instanceName}-task", "").toInt
     var report: String = null
-    var reportTxn: ProducerTransaction[Array[Byte]] = null
+    var reportTxn: Transaction[Array[Byte]] = null
     while (true) {
       logger.info(s"Task: $taskName. Wait $reportingInterval ms to report performance metrics\n")
       TimeUnit.MILLISECONDS.sleep(reportingInterval)

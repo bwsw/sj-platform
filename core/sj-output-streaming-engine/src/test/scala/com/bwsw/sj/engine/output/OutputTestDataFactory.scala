@@ -10,7 +10,7 @@ import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.tstreams.agents.producer.DataInsertType.BatchInsert
 import com.bwsw.tstreams.agents.producer._
 import com.bwsw.tstreams.converter.IConverter
-import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
+import com.bwsw.tstreams.coordination.producer.transport.impl.TcpTransport
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorage, AerospikeStorageOptions, AerospikeStorageFactory}
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
@@ -77,7 +77,7 @@ object OutputTestDataFactory {
     val tStream: TStream[Array[Byte]] =
       BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
 
-    val coordinationSettings = new ProducerCoordinationOptions(
+    val coordinationSettings = new CoordinationOptions(
       agentAddress = s"localhost:8030",
       zkHosts = List(new InetSocketAddress("localhost", 2181)),
       zkRootPath = "/unit",
@@ -91,7 +91,7 @@ object OutputTestDataFactory {
 
     val timeUuidGenerator = new LocalTimeUUIDGenerator
 
-    val options = new ProducerOptions[Array[Byte]](
+    val options = new Options[Array[Byte]](
       transactionTTL = 6,
       transactionKeepAliveInterval = 2,
       roundRobinPolicy,

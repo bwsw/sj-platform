@@ -19,7 +19,7 @@ import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerOptions}
 import com.bwsw.tstreams.agents.producer.DataInsertType.BatchInsert
 import com.bwsw.tstreams.agents.producer._
 import com.bwsw.tstreams.converter.IConverter
-import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
+import com.bwsw.tstreams.coordination.producer.transport.impl.TcpTransport
 import com.bwsw.tstreams.data.cassandra.{CassandraStorageFactory, CassandraStorageOptions}
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
@@ -454,7 +454,7 @@ object DataFactory {
     val tStream =
       BasicStreamService.loadStream(stream.name, metadataStorage, dataStorageFactory.getInstance(dataStorageOptions))
 
-    val coordinationSettings = new ProducerCoordinationOptions(
+    val coordinationSettings = new CoordinationOptions(
       agentAddress = s"localhost:8030",
       zkHosts = zookeeperHosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList,
       zkRootPath = "/unit",
@@ -468,7 +468,7 @@ object DataFactory {
 
     val timeUuidGenerator = new LocalTimeUUIDGenerator
 
-    val options = new ProducerOptions[Array[Byte]](
+    val options = new Options[Array[Byte]](
       transactionTTL = 6,
       transactionKeepAliveInterval = 2,
       roundRobinPolicy,
