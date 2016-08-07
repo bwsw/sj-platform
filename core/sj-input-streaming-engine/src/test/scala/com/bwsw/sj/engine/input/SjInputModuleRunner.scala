@@ -15,7 +15,7 @@ object SjInputModuleSetup extends App {
   val fileStorage = ConnectionRepository.getFileStorage
   val checkpointInterval = 10
 
-  val inputModule = new File("/home/mikhaleva_ka/Juggler/contrib/stubs/sj-stub-input-streaming/target/scala-2.11/sj-stub-input-streaming.jar")
+  val inputModule = new File("/home/mikhaleva_ka/Juggler/contrib/stubs/sj-stub-input-streaming/target/scala-2.11/sj-stub-input-streaming-1.0.jar")
 
   cassandraSetup()
   loadModule(inputModule, fileStorage)
@@ -56,7 +56,7 @@ object SjInputModuleDestroy extends App {
   val instanceService = ConnectionRepository.getInstanceService
   val fileStorage = ConnectionRepository.getFileStorage
 
-  val inputModule = new File("/home/mikhaleva_ka/Juggler/contrib/stubs/sj-stub-input-streaming/target/scala-2.11/sj-stub-input-streaming.jar")
+  val inputModule = new File("/home/mikhaleva_ka/Juggler/contrib/stubs/sj-stub-input-streaming/target/scala-2.11/sj-stub-input-streaming-1.0.jar")
 
   deleteStreams(streamService, outputCount)
   deleteServices(serviceManager)
