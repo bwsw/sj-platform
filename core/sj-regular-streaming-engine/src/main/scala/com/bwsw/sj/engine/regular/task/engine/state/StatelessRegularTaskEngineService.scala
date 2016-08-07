@@ -18,7 +18,7 @@ class StatelessRegularTaskEngineService(manager: RegularTaskManager, performance
   extends RegularTaskEngineService(manager, performanceMetrics) {
 
   val moduleEnvironmentManager = new ModuleEnvironmentManager(
-    serializer.deserialize[Map[String, Any]](regularInstance.options),
+    envelopeSerializer.deserialize[Map[String, Any]](regularInstance.options),
     outputProducers,
     regularInstance.outputs
       .map(ConnectionRepository.getStreamService.get)

@@ -29,29 +29,29 @@ object RegularTaskRunner {
   private val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(ModuleConstants.persistentBlockingQueue)
 
   def main(args: Array[String]) {
-
-    val manager = new RegularTaskManager()
-    logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for regular module\n")
-
-    val performanceMetrics = new RegularStreamingPerformanceMetrics(manager)
-
-    val regularTaskEngineFactory = new RegularTaskEngineFactory(manager, performanceMetrics, blockingQueue)
-
-    val regularTaskEngine: RegularTaskEngine = regularTaskEngineFactory.createInputTaskEngine()
-
-    val regularTaskInputService: RegularTaskInputService = regularTaskEngine.regularTaskInputService
-
-    logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
     try {
+      val manager = new RegularTaskManager()
+
+      logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for regular module\n")
+
+      val performanceMetrics: RegularStreamingPerformanceMetrics = new RegularStreamingPerformanceMetrics(manager)
+
+      val regularTaskEngineFactory = new RegularTaskEngineFactory(manager, performanceMetrics, blockingQueue)
+
+      val regularTaskEngine: RegularTaskEngine = regularTaskEngineFactory.createInputTaskEngine()
+
+      val regularTaskInputService: RegularTaskInputService = regularTaskEngine.regularTaskInputService
+
+      logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
+
       executorService.submit(regularTaskInputService)
       executorService.submit(regularTaskEngine)
       executorService.submit(performanceMetrics)
 
       executorService.take().get()
     } catch {
-      case exception: Exception => {
-        handleExceptionOfExecutorService(exception)
-      }
+      case assertionError: Error => handleException(assertionError)
+      case exception: Exception => handleException(exception)
     }
   }
 
@@ -61,7 +61,7 @@ object RegularTaskRunner {
       .build()
   }
 
-  def handleExceptionOfExecutorService(exception: Exception) = {
+  def handleException(exception: Throwable) = {
     exception.printStackTrace()
     threadPool.shutdownNow()
     System.exit(-1)

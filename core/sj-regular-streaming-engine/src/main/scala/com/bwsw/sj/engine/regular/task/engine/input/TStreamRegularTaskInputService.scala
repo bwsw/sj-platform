@@ -73,9 +73,6 @@ class TStreamRegularTaskInputService(manager: RegularTaskManager,
     logger.debug(s"Task: ${manager.taskName}. Subscribing consumers are launched\n")
   }
 
-  /**
-   * Adds subscribing consumers to checkpoint group
-   */
   private def addConsumersToCheckpointGroup() = {
     logger.debug(s"Task: ${manager.taskName}. Start adding subscribing consumers to checkpoint group\n")
     consumers.foreach(x => checkpointGroup.add(x._2))

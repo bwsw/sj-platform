@@ -30,7 +30,6 @@ object InputTaskRunner {
   val executorService = new ExecutorCompletionService[Unit](threadPool)
 
   def main(args: Array[String]) {
-
     try {
       val bufferForEachContext = (new ConcurrentHashMap[ChannelHandlerContext, ByteBuf]()).asScala
       val channelContextQueue = new ArrayBlockingQueue[ChannelHandlerContext](queueSize)
@@ -60,12 +59,8 @@ object InputTaskRunner {
 
       executorService.take().get()
     } catch {
-      case assertionError: Error => {
-        handleExceptionOfInputStreamingEngine(assertionError)
-      }
-      case exception: Exception => {
-        handleExceptionOfInputStreamingEngine(exception)
-      }
+      case assertionError: Error => handleException(assertionError)
+      case exception: Exception => handleException(exception)
     }
   }
 
@@ -76,7 +71,7 @@ object InputTaskRunner {
       .build()
   }
 
-  def handleExceptionOfInputStreamingEngine(exception: Throwable) = {
+  def handleException(exception: Throwable) = {
     exception.printStackTrace()
     threadPool.shutdownNow()
     System.exit(-1)

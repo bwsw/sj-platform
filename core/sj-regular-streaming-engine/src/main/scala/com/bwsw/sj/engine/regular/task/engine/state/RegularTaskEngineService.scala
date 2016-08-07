@@ -19,11 +19,8 @@ import org.slf4j.LoggerFactory
 abstract class RegularTaskEngineService(manager: RegularTaskManager, performanceMetrics: RegularStreamingPerformanceMetrics) {
 
   protected val logger = LoggerFactory.getLogger(this.getClass)
-  /**
-   * Json serializer for deserialization of envelope
-   */
-  protected val serializer = new JsonSerializer()
-  serializer.setIgnoreUnknown(true)
+  protected val envelopeSerializer = new JsonSerializer()
+  envelopeSerializer.setIgnoreUnknown(true)
 
   protected val regularInstance = manager.getInstance.asInstanceOf[RegularInstance]
   protected val outputProducers = manager.outputProducers

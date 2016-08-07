@@ -44,12 +44,9 @@ abstract class RegularTaskEngine(manager: RegularTaskManager,
   private val regularTaskInputServiceFactory = new RegularTaskInputServiceFactory(manager, blockingQueue, checkpointGroup)
   val regularTaskInputService = regularTaskInputServiceFactory.createRegularTaskInputService()
   protected val isNotOnlyCustomCheckpoint: Boolean
-
-  /**
-   * Json serializer for deserialization of envelope
-   */
-  protected val serializer = new JsonSerializer()
-  serializer.setIgnoreUnknown(true)
+  
+  protected val envelopeSerializer = new JsonSerializer()
+  envelopeSerializer.setIgnoreUnknown(true)
 
   addProducersToCheckpointGroup()
 
@@ -99,7 +96,7 @@ abstract class RegularTaskEngine(manager: RegularTaskManager,
         logger.debug(s"Task: ${manager.taskName}. Invoke onIdle() handler\n")
         executor.onIdle()
       } else {
-        val envelope = serializer.deserialize[Envelope](maybeEnvelope)
+        val envelope = envelopeSerializer.deserialize[Envelope](maybeEnvelope)
         afterReceivingEnvelope()
         regularTaskInputService.registerEnvelope(envelope, performanceMetrics)
         logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
@@ -116,11 +113,6 @@ abstract class RegularTaskEngine(manager: RegularTaskManager,
     }
   }
 
-
-  /**
-   * Creates a manager of environment of regular streaming module
-   * @return Manager of environment of regular streaming module
-   */
   protected def createRegularTaskEngineService(): RegularTaskEngineService = {
     regularInstance.stateManagement match {
       case "none" =>
@@ -131,9 +123,6 @@ abstract class RegularTaskEngine(manager: RegularTaskManager,
     }
   }
 
-  /**
-   * Adds producers for each output to checkpoint group
-   */
   private def addProducersToCheckpointGroup() = {
     logger.debug(s"Task: ${manager.taskName}. Start adding t-stream producers to checkpoint group\n")
     producers.foreach(x => checkpointGroup.add(x._2))

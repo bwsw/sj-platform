@@ -31,9 +31,9 @@ class CompleteRegularTaskInputService(manager: RegularTaskManager,
 
   def registerEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics) = {
     envelope.streamType match {
-      case StreamConstants.`tStreamType` =>
+      case StreamConstants.tStreamType =>
         tStreamRegularTaskInputService.registerEnvelope(envelope, performanceMetrics)
-      case StreamConstants.`kafkaStreamType` =>
+      case StreamConstants.kafkaStreamType =>
         kafkaRegularTaskInputService.registerEnvelope(envelope, performanceMetrics)
       case _ =>
         logger.error(s"Input stream type: ${envelope.streamType} is not defined for regular streaming engine")
