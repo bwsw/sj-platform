@@ -46,19 +46,19 @@ lazy val root = (project in file(".")) aggregate(common,
   )
 
 lazy val common = Project(id = "sj-common",
-  base = file("./core/sj-common")).enablePlugins(JavaAppPackaging)
+  base = file("./core/sj-common"))
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjCommonDependencies.value
   )
 
 lazy val engineCore = Project(id = "sj-engine-core",
-  base = file("./core/sj-engine-core")).enablePlugins(JavaAppPackaging)
+  base = file("./core/sj-engine-core"))
   .settings(commonSettings: _*)
   .dependsOn(common)
 
 lazy val crudRest = Project(id = "sj-crud-rest",
-  base = file("./core/sj-crud-rest")).enablePlugins(JavaAppPackaging)
+  base = file("./core/sj-crud-rest"))
   .settings(commonSettings: _*)
    .settings(
     libraryDependencies ++= Dependencies.sjRestDependencies.value
@@ -66,7 +66,7 @@ lazy val crudRest = Project(id = "sj-crud-rest",
   .dependsOn(common)
 
 lazy val inputStreamingEngine = Project(id = "sj-input-streaming-engine",
-  base = file("./core/sj-input-streaming-engine")).enablePlugins(JavaAppPackaging)
+  base = file("./core/sj-input-streaming-engine"))
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjInputEngineDependencies.value
@@ -74,7 +74,7 @@ lazy val inputStreamingEngine = Project(id = "sj-input-streaming-engine",
   .dependsOn(engineCore)
 
 lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
-  base = file("./core/sj-regular-streaming-engine")).enablePlugins(JavaAppPackaging)
+  base = file("./core/sj-regular-streaming-engine"))
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjRegularEngineDependencies.value
@@ -82,12 +82,12 @@ lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
   .dependsOn(engineCore)
 
 lazy val windowedStreamingEngine = Project(id = "sj-windowed-streaming-engine",
-  base = file("./core/sj-windowed-streaming-engine")).enablePlugins(JavaAppPackaging)
+  base = file("./core/sj-windowed-streaming-engine"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 
 lazy val outputStreamingEngine = Project(id = "sj-output-streaming-engine",
-  base = file("./core/sj-output-streaming-engine")).enablePlugins(JavaAppPackaging)
+  base = file("./core/sj-output-streaming-engine"))
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjOutputEngineDependencies.value
@@ -95,7 +95,7 @@ lazy val outputStreamingEngine = Project(id = "sj-output-streaming-engine",
   .dependsOn(engineCore)
 
 lazy val framework = Project(id = "sj-mesos-framework",
-  base = file("./core/sj-mesos-framework")).enablePlugins(JavaAppPackaging)
+  base = file("./core/sj-mesos-framework"))
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjFrameworkDependencies.value
@@ -103,32 +103,32 @@ lazy val framework = Project(id = "sj-mesos-framework",
   .dependsOn(common)
 
 lazy val transactionGenerator = Project(id = "sj-transaction-generator",
-  base = file("./core/sj-transaction-generator")).enablePlugins(JavaAppPackaging)
+  base = file("./core/sj-transaction-generator"))
   .settings(commonSettings: _*)
   .dependsOn(common)
 
 lazy val stubInput = Project(id = "sj-stub-input-streaming",
-  base = file("./contrib/stubs/sj-stub-input-streaming")).enablePlugins(JavaAppPackaging)
+  base = file("./contrib/stubs/sj-stub-input-streaming"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 
 lazy val stubRegular = Project(id = "sj-stub-regular-streaming",
-  base = file("./contrib/stubs/sj-stub-regular-streaming")).enablePlugins(JavaAppPackaging)
+  base = file("./contrib/stubs/sj-stub-regular-streaming"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 
 lazy val stubOutput = Project(id = "sj-stub-output",
-  base = file("./contrib/stubs/sj-stub-output")).enablePlugins(JavaAppPackaging)
+  base = file("./contrib/stubs/sj-stub-output"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 
 lazy val pmOutput = Project(id = "sj-performance-metrics-output-es",
-  base = file("./contrib/sj-platform/sj-performance-metrics-output-es")).enablePlugins(JavaAppPackaging)
+  base = file("./contrib/sj-platform/sj-performance-metrics-output-es"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 
 lazy val sflowProcess = Project(id = "sj-sflow-process",
-  base = file("./contrib/examples/sflow/sj-sflow-process")).enablePlugins(JavaAppPackaging)
+  base = file("./contrib/examples/sflow/sj-sflow-process"))
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Dependencies.sjSflowProcessDependencies.value
@@ -136,21 +136,21 @@ lazy val sflowProcess = Project(id = "sj-sflow-process",
   .dependsOn(engineCore)
 
 lazy val sflowOutput = Project(id = "sj-sflow-output",
-  base = file("./contrib/examples/sflow/sj-sflow-output")).enablePlugins(JavaAppPackaging)
+  base = file("./contrib/examples/sflow/sj-sflow-output"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 
 lazy val psInput = Project(id = "ps-input",
-  base = file("./contrib/examples/pingstation/ps-input")).enablePlugins(JavaAppPackaging)
+  base = file("./contrib/examples/pingstation/ps-input"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 
 lazy val psProcess = Project(id = "ps-process",
-  base = file("./contrib/examples/pingstation/ps-process")).enablePlugins(JavaAppPackaging)
+  base = file("./contrib/examples/pingstation/ps-process"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 
 lazy val psOutput = Project(id = "ps-output",
-  base = file("./contrib/examples/pingstation/ps-output")).enablePlugins(JavaAppPackaging)
+  base = file("./contrib/examples/pingstation/ps-output"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
