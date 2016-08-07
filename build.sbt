@@ -13,6 +13,8 @@ val commonSettings = Seq(
   resolvers +=
     "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
 
+  resolvers += "Twitter Repository" at "http://maven.twttr.com",
+
   libraryDependencies ++= Seq(
     "com.bwsw" % "t-streams_2.11" % "1.0-SNAPSHOT"),
 
