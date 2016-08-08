@@ -19,6 +19,7 @@ RUN echo "deb http://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list
 
 # see .dockerignore in root dir
 COPY ./project /opt/bin/juggler/project
+COPY ./build.sbt /opt/bin/juggler/
 COPY ./core/sj-common /opt/bin/juggler/core/sj-common
 COPY ./core/sj-crud-rest /opt/bin/juggler/core/sj-crud-rest
 
