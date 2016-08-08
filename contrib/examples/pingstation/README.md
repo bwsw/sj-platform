@@ -6,9 +6,9 @@ Assuming that all components of the SJ infrastructure is deployed.
 
 At the beginning you should create streams that will be used in the instances of input, process and output modules by sending several post requests to 'http://rest-api-address/v1/streams' with the following content:
 
-1. [The content](https://github.com/bwsw/sj-platform/contrib/examples/pingstation/api-json/streams/echo-response.json)
+1. [The content](api-json/streams/echo-response.json)
 to create an output stream of input module (consequently, an input stream of process module) that will be used for keeping an IP and average time from ICMP echo response and also timestamp of the event
-2. [The content](https://github.com/bwsw/sj-platform/contrib/examples/pingstation/api-json/streams/unreachable-response.json)
+2. [The content](api-json/streams/unreachable-response.json)
 to create another output stream of input module (consequently, an input stream of process module) that will be used for keeping an IP from ICMP unreachable response and also timestamp of the event
 3. [The content](https://github.com/bwsw/sj-platform/contrib/examples/pingstation/api-json/streams/echo-response-1m.json)
 to create an output stream of process module (consequently, an input stream of output module) that will be used for keeping an aggregated information for each IP (by minute)
