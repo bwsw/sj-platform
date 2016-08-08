@@ -15,8 +15,8 @@ object StateHelper {
     val lastTxn = consumer.getLastTransaction(0).get
     var value = objectSerializer.deserialize(lastTxn.next())
     value match {
-      case variable: (String, Any) =>
-        initialState(variable._1) = variable._2
+      case variable: (Any, Any) =>
+        initialState(variable._1.asInstanceOf[String]) = variable._2
         fillFullState(initialState, lastTxn, objectSerializer)
       case _ =>
         val lastFullTxnUUID = Some(value.asInstanceOf[UUID])

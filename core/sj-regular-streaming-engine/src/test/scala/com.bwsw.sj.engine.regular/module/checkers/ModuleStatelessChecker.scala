@@ -14,6 +14,9 @@ object ModuleStatelessChecker extends App {
   val inputKafkaConsumer = createInputKafkaConsumer(streamService, partitions)
   val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(streamService, x.toString))
 
+  inputTstreamConsumers.foreach(x => x.start())
+  outputConsumers.foreach(x => x.start())
+
   var totalInputElements = 0
   var totalOutputElements = 0
 
@@ -62,6 +65,8 @@ object ModuleStatelessChecker extends App {
   assert(inputElements.forall(x => outputElements.contains(x)) && outputElements.forall(x => inputElements.contains(x)),
     "All txns elements that are consumed from output stream should equals all txns elements that are consumed from input stream")
 
+  inputTstreamConsumers.foreach(x => x.stop())
+  outputConsumers.foreach(x => x.stop())
   close()
   ConnectionRepository.close()
 

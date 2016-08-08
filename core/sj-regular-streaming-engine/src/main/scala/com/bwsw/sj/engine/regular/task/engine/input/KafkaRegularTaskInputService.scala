@@ -141,13 +141,15 @@ class KafkaRegularTaskInputService(manager: RegularTaskManager,
 
   private def seekKafkaConsumerOffsets(consumer: KafkaConsumer[Array[Byte], Array[Byte]]) = {
     val partition = 0
-    val partitionsRange = List(partition)
+    val partitionsRange = List(partition, partition)
 
     val offsetConsumer = manager.createConsumer(
       offsetStream,
       partitionsRange,
       Newest
     )
+
+    offsetConsumer.start()
 
     val lastTxn = offsetConsumer.getLastTransaction(partition)
 
@@ -156,6 +158,8 @@ class KafkaRegularTaskInputService(manager: RegularTaskManager,
       kafkaOffsetsStorage = objectSerializer.deserialize(lastTxn.get.next()).asInstanceOf[mutable.Map[(String, Int), Long]]
       kafkaOffsetsStorage.foreach(x => consumer.seek(new TopicPartition(x._1._1, x._1._2), x._2 + 1))
     }
+
+    offsetConsumer.stop()
   }
 
   private def chooseOffset() = {

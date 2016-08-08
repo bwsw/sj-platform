@@ -69,8 +69,8 @@ abstract class TaskManager() {
 
     setMetadataClusterProperties(tstreamService)
     setDataClusterProperties(tstreamService)
-    setCoordanationOptions(tstreamService)
-    setBindHost()
+    setCoordinationOptions(tstreamService)
+    setBindHostForAgents()
     setPersistentQueuePath()
   }
 
@@ -100,13 +100,14 @@ abstract class TaskManager() {
       .setProperty(TSF_Dictionary.Data.Cluster.ENDPOINTS, tStreamService.metadataProvider.hosts.mkString(","))
   }
 
-  private def setCoordanationOptions(tStreamService: TStreamService) = {
+  private def setCoordinationOptions(tStreamService: TStreamService) = {
     tstreamFactory.setProperty(TSF_Dictionary.Coordination.ROOT, s"/${tStreamService.lockNamespace}")
       .setProperty(TSF_Dictionary.Coordination.ENDPOINTS, tStreamService.lockProvider.hosts.mkString(","))
   }
 
-  private def setBindHost() = {
+  private def setBindHostForAgents() = {
     tstreamFactory.setProperty(TSF_Dictionary.Producer.BIND_HOST, agentsHost)
+    tstreamFactory.setProperty(TSF_Dictionary.Consumer.Subscriber.BIND_HOST, agentsHost)
   }
 
   private def setPersistentQueuePath() = {
@@ -124,17 +125,18 @@ abstract class TaskManager() {
 
     instance.outputs
       .map(x => (x, ConnectionRepository.getStreamService.get(x)))
-      .map(x => (x._1, createProducer(x._2))).toMap
+      .map(x => (x._1, createProducer(x._2.asInstanceOf[TStreamSjStream]))).toMap
   }
 
-  def createProducer(stream: SjStream) = {
+  def createProducer(stream: TStreamSjStream) = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create producer for stream: ${stream.name}\n")
 
     val timeUuidGenerator = EngineUtils.getUUIDGenerator(stream.asInstanceOf[TStreamSjStream])
 
-    tstreamFactory.setProperty(TSF_Dictionary.Stream.NAME, stream.name)
-    tstreamFactory.setProperty(TSF_Dictionary.Consumer.Subscriber.BIND_PORT, agentsPorts(currentPortNumber))
+    setStreamOptions(stream)
+
+    tstreamFactory.setProperty(TSF_Dictionary.Producer.BIND_PORT, agentsPorts(currentPortNumber))
 
     currentPortNumber += 1
 
@@ -143,6 +145,12 @@ abstract class TaskManager() {
       timeUuidGenerator,
       converter,
       (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
+  }
+
+  protected def setStreamOptions(stream: TStreamSjStream) = {
+    tstreamFactory.setProperty(TSF_Dictionary.Stream.NAME, stream.name)
+    tstreamFactory.setProperty(TSF_Dictionary.Stream.PARTITIONS, stream.partitions)
+    tstreamFactory.setProperty(TSF_Dictionary.Stream.DESCRIPTION, stream.description)
   }
 
 
@@ -229,16 +237,18 @@ abstract class TaskManager() {
    * @param callback Subscriber callback for t-stream consumer
    * @return T-stream subscribing consumer
    */
-  def createSubscribingConsumer(stream: SjStream,
+  def createSubscribingConsumer(stream: TStreamSjStream,
                                 partitions: List[Int],
                                 offset: IOffset,
                                 callback: Callback[Array[Byte]]) = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create subscribing consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
 
+    val partitionRange = (partitions.head to partitions.tail.head).toList
     val timeUuidGenerator = EngineUtils.getUUIDGenerator(stream.asInstanceOf[TStreamSjStream])
 
-    tstreamFactory.setProperty(TSF_Dictionary.Stream.NAME, stream.name)
+    setStreamOptions(stream)
+
     tstreamFactory.setProperty(TSF_Dictionary.Consumer.Subscriber.BIND_PORT, agentsPorts(currentPortNumber))
 
     currentPortNumber += 1
@@ -247,7 +257,7 @@ abstract class TaskManager() {
       "subscribing_consumer_for_" + taskName + "_" + stream.name,
       timeUuidGenerator,
       converter,
-      partitions,
+      partitionRange,
       callback,
       offset)
   }

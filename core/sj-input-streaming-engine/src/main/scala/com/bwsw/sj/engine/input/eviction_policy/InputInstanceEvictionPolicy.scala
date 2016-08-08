@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
  * @author Kseniya Mikhaleva
  */
 
-abstract class EvictionPolicy(instance: InputInstance) {
+abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
   protected val logger = LoggerFactory.getLogger(this.getClass)
   private val hazelcastMapName = "inputEngine"
   private val config = createHazelcastConfig()

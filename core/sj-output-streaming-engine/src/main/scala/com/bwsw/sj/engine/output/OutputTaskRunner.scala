@@ -8,7 +8,7 @@ import java.util.{Calendar, UUID}
 import com.bwsw.common.traits.Serializer
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
-import com.bwsw.sj.common.DAL.model.{ESService, FileMetadata, SjStream}
+import com.bwsw.sj.common.DAL.model.{TStreamSjStream, ESService, FileMetadata, SjStream}
 import com.bwsw.sj.engine.core.entities.{EsEntity, OutputEntity, OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
 import com.bwsw.sj.engine.core.utils.EngineUtils._
@@ -58,7 +58,7 @@ object OutputTaskRunner {
     val callback = new OutputSubscriberCallback(blockingQueue)
 
     val subscribeConsumer = taskManager.createSubscribingConsumer(
-      inputStream,
+      inputStream.asInstanceOf[TStreamSjStream],
       taskPartitions.toList,
       chooseOffset(instance.startFrom),
       callback

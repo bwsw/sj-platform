@@ -2,6 +2,7 @@ package com.bwsw.sj.engine.regular.task.engine.input
 
 import java.util.Date
 
+import com.bwsw.sj.common.DAL.model.TStreamSjStream
 import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.engine.core.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
@@ -60,7 +61,7 @@ class TStreamRegularTaskInputService(manager: RegularTaskManager,
     val callback = new RegularConsumerCallback[Array[Byte]](blockingQueue)
 
     val consumers = inputs.filter(x => x._1.streamType == StreamConstants.tStreamType).map({
-      x => manager.createSubscribingConsumer(x._1, x._2.toList, chooseOffset(offset), callback)
+      x => manager.createSubscribingConsumer(x._1.asInstanceOf[TStreamSjStream], x._2.toList, chooseOffset(offset), callback)
     }).map(x => (x.name, x)).toMap
     logger.debug(s"Task: ${manager.taskName}. Creation of subscribing consumers is finished\n")
 
