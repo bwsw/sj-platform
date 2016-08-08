@@ -51,148 +51,17 @@ abstract class TaskManager() {
   lazy val outputProducers = createOutputProducers()
   val reportStream = getReportStream()
 
-  /**
-   * Returns class loader for retrieving classes from jar
-   *
-   * @param pathToJar Absolute path to jar file
-   * @return Class loader for retrieving classes from jar
-   */
-  protected def getClassLoader(pathToJar: String) = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get class loader for class: $pathToJar\n")
-    val classLoaderUrls = Array(new File(pathToJar).toURI.toURL)
+  private def getAuxiliaryTStream() = {
+    val streams = if (instance.inputs != null) {
+      instance.outputs.union(instance.inputs.map(x => x.takeWhile(y => y != '/')))
+    } else instance.outputs
+    val sjStream = streams.map(s => streamDAO.get(s)).filter(s => s.streamType.equals(tStreamType)).head
 
-    new URLClassLoader(classLoaderUrls)
+    sjStream
   }
 
-  protected def getModuleJar: File = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '${instance.moduleName}' module jar\n")
-    storage.get(fileMetadata.filename, s"tmp/${instance.moduleName}")
-  }
-
-  def createProducer(stream: SjStream) = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-      s"Create producer for stream: ${stream.name}\n")
-
-    val timeUuidGenerator = EngineUtils.getUUIDGenerator(stream.asInstanceOf[TStreamSjStream])
-
-    tstreamFactory.setProperty(TSF_Dictionary.Stream.NAME, stream.name)
-    tstreamFactory.setProperty(TSF_Dictionary.Consumer.Subscriber.BIND_PORT, agentsPorts(currentPortNumber))
-
-    currentPortNumber += 1
-
-    tstreamFactory.getProducer[Array[Byte]](
-      "producer_for_" + taskName + "_" + stream.name,
-      timeUuidGenerator,
-      converter,
-      (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
-  }
-
-  /**
-   * Creates a t-stream consumer with pub/sub property
-   *
-   * @param stream SjStream from which massages are consumed
-   * @param partitions Range of stream partition
-   * @param offset Offset policy that describes where a consumer starts
-   * @param callback Subscriber callback for t-stream consumer
-   * @return T-stream subscribing consumer
-   */
-  def createSubscribingConsumer(stream: SjStream,
-                                partitions: List[Int],
-                                offset: IOffset,
-                                callback: Callback[Array[Byte]]) = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-      s"Create subscribing consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
-
-    val timeUuidGenerator = EngineUtils.getUUIDGenerator(stream.asInstanceOf[TStreamSjStream])
-
-    tstreamFactory.setProperty(TSF_Dictionary.Stream.NAME, stream.name)
-    tstreamFactory.setProperty(TSF_Dictionary.Consumer.Subscriber.BIND_PORT, agentsPorts(currentPortNumber))
-
-    currentPortNumber += 1
-
-    tstreamFactory.getSubscriber[Array[Byte]](
-      "subscribing_consumer_for_" + taskName + "_" + stream.name,
-      timeUuidGenerator,
-      converter,
-      partitions,
-      callback,
-      offset)
-  }
-
-  /**
-   * Create t-stream producers for each output stream
-   *
-   * @return Map where key is stream name and value is t-stream producer
-   */
-  private def createOutputProducers() = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-      s"Create the t-stream producers for each output stream\n")
-
-    instance.outputs
-      .map(x => (x, ConnectionRepository.getStreamService.get(x)))
-      .map(x => (x._1, createProducer(x._2))).toMap
-  }
-
-  /**
-   * Creates a SjStream to keep the reports of module performance.
-   * For each task there is specific partition (task number = partition number).
-   *
-   * @return SjStream used for keeping the reports of module performance
-   */
-  private def getReportStream(): TStreamSjStream = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-      s"Get stream for performance metrics\n")
-    val tags = Array("report", "performance")
-    val description = "store reports of performance metrics"
-    val partitions = instance.parallelism
-
-    createTStreamOnCluster(reportStreamName, description, partitions)
-
-    getSjStream(
-      reportStreamName,
-      description,
-      tags,
-      partitions
-    )
-  }
-
-  def getSjStream(name: String, description: String, tags: Array[String], partitions: Int) = {
-    new TStreamSjStream(
-      name,
-      description,
-      partitions,
-      auxiliaryTStreamService,
-      tStreamType,
-      tags,
-      new Generator("local")
-    )
-  }
-
-  def createTStreamOnCluster(name: String, description: String, partitions: Int): Unit = {
-    val streamTTL = tstreamFactory.getProperty(TSF_Dictionary.Stream.TTL).asInstanceOf[Int]
-    tstreamFactory.setProperty(TSF_Dictionary.Stream.NAME, auxiliarySJTStream.name)
-    val auxiliaryTStream = tstreamFactory.getStream()
-    val metadataStorage = auxiliaryTStream.metadataStorage
-    val dataStorage = auxiliaryTStream.dataStorage
-
-    if (!BasicStreamService.isExist(name, metadataStorage)) {
-      logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-        s"Create t-stream: $name to $description\n")
-      BasicStreamService.createStream(
-        name,
-        partitions,
-        streamTTL,
-        description,
-        metadataStorage,
-        dataStorage
-      )
-    }
-  }
-
-  def getInstance: Instance = {
-    logger.info(s"Task name: $taskName. Get instance\n")
-
-    instance
+  private def getAuxiliaryTStreamService() = {
+    auxiliarySJTStream.service.asInstanceOf[TStreamService]
   }
 
   private def setTStreamFactoryProperties() = {
@@ -244,17 +113,149 @@ abstract class TaskManager() {
     tstreamFactory.setProperty(TSF_Dictionary.Consumer.Subscriber.PERSISTENT_QUEUE_PATH, "/tmp/" + persistentQueuePath)
   }
 
-  private def getAuxiliaryTStreamService() = {
-    auxiliarySJTStream.service.asInstanceOf[TStreamService]
+  /**
+   * Create t-stream producers for each output stream
+   *
+   * @return Map where key is stream name and value is t-stream producer
+   */
+  private def createOutputProducers() = {
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
+      s"Create the t-stream producers for each output stream\n")
+
+    instance.outputs
+      .map(x => (x, ConnectionRepository.getStreamService.get(x)))
+      .map(x => (x._1, createProducer(x._2))).toMap
   }
 
-  private def getAuxiliaryTStream() = {
-    val streams = if (instance.inputs != null) {
-      instance.outputs.union(instance.inputs.map(x => x.takeWhile(y => y != '/')))
-    } else instance.outputs
-    val sjStream = streams.map(s => streamDAO.get(s)).filter(s => s.streamType.equals(tStreamType)).head
+  def createProducer(stream: SjStream) = {
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
+      s"Create producer for stream: ${stream.name}\n")
 
-    sjStream
+    val timeUuidGenerator = EngineUtils.getUUIDGenerator(stream.asInstanceOf[TStreamSjStream])
+
+    tstreamFactory.setProperty(TSF_Dictionary.Stream.NAME, stream.name)
+    tstreamFactory.setProperty(TSF_Dictionary.Consumer.Subscriber.BIND_PORT, agentsPorts(currentPortNumber))
+
+    currentPortNumber += 1
+
+    tstreamFactory.getProducer[Array[Byte]](
+      "producer_for_" + taskName + "_" + stream.name,
+      timeUuidGenerator,
+      converter,
+      (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
+  }
+
+
+  /**
+   * Creates a SjStream to keep the reports of module performance.
+   * For each task there is specific partition (task number = partition number).
+   *
+   * @return SjStream used for keeping the reports of module performance
+   */
+  private def getReportStream(): TStreamSjStream = {
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
+      s"Get stream for performance metrics\n")
+    val tags = Array("report", "performance")
+    val description = "store reports of performance metrics"
+    val partitions = instance.parallelism
+
+    createTStreamOnCluster(reportStreamName, description, partitions)
+
+    getSjStream(
+      reportStreamName,
+      description,
+      tags,
+      partitions
+    )
+  }
+
+  def createTStreamOnCluster(name: String, description: String, partitions: Int): Unit = {
+    val streamTTL = tstreamFactory.getProperty(TSF_Dictionary.Stream.TTL).asInstanceOf[Int]
+    tstreamFactory.setProperty(TSF_Dictionary.Stream.NAME, auxiliarySJTStream.name)
+    val auxiliaryTStream = tstreamFactory.getStream()
+    val metadataStorage = auxiliaryTStream.metadataStorage
+    val dataStorage = auxiliaryTStream.dataStorage
+
+    if (!BasicStreamService.isExist(name, metadataStorage)) {
+      logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
+        s"Create t-stream: $name to $description\n")
+      BasicStreamService.createStream(
+        name,
+        partitions,
+        streamTTL,
+        description,
+        metadataStorage,
+        dataStorage
+      )
+    }
+  }
+
+  def getSjStream(name: String, description: String, tags: Array[String], partitions: Int) = {
+    new TStreamSjStream(
+      name,
+      description,
+      partitions,
+      auxiliaryTStreamService,
+      tStreamType,
+      tags,
+      new Generator("local")
+    )
+  }
+
+  /**
+   * Returns class loader for retrieving classes from jar
+   *
+   * @param pathToJar Absolute path to jar file
+   * @return Class loader for retrieving classes from jar
+   */
+  protected def getClassLoader(pathToJar: String) = {
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get class loader for class: $pathToJar\n")
+    val classLoaderUrls = Array(new File(pathToJar).toURI.toURL)
+
+    new URLClassLoader(classLoaderUrls)
+  }
+
+  protected def getModuleJar: File = {
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '${instance.moduleName}' module jar\n")
+    storage.get(fileMetadata.filename, s"tmp/${instance.moduleName}")
+  }
+
+  /**
+   * Creates a t-stream consumer with pub/sub property
+   *
+   * @param stream SjStream from which massages are consumed
+   * @param partitions Range of stream partition
+   * @param offset Offset policy that describes where a consumer starts
+   * @param callback Subscriber callback for t-stream consumer
+   * @return T-stream subscribing consumer
+   */
+  def createSubscribingConsumer(stream: SjStream,
+                                partitions: List[Int],
+                                offset: IOffset,
+                                callback: Callback[Array[Byte]]) = {
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
+      s"Create subscribing consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
+
+    val timeUuidGenerator = EngineUtils.getUUIDGenerator(stream.asInstanceOf[TStreamSjStream])
+
+    tstreamFactory.setProperty(TSF_Dictionary.Stream.NAME, stream.name)
+    tstreamFactory.setProperty(TSF_Dictionary.Consumer.Subscriber.BIND_PORT, agentsPorts(currentPortNumber))
+
+    currentPortNumber += 1
+
+    tstreamFactory.getSubscriber[Array[Byte]](
+      "subscribing_consumer_for_" + taskName + "_" + stream.name,
+      timeUuidGenerator,
+      converter,
+      partitions,
+      callback,
+      offset)
+  }
+
+  def getInstance: Instance = {
+    logger.info(s"Task name: $taskName. Get instance\n")
+
+    instance
   }
 
   /**
