@@ -1,6 +1,18 @@
 # Ping Station Demo
 
-Assuming that all components of the SJ infrastructure is deployed.
+![](FPingDemo.png)
+
+There is a diagram that demonstrates the processing workflow of demo
+that is responsible for collecting of aggregated information on accessibility of nodes.
+Green, yellow and purple blocks are executed with SJ-Platform
+and it is ps-input module, ps-process module and ps-output module respectively.
+As you can see, the data come in input module through pipeline of fping and netcat.
+Then the input module parses ICMP echo responses (select IP and response time)
+and ICMP unreachable responses (select only IP)
+and puts parsed data into echo-response stream and unreachable-response stream respectively.
+After that the process module aggregates response time and total amount of echo/unreachable responses by IP by 1 minute
+and sends aggregated data to echo-response-1m.
+And finally the output module just displace aggregated data from echo-response-1m to Elasticsearch.
 
 ## Table of contents
 
@@ -9,12 +21,26 @@ Assuming that all components of the SJ infrastructure is deployed.
 - [Launching](#launching)
     * [Customization](#customization)
 - [Shutdown](#shutdown)
+- [See the Results](#see-the-results)
 
 ## Installation
 
+You should follow these steps to build and upload the all of modules of ping station demo:
+
+```bash
+$ git clone https://github.com/bwsw/pingstation.git
+$ cd pingstation
+$ sbt ps-input/assembly
+$ curl --form jar=@ps-input/target/scala-2.11/ps-input-1.0.jar http://host:port/v1/modules
+$ sbt ps-process/assembly
+$ curl --form jar=@ps-process/target/scala-2.11/ps-process-1.0.jar http://host:port/v1/modules
+$ sbt ps-output/assembly
+$ curl --form jar=@ps-output/target/scala-2.11/ps-output-1.0.jar http://host:port/v1/modules
+```
+
 ## Preparation
 
-At the beginning you should create streams that will be used in the instances of input, process and output modules by sending several post requests:
+After loading the modules you should create streams that will be used in the instances of input, process and output modules by sending several post requests:
 
 1. To create an output stream of input module (consequently, an input stream of process module) that will be used for keeping an IP and average time from ICMP echo response and also timestamp of the event
 ```bash
@@ -89,15 +115,15 @@ fping -l -g 91.221.60.0/23 2>&1 | nc 176.120.25.19 31000
 
 ### Customization
 
-If you want to change an aggregation interval:
+If you want to change an aggregation interval you can follow these steps:
 
 1. Create two additional streams like 'echo-response-1m' and 'es-echo-response-1m'
 (e.g. ['echo-response-3m'](api-json/streams/echo-response-3m.json) and
 ['es-echo-response-3m'](api-json/streams/es-echo-response-3m.json))
 2. Create an instance of process module only changing the 'checkpoint-interval' at the corresponding time (in milliseconds)
 
-After that you can launch this instance as described above in the second point of launching section
-(don't forget to change the instance name: 'pingstation-process' -> <new instance name> in the request line
+After that, you can launch this instance as described above in the second point of launching section
+(don't forget to change the instance name: 'pingstation-process' in the request line
 ```bash
 $ curl --request GET "http://host:port/v1/modules/regular-streaming/pingstation-process/0.1/instance/<new instance name>/start"
 ```
@@ -119,3 +145,7 @@ $ curl --request GET "http://host:port/v1/modules/regular-streaming/pingstation-
 ```bash
 $ curl --request GET "http://host:port/v1/modules/output-streaming/pingstation-output/0.1/instance/pingstation-output/start"
 ```
+
+## See the Results
+
+To see the results of processing containing in ElasticSearch go to the [Kibana](http://176.120.25.19/).
