@@ -9,10 +9,10 @@ and it is ps-input module, ps-process module and ps-output module respectively.
 As you can see, the data come in input module through pipeline of fping and netcat.
 Then the input module parses ICMP echo responses (select IP and response time)
 and ICMP unreachable responses (select only IP)
-and puts parsed data into echo-response stream and unreachable-response stream respectively.
+and puts parsed data into 'echo-response' stream and 'unreachable-response' stream respectively.
 After that the process module aggregates response time and total amount of echo/unreachable responses by IP by 1 minute
-and sends aggregated data to echo-response-1m.
-And finally the output module just displace aggregated data from echo-response-1m to Elasticsearch.
+and sends aggregated data to 'echo-response-1m' stream.
+And finally the output module just displace aggregated data from 'echo-response-1m' to Elasticsearch.
 
 ## Table of contents
 
