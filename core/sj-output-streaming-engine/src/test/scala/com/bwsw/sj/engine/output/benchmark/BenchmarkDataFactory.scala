@@ -336,7 +336,7 @@ object BenchmarkDataFactory {
     instance.name = instanceName
     instance.moduleType = "output-streaming"
     instance.moduleName = "com.bwsw.stub.output-bench-test"
-    instance.moduleVersion = "0.1"
+    instance.moduleVersion = "1.0"
     instance.status = "started"
     instance.description = "some description of test instance"
     instance.inputs = Array(tStreamName)
@@ -350,7 +350,7 @@ object BenchmarkDataFactory {
     instance.perTaskRam = 64
     instance.performanceReportingInterval = 10000
     instance.executionPlan = executionPlan
-    instance.engine = "com.bwsw.output.streaming.engine-0.1"
+    instance.engine = "com.bwsw.output.streaming.engine-1.0"
     instance.coordinationService = serviceManager.get(zkServiceName).asInstanceOf[ZKService]
 
     instanceService.save(instance)

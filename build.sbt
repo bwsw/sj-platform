@@ -43,8 +43,7 @@ lazy val root = (project in file(".")) aggregate(common,
   framework, transactionGenerator,
   stubInput, stubRegular, stubOutput,
   pmOutput,
-  sflowProcess, sflowOutput,
-  psInput, psProcess, psOutput
+  sflowProcess, sflowOutput
   )
 
 lazy val common = Project(id = "sj-common",
@@ -139,20 +138,5 @@ lazy val sflowProcess = Project(id = "sj-sflow-process",
 
 lazy val sflowOutput = Project(id = "sj-sflow-output",
   base = file("./contrib/examples/sflow/sj-sflow-output"))
-  .settings(commonSettings: _*)
-  .dependsOn(engineCore)
-
-lazy val psInput = Project(id = "ps-input",
-  base = file("./contrib/examples/pingstation/ps-input"))
-  .settings(commonSettings: _*)
-  .dependsOn(engineCore)
-
-lazy val psProcess = Project(id = "ps-process",
-  base = file("./contrib/examples/pingstation/ps-process"))
-  .settings(commonSettings: _*)
-  .dependsOn(engineCore)
-
-lazy val psOutput = Project(id = "ps-output",
-  base = file("./contrib/examples/pingstation/ps-output"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)

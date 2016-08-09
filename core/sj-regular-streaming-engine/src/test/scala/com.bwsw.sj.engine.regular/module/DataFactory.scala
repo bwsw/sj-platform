@@ -289,7 +289,7 @@ object DataFactory {
     instance.name = instanceName
     instance.moduleType = "regular-streaming"
     instance.moduleName = "regular-streaming-stub"
-    instance.moduleVersion = "0.1"
+    instance.moduleVersion = "1.0"
     instance.status = "started"
     instance.description = "some description of test instance"
     instance.inputs = instanceInputs
@@ -305,7 +305,7 @@ object DataFactory {
     instance.perTaskRam = 64
     instance.performanceReportingInterval = 10000
     instance.executionPlan = new ExecutionPlan(Map((instanceName + "-task0", task), (instanceName + "-task1", task)).asJava)
-    instance.engine = "com.bwsw.regular.streaming.engine-0.1"
+    instance.engine = "com.bwsw.regular.streaming.engine-1.0"
     instance.eventWaitTime = 10
     instance.coordinationService = serviceManager.get("zookeeper-test-service").asInstanceOf[ZKService]
 

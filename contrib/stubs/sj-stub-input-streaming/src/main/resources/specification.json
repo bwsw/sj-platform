@@ -1,7 +1,7 @@
 {
   "name": "input-streaming-stub",
   "description": "Stub module by BW",
-  "version": "0.1",
+  "version": "1.0",
   "author": "Ksenia Mikhaleva",
   "license": "Apache 2.0",
   "inputs": {
@@ -24,7 +24,7 @@
   },
   "module-type": "input-streaming",
   "engine-name": "com.bwsw.input.streaming.engine",
-  "engine-version": "0.1",
+  "engine-version": "1.0",
   "options": {
     "opt": 1
   },

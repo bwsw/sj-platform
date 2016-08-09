@@ -178,7 +178,7 @@ object DataFactory {
     instance.name = instanceName
     instance.moduleType = "input-streaming"
     instance.moduleName = "input-streaming-stub"
-    instance.moduleVersion = "0.1"
+    instance.moduleVersion = "1.0"
     instance.status = "ready"
     instance.description = "some description of test instance"
     instance.outputs = instanceOutputs
@@ -189,7 +189,7 @@ object DataFactory {
     instance.perTaskCores = 0.1
     instance.perTaskRam = 64
     instance.performanceReportingInterval = 10000
-    instance.engine = "com.bwsw.input.streaming.engine-0.1"
+    instance.engine = "com.bwsw.input.streaming.engine-1.0"
     instance.coordinationService = serviceManager.get("zookeeper-test-service").asInstanceOf[ZKService]
     instance.duplicateCheck = false
     instance.lookupHistory = 100
