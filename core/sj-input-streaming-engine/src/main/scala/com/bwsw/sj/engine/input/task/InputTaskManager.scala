@@ -15,7 +15,7 @@ import com.bwsw.sj.engine.core.managment.TaskManager
 class InputTaskManager() extends TaskManager {
 
   val inputInstance = instance.asInstanceOf[InputInstance]
-  val entryPort = inputInstance.tasks.get(taskName).port
+  val entryPort = System.getProperty("ENTRY_PORT", inputInstance.tasks.get(taskName).port.toString).toInt
 
   assert(agentsPorts.length >=
     (instance.outputs.length + 1),

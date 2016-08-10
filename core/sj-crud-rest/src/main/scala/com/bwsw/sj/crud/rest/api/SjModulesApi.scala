@@ -405,7 +405,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                    moduleVersion: String,
                    engineName: String,
                    engineVersion: String) = {
-    instance.engine = engineName + "-" + engineVersion //todo: maybe spaces/commons or some special characters from name/version need to remove
+    instance.engine = engineName + "-" + engineVersion
     instance.moduleName = moduleName
     instance.moduleVersion = moduleVersion
     instance.moduleType = moduleType

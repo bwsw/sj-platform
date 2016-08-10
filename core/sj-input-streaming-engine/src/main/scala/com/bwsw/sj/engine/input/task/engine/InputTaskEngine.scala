@@ -36,7 +36,6 @@ abstract class InputTaskEngine(manager: InputTaskManager,
 
   protected val currentThread = Thread.currentThread()
   protected val logger = LoggerFactory.getLogger(this.getClass)
-  protected val serializer = new JsonSerializer()
   protected val producers: Map[String, Producer[Array[Byte]]] = manager.outputProducers
   protected val streams = producers.keySet
   protected var txnsByStreamPartitions = createTxnsStorage(streams)
@@ -274,6 +273,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
    * @return Manager of environment of input streaming module
    */
   private def createModuleEnvironmentManager() = {
+    val serializer = new JsonSerializer()
     val taggedOutputs = inputInstance.outputs
       .map(ConnectionRepository.getStreamService.get)
       .filter(_.tags != null)

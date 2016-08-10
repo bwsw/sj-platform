@@ -32,7 +32,7 @@ class RegularTaskEngineFactory(manager: RegularTaskManager,
    * Creates RegularTaskEngine is in charge of a basic execution logic of task of regular module
    * @return Engine of input task
    */
-  def createInputTaskEngine(): RegularTaskEngine = {
+  def createRegularTaskEngine(): RegularTaskEngine = {
     inputInstanceMetadata.checkpointMode match {
       case "time-interval" =>
         logger.info(s"Task: ${manager.taskName}. Regular module has a 'time-interval' checkpoint mode, create an appropriate task engine\n")

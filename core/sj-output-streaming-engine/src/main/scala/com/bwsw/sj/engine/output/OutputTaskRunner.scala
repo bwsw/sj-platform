@@ -73,8 +73,6 @@ object OutputTaskRunner {
     val entity: OutputEntity = taskManager.getOutputModuleEntity(moduleJar, moduleMetadata.specification.entityClass)
 
     val performanceMetrics = new OutputStreamingPerformanceMetrics(taskManager)
-
-    logger.debug(s"Task: ${OutputDataFactory.taskName}. Launch a new thread to report performance metrics \n")
     executorService.submit(performanceMetrics)
 
     logger.info(s"Task: ${OutputDataFactory.taskName}. Preparing finished. Launch task.")
@@ -97,7 +95,7 @@ object OutputTaskRunner {
 
   def createThreadFactory() = {
     new ThreadFactoryBuilder()
-      .setNameFormat("RegularTaskRunner-%d")
+      .setNameFormat("OutputTaskRunner-%d")
       .build()
   }
   /**

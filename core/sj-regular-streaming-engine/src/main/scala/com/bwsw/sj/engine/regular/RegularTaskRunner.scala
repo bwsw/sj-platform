@@ -38,7 +38,7 @@ object RegularTaskRunner {
 
       val regularTaskEngineFactory = new RegularTaskEngineFactory(manager, performanceMetrics, blockingQueue)
 
-      val regularTaskEngine: RegularTaskEngine = regularTaskEngineFactory.createInputTaskEngine()
+      val regularTaskEngine: RegularTaskEngine = regularTaskEngineFactory.createRegularTaskEngine()
 
       val regularTaskInputService: RegularTaskInputService = regularTaskEngine.regularTaskInputService
 
