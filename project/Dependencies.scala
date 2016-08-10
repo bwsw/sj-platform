@@ -27,13 +27,13 @@ object Dependencies {
   ))
 
   lazy val sjRegularEngineDependencies = Def.setting(Seq(
-    "org.apache.kafka" % "kafka_2.11" % "0.9.0.1",
+    ("org.apache.kafka" % "kafka_2.11" % "0.9.0.1")
+      .exclude("org.slf4j", "slf4j-log4j12"),
     "net.openhft" % "chronicle-queue" % "4.2.6"
   ))
 
   lazy val sjOutputEngineDependencies = Def.setting(Seq(
-    "org.elasticsearch" % "elasticsearch" % "2.3.2",
-    "org.slf4j" % "slf4j-simple" % "1.7.21"
+    "org.elasticsearch" % "elasticsearch" % "2.3.2"
   ))
 
   lazy val sjFrameworkDependencies = Def.setting(Seq(

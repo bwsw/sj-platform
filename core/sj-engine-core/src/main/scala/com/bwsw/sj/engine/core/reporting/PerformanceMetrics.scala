@@ -6,12 +6,13 @@ package com.bwsw.sj.engine.core.reporting
  * @author Kseniya Mikhaleva
  */
 
-import java.util.concurrent.{Callable, TimeUnit}
 import java.util.concurrent.locks.ReentrantLock
+import java.util.concurrent.{Callable, TimeUnit}
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
+import com.bwsw.sj.common.DAL.model.TStreamSjStream
 import com.bwsw.sj.engine.core.managment.TaskManager
-import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Transaction}
+import com.bwsw.tstreams.agents.producer.NewTransactionProducerPolicy
 import org.slf4j.LoggerFactory
 
 import scala.collection._
@@ -22,22 +23,59 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
   protected val currentThread = Thread.currentThread()
   protected val logger = LoggerFactory.getLogger(this.getClass)
   protected val mutex: ReentrantLock = new ReentrantLock(true)
-  protected val serializer = new JsonSerializer()
+  protected val reportSerializer = new JsonSerializer()
   protected val startTime = System.currentTimeMillis()
   protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Int]]]
   protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Int]]]
   protected val taskName = manager.taskName
-  protected val reportingInterval = manager.getInstance.performanceReportingInterval
+  private val reportingInterval = manager.getInstance.performanceReportingInterval
   protected val instance = manager.getInstance
-  protected val performanceReport = new PerformanceMetricsMetadata()
+  protected val report = new PerformanceMetricsMetadata()
+  private val reportStreamName = instance.name + "_report"
+  private val reportStream = getReportStream()
+  private val reportProducer = createReportProducer()
 
   fillStaticPerformanceMetrics()
 
   /**
-   * Constructs a report of performance metrics of task's work
-   * @return Constructed performance report
+   * Creates a SjStream to keep the reports of module performance.
+   * For each task there is specific partition (task number = partition number).
+   *
+   * @return SjStream used for keeping the reports of module performance
    */
-  def getReport(): String
+  private def getReportStream(): TStreamSjStream = {
+    logger.debug(s"Task name: $taskName. " +
+      s"Get stream for performance metrics\n")
+    val tags = Array("report", "performance")
+    val description = "store reports of performance metrics"
+    val partitions = instance.parallelism
+
+    manager.createTStreamOnCluster(reportStreamName, description, partitions)
+
+    manager.getSjStream(
+      reportStreamName,
+      description,
+      tags,
+      partitions
+    )
+  }
+
+  /**
+   * Create t-stream producer for stream for reporting
+   * @return Producer for reporting performance metrics
+   */
+  private def createReportProducer() = {
+    logger.debug(s"Task: $taskName. Start creating a t-stream producer to record performance reports\n")
+    val reportProducer = manager.createProducer(reportStream)
+    logger.debug(s"Task: $taskName. Creation of t-stream producer is finished\n")
+
+    reportProducer
+  }
+
+  private def fillStaticPerformanceMetrics() = {
+    report.taskId = taskName
+    report.host = manager.agentsHost
+  }
 
   /**
    * It's in charge of cleaning a report of performance metrics for next time
@@ -88,44 +126,35 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
    * It is in charge of running of input module
    */
   override def call() = {
-
-    val reportProducer = createReportProducer()
     logger.debug(s"Task: $taskName. Launch a new thread to report performance metrics \n")
-    val objectSerializer = new ObjectSerializer()
     val currentThread = Thread.currentThread()
     currentThread.setName(s"report-task-$taskName")
 
-    val taskNumber = taskName.replace(s"${manager.instanceName}-task", "").toInt
-    var report: String = null
-    var reportTxn: Transaction[Array[Byte]] = null
     while (true) {
       logger.info(s"Task: $taskName. Wait $reportingInterval ms to report performance metrics\n")
       TimeUnit.MILLISECONDS.sleep(reportingInterval)
-      report = getReport()
-      println(s"Performance metrics: $report \n")
+      val report = getReport()
       logger.info(s"Task: $taskName. Performance metrics: $report \n")
-      logger.debug(s"Task: $taskName. Create a new txn for sending performance metrics\n")
-      reportTxn = reportProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened, taskNumber)
-      logger.debug(s"Task: $taskName. Send performance metrics\n")
-      reportTxn.send(objectSerializer.serialize(report))
+      sendReport(report)
       logger.debug(s"Task: $taskName. Do checkpoint of producer for performance reporting\n")
       reportProducer.checkpoint()
     }
   }
 
   /**
-   * Create t-stream producer for stream for reporting
-   * @return Producer for reporting performance metrics
+   * Constructs a report of performance metrics of task's work
+   * @return Constructed performance report
    */
-  private def createReportProducer() = {
-    logger.debug(s"Task: $taskName. Start creating a t-stream producer to record performance reports\n")
-    val reportStream = manager.reportStream
-    val reportProducer = manager.createProducer(reportStream)
-    logger.debug(s"Task: $taskName. Creation of t-stream producer is finished\n")
+  def getReport(): String
 
-    reportProducer
+  private def sendReport(report: String) = {
+    val reportSerializerForTxn = new ObjectSerializer()
+    val taskNumber = taskName.replace(s"${manager.instanceName}-task", "").toInt
+    logger.debug(s"Task: $taskName. Create a new txn for sending performance metrics\n")
+    val reportTxn = reportProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened, taskNumber)
+    logger.debug(s"Task: $taskName. Send performance metrics\n")
+    reportTxn.send(reportSerializerForTxn.serialize(report))
   }
-
 
   protected def createStorageForInputEnvelopes(inputStreamNames: Array[String]) = {
     mutable.Map(inputStreamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
@@ -134,10 +163,4 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
   protected def createStorageForOutputEnvelopes(outputStreamNames: Array[String]) = {
     mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
   }
-
-  private def fillStaticPerformanceMetrics() = {
-    performanceReport.taskId = taskName
-    performanceReport.host = manager.agentsHost
-  }
-
 }

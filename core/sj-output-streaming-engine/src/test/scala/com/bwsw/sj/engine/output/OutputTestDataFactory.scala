@@ -9,6 +9,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.tstreams.agents.producer.DataInsertType.BatchInsert
 import com.bwsw.tstreams.agents.producer._
+import com.bwsw.tstreams.common.CassandraConnectorConf
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.producer.transport.impl.TcpTransport
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorage, AerospikeStorageOptions, AerospikeStorageFactory}
@@ -32,11 +33,11 @@ object OutputTestDataFactory {
   val inputStreamService = stream.service.asInstanceOf[TStreamService]
 
   private val metadataStorageFactory = new MetadataStorageFactory
-  private val metadataStorageHosts = inputStreamService.metadataProvider.hosts.map { addr =>
+  private val cassandraConnectorConf = CassandraConnectorConf.apply(inputStreamService.metadataProvider.hosts.map { addr =>
     val parts = addr.split(":")
     new InetSocketAddress(parts(0), parts(1).toInt)
-  }.toList
-  val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(metadataStorageHosts, inputStreamService.metadataNamespace)
+  }.toSet)
+  val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(cassandraConnectorConf, inputStreamService.metadataNamespace)
 
   private val dataStorageFactory = new AerospikeStorageFactory
   private val dataStorageHosts = inputStreamService.dataProvider.hosts.map { addr =>

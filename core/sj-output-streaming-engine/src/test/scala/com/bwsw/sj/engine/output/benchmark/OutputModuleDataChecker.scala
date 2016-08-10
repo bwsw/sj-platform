@@ -7,6 +7,7 @@ import com.bwsw.sj.common.DAL.model.{TStreamService, SjStream, TStreamSjStream, 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.engine.output.benchmark.BenchmarkDataFactory._
+import com.bwsw.tstreams.common.CassandraConnectorConf
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorage, AerospikeStorageOptions, AerospikeStorageFactory}
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import org.elasticsearch.action.search.SearchResponse
@@ -26,11 +27,11 @@ object OutputModuleDataChecker extends App {
 
   val tStreamService = tStream.service.asInstanceOf[TStreamService]
   val metadataStorageFactory = new MetadataStorageFactory
-  val metadataStorageHosts = tStreamService.metadataProvider.hosts.map { addr =>
+  val cassandraConnectorConf = CassandraConnectorConf.apply(tStreamService.metadataProvider.hosts.map { addr =>
     val parts = addr.split(":")
     new InetSocketAddress(parts(0), parts(1).toInt)
-  }.toList
-  val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(metadataStorageHosts, tStreamService.metadataNamespace)
+  }.toSet)
+  val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(cassandraConnectorConf, tStreamService.metadataNamespace)
 
   val dataStorageFactory = new AerospikeStorageFactory
   val dataStorageHosts = tStreamService.dataProvider.hosts.map {addr =>

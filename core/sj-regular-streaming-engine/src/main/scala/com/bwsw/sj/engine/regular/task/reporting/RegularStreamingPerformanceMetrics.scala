@@ -66,36 +66,36 @@ class RegularStreamingPerformanceMetrics(manager: RegularTaskManager)
     val inputEnvelopesSize = inputEnvelopesPerStream.flatMap(x => x._2.map(_.size))
     val outputEnvelopesSize = outputEnvelopesPerStream.flatMap(x => x._2.map(_._2.size))
 
-    performanceReport.pmDatetime = Calendar.getInstance().getTime
-    performanceReport.totalIdleTime = totalIdleTime
-    performanceReport.totalInputEnvelopes = inputEnvelopesTotalNumber
-    performanceReport.inputEnvelopesPerStream = numberOfInputEnvelopesPerStream.toMap
-    performanceReport.totalInputElements = inputElementsTotalNumber
-    performanceReport.inputElementsPerStream = numberOfInputElementsPerStream.toMap
-    performanceReport.totalInputBytes = bytesOfInputEnvelopesPerStream.values.sum
-    performanceReport.inputBytesPerStream = bytesOfInputEnvelopesPerStream.toMap
-    performanceReport.averageSizeInputEnvelope = if (inputElementsTotalNumber != 0) inputElementsTotalNumber / inputEnvelopesTotalNumber else 0
-    performanceReport.maxSizeInputEnvelope = if (inputEnvelopesSize.nonEmpty) inputEnvelopesSize.max else 0
-    performanceReport.minSizeInputEnvelope = if (inputEnvelopesSize.nonEmpty) inputEnvelopesSize.min else 0
-    performanceReport.averageSizeInputElement = if (inputElementsTotalNumber != 0) bytesOfInputEnvelopesPerStream.values.sum / inputElementsTotalNumber else 0
-    performanceReport.totalOutputEnvelopes = outputEnvelopesTotalNumber
-    performanceReport.totalOutputElements = outputElementsTotalNumber
-    performanceReport.outputEnvelopesPerStream = numberOfOutputEnvelopesPerStream.toMap
-    performanceReport.outputElementsPerStream = numberOfOutputElementsPerStream.toMap
-    performanceReport.outputBytesPerStream = bytesOfOutputEnvelopesPerStream.toMap
-    performanceReport.totalOutputBytes = bytesOfOutputEnvelopesPerStream.values.sum
-    performanceReport.averageSizeOutputEnvelope = if (outputEnvelopesTotalNumber != 0) outputElementsTotalNumber / outputEnvelopesTotalNumber else 0
-    performanceReport.maxSizeOutputEnvelope = if (outputEnvelopesSize.nonEmpty) outputEnvelopesSize.max else 0
-    performanceReport.minSizeOutputEnvelope = if (outputEnvelopesSize.nonEmpty) outputEnvelopesSize.min else 0
-    performanceReport.averageSizeOutputElement = if (outputEnvelopesTotalNumber != 0) bytesOfOutputEnvelopesPerStream.values.sum / outputElementsTotalNumber else 0
-    performanceReport.stateVariablesNumber = numberOfStateVariables
-    performanceReport.uptime = (System.currentTimeMillis() - startTime) / 1000
+    report.pmDatetime = Calendar.getInstance().getTime
+    report.totalIdleTime = totalIdleTime
+    report.totalInputEnvelopes = inputEnvelopesTotalNumber
+    report.inputEnvelopesPerStream = numberOfInputEnvelopesPerStream.toMap
+    report.totalInputElements = inputElementsTotalNumber
+    report.inputElementsPerStream = numberOfInputElementsPerStream.toMap
+    report.totalInputBytes = bytesOfInputEnvelopesPerStream.values.sum
+    report.inputBytesPerStream = bytesOfInputEnvelopesPerStream.toMap
+    report.averageSizeInputEnvelope = if (inputElementsTotalNumber != 0) inputElementsTotalNumber / inputEnvelopesTotalNumber else 0
+    report.maxSizeInputEnvelope = if (inputEnvelopesSize.nonEmpty) inputEnvelopesSize.max else 0
+    report.minSizeInputEnvelope = if (inputEnvelopesSize.nonEmpty) inputEnvelopesSize.min else 0
+    report.averageSizeInputElement = if (inputElementsTotalNumber != 0) bytesOfInputEnvelopesPerStream.values.sum / inputElementsTotalNumber else 0
+    report.totalOutputEnvelopes = outputEnvelopesTotalNumber
+    report.totalOutputElements = outputElementsTotalNumber
+    report.outputEnvelopesPerStream = numberOfOutputEnvelopesPerStream.toMap
+    report.outputElementsPerStream = numberOfOutputElementsPerStream.toMap
+    report.outputBytesPerStream = bytesOfOutputEnvelopesPerStream.toMap
+    report.totalOutputBytes = bytesOfOutputEnvelopesPerStream.values.sum
+    report.averageSizeOutputEnvelope = if (outputEnvelopesTotalNumber != 0) outputElementsTotalNumber / outputEnvelopesTotalNumber else 0
+    report.maxSizeOutputEnvelope = if (outputEnvelopesSize.nonEmpty) outputEnvelopesSize.max else 0
+    report.minSizeOutputEnvelope = if (outputEnvelopesSize.nonEmpty) outputEnvelopesSize.min else 0
+    report.averageSizeOutputElement = if (outputEnvelopesTotalNumber != 0) bytesOfOutputEnvelopesPerStream.values.sum / outputElementsTotalNumber else 0
+    report.stateVariablesNumber = numberOfStateVariables
+    report.uptime = (System.currentTimeMillis() - startTime) / 1000
 
     clear()
 
     mutex.unlock()
 
-    serializer.serialize(performanceReport)
+    reportSerializer.serialize(report)
   }
 
   override def clear() = {

@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.input
 
-import java.io.{PrintStream, BufferedReader, File, InputStreamReader}
-import java.net.{Socket, InetSocketAddress}
+import java.io.{BufferedReader, File, InputStreamReader, PrintStream}
+import java.net.{InetSocketAddress, Socket}
 import java.util
 import java.util.jar.JarFile
 
@@ -11,12 +11,12 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask, Instance}
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.StreamConstants
-import com.bwsw.sj.engine.core.utils.CassandraHelper
 import com.bwsw.sj.engine.core.utils.CassandraHelper._
 import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
 import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerOptions}
+import com.bwsw.tstreams.common.CassandraConnectorConf
 import com.bwsw.tstreams.converter.IConverter
-import com.bwsw.tstreams.data.cassandra.{CassandraStorageOptions, CassandraStorageFactory}
+import com.bwsw.tstreams.data.cassandra.CassandraStorageFactory
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.policy.RoundRobinPolicy
@@ -39,10 +39,7 @@ object DataFactory {
   private val cluster = Cluster.builder().addContactPoint(cassandraHost).build()
   private val session = cluster.connect()
   private val dataStorageFactory = new CassandraStorageFactory()
-  private val dataStorageOptions = new CassandraStorageOptions(
-    List(new InetSocketAddress(CassandraHelper.cassandraHost, CassandraHelper.cassandraPort)),
-    cassandraTestKeyspace
-  )
+  private val cassandraConnectorConf = CassandraConnectorConf.apply(Set(new InetSocketAddress(cassandraHost, cassandraPort)))
   val outputCount = 2
 
   def writeData(totalInputElements: Int, totalDuplicateElements: Int) = {
@@ -82,7 +79,7 @@ object DataFactory {
 
   private lazy val metadataStorageFactory: MetadataStorageFactory = new MetadataStorageFactory()
   private lazy val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(
-    cassandraHosts = List(new InetSocketAddress(cassandraHost, cassandraPort)),
+    cassandraConnectorConf,
     keyspace = cassandraTestKeyspace)
 
   def cassandraSetup() = {
@@ -95,7 +92,6 @@ object DataFactory {
   }
 
   def close() = {
-    dataStorageFactory.closeFactory()
     metadataStorageFactory.closeFactory()
     session.close()
     cluster.close()
@@ -160,7 +156,9 @@ object DataFactory {
       1000 * 60,
       "description of test output tstream",
       metadataStorage,
-      dataStorageFactory.getInstance(dataStorageOptions)
+      dataStorageFactory.getInstance(
+        cassandraConnectorConf,
+        keyspace = cassandraTestKeyspace)
     )
   }
 
@@ -242,7 +240,9 @@ object DataFactory {
     val stream = streamService.get(streamName)
 
     val tStream: TStream[Array[Byte]] =
-      BasicStreamService.loadStream(stream.name, metadataStorage, dataStorageFactory.getInstance(dataStorageOptions))
+      BasicStreamService.loadStream(stream.name, metadataStorage, dataStorageFactory.getInstance(
+        cassandraConnectorConf,
+        keyspace = cassandraTestKeyspace))
 
     val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
 

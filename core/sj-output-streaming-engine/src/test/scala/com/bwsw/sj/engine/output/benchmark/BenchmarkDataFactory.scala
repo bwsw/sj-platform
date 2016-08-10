@@ -18,6 +18,7 @@ import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
 import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerOptions}
 import com.bwsw.tstreams.agents.producer.DataInsertType.BatchInsert
 import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer, CoordinationOptions, Options}
+import com.bwsw.tstreams.common.CassandraConnectorConf
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.producer.transport.impl.TcpTransport
 
@@ -75,11 +76,11 @@ object BenchmarkDataFactory {
     val tStream: TStreamSjStream = streamService.get(tStreamName).asInstanceOf[TStreamSjStream]
     val tStreamService = tStream.service.asInstanceOf[TStreamService]
     val metadataStorageFactory = new MetadataStorageFactory
-    val metadataStorageHosts = tStreamService.metadataProvider.hosts.map { addr =>
+    val cassandraConnectorConf = CassandraConnectorConf.apply(tStreamService.metadataProvider.hosts.map { addr =>
       val parts = addr.split(":")
       new InetSocketAddress(parts(0), parts(1).toInt)
-    }.toList
-    val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(metadataStorageHosts, tStreamService.metadataNamespace)
+    }.toSet)
+    val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(cassandraConnectorConf, tStreamService.metadataNamespace)
 
     val dataStorageFactory = new AerospikeStorageFactory
     val dataStorageHosts = tStreamService.dataProvider.hosts.map { addr =>
@@ -300,11 +301,11 @@ object BenchmarkDataFactory {
     streamService.save(tStream)
 
     val metadataStorageFactory = new MetadataStorageFactory
-    val metadataStorageHosts = tService.metadataProvider.hosts.map { addr =>
+    val cassandraConnectorConf = CassandraConnectorConf.apply(tService.metadataProvider.hosts.map { addr =>
       val parts = addr.split(":")
       new InetSocketAddress(parts(0), parts(1).toInt)
-    }.toList
-    val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(metadataStorageHosts, tService.metadataNamespace)
+    }.toSet)
+    val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(cassandraConnectorConf, tService.metadataNamespace)
 
     val dataStorageFactory = new AerospikeStorageFactory
     val dataStorageHosts = tService.dataProvider.hosts.map { addr =>

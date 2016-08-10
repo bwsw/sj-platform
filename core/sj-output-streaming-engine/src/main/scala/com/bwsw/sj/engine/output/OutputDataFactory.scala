@@ -11,9 +11,10 @@ import com.bwsw.sj.common.DAL.model.module.{Instance, OutputInstance}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.StreamConstants._
+import com.bwsw.tstreams.common.CassandraConnectorConf
 import com.bwsw.tstreams.data.IStorage
 import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStorageOptions}
-import com.bwsw.tstreams.data.cassandra.{CassandraStorageFactory, CassandraStorageOptions}
+import com.bwsw.tstreams.data.cassandra.CassandraStorageFactory
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.services.BasicStreamService
 import com.bwsw.tstreams.streams.TStream
@@ -51,11 +52,11 @@ object OutputDataFactory {
   val inputStreamService = inputStream.service.asInstanceOf[TStreamService]
 
   private val metadataStorageFactory: MetadataStorageFactory = new MetadataStorageFactory
-  private val metadataStorageHosts: List[InetSocketAddress] = inputStreamService.metadataProvider.hosts.map { addr =>
+  private val cassandraConnectorConf = CassandraConnectorConf.apply(inputStreamService.metadataProvider.hosts.map { addr =>
     val parts = addr.split(":")
     new InetSocketAddress(parts(0), parts(1).toInt)
-  }.toList
-  val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(metadataStorageHosts, inputStreamService.metadataNamespace)
+  }.toSet)
+  val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(cassandraConnectorConf, inputStreamService.metadataNamespace)
 
   private val configService = ConnectionRepository.getConfigService
   private val streamTTL = configService.get(streamTTLTag).value.toInt
@@ -108,12 +109,7 @@ object OutputDataFactory {
         (new AerospikeStorageFactory).getInstance(options)
 
       case _ =>
-        val options = new CassandraStorageOptions(
-          OutputDataFactory.tstreamService.dataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList,
-          OutputDataFactory.tstreamService.dataNamespace
-        )
-
-        (new CassandraStorageFactory).getInstance(options)
+        (new CassandraStorageFactory).getInstance(cassandraConnectorConf, OutputDataFactory.tstreamService.dataNamespace)
     }
   }
 

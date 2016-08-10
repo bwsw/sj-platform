@@ -16,7 +16,10 @@ val commonSettings = Seq(
   resolvers += "Twitter Repository" at "http://maven.twttr.com",
 
   libraryDependencies ++= Seq(
-    "com.bwsw" % "t-streams_2.11" % "1.0-SNAPSHOT"),
+    ("com.bwsw" % "t-streams_2.11" % "1.0-SNAPSHOT")
+      .exclude("org.slf4j", "slf4j-simple"),
+    "org.slf4j" % "slf4j-log4j12" % "1.7.21"
+  ),
 
   assemblyMergeStrategy in assembly := {
     case PathList("scala", xs@_*) => MergeStrategy.first
@@ -61,7 +64,7 @@ lazy val engineCore = Project(id = "sj-engine-core",
 lazy val crudRest = Project(id = "sj-crud-rest",
   base = file("./core/sj-crud-rest"))
   .settings(commonSettings: _*)
-   .settings(
+  .settings(
     libraryDependencies ++= Dependencies.sjRestDependencies.value
   )
   .dependsOn(common)

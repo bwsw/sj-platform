@@ -72,6 +72,7 @@ object InputTaskRunner {
   }
 
   def handleException(exception: Throwable) = {
+    logger.error("Runtime exception", exception)
     exception.printStackTrace()
     threadPool.shutdownNow()
     System.exit(-1)

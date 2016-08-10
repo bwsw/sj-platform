@@ -27,7 +27,6 @@ abstract class TaskManager() {
   val agentsHost = System.getenv("AGENTS_HOST")
   protected val agentsPorts = System.getenv("AGENTS_PORTS").split(",")
   val taskName = System.getenv("TASK_NAME")
-  protected val reportStreamName = instanceName + "_report"
   protected val instance: Instance = ConnectionRepository.getInstanceService.get(instanceName)
   protected val auxiliarySJTStream = getAuxiliaryTStream()
   protected val auxiliaryTStreamService = getAuxiliaryTStreamService()
@@ -49,7 +48,6 @@ abstract class TaskManager() {
   val converter = new ArrayByteConverter
 
   lazy val outputProducers = createOutputProducers()
-  val reportStream = getReportStream()
 
   private def getAuxiliaryTStream() = {
     val streams = if (instance.inputs != null) {
@@ -132,19 +130,16 @@ abstract class TaskManager() {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create producer for stream: ${stream.name}\n")
 
-    val timeUuidGenerator = EngineUtils.getUUIDGenerator(stream.asInstanceOf[TStreamSjStream])
+    val timeUuidGenerator = EngineUtils.getUUIDGenerator(stream)
 
     setStreamOptions(stream)
-
-    tstreamFactory.setProperty(TSF_Dictionary.Producer.BIND_PORT, agentsPorts(currentPortNumber))
-
-    currentPortNumber += 1
+    setProducerBindPort()
 
     tstreamFactory.getProducer[Array[Byte]](
       "producer_for_" + taskName + "_" + stream.name,
       timeUuidGenerator,
       converter,
-      (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
+      (0 until stream.partitions).toList)
   }
 
   protected def setStreamOptions(stream: TStreamSjStream) = {
@@ -153,28 +148,9 @@ abstract class TaskManager() {
     tstreamFactory.setProperty(TSF_Dictionary.Stream.DESCRIPTION, stream.description)
   }
 
-
-  /**
-   * Creates a SjStream to keep the reports of module performance.
-   * For each task there is specific partition (task number = partition number).
-   *
-   * @return SjStream used for keeping the reports of module performance
-   */
-  private def getReportStream(): TStreamSjStream = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-      s"Get stream for performance metrics\n")
-    val tags = Array("report", "performance")
-    val description = "store reports of performance metrics"
-    val partitions = instance.parallelism
-
-    createTStreamOnCluster(reportStreamName, description, partitions)
-
-    getSjStream(
-      reportStreamName,
-      description,
-      tags,
-      partitions
-    )
+  private def setProducerBindPort() = {
+    tstreamFactory.setProperty(TSF_Dictionary.Producer.BIND_PORT, agentsPorts(currentPortNumber))
+    currentPortNumber += 1
   }
 
   def createTStreamOnCluster(name: String, description: String, partitions: Int): Unit = {
@@ -245,13 +221,10 @@ abstract class TaskManager() {
       s"Create subscribing consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
 
     val partitionRange = (partitions.head to partitions.tail.head).toList
-    val timeUuidGenerator = EngineUtils.getUUIDGenerator(stream.asInstanceOf[TStreamSjStream])
+    val timeUuidGenerator = EngineUtils.getUUIDGenerator(stream)
 
     setStreamOptions(stream)
-
-    tstreamFactory.setProperty(TSF_Dictionary.Consumer.Subscriber.BIND_PORT, agentsPorts(currentPortNumber))
-
-    currentPortNumber += 1
+    setSubscribingConsumerBindPort()
 
     tstreamFactory.getSubscriber[Array[Byte]](
       "subscribing_consumer_for_" + taskName + "_" + stream.name,
@@ -260,6 +233,11 @@ abstract class TaskManager() {
       partitionRange,
       callback,
       offset)
+  }
+
+  private def setSubscribingConsumerBindPort() = {
+    tstreamFactory.setProperty(TSF_Dictionary.Consumer.Subscriber.BIND_PORT, agentsPorts(currentPortNumber))
+    currentPortNumber += 1
   }
 
   def getInstance: Instance = {

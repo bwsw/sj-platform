@@ -12,15 +12,15 @@ import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, Instance, RegularInst
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.{ConfigConstants, StreamConstants}
-import com.bwsw.sj.engine.core.utils.CassandraHelper
 import com.bwsw.sj.engine.core.utils.CassandraHelper._
 import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
 import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerOptions}
 import com.bwsw.tstreams.agents.producer.DataInsertType.BatchInsert
 import com.bwsw.tstreams.agents.producer._
+import com.bwsw.tstreams.common.CassandraConnectorConf
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.producer.transport.impl.TcpTransport
-import com.bwsw.tstreams.data.cassandra.{CassandraStorageFactory, CassandraStorageOptions}
+import com.bwsw.tstreams.data.cassandra.CassandraStorageFactory
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.policy.RoundRobinPolicy
@@ -50,10 +50,8 @@ object DataFactory {
   private val cluster = Cluster.builder().addContactPoint(cassandraHost).build()
   private val session = cluster.connect()
   private val dataStorageFactory = new CassandraStorageFactory()
-  private val dataStorageOptions = new CassandraStorageOptions(
-    List(new InetSocketAddress(CassandraHelper.cassandraHost, CassandraHelper.cassandraPort)),
-    cassandraTestKeyspace
-  )
+  private val cassandraConnectorConf = CassandraConnectorConf.apply(Set(new InetSocketAddress(cassandraHost, cassandraPort)))
+
   val inputCount = 2
   val outputCount = 2
   val partitions = 4
@@ -71,7 +69,7 @@ object DataFactory {
 
   private lazy val metadataStorageFactory: MetadataStorageFactory = new MetadataStorageFactory()
   private lazy val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(
-    cassandraHosts = List(new InetSocketAddress(cassandraHost, cassandraPort)),
+    cassandraConnectorConf,
     keyspace = cassandraTestKeyspace)
 
   def cassandraSetup() = {
@@ -84,7 +82,6 @@ object DataFactory {
   }
 
   def close() = {
-    dataStorageFactory.closeFactory()
     metadataStorageFactory.closeFactory()
     session.close()
     cluster.close()
@@ -213,7 +210,9 @@ object DataFactory {
       1000 * 60,
       "description of test input tstream",
       metadataStorage,
-      dataStorageFactory.getInstance(dataStorageOptions)
+      dataStorageFactory.getInstance(
+        cassandraConnectorConf,
+        keyspace = cassandraTestKeyspace)
     )
   }
 
@@ -231,7 +230,9 @@ object DataFactory {
       1000 * 60,
       "description of test output tstream",
       metadataStorage,
-      dataStorageFactory.getInstance(dataStorageOptions)
+      dataStorageFactory.getInstance(
+        cassandraConnectorConf,
+        keyspace = cassandraTestKeyspace)
     )
   }
 
@@ -409,7 +410,9 @@ object DataFactory {
     val partitions = 1
 
     val tStream =
-      BasicStreamService.loadStream(name, metadataStorage, dataStorageFactory.getInstance(dataStorageOptions))
+      BasicStreamService.loadStream(name, metadataStorage, dataStorageFactory.getInstance(
+        cassandraConnectorConf,
+        keyspace = cassandraTestKeyspace))
 
     val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until partitions).toList)
 
@@ -452,7 +455,9 @@ object DataFactory {
 
   private def createProducer(stream: SjStream) = {
     val tStream =
-      BasicStreamService.loadStream(stream.name, metadataStorage, dataStorageFactory.getInstance(dataStorageOptions))
+      BasicStreamService.loadStream(stream.name, metadataStorage, dataStorageFactory.getInstance(
+        cassandraConnectorConf,
+        keyspace = cassandraTestKeyspace))
 
     val coordinationSettings = new CoordinationOptions(
       agentAddress = s"localhost:8030",
@@ -484,7 +489,9 @@ object DataFactory {
     val stream = streamService.get(streamName)
 
     val tStream =
-      BasicStreamService.loadStream(stream.name, metadataStorage, dataStorageFactory.getInstance(dataStorageOptions))
+      BasicStreamService.loadStream(stream.name, metadataStorage, dataStorageFactory.getInstance(
+        cassandraConnectorConf,
+        keyspace = cassandraTestKeyspace))
 
     val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
 
