@@ -1,3 +1,5 @@
+import sbt.Keys._
+
 name := "sj"
 
 addCommandAlias("rebuild", ";clean; compile; package")
@@ -37,11 +39,8 @@ val commonSettings = Seq(
 
   fork in run := true,
   fork in Test := true,
-  parallelExecution in Test := false
-)
+  parallelExecution in Test := false,
 
-val publishSettings = Seq(
-  name := "SJ-platform",
   version := "1.0-SNAPSHOT",
   organization := "com.bwsw",
   publishMavenStyle := true,
@@ -71,13 +70,11 @@ lazy val common = Project(id = "sj-common",
   .settings(
     libraryDependencies ++= Dependencies.sjCommonDependencies.value
   )
-  .settings(publishSettings)
 
 lazy val engineCore = Project(id = "sj-engine-core",
   base = file("./core/sj-engine-core"))
   .settings(commonSettings: _*)
   .dependsOn(common)
-  .settings(publishSettings)
 
 lazy val crudRest = Project(id = "sj-crud-rest",
   base = file("./core/sj-crud-rest"))
@@ -85,7 +82,6 @@ lazy val crudRest = Project(id = "sj-crud-rest",
   .settings(
     libraryDependencies ++= Dependencies.sjRestDependencies.value
   )
-  .settings(publishSettings)
   .dependsOn(common)
 
 lazy val inputStreamingEngine = Project(id = "sj-input-streaming-engine",
@@ -94,7 +90,6 @@ lazy val inputStreamingEngine = Project(id = "sj-input-streaming-engine",
   .settings(
     libraryDependencies ++= Dependencies.sjInputEngineDependencies.value
   )
-  .settings(publishSettings)
   .dependsOn(engineCore)
 
 lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
@@ -103,13 +98,11 @@ lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
   .settings(
     libraryDependencies ++= Dependencies.sjRegularEngineDependencies.value
   )
-  .settings(publishSettings)
   .dependsOn(engineCore)
 
 lazy val windowedStreamingEngine = Project(id = "sj-windowed-streaming-engine",
   base = file("./core/sj-windowed-streaming-engine"))
   .settings(commonSettings: _*)
-  .settings(publishSettings)
   .dependsOn(engineCore)
 
 lazy val outputStreamingEngine = Project(id = "sj-output-streaming-engine",
@@ -118,7 +111,6 @@ lazy val outputStreamingEngine = Project(id = "sj-output-streaming-engine",
   .settings(
     libraryDependencies ++= Dependencies.sjOutputEngineDependencies.value
   )
-  .settings(publishSettings)
   .dependsOn(engineCore)
 
 lazy val framework = Project(id = "sj-mesos-framework",
@@ -127,37 +119,31 @@ lazy val framework = Project(id = "sj-mesos-framework",
   .settings(
     libraryDependencies ++= Dependencies.sjFrameworkDependencies.value
   )
-  .settings(publishSettings)
   .dependsOn(common)
 
 lazy val transactionGenerator = Project(id = "sj-transaction-generator",
   base = file("./core/sj-transaction-generator"))
   .settings(commonSettings: _*)
-  .settings(publishSettings)
   .dependsOn(common)
 
 lazy val stubInput = Project(id = "sj-stub-input-streaming",
   base = file("./contrib/stubs/sj-stub-input-streaming"))
   .settings(commonSettings: _*)
-  .settings(publishSettings)
   .dependsOn(engineCore)
 
 lazy val stubRegular = Project(id = "sj-stub-regular-streaming",
   base = file("./contrib/stubs/sj-stub-regular-streaming"))
   .settings(commonSettings: _*)
-  .settings(publishSettings)
   .dependsOn(engineCore)
 
 lazy val stubOutput = Project(id = "sj-stub-output",
   base = file("./contrib/stubs/sj-stub-output"))
   .settings(commonSettings: _*)
-  .settings(publishSettings)
   .dependsOn(engineCore)
 
 lazy val pmOutput = Project(id = "sj-performance-metrics-output-es",
   base = file("./contrib/sj-platform/sj-performance-metrics-output-es"))
   .settings(commonSettings: _*)
-  .settings(publishSettings)
   .dependsOn(engineCore)
 
 lazy val sflowProcess = Project(id = "sj-sflow-process",
@@ -166,11 +152,9 @@ lazy val sflowProcess = Project(id = "sj-sflow-process",
   .settings(
     libraryDependencies ++= Dependencies.sjSflowProcessDependencies.value
   )
-  .settings(publishSettings)
   .dependsOn(engineCore)
 
 lazy val sflowOutput = Project(id = "sj-sflow-output",
   base = file("./contrib/examples/sflow/sj-sflow-output"))
   .settings(commonSettings: _*)
-  .settings(publishSettings)
   .dependsOn(engineCore)
