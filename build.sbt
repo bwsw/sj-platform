@@ -41,6 +41,7 @@ val commonSettings = Seq(
 )
 
 val publishSettings = Seq(
+  name := "SJ-platform",
   version := "1.0-SNAPSHOT",
   organization := "com.bwsw",
   publishMavenStyle := true,
@@ -55,7 +56,7 @@ val publishSettings = Seq(
   publishArtifact in Test := false
 )
 
-lazy val root = (project in file(".")) aggregate(common,
+lazy val root = (project in file(".")) settings (publish := { }) aggregate(common,
   engineCore, crudRest,
   inputStreamingEngine, regularStreamingEngine, windowedStreamingEngine, outputStreamingEngine,
   framework, transactionGenerator,
