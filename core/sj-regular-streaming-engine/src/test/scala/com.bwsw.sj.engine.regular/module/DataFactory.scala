@@ -465,8 +465,7 @@ object DataFactory {
       zkRootPath = "/unit",
       zkConnectionTimeout = 7000,
       isLowPriorityToBeMaster = false,
-      transport = new TcpTransport,
-      transportTimeout = 5,
+      transport = new TcpTransport(5),
       zkSessionTimeout = 7000)
 
     val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)

@@ -84,8 +84,7 @@ object OutputTestDataFactory {
       zkRootPath = "/unit",
       zkSessionTimeout = 7000,
       isLowPriorityToBeMaster = false,
-      transport = new TcpTransport,
-      transportTimeout = 5,
+      transport = new TcpTransport(5),
       zkConnectionTimeout = 7000)
 
     val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until stream.partitions).toList)
