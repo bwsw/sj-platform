@@ -41,7 +41,6 @@ val commonSettings = Seq(
   fork in Test := true,
   parallelExecution in Test := false,
 
-  version := "1.0-SNAPSHOT",
   organization := "com.bwsw",
   publishMavenStyle := true,
   pomIncludeRepository := { _ => false },
