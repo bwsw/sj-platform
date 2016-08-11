@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.input.task.engine
 
 import java.util.concurrent.ArrayBlockingQueue
-
+import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
 import com.bwsw.sj.engine.input.task.InputTaskManager
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import io.netty.buffer.ByteBuf
@@ -38,16 +38,14 @@ class InputTaskEngineFactory(manager: InputTaskManager,
    * Creates InputTaskEngine is in charge of a basic execution logic of task of input module
    * @return Engine of input task
    */
-  def createInputTaskEngine() = {
+  def createInputTaskEngine(): InputTaskEngine = {
     inputInstanceMetadata.checkpointMode match {
       case "time-interval" =>
         logger.info(s"Task: ${manager.taskName}. Input module has a 'time-interval' checkpoint mode, create an appropriate task engine\n")
-        logger.debug(s"Task: ${manager.taskName}. Create TimeCheckpointInputTaskEngine()\n")
-        new TimeCheckpointInputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext)
+        new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext) with TimeCheckpointTaskEngine
       case "every-nth" =>
         logger.info(s"Task: ${manager.taskName}. Input module has an 'every-nth' checkpoint mode, create an appropriate task engine\n")
-        new NumericalCheckpointInputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext)
-
+        new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext) with NumericalCheckpointTaskEngine
     }
   }
 }
