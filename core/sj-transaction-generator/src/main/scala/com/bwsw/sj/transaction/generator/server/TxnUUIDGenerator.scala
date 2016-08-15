@@ -21,8 +21,7 @@ class TxnUUIDGenerator(socket: Socket, doesServerWork: AtomicBoolean) extends Ru
       }
     } catch {
       case ex: Exception =>
-        socket.close()
-        return
+        close()
     }
   }
 
