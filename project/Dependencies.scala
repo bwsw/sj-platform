@@ -15,8 +15,10 @@ object Dependencies {
 
   lazy val sjRestDependencies = Def.setting(Seq(
     "com.typesafe.akka" % "akka-http-experimental_2.11" % "2.0-M2",
-    "org.everit.json" % "org.everit.json.schema" % "1.2.0",
-    "org.apache.httpcomponents" % "httpclient" % "4.5.2",
+    ("org.everit.json" % "org.everit.json.schema" % "1.2.0")
+      .exclude("commons-logging", "commons-logging"),
+    ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
+      .exclude("commons-logging", "commons-logging"),
     "org.elasticsearch" % "elasticsearch" % "2.3.2",
     "org.apache.kafka" % "kafka_2.11" % "0.9.0.1",
     "com.typesafe.akka" % "akka-slf4j_2.11" % "2.4.4"

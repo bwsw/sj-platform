@@ -1,5 +1,3 @@
-import sbt.Keys._
-
 name := "sj"
 
 addCommandAlias("rebuild", ";clean; compile; package")
