@@ -1,12 +1,14 @@
 package com.bwsw.sj.transaction.generator.server
 
-import java.io.{OutputStreamWriter, PrintWriter}
+import java.io.{DataInputStream, PrintStream}
 import java.net.Socket
 import java.util.concurrent.atomic.AtomicBoolean
 
 import com.datastax.driver.core.utils.UUIDs
 
 class TxnUUIDGenerator(socket: Socket, doesServerWork: AtomicBoolean) extends Runnable {
+  val inputStream = new DataInputStream(socket.getInputStream)
+  val outputStream = new PrintStream(socket.getOutputStream)
 
   override def run(): Unit = {
     try {
@@ -26,7 +28,6 @@ class TxnUUIDGenerator(socket: Socket, doesServerWork: AtomicBoolean) extends Ru
   }
 
   private def isClientAvailable = {
-    val inputStream = socket.getInputStream
     val clientRequestStatus = inputStream.read()
 
     clientRequestStatus != -1
@@ -37,11 +38,13 @@ class TxnUUIDGenerator(socket: Socket, doesServerWork: AtomicBoolean) extends Ru
   }
 
   private def send(message: String) {
-    val out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream))
-    out.print(message)
-    out.flush()
+    outputStream.print(message)
   }
 
-  private def close() = socket.close()
+  private def close() = {
+    inputStream.close()
+    outputStream.close()
+    socket.close()
+  }
 }
 
