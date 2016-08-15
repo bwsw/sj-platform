@@ -9,8 +9,8 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.tstreams.common.CassandraConnectorConf
 import com.bwsw.tstreams.data.IStorage
-import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStorageOptions}
-import com.bwsw.tstreams.data.cassandra.CassandraStorageFactory
+import com.bwsw.tstreams.data.aerospike._
+import com.bwsw.tstreams.data._
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.services.BasicStreamService
 import kafka.admin.AdminUtils
@@ -51,13 +51,13 @@ object StreamUtil {
     val dataProvider = service.dataProvider
     var dataStorage: IStorage[Array[Byte]] = null
     if (dataProvider.providerType.equals("cassandra")) {
-      dataStorage = (new CassandraStorageFactory).getInstance(cassandraConnectorConf, service.dataNamespace)
+      dataStorage = (new cassandra.Factory).getInstance(cassandraConnectorConf, service.dataNamespace)
     } else if (dataProvider.providerType.equals("aerospike")) {
-      val options = new AerospikeStorageOptions(
+      val options = new aerospike.Options(
         service.dataNamespace,
         dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toList
       )
-      dataStorage = (new AerospikeStorageFactory).getInstance(options)
+      dataStorage = (new aerospike.Factory).getInstance(options)
     }
 
     if (BasicStreamService.isExist(stream.name, metadataStorage)) {
@@ -269,13 +269,13 @@ object StreamUtil {
     val dataProvider = service.dataProvider
     var dataStorage: IStorage[Array[Byte]] = null
     if (dataProvider.providerType.equals("cassandra")) {
-      dataStorage = (new CassandraStorageFactory).getInstance(cassandraConnectorConf, service.dataNamespace)
+      dataStorage = (new cassandra.Factory).getInstance(cassandraConnectorConf, service.dataNamespace)
     } else if (dataProvider.providerType.equals("aerospike")) {
-      val options = new AerospikeStorageOptions(
+      val options = new Options(
         service.dataNamespace,
         dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toList
       )
-      dataStorage = (new AerospikeStorageFactory).getInstance(options)
+      dataStorage = (new aerospike.Factory).getInstance(options)
     }
 
     if (BasicStreamService.isExist(stream.name, metadataStorage)) {

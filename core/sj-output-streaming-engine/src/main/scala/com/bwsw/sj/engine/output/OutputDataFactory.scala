@@ -13,8 +13,8 @@ import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.StreamConstants._
 import com.bwsw.tstreams.common.CassandraConnectorConf
 import com.bwsw.tstreams.data.IStorage
-import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStorageOptions}
-import com.bwsw.tstreams.data.cassandra.CassandraStorageFactory
+import com.bwsw.tstreams.data.aerospike
+import com.bwsw.tstreams.data.cassandra
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.services.BasicStreamService
 import com.bwsw.tstreams.streams.TStream
@@ -102,14 +102,14 @@ object OutputDataFactory {
     logger.debug(s"Task $taskName. Get data storage for service ${tstreamService.name}.")
     OutputDataFactory.tstreamService.dataProvider.providerType match {
       case "aerospike" =>
-        val options = new AerospikeStorageOptions(
+        val options = new aerospike.Options(
           OutputDataFactory.tstreamService.dataNamespace,
           OutputDataFactory.tstreamService.dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toList)
 
-        (new AerospikeStorageFactory).getInstance(options)
+        (new aerospike.Factory).getInstance(options)
 
       case _ =>
-        (new CassandraStorageFactory).getInstance(cassandraConnectorConf, OutputDataFactory.tstreamService.dataNamespace)
+        (new cassandra.Factory).getInstance(cassandraConnectorConf, OutputDataFactory.tstreamService.dataNamespace)
     }
   }
 

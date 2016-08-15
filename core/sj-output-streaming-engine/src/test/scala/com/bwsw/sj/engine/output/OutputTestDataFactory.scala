@@ -12,7 +12,8 @@ import com.bwsw.tstreams.agents.producer._
 import com.bwsw.tstreams.common.CassandraConnectorConf
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.producer.transport.impl.TcpTransport
-import com.bwsw.tstreams.data.aerospike.{AerospikeStorage, AerospikeStorageOptions, AerospikeStorageFactory}
+import com.bwsw.tstreams.data.aerospike
+import com.bwsw.tstreams.env.TSF_Dictionary
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.policy.RoundRobinPolicy
@@ -39,13 +40,13 @@ object OutputTestDataFactory {
   }.toSet)
   val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(cassandraConnectorConf, inputStreamService.metadataNamespace)
 
-  private val dataStorageFactory = new AerospikeStorageFactory
+  private val dataStorageFactory = new aerospike.Factory
   private val dataStorageHosts = inputStreamService.dataProvider.hosts.map { addr =>
     val parts = addr.split(":")
     new Host(parts(0), parts(1).toInt)
   }.toList
-  private val options = new AerospikeStorageOptions(inputStreamService.dataNamespace, dataStorageHosts)
-  val dataStorage: AerospikeStorage = dataStorageFactory.getInstance(options)
+  private val options = new aerospike.Options(inputStreamService.dataNamespace, dataStorageHosts)
+  val dataStorage = dataStorageFactory.getInstance(options)
 
   private val converter = new IConverter[Array[Byte], Array[Byte]] {
     override def convert(obj: Array[Byte]): Array[Byte] = obj
@@ -84,7 +85,8 @@ object OutputTestDataFactory {
       zkRootPath = "/unit",
       zkSessionTimeout = 7000,
       isLowPriorityToBeMaster = false,
-      transport = new TcpTransport(5),
+      transport = new TcpTransport("localhost:8030",
+        TSF_Dictionary.Producer.TRANSPORT_TIMEOUT.toInt * 1000),
       zkConnectionTimeout = 7000)
 
     val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until stream.partitions).toList)
