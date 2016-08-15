@@ -1,18 +1,16 @@
 package com.bwsw.common.client
 
-import java.io._
-
 import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import org.apache.log4j.Logger
 
 /**
-  * Main object for running TcpClient
-  * Created: 18/04/2016
-  *
-  * @author Kseniya Tomskikh
-  */
-object Client {
+ * Main object for running TcpClient
+ * Created: 18/04/2016
+ *
+ * @author Kseniya Tomskikh
+ */
+object ClientExample {
 
   private val logger = Logger.getLogger(getClass)
 
@@ -31,15 +29,18 @@ object Client {
 
     val client = new TcpClient(options)
     client.open()
-    val consoleReader = new BufferedReader(new InputStreamReader(System.in))
+    //val consoleReader = new BufferedReader(new InputStreamReader(System.in))
     var i = 0
-    while(consoleReader.readLine() != null) {
+    val t0 = System.nanoTime()
+    while (i <= 1000000) {
+      //while (consoleReader.readLine() != null) {
       logger.debug("send request")
-      println(client.get())
+      //println(client.get())
+      client.get()
       i += 1
     }
     client.close()
+    val t1 = System.nanoTime()
+    println("Elapsed time: " + (t1 - t0) / 1000000 + "ms")
   }
 }
-
-

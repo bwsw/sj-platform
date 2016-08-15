@@ -21,12 +21,23 @@ import org.slf4j.LoggerFactory
 object RegularTaskRunner {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-  val countOfThreads = 3
-  private val threadFactory = createThreadFactory()
-  private val threadPool = Executors.newFixedThreadPool(countOfThreads, threadFactory)
+  private val threadPool = createThreadPool()
   private val executorService = new ExecutorCompletionService[Unit](threadPool)
 
   private val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(ModuleConstants.persistentBlockingQueue)
+
+  private def createThreadPool() = {
+    val countOfThreads = 3
+    val threadFactory = createThreadFactory()
+
+    Executors.newFixedThreadPool(countOfThreads, threadFactory)
+  }
+
+  private def createThreadFactory() = {
+    new ThreadFactoryBuilder()
+      .setNameFormat("RegularTaskRunner-%d")
+      .build()
+  }
 
   def main(args: Array[String]) {
     try {
@@ -53,12 +64,6 @@ object RegularTaskRunner {
       case assertionError: Error => handleException(assertionError)
       case exception: Exception => handleException(exception)
     }
-  }
-
-  def createThreadFactory() = {
-    new ThreadFactoryBuilder()
-      .setNameFormat("RegularTaskRunner-%d")
-      .build()
   }
 
   def handleException(exception: Throwable) = {
