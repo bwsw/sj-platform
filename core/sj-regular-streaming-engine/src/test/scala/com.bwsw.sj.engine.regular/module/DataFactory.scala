@@ -20,7 +20,8 @@ import com.bwsw.tstreams.agents.producer._
 import com.bwsw.tstreams.common.CassandraConnectorConf
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.producer.transport.impl.TcpTransport
-import com.bwsw.tstreams.data.cassandra.CassandraStorageFactory
+import com.bwsw.tstreams.data.cassandra.Factory
+import com.bwsw.tstreams.env.TSF_Dictionary
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.policy.RoundRobinPolicy
@@ -49,7 +50,7 @@ object DataFactory {
   private val objectSerializer = new ObjectSerializer()
   private val cluster = Cluster.builder().addContactPoint(cassandraHost).build()
   private val session = cluster.connect()
-  private val dataStorageFactory = new CassandraStorageFactory()
+  private val dataStorageFactory = new Factory()
   private val cassandraConnectorConf = CassandraConnectorConf.apply(Set(new InetSocketAddress(cassandraHost, cassandraPort)))
 
   val inputCount = 2
@@ -465,7 +466,8 @@ object DataFactory {
       zkRootPath = "/unit",
       zkConnectionTimeout = 7000,
       isLowPriorityToBeMaster = false,
-      transport = new TcpTransport(5),
+      transport = new TcpTransport("localhost:8030",
+        TSF_Dictionary.Producer.TRANSPORT_TIMEOUT.toInt * 1000),
       zkSessionTimeout = 7000)
 
     val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)

@@ -16,7 +16,7 @@ import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
 import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerOptions}
 import com.bwsw.tstreams.common.CassandraConnectorConf
 import com.bwsw.tstreams.converter.IConverter
-import com.bwsw.tstreams.data.cassandra.CassandraStorageFactory
+import com.bwsw.tstreams.data.cassandra
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.policy.RoundRobinPolicy
@@ -38,7 +38,7 @@ object DataFactory {
   private val serializer = new JsonSerializer()
   private val cluster = Cluster.builder().addContactPoint(cassandraHost).build()
   private val session = cluster.connect()
-  private val dataStorageFactory = new CassandraStorageFactory()
+  private val dataStorageFactory = new cassandra.Factory()
   private val cassandraConnectorConf = CassandraConnectorConf.apply(Set(new InetSocketAddress(cassandraHost, cassandraPort)))
   val outputCount = 2
 
