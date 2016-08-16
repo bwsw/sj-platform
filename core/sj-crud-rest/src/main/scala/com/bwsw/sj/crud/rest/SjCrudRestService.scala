@@ -18,7 +18,6 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.crud.rest.utils.InstanceUtil
 
 import scala.concurrent.Future
-import scala.io.StdIn
 
 /**
  * Run object of CRUD Rest-API
@@ -66,7 +65,7 @@ object SjCrudRestService extends App with SjCrudRouter {
   val routeLogged = logRequestResult(Logging.InfoLevel, route())
   val logger = Logging(system, getClass)
 
-  //putRestSettingsToConfigFile()
+  putRestSettingsToConfigFile()
 
   InstanceUtil.checkStatusInstances()
 
@@ -78,9 +77,6 @@ object SjCrudRestService extends App with SjCrudRouter {
   }
 
   logger.info(s"Server online at http://$restHost:$restPort/")
-  StdIn.readLine()
-  serverBinding.flatMap(_.unbind())
-    .onComplete(_ => system.terminate())
 
   private def putRestSettingsToConfigFile() = {
     configService.save(new ConfigSetting(ConfigConstants.hostOfCrudRestTag, restHost, "system"))
