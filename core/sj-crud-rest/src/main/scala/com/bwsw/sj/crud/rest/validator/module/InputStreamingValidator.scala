@@ -116,6 +116,10 @@ class InputStreamingValidator extends StreamingModuleValidator {
     var validatedInstance: Instance = null
     if (outputStreams.nonEmpty) {
       val allStreams = outputStreams
+      val inputInstanceMetadata = parameters.asInstanceOf[InputInstanceMetadata]
+
+      if (inputInstanceMetadata.backupCount > 6)
+        errors += "Backup count must be in the interval from 0 to 6"
 
       val service = allStreams.head.service
       if (!service.isInstanceOf[TStreamService]) {
@@ -126,9 +130,9 @@ class InputStreamingValidator extends StreamingModuleValidator {
 
       parameters.parallelism = checkParallelism(parameters.parallelism, errors)
       if (parameters.parallelism != null)
-        checkBackupNumber(parameters.asInstanceOf[InputInstanceMetadata], errors)
+        checkBackupNumber(inputInstanceMetadata, errors)
 
-      validatedInstance = createInstance(parameters.asInstanceOf[InputInstanceMetadata])
+      validatedInstance = createInstance(inputInstanceMetadata)
     }
     (errors, validatedInstance)
   }
