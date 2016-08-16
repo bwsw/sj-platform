@@ -32,7 +32,7 @@ class PartitionedOutput(producer: Producer[Array[Byte]],
     logger.debug(s"Add an element to output envelope of output stream:  '$streamName'")
     performanceMetrics.addElementToOutputEnvelope(
       streamName,
-      txns(partition).getTxnUUID.toString,
+      txns(partition).getTransactionUUID().toString,
       data.length
     )
   }

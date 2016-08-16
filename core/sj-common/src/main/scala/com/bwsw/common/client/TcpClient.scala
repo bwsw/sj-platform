@@ -9,7 +9,7 @@ import java.util
 
 import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.twitter.common.quantity.{Time, Amount}
+import com.twitter.common.quantity.{Amount, Time}
 import com.twitter.common.zookeeper.ZooKeeperClient
 import org.apache.log4j.Logger
 
@@ -21,10 +21,12 @@ import org.apache.log4j.Logger
  */
 class TcpClient(options: TcpClientOptions) {
   private val logger = Logger.getLogger(getClass)
-  var client: SocketChannel = null
+  private var client: SocketChannel = null
   private var retryCount = options.retryCount
   private val configService = ConnectionRepository.getConfigService
   private val zkSessionTimeout = configService.get(ConfigConstants.zkSessionTimeoutTag).value.toInt
+
+  private var outputStream: OutputStream = null
 
   val zooKeeperServers = new util.ArrayList[InetSocketAddress]()
   options.zkServers.map(x => (x.split(":")(0), x.split(":")(1).toInt))
@@ -57,6 +59,7 @@ class TcpClient(options: TcpClientOptions) {
       val master = getMasterServer()
       client = SocketChannel.open(new InetSocketAddress(master(0), master(1).toInt))
       client.socket.setSoTimeout(zkSessionTimeout)
+      outputStream = client.socket().getOutputStream
       true
     } catch {
       case ex: IOException => false
@@ -94,10 +97,7 @@ class TcpClient(options: TcpClientOptions) {
   }
 
   private def sendRequest() {
-    val bs = "x".getBytes(StandardCharsets.UTF_8)
-    val buffer = ByteBuffer.wrap(bs)
-    client.write(buffer)
-    buffer.clear()
+    outputStream.write(84)
   }
 
   private def isServerAvailable = {
@@ -107,12 +107,12 @@ class TcpClient(options: TcpClientOptions) {
   }
 
   private def readFromServer() = {
+    inputBuffer.clear()
     client.read(inputBuffer)
   }
 
   private def deserializeResponse() = {
     val uuid = new String(inputBuffer.array(), StandardCharsets.UTF_8)
-    inputBuffer.clear()
 
     Some(uuid)
   }
