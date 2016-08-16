@@ -55,7 +55,7 @@ object StreamUtil {
     } else if (dataProvider.providerType.equals("aerospike")) {
       val options = new aerospike.Options(
         service.dataNamespace,
-        dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toList
+        dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toSet
       )
       dataStorage = (new aerospike.Factory).getInstance(options)
     }
@@ -273,7 +273,7 @@ object StreamUtil {
     } else if (dataProvider.providerType.equals("aerospike")) {
       val options = new Options(
         service.dataNamespace,
-        dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toList
+        dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toSet
       )
       dataStorage = (new aerospike.Factory).getInstance(options)
     }
