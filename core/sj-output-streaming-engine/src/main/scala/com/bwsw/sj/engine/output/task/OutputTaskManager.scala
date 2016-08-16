@@ -4,7 +4,7 @@ import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.engine.core.entities.OutputEntity
 import com.bwsw.sj.engine.core.environment.EnvironmentManager
 import com.bwsw.sj.engine.core.managment.TaskManager
-import com.bwsw.sj.engine.core.output.OutputStreamingHandler
+import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -41,7 +41,7 @@ class OutputTaskManager() extends TaskManager {
     val executor = classLoader
       .loadClass(fileMetadata.specification.executorClass)
       .newInstance()
-      .asInstanceOf[OutputStreamingHandler]
+      .asInstanceOf[OutputStreamingExecutor]
 
     executor
   }

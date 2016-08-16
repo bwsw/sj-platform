@@ -13,6 +13,10 @@ object Dependencies {
     "com.typesafe" % "config" % "1.3.0"
   ))
 
+   lazy val sjEngineCoreDependencies = Def.setting(Seq(
+    "net.openhft" % "chronicle-queue" % "4.2.6"
+  ))
+
   lazy val sjRestDependencies = Def.setting(Seq(
     "com.typesafe.akka" % "akka-http-experimental_2.11" % "2.0-M2",
     ("org.everit.json" % "org.everit.json.schema" % "1.2.0")

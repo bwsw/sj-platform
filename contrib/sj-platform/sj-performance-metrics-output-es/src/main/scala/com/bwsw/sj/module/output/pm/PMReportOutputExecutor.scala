@@ -2,7 +2,7 @@ package com.bwsw.sj.module.output.pm
 
 import com.bwsw.common.{ObjectSerializer, JsonSerializer}
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
-import com.bwsw.sj.engine.core.output.OutputStreamingHandler
+import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.module.output.pm.data.PerformanceMetrics
 
 /**
@@ -12,7 +12,7 @@ import com.bwsw.sj.module.output.pm.data.PerformanceMetrics
  *
  * @author Kseniya Mikhaleva
  */
-class PMReportOutputHandler extends OutputStreamingHandler {
+class PMReportOutputExecutor extends OutputStreamingExecutor {
   val jsonSerializer = new JsonSerializer()
   val objectSerializer = new ObjectSerializer()
 

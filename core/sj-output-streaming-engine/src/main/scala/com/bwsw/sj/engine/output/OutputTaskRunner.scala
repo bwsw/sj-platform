@@ -9,7 +9,7 @@ import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.DAL.model.{ESService, SjStream, TStreamSjStream}
 import com.bwsw.sj.engine.core.entities.{EsEntity, OutputEntity, OutputEnvelope, TStreamEnvelope}
-import com.bwsw.sj.engine.core.output.OutputStreamingHandler
+import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.core.utils.EngineUtils._
 import com.bwsw.sj.engine.output.subscriber.OutputSubscriberCallback
 import com.bwsw.sj.engine.output.task.OutputTaskManager
@@ -42,8 +42,8 @@ object OutputTaskRunner {
 
   def main(args: Array[String]) = {
 
-    val instance: OutputInstance = OutputDataFactory.instance
     val taskManager: OutputTaskManager = new OutputTaskManager()
+
     logger.info(s"Task: ${OutputDataFactory.taskName}. Start preparing of task runner for output module.")
 
     val inputStream: SjStream = OutputDataFactory.inputStream
@@ -65,14 +65,14 @@ object OutputTaskRunner {
     logger.debug(s"Task: ${OutputDataFactory.taskName}. Creation of subscribing consumer is finished.")
 
     logger.debug(s"Task: ${OutputDataFactory.taskName}. Start loading of executor (handler) class from module jar.")
-    val handler: OutputStreamingHandler = taskManager.getExecutor.asInstanceOf[OutputStreamingHandler]
+    val handler = taskManager.getExecutor.asInstanceOf[OutputStreamingExecutor]
 
     val entity: OutputEntity = taskManager.getOutputModuleEntity()
 
     val performanceMetrics = new OutputStreamingPerformanceMetrics(taskManager)
     executorService.submit(performanceMetrics)
 
-    logger.info(s"Task: ${OutputDataFactory.taskName}. Preparing finished. Launch task.")
+    logger.info(s"Task: ${taskManager.taskName}. Preparing finished. Launch task.")
     try {
       runModule(instance,
         blockingQueue,
@@ -108,12 +108,10 @@ object OutputTaskRunner {
                 blockingQueue: ArrayBlockingQueue[String],
                 subscribeConsumer: SubscribingConsumer[Array[Byte]],
                 taskManager: OutputTaskManager,
-                handler: OutputStreamingHandler,
+                handler: OutputStreamingExecutor,
                 outputModuleEntity: OutputEntity,
                 outputStream: SjStream,
                 performanceMetrics: OutputStreamingPerformanceMetrics) = {
-    logger.debug(s"Task: ${OutputDataFactory.taskName}. Launch subscribing consumer.")
-    subscribeConsumer.start()
 
     val (client, esService) = openDbConnection(outputStream)
     createEsStream(esService.index, outputStream.name, outputModuleEntity, client)
@@ -122,7 +120,7 @@ object OutputTaskRunner {
       //todo пока так
       case "every-nth" =>
         var countOfTxn = 0
-        var isFirstCheckpoint = false
+        var wasFirstCheckpoint = false
         while (true) {
           logger.debug(s"Task: ${OutputDataFactory.taskName}. Start a output module with every-nth checkpoint mode.")
 
@@ -133,9 +131,9 @@ object OutputTaskRunner {
             countOfTxn += 1
             logger.debug(s"Task: ${OutputDataFactory.taskName}. Envelope processing...")
             val tStreamEnvelope = serializer.deserialize[TStreamEnvelope](nextEnvelope)
-            subscribeConsumer.setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
+            //subscribeConsumer.setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
 
-            if (!isFirstCheckpoint) {
+            if (!wasFirstCheckpoint) {
               deleteTransactionFromES(tStreamEnvelope.txnUUID.toString.replaceAll("-", ""), esService.index, outputStream.name, client)
             }
 
@@ -167,9 +165,9 @@ object OutputTaskRunner {
 
           if (countOfTxn == instance.checkpointInterval) {
             logger.debug(s"Task: ${OutputDataFactory.taskName}. Checkpoint.")
-            subscribeConsumer.checkpoint()
+            //subscribeConsumer.checkpoint()
             countOfTxn = 0
-            isFirstCheckpoint = true
+            wasFirstCheckpoint = true
           }
         }
     }

@@ -4,8 +4,8 @@ import java.util.concurrent.{ExecutorCompletionService, Executors}
 
 import com.bwsw.sj.common.ModuleConstants
 import com.bwsw.sj.engine.core.PersistentBlockingQueue
+import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
-import com.bwsw.sj.engine.regular.task.engine.input.RegularTaskInputService
 import com.bwsw.sj.engine.regular.task.engine.{RegularTaskEngine, RegularTaskEngineFactory}
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 import com.google.common.util.concurrent.ThreadFactoryBuilder
@@ -51,7 +51,7 @@ object RegularTaskRunner {
 
       val regularTaskEngine: RegularTaskEngine = regularTaskEngineFactory.createRegularTaskEngine()
 
-      val regularTaskInputService: RegularTaskInputService = regularTaskEngine.regularTaskInputService
+      val regularTaskInputService: TaskInputService = regularTaskEngine.regularTaskInputService
 
       logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
 

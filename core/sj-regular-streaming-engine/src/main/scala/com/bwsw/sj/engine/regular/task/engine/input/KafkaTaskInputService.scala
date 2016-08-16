@@ -2,10 +2,14 @@ package com.bwsw.sj.engine.regular.task.engine.input
 
 import java.util.Properties
 
+import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.ConfigConstants._
+import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.DAL.model.{KafkaService, SjStream}
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.engine.core.PersistentBlockingQueue
+import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope}
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
@@ -32,14 +36,17 @@ import scala.collection.mutable
  *                      which will be retrieved into a module
  * @param checkpointGroup Group of t-stream agents that have to make a checkpoint at the same time
  */
-class KafkaRegularTaskInputService(manager: RegularTaskManager,
+class KafkaTaskInputService(manager: RegularTaskManager,
                                    blockingQueue: PersistentBlockingQueue,
                                    checkpointGroup: CheckpointGroup)
-  extends RegularTaskInputService(manager) {
+  extends TaskInputService {
 
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"regular-task-${manager.taskName}-kafka-consumer")
   private val logger = LoggerFactory.getLogger(this.getClass)
+  private val offsetSerializer = new ObjectSerializer()
+  private val regularInstance = manager.getInstance.asInstanceOf[RegularInstance]
+  private val configService = ConnectionRepository.getConfigService
   private val kafkaSubscriberTimeout = configService.get(kafkaSubscriberTimeoutTag).value.toInt
   private val kafkaInputs = getKafkaInputs()
   private var kafkaOffsetsStorage = mutable.Map[(String, Int), Long]()
@@ -155,7 +162,7 @@ class KafkaRegularTaskInputService(manager: RegularTaskManager,
 
     if (lastTxn.isDefined) {
       logger.debug(s"Task name: ${manager.taskName}. Get saved offsets for kafka consumer and apply their\n")
-      kafkaOffsetsStorage = objectSerializer.deserialize(lastTxn.get.next()).asInstanceOf[mutable.Map[(String, Int), Long]]
+      kafkaOffsetsStorage = offsetSerializer.deserialize(lastTxn.get.next()).asInstanceOf[mutable.Map[(String, Int), Long]]
       kafkaOffsetsStorage.foreach(x => consumer.seek(new TopicPartition(x._1._1, x._1._2), x._2 + 1))
     }
 
@@ -173,6 +180,7 @@ class KafkaRegularTaskInputService(manager: RegularTaskManager,
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Run a kafka consumer for regular task in a separate thread of execution service\n")
 
+    val envelopeSerializer = new JsonSerializer()
     val streamNameToTags = kafkaInputs.map(x => (x._1.name, x._1.tags)).toMap
 
     while (true) {
@@ -208,6 +216,6 @@ class KafkaRegularTaskInputService(manager: RegularTaskManager,
   override def doCheckpoint() = {
     logger.debug(s"Task: ${manager.taskName}. Save kafka offsets for each kafka input\n")
     offsetProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
-      .send(objectSerializer.serialize(kafkaOffsetsStorage))
+      .send(offsetSerializer.serialize(kafkaOffsetsStorage))
   }
 }

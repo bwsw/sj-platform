@@ -3,11 +3,12 @@ package com.bwsw.sj.engine.regular.task.engine.input
 import java.util.Date
 
 import com.bwsw.sj.common.DAL.model.TStreamSjStream
+import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.StreamConstants
-import com.bwsw.sj.engine.core.PersistentBlockingQueue
+import com.bwsw.sj.engine.core.{ConsumerCallback, PersistentBlockingQueue}
+import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
-import com.bwsw.sj.engine.regular.subscriber.RegularConsumerCallback
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
 import com.bwsw.tstreams.agents.consumer.Offsets.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.group.CheckpointGroup
@@ -27,17 +28,14 @@ import org.slf4j.LoggerFactory
  * @author Kseniya Mikhaleva
  *
  */
-class TStreamRegularTaskInputService(manager: RegularTaskManager,
+class TStreamTaskInputService(manager: RegularTaskManager,
                                      blockingQueue: PersistentBlockingQueue,
                                      checkpointGroup: CheckpointGroup)
-  extends RegularTaskInputService(manager) {
+  extends TaskInputService {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-
+  private val regularInstance = manager.getInstance.asInstanceOf[RegularInstance]
   private val consumers = createSubscribingConsumers()
-
-  addConsumersToCheckpointGroup()
-  launchConsumers()
 
   /**
    * Chooses offset policy for t-streams consumers
@@ -58,7 +56,7 @@ class TStreamRegularTaskInputService(manager: RegularTaskManager,
     logger.debug(s"Task: ${manager.taskName}. Start creating subscribing consumers\n")
     val inputs = manager.inputs
     val offset = regularInstance.startFrom
-    val callback = new RegularConsumerCallback[Array[Byte]](blockingQueue)
+    val callback = new ConsumerCallback[Array[Byte]](blockingQueue)
 
     val consumers = inputs.filter(x => x._1.streamType == StreamConstants.tStreamType).map({
       x => manager.createSubscribingConsumer(x._1.asInstanceOf[TStreamSjStream], x._2.toList, chooseOffset(offset), callback)
@@ -92,5 +90,10 @@ class TStreamRegularTaskInputService(manager: RegularTaskManager,
     )
   }
 
-  def call() = {}
+  def call() = {
+    addConsumersToCheckpointGroup()
+    launchConsumers()
+  }
+
+  override def doCheckpoint(): Unit = {}
 }

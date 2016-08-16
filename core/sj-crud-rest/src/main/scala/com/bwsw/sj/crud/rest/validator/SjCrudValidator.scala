@@ -128,8 +128,7 @@ trait SjCrudValidator {
 
   def doesModuleExist(specification: Map[String, Any]) = {
     fileMetadataDAO.getByParameters(
-      Map("specification.name" ->
-        specification("name").asInstanceOf[String],
+      Map("specification.name" -> specification("name").asInstanceOf[String],
         "specification.module-type" -> specification("module-type").asInstanceOf[String],
         "specification.version" -> specification("version").asInstanceOf[String]
       )).nonEmpty

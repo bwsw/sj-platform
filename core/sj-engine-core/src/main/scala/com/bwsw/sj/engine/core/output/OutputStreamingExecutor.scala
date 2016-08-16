@@ -8,7 +8,7 @@ import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
   *
   * @author Kseniya Tomskikh
   */
-trait OutputStreamingHandler extends StreamingExecutor {
+trait OutputStreamingExecutor extends StreamingExecutor {
 
   /**
     *

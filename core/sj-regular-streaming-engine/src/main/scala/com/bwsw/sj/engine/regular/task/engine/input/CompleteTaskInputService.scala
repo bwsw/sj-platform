@@ -2,6 +2,7 @@ package com.bwsw.sj.engine.regular.task.engine.input
 
 import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.engine.core.PersistentBlockingQueue
+import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
@@ -20,14 +21,14 @@ import org.slf4j.LoggerFactory
  *                      which will be retrieved into a module
  * @param checkpointGroup Group of t-stream agents that have to make a checkpoint at the same time
  */
-class CompleteRegularTaskInputService(manager: RegularTaskManager,
+class CompleteTaskInputService(manager: RegularTaskManager,
                                       blockingQueue: PersistentBlockingQueue,
                                       checkpointGroup: CheckpointGroup)
-  extends RegularTaskInputService(manager) {
+  extends TaskInputService {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val kafkaRegularTaskInputService = new KafkaRegularTaskInputService(manager, blockingQueue, checkpointGroup)
-  private val tStreamRegularTaskInputService = new TStreamRegularTaskInputService(manager, blockingQueue, checkpointGroup)
+  private val kafkaRegularTaskInputService = new KafkaTaskInputService(manager, blockingQueue, checkpointGroup)
+  private val tStreamRegularTaskInputService = new TStreamTaskInputService(manager, blockingQueue, checkpointGroup)
 
   def registerEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics) = {
     envelope.streamType match {
@@ -41,7 +42,10 @@ class CompleteRegularTaskInputService(manager: RegularTaskManager,
     }
   }
 
-  def call() = kafkaRegularTaskInputService.call()
+  def call() = {
+    tStreamRegularTaskInputService.call()
+    kafkaRegularTaskInputService.call()
+  }
 
   override def doCheckpoint() = kafkaRegularTaskInputService.doCheckpoint()
 }

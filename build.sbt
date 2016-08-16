@@ -71,6 +71,9 @@ lazy val common = Project(id = "sj-common",
 lazy val engineCore = Project(id = "sj-engine-core",
   base = file("./core/sj-engine-core"))
   .settings(commonSettings: _*)
+   .settings(
+    libraryDependencies ++= Dependencies.sjEngineCoreDependencies.value
+  )
   .dependsOn(common)
 
 lazy val crudRest = Project(id = "sj-crud-rest",

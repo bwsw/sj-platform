@@ -22,11 +22,7 @@ class OutputSubscriberCallback(blockingQueue: ArrayBlockingQueue[String])
   extends Callback[Array[Byte]] {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass)
-
-  /**
-    * Provides a serialization from Transaction to String in order to put in queue
-    */
-  private val serializer = new JsonSerializer()
+  private val envelopeSerializer = new JsonSerializer()
 
   /**
     * Executing, when getting new transaction from t-stream
@@ -42,6 +38,7 @@ class OutputSubscriberCallback(blockingQueue: ArrayBlockingQueue[String])
     logger.debug(s"onEvent handler was invoked by subscriber: ${subscriber.name}\n")
     val txn = subscriber.getTransactionById(partition, transactionUuid).get
     val stream = ConnectionRepository.getStreamService.get(subscriber.stream.getName)
+
     val envelope = new TStreamEnvelope()
     envelope.stream = stream.name
     envelope.partition = partition
@@ -49,6 +46,7 @@ class OutputSubscriberCallback(blockingQueue: ArrayBlockingQueue[String])
     envelope.consumerName = subscriber.name
     envelope.data = txn.getAll()
     envelope.tags = stream.tags
-    blockingQueue.put(serializer.serialize(envelope))
+
+    blockingQueue.put(envelopeSerializer.serialize(envelope))
   }
 }
