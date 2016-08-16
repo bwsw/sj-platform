@@ -148,8 +148,8 @@ class InputStreamingValidator extends StreamingModuleValidator {
   }
 
   private def checkBackupNumber(parameters: InputInstanceMetadata, errors: ArrayBuffer[String]) = {
-    if (parameters.parallelism.asInstanceOf[Int] < (parameters.backupCount + parameters.asyncBackupCount))
-      errors += "Parallelism must be greater than or equal to the total number of backups."
+    if (parameters.parallelism.asInstanceOf[Int] <= (parameters.backupCount + parameters.asyncBackupCount))
+      errors += "Parallelism must be greater than the total number of backups."
   }
 
   /**
