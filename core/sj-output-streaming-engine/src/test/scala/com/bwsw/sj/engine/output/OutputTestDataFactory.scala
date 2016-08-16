@@ -44,7 +44,7 @@ object OutputTestDataFactory {
   private val dataStorageHosts = inputStreamService.dataProvider.hosts.map { addr =>
     val parts = addr.split(":")
     new Host(parts(0), parts(1).toInt)
-  }.toList
+  }.toSet
   private val options = new aerospike.Options(inputStreamService.dataNamespace, dataStorageHosts)
   val dataStorage = dataStorageFactory.getInstance(options)
 

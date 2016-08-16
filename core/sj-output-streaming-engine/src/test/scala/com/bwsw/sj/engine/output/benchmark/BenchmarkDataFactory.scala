@@ -85,7 +85,7 @@ object BenchmarkDataFactory {
     val dataStorageHosts = tStreamService.dataProvider.hosts.map { addr =>
       val parts = addr.split(":")
       new Host(parts(0), parts(1).toInt)
-    }.toList
+    }.toSet
     val options = new aerospike.Options(tStreamService.dataNamespace, dataStorageHosts)
     val dataStorage: aerospike.Storage = dataStorageFactory.getInstance(options)
 
@@ -310,7 +310,7 @@ object BenchmarkDataFactory {
     val dataStorageHosts = tService.dataProvider.hosts.map { addr =>
       val parts = addr.split(":")
       new Host(parts(0), parts(1).toInt)
-    }.toList
+    }.toSet
     val options = new aerospike.Options(tService.dataNamespace, dataStorageHosts)
     val dataStorage: aerospike.Storage = dataStorageFactory.getInstance(options)
 
