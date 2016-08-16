@@ -142,12 +142,6 @@ abstract class TaskManager() {
       (0 until stream.partitions).toList)
   }
 
-  protected def setStreamOptions(stream: TStreamSjStream) = {
-    tstreamFactory.setProperty(TSF_Dictionary.Stream.NAME, stream.name)
-    tstreamFactory.setProperty(TSF_Dictionary.Stream.PARTITIONS, stream.partitions)
-    tstreamFactory.setProperty(TSF_Dictionary.Stream.DESCRIPTION, stream.description)
-  }
-
   private def setProducerBindPort() = {
     tstreamFactory.setProperty(TSF_Dictionary.Producer.BIND_PORT, agentsPorts(currentPortNumber))
     currentPortNumber += 1
@@ -233,6 +227,12 @@ abstract class TaskManager() {
       partitionRange,
       callback,
       offset)
+  }
+
+  protected def setStreamOptions(stream: TStreamSjStream) = {
+    tstreamFactory.setProperty(TSF_Dictionary.Stream.NAME, stream.name)
+    tstreamFactory.setProperty(TSF_Dictionary.Stream.PARTITIONS, stream.partitions)
+    tstreamFactory.setProperty(TSF_Dictionary.Stream.DESCRIPTION, stream.description)
   }
 
   private def setSubscribingConsumerBindPort() = {

@@ -266,7 +266,7 @@ class RAMStateService(manager: RegularTaskManager, checkpointGroup: CheckpointGr
     logger.debug(s"Save a full state in t-stream intended for storing/restoring a state\n")
     val transaction = stateProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
     state.foreach((x: (String, Any)) => transaction.send(serializer.serialize(x)))
-    transaction.getTxnUUID
+    transaction.getTransactionUUID()
   }
 
   /**

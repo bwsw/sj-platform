@@ -31,7 +31,7 @@ class RoundRobinOutput(producer: Producer[Array[Byte]],
     logger.debug(s"Add an element to output envelope of output stream:  '$streamName'")
     performanceMetrics.addElementToOutputEnvelope(
       streamName,
-      txn.get.getTxnUUID.toString,
+      txn.get.getTransactionUUID().toString,
       data.length
     )
   }

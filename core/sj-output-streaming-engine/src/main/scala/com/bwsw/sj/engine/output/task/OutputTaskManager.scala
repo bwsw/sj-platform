@@ -1,7 +1,5 @@
 package com.bwsw.sj.engine.output.task
 
-import java.io.File
-
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.engine.core.entities.OutputEntity
 import com.bwsw.sj.engine.core.environment.EnvironmentManager
@@ -23,17 +21,17 @@ class OutputTaskManager() extends TaskManager {
   val task: mutable.Map[String, Array[Int]] = instance.executionPlan.tasks.get(taskName).inputs.asScala
 
   /**
-    * Returns an instance of executor of module
-    *
-    * @return An instance of executor of module
-    */
+   * Returns an instance of executor of module
+   *
+   * @return An instance of executor of module
+   */
   def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = ???
 
   /**
-    * Returns instance of executor of module
-    *
-    * @return An instance of executor of module
-    */
+   * Returns instance of executor of module
+   *
+   * @return An instance of executor of module
+   */
   def getExecutor: StreamingExecutor = {
     logger.debug(s"Task: $taskName. Start loading of executor class from module jar\n")
     val moduleJar = getModuleJar
@@ -49,13 +47,11 @@ class OutputTaskManager() extends TaskManager {
   }
 
   /**
-    * Getting instance of entity object from output module jar
-    *
-    * @param file Jar of module
-    * @param entityClassName Classname of entity class of module
-    * @return Entity instance from jar
-    */
-  def getOutputModuleEntity(file: File, entityClassName: String) = {
+   * Getting instance of entity object from output module jar
+   */
+  def getOutputModuleEntity() = {
+    val file = getModuleJar
+    val entityClassName = fileMetadata.specification.entityClass
     logger.info(s"Task: $taskName. Getting entity object from jar of file: ${instance.moduleType}-${instance.moduleName}-${instance.moduleVersion}")
     val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
     val clazz = loader.loadClass(entityClassName)

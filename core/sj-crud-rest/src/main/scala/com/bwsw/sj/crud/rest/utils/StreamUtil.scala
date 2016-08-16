@@ -100,7 +100,7 @@ object StreamUtil {
     BasicStreamService.createStream(
       stream.name,
       stream.asInstanceOf[TStreamSjStream].partitions,
-      configService.get(ConfigConstants.streamTTLTag).value.toInt,
+      60000, //todo t-streams-stream-ttl
       "", metadataStorage,
       dataStorage
     )

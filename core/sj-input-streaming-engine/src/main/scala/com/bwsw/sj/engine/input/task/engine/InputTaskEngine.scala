@@ -131,7 +131,7 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
     logger.debug(s"Task name: ${manager.taskName}. Add envelope to output stream in performance metrics \n")
     performanceMetrics.addElementToOutputEnvelope(
       stream,
-      txn.getTxnUUID.toString,
+      txn.getTransactionUUID().toString,
       data.length
     )
   }
