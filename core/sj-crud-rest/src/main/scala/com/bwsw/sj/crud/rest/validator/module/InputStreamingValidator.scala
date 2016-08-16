@@ -118,9 +118,6 @@ class InputStreamingValidator extends StreamingModuleValidator {
       val allStreams = outputStreams
       val inputInstanceMetadata = parameters.asInstanceOf[InputInstanceMetadata]
 
-      if (inputInstanceMetadata.backupCount > 6)
-        errors += "Backup count must be in the interval from 0 to 6"
-
       val service = allStreams.head.service
       if (!service.isInstanceOf[TStreamService]) {
         errors += s"Service for t-streams must be 'TstrQ'."
@@ -195,6 +192,9 @@ class InputStreamingValidator extends StreamingModuleValidator {
           s"Eviction-policy must be 'fix-time' or 'expanded-time'."
       }
     }
+
+    if (instance.backupCount < 0 || instance.backupCount > 6)
+      errors += "Backup count must be in the interval from 0 to 6"
 
     streamOptionsValidate(parameters, specification, errors)
   }

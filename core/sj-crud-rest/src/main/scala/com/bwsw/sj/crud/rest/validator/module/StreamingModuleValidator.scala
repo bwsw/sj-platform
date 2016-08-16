@@ -475,9 +475,7 @@ abstract class StreamingModuleValidator {
     * @return - mode of stream
     */
   def getStreamMode(name: String) = {
-    if (name.contains("/split")) {
-      "split"
-    } else if (name.contains("/full")) {
+    if (name.contains("/full")) {
       "full"
     } else {
       "split"
