@@ -94,8 +94,8 @@ class OutputStreamingValidator extends StreamingModuleValidator {
       }
 
       parameters.parallelism = checkParallelism(parameters.parallelism, inputStream.asInstanceOf[TStreamSjStream].partitions, errors)
-      val partitions = getPartitionForStreams(Array(inputStream))
 
+      val partitions = getPartitionForStreams(Array(inputStream))
       parameters.inputs = Array(parameters.asInstanceOf[OutputInstanceMetadata].input)
       validatedInstance = createInstance(parameters, partitions, allStreams.filter(s => s.streamType.equals(tStreamType)).toSet)
     }

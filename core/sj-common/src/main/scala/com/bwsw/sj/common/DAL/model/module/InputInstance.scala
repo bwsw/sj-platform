@@ -14,5 +14,7 @@ class InputInstance extends Instance {
   @Property("queue-max-size") var queueMaxSize: Int = 0
   @Property("default-eviction-policy") var defaultEvictionPolicy: String = null
   @Property("eviction-policy") var evictionPolicy: String = null
+  @Property("backup-count") var backupCount: Int = 0
+  @Property("async-backup-count") var asyncBackupCount: Int = 0
   var tasks: java.util.Map[String, InputTask] = null
 }

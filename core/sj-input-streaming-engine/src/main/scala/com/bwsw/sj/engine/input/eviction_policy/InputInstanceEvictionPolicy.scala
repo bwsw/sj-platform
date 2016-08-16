@@ -54,6 +54,8 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
       .setTimeToLiveSeconds(instance.lookupHistory)
       .setEvictionPolicy(evictionPolicy)
       .setMaxSizeConfig(maxSizeConfig)
+      .setAsyncBackupCount(instance.asyncBackupCount)
+      .setBackupCount(instance.backupCount)
 
     config
   }

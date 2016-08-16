@@ -15,20 +15,20 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 /**
-  * Validator for input-streaming instance
-  * Created: 11/07/2016
-  *
-  * @author Kseniya Tomskikh
-  */
+ * Validator for input-streaming instance
+ * Created: 11/07/2016
+ *
+ * @author Kseniya Tomskikh
+ */
 class InputStreamingValidator extends StreamingModuleValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
   /**
-    * Create entity of input instance for saving to database
-    *
-    * @return
-    */
+   * Create entity of input instance for saving to database
+   *
+   * @return
+   */
   def createInstance(parameters: InputInstanceMetadata): Instance = {
     logger.debug(s"Instance ${parameters.name}. Create model object.")
     val instance = convertToModelInstance(parameters)
@@ -51,10 +51,10 @@ class InputStreamingValidator extends StreamingModuleValidator {
   }
 
   /**
-    * Create tasks object for instance of input module
-    *
-    * @param instance - instance for input module
-    */
+   * Create tasks object for instance of input module
+   *
+   * @param instance - instance for input module
+   */
   def createTasks(instance: InputInstance): Unit = {
     logger.debug(s"Instance ${instance.name}. Create tasks for input instance.")
 
@@ -68,13 +68,13 @@ class InputStreamingValidator extends StreamingModuleValidator {
   }
 
   /**
-    * Validating options of streams of instance for module
-    *
-    * @param parameters    - Input instance parameters
-    * @param specification - Specification of module
-    * @param errors        - List of validating errors
-    * @return - List of errors and validating instance (null, if errors non empty)
-    */
+   * Validating options of streams of instance for module
+   *
+   * @param parameters    - Input instance parameters
+   * @param specification - Specification of module
+   * @param errors        - List of validating errors
+   * @return - List of errors and validating instance (null, if errors non empty)
+   */
   override def streamOptionsValidate(parameters: InstanceMetadata,
                                      specification: ModuleSpecification,
                                      errors: ArrayBuffer[String]): (ArrayBuffer[String], Instance) = {
@@ -124,17 +124,36 @@ class InputStreamingValidator extends StreamingModuleValidator {
         checkTStreams(errors, allStreams.filter(s => s.streamType.equals(tStreamType)).map(_.asInstanceOf[TStreamSjStream]))
       }
 
+      parameters.parallelism = checkParallelism(parameters.parallelism, errors)
+      if (parameters.parallelism != null)
+        checkBackupNumber(parameters.asInstanceOf[InputInstanceMetadata], errors)
+
       validatedInstance = createInstance(parameters.asInstanceOf[InputInstanceMetadata])
     }
     (errors, validatedInstance)
   }
 
+  private def checkParallelism(parallelism: Any, errors: ArrayBuffer[String]) = {
+    parallelism match {
+      case dig: Int =>
+        dig
+      case _ =>
+        errors += "Unknown type of 'parallelism' parameter. Must be Int."
+        null
+    }
+  }
+
+  private def checkBackupNumber(parameters: InputInstanceMetadata, errors: ArrayBuffer[String]) = {
+    if (parameters.parallelism.asInstanceOf[Int] < (parameters.backupCount + parameters.asyncBackupCount))
+      errors += "Parallelism must be greater than or equal to the total number of backups."
+  }
+
   /**
-    * Validating input parameters for input-streaming module
-    *
-    * @param parameters - input parameters for running module
-    * @return - List of errors
-    */
+   * Validating input parameters for input-streaming module
+   *
+   * @param parameters - input parameters for running module
+   * @return - List of errors
+   */
   override def validate(parameters: InstanceMetadata,
                         specification: ModuleSpecification): (ArrayBuffer[String], Instance) = {
     logger.debug(s"Instance: ${parameters.name}. Start input-streaming validation.")
