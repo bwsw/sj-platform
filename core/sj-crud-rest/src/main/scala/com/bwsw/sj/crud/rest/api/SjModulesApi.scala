@@ -222,6 +222,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                             msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.deleted"), instanceName)
                           } else {
                             msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.cannot.delete"), instanceName)
+                            throw new InstanceException(msg, instanceName)
                           }
                           complete(HttpEntity(
                             `application/json`,

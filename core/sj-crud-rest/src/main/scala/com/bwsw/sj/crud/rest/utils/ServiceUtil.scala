@@ -92,4 +92,28 @@ object ServiceUtil {
     }.toSet
     cassandraFactory.open(cassandraHosts)
   }
+
+  def deleteService(service: Service) = {
+    service match {
+      case esService: ESService => deleteIndex(esService)
+
+      case cassService: CassandraService =>
+        openCassandraSession(cassService.provider)
+        cassandraFactory.dropKeyspace(cassService.keyspace)
+        cassandraFactory.close()
+
+      case _ =>
+    }
+  }
+
+  private def deleteIndex(esService: ESService) = {
+    logger.info(s"Delete elasticsearch index ${esService.index}.")
+    val client: TransportClient = TransportClient.builder().build()
+    esService.provider.hosts.foreach { host =>
+      val parts = host.split(":")
+      client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(parts(0)), parts(1).toInt))
+    }
+    client.admin().indices().prepareDelete(esService.index).execute().actionGet()
+    logger.debug(s"Elasicsearch service ${esService.name}. Index ${esService.index} is create.")
+  }
 }
