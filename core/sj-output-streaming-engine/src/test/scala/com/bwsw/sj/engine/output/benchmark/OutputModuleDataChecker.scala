@@ -82,7 +82,6 @@ object OutputModuleDataChecker extends App {
   metadataStorageFactory.closeFactory()
   dataStorageFactory.closeFactory()
   esClient.close()
-  close()
   ConnectionRepository.close()
 
   println("DONE")

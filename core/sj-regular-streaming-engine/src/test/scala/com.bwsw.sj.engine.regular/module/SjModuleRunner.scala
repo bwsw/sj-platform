@@ -8,7 +8,7 @@ import com.bwsw.sj.engine.regular.module.DataFactory._
 import com.bwsw.sj.engine.regular.RegularTaskRunner
 
 object SjModuleSetup extends App {
- LogManager.getLogManager.reset()
+  LogManager.getLogManager.reset()
   val streamService = ConnectionRepository.getStreamService
   val serviceManager = ConnectionRepository.getServiceManager
   val providerService = ConnectionRepository.getProviderService
@@ -21,6 +21,7 @@ object SjModuleSetup extends App {
 
   val module = new File("./contrib/stubs/sj-stub-regular-streaming/target/scala-2.11/sj-stub-regular-streaming-1.0.jar")
 
+  open()
   cassandraSetup()
   loadModule(module, fileStorage)
   createProviders(providerService)
@@ -29,7 +30,6 @@ object SjModuleSetup extends App {
   createInstance(serviceManager, instanceService, checkpointInterval, stateManagement, stateFullCheckpoint)
 
   createData(12, 4, streamService, _type, inputCount)
-
   close()
   ConnectionRepository.close()
 
@@ -52,13 +52,13 @@ object SjModuleDestroy extends App {
 
   val module = new File("./contrib/stubs/sj-stub-regular-streaming/target/scala-2.11/sj-stub-regular-streaming-1.0.jar")
 
+  open()
   deleteStreams(streamService, _type, inputCount, outputCount)
   deleteServices(serviceManager)
   deleteProviders(providerService)
   deleteInstance(instanceService)
   deleteModule(fileStorage, module.getName)
   cassandraDestroy()
-
   close()
   ConnectionRepository.close()
 

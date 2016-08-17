@@ -52,7 +52,7 @@ val commonSettings = Seq(
   publishArtifact in Test := false
 )
 
-lazy val root = (project in file(".")) settings (publish := { }) aggregate(common,
+lazy val sj = (project in file(".")) settings (publish := { }) aggregate(common,
   engineCore, crudRest,
   inputStreamingEngine, regularStreamingEngine, windowedStreamingEngine, outputStreamingEngine,
   framework, transactionGenerator,
