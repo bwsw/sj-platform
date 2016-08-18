@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory
 object ServiceUtil {
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
-  private val cassandraFactory = new CassandraFactory
 
   /**
    * Prepare service: create keyspaces/namespaces/indexes/metatables
@@ -30,7 +29,8 @@ object ServiceUtil {
       case esService: ESService => createIndex(esService)
 
       case cassService: CassandraService =>
-        openCassandraSession(cassService.provider)
+        val cassandraFactory = new CassandraFactory
+        cassandraFactory.open(getCassandraHosts(cassService.provider))
         cassandraFactory.createKeyspace(cassService.keyspace)
         cassandraFactory.close()
 
@@ -65,12 +65,14 @@ object ServiceUtil {
    * @param tStreamService TStream service
    */
   private def createTStreamService(tStreamService: TStreamService) = {
-    openCassandraSession(tStreamService.metadataProvider)
+    val cassandraFactory = new CassandraFactory
+    cassandraFactory.open(getCassandraHosts(tStreamService.metadataProvider))
     cassandraFactory.createKeyspace(tStreamService.metadataNamespace)
     cassandraFactory.createMetadataTables(tStreamService.metadataNamespace)
 
     if (tStreamService.dataProvider.providerType.equals("cassandra")) {
-      openCassandraSession(tStreamService.dataProvider)
+      val cassandraFactory = new CassandraFactory
+      cassandraFactory.open(getCassandraHosts(tStreamService.metadataProvider))
       cassandraFactory.createKeyspace(tStreamService.dataNamespace)
       cassandraFactory.createDataTable(tStreamService.dataNamespace)
       cassandraFactory.close()
@@ -78,19 +80,14 @@ object ServiceUtil {
     cassandraFactory.close()
   }
 
-  /**
-   * Open new session to cassandra server
-   *
-   * @param provider Cassandra provider for connection to server
-   * @return New cassandra session
-   */
-  private def openCassandraSession(provider: Provider) = {
+  private def getCassandraHosts(provider: Provider) = {
     logger.debug(s"Open cassandra connection. Provider: ${provider.name}.")
     val cassandraHosts = provider.hosts.map { host =>
       val parts = host.split(":")
       new InetSocketAddress(parts(0), parts(1).toInt)
     }.toSet
-    cassandraFactory.open(cassandraHosts)
+
+    cassandraHosts
   }
 
   def deleteService(service: Service) = {
@@ -98,7 +95,8 @@ object ServiceUtil {
       case esService: ESService => deleteIndex(esService)
 
       case cassService: CassandraService =>
-        openCassandraSession(cassService.provider)
+        val cassandraFactory = new CassandraFactory
+        cassandraFactory.open(getCassandraHosts(cassService.provider))
         cassandraFactory.dropKeyspace(cassService.keyspace)
         cassandraFactory.close()
 
@@ -114,6 +112,6 @@ object ServiceUtil {
       client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(parts(0)), parts(1).toInt))
     }
     client.admin().indices().prepareDelete(esService.index).execute().actionGet()
-    logger.debug(s"Elasicsearch service ${esService.name}. Index ${esService.index} is create.")
+    logger.debug(s"Elasticsearch service ${esService.name}. Index ${esService.index} is create.")
   }
 }
