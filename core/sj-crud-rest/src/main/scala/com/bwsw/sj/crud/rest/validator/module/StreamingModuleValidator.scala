@@ -92,8 +92,8 @@ abstract class StreamingModuleValidator {
     logger.debug(s"Instance: ${parameters.name}. General options validation.")
     val errors = new ArrayBuffer[String]()
 
-    if (!parameters.name.matches("""^([a-zA-Z][a-zA-Z0-9-]+)$""")) {
-      errors += s"Instance has incorrect name: ${parameters.name}. Name of instance must be contain digits, letters or hyphens. First symbol must be letter."
+    if (!parameters.name.matches("""^([a-z][a-z0-9-]*)$""")) {
+      errors += s"Instance has incorrect name: ${parameters.name}. Name of instance must be contain digits, lowercase letters or hyphens. First symbol must be letter."
     }
 
     val instance = instanceDAO.get(parameters.name)
@@ -475,9 +475,7 @@ abstract class StreamingModuleValidator {
     * @return - mode of stream
     */
   def getStreamMode(name: String) = {
-    if (name.contains("/split")) {
-      "split"
-    } else if (name.contains("/full")) {
+    if (name.contains("/full")) {
       "full"
     } else {
       "split"

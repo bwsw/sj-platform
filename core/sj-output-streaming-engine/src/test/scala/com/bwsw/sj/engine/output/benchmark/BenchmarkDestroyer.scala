@@ -4,14 +4,14 @@ import java.io.File
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.engine.output.benchmark.BenchmarkDataFactory._
-import com.bwsw.sj.engine.output.benchmark.BenchmarkDataPrepare._
 
 /**
-  * Created: 20/06/2016
-  *
-  * @author Kseniya Tomskikh
-  */
+ * Created: 20/06/2016
+ *
+ * @author Kseniya Tomskikh
+ */
 object BenchmarkDestroyer extends App {
+  open()
   val instanceName: String = "test-bench-instance"
   val module = new File(getClass.getClassLoader.getResource("sj-stub-output-bench-test.jar").getPath)
 
@@ -22,7 +22,6 @@ object BenchmarkDestroyer extends App {
   deleteInstance(instanceName)
   deleteModule(module.getName)
   cassandraDestroy("bench")
-
   close()
   ConnectionRepository.close()
 

@@ -1,8 +1,0 @@
-{
-  "name": "kafka-ps-service",
-  "description": "Kafka service for demo",
-  "provider": "kafka-ps-provider",
-  "type": "KfkQ",
-  "zk-provider": "zookeeper-ps-provider",
-  "zk-namespace": "ping-station-namespace"
-}

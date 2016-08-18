@@ -3,16 +3,16 @@ package com.bwsw.sj.crud.rest.validator.service
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.crud.rest.entities._
 import com.bwsw.sj.crud.rest.entities.service._
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
 
 /**
-  * Created by mendelbaum_nm
-  */
+ * Created by mendelbaum_nm
+ */
 object ServiceValidator {
+
   import com.bwsw.sj.common.ServiceConstants._
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
@@ -21,12 +21,12 @@ object ServiceValidator {
   var providerDAO: GenericMongoService[Provider] = null
 
   /**
-    * Validating input parameters for service and filling-in the service object
-    *
-    * @param initialData - input parameters for service being validated
-    * @param service - service object to fill
-    * @return - errors
-    */
+   * Validating input parameters for service and filling-in the service object
+   *
+   * @param initialData - input parameters for service being validated
+   * @param service - service object to fill
+   * @return - errors
+   */
   def validate(initialData: ServiceData, service: Service) = {
     logger.debug(s"Service ${initialData.name}. Start service validation.")
 
@@ -56,8 +56,8 @@ object ServiceValidator {
         }
     }
 
-    if (!initialData.name.matches("""^([a-zA-Z][a-zA-Z0-9-]+)$""")) {
-      errors += s"Service has incorrect name: ${initialData.name}. Name of service must be contain digits, letters or hyphens. First symbol must be letter."
+    if (!initialData.name.matches("""^([a-z][a-z0-9-]*)$""")) {
+      errors += s"Service has incorrect name: ${initialData.name}. Name of service must be contain digits, lowercase letters or hyphens. First symbol must be letter."
     }
 
     // 'description' field
@@ -74,6 +74,7 @@ object ServiceValidator {
 
         // 'keyspace' field
         errors ++= validateStringFieldRequired(cassDBServiceData.keyspace, "keyspace")
+        errors ++= validateNamespace(cassDBServiceData.keyspace)
 
         // filling-in service object serviceType-dependent extra fields
         if (errors.isEmpty) {
@@ -91,6 +92,7 @@ object ServiceValidator {
 
         // 'index', 'login', 'password' fields
         errors ++= validateStringFieldRequired(esindServiceData.index, "index")
+        errors ++= validateNamespace(esindServiceData.index)
         errors ++= validateStringFieldRequired(esindServiceData.login, "login")
         errors ++= validateStringFieldRequired(esindServiceData.password, "password")
 
@@ -165,6 +167,7 @@ object ServiceValidator {
 
         // 'metadataNamespace' field
         errors ++= validateStringFieldRequired(tstrqServiceData.metadataNamespace, "metadata-namespace")
+        errors ++= validateNamespace(tstrqServiceData.metadataNamespace)
 
         // 'dataProvider' field
         Option(tstrqServiceData.dataProvider) match {
@@ -179,7 +182,7 @@ object ServiceValidator {
               if (dataProviderObj == null) {
                 errors += s"Data-provider '$x' does not exist"
               } else if (!allowedTypes.contains(dataProviderObj.providerType)) {
-                errors += s"Data-provider must be of type ${allowedTypes.mkString("[","|","]")} " +
+                errors += s"Data-provider must be of type ${allowedTypes.mkString("[", "|", "]")} " +
                   s"('${dataProviderObj.providerType}' is given instead)"
               }
             }
@@ -187,6 +190,7 @@ object ServiceValidator {
 
         // 'dataNamespace' field
         errors ++= validateStringFieldRequired(tstrqServiceData.dataNamespace, "data-namespace")
+        errors ++= validateNamespace(tstrqServiceData.dataNamespace)
 
         Option(tstrqServiceData.lockProvider) match {
           case None =>
@@ -200,7 +204,7 @@ object ServiceValidator {
               if (lockProviderObj == null) {
                 errors += s"Lock-provider '$x' does not exist"
               } else if (!allowedTypes.contains(lockProviderObj.providerType)) {
-                errors += s"Lock-provider must be of type ${allowedTypes.mkString("[","|","]")} " +
+                errors += s"Lock-provider must be of type ${allowedTypes.mkString("[", "|", "]")} " +
                   s"('${lockProviderObj.providerType}' is given instead)"
               }
             }
@@ -208,6 +212,7 @@ object ServiceValidator {
 
         // 'lockNamespace' field
         errors ++= validateStringFieldRequired(tstrqServiceData.lockNamespace, "lock-namespace")
+        errors ++= validateNamespace(tstrqServiceData.lockNamespace)
 
         // filling-in service object serviceType-dependent extra fields
         if (errors.isEmpty) {
@@ -228,6 +233,7 @@ object ServiceValidator {
 
         // 'namespace' field
         errors ++= validateStringFieldRequired(zkcoordServiceData.namespace, "namespace")
+        errors ++= validateNamespace(zkcoordServiceData.namespace)
 
         // filling-in service object serviceType-dependent extra fields
         if (errors.isEmpty) {
@@ -244,6 +250,7 @@ object ServiceValidator {
 
         // 'namespace' field
         errors ++= validateStringFieldRequired(rdscoordServiceData.namespace, "namespace")
+        errors ++= validateNamespace(rdscoordServiceData.namespace)
 
         // filling-in service object serviceType-dependent extra fields
         if (errors.isEmpty) {
@@ -260,6 +267,7 @@ object ServiceValidator {
 
         // 'namespace' field
         errors ++= validateStringFieldRequired(arspkServiceData.namespace, "namespace")
+        errors ++= validateNamespace(arspkServiceData.namespace)
 
         // filling-in service object serviceType-dependent extra fields
         if (errors.isEmpty) {
@@ -276,6 +284,7 @@ object ServiceValidator {
 
         // 'namespace', 'login', 'password' fields
         errors ++= validateStringFieldRequired(jdbcServiceData.namespace, "namespace")
+        errors ++= validateNamespace(jdbcServiceData.namespace)
         errors ++= validateStringFieldRequired(jdbcServiceData.login, "login")
         errors ++= validateStringFieldRequired(jdbcServiceData.password, "password")
 
@@ -296,12 +305,12 @@ object ServiceValidator {
     }
 
     /**
-      * Simple validation for required string field
-      *
-      * @param fieldData - data from field to validate
-      * @param fieldJsonName - field name in json
-      * @return - errors list
-      */
+     * Simple validation for required string field
+     *
+     * @param fieldData - data from field to validate
+     * @param fieldJsonName - field name in json
+     * @return - errors list
+     */
     def validateStringFieldRequired(fieldData: String, fieldJsonName: String) = {
       val errors = new ArrayBuffer[String]()
       Option(fieldData) match {
@@ -314,13 +323,23 @@ object ServiceValidator {
       errors
     }
 
+    def validateNamespace(namespace: String) = {
+      val errors = new ArrayBuffer[String]()
+
+      if (!namespace.matches("""^([a-z][a-z0-9_]*)$""")) {
+        errors += s"Service has incorrect parameter: $namespace. Name must be contain digits, lowercase letters or underscore. First symbol must be letter."
+      }
+
+      errors
+    }
+
     /**
-      * Service provider validation by provider name and service type
-      *
-      * @param provider - provider name
-      * @param serviceType - service type
-      * @return - (provider errors, loaded provider object) pair
-      */
+     * Service provider validation by provider name and service type
+     *
+     * @param provider - provider name
+     * @param serviceType - service type
+     * @return - (provider errors, loaded provider object) pair
+     */
     def validateProvider(provider: String, serviceType: String) = {
       val providerErrors = new ArrayBuffer[String]()
       var providerObj: Provider = null

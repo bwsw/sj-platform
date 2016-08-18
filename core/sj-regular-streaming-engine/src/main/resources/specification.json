@@ -1,7 +1,7 @@
 {
   "name": "com.bwsw.regular.streaming.engine",
   "description": "Regular streaming engine by BW",
-  "version": "0.1",
+  "version": "1.0",
   "author": "Ksenia Mikhaleva",
   "license": "Apache 2.0"
 }

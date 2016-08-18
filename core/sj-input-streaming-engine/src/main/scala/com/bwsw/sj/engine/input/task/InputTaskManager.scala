@@ -15,11 +15,17 @@ import com.bwsw.sj.engine.core.managment.TaskManager
 class InputTaskManager() extends TaskManager {
 
   val inputInstance = instance.asInstanceOf[InputInstance]
-  val entryPort = inputInstance.tasks.get(taskName).port
+  val entryPort = getEntryPort()
 
   assert(agentsPorts.length >=
     (instance.outputs.length + 1),
     "Not enough ports for t-stream consumers/producers ")
+
+  def getEntryPort() = {
+    if (System.getenv().containsKey("ENTRY_PORT"))
+      System.getenv("ENTRY_PORT").toInt
+    else inputInstance.tasks.get(taskName).port
+  }
 
   /**
    * Returns an instance of executor of module

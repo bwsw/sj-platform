@@ -8,11 +8,11 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.engine.core.entities.InputEnvelope
 import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.engine.core.input.InputStreamingExecutor
+import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.sj.engine.input.eviction_policy.{ExpandedTimeEvictionPolicy, FixTimeEvictionPolicy}
-import com.bwsw.sj.engine.input.task.InputTaskManager
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
-import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer, ProducerTransaction}
+import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer, Transaction}
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import org.slf4j.LoggerFactory
@@ -29,21 +29,21 @@ import scala.collection._
  * @param bufferForEachContext Map for keeping a buffer containing incoming bytes with the channel context
  * @author Kseniya Mikhaleva
  */
-abstract class InputTaskEngine(manager: InputTaskManager,
+abstract class InputTaskEngine(protected val manager: TaskManager,
                                performanceMetrics: InputStreamingPerformanceMetrics,
                                channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
                                bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf]) extends Callable[Unit] {
 
-  protected val currentThread = Thread.currentThread()
+  private val currentThread = Thread.currentThread()
+  currentThread.setName(s"input-task-${manager.taskName}-engine")
   protected val logger = LoggerFactory.getLogger(this.getClass)
-  protected val serializer = new JsonSerializer()
   protected val producers: Map[String, Producer[Array[Byte]]] = manager.outputProducers
   protected val streams = producers.keySet
   protected var txnsByStreamPartitions = createTxnsStorage(streams)
   protected val checkpointGroup = new CheckpointGroup()
-  protected val inputInstance = manager.getInstance.asInstanceOf[InputInstance]
+  protected val instance = manager.getInstance.asInstanceOf[InputInstance]
   protected val moduleEnvironmentManager = createModuleEnvironmentManager()
-  val executor: InputStreamingExecutor = manager.getExecutor(moduleEnvironmentManager)
+  val executor = manager.getExecutor(moduleEnvironmentManager).asInstanceOf[InputStreamingExecutor]
   protected val evictionPolicy = createEvictionPolicy()
   protected val isNotOnlyCustomCheckpoint: Boolean
 
@@ -96,12 +96,15 @@ abstract class InputTaskEngine(manager: InputTaskManager,
         inputEnvelope.outputMetadata.foreach(x => {
           sendEnvelope(x._1, x._2, inputEnvelope.data)
         })
+        afterReceivingEnvelope()
         return true
       }
     }
     logger.debug(s"Task name: ${manager.taskName}. Envelope hasn't been processed\n")
     false
   }
+
+  protected def afterReceivingEnvelope(): Unit
 
   /**
    * Sends an input envelope to output steam
@@ -112,7 +115,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   protected def sendEnvelope(stream: String, partition: Int, data: Array[Byte]) = {
     logger.info(s"Task name: ${manager.taskName}. Send envelope to each output stream.\n")
     val maybeTxn = getTxn(stream, partition)
-    var txn: ProducerTransaction[Array[Byte]] = null
+    var txn: Transaction[Array[Byte]] = null
     if (maybeTxn.isDefined) {
       logger.debug(s"Task name: ${manager.taskName}. Txn for stream/partition: '$stream/$partition' is defined\n")
       txn = maybeTxn.get
@@ -128,7 +131,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     logger.debug(s"Task name: ${manager.taskName}. Add envelope to output stream in performance metrics \n")
     performanceMetrics.addElementToOutputEnvelope(
       stream,
-      txn.getTxnUUID.toString,
+      txn.getTransactionUUID().toString,
       data.length
     )
   }
@@ -143,8 +146,8 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   protected def checkForDuplication(key: String, duplicateCheck: Boolean, value: Array[Byte]): Boolean = {
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Try to check key: '$key' for duplication with a setting duplicateCheck = '$duplicateCheck' " +
-      s"and an instance setting - 'duplicate-check' : '${inputInstance.duplicateCheck}'\n")
-    if (inputInstance.duplicateCheck || duplicateCheck) {
+      s"and an instance setting - 'duplicate-check' : '${instance.duplicateCheck}'\n")
+    if (instance.duplicateCheck || duplicateCheck) {
       logger.info(s"Task name: ${manager.taskName}. " +
         s"Check key: '$key' for duplication\n")
       evictionPolicy.checkForDuplication(key, value)
@@ -154,7 +157,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   /**
    * It is in charge of running a basic execution logic of input task engine
    */
-  override def call(): Unit = {
+  def call(): Unit = {
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Run input task engine in a separate thread of execution service\n")
     while (true) {
@@ -214,7 +217,10 @@ abstract class InputTaskEngine(manager: InputTaskManager,
     checkpointGroup.checkpoint()
     checkpointInitiated()
     txnsByStreamPartitions = createTxnsStorage(streams)
+    prepareForNextCheckpoint()
   }
+
+  protected def prepareForNextCheckpoint(): Unit
 
   /**
    * Check whether a group checkpoint of t-streams consumers/producers have to be done or not
@@ -242,7 +248,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
    * @param partition Partition of stream
    * @return Current open transaction
    */
-  private def putTxn(stream: String, partition: Int, txn: ProducerTransaction[Array[Byte]]) = {
+  private def putTxn(stream: String, partition: Int, txn: Transaction[Array[Byte]]) = {
     logger.debug(s"Task name: ${manager.taskName}. " +
       s"Put txn for stream: $stream, partition: $partition\n")
     txnsByStreamPartitions(stream) += (partition -> txn)
@@ -257,7 +263,7 @@ abstract class InputTaskEngine(manager: InputTaskManager,
   protected def createTxnsStorage(streams: Set[String]) = {
     logger.debug(s"Task name: ${manager.taskName}. " +
       s"Create storage for keeping txns for each partition of output streams\n")
-    streams.map(x => (x, mutable.Map[Int, ProducerTransaction[Array[Byte]]]())).toMap
+    streams.map(x => (x, mutable.Map[Int, Transaction[Array[Byte]]]())).toMap
   }
 
   /**
@@ -274,11 +280,12 @@ abstract class InputTaskEngine(manager: InputTaskManager,
    * @return Manager of environment of input streaming module
    */
   private def createModuleEnvironmentManager() = {
-    val taggedOutputs = inputInstance.outputs
+    val serializer = new JsonSerializer()
+    val taggedOutputs = instance.outputs
       .map(ConnectionRepository.getStreamService.get)
       .filter(_.tags != null)
 
-    new InputEnvironmentManager(serializer.deserialize[Map[String, Any]](inputInstance.options), taggedOutputs)
+    new InputEnvironmentManager(serializer.deserialize[Map[String, Any]](instance.options), taggedOutputs)
   }
 
   /**
@@ -286,10 +293,10 @@ abstract class InputTaskEngine(manager: InputTaskManager,
    * @return Eviction policy of duplicate envelopes
    */
   private def createEvictionPolicy() = {
-    inputInstance.evictionPolicy match {
-      case "fix-time" => new FixTimeEvictionPolicy(inputInstance)
-      case "expanded-time" => new ExpandedTimeEvictionPolicy(inputInstance)
-      case _ => new FixTimeEvictionPolicy(inputInstance)
+    instance.evictionPolicy match {
+      case "fix-time" => new FixTimeEvictionPolicy(instance)
+      case "expanded-time" => new ExpandedTimeEvictionPolicy(instance)
+      case _ => new FixTimeEvictionPolicy(instance)
     }
   }
 }

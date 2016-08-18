@@ -44,7 +44,7 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
         tstreamEnvelope.data.foreach(output.put)
         state.set("sum", sum)
     }
-    println("stream type = " + envelope.streamType)
+    println("stream name = " + envelope.stream + ", stream type = " + envelope.streamType)
   }
 
   override def onTimer(jitter: Long): Unit = {

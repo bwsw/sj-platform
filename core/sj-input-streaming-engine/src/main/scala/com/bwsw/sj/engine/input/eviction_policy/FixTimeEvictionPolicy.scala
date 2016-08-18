@@ -12,7 +12,7 @@ import com.bwsw.sj.common.DAL.model.module.InputInstance
  * @author Kseniya Mikhaleva
  */
 
-class FixTimeEvictionPolicy(instance: InputInstance) extends EvictionPolicy(instance) {
+class FixTimeEvictionPolicy(instance: InputInstance) extends InputInstanceEvictionPolicy(instance) {
 
   /**
    * Checks whether a specific key is duplicate or not

@@ -1,6 +1,7 @@
 package com.bwsw.sj.engine.regular.task.engine
 
 import com.bwsw.sj.engine.core.PersistentBlockingQueue
+import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
@@ -32,15 +33,14 @@ class RegularTaskEngineFactory(manager: RegularTaskManager,
    * Creates RegularTaskEngine is in charge of a basic execution logic of task of regular module
    * @return Engine of input task
    */
-  def createInputTaskEngine(): RegularTaskEngine = {
+  def createRegularTaskEngine(): RegularTaskEngine = {
     inputInstanceMetadata.checkpointMode match {
       case "time-interval" =>
         logger.info(s"Task: ${manager.taskName}. Regular module has a 'time-interval' checkpoint mode, create an appropriate task engine\n")
-        logger.debug(s"Task: ${manager.taskName}. Create TimeCheckpointInputTaskEngine()\n")
-        new TimeCheckpointRegularTaskEngine(manager, performanceMetrics, blockingQueue)
+        new RegularTaskEngine(manager, performanceMetrics, blockingQueue) with TimeCheckpointTaskEngine
       case "every-nth" =>
         logger.info(s"Task: ${manager.taskName}. Regular module has an 'every-nth' checkpoint mode, create an appropriate task engine\n")
-        new NumericalCheckpointRegularTaskEngine(manager, performanceMetrics, blockingQueue)
+        new RegularTaskEngine(manager, performanceMetrics, blockingQueue) with NumericalCheckpointTaskEngine
 
     }
   }

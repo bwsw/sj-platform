@@ -82,23 +82,21 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
             complete(HttpEntity(`application/json`, serializer.serialize(response)))
           } ~
           delete {
-            val providers = serviceDAO.getAll.filter { service =>
-              service match {
-                case esService: ESService =>
-                  esService.provider.name.equals(providerName)
-                case zkService: ZKService =>
-                  zkService.provider.name.equals(providerName)
-                case aeroService: AerospikeService =>
-                  aeroService.provider.name.equals(providerName)
-                case cassService: CassandraService =>
-                  cassService.provider.name.equals(providerName)
-                case kfkService: KafkaService =>
-                  kfkService.provider.name.equals(providerName)
-                case tService: TStreamService =>
-                  tService.metadataProvider.name.equals(providerName) || tService.dataProvider.name.equals(providerName)
-                case _ =>
-                  false //todo redis and jdbc
-              }
+            val providers = serviceDAO.getAll.filter {
+              case esService: ESService =>
+                esService.provider.name.equals(providerName)
+              case zkService: ZKService =>
+                zkService.provider.name.equals(providerName)
+              case aeroService: AerospikeService =>
+                aeroService.provider.name.equals(providerName)
+              case cassService: CassandraService =>
+                cassService.provider.name.equals(providerName)
+              case kfkService: KafkaService =>
+                kfkService.provider.name.equals(providerName)
+              case tService: TStreamService =>
+                tService.metadataProvider.name.equals(providerName) || tService.dataProvider.name.equals(providerName)
+              case _ =>
+                false //todo redis and jdbc
             }
             if (providers.isEmpty) {
               val provider = providerDAO.get(providerName)

@@ -26,7 +26,7 @@ class StatefulRegularTaskEngineService(manager: RegularTaskManager, checkpointGr
 
   val moduleEnvironmentManager = new StatefulModuleEnvironmentManager(
     new StateStorage(stateService),
-    serializer.deserialize[Map[String, Any]](regularInstance.options),
+    optionsSerializer.deserialize[Map[String, Any]](regularInstance.options),
     outputProducers,
     regularInstance.outputs
       .map(ConnectionRepository.getStreamService.get)

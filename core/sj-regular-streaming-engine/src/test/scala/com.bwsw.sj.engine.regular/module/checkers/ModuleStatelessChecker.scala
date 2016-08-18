@@ -6,13 +6,16 @@ import com.bwsw.sj.engine.regular.module.DataFactory._
 import scala.collection.JavaConverters._
 
 object ModuleStatelessChecker extends App {
-
+  open()
   val streamService = ConnectionRepository.getStreamService
   val objectSerializer = new ObjectSerializer()
 
   val inputTstreamConsumers = (1 to inputCount).map(x => createInputTstreamConsumer(streamService, x.toString))
   val inputKafkaConsumer = createInputKafkaConsumer(streamService, partitions)
   val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(streamService, x.toString))
+
+  inputTstreamConsumers.foreach(x => x.start())
+  outputConsumers.foreach(x => x.start())
 
   var totalInputElements = 0
   var totalOutputElements = 0
@@ -62,6 +65,8 @@ object ModuleStatelessChecker extends App {
   assert(inputElements.forall(x => outputElements.contains(x)) && outputElements.forall(x => inputElements.contains(x)),
     "All txns elements that are consumed from output stream should equals all txns elements that are consumed from input stream")
 
+  inputTstreamConsumers.foreach(x => x.stop())
+  outputConsumers.foreach(x => x.stop())
   close()
   ConnectionRepository.close()
 

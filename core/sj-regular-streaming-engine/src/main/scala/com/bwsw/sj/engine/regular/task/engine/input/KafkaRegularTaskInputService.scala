@@ -54,48 +54,30 @@ class KafkaRegularTaskInputService(manager: RegularTaskManager,
     kafkaInputs.flatMap(_._1.service.asInstanceOf[KafkaService].provider.hosts).toList,
     chooseOffset()
   )
-
-  override def call() = {
-    logger.info(s"Task name: ${manager.taskName}. " +
-      s"Run a kafka consumer for regular task in a separate thread of execution service\n")
-
-    val streamNameToTags = kafkaInputs.map(x => (x._1.name, x._1.tags)).toMap
-
-    while (true) {
-      logger.debug(s"Task: ${manager.taskName}. Waiting for records that consumed from kafka for $kafkaSubscriberTimeout milliseconds\n")
-      val records = kafkaConsumer.poll(kafkaSubscriberTimeout)
-      records.asScala.foreach(x => {
-
-        blockingQueue.put(envelopeSerializer.serialize({
-          val envelope = new KafkaEnvelope()
-          envelope.stream = x.topic()
-          envelope.partition = x.partition()
-          envelope.data = x.value()
-          envelope.offset = x.offset()
-          envelope.tags = streamNameToTags(x.topic())
-          envelope
-        }))
-      })
-    }
+  
+  private def getKafkaInputs(): mutable.Map[SjStream, Array[Int]] = {
+    manager.inputs.filter(x => x._1.streamType == StreamConstants.kafkaStreamType)
   }
 
-  def registerEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics) = {
-    logger.info(s"Task: ${manager.taskName}. Kafka envelope is received\n")
-    val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
-    logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${kafkaEnvelope.stream} " +
-      s"for partition: ${kafkaEnvelope.partition} to ${kafkaEnvelope.offset}\n")
-    kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
-    performanceMetrics.addEnvelopeToInputStream(
-      kafkaEnvelope.stream,
-      List(kafkaEnvelope.data.length)
-    )
+  /**
+   * Creates SJStream is responsible for committing the offsets of last messages
+   * that has successfully processed for each topic for each partition
+   *
+   * @return SJStream is responsible for committing the offsets of last messages
+   *         that has successfully processed for each topic for each partition
+   */
+  private def createOffsetStream() = {
+    logger.debug(s"Task name: ${manager.taskName}. " +
+      s"Get stream for keeping kafka offsets\n")
+    val description = "store kafka offsets of input streams"
+    val tags = Array("offsets")
+    val partitions = 1
+
+    manager.createTStreamOnCluster(kafkaOffsetsStream, description, partitions)
+
+    manager.getSjStream(kafkaOffsetsStream, description, tags, partitions)
   }
 
-  override def doCheckpoint() = {
-    logger.debug(s"Task: ${manager.taskName}. Save kafka offsets for each kafka input\n")
-    offsetProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
-      .send(objectSerializer.serialize(kafkaOffsetsStorage))
-  }
 
   private def createOffsetProducer() = {
     logger.debug(s"Task: ${manager.taskName}. Start creating a t-stream producer to record kafka offsets\n")
@@ -105,23 +87,13 @@ class KafkaRegularTaskInputService(manager: RegularTaskManager,
 
     offsetProducer
   }
-  
+
   private def addOffsetProducerToCheckpointGroup() = {
     logger.debug(s"Task: ${manager.taskName}. Start adding the t-stream producer to checkpoint group\n")
     checkpointGroup.add(offsetProducer)
     logger.debug(s"Task: ${manager.taskName}. The t-stream producer is added to checkpoint group\n")
   }
 
-  private def getKafkaInputs(): mutable.Map[SjStream, Array[Int]] = {
-    manager.inputs.filter(x => x._1.streamType == StreamConstants.kafkaStreamType)
-  }
-
-  private def chooseOffset() = {
-    regularInstance.startFrom match {
-      case "oldest" => "earliest"
-      case _ => "latest"
-    }
-  }
 
   /**
    * Creates a kafka consumer for all input streams of kafka type.
@@ -169,13 +141,15 @@ class KafkaRegularTaskInputService(manager: RegularTaskManager,
 
   private def seekKafkaConsumerOffsets(consumer: KafkaConsumer[Array[Byte], Array[Byte]]) = {
     val partition = 0
-    val partitionsRange = List(partition)
+    val partitionsRange = List(partition, partition)
 
     val offsetConsumer = manager.createConsumer(
       offsetStream,
       partitionsRange,
       Newest
     )
+
+    offsetConsumer.start()
 
     val lastTxn = offsetConsumer.getLastTransaction(partition)
 
@@ -184,24 +158,56 @@ class KafkaRegularTaskInputService(manager: RegularTaskManager,
       kafkaOffsetsStorage = objectSerializer.deserialize(lastTxn.get.next()).asInstanceOf[mutable.Map[(String, Int), Long]]
       kafkaOffsetsStorage.foreach(x => consumer.seek(new TopicPartition(x._1._1, x._1._2), x._2 + 1))
     }
+
+    offsetConsumer.stop()
   }
 
-  /**
-   * Creates SJStream is responsible for committing the offsets of last messages
-   * that has successfully processed for each topic for each partition
-   *
-   * @return SJStream is responsible for committing the offsets of last messages
-   *         that has successfully processed for each topic for each partition
-   */
-  private def createOffsetStream() = {
-    logger.debug(s"Task name: ${manager.taskName}. " +
-      s"Get stream for keeping kafka offsets\n")
-    val description = "store kafka offsets of input streams"
-    val tags = Array("offsets")
-    val partitions = 1
+  private def chooseOffset() = {
+    regularInstance.startFrom match {
+      case "oldest" => "earliest"
+      case _ => "latest"
+    }
+  }
 
-    manager.createTStreamOnCluster(kafkaOffsetsStream, description, partitions)
+  override def call() = {
+    logger.info(s"Task name: ${manager.taskName}. " +
+      s"Run a kafka consumer for regular task in a separate thread of execution service\n")
 
-    manager.getSjStream(kafkaOffsetsStream, description, tags, partitions)
+    val streamNameToTags = kafkaInputs.map(x => (x._1.name, x._1.tags)).toMap
+
+    while (true) {
+      logger.debug(s"Task: ${manager.taskName}. Waiting for records that consumed from kafka for $kafkaSubscriberTimeout milliseconds\n")
+      val records = kafkaConsumer.poll(kafkaSubscriberTimeout)
+      records.asScala.foreach(x => {
+
+        blockingQueue.put(envelopeSerializer.serialize({
+          val envelope = new KafkaEnvelope()
+          envelope.stream = x.topic()
+          envelope.partition = x.partition()
+          envelope.data = x.value()
+          envelope.offset = x.offset()
+          envelope.tags = streamNameToTags(x.topic())
+          envelope
+        }))
+      })
+    }
+  }
+
+  def registerEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics) = {
+    logger.info(s"Task: ${manager.taskName}. Kafka envelope is received\n")
+    val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
+    logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${kafkaEnvelope.stream} " +
+      s"for partition: ${kafkaEnvelope.partition} to ${kafkaEnvelope.offset}\n")
+    kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
+    performanceMetrics.addEnvelopeToInputStream(
+      kafkaEnvelope.stream,
+      List(kafkaEnvelope.data.length)
+    )
+  }
+
+  override def doCheckpoint() = {
+    logger.debug(s"Task: ${manager.taskName}. Save kafka offsets for each kafka input\n")
+    offsetProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
+      .send(objectSerializer.serialize(kafkaOffsetsStorage))
   }
 }

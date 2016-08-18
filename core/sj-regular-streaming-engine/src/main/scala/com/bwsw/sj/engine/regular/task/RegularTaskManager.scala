@@ -10,7 +10,6 @@ import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.utils.EngineUtils
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offsets.IOffset
-import com.bwsw.tstreams.env.TSF_Dictionary
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -23,8 +22,6 @@ import scala.collection.mutable
  */
 class RegularTaskManager() extends TaskManager {
 
-  private val stateStreamName = taskName + "_state"
-
   val inputs = instance.executionPlan.tasks.get(taskName).inputs.asScala
     .map(x => {
     val service = ConnectionRepository.getStreamService
@@ -32,7 +29,6 @@ class RegularTaskManager() extends TaskManager {
     (service.get(x._1), x._2)
   })
 
-  val stateStream = createStateStream()
   val outputTags = createOutputTags()
 
   assert(agentsPorts.length >=
@@ -71,13 +67,13 @@ class RegularTaskManager() extends TaskManager {
    * @param offset Offset policy that describes where a consumer starts
    * @return T-stream consumer
    */
-  def createConsumer(stream: SjStream, partitions: List[Int], offset: IOffset): Consumer[Array[Byte]] = {
+  def createConsumer(stream: TStreamSjStream, partitions: List[Int], offset: IOffset): Consumer[Array[Byte]] = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
 
     val timeUuidGenerator = EngineUtils.getUUIDGenerator(stream.asInstanceOf[TStreamSjStream])
 
-    tstreamFactory.setProperty(TSF_Dictionary.Stream.NAME, stream.name)
+    setStreamOptions(stream)
 
     tstreamFactory.getConsumer[Array[Byte]](
       "consumer_for_" + taskName + "_" + stream.name,
@@ -85,16 +81,5 @@ class RegularTaskManager() extends TaskManager {
       converter,
       (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList,
       offset)
-  }
-
-  /**
-   * Creates SJStream to keep a module state
-   *
-   * @return SjStream used for keeping a module state
-   */
-  private def createStateStream() = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-      s"Get stream for keeping state of module\n")
-    getSjStream(stateStreamName, "store state of module", Array("state"), 1)
   }
 }

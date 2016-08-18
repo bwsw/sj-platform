@@ -1,7 +1,7 @@
 {
   "name": "com.bwsw.fw",
   "description": "Juggler mesos framework by BW",
-  "version": "0.1",
+  "version": "1.0",
   "author": "Diryavkin Dmitri",
   "license": "Apache 2.0"
 }

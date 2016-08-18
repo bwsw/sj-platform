@@ -19,11 +19,8 @@ import org.slf4j.LoggerFactory
 abstract class RegularTaskEngineService(manager: RegularTaskManager, performanceMetrics: RegularStreamingPerformanceMetrics) {
 
   protected val logger = LoggerFactory.getLogger(this.getClass)
-  /**
-   * Json serializer for deserialization of envelope
-   */
-  protected val serializer = new JsonSerializer()
-  serializer.setIgnoreUnknown(true)
+  protected val optionsSerializer = new JsonSerializer()
+  optionsSerializer.setIgnoreUnknown(true)
 
   protected val regularInstance = manager.getInstance.asInstanceOf[RegularInstance]
   protected val outputProducers = manager.outputProducers
@@ -33,11 +30,5 @@ abstract class RegularTaskEngineService(manager: RegularTaskManager, performance
   val moduleEnvironmentManager: ModuleEnvironmentManager
   val executor: RegularStreamingExecutor
 
-  /**
-   * Does group checkpoint of t-streams state consumers/producers
-   * if it's not a stateless regular module
-   */
-  def doCheckpoint(): Unit = {}
-
-
+  def doCheckpoint(): Unit
 }

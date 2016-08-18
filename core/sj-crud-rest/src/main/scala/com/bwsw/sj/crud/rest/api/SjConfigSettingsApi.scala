@@ -84,7 +84,7 @@ trait SjConfigSettingsApi extends Directives with SjCrudValidator {
                     if (configService.get(domain + "." + name) != null) {
                       val entity = Map("message" -> s"$domain config setting '$name' has been deleted")
                       response = Some(ProtocolResponse(200, entity))
-                      configService.delete(name)
+                      configService.delete(domain + "." + name)
                     } else {
                       response = Some(ProtocolResponse(200, Map("message" -> s"$domain config setting '$name' has not found")))
                     }

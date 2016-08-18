@@ -8,24 +8,23 @@ import com.aerospike.client.Host
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.common.traits.Serializer
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, OutputInstance, Task}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.engine.core.utils.CassandraHelper._
+import com.bwsw.sj.common.utils.CassandraFactory
 import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
 import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerOptions}
-import com.bwsw.tstreams.agents.producer.DataInsertType.BatchInsert
-import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer, ProducerCoordinationOptions, ProducerOptions}
+import com.bwsw.tstreams.agents.producer.{CoordinationOptions, NewTransactionProducerPolicy, Options, Producer}
+import com.bwsw.tstreams.common.CassandraConnectorConf
 import com.bwsw.tstreams.converter.IConverter
-import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
-import com.bwsw.tstreams.data.aerospike.{AerospikeStorage, AerospikeStorageFactory, AerospikeStorageOptions}
+import com.bwsw.tstreams.coordination.producer.transport.impl.TcpTransport
+import com.bwsw.tstreams.data.aerospike
+import com.bwsw.tstreams.env.TSF_Dictionary
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.policy.RoundRobinPolicy
 import com.bwsw.tstreams.services.BasicStreamService
-import com.datastax.driver.core.Cluster
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.transport.InetSocketTransportAddress
@@ -63,30 +62,31 @@ object BenchmarkDataFactory {
   val objectSerializer = new ObjectSerializer()
   private val serializer: Serializer = new JsonSerializer
 
+  private val cassandraHost = System.getenv("CASSANDRA_HOST")
+  private val cassandraPort = System.getenv("CASSANDRA_PORT").toInt
+  private val cassandraFactory = new CassandraFactory()
+
   private val converter = new IConverter[Array[Byte], Array[Byte]] {
     override def convert(obj: Array[Byte]): Array[Byte] = obj
   }
-
-  private val cluster = Cluster.builder().addContactPoint(cassandraHost).build()
-  private val session = cluster.connect()
 
   def createData(countTxns: Int, countElements: Int) = {
     val tStream: TStreamSjStream = streamService.get(tStreamName).asInstanceOf[TStreamSjStream]
     val tStreamService = tStream.service.asInstanceOf[TStreamService]
     val metadataStorageFactory = new MetadataStorageFactory
-    val metadataStorageHosts = tStreamService.metadataProvider.hosts.map { addr =>
+    val cassandraConnectorConf = CassandraConnectorConf.apply(tStreamService.metadataProvider.hosts.map { addr =>
       val parts = addr.split(":")
       new InetSocketAddress(parts(0), parts(1).toInt)
-    }.toList
-    val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(metadataStorageHosts, tStreamService.metadataNamespace)
+    }.toSet)
+    val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(cassandraConnectorConf, tStreamService.metadataNamespace)
 
-    val dataStorageFactory = new AerospikeStorageFactory
+    val dataStorageFactory = new aerospike.Factory
     val dataStorageHosts = tStreamService.dataProvider.hosts.map { addr =>
       val parts = addr.split(":")
       new Host(parts(0), parts(1).toInt)
-    }.toList
-    val options = new AerospikeStorageOptions(tStreamService.dataNamespace, dataStorageHosts)
-    val dataStorage: AerospikeStorage = dataStorageFactory.getInstance(options)
+    }.toSet
+    val options = new aerospike.Options(tStreamService.dataNamespace, dataStorageHosts)
+    val dataStorage: aerospike.Storage = dataStorageFactory.getInstance(options)
 
     val producer = createProducer(metadataStorage, dataStorage, tStream.partitions)
 
@@ -148,29 +148,28 @@ object BenchmarkDataFactory {
     }
   }
 
-  private def createProducer(metadataStorage: MetadataStorage, dataStorage: AerospikeStorage, partitions: Int) = {
+  private def createProducer(metadataStorage: MetadataStorage, dataStorage: aerospike.Storage, partitions: Int) = {
     val tStream =
       BasicStreamService.loadStream(tStreamName, metadataStorage, dataStorage)
 
-    val coordinationSettings = new ProducerCoordinationOptions(
-      agentAddress = s"localhost:8030",
+    val coordinationSettings = new CoordinationOptions(
       zkHosts = List(new InetSocketAddress("localhost", 2181)),
       zkRootPath = "/unit",
+      zkConnectionTimeout = 7000,
       zkSessionTimeout = 7000,
       isLowPriorityToBeMaster = false,
-      transport = new TcpTransport,
-      transportTimeout = 5,
-      zkConnectionTimeout = 7000)
+      transport = new TcpTransport("localhost:8030",
+        TSF_Dictionary.Producer.TRANSPORT_TIMEOUT.toInt * 1000))
 
     val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until partitions).toList)
 
     val timeUuidGenerator = new LocalTimeUUIDGenerator
 
-    val producerOptions = new ProducerOptions[Array[Byte]](
+    val producerOptions = new Options[Array[Byte]](
       transactionTTL = 6,
       transactionKeepAliveInterval = 2,
       roundRobinPolicy,
-      BatchInsert(5),
+      5,
       timeUuidGenerator,
       coordinationSettings,
       converter)
@@ -181,7 +180,7 @@ object BenchmarkDataFactory {
   def createConsumer(stream: TStreamSjStream,
                      address: String,
                      metadataStorage: MetadataStorage,
-                     dataStorage: AerospikeStorage): Consumer[Array[Byte]] = {
+                     dataStorage: aerospike.Storage): Consumer[Array[Byte]] = {
 
     val tStream =
       BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
@@ -202,10 +201,15 @@ object BenchmarkDataFactory {
     new Consumer[Array[Byte]](tStream.name, tStream, options)
   }
 
+  def open() = cassandraFactory.open(Set(new InetSocketAddress(cassandraHost, cassandraPort)))
+
   def prepareCassandra(keyspace: String) = {
-    createKeyspace(session, keyspace)
-    createMetadataTables(session, keyspace)
+    cassandraFactory.createKeyspace(keyspace)
+    cassandraFactory.createMetadataTables(keyspace)
+    cassandraFactory.createDataTable(keyspace)
   }
+
+  def close() = cassandraFactory.close()
 
   def createProviders() = {
     val esProvider = new Provider()
@@ -299,23 +303,23 @@ object BenchmarkDataFactory {
     streamService.save(tStream)
 
     val metadataStorageFactory = new MetadataStorageFactory
-    val metadataStorageHosts = tService.metadataProvider.hosts.map { addr =>
+    val cassandraConnectorConf = CassandraConnectorConf.apply(tService.metadataProvider.hosts.map { addr =>
       val parts = addr.split(":")
       new InetSocketAddress(parts(0), parts(1).toInt)
-    }.toList
-    val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(metadataStorageHosts, tService.metadataNamespace)
+    }.toSet)
+    val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(cassandraConnectorConf, tService.metadataNamespace)
 
-    val dataStorageFactory = new AerospikeStorageFactory
+    val dataStorageFactory = new aerospike.Factory
     val dataStorageHosts = tService.dataProvider.hosts.map { addr =>
       val parts = addr.split(":")
       new Host(parts(0), parts(1).toInt)
-    }.toList
-    val options = new AerospikeStorageOptions(tService.dataNamespace, dataStorageHosts)
-    val dataStorage: AerospikeStorage = dataStorageFactory.getInstance(options)
+    }.toSet
+    val options = new aerospike.Options(tService.dataNamespace, dataStorageHosts)
+    val dataStorage: aerospike.Storage = dataStorageFactory.getInstance(options)
 
     BasicStreamService.createStream(tStreamName,
       partitions,
-      configService.get(ConfigConstants.streamTTLTag).value.toInt,
+      60000,
       "", metadataStorage,
       dataStorage)
 
@@ -335,7 +339,7 @@ object BenchmarkDataFactory {
     instance.name = instanceName
     instance.moduleType = "output-streaming"
     instance.moduleName = "com.bwsw.stub.output-bench-test"
-    instance.moduleVersion = "0.1"
+    instance.moduleVersion = "1.0"
     instance.status = "started"
     instance.description = "some description of test instance"
     instance.inputs = Array(tStreamName)
@@ -349,7 +353,7 @@ object BenchmarkDataFactory {
     instance.perTaskRam = 64
     instance.performanceReportingInterval = 10000
     instance.executionPlan = executionPlan
-    instance.engine = "com.bwsw.output.streaming.engine-0.1"
+    instance.engine = "com.bwsw.output.streaming.engine-1.0"
     instance.coordinationService = serviceManager.get(zkServiceName).asInstanceOf[ZKService]
 
     instanceService.save(instance)
@@ -377,13 +381,9 @@ object BenchmarkDataFactory {
     providerService.delete(esProviderName)
   }
 
-  def close() = {
-    session.close()
-    cluster.close()
-  }
-
   def cassandraDestroy(keyspace: String) = {
-    session.execute(s"DROP KEYSPACE $keyspace")
+    cassandraFactory.dropKeyspace(keyspace)
+     cassandraFactory.close()
   }
 
   def uploadModule(moduleJar: File) = {

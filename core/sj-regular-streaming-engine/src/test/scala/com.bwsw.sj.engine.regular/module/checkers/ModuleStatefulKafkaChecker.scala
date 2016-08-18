@@ -7,12 +7,15 @@ import com.bwsw.sj.engine.regular.utils.StateHelper
 
 import scala.collection.JavaConverters._
 
-object ModuleStatefulKafkaChecker extends App{
+object ModuleStatefulKafkaChecker extends App {
+  open()
   val streamService = ConnectionRepository.getStreamService
   val objectSerializer = new ObjectSerializer()
 
   val inputConsumer = createInputKafkaConsumer(streamService, partitions)
   val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(streamService, x.toString))
+
+  outputConsumers.foreach(x => x.start())
 
   var totalInputElements = 0
   var totalOutputElements = 0
@@ -44,6 +47,7 @@ object ModuleStatefulKafkaChecker extends App{
   })
 
   val consumer = createStateConsumer(streamService)
+  consumer.start()
   val initialState = StateHelper.getState(consumer, objectSerializer)
 
   assert(totalInputElements == totalOutputElements,
@@ -55,6 +59,8 @@ object ModuleStatefulKafkaChecker extends App{
   assert(initialState("sum") == inputElements.sum,
     "Sum of all txns elements that are consumed from input stream should equals state variable sum")
 
+  consumer.stop()
+  outputConsumers.foreach(x => x.stop())
   close()
   ConnectionRepository.close()
 

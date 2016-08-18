@@ -1,6 +1,5 @@
 package com.bwsw.sj.engine.output
 
-import java.io.File
 import java.net.InetAddress
 import java.util.concurrent.{ArrayBlockingQueue, ExecutorCompletionService, ExecutorService, Executors}
 import java.util.{Calendar, UUID}
@@ -8,7 +7,7 @@ import java.util.{Calendar, UUID}
 import com.bwsw.common.traits.Serializer
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
-import com.bwsw.sj.common.DAL.model.{ESService, FileMetadata, SjStream}
+import com.bwsw.sj.common.DAL.model.{ESService, SjStream, TStreamSjStream}
 import com.bwsw.sj.engine.core.entities.{EsEntity, OutputEntity, OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.OutputStreamingHandler
 import com.bwsw.sj.engine.core.utils.EngineUtils._
@@ -58,7 +57,7 @@ object OutputTaskRunner {
     val callback = new OutputSubscriberCallback(blockingQueue)
 
     val subscribeConsumer = taskManager.createSubscribingConsumer(
-      inputStream,
+      inputStream.asInstanceOf[TStreamSjStream],
       taskPartitions.toList,
       chooseOffset(instance.startFrom),
       callback
@@ -66,15 +65,11 @@ object OutputTaskRunner {
     logger.debug(s"Task: ${OutputDataFactory.taskName}. Creation of subscribing consumer is finished.")
 
     logger.debug(s"Task: ${OutputDataFactory.taskName}. Start loading of executor (handler) class from module jar.")
-    val moduleJar: File = OutputDataFactory.getModuleJar
-    val moduleMetadata: FileMetadata = OutputDataFactory.getFileMetadata
     val handler: OutputStreamingHandler = taskManager.getExecutor.asInstanceOf[OutputStreamingHandler]
 
-    val entity: OutputEntity = taskManager.getOutputModuleEntity(moduleJar, moduleMetadata.specification.entityClass)
+    val entity: OutputEntity = taskManager.getOutputModuleEntity()
 
     val performanceMetrics = new OutputStreamingPerformanceMetrics(taskManager)
-
-    logger.debug(s"Task: ${OutputDataFactory.taskName}. Launch a new thread to report performance metrics \n")
     executorService.submit(performanceMetrics)
 
     logger.info(s"Task: ${OutputDataFactory.taskName}. Preparing finished. Launch task.")
@@ -97,7 +92,7 @@ object OutputTaskRunner {
 
   def createThreadFactory() = {
     new ThreadFactoryBuilder()
-      .setNameFormat("RegularTaskRunner-%d")
+      .setNameFormat("OutputTaskRunner-%d")
       .build()
   }
   /**

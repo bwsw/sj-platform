@@ -1,7 +1,7 @@
 {
   "name": "com.bwsw.output.pm",
   "description": "Output-module for performance metrics by BW",
-  "version": "0.1",
+  "version": "1.0",
   "author": "Kseniya Mikhaleva",
   "license": "Apache 2.0",
   "inputs": {
@@ -24,7 +24,7 @@
   },
   "module-type": "output-streaming",
   "engine-name": "com.bwsw.output.streaming.engine",
-  "engine-version": "0.1",
+  "engine-version": "1.0",
   "options": {
     "opt": 1
   },

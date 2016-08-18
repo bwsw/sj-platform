@@ -1,9 +1,0 @@
-{
-  "name": "elasticsearch-ps-service",
-  "description": "Elasticsearch service for demo",
-  "provider": "elasticsearch-ps-provider",
-  "login" : "test",
-  "password":"test",
-  "index": "pingstation",
-  "type": "ESInd"
-}

@@ -7,11 +7,12 @@ import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.DAL.model.{TStreamSjStream, TStreamService, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.tstreams.agents.producer.DataInsertType.BatchInsert
 import com.bwsw.tstreams.agents.producer._
+import com.bwsw.tstreams.common.CassandraConnectorConf
 import com.bwsw.tstreams.converter.IConverter
-import com.bwsw.tstreams.coordination.transactions.transport.impl.TcpTransport
-import com.bwsw.tstreams.data.aerospike.{AerospikeStorage, AerospikeStorageOptions, AerospikeStorageFactory}
+import com.bwsw.tstreams.coordination.producer.transport.impl.TcpTransport
+import com.bwsw.tstreams.data.aerospike
+import com.bwsw.tstreams.env.TSF_Dictionary
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.policy.RoundRobinPolicy
@@ -32,19 +33,19 @@ object OutputTestDataFactory {
   val inputStreamService = stream.service.asInstanceOf[TStreamService]
 
   private val metadataStorageFactory = new MetadataStorageFactory
-  private val metadataStorageHosts = inputStreamService.metadataProvider.hosts.map { addr =>
+  private val cassandraConnectorConf = CassandraConnectorConf.apply(inputStreamService.metadataProvider.hosts.map { addr =>
     val parts = addr.split(":")
     new InetSocketAddress(parts(0), parts(1).toInt)
-  }.toList
-  val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(metadataStorageHosts, inputStreamService.metadataNamespace)
+  }.toSet)
+  val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(cassandraConnectorConf, inputStreamService.metadataNamespace)
 
-  private val dataStorageFactory = new AerospikeStorageFactory
+  private val dataStorageFactory = new aerospike.Factory
   private val dataStorageHosts = inputStreamService.dataProvider.hosts.map { addr =>
     val parts = addr.split(":")
     new Host(parts(0), parts(1).toInt)
-  }.toList
-  private val options = new AerospikeStorageOptions(inputStreamService.dataNamespace, dataStorageHosts)
-  val dataStorage: AerospikeStorage = dataStorageFactory.getInstance(options)
+  }.toSet
+  private val options = new aerospike.Options(inputStreamService.dataNamespace, dataStorageHosts)
+  val dataStorage = dataStorageFactory.getInstance(options)
 
   private val converter = new IConverter[Array[Byte], Array[Byte]] {
     override def convert(obj: Array[Byte]): Array[Byte] = obj
@@ -77,25 +78,24 @@ object OutputTestDataFactory {
     val tStream: TStream[Array[Byte]] =
       BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
 
-    val coordinationSettings = new ProducerCoordinationOptions(
-      agentAddress = s"localhost:8030",
+    val coordinationSettings = new CoordinationOptions(
       zkHosts = List(new InetSocketAddress("localhost", 2181)),
       zkRootPath = "/unit",
+      zkConnectionTimeout = 7000,
       zkSessionTimeout = 7000,
       isLowPriorityToBeMaster = false,
-      transport = new TcpTransport,
-      transportTimeout = 5,
-      zkConnectionTimeout = 7000)
+      transport = new TcpTransport("localhost:8030",
+        TSF_Dictionary.Producer.TRANSPORT_TIMEOUT.toInt * 1000))
 
     val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until stream.partitions).toList)
 
     val timeUuidGenerator = new LocalTimeUUIDGenerator
 
-    val options = new ProducerOptions[Array[Byte]](
+    val options = new Options[Array[Byte]](
       transactionTTL = 6,
       transactionKeepAliveInterval = 2,
       roundRobinPolicy,
-      BatchInsert(5),
+      5,
       timeUuidGenerator,
       coordinationSettings,
       converter)

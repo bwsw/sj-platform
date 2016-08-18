@@ -1,24 +1,23 @@
 package com.bwsw.sj.crud.rest.api
 
-import java.io.{FileNotFoundException, File}
+import java.io.{File, FileNotFoundException}
 import java.text.MessageFormat
 
-import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.MediaTypes._
-import akka.http.scaladsl.server.{RequestContext, Directives}
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.server.directives.FileInfo
-import com.bwsw.common.exceptions.{InstanceException, BadRecordWithKey}
+import akka.http.scaladsl.server.{Directives, RequestContext}
+import akka.stream.scaladsl._
+import com.bwsw.common.exceptions.{BadRecordWithKey, InstanceException}
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.engine.StreamingValidator
 import com.bwsw.sj.crud.rest.entities._
-import akka.http.scaladsl.model.headers._
 import com.bwsw.sj.crud.rest.entities.module._
-import com.bwsw.sj.crud.rest.runner.{InstanceDestroyer, InstanceStopper, InstanceStarter}
+import com.bwsw.sj.crud.rest.runner.{InstanceDestroyer, InstanceStarter, InstanceStopper}
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.module.StreamingModuleValidator
 import org.apache.commons.io.FileUtils
-
-import akka.stream.scaladsl._
 
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
@@ -42,18 +41,27 @@ trait SjModulesApi extends Directives with SjCrudValidator {
             case (metadata: FileInfo, file: File) =>
               if (metadata.fileName.endsWith(".jar")) {
                 val specification = checkJarFile(file)
-                val uploadingFile = new File(metadata.fileName)
-                FileUtils.copyFile(file, uploadingFile)
-                storage.put(uploadingFile, metadata.fileName, specification, "module")
-                val response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
-                  messages.getString("rest.modules.module.uploaded"),
-                  metadata.fileName
-                )))
+                if (!doesModuleExist(specification)) {
+                  val uploadingFile = new File(metadata.fileName)
+                  FileUtils.copyFile(file, uploadingFile)
+                  storage.put(uploadingFile, metadata.fileName, specification, "module")
+                  val response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+                    messages.getString("rest.modules.module.uploaded"),
+                    metadata.fileName
+                  )))
 
-                complete(HttpEntity(
-                  `application/json`,
-                  serializer.serialize(response)
-                ))
+                  complete(HttpEntity(
+                    `application/json`,
+                    serializer.serialize(response)
+                  ))
+                }
+                else {
+                  file.delete()
+                  throw new BadRecordWithKey(MessageFormat.format(
+                    messages.getString("rest.modules.module.exists"),
+                    metadata.fileName
+                  ), metadata.fileName)
+                }
               } else {
                 file.delete()
                 throw new BadRecordWithKey(MessageFormat.format(
@@ -63,285 +71,286 @@ trait SjModulesApi extends Directives with SjCrudValidator {
               }
           }
         } ~
-        get {
-          val files = fileMetadataDAO.getByParameters(Map("filetype" -> "module"))
-          var response: ProtocolResponse = null
-          if (files.nonEmpty) {
-            val entity = Map("modules" -> files.map(f => Map("module-type" -> f.specification.moduleType,
-              "module-name" -> f.specification.name,
-              "module-version" -> f.specification.version)))
-            response = ProtocolResponse(200, entity)
-          } else {
-            response = ProtocolResponse(200, Map("message" -> messages.getString("rest.modules.notfound")))
-          }
-          complete(HttpEntity(
-            `application/json`,
-            serializer.serialize(response)
-          ))
-        }
-      } ~
-      pathPrefix("instances") {
-        pathEndOrSingleSlash {
           get {
-            val allInstances = instanceDAO.getAll
-
+            val files = fileMetadataDAO.getByParameters(Map("filetype" -> "module"))
             var response: ProtocolResponse = null
-            if (allInstances.isEmpty) {
-              response = ProtocolResponse(200, Map("message" -> messages.getString("rest.modules.instances.notfound")))
-            } else {
-              val entity = Map("instances" -> allInstances.map(x => ShortInstanceMetadata(x.name,
-                x.moduleType,
-                x.moduleName,
-                x.moduleVersion,
-                x.description,
-                x.status)))
+            if (files.nonEmpty) {
+              val entity = Map("modules" -> files.map(f => Map("module-type" -> f.specification.moduleType,
+                "module-name" -> f.specification.name,
+                "module-version" -> f.specification.version)))
               response = ProtocolResponse(200, entity)
+            } else {
+              response = ProtocolResponse(200, Map("message" -> messages.getString("rest.modules.notfound")))
             }
             complete(HttpEntity(
               `application/json`,
               serializer.serialize(response)
             ))
           }
-        }
       } ~
-      pathPrefix(Segment) { (moduleType: String) =>
-        if (!checkModuleType(moduleType)) {
-          throw new BadRecordWithKey(MessageFormat.format(messages.getString("rest.modules.type.unknown"), moduleType), moduleType)
-        }
-        pathPrefix(Segment) { (moduleName: String) =>
-          pathPrefix(Segment) { (moduleVersion: String) =>
-            val fileMetadatas = fileMetadataDAO.getByParameters(Map("specification.name" -> moduleName,
-              "specification.module-type" -> moduleType,
-              "specification.version" -> moduleVersion)
-            )
-            if (fileMetadatas.isEmpty) {
-              throw new BadRecordWithKey(MessageFormat.format(
-                  messages.getString("rest.modules.module.notfound"),
-                  s"$moduleType-$moduleName-$moduleVersion"
-                ), s"$moduleType - $moduleName - $moduleVersion")
-            }
-            val fileMetadata = fileMetadatas.head
+        pathPrefix("instances") {
+          pathEndOrSingleSlash {
+            get {
+              val allInstances = instanceDAO.getAll
 
-            val fileSpecification = fileMetadata.specification
-            val specification = specificationToSpecificationData(fileSpecification)
-            val filename = fileMetadata.filename
-
-            pathPrefix("instance") {
-              pathEndOrSingleSlash {
-                post { (ctx: RequestContext) =>
-                  val instanceMetadata = deserializeOptions(getEntityFromContext(ctx), moduleType)
-                  val (errors, validatedInstance) = validateInstance(instanceMetadata, specification, moduleType)
-                  if (errors.isEmpty && validatedInstance != null) {
-                    val validatorClassName = specification.validateClass
-                    val jarFile = storage.get(filename, s"tmp/$filename")
-                    if (jarFile != null && jarFile.exists()) {
-                      if (moduleValidate(jarFile, validatorClassName, validatedInstance.options)) {
-                        val nameInstance = saveInstance(
-                          validatedInstance,
-                          moduleType,
-                          moduleName,
-                          moduleVersion,
-                          specification.engineName,
-                          specification.engineVersion
-                        )
-                        val response = ProtocolResponse(200,
-                          Map("message" -> MessageFormat.format(messages.getString("rest.modules.instances.instance.created"),
-                            nameInstance, s"$moduleType-$moduleName-$moduleVersion"
-                          )))
-                        ctx.complete(HttpEntity(
-                          `application/json`,
-                          serializer.serialize(response)
-                        ))
-                      } else {
-                        throw new InstanceException(messages.getString("rest.modules.instances.instance.create.incorrect"),
-                          s"$moduleType-$moduleName-$moduleVersion")
-                      }
-                    } else {
-                      throw new FileNotFoundException(MessageFormat.format(
-                        messages.getString("rest.modules.module.jar.notfound"),
-                        s"$moduleType-$moduleName-$moduleVersion"
-                      ))
-                    }
-                  } else {
-                    throw new InstanceException(MessageFormat.format(
-                      messages.getString("rest.modules.instances.instance.cannot.create"),
-                      errors.mkString("\n")
-                    ), s"$moduleType-$moduleName-$moduleVersion")
-                  }
-                } ~
-                  get {
-                    val instances = instanceDAO.getByParameters(Map("module-name" -> moduleName,
-                      "module-type" -> moduleType,
-                      "module-version" -> moduleVersion)
-                    )
-                    var response: ProtocolResponse = null
-                    if (instances.nonEmpty) {
-                      response = ProtocolResponse(200, Map("instances" -> instances.map(i => convertModelInstanceToApiInstance(i))))
-                    } else {
-                      response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
-                        messages.getString("rest.modules.module.instances.notfound"),
-                        s"$moduleType-$moduleName-$moduleVersion"
-                      )))
-                    }
-                    complete(HttpEntity(`application/json`, serializer.serialize(response)))
-                  }
-              } ~
-              pathPrefix(Segment) { (instanceName: String) =>
-                val instance = instanceDAO.get(instanceName)
-                if (instance == null) {
-                  throw new BadRecordWithKey(MessageFormat.format(
-                    messages.getString("rest.modules.module.instances.instance.notfound"),
-                    instanceName
-                  ), instanceName)
-                }
-                pathEndOrSingleSlash {
-                  get {
-                    val response = new ProtocolResponse(200, Map("instance" -> convertModelInstanceToApiInstance(instance)))
-                    complete(HttpEntity(
-                      `application/json`,
-                      serializer.serialize(response)
-                    ))
-                  } ~
-                  delete {
-                    var msg = ""
-                    if (instance.status.equals(stopped) || instance.status.equals(failed)) {
-                      instance.status = deleting
-                      instanceDAO.save(instance)
-                      destroyInstance(instance)
-                      msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.deleting"), instanceName)
-                    } else if (instance.status.equals(ready)) {
-                      instanceDAO.delete(instanceName)
-                      msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.deleted"), instanceName)
-                    } else {
-                      msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.cannot.delete"), instanceName)
-                    }
-                    complete(HttpEntity(
-                      `application/json`,
-                      serializer.serialize(ProtocolResponse(200, Map("message" -> msg)))
-                    ))
-                  }
-                } ~
-                path("start") {
-                  pathEndOrSingleSlash {
-                    get {
-                      var msg = ""
-                      if (instance.status.equals(ready) ||
-                        instance.status.equals(stopped) ||
-                        instance.status.equals(failed)) {
-                        instance.status = starting
-                        instanceDAO.save(instance)
-                        startInstance(instance)
-                        msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.starting"), instanceName)
-                      } else {
-                        msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.cannot.start"), instanceName)
-                      }
-                      complete(HttpEntity(
-                        `application/json`,
-                        serializer.serialize(ProtocolResponse(200, Map("message" -> msg)))
-                      ))
-                    }
-                  }
-                } ~
-                path("stop") {
-                  pathEndOrSingleSlash {
-                    get {
-                      var msg = ""
-                      if (instance.status.equals(started)) {
-                        instance.status = stopping
-                        instanceDAO.save(instance)
-                        stopInstance(instance)
-                        msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.stopping"), instanceName)
-                      } else {
-                        msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.cannot.stop"), instanceName)
-                      }
-                      complete(HttpEntity(
-                        `application/json`,
-                        serializer.serialize(ProtocolResponse(200, Map("message" -> msg)))
-                      ))
-                    }
-                  }
-                }
+              var response: ProtocolResponse = null
+              if (allInstances.isEmpty) {
+                response = ProtocolResponse(200, Map("message" -> messages.getString("rest.modules.instances.notfound")))
+              } else {
+                val entity = Map("instances" -> allInstances.map(x => ShortInstanceMetadata(x.name,
+                  x.moduleType,
+                  x.moduleName,
+                  x.moduleVersion,
+                  x.description,
+                  x.status)))
+                response = ProtocolResponse(200, entity)
               }
-            } ~
-            pathSuffix("specification") {
-              pathEndOrSingleSlash {
-                get {
-                  complete(HttpEntity(
-                    `application/json`,
-                    serializer.serialize(ProtocolResponse(200, Map("specification" -> specification)))
-                  ))
-                }
-              }
-            } ~
-            pathEndOrSingleSlash {
-              get {
-                val jarFile = storage.get(filename, s"tmp/$filename")
-                if (jarFile != null && jarFile.exists()) {
-                  complete(HttpResponse(
-                    headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> filename))),
-                    entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
-                  ))
-                } else {
-                  throw new BadRecordWithKey(MessageFormat.format(
-                    messages.getString("rest.modules.module.jar.notfound"),
-                    s"$moduleName-$moduleVersion"
-                  ), s"$moduleType - $moduleName - $moduleVersion")
-                }
-              } ~
-              delete {
-                val instances = instanceDAO.getByParameters(Map("module-name" -> moduleName,
-                  "module-type" -> moduleType,
-                  "module-version" -> moduleVersion)
-                )
-                if (instances.isEmpty) {
-                  if (storage.delete(filename)) {
-                    val response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
-                      messages.getString("rest.modules.module.deleted"),
-                      s"$moduleName-$moduleVersion"
-                    )))
-
-                    complete(HttpEntity(
-                      `application/json`,
-                      serializer.serialize(response)
-                    ))
-                  } else {
-                    throw new BadRecordWithKey( MessageFormat.format(
-                      messages.getString("rest.modules.module.notfound"),
-                      s"$moduleName-$moduleVersion"
-                    ), s"$moduleType-$moduleName-$moduleVersion")
-                  }
-                } else {
-                  throw new BadRecordWithKey( MessageFormat.format(
-                    messages.getString("rest.modules.module.cannot.delete"),
-                    s"$moduleName-$moduleVersion"
-                  ), s"$moduleType-$moduleName-$moduleVersion")
-                }
-              }
+              complete(HttpEntity(
+                `application/json`,
+                serializer.serialize(response)
+              ))
             }
           }
         } ~
-        pathEndOrSingleSlash {
-          get {
-            val files = fileMetadataDAO.getByParameters(Map("specification.module-type" -> moduleType))
-            var response: ProtocolResponse = null
-            if (files.nonEmpty) {
-              val entity = Map("message" -> s"Uploaded modules for type $moduleType",
-                "modules" -> files.map(f => Map("module-type" -> f.specification.moduleType,
-                  "module-name" -> f.specification.name,
-                  "module-version" -> f.specification.version)))
-              response = ProtocolResponse(200, entity)
-            } else {
-              response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
-                messages.getString("rest.modules.type.notfound"),
-                moduleType)))
-            }
-            complete(HttpEntity(
-              `application/json`,
-              serializer.serialize(response)
-            ))
+        pathPrefix(Segment) { (moduleType: String) =>
+          if (!checkModuleType(moduleType)) {
+            throw new BadRecordWithKey(MessageFormat.format(messages.getString("rest.modules.type.unknown"), moduleType), moduleType)
           }
+          pathPrefix(Segment) { (moduleName: String) =>
+            pathPrefix(Segment) { (moduleVersion: String) =>
+              val fileMetadatas = fileMetadataDAO.getByParameters(Map("specification.name" -> moduleName,
+                "specification.module-type" -> moduleType,
+                "specification.version" -> moduleVersion)
+              )
+              if (fileMetadatas.isEmpty) {
+                throw new BadRecordWithKey(MessageFormat.format(
+                  messages.getString("rest.modules.module.notfound"),
+                  s"$moduleType-$moduleName-$moduleVersion"
+                ), s"$moduleType - $moduleName - $moduleVersion")
+              }
+              val fileMetadata = fileMetadatas.head
+
+              val fileSpecification = fileMetadata.specification
+              val specification = specificationToSpecificationData(fileSpecification)
+              val filename = fileMetadata.filename
+
+              pathPrefix("instance") {
+                pathEndOrSingleSlash {
+                  post { (ctx: RequestContext) =>
+                    val instanceMetadata = deserializeOptions(getEntityFromContext(ctx), moduleType)
+                    val (errors, validatedInstance) = validateInstance(instanceMetadata, specification, moduleType)
+                    if (errors.isEmpty && validatedInstance != null) {
+                      val validatorClassName = specification.validateClass
+                      val jarFile = storage.get(filename, s"tmp/$filename")
+                      if (jarFile != null && jarFile.exists()) {
+                        if (moduleValidate(jarFile, validatorClassName, validatedInstance.options)) {
+                          val nameInstance = saveInstance(
+                            validatedInstance,
+                            moduleType,
+                            moduleName,
+                            moduleVersion,
+                            specification.engineName,
+                            specification.engineVersion
+                          )
+                          val response = ProtocolResponse(200,
+                            Map("message" -> MessageFormat.format(messages.getString("rest.modules.instances.instance.created"),
+                              nameInstance, s"$moduleType-$moduleName-$moduleVersion"
+                            )))
+                          ctx.complete(HttpEntity(
+                            `application/json`,
+                            serializer.serialize(response)
+                          ))
+                        } else {
+                          throw new InstanceException(messages.getString("rest.modules.instances.instance.create.incorrect"),
+                            s"$moduleType-$moduleName-$moduleVersion")
+                        }
+                      } else {
+                        throw new FileNotFoundException(MessageFormat.format(
+                          messages.getString("rest.modules.module.jar.notfound"),
+                          s"$moduleType-$moduleName-$moduleVersion"
+                        ))
+                      }
+                    } else {
+                      throw new InstanceException(MessageFormat.format(
+                        messages.getString("rest.modules.instances.instance.cannot.create"),
+                        errors.mkString("\n")
+                      ), s"$moduleType-$moduleName-$moduleVersion")
+                    }
+                  } ~
+                    get {
+                      val instances = instanceDAO.getByParameters(Map("module-name" -> moduleName,
+                        "module-type" -> moduleType,
+                        "module-version" -> moduleVersion)
+                      )
+                      var response: ProtocolResponse = null
+                      if (instances.nonEmpty) {
+                        response = ProtocolResponse(200, Map("instances" -> instances.map(i => convertModelInstanceToApiInstance(i))))
+                      } else {
+                        response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+                          messages.getString("rest.modules.module.instances.notfound"),
+                          s"$moduleType-$moduleName-$moduleVersion"
+                        )))
+                      }
+                      complete(HttpEntity(`application/json`, serializer.serialize(response)))
+                    }
+                } ~
+                  pathPrefix(Segment) { (instanceName: String) =>
+                    val instance = instanceDAO.get(instanceName)
+                    if (instance == null) {
+                      throw new BadRecordWithKey(MessageFormat.format(
+                        messages.getString("rest.modules.module.instances.instance.notfound"),
+                        instanceName
+                      ), instanceName)
+                    }
+                    pathEndOrSingleSlash {
+                      get {
+                        val response = new ProtocolResponse(200, Map("instance" -> convertModelInstanceToApiInstance(instance)))
+                        complete(HttpEntity(
+                          `application/json`,
+                          serializer.serialize(response)
+                        ))
+                      } ~
+                        delete {
+                          var msg = ""
+                          if (instance.status.equals(stopped) || instance.status.equals(failed)) {
+                            instance.status = deleting
+                            instanceDAO.save(instance)
+                            destroyInstance(instance)
+                            msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.deleting"), instanceName)
+                          } else if (instance.status.equals(ready)) {
+                            instanceDAO.delete(instanceName)
+                            msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.deleted"), instanceName)
+                          } else {
+                            msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.cannot.delete"), instanceName)
+                            throw new InstanceException(msg, instanceName)
+                          }
+                          complete(HttpEntity(
+                            `application/json`,
+                            serializer.serialize(ProtocolResponse(200, Map("message" -> msg)))
+                          ))
+                        }
+                    } ~
+                      path("start") {
+                        pathEndOrSingleSlash {
+                          get {
+                            var msg = ""
+                            if (instance.status.equals(ready) ||
+                              instance.status.equals(stopped) ||
+                              instance.status.equals(failed)) {
+                              instance.status = starting
+                              instanceDAO.save(instance)
+                              startInstance(instance)
+                              msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.starting"), instanceName)
+                            } else {
+                              msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.cannot.start"), instanceName)
+                            }
+                            complete(HttpEntity(
+                              `application/json`,
+                              serializer.serialize(ProtocolResponse(200, Map("message" -> msg)))
+                            ))
+                          }
+                        }
+                      } ~
+                      path("stop") {
+                        pathEndOrSingleSlash {
+                          get {
+                            var msg = ""
+                            if (instance.status.equals(started)) {
+                              instance.status = stopping
+                              instanceDAO.save(instance)
+                              stopInstance(instance)
+                              msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.stopping"), instanceName)
+                            } else {
+                              msg = MessageFormat.format(messages.getString("rest.modules.instances.instance.cannot.stop"), instanceName)
+                            }
+                            complete(HttpEntity(
+                              `application/json`,
+                              serializer.serialize(ProtocolResponse(200, Map("message" -> msg)))
+                            ))
+                          }
+                        }
+                      }
+                  }
+              } ~
+                pathSuffix("specification") {
+                  pathEndOrSingleSlash {
+                    get {
+                      complete(HttpEntity(
+                        `application/json`,
+                        serializer.serialize(ProtocolResponse(200, Map("specification" -> specification)))
+                      ))
+                    }
+                  }
+                } ~
+                pathEndOrSingleSlash {
+                  get {
+                    val jarFile = storage.get(filename, s"tmp/$filename")
+                    if (jarFile != null && jarFile.exists()) {
+                      complete(HttpResponse(
+                        headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> filename))),
+                        entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
+                      ))
+                    } else {
+                      throw new BadRecordWithKey(MessageFormat.format(
+                        messages.getString("rest.modules.module.jar.notfound"),
+                        s"$moduleName-$moduleVersion"
+                      ), s"$moduleType - $moduleName - $moduleVersion")
+                    }
+                  } ~
+                    delete {
+                      val instances = instanceDAO.getByParameters(Map("module-name" -> moduleName,
+                        "module-type" -> moduleType,
+                        "module-version" -> moduleVersion)
+                      )
+                      if (instances.isEmpty) {
+                        if (storage.delete(filename)) {
+                          val response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+                            messages.getString("rest.modules.module.deleted"),
+                            s"$moduleName-$moduleVersion"
+                          )))
+
+                          complete(HttpEntity(
+                            `application/json`,
+                            serializer.serialize(response)
+                          ))
+                        } else {
+                          throw new BadRecordWithKey(MessageFormat.format(
+                            messages.getString("rest.modules.module.notfound"),
+                            s"$moduleName-$moduleVersion"
+                          ), s"$moduleType-$moduleName-$moduleVersion")
+                        }
+                      } else {
+                        throw new BadRecordWithKey(MessageFormat.format(
+                          messages.getString("rest.modules.module.cannot.delete"),
+                          s"$moduleName-$moduleVersion"
+                        ), s"$moduleType-$moduleName-$moduleVersion")
+                      }
+                    }
+                }
+            }
+          } ~
+            pathEndOrSingleSlash {
+              get {
+                val files = fileMetadataDAO.getByParameters(Map("specification.module-type" -> moduleType))
+                var response: ProtocolResponse = null
+                if (files.nonEmpty) {
+                  val entity = Map("message" -> s"Uploaded modules for type $moduleType",
+                    "modules" -> files.map(f => Map("module-type" -> f.specification.moduleType,
+                      "module-name" -> f.specification.name,
+                      "module-version" -> f.specification.version)))
+                  response = ProtocolResponse(200, entity)
+                } else {
+                  response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+                    messages.getString("rest.modules.type.notfound"),
+                    moduleType)))
+                }
+                complete(HttpEntity(
+                  `application/json`,
+                  serializer.serialize(response)
+                ))
+              }
+            }
         }
-      }
     }
   }
 
@@ -397,7 +406,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                    moduleVersion: String,
                    engineName: String,
                    engineVersion: String) = {
-    instance.engine = engineName + "-" + engineVersion //todo: maybe spaces/commons or some special characters from name/version need to remove
+    instance.engine = engineName + "-" + engineVersion
     instance.moduleName = moduleName
     instance.moduleVersion = moduleVersion
     instance.moduleType = moduleType

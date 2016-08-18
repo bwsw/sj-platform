@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.input
 
-import java.io.{PrintStream, BufferedReader, File, InputStreamReader}
-import java.net.{Socket, InetSocketAddress}
+import java.io.{BufferedReader, File, InputStreamReader, PrintStream}
+import java.net.{InetSocketAddress, Socket}
 import java.util
 import java.util.jar.JarFile
 
@@ -11,22 +11,24 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask, Instance}
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.StreamConstants
-import com.bwsw.sj.engine.core.utils.CassandraHelper
-import com.bwsw.sj.engine.core.utils.CassandraHelper._
+import com.bwsw.sj.common.utils.CassandraFactory
 import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
 import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerOptions}
+
 import com.bwsw.tstreams.converter.IConverter
-import com.bwsw.tstreams.data.cassandra.{CassandraStorageOptions, CassandraStorageFactory}
+
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
-import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
+
 import com.bwsw.tstreams.policy.RoundRobinPolicy
 import com.bwsw.tstreams.services.BasicStreamService
 import com.bwsw.tstreams.streams.TStream
-import com.datastax.driver.core.Cluster
 
 object DataFactory {
 
   private val zookeeperHosts = System.getenv("ZOOKEEPER_HOSTS").split(",")
+  private val cassandraHost = System.getenv("CASSANDRA_HOST")
+  private val cassandraPort = System.getenv("CASSANDRA_PORT").toInt
+  private val cassandraTestKeyspace = "test_keyspace_for_input_engine"
   private val testNamespace = "test"
   private val instanceName = "test-instance-for-input-engine"
   private var instanceOutputs: Array[String] = Array()
@@ -36,13 +38,8 @@ object DataFactory {
   tasks.put(s"$instanceName-task0", new InputTask(host, port))
   private val partitions = 1
   private val serializer = new JsonSerializer()
-  private val cluster = Cluster.builder().addContactPoint(cassandraHost).build()
-  private val session = cluster.connect()
-  private val dataStorageFactory = new CassandraStorageFactory()
-  private val dataStorageOptions = new CassandraStorageOptions(
-    List(new InetSocketAddress(CassandraHelper.cassandraHost, CassandraHelper.cassandraPort)),
-    cassandraTestKeyspace
-  )
+  private val cassandraFactory = new CassandraFactory()
+
   val outputCount = 2
 
   def writeData(totalInputElements: Int, totalDuplicateElements: Int) = {
@@ -80,59 +77,51 @@ object DataFactory {
     override def convert(obj: Array[Byte]): Array[Byte] = obj
   }
 
-  private lazy val metadataStorageFactory: MetadataStorageFactory = new MetadataStorageFactory()
-  private lazy val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(
-    cassandraHosts = List(new InetSocketAddress(cassandraHost, cassandraPort)),
-    keyspace = cassandraTestKeyspace)
+  def open() = cassandraFactory.open(Set(new InetSocketAddress(cassandraHost, cassandraPort)))
 
   def cassandraSetup() = {
-    createKeyspace(session, cassandraTestKeyspace)
-    createMetadataTables(session, cassandraTestKeyspace)
+    cassandraFactory.createKeyspace(cassandraTestKeyspace)
+    cassandraFactory.createMetadataTables(cassandraTestKeyspace)
+    cassandraFactory.createDataTable(cassandraTestKeyspace)
   }
 
   def cassandraDestroy() = {
-    session.execute(s"DROP KEYSPACE $cassandraTestKeyspace")
+    cassandraFactory.dropKeyspace(cassandraTestKeyspace)
   }
 
-  def close() = {
-    dataStorageFactory.closeFactory()
-    metadataStorageFactory.closeFactory()
-    session.close()
-    cluster.close()
-  }
+  def close() = cassandraFactory.close()
 
   def createProviders(providerService: GenericMongoService[Provider]) = {
-    val cassandraProvider = new Provider("cassandra_test_provider", "cassandra provider", Array(s"$cassandraHost:9042"), "", "", "cassandra")
+    val cassandraProvider = new Provider("cassandra-test-provider", "cassandra provider", Array(s"$cassandraHost:$cassandraPort"), "", "", "cassandra")
     providerService.save(cassandraProvider)
 
-    val zookeeperProvider = new Provider("zookeeper_test_provider", "zookeeper provider", zookeeperHosts, "", "", "zookeeper")
+    val zookeeperProvider = new Provider("zookeeper-test-provider", "zookeeper provider", zookeeperHosts, "", "", "zookeeper")
     providerService.save(zookeeperProvider)
   }
 
   def deleteProviders(providerService: GenericMongoService[Provider]) = {
-    providerService.delete("cassandra_test_provider")
-    providerService.delete("aerospike_test_provider")
-    providerService.delete("zookeeper_test_provider")
+    providerService.delete("cassandra-test-provider")
+    providerService.delete("zookeeper-test-provider")
   }
 
   def createServices(serviceManager: GenericMongoService[Service], providerService: GenericMongoService[Provider]) = {
-    val cassProv = providerService.get("cassandra_test_provider")
-    val cassService = new CassandraService("cassandra_test_service", "CassDB", "cassandra test service", cassProv, cassandraTestKeyspace)
+    val cassProv = providerService.get("cassandra-test-provider")
+    val cassService = new CassandraService("cassandra-test-service", "CassDB", "cassandra test service", cassProv, cassandraTestKeyspace)
     serviceManager.save(cassService)
 
-    val zkProv = providerService.get("zookeeper_test_provider")
-    val zkService = new ZKService("zookeeper_test_service", "ZKCoord", "zookeeper test service", zkProv, testNamespace)
+    val zkProv = providerService.get("zookeeper-test-provider")
+    val zkService = new ZKService("zookeeper-test-service", "ZKCoord", "zookeeper test service", zkProv, testNamespace)
     serviceManager.save(zkService)
 
-    val tstrqService = new TStreamService("tstream_test_service", "TstrQ", "tstream test service",
+    val tstrqService = new TStreamService("tstream-test-service", "TstrQ", "tstream test service",
       cassProv, cassandraTestKeyspace, cassProv, cassandraTestKeyspace, zkProv, "unit")
     serviceManager.save(tstrqService)
   }
 
   def deleteServices(serviceManager: GenericMongoService[Service]) = {
-    serviceManager.delete("cassandra_test_service")
-    serviceManager.delete("zookeeper_test_service")
-    serviceManager.delete("tstream_test_service")
+    serviceManager.delete("cassandra-test-service")
+    serviceManager.delete("zookeeper-test-service")
+    serviceManager.delete("tstream-test-service")
   }
 
   def createStreams(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], outputCount: Int) = {
@@ -150,10 +139,13 @@ object DataFactory {
   private def createOutputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
     val localGenerator = new Generator("local")
 
-    val tService = serviceManager.get("tstream_test_service")
+    val tService = serviceManager.get("tstream-test-service")
 
     val s2 = new TStreamSjStream("test-output-tstream" + suffix, "test-output-tstream", partitions, tService, StreamConstants.tStreamType, Array("output", "some tags"), localGenerator)
     sjStreamService.save(s2)
+
+    val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
+    val dataStorage = cassandraFactory.getDataStorage(cassandraTestKeyspace)
 
     BasicStreamService.createStream(
       "test-output-tstream" + suffix,
@@ -161,12 +153,13 @@ object DataFactory {
       1000 * 60,
       "description of test output tstream",
       metadataStorage,
-      dataStorageFactory.getInstance(dataStorageOptions)
+      dataStorage
     )
   }
 
   private def deleteOutputTStream(streamService: GenericMongoService[SjStream], suffix: String) = {
     streamService.delete("test-output-tstream" + suffix)
+    val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
     BasicStreamService.deleteStream("test-output-tstream" + suffix, metadataStorage)
   }
 
@@ -178,8 +171,8 @@ object DataFactory {
     val instance = new InputInstance()
     instance.name = instanceName
     instance.moduleType = "input-streaming"
-    instance.moduleName = "com.bwsw.input.streaming.engine"
-    instance.moduleVersion = "0.1"
+    instance.moduleName = "input-streaming-stub"
+    instance.moduleVersion = "1.0"
     instance.status = "ready"
     instance.description = "some description of test instance"
     instance.outputs = instanceOutputs
@@ -190,8 +183,8 @@ object DataFactory {
     instance.perTaskCores = 0.1
     instance.perTaskRam = 64
     instance.performanceReportingInterval = 10000
-    instance.engine = "com.bwsw.input.streaming.engine-0.1"
-    instance.coordinationService = serviceManager.get("zookeeper_test_service").asInstanceOf[ZKService]
+    instance.engine = "com.bwsw.input.streaming.engine-1.0"
+    instance.coordinationService = serviceManager.get("zookeeper-test-service").asInstanceOf[ZKService]
     instance.duplicateCheck = false
     instance.lookupHistory = 100
     instance.queueMaxSize = 100
@@ -241,9 +234,11 @@ object DataFactory {
 
   private def createConsumer(streamName: String, streamService: GenericMongoService[SjStream], address: String): Consumer[Array[Byte]] = {
     val stream = streamService.get(streamName)
+    val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
+    val dataStorage = cassandraFactory.getDataStorage(cassandraTestKeyspace)
 
     val tStream: TStream[Array[Byte]] =
-      BasicStreamService.loadStream(stream.name, metadataStorage, dataStorageFactory.getInstance(dataStorageOptions))
+      BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
 
     val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
 

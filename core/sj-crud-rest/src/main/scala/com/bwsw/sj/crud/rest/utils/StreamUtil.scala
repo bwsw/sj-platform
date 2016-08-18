@@ -7,9 +7,11 @@ import com.aerospike.client.Host
 import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.tstreams.common.CassandraConnectorConf
 import com.bwsw.tstreams.data.IStorage
-import com.bwsw.tstreams.data.aerospike.{AerospikeStorageFactory, AerospikeStorageOptions}
-import com.bwsw.tstreams.data.cassandra.{CassandraStorageFactory, CassandraStorageOptions}
+import com.bwsw.tstreams.data.aerospike._
+import com.bwsw.tstreams.data._
+import com.bwsw.tstreams.env.{TStreamsFactory, TSF_Dictionary}
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.services.BasicStreamService
 import kafka.admin.AdminUtils
@@ -43,23 +45,20 @@ object StreamUtil {
     logger.debug(s"Stream ${stream.name}. Check and create t-stream.")
     val service = stream.service.asInstanceOf[TStreamService]
     val metadataProvider = service.metadataProvider
-    val hosts = metadataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt))
-    val metadataStorage = (new MetadataStorageFactory).getInstance(hosts.toList, service.metadataNamespace)
+    val hosts = metadataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toSet
+    val cassandraConnectorConf = CassandraConnectorConf.apply(hosts)
+    val metadataStorage = (new MetadataStorageFactory).getInstance(conf = cassandraConnectorConf, service.metadataNamespace)
 
     val dataProvider = service.dataProvider
     var dataStorage: IStorage[Array[Byte]] = null
     if (dataProvider.providerType.equals("cassandra")) {
-      val options = new CassandraStorageOptions(
-        dataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList,
-        service.dataNamespace
-      )
-      dataStorage = (new CassandraStorageFactory).getInstance(options)
+      dataStorage = (new cassandra.Factory).getInstance(cassandraConnectorConf, service.dataNamespace)
     } else if (dataProvider.providerType.equals("aerospike")) {
-      val options = new AerospikeStorageOptions(
+      val options = new aerospike.Options(
         service.dataNamespace,
-        dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toList
+        dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toSet
       )
-      dataStorage = (new AerospikeStorageFactory).getInstance(options)
+      dataStorage = (new aerospike.Factory).getInstance(options)
     }
 
     if (BasicStreamService.isExist(stream.name, metadataStorage)) {
@@ -76,8 +75,8 @@ object StreamUtil {
           dataStorage
         )
         if (tStream.getPartitions != stream.asInstanceOf[TStreamSjStream].partitions) {
-          logger.debug(s"Kafka stream partitions (${stream.asInstanceOf[TStreamSjStream].partitions}) " +
-            s"mismatch partitions of exists kafka topic (${tStream.getPartitions}).")
+          logger.debug(s"T-stream partitions (${stream.asInstanceOf[TStreamSjStream].partitions}) " +
+            s"mismatch with partitions of existent t-stream (${tStream.getPartitions}).")
           Left(s"Partitions count of stream ${stream.name} mismatch")
         } else {
           Right(true)
@@ -99,11 +98,14 @@ object StreamUtil {
   private def createTStream(stream: TStreamSjStream,
                             metadataStorage: MetadataStorage,
                             dataStorage: IStorage[Array[Byte]]) = {
+    val tstreamFactory = new TStreamsFactory()
+    val streamTTL = tstreamFactory.getProperty(TSF_Dictionary.Stream.TTL).asInstanceOf[Int]
     BasicStreamService.createStream(
       stream.name,
       stream.asInstanceOf[TStreamSjStream].partitions,
-      configService.get(ConfigConstants.streamTTLTag).value.toInt,
-      "", metadataStorage,
+      streamTTL,
+      stream.description,
+      metadataStorage,
       dataStorage
     )
     logger.debug(s"Stream ${stream.name}. T-stream is created.")
@@ -264,23 +266,20 @@ object StreamUtil {
   def deleteTStream(stream: TStreamSjStream) = {
     val service = stream.service.asInstanceOf[TStreamService]
     val metadataProvider = service.metadataProvider
-    val hosts = metadataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt))
-    val metadataStorage = (new MetadataStorageFactory).getInstance(hosts.toList, service.metadataNamespace)
+    val hosts = metadataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toSet
+    val cassandraConnectorConf = CassandraConnectorConf.apply(hosts)
+    val metadataStorage = (new MetadataStorageFactory).getInstance(cassandraConnectorConf, service.metadataNamespace)
 
     val dataProvider = service.dataProvider
     var dataStorage: IStorage[Array[Byte]] = null
     if (dataProvider.providerType.equals("cassandra")) {
-      val options = new CassandraStorageOptions(
-        dataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList,
-        service.dataNamespace
-      )
-      dataStorage = (new CassandraStorageFactory).getInstance(options)
+      dataStorage = (new cassandra.Factory).getInstance(cassandraConnectorConf, service.dataNamespace)
     } else if (dataProvider.providerType.equals("aerospike")) {
-      val options = new AerospikeStorageOptions(
+      val options = new Options(
         service.dataNamespace,
-        dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toList
+        dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toSet
       )
-      dataStorage = (new AerospikeStorageFactory).getInstance(options)
+      dataStorage = (new aerospike.Factory).getInstance(options)
     }
 
     if (BasicStreamService.isExist(stream.name, metadataStorage)) {
