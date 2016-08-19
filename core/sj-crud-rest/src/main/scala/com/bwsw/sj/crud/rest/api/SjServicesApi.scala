@@ -42,7 +42,7 @@ trait SjServicesApi extends Directives with SjCrudValidator {
           val errors = ServiceValidator.validate(data, service)
 
           if (errors.isEmpty) {
-            ServiceUtil.prepareService(service) //todo or when running instance?
+            ServiceUtil.prepareService(service)
             serviceDAO.save(service)
             val response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
               messages.getString("rest.services.service.created"),
@@ -93,6 +93,7 @@ trait SjServicesApi extends Directives with SjCrudValidator {
               val service = serviceDAO.get(serviceName)
               var response: ProtocolResponse = null
               if (service != null) {
+                ServiceUtil.deleteService(service)
                 serviceDAO.delete(serviceName)
                 response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
                   messages.getString("rest.services.service.deleted"),

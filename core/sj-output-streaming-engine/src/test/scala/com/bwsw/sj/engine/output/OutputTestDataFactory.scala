@@ -7,7 +7,6 @@ import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.DAL.model.{TStreamSjStream, TStreamService, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.tstreams.agents.producer.DataInsertType.BatchInsert
 import com.bwsw.tstreams.agents.producer._
 import com.bwsw.tstreams.common.CassandraConnectorConf
 import com.bwsw.tstreams.converter.IConverter
@@ -44,7 +43,7 @@ object OutputTestDataFactory {
   private val dataStorageHosts = inputStreamService.dataProvider.hosts.map { addr =>
     val parts = addr.split(":")
     new Host(parts(0), parts(1).toInt)
-  }.toList
+  }.toSet
   private val options = new aerospike.Options(inputStreamService.dataNamespace, dataStorageHosts)
   val dataStorage = dataStorageFactory.getInstance(options)
 
@@ -80,14 +79,13 @@ object OutputTestDataFactory {
       BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
 
     val coordinationSettings = new CoordinationOptions(
-      agentAddress = s"localhost:8030",
       zkHosts = List(new InetSocketAddress("localhost", 2181)),
       zkRootPath = "/unit",
+      zkConnectionTimeout = 7000,
       zkSessionTimeout = 7000,
       isLowPriorityToBeMaster = false,
       transport = new TcpTransport("localhost:8030",
-        TSF_Dictionary.Producer.TRANSPORT_TIMEOUT.toInt * 1000),
-      zkConnectionTimeout = 7000)
+        TSF_Dictionary.Producer.TRANSPORT_TIMEOUT.toInt * 1000))
 
     val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until stream.partitions).toList)
 
@@ -97,7 +95,7 @@ object OutputTestDataFactory {
       transactionTTL = 6,
       transactionKeepAliveInterval = 2,
       roundRobinPolicy,
-      BatchInsert(5),
+      5,
       timeUuidGenerator,
       coordinationSettings,
       converter)

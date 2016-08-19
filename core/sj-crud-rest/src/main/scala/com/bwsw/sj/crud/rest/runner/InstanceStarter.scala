@@ -32,11 +32,11 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
   private val configService = ConnectionRepository.getConfigService
-  private val zkSessionTimeout = configService.get(ConfigConstants.zkSessionTimeoutTag).value.toInt
 
   def run() = {
     logger.debug(s"Instance: ${instance.name}. Start instance.")
     try {
+      val zkSessionTimeout = configService.get(ConfigConstants.zkSessionTimeoutTag).value.toInt
       val mesosInfoResponse = getMesosInfo
       if (mesosInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
         val entity = serializer.deserialize[Map[String, Any]](EntityUtils.toString(mesosInfoResponse.getEntity, "UTF-8"))
@@ -100,7 +100,8 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
     val startFrameworkResult = frameworkStart(mesosMaster)
     var isStarted = false
     startFrameworkResult match {
-      case Right(response) => if (response.getStatusLine.getStatusCode.equals(OK) ||
+      case Right(response) =>
+        if (response.getStatusLine.getStatusCode.equals(OK) ||
         response.getStatusLine.getStatusCode.equals(Created)) {
 
         while (!isStarted) {
@@ -140,38 +141,38 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
     *         (true, if framework running on mesos)
     */
   def frameworkStart(mesosMaster: String) = {
-    logger.debug(s"Instance: ${instance.name}. Start framework for instance.")
-    val frameworkJarName = configService.get("system" + "." + configService.get(frameworkTag).value).value
-    val restUrl = new URI(s"$restAddress/v1/custom/jars/$frameworkJarName")
-    val taskInfoResponse = getTaskInfo(instance.name)
-    if (taskInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
-      val ignore = serializer.getIgnoreUnknown()
-      serializer.setIgnoreUnknown(true)
-      val entity = serializer.deserialize[MarathonRequest](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
-      serializer.setIgnoreUnknown(ignore)
-      if (entity.instances < 1) {
-        Right(scaleApplication(instance.name, 1))
+      logger.debug(s"Instance: ${instance.name}. Start framework for instance.")
+      val frameworkJarName = configService.get("system" + "." + configService.get(frameworkTag).value).value
+      val restUrl = new URI(s"$restAddress/v1/custom/jars/$frameworkJarName")
+      val taskInfoResponse = getTaskInfo(instance.name)
+      if (taskInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
+        val ignore = serializer.getIgnoreUnknown()
+        serializer.setIgnoreUnknown(true)
+        val entity = serializer.deserialize[MarathonRequest](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
+        serializer.setIgnoreUnknown(ignore)
+        if (entity.instances < 1) {
+          Right(scaleApplication(instance.name, 1))
+        } else {
+          Left(true)
+        }
       } else {
-        Left(true)
-      }
-    } else {
-      var applicationEnvs = Map(
-        "MONGO_HOST" -> ConnectionConstants.mongoHost,
-        "MONGO_PORT" -> s"${ConnectionConstants.mongoPort}",
-        "INSTANCE_ID" -> instance.name,
-        "MESOS_MASTER" -> mesosMaster
-      )
-      if (instance.environmentVariables != null) {
-        applicationEnvs = applicationEnvs ++ Map(instance.environmentVariables.asScala.toList: _*)
-      }
-      val request = new MarathonRequest(instance.name,
-        "java -jar " + frameworkJarName + " $PORT",
-        1,
-        Map(applicationEnvs.toList: _*),
-        List(restUrl.toString))
+        var applicationEnvs = Map(
+          "MONGO_HOST" -> ConnectionConstants.mongoHost,
+          "MONGO_PORT" -> s"${ConnectionConstants.mongoPort}",
+          "INSTANCE_ID" -> instance.name,
+          "MESOS_MASTER" -> mesosMaster
+        )
+        if (instance.environmentVariables != null) {
+          applicationEnvs = applicationEnvs ++ Map(instance.environmentVariables.asScala.toList: _*)
+        }
+        val request = new MarathonRequest(instance.name,
+          "java -jar " + frameworkJarName + " $PORT",
+          1,
+          Map(applicationEnvs.toList: _*),
+          List(restUrl.toString))
 
-      Right(startApplication(request))
-    }
+        Right(startApplication(request))
+      }
   }
 
   /**

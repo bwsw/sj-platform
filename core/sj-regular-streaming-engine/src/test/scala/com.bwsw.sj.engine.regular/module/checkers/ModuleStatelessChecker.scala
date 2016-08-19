@@ -6,7 +6,7 @@ import com.bwsw.sj.engine.regular.module.DataFactory._
 import scala.collection.JavaConverters._
 
 object ModuleStatelessChecker extends App {
-
+  open()
   val streamService = ConnectionRepository.getStreamService
   val objectSerializer = new ObjectSerializer()
 

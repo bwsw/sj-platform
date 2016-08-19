@@ -5,7 +5,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.engine.regular.module.DataFactory._
 
 object ModuleStatelessTstreamChecker extends App {
-
+  open()
   val streamService = ConnectionRepository.getStreamService
   val objectSerializer = new ObjectSerializer()
 

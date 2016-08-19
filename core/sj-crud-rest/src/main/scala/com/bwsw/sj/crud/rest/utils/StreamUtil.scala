@@ -11,6 +11,7 @@ import com.bwsw.tstreams.common.CassandraConnectorConf
 import com.bwsw.tstreams.data.IStorage
 import com.bwsw.tstreams.data.aerospike._
 import com.bwsw.tstreams.data._
+import com.bwsw.tstreams.env.{TStreamsFactory, TSF_Dictionary}
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.services.BasicStreamService
 import kafka.admin.AdminUtils
@@ -74,8 +75,8 @@ object StreamUtil {
           dataStorage
         )
         if (tStream.getPartitions != stream.asInstanceOf[TStreamSjStream].partitions) {
-          logger.debug(s"Kafka stream partitions (${stream.asInstanceOf[TStreamSjStream].partitions}) " +
-            s"mismatch partitions of exists kafka topic (${tStream.getPartitions}).")
+          logger.debug(s"T-stream partitions (${stream.asInstanceOf[TStreamSjStream].partitions}) " +
+            s"mismatch with partitions of existent t-stream (${tStream.getPartitions}).")
           Left(s"Partitions count of stream ${stream.name} mismatch")
         } else {
           Right(true)
@@ -97,11 +98,14 @@ object StreamUtil {
   private def createTStream(stream: TStreamSjStream,
                             metadataStorage: MetadataStorage,
                             dataStorage: IStorage[Array[Byte]]) = {
+    val tstreamFactory = new TStreamsFactory()
+    val streamTTL = tstreamFactory.getProperty(TSF_Dictionary.Stream.TTL).asInstanceOf[Int]
     BasicStreamService.createStream(
       stream.name,
       stream.asInstanceOf[TStreamSjStream].partitions,
-      60000, //todo t-streams-stream-ttl
-      "", metadataStorage,
+      streamTTL,
+      stream.description,
+      metadataStorage,
       dataStorage
     )
     logger.debug(s"Stream ${stream.name}. T-stream is created.")
