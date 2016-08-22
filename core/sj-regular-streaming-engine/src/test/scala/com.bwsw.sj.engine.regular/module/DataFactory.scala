@@ -14,14 +14,14 @@ import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.utils.CassandraFactory
 
 import com.bwsw.sj.common.{ConfigConstants, StreamConstants}
-import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
-import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerOptions}
+import com.bwsw.tstreams.agents.consumer.Offset.Oldest
+import com.bwsw.tstreams.agents.consumer.{Consumer, Options}
 import com.bwsw.tstreams.agents.producer._
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.producer.transport.impl.TcpTransport
 import com.bwsw.tstreams.env.TSF_Dictionary
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
-import com.bwsw.tstreams.policy.RoundRobinPolicy
+import com.bwsw.tstreams.common.RoundRobinPolicy
 import com.bwsw.tstreams.services.BasicStreamService
 import kafka.admin.AdminUtils
 import kafka.utils.ZkUtils

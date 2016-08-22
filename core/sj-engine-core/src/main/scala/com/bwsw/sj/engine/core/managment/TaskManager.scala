@@ -12,7 +12,7 @@ import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
 import com.bwsw.sj.engine.core.environment.EnvironmentManager
 import com.bwsw.sj.engine.core.utils.EngineUtils
-import com.bwsw.tstreams.agents.consumer.Offsets.IOffset
+import com.bwsw.tstreams.agents.consumer.Offset.IOffset
 import com.bwsw.tstreams.agents.consumer.subscriber.Callback
 import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
 import com.bwsw.tstreams.services.BasicStreamService

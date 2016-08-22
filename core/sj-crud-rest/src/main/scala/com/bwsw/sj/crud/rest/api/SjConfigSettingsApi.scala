@@ -2,33 +2,31 @@ package com.bwsw.sj.crud.rest.api
 
 import java.text.MessageFormat
 
-
-import akka.http.scaladsl.model.HttpEntity
-import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.server.{Directives, RequestContext}
-import com.bwsw.common.exceptions.{BadRequestWithKey}
+import com.bwsw.sj.crud.rest.exceptions.{UnknownConfigSettingDomain}
 import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.DAL.model.ConfigSetting
 import com.bwsw.sj.crud.rest.entities._
 import com.bwsw.sj.crud.rest.entities.config.ConfigSettingData
+import com.bwsw.sj.crud.rest.utils.CompletionUtils
+import com.bwsw.sj.crud.rest.utils.ConvertUtil._
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.config.ConfigSettingValidator
-import com.bwsw.sj.crud.rest.utils.ConvertUtil._
 
 /**
  * Rest-api for config file
  *
  */
-trait SjConfigSettingsApi extends Directives with SjCrudValidator {
+trait SjConfigSettingsApi extends Directives with SjCrudValidator with CompletionUtils {
 
   val configSettingsApi = {
     pathPrefix("config") {
       pathPrefix("settings") {
         pathPrefix(Segment) { (domain: String) =>
-          if (!ConfigConstants.domains.contains(domain)) throw new BadRequestWithKey(
-            s"Cannot recognize config setting domain. Domain must be one of the following values: ${ConfigConstants.domains.mkString(", ")}",
-            s"$domain"
-          )
+          if (!ConfigConstants.domains.contains(domain)) throw UnknownConfigSettingDomain(
+            MessageFormat.format(messages.getString("rest.config.setting.domain.unknown"),
+              ConfigConstants.domains.mkString(", ")),
+            domain)
           pathEndOrSingleSlash {
             post { (ctx: RequestContext) =>
               val data = serializer.deserialize[ConfigSettingData](getEntityFromContext(ctx))
@@ -46,7 +44,7 @@ trait SjConfigSettingsApi extends Directives with SjCrudValidator {
                   Map("message" -> MessageFormat.format(messages.getString("rest.config.setting.created"), domain, data.name)))
               }
 
-              ctx.complete(HttpEntity(`application/json`, serializer.serialize(response)))
+              ctx.complete(restResponseToHttpResponse(response))
             } ~
               get {
                 val configElements = configService.getByParameters(Map("domain" -> domain))
@@ -57,7 +55,7 @@ trait SjConfigSettingsApi extends Directives with SjCrudValidator {
                   response = OkRestResponse(entity)
                 }
 
-                complete(HttpEntity(`application/json`, serializer.serialize(response)))
+                complete(restResponseToHttpResponse(response))
 
               }
           } ~
@@ -73,7 +71,7 @@ trait SjConfigSettingsApi extends Directives with SjCrudValidator {
                     case None =>
                   }
 
-                  complete(HttpEntity(`application/json`, serializer.serialize(response)))
+                  complete(restResponseToHttpResponse(response))
                 } ~
                   delete {
                     var response: RestResponse = NotFoundRestResponse(
@@ -86,7 +84,7 @@ trait SjConfigSettingsApi extends Directives with SjCrudValidator {
                       case None =>
                     }
 
-                    complete(HttpEntity(`application/json`, serializer.serialize(response)))
+                    complete(restResponseToHttpResponse(response))
                   }
               }
             }
@@ -99,7 +97,7 @@ trait SjConfigSettingsApi extends Directives with SjCrudValidator {
               response = OkRestResponse(entity)
             }
 
-            complete(HttpEntity(`application/json`, serializer.serialize(response)))
+            complete(restResponseToHttpResponse(response))
           }
         }
       }

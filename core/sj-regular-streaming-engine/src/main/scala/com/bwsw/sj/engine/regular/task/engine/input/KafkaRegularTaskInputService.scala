@@ -10,7 +10,7 @@ import com.bwsw.sj.engine.core.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope}
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
-import com.bwsw.tstreams.agents.consumer.Offsets.Newest
+import com.bwsw.tstreams.agents.consumer.Offset.Newest
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.NewTransactionProducerPolicy
 import org.apache.kafka.clients.consumer.KafkaConsumer

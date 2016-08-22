@@ -5,7 +5,7 @@ import java.util.Date
 import com.bwsw.common.tstream.NetworkTimeUUIDGenerator
 import com.bwsw.sj.common.DAL.model.{TStreamSjStream, ZKService}
 import com.bwsw.sj.common.utils.ConfigUtils
-import com.bwsw.tstreams.agents.consumer.Offsets.{DateTime, IOffset, Newest, Oldest}
+import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.generator.{IUUIDGenerator, LocalTimeUUIDGenerator}
 
 /**

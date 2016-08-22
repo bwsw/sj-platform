@@ -1,8 +1,9 @@
 package com.bwsw.common.file.utils
 
-import java.io.File
+import java.io.{File, FileNotFoundException}
+import java.nio.file.FileAlreadyExistsException
+import javafx.fxml.LoadException
 
-import com.bwsw.common.exceptions.BadRequestWithKey
 import com.mongodb.casbah.MongoDB
 import com.mongodb.casbah.gridfs.Imports._
 
@@ -20,7 +21,7 @@ class MongoFileStorage(mongoDB: MongoDB) extends FileStorage {
       gridFsFile.save()
     } else {
       logger.error(s"File with name: '$fileName' already exists in a mongo storage")
-      throw BadRequestWithKey(s"$fileName already exists", fileName)
+      throw new FileAlreadyExistsException(s"$fileName already exists")
     }
   }
 
@@ -38,7 +39,7 @@ class MongoFileStorage(mongoDB: MongoDB) extends FileStorage {
       //gridFsFile.validate() sometimes mongodb can't get executor for query and fail as no md5 returned from server
     } else {
       logger.error(s"File with name: '$fileName' already exists in a mongo storage")
-      throw BadRequestWithKey(s"$fileName already exists", fileName)
+      throw new FileAlreadyExistsException(s"$fileName already exists")
     }
   }
 
@@ -53,11 +54,11 @@ class MongoFileStorage(mongoDB: MongoDB) extends FileStorage {
       if (storageFile.get.writeTo(localFile) > 0) localFile
       else {
         logger.error(s"MongoFileStorage.get file: '$fileName' failed")
-        throw BadRequestWithKey(s"MongoFileStorage.get $fileName failed", fileName)
+        throw new LoadException(s"MongoFileStorage.get $fileName failed")
       }
     } else {
       logger.error(s"File with name: '$fileName' doesn't exist in a mongo storage")
-      throw new BadRequestWithKey(s"$fileName doesn't exist", fileName)
+      throw new FileNotFoundException(s"$fileName doesn't exist")
     }
   }
 

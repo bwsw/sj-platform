@@ -1,11 +1,15 @@
 package com.bwsw.sj.crud.rest.validator.stream
 
+import java.text.MessageFormat
+import java.util.ResourceBundle
+
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.crud.rest.entities.stream.{KafkaSjStreamData, SjStreamData, TStreamSjStreamData}
-import com.bwsw.sj.crud.rest.utils.ValidationUtils
+import com.bwsw.sj.crud.rest.utils.{StreamUtil, ValidationUtils}
 import com.bwsw.sj.crud.rest.validator.provider.ProviderValidator
+import kafka.common.TopicExistsException
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
@@ -24,7 +28,7 @@ object StreamValidator extends ValidationUtils {
    * @param initialData - input parameters for stream being validated
    * @return - List of errors
    */
-  def validate(initialData: SjStreamData, stream: SjStream) = {
+  def validate(initialData: SjStreamData, stream: SjStream): ArrayBuffer[String] = {
     logger.debug(s"Stream ${initialData.name}. Start stream validation.")
 
     val streamDAO = ConnectionRepository.getStreamService
@@ -165,6 +169,44 @@ object StreamValidator extends ValidationUtils {
         }
 
       case _ =>
+    }
+
+    if (errors.isEmpty) {
+      stream match {
+        case s: TStreamSjStream =>
+          val streamCheckResult = StreamUtil.checkAndCreateTStream(s, initialData.force)
+          streamCheckResult match {
+            case Left(err) => errors += err
+            case _ =>
+          }
+        case s: KafkaSjStream =>
+          try {
+            val streamCheckResult = StreamUtil.checkAndCreateKafkaTopic(s, initialData.force)
+            streamCheckResult match {
+              case Left(err) => errors += err
+              case _ =>
+            }
+          } catch {
+            case e: TopicExistsException =>
+              val messages = ResourceBundle.getBundle("messages")
+              errors += MessageFormat.format(
+              messages.getString("rest.streams.create.kafka.cannot"),
+              errors.mkString("\n")
+            )
+          }
+        case s: ESSjStream =>
+          val streamCheckResult = StreamUtil.checkAndCreateEsStream(s, initialData.force)
+          streamCheckResult match {
+            case Left(err) => errors += err
+            case _ =>
+          }
+        case s: JDBCSjStream =>
+          val streamCheckResult = StreamUtil.checkAndCreateJdbcStream(s, initialData.force)
+          streamCheckResult match {
+            case Left(err) => errors += err
+            case _ =>
+          }
+      }
     }
 
     // Fulfill common fields

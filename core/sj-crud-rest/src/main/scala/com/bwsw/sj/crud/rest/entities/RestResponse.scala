@@ -14,4 +14,6 @@ case class NotFoundRestResponse(var entity: Map[String, Any]) extends RestRespon
 
 case class ConflictRestResponse(var entity: Map[String, Any]) extends RestResponse(409, entity)
 
+case class UnprocessableEntityRestResponse(var entity: Map[String, Any]) extends RestResponse(422, entity)
+
 case class InternalServerErrorRestResponse(var entity: Map[String, Any]) extends RestResponse(500, entity)

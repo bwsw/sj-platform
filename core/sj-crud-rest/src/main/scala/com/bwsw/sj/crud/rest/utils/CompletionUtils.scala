@@ -1,0 +1,18 @@
+package com.bwsw.sj.crud.rest.utils
+
+import akka.http.scaladsl.model.MediaTypes._
+import akka.http.scaladsl.model.{HttpEntity, HttpResponse}
+import com.bwsw.common.JsonSerializer
+import com.bwsw.sj.crud.rest.entities.RestResponse
+
+trait CompletionUtils {
+
+  private val responseSerializer = new JsonSerializer()
+
+  def restResponseToHttpResponse(restResponse: RestResponse) = {
+    HttpResponse(
+      status = restResponse.statusCode,
+      entity = HttpEntity(`application/json`, responseSerializer.serialize(restResponse))
+    )
+  }
+}

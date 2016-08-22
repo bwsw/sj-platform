@@ -65,7 +65,7 @@ object SjCrudRestService extends App with SjCrudRouter {
   val routeLogged = logRequestResult(Logging.InfoLevel, route())
   val logger = Logging(system, getClass)
 
-  putRestSettingsToConfigFile()
+  //putRestSettingsToConfigFile()
 
   InstanceUtil.checkStatusInstances()
 

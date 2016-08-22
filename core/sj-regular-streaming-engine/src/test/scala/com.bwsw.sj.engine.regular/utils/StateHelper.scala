@@ -3,7 +3,7 @@ package com.bwsw.sj.engine.regular.utils
 import java.util.UUID
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction}
+import com.bwsw.tstreams.agents.consumer.{Consumer, Transaction}
 
 import scala.collection.mutable
 
@@ -43,7 +43,7 @@ object StateHelper {
     initialState
   }
 
-  def fillFullState(initialState: mutable.Map[String, Any], transaction: ConsumerTransaction[Array[Byte]], objectSerializer: ObjectSerializer) = {
+  def fillFullState(initialState: mutable.Map[String, Any], transaction: Transaction[Array[Byte]], objectSerializer: ObjectSerializer) = {
     var value: Object = null
     var variable: (String, Any) = null
 

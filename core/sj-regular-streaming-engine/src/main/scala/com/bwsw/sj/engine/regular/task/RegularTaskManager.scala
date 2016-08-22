@@ -9,7 +9,7 @@ import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.utils.EngineUtils
 import com.bwsw.tstreams.agents.consumer.Consumer
-import com.bwsw.tstreams.agents.consumer.Offsets.IOffset
+import com.bwsw.tstreams.agents.consumer.Offset.IOffset
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
