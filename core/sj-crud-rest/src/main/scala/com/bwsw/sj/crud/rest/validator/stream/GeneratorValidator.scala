@@ -5,7 +5,6 @@ import java.net.URI
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.GeneratorConstants._
-import com.bwsw.sj.crud.rest.entities._
 import com.bwsw.sj.crud.rest.entities.stream.GeneratorData
 import org.slf4j.LoggerFactory
 
@@ -31,7 +30,7 @@ object GeneratorValidator {
     val serviceDAO = ConnectionRepository.getServiceManager
     val errors = new ArrayBuffer[String]()
 
-    var serviceObj: Service = null
+    var serviceObj: Option[Service] = None
     Option(generatorData.generatorType) match {
       case Some(t) if !generatorTypes.contains(t) =>
         errors += s"Unknown 'generator-type' provided. Must be one of: $generatorTypes"
@@ -52,7 +51,7 @@ object GeneratorValidator {
                   errors += s"Generator 'service' uri protocol prefix must be 'service-zk://'. Or use plain service name instead"
                 }
               }
-              var serviceName: String = null
+              var serviceName: String = ""
               if (generatorData.service contains "://") {
                 val generatorUrl = new URI(generatorData.service)
                 if (generatorUrl.getScheme.equals("service-zk")) {
@@ -64,11 +63,11 @@ object GeneratorValidator {
               serviceObj = serviceDAO.get(serviceName)
 
 
-              if (serviceObj == null) {
+              if (serviceObj.isEmpty) {
                 errors += s"Unknown generator 'service' provided"
               } else {
-                if (serviceObj.serviceType != "ZKCoord") {
-                  errors += s"Provided generator service '${serviceObj.name}' is not of type ZKCoord"
+                if (serviceObj.get.serviceType != "ZKCoord") {
+                  errors += s"Provided generator service '$serviceName' is not of type ZKCoord"
                 }
               }
           }
@@ -89,7 +88,7 @@ object GeneratorValidator {
 
     if (errors.isEmpty) {
       generator.generatorType = generatorData.generatorType
-      generator.service = serviceObj
+      generator.service = serviceObj.get
       generator.instanceCount = generatorData.instanceCount
     }
     errors

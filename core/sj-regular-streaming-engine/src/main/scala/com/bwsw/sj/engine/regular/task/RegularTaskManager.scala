@@ -26,7 +26,7 @@ class RegularTaskManager() extends TaskManager {
     .map(x => {
     val service = ConnectionRepository.getStreamService
 
-    (service.get(x._1), x._2)
+    (service.get(x._1).get, x._2)
   })
 
   val outputTags = createOutputTags()

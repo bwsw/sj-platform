@@ -101,7 +101,7 @@ object DataFactory {
   }
 
   def createServices(serviceManager: GenericMongoService[Service], providerService: GenericMongoService[Provider]) = {
-    val cassProv = providerService.get("cassandra-test-provider")
+    val cassProv = providerService.get("cassandra-test-provider").get
     val cassService = new CassandraService("cassandra-test-service", "CassDB", "cassandra test service", cassProv, cassandraTestKeyspace)
     serviceManager.save(cassService)
 
@@ -109,11 +109,11 @@ object DataFactory {
     //    val aeroService = new AerospikeService("aerospike-test-service", "ArspkDB", "aerospike test service", aeroProv, testNamespace)
     //    serviceManager.save(aeroService)
 
-    val zkProv = providerService.get("zookeeper-test-provider")
+    val zkProv = providerService.get("zookeeper-test-provider").get
     val zkService = new ZKService("zookeeper-test-service", "ZKCoord", "zookeeper test service", zkProv, testNamespace)
     serviceManager.save(zkService)
 
-    val kafkaProv = providerService.get("kafka-test-provider")
+    val kafkaProv = providerService.get("kafka-test-provider").get
     val kafkaService = new KafkaService("kafka-test-service", "KfkQ", "kafka test service", kafkaProv, zkProv, testNamespace)
     serviceManager.save(kafkaService)
 
@@ -191,7 +191,7 @@ object DataFactory {
   private def createInputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
     val localGenerator = new Generator("local")
 
-    val tService = serviceManager.get("tstream-test-service")
+    val tService = serviceManager.get("tstream-test-service").get
 
     val s1 = new TStreamSjStream("test-input-tstream" + suffix, "test-input-tstream", partitions, tService, StreamConstants.tStreamType, Array("input"), localGenerator)
     sjStreamService.save(s1)
@@ -212,7 +212,7 @@ object DataFactory {
   private def createOutputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
     val localGenerator = new Generator("local")
 
-    val tService = serviceManager.get("tstream-test-service")
+    val tService = serviceManager.get("tstream-test-service").get
 
     val s2 = new TStreamSjStream("test-output-tstream" + suffix, "test-output-tstream", partitions, tService, StreamConstants.tStreamType, Array("output", "some tags"), localGenerator)
     sjStreamService.save(s2)
@@ -258,7 +258,7 @@ object DataFactory {
       val replications = replicationFactor
       val zkHost = kService.zkProvider.hosts
       val zkConnect = new ZkConnection(zkHost.mkString(";"))
-      val zkTimeout = ConnectionRepository.getConfigService.get(ConfigConstants.zkSessionTimeoutTag).value.toInt
+      val zkTimeout = ConnectionRepository.getConfigService.get(ConfigConstants.zkSessionTimeoutTag).get.value.toInt
       val zkClient = ZkUtils.createZkClient(zkHost.mkString(";"), zkTimeout, zkTimeout)
       val zkUtils = new ZkUtils(zkClient, zkConnect, false)
 
@@ -348,7 +348,7 @@ object DataFactory {
     var number = 0
 
     def createTstreamData(countTxns: Int, countElements: Int, streamService: GenericMongoService[SjStream], suffix: String) = {
-      val producer = createProducer(streamService.get("test-input-tstream" + suffix))
+      val producer = createProducer(streamService.get("test-input-tstream" + suffix).get)
       val s = System.nanoTime
       (0 until countTxns) foreach { (x: Int) =>
         val txn = producer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
@@ -483,7 +483,7 @@ object DataFactory {
   }
 
   private def createConsumer(streamName: String, streamService: GenericMongoService[SjStream], address: String) = {
-    val stream = streamService.get(streamName)
+    val stream = streamService.get(streamName).get
     val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
     val dataStorage = cassandraFactory.getDataStorage(cassandraTestKeyspace)
 

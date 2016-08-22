@@ -5,7 +5,7 @@ import java.text.MessageFormat
 import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.{Directives, RequestContext}
-import com.bwsw.common.exceptions.BadRecordWithKey
+import com.bwsw.common.exceptions.BadRequestWithKey
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.StreamConstants
@@ -19,10 +19,10 @@ import com.bwsw.sj.crud.rest.validator.stream.StreamValidator
 import kafka.common.TopicExistsException
 
 /**
-  * Rest-api for streams
-  *
-  * Created by mendelbaum_nm
-  */
+ * Rest-api for streams
+ *
+ * Created by mendelbaum_nm
+ */
 trait SjStreamsApi extends Directives with SjCrudValidator {
 
   val streamsApi = {
@@ -69,11 +69,11 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
                   )
                 }
               case s: ESSjStream =>
-                  val streamCheckResult = StreamUtil.checkAndCreateEsStream(s, data.force)
-                  streamCheckResult match {
-                    case Left(err) => errors += err
-                    case _ =>
-                  }
+                val streamCheckResult = StreamUtil.checkAndCreateEsStream(s, data.force)
+                streamCheckResult match {
+                  case Left(err) => errors += err
+                  case _ =>
+                }
               case s: JDBCSjStream =>
                 val streamCheckResult = StreamUtil.checkAndCreateJdbcStream(s, data.force)
                 streamCheckResult match {
@@ -84,13 +84,13 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
           }
           if (errors.isEmpty) {
             streamDAO.save(stream)
-            val response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+            val response = OkRestResponse(Map("message" -> MessageFormat.format(
               messages.getString("rest.streams.stream.created"),
               stream.name
             )))
             ctx.complete(HttpEntity(`application/json`, serializer.serialize(response)))
           } else {
-            throw new BadRecordWithKey(
+            throw new BadRequestWithKey(
               MessageFormat.format(
                 messages.getString("rest.streams.stream.cannot.create"),
                 errors.mkString("\n")
@@ -99,71 +99,72 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
             )
           }
         } ~
-        get {
-          val streams = streamDAO.getAll
-          var response: ProtocolResponse = null
-          if (streams.nonEmpty) {
-            val entity = Map("streams" -> streams.map(s => streamToStreamData(s)))
-            response = ProtocolResponse(200, entity)
-          } else {
-            response = ProtocolResponse(200, Map("message" -> messages.getString("rest.streams.notfound")))
-          }
-          complete(HttpEntity(`application/json`, serializer.serialize(response)))
-
-        }
-      } ~
-      pathPrefix(Segment) { (streamName: String) =>
-        pathEndOrSingleSlash {
           get {
-            val stream = streamDAO.get(streamName)
-            var response: ProtocolResponse = null
-            if (stream != null) {
-              val entity = Map("streams" -> streamToStreamData(stream))
-              response = ProtocolResponse(200, entity)
+            val streams = streamDAO.getAll
+            var response: RestResponse = null
+            if (streams.nonEmpty) {
+              val entity = Map("streams" -> streams.map(s => streamToStreamData(s)))
+              response = OkRestResponse(entity)
             } else {
-              response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
-                messages.getString("rest.streams.stream.notfound"),
-                streamName
-              )))
+              response = OkRestResponse(Map("message" -> messages.getString("rest.streams.notfound")))
             }
             complete(HttpEntity(`application/json`, serializer.serialize(response)))
-          } ~
-          delete {
 
-            val instances = instanceDAO.getAll.filter { (inst: Instance) =>
-              if (!inst.moduleType.equals(inputStreamingType)) {
-                inst.inputs.map(_.replaceAll("/split|/full", "")).contains(streamName) || inst.outputs.contains(streamName)
-              } else {
-                inst.outputs.contains(streamName)
-              }
-            }
-
-            if (instances.isEmpty) {
+          }
+      } ~
+        pathPrefix(Segment) { (streamName: String) =>
+          pathEndOrSingleSlash {
+            get {
               val stream = streamDAO.get(streamName)
-
-              var response: ProtocolResponse = null
-              if (stream != null) {
-                StreamUtil.deleteStream(stream)
-                streamDAO.delete(streamName)
-                response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
-                  messages.getString("rest.streams.stream.deleted"),
-                  streamName
-                )))
-              } else {
-                response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
-                  messages.getString("rest.streams.stream.notfound"),
-                  streamName
-                )))
+              var response: RestResponse = null
+              stream match {
+                case Some(x) =>
+                  val entity = Map("streams" -> streamToStreamData(x))
+                  response = OkRestResponse(entity)
+                case None =>
+                  response = OkRestResponse(Map("message" -> MessageFormat.format(
+                    messages.getString("rest.streams.stream.notfound"),
+                    streamName
+                  )))
               }
               complete(HttpEntity(`application/json`, serializer.serialize(response)))
-            } else {
-              throw new BadRecordWithKey(MessageFormat.format(
-                messages.getString("rest.streams.stream.cannot.delete"),
-                streamName), streamName)
-            }
+            } ~
+              delete {
+
+                val instances = instanceDAO.getAll.filter { (inst: Instance) =>
+                  if (!inst.moduleType.equals(inputStreamingType)) {
+                    inst.inputs.map(_.replaceAll("/split|/full", "")).contains(streamName) || inst.outputs.contains(streamName)
+                  } else {
+                    inst.outputs.contains(streamName)
+                  }
+                }
+
+                if (instances.isEmpty) {
+                  val stream = streamDAO.get(streamName)
+                  var response: RestResponse = null
+                  stream match {
+                    case Some(x) =>
+                      StreamUtil.deleteStream(x)
+                      streamDAO.delete(streamName)
+                      response = OkRestResponse(Map("message" -> MessageFormat.format(
+                        messages.getString("rest.streams.stream.deleted"),
+                        streamName
+                      )))
+                    case None =>
+                      response = OkRestResponse(Map("message" -> MessageFormat.format(
+                        messages.getString("rest.streams.stream.notfound"),
+                        streamName
+                      )))
+                  }
+                  complete(HttpEntity(`application/json`, serializer.serialize(response)))
+                } else {
+                  throw new BadRequestWithKey(MessageFormat.format(
+                    messages.getString("rest.streams.stream.cannot.delete"),
+                    streamName), streamName)
+                }
+              }
           }
         }
-      }
     }
   }
 }

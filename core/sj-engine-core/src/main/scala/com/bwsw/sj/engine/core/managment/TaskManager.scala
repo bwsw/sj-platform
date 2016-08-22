@@ -27,7 +27,7 @@ abstract class TaskManager() {
   val agentsHost = System.getenv("AGENTS_HOST")
   protected val agentsPorts = System.getenv("AGENTS_PORTS").split(",")
   val taskName = System.getenv("TASK_NAME")
-  protected val instance: Instance = ConnectionRepository.getInstanceService.get(instanceName)
+  val instance: Instance = getInstance()
   protected val auxiliarySJTStream = getAuxiliaryTStream()
   protected val auxiliaryTStreamService = getAuxiliaryTStreamService()
   val tstreamFactory = new TStreamsFactory()
@@ -49,11 +49,18 @@ abstract class TaskManager() {
 
   lazy val outputProducers = createOutputProducers()
 
+  private def getInstance() = {
+    val maybeInstance = ConnectionRepository.getInstanceService.get(instanceName)
+    if (maybeInstance.isDefined)
+      maybeInstance.get
+    else throw new NoSuchElementException(s"Instance is named '$instanceName' has not found")
+  }
+
   private def getAuxiliaryTStream() = {
     val streams = if (instance.inputs != null) {
       instance.outputs.union(instance.inputs.map(x => x.takeWhile(y => y != '/')))
     } else instance.outputs
-    val sjStream = streams.map(s => streamDAO.get(s)).filter(s => s.streamType.equals(tStreamType)).head
+    val sjStream = streams.flatMap(s => streamDAO.get(s)).filter(s => s.streamType.equals(tStreamType)).head
 
     sjStream
   }
@@ -238,12 +245,6 @@ abstract class TaskManager() {
   private def setSubscribingConsumerBindPort() = {
     tstreamFactory.setProperty(TSF_Dictionary.Consumer.Subscriber.BIND_PORT, agentsPorts(currentPortNumber))
     currentPortNumber += 1
-  }
-
-  def getInstance: Instance = {
-    logger.info(s"Task name: $taskName. Get instance\n")
-
-    instance
   }
 
   /**

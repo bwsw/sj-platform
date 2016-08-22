@@ -2,7 +2,7 @@ package com.bwsw.common.file.utils
 
 import java.io.File
 
-import com.bwsw.common.exceptions.BadRecordWithKey
+import com.bwsw.common.exceptions.BadRequestWithKey
 import com.mongodb.casbah.MongoDB
 import com.mongodb.casbah.gridfs.Imports._
 
@@ -20,7 +20,7 @@ class MongoFileStorage(mongoDB: MongoDB) extends FileStorage {
       gridFsFile.save()
     } else {
       logger.error(s"File with name: '$fileName' already exists in a mongo storage")
-      throw BadRecordWithKey(s"$fileName already exists", fileName)
+      throw BadRequestWithKey(s"$fileName already exists", fileName)
     }
   }
 
@@ -38,7 +38,7 @@ class MongoFileStorage(mongoDB: MongoDB) extends FileStorage {
       //gridFsFile.validate() sometimes mongodb can't get executor for query and fail as no md5 returned from server
     } else {
       logger.error(s"File with name: '$fileName' already exists in a mongo storage")
-      throw BadRecordWithKey(s"$fileName already exists", fileName)
+      throw BadRequestWithKey(s"$fileName already exists", fileName)
     }
   }
 
@@ -53,16 +53,16 @@ class MongoFileStorage(mongoDB: MongoDB) extends FileStorage {
       if (storageFile.get.writeTo(localFile) > 0) localFile
       else {
         logger.error(s"MongoFileStorage.get file: '$fileName' failed")
-        throw BadRecordWithKey(s"MongoFileStorage.get $fileName failed", fileName)
+        throw BadRequestWithKey(s"MongoFileStorage.get $fileName failed", fileName)
       }
     } else {
       logger.error(s"File with name: '$fileName' doesn't exist in a mongo storage")
-      throw new BadRecordWithKey(s"$fileName doesn't exist", fileName)
+      throw new BadRequestWithKey(s"$fileName doesn't exist", fileName)
     }
   }
 
-  override def getContent(path: String): Seq[String] = {
-    logger.debug(s"Get a list of contents of a mongo storage directory: '$path'")
+  override def getContent(): Seq[String] = {
+    logger.debug(s"Get a list of contents of a mongo storage directory")
     gridFS.iterator.toList.map(_.filename.get).toSeq
   }
 

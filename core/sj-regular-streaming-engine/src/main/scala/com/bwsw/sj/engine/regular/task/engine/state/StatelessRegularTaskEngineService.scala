@@ -16,13 +16,13 @@ import scala.collection.Map
  */
 class StatelessRegularTaskEngineService(manager: RegularTaskManager, performanceMetrics: RegularStreamingPerformanceMetrics)
   extends RegularTaskEngineService(manager, performanceMetrics) {
+  private val streamService = ConnectionRepository.getStreamService
 
   val moduleEnvironmentManager = new ModuleEnvironmentManager(
     optionsSerializer.deserialize[Map[String, Any]](regularInstance.options),
     outputProducers,
     regularInstance.outputs
-      .map(ConnectionRepository.getStreamService.get)
-      .filter(_.tags != null),
+      .flatMap(x => streamService.get(x)),
     outputTags,
     moduleTimer,
     performanceMetrics

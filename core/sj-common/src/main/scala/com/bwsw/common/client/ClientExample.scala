@@ -1,7 +1,6 @@
 package com.bwsw.common.client
 
-import com.bwsw.sj.common.ConfigConstants
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.utils.ConfigUtils
 import org.apache.log4j.Logger
 
 /**
@@ -17,9 +16,9 @@ object ClientExample {
   def main(args: Array[String]) = {
     val zkServers = Array("176.120.25.19:2181")
     val prefix = "zk_test/global"
-    val configService = ConnectionRepository.getConfigService
-    val retryPeriod = configService.get(ConfigConstants.tgClientRetryPeriodTag).value.toInt
-    val retryCount = configService.get(ConfigConstants.tgRetryCountTag).value.toInt
+
+    val retryPeriod = ConfigUtils.getClientRetryPeriod()
+    val retryCount = ConfigUtils.getServerRetryPeriod()
 
     val options = new TcpClientOptions()
       .setZkServers(zkServers)
@@ -32,11 +31,11 @@ object ClientExample {
     //val consoleReader = new BufferedReader(new InputStreamReader(System.in))
     var i = 0
     val t0 = System.nanoTime()
-    while (i <= 1000000) {
+    while (i <= 10) {
       //while (consoleReader.readLine() != null) {
       logger.debug("send request")
-      //println(client.get())
-      client.get()
+      println(client.get())
+      //client.get()
       i += 1
     }
     client.close()

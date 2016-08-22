@@ -29,7 +29,7 @@ class InputStreamingValidator extends StreamingModuleValidator {
    *
    * @return
    */
-  def createInstance(parameters: InputInstanceMetadata): Instance = {
+  def createInstance(parameters: InputInstanceMetadata) = {
     logger.debug(s"Instance ${parameters.name}. Create model object.")
     val instance = convertToModelInstance(parameters)
     val stages = scala.collection.mutable.Map[String, InstanceStage]()
@@ -47,7 +47,7 @@ class InputStreamingValidator extends StreamingModuleValidator {
     instanceTask.duration = 0
     stages.put(instance.name, instanceTask)
     instance.stages = mapAsJavaMap(stages)
-    instance
+    Some(instance)
   }
 
   /**
@@ -77,7 +77,7 @@ class InputStreamingValidator extends StreamingModuleValidator {
    */
   override def streamOptionsValidate(parameters: InstanceMetadata,
                                      specification: ModuleSpecification,
-                                     errors: ArrayBuffer[String]): (ArrayBuffer[String], Instance) = {
+                                     errors: ArrayBuffer[String]): (ArrayBuffer[String], Option[Instance]) = {
     logger.debug(s"Instance: ${parameters.name}. Stream options validation.")
 
     if (!parameters.checkpointMode.equals("every-nth")) {
@@ -113,7 +113,7 @@ class InputStreamingValidator extends StreamingModuleValidator {
       errors += s"Unknown attribute 'start-from'."
     }
 
-    var validatedInstance: Instance = null
+    var validatedInstance: Option[Instance] = None
     if (outputStreams.nonEmpty) {
       val allStreams = outputStreams
       val inputInstanceMetadata = parameters.asInstanceOf[InputInstanceMetadata]
@@ -156,7 +156,7 @@ class InputStreamingValidator extends StreamingModuleValidator {
    * @return - List of errors
    */
   override def validate(parameters: InstanceMetadata,
-                        specification: ModuleSpecification): (ArrayBuffer[String], Instance) = {
+                        specification: ModuleSpecification): (ArrayBuffer[String], Option[Instance]) = {
     logger.debug(s"Instance: ${parameters.name}. Start input-streaming validation.")
     val errors = super.generalOptionsValidate(parameters)
 

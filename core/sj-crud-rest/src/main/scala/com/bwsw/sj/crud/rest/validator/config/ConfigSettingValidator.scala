@@ -2,7 +2,6 @@ package com.bwsw.sj.crud.rest.validator.config
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.crud.rest.entities.config.ConfigSettingData
-import com.bwsw.sj.crud.rest.validator.stream.StreamValidator._
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
@@ -25,7 +24,7 @@ object ConfigSettingValidator {
         if (x.isEmpty) {
           errors += s"'name' can not be empty"
         } else {
-          if (configService.get(x) != null) {
+          if (configService.get(x).isDefined) {
             errors += s"Config setting with name $x already exists"
           }
           if (x.contains(" ")) {

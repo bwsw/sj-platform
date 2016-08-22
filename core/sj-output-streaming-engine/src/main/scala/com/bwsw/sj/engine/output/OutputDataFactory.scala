@@ -28,8 +28,8 @@ object OutputDataFactory {
 
   val instance: OutputInstance = instanceDAO.get(instanceName).asInstanceOf[OutputInstance]
 
-  val inputStream: SjStream = streamDAO.get(instance.inputs.head)
-  val outputStream: SjStream = streamDAO.get(instance.outputs.head)
+  val inputStream: SjStream = streamDAO.get(instance.inputs.head).get
+  val outputStream: SjStream = streamDAO.get(instance.outputs.head).get
 
   val inputStreamService = inputStream.service.asInstanceOf[TStreamService]
 

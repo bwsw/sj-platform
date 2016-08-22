@@ -23,7 +23,7 @@ trait DatabaseService[T] {
    * @param name Id of element
    * @return Specific element of T type
    */
-  def get(name: String): T
+  def get(name: String): Option[T]
 
   /**
    * Allows retrieving an element by set of fields

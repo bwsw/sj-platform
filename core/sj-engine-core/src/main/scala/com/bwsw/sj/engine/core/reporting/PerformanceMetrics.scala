@@ -28,8 +28,8 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
   protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Int]]]
   protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Int]]]
   protected val taskName = manager.taskName
-  private val reportingInterval = manager.getInstance.performanceReportingInterval
-  protected val instance = manager.getInstance
+  protected val instance = manager.instance
+  private val reportingInterval = instance.performanceReportingInterval
   protected val report = new PerformanceMetricsMetadata()
   private val reportStreamName = instance.name + "_report"
   private val reportStream = getReportStream()

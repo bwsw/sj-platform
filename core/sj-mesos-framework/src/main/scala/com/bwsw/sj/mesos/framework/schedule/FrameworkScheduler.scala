@@ -29,7 +29,7 @@ class FrameworkScheduler extends Scheduler {
   var perTaskMem: Double = 0.0
   var perTaskPortsCount: Int = 0
   var params = immutable.Map[String, String]()
-  var instance: Instance = null
+  var instance: Option[Instance] = None
   val configFileService = ConnectionRepository.getConfigService
   var jarName: String = null
   val availablePortsForOneInstance: collection.mutable.ListBuffer[Long] = collection.mutable.ListBuffer()
@@ -69,7 +69,7 @@ class FrameworkScheduler extends Scheduler {
     logger.info(s"RESOURCE OFFERS")
     availablePortsForOneInstance.remove(0, availablePortsForOneInstance.length)
 
-    val filteredOffers = filterOffers(offers, this.instance.nodeAttributes)
+    val filteredOffers = filterOffers(offers, this.instance.get.nodeAttributes)
     if (filteredOffers.size == 0) {
       for (offer <- offers.asScala) {
         driver.declineOffer(offer.getId)
@@ -150,11 +150,11 @@ class FrameworkScheduler extends Scheduler {
       var taskPort: String = ""
 
       var availablePorts = ports.getRanges.getRangeList.asScala.map(_.getBegin.toString)
-      if (instance.moduleType.equals(ModuleConstants.inputStreamingType)) {
+      if (instance.get.moduleType.equals(ModuleConstants.inputStreamingType)) {
         taskPort = availablePorts.head; availablePorts = availablePorts.tail
         val inputInstance = instance.asInstanceOf[InputInstance]
         inputInstance.tasks.put(currTask, new InputTask(currentOffer._1.getUrl.getAddress.getIp, taskPort.toInt))
-        ConnectionRepository.getInstanceService.save(instance)
+        ConnectionRepository.getInstanceService.save(instance.get)
       }
       agentPorts = availablePorts.mkString(",")
       agentPorts.dropRight(1)
@@ -178,7 +178,7 @@ class FrameworkScheduler extends Scheduler {
 //        }
 
         cmd
-          .addUris(CommandInfo.URI.newBuilder.setValue(getModuleUrl(instance)))
+          .addUris(CommandInfo.URI.newBuilder.setValue(getModuleUrl(instance.get)))
           .setValue("java -jar " + jarName)
           .setEnvironment(environments)
       } catch {
@@ -248,13 +248,13 @@ class FrameworkScheduler extends Scheduler {
     logger.debug(s"Got environment variable: $params")
 
     instance = ConnectionRepository.getInstanceService.get(params("instanceId"))
-    if (instance == null) {
+    if (instance.isEmpty) {
       logger.error(s"Not found instance")
       driver.stop()
       TasksList.message = "Framework shut down: not found instance."
       return
     }
-    logger.debug(s"Got instance ${instance.name}")
+    logger.debug(s"Got instance ${instance.get.name}")
 
 //    //framework blocking
 //    try {
@@ -269,12 +269,12 @@ class FrameworkScheduler extends Scheduler {
 //      case e:Exception => FrameworkUtil.handleSchedulerException(e, driver, logger)
 //    }
 
-    perTaskCores = instance.perTaskCores
-    perTaskMem = instance.perTaskRam
-    perTaskPortsCount = FrameworkUtil.getCountPorts(instance)
-    val tasks = if (instance.moduleType.equals(ModuleConstants.inputStreamingType))
-        (0 until instance.parallelism).map(tn => instance.name+"-task"+tn)
-        else instance.executionPlan.tasks.asScala.keys
+    perTaskCores = instance.get.perTaskCores
+    perTaskMem = instance.get.perTaskRam
+    perTaskPortsCount = FrameworkUtil.getCountPorts(instance.get)
+    val tasks = if (instance.get.moduleType.equals(ModuleConstants.inputStreamingType))
+        (0 until instance.get.parallelism).map(tn => instance.get.name+"-task"+tn)
+        else instance.get.executionPlan.tasks.asScala.keys
     tasks.foreach(task => TasksList.newTask(task))
     logger.debug(s"Got tasks: $TasksList")
 
@@ -376,6 +376,7 @@ class FrameworkScheduler extends Scheduler {
         }
       }
     } else result = offers.asScala
+
     result.asJava
   }
 
@@ -385,9 +386,9 @@ class FrameworkScheduler extends Scheduler {
     * @return String
     */
   def getModuleUrl(instance: Instance): String = {
-    jarName = configFileService.get("system." + instance.engine).value
-    val restHost = configFileService.get(ConfigConstants.hostOfCrudRestTag).value
-    val restPort = configFileService.get(ConfigConstants.portOfCrudRestTag).value.toInt
+    jarName = configFileService.get("system." + instance.engine).get.value
+    val restHost = configFileService.get(ConfigConstants.hostOfCrudRestTag).get.value
+    val restPort = configFileService.get(ConfigConstants.portOfCrudRestTag).get.value.toInt
     val restAddress = new URI(s"http://$restHost:$restPort/v1/custom/jars/$jarName").toString
     logger.debug(s"Engine downloading URL: $restAddress")
     restAddress

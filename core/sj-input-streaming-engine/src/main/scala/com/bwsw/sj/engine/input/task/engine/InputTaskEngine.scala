@@ -41,7 +41,7 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
   protected val streams = producers.keySet
   protected var txnsByStreamPartitions = createTxnsStorage(streams)
   protected val checkpointGroup = new CheckpointGroup()
-  protected val instance = manager.getInstance.asInstanceOf[InputInstance]
+  protected val instance = manager.instance.asInstanceOf[InputInstance]
   protected val moduleEnvironmentManager = createModuleEnvironmentManager()
   val executor = manager.getExecutor(moduleEnvironmentManager).asInstanceOf[InputStreamingExecutor]
   protected val evictionPolicy = createEvictionPolicy()
@@ -281,9 +281,9 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
    */
   private def createModuleEnvironmentManager() = {
     val serializer = new JsonSerializer()
+    val streamService = ConnectionRepository.getStreamService
     val taggedOutputs = instance.outputs
-      .map(ConnectionRepository.getStreamService.get)
-      .filter(_.tags != null)
+      .flatMap(x => streamService.get(x))
 
     new InputEnvironmentManager(serializer.deserialize[Map[String, Any]](instance.options), taggedOutputs)
   }

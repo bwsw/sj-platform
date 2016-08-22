@@ -15,9 +15,9 @@ class CassandraFactory {
 
   private var cluster: Cluster = null
   private var session: Session = null
+  private var cassandraConnectorConf: CassandraConnectorConf = null
   private val metadataStorageFactory = new MetadataStorageFactory()
   private val dataStorageFactory = new Factory()
-  private var cassandraConnectorConf: CassandraConnectorConf = null
 
   def open(cassandraHosts: Set[InetSocketAddress]) = {
     cluster = Cluster.builder().addContactPointsWithPorts(cassandraHosts.toList.asJava).build()

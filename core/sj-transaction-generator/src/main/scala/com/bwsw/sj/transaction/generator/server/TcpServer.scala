@@ -5,8 +5,7 @@ import java.net.{ServerSocket, URI}
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
-import com.bwsw.sj.common.ConfigConstants
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.utils.ConfigUtils
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.twitter.common.zookeeper.DistributedLock.LockingException
 import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
@@ -21,16 +20,10 @@ import org.apache.zookeeper.{CreateMode, ZooDefs}
  */
 class TcpServer(prefix: String, zkClient: ZooKeeperClient, host: String, port: Int) {
   private val logger = Logger.getLogger(getClass)
-  private val retryPeriod = getRetryPeriod()
+  private val retryPeriod = ConfigUtils.getServerRetryPeriod()
   private val executorService = createExecutorService()
 
   var serverSocket: ServerSocket = null
-
-  private def getRetryPeriod() = {
-    val configService = ConnectionRepository.getConfigService
-
-    configService.get(ConfigConstants.tgServerRetryPeriodTag).value.toInt
-  }
 
   private def createExecutorService() = {
     val countOfThreads = 60

@@ -5,11 +5,11 @@ import java.util.Calendar
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.traits.Serializer
-import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{SjStream, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
+import com.bwsw.sj.common.utils.ConfigUtils
 import com.bwsw.sj.crud.rest.entities.MarathonRequest
 import org.apache.http.client.methods.{HttpDelete, HttpGet, HttpPost, HttpPut}
 import org.apache.http.entity.StringEntity
@@ -30,16 +30,15 @@ object InstanceMethods {
   val serializer: Serializer = new JsonSerializer
   val instanceDAO: GenericMongoService[Instance] = ConnectionRepository.getInstanceService
   val streamDAO: GenericMongoService[SjStream] = ConnectionRepository.getStreamService
-  val configService = ConnectionRepository.getConfigService
 
   val OK: Int = 200
   val Created: Int = 201
   val NotFound: Int = 404
 
-  lazy val restHost = configService.get(ConfigConstants.hostOfCrudRestTag).value
-  lazy val restPort = configService.get(ConfigConstants.portOfCrudRestTag).value.toInt
-  lazy val marathonConnect = configService.get(ConfigConstants.marathonTag).value
-  lazy val marathonTimeout = configService.get(ConfigConstants.marathonTimeoutTag).value.toInt
+  lazy val restHost = ConfigUtils.getCrudRestHost()
+  lazy val restPort = ConfigUtils.getCrudRestPort()
+  lazy val marathonConnect = ConfigUtils.getMarathonConnect()
+  lazy val marathonTimeout = ConfigUtils.getMarathonTimeout()
 
   val restAddress = new URI(s"http://$restHost:$restPort").toString
 

@@ -28,7 +28,7 @@ class RegularConsumerCallback[USERTYPE](blockingQueue: PersistentBlockingQueue) 
   override def onEvent(subscriber: SubscribingConsumer[ USERTYPE], partition: Int, transactionUuid: UUID): Unit = {
     logger.debug(s"onEvent handler was invoked by subscriber: ${subscriber.name}\n")
     val transaction = subscriber.getTransactionById(partition, transactionUuid).get
-    val stream = ConnectionRepository.getStreamService.get(subscriber.stream.getName)
+    val stream = ConnectionRepository.getStreamService.get(subscriber.stream.getName).get
     blockingQueue.put(serializer.serialize(
     {
       val envelope = new TStreamEnvelope()

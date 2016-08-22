@@ -246,7 +246,7 @@ object BenchmarkDataFactory {
   }
 
   def createServices() = {
-    val esProv: Provider = providerService.get(esProviderName)
+    val esProv: Provider = providerService.get(esProviderName).get
     val esService: ESService = new ESService()
     esService.name = esServiceName
     esService.serviceType = "ESInd"
@@ -257,9 +257,9 @@ object BenchmarkDataFactory {
     esService.password = ""
     serviceManager.save(esService)
 
-    val metadataProvider: Provider = providerService.get(metadataProviderName)
-    val dataProvider: Provider = providerService.get(dataProviderName)
-    val lockProvider: Provider = providerService.get(lockProviderName)
+    val metadataProvider: Provider = providerService.get(metadataProviderName).get
+    val dataProvider: Provider = providerService.get(dataProviderName).get
+    val lockProvider: Provider = providerService.get(lockProviderName).get
     val tStreamService: TStreamService = new TStreamService()
     tStreamService.name = tServiceName
     tStreamService.serviceType = "TstrQ"

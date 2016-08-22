@@ -11,9 +11,9 @@ import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import com.bwsw.common.exceptions.BadRecordWithKey
+import com.bwsw.common.exceptions.BadRequestWithKey
 import com.bwsw.sj.common.DAL.model.ConfigSetting
-import com.bwsw.sj.crud.rest.entities.ProtocolResponse
+import com.bwsw.sj.crud.rest.entities.{OkRestResponse, RestResponse}
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import org.apache.commons.io.FileUtils
 
@@ -57,7 +57,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                   entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
                 ))
               } else {
-                throw new BadRecordWithKey(MessageFormat.format(
+                throw new BadRequestWithKey(MessageFormat.format(
                   messages.getString("rest.custom.jars.file.notfound"), name), name)
               }
             }
@@ -66,7 +66,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
             pathEndOrSingleSlash {
               val fileMetadatas = fileMetadataDAO.getByParameters(Map("specification.name" -> name, "specification.version" -> version))
               if (fileMetadatas.isEmpty) {
-                throw new BadRecordWithKey(MessageFormat.format(
+                throw new BadRequestWithKey(MessageFormat.format(
                   messages.getString("rest.custom.jars.file.notfound"), name), name)
               }
               val filename = fileMetadatas.head.filename
@@ -78,15 +78,14 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                     entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
                   ))
                 } else {
-                  throw new BadRecordWithKey(MessageFormat.format(
+                  throw new BadRequestWithKey(MessageFormat.format(
                     messages.getString("rest.custom.jars.file.notfound"), name), name)
                 }
               } ~
               delete {
                 if (storage.delete(filename)) {
                   configService.delete("system" + "." + name + "-" + version)
-                  val response = ProtocolResponse(
-                    200,
+                  val response = OkRestResponse(
                     Map("message" -> MessageFormat.format(
                       messages.getString("rest.custom.jars.file.deleted"), name, version
                     ))
@@ -96,7 +95,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                     serializer.serialize(response)
                   ))
                 } else {
-                  throw new BadRecordWithKey(MessageFormat.format(
+                  throw new BadRequestWithKey(MessageFormat.format(
                     messages.getString("rest.custom.jars.file.cannot.delete"), name, version),
                     name)
                 }
@@ -118,7 +117,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                   "system"
                 )
                 configService.save(customJarConfigElement)
-                val response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+                val response = OkRestResponse(Map("message" -> MessageFormat.format(
                   messages.getString("rest.custom.jars.file.uploaded"),
                   metadata.fileName)
                 ))
@@ -131,15 +130,15 @@ trait SjCustomApi extends Directives with SjCrudValidator {
           } ~
           get {
             val files = fileMetadataDAO.getByParameters(Map("filetype" -> "custom"))
-            var response: ProtocolResponse = null
+            var response: RestResponse = null
             if (files.nonEmpty) {
               val entity = Map("custom-jars" -> files.map(metadata =>
                 Map("name" -> metadata.specification.name,
                   "version" -> metadata.specification.version))
               )
-              response = ProtocolResponse(200, entity)
+              response = OkRestResponse(entity)
             } else {
-              response = ProtocolResponse(200, Map("message" -> messages.getString("rest.custom.jars.notfound")))
+              response = OkRestResponse(Map("message" -> messages.getString("rest.custom.jars.notfound")))
             }
             complete(HttpEntity(
               `application/json`,
@@ -180,7 +179,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
               storage.put(uploadingFile, filename, spec, "custom-file")
               uploadingFile.delete()
 
-              val response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+              val response = OkRestResponse(Map("message" -> MessageFormat.format(
                 messages.getString("rest.custom.files.file.uploaded"), filename
               )))
 
@@ -192,16 +191,16 @@ trait SjCustomApi extends Directives with SjCrudValidator {
           } ~
           get {
             val files = fileMetadataDAO.getByParameters(Map("filetype" -> "custom-file"))
-            var response: ProtocolResponse = null
+            var response: RestResponse = null
             if (files.nonEmpty) {
               val entity = Map("custom-files" -> files.map(metadata =>
                 Map("name" -> metadata.filename,
                   "description" -> metadata.specification.description,
                   "upload-date" -> metadata.uploadDate.toString))
               )
-              response = ProtocolResponse(200, entity)
+              response = OkRestResponse(entity)
             } else {
-              response = ProtocolResponse(200, Map("message" -> messages.getString("rest.custom.files.notfound")))
+              response = OkRestResponse(Map("message" -> messages.getString("rest.custom.files.notfound")))
             }
             complete(HttpEntity(
               `application/json`,
@@ -212,7 +211,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
         pathPrefix(Segment) { (name: String) =>
           val file = storage.get(name, s"tmp/rest/$name")
           if (file == null || !file.exists()) {
-            throw new BadRecordWithKey(MessageFormat.format(
+            throw new BadRequestWithKey(MessageFormat.format(
               messages.getString("rest.custom.files.file.notfound"), name),
               name)
           }
@@ -225,7 +224,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
             } ~
             delete {
               storage.delete(name)
-              val response = ProtocolResponse(200, Map("message" -> MessageFormat.format(
+              val response = OkRestResponse(Map("message" -> MessageFormat.format(
                 messages.getString("rest.custom.files.file.deleted"), name
               )))
 

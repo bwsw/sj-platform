@@ -2,9 +2,10 @@ package com.bwsw.sj.engine.regular.task.engine.input
 
 import java.util.Properties
 
-import com.bwsw.sj.common.ConfigConstants._
 import com.bwsw.sj.common.DAL.model.{KafkaService, SjStream}
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.StreamConstants
+import com.bwsw.sj.common.utils.ConfigUtils
 import com.bwsw.sj.engine.core.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope}
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
@@ -40,7 +41,7 @@ class KafkaRegularTaskInputService(manager: RegularTaskManager,
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"regular-task-${manager.taskName}-kafka-consumer")
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val kafkaSubscriberTimeout = configService.get(kafkaSubscriberTimeoutTag).value.toInt
+  private val kafkaSubscriberTimeout = ConfigUtils.getKafkaSubscriberTimeout()
   private val kafkaInputs = getKafkaInputs()
   private var kafkaOffsetsStorage = mutable.Map[(String, Int), Long]()
   private val kafkaOffsetsStream = manager.taskName + "_kafka_offsets"
@@ -56,8 +57,8 @@ class KafkaRegularTaskInputService(manager: RegularTaskManager,
   )
   
   private def getKafkaInputs(): mutable.Map[SjStream, Array[Int]] = {
-    manager.inputs.filter(x => x._1.streamType == StreamConstants.kafkaStreamType)
-  }
+    manager.inputs
+      .filter(x => x._1.streamType == StreamConstants.kafkaStreamType)  }
 
   /**
    * Creates SJStream is responsible for committing the offsets of last messages
@@ -118,6 +119,8 @@ class KafkaRegularTaskInputService(manager: RegularTaskManager,
   }
 
   private def createKafkaConsumer(hosts: List[String], offset: String) = {
+    val configService = ConnectionRepository.getConfigService
+
     val props = new Properties()
     props.put("bootstrap.servers", hosts.mkString(","))
     props.put("enable.auto.commit", "false")

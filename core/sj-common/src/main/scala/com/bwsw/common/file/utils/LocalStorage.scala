@@ -2,7 +2,7 @@ package com.bwsw.common.file.utils
 
 import java.io.File
 
-import com.bwsw.common.exceptions.BadRecordWithKey
+import com.bwsw.common.exceptions.BadRequestWithKey
 import org.apache.commons.io.FileUtils
 
 import scala.reflect.io.{Directory, Path}
@@ -17,7 +17,7 @@ class LocalStorage(pathToLocalStorage: String) extends FileStorage {
       FileUtils.copyFile(file, storageFile)
     } else {
       logger.error(s"File with name: '$fileName' already exists in a local storage")
-      throw BadRecordWithKey(s"$fileName already exists", fileName)
+      throw BadRequestWithKey(s"$fileName already exists", fileName)
     }
   }
 
@@ -33,7 +33,7 @@ class LocalStorage(pathToLocalStorage: String) extends FileStorage {
       file
     } else {
       logger.error(s"File with name: '$fileName' doesn't exist in a local storage")
-      throw new BadRecordWithKey(s"$fileName doesn't exist", fileName)
+      throw new BadRequestWithKey(s"$fileName doesn't exist", fileName)
     }
   }
 
@@ -50,8 +50,8 @@ class LocalStorage(pathToLocalStorage: String) extends FileStorage {
     }
   }
 
-  override def getContent(path: String): Seq[String] = {
-    logger.debug(s"Get a list of contents of a local storage directory: '$path'")
+  override def getContent(): Seq[String] = {
+    logger.debug(s"Get a list of contents of a local storage directory")
     Directory.apply(Path(pathToLocalStorage).toAbsolute).files.map(_.name).toSeq
   }
 

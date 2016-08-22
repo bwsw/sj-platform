@@ -8,7 +8,7 @@ class SjStream() {
   var description: String = null
   @Reference var service: Service = null
   @Property("stream-type") var streamType: String = null
-  var tags: Array[String] = null
+  var tags: Array[String] = Array()
 
   def this(name: String,
            description: String,

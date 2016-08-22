@@ -7,8 +7,7 @@ import java.nio.channels.SocketChannel
 import java.nio.charset.StandardCharsets
 import java.util
 
-import com.bwsw.sj.common.ConfigConstants
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.utils.ConfigUtils
 import com.twitter.common.quantity.{Amount, Time}
 import com.twitter.common.zookeeper.ZooKeeperClient
 import org.apache.log4j.Logger
@@ -23,16 +22,23 @@ class TcpClient(options: TcpClientOptions) {
   private val logger = Logger.getLogger(getClass)
   private var client: SocketChannel = null
   private var retryCount = options.retryCount
-  private val configService = ConnectionRepository.getConfigService
-  private val zkSessionTimeout = configService.get(ConfigConstants.zkSessionTimeoutTag).value.toInt
-
-  private var outputStream: OutputStream = null
-
-  val zooKeeperServers = new util.ArrayList[InetSocketAddress]()
-  options.zkServers.map(x => (x.split(":")(0), x.split(":")(1).toInt))
-    .foreach(zkServer => zooKeeperServers.add(new InetSocketAddress(zkServer._1, zkServer._2)))
-  val zkClient = new ZooKeeperClient(Amount.of(zkSessionTimeout, Time.MILLISECONDS), zooKeeperServers)
+  private val zkSessionTimeout = ConfigUtils.getZkSessionTimeout()
   private val inputBuffer = ByteBuffer.allocate(36)
+  private var outputStream: OutputStream = new ByteArrayOutputStream()
+  private val zkClient = createZooKeeperClient()
+
+  private def createZooKeeperClient() = {
+    val zkServers = createZooKeeperServers()
+    new ZooKeeperClient(Amount.of(zkSessionTimeout, Time.MILLISECONDS), zkServers)
+  }
+
+  private def createZooKeeperServers() = {
+    val zooKeeperServers = new util.ArrayList[InetSocketAddress]()
+    options.zkServers.map(x => (x.split(":")(0), x.split(":")(1).toInt))
+      .foreach(zkServer => zooKeeperServers.add(new InetSocketAddress(zkServer._1, zkServer._2)))
+
+    zooKeeperServers
+  }
 
   def open() = {
     var isConnected = false
