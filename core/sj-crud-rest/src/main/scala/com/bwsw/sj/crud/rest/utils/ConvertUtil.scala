@@ -4,7 +4,6 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.crud.rest.entities._
 import com.bwsw.sj.crud.rest.entities.config.ConfigSettingData
 import com.bwsw.sj.crud.rest.entities.module._
 import com.bwsw.sj.crud.rest.entities.provider.ProviderData
@@ -144,7 +143,7 @@ object ConvertUtil {
    * @param apiInstance - api object of instance
    * @return - object of model instance
    */
-  def convertToModelInstance(apiInstance: InstanceMetadata) = {
+  def convertToModelInstance(apiInstance: InstanceMetadata): Instance = {
     logger.debug(s"Convert api instance ${apiInstance.name} to model instance object.")
     apiInstance match {
       case windowedInstanceMetadata: WindowedInstanceMetadata =>
@@ -216,8 +215,8 @@ object ConvertUtil {
     val serviceDAO = ConnectionRepository.getServiceManager
     if (apiInstance.coordinationService != null) {
       val service = serviceDAO.get(apiInstance.coordinationService)
-      if (service != null && service.isInstanceOf[ZKService]) {
-        modelInstance.coordinationService = service.asInstanceOf[ZKService]
+      if (service.isDefined && service.get.isInstanceOf[ZKService]) {
+        modelInstance.coordinationService = service.get.asInstanceOf[ZKService]
       }
     }
     modelInstance

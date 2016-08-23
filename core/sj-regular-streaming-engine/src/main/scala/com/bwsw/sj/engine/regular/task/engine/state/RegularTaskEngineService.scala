@@ -22,7 +22,7 @@ abstract class RegularTaskEngineService(manager: RegularTaskManager, performance
   protected val optionsSerializer = new JsonSerializer()
   optionsSerializer.setIgnoreUnknown(true)
 
-  protected val regularInstance = manager.getInstance.asInstanceOf[RegularInstance]
+  protected val regularInstance = manager.instance.asInstanceOf[RegularInstance]
   protected val outputProducers = manager.outputProducers
   val moduleTimer = new SjTimer()
   val outputTags = manager.outputTags

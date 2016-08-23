@@ -30,16 +30,11 @@ class InputTaskEngineFactory(manager: InputTaskManager,
   protected val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
-   * Input instance is a metadata for running a task of input module
-   */
-  private val inputInstanceMetadata = manager.getInstance
-
-  /**
    * Creates InputTaskEngine is in charge of a basic execution logic of task of input module
    * @return Engine of input task
    */
   def createInputTaskEngine(): InputTaskEngine = {
-    inputInstanceMetadata.checkpointMode match {
+    manager.instance.checkpointMode match {
       case "time-interval" =>
         logger.info(s"Task: ${manager.taskName}. Input module has a 'time-interval' checkpoint mode, create an appropriate task engine\n")
         new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext) with TimeCheckpointTaskEngine

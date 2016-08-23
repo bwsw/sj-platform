@@ -6,8 +6,8 @@ import java.util
 import com.bwsw.sj.common.DAL.ConnectionConstants
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{TStreamSjStream, ZKService}
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.{ConfigConstants, StreamConstants}
+import com.bwsw.sj.common.StreamConstants
+import com.bwsw.sj.common.utils.ConfigUtils
 import com.bwsw.sj.crud.rest.entities.MarathonRequest
 import com.bwsw.sj.crud.rest.utils.StreamUtil
 import com.twitter.common.quantity.{Amount, Time}
@@ -25,18 +25,16 @@ import org.slf4j.LoggerFactory
   */
 class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
   import InstanceMethods._
-  import com.bwsw.sj.common.ConfigConstants._
   import com.bwsw.sj.common.ModuleConstants._
 
   import scala.collection.JavaConverters._
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
-  private val configService = ConnectionRepository.getConfigService
 
   def run() = {
     logger.debug(s"Instance: ${instance.name}. Start instance.")
     try {
-      val zkSessionTimeout = configService.get(ConfigConstants.zkSessionTimeoutTag).value.toInt
+      val zkSessionTimeout = ConfigUtils.getZkSessionTimeout()
       val mesosInfoResponse = getMesosInfo
       if (mesosInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
         val entity = serializer.deserialize[Map[String, Any]](EntityUtils.toString(mesosInfoResponse.getEntity, "UTF-8"))
@@ -63,7 +61,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
         if (!instance.moduleType.equals(inputStreamingType)) {
           streams = streams.union(instance.inputs.map(_.replaceAll("/split|/full", "")))
         }
-        val streamsToStart = streams.map(name => streamDAO.get(name))
+        val streamsToStart = streams.flatMap(name => streamDAO.get(name))
           .filter(stream => stream.streamType.equals(StreamConstants.tStreamType))
           .filter(stream => !stream.asInstanceOf[TStreamSjStream].generator.generatorType.equals("local"))
         startGenerators(streamsToStart.map(stream => stream.asInstanceOf[TStreamSjStream]).toSet)
@@ -142,7 +140,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
     */
   def frameworkStart(mesosMaster: String) = {
       logger.debug(s"Instance: ${instance.name}. Start framework for instance.")
-      val frameworkJarName = configService.get("system" + "." + configService.get(frameworkTag).value).value
+      val frameworkJarName = ConfigUtils.getFrameworkJarName()
       val restUrl = new URI(s"$restAddress/v1/custom/jars/$frameworkJarName")
       val taskInfoResponse = getTaskInfo(instance.name)
       if (taskInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
@@ -227,9 +225,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
     */
   def startGenerator(stream: TStreamSjStream) = {
     logger.debug(s"Instance: ${instance.name}. Start generator for stream ${stream.name}.")
-    val transactionGeneratorJar = configService.get(
-      "system." + configService.get(transactionGeneratorTag).value
-    ).value
+    val transactionGeneratorJar = ConfigUtils.getTransactionGeneratorJarName()
     val zkService = stream.generator.service.asInstanceOf[ZKService]
     val generatorProvider = zkService.provider
     var prefix = zkService.namespace

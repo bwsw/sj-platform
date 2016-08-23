@@ -63,7 +63,7 @@ object SjTest {
     val name3 = "dasfd-4fs-ds"
     val name4 = "s9ds?saf_ds"
 
-    if (name1.matches("""^([a-zA-Z][a-zA-Z0-9-]+)$""")) {
+    if (name1.matches("""^([a-z][a-z0-9-]*)$""")) {
       println("name 1 OK")
     } else {
       println("name 1 NOT OK")
@@ -104,7 +104,7 @@ object SjTest {
     val providerDAO = ConnectionRepository.getProviderService
     createProviders(providerDAO)
     createServices(serviceDAO, providerDAO)
-    val tService = serviceDAO.get("tstrq_service")
+    val tService = serviceDAO.get("tstrq_service").get
     createStreams(tService, serviceDAO.get("zk_service").asInstanceOf[ZKService])
   }
 
@@ -187,7 +187,7 @@ object SjTest {
 
   def createServices(serviceDAO: GenericMongoService[Service], providerDAO: GenericMongoService[Provider]) = {
     val cassService = new CassandraService
-    val cassProv = providerDAO.get("cass_prov")
+    val cassProv = providerDAO.get("cass_prov").get
     cassService.keyspace = "test_keyspace"
     cassService.name = "cass_service"
     cassService.description = "cassandra test service"
@@ -196,7 +196,7 @@ object SjTest {
     serviceDAO.save(cassService)
 
     val zkService = new ZKService
-    val zkProv = providerDAO.get("zk_prov")
+    val zkProv = providerDAO.get("zk_prov").get
     zkService.namespace = "zk_test"
     zkService.name = "zk_service"
     zkService.description = "zookeeper test service"
@@ -205,7 +205,7 @@ object SjTest {
     serviceDAO.save(zkService)
 
     val aeroService = new AerospikeService
-    val aeroProv = providerDAO.get("aero_prov")
+    val aeroProv = providerDAO.get("aero_prov").get
     aeroService.namespace = "test"
     aeroService.name = "aero_service"
     aeroService.description = "aerospike test service"
@@ -214,7 +214,7 @@ object SjTest {
     serviceDAO.save(aeroService)
 
     val redisService = new RedisService
-    val redisProv = providerDAO.get("redis_prov")
+    val redisProv = providerDAO.get("redis_prov").get
     redisService.namespace = "test"
     redisService.name = "rd_service"
     redisService.description = "redis test service"
@@ -223,7 +223,7 @@ object SjTest {
     serviceDAO.save(redisService)
 
     val zkService1 = new ZKService
-    val zk1Prov = providerDAO.get("zk1_prov")
+    val zk1Prov = providerDAO.get("zk1_prov").get
     zkService1.namespace = "zk_test1"
     zkService1.name = "zk1_service"
     zkService1.description = "zookeeper test service"

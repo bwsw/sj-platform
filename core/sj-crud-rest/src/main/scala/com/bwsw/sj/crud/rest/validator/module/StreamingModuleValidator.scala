@@ -10,7 +10,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.crud.rest.entities.module.{InstanceMetadata, ModuleSpecification}
-import com.bwsw.sj.crud.rest.utils.StreamUtil
+import com.bwsw.sj.crud.rest.utils.{ValidationUtils, StreamUtil}
 import kafka.common.TopicExistsException
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -24,7 +24,7 @@ import scala.collection.mutable.ArrayBuffer
   *
   * @author Kseniya Tomskikh
   */
-abstract class StreamingModuleValidator {
+abstract class StreamingModuleValidator extends ValidationUtils {
   import com.bwsw.sj.common.ModuleConstants._
   import com.bwsw.sj.common.StreamConstants._
   import com.bwsw.sj.crud.rest.utils.ConvertUtil._
@@ -67,7 +67,7 @@ abstract class StreamingModuleValidator {
     instanceTask.duration = 0
     stages.put(instance.name, instanceTask)
     instance.stages = mapAsJavaMap(stages)
-    instance
+    Option(instance)
   }
 
 
@@ -92,12 +92,12 @@ abstract class StreamingModuleValidator {
     logger.debug(s"Instance: ${parameters.name}. General options validation.")
     val errors = new ArrayBuffer[String]()
 
-    if (!parameters.name.matches("""^([a-z][a-z0-9-]*)$""")) {
+    if (!validateName(parameters.name)) {
       errors += s"Instance has incorrect name: ${parameters.name}. Name of instance must be contain digits, lowercase letters or hyphens. First symbol must be letter."
     }
 
     val instance = instanceDAO.get(parameters.name)
-    if (instance != null) {
+    if (instance.isDefined) {
       errors += s"Instance for name: ${parameters.name} is exist."
     }
 
@@ -121,8 +121,8 @@ abstract class StreamingModuleValidator {
       errors += "Coordination service attribute is empty."
     } else {
       val coordService = serviceDAO.get(parameters.coordinationService)
-      if (coordService != null) {
-        if (!coordService.isInstanceOf[ZKService]) {
+      if (coordService.isDefined) {
+        if (!coordService.get.isInstanceOf[ZKService]) {
           errors += s"Coordination service ${parameters.coordinationService} is not ZKCoord."
         }
       } else {
@@ -215,7 +215,7 @@ abstract class StreamingModuleValidator {
         errors += s"All t-streams should have the same service."
       } else {
         val service = serviceDAO.get(tStreamsServices.head)
-        if (!service.isInstanceOf[TStreamService]) {
+        if (!service.get.isInstanceOf[TStreamService]) {
           errors += s"Service for t-streams must be 'TstrQ'."
         } else {
           checkTStreams(errors, allStreams.filter(s => s.streamType.equals(tStreamType)).map(_.asInstanceOf[TStreamSjStream]))
@@ -239,7 +239,7 @@ abstract class StreamingModuleValidator {
       val validatedInstance = createInstance(parameters, partitions, allStreams.filter(s => s.streamType.equals(tStreamType)).toSet)
       (errors, validatedInstance)
     } else {
-      (errors, null)
+      (errors, None)
     }
 
   }
@@ -419,7 +419,7 @@ abstract class StreamingModuleValidator {
     */
   def createExecutionPlan(instance: InstanceMetadata, partitionsCount: Map[String, Int]) = {
     logger.debug(s"Instance ${instance.name}. Create execution plan.")
-    var inputStreams: Array[String] = null
+    var inputStreams: Array[String] = Array()
     instance.inputs match {
       case inputStreamArray: Array[String] =>
         inputStreams = inputStreamArray

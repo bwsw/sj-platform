@@ -10,28 +10,28 @@ import org.slf4j.{LoggerFactory, Logger}
 import scala.collection.mutable.ArrayBuffer
 
 /**
-  * Created: 23/05/2016
-  *
-  * @author Kseniya Tomskikh
-  */
+ * Created: 23/05/2016
+ *
+ * @author Kseniya Tomskikh
+ */
 class OutputStreamingValidator extends StreamingModuleValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
   /**
-    * Validating options of streams of instance for module
-    *
-    * @param parameters - Input instance parameters
-    * @param specification - Specification of module
-    * @param errors - List of validating errors
-    * @return - List of errors and validating instance (null, if errors non empty)
-    */
+   * Validating options of streams of instance for module
+   *
+   * @param parameters - Input instance parameters
+   * @param specification - Specification of module
+   * @param errors - List of validating errors
+   * @return - List of errors and validating instance (null, if errors non empty)
+   */
   override def streamOptionsValidate(parameters: InstanceMetadata, specification: ModuleSpecification, errors: ArrayBuffer[String]) = {
     if (!parameters.checkpointMode.equals("every-nth")) {
       errors += s"Checkpoint-mode attribute for output-streaming module must be only 'every-nth'."
     }
 
-    var inputStream: SjStream = null
+    var inputStream: Option[SjStream] = None
     if (parameters.inputs != null) {
       errors += s"Unknown attribute 'inputs'."
     }
@@ -43,30 +43,32 @@ class OutputStreamingValidator extends StreamingModuleValidator {
 
       val inputStreamName = parameters.asInstanceOf[OutputInstanceMetadata].input.replaceAll("/split", "")
       inputStream = getStream(inputStreamName)
-      if (inputStream == null) {
-        errors += s"Input stream '$inputStreamName' is not exists."
-      } else {
-        if (!inputStream.streamType.equals(tStreamType)) {
-          errors += s"Input streams must be T-stream."
-        }
+      inputStream match {
+        case None =>
+          errors += s"Input stream '$inputStreamName' is not exists."
+        case Some(stream) =>
+          if (!stream.streamType.equals(tStreamType)) {
+            errors += s"Input streams must be T-stream."
+          }
       }
     } else {
       errors += s"Input stream attribute is empty."
     }
 
-    var outputStream: SjStream = null
+    var outputStream: Option[SjStream] = None
     if (parameters.outputs != null) {
       errors += s"Unknown attribute 'outputs'."
     }
     if (parameters.asInstanceOf[OutputInstanceMetadata].output != null) {
       outputStream = getStream(parameters.asInstanceOf[OutputInstanceMetadata].output)
-      if (outputStream == null) {
-        errors += s"Output stream '${parameters.asInstanceOf[OutputInstanceMetadata].output}' is not exists."
-      } else {
-        val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
-        if (!outputTypes.contains(outputStream.streamType)) {
-          errors += s"Output streams must be in: ${outputTypes.mkString(", ")}."
-        }
+      outputStream match {
+        case None =>
+          errors += s"Output stream '${parameters.asInstanceOf[OutputInstanceMetadata].output}' is not exists."
+        case Some(stream) =>
+          val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
+          if (!outputTypes.contains(stream.streamType)) {
+            errors += s"Output streams must be in: ${outputTypes.mkString(", ")}."
+          }
       }
     } else {
       errors += s"Output stream attribute is empty."
@@ -82,9 +84,9 @@ class OutputStreamingValidator extends StreamingModuleValidator {
       }
     }
 
-    var validatedInstance: Instance = null
-    if (inputStream != null && outputStream != null) {
-      val allStreams = Array(inputStream, outputStream)
+    var validatedInstance: Option[Instance] = None
+    if (inputStream.isDefined && outputStream.isDefined) {
+      val allStreams = Array(inputStream.get, outputStream.get)
 
       val service = allStreams.head.service
       if (!service.isInstanceOf[TStreamService]) {
@@ -95,7 +97,7 @@ class OutputStreamingValidator extends StreamingModuleValidator {
 
       parameters.parallelism = checkParallelism(parameters.parallelism, inputStream.asInstanceOf[TStreamSjStream].partitions, errors)
 
-      val partitions = getPartitionForStreams(Array(inputStream))
+      val partitions = getPartitionForStreams(Array(inputStream.get))
       parameters.inputs = Array(parameters.asInstanceOf[OutputInstanceMetadata].input)
       validatedInstance = createInstance(parameters, partitions, allStreams.filter(s => s.streamType.equals(tStreamType)).toSet)
     }
@@ -103,12 +105,12 @@ class OutputStreamingValidator extends StreamingModuleValidator {
   }
 
   /**
-    * Validating input parameters for 'output-streaming' module
-    *
-    * @param parameters - input parameters for running module
-    * @param specification - specification of module
-    * @return - List of errors
-    */
+   * Validating input parameters for 'output-streaming' module
+   *
+   * @param parameters - input parameters for running module
+   * @param specification - specification of module
+   * @return - List of errors
+   */
   override def validate(parameters: InstanceMetadata, specification: ModuleSpecification) = {
     logger.debug(s"Instance: ${parameters.name}. Start output-streaming validation.")
     val errors = super.generalOptionsValidate(parameters)

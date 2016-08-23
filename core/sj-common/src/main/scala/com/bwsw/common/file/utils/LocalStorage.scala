@@ -1,8 +1,8 @@
 package com.bwsw.common.file.utils
 
-import java.io.File
+import java.io.{FileNotFoundException, File}
+import java.nio.file.FileAlreadyExistsException
 
-import com.bwsw.common.exceptions.BadRecordWithKey
 import org.apache.commons.io.FileUtils
 
 import scala.reflect.io.{Directory, Path}
@@ -17,7 +17,7 @@ class LocalStorage(pathToLocalStorage: String) extends FileStorage {
       FileUtils.copyFile(file, storageFile)
     } else {
       logger.error(s"File with name: '$fileName' already exists in a local storage")
-      throw BadRecordWithKey(s"$fileName already exists", fileName)
+      throw new FileAlreadyExistsException(s"$fileName already exists")
     }
   }
 
@@ -33,7 +33,7 @@ class LocalStorage(pathToLocalStorage: String) extends FileStorage {
       file
     } else {
       logger.error(s"File with name: '$fileName' doesn't exist in a local storage")
-      throw new BadRecordWithKey(s"$fileName doesn't exist", fileName)
+      throw new FileNotFoundException(s"$fileName doesn't exist")
     }
   }
 
@@ -50,13 +50,13 @@ class LocalStorage(pathToLocalStorage: String) extends FileStorage {
     }
   }
 
-  override def getContent(path: String): Seq[String] = {
-    logger.debug(s"Get a list of contents of a local storage directory: '$path'")
+  override def getContent(): Seq[String] = {
+    logger.debug(s"Get a list of contents of a local storage directory")
     Directory.apply(Path(pathToLocalStorage).toAbsolute).files.map(_.name).toSeq
   }
 
   override def put(file: File, fileName: String, specification: Map[String, Any], filetype: String) = {
-    throw new NotImplementedError("Local storage hasn't a opportunity to save file with specification yet")
+    throw new NotImplementedError("Local storage hasn't an opportunity to save file with specification yet")
   }
 
   override def exists(fileName: String): Boolean = {

@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory
 
 class NetworkTimeUUIDGenerator(zkServers: Array[String],
                               prefix: String,
-                              retryInterval: Long,
+                              retryInterval: Int,
                               retryCount: Int) extends IUUIDGenerator {
 
   private val logger = LoggerFactory.getLogger(this.getClass)

@@ -25,16 +25,11 @@ class RegularTaskEngineFactory(manager: RegularTaskManager,
   protected val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
-   * Input instance is a metadata for running a task of regular module
-   */
-  private val inputInstanceMetadata = manager.getInstance
-
-  /**
    * Creates RegularTaskEngine is in charge of a basic execution logic of task of regular module
    * @return Engine of input task
    */
   def createRegularTaskEngine(): RegularTaskEngine = {
-    inputInstanceMetadata.checkpointMode match {
+    manager.instance.checkpointMode match {
       case "time-interval" =>
         logger.info(s"Task: ${manager.taskName}. Regular module has a 'time-interval' checkpoint mode, create an appropriate task engine\n")
         new RegularTaskEngine(manager, performanceMetrics, blockingQueue) with TimeCheckpointTaskEngine

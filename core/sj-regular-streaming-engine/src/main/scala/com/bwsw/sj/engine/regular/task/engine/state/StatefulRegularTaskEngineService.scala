@@ -20,8 +20,8 @@ import com.bwsw.tstreams.agents.group.CheckpointGroup
 class StatefulRegularTaskEngineService(manager: RegularTaskManager, checkpointGroup: CheckpointGroup, performanceMetrics: RegularStreamingPerformanceMetrics)
   extends RegularTaskEngineService(manager, performanceMetrics) {
 
+  private val streamService = ConnectionRepository.getStreamService
   private var countOfCheckpoints = 1
-
   private val stateService = new RAMStateService(manager, checkpointGroup)
 
   val moduleEnvironmentManager = new StatefulModuleEnvironmentManager(
@@ -29,8 +29,7 @@ class StatefulRegularTaskEngineService(manager: RegularTaskManager, checkpointGr
     optionsSerializer.deserialize[Map[String, Any]](regularInstance.options),
     outputProducers,
     regularInstance.outputs
-      .map(ConnectionRepository.getStreamService.get)
-      .filter(_.tags != null),
+      .flatMap(x => streamService.get(x)),
     outputTags,
     moduleTimer,
     performanceMetrics

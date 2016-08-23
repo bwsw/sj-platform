@@ -29,7 +29,7 @@ object KafkaSubscribingConsumer {
     val inputs = Map(("sflow-kafka-2", Array(0,2))).map(x => {
       val service = ConnectionRepository.getStreamService
 
-      (service.get(x._1), x._2)
+      (service.get(x._1).get, x._2)
     })
 
     val kafkaInputs = inputs.filter(x => x._1.streamType == StreamConstants.kafkaStreamType)

@@ -45,7 +45,7 @@ class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable {
     if (!instance.moduleType.equals(inputStreamingType)) {
       instanceStreams = instanceStreams.union(instance.inputs.map(_.replaceAll("/split|/full", "")))
     }
-    val allStreams = instanceStreams.map(streamDAO.get)
+    val allStreams = instanceStreams.flatMap(streamDAO.get)
     val startedInstances = instanceDAO.getByParameters(Map("status" -> started))
     val startingInstance = startedInstances.union(instanceDAO.getByParameters(Map("status" -> starting)))
     val tStreamStreamsToStop = allStreams
@@ -58,7 +58,7 @@ class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable {
                 val streamGeneratorName = createGeneratorTaskName(stream.asInstanceOf[TStreamSjStream])
                 val instanceStreamGenerators = instance.inputs.map(_.replaceAll("/split|/full", ""))
                   .union(instance.outputs)
-                  .map(name => streamDAO.get(name))
+                  .flatMap(name => streamDAO.get(name))
                   .filter(s => s.streamType.equals(StreamConstants.tStreamType))
                   .map(sjStream => createGeneratorTaskName(sjStream.asInstanceOf[TStreamSjStream]))
                 instanceStreamGenerators.contains(streamGeneratorName)

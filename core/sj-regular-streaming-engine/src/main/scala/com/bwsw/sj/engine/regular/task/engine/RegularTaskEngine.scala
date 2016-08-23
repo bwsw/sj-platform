@@ -34,7 +34,7 @@ abstract class RegularTaskEngine(protected val manager: RegularTaskManager,
   protected val logger = LoggerFactory.getLogger(this.getClass)
   protected val producers: Map[String, Producer[Array[Byte]]] = manager.outputProducers
   protected val checkpointGroup = new CheckpointGroup()
-  protected val instance = manager.getInstance.asInstanceOf[RegularInstance]
+  protected val instance = manager.instance.asInstanceOf[RegularInstance]
   protected val regularTaskEngineService = createRegularTaskEngineService()
   protected val moduleEnvironmentManager = regularTaskEngineService.moduleEnvironmentManager
   protected val executor = regularTaskEngineService.executor

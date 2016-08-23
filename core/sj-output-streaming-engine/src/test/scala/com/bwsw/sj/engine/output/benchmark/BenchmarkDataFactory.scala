@@ -13,8 +13,8 @@ import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, OutputInstance, Task}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.utils.CassandraFactory
-import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
-import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerOptions}
+import com.bwsw.tstreams.agents.consumer.Offset.Oldest
+import com.bwsw.tstreams.agents.consumer
 import com.bwsw.tstreams.agents.producer.{CoordinationOptions, NewTransactionProducerPolicy, Options, Producer}
 import com.bwsw.tstreams.common.CassandraConnectorConf
 import com.bwsw.tstreams.converter.IConverter
@@ -23,7 +23,7 @@ import com.bwsw.tstreams.data.aerospike
 import com.bwsw.tstreams.env.TSF_Dictionary
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
-import com.bwsw.tstreams.policy.RoundRobinPolicy
+import com.bwsw.tstreams.common.RoundRobinPolicy
 import com.bwsw.tstreams.services.BasicStreamService
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.client.transport.TransportClient
@@ -180,7 +180,7 @@ object BenchmarkDataFactory {
   def createConsumer(stream: TStreamSjStream,
                      address: String,
                      metadataStorage: MetadataStorage,
-                     dataStorage: aerospike.Storage): Consumer[Array[Byte]] = {
+                     dataStorage: aerospike.Storage): consumer.Consumer[Array[Byte]] = {
 
     val tStream =
       BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
@@ -189,7 +189,7 @@ object BenchmarkDataFactory {
 
     val timeUuidGenerator = new LocalTimeUUIDGenerator
 
-    val options = new ConsumerOptions[Array[Byte]](
+    val options = new consumer.Options[Array[Byte]](
       transactionsPreload = 10,
       dataPreload = 7,
       converter,
@@ -198,7 +198,7 @@ object BenchmarkDataFactory {
       timeUuidGenerator,
       useLastOffset = true)
 
-    new Consumer[Array[Byte]](tStream.name, tStream, options)
+    new consumer.Consumer[Array[Byte]](tStream.name, tStream, options)
   }
 
   def open() = cassandraFactory.open(Set(new InetSocketAddress(cassandraHost, cassandraPort)))
@@ -246,7 +246,7 @@ object BenchmarkDataFactory {
   }
 
   def createServices() = {
-    val esProv: Provider = providerService.get(esProviderName)
+    val esProv: Provider = providerService.get(esProviderName).get
     val esService: ESService = new ESService()
     esService.name = esServiceName
     esService.serviceType = "ESInd"
@@ -257,9 +257,9 @@ object BenchmarkDataFactory {
     esService.password = ""
     serviceManager.save(esService)
 
-    val metadataProvider: Provider = providerService.get(metadataProviderName)
-    val dataProvider: Provider = providerService.get(dataProviderName)
-    val lockProvider: Provider = providerService.get(lockProviderName)
+    val metadataProvider: Provider = providerService.get(metadataProviderName).get
+    val dataProvider: Provider = providerService.get(dataProviderName).get
+    val lockProvider: Provider = providerService.get(lockProviderName).get
     val tStreamService: TStreamService = new TStreamService()
     tStreamService.name = tServiceName
     tStreamService.serviceType = "TstrQ"

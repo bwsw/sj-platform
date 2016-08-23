@@ -5,14 +5,15 @@ import java.nio.channels.ClosedChannelException
 import java.util.Collections
 
 import com.aerospike.client.AerospikeClient
-import com.bwsw.sj.common.ConfigConstants._
 import com.bwsw.sj.common.DAL.model.Provider
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.utils.ConfigUtils
 import com.bwsw.sj.crud.rest.entities.provider.ProviderData
+import com.bwsw.sj.crud.rest.utils.ValidationUtils
 import com.datastax.driver.core.Cluster
 import com.datastax.driver.core.exceptions.NoHostAvailableException
+import kafka.javaapi.TopicMetadataRequest
 import kafka.javaapi.consumer.SimpleConsumer
-import kafka.javaapi.{TopicMetadataRequest, TopicMetadataResponse}
 import org.apache.zookeeper.ZooKeeper
 import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.settings.Settings
@@ -25,13 +26,11 @@ import scala.concurrent.duration._
 /**
   * Created by mendelbaum_nm on 13.05.16.
   */
-object ProviderValidator {
+object ProviderValidator extends ValidationUtils {
   import com.bwsw.sj.common.ProviderConstants._
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
-
-  private val configService = ConnectionRepository.getConfigService
-  private val zkTimeout = configService.get(zkSessionTimeoutTag).value.toInt
+  private val zkTimeout = ConfigUtils.getZkSessionTimeout()
 
   /**
     * Validating input parameters for provider
@@ -54,13 +53,13 @@ object ProviderValidator {
         if (x.isEmpty) {
           errors += s"'name' can not be empty"
         } else {
-          if (providerDAO.get(x) != null) {
+          if (providerDAO.get(x).isDefined) {
             errors += s"Provider with name $x already exists"
           }
         }
     }
 
-    if (!initialData.name.matches("""^([a-z][a-z0-9-]*)$""")) {
+    if (!validateName(initialData.name)) {
       errors += s"Provider has incorrect name: ${initialData.name}. Name of provider must be contain digits, letters or hyphens. First symbol must be letter."
     }
 
@@ -144,7 +143,7 @@ object ProviderValidator {
 
   def validateHost (hostString: String, providerType: String): (ArrayBuffer[String], Int) = {
     val errors = ArrayBuffer[String]()
-    var hostname : String = null
+    var hostname : String = ""
     var port : Int = -1
     try {
       val uri = new URI(s"dummy://$hostString")
@@ -239,9 +238,8 @@ object ProviderValidator {
     val consumer = new SimpleConsumer(hostname, kafkaPort, 500, 64 * 1024, "connectionTest")
     val topics = Collections.singletonList("test_connection")
     val req = new TopicMetadataRequest(topics)
-    var resp: TopicMetadataResponse = null
     try {
-      resp = consumer.send(req)
+      consumer.send(req)
     } catch {
       case ex: ClosedChannelException =>
         errors += s"'$hostname:$kafkaPort' does not respond"

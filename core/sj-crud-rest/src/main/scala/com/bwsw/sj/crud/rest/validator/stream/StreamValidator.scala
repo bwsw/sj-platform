@@ -1,30 +1,34 @@
 package com.bwsw.sj.crud.rest.validator.stream
 
+import java.text.MessageFormat
+import java.util.ResourceBundle
+
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.StreamConstants
-import com.bwsw.sj.crud.rest.entities._
-import com.bwsw.sj.crud.rest.entities.stream.{KafkaSjStreamData, TStreamSjStreamData, SjStreamData}
+import com.bwsw.sj.crud.rest.entities.stream.{KafkaSjStreamData, SjStreamData, TStreamSjStreamData}
+import com.bwsw.sj.crud.rest.utils.{StreamUtil, ValidationUtils}
 import com.bwsw.sj.crud.rest.validator.provider.ProviderValidator
+import kafka.common.TopicExistsException
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
 
 /**
-  * Created by mendelbaum_nm
-  */
-object StreamValidator {
+ * Created by mendelbaum_nm
+ */
+object StreamValidator extends ValidationUtils {
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
 
   /**
-    * Validating input parameters for stream
-    *
-    * @param stream - parameters of stream being validated
-    * @param initialData - input parameters for stream being validated
-    * @return - List of errors
-    */
-  def validate(initialData: SjStreamData, stream: SjStream) = {
+   * Validating input parameters for stream
+   *
+   * @param stream - parameters of stream being validated
+   * @param initialData - input parameters for stream being validated
+   * @return - List of errors
+   */
+  def validate(initialData: SjStreamData, stream: SjStream): ArrayBuffer[String] = {
     logger.debug(s"Stream ${initialData.name}. Start stream validation.")
 
     val streamDAO = ConnectionRepository.getStreamService
@@ -40,13 +44,13 @@ object StreamValidator {
           errors += s"'name' can not be empty"
     }
 
-    if (!initialData.name.matches("""^([a-zA-Z][a-zA-Z0-9-]+)$""")) {
+    if (!validateName(initialData.name)) {
       errors += s"Stream has incorrect name: ${initialData.name}. Name of stream must be contain digits, letters or hyphens. First symbol must be letter."
     }
 
     val streamObj = streamDAO.get(initialData.name)
-    if (streamObj != null) {
-      errors += s"Stream with name ${streamObj.name} already exists"
+    if (streamObj.isDefined) {
+      errors += s"Stream with name ${initialData.name} already exists"
     }
 
     Option(initialData.description) match {
@@ -58,7 +62,7 @@ object StreamValidator {
     }
 
 
-    var serviceObj: Service = null
+    var serviceObj: Option[Service] = None
     Option(initialData.service) match {
       case None =>
         errors += s"'service' is required"
@@ -67,17 +71,19 @@ object StreamValidator {
           errors += s"'service' can not be empty"
         else {
           serviceObj = serviceDAO.get(initialData.service)
-          if (serviceObj == null) {
-            errors += s"Service '${initialData.service}' does not exist"
-          }
-          else if (initialData.streamType == StreamConstants.tStreamType && serviceObj.serviceType != "TstrQ") {
-            errors += s"Service for ${StreamConstants.tStreamType} stream must be of TstrQ type. '${serviceObj.name}' is not of type TstrQ"
-          } else if (initialData.streamType == StreamConstants.kafkaStreamType && serviceObj.serviceType != "KfkQ") {
-            errors += s"Service for '${StreamConstants.kafkaStreamType}' stream must be of KfkQ type. '${serviceObj.name}' is not of type KfkQ"
-          } else if (initialData.streamType == StreamConstants.esOutputType && serviceObj.serviceType != "ESInd") {
-            errors += s"Service for '${StreamConstants.esOutputType}' stream must be of ESInd type. '${serviceObj.name}' is not of type ESInd"
-          } else if (initialData.streamType == StreamConstants.jdbcOutputType && serviceObj.serviceType != "JDBC") {
-            errors += s"Service for '${StreamConstants.jdbcOutputType}' stream must be of JDBC type. '${serviceObj.name}' is not of type JDBC"
+          serviceObj match {
+            case None =>
+              errors += s"Service '${initialData.service}' does not exist"
+            case Some(service) =>
+              if (initialData.streamType == StreamConstants.tStreamType && service.serviceType != "TstrQ") {
+                errors += s"Service for ${StreamConstants.tStreamType} stream must be of TstrQ type. '${service.name}' is not of type TstrQ"
+              } else if (initialData.streamType == StreamConstants.kafkaStreamType && service.serviceType != "KfkQ") {
+                errors += s"Service for '${StreamConstants.kafkaStreamType}' stream must be of KfkQ type. '${service.name}' is not of type KfkQ"
+              } else if (initialData.streamType == StreamConstants.esOutputType && service.serviceType != "ESInd") {
+                errors += s"Service for '${StreamConstants.esOutputType}' stream must be of ESInd type. '${service.name}' is not of type ESInd"
+              } else if (initialData.streamType == StreamConstants.jdbcOutputType && service.serviceType != "JDBC") {
+                errors += s"Service for '${StreamConstants.jdbcOutputType}' stream must be of JDBC type. '${service.name}' is not of type JDBC"
+              }
           }
         }
     }
@@ -126,7 +132,7 @@ object StreamValidator {
             stream.asInstanceOf[TStreamSjStream].generator = generator
         }
 
-      case StreamConstants.`kafkaStreamType` =>
+      case StreamConstants.kafkaStreamType =>
         //partitions
         if (initialData.asInstanceOf[KafkaSjStreamData].partitions <= 0)
           errors += s"'partitions' is required and must be a positive integer"
@@ -139,14 +145,15 @@ object StreamValidator {
           errors += s"'replication-factor' is required for '${StreamConstants.kafkaStreamType}' stream and must be a positive integer"
         }
         else {
-          if (serviceObj != null) {
-            val zkHostsNumber = serviceObj.asInstanceOf[KafkaService].zkProvider.hosts.length
+          if (serviceObj.isDefined) {
+            val zkProvider = serviceObj.get.asInstanceOf[KafkaService].zkProvider
+            val zkHostsNumber = zkProvider.hosts.length
 
             if (rFactor > zkHostsNumber) {
               errors += s"'replication-factor' can not be greater than service's zk-provider hosts number"
             }
             else {
-              val zkHostsConnectionErrors = ProviderValidator.checkProviderConnection(serviceObj.asInstanceOf[KafkaService].zkProvider)
+              val zkHostsConnectionErrors = ProviderValidator.checkProviderConnection(zkProvider)
               if (rFactor > (zkHostsNumber - zkHostsConnectionErrors.length)) {
                 errors += s"Some service's zk-provider hosts are unreachable. There is not enough alive hosts for 'replication-factor' provided"
                 errors ++= zkHostsConnectionErrors
@@ -164,11 +171,49 @@ object StreamValidator {
       case _ =>
     }
 
+    if (errors.isEmpty) {
+      stream match {
+        case s: TStreamSjStream =>
+          val streamCheckResult = StreamUtil.checkAndCreateTStream(s, initialData.force)
+          streamCheckResult match {
+            case Left(err) => errors += err
+            case _ =>
+          }
+        case s: KafkaSjStream =>
+          try {
+            val streamCheckResult = StreamUtil.checkAndCreateKafkaTopic(s, initialData.force)
+            streamCheckResult match {
+              case Left(err) => errors += err
+              case _ =>
+            }
+          } catch {
+            case e: TopicExistsException =>
+              val messages = ResourceBundle.getBundle("messages")
+              errors += MessageFormat.format(
+              messages.getString("rest.streams.create.kafka.cannot"),
+              errors.mkString("\n")
+            )
+          }
+        case s: ESSjStream =>
+          val streamCheckResult = StreamUtil.checkAndCreateEsStream(s, initialData.force)
+          streamCheckResult match {
+            case Left(err) => errors += err
+            case _ =>
+          }
+        case s: JDBCSjStream =>
+          val streamCheckResult = StreamUtil.checkAndCreateJdbcStream(s, initialData.force)
+          streamCheckResult match {
+            case Left(err) => errors += err
+            case _ =>
+          }
+      }
+    }
+
     // Fulfill common fields
     if (errors.isEmpty) {
       stream.name = initialData.name
       stream.description = initialData.description
-      stream.service = serviceObj
+      stream.service = serviceObj.get
       stream.tags = initialData.tags
       stream.streamType = initialData.streamType
     }

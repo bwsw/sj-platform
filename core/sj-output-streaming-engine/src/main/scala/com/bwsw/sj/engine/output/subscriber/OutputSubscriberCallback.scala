@@ -37,8 +37,7 @@ class OutputSubscriberCallback(blockingQueue: ArrayBlockingQueue[String])
                        transactionUuid: UUID): Unit = {
     logger.debug(s"onEvent handler was invoked by subscriber: ${subscriber.name}\n")
     val txn = subscriber.getTransactionById(partition, transactionUuid).get
-    val stream = ConnectionRepository.getStreamService.get(subscriber.stream.getName)
-
+    val stream = ConnectionRepository.getStreamService.get(subscriber.stream.getName).get
     val envelope = new TStreamEnvelope()
     envelope.stream = stream.name
     envelope.partition = partition

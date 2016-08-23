@@ -5,8 +5,8 @@ import java.util.UUID
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.engine.core.state.IStateService
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
-import com.bwsw.tstreams.agents.consumer.ConsumerTransaction
-import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
+import com.bwsw.tstreams.agents.consumer.Transaction
+import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.NewTransactionProducerPolicy
 
@@ -232,7 +232,7 @@ class RAMStateService(manager: RegularTaskManager, checkpointGroup: CheckpointGr
    * @param initialState State from which to need start
    * @param transaction Transaction containing a state
    */
-  private def fillFullState(initialState: mutable.Map[String, Any], transaction: ConsumerTransaction[Array[Byte]]) = {
+  private def fillFullState(initialState: mutable.Map[String, Any], transaction: Transaction[Array[Byte]]) = {
     logger.debug(s"Fill full state\n")
     var value: Object = null
     var variable: (String, Any) = null
