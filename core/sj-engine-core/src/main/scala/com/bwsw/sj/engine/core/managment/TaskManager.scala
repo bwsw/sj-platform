@@ -18,6 +18,8 @@ import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
 import com.bwsw.tstreams.services.BasicStreamService
 import org.slf4j.LoggerFactory
 
+import scala.collection.JavaConverters._
+
 abstract class TaskManager() {
   protected val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -41,12 +43,12 @@ abstract class TaskManager() {
       "specification.module-type" -> instance.moduleType,
       "specification.version" -> instance.moduleVersion)
   ).head
+  protected val executorClassName = fileMetadata.specification.executorClass
 
-  /**
-   * Converter to convert usertype->storagetype; storagetype->usertype
-   */
+  protected val moduleClassLoader = createClassLoader()
+
   val converter = new ArrayByteConverter
-
+  val inputs = getInputs()
   lazy val outputProducers = createOutputProducers()
 
   private def getInstance() = {
@@ -120,6 +122,33 @@ abstract class TaskManager() {
   }
 
   /**
+   * Returns class loader for retrieving classes from jar
+   *
+   * @return Class loader for retrieving classes from jar
+   */
+  protected def createClassLoader() = {
+    val file = getModuleJar
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
+      s"Get class loader for jar file: ${file.getName}\n")
+
+    val classLoaderUrls = Array(file.toURI.toURL)
+
+    new URLClassLoader(classLoaderUrls, ClassLoader.getSystemClassLoader)
+  }
+
+  private def getModuleJar: File = {
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '${instance.moduleName}' module jar\n")
+    storage.get(fileMetadata.filename, s"tmp/${instance.moduleName}")
+  }
+
+  private def getInputs() = {
+    val service = ConnectionRepository.getStreamService
+
+    instance.executionPlan.tasks.get(taskName).inputs.asScala
+      .map(x => (service.get(x._1).get, x._2))
+  }
+
+  /**
    * Create t-stream producers for each output stream
    *
    * @return Map where key is stream name and value is t-stream producer
@@ -188,24 +217,6 @@ abstract class TaskManager() {
   }
 
   /**
-   * Returns class loader for retrieving classes from jar
-   *
-   * @param pathToJar Absolute path to jar file
-   * @return Class loader for retrieving classes from jar
-   */
-  protected def getClassLoader(pathToJar: String) = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get class loader for class: $pathToJar\n")
-    val classLoaderUrls = Array(new File(pathToJar).toURI.toURL)
-
-    new URLClassLoader(classLoaderUrls)
-  }
-
-  protected def getModuleJar: File = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '${instance.moduleName}' module jar\n")
-    storage.get(fileMetadata.filename, s"tmp/${instance.moduleName}")
-  }
-
-  /**
    * Creates a t-stream consumer with pub/sub property
    *
    * @param stream SjStream from which massages are consumed
@@ -255,5 +266,5 @@ abstract class TaskManager() {
   /**
    * @return An instance of executor of module that hasn't got an environment manager
    */
-  def getExecutor: StreamingExecutor
+  def getExecutor(): StreamingExecutor //todo maybe needless
 }

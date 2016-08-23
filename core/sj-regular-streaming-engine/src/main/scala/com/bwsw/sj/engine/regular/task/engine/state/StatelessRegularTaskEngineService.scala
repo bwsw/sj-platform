@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.regular.task.engine.state
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
+import com.bwsw.sj.engine.core.environment.RegularEnvironmentManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
@@ -18,7 +18,7 @@ class StatelessRegularTaskEngineService(manager: RegularTaskManager, performance
   extends RegularTaskEngineService(manager, performanceMetrics) {
   private val streamService = ConnectionRepository.getStreamService
 
-  val moduleEnvironmentManager = new ModuleEnvironmentManager(
+  val regularEnvironmentManager = new RegularEnvironmentManager(
     optionsSerializer.deserialize[Map[String, Any]](regularInstance.options),
     outputProducers,
     regularInstance.outputs
@@ -28,7 +28,7 @@ class StatelessRegularTaskEngineService(manager: RegularTaskManager, performance
     performanceMetrics
   )
 
-  val executor = manager.getExecutor(moduleEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
+  val executor = manager.getExecutor(regularEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
 
   override def doCheckpoint(): Unit = {}
 }

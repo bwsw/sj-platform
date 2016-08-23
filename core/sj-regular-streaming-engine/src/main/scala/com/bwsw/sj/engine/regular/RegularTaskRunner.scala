@@ -23,7 +23,6 @@ object RegularTaskRunner {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val threadPool = createThreadPool()
   private val executorService = new ExecutorCompletionService[Unit](threadPool)
-
   private val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(ModuleConstants.persistentBlockingQueue)
 
   private def createThreadPool() = {
@@ -51,7 +50,7 @@ object RegularTaskRunner {
 
       val regularTaskEngine: RegularTaskEngine = regularTaskEngineFactory.createRegularTaskEngine()
 
-      val regularTaskInputService: TaskInputService = regularTaskEngine.regularTaskInputService
+      val regularTaskInputService: TaskInputService = regularTaskEngine.taskInputService
 
       logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
 

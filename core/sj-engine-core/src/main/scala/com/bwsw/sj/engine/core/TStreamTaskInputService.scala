@@ -1,15 +1,14 @@
-package com.bwsw.sj.engine.regular.task.engine.input
+package com.bwsw.sj.engine.core
 
 import java.util.Date
 
 import com.bwsw.sj.common.DAL.model.TStreamSjStream
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.StreamConstants
-import com.bwsw.sj.engine.core.{ConsumerCallback, PersistentBlockingQueue}
 import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
-import com.bwsw.sj.engine.regular.task.RegularTaskManager
 import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
@@ -28,13 +27,13 @@ import org.slf4j.LoggerFactory
  * @author Kseniya Mikhaleva
  *
  */
-class TStreamTaskInputService(manager: RegularTaskManager,
-                                     blockingQueue: PersistentBlockingQueue,
-                                     checkpointGroup: CheckpointGroup)
+class TStreamTaskInputService(manager: TaskManager,
+                              blockingQueue: PersistentBlockingQueue,
+                              checkpointGroup: CheckpointGroup)
   extends TaskInputService {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val regularInstance = manager.getInstance.asInstanceOf[RegularInstance]
+  private val regularInstance = manager.instance.asInstanceOf[RegularInstance]
   private val consumers = createSubscribingConsumers()
 
   /**
@@ -56,11 +55,12 @@ class TStreamTaskInputService(manager: RegularTaskManager,
     logger.debug(s"Task: ${manager.taskName}. Start creating subscribing consumers\n")
     val inputs = manager.inputs
     val offset = regularInstance.startFrom
-    val callback = new ConsumerCallback[Array[Byte]](blockingQueue)
+    val callback = new ConsumerCallback(blockingQueue)
 
-    val consumers = inputs.filter(x => x._1.streamType == StreamConstants.tStreamType).map({
-      x => manager.createSubscribingConsumer(x._1.asInstanceOf[TStreamSjStream], x._2.toList, chooseOffset(offset), callback)
-    }).map(x => (x.name, x)).toMap
+    val consumers = inputs.filter(x => x._1.streamType == StreamConstants.tStreamType)
+      .map(x => (x._1.asInstanceOf[TStreamSjStream], x._2.toList))
+      .map(x => manager.createSubscribingConsumer(x._1, x._2, chooseOffset(offset), callback))
+      .map(x => (x.name, x)).toMap
     logger.debug(s"Task: ${manager.taskName}. Creation of subscribing consumers is finished\n")
 
     consumers

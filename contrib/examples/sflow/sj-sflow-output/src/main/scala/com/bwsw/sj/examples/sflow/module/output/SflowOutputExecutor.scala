@@ -24,7 +24,7 @@ class SflowOutputExecutor extends OutputStreamingExecutor {
    * @param envelope Input T-Stream envelope
    * @return List of output envelopes
    */
-  def onTransaction(envelope: TStreamEnvelope): List[OutputEnvelope] = {
+  def onMessage(envelope: TStreamEnvelope): List[OutputEnvelope] = {
     val list = envelope.data.map { bytes =>
       val data = new TrafficMetrics()
       val rawData = objectSerializer.deserialize(bytes).asInstanceOf[String].split(",")

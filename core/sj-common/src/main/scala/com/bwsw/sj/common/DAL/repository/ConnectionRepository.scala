@@ -23,8 +23,7 @@ object ConnectionRepository {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  private val serializer = new JsonSerializer()
-  serializer.setIgnoreUnknown(true)
+  private val serializer = new JsonSerializer(true)
 
   private lazy val mongoClient = new MongoClient(mongoHost, mongoPort)
 

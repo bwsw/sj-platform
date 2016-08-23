@@ -13,7 +13,7 @@ trait TimeCheckpointTaskEngine {
   private val logger = LoggerFactory.getLogger(this.getClass)
   protected val instance: Instance
   protected val manager: TaskManager
-  protected val moduleEnvironmentManager: EnvironmentManager
+  protected val environmentManager: EnvironmentManager
 
   private val checkpointTimer: Option[SjTimer] = createTimer()
   val isNotOnlyCustomCheckpoint = checkpointTimer.isDefined
@@ -35,7 +35,7 @@ trait TimeCheckpointTaskEngine {
   }
 
   def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean = {
-    isNotOnlyCustomCheckpoint && checkpointTimer.get.isTime || moduleEnvironmentManager.isCheckpointInitiated
+    isNotOnlyCustomCheckpoint && checkpointTimer.get.isTime || environmentManager.isCheckpointInitiated
   }
 
   def prepareForNextCheckpoint() = {

@@ -18,6 +18,11 @@ import org.slf4j.LoggerFactory
 
 class JsonSerializer extends Serializer {
 
+  def this(ignore: Boolean) = {
+    this()
+    this.setIgnoreUnknown(ignore)
+  }
+
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   val mapper = new ObjectMapper()

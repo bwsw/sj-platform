@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.regular.task.engine.input
 
 import com.bwsw.sj.common.StreamConstants
-import com.bwsw.sj.engine.core.PersistentBlockingQueue
+import com.bwsw.sj.engine.core.{TStreamTaskInputService, PersistentBlockingQueue}
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory

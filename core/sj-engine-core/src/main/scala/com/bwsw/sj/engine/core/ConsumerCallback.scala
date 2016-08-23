@@ -24,7 +24,7 @@ class ConsumerCallback(blockingQueue: PersistentBlockingQueue) extends Callback[
   override def onEvent(subscriber: SubscribingConsumer[Array[Byte]], partition: Int, transactionUuid: UUID): Unit = {
     logger.debug(s"onEvent handler was invoked by subscriber: ${subscriber.name}\n")
     val transaction = subscriber.getTransactionById(partition, transactionUuid).get
-    val stream = ConnectionRepository.getStreamService.get(subscriber.stream.getName)
+    val stream = ConnectionRepository.getStreamService.get(subscriber.stream.getName).get
 
     val envelope = new TStreamEnvelope()
     envelope.stream = stream.name

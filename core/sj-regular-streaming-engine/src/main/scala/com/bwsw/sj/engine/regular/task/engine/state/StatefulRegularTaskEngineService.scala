@@ -24,7 +24,7 @@ class StatefulRegularTaskEngineService(manager: RegularTaskManager, checkpointGr
   private var countOfCheckpoints = 1
   private val stateService = new RAMStateService(manager, checkpointGroup)
 
-  val moduleEnvironmentManager = new StatefulModuleEnvironmentManager(
+  val regularEnvironmentManager = new StatefulModuleEnvironmentManager(
     new StateStorage(stateService),
     optionsSerializer.deserialize[Map[String, Any]](regularInstance.options),
     outputProducers,
@@ -35,7 +35,7 @@ class StatefulRegularTaskEngineService(manager: RegularTaskManager, checkpointGr
     performanceMetrics
   )
 
-  val executor = manager.getExecutor(moduleEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
+  val executor = manager.getExecutor(regularEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
 
   /**
    * Does group checkpoint of t-streams state consumers/producers

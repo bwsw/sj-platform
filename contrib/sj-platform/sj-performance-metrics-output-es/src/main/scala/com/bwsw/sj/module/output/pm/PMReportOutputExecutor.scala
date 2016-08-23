@@ -22,7 +22,7 @@ class PMReportOutputExecutor extends OutputStreamingExecutor {
    * @param envelope Input T-Stream envelope
    * @return List of output envelopes
    */
-  def onTransaction(envelope: TStreamEnvelope): List[OutputEnvelope] = {
+  def onMessage(envelope: TStreamEnvelope): List[OutputEnvelope] = {
     val list = envelope.data.map { rawPM =>
       val performanceMetrics = objectSerializer.deserialize(rawPM).asInstanceOf[String]
       val data: PerformanceMetrics = jsonSerializer.deserialize[PerformanceMetrics](performanceMetrics)

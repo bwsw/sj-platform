@@ -3,7 +3,6 @@ package com.bwsw.sj.engine.regular.task.engine.input
 import java.util.Properties
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.common.ConfigConstants._
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.DAL.model.{KafkaService, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
@@ -38,8 +37,8 @@ import scala.collection.mutable
  * @param checkpointGroup Group of t-stream agents that have to make a checkpoint at the same time
  */
 class KafkaTaskInputService(manager: RegularTaskManager,
-                                   blockingQueue: PersistentBlockingQueue,
-                                   checkpointGroup: CheckpointGroup)
+                            blockingQueue: PersistentBlockingQueue,
+                            checkpointGroup: CheckpointGroup)
   extends TaskInputService {
 
   private val currentThread = Thread.currentThread()
@@ -61,10 +60,10 @@ class KafkaTaskInputService(manager: RegularTaskManager,
     kafkaInputs.flatMap(_._1.service.asInstanceOf[KafkaService].provider.hosts).toList,
     chooseOffset()
   )
-  
+
   private def getKafkaInputs(): mutable.Map[SjStream, Array[Int]] = {
-    manager.inputs
-      .filter(x => x._1.streamType == StreamConstants.kafkaStreamType)  }
+    manager.inputs.filter(x => x._1.streamType == StreamConstants.kafkaStreamType)
+  }
 
   /**
    * Creates SJStream is responsible for committing the offsets of last messages
@@ -112,7 +111,7 @@ class KafkaTaskInputService(manager: RegularTaskManager,
    * @param offset Default policy for kafka consumer (earliest/latest)
    * @return Kafka consumer subscribed to topics
    */
-  private def createSubscribingKafkaConsumer(topics: List[(String, List[Int])], hosts: List[String], offset: String): KafkaConsumer[Array[Byte], Array[Byte]] = {
+  private def createSubscribingKafkaConsumer(topics: List[(String, List[Int])], hosts: List[String], offset: String) = {
     logger.debug(s"Task name: ${manager.taskName}. Create kafka consumer for topics (with their partitions): " +
       s"${topics.map(x => s"topic name: ${x._1}, " + s"partitions: ${x._2.mkString(",")}").mkString(",")}\n")
     val consumer: KafkaConsumer[Array[Byte], Array[Byte]] = createKafkaConsumer(hosts, offset)
@@ -141,9 +140,9 @@ class KafkaTaskInputService(manager: RegularTaskManager,
   }
 
   private def assignKafkaConsumerOnTopics(consumer: KafkaConsumer[Array[Byte], Array[Byte]], topics: List[(String, List[Int])]) = {
-    val topicPartitions = topics.flatMap(x => {
-      (x._2.head to x._2.tail.head).map(y => new TopicPartition(x._1, y))
-    }).asJava
+    val topicPartitions = topics
+      .flatMap(x => (x._2.head to x._2.tail.head)
+      .map(y => new TopicPartition(x._1, y))).asJava
 
     consumer.assign(topicPartitions)
   }
@@ -183,22 +182,20 @@ class KafkaTaskInputService(manager: RegularTaskManager,
       s"Run a kafka consumer for regular task in a separate thread of execution service\n")
 
     val envelopeSerializer = new JsonSerializer()
-    val streamNameToTags = kafkaInputs.map(x => (x._1.name, x._1.tags)).toMap
+    val streamNamesToTags = kafkaInputs.map(x => (x._1.name, x._1.tags)).toMap
 
     while (true) {
       logger.debug(s"Task: ${manager.taskName}. Waiting for records that consumed from kafka for $kafkaSubscriberTimeout milliseconds\n")
       val records = kafkaConsumer.poll(kafkaSubscriberTimeout)
       records.asScala.foreach(x => {
+        val envelope = new KafkaEnvelope()
+        envelope.stream = x.topic()
+        envelope.partition = x.partition()
+        envelope.data = x.value()
+        envelope.offset = x.offset()
+        envelope.tags = streamNamesToTags(x.topic())
 
-        blockingQueue.put(envelopeSerializer.serialize({
-          val envelope = new KafkaEnvelope()
-          envelope.stream = x.topic()
-          envelope.partition = x.partition()
-          envelope.data = x.value()
-          envelope.offset = x.offset()
-          envelope.tags = streamNameToTags(x.topic())
-          envelope
-        }))
+        blockingQueue.put(envelopeSerializer.serialize(envelope))
       })
     }
   }
@@ -217,7 +214,8 @@ class KafkaTaskInputService(manager: RegularTaskManager,
 
   override def doCheckpoint() = {
     logger.debug(s"Task: ${manager.taskName}. Save kafka offsets for each kafka input\n")
-    offsetProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
+    offsetProducer
+      .newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
       .send(offsetSerializer.serialize(kafkaOffsetsStorage))
   }
 }

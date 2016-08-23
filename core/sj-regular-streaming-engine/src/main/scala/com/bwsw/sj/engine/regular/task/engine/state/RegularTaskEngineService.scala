@@ -3,7 +3,7 @@ package com.bwsw.sj.engine.regular.task.engine.state
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.utils.SjTimer
-import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
+import com.bwsw.sj.engine.core.environment.RegularEnvironmentManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
@@ -27,7 +27,7 @@ abstract class RegularTaskEngineService(manager: RegularTaskManager, performance
   val moduleTimer = new SjTimer()
   val outputTags = manager.outputTags
 
-  val moduleEnvironmentManager: ModuleEnvironmentManager
+  val regularEnvironmentManager: RegularEnvironmentManager
   val executor: RegularStreamingExecutor
 
   def doCheckpoint(): Unit

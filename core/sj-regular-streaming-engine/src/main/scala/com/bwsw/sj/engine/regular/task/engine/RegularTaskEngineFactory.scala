@@ -26,7 +26,7 @@ class RegularTaskEngineFactory(manager: RegularTaskManager,
 
   /**
    * Creates RegularTaskEngine is in charge of a basic execution logic of task of regular module
-   * @return Engine of input task
+   * @return Engine of regular task
    */
   def createRegularTaskEngine(): RegularTaskEngine = {
     manager.instance.checkpointMode match {

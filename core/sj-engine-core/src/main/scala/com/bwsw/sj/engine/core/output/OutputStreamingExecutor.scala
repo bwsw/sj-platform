@@ -9,12 +9,6 @@ import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
   * @author Kseniya Tomskikh
   */
 trait OutputStreamingExecutor extends StreamingExecutor {
-
-  /**
-    *
-    * @param envelope
-    * @return
-    */
-  def onTransaction(envelope: TStreamEnvelope): List[OutputEnvelope]
-
+  
+  def onMessage(envelope: TStreamEnvelope): List[OutputEnvelope]
 }

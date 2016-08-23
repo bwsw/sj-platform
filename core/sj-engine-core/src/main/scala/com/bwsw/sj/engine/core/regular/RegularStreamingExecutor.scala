@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.core.regular
 
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.engine.core.entities.Envelope
-import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
+import com.bwsw.sj.engine.core.environment.RegularEnvironmentManager
 
 /**
  * Class that contains an execution logic of regular module
@@ -11,7 +11,7 @@ import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
  * @author Kseniya Mikhaleva
  */
 
-class RegularStreamingExecutor(manager: ModuleEnvironmentManager) extends StreamingExecutor {
+class RegularStreamingExecutor(manager: RegularEnvironmentManager) extends StreamingExecutor {
   /**
    * Will be invoked only once at the beginning of launch of module
    */

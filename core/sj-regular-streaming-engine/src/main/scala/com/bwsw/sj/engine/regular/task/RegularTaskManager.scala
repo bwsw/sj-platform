@@ -1,17 +1,15 @@
 package com.bwsw.sj.engine.regular.task
 
 import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.common.engine.StreamingExecutor
-import com.bwsw.sj.engine.core.environment.{EnvironmentManager, ModuleEnvironmentManager, ModuleOutput}
+import com.bwsw.sj.engine.core.environment.{EnvironmentManager, RegularEnvironmentManager, ModuleOutput}
 import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.utils.EngineUtils
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
 
-import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 /**
@@ -21,13 +19,6 @@ import scala.collection.mutable
  * @author Kseniya Mikhaleva
  */
 class RegularTaskManager() extends TaskManager {
-
-  val inputs = instance.executionPlan.tasks.get(taskName).inputs.asScala
-    .map(x => {
-    val service = ConnectionRepository.getStreamService
-
-    (service.get(x._1).get, x._2)
-  })
 
   val outputTags = createOutputTags()
 
@@ -42,17 +33,17 @@ class RegularTaskManager() extends TaskManager {
    */
   def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = {
     logger.debug(s"Task: $taskName. Start loading of executor class from module jar\n")
-    val moduleJar = getModuleJar
-    val classLoader = getClassLoader(moduleJar.getAbsolutePath)
-    val executor = classLoader.loadClass(fileMetadata.specification.executorClass)
-      .getConstructor(classOf[ModuleEnvironmentManager])
-      .newInstance(environmentManager).asInstanceOf[RegularStreamingExecutor]
+    val executor = moduleClassLoader
+      .loadClass(executorClassName)
+      .getConstructor(classOf[RegularEnvironmentManager])
+      .newInstance(environmentManager)
+      .asInstanceOf[RegularStreamingExecutor]
     logger.debug(s"Task: $taskName. Create instance of executor class\n")
 
     executor
   }
 
-  def getExecutor: StreamingExecutor = ???
+  def getExecutor: StreamingExecutor = ??? //todo maybe needless
 
   private def createOutputTags() = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Get tags for each output stream\n")

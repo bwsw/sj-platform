@@ -2,12 +2,12 @@ package com.bwsw.sj.stubs.module.regular_streaming
 
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.engine.core.entities.{TStreamEnvelope, Envelope, KafkaEnvelope}
-import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
+import com.bwsw.sj.engine.core.environment.RegularEnvironmentManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.state.StateStorage
 
 
-class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor(manager) {
+class Executor(manager: RegularEnvironmentManager) extends RegularStreamingExecutor(manager) {
 
   val objectSerializer = new ObjectSerializer()
   val state: StateStorage = manager.getState
