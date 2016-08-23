@@ -16,7 +16,7 @@ import com.bwsw.sj.common.utils.CassandraFactory
 import com.bwsw.sj.common.{ConfigConstants, StreamConstants}
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.consumer.{Consumer, Options}
-import com.bwsw.tstreams.agents.producer._
+import com.bwsw.tstreams.agents.producer
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.producer.transport.impl.TcpTransport
 import com.bwsw.tstreams.env.TSF_Dictionary
@@ -346,12 +346,13 @@ object DataFactory {
 
   def createData(countTxns: Int, countElements: Int, streamService: GenericMongoService[SjStream], _type: String, count: Int) = {
     var number = 0
+    val policy = producer.NewTransactionProducerPolicy.ErrorIfOpened
 
     def createTstreamData(countTxns: Int, countElements: Int, streamService: GenericMongoService[SjStream], suffix: String) = {
       val producer = createProducer(streamService.get("test-input-tstream" + suffix).get)
       val s = System.nanoTime
       (0 until countTxns) foreach { (x: Int) =>
-        val txn = producer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
+        val txn = producer.newTransaction(policy)
         (0 until countElements) foreach { (y: Int) =>
           number += 1
           txn.send(objectSerializer.serialize(number.asInstanceOf[Object]))
@@ -416,7 +417,7 @@ object DataFactory {
 
     val timeUuidGenerator = new LocalTimeUUIDGenerator
 
-    val options = new ConsumerOptions[Array[Byte]](
+    val options = new Options[Array[Byte]](
       transactionsPreload = 10,
       dataPreload = 7,
       converter,
@@ -458,7 +459,7 @@ object DataFactory {
     val tStream =
       BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
 
-    val coordinationSettings = new CoordinationOptions(
+    val coordinationSettings = new producer.CoordinationOptions(
       zkHosts = zookeeperHosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList,
       zkRootPath = "/unit",
       zkSessionTimeout = 7000,
@@ -470,7 +471,7 @@ object DataFactory {
 
     val timeUuidGenerator = new LocalTimeUUIDGenerator
 
-    val options = new Options[Array[Byte]](
+    val options = new producer.Options[Array[Byte]](
       transactionTTL = 6,
       transactionKeepAliveInterval = 2,
       roundRobinPolicy,
@@ -479,7 +480,7 @@ object DataFactory {
       coordinationSettings,
       converter)
 
-    new Producer[Array[Byte]]("producer for " + tStream.name, tStream, options)
+    new producer.Producer[Array[Byte]]("producer for " + tStream.name, tStream, options)
   }
 
   private def createConsumer(streamName: String, streamService: GenericMongoService[SjStream], address: String) = {
@@ -494,7 +495,7 @@ object DataFactory {
 
     val timeUuidGenerator = new LocalTimeUUIDGenerator
 
-    val options = new ConsumerOptions[Array[Byte]](
+    val options = new Options[Array[Byte]](
       transactionsPreload = 10,
       dataPreload = 7,
       converter,

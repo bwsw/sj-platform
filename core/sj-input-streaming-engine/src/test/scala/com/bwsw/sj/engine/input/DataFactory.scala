@@ -12,14 +12,14 @@ import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask, Instance}
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.common.utils.CassandraFactory
-import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
-import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerOptions}
+import com.bwsw.tstreams.agents.consumer.Offset.Oldest
+import com.bwsw.tstreams.agents.consumer.{Consumer, Options}
 
 import com.bwsw.tstreams.converter.IConverter
 
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 
-import com.bwsw.tstreams.policy.RoundRobinPolicy
+import com.bwsw.tstreams.common.RoundRobinPolicy
 import com.bwsw.tstreams.services.BasicStreamService
 import com.bwsw.tstreams.streams.TStream
 
@@ -244,7 +244,7 @@ object DataFactory {
 
     val timeUuidGenerator = new LocalTimeUUIDGenerator
 
-    val options = new ConsumerOptions[Array[Byte]](
+    val options = new Options[Array[Byte]](
       transactionsPreload = 10,
       dataPreload = 7,
       converter,

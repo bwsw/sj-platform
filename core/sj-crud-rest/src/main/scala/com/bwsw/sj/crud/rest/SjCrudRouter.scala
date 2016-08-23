@@ -4,10 +4,10 @@ import java.text.MessageFormat
 
 import akka.http.scaladsl.model.EntityStreamSizeException
 import akka.http.scaladsl.server.{Directives, ExceptionHandler}
-import com.bwsw.sj.crud.rest.exceptions._
 import com.bwsw.sj.crud.rest.api._
 import com.bwsw.sj.crud.rest.cors.CorsSupport
-import com.bwsw.sj.crud.rest.entities.{NotFoundRestResponse, BadRequestRestResponse, InternalServerErrorRestResponse}
+import com.bwsw.sj.crud.rest.entities.{InternalServerErrorRestResponse, NotFoundRestResponse}
+import com.bwsw.sj.crud.rest.exceptions._
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
 import org.everit.json.schema.ValidationException
@@ -36,9 +36,6 @@ with SjConfigSettingsApi with CompletionUtils {
       complete(restResponseToHttpResponse(response))
     case ModuleJarNotFound(msg, key) =>
       val response = NotFoundRestResponse(Map("message" -> msg, "key" -> key))
-      complete(restResponseToHttpResponse(response))
-    case BadRequestWithKey(msg, key) =>
-      val response = BadRequestRestResponse(Map("message" -> msg, "key" -> key))
       complete(restResponseToHttpResponse(response))
     case ex: ValidationException =>
       val response = InternalServerErrorRestResponse(Map("message" -> messages.getString("rest.errors.invalid.specification")))

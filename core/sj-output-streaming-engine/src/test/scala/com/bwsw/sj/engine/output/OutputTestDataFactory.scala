@@ -15,7 +15,7 @@ import com.bwsw.tstreams.data.aerospike
 import com.bwsw.tstreams.env.TSF_Dictionary
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
-import com.bwsw.tstreams.policy.RoundRobinPolicy
+import com.bwsw.tstreams.common.RoundRobinPolicy
 import com.bwsw.tstreams.services.BasicStreamService
 import com.bwsw.tstreams.streams.TStream
 
