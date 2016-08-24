@@ -86,7 +86,8 @@ class OutputStreamingValidator extends StreamingModuleValidator {
 
     var validatedInstance: Option[Instance] = None
     if (inputStream.isDefined && outputStream.isDefined) {
-      val allStreams = Array(inputStream.get, outputStream.get)
+      val input = inputStream.get
+      val allStreams = Array(input, outputStream.get)
 
       val service = allStreams.head.service
       if (!service.isInstanceOf[TStreamService]) {
@@ -95,9 +96,9 @@ class OutputStreamingValidator extends StreamingModuleValidator {
         checkTStreams(errors, allStreams.filter(s => s.streamType.equals(tStreamType)).map(_.asInstanceOf[TStreamSjStream]).toBuffer)
       }
 
-      parameters.parallelism = checkParallelism(parameters.parallelism, inputStream.asInstanceOf[TStreamSjStream].partitions, errors)
+      parameters.parallelism = checkParallelism(parameters.parallelism, input.asInstanceOf[TStreamSjStream].partitions, errors)
 
-      val partitions = getPartitionForStreams(Array(inputStream.get))
+      val partitions = getPartitionForStreams(Array(input))
       parameters.inputs = Array(parameters.asInstanceOf[OutputInstanceMetadata].input)
       validatedInstance = createInstance(parameters, partitions, allStreams.filter(s => s.streamType.equals(tStreamType)).toSet)
     }
