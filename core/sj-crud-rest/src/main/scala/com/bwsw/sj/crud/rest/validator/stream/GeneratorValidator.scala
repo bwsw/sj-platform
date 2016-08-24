@@ -78,17 +78,17 @@ object GeneratorValidator {
         else {
           //service
           if (Option(generatorData.service).isDefined)
-            errors += s"Generator 'service' must be null for 'local' generator-type"
+            errors += s"Generator 'service' should not exist for 'local' generator-type"
 
           //instacneCount
           if (generatorData.instanceCount > 0)
-            errors += s"Generator 'instance-count' must be null for 'local' generator-type"
+            errors += s"Generator 'instance-count' should not exist for 'local' generator-type"
         }
     }
 
     if (errors.isEmpty) {
       generator.generatorType = generatorData.generatorType
-      generator.service = serviceObj.get
+      if (serviceObj.isDefined) generator.service = serviceObj.get
       generator.instanceCount = generatorData.instanceCount
     }
     errors

@@ -171,7 +171,14 @@ object StreamValidator extends ValidationUtils {
       case _ =>
     }
 
+    // Fulfill common fields
     if (errors.isEmpty) {
+      stream.name = initialData.name
+      stream.description = initialData.description
+      stream.service = serviceObj.get
+      stream.tags = initialData.tags
+      stream.streamType = initialData.streamType
+
       stream match {
         case s: TStreamSjStream =>
           val streamCheckResult = StreamUtil.checkAndCreateTStream(s, initialData.force)
@@ -207,15 +214,6 @@ object StreamValidator extends ValidationUtils {
             case _ =>
           }
       }
-    }
-
-    // Fulfill common fields
-    if (errors.isEmpty) {
-      stream.name = initialData.name
-      stream.description = initialData.description
-      stream.service = serviceObj.get
-      stream.tags = initialData.tags
-      stream.streamType = initialData.streamType
     }
 
     errors
