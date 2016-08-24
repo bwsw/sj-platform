@@ -17,6 +17,7 @@ import com.bwsw.tstreams.agents.consumer.subscriber.Callback
 import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
 import com.bwsw.tstreams.services.BasicStreamService
 import org.slf4j.LoggerFactory
+import scala.collection.mutable
 
 import scala.collection.JavaConverters._
 
@@ -48,7 +49,7 @@ abstract class TaskManager() {
   protected val moduleClassLoader = createClassLoader()
 
   val converter = new ArrayByteConverter
-  val inputs = getInputs()
+  lazy val inputs = getInputs()
   lazy val outputProducers = createOutputProducers()
 
   private def getInstance() = {
@@ -143,9 +144,8 @@ abstract class TaskManager() {
 
   private def getInputs() = {
     val service = ConnectionRepository.getStreamService
-
-    instance.executionPlan.tasks.get(taskName).inputs.asScala
-      .map(x => (service.get(x._1).get, x._2))
+      instance.executionPlan.tasks.get(taskName).inputs.asScala
+        .map(x => (service.get(x._1).get, x._2))
   }
 
   /**
@@ -158,7 +158,7 @@ abstract class TaskManager() {
       s"Create the t-stream producers for each output stream\n")
 
     instance.outputs
-      .map(x => (x, ConnectionRepository.getStreamService.get(x)))
+      .map(x => (x, ConnectionRepository.getStreamService.get(x).get))
       .map(x => (x._1, createProducer(x._2.asInstanceOf[TStreamSjStream]))).toMap
   }
 
