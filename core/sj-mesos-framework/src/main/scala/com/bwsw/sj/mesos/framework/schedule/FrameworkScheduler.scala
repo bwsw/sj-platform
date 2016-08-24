@@ -152,7 +152,7 @@ class FrameworkScheduler extends Scheduler {
       var availablePorts = ports.getRanges.getRangeList.asScala.map(_.getBegin.toString)
       if (instance.get.moduleType.equals(ModuleConstants.inputStreamingType)) {
         taskPort = availablePorts.head; availablePorts = availablePorts.tail
-        val inputInstance = instance.asInstanceOf[InputInstance]
+        val inputInstance = instance.get.asInstanceOf[InputInstance]
         inputInstance.tasks.put(currTask, new InputTask(currentOffer._1.getUrl.getAddress.getIp, taskPort.toInt))
         ConnectionRepository.getInstanceService.save(instance.get)
       }
