@@ -44,6 +44,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"output-task-${manager.taskName}-engine")
   protected val logger = LoggerFactory.getLogger(this.getClass)
+  private val serializer = new JsonSerializer()
   protected val checkpointGroup = new CheckpointGroup()
   protected val instance = manager.instance.asInstanceOf[OutputInstance]
   private val outputStream = getOutput()
@@ -54,7 +55,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private val (client, esService) = openDbConnection(outputStream)
   private var wasFirstCheckpoint = false
   private val outputEnvelopeSerializer = new ObjectSerializer()
-  private val serializer = new JsonSerializer()
+
 
   private def getOutput() = {
     val streamService = ConnectionRepository.getStreamService
