@@ -63,11 +63,21 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   }
 
   private def createModuleEnvironmentManager() = {
+    def getOptions() = {
+      if (instance.options != null) {
+        serializer.deserialize[Map[String, Any]](instance.options)
+      } else {
+        Map[String, Any]()
+      }
+    }
+
     val streamService = ConnectionRepository.getStreamService
     val outputs = instance.outputs
       .flatMap(x => streamService.get(x))
 
-    new OutputEnvironmentManager(serializer.deserialize[Map[String, Any]](instance.options), outputs)
+    val options = getOptions()
+
+    new OutputEnvironmentManager(options, outputs)
   }
 
   /**
