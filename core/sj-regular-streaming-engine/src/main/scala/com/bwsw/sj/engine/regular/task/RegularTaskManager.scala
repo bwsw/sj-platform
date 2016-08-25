@@ -3,9 +3,8 @@ package com.bwsw.sj.engine.regular.task
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.common.engine.StreamingExecutor
-import com.bwsw.sj.engine.core.environment.{EnvironmentManager, RegularEnvironmentManager, ModuleOutput}
+import com.bwsw.sj.engine.core.environment.{RegularEnvironmentManager, EnvironmentManager, ModuleOutput}
 import com.bwsw.sj.engine.core.managment.TaskManager
-import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.utils.EngineUtils
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
@@ -24,7 +23,8 @@ class RegularTaskManager() extends TaskManager {
 
   assert(agentsPorts.length >=
     (inputs.count(x => x._1.streamType == StreamConstants.tStreamType) + instance.outputs.length + 3),
-    "Not enough ports for t-stream consumers/producers ")
+    "Not enough ports for t-stream consumers/producers." +
+      s"${inputs.count(x => x._1.streamType == StreamConstants.tStreamType) + instance.outputs.length + 3} ports are required")
 
   /**
    * Returns instance of executor of module
@@ -37,7 +37,7 @@ class RegularTaskManager() extends TaskManager {
       .loadClass(executorClassName)
       .getConstructor(classOf[RegularEnvironmentManager])
       .newInstance(environmentManager)
-      .asInstanceOf[RegularStreamingExecutor]
+      .asInstanceOf[StreamingExecutor]
     logger.debug(s"Task: $taskName. Create instance of executor class\n")
 
     executor

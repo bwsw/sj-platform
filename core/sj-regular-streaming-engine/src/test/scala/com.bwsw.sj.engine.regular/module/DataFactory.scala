@@ -12,16 +12,14 @@ import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, Instance, RegularInst
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.utils.CassandraFactory
-
 import com.bwsw.sj.common.{ConfigConstants, StreamConstants}
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.consumer.{Consumer, Options}
 import com.bwsw.tstreams.agents.producer
+import com.bwsw.tstreams.common.RoundRobinPolicy
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.producer.transport.impl.TcpTransport
-import com.bwsw.tstreams.env.TSF_Dictionary
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
-import com.bwsw.tstreams.common.RoundRobinPolicy
 import com.bwsw.tstreams.services.BasicStreamService
 import kafka.admin.AdminUtils
 import kafka.utils.ZkUtils
@@ -306,7 +304,7 @@ object DataFactory {
     instance.executionPlan = new ExecutionPlan(Map((instanceName + "-task0", task), (instanceName + "-task1", task)).asJava)
     instance.engine = "com.bwsw.regular.streaming.engine-1.0"
     instance.eventWaitTime = 10
-    instance.coordinationService = serviceManager.get("zookeeper-test-service").asInstanceOf[ZKService]
+    instance.coordinationService = serviceManager.get("zookeeper-test-service").get.asInstanceOf[ZKService]
 
     instanceService.save(instance)
   }
@@ -465,7 +463,7 @@ object DataFactory {
       zkSessionTimeout = 7000,
       zkConnectionTimeout = 7000,
       isLowPriorityToBeMaster = false,
-      transport = new TcpTransport("localhost:8030", TSF_Dictionary.Producer.TRANSPORT_TIMEOUT.toInt * 1000))
+      transport = new TcpTransport("localhost:8030", 60 * 1000))
 
     val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
 

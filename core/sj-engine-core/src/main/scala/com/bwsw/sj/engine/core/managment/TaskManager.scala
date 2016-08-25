@@ -17,7 +17,6 @@ import com.bwsw.tstreams.agents.consumer.subscriber.Callback
 import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
 import com.bwsw.tstreams.services.BasicStreamService
 import org.slf4j.LoggerFactory
-import scala.collection.mutable
 
 import scala.collection.JavaConverters._
 
@@ -25,6 +24,12 @@ abstract class TaskManager() {
   protected val logger = LoggerFactory.getLogger(this.getClass)
 
   val streamDAO = ConnectionRepository.getStreamService
+
+  assert(System.getenv("INSTANCE_NAME") != null &&
+    System.getenv("TASK_NAME") != null &&
+    System.getenv("AGENTS_HOST") != null &&
+    System.getenv("AGENTS_PORTS") != null,
+    "No environment variables: INSTANCE_NAME, TASK_NAME, AGENTS_HOST, AGENTS_PORTS")
 
   val instanceName = System.getenv("INSTANCE_NAME")
   val agentsHost = System.getenv("AGENTS_HOST")

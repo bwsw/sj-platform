@@ -4,7 +4,6 @@ import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.engine.core.entities.OutputEntity
 import com.bwsw.sj.engine.core.environment.EnvironmentManager
 import com.bwsw.sj.engine.core.managment.TaskManager
-import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 
 /**
  * Task manager for working with streams of output-streaming module
@@ -32,7 +31,7 @@ class OutputTaskManager() extends TaskManager {
     val executor = moduleClassLoader
       .loadClass(executorClassName)
       .newInstance()
-      .asInstanceOf[OutputStreamingExecutor]
+      .asInstanceOf[StreamingExecutor]
     logger.debug(s"Task: $taskName. Create instance of executor class\n")
 
     executor

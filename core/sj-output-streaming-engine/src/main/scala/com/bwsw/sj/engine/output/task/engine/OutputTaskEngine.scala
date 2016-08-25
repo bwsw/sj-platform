@@ -5,9 +5,10 @@ import java.util.concurrent.Callable
 import java.util.{Calendar, UUID}
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.common.DAL.model.module.RegularInstance
+import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.DAL.model.{ESService, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.ModuleConstants
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
@@ -44,7 +45,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   currentThread.setName(s"output-task-${manager.taskName}-engine")
   protected val logger = LoggerFactory.getLogger(this.getClass)
   protected val checkpointGroup = new CheckpointGroup()
-  protected val instance = manager.instance.asInstanceOf[RegularInstance]
+  protected val instance = manager.instance.asInstanceOf[OutputInstance]
   private val outputStream = getOutput()
   protected val environmentManager = createModuleEnvironmentManager()
   protected val executor = manager.getExecutor(environmentManager).asInstanceOf[OutputStreamingExecutor]
@@ -89,12 +90,12 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
   /**
    * Check whether a group checkpoint of t-streams consumers/producers have to be done or not
-   * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside regular module (not on the schedule) or not.
+   * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside output module (not on the schedule) or not.
    */
   protected def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean
 
   /**
-   * It is in charge of running a basic execution logic of regular task engine
+   * It is in charge of running a basic execution logic of output task engine
    */
   override def call(): Unit = {
     val envelopeSerializer = new JsonSerializer(true)
@@ -104,10 +105,10 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     createEsStream(esService.index, outputStream.name, outputModuleEntity, client)
 
     while (true) {
-      val maybeEnvelope = blockingQueue.get(instance.eventWaitTime)
+      val maybeEnvelope = blockingQueue.get(ModuleConstants.eventWaitTimeout) //todo maybe add to OutputInstance eventWaitTime parameter so PM will change too
 
       if (maybeEnvelope == null) {
-        logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${instance.eventWaitTime} went out and nothing was received\n")
+        logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${ModuleConstants.eventWaitTimeout} went out and nothing was received\n")
       } else {
         val envelope = envelopeSerializer.deserialize[Envelope](maybeEnvelope).asInstanceOf[TStreamEnvelope]
         afterReceivingEnvelope()
