@@ -245,7 +245,7 @@ object DataFactory {
   }
 
   private def createKafkaStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int) = {
-    val kService = serviceManager.get("kafka-test-service").asInstanceOf[KafkaService]
+    val kService = serviceManager.get("kafka-test-service").get.asInstanceOf[KafkaService]
     val replicationFactor = 1
 
     val s1 = new KafkaSjStream("kafka-input1", "kafka-input1", partitions, kService, StreamConstants.kafkaStreamType, Array("kafka input"), replicationFactor)

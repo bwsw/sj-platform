@@ -2,7 +2,6 @@ package com.bwsw.common.file.utils
 
 import java.io.{File, FileNotFoundException}
 import java.nio.file.FileAlreadyExistsException
-import javafx.fxml.LoadException
 
 import com.mongodb.casbah.MongoDB
 import com.mongodb.casbah.gridfs.Imports._
@@ -54,7 +53,7 @@ class MongoFileStorage(mongoDB: MongoDB) extends FileStorage {
       if (storageFile.get.writeTo(localFile) > 0) localFile
       else {
         logger.error(s"MongoFileStorage.get file: '$fileName' failed")
-        throw new LoadException(s"MongoFileStorage.get $fileName failed")
+        throw new Exception(s"MongoFileStorage.get $fileName failed")
       }
     } else {
       logger.error(s"File with name: '$fileName' doesn't exist in a mongo storage")
