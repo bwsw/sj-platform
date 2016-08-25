@@ -43,8 +43,6 @@ class RegularTaskManager() extends TaskManager {
     executor
   }
 
-  def getExecutor: StreamingExecutor = ??? //todo maybe needless
-
   private def createOutputTags() = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Get tags for each output stream\n")
     mutable.Map[String, (String, ModuleOutput)]()

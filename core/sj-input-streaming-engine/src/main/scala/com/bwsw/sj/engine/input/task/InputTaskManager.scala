@@ -43,11 +43,4 @@ class InputTaskManager() extends TaskManager {
 
     executor
   }
-
-  /**
-    * Returns an instance of executor of module
-    *
-    * @return An instance of executor of module
-    */
-  def getExecutor: StreamingExecutor = ??? //todo maybe needless
 }

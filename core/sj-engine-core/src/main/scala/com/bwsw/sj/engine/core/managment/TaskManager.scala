@@ -267,9 +267,4 @@ abstract class TaskManager() {
    * @return An instance of executor of module that has got an environment manager
    */
   def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor
-
-  /**
-   * @return An instance of executor of module that hasn't got an environment manager
-   */
-  def getExecutor(): StreamingExecutor //todo maybe needless
 }

@@ -242,7 +242,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
    * @param envelope Output envelope for writing to sql database
    */
   private def writeToJdbc(envelope: OutputEnvelope) = {
-    //todo
+    //todo writing to JDBC
   }
 
   /**

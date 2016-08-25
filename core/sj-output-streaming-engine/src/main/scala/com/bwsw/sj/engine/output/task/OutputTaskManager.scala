@@ -18,14 +18,7 @@ class OutputTaskManager() extends TaskManager {
    *
    * @return An instance of executor of module
    */
-  def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = getExecutor()
-
-  /**
-   * Returns an instance of executor of module
-   *
-   * @return An instance of executor of module
-   */
-  def getExecutor(): StreamingExecutor = {
+  def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = {
     logger.debug(s"Task: $taskName. Start loading of executor class from module jar\n")
     logger.debug(s"Task: $taskName. Create instance of executor class\n")
     val executor = moduleClassLoader
@@ -35,7 +28,7 @@ class OutputTaskManager() extends TaskManager {
     logger.debug(s"Task: $taskName. Create instance of executor class\n")
 
     executor
-  } //todo maybe needless
+  }
 
   /**
    * Getting instance of entity object from output module jar
