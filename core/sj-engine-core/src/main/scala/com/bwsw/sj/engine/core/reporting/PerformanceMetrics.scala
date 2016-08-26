@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.core.reporting
 
 /**
  * Class represents a set of metrics that characterize performance of module
- * Created: 07/06/2016
+ *
  * @author Kseniya Mikhaleva
  */
 

@@ -2,7 +2,7 @@ package com.bwsw.sj.common.DAL.model.module
 
 /**
   * Entity for task of tasks of input instance
-  * Created: 16/07/2016
+  *
   *
   * @author Kseniya Tomskikh
   */

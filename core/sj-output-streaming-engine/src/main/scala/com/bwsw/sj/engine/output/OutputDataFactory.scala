@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 
 /**
  * Data factory of output streaming engine
- * Created: 26/05/2016
+ *
  *
  * @author Kseniya Tomskikh
  */

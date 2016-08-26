@@ -4,7 +4,6 @@ import com.bwsw.sj.common.utils.ConfigUtils
 
 /**
   * Options for TcpClient
-  * Created: 18/04/2016
   *
   * @author Kseniya Tomskikh
   */

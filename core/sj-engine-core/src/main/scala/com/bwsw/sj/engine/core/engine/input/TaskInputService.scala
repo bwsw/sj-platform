@@ -9,7 +9,7 @@ import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
  * Class is responsible for handling an input streams of specific type(types),
  * i.e. for consuming, processing and sending the input envelopes
  *
- * Created: 27/04/2016
+ *
  * @author Kseniya Mikhaleva
  */
 trait TaskInputService extends Callable[Unit] {

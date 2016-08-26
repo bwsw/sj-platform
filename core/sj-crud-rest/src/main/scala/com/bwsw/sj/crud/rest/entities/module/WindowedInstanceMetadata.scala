@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
   * Protocol entity for instance of windowed module
-  * Created: 29/04/2016
+  *
   *
   * @author Kseniya Tomskikh
   */

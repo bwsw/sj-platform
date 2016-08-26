@@ -15,7 +15,7 @@ import scala.collection.convert.decorateAsScala._
 
 /**
  * Object is responsible for running a task of job that launches input module
- * Created: 07/07/2016
+ *
  *
  * @author Kseniya Mikhaleva
  */

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
  * Entity for preview short data of instance
- * Created: 13/04/2016
+ *
  *
  * @author Kseniya Tomskikh
  */

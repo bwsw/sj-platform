@@ -9,6 +9,8 @@ import com.bwsw.sj.engine.regular.task.RegularTaskManager
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
 
+import scala.collection.Map
+
 /**
  * Class is in charge of creating a specific ModuleEnvironmentManager (and executor)
  * depending on an instance parameter 'state-management' and performing the appropriate actions related with checkpoint
@@ -19,8 +21,7 @@ import org.slf4j.LoggerFactory
 abstract class RegularTaskEngineService(manager: RegularTaskManager, performanceMetrics: RegularStreamingPerformanceMetrics) {
 
   protected val logger = LoggerFactory.getLogger(this.getClass)
-  protected val optionsSerializer = new JsonSerializer()
-  optionsSerializer.setIgnoreUnknown(true)
+  private val optionsSerializer = new JsonSerializer(true)
 
   protected val regularInstance = manager.instance.asInstanceOf[RegularInstance]
   protected val outputProducers = manager.outputProducers
@@ -31,4 +32,12 @@ abstract class RegularTaskEngineService(manager: RegularTaskManager, performance
   val executor: RegularStreamingExecutor
 
   def doCheckpoint(): Unit
+
+  protected def getOptions() = {
+    if (regularInstance.options != null) {
+      optionsSerializer.deserialize[Map[String, Any]](regularInstance.options)
+    } else {
+      Map[String, Any]()
+    } //todo remake this (or maybe remove) after completing SJ-2257
+  }
 }

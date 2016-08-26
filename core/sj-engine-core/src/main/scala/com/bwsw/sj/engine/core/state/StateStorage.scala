@@ -3,7 +3,7 @@ package com.bwsw.sj.engine.core.state
 /**
  * Class representing storage of state of module that can be used only in a stateful module.
  * State can be used to keeping some global module variables related to processing
- * Created: 19/04/2016
+ *
  * @author Kseniya Mikhaleva
  *
  * @param stateService Service for a state management

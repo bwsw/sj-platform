@@ -8,7 +8,7 @@ import com.bwsw.sj.engine.core.managment.TaskManager
 
 /**
  * Class allowing to manage an environment of input streaming task
- * Created: 08/07/2016
+ *
  *
  * @author Kseniya Mikhaleva
  */

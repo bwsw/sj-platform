@@ -5,7 +5,6 @@ import org.apache.log4j.Logger
 
 /**
  * Main object for running TcpClient
- * Created: 18/04/2016
  *
  * @author Kseniya Tomskikh
  */

@@ -4,7 +4,7 @@ import org.slf4j.LoggerFactory
 
 /**
  * Trait representing service to manage a state of module that has checkpoints (partial and full)
- * Created: 12/04/2016
+ *
  * @author Kseniya Mikhaleva
  */
 

@@ -23,7 +23,7 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress
 import org.slf4j.LoggerFactory
 
 /**
-  * Created: 19/05/2016
+  *
   *
   * @author Kseniya Tomskikh
   */

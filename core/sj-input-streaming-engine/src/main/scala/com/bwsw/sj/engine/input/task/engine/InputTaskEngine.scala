@@ -21,7 +21,7 @@ import scala.collection._
 
 /**
  * Provides methods are responsible for a basic execution logic of task of input module
- * Created: 10/07/2016
+ *
  *
  * @param manager Manager of environment of task of input module
  * @param performanceMetrics Set of metrics that characterize performance of a input streaming module
@@ -60,12 +60,21 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
    * @return Manager of environment of input streaming module
    */
   private def createModuleEnvironmentManager() = {
-    val serializer = new JsonSerializer()
+    def getOptions() = {
+      val serializer = new JsonSerializer()
+      if (instance.options != null) {
+        serializer.deserialize[Map[String, Any]](instance.options)
+      } else {
+        Map[String, Any]()
+      } //todo remake this (or maybe remove) after completing SJ-2257
+    }
+
+    val options = getOptions()
     val streamService = ConnectionRepository.getStreamService
     val taggedOutputs = instance.outputs
       .flatMap(x => streamService.get(x))
 
-    new InputEnvironmentManager(serializer.deserialize[Map[String, Any]](instance.options), taggedOutputs)
+    new InputEnvironmentManager(options, taggedOutputs)
   }
 
   /**

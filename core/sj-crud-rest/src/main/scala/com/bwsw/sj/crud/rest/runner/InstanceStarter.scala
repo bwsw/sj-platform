@@ -19,15 +19,12 @@ import org.slf4j.LoggerFactory
 /**
  * One-thread starting object for instance
  * using synchronous apache http client
- * Created: 13/05/2016
+ *
  *
  * @author Kseniya Tomskikh
  */
-class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
-
-  import InstanceMethods._
+class InstanceStarter(instance: Instance, delay: Long) extends Runnable with InstanceMarathonManager {
   import com.bwsw.sj.common.ModuleConstants._
-
   import scala.collection.JavaConverters._
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
@@ -36,9 +33,9 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
     logger.debug(s"Instance: ${instance.name}. Start instance.")
     try {
       val zkSessionTimeout = ConfigUtils.getZkSessionTimeout()
-      val mesosInfoResponse = getMesosInfo
+      val mesosInfoResponse = getMarathonInfo
       if (mesosInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
-        val entity = serializer.deserialize[Map[String, Any]](EntityUtils.toString(mesosInfoResponse.getEntity, "UTF-8"))
+        val entity = marathonEntitySerializer.deserialize[Map[String, Any]](EntityUtils.toString(mesosInfoResponse.getEntity, "UTF-8"))
         val mesosMaster = entity.get("marathon_config").get.asInstanceOf[Map[String, Any]].get("master").get.asInstanceOf[String]
 
         val zooKeeperServers = getZooKeeperServers(mesosMaster)
@@ -119,7 +116,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
             Thread.sleep(delay)
             val taskInfoResponse = getTaskInfo(instance.name)
             if (taskInfoResponse.getStatusLine.getStatusCode == OK) {
-              val entity = serializer.deserialize[Map[String, Any]](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
+              val entity = marathonEntitySerializer.deserialize[Map[String, Any]](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
               val tasksRunning = entity("app").asInstanceOf[Map[String, Any]]("tasksRunning").asInstanceOf[Int]
               if (tasksRunning == 1) {
                 instance.status = started
@@ -157,10 +154,10 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
     val restUrl = new URI(s"$restAddress/v1/custom/jars/$frameworkJarName")
     val taskInfoResponse = getTaskInfo(instance.name)
     if (taskInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
-      val ignore = serializer.getIgnoreUnknown()
-      serializer.setIgnoreUnknown(true)
-      val entity = serializer.deserialize[MarathonRequest](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
-      serializer.setIgnoreUnknown(ignore)
+      val ignore = marathonEntitySerializer.getIgnoreUnknown()
+      marathonEntitySerializer.setIgnoreUnknown(true)
+      val entity = marathonEntitySerializer.deserialize[MarathonRequest](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
+      marathonEntitySerializer.setIgnoreUnknown(ignore)
       if (entity.instances < 1) {
         Right(scaleApplication(instance.name, 1))
       } else {
@@ -209,7 +206,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
                 Thread.sleep(delay)
                 val taskInfoResponse = getTaskInfo(StreamUtil.createGeneratorTaskName(stream))
                 if (taskInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
-                  val entity = serializer.deserialize[Map[String, Any]](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
+                  val entity = marathonEntitySerializer.deserialize[Map[String, Any]](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
                   val tasksRunning = entity("app").asInstanceOf[Map[String, Any]]("tasksRunning").asInstanceOf[Int]
                   if (tasksRunning == stream.generator.instanceCount) {
                     stageUpdate(instance, stream.name, started)
@@ -259,10 +256,10 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable {
 
     val taskInfoResponse = getTaskInfo(marathonRequest.id)
     if (taskInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
-      val ignore = serializer.getIgnoreUnknown()
-      serializer.setIgnoreUnknown(true)
-      val entity = serializer.deserialize[MarathonRequest](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
-      serializer.setIgnoreUnknown(ignore)
+      val ignore = marathonEntitySerializer.getIgnoreUnknown()
+      marathonEntitySerializer.setIgnoreUnknown(true)
+      val entity = marathonEntitySerializer.deserialize[MarathonRequest](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
+      marathonEntitySerializer.setIgnoreUnknown(ignore)
       if (entity.instances < marathonRequest.instances) {
         logger.debug(s"Instance: ${instance.name}. Scaling generator ${marathonRequest.id}.")
         Right(scaleApplication(marathonRequest.id, marathonRequest.instances))

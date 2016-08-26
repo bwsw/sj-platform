@@ -13,7 +13,7 @@ import org.slf4j.{Logger, LoggerFactory}
 
 /**
  * Runner object for engine of output-streaming module
- * Created: 26/05/2016
+ *
  *
  * @author Kseniya Tomskikh
  */

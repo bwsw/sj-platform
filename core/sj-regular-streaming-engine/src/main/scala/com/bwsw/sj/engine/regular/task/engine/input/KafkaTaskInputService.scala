@@ -27,7 +27,7 @@ import scala.collection.mutable
  * Class is responsible for launching kafka consumers
  * that put consumed message, which are wrapped in envelope, into a common queue
  * and handling producers to save offsets for further recovering after fails
- * Created: 27/04/2016
+ *
  *
  * @author Kseniya Mikhaleva
  *

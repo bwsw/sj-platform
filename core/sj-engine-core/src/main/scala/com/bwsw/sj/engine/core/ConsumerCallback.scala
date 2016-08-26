@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 
 /**
  * Provides a handler for sub. consumer that puts a t-stream envelope in a persistent blocking queue
- * Created: 21/04/2016
+ *
  *
  * @author Kseniya Mikhaleva
  * @param blockingQueue Persistent blocking queue for storing transactions

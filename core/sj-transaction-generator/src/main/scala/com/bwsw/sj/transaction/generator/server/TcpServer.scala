@@ -14,7 +14,7 @@ import org.apache.zookeeper.{CreateMode, ZooDefs}
 
 /**
  * TCP-Server for transaction generating
- * Created: 18/04/2016
+ *
  *
  * @author Kseniya Tomskikh
  */

@@ -7,7 +7,7 @@ import scala.collection._
 
 /**
  * Provides an output stream that defined for each partition
- * Created: 20/04/2016
+ *
  *
  * @author Kseniya Mikhaleva
  * @param producer Producer for specific output of stream

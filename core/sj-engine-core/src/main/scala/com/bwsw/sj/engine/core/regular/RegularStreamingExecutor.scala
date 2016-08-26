@@ -6,7 +6,7 @@ import com.bwsw.sj.engine.core.environment.RegularEnvironmentManager
 
 /**
  * Class that contains an execution logic of regular module
- * Created: 11/04/2016
+ *
  *
  * @author Kseniya Mikhaleva
  */

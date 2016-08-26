@@ -6,7 +6,7 @@ import com.bwsw.sj.engine.core.entities.EsEntity
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
-  * Created: 27/05/2016
+  *
   *
   * @author Kseniya Tomskikh
   */

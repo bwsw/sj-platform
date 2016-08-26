@@ -23,7 +23,7 @@ import scala.concurrent.{Await, ExecutionContextExecutor}
  * Trait for validation of crud-rest-api
  * and contains common methods for routes
  *
- * Created: 06/04/2016
+ *
  *
  * @author Kseniya Tomskikh
  */

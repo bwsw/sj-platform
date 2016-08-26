@@ -32,7 +32,7 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress
 import scala.collection.JavaConverters._
 
 /**
- * Created: 20/06/2016
+ *
  *
  * @author Kseniya Tomskikh
  */

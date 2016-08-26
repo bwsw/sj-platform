@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory
  * that put consumed message, which are wrapped in envelope, into a common queue,
  * and processing the envelopes
  *
- * Created: 27/04/2016
+ *
  *
  * @param manager Manager of environment of task of regular module
  * @param blockingQueue Blocking queue for keeping incoming envelopes that are serialized into a string,

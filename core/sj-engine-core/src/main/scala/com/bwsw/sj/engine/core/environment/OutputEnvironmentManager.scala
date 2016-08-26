@@ -6,7 +6,7 @@ import scala.collection.Map
 
 /**
  * Provides for user methods that can be used in an output module
- * Created: 23/08/2016
+ *
  *
  * @author Kseniya Mikhaleva
  *

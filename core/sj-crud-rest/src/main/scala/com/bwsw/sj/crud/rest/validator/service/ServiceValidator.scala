@@ -11,7 +11,7 @@ import scala.collection.mutable.ArrayBuffer
 /**
  * Created by mendelbaum_nm
  */
-object ServiceValidator extends ValidationUtils{
+object ServiceValidator extends ValidationUtils {
 
   import com.bwsw.sj.common.ServiceConstants._
 
@@ -193,187 +193,173 @@ object ServiceValidator extends ValidationUtils{
             }
         }
 
-            // 'dataNamespace' field
-            errors ++= validateStringFieldRequired(tstrqServiceData.dataNamespace, "data-namespace")
-            errors ++= validateNamespace(tstrqServiceData.dataNamespace)
+        // 'dataNamespace' field
+        errors ++= validateStringFieldRequired(tstrqServiceData.dataNamespace, "data-namespace")
+        errors ++= validateNamespace(tstrqServiceData.dataNamespace)
 
-            Option(tstrqServiceData.lockProvider) match {
-              case None =>
-                errors += s"'lock-provider' is required"
-              case Some(x) =>
-                if (x.isEmpty) {
-                  errors += s"'lock-provider' can not be empty"
-                } else {
-                  lockProviderObj = providerDAO.get(x)
-                  val allowedTypes = List("zookeeper", "redis")
-                  lockProviderObj match {
-                    case Some(provider) =>
-                      if (!allowedTypes.contains(provider.providerType)) {
-                        errors += s"Lock-provider must be of type ${allowedTypes.mkString("[", "|", "]")} " +
-                          s"('${provider.providerType}' is given instead)"
-                      }
-                    case None =>
-                      errors += s"Lock-provider '$x' does not exist"
+        Option(tstrqServiceData.lockProvider) match {
+          case None =>
+            errors += s"'lock-provider' is required"
+          case Some(x) =>
+            if (x.isEmpty) {
+              errors += s"'lock-provider' can not be empty"
+            } else {
+              lockProviderObj = providerDAO.get(x)
+              val allowedTypes = List("zookeeper", "redis")
+              lockProviderObj match {
+                case Some(provider) =>
+                  if (!allowedTypes.contains(provider.providerType)) {
+                    errors += s"Lock-provider must be of type ${allowedTypes.mkString("[", "|", "]")} " +
+                      s"('${provider.providerType}' is given instead)"
                   }
-                }
-            }
-
-            // 'lockNamespace' field
-            errors ++= validateStringFieldRequired(tstrqServiceData.lockNamespace, "lock-namespace")
-            errors ++= validateNamespace(tstrqServiceData.lockNamespace)
-
-            // filling-in service object serviceType-dependent extra fields
-            if (errors.isEmpty) {
-              service.asInstanceOf[TStreamService].metadataProvider = metadataProviderObj.get
-              service.asInstanceOf[TStreamService].metadataNamespace = tstrqServiceData.metadataNamespace
-              service.asInstanceOf[TStreamService].dataProvider = dataProviderObj.get
-              service.asInstanceOf[TStreamService].dataNamespace = tstrqServiceData.dataNamespace
-              service.asInstanceOf[TStreamService].lockProvider = lockProviderObj.get
-              service.asInstanceOf[TStreamService].lockNamespace = tstrqServiceData.lockNamespace
-            }
-
-          case "ZKCoord" =>
-            val zkcoordServiceData = initialData.asInstanceOf[ZKCoordServiceData]
-
-            // 'provider' field
-            val (providerErrors, providerObj) = validateProvider(zkcoordServiceData.provider, initialData.serviceType)
-            errors ++= providerErrors
-
-            // 'namespace' field
-            errors ++= validateStringFieldRequired(zkcoordServiceData.namespace, "namespace")
-            errors ++= validateNamespace(zkcoordServiceData.namespace)
-
-            // filling-in service object serviceType-dependent extra fields
-            if (errors.isEmpty) {
-              service.asInstanceOf[ZKService].provider = providerObj.get
-              service.asInstanceOf[ZKService].namespace = zkcoordServiceData.namespace
-            }
-
-          case "RDSCoord" =>
-            val rdscoordServiceData = initialData.asInstanceOf[RDSCoordServiceData]
-
-            // 'provider' field
-            val (providerErrors, providerObj) = validateProvider(rdscoordServiceData.provider, initialData.serviceType)
-            errors ++= providerErrors
-
-            // 'namespace' field
-            errors ++= validateStringFieldRequired(rdscoordServiceData.namespace, "namespace")
-            errors ++= validateNamespace(rdscoordServiceData.namespace)
-
-            // filling-in service object serviceType-dependent extra fields
-            if (errors.isEmpty) {
-              service.asInstanceOf[RedisService].provider = providerObj.get
-              service.asInstanceOf[RedisService].namespace = rdscoordServiceData.namespace
-            }
-
-          case "ArspkDB" =>
-            val arspkServiceData = initialData.asInstanceOf[ArspkDBServiceData]
-
-            // 'provider' field
-            val (providerErrors, providerObj) = validateProvider(arspkServiceData.provider, initialData.serviceType)
-            errors ++= providerErrors
-
-            // 'namespace' field
-            errors ++= validateStringFieldRequired(arspkServiceData.namespace, "namespace")
-            errors ++= validateNamespace(arspkServiceData.namespace)
-
-            // filling-in service object serviceType-dependent extra fields
-            if (errors.isEmpty) {
-              service.asInstanceOf[AerospikeService].provider = providerObj.get
-              service.asInstanceOf[AerospikeService].namespace = arspkServiceData.namespace
-            }
-
-          case "JDBC" =>
-            val jdbcServiceData = initialData.asInstanceOf[JDBCServiceData]
-
-            // 'provider' field
-            val (providerErrors, providerObj) = validateProvider(jdbcServiceData.provider, initialData.serviceType)
-            errors ++= providerErrors
-
-            // 'namespace', 'login', 'password' fields
-            errors ++= validateStringFieldRequired(jdbcServiceData.namespace, "namespace")
-            errors ++= validateNamespace(jdbcServiceData.namespace)
-            errors ++= validateStringFieldRequired(jdbcServiceData.login, "login")
-            errors ++= validateStringFieldRequired(jdbcServiceData.password, "password")
-
-            // filling-in service object serviceType-dependent extra fields
-            if (errors.isEmpty) {
-              service.asInstanceOf[JDBCService].provider = providerObj.get
-              service.asInstanceOf[JDBCService].namespace = jdbcServiceData.namespace
-              service.asInstanceOf[JDBCService].login = jdbcServiceData.login
-              service.asInstanceOf[JDBCService].password = jdbcServiceData.password
-            }
-        }
-
-        // filling-in service object common fields
-        if (errors.isEmpty) {
-          service.serviceType = initialData.serviceType
-          service.name = initialData.name
-          service.description = initialData.description
-        }
-
-        /**
-         * Simple validation for required string field
-         *
-         * @param fieldData - data from field to validate
-         * @param fieldJsonName - field name in json
-         * @return - errors list
-         */
-        def validateStringFieldRequired(fieldData: String, fieldJsonName: String) = {
-          val errors = new ArrayBuffer[String]()
-          Option(fieldData) match {
-            case None =>
-              errors += s"'$fieldJsonName' is required"
-            case Some(x) =>
-              if (x.isEmpty)
-                errors += s"'$fieldJsonName' can not be empty"
-          }
-          errors
-        }
-
-        def validateNamespace(namespace: String) = {
-          val errors = new ArrayBuffer[String]()
-
-          if (!validateServiceNamespace(namespace)) {
-            errors += s"Service has incorrect parameter: $namespace. Name must be contain digits, lowercase letters or underscore. First symbol must be letter."
-          }
-
-          errors
-        }
-
-        /**
-         * Service provider validation by provider name and service type
-         *
-         * @param provider - provider name
-         * @param serviceType - service type
-         * @return - (provider errors, loaded provider object) pair
-         */
-        def validateProvider(provider: String, serviceType: String) = {
-          val providerErrors = new ArrayBuffer[String]()
-          var providerObj: Option[Provider] = None
-          serviceType match {
-            case _ if serviceTypesWithProvider.contains(serviceType) =>
-              Option(provider) match {
                 case None =>
-                  providerErrors += s"'provider' is required for '$serviceType' service"
-                case Some(p) =>
-                  if (p.isEmpty) {
-                    providerErrors += s"'provider' can not be empty"
-                  }
-                  else {
-                    providerObj = providerDAO.get(p)
-                    if (providerObj.isEmpty) {
-                      providerErrors += s"Provider '$p' does not exist"
-                    } else if (providerObj.get.providerType != serviceTypeProviders(serviceType)) {
-                      providerErrors += s"Provider for '$serviceType' service must be of type '${serviceTypeProviders(serviceType)}' " +
-                        s"('${providerObj.get.providerType}' is given instead)"
-                    }
-                  }
+                  errors += s"Lock-provider '$x' does not exist"
+              }
+            }
+        }
+
+        // 'lockNamespace' field
+        errors ++= validateStringFieldRequired(tstrqServiceData.lockNamespace, "lock-namespace")
+        errors ++= validateNamespace(tstrqServiceData.lockNamespace)
+
+        // filling-in service object serviceType-dependent extra fields
+        if (errors.isEmpty) {
+          service.asInstanceOf[TStreamService].metadataProvider = metadataProviderObj.get
+          service.asInstanceOf[TStreamService].metadataNamespace = tstrqServiceData.metadataNamespace
+          service.asInstanceOf[TStreamService].dataProvider = dataProviderObj.get
+          service.asInstanceOf[TStreamService].dataNamespace = tstrqServiceData.dataNamespace
+          service.asInstanceOf[TStreamService].lockProvider = lockProviderObj.get
+          service.asInstanceOf[TStreamService].lockNamespace = tstrqServiceData.lockNamespace
+        }
+
+      case "ZKCoord" =>
+        val zkcoordServiceData = initialData.asInstanceOf[ZKCoordServiceData]
+
+        // 'provider' field
+        val (providerErrors, providerObj) = validateProvider(zkcoordServiceData.provider, initialData.serviceType)
+        errors ++= providerErrors
+
+        // 'namespace' field
+        errors ++= validateStringFieldRequired(zkcoordServiceData.namespace, "namespace")
+        errors ++= validateNamespace(zkcoordServiceData.namespace)
+
+        // filling-in service object serviceType-dependent extra fields
+        if (errors.isEmpty) {
+          service.asInstanceOf[ZKService].provider = providerObj.get
+          service.asInstanceOf[ZKService].namespace = zkcoordServiceData.namespace
+        }
+
+      case "RDSCoord" =>
+        val rdscoordServiceData = initialData.asInstanceOf[RDSCoordServiceData]
+
+        // 'provider' field
+        val (providerErrors, providerObj) = validateProvider(rdscoordServiceData.provider, initialData.serviceType)
+        errors ++= providerErrors
+
+        // 'namespace' field
+        errors ++= validateStringFieldRequired(rdscoordServiceData.namespace, "namespace")
+        errors ++= validateNamespace(rdscoordServiceData.namespace)
+
+        // filling-in service object serviceType-dependent extra fields
+        if (errors.isEmpty) {
+          service.asInstanceOf[RedisService].provider = providerObj.get
+          service.asInstanceOf[RedisService].namespace = rdscoordServiceData.namespace
+        }
+
+      case "ArspkDB" =>
+        val arspkServiceData = initialData.asInstanceOf[ArspkDBServiceData]
+
+        // 'provider' field
+        val (providerErrors, providerObj) = validateProvider(arspkServiceData.provider, initialData.serviceType)
+        errors ++= providerErrors
+
+        // 'namespace' field
+        errors ++= validateStringFieldRequired(arspkServiceData.namespace, "namespace")
+        errors ++= validateNamespace(arspkServiceData.namespace)
+
+        // filling-in service object serviceType-dependent extra fields
+        if (errors.isEmpty) {
+          service.asInstanceOf[AerospikeService].provider = providerObj.get
+          service.asInstanceOf[AerospikeService].namespace = arspkServiceData.namespace
+        }
+
+      case "JDBC" =>
+        val jdbcServiceData = initialData.asInstanceOf[JDBCServiceData]
+
+        // 'provider' field
+        val (providerErrors, providerObj) = validateProvider(jdbcServiceData.provider, initialData.serviceType)
+        errors ++= providerErrors
+
+        // 'namespace', 'login', 'password' fields
+        errors ++= validateStringFieldRequired(jdbcServiceData.namespace, "namespace")
+        errors ++= validateNamespace(jdbcServiceData.namespace)
+        errors ++= validateStringFieldRequired(jdbcServiceData.login, "login")
+        errors ++= validateStringFieldRequired(jdbcServiceData.password, "password")
+
+        // filling-in service object serviceType-dependent extra fields
+        if (errors.isEmpty) {
+          service.asInstanceOf[JDBCService].provider = providerObj.get
+          service.asInstanceOf[JDBCService].namespace = jdbcServiceData.namespace
+          service.asInstanceOf[JDBCService].login = jdbcServiceData.login
+          service.asInstanceOf[JDBCService].password = jdbcServiceData.password
+        }
+    }
+
+    // filling-in service object common fields
+    if (errors.isEmpty) {
+      service.serviceType = initialData.serviceType
+      service.name = initialData.name
+      service.description = initialData.description
+    }
+
+    def validateStringFieldRequired(fieldData: String, fieldJsonName: String) = {
+      val errors = new ArrayBuffer[String]()
+      Option(fieldData) match {
+        case None =>
+          errors += s"'$fieldJsonName' is required"
+        case Some(x) =>
+          if (x.isEmpty)
+            errors += s"'$fieldJsonName' can not be empty"
+      }
+      errors
+    }
+
+    def validateNamespace(namespace: String) = {
+      val errors = new ArrayBuffer[String]()
+
+      if (!validateServiceNamespace(namespace)) {
+        errors += s"Service has incorrect parameter: $namespace. Name must be contain digits, lowercase letters or underscore. First symbol must be letter."
+      }
+
+      errors
+    }
+
+    def validateProvider(provider: String, serviceType: String) = {
+      val providerErrors = new ArrayBuffer[String]()
+      var providerObj: Option[Provider] = None
+      serviceType match {
+        case _ if serviceTypesWithProvider.contains(serviceType) =>
+          Option(provider) match {
+            case None =>
+              providerErrors += s"'provider' is required for '$serviceType' service"
+            case Some(p) =>
+              if (p.isEmpty) {
+                providerErrors += s"'provider' can not be empty"
+              }
+              else {
+                providerObj = providerDAO.get(p)
+                if (providerObj.isEmpty) {
+                  providerErrors += s"Provider '$p' does not exist"
+                } else if (providerObj.get.providerType != serviceTypeProviders(serviceType)) {
+                  providerErrors += s"Provider for '$serviceType' service must be of type '${serviceTypeProviders(serviceType)}' " +
+                    s"('${providerObj.get.providerType}' is given instead)"
+                }
               }
           }
-          (providerErrors, providerObj)
-        }
-
-        errors
+      }
+      (providerErrors, providerObj)
     }
+
+    errors
   }
+}

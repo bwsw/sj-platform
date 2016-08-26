@@ -7,7 +7,7 @@ import io.netty.buffer.ByteBuf
 
 /**
  * Class that contains an execution logic of input module
- * Created: 10/07/2016
+ *
  *
  * @author Kseniya Mikhaleva
  */

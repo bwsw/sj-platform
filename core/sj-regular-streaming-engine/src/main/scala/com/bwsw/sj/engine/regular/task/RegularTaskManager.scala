@@ -13,7 +13,7 @@ import scala.collection.mutable
 
 /**
  * Class allowing to manage an environment of regular streaming task
- * Created: 13/04/2016
+ *
  *
  * @author Kseniya Mikhaleva
  */

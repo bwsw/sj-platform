@@ -4,7 +4,7 @@ import com.bwsw.sj.common.StreamConstants
 
 /**
  * Provides a wrapper for t-stream transactions (if outputMetadata has more than one element) that is formed by input engine.
- * Created: 12/04/2016
+ *
  * @author Kseniya Mikhaleva
  */
 

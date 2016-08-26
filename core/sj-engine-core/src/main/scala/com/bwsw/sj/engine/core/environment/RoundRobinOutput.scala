@@ -6,7 +6,7 @@ import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer
 /**
  * Provides an output stream that defined for stream in whole.
  * Recording of transaction occurs with the use of round-robin policy
- * Created: 20/04/2016
+ *
  *
  * @author Kseniya Mikhaleva
  * @param producer Producer for specific output of stream

@@ -16,7 +16,7 @@ import scala.collection.mutable.ArrayBuffer
 
 /**
  * Validator for input-streaming instance
- * Created: 11/07/2016
+ *
  *
  * @author Kseniya Tomskikh
  */

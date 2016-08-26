@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory
 
 /**
  * Class represents a json serializer
- * Created: 11/04/2016
  *
  * @author Kseniya Mikhaleva
  */

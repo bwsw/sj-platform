@@ -16,7 +16,7 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 
 /**
-  * Created: 20/06/2016
+  *
   *
   * @author Kseniya Tomskikh
   */

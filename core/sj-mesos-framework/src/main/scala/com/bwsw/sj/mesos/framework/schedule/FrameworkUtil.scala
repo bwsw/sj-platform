@@ -9,7 +9,7 @@ import org.apache.log4j.Logger
 import org.apache.mesos.SchedulerDriver
 
 /**
-  * Created: 21/07/2016
+  *
   *
   * @author Kseniya Tomskikh
   */

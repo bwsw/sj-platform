@@ -9,7 +9,7 @@ import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Olde
 import com.bwsw.tstreams.generator.{IUUIDGenerator, LocalTimeUUIDGenerator}
 
 /**
-  * Created: 27/05/2016
+  *
   *
   * @author Kseniya Tomskikh
   */

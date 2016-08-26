@@ -5,7 +5,7 @@ import scala.collection.Map
 
 /**
  * Provides for user methods that can be used in an input module
- * Created: 10/07/2016
+ *
  *
  * @author Kseniya Mikhaleva
  *

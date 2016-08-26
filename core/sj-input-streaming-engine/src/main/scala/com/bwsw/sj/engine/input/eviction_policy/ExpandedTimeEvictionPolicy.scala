@@ -5,7 +5,7 @@ import com.bwsw.sj.common.DAL.model.module.InputInstance
 /**
  * Provides methods are responsible for an expanded time eviction policy of input envelope duplicates
  * In this case time, within which a specific key is kept, will increase if a duplicate appears
- * Created: 14/07/2016
+ *
  *
  * @param instance Input instance contains a settings of an eviction policy
  *                 (message TTL, a default eviction policy and a maximum size of message queue)

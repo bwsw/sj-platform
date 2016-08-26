@@ -5,7 +5,7 @@ import org.mongodb.morphia.annotations.{Embedded, Entity, Id, Property}
 
 /**
   * Entity for base instance-json
-  * Created: 23/05/2016
+  *
   *
   * @author Kseniya Tomskikh
   */

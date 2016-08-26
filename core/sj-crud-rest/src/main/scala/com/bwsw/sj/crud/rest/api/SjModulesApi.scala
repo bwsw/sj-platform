@@ -25,7 +25,7 @@ import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 /**
  * Rest-api for module-jars
  *
- * Created: 08/04/2016
+ *
  *
  * @author Kseniya Tomskikh
  */

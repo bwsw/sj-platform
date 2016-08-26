@@ -20,7 +20,7 @@ import scala.collection.mutable.ArrayBuffer
 
 /**
   * Trait of validator for modules
-  * Created: 12/04/2016
+  *
   *
   * @author Kseniya Tomskikh
   */

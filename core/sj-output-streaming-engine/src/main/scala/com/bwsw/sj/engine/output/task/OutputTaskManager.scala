@@ -7,7 +7,7 @@ import com.bwsw.sj.engine.core.managment.TaskManager
 
 /**
  * Task manager for working with streams of output-streaming module
- * Created: 27/05/2016
+ *
  *
  * @author Kseniya Tomskikh
  */

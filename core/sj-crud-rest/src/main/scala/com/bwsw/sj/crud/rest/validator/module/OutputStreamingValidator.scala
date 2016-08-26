@@ -10,7 +10,7 @@ import org.slf4j.{LoggerFactory, Logger}
 import scala.collection.mutable.ArrayBuffer
 
 /**
- * Created: 23/05/2016
+ *
  *
  * @author Kseniya Tomskikh
  */

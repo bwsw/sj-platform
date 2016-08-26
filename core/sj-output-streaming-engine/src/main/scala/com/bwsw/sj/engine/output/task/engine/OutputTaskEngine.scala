@@ -29,7 +29,7 @@ import scala.collection.Map
 
 /**
  * Provides methods are responsible for a basic execution logic of task of output module
- * Created: 23/08/2016
+ *
  *
  * @param manager Manager of environment of task of output module
  * @param performanceMetrics Set of metrics that characterize performance of a output streaming module
@@ -69,7 +69,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
         serializer.deserialize[Map[String, Any]](instance.options)
       } else {
         Map[String, Any]()
-      }
+      } //todo remake this (or maybe remove) after completing SJ-2257
     }
 
     val streamService = ConnectionRepository.getStreamService

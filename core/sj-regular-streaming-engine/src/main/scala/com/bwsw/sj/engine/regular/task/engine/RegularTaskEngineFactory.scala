@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 
 /**
  * Factory is in charge of creating of a task engine of regular module
- * Created: 27/07/2016
+ *
  *
  * @param manager Manager of environment of task of regular module
  * @param performanceMetrics Set of metrics that characterize performance of a regular streaming module

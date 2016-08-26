@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
  * Entity for specification of module
- * Created: 29/04/2016
+ *
  *
  * @author Kseniya Tomskikh
  */

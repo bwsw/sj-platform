@@ -9,7 +9,7 @@ import scala.collection.mutable
 
 /**
  * Class represents a set of metrics that characterize performance of a input streaming module
- * Created: 14/07/2016
+ *
  * @author Kseniya Mikhaleva
  */
 

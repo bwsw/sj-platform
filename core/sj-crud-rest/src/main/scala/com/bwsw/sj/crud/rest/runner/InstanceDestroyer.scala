@@ -8,14 +8,13 @@ import org.slf4j.LoggerFactory
 /**
   * One-thread deleting object for instance
   * using synchronous apache http client
-  * Created: 16/05/2016
+  *
   *
   * @author Kseniya Tomskikh
   */
-class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable {
+class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable with InstanceMarathonManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
 
-  import InstanceMethods._
   import com.bwsw.sj.common.ModuleConstants._
 
   def run() = {
@@ -55,12 +54,12 @@ class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable {
           !stream.asInstanceOf[TStreamSjStream].generator.generatorType.equals("local") &&
             (stage.state.equals(failed) ||
               !startingInstance.exists { instance =>
-                val streamGeneratorName = createGeneratorTaskName(stream.asInstanceOf[TStreamSjStream])
+                val streamGeneratorName = getGeneratorAppName(stream.asInstanceOf[TStreamSjStream])
                 val instanceStreamGenerators = instance.inputs.map(_.replaceAll("/split|/full", ""))
                   .union(instance.outputs)
                   .flatMap(name => streamDAO.get(name))
                   .filter(s => s.streamType.equals(StreamConstants.tStreamType))
-                  .map(sjStream => createGeneratorTaskName(sjStream.asInstanceOf[TStreamSjStream]))
+                  .map(sjStream => getGeneratorAppName(sjStream.asInstanceOf[TStreamSjStream]))
                 instanceStreamGenerators.contains(streamGeneratorName)
               })
         } else false
@@ -68,7 +67,7 @@ class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable {
     tStreamStreamsToStop.foreach { stream =>
       var isTaskDeleted = false
       stageUpdate(instance, stream.name, deleting)
-      val taskId = createGeneratorTaskName(stream.asInstanceOf[TStreamSjStream])
+      val taskId = getGeneratorAppName(stream.asInstanceOf[TStreamSjStream])
       val taskInfoResponse = getTaskInfo(taskId)
       if (taskInfoResponse.getStatusLine.getStatusCode != NotFound) {
         logger.debug(s"Instance: ${instance.name}. Delete generator: $taskId.")

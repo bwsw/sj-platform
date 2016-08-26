@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 
 /**
  * Provides methods are responsible for an eviction policy of input envelope duplicates
- * Created: 14/07/2016
+ *
  *
  * @param instance Input instance contains a settings of an eviction policy
  *                 (message TTL, a default eviction policy and a maximum size of message queue)

@@ -2,7 +2,7 @@ package com.bwsw.sj.crud.rest.entities
 
 /**
   * Protocol for creating and running application on mesos
-  * Created: 27/04/2016
+  *
   *
   * @author Kseniya Tomskikh
   */

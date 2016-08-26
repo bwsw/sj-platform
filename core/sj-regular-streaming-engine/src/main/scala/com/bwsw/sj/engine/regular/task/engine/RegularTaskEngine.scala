@@ -18,7 +18,7 @@ import scala.collection.Map
 
 /**
  * Provides methods are responsible for a basic execution logic of task of regular module
- * Created: 26/07/2016
+ *
  *
  * @param manager Manager of environment of task of regular module
  * @param performanceMetrics Set of metrics that characterize performance of a regular streaming module

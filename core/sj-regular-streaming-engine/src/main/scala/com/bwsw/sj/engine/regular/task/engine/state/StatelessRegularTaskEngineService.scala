@@ -6,8 +6,6 @@ import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 
-import scala.collection.Map
-
 /**
  * Class is in charge of creating a ModuleEnvironmentManager (and executor)
  *
@@ -19,7 +17,7 @@ class StatelessRegularTaskEngineService(manager: RegularTaskManager, performance
   private val streamService = ConnectionRepository.getStreamService
 
   val regularEnvironmentManager = new RegularEnvironmentManager(
-    optionsSerializer.deserialize[Map[String, Any]](regularInstance.options),
+    getOptions(),
     outputProducers,
     regularInstance.outputs
       .flatMap(x => streamService.get(x)),

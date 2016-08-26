@@ -8,10 +8,10 @@ import com.bwsw.sj.engine.core.state.StateStorage
 import com.bwsw.tstreams.agents.producer.Producer
 
 import scala.collection.mutable
-
+import scala.collection._
 /**
  * Class allowing to manage environment of module that has state
- * Created: 15/04/2016
+ *
  *
  * @author Kseniya Mikhaleva
  * @param stateStorage Storage of state of module

@@ -21,7 +21,7 @@ import scala.concurrent.Future
 
 /**
  * Run object of CRUD Rest-API
- * Created: 06/04/2016
+ *
  *
  * @author Kseniya Tomskikh
  */

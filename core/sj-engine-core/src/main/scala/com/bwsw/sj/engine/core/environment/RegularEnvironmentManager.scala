@@ -10,7 +10,7 @@ import scala.collection._
 
 /**
  * Provides for user methods that can be used in a module
- * Created: 12/04/2016
+ *
  *
  * @author Kseniya Mikhaleva
  * @param options User defined options from instance parameters

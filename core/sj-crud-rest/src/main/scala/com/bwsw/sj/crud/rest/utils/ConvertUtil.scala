@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
 /**
  * Methods for converting protocol entity to model entity
  * and model entity to protocol entity
- * Created: 12/05/2016
+ *
  *
  * @author Kseniya Tomskikh
  */

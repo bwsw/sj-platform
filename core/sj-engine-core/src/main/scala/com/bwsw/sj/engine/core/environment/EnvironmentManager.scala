@@ -7,7 +7,7 @@ import scala.collection.Map
 
 /**
  * A common class providing for user methods that can be used in a module of specific type
- * Created: 20/07/2016
+ *
  *
  * @author Kseniya Mikhaleva
  *

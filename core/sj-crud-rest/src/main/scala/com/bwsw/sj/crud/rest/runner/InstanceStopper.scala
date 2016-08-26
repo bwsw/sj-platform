@@ -9,15 +9,14 @@ import scala.collection.JavaConverters._
 /**
   * One-thread stopper object for instance
   * using synchronous apache http client
-  * Created: 16/05/2016
+  *
   *
   * @author Kseniya Tomskikh
   */
-class InstanceStopper(instance: Instance, delay: Long) extends Runnable {
+class InstanceStopper(instance: Instance, delay: Long) extends Runnable with InstanceMarathonManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
 
   import com.bwsw.sj.common.ModuleConstants._
-  import InstanceMethods._
 
   def run() = {
     logger.debug(s"Instance: ${instance.name}. Stop instance.")
@@ -29,7 +28,7 @@ class InstanceStopper(instance: Instance, delay: Long) extends Runnable {
         while (!isInstanceStopped) {
           val taskInfoResponse = getTaskInfo(instance.name)
           if (taskInfoResponse.getStatusLine.getStatusCode == OK) {
-            val entity = serializer.deserialize[Map[String, Any]](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
+            val entity = marathonEntitySerializer.deserialize[Map[String, Any]](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
             val tasksRunning = entity("app").asInstanceOf[Map[String, Any]]("tasksRunning").asInstanceOf[Int]
             if (tasksRunning == 0) {
               instance.status = stopped

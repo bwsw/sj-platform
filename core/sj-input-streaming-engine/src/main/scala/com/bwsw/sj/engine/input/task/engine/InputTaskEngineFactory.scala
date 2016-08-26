@@ -12,7 +12,7 @@ import scala.collection.concurrent
 
 /**
  * Factory is in charge of creating of a task engine of input module
- * Created: 18/07/2016
+ *
  *
  * @param manager Manager of environment of task of input module
  * @param performanceMetrics Set of metrics that characterize performance of a input streaming module

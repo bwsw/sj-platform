@@ -5,7 +5,7 @@ import org.apache.http.impl.client.{CloseableHttpClient, HttpClientBuilder}
 
 /**
   * Synchronous http client
-  * Created: 16/05/2016
+  *
   *
   * @author Kseniya Tomskikh
   */

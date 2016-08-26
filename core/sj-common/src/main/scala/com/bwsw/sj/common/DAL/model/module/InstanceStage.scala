@@ -4,7 +4,7 @@ import java.util.Date
 
 /**
   * Stage of running instance
-  * Created: 13/05/2016
+  *
   *
   * @author Kseniya Tomskikh
   */

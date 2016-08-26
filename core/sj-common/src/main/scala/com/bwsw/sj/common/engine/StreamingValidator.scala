@@ -2,7 +2,7 @@ package com.bwsw.sj.common.engine
 
 /**
  * Trait for validating a launch parameters of module
- * Created: 07/04/2016
+ *
  * @author Kseniya Mikhaleva
  */
 

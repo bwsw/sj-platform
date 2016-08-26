@@ -6,7 +6,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.engine.output.benchmark.BenchmarkDataFactory._
 
 /**
- * Created: 17/06/2016
+ *
  *
  * @author Kseniya Tomskikh
  */

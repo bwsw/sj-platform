@@ -8,7 +8,7 @@ import com.bwsw.sj.module.output.pm.data.PerformanceMetrics
 /**
  * Handler for work with performance metrics t-stream envelopes
  *
- * Created: 23/06/2016
+ *
  *
  * @author Kseniya Mikhaleva
  */
@@ -22,7 +22,7 @@ class PMReportOutputExecutor extends OutputStreamingExecutor {
    * @param envelope Input T-Stream envelope
    * @return List of output envelopes
    */
-  def onMessage(envelope: TStreamEnvelope): List[OutputEnvelope] = {
+  override def onMessage(envelope: TStreamEnvelope): List[OutputEnvelope] = {
     val list = envelope.data.map { rawPM =>
       val performanceMetrics = objectSerializer.deserialize(rawPM).asInstanceOf[String]
       val data: PerformanceMetrics = jsonSerializer.deserialize[PerformanceMetrics](performanceMetrics)

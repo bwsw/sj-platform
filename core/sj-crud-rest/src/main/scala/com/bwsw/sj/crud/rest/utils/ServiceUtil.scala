@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 
 /**
  * Util objects for work with services
- * Created: 01/07/2016
+ *
  *
  * @author Kseniya Tomskikh
  */

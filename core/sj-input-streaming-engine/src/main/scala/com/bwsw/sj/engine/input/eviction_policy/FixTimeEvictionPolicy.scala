@@ -5,7 +5,7 @@ import com.bwsw.sj.common.DAL.model.module.InputInstance
 /**
  * Provides methods are responsible for a fix time eviction policy of input envelope duplicates.
  * In this case a specific key will be kept within fix time
- * Created: 14/07/2016
+ *
  *
  * @param instance Input instance contains a settings of an eviction policy
  *                 (message TTL, a default eviction policy and a maximum size of message queue)

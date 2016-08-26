@@ -14,7 +14,7 @@ import org.everit.json.schema.ValidationException
 
 /**
  * Router trait for CRUD Rest-API
- * Created: 06/04/2016
+ *
  *
  * @author Kseniya Tomskikh
  */

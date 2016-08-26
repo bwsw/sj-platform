@@ -23,7 +23,7 @@ import scala.concurrent.duration._
 /**
  * Rest-api for custom jars
  *
- * Created: 08/04/2016
+ *
  *
  * @author Kseniya Tomskikh
  */

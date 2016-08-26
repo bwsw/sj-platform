@@ -13,7 +13,7 @@ import org.slf4j.{Logger, LoggerFactory}
   * Subscriber callback for processing transaction of t-stream
   * for output-streaming engine
   *
-  * Created: 27/05/2016
+  *
   *
   * @author Kseniya Tomskikh
   * @param blockingQueue Blocking Queue for saving new transaction from t-stream

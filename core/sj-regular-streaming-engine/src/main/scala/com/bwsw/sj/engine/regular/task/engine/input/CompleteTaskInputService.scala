@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 
 /**
  * Class is responsible for handling kafka inputs and t-stream inputs
- * Created: 27/04/2016
+ *
  *
  * @author Kseniya Mikhaleva
  *

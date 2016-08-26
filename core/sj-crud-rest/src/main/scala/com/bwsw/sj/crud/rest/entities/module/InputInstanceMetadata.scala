@@ -4,7 +4,7 @@ import com.bwsw.sj.common.DAL.model.module.InputTask
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
-  * Created: 11/07/2016
+  *
   *
   * @author Kseniya Tomskikh
   */

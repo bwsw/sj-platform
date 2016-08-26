@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 
 /**
  * Factory is in charge of creating of a task input service of regular engine
- * Created: 27/07/2016
+ *
  *
  * @author Kseniya Mikhaleva
  *

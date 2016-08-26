@@ -6,7 +6,7 @@ import com.bwsw.sj.common.StreamConstants
 
 /**
  * Provides a wrapper for t-stream transaction.
- * Created: 12/04/2016
+ *
  * @author Kseniya Mikhaleva
  */
 

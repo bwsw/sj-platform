@@ -25,7 +25,7 @@ class StubOutputExecutor extends OutputStreamingExecutor {
     * @param envelope Input T-Stream envelope
     * @return List of output envelopes
     */
-  def onMessage(envelope: TStreamEnvelope): List[OutputEnvelope] = {
+  override def onMessage(envelope: TStreamEnvelope): List[OutputEnvelope] = {
     val list = envelope.data.map { row =>
       val data: StubEsData = new StubEsData
 

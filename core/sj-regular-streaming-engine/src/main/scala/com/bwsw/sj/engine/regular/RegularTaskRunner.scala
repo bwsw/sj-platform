@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 
 /**
  * Object is responsible for running a task of job that launches regular module
- * Created: 13/04/2016
+ *
  *
  * @author Kseniya Mikhaleva
  */

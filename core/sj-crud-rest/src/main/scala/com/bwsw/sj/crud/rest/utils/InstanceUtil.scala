@@ -8,7 +8,7 @@ import com.bwsw.sj.crud.rest.runner.InstanceStopper
 import org.slf4j.LoggerFactory
 
 /**
-  * Created: 20/07/2016
+  *
   *
   * @author Kseniya Tomskikh
   */

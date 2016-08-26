@@ -14,7 +14,7 @@ import scala.collection.mutable
 
 /**
  * Class representing a service for managing by a storage for default state that is kept in RAM and use t-stream for checkpoints
- * Created: 12/04/2016
+ *
  * @author Kseniya Mikhaleva
  *
  * @param manager Manager of environment of task of regular module

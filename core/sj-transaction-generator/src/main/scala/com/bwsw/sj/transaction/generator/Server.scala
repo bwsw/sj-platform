@@ -12,7 +12,7 @@ import org.apache.log4j.Logger
 
 /**
  * TCP-Server for transaction generating
- * Created: 18/04/2016
+ *
  *
  * @author Kseniya Tomskikh
  */
