@@ -96,7 +96,6 @@ class RAMStateService(manager: RegularTaskManager, checkpointGroup: CheckpointGr
     if (maybeTxn.nonEmpty) {
       logger.debug(s"Get txn that was last. It contains a full or partial state\n")
       val lastTxn = maybeTxn.get
-      lastTxn.attach(stateConsumer) //todo will be fixed in the next version
       var value = serializer.deserialize(lastTxn.next())
       value match {
         case variable: (Any, Any) =>

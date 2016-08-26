@@ -163,7 +163,6 @@ class KafkaTaskInputService(manager: RegularTaskManager,
 
     if (maybeTxn.isDefined) {
       val lastTxn = maybeTxn.get
-      lastTxn.attach(offsetConsumer) //todo will be fixed in the next version
       logger.debug(s"Task name: ${manager.taskName}. Get saved offsets for kafka consumer and apply their\n")
       kafkaOffsetsStorage = offsetSerializer.deserialize(lastTxn.next()).asInstanceOf[mutable.Map[(String, Int), Long]]
       kafkaOffsetsStorage.foreach(x => consumer.seek(new TopicPartition(x._1._1, x._1._2), x._2 + 1))

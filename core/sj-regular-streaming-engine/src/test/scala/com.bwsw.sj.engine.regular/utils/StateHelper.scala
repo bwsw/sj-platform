@@ -13,7 +13,6 @@ object StateHelper {
 
     val initialState = mutable.Map[String, Any]()
     val lastTxn = consumer.getLastTransaction(0).get
-    lastTxn.attach(consumer) //todo will be fixed in the next version
     var value = objectSerializer.deserialize(lastTxn.next())
     value match {
       case variable: (Any, Any) =>
