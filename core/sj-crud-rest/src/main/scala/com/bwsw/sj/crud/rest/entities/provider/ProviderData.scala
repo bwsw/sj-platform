@@ -2,9 +2,6 @@ package com.bwsw.sj.crud.rest.entities.provider
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-/**
-  * Stream data case class
-  */
 case class ProviderData(name: String,
                         description: String,
                         login: String,

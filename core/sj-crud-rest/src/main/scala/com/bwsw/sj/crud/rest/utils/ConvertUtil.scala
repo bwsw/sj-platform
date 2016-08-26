@@ -4,7 +4,7 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.crud.rest.entities.config.ConfigSettingData
+import com.bwsw.sj.crud.rest.entities.config.ConfigurationSettingData
 import com.bwsw.sj.crud.rest.entities.module._
 import com.bwsw.sj.crud.rest.entities.provider.ProviderData
 import com.bwsw.sj.crud.rest.entities.service._
@@ -24,16 +24,10 @@ object ConvertUtil {
   import scala.collection.JavaConverters._
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
-  val serializer = new JsonSerializer
+  private val serializer = new JsonSerializer
 
-  /**
-   * Convert model instance to protocol instance for such module type
-   *
-   * @param instance - Model instance object
-   * @return - API instance object for such module type
-   */
-  def convertModelInstanceToApiInstance(instance: Instance) = {
-    logger.debug(s"Convert model instance ${instance.name} to api instance object.")
+  def convertModelInstanceToProtocolInstance(instance: Instance): InstanceMetadata = {
+    logger.debug(s"Convert model instance ${instance.name} to protocol instance object.")
     instance match {
       case timeWindowedInstance: WindowedInstance =>
         val apiInstance = instanceToInstanceMetadata(new WindowedInstanceMetadata, instance).asInstanceOf[WindowedInstanceMetadata]
@@ -119,7 +113,7 @@ object ConvertUtil {
    * @return - API file specification object
    */
   def specificationToSpecificationData(specification: Specification) = {
-    logger.debug(s"Convert model specification ${specification.name} to api specification object.")
+    logger.debug(s"Convert model specification ${specification.name} to protocol specification object.")
     ModuleSpecification(specification.name,
       specification.description,
       specification.version,
@@ -144,7 +138,7 @@ object ConvertUtil {
    * @return - object of model instance
    */
   def convertToModelInstance(apiInstance: InstanceMetadata): Instance = {
-    logger.debug(s"Convert api instance ${apiInstance.name} to model instance object.")
+    logger.debug(s"Convert protocol instance ${apiInstance.name} to model instance object.")
     apiInstance match {
       case windowedInstanceMetadata: WindowedInstanceMetadata =>
         val modelInstance = instanceMetadataToInstance(new WindowedInstance, windowedInstanceMetadata).asInstanceOf[WindowedInstance]
@@ -229,7 +223,7 @@ object ConvertUtil {
    * @return - SjStreamData object
    */
   def streamToStreamData(stream: SjStream) = {
-    logger.debug(s"Convert model stream ${stream.name} to api stream object.")
+    logger.debug(s"Convert model stream ${stream.name} to protocol stream object.")
     var streamData: SjStreamData = null
     stream match {
       case s: TStreamSjStream =>
@@ -266,7 +260,7 @@ object ConvertUtil {
    * @return - service data entity
    */
   def serviceToServiceData(service: Service) = {
-    logger.debug(s"Convert model service ${service.name} to api service object.")
+    logger.debug(s"Convert model service ${service.name} to protocol service object.")
     var serviceData: ServiceData = null
     service match {
       case s: CassandraService =>
@@ -336,7 +330,7 @@ object ConvertUtil {
    * @return - provider data entity
    */
   def providerToProviderData(provider: Provider) = {
-    logger.debug(s"Convert model provider ${provider.name} to api provider object.")
+    logger.debug(s"Convert model provider ${provider.name} to protocol provider object.")
     val providerData = new ProviderData(
       provider.name,
       provider.description,
@@ -355,8 +349,8 @@ object ConvertUtil {
    * @return - config setting data entity
    */
   def configSettingToConfigSettingData(configElement: ConfigSetting) = {
-    logger.debug(s"Convert model config settings data ${configElement.name} to api config settings object.")
-    new ConfigSettingData(
+    logger.debug(s"Convert model config settings data ${configElement.name} to protocol config settings object.")
+    new ConfigurationSettingData(
       configElement.name.replace(configElement.domain + ".", ""),
       configElement.value
     )

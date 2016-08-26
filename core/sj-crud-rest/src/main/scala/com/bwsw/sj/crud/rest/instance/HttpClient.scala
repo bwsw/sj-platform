@@ -1,11 +1,11 @@
-package com.bwsw.sj.crud.rest.runner
+package com.bwsw.sj.crud.rest.instance
 
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.impl.client.{CloseableHttpClient, HttpClientBuilder}
 
 /**
-  * Synchronous http client
-  *
+  * Synchronous simple http client
+  * Used for connecting to marathon
   *
   * @author Kseniya Tomskikh
   */

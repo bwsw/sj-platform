@@ -2,12 +2,6 @@ package com.bwsw.sj.crud.rest.entities.module
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-/**
- * Entity for preview short data of instance
- *
- *
- * @author Kseniya Tomskikh
- */
 case class ShortInstanceMetadata(var name: String,
                                  @JsonProperty("module-type") var moduleType: String,
                                  @JsonProperty("module-name") var moduleName: String,

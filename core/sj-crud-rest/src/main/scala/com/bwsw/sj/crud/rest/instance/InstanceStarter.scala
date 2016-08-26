@@ -1,4 +1,4 @@
-package com.bwsw.sj.crud.rest.runner
+package com.bwsw.sj.crud.rest.instance
 
 import java.net.{InetSocketAddress, URI}
 import java.util
@@ -15,6 +15,7 @@ import com.twitter.common.zookeeper.DistributedLock.LockingException
 import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
 import org.apache.http.util.EntityUtils
 import org.slf4j.LoggerFactory
+import scala.collection.JavaConversions._
 
 /**
  * One-thread starting object for instance
@@ -104,7 +105,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable with Ins
    */
   def instanceStart(mesosMaster: String) = {
     logger.debug(s"Instance: ${instance.name}. Instance is starting.")
-    stageUpdate(instance, instance.name, starting)
+    updateInstanceStage(instance, instance.name, starting)
     val startFrameworkResult = frameworkStart(mesosMaster)
     var isStarted = false
     startFrameworkResult match {
@@ -114,30 +115,30 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable with Ins
 
           while (!isStarted) {
             Thread.sleep(delay)
-            val taskInfoResponse = getTaskInfo(instance.name)
+            val taskInfoResponse = getApplicationInfo(instance.name)
             if (taskInfoResponse.getStatusLine.getStatusCode == OK) {
               val entity = marathonEntitySerializer.deserialize[Map[String, Any]](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
               val tasksRunning = entity("app").asInstanceOf[Map[String, Any]]("tasksRunning").asInstanceOf[Int]
               if (tasksRunning == 1) {
                 instance.status = started
-                stageUpdate(instance, instance.name, started)
+                updateInstanceStage(instance, instance.name, started)
                 isStarted = true
               }
             } else {
-              stageUpdate(instance, instance.name, starting)
+              updateInstanceStage(instance, instance.name, starting)
             }
           }
         } else {
           instance.status = failed
-          stageUpdate(instance, instance.name, failed)
+          updateInstanceStage(instance, instance.name, failed)
         }
       case Left(isRunning) =>
         if (!isRunning) {
           instance.status = failed
-          stageUpdate(instance, instance.name, failed)
+          updateInstanceStage(instance, instance.name, failed)
         } else {
           instance.status = started
-          stageUpdate(instance, instance.name, started)
+          updateInstanceStage(instance, instance.name, started)
         }
     }
   }
@@ -152,14 +153,14 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable with Ins
     logger.debug(s"Instance: ${instance.name}. Start framework for instance.")
     val frameworkJarName = ConfigUtils.getFrameworkJarName()
     val restUrl = new URI(s"$restAddress/v1/custom/jars/$frameworkJarName")
-    val taskInfoResponse = getTaskInfo(instance.name)
+    val taskInfoResponse = getApplicationInfo(instance.name)
     if (taskInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
       val ignore = marathonEntitySerializer.getIgnoreUnknown()
       marathonEntitySerializer.setIgnoreUnknown(true)
       val entity = marathonEntitySerializer.deserialize[MarathonRequest](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
       marathonEntitySerializer.setIgnoreUnknown(ignore)
       if (entity.instances < 1) {
-        Right(scaleApplication(instance.name, 1))
+        Right(scaleMarathonApplication(instance.name, 1))
       } else {
         Left(true)
       }
@@ -179,7 +180,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable with Ins
         Map(applicationEnvs.toList: _*),
         List(restUrl.toString))
 
-      Right(startApplication(request))
+      Right(startMarathonApplication(request))
     }
   }
 
@@ -196,7 +197,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable with Ins
       val stage = instance.stages.get(generatorName)
       if (stage.state.equals(toHandle) || stage.state.equals(failed)) {
         var isStarted = false
-        stageUpdate(instance, stream.name, starting)
+        updateInstanceStage(instance, stream.name, starting)
         val startGeneratorResult = startGenerator(stream)
         startGeneratorResult match {
           case Right(response) =>
@@ -204,23 +205,23 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable with Ins
               response.getStatusLine.getStatusCode.equals(Created)) {
               while (!isStarted) {
                 Thread.sleep(delay)
-                val taskInfoResponse = getTaskInfo(StreamUtil.createGeneratorTaskName(stream))
+                val taskInfoResponse = getApplicationInfo(StreamUtil.createGeneratorTaskName(stream))
                 if (taskInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
                   val entity = marathonEntitySerializer.deserialize[Map[String, Any]](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
                   val tasksRunning = entity("app").asInstanceOf[Map[String, Any]]("tasksRunning").asInstanceOf[Int]
                   if (tasksRunning == stream.generator.instanceCount) {
-                    stageUpdate(instance, stream.name, started)
+                    updateInstanceStage(instance, stream.name, started)
                     isStarted = true
                   } else {
-                    stageUpdate(instance, stream.name, starting)
+                    updateInstanceStage(instance, stream.name, starting)
                   }
                 }
               }
             } else {
-              stageUpdate(instance, stream.name, failed)
+              updateInstanceStage(instance, stream.name, failed)
             }
 
-          case Left(msg) => stageUpdate(instance, stream.name, failed)
+          case Left(msg) => updateInstanceStage(instance, stream.name, failed)
         }
       }
       updateInstanceStages(instance)
@@ -233,7 +234,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable with Ins
    * @param stream - Stream for running generator
    * @return - Future with response from request to marathon
    */
-  def startGenerator(stream: TStreamSjStream) = {
+  private def startGenerator(stream: TStreamSjStream) = {
     logger.debug(s"Instance: ${instance.name}. Start generator for stream ${stream.name}.")
     val transactionGeneratorJar = ConfigUtils.getTransactionGeneratorJarName()
     val zkService = stream.generator.service.asInstanceOf[ZKService]
@@ -254,7 +255,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable with Ins
       Map("ZK_SERVERS" -> generatorProvider.hosts.mkString(";"), "PREFIX" -> prefix),
       List(restUrl.toString))
 
-    val taskInfoResponse = getTaskInfo(marathonRequest.id)
+    val taskInfoResponse = getApplicationInfo(marathonRequest.id)
     if (taskInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
       val ignore = marathonEntitySerializer.getIgnoreUnknown()
       marathonEntitySerializer.setIgnoreUnknown(true)
@@ -262,15 +263,28 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable with Ins
       marathonEntitySerializer.setIgnoreUnknown(ignore)
       if (entity.instances < marathonRequest.instances) {
         logger.debug(s"Instance: ${instance.name}. Scaling generator ${marathonRequest.id}.")
-        Right(scaleApplication(marathonRequest.id, marathonRequest.instances))
+        Right(scaleMarathonApplication(marathonRequest.id, marathonRequest.instances))
       } else {
         logger.debug(s"Instance: ${instance.name}. Generator ${marathonRequest.id} already started.")
         Left(s"Generator $taskId is already created")
       }
     } else {
       logger.debug(s"Instance: ${instance.name}. Generator ${marathonRequest.id} is starting.")
-      Right(startApplication(marathonRequest))
+      Right(startMarathonApplication(marathonRequest))
     }
   }
 
+
+  /**
+   * Updating duration for all stages of instance
+   *
+   * @param instance - Instance for updating
+   */
+  private def updateInstanceStages(instance: Instance) = {
+    logger.debug(s"Update stages of instance ${instance.name}")
+    instance.stages.keySet().foreach { key =>
+      val stage = instance.stages.get(key)
+      updateInstanceStage(instance, key, stage.state)
+    }
+  }
 }

@@ -1,4 +1,4 @@
-package com.bwsw.sj.crud.rest.runner
+package com.bwsw.sj.crud.rest.instance
 
 import com.bwsw.sj.common.DAL.model.module.{InputInstance, Instance}
 import org.apache.http.util.EntityUtils
@@ -21,12 +21,12 @@ class InstanceStopper(instance: Instance, delay: Long) extends Runnable with Ins
   def run() = {
     logger.debug(s"Instance: ${instance.name}. Stop instance.")
     try {
-      stageUpdate(instance, instance.name, stopping)
-      val stopResult = stopApplication(instance.name)
+      updateInstanceStage(instance, instance.name, stopping)
+      val stopResult = stopMarathonApplication(instance.name)
       if (stopResult.getStatusLine.getStatusCode == OK) {
         var isInstanceStopped = false
         while (!isInstanceStopped) {
-          val taskInfoResponse = getTaskInfo(instance.name)
+          val taskInfoResponse = getApplicationInfo(instance.name)
           if (taskInfoResponse.getStatusLine.getStatusCode == OK) {
             val entity = marathonEntitySerializer.deserialize[Map[String, Any]](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
             val tasksRunning = entity("app").asInstanceOf[Map[String, Any]]("tasksRunning").asInstanceOf[Int]
@@ -40,10 +40,10 @@ class InstanceStopper(instance: Instance, delay: Long) extends Runnable with Ins
                   task
                 })
               }
-              stageUpdate(instance, instance.name, stopped)
+              updateInstanceStage(instance, instance.name, stopped)
               isInstanceStopped = true
             } else {
-              stageUpdate(instance, instance.name, stopping)
+              updateInstanceStage(instance, instance.name, stopping)
               Thread.sleep(delay)
             }
           } else {

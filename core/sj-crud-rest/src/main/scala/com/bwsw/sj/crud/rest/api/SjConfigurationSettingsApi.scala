@@ -7,17 +7,13 @@ import com.bwsw.sj.crud.rest.exceptions.{UnknownConfigSettingDomain}
 import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.DAL.model.ConfigSetting
 import com.bwsw.sj.crud.rest.entities._
-import com.bwsw.sj.crud.rest.entities.config.ConfigSettingData
+import com.bwsw.sj.crud.rest.entities.config.ConfigurationSettingData
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.utils.ConvertUtil._
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.config.ConfigSettingValidator
 
-/**
- * Rest-api for config file
- *
- */
-trait SjConfigSettingsApi extends Directives with SjCrudValidator with CompletionUtils {
+trait SjConfigurationSettingsApi extends Directives with SjCrudValidator with CompletionUtils {
 
   val configSettingsApi = {
     pathPrefix("config") {
@@ -29,7 +25,7 @@ trait SjConfigSettingsApi extends Directives with SjCrudValidator with Completio
             domain)
           pathEndOrSingleSlash {
             post { (ctx: RequestContext) =>
-              val data = serializer.deserialize[ConfigSettingData](getEntityFromContext(ctx))
+              val data = serializer.deserialize[ConfigurationSettingData](getEntityFromContext(ctx))
               val errors = ConfigSettingValidator.validate(data)
               var response: RestResponse = ConflictRestResponse(
                 Map("message" -> MessageFormat.format(messages.getString("rest.config.setting.cannot.create"), errors.mkString("\n"))))

@@ -4,7 +4,7 @@ import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.ModuleConstants._
-import com.bwsw.sj.crud.rest.runner.InstanceStopper
+import com.bwsw.sj.crud.rest.instance.InstanceStopper
 import org.slf4j.LoggerFactory
 
 /**

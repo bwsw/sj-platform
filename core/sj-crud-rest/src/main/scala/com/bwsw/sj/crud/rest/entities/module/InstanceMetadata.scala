@@ -2,12 +2,6 @@ package com.bwsw.sj.crud.rest.entities.module
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-/**
-  * Base protocol entity for instance of module
-  *
-  *
-  * @author Kseniya Tomskikh
-  */
 class InstanceMetadata {
   var status: String = null
   var name: String = null

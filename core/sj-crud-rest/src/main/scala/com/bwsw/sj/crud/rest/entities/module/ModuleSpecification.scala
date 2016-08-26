@@ -2,12 +2,6 @@ package com.bwsw.sj.crud.rest.entities.module
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-/**
- * Entity for specification of module
- *
- *
- * @author Kseniya Tomskikh
- */
 case class ModuleSpecification(var name: String,
                                var description: String,
                                var version: String,

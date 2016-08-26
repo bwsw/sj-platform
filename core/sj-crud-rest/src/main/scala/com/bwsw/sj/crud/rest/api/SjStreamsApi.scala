@@ -16,11 +16,6 @@ import com.bwsw.sj.crud.rest.validator.stream.StreamValidator
 
 import scala.collection.mutable
 
-/**
- * Rest-api for streams
- *
- * Created by mendelbaum_nm
- */
 trait SjStreamsApi extends Directives with SjCrudValidator with CompletionUtils {
 
   val streamsApi = {

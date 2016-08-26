@@ -5,6 +5,9 @@ import akka.http.scaladsl.model.{HttpEntity, HttpResponse}
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.crud.rest.entities.RestResponse
 
+/**
+ * Provides methods for completion of sj-api response
+ */
 trait CompletionUtils {
 
   private val responseSerializer = new JsonSerializer()

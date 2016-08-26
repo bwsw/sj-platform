@@ -25,9 +25,44 @@ import scala.concurrent.Future
  *
  * @author Kseniya Tomskikh
  */
-object SjCrudRestService extends App with SjCrudRouter {
+object SjCrudRestService extends App with SjCrudInterface {
+  implicit val system = ActorSystem("sj-crud-rest-server")
+  implicit val materializer = ActorMaterializer()
+  implicit val executor = system.dispatcher
 
-  def logRequestResult(level: LogLevel, route: Route) = {
+  assert(System.getenv("CRUD_REST_HOST") != null && System.getenv("CRUD_REST_PORT") != null,
+  "No environment variables: CRUD_REST_HOST, CRUD_REST_PORT")
+
+  val restHost = System.getenv("CRUD_REST_HOST")
+  val restPort = System.getenv("CRUD_REST_PORT").toInt
+  val serializer = new JsonSerializer()
+  val storage = ConnectionRepository.getFileStorage
+  val fileMetadataDAO = ConnectionRepository.getFileMetadataService
+  val instanceDAO = ConnectionRepository.getInstanceService
+  val serviceDAO = ConnectionRepository.getServiceManager
+  val providerDAO = ConnectionRepository.getProviderService
+  val streamDAO = ConnectionRepository.getStreamService
+  val configService = ConnectionRepository.getConfigService
+  val routeLogged = logRequestResult(Logging.InfoLevel, route())
+  val logger = Logging(system, getClass)
+
+  //putRestSettingsToConfigFile() /todo uncomment before merging with master after demo
+
+  InstanceUtil.checkStatusInstances()
+
+  val serverBinding: Future[ServerBinding] = Http().bindAndHandle(routeLogged, interface = restHost, port = restPort)
+  serverBinding onFailure {
+    case ex: Exception =>
+      logger.error("Failed to bind to {}:{}!", restHost, restPort)
+  }
+  logger.info(s"Server online at http://$restHost:$restPort/")
+
+  private def putRestSettingsToConfigFile() = {
+    configService.save(new ConfigSetting(ConfigConstants.hostOfCrudRestTag, restHost, "system"))
+    configService.save(new ConfigSetting(ConfigConstants.portOfCrudRestTag, restPort.toString, "system"))
+  }
+
+  private def logRequestResult(level: LogLevel, route: Route) = {
     def getRequestEntityAsString(logger: LoggingAdapter)(req: HttpRequest)(res: Any): Unit = {
       val entry = res match {
         case Complete(resp) =>
@@ -40,49 +75,9 @@ object SjCrudRestService extends App with SjCrudRouter {
     DebuggingDirectives.logRequestResult(LoggingMagnet(log => getRequestEntityAsString(log)))(route)
   }
 
-  def entityAsString(entity: HttpEntity): Future[String] = {
+  private def entityAsString(entity: HttpEntity): Future[String] = {
     entity.dataBytes
       .map(_.decodeString(entity.contentType().charset().value))
       .runWith(Sink.head)
-  }
-
-  implicit val system = ActorSystem("sj-crud-rest-server")
-  implicit val materializer = ActorMaterializer()
-  implicit val executor = system.dispatcher
-
-  assert(System.getenv("CRUD_REST_HOST") != null && System.getenv("CRUD_REST_PORT") != null,
-  "No environment variables: CRUD_REST_HOST, CRUD_REST_PORT")
-
-  val restHost = System.getenv("CRUD_REST_HOST")
-  val restPort = System.getenv("CRUD_REST_PORT").toInt
-
-  val serializer = new JsonSerializer()
-  val storage = ConnectionRepository.getFileStorage
-  val fileMetadataDAO = ConnectionRepository.getFileMetadataService
-  val instanceDAO = ConnectionRepository.getInstanceService
-  val serviceDAO = ConnectionRepository.getServiceManager
-  val providerDAO = ConnectionRepository.getProviderService
-  val streamDAO = ConnectionRepository.getStreamService
-  val configService = ConnectionRepository.getConfigService
-
-  val routeLogged = logRequestResult(Logging.InfoLevel, route())
-  val logger = Logging(system, getClass)
-
-  //putRestSettingsToConfigFile() /todo uncomment before merging with master after demo
-
-  InstanceUtil.checkStatusInstances()
-
-  val serverBinding: Future[ServerBinding] = Http().bindAndHandle(routeLogged, interface = restHost, port = restPort)
-
-  serverBinding onFailure {
-    case ex: Exception =>
-      logger.error("Failed to bind to {}:{}!", restHost, restPort)
-  }
-
-  logger.info(s"Server online at http://$restHost:$restPort/")
-
-  private def putRestSettingsToConfigFile() = {
-    configService.save(new ConfigSetting(ConfigConstants.hostOfCrudRestTag, restHost, "system"))
-    configService.save(new ConfigSetting(ConfigConstants.portOfCrudRestTag, restPort.toString, "system"))
   }
 }

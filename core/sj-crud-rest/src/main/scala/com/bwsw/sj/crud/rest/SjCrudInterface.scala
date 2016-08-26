@@ -3,7 +3,7 @@ package com.bwsw.sj.crud.rest
 import java.text.MessageFormat
 
 import akka.http.scaladsl.model.EntityStreamSizeException
-import akka.http.scaladsl.server.{Directives, ExceptionHandler}
+import akka.http.scaladsl.server.{Route, Directives, ExceptionHandler}
 import com.bwsw.sj.crud.rest.api._
 import com.bwsw.sj.crud.rest.cors.CorsSupport
 import com.bwsw.sj.crud.rest.entities.{InternalServerErrorRestResponse, NotFoundRestResponse}
@@ -13,19 +13,19 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
 import org.everit.json.schema.ValidationException
 
 /**
- * Router trait for CRUD Rest-API
+ * Route for CRUD Rest-API
  *
  *
  * @author Kseniya Tomskikh
  */
-trait SjCrudRouter extends Directives
+trait SjCrudInterface extends Directives
 with CorsSupport
 with SjModulesApi
 with SjCustomApi
 with SjStreamsApi
 with SjServicesApi
 with SjProvidersApi
-with SjConfigSettingsApi with CompletionUtils {
+with SjConfigurationSettingsApi with CompletionUtils {
 
   val exceptionHandler = ExceptionHandler {
     case InstanceNotFound(msg, key) =>
@@ -54,7 +54,7 @@ with SjConfigSettingsApi with CompletionUtils {
       complete(restResponseToHttpResponse(response))
   }
 
-  def route() = {
+  def route(): Route = {
     handleExceptions(exceptionHandler) {
       corsHandler {
         pathPrefix("v1") {

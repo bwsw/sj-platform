@@ -1,7 +1,7 @@
 package com.bwsw.sj.crud.rest.validator.config
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.crud.rest.entities.config.ConfigSettingData
+import com.bwsw.sj.crud.rest.entities.config.ConfigurationSettingData
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
@@ -11,7 +11,7 @@ object ConfigSettingValidator {
   private val logger = LoggerFactory.getLogger(getClass.getName)
   val configService = ConnectionRepository.getConfigService
 
-  def validate(initialData: ConfigSettingData) = {
+  def validate(initialData: ConfigurationSettingData) = {
     logger.debug(s"Config setting ${initialData.name}. Start config settings validation.")
 
     val errors = new ArrayBuffer[String]()

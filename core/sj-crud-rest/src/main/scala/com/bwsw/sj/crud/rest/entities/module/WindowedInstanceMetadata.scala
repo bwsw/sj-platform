@@ -2,12 +2,6 @@ package com.bwsw.sj.crud.rest.entities.module
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-/**
-  * Protocol entity for instance of windowed module
-  *
-  *
-  * @author Kseniya Tomskikh
-  */
 class WindowedInstanceMetadata extends InstanceMetadata {
   @JsonProperty("state-management") var stateManagement: String = null
   @JsonProperty("state-full-checkpoint") var stateFullCheckpoint: Int = 0

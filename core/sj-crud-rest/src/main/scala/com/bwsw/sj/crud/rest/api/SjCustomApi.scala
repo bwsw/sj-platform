@@ -21,7 +21,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 
 /**
- * Rest-api for custom jars
+ * Rest-api for sj-platform executive units and custom files
  *
  *
  *

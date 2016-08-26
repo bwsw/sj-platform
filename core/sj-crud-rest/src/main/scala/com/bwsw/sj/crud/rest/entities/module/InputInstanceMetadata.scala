@@ -3,11 +3,6 @@ package com.bwsw.sj.crud.rest.entities.module
 import com.bwsw.sj.common.DAL.model.module.InputTask
 import com.fasterxml.jackson.annotation.JsonProperty
 
-/**
-  *
-  *
-  * @author Kseniya Tomskikh
-  */
 class InputInstanceMetadata extends InstanceMetadata {
   @JsonProperty("duplicate-check") var duplicateCheck: Boolean = false
   @JsonProperty("lookup-history") var lookupHistory: Int = 0

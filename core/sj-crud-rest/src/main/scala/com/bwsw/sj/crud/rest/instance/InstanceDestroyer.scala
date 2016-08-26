@@ -1,4 +1,4 @@
-package com.bwsw.sj.crud.rest.runner
+package com.bwsw.sj.crud.rest.instance
 
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{SjStream, TStreamSjStream}
@@ -20,7 +20,7 @@ class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable with I
   def run() = {
     logger.debug(s"Instance: ${instance.name}. Destroy instance.")
     try {
-      stageUpdate(instance, instance.name, deleting)
+      updateInstanceStage(instance, instance.name, deleting)
       deleteGenerators(instance)
       deleteInstance(instance)
       instanceDAO.delete(instance.name)
@@ -66,26 +66,26 @@ class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable with I
     }
     tStreamStreamsToStop.foreach { stream =>
       var isTaskDeleted = false
-      stageUpdate(instance, stream.name, deleting)
+      updateInstanceStage(instance, stream.name, deleting)
       val taskId = getGeneratorAppName(stream.asInstanceOf[TStreamSjStream])
-      val taskInfoResponse = getTaskInfo(taskId)
+      val taskInfoResponse = getApplicationInfo(taskId)
       if (taskInfoResponse.getStatusLine.getStatusCode != NotFound) {
         logger.debug(s"Instance: ${instance.name}. Delete generator: $taskId.")
-        val stopResponse = destroyApplication(taskId)
+        val stopResponse = destroyMarathonApplication(taskId)
         if (stopResponse.getStatusLine.getStatusCode == OK) {
           while (!isTaskDeleted) {
-            val taskInfoResponse = getTaskInfo(taskId)
+            val taskInfoResponse = getApplicationInfo(taskId)
             if (taskInfoResponse.getStatusLine.getStatusCode != NotFound) {
-              stageUpdate(instance, stream.name, deleting)
+              updateInstanceStage(instance, stream.name, deleting)
               Thread.sleep(delay)
             } else {
-              stageUpdate(instance, stream.name, deleted)
+              updateInstanceStage(instance, stream.name, deleted)
               isTaskDeleted = true
             }
           }
         }
       } else {
-        stageUpdate(instance, stream.name, deleted)
+        updateInstanceStage(instance, stream.name, deleted)
         isTaskDeleted = true
       }
     }
@@ -101,16 +101,16 @@ class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable with I
     var isInstanceDeleted = false
     //todo maybe add timeout and retry count?
     while (!isInstanceDeleted) {
-      val response = destroyApplication(instance.name)
+      val response = destroyMarathonApplication(instance.name)
       if (response.getStatusLine.getStatusCode == OK) {
         while (!isInstanceDeleted) {
-          val taskInfoResponse = getTaskInfo(instance.name)
+          val taskInfoResponse = getApplicationInfo(instance.name)
           if (taskInfoResponse.getStatusLine.getStatusCode != NotFound) {
-            stageUpdate(instance, instance.name, deleting)
+            updateInstanceStage(instance, instance.name, deleting)
             Thread.sleep(delay)
           } else {
             instance.status = deleted
-            stageUpdate(instance, instance.name, deleted)
+            updateInstanceStage(instance, instance.name, deleted)
             isInstanceDeleted = true
           }
         }

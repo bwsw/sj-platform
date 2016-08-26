@@ -14,7 +14,7 @@ import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.engine.StreamingValidator
 import com.bwsw.sj.crud.rest.entities._
 import com.bwsw.sj.crud.rest.entities.module._
-import com.bwsw.sj.crud.rest.runner.{InstanceDestroyer, InstanceStarter, InstanceStopper}
+import com.bwsw.sj.crud.rest.instance.{InstanceDestroyer, InstanceStarter, InstanceStopper}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.module.StreamingModuleValidator
@@ -22,13 +22,6 @@ import org.apache.commons.io.FileUtils
 
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
-/**
- * Rest-api for module-jars
- *
- *
- *
- * @author Kseniya Tomskikh
- */
 trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils {
 
   import com.bwsw.sj.common.ModuleConstants._
@@ -172,7 +165,7 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
                         MessageFormat.format(messages.getString("rest.modules.module.instances.notfound"), s"$moduleType-$moduleName-$moduleVersion"))
                       )
                       if (instances.nonEmpty) {
-                        response = OkRestResponse(Map("instances" -> instances.map(i => convertModelInstanceToApiInstance(i))))
+                        response = OkRestResponse(Map("instances" -> instances.map(i => convertModelInstanceToProtocolInstance(i))))
                       }
 
                       complete(restResponseToHttpResponse(response))
@@ -188,7 +181,7 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
                     }
                     pathEndOrSingleSlash {
                       get {
-                        val response = OkRestResponse(Map("instance" -> convertModelInstanceToApiInstance(instance.get)))
+                        val response = OkRestResponse(Map("instance" -> convertModelInstanceToProtocolInstance(instance.get)))
                         complete(restResponseToHttpResponse(response))
                       } ~
                         delete {

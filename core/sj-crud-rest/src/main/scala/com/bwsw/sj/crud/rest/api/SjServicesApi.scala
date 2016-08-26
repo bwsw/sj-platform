@@ -11,11 +11,6 @@ import com.bwsw.sj.crud.rest.utils.{CompletionUtils, ServiceUtil}
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.service.ServiceValidator
 
-/**
- * Rest-api for streams
- *
- * Created by mendelbaum_nm
- */
 trait SjServicesApi extends Directives with SjCrudValidator with CompletionUtils {
 
   val servicesApi = {

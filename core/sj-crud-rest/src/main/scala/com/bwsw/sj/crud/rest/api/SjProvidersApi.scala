@@ -11,11 +11,6 @@ import com.bwsw.sj.crud.rest.utils.ConvertUtil.providerToProviderData
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.provider.ProviderValidator
 
-/**
- * Rest-api for streams
- *
- * Created by mendelbaum_nm
- */
 trait SjProvidersApi extends Directives with SjCrudValidator with CompletionUtils {
 
   val providersApi = {
