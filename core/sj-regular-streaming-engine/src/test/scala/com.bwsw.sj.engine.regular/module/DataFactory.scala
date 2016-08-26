@@ -18,7 +18,7 @@ import com.bwsw.tstreams.agents.consumer.{Consumer, Options}
 import com.bwsw.tstreams.agents.producer
 import com.bwsw.tstreams.common.RoundRobinPolicy
 import com.bwsw.tstreams.converter.IConverter
-import com.bwsw.tstreams.coordination.producer.transport.impl.TcpTransport
+import com.bwsw.tstreams.coordination.client.TcpTransport
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.services.BasicStreamService
 import kafka.admin.AdminUtils

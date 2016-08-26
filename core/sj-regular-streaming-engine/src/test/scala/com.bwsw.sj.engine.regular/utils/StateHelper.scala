@@ -23,7 +23,7 @@ object StateHelper {
         val lastFullTxnUUID = Some(value.asInstanceOf[UUID])
         val lastFullStateTxn = consumer.getTransactionById(0, lastFullTxnUUID.get).get
         fillFullState(initialState, lastFullStateTxn, objectSerializer)
-        consumer.setLocalOffset(0, lastFullTxnUUID.get)
+        consumer.setStreamPartitionOffset(0, lastFullTxnUUID.get)
 
         var maybeTxn = consumer.getTransaction
         while (maybeTxn.nonEmpty) {

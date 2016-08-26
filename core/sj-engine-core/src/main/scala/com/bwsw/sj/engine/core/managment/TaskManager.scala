@@ -237,7 +237,7 @@ abstract class TaskManager() {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create subscribing consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
 
-    val partitionRange = (partitions.head to partitions.tail.head).toList
+    val partitionRange = (partitions.head to partitions.tail.head).toSet
     val timeUuidGenerator = EngineUtils.getUUIDGenerator(stream)
 
     setStreamOptions(stream)

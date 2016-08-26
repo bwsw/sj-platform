@@ -74,7 +74,7 @@ class TStreamTaskInputService(manager: TaskManager,
 
   private def addConsumersToCheckpointGroup() = {
     logger.debug(s"Task: ${manager.taskName}. Start adding subscribing consumers to checkpoint group\n")
-    consumers.foreach(x => checkpointGroup.add(x._2))
+    consumers.foreach(x => checkpointGroup.add(x._2.getConsumer()))
     logger.debug(s"Task: ${manager.taskName}. Adding subscribing consumers to checkpoint group is finished\n")
   }
 
@@ -83,7 +83,7 @@ class TStreamTaskInputService(manager: TaskManager,
     val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
     logger.debug(s"Task: ${manager.taskName}. " +
       s"Change local offset of consumer: ${tStreamEnvelope.consumerName} to txn: ${tStreamEnvelope.txnUUID}\n")
-    consumers(tStreamEnvelope.consumerName).setLocalOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
+    consumers(tStreamEnvelope.consumerName).getConsumer().setStreamPartitionOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
     performanceMetrics.addEnvelopeToInputStream(
       tStreamEnvelope.stream,
       tStreamEnvelope.data.map(_.length)

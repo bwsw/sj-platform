@@ -6,18 +6,19 @@ import java.util.concurrent.ArrayBlockingQueue
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.engine.core.entities.TStreamEnvelope
-import com.bwsw.tstreams.agents.consumer.subscriber.{SubscribingConsumer, Callback}
+import com.bwsw.tstreams.agents.consumer.{Consumer, TransactionOperator}
+import com.bwsw.tstreams.agents.consumer.subscriber.Callback
 import org.slf4j.{Logger, LoggerFactory}
 
 /**
-  * Subscriber callback for processing transaction of t-stream
-  * for output-streaming engine
-  *
-  *
-  *
-  * @author Kseniya Tomskikh
-  * @param blockingQueue Blocking Queue for saving new transaction from t-stream
-  */
+ * Subscriber callback for processing transaction of t-stream
+ * for output-streaming engine
+ *
+ *
+ *
+ * @author Kseniya Tomskikh
+ * @param blockingQueue Blocking Queue for saving new transaction from t-stream
+ */
 class OutputSubscriberCallback(blockingQueue: ArrayBlockingQueue[String])
   extends Callback[Array[Byte]] {
 
@@ -25,24 +26,23 @@ class OutputSubscriberCallback(blockingQueue: ArrayBlockingQueue[String])
   private val envelopeSerializer = new JsonSerializer()
 
   /**
-    * Executing, when getting new transaction from t-stream
-    * Putting new transaction as envelope to blocking queue
-    *
-    * @param subscriber Subscriber for consumer for read data from t-stream
-    * @param partition Number of partition
-    * @param transactionUuid Txn uuid from t-stream
-    */
-  override def onEvent(subscriber: SubscribingConsumer[Array[Byte]],
-                       partition: Int,
-                       transactionUuid: UUID): Unit = {
-    logger.debug(s"onEvent handler was invoked by subscriber: ${subscriber.name}\n")
-    val txn = subscriber.getTransactionById(partition, transactionUuid).get
-    val stream = ConnectionRepository.getStreamService.get(subscriber.stream.getName).get
+   * Executing, when getting new transaction from t-stream
+   * Putting new transaction as envelope to blocking queue
+   *
+   * @param operator Subscriber for consumer for read data from t-stream
+   * @param partition Number of partition
+   * @param uuid Txn uuid from t-stream
+   */
+  override def onEvent(operator: TransactionOperator[Array[Byte]], partition: Int, uuid: UUID, count: Int): Unit = {
+    val consumer = operator.asInstanceOf[Consumer[Array[Byte]]]
+    logger.debug(s"onEvent handler was invoked by subscriber: ${consumer.name}\n")
+    val txn = consumer.getTransactionById(partition, uuid).get
+    val stream = ConnectionRepository.getStreamService.get(consumer.stream.getName).get
     val envelope = new TStreamEnvelope()
     envelope.stream = stream.name
     envelope.partition = partition
-    envelope.txnUUID = transactionUuid
-    envelope.consumerName = subscriber.name
+    envelope.txnUUID = uuid
+    envelope.consumerName = consumer.name
     envelope.data = txn.getAll()
     envelope.tags = stream.tags
 

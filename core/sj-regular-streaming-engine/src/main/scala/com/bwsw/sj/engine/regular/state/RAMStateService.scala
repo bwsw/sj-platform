@@ -110,7 +110,7 @@ class RAMStateService(manager: RegularTaskManager, checkpointGroup: CheckpointGr
           lastFullTxnUUID = Some(value.asInstanceOf[UUID])
           val lastFullStateTxn = stateConsumer.getTransactionById(0, lastFullTxnUUID.get).get
           fillFullState(initialState, lastFullStateTxn)
-          stateConsumer.setLocalOffset(0, lastFullTxnUUID.get)
+          stateConsumer.setStreamPartitionOffset(0, lastFullTxnUUID.get)
 
           var maybeTxn = stateConsumer.getTransaction
           while (maybeTxn.nonEmpty) {
