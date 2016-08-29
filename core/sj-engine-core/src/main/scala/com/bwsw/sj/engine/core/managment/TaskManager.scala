@@ -3,18 +3,20 @@ package com.bwsw.sj.engine.core.managment
 import java.io.File
 import java.net.URLClassLoader
 
+import com.bwsw.common.tstream.NetworkTimeUUIDGenerator
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.ModuleConstants._
 import com.bwsw.sj.common.StreamConstants._
 import com.bwsw.sj.common.engine.StreamingExecutor
+import com.bwsw.sj.common.utils.ConfigUtils
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
 import com.bwsw.sj.engine.core.environment.EnvironmentManager
-import com.bwsw.sj.engine.core.utils.EngineUtils
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
 import com.bwsw.tstreams.agents.consumer.subscriber.Callback
 import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
+import com.bwsw.tstreams.generator.{LocalTimeUUIDGenerator, IUUIDGenerator}
 import com.bwsw.tstreams.services.BasicStreamService
 import org.slf4j.LoggerFactory
 
@@ -148,9 +150,8 @@ abstract class TaskManager() {
   }
 
   private def getInputs() = {
-    val service = ConnectionRepository.getStreamService
       instance.executionPlan.tasks.get(taskName).inputs.asScala
-        .map(x => (service.get(x._1).get, x._2))
+        .map(x => (streamDAO.get(x._1).get, x._2))
   }
 
   /**
@@ -162,8 +163,10 @@ abstract class TaskManager() {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create the t-stream producers for each output stream\n")
 
+    tstreamFactory.setProperty(TSF_Dictionary.Producer.Transaction.DATA_WRITE_BATCH_SIZE, 20) //testing
+
     instance.outputs
-      .map(x => (x, ConnectionRepository.getStreamService.get(x).get))
+      .map(x => (x, streamDAO.get(x).get))
       .map(x => (x._1, createProducer(x._2.asInstanceOf[TStreamSjStream]))).toMap
   }
 
@@ -171,7 +174,7 @@ abstract class TaskManager() {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create producer for stream: ${stream.name}\n")
 
-    val timeUuidGenerator = EngineUtils.getUUIDGenerator(stream)
+    val timeUuidGenerator = getUUIDGenerator(stream)
 
     setStreamOptions(stream)
     setProducerBindPort()
@@ -238,7 +241,7 @@ abstract class TaskManager() {
       s"Create subscribing consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
 
     val partitionRange = (partitions.head to partitions.tail.head).toSet
-    val timeUuidGenerator = EngineUtils.getUUIDGenerator(stream)
+    val timeUuidGenerator = getUUIDGenerator(stream)
 
     setStreamOptions(stream)
     setSubscribingConsumerBindPort()
@@ -250,6 +253,23 @@ abstract class TaskManager() {
       partitionRange,
       callback,
       offset)
+  }
+
+  protected def getUUIDGenerator(stream: TStreamSjStream) : IUUIDGenerator = {
+    val retryPeriod = ConfigUtils.getClientRetryPeriod()
+    val retryCount = ConfigUtils.getRetryCount()
+
+    stream.generator.generatorType match {
+      case "local" => new LocalTimeUUIDGenerator
+      case generatorType =>
+        val service = stream.generator.service.asInstanceOf[ZKService]
+        val zkHosts = service.provider.hosts
+        val prefix = "/" + service.namespace + "/" + {
+          if (generatorType == "global") generatorType else stream.name
+        }
+
+        new NetworkTimeUUIDGenerator(zkHosts, prefix, retryPeriod, retryCount)
+    }
   }
 
   protected def setStreamOptions(stream: TStreamSjStream) = {

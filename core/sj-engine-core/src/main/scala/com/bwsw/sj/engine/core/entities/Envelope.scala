@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
 
 /**
  * Represents a message envelope that is received by an Executor for each message
- * that is received from a partition of a specific input kafka stream or t-stream.
+ * that is received from a partition of a specific input (kafka, t-stream, elasticsearch, jdbc)
  */
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "streamType")

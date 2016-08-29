@@ -14,7 +14,7 @@ import scala.collection._
  */
 
 class PartitionedOutput(producer: Producer[Array[Byte]],
-                        performanceMetrics: PerformanceMetrics) extends ModuleOutput(performanceMetrics) {
+                        performanceMetrics: PerformanceMetrics) extends RegularModuleOutput(performanceMetrics) {
 
   private val txns = mutable.Map[Int, Transaction[Array[Byte]]]()
   private val streamName = producer.stream.getName

@@ -1,10 +1,9 @@
 package com.bwsw.sj.engine.core.entities
 
 /**
-  * Created: 5/26/16
-  *
-  * @author Kseniya Tomskikh
-  */
+ * Provides a wrapper for jdbc entity.
+ */
+
 class JdbcEntity extends OutputEntity {
 
 }

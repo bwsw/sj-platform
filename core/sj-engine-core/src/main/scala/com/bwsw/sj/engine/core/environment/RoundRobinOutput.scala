@@ -13,7 +13,7 @@ import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer
  */
 
 class RoundRobinOutput(producer: Producer[Array[Byte]],
-                       performanceMetrics: PerformanceMetrics) extends ModuleOutput(performanceMetrics) {
+                       performanceMetrics: PerformanceMetrics) extends RegularModuleOutput(performanceMetrics) {
 
   private var txn: Option[Transaction[Array[Byte]]] = None
   private val streamName = producer.stream.getName

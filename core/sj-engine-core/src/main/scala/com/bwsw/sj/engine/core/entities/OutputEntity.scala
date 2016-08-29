@@ -2,11 +2,6 @@ package com.bwsw.sj.engine.core.entities
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-/**
-  *
-  *
-  * @author Kseniya Tomskikh
-  */
 class OutputEntity extends Serializable {
 
   @JsonProperty("output-date-time") var outputDateTime: String = null
