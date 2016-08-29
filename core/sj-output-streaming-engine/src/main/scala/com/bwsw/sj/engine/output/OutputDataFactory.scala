@@ -26,7 +26,7 @@ object OutputDataFactory {
   private val instanceDAO: GenericMongoService[Instance] = ConnectionRepository.getInstanceService
   private val streamDAO = ConnectionRepository.getStreamService
 
-  val instance: OutputInstance = instanceDAO.get(instanceName).asInstanceOf[OutputInstance]
+  val instance: OutputInstance = instanceDAO.get(instanceName).get.asInstanceOf[OutputInstance]
 
   val inputStream: SjStream = streamDAO.get(instance.inputs.head).get
   val outputStream: SjStream = streamDAO.get(instance.outputs.head).get
