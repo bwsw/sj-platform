@@ -150,9 +150,8 @@ abstract class TaskManager() {
   }
 
   private def getInputs() = {
-    val service = ConnectionRepository.getStreamService
       instance.executionPlan.tasks.get(taskName).inputs.asScala
-        .map(x => (service.get(x._1).get, x._2))
+        .map(x => (streamDAO.get(x._1).get, x._2))
   }
 
   /**
@@ -164,8 +163,10 @@ abstract class TaskManager() {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create the t-stream producers for each output stream\n")
 
+    tstreamFactory.setProperty(TSF_Dictionary.Producer.Transaction.DATA_WRITE_BATCH_SIZE, 20) //testing
+
     instance.outputs
-      .map(x => (x, ConnectionRepository.getStreamService.get(x).get))
+      .map(x => (x, streamDAO.get(x).get))
       .map(x => (x._1, createProducer(x._2.asInstanceOf[TStreamSjStream]))).toMap
   }
 
