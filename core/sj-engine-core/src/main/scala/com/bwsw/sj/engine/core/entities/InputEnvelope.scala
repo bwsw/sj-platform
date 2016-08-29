@@ -3,9 +3,7 @@ package com.bwsw.sj.engine.core.entities
 import com.bwsw.sj.common.StreamConstants
 
 /**
- * Provides a wrapper for t-stream transactions (if outputMetadata has more than one element) that is formed by input engine.
- *
- * @author Kseniya Mikhaleva
+ * Provides a wrapper for t-stream transaction that is formed by input engine.
  */
 
 class InputEnvelope(var key: String,

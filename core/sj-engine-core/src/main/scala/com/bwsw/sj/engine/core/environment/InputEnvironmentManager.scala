@@ -10,7 +10,7 @@ import scala.collection.Map
  * @author Kseniya Mikhaleva
  *
  * @param options User defined options from instance parameters
- * @param outputs Set of output streams of instance parameters that have tags
+ * @param outputs Set of output streams of instance parameters
  */
 class InputEnvironmentManager(options: Map[String, Any], outputs: Array[SjStream]) extends EnvironmentManager(options, outputs) {
 

@@ -3,7 +3,7 @@ package com.bwsw.sj.engine.output
 import java.util.concurrent.{ExecutorCompletionService, Executors}
 
 import com.bwsw.sj.common.ModuleConstants
-import com.bwsw.sj.engine.core.PersistentBlockingQueue
+import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.engine.OutputTaskEngineFactory

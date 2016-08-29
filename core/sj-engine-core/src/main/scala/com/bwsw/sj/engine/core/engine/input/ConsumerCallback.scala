@@ -1,18 +1,18 @@
-package com.bwsw.sj.engine.core
+package com.bwsw.sj.engine.core.engine.input
 
 import java.util.UUID
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.TStreamEnvelope
-import com.bwsw.tstreams.agents.consumer.{TransactionOperator, Consumer}
 import com.bwsw.tstreams.agents.consumer.subscriber.Callback
+import com.bwsw.tstreams.agents.consumer.{Consumer, TransactionOperator}
 import org.slf4j.LoggerFactory
 
 
 /**
  * Provides a handler for sub. consumer that puts a t-stream envelope in a persistent blocking queue
- *
  *
  * @author Kseniya Mikhaleva
  * @param blockingQueue Persistent blocking queue for storing transactions

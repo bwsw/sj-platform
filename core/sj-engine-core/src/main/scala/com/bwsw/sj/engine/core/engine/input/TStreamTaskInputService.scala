@@ -1,11 +1,11 @@
-package com.bwsw.sj.engine.core
+package com.bwsw.sj.engine.core.engine.input
 
 import java.util.Date
 
 import com.bwsw.sj.common.DAL.model.TStreamSjStream
 import com.bwsw.sj.common.DAL.model.module.{OutputInstance, RegularInstance}
 import com.bwsw.sj.common.StreamConstants
-import com.bwsw.sj.engine.core.engine.input.TaskInputService
+import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics

@@ -4,8 +4,7 @@ import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 
 /**
-  *
-  *
+  * Class that contains an execution logic of output module
   * @author Kseniya Tomskikh
   */
 class OutputStreamingExecutor extends StreamingExecutor {

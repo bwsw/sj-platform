@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.core
+package com.bwsw.sj.engine.core.engine
 
 import java.nio.file.{Files, Path}
 import java.util.concurrent.TimeUnit._
@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 
 /**
  * Provides a blocking queue to keep incoming envelopes that are serialized into a string,
- * which will be retrieved into a module
+ * which will be retrieved inside an engine
  * @param path Temporary directory path for queue
  */
 class PersistentBlockingQueue(path: String) {
@@ -24,8 +24,8 @@ class PersistentBlockingQueue(path: String) {
   private val cond = mutex.newCondition()
 
   /**
-   * Puts a message in a queue with blocking
-   * @param message Specific data
+   * Put a message in a queue using blocking
+   * @param message
    */
   def put(message: String) = {
     logger.info(s"Put a message: $message to queue\n")

@@ -8,7 +8,7 @@ import com.bwsw.sj.common.DAL.model.{KafkaService, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.common.utils.ConfigUtils
-import com.bwsw.sj.engine.core.PersistentBlockingQueue
+import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope}
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics

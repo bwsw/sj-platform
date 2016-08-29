@@ -1,10 +1,8 @@
 package com.bwsw.sj.engine.core.entities
 
 /**
-  *
-  *
-  * @author Kseniya Tomskikh
-  */
+ * Provides a wrapper for elasticsearch entity.
+ */
 
 class EsEntity extends OutputEntity {
 

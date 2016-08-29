@@ -6,8 +6,6 @@ import com.bwsw.sj.common.StreamConstants
 
 /**
  * Provides a wrapper for t-stream transaction.
- *
- * @author Kseniya Mikhaleva
  */
 
 class TStreamEnvelope() extends Envelope() {

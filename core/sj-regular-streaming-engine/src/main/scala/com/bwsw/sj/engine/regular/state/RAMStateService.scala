@@ -17,7 +17,7 @@ import scala.collection.mutable
  *
  * @author Kseniya Mikhaleva
  *
- * @param manager Manager of environment of task of regular module
+ * @param manager Manager of environment of regular module task
  * @param checkpointGroup Group of t-stream agents that have to make a checkpoint at the same time
  */
 
@@ -39,7 +39,7 @@ class RAMStateService(manager: RegularTaskManager, checkpointGroup: CheckpointGr
   addAgentsToCheckpointGroup()
 
   /**
-   * Number of a last transaction that saved a state. Used for saving partial changes of state
+   * Number of a last transaction that keeps a state. Used for saving partial changes of state
    */
   private var lastFullTxnUUID: Option[UUID] = None
 
@@ -60,8 +60,6 @@ class RAMStateService(manager: RegularTaskManager, checkpointGroup: CheckpointGr
 
   /**
    * Creates SJStream to keep a module state
-   *
-   * @return SjStream used for keeping a module state
    */
   private def createStateStream() = {
     logger.debug(s"Task name: ${manager.taskName} " +
@@ -135,48 +133,55 @@ class RAMStateService(manager: RegularTaskManager, checkpointGroup: CheckpointGr
   }
 
   /**
-   * Check whether a state variable with specific key exists or not
-   * @param key State variable name
-   * @return True or false
+   * Allow getting a state by gathering together all data from transaction
+   * @param initialState State from which to need start
+   * @param transaction Transaction containing a state
    */
+  private def fillFullState(initialState: mutable.Map[String, Any], transaction: Transaction[Array[Byte]]) = {
+    logger.debug(s"Fill full state\n")
+    var value: Object = null
+    var variable: (String, Any) = null
+
+    while (transaction.hasNext()) {
+      value = serializer.deserialize(transaction.next())
+      variable = value.asInstanceOf[(String, Any)]
+      initialState(variable._1) = variable._2
+    }
+  }
+
+  /**
+   * Allows restoring a state consistently applying all partial changes of state
+   * @param fullState Last state that has been saved
+   * @param partialState Partial changes of state
+   */
+  private def applyPartialChanges(fullState: mutable.Map[String, Any], partialState: mutable.Map[String, (String, Any)]) = {
+    logger.debug(s"Apply partial changes to state sequentially\n")
+    partialState.foreach {
+      case (key, ("set", value)) => fullState(key) = value
+      case (key, ("delete", _)) => fullState.remove(key)
+    }
+  }
+
   override def isExist(key: String): Boolean = {
     logger.info(s"Check whether a state variable: $key  exists or not\n")
     stateVariables.contains(key)
   }
 
-  /**
-   * Gets a value of the state variable by key
-   * @param key State variable name
-   * @return Value of the state variable
-   */
   override def get(key: String): Any = {
     logger.info(s"Get a state variable: $key\n")
     stateVariables(key)
   }
 
-  /**
-   * Puts a value of the state variable by key
-   * @param key State variable name
-   * @param value Value of the state variable
-   */
   override def set(key: String, value: Any): Unit = {
     logger.info(s"Set a state variable: $key to $value\n")
     stateVariables(key) = value
   }
 
-  /**
-   * Delete a state variable by key
-   * @param key State variable name
-   */
   override def delete(key: String): Unit = {
     logger.info(s"Remove a state variable: $key\n")
     stateVariables.remove(key)
   }
 
-  /**
-   * Removes all state variables. After this operation has completed,
-   * the state will be empty.
-   */
   override def clear(): Unit = {
     logger.info(s"Remove all state variables\n")
     stateVariables.clear()
@@ -209,6 +214,12 @@ class RAMStateService(manager: RegularTaskManager, checkpointGroup: CheckpointGr
     stateVariables.foreach(x => deleteChange(x._1))
   }
 
+  override def getNumberOfVariables: Int = {
+    stateVariables.size
+  }
+
+  override def getAll: Map[String, Any] = stateVariables.toMap
+
   override def savePartialState(): Unit = {
     logger.debug(s"Do checkpoint of a part of state\n")
     if (stateChanges.nonEmpty) {
@@ -217,56 +228,6 @@ class RAMStateService(manager: RegularTaskManager, checkpointGroup: CheckpointGr
         stateChanges.clear()
       } else saveFullState()
     }
-  }
-
-  override def saveFullState(): Unit = {
-    logger.debug(s"Do checkpoint of a full state\n")
-    if (stateVariables.nonEmpty) {
-      lastFullTxnUUID = Some(sendState(stateVariables))
-      stateChanges.clear()
-    }
-  }
-
-  /**
-   * Allow getting a state by gathering together all data from transaction
-   * @param initialState State from which to need start
-   * @param transaction Transaction containing a state
-   */
-  private def fillFullState(initialState: mutable.Map[String, Any], transaction: Transaction[Array[Byte]]) = {
-    logger.debug(s"Fill full state\n")
-    var value: Object = null
-    var variable: (String, Any) = null
-
-    while (transaction.hasNext()) {
-      value = serializer.deserialize(transaction.next())
-      variable = value.asInstanceOf[(String, Any)]
-      initialState(variable._1) = variable._2
-    }
-  }
-
-  /**
-   * Allows restoring a state consistently applying all partial changes of state
-   * @param fullState Last state that has been saved
-   * @param partialState Partial changes of state
-   */
-  private def applyPartialChanges(fullState: mutable.Map[String, Any], partialState: mutable.Map[String, (String, Any)]) = {
-    logger.debug(s"Apply partial changes to state sequentially\n")
-    partialState.foreach {
-      case (key, ("set", value)) => fullState(key) = value
-      case (key, ("delete", _)) => fullState.remove(key)
-    }
-  }
-
-  /**
-   * Does checkpoint of state
-   * @param state State variables
-   * @return UUID of transaction
-   */
-  private def sendState(state: mutable.Map[String, Any]): UUID = {
-    logger.debug(s"Save a full state in t-stream intended for storing/restoring a state\n")
-    val transaction = stateProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
-    state.foreach((x: (String, Any)) => transaction.send(serializer.serialize(x)))
-    transaction.getTransactionUUID()
   }
 
   /**
@@ -281,9 +242,23 @@ class RAMStateService(manager: RegularTaskManager, checkpointGroup: CheckpointGr
     changes.foreach((x: (String, (String, Any))) => transaction.send(serializer.serialize(x)))
   }
 
-  override def getNumberOfVariables: Int = {
-    stateVariables.size
+  override def saveFullState(): Unit = {
+    logger.debug(s"Do checkpoint of a full state\n")
+    if (stateVariables.nonEmpty) {
+      lastFullTxnUUID = Some(sendState(stateVariables))
+      stateChanges.clear()
+    }
   }
 
-  override def getAll: Map[String, Any] = stateVariables.toMap
+  /**
+   * Does checkpoint of state
+   * @param state State variables
+   * @return UUID of transaction
+   */
+  private def sendState(state: mutable.Map[String, Any]): UUID = {
+    logger.debug(s"Save a full state in t-stream intended for storing/restoring a state\n")
+    val transaction = stateProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
+    state.foreach((x: (String, Any)) => transaction.send(serializer.serialize(x)))
+    transaction.getTransactionUUID()
+  }
 }

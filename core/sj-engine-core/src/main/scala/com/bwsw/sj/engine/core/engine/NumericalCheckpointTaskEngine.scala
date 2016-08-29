@@ -6,8 +6,9 @@ import com.bwsw.sj.engine.core.managment.TaskManager
 import org.slf4j.LoggerFactory
 
 /**
- * Provides methods are responsible for a basic execution logic of task engine that has an every-nth checkpoint mode
+ * Provides methods for a basic execution logic of task engine that has an every-nth checkpoint mode
  */
+
 trait NumericalCheckpointTaskEngine {
 
   private val logger = LoggerFactory.getLogger(this.getClass)

@@ -8,11 +8,10 @@ import scala.collection.Map
 /**
  * A common class providing for user methods that can be used in a module of specific type
  *
- *
  * @author Kseniya Mikhaleva
  *
  * @param options User defined options from instance parameters
- * @param outputs Set of output streams of instance parameters that have tags
+ * @param outputs Set of output streams of instance parameters
  */
 
 abstract class EnvironmentManager(val options: Map[String, Any], outputs: Array[SjStream]) {
@@ -26,7 +25,7 @@ abstract class EnvironmentManager(val options: Map[String, Any], outputs: Array[
   }
 
   /**
-   * Returns set of names of the output streams according to the set of tags
+   * Returns a set of names of the output streams according to the set of tags
    *
    * @param tags Set of tags
    * @return Set of names of the streams according to the set of tags
