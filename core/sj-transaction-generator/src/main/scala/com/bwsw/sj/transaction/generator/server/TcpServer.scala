@@ -5,7 +5,7 @@ import java.net.{ServerSocket, URI}
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
-import com.bwsw.sj.common.utils.ConfigUtils
+import com.bwsw.sj.common.utils.ConfigSettingsUtils
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.twitter.common.zookeeper.DistributedLock.LockingException
 import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
@@ -20,7 +20,7 @@ import org.apache.zookeeper.{CreateMode, ZooDefs}
  */
 class TcpServer(prefix: String, zkClient: ZooKeeperClient, host: String, port: Int) {
   private val logger = Logger.getLogger(getClass)
-  private val retryPeriod = ConfigUtils.getServerRetryPeriod()
+  private val retryPeriod = ConfigSettingsUtils.getServerRetryPeriod()
   private val executorService = createExecutorService()
 
   var serverSocket: ServerSocket = null

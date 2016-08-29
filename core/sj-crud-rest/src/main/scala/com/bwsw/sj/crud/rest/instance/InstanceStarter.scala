@@ -6,8 +6,7 @@ import java.util
 import com.bwsw.sj.common.DAL.ConnectionConstants
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{TStreamSjStream, ZKService}
-import com.bwsw.sj.common.StreamConstants
-import com.bwsw.sj.common.utils.ConfigUtils
+import com.bwsw.sj.common.utils.{StreamConstants, EngineConstants, ConfigSettingsUtils}
 import com.bwsw.sj.crud.rest.entities.MarathonRequest
 import com.bwsw.sj.crud.rest.utils.StreamUtil
 import com.twitter.common.quantity.{Amount, Time}
@@ -25,7 +24,7 @@ import scala.collection.JavaConversions._
  * @author Kseniya Tomskikh
  */
 class InstanceStarter(instance: Instance, delay: Long) extends Runnable with InstanceMarathonManager {
-  import com.bwsw.sj.common.ModuleConstants._
+  import EngineConstants._
   import scala.collection.JavaConverters._
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
@@ -33,7 +32,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable with Ins
   def run() = {
     logger.debug(s"Instance: ${instance.name}. Start instance.")
     try {
-      val zkSessionTimeout = ConfigUtils.getZkSessionTimeout()
+      val zkSessionTimeout = ConfigSettingsUtils.getZkSessionTimeout()
       val mesosInfoResponse = getMarathonInfo
       if (mesosInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
         val entity = marathonEntitySerializer.deserialize[Map[String, Any]](EntityUtils.toString(mesosInfoResponse.getEntity, "UTF-8"))
@@ -151,7 +150,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable with Ins
    */
   def frameworkStart(mesosMaster: String) = {
     logger.debug(s"Instance: ${instance.name}. Start framework for instance.")
-    val frameworkJarName = ConfigUtils.getFrameworkJarName()
+    val frameworkJarName = ConfigSettingsUtils.getFrameworkJarName()
     val restUrl = new URI(s"$restAddress/v1/custom/jars/$frameworkJarName")
     val taskInfoResponse = getApplicationInfo(instance.name)
     if (taskInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
@@ -236,7 +235,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable with Ins
    */
   private def startGenerator(stream: TStreamSjStream) = {
     logger.debug(s"Instance: ${instance.name}. Start generator for stream ${stream.name}.")
-    val transactionGeneratorJar = ConfigUtils.getTransactionGeneratorJarName()
+    val transactionGeneratorJar = ConfigSettingsUtils.getTransactionGeneratorJarName()
     val zkService = stream.generator.service.asInstanceOf[ZKService]
     val generatorProvider = zkService.provider
     var prefix = zkService.namespace

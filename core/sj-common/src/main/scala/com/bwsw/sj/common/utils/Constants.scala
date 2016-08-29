@@ -1,11 +1,8 @@
-package com.bwsw.sj.common
+package com.bwsw.sj.common.utils
 
 import java.util.UUID
 
-/**
- * Object with constants
- */
-object ModuleConstants {
+object EngineConstants {
   def persistentQueuePath = UUID.randomUUID().toString //todo: yet t-streams can't remove persistent queue
   val persistentBlockingQueue = "persistentBlockingQueue"
   val eventWaitTimeout = 10

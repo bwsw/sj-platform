@@ -8,7 +8,7 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.StreamConstants
+import com.bwsw.sj.common.utils.{StreamConstants, EngineConstants}
 import com.bwsw.sj.crud.rest.entities.module.{InstanceMetadata, ModuleSpecification}
 import com.bwsw.sj.crud.rest.utils.{ValidationUtils, StreamUtil}
 import kafka.common.TopicExistsException
@@ -17,8 +17,8 @@ import org.slf4j.{Logger, LoggerFactory}
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
-import com.bwsw.sj.common.ModuleConstants._
-import com.bwsw.sj.common.StreamConstants._
+import EngineConstants._
+import StreamConstants._
 import com.bwsw.sj.crud.rest.utils.ConvertUtil._
 
 /**

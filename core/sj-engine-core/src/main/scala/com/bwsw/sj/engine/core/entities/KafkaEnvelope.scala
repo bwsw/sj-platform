@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.core.entities
 
-import com.bwsw.sj.common.StreamConstants
+import com.bwsw.sj.common.utils.StreamConstants
 
 /**
  * Provides a wrapper for kafka message.

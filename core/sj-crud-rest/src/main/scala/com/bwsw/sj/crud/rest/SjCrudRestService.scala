@@ -12,10 +12,10 @@ import akka.http.scaladsl.server.directives.{DebuggingDirectives, LogEntry, Logg
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.DAL.model.ConfigSetting
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.ModuleConstants._
+import com.bwsw.sj.common.utils.{ConfigConstants, EngineConstants}
+import EngineConstants._
 import com.bwsw.sj.crud.rest.instance.InstanceStopper
 
 import scala.concurrent.Future

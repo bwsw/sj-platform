@@ -1,6 +1,6 @@
 package com.bwsw.common.client
 
-import com.bwsw.sj.common.utils.ConfigUtils
+import com.bwsw.sj.common.utils.ConfigSettingsUtils
 import org.apache.log4j.Logger
 
 /**
@@ -8,7 +8,7 @@ import org.apache.log4j.Logger
  *
  * @author Kseniya Tomskikh
  */
-object ClientExample {
+object TcpClientExample {
 
   private val logger = Logger.getLogger(getClass)
 
@@ -16,8 +16,8 @@ object ClientExample {
     val zkServers = Array("176.120.25.19:2181")
     val prefix = "zk_test/global"
 
-    val retryPeriod = ConfigUtils.getClientRetryPeriod()
-    val retryCount = ConfigUtils.getServerRetryPeriod()
+    val retryPeriod = ConfigSettingsUtils.getClientRetryPeriod()
+    val retryCount = ConfigSettingsUtils.getServerRetryPeriod()
 
     val options = new TcpClientOptions()
       .setZkServers(zkServers)

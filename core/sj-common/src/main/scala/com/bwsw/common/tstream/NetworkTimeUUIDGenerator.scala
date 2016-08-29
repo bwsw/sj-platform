@@ -8,9 +8,9 @@ import com.datastax.driver.core.utils.UUIDs
 import org.slf4j.LoggerFactory
 
 /**
- * Provides an entity for generating new txn time UUID through Tcp client
+ * Provides an entity for generating new txn time UUID through tcp client
  * @param zkServers Set of host + port of zookeeper
- * @param prefix Zookeeper path to generator (master of Tcp servers)
+ * @param prefix Zookeeper path to generator (master of tcp servers)
  * @param retryInterval Delay time between reconnecting attempts to connect to generator
  * @param retryCount Count of attempt to reconnect to generator
  */

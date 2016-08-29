@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.regular.task.engine.input
 
-import com.bwsw.sj.common.StreamConstants
+import com.bwsw.sj.common.utils.StreamConstants
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.engine.input.TStreamTaskInputService
 import com.bwsw.sj.engine.regular.task.RegularTaskManager

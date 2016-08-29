@@ -1,19 +1,13 @@
 package com.bwsw.common.client
 
-import com.bwsw.sj.common.utils.ConfigUtils
-
-/**
-  * Options for TcpClient
-  *
-  * @author Kseniya Tomskikh
-  */
+import com.bwsw.sj.common.utils.ConfigSettingsUtils
 
 class TcpClientOptions() {
   var zkServers = Array(s"127.0.0.1:2181")
   var prefix = ""
 
-  var retryPeriod = ConfigUtils.getClientRetryPeriod()
-  var retryCount = ConfigUtils.getRetryCount()
+  var retryPeriod = ConfigSettingsUtils.getClientRetryPeriod()
+  var retryCount = ConfigSettingsUtils.getRetryCount()
 
   def setZkServers(hosts: Array[String]): TcpClientOptions = {
     zkServers = hosts

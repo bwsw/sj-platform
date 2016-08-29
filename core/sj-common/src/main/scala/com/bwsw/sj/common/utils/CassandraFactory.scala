@@ -1,15 +1,12 @@
 package com.bwsw.sj.common.utils
 
-import java.net.{InetAddress, InetSocketAddress}
+import java.net.InetSocketAddress
 
 import com.bwsw.tstreams.common.{CassandraConnectorConf, CassandraHelper}
 import com.bwsw.tstreams.data.cassandra.Factory
 import com.bwsw.tstreams.metadata.MetadataStorageFactory
 import com.datastax.driver.core.{Cluster, Session}
 
-/**
- * Test util for creating C* entities
- */
 class CassandraFactory {
   import scala.collection.JavaConverters._
 

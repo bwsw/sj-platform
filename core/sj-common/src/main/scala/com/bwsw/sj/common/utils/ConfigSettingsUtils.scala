@@ -1,10 +1,10 @@
 package com.bwsw.sj.common.utils
 
 
-import com.bwsw.sj.common.ConfigConstants._
+import ConfigConstants._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 
-object ConfigUtils {
+object ConfigSettingsUtils {
 
   private val configService = ConnectionRepository.getConfigService
 

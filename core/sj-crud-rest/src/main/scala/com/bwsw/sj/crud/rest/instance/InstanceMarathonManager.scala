@@ -9,7 +9,7 @@ import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{SjStream, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.utils.ConfigUtils
+import com.bwsw.sj.common.utils.ConfigSettingsUtils
 import com.bwsw.sj.crud.rest.entities.MarathonRequest
 import org.apache.http.client.methods.{HttpDelete, HttpGet, HttpPost, HttpPut}
 import org.apache.http.entity.StringEntity
@@ -23,10 +23,10 @@ import org.slf4j.LoggerFactory
  */
 trait InstanceMarathonManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
-  private lazy val restHost = ConfigUtils.getCrudRestHost()
-  private lazy val restPort = ConfigUtils.getCrudRestPort()
-  private lazy val marathonConnect = ConfigUtils.getMarathonConnect()
-  private lazy val marathonTimeout = ConfigUtils.getMarathonTimeout()
+  private lazy val restHost = ConfigSettingsUtils.getCrudRestHost()
+  private lazy val restPort = ConfigSettingsUtils.getCrudRestPort()
+  private lazy val marathonConnect = ConfigSettingsUtils.getMarathonConnect()
+  private lazy val marathonTimeout = ConfigSettingsUtils.getMarathonTimeout()
 
   val marathonEntitySerializer: Serializer = new JsonSerializer
   val instanceDAO: GenericMongoService[Instance] = ConnectionRepository.getInstanceService

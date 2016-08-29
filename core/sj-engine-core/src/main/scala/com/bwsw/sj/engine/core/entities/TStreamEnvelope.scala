@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.core.entities
 
 import java.util.UUID
 
-import com.bwsw.sj.common.StreamConstants
+import com.bwsw.sj.common.utils.StreamConstants
 
 /**
  * Provides a wrapper for t-stream transaction.

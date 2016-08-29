@@ -2,7 +2,7 @@ package com.bwsw.sj.crud.rest.instance
 
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{SjStream, TStreamSjStream}
-import com.bwsw.sj.common.StreamConstants
+import com.bwsw.sj.common.utils.{StreamConstants, EngineConstants}
 import org.slf4j.LoggerFactory
 
 /**
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable with InstanceMarathonManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
 
-  import com.bwsw.sj.common.ModuleConstants._
+  import EngineConstants._
 
   def run() = {
     logger.debug(s"Instance: ${instance.name}. Destroy instance.")

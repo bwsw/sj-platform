@@ -17,6 +17,7 @@ import scala.reflect.ClassTag
 /**
  * Repository for connection to MongoDB and file storage (GridFS)
  */
+
 object ConnectionRepository {
 
   import ConnectionConstants._

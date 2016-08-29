@@ -7,10 +7,10 @@ import com.bwsw.common.tstream.NetworkTimeUUIDGenerator
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.ModuleConstants._
-import com.bwsw.sj.common.StreamConstants._
+import com.bwsw.sj.common.utils.{StreamConstants, EngineConstants, ConfigSettingsUtils}
+import EngineConstants._
+import StreamConstants._
 import com.bwsw.sj.common.engine.StreamingExecutor
-import com.bwsw.sj.common.utils.ConfigUtils
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
 import com.bwsw.sj.engine.core.environment.EnvironmentManager
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
@@ -163,7 +163,7 @@ abstract class TaskManager() {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create the t-stream producers for each output stream\n")
 
-    tstreamFactory.setProperty(TSF_Dictionary.Producer.Transaction.DATA_WRITE_BATCH_SIZE, 20) //testing
+    tstreamFactory.setProperty(TSF_Dictionary.Producer.Transaction.DATA_WRITE_BATCH_SIZE, 20) //todo testing
 
     instance.outputs
       .map(x => (x, streamDAO.get(x).get))
@@ -256,8 +256,8 @@ abstract class TaskManager() {
   }
 
   protected def getUUIDGenerator(stream: TStreamSjStream) : IUUIDGenerator = {
-    val retryPeriod = ConfigUtils.getClientRetryPeriod()
-    val retryCount = ConfigUtils.getRetryCount()
+    val retryPeriod = ConfigSettingsUtils.getClientRetryPeriod()
+    val retryCount = ConfigSettingsUtils.getRetryCount()
 
     stream.generator.generatorType match {
       case "local" => new LocalTimeUUIDGenerator

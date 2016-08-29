@@ -14,6 +14,7 @@ import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.service.GenericMongoService
+import com.bwsw.sj.common.utils.{StreamConstants, EngineConstants}
 import org.everit.json.schema.loader.SchemaLoader
 import org.json.{JSONObject, JSONTokener}
 
@@ -48,8 +49,8 @@ trait SjCrudValidator {
   val restHost: String
   val restPort: Int
 
-  import com.bwsw.sj.common.ModuleConstants._
-  import com.bwsw.sj.common.StreamConstants._
+  import EngineConstants._
+  import StreamConstants._
 
   /**
    * Getting entity from HTTP-request

@@ -9,6 +9,7 @@ import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import akka.stream.scaladsl._
+import com.bwsw.sj.common.utils.EngineConstants
 import com.bwsw.sj.crud.rest.exceptions._
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.engine.StreamingValidator
@@ -24,7 +25,7 @@ import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils {
 
-  import com.bwsw.sj.common.ModuleConstants._
+  import EngineConstants._
   import com.bwsw.sj.crud.rest.utils.ConvertUtil._
 
   val modulesApi = {

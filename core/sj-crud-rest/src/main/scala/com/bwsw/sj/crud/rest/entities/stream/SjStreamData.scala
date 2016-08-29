@@ -1,6 +1,6 @@
 package com.bwsw.sj.crud.rest.entities.stream
 
-import com.bwsw.sj.common.StreamConstants
+import com.bwsw.sj.common.utils.StreamConstants
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonProperty, JsonSubTypes, JsonTypeInfo}
 

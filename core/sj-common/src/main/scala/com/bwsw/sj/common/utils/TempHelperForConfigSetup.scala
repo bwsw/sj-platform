@@ -1,8 +1,7 @@
-package com.bwsw
+package com.bwsw.sj.common.utils
 
 import java.io.File
 
-import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.DAL.model.ConfigSetting
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 

@@ -3,8 +3,8 @@ package com.bwsw.sj.crud.rest.api
 import java.text.MessageFormat
 
 import akka.http.scaladsl.server.{Directives, RequestContext}
+import com.bwsw.sj.common.utils.ConfigConstants
 import com.bwsw.sj.crud.rest.exceptions.{UnknownConfigSettingDomain}
-import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.DAL.model.ConfigSetting
 import com.bwsw.sj.crud.rest.entities._
 import com.bwsw.sj.crud.rest.entities.config.ConfigurationSettingData

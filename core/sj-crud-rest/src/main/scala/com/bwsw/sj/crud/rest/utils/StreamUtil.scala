@@ -5,7 +5,7 @@ import java.util.Properties
 
 import com.aerospike.client.Host
 import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.common.utils.ConfigUtils
+import com.bwsw.sj.common.utils.ConfigSettingsUtils
 import com.bwsw.tstreams.common.CassandraConnectorConf
 import com.bwsw.tstreams.data.aerospike._
 import com.bwsw.tstreams.data.{IStorage, _}
@@ -116,7 +116,7 @@ object StreamUtil {
     val replications = brokers.length
     val zkHost = service.zkProvider.hosts
     val zkConnect = new ZkConnection(zkHost.mkString(";"))
-    val zkTimeout = ConfigUtils.getZkSessionTimeout()
+    val zkTimeout = ConfigSettingsUtils.getZkSessionTimeout()
     val zkClient = ZkUtils.createZkClient(zkHost.mkString(";"), zkTimeout, zkTimeout)
     val zkUtils = new ZkUtils(zkClient, zkConnect, false)
     if (!AdminUtils.topicExists(zkUtils, stream.name)) {
@@ -254,7 +254,7 @@ object StreamUtil {
     val service = stream.service.asInstanceOf[KafkaService]
     val zkHost = service.zkProvider.hosts
     val zkConnect = new ZkConnection(zkHost.mkString(";"))
-    val zkTimeout = ConfigUtils.getZkSessionTimeout()
+    val zkTimeout = ConfigSettingsUtils.getZkSessionTimeout()
     val zkClient = ZkUtils.createZkClient(zkHost.mkString(";"), zkTimeout, zkTimeout)
     val zkUtils = new ZkUtils(zkClient, zkConnect, false)
     if (AdminUtils.topicExists(zkUtils, stream.name)) {

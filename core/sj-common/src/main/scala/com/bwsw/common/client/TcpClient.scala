@@ -7,13 +7,13 @@ import java.nio.channels.SocketChannel
 import java.nio.charset.StandardCharsets
 import java.util
 
-import com.bwsw.sj.common.utils.ConfigUtils
+import com.bwsw.sj.common.utils.ConfigSettingsUtils
 import com.twitter.common.quantity.{Amount, Time}
 import com.twitter.common.zookeeper.ZooKeeperClient
 import org.apache.log4j.Logger
 
 /**
- * Client for transaction generating
+ * Simple tcp client for retrieving transaction ID
  *
  * @author Kseniya Tomskikh
  */
@@ -21,7 +21,7 @@ class TcpClient(options: TcpClientOptions) {
   private val logger = Logger.getLogger(getClass)
   private var client: SocketChannel = null
   private var retryCount = options.retryCount
-  private val zkSessionTimeout = ConfigUtils.getZkSessionTimeout()
+  private val zkSessionTimeout = ConfigSettingsUtils.getZkSessionTimeout()
   private val inputBuffer = ByteBuffer.allocate(36)
   private var outputStream: OutputStream = new ByteArrayOutputStream()
   private val zkClient = createZooKeeperClient()

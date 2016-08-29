@@ -1,8 +1,7 @@
 package com.bwsw.sj.engine.output
 
 import java.util.concurrent.{ExecutorCompletionService, Executors}
-
-import com.bwsw.sj.common.ModuleConstants
+import com.bwsw.sj.common.utils.EngineConstants
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.output.task.OutputTaskManager
@@ -21,7 +20,7 @@ object OutputTaskRunner {
   private val logger: Logger = LoggerFactory.getLogger(this.getClass)
   private val threadPool = createThreadPool()
   private val executorService = new ExecutorCompletionService[Unit](threadPool)
-  private val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(ModuleConstants.persistentBlockingQueue)
+  private val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(EngineConstants.persistentBlockingQueue)
 
   private def createThreadPool() = {
     val countOfThreads = 3

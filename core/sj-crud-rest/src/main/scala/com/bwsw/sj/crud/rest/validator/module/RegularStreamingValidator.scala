@@ -1,6 +1,7 @@
 package com.bwsw.sj.crud.rest.validator.module
 
-import com.bwsw.sj.common.ModuleConstants._
+import com.bwsw.sj.common.utils.EngineConstants
+import EngineConstants._
 import com.bwsw.sj.crud.rest.entities.module.{RegularInstanceMetadata, ModuleSpecification, InstanceMetadata}
 import org.slf4j.{LoggerFactory, Logger}
 

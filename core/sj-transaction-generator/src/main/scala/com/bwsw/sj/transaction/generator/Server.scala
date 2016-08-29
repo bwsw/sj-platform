@@ -4,7 +4,7 @@ import java.io._
 import java.net.InetSocketAddress
 import java.util
 
-import com.bwsw.sj.common.utils.ConfigUtils
+import com.bwsw.sj.common.utils.ConfigSettingsUtils
 import com.bwsw.sj.transaction.generator.server.TcpServer
 import com.twitter.common.quantity.{Amount, Time}
 import com.twitter.common.zookeeper.ZooKeeperClient
@@ -20,7 +20,7 @@ object Server {
   private val logger = Logger.getLogger(getClass)
 
   def main(args: Array[String]) = {
-    val retryPeriod = ConfigUtils.getServerRetryPeriod()
+    val retryPeriod = ConfigSettingsUtils.getServerRetryPeriod()
     val zkServers = System.getenv("ZK_SERVERS")
     val host = System.getenv("HOST")
     val port = System.getenv("PORT0").toInt

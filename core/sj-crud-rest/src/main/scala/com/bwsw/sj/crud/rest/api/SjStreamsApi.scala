@@ -5,8 +5,8 @@ import java.text.MessageFormat
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.Instance
-import com.bwsw.sj.common.ModuleConstants._
-import com.bwsw.sj.common.StreamConstants
+import com.bwsw.sj.common.utils.{StreamConstants, EngineConstants}
+import EngineConstants._
 import com.bwsw.sj.crud.rest.entities._
 import com.bwsw.sj.crud.rest.entities.stream.SjStreamData
 import com.bwsw.sj.crud.rest.utils.ConvertUtil.streamToStreamData

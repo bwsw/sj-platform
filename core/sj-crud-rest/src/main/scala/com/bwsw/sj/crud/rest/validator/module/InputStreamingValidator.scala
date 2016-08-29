@@ -4,8 +4,9 @@ import java.util.Calendar
 
 import com.bwsw.sj.common.DAL.model.{TStreamSjStream, TStreamService}
 import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask, InstanceStage, Instance}
-import com.bwsw.sj.common.ModuleConstants._
-import com.bwsw.sj.common.StreamConstants._
+import com.bwsw.sj.common.utils.{StreamConstants, EngineConstants}
+import EngineConstants._
+import StreamConstants._
 import com.bwsw.sj.crud.rest.entities.module.{InputInstanceMetadata, ModuleSpecification, InstanceMetadata}
 import com.bwsw.sj.crud.rest.utils.ConvertUtil._
 import org.slf4j.{LoggerFactory, Logger}

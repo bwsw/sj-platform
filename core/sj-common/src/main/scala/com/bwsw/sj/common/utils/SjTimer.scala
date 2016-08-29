@@ -49,9 +49,6 @@ class SjTimer {
     isTimerWentOut
   }
 
-  /**
-   * Allows resetting a timer 
-   */
   def reset() = {
     logger.debug(s"Reset a timer\n")
     isTimerWentOut = false

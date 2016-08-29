@@ -1,8 +1,8 @@
 package com.bwsw.sj.engine.regular.task
 
 import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.common.engine.StreamingExecutor
+import com.bwsw.sj.common.utils.StreamConstants
 import com.bwsw.sj.engine.core.environment.{RegularEnvironmentManager, EnvironmentManager, RegularModuleOutput}
 import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.tstreams.agents.consumer.Consumer

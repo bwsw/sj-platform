@@ -2,6 +2,7 @@ package com.bwsw.sj.crud.rest.validator.service
 
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.utils.ServiceConstants
 import com.bwsw.sj.crud.rest.entities.service._
 import com.bwsw.sj.crud.rest.utils.ValidationUtils
 import org.slf4j.LoggerFactory
@@ -13,7 +14,7 @@ import scala.collection.mutable.ArrayBuffer
  */
 object ServiceValidator extends ValidationUtils {
 
-  import com.bwsw.sj.common.ServiceConstants._
+  import ServiceConstants._
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
 

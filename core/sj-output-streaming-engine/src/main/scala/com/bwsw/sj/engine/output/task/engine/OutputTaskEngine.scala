@@ -8,7 +8,7 @@ import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.DAL.model.{ESService, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.ModuleConstants
+import com.bwsw.sj.common.utils.EngineConstants
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.engine.input.TStreamTaskInputService
 import com.bwsw.sj.engine.core.entities._
@@ -117,10 +117,10 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     createEsStream(esService.index, outputStream.name, outputModuleEntity, client)
 
     while (true) {
-      val maybeEnvelope = blockingQueue.get(ModuleConstants.eventWaitTimeout) //todo maybe add to OutputInstance eventWaitTime parameter so PM will change too
+      val maybeEnvelope = blockingQueue.get(EngineConstants.eventWaitTimeout) //todo maybe add to OutputInstance eventWaitTime parameter so PM will change too
 
       if (maybeEnvelope == null) {
-        logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${ModuleConstants.eventWaitTimeout} went out and nothing was received\n")
+        logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${EngineConstants.eventWaitTimeout} went out and nothing was received\n")
       } else {
         val envelope = envelopeSerializer.deserialize[Envelope](maybeEnvelope).asInstanceOf[TStreamEnvelope]
         afterReceivingEnvelope()

@@ -5,7 +5,8 @@ import java.util
 
 import com.bwsw.sj.common.DAL.model.module.{InputTask, Instance, InputInstance}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.{ConfigConstants, ModuleConstants}
+import com.bwsw.sj.common.ConfigConstants
+import com.bwsw.sj.common.utils.{ConfigConstants, EngineConstants}
 import com.bwsw.sj.mesos.framework.task.{StatusHandler, TasksList}
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos._
@@ -150,7 +151,7 @@ class FrameworkScheduler extends Scheduler {
       var taskPort: String = ""
 
       var availablePorts = ports.getRanges.getRangeList.asScala.map(_.getBegin.toString)
-      if (instance.get.moduleType.equals(ModuleConstants.inputStreamingType)) {
+      if (instance.get.moduleType.equals(EngineConstants.inputStreamingType)) {
         taskPort = availablePorts.head; availablePorts = availablePorts.tail
         val inputInstance = instance.get.asInstanceOf[InputInstance]
         inputInstance.tasks.put(currTask, new InputTask(currentOffer._1.getUrl.getAddress.getIp, taskPort.toInt))
@@ -272,7 +273,7 @@ class FrameworkScheduler extends Scheduler {
     perTaskCores = instance.get.perTaskCores
     perTaskMem = instance.get.perTaskRam
     perTaskPortsCount = FrameworkUtil.getCountPorts(instance.get)
-    val tasks = if (instance.get.moduleType.equals(ModuleConstants.inputStreamingType))
+    val tasks = if (instance.get.moduleType.equals(EngineConstants.inputStreamingType))
         (0 until instance.get.parallelism).map(tn => instance.get.name+"-task"+tn)
         else instance.get.executionPlan.tasks.asScala.keys
     tasks.foreach(task => TasksList.newTask(task))

@@ -6,8 +6,7 @@ import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.DAL.model.{KafkaService, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.StreamConstants
-import com.bwsw.sj.common.utils.ConfigUtils
+import com.bwsw.sj.common.utils.{StreamConstants, ConfigSettingsUtils}
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope}
@@ -46,7 +45,7 @@ class KafkaTaskInputService(manager: RegularTaskManager,
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val offsetSerializer = new ObjectSerializer()
   private val regularInstance = manager.instance.asInstanceOf[RegularInstance]
-  private val kafkaSubscriberTimeout = ConfigUtils.getKafkaSubscriberTimeout()
+  private val kafkaSubscriberTimeout = ConfigSettingsUtils.getKafkaSubscriberTimeout()
   private val kafkaInputs = getKafkaInputs()
   private var kafkaOffsetsStorage = mutable.Map[(String, Int), Long]()
   private val kafkaOffsetsStream = manager.taskName + "_kafka_offsets"

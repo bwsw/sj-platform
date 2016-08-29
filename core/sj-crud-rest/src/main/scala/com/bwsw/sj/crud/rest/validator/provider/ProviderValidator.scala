@@ -7,7 +7,7 @@ import java.util.Collections
 import com.aerospike.client.AerospikeClient
 import com.bwsw.sj.common.DAL.model.Provider
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.ConfigUtils
+import com.bwsw.sj.common.utils.{ProviderConstants, ConfigSettingsUtils}
 import com.bwsw.sj.crud.rest.entities.provider.ProviderData
 import com.bwsw.sj.crud.rest.utils.ValidationUtils
 import com.datastax.driver.core.Cluster
@@ -28,10 +28,10 @@ import scala.concurrent.duration._
  */
 object ProviderValidator extends ValidationUtils {
 
-  import com.bwsw.sj.common.ProviderConstants._
+  import ProviderConstants._
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
-  private val zkTimeout = ConfigUtils.getZkSessionTimeout()
+  private val zkTimeout = ConfigSettingsUtils.getZkSessionTimeout()
 
   /**
    * Validating input parameters for provider

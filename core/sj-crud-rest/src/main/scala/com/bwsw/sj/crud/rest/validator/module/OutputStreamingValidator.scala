@@ -3,8 +3,9 @@ package com.bwsw.sj.crud.rest.validator.module
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{SjStream, TStreamService, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.ModuleConstants._
-import com.bwsw.sj.common.StreamConstants._
+import com.bwsw.sj.common.utils.{StreamConstants, EngineConstants}
+import EngineConstants._
+import StreamConstants._
 import com.bwsw.sj.crud.rest.entities.module.{InstanceMetadata, ModuleSpecification, OutputInstanceMetadata}
 import org.slf4j.{LoggerFactory, Logger}
 

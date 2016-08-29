@@ -10,8 +10,7 @@ import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask, Instance}
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.StreamConstants
-import com.bwsw.sj.common.utils.CassandraFactory
+import com.bwsw.sj.common.utils.{StreamConstants, CassandraFactory}
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.consumer.{Consumer, Options}
 

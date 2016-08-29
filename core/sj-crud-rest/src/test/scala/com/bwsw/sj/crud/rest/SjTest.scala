@@ -8,7 +8,7 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.utils.CassandraFactory
+import com.bwsw.sj.common.utils.{StreamConstants, CassandraFactory}
 
 /**
  * Created: 4/14/16
@@ -17,7 +17,7 @@ import com.bwsw.sj.common.utils.CassandraFactory
  */
 object SjTest {
 
-  import com.bwsw.sj.common.StreamConstants._
+  import StreamConstants._
 
   val serializer = new JsonSerializer
 
