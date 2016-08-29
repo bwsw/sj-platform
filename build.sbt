@@ -47,12 +47,12 @@ val commonSettings = Seq(
     if (isSnapshot.value)
       Some("snapshots" at nexus + "content/repositories/snapshots")
     else
-      Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+      Some("releases" at nexus + "service/local/staging/deploy/maven2")
   },
   publishArtifact in Test := false
 )
 
-lazy val sj = (project in file(".")) settings (publish := { }) aggregate(common,
+lazy val sj = (project in file(".")) settings (publish := {}) aggregate(common,
   engineCore, crudRest,
   inputStreamingEngine, regularStreamingEngine, windowedStreamingEngine, outputStreamingEngine,
   framework, transactionGenerator,
@@ -71,7 +71,7 @@ lazy val common = Project(id = "sj-common",
 lazy val engineCore = Project(id = "sj-engine-core",
   base = file("./core/sj-engine-core"))
   .settings(commonSettings: _*)
-   .settings(
+  .settings(
     libraryDependencies ++= Dependencies.sjEngineCoreDependencies.value
   )
   .dependsOn(common)
@@ -80,7 +80,8 @@ lazy val crudRest = Project(id = "sj-crud-rest",
   base = file("./core/sj-crud-rest"))
   .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= Dependencies.sjRestDependencies.value
+    libraryDependencies ++= Dependencies.sjRestDependencies.value,
+    assemblyJarName in assembly := s"${name.value}-1.0.jar"
   )
   .dependsOn(common)
 
