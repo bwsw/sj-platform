@@ -8,18 +8,12 @@ import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.transport.InetSocketTransportAddress
 import org.slf4j.LoggerFactory
 
-/**
- * Util objects for work with services
- *
- *
- * @author Kseniya Tomskikh
- */
 object ServiceUtil {
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
 
   /**
-   * Prepare service: create keyspaces/namespaces/indexes/metatables
+   * Prepare service: create keyspace/namespace/index/metadata tables/data tables
    *
    * @param service Service object
    */
@@ -27,24 +21,12 @@ object ServiceUtil {
     logger.info(s"Prepare service ${service.name}.")
     service match {
       case esService: ESService => createIndex(esService)
-
-      case cassService: CassandraService =>
-        val cassandraFactory = new CassandraFactory
-        cassandraFactory.open(getCassandraHosts(cassService.provider))
-        cassandraFactory.createKeyspace(cassService.keyspace)
-        cassandraFactory.close()
-
+      case cassService: CassandraService => createKeyspace(cassService)
       case tService: TStreamService => createTStreamService(tService)
-
       case _ =>
     }
   }
 
-  /**
-   * Create elasticsearch index
-   *
-   * @param esService Elasticsearch service
-   */
   private def createIndex(esService: ESService) = {
     logger.info(s"Check and create elasticsearch index ${esService.index}.")
     val client: TransportClient = TransportClient.builder().build()
@@ -59,12 +41,18 @@ object ServiceUtil {
     }
   }
 
+  private def createKeyspace(cassService: CassandraService) = {
+    val cassandraFactory = new CassandraFactory
+    cassandraFactory.open(getCassandraHosts(cassService.provider))
+    cassandraFactory.createKeyspace(cassService.keyspace)
+    cassandraFactory.close()
+  }
+
   /**
-   * Create namespaces and metadata tables for t-stream service
-   *
-   * @param tStreamService TStream service
+   * Create namespace, metadata and data tables (if data provider has cassandra type) for t-stream service
    */
   private def createTStreamService(tStreamService: TStreamService) = {
+    logger.info(s"Create cassandra keyspace ${tStreamService.metadataNamespace}.")
     val cassandraFactory = new CassandraFactory
     cassandraFactory.open(getCassandraHosts(tStreamService.metadataProvider))
     cassandraFactory.createKeyspace(tStreamService.metadataNamespace)
@@ -76,30 +64,14 @@ object ServiceUtil {
       cassandraFactory.createKeyspace(tStreamService.dataNamespace)
       cassandraFactory.createDataTable(tStreamService.dataNamespace)
       cassandraFactory.close()
-    }
+    } //todo possible there is a necessary of creation namespace of other provider type (aerospike)
     cassandraFactory.close()
-  }
-
-  private def getCassandraHosts(provider: Provider) = {
-    logger.debug(s"Open cassandra connection. Provider: ${provider.name}.")
-    val cassandraHosts = provider.hosts.map { host =>
-      val parts = host.split(":")
-      new InetSocketAddress(parts(0), parts(1).toInt)
-    }.toSet
-
-    cassandraHosts
   }
 
   def deleteService(service: Service) = {
     service match {
       case esService: ESService => deleteIndex(esService)
-
-      case cassService: CassandraService =>
-        val cassandraFactory = new CassandraFactory
-        cassandraFactory.open(getCassandraHosts(cassService.provider))
-        cassandraFactory.dropKeyspace(cassService.keyspace)
-        cassandraFactory.close()
-
+      case cassService: CassandraService => deleteKeyspace(cassService)
       case _ =>
     }
   }
@@ -113,5 +85,23 @@ object ServiceUtil {
     }
     client.admin().indices().prepareDelete(esService.index).execute().actionGet()
     logger.debug(s"Elasticsearch service ${esService.name}. Index ${esService.index} is create.")
+  }
+
+  private def deleteKeyspace(cassService: CassandraService) = {
+    logger.info(s"Delete cassandra keyspace ${cassService.keyspace}.")
+    val cassandraFactory = new CassandraFactory
+    cassandraFactory.open(getCassandraHosts(cassService.provider))
+    cassandraFactory.dropKeyspace(cassService.keyspace)
+    cassandraFactory.close()
+  }
+
+  private def getCassandraHosts(provider: Provider) = {
+    logger.debug(s"Open cassandra connection. Provider: ${provider.name}.")
+    val cassandraHosts = provider.hosts.map { host =>
+      val parts = host.split(":")
+      new InetSocketAddress(parts(0), parts(1).toInt)
+    }.toSet
+
+    cassandraHosts
   }
 }

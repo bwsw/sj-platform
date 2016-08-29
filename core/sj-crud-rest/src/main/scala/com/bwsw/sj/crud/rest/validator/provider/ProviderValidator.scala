@@ -24,20 +24,21 @@ import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.concurrent.duration._
 
 /**
-  * Created by mendelbaum_nm on 13.05.16.
-  */
+ * Created by mendelbaum_nm on 13.05.16.
+ */
 object ProviderValidator extends ValidationUtils {
+
   import com.bwsw.sj.common.ProviderConstants._
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
   private val zkTimeout = ConfigUtils.getZkSessionTimeout()
 
   /**
-    * Validating input parameters for provider
-    *
-    * @param initialData - input parameters for service being validated
-    * @return - errors
-    */
+   * Validating input parameters for provider
+   *
+   * @param initialData - input parameters for service being validated
+   * @return - errors
+   */
   def validate(initialData: ProviderData) = {
     logger.debug(s"Provider ${initialData.name}. Start provider validation.")
 
@@ -112,7 +113,7 @@ object ProviderValidator extends ValidationUtils {
       } else {
         var ports = new ListBuffer[Int]()
         for (host <- initialData.hosts) {
-          val (hostErrors, hostPort) = validateHost(host, initialData.providerType)
+          val (hostErrors, hostPort) = validateProviderConnection(host, initialData.providerType)
           errors ++= hostErrors
           ports += hostPort
         }
@@ -127,26 +128,35 @@ object ProviderValidator extends ValidationUtils {
   }
 
   /**
-    * Check provider hosts availability
-    *
-    * @param provider - provider entity
-    * @return - errors array
-    */
+   * Check provider hosts availability
+   *
+   * @param provider - provider entity
+   * @return - errors array
+   */
   def checkProviderConnection(provider: Provider) = {
     var errors = ArrayBuffer[String]()
     for (host <- provider.hosts) {
-      val (hostErrors, _) = validateHost(host, provider.providerType)
+      val (hostErrors, port) = validateProviderConnection(provider.providerType, host)
       errors ++= hostErrors
+      if (errors.isEmpty) {
+        checkProviderConnectionByType(
+          provider.providerType,
+          host,
+          port,
+          errors
+        )
+      }
     }
+
     errors
   }
 
-  def validateHost (hostString: String, providerType: String): (ArrayBuffer[String], Int) = {
+  private def validateProviderConnection(providerType: String, host: String): (ArrayBuffer[String], Int) = {
     val errors = ArrayBuffer[String]()
-    var hostname : String = ""
-    var port : Int = -1
+    var hostname: String = ""
+    var port: Int = -1
     try {
-      val uri = new URI(s"dummy://$hostString")
+      val uri = new URI(s"dummy://$host")
       hostname = uri.getHost
       port = uri.getPort
       val path = uri.getPath
@@ -156,33 +166,34 @@ object ProviderValidator extends ValidationUtils {
 
     } catch {
       case ex: URISyntaxException =>
-        errors += s"Wrong host provided: '$hostString'"
+        errors += s"Wrong host provided: '$host'"
     }
 
-    if (errors.isEmpty) {
-      providerType match {
-        case "cassandra" =>
-          checkCassandraConnection(errors, hostname, port)
-        case "aerospike" =>
-          checkAerospikeConnection(errors, hostname, port)
-        case "zookeeper" =>
-          checkZookeeperConnection(errors, hostname, port)
-        case "kafka" =>
-          checkKafkaConnection(errors, hostname, port)
-        case "ES" =>
-          checkESConnection(errors, hostname, port)
-        case "redis" =>
-          // TODO: remove redis in future. So returning no errors for now.
-        case "JDBC" =>
-          checkJdbcConnection(errors, hostname, port)
-        case _ =>
-          errors += s"host checking for provider type '$providerType' is not implemented"
-      }
-    }
     (errors, port)
   }
 
-  def checkCassandraConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
+  private def checkProviderConnectionByType(providerType: String, host: String, port: Int, errors: ArrayBuffer[String]) = {
+    providerType match {
+      case "cassandra" =>
+        checkCassandraConnection(errors, host, port)
+      case "aerospike" =>
+        checkAerospikeConnection(errors, host, port)
+      case "zookeeper" =>
+        checkZookeeperConnection(errors, host, port)
+      case "kafka" =>
+        checkKafkaConnection(errors, host, port)
+      case "ES" =>
+        checkESConnection(errors, host, port)
+      case "redis" =>
+      // TODO: remove redis in future. So returning no errors for now.
+      case "JDBC" =>
+        checkJdbcConnection(errors, host, port)
+      case _ =>
+        errors += s"host checking for provider type '$providerType' is not implemented"
+    }
+  }
+
+  private def checkCassandraConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
     try {
       val builder =
         if (port == -1)
@@ -201,7 +212,7 @@ object ProviderValidator extends ValidationUtils {
     }
   }
 
-  def checkAerospikeConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
+  private def checkAerospikeConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
     val aerospikePort = if (port == -1) 3000 else port
     val client = new AerospikeClient(hostname, aerospikePort)
     if (!client.isConnected) {
@@ -210,7 +221,7 @@ object ProviderValidator extends ValidationUtils {
     client.close()
   }
 
-  def checkZookeeperConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
+  private def checkZookeeperConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
     val zookeeperPort = if (port == -1) 2181 else port
     var client: ZooKeeper = null
     try {
@@ -233,7 +244,7 @@ object ProviderValidator extends ValidationUtils {
     }
   }
 
-  def checkKafkaConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
+  private def checkKafkaConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
     val kafkaPort = if (port == -1) 9092 else port
     val consumer = new SimpleConsumer(hostname, kafkaPort, 500, 64 * 1024, "connectionTest")
     val topics = Collections.singletonList("test_connection")
@@ -250,7 +261,7 @@ object ProviderValidator extends ValidationUtils {
     }
   }
 
-  def checkESConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
+  private def checkESConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
     val esPort = if (port == -1) 9300 else port
     val settings = Settings.settingsBuilder().put("client.transport.ping_timeout", "2s").build()
     val client = TransportClient.builder().settings(settings).build()
@@ -260,7 +271,7 @@ object ProviderValidator extends ValidationUtils {
     }
   }
 
-  def checkJdbcConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
+  private def checkJdbcConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
     true
   }
 

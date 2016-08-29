@@ -15,7 +15,8 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.DAL.model.ConfigSetting
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.crud.rest.utils.InstanceUtil
+import com.bwsw.sj.common.ModuleConstants._
+import com.bwsw.sj.crud.rest.instance.InstanceStopper
 
 import scala.concurrent.Future
 
@@ -48,7 +49,7 @@ object SjCrudRestService extends App with SjCrudInterface {
 
   //putRestSettingsToConfigFile() /todo uncomment before merging with master after demo
 
-  InstanceUtil.checkStatusInstances()
+  stopInstances()
 
   val serverBinding: Future[ServerBinding] = Http().bindAndHandle(routeLogged, interface = restHost, port = restPort)
   serverBinding onFailure {
@@ -56,11 +57,6 @@ object SjCrudRestService extends App with SjCrudInterface {
       logger.error("Failed to bind to {}:{}!", restHost, restPort)
   }
   logger.info(s"Server online at http://$restHost:$restPort/")
-
-  private def putRestSettingsToConfigFile() = {
-    configService.save(new ConfigSetting(ConfigConstants.hostOfCrudRestTag, restHost, "system"))
-    configService.save(new ConfigSetting(ConfigConstants.portOfCrudRestTag, restPort.toString, "system"))
-  }
 
   private def logRequestResult(level: LogLevel, route: Route) = {
     def getRequestEntityAsString(logger: LoggingAdapter)(req: HttpRequest)(res: Any): Unit = {
@@ -79,5 +75,27 @@ object SjCrudRestService extends App with SjCrudInterface {
     entity.dataBytes
       .map(_.decodeString(entity.contentType().charset().value))
       .runWith(Sink.head)
+  }
+
+  private def putRestSettingsToConfigFile() = {
+    configService.save(new ConfigSetting(ConfigConstants.hostOfCrudRestTag, restHost, "system"))
+    configService.save(new ConfigSetting(ConfigConstants.portOfCrudRestTag, restPort.toString, "system"))
+  }
+
+  /**
+   * If instance has status "starting", "stopping" or "deleting"
+   * instance will be stopped
+   */
+  private def stopInstances() = {
+    logger.info("Running of crud-rest. Stop instances which have status \"starting\", \"stopping\" or \"deleting\".")
+    val instances = instanceDAO.getAll.filter { instance =>
+      instance.status.equals(starting) ||
+        instance.status.equals(stopping) ||
+        instance.status.equals(deleting)
+    }
+
+    instances.foreach { instance =>
+      new Thread(new InstanceStopper(instance, 1000)).start()
+    }
   }
 }

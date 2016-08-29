@@ -67,14 +67,6 @@ trait SjCrudValidator {
   }
 
   /**
-   * Check String object
-   *
-   * @param value - input string
-   * @return - boolean result of checking
-   */
-  private def isEmptyOrNullString(value: String): Boolean = value == null || value.isEmpty
-
-  /**
    * Check specification of uploading jar file
    *
    * @param jarFile - input jar file
@@ -144,10 +136,9 @@ trait SjCrudValidator {
 
   def getSpecification(jarFile: File) = {
     val json = getSpecificationFromJar(jarFile)
-    
+
     serializer.deserialize[Map[String, Any]](json)
   }
-
 
   /**
    * Return content of specification.json file from root of jar
@@ -176,6 +167,14 @@ trait SjCrudValidator {
     }
     builder.toString()
   }
+
+  /**
+   * Check String object
+   *
+   * @param value - input string
+   * @return - boolean result of checking
+   */
+  private def isEmptyOrNullString(value: String): Boolean = value == null || value.isEmpty
 
   /**
    * Validate json for such schema

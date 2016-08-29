@@ -22,22 +22,17 @@ import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.transport.InetSocketTransportAddress
 import org.slf4j.LoggerFactory
 
-/**
-  *
-  *
-  * @author Kseniya Tomskikh
-  */
 object StreamUtil {
   private val logger = LoggerFactory.getLogger(getClass.getName)
 
   /**
-    * Check t-stream for exists
-    * If stream is not exists, then it created
-    * Else compare count of partitions
-    *
-    * @param stream - T-stream for checking
-    * @return - Error, if cannot creating stream or stream is incorrect
-    */
+   * Check t-stream for existence
+   * If stream does not exist, it will be created
+   * Else compare count of partitions
+   *
+   * @param stream - T-stream for checking
+   * @return - Error, if cannot create stream or stream is incorrect
+   */
   def checkAndCreateTStream(stream: TStreamSjStream, force: Boolean = false) = {
     logger.debug(s"Stream ${stream.name}. Check and create t-stream.")
     val service = stream.service.asInstanceOf[TStreamService]
@@ -86,12 +81,10 @@ object StreamUtil {
   }
 
   /**
-    * Create t-stream
-    *
-    * @param stream Stream for creating
-    * @param metadataStorage t-stream metadata storage (cassandra storage)
-    * @param dataStorage t-stream data storage (aerospike or cassandra)
-    */
+   * @param stream Stream for creating
+   * @param metadataStorage t-stream metadata storage (cassandra storage)
+   * @param dataStorage t-stream data storage (aerospike or cassandra)
+   */
   private def createTStream(stream: TStreamSjStream,
                             metadataStorage: MetadataStorage,
                             dataStorage: IStorage[Array[Byte]]) = {
@@ -109,13 +102,13 @@ object StreamUtil {
   }
 
   /**
-    * Check kafka topic for exists
-    * If kafka topic is not exists, then it creating
-    * Else compare count of partitions
-    *
-    * @param stream - Kafka topic (stream)
-    * @return - Error, if topic is incorrect or cannot creating it
-    */
+   * Check kafka topic for existence
+   * If kafka topic does not exist, it will be created
+   * Else compare count of partitions
+   *
+   * @param stream - Kafka topic (stream)
+   * @return - Error, if topic is incorrect or cannot create it
+   */
   def checkAndCreateKafkaTopic(stream: KafkaSjStream, force: Boolean = false) = {
     logger.debug(s"Stream ${stream.name}. Check and create kafka stream.")
     val service = stream.service.asInstanceOf[KafkaService]
@@ -158,13 +151,12 @@ object StreamUtil {
   }
 
   /**
-    * Check elasticsearch index for exists
-    * If ES index is not exists, then it creating
-    * Else compare count of partitions
-    *
-    * @param stream - ES index (stream)
-    * @return - Error, if index is incorrect or cannot creating it
-    */
+   * Check elasticsearch index for existence
+   * If ES index does not exist, it will be created
+   *
+   * @param stream - ES index (stream)
+   * @return - Error, if index is incorrect or cannot create it
+   */
   def checkAndCreateEsStream(stream: ESSjStream, force: Boolean = false) = {
     logger.debug(s"Stream ${stream.name}. Check and create elasticsearch stream.")
     val service = stream.service.asInstanceOf[ESService]
@@ -183,35 +175,13 @@ object StreamUtil {
     }
   }
 
-  def deleteEsStream(stream: ESSjStream) = {
-    val service = stream.service.asInstanceOf[ESService]
-    val hosts: Array[InetSocketTransportAddress] = service.provider.hosts.map { s =>
-      val parts = s.split(":")
-      new InetSocketTransportAddress(new InetSocketAddress(parts(0), parts(1).toInt))
-    }
-    val client = TransportClient.builder().build().addTransportAddresses(hosts.head)
-    val esRequest: SearchResponse = client
-      .prepareSearch(service.index)
-      .setTypes(stream.name)
-      .setSize(2000)
-      .execute()
-      .get()
-    val outputData = esRequest.getHits
-
-    outputData.getHits.foreach { hit =>
-      val id = hit.getId
-      client.prepareDelete(service.index, stream.name, id).execute().actionGet()
-    }
-  }
-
   /**
-    * Check sql table for exists
-    * If table is not exists, then it creating
-    * Else compare count of partitions
-    *
-    * @param stream - SQL table (stream)
-    * @return - Error, if table is incorrect or cannot creating it
-    */
+   * Check sql table for existence
+   * If table does not exist, then it will be created
+   *
+   * @param stream - SQL table (stream)
+   * @return - Error, if table is incorrect or cannot creating it
+   */
   def checkAndCreateJdbcStream(stream: JDBCSjStream, force: Boolean = false) = {
     logger.debug(s"Stream ${stream.name}. Check and create jdbc stream.")
     val service = stream.service.asInstanceOf[JDBCService]
@@ -224,11 +194,11 @@ object StreamUtil {
   }
 
   /**
-    * Generating name of task for stream generator
-    *
-    * @param stream - SjStream object
-    * @return - Task name for transaction generator application
-    */
+   * Generating name of task for stream generator
+   *
+   * @param stream - SjStream object
+   * @return - Task name for transaction generator application
+   */
   def createGeneratorTaskName(stream: TStreamSjStream) = {
     var name = ""
     if (stream.generator.generatorType.equals("per-stream")) {
@@ -240,10 +210,10 @@ object StreamUtil {
   }
 
   /**
-    * Delete stream from base
-    *
-    * @param stream Stream for deleting
-    */
+   * Delete stream from base
+   *
+   * @param stream Stream for deleting
+   */
   def deleteStream(stream: SjStream) = {
     stream match {
       case s: TStreamSjStream =>
@@ -255,12 +225,7 @@ object StreamUtil {
     }
   }
 
-  /**
-    * Delete t-stream
-    *
-    * @param stream T-stream fo deleting
-    */
-  def deleteTStream(stream: TStreamSjStream) = {
+  private def deleteTStream(stream: TStreamSjStream) = {
     val service = stream.service.asInstanceOf[TStreamService]
     val metadataProvider = service.metadataProvider
     val hosts = metadataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toSet
@@ -284,12 +249,7 @@ object StreamUtil {
     }
   }
 
-  /**
-    * Delete kafka topic
-    *
-    * @param stream Kafka stream for deleting
-    */
-  def deleteKafkaStream(stream: KafkaSjStream) = {
+  private def deleteKafkaStream(stream: KafkaSjStream) = {
     logger.info(s"Deleting kafka topic ${stream.name}")
     val service = stream.service.asInstanceOf[KafkaService]
     val zkHost = service.zkProvider.hosts
@@ -308,4 +268,24 @@ object StreamUtil {
     }
   }
 
+  private def deleteEsStream(stream: ESSjStream) = {
+    val service = stream.service.asInstanceOf[ESService]
+    val hosts: Array[InetSocketTransportAddress] = service.provider.hosts.map { s =>
+      val parts = s.split(":")
+      new InetSocketTransportAddress(new InetSocketAddress(parts(0), parts(1).toInt))
+    }
+    val client = TransportClient.builder().build().addTransportAddresses(hosts.head)
+    val esRequest: SearchResponse = client
+      .prepareSearch(service.index)
+      .setTypes(stream.name)
+      .setSize(2000)
+      .execute()
+      .get()
+    val outputData = esRequest.getHits
+
+    outputData.getHits.foreach { hit =>
+      val id = hit.getId
+      client.prepareDelete(service.index, stream.name, id).execute().actionGet()
+    }
+  }
 }

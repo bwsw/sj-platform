@@ -26,94 +26,81 @@ object ConvertUtil {
   private val logger = LoggerFactory.getLogger(getClass.getName)
   private val serializer = new JsonSerializer
 
-  def convertModelInstanceToProtocolInstance(instance: Instance): InstanceMetadata = {
-    logger.debug(s"Convert model instance ${instance.name} to protocol instance object.")
+  def instanceToInstanceMetadata(instance: Instance): InstanceMetadata = {
+    logger.debug(s"Convert model instance ${instance.name} to protocol instance.")
     instance match {
       case timeWindowedInstance: WindowedInstance =>
-        val apiInstance = instanceToInstanceMetadata(new WindowedInstanceMetadata, instance).asInstanceOf[WindowedInstanceMetadata]
-        apiInstance.timeWindowed = timeWindowedInstance.timeWindowed
-        apiInstance.windowFullMax = timeWindowedInstance.windowFullMax
-        apiInstance.stateManagement = timeWindowedInstance.stateManagement
-        apiInstance.stateFullCheckpoint = timeWindowedInstance.stateFullCheckpoint
-        apiInstance.eventWaitTime = timeWindowedInstance.eventWaitTime
-        apiInstance.inputs = timeWindowedInstance.inputs
-        apiInstance.outputs = timeWindowedInstance.outputs
-        apiInstance.startFrom = timeWindowedInstance.startFrom
-        apiInstance
+        val protocolInstance = instanceToInstanceMetadata(new WindowedInstanceMetadata, instance).asInstanceOf[WindowedInstanceMetadata]
+        protocolInstance.timeWindowed = timeWindowedInstance.timeWindowed
+        protocolInstance.windowFullMax = timeWindowedInstance.windowFullMax
+        protocolInstance.stateManagement = timeWindowedInstance.stateManagement
+        protocolInstance.stateFullCheckpoint = timeWindowedInstance.stateFullCheckpoint
+        protocolInstance.eventWaitTime = timeWindowedInstance.eventWaitTime
+        protocolInstance.inputs = timeWindowedInstance.inputs
+        protocolInstance.outputs = timeWindowedInstance.outputs
+        protocolInstance.startFrom = timeWindowedInstance.startFrom
+        protocolInstance
       case regularInstance: RegularInstance =>
-        val apiInstance = instanceToInstanceMetadata(new RegularInstanceMetadata, instance).asInstanceOf[RegularInstanceMetadata]
-        apiInstance.stateManagement = regularInstance.stateManagement
-        apiInstance.stateFullCheckpoint = regularInstance.stateFullCheckpoint
-        apiInstance.eventWaitTime = regularInstance.eventWaitTime
-        apiInstance.inputs = regularInstance.inputs
-        apiInstance.outputs = regularInstance.outputs
-        apiInstance.startFrom = regularInstance.startFrom
-        apiInstance
+        val protocolInstance = instanceToInstanceMetadata(new RegularInstanceMetadata, instance).asInstanceOf[RegularInstanceMetadata]
+        protocolInstance.stateManagement = regularInstance.stateManagement
+        protocolInstance.stateFullCheckpoint = regularInstance.stateFullCheckpoint
+        protocolInstance.eventWaitTime = regularInstance.eventWaitTime
+        protocolInstance.inputs = regularInstance.inputs
+        protocolInstance.outputs = regularInstance.outputs
+        protocolInstance.startFrom = regularInstance.startFrom
+        protocolInstance
       case outputInstance: OutputInstance =>
-        val apiInstance = instanceToInstanceMetadata(new OutputInstanceMetadata, instance).asInstanceOf[OutputInstanceMetadata]
-        apiInstance.input = outputInstance.inputs.head
-        apiInstance.output = outputInstance.outputs.head
-        apiInstance.startFrom = outputInstance.startFrom
-        apiInstance
+        val protocolInstance = instanceToInstanceMetadata(new OutputInstanceMetadata, instance).asInstanceOf[OutputInstanceMetadata]
+        protocolInstance.input = outputInstance.inputs.head
+        protocolInstance.output = outputInstance.outputs.head
+        protocolInstance.startFrom = outputInstance.startFrom
+        protocolInstance
       case inputInstance: InputInstance =>
-        val apiInstance = instanceToInstanceMetadata(new InputInstanceMetadata, instance).asInstanceOf[InputInstanceMetadata]
-        apiInstance.outputs = inputInstance.outputs
-        apiInstance.defaultEvictionPolicy = inputInstance.defaultEvictionPolicy
-        apiInstance.evictionPolicy = inputInstance.evictionPolicy
-        apiInstance.lookupHistory = inputInstance.lookupHistory
-        apiInstance.queueMaxSize = inputInstance.queueMaxSize
+        val protocolInstance = instanceToInstanceMetadata(new InputInstanceMetadata, instance).asInstanceOf[InputInstanceMetadata]
+        protocolInstance.outputs = inputInstance.outputs
+        protocolInstance.defaultEvictionPolicy = inputInstance.defaultEvictionPolicy
+        protocolInstance.evictionPolicy = inputInstance.evictionPolicy
+        protocolInstance.lookupHistory = inputInstance.lookupHistory
+        protocolInstance.queueMaxSize = inputInstance.queueMaxSize
         if (inputInstance.tasks != null) {
-          apiInstance.tasks = Map(inputInstance.tasks.asScala.toList: _*)
+          protocolInstance.tasks = Map(inputInstance.tasks.asScala.toList: _*)
         }
-        apiInstance
+        protocolInstance
       case _ => instanceToInstanceMetadata(new InstanceMetadata, instance)
     }
   }
-
-  /**
-   * Convert model instance object to API instance
-   *
-   * @param apiInstance - protocol object of instance
-   * @param instance - object of model instance
-   * @return - API instance object
-   */
-  def instanceToInstanceMetadata(apiInstance: InstanceMetadata, instance: Instance): InstanceMetadata = {
+  
+  private def instanceToInstanceMetadata(protocolInstance: InstanceMetadata, instance: Instance): InstanceMetadata = {
     if (instance.inputs != null) {
       val executionPlan = Map(
         "tasks" -> instance.executionPlan.tasks.map(t => t._1 -> Map("inputs" -> t._2.inputs))
       )
-      apiInstance.executionPlan = executionPlan
+      protocolInstance.executionPlan = executionPlan
     }
-    apiInstance.status = instance.status
-    apiInstance.name = instance.name
-    apiInstance.description = instance.description
-    apiInstance.checkpointMode = instance.checkpointMode
-    apiInstance.checkpointInterval = instance.checkpointInterval
-    apiInstance.parallelism = instance.parallelism
-    apiInstance.options = serializer.deserialize[Map[String, Any]](instance.options)
-    apiInstance.perTaskCores = instance.perTaskCores
-    apiInstance.performanceReportingInterval = instance.performanceReportingInterval
-    apiInstance.engine = instance.engine
-    apiInstance.perTaskRam = instance.perTaskRam
-    apiInstance.jvmOptions = Map(instance.jvmOptions.asScala.toList: _*)
+    protocolInstance.status = instance.status
+    protocolInstance.name = instance.name
+    protocolInstance.description = instance.description
+    protocolInstance.checkpointMode = instance.checkpointMode
+    protocolInstance.checkpointInterval = instance.checkpointInterval
+    protocolInstance.parallelism = instance.parallelism
+    protocolInstance.options = serializer.deserialize[Map[String, Any]](instance.options)
+    protocolInstance.perTaskCores = instance.perTaskCores
+    protocolInstance.performanceReportingInterval = instance.performanceReportingInterval
+    protocolInstance.engine = instance.engine
+    protocolInstance.perTaskRam = instance.perTaskRam
+    protocolInstance.jvmOptions = Map(instance.jvmOptions.asScala.toList: _*)
     if (instance.nodeAttributes != null) {
-      apiInstance.nodeAttributes = Map(instance.nodeAttributes.asScala.toList: _*)
+      protocolInstance.nodeAttributes = Map(instance.nodeAttributes.asScala.toList: _*)
     }
     if (instance.environmentVariables != null) {
-      apiInstance.environmentVariables = Map(instance.environmentVariables.asScala.toList: _*)
+      protocolInstance.environmentVariables = Map(instance.environmentVariables.asScala.toList: _*)
     }
-    apiInstance.coordinationService = instance.coordinationService.name
-    apiInstance
+    protocolInstance.coordinationService = instance.coordinationService.name
+    protocolInstance
   }
-
-  /**
-   * Convert model file specification to protocol file specification
-   *
-   * @param specification - Model file specification object
-   * @return - API file specification object
-   */
+  
   def specificationToSpecificationData(specification: Specification) = {
-    logger.debug(s"Convert model specification ${specification.name} to protocol specification object.")
+    logger.debug(s"Convert model specification ${specification.name} to protocol specification.")
     ModuleSpecification(specification.name,
       specification.description,
       specification.version,
@@ -131,15 +118,9 @@ object ConvertUtil {
       specification.executorClass)
   }
 
-  /**
-   * Convert api instance to db-model instance
-   *
-   * @param apiInstance - api object of instance
-   * @return - object of model instance
-   */
-  def convertToModelInstance(apiInstance: InstanceMetadata): Instance = {
-    logger.debug(s"Convert protocol instance ${apiInstance.name} to model instance object.")
-    apiInstance match {
+  def instanceMetadataToInstance(protocolInstance: InstanceMetadata): Instance = {
+    logger.debug(s"Convert protocol instance ${protocolInstance.name} to model instance.")
+    protocolInstance match {
       case windowedInstanceMetadata: WindowedInstanceMetadata =>
         val modelInstance = instanceMetadataToInstance(new WindowedInstance, windowedInstanceMetadata).asInstanceOf[WindowedInstance]
         modelInstance.timeWindowed = windowedInstanceMetadata.timeWindowed
@@ -177,18 +158,11 @@ object ConvertUtil {
           modelInstance.tasks = inputInstanceMetadata.tasks
         }
         modelInstance
-      case _ => instanceMetadataToInstance(new Instance, apiInstance)
+      case _ => instanceMetadataToInstance(new Instance, protocolInstance)
     }
   }
 
-  /**
-   * Convert API instance object to model instance
-   *
-   * @param modelInstance - object of model instance
-   * @param apiInstance - protocol object of instance
-   * @return - Model instance object
-   */
-  def instanceMetadataToInstance(modelInstance: Instance, apiInstance: InstanceMetadata) = {
+  private def instanceMetadataToInstance(modelInstance: Instance, apiInstance: InstanceMetadata) = {
     modelInstance.name = apiInstance.name
     modelInstance.description = apiInstance.description
     modelInstance.checkpointMode = apiInstance.checkpointMode
@@ -216,14 +190,8 @@ object ConvertUtil {
     modelInstance
   }
 
-  /**
-   * Convert SjStream entity object to SjStreamData API object
-   *
-   * @param stream - SjStream object
-   * @return - SjStreamData object
-   */
   def streamToStreamData(stream: SjStream) = {
-    logger.debug(s"Convert model stream ${stream.name} to protocol stream object.")
+    logger.debug(s"Convert model stream ${stream.name} to protocol stream.")
     var streamData: SjStreamData = null
     stream match {
       case s: TStreamSjStream =>
@@ -253,14 +221,8 @@ object ConvertUtil {
     streamData
   }
 
-  /**
-   * Convert Service entity object to ServiceData API object
-   *
-   * @param service - service entity
-   * @return - service data entity
-   */
   def serviceToServiceData(service: Service) = {
-    logger.debug(s"Convert model service ${service.name} to protocol service object.")
+    logger.debug(s"Convert model service ${service.name} to protocol service.")
     var serviceData: ServiceData = null
     service match {
       case s: CassandraService =>
@@ -323,14 +285,8 @@ object ConvertUtil {
     serviceData
   }
 
-  /**
-   * Convert Provider entity object to ProviderData API object
-   *
-   * @param provider - provider entity
-   * @return - provider data entity
-   */
   def providerToProviderData(provider: Provider) = {
-    logger.debug(s"Convert model provider ${provider.name} to protocol provider object.")
+    logger.debug(s"Convert model provider ${provider.name} to protocol provider.")
     val providerData = new ProviderData(
       provider.name,
       provider.description,
@@ -342,14 +298,8 @@ object ConvertUtil {
     providerData
   }
 
-  /**
-   * Convert ConfigSetting entity object to ConfigSettingData API object
-   *
-   * @param configElement - config setting entity
-   * @return - config setting data entity
-   */
   def configSettingToConfigSettingData(configElement: ConfigSetting) = {
-    logger.debug(s"Convert model config settings data ${configElement.name} to protocol config settings object.")
+    logger.debug(s"Convert model config setting ${configElement.name} to protocol config setting.")
     new ConfigurationSettingData(
       configElement.name.replace(configElement.domain + ".", ""),
       configElement.value

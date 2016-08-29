@@ -25,32 +25,6 @@ class InputStreamingValidator extends StreamingModuleValidator {
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
   /**
-   * Create entity of input instance for saving to database
-   *
-   * @return
-   */
-  def createInstance(parameters: InputInstanceMetadata) = {
-    logger.debug(s"Instance ${parameters.name}. Create model object.")
-    val instance = convertToModelInstance(parameters)
-    val stages = scala.collection.mutable.Map[String, InstanceStage]()
-    parameters.outputs.foreach { stream =>
-      val instanceStartTask = new InstanceStage
-      instanceStartTask.state = toHandle
-      instanceStartTask.datetime = Calendar.getInstance().getTime
-      instanceStartTask.duration = 0
-      stages.put(stream, instanceStartTask)
-    }
-    createTasks(instance.asInstanceOf[InputInstance])
-    val instanceTask = new InstanceStage
-    instanceTask.state = toHandle
-    instanceTask.datetime = Calendar.getInstance().getTime
-    instanceTask.duration = 0
-    stages.put(instance.name, instanceTask)
-    instance.stages = mapAsJavaMap(stages)
-    Some(instance)
-  }
-
-  /**
    * Create tasks object for instance of input module
    *
    * @param instance - instance for input module
@@ -75,7 +49,7 @@ class InputStreamingValidator extends StreamingModuleValidator {
    * @param errors        - List of validating errors
    * @return - List of errors and validating instance (null, if errors non empty)
    */
-  override def streamOptionsValidate(parameters: InstanceMetadata,
+  override def validateStreamOptions(parameters: InstanceMetadata,
                                      specification: ModuleSpecification,
                                      errors: ArrayBuffer[String]): (ArrayBuffer[String], Option[Instance]) = {
     logger.debug(s"Instance: ${parameters.name}. Stream options validation.")
@@ -95,7 +69,7 @@ class InputStreamingValidator extends StreamingModuleValidator {
     if (parameters.outputs.length > outputsCardinality(1)) {
       errors += s"Count of outputs cannot be more than ${outputsCardinality(1)}."
     }
-    if (listHasDoubles(parameters.outputs.toList)) {
+    if (doesContainDoubles(parameters.outputs.toList)) {
       errors += s"Outputs is not unique."
     }
     val outputStreams = getStreams(parameters.outputs.toList)
@@ -134,6 +108,32 @@ class InputStreamingValidator extends StreamingModuleValidator {
     (errors, validatedInstance)
   }
 
+  /**
+   * Create entity of input instance for saving to database
+   *
+   * @return
+   */
+  private def createInstance(parameters: InputInstanceMetadata) = {
+    logger.debug(s"Instance ${parameters.name}. Create model object.")
+    val instance = instanceMetadataToInstance(parameters)
+    val stages = scala.collection.mutable.Map[String, InstanceStage]()
+    parameters.outputs.foreach { stream =>
+      val instanceStartTask = new InstanceStage
+      instanceStartTask.state = toHandle
+      instanceStartTask.datetime = Calendar.getInstance().getTime
+      instanceStartTask.duration = 0
+      stages.put(stream, instanceStartTask)
+    }
+    createTasks(instance.asInstanceOf[InputInstance])
+    val instanceTask = new InstanceStage
+    instanceTask.state = toHandle
+    instanceTask.datetime = Calendar.getInstance().getTime
+    instanceTask.duration = 0
+    stages.put(instance.name, instanceTask)
+    instance.stages = mapAsJavaMap(stages)
+    Some(instance)
+  }
+
   private def checkParallelism(parallelism: Any, errors: ArrayBuffer[String]) = {
     parallelism match {
       case dig: Int =>
@@ -158,7 +158,7 @@ class InputStreamingValidator extends StreamingModuleValidator {
   override def validate(parameters: InstanceMetadata,
                         specification: ModuleSpecification): (ArrayBuffer[String], Option[Instance]) = {
     logger.debug(s"Instance: ${parameters.name}. Start input-streaming validation.")
-    val errors = super.generalOptionsValidate(parameters)
+    val errors = super.validateGeneralOptions(parameters)
 
     val instance = parameters.asInstanceOf[InputInstanceMetadata]
 
@@ -196,6 +196,6 @@ class InputStreamingValidator extends StreamingModuleValidator {
     if (instance.backupCount < 0 || instance.backupCount > 6)
       errors += "Backup count must be in the interval from 0 to 6"
 
-    streamOptionsValidate(parameters, specification, errors)
+    validateStreamOptions(parameters, specification, errors)
   }
 }

@@ -3,7 +3,7 @@ package com.bwsw.sj.engine.core
 import java.util.Date
 
 import com.bwsw.sj.common.DAL.model.TStreamSjStream
-import com.bwsw.sj.common.DAL.model.module.RegularInstance
+import com.bwsw.sj.common.DAL.model.module.{OutputInstance, RegularInstance}
 import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
@@ -33,8 +33,35 @@ class TStreamTaskInputService(manager: TaskManager,
   extends TaskInputService {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val regularInstance = manager.instance.asInstanceOf[RegularInstance]
   private val consumers = createSubscribingConsumers()
+
+  private def createSubscribingConsumers() = {
+    logger.debug(s"Task: ${manager.taskName}. Start creating subscribing consumers\n")
+    val inputs = manager.inputs
+    val offset = getOffset()
+    val callback = new ConsumerCallback(blockingQueue)
+
+    val consumers = inputs.filter(x => x._1.streamType == StreamConstants.tStreamType)
+      .map(x => (x._1.asInstanceOf[TStreamSjStream], x._2.toList))
+      .map(x => manager.createSubscribingConsumer(x._1, x._2, offset, callback))
+      .map(x => (x.name, x)).toMap
+    logger.debug(s"Task: ${manager.taskName}. Creation of subscribing consumers is finished\n")
+
+    consumers
+  }
+
+  private def getOffset() = {
+    val instance = manager.instance
+    val offset = instance match {
+      case instance: RegularInstance => instance.startFrom
+      case instance: OutputInstance => instance.startFrom
+      case badInstance =>
+        throw new TypeNotPresentException(badInstance.getClass.getName,
+          new Throwable("Instance should be or RegularInstance or OutputInstance"))
+    }
+
+    chooseOffset(offset)
+  }
 
   /**
    * Chooses offset policy for t-streams consumers
@@ -49,33 +76,6 @@ class TStreamTaskInputService(manager: TaskManager,
       case "newest" => Newest
       case time => DateTime(new Date(time.toLong * 1000))
     }
-  }
-
-  private def createSubscribingConsumers() = {
-    logger.debug(s"Task: ${manager.taskName}. Start creating subscribing consumers\n")
-    val inputs = manager.inputs
-    val offset = regularInstance.startFrom
-    val callback = new ConsumerCallback(blockingQueue)
-
-    val consumers = inputs.filter(x => x._1.streamType == StreamConstants.tStreamType)
-      .map(x => (x._1.asInstanceOf[TStreamSjStream], x._2.toList))
-      .map(x => manager.createSubscribingConsumer(x._1, x._2, chooseOffset(offset), callback))
-      .map(x => (x.name, x)).toMap
-    logger.debug(s"Task: ${manager.taskName}. Creation of subscribing consumers is finished\n")
-
-    consumers
-  }
-
-  private def launchConsumers() = {
-    logger.debug(s"Task: ${manager.taskName}. Launch subscribing consumers\n")
-    consumers.foreach(_._2.start())
-    logger.debug(s"Task: ${manager.taskName}. Subscribing consumers are launched\n")
-  }
-
-  private def addConsumersToCheckpointGroup() = {
-    logger.debug(s"Task: ${manager.taskName}. Start adding subscribing consumers to checkpoint group\n")
-    consumers.foreach(x => checkpointGroup.add(x._2.getConsumer()))
-    logger.debug(s"Task: ${manager.taskName}. Adding subscribing consumers to checkpoint group is finished\n")
   }
 
   def registerEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics) = {
@@ -93,6 +93,18 @@ class TStreamTaskInputService(manager: TaskManager,
   def call() = {
     addConsumersToCheckpointGroup()
     launchConsumers()
+  }
+
+  private def launchConsumers() = {
+    logger.debug(s"Task: ${manager.taskName}. Launch subscribing consumers\n")
+    consumers.foreach(_._2.start())
+    logger.debug(s"Task: ${manager.taskName}. Subscribing consumers are launched\n")
+  }
+
+  private def addConsumersToCheckpointGroup() = {
+    logger.debug(s"Task: ${manager.taskName}. Start adding subscribing consumers to checkpoint group\n")
+    consumers.foreach(x => checkpointGroup.add(x._2.getConsumer()))
+    logger.debug(s"Task: ${manager.taskName}. Adding subscribing consumers to checkpoint group is finished\n")
   }
 
   override def doCheckpoint(): Unit = {}

@@ -2,6 +2,7 @@ package com.bwsw.sj.crud.rest.validator.module
 
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{SjStream, TStreamService, TStreamSjStream}
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.ModuleConstants._
 import com.bwsw.sj.common.StreamConstants._
 import com.bwsw.sj.crud.rest.entities.module.{InstanceMetadata, ModuleSpecification, OutputInstanceMetadata}
@@ -17,7 +18,7 @@ import scala.collection.mutable.ArrayBuffer
 class OutputStreamingValidator extends StreamingModuleValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
-
+  private val streamsDAO = ConnectionRepository.getStreamService
   /**
    * Validating options of streams of instance for module
    *
@@ -26,7 +27,7 @@ class OutputStreamingValidator extends StreamingModuleValidator {
    * @param errors - List of validating errors
    * @return - List of errors and validating instance (null, if errors non empty)
    */
-  override def streamOptionsValidate(parameters: InstanceMetadata, specification: ModuleSpecification, errors: ArrayBuffer[String]) = {
+  override def validateStreamOptions(parameters: InstanceMetadata, specification: ModuleSpecification, errors: ArrayBuffer[String]) = {
     if (!parameters.checkpointMode.equals("every-nth")) {
       errors += s"Checkpoint-mode attribute for output-streaming module must be only 'every-nth'."
     }
@@ -98,11 +99,15 @@ class OutputStreamingValidator extends StreamingModuleValidator {
 
       parameters.parallelism = checkParallelism(parameters.parallelism, input.asInstanceOf[TStreamSjStream].partitions, errors)
 
-      val partitions = getPartitionForStreams(Array(input))
+      val partitions = getStreamsPartitions(Array(input))
       parameters.inputs = Array(parameters.asInstanceOf[OutputInstanceMetadata].input)
       validatedInstance = createInstance(parameters, partitions, allStreams.filter(s => s.streamType.equals(tStreamType)).toSet)
     }
     (errors, validatedInstance)
+  }
+
+  private def getStream(streamName: String) = {
+    streamsDAO.get(streamName)
   }
 
   /**
@@ -114,8 +119,8 @@ class OutputStreamingValidator extends StreamingModuleValidator {
    */
   override def validate(parameters: InstanceMetadata, specification: ModuleSpecification) = {
     logger.debug(s"Instance: ${parameters.name}. Start output-streaming validation.")
-    val errors = super.generalOptionsValidate(parameters)
-    streamOptionsValidate(parameters, specification, errors)
+    val errors = super.validateGeneralOptions(parameters)
+    validateStreamOptions(parameters, specification, errors)
   }
 
 }

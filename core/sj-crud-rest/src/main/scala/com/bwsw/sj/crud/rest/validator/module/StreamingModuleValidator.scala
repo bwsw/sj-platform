@@ -17,21 +17,18 @@ import org.slf4j.{Logger, LoggerFactory}
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
+import com.bwsw.sj.common.ModuleConstants._
+import com.bwsw.sj.common.StreamConstants._
+import com.bwsw.sj.crud.rest.utils.ConvertUtil._
 
 /**
-  * Trait of validator for modules
-  *
-  *
-  * @author Kseniya Tomskikh
-  */
+ * Trait of validator for modules
+ *
+ *
+ * @author Kseniya Tomskikh
+ */
 abstract class StreamingModuleValidator extends ValidationUtils {
-  import com.bwsw.sj.common.ModuleConstants._
-  import com.bwsw.sj.common.StreamConstants._
-  import com.bwsw.sj.crud.rest.utils.ConvertUtil._
-
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
-
-  val instanceNamePattern = "^[a-zA-Z0-9-]$".r
 
   var serviceDAO: GenericMongoService[Service] = ConnectionRepository.getServiceManager
   var instanceDAO: GenericMongoService[Instance] = ConnectionRepository.getInstanceService
@@ -42,16 +39,16 @@ abstract class StreamingModuleValidator extends ValidationUtils {
   case class StreamProcess(currentPartition: Int, countFreePartitions: Int)
 
   /**
-    * Create entity of instance for saving to database
-    *
-    * @param parameters - metadata of instance
-    * @param partitionsCount - partitions count of input streams
-    * @return
-    */
-  def createInstance(parameters: InstanceMetadata, partitionsCount: Map[String, Int], streams: Set[SjStream]) = {
-    logger.debug(s"Instance ${parameters.name}. Create model object.")
-    val executionPlan = createExecutionPlan(parameters, partitionsCount)
-    val instance = convertToModelInstance(parameters)
+   * Create entity of instance for saving to database
+   *
+   * @param instanceMetadata - metadata of instance
+   * @param partitionsCount - partitions count of input streams
+   * @return
+   */
+  def createInstance(instanceMetadata: InstanceMetadata, partitionsCount: Map[String, Int], streams: Set[SjStream]) = {
+    logger.debug(s"Instance ${instanceMetadata.name}. Create model object.")
+    val executionPlan = createExecutionPlan(instanceMetadata, partitionsCount)
+    val instance = instanceMetadataToInstance(instanceMetadata)
     instance.executionPlan = executionPlan
     val stages = scala.collection.mutable.Map[String, InstanceStage]()
     streams.foreach { stream =>
@@ -70,78 +67,83 @@ abstract class StreamingModuleValidator extends ValidationUtils {
     Option(instance)
   }
 
-
   /**
-    * Validating input parameters for streaming module
-    *
-    * @param parameters - input parameters for running module
-    * @return - List of errors
-    */
-  def validate(parameters: InstanceMetadata, specification: ModuleSpecification) = {
-    val errors = generalOptionsValidate(parameters)
-    streamOptionsValidate(parameters, specification, errors)
-  }
-
-  /**
-    * Validation base instance options
-    *
-    * @param parameters - Instance parameters
-    * @return - List of errors
-    */
-  def generalOptionsValidate(parameters: InstanceMetadata) = {
-    logger.debug(s"Instance: ${parameters.name}. General options validation.")
-    val errors = new ArrayBuffer[String]()
-
-    if (!validateName(parameters.name)) {
-      errors += s"Instance has incorrect name: ${parameters.name}. Name of instance must be contain digits, lowercase letters or hyphens. First symbol must be letter."
+   * Create execution plan for instance of module
+   *
+   * @param instance - instance for module
+   * @return - execution plan of instance
+   */
+  private def createExecutionPlan(instance: InstanceMetadata, partitionsCount: Map[String, Int]) = {
+    logger.debug(s"Instance ${instance.name}. Create execution plan.")
+    var inputStreams: Array[String] = Array()
+    instance.inputs match {
+      case inputStreamArray: Array[String] =>
+        inputStreams = inputStreamArray
+      case _ =>
+        inputStreams = Array(instance.inputs.asInstanceOf[String])
     }
-
-    val instance = instanceDAO.get(parameters.name)
-    if (instance.isDefined) {
-      errors += s"Instance for name: ${parameters.name} is exist."
+    val inputs = inputStreams.map { input =>
+      val mode = getStreamMode(input)
+      val name = input.replaceAll("/split|/full", "")
+      InputStream(name, mode, partitionsCount(name))
     }
+    val parallelism = instance.parallelism.asInstanceOf[Int]
+    val tasks = (0 until parallelism)
+      .map(x => instance.name + "-task" + x)
+      .map(x => x -> inputs)
 
-    if (!checkpointModes.contains(parameters.checkpointMode)) {
-      errors += s"Unknown value of checkpoint-mode attribute: ${parameters.checkpointMode}."
-    }
+    val executionPlan = mutable.Map[String, Task]()
+    val streams = mutable.Map(inputs.map(x => x.name -> StreamProcess(0, x.partitionsCount)).toSeq: _*)
 
-    if (parameters.options.isEmpty) {
-      errors += "Options attribute is empty."
-    }
-
-    if (parameters.performanceReportingInterval <= 0) {
-      errors += "Performance reporting interval attribute must be greater than zero."
-    }
-
-    if (parameters.jvmOptions.isEmpty) {
-      errors += "Jvm-options attribute is empty."
-    }
-
-    if (parameters.coordinationService.isEmpty) {
-      errors += "Coordination service attribute is empty."
-    } else {
-      val coordService = serviceDAO.get(parameters.coordinationService)
-      if (coordService.isDefined) {
-        if (!coordService.get.isInstanceOf[ZKService]) {
-          errors += s"Coordination service ${parameters.coordinationService} is not ZKCoord."
+    var tasksNotProcessed = tasks.size
+    tasks.foreach { task =>
+      val list = task._2.map { inputStream =>
+        val stream = streams(inputStream.name)
+        val countFreePartitions = stream.countFreePartitions
+        val startPartition = stream.currentPartition
+        var endPartition = startPartition + countFreePartitions
+        inputStream.mode match {
+          case "full" => endPartition = startPartition + countFreePartitions
+          case "split" =>
+            val cntTaskStreamPartitions = countFreePartitions / tasksNotProcessed
+            streams.update(inputStream.name, StreamProcess(startPartition + cntTaskStreamPartitions, countFreePartitions - cntTaskStreamPartitions))
+            if (Math.abs(cntTaskStreamPartitions - countFreePartitions) >= cntTaskStreamPartitions) {
+              endPartition = startPartition + cntTaskStreamPartitions
+            }
         }
-      } else {
-        errors += s"Coordination service ${parameters.coordinationService} is not exists."
-      }
-    }
 
-    errors
+        inputStream.name -> Array(startPartition, endPartition - 1)
+      }
+      tasksNotProcessed -= 1
+      val planTask = new Task
+      planTask.inputs = mapAsJavaMap(Map(list.toSeq: _*))
+      executionPlan.put(task._1, planTask)
+    }
+    val execPlan = new ExecutionPlan
+    execPlan.tasks = mapAsJavaMap(executionPlan)
+    execPlan
+  }
+  
+  /**
+   * Validating input parameters for streaming module
+   *
+   * @param parameters - input parameters for running module
+   * @return - List of errors
+   */
+  def validate(parameters: InstanceMetadata, specification: ModuleSpecification) = {
+    val errors = validateGeneralOptions(parameters)
+    validateStreamOptions(parameters, specification, errors)
   }
 
   /**
-    * Validating options of streams of instance for module
-    *
-    * @param parameters - Input instance parameters
-    * @param specification - Specification of module
-    * @param errors - List of validating errors
-    * @return - List of errors and validating instance (null, if errors non empty)
-    */
-  def streamOptionsValidate(parameters: InstanceMetadata, specification: ModuleSpecification, errors: ArrayBuffer[String]) = {
+   * Validating options of streams of instance for module
+   *
+   * @param parameters - Input instance parameters
+   * @param specification - Specification of module
+   * @param errors - List of validating errors
+   * @return - List of errors and validating instance (null, if errors non empty)
+   */
+  protected def validateStreamOptions(parameters: InstanceMetadata, specification: ModuleSpecification, errors: ArrayBuffer[String]) = {
     logger.debug(s"Instance: ${parameters.name}. Stream options validation.")
 
     val inputModes = parameters.inputs.map(i => getStreamMode(i))
@@ -149,13 +151,13 @@ abstract class StreamingModuleValidator extends ValidationUtils {
       errors += s"Unknown stream modes. Input streams must have modes 'split' or 'full'."
     }
     val inputsCardinality = specification.inputs("cardinality").asInstanceOf[Array[Int]]
-    if ( parameters.inputs.length < inputsCardinality(0)) {
+    if (parameters.inputs.length < inputsCardinality(0)) {
       errors += s"Count of inputs cannot be less than ${inputsCardinality(0)}."
     }
-    if ( parameters.inputs.length > inputsCardinality(1)) {
+    if (parameters.inputs.length > inputsCardinality(1)) {
       errors += s"Count of inputs cannot be more than ${inputsCardinality(1)}."
     }
-    if (listHasDoubles(parameters.inputs.toList)) {
+    if (doesContainDoubles(parameters.inputs.toList)) {
       errors += s"Inputs is not unique."
     }
     val inputStreams = getStreams(parameters.inputs.toList.map(_.replaceAll("/split|/full", "")))
@@ -177,7 +179,7 @@ abstract class StreamingModuleValidator extends ValidationUtils {
     if (parameters.outputs.length > outputsCardinality(1)) {
       errors += s"Count of outputs cannot be more than ${outputsCardinality(1)}."
     }
-    if (listHasDoubles(parameters.outputs.toList)) {
+    if (doesContainDoubles(parameters.outputs.toList)) {
       errors += s"Outputs is not unique."
     }
     val outputStreams = getStreams(parameters.outputs.toList)
@@ -231,7 +233,7 @@ abstract class StreamingModuleValidator extends ValidationUtils {
         }
       }
 
-      val partitions = getPartitionForStreams(inputStreams)
+      val partitions = getStreamsPartitions(inputStreams)
       val minPartitionCount = if (partitions.nonEmpty) partitions.values.min else 0
 
       parameters.parallelism = checkParallelism(parameters.parallelism, minPartitionCount, errors)
@@ -244,39 +246,40 @@ abstract class StreamingModuleValidator extends ValidationUtils {
 
   }
 
-  /**
-    * Validating 'parallelism' parameters of instance
-    *
-    * @param parallelism - Parallelism value
-    * @param partitions - Min count of partitions of input streams
-    * @param errors - List of errors
-    * @return - Validated value of parallelism
-    */
-  def checkParallelism(parallelism: Any, partitions: Int, errors: ArrayBuffer[String]) = {
-    parallelism match {
-      case dig: Int =>
-        if (dig > partitions) {
-          errors += s"Parallelism ($dig) > minimum of partition count ($partitions) in all input stream."
-        }
-        dig
-      case s: String =>
-        if (!s.equals("max")) {
-          errors += s"Parallelism must be int value or string 'max'."
-        }
-        partitions
-      case _ =>
-        errors += "Unknown type of 'parallelism' parameter. Must be Int or String."
-        null
+  protected def getStreamMode(name: String) = {
+    if (name.contains("/full")) {
+      "full"
+    } else {
+      "split"
     }
   }
 
+  protected def doesContainDoubles(list: List[String]): Boolean = {
+    list.map(x => (x, 1)).groupBy(_._1).map(x => x._2.reduce { (a, b) => (a._1, a._2 + b._2) }).exists(x => x._2 > 1)
+  }
+
+  protected def getStreams(streamNames: List[String]): mutable.Buffer[SjStream] = {
+    val streamsDAO = ConnectionRepository.getStreamService
+    streamsDAO.getAll.filter(s => streamNames.contains(s.name))
+  }
+
   /**
-    * Checking and creating t-streams, if streams is not exists
-    *
-    * @param errors - List of all errors
-    * @param allTStreams - all t-streams of instance
-    */
-  def checkTStreams(errors: ArrayBuffer[String], allTStreams: mutable.Buffer[TStreamSjStream]) = {
+   * Getting service names for all streams (must be one element in list)
+   *
+   * @param streams All streams
+   * @return List of service-names
+   */
+  def getStreamServices(streams: Seq[SjStream]): List[String] = {
+    streams.map(s => (s.service.name, 1)).groupBy(_._1).keys.toList
+  }
+  
+  /**
+   * Checking and creating t-streams, if streams do not exist
+   *
+   * @param errors - List of all errors
+   * @param allTStreams - all t-streams of instance
+   */
+  protected def checkTStreams(errors: ArrayBuffer[String], allTStreams: mutable.Buffer[TStreamSjStream]) = {
     logger.debug(s"Check t-streams.")
     allTStreams.foreach { (stream: TStreamSjStream) =>
       if (errors.isEmpty) {
@@ -288,13 +291,13 @@ abstract class StreamingModuleValidator extends ValidationUtils {
       }
     }
   }
-
+  
   /**
-    * Checking and creating kafka topics, if it's not exists
-    *
-    * @param errors - list of all errors
-    * @param allKafkaStreams - all kafka streams of instance
-    */
+   * Checking and creating kafka topics, if topics do not exist
+   *
+   * @param errors - list of all errors
+   * @param allKafkaStreams - all kafka streams of instance
+   */
   def checkKafkaStreams(errors: ArrayBuffer[String], allKafkaStreams: mutable.Buffer[KafkaSjStream]) = {
     logger.debug(s"Check kafka streams.")
     allKafkaStreams.foreach { (stream: KafkaSjStream) =>
@@ -314,12 +317,101 @@ abstract class StreamingModuleValidator extends ValidationUtils {
     }
   }
 
+  protected def getStreamsPartitions(streams: Seq[SjStream]): Map[String, Int] = {
+    Map(streams.map { stream =>
+      stream.streamType match {
+        case StreamConstants.`tStreamType` =>
+          stream.name -> stream.asInstanceOf[TStreamSjStream].partitions
+        case StreamConstants.`kafkaStreamType` =>
+          stream.name -> stream.asInstanceOf[KafkaSjStream].partitions
+      }
+
+    }: _*)
+  }
+  
   /**
-    * Checking and creating elasticsearch streams, if it's not exists
-    *
-    * @param errors - list of all errors
-    * @param allEsStreams - all elasticsearch streams of instance
-    */
+   * Validating 'parallelism' parameters of instance
+   *
+   * @param parallelism - Parallelism value
+   * @param partitions - Min count of partitions of input streams
+   * @param errors - List of errors
+   * @return - Validated value of parallelism
+   */
+  protected def checkParallelism(parallelism: Any, partitions: Int, errors: ArrayBuffer[String]) = {
+    parallelism match {
+      case dig: Int =>
+        if (dig > partitions) {
+          errors += s"Parallelism ($dig) > minimum of partition count ($partitions) in all input stream."
+        }
+        dig
+      case s: String =>
+        if (!s.equals("max")) {
+          errors += s"Parallelism must be int value or string 'max'."
+        }
+        partitions
+      case _ =>
+        errors += "Unknown type of 'parallelism' parameter. Must be Int or String."
+        null
+    }
+  }
+  
+  /**
+   * Validation base instance options
+   *
+   * @param parameters - Instance parameters
+   * @return - List of errors
+   */
+  protected def validateGeneralOptions(parameters: InstanceMetadata) = {
+    logger.debug(s"Instance: ${parameters.name}. General options validation.")
+    val errors = new ArrayBuffer[String]()
+
+    if (!validateName(parameters.name)) {
+      errors += s"Instance has incorrect name: ${parameters.name}. Name of instance must be contain digits, lowercase letters or hyphens. First symbol must be letter."
+    }
+
+    val instance = instanceDAO.get(parameters.name)
+    if (instance.isDefined) {
+      errors += s"Instance for name: ${parameters.name} is exist."
+    }
+
+    if (!checkpointModes.contains(parameters.checkpointMode)) {
+      errors += s"Unknown value of checkpoint-mode attribute: ${parameters.checkpointMode}."
+    }
+
+    if (parameters.options.isEmpty) {
+      errors += "Options attribute is empty."
+    }
+
+    if (parameters.performanceReportingInterval <= 0) {
+      errors += "Performance reporting interval attribute must be greater than zero."
+    }
+
+    if (parameters.jvmOptions.isEmpty) {
+      errors += "Jvm-options attribute is empty."
+    }
+
+    if (parameters.coordinationService.isEmpty) {
+      errors += "Coordination service attribute is empty."
+    } else {
+      val coordService = serviceDAO.get(parameters.coordinationService)
+      if (coordService.isDefined) {
+        if (!coordService.get.isInstanceOf[ZKService]) {
+          errors += s"Coordination service ${parameters.coordinationService} is not ZKCoord."
+        }
+      } else {
+        errors += s"Coordination service ${parameters.coordinationService} is not exists."
+      }
+    }
+
+    errors
+  }
+
+  /**
+   * Checking and creating elasticsearch streams, if it's not exists
+   *
+   * @param errors - list of all errors
+   * @param allEsStreams - all elasticsearch streams of instance
+   */
   def checkEsStreams(errors: ArrayBuffer[String], allEsStreams: List[ESSjStream]) = {
     logger.debug(s"Check elasticsearch streams.")
     allEsStreams.foreach { (stream: ESSjStream) =>
@@ -334,11 +426,11 @@ abstract class StreamingModuleValidator extends ValidationUtils {
   }
 
   /**
-    * Checking and creating sql tables, if it's not exists
-    *
-    * @param errors - list of all errors
-    * @param allJdbcStreams - all jdbc streams of instance
-    */
+   * Checking and creating sql tables, if it's not exists
+   *
+   * @param errors - list of all errors
+   * @param allJdbcStreams - all jdbc streams of instance
+   */
   def checkJdbcStreams(errors: ArrayBuffer[String], allJdbcStreams: List[JDBCSjStream]) = {
     logger.debug(s"Check jdbc streams.")
     allJdbcStreams.foreach { (stream: JDBCSjStream) =>
@@ -351,135 +443,4 @@ abstract class StreamingModuleValidator extends ValidationUtils {
       }
     }
   }
-
-  /**
-    * Check doubles in list
-    *
-    * @param list - list for checking
-    * @return - true, if list contain doubles
-    */
-  def listHasDoubles(list: List[String]): Boolean = {
-    list.map(x => (x, 1)).groupBy(_._1).map(x => x._2.reduce { (a, b) => (a._1, a._2 + b._2) }).exists(x => x._2 > 1)
-  }
-
-  /**
-    * Get count of partition for streams
-    *
-    * @return - count of partition for each stream
-    */
-  def getPartitionForStreams(streams: Seq[SjStream]): Map[String, Int] = {
-    Map(streams.map { stream =>
-      stream.streamType match {
-        case StreamConstants.`tStreamType` =>
-          stream.name -> stream.asInstanceOf[TStreamSjStream].partitions
-        case StreamConstants.`kafkaStreamType` =>
-          stream.name -> stream.asInstanceOf[KafkaSjStream].partitions
-      }
-
-    }: _*)
-  }
-
-  /**
-    * Getting streams for such names
-    *
-    * @param streamNames Names of streams
-    * @return Seq of streams
-    */
-  def getStreams(streamNames: List[String]): mutable.Buffer[SjStream] = {
-    val streamsDAO = ConnectionRepository.getStreamService
-    streamsDAO.getAll.filter(s => streamNames.contains(s.name))
-  }
-
-  /**
-    * Getting stream for such name
-    *
-    * @param streamName Name of stream
-    * @return SjStream object
-    */
-  def getStream(streamName: String) = {
-    val streamsDAO = ConnectionRepository.getStreamService
-    streamsDAO.get(streamName)
-  }
-
-  /**
-    * Getting service names for all streams (must be one element in list)
-    *
-    * @param streams All streams
-    * @return List of service-names
-    */
-  def getStreamServices(streams: Seq[SjStream]) = {
-    streams.map(s => (s.service.name, 1)).groupBy(_._1).keys.toList
-  }
-
-  /**
-    * Create execution plan for instance of module
-    *
-    * @param instance - instance for module
-    * @return - execution plan of instance
-    */
-  def createExecutionPlan(instance: InstanceMetadata, partitionsCount: Map[String, Int]) = {
-    logger.debug(s"Instance ${instance.name}. Create execution plan.")
-    var inputStreams: Array[String] = Array()
-    instance.inputs match {
-      case inputStreamArray: Array[String] =>
-        inputStreams = inputStreamArray
-      case _ =>
-        inputStreams = Array(instance.inputs.asInstanceOf[String])
-    }
-    val inputs = inputStreams.map { input =>
-      val mode = getStreamMode(input)
-      val name = input.replaceAll("/split|/full", "")
-      InputStream(name, mode, partitionsCount(name))
-    }
-    val parallelism = instance.parallelism.asInstanceOf[Int]
-    val tasks = (0 until parallelism)
-      .map(x => instance.name + "-task" + x)
-      .map(x => x -> inputs)
-
-    val executionPlan = mutable.Map[String, Task]()
-    val streams = mutable.Map(inputs.map(x => x.name -> StreamProcess(0, x.partitionsCount)).toSeq: _*)
-
-    var tasksNotProcessed = tasks.size
-    tasks.foreach { task =>
-      val list = task._2.map { inputStream =>
-        val stream = streams(inputStream.name)
-        val countFreePartitions = stream.countFreePartitions
-        val startPartition = stream.currentPartition
-        var endPartition = startPartition + countFreePartitions
-        inputStream.mode match {
-          case "full" => endPartition = startPartition + countFreePartitions
-          case "split" =>
-            val cntTaskStreamPartitions = countFreePartitions / tasksNotProcessed
-            streams.update(inputStream.name, StreamProcess(startPartition + cntTaskStreamPartitions, countFreePartitions - cntTaskStreamPartitions))
-            if (Math.abs(cntTaskStreamPartitions - countFreePartitions) >= cntTaskStreamPartitions) {
-              endPartition = startPartition + cntTaskStreamPartitions
-            }
-        }
-
-        inputStream.name -> Array(startPartition, endPartition - 1)
-      }
-      tasksNotProcessed -= 1
-      val planTask = new Task
-      planTask.inputs = mapAsJavaMap(Map(list.toSeq: _*))
-      executionPlan.put(task._1, planTask)
-    }
-    val execPlan = new ExecutionPlan
-    execPlan.tasks = mapAsJavaMap(executionPlan)
-    execPlan
-  }
-
-  /**
-    * Get mode from stream-name
-    *
-    * @param name - name of stream
-    * @return - mode of stream
-    */
-  def getStreamMode(name: String) = {
-    if (name.contains("/full")) {
-      "full"
-    } else {
-      "split"
-    }
-  }
-
 }
