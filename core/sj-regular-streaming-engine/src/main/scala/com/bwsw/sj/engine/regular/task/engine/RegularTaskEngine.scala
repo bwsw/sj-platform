@@ -78,10 +78,10 @@ abstract class RegularTaskEngine(protected val manager: RegularTaskManager,
       val maybeEnvelope = blockingQueue.get(instance.eventWaitTime)
 
       if (maybeEnvelope == null) {
-        logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${instance.eventWaitTime} went out and nothing was received\n")
-        logger.debug(s"Task: ${manager.taskName}. Increase total idle time\n")
+        // logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${instance.eventWaitTime} went out and nothing was received\n")
+        // logger.debug(s"Task: ${manager.taskName}. Increase total idle time\n")
         performanceMetrics.increaseTotalIdleTime(instance.eventWaitTime)
-        logger.debug(s"Task: ${manager.taskName}. Invoke onIdle() handler\n")
+        // logger.debug(s"Task: ${manager.taskName}. Invoke onIdle() handler\n")
         executor.onIdle()
       } else {
         val envelope = envelopeSerializer.deserialize[Envelope](maybeEnvelope)
