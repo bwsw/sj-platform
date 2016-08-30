@@ -5,7 +5,6 @@ import java.util
 
 import com.bwsw.sj.common.DAL.model.module.{InputTask, Instance, InputInstance}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.utils.{ConfigConstants, EngineConstants}
 import com.bwsw.sj.mesos.framework.task.{StatusHandler, TasksList}
 import org.apache.log4j.Logger

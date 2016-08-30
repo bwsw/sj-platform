@@ -12,7 +12,6 @@ import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, Instance, RegularInst
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.utils.{ConfigConstants, StreamConstants, CassandraFactory}
-import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.consumer.{Consumer, Options}
 import com.bwsw.tstreams.agents.producer

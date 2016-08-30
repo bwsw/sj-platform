@@ -5,7 +5,6 @@ import java.util.concurrent.Executors
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.StreamConstants
 import com.bwsw.sj.common.utils.{StreamConstants, EngineConstants}
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.KafkaEnvelope
