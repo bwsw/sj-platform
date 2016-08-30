@@ -1,5 +1,7 @@
 package com.bwsw.sj.crud.rest.validator.service
 
+import com.aerospike.client.policy.ClientPolicy
+import com.aerospike.client.{AerospikeClient, Host, Info}
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.ServiceConstants
@@ -277,6 +279,23 @@ object ServiceValidator extends ValidationUtils {
         // 'namespace' field
         errors ++= validateStringFieldRequired(arspkServiceData.namespace, "namespace")
         errors ++= validateNamespace(arspkServiceData.namespace)
+
+        if (errors.isEmpty) {
+          val provider = providerObj.get
+          val policy = new ClientPolicy()
+          val hosts = provider.hosts.map(x => {
+            val address = x.split(":")
+            new Host(address(0), address(1).toInt)
+          })
+
+          val client = new AerospikeClient(policy, hosts: _*)
+          val node = client.getNodes()(0)
+          val namespaces = Info.request(null, node, "namespaces").split(";")
+          if (!namespaces.contains(arspkServiceData.namespace)) {
+            errors += s"Aerospike namespace: '${arspkServiceData.namespace}' does not exist. " +
+              s"Create it and please try again"
+          }
+        }
 
         // filling-in service object serviceType-dependent extra fields
         if (errors.isEmpty) {

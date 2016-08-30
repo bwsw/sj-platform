@@ -13,7 +13,7 @@ object Dependencies {
     "com.typesafe" % "config" % "1.3.0"
   ))
 
-   lazy val sjEngineCoreDependencies = Def.setting(Seq(
+  lazy val sjEngineCoreDependencies = Def.setting(Seq(
     "net.openhft" % "chronicle-queue" % "4.2.6"
   ))
 
