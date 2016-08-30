@@ -8,7 +8,7 @@ import com.bwsw.sj.engine.output.task.OutputTaskManager
 import scala.collection.mutable
 
 /**
- * Class represents a set of metrics that characterize performance of a output streaming module
+ * Class represents a set of metrics that characterize performance of an output streaming module
  *
  * @author Kseniya Mikhaleva
  */
@@ -23,10 +23,6 @@ class OutputStreamingPerformanceMetrics(manager: OutputTaskManager)
   override protected var inputEnvelopesPerStream = createStorageForInputEnvelopes(inputStreamNames)
   override protected var outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
 
-  /**
-   * Constructs a report of performance metrics of task's work
-   * @return Constructed performance report
-   */
   override def getReport() = {
     logger.info(s"Start preparing a report of performance for task: $taskName of output module\n")
     mutex.lock()

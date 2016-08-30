@@ -64,7 +64,7 @@ object ServiceUtil {
       cassandraFactory.createKeyspace(tStreamService.dataNamespace)
       cassandraFactory.createDataTable(tStreamService.dataNamespace)
       cassandraFactory.close()
-    } //todo possible there is a necessary of creation namespace of other provider type (aerospike)
+    } //todo possible there is a necessary of creation namespace of other provider (aerospike)
     cassandraFactory.close()
   }
 

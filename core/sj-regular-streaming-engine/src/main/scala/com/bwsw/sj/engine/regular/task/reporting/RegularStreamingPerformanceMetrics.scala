@@ -30,7 +30,7 @@ class RegularStreamingPerformanceMetrics(manager: RegularTaskManager)
    */
   def increaseTotalIdleTime(idle: Long) = {
     mutex.lock()
-    logger.debug(s"Increase total idle time on $idle ms\n")
+    //logger.debug(s"Increase total idle time on $idle ms\n")
     totalIdleTime += idle
     mutex.unlock()
   }

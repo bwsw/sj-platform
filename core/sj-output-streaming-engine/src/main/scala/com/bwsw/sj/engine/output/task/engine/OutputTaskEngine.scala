@@ -14,7 +14,6 @@ import com.bwsw.sj.engine.core.engine.input.TStreamTaskInputService
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
-import com.bwsw.sj.engine.output.OutputDataFactory
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
@@ -89,7 +88,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
    * @return ES Transport client and ES service of stream
    */
   private def openDbConnection(outputStream: SjStream): (TransportClient, ESService) = {
-    logger.info(s"Task: ${OutputDataFactory.taskName}. Open output elasticsearch connection.\n")
+    logger.info(s"Task: ${manager.taskName}. Open output elasticsearch connection.\n")
     val esService: ESService = outputStream.service.asInstanceOf[ESService]
     val client: TransportClient = TransportClient.builder().build()
     esService.provider.hosts.foreach { host =>
@@ -113,8 +112,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     val envelopeSerializer = new JsonSerializer(true)
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Run output task engine in a separate thread of execution service\n")
-    val outputModuleEntity = manager.getOutputModuleEntity()
-    createEsStream(esService.index, outputStream.name, outputModuleEntity, client)
+    prepareES()
 
     while (true) {
       val maybeEnvelope = blockingQueue.get(EngineConstants.eventWaitTimeout) //todo maybe add to OutputInstance eventWaitTime parameter so PM will change too
@@ -125,7 +123,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
         val envelope = envelopeSerializer.deserialize[Envelope](maybeEnvelope).asInstanceOf[TStreamEnvelope]
         afterReceivingEnvelope()
         taskInputService.registerEnvelope(envelope, performanceMetrics)
-        deleteEnvelopeFromES(envelope)
+        removeFromES(envelope)
         logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
         val outputEnvelopes: List[OutputEnvelope] = executor.onMessage(envelope)
         outputEnvelopes.foreach(outputEnvelope => processOutputEnvelope(outputEnvelope, envelope))
@@ -135,22 +133,25 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     }
   }
 
-  /**
-   * Create document type with mapping in elasticsearch
-   *
-   * @param index ES service index
-   * @param streamName ES document type
-   * @param entity User module output entity object
-   * @param client ES Transport client
-   * @return ES Response
-   */
-  private def createEsStream(index: String, streamName: String, entity: OutputEntity, client: TransportClient) = {
-    logger.debug(s"Task: ${OutputDataFactory.taskName}. Create elasticsearch index $index")
-    val isIndexExist = client.admin().indices().prepareExists(index).execute().actionGet()
-    if (!isIndexExist.isExists) {
-      client.admin().indices().prepareCreate(index).execute().actionGet()
+  private def prepareES() = {
+    logger.debug(s"Task: ${manager.taskName}. Prepare an elasticsearch index ${esService.index}")
+    if (!doesIndexExist) {
+      createIndex()
     }
+    createIndexMapping()
+  }
 
+  private def createIndex() = {
+    val index = esService.index
+    logger.debug(s"Task: ${manager.taskName}. Create an elasticsearch index $index")
+    client.admin().indices().prepareCreate(index).execute().actionGet()
+  }
+
+  private def createIndexMapping() = {
+    val index = esService.index
+    logger.debug(s"Task: ${manager.taskName}. Create the mapping for the elasticsearch index $index")
+    val streamName = outputStream.name
+    val entity = manager.getOutputModuleEntity()
     val fields = scala.collection.mutable.Map("txn" -> Map("type" -> "string"),
       "stream" -> Map("type" -> "string"),
       "partition" -> Map("type" -> "integer"))
@@ -171,25 +172,21 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
   protected def afterReceivingEnvelope(): Unit
 
-  private def deleteEnvelopeFromES(envelope: TStreamEnvelope) = {
+  private def removeFromES(envelope: TStreamEnvelope) = {
     if (!wasFirstCheckpoint) {
-      deleteTransactionFromES(envelope, esService.index, outputStream.name, client)
+      val txn = envelope.txnUUID.toString.replaceAll("-", "")
+      removeTxnFromES(txn)
     }
   }
 
-  /**
-   * Delete transactions from ES stream from last checkpoint
-   *
-   */
-  private def deleteTransactionFromES(envelope: TStreamEnvelope, index: String, documentType: String, client: TransportClient) = {
-    val txn = envelope.txnUUID.toString.replaceAll("-", "")
-
-    logger.info(s"Task: ${OutputDataFactory.taskName}. Delete transaction $txn from ES stream.")
-    val isIndexExist = client.admin().indices().prepareExists(index).execute().actionGet()
-    if (isIndexExist.isExists) {
+  private def removeTxnFromES(txn: String) = {
+    val index = esService.index
+    val streamName = outputStream.name
+    logger.info(s"Task: ${manager.taskName}. Delete transaction $txn from ES stream.")
+    if (doesIndexExist) {
       val request: SearchRequestBuilder = client
         .prepareSearch(index)
-        .setTypes(documentType)
+        .setTypes(streamName)
         .setQuery(QueryBuilders.matchQuery("txn", txn))
         .setSize(2000)
       val response: SearchResponse = request.execute().get()
@@ -197,7 +194,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
       outputData.getHits.foreach { hit =>
         val id = hit.getId
-        client.prepareDelete(index, documentType, id).execute().actionGet()
+        client.prepareDelete(index, streamName, id).execute().actionGet()
       }
     }
   }
@@ -224,28 +221,28 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
         entity.txn = inputEnvelope.txnUUID.toString.replaceAll("-", "")
         entity.stream = inputEnvelope.stream
         entity.partition = inputEnvelope.partition
-        writeToElasticsearch(esService.index, outputStream.name, entity, client)
+        writeEntityToES(esService.index, outputStream.name, entity, client)
       case "jdbc-output" => writeToJdbc(outputEnvelope)
       case _ =>
     }
   }
 
-  /**
-   * Writing entity to ES
-   *
-   * @param index ES index
-   * @param documentType ES document type (name of stream)
-   * @param entity ES entity (data row)
-   * @param client ES Transport client
-   * @return Response from ES
-   */
-  private def writeToElasticsearch(index: String, documentType: String, entity: EsEntity, client: TransportClient) = {
-    logger.debug(s"Task: ${OutputDataFactory.taskName}. Write output envelope to elasticearch.")
+  private def writeEntityToES(index: String, documentType: String, entity: EsEntity, client: TransportClient) = {
+    logger.debug(s"Task: ${manager.taskName}. Write output envelope to elasticearch.")
     val esData: String = serializer.serialize(entity)
 
     val request: IndexRequestBuilder = client.prepareIndex(index, documentType, UUID.randomUUID().toString)
     request.setSource(esData)
-    request.execute().actionGet()
+    val response = request.execute().actionGet()
+
+    response
+  }
+
+  private def doesIndexExist = {
+    val index = esService.index
+    val doesExist = client.admin().indices().prepareExists(index).execute().actionGet().isExists
+
+    doesExist
   }
 
   /**

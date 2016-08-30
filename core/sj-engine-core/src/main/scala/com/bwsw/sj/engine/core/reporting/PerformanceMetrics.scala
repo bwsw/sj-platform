@@ -142,7 +142,7 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
   }
 
   /**
-   * Constructs a report of performance metrics of task's work
+   * Constructs a report of performance metrics of task work
    * @return Constructed performance report
    */
   def getReport(): String

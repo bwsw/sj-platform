@@ -8,16 +8,12 @@ import com.bwsw.sj.engine.core.managment.TaskManager
 /**
  * Task manager for working with streams of output-streaming module
  *
- *
  * @author Kseniya Tomskikh
  */
 class OutputTaskManager() extends TaskManager {
 
-  /**
-   * Returns an instance of executor of module
-   *
-   * @return An instance of executor of module
-   */
+  assert(agentsPorts.length == 2, "Not enough ports for t-stream consumers/producers ")
+
   def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = {
     logger.debug(s"Task: $taskName. Start loading of executor class from module jar\n")
     logger.debug(s"Task: $taskName. Create instance of executor class\n")
@@ -30,9 +26,6 @@ class OutputTaskManager() extends TaskManager {
     executor
   }
 
-  /**
-   * Getting instance of entity object from output module jar
-   */
   def getOutputModuleEntity(): OutputEntity = {
     logger.info(s"Task: $taskName. Getting entity object from jar of file: " +
       instance.moduleType + "-" + instance.moduleName + "-" + instance.moduleVersion)

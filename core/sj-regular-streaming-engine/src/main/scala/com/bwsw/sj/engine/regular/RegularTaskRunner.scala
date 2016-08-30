@@ -1,13 +1,10 @@
 package com.bwsw.sj.engine.regular
 
-import java.util.concurrent.{ExecutorCompletionService, Executors}
-import com.bwsw.sj.common.utils.EngineConstants
-import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
+import com.bwsw.sj.engine.core.engine.TaskRunner
 import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
 import com.bwsw.sj.engine.regular.task.engine.{RegularTaskEngine, RegularTaskEngineFactory}
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
-import com.google.common.util.concurrent.ThreadFactoryBuilder
 import org.slf4j.LoggerFactory
 
 /**
@@ -17,25 +14,9 @@ import org.slf4j.LoggerFactory
  * @author Kseniya Mikhaleva
  */
 
-object RegularTaskRunner {
+object RegularTaskRunner extends {override val threadName = "RegularTaskRunner-%d"} with TaskRunner {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val threadPool = createThreadPool()
-  private val executorService = new ExecutorCompletionService[Unit](threadPool)
-  private val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(EngineConstants.persistentBlockingQueue)
-
-  private def createThreadPool() = {
-    val countOfThreads = 3
-    val threadFactory = createThreadFactory()
-
-    Executors.newFixedThreadPool(countOfThreads, threadFactory)
-  }
-
-  private def createThreadFactory() = {
-    new ThreadFactoryBuilder()
-      .setNameFormat("RegularTaskRunner-%d")
-      .build()
-  }
 
   def main(args: Array[String]) {
     try {
@@ -62,12 +43,5 @@ object RegularTaskRunner {
       case assertionError: Error => handleException(assertionError)
       case exception: Exception => handleException(exception)
     }
-  }
-
-  def handleException(exception: Throwable) = {
-    logger.error("Runtime exception", exception)
-    exception.printStackTrace()
-    threadPool.shutdownNow()
-    System.exit(-1)
   }
 }

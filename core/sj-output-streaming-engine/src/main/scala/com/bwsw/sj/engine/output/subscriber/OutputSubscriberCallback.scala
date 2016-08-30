@@ -14,10 +14,9 @@ import org.slf4j.{Logger, LoggerFactory}
  * Subscriber callback for processing transaction of t-stream
  * for output-streaming engine
  *
- *
+ * @param blockingQueue Blocking Queue for saving new transaction from t-stream
  *
  * @author Kseniya Tomskikh
- * @param blockingQueue Blocking Queue for saving new transaction from t-stream
  */
 class OutputSubscriberCallback(blockingQueue: ArrayBlockingQueue[String])
   extends Callback[Array[Byte]] {
@@ -30,7 +29,7 @@ class OutputSubscriberCallback(blockingQueue: ArrayBlockingQueue[String])
    * Putting new transaction as envelope to blocking queue
    *
    * @param operator Subscriber for consumer for read data from t-stream
-   * @param partition Number of partition
+   * @param partition Number of partitions
    * @param uuid Txn uuid from t-stream
    */
   override def onEvent(operator: TransactionOperator[Array[Byte]], partition: Int, uuid: UUID, count: Int): Unit = {

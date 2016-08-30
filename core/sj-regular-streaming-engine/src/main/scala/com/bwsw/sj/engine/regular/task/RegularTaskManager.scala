@@ -25,11 +25,6 @@ class RegularTaskManager() extends TaskManager {
     "Not enough ports for t-stream consumers/producers." +
       s"${inputs.count(x => x._1.streamType == StreamConstants.tStreamType) + instance.outputs.length + 3} ports are required")
 
-  /**
-   * Returns instance of executor of module
-   *
-   * @return An instance of executor of module
-   */
   def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = {
     logger.debug(s"Task: $taskName. Start loading of executor class from module jar\n")
     val executor = moduleClassLoader

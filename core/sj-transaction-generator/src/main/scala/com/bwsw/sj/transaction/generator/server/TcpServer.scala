@@ -13,7 +13,7 @@ import org.apache.log4j.Logger
 import org.apache.zookeeper.{CreateMode, ZooDefs}
 
 /**
- * TCP-Server for transaction generating
+ * Simple tcp server for creating transaction ID
  *
  *
  * @author Kseniya Tomskikh

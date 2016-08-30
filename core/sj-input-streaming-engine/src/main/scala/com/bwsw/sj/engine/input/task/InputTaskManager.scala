@@ -1,7 +1,6 @@
 package com.bwsw.sj.engine.input.task
 
 import com.bwsw.sj.common.DAL.model.module.InputInstance
-import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.engine.core.environment.{EnvironmentManager, InputEnvironmentManager}
 import com.bwsw.sj.engine.core.input.InputStreamingExecutor
 import com.bwsw.sj.engine.core.managment.TaskManager
@@ -27,11 +26,6 @@ class InputTaskManager() extends TaskManager {
     else inputInstance.tasks.get(taskName).port
   }
 
-  /**
-   * Returns an instance of executor of module
-   *
-   * @return An instance of executor of module
-   */
   override def getExecutor(environmentManager: EnvironmentManager) = {
     logger.debug(s"Task: $taskName. Start loading of executor class from module jar\n")
     val executor = moduleClassLoader

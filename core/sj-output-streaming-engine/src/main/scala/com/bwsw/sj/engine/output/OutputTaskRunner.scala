@@ -1,14 +1,11 @@
 package com.bwsw.sj.engine.output
 
-import java.util.concurrent.{ExecutorCompletionService, Executors}
-import com.bwsw.sj.common.utils.EngineConstants
-import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
+import com.bwsw.sj.engine.core.engine.TaskRunner
 import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.engine.OutputTaskEngineFactory
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
-import com.google.common.util.concurrent.ThreadFactoryBuilder
-import org.slf4j.{Logger, LoggerFactory}
+import org.slf4j.LoggerFactory
 
 /**
  * Runner object for engine of output-streaming module
@@ -16,24 +13,9 @@ import org.slf4j.{Logger, LoggerFactory}
  *
  * @author Kseniya Tomskikh
  */
-object OutputTaskRunner {
-  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
-  private val threadPool = createThreadPool()
-  private val executorService = new ExecutorCompletionService[Unit](threadPool)
-  private val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(EngineConstants.persistentBlockingQueue)
+object OutputTaskRunner extends {override val threadName = "OutputTaskRunner-%d"} with TaskRunner {
 
-  private def createThreadPool() = {
-    val countOfThreads = 3
-    val threadFactory = createThreadFactory()
-
-    Executors.newFixedThreadPool(countOfThreads, threadFactory)
-  }
-
-  private def createThreadFactory() = {
-    new ThreadFactoryBuilder()
-      .setNameFormat("OutputTaskRunner-%d")
-      .build()
-  }
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   def main(args: Array[String]) {
     try {
@@ -60,12 +42,5 @@ object OutputTaskRunner {
       case assertionError: Error => handleException(assertionError)
       case exception: Exception => handleException(exception)
     }
-  }
-
-  def handleException(exception: Throwable) = {
-    logger.error("Runtime exception", exception)
-    exception.printStackTrace()
-    threadPool.shutdownNow()
-    System.exit(-1)
   }
 }

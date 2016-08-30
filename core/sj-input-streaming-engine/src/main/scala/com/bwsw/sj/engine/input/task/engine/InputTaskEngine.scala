@@ -89,9 +89,6 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
     }
   }
 
-  /**
-   * Adds producers for each output to checkpoint group
-   */
   private def addProducersToCheckpointGroup() = {
     logger.debug(s"Task: ${manager.taskName}. Start adding t-stream producers to checkpoint group\n")
     producers.foreach(x => checkpointGroup.add(x._2))
@@ -101,9 +98,6 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
 
   /**
    * Sends an input envelope to output steam
-   * @param stream Output stream name
-   * @param partition Partition of stream
-   * @param data Data for sending
    */
   protected def sendEnvelope(stream: String, partition: Int, data: Array[Byte]) = {
     logger.info(s"Task name: ${manager.taskName}. Send envelope to each output stream.\n")
@@ -215,7 +209,7 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
    * Checks whether a key is duplicate or not if it's necessary
    * @param key Key for checking
    * @param duplicateCheck Flag points a key has to be checked or not.
-   * @param value In case there has to update duplicate key this value will be used
+   * @param value In case there is a need to update duplicate key this value will be used
    * @return True if a processed envelope is not duplicate and false in other case
    */
   protected def checkForDuplication(key: String, duplicateCheck: Boolean, value: Array[Byte]): Boolean = {
