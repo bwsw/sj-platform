@@ -2,6 +2,7 @@ package com.bwsw.sj.engine.core.entities
 
 /**
  * Provides a common data type for an EsEnvelope data field
+ * You should define such fields (class variables) that will be in congruence with an ES index document structure
  */
 
 class OutputData extends Serializable {
