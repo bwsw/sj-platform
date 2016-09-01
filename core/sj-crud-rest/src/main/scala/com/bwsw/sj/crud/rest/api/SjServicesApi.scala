@@ -22,7 +22,7 @@ trait SjServicesApi extends Directives with SjCrudValidator with CompletionUtils
           val service = createService(data)
           val errors = ServiceValidator.validate(data, service)
           var response: RestResponse = BadRequestRestResponse(Map("message" ->
-            MessageFormat.format(messages.getString("rest.services.service.cannot.create"), errors.mkString("\n")))
+            MessageFormat.format(messages.getString("rest.services.service.cannot.create"), errors.mkString(";")))
           )
 
           if (errors.isEmpty) {

@@ -37,17 +37,18 @@ object StreamValidator extends ValidationUtils {
       case None =>
         errors += s"'name' is required"
       case Some(x) =>
-        if (x.isEmpty)
+        if (x.isEmpty) {
           errors += s"'name' can not be empty"
-    }
+        } else {
+          val streamObj = streamDAO.get(x)
+          if (streamObj.isDefined) {
+            errors += s"Stream with name $x already exists"
+          }
 
-    if (!validateName(initialData.name)) {
-      errors += s"Stream has incorrect name: ${initialData.name}. Name of stream must be contain digits, letters or hyphens. First symbol must be letter."
-    }
-
-    val streamObj = streamDAO.get(initialData.name)
-    if (streamObj.isDefined) {
-      errors += s"Stream with name ${initialData.name} already exists"
+          if (!validateName(x)) {
+            errors += s"Stream has incorrect name: $x. Name of stream must be contain digits, letters or hyphens. First symbol must be letter."
+          }
+        }
     }
 
     Option(initialData.description) match {
@@ -194,9 +195,9 @@ object StreamValidator extends ValidationUtils {
             case e: TopicExistsException =>
               val messages = ResourceBundle.getBundle("messages")
               errors += MessageFormat.format(
-              messages.getString("rest.streams.create.kafka.cannot"),
-              errors.mkString("\n")
-            )
+                messages.getString("rest.streams.create.kafka.cannot"),
+                errors.mkString("\n")
+              )
           }
         case s: ESSjStream =>
           val streamCheckResult = StreamUtil.checkAndCreateEsStream(s, initialData.force)

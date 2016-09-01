@@ -20,7 +20,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator with CompletionUtil
           val data = serializer.deserialize[ProviderData](getEntityFromContext(ctx))
           val errors = ProviderValidator.validate(data)
           var response: RestResponse = BadRequestRestResponse(Map("message" ->
-            MessageFormat.format(messages.getString("rest.providers.provider.cannot.create"), errors.mkString("\n")))
+            MessageFormat.format(messages.getString("rest.providers.provider.cannot.create"), errors.mkString(";")))
           )
 
           if (errors.isEmpty) {
@@ -105,7 +105,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator with CompletionUtil
                       else {
                         response = ConflictRestResponse(Map(
                           "connection" -> false,
-                          "errors" -> errors.mkString("\n")
+                          "errors" -> errors.mkString(";")
                         ))
                       }
                     case None =>

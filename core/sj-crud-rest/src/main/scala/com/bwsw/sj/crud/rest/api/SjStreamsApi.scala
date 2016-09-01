@@ -27,7 +27,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator with CompletionUtils 
           val stream = createStream(data)
           val errors = StreamValidator.validate(data, stream)
           var response: RestResponse = BadRequestRestResponse(Map("message" ->
-            MessageFormat.format(messages.getString("rest.streams.stream.cannot.create"), errors.mkString("\n"))))
+            MessageFormat.format(messages.getString("rest.streams.stream.cannot.create"), errors.mkString(";"))))
           if (errors.isEmpty) {
             streamDAO.save(stream)
             response = CreatedRestResponse(Map("message" ->

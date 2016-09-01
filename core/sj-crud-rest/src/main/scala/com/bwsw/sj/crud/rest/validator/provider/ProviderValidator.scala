@@ -52,13 +52,13 @@ object ProviderValidator extends ValidationUtils {
           errors += s"'name' can not be empty"
         } else {
           if (providerDAO.get(x).isDefined) {
-            errors += s"Provider with name $x already exists"
+            errors += s"Provider with name '$x' already exists"
+          }
+
+          if (!validateName(x)) {
+            errors += s"Provider has incorrect name: '$x'. Name of provider must be contain digits, letters or hyphens. First symbol must be letter"
           }
         }
-    }
-
-    if (!validateName(initialData.name)) {
-      errors += s"Provider has incorrect name: ${initialData.name}. Name of provider must be contain digits, letters or hyphens. First symbol must be letter."
     }
 
     // 'description' field
@@ -77,7 +77,7 @@ object ProviderValidator extends ValidationUtils {
         errors += s"'type' is required"
       case Some(x) =>
         if (!providerTypes.contains(x)) {
-          errors += s"Unknown 'type' provided. Must be one of: ${providerTypes.mkString("[", "|", "]")}"
+          errors += s"Unknown type '$x' provided. Must be one of: ${providerTypes.mkString("[", ",", "]")}"
         }
     }
 
@@ -97,7 +97,7 @@ object ProviderValidator extends ValidationUtils {
 
         if (initialData.providerType == "cassandra" && ports.distinct.size > 1) {
           errors += s"Ports must be the same for all hosts of '${initialData.providerType}' provider subset"
-        }
+        } //todo  why?
       }
     }
 
@@ -119,7 +119,6 @@ object ProviderValidator extends ValidationUtils {
         checkProviderConnectionByType(
           provider.providerType,
           host,
-          port,
           errors
         )
       }
@@ -136,10 +135,15 @@ object ProviderValidator extends ValidationUtils {
       val uri = new URI(s"dummy://$host")
       hostname = uri.getHost
       port = uri.getPort
+
+      if (hostname == null) {
+        errors += s"Wrong host provided: '$host'"
+      }
+
       val path = uri.getPath
 
       if (path.length > 0)
-        errors += s"host can not contain any uri path ('$path')"
+        errors += s"Host can not contain any uri path ('$path')"
 
     } catch {
       case ex: URISyntaxException =>
@@ -149,107 +153,112 @@ object ProviderValidator extends ValidationUtils {
     (errors, port)
   }
 
-  private def checkProviderConnectionByType(providerType: String, host: String, port: Int, errors: ArrayBuffer[String]) = {
+  private def checkProviderConnectionByType(providerType: String, host: String, errors: ArrayBuffer[String]) = {
     providerType match {
       case "cassandra" =>
-        checkCassandraConnection(errors, host, port)
+        checkCassandraConnection(errors, host)
       case "aerospike" =>
-        checkAerospikeConnection(errors, host, port)
+        checkAerospikeConnection(errors, host)
       case "zookeeper" =>
-        checkZookeeperConnection(errors, host, port)
+        checkZookeeperConnection(errors, host)
       case "kafka" =>
-        checkKafkaConnection(errors, host, port)
+        checkKafkaConnection(errors, host)
       case "ES" =>
-        checkESConnection(errors, host, port)
+        checkESConnection(errors, host)
       case "redis" =>
       // TODO: remove redis in future. So returning no errors for now.
       case "JDBC" =>
-        checkJdbcConnection(errors, host, port)
+        checkJdbcConnection(errors, host)
       case _ =>
-        errors += s"host checking for provider type '$providerType' is not implemented"
+        errors += s"Host checking for provider type '$providerType' is not implemented"
     }
   }
 
-  private def checkCassandraConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
+  private def checkCassandraConnection(errors: ArrayBuffer[String], address: String) = {
     try {
-      val builder =
-        if (port == -1)
-          Cluster.builder().addContactPoint(hostname)
-        else
-          Cluster.builder().addContactPointsWithPorts(new InetSocketAddress(hostname, port))
+      val (host, port) = getHostAndPort(address)
+
+      val builder = Cluster.builder().addContactPointsWithPorts(new InetSocketAddress(host, port))
 
       val client = builder.build()
-      val metadata = client.getMetadata
+      client.getMetadata
       client.close()
     } catch {
       case ex: NoHostAvailableException =>
-        errors += s"Cannot access Cassandra on '$hostname'"
+        errors += s"Cannot gain an access to Cassandra on '$address'"
       case _: Throwable =>
-        errors += s"Wrong host '$hostname'"
+        errors += s"Wrong host '$address'"
     }
   }
 
-  private def checkAerospikeConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
-    val aerospikePort = if (port == -1) 3000 else port
-    val client = new AerospikeClient(hostname, aerospikePort)
+  private def checkAerospikeConnection(errors: ArrayBuffer[String], address: String) = {
+    val (host, port) = getHostAndPort(address)
+
+    val client = new AerospikeClient(host, port)
     if (!client.isConnected) {
-      errors += s"Cannot access Aerospike on '$hostname:$port'"
+      errors += s"Cannot gain an access to Aerospike on '$address'"
     }
     client.close()
   }
 
-  private def checkZookeeperConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
-    val zookeeperPort = if (port == -1) 2181 else port
+  private def checkZookeeperConnection(errors: ArrayBuffer[String], address: String) = {
     var client: ZooKeeper = null
     try {
-      client = new ZooKeeper(s"$hostname:$zookeeperPort", zkTimeout, null)
+      client = new ZooKeeper(address, zkTimeout, null)
       val deadline = 1.seconds.fromNow
       var connected: Boolean = false
       while (!connected && deadline.hasTimeLeft) {
         connected = client.getState.isConnected
       }
       if (!connected) {
-        errors += s"Can not access Zookeeper on '$hostname:$zookeeperPort'"
+        errors += s"Can gain an access to Zookeeper on '$address'"
       }
 
     } catch {
       case ex: Throwable =>
-        errors += s"Wrong zookeeper host"
+        errors += s"Wrong host '$address'"
     }
     if (Option(client).isDefined) {
       client.close()
     }
   }
 
-  private def checkKafkaConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
-    val kafkaPort = if (port == -1) 9092 else port
-    val consumer = new SimpleConsumer(hostname, kafkaPort, 500, 64 * 1024, "connectionTest")
+  private def checkKafkaConnection(errors: ArrayBuffer[String], address: String) = {
+    val (host, port) = getHostAndPort(address)
+    val consumer = new SimpleConsumer(host, port, 500, 64 * 1024, "connectionTest")
     val topics = Collections.singletonList("test_connection")
     val req = new TopicMetadataRequest(topics)
     try {
       consumer.send(req)
     } catch {
       case ex: ClosedChannelException =>
-        errors += s"'$hostname:$kafkaPort' does not respond"
+        errors += s"'$address' does not respond"
       case ex: java.io.EOFException =>
-        errors += s"Can not establish connection to Kafka on '$hostname:$kafkaPort'"
+        errors += s"Can not establish connection to Kafka on '$address'"
       case ex: Throwable =>
-        errors += s"Some issues encountered while trying to establish connection to '$hostname:$kafkaPort'"
+        errors += s"Some issues encountered while trying to establish connection to '$address'"
     }
   }
 
-  private def checkESConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
-    val esPort = if (port == -1) 9300 else port
+  private def checkESConnection(errors: ArrayBuffer[String], address: String) = {
+    val (host, port) = getHostAndPort(address)
     val settings = Settings.settingsBuilder().put("client.transport.ping_timeout", "2s").build()
     val client = TransportClient.builder().settings(settings).build()
-    client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(hostname), esPort))
+    client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(host), port))
     if (client.connectedNodes().size() < 1) {
-      errors += s"Can not establish connection to ElasticSearch on '$hostname:$esPort'"
+      errors += s"Can not establish connection to ElasticSearch on '$address'"
     }
   }
 
-  private def checkJdbcConnection(errors: ArrayBuffer[String], hostname: String, port: Int) = {
+  private def checkJdbcConnection(errors: ArrayBuffer[String], address: String) = {
     true
   }
 
+  private def getHostAndPort(address: String) = {
+    val uri = new URI("dummy://" + address)
+    val host = uri.getHost()
+    val port = uri.getPort()
+
+    (host, port)
+  }
 }

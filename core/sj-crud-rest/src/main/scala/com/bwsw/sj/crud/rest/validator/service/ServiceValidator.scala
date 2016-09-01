@@ -51,11 +51,11 @@ object ServiceValidator extends ValidationUtils {
           if (serviceDAO.get(x).isDefined) {
             errors += s"Service with name $x already exists"
           }
-        }
-    }
 
-    if (!validateName(initialData.name)) {
-      errors += s"Service has incorrect name: ${initialData.name}. Name of service must be contain digits, lowercase letters or hyphens. First symbol must be letter."
+          if (!validateName(x)) {
+            errors += s"Service has incorrect name: $x. Name of service must be contain digits, lowercase letters or hyphens. First symbol must be letter."
+          }
+        }
     }
 
     // 'description' field

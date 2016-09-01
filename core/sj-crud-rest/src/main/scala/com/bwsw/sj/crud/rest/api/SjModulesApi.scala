@@ -128,7 +128,7 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
                     val instanceMetadata = deserializeOptions(getEntityFromContext(ctx), moduleType)
                     val (errors, validatedInstance) = validateInstance(instanceMetadata, specification, moduleType)
                     var response: RestResponse = BadRequestRestResponse(Map("message" ->
-                      MessageFormat.format(messages.getString("rest.modules.instances.instance.cannot.create"), errors.mkString("\n"))))
+                      MessageFormat.format(messages.getString("rest.modules.instances.instance.cannot.create"), errors.mkString(";"))))
 
                     if (errors.isEmpty && validatedInstance.isDefined) {
                       val instance = validatedInstance.get
