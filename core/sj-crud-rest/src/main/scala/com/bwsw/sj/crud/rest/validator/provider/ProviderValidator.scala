@@ -71,26 +71,6 @@ object ProviderValidator extends ValidationUtils {
         }
     }
 
-    // 'login' field
-    Option(initialData.login) match {
-      case None =>
-        errors += s"'login' is required"
-      case Some(x) =>
-        if (x.isEmpty) {
-          errors += s"'login' can not be empty"
-        }
-    }
-
-    // 'password' field
-    Option(initialData.description) match {
-      case None =>
-        errors += s"'description' is required"
-      case Some(x) =>
-        if (x.isEmpty) {
-          errors += s"'description' can not be empty"
-        }
-    }
-
     // 'providerType field
     Option(initialData.providerType) match {
       case None =>
@@ -110,7 +90,7 @@ object ProviderValidator extends ValidationUtils {
       } else {
         var ports = new ListBuffer[Int]()
         for (host <- initialData.hosts) {
-          val (hostErrors, hostPort) = validateProviderConnection(host, initialData.providerType)
+          val (hostErrors, hostPort) = validateProviderHost(host, initialData.providerType)
           errors ++= hostErrors
           ports += hostPort
         }
@@ -133,7 +113,7 @@ object ProviderValidator extends ValidationUtils {
   def checkProviderConnection(provider: Provider) = {
     var errors = ArrayBuffer[String]()
     for (host <- provider.hosts) {
-      val (hostErrors, port) = validateProviderConnection(provider.providerType, host)
+      val (hostErrors, port) = validateProviderHost(provider.providerType, host)
       errors ++= hostErrors
       if (errors.isEmpty) {
         checkProviderConnectionByType(
@@ -148,7 +128,7 @@ object ProviderValidator extends ValidationUtils {
     errors
   }
 
-  private def validateProviderConnection(providerType: String, host: String): (ArrayBuffer[String], Int) = {
+  private def validateProviderHost(providerType: String, host: String): (ArrayBuffer[String], Int) = {
     val errors = ArrayBuffer[String]()
     var hostname: String = ""
     var port: Int = -1
