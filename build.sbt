@@ -1,4 +1,5 @@
 name := "sj"
+scalaVersion := Dependencies.Versions.scala
 
 addCommandAlias("rebuild", ";clean; compile; package")
 
@@ -34,6 +35,7 @@ val commonSettings = Seq(
   },
 
   assemblyJarName in assembly := s"${name.value}-${version.value}.jar",
+  scalacOptions in(Compile, doc) ++= Seq("-groups", "-implicits"),
 
   fork in run := true,
   fork in Test := true,
@@ -52,13 +54,15 @@ val commonSettings = Seq(
   publishArtifact in Test := false
 )
 
-lazy val sj = (project in file(".")) settings (publish := {}) aggregate(common,
-  engineCore, crudRest,
-  inputStreamingEngine, regularStreamingEngine, windowedStreamingEngine, outputStreamingEngine,
-  framework, transactionGenerator,
-  stubInput, stubRegular, stubOutput,
-  pmOutput,
-  sflowProcess, sflowOutput
+lazy val sj = (project in file(".")).settings(publish := {})
+  .settings(unidocSettings: _*)
+  .aggregate(common,
+    engineCore, crudRest,
+    inputStreamingEngine, regularStreamingEngine, windowedStreamingEngine, outputStreamingEngine,
+    framework, transactionGenerator,
+    stubInput, stubRegular, stubOutput,
+    pmOutput,
+    sflowProcess, sflowOutput
   )
 
 lazy val common = Project(id = "sj-common",
