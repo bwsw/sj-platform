@@ -12,11 +12,11 @@ import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
 @JsonSubTypes(Array(
   new Type(value = classOf[TStreamEnvelope], name = "stream.t-stream"),
   new Type(value = classOf[KafkaEnvelope], name = "stream.kafka"),
-  new Type(value = classOf[OutputEnvelope], name = "elasticsearch-output"),
-  new Type(value = classOf[OutputEnvelope], name = "jdbc-output")
+  new Type(value = classOf[EsEnvelope], name = "elasticsearch-output"),
+  new Type(value = classOf[JdbcEnvelope], name = "jdbc-output")
 ))
 class Envelope() {
-  var streamType: String = null
+  protected var streamType: String = null
   var stream: String = null
   var partition: Int = 0
   var tags: Array[String] = null

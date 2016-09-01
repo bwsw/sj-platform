@@ -1,12 +1,10 @@
 package com.bwsw.sj.engine.regular.task.engine.input
 
-import com.bwsw.sj.common.utils.StreamConstants
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.engine.input.{TStreamTaskInputService, TaskInputService}
-import com.bwsw.sj.engine.core.entities.Envelope
+import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
-
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
@@ -31,14 +29,14 @@ class CompleteTaskInputService(manager: RegularTaskManager,
   private val tStreamRegularTaskInputService = new TStreamTaskInputService(manager, blockingQueue, checkpointGroup)
 
   def registerEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics) = {
-    envelope.streamType match {
-      case StreamConstants.tStreamType =>
+    envelope match {
+      case _ : TStreamEnvelope =>
         tStreamRegularTaskInputService.registerEnvelope(envelope, performanceMetrics)
-      case StreamConstants.kafkaStreamType =>
+      case _ : KafkaEnvelope =>
         kafkaRegularTaskInputService.registerEnvelope(envelope, performanceMetrics)
-      case _ =>
-        logger.error(s"Input stream type: ${envelope.streamType} is not defined for regular streaming engine")
-        throw new Exception(s"Input stream type: ${envelope.streamType} is not defined for regular streaming engine")
+      case badType =>
+        logger.error(s"Incoming envelope with type: ${badType.getClass} is not defined for regular streaming engine")
+        throw new Exception(s"Incoming envelope with type: ${badType.getClass} is not defined for regular streaming engine")
     }
   }
 

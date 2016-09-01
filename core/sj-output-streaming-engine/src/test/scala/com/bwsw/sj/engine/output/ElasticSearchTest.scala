@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.output
 
-import java.net.{InetSocketAddress, InetAddress}
+import java.net.InetSocketAddress
 
 import com.bwsw.common.JsonSerializer
 import com.datastax.driver.core.utils.UUIDs
@@ -9,8 +9,6 @@ import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.transport.InetSocketTransportAddress
 
 /**
-  * Created: 6/24/16
-  *
   * @author Kseniya Tomskikh
   */
 object ElasticSearchTest {

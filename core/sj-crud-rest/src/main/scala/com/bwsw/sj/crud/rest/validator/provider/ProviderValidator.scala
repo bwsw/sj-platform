@@ -23,9 +23,6 @@ import org.slf4j.LoggerFactory
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.concurrent.duration._
 
-/**
- * Created by mendelbaum_nm on 13.05.16.
- */
 object ProviderValidator extends ValidationUtils {
 
   import ProviderConstants._

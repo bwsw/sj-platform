@@ -4,7 +4,6 @@ import org.mongodb.morphia.annotations.Property
 
 /**
  * Entity for input instance-json
- * Created:  10/07/2016
  *
  * @author Kseniya Tomskikh
  */

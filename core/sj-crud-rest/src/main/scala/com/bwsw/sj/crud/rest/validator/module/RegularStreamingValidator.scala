@@ -7,7 +7,6 @@ import org.slf4j.{LoggerFactory, Logger}
 
 /**
   * Validator for Stream-processing regular module type
-  * Created:  13/04/2016
   *
   * @author Kseniya Tomskikh
   */

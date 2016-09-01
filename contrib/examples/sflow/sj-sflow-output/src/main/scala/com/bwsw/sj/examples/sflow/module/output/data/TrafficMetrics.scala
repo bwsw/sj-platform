@@ -2,7 +2,7 @@ package com.bwsw.sj.examples.sflow.module.output.data
 
 import java.util.Date
 
-import com.bwsw.sj.engine.core.entities.EsEntity
+import com.bwsw.sj.engine.core.entities.OutputData
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
   *
   * @author Kseniya Mikhaleva
   */
-class TrafficMetrics extends EsEntity {
+class TrafficMetrics extends OutputData {
   var ts: Date = null
   @JsonProperty("src-as") var srcAs: Int= 0
   @JsonProperty("dst-as") var dstAs: String= null

@@ -11,8 +11,6 @@ import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.utils.{StreamConstants, CassandraFactory}
 
 /**
- * Created: 4/14/16
- *
  * @author Kseniya Tomskikh
  */
 object SjTest {

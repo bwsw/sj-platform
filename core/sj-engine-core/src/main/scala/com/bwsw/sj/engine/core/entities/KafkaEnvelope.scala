@@ -10,5 +10,4 @@ class KafkaEnvelope() extends Envelope() {
   var data: Array[Byte] = null
   var offset: Long = 0
   streamType = StreamConstants.kafkaStreamType
-
 }

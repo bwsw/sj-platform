@@ -11,9 +11,6 @@ import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
 
-/**
- * Created by mendelbaum_nm
- */
 object ServiceValidator extends ValidationUtils {
 
   import ServiceConstants._

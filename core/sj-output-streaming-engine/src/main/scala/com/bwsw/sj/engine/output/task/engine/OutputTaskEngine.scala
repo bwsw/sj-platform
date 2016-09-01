@@ -125,7 +125,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
         taskInputService.registerEnvelope(envelope, performanceMetrics)
         removeFromES(envelope)
         logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
-        val outputEnvelopes: List[OutputEnvelope] = executor.onMessage(envelope)
+        val outputEnvelopes: List[Envelope] = executor.onMessage(envelope)
         outputEnvelopes.foreach(outputEnvelope => processOutputEnvelope(outputEnvelope, envelope))
       }
 
@@ -199,35 +199,32 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     }
   }
 
-  private def processOutputEnvelope(outputEnvelope: OutputEnvelope, inputEnvelope: TStreamEnvelope) = {
-    registerOutputEnvelope(outputEnvelope, inputEnvelope)
-    sendOutputEnvelope(outputEnvelope, inputEnvelope)
+  private def processOutputEnvelope(outputEnvelope: Envelope, inputEnvelope: TStreamEnvelope) = {
+    registerAndSendOutputEnvelope(outputEnvelope, inputEnvelope)
   }
 
-  private def registerOutputEnvelope(outputEnvelope: OutputEnvelope, inputEnvelope: TStreamEnvelope) = {
-    performanceMetrics.addElementToOutputEnvelope(
-      outputStream.name,
-      inputEnvelope.txnUUID.toString,
-      outputEnvelopeSerializer.serialize(outputEnvelope.data).length
-    )
-  }
-
-  private def sendOutputEnvelope(outputEnvelope: OutputEnvelope, inputEnvelope: TStreamEnvelope) = {
-    outputEnvelope.streamType match {
-      case "elasticsearch-output" =>
-        val entity = outputEnvelope.data.asInstanceOf[EsEntity]
-        entity.outputDateTime = s"${Calendar.getInstance().getTimeInMillis}"
-        entity.txnDateTime = s"${UUIDs.unixTimestamp(inputEnvelope.txnUUID)}"
-        entity.txn = inputEnvelope.txnUUID.toString.replaceAll("-", "")
-        entity.stream = inputEnvelope.stream
-        entity.partition = inputEnvelope.partition
-        writeEntityToES(esService.index, outputStream.name, entity, client)
-      case "jdbc-output" => writeToJdbc(outputEnvelope)
+  private def registerAndSendOutputEnvelope(outputEnvelope: Envelope, inputEnvelope: TStreamEnvelope) = {
+    outputEnvelope match {
+      case esEnvelope: EsEnvelope =>
+        esEnvelope.outputDateTime = s"${Calendar.getInstance().getTimeInMillis}"
+        esEnvelope.txnDateTime = s"${UUIDs.unixTimestamp(inputEnvelope.txnUUID)}"
+        esEnvelope.txn = inputEnvelope.txnUUID.toString.replaceAll("-", "")
+        esEnvelope.stream = inputEnvelope.stream
+        esEnvelope.partition = inputEnvelope.partition
+        esEnvelope.tags = inputEnvelope.tags
+        registerOutputEnvelope(esEnvelope.txn, esEnvelope.data)
+        writeEntityToES(esService.index, outputStream.name, esEnvelope.data, client)
+      case jdbcEnvelope: JdbcEnvelope => writeToJdbc(outputEnvelope)
       case _ =>
     }
   }
 
-  private def writeEntityToES(index: String, documentType: String, entity: EsEntity, client: TransportClient) = {
+  private def registerOutputEnvelope(envelopeID: String, data: OutputData) = {
+    val elementSize = outputEnvelopeSerializer.serialize(data).length
+    performanceMetrics.addElementToOutputEnvelope(outputStream.name, envelopeID, elementSize)
+  }
+
+  private def writeEntityToES(index: String, documentType: String, entity: OutputData, client: TransportClient) = {
     logger.debug(s"Task: ${manager.taskName}. Write output envelope to elasticearch.")
     val esData: String = serializer.serialize(entity)
 
@@ -250,7 +247,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
    *
    * @param envelope Output envelope for writing to sql database
    */
-  private def writeToJdbc(envelope: OutputEnvelope) = {
+  private def writeToJdbc(envelope: Envelope) = {
     //todo writing to JDBC
   }
 

@@ -20,8 +20,6 @@ import com.bwsw.tstreams.services.BasicStreamService
 import com.bwsw.tstreams.streams.TStream
 
 /**
- * Created: 5/31/16
- *
  * @author Kseniya Tomskikh
  */
 object OutputTestDataFactory {

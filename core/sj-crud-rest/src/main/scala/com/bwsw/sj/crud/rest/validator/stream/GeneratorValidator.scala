@@ -11,10 +11,6 @@ import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
 
-/**
-  * Created by mendelbaum_nm on 05.05.16.
-  */
-
 object GeneratorValidator {
 
   private val logger = LoggerFactory.getLogger(getClass.getName)

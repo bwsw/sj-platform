@@ -14,9 +14,6 @@ import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
 
-/**
- * Created by mendelbaum_nm
- */
 object StreamValidator extends ValidationUtils {
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
