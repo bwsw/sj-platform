@@ -1,0 +1,236 @@
+:host {
+  display: block;
+  padding: 0 16px;
+}
+
+input {
+  width: 250px;
+}
+.instances-list {
+  width: 75%;
+  display: inline-block;
+  margin-top: 30px;
+}
+.instances-list ul {
+  list-style-type: none;
+  padding: 0 0 0 8px;
+  padding-top: 60px;
+}
+.instances-list ul li {
+  cursor: pointer;
+}
+
+.instances-list ul li:hover {
+  cursor: pointer;
+  background-color: rgba(155, 228, 175, 0.1);
+}
+
+.instances-list ul > li:nth-of-type(1):hover {
+  cursor: default !important;
+  background-color: white !important;
+}
+
+.instance-name {
+  width: 86%;
+  display: inline-block;
+}
+
+.instance-status {
+  width: 8%;
+  display: inline-block;
+  border-radius: 5px;
+  margin: -5px 0;
+  padding: 5px;
+  text-align: center;
+}
+
+.status-started {
+  background-color: rgba(54, 239, 78, 0.99);
+}
+.status-stopped {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+.status-stopping {
+  background-color: rgba(243, 243, 46, 0.63);
+}
+.status-failed {
+  background-color: rgba(249, 27, 27, 0.65);
+}
+.status-starting {
+  background-color: rgba(119, 214, 114, 0.54);
+}
+.status-ready {
+  background-color: white;
+  border: 1px solid grey;
+}
+.start-stop-icon {
+  margin-right: 5px;
+}
+
+h2 {
+  text-align: center;
+}
+
+.create-provider {
+  float: right;
+  color: white;
+}
+
+.right-inner-addon {
+  position: relative;
+  float: right;
+  margin-right: 15px;
+}
+.right-inner-addon input {
+  padding-right: 30px;
+}
+.right-inner-addon i {
+  position: absolute;
+  right: 0;
+  padding: 10px 12px;
+  pointer-events: none;
+}
+
+.kafkaStyle {
+  width: 50% !important;
+}
+
+.kafka-zk-prefix {
+  width: 20% !important;
+}
+
+.provider-host .kafka-zk-prefix {
+  margin-top: 5px;
+}
+
+.provider-host:nth-of-type(1) .kafka-zk-prefix {
+  margin-top: 0;
+}
+
+.provider-host.kafkaStyle input {
+  margin-left: 25%;
+  margin-top: 5px;
+}
+
+.provider-host:nth-of-type(1) input {
+  margin-left: 0;
+  margin-top: 0;
+}
+
+.detail-info {
+  margin-left: 10px !important;
+}
+
+.form-type,
+.form-desc {
+  width: 70% !important;
+}
+.form-add-host {
+  margin-left: 25%;
+  margin-top: 5px;
+  width: 50px;
+  padding: 0;
+  color: #07c;
+}
+.form-submit {
+  width: 35%;
+}
+.form-actions {
+  text-align: right;
+  margin-right: 5%;
+}
+
+.form-create-provider .form-control {
+  width: 70%;
+}
+
+.form-create-provider label.required:after {
+  content: ' *';
+  color: #ff706f;
+}
+
+.modal-title {
+  text-align: center !important;
+}
+
+.instances-list ul .selected,
+.instances-list ul .selected:hover {
+  background-color: rgba(155, 228, 175, 0.42);
+}
+
+.right-detail {
+  border-color: #e1e1e1;
+  border-style: solid;
+  border-width: 0 0 1px;
+  display: block;
+  padding: 0 16px;
+  right: 0;
+  position: absolute;
+  width: 20%;
+  border-left: 2px solid #ececec;
+  padding-top: 80px;
+  top: 0;
+  z-index: -1;
+  overflow: auto;
+  max-height: 100vh;
+}
+
+.right-detail p {
+  text-align: center;
+}
+
+.provider-host input:nth-of-type(1) {
+  margin-left: 25% !important;
+  margin-top: 5px !important;
+}
+
+.provider-host:nth-of-type(1) input:nth-of-type(1) {
+  margin-left: 0 !important;
+  margin-top: 0 !important;
+}
+
+.main-alerts {
+  margin-top: 70px;
+  margin-bottom: -40px;
+}
+.main-alerts .custom-alert div {
+  margin-bottom: 0 !important;
+}
+
+.instance-outputs select:nth-of-type(1),
+.instance-inputs select:nth-of-type(1) {
+  margin-left: 25% !important;
+  margin-top: 5px !important;
+}
+.instance-inputs select:nth-of-type(1) {
+  width: 54% !important;
+  margin-right: 1%;
+}
+.instance-inputs select:nth-of-type(2) {
+  width: 15% !important;
+  margin-top: 5px !important;
+}
+
+.instance-outputs:nth-of-type(1) select:nth-of-type(1),
+.instance-inputs:nth-of-type(1) select {
+  margin-left: 0 !important;
+  margin-top: 0 !important;
+}
+
+:host .instance-tasks .panel {
+  padding: 5px;
+  background-color: rgba(0, 0, 0, 0.11) !important;
+  border-radius: 4px;
+  margin-bottom: 2px;
+}
+:host .instance-tasks .panel span {
+  color: rgb(55, 58, 60);
+  font-size: 17px;
+  word-break: break-all;
+}
+.accordion-toogle {
+  color: #000;
+}
+.clone-checkbox {
+  width: 20px;
+}

@@ -8,6 +8,10 @@ import scala.util.Properties
 
 object StartFramework {
 
+  /**
+    * Main function to start rest and framework.
+    * @param args exposed port for rest service
+    */
   def main(args: Array[String]): Unit = {
     val port = if (args.nonEmpty) args(0).toInt else 8080
     Rest.start(port)

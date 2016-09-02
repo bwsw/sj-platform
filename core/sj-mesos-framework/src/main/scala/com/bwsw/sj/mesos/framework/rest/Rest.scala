@@ -5,6 +5,13 @@ import com.bwsw.sj.mesos.framework.task.TasksList
 import unfiltered.request._
 import unfiltered.response._
 
+/**
+  * Created by diryavkin_dn on 16.05.16.
+  */
+
+/**
+  * Rest object used for show some information about framework tasks.
+  */
 object Rest {
   val serializer: JsonSerializer = new JsonSerializer()
 

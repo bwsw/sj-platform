@@ -1,0 +1,13 @@
+:host {
+  background-color: rgb(51, 51, 51);
+  color: rgba(255, 255, 255, 0.87);
+  display: block;
+  height: 61px;
+  padding: 8px 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1001;
+  overflow: visible;
+}

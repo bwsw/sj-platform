@@ -1,0 +1,120 @@
+
+<div class="modules-list">
+<h2>Modules list</h2>
+
+  <!--<div *ngIf="upload_in_progress == true" class="upload-progress">-->
+    <!--<div class="progress-bar" [style.width]="basicProgress + '%'"></div>-->
+    <!--<span class="percent">{{ basicProgress }}%</span>-->
+  <!--</div>-->
+  <label [ngClass]="{inProgress:upload_in_progress}" class="btn upload-module">
+    <div *ngIf="!upload_in_progress"><i class="fa fa-upload icon is-small"></i> Upload module</div>
+    <i *ngIf="upload_in_progress" class="fa fa-spinner fa-spin" aria-hidden="true"></i>
+    <input type="file" (change)="fileUpload($event)"> <!--[ng-file-select]="options" -->
+  </label>
+<!--<button type="button" class="btn upload-module create-provider">-->
+  <!--&lt;!&ndash;<i *ngIf="upload_in_progress" class="fa fa-spinner fa-spin" aria-hidden="true"></i>&ndash;&gt;-->
+  <!--&lt;!&ndash;<span *ngIf="!upload_in_progress">+ Upload module</span>&ndash;&gt;-->
+  <!--<div *ngIf="!upload_in_progress"><i class="fa fa-upload icon is-small"></i> Upload module</div>-->
+  <!--<i *ngIf="upload_in_progress" class="fa fa-spinner fa-spin" aria-hidden="true"></i>-->
+  <!--<input type="file" (change)="onChange($event)"> &lt;!&ndash;[ng-file-select]="options" &ndash;&gt;-->
+<!--</button>-->
+
+<search-box (update)="term = $event"></search-box>
+
+  <div class="main-alerts">
+    <alert class="custom-alert" *ngFor="let alert of alerts; let i = index" [type]="alert.type" dismissible="true" [dismissOnTimeout]="alert.timeout" (close)="closeAlert(i)">
+      {{ alert.msg }}
+    </alert>
+  </div>
+
+  <ul>
+    <li class="list-group-item">
+      <span class="module-name">Name</span>
+      <span class="module-type">Type</span>
+      <span class="module-version">Version</span>
+    </li>
+    <li class="list-group-item" [ngClass]="{selected:isSelected(module)}" (click)="module_select(module)"
+        *ngFor="let module of moduleList | orderBy: 'module-name' | listFilter : term">
+      <span class="module-name">{{module["module-name"]}}</span>
+      <span class="module-type">{{ module["module-type"] }}</span>
+      <span class="module-version">{{ module["module-version"] }}</span>
+      <i class="fa fa-download pull-right" (click)="download_module(module)" aria-hidden="true" title="Download file"></i>
+      <i class="fa fa-file-text pull-right detail-info" aria-hidden="true" title="Show detailed info"></i>
+      <i class="fa fa-trash  pull-right" (click)="delete_module_confirm(DeleteModule, module)" aria-hidden="true"></i></li>
+
+  </ul>
+</div>
+
+
+<div bsModal #DeleteModule="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" (click)="DeleteModule.hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Delete confirmation</h4>
+      </div>
+      <div class="modal-body" *ngIf="module_to_delete && (blockingInstances.length === 0)">
+        <p>Do you really want to delete module " {{ module_to_delete["module-name"] }} " ? This action can not be undone!</p>
+        <fieldset class="form-actions">
+          <button type="button" class="btn btn-danger pull-left"  (click)="delete_module(DeleteModule, module_to_delete)">Delete</button>
+          <button type="button" class="btn btn-primary "  (click)="DeleteModule.hide()">Cancel</button>
+        </fieldset>
+      </div>
+      <div class="modal-body" *ngIf="module_to_delete && (blockingInstances.length > 0)">
+        <p>Unable to delete module! Next instances using module " {{ module_to_delete['module-name'] }} "</p>
+        <ul>
+          <li *ngFor="let instance of blockingInstances | orderBy: 'name' ">{{instance.name}}</li>
+        </ul>
+        <fieldset class="form-actions">
+          <button type="button" class="btn btn-primary "  (click)="DeleteModule.hide()">Ok</button>
+        </fieldset>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="right-detail">
+  <p>Detailed information about node</p>
+  <ul *ngIf="current_module_specification">
+    <li>Name: {{current_module_specification.name}}</li>
+    <li>Description: {{current_module_specification.description}}</li>
+    <li>Version:  {{current_module_specification.version}}</li>
+    <li>Author: {{current_module_specification.author}}</li>
+    <li>Licence: {{current_module_specification.license}}</li>
+    <li>Inputs:
+      <ul>
+        <li>Cardinality:
+          <ul>
+            <li *ngFor="let parameter of current_module_specification['inputs']['cardinality']">{{parameter}}</li>
+          </ul>
+        </li>
+        <li>Types:
+          <ul>
+            <li *ngFor="let type of current_module_specification['inputs']['types']">{{type}}</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Outputs:
+      <ul>
+      <li>Cardinality:
+        <ul>
+          <li *ngFor="let parameter of current_module_specification['outputs']['cardinality']">{{parameter}}</li>
+        </ul>
+      </li>
+      <li>Types:
+        <ul>
+          <li *ngFor="let type of current_module_specification['outputs']['cardinality']">{{type}}</li>
+        </ul>
+      </li>
+    </ul>
+    </li>
+    <li>Module-type: {{current_module_specification["module-type"]}}</li>
+    <li>Engine: {{current_module_specification.engine}}</li>
+    <li>Options : {{current_module_specification.options | json}}</li>
+    <li>Validator-class: {{current_module_specification["validator-class"]}}</li>
+    <li>Executor-class: {{current_module_specification["executor-class"]}}</li>
+  </ul>
+</div>

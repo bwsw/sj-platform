@@ -51,6 +51,11 @@ class FrameworkScheduler extends Scheduler {
     TasksList.message = s"Got framework message: $data"
   }
 
+  /**
+    * Execute when task change status.
+    * @param driver scheduler driver
+    * @param status received status from master
+    */
   def statusUpdate(driver: SchedulerDriver, status: TaskStatus) {
     StatusHandler.handle(status)
   }
@@ -60,10 +65,10 @@ class FrameworkScheduler extends Scheduler {
 
 
   /**
-    * Obtaining slaves
+    * Obtaining resources and lauch tasks.
     *
-    * @param driver:SchedulerDriver
-    * @param offers:util.List[Offer]
+    * @param driver scheduler driver
+    * @param offers resources, that master offered to framework
     */
   override def resourceOffers(driver: SchedulerDriver, offers: util.List[Offer]) {
     logger.info(s"RESOURCE OFFERS")
@@ -226,7 +231,7 @@ class FrameworkScheduler extends Scheduler {
   }
 
   /**
-    * Reregistering framework
+    * Reregistering framework after master disconnected.
     */
   def reregistered(driver: SchedulerDriver, masterInfo: MasterInfo) {
     logger.debug(s"New master $masterInfo")
@@ -234,7 +239,7 @@ class FrameworkScheduler extends Scheduler {
   }
 
   /**
-    * Registering framework
+    * Registering framework.
     */
   def registered(driver: SchedulerDriver, frameworkId: FrameworkID, masterInfo: MasterInfo) {
     logger.info(s"Registered framework as: ${frameworkId.getValue}")
