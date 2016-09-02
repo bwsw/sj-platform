@@ -15,6 +15,11 @@ import org.apache.mesos.SchedulerDriver
   */
 object FrameworkUtil {
 
+  /**
+    * Count how much ports must be for current task.
+    * @param instance current launched task
+    * @return ports count for current task
+    */
   def getCountPorts(instance: Instance) = {
     instance.moduleType match {
       case EngineConstants.outputStreamingType => 2
