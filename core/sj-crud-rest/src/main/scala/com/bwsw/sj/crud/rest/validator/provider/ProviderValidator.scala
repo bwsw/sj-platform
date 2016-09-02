@@ -56,7 +56,7 @@ object ProviderValidator extends ValidationUtils {
           }
 
           if (!validateName(x)) {
-            errors += s"Provider has incorrect name: '$x'. Name of provider must be contain digits, letters or hyphens. First symbol must be letter"
+            errors += s"Provider has incorrect name: '$x'. Name of provider must be contain digits, lowercase letters or hyphens. First symbol must be letter"
           }
         }
     }

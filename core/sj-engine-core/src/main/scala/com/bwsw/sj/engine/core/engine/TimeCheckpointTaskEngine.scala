@@ -22,7 +22,7 @@ trait TimeCheckpointTaskEngine {
 
   private def createTimer() = {
     if (instance.checkpointInterval > 0) {
-      logger.debug(s"Task: ${manager.taskName}. Create a checkpoint timer for input module\n")
+      logger.debug(s"Task: ${manager.taskName}. Create a checkpoint timer for an input module\n")
       Some(new SjTimer())
     } else {
       logger.debug(s"Task: ${manager.taskName}. Input module has not programmatic checkpoint. Manually only\n")

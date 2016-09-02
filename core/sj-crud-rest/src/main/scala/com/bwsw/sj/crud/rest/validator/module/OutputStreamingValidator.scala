@@ -1,13 +1,12 @@
 package com.bwsw.sj.crud.rest.validator.module
 
+import com.bwsw.sj.common.DAL.model.{TStreamSjStream, TStreamService, SjStream}
 import com.bwsw.sj.common.DAL.model.module.Instance
-import com.bwsw.sj.common.DAL.model.{SjStream, TStreamService, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{StreamConstants, EngineConstants}
-import EngineConstants._
-import StreamConstants._
-import com.bwsw.sj.crud.rest.entities.module.{InstanceMetadata, ModuleSpecification, OutputInstanceMetadata}
-import org.slf4j.{LoggerFactory, Logger}
+import com.bwsw.sj.common.utils.EngineConstants._
+import com.bwsw.sj.common.utils.StreamConstants._
+import com.bwsw.sj.crud.rest.entities.module.{OutputInstanceMetadata, InstanceMetadata, ModuleSpecification}
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -20,6 +19,24 @@ class OutputStreamingValidator extends StreamingModuleValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
   private val streamsDAO = ConnectionRepository.getStreamService
+
+  private def getStream(streamName: String) = {
+    streamsDAO.get(streamName)
+  }
+
+  /**
+   * Validating input parameters for 'output-streaming' module
+   *
+   * @param parameters - input parameters for running module
+   * @param specification - specification of module
+   * @return - List of errors
+   */
+  override def validate(parameters: InstanceMetadata, specification: ModuleSpecification) = {
+    logger.debug(s"Instance: ${parameters.name}. Start output-streaming validation.")
+    val errors = super.validateGeneralOptions(parameters)
+    validateStreamOptions(parameters, specification, errors)
+  }
+
   /**
    * Validating options of streams of instance for module
    *
@@ -34,9 +51,6 @@ class OutputStreamingValidator extends StreamingModuleValidator {
     }
 
     var inputStream: Option[SjStream] = None
-    if (parameters.inputs != null) {
-      errors += s"Unknown attribute 'inputs'."
-    }
     if (parameters.asInstanceOf[OutputInstanceMetadata].input != null) {
       val inputMode: String = getStreamMode(parameters.asInstanceOf[OutputInstanceMetadata].input)
       if (!inputMode.equals("split")) {
@@ -76,7 +90,7 @@ class OutputStreamingValidator extends StreamingModuleValidator {
       errors += s"Output stream attribute is empty."
     }
 
-    val startFrom = parameters.startFrom
+    val startFrom = parameters.asInstanceOf[OutputInstanceMetadata].startFrom
     if (!startFromModes.contains(startFrom)) {
       try {
         startFrom.toLong
@@ -101,27 +115,9 @@ class OutputStreamingValidator extends StreamingModuleValidator {
       parameters.parallelism = checkParallelism(parameters.parallelism, input.asInstanceOf[TStreamSjStream].partitions, errors)
 
       val partitions = getStreamsPartitions(Array(input))
-      parameters.inputs = Array(parameters.asInstanceOf[OutputInstanceMetadata].input)
+      //parameters.inputs = Array(parameters.asInstanceOf[OutputInstanceMetadata].input) делается для того, чтобы функция по построению execution плана работала однотипно
       validatedInstance = createInstance(parameters, partitions, allStreams.filter(s => s.streamType.equals(tStreamType)).toSet)
     }
     (errors, validatedInstance)
   }
-
-  private def getStream(streamName: String) = {
-    streamsDAO.get(streamName)
-  }
-
-  /**
-   * Validating input parameters for 'output-streaming' module
-   *
-   * @param parameters - input parameters for running module
-   * @param specification - specification of module
-   * @return - List of errors
-   */
-  override def validate(parameters: InstanceMetadata, specification: ModuleSpecification) = {
-    logger.debug(s"Instance: ${parameters.name}. Start output-streaming validation.")
-    val errors = super.validateGeneralOptions(parameters)
-    validateStreamOptions(parameters, specification, errors)
-  }
-
 }

@@ -163,7 +163,7 @@ abstract class TaskManager() {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create the t-stream producers for each output stream\n")
 
-    tstreamFactory.setProperty(TSF_Dictionary.Producer.Transaction.DATA_WRITE_BATCH_SIZE, 20) //todo testing
+    tstreamFactory.setProperty(TSF_Dictionary.Producer.Transaction.DATA_WRITE_BATCH_SIZE, 20)
 
     instance.outputs
       .map(x => (x, streamDAO.get(x).get))

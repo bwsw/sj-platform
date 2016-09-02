@@ -54,59 +54,77 @@ class InputStreamingValidator extends StreamingModuleValidator {
                                      specification: ModuleSpecification,
                                      errors: ArrayBuffer[String]): (ArrayBuffer[String], Option[Instance]) = {
     logger.debug(s"Instance: ${parameters.name}. Stream options validation.")
-
-    if (!parameters.checkpointMode.equals("every-nth")) {
-      errors += s"Checkpoint-mode attribute for output-streaming module must be only 'every-nth'."
-    }
-
-    if (parameters.inputs != null) {
-      errors += s"Unknown attribute 'inputs'."
-    }
-
-    val outputsCardinality = specification.outputs("cardinality").asInstanceOf[Array[Int]]
-    if (parameters.outputs.length < outputsCardinality(0)) {
-      errors += s"Count of outputs cannot be less than ${outputsCardinality(0)}."
-    }
-    if (parameters.outputs.length > outputsCardinality(1)) {
-      errors += s"Count of outputs cannot be more than ${outputsCardinality(1)}."
-    }
-    if (doesContainDoubles(parameters.outputs.toList)) {
-      errors += s"Outputs is not unique."
-    }
-    val outputStreams = getStreams(parameters.outputs.toList)
-    parameters.outputs.toList.foreach { streamName =>
-      if (!outputStreams.exists(s => s.name == streamName)) {
-        errors += s"Output stream '$streamName' is not exists."
-      }
-    }
-    val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
-    if (outputStreams.exists(s => !outputTypes.contains(s.streamType))) {
-      errors += s"Output streams must be in: ${outputTypes.mkString(", ")}."
-    }
-
-    if (parameters.startFrom != null) {
-      errors += s"Unknown attribute 'start-from'."
-    }
-
     var validatedInstance: Option[Instance] = None
-    if (outputStreams.nonEmpty) {
-      val allStreams = outputStreams
-      val inputInstanceMetadata = parameters.asInstanceOf[InputInstanceMetadata]
 
-      val service = allStreams.head.service
-      if (!service.isInstanceOf[TStreamService]) {
-        errors += s"Service for t-streams must be 'TstrQ'."
-      } else {
-        checkTStreams(errors, allStreams.filter(s => s.streamType.equals(tStreamType)).map(_.asInstanceOf[TStreamSjStream]))
-      }
+    // 'outputs' field
+    Option(parameters.outputs) match {
+      case None =>
+        errors += s"'Outputs' is required"
+      case Some(x) =>
+        val outputsCardinality = specification.outputs("cardinality").asInstanceOf[Array[Int]]
+        if (parameters.outputs.length < outputsCardinality(0)) {
+          errors += s"Count of outputs cannot be less than ${outputsCardinality(0)}."
+        }
+        if (parameters.outputs.length > outputsCardinality(1)) {
+          errors += s"Count of outputs cannot be more than ${outputsCardinality(1)}."
+        }
+        if (doesContainDoubles(parameters.outputs.toList)) {
+          errors += s"Outputs is not unique."
+        }
+        val outputStreams = getStreams(parameters.outputs.toList)
+        parameters.outputs.toList.foreach { streamName =>
+          if (!outputStreams.exists(s => s.name == streamName)) {
+            errors += s"Output stream '$streamName' is not exists."
+          }
+        }
+        val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
+        if (outputStreams.exists(s => !outputTypes.contains(s.streamType))) {
+          errors += s"Output streams must be in: ${outputTypes.mkString(", ")}."
+        }
 
-      parameters.parallelism = checkParallelism(parameters.parallelism, errors)
-      if (parameters.parallelism != null)
-        checkBackupNumber(inputInstanceMetadata, errors)
+        if (outputStreams.nonEmpty) {
+          val inputInstanceMetadata = parameters.asInstanceOf[InputInstanceMetadata]
 
-      validatedInstance = createInstance(inputInstanceMetadata)
+          val tStreamsServices = getStreamServices(outputStreams)
+          if (tStreamsServices.size != 1) {
+            errors += s"All t-streams should have the same service."
+          } else {
+            val service = serviceDAO.get(tStreamsServices.head)
+            if (!service.get.isInstanceOf[TStreamService]) {
+              errors += s"Service for t-streams must be 'TstrQ'."
+            } else {
+              checkTStreams(errors, outputStreams.filter(s => s.streamType.equals(tStreamType)).map(_.asInstanceOf[TStreamSjStream]))
+            }
+          }
+
+          // 'parallelism' field
+          Option(parameters.parallelism) match {
+            case None =>
+              errors += s"'Parallelism' is required"
+            case Some(x) =>
+              x match {
+                case dig: Int =>
+                  checkBackupNumber(inputInstanceMetadata, errors)
+                case _ =>
+                  errors += "Unknown type of 'parallelism' parameter. Must be Int."
+              }
+          }
+
+          validatedInstance = createInstance(inputInstanceMetadata)
+        }
     }
+
     (errors, validatedInstance)
+  }
+
+  private def checkBackupNumber(parameters: InputInstanceMetadata, errors: ArrayBuffer[String]) = {
+    val parallelism = parameters.parallelism.asInstanceOf[Int]
+    if (parallelism <= 0) {
+      errors += "Parallelism must be greater than 0."
+    }
+    if (parallelism <= (parameters.backupCount + parameters.asyncBackupCount)){
+      errors += "Parallelism must be greater than the total number of backups."
+    }
   }
 
   /**
@@ -133,21 +151,6 @@ class InputStreamingValidator extends StreamingModuleValidator {
     stages.put(instance.name, instanceTask)
     instance.stages = mapAsJavaMap(stages)
     Some(instance)
-  }
-
-  private def checkParallelism(parallelism: Any, errors: ArrayBuffer[String]) = {
-    parallelism match {
-      case dig: Int =>
-        dig
-      case _ =>
-        errors += "Unknown type of 'parallelism' parameter. Must be Int."
-        null
-    }
-  }
-
-  private def checkBackupNumber(parameters: InputInstanceMetadata, errors: ArrayBuffer[String]) = {
-    if (parameters.parallelism.asInstanceOf[Int] <= (parameters.backupCount + parameters.asyncBackupCount))
-      errors += "Parallelism must be greater than the total number of backups."
   }
 
   /**

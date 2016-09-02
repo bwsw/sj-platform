@@ -24,10 +24,10 @@ trait CompletionUtils {
   }
 
   def createMessage(name: String, params: String*) = {
-    MessageFormat.format(getMessage("rest.providers.provider.cannot.create"), params: _*)
+    MessageFormat.format(getMessage(name), params: _*)
   }
 
   def getMessage(name: String) = {
-    messages.getString("rest.providers.provider.cannot.create")
+    messages.getString(name)
   }
 }

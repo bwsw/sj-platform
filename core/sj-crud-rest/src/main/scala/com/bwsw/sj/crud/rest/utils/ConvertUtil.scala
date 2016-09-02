@@ -168,12 +168,17 @@ object ConvertUtil {
     modelInstance.checkpointMode = apiInstance.checkpointMode
     modelInstance.checkpointInterval = apiInstance.checkpointInterval
     modelInstance.parallelism = apiInstance.parallelism.asInstanceOf[Int]
-    modelInstance.options = serializer.serialize(apiInstance.options)
+    if (apiInstance.options != null) {
+    //todo тут недолжно быть проверки на что-то невалидное , если мы дошли до создания инстанса, то ошибок быть недолжно, а все null поля должны быть переопределены так, чтобы ничего при конвертации не сломалось
+      modelInstance.options = serializer.serialize(apiInstance.options)
+    }
     modelInstance.perTaskCores = apiInstance.perTaskCores
     modelInstance.perTaskRam = apiInstance.perTaskRam
     modelInstance.performanceReportingInterval = apiInstance.performanceReportingInterval
     modelInstance.engine = apiInstance.engine
-    modelInstance.jvmOptions = mapAsJavaMap(apiInstance.jvmOptions)
+    if (apiInstance.jvmOptions != null) {
+      modelInstance.jvmOptions = mapAsJavaMap(apiInstance.jvmOptions)
+    }
     if (apiInstance.nodeAttributes != null) {
       modelInstance.nodeAttributes = mapAsJavaMap(apiInstance.nodeAttributes)
     }
