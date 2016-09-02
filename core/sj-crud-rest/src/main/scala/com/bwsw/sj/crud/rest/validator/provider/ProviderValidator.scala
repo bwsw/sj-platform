@@ -4,7 +4,7 @@ import java.net.{InetAddress, InetSocketAddress, URI, URISyntaxException}
 import java.nio.channels.ClosedChannelException
 import java.util.Collections
 
-import com.aerospike.client.AerospikeClient
+import com.aerospike.client.{AerospikeException, AerospikeClient}
 import com.bwsw.sj.common.DAL.model.Provider
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.{ProviderConstants, ConfigSettingsUtils}
@@ -194,11 +194,16 @@ object ProviderValidator extends ValidationUtils {
   private def checkAerospikeConnection(errors: ArrayBuffer[String], address: String) = {
     val (host, port) = getHostAndPort(address)
 
-    val client = new AerospikeClient(host, port)
-    if (!client.isConnected) {
-      errors += s"Cannot gain an access to Aerospike on '$address'"
+    try {
+      val client = new AerospikeClient(host, port)
+      if (!client.isConnected) {
+        errors += s"Cannot gain an access to Aerospike on '$address'"
+      }
+      client.close()
+    } catch {
+      case ex: AerospikeException =>
+        errors += s"Cannot gain an access to Aerospike on '$address'"
     }
-    client.close()
   }
 
   private def checkZookeeperConnection(errors: ArrayBuffer[String], address: String) = {
@@ -232,7 +237,7 @@ object ProviderValidator extends ValidationUtils {
       consumer.send(req)
     } catch {
       case ex: ClosedChannelException =>
-        errors += s"'$address' does not respond"
+        errors += s"Can not establish connection to Kafka on '$address'"
       case ex: java.io.EOFException =>
         errors += s"Can not establish connection to Kafka on '$address'"
       case ex: Throwable =>

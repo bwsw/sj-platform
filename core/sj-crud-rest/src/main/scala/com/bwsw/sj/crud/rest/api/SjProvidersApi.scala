@@ -1,7 +1,5 @@
 package com.bwsw.sj.crud.rest.api
 
-import java.text.MessageFormat
-
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.crud.rest.entities._
@@ -20,8 +18,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator with CompletionUtil
           val data = serializer.deserialize[ProviderData](getEntityFromContext(ctx))
           val errors = ProviderValidator.validate(data)
           var response: RestResponse = BadRequestRestResponse(Map("message" ->
-            MessageFormat.format(messages.getString("rest.providers.provider.cannot.create"), errors.mkString(";")))
-          )
+            createMessage("rest.providers.provider.cannot.create", errors.mkString(";"))))
 
           if (errors.isEmpty) {
             val provider = new Provider(
@@ -34,15 +31,14 @@ trait SjProvidersApi extends Directives with SjCrudValidator with CompletionUtil
             )
             providerDAO.save(provider)
             response = CreatedRestResponse(Map("message" ->
-              MessageFormat.format(messages.getString("rest.providers.provider.created"), provider.name))
-            )
+              createMessage("rest.providers.provider.created", provider.name)))
           }
 
           ctx.complete(restResponseToHttpResponse(response))
         } ~
           get {
             val providers = providerDAO.getAll
-            var response: RestResponse = NotFoundRestResponse(Map("message" -> messages.getString("rest.providers.notfound")))
+            var response: RestResponse = NotFoundRestResponse(Map("message" -> getMessage("rest.providers.notfound")))
             if (providers.nonEmpty) {
               val entity = Map("providers" -> providers.map(p => providerToProviderData(p)))
               response = OkRestResponse(entity)
@@ -56,8 +52,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator with CompletionUtil
             get {
               val provider = providerDAO.get(providerName)
               var response: RestResponse = NotFoundRestResponse(Map("message" ->
-                MessageFormat.format(messages.getString("rest.providers.provider.notfound"), providerName))
-              )
+                createMessage("rest.providers.provider.notfound", providerName)))
               provider match {
                 case Some(x) =>
                   val entity = Map("providers" -> providerToProviderData(x))
@@ -69,7 +64,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator with CompletionUtil
             } ~
               delete {
                 var response: RestResponse = UnprocessableEntityRestResponse(Map("message" ->
-                  MessageFormat.format(messages.getString("rest.providers.provider.cannot.delete"), providerName)))
+                  createMessage("rest.providers.provider.cannot.delete", providerName)))
                 val providers = getUsedProviders(providerName)
                 if (providers.isEmpty) {
                   val provider = providerDAO.get(providerName)
@@ -77,12 +72,10 @@ trait SjProvidersApi extends Directives with SjCrudValidator with CompletionUtil
                     case Some(_) =>
                       providerDAO.delete(providerName)
                       response = OkRestResponse(Map("message" ->
-                        MessageFormat.format(messages.getString("rest.providers.provider.deleted"), providerName))
-                      )
+                        createMessage("rest.providers.provider.deleted", providerName)))
                     case None =>
                       response = NotFoundRestResponse(Map("message" ->
-                        MessageFormat.format(messages.getString("rest.providers.provider.notfound"), providerName))
-                      )
+                        createMessage("rest.providers.provider.notfound", providerName)))
                   }
                 }
 
@@ -94,7 +87,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator with CompletionUtil
                 get {
                   val provider = providerDAO.get(providerName)
                   var response: RestResponse = NotFoundRestResponse(
-                    Map("message" -> MessageFormat.format(messages.getString("rest.providers.provider.notfound"), providerName)))
+                    Map("message" -> createMessage("rest.providers.provider.notfound", providerName)))
 
                   provider match {
                     case Some(x) =>
