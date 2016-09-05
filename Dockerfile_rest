@@ -1,6 +1,6 @@
 FROM ubuntu:trusty
 
-MAINTAINER BITWORKS mendelbaum_nm@bw-sw.com diryavkin_dn@bw-sw.com
+MAINTAINER BITWORKS
 
 # Install Oracle JDK 8
 RUN echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main" | tee /etc/apt/sources.list.d/webupd8team-java.list && \
@@ -39,7 +39,9 @@ RUN npm install -g npm && \
     n stable && \
     npm install && \
     npm uninstall gulp --save && \
-    npm install gulp --save
+    npm install gulp --save && \
+    npm install gulp-util --save-dev && \
+    npm install run-sequence
 
 # Prepare Rest
 WORKDIR /opt/bin/juggler
