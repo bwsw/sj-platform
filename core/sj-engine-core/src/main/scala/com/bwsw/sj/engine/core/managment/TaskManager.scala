@@ -183,7 +183,7 @@ abstract class TaskManager() {
       "producer_for_" + taskName + "_" + stream.name,
       timeUuidGenerator,
       converter,
-      (0 until stream.partitions).toList)
+      (0 until stream.partitions).toSet)
   }
 
   private def setProducerBindPort() = {
