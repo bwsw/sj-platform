@@ -62,7 +62,7 @@ class RegularTaskManager() extends TaskManager {
       "consumer_for_" + taskName + "_" + stream.name,
       timeUuidGenerator,
       converter,
-      (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList,
+      (0 until stream.asInstanceOf[TStreamSjStream].partitions).toSet,
       offset)
   }
 }
