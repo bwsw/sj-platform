@@ -1,4 +1,4 @@
-package com.bwsw.sj.crud.rest.entities
+package com.bwsw.sj.common.rest.entities
 
 case class MarathonRequest(id: String,
                            cmd: String,

@@ -8,7 +8,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.utils.EngineConstants._
 import com.bwsw.sj.common.utils.StreamConstants
-import com.bwsw.sj.crud.rest.entities.module.{InstanceMetadata, ModuleSpecification}
+import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, ModuleSpecification}
 import com.bwsw.sj.crud.rest.utils.{StreamUtil, ValidationUtils}
 import kafka.common.TopicExistsException
 import org.slf4j.{Logger, LoggerFactory}
@@ -24,12 +24,9 @@ import scala.collection.mutable.ArrayBuffer
  */
 abstract class StreamingModuleValidator extends ValidationUtils {
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
-
   var serviceDAO: GenericMongoService[Service] = ConnectionRepository.getServiceManager
   var instanceDAO: GenericMongoService[Instance] = ConnectionRepository.getInstanceService
   val serializer: Serializer = new JsonSerializer
-
-
 
   /**
    * Validating input parameters for streaming module
@@ -37,11 +34,7 @@ abstract class StreamingModuleValidator extends ValidationUtils {
    * @param parameters - input parameters for running module
    * @return - List of errors
    */
-  def validate(parameters: InstanceMetadata, specification: ModuleSpecification) = {
-    val errors = validateGeneralOptions(parameters)
-    validateStreamOptions(parameters, specification, errors)
-  }
-
+  def validate(parameters: InstanceMetadata, specification: ModuleSpecification): (ArrayBuffer[String], Option[Instance])
 
   /**
    * Validation base instance options
@@ -119,19 +112,6 @@ abstract class StreamingModuleValidator extends ValidationUtils {
 
     errors
   }
-
-  /**
-   * Validating options of streams of instance for module
-   *
-   * @param parameters - Input instance parameters
-   * @param specification - Specification of module
-   * @param errors - List of validating errors
-   * @return - List of errors and validating instance (null, if errors non empty)
-   */
-  protected def validateStreamOptions(parameters: InstanceMetadata,
-                                      specification: ModuleSpecification,
-                                      errors: ArrayBuffer[String]): (ArrayBuffer[String], Option[Instance])
-
 
   protected def doesContainDoubles(list: List[String]): Boolean = {
     list.map(x => (x, 1)).groupBy(_._1).map(x => x._2.reduce { (a, b) => (a._1, a._2 + b._2) }).exists(x => x._2 > 1)

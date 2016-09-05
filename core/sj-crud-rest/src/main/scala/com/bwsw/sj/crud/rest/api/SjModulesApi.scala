@@ -13,8 +13,8 @@ import com.bwsw.sj.common.utils.EngineConstants
 import com.bwsw.sj.crud.rest.exceptions._
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.engine.StreamingValidator
-import com.bwsw.sj.crud.rest.entities._
-import com.bwsw.sj.crud.rest.entities.module._
+import com.bwsw.sj.common.rest.entities._
+import com.bwsw.sj.common.rest.entities.module._
 import com.bwsw.sj.crud.rest.instance.{InstanceDestroyer, InstanceStarter, InstanceStopper}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator

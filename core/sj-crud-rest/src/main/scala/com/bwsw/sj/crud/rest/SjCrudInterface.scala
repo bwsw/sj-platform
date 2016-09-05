@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.EntityStreamSizeException
 import akka.http.scaladsl.server.{Route, Directives, ExceptionHandler}
 import com.bwsw.sj.crud.rest.api._
 import com.bwsw.sj.crud.rest.cors.CorsSupport
-import com.bwsw.sj.crud.rest.entities.{InternalServerErrorRestResponse, NotFoundRestResponse}
+import com.bwsw.sj.common.rest.entities.{InternalServerErrorRestResponse, NotFoundRestResponse}
 import com.bwsw.sj.crud.rest.exceptions._
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException

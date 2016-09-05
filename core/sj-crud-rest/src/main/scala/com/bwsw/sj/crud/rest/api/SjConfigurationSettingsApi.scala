@@ -6,8 +6,8 @@ import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.sj.common.utils.ConfigConstants
 import com.bwsw.sj.crud.rest.exceptions.{UnknownConfigSettingDomain}
 import com.bwsw.sj.common.DAL.model.ConfigSetting
-import com.bwsw.sj.crud.rest.entities._
-import com.bwsw.sj.crud.rest.entities.config.ConfigurationSettingData
+import com.bwsw.sj.common.rest.entities._
+import com.bwsw.sj.common.rest.entities.config.ConfigurationSettingData
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.utils.ConvertUtil._
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator

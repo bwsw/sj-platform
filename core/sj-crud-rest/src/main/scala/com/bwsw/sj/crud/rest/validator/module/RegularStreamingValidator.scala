@@ -5,7 +5,7 @@ import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.utils.EngineConstants
 import EngineConstants._
 import com.bwsw.sj.common.utils.StreamConstants._
-import com.bwsw.sj.crud.rest.entities.module.{RegularInstanceMetadata, ModuleSpecification, InstanceMetadata}
+import com.bwsw.sj.common.rest.entities.module.{RegularInstanceMetadata, ModuleSpecification, InstanceMetadata}
 import org.slf4j.{LoggerFactory, Logger}
 
 import scala.collection.mutable.ArrayBuffer
@@ -28,7 +28,8 @@ class RegularStreamingValidator extends StreamingModuleValidator {
   override def validate(instanceParameters: InstanceMetadata, specification: ModuleSpecification) = {
     logger.debug(s"Instance: ${instanceParameters.name}. Start regular-streaming validation.")
     val parameters = instanceParameters.asInstanceOf[RegularInstanceMetadata]
-    val result = super.validate(instanceParameters, specification)
+    val generalErrors = super.validateGeneralOptions(parameters)
+    val result = validateStreamOptions(parameters, specification, generalErrors)
     val errors = result._1
 
     if (!stateManagementModes.contains(parameters.stateManagement)) {
@@ -47,7 +48,7 @@ class RegularStreamingValidator extends StreamingModuleValidator {
    * @param errors - List of validating errors
    * @return - List of errors and validating instance (null, if errors non empty)
    */
-  override protected def validateStreamOptions(instance: InstanceMetadata,
+  protected def validateStreamOptions(instance: InstanceMetadata,
                                                specification: ModuleSpecification,
                                                errors: ArrayBuffer[String]): (ArrayBuffer[String], Option[Instance]) = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
@@ -150,7 +151,5 @@ class RegularStreamingValidator extends StreamingModuleValidator {
     } else {
       (errors, None)
     }
-
   }
-
 }

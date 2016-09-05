@@ -354,7 +354,7 @@ class FrameworkScheduler extends Scheduler {
   def filterOffers(offers: util.List[Offer], filters: util.Map[String, String]): util.List[Offer] = {
     logger.debug(s"FILTER OFFERS")
     var result: mutable.Buffer[Offer] = mutable.Buffer()
-    if (filters != null) {
+    if (!filters.isEmpty) { //todo Дим, подумай, теперь filters не может быть null, мб теперь не понадобится if условие (раньше было условие: filters != null)
       for (filter <- filters.asScala) {
         for (offer <- offers.asScala) {
           if (filter._1.matches("""\+.+""")) {

@@ -2,8 +2,8 @@ package com.bwsw.sj.crud.rest.api
 
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.crud.rest.entities._
-import com.bwsw.sj.crud.rest.entities.provider.ProviderData
+import com.bwsw.sj.common.rest.entities._
+import com.bwsw.sj.common.rest.entities.provider.ProviderData
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.utils.ConvertUtil.providerToProviderData
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator

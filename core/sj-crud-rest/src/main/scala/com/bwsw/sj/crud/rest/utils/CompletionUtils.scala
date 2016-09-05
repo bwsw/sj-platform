@@ -6,7 +6,7 @@ import java.util.ResourceBundle
 import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model.{HttpEntity, HttpResponse}
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.crud.rest.entities.RestResponse
+import com.bwsw.sj.common.rest.entities.RestResponse
 
 /**
  * Provides methods for completion of sj-api response

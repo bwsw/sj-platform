@@ -1,5 +1,7 @@
 package com.bwsw.sj.common.DAL.model.module
 
+import java.util
+
 /**
  * Entity for execution plan of module instance
  *
@@ -7,7 +9,7 @@ package com.bwsw.sj.common.DAL.model.module
  * @author Kseniya Tomskikh
  */
 class ExecutionPlan {
-  var tasks: java.util.Map[String, Task] = null
+  var tasks: java.util.Map[String, Task] = new util.HashMap()
   
   def this(tasks: java.util.Map[String, Task]) = {
     this()

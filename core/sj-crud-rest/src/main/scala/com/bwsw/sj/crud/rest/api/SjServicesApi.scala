@@ -4,8 +4,8 @@ import java.text.MessageFormat
 
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.crud.rest.entities._
-import com.bwsw.sj.crud.rest.entities.service.ServiceData
+import com.bwsw.sj.common.rest.entities._
+import com.bwsw.sj.common.rest.entities.service.ServiceData
 import com.bwsw.sj.crud.rest.utils.ConvertUtil.serviceToServiceData
 import com.bwsw.sj.crud.rest.utils.{CompletionUtils, ServiceUtil}
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator

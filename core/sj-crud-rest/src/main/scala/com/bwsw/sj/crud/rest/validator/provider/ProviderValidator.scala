@@ -8,7 +8,7 @@ import com.aerospike.client.{AerospikeException, AerospikeClient}
 import com.bwsw.sj.common.DAL.model.Provider
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.{ProviderConstants, ConfigSettingsUtils}
-import com.bwsw.sj.crud.rest.entities.provider.ProviderData
+import com.bwsw.sj.common.rest.entities.provider.ProviderData
 import com.bwsw.sj.crud.rest.utils.ValidationUtils
 import com.datastax.driver.core.Cluster
 import com.datastax.driver.core.exceptions.NoHostAvailableException

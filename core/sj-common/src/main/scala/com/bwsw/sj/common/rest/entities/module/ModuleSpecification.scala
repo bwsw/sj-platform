@@ -1,4 +1,4 @@
-package com.bwsw.sj.crud.rest.entities.module
+package com.bwsw.sj.common.rest.entities.module
 
 import com.fasterxml.jackson.annotation.JsonProperty
 

@@ -5,7 +5,7 @@ import com.aerospike.client.{AerospikeClient, Host, Info}
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.ServiceConstants
-import com.bwsw.sj.crud.rest.entities.service._
+import com.bwsw.sj.common.rest.entities.service._
 import com.bwsw.sj.crud.rest.utils.ValidationUtils
 import org.slf4j.LoggerFactory
 
