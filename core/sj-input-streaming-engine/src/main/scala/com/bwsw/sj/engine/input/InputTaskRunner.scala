@@ -31,7 +31,7 @@ object InputTaskRunner extends {override val threadName = "InputTaskRunner-%d"} 
       val channelContextQueue = new ArrayBlockingQueue[ChannelHandlerContext](queueSize)
 
       val manager: InputTaskManager = new InputTaskManager()
-      logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for input module\n")
+      logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for an input module\n")
 
       val performanceMetrics = new InputStreamingPerformanceMetrics(manager)
 

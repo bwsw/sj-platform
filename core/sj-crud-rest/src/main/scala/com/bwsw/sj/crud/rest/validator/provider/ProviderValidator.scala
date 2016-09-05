@@ -8,7 +8,7 @@ import com.aerospike.client.{AerospikeException, AerospikeClient}
 import com.bwsw.sj.common.DAL.model.Provider
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.{ProviderConstants, ConfigSettingsUtils}
-import com.bwsw.sj.crud.rest.entities.provider.ProviderData
+import com.bwsw.sj.common.rest.entities.provider.ProviderData
 import com.bwsw.sj.crud.rest.utils.ValidationUtils
 import com.datastax.driver.core.Cluster
 import com.datastax.driver.core.exceptions.NoHostAvailableException
@@ -56,7 +56,7 @@ object ProviderValidator extends ValidationUtils {
           }
 
           if (!validateName(x)) {
-            errors += s"Provider has incorrect name: '$x'. Name of provider must be contain digits, letters or hyphens. First symbol must be letter"
+            errors += s"Provider has incorrect name: '$x'. Name of provider must be contain digits, lowercase letters or hyphens. First symbol must be letter"
           }
         }
     }

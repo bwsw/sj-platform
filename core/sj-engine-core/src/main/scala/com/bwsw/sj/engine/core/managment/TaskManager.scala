@@ -67,9 +67,8 @@ abstract class TaskManager() {
   }
 
   private def getAuxiliaryTStream() = {
-    val streams = if (instance.inputs != null) {
-      instance.outputs.union(instance.inputs.map(x => x.takeWhile(y => y != '/')))
-    } else instance.outputs
+    val inputs = clearInputsFromExecutionMode()
+    val streams = inputs.union(instance.outputs)
     val sjStream = streams.flatMap(s => streamDAO.get(s)).filter(s => s.streamType.equals(tStreamType)).head
 
     sjStream
@@ -150,8 +149,8 @@ abstract class TaskManager() {
   }
 
   private def getInputs() = {
-      instance.executionPlan.tasks.get(taskName).inputs.asScala
-        .map(x => (streamDAO.get(x._1).get, x._2))
+    instance.executionPlan.tasks.get(taskName).inputs.asScala
+      .map(x => (streamDAO.get(x._1).get, x._2))
   }
 
   /**
@@ -163,7 +162,7 @@ abstract class TaskManager() {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create the t-stream producers for each output stream\n")
 
-    tstreamFactory.setProperty(TSF_Dictionary.Producer.Transaction.DATA_WRITE_BATCH_SIZE, 20) //todo testing
+    tstreamFactory.setProperty(TSF_Dictionary.Producer.Transaction.DATA_WRITE_BATCH_SIZE, 20)
 
     instance.outputs
       .map(x => (x, streamDAO.get(x).get))
@@ -212,6 +211,10 @@ abstract class TaskManager() {
     }
   }
 
+  private def clearInputsFromExecutionMode() = {
+    instance.inputs.map(x => x.takeWhile(y => y != '/'))
+  }
+
   def getSjStream(name: String, description: String, tags: Array[String], partitions: Int) = {
     new TStreamSjStream(
       name,
@@ -255,7 +258,7 @@ abstract class TaskManager() {
       offset)
   }
 
-  protected def getUUIDGenerator(stream: TStreamSjStream) : IUUIDGenerator = {
+  protected def getUUIDGenerator(stream: TStreamSjStream): IUUIDGenerator = {
     val retryPeriod = ConfigSettingsUtils.getClientRetryPeriod()
     val retryCount = ConfigSettingsUtils.getRetryCount()
 

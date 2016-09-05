@@ -1,3 +1,3 @@
-package com.bwsw.sj.crud.rest.entities.config
+package com.bwsw.sj.common.rest.entities.config
 
 case class ConfigurationSettingData(name: String, value: String)

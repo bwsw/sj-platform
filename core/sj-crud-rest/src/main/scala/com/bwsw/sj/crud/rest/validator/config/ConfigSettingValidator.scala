@@ -1,12 +1,13 @@
 package com.bwsw.sj.crud.rest.validator.config
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.crud.rest.entities.config.ConfigurationSettingData
+import com.bwsw.sj.common.rest.entities.config.ConfigurationSettingData
+import com.bwsw.sj.crud.rest.utils.ValidationUtils
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
 
-object ConfigSettingValidator {
+object ConfigSettingValidator extends ValidationUtils{
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
   val configService = ConnectionRepository.getConfigService
@@ -19,16 +20,18 @@ object ConfigSettingValidator {
     // 'name' field
     Option(initialData.name) match {
       case None =>
-        errors += s"'name' is required"
+        errors += s"'Name' is required"
       case Some(x) =>
         if (x.isEmpty) {
-          errors += s"'name' can not be empty"
+          errors += s"'Name' can not be empty"
         } else {
           if (configService.get(x).isDefined) {
-            errors += s"Config setting with name $x already exists"
+            errors += s"Config setting with name '$x' already exists"
           }
-          if (x.contains(" ")) {
-            errors += s"Name $x of config setting contains spaces"
+
+          if (!validateName(x)) {
+            errors += s"Config setting has incorrect name: $x. " +
+              s"Name of config setting must be contain digits, lowercase letters or hyphens. First symbol must be letter."
           }
         }
     }
@@ -36,10 +39,10 @@ object ConfigSettingValidator {
     // 'value' field
     Option(initialData.value) match {
       case None =>
-        errors += s"'value' is required"
+        errors += s"'Value' is required"
       case Some(x) =>
         if (x.isEmpty)
-          errors += s"'value' can not be empty"
+          errors += s"'Value' can not be empty"
     }
 
     errors

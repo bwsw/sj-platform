@@ -1,4 +1,4 @@
-package com.bwsw.sj.crud.rest.entities.service
+package com.bwsw.sj.common.rest.entities.service
 
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonProperty, JsonSubTypes, JsonTypeInfo}

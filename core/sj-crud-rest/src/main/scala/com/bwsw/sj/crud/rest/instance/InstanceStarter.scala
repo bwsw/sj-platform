@@ -7,7 +7,7 @@ import com.bwsw.sj.common.DAL.ConnectionConstants
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{TStreamSjStream, ZKService}
 import com.bwsw.sj.common.utils.{StreamConstants, EngineConstants, ConfigSettingsUtils}
-import com.bwsw.sj.crud.rest.entities.MarathonRequest
+import com.bwsw.sj.common.rest.entities.MarathonRequest
 import com.bwsw.sj.crud.rest.utils.StreamUtil
 import com.twitter.common.quantity.{Amount, Time}
 import com.twitter.common.zookeeper.DistributedLock.LockingException
@@ -24,6 +24,7 @@ import scala.collection.JavaConversions._
  * @author Kseniya Tomskikh
  */
 class InstanceStarter(instance: Instance, delay: Long) extends Runnable with InstanceMarathonManager {
+
   import EngineConstants._
   import scala.collection.JavaConverters._
 
@@ -170,9 +171,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable with Ins
         "INSTANCE_ID" -> instance.name,
         "MESOS_MASTER" -> mesosMaster
       )
-      if (instance.environmentVariables != null) {
-        applicationEnvs = applicationEnvs ++ Map(instance.environmentVariables.asScala.toList: _*)
-      }
+      applicationEnvs = applicationEnvs ++ mapAsScalaMap(instance.environmentVariables)
       val request = new MarathonRequest(instance.name,
         "java -jar " + frameworkJarName + " $PORT",
         1,

@@ -6,7 +6,7 @@ import java.util.ResourceBundle
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.StreamConstants
-import com.bwsw.sj.crud.rest.entities.stream.{KafkaSjStreamData, SjStreamData, TStreamSjStreamData}
+import com.bwsw.sj.common.rest.entities.stream.{KafkaSjStreamData, SjStreamData, TStreamSjStreamData}
 import com.bwsw.sj.crud.rest.utils.{StreamUtil, ValidationUtils}
 import com.bwsw.sj.crud.rest.validator.provider.ProviderValidator
 import kafka.common.TopicExistsException
@@ -46,7 +46,7 @@ object StreamValidator extends ValidationUtils {
           }
 
           if (!validateName(x)) {
-            errors += s"Stream has incorrect name: $x. Name of stream must be contain digits, letters or hyphens. First symbol must be letter."
+            errors += s"Stream has incorrect name: $x. Name of stream must be contain digits, lowercase letters or hyphens. First symbol must be letter."
           }
         }
     }

@@ -12,7 +12,7 @@ import akka.http.scaladsl.server.directives.FileInfo
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.bwsw.sj.common.DAL.model.ConfigSetting
-import com.bwsw.sj.crud.rest.entities._
+import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import org.apache.commons.io.FileUtils

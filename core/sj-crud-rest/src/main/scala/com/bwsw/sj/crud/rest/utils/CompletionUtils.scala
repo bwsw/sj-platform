@@ -6,7 +6,7 @@ import java.util.ResourceBundle
 import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model.{HttpEntity, HttpResponse}
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.crud.rest.entities.RestResponse
+import com.bwsw.sj.common.rest.entities.RestResponse
 
 /**
  * Provides methods for completion of sj-api response
@@ -24,10 +24,10 @@ trait CompletionUtils {
   }
 
   def createMessage(name: String, params: String*) = {
-    MessageFormat.format(getMessage("rest.providers.provider.cannot.create"), params: _*)
+    MessageFormat.format(getMessage(name), params: _*)
   }
 
   def getMessage(name: String) = {
-    messages.getString("rest.providers.provider.cannot.create")
+    messages.getString(name)
   }
 }

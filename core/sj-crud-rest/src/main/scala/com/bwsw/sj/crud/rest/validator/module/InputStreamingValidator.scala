@@ -7,7 +7,7 @@ import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask, InstanceSt
 import com.bwsw.sj.common.utils.{StreamConstants, EngineConstants}
 import EngineConstants._
 import StreamConstants._
-import com.bwsw.sj.crud.rest.entities.module.{InputInstanceMetadata, ModuleSpecification, InstanceMetadata}
+import com.bwsw.sj.common.rest.entities.module.{InputInstanceMetadata, ModuleSpecification, InstanceMetadata}
 import com.bwsw.sj.crud.rest.utils.ConvertUtil._
 import org.slf4j.{LoggerFactory, Logger}
 
@@ -24,131 +24,6 @@ import scala.collection.mutable.ArrayBuffer
 class InputStreamingValidator extends StreamingModuleValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
-
-  /**
-   * Create tasks object for instance of input module
-   *
-   * @param instance - instance for input module
-   */
-  def createTasks(instance: InputInstance): Unit = {
-    logger.debug(s"Instance ${instance.name}. Create tasks for input instance.")
-
-    val tasks = mutable.Map[String, InputTask]()
-
-    for (i <- 0 until instance.parallelism) {
-      val task = new InputTask("", 0)
-      tasks.put(s"${instance.name}-task$i", task)
-    }
-    instance.tasks = mapAsJavaMap(tasks)
-  }
-
-  /**
-   * Validating options of streams of instance for module
-   *
-   * @param parameters    - Input instance parameters
-   * @param specification - Specification of module
-   * @param errors        - List of validating errors
-   * @return - List of errors and validating instance (null, if errors non empty)
-   */
-  override def validateStreamOptions(parameters: InstanceMetadata,
-                                     specification: ModuleSpecification,
-                                     errors: ArrayBuffer[String]): (ArrayBuffer[String], Option[Instance]) = {
-    logger.debug(s"Instance: ${parameters.name}. Stream options validation.")
-
-    if (!parameters.checkpointMode.equals("every-nth")) {
-      errors += s"Checkpoint-mode attribute for output-streaming module must be only 'every-nth'."
-    }
-
-    if (parameters.inputs != null) {
-      errors += s"Unknown attribute 'inputs'."
-    }
-
-    val outputsCardinality = specification.outputs("cardinality").asInstanceOf[Array[Int]]
-    if (parameters.outputs.length < outputsCardinality(0)) {
-      errors += s"Count of outputs cannot be less than ${outputsCardinality(0)}."
-    }
-    if (parameters.outputs.length > outputsCardinality(1)) {
-      errors += s"Count of outputs cannot be more than ${outputsCardinality(1)}."
-    }
-    if (doesContainDoubles(parameters.outputs.toList)) {
-      errors += s"Outputs is not unique."
-    }
-    val outputStreams = getStreams(parameters.outputs.toList)
-    parameters.outputs.toList.foreach { streamName =>
-      if (!outputStreams.exists(s => s.name == streamName)) {
-        errors += s"Output stream '$streamName' is not exists."
-      }
-    }
-    val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
-    if (outputStreams.exists(s => !outputTypes.contains(s.streamType))) {
-      errors += s"Output streams must be in: ${outputTypes.mkString(", ")}."
-    }
-
-    if (parameters.startFrom != null) {
-      errors += s"Unknown attribute 'start-from'."
-    }
-
-    var validatedInstance: Option[Instance] = None
-    if (outputStreams.nonEmpty) {
-      val allStreams = outputStreams
-      val inputInstanceMetadata = parameters.asInstanceOf[InputInstanceMetadata]
-
-      val service = allStreams.head.service
-      if (!service.isInstanceOf[TStreamService]) {
-        errors += s"Service for t-streams must be 'TstrQ'."
-      } else {
-        checkTStreams(errors, allStreams.filter(s => s.streamType.equals(tStreamType)).map(_.asInstanceOf[TStreamSjStream]))
-      }
-
-      parameters.parallelism = checkParallelism(parameters.parallelism, errors)
-      if (parameters.parallelism != null)
-        checkBackupNumber(inputInstanceMetadata, errors)
-
-      validatedInstance = createInstance(inputInstanceMetadata)
-    }
-    (errors, validatedInstance)
-  }
-
-  /**
-   * Create entity of input instance for saving to database
-   *
-   * @return
-   */
-  private def createInstance(parameters: InputInstanceMetadata) = {
-    logger.debug(s"Instance ${parameters.name}. Create model object.")
-    val instance = instanceMetadataToInstance(parameters)
-    val stages = scala.collection.mutable.Map[String, InstanceStage]()
-    parameters.outputs.foreach { stream =>
-      val instanceStartTask = new InstanceStage
-      instanceStartTask.state = toHandle
-      instanceStartTask.datetime = Calendar.getInstance().getTime
-      instanceStartTask.duration = 0
-      stages.put(stream, instanceStartTask)
-    }
-    createTasks(instance.asInstanceOf[InputInstance])
-    val instanceTask = new InstanceStage
-    instanceTask.state = toHandle
-    instanceTask.datetime = Calendar.getInstance().getTime
-    instanceTask.duration = 0
-    stages.put(instance.name, instanceTask)
-    instance.stages = mapAsJavaMap(stages)
-    Some(instance)
-  }
-
-  private def checkParallelism(parallelism: Any, errors: ArrayBuffer[String]) = {
-    parallelism match {
-      case dig: Int =>
-        dig
-      case _ =>
-        errors += "Unknown type of 'parallelism' parameter. Must be Int."
-        null
-    }
-  }
-
-  private def checkBackupNumber(parameters: InputInstanceMetadata, errors: ArrayBuffer[String]) = {
-    if (parameters.parallelism.asInstanceOf[Int] <= (parameters.backupCount + parameters.asyncBackupCount))
-      errors += "Parallelism must be greater than the total number of backups."
-  }
 
   /**
    * Validating input parameters for input-streaming module
@@ -197,6 +72,132 @@ class InputStreamingValidator extends StreamingModuleValidator {
     if (instance.backupCount < 0 || instance.backupCount > 6)
       errors += "Backup count must be in the interval from 0 to 6"
 
-    validateStreamOptions(parameters, specification, errors)
+    validateStreamOptions(instance, specification, errors)
+  }
+
+  /**
+   * Validating options of streams of instance for module
+   *
+   * @param parameters    - Input instance parameters
+   * @param specification - Specification of module
+   * @param errors        - List of validating errors
+   * @return - List of errors and validating instance (null, if errors non empty)
+   */
+  def validateStreamOptions(parameters: InputInstanceMetadata,
+                                     specification: ModuleSpecification,
+                                     errors: ArrayBuffer[String]): (ArrayBuffer[String], Option[Instance]) = {
+    logger.debug(s"Instance: ${parameters.name}. Stream options validation.")
+    var validatedInstance: Option[Instance] = None
+
+    // 'outputs' field
+    Option(parameters.outputs) match {
+      case None =>
+        errors += s"'Outputs' is required"
+      case Some(x) =>
+        val outputsCardinality = specification.outputs("cardinality").asInstanceOf[Array[Int]]
+        if (parameters.outputs.length < outputsCardinality(0)) {
+          errors += s"Count of outputs cannot be less than ${outputsCardinality(0)}."
+        }
+        if (parameters.outputs.length > outputsCardinality(1)) {
+          errors += s"Count of outputs cannot be more than ${outputsCardinality(1)}."
+        }
+        if (doesContainDoubles(parameters.outputs.toList)) {
+          errors += s"Outputs is not unique."
+        }
+        val outputStreams = getStreams(parameters.outputs.toList)
+        parameters.outputs.toList.foreach { streamName =>
+          if (!outputStreams.exists(s => s.name == streamName)) {
+            errors += s"Output stream '$streamName' is not exists."
+          }
+        }
+        val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
+        if (outputStreams.exists(s => !outputTypes.contains(s.streamType))) {
+          errors += s"Output streams must be in: ${outputTypes.mkString(", ")}."
+        }
+
+        if (outputStreams.nonEmpty) {
+          val tStreamsServices = getStreamServices(outputStreams)
+          if (tStreamsServices.size != 1) {
+            errors += s"All t-streams should have the same service."
+          } else {
+            val service = serviceDAO.get(tStreamsServices.head)
+            if (!service.get.isInstanceOf[TStreamService]) {
+              errors += s"Service for t-streams must be 'TstrQ'."
+            } else {
+              checkTStreams(errors, outputStreams.filter(s => s.streamType.equals(tStreamType)).map(_.asInstanceOf[TStreamSjStream]))
+            }
+          }
+
+          // 'parallelism' field
+          Option(parameters.parallelism) match {
+            case None =>
+              errors += s"'Parallelism' is required"
+            case Some(x) =>
+              x match {
+                case dig: Int =>
+                  checkBackupNumber(parameters, errors)
+                case _ =>
+                  errors += "Unknown type of 'parallelism' parameter. Must be Int."
+              }
+          }
+
+          validatedInstance = createInstance(parameters)
+        }
+    }
+
+    (errors, validatedInstance)
+  }
+
+  private def checkBackupNumber(parameters: InputInstanceMetadata, errors: ArrayBuffer[String]) = {
+    val parallelism = parameters.parallelism.asInstanceOf[Int]
+    if (parallelism <= 0) {
+      errors += "Parallelism must be greater than 0."
+    }
+    if (parallelism <= (parameters.backupCount + parameters.asyncBackupCount)){
+      errors += "Parallelism must be greater than the total number of backups."
+    }
+  }
+
+  /**
+   * Create entity of input instance for saving to database
+   *
+   * @return
+   */
+  private def createInstance(parameters: InputInstanceMetadata) = {
+    logger.debug(s"Instance ${parameters.name}. Create model object.")
+    val instance = instanceMetadataToInstance(parameters)
+    val stages = scala.collection.mutable.Map[String, InstanceStage]()
+    parameters.outputs.foreach { stream =>
+      val instanceStartTask = new InstanceStage
+      instanceStartTask.state = toHandle
+      instanceStartTask.datetime = Calendar.getInstance().getTime
+      instanceStartTask.duration = 0
+      stages.put(stream, instanceStartTask)
+    }
+    createTasks(instance.asInstanceOf[InputInstance])
+    val instanceTask = new InstanceStage
+    instanceTask.state = toHandle
+    instanceTask.datetime = Calendar.getInstance().getTime
+    instanceTask.duration = 0
+    stages.put(instance.name, instanceTask)
+    instance.stages = mapAsJavaMap(stages)
+    Some(instance)
+  }
+
+  /**
+   * Create tasks object for instance of input module
+   *
+   * @param instance - instance for input module
+   */
+  def createTasks(instance: InputInstance): Unit = {
+    logger.debug(s"Instance ${instance.name}. Create tasks for input instance.")
+
+    val tasks = mutable.Map[String, InputTask]()
+
+    for (i <- 0 until instance.parallelism) {
+      val task = new InputTask("", 0)
+      tasks.put(s"${instance.name}-task$i", task)
+    }
+    instance.tasks = mapAsJavaMap(tasks)
   }
 }

@@ -1,9 +1,12 @@
 package com.bwsw.sj.crud.rest.validator.module
 
+import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.utils.EngineConstants
 import EngineConstants._
-import com.bwsw.sj.crud.rest.entities.module.{WindowedInstanceMetadata, InstanceMetadata, ModuleSpecification}
+import com.bwsw.sj.common.rest.entities.module.{WindowedInstanceMetadata, InstanceMetadata, ModuleSpecification}
 import org.slf4j.{LoggerFactory, Logger}
+
+import scala.collection.mutable.ArrayBuffer
 
 /**
   * Validator for Stream-processing-windowed module type
@@ -23,7 +26,8 @@ class WindowedStreamingValidator extends StreamingModuleValidator {
   override def validate(instanceParameters: InstanceMetadata, specification: ModuleSpecification) = {
     logger.debug(s"Instance: ${instanceParameters.name}. Start windowed-streaming validation.")
     val parameters = instanceParameters.asInstanceOf[WindowedInstanceMetadata]
-    val result = super.validate(instanceParameters, specification)
+    val generalErrors = super.validateGeneralOptions(parameters)
+    val result = validateStreamOptions(parameters, specification, generalErrors)
     val errors = result._1
 
     if (!stateManagementModes.contains(parameters.stateManagement)) {
@@ -39,4 +43,15 @@ class WindowedStreamingValidator extends StreamingModuleValidator {
     (errors, result._2)
   }
 
+  /**
+   * Validating options of streams of instance for module
+   *
+   * @param parameters - Input instance parameters
+   * @param specification - Specification of module
+   * @param errors - List of validating errors
+   * @return - List of errors and validating instance (null, if errors non empty)
+   */
+  def validateStreamOptions(parameters: InstanceMetadata,
+                                               specification: ModuleSpecification,
+                                               errors: ArrayBuffer[String]): (ArrayBuffer[String], Option[Instance]) = ???
 }
