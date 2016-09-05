@@ -37,11 +37,12 @@ RUN npm install -g npm && \
     npm install -g npm && \
     npm install -g n && \
     n stable && \
-    npm install && \
     npm uninstall gulp --save && \
     npm install gulp --save && \
     npm install gulp-util --save-dev && \
-    npm install run-sequence
+    npm install run-sequence && \
+    rm -rf node_modules/ && \
+    npm install
 
 # Prepare Rest
 WORKDIR /opt/bin/juggler
