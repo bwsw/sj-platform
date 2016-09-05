@@ -15,10 +15,8 @@ object EngineConstants {
   val moduleTypes = Set(windowedStreamingType, regularStreamingType, outputStreamingType, inputStreamingType)
   val checkpointModes = Set("every-nth", "time-interval")
   val stateManagementModes = Set("none", "ram", "rocks")
-  val oldest = "oldest"
-  val newest = "newest"
-  val startFromModes = Set(oldest, newest)
-  val defaultEvictionPolicies = Set("LRU", "LFU")
+  val startFromModes = Set("oldest", "newest")
+  val defaultEvictionPolicies = Set("LRU", "LFU", "NONE")
   val evictionPolicies = Set("fix-time", "expanded-time")
 
   val ready = "ready"

@@ -9,8 +9,8 @@ import org.mongodb.morphia.annotations._
  * @author Kseniya Tomskikh
  */
 class RegularInstance() extends Instance {
-  @Property("start-from") var startFrom: String = null
-  @Property("state-management") var stateManagement: String = null
+  @Property("start-from") var startFrom: String = "newest"
+  @Property("state-management") var stateManagement: String = "none"
   @Property("state-full-checkpoint") var stateFullCheckpoint: Int = 0
   @Property("event-wait-time") var eventWaitTime: Long = 0
 

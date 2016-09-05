@@ -6,9 +6,10 @@ import com.fasterxml.jackson.annotation.JsonProperty
 class RegularInstanceMetadata extends InstanceMetadata {
   var inputs: Array[String] = Array()
   var outputs: Array[String] = Array()
-  @JsonProperty("execution-plan") var executionPlan: Map[String, Any] = null
-  @JsonProperty("start-from") var startFrom: String = null
-  @JsonProperty("state-management") var stateManagement: String = null
+  @JsonProperty("execution-plan") var executionPlan: Map[String, Any] = null //todo используется только для того, чтобы показывать пользователям, мб стоит его заполнять,
+  // а потом только конвертировать в модельный инстанс
+  @JsonProperty("start-from") var startFrom: String = "newest"
+  @JsonProperty("state-management") var stateManagement: String = "none"
   @JsonProperty("state-full-checkpoint") var stateFullCheckpoint: Int = 0
   @JsonProperty("event-wait-time") var eventWaitTime: Long = 0
 

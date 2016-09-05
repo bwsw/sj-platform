@@ -10,9 +10,9 @@ import scala.collection.JavaConversions._
 class InstanceMetadata {
   var status: String = null
   var name: String = null
-  var description: String = null
+  var description: String = "No description"
   @JsonProperty("checkpoint-mode") var checkpointMode: String = null
-  @JsonProperty("checkpoint-interval") var checkpointInterval: Long = 0
+  @JsonProperty("checkpoint-interval") var checkpointInterval: Long = 0L
   var parallelism: Any = null
   var options: Map[String, Any] = Map()
   @JsonProperty("per-task-cores") var perTaskCores: Double = 0.0

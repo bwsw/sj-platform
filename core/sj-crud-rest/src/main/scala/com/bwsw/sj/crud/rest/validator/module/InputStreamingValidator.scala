@@ -2,14 +2,13 @@ package com.bwsw.sj.crud.rest.validator.module
 
 import java.util.Calendar
 
-import com.bwsw.sj.common.DAL.model.{TStreamSjStream, TStreamService}
-import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask, InstanceStage, Instance}
-import com.bwsw.sj.common.utils.{StreamConstants, EngineConstants}
-import EngineConstants._
-import StreamConstants._
-import com.bwsw.sj.common.rest.entities.module.{InputInstanceMetadata, ModuleSpecification, InstanceMetadata}
+import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask, Instance, InstanceStage}
+import com.bwsw.sj.common.DAL.model.{TStreamService, TStreamSjStream}
+import com.bwsw.sj.common.rest.entities.module.{InputInstanceMetadata, InstanceMetadata, ModuleSpecification}
+import com.bwsw.sj.common.utils.EngineConstants._
+import com.bwsw.sj.common.utils.StreamConstants._
 import com.bwsw.sj.crud.rest.utils.ConvertUtil._
-import org.slf4j.{LoggerFactory, Logger}
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -38,35 +37,22 @@ class InputStreamingValidator extends StreamingModuleValidator {
 
     val instance = parameters.asInstanceOf[InputInstanceMetadata]
 
-    if (instance.lookupHistory > 0) {
-      if (instance.evictionPolicy == null) {
-        errors += s"Eviction policy attribute must be not null, if 'lookup-history' is greater zero."
-      }
-    } else if (instance.lookupHistory == 0) {
-      if (instance.defaultEvictionPolicy == null) {
-        errors += s"Default eviction policy attribute must be not null, if 'lookup-history' is zero."
-      }
-      if (instance.queueMaxSize == 0) {
-        errors += s"Queue max size attribute must be greater than zero, if 'lookup-history' is zero."
-      }
-    } else {
-      errors += s"Lookup history attribute must be greater than zero."
+    if (instance.lookupHistory < 0) {
+      errors += s"Lookup history attribute must be greater than zero or equal to zero"
     }
 
-    if (instance.defaultEvictionPolicy != null) {
-      val defaultEvictionPolicy = instance.defaultEvictionPolicy
-      if (!defaultEvictionPolicies.contains(defaultEvictionPolicy)) {
-        errors += s"Unknown value of 'default-eviction-policy' attribute: $defaultEvictionPolicy. " +
-          s"Eviction-policy must be 'LRU' or 'LFU'."
-      }
+    if (instance.queueMaxSize < 0) {
+      errors += s"Queue max size attribute must be greater than zero or equal to zero"
     }
 
-    if (instance.evictionPolicy != null) {
-      val evictionPolicy = instance.evictionPolicy
-      if (!evictionPolicies.contains(evictionPolicy)) {
-        errors += s"Unknown value of 'eviction-policy' attribute: $evictionPolicy. " +
-          s"Eviction-policy must be 'fix-time' or 'expanded-time'."
-      }
+    if (!defaultEvictionPolicies.contains(instance.defaultEvictionPolicy)) {
+      errors += s"Unknown value of 'default-eviction-policy' attribute: ${instance.defaultEvictionPolicy}. " +
+        s"Eviction-policy must be one of: ${defaultEvictionPolicies.mkString("[", ",", "]")}"
+    }
+
+    if (!evictionPolicies.contains(instance.evictionPolicy)) {
+      errors += s"Unknown value of 'eviction-policy' attribute: ${instance.evictionPolicy}. " +
+        s"Eviction-policy must be one of: ${evictionPolicies.mkString("[", ",", "]")}"
     }
 
     if (instance.backupCount < 0 || instance.backupCount > 6)
@@ -84,65 +70,62 @@ class InputStreamingValidator extends StreamingModuleValidator {
    * @return - List of errors and validating instance (null, if errors non empty)
    */
   def validateStreamOptions(parameters: InputInstanceMetadata,
-                                     specification: ModuleSpecification,
-                                     errors: ArrayBuffer[String]): (ArrayBuffer[String], Option[Instance]) = {
+                            specification: ModuleSpecification,
+                            errors: ArrayBuffer[String]): (ArrayBuffer[String], Option[Instance]) = {
     logger.debug(s"Instance: ${parameters.name}. Stream options validation.")
     var validatedInstance: Option[Instance] = None
 
     // 'outputs' field
-    Option(parameters.outputs) match {
-      case None =>
-        errors += s"'Outputs' is required"
-      case Some(x) =>
-        val outputsCardinality = specification.outputs("cardinality").asInstanceOf[Array[Int]]
-        if (parameters.outputs.length < outputsCardinality(0)) {
-          errors += s"Count of outputs cannot be less than ${outputsCardinality(0)}."
-        }
-        if (parameters.outputs.length > outputsCardinality(1)) {
-          errors += s"Count of outputs cannot be more than ${outputsCardinality(1)}."
-        }
-        if (doesContainDoubles(parameters.outputs.toList)) {
-          errors += s"Outputs is not unique."
-        }
-        val outputStreams = getStreams(parameters.outputs.toList)
-        parameters.outputs.toList.foreach { streamName =>
-          if (!outputStreams.exists(s => s.name == streamName)) {
-            errors += s"Output stream '$streamName' is not exists."
-          }
-        }
-        val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
-        if (outputStreams.exists(s => !outputTypes.contains(s.streamType))) {
-          errors += s"Output streams must be in: ${outputTypes.mkString(", ")}."
-        }
+    val outputsCardinality = specification.outputs("cardinality").asInstanceOf[Array[Int]]
+    if (parameters.outputs.length < outputsCardinality(0)) {
+      errors += s"Count of outputs cannot be less than ${outputsCardinality(0)}."
+    }
+    if (parameters.outputs.length > outputsCardinality(1)) {
+      errors += s"Count of outputs cannot be more than ${outputsCardinality(1)}."
+    }
+    if (doesContainDoubles(parameters.outputs.toList)) {
+      errors += s"Outputs contain the non-unique streams"
+    }
+    val outputStreams = getStreams(parameters.outputs.toList)
+    parameters.outputs.toList.foreach { streamName =>
+      if (!outputStreams.exists(s => s.name == streamName)) {
+        errors += s"Output stream '$streamName' does not exists"
+      }
+    }
+    val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
+    if (outputStreams.exists(s => !outputTypes.contains(s.streamType))) {
+      errors += s"Output streams must be one of the following type: ${outputTypes.mkString("[", ",", "]")}"
+    }
 
-        if (outputStreams.nonEmpty) {
-          val tStreamsServices = getStreamServices(outputStreams)
-          if (tStreamsServices.size != 1) {
-            errors += s"All t-streams should have the same service."
-          } else {
-            val service = serviceDAO.get(tStreamsServices.head)
-            if (!service.get.isInstanceOf[TStreamService]) {
-              errors += s"Service for t-streams must be 'TstrQ'."
-            } else {
-              checkTStreams(errors, outputStreams.filter(s => s.streamType.equals(tStreamType)).map(_.asInstanceOf[TStreamSjStream]))
-            }
-          }
-
-          // 'parallelism' field
-          Option(parameters.parallelism) match {
-            case None =>
-              errors += s"'Parallelism' is required"
-            case Some(x) =>
-              x match {
-                case dig: Int =>
-                  checkBackupNumber(parameters, errors)
-                case _ =>
-                  errors += "Unknown type of 'parallelism' parameter. Must be Int."
-              }
-          }
-
-          validatedInstance = createInstance(parameters)
+    if (outputStreams.nonEmpty) {
+      val tStreamsServices = getStreamServices(outputStreams)
+      if (tStreamsServices.size != 1) {
+        errors += s"All t-streams should have the same service"
+      } else {
+        val service = serviceDAO.get(tStreamsServices.head)
+        if (!service.get.isInstanceOf[TStreamService]) {
+          errors += s"Service for t-streams must be 'TstrQ'"
+        } else {
+          checkTStreams(errors, outputStreams.filter(s => s.streamType.equals(tStreamType)).map(_.asInstanceOf[TStreamSjStream]))
         }
+      }
+
+      // 'parallelism' field
+      Option(parameters.parallelism) match {
+        case None =>
+          errors += s"'Parallelism' is required"
+        case Some(x) =>
+          x match {
+            case dig: Int =>
+              checkBackupNumber(parameters, errors)
+            case _ =>
+              errors += "Unknown type of 'parallelism' parameter. Must be Int"
+          }
+      }
+
+      validatedInstance = createInstance(parameters)
+    } else {
+      errors += "'Outputs' attribute is empty" //todo needs? or outputs can be empty
     }
 
     (errors, validatedInstance)
@@ -151,10 +134,10 @@ class InputStreamingValidator extends StreamingModuleValidator {
   private def checkBackupNumber(parameters: InputInstanceMetadata, errors: ArrayBuffer[String]) = {
     val parallelism = parameters.parallelism.asInstanceOf[Int]
     if (parallelism <= 0) {
-      errors += "Parallelism must be greater than 0."
+      errors += "Parallelism must be greater than 0"
     }
-    if (parallelism <= (parameters.backupCount + parameters.asyncBackupCount)){
-      errors += "Parallelism must be greater than the total number of backups."
+    if (parallelism <= (parameters.backupCount + parameters.asyncBackupCount)) {
+      errors += "Parallelism must be greater than the total number of backups"
     }
   }
 

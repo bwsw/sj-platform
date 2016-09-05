@@ -60,7 +60,7 @@ abstract class StreamingModuleValidator extends ValidationUtils {
           }
 
           if (instanceDAO.get(parameters.name).isDefined) {
-            errors += s"Instance with name: ${parameters.name} is exist."
+            errors += s"Instance with name: ${parameters.name} exists."
           }
         }
     }
@@ -76,23 +76,23 @@ abstract class StreamingModuleValidator extends ValidationUtils {
     }
 
     // 'checkpoint-interval' field
-    Option(parameters.checkpointInterval) match {
-      case None =>
-        errors += s"'Checkpoint-interval' is required"
-      case Some(x) =>
-        if (parameters.checkpointInterval <= 0) {
-          errors += s"'Checkpoint-interval' must be greater than zero."
-        }
+    if (parameters.checkpointInterval <= 0) {
+      errors += s"'Checkpoint-interval' must be greater than zero."
+    }
+
+    // 'per-task-cores' field
+    if (parameters.perTaskCores <= 0) {
+      errors += s"'Per-task-cores' must be greater than zero."
+    }
+
+    // 'per-task-ram' field
+    if (parameters.perTaskRam <= 0) {
+      errors += s"'Per-task-ram' must be greater than zero."
     }
 
     // 'performance-reporting-interval' field
-    Option(parameters.performanceReportingInterval) match {
-      case None =>
-        errors += s"'Performance-reporting-interval' is required"
-      case Some(x) =>
-        if (parameters.performanceReportingInterval <= 0) {
-          errors += "'Performance-reporting-interval' must be greater than zero."
-        }
+    if (parameters.performanceReportingInterval <= 0) {
+      errors += "'Performance-reporting-interval' must be greater than zero."
     }
 
     // 'coordination-service' field
@@ -199,13 +199,16 @@ abstract class StreamingModuleValidator extends ValidationUtils {
   protected def checkParallelism(parallelism: Any, partitions: Int, errors: ArrayBuffer[String]) = {
     parallelism match {
       case dig: Int =>
+        if (dig <= 0) {
+          errors += "Parallelism must be greater than zero"
+        }
         if (dig > partitions) {
-          errors += s"Parallelism ($dig) > minimum of partition count ($partitions) in all input stream."
+          errors += s"Parallelism ($dig) > minimum of partition count ($partitions) in all input streams."
         }
         dig
       case s: String =>
         if (!s.equals("max")) {
-          errors += s"Parallelism must be int value or string 'max'."
+          errors += s"Parallelism must be int value or 'max'."
         }
         partitions
       case _ =>
