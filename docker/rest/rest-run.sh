@@ -28,6 +28,8 @@ sed -i 's/listen 8080/listen '"$REST_PORT"'/g' /etc/nginx/conf.d/rest-nginx.conf
 # Cfg for scala REST
 export CRUD_REST_PORT=3001
 export CRUD_REST_HOST=0.0.0.0
+export UI_PORT=5555
+export UI_HOST=0.0.0.0
 
 mkdir -p /var/log/rest
 touch /var/log/rest/supervisor.log
