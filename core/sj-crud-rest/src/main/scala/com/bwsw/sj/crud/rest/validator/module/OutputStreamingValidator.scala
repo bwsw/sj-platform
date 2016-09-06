@@ -32,60 +32,67 @@ class OutputStreamingValidator extends StreamingModuleValidator {
    */
   override def validate(parameters: InstanceMetadata, specification: ModuleSpecification) = {
     logger.debug(s"Instance: ${parameters.name}. Start output-streaming validation.")
-    val generalErrors = super.validateGeneralOptions(parameters)
+    val errors = super.validateGeneralOptions(parameters)
     val outputInstanceMetadata = parameters.asInstanceOf[OutputInstanceMetadata]
-    val result = validateStreamOptions(outputInstanceMetadata, specification, generalErrors)
-    val errors = result._1
 
-    if (!parameters.checkpointMode.equals("every-nth")) {
-      errors += s"'Checkpoint-mode' attribute for output-streaming module must be only 'every-nth'"
+    Option(parameters.checkpointMode) match {
+      case None =>
+        errors += s"'Checkpoint-mode' is required"
+      case Some(x) =>
+        if (!x.equals("every-nth")) {
+          errors += s"Unknown value of 'checkpoint-mode' attribute: '$x'. " +
+            s"'Checkpoint-mode' attribute for output-streaming module must be only 'every-nth'"
+        }
     }
 
-    (errors, result._2)
+    validateStreamOptions(outputInstanceMetadata, specification, errors)
   }
 
   /**
    * Validating options of streams of instance for module
    *
-   * @param parameters - Input instance parameters
+   * @param instance - Input instance parameters
    * @param specification - Specification of module
    * @param errors - List of validating errors
    * @return - List of errors and validating instance (null, if errors non empty)
    */
-  def validateStreamOptions(parameters: OutputInstanceMetadata, specification: ModuleSpecification, errors: ArrayBuffer[String]) = {
-
+  def validateStreamOptions(instance: OutputInstanceMetadata,
+                            specification: ModuleSpecification, 
+                            errors: ArrayBuffer[String]) = {
+    logger.debug(s"Instance: ${instance.name}. Stream options validation.")
+    
     // 'inputs' field
     var inputStream: Option[SjStream] = None
-    if (parameters.input != null) {
-      val inputMode: String = getStreamMode(parameters.input)
+    if (instance.input != null) {
+      val inputMode: String = getStreamMode(instance.input)
       if (!inputMode.equals("split")) {
-        errors += s"Unknown stream mode. Input stream must have the mode 'split'"
+        errors += s"Unknown value of 'stream-mode' attribute. Input stream must have the mode 'split'"
       }
 
-      val inputStreamName = parameters.input.replaceAll("/split", "")
+      val inputStreamName = instance.input.replaceAll("/split", "")
       inputStream = getStream(inputStreamName)
       inputStream match {
         case None =>
-          errors += s"Input stream '$inputStreamName' does not exists"
+          errors += s"Input stream '$inputStreamName' does not exist"
         case Some(stream) =>
           val inputTypes = specification.inputs("types").asInstanceOf[Array[String]]
           if (!inputTypes.contains(stream.streamType)) {
-            errors += s"Input stream must be one of: ${inputTypes.mkString("[", ",", "]")}"
+            errors += s"Input stream must be one of: ${inputTypes.mkString("[", ", ", "]")}"
           }
       }
     } else {
       errors += s"'Input' attribute is required"
     }
 
-    if (parameters.output != null) {
-      val outputStream = getStream(parameters.output)
+    if (instance.output != null) {
+      val outputStream = getStream(instance.output)
       outputStream match {
         case None =>
-          errors += s"Output stream '${parameters.output}' does not exists"
+          errors += s"Output stream '${instance.output}' does not exist"
         case Some(stream) =>
           val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
           if (!outputTypes.contains(stream.streamType)) {
-            errors += s"Output streams must be one of: ${outputTypes.mkString("[", ",", "]")}."
+            errors += s"Output streams must be one of: ${outputTypes.mkString("[", ", ", "]")}"
           }
       }
     } else {
@@ -93,13 +100,13 @@ class OutputStreamingValidator extends StreamingModuleValidator {
     }
 
     // 'start-from' field
-    val startFrom = parameters.startFrom
+    val startFrom = instance.startFrom
     if (!startFromModes.contains(startFrom)) {
       try {
         startFrom.toLong
       } catch {
         case ex: NumberFormatException =>
-          errors += s"'Start-from' attribute is not one of: ${startFromModes.mkString("[", ",", "]")} or timestamp"
+          errors += s"'Start-from' attribute is not one of: ${startFromModes.mkString("[", ", ", "]")} or timestamp"
       }
     }
 
@@ -114,10 +121,10 @@ class OutputStreamingValidator extends StreamingModuleValidator {
         checkTStreams(errors, ArrayBuffer(input))
       }
 
-      parameters.parallelism = checkParallelism(parameters.parallelism, input.partitions, errors)
+      instance.parallelism = checkParallelism(instance.parallelism, input.partitions, errors)
 
       val partitions = getStreamsPartitions(Array(input))
-      validatedInstance = createInstance(parameters, partitions, Set(input))
+      validatedInstance = createInstance(instance, partitions, Set(input))
     }
 
     (errors, validatedInstance)

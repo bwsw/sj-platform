@@ -50,38 +50,34 @@ abstract class StreamingModuleValidator extends ValidationUtils {
       case None =>
         errors += s"'Name' is required"
       case Some(x) =>
-        if (x.isEmpty) {
-          errors += s"'Name' can not be empty"
-        } else {
-          if (!validateName(parameters.name)) {
-            errors += s"Instance has incorrect name: ${parameters.name}. " +
-              s"Name of instance must be contain digits, lowercase letters or hyphens. First symbol must be letter."
-          }
+        if (instanceDAO.get(parameters.name).isDefined) {
+          errors += s"Instance with name ${parameters.name} already exists"
+        }
 
-          if (instanceDAO.get(parameters.name).isDefined) {
-            errors += s"Instance with name: ${parameters.name} exists."
-          }
+        if (!validateName(parameters.name)) {
+          errors += s"Instance has incorrect name: ${parameters.name}. " +
+            s"Name of instance must be contain digits, lowercase letters or hyphens. First symbol must be a letter"
         }
     }
 
     // 'checkpoint-interval' field
     if (parameters.checkpointInterval <= 0) {
-      errors += s"'Checkpoint-interval' must be greater than zero."
+      errors += s"'Checkpoint-interval' must be greater than zero"
     }
 
     // 'per-task-cores' field
     if (parameters.perTaskCores <= 0) {
-      errors += s"'Per-task-cores' must be greater than zero."
+      errors += s"'Per-task-cores' must be greater than zero"
     }
 
     // 'per-task-ram' field
     if (parameters.perTaskRam <= 0) {
-      errors += s"'Per-task-ram' must be greater than zero."
+      errors += s"'Per-task-ram' must be greater than zero"
     }
 
     // 'performance-reporting-interval' field
     if (parameters.performanceReportingInterval <= 0) {
-      errors += "'Performance-reporting-interval' must be greater than zero."
+      errors += "'Performance-reporting-interval' must be greater than zero"
     }
 
     // 'coordination-service' field
@@ -92,10 +88,10 @@ abstract class StreamingModuleValidator extends ValidationUtils {
         val coordService = serviceDAO.get(parameters.coordinationService)
         if (coordService.isDefined) {
           if (!coordService.get.isInstanceOf[ZKService]) {
-            errors += s"'Coordination-service' ${parameters.coordinationService} is not ZKCoord."
+            errors += s"'Coordination-service' ${parameters.coordinationService} is not ZKCoord"
           }
         } else {
-          errors += s"'Coordination-service' ${parameters.coordinationService} is not exists."
+          errors += s"'Coordination-service' ${parameters.coordinationService} does not exist"
         }
     }
 
@@ -186,23 +182,28 @@ abstract class StreamingModuleValidator extends ValidationUtils {
    * @return - Validated value of parallelism
    */
   protected def checkParallelism(parallelism: Any, partitions: Int, errors: ArrayBuffer[String]) = {
-    parallelism match {
-      case dig: Int =>
-        if (dig <= 0) {
-          errors += "Parallelism must be greater than zero"
+    Option(parallelism) match {
+      case None =>
+        errors += s"'Parallelism' is required"
+      case Some(x) =>
+        x match {
+          case dig: Int =>
+            if (dig <= 0) {
+              errors += "'Parallelism' must be greater than zero"
+            }
+            if (dig > partitions) {
+              errors += s"'Parallelism' ($dig) is greater than minimum of partitions count ($partitions) of input streams"
+            }
+            dig
+          case s: String =>
+            if (!s.equals("max")) {
+              errors += "Unknown type of 'parallelism' parameter. Must be a digit or 'max'"
+            }
+            partitions
+          case _ =>
+            errors += "Unknown type of 'parallelism' parameter. Must be a digit or 'max'"
+            null
         }
-        if (dig > partitions) {
-          errors += s"Parallelism ($dig) > minimum of partition count ($partitions) in all input streams."
-        }
-        dig
-      case s: String =>
-        if (!s.equals("max")) {
-          errors += s"Parallelism must be int value or 'max'."
-        }
-        partitions
-      case _ =>
-        errors += "Unknown type of 'parallelism' parameter. Must be Int or String."
-        null
     }
   }
 

@@ -31,7 +31,7 @@ object ConfigSettingValidator extends ValidationUtils{
 
           if (!validateName(x)) {
             errors += s"Config setting has incorrect name: $x. " +
-              s"Name of config setting must be contain digits, lowercase letters or hyphens. First symbol must be letter."
+              s"Name of config setting must be contain digits, lowercase letters or hyphens. First symbol must be a letter."
           }
         }
     }

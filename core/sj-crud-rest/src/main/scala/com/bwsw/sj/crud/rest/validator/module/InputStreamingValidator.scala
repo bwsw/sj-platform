@@ -42,30 +42,31 @@ class InputStreamingValidator extends StreamingModuleValidator {
         errors += s"'Checkpoint-mode' is required"
       case Some(x) =>
         if (!checkpointModes.contains(parameters.checkpointMode)) {
-          errors += s"Unknown value of checkpoint-mode attribute: ${parameters.checkpointMode}."
+          errors += s"Unknown value of 'checkpoint-mode' attribute: '$x'. " +
+            s"'Checkpoint-mode' must be one of: ${checkpointModes.mkString("[", ", ", "]")}"
         }
     }
 
     if (inputInstanceMetadata.lookupHistory < 0) {
-      errors += s"Lookup history attribute must be greater than zero or equal to zero"
+      errors += s"'Lookup-history' attribute must be greater than zero or equal to zero"
     }
 
     if (inputInstanceMetadata.queueMaxSize < 0) {
-      errors += s"Queue max size attribute must be greater than zero or equal to zero"
+      errors += s"'Queue-max-size' attribute must be greater than zero or equal to zero"
     }
 
     if (!defaultEvictionPolicies.contains(inputInstanceMetadata.defaultEvictionPolicy)) {
-      errors += s"Unknown value of 'default-eviction-policy' attribute: ${inputInstanceMetadata.defaultEvictionPolicy}. " +
-        s"Eviction-policy must be one of: ${defaultEvictionPolicies.mkString("[", ",", "]")}"
+      errors += s"Unknown value of 'default-eviction-policy' attribute: '${inputInstanceMetadata.defaultEvictionPolicy}'. " +
+        s"'Default-eviction-policy' must be one of: ${defaultEvictionPolicies.mkString("[", ", ", "]")}"
     }
 
     if (!evictionPolicies.contains(inputInstanceMetadata.evictionPolicy)) {
-      errors += s"Unknown value of 'eviction-policy' attribute: ${inputInstanceMetadata.evictionPolicy}. " +
-        s"Eviction-policy must be one of: ${evictionPolicies.mkString("[", ",", "]")}"
+      errors += s"Unknown value of 'eviction-policy' attribute: '${inputInstanceMetadata.evictionPolicy}'. " +
+        s"'Eviction-policy' must be one of: ${evictionPolicies.mkString("[", ", ", "]")}"
     }
 
     if (inputInstanceMetadata.backupCount < 0 || inputInstanceMetadata.backupCount > 6)
-      errors += "Backup count must be in the interval from 0 to 6"
+      errors += "'Backup-count' must be in the interval from 0 to 6"
 
     validateStreamOptions(inputInstanceMetadata, specification, errors)
   }
@@ -73,37 +74,37 @@ class InputStreamingValidator extends StreamingModuleValidator {
   /**
    * Validating options of streams of instance for module
    *
-   * @param parameters    - Input instance parameters
+   * @param instance    - Input instance parameters
    * @param specification - Specification of module
    * @param errors        - List of validating errors
    * @return - List of errors and validating instance (null, if errors non empty)
    */
-  def validateStreamOptions(parameters: InputInstanceMetadata,
+  def validateStreamOptions(instance: InputInstanceMetadata,
                             specification: ModuleSpecification,
                             errors: ArrayBuffer[String]): (ArrayBuffer[String], Option[Instance]) = {
-    logger.debug(s"Instance: ${parameters.name}. Stream options validation.")
+    logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     var validatedInstance: Option[Instance] = None
 
     // 'outputs' field
     val outputsCardinality = specification.outputs("cardinality").asInstanceOf[Array[Int]]
-    if (parameters.outputs.length < outputsCardinality(0)) {
-      errors += s"Count of outputs cannot be less than ${outputsCardinality(0)}."
+    if (instance.outputs.length < outputsCardinality(0)) {
+      errors += s"Count of outputs cannot be less than ${outputsCardinality(0)}"
     }
-    if (parameters.outputs.length > outputsCardinality(1)) {
-      errors += s"Count of outputs cannot be more than ${outputsCardinality(1)}."
+    if (instance.outputs.length > outputsCardinality(1)) {
+      errors += s"Count of outputs cannot be more than ${outputsCardinality(1)}"
     }
-    if (doesContainDoubles(parameters.outputs.toList)) {
-      errors += s"Outputs contain the non-unique streams"
+    if (doesContainDoubles(instance.outputs.toList)) {
+      errors += s"'Outputs' contain the non-unique streams"
     }
-    val outputStreams = getStreams(parameters.outputs.toList)
-    parameters.outputs.toList.foreach { streamName =>
+    val outputStreams = getStreams(instance.outputs.toList)
+    instance.outputs.toList.foreach { streamName =>
       if (!outputStreams.exists(s => s.name == streamName)) {
-        errors += s"Output stream '$streamName' does not exists"
+        errors += s"Output stream '$streamName' does not exist"
       }
     }
     val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
     if (outputStreams.exists(s => !outputTypes.contains(s.streamType))) {
-      errors += s"Output streams must be one of the following type: ${outputTypes.mkString("[", ",", "]")}"
+      errors += s"Output streams must be one of the following type: ${outputTypes.mkString("[", ", ", "]")}"
     }
 
     if (outputStreams.nonEmpty) {
@@ -120,19 +121,19 @@ class InputStreamingValidator extends StreamingModuleValidator {
       }
 
       // 'parallelism' field
-      Option(parameters.parallelism) match {
+      Option(instance.parallelism) match {
         case None =>
           errors += s"'Parallelism' is required"
         case Some(x) =>
           x match {
             case dig: Int =>
-              checkBackupNumber(parameters, errors)
+              checkBackupNumber(instance, errors)
             case _ =>
-              errors += "Unknown type of 'parallelism' parameter. Must be Int"
+              errors += "Unknown type of 'parallelism' parameter. Must be a digit"
           }
       }
 
-      validatedInstance = createInstance(parameters)
+      validatedInstance = createInstance(instance)
     } else {
       errors += "'Outputs' attribute is empty" //todo needs? or outputs can be empty
     }
@@ -143,10 +144,10 @@ class InputStreamingValidator extends StreamingModuleValidator {
   private def checkBackupNumber(parameters: InputInstanceMetadata, errors: ArrayBuffer[String]) = {
     val parallelism = parameters.parallelism.asInstanceOf[Int]
     if (parallelism <= 0) {
-      errors += "Parallelism must be greater than 0"
+      errors += "'Parallelism' must be greater than 0"
     }
     if (parallelism <= (parameters.backupCount + parameters.asyncBackupCount)) {
-      errors += "Parallelism must be greater than the total number of backups"
+      errors += "'Parallelism' must be greater than the total number of backups"
     }
   }
 

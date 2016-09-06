@@ -46,7 +46,8 @@ object StreamValidator extends ValidationUtils {
           }
 
           if (!validateName(x)) {
-            errors += s"Stream has incorrect name: $x. Name of stream must be contain digits, lowercase letters or hyphens. First symbol must be letter."
+            errors += s"Stream has incorrect name: $x. " +
+              s"Name of stream must be contain digits, lowercase letters or hyphens. First symbol must be a letter."
           }
         }
     }

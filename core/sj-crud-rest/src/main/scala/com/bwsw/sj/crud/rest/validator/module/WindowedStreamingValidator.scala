@@ -43,7 +43,7 @@ class WindowedStreamingValidator extends StreamingModuleValidator {
     // 'state-management' field
     if (!stateManagementModes.contains(windowedInstanceMetadata.stateManagement)) {
       errors += s"Unknown value of state-management attribute: ${windowedInstanceMetadata.stateManagement}. " +
-        s"State-management must be one of: ${stateManagementModes.mkString("[", ",", "]")}"
+        s"State-management must be one of: ${stateManagementModes.mkString("[", ", ", "]")}"
     } else {
       if (windowedInstanceMetadata.stateManagement != "none") {
         // 'state-full-checkpoint' field

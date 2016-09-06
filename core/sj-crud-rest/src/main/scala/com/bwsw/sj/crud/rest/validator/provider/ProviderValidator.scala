@@ -46,47 +46,41 @@ object ProviderValidator extends ValidationUtils {
     // 'name' field
     Option(initialData.name) match {
       case None =>
-        errors += s"'name' is required"
+        errors += s"'Name' is required"
       case Some(x) =>
-        if (x.isEmpty) {
-          errors += s"'name' can not be empty"
-        } else {
-          if (providerDAO.get(x).isDefined) {
-            errors += s"Provider with name '$x' already exists"
-          }
+        if (providerDAO.get(x).isDefined) {
+          errors += s"Provider with name '$x' already exists"
+        }
 
-          if (!validateName(x)) {
-            errors += s"Provider has incorrect name: '$x'. Name of provider must be contain digits, lowercase letters or hyphens. First symbol must be letter"
-          }
+        if (!validateName(x)) {
+          errors += s"Provider has incorrect name: '$x'. " +
+            s"Name of provider must be contain digits, lowercase letters or hyphens. First symbol must be a letter"
         }
     }
 
     // 'description' field
     Option(initialData.description) match {
       case None =>
-        errors += s"'description' is required"
+        errors += s"'Description' is required"
       case Some(x) =>
-        if (x.isEmpty) {
-          errors += s"'description' can not be empty"
-        }
     }
 
     // 'providerType field
     Option(initialData.providerType) match {
       case None =>
-        errors += s"'type' is required"
+        errors += s"'Type' is required"
       case Some(x) =>
         if (!providerTypes.contains(x)) {
-          errors += s"Unknown type '$x' provided. Must be one of: ${providerTypes.mkString("[", ",", "]")}"
+          errors += s"Unknown type '$x' provided. Must be one of: ${providerTypes.mkString("[", ", ", "]")}"
         }
     }
 
     //'hosts' field
     if (Option(initialData.hosts).isEmpty) {
-      errors += s"'hosts' is required"
+      errors += s"'Hosts' is required"
     } else {
       if (initialData.hosts.isEmpty) {
-        errors += s"'hosts' must contain at least one host"
+        errors += s"'Hosts' must contain at least one host"
       } else {
         var ports = new ListBuffer[Int]()
         for (host <- initialData.hosts) {
@@ -97,7 +91,7 @@ object ProviderValidator extends ValidationUtils {
 
         if (initialData.providerType == "cassandra" && ports.distinct.size > 1) {
           errors += s"Ports must be the same for all hosts of '${initialData.providerType}' provider subset"
-        } //todo  why?
+        } //todo  why? если останется, то добавить в описание ошибок
       }
     }
 

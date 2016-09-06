@@ -345,7 +345,8 @@ object ServiceValidator extends ValidationUtils {
       val errors = new ArrayBuffer[String]()
 
       if (!validateServiceNamespace(namespace)) {
-        errors += s"Service has incorrect parameter: $namespace. Name must be contain digits, lowercase letters or underscore. First symbol must be letter."
+        errors += s"Service has incorrect parameter: $namespace. " +
+          s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter."
       }
 
       errors
