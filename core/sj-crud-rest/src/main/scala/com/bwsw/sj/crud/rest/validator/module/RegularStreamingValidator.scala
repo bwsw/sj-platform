@@ -32,6 +32,16 @@ class RegularStreamingValidator extends StreamingModuleValidator {
     val result = validateStreamOptions(parameters, specification, generalErrors)
     val errors = result._1
 
+    // 'checkpoint-mode' field
+    Option(parameters.checkpointMode) match {
+      case None =>
+        errors += s"'Checkpoint-mode' is required"
+      case Some(x) =>
+        if (!checkpointModes.contains(parameters.checkpointMode)) {
+          errors += s"Unknown value of checkpoint-mode attribute: ${parameters.checkpointMode}."
+        }
+    }
+
     // 'event-wait-time' field
     if (parameters.eventWaitTime <= 0) {
       errors += s"'Event-wait-time' attribute must be greater than zero"
@@ -61,29 +71,28 @@ class RegularStreamingValidator extends StreamingModuleValidator {
    * @param errors - List of validating errors
    * @return - List of errors and validating instance (null, if errors non empty)
    */
-  protected def validateStreamOptions(instance: InstanceMetadata,
+  protected def validateStreamOptions(instance: RegularInstanceMetadata,
                                       specification: ModuleSpecification,
                                       errors: ArrayBuffer[String]): (ArrayBuffer[String], Option[Instance]) = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
-    val parameters = instance.asInstanceOf[RegularInstanceMetadata]
 
     // 'inputs' field
-    val inputModes = parameters.inputs.map(i => getStreamMode(i))
+    val inputModes = instance.inputs.map(i => getStreamMode(i))
     if (inputModes.exists(m => !streamModes.contains(m))) {
-      errors += s"Unknown stream mode. Input streams must have on of mode: ${streamModes.mkString("[", ",", "]")}"
+      errors += s"Unknown stream mode. Input streams must have one of mode: ${streamModes.mkString("[", ",", "]")}"
     }
     val inputsCardinality = specification.inputs("cardinality").asInstanceOf[Array[Int]]
-    if (parameters.inputs.length < inputsCardinality(0)) {
+    if (instance.inputs.length < inputsCardinality(0)) {
       errors += s"Count of inputs cannot be less than ${inputsCardinality(0)}"
     }
-    if (parameters.inputs.length > inputsCardinality(1)) {
+    if (instance.inputs.length > inputsCardinality(1)) {
       errors += s"Count of inputs cannot be more than ${inputsCardinality(1)}"
     }
-    if (doesContainDoubles(parameters.inputs.toList)) {
+    if (doesContainDoubles(instance.inputs.toList)) {
       errors += s"Inputs is not unique"
     }
-    val inputStreams = getStreams(parameters.inputs.toList.map(_.replaceAll("/split|/full", "")))
-    parameters.inputs.toList.map(_.replaceAll("/split|/full", "")).foreach { streamName =>
+    val inputStreams = getStreams(instance.inputs.toList.map(_.replaceAll("/split|/full", "")))
+    instance.inputs.toList.map(_.replaceAll("/split|/full", "")).foreach { streamName =>
       if (!inputStreams.exists(s => s.name == streamName)) {
         errors += s"Input stream '$streamName' does not exists"
       }
@@ -94,44 +103,45 @@ class RegularStreamingValidator extends StreamingModuleValidator {
     }
 
     // 'start-from' field
-    val startFrom = parameters.startFrom
+    val startFrom = instance.startFrom
     if (inputStreams.exists(s => s.streamType.equals(kafkaStreamType))) {
       if (!startFromModes.contains(startFrom)) {
-        errors += s"'Start-from' attribute must be one of: ${startFromModes.mkString("[", ",", "]")}, if instance has the kafka-streams"
+        errors += s"'Start-from' attribute must be one of: ${startFromModes.mkString("[", ",", "]")}, if instance inputs have the kafka-streams"
       }
     } else {
-      try {
-        startFrom.toLong
-      } catch {
-        case ex: NumberFormatException =>
-          if (!startFromModes.contains(startFrom)) {
+      if (!startFromModes.contains(startFrom)) {
+        try {
+          startFrom.toLong
+        } catch {
+          case ex: NumberFormatException =>
             errors += s"'Start-from' attribute is not one of: ${startFromModes.mkString("[", ",", "]")} or timestamp"
-          }
+        }
       }
     }
 
     // 'outputs' field
     val outputsCardinality = specification.outputs("cardinality").asInstanceOf[Array[Int]]
-    if (parameters.outputs.length < outputsCardinality(0)) {
+    if (instance.outputs.length < outputsCardinality(0)) {
       errors += s"Count of outputs cannot be less than ${outputsCardinality(0)}."
     }
-    if (parameters.outputs.length > outputsCardinality(1)) {
+    if (instance.outputs.length > outputsCardinality(1)) {
       errors += s"Count of outputs cannot be more than ${outputsCardinality(1)}."
     }
-    if (doesContainDoubles(parameters.outputs.toList)) {
+    if (doesContainDoubles(instance.outputs.toList)) {
       errors += s"Outputs is not unique"
     }
-    val outputStreams = getStreams(parameters.outputs.toList)
-    parameters.outputs.toList.foreach { streamName =>
+    val outputStreams = getStreams(instance.outputs.toList)
+    instance.outputs.toList.foreach { streamName =>
       if (!outputStreams.exists(s => s.name == streamName)) {
         errors += s"Output stream '$streamName' does not exists"
       }
     }
     val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
     if (outputStreams.exists(s => !outputTypes.contains(s.streamType))) {
-      errors += s"Output streams must be in: ${outputTypes.mkString(", ")}"
+      errors += s"Output streams must be one of: ${outputTypes.mkString("[", ",", "]")}"
     }
 
+    var validatedInstance: Option[Instance] = None
     if (errors.isEmpty) {
       val allStreams = inputStreams.union(outputStreams)
 
@@ -149,7 +159,7 @@ class RegularStreamingValidator extends StreamingModuleValidator {
         }
       }
 
-      val kafkaStreams = allStreams.filter(s => s.streamType.equals(kafkaStreamType)).map(_.asInstanceOf[KafkaSjStream])
+      val kafkaStreams = inputStreams.filter(s => s.streamType.equals(kafkaStreamType)).map(_.asInstanceOf[KafkaSjStream])
       if (kafkaStreams.nonEmpty) {
         if (kafkaStreams.exists(s => !s.service.isInstanceOf[KafkaService])) {
           errors += s"Service for kafka streams must be 'KfkQ'"
@@ -161,13 +171,11 @@ class RegularStreamingValidator extends StreamingModuleValidator {
       // 'parallelism' field
       val partitions = getStreamsPartitions(inputStreams)
       val minPartitionCount = if (partitions.nonEmpty) partitions.values.min else 0
-      parameters.parallelism = checkParallelism(parameters.parallelism, minPartitionCount, errors)
+      instance.parallelism = checkParallelism(instance.parallelism, minPartitionCount, errors)
 
-      val validatedInstance = createInstance(parameters, partitions, allStreams.filter(s => s.streamType.equals(tStreamType)).toSet)
-      (errors, validatedInstance)
-    } else {
-      (errors, None)
+      validatedInstance = createInstance(instance, partitions, allStreams.filter(s => s.streamType.equals(tStreamType)).toSet)
     }
-  }
 
+    (errors, validatedInstance)
+  }
 }

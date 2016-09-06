@@ -1,11 +1,10 @@
 package com.bwsw.sj.crud.rest.validator.module
 
-import com.bwsw.sj.common.DAL.model.{TStreamSjStream, TStreamService, SjStream}
 import com.bwsw.sj.common.DAL.model.module.Instance
+import com.bwsw.sj.common.DAL.model.{SjStream, TStreamService, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, ModuleSpecification, OutputInstanceMetadata}
 import com.bwsw.sj.common.utils.EngineConstants._
-import com.bwsw.sj.common.utils.StreamConstants._
-import com.bwsw.sj.common.rest.entities.module.{OutputInstanceMetadata, InstanceMetadata, ModuleSpecification}
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable.ArrayBuffer
@@ -33,9 +32,16 @@ class OutputStreamingValidator extends StreamingModuleValidator {
    */
   override def validate(parameters: InstanceMetadata, specification: ModuleSpecification) = {
     logger.debug(s"Instance: ${parameters.name}. Start output-streaming validation.")
-    val errors = super.validateGeneralOptions(parameters)
+    val generalErrors = super.validateGeneralOptions(parameters)
     val outputInstanceMetadata = parameters.asInstanceOf[OutputInstanceMetadata]
-    validateStreamOptions(outputInstanceMetadata, specification, errors)
+    val result = validateStreamOptions(outputInstanceMetadata, specification, generalErrors)
+    val errors = result._1
+
+    if (!parameters.checkpointMode.equals("every-nth")) {
+      errors += s"'Checkpoint-mode' attribute for output-streaming module must be only 'every-nth'"
+    }
+
+    (errors, result._2)
   }
 
   /**
@@ -47,75 +53,73 @@ class OutputStreamingValidator extends StreamingModuleValidator {
    * @return - List of errors and validating instance (null, if errors non empty)
    */
   def validateStreamOptions(parameters: OutputInstanceMetadata, specification: ModuleSpecification, errors: ArrayBuffer[String]) = {
-    if (!parameters.checkpointMode.equals("every-nth")) {
-      errors += s"Checkpoint-mode attribute for output-streaming module must be only 'every-nth'."
-    }
 
+    // 'inputs' field
     var inputStream: Option[SjStream] = None
     if (parameters.input != null) {
       val inputMode: String = getStreamMode(parameters.input)
       if (!inputMode.equals("split")) {
-        errors += s"Unknown stream mode. Input stream must have modes 'split'."
+        errors += s"Unknown stream mode. Input stream must have the mode 'split'"
       }
 
       val inputStreamName = parameters.input.replaceAll("/split", "")
       inputStream = getStream(inputStreamName)
       inputStream match {
         case None =>
-          errors += s"Input stream '$inputStreamName' is not exists."
+          errors += s"Input stream '$inputStreamName' does not exists"
         case Some(stream) =>
-          if (!stream.streamType.equals(tStreamType)) {
-            errors += s"Input streams must be T-stream."
+          val inputTypes = specification.inputs("types").asInstanceOf[Array[String]]
+          if (!inputTypes.contains(stream.streamType)) {
+            errors += s"Input stream must be one of: ${inputTypes.mkString("[", ",", "]")}"
           }
       }
     } else {
-      errors += s"Input stream attribute is empty."
+      errors += s"'Input' attribute is required"
     }
 
-    var outputStream: Option[SjStream] = None
-
     if (parameters.output != null) {
-      outputStream = getStream(parameters.output)
+      val outputStream = getStream(parameters.output)
       outputStream match {
         case None =>
-          errors += s"Output stream '${parameters.output}' is not exists."
+          errors += s"Output stream '${parameters.output}' does not exists"
         case Some(stream) =>
           val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
           if (!outputTypes.contains(stream.streamType)) {
-            errors += s"Output streams must be in: ${outputTypes.mkString(", ")}."
+            errors += s"Output streams must be one of: ${outputTypes.mkString("[", ",", "]")}."
           }
       }
     } else {
-      errors += s"Output stream attribute is empty."
+      errors += s"'Output' attribute is required"
     }
 
+    // 'start-from' field
     val startFrom = parameters.startFrom
     if (!startFromModes.contains(startFrom)) {
       try {
         startFrom.toLong
       } catch {
         case ex: NumberFormatException =>
-          errors += s"Start-from attribute is not 'oldest' or 'newest' or timestamp."
+          errors += s"'Start-from' attribute is not one of: ${startFromModes.mkString("[", ",", "]")} or timestamp"
       }
     }
 
     var validatedInstance: Option[Instance] = None
-    if (inputStream.isDefined && outputStream.isDefined) {
-      val input = inputStream.get
-      val allStreams = Array(input, outputStream.get)
+    if (errors.isEmpty) {
+      val input = inputStream.get.asInstanceOf[TStreamSjStream]
 
-      val service = allStreams.head.service
+      val service = input.service
       if (!service.isInstanceOf[TStreamService]) {
-        errors += s"Service for t-streams must be 'TstrQ'."
+        errors += s"Service for t-streams must be 'TstrQ'"
       } else {
-        checkTStreams(errors, allStreams.filter(s => s.streamType.equals(tStreamType)).map(_.asInstanceOf[TStreamSjStream]).toBuffer)
+        checkTStreams(errors, ArrayBuffer(input))
       }
 
-      parameters.parallelism = checkParallelism(parameters.parallelism, input.asInstanceOf[TStreamSjStream].partitions, errors)
+      parameters.parallelism = checkParallelism(parameters.parallelism, input.partitions, errors)
 
       val partitions = getStreamsPartitions(Array(input))
-      validatedInstance = createInstance(parameters, partitions, allStreams.filter(s => s.streamType.equals(tStreamType)).toSet)
+      validatedInstance = createInstance(parameters, partitions, Set(input))
     }
+
     (errors, validatedInstance)
   }
 }

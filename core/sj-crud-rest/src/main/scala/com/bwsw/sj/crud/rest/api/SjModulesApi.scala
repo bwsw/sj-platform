@@ -97,7 +97,7 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
         } ~
         pathPrefix(Segment) { (moduleType: String) =>
           if (!checkModuleType(moduleType)) {
-            throw UnknownModuleType(MessageFormat.format(messages.getString("rest.modules.type.unknown"), moduleType), moduleType)
+            throw UnknownModuleType(createMessage("rest.modules.type.unknown", moduleType), moduleType)
           }
           pathPrefix(Segment) { (moduleName: String) =>
             pathPrefix(Segment) { (moduleVersion: String) =>
@@ -130,7 +130,7 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
                     var response: RestResponse = BadRequestRestResponse(Map("message" ->
                       MessageFormat.format(messages.getString("rest.modules.instances.instance.cannot.create"), errors.mkString(";"))))
 
-                    if (errors.isEmpty && validatedInstance.isDefined) {
+                    if (errors.isEmpty && validatedInstance.isDefined) { //todo по хорошему, тут должно быть достаточно одной проверки на ошибки или на инстанс
                       val instance = validatedInstance.get
                       val validatorClassName = specification.validateClass
                       val jarFile = storage.get(filename, s"tmp/$filename")

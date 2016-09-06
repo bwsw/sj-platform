@@ -6,9 +6,8 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.utils.EngineConstants._
-import com.bwsw.sj.common.utils.StreamConstants
 import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, ModuleSpecification}
+import com.bwsw.sj.common.utils.StreamConstants
 import com.bwsw.sj.crud.rest.utils.{StreamUtil, ValidationUtils}
 import kafka.common.TopicExistsException
 import org.slf4j.{Logger, LoggerFactory}
@@ -62,16 +61,6 @@ abstract class StreamingModuleValidator extends ValidationUtils {
           if (instanceDAO.get(parameters.name).isDefined) {
             errors += s"Instance with name: ${parameters.name} exists."
           }
-        }
-    }
-
-    // 'checkpoint-mode' field
-    Option(parameters.checkpointMode) match {
-      case None =>
-        errors += s"'Checkpoint-mode' is required"
-      case Some(x) =>
-        if (!checkpointModes.contains(parameters.checkpointMode)) {
-          errors += s"Unknown value of checkpoint-mode attribute: ${parameters.checkpointMode}."
         }
     }
 

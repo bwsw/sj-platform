@@ -34,31 +34,40 @@ class InputStreamingValidator extends StreamingModuleValidator {
                         specification: ModuleSpecification): (ArrayBuffer[String], Option[Instance]) = {
     logger.debug(s"Instance: ${parameters.name}. Start input-streaming validation.")
     val errors = super.validateGeneralOptions(parameters)
+    val inputInstanceMetadata = parameters.asInstanceOf[InputInstanceMetadata]
 
-    val instance = parameters.asInstanceOf[InputInstanceMetadata]
+    // 'checkpoint-mode' field
+    Option(inputInstanceMetadata.checkpointMode) match {
+      case None =>
+        errors += s"'Checkpoint-mode' is required"
+      case Some(x) =>
+        if (!checkpointModes.contains(parameters.checkpointMode)) {
+          errors += s"Unknown value of checkpoint-mode attribute: ${parameters.checkpointMode}."
+        }
+    }
 
-    if (instance.lookupHistory < 0) {
+    if (inputInstanceMetadata.lookupHistory < 0) {
       errors += s"Lookup history attribute must be greater than zero or equal to zero"
     }
 
-    if (instance.queueMaxSize < 0) {
+    if (inputInstanceMetadata.queueMaxSize < 0) {
       errors += s"Queue max size attribute must be greater than zero or equal to zero"
     }
 
-    if (!defaultEvictionPolicies.contains(instance.defaultEvictionPolicy)) {
-      errors += s"Unknown value of 'default-eviction-policy' attribute: ${instance.defaultEvictionPolicy}. " +
+    if (!defaultEvictionPolicies.contains(inputInstanceMetadata.defaultEvictionPolicy)) {
+      errors += s"Unknown value of 'default-eviction-policy' attribute: ${inputInstanceMetadata.defaultEvictionPolicy}. " +
         s"Eviction-policy must be one of: ${defaultEvictionPolicies.mkString("[", ",", "]")}"
     }
 
-    if (!evictionPolicies.contains(instance.evictionPolicy)) {
-      errors += s"Unknown value of 'eviction-policy' attribute: ${instance.evictionPolicy}. " +
+    if (!evictionPolicies.contains(inputInstanceMetadata.evictionPolicy)) {
+      errors += s"Unknown value of 'eviction-policy' attribute: ${inputInstanceMetadata.evictionPolicy}. " +
         s"Eviction-policy must be one of: ${evictionPolicies.mkString("[", ",", "]")}"
     }
 
-    if (instance.backupCount < 0 || instance.backupCount > 6)
+    if (inputInstanceMetadata.backupCount < 0 || inputInstanceMetadata.backupCount > 6)
       errors += "Backup count must be in the interval from 0 to 6"
 
-    validateStreamOptions(instance, specification, errors)
+    validateStreamOptions(inputInstanceMetadata, specification, errors)
   }
 
   /**

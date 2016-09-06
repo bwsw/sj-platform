@@ -73,7 +73,8 @@ trait SjCrudValidator {
    * @param jarFile - input jar file
    * @return - content of specification.json
    */
-  def checkJarFile(jarFile: File) = {
+  def checkJarFile(jarFile: File) = { //todo нужно описать каждую ошибку в отдельности,
+  // потому что в противном случае пользователь будет три года искать, что же у него неправильно в спецификации
     val json = getSpecificationFromJar(jarFile)
     if (isEmptyOrNullString(json)) {
       logger.debug(s"File specification.json not found in module jar ${jarFile.getName}.")

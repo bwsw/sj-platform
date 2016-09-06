@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.output.task.engine
 
-import com.bwsw.sj.engine.core.engine.{PersistentBlockingQueue, NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
+import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, PersistentBlockingQueue}
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
@@ -24,16 +24,16 @@ class OutputTaskEngineFactory(manager: OutputTaskManager,
   protected val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
-   * Creates OutputTaskEngine is in charge of a basic execution logic of task of regular module
+   * Creates OutputTaskEngine is in charge of a basic execution logic of task of output module
    * @return Engine of output task
    */
   def createOutputTaskEngine(): OutputTaskEngine = {
     manager.instance.checkpointMode match {
       case "time-interval" =>
-        logger.info(s"Task: ${manager.taskName}. Regular module has a 'time-interval' checkpoint mode, create an appropriate task engine\n")
-        new OutputTaskEngine(manager, performanceMetrics, blockingQueue) with TimeCheckpointTaskEngine
+        logger.error(s"Task: ${manager.taskName}. Output module can't have a 'time-interval' checkpoint mode\n")
+        throw new Exception(s"Task: ${manager.taskName}. Output module can't have a 'time-interval' checkpoint mode\n")
       case "every-nth" =>
-        logger.info(s"Task: ${manager.taskName}. Regular module has an 'every-nth' checkpoint mode, create an appropriate task engine\n")
+        logger.info(s"Task: ${manager.taskName}. Output module has an 'every-nth' checkpoint mode, create an appropriate task engine\n")
         new OutputTaskEngine(manager, performanceMetrics, blockingQueue) with NumericalCheckpointTaskEngine
     }
   }

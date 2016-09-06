@@ -37,6 +37,9 @@ with SjConfigurationSettingsApi with CompletionUtils {
     case ModuleJarNotFound(msg, key) =>
       val response = NotFoundRestResponse(Map("message" -> msg, "key" -> key))
       complete(restResponseToHttpResponse(response))
+    case UnknownModuleType(msg, key) =>
+      val response = NotFoundRestResponse(Map("message" -> msg, "key" -> key))
+      complete(restResponseToHttpResponse(response))
     case ex: ValidationException =>
       val response = InternalServerErrorRestResponse(Map("message" -> messages.getString("rest.errors.invalid.specification")))
       complete(restResponseToHttpResponse(response))
