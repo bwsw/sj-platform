@@ -5,7 +5,7 @@ import java.util.UUID
 object EngineConstants {
   def persistentQueuePath = UUID.randomUUID().toString //todo: yet t-streams can't remove persistent queue
   val persistentBlockingQueue = "persistentBlockingQueue"
-  val eventWaitTimeout = 10
+  val eventWaitTimeout = 100
 
   val inputStreamingType = "input-streaming"
   val outputStreamingType = "output-streaming"

@@ -88,10 +88,6 @@ object ProviderValidator extends ValidationUtils {
           errors ++= hostErrors
           ports += hostPort
         }
-
-        if (initialData.providerType == "cassandra" && ports.distinct.size > 1) {
-          errors += s"Ports must be the same for all hosts of '${initialData.providerType}' provider subset"
-        } //todo  why? если останется, то добавить в описание ошибок
       }
     }
 

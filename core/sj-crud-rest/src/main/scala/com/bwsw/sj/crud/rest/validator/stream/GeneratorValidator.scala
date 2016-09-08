@@ -16,12 +16,12 @@ object GeneratorValidator {
   private val logger = LoggerFactory.getLogger(getClass.getName)
 
   /**
-    * Validating stream generator data
-    *
-    * @param generatorData - input parameters for stream generator being validated
-    * @param generator - stream generator to fulfill data
-    * @return - List of errors
-    */
+   * Validating stream generator data
+   *
+   * @param generatorData - input parameters for stream generator being validated
+   * @param generator - stream generator to fulfill data
+   * @return - List of errors
+   */
   def validate(generatorData: GeneratorData, generator: Generator) = {
     logger.debug(s"Start generator validation.")
     val serviceDAO = ConnectionRepository.getServiceManager
@@ -30,38 +30,31 @@ object GeneratorValidator {
     var serviceObj: Option[Service] = None
     Option(generatorData.generatorType) match {
       case Some(t) if !generatorTypes.contains(t) =>
-        errors += s"Unknown 'generator-type' provided. Must be one of: $generatorTypes"
+        errors += s"Unknown 'generator-type' provided. Must be one of: ${generatorTypes.mkString("[", ", ", "]")}"
       case None =>
-        errors += s"'generator-type' is required"
+        errors += s"'Generator-type' is required"
       case _ =>
         if (generatorData.generatorType != "local") {
           //service
           Option(generatorData.service) match {
-            case Some(s) if s.isEmpty =>
-              errors += s"Generator 'service' can not be empty"
             case None =>
-              errors += s"Generator 'service' is required for non-'local' generator-type"
-            case _ =>
-              if (generatorData.service contains "://") {
-                val generatorUrl = new URI(generatorData.service)
-                if (!generatorUrl.getScheme.equals("service-zk")) {
-                  errors += s"Generator 'service' uri protocol prefix must be 'service-zk://'. Or use plain service name instead"
-                }
-              }
+              errors += s"Generator 'service' is required for a non-local generator type"
+            case Some(s) =>
               var serviceName: String = ""
-              if (generatorData.service contains "://") {
-                val generatorUrl = new URI(generatorData.service)
-                if (generatorUrl.getScheme.equals("service-zk")) {
+              if (s contains "://") {
+                val generatorUrl = new URI(s)
+                if (!generatorUrl.getScheme.equals("service-zk")) {
+                  errors += s"Generator 'service' uri protocol prefix must be 'service-zk://'. Or use a plain service name instead"
+                } else {
                   serviceName = generatorUrl.getAuthority
                 }
               } else {
                 serviceName = generatorData.service
               }
+
               serviceObj = serviceDAO.get(serviceName)
-
-
               if (serviceObj.isEmpty) {
-                errors += s"Unknown generator 'service' provided"
+                errors += s"Generator 'service' does not exist"
               } else {
                 if (serviceObj.get.serviceType != "ZKCoord") {
                   errors += s"Provided generator service '$serviceName' is not of type ZKCoord"
@@ -70,16 +63,7 @@ object GeneratorValidator {
           }
           //instacneCount
           if (generatorData.instanceCount <= 0)
-            errors += s"Generator 'instance-count' must be a positive integer for non-'local' generator-type"
-        }
-        else {
-          //service
-          if (Option(generatorData.service).isDefined)
-            errors += s"Generator 'service' should not exist for 'local' generator-type"
-
-          //instacneCount
-          if (generatorData.instanceCount > 0)
-            errors += s"Generator 'instance-count' should not exist for 'local' generator-type"
+            errors += s"Generator 'instance-count' must be a positive integer for a non-local generator-type"
         }
     }
 

@@ -134,8 +134,6 @@ class InputStreamingValidator extends StreamingModuleValidator {
       }
 
       validatedInstance = createInstance(instance)
-    } else {
-      errors += "'Outputs' attribute is empty" //todo needs? or outputs can be empty
     }
 
     (errors, validatedInstance)

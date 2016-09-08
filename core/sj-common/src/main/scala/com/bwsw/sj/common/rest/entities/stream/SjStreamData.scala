@@ -15,9 +15,9 @@ import com.fasterxml.jackson.annotation.{JsonProperty, JsonSubTypes, JsonTypeInf
 class SjStreamData() {
   @JsonProperty("stream-type") var streamType: String = null
   var name: String = null
-  var description: String = null
+  var description: String = "No description"
   var service: String = null
-  var tags: Array[String] = null
+  var tags: Array[String] = Array()
   var force: Boolean = false
 }
 

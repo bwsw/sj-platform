@@ -115,7 +115,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     prepareES()
 
     while (true) {
-      val maybeEnvelope = blockingQueue.get(EngineConstants.eventWaitTimeout) //todo maybe add to OutputInstance eventWaitTime parameter so PM will change too
+      val maybeEnvelope = blockingQueue.get(EngineConstants.eventWaitTimeout)
 
       if (maybeEnvelope == null) {
         logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${EngineConstants.eventWaitTimeout} went out and nothing was received\n")
