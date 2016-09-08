@@ -10,5 +10,5 @@ class InputEnvelope(var key: String,
                     var outputMetadata: Array[(String, Int)],
                     var duplicateCheck: Boolean,
                     var data: Array[Byte]) extends Envelope {
-  streamType = StreamConstants.input
+  streamType = StreamConstants.inputDummy
 }

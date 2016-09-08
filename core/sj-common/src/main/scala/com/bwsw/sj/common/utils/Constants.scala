@@ -43,7 +43,7 @@ object EngineConstants {
 }
 
 object StreamConstants {
-  final val input = "input"
+  final val inputDummy = "input"
   final val tStreamType = "stream.t-stream"
   final val kafkaStreamType = "stream.kafka"
   final val esOutputType = "elasticsearch-output"

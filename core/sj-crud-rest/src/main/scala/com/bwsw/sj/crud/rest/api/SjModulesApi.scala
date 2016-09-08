@@ -261,7 +261,7 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
                   } ~
                     delete {
                       var response: RestResponse = UnprocessableEntityRestResponse(Map("message" ->
-                        MessageFormat.format(messages.getString("rest.modules.module.cannot.delete"), s"$moduleName-$moduleVersion")))
+                        MessageFormat.format(messages.getString("rest.modules.module.cannot.delete"), s"$moduleType-$moduleName-$moduleVersion")))
 
                       val instances = instanceDAO.getByParameters(Map(
                         "module-name" -> moduleName,
@@ -271,7 +271,7 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
                       if (instances.isEmpty) {
                         storage.delete(filename)
                         response = OkRestResponse(Map("message" ->
-                          MessageFormat.format(messages.getString("rest.modules.module.deleted"), s"$moduleName-$moduleVersion"))
+                          MessageFormat.format(messages.getString("rest.modules.module.deleted"), s"$moduleType-$moduleName-$moduleVersion"))
                         )
                       }
 

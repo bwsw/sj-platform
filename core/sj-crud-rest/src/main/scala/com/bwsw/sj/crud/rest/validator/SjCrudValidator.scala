@@ -13,6 +13,7 @@ import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.Instance
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.utils.{StreamConstants, EngineConstants}
 import org.everit.json.schema.loader.SchemaLoader
@@ -73,8 +74,8 @@ trait SjCrudValidator {
    * @param jarFile - input jar file
    * @return - content of specification.json
    */
-  def checkJarFile(jarFile: File) = { //todo нужно описать каждую ошибку в отдельности,
-  // потому что в противном случае пользователь будет три года искать, что же у него неправильно в спецификации
+  def checkJarFile(jarFile: File) = {
+    val configService = ConnectionRepository.getConfigService
     val json = getSpecificationFromJar(jarFile)
     if (isEmptyOrNullString(json)) {
       logger.debug(s"File specification.json not found in module jar ${jarFile.getName}.")
@@ -83,42 +84,116 @@ trait SjCrudValidator {
     schemaValidate(json, getClass.getClassLoader.getResourceAsStream("schema.json"))
     val specification = serializer.deserialize[Map[String, Any]](json)
     val moduleType = specification("module-type").asInstanceOf[String]
-    if (moduleType.equals(outputStreamingType)) {
-      val inputs = specification("inputs").asInstanceOf[Map[String, Any]]
-      val inputTypes = inputs("types").asInstanceOf[List[String]]
-      val inputCardinalites = inputs("cardinality").asInstanceOf[List[Int]]
+    val inputs = specification("inputs").asInstanceOf[Map[String, Any]]
+    val inputCardinality = inputs("cardinality").asInstanceOf[List[Int]]
+    val inputTypes = inputs("types").asInstanceOf[List[String]]
+    val outputs = specification("outputs").asInstanceOf[Map[String, Any]]
+    val outputCardinality = outputs("cardinality").asInstanceOf[List[Int]]
+    val outputTypes = outputs("types").asInstanceOf[List[String]]
+    moduleType match {
+      case `inputStreamingType` =>
+        //'inputs.cardinality' field
+        if (!isZeroCardinality(inputCardinality)) {
+          throw new Exception("Specification.json for input-streaming module has incorrect params: " +
+            "both of cardinality of inputs has to be equal zero.")
+        }
 
-      val outputs = specification("outputs").asInstanceOf[Map[String, Any]]
-      val outputTypes = outputs("types").asInstanceOf[List[String]]
-      val outputCardinalites = outputs("cardinality").asInstanceOf[List[Int]]
+        //'inputs.types' field
+        if (inputTypes.length != 1 || !inputTypes.contains(inputDummy)) {
+          throw new Exception("Specification.json for input-streaming module has incorrect params: " +
+            "inputs must contain only one string: 'input'.")
+        }
 
-      if (inputTypes.length > 1 ||
-        !inputTypes.head.equals(tStreamType) || (inputCardinalites.head != 1 || inputCardinalites(1) != 1) ||
-        !(outputTypes.contains(jdbcOutputType) || outputTypes.contains(esOutputType)) ||
-        (outputCardinalites.head != 1 || outputCardinalites(1) != 1)
-      ) {
-        throw new Exception("Specification.json for output-streaming has incorrect params!")
-      }
+        //'outputs.cardinality' field
+        if (!isNonZeroCardinality(outputCardinality)) {
+          throw new Exception("Specification.json for input-streaming module has incorrect params: " +
+            "cardinality of outputs has to be an interval with the left bound that is greater than zero.")
+        }
 
-      if (specification.get("entity-class").isEmpty) {
-        throw new Exception("Specification.json for output-streaming hasn't 'entity-class' param!")
-      }
-    } else if (moduleType.equals(inputStreamingType)) {
-      val inputs = specification("inputs").asInstanceOf[Map[String, Any]]
-      val inputTypes = inputs("types").asInstanceOf[List[String]]
-      val inputCardinalites = inputs("cardinality").asInstanceOf[List[Int]]
+        //'outputs.types' field
+        if (outputTypes.length != 1 || !doesSourceTypesConsistOf(outputTypes, Set(tStreamType))) {
+          throw new Exception("Specification.json for input-streaming module has incorrect params: " +
+            "outputs must have the streams of t-stream type.")
+        }
 
-      val outputs = specification("outputs").asInstanceOf[Map[String, Any]]
-      val outputTypes = outputs("types").asInstanceOf[List[String]]
+      case `regularStreamingType` =>
+        //'inputs.cardinality' field
+        if (!isNonZeroCardinality(inputCardinality)) {
+          throw new Exception("Specification.json for regular-streaming module has incorrect params: " +
+            "cardinality of inputs has to be an interval with the left bound that is greater than zero.")
+        }
 
-      if ((inputTypes.size > 1 || !inputTypes.contains(input)
-        || (inputCardinalites.head != 0 && inputCardinalites(1) != 0))
-        || (outputTypes.size != 1 || !outputTypes.contains(tStreamType))) {
-        throw new Exception("Specification.json for input-streaming has incorrect params!")
-      }
+        //'inputs.types' field
+        if (inputTypes.isEmpty || !doesSourceTypesConsistOf(inputTypes, Set(tStreamType, kafkaStreamType))) {
+          throw new Exception("Specification.json for regular-streaming module has incorrect params: " +
+            "inputs must have the streams of t-stream and kafka type.")
+        }
+
+        //'outputs.cardinality' field
+        if (!isNonZeroCardinality(outputCardinality)) {
+          throw new Exception("Specification.json for regular-streaming module has incorrect params: " +
+            "cardinality of outputs has to be an interval with the left bound that is greater than zero.")
+        }
+
+        //'outputs.types' field
+        if (outputTypes.length != 1 || !doesSourceTypesConsistOf(outputTypes, Set(tStreamType))) {
+          throw new Exception("Specification.json for regular-streaming module has incorrect params: " +
+            "outputs must have the streams of t-stream type.")
+        }
+
+      case `outputStreamingType` =>
+        //'inputs.cardinality' field
+        if (!isSingleCardinality(inputCardinality)) {
+          throw new Exception("Specification.json for output-streaming module has incorrect params: " +
+            "both of cardinality of inputs has to be equal 1.")
+        }
+
+        //'inputs.types' field
+        if (inputTypes.length != 1 || !doesSourceTypesConsistOf(inputTypes, Set(tStreamType))) {
+          throw new Exception("Specification.json for output-streaming module has incorrect params: " +
+            "inputs must have the streams of t-stream type.")
+        }
+
+        //'outputs.cardinality' field
+        if (!isSingleCardinality(outputCardinality)) {
+          throw new Exception("Specification.json for output-streaming module has incorrect params: " +
+            "both of cardinality of outputs has to be equal 1.")
+        }
+
+        //'outputs.types' field
+        if (outputTypes.isEmpty || !doesSourceTypesConsistOf(outputTypes, Set(esOutputType, jdbcOutputType))) {
+          throw new Exception("Specification.json for output-streaming module has incorrect params: " +
+            "outputs must have the streams of elasticsearch or jdbc type.")
+        }
+
+        //'entity-class' field
+        if (specification.get("entity-class").isEmpty) {
+          throw new Exception("Specification.json for output-streaming module hasn't got 'entity-class' param.")
+        }
+    }
+
+    val engine = specification("engine-name").asInstanceOf[String] + "-" + specification("engine-version").asInstanceOf[String]
+    if (configService.get("system." + engine).isEmpty) {
+      throw new Exception("Specification.json has got the invalid 'engine-name' and 'engine-version' params.")
     }
 
     specification
+  }
+
+  private def isZeroCardinality(cardinality: List[Int]): Boolean = {
+    cardinality.head == 0 && cardinality.last == 0
+  }
+
+  private def doesSourceTypesConsistOf(sourceTypes: List[String], types: Set[String]) = {
+    sourceTypes.forall(_type => types.contains(_type))
+  }
+
+  private def isNonZeroCardinality(cardinality: List[Int]): Boolean = {
+    cardinality.head > 0 && (cardinality.last >= cardinality.head)
+  }
+
+  private def isSingleCardinality(cardinality: List[Int]): Boolean = {
+    cardinality.head == 1 && cardinality.last == 1
   }
 
   /**
