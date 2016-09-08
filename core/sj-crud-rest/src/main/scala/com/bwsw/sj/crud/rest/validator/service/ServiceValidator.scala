@@ -35,31 +35,24 @@ object ServiceValidator extends ValidationUtils {
     // 'serviceType field
     Option(initialData.serviceType) match {
       case None =>
-        errors += s"'type' is required"
+        errors += s"'Type' is required"
       case Some(x) =>
-        if (!serviceTypes.contains(x)) errors += s"Unknown 'type' provided. Must be one of: $serviceTypes"
+        if (!serviceTypes.contains(x)) errors += s"Unknown 'type' provided. Must be one of: ${serviceTypes.mkString("[", ", ", "]")}"
     }
 
     // 'name' field
     Option(initialData.name) match {
       case None =>
-        errors += s"'name' is required"
+        errors += s"'Name' is required"
       case Some(x) =>
-        if (x.isEmpty) {
-          errors += s"'name' can not be empty"
-        } else {
-          if (serviceDAO.get(x).isDefined) {
-            errors += s"Service with name $x already exists"
-          }
+        if (serviceDAO.get(x).isDefined) {
+          errors += s"Service with name $x already exists"
+        }
 
-          if (!validateName(x)) {
-            errors += s"Service has incorrect name: $x. Name of service must be contain digits, lowercase letters or hyphens. First symbol must be letter."
-          }
+        if (!validateName(x)) {
+          errors += s"Service has incorrect name: $x. Name of service must be contain digits, lowercase letters or hyphens. First symbol must be letter"
         }
     }
-
-    // 'description' field
-    errors ++= validateStringFieldRequired(initialData.description, "description")
 
     // serviceType-dependent extra fields
     initialData.serviceType match {
@@ -71,7 +64,7 @@ object ServiceValidator extends ValidationUtils {
         errors ++= providerErrors
 
         // 'keyspace' field
-        errors ++= validateStringFieldRequired(cassDBServiceData.keyspace, "keyspace")
+        errors ++= validateStringFieldRequired(cassDBServiceData.keyspace, "Keyspace")
         errors ++= validateNamespace(cassDBServiceData.keyspace)
 
         // filling-in service object serviceType-dependent extra fields
@@ -89,10 +82,8 @@ object ServiceValidator extends ValidationUtils {
         errors ++= providerErrors
 
         // 'index', 'login', 'password' fields
-        errors ++= validateStringFieldRequired(esindServiceData.index, "index")
+        errors ++= validateStringFieldRequired(esindServiceData.index, "Index")
         errors ++= validateNamespace(esindServiceData.index)
-        errors ++= validateStringFieldRequired(esindServiceData.login, "login")
-        errors ++= validateStringFieldRequired(esindServiceData.password, "password")
 
         // filling-in service object serviceType-dependent extra fields
         if (errors.isEmpty) {
@@ -112,33 +103,28 @@ object ServiceValidator extends ValidationUtils {
         var zkProviderObj: Option[Provider] = None
         Option(kfkqServiceData.zkProvider) match {
           case None =>
-            errors += s"'zk-provider' is required for 'KfkQ' service"
+            errors += s"'Zk-provider' is required"
           case Some(p) =>
-            if (p.isEmpty) {
-              errors += s"'zk-provider' can not be empty"
-            }
-            else {
-              zkProviderObj = providerDAO.get(p)
-              zkProviderObj match {
-                case Some(provider) =>
-                  if (provider.providerType != "zookeeper") {
-                    errors += s"'zk-provider' must be of type 'zookeeper' " +
-                      s"('${provider.providerType}' is given instead)"
-                  }
-                case None => errors += s"Zookeeper provider '$p' does not exist"
-              }
+            zkProviderObj = providerDAO.get(p)
+            zkProviderObj match {
+              case Some(provider) =>
+                if (provider.providerType != "zookeeper") {
+                  errors += s"'Zk-provider' must be of type 'zookeeper' " +
+                    s"('${provider.providerType}' is given instead)"
+                }
+              case None => errors += s"Zookeeper provider '$p' does not exist"
             }
         }
 
         // 'zkNamespace' field
-        errors ++= validateStringFieldRequired(kfkqServiceData.zkNamespace, "zk-namespace")
+        errors ++= validateStringFieldRequired(kfkqServiceData.zkNamespace, "ZK-namespace")
+        errors ++= validateNamespace(kfkqServiceData.zkNamespace)
 
         // filling-in service object serviceType-dependent extra fields
         if (errors.isEmpty) {
           service.asInstanceOf[KafkaService].provider = providerObj.get
           service.asInstanceOf[KafkaService].zkProvider = zkProviderObj.get
           service.asInstanceOf[KafkaService].zkNamespace = kfkqServiceData.zkNamespace
-
         }
 
       case "TstrQ" =>
@@ -149,26 +135,22 @@ object ServiceValidator extends ValidationUtils {
         // 'metadataProvider' field
         Option(tstrqServiceData.metadataProvider) match {
           case None =>
-            errors += s"'metadata-provider' is required"
+            errors += s"'Metadata-provider' is required"
           case Some(x) =>
-            if (x.isEmpty) {
-              errors += s"'metadata-provider' can not be empty"
-            } else {
-              metadataProviderObj = providerDAO.get(x)
-              metadataProviderObj match {
-                case Some(provider) =>
-                  if (provider.providerType != "cassandra") {
-                    errors += s"metadata-provider must be of type 'cassandra' " +
-                      s"('${provider.providerType}' is given instead)"
-                  }
-                case None => errors += s"Metadata-provider '$x' does not exist"
+            metadataProviderObj = providerDAO.get(x)
+            metadataProviderObj match {
+              case Some(provider) =>
+                if (provider.providerType != "cassandra") {
+                  errors += s"'Metadata-provider' must be of type 'cassandra' " +
+                    s"('${provider.providerType}' is given instead)"
+                }
+              case None => errors += s"Metadata-provider '$x' does not exist"
 
-              }
             }
         }
 
         // 'metadataNamespace' field
-        errors ++= validateStringFieldRequired(tstrqServiceData.metadataNamespace, "metadata-namespace")
+        errors ++= validateStringFieldRequired(tstrqServiceData.metadataNamespace, "Metadata-namespace")
         errors ++= validateNamespace(tstrqServiceData.metadataNamespace)
 
         // 'dataProvider' field
@@ -184,7 +166,7 @@ object ServiceValidator extends ValidationUtils {
               dataProviderObj match {
                 case Some(provider) =>
                   if (!allowedTypes.contains(provider.providerType)) {
-                    errors += s"Data-provider must be of type ${allowedTypes.mkString("[", "|", "]")} " +
+                    errors += s"Data-provider must be one of type: ${allowedTypes.mkString("[", ", ", "]")} " +
                       s"('${provider.providerType}' is given instead)"
                   }
                 case None =>
@@ -194,32 +176,27 @@ object ServiceValidator extends ValidationUtils {
         }
 
         // 'dataNamespace' field
-        errors ++= validateStringFieldRequired(tstrqServiceData.dataNamespace, "data-namespace")
+        errors ++= validateStringFieldRequired(tstrqServiceData.dataNamespace, "Data-namespace")
         errors ++= validateNamespace(tstrqServiceData.dataNamespace)
 
         Option(tstrqServiceData.lockProvider) match {
           case None =>
-            errors += s"'lock-provider' is required"
+            errors += s"'Lock-provider' is required"
           case Some(x) =>
-            if (x.isEmpty) {
-              errors += s"'lock-provider' can not be empty"
-            } else {
-              lockProviderObj = providerDAO.get(x)
-              val allowedTypes = List("zookeeper", "redis")
-              lockProviderObj match {
-                case Some(provider) =>
-                  if (!allowedTypes.contains(provider.providerType)) {
-                    errors += s"Lock-provider must be of type ${allowedTypes.mkString("[", "|", "]")} " +
-                      s"('${provider.providerType}' is given instead)"
-                  }
-                case None =>
-                  errors += s"Lock-provider '$x' does not exist"
-              }
+            lockProviderObj = providerDAO.get(x)
+            lockProviderObj match {
+              case Some(provider) =>
+                if (provider.providerType != "zookeeper") {
+                  errors += s"'Lock-provider' must be of type 'zookeeper' " +
+                    s"('${provider.providerType}' is given instead)"
+                }
+              case None =>
+                errors += s"Lock-provider '$x' does not exist"
             }
         }
 
         // 'lockNamespace' field
-        errors ++= validateStringFieldRequired(tstrqServiceData.lockNamespace, "lock-namespace")
+        errors ++= validateStringFieldRequired(tstrqServiceData.lockNamespace, "Lock-namespace")
         errors ++= validateNamespace(tstrqServiceData.lockNamespace)
 
         // filling-in service object serviceType-dependent extra fields
@@ -240,7 +217,7 @@ object ServiceValidator extends ValidationUtils {
         errors ++= providerErrors
 
         // 'namespace' field
-        errors ++= validateStringFieldRequired(zkcoordServiceData.namespace, "namespace")
+        errors ++= validateStringFieldRequired(zkcoordServiceData.namespace, "Namespace")
         errors ++= validateNamespace(zkcoordServiceData.namespace)
 
         // filling-in service object serviceType-dependent extra fields
@@ -257,7 +234,7 @@ object ServiceValidator extends ValidationUtils {
         errors ++= providerErrors
 
         // 'namespace' field
-        errors ++= validateStringFieldRequired(rdscoordServiceData.namespace, "namespace")
+        errors ++= validateStringFieldRequired(rdscoordServiceData.namespace, "Namespace")
         errors ++= validateNamespace(rdscoordServiceData.namespace)
 
         // filling-in service object serviceType-dependent extra fields
@@ -274,7 +251,7 @@ object ServiceValidator extends ValidationUtils {
         errors ++= providerErrors
 
         // 'namespace' field
-        errors ++= validateStringFieldRequired(arspkServiceData.namespace, "namespace")
+        errors ++= validateStringFieldRequired(arspkServiceData.namespace, "Namespace")
         errors ++= validateNamespace(arspkServiceData.namespace)
 
         if (errors.isEmpty) {
@@ -308,10 +285,8 @@ object ServiceValidator extends ValidationUtils {
         errors ++= providerErrors
 
         // 'namespace', 'login', 'password' fields
-        errors ++= validateStringFieldRequired(jdbcServiceData.namespace, "namespace")
+        errors ++= validateStringFieldRequired(jdbcServiceData.namespace, "Namespace")
         errors ++= validateNamespace(jdbcServiceData.namespace)
-        errors ++= validateStringFieldRequired(jdbcServiceData.login, "login")
-        errors ++= validateStringFieldRequired(jdbcServiceData.password, "password")
 
         // filling-in service object serviceType-dependent extra fields
         if (errors.isEmpty) {
@@ -335,8 +310,6 @@ object ServiceValidator extends ValidationUtils {
         case None =>
           errors += s"'$fieldJsonName' is required"
         case Some(x) =>
-          if (x.isEmpty)
-            errors += s"'$fieldJsonName' can not be empty"
       }
       errors
     }
@@ -346,7 +319,7 @@ object ServiceValidator extends ValidationUtils {
 
       if (!validateServiceNamespace(namespace)) {
         errors += s"Service has incorrect parameter: $namespace. " +
-          s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter."
+          s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
       }
 
       errors
@@ -356,22 +329,17 @@ object ServiceValidator extends ValidationUtils {
       val providerErrors = new ArrayBuffer[String]()
       var providerObj: Option[Provider] = None
       serviceType match {
-        case _ if serviceTypesWithProvider.contains(serviceType) =>
+        case _ if serviceTypes.contains(serviceType) =>
           Option(provider) match {
             case None =>
-              providerErrors += s"'provider' is required for '$serviceType' service"
+              providerErrors += s"'Provider' is required"
             case Some(p) =>
-              if (p.isEmpty) {
-                providerErrors += s"'provider' can not be empty"
-              }
-              else {
-                providerObj = providerDAO.get(p)
-                if (providerObj.isEmpty) {
-                  providerErrors += s"Provider '$p' does not exist"
-                } else if (providerObj.get.providerType != serviceTypeProviders(serviceType)) {
-                  providerErrors += s"Provider for '$serviceType' service must be of type '${serviceTypeProviders(serviceType)}' " +
-                    s"('${providerObj.get.providerType}' is given instead)"
-                }
+              providerObj = providerDAO.get(p)
+              if (providerObj.isEmpty) {
+                providerErrors += s"Provider '$p' does not exist"
+              } else if (providerObj.get.providerType != serviceTypeProviders(serviceType)) {
+                providerErrors += s"Provider for '$serviceType' service must be of type '${serviceTypeProviders(serviceType)}' " +
+                  s"('${providerObj.get.providerType}' is given instead)"
               }
           }
       }

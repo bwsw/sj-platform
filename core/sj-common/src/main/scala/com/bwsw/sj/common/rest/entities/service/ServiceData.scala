@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.{JsonProperty, JsonSubTypes, JsonTypeInf
 class ServiceData() {
   @JsonProperty("type") var serviceType: String = null
   var name: String = null
-  var description: String = null
+  var description: String = "No description"
 }
 
 class CassDBServiceData() extends ServiceData() {

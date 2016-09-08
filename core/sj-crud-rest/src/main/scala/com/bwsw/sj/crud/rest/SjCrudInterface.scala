@@ -3,14 +3,13 @@ package com.bwsw.sj.crud.rest
 import java.text.MessageFormat
 
 import akka.http.scaladsl.model.EntityStreamSizeException
-import akka.http.scaladsl.server.{Route, Directives, ExceptionHandler}
+import akka.http.scaladsl.server.{Directives, ExceptionHandler, Route}
+import com.bwsw.sj.common.rest.entities.{InternalServerErrorRestResponse, NotFoundRestResponse}
 import com.bwsw.sj.crud.rest.api._
 import com.bwsw.sj.crud.rest.cors.CorsSupport
-import com.bwsw.sj.common.rest.entities.{InternalServerErrorRestResponse, NotFoundRestResponse}
 import com.bwsw.sj.crud.rest.exceptions._
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
-import org.everit.json.schema.ValidationException
 
 /**
  * Route for CRUD Rest-API
@@ -39,9 +38,6 @@ with SjConfigurationSettingsApi with CompletionUtils {
       complete(restResponseToHttpResponse(response))
     case UnknownModuleType(msg, key) =>
       val response = NotFoundRestResponse(Map("message" -> msg, "key" -> key))
-      complete(restResponseToHttpResponse(response))
-    case ex: ValidationException =>
-      val response = InternalServerErrorRestResponse(Map("message" -> messages.getString("rest.errors.invalid.specification")))
       complete(restResponseToHttpResponse(response))
     case ex: EntityStreamSizeException =>
       val response = InternalServerErrorRestResponse(Map("message" -> messages.getString("rest.errors.large_file")))
