@@ -2,7 +2,7 @@ package com.bwsw.sj.crud.rest.validator.config
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.entities.config.ConfigurationSettingData
-import com.bwsw.sj.crud.rest.utils.ValidationUtils
+import com.bwsw.sj.common.rest.utils.ValidationUtils
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer

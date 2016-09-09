@@ -6,8 +6,9 @@ import java.util.ResourceBundle
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.entities.stream.{KafkaSjStreamData, SjStreamData, TStreamSjStreamData}
+import com.bwsw.sj.common.rest.utils.ValidationUtils
 import com.bwsw.sj.common.utils.StreamConstants
-import com.bwsw.sj.crud.rest.utils.{StreamUtil, ValidationUtils}
+import com.bwsw.sj.crud.rest.utils.StreamUtil
 import kafka.common.TopicExistsException
 import org.slf4j.LoggerFactory
 

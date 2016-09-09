@@ -130,7 +130,7 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
                     var response: RestResponse = BadRequestRestResponse(Map("message" ->
                       MessageFormat.format(messages.getString("rest.modules.instances.instance.cannot.create"), errors.mkString(";"))))
 
-                    if (errors.isEmpty && validatedInstance.isDefined) { //todo по хорошему, тут должно быть достаточно одной проверки на наличие ошибок или на инстанс
+                    if (errors.isEmpty && validatedInstance.isDefined) { //todo по-хорошему, тут должно быть достаточно одной проверки на наличие ошибок или на инстанс
                       val instance = validatedInstance.get
                       val validatorClassName = specification.validateClass
                       val jarFile = storage.get(filename, s"tmp/$filename")
@@ -166,7 +166,7 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
                         MessageFormat.format(messages.getString("rest.modules.module.instances.notfound"), s"$moduleType-$moduleName-$moduleVersion"))
                       )
                       if (instances.nonEmpty) {
-                        response = OkRestResponse(Map("instances" -> instances.map(i => instanceToInstanceMetadata(i))))
+                        response = OkRestResponse(Map("instances" -> instances.map(_.toProtocolInstance())))
                       }
 
                       complete(restResponseToHttpResponse(response))
@@ -182,7 +182,7 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
                     }
                     pathEndOrSingleSlash {
                       get {
-                        val response = OkRestResponse(Map("instance" -> instanceToInstanceMetadata(instance.get)))
+                        val response = OkRestResponse(Map("instance" -> instance.get.toProtocolInstance()))
                         complete(restResponseToHttpResponse(response))
                       } ~
                         delete {

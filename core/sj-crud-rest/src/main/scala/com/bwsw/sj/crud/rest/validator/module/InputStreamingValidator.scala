@@ -7,7 +7,6 @@ import com.bwsw.sj.common.DAL.model.{TStreamService, TStreamSjStream}
 import com.bwsw.sj.common.rest.entities.module.{InputInstanceMetadata, InstanceMetadata, ModuleSpecification}
 import com.bwsw.sj.common.utils.EngineConstants._
 import com.bwsw.sj.common.utils.StreamConstants._
-import com.bwsw.sj.crud.rest.utils.ConvertUtil._
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.JavaConversions._
@@ -156,7 +155,7 @@ class InputStreamingValidator extends StreamingModuleValidator {
    */
   private def createInstance(parameters: InputInstanceMetadata) = {
     logger.debug(s"Instance ${parameters.name}. Create model object.")
-    val instance = instanceMetadataToInstance(parameters)
+    val instance = parameters.toModelInstance()
     val stages = scala.collection.mutable.Map[String, InstanceStage]()
     parameters.outputs.foreach { stream =>
       val instanceStartTask = new InstanceStage

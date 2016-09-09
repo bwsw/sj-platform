@@ -7,8 +7,9 @@ import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, ModuleSpecification}
+import com.bwsw.sj.common.rest.utils.ValidationUtils
 import com.bwsw.sj.common.utils.StreamConstants
-import com.bwsw.sj.crud.rest.utils.{StreamUtil, ValidationUtils}
+import com.bwsw.sj.crud.rest.utils.StreamUtil
 import kafka.common.TopicExistsException
 import org.slf4j.{Logger, LoggerFactory}
 

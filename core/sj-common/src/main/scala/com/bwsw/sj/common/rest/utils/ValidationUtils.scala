@@ -1,16 +1,18 @@
-package com.bwsw.sj.crud.rest.utils
+package com.bwsw.sj.common.rest.utils
 
 import java.util.Calendar
 
 import com.bwsw.sj.common.DAL.model.SjStream
 import com.bwsw.sj.common.DAL.model.module._
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, OutputInstanceMetadata, RegularInstanceMetadata}
 import com.bwsw.sj.common.utils.EngineConstants._
-import com.bwsw.sj.common.rest.entities.module.{OutputInstanceMetadata, RegularInstanceMetadata, InstanceMetadata}
-import com.bwsw.sj.crud.rest.utils.ConvertUtil._
-import org.slf4j.{LoggerFactory, Logger}
+import com.bwsw.sj.common.utils.ServiceConstants._
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 trait ValidationUtils {
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
@@ -19,12 +21,10 @@ trait ValidationUtils {
 
   private case class StreamProcess(currentPartition: Int, countFreePartitions: Int)
 
+  private val providerDAO = ConnectionRepository.getProviderService
+
   def validateName(name: String) = {
     name.matches( """^([a-z][a-z0-9-]*)$""")
-  }
-
-  def validateServiceNamespace(namespace: String) = {
-    namespace.matches( """^([a-z][a-z0-9_]*)$""")
   }
 
   /**
@@ -37,7 +37,7 @@ trait ValidationUtils {
   def createInstance(instanceMetadata: InstanceMetadata, partitionsCount: Map[String, Int], streams: Set[SjStream]) = {
     logger.debug(s"Instance ${instanceMetadata.name}. Create model object.")
     val executionPlan = createExecutionPlan(instanceMetadata, partitionsCount)
-    val instance = instanceMetadataToInstance(instanceMetadata)
+    val instance = instanceMetadata.toModelInstance()
     instance match {
       case regularInstance: RegularInstance => regularInstance.executionPlan = executionPlan //todo переделать эту часть, когда будет разделяться валидация и создание инстанса
       case outputInstance: OutputInstance => outputInstance.executionPlan = executionPlan
@@ -125,6 +125,54 @@ trait ValidationUtils {
     } else {
       "split"
     }
+  }
+
+  def validateProvider(provider: String, serviceType: String) = {
+    val providerErrors = new ArrayBuffer[String]()
+    serviceType match {
+      case _ if serviceTypes.contains(serviceType) =>
+        Option(provider) match {
+          case None =>
+            providerErrors += s"'Provider' is required"
+          case Some(p) =>
+            val providerObj = providerDAO.get(p)
+            if (providerObj.isEmpty) {
+              providerErrors += s"Provider '$p' does not exist"
+            } else if (providerObj.get.providerType != serviceTypeProviders(serviceType)) {
+              providerErrors += s"Provider for '$serviceType' service must be of type '${serviceTypeProviders(serviceType)}' " +
+                s"('${providerObj.get.providerType}' is given instead)"
+            }
+        }
+    }
+
+    providerErrors
+  }
+
+  def validateStringFieldRequired(fieldData: String, fieldJsonName: String) = {
+    val errors = new ArrayBuffer[String]()
+
+    Option(fieldData) match {
+      case None =>
+        errors += s"'$fieldJsonName' is required"
+      case Some(x) =>
+    }
+
+    errors
+  }
+
+  def validateNamespace(namespace: String) = {
+    val errors = new ArrayBuffer[String]()
+
+    if (!validateServiceNamespace(namespace)) {
+      errors += s"Service has incorrect parameter: $namespace. " +
+        s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+    }
+
+    errors
+  }
+
+  private def validateServiceNamespace(namespace: String) = {
+    namespace.matches( """^([a-z][a-z0-9_]*)$""")
   }
 
   //todo create an abstract method - validate for all validators (which are object now, e.g. ProviderValidator)

@@ -1,7 +1,13 @@
 package com.bwsw.sj.common.rest.entities.service
 
+import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.rest.utils.ValidationUtils
+import com.bwsw.sj.common.utils.ServiceConstants._
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonProperty, JsonSubTypes, JsonTypeInfo}
+
+import scala.collection.mutable.ArrayBuffer
 
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
@@ -14,59 +20,49 @@ import com.fasterxml.jackson.annotation.{JsonProperty, JsonSubTypes, JsonTypeInf
   new Type(value = classOf[ArspkDBServiceData], name = "ArspkDB"),
   new Type(value = classOf[JDBCServiceData], name = "JDBC")
 ))
-class ServiceData() {
+class ServiceData() extends ValidationUtils {
   @JsonProperty("type") var serviceType: String = null
   var name: String = null
   var description: String = "No description"
+
+  def toModelService(): Service = ???
+
+  def validate() = validateGeneralFields()
+
+  protected def fillModelService(modelService: Service) = {
+    modelService.serviceType = this.serviceType
+    modelService.name = this.name
+    modelService.description = this.description
+  }
+
+  protected def validateGeneralFields() = {
+    val serviceDAO = ConnectionRepository.getServiceManager
+    val errors = new ArrayBuffer[String]()
+
+    // 'serviceType field
+    Option(this.serviceType) match {
+      case None =>
+        errors += s"'Type' is required"
+      case Some(x) =>
+        if (!serviceTypes.contains(x)) errors += s"Unknown 'type' provided. Must be one of: ${serviceTypes.mkString("[", ", ", "]")}"
+    }
+
+    // 'name' field
+    Option(this.name) match {
+      case None =>
+        errors += s"'Name' is required"
+      case Some(x) =>
+        if (serviceDAO.get(x).isDefined) {
+          errors += s"Service with name $x already exists"
+        }
+
+        if (!validateName(x)) {
+          errors += s"Service has incorrect name: $x. Name of service must be contain digits, lowercase letters or hyphens. First symbol must be letter"
+        }
+    }
+
+    errors
+  }
 }
 
-class CassDBServiceData() extends ServiceData() {
-  serviceType = "CassDB"
-  var provider: String = null
-  var keyspace: String = null
-}
 
-class EsIndServiceData() extends ServiceData() {
-  serviceType = "ESInd"
-  var provider: String = null
-  var index: String = null
-  var login: String = null
-  var password: String = null
-}
-
-class KfkQServiceData() extends ServiceData() {
-  serviceType = "KfkQ"
-  var provider: String = null
-  @JsonProperty("zk-provider") var zkProvider : String = null
-  @JsonProperty("zk-namespace") var zkNamespace : String = null
-}
-
-class TstrQServiceData() extends ServiceData() {
-  serviceType = "TstrQ"
-  @JsonProperty("metadata-provider") var metadataProvider: String = null
-  @JsonProperty("metadata-namespace") var metadataNamespace: String = null
-  @JsonProperty("data-provider") var dataProvider: String = null
-  @JsonProperty("data-namespace") var dataNamespace: String = null
-  @JsonProperty("lock-provider") var lockProvider: String = null
-  @JsonProperty("lock-namespace") var lockNamespace: String = null
-}
-
-class ZKCoordServiceData() extends ServiceData() {
-  serviceType = "ZKCoord"
-  var namespace: String = null
-  var provider: String = null
-}
-
-class ArspkDBServiceData() extends ServiceData() {
-  serviceType = "ArspkDB"
-  var namespace: String = null
-  var provider: String = null
-}
-
-class JDBCServiceData() extends ServiceData() {
-  serviceType = "JDBC"
-  var namespace: String = null
-  var provider: String = null
-  var login: String = null
-  var password: String = null
-}

@@ -1,5 +1,7 @@
 package com.bwsw.sj.common.DAL.model
 
+import com.bwsw.sj.common.rest.entities.service.{JDBCServiceData, ServiceData}
+import com.bwsw.sj.common.utils.ServiceConstants
 import org.mongodb.morphia.annotations.Reference
 
 /**
@@ -7,7 +9,7 @@ import org.mongodb.morphia.annotations.Reference
   * @author Kseniya Tomskikh
   */
 class JDBCService() extends Service {
-
+  serviceType = ServiceConstants.jdbcServiceType
   @Reference var provider: Provider = null
   var namespace: String = null
   var login: String = null
@@ -24,4 +26,15 @@ class JDBCService() extends Service {
     this.password = password
   }
 
+  override def toProtocolService(): ServiceData = {
+    val protocolService = new JDBCServiceData()
+    super.fillProtocolService(protocolService)
+
+    protocolService.namespace = this.namespace
+    protocolService.provider = this.provider.name
+    protocolService.login = this.login
+    protocolService.password = this.password
+
+    protocolService
+  }
 }

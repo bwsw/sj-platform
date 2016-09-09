@@ -1,8 +1,11 @@
 package com.bwsw.sj.common.DAL.model
 
+import com.bwsw.sj.common.rest.entities.service.{ServiceData, ZKCoordServiceData}
+import com.bwsw.sj.common.utils.ServiceConstants
 import org.mongodb.morphia.annotations.Reference
 
 class ZKService() extends Service {
+  serviceType = ServiceConstants.zookeeperServiceType
   @Reference var provider: Provider = null
   var namespace: String = null
 
@@ -13,5 +16,15 @@ class ZKService() extends Service {
     this.description = description
     this.provider = provider
     this.namespace = namespace
+  }
+
+  override def toProtocolService(): ServiceData = {
+    val protocolService = new ZKCoordServiceData()
+    super.fillProtocolService(protocolService)
+
+    protocolService.namespace = this.namespace
+    protocolService.provider = this.provider.name
+
+    protocolService
   }
 }

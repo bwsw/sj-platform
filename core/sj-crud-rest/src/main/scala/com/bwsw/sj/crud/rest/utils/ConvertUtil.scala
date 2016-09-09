@@ -6,7 +6,6 @@ import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.rest.entities.config.ConfigurationSettingData
 import com.bwsw.sj.common.rest.entities.module._
 import com.bwsw.sj.common.rest.entities.provider.ProviderData
-import com.bwsw.sj.common.rest.entities.service._
 import com.bwsw.sj.common.rest.entities.stream._
 import org.slf4j.LoggerFactory
 
@@ -21,16 +20,6 @@ object ConvertUtil {
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
   private val serializer = new JsonSerializer
-
-  def instanceToInstanceMetadata(modelInstance: Instance): InstanceMetadata = {
-    logger.debug(s"Convert model instance ${modelInstance.name} to protocol instance.")
-    modelInstance.toProtocolInstance()
-  }
-
-  def instanceMetadataToInstance(protocolInstance: InstanceMetadata): Instance = {
-    logger.debug(s"Convert protocol instance ${protocolInstance.name} to model instance.")
-    protocolInstance.toModelInstance()
-  }
 
   def specificationToSpecificationData(specification: Specification) = {
     logger.debug(s"Convert model specification ${specification.name} to protocol specification.")
@@ -80,64 +69,6 @@ object ConvertUtil {
     streamData.streamType = stream.streamType
     streamData.tags = stream.tags
     streamData
-  }
-
-  def serviceToServiceData(service: Service) = {
-    logger.debug(s"Convert model service ${service.name} to protocol service.")
-    var serviceData: ServiceData = null
-    service match {
-      case s: CassandraService =>
-        serviceData = new CassDBServiceData
-        serviceData.name = s.name
-        serviceData.description = s.description
-        serviceData.asInstanceOf[CassDBServiceData].provider = s.provider.name
-        serviceData.asInstanceOf[CassDBServiceData].keyspace = s.keyspace
-      case s: ESService =>
-        serviceData = new EsIndServiceData
-        serviceData.name = s.name
-        serviceData.description = s.description
-        serviceData.asInstanceOf[EsIndServiceData].provider = s.provider.name
-        serviceData.asInstanceOf[EsIndServiceData].index = s.index
-      case s: KafkaService =>
-        serviceData = new KfkQServiceData
-        serviceData.name = s.name
-        serviceData.description = s.description
-        serviceData.asInstanceOf[KfkQServiceData].provider = s.provider.name
-        serviceData.asInstanceOf[KfkQServiceData].zkProvider = s.zkProvider.name
-        serviceData.asInstanceOf[KfkQServiceData].zkNamespace = s.zkNamespace
-      case s: TStreamService =>
-        serviceData = new TstrQServiceData
-        serviceData.name = s.name
-        serviceData.description = s.description
-        serviceData.asInstanceOf[TstrQServiceData].metadataProvider = s.metadataProvider.name
-        serviceData.asInstanceOf[TstrQServiceData].metadataNamespace = s.metadataNamespace
-        serviceData.asInstanceOf[TstrQServiceData].dataProvider = s.dataProvider.name
-        serviceData.asInstanceOf[TstrQServiceData].dataNamespace = s.dataNamespace
-        serviceData.asInstanceOf[TstrQServiceData].lockProvider = s.lockProvider.name
-        serviceData.asInstanceOf[TstrQServiceData].lockNamespace = s.lockNamespace
-      case s: ZKService =>
-        serviceData = new ZKCoordServiceData
-        serviceData.name = s.name
-        serviceData.description = s.description
-        serviceData.asInstanceOf[ZKCoordServiceData].namespace = s.namespace
-        serviceData.asInstanceOf[ZKCoordServiceData].provider = s.provider.name
-      case s: AerospikeService =>
-        serviceData = new ArspkDBServiceData
-        serviceData.name = s.name
-        serviceData.description = s.description
-        serviceData.asInstanceOf[ArspkDBServiceData].namespace = s.namespace
-        serviceData.asInstanceOf[ArspkDBServiceData].provider = s.provider.name
-      case s: JDBCService =>
-        serviceData = new JDBCServiceData
-        serviceData.name = s.name
-        serviceData.description = s.description
-        serviceData.asInstanceOf[JDBCServiceData].namespace = s.namespace
-        serviceData.asInstanceOf[JDBCServiceData].provider = s.provider.name
-        serviceData.asInstanceOf[JDBCServiceData].login = s.login
-        serviceData.asInstanceOf[JDBCServiceData].password = s.provider.password
-      case _ =>
-    }
-    serviceData
   }
 
   def providerToProviderData(provider: Provider) = {
