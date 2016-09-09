@@ -156,8 +156,6 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
               s"that an input stream is not defined at (buffer write index: ${buffer.writerIndex()})")
           }
         }
-      } else {
-        //logger.debug(s"Task name: ${manager.taskName}. Nothing to execute because of a message queue is empty")
       }
 
       if (isItTimeToCheckpoint(environmentManager.isCheckpointInitiated)) doCheckpoint()

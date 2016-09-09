@@ -117,9 +117,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     while (true) {
       val maybeEnvelope = blockingQueue.get(EngineConstants.eventWaitTimeout)
 
-      if (maybeEnvelope == null) {
-        logger.debug(s"Task: ${manager.taskName}. Idle timeout: ${EngineConstants.eventWaitTimeout} went out and nothing was received\n")
-      } else {
+      if (maybeEnvelope != null) {
         val envelope = envelopeSerializer.deserialize[Envelope](maybeEnvelope).asInstanceOf[TStreamEnvelope]
         afterReceivingEnvelope()
         taskInputService.registerEnvelope(envelope, performanceMetrics)

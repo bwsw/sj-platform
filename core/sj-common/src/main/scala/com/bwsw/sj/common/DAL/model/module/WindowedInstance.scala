@@ -1,7 +1,7 @@
 package com.bwsw.sj.common.DAL.model.module
 
 import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, WindowedInstanceMetadata}
-import org.mongodb.morphia.annotations.Property
+import org.mongodb.morphia.annotations.{Embedded, Property}
 
 /**
  * Entity for windowed instance-json
@@ -9,6 +9,7 @@ import org.mongodb.morphia.annotations.Property
   * @author Kseniya Tomskikh
  */
 class WindowedInstance() extends Instance {
+  @Embedded("execution-plan") var executionPlan: ExecutionPlan = null
   @Property("start-from") var startFrom: String = null
   @Property("state-management") var stateManagement: String = null
   @Property("state-full-checkpoint") var stateFullCheckpoint: Int = 0
@@ -21,7 +22,7 @@ class WindowedInstance() extends Instance {
     val protocolInstance = new WindowedInstanceMetadata()
     super.fillProtocolInstance(protocolInstance)
 
-    protocolInstance.executionPlan = getProtocolExecutionPlan()
+    protocolInstance.executionPlan = getProtocolExecutionPlan(this.executionPlan)
     protocolInstance.timeWindowed = this.timeWindowed
     protocolInstance.windowFullMax = this.windowFullMax
     protocolInstance.stateManagement = this.stateManagement

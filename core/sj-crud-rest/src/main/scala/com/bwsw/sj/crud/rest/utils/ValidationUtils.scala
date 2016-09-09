@@ -3,7 +3,7 @@ package com.bwsw.sj.crud.rest.utils
 import java.util.Calendar
 
 import com.bwsw.sj.common.DAL.model.SjStream
-import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, Task, InstanceStage}
+import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.utils.EngineConstants._
 import com.bwsw.sj.common.rest.entities.module.{OutputInstanceMetadata, RegularInstanceMetadata, InstanceMetadata}
 import com.bwsw.sj.crud.rest.utils.ConvertUtil._
@@ -38,7 +38,10 @@ trait ValidationUtils {
     logger.debug(s"Instance ${instanceMetadata.name}. Create model object.")
     val executionPlan = createExecutionPlan(instanceMetadata, partitionsCount)
     val instance = instanceMetadataToInstance(instanceMetadata)
-    instance.executionPlan = executionPlan
+    instance match {
+      case regularInstance: RegularInstance => regularInstance.executionPlan = executionPlan //todo переделать эту часть, когда будет разделяться валидация и создание инстанса
+      case outputInstance: OutputInstance => outputInstance.executionPlan = executionPlan
+    }
     val stages = scala.collection.mutable.Map[String, InstanceStage]()
     streams.foreach { stream =>
       val instanceStartTask = new InstanceStage

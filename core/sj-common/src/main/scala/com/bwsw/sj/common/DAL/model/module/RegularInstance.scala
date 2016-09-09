@@ -9,6 +9,7 @@ import org.mongodb.morphia.annotations._
  * @author Kseniya Tomskikh
  */
 class RegularInstance() extends Instance {
+  @Embedded("execution-plan") var executionPlan: ExecutionPlan = null
   @Property("start-from") var startFrom: String = "newest"
   @Property("state-management") var stateManagement: String = "none"
   @Property("state-full-checkpoint") var stateFullCheckpoint: Int = 0
@@ -18,7 +19,7 @@ class RegularInstance() extends Instance {
     val protocolInstance = new RegularInstanceMetadata()
     super.fillProtocolInstance(protocolInstance)
 
-    protocolInstance.executionPlan = getProtocolExecutionPlan()
+    protocolInstance.executionPlan = getProtocolExecutionPlan(this.executionPlan)
     protocolInstance.stateManagement = this.stateManagement
     protocolInstance.stateFullCheckpoint = this.stateFullCheckpoint
     protocolInstance.eventWaitTime = this.eventWaitTime

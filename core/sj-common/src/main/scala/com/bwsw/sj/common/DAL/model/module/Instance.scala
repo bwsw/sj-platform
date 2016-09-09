@@ -6,9 +6,8 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.ZKService
 import com.bwsw.sj.common.rest.entities.module.InstanceMetadata
 import org.mongodb.morphia.annotations.{Embedded, Entity, Id, Property}
-
-import scala.collection.JavaConverters._
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 /**
   * Entity for base instance-json
@@ -33,7 +32,6 @@ class Instance {
   @Property("per-task-cores") var perTaskCores: Double = 0.0
   @Property("per-task-ram") var perTaskRam: Int = 0
   @Embedded("jvm-options") var jvmOptions: java.util.Map[String, String] = new util.HashMap[String, String]()
-  @Embedded("execution-plan") var executionPlan: ExecutionPlan = null //todo it is not common field
   @Property("node-attributes") var nodeAttributes: java.util.Map[String, String] = new util.HashMap[String, String]()
   @Embedded("coordination-service") var coordinationService: ZKService = null
   @Property("environment-variables") var environmentVariables: java.util.Map[String, String] = new util.HashMap[String, String]()
@@ -63,11 +61,11 @@ class Instance {
     protocolInstance.coordinationService = this.coordinationService.name
   }
 
-  protected def getProtocolExecutionPlan() = {
-    val executionPlan = Map(
-      "tasks" -> this.executionPlan.tasks.map(t => t._1 -> Map("inputs" -> t._2.inputs))
+  protected def getProtocolExecutionPlan(executionPlan: ExecutionPlan) = {
+    val protocolExecutionPlan = Map(
+      "tasks" -> executionPlan.tasks.map(t => t._1 -> Map("inputs" -> t._2.inputs))
     )
 
-    executionPlan
+    protocolExecutionPlan
   }
 }

@@ -13,8 +13,16 @@ import com.bwsw.sj.engine.core.managment.TaskManager
  */
 class InputTaskManager() extends TaskManager {
 
+  val inputs = {
+    logger.error(s"Instance of Input module hasn't got execution plan " +
+      s"and it's impossible to retrieve inputs")
+    throw new Exception(s"Instance of Input module hasn't got execution plan " +
+      s"and it's impossible to retrieve inputs")
+  }
+
   val inputInstance = instance.asInstanceOf[InputInstance]
   val entryPort = getEntryPort()
+  val outputProducers =  createOutputProducers()
 
   assert(agentsPorts.length >=
     (instance.outputs.length + 1),

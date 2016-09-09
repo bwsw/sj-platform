@@ -5,22 +5,24 @@ import java.net.URLClassLoader
 
 import com.bwsw.common.tstream.NetworkTimeUUIDGenerator
 import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.common.DAL.model.module.Instance
+import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, Instance}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{StreamConstants, EngineConstants, ConfigSettingsUtils}
-import EngineConstants._
-import StreamConstants._
 import com.bwsw.sj.common.engine.StreamingExecutor
+import com.bwsw.sj.common.utils.ConfigSettingsUtils
+import com.bwsw.sj.common.utils.EngineConstants._
+import com.bwsw.sj.common.utils.StreamConstants._
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
 import com.bwsw.sj.engine.core.environment.EnvironmentManager
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
 import com.bwsw.tstreams.agents.consumer.subscriber.Callback
+import com.bwsw.tstreams.agents.producer.Producer
 import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
-import com.bwsw.tstreams.generator.{LocalTimeUUIDGenerator, IUUIDGenerator}
+import com.bwsw.tstreams.generator.{IUUIDGenerator, LocalTimeUUIDGenerator}
 import com.bwsw.tstreams.services.BasicStreamService
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 abstract class TaskManager() {
   protected val logger = LoggerFactory.getLogger(this.getClass)
@@ -35,7 +37,7 @@ abstract class TaskManager() {
 
   val instanceName = System.getenv("INSTANCE_NAME")
   val agentsHost = System.getenv("AGENTS_HOST")
-  protected val agentsPorts = System.getenv("AGENTS_PORTS").split(",")
+  protected val agentsPorts = System.getenv("AGENTS_PORTS").split(",").map(_.toInt)
   val taskName = System.getenv("TASK_NAME")
   val instance: Instance = getInstance()
   protected val auxiliarySJTStream = getAuxiliaryTStream()
@@ -56,8 +58,8 @@ abstract class TaskManager() {
   protected val moduleClassLoader = createClassLoader()
 
   val converter = new ArrayByteConverter
-  lazy val inputs = getInputs()
-  lazy val outputProducers = createOutputProducers()
+  val inputs: mutable.Map[SjStream, Array[Int]]
+  val outputProducers: Map[String, Producer[Array[Byte]]]
 
   private def getInstance() = {
     val maybeInstance = ConnectionRepository.getInstanceService.get(instanceName)
@@ -148,8 +150,8 @@ abstract class TaskManager() {
     storage.get(fileMetadata.filename, s"tmp/${instance.moduleName}")
   }
 
-  private def getInputs() = {
-    instance.executionPlan.tasks.get(taskName).inputs.asScala
+  protected def getInputs(executionPlan: ExecutionPlan) = {
+    executionPlan.tasks.get(taskName).inputs.asScala
       .map(x => (streamDAO.get(x._1).get, x._2))
   }
 
@@ -158,7 +160,7 @@ abstract class TaskManager() {
    *
    * @return Map where key is stream name and value is t-stream producer
    */
-  private def createOutputProducers() = {
+  protected def createOutputProducers() = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create the t-stream producers for each output stream\n")
 
