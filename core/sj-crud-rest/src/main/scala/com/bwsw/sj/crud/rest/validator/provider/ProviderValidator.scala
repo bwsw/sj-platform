@@ -58,13 +58,6 @@ object ProviderValidator extends ValidationUtils {
         }
     }
 
-    // 'description' field
-    Option(initialData.description) match {
-      case None =>
-        errors += s"'Description' is required"
-      case Some(x) =>
-    }
-
     // 'providerType field
     Option(initialData.providerType) match {
       case None =>

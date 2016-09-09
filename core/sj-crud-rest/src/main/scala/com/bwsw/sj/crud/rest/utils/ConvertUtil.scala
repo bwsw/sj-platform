@@ -150,11 +150,11 @@ object ConvertUtil {
     logger.debug(s"Convert model provider ${provider.name} to protocol provider.")
     val providerData = new ProviderData(
       provider.name,
-      provider.description,
       provider.login,
       provider.password,
       provider.providerType,
-      provider.hosts
+      provider.hosts,
+      provider.description
     )
     providerData
   }

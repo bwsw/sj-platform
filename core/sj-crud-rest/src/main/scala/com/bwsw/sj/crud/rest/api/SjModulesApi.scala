@@ -130,7 +130,7 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
                     var response: RestResponse = BadRequestRestResponse(Map("message" ->
                       MessageFormat.format(messages.getString("rest.modules.instances.instance.cannot.create"), errors.mkString(";"))))
 
-                    if (errors.isEmpty && validatedInstance.isDefined) { //todo по хорошему, тут должно быть достаточно одной проверки на ошибки или на инстанс
+                    if (errors.isEmpty && validatedInstance.isDefined) { //todo по хорошему, тут должно быть достаточно одной проверки на наличие ошибок или на инстанс
                       val instance = validatedInstance.get
                       val validatorClassName = specification.validateClass
                       val jarFile = storage.get(filename, s"tmp/$filename")
