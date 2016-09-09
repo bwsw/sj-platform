@@ -127,7 +127,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator with CompletionUtil
       case tService: TStreamService =>
         tService.metadataProvider.name.equals(providerName) || tService.dataProvider.name.equals(providerName)
       case _ =>
-        false //todo redis and jdbc
+        false //todo jdbc
     }
   }
 }

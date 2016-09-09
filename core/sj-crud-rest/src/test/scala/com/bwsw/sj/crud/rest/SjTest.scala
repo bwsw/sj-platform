@@ -211,15 +211,6 @@ object SjTest {
     aeroService.serviceType = "ArspkDB"
     serviceDAO.save(aeroService)
 
-    val redisService = new RedisService
-    val redisProv = providerDAO.get("redis_prov").get
-    redisService.namespace = "test"
-    redisService.name = "rd_service"
-    redisService.description = "redis test service"
-    redisService.provider = redisProv
-    redisService.serviceType = "RdsCoord"
-    serviceDAO.save(redisService)
-
     val zkService1 = new ZKService
     val zk1Prov = providerDAO.get("zk1_prov").get
     zkService1.namespace = "zk_test1"
@@ -258,15 +249,6 @@ object SjTest {
     aeroProv.description = "aerospike provider test"
     aeroProv.hosts = Array("stream-juggler.z1.netpoint-dc.com:3000", "stream-juggler.z1.netpoint-dc.com:3001")
     providerDAO.save(aeroProv)
-
-    val redisProv = new Provider
-    redisProv.providerType = "zookeeper"
-    redisProv.name = "zk1_prov"
-    redisProv.login = ""
-    redisProv.password = ""
-    redisProv.description = "zk provider test"
-    redisProv.hosts = Array("stream-juggler.z1.netpoint-dc.com:2181")
-    providerDAO.save(redisProv)
 
     val zkProv = new Provider
     zkProv.providerType = "zookeeper"

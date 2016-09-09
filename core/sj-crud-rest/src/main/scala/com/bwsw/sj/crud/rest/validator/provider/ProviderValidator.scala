@@ -148,8 +148,6 @@ object ProviderValidator extends ValidationUtils {
         checkKafkaConnection(errors, host)
       case "ES" =>
         checkESConnection(errors, host)
-      case "redis" =>
-      // TODO: remove redis in future. So returning no errors for now.
       case "JDBC" =>
         checkJdbcConnection(errors, host)
       case _ =>

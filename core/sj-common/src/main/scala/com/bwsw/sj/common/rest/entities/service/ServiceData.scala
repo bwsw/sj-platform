@@ -11,7 +11,6 @@ import com.fasterxml.jackson.annotation.{JsonProperty, JsonSubTypes, JsonTypeInf
   new Type(value = classOf[KfkQServiceData], name = "KfkQ"),
   new Type(value = classOf[TstrQServiceData], name = "TstrQ"),
   new Type(value = classOf[ZKCoordServiceData], name = "ZKCoord"),
-  new Type(value = classOf[RDSCoordServiceData], name = "RDSCoord"),
   new Type(value = classOf[ArspkDBServiceData], name = "ArspkDB"),
   new Type(value = classOf[JDBCServiceData], name = "JDBC")
 ))
@@ -54,12 +53,6 @@ class TstrQServiceData() extends ServiceData() {
 
 class ZKCoordServiceData() extends ServiceData() {
   serviceType = "ZKCoord"
-  var namespace: String = null
-  var provider: String = null
-}
-
-class RDSCoordServiceData() extends ServiceData() {
-  serviceType = "RDSCoord"
   var namespace: String = null
   var provider: String = null
 }

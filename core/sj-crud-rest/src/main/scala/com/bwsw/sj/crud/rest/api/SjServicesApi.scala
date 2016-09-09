@@ -98,7 +98,6 @@ trait SjServicesApi extends Directives with SjCrudValidator with CompletionUtils
       case "KfkQ" => service = new KafkaService
       case "TstrQ" => service = new TStreamService
       case "ZKCoord" => service = new ZKService
-      case "RDSCoord" => service = new RedisService
       case "ArspkDB" => service = new AerospikeService
       case "JDBC" => service = new JDBCService
     }

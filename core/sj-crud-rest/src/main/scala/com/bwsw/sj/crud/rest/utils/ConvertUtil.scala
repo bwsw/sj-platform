@@ -121,12 +121,6 @@ object ConvertUtil {
         serviceData.description = s.description
         serviceData.asInstanceOf[ZKCoordServiceData].namespace = s.namespace
         serviceData.asInstanceOf[ZKCoordServiceData].provider = s.provider.name
-      case s: RedisService =>
-        serviceData = new RDSCoordServiceData
-        serviceData.name = s.name
-        serviceData.description = s.description
-        serviceData.asInstanceOf[RDSCoordServiceData].namespace = s.namespace
-        serviceData.asInstanceOf[RDSCoordServiceData].provider = s.provider.name
       case s: AerospikeService =>
         serviceData = new ArspkDBServiceData
         serviceData.name = s.name

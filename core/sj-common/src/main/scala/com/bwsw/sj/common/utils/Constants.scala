@@ -56,20 +56,19 @@ object GeneratorConstants {
 }
 
 object ServiceConstants {
-  val serviceTypes = Set("CassDB", "ESInd", "KfkQ", "TstrQ", "ZKCoord", "RdsCoord", "ArspkDB", "JDBC")
+  val serviceTypes = Set("CassDB", "ESInd", "KfkQ", "TstrQ", "ZKCoord", "ArspkDB", "JDBC")
   val serviceTypeProviders = Map(
     "CassDB" -> "cassandra",
     "ESInd" -> "ES",
     "KfkQ" -> "kafka",
     "ZKCoord" -> "zookeeper",
-    "RdsCoord" -> "redis",
     "ArspkDB" -> "aerospike",
     "JDBC" -> "JDBC"
   )
 }
 
 object ProviderConstants {
-  val providerTypes = Set("cassandra", "aerospike", "zookeeper", "kafka", "ES", "redis", "JDBC")
+  val providerTypes = Set("cassandra", "aerospike", "zookeeper", "kafka", "ES", "JDBC")
 }
 
 object ConfigConstants {

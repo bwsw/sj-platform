@@ -226,23 +226,6 @@ object ServiceValidator extends ValidationUtils {
           service.asInstanceOf[ZKService].namespace = zkcoordServiceData.namespace
         }
 
-      case "RDSCoord" =>
-        val rdscoordServiceData = initialData.asInstanceOf[RDSCoordServiceData]
-
-        // 'provider' field
-        val (providerErrors, providerObj) = validateProvider(rdscoordServiceData.provider, initialData.serviceType)
-        errors ++= providerErrors
-
-        // 'namespace' field
-        errors ++= validateStringFieldRequired(rdscoordServiceData.namespace, "Namespace")
-        errors ++= validateNamespace(rdscoordServiceData.namespace)
-
-        // filling-in service object serviceType-dependent extra fields
-        if (errors.isEmpty) {
-          service.asInstanceOf[RedisService].provider = providerObj.get
-          service.asInstanceOf[RedisService].namespace = rdscoordServiceData.namespace
-        }
-
       case "ArspkDB" =>
         val arspkServiceData = initialData.asInstanceOf[ArspkDBServiceData]
 
