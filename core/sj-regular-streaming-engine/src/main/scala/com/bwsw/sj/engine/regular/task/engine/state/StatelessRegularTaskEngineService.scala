@@ -17,7 +17,7 @@ class StatelessRegularTaskEngineService(manager: RegularTaskManager, performance
   private val streamService = ConnectionRepository.getStreamService
 
   val regularEnvironmentManager = new RegularEnvironmentManager(
-    getOptions(),
+    regularInstance.getOptionsAsMap(),
     outputProducers,
     regularInstance.outputs
       .flatMap(x => streamService.get(x)),

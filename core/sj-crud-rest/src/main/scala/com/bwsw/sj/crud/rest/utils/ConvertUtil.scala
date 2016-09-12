@@ -2,7 +2,6 @@ package com.bwsw.sj.crud.rest.utils
 
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.rest.entities.config.ConfigurationSettingData
-import com.bwsw.sj.common.rest.entities.provider.ProviderData
 import com.bwsw.sj.common.rest.entities.stream._
 import org.slf4j.LoggerFactory
 
@@ -46,19 +45,6 @@ object ConvertUtil {
     streamData.streamType = stream.streamType
     streamData.tags = stream.tags
     streamData
-  }
-
-  def providerToProviderData(provider: Provider) = {
-    logger.debug(s"Convert model provider ${provider.name} to protocol provider.")
-    val providerData = new ProviderData(
-      provider.name,
-      provider.login,
-      provider.password,
-      provider.providerType,
-      provider.hosts,
-      provider.description
-    )
-    providerData
   }
 
   def configSettingToConfigSettingData(configElement: ConfigSetting) = {

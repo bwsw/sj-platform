@@ -2,6 +2,7 @@ package com.bwsw.sj.common.DAL.model
 
 import java.net.InetSocketAddress
 
+import com.bwsw.sj.common.rest.entities.provider.ProviderData
 import org.mongodb.morphia.annotations.{Entity, Id, Property}
 
 @Entity("providers")
@@ -30,5 +31,18 @@ class Provider {
     }.toSet
 
     inetSocketAddresses
+  }
+
+  def asProviderData() = {
+    val providerData = new ProviderData(
+      this.name,
+      this.login,
+      this.password,
+      this.providerType,
+      this.hosts,
+      this.description
+    )
+
+    providerData
   }
 }

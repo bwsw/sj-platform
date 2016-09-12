@@ -26,7 +26,7 @@ class StatefulRegularTaskEngineService(manager: RegularTaskManager, checkpointGr
 
   val regularEnvironmentManager = new StatefulModuleEnvironmentManager(
     new StateStorage(stateService),
-    getOptions(),
+    regularInstance.getOptionsAsMap(),
     outputProducers,
     regularInstance.outputs
       .flatMap(x => streamService.get(x)),

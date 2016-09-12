@@ -5,7 +5,6 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.provider.ProviderData
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
-import com.bwsw.sj.crud.rest.utils.ConvertUtil.providerToProviderData
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.provider.ProviderValidator
 
@@ -21,17 +20,9 @@ trait SjProvidersApi extends Directives with SjCrudValidator with CompletionUtil
             createMessage("rest.providers.provider.cannot.create", errors.mkString(";"))))
 
           if (errors.isEmpty) {
-            val provider = new Provider(
-              data.name,
-              data.description,
-              data.hosts,
-              data.login,
-              data.password,
-              data.providerType
-            )
-            providerDAO.save(provider)
+            providerDAO.save(data.asProvider())
             response = CreatedRestResponse(Map("message" ->
-              createMessage("rest.providers.provider.created", provider.name)))
+              createMessage("rest.providers.provider.created", data.name)))
           }
 
           ctx.complete(restResponseToHttpResponse(response))
@@ -40,7 +31,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator with CompletionUtil
             val providers = providerDAO.getAll
             var response: RestResponse = NotFoundRestResponse(Map("message" -> getMessage("rest.providers.notfound")))
             if (providers.nonEmpty) {
-              val entity = Map("providers" -> providers.map(p => providerToProviderData(p)))
+              val entity = Map("providers" -> providers.map(p => p.asProviderData()))
               response = OkRestResponse(entity)
             }
 
@@ -55,7 +46,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator with CompletionUtil
                 createMessage("rest.providers.provider.notfound", providerName)))
               provider match {
                 case Some(x) =>
-                  val entity = Map("providers" -> providerToProviderData(x))
+                  val entity = Map("providers" -> x.asProviderData())
                   response = OkRestResponse(entity)
                 case None =>
               }
