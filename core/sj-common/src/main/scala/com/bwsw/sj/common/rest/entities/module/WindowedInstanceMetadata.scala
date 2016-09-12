@@ -7,10 +7,10 @@ class WindowedInstanceMetadata extends InstanceMetadata {
   var inputs: Array[String] = Array()
   var outputs: Array[String] = Array()
   @JsonProperty("execution-plan") var executionPlan: Map[String, Any] = null
-  @JsonProperty("start-from") var startFrom: String = null
-  @JsonProperty("state-management") var stateManagement: String = null
-  @JsonProperty("state-full-checkpoint") var stateFullCheckpoint: Int = 0
-  @JsonProperty("event-wait-time") var eventWaitTime: Long = 0
+  @JsonProperty("start-from") var startFrom: String = "newest"
+  @JsonProperty("state-management") var stateManagement: String = "none"
+  @JsonProperty("state-full-checkpoint") var stateFullCheckpoint: Int = 100
+  @JsonProperty("event-wait-time") var eventWaitTime: Long = 1000
   @JsonProperty("time-windowed") var timeWindowed: Int = 0
   @JsonProperty("window-full-max") var windowFullMax: Int = 0
 

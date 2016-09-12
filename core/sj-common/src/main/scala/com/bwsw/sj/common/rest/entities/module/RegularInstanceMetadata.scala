@@ -10,8 +10,8 @@ class RegularInstanceMetadata extends InstanceMetadata {
   // а потом только конвертировать в модельный инстанс
   @JsonProperty("start-from") var startFrom: String = "newest"
   @JsonProperty("state-management") var stateManagement: String = "none"
-  @JsonProperty("state-full-checkpoint") var stateFullCheckpoint: Int = 0
-  @JsonProperty("event-wait-time") var eventWaitTime: Long = 0
+  @JsonProperty("state-full-checkpoint") var stateFullCheckpoint: Int = 100
+  @JsonProperty("event-wait-time") var eventWaitTime: Long = 1000
 
   override def asModelInstance() = {
     val modelInstance = new RegularInstance()

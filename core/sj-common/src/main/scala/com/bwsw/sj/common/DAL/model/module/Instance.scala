@@ -27,16 +27,16 @@ class Instance {
   var outputs: Array[String] = Array()
   @Property("checkpoint-mode") var checkpointMode: String = null
   @Property("checkpoint-interval") var checkpointInterval: Long = 0
-  var parallelism: Int = 0
+  var parallelism: Int = 1
   var options: String = "{}"
-  @Property("per-task-cores") var perTaskCores: Double = 0.0
-  @Property("per-task-ram") var perTaskRam: Int = 0
+  @Property("per-task-cores") var perTaskCores: Double = 1.0
+  @Property("per-task-ram") var perTaskRam: Int = 1024
   @Embedded("jvm-options") var jvmOptions: java.util.Map[String, String] = new util.HashMap[String, String]()
   @Property("node-attributes") var nodeAttributes: java.util.Map[String, String] = new util.HashMap[String, String]()
   @Embedded("coordination-service") var coordinationService: ZKService = null
   @Property("environment-variables") var environmentVariables: java.util.Map[String, String] = new util.HashMap[String, String]()
   var stages: java.util.Map[String, InstanceStage] = new util.HashMap()
-  @Property("performance-reporting-interval") var performanceReportingInterval: Long = 0
+  @Property("performance-reporting-interval") var performanceReportingInterval: Long = 60000
   var engine: String = null
 
   def asProtocolInstance(): InstanceMetadata = ???

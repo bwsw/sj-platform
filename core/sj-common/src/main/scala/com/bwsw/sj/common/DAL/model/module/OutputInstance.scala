@@ -11,7 +11,7 @@ import org.mongodb.morphia.annotations.{Embedded, Property}
  */
 class OutputInstance() extends Instance {
   @Embedded("execution-plan") var executionPlan: ExecutionPlan = null
-  @Property("start-from") var startFrom: String = null
+  @Property("start-from") var startFrom: String = "newest"
 
   override def asProtocolInstance(): InstanceMetadata = {
     val protocolInstance = new OutputInstanceMetadata()

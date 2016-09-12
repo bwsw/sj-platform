@@ -13,15 +13,15 @@ class InstanceMetadata {
   var description: String = "No description"
   @JsonProperty("checkpoint-mode") var checkpointMode: String = null
   @JsonProperty("checkpoint-interval") var checkpointInterval: Long = 0L
-  var parallelism: Any = null
+  var parallelism: Any = 1
   var options: Map[String, Any] = Map()
-  @JsonProperty("per-task-cores") var perTaskCores: Double = 0.0
-  @JsonProperty("per-task-ram") var perTaskRam: Int = 0
+  @JsonProperty("per-task-cores") var perTaskCores: Double = 1.0
+  @JsonProperty("per-task-ram") var perTaskRam: Int = 1024
   @JsonProperty("jvm-options") var jvmOptions: Map[String, String] = Map()
   @JsonProperty("node-attributes") var nodeAttributes: Map[String, String] = Map()
   @JsonProperty("coordination-service") var coordinationService: String = null
   @JsonProperty("environment-variables") var environmentVariables: Map[String, String] = Map()
-  @JsonProperty("performance-reporting-interval") var performanceReportingInterval: Long = 0L
+  @JsonProperty("performance-reporting-interval") var performanceReportingInterval: Long = 60000
   var engine: String = null
 
   def asModelInstance(): Instance = ???

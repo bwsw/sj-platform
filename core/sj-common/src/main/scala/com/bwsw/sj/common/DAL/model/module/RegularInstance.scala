@@ -12,8 +12,8 @@ class RegularInstance() extends Instance {
   @Embedded("execution-plan") var executionPlan: ExecutionPlan = null
   @Property("start-from") var startFrom: String = "newest"
   @Property("state-management") var stateManagement: String = "none"
-  @Property("state-full-checkpoint") var stateFullCheckpoint: Int = 0
-  @Property("event-wait-time") var eventWaitTime: Long = 0
+  @Property("state-full-checkpoint") var stateFullCheckpoint: Int = 100
+  @Property("event-wait-time") var eventWaitTime: Long = 1000
 
   override def asProtocolInstance(): InstanceMetadata = {
     val protocolInstance = new RegularInstanceMetadata()

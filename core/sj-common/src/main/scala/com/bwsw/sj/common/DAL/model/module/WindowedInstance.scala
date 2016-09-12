@@ -10,10 +10,10 @@ import org.mongodb.morphia.annotations.{Embedded, Property}
  */
 class WindowedInstance() extends Instance {
   @Embedded("execution-plan") var executionPlan: ExecutionPlan = null
-  @Property("start-from") var startFrom: String = null
-  @Property("state-management") var stateManagement: String = null
-  @Property("state-full-checkpoint") var stateFullCheckpoint: Int = 0
-  @Property("event-wait-time") var eventWaitTime: Long = 0
+  @Property("start-from") var startFrom: String = "newest"
+  @Property("state-management") var stateManagement: String = "none"
+  @Property("state-full-checkpoint") var stateFullCheckpoint: Int = 100
+  @Property("event-wait-time") var eventWaitTime: Long = 1000
   @Property("time-windowed") var timeWindowed: Int = 0
   @Property("window-full-max") var windowFullMax: Int = 0
 
