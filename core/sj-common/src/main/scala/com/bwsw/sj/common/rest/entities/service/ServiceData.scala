@@ -25,7 +25,7 @@ class ServiceData() extends ValidationUtils {
   var name: String = null
   var description: String = "No description"
 
-  def toModelService(): Service = ???
+  def asModelService(): Service = ???
 
   def validate() = validateGeneralFields()
 

@@ -155,7 +155,7 @@ class InputStreamingValidator extends StreamingModuleValidator {
    */
   private def createInstance(parameters: InputInstanceMetadata) = {
     logger.debug(s"Instance ${parameters.name}. Create model object.")
-    val instance = parameters.toModelInstance()
+    val instance = parameters.asModelInstance()
     val stages = scala.collection.mutable.Map[String, InstanceStage]()
     parameters.outputs.foreach { stream =>
       val instanceStartTask = new InstanceStage

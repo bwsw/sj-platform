@@ -44,14 +44,19 @@ object OutputModuleDataChecker extends App {
   val inputConsumer = createConsumer(tStream, "localhost:8188", metadataStorage, dataStorage)
 
   val inputElements = new ArrayBuffer[Int]()
-  var maybeTxn = inputConsumer.getTransaction
-  while (maybeTxn.isDefined) {
-    val txn = maybeTxn.get
-    while (txn.hasNext()) {
-      val element = objectSerializer.deserialize(txn.next()).asInstanceOf[Int]
-      inputElements.append(element)
+  val partitions = inputConsumer.getPartitions().toIterator
+
+  while (partitions.hasNext) {
+    val currentPartition = partitions.next()
+    var maybeTxn = inputConsumer.getTransaction(currentPartition)
+    while (maybeTxn.isDefined) {
+      val txn = maybeTxn.get
+      while (txn.hasNext()) {
+        val element = objectSerializer.deserialize(txn.next()).asInstanceOf[Int]
+        inputElements.append(element)
+      }
+      maybeTxn = inputConsumer.getTransaction(currentPartition)
     }
-    maybeTxn = inputConsumer.getTransaction
   }
 
   val esStream: ESSjStream = streamService.get(esStreamName).asInstanceOf[ESSjStream]

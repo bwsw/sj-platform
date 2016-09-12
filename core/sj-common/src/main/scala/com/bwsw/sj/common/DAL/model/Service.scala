@@ -16,9 +16,11 @@ class Service() {
     this.description = description
   }
 
-  def prepareService() = ??? //todo ref. ServiceUtil
+  def prepare(): Unit = {}
+  
+  def destroy(): Unit = {}
 
-  def toProtocolService(): ServiceData = ???
+  def asProtocolService(): ServiceData = ???
 
   protected def fillProtocolService(protocolService: ServiceData) = {
     protocolService.name = this.name

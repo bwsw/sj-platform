@@ -20,7 +20,7 @@ class KafkaService() extends Service {
     this.zkNamespace = zkNamespace
   }
 
-  override def toProtocolService(): ServiceData = {
+  override def asProtocolService(): ServiceData = {
     val protocolService = new KfkQServiceData()
     super.fillProtocolService(protocolService)
 

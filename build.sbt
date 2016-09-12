@@ -17,8 +17,6 @@ val commonSettings = Seq(
   resolvers += "Twitter Repository" at "http://maven.twttr.com",
 
   libraryDependencies ++= Seq(
-    ("com.bwsw" % "t-streams_2.11" % "1.0-SNAPSHOT")
-      .exclude("org.slf4j", "slf4j-simple"),
     "org.slf4j" % "slf4j-log4j12" % "1.7.21"
   ),
 

@@ -18,7 +18,7 @@ class WindowedInstance() extends Instance {
   @Property("window-full-max") var windowFullMax: Int = 0
 
 
-  override def toProtocolInstance(): InstanceMetadata = {
+  override def asProtocolInstance(): InstanceMetadata = {
     val protocolInstance = new WindowedInstanceMetadata()
     super.fillProtocolInstance(protocolInstance)
 

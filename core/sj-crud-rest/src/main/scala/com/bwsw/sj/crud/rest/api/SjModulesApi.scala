@@ -166,7 +166,7 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
                         MessageFormat.format(messages.getString("rest.modules.module.instances.notfound"), s"$moduleType-$moduleName-$moduleVersion"))
                       )
                       if (instances.nonEmpty) {
-                        response = OkRestResponse(Map("instances" -> instances.map(_.toProtocolInstance())))
+                        response = OkRestResponse(Map("instances" -> instances.map(_.asProtocolInstance())))
                       }
 
                       complete(restResponseToHttpResponse(response))
@@ -182,7 +182,7 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
                     }
                     pathEndOrSingleSlash {
                       get {
-                        val response = OkRestResponse(Map("instance" -> instance.get.toProtocolInstance()))
+                        val response = OkRestResponse(Map("instance" -> instance.get.asProtocolInstance()))
                         complete(restResponseToHttpResponse(response))
                       } ~
                         delete {

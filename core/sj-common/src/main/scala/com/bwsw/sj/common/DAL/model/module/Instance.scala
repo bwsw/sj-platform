@@ -39,7 +39,7 @@ class Instance {
   @Property("performance-reporting-interval") var performanceReportingInterval: Long = 0
   var engine: String = null
 
-  def toProtocolInstance(): InstanceMetadata = ???
+  def asProtocolInstance(): InstanceMetadata = ???
 
   protected def fillProtocolInstance(protocolInstance: InstanceMetadata) = {
     val serializer = new JsonSerializer()

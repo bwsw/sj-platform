@@ -21,7 +21,7 @@ class InputInstance extends Instance {
   @Property("async-backup-count") var asyncBackupCount: Int = 0
   var tasks: java.util.Map[String, InputTask] = new util.HashMap()
 
-  override def toProtocolInstance(): InstanceMetadata = {
+  override def asProtocolInstance(): InstanceMetadata = {
     val protocolInstance = new InputInstanceMetadata()
     super.fillProtocolInstance(protocolInstance)
 

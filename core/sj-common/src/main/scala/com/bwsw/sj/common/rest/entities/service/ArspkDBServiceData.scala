@@ -10,7 +10,7 @@ class ArspkDBServiceData() extends ServiceData() {
   var namespace: String = null
   var provider: String = null
 
-  override def toModelService() = {
+  override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService
     val modelService = new AerospikeService()
     super.fillModelService(modelService)

@@ -37,7 +37,7 @@ trait ValidationUtils {
   def createInstance(instanceMetadata: InstanceMetadata, partitionsCount: Map[String, Int], streams: Set[SjStream]) = {
     logger.debug(s"Instance ${instanceMetadata.name}. Create model object.")
     val executionPlan = createExecutionPlan(instanceMetadata, partitionsCount)
-    val instance = instanceMetadata.toModelInstance()
+    val instance = instanceMetadata.asModelInstance()
     instance match {
       case regularInstance: RegularInstance => regularInstance.executionPlan = executionPlan //todo переделать эту часть, когда будет разделяться валидация и создание инстанса
       case outputInstance: OutputInstance => outputInstance.executionPlan = executionPlan

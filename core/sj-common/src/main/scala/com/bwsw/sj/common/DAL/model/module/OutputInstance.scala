@@ -13,7 +13,7 @@ class OutputInstance() extends Instance {
   @Embedded("execution-plan") var executionPlan: ExecutionPlan = null
   @Property("start-from") var startFrom: String = null
 
-  override def toProtocolInstance(): InstanceMetadata = {
+  override def asProtocolInstance(): InstanceMetadata = {
     val protocolInstance = new OutputInstanceMetadata()
     super.fillProtocolInstance(protocolInstance)
 

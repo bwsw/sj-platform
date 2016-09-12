@@ -12,7 +12,7 @@ class EsIndServiceData() extends ServiceData() {
   var login: String = null
   var password: String = null
 
-  override def toModelService() = {
+  override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService
     val modelService = new ESService()
     super.fillModelService(modelService)

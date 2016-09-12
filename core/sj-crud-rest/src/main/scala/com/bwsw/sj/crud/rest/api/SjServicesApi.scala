@@ -5,7 +5,7 @@ import java.text.MessageFormat
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.service.ServiceData
-import com.bwsw.sj.crud.rest.utils.{CompletionUtils, ServiceUtil}
+import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
 trait SjServicesApi extends Directives with SjCrudValidator with CompletionUtils {
@@ -21,8 +21,8 @@ trait SjServicesApi extends Directives with SjCrudValidator with CompletionUtils
           )
 
           if (errors.isEmpty) {
-            val service = protocolService.toModelService()
-            service.prepareService()
+            val service = protocolService.asModelService()
+            service.prepare()
             serviceDAO.save(service)
             response = CreatedRestResponse(Map("message" -> MessageFormat.format(
               messages.getString("rest.services.service.created"),
@@ -36,7 +36,7 @@ trait SjServicesApi extends Directives with SjCrudValidator with CompletionUtils
             val services = serviceDAO.getAll
             var response: RestResponse = NotFoundRestResponse(Map("message" -> messages.getString("rest.services.notfound")))
             if (services.nonEmpty) {
-              val entity = Map("services" -> services.map(_.toProtocolService()))
+              val entity = Map("services" -> services.map(_.asProtocolService()))
               response = OkRestResponse(entity)
             }
 
@@ -52,7 +52,7 @@ trait SjServicesApi extends Directives with SjCrudValidator with CompletionUtils
               )
               service match {
                 case Some(x) =>
-                  val entity = Map("services" -> x.toProtocolService())
+                  val entity = Map("services" -> x.asProtocolService())
                   response = OkRestResponse(entity)
                 case None =>
               }
@@ -67,7 +67,7 @@ trait SjServicesApi extends Directives with SjCrudValidator with CompletionUtils
                   val service = serviceDAO.get(serviceName)
                   service match {
                     case Some(x) =>
-                      ServiceUtil.deleteService(x)
+                      x.destroy()
                       serviceDAO.delete(serviceName)
                       response = OkRestResponse(Map("message" ->
                         MessageFormat.format(messages.getString("rest.services.service.deleted"), serviceName))

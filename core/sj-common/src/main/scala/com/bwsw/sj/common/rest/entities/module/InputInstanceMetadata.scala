@@ -16,7 +16,7 @@ class InputInstanceMetadata extends InstanceMetadata {
   @JsonProperty("async-backup-count") var asyncBackupCount: Int = 0
   var tasks: Map[String, InputTask] = null
 
-  override def toModelInstance() = {
+  override def asModelInstance() = {
     val modelInstance = new InputInstance()
     super.fillModelInstance(modelInstance)
     modelInstance.outputs = this.outputs

@@ -12,7 +12,7 @@ class KfkQServiceData() extends ServiceData() {
   @JsonProperty("zk-provider") var zkProvider: String = null
   @JsonProperty("zk-namespace") var zkNamespace: String = null
 
-  override def toModelService() = {
+  override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService
     val modelService = new KafkaService()
     super.fillModelService(modelService)

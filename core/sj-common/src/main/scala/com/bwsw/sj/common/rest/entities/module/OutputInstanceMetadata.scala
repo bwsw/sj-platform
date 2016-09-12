@@ -10,7 +10,7 @@ class OutputInstanceMetadata extends InstanceMetadata {
   var input: String = null
   var output: String = null
 
-  override def toModelInstance() = {
+  override def asModelInstance() = {
     val modelInstance = new OutputInstance()
     super.fillModelInstance(modelInstance)
 

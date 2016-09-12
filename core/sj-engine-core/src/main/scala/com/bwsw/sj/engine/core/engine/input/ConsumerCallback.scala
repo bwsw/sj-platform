@@ -1,13 +1,11 @@
 package com.bwsw.sj.engine.core.engine.input
 
-import java.util.UUID
-
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.TStreamEnvelope
 import com.bwsw.tstreams.agents.consumer.subscriber.Callback
-import com.bwsw.tstreams.agents.consumer.{Consumer, TransactionOperator}
+import com.bwsw.tstreams.agents.consumer.{Consumer, Transaction, TransactionOperator}
 import org.slf4j.LoggerFactory
 
 
@@ -22,16 +20,15 @@ class ConsumerCallback(blockingQueue: PersistentBlockingQueue) extends Callback[
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val envelopeSerializer = new JsonSerializer()
 
-  override def onEvent(operator: TransactionOperator[Array[Byte]], partition: Int, uuid: UUID, count: Int): Unit = {
+  override def onEvent(operator: TransactionOperator[Array[Byte]], transaction: Transaction[Array[Byte]]) = {
     val consumer = operator.asInstanceOf[Consumer[Array[Byte]]]
     logger.debug(s"onEvent handler was invoked by subscriber: ${consumer.name}\n")
-    val transaction = consumer.getTransactionById(partition, uuid).get
     val stream = ConnectionRepository.getStreamService.get(consumer.stream.getName).get
 
     val envelope = new TStreamEnvelope()
     envelope.stream = stream.name
-    envelope.partition = partition
-    envelope.txnUUID = uuid
+    envelope.partition = transaction.getPartition()
+    envelope.txnUUID = transaction.getTransactionUUID()
     envelope.consumerName = consumer.name
     envelope.data = transaction.getAll()
     envelope.tags = stream.tags

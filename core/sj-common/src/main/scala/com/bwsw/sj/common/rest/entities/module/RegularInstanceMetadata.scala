@@ -13,7 +13,7 @@ class RegularInstanceMetadata extends InstanceMetadata {
   @JsonProperty("state-full-checkpoint") var stateFullCheckpoint: Int = 0
   @JsonProperty("event-wait-time") var eventWaitTime: Long = 0
 
-  override def toModelInstance() = {
+  override def asModelInstance() = {
     val modelInstance = new RegularInstance()
     super.fillModelInstance(modelInstance)
     modelInstance.stateManagement = this.stateManagement

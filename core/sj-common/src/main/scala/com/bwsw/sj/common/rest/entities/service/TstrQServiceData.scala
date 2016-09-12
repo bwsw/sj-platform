@@ -15,7 +15,7 @@ class TstrQServiceData() extends ServiceData() {
   @JsonProperty("lock-provider") var lockProvider: String = null
   @JsonProperty("lock-namespace") var lockNamespace: String = null
 
-  override def toModelService() = {
+  override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService
     val modelService = new TStreamService()
     super.fillModelService(modelService)

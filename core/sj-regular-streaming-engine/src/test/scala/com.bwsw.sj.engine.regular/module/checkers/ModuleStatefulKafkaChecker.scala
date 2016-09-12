@@ -33,16 +33,21 @@ object ModuleStatefulKafkaChecker extends App {
   })
 
   outputConsumers.foreach(outputConsumer => {
-    var maybeTxn = outputConsumer.getTransaction
+    val partitions = outputConsumer.getPartitions().toIterator
 
-    while (maybeTxn.isDefined) {
-      val txn = maybeTxn.get
-      while (txn.hasNext()) {
-        val element = objectSerializer.deserialize(txn.next()).asInstanceOf[Int]
-        outputElements.+=(element)
-        totalOutputElements += 1
+    while (partitions.hasNext) {
+      val currentPartition = partitions.next()
+      var maybeTxn = outputConsumer.getTransaction(currentPartition)
+
+      while (maybeTxn.isDefined) {
+        val txn = maybeTxn.get
+        while (txn.hasNext()) {
+          val element = objectSerializer.deserialize(txn.next()).asInstanceOf[Int]
+          outputElements.+=(element)
+          totalOutputElements += 1
+        }
+        maybeTxn = outputConsumer.getTransaction(currentPartition)
       }
-      maybeTxn = outputConsumer.getTransaction
     }
   })
 

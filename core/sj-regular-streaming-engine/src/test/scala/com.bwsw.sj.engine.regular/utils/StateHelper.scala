@@ -9,6 +9,8 @@ import scala.collection.mutable
 
 object StateHelper {
 
+  private val partition = 0
+
   def getState(consumer: Consumer[Array[Byte]], objectSerializer: ObjectSerializer) = {
 
     val initialState = mutable.Map[String, Any]()
@@ -20,11 +22,11 @@ object StateHelper {
         fillFullState(initialState, lastTxn, objectSerializer)
       case _ =>
         val lastFullTxnUUID = Some(value.asInstanceOf[UUID])
-        val lastFullStateTxn = consumer.getTransactionById(0, lastFullTxnUUID.get).get
+        val lastFullStateTxn = consumer.getTransactionById(partition, lastFullTxnUUID.get).get
         fillFullState(initialState, lastFullStateTxn, objectSerializer)
-        consumer.setStreamPartitionOffset(0, lastFullTxnUUID.get)
+        consumer.setStreamPartitionOffset(partition, lastFullTxnUUID.get)
 
-        var maybeTxn = consumer.getTransaction
+        var maybeTxn = consumer.getTransaction(partition)
         while (maybeTxn.nonEmpty) {
           val partialState = mutable.Map[String, (String, Any)]()
           val partialStateTxn = maybeTxn.get
@@ -36,7 +38,7 @@ object StateHelper {
             partialState(variable._1) = variable._2
           }
           applyPartialChanges(initialState, partialState)
-          maybeTxn = consumer.getTransaction
+          maybeTxn = consumer.getTransaction(partition)
         }
     }
 

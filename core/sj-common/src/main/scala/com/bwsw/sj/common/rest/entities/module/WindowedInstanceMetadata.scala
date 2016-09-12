@@ -14,7 +14,7 @@ class WindowedInstanceMetadata extends InstanceMetadata {
   @JsonProperty("time-windowed") var timeWindowed: Int = 0
   @JsonProperty("window-full-max") var windowFullMax: Int = 0
 
-  override def toModelInstance() = {
+  override def asModelInstance() = {
     val modelInstance = new WindowedInstance()
     super.fillModelInstance(modelInstance)
     modelInstance.timeWindowed = this.timeWindowed

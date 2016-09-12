@@ -12,7 +12,7 @@ class JDBCServiceData() extends ServiceData() {
   var login: String = null
   var password: String = null
 
-  override def toModelService() = {
+  override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService
     val modelService = new JDBCService()
     super.fillModelService(modelService)

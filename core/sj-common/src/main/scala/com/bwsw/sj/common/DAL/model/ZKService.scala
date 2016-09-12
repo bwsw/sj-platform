@@ -18,7 +18,7 @@ class ZKService() extends Service {
     this.namespace = namespace
   }
 
-  override def toProtocolService(): ServiceData = {
+  override def asProtocolService(): ServiceData = {
     val protocolService = new ZKCoordServiceData()
     super.fillProtocolService(protocolService)
 

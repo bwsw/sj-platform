@@ -15,7 +15,7 @@ class RegularInstance() extends Instance {
   @Property("state-full-checkpoint") var stateFullCheckpoint: Int = 0
   @Property("event-wait-time") var eventWaitTime: Long = 0
 
-  override def toProtocolInstance(): InstanceMetadata = {
+  override def asProtocolInstance(): InstanceMetadata = {
     val protocolInstance = new RegularInstanceMetadata()
     super.fillProtocolInstance(protocolInstance)
 

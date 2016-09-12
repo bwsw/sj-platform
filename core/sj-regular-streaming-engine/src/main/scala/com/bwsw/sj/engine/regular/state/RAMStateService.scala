@@ -23,6 +23,7 @@ import scala.collection.mutable
 
 class RAMStateService(manager: RegularTaskManager, checkpointGroup: CheckpointGroup) extends IStateService {
 
+  private val partition = 0
   private val stateStreamName = manager.taskName + "_state"
   private val stateStream = createStateStream()
   /**
@@ -33,7 +34,7 @@ class RAMStateService(manager: RegularTaskManager, checkpointGroup: CheckpointGr
   /**
    * Consumer is responsible for retrieving a partial or full state
    */
-  private val stateConsumer = manager.createConsumer(stateStream, List(0, 0), Oldest)
+  private val stateConsumer = manager.createConsumer(stateStream, List(partition, partition), Oldest)
   stateConsumer.start()
 
   addAgentsToCheckpointGroup()
@@ -90,7 +91,7 @@ class RAMStateService(manager: RegularTaskManager, checkpointGroup: CheckpointGr
   private def loadLastState(): mutable.Map[String, Any] = {
     logger.debug(s"Restore a state\n")
     val initialState = mutable.Map[String, Any]()
-    val maybeTxn = stateConsumer.getLastTransaction(0)
+    val maybeTxn = stateConsumer.getLastTransaction(partition)
     if (maybeTxn.nonEmpty) {
       logger.debug(s"Get txn that was last. It contains a full or partial state\n")
       val lastTxn = maybeTxn.get
@@ -98,18 +99,18 @@ class RAMStateService(manager: RegularTaskManager, checkpointGroup: CheckpointGr
       value match {
         case variable: (Any, Any) =>
           logger.debug(s"Last txn contains a full state\n")
-          lastFullTxnUUID = Some(lastTxn.getTxnUUID)
+          lastFullTxnUUID = Some(lastTxn.getTransactionUUID())
           initialState(variable._1.asInstanceOf[String]) = variable._2
           fillFullState(initialState, lastTxn)
           initialState
         case _ =>
           logger.debug(s"Last txn contains a partial state. Start restoring it\n")
           lastFullTxnUUID = Some(value.asInstanceOf[UUID])
-          val lastFullStateTxn = stateConsumer.getTransactionById(0, lastFullTxnUUID.get).get
+          val lastFullStateTxn = stateConsumer.getTransactionById(partition, lastFullTxnUUID.get).get
           fillFullState(initialState, lastFullStateTxn)
-          stateConsumer.setStreamPartitionOffset(0, lastFullTxnUUID.get)
+          stateConsumer.setStreamPartitionOffset(partition, lastFullTxnUUID.get)
 
-          var maybeTxn = stateConsumer.getTransaction
+          var maybeTxn = stateConsumer.getTransaction(partition)
           while (maybeTxn.nonEmpty) {
             val partialState = mutable.Map[String, (String, Any)]()
             val partialStateTxn = maybeTxn.get
@@ -121,7 +122,7 @@ class RAMStateService(manager: RegularTaskManager, checkpointGroup: CheckpointGr
               partialState(variable._1) = variable._2
             }
             applyPartialChanges(initialState, partialState)
-            maybeTxn = stateConsumer.getTransaction
+            maybeTxn = stateConsumer.getTransaction(partition)
           }
           logger.debug(s"Restore of state is finished\n")
           initialState

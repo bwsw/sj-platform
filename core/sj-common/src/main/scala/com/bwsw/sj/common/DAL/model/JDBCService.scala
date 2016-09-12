@@ -26,7 +26,7 @@ class JDBCService() extends Service {
     this.password = password
   }
 
-  override def toProtocolService(): ServiceData = {
+  override def asProtocolService(): ServiceData = {
     val protocolService = new JDBCServiceData()
     super.fillProtocolService(protocolService)
 

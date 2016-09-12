@@ -1,7 +1,7 @@
 package com.bwsw.sj.common.DAL.model
 
 import com.bwsw.sj.common.rest.entities.service.{ServiceData, TstrQServiceData}
-import com.bwsw.sj.common.utils.ServiceConstants
+import com.bwsw.sj.common.utils.{CassandraFactory, ServiceConstants}
 import org.mongodb.morphia.annotations.{Property, Reference}
 
 class TStreamService() extends Service {
@@ -34,7 +34,7 @@ class TStreamService() extends Service {
     this.lockNamespace = lockNamespace
   }
 
-  override def toProtocolService(): ServiceData = {
+  override def asProtocolService(): ServiceData = {
     val protocolService = new TstrQServiceData()
     super.fillProtocolService(protocolService)
 
@@ -46,5 +46,21 @@ class TStreamService() extends Service {
     protocolService.lockNamespace = this.lockNamespace
 
     protocolService
+  }
+
+  override def prepare() = {
+    val cassandraFactory = new CassandraFactory
+    cassandraFactory.open(this.metadataProvider.getHosts())
+    cassandraFactory.createKeyspace(this.metadataNamespace)
+    cassandraFactory.createMetadataTables(this.metadataNamespace)
+
+    if (this.dataProvider.providerType.equals("cassandra")) {
+      val cassandraFactory = new CassandraFactory
+      cassandraFactory.open(this.dataProvider.getHosts())
+      cassandraFactory.createKeyspace(this.dataNamespace)
+      cassandraFactory.createDataTable(this.dataNamespace)
+      cassandraFactory.close()
+    }
+    cassandraFactory.close()
   }
 }

@@ -24,7 +24,7 @@ class InstanceMetadata {
   @JsonProperty("performance-reporting-interval") var performanceReportingInterval: Long = 0L
   var engine: String = null
 
-  def toModelInstance(): Instance = ???
+  def asModelInstance(): Instance = ???
 
   protected def fillModelInstance(modelInstance: Instance) = {
     val serializer = new JsonSerializer()
