@@ -1,5 +1,6 @@
 package com.bwsw.sj.common.DAL.model
 
+import com.bwsw.sj.common.rest.entities.stream.SjStreamData
 import org.mongodb.morphia.annotations._
 
 @Entity("streams")
@@ -21,5 +22,15 @@ class SjStream() {
     this.service = service
     this.streamType = streamType
     this.tags = tags
+  }
+
+  def asProtocolStream(): SjStreamData = ???
+
+  protected def fillProtocolStream(stream: SjStreamData) = {
+    stream.name = this.name
+    stream.description = this.description
+    stream.service = this.service.name
+    stream.streamType = this.streamType
+    stream.tags = this.tags
   }
 }

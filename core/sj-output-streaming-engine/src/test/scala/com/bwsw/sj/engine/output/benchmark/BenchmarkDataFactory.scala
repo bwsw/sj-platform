@@ -57,7 +57,7 @@ object BenchmarkDataFactory {
   val providerService = ConnectionRepository.getProviderService
   val instanceService = ConnectionRepository.getInstanceService
   val fileStorage: MongoFileStorage = ConnectionRepository.getFileStorage
-  val configService: GenericMongoService[ConfigSetting] = ConnectionRepository.getConfigService
+  val configService: GenericMongoService[ConfigurationSetting] = ConnectionRepository.getConfigService
 
   val objectSerializer = new ObjectSerializer()
   private val serializer: Serializer = new JsonSerializer

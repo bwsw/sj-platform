@@ -20,7 +20,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator with CompletionUtil
             createMessage("rest.providers.provider.cannot.create", errors.mkString(";"))))
 
           if (errors.isEmpty) {
-            providerDAO.save(data.asProvider())
+            providerDAO.save(data.asModelProvider())
             response = CreatedRestResponse(Map("message" ->
               createMessage("rest.providers.provider.created", data.name)))
           }
@@ -31,7 +31,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator with CompletionUtil
             val providers = providerDAO.getAll
             var response: RestResponse = NotFoundRestResponse(Map("message" -> getMessage("rest.providers.notfound")))
             if (providers.nonEmpty) {
-              val entity = Map("providers" -> providers.map(p => p.asProviderData()))
+              val entity = Map("providers" -> providers.map(p => p.asProtocolProvider()))
               response = OkRestResponse(entity)
             }
 
@@ -46,7 +46,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator with CompletionUtil
                 createMessage("rest.providers.provider.notfound", providerName)))
               provider match {
                 case Some(x) =>
-                  val entity = Map("providers" -> x.asProviderData())
+                  val entity = Map("providers" -> x.asProtocolProvider())
                   response = OkRestResponse(entity)
                 case None =>
               }

@@ -27,7 +27,7 @@ object ConnectionRepository {
   private lazy val mongoClient = new MongoClient(mongoHost, mongoPort)
 
   private lazy val morphia = new Morphia()
-  morphia.map(classOf[SjStream]).map(classOf[Service]).map(classOf[Provider]).map(classOf[ConfigSetting]).map(classOf[Instance])
+  morphia.map(classOf[SjStream]).map(classOf[Service]).map(classOf[Provider]).map(classOf[ConfigurationSetting]).map(classOf[Instance])
 
   changeGettingClassLoaderForMongo()
 
@@ -47,7 +47,7 @@ object ConnectionRepository {
 
   private lazy val providerService = new GenericMongoService[Provider]()
 
-  private lazy val configService = new GenericMongoService[ConfigSetting]()
+  private lazy val configService = new GenericMongoService[ConfigurationSetting]()
 
   def getFileMetadataService = {
     fileMetadataService

@@ -10,7 +10,7 @@ case class ProviderData(name: String,
                         hosts: Array[String],
                         description: String = "No description"
                        ) {
-  def asProvider() = {
+  def asModelProvider() = {
     val provider = new Provider(
       this.name,
       this.description,

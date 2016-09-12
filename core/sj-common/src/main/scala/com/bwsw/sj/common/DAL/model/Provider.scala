@@ -33,7 +33,7 @@ class Provider {
     inetSocketAddresses
   }
 
-  def asProviderData() = {
+  def asProtocolProvider() = {
     val providerData = new ProviderData(
       this.name,
       this.login,

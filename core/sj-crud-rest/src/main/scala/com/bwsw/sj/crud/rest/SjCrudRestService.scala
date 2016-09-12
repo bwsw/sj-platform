@@ -12,7 +12,7 @@ import akka.http.scaladsl.server.directives.{DebuggingDirectives, LogEntry, Logg
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.DAL.model.ConfigSetting
+import com.bwsw.sj.common.DAL.model.ConfigurationSetting
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.{ConfigConstants, EngineConstants}
 import EngineConstants._
@@ -78,8 +78,8 @@ object SjCrudRestService extends App with SjCrudInterface {
   }
 
   private def putRestSettingsToConfigFile() = {
-    configService.save(new ConfigSetting(ConfigConstants.hostOfCrudRestTag, restHost, "system"))
-    configService.save(new ConfigSetting(ConfigConstants.portOfCrudRestTag, restPort.toString, "system"))
+    configService.save(new ConfigurationSetting(ConfigConstants.hostOfCrudRestTag, restHost, "system"))
+    configService.save(new ConfigurationSetting(ConfigConstants.portOfCrudRestTag, restPort.toString, "system"))
   }
 
   /**

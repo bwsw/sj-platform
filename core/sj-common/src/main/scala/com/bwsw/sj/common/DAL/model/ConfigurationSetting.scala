@@ -1,5 +1,6 @@
 package com.bwsw.sj.common.DAL.model
 
+import com.bwsw.sj.common.rest.entities.config.ConfigurationSettingData
 import org.mongodb.morphia.annotations.{Id, Entity}
 
 /**
@@ -8,7 +9,7 @@ import org.mongodb.morphia.annotations.{Id, Entity}
  * collection element is one configuration setting.
  */
 @Entity("config")
-class ConfigSetting {
+class ConfigurationSetting {
   @Id var name: String = null
   var value: String = null
   var domain: String = null
@@ -18,5 +19,14 @@ class ConfigSetting {
     this.name = name
     this.value = value
     this.domain = domain
+  }
+  
+  def asProtocolConfigurationSetting() = {
+    val configurationSettingData = new ConfigurationSettingData(
+      this.name.replace(this.domain + ".", ""),
+      this.value
+    )
+    
+    configurationSettingData
   }
 }

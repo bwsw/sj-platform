@@ -9,7 +9,6 @@ import com.bwsw.sj.common.utils.{StreamConstants, EngineConstants}
 import EngineConstants._
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.stream.SjStreamData
-import com.bwsw.sj.crud.rest.utils.ConvertUtil.streamToStreamData
 import com.bwsw.sj.crud.rest.utils.{CompletionUtils, StreamUtil}
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.stream.StreamValidator
@@ -41,7 +40,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator with CompletionUtils 
             val streams = streamDAO.getAll
             var response: RestResponse = NotFoundRestResponse(Map("message" -> messages.getString("rest.streams.notfound")))
             if (streams.nonEmpty) {
-              val entity = Map("streams" -> streams.map(s => streamToStreamData(s)))
+              val entity = Map("streams" -> streams.map(s => s.asProtocolStream()))
               response = OkRestResponse(entity)
             }
 
@@ -57,7 +56,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator with CompletionUtils 
               )
               stream match {
                 case Some(x) =>
-                  val entity = Map("streams" -> streamToStreamData(x))
+                  val entity = Map("streams" -> x.asProtocolStream())
                   response = OkRestResponse(entity)
                 case None =>
               }

@@ -1,5 +1,7 @@
 package com.bwsw.sj.common.DAL.model
 
+import com.bwsw.sj.common.rest.entities.stream.KafkaSjStreamData
+
 class KafkaSjStream() extends SjStream {
 
   var partitions: Int = 0
@@ -20,5 +22,15 @@ class KafkaSjStream() extends SjStream {
     this.streamType = streamType
     this.tags = tags
     this.replicationFactor = replicationFactor
+  }
+
+  override def asProtocolStream() = {
+    val streamData = new KafkaSjStreamData
+    super.fillProtocolStream(streamData)
+
+    streamData.partitions = this.partitions
+    streamData.replicationFactor = this.replicationFactor
+
+    streamData
   }
 }

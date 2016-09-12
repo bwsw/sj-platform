@@ -49,8 +49,10 @@ object StreamValidator extends ValidationUtils {
     }
 
     Option(initialData.streamType) match {
-      case Some(t) if !StreamConstants.streamTypes.contains(t) =>
-        errors += s"Unknown type '$t' provided. Must be one of: ${StreamConstants.streamTypes.mkString("[", ", ", "]")}"
+      case Some(t) =>
+        if (!StreamConstants.streamTypes.contains(t)) {
+          errors += s"Unknown type '$t' provided. Must be one of: ${StreamConstants.streamTypes.mkString("[", ", ", "]")}"
+        }
       case None =>
         errors += s"'Type' is required"
     }
