@@ -98,7 +98,7 @@
       "type": "string"
     },
     "entity-class": {
-      "description": "The absolute path to class that is responsible for a data entity of module",
+      "description": "The absolute path to class that is responsible for a data entity of output-streaming module",
       "type": "string"
     }
   },
@@ -107,7 +107,8 @@
     "inputs",
     "outputs",
     "module-type",
-    "options",
+    "engine-name",
+    "engine-version",
     "validator-class",
     "executor-class"
   ]

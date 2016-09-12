@@ -3,7 +3,7 @@ package com.bwsw.sj.crud.rest.validator.module
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{SjStream, TStreamService, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, ModuleSpecification, OutputInstanceMetadata}
+import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, SpecificationData, OutputInstanceMetadata}
 import com.bwsw.sj.common.utils.EngineConstants._
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -30,7 +30,7 @@ class OutputStreamingValidator extends StreamingModuleValidator {
    * @param specification - specification of module
    * @return - List of errors
    */
-  override def validate(parameters: InstanceMetadata, specification: ModuleSpecification) = {
+  override def validate(parameters: InstanceMetadata, specification: SpecificationData) = {
     logger.debug(s"Instance: ${parameters.name}. Start output-streaming validation.")
     val errors = super.validateGeneralOptions(parameters)
     val outputInstanceMetadata = parameters.asInstanceOf[OutputInstanceMetadata]
@@ -57,7 +57,7 @@ class OutputStreamingValidator extends StreamingModuleValidator {
    * @return - List of errors and validating instance (null, if errors non empty)
    */
   def validateStreamOptions(instance: OutputInstanceMetadata,
-                            specification: ModuleSpecification, 
+                            specification: SpecificationData,
                             errors: ArrayBuffer[String]) = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     

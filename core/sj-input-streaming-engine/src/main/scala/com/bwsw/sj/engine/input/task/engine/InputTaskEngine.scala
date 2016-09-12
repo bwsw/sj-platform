@@ -1,8 +1,7 @@
 package com.bwsw.sj.engine.input.task.engine
 
-import java.util.concurrent.{Callable, ArrayBlockingQueue}
+import java.util.concurrent.{ArrayBlockingQueue, Callable}
 
-import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module.InputInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.engine.core.entities.InputEnvelope
@@ -60,16 +59,7 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
    * @return Manager of environment of input streaming module
    */
   private def createModuleEnvironmentManager() = {
-    def getOptions() = {
-      val serializer = new JsonSerializer()
-      if (instance.options != null) {
-        serializer.deserialize[Map[String, Any]](instance.options)
-      } else {
-        Map[String, Any]()
-      } //todo remake this (or maybe remove) after completing SJ-2257
-    }
-
-    val options = getOptions()
+    val options = instance.getOptionsAsMap()
     val streamService = ConnectionRepository.getStreamService
     val taggedOutputs = instance.outputs
       .flatMap(x => streamService.get(x))

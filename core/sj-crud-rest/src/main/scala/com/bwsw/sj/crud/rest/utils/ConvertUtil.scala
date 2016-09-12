@@ -1,10 +1,7 @@
 package com.bwsw.sj.crud.rest.utils
 
-import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.rest.entities.config.ConfigurationSettingData
-import com.bwsw.sj.common.rest.entities.module._
 import com.bwsw.sj.common.rest.entities.provider.ProviderData
 import com.bwsw.sj.common.rest.entities.stream._
 import org.slf4j.LoggerFactory
@@ -19,26 +16,6 @@ import org.slf4j.LoggerFactory
 object ConvertUtil {
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
-  private val serializer = new JsonSerializer
-
-  def specificationToSpecificationData(specification: Specification) = {
-    logger.debug(s"Convert model specification ${specification.name} to protocol specification.")
-    ModuleSpecification(specification.name,
-      specification.description,
-      specification.version,
-      specification.author,
-      specification.license,
-      Map("cardinality" -> specification.inputs.cardinality,
-        "types" -> specification.inputs.types),
-      Map("cardinality" -> specification.outputs.cardinality,
-        "types" -> specification.outputs.types),
-      specification.moduleType,
-      specification.engineName,
-      specification.engineVersion,
-      serializer.deserialize[Map[String, Any]](specification.options),
-      specification.validateClass,
-      specification.executorClass)
-  }
 
   def streamToStreamData(stream: SjStream) = {
     logger.debug(s"Convert model stream ${stream.name} to protocol stream.")

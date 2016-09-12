@@ -3,7 +3,7 @@ package com.bwsw.sj.crud.rest.validator.module
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.utils.EngineConstants
 import EngineConstants._
-import com.bwsw.sj.common.rest.entities.module.{WindowedInstanceMetadata, InstanceMetadata, ModuleSpecification}
+import com.bwsw.sj.common.rest.entities.module.{WindowedInstanceMetadata, InstanceMetadata, SpecificationData}
 import org.slf4j.{LoggerFactory, Logger}
 
 import scala.collection.mutable.ArrayBuffer
@@ -23,7 +23,7 @@ class WindowedStreamingValidator extends StreamingModuleValidator {
     * @param instanceParameters - input parameters for running module
     * @return - List of errors
     */
-  override def validate(instanceParameters: InstanceMetadata, specification: ModuleSpecification) = {
+  override def validate(instanceParameters: InstanceMetadata, specification: SpecificationData) = {
     logger.debug(s"Instance: ${instanceParameters.name}. Start windowed-streaming validation.")
     val windowedInstanceMetadata = instanceParameters.asInstanceOf[WindowedInstanceMetadata]
     val generalErrors = super.validateGeneralOptions(windowedInstanceMetadata)
@@ -74,6 +74,6 @@ class WindowedStreamingValidator extends StreamingModuleValidator {
    * @return - List of errors and validating instance (null, if errors non empty)
    */
   def validateStreamOptions(parameters: InstanceMetadata,
-                                               specification: ModuleSpecification,
+                                               specification: SpecificationData,
                                                errors: ArrayBuffer[String]): (ArrayBuffer[String], Option[Instance]) = ???
 }

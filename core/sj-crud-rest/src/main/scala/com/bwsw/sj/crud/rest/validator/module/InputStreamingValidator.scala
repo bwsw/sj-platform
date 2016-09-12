@@ -4,7 +4,7 @@ import java.util.Calendar
 
 import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask, Instance, InstanceStage}
 import com.bwsw.sj.common.DAL.model.{TStreamService, TStreamSjStream}
-import com.bwsw.sj.common.rest.entities.module.{InputInstanceMetadata, InstanceMetadata, ModuleSpecification}
+import com.bwsw.sj.common.rest.entities.module.{InputInstanceMetadata, InstanceMetadata, SpecificationData}
 import com.bwsw.sj.common.utils.EngineConstants._
 import com.bwsw.sj.common.utils.StreamConstants._
 import org.slf4j.{Logger, LoggerFactory}
@@ -30,7 +30,7 @@ class InputStreamingValidator extends StreamingModuleValidator {
    * @return - List of errors
    */
   override def validate(parameters: InstanceMetadata,
-                        specification: ModuleSpecification): (ArrayBuffer[String], Option[Instance]) = {
+                        specification: SpecificationData): (ArrayBuffer[String], Option[Instance]) = {
     logger.debug(s"Instance: ${parameters.name}. Start input-streaming validation.")
     val errors = super.validateGeneralOptions(parameters)
     val inputInstanceMetadata = parameters.asInstanceOf[InputInstanceMetadata]
@@ -79,7 +79,7 @@ class InputStreamingValidator extends StreamingModuleValidator {
    * @return - List of errors and validating instance (null, if errors non empty)
    */
   def validateStreamOptions(instance: InputInstanceMetadata,
-                            specification: ModuleSpecification,
+                            specification: SpecificationData,
                             errors: ArrayBuffer[String]): (ArrayBuffer[String], Option[Instance]) = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     var validatedInstance: Option[Instance] = None

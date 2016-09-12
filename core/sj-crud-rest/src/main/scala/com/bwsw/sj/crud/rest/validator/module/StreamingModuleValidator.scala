@@ -6,7 +6,7 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, ModuleSpecification}
+import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, SpecificationData}
 import com.bwsw.sj.common.rest.utils.ValidationUtils
 import com.bwsw.sj.common.utils.StreamConstants
 import com.bwsw.sj.crud.rest.utils.StreamUtil
@@ -34,7 +34,7 @@ abstract class StreamingModuleValidator extends ValidationUtils {
    * @param parameters - input parameters for running module
    * @return - List of errors
    */
-  def validate(parameters: InstanceMetadata, specification: ModuleSpecification): (ArrayBuffer[String], Option[Instance])
+  def validate(parameters: InstanceMetadata, specification: SpecificationData): (ArrayBuffer[String], Option[Instance])
 
   /**
    * Validation base instance options

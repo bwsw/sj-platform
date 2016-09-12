@@ -2,7 +2,7 @@ package com.bwsw.sj.common.rest.entities.module
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-case class ModuleSpecification(var name: String,
+case class SpecificationData(var name: String,
                                var description: String,
                                var version: String,
                                var author: String,

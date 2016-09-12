@@ -9,12 +9,12 @@ import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import akka.stream.scaladsl._
-import com.bwsw.sj.common.utils.EngineConstants
-import com.bwsw.sj.crud.rest.exceptions._
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.engine.StreamingValidator
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.module._
+import com.bwsw.sj.common.utils.EngineConstants
+import com.bwsw.sj.crud.rest.exceptions._
 import com.bwsw.sj.crud.rest.instance.{InstanceDestroyer, InstanceStarter, InstanceStopper}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
@@ -26,7 +26,6 @@ import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils {
 
   import EngineConstants._
-  import com.bwsw.sj.crud.rest.utils.ConvertUtil._
 
   val modulesApi = {
     pathPrefix("modules") {
@@ -112,7 +111,7 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
               }
               val fileMetadata = fileMetadatas.head
               val fileSpecification = fileMetadata.specification
-              val specification = specificationToSpecificationData(fileSpecification)
+              val specification = fileSpecification.asSpecificationData()
               val filename = fileMetadata.filename
 
               if (!storage.exists(filename)) {
@@ -342,7 +341,7 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
    * @param moduleType - type name of module
    * @return - list of errors
    */
-  def validateInstance(options: InstanceMetadata, specification: ModuleSpecification, moduleType: String) = {
+  def validateInstance(options: InstanceMetadata, specification: SpecificationData, moduleType: String) = {
     val validatorClassName = configService.get(s"system.$moduleType-validator-class").get.value
     val validatorClass = Class.forName(validatorClassName)
     val validator = validatorClass.newInstance().asInstanceOf[StreamingModuleValidator]
