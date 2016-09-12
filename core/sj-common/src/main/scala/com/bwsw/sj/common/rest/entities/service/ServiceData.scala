@@ -27,13 +27,13 @@ class ServiceData() extends ValidationUtils {
 
   def asModelService(): Service = ???
 
-  def validate() = validateGeneralFields()
-
   protected def fillModelService(modelService: Service) = {
     modelService.serviceType = this.serviceType
     modelService.name = this.name
     modelService.description = this.description
   }
+
+  def validate() = validateGeneralFields()
 
   protected def validateGeneralFields() = {
     val serviceDAO = ConnectionRepository.getServiceManager
@@ -57,7 +57,8 @@ class ServiceData() extends ValidationUtils {
         }
 
         if (!validateName(x)) {
-          errors += s"Service has incorrect name: $x. Name of service must be contain digits, lowercase letters or hyphens. First symbol must be letter"
+          errors += s"Service has incorrect name: $x. " +
+            s"Name of service must be contain digits, lowercase letters or hyphens. First symbol must be a letter"
         }
     }
 

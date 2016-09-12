@@ -9,7 +9,6 @@ import com.bwsw.sj.common.utils.ConfigConstants
 import com.bwsw.sj.crud.rest.exceptions.UnknownConfigSettingDomain
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
-import com.bwsw.sj.crud.rest.validator.config.ConfigSettingValidator
 
 trait SjConfigurationSettingsApi extends Directives with SjCrudValidator with CompletionUtils {
 
@@ -24,7 +23,7 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator with Co
           pathEndOrSingleSlash {
             post { (ctx: RequestContext) =>
               val data = serializer.deserialize[ConfigurationSettingData](getEntityFromContext(ctx))
-              val errors = ConfigSettingValidator.validate(data)
+              val errors = data.validate()
               var response: RestResponse = ConflictRestResponse(
                 Map("message" -> MessageFormat.format(messages.getString("rest.config.setting.cannot.create"), errors.mkString("\n"))))
               if (errors.isEmpty) {
