@@ -1,11 +1,8 @@
 package com.bwsw.sj.common.DAL.model
 
-import java.net.InetAddress
-
+import com.bwsw.common.ElasticsearchClient
 import com.bwsw.sj.common.rest.entities.service.{EsIndServiceData, ServiceData}
 import com.bwsw.sj.common.utils.ServiceConstants
-import org.elasticsearch.client.transport.TransportClient
-import org.elasticsearch.common.transport.InetSocketTransportAddress
 import org.mongodb.morphia.annotations.Reference
 
 class ESService() extends Service {
@@ -39,46 +36,28 @@ class ESService() extends Service {
   }
 
   override def prepare() = {
-    val client = createClient()
+    val client = new ElasticsearchClient(getProviderHosts())
 
-    if (!doesIndexExist(client)) {
-      createIndex(client)
+    if (!client.doesIndexExist(this.index)) {
+      client.createIndex(this.index)
     }
+
+    client.close()
   }
 
   override def destroy() = {
-    val client = createClient()
-    deleteIndex(client)
+    val client = new ElasticsearchClient(getProviderHosts())
+    client.deleteIndex(this.index)
+    client.close()
   }
 
-  private def createClient() = {
-    val client = TransportClient.builder().build()
-    setTransportAddresses(client)
+  private def getProviderHosts() = {
+    this.provider.hosts.map(address => {
+      val hostAndPort = address.split(":")
+      val host = hostAndPort(0)
+      val port = hostAndPort(1).toInt
 
-    client
-  }
-
-  private def setTransportAddresses(client: TransportClient) = {
-    this.provider.hosts.foreach(host => setTransportAddressToClient(host, client))
-  }
-
-  private def setTransportAddressToClient(host: String, client: TransportClient) = {
-    val hostAndPort = host.split(":")
-    val transportAddress = new InetSocketTransportAddress(InetAddress.getByName(hostAndPort(0)), hostAndPort(1).toInt)
-    client.addTransportAddress(transportAddress)
-  }
-
-  private def doesIndexExist(client: TransportClient) = {
-    val indicesExistsResponse = client.admin().indices().prepareExists(this.index).execute().actionGet()
-
-    indicesExistsResponse.isExists
-  }
-
-  private def createIndex(client: TransportClient) = {
-    client.admin().indices().prepareCreate(this.index).execute().actionGet()
-  }
-
-  private def deleteIndex(client: TransportClient) = {
-    client.admin().indices().prepareDelete(this.index).execute().actionGet()
+      (host, port)
+    }).toSet
   }
 }
