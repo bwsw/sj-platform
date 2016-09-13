@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.rest.entities.stream
 
-import com.bwsw.sj.common.DAL.model.{TStreamSjStream, Generator}
+import com.bwsw.sj.common.DAL.model.TStreamSjStream
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.{ServiceConstants, StreamConstants}
 
@@ -42,12 +42,7 @@ class TStreamSjStreamData() extends SjStreamData() {
       errors += s"'Generator' is required"
     }
     else {
-      val generator = new Generator
-      val generatorErrors = GeneratorValidator.validate(
-        this.asInstanceOf[TStreamSjStreamData].generator,
-        generator
-      )
-      errors ++= generatorErrors
+      errors ++= this.generator.validate()
     }
 
     errors

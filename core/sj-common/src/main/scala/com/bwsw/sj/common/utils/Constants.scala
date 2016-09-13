@@ -52,7 +52,10 @@ object StreamConstants {
 }
 
 object GeneratorConstants {
-  val generatorTypes = Set("global", "local", "per-stream")
+  final val local = "local"
+  final val global = "global"
+  final val perStream = "per-stream"
+  val generatorTypes = Set(global, local, perStream)
 }
 
 object ServiceConstants {

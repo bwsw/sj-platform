@@ -12,7 +12,7 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, OutputInstance, Task}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.utils.CassandraFactory
+import com.bwsw.sj.common.utils.{GeneratorConstants, CassandraFactory}
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.consumer
 import com.bwsw.tstreams.agents.producer.{CoordinationOptions, NewTransactionProducerPolicy, Options, Producer}
@@ -299,7 +299,7 @@ object BenchmarkDataFactory {
     tStream.service = tService
     tStream.tags = Array("tag1")
     tStream.partitions = partitions
-    tStream.generator = new Generator("local")
+    tStream.generator = new Generator(GeneratorConstants.local)
     streamService.save(tStream)
 
     val metadataStorageFactory = new MetadataStorageFactory

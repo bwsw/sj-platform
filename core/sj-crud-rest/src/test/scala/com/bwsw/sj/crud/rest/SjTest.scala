@@ -8,7 +8,7 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.utils.{StreamConstants, CassandraFactory}
+import com.bwsw.sj.common.utils.{GeneratorConstants, StreamConstants, CassandraFactory}
 
 /**
  * @author Kseniya Tomskikh
@@ -262,7 +262,7 @@ object SjTest {
 
   def createStreams(tService: Service, service: ZKService) = {
     val generator1 = new Generator
-    generator1.generatorType = "global"
+    generator1.generatorType = GeneratorConstants.global
     generator1.instanceCount = 1
     generator1.service = service
 
@@ -278,7 +278,7 @@ object SjTest {
     sjStreamDAO.save(s1)
 
     val generator2 = new Generator
-    generator2.generatorType = "global"
+    generator2.generatorType = GeneratorConstants.global
     generator2.instanceCount = 2
     generator2.service = service
     val s2 = new TStreamSjStream
@@ -292,7 +292,7 @@ object SjTest {
     sjStreamDAO.save(s2)
 
     val generator3 = new Generator
-    generator3.generatorType = "global"
+    generator3.generatorType = GeneratorConstants.global
     generator3.instanceCount = 3
     generator3.service = service
     val s3 = new TStreamSjStream
@@ -306,7 +306,7 @@ object SjTest {
     sjStreamDAO.save(s3)
 
     val generator10 = new Generator
-    generator10.generatorType = "local"
+    generator10.generatorType = GeneratorConstants.local
     val s10 = new TStreamSjStream
     s10.name = "s10"
     s10.description = "s10 stream"

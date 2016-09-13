@@ -7,7 +7,7 @@ import java.util.{Properties, ResourceBundle}
 import com.aerospike.client.Host
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.rest.entities.stream.SjStreamData
-import com.bwsw.sj.common.utils.ConfigSettingsUtils
+import com.bwsw.sj.common.utils.{GeneratorConstants, ConfigSettingsUtils}
 import com.bwsw.tstreams.common.CassandraConnectorConf
 import com.bwsw.tstreams.data.aerospike._
 import com.bwsw.tstreams.data.{IStorage, _}
@@ -247,7 +247,7 @@ object StreamUtil {
    */
   def createGeneratorTaskName(stream: TStreamSjStream) = {
     var name = ""
-    if (stream.generator.generatorType.equals("per-stream")) {
+    if (stream.generator.generatorType.equals(GeneratorConstants.perStream)) {
       name = s"${stream.generator.service.name}-${stream.name}-tg"
     } else {
       name = s"${stream.generator.service.name}-global-tg"

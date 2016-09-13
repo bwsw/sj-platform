@@ -2,7 +2,7 @@ package com.bwsw.sj.crud.rest.instance
 
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{SjStream, TStreamSjStream}
-import com.bwsw.sj.common.utils.{StreamConstants, EngineConstants}
+import com.bwsw.sj.common.utils.{GeneratorConstants, StreamConstants, EngineConstants}
 import org.slf4j.LoggerFactory
 
 /**
@@ -51,7 +51,7 @@ class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable with I
       .filter { stream: SjStream =>
         if (stream.streamType.equals(StreamConstants.tStreamType)) {
           val stage = instance.stages.get(stream.name)
-          !stream.asInstanceOf[TStreamSjStream].generator.generatorType.equals("local") &&
+          !stream.asInstanceOf[TStreamSjStream].generator.generatorType.equals(GeneratorConstants.local) &&
             (stage.state.equals(failed) ||
               !startingInstance.exists { instance =>
                 val streamGeneratorName = getGeneratorAppName(stream.asInstanceOf[TStreamSjStream])

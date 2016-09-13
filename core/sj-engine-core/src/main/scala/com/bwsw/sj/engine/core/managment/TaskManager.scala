@@ -8,7 +8,7 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, Instance}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.StreamingExecutor
-import com.bwsw.sj.common.utils.ConfigSettingsUtils
+import com.bwsw.sj.common.utils.{GeneratorConstants, ConfigSettingsUtils}
 import com.bwsw.sj.common.utils.EngineConstants._
 import com.bwsw.sj.common.utils.StreamConstants._
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
@@ -225,7 +225,7 @@ abstract class TaskManager() {
       auxiliaryTStreamService,
       tStreamType,
       tags,
-      new Generator("local")
+      new Generator(GeneratorConstants.local)
     )
   }
 
@@ -265,12 +265,12 @@ abstract class TaskManager() {
     val retryCount = ConfigSettingsUtils.getRetryCount()
 
     stream.generator.generatorType match {
-      case "local" => new LocalTimeUUIDGenerator
+      case GeneratorConstants.local => new LocalTimeUUIDGenerator
       case generatorType =>
         val service = stream.generator.service.asInstanceOf[ZKService]
         val zkHosts = service.provider.hosts
         val prefix = "/" + service.namespace + "/" + {
-          if (generatorType == "global") generatorType else stream.name
+          if (generatorType == GeneratorConstants.global) generatorType else stream.name
         }
 
         new NetworkTimeUUIDGenerator(zkHosts, prefix, retryPeriod, retryCount)

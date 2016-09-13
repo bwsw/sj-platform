@@ -11,7 +11,7 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, Instance, RegularInstance, Task}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.utils.{ConfigConstants, StreamConstants, CassandraFactory}
+import com.bwsw.sj.common.utils.{GeneratorConstants, ConfigConstants, StreamConstants, CassandraFactory}
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.consumer.{Consumer, Options}
 import com.bwsw.tstreams.agents.producer
@@ -186,7 +186,7 @@ object DataFactory {
   }
 
   private def createInputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
-    val localGenerator = new Generator("local")
+    val localGenerator = new Generator(GeneratorConstants.local)
 
     val tService = serviceManager.get("tstream-test-service").get
 
@@ -207,7 +207,7 @@ object DataFactory {
   }
 
   private def createOutputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
-    val localGenerator = new Generator("local")
+    val localGenerator = new Generator(GeneratorConstants.local)
 
     val tService = serviceManager.get("tstream-test-service").get
 
