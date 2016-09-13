@@ -6,7 +6,6 @@ import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.provider.ProviderData
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
-import com.bwsw.sj.crud.rest.validator.provider.ProviderValidator
 
 trait SjProvidersApi extends Directives with SjCrudValidator with CompletionUtils {
 
@@ -15,7 +14,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator with CompletionUtil
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>
           val data = serializer.deserialize[ProviderData](getEntityFromContext(ctx))
-          val errors = ProviderValidator.validate(data)
+          val errors = data.validate()
           var response: RestResponse = BadRequestRestResponse(Map("message" ->
             createMessage("rest.providers.provider.cannot.create", errors.mkString(";"))))
 
@@ -82,7 +81,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator with CompletionUtil
 
                   provider match {
                     case Some(x) =>
-                      val errors = ProviderValidator.checkProviderConnection(x)
+                      val errors = x.checkConnection()
                       if (errors.isEmpty) {
                         response = OkRestResponse(Map("connection" -> true))
                       }
@@ -103,7 +102,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator with CompletionUtil
     }
   }
 
-  def getUsedProviders(providerName: String) = {
+  private def getUsedProviders(providerName: String) = {
     serviceDAO.getAll.filter {
       case esService: ESService =>
         esService.provider.name.equals(providerName)

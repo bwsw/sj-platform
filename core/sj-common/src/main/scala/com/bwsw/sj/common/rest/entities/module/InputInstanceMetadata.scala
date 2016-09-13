@@ -1,6 +1,7 @@
 package com.bwsw.sj.common.rest.entities.module
 
 import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask}
+import com.bwsw.sj.common.utils.EngineConstants
 import com.fasterxml.jackson.annotation.JsonProperty
 
 import scala.collection.JavaConverters._
@@ -10,8 +11,8 @@ class InputInstanceMetadata extends InstanceMetadata {
   @JsonProperty("duplicate-check") var duplicateCheck: Boolean = false
   @JsonProperty("lookup-history") var lookupHistory: Int = 0
   @JsonProperty("queue-max-size") var queueMaxSize: Int = 0
-  @JsonProperty("default-eviction-policy") var defaultEvictionPolicy: String = "NONE"
-  @JsonProperty("eviction-policy") var evictionPolicy: String = "fix-time"
+  @JsonProperty("default-eviction-policy") var defaultEvictionPolicy: String = EngineConstants.noneDefaultEvictionPolicy
+  @JsonProperty("eviction-policy") var evictionPolicy: String = EngineConstants.fixTimeEvictionPolicy
   @JsonProperty("backup-count") var backupCount: Int = 0
   @JsonProperty("async-backup-count") var asyncBackupCount: Int = 0
   var tasks: Map[String, InputTask] = null

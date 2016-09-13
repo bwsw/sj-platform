@@ -6,8 +6,9 @@ import com.bwsw.sj.common.DAL.model.SjStream
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, OutputInstanceMetadata, RegularInstanceMetadata}
+import com.bwsw.sj.common.utils.EngineConstants
 import com.bwsw.sj.common.utils.EngineConstants._
-import com.bwsw.sj.common.utils.ServiceConstants._
+import com.bwsw.sj.common.utils.Service._
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.JavaConversions._
@@ -79,7 +80,7 @@ trait ValidationUtils {
 
     val inputs = inputStreams.map { input =>
       val mode = getStreamMode(input)
-      val name = input.replaceAll("/split|/full", "")
+      val name = input.replaceAll(s"/${EngineConstants.splitStreamMode}|/${EngineConstants.fullStreamMode}", "")
       InputStream(name, mode, partitionsCount(name))
     }
     val parallelism = instance.parallelism.asInstanceOf[Int]
@@ -98,8 +99,8 @@ trait ValidationUtils {
         val startPartition = stream.currentPartition
         var endPartition = startPartition + countFreePartitions
         inputStream.mode match {
-          case "full" => endPartition = startPartition + countFreePartitions
-          case "split" =>
+          case EngineConstants.fullStreamMode => endPartition = startPartition + countFreePartitions
+          case EngineConstants.splitStreamMode =>
             val cntTaskStreamPartitions = countFreePartitions / tasksNotProcessed
             streams.update(inputStream.name, StreamProcess(startPartition + cntTaskStreamPartitions, countFreePartitions - cntTaskStreamPartitions))
             if (Math.abs(cntTaskStreamPartitions - countFreePartitions) >= cntTaskStreamPartitions) {
@@ -120,17 +121,17 @@ trait ValidationUtils {
   }
 
   def getStreamMode(name: String) = {
-    if (name.contains("/full")) {
-      "full"
+    if (name.contains(s"/${EngineConstants.fullStreamMode}")) {
+      EngineConstants.fullStreamMode
     } else {
-      "split"
+      EngineConstants.splitStreamMode
     }
   }
 
   def validateProvider(provider: String, serviceType: String) = {
     val providerErrors = new ArrayBuffer[String]()
     serviceType match {
-      case _ if serviceTypes.contains(serviceType) =>
+      case _ if types.contains(serviceType) =>
         Option(provider) match {
           case None =>
             providerErrors += s"'Provider' is required"
@@ -138,8 +139,8 @@ trait ValidationUtils {
             val providerObj = providerDAO.get(p)
             if (providerObj.isEmpty) {
               providerErrors += s"Provider '$p' does not exist"
-            } else if (providerObj.get.providerType != serviceTypeProviders(serviceType)) {
-              providerErrors += s"Provider for '$serviceType' service must be of type '${serviceTypeProviders(serviceType)}' " +
+            } else if (providerObj.get.providerType != typeToProviderType(serviceType)) {
+              providerErrors += s"Provider for '$serviceType' service must be of type '${typeToProviderType(serviceType)}' " +
                 s"('${providerObj.get.providerType}' is given instead)"
             }
         }

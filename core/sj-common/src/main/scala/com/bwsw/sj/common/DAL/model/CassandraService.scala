@@ -1,11 +1,11 @@
 package com.bwsw.sj.common.DAL.model
 
 import com.bwsw.sj.common.rest.entities.service.{CassDBServiceData, ServiceData}
-import com.bwsw.sj.common.utils.{CassandraFactory, ServiceConstants}
+import com.bwsw.sj.common.utils.{CassandraFactory, Service}
 import org.mongodb.morphia.annotations.Reference
 
 class CassandraService() extends Service {
-  serviceType = ServiceConstants.cassandraServiceType
+  serviceType = Service.cassandraType
   @Reference var provider: Provider = null
   var keyspace: String = null
 

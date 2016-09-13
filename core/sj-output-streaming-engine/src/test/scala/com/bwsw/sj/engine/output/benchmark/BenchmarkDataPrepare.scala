@@ -3,6 +3,7 @@ package com.bwsw.sj.engine.output.benchmark
 import java.io.File
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.utils.EngineConstants
 import com.bwsw.sj.engine.output.benchmark.BenchmarkDataFactory._
 
 /**
@@ -14,7 +15,7 @@ object BenchmarkDataPrepare extends App {
 
   val instanceName: String = "test-bench-instance"
   val checkpointInterval = 3
-  val checkpointMode = "every-nth"
+  val checkpointMode = EngineConstants.everyNthCheckpointMode
   val partitions = 4
 
   val module = new File(getClass.getClassLoader.getResource("sj-stub-output-bench-test.jar").getPath)

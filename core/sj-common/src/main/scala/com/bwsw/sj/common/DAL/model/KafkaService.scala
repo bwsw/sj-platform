@@ -1,11 +1,11 @@
 package com.bwsw.sj.common.DAL.model
 
 import com.bwsw.sj.common.rest.entities.service.{KfkQServiceData, ServiceData}
-import com.bwsw.sj.common.utils.ServiceConstants
+import com.bwsw.sj.common.utils.Service
 import org.mongodb.morphia.annotations.Reference
 
 class KafkaService() extends Service {
-  serviceType = ServiceConstants.kafkaServiceType
+  serviceType = Service.kafkaType
   @Reference var provider: Provider = null
   @Reference var zkProvider: Provider = null
   var zkNamespace: String = null

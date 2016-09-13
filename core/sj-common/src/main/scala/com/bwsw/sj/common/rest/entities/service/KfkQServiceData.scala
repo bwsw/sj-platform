@@ -2,12 +2,13 @@ package com.bwsw.sj.common.rest.entities.service
 
 import com.bwsw.sj.common.DAL.model.KafkaService
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.utils.{Service, Provider}
 import com.fasterxml.jackson.annotation.JsonProperty
 
 import scala.collection.mutable.ArrayBuffer
 
 class KfkQServiceData() extends ServiceData() {
-  serviceType = "KfkQ"
+  serviceType = Service.kafkaType
   var provider: String = null
   @JsonProperty("zk-provider") var zkProvider: String = null
   @JsonProperty("zk-namespace") var zkNamespace: String = null
@@ -40,8 +41,8 @@ class KfkQServiceData() extends ServiceData() {
         val zkProviderObj = providerDAO.get(p)
         zkProviderObj match {
           case Some(zkProvider) =>
-            if (zkProvider.providerType != "zookeeper") {
-              errors += s"'Zk-provider' must be of type 'zookeeper' " +
+            if (zkProvider.providerType != Provider.zookeeperType) {
+              errors += s"'Zk-provider' must be of type '${Provider.zookeeperType}' " +
                 s"('${zkProvider.providerType}' is given instead)"
             }
           case None => errors += s"Zookeeper provider '$p' does not exist"

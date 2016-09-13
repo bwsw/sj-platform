@@ -7,7 +7,7 @@ import java.util.{Properties, ResourceBundle}
 import com.aerospike.client.Host
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.rest.entities.stream.SjStreamData
-import com.bwsw.sj.common.utils.{GeneratorConstants, ConfigSettingsUtils}
+import com.bwsw.sj.common.utils.{Provider, Generator, ConfigSettingsUtils}
 import com.bwsw.tstreams.common.CassandraConnectorConf
 import com.bwsw.tstreams.data.aerospike._
 import com.bwsw.tstreams.data.{IStorage, _}
@@ -89,9 +89,9 @@ object StreamUtil {
 
     val dataProvider = service.dataProvider
     var dataStorage: IStorage[Array[Byte]] = null
-    if (dataProvider.providerType.equals("cassandra")) {
+    if (dataProvider.providerType.equals(Provider.cassandraType)) {
       dataStorage = (new cassandra.Factory).getInstance(cassandraConnectorConf, service.dataNamespace)
-    } else if (dataProvider.providerType.equals("aerospike")) {
+    } else if (dataProvider.providerType.equals(Provider.aerospikeType)) {
       val options = new aerospike.Options(
         service.dataNamespace,
         dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toSet
@@ -247,7 +247,7 @@ object StreamUtil {
    */
   def createGeneratorTaskName(stream: TStreamSjStream) = {
     var name = ""
-    if (stream.generator.generatorType.equals(GeneratorConstants.perStream)) {
+    if (stream.generator.generatorType.equals(Generator.perStreamType)) {
       name = s"${stream.generator.service.name}-${stream.name}-tg"
     } else {
       name = s"${stream.generator.service.name}-global-tg"
@@ -280,9 +280,9 @@ object StreamUtil {
 
     val dataProvider = service.dataProvider
     var dataStorage: IStorage[Array[Byte]] = null
-    if (dataProvider.providerType.equals("cassandra")) {
+    if (dataProvider.providerType.equals(Provider.cassandraType)) {
       dataStorage = (new cassandra.Factory).getInstance(cassandraConnectorConf, service.dataNamespace)
-    } else if (dataProvider.providerType.equals("aerospike")) {
+    } else if (dataProvider.providerType.equals(Provider.aerospikeType)) {
       val options = new Options(
         service.dataNamespace,
         dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toSet

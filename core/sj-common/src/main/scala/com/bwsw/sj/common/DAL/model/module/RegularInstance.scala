@@ -1,6 +1,7 @@
 package com.bwsw.sj.common.DAL.model.module
 
 import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, RegularInstanceMetadata}
+import com.bwsw.sj.common.utils.EngineConstants
 import org.mongodb.morphia.annotations._
 
 /**
@@ -10,8 +11,8 @@ import org.mongodb.morphia.annotations._
  */
 class RegularInstance() extends Instance {
   @Embedded("execution-plan") var executionPlan: ExecutionPlan = null
-  @Property("start-from") var startFrom: String = "newest"
-  @Property("state-management") var stateManagement: String = "none"
+  @Property("start-from") var startFrom: String = EngineConstants.newestStartMode
+  @Property("state-management") var stateManagement: String = EngineConstants.noneStateMode
   @Property("state-full-checkpoint") var stateFullCheckpoint: Int = 100
   @Property("event-wait-time") var eventWaitTime: Long = 1000
 

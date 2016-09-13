@@ -6,7 +6,7 @@ import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask, Instance, 
 import com.bwsw.sj.common.DAL.model.{TStreamService, TStreamSjStream}
 import com.bwsw.sj.common.rest.entities.module.{InputInstanceMetadata, InstanceMetadata, SpecificationData}
 import com.bwsw.sj.common.utils.EngineConstants._
-import com.bwsw.sj.common.utils.StreamConstants._
+import com.bwsw.sj.common.utils.Stream._
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.JavaConversions._

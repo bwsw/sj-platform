@@ -2,11 +2,12 @@ package com.bwsw.sj.common.rest.entities.service
 
 import com.bwsw.sj.common.DAL.model.ESService
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.utils.Service
 
 import scala.collection.mutable.ArrayBuffer
 
 class EsIndServiceData() extends ServiceData() {
-  serviceType = "ESInd"
+  serviceType = Service.elasticsearchType
   var provider: String = null
   var index: String = null
   var login: String = null

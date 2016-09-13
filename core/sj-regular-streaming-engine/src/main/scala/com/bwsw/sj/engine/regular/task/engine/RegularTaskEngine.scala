@@ -4,6 +4,7 @@ import java.util.concurrent.Callable
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
+import com.bwsw.sj.common.utils.EngineConstants
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
@@ -51,10 +52,10 @@ abstract class RegularTaskEngine(protected val manager: RegularTaskManager,
 
   protected def createRegularTaskEngineService(): RegularTaskEngineService = {
     instance.stateManagement match {
-      case "none" =>
+      case EngineConstants.noneStateMode =>
         logger.debug(s"Task: ${manager.taskName}. Start preparing of regular module without state\n")
         new StatelessRegularTaskEngineService(manager, performanceMetrics)
-      case "ram" =>
+      case EngineConstants.ramStateMode =>
         new StatefulRegularTaskEngineService(manager, checkpointGroup, performanceMetrics)
     }
   }

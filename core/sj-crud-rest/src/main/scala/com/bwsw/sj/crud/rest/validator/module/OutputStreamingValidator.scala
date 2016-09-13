@@ -4,6 +4,7 @@ import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{SjStream, TStreamService, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, SpecificationData, OutputInstanceMetadata}
+import com.bwsw.sj.common.utils.EngineConstants
 import com.bwsw.sj.common.utils.EngineConstants._
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -39,9 +40,9 @@ class OutputStreamingValidator extends StreamingModuleValidator {
       case None =>
         errors += s"'Checkpoint-mode' is required"
       case Some(x) =>
-        if (!x.equals("every-nth")) {
+        if (!x.equals(EngineConstants.everyNthCheckpointMode)) {
           errors += s"Unknown value of 'checkpoint-mode' attribute: '$x'. " +
-            s"'Checkpoint-mode' attribute for output-streaming module must be only 'every-nth'"
+            s"'Checkpoint-mode' attribute for output-streaming module must be only '${EngineConstants.everyNthCheckpointMode}'"
         }
     }
 
@@ -65,8 +66,8 @@ class OutputStreamingValidator extends StreamingModuleValidator {
     var inputStream: Option[SjStream] = None
     if (instance.input != null) {
       val inputMode: String = getStreamMode(instance.input)
-      if (!inputMode.equals("split")) {
-        errors += s"Unknown value of 'stream-mode' attribute. Input stream must have the mode 'split'"
+      if (!inputMode.equals(EngineConstants.splitStreamMode)) {
+        errors += s"Unknown value of 'stream-mode' attribute. Input stream must have the mode '${EngineConstants.splitStreamMode}'"
       }
 
       val inputStreamName = instance.input.replaceAll("/split", "")

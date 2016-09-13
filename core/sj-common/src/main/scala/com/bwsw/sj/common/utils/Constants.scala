@@ -4,29 +4,45 @@ import java.util.UUID
 
 object EngineConstants {
   def persistentQueuePath = UUID.randomUUID().toString //todo: yet t-streams can't remove persistent queue
-  val persistentBlockingQueue = "persistentBlockingQueue"
-  val eventWaitTimeout = 1000
+  final val persistentBlockingQueue = "persistentBlockingQueue"
+  final val eventWaitTimeout = 1000
 
-  val inputStreamingType = "input-streaming"
-  val outputStreamingType = "output-streaming"
-  val windowedStreamingType = "windowed-streaming"
-  val regularStreamingType = "regular-streaming"
-
+  final val inputStreamingType = "input-streaming"
+  final val outputStreamingType = "output-streaming"
+  final val windowedStreamingType = "windowed-streaming"
+  final val regularStreamingType = "regular-streaming"
   val moduleTypes = Set(windowedStreamingType, regularStreamingType, outputStreamingType, inputStreamingType)
-  val checkpointModes = Set("every-nth", "time-interval")
-  val stateManagementModes = Set("none", "ram", "rocks")
-  val startFromModes = Set("oldest", "newest")
-  val defaultEvictionPolicies = Set("LRU", "LFU", "NONE")
-  val evictionPolicies = Set("fix-time", "expanded-time")
 
-  val ready = "ready"
-  val starting = "starting"
-  val started = "started"
-  val stopping = "stopping"
-  val stopped = "stopped"
-  val deleting = "deleting"
-  val deleted = "deleted"
-  val failed = "failed"
+  final val everyNthCheckpointMode = "every-nth"
+  final val timeIntervalCheckpointMode = "time-interval"
+  val checkpointModes = Set(everyNthCheckpointMode, timeIntervalCheckpointMode)
+
+  final val noneStateMode = "none"
+  final val ramStateMode = "ram"
+  final val rocksStateMode = "rocks"
+  val stateManagementModes = Set(noneStateMode, ramStateMode, rocksStateMode)
+
+  final val oldestStartMode = "oldest"
+  final val newestStartMode = "newest"
+  val startFromModes = Set(oldestStartMode, newestStartMode)
+
+  final val noneDefaultEvictionPolicy = "NONE"
+  final val lruDefaultEvictionPolicy = "LRU"
+  final val lfuDefaultEvictionPolicy = "LFU"
+  val defaultEvictionPolicies = Set(lruDefaultEvictionPolicy, lfuDefaultEvictionPolicy, noneDefaultEvictionPolicy)
+
+  final val fixTimeEvictionPolicy = "fix-time"
+  final val expandedTimeEvictionPolicy = "expanded-time"
+  val evictionPolicies = Set(fixTimeEvictionPolicy, expandedTimeEvictionPolicy)
+
+  final val ready = "ready"
+  final val starting = "starting"
+  final val started = "started"
+  final val stopping = "stopping"
+  final val stopped = "stopped"
+  final val deleting = "deleting"
+  final val deleted = "deleted"
+  final val failed = "failed"
   val instanceStatusModes = Set(starting,
     started,
     stopping,
@@ -39,59 +55,74 @@ object EngineConstants {
 
   val toHandle = "to-handle"
   val generatorStatusModes = Set(starting, started, failed, toHandle)
-  val streamModes = Array("split", "full")
+
+  final val splitStreamMode = "split"
+  final val fullStreamMode = "full"
+  val streamModes = Array(splitStreamMode, fullStreamMode)
 }
 
-object StreamConstants {
+object Stream {
   final val inputDummy = "input"
   final val tStreamType = "stream.t-stream"
   final val kafkaStreamType = "stream.kafka"
   final val esOutputType = "elasticsearch-output"
   final val jdbcOutputType = "jdbc-output"
-  val streamTypes = Set(tStreamType, kafkaStreamType, esOutputType, jdbcOutputType)
+  val types = Set(tStreamType, kafkaStreamType, esOutputType, jdbcOutputType)
 }
 
-object GeneratorConstants {
-  final val local = "local"
-  final val global = "global"
-  final val perStream = "per-stream"
-  val generatorTypes = Set(global, local, perStream)
+object Generator {
+  final val localType = "local"
+  final val globalType = "global"
+  final val perStreamType = "per-stream"
+  val types = Set(globalType, localType, perStreamType)
 }
 
-object ServiceConstants {
-  final val cassandraServiceType = "CassDB"
-  final val elasticsearchServiceType = "ESInd"
-  final val kafkaServiceType = "KfkQ"
-  final val tstreamsServiceType = "TstrQ"
-  final val zookeeperServiceType = "ZKCoord"
-  final val aerospikeServiceType = "ArspkDB"
-  final val jdbcServiceType = "JDBC"
+object Service {
+  final val cassandraType = "CassDB"
+  final val elasticsearchType = "ESInd"
+  final val kafkaType = "KfkQ"
+  final val tstreamsType = "TstrQ"
+  final val zookeeperType = "ZKCoord"
+  final val aerospikeType = "ArspkDB"
+  final val jdbcType = "JDBC"
 
-  val serviceTypes = Set(
-    cassandraServiceType,
-    elasticsearchServiceType,
-    kafkaServiceType,
-    tstreamsServiceType,
-    zookeeperServiceType,
-    aerospikeServiceType,
-    jdbcServiceType
+  val types = Set(
+    cassandraType,
+    elasticsearchType,
+    kafkaType,
+    tstreamsType,
+    zookeeperType,
+    aerospikeType,
+    jdbcType
   )
-  val serviceTypeProviders = Map(
-    "CassDB" -> "cassandra",
-    "ESInd" -> "ES",
-    "KfkQ" -> "kafka",
-    "ZKCoord" -> "zookeeper",
-    "ArspkDB" -> "aerospike",
-    "JDBC" -> "JDBC"
+  val typeToProviderType = Map(
+    cassandraType -> Provider.cassandraType,
+    elasticsearchType -> Provider.elasticsearchType,
+    kafkaType -> Provider.kafkaType,
+    zookeeperType -> Provider.zookeeperType,
+    aerospikeType -> Provider.aerospikeType,
+    jdbcType -> Provider.jdbcType
   )
 }
 
-object ProviderConstants {
-  val providerTypes = Set("cassandra", "aerospike", "zookeeper", "kafka", "ES", "JDBC")
+object Provider {
+  final val cassandraType = "cassandra"
+  final val aerospikeType = "aerospike"
+  final val zookeeperType = "zookeeper"
+  final val kafkaType = "kafka"
+  final val elasticsearchType = "ES"
+  final val jdbcType = "JDBC"
+  val providerTypes = Set(cassandraType,aerospikeType, zookeeperType, kafkaType, elasticsearchType, jdbcType)
 }
 
 object ConfigConstants {
-  val domains = Array("system", "t-streams", "kafka", "es", "zk", "jdbc")
+  final val systemDomain = "system"
+  final val tstreamsDomain = "t-streams"
+  final val kafkaDomain = "kafka"
+  final val elasticsearchDomain = "es"
+  final val zookeeperDomain = "zk"
+  final val jdbcDomain = "jdbc"
+  val domains = Array(systemDomain, tstreamsDomain, kafkaDomain, elasticsearchDomain, zookeeperDomain, jdbcDomain)
   val transactionGeneratorTag = "system.current-transaction-generator"
   val frameworkTag = "system.current-framework"
   val hostOfCrudRestTag = "system.crud-rest-host"

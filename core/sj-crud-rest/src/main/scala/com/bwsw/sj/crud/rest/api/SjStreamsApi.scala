@@ -3,13 +3,11 @@ package com.bwsw.sj.crud.rest.api
 import java.text.MessageFormat
 
 import akka.http.scaladsl.server.{Directives, RequestContext}
-import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.stream.SjStreamData
 import com.bwsw.sj.common.utils.EngineConstants._
-import com.bwsw.sj.common.utils.StreamConstants
-import com.bwsw.sj.crud.rest.utils.{StreamUtil, CompletionUtils}
+import com.bwsw.sj.crud.rest.utils.{CompletionUtils, StreamUtil}
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
 import scala.collection.mutable
@@ -95,27 +93,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator with CompletionUtils 
     }
   }
 
-  def createStream(data: SjStreamData) = {
-    var stream = new SjStream
-    data.streamType match {
-      case StreamConstants.`tStreamType` =>
-        stream = new TStreamSjStream
-        stream.streamType = StreamConstants.tStreamType
-      case StreamConstants.`kafkaStreamType` =>
-        stream = new KafkaSjStream
-        stream.streamType = StreamConstants.kafkaStreamType
-      case StreamConstants.`esOutputType` =>
-        stream = new ESSjStream
-        stream.streamType = StreamConstants.esOutputType
-      case StreamConstants.`jdbcOutputType` =>
-        stream = new JDBCSjStream
-        stream.streamType = StreamConstants.jdbcOutputType
-    }
-
-    stream
-  }
-
-  def getUsedInstances(streamName: String): mutable.Buffer[Instance] = {
+  private def getUsedInstances(streamName: String): mutable.Buffer[Instance] = {
     instanceDAO.getAll.filter { (instance: Instance) =>
       if (!instance.moduleType.equals(inputStreamingType)) {
         instance.inputs.map(_.replaceAll("/split|/full", "")).contains(streamName) || instance.outputs.contains(streamName)

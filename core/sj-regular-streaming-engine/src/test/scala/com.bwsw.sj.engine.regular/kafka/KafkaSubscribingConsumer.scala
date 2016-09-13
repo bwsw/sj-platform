@@ -5,7 +5,7 @@ import java.util.concurrent.Executors
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{StreamConstants, EngineConstants}
+import com.bwsw.sj.common.utils.{Stream, EngineConstants}
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.KafkaEnvelope
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -32,7 +32,7 @@ object KafkaSubscribingConsumer {
       (service.get(x._1).get, x._2)
     })
 
-    val kafkaInputs = inputs.filter(x => x._1.streamType == StreamConstants.kafkaStreamType)
+    val kafkaInputs = inputs.filter(x => x._1.streamType == Stream.kafkaStreamType)
 
     executorService.execute(new Runnable() {
       def run() = {

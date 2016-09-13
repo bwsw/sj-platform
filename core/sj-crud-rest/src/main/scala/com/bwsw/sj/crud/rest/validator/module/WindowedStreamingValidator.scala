@@ -45,7 +45,7 @@ class WindowedStreamingValidator extends StreamingModuleValidator {
       errors += s"Unknown value of state-management attribute: ${windowedInstanceMetadata.stateManagement}. " +
         s"State-management must be one of: ${stateManagementModes.mkString("[", ", ", "]")}"
     } else {
-      if (windowedInstanceMetadata.stateManagement != "none") {
+      if (windowedInstanceMetadata.stateManagement != EngineConstants.noneStateMode) {
         // 'state-full-checkpoint' field
         if (windowedInstanceMetadata.stateFullCheckpoint <= 0) {
           errors += s"'State-full-checkpoint' attribute must be greater than zero"

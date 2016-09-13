@@ -1,6 +1,7 @@
 package com.bwsw.sj.engine.input.eviction_policy
 
 import com.bwsw.sj.common.DAL.model.module.InputInstance
+import com.bwsw.sj.common.utils.EngineConstants
 import com.hazelcast.config.{EvictionPolicy, MaxSizeConfig, XmlConfigBuilder}
 import com.hazelcast.core.Hazelcast
 import org.slf4j.LoggerFactory
@@ -59,8 +60,8 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
   private def createEvictionPolicy() = {
     logger.debug(s"Create EvictionPolicy\n")
     instance.defaultEvictionPolicy match {
-      case "LRU" => EvictionPolicy.LRU
-      case "LFU" => EvictionPolicy.LFU
+      case EngineConstants.lruDefaultEvictionPolicy => EvictionPolicy.LRU
+      case EngineConstants.lfuDefaultEvictionPolicy => EvictionPolicy.LFU
       case _ => EvictionPolicy.NONE
     }
   }

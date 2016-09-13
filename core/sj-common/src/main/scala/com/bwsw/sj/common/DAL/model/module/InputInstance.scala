@@ -3,6 +3,7 @@ package com.bwsw.sj.common.DAL.model.module
 import java.util
 
 import com.bwsw.sj.common.rest.entities.module.{InputInstanceMetadata, InstanceMetadata}
+import com.bwsw.sj.common.utils.EngineConstants
 import org.mongodb.morphia.annotations.Property
 import scala.collection.JavaConverters._
 
@@ -15,8 +16,8 @@ class InputInstance extends Instance {
   @Property("duplicate-check") var duplicateCheck: Boolean = false
   @Property("lookup-history") var lookupHistory: Int = 0
   @Property("queue-max-size") var queueMaxSize: Int = 0
-  @Property("default-eviction-policy") var defaultEvictionPolicy: String = "NONE"
-  @Property("eviction-policy") var evictionPolicy: String = "fix-time"
+  @Property("default-eviction-policy") var defaultEvictionPolicy: String = EngineConstants.noneDefaultEvictionPolicy
+  @Property("eviction-policy") var evictionPolicy: String = EngineConstants.fixTimeEvictionPolicy
   @Property("backup-count") var backupCount: Int = 0
   @Property("async-backup-count") var asyncBackupCount: Int = 0
   var tasks: java.util.Map[String, InputTask] = new util.HashMap()

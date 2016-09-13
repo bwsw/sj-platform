@@ -2,12 +2,12 @@ package com.bwsw.sj.common.rest.entities.stream
 
 import com.bwsw.sj.common.DAL.model.TStreamSjStream
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{ServiceConstants, StreamConstants}
+import com.bwsw.sj.common.utils.{Service, Stream}
 
 import scala.collection.mutable.ArrayBuffer
 
 class TStreamSjStreamData() extends SjStreamData() {
-  streamType = StreamConstants.tStreamType
+  streamType = Stream.tStreamType
   var partitions: Int = 0
   var generator: GeneratorData = null
 
@@ -26,9 +26,9 @@ class TStreamSjStreamData() extends SjStreamData() {
           case None =>
             errors += s"Service '${this.service}' does not exist"
           case Some(service) =>
-            if (service.serviceType != ServiceConstants.tstreamsServiceType) {
-              errors += s"Service for ${StreamConstants.tStreamType} stream " +
-                s"must be of '${ServiceConstants.tstreamsServiceType}' type ('${service.serviceType}' is given instead)"
+            if (service.serviceType != Service.tstreamsType) {
+              errors += s"Service for ${Stream.tStreamType} stream " +
+                s"must be of '${Service.tstreamsType}' type ('${service.serviceType}' is given instead)"
             }
         }
     }

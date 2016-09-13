@@ -4,6 +4,7 @@ import java.util.concurrent.{ArrayBlockingQueue, Callable}
 
 import com.bwsw.sj.common.DAL.model.module.InputInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.utils.EngineConstants
 import com.bwsw.sj.engine.core.entities.InputEnvelope
 import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.engine.core.input.InputStreamingExecutor
@@ -73,8 +74,8 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
    */
   private def createEvictionPolicy() = {
     instance.evictionPolicy match {
-      case "fix-time" => new FixTimeEvictionPolicy(instance)
-      case "expanded-time" => new ExpandedTimeEvictionPolicy(instance)
+      case EngineConstants.fixTimeEvictionPolicy => new FixTimeEvictionPolicy(instance)
+      case EngineConstants.expandedTimeEvictionPolicy => new ExpandedTimeEvictionPolicy(instance)
       case _ => new FixTimeEvictionPolicy(instance)
     }
   }

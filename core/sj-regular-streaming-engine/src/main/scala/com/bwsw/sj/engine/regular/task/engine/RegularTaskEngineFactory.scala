@@ -1,5 +1,6 @@
 package com.bwsw.sj.engine.regular.task.engine
 
+import com.bwsw.sj.common.utils.EngineConstants
 import com.bwsw.sj.engine.core.engine.{PersistentBlockingQueue, NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
@@ -29,11 +30,11 @@ class RegularTaskEngineFactory(manager: RegularTaskManager,
    */
   def createRegularTaskEngine(): RegularTaskEngine = {
     manager.instance.checkpointMode match {
-      case "time-interval" =>
-        logger.info(s"Task: ${manager.taskName}. Regular module has a 'time-interval' checkpoint mode, create an appropriate task engine\n")
+      case EngineConstants.timeIntervalCheckpointMode =>
+        logger.info(s"Task: ${manager.taskName}. Regular module has a '${EngineConstants.timeIntervalCheckpointMode}' checkpoint mode, create an appropriate task engine\n")
         new RegularTaskEngine(manager, performanceMetrics, blockingQueue) with TimeCheckpointTaskEngine
-      case "every-nth" =>
-        logger.info(s"Task: ${manager.taskName}. Regular module has an 'every-nth' checkpoint mode, create an appropriate task engine\n")
+      case EngineConstants.everyNthCheckpointMode =>
+        logger.info(s"Task: ${manager.taskName}. Regular module has an '${EngineConstants.everyNthCheckpointMode}' checkpoint mode, create an appropriate task engine\n")
         new RegularTaskEngine(manager, performanceMetrics, blockingQueue) with NumericalCheckpointTaskEngine
 
     }

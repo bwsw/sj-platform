@@ -3,7 +3,7 @@ package com.bwsw.sj.common.rest.entities.stream
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils
-import com.bwsw.sj.common.utils.StreamConstants
+import com.bwsw.sj.common.utils.Stream
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonProperty, JsonSubTypes, JsonTypeInfo}
 
@@ -11,10 +11,10 @@ import scala.collection.mutable.ArrayBuffer
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "stream-type")
 @JsonSubTypes(Array(
-  new Type(value = classOf[TStreamSjStreamData], name = StreamConstants.tStreamType),
-  new Type(value = classOf[KafkaSjStreamData], name = StreamConstants.kafkaStreamType),
-  new Type(value = classOf[ESSjStreamData], name = StreamConstants.esOutputType),
-  new Type(value = classOf[JDBCSjStreamData], name = StreamConstants.jdbcOutputType)
+  new Type(value = classOf[TStreamSjStreamData], name = Stream.tStreamType),
+  new Type(value = classOf[KafkaSjStreamData], name = Stream.kafkaStreamType),
+  new Type(value = classOf[ESSjStreamData], name = Stream.esOutputType),
+  new Type(value = classOf[JDBCSjStreamData], name = Stream.jdbcOutputType)
 ))
 class SjStreamData() extends ValidationUtils {
   @JsonProperty("stream-type") var streamType: String = null
@@ -58,8 +58,8 @@ class SjStreamData() extends ValidationUtils {
 
     Option(this.streamType) match {
       case Some(t) =>
-        if (!StreamConstants.streamTypes.contains(t)) {
-          errors += s"Unknown type '$t' provided. Must be one of: ${StreamConstants.streamTypes.mkString("[", ", ", "]")}"
+        if (!Stream.types.contains(t)) {
+          errors += s"Unknown type '$t' provided. Must be one of: ${Stream.types.mkString("[", ", ", "]")}"
         }
       case None =>
         errors += s"'Type' is required"

@@ -2,11 +2,12 @@ package com.bwsw.sj.common.rest.entities.service
 
 import com.bwsw.sj.common.DAL.model.AerospikeService
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.utils.Service
 
 import scala.collection.mutable.ArrayBuffer
 
 class ArspkDBServiceData() extends ServiceData() {
-  serviceType = "ArspkDB"
+  serviceType = Service.aerospikeType
   var namespace: String = null
   var provider: String = null
 

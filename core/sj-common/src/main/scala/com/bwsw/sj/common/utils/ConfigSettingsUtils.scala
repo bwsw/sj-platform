@@ -37,11 +37,11 @@ object ConfigSettingsUtils {
   }
 
   def getFrameworkJarName() = {
-    getStringConfigSetting("system" + "." + getStringConfigSetting(frameworkTag))
+    getStringConfigSetting(ConfigConstants.systemDomain + "." + getStringConfigSetting(frameworkTag))
   }
 
   def getTransactionGeneratorJarName() = {
-    getStringConfigSetting("system" + "." + getStringConfigSetting(transactionGeneratorTag))
+    getStringConfigSetting(ConfigConstants.systemDomain + "." + getStringConfigSetting(transactionGeneratorTag))
   }
 
   def getCrudRestHost() = {

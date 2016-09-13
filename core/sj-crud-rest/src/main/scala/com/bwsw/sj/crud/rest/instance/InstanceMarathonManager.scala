@@ -9,7 +9,7 @@ import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{SjStream, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.utils.{GeneratorConstants, ConfigSettingsUtils}
+import com.bwsw.sj.common.utils.{Generator, ConfigSettingsUtils}
 import com.bwsw.sj.common.rest.entities.MarathonRequest
 import org.apache.http.client.methods.{HttpDelete, HttpGet, HttpPost, HttpPut}
 import org.apache.http.entity.StringEntity
@@ -38,7 +38,7 @@ trait InstanceMarathonManager {
 
   def getGeneratorAppName(stream: TStreamSjStream) = {
     var name = ""
-    if (stream.generator.generatorType.equals(GeneratorConstants.perStream)) {
+    if (stream.generator.generatorType.equals(Generator.perStreamType)) {
       name = s"${stream.generator.service.name}-${stream.name}-tg"
     } else {
       name = s"${stream.generator.service.name}-global-tg"

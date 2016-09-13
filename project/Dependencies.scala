@@ -13,6 +13,7 @@ object Dependencies {
     "org.mongodb.morphia" % "morphia" % "1.1.1",
     "org.apache.commons" % "commons-io" % "1.3.2",
     "com.typesafe" % "config" % "1.3.0",
+    "org.apache.kafka" % "kafka_2.11" % "0.9.0.1",
     "org.elasticsearch" % "elasticsearch" % "2.3.2"
   ))
 
@@ -27,7 +28,6 @@ object Dependencies {
     ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
       .exclude("commons-logging", "commons-logging"),
     "org.elasticsearch" % "elasticsearch" % "2.3.2",
-    "org.apache.kafka" % "kafka_2.11" % "0.9.0.1",
     "com.typesafe.akka" % "akka-slf4j_2.11" % "2.4.4"
   ))
 

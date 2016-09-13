@@ -4,8 +4,8 @@ import java.net.URI
 
 import com.bwsw.sj.common.DAL.model.Generator
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{ServiceConstants, GeneratorConstants}
-import com.bwsw.sj.common.utils.GeneratorConstants._
+import com.bwsw.sj.common.utils.{Service, Generator}
+import com.bwsw.sj.common.utils.Generator._
 import com.fasterxml.jackson.annotation.JsonProperty
 
 import scala.collection.mutable.ArrayBuffer
@@ -17,7 +17,7 @@ case class GeneratorData(@JsonProperty("generator-type") generatorType: String,
   def asModelGenerator() = {
     val serviceDAO = ConnectionRepository.getServiceManager
     this.generatorType match {
-      case GeneratorConstants.local => new Generator(this.generatorType)
+      case Generator.`localType` => new Generator(this.generatorType)
       case _ => new Generator(this.generatorType, serviceDAO.get(this.service).get, this.instanceCount)
     }
   }
@@ -32,10 +32,10 @@ case class GeneratorData(@JsonProperty("generator-type") generatorType: String,
         if (this.instanceCount <= 0)
           errors += s"Generator 'instance-count' must be a positive integer for a non-local generator type"
 
-        if (!generatorTypes.contains(t)) {
-          errors += s"Unknown 'generator-type' provided. Must be one of: ${generatorTypes.mkString("[", ", ", "]")}"
+        if (!types.contains(t)) {
+          errors += s"Unknown 'generator-type' provided. Must be one of: ${types.mkString("[", ", ", "]")}"
         } else {
-          if (this.generatorType != GeneratorConstants.local) {
+          if (this.generatorType != Generator.localType) {
             //service
             Option(this.service) match {
               case None =>
@@ -57,8 +57,8 @@ case class GeneratorData(@JsonProperty("generator-type") generatorType: String,
                 if (serviceObj.isEmpty) {
                   errors += s"Generator 'service' does not exist"
                 } else {
-                  if (serviceObj.get.serviceType != ServiceConstants.zookeeperServiceType) {
-                    errors += s"Provided generator service '$serviceName' is not of type ${ServiceConstants.zookeeperServiceType}"
+                  if (serviceObj.get.serviceType != Service.zookeeperType) {
+                    errors += s"Provided generator service '$serviceName' is not of type ${Service.zookeeperType}"
                   }
                 }
             }

@@ -7,11 +7,14 @@ import java.util.jar.JarFile
 
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
+import com.bwsw.sj.common.DAL.model.Provider
+import com.bwsw.sj.common.DAL.model.Service
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, Instance, RegularInstance, Task}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.utils.{GeneratorConstants, ConfigConstants, StreamConstants, CassandraFactory}
+import com.bwsw.sj.common.utils.Generator
+import com.bwsw.sj.common.utils._
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.consumer.{Consumer, Options}
 import com.bwsw.tstreams.agents.producer
@@ -77,16 +80,16 @@ object DataFactory {
   def close() = cassandraFactory.close()
 
   def createProviders(providerService: GenericMongoService[Provider]) = {
-    val cassandraProvider = new Provider("cassandra-test-provider", "cassandra provider", Array(s"$cassandraHost:9042"), "", "", "cassandra")
+    val cassandraProvider = new Provider("cassandra-test-provider", "cassandra provider", Array(s"$cassandraHost:9042"), "", "", Provider.cassandraType)
     providerService.save(cassandraProvider)
 
-    //    val aerospikeProvider = new Provider("aerospike-test-provider", "aerospike provider", aerospikeHosts, "", "", "aerospike")
+    //    val aerospikeProvider = new Provider("aerospike-test-provider", "aerospike provider", aerospikeHosts, "", "", Provider.aerospikeType)
     //    providerService.save(aerospikeProvider)
 
-    val kafkaProvider = new Provider("kafka-test-provider", "kafka provider", kafkaHosts, "", "", "kafka")
+    val kafkaProvider = new Provider("kafka-test-provider", "kafka provider", kafkaHosts, "", "", Provider.kafkaType)
     providerService.save(kafkaProvider)
 
-    val zookeeperProvider = new Provider("zookeeper-test-provider", "zookeeper provider", zookeeperHosts, "", "", "zookeeper")
+    val zookeeperProvider = new Provider("zookeeper-test-provider", "zookeeper provider", zookeeperHosts, "", "", Provider.zookeeperType)
     providerService.save(zookeeperProvider)
   }
 
@@ -99,7 +102,7 @@ object DataFactory {
 
   def createServices(serviceManager: GenericMongoService[Service], providerService: GenericMongoService[Provider]) = {
     val cassProv = providerService.get("cassandra-test-provider").get
-    val cassService = new CassandraService("cassandra-test-service", "CassDB", "cassandra test service", cassProv, cassandraTestKeyspace)
+    val cassService = new CassandraService("cassandra-test-service", Service.cassandraType, "cassandra test service", cassProv, cassandraTestKeyspace)
     serviceManager.save(cassService)
 
     //    val aeroProv = providerService.get("aerospike-test-provider")
@@ -107,14 +110,14 @@ object DataFactory {
     //    serviceManager.save(aeroService)
 
     val zkProv = providerService.get("zookeeper-test-provider").get
-    val zkService = new ZKService("zookeeper-test-service", "ZKCoord", "zookeeper test service", zkProv, testNamespace)
+    val zkService = new ZKService("zookeeper-test-service", Service.zookeeperType, "zookeeper test service", zkProv, testNamespace)
     serviceManager.save(zkService)
 
     val kafkaProv = providerService.get("kafka-test-provider").get
-    val kafkaService = new KafkaService("kafka-test-service", "KfkQ", "kafka test service", kafkaProv, zkProv, testNamespace)
+    val kafkaService = new KafkaService("kafka-test-service", Service.kafkaType, "kafka test service", kafkaProv, zkProv, testNamespace)
     serviceManager.save(kafkaService)
 
-    val tstrqService = new TStreamService("tstream-test-service", "TstrQ", "tstream test service",
+    val tstrqService = new TStreamService("tstream-test-service", Service.tstreamsType, "tstream test service",
       cassProv, cassandraTestKeyspace, cassProv, cassandraTestKeyspace, zkProv, "unit")
     serviceManager.save(tstrqService)
   }
@@ -186,11 +189,11 @@ object DataFactory {
   }
 
   private def createInputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
-    val localGenerator = new Generator(GeneratorConstants.local)
+    val localGenerator = new Generator(Generator.localType)
 
     val tService = serviceManager.get("tstream-test-service").get
 
-    val s1 = new TStreamSjStream("test-input-tstream" + suffix, "test-input-tstream", partitions, tService, StreamConstants.tStreamType, Array("input"), localGenerator)
+    val s1 = new TStreamSjStream("test-input-tstream" + suffix, "test-input-tstream", partitions, tService, Stream.tStreamType, Array("input"), localGenerator)
     sjStreamService.save(s1)
 
     val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
@@ -207,11 +210,11 @@ object DataFactory {
   }
 
   private def createOutputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
-    val localGenerator = new Generator(GeneratorConstants.local)
+    val localGenerator = new Generator(Generator.localType)
 
     val tService = serviceManager.get("tstream-test-service").get
 
-    val s2 = new TStreamSjStream("test-output-tstream" + suffix, "test-output-tstream", partitions, tService, StreamConstants.tStreamType, Array("output", "some tags"), localGenerator)
+    val s2 = new TStreamSjStream("test-output-tstream" + suffix, "test-output-tstream", partitions, tService, Stream.tStreamType, Array("output", "some tags"), localGenerator)
     sjStreamService.save(s2)
 
     val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
@@ -245,10 +248,10 @@ object DataFactory {
     val kService = serviceManager.get("kafka-test-service").get.asInstanceOf[KafkaService]
     val replicationFactor = 1
 
-    val s1 = new KafkaSjStream("kafka-input1", "kafka-input1", partitions, kService, StreamConstants.kafkaStreamType, Array("kafka input"), replicationFactor)
+    val s1 = new KafkaSjStream("kafka-input1", "kafka-input1", partitions, kService, Stream.kafkaStreamType, Array("kafka input"), replicationFactor)
     sjStreamService.save(s1)
 
-    val s2 = new KafkaSjStream("kafka-input2", "kafka-input2", partitions, kService, StreamConstants.kafkaStreamType, Array("kafka input"), replicationFactor)
+    val s2 = new KafkaSjStream("kafka-input2", "kafka-input2", partitions, kService, Stream.kafkaStreamType, Array("kafka input"), replicationFactor)
     sjStreamService.save(s2)
 
     try {
@@ -276,27 +279,27 @@ object DataFactory {
   def createInstance(serviceManager: GenericMongoService[Service],
                      instanceService: GenericMongoService[Instance],
                      checkpointInterval: Int,
-                     stateManagement: String = "none",
+                     stateManagement: String = EngineConstants.noneStateMode,
                      stateFullCheckpoint: Int = 0
                       ) = {
     import scala.collection.JavaConverters._
 
     val instance = new RegularInstance()
     instance.name = instanceName
-    instance.moduleType = "regular-streaming"
+    instance.moduleType = EngineConstants.regularStreamingType
     instance.moduleName = "regular-streaming-stub"
     instance.moduleVersion = "1.0"
-    instance.status = "started"
+    instance.status = EngineConstants.started
     instance.description = "some description of test instance"
     instance.inputs = instanceInputs
     instance.outputs = instanceOutputs
-    instance.checkpointMode = "every-nth"
+    instance.checkpointMode = EngineConstants.everyNthCheckpointMode
     instance.checkpointInterval = checkpointInterval
     instance.stateManagement = stateManagement
     instance.stateFullCheckpoint = stateFullCheckpoint
     instance.parallelism = 1
     instance.options = """{"hey": "hey"}"""
-    instance.startFrom = "oldest"
+    instance.startFrom = EngineConstants.oldestStartMode
     instance.perTaskCores = 0.1
     instance.perTaskRam = 64
     instance.performanceReportingInterval = 10000
@@ -462,7 +465,12 @@ object DataFactory {
       zkSessionTimeout = 7000,
       zkConnectionTimeout = 7000,
       isLowPriorityToBeMaster = false,
-      transport = new TcpTransport("localhost:8030", 60 * 1000))
+      transport = new TcpTransport("localhost:8030", 60 * 1000),
+      1,
+      1,
+      2,
+      true,
+      true)
 
     val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
 

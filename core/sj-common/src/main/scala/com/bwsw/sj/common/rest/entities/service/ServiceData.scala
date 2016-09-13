@@ -3,8 +3,8 @@ package com.bwsw.sj.common.rest.entities.service
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils
-import com.bwsw.sj.common.utils.ServiceConstants
-import com.bwsw.sj.common.utils.ServiceConstants._
+import com.bwsw.sj.common.utils.Service
+import com.bwsw.sj.common.utils.Service._
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonProperty, JsonSubTypes, JsonTypeInfo}
 
@@ -13,13 +13,13 @@ import scala.collection.mutable.ArrayBuffer
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(Array(
-  new Type(value = classOf[CassDBServiceData], name = ServiceConstants.cassandraServiceType),
-  new Type(value = classOf[EsIndServiceData], name = ServiceConstants.elasticsearchServiceType),
-  new Type(value = classOf[KfkQServiceData], name = ServiceConstants.kafkaServiceType),
-  new Type(value = classOf[TstrQServiceData], name = ServiceConstants.tstreamsServiceType),
-  new Type(value = classOf[ZKCoordServiceData], name = ServiceConstants.tstreamsServiceType),
-  new Type(value = classOf[ArspkDBServiceData], name = ServiceConstants.aerospikeServiceType),
-  new Type(value = classOf[JDBCServiceData], name = ServiceConstants.jdbcServiceType)
+  new Type(value = classOf[CassDBServiceData], name = Service.cassandraType),
+  new Type(value = classOf[EsIndServiceData], name = Service.elasticsearchType),
+  new Type(value = classOf[KfkQServiceData], name = Service.kafkaType),
+  new Type(value = classOf[TstrQServiceData], name = Service.tstreamsType),
+  new Type(value = classOf[ZKCoordServiceData], name = Service.tstreamsType),
+  new Type(value = classOf[ArspkDBServiceData], name = Service.aerospikeType),
+  new Type(value = classOf[JDBCServiceData], name = Service.jdbcType)
 ))
 class ServiceData() extends ValidationUtils {
   @JsonProperty("type") var serviceType: String = null
@@ -45,7 +45,7 @@ class ServiceData() extends ValidationUtils {
       case None =>
         errors += s"'Type' is required"
       case Some(x) =>
-        if (!serviceTypes.contains(x)) errors += s"Unknown 'type' provided. Must be one of: ${serviceTypes.mkString("[", ", ", "]")}"
+        if (!types.contains(x)) errors += s"Unknown 'type' provided. Must be one of: ${types.mkString("[", ", ", "]")}"
     }
 
     // 'name' field
