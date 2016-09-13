@@ -1,10 +1,12 @@
 package com.bwsw.sj.crud.rest.utils
 
 import java.net.InetSocketAddress
-import java.util.Properties
+import java.text.MessageFormat
+import java.util.{Properties, ResourceBundle}
 
 import com.aerospike.client.Host
 import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.rest.entities.stream.SjStreamData
 import com.bwsw.sj.common.utils.ConfigSettingsUtils
 import com.bwsw.tstreams.common.CassandraConnectorConf
 import com.bwsw.tstreams.data.aerospike._
@@ -13,7 +15,7 @@ import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.services.BasicStreamService
 import kafka.admin.AdminUtils
-import kafka.common.TopicAlreadyMarkedForDeletionException
+import kafka.common.{TopicAlreadyMarkedForDeletionException, TopicExistsException}
 import kafka.utils.ZkUtils
 import org.I0Itec.zkclient.ZkConnection
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest
@@ -22,8 +24,52 @@ import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.transport.InetSocketTransportAddress
 import org.slf4j.LoggerFactory
 
+import scala.collection.mutable.ArrayBuffer
+
 object StreamUtil {
   private val logger = LoggerFactory.getLogger(getClass.getName)
+
+  def chackAndCreate(initialData: SjStreamData, stream: SjStream): ArrayBuffer[String] = {
+    val errors = new ArrayBuffer[String]()
+    stream match {
+      case s: TStreamSjStream =>
+        val streamCheckResult = StreamUtil.checkAndCreateTStream(s, initialData.force)
+        streamCheckResult match {
+          case Left(err) => errors += err
+          case _ =>
+        }
+      case s: KafkaSjStream =>
+        try {
+          val streamCheckResult = StreamUtil.checkAndCreateKafkaTopic(s, initialData.force)
+          streamCheckResult match {
+            case Left(err) => errors += err
+            case _ =>
+          }
+        } catch {
+          case e: TopicExistsException =>
+            val messages = ResourceBundle.getBundle("messages")
+            errors += MessageFormat.format(
+              messages.getString("rest.streams.create.kafka.cannot"),
+              errors.mkString("\n")
+            )
+        }
+      case s: ESSjStream =>
+        val streamCheckResult = StreamUtil.checkAndCreateEsStream(s, initialData.force)
+        streamCheckResult match {
+          case Left(err) => errors += err
+          case _ =>
+        }
+      case s: JDBCSjStream =>
+        val streamCheckResult = StreamUtil.checkAndCreateJdbcStream(s, initialData.force)
+        streamCheckResult match {
+          case Left(err) => errors += err
+          case _ =>
+        }
+    }
+
+    errors
+  }
+
 
   /**
    * Check t-stream for existence

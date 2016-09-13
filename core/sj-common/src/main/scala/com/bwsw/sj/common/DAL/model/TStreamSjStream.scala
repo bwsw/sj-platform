@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.DAL.model
 
-import com.bwsw.sj.common.rest.entities.stream.{GeneratorData, TStreamSjStreamData}
+import com.bwsw.sj.common.rest.entities.stream.TStreamSjStreamData
 import org.mongodb.morphia.annotations.Embedded
 
 class TStreamSjStream() extends SjStream {
@@ -30,15 +30,8 @@ class TStreamSjStream() extends SjStream {
 
 
     streamData.partitions = this.partitions
-    streamData.generator = createGeneratorData()
+    streamData.generator = this.generator.asProtocolGenerator()
 
     streamData
-  }
-
-  private def createGeneratorData() = {
-    this.generator.generatorType match {
-      case "local" => new GeneratorData(this.generator.generatorType)
-      case _ => new GeneratorData(this.generator.generatorType, this.generator.service.name, this.generator.instanceCount)
-    }
   }
 }

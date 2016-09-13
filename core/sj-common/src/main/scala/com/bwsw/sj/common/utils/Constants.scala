@@ -56,13 +56,13 @@ object GeneratorConstants {
 }
 
 object ServiceConstants {
-  val cassandraServiceType = "CassDB"
-  val elasticsearchServiceType = "ESInd"
-  val kafkaServiceType = "KfkQ"
-  val tstreamsServiceType = "TstrQ"
-  val zookeeperServiceType = "ZKCoord"
-  val aerospikeServiceType = "ArspkDB"
-  val jdbcServiceType = "JDBC"
+  final val cassandraServiceType = "CassDB"
+  final val elasticsearchServiceType = "ESInd"
+  final val kafkaServiceType = "KfkQ"
+  final val tstreamsServiceType = "TstrQ"
+  final val zookeeperServiceType = "ZKCoord"
+  final val aerospikeServiceType = "ArspkDB"
+  final val jdbcServiceType = "JDBC"
 
   val serviceTypes = Set(
     cassandraServiceType,

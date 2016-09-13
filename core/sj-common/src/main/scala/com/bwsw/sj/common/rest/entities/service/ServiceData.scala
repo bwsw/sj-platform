@@ -3,6 +3,7 @@ package com.bwsw.sj.common.rest.entities.service
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils
+import com.bwsw.sj.common.utils.ServiceConstants
 import com.bwsw.sj.common.utils.ServiceConstants._
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonProperty, JsonSubTypes, JsonTypeInfo}
@@ -12,13 +13,13 @@ import scala.collection.mutable.ArrayBuffer
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(Array(
-  new Type(value = classOf[CassDBServiceData], name = "CassDB"),
-  new Type(value = classOf[EsIndServiceData], name = "ESInd"),
-  new Type(value = classOf[KfkQServiceData], name = "KfkQ"),
-  new Type(value = classOf[TstrQServiceData], name = "TstrQ"),
-  new Type(value = classOf[ZKCoordServiceData], name = "ZKCoord"),
-  new Type(value = classOf[ArspkDBServiceData], name = "ArspkDB"),
-  new Type(value = classOf[JDBCServiceData], name = "JDBC")
+  new Type(value = classOf[CassDBServiceData], name = ServiceConstants.cassandraServiceType),
+  new Type(value = classOf[EsIndServiceData], name = ServiceConstants.elasticsearchServiceType),
+  new Type(value = classOf[KfkQServiceData], name = ServiceConstants.kafkaServiceType),
+  new Type(value = classOf[TstrQServiceData], name = ServiceConstants.tstreamsServiceType),
+  new Type(value = classOf[ZKCoordServiceData], name = ServiceConstants.tstreamsServiceType),
+  new Type(value = classOf[ArspkDBServiceData], name = ServiceConstants.aerospikeServiceType),
+  new Type(value = classOf[JDBCServiceData], name = ServiceConstants.jdbcServiceType)
 ))
 class ServiceData() extends ValidationUtils {
   @JsonProperty("type") var serviceType: String = null

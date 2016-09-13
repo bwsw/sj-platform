@@ -5,13 +5,12 @@ import java.text.MessageFormat
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.Instance
-import com.bwsw.sj.common.utils.{StreamConstants, EngineConstants}
-import EngineConstants._
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.stream.SjStreamData
-import com.bwsw.sj.crud.rest.utils.{CompletionUtils, StreamUtil}
+import com.bwsw.sj.common.utils.EngineConstants._
+import com.bwsw.sj.common.utils.StreamConstants
+import com.bwsw.sj.crud.rest.utils.{StreamUtil, CompletionUtils}
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
-import com.bwsw.sj.crud.rest.validator.stream.StreamValidator
 
 import scala.collection.mutable
 
@@ -22,16 +21,20 @@ trait SjStreamsApi extends Directives with SjCrudValidator with CompletionUtils 
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>
           val data: SjStreamData = serializer.deserialize[SjStreamData](getEntityFromContext(ctx))
-
-          val stream = createStream(data)
-          val errors = StreamValidator.validate(data, stream)
+          val errors = data.validate()
           var response: RestResponse = BadRequestRestResponse(Map("message" ->
             MessageFormat.format(messages.getString("rest.streams.stream.cannot.create"), errors.mkString(";"))))
           if (errors.isEmpty) {
-            streamDAO.save(stream)
-            response = CreatedRestResponse(Map("message" ->
-              MessageFormat.format(messages.getString("rest.streams.stream.created"), stream.name))
-            )
+            val stream = data.asModelStream()
+            errors ++= StreamUtil.chackAndCreate(data, stream)
+            response = BadRequestRestResponse(Map("message" ->
+            MessageFormat.format(messages.getString("rest.streams.stream.cannot.create"), errors.mkString(";"))))
+            if (errors.isEmpty) {
+              streamDAO.save(stream)
+              response = CreatedRestResponse(Map("message" ->
+                MessageFormat.format(messages.getString("rest.streams.stream.created"), data.name))
+              )
+            }
           }
 
           ctx.complete(restResponseToHttpResponse(response))

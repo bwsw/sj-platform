@@ -1,12 +1,10 @@
-package com.bwsw.sj.crud.rest.validator.stream
+package com.bwsw.sj.common.rest.entities.stream
 
 import java.net.URI
 
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.GeneratorConstants
-import GeneratorConstants._
-import com.bwsw.sj.common.rest.entities.stream.GeneratorData
+import com.bwsw.sj.common.utils.GeneratorConstants._
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
