@@ -6,9 +6,9 @@ import com.bwsw.sj.common.DAL.model.SjStream
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, OutputInstanceMetadata, RegularInstanceMetadata}
-import com.bwsw.sj.common.utils.EngineConstants
-import com.bwsw.sj.common.utils.EngineConstants._
-import com.bwsw.sj.common.utils.Service._
+import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.common.utils.EngineLiterals._
+import com.bwsw.sj.common.utils.ServiceLiterals._
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.JavaConversions._
@@ -80,7 +80,7 @@ trait ValidationUtils {
 
     val inputs = inputStreams.map { input =>
       val mode = getStreamMode(input)
-      val name = input.replaceAll(s"/${EngineConstants.splitStreamMode}|/${EngineConstants.fullStreamMode}", "")
+      val name = input.replaceAll(s"/${EngineLiterals.splitStreamMode}|/${EngineLiterals.fullStreamMode}", "")
       InputStream(name, mode, partitionsCount(name))
     }
     val parallelism = instance.parallelism.asInstanceOf[Int]
@@ -99,8 +99,8 @@ trait ValidationUtils {
         val startPartition = stream.currentPartition
         var endPartition = startPartition + countFreePartitions
         inputStream.mode match {
-          case EngineConstants.fullStreamMode => endPartition = startPartition + countFreePartitions
-          case EngineConstants.splitStreamMode =>
+          case EngineLiterals.fullStreamMode => endPartition = startPartition + countFreePartitions
+          case EngineLiterals.splitStreamMode =>
             val cntTaskStreamPartitions = countFreePartitions / tasksNotProcessed
             streams.update(inputStream.name, StreamProcess(startPartition + cntTaskStreamPartitions, countFreePartitions - cntTaskStreamPartitions))
             if (Math.abs(cntTaskStreamPartitions - countFreePartitions) >= cntTaskStreamPartitions) {
@@ -121,10 +121,10 @@ trait ValidationUtils {
   }
 
   def getStreamMode(name: String) = {
-    if (name.contains(s"/${EngineConstants.fullStreamMode}")) {
-      EngineConstants.fullStreamMode
+    if (name.contains(s"/${EngineLiterals.fullStreamMode}")) {
+      EngineLiterals.fullStreamMode
     } else {
-      EngineConstants.splitStreamMode
+      EngineLiterals.splitStreamMode
     }
   }
 

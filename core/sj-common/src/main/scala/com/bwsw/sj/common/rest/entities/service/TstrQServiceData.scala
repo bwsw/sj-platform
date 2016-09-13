@@ -2,13 +2,13 @@ package com.bwsw.sj.common.rest.entities.service
 
 import com.bwsw.sj.common.DAL.model.TStreamService
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{Service, Provider}
+import com.bwsw.sj.common.utils.{ServiceLiterals, ProviderLiterals}
 import com.fasterxml.jackson.annotation.JsonProperty
 
 import scala.collection.mutable.ArrayBuffer
 
 class TstrQServiceData() extends ServiceData() {
-  serviceType = Service.tstreamsType
+  serviceType = ServiceLiterals.tstreamsType
   @JsonProperty("metadata-provider") var metadataProvider: String = null
   @JsonProperty("metadata-namespace") var metadataNamespace: String = null
   @JsonProperty("data-provider") var dataProvider: String = null
@@ -44,8 +44,8 @@ class TstrQServiceData() extends ServiceData() {
         val metadataProviderObj = providerDAO.get(x)
         metadataProviderObj match {
           case Some(provider) =>
-            if (provider.providerType != Provider.cassandraType) {
-              errors += s"'Metadata-provider' must be of type '${Provider.cassandraType}' " +
+            if (provider.providerType != ProviderLiterals.cassandraType) {
+              errors += s"'Metadata-provider' must be of type '${ProviderLiterals.cassandraType}' " +
                 s"('${provider.providerType}' is given instead)"
             }
           case None => errors += s"Metadata-provider '$x' does not exist"
@@ -66,7 +66,7 @@ class TstrQServiceData() extends ServiceData() {
           errors += s"'data-provider' can not be empty"
         } else {
           val dataProviderObj = providerDAO.get(x)
-          val allowedTypes = List(Provider.cassandraType, Provider.aerospikeType)
+          val allowedTypes = List(ProviderLiterals.cassandraType, ProviderLiterals.aerospikeType)
           dataProviderObj match {
             case Some(provider) =>
               if (!allowedTypes.contains(provider.providerType)) {
@@ -90,8 +90,8 @@ class TstrQServiceData() extends ServiceData() {
         val lockProviderObj = providerDAO.get(x)
         lockProviderObj match {
           case Some(provider) =>
-            if (provider.providerType != Provider.zookeeperType) {
-              errors += s"'Lock-provider' must be of type '${Provider.zookeeperType}' " +
+            if (provider.providerType != ProviderLiterals.zookeeperType) {
+              errors += s"'Lock-provider' must be of type '${ProviderLiterals.zookeeperType}' " +
                 s"('${provider.providerType}' is given instead)"
             }
           case None =>

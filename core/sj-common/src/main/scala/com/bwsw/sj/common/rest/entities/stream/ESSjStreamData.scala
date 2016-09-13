@@ -2,12 +2,12 @@ package com.bwsw.sj.common.rest.entities.stream
 
 import com.bwsw.sj.common.DAL.model.ESSjStream
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{Service, Stream}
+import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
 
 import scala.collection.mutable.ArrayBuffer
 
 class ESSjStreamData() extends SjStreamData() {
-  streamType = Stream.esOutputType
+  streamType = StreamLiterals.esOutputType
 
   override def validate() = {
     val serviceDAO = ConnectionRepository.getServiceManager
@@ -24,9 +24,9 @@ class ESSjStreamData() extends SjStreamData() {
           case None =>
             errors += s"Service '${this.service}' does not exist"
           case Some(service) =>
-            if (service.serviceType != Service.elasticsearchType) {
-              errors += s"Service for ${Stream.esOutputType} stream " +
-                s"must be of '${Service.elasticsearchType}' type ('${service.serviceType}' is given instead)"
+            if (service.serviceType != ServiceLiterals.elasticsearchType) {
+              errors += s"Service for ${StreamLiterals.esOutputType} stream " +
+                s"must be of '${ServiceLiterals.elasticsearchType}' type ('${service.serviceType}' is given instead)"
             }
         }
     }

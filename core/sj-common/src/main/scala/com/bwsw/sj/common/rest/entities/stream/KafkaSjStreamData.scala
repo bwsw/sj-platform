@@ -2,13 +2,13 @@ package com.bwsw.sj.common.rest.entities.stream
 
 import com.bwsw.sj.common.DAL.model.KafkaSjStream
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{Service, Stream}
+import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonProperty
 
 import scala.collection.mutable.ArrayBuffer
 
 class KafkaSjStreamData() extends SjStreamData() {
-  streamType = Stream.kafkaStreamType
+  streamType = StreamLiterals.kafkaStreamType
   var partitions: Int = 0
   @JsonProperty("replication-factor") var replicationFactor: Int = 0
 
@@ -27,9 +27,9 @@ class KafkaSjStreamData() extends SjStreamData() {
           case None =>
             errors += s"Service '${this.service}' does not exist"
           case Some(service) =>
-            if (service.serviceType != Service.kafkaType) {
-              errors += s"Service for ${Stream.kafkaStreamType} stream " +
-                s"must be of '${Service.kafkaType}' type ('${service.serviceType}' is given instead)"
+            if (service.serviceType != ServiceLiterals.kafkaType) {
+              errors += s"Service for ${StreamLiterals.kafkaStreamType} stream " +
+                s"must be of '${ServiceLiterals.kafkaType}' type ('${service.serviceType}' is given instead)"
             }
         }
     }

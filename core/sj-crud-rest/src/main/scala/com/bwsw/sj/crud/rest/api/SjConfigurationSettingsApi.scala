@@ -5,7 +5,7 @@ import java.text.MessageFormat
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.config.ConfigurationSettingData
-import com.bwsw.sj.common.utils.ConfigConstants
+import com.bwsw.sj.common.utils.ConfigLiterals
 import com.bwsw.sj.crud.rest.exceptions.UnknownConfigSettingDomain
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
@@ -16,9 +16,9 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator with Co
     pathPrefix("config") {
       pathPrefix("settings") {
         pathPrefix(Segment) { (domain: String) =>
-          if (!ConfigConstants.domains.contains(domain)) throw UnknownConfigSettingDomain(
+          if (!ConfigLiterals.domains.contains(domain)) throw UnknownConfigSettingDomain(
             MessageFormat.format(messages.getString("rest.config.setting.domain.unknown"),
-              ConfigConstants.domains.mkString(", ")),
+              ConfigLiterals.domains.mkString(", ")),
             domain)
           pathEndOrSingleSlash {
             post { (ctx: RequestContext) =>

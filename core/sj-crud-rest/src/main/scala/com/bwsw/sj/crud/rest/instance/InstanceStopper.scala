@@ -1,7 +1,7 @@
 package com.bwsw.sj.crud.rest.instance
 
 import com.bwsw.sj.common.DAL.model.module.{InputInstance, Instance}
-import com.bwsw.sj.common.utils.EngineConstants
+import com.bwsw.sj.common.utils.EngineLiterals
 import org.apache.http.util.EntityUtils
 import org.slf4j.LoggerFactory
 import scala.collection.JavaConversions._
@@ -17,7 +17,7 @@ import scala.collection.JavaConverters._
 class InstanceStopper(instance: Instance, delay: Long) extends Runnable with InstanceMarathonManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
 
-  import EngineConstants._
+  import EngineLiterals._
 
   def run() = {
     logger.debug(s"Instance: ${instance.name}. Stop instance.")

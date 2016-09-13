@@ -1,11 +1,11 @@
 package com.bwsw.sj.common.DAL.model
 
 import com.bwsw.sj.common.rest.entities.service.{ServiceData, ZKCoordServiceData}
-import com.bwsw.sj.common.utils.Service
+import com.bwsw.sj.common.utils.ServiceLiterals
 import org.mongodb.morphia.annotations.Reference
 
 class ZKService() extends Service {
-  serviceType = Service.zookeeperType
+  serviceType = ServiceLiterals.zookeeperType
   @Reference var provider: Provider = null
   var namespace: String = null
 

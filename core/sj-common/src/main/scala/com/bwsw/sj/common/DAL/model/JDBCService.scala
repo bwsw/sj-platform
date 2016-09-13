@@ -1,7 +1,7 @@
 package com.bwsw.sj.common.DAL.model
 
 import com.bwsw.sj.common.rest.entities.service.{JDBCServiceData, ServiceData}
-import com.bwsw.sj.common.utils.Service
+import com.bwsw.sj.common.utils.ServiceLiterals
 import org.mongodb.morphia.annotations.Reference
 
 /**
@@ -9,7 +9,7 @@ import org.mongodb.morphia.annotations.Reference
   * @author Kseniya Tomskikh
   */
 class JDBCService() extends Service {
-  serviceType = Service.jdbcType
+  serviceType = ServiceLiterals.jdbcType
   @Reference var provider: Provider = null
   var namespace: String = null
   var login: String = null

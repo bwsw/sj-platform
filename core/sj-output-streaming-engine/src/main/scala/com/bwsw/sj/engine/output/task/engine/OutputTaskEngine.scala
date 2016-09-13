@@ -8,7 +8,7 @@ import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.DAL.model.{ESService, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.EngineConstants
+import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.engine.input.TStreamTaskInputService
 import com.bwsw.sj.engine.core.entities._
@@ -107,7 +107,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     prepareES()
 
     while (true) {
-      val maybeEnvelope = blockingQueue.get(EngineConstants.eventWaitTimeout)
+      val maybeEnvelope = blockingQueue.get(EngineLiterals.eventWaitTimeout)
 
       if (maybeEnvelope != null) {
         val envelope = envelopeSerializer.deserialize[Envelope](maybeEnvelope).asInstanceOf[TStreamEnvelope]

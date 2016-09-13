@@ -3,7 +3,7 @@ package com.bwsw.sj.engine.regular.task
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.engine.StreamingExecutor
-import com.bwsw.sj.common.utils.Stream
+import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.environment.{RegularEnvironmentManager, EnvironmentManager, RegularModuleOutput}
 import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.tstreams.agents.consumer.Consumer
@@ -26,9 +26,9 @@ class RegularTaskManager() extends TaskManager {
 
 
   assert(agentsPorts.length >=
-    (inputs.count(x => x._1.streamType == Stream.tStreamType) + instance.outputs.length + 3),
+    (inputs.count(x => x._1.streamType == StreamLiterals.tStreamType) + instance.outputs.length + 3),
     "Not enough ports for t-stream consumers/producers." +
-      s"${inputs.count(x => x._1.streamType == Stream.tStreamType) + instance.outputs.length + 3} ports are required")
+      s"${inputs.count(x => x._1.streamType == StreamLiterals.tStreamType) + instance.outputs.length + 3} ports are required")
 
   def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = {
     logger.debug(s"Task: $taskName. Start loading of executor class from module jar\n")

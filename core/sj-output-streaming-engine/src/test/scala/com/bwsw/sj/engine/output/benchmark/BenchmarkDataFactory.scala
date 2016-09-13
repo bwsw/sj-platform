@@ -12,9 +12,9 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, OutputInstance, Task}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.utils.Generator
-import com.bwsw.sj.common.utils.Provider
-import com.bwsw.sj.common.utils.Service
+import com.bwsw.sj.common.utils.GeneratorLiterals
+import com.bwsw.sj.common.utils.ProviderLiterals
+import com.bwsw.sj.common.utils.ServiceLiterals
 import com.bwsw.sj.common.utils._
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.consumer
@@ -223,7 +223,7 @@ object BenchmarkDataFactory {
     val esProvider = new Provider()
     esProvider.name = esProviderName
     esProvider.hosts = Array("127.0.0.1:9300")
-    esProvider.providerType = Provider.elasticsearchType
+    esProvider.providerType = ProviderLiterals.elasticsearchType
     esProvider.login = ""
     esProvider.password = ""
     providerService.save(esProvider)
@@ -231,7 +231,7 @@ object BenchmarkDataFactory {
     val metadataProvider = new Provider()
     metadataProvider.name = metadataProviderName
     metadataProvider.hosts = Array("127.0.0.1:9042")
-    metadataProvider.providerType = Provider.cassandraType
+    metadataProvider.providerType = ProviderLiterals.cassandraType
     metadataProvider.login = ""
     metadataProvider.password = ""
     providerService.save(metadataProvider)
@@ -239,7 +239,7 @@ object BenchmarkDataFactory {
     val dataProvider = new Provider()
     dataProvider.name = dataProviderName
     dataProvider.hosts = Array("127.0.0.1:3000", "127.0.0.1:3001")
-    dataProvider.providerType = Provider.aerospikeType
+    dataProvider.providerType = ProviderLiterals.aerospikeType
     dataProvider.login = ""
     dataProvider.password = ""
     providerService.save(dataProvider)
@@ -247,7 +247,7 @@ object BenchmarkDataFactory {
     val lockProvider = new Provider()
     lockProvider.name = lockProviderName
     lockProvider.hosts = Array("127.0.0.1:2181")
-    lockProvider.providerType = Provider.zookeeperType
+    lockProvider.providerType = ProviderLiterals.zookeeperType
     lockProvider.login = ""
     lockProvider.password = ""
     providerService.save(lockProvider)
@@ -257,7 +257,7 @@ object BenchmarkDataFactory {
     val esProv: Provider = providerService.get(esProviderName).get
     val esService: ESService = new ESService()
     esService.name = esServiceName
-    esService.serviceType = Service.elasticsearchType
+    esService.serviceType = ServiceLiterals.elasticsearchType
     esService.description = "es service for benchmarks"
     esService.provider = esProv
     esService.index = "bench"
@@ -270,7 +270,7 @@ object BenchmarkDataFactory {
     val lockProvider: Provider = providerService.get(lockProviderName).get
     val tStreamService: TStreamService = new TStreamService()
     tStreamService.name = tServiceName
-    tStreamService.serviceType = Service.tstreamsType
+    tStreamService.serviceType = ServiceLiterals.tstreamsType
     tStreamService.description = "t-streams service for benchmarks"
     tStreamService.metadataProvider = metadataProvider
     tStreamService.metadataNamespace = metadataNamespace
@@ -282,7 +282,7 @@ object BenchmarkDataFactory {
 
     val zkService = new ZKService()
     zkService.name = zkServiceName
-    zkService.serviceType = Service.zookeeperType
+    zkService.serviceType = ServiceLiterals.zookeeperType
     zkService.description = "zk service for benchmarks"
     zkService.provider = lockProvider
     zkService.namespace = "bench"
@@ -307,7 +307,7 @@ object BenchmarkDataFactory {
     tStream.service = tService
     tStream.tags = Array("tag1")
     tStream.partitions = partitions
-    tStream.generator = new Generator(Generator.localType)
+    tStream.generator = new Generator(GeneratorLiterals.localType)
     streamService.save(tStream)
 
     val metadataStorageFactory = new MetadataStorageFactory
@@ -345,10 +345,10 @@ object BenchmarkDataFactory {
 
     val instance = new OutputInstance()
     instance.name = instanceName
-    instance.moduleType = EngineConstants.outputStreamingType
+    instance.moduleType = EngineLiterals.outputStreamingType
     instance.moduleName = "com.bwsw.stub.output-bench-test"
     instance.moduleVersion = "1.0"
-    instance.status = EngineConstants.started
+    instance.status = EngineLiterals.started
     instance.description = "some description of test instance"
     instance.inputs = Array(tStreamName)
     instance.outputs = Array(esStreamName)
@@ -356,7 +356,7 @@ object BenchmarkDataFactory {
     instance.checkpointInterval = checkpointInterval
     instance.parallelism = 2
     instance.options = """{"hey": "hey"}"""
-    instance.startFrom = EngineConstants.oldestStartMode
+    instance.startFrom = EngineLiterals.oldestStartMode
     instance.perTaskCores = 0.1
     instance.perTaskRam = 64
     instance.performanceReportingInterval = 10000

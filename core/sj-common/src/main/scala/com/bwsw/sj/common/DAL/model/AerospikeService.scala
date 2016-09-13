@@ -1,11 +1,11 @@
 package com.bwsw.sj.common.DAL.model
 
 import com.bwsw.sj.common.rest.entities.service.{ServiceData, ArspkDBServiceData}
-import com.bwsw.sj.common.utils.Service
+import com.bwsw.sj.common.utils.ServiceLiterals
 import org.mongodb.morphia.annotations.Reference
 
 class AerospikeService() extends Service {
-  serviceType = Service.aerospikeType
+  serviceType = ServiceLiterals.aerospikeType
   @Reference var provider: Provider = null
   var namespace: String = null
 

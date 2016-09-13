@@ -2,7 +2,7 @@ package com.bwsw.sj.common.utils
 
 import java.util.UUID
 
-object EngineConstants {
+object EngineLiterals {
   def persistentQueuePath = UUID.randomUUID().toString //todo: yet t-streams can't remove persistent queue
   final val persistentBlockingQueue = "persistentBlockingQueue"
   final val eventWaitTimeout = 1000
@@ -61,7 +61,7 @@ object EngineConstants {
   val streamModes = Array(splitStreamMode, fullStreamMode)
 }
 
-object Stream {
+object StreamLiterals {
   final val inputDummy = "input"
   final val tStreamType = "stream.t-stream"
   final val kafkaStreamType = "stream.kafka"
@@ -70,14 +70,14 @@ object Stream {
   val types = Set(tStreamType, kafkaStreamType, esOutputType, jdbcOutputType)
 }
 
-object Generator {
+object GeneratorLiterals {
   final val localType = "local"
   final val globalType = "global"
   final val perStreamType = "per-stream"
   val types = Set(globalType, localType, perStreamType)
 }
 
-object Service {
+object ServiceLiterals {
   final val cassandraType = "CassDB"
   final val elasticsearchType = "ESInd"
   final val kafkaType = "KfkQ"
@@ -96,16 +96,16 @@ object Service {
     jdbcType
   )
   val typeToProviderType = Map(
-    cassandraType -> Provider.cassandraType,
-    elasticsearchType -> Provider.elasticsearchType,
-    kafkaType -> Provider.kafkaType,
-    zookeeperType -> Provider.zookeeperType,
-    aerospikeType -> Provider.aerospikeType,
-    jdbcType -> Provider.jdbcType
+    cassandraType -> ProviderLiterals.cassandraType,
+    elasticsearchType -> ProviderLiterals.elasticsearchType,
+    kafkaType -> ProviderLiterals.kafkaType,
+    zookeeperType -> ProviderLiterals.zookeeperType,
+    aerospikeType -> ProviderLiterals.aerospikeType,
+    jdbcType -> ProviderLiterals.jdbcType
   )
 }
 
-object Provider {
+object ProviderLiterals {
   final val cassandraType = "cassandra"
   final val aerospikeType = "aerospike"
   final val zookeeperType = "zookeeper"
@@ -115,7 +115,7 @@ object Provider {
   val providerTypes = Set(cassandraType,aerospikeType, zookeeperType, kafkaType, elasticsearchType, jdbcType)
 }
 
-object ConfigConstants {
+object ConfigLiterals {
   final val systemDomain = "system"
   final val tstreamsDomain = "t-streams"
   final val kafkaDomain = "kafka"

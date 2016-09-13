@@ -3,9 +3,9 @@ package com.bwsw.sj.crud.rest.validator.module
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{KafkaService, KafkaSjStream, TStreamService, TStreamSjStream}
 import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, SpecificationData, RegularInstanceMetadata}
-import com.bwsw.sj.common.utils.EngineConstants
-import com.bwsw.sj.common.utils.EngineConstants._
-import com.bwsw.sj.common.utils.Stream._
+import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.common.utils.EngineLiterals._
+import com.bwsw.sj.common.utils.StreamLiterals._
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable.ArrayBuffer
@@ -51,7 +51,7 @@ class RegularStreamingValidator extends StreamingModuleValidator {
       errors += s"Unknown value of 'state-management' attribute: '${parameters.stateManagement}'. " +
         s"'State-management' must be one of: ${stateManagementModes.mkString("[", ", ", "]")}"
     } else {
-      if (parameters.stateManagement != EngineConstants.noneStateMode) {
+      if (parameters.stateManagement != EngineLiterals.noneStateMode) {
         // 'state-full-checkpoint' field
         if (parameters.stateFullCheckpoint <= 0) {
           errors += s"'State-full-checkpoint' attribute must be greater than zero"

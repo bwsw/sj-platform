@@ -5,7 +5,7 @@ import java.net.{URI, URISyntaxException}
 import com.bwsw.sj.common.DAL.model.Provider
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils
-import com.bwsw.sj.common.utils.Provider._
+import com.bwsw.sj.common.utils.ProviderLiterals._
 import com.fasterxml.jackson.annotation.JsonProperty
 
 import scala.collection.mutable.ArrayBuffer

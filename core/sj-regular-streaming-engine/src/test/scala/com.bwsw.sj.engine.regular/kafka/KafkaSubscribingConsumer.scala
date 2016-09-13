@@ -5,7 +5,7 @@ import java.util.concurrent.Executors
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{Stream, EngineConstants}
+import com.bwsw.sj.common.utils.{StreamLiterals, EngineLiterals}
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.KafkaEnvelope
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -19,7 +19,7 @@ object KafkaSubscribingConsumer {
     val logger = LoggerFactory.getLogger(this.getClass)
     val executorService = Executors.newCachedThreadPool()
     var kafkaMessageAmount = 0
-    val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(EngineConstants.persistentBlockingQueue)
+    val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(EngineLiterals.persistentBlockingQueue)
     val kafkaConsumer = createKafkaConsumer(List(("test", List(0, 2))))
     val timeout = 10
 
@@ -32,7 +32,7 @@ object KafkaSubscribingConsumer {
       (service.get(x._1).get, x._2)
     })
 
-    val kafkaInputs = inputs.filter(x => x._1.streamType == Stream.kafkaStreamType)
+    val kafkaInputs = inputs.filter(x => x._1.streamType == StreamLiterals.kafkaStreamType)
 
     executorService.execute(new Runnable() {
       def run() = {

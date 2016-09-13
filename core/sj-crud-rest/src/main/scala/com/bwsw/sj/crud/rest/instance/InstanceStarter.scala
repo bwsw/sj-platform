@@ -6,7 +6,7 @@ import java.util
 import com.bwsw.sj.common.DAL.ConnectionConstants
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{TStreamSjStream, ZKService}
-import com.bwsw.sj.common.utils.{Generator, Stream, EngineConstants, ConfigSettingsUtils}
+import com.bwsw.sj.common.utils.{GeneratorLiterals, StreamLiterals, EngineLiterals, ConfigSettingsUtils}
 import com.bwsw.sj.common.rest.entities.MarathonRequest
 import com.bwsw.sj.crud.rest.utils.StreamUtil
 import com.twitter.common.quantity.{Amount, Time}
@@ -25,7 +25,7 @@ import scala.collection.JavaConversions._
  */
 class InstanceStarter(instance: Instance, delay: Long) extends Runnable with InstanceMarathonManager {
 
-  import EngineConstants._
+  import EngineLiterals._
   import scala.collection.JavaConverters._
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
@@ -59,8 +59,8 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable with Ins
           streams = streams.union(instance.inputs.map(_.replaceAll("/split|/full", "")))
         }
         val streamsToStart = streams.flatMap(name => streamDAO.get(name))
-          .filter(stream => stream.streamType.equals(Stream.tStreamType))
-          .filter(stream => !stream.asInstanceOf[TStreamSjStream].generator.generatorType.equals(Generator.localType))
+          .filter(stream => stream.streamType.equals(StreamLiterals.tStreamType))
+          .filter(stream => !stream.asInstanceOf[TStreamSjStream].generator.generatorType.equals(GeneratorLiterals.localType))
         startGenerators(streamsToStart.map(stream => stream.asInstanceOf[TStreamSjStream]).toSet)
 
         val stages = Map(instance.stages.asScala.toList: _*)
@@ -239,7 +239,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable with Ins
     val generatorProvider = zkService.provider
     var prefix = zkService.namespace
     val taskId = StreamUtil.createGeneratorTaskName(stream)
-    if (stream.generator.generatorType.equals(Generator.perStreamType)) {
+    if (stream.generator.generatorType.equals(GeneratorLiterals.perStreamType)) {
       prefix += s"/${stream.name}"
     } else {
       prefix += "/global"

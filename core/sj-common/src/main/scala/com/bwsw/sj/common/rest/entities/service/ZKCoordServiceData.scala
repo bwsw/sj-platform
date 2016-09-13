@@ -2,12 +2,12 @@ package com.bwsw.sj.common.rest.entities.service
 
 import com.bwsw.sj.common.DAL.model.ZKService
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.Service
+import com.bwsw.sj.common.utils.ServiceLiterals
 
 import scala.collection.mutable.ArrayBuffer
 
 class ZKCoordServiceData() extends ServiceData() {
-  serviceType = Service.zookeeperType
+  serviceType = ServiceLiterals.zookeeperType
   var namespace: String = null
   var provider: String = null
 

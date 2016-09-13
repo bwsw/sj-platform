@@ -8,7 +8,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, SpecificationData}
 import com.bwsw.sj.common.rest.utils.ValidationUtils
-import com.bwsw.sj.common.utils.Stream
+import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.crud.rest.utils.StreamUtil
 import kafka.common.TopicExistsException
 import org.slf4j.{Logger, LoggerFactory}
@@ -165,9 +165,9 @@ abstract class StreamingModuleValidator extends ValidationUtils {
   protected def getStreamsPartitions(streams: Seq[SjStream]): Map[String, Int] = {
     Map(streams.map { stream =>
       stream.streamType match {
-        case Stream.`tStreamType` =>
+        case StreamLiterals.`tStreamType` =>
           stream.name -> stream.asInstanceOf[TStreamSjStream].partitions
-        case Stream.`kafkaStreamType` =>
+        case StreamLiterals.`kafkaStreamType` =>
           stream.name -> stream.asInstanceOf[KafkaSjStream].partitions
       }
 

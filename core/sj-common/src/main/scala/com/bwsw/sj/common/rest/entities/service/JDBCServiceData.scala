@@ -2,12 +2,12 @@ package com.bwsw.sj.common.rest.entities.service
 
 import com.bwsw.sj.common.DAL.model.JDBCService
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.Service
+import com.bwsw.sj.common.utils.ServiceLiterals
 
 import scala.collection.mutable.ArrayBuffer
 
 class JDBCServiceData() extends ServiceData() {
-  serviceType = Service.jdbcType
+  serviceType = ServiceLiterals.jdbcType
   var namespace: String = null
   var provider: String = null
   var login: String = null

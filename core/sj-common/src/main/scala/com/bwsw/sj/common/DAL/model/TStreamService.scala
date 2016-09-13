@@ -1,11 +1,11 @@
 package com.bwsw.sj.common.DAL.model
 
 import com.bwsw.sj.common.rest.entities.service.{ServiceData, TstrQServiceData}
-import com.bwsw.sj.common.utils.{Provider, CassandraFactory, Service}
+import com.bwsw.sj.common.utils.{ProviderLiterals, CassandraFactory, ServiceLiterals}
 import org.mongodb.morphia.annotations.{Property, Reference}
 
 class TStreamService() extends Service {
-  serviceType = Service.tstreamsType
+  serviceType = ServiceLiterals.tstreamsType
   @Reference(value = "metadata_provider") var metadataProvider: Provider = null
   @Property("metadata_namespace") var metadataNamespace: String = null
   @Reference(value = "data_provider") var dataProvider: Provider = null
@@ -54,7 +54,7 @@ class TStreamService() extends Service {
     cassandraFactory.createKeyspace(this.metadataNamespace)
     cassandraFactory.createMetadataTables(this.metadataNamespace)
 
-    if (this.dataProvider.providerType.equals(Provider.cassandraType)) {
+    if (this.dataProvider.providerType.equals(ProviderLiterals.cassandraType)) {
       val cassandraFactory = new CassandraFactory
       cassandraFactory.open(this.dataProvider.getHosts())
       cassandraFactory.createKeyspace(this.dataNamespace)

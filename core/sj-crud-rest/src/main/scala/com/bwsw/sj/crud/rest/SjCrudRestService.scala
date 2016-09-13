@@ -14,8 +14,8 @@ import akka.stream.scaladsl.Sink
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.ConfigurationSetting
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{ConfigConstants, EngineConstants}
-import EngineConstants._
+import com.bwsw.sj.common.utils.{ConfigLiterals, EngineLiterals}
+import EngineLiterals._
 import com.bwsw.sj.crud.rest.instance.InstanceStopper
 
 import scala.concurrent.Future
@@ -78,8 +78,8 @@ object SjCrudRestService extends App with SjCrudInterface {
   }
 
   private def putRestSettingsToConfigFile() = {
-    configService.save(new ConfigurationSetting(ConfigConstants.hostOfCrudRestTag, restHost, ConfigConstants.systemDomain))
-    configService.save(new ConfigurationSetting(ConfigConstants.portOfCrudRestTag, restPort.toString, ConfigConstants.systemDomain))
+    configService.save(new ConfigurationSetting(ConfigLiterals.hostOfCrudRestTag, restHost, ConfigLiterals.systemDomain))
+    configService.save(new ConfigurationSetting(ConfigLiterals.portOfCrudRestTag, restPort.toString, ConfigLiterals.systemDomain))
   }
 
   /**

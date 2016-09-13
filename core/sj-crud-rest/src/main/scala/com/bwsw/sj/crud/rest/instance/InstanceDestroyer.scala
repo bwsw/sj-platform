@@ -2,7 +2,7 @@ package com.bwsw.sj.crud.rest.instance
 
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{SjStream, TStreamSjStream}
-import com.bwsw.sj.common.utils.{Generator, Stream, EngineConstants}
+import com.bwsw.sj.common.utils.{GeneratorLiterals, StreamLiterals, EngineLiterals}
 import org.slf4j.LoggerFactory
 
 /**
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable with InstanceMarathonManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
 
-  import EngineConstants._
+  import EngineLiterals._
 
   def run() = {
     logger.debug(s"Instance: ${instance.name}. Destroy instance.")
@@ -49,16 +49,16 @@ class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable with I
     val startingInstance = startedInstances.union(instanceDAO.getByParameters(Map("status" -> starting)))
     val tStreamStreamsToStop = allStreams
       .filter { stream: SjStream =>
-        if (stream.streamType.equals(Stream.tStreamType)) {
+        if (stream.streamType.equals(StreamLiterals.tStreamType)) {
           val stage = instance.stages.get(stream.name)
-          !stream.asInstanceOf[TStreamSjStream].generator.generatorType.equals(Generator.localType) &&
+          !stream.asInstanceOf[TStreamSjStream].generator.generatorType.equals(GeneratorLiterals.localType) &&
             (stage.state.equals(failed) ||
               !startingInstance.exists { instance =>
                 val streamGeneratorName = getGeneratorAppName(stream.asInstanceOf[TStreamSjStream])
                 val instanceStreamGenerators = instance.inputs.map(_.replaceAll("/split|/full", ""))
                   .union(instance.outputs)
                   .flatMap(name => streamDAO.get(name))
-                  .filter(s => s.streamType.equals(Stream.tStreamType))
+                  .filter(s => s.streamType.equals(StreamLiterals.tStreamType))
                   .map(sjStream => getGeneratorAppName(sjStream.asInstanceOf[TStreamSjStream]))
                 instanceStreamGenerators.contains(streamGeneratorName)
               })

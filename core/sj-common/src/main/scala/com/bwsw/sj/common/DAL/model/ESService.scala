@@ -2,11 +2,11 @@ package com.bwsw.sj.common.DAL.model
 
 import com.bwsw.common.ElasticsearchClient
 import com.bwsw.sj.common.rest.entities.service.{EsIndServiceData, ServiceData}
-import com.bwsw.sj.common.utils.Service
+import com.bwsw.sj.common.utils.ServiceLiterals
 import org.mongodb.morphia.annotations.Reference
 
 class ESService() extends Service {
-  serviceType = Service.elasticsearchType
+  serviceType = ServiceLiterals.elasticsearchType
   @Reference var provider: Provider = null
   var index: String = null
   var login: String = null

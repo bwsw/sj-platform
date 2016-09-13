@@ -2,12 +2,12 @@ package com.bwsw.sj.common.rest.entities.stream
 
 import com.bwsw.sj.common.DAL.model.JDBCSjStream
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{Service, Stream}
+import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
 
 import scala.collection.mutable.ArrayBuffer
 
 class JDBCSjStreamData() extends SjStreamData() {
-  streamType = Stream.jdbcOutputType
+  streamType = StreamLiterals.jdbcOutputType
 
   override def validate() = {
     val serviceDAO = ConnectionRepository.getServiceManager
@@ -24,9 +24,9 @@ class JDBCSjStreamData() extends SjStreamData() {
           case None =>
             errors += s"Service '${this.service}' does not exist"
           case Some(service) =>
-            if (service.serviceType != Service.jdbcType) {
-              errors += s"Service for ${Stream.jdbcOutputType} stream " +
-                s"must be of '${Service.jdbcType}' type ('${service.serviceType}' is given instead)"
+            if (service.serviceType != ServiceLiterals.jdbcType) {
+              errors += s"Service for ${StreamLiterals.jdbcOutputType} stream " +
+                s"must be of '${ServiceLiterals.jdbcType}' type ('${service.serviceType}' is given instead)"
             }
         }
     }

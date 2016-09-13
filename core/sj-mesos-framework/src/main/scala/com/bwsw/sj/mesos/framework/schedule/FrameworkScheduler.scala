@@ -5,7 +5,7 @@ import java.util
 
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{ConfigConstants, EngineConstants}
+import com.bwsw.sj.common.utils.{ConfigLiterals, EngineLiterals}
 import com.bwsw.sj.mesos.framework.task.{StatusHandler, TasksList}
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos._
@@ -155,7 +155,7 @@ class FrameworkScheduler extends Scheduler {
       var taskPort: String = ""
 
       var availablePorts = ports.getRanges.getRangeList.asScala.map(_.getBegin.toString)
-      if (instance.get.moduleType.equals(EngineConstants.inputStreamingType)) {
+      if (instance.get.moduleType.equals(EngineLiterals.inputStreamingType)) {
         taskPort = availablePorts.head;
         availablePorts = availablePorts.tail
         val inputInstance = instance.get.asInstanceOf[InputInstance]
@@ -285,7 +285,7 @@ class FrameworkScheduler extends Scheduler {
     perTaskMem = instance.get.perTaskRam
     perTaskPortsCount = FrameworkUtil.getCountPorts(instance.get)
     val tasks =
-      if (instance.get.moduleType.equals(EngineConstants.inputStreamingType))
+      if (instance.get.moduleType.equals(EngineLiterals.inputStreamingType))
         (0 until instance.get.parallelism).map(tn => instance.get.name + "-task" + tn)
       else {
         val executionPlan = instance.get match {
@@ -410,8 +410,8 @@ class FrameworkScheduler extends Scheduler {
    */
   def getModuleUrl(instance: Instance): String = {
     jarName = configFileService.get("system." + instance.engine).get.value
-    val restHost = configFileService.get(ConfigConstants.hostOfCrudRestTag).get.value
-    val restPort = configFileService.get(ConfigConstants.portOfCrudRestTag).get.value.toInt
+    val restHost = configFileService.get(ConfigLiterals.hostOfCrudRestTag).get.value
+    val restPort = configFileService.get(ConfigLiterals.portOfCrudRestTag).get.value.toInt
     val restAddress = new URI(s"http://$restHost:$restPort/v1/custom/jars/$jarName").toString
     logger.debug(s"Engine downloading URL: $restAddress")
     restAddress

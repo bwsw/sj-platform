@@ -4,7 +4,7 @@ import java.util.Date
 
 import com.bwsw.sj.common.DAL.model.TStreamSjStream
 import com.bwsw.sj.common.DAL.model.module.{OutputInstance, RegularInstance}
-import com.bwsw.sj.common.utils.{EngineConstants, Stream}
+import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.TaskManager
@@ -41,7 +41,7 @@ class TStreamTaskInputService(manager: TaskManager,
     val offset = getOffset()
     val callback = new ConsumerCallback(blockingQueue)
 
-    val consumers = inputs.filter(x => x._1.streamType == Stream.tStreamType)
+    val consumers = inputs.filter(x => x._1.streamType == StreamLiterals.tStreamType)
       .map(x => (x._1.asInstanceOf[TStreamSjStream], x._2.toList))
       .map(x => manager.createSubscribingConsumer(x._1, x._2, offset, callback))
       .map(x => (x.name, x)).toMap
@@ -72,8 +72,8 @@ class TStreamTaskInputService(manager: TaskManager,
   private def chooseOffset(startFrom: String): IOffset = {
     logger.debug(s"Choose offset policy for t-streams consumer\n")
     startFrom match {
-      case EngineConstants.oldestStartMode => Oldest
-      case EngineConstants.newestStartMode => Newest
+      case EngineLiterals.oldestStartMode => Oldest
+      case EngineLiterals.newestStartMode => Newest
       case time => DateTime(new Date(time.toLong * 1000))
     }
   }

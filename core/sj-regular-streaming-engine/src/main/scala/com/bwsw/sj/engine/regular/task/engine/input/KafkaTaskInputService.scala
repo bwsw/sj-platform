@@ -6,7 +6,7 @@ import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.DAL.model.{KafkaService, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{EngineConstants, ConfigConstants, Stream, ConfigSettingsUtils}
+import com.bwsw.sj.common.utils.{EngineLiterals, ConfigLiterals, StreamLiterals, ConfigSettingsUtils}
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope}
@@ -61,7 +61,7 @@ class KafkaTaskInputService(manager: RegularTaskManager,
   )
 
   private def getKafkaInputs(): mutable.Map[SjStream, Array[Int]] = {
-    manager.inputs.filter(x => x._1.streamType == Stream.kafkaStreamType)
+    manager.inputs.filter(x => x._1.streamType == StreamLiterals.kafkaStreamType)
   }
 
   /**
@@ -131,7 +131,7 @@ class KafkaTaskInputService(manager: RegularTaskManager,
     props.put("auto.offset.reset", offset)
     props.put("key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
     props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
-    configService.getByParameters(Map("domain" -> ConfigConstants.kafkaDomain)).foreach(x => props.put(x.name.replace(x.domain + ".", ""), x.value))
+    configService.getByParameters(Map("domain" -> ConfigLiterals.kafkaDomain)).foreach(x => props.put(x.name.replace(x.domain + ".", ""), x.value))
 
     val consumer = new KafkaConsumer[Array[Byte], Array[Byte]](props)
 
@@ -172,7 +172,7 @@ class KafkaTaskInputService(manager: RegularTaskManager,
 
   private def chooseOffset() = {
     regularInstance.startFrom match {
-      case EngineConstants.oldestStartMode => "earliest"
+      case EngineLiterals.oldestStartMode => "earliest"
       case _ => "latest"
     }
   }

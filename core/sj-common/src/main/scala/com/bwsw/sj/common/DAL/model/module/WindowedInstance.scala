@@ -1,7 +1,7 @@
 package com.bwsw.sj.common.DAL.model.module
 
 import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, WindowedInstanceMetadata}
-import com.bwsw.sj.common.utils.EngineConstants
+import com.bwsw.sj.common.utils.EngineLiterals
 import org.mongodb.morphia.annotations.{Embedded, Property}
 
 /**
@@ -11,8 +11,8 @@ import org.mongodb.morphia.annotations.{Embedded, Property}
  */
 class WindowedInstance() extends Instance {
   @Embedded("execution-plan") var executionPlan: ExecutionPlan = null
-  @Property("start-from") var startFrom: String = EngineConstants.newestStartMode
-  @Property("state-management") var stateManagement: String = EngineConstants.noneStateMode
+  @Property("start-from") var startFrom: String = EngineLiterals.newestStartMode
+  @Property("state-management") var stateManagement: String = EngineLiterals.noneStateMode
   @Property("state-full-checkpoint") var stateFullCheckpoint: Int = 100
   @Property("event-wait-time") var eventWaitTime: Long = 1000
   @Property("time-windowed") var timeWindowed: Int = 0

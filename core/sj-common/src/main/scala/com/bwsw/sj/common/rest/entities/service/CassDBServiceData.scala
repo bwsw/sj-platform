@@ -2,12 +2,12 @@ package com.bwsw.sj.common.rest.entities.service
 
 import com.bwsw.sj.common.DAL.model.CassandraService
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.Service
+import com.bwsw.sj.common.utils.ServiceLiterals
 
 import scala.collection.mutable.ArrayBuffer
 
 class CassDBServiceData() extends ServiceData() {
-  serviceType = Service.cassandraType
+  serviceType = ServiceLiterals.cassandraType
   var provider: String = null
   var keyspace: String = null
 

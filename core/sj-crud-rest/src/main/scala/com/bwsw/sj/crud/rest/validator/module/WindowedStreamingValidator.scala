@@ -1,8 +1,8 @@
 package com.bwsw.sj.crud.rest.validator.module
 
 import com.bwsw.sj.common.DAL.model.module.Instance
-import com.bwsw.sj.common.utils.EngineConstants
-import EngineConstants._
+import com.bwsw.sj.common.utils.EngineLiterals
+import EngineLiterals._
 import com.bwsw.sj.common.rest.entities.module.{WindowedInstanceMetadata, InstanceMetadata, SpecificationData}
 import org.slf4j.{LoggerFactory, Logger}
 
@@ -45,7 +45,7 @@ class WindowedStreamingValidator extends StreamingModuleValidator {
       errors += s"Unknown value of state-management attribute: ${windowedInstanceMetadata.stateManagement}. " +
         s"State-management must be one of: ${stateManagementModes.mkString("[", ", ", "]")}"
     } else {
-      if (windowedInstanceMetadata.stateManagement != EngineConstants.noneStateMode) {
+      if (windowedInstanceMetadata.stateManagement != EngineLiterals.noneStateMode) {
         // 'state-full-checkpoint' field
         if (windowedInstanceMetadata.stateFullCheckpoint <= 0) {
           errors += s"'State-full-checkpoint' attribute must be greater than zero"

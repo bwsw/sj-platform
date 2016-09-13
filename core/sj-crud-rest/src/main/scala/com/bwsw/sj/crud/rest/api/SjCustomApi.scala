@@ -13,7 +13,7 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.bwsw.sj.common.DAL.model.ConfigurationSetting
 import com.bwsw.sj.common.rest.entities._
-import com.bwsw.sj.common.utils.ConfigConstants
+import com.bwsw.sj.common.utils.ConfigLiterals
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import org.apache.commons.io.FileUtils
@@ -90,7 +90,7 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
                     var response: RestResponse = NotFoundRestResponse(Map("message" ->
                       MessageFormat.format(messages.getString("rest.custom.jars.file.notfound"), name)))
                     if (storage.delete(filename)) {
-                      configService.delete(ConfigConstants.systemDomain + "." + name + "-" + version)
+                      configService.delete(ConfigLiterals.systemDomain + "." + name + "-" + version)
                       response = OkRestResponse(
                         Map("message" -> MessageFormat.format(
                           messages.getString("rest.custom.jars.file.deleted"), name, version
@@ -116,9 +116,9 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
                       FileUtils.copyFile(file, uploadingFile)
                       storage.put(uploadingFile, metadata.fileName, specification, "custom")
                       val customJarConfigElement = new ConfigurationSetting(
-                        ConfigConstants.systemDomain + "." + specification("name").toString + "-" + specification("version").toString,
+                        ConfigLiterals.systemDomain + "." + specification("name").toString + "-" + specification("version").toString,
                         metadata.fileName,
-                        ConfigConstants.systemDomain
+                        ConfigLiterals.systemDomain
                       )
                       configService.save(customJarConfigElement)
                       response = OkRestResponse(Map("message" ->

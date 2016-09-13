@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.output.task.engine
 
-import com.bwsw.sj.common.utils.EngineConstants
+import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, PersistentBlockingQueue}
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
@@ -30,11 +30,11 @@ class OutputTaskEngineFactory(manager: OutputTaskManager,
    */
   def createOutputTaskEngine(): OutputTaskEngine = {
     manager.instance.checkpointMode match {
-      case EngineConstants.timeIntervalCheckpointMode =>
-        logger.error(s"Task: ${manager.taskName}. Output module can't have a '${EngineConstants.timeIntervalCheckpointMode}' checkpoint mode\n")
-        throw new Exception(s"Task: ${manager.taskName}. Output module can't have a '${EngineConstants.timeIntervalCheckpointMode}' checkpoint mode\n")
-      case EngineConstants.everyNthCheckpointMode =>
-        logger.info(s"Task: ${manager.taskName}. Output module has an '${EngineConstants.everyNthCheckpointMode}' checkpoint mode, create an appropriate task engine\n")
+      case EngineLiterals.timeIntervalCheckpointMode =>
+        logger.error(s"Task: ${manager.taskName}. Output module can't have a '${EngineLiterals.timeIntervalCheckpointMode}' checkpoint mode\n")
+        throw new Exception(s"Task: ${manager.taskName}. Output module can't have a '${EngineLiterals.timeIntervalCheckpointMode}' checkpoint mode\n")
+      case EngineLiterals.everyNthCheckpointMode =>
+        logger.info(s"Task: ${manager.taskName}. Output module has an '${EngineLiterals.everyNthCheckpointMode}' checkpoint mode, create an appropriate task engine\n")
         new OutputTaskEngine(manager, performanceMetrics, blockingQueue) with NumericalCheckpointTaskEngine
     }
   }

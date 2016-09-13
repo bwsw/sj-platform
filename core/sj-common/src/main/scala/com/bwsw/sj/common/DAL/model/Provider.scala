@@ -7,7 +7,7 @@ import java.util.Collections
 import com.aerospike.client.{AerospikeClient, AerospikeException}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.entities.provider.ProviderData
-import com.bwsw.sj.common.utils.{ConfigConstants, Provider}
+import com.bwsw.sj.common.utils.{ConfigLiterals, ProviderLiterals}
 import com.datastax.driver.core.Cluster
 import com.datastax.driver.core.exceptions.NoHostAvailableException
 import kafka.javaapi.TopicMetadataRequest
@@ -73,17 +73,17 @@ class Provider {
 
   private def checkProviderConnectionByType(host: String, providerType: String) = {
     providerType match {
-      case Provider.cassandraType =>
+      case ProviderLiterals.cassandraType =>
         checkCassandraConnection(host)
-      case Provider.aerospikeType =>
+      case ProviderLiterals.aerospikeType =>
         checkAerospikeConnection(host)
-      case Provider.zookeeperType =>
+      case ProviderLiterals.zookeeperType =>
         checkZookeeperConnection(host)
-      case Provider.kafkaType =>
+      case ProviderLiterals.kafkaType =>
         checkKafkaConnection(host)
-      case Provider.elasticsearchType =>
+      case ProviderLiterals.elasticsearchType =>
         checkESConnection(host)
-      case Provider.jdbcType =>
+      case ProviderLiterals.jdbcType =>
         checkJdbcConnection(host)
       case _ =>
         throw new Exception(s"Host checking for provider type '$providerType' is not implemented")
@@ -130,7 +130,7 @@ class Provider {
 
   private def checkZookeeperConnection(address: String) = {
     val errors = ArrayBuffer[String]()
-    val zkTimeout = ConnectionRepository.getConfigService.get(ConfigConstants.zkSessionTimeoutTag).get.value.toInt
+    val zkTimeout = ConnectionRepository.getConfigService.get(ConfigLiterals.zkSessionTimeoutTag).get.value.toInt
     var client: ZooKeeper = null
     try {
       client = new ZooKeeper(address, zkTimeout, null)

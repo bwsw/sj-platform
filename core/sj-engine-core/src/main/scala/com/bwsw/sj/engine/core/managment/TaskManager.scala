@@ -8,9 +8,9 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, Instance}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.StreamingExecutor
-import com.bwsw.sj.common.utils.{Provider, Generator, ConfigSettingsUtils}
-import com.bwsw.sj.common.utils.EngineConstants._
-import com.bwsw.sj.common.utils.Stream._
+import com.bwsw.sj.common.utils.{ProviderLiterals, GeneratorLiterals, ConfigSettingsUtils}
+import com.bwsw.sj.common.utils.EngineLiterals._
+import com.bwsw.sj.common.utils.StreamLiterals._
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
 import com.bwsw.sj.engine.core.environment.EnvironmentManager
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
@@ -100,7 +100,7 @@ abstract class TaskManager() {
 
   private def setDataClusterProperties(tStreamService: TStreamService) = {
     tStreamService.dataProvider.providerType match {
-      case Provider.aerospikeType =>
+      case ProviderLiterals.aerospikeType =>
         logger.debug(s"Task name: $taskName. Set properties of aerospike data storage " +
           s"(namespace: ${tStreamService.dataNamespace}, hosts: ${tStreamService.dataProvider.hosts.mkString(",")}) " +
           s"of t-stream factory\n")
@@ -225,7 +225,7 @@ abstract class TaskManager() {
       auxiliaryTStreamService,
       tStreamType,
       tags,
-      new Generator(Generator.localType)
+      new Generator(GeneratorLiterals.localType)
     )
   }
 
@@ -265,12 +265,12 @@ abstract class TaskManager() {
     val retryCount = ConfigSettingsUtils.getRetryCount()
 
     stream.generator.generatorType match {
-      case Generator.`localType` => new LocalTimeUUIDGenerator
+      case GeneratorLiterals.`localType` => new LocalTimeUUIDGenerator
       case generatorType =>
         val service = stream.generator.service.asInstanceOf[ZKService]
         val zkHosts = service.provider.hosts
         val prefix = "/" + service.namespace + "/" + {
-          if (generatorType == Generator.globalType) generatorType else stream.name
+          if (generatorType == GeneratorLiterals.globalType) generatorType else stream.name
         }
 
         new NetworkTimeUUIDGenerator(zkHosts, prefix, retryPeriod, retryCount)

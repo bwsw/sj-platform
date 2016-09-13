@@ -1,7 +1,7 @@
 package com.bwsw.sj.common.utils
 
 
-import ConfigConstants._
+import ConfigLiterals._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 
 object ConfigSettingsUtils {
@@ -37,11 +37,11 @@ object ConfigSettingsUtils {
   }
 
   def getFrameworkJarName() = {
-    getStringConfigSetting(ConfigConstants.systemDomain + "." + getStringConfigSetting(frameworkTag))
+    getStringConfigSetting(ConfigLiterals.systemDomain + "." + getStringConfigSetting(frameworkTag))
   }
 
   def getTransactionGeneratorJarName() = {
-    getStringConfigSetting(ConfigConstants.systemDomain + "." + getStringConfigSetting(transactionGeneratorTag))
+    getStringConfigSetting(ConfigLiterals.systemDomain + "." + getStringConfigSetting(transactionGeneratorTag))
   }
 
   def getCrudRestHost() = {

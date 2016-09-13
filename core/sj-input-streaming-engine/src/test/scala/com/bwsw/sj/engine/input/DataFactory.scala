@@ -11,8 +11,8 @@ import com.bwsw.sj.common.DAL.model.Service
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask, Instance}
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.utils.Generator
-import com.bwsw.sj.common.utils.Provider
+import com.bwsw.sj.common.utils.GeneratorLiterals
+import com.bwsw.sj.common.utils.ProviderLiterals
 import com.bwsw.sj.common.utils._
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.consumer.{Consumer, Options}
@@ -94,10 +94,10 @@ object DataFactory {
   def close() = cassandraFactory.close()
 
   def createProviders(providerService: GenericMongoService[Provider]) = {
-    val cassandraProvider = new Provider("cassandra-test-provider", "cassandra provider", Array(s"$cassandraHost:$cassandraPort"), "", "", Provider.cassandraType)
+    val cassandraProvider = new Provider("cassandra-test-provider", "cassandra provider", Array(s"$cassandraHost:$cassandraPort"), "", "", ProviderLiterals.cassandraType)
     providerService.save(cassandraProvider)
 
-    val zookeeperProvider = new Provider("zookeeper-test-provider", "zookeeper provider", zookeeperHosts, "", "", Provider.zookeeperType)
+    val zookeeperProvider = new Provider("zookeeper-test-provider", "zookeeper provider", zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
     providerService.save(zookeeperProvider)
   }
 
@@ -108,14 +108,14 @@ object DataFactory {
 
   def createServices(serviceManager: GenericMongoService[Service], providerService: GenericMongoService[Provider]) = {
     val cassProv = providerService.get("cassandra-test-provider").get
-    val cassService = new CassandraService("cassandra-test-service", Service.cassandraType, "cassandra test service", cassProv, cassandraTestKeyspace)
+    val cassService = new CassandraService("cassandra-test-service", ServiceLiterals.cassandraType, "cassandra test service", cassProv, cassandraTestKeyspace)
     serviceManager.save(cassService)
 
     val zkProv = providerService.get("zookeeper-test-provider").get
-    val zkService = new ZKService("zookeeper-test-service", Service.zookeeperType, "zookeeper test service", zkProv, testNamespace)
+    val zkService = new ZKService("zookeeper-test-service", ServiceLiterals.zookeeperType, "zookeeper test service", zkProv, testNamespace)
     serviceManager.save(zkService)
 
-    val tstrqService = new TStreamService("tstream-test-service", Service.tstreamsType, "tstream test service",
+    val tstrqService = new TStreamService("tstream-test-service", ServiceLiterals.tstreamsType, "tstream test service",
       cassProv, cassandraTestKeyspace, cassProv, cassandraTestKeyspace, zkProv, "unit")
     serviceManager.save(tstrqService)
   }
@@ -139,11 +139,11 @@ object DataFactory {
   }
 
   private def createOutputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
-    val localGenerator = new Generator(Generator.localType)
+    val localGenerator = new Generator(GeneratorLiterals.localType)
 
     val tService = serviceManager.get("tstream-test-service").get
 
-    val s2 = new TStreamSjStream("test-output-tstream" + suffix, "test-output-tstream", partitions, tService, Stream.tStreamType, Array("output", "some tags"), localGenerator)
+    val s2 = new TStreamSjStream("test-output-tstream" + suffix, "test-output-tstream", partitions, tService, StreamLiterals.tStreamType, Array("output", "some tags"), localGenerator)
     sjStreamService.save(s2)
 
     val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
@@ -172,13 +172,13 @@ object DataFactory {
 
     val instance = new InputInstance()
     instance.name = instanceName
-    instance.moduleType = EngineConstants.inputStreamingType
+    instance.moduleType = EngineLiterals.inputStreamingType
     instance.moduleName = "input-streaming-stub"
     instance.moduleVersion = "1.0"
-    instance.status = EngineConstants.ready
+    instance.status = EngineLiterals.ready
     instance.description = "some description of test instance"
     instance.outputs = instanceOutputs
-    instance.checkpointMode = EngineConstants.everyNthCheckpointMode
+    instance.checkpointMode = EngineLiterals.everyNthCheckpointMode
     instance.checkpointInterval = checkpointInterval
     instance.parallelism = 1
     instance.options = """{"hey": "hey"}"""
@@ -190,7 +190,7 @@ object DataFactory {
     instance.duplicateCheck = false
     instance.lookupHistory = 100
     instance.queueMaxSize = 100
-    instance.defaultEvictionPolicy = EngineConstants.lruDefaultEvictionPolicy
+    instance.defaultEvictionPolicy = EngineLiterals.lruDefaultEvictionPolicy
     instance.evictionPolicy = "expanded-time"
     instance.tasks = tasks
 

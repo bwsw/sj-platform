@@ -4,8 +4,8 @@ import java.net.URI
 
 import com.bwsw.sj.common.DAL.model.Generator
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{Service, Generator}
-import com.bwsw.sj.common.utils.Generator._
+import com.bwsw.sj.common.utils.{ServiceLiterals, GeneratorLiterals}
+import com.bwsw.sj.common.utils.GeneratorLiterals._
 import com.fasterxml.jackson.annotation.JsonProperty
 
 import scala.collection.mutable.ArrayBuffer
@@ -17,7 +17,7 @@ case class GeneratorData(@JsonProperty("generator-type") generatorType: String,
   def asModelGenerator() = {
     val serviceDAO = ConnectionRepository.getServiceManager
     this.generatorType match {
-      case Generator.`localType` => new Generator(this.generatorType)
+      case GeneratorLiterals.`localType` => new Generator(this.generatorType)
       case _ => new Generator(this.generatorType, serviceDAO.get(this.service).get, this.instanceCount)
     }
   }
@@ -35,7 +35,7 @@ case class GeneratorData(@JsonProperty("generator-type") generatorType: String,
         if (!types.contains(t)) {
           errors += s"Unknown 'generator-type' provided. Must be one of: ${types.mkString("[", ", ", "]")}"
         } else {
-          if (this.generatorType != Generator.localType) {
+          if (this.generatorType != GeneratorLiterals.localType) {
             //service
             Option(this.service) match {
               case None =>
@@ -57,8 +57,8 @@ case class GeneratorData(@JsonProperty("generator-type") generatorType: String,
                 if (serviceObj.isEmpty) {
                   errors += s"Generator 'service' does not exist"
                 } else {
-                  if (serviceObj.get.serviceType != Service.zookeeperType) {
-                    errors += s"Provided generator service '$serviceName' is not of type ${Service.zookeeperType}"
+                  if (serviceObj.get.serviceType != ServiceLiterals.zookeeperType) {
+                    errors += s"Provided generator service '$serviceName' is not of type ${ServiceLiterals.zookeeperType}"
                   }
                 }
             }
