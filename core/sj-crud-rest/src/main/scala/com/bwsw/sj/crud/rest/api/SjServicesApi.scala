@@ -1,7 +1,5 @@
 package com.bwsw.sj.crud.rest.api
 
-import java.text.MessageFormat
-
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.service.ServiceData
@@ -17,24 +15,20 @@ trait SjServicesApi extends Directives with SjCrudValidator with CompletionUtils
           val protocolService = serializer.deserialize[ServiceData](getEntityFromContext(ctx))
           val errors = protocolService.validate()
           var response: RestResponse = BadRequestRestResponse(Map("message" ->
-            MessageFormat.format(messages.getString("rest.services.service.cannot.create"), errors.mkString(";")))
-          )
+            createMessage("rest.services.service.cannot.create", errors.mkString(";"))))
 
           if (errors.isEmpty) {
             val service = protocolService.asModelService()
             service.prepare()
             serviceDAO.save(service)
-            response = CreatedRestResponse(Map("message" -> MessageFormat.format(
-              messages.getString("rest.services.service.created"),
-              service.name
-            )))
+            response = CreatedRestResponse(Map("message" -> createMessage("rest.services.service.created", service.name)))
           }
 
           ctx.complete(restResponseToHttpResponse(response))
         } ~
           get {
             val services = serviceDAO.getAll
-            var response: RestResponse = NotFoundRestResponse(Map("message" -> messages.getString("rest.services.notfound")))
+            var response: RestResponse = NotFoundRestResponse(Map("message" -> getMessage("rest.services.notfound")))
             if (services.nonEmpty) {
               val entity = Map("services" -> services.map(_.asProtocolService()))
               response = OkRestResponse(entity)
@@ -48,8 +42,7 @@ trait SjServicesApi extends Directives with SjCrudValidator with CompletionUtils
             get {
               val service = serviceDAO.get(serviceName)
               var response: RestResponse = NotFoundRestResponse(Map("message" ->
-                MessageFormat.format(messages.getString("rest.services.service.notfound"), serviceName))
-              )
+                createMessage("rest.services.service.notfound", serviceName)))
               service match {
                 case Some(x) =>
                   val entity = Map("services" -> x.asProtocolService())
@@ -61,7 +54,7 @@ trait SjServicesApi extends Directives with SjCrudValidator with CompletionUtils
             } ~
               delete {
                 var response: RestResponse = UnprocessableEntityRestResponse(Map("message" ->
-                  MessageFormat.format(messages.getString("rest.services.service.cannot.delete"), serviceName)))
+                  createMessage("rest.services.service.cannot.delete", serviceName)))
                 val streams = getUsedStreams(serviceName)
                 if (streams.isEmpty) {
                   val service = serviceDAO.get(serviceName)
@@ -70,12 +63,10 @@ trait SjServicesApi extends Directives with SjCrudValidator with CompletionUtils
                       x.destroy()
                       serviceDAO.delete(serviceName)
                       response = OkRestResponse(Map("message" ->
-                        MessageFormat.format(messages.getString("rest.services.service.deleted"), serviceName))
-                      )
+                        createMessage("rest.services.service.deleted", serviceName)))
                     case None =>
                       response = NotFoundRestResponse(Map("message" ->
-                        MessageFormat.format(messages.getString("rest.services.service.notfound"), serviceName))
-                      )
+                        createMessage("rest.services.service.notfound", serviceName)))
                   }
                 }
 
@@ -86,7 +77,7 @@ trait SjServicesApi extends Directives with SjCrudValidator with CompletionUtils
     }
   }
 
-  def getUsedStreams(serviceName: String) = {
+  private def getUsedStreams(serviceName: String) = {
     streamDAO.getAll.filter(s => s.service.name.equals(serviceName))
   }
 }

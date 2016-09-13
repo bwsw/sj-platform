@@ -1,11 +1,10 @@
 package com.bwsw.sj.crud.rest.api
 
-import java.text.MessageFormat
-
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.stream.SjStreamData
+import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.crud.rest.utils.{CompletionUtils, StreamUtil}
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
@@ -21,16 +20,18 @@ trait SjStreamsApi extends Directives with SjCrudValidator with CompletionUtils 
           val data: SjStreamData = serializer.deserialize[SjStreamData](getEntityFromContext(ctx))
           val errors = data.validate()
           var response: RestResponse = BadRequestRestResponse(Map("message" ->
-            MessageFormat.format(messages.getString("rest.streams.stream.cannot.create"), errors.mkString(";"))))
+            createMessage("rest.streams.stream.cannot.create", errors.mkString(";"))))
+
           if (errors.isEmpty) {
             val stream = data.asModelStream()
             errors ++= StreamUtil.chackAndCreate(data, stream)
             response = BadRequestRestResponse(Map("message" ->
-            MessageFormat.format(messages.getString("rest.streams.stream.cannot.create"), errors.mkString(";"))))
+            createMessage("rest.streams.stream.cannot.create", errors.mkString(";"))))
+
             if (errors.isEmpty) {
               streamDAO.save(stream)
               response = CreatedRestResponse(Map("message" ->
-                MessageFormat.format(messages.getString("rest.streams.stream.created"), data.name))
+                createMessage("rest.streams.stream.created", data.name))
               )
             }
           }
@@ -39,7 +40,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator with CompletionUtils 
         } ~
           get {
             val streams = streamDAO.getAll
-            var response: RestResponse = NotFoundRestResponse(Map("message" -> messages.getString("rest.streams.notfound")))
+            var response: RestResponse = NotFoundRestResponse(Map("message" -> getMessage("rest.streams.notfound")))
             if (streams.nonEmpty) {
               val entity = Map("streams" -> streams.map(s => s.asProtocolStream()))
               response = OkRestResponse(entity)
@@ -53,7 +54,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator with CompletionUtils 
             get {
               val stream = streamDAO.get(streamName)
               var response: RestResponse = NotFoundRestResponse(Map("message" ->
-                MessageFormat.format(messages.getString("rest.streams.stream.notfound"), streamName))
+                createMessage("rest.streams.stream.notfound", streamName))
               )
               stream match {
                 case Some(x) =>
@@ -66,7 +67,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator with CompletionUtils 
             } ~
               delete {
                 var response: RestResponse = UnprocessableEntityRestResponse(Map("message" ->
-                  MessageFormat.format(messages.getString("rest.streams.stream.cannot.delete"), streamName)))
+                  createMessage("rest.streams.stream.cannot.delete", streamName)))
 
                 val instances = getUsedInstances(streamName)
 
@@ -77,11 +78,11 @@ trait SjStreamsApi extends Directives with SjCrudValidator with CompletionUtils 
                       StreamUtil.deleteStream(x)
                       streamDAO.delete(streamName)
                       response = OkRestResponse(Map("message" ->
-                        MessageFormat.format(messages.getString("rest.streams.stream.deleted"), streamName))
+                       createMessage("rest.streams.stream.deleted", streamName))
                       )
                     case None =>
                       response = NotFoundRestResponse(Map("message" ->
-                        MessageFormat.format(messages.getString("rest.streams.stream.notfound"), streamName))
+                        createMessage("rest.streams.stream.notfound", streamName))
                       )
                   }
                 }
@@ -96,7 +97,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator with CompletionUtils 
   private def getUsedInstances(streamName: String): mutable.Buffer[Instance] = {
     instanceDAO.getAll.filter { (instance: Instance) =>
       if (!instance.moduleType.equals(inputStreamingType)) {
-        instance.inputs.map(_.replaceAll("/split|/full", "")).contains(streamName) || instance.outputs.contains(streamName)
+        instance.inputs.map(_.replaceAll(s"/${EngineLiterals.splitStreamMode}|/${EngineLiterals.fullStreamMode}", "")).contains(streamName) || instance.outputs.contains(streamName)
       } else {
         instance.outputs.contains(streamName)
       }

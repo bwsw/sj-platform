@@ -1,7 +1,6 @@
 package com.bwsw.sj.crud.rest.api
 
 import java.io.{File, FileOutputStream}
-import java.text.MessageFormat
 
 import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model.Multipart.FormData.BodyPart
@@ -58,8 +57,7 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
                   entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
                 ))
               } else {
-                val response = NotFoundRestResponse(Map("message" ->
-                  MessageFormat.format(messages.getString("rest.custom.jars.file.notfound"), name)))
+                val response = NotFoundRestResponse(Map("message" -> createMessage("rest.custom.jars.file.notfound", name)))
                 complete(restResponseToHttpResponse(response))
               }
             }
@@ -69,7 +67,7 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
                 val fileMetadatas = fileMetadataDAO.getByParameters(Map("specification.name" -> name, "specification.version" -> version))
                 if (fileMetadatas.isEmpty) {
                   val response: RestResponse = NotFoundRestResponse(Map("message" ->
-                    MessageFormat.format(messages.getString("rest.custom.jars.file.notfound"), name)))
+                    createMessage("rest.custom.jars.file.notfound", name)))
                   complete(restResponseToHttpResponse(response))
                 }
                 val filename = fileMetadatas.head.filename
@@ -82,19 +80,17 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
                     ))
                   } else {
                     val response = NotFoundRestResponse(Map("message" ->
-                      MessageFormat.format(messages.getString("rest.custom.jars.file.notfound"), name)))
+                      createMessage("rest.custom.jars.file.notfound", name)))
                     complete(restResponseToHttpResponse(response))
                   }
                 } ~
                   delete {
                     var response: RestResponse = NotFoundRestResponse(Map("message" ->
-                      MessageFormat.format(messages.getString("rest.custom.jars.file.notfound"), name)))
+                     createMessage("rest.custom.jars.file.notfound", name)))
                     if (storage.delete(filename)) {
                       configService.delete(ConfigLiterals.systemDomain + "." + name + "-" + version)
                       response = OkRestResponse(
-                        Map("message" -> MessageFormat.format(
-                          messages.getString("rest.custom.jars.file.deleted"), name, version
-                        )))
+                        Map("message" -> createMessage("rest.custom.jars.file.deleted", name, version)))
                     }
 
                     complete(restResponseToHttpResponse(response))
@@ -107,7 +103,7 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
               uploadedFile("jar") {
                 case (metadata: FileInfo, file: File) =>
                   var response: RestResponse = ConflictRestResponse(Map("message" ->
-                    MessageFormat.format(messages.getString("rest.custom.jars.file.exists"), metadata.fileName)))
+                    createMessage("rest.custom.jars.file.exists", metadata.fileName)))
 
                   if (!storage.exists(metadata.fileName)) {
                     if (checkSpecification(file)) {
@@ -122,9 +118,9 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
                       )
                       configService.save(customJarConfigElement)
                       response = OkRestResponse(Map("message" ->
-                        MessageFormat.format(messages.getString("rest.custom.jars.file.uploaded"), metadata.fileName)))
+                        createMessage("rest.custom.jars.file.uploaded", metadata.fileName)))
                     } else {
-                      response = BadRequestRestResponse(Map("message" -> messages.getString("rest.errors.invalid.specification")))
+                      response = BadRequestRestResponse(Map("message" -> getMessage("rest.errors.invalid.specification")))
                     }
                   }
 
@@ -133,8 +129,7 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
             } ~
               get {
                 val files = fileMetadataDAO.getByParameters(Map("filetype" -> "custom"))
-                var response: RestResponse = NotFoundRestResponse(Map("message" ->
-                  messages.getString("rest.custom.jars.notfound")))
+                var response: RestResponse = NotFoundRestResponse(Map("message" -> getMessage("rest.custom.jars.notfound")))
                 if (files.nonEmpty) {
                   val entity = Map("custom-jars" -> files.map(metadata =>
                     Map("name" -> metadata.specification.name,
@@ -175,7 +170,7 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
                 Await.result(partsResult, 30.seconds)
 
                 var response: RestResponse = ConflictRestResponse(Map("message" ->
-                  MessageFormat.format(messages.getString("rest.custom.files.file.exists"), filename)))
+                  createMessage("rest.custom.files.file.exists", filename)))
 
                 if (!storage.exists(filename)) {
                   val uploadingFile = new File(filename)
@@ -183,9 +178,7 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
                   storage.put(uploadingFile, filename, spec, "custom-file")
                   uploadingFile.delete()
 
-                  response = OkRestResponse(Map("message" -> MessageFormat.format(
-                    messages.getString("rest.custom.files.file.uploaded"), filename
-                  )))
+                  response = OkRestResponse(Map("message" -> createMessage("rest.custom.files.file.uploaded", filename)))
                 }
 
                 complete(restResponseToHttpResponse(response))
@@ -193,7 +186,7 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
             } ~
               get {
                 val files = fileMetadataDAO.getByParameters(Map("filetype" -> "custom-file"))
-                var response: RestResponse = NotFoundRestResponse(Map("message" -> messages.getString("rest.custom.files.notfound")))
+                var response: RestResponse = NotFoundRestResponse(Map("message" -> getMessage("rest.custom.files.notfound")))
                 if (files.nonEmpty) {
                   val entity = Map("custom-files" -> files.map(metadata =>
                     Map("name" -> metadata.filename,
@@ -218,19 +211,17 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
                     ))
                   } else {
                     val response: RestResponse = NotFoundRestResponse(Map("message" ->
-                      MessageFormat.format(messages.getString("rest.custom.files.file.notfound"), name)))
+                      createMessage("rest.custom.files.file.notfound", name)))
 
                     complete(restResponseToHttpResponse(response))
                   }
                 } ~
                   delete {
                     var response : RestResponse = NotFoundRestResponse(Map("message" ->
-                      MessageFormat.format(messages.getString("rest.custom.files.file.notfound"), name)))
+                      createMessage("rest.custom.files.file.notfound", name)))
 
                     if (storage.delete(name)) {
-                      response = OkRestResponse(Map("message" -> MessageFormat.format(
-                        messages.getString("rest.custom.files.file.deleted"), name
-                      )))
+                      response = OkRestResponse(Map("message" -> createMessage("rest.custom.files.file.deleted", name)))
                     }
 
                     complete(restResponseToHttpResponse(response))

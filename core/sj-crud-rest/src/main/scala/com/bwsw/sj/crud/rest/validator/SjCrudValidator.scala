@@ -1,7 +1,6 @@
 package com.bwsw.sj.crud.rest.validator
 
 import java.io._
-import java.util.ResourceBundle
 import java.util.jar.JarFile
 
 import akka.actor.ActorSystem
@@ -15,7 +14,7 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.utils.{StreamLiterals, EngineLiterals}
+import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import org.everit.json.schema.loader.SchemaLoader
 import org.json.{JSONObject, JSONTokener}
 
@@ -30,8 +29,6 @@ import scala.concurrent.{Await, ExecutionContextExecutor}
  * @author Kseniya Tomskikh
  */
 trait SjCrudValidator {
-  val messages = ResourceBundle.getBundle("messages")
-
   val logger: LoggingAdapter
 
   implicit val materializer: Materializer

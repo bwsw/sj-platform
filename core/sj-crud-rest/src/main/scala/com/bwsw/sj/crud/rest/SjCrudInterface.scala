@@ -1,7 +1,5 @@
 package com.bwsw.sj.crud.rest
 
-import java.text.MessageFormat
-
 import akka.http.scaladsl.model.EntityStreamSizeException
 import akka.http.scaladsl.server.{Directives, ExceptionHandler, Route}
 import com.bwsw.sj.common.rest.entities.{InternalServerErrorRestResponse, NotFoundRestResponse}
@@ -25,7 +23,6 @@ with SjStreamsApi
 with SjServicesApi
 with SjProvidersApi
 with SjConfigurationSettingsApi with CompletionUtils {
-
   val exceptionHandler = ExceptionHandler {
     case InstanceNotFound(msg, key) =>
       val response = NotFoundRestResponse(Map("message" -> msg, "key" -> key))
@@ -40,16 +37,16 @@ with SjConfigurationSettingsApi with CompletionUtils {
       val response = NotFoundRestResponse(Map("message" -> msg, "key" -> key))
       complete(restResponseToHttpResponse(response))
     case ex: EntityStreamSizeException =>
-      val response = InternalServerErrorRestResponse(Map("message" -> messages.getString("rest.errors.large_file")))
+      val response = InternalServerErrorRestResponse(Map("message" -> getMessage("rest.errors.large_file")))
       complete(restResponseToHttpResponse(response))
     case ex: UnrecognizedPropertyException =>
-      val response = InternalServerErrorRestResponse(Map("message" -> MessageFormat.format(
-        messages.getString("rest.errors.unrecognized_property"), ex.getPropertyName, ex.getKnownPropertyIds)))
+      val response = InternalServerErrorRestResponse(Map("message" ->
+        createMessage("rest.errors.unrecognized_property", ex.getPropertyName, ex.getKnownPropertyIds.toString)))
       complete(restResponseToHttpResponse(response))
     case ex: Exception =>
       ex.printStackTrace()
-      val response = InternalServerErrorRestResponse(Map("message" -> MessageFormat.format(
-        messages.getString("rest.errors.internal_server_error"), ex.getMessage)))
+      val response = InternalServerErrorRestResponse(Map("message" ->
+        createMessage("rest.errors.internal_server_error", ex.getMessage)))
       complete(restResponseToHttpResponse(response))
   }
 
