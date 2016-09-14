@@ -17,7 +17,7 @@ import scala.collection.mutable.ArrayBuffer
   new Type(value = classOf[EsIndServiceData], name = ServiceLiterals.elasticsearchType),
   new Type(value = classOf[KfkQServiceData], name = ServiceLiterals.kafkaType),
   new Type(value = classOf[TstrQServiceData], name = ServiceLiterals.tstreamsType),
-  new Type(value = classOf[ZKCoordServiceData], name = ServiceLiterals.tstreamsType),
+  new Type(value = classOf[ZKCoordServiceData], name = ServiceLiterals.zookeeperType),
   new Type(value = classOf[ArspkDBServiceData], name = ServiceLiterals.aerospikeType),
   new Type(value = classOf[JDBCServiceData], name = ServiceLiterals.jdbcType)
 ))
