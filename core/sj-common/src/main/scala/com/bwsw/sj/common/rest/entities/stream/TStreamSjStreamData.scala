@@ -37,7 +37,7 @@ class TStreamSjStreamData() extends SjStreamData() {
               errors += s"Service for ${StreamLiterals.tStreamType} stream " +
                 s"must be of '${ServiceLiterals.tstreamsType}' type ('${modelService.serviceType}' is given instead)"
             } else {
-              checkStreamPartitionsOnConsistency(modelService.asInstanceOf[TStreamService])
+              errors ++= checkStreamPartitionsOnConsistency(modelService.asInstanceOf[TStreamService])
             }
         }
     }
@@ -78,10 +78,12 @@ class TStreamSjStreamData() extends SjStreamData() {
         dataStorage
       )
       if (tStream.getPartitions != this.partitions) {
-        errors += s"Partitions count of stream ${this.name} mismatch. T-stream partitions (${this.partitions}) " +
-          s"mismatch with partitions of existent t-stream (${tStream.getPartitions})."
+        errors += s"Partitions count of stream '${this.name}' mismatch. T-stream partitions (${this.partitions}) " +
+          s"mismatch with partitions of existent t-stream (${tStream.getPartitions})"
       }
     }
+
+    errors
   }
 
   private def createMetadataStorage(service: TStreamService) = {

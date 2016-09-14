@@ -37,7 +37,7 @@ class KafkaSjStreamData() extends SjStreamData() {
               errors += s"Service for ${StreamLiterals.kafkaStreamType} stream " +
                 s"must be of '${ServiceLiterals.kafkaType}' type ('${modelService.serviceType}' is given instead)"
             } else {
-              checkStreamPartitionsOnConsistency(modelService.asInstanceOf[KafkaService])
+              errors ++= checkStreamPartitionsOnConsistency(modelService.asInstanceOf[KafkaService])
             }
         }
     }
@@ -68,9 +68,11 @@ class KafkaSjStreamData() extends SjStreamData() {
     val zkUtils = createZkUtils()
     val topicMetadata = AdminUtils.fetchTopicMetadataFromZk(this.name, zkUtils)
     if (topicMetadata.partitionsMetadata.size != this.partitions) {
-      errors += s"Partitions count of stream ${this.name} mismatch. Kafka stream partitions (${this.partitions}) " +
-        s"mismatch partitions of exists kafka topic (${topicMetadata.partitionsMetadata.size})."
+      errors += s"Partitions count of stream '${this.name}' mismatch. Kafka stream partitions (${this.partitions}) " +
+        s"mismatch partitions of exists kafka topic (${topicMetadata.partitionsMetadata.size})"
     }
+
+    errors
   }
 
   override def create() = {
