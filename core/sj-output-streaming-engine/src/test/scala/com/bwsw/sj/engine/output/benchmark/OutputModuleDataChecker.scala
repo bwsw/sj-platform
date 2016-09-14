@@ -1,15 +1,9 @@
 package com.bwsw.sj.engine.output.benchmark
 
-import java.net.InetSocketAddress
-
-import com.aerospike.client.Host
-import com.bwsw.sj.common.DAL.model.{ESSjStream, SjStream, TStreamService, TStreamSjStream}
+import com.bwsw.sj.common.DAL.model.{ESSjStream, SjStream, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.engine.output.benchmark.BenchmarkDataFactory._
-import com.bwsw.tstreams.common.CassandraConnectorConf
-import com.bwsw.tstreams.data.aerospike
-import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
@@ -23,24 +17,7 @@ object OutputModuleDataChecker extends App {
 
   val streamService: GenericMongoService[SjStream] = ConnectionRepository.getStreamService
   val tStream: TStreamSjStream = streamService.get(tStreamName).asInstanceOf[TStreamSjStream]
-
-  val tStreamService = tStream.service.asInstanceOf[TStreamService]
-  val metadataStorageFactory = new MetadataStorageFactory
-  val cassandraConnectorConf = CassandraConnectorConf.apply(tStreamService.metadataProvider.hosts.map { addr =>
-    val parts = addr.split(":")
-    new InetSocketAddress(parts(0), parts(1).toInt)
-  }.toSet)
-  val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(cassandraConnectorConf, tStreamService.metadataNamespace)
-
-  val dataStorageFactory = new aerospike.Factory
-  val dataStorageHosts = tStreamService.dataProvider.hosts.map {addr =>
-    val parts = addr.split(":")
-    new Host(parts(0), parts(1).toInt)
-  }.toSet
-  val aerospikeOptions = new aerospike.Options(tStreamService.dataNamespace, dataStorageHosts)
-  val dataStorage = dataStorageFactory.getInstance(aerospikeOptions)
-
-  val inputConsumer = createConsumer(tStream, "localhost:8188", metadataStorage, dataStorage)
+  val inputConsumer = createConsumer(tStream)
 
   val inputElements = new ArrayBuffer[Int]()
   val partitions = inputConsumer.getPartitions().toIterator
@@ -77,8 +54,6 @@ object OutputModuleDataChecker extends App {
   assert(inputElements.forall(x => outputElements.contains(x)) && outputElements.forall(x => inputElements.contains(x)),
     "All txns elements that are consumed from output stream should equals all txns elements that are consumed from input stream")
 
-  metadataStorageFactory.closeFactory()
-  dataStorageFactory.closeFactory()
   esClient.close()
   ConnectionRepository.close()
 

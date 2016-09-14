@@ -64,7 +64,9 @@ class ESSjStreamData() extends SjStreamData() {
 
     outputData.getHits.foreach { hit =>
       val id = hit.getId
-      client.deleteIndexDocumentById(service.index, this.name, id)
+      client.deleteDocumentByTypeAndId(service.index, this.name, id)
     }
+
+    client.close()
   }
 }

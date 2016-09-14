@@ -56,3 +56,11 @@ class CassandraFactory {
     cluster.close()
   }
 }
+
+class AerospikeStorage() {
+//  val options = new aerospike.Options(
+//    service.dataNamespace,
+//    dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toSet
+//  )
+//  val dataStorage = (new aerospike.Factory).getInstance(options)
+}

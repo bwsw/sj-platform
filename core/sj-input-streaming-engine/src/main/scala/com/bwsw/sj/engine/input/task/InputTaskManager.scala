@@ -13,7 +13,7 @@ import com.bwsw.sj.engine.core.managment.TaskManager
  */
 class InputTaskManager() extends TaskManager {
 
-  val inputs = {
+  lazy val inputs = {
     logger.error(s"Instance of Input module hasn't got execution plan " +
       s"and it's impossible to retrieve inputs")
     throw new Exception(s"Instance of Input module hasn't got execution plan " +

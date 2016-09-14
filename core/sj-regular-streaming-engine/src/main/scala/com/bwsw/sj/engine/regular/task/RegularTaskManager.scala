@@ -59,7 +59,7 @@ class RegularTaskManager() extends TaskManager {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
 
-    val timeUuidGenerator = getUUIDGenerator(stream.asInstanceOf[TStreamSjStream])
+    val timeUuidGenerator = getUUIDGenerator(stream)
 
     setStreamOptions(stream)
 
@@ -67,7 +67,7 @@ class RegularTaskManager() extends TaskManager {
       "consumer_for_" + taskName + "_" + stream.name,
       timeUuidGenerator,
       converter,
-      (0 until stream.asInstanceOf[TStreamSjStream].partitions).toSet,
+      (0 until stream.partitions).toSet,
       offset)
   }
 }

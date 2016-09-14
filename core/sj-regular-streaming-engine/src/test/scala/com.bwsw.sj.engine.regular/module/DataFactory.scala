@@ -7,20 +7,16 @@ import java.util.jar.JarFile
 
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.common.DAL.model.Provider
-import com.bwsw.sj.common.DAL.model.Service
-import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, Instance, RegularInstance, Task}
+import com.bwsw.sj.common.DAL.model.{Provider, Service, _}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.utils.GeneratorLiterals
-import com.bwsw.sj.common.utils._
+import com.bwsw.sj.common.utils.{GeneratorLiterals, _}
+import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
-import com.bwsw.tstreams.agents.consumer.{Consumer, Options}
 import com.bwsw.tstreams.agents.producer
-import com.bwsw.tstreams.common.RoundRobinPolicy
 import com.bwsw.tstreams.converter.IConverter
-import com.bwsw.tstreams.coordination.client.TcpTransport
+import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.services.BasicStreamService
 import kafka.admin.AdminUtils
@@ -39,6 +35,7 @@ object DataFactory {
   private val kafkaHosts = System.getenv("KAFKA_HOSTS").split(",")
   private val cassandraHost = System.getenv("CASSANDRA_HOST")
   private val cassandraPort = System.getenv("CASSANDRA_PORT").toInt
+  private val agentsHost = "localhost"
   private val cassandraTestKeyspace = "test_keyspace_for_regular_engine"
   private val testNamespace = "test"
   private val instanceName = "test-instance-for-regular-engine"
@@ -48,10 +45,50 @@ object DataFactory {
   private val serializer = new JsonSerializer()
   private val objectSerializer = new ObjectSerializer()
   private val cassandraFactory = new CassandraFactory()
+  private val cassandraProvider = new Provider("cassandra-test-provider", "cassandra provider", Array(s"$cassandraHost:$cassandraPort"), "", "", ProviderLiterals.cassandraType)
+  private val zookeeperProvider = new Provider("zookeeper-test-provider", "zookeeper provider", zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
+  private val tstrqService = new TStreamService("tstream-test-service", ServiceLiterals.tstreamsType, "tstream test service",
+    cassandraProvider, cassandraTestKeyspace, cassandraProvider, cassandraTestKeyspace, zookeeperProvider, "unit")
+  private val tstreamFactory = new TStreamsFactory()
+  setTStreamFactoryProperties()
 
   val inputCount = 2
   val outputCount = 2
   val partitions = 4
+
+  private def setTStreamFactoryProperties() = {
+    setMetadataClusterProperties(tstrqService)
+    setDataClusterProperties(tstrqService)
+    setCoordinationOptions(tstrqService)
+    setBindHostForAgents()
+  }
+
+  private def setMetadataClusterProperties(tStreamService: TStreamService) = {
+    tstreamFactory.setProperty(TSF_Dictionary.Metadata.Cluster.NAMESPACE, tStreamService.metadataNamespace)
+      .setProperty(TSF_Dictionary.Metadata.Cluster.ENDPOINTS, tStreamService.metadataProvider.hosts.mkString(","))
+  }
+
+  private def setDataClusterProperties(tStreamService: TStreamService) = {
+    tStreamService.dataProvider.providerType match {
+      case ProviderLiterals.aerospikeType =>
+        tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.DRIVER, TSF_Dictionary.Data.Cluster.Consts.DATA_DRIVER_AEROSPIKE)
+      case _ =>
+        tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.DRIVER, TSF_Dictionary.Data.Cluster.Consts.DATA_DRIVER_CASSANDRA)
+    }
+
+    tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.NAMESPACE, tStreamService.dataNamespace)
+      .setProperty(TSF_Dictionary.Data.Cluster.ENDPOINTS, tStreamService.dataProvider.hosts.mkString(","))
+  }
+
+  private def setCoordinationOptions(tStreamService: TStreamService) = {
+    tstreamFactory.setProperty(TSF_Dictionary.Coordination.ROOT, s"/${tStreamService.lockNamespace}")
+      .setProperty(TSF_Dictionary.Coordination.ENDPOINTS, tStreamService.lockProvider.hosts.mkString(","))
+  }
+
+  private def setBindHostForAgents() = {
+    tstreamFactory.setProperty(TSF_Dictionary.Producer.BIND_HOST, agentsHost)
+    tstreamFactory.setProperty(TSF_Dictionary.Consumer.Subscriber.BIND_HOST, agentsHost)
+  }
 
   private val converter = new IConverter[Array[Byte], Array[Byte]] {
     override def convert(obj: Array[Byte]): Array[Byte] = obj
@@ -80,7 +117,6 @@ object DataFactory {
   def close() = cassandraFactory.close()
 
   def createProviders(providerService: GenericMongoService[Provider]) = {
-    val cassandraProvider = new Provider("cassandra-test-provider", "cassandra provider", Array(s"$cassandraHost:9042"), "", "", ProviderLiterals.cassandraType)
     providerService.save(cassandraProvider)
 
     //    val aerospikeProvider = new Provider("aerospike-test-provider", "aerospike provider", aerospikeHosts, "", "", Provider.aerospikeType)
@@ -89,7 +125,6 @@ object DataFactory {
     val kafkaProvider = new Provider("kafka-test-provider", "kafka provider", kafkaHosts, "", "", ProviderLiterals.kafkaType)
     providerService.save(kafkaProvider)
 
-    val zookeeperProvider = new Provider("zookeeper-test-provider", "zookeeper provider", zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
     providerService.save(zookeeperProvider)
   }
 
@@ -101,24 +136,20 @@ object DataFactory {
   }
 
   def createServices(serviceManager: GenericMongoService[Service], providerService: GenericMongoService[Provider]) = {
-    val cassProv = providerService.get("cassandra-test-provider").get
-    val cassService = new CassandraService("cassandra-test-service", ServiceLiterals.cassandraType, "cassandra test service", cassProv, cassandraTestKeyspace)
+    val cassService = new CassandraService("cassandra-test-service", ServiceLiterals.cassandraType, "cassandra test service", cassandraProvider, cassandraTestKeyspace)
     serviceManager.save(cassService)
 
     //    val aeroProv = providerService.get("aerospike-test-provider")
     //    val aeroService = new AerospikeService("aerospike-test-service", "ArspkDB", "aerospike test service", aeroProv, testNamespace)
     //    serviceManager.save(aeroService)
 
-    val zkProv = providerService.get("zookeeper-test-provider").get
-    val zkService = new ZKService("zookeeper-test-service", ServiceLiterals.zookeeperType, "zookeeper test service", zkProv, testNamespace)
+    val zkService = new ZKService("zookeeper-test-service", ServiceLiterals.zookeeperType, "zookeeper test service", zookeeperProvider, testNamespace)
     serviceManager.save(zkService)
 
     val kafkaProv = providerService.get("kafka-test-provider").get
-    val kafkaService = new KafkaService("kafka-test-service", ServiceLiterals.kafkaType, "kafka test service", kafkaProv, zkProv, testNamespace)
+    val kafkaService = new KafkaService("kafka-test-service", ServiceLiterals.kafkaType, "kafka test service", kafkaProv, zookeeperProvider, testNamespace)
     serviceManager.save(kafkaService)
 
-    val tstrqService = new TStreamService("tstream-test-service", ServiceLiterals.tstreamsType, "tstream test service",
-      cassProv, cassandraTestKeyspace, cassProv, cassandraTestKeyspace, zkProv, "unit")
     serviceManager.save(tstrqService)
   }
 
@@ -349,7 +380,7 @@ object DataFactory {
     val policy = producer.NewTransactionProducerPolicy.ErrorIfOpened
 
     def createTstreamData(countTxns: Int, countElements: Int, streamService: GenericMongoService[SjStream], suffix: String) = {
-      val producer = createProducer(streamService.get("test-input-tstream" + suffix).get)
+      val producer = createProducer(streamService.get("test-input-tstream" + suffix).get.asInstanceOf[TStreamSjStream])
       val s = System.nanoTime
       (0 until countTxns) foreach { (x: Int) =>
         val txn = producer.newTransaction(policy)
@@ -401,32 +432,23 @@ object DataFactory {
   }
 
   def createInputTstreamConsumer(streamService: GenericMongoService[SjStream], suffix: String) = {
-    createConsumer("test-input-tstream" + suffix, streamService, "localhost:804" + suffix)
+    createConsumer("test-input-tstream" + suffix, streamService)
   }
 
   def createStateConsumer(streamService: GenericMongoService[SjStream]) = {
     val name = instanceName + "-task0" + "_state"
     val partitions = 1
-    val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
-    val dataStorage = cassandraFactory.getDataStorage(cassandraTestKeyspace)
-
-    val tStream =
-      BasicStreamService.loadStream(name, metadataStorage, dataStorage)
-
-    val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until partitions).toList)
-
     val timeUuidGenerator = new LocalTimeUUIDGenerator
 
-    val options = new Options[Array[Byte]](
-      transactionsPreload = 10,
-      dataPreload = 7,
-      converter,
-      roundRobinPolicy,
-      Oldest,
-      timeUuidGenerator,
-      useLastOffset = true)
+    tstreamFactory.setProperty(TSF_Dictionary.Stream.NAME, name)
+    tstreamFactory.setProperty(TSF_Dictionary.Stream.PARTITIONS, partitions)
 
-    new Consumer[Array[Byte]](tStream.name, tStream, options)
+    tstreamFactory.getConsumer[Array[Byte]](
+      name,
+      timeUuidGenerator,
+      converter,
+      (0 until partitions).toSet,
+      Oldest)
   }
 
   def createInputKafkaConsumer(streamService: GenericMongoService[SjStream], partitionNumber: Int) = {
@@ -449,66 +471,43 @@ object DataFactory {
   }
 
   def createOutputConsumer(streamService: GenericMongoService[SjStream], suffix: String) = {
-    createConsumer("test-output-tstream" + suffix, streamService, "localhost:805" + suffix)
+    createConsumer("test-output-tstream" + suffix, streamService)
   }
 
-  private def createProducer(stream: SjStream) = {
-    val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
-    val dataStorage = cassandraFactory.getDataStorage(cassandraTestKeyspace)
-
-    val tStream =
-      BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
-
-    val coordinationSettings = new producer.CoordinationOptions(
-      zkHosts = zookeeperHosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toList,
-      zkRootPath = "/unit",
-      zkSessionTimeout = 7000,
-      zkConnectionTimeout = 7000,
-      isLowPriorityToBeMaster = false,
-      transport = new TcpTransport("localhost:8030", 60 * 1000),
-      1,
-      1,
-      2,
-      true,
-      true)
-
-    val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
-
+  def createProducer(stream: TStreamSjStream) = {
     val timeUuidGenerator = new LocalTimeUUIDGenerator
 
-    val options = new producer.Options[Array[Byte]](
-      transactionTTL = 6,
-      transactionKeepAliveInterval = 2,
-      roundRobinPolicy,
-      5,
+    setProducerBindPort()
+    setStreamOptions(stream)
+
+    tstreamFactory.getProducer[Array[Byte]](
+      "producer for " + stream.name,
       timeUuidGenerator,
-      coordinationSettings,
-      converter)
-
-    new producer.Producer[Array[Byte]]("producer for " + tStream.name, tStream, options)
-  }
-
-  private def createConsumer(streamName: String, streamService: GenericMongoService[SjStream], address: String) = {
-    val stream = streamService.get(streamName).get
-    val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
-    val dataStorage = cassandraFactory.getDataStorage(cassandraTestKeyspace)
-
-    val tStream =
-      BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
-
-    val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
-
-    val timeUuidGenerator = new LocalTimeUUIDGenerator
-
-    val options = new Options[Array[Byte]](
-      transactionsPreload = 10,
-      dataPreload = 7,
       converter,
-      roundRobinPolicy,
-      Oldest,
-      timeUuidGenerator,
-      useLastOffset = true)
+      (0 until stream.partitions).toSet)
+  }
 
-    new Consumer[Array[Byte]](tStream.name, tStream, options)
+  private def setProducerBindPort() = {
+    tstreamFactory.setProperty(TSF_Dictionary.Producer.BIND_PORT, 8030)
+  }
+
+  private def createConsumer(streamName: String, streamService: GenericMongoService[SjStream]): Consumer[Array[Byte]] = {
+    val stream = streamService.get(streamName).get.asInstanceOf[TStreamSjStream]
+    val timeUuidGenerator = new LocalTimeUUIDGenerator
+
+    setStreamOptions(stream)
+
+    tstreamFactory.getConsumer[Array[Byte]](
+      streamName,
+      timeUuidGenerator,
+      converter,
+      (0 until stream.partitions).toSet,
+      Oldest)
+  }
+
+  protected def setStreamOptions(stream: TStreamSjStream) = {
+    tstreamFactory.setProperty(TSF_Dictionary.Stream.NAME, stream.name)
+    tstreamFactory.setProperty(TSF_Dictionary.Stream.PARTITIONS, stream.partitions)
+    tstreamFactory.setProperty(TSF_Dictionary.Stream.DESCRIPTION, stream.description)
   }
 }

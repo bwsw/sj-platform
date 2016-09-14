@@ -28,8 +28,8 @@ class ElasticsearchClient(hosts: Set[(String, Int)]) {
     client.admin().indices().prepareCreate(index).execute().actionGet()
   }
 
-  def deleteIndexDocumentById(index: String, documentType: String, id: String) = {
-    client.prepareDelete(index, documentType, id).execute().actionGet()
+  def deleteDocumentByTypeAndId(index: String, documentType: String, documentId: String) = {
+    client.prepareDelete(index, documentType, documentId).execute().actionGet()
   }
 
   def deleteIndex(index: String) = {
@@ -55,12 +55,17 @@ class ElasticsearchClient(hosts: Set[(String, Int)]) {
       .getHits
   }
 
-  def writeWithRandomId(index: String, documentType: String, data: String) = {
+  def write(data: String, index: String, documentType: String, documentId: String = UUID.randomUUID().toString) = {
     client
-      .prepareIndex(index, documentType, UUID.randomUUID().toString)
+      .prepareIndex(index, documentType, documentId)
       .setSource(data)
       .execute()
       .actionGet()
+  }
+
+  def isConnected() = {
+    //val settings = Settings.settingsBuilder().put("client.transport.ping_timeout", "2s").build() todo maybe need
+    client.connectedNodes().size() < 1
   }
 
   def close() = {

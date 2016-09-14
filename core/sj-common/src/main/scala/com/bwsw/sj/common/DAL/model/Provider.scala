@@ -1,10 +1,11 @@
 package com.bwsw.sj.common.DAL.model
 
-import java.net.{InetAddress, InetSocketAddress, URI}
+import java.net.{InetSocketAddress, URI}
 import java.nio.channels.ClosedChannelException
 import java.util.Collections
 
 import com.aerospike.client.{AerospikeClient, AerospikeException}
+import com.bwsw.common.ElasticsearchClient
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.entities.provider.ProviderData
 import com.bwsw.sj.common.utils.{ConfigLiterals, ProviderLiterals}
@@ -13,9 +14,6 @@ import com.datastax.driver.core.exceptions.NoHostAvailableException
 import kafka.javaapi.TopicMetadataRequest
 import kafka.javaapi.consumer.SimpleConsumer
 import org.apache.zookeeper.ZooKeeper
-import org.elasticsearch.client.transport.TransportClient
-import org.elasticsearch.common.settings.Settings
-import org.elasticsearch.common.transport.InetSocketTransportAddress
 import org.mongodb.morphia.annotations.{Entity, Id, Property}
 
 import scala.collection.mutable.ArrayBuffer
@@ -176,13 +174,11 @@ class Provider {
 
   private def checkESConnection(address: String) = {
     val errors = ArrayBuffer[String]()
-    val (host, port) = getHostAndPort(address)
-    val settings = Settings.settingsBuilder().put("client.transport.ping_timeout", "2s").build()
-    val client = TransportClient.builder().settings(settings).build()
-    client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(host), port))
-    if (client.connectedNodes().size() < 1) {
+    val client = new ElasticsearchClient(Set(getHostAndPort(address)))
+    if (client.isConnected()) {
       errors += s"Can not establish connection to ElasticSearch on '$address'"
     }
+    client.close()
 
     errors
   }

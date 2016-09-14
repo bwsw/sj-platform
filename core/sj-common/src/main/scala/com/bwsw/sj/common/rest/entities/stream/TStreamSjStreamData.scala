@@ -5,10 +5,9 @@ import java.net.InetSocketAddress
 import com.aerospike.client.Host
 import com.bwsw.sj.common.DAL.model.{TStreamService, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{ProviderLiterals, ServiceLiterals, StreamLiterals}
-import com.bwsw.tstreams.common.CassandraConnectorConf
-import com.bwsw.tstreams.data.{IStorage, aerospike, cassandra}
-import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
+import com.bwsw.sj.common.utils.{CassandraFactory, ProviderLiterals, ServiceLiterals, StreamLiterals}
+import com.bwsw.tstreams.data.{IStorage, aerospike}
+import com.bwsw.tstreams.metadata.MetadataStorage
 import com.bwsw.tstreams.services.BasicStreamService
 
 import scala.collection.mutable.ArrayBuffer
@@ -89,8 +88,10 @@ class TStreamSjStreamData() extends SjStreamData() {
   private def createMetadataStorage(service: TStreamService) = {
     val metadataProvider = service.metadataProvider
     val hosts = metadataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toSet
-    val cassandraConnectorConf = CassandraConnectorConf.apply(hosts)
-    val metadataStorage = (new MetadataStorageFactory).getInstance(cassandraConnectorConf, service.metadataNamespace)
+    val cassandraFactory = new CassandraFactory()
+    cassandraFactory.open(hosts)
+    val metadataStorage = cassandraFactory.getMetadataStorage(service.metadataNamespace)
+    cassandraFactory.close()
 
     metadataStorage
   }
@@ -101,14 +102,16 @@ class TStreamSjStreamData() extends SjStreamData() {
     dataProvider.providerType match {
       case ProviderLiterals.cassandraType =>
         val hosts = dataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toSet
-        val cassandraConnectorConf = CassandraConnectorConf.apply(hosts)
-        dataStorage = (new cassandra.Factory).getInstance(cassandraConnectorConf, service.dataNamespace)
+        val cassandraFactory = new CassandraFactory()
+        cassandraFactory.open(hosts)
+        dataStorage = cassandraFactory.getDataStorage(service.dataNamespace)
+        cassandraFactory.close()
       case ProviderLiterals.aerospikeType =>
         val options = new aerospike.Options(
           service.dataNamespace,
           dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toSet
         )
-        dataStorage = (new aerospike.Factory).getInstance(options)
+        dataStorage = (new aerospike.Factory).getInstance(options) //todo
     }
 
     dataStorage

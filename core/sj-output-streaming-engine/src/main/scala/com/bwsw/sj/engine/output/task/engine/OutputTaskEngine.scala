@@ -166,7 +166,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
       outputData.getHits.foreach { hit =>
         val id = hit.getId
-        client.deleteIndexDocumentById(index, streamName, id)
+        client.deleteDocumentByTypeAndId(index, streamName, id)
       }
     }
   }
@@ -186,7 +186,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
         esEnvelope.tags = inputEnvelope.tags
         registerOutputEnvelope(esEnvelope.txn, esEnvelope.data)
         logger.debug(s"Task: ${manager.taskName}. Write output envelope to elasticearch.")
-        client.writeWithRandomId(esService.index,  outputStream.name, serializer.serialize(esEnvelope.data))
+        client.write(serializer.serialize(esEnvelope.data), esService.index,  outputStream.name)
       case jdbcEnvelope: JdbcEnvelope => writeToJdbc(outputEnvelope)
       case _ =>
     }

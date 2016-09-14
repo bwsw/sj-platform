@@ -81,11 +81,9 @@ abstract class TaskManager() {
   }
 
   private def setTStreamFactoryProperties() = {
-    val tstreamService: TStreamService = getAuxiliaryTStreamService()
-
-    setMetadataClusterProperties(tstreamService)
-    setDataClusterProperties(tstreamService)
-    setCoordinationOptions(tstreamService)
+    setMetadataClusterProperties(auxiliaryTStreamService)
+    setDataClusterProperties(auxiliaryTStreamService)
+    setCoordinationOptions(auxiliaryTStreamService)
     setBindHostForAgents()
     setPersistentQueuePath()
   }
@@ -177,8 +175,8 @@ abstract class TaskManager() {
 
     val timeUuidGenerator = getUUIDGenerator(stream)
 
-    setStreamOptions(stream)
     setProducerBindPort()
+    setStreamOptions(stream)
 
     tstreamFactory.getProducer[Array[Byte]](
       "producer_for_" + taskName + "_" + stream.name,
