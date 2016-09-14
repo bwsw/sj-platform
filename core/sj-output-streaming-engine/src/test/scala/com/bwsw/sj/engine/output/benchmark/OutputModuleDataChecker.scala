@@ -3,14 +3,13 @@ package com.bwsw.sj.engine.output.benchmark
 import java.net.InetSocketAddress
 
 import com.aerospike.client.Host
-import com.bwsw.sj.common.DAL.model.{TStreamService, SjStream, TStreamSjStream, ESSjStream}
+import com.bwsw.sj.common.DAL.model.{ESSjStream, SjStream, TStreamService, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.engine.output.benchmark.BenchmarkDataFactory._
 import com.bwsw.tstreams.common.CassandraConnectorConf
 import com.bwsw.tstreams.data.aerospike
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
-import org.elasticsearch.action.search.SearchResponse
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
@@ -63,13 +62,7 @@ object OutputModuleDataChecker extends App {
 
   val (esClient, esService) = openDbConnection(esStream)
 
-  val esRequest: SearchResponse = esClient
-    .prepareSearch(esService.index)
-    .setTypes(esStream.name)
-    .setSize(2 * inputElements.size)
-    .execute()
-    .actionGet()
-  val outputData = esRequest.getHits
+  val outputData = esClient.search(esService.index, esStream.name)
 
   val outputElements = new ArrayBuffer[Int]()
   outputData.getHits.foreach { hit =>

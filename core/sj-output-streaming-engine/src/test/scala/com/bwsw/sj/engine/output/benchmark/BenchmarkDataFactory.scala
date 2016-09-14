@@ -1,36 +1,29 @@
 package com.bwsw.sj.engine.output.benchmark
 
 import java.io.{BufferedReader, File, InputStreamReader}
-import java.net.{InetAddress, InetSocketAddress}
+import java.net.InetSocketAddress
 import java.util.jar.JarFile
 
 import com.aerospike.client.Host
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.common.traits.Serializer
-import com.bwsw.common.{JsonSerializer, ObjectSerializer}
+import com.bwsw.common.{ElasticsearchClient, JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, OutputInstance, Task}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.utils.GeneratorLiterals
-import com.bwsw.sj.common.utils.ProviderLiterals
-import com.bwsw.sj.common.utils.ServiceLiterals
-import com.bwsw.sj.common.utils._
-import com.bwsw.tstreams.agents.consumer.Offset.Oldest
+import com.bwsw.sj.common.utils.{GeneratorLiterals, ProviderLiterals, ServiceLiterals, _}
 import com.bwsw.tstreams.agents.consumer
+import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.producer.{CoordinationOptions, NewTransactionProducerPolicy, Options, Producer}
-import com.bwsw.tstreams.common.CassandraConnectorConf
+import com.bwsw.tstreams.common.{CassandraConnectorConf, RoundRobinPolicy}
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.coordination.client.TcpTransport
 import com.bwsw.tstreams.data.aerospike
 import com.bwsw.tstreams.env.TSF_Dictionary
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
 import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
-import com.bwsw.tstreams.common.RoundRobinPolicy
 import com.bwsw.tstreams.services.BasicStreamService
-import org.elasticsearch.action.search.SearchResponse
-import org.elasticsearch.client.transport.TransportClient
-import org.elasticsearch.common.transport.InetSocketTransportAddress
 
 import scala.collection.JavaConverters._
 
@@ -124,30 +117,25 @@ object BenchmarkDataFactory {
     }
   }
 
-  def openDbConnection(outputStream: SjStream): (TransportClient, ESService) = {
+  def openDbConnection(outputStream: SjStream) = {
     val esService: ESService = outputStream.service.asInstanceOf[ESService]
-    val client: TransportClient = TransportClient.builder().build()
-    esService.provider.hosts.foreach { host =>
+    val hosts = esService.provider.hosts.map { host =>
       val parts = host.split(":")
-      client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(parts(0)), parts(1).toInt))
-    }
+      (parts(0), parts(1).toInt)
+    }.toSet
+    val client = new ElasticsearchClient(hosts)
+
     (client, esService)
   }
 
   def clearEsStream() = {
     val stream = streamService.get(esStreamName).asInstanceOf[ESSjStream]
     val (client, service) = openDbConnection(stream)
-    val esRequest: SearchResponse = client
-      .prepareSearch(service.index)
-      .setTypes(stream.name)
-      .setSize(2000)
-      .execute()
-      .get()
-    val outputData = esRequest.getHits
+    val outputData = client.search(service.index, stream.name)
 
     outputData.getHits.foreach { hit =>
       val id = hit.getId
-      client.prepareDelete(service.index, stream.name, id).execute().actionGet()
+      client.deleteIndexDocumentById(service.index, stream.name, id)
     }
   }
 

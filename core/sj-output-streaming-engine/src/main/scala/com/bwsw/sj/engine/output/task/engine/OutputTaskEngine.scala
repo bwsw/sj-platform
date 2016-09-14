@@ -1,10 +1,9 @@
 package com.bwsw.sj.engine.output.task.engine
 
-import java.net.InetAddress
+import java.util.Calendar
 import java.util.concurrent.Callable
-import java.util.{Calendar, UUID}
 
-import com.bwsw.common.{JsonSerializer, ObjectSerializer}
+import com.bwsw.common.{ElasticsearchClient, JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.DAL.model.{ESService, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
@@ -18,10 +17,6 @@ import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.datastax.driver.core.utils.UUIDs
-import org.elasticsearch.action.index.IndexRequestBuilder
-import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse}
-import org.elasticsearch.client.transport.TransportClient
-import org.elasticsearch.common.transport.InetSocketTransportAddress
 import org.elasticsearch.index.query.QueryBuilders
 import org.slf4j.LoggerFactory
 
@@ -79,14 +74,15 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
    * @param outputStream Output ES stream
    * @return ES Transport client and ES service of stream
    */
-  private def openDbConnection(outputStream: SjStream): (TransportClient, ESService) = {
+  private def openDbConnection(outputStream: SjStream) = {
     logger.info(s"Task: ${manager.taskName}. Open output elasticsearch connection.\n")
     val esService: ESService = outputStream.service.asInstanceOf[ESService]
-    val client: TransportClient = TransportClient.builder().build()
-    esService.provider.hosts.foreach { host =>
+    val hosts = esService.provider.hosts.map { host =>
       val parts = host.split(":")
-      client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(parts(0)), parts(1).toInt))
-    }
+      (parts(0), parts(1).toInt)
+    }.toSet
+    val client = new ElasticsearchClient(hosts)
+
 
     (client, esService)
   }
@@ -124,17 +120,13 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   }
 
   private def prepareES() = {
-    logger.debug(s"Task: ${manager.taskName}. Prepare an elasticsearch index ${esService.index}")
-    if (!doesIndexExist) {
-      createIndex()
-    }
-    createIndexMapping()
-  }
-
-  private def createIndex() = {
     val index = esService.index
-    logger.debug(s"Task: ${manager.taskName}. Create an elasticsearch index $index")
-    client.admin().indices().prepareCreate(index).execute().actionGet()
+    logger.debug(s"Task: ${manager.taskName}. Prepare an elasticsearch index ${esService.index}")
+    if (client.doesIndexExist(index)) {
+      client.createIndex(index)
+    }
+
+    createIndexMapping()
   }
 
   private def createIndexMapping() = {
@@ -152,12 +144,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     val mapping = Map("properties" -> fields)
     val mappingJson = serializer.serialize(mapping)
 
-    client.admin().indices()
-      .preparePutMapping(index)
-      .setType(streamName)
-      .setSource(mappingJson)
-      .execute()
-      .actionGet()
+    client.createMapping(index, streamName, mappingJson)
   }
 
   protected def afterReceivingEnvelope(): Unit
@@ -173,18 +160,13 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     val index = esService.index
     val streamName = outputStream.name
     logger.info(s"Task: ${manager.taskName}. Delete transaction $txn from ES stream.")
-    if (doesIndexExist) {
-      val request: SearchRequestBuilder = client
-        .prepareSearch(index)
-        .setTypes(streamName)
-        .setQuery(QueryBuilders.matchQuery("txn", txn))
-        .setSize(2000)
-      val response: SearchResponse = request.execute().get()
-      val outputData = response.getHits
+    if (client.doesIndexExist(index)) {
+      val query = QueryBuilders.matchQuery("txn", txn)
+      val outputData = client.search(index, streamName, query)
 
       outputData.getHits.foreach { hit =>
         val id = hit.getId
-        client.prepareDelete(index, streamName, id).execute().actionGet()
+        client.deleteIndexDocumentById(index, streamName, id)
       }
     }
   }
@@ -203,7 +185,8 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
         esEnvelope.partition = inputEnvelope.partition
         esEnvelope.tags = inputEnvelope.tags
         registerOutputEnvelope(esEnvelope.txn, esEnvelope.data)
-        writeEntityToES(esService.index, outputStream.name, esEnvelope.data, client)
+        logger.debug(s"Task: ${manager.taskName}. Write output envelope to elasticearch.")
+        client.writeWithRandomId(esService.index,  outputStream.name, serializer.serialize(esEnvelope.data))
       case jdbcEnvelope: JdbcEnvelope => writeToJdbc(outputEnvelope)
       case _ =>
     }
@@ -212,24 +195,6 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private def registerOutputEnvelope(envelopeID: String, data: OutputData) = {
     val elementSize = outputEnvelopeSerializer.serialize(data).length
     performanceMetrics.addElementToOutputEnvelope(outputStream.name, envelopeID, elementSize)
-  }
-
-  private def writeEntityToES(index: String, documentType: String, entity: OutputData, client: TransportClient) = {
-    logger.debug(s"Task: ${manager.taskName}. Write output envelope to elasticearch.")
-    val esData: String = serializer.serialize(entity)
-
-    val request: IndexRequestBuilder = client.prepareIndex(index, documentType, UUID.randomUUID().toString)
-    request.setSource(esData)
-    val response = request.execute().actionGet()
-
-    response
-  }
-
-  private def doesIndexExist = {
-    val index = esService.index
-    val doesExist = client.admin().indices().prepareExists(index).execute().actionGet().isExists
-
-    doesExist
   }
 
   /**

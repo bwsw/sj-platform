@@ -29,7 +29,7 @@ import scala.collection.mutable.ArrayBuffer
 object StreamUtil {
   private val logger = LoggerFactory.getLogger(getClass.getName)
 
-  def chackAndCreate(initialData: SjStreamData, stream: SjStream): ArrayBuffer[String] = {
+  def checkAndCreate(initialData: SjStreamData, stream: SjStream): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
     stream match {
       case s: TStreamSjStream =>
@@ -69,7 +69,6 @@ object StreamUtil {
 
     errors
   }
-
 
   /**
    * Check t-stream for existence

@@ -24,7 +24,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator with CompletionUtils 
 
           if (errors.isEmpty) {
             val stream = data.asModelStream()
-            errors ++= StreamUtil.chackAndCreate(data, stream)
+            errors ++= StreamUtil.checkAndCreate(data, stream)
             response = BadRequestRestResponse(Map("message" ->
             createMessage("rest.streams.stream.cannot.create", errors.mkString(";"))))
 
