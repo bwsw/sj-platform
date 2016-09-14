@@ -8,6 +8,7 @@ import com.bwsw.sj.crud.rest.cors.CorsSupport
 import com.bwsw.sj.crud.rest.exceptions._
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
+import kafka.common.TopicAlreadyMarkedForDeletionException
 
 /**
  * Route for CRUD Rest-API
@@ -41,7 +42,7 @@ with SjConfigurationSettingsApi with CompletionUtils {
       complete(restResponseToHttpResponse(response))
     case ex: UnrecognizedPropertyException =>
       val response = InternalServerErrorRestResponse(Map("message" ->
-        createMessage("rest.errors.unrecognized_property", ex.getPropertyName, ex.getKnownPropertyIds.toString)))
+        createMessage("rest.errors.unrecognized_property", ex.getPropertyName, ex.getKnownPropertyIds.toArray.mkString(", "))))
       complete(restResponseToHttpResponse(response))
     case ex: Exception =>
       ex.printStackTrace()

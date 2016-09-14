@@ -115,7 +115,7 @@ class InputStreamingValidator extends StreamingModuleValidator {
         if (!service.get.isInstanceOf[TStreamService]) {
           errors += s"Service for t-streams must be 'TstrQ'"
         } else {
-          checkTStreams(errors, outputStreams.filter(s => s.streamType.equals(tStreamType)).map(_.asInstanceOf[TStreamSjStream]))
+          createTStreams(errors, outputStreams.filter(s => s.streamType.equals(tStreamType)).map(_.asInstanceOf[TStreamSjStream]))
         }
       }
 

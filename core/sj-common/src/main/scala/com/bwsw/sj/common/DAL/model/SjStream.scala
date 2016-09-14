@@ -24,6 +24,10 @@ class SjStream() {
     this.tags = tags
   }
 
+  def create(): Unit = ???
+
+  def delete(): Unit = ???
+
   def asProtocolStream(): SjStreamData = ???
 
   protected def fillProtocolStream(stream: SjStreamData) = {

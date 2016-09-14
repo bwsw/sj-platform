@@ -106,7 +106,7 @@ class RegularStreamingValidator extends StreamingModuleValidator {
       if (kafkaStreams.exists(s => !s.service.isInstanceOf[KafkaService])) {
         errors += s"Service for kafka streams must be 'KfkQ'"
       } else {
-        checkKafkaStreams(errors, kafkaStreams)
+        createKafkaStreams(errors, kafkaStreams)
       }
     }
 
@@ -163,7 +163,7 @@ class RegularStreamingValidator extends StreamingModuleValidator {
         if (!service.get.isInstanceOf[TStreamService]) {
           errors += s"Service for t-streams must be 'TstrQ'"
         } else {
-          checkTStreams(errors, allStreams.filter(s => s.streamType.equals(tStreamType)).map(_.asInstanceOf[TStreamSjStream]))
+          createTStreams(errors, allStreams.filter(s => s.streamType.equals(tStreamType)).map(_.asInstanceOf[TStreamSjStream]))
         }
       }
 

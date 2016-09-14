@@ -24,6 +24,8 @@ class SjStreamData() extends ValidationUtils {
   var tags: Array[String] = Array()
   var force: Boolean = false
 
+  def create(): Unit = ???
+
   def asModelStream(): SjStream = ???
 
   protected def fillModelStream(stream: SjStream) = {

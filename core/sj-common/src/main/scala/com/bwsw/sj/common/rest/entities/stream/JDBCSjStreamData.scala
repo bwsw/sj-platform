@@ -40,4 +40,8 @@ class JDBCSjStreamData() extends SjStreamData() {
 
     modelStream
   }
+
+  override def create() = {
+
+  }
 }

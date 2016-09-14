@@ -8,7 +8,6 @@ import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{TStreamSjStream, ZKService}
 import com.bwsw.sj.common.utils.{GeneratorLiterals, StreamLiterals, EngineLiterals, ConfigSettingsUtils}
 import com.bwsw.sj.common.rest.entities.MarathonRequest
-import com.bwsw.sj.crud.rest.utils.StreamUtil
 import com.twitter.common.quantity.{Amount, Time}
 import com.twitter.common.zookeeper.DistributedLock.LockingException
 import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
@@ -203,7 +202,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable with Ins
               response.getStatusLine.getStatusCode.equals(Created)) {
               while (!isStarted) {
                 Thread.sleep(delay)
-                val taskInfoResponse = getApplicationInfo(StreamUtil.createGeneratorTaskName(stream))
+                val taskInfoResponse = getApplicationInfo(createGeneratorTaskName(stream))
                 if (taskInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
                   val entity = marathonEntitySerializer.deserialize[Map[String, Any]](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
                   val tasksRunning = entity("app").asInstanceOf[Map[String, Any]]("tasksRunning").asInstanceOf[Int]
@@ -238,7 +237,7 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable with Ins
     val zkService = stream.generator.service.asInstanceOf[ZKService]
     val generatorProvider = zkService.provider
     var prefix = zkService.namespace
-    val taskId = StreamUtil.createGeneratorTaskName(stream)
+    val taskId = createGeneratorTaskName(stream)
     if (stream.generator.generatorType.equals(GeneratorLiterals.perStreamType)) {
       prefix += s"/${stream.name}"
     } else {
@@ -284,5 +283,15 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable with Ins
       val stage = instance.stages.get(key)
       updateInstanceStage(instance, key, stage.state)
     }
+  }
+
+  private def createGeneratorTaskName(stream: TStreamSjStream) = {
+    var name = ""
+    if (stream.generator.generatorType.equals(GeneratorLiterals.perStreamType)) {
+      name = s"${stream.generator.service.name}-${stream.name}-tg"
+    } else {
+      name = s"${stream.generator.service.name}-global-tg"
+    }
+    name.replaceAll("_", "-")
   }
 }

@@ -1,8 +1,15 @@
 package com.bwsw.sj.common.rest.entities.stream
 
-import com.bwsw.sj.common.DAL.model.TStreamSjStream
+import java.net.InetSocketAddress
+
+import com.aerospike.client.Host
+import com.bwsw.sj.common.DAL.model.{TStreamService, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
+import com.bwsw.sj.common.utils.{ProviderLiterals, ServiceLiterals, StreamLiterals}
+import com.bwsw.tstreams.common.CassandraConnectorConf
+import com.bwsw.tstreams.data.{IStorage, aerospike, cassandra}
+import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
+import com.bwsw.tstreams.services.BasicStreamService
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -25,10 +32,12 @@ class TStreamSjStreamData() extends SjStreamData() {
         serviceObj match {
           case None =>
             errors += s"Service '${this.service}' does not exist"
-          case Some(service) =>
-            if (service.serviceType != ServiceLiterals.tstreamsType) {
+          case Some(modelService) =>
+            if (modelService.serviceType != ServiceLiterals.tstreamsType) {
               errors += s"Service for ${StreamLiterals.tStreamType} stream " +
-                s"must be of '${ServiceLiterals.tstreamsType}' type ('${service.serviceType}' is given instead)"
+                s"must be of '${ServiceLiterals.tstreamsType}' type ('${modelService.serviceType}' is given instead)"
+            } else {
+              checkStreamPartitionsOnConsistency(modelService.asInstanceOf[TStreamService])
             }
         }
     }
@@ -56,4 +65,82 @@ class TStreamSjStreamData() extends SjStreamData() {
 
     modelStream
   }
+
+  private def checkStreamPartitionsOnConsistency(service: TStreamService) = {
+    val errors = new ArrayBuffer[String]()
+    val metadataStorage = createMetadataStorage(service)
+    val dataStorage = createDataStorage(service)
+
+    if (BasicStreamService.isExist(this.name, metadataStorage) && !this.force) {
+      val tStream = BasicStreamService.loadStream[Array[Byte]](
+        this.name,
+        metadataStorage,
+        dataStorage
+      )
+      if (tStream.getPartitions != this.partitions) {
+        errors += s"Partitions count of stream ${this.name} mismatch. T-stream partitions (${this.partitions}) " +
+          s"mismatch with partitions of existent t-stream (${tStream.getPartitions})."
+      }
+    }
+  }
+
+  private def createMetadataStorage(service: TStreamService) = {
+    val metadataProvider = service.metadataProvider
+    val hosts = metadataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toSet
+    val cassandraConnectorConf = CassandraConnectorConf.apply(hosts)
+    val metadataStorage = (new MetadataStorageFactory).getInstance(cassandraConnectorConf, service.metadataNamespace)
+
+    metadataStorage
+  }
+
+  private def createDataStorage(service: TStreamService) = {
+    val dataProvider = service.dataProvider
+    var dataStorage: IStorage[Array[Byte]] = null
+    dataProvider.providerType match {
+      case ProviderLiterals.cassandraType =>
+        val hosts = dataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toSet
+        val cassandraConnectorConf = CassandraConnectorConf.apply(hosts)
+        dataStorage = (new cassandra.Factory).getInstance(cassandraConnectorConf, service.dataNamespace)
+      case ProviderLiterals.aerospikeType =>
+        val options = new aerospike.Options(
+          service.dataNamespace,
+          dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toSet
+        )
+        dataStorage = (new aerospike.Factory).getInstance(options)
+    }
+
+    dataStorage
+  }
+
+  override def create() = {
+    val serviceDAO = ConnectionRepository.getServiceManager
+    val service = serviceDAO.get(this.service).get.asInstanceOf[TStreamService]
+    val metadataStorage = createMetadataStorage(service)
+    val dataStorage = createDataStorage(service)
+
+    if (doesStreamHaveForcedCreation(metadataStorage)) {
+      deleteStream(metadataStorage)
+      createTStream(metadataStorage, dataStorage)
+    } else {
+      createTStream(metadataStorage, dataStorage)
+    }
+  }
+
+  private def createTStream(metadataStorage: MetadataStorage,
+                            dataStorage: IStorage[Array[Byte]]) = {
+    BasicStreamService.createStream(
+      this.name,
+      this.partitions,
+      StreamLiterals.ttl,
+      this.description,
+      metadataStorage,
+      dataStorage
+    )
+  }
+  
+  private def doesStreamHaveForcedCreation(metadataStorage: MetadataStorage) = {
+    BasicStreamService.isExist(this.name, metadataStorage) && this.force
+  }
+  
+  private def deleteStream(metadataStorage: MetadataStorage) = BasicStreamService.deleteStream(this.name, metadataStorage)
 }

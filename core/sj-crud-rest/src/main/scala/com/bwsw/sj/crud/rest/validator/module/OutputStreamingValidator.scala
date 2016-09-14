@@ -119,7 +119,7 @@ class OutputStreamingValidator extends StreamingModuleValidator {
       if (!service.isInstanceOf[TStreamService]) {
         errors += s"Service for t-streams must be 'TstrQ'"
       } else {
-        checkTStreams(errors, ArrayBuffer(input))
+        createTStreams(errors, ArrayBuffer(input))
       }
 
       instance.parallelism = checkParallelism(instance.parallelism, input.partitions, errors)

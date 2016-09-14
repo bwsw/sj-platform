@@ -6,7 +6,7 @@ import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.stream.SjStreamData
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._
-import com.bwsw.sj.crud.rest.utils.{CompletionUtils, StreamUtil}
+import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
 import scala.collection.mutable
@@ -17,23 +17,16 @@ trait SjStreamsApi extends Directives with SjCrudValidator with CompletionUtils 
     pathPrefix("streams") {
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>
-          val data: SjStreamData = serializer.deserialize[SjStreamData](getEntityFromContext(ctx))
-          val errors = data.validate()
+          val streamData = serializer.deserialize[SjStreamData](getEntityFromContext(ctx))
+          val errors = streamData.validate()
           var response: RestResponse = BadRequestRestResponse(Map("message" ->
             createMessage("rest.streams.stream.cannot.create", errors.mkString(";"))))
 
           if (errors.isEmpty) {
-            val stream = data.asModelStream()
-            errors ++= StreamUtil.checkAndCreate(data, stream)
-            response = BadRequestRestResponse(Map("message" ->
-            createMessage("rest.streams.stream.cannot.create", errors.mkString(";"))))
-
-            if (errors.isEmpty) {
-              streamDAO.save(stream)
-              response = CreatedRestResponse(Map("message" ->
-                createMessage("rest.streams.stream.created", data.name))
-              )
-            }
+            streamData.create()
+            streamDAO.save(streamData.asModelStream())
+            response = CreatedRestResponse(Map("message" ->
+              createMessage("rest.streams.stream.created", streamData.name)))
           }
 
           ctx.complete(restResponseToHttpResponse(response))
@@ -75,10 +68,10 @@ trait SjStreamsApi extends Directives with SjCrudValidator with CompletionUtils 
                   val stream = streamDAO.get(streamName)
                   stream match {
                     case Some(x) =>
-                      StreamUtil.deleteStream(x)
+                      x.delete()
                       streamDAO.delete(streamName)
                       response = OkRestResponse(Map("message" ->
-                       createMessage("rest.streams.stream.deleted", streamName))
+                        createMessage("rest.streams.stream.deleted", streamName))
                       )
                     case None =>
                       response = NotFoundRestResponse(Map("message" ->

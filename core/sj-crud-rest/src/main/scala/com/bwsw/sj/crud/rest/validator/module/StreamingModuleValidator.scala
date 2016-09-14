@@ -9,8 +9,6 @@ import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, SpecificationData}
 import com.bwsw.sj.common.rest.utils.ValidationUtils
 import com.bwsw.sj.common.utils.StreamLiterals
-import com.bwsw.sj.crud.rest.utils.StreamUtil
-import kafka.common.TopicExistsException
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable
@@ -124,15 +122,11 @@ abstract class StreamingModuleValidator extends ValidationUtils {
    * @param errors - List of all errors
    * @param allTStreams - all t-streams of instance
    */
-  protected def checkTStreams(errors: ArrayBuffer[String], allTStreams: mutable.Buffer[TStreamSjStream]) = {
+  protected def createTStreams(errors: ArrayBuffer[String], allTStreams: mutable.Buffer[TStreamSjStream]) = {
     logger.debug(s"Check t-streams.")
     allTStreams.foreach { (stream: TStreamSjStream) =>
       if (errors.isEmpty) {
-        val streamCheckResult = StreamUtil.checkAndCreateTStream(stream)
-        streamCheckResult match {
-          case Left(err) => errors += err
-          case _ =>
-        }
+        stream.create()
       }
     }
   }
@@ -143,23 +137,14 @@ abstract class StreamingModuleValidator extends ValidationUtils {
    * @param errors - list of all errors
    * @param allKafkaStreams - all kafka streams of instance
    */
-  def checkKafkaStreams(errors: ArrayBuffer[String], allKafkaStreams: mutable.Buffer[KafkaSjStream]) = {
+  def createKafkaStreams(errors: ArrayBuffer[String], allKafkaStreams: mutable.Buffer[KafkaSjStream]) = {
     logger.debug(s"Check kafka streams.")
     allKafkaStreams.foreach { (stream: KafkaSjStream) =>
       if (errors.isEmpty) {
-        try {
-          val streamCheckResult = StreamUtil.checkAndCreateKafkaTopic(stream)
-          streamCheckResult match {
-            case Left(err) => errors += err
-            case _ =>
-          }
-        } catch {
-          case e: TopicExistsException =>
-            logger.debug(s"Stream ${stream.name}. Kafka topic already exists.")
-            errors += s"Cannot create kafka topic: ${e.getMessage}"
-        }
+        stream.create()
       }
     }
+
   }
 
   protected def getStreamsPartitions(streams: Seq[SjStream]): Map[String, Int] = {
@@ -205,44 +190,6 @@ abstract class StreamingModuleValidator extends ValidationUtils {
             errors += "Unknown type of 'parallelism' parameter. Must be a digit or 'max'"
             null
         }
-    }
-  }
-
-  /**
-   * Checking and creating elasticsearch streams, if it's not exists
-   *
-   * @param errors - list of all errors
-   * @param allEsStreams - all elasticsearch streams of instance
-   */
-  def checkEsStreams(errors: ArrayBuffer[String], allEsStreams: List[ESSjStream]) = {
-    logger.debug(s"Check elasticsearch streams.")
-    allEsStreams.foreach { (stream: ESSjStream) =>
-      if (errors.isEmpty) {
-        val streamCheckResult = StreamUtil.checkAndCreateEsStream(stream)
-        streamCheckResult match {
-          case Left(err) => errors += err
-          case _ =>
-        }
-      }
-    }
-  }
-
-  /**
-   * Checking and creating sql tables, if it's not exists
-   *
-   * @param errors - list of all errors
-   * @param allJdbcStreams - all jdbc streams of instance
-   */
-  def checkJdbcStreams(errors: ArrayBuffer[String], allJdbcStreams: List[JDBCSjStream]) = {
-    logger.debug(s"Check jdbc streams.")
-    allJdbcStreams.foreach { (stream: JDBCSjStream) =>
-      if (errors.isEmpty) {
-        val streamCheckResult = StreamUtil.checkAndCreateJdbcStream(stream)
-        streamCheckResult match {
-          case Left(err) => errors += err
-          case _ =>
-        }
-      }
     }
   }
 }

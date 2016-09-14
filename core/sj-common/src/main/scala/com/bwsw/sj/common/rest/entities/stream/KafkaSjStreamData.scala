@@ -1,9 +1,15 @@
 package com.bwsw.sj.common.rest.entities.stream
 
-import com.bwsw.sj.common.DAL.model.KafkaSjStream
+import java.util.Properties
+
+import com.bwsw.sj.common.DAL.model.{KafkaService, KafkaSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
+import com.bwsw.sj.common.utils.{ConfigSettingsUtils, ServiceLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonProperty
+import kafka.admin.AdminUtils
+import kafka.common.{TopicAlreadyMarkedForDeletionException, TopicExistsException}
+import kafka.utils.ZkUtils
+import org.I0Itec.zkclient.ZkConnection
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -26,10 +32,12 @@ class KafkaSjStreamData() extends SjStreamData() {
         serviceObj match {
           case None =>
             errors += s"Service '${this.service}' does not exist"
-          case Some(service) =>
-            if (service.serviceType != ServiceLiterals.kafkaType) {
+          case Some(modelService) =>
+            if (modelService.serviceType != ServiceLiterals.kafkaType) {
               errors += s"Service for ${StreamLiterals.kafkaStreamType} stream " +
-                s"must be of '${ServiceLiterals.kafkaType}' type ('${service.serviceType}' is given instead)"
+                s"must be of '${ServiceLiterals.kafkaType}' type ('${modelService.serviceType}' is given instead)"
+            } else {
+              checkStreamPartitionsOnConsistency(modelService.asInstanceOf[KafkaService])
             }
         }
     }
@@ -54,4 +62,53 @@ class KafkaSjStreamData() extends SjStreamData() {
 
     modelStream
   }
+
+  private def checkStreamPartitionsOnConsistency(service: KafkaService) = {
+    val errors = new ArrayBuffer[String]()
+    val zkUtils = createZkUtils()
+    val topicMetadata = AdminUtils.fetchTopicMetadataFromZk(this.name, zkUtils)
+    if (topicMetadata.partitionsMetadata.size != this.partitions) {
+      errors += s"Partitions count of stream ${this.name} mismatch. Kafka stream partitions (${this.partitions}) " +
+        s"mismatch partitions of exists kafka topic (${topicMetadata.partitionsMetadata.size})."
+    }
+  }
+
+  override def create() = {
+    try {
+      val zkUtils = createZkUtils()
+      if (doesStreamHaveForcedCreation(zkUtils)) {
+        deleteTopic(zkUtils)
+        createTopic(zkUtils)
+      } else {
+        createTopic(zkUtils)
+      }
+    } catch {
+      case ex: TopicAlreadyMarkedForDeletionException =>
+        throw new Exception(s"Cannot delete a kafka topic '${this.name}'. Topic is already marked for deletion. It means that kafka doesn't support deletion")
+      case e: TopicExistsException =>
+        throw new Exception(s"Cannot create a kafka topic '${this.name}'. Topic is marked for deletion. It means that kafka doesn't support deletion")
+    }
+  }
+
+  private def createZkUtils() = {
+    val serviceDAO = ConnectionRepository.getServiceManager
+    val service = serviceDAO.get(this.service).get.asInstanceOf[KafkaService]
+    val zkHost = service.zkProvider.hosts
+    val zkConnect = new ZkConnection(zkHost.mkString(";"))
+    val zkTimeout = ConfigSettingsUtils.getZkSessionTimeout()
+    val zkClient = ZkUtils.createZkClient(zkHost.mkString(";"), zkTimeout, zkTimeout)
+    val zkUtils = new ZkUtils(zkClient, zkConnect, false)
+
+    zkUtils
+  }
+
+  private def createTopic(zkUtils: ZkUtils) = {
+    AdminUtils.createTopic(zkUtils, this.name, this.partitions, this.replicationFactor, new Properties())
+  }
+
+  private def doesStreamHaveForcedCreation(zkUtils: ZkUtils) = {
+    AdminUtils.topicExists(zkUtils, this.name) && this.force
+  }
+
+  private def deleteTopic(zkUtils: ZkUtils) = AdminUtils.deleteTopic(zkUtils, this.name)
 }
