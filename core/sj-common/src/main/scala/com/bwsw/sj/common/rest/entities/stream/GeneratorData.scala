@@ -28,14 +28,14 @@ case class GeneratorData(@JsonProperty("generator-type") generatorType: String,
 
     Option(this.generatorType) match {
       case Some(t) =>
-        //instacneCount
-        if (this.instanceCount <= 0)
-          errors += s"Generator 'instance-count' must be a positive integer for a non-local generator type"
-
         if (!types.contains(t)) {
           errors += s"Unknown 'generator-type' provided. Must be one of: ${types.mkString("[", ", ", "]")}"
         } else {
           if (this.generatorType != GeneratorLiterals.localType) {
+            //instacneCount
+            if (this.instanceCount <= 0)
+              errors += s"Generator 'instance-count' must be a positive integer for a non-local generator type"
+
             //service
             Option(this.service) match {
               case None =>
