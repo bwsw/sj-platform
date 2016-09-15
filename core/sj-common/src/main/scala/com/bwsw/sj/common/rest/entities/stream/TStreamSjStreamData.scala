@@ -1,14 +1,12 @@
 package com.bwsw.sj.common.rest.entities.stream
 
-import java.net.InetSocketAddress
-
-import com.aerospike.client.Host
 import com.bwsw.sj.common.DAL.model.{TStreamService, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{CassandraFactory, ProviderLiterals, ServiceLiterals, StreamLiterals}
-import com.bwsw.tstreams.data.{IStorage, aerospike}
+import com.bwsw.sj.common.utils._
+import com.bwsw.tstreams.data.IStorage
 import com.bwsw.tstreams.metadata.MetadataStorage
 import com.bwsw.tstreams.services.BasicStreamService
+import SjStreamUtilsForCreation._
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -83,38 +81,6 @@ class TStreamSjStreamData() extends SjStreamData() {
     }
 
     errors
-  }
-
-  private def createMetadataStorage(service: TStreamService) = {
-    val metadataProvider = service.metadataProvider
-    val hosts = metadataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toSet
-    val cassandraFactory = new CassandraFactory()
-    cassandraFactory.open(hosts)
-    val metadataStorage = cassandraFactory.getMetadataStorage(service.metadataNamespace)
-    cassandraFactory.close()
-
-    metadataStorage
-  }
-
-  private def createDataStorage(service: TStreamService) = {
-    val dataProvider = service.dataProvider
-    var dataStorage: IStorage[Array[Byte]] = null
-    dataProvider.providerType match {
-      case ProviderLiterals.cassandraType =>
-        val hosts = dataProvider.hosts.map(s => new InetSocketAddress(s.split(":")(0), s.split(":")(1).toInt)).toSet
-        val cassandraFactory = new CassandraFactory()
-        cassandraFactory.open(hosts)
-        dataStorage = cassandraFactory.getDataStorage(service.dataNamespace)
-        cassandraFactory.close()
-      case ProviderLiterals.aerospikeType =>
-        val options = new aerospike.Options(
-          service.dataNamespace,
-          dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toSet
-        )
-        dataStorage = (new aerospike.Factory).getInstance(options) //todo
-    }
-
-    dataStorage
   }
 
   override def create() = {

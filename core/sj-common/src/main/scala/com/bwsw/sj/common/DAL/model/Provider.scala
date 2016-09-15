@@ -41,7 +41,7 @@ class Provider {
   def getHosts() = {
     val inetSocketAddresses = this.hosts.map { host =>
       val parts = host.split(":")
-      new InetSocketAddress(parts(0), parts(1).toInt)
+      (parts(0), parts(1).toInt)
     }.toSet
 
     inetSocketAddresses

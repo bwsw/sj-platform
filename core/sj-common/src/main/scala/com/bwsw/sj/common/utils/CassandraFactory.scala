@@ -8,6 +8,7 @@ import com.bwsw.tstreams.metadata.MetadataStorageFactory
 import com.datastax.driver.core.{Cluster, Session}
 
 class CassandraFactory {
+
   import scala.collection.JavaConverters._
 
   private var cluster: Cluster = null
@@ -16,7 +17,8 @@ class CassandraFactory {
   private val metadataStorageFactory = new MetadataStorageFactory()
   private val dataStorageFactory = new Factory()
 
-  def open(cassandraHosts: Set[InetSocketAddress]) = {
+  def open(hosts: Set[(String, Int)]) = {
+    val cassandraHosts = hosts.map(s => new InetSocketAddress(s._1, s._2))
     cluster = Cluster.builder().addContactPointsWithPorts(cassandraHosts.toList.asJava).build()
     session = cluster.connect()
     cassandraConnectorConf = CassandraConnectorConf.apply(cassandraHosts)
@@ -55,12 +57,4 @@ class CassandraFactory {
     session.close()
     cluster.close()
   }
-}
-
-class AerospikeStorage() {
-//  val options = new aerospike.Options(
-//    service.dataNamespace,
-//    dataProvider.hosts.map(s => new Host(s.split(":")(0), s.split(":")(1).toInt)).toSet
-//  )
-//  val dataStorage = (new aerospike.Factory).getInstance(options)
 }

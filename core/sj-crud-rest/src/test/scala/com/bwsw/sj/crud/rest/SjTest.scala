@@ -1,17 +1,13 @@
 package com.bwsw.sj.crud.rest
 
-import java.net.InetSocketAddress
 import java.text.MessageFormat
 import java.util.ResourceBundle
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.DAL.model.Service
-import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.model.{Service, _}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.utils.GeneratorLiterals
-import com.bwsw.sj.common.utils.ProviderLiterals
-import com.bwsw.sj.common.utils._
+import com.bwsw.sj.common.utils.{GeneratorLiterals, ProviderLiterals, _}
 
 /**
  * @author Kseniya Tomskikh
@@ -93,7 +89,7 @@ object SjTest {
 
   def prepareCassandra() = {
     val cassandraFactory = new CassandraFactory()
-    cassandraFactory.open(Set(new InetSocketAddress("stream-juggler.z1.netpoint-dc.com", 9042)))
+    cassandraFactory.open(Set(("stream-juggler.z1.netpoint-dc.com", 9042)))
     cassandraFactory.createKeyspace("test_keyspace")
     cassandraFactory.createMetadataTables("test_keyspace")
     cassandraFactory.createDataTable("test_keyspace")

@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.input
 
 import java.io.{BufferedReader, File, InputStreamReader, PrintStream}
-import java.net.{InetSocketAddress, Socket}
+import java.net.Socket
 import java.util
 import java.util.jar.JarFile
 
@@ -106,7 +106,7 @@ object DataFactory {
     override def convert(obj: Array[Byte]): Array[Byte] = obj
   }
 
-  def open() = cassandraFactory.open(Set(new InetSocketAddress(cassandraHost, cassandraPort)))
+  def open() = cassandraFactory.open(Set((cassandraHost, cassandraPort)))
 
   def cassandraSetup() = {
     cassandraFactory.createKeyspace(cassandraTestKeyspace)

@@ -1,10 +1,8 @@
 package com.bwsw.sj.engine.output.benchmark
 
 import java.io.{BufferedReader, File, InputStreamReader}
-import java.net.InetSocketAddress
 import java.util.jar.JarFile
 
-import com.aerospike.client.Host
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.common.traits.Serializer
 import com.bwsw.common.{ElasticsearchClient, JsonSerializer, ObjectSerializer}
@@ -16,12 +14,9 @@ import com.bwsw.sj.common.utils.{GeneratorLiterals, ProviderLiterals, ServiceLit
 import com.bwsw.tstreams.agents.consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer}
-import com.bwsw.tstreams.common.CassandraConnectorConf
 import com.bwsw.tstreams.converter.IConverter
-import com.bwsw.tstreams.data.aerospike
 import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
 import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
-import com.bwsw.tstreams.metadata.{MetadataStorage, MetadataStorageFactory}
 import com.bwsw.tstreams.services.BasicStreamService
 
 import scala.collection.JavaConverters._
@@ -190,7 +185,7 @@ object BenchmarkDataFactory {
     tstreamFactory.setProperty(TSF_Dictionary.Stream.DESCRIPTION, stream.description)
   }
 
-  def open() = cassandraFactory.open(Set(new InetSocketAddress(cassandraHost, cassandraPort)))
+  def open() = cassandraFactory.open(Set((cassandraHost, cassandraPort)))
 
   def prepareCassandra(keyspace: String) = {
     cassandraFactory.createKeyspace(keyspace)
@@ -294,20 +289,15 @@ object BenchmarkDataFactory {
     tStream.generator = new Generator(GeneratorLiterals.localType)
     streamService.save(tStream)
 
-    val metadataStorageFactory = new MetadataStorageFactory
-    val cassandraConnectorConf = CassandraConnectorConf.apply(tService.metadataProvider.hosts.map { addr =>
-      val parts = addr.split(":")
-      new InetSocketAddress(parts(0), parts(1).toInt)
-    }.toSet)
-    val metadataStorage: MetadataStorage = metadataStorageFactory.getInstance(cassandraConnectorConf, tService.metadataNamespace)
+    val metadataHosts = splitHosts(tService.metadataProvider.hosts)
+    val cassandraFactory = new CassandraFactory()
+    cassandraFactory.open(metadataHosts)
+    val metadataStorage = cassandraFactory.getMetadataStorage(tService.metadataNamespace)
 
-    val dataStorageFactory = new aerospike.Factory
-    val dataStorageHosts = tService.dataProvider.hosts.map { addr =>
-      val parts = addr.split(":")
-      new Host(parts(0), parts(1).toInt)
-    }.toSet
-    val options = new aerospike.Options(tService.dataNamespace, dataStorageHosts)
-    val dataStorage: aerospike.Storage = dataStorageFactory.getInstance(options)
+    val aerospikeFactory = new AerospikeFactory
+    val namespace = tService.dataNamespace
+    val dataHosts = splitHosts(tService.dataProvider.hosts)
+    val dataStorage = aerospikeFactory.getDataStorage(namespace, dataHosts)
 
     BasicStreamService.createStream(tStreamName,
       partitions,
@@ -315,8 +305,7 @@ object BenchmarkDataFactory {
       "", metadataStorage,
       dataStorage)
 
-    metadataStorageFactory.closeFactory()
-    dataStorageFactory.closeFactory()
+    cassandraFactory.close()
   }
 
   def createInstance(instanceName: String, checkpointMode: String, checkpointInterval: Long) = {
@@ -406,4 +395,10 @@ object BenchmarkDataFactory {
     fileStorage.delete(filename)
   }
 
+  private def splitHosts(hosts: Array[String]) = {
+    hosts.map(s => {
+      val address = s.split(":")
+      (address(0), address(1).toInt)
+    }).toSet
+  }
 }

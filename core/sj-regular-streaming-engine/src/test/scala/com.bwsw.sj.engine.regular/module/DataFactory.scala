@@ -1,7 +1,6 @@
 package com.bwsw.sj.engine.regular.module
 
 import java.io.{BufferedReader, File, InputStreamReader}
-import java.net.InetSocketAddress
 import java.util.Properties
 import java.util.jar.JarFile
 
@@ -102,7 +101,7 @@ object DataFactory {
   //  private lazy val aerospikeStorageFactory = new AerospikeStorageFactory()
 
 
-  def open() = cassandraFactory.open(Set(new InetSocketAddress(cassandraHost, cassandraPort)))
+  def open() = cassandraFactory.open(Set((cassandraHost, cassandraPort)))
 
   def cassandraSetup() = {
     cassandraFactory.createKeyspace(cassandraTestKeyspace)
