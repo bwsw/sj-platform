@@ -37,8 +37,9 @@ class RegularInstanceMetadata extends InstanceMetadata {
                             engineName: String,
                             engineVersion: String) = {
 
-    val instance = super.fillInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion).asInstanceOf[RegularInstance]
     castParallelismToNumber(this.inputs.map(clearStreamFromMode).toSet)
+    val instance = super.fillInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion).asInstanceOf[RegularInstance]
+
 
     val executionPlan = createExecutionPlan()
     instance.executionPlan = executionPlan

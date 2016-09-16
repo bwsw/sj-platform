@@ -31,8 +31,9 @@ class OutputInstanceMetadata extends InstanceMetadata {
                             engineName: String,
                             engineVersion: String) = {
 
-    val instance = super.fillInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion).asInstanceOf[OutputInstance]
     castParallelismToNumber(Set(clearStreamFromMode(this.input)))
+    val instance = super.fillInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion).asInstanceOf[OutputInstance]
+
 
     val executionPlan = createExecutionPlan()
     instance.executionPlan = executionPlan
