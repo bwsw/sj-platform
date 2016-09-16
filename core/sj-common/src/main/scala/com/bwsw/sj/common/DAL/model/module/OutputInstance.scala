@@ -17,7 +17,7 @@ class OutputInstance() extends Instance {
     val protocolInstance = new OutputInstanceMetadata()
     super.fillProtocolInstance(protocolInstance)
 
-    protocolInstance.executionPlan = getProtocolExecutionPlan(this.executionPlan)
+    protocolInstance.executionPlan = this.executionPlan
     protocolInstance.input = this.inputs.head
     protocolInstance.output = this.outputs.head
     protocolInstance.startFrom = this.startFrom

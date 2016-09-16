@@ -1,15 +1,11 @@
 package com.bwsw.sj.common.rest.entities.module
 
-import com.bwsw.sj.common.DAL.model.module.OutputInstance
+import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, OutputInstance}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.fasterxml.jackson.annotation.JsonProperty
 
-import scala.collection.JavaConversions._
-
 class OutputInstanceMetadata extends InstanceMetadata {
-  @JsonProperty("execution-plan") var executionPlan: Map[String, Any] = null
-  //todo используется только для того, чтобы показывать пользователям, мб стоит его заполнять,
-  // а потом только конвертировать в модельный инстанс
+  @JsonProperty("execution-plan") var executionPlan: ExecutionPlan = null
   @JsonProperty("start-from") var startFrom: String = EngineLiterals.newestStartMode
   var input: String = null
   var output: String = null
@@ -25,24 +21,18 @@ class OutputInstanceMetadata extends InstanceMetadata {
     modelInstance
   }
 
-  override def fillInstance(moduleType: String,
+  override def prepareInstance(moduleType: String,
                             moduleName: String,
                             moduleVersion: String,
                             engineName: String,
                             engineVersion: String) = {
 
-    castParallelismToNumber(Set(clearStreamFromMode(this.input)))
-    val instance = super.fillInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion).asInstanceOf[OutputInstance]
-
-
-    val executionPlan = createExecutionPlan()
-    instance.executionPlan = executionPlan
+    super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion)
+    castParallelismToNumber(getStreamsPartitions(Array(clearStreamFromMode(this.input))))
+    this.executionPlan = new ExecutionPlan().fillTasks(getInputs(), this.parallelism.asInstanceOf[Int], this.name)
 
     val streams = Array(clearStreamFromMode(input))
-    val stages = createStages(streams)
-    instance.stages = mapAsJavaMap(stages)
-
-    instance
+    fillStages(streams)
   }
 
   override def createStreams() = {
@@ -50,5 +40,5 @@ class OutputInstanceMetadata extends InstanceMetadata {
     sjStreams.foreach(_.create())
   }
 
-  override def getInputs() = Array(clearStreamFromMode(this.input))
+  private def getInputs() = Array(this.input)
 }

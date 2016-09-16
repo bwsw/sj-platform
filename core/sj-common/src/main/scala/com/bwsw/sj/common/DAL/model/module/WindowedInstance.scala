@@ -18,12 +18,11 @@ class WindowedInstance() extends Instance {
   @Property("time-windowed") var timeWindowed: Int = 0
   @Property("window-full-max") var windowFullMax: Int = 0
 
-
   override def asProtocolInstance(): InstanceMetadata = {
     val protocolInstance = new WindowedInstanceMetadata()
     super.fillProtocolInstance(protocolInstance)
 
-    protocolInstance.executionPlan = getProtocolExecutionPlan(this.executionPlan)
+    protocolInstance.executionPlan = this.executionPlan
     protocolInstance.timeWindowed = this.timeWindowed
     protocolInstance.windowFullMax = this.windowFullMax
     protocolInstance.stateManagement = this.stateManagement

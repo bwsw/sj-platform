@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import scala.collection.mutable
 
 class InputInstanceMetadata extends InstanceMetadata {
   var outputs: Array[String] = Array()
@@ -35,18 +34,14 @@ class InputInstanceMetadata extends InstanceMetadata {
     modelInstance
   }
 
-  override def fillInstance(moduleType: String,
+  override def prepareInstance(moduleType: String,
                             moduleName: String,
                             moduleVersion: String,
                             engineName: String,
                             engineVersion: String) = {
-    val instance = super.fillInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion).asInstanceOf[InputInstance]
-
-    fillTasks(instance)
-    val stages = createStages(this.outputs)
-    instance.stages = mapAsJavaMap(stages)
-
-    instance
+    super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion)
+    fillTasks()
+    fillStages(this.outputs)
   }
 
   override def createStreams() = {
@@ -54,18 +49,10 @@ class InputInstanceMetadata extends InstanceMetadata {
     sjStreams.foreach(_.create())
   }
 
-  /**
-   * Create tasks object for instance of input module
-   *
-   * @param instance - instance for input module
-   */
-  private def fillTasks(instance: InputInstance): Unit = {
-    val tasks = mutable.Map[String, InputTask]()
-
-    for (i <- 0 until instance.parallelism) {
+  private def fillTasks(): Unit = {
+    for (i <- 0 until this.parallelism.asInstanceOf[Int]) {
       val task = new InputTask("", 0)
-      tasks.put(s"${instance.name}-task$i", task)
+      this.tasks.put(s"${this.name}-task$i", task)
     }
-    instance.tasks = mapAsJavaMap(tasks)
   }
 }

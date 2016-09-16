@@ -5,6 +5,7 @@ import java.util
 import com.bwsw.sj.common.rest.entities.module.{InputInstanceMetadata, InstanceMetadata}
 import com.bwsw.sj.common.utils.EngineLiterals
 import org.mongodb.morphia.annotations.Property
+
 import scala.collection.JavaConverters._
 
 /**

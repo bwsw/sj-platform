@@ -131,15 +131,15 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
 
                     if (errors.isEmpty) {
                       if (optionsPassValidation) {
-                        instanceMetadata.createStreams()
-                        val instance = instanceMetadata.fillInstance(
+                        instanceMetadata.prepareInstance(
                           moduleType,
                           moduleName,
                           moduleVersion,
                           specification.engineName,
                           specification.engineVersion
                         )
-                        instanceDAO.save(instance)
+                        instanceMetadata.createStreams()
+                        instanceDAO.save(instanceMetadata.asModelInstance())
 
                         response = CreatedRestResponse(Map("message" ->
                           createMessage("rest.modules.instances.instance.created", instanceMetadata.name, s"$moduleType-$moduleName-$moduleVersion")))

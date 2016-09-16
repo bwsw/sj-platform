@@ -20,7 +20,7 @@ class RegularInstance() extends Instance {
     val protocolInstance = new RegularInstanceMetadata()
     super.fillProtocolInstance(protocolInstance)
 
-    protocolInstance.executionPlan = getProtocolExecutionPlan(this.executionPlan)
+    protocolInstance.executionPlan = this.executionPlan
     protocolInstance.stateManagement = this.stateManagement
     protocolInstance.stateFullCheckpoint = this.stateFullCheckpoint
     protocolInstance.eventWaitTime = this.eventWaitTime
