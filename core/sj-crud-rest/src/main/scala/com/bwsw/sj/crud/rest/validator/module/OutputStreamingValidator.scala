@@ -1,9 +1,8 @@
 package com.bwsw.sj.crud.rest.validator.module
 
-import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{SjStream, TStreamService, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, SpecificationData, OutputInstanceMetadata}
+import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, OutputInstanceMetadata, SpecificationData}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._
 import org.slf4j.{Logger, LoggerFactory}
@@ -33,7 +32,8 @@ class OutputStreamingValidator extends StreamingModuleValidator {
    */
   override def validate(parameters: InstanceMetadata, specification: SpecificationData) = {
     logger.debug(s"Instance: ${parameters.name}. Start output-streaming validation.")
-    val errors = super.validateGeneralOptions(parameters)
+    val errors = new ArrayBuffer[String]()
+    errors ++= super.validateGeneralOptions(parameters)
     val outputInstanceMetadata = parameters.asInstanceOf[OutputInstanceMetadata]
 
     Option(parameters.checkpointMode) match {
@@ -46,22 +46,14 @@ class OutputStreamingValidator extends StreamingModuleValidator {
         }
     }
 
-    validateStreamOptions(outputInstanceMetadata, specification, errors)
+    errors ++= validateStreamOptions(outputInstanceMetadata, specification)
   }
 
-  /**
-   * Validating options of streams of instance for module
-   *
-   * @param instance - Input instance parameters
-   * @param specification - Specification of module
-   * @param errors - List of validating errors
-   * @return - List of errors and validating instance (null, if errors non empty)
-   */
-  def validateStreamOptions(instance: OutputInstanceMetadata,
-                            specification: SpecificationData,
-                            errors: ArrayBuffer[String]) = {
+  private def validateStreamOptions(instance: OutputInstanceMetadata,
+                                    specification: SpecificationData) = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
-    
+    val errors = new ArrayBuffer[String]()
+
     // 'inputs' field
     var inputStream: Option[SjStream] = None
     if (instance.input != null) {
@@ -111,23 +103,14 @@ class OutputStreamingValidator extends StreamingModuleValidator {
       }
     }
 
-    var validatedInstance: Option[Instance] = None
-    if (errors.isEmpty) {
-      val input = inputStream.get.asInstanceOf[TStreamSjStream]
-
-      val service = input.service
-      if (!service.isInstanceOf[TStreamService]) {
-        errors += s"Service for t-streams must be 'TstrQ'"
-      } else {
-        createTStreams(errors, ArrayBuffer(input))
-      }
-
-      instance.parallelism = checkParallelism(instance.parallelism, input.partitions, errors)
-
-      val partitions = getStreamsPartitions(Array(input))
-      validatedInstance = createInstance(instance, partitions, Set(input))
+    val input = inputStream.get.asInstanceOf[TStreamSjStream]
+    val service = input.service
+    if (!service.isInstanceOf[TStreamService]) {
+      errors += s"Service for t-streams must be 'TstrQ'"
     }
 
-    (errors, validatedInstance)
+    errors ++= checkParallelism(instance.parallelism, input.partitions)
+
+    errors
   }
 }

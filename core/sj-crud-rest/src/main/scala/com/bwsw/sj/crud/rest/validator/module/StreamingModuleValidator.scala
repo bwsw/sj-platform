@@ -8,7 +8,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, SpecificationData}
 import com.bwsw.sj.common.rest.utils.ValidationUtils
-import com.bwsw.sj.common.utils.StreamLiterals
+import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable
@@ -32,7 +32,7 @@ abstract class StreamingModuleValidator extends ValidationUtils {
    * @param parameters - input parameters for running module
    * @return - List of errors
    */
-  def validate(parameters: InstanceMetadata, specification: SpecificationData): (ArrayBuffer[String], Option[Instance])
+  def validate(parameters: InstanceMetadata, specification: SpecificationData): ArrayBuffer[String]
 
   /**
    * Validation base instance options
@@ -116,37 +116,6 @@ abstract class StreamingModuleValidator extends ValidationUtils {
     streams.map(s => (s.service.name, 1)).groupBy(_._1).keys.toList
   }
 
-  /**
-   * Checking and creating t-streams, if streams do not exist
-   *
-   * @param errors - List of all errors
-   * @param allTStreams - all t-streams of instance
-   */
-  protected def createTStreams(errors: ArrayBuffer[String], allTStreams: mutable.Buffer[TStreamSjStream]) = {
-    logger.debug(s"Check t-streams.")
-    allTStreams.foreach { (stream: TStreamSjStream) =>
-      if (errors.isEmpty) {
-        stream.create()
-      }
-    }
-  }
-
-  /**
-   * Checking and creating kafka topics, if topics do not exist
-   *
-   * @param errors - list of all errors
-   * @param allKafkaStreams - all kafka streams of instance
-   */
-  def createKafkaStreams(errors: ArrayBuffer[String], allKafkaStreams: mutable.Buffer[KafkaSjStream]) = {
-    logger.debug(s"Check kafka streams.")
-    allKafkaStreams.foreach { (stream: KafkaSjStream) =>
-      if (errors.isEmpty) {
-        stream.create()
-      }
-    }
-
-  }
-
   protected def getStreamsPartitions(streams: Seq[SjStream]): Map[String, Int] = {
     Map(streams.map { stream =>
       stream.streamType match {
@@ -155,19 +124,11 @@ abstract class StreamingModuleValidator extends ValidationUtils {
         case StreamLiterals.`kafkaStreamType` =>
           stream.name -> stream.asInstanceOf[KafkaSjStream].partitions
       }
-
     }: _*)
   }
 
-  /**
-   * Validating 'parallelism' parameters of instance
-   *
-   * @param parallelism - Parallelism value
-   * @param partitions - Min count of partitions of input streams
-   * @param errors - List of errors
-   * @return - Validated value of parallelism
-   */
-  protected def checkParallelism(parallelism: Any, partitions: Int, errors: ArrayBuffer[String]) = {
+  protected def checkParallelism(parallelism: Any, minimumNumberOfPartitions: Int) = {
+    val errors = new ArrayBuffer[String]()
     Option(parallelism) match {
       case None =>
         errors += s"'Parallelism' is required"
@@ -177,19 +138,26 @@ abstract class StreamingModuleValidator extends ValidationUtils {
             if (dig <= 0) {
               errors += "'Parallelism' must be greater than zero"
             }
-            if (dig > partitions) {
-              errors += s"'Parallelism' ($dig) is greater than minimum of partitions count ($partitions) of input streams"
+            if (dig > minimumNumberOfPartitions) {
+              errors += s"'Parallelism' ($dig) is greater than minimum of partitions count ($minimumNumberOfPartitions) of input streams"
             }
-            dig
           case s: String =>
             if (!s.equals("max")) {
               errors += "Unknown type of 'parallelism' parameter. Must be a digit or 'max'"
             }
-            partitions
           case _ =>
             errors += "Unknown type of 'parallelism' parameter. Must be a digit or 'max'"
-            null
         }
+    }
+
+    errors
+  }
+
+  def getStreamMode(name: String) = {
+    if (name.contains(s"/${EngineLiterals.fullStreamMode}")) {
+      EngineLiterals.fullStreamMode
+    } else {
+      EngineLiterals.splitStreamMode
     }
   }
 }

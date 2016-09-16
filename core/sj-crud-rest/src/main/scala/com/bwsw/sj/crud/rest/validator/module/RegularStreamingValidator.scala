@@ -1,8 +1,7 @@
 package com.bwsw.sj.crud.rest.validator.module
 
-import com.bwsw.sj.common.DAL.model.module.Instance
-import com.bwsw.sj.common.DAL.model.{KafkaService, KafkaSjStream, TStreamService, TStreamSjStream}
-import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, SpecificationData, RegularInstanceMetadata}
+import com.bwsw.sj.common.DAL.model.{KafkaService, KafkaSjStream, TStreamService}
+import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, RegularInstanceMetadata, SpecificationData}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.StreamLiterals._
@@ -19,19 +18,14 @@ class RegularStreamingValidator extends StreamingModuleValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
-  /**
-   * Validating input parameters for 'regular-streaming' module
-   *
-   * @param instanceParameters - input parameters for running module
-   * @return - List of errors
-   */
-  override def validate(instanceParameters: InstanceMetadata, specification: SpecificationData) = {
-    logger.debug(s"Instance: ${instanceParameters.name}. Start regular-streaming validation.")
-    val parameters = instanceParameters.asInstanceOf[RegularInstanceMetadata]
-    val errors =  super.validateGeneralOptions(parameters)
+  override def validate(parameters: InstanceMetadata, specification: SpecificationData) = {
+    logger.debug(s"Instance: ${parameters.name}. Start regular-streaming validation.")
+    val errors = new ArrayBuffer[String]()
+    errors ++= super.validateGeneralOptions(parameters)
+    val regularInstanceMetadata = parameters.asInstanceOf[RegularInstanceMetadata]
 
     // 'checkpoint-mode' field
-    Option(parameters.checkpointMode) match {
+    Option(regularInstanceMetadata.checkpointMode) match {
       case None =>
         errors += s"'Checkpoint-mode' is required"
       case Some(x) =>
@@ -42,24 +36,24 @@ class RegularStreamingValidator extends StreamingModuleValidator {
     }
 
     // 'event-wait-time' field
-    if (parameters.eventWaitTime <= 0) {
+    if (regularInstanceMetadata.eventWaitTime <= 0) {
       errors += s"'Event-wait-time' attribute must be greater than zero"
     }
 
     // 'state-management' field
-    if (!stateManagementModes.contains(parameters.stateManagement)) {
-      errors += s"Unknown value of 'state-management' attribute: '${parameters.stateManagement}'. " +
+    if (!stateManagementModes.contains(regularInstanceMetadata.stateManagement)) {
+      errors += s"Unknown value of 'state-management' attribute: '${regularInstanceMetadata.stateManagement}'. " +
         s"'State-management' must be one of: ${stateManagementModes.mkString("[", ", ", "]")}"
     } else {
-      if (parameters.stateManagement != EngineLiterals.noneStateMode) {
+      if (regularInstanceMetadata.stateManagement != EngineLiterals.noneStateMode) {
         // 'state-full-checkpoint' field
-        if (parameters.stateFullCheckpoint <= 0) {
+        if (regularInstanceMetadata.stateFullCheckpoint <= 0) {
           errors += s"'State-full-checkpoint' attribute must be greater than zero"
         }
       }
     }
 
-    validateStreamOptions(parameters, specification, errors)
+    errors ++= validateStreamOptions(regularInstanceMetadata, specification)
   }
 
   /**
@@ -67,13 +61,12 @@ class RegularStreamingValidator extends StreamingModuleValidator {
    *
    * @param instance - Input instance parameters
    * @param specification - Specification of module
-   * @param errors - List of validating errors
    * @return - List of errors and validating instance (null, if errors non empty)
    */
-  protected def validateStreamOptions(instance: RegularInstanceMetadata,
-                                      specification: SpecificationData,
-                                      errors: ArrayBuffer[String]): (ArrayBuffer[String], Option[Instance]) = {
+  private def validateStreamOptions(instance: RegularInstanceMetadata,
+                                      specification: SpecificationData) = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
+    val errors = new ArrayBuffer[String]()
 
     // 'inputs' field
     val inputModes = instance.inputs.map(i => getStreamMode(i))
@@ -105,8 +98,6 @@ class RegularStreamingValidator extends StreamingModuleValidator {
     if (kafkaStreams.nonEmpty) {
       if (kafkaStreams.exists(s => !s.service.isInstanceOf[KafkaService])) {
         errors += s"Service for kafka streams must be 'KfkQ'"
-      } else {
-        createKafkaStreams(errors, kafkaStreams)
       }
     }
 
@@ -149,32 +140,24 @@ class RegularStreamingValidator extends StreamingModuleValidator {
       errors += s"Output streams must be one of: ${outputTypes.mkString("[", ", ", "]")}"
     }
 
-    var validatedInstance: Option[Instance] = None
-    if (errors.isEmpty) {
-      val allStreams = inputStreams.union(outputStreams)
+    // 'parallelism' field
+    val partitions = getStreamsPartitions(inputStreams)
+    val minPartitionCount = if (partitions.nonEmpty) partitions.values.min else 0
+    errors ++= checkParallelism(instance.parallelism, minPartitionCount)
 
-      val tStreamsServices = getStreamServices(allStreams.filter { s =>
-        s.streamType.equals(tStreamType)
-      })
-      if (tStreamsServices.size != 1) {
-        errors += s"All t-streams should have the same service"
-      } else {
-        val service = serviceDAO.get(tStreamsServices.head)
-        if (!service.get.isInstanceOf[TStreamService]) {
-          errors += s"Service for t-streams must be 'TstrQ'"
-        } else {
-          createTStreams(errors, allStreams.filter(s => s.streamType.equals(tStreamType)).map(_.asInstanceOf[TStreamSjStream]))
-        }
+    val allStreams = inputStreams.union(outputStreams)
+    val tStreamsServices = getStreamServices(allStreams.filter { s =>
+      s.streamType.equals(tStreamType)
+    })
+    if (tStreamsServices.size != 1) {
+      errors += s"All t-streams should have the same service"
+    } else {
+      val service = serviceDAO.get(tStreamsServices.head)
+      if (!service.get.isInstanceOf[TStreamService]) {
+        errors += s"Service for t-streams must be 'TstrQ'"
       }
-
-      // 'parallelism' field
-      val partitions = getStreamsPartitions(inputStreams)
-      val minPartitionCount = if (partitions.nonEmpty) partitions.values.min else 0
-      instance.parallelism = checkParallelism(instance.parallelism, minPartitionCount, errors)
-
-      validatedInstance = createInstance(instance, partitions, allStreams.filter(s => s.streamType.equals(tStreamType)).toSet)
     }
 
-    (errors, validatedInstance)
+    errors
   }
 }

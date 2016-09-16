@@ -1,34 +1,26 @@
 package com.bwsw.sj.crud.rest.validator.module
 
-import com.bwsw.sj.common.DAL.model.module.Instance
+import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, SpecificationData, WindowedInstanceMetadata}
 import com.bwsw.sj.common.utils.EngineLiterals
-import EngineLiterals._
-import com.bwsw.sj.common.rest.entities.module.{WindowedInstanceMetadata, InstanceMetadata, SpecificationData}
-import org.slf4j.{LoggerFactory, Logger}
+import com.bwsw.sj.common.utils.EngineLiterals._
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable.ArrayBuffer
 
 /**
-  * Validator for Stream-processing-windowed module type
-  *
-  * @author Kseniya Tomskikh
-  */
+ * Validator for Stream-processing-windowed module type
+ *
+ * @author Kseniya Tomskikh
+ */
 class WindowedStreamingValidator extends StreamingModuleValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
-  /**
-    * Validating input parameters for 'windowed-streaming' module
-    *
-    * @param instanceParameters - input parameters for running module
-    * @return - List of errors
-    */
-  override def validate(instanceParameters: InstanceMetadata, specification: SpecificationData) = {
-    logger.debug(s"Instance: ${instanceParameters.name}. Start windowed-streaming validation.")
-    val windowedInstanceMetadata = instanceParameters.asInstanceOf[WindowedInstanceMetadata]
-    val generalErrors = super.validateGeneralOptions(windowedInstanceMetadata)
-    val result = validateStreamOptions(windowedInstanceMetadata, specification, generalErrors)
-    val errors = result._1
+  override def validate(parameters: InstanceMetadata, specification: SpecificationData) = {
+    logger.debug(s"Instance: ${parameters.name}. Start windowed-streaming validation.")
+    val errors = new ArrayBuffer[String]()
+    errors ++= super.validateGeneralOptions(parameters)
+    val windowedInstanceMetadata = parameters.asInstanceOf[WindowedInstanceMetadata]
 
     // 'checkpoint-mode' field
     Option(windowedInstanceMetadata.checkpointMode) match {
@@ -62,18 +54,12 @@ class WindowedStreamingValidator extends StreamingModuleValidator {
     if (windowedInstanceMetadata.windowFullMax <= 0) {
       errors += s"Window-full-max attribute must be greater than zero"
     }
-    (errors, result._2)
+
+    errors ++= validateStreamOptions(windowedInstanceMetadata, specification)
+
+    errors
   }
 
-  /**
-   * Validating options of streams of instance for module
-   *
-   * @param parameters - Input instance parameters
-   * @param specification - Specification of module
-   * @param errors - List of validating errors
-   * @return - List of errors and validating instance (null, if errors non empty)
-   */
   def validateStreamOptions(parameters: InstanceMetadata,
-                                               specification: SpecificationData,
-                                               errors: ArrayBuffer[String]): (ArrayBuffer[String], Option[Instance]) = ???
+                            specification: SpecificationData): ArrayBuffer[String] = ???
 }
