@@ -33,16 +33,12 @@ COPY ./core/sj-frontend /opt/bin/juggler/core/sj-frontend
 #Prepare UI
 WORKDIR /opt/bin/juggler/core/sj-frontend
 
-RUN npm install -g npm && \
-    npm install -g npm && \
-    npm install -g n && \
-    n stable && \
-    npm uninstall gulp --save && \
-    npm install gulp --save && \
-    npm install gulp-util --save-dev && \
-    npm install run-sequence && \
-    rm -rf node_modules/ && \
-    npm install
+RUN npm install -g npm typings
+RUN npm install --unsafe-perm
+RUN npm run-script build.prod
+RUN mkdir /var/www
+RUN cp dist/prod/. /var/www/ -R
+RUN rm -rf *
 
 # Prepare Rest
 WORKDIR /opt/bin/juggler
