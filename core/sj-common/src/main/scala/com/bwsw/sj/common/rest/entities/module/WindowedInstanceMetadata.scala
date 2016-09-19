@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.rest.entities.module
 
-import com.bwsw.sj.common.DAL.model.module.{RegularInstance, WindowedInstance}
+import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.StreamLiterals._
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -36,7 +36,7 @@ class WindowedInstanceMetadata extends InstanceMetadata {
                             moduleVersion: String,
                             engineName: String,
                             engineVersion: String) = {
-    val instance = super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion).asInstanceOf[RegularInstance]
+    super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion)
     castParallelismToNumber(getStreamsPartitions(this.inputs.map(clearStreamFromMode)))
     this.executionPlan = new ExecutionPlan().fillTasks(createTaskStreams(), createTaskNames(this.parallelism.asInstanceOf[Int], this.name))
 
