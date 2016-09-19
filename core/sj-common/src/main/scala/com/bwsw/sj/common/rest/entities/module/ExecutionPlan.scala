@@ -24,28 +24,46 @@ class ExecutionPlan {
   def fillTasks(taskStreams: Array[TaskStream], taskNames: Set[String]) = {
     var notProcessedTasks = taskNames.size
 
-    taskNames.foreach { taskName =>
-      val list = taskStreams.map { taskStream =>
-        val availablePartitionsCount = taskStream.availablePartitionsCount
-        val startPartition = taskStream.currentPartition
-        var endPartition = startPartition + availablePartitionsCount
-        taskStream.mode match {
-          case EngineLiterals.fullStreamMode => endPartition = startPartition + availablePartitionsCount
-          case EngineLiterals.splitStreamMode =>
-            val cntTaskStreamPartitions = availablePartitionsCount / notProcessedTasks
-            taskStream.availablePartitionsCount = taskStream.availablePartitionsCount - cntTaskStreamPartitions
-            taskStream.currentPartition = startPartition + cntTaskStreamPartitions
-            if (Math.abs(cntTaskStreamPartitions - availablePartitionsCount) >= cntTaskStreamPartitions) {
-              endPartition = startPartition + cntTaskStreamPartitions
-            }
-        }
-
-        taskStream.name -> Array(startPartition, endPartition - 1)
-      }.toMap
+    taskNames.foreach(taskName => {
+      val task = createTask(taskStreams, notProcessedTasks)
+      this.tasks.put(taskName, task)
       notProcessedTasks -= 1
-      this.tasks.put(taskName, new Task(list))
-    }
+    })
 
     this
+  }
+
+  private def createTask(taskStreams: Array[TaskStream], notProcessedTasks: Int) = {
+    val inputs = taskStreams
+      .map(taskStream => taskStream.name -> createPartitionsInterval(taskStream, notProcessedTasks)).toMap
+
+    new Task(inputs)
+  }
+
+  private def createPartitionsInterval(taskStream: TaskStream, notProcessedTasks: Int) = {
+    val startPartition = taskStream.currentPartition
+    val endPartition = getEndPartition(taskStream, notProcessedTasks)
+    val interval = Array(startPartition, endPartition - 1)
+
+    interval
+  }
+
+  private def getEndPartition(taskStream: TaskStream, notProcessedTasks: Int) = {
+    val availablePartitionsCount = taskStream.availablePartitionsCount
+    val startPartition = taskStream.currentPartition
+    var endPartition = startPartition + availablePartitionsCount
+    taskStream.mode match {
+      case EngineLiterals.splitStreamMode =>
+        val cntTaskStreamPartitions = availablePartitionsCount / notProcessedTasks
+        taskStream.availablePartitionsCount -= cntTaskStreamPartitions
+        taskStream.currentPartition += cntTaskStreamPartitions
+        if (Math.abs(cntTaskStreamPartitions - availablePartitionsCount) >= cntTaskStreamPartitions) {
+          endPartition = startPartition + cntTaskStreamPartitions
+        }
+
+      case EngineLiterals.fullStreamMode =>
+    }
+
+    endPartition
   }
 }
