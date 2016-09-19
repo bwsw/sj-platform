@@ -33,8 +33,7 @@ COPY ./core/sj-frontend /opt/bin/juggler/core/sj-frontend
 #Prepare UI
 WORKDIR /opt/bin/juggler/core/sj-frontend
 
-RUN echo Hello
-RUN npm install -g npm n
+RUN apt-get install nodejs
 RUN npm install -g npm n
 RUN npm install -g typings
 RUN npm install --unsafe-perm
