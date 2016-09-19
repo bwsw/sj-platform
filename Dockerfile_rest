@@ -33,10 +33,11 @@ COPY ./core/sj-frontend /opt/bin/juggler/core/sj-frontend
 #Prepare UI
 WORKDIR /opt/bin/juggler/core/sj-frontend
 
-RUN apt-get install nodejs
-RUN apt-get upgrade nodejs
-RUN npm install -g npm n --unsafe-perm
-RUN npm install -g typings --unsafe-perm
+#RUN apt-get install nodejs
+#RUN apt-get upgrade nodejs
+RUN npm cache clear
+RUN npm install -g n
+RUN npm install -g typings
 RUN npm install --unsafe-perm
 RUN npm run-script build.prod
 RUN mkdir /var/www
