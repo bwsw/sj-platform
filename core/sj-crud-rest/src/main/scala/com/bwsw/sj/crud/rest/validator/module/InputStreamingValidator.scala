@@ -1,16 +1,10 @@
 package com.bwsw.sj.crud.rest.validator.module
 
-import java.util.Calendar
-
-import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask, Instance, InstanceStage}
-import com.bwsw.sj.common.DAL.model.{TStreamService, TStreamSjStream}
+import com.bwsw.sj.common.DAL.model.TStreamService
 import com.bwsw.sj.common.rest.entities.module.{InputInstanceMetadata, InstanceMetadata, SpecificationData}
 import com.bwsw.sj.common.utils.EngineLiterals._
-import com.bwsw.sj.common.utils.StreamLiterals._
 import org.slf4j.{Logger, LoggerFactory}
 
-import scala.collection.JavaConversions._
-import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 /**
@@ -30,9 +24,10 @@ class InputStreamingValidator extends StreamingModuleValidator {
    * @return - List of errors
    */
   override def validate(parameters: InstanceMetadata,
-                        specification: SpecificationData): (ArrayBuffer[String], Option[Instance]) = {
+                        specification: SpecificationData) = {
     logger.debug(s"Instance: ${parameters.name}. Start input-streaming validation.")
-    val errors = super.validateGeneralOptions(parameters)
+    val errors = new ArrayBuffer[String]()
+    errors ++= super.validateGeneralOptions(parameters)
     val inputInstanceMetadata = parameters.asInstanceOf[InputInstanceMetadata]
 
     // 'checkpoint-mode' field
@@ -67,7 +62,9 @@ class InputStreamingValidator extends StreamingModuleValidator {
     if (inputInstanceMetadata.backupCount < 0 || inputInstanceMetadata.backupCount > 6)
       errors += "'Backup-count' must be in the interval from 0 to 6"
 
-    validateStreamOptions(inputInstanceMetadata, specification, errors)
+    errors ++= validateStreamOptions(inputInstanceMetadata, specification)
+
+    errors
   }
 
   /**
@@ -75,14 +72,12 @@ class InputStreamingValidator extends StreamingModuleValidator {
    *
    * @param instance    - Input instance parameters
    * @param specification - Specification of module
-   * @param errors        - List of validating errors
    * @return - List of errors and validating instance (null, if errors non empty)
    */
   def validateStreamOptions(instance: InputInstanceMetadata,
-                            specification: SpecificationData,
-                            errors: ArrayBuffer[String]): (ArrayBuffer[String], Option[Instance]) = {
+                            specification: SpecificationData) = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
-    var validatedInstance: Option[Instance] = None
+    val errors = new ArrayBuffer[String]()
 
     // 'outputs' field
     val outputsCardinality = specification.outputs("cardinality").asInstanceOf[Array[Int]]
@@ -114,8 +109,6 @@ class InputStreamingValidator extends StreamingModuleValidator {
         val service = serviceDAO.get(tStreamsServices.head)
         if (!service.get.isInstanceOf[TStreamService]) {
           errors += s"Service for t-streams must be 'TstrQ'"
-        } else {
-          createTStreams(errors, outputStreams.filter(s => s.streamType.equals(tStreamType)).map(_.asInstanceOf[TStreamSjStream]))
         }
       }
 
@@ -131,11 +124,9 @@ class InputStreamingValidator extends StreamingModuleValidator {
               errors += "Unknown type of 'parallelism' parameter. Must be a digit"
           }
       }
-
-      validatedInstance = createInstance(instance)
     }
 
-    (errors, validatedInstance)
+    errors
   }
 
   private def checkBackupNumber(parameters: InputInstanceMetadata, errors: ArrayBuffer[String]) = {
@@ -146,48 +137,5 @@ class InputStreamingValidator extends StreamingModuleValidator {
     if (parallelism <= (parameters.backupCount + parameters.asyncBackupCount)) {
       errors += "'Parallelism' must be greater than the total number of backups"
     }
-  }
-
-  /**
-   * Create entity of input instance for saving to database
-   *
-   * @return
-   */
-  private def createInstance(parameters: InputInstanceMetadata) = {
-    logger.debug(s"Instance ${parameters.name}. Create model object.")
-    val instance = parameters.asModelInstance()
-    val stages = scala.collection.mutable.Map[String, InstanceStage]()
-    parameters.outputs.foreach { stream =>
-      val instanceStartTask = new InstanceStage
-      instanceStartTask.state = toHandle
-      instanceStartTask.datetime = Calendar.getInstance().getTime
-      instanceStartTask.duration = 0
-      stages.put(stream, instanceStartTask)
-    }
-    createTasks(instance.asInstanceOf[InputInstance])
-    val instanceTask = new InstanceStage
-    instanceTask.state = toHandle
-    instanceTask.datetime = Calendar.getInstance().getTime
-    instanceTask.duration = 0
-    stages.put(instance.name, instanceTask)
-    instance.stages = mapAsJavaMap(stages)
-    Some(instance)
-  }
-
-  /**
-   * Create tasks object for instance of input module
-   *
-   * @param instance - instance for input module
-   */
-  def createTasks(instance: InputInstance): Unit = {
-    logger.debug(s"Instance ${instance.name}. Create tasks for input instance.")
-
-    val tasks = mutable.Map[String, InputTask]()
-
-    for (i <- 0 until instance.parallelism) {
-      val task = new InputTask("", 0)
-      tasks.put(s"${instance.name}-task$i", task)
-    }
-    instance.tasks = mapAsJavaMap(tasks)
   }
 }

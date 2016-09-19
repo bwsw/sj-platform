@@ -15,7 +15,7 @@ import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
-import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
+import com.bwsw.tstreams.generator.LocalTransactionGenerator
 import com.bwsw.tstreams.services.BasicStreamService
 
 object DataFactory {
@@ -254,7 +254,7 @@ object DataFactory {
 
   private def createConsumer(streamName: String, streamService: GenericMongoService[SjStream]): Consumer[Array[Byte]] = {
     val stream = streamService.get(streamName).get.asInstanceOf[TStreamSjStream]
-    val timeUuidGenerator = new LocalTimeUUIDGenerator
+    val timeUuidGenerator = new LocalTransactionGenerator
 
     setStreamOptions(stream)
 

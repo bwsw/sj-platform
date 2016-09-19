@@ -6,17 +6,18 @@ import java.util.jar.JarFile
 
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, Instance, RegularInstance, Task}
+import com.bwsw.sj.common.DAL.model.module.{Instance, RegularInstance, Task}
 import com.bwsw.sj.common.DAL.model.{Provider, Service, _}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
+import com.bwsw.sj.common.rest.entities.module.ExecutionPlan
 import com.bwsw.sj.common.utils.{GeneratorLiterals, _}
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.producer
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
-import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
+import com.bwsw.tstreams.generator.LocalTransactionGenerator
 import com.bwsw.tstreams.services.BasicStreamService
 import kafka.admin.AdminUtils
 import kafka.utils.ZkUtils
@@ -437,7 +438,7 @@ object DataFactory {
   def createStateConsumer(streamService: GenericMongoService[SjStream]) = {
     val name = instanceName + "-task0" + "_state"
     val partitions = 1
-    val timeUuidGenerator = new LocalTimeUUIDGenerator
+    val timeUuidGenerator = new LocalTransactionGenerator
 
     tstreamFactory.setProperty(TSF_Dictionary.Stream.NAME, name)
     tstreamFactory.setProperty(TSF_Dictionary.Stream.PARTITIONS, partitions)
@@ -474,7 +475,7 @@ object DataFactory {
   }
 
   def createProducer(stream: TStreamSjStream) = {
-    val timeUuidGenerator = new LocalTimeUUIDGenerator
+    val timeUuidGenerator = new LocalTransactionGenerator
 
     setProducerBindPort()
     setStreamOptions(stream)
@@ -492,7 +493,7 @@ object DataFactory {
 
   private def createConsumer(streamName: String, streamService: GenericMongoService[SjStream]): Consumer[Array[Byte]] = {
     val stream = streamService.get(streamName).get.asInstanceOf[TStreamSjStream]
-    val timeUuidGenerator = new LocalTimeUUIDGenerator
+    val timeUuidGenerator = new LocalTransactionGenerator
 
     setStreamOptions(stream)
 

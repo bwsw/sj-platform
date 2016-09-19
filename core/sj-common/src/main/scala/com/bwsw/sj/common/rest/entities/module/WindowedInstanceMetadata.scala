@@ -1,13 +1,14 @@
 package com.bwsw.sj.common.rest.entities.module
 
-import com.bwsw.sj.common.DAL.model.module.WindowedInstance
+import com.bwsw.sj.common.DAL.model.module.{RegularInstance, WindowedInstance}
 import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.common.utils.StreamLiterals._
 import com.fasterxml.jackson.annotation.JsonProperty
 
 class WindowedInstanceMetadata extends InstanceMetadata {
   var inputs: Array[String] = Array()
   var outputs: Array[String] = Array()
-  @JsonProperty("execution-plan") var executionPlan: Map[String, Any] = null
+  @JsonProperty("execution-plan") var executionPlan: ExecutionPlan = null
   @JsonProperty("start-from") var startFrom: String = EngineLiterals.newestStartMode
   @JsonProperty("state-management") var stateManagement: String = EngineLiterals.noneStateMode
   @JsonProperty("state-full-checkpoint") var stateFullCheckpoint: Int = 100
@@ -29,4 +30,26 @@ class WindowedInstanceMetadata extends InstanceMetadata {
 
     modelInstance
   }
+
+  override def prepareInstance(moduleType: String,
+                            moduleName: String,
+                            moduleVersion: String,
+                            engineName: String,
+                            engineVersion: String) = {
+    val instance = super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion).asInstanceOf[RegularInstance]
+    castParallelismToNumber(getStreamsPartitions(this.inputs.map(clearStreamFromMode)))
+    this.executionPlan = new ExecutionPlan().fillTasks(createTaskStreams(), createTaskNames(this.parallelism.asInstanceOf[Int], this.name))
+
+    val inputStreams = getStreams(this.inputs.map(clearStreamFromMode))
+    val outputStreams = this.outputs
+    val streams = inputStreams.filter(s => s.streamType.equals(tStreamType)).map(_.name).union(outputStreams)
+    fillStages(streams)
+  }
+
+  override def createStreams() = {
+    val sjStreams = getStreams(this.inputs.map(clearStreamFromMode) ++ this.outputs)
+    sjStreams.foreach(_.create())
+  }
+
+  override def getInputs() = this.inputs
 }

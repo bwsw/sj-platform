@@ -7,16 +7,17 @@ import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.common.traits.Serializer
 import com.bwsw.common.{ElasticsearchClient, JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, OutputInstance, Task}
+import com.bwsw.sj.common.DAL.model.module.{OutputInstance, Task}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
+import com.bwsw.sj.common.rest.entities.module.ExecutionPlan
 import com.bwsw.sj.common.utils.{GeneratorLiterals, ProviderLiterals, ServiceLiterals, _}
 import com.bwsw.tstreams.agents.consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer}
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
-import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
+import com.bwsw.tstreams.generator.LocalTransactionGenerator
 import com.bwsw.tstreams.services.BasicStreamService
 
 import scala.collection.JavaConverters._
@@ -150,7 +151,7 @@ object BenchmarkDataFactory {
   }
 
   def createProducer(stream: TStreamSjStream) = {
-    val timeUuidGenerator = new LocalTimeUUIDGenerator
+    val timeUuidGenerator = new LocalTransactionGenerator
 
     setProducerBindPort()
     setStreamOptions(stream)
@@ -167,7 +168,7 @@ object BenchmarkDataFactory {
   }
 
   def createConsumer(stream: TStreamSjStream): consumer.Consumer[Array[Byte]] = {
-    val timeUuidGenerator = new LocalTimeUUIDGenerator
+    val timeUuidGenerator = new LocalTransactionGenerator
 
     setStreamOptions(stream)
 

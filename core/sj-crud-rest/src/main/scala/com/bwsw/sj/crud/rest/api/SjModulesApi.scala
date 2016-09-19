@@ -8,7 +8,7 @@ import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import akka.stream.scaladsl._
-import com.bwsw.sj.common.DAL.model.module.Instance
+import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.engine.StreamingValidator
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.module._
@@ -124,26 +124,25 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
                 pathEndOrSingleSlash {
                   post { (ctx: RequestContext) =>
                     val instanceMetadata = deserializeOptions(getEntityFromContext(ctx), moduleType)
-                    val (errors, validatedInstance) = validateInstance(instanceMetadata, specification, moduleType)
+                    val errors = validateInstance(instanceMetadata, specification, moduleType)
+                    val optionsPassValidation = validateInstanceOptions(specification, filename, instanceMetadata.options)
                     var response: RestResponse = BadRequestRestResponse(Map("message" ->
                       createMessage("rest.modules.instances.instance.cannot.create", errors.mkString(";"))))
 
-                    if (errors.isEmpty && validatedInstance.isDefined) {
-                      //todo по-хорошему, тут должно быть достаточно одной проверки на наличие ошибок или на инстанс
-                      val instance = validatedInstance.get
-                      val validatorClassName = specification.validateClass
-                      val jarFile = storage.get(filename, s"tmp/$filename")
-                      if (validateInstanceOptions(jarFile, validatorClassName, instance.options)) {
-                        val nameInstance = saveInstance(
-                          instance,
+                    if (errors.isEmpty) {
+                      if (optionsPassValidation) {
+                        instanceMetadata.prepareInstance(
                           moduleType,
                           moduleName,
                           moduleVersion,
                           specification.engineName,
                           specification.engineVersion
                         )
+                        instanceMetadata.createStreams()
+                        instanceDAO.save(instanceMetadata.asModelInstance())
+
                         response = CreatedRestResponse(Map("message" ->
-                          createMessage("rest.modules.instances.instance.created", nameInstance, s"$moduleType-$moduleName-$moduleVersion")))
+                          createMessage("rest.modules.instances.instance.created", instanceMetadata.name, s"$moduleType-$moduleName-$moduleVersion")))
                       } else {
                         response = BadRequestRestResponse(Map("message" ->
                           getMessage("rest.modules.instances.instance.cannot.create.incorrect.options")))
@@ -342,37 +341,13 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
     validator.validate(options, specification)
   }
 
-  /**
-   * Save instance of module to db
-   *
-   * @param instance - entity of instance, which saving to db
-   * @param moduleType - type name of module
-   * @param moduleName - name of module
-   * @param moduleVersion - version of module
-   * @param engineName - name of engine
-   * @param engineVersion - version of engine
-   * @return - name of created entity
-   */
-  private def saveInstance(instance: Instance,
-                   moduleType: String,
-                   moduleName: String,
-                   moduleVersion: String,
-                   engineName: String,
-                   engineVersion: String) = {
-    instance.engine = engineName + "-" + engineVersion
-    instance.moduleName = moduleName
-    instance.moduleVersion = moduleVersion
-    instance.moduleType = moduleType
-    instance.status = ready
-    instanceDAO.save(instance)
-    instance.name
-  }
-
-  private def validateInstanceOptions(file: File, validateClassName: String, options: String): Boolean = {
+  private def validateInstanceOptions(specification: SpecificationData, filename: String, options: Map[String, Any]): Boolean = {
+    val validatorClassName = specification.validateClass
+    val file = storage.get(filename, s"tmp/$filename")
     val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
-    val clazz = loader.loadClass(validateClassName)
+    val clazz = loader.loadClass(validatorClassName)
     val validator = clazz.newInstance().asInstanceOf[StreamingValidator]
-    validator.validate(serializer.deserialize[Map[String, Any]](options))
+    validator.validate(options)
   }
 
   /**

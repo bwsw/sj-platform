@@ -12,7 +12,7 @@ import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.sj.engine.input.eviction_policy.{ExpandedTimeEvictionPolicy, FixTimeEvictionPolicy}
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
-import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer, Transaction}
+import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer, ProducerTransaction}
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import org.slf4j.LoggerFactory
@@ -93,7 +93,7 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
   protected def sendEnvelope(stream: String, partition: Int, data: Array[Byte]) = {
     logger.info(s"Task name: ${manager.taskName}. Send envelope to each output stream.\n")
     val maybeTxn = getTxn(stream, partition)
-    var txn: Transaction[Array[Byte]] = null
+    var txn: ProducerTransaction[Array[Byte]] = null
     if (maybeTxn.isDefined) {
       logger.debug(s"Task name: ${manager.taskName}. Txn for stream/partition: '$stream/$partition' is defined\n")
       txn = maybeTxn.get
@@ -109,7 +109,7 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
     logger.debug(s"Task name: ${manager.taskName}. Add envelope to output stream in performance metrics \n")
     performanceMetrics.addElementToOutputEnvelope(
       stream,
-      txn.getTransactionUUID().toString,
+      txn.getTransactionID().toString,
       data.length
     )
   }
@@ -277,7 +277,7 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
    * @param partition Partition of stream
    * @return Current open transaction
    */
-  private def putTxn(stream: String, partition: Int, txn: Transaction[Array[Byte]]) = {
+  private def putTxn(stream: String, partition: Int, txn: ProducerTransaction[Array[Byte]]) = {
     logger.debug(s"Task name: ${manager.taskName}. " +
       s"Put txn for stream: $stream, partition: $partition\n")
     txnsByStreamPartitions(stream) += (partition -> txn)
@@ -292,6 +292,6 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
   protected def createTxnsStorage(streams: Set[String]) = {
     logger.debug(s"Task name: ${manager.taskName}. " +
       s"Create storage for keeping txns for each partition of output streams\n")
-    streams.map(x => (x, mutable.Map[Int, Transaction[Array[Byte]]]())).toMap
+    streams.map(x => (x, mutable.Map[Int, ProducerTransaction[Array[Byte]]]())).toMap
   }
 }

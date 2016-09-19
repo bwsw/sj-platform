@@ -6,7 +6,7 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.ZKService
 import com.bwsw.sj.common.rest.entities.module.InstanceMetadata
 import org.mongodb.morphia.annotations.{Embedded, Entity, Id, Property}
-import scala.collection.JavaConversions._
+
 import scala.collection.JavaConverters._
 
 /**
@@ -59,14 +59,6 @@ class Instance {
     protocolInstance.nodeAttributes = Map(this.nodeAttributes.asScala.toList: _*)
     protocolInstance.environmentVariables = Map(this.environmentVariables.asScala.toList: _*)
     protocolInstance.coordinationService = this.coordinationService.name
-  }
-
-  protected def getProtocolExecutionPlan(executionPlan: ExecutionPlan) = {
-    val protocolExecutionPlan = Map(
-      "tasks" -> executionPlan.tasks.map(t => t._1 -> Map("inputs" -> t._2.inputs))
-    )
-
-    protocolExecutionPlan
   }
 
   def getOptionsAsMap() = {

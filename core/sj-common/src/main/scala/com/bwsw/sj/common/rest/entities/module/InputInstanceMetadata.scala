@@ -4,6 +4,7 @@ import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.fasterxml.jackson.annotation.JsonProperty
 
+import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 
 class InputInstanceMetadata extends InstanceMetadata {
@@ -31,5 +32,27 @@ class InputInstanceMetadata extends InstanceMetadata {
     modelInstance.asyncBackupCount = this.asyncBackupCount
 
     modelInstance
+  }
+
+  override def prepareInstance(moduleType: String,
+                            moduleName: String,
+                            moduleVersion: String,
+                            engineName: String,
+                            engineVersion: String) = {
+    super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion)
+    fillTasks()
+    fillStages(this.outputs)
+  }
+
+  override def createStreams() = {
+    val sjStreams = getStreams(this.outputs)
+    sjStreams.foreach(_.create())
+  }
+
+  private def fillTasks(): Unit = {
+    for (i <- 0 until this.parallelism.asInstanceOf[Int]) {
+      val task = new InputTask("", 0)
+      this.tasks.put(s"${this.name}-task$i", task)
+    }
   }
 }

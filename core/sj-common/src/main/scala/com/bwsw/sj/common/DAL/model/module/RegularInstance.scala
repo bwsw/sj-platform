@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.DAL.model.module
 
-import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, RegularInstanceMetadata}
+import com.bwsw.sj.common.rest.entities.module.{ExecutionPlan, InstanceMetadata, RegularInstanceMetadata}
 import com.bwsw.sj.common.utils.EngineLiterals
 import org.mongodb.morphia.annotations._
 
@@ -20,7 +20,7 @@ class RegularInstance() extends Instance {
     val protocolInstance = new RegularInstanceMetadata()
     super.fillProtocolInstance(protocolInstance)
 
-    protocolInstance.executionPlan = getProtocolExecutionPlan(this.executionPlan)
+    protocolInstance.executionPlan = this.executionPlan
     protocolInstance.stateManagement = this.stateManagement
     protocolInstance.stateFullCheckpoint = this.stateFullCheckpoint
     protocolInstance.eventWaitTime = this.eventWaitTime

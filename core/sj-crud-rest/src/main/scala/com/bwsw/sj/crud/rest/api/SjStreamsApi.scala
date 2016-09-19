@@ -90,10 +90,14 @@ trait SjStreamsApi extends Directives with SjCrudValidator with CompletionUtils 
   private def getUsedInstances(streamName: String): mutable.Buffer[Instance] = {
     instanceDAO.getAll.filter { (instance: Instance) =>
       if (!instance.moduleType.equals(inputStreamingType)) {
-        instance.inputs.map(_.replaceAll(s"/${EngineLiterals.splitStreamMode}|/${EngineLiterals.fullStreamMode}", "")).contains(streamName) || instance.outputs.contains(streamName)
+          instance.inputs.map(clearStreamFromMode).contains(streamName) || instance.outputs.contains(streamName)
       } else {
         instance.outputs.contains(streamName)
       }
     }
+  }
+
+  private def clearStreamFromMode(streamName: String) = {
+    streamName.replaceAll(s"/${EngineLiterals.splitStreamMode}|/${EngineLiterals.fullStreamMode}", "")
   }
 }

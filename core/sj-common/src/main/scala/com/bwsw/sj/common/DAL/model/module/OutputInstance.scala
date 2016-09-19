@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.DAL.model.module
 
-import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, OutputInstanceMetadata}
+import com.bwsw.sj.common.rest.entities.module.{ExecutionPlan, InstanceMetadata, OutputInstanceMetadata}
 import org.mongodb.morphia.annotations.{Embedded, Property}
 
 /**
@@ -17,7 +17,7 @@ class OutputInstance() extends Instance {
     val protocolInstance = new OutputInstanceMetadata()
     super.fillProtocolInstance(protocolInstance)
 
-    protocolInstance.executionPlan = getProtocolExecutionPlan(this.executionPlan)
+    protocolInstance.executionPlan = this.executionPlan
     protocolInstance.input = this.inputs.head
     protocolInstance.output = this.outputs.head
     protocolInstance.startFrom = this.startFrom

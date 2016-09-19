@@ -16,7 +16,6 @@ import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
-import com.datastax.driver.core.utils.UUIDs
 import org.elasticsearch.index.query.QueryBuilders
 import org.slf4j.LoggerFactory
 
@@ -151,7 +150,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
   private def removeFromES(envelope: TStreamEnvelope) = {
     if (!wasFirstCheckpoint) {
-      val txn = envelope.txnUUID.toString.replaceAll("-", "")
+      val txn = envelope.id.toString.replaceAll("-", "")
       removeTxnFromES(txn)
     }
   }
@@ -179,8 +178,8 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     outputEnvelope match {
       case esEnvelope: EsEnvelope =>
         esEnvelope.outputDateTime = s"${Calendar.getInstance().getTimeInMillis}"
-        esEnvelope.txnDateTime = s"${UUIDs.unixTimestamp(inputEnvelope.txnUUID)}"
-        esEnvelope.txn = inputEnvelope.txnUUID.toString.replaceAll("-", "")
+        esEnvelope.txnDateTime = s"${inputEnvelope.id}"
+        esEnvelope.txn = inputEnvelope.id.toString.replaceAll("-", "")
         esEnvelope.stream = inputEnvelope.stream
         esEnvelope.partition = inputEnvelope.partition
         esEnvelope.tags = inputEnvelope.tags

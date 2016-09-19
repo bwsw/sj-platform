@@ -82,8 +82,8 @@ class TStreamTaskInputService(manager: TaskManager,
     logger.info(s"Task: ${manager.taskName}. T-stream envelope is received\n")
     val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
     logger.debug(s"Task: ${manager.taskName}. " +
-      s"Change local offset of consumer: ${tStreamEnvelope.consumerName} to txn: ${tStreamEnvelope.txnUUID}\n")
-    consumers(tStreamEnvelope.consumerName).getConsumer().setStreamPartitionOffset(tStreamEnvelope.partition, tStreamEnvelope.txnUUID)
+      s"Change local offset of consumer: ${tStreamEnvelope.consumerName} to txn: ${tStreamEnvelope.id}\n")
+    consumers(tStreamEnvelope.consumerName).getConsumer().setStreamPartitionOffset(tStreamEnvelope.partition, tStreamEnvelope.id)
     performanceMetrics.addEnvelopeToInputStream(
       tStreamEnvelope.stream,
       tStreamEnvelope.data.map(_.length)
