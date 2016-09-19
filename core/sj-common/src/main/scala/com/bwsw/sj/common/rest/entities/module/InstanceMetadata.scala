@@ -6,6 +6,7 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module.{Instance, InstanceStage}
 import com.bwsw.sj.common.DAL.model.{KafkaSjStream, SjStream, TStreamSjStream, ZKService}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -110,8 +111,56 @@ class InstanceMetadata {
     this.stages.put(this.name, initialStage)
   }
 
+  protected def createTaskStreams() = {
+    val streamDAO = ConnectionRepository.getStreamService
+    val inputStreamsWithModes = splitStreamsAndModes(getInputs())
+    inputStreamsWithModes.map(streamWithMode => {
+      val partitions = getPartitions(streamWithMode.streamName, streamDAO)
+      TaskStream(streamWithMode.streamName, streamWithMode.mode, partitions)
+    })
+  }
+
+  protected def getInputs(): Array[String] = ???
+
+  private def splitStreamsAndModes(streamsWithModes: Array[String]) = {
+    streamsWithModes.map(x => {
+      val name = clearStreamFromMode(x)
+      val mode = getStreamMode(name)
+
+      StreamWithMode(name, mode)
+    })
+  }
+
+  private def getPartitions(streamName: String, streamDAO: GenericMongoService[SjStream]) = {
+    val stream = streamDAO.get(streamName).get
+    val partitions = stream.streamType match {
+      case StreamLiterals.`tStreamType` =>
+        stream.asInstanceOf[TStreamSjStream].partitions
+      case StreamLiterals.`kafkaStreamType` =>
+        stream.asInstanceOf[KafkaSjStream].partitions
+    }
+
+    partitions
+  }
+
   protected def clearStreamFromMode(streamName: String) = {
     streamName.replaceAll(s"/${EngineLiterals.splitStreamMode}|/${EngineLiterals.fullStreamMode}", "")
+  }
+
+  private def getStreamMode(name: String) = {
+    if (name.contains(s"/${EngineLiterals.fullStreamMode}")) {
+      EngineLiterals.fullStreamMode
+    } else {
+      EngineLiterals.splitStreamMode
+    }
+  }
+
+  protected def createTaskNames(parallelism: Int, taskPrefix: String) = {
+    (0 until parallelism).map(x => createTaskName(taskPrefix, x)).toSet
+  }
+
+  private def createTaskName(taskPrefix: String, taskNumber: Int) = {
+    taskPrefix + "-task" + taskNumber
   }
 }
 

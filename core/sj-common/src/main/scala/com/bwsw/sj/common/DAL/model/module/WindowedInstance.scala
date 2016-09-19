@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.DAL.model.module
 
-import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, WindowedInstanceMetadata}
+import com.bwsw.sj.common.rest.entities.module.{ExecutionPlan, InstanceMetadata, WindowedInstanceMetadata}
 import com.bwsw.sj.common.utils.EngineLiterals
 import org.mongodb.morphia.annotations.{Embedded, Property}
 

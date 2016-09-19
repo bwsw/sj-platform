@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.rest.entities.module
 
-import com.bwsw.sj.common.DAL.model.module.{ExecutionPlan, OutputInstance}
+import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.fasterxml.jackson.annotation.JsonProperty
 
@@ -29,7 +29,7 @@ class OutputInstanceMetadata extends InstanceMetadata {
 
     super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion)
     castParallelismToNumber(getStreamsPartitions(Array(clearStreamFromMode(this.input))))
-    this.executionPlan = new ExecutionPlan().fillTasks(getInputs(), this.parallelism.asInstanceOf[Int], this.name)
+    this.executionPlan = new ExecutionPlan().fillTasks(createTaskStreams(), createTaskNames(this.parallelism.asInstanceOf[Int], this.name))
 
     val streams = Array(clearStreamFromMode(input))
     fillStages(streams)
@@ -40,5 +40,5 @@ class OutputInstanceMetadata extends InstanceMetadata {
     sjStreams.foreach(_.create())
   }
 
-  private def getInputs() = Array(this.input)
+  override def getInputs() = Array(this.input)
 }

@@ -35,7 +35,7 @@ class RegularInstanceMetadata extends InstanceMetadata {
                             engineVersion: String) = {
     super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion)
     castParallelismToNumber(getStreamsPartitions(this.inputs.map(clearStreamFromMode)))
-    this.executionPlan = new ExecutionPlan().fillTasks(getInputs(), this.parallelism.asInstanceOf[Int], this.name)
+    this.executionPlan = new ExecutionPlan().fillTasks(createTaskStreams(), createTaskNames(this.parallelism.asInstanceOf[Int], this.name))
 
     val inputStreams = getStreams(this.inputs.map(clearStreamFromMode))
     val outputStreams = this.outputs
@@ -48,5 +48,5 @@ class RegularInstanceMetadata extends InstanceMetadata {
     sjStreams.foreach(_.create())
   }
 
-  private def getInputs() = this.inputs
+  override def getInputs() = this.inputs
 }
