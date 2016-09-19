@@ -1,7 +1,5 @@
 package com.bwsw.sj.engine.core.entities
 
-import java.util.UUID
-
 import com.bwsw.sj.common.utils.StreamLiterals
 
 /**
@@ -9,7 +7,7 @@ import com.bwsw.sj.common.utils.StreamLiterals
  */
 
 class TStreamEnvelope() extends Envelope() {
-  var txnUUID: UUID = null
+  var id: Long = 0
   var consumerName: String = null
   var data: List[Array[Byte]] = null
   streamType = StreamLiterals.tStreamType

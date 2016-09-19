@@ -18,7 +18,7 @@ import com.bwsw.tstreams.agents.consumer.Offset.IOffset
 import com.bwsw.tstreams.agents.consumer.subscriber.Callback
 import com.bwsw.tstreams.agents.producer.Producer
 import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
-import com.bwsw.tstreams.generator.{IUUIDGenerator, LocalTimeUUIDGenerator}
+import com.bwsw.tstreams.generator.LocalTransactionGenerator
 import com.bwsw.tstreams.services.BasicStreamService
 import org.slf4j.LoggerFactory
 
@@ -87,6 +87,7 @@ abstract class TaskManager() {
     setCoordinationOptions(auxiliaryTStreamService)
     setBindHostForAgents()
     setPersistentQueuePath()
+    setProducerMasterBootstrapMode()
   }
 
   private def setMetadataClusterProperties(tStreamService: TStreamService) = {
@@ -127,6 +128,10 @@ abstract class TaskManager() {
 
   private def setPersistentQueuePath() = {
     tstreamFactory.setProperty(TSF_Dictionary.Consumer.Subscriber.PERSISTENT_QUEUE_PATH, "/tmp/" + persistentQueuePath)
+  }
+
+  private def setProducerMasterBootstrapMode() = {
+    tstreamFactory.setProperty(TSF_Dictionary.Producer.MASTER_BOOTSTRAP_MODE, TSF_Dictionary.Producer.Consts.MASTER_BOOTSTRAP_MODE_LAZY_VOTE)
   }
 
   /**
@@ -259,12 +264,12 @@ abstract class TaskManager() {
       offset)
   }
 
-  protected def getUUIDGenerator(stream: TStreamSjStream): IUUIDGenerator = {
+  protected def getUUIDGenerator(stream: TStreamSjStream) = {
     val retryPeriod = ConfigSettingsUtils.getClientRetryPeriod()
     val retryCount = ConfigSettingsUtils.getRetryCount()
 
     stream.generator.generatorType match {
-      case GeneratorLiterals.`localType` => new LocalTimeUUIDGenerator
+      case GeneratorLiterals.`localType` => new LocalTransactionGenerator()
       case generatorType =>
         val service = stream.generator.service.asInstanceOf[ZKService]
         val zkHosts = service.provider.hosts

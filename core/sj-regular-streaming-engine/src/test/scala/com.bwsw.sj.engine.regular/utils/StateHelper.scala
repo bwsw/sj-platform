@@ -1,9 +1,7 @@
 package com.bwsw.sj.engine.regular.utils
 
-import java.util.UUID
-
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.tstreams.agents.consumer.{Consumer, Transaction}
+import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction}
 
 import scala.collection.mutable
 
@@ -21,7 +19,7 @@ object StateHelper {
         initialState(variable._1.asInstanceOf[String]) = variable._2
         fillFullState(initialState, lastTxn, objectSerializer)
       case _ =>
-        val lastFullTxnUUID = Some(value.asInstanceOf[UUID])
+        val lastFullTxnUUID = Some(Long.unbox(value))
         val lastFullStateTxn = consumer.getTransactionById(partition, lastFullTxnUUID.get).get
         fillFullState(initialState, lastFullStateTxn, objectSerializer)
         consumer.setStreamPartitionOffset(partition, lastFullTxnUUID.get)
@@ -45,7 +43,7 @@ object StateHelper {
     initialState
   }
 
-  def fillFullState(initialState: mutable.Map[String, Any], transaction: Transaction[Array[Byte]], objectSerializer: ObjectSerializer) = {
+  def fillFullState(initialState: mutable.Map[String, Any], transaction: ConsumerTransaction[Array[Byte]], objectSerializer: ObjectSerializer) = {
     var value: Object = null
     var variable: (String, Any) = null
 
