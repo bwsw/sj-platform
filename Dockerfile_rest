@@ -34,6 +34,7 @@ COPY ./core/sj-frontend /opt/bin/juggler/core/sj-frontend
 WORKDIR /opt/bin/juggler/core/sj-frontend
 
 RUN apt-get install nodejs
+RUN apt-get upgrade nodejs
 RUN npm install -g npm n
 RUN npm install -g typings
 RUN npm install --unsafe-perm
