@@ -369,7 +369,7 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
    */
   private def startInstance(instance: Instance) = {
     logger.debug(s"Starting application of instance ${instance.name}")
-    new Thread(new InstanceStarter(instance, 1000)).start()
+    new Thread(new InstanceStarter(instance)).start()
   }
 
   /**
@@ -380,7 +380,7 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
    */
   private def stopInstance(instance: Instance) = {
     logger.debug(s"Stopping application of instance ${instance.name}")
-    new Thread(new InstanceStopper(instance, 1000)).start()
+    new Thread(new InstanceStopper(instance)).start()
   }
 
   /**
@@ -391,7 +391,7 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
    */
   private def destroyInstance(instance: Instance) = {
     logger.debug(s"Destroying application of instance ${instance.name}")
-    new Thread(new InstanceDestroyer(instance, 1000)).start()
+    new Thread(new InstanceDestroyer(instance)).start()
   }
 
   val modulesApi =

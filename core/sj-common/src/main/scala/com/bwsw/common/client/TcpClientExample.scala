@@ -29,7 +29,7 @@ object TcpClientExample {
     client.open()
     //val consoleReader = new BufferedReader(new InputStreamReader(System.in))
     var i = 0
-    val t0 = System.nanoTime()
+    val t0 = System.currentTimeMillis()
     while (i <= 10) {
       //while (consoleReader.readLine() != null) {
       logger.debug("send request")
@@ -38,7 +38,7 @@ object TcpClientExample {
       i += 1
     }
     client.close()
-    val t1 = System.nanoTime()
-    println("Elapsed time: " + (t1 - t0) / 1000000 + "ms")
+    val t1 = System.currentTimeMillis()
+    println("Elapsed time: " + (t1 - t0) + "ms")
   }
 }

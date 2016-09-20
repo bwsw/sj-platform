@@ -4,15 +4,16 @@ import java.net.{InetSocketAddress, URI}
 import java.util
 
 import com.bwsw.sj.common.DAL.ConnectionConstants
-import com.bwsw.sj.common.DAL.model.module.Instance
+import com.bwsw.sj.common.DAL.model.module.{InstanceStage, Instance}
 import com.bwsw.sj.common.DAL.model.{TStreamSjStream, ZKService}
-import com.bwsw.sj.common.utils.{GeneratorLiterals, StreamLiterals, EngineLiterals, ConfigSettingsUtils}
 import com.bwsw.sj.common.rest.entities.MarathonRequest
+import com.bwsw.sj.common.utils.{ConfigSettingsUtils, EngineLiterals, GeneratorLiterals, StreamLiterals}
 import com.twitter.common.quantity.{Amount, Time}
 import com.twitter.common.zookeeper.DistributedLock.LockingException
 import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
 import org.apache.http.util.EntityUtils
 import org.slf4j.LoggerFactory
+
 import scala.collection.JavaConversions._
 
 /**
@@ -22,10 +23,9 @@ import scala.collection.JavaConversions._
  *
  * @author Kseniya Tomskikh
  */
-class InstanceStarter(instance: Instance, delay: Long) extends Runnable with InstanceMarathonManager {
+class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable with InstanceMarathonManager {
 
   import EngineLiterals._
-  import scala.collection.JavaConverters._
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
 
@@ -53,16 +53,9 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable with Ins
           }
         }
 
-        var streams: Array[String] = instance.outputs
-        if (!instance.moduleType.equals(inputStreamingType)) {
-          streams = streams.union(instance.inputs.map(_.replaceAll("/split|/full", "")))
-        }
-        val streamsToStart = streams.flatMap(name => streamDAO.get(name))
-          .filter(stream => stream.streamType.equals(StreamLiterals.tStreamType))
-          .filter(stream => !stream.asInstanceOf[TStreamSjStream].generator.generatorType.equals(GeneratorLiterals.localType))
-        startGenerators(streamsToStart.map(stream => stream.asInstanceOf[TStreamSjStream]).toSet)
+        startGenerators(getStreamsWithNonLocalGenerator())
 
-        val stages = Map(instance.stages.asScala.toList: _*)
+        val stages = mapAsScalaMap(instance.stages)
         if (!stages.exists(s => !s._1.equals(instance.name) && s._2.state.equals(failed))) {
           instanceStart(mesosMaster)
           logger.debug(s"Instance: ${instance.name}. Instance is started.")
@@ -97,6 +90,19 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable with Ins
     }
 
     zooKeeperServers
+  }
+
+  private def getStreamsWithNonLocalGenerator() = {
+    var streams = instance.outputs.toSet
+    if (!instance.moduleType.equals(inputStreamingType)) {
+      streams = streams.union(instance.inputs.map(_.replaceAll(s"/${EngineLiterals.splitStreamMode}|/${EngineLiterals.fullStreamMode}", "")).toSet)
+    }
+    val streamsWithGenerator = streams.flatMap(streamDAO.get)
+      .filter(stream => stream.streamType.equals(StreamLiterals.tStreamType))
+      .filter(stream => !stream.asInstanceOf[TStreamSjStream].generator.generatorType.equals(GeneratorLiterals.localType))
+      .map(stream => stream.asInstanceOf[TStreamSjStream])
+
+    streamsWithGenerator
   }
 
   /**
@@ -279,9 +285,8 @@ class InstanceStarter(instance: Instance, delay: Long) extends Runnable with Ins
    */
   private def updateInstanceStages(instance: Instance) = {
     logger.debug(s"Update stages of instance ${instance.name}")
-    instance.stages.keySet().foreach { key =>
-      val stage = instance.stages.get(key)
-      updateInstanceStage(instance, key, stage.state)
+    instance.stages.foreach { (stageNameWithStage: (String, InstanceStage)) =>
+      updateInstanceStage(instance, stageNameWithStage._1, stageNameWithStage._2.state)
     }
   }
 

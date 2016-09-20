@@ -381,7 +381,7 @@ object DataFactory {
 
     def createTstreamData(countTxns: Int, countElements: Int, streamService: GenericMongoService[SjStream], suffix: String) = {
       val producer = createProducer(streamService.get("test-input-tstream" + suffix).get.asInstanceOf[TStreamSjStream])
-      val s = System.nanoTime
+      val s = System.currentTimeMillis()
       (0 until countTxns) foreach { (x: Int) =>
         val txn = producer.newTransaction(policy)
         (0 until countElements) foreach { (y: Int) =>
@@ -391,7 +391,7 @@ object DataFactory {
         txn.checkpoint()
       }
 
-      println(s"producer time: ${(System.nanoTime - s) / 1000000}")
+      println(s"producer time: ${(System.currentTimeMillis() - s) / 1000}")
 
       producer.stop()
     }
@@ -416,7 +416,7 @@ object DataFactory {
 
     val producer = new KafkaProducer[Array[Byte], Array[Byte]](props)
     var number = 0
-    val s = System.nanoTime()
+    val s = System.currentTimeMillis()
     (0 until countTxns) foreach { (x: Int) =>
       (0 until countElements) foreach { (y: Int) =>
         number += 1
@@ -427,7 +427,7 @@ object DataFactory {
       }
     }
 
-    println(s"producer time: ${(System.nanoTime - s) / 1000000}")
+    println(s"producer time: ${(System.currentTimeMillis() - s) / 1000}")
     producer.close()
   }
 

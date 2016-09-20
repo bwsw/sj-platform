@@ -2,6 +2,8 @@ package com.bwsw.sj.common.DAL.model.module
 
 import java.util.Date
 
+import com.bwsw.sj.common.utils.EngineLiterals._
+
 /**
  * Stage of running instance
  *
@@ -9,7 +11,7 @@ import java.util.Date
  * @author Kseniya Tomskikh
  */
 class InstanceStage() {
-  var state: String = null
+  var state: String = toHandle
   var datetime: Date = null
   var duration: Long = 0
 

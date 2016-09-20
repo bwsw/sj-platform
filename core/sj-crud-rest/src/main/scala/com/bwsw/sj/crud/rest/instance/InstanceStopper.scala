@@ -14,7 +14,7 @@ import scala.collection.JavaConverters._
   *
   * @author Kseniya Tomskikh
   */
-class InstanceStopper(instance: Instance, delay: Long) extends Runnable with InstanceMarathonManager {
+class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable with InstanceMarathonManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
 
   import EngineLiterals._

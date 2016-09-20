@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
   *
   * @author Kseniya Tomskikh
   */
-class InstanceDestroyer(instance: Instance, delay: Long) extends Runnable with InstanceMarathonManager {
+class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable with InstanceMarathonManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
 
   import EngineLiterals._

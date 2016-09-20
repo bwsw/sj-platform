@@ -101,11 +101,11 @@ object BenchmarkDataFactory {
   def createData(countTxns: Int, countElements: Int) = {
     val tStream: TStreamSjStream = streamService.get(tStreamName).asInstanceOf[TStreamSjStream]
     val producer = createProducer(tStream)
-    val s = System.nanoTime
+    val s = System.currentTimeMillis()
     writeData(countTxns,
       countElements,
       producer)
-    println(s"producer time: ${(System.nanoTime - s) / 1000000}")
+    println(s"producer time: ${(System.currentTimeMillis - s) / 1000}")
     producer.stop()
   }
 

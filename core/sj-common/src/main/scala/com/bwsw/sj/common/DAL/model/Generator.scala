@@ -22,7 +22,7 @@ class Generator() {
 
   def asProtocolGenerator() = {
     this.generatorType match {
-      case GeneratorLiterals.`localType` => new GeneratorData(this.generatorType)
+      case GeneratorLiterals.localType => new GeneratorData(this.generatorType)
       case _ => new GeneratorData(this.generatorType, this.service.name, this.instanceCount)
     }
   }

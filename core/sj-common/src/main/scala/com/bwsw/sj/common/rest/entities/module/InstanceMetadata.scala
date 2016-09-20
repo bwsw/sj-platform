@@ -8,7 +8,7 @@ import com.bwsw.sj.common.DAL.model.{KafkaSjStream, SjStream, TStreamSjStream, Z
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.utils.EngineLiterals._
-import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
+import com.bwsw.sj.common.utils.{EngineLiterals, GeneratorLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonProperty
 
 import scala.collection.JavaConversions._
@@ -17,7 +17,7 @@ class InstanceMetadata {
   private var moduleName: String = null
   private var moduleVersion: String = null
   private var moduleType: String = null
-  private val stages = scala.collection.mutable.Map[String, InstanceStage]()
+  var stages = scala.collection.mutable.Map[String, InstanceStage]()
   var status: String = null
   var name: String = null
   var description: String = "No description"
@@ -106,9 +106,18 @@ class InstanceMetadata {
   }
 
   protected def fillStages(streamsWithGenerator: Array[String]) = {
+    val streamsDAO = ConnectionRepository.getStreamService
     val initialStage = new InstanceStage(toHandle, Calendar.getInstance().getTime)
-    streamsWithGenerator.foreach(stream => this.stages.put(stream, initialStage))
+    val stageForLocalGenerator = new InstanceStage(started, Calendar.getInstance().getTime)
     this.stages.put(this.name, initialStage)
+
+    streamsWithGenerator.foreach(stream => {
+      val tstream = streamsDAO.get(stream).get.asInstanceOf[TStreamSjStream]
+      tstream.generator.generatorType match {
+        case GeneratorLiterals.localType => this.stages.put(stream, stageForLocalGenerator)
+        case _ => this.stages.put(stream, initialStage)
+      }
+    })
   }
 
   protected def createTaskStreams() = {
