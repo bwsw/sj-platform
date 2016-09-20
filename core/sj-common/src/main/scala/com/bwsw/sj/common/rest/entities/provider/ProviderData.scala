@@ -78,7 +78,7 @@ case class ProviderData(name: String,
   private def validateHost(host: String): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
     try {
-      val uri = new URI(s"dummy://$host")
+      val uri = new URI(s"dummy://${normalizeName(host)}")
       val hostname = uri.getHost
 
       if (hostname == null) {
@@ -96,5 +96,9 @@ case class ProviderData(name: String,
     }
 
     errors
+  }
+
+  private def normalizeName(name: String) = {
+    name.replace('\\','/')
   }
 }
