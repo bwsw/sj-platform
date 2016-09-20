@@ -77,7 +77,7 @@ class InstanceMetadata {
     this.status = ready
   }
 
-  def createStreams(): Unit = ???
+  def createStreams(): Unit = {}
 
   protected def castParallelismToNumber(partitions: Array[Int]) = {
     val parallelism = this.parallelism match {
@@ -120,7 +120,7 @@ class InstanceMetadata {
     })
   }
 
-  protected def getInputs(): Array[String] = ???
+  protected def getInputs(): Array[String] = Array()
 
   private def splitStreamsAndModes(streamsWithModes: Array[String]) = {
     streamsWithModes.map(x => {

@@ -18,6 +18,7 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator with Co
             throw UnknownConfigSettingDomain(createMessage("rest.config.setting.domain.unknown", ConfigLiterals.domains.mkString(", ")), domain)
           pathEndOrSingleSlash {
             post { (ctx: RequestContext) =>
+              checkContext(ctx)
               val data = serializer.deserialize[ConfigurationSettingData](getEntityFromContext(ctx))
               val errors = data.validate()
               var response: RestResponse = ConflictRestResponse(Map("message" ->

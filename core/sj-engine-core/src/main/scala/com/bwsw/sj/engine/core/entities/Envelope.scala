@@ -19,5 +19,5 @@ class Envelope() {
   protected var streamType: String = null
   var stream: String = null
   var partition: Int = 0
-  var tags: Array[String] = null
+  var tags: Array[String] = Array()
 }

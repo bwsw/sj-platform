@@ -17,6 +17,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator with CompletionUtils 
     pathPrefix("streams") {
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>
+          checkContext(ctx)
           val streamData = serializer.deserialize[SjStreamData](getEntityFromContext(ctx))
           val errors = streamData.validate()
           var response: RestResponse = BadRequestRestResponse(Map("message" ->

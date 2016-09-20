@@ -65,6 +65,11 @@ trait SjCrudValidator {
     Await.result(entity.toStrict(1.second), 1.seconds).data.decodeString("UTF-8")
   }
 
+  def checkContext(ctx: RequestContext) = {
+    if (ctx.request.entity.isKnownEmpty()) {
+      throw new Exception("No entity was received to parse")
+    }
+  }
   /**
    * Check specification of uploading jar file
    *

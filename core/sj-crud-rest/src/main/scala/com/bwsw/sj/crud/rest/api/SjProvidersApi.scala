@@ -13,6 +13,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator with CompletionUtil
     pathPrefix("providers") {
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>
+          checkContext(ctx)
           val data = serializer.deserialize[ProviderData](getEntityFromContext(ctx))
           val errors = data.validate()
           var response: RestResponse = BadRequestRestResponse(Map("message" ->

@@ -4,7 +4,6 @@ import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.fasterxml.jackson.annotation.JsonProperty
 
-import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 
 class InputInstanceMetadata extends InstanceMetadata {
@@ -16,7 +15,7 @@ class InputInstanceMetadata extends InstanceMetadata {
   @JsonProperty("eviction-policy") var evictionPolicy: String = EngineLiterals.fixTimeEvictionPolicy
   @JsonProperty("backup-count") var backupCount: Int = 0
   @JsonProperty("async-backup-count") var asyncBackupCount: Int = 0
-  var tasks: Map[String, InputTask] = null
+  var tasks: Map[String, InputTask] = Map()
 
   override def asModelInstance() = {
     val modelInstance = new InputInstance()
@@ -52,7 +51,7 @@ class InputInstanceMetadata extends InstanceMetadata {
   private def fillTasks(): Unit = {
     for (i <- 0 until this.parallelism.asInstanceOf[Int]) {
       val task = new InputTask("", 0)
-      this.tasks.put(s"${this.name}-task$i", task)
+      this.tasks += (s"${this.name}-task$i" -> task)
     }
   }
 }
