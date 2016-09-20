@@ -93,9 +93,19 @@ class TStreamSjStreamData() extends SjStreamData() {
       deleteStream(metadataStorage)
       createTStream(metadataStorage, dataStorage)
     } else {
-      createTStream(metadataStorage, dataStorage)
+      if (!doesTopicExist(metadataStorage)) createTStream(metadataStorage, dataStorage)
     }
   }
+
+  private def doesStreamHaveForcedCreation(metadataStorage: MetadataStorage) = {
+     doesTopicExist(metadataStorage) && this.force
+  }
+
+  private def doesTopicExist(metadataStorage: MetadataStorage) = {
+    BasicStreamService.isExist(this.name, metadataStorage)
+  }
+
+  private def deleteStream(metadataStorage: MetadataStorage) = BasicStreamService.deleteStream(this.name, metadataStorage)
 
   private def createTStream(metadataStorage: MetadataStorage,
                             dataStorage: IStorage[Array[Byte]]) = {
@@ -108,10 +118,4 @@ class TStreamSjStreamData() extends SjStreamData() {
       dataStorage
     )
   }
-  
-  private def doesStreamHaveForcedCreation(metadataStorage: MetadataStorage) = {
-    BasicStreamService.isExist(this.name, metadataStorage) && this.force
-  }
-  
-  private def deleteStream(metadataStorage: MetadataStorage) = BasicStreamService.deleteStream(this.name, metadataStorage)
 }

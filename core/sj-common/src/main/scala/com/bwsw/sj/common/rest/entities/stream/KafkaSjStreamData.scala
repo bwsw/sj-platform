@@ -82,7 +82,7 @@ class KafkaSjStreamData() extends SjStreamData() {
         deleteTopic(zkUtils)
         createTopic(zkUtils)
       } else {
-        createTopic(zkUtils)
+        if (!doesTopicExist(zkUtils)) createTopic(zkUtils)
       }
     } catch {
       case ex: TopicAlreadyMarkedForDeletionException =>
@@ -104,13 +104,18 @@ class KafkaSjStreamData() extends SjStreamData() {
     zkUtils
   }
 
-  private def createTopic(zkUtils: ZkUtils) = {
-    AdminUtils.createTopic(zkUtils, this.name, this.partitions, this.replicationFactor, new Properties())
+  private def doesStreamHaveForcedCreation(zkUtils: ZkUtils) = {
+    doesTopicExist(zkUtils) && this.force
   }
 
-  private def doesStreamHaveForcedCreation(zkUtils: ZkUtils) = {
-    AdminUtils.topicExists(zkUtils, this.name) && this.force
+  private def doesTopicExist(zkUtils: ZkUtils) = {
+    AdminUtils.topicExists(zkUtils, this.name)
   }
 
   private def deleteTopic(zkUtils: ZkUtils) = AdminUtils.deleteTopic(zkUtils, this.name)
+
+
+  private def createTopic(zkUtils: ZkUtils) = {
+    AdminUtils.createTopic(zkUtils, this.name, this.partitions, this.replicationFactor, new Properties())
+  }
 }
