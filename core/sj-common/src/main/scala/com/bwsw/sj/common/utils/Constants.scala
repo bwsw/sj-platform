@@ -144,3 +144,7 @@ object ConfigLiterals {
   val geoIpAsNum = "system.geo-ip-as-num"
   val geoIpAsNumv6 = "system.geo-ip-as-num-v6"
 }
+
+object TransactionGeneratorLiterals {
+  val scale: Int = 10000
+}

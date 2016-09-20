@@ -3,7 +3,7 @@ package com.bwsw.sj.engine.core.managment
 import java.io.File
 import java.net.URLClassLoader
 
-import com.bwsw.common.tstream.NetworkTimeUUIDGenerator
+import com.bwsw.common.tstream.NetworkTransactionGenerator
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
@@ -179,14 +179,14 @@ abstract class TaskManager() {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create producer for stream: ${stream.name}\n")
 
-    val timeUuidGenerator = getUUIDGenerator(stream)
+    val idGenerator = getTransactionGenerator(stream)
 
     setProducerBindPort()
     setStreamOptions(stream)
 
     tstreamFactory.getProducer[Array[Byte]](
       "producer_for_" + taskName + "_" + stream.name,
-      timeUuidGenerator,
+      idGenerator,
       converter,
       (0 until stream.partitions).toSet)
   }
@@ -250,21 +250,21 @@ abstract class TaskManager() {
       s"Create subscribing consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
 
     val partitionRange = (partitions.head to partitions.tail.head).toSet
-    val timeUuidGenerator = getUUIDGenerator(stream)
+    val idGenerator = getTransactionGenerator(stream)
 
     setStreamOptions(stream)
     setSubscribingConsumerBindPort()
 
     tstreamFactory.getSubscriber[Array[Byte]](
       "subscribing_consumer_for_" + taskName + "_" + stream.name,
-      timeUuidGenerator,
+      idGenerator,
       converter,
       partitionRange,
       callback,
       offset)
   }
 
-  protected def getUUIDGenerator(stream: TStreamSjStream) = {
+  protected def getTransactionGenerator(stream: TStreamSjStream) = {
     val retryPeriod = ConfigSettingsUtils.getClientRetryPeriod()
     val retryCount = ConfigSettingsUtils.getRetryCount()
 
@@ -277,7 +277,7 @@ abstract class TaskManager() {
           if (generatorType == GeneratorLiterals.globalType) generatorType else stream.name
         }
 
-        new NetworkTimeUUIDGenerator(zkHosts, prefix, retryPeriod, retryCount)
+        new NetworkTransactionGenerator(zkHosts, prefix, retryPeriod, retryCount)
     }
   }
 

@@ -12,7 +12,7 @@ class EsEnvelope() extends Envelope {
   streamType = "elasticsearch-output"
   var data: OutputData = null
   @JsonProperty("output-date-time") var outputDateTime: String = null
-  @JsonProperty("txn-date-time") var txnDateTime: String = null
-  var txn: String = null
+  @JsonProperty("txn-date-time") var transactionDateTime: String = null
+  var transaction: String = null
 }
 

@@ -19,10 +19,10 @@ object StateHelper {
         initialState(variable._1.asInstanceOf[String]) = variable._2
         fillFullState(initialState, lastTxn, objectSerializer)
       case _ =>
-        val lastFullTxnUUID = Some(Long.unbox(value))
-        val lastFullStateTxn = consumer.getTransactionById(partition, lastFullTxnUUID.get).get
-        fillFullState(initialState, lastFullStateTxn, objectSerializer)
-        consumer.setStreamPartitionOffset(partition, lastFullTxnUUID.get)
+        val lastFullStateID = Some(Long.unbox(value))
+        val lastFullState = consumer.getTransactionById(partition, lastFullStateID.get).get
+        fillFullState(initialState, lastFullState, objectSerializer)
+        consumer.setStreamPartitionOffset(partition, lastFullStateID.get)
 
         var maybeTxn = consumer.getTransaction(partition)
         while (maybeTxn.nonEmpty) {

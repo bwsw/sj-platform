@@ -1,10 +1,8 @@
 package com.bwsw.common.tstream
 
-import java.util.UUID
-
 import com.bwsw.common.client.{TcpClient, TcpClientOptions}
+import com.bwsw.sj.common.utils.TransactionGeneratorLiterals
 import com.bwsw.tstreams.generator.ITransactionGenerator
-import com.datastax.driver.core.utils.UUIDs
 import org.slf4j.LoggerFactory
 
 /**
@@ -15,13 +13,13 @@ import org.slf4j.LoggerFactory
  * @param retryCount Count of attempt to reconnect to generator
  */
 
-class NetworkTimeUUIDGenerator(zkServers: Array[String],
-                              prefix: String,
-                              retryInterval: Int,
-                              retryCount: Int) extends ITransactionGenerator {
+class NetworkTransactionGenerator(zkServers: Array[String],
+                                  prefix: String,
+                                  retryInterval: Int,
+                                  retryCount: Int) extends ITransactionGenerator {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-
+  private val scale = TransactionGeneratorLiterals.scale
   private val options = new TcpClientOptions()
     .setZkServers(zkServers)
     .setPrefix(prefix)
@@ -36,7 +34,7 @@ class NetworkTimeUUIDGenerator(zkServers: Array[String],
    */
   override def getTransaction(): Long = {
     logger.debug("Create a new transaction ID using a tcp client")
-    UUID.fromString(client.get()).timestamp()
+    client.get()
   }
 
   /**
@@ -44,6 +42,6 @@ class NetworkTimeUUIDGenerator(zkServers: Array[String],
    */
   override def getTransaction(timestamp: Long): Long = {
     logger.debug("Create a new transaction ID based on a timestamp")
-    UUIDs.startOf(timestamp).timestamp()
+    timestamp * scale
   }
 }

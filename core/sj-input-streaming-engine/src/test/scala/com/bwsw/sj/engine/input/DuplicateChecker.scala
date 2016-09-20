@@ -23,9 +23,9 @@ object DuplicateChecker extends App {
       var maybeTxn = outputConsumer.getTransaction(currentPartition)
 
       while (maybeTxn.isDefined) {
-        val txn = maybeTxn.get
-        while (txn.hasNext()) {
-          txn.next()
+        val transaction = maybeTxn.get
+        while (transaction.hasNext()) {
+          transaction.next()
           totalOutputElements += 1
         }
         maybeTxn = outputConsumer.getTransaction(currentPartition)

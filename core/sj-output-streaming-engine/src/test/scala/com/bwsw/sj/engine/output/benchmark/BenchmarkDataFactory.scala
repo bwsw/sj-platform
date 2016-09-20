@@ -114,15 +114,15 @@ object BenchmarkDataFactory {
                         producer: Producer[Array[Byte]]) = {
     var number = 0
     (0 until countTxns) foreach { (x: Int) =>
-      val txn = producer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
+      val transaction = producer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
       (0 until countElements) foreach { (y: Int) =>
         number += 1
         println("write data " + number)
         val msg = objectSerializer.serialize(number.asInstanceOf[Object])
-        txn.send(msg)
+        transaction.send(msg)
       }
       println("checkpoint")
-      txn.checkpoint()
+      transaction.checkpoint()
     }
   }
 
@@ -151,14 +151,14 @@ object BenchmarkDataFactory {
   }
 
   def createProducer(stream: TStreamSjStream) = {
-    val timeUuidGenerator = new LocalTransactionGenerator
+    val transactionGenerator = new LocalTransactionGenerator
 
     setProducerBindPort()
     setStreamOptions(stream)
 
     tstreamFactory.getProducer[Array[Byte]](
       "producer for " + stream.name,
-      timeUuidGenerator,
+      transactionGenerator,
       converter,
       (0 until stream.partitions).toSet)
   }
@@ -168,13 +168,13 @@ object BenchmarkDataFactory {
   }
 
   def createConsumer(stream: TStreamSjStream): consumer.Consumer[Array[Byte]] = {
-    val timeUuidGenerator = new LocalTransactionGenerator
+    val transactionGenerator = new LocalTransactionGenerator
 
     setStreamOptions(stream)
 
     tstreamFactory.getConsumer[Array[Byte]](
       stream.name,
-      timeUuidGenerator,
+      transactionGenerator,
       converter,
       (0 until stream.partitions).toSet,
       Oldest)

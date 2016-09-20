@@ -150,17 +150,17 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
   private def removeFromES(envelope: TStreamEnvelope) = {
     if (!wasFirstCheckpoint) {
-      val txn = envelope.id.toString.replaceAll("-", "")
-      removeTxnFromES(txn)
+      val transaction = envelope.id.toString.replaceAll("-", "")
+      removeTxnFromES(transaction)
     }
   }
 
-  private def removeTxnFromES(txn: String) = {
+  private def removeTxnFromES(transaction: String) = {
     val index = esService.index
     val streamName = outputStream.name
-    logger.info(s"Task: ${manager.taskName}. Delete transaction $txn from ES stream.")
+    logger.info(s"Task: ${manager.taskName}. Delete transaction $transaction from ES stream.")
     if (client.doesIndexExist(index)) {
-      val query = QueryBuilders.matchQuery("txn", txn)
+      val query = QueryBuilders.matchQuery("txn", transaction)
       val outputData = client.search(index, streamName, query)
 
       outputData.getHits.foreach { hit =>
@@ -178,12 +178,12 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     outputEnvelope match {
       case esEnvelope: EsEnvelope =>
         esEnvelope.outputDateTime = s"${Calendar.getInstance().getTimeInMillis}"
-        esEnvelope.txnDateTime = s"${inputEnvelope.id}"
-        esEnvelope.txn = inputEnvelope.id.toString.replaceAll("-", "")
+        esEnvelope.transactionDateTime = s"${inputEnvelope.id}"
+        esEnvelope.transaction = inputEnvelope.id.toString.replaceAll("-", "")
         esEnvelope.stream = inputEnvelope.stream
         esEnvelope.partition = inputEnvelope.partition
         esEnvelope.tags = inputEnvelope.tags
-        registerOutputEnvelope(esEnvelope.txn, esEnvelope.data)
+        registerOutputEnvelope(esEnvelope.transaction, esEnvelope.data)
         logger.debug(s"Task: ${manager.taskName}. Write output envelope to elasticearch.")
         client.write(serializer.serialize(esEnvelope.data), esService.index,  outputStream.name)
       case jdbcEnvelope: JdbcEnvelope => writeToJdbc(outputEnvelope)

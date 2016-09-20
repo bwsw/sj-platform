@@ -15,23 +15,23 @@ import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer
 class RoundRobinOutput(producer: Producer[Array[Byte]],
                        performanceMetrics: PerformanceMetrics) extends RegularModuleOutput(performanceMetrics) {
 
-  private var txn: Option[ProducerTransaction[Array[Byte]]] = None
+  private var maybeTransaction: Option[ProducerTransaction[Array[Byte]]] = None
   private val streamName = producer.stream.getName
 
   def put(data: Array[Byte]) = {
     logger.debug(s"Send a portion of data to stream: '$streamName'")
-    if (txn.isDefined) {
-      txn.get.send(data)
+    if (maybeTransaction.isDefined) {
+      maybeTransaction.get.send(data)
     }
     else {
-      txn = Some(producer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened))
-      txn.get.send(data)
+      maybeTransaction = Some(producer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened))
+      maybeTransaction.get.send(data)
     }
 
     logger.debug(s"Add an element to output envelope of output stream:  '$streamName'")
     performanceMetrics.addElementToOutputEnvelope(
       streamName,
-      txn.get.getTransactionID().toString,
+      maybeTransaction.get.getTransactionID().toString,
       data.length
     )
   }

@@ -254,13 +254,13 @@ object DataFactory {
 
   private def createConsumer(streamName: String, streamService: GenericMongoService[SjStream]): Consumer[Array[Byte]] = {
     val stream = streamService.get(streamName).get.asInstanceOf[TStreamSjStream]
-    val timeUuidGenerator = new LocalTransactionGenerator
+    val transactionGenerator = new LocalTransactionGenerator
 
     setStreamOptions(stream)
 
     tstreamFactory.getConsumer[Array[Byte]](
       streamName,
-      timeUuidGenerator,
+      transactionGenerator,
       converter,
       (0 until stream.partitions).toSet,
       Oldest)

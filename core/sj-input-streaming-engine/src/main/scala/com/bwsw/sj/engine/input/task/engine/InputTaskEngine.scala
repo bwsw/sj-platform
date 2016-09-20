@@ -93,23 +93,23 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
   protected def sendEnvelope(stream: String, partition: Int, data: Array[Byte]) = {
     logger.info(s"Task name: ${manager.taskName}. Send envelope to each output stream.\n")
     val maybeTxn = getTxn(stream, partition)
-    var txn: ProducerTransaction[Array[Byte]] = null
+    var transaction: ProducerTransaction[Array[Byte]] = null
     if (maybeTxn.isDefined) {
       logger.debug(s"Task name: ${manager.taskName}. Txn for stream/partition: '$stream/$partition' is defined\n")
-      txn = maybeTxn.get
-      txn.send(data)
+      transaction = maybeTxn.get
+      transaction.send(data)
     } else {
       logger.debug(s"Task name: ${manager.taskName}. Txn for stream/partition: '$stream/$partition' is not defined " +
         s"so create new txn\n")
-      txn = producers(stream).newTransaction(NewTransactionProducerPolicy.ErrorIfOpened, partition)
-      txn.send(data)
-      putTxn(stream, partition, txn)
+      transaction = producers(stream).newTransaction(NewTransactionProducerPolicy.ErrorIfOpened, partition)
+      transaction.send(data)
+      putTxn(stream, partition, transaction)
     }
 
     logger.debug(s"Task name: ${manager.taskName}. Add envelope to output stream in performance metrics \n")
     performanceMetrics.addElementToOutputEnvelope(
       stream,
-      txn.getTransactionID().toString,
+      transaction.getTransactionID().toString,
       data.length
     )
   }
@@ -277,10 +277,10 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
    * @param partition Partition of stream
    * @return Current open transaction
    */
-  private def putTxn(stream: String, partition: Int, txn: ProducerTransaction[Array[Byte]]) = {
+  private def putTxn(stream: String, partition: Int, transaction: ProducerTransaction[Array[Byte]]) = {
     logger.debug(s"Task name: ${manager.taskName}. " +
       s"Put txn for stream: $stream, partition: $partition\n")
-    txnsByStreamPartitions(stream) += (partition -> txn)
+    txnsByStreamPartitions(stream) += (partition -> transaction)
   }
 
   /**

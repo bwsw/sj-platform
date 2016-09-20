@@ -383,12 +383,12 @@ object DataFactory {
       val producer = createProducer(streamService.get("test-input-tstream" + suffix).get.asInstanceOf[TStreamSjStream])
       val s = System.currentTimeMillis()
       (0 until countTxns) foreach { (x: Int) =>
-        val txn = producer.newTransaction(policy)
+        val transaction = producer.newTransaction(policy)
         (0 until countElements) foreach { (y: Int) =>
           number += 1
-          txn.send(objectSerializer.serialize(number.asInstanceOf[Object]))
+          transaction.send(objectSerializer.serialize(number.asInstanceOf[Object]))
         }
-        txn.checkpoint()
+        transaction.checkpoint()
       }
 
       println(s"producer time: ${(System.currentTimeMillis() - s) / 1000}")
@@ -438,14 +438,14 @@ object DataFactory {
   def createStateConsumer(streamService: GenericMongoService[SjStream]) = {
     val name = instanceName + "-task0" + "_state"
     val partitions = 1
-    val timeUuidGenerator = new LocalTransactionGenerator
+    val transactionGenerator = new LocalTransactionGenerator
 
     tstreamFactory.setProperty(TSF_Dictionary.Stream.NAME, name)
     tstreamFactory.setProperty(TSF_Dictionary.Stream.PARTITIONS, partitions)
 
     tstreamFactory.getConsumer[Array[Byte]](
       name,
-      timeUuidGenerator,
+      transactionGenerator,
       converter,
       (0 until partitions).toSet,
       Oldest)
@@ -475,14 +475,14 @@ object DataFactory {
   }
 
   def createProducer(stream: TStreamSjStream) = {
-    val timeUuidGenerator = new LocalTransactionGenerator
+    val transactionGenerator = new LocalTransactionGenerator
 
     setProducerBindPort()
     setStreamOptions(stream)
 
     tstreamFactory.getProducer[Array[Byte]](
       "producer for " + stream.name,
-      timeUuidGenerator,
+      transactionGenerator,
       converter,
       (0 until stream.partitions).toSet)
   }
@@ -493,13 +493,13 @@ object DataFactory {
 
   private def createConsumer(streamName: String, streamService: GenericMongoService[SjStream]): Consumer[Array[Byte]] = {
     val stream = streamService.get(streamName).get.asInstanceOf[TStreamSjStream]
-    val timeUuidGenerator = new LocalTransactionGenerator
+    val transactionGenerator = new LocalTransactionGenerator
 
     setStreamOptions(stream)
 
     tstreamFactory.getConsumer[Array[Byte]](
       streamName,
-      timeUuidGenerator,
+      transactionGenerator,
       converter,
       (0 until stream.partitions).toSet,
       Oldest)

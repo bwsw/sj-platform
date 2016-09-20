@@ -28,9 +28,9 @@ object ModuleStatelessTstreamChecker extends App {
       val currentPartition = partitions.next()
       var maybeTxn = inputTstreamConsumer.getTransaction(currentPartition)
       while (maybeTxn.isDefined) {
-        val txn = maybeTxn.get
-        while (txn.hasNext()) {
-          val element = objectSerializer.deserialize(txn.next()).asInstanceOf[Int]
+        val transaction = maybeTxn.get
+        while (transaction.hasNext()) {
+          val element = objectSerializer.deserialize(transaction.next()).asInstanceOf[Int]
           inputElements.+=(element)
           totalInputElements += 1
         }
@@ -47,9 +47,9 @@ object ModuleStatelessTstreamChecker extends App {
       var maybeTxn = outputConsumer.getTransaction(currentPartition)
 
       while (maybeTxn.isDefined) {
-        val txn = maybeTxn.get
-        while (txn.hasNext()) {
-          val element = objectSerializer.deserialize(txn.next()).asInstanceOf[Int]
+        val transaction = maybeTxn.get
+        while (transaction.hasNext()) {
+          val element = objectSerializer.deserialize(transaction.next()).asInstanceOf[Int]
           outputElements.+=(element)
           totalOutputElements += 1
         }

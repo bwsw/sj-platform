@@ -57,8 +57,8 @@ class TcpServer(prefix: String, zkClient: ZooKeeperClient, host: String, port: I
     try {
       while (doesServerWork.get()) {
         val newClient = serverSocket.accept()
-        val txnUUIDGenerator = new TxnUUIDGenerator(newClient, doesServerWork)
-        executorService.execute(txnUUIDGenerator)
+        val transactionGenerator = new TransactionGenerator(newClient, doesServerWork)
+        executorService.execute(transactionGenerator)
       }
     } catch {
       case exception: IOException => {
