@@ -178,7 +178,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
         "MESOS_MASTER" -> mesosMaster
       )
       applicationEnvs = applicationEnvs ++ mapAsScalaMap(instance.environmentVariables)
-      applicationEnvs = applicationEnvs ++ getAuthorisationEnvironmentVariables()
+      applicationEnvs = applicationEnvs ++ getAuthenticationEnvironmentVariables()
       val request = new MarathonRequest(instance.name,
         "java -jar " + frameworkJarName + " $PORT",
         1,
@@ -189,7 +189,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
     }
   }
 
-  private def getAuthorisationEnvironmentVariables() = {
+  private def getAuthenticationEnvironmentVariables() = {
     val environmentVariables = scala.collection.mutable.Map[String, String]()
     val configService = ConnectionRepository.getConfigService
     val maybeLogin = configService.get(ConfigLiterals.mesosLoginTag)
