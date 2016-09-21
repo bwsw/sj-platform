@@ -1,6 +1,6 @@
 package com.bwsw.sj.transaction.generator.server
 
-import java.io.{DataInputStream, PrintStream}
+import java.io.{DataInputStream, DataOutputStream}
 import java.net.Socket
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger, AtomicLong}
 
@@ -10,7 +10,7 @@ class TransactionGenerator(socket: Socket, doesServerWork: AtomicBoolean) extend
   private val counter = new AtomicInteger(0)
   private val currentMillis = new AtomicLong(0)
   private val inputStream = new DataInputStream(socket.getInputStream)
-  private val outputStream = new PrintStream(socket.getOutputStream)
+  private val outputStream = new DataOutputStream(socket.getOutputStream)
   private val scale = TransactionGeneratorLiterals.scale
 
   override def run(): Unit = {
@@ -46,7 +46,7 @@ class TransactionGenerator(socket: Socket, doesServerWork: AtomicBoolean) extend
   }
 
   private def send(id: Long) {
-    outputStream.print(id)
+    outputStream.writeLong(id)
   }
 
   private def close() = {
