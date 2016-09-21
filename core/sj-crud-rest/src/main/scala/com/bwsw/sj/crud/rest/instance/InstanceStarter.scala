@@ -6,8 +6,9 @@ import java.util
 import com.bwsw.sj.common.DAL.ConnectionConstants
 import com.bwsw.sj.common.DAL.model.module.{InstanceStage, Instance}
 import com.bwsw.sj.common.DAL.model.{TStreamSjStream, ZKService}
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.entities.MarathonRequest
-import com.bwsw.sj.common.utils.{ConfigSettingsUtils, EngineLiterals, GeneratorLiterals, StreamLiterals}
+import com.bwsw.sj.common.utils._
 import com.twitter.common.quantity.{Amount, Time}
 import com.twitter.common.zookeeper.DistributedLock.LockingException
 import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
@@ -177,6 +178,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
         "MESOS_MASTER" -> mesosMaster
       )
       applicationEnvs = applicationEnvs ++ mapAsScalaMap(instance.environmentVariables)
+      applicationEnvs = applicationEnvs ++ getAuthorisationEnvironmentVariables()
       val request = new MarathonRequest(instance.name,
         "java -jar " + frameworkJarName + " $PORT",
         1,
@@ -185,6 +187,19 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
 
       Right(startMarathonApplication(request))
     }
+  }
+
+  private def getAuthorisationEnvironmentVariables() = {
+    val environmentVariables = scala.collection.mutable.Map[String, String]()
+    val configService = ConnectionRepository.getConfigService
+    val maybeLogin = configService.get(ConfigLiterals.mesosLoginTag)
+    val maybePassword = configService.get(ConfigLiterals.mesosPasswordTag)
+    if (maybeLogin.isDefined && maybePassword.isDefined) {
+      environmentVariables += ("LOGIN" -> maybeLogin.get.value)
+      environmentVariables += ("PASSWORD" -> maybePassword.get.value)
+    }
+
+    environmentVariables
   }
 
   /**
