@@ -1,6 +1,5 @@
 package com.bwsw.common.client
 
-import com.bwsw.sj.common.utils.ConfigSettingsUtils
 import org.apache.log4j.Logger
 
 /**
@@ -16,25 +15,20 @@ object TcpClientExample {
     val zkServers = Array("176.120.25.19:2181")
     val prefix = "zk_test/global"
 
-    val retryPeriod = ConfigSettingsUtils.getClientRetryPeriod()
-    val retryCount = ConfigSettingsUtils.getServerRetryPeriod()
-
     val options = new TcpClientOptions()
       .setZkServers(zkServers)
       .setPrefix(prefix)
-      .setRetryPeriod(retryPeriod)
-      .setRetryCount(retryCount)
 
     val client = new TcpClient(options)
     client.open()
     //val consoleReader = new BufferedReader(new InputStreamReader(System.in))
     var i = 0
     val t0 = System.currentTimeMillis()
-    while (i <= 10) {
+    while (i <= 1000000) {
       //while (consoleReader.readLine() != null) {
       logger.debug("send request")
-      println(client.get())
-      //client.get()
+      //println(client.get())
+      client.get()
       i += 1
     }
     client.close()

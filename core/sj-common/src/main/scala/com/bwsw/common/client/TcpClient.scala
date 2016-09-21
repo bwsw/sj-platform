@@ -4,6 +4,7 @@ import java.io._
 import java.net._
 import java.nio.ByteBuffer
 import java.nio.channels.SocketChannel
+import java.nio.charset.StandardCharsets
 import java.util
 
 import com.bwsw.sj.common.utils.ConfigSettingsUtils
@@ -22,7 +23,7 @@ class TcpClient(options: TcpClientOptions) {
   private var client: SocketChannel = null
   private var retryCount = options.retryCount
   private val zkSessionTimeout = ConfigSettingsUtils.getZkSessionTimeout()
-  private val inputBuffer = ByteBuffer.allocate(36)
+  private val inputBuffer = ByteBuffer.allocate(17)
   private var outputStream: OutputStream = new ByteArrayOutputStream()
   private val zkClient = createZooKeeperClient()
 
@@ -117,7 +118,7 @@ class TcpClient(options: TcpClientOptions) {
   }
 
   private def deserializeResponse() = {
-    val id = inputBuffer.getLong
+    val id = new String(inputBuffer.array(), StandardCharsets.UTF_8).toLong
 
     Some(id)
   }
