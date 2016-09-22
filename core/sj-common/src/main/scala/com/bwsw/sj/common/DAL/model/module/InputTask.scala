@@ -7,7 +7,7 @@ package com.bwsw.sj.common.DAL.model.module
   * @author Kseniya Tomskikh
   */
 class InputTask() {
-  var host: String = null
+  var host: String = ""
   var port: Int = 0
 
   def this(host: String, port: Int) = {
@@ -16,4 +16,8 @@ class InputTask() {
     this.port = port
   }
 
+  def clear(): Unit = {
+    this.host = ""
+    this.port = 0
+  }
 }

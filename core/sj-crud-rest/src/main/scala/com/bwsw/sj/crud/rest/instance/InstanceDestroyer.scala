@@ -2,18 +2,21 @@ package com.bwsw.sj.crud.rest.instance
 
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{SjStream, TStreamSjStream}
-import com.bwsw.sj.common.utils.{GeneratorLiterals, StreamLiterals, EngineLiterals}
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.utils.{EngineLiterals, GeneratorLiterals, StreamLiterals}
 import org.slf4j.LoggerFactory
 
 /**
-  * One-thread deleting object for instance
-  * using synchronous apache http client
-  *
-  *
-  * @author Kseniya Tomskikh
-  */
+ * One-thread deleting object for instance
+ * using synchronous apache http client
+ *
+ *
+ * @author Kseniya Tomskikh
+ */
 class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable with InstanceMarathonManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
+  private val instanceDAO = ConnectionRepository.getInstanceService
+  private val streamDAO = ConnectionRepository.getStreamService
 
   import EngineLiterals._
 
@@ -32,12 +35,12 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
   }
 
   /**
-    * Stopping all running generators for streams of instance,
-    * if generators is not using any streams of started instances
-    *
-    * @param instance - Instance for stopping
-    * @return - Response from marathon
-    */
+   * Stopping all running generators for streams of instance,
+   * if generators is not using any streams of started instances
+   *
+   * @param instance - Instance for stopping
+   * @return - Response from marathon
+   */
   def deleteGenerators(instance: Instance) = {
     logger.debug(s"Instance: ${instance.name}. Deleting generators.")
     var instanceStreams = instance.outputs
@@ -49,33 +52,33 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
     val startingInstance = startedInstances.union(instanceDAO.getByParameters(Map("status" -> starting)))
     val tStreamStreamsToStop = allStreams
       .filter { stream: SjStream =>
-        if (stream.streamType.equals(StreamLiterals.tStreamType)) {
-          val stage = instance.stages.get(stream.name)
-          !stream.asInstanceOf[TStreamSjStream].generator.generatorType.equals(GeneratorLiterals.localType) &&
-            (stage.state.equals(failed) ||
-              !startingInstance.exists { instance =>
-                val streamGeneratorName = getGeneratorAppName(stream.asInstanceOf[TStreamSjStream])
-                val instanceStreamGenerators = instance.inputs.map(_.replaceAll("/split|/full", ""))
-                  .union(instance.outputs)
-                  .flatMap(name => streamDAO.get(name))
-                  .filter(s => s.streamType.equals(StreamLiterals.tStreamType))
-                  .map(sjStream => getGeneratorAppName(sjStream.asInstanceOf[TStreamSjStream]))
-                instanceStreamGenerators.contains(streamGeneratorName)
-              })
-        } else false
+      if (stream.streamType.equals(StreamLiterals.tStreamType)) {
+        val stage = instance.stages.get(stream.name)
+        !stream.asInstanceOf[TStreamSjStream].generator.generatorType.equals(GeneratorLiterals.localType) &&
+          (stage.state.equals(failed) ||
+            !startingInstance.exists { instance =>
+              val streamGeneratorName = getGeneratorApplicationID(stream.asInstanceOf[TStreamSjStream])
+              val instanceStreamGenerators = instance.inputs.map(_.replaceAll("/split|/full", ""))
+                .union(instance.outputs)
+                .flatMap(name => streamDAO.get(name))
+                .filter(s => s.streamType.equals(StreamLiterals.tStreamType))
+                .map(sjStream => getGeneratorApplicationID(sjStream.asInstanceOf[TStreamSjStream]))
+              instanceStreamGenerators.contains(streamGeneratorName)
+            })
+      } else false
     }
     tStreamStreamsToStop.foreach { stream =>
       var isTaskDeleted = false
       updateInstanceStage(instance, stream.name, deleting)
-      val taskId = getGeneratorAppName(stream.asInstanceOf[TStreamSjStream])
+      val taskId = getGeneratorApplicationID(stream.asInstanceOf[TStreamSjStream])
       val taskInfoResponse = getApplicationInfo(taskId)
-      if (taskInfoResponse.getStatusLine.getStatusCode != NotFound) {
+      if (!isStatusNotFound(taskInfoResponse)) {
         logger.debug(s"Instance: ${instance.name}. Delete generator: $taskId.")
         val stopResponse = destroyMarathonApplication(taskId)
-        if (stopResponse.getStatusLine.getStatusCode == OK) {
+        if (isStatusOK(stopResponse)) {
           while (!isTaskDeleted) {
             val taskInfoResponse = getApplicationInfo(taskId)
-            if (taskInfoResponse.getStatusLine.getStatusCode != NotFound) {
+            if (!isStatusNotFound(taskInfoResponse)) {
               updateInstanceStage(instance, stream.name, deleting)
               Thread.sleep(delay)
             } else {
@@ -92,20 +95,20 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
   }
 
   /**
-    * Destroying application of instance on mesos
-    *
-    * @param instance - Instance for deleting
-    */
+   * Destroying application of instance on mesos
+   *
+   * @param instance - Instance for deleting
+   */
   def deleteInstance(instance: Instance) = {
     logger.debug(s"Instance: ${instance.name}. Delete instance application.")
     var isInstanceDeleted = false
     //todo maybe add timeout and retry count?
     while (!isInstanceDeleted) {
       val response = destroyMarathonApplication(instance.name)
-      if (response.getStatusLine.getStatusCode == OK) {
+      if (isStatusOK(response)) {
         while (!isInstanceDeleted) {
           val taskInfoResponse = getApplicationInfo(instance.name)
-          if (taskInfoResponse.getStatusLine.getStatusCode != NotFound) {
+          if (!isStatusNotFound(taskInfoResponse)) {
             updateInstanceStage(instance, instance.name, deleting)
             Thread.sleep(delay)
           } else {

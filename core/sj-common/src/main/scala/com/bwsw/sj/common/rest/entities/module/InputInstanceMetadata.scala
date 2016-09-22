@@ -50,7 +50,7 @@ class InputInstanceMetadata extends InstanceMetadata {
 
   private def fillTasks(): Unit = {
     for (i <- 0 until this.parallelism.asInstanceOf[Int]) {
-      val task = new InputTask("", 0)
+      val task = new InputTask()
       this.tasks += (s"${this.name}-task$i" -> task)
     }
   }

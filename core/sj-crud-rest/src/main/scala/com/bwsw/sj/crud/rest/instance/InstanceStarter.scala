@@ -4,7 +4,7 @@ import java.net.{InetSocketAddress, URI}
 import java.util
 
 import com.bwsw.sj.common.DAL.ConnectionConstants
-import com.bwsw.sj.common.DAL.model.module.{InstanceStage, Instance}
+import com.bwsw.sj.common.DAL.model.module.{Instance, InstanceStage}
 import com.bwsw.sj.common.DAL.model.{TStreamSjStream, ZKService}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.entities.MarathonRequest
@@ -12,6 +12,7 @@ import com.bwsw.sj.common.utils._
 import com.twitter.common.quantity.{Amount, Time}
 import com.twitter.common.zookeeper.DistributedLock.LockingException
 import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
+import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.util.EntityUtils
 import org.slf4j.LoggerFactory
 
@@ -29,13 +30,18 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   import EngineLiterals._
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
+  private val instanceDAO = ConnectionRepository.getInstanceService
+  private val streamDAO = ConnectionRepository.getStreamService
+  private lazy val restHost = ConfigSettingsUtils.getCrudRestHost()
+  private lazy val restPort = ConfigSettingsUtils.getCrudRestPort()
+  private lazy val restAddress = new URI(s"http://$restHost:$restPort").toString
 
   def run() = {
     logger.debug(s"Instance: ${instance.name}. Start instance.")
     try {
       val zkSessionTimeout = ConfigSettingsUtils.getZkSessionTimeout()
       val mesosInfoResponse = getMarathonInfo
-      if (mesosInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
+      if (isStatusOK(mesosInfoResponse)) {
         val entity = marathonEntitySerializer.deserialize[Map[String, Any]](EntityUtils.toString(mesosInfoResponse.getEntity, "UTF-8"))
         val mesosMaster = entity.get("marathon_config").get.asInstanceOf[Map[String, Any]].get("master").get.asInstanceOf[String]
 
@@ -116,13 +122,11 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
     var isStarted = false
     startFrameworkResult match {
       case Right(response) =>
-        if (response.getStatusLine.getStatusCode.equals(OK) ||
-          response.getStatusLine.getStatusCode.equals(Created)) {
-
+        if (isStatusOK(response) || isStatusCreated(response)) {
           while (!isStarted) {
             Thread.sleep(delay)
             val taskInfoResponse = getApplicationInfo(instance.name)
-            if (taskInfoResponse.getStatusLine.getStatusCode == OK) {
+            if (isStatusOK(taskInfoResponse)) {
               val entity = marathonEntitySerializer.deserialize[Map[String, Any]](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
               val tasksRunning = entity("app").asInstanceOf[Map[String, Any]]("tasksRunning").asInstanceOf[Int]
               if (tasksRunning == 1) {
@@ -160,7 +164,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
     val frameworkJarName = ConfigSettingsUtils.getFrameworkJarName()
     val restUrl = new URI(s"$restAddress/v1/custom/jars/$frameworkJarName")
     val taskInfoResponse = getApplicationInfo(instance.name)
-    if (taskInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
+    if (isStatusOK(taskInfoResponse)) {
       val ignore = marathonEntitySerializer.getIgnoreUnknown()
       marathonEntitySerializer.setIgnoreUnknown(true)
       val entity = marathonEntitySerializer.deserialize[MarathonRequest](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
@@ -216,15 +220,14 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
       if (stage.state.equals(toHandle) || stage.state.equals(failed)) {
         var isStarted = false
         updateInstanceStage(instance, stream.name, starting)
-        val startGeneratorResult = startGenerator(stream)
+        val startGeneratorResult: Either[String, CloseableHttpResponse] with Product with Serializable = startGenerator(stream)
         startGeneratorResult match {
           case Right(response) =>
-            if (response.getStatusLine.getStatusCode.equals(OK) ||
-              response.getStatusLine.getStatusCode.equals(Created)) {
+            if (isStatusOK(response) || isStatusCreated(response)) {
               while (!isStarted) {
                 Thread.sleep(delay)
-                val taskInfoResponse = getApplicationInfo(createGeneratorTaskName(stream))
-                if (taskInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
+                val taskInfoResponse = getApplicationInfo(getGeneratorApplicationID(stream))
+                if (isStatusOK(taskInfoResponse)) {
                   val entity = marathonEntitySerializer.deserialize[Map[String, Any]](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
                   val tasksRunning = entity("app").asInstanceOf[Map[String, Any]]("tasksRunning").asInstanceOf[Int]
                   if (tasksRunning == stream.generator.instanceCount) {
@@ -258,7 +261,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
     val zkService = stream.generator.service.asInstanceOf[ZKService]
     val generatorProvider = zkService.provider
     var prefix = zkService.namespace
-    val taskId = createGeneratorTaskName(stream)
+    val id = getGeneratorApplicationID(stream)
     if (stream.generator.generatorType.equals(GeneratorLiterals.perStreamType)) {
       prefix += s"/${stream.name}"
     } else {
@@ -267,14 +270,14 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
 
     val restUrl = new URI(s"$restAddress/v1/custom/jars/$transactionGeneratorJar")
 
-    val marathonRequest = MarathonRequest(taskId,
+    val marathonRequest = MarathonRequest(id,
       "java -jar " + transactionGeneratorJar + " $PORT",
       stream.generator.instanceCount,
       Map("ZK_SERVERS" -> generatorProvider.hosts.mkString(";"), "PREFIX" -> prefix),
       List(restUrl.toString))
 
     val taskInfoResponse = getApplicationInfo(marathonRequest.id)
-    if (taskInfoResponse.getStatusLine.getStatusCode.equals(OK)) {
+    if (isStatusOK(taskInfoResponse)) {
       val ignore = marathonEntitySerializer.getIgnoreUnknown()
       marathonEntitySerializer.setIgnoreUnknown(true)
       val entity = marathonEntitySerializer.deserialize[MarathonRequest](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
@@ -284,7 +287,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
         Right(scaleMarathonApplication(marathonRequest.id, marathonRequest.instances))
       } else {
         logger.debug(s"Instance: ${instance.name}. Generator ${marathonRequest.id} already started.")
-        Left(s"Generator $taskId is already created")
+        Left(s"Generator $id is already created")
       }
     } else {
       logger.debug(s"Instance: ${instance.name}. Generator ${marathonRequest.id} is starting.")
@@ -303,15 +306,5 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
     instance.stages.foreach { (stageNameWithStage: (String, InstanceStage)) =>
       updateInstanceStage(instance, stageNameWithStage._1, stageNameWithStage._2.state)
     }
-  }
-
-  private def createGeneratorTaskName(stream: TStreamSjStream) = {
-    var name = ""
-    if (stream.generator.generatorType.equals(GeneratorLiterals.perStreamType)) {
-      name = s"${stream.generator.service.name}-${stream.name}-tg"
-    } else {
-      name = s"${stream.generator.service.name}-global-tg"
-    }
-    name.replaceAll("_", "-")
   }
 }

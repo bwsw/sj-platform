@@ -5,13 +5,11 @@ import java.util.Calendar
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.traits.Serializer
+import com.bwsw.sj.common.DAL.model.TStreamSjStream
 import com.bwsw.sj.common.DAL.model.module.Instance
-import com.bwsw.sj.common.DAL.model.{SjStream, TStreamSjStream}
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.utils.{GeneratorLiterals, ConfigSettingsUtils}
 import com.bwsw.sj.common.rest.entities.MarathonRequest
-import org.apache.http.client.methods.{HttpDelete, HttpGet, HttpPost, HttpPut}
+import com.bwsw.sj.common.utils.{ConfigSettingsUtils, GeneratorLiterals}
+import org.apache.http.client.methods._
 import org.apache.http.entity.StringEntity
 import org.slf4j.LoggerFactory
 
@@ -23,20 +21,24 @@ import org.slf4j.LoggerFactory
  */
 trait InstanceMarathonManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
-  private lazy val restHost = ConfigSettingsUtils.getCrudRestHost()
-  private lazy val restPort = ConfigSettingsUtils.getCrudRestPort()
   private lazy val marathonConnect = ConfigSettingsUtils.getMarathonConnect()
   private lazy val marathonTimeout = ConfigSettingsUtils.getMarathonTimeout()
 
   val marathonEntitySerializer: Serializer = new JsonSerializer
-  val instanceDAO: GenericMongoService[Instance] = ConnectionRepository.getInstanceService
-  val streamDAO: GenericMongoService[SjStream] = ConnectionRepository.getStreamService
-  val OK: Int = 200
-  val Created: Int = 201
-  val NotFound: Int = 404
-  val restAddress = new URI(s"http://$restHost:$restPort").toString
 
-  def getGeneratorAppName(stream: TStreamSjStream) = {
+  def isStatusOK(response: CloseableHttpResponse) = {
+    response.getStatusLine.getStatusCode == 200
+  }
+
+  def isStatusCreated(response: CloseableHttpResponse) = {
+    response.getStatusLine.getStatusCode == 201
+  }
+
+  def isStatusNotFound(response: CloseableHttpResponse) = {
+    response.getStatusLine.getStatusCode == 404
+  }
+
+  def getGeneratorApplicationID(stream: TStreamSjStream) = {
     var name = ""
     if (stream.generator.generatorType.equals(GeneratorLiterals.perStreamType)) {
       name = s"${stream.generator.service.name}-${stream.name}-tg"
@@ -101,18 +103,21 @@ trait InstanceMarathonManager {
     httpPut.setEntity(entity)
     client.execute(httpPut)
   }
+  
+  def updateInstanceStatus(instance: Instance, status: String) = {
+    instance.status = status
+  }
 
-  def updateInstanceStage(instance: Instance, stageName: String, state: String) = {
-    logger.debug(s"Update stage $stageName of instance ${instance.name} to state $state")
+  def updateInstanceStage(instance: Instance, stageName: String, status: String) = {
+    logger.debug(s"Update stage $stageName of instance ${instance.name} to state $status")
     val stage = instance.stages.get(stageName)
-    if (stage.state.equals(state)) {
+    if (stage.state.equals(status)) {
       stage.duration = Calendar.getInstance().getTime.getTime - stage.datetime.getTime
     } else {
-      stage.state = state
+      stage.state = status
       stage.datetime = Calendar.getInstance().getTime
       stage.duration = 0
     }
     instance.stages.replace(stageName, stage)
-    instanceDAO.save(instance)
   }
 }
