@@ -3,13 +3,14 @@ package com.bwsw.sj.common.rest.entities.config
 import com.bwsw.sj.common.DAL.model.ConfigurationSetting
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils
+import com.bwsw.sj.common.utils.ConfigurationSettingsUtils._
 
 import scala.collection.mutable.ArrayBuffer
 
 case class ConfigurationSettingData(name: String, value: String) extends ValidationUtils {
   def asModelConfigurationSetting(domain: String) = {
     val configurationSetting = new ConfigurationSetting(
-      domain + "." + this.name,
+      createConfigurationSettingName(domain, this.name),
       this.value,
       domain
     )

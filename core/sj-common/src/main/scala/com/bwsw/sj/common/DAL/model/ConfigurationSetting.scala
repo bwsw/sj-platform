@@ -1,6 +1,7 @@
 package com.bwsw.sj.common.DAL.model
 
 import com.bwsw.sj.common.rest.entities.config.ConfigurationSettingData
+import com.bwsw.sj.common.utils.ConfigurationSettingsUtils._
 import org.mongodb.morphia.annotations.{Id, Entity}
 
 /**
@@ -23,7 +24,7 @@ class ConfigurationSetting {
   
   def asProtocolConfigurationSetting() = {
     val configurationSettingData = new ConfigurationSettingData(
-      this.name.replace(this.domain + ".", ""),
+      clearConfigurationSettingName(domain, name),
       this.value
     )
     

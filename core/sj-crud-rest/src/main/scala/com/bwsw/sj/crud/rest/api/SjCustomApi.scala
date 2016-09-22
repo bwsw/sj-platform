@@ -13,6 +13,7 @@ import akka.util.ByteString
 import com.bwsw.sj.common.DAL.model.ConfigurationSetting
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.utils.ConfigLiterals
+import com.bwsw.sj.common.utils.ConfigurationSettingsUtils._
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import org.apache.commons.io.FileUtils
@@ -88,7 +89,7 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
                     var response: RestResponse = NotFoundRestResponse(Map("message" ->
                      createMessage("rest.custom.jars.file.notfound", name)))
                     if (storage.delete(filename)) {
-                      configService.delete(ConfigLiterals.systemDomain + "." + name + "-" + version)
+                      configService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, name + "-" + version))
                       response = OkRestResponse(
                         Map("message" -> createMessage("rest.custom.jars.file.deleted", name, version)))
                     }
@@ -111,8 +112,9 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
                       val uploadingFile = new File(metadata.fileName)
                       FileUtils.copyFile(file, uploadingFile)
                       storage.put(uploadingFile, metadata.fileName, specification, "custom")
+                      val name = specification("name").toString + "-" + specification("version").toString
                       val customJarConfigElement = new ConfigurationSetting(
-                        ConfigLiterals.systemDomain + "." + specification("name").toString + "-" + specification("version").toString,
+                        createConfigurationSettingName(ConfigLiterals.systemDomain, name),
                         metadata.fileName,
                         ConfigLiterals.systemDomain
                       )

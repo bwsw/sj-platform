@@ -4,6 +4,7 @@ import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.config.ConfigurationSettingData
 import com.bwsw.sj.common.utils.ConfigLiterals
+import com.bwsw.sj.common.utils.ConfigurationSettingsUtils._
 import com.bwsw.sj.crud.rest.exceptions.UnknownConfigSettingDomain
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
@@ -49,7 +50,7 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator with Co
                 get {
                   var response: RestResponse = NotFoundRestResponse(Map("message" ->
                     createMessage("rest.config.setting.notfound", domain, name)))
-                  configService.get(domain + "." + name) match {
+                  configService.get(createConfigurationSettingName(domain, name)) match {
                     case Some(configElement) =>
                       val entity = Map(s"$domain-config-settings" -> configElement.asProtocolConfigurationSetting())
                       response = OkRestResponse(entity)
@@ -61,9 +62,9 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator with Co
                   delete {
                     var response: RestResponse = NotFoundRestResponse(Map("message" ->
                       createMessage("rest.config.setting.notfound", domain, name)))
-                    configService.get(domain + "." + name) match {
+                    configService.get(createConfigurationSettingName(domain, name)) match {
                       case Some(_) =>
-                        configService.delete(domain + "." + name)
+                        configService.delete(createConfigurationSettingName(domain, name))
                         val entity = Map("message" -> createMessage("rest.config.setting.deleted", domain, name))
                         response = OkRestResponse(entity)
                       case None =>

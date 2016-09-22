@@ -6,6 +6,7 @@ import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.DAL.model.{KafkaService, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.utils.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.utils.{EngineLiterals, ConfigLiterals, StreamLiterals, ConfigSettingsUtils}
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.engine.input.TaskInputService
@@ -99,7 +100,6 @@ class KafkaTaskInputService(manager: RegularTaskManager,
     logger.debug(s"Task: ${manager.taskName}. The t-stream producer is added to checkpoint group\n")
   }
 
-
   /**
    * Creates a kafka consumer for all input streams of kafka type.
    * If there was a checkpoint with offsets of last consumed messages for each topic/partition
@@ -122,18 +122,23 @@ class KafkaTaskInputService(manager: RegularTaskManager,
     consumer
   }
 
+  private def chooseOffset() = {
+    regularInstance.startFrom match {
+      case EngineLiterals.oldestStartMode => "earliest"
+      case _ => "latest"
+    }
+  }
+
   private def createKafkaConsumer(hosts: List[String], offset: String) = {
-    val configService = ConnectionRepository.getConfigService
+    val properties = new Properties()
+    properties.put("bootstrap.servers", hosts.mkString(","))
+    properties.put("enable.auto.commit", "false")
+    properties.put("auto.offset.reset", offset)
+    properties.put("key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
+    properties.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
+    applyConfigurationSettings(properties)
 
-    val props = new Properties()
-    props.put("bootstrap.servers", hosts.mkString(","))
-    props.put("enable.auto.commit", "false")
-    props.put("auto.offset.reset", offset)
-    props.put("key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
-    props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
-    configService.getByParameters(Map("domain" -> ConfigLiterals.kafkaDomain)).foreach(x => props.put(x.name.replace(x.domain + ".", ""), x.value))
-
-    val consumer = new KafkaConsumer[Array[Byte], Array[Byte]](props)
+    val consumer = new KafkaConsumer[Array[Byte], Array[Byte]](properties)
 
     consumer
   }
@@ -170,11 +175,11 @@ class KafkaTaskInputService(manager: RegularTaskManager,
     offsetConsumer.stop()
   }
 
-  private def chooseOffset() = {
-    regularInstance.startFrom match {
-      case EngineLiterals.oldestStartMode => "earliest"
-      case _ => "latest"
-    }
+  private def applyConfigurationSettings(properties: Properties) = {
+    val configService = ConnectionRepository.getConfigService
+
+    val kafkaSettings = configService.getByParameters(Map("domain" -> ConfigLiterals.kafkaDomain))
+     kafkaSettings.foreach(x => properties.put(clearConfigurationSettingName(x.domain, x.name), x.value))
   }
 
   override def call() = {
