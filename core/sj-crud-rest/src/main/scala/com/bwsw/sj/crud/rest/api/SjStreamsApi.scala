@@ -10,6 +10,7 @@ import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
 import scala.collection.mutable
+import com.bwsw.sj.common.utils.SjStreamUtils._
 
 trait SjStreamsApi extends Directives with SjCrudValidator with CompletionUtils {
 
@@ -91,14 +92,10 @@ trait SjStreamsApi extends Directives with SjCrudValidator with CompletionUtils 
   private def getUsedInstances(streamName: String): mutable.Buffer[Instance] = {
     instanceDAO.getAll.filter { (instance: Instance) =>
       if (!instance.moduleType.equals(inputStreamingType)) {
-          instance.inputs.map(clearStreamFromMode).contains(streamName) || instance.outputs.contains(streamName)
+        instance.inputs.map(clearStreamFromMode).contains(streamName) || instance.outputs.contains(streamName)
       } else {
         instance.outputs.contains(streamName)
       }
     }
-  }
-
-  private def clearStreamFromMode(streamName: String) = {
-    streamName.replaceAll(s"/${EngineLiterals.splitStreamMode}|/${EngineLiterals.fullStreamMode}", "")
   }
 }

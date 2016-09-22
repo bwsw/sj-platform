@@ -4,6 +4,7 @@ import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.StreamLiterals._
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.bwsw.sj.common.utils.SjStreamUtils._
 
 class RegularInstanceMetadata extends InstanceMetadata {
   var inputs: Array[String] = Array()
@@ -29,10 +30,10 @@ class RegularInstanceMetadata extends InstanceMetadata {
   }
 
   override def prepareInstance(moduleType: String,
-                            moduleName: String,
-                            moduleVersion: String,
-                            engineName: String,
-                            engineVersion: String) = {
+                               moduleName: String,
+                               moduleVersion: String,
+                               engineName: String,
+                               engineVersion: String) = {
     super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion)
     castParallelismToNumber(getStreamsPartitions(this.inputs.map(clearStreamFromMode)))
     this.executionPlan.fillTasks(createTaskStreams(), createTaskNames(this.parallelism.asInstanceOf[Int], this.name))

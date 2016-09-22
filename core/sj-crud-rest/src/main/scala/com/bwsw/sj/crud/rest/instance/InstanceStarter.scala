@@ -8,6 +8,7 @@ import com.bwsw.sj.common.DAL.model.module.{Instance, InstanceStage}
 import com.bwsw.sj.common.DAL.model.{TStreamSjStream, ZKService}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.entities.MarathonRequest
+import com.bwsw.sj.common.utils.SjStreamUtils._
 import com.bwsw.sj.common.utils._
 import com.twitter.common.quantity.{Amount, Time}
 import com.twitter.common.zookeeper.DistributedLock.LockingException
@@ -102,7 +103,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   private def getStreamsWithNonLocalGenerator() = {
     var streams = instance.outputs.toSet
     if (!instance.moduleType.equals(inputStreamingType)) {
-      streams = streams.union(instance.inputs.map(_.replaceAll(s"/${EngineLiterals.splitStreamMode}|/${EngineLiterals.fullStreamMode}", "")).toSet)
+      streams = streams.union(instance.inputs.map(clearStreamFromMode).toSet)
     }
     val streamsWithGenerator = streams.flatMap(streamDAO.get)
       .filter(stream => stream.streamType.equals(StreamLiterals.tStreamType))

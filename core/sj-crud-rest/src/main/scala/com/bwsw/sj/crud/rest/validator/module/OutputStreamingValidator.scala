@@ -8,6 +8,7 @@ import com.bwsw.sj.common.utils.EngineLiterals._
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable.ArrayBuffer
+import com.bwsw.sj.common.utils.SjStreamUtils._
 
 /**
  *
@@ -62,7 +63,7 @@ class OutputStreamingValidator extends StreamingModuleValidator {
         errors += s"Unknown value of 'stream-mode' attribute. Input stream must have the mode '${EngineLiterals.splitStreamMode}'"
       }
 
-      val inputStreamName = instance.input.replaceAll("/split", "")
+      val inputStreamName = clearStreamFromMode(instance.input)
       inputStream = getStream(inputStreamName)
       inputStream match {
         case None =>

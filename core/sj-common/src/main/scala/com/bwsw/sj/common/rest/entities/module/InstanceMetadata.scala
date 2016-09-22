@@ -12,6 +12,7 @@ import com.bwsw.sj.common.utils.{EngineLiterals, GeneratorLiterals, StreamLitera
 import com.fasterxml.jackson.annotation.JsonProperty
 
 import scala.collection.JavaConversions._
+import com.bwsw.sj.common.utils.SjStreamUtils._
 
 class InstanceMetadata {
   private var moduleName: String = null
@@ -149,10 +150,6 @@ class InstanceMetadata {
     }
 
     partitions
-  }
-
-  protected def clearStreamFromMode(streamName: String) = {
-    streamName.replaceAll(s"/${EngineLiterals.splitStreamMode}|/${EngineLiterals.fullStreamMode}", "")
   }
 
   private def getStreamMode(name: String) = {

@@ -39,13 +39,13 @@ class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable w
   }
 
   private def waitForInstanceToStop() = {
-    var isInstanceStopped = false
-    while (!isInstanceStopped) {
+    var hasStopped = false
+    while (!hasStopped) {
       val instanceApplicationInfo = getApplicationInfo(instance.name)
       if (isStatusOK(instanceApplicationInfo)) {
         if (hasInstanceStopped(instanceApplicationInfo)) {
           markInstanceAsStopped()
-          isInstanceStopped = true
+          hasStopped = true
         } else {
           updateInstance(stopping)
           Thread.sleep(delay)
@@ -62,18 +62,18 @@ class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable w
     tasksRunning == 0
   }
 
-  private def markInstanceAsStopped() = {
-    if (isInputInstance()) {
-      clearTasks()
-    }
-    updateInstance(stopped)
-  }
-
   private def getNumberOfRunningTasks(response: CloseableHttpResponse) = {
     val entity = marathonEntitySerializer.deserialize[Map[String, Any]](EntityUtils.toString(response.getEntity, "UTF-8"))
     val tasksRunning = entity("app").asInstanceOf[Map[String, Any]]("tasksRunning").asInstanceOf[Int]
 
     tasksRunning
+  }
+
+  private def markInstanceAsStopped() = {
+    if (isInputInstance()) {
+      clearTasks()
+    }
+    updateInstance(stopped)
   }
 
   private def isInputInstance() = {
@@ -88,5 +88,5 @@ class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable w
     updateInstanceStage(instance, instance.name, status)
     updateInstanceStatus(instance, status)
     instanceDAO.save(instance)
-  }
+  } //todo вынести в отдельный трейт, от которого будут наследоваться starter, destroyer, stopper
 }

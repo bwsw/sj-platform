@@ -4,6 +4,7 @@ import com.bwsw.sj.common.DAL.model.{KafkaService, KafkaSjStream, TStreamService
 import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, RegularInstanceMetadata, SpecificationData}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._
+import com.bwsw.sj.common.utils.SjStreamUtils._
 import com.bwsw.sj.common.utils.StreamLiterals._
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -76,8 +77,8 @@ class RegularStreamingValidator extends StreamingModuleValidator {
     if (doesContainDoubles(instance.inputs.toList)) {
       errors += s"Inputs is not unique"
     }
-    val inputStreams = getStreams(instance.inputs.toList.map(_.replaceAll("/split|/full", "")))
-    instance.inputs.toList.map(_.replaceAll("/split|/full", "")).foreach { streamName =>
+    val inputStreams = getStreams(instance.inputs.toList.map(clearStreamFromMode))
+    instance.inputs.toList.map(clearStreamFromMode).foreach { streamName =>
       if (!inputStreams.exists(s => s.name == streamName)) {
         errors += s"Input stream '$streamName' does not exist"
       }

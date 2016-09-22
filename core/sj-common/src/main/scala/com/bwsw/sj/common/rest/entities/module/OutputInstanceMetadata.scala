@@ -3,6 +3,7 @@ package com.bwsw.sj.common.rest.entities.module
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.bwsw.sj.common.utils.SjStreamUtils._
 
 class OutputInstanceMetadata extends InstanceMetadata {
   @JsonProperty("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan()
@@ -22,10 +23,10 @@ class OutputInstanceMetadata extends InstanceMetadata {
   }
 
   override def prepareInstance(moduleType: String,
-                            moduleName: String,
-                            moduleVersion: String,
-                            engineName: String,
-                            engineVersion: String) = {
+                               moduleName: String,
+                               moduleVersion: String,
+                               engineName: String,
+                               engineVersion: String) = {
 
     super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion)
     castParallelismToNumber(getStreamsPartitions(Array(clearStreamFromMode(this.input))))

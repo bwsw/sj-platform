@@ -67,46 +67,46 @@ trait InstanceMarathonManager {
     client.execute(httpPost)
   }
 
-  def getApplicationInfo(appId: String) = {
-    logger.debug(s"Get application info $appId")
+  def getApplicationInfo(applicationID: String) = {
+    logger.debug(s"Get application info $applicationID")
     val client = new HttpClient(marathonTimeout).client
-    val url = new URI(s"$marathonConnect/v2/apps/$appId?force=true")
+    val url = new URI(s"$marathonConnect/v2/apps/$applicationID?force=true")
     val httpGet = new HttpGet(url.toString)
     client.execute(httpGet)
   }
 
-  def destroyMarathonApplication(appId: String) = {
-    logger.debug(s"Destroy application $appId")
+  def destroyMarathonApplication(applicationID: String) = {
+    logger.debug(s"Destroy application $applicationID")
     val client = new HttpClient(marathonTimeout).client
-    val url = new URI(s"$marathonConnect/v2/apps/$appId")
+    val url = new URI(s"$marathonConnect/v2/apps/$applicationID")
     val httpDelete = new HttpDelete(url.toString)
     client.execute(httpDelete)
   }
 
-  def stopMarathonApplication(appId: String) = {
-    logger.debug(s"Stop application $appId")
-    suspendMarathonApplication(appId)
+  def stopMarathonApplication(applicationID: String) = {
+    logger.debug(s"Stop application $applicationID")
+    suspendMarathonApplication(applicationID)
   }
 
-  private def suspendMarathonApplication(appId: String) = {
-    logger.debug(s"Suspend application $appId")
-    scaleMarathonApplication(appId, 0)
+  private def suspendMarathonApplication(applicationID: String) = {
+    logger.debug(s"Suspend application $applicationID")
+    scaleMarathonApplication(applicationID, 0)
   }
 
-  def scaleMarathonApplication(appId: String, countOfInstances: Int) = {
-    logger.debug(s"Scale application $appId to count $countOfInstances")
+  def scaleMarathonApplication(applicationID: String, countOfInstances: Int) = {
+    logger.debug(s"Scale application $applicationID to count $countOfInstances")
     val client = new HttpClient(marathonTimeout).client
-    val url = new URI(s"$marathonConnect/v2/apps/$appId?force=true")
+    val url = new URI(s"$marathonConnect/v2/apps/$applicationID?force=true")
     val httpPut = new HttpPut(url.toString)
     httpPut.addHeader("Content-Type", "application/json")
     val entity = new StringEntity(marathonEntitySerializer.serialize(Map("instances" -> countOfInstances)), "UTF-8")
     httpPut.setEntity(entity)
     client.execute(httpPut)
   }
-  
+
   def updateInstanceStatus(instance: Instance, status: String) = {
     instance.status = status
-  }
+  } //todo вынести в отдельный трейт, от которого будут наследоваться starter, destroyer, stopper
 
   def updateInstanceStage(instance: Instance, stageName: String, status: String) = {
     logger.debug(s"Update stage $stageName of instance ${instance.name} to state $status")
@@ -119,5 +119,5 @@ trait InstanceMarathonManager {
       stage.duration = 0
     }
     instance.stages.replace(stageName, stage)
-  }
+  } //todo вынести в отдельный трейт, от которого будут наследоваться starter, destroyer, stopper
 }
