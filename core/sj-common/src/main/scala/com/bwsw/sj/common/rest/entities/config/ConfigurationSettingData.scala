@@ -3,7 +3,9 @@ package com.bwsw.sj.common.rest.entities.config
 import com.bwsw.sj.common.DAL.model.ConfigurationSetting
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils
+import com.bwsw.sj.common.utils.ConfigLiterals
 import com.bwsw.sj.common.utils.ConfigurationSettingsUtils._
+import com.bwsw.tstreams.env.TSF_Dictionary
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -18,7 +20,7 @@ case class ConfigurationSettingData(name: String, value: String) extends Validat
     configurationSetting
   }
 
-  def validate() = {
+  def validate(domain: String) = {
     val configService = ConnectionRepository.getConfigService
     val errors = new ArrayBuffer[String]()
 
@@ -31,9 +33,14 @@ case class ConfigurationSettingData(name: String, value: String) extends Validat
           errors += s"Configuration setting with name '$x' already exists"
         }
 
-        if (!validateName(x)) {
+        if (!validateConfigSettingName(x)) {
           errors += s"Configuration setting has incorrect name: $x. " +
-            s"Name of configuration setting must be contain digits, lowercase letters or hyphens. First symbol must be a letter"
+            s"Name of configuration setting must be contain lowercase letters, hyphens or periods. First symbol must be a letter"
+        }
+
+        if (domain == ConfigLiterals.tstreamsDomain && !validateTstreamProperty()) {
+          errors += s"Configuration setting has incorrect name: $x. " +
+            s"T-streams domain configuration setting must be only for consumer or producer"
         }
     }
 
@@ -47,5 +54,9 @@ case class ConfigurationSettingData(name: String, value: String) extends Validat
     }
 
     errors
+  }
+
+  private def validateTstreamProperty(): Boolean = {
+    this.name.contains("producer") || this.name.contains("consumer") || this.name == TSF_Dictionary.Producer.Transaction.DISTRIBUTION_POLICY
   }
 }

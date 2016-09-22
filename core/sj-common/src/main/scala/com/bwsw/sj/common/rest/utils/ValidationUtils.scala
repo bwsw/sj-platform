@@ -12,6 +12,10 @@ trait ValidationUtils {
     name.matches( """^([a-z][a-z0-9-]*)$""")
   }
 
+  def validateConfigSettingName(name: String) = {
+    name.matches( """^([a-z][a-z-\.]*)$""")
+  }
+
   def validateProvider(provider: String, serviceType: String) = {
     val providerErrors = new ArrayBuffer[String]()
     serviceType match {

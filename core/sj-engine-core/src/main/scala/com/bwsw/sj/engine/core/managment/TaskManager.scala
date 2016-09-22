@@ -9,9 +9,10 @@ import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.common.rest.entities.module.ExecutionPlan
-import com.bwsw.sj.common.utils.{ProviderLiterals, GeneratorLiterals, ConfigSettingsUtils}
+import com.bwsw.sj.common.utils.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.StreamLiterals._
+import com.bwsw.sj.common.utils.{ConfigLiterals, ConfigSettingsUtils, GeneratorLiterals, ProviderLiterals}
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
 import com.bwsw.sj.engine.core.environment.EnvironmentManager
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
@@ -88,6 +89,7 @@ abstract class TaskManager() {
     setBindHostForAgents()
     setPersistentQueuePath()
     setProducerMasterBootstrapMode()
+    applyConfigurationSettings()
   }
 
   private def setMetadataClusterProperties(tStreamService: TStreamService) = {
@@ -132,6 +134,13 @@ abstract class TaskManager() {
 
   private def setProducerMasterBootstrapMode() = {
     tstreamFactory.setProperty(TSF_Dictionary.Producer.MASTER_BOOTSTRAP_MODE, TSF_Dictionary.Producer.Consts.MASTER_BOOTSTRAP_MODE_LAZY_VOTE)
+  }
+
+  private def applyConfigurationSettings() = {
+    val configService = ConnectionRepository.getConfigService
+
+    val tstreamsSettings = configService.getByParameters(Map("domain" -> ConfigLiterals.tstreamsDomain))
+    tstreamsSettings.foreach(x => tstreamFactory.setProperty(clearConfigurationSettingName(x.domain, x.name), x.value))
   }
 
   /**

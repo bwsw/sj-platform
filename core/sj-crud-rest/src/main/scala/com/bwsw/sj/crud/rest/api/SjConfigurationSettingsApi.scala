@@ -21,7 +21,7 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator with Co
             post { (ctx: RequestContext) =>
               checkContext(ctx)
               val data = serializer.deserialize[ConfigurationSettingData](getEntityFromContext(ctx))
-              val errors = data.validate()
+              val errors = data.validate(domain)
               var response: RestResponse = ConflictRestResponse(Map("message" ->
                 createMessage("rest.config.setting.cannot.create", errors.mkString("\n"))))
               if (errors.isEmpty) {
