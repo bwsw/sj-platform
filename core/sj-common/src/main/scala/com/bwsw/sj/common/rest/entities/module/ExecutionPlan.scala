@@ -5,8 +5,6 @@ import java.util
 import com.bwsw.sj.common.DAL.model.module.Task
 import com.bwsw.sj.common.utils.EngineLiterals
 
-import scala.collection.JavaConversions._
-
 /**
  * Entity for execution plan of module instance
  *
@@ -34,10 +32,12 @@ class ExecutionPlan {
   }
 
   private def createTask(taskStreams: Array[TaskStream], notProcessedTasks: Int) = {
-    val inputs = taskStreams
-      .map(taskStream => taskStream.name -> createPartitionsInterval(taskStream, notProcessedTasks)).toMap
+    val task= new Task()
+    taskStreams.foreach(taskStream => {
+      task.addInput(taskStream.name, createPartitionsInterval(taskStream, notProcessedTasks))
+    })
 
-    new Task(inputs)
+    task
   }
 
   private def createPartitionsInterval(taskStream: TaskStream, notProcessedTasks: Int) = {

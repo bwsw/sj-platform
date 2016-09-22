@@ -18,7 +18,7 @@ class InstanceMetadata {
   private var moduleVersion: String = null
   private var moduleType: String = null
   var stages = scala.collection.mutable.Map[String, InstanceStage]()
-  var status: String = null
+  var status: String = EngineLiterals.ready
   var name: String = null
   var description: String = "No description"
   @JsonProperty("checkpoint-mode") var checkpointMode: String = null
@@ -74,7 +74,6 @@ class InstanceMetadata {
     this.moduleName = moduleName
     this.moduleVersion = moduleVersion
     this.moduleType = moduleType
-    this.status = ready
   }
 
   def createStreams(): Unit = {}

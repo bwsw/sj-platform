@@ -92,7 +92,7 @@ object ConnectionRepository {
   }
 
   /**
-   * It's necessary because of when a MesosSchedulerDriver (in mesos framework) is being created a something is going wrong
+   * It's necessary because of when a MesosSchedulerDriver (in mesos framework) is being created something is going wrong
    * (probably it should be but it's not our case) and after it the all instances have a null value of class loader.
    * May be it is a temporary measure (if we will find a different solution)
    */

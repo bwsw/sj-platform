@@ -78,15 +78,18 @@ abstract class RegularTaskEngine(protected val manager: RegularTaskManager,
     while (true) {
       val maybeEnvelope = blockingQueue.get(instance.eventWaitTime)
 
-      if (maybeEnvelope == null) {
-        performanceMetrics.increaseTotalIdleTime(instance.eventWaitTime)
-        executor.onIdle()
-      } else {
-        val envelope = envelopeSerializer.deserialize[Envelope](maybeEnvelope)
-        afterReceivingEnvelope()
-        taskInputService.registerEnvelope(envelope, performanceMetrics)
-        logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
-        executor.onMessage(envelope)
+      maybeEnvelope match {
+        case Some(serializedEnvelope) => {
+          val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope)
+          afterReceivingEnvelope()
+          taskInputService.registerEnvelope(envelope, performanceMetrics)
+          logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
+          executor.onMessage(envelope)
+        }
+        case None => {
+          performanceMetrics.increaseTotalIdleTime(instance.eventWaitTime)
+          executor.onIdle()
+        }
       }
 
       if (isItTimeToCheckpoint(environmentManager.isCheckpointInitiated)) doCheckpoint()
@@ -106,7 +109,7 @@ abstract class RegularTaskEngine(protected val manager: RegularTaskManager,
    * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside regular module (not on the schedule) or not.
    */
   protected def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean
-  
+
   /**
    * Does group checkpoint of t-streams consumers/producers
    */

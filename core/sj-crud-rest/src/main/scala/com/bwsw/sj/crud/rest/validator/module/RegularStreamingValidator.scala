@@ -56,13 +56,6 @@ class RegularStreamingValidator extends StreamingModuleValidator {
     errors ++= validateStreamOptions(regularInstanceMetadata, specification)
   }
 
-  /**
-   * Validating options of streams of instance for module
-   *
-   * @param instance - Input instance parameters
-   * @param specification - Specification of module
-   * @return - List of errors and validating instance (null, if errors non empty)
-   */
   private def validateStreamOptions(instance: RegularInstanceMetadata,
                                       specification: SpecificationData) = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")

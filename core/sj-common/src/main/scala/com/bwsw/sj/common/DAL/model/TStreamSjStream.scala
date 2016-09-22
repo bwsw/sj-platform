@@ -8,7 +8,7 @@ import SjStreamUtilsForCreation._
 
 class TStreamSjStream() extends SjStream {
   var partitions: Int = 0
-  @Embedded var generator: Generator = null
+  @Embedded var generator: Generator = new Generator(GeneratorLiterals.localType)
 
   def this(name: String,
            description: String,

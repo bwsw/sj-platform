@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 class RegularInstanceMetadata extends InstanceMetadata {
   var inputs: Array[String] = Array()
   var outputs: Array[String] = Array()
-  @JsonProperty("execution-plan") var executionPlan: ExecutionPlan = null
+  @JsonProperty("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan()
   @JsonProperty("start-from") var startFrom: String = EngineLiterals.newestStartMode
   @JsonProperty("state-management") var stateManagement: String = EngineLiterals.noneStateMode
   @JsonProperty("state-full-checkpoint") var stateFullCheckpoint: Int = 100
@@ -35,7 +35,7 @@ class RegularInstanceMetadata extends InstanceMetadata {
                             engineVersion: String) = {
     super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion)
     castParallelismToNumber(getStreamsPartitions(this.inputs.map(clearStreamFromMode)))
-    this.executionPlan = new ExecutionPlan().fillTasks(createTaskStreams(), createTaskNames(this.parallelism.asInstanceOf[Int], this.name))
+    this.executionPlan.fillTasks(createTaskStreams(), createTaskNames(this.parallelism.asInstanceOf[Int], this.name))
 
     val inputStreams = getStreams(this.inputs.map(clearStreamFromMode))
     val outputStreams = this.outputs

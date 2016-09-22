@@ -10,7 +10,7 @@ import org.mongodb.morphia.annotations._
  * @author Kseniya Tomskikh
  */
 class RegularInstance() extends Instance {
-  @Embedded("execution-plan") var executionPlan: ExecutionPlan = null
+  @Embedded("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan()
   @Property("start-from") var startFrom: String = EngineLiterals.newestStartMode
   @Property("state-management") var stateManagement: String = EngineLiterals.noneStateMode
   @Property("state-full-checkpoint") var stateFullCheckpoint: Int = 100

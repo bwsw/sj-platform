@@ -41,7 +41,7 @@ object DataFactory {
   private val instanceName = "test-instance-for-regular-engine"
   private var instanceInputs: Array[String] = Array()
   private var instanceOutputs: Array[String] = Array()
-  private val task: Task = new Task(new java.util.HashMap[String, Array[Int]]())
+  private val task: Task = new Task()
   private val serializer = new JsonSerializer()
   private val objectSerializer = new ObjectSerializer()
   private val cassandraFactory = new CassandraFactory()

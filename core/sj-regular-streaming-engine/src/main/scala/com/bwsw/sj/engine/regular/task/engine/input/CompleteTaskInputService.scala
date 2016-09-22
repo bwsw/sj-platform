@@ -34,9 +34,9 @@ class CompleteTaskInputService(manager: RegularTaskManager,
         tStreamRegularTaskInputService.registerEnvelope(envelope, performanceMetrics)
       case _ : KafkaEnvelope =>
         kafkaRegularTaskInputService.registerEnvelope(envelope, performanceMetrics)
-      case badType =>
-        logger.error(s"Incoming envelope with type: ${badType.getClass} is not defined for regular streaming engine")
-        throw new Exception(s"Incoming envelope with type: ${badType.getClass} is not defined for regular streaming engine")
+      case envelope =>
+        logger.error(s"Incoming envelope with type: ${envelope.getClass} is not defined for regular streaming engine")
+        throw new Exception(s"Incoming envelope with type: ${envelope.getClass} is not defined for regular streaming engine")
     }
   }
 

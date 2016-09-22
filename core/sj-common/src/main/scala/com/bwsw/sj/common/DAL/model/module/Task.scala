@@ -7,10 +7,9 @@ package com.bwsw.sj.common.DAL.model.module
  * @author Kseniya Tomskikh
  */
 class Task() {
-  var inputs: java.util.Map[String, Array[Int]] = null
+  var inputs: java.util.Map[String, Array[Int]] = new java.util.HashMap()
 
-  def this(inputs: java.util.Map[String, Array[Int]]) = {
-    this()
-    this.inputs = inputs
+  def addInput(name: String, partitions: Array[Int]) = {
+    inputs.put(name, partitions)
   }
 }

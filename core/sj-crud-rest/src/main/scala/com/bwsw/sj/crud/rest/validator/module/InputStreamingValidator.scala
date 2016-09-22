@@ -67,13 +67,6 @@ class InputStreamingValidator extends StreamingModuleValidator {
     errors
   }
 
-  /**
-   * Validating options of streams of instance for module
-   *
-   * @param instance    - Input instance parameters
-   * @param specification - Specification of module
-   * @return - List of errors and validating instance (null, if errors non empty)
-   */
   def validateStreamOptions(instance: InputInstanceMetadata,
                             specification: SpecificationData) = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")

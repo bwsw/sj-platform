@@ -9,7 +9,7 @@ import com.bwsw.sj.common.utils.StreamLiterals
 class TStreamEnvelope() extends Envelope() {
   var id: Long = 0
   var consumerName: String = null
-  var data: List[Array[Byte]] = null
+  var data: List[Array[Byte]] = List()
   streamType = StreamLiterals.tStreamType
 }
 

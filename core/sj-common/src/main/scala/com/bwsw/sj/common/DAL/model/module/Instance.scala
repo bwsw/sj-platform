@@ -5,6 +5,7 @@ import java.util
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.ZKService
 import com.bwsw.sj.common.rest.entities.module.InstanceMetadata
+import com.bwsw.sj.common.utils.EngineLiterals
 import org.mongodb.morphia.annotations.{Embedded, Entity, Id, Property}
 
 import scala.collection.JavaConverters._
@@ -20,7 +21,7 @@ class Instance {
   @Property("module-type") var moduleType: String = null
   @Property("module-name") var moduleName: String = null
   @Property("module-version") var moduleVersion: String = null
-  var status: String = null
+  var status: String = EngineLiterals.ready
   @Id var name: String = null
   var description: String = "No description"
   var inputs: Array[String] = Array()

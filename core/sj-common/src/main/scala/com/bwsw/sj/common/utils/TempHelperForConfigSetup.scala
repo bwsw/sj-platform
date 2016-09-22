@@ -1,14 +1,12 @@
 package com.bwsw.sj.common.utils
 
-import java.io.File
-
 import com.bwsw.sj.common.DAL.model.ConfigurationSetting
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 
 object TempHelperForConfigSetup extends App {
 
-  ConnectionRepository.getFileStorage.put(new File("GeoIPASNum.dat"), "GeoIPASNum.dat")
-  ConnectionRepository.getFileStorage.put(new File("GeoIPASNumv6.dat"), "GeoIPASNumv6.dat")
+  //ConnectionRepository.getFileStorage.put(new File("GeoIPASNum.dat"), "GeoIPASNum.dat")
+  //ConnectionRepository.getFileStorage.put(new File("GeoIPASNumv6.dat"), "GeoIPASNumv6.dat")
 
   val configService = ConnectionRepository.getConfigService
 
@@ -36,7 +34,7 @@ object TempHelperForConfigSetup extends App {
   configService.save(new ConfigurationSetting(ConfigLiterals.tgClientRetryPeriodTag, "500", ConfigLiterals.systemDomain))
   configService.save(new ConfigurationSetting(ConfigLiterals.tgServerRetryPeriodTag, "500", ConfigLiterals.systemDomain))
   configService.save(new ConfigurationSetting(ConfigLiterals.tgRetryCountTag, "10", ConfigLiterals.systemDomain))
-  configService.save(new ConfigurationSetting(ConfigLiterals.kafkaSubscriberTimeoutTag, "10", ConfigLiterals.systemDomain))
+  configService.save(new ConfigurationSetting(ConfigLiterals.kafkaSubscriberTimeoutTag, "100", ConfigLiterals.systemDomain))
 
   configService.save(new ConfigurationSetting(ConfigLiterals.geoIpAsNum, "GeoIPASNum.dat", ConfigLiterals.systemDomain))
   configService.save(new ConfigurationSetting(ConfigLiterals.geoIpAsNumv6, "GeoIPASNumv6.dat", ConfigLiterals.systemDomain))

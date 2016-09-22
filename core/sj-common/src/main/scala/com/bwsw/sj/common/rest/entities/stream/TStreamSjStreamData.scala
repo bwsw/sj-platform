@@ -13,7 +13,7 @@ import scala.collection.mutable.ArrayBuffer
 class TStreamSjStreamData() extends SjStreamData() {
   streamType = StreamLiterals.tStreamType
   var partitions: Int = 0
-  var generator: GeneratorData = null
+  var generator: GeneratorData = new GeneratorData(GeneratorLiterals.localType)
 
   override def validate() = {
     val serviceDAO = ConnectionRepository.getServiceManager
@@ -44,12 +44,7 @@ class TStreamSjStreamData() extends SjStreamData() {
       errors += s"'Partitions' must be a positive integer"
 
     //generator
-    if (this.generator == null) {
-      errors += s"'Generator' is required"
-    }
-    else {
-      errors ++= this.generator.validate()
-    }
+    errors ++= this.generator.validate()
 
     errors
   }
@@ -98,7 +93,7 @@ class TStreamSjStreamData() extends SjStreamData() {
   }
 
   private def doesStreamHaveForcedCreation(metadataStorage: MetadataStorage) = {
-     doesTopicExist(metadataStorage) && this.force
+    doesTopicExist(metadataStorage) && this.force
   }
 
   private def doesTopicExist(metadataStorage: MetadataStorage) = {

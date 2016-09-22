@@ -10,7 +10,7 @@ import org.mongodb.morphia.annotations.{Embedded, Property}
  * @author Kseniya Tomskikh
  */
 class OutputInstance() extends Instance {
-  @Embedded("execution-plan") var executionPlan: ExecutionPlan = null
+  @Embedded("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan()
   @Property("start-from") var startFrom: String = "newest"
 
   override def asProtocolInstance(): InstanceMetadata = {

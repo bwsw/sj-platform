@@ -36,9 +36,9 @@ class PersistentBlockingQueue(path: String) {
   }
 
   /**
-   * Queue is blocked on idle timeout (in milliseconds) after which null will be returned
+   * Queue is blocked on idle timeout (in milliseconds) after which Option will be returned
    * @param idle Timeout of waiting
-   * @return Received message or null
+   * @return Some received message or None
    */
   def get(idle: Long) = {
     logger.info(s"Get next message from queue\n")
@@ -51,6 +51,6 @@ class PersistentBlockingQueue(path: String) {
       logger.debug(s"After $idle milliseconds message: $data was received\n")
     }
     mutex.unlock()
-    data
+    Option(data)
   }
 }

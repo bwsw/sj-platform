@@ -5,7 +5,7 @@ import com.bwsw.sj.common.utils.EngineLiterals
 import com.fasterxml.jackson.annotation.JsonProperty
 
 class OutputInstanceMetadata extends InstanceMetadata {
-  @JsonProperty("execution-plan") var executionPlan: ExecutionPlan = null
+  @JsonProperty("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan()
   @JsonProperty("start-from") var startFrom: String = EngineLiterals.newestStartMode
   var input: String = null
   var output: String = null
@@ -29,7 +29,7 @@ class OutputInstanceMetadata extends InstanceMetadata {
 
     super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion)
     castParallelismToNumber(getStreamsPartitions(Array(clearStreamFromMode(this.input))))
-    this.executionPlan = new ExecutionPlan().fillTasks(createTaskStreams(), createTaskNames(this.parallelism.asInstanceOf[Int], this.name))
+    this.executionPlan.fillTasks(createTaskStreams(), createTaskNames(this.parallelism.asInstanceOf[Int], this.name))
 
     val streams = Array(clearStreamFromMode(input))
     fillStages(streams)

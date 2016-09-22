@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo, JsonPropert
 ))
 class SjStreamTest {
   var name: String = null
-  var description: String = null
+  var description: String = "No description"
   @JsonProperty("stream-type") var streamType: String = null
 }
 

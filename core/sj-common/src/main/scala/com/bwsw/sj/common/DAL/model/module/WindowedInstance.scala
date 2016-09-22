@@ -10,7 +10,7 @@ import org.mongodb.morphia.annotations.{Embedded, Property}
   * @author Kseniya Tomskikh
  */
 class WindowedInstance() extends Instance {
-  @Embedded("execution-plan") var executionPlan: ExecutionPlan = null
+  @Embedded("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan()
   @Property("start-from") var startFrom: String = EngineLiterals.newestStartMode
   @Property("state-management") var stateManagement: String = EngineLiterals.noneStateMode
   @Property("state-full-checkpoint") var stateFullCheckpoint: Int = 100

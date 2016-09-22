@@ -104,14 +104,18 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     while (true) {
       val maybeEnvelope = blockingQueue.get(EngineLiterals.eventWaitTimeout)
 
-      if (maybeEnvelope != null) {
-        val envelope = envelopeSerializer.deserialize[Envelope](maybeEnvelope).asInstanceOf[TStreamEnvelope]
-        afterReceivingEnvelope()
-        taskInputService.registerEnvelope(envelope, performanceMetrics)
-        removeFromES(envelope)
-        logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
-        val outputEnvelopes: List[Envelope] = executor.onMessage(envelope)
-        outputEnvelopes.foreach(outputEnvelope => processOutputEnvelope(outputEnvelope, envelope))
+      maybeEnvelope match {
+        case Some(serializedEnvelope) =>
+          val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope).asInstanceOf[TStreamEnvelope]
+          afterReceivingEnvelope()
+          taskInputService.registerEnvelope(envelope, performanceMetrics)
+          removeFromES(envelope)
+          logger.debug(s"Task: ${
+            manager.taskName
+          }. Invoke onMessage() handler\n")
+          val outputEnvelopes: List[Envelope] = executor.onMessage(envelope)
+          outputEnvelopes.foreach(outputEnvelope => processOutputEnvelope(outputEnvelope, envelope))
+        case _ =>
       }
 
       if (isItTimeToCheckpoint(environmentManager.isCheckpointInitiated)) doCheckpoint()
@@ -185,7 +189,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
         esEnvelope.tags = inputEnvelope.tags
         registerOutputEnvelope(esEnvelope.transaction, esEnvelope.data)
         logger.debug(s"Task: ${manager.taskName}. Write output envelope to elasticearch.")
-        client.write(serializer.serialize(esEnvelope.data), esService.index,  outputStream.name)
+        client.write(serializer.serialize(esEnvelope.data), esService.index, outputStream.name)
       case jdbcEnvelope: JdbcEnvelope => writeToJdbc(outputEnvelope)
       case _ =>
     }

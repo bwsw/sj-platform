@@ -17,7 +17,7 @@ case class GeneratorData(@JsonProperty("generator-type") generatorType: String,
   def asModelGenerator() = {
     val serviceDAO = ConnectionRepository.getServiceManager
     this.generatorType match {
-      case GeneratorLiterals.`localType` => new Generator(this.generatorType)
+      case GeneratorLiterals.localType => new Generator(this.generatorType)
       case _ => new Generator(this.generatorType, serviceDAO.get(this.service).get, this.instanceCount)
     }
   }
