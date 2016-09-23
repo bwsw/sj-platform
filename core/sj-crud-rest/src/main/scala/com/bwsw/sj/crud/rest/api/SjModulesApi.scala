@@ -154,8 +154,6 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
       createMessage("rest.modules.instances.instance.cannot.delete", instanceName)))
 
     if (instance.status.equals(stopped) || instance.status.equals(failed)) {
-      instance.status = deleting
-      instanceDAO.save(instance)
       destroyInstance(instance)
       response = OkRestResponse(Map("message" ->
         createMessage("rest.modules.instances.instance.deleting", instanceName)))
@@ -175,8 +173,6 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
     if (instance.status.equals(ready) ||
       instance.status.equals(stopped) ||
       instance.status.equals(failed)) {
-      instance.status = starting
-      instanceDAO.save(instance)
       startInstance(instance)
       response = OkRestResponse(Map("message" ->
         createMessage("rest.modules.instances.instance.starting", instanceName)))
@@ -191,8 +187,6 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
       createMessage("rest.modules.instances.instance.cannot.stop", instanceName)))
 
     if (instance.status.equals(started)) {
-      instance.status = stopping
-      instanceDAO.save(instance)
       stopInstance(instance)
       response = OkRestResponse(Map("message" ->
         createMessage("rest.modules.instances.instance.stopping", instanceName)))

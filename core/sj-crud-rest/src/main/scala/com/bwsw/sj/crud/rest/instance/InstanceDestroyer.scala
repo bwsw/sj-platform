@@ -3,8 +3,8 @@ package com.bwsw.sj.crud.rest.instance
 import com.bwsw.sj.common.DAL.model.TStreamSjStream
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
-import com.bwsw.sj.common.utils.{EngineLiterals, GeneratorLiterals, StreamLiterals}
 import org.slf4j.LoggerFactory
 
 /**
@@ -14,23 +14,20 @@ import org.slf4j.LoggerFactory
  *
  * @author Kseniya Tomskikh
  */
-class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable with InstanceMarathonManager {
+class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable with InstanceManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
   private val instanceDAO = ConnectionRepository.getInstanceService
-  private val streamDAO = ConnectionRepository.getStreamService
 
   import EngineLiterals._
 
   def run() = {
-    logger.debug(s"Instance: ${instance.name}. Destroy instance.")
     try {
-      updateInstance(deleting)
+      updateInstanceStatus(instance, deleting)
       deleteGenerators()
+      deleteFramework()
       deleteInstance()
-      logger.debug(s"Instance: ${instance.name}. Instance is deleted.")
     } catch {
       case e: Exception => //todo что тут подразумевалось? зачем try catch, если непонятен результат при падении
-
     }
   }
 
@@ -41,29 +38,14 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
   }
 
   private def getGeneratorsToDelete() = {
-    val streamsHavingGenerator = getStreamsHavingGenerator()
+    val streamsHavingGenerator = getStreamsHavingGenerator(instance)
     val generatorsToDelete = streamsHavingGenerator.filter(isGeneratorAvailableForDeletion).map(x => (x.name, getGeneratorApplicationID(x)))
 
     generatorsToDelete
   }
 
-  private def getStreamsHavingGenerator() = {
-    val streams = getInstanceStreams()
-    val sjStreamsHavingGenerator = streams.flatMap(streamDAO.get)
-      .filter(_.streamType == StreamLiterals.tStreamType)
-      .map(_.asInstanceOf[TStreamSjStream])
-      .filter(_.generator.generatorType != GeneratorLiterals.localType)
-
-    sjStreamsHavingGenerator
-  }
-
   private def isGeneratorAvailableForDeletion(stream: TStreamSjStream) = {
-    hasGeneratorFailed(stream.name) || !isGeneratorUsed(stream)
-  }
-
-  private def hasGeneratorFailed(name: String) = {
-    val stage = instance.stages.get(name)
-    stage.state.equals(failed)
+    hasGeneratorFailed(instance, stream.name) || !isGeneratorUsed(stream)
   }
 
   private def isGeneratorUsed(stream: TStreamSjStream) = {
@@ -89,16 +71,10 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
   }
 
   private def deleteGenerator(streamName: String, applicationID: String) = {
-    updateInstance(deleting)
-    val taskInfoResponse = getApplicationInfo(applicationID)
-    if (!isStatusNotFound(taskInfoResponse)) {
-      logger.debug(s"Instance: ${instance.name}. Delete generator: $applicationID.")
-      val stopResponse = destroyMarathonApplication(applicationID)
-      if (isStatusOK(stopResponse)) {
-        waitForGeneratorToDelete(streamName, applicationID)
-      }
-    } else {
-      updateStage(streamName, deleted)
+    updateGeneratorState(instance, streamName, deleting)
+    val response = destroyMarathonApplication(applicationID)
+    if (isStatusOK(response)) {
+      waitForGeneratorToDelete(streamName, applicationID)
     }
   }
 
@@ -107,47 +83,38 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
     while (!hasDeleted) {
       val generatorApplicationInfo = getApplicationInfo(applicationID)
       if (!isStatusNotFound(generatorApplicationInfo)) {
-        updateStage(streamName, deleting)
+        updateGeneratorState(instance, streamName, deleting)
         Thread.sleep(delay)
       } else {
-        updateStage(streamName, deleted)
+        updateGeneratorState(instance, streamName, deleted)
         hasDeleted = true
       }
     }
   }
 
-  private def updateStage(name: String, status: String) = {
-    updateInstanceStage(instance, name, status)
-    instanceDAO.save(instance)
+  private def deleteFramework() = {
+    updateFrameworkState(instance, deleting)
+    val response = destroyMarathonApplication(instance.name)
+    if (isStatusOK(response)) {
+      waitForFrameworkToDelete()
+    }
+  }
+
+  private def waitForFrameworkToDelete() = {
+    var hasDeleted = false
+    while (!hasDeleted) {
+      val frameworkApplicationInfo = getApplicationInfo(instance.name)
+      if (!isStatusNotFound(frameworkApplicationInfo)) {
+        updateFrameworkState(instance, deleting)
+        Thread.sleep(delay)
+      } else {
+        updateFrameworkState(instance, deleted)
+        hasDeleted = true
+      }
+    }
   }
 
   private def deleteInstance() = {
-    logger.debug(s"Instance: ${instance.name}. Delete instance application.")
-    //todo maybe add timeout and retry count?
-    val response = destroyMarathonApplication(instance.name)
-    if (isStatusOK(response)) {
-      waitForInstanceToDelete()
-    }
     instanceDAO.delete(instance.name)
   }
-
-  private def waitForInstanceToDelete() = {
-    var hasDeleted = false
-    while (!hasDeleted) {
-      val instanceApplicationInfo = getApplicationInfo(instance.name)
-      if (!isStatusNotFound(instanceApplicationInfo)) {
-        updateInstance(deleting)
-        Thread.sleep(delay)
-      } else {
-        updateInstance(deleted)
-        hasDeleted = true
-      }
-    }
-  }
-
-  private def updateInstance(status: String) = {
-    updateInstanceStage(instance, instance.name, status)
-    updateInstanceStatus(instance, status)
-    instanceDAO.save(instance)
-  } //todo вынести в отдельный трейт, от которого будут наследоваться starter, destroyer, stopper
 }

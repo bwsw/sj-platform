@@ -4,17 +4,15 @@ import java.net.{InetSocketAddress, URI}
 import java.util
 
 import com.bwsw.sj.common.DAL.ConnectionConstants
-import com.bwsw.sj.common.DAL.model.module.{Instance, InstanceStage}
+import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{TStreamSjStream, ZKService}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.entities.MarathonRequest
-import com.bwsw.sj.common.utils.SjStreamUtils._
 import com.bwsw.sj.common.utils._
 import com.twitter.common.quantity.{Amount, Time}
 import com.twitter.common.zookeeper.DistributedLock.LockingException
 import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
 import org.apache.http.client.methods.CloseableHttpResponse
-import org.apache.http.util.EntityUtils
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConversions._
@@ -26,13 +24,11 @@ import scala.collection.JavaConversions._
  *
  * @author Kseniya Tomskikh
  */
-class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable with InstanceMarathonManager {
+class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable with InstanceManager {
 
   import EngineLiterals._
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
-  private val instanceDAO = ConnectionRepository.getInstanceService
-  private val streamDAO = ConnectionRepository.getStreamService
   private lazy val restHost = ConfigSettingsUtils.getCrudRestHost()
   private lazy val restPort = ConfigSettingsUtils.getCrudRestPort()
   private lazy val restAddress = new URI(s"http://$restHost:$restPort").toString
@@ -40,50 +36,47 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   def run() = {
     logger.debug(s"Instance: ${instance.name}. Start instance.")
     try {
-      val zkSessionTimeout = ConfigSettingsUtils.getZkSessionTimeout()
-      val mesosInfoResponse = getMarathonInfo
-      if (isStatusOK(mesosInfoResponse)) {
-        val entity = marathonEntitySerializer.deserialize[Map[String, Any]](EntityUtils.toString(mesosInfoResponse.getEntity, "UTF-8"))
-        val mesosMaster = entity.get("marathon_config").get.asInstanceOf[Map[String, Any]].get("master").get.asInstanceOf[String]
-
-        val zooKeeperServers = getZooKeeperServers(mesosMaster)
-        val zkClient = new ZooKeeperClient(Amount.of(zkSessionTimeout, Time.MILLISECONDS), zooKeeperServers)
-
-        var isMaster = false
-        val zkLockNode = new URI(s"/rest/instance/lock").normalize()
-        val distributedLock = new DistributedLockImpl(zkClient, zkLockNode.toString)
-        while (!isMaster) {
-          try {
-            distributedLock.lock()
-            isMaster = true
-          } catch {
-            case e: LockingException => Thread.sleep(delay)
-          }
-        }
-
-        startGenerators(getStreamsWithNonLocalGenerator())
-
-        val stages = mapAsScalaMap(instance.stages)
-        if (!stages.exists(s => !s._1.equals(instance.name) && s._2.state.equals(failed))) {
-          instanceStart(mesosMaster)
-          logger.debug(s"Instance: ${instance.name}. Instance is started.")
-        } else {
-          logger.debug(s"Instance: ${instance.name}. Failed instance.")
-          instance.status = failed
-        }
-        distributedLock.unlock()
-      } else {
-        logger.debug(s"Instance: ${instance.name}. Failed instance.")
-        instance.status = failed
-      }
+      updateInstanceStatus(instance, starting)
+      startInstance()
     } catch {
       case e: Exception =>
         logger.debug(s"Instance: ${instance.name}. Failed instance.")
         logger.debug(e.getMessage)
         e.printStackTrace()
-        instance.status = failed
+        updateInstanceStatus(instance, failed)
     }
-    instanceDAO.save(instance)
+  }
+
+  private def startInstance() = {
+    val marathonInfo = getMarathonInfo()
+    if (isStatusOK(marathonInfo)) {
+      val marathonMaster = getMarathonMaster(marathonInfo)
+      val distributedLock = becomeMaster(marathonMaster)
+      startGenerators()
+      tryToStartFramework(marathonMaster)
+      distributedLock.unlock()
+    } else {
+      updateInstanceStatus(instance, failed)
+    }
+  }
+
+  private def becomeMaster(marathonMaster: String) = {
+    val zooKeeperServers = getZooKeeperServers(marathonMaster)
+    val zkSessionTimeout = ConfigSettingsUtils.getZkSessionTimeout()
+    val zkClient = new ZooKeeperClient(Amount.of(zkSessionTimeout, Time.MILLISECONDS), zooKeeperServers)
+    var isMaster = false
+    val zkLockNode = new URI(s"/rest/instance/lock").normalize()
+    val distributedLock = new DistributedLockImpl(zkClient, zkLockNode.toString)
+    while (!isMaster) {
+      try {
+        distributedLock.lock()
+        isMaster = true
+      } catch {
+        case e: LockingException => Thread.sleep(delay)
+      }
+    }
+
+    distributedLock
   }
 
   private def getZooKeeperServers(mesosMaster: String) = {
@@ -94,104 +87,195 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
       zooKeeperServers.add(new InetSocketAddress(restHost, restPort.toInt))
     } else {
       val mesosMasterUrl = new URI(mesosMaster)
-      zooKeeperServers.add(new InetSocketAddress(mesosMasterUrl.getHost, mesosMasterUrl.getPort))
+      val address = new InetSocketAddress(mesosMasterUrl.getHost, mesosMasterUrl.getPort)
+      zooKeeperServers.add(address)
     }
 
     zooKeeperServers
   }
 
-  private def getStreamsWithNonLocalGenerator() = {
-    var streams = instance.outputs.toSet
-    if (!instance.moduleType.equals(inputStreamingType)) {
-      streams = streams.union(instance.inputs.map(clearStreamFromMode).toSet)
-    }
-    val streamsWithGenerator = streams.flatMap(streamDAO.get)
-      .filter(stream => stream.streamType.equals(StreamLiterals.tStreamType))
-      .filter(stream => !stream.asInstanceOf[TStreamSjStream].generator.generatorType.equals(GeneratorLiterals.localType))
-      .map(stream => stream.asInstanceOf[TStreamSjStream])
-
-    streamsWithGenerator
+  private def startGenerators() = {
+    val generators = getGeneratorsToStart()
+    generators.foreach(startGenerator)
   }
 
-  /**
-   * Starting of instance if all generators is started
-   */
-  def instanceStart(mesosMaster: String) = {
-    logger.debug(s"Instance: ${instance.name}. Instance is starting.")
-    updateInstanceStage(instance, instance.name, starting)
-    val startFrameworkResult = frameworkStart(mesosMaster)
-    var isStarted = false
-    startFrameworkResult match {
-      case Right(response) =>
-        if (isStatusOK(response) || isStatusCreated(response)) {
-          while (!isStarted) {
-            Thread.sleep(delay)
-            val taskInfoResponse = getApplicationInfo(instance.name)
-            if (isStatusOK(taskInfoResponse)) {
-              val entity = marathonEntitySerializer.deserialize[Map[String, Any]](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
-              val tasksRunning = entity("app").asInstanceOf[Map[String, Any]]("tasksRunning").asInstanceOf[Int]
-              if (tasksRunning == 1) {
-                instance.status = started
-                updateInstanceStage(instance, instance.name, started)
-                isStarted = true
-              }
-            } else {
-              updateInstanceStage(instance, instance.name, starting)
-            }
-          }
-        } else {
-          instance.status = failed
-          updateInstanceStage(instance, instance.name, failed)
-        }
-      case Left(isRunning) =>
-        if (!isRunning) {
-          instance.status = failed
-          updateInstanceStage(instance, instance.name, failed)
-        } else {
-          instance.status = started
-          updateInstanceStage(instance, instance.name, started)
-        }
-    }
+  private def getGeneratorsToStart() = {
+    val streamsHavingGenerator = getStreamsHavingGenerator(instance)
+    val generatorsToStart = streamsHavingGenerator.filter(isGeneratorAvailableForStarting)
+
+    generatorsToStart
   }
 
-  /**
-   * Running framework on mesos
-   *
-   * @return - Response from marathon or flag of running framework
-   *         (true, if framework running on mesos)
-   */
-  def frameworkStart(mesosMaster: String) = {
-    logger.debug(s"Instance: ${instance.name}. Start framework for instance.")
-    val frameworkJarName = ConfigSettingsUtils.getFrameworkJarName()
-    val restUrl = new URI(s"$restAddress/v1/custom/jars/$frameworkJarName")
-    val taskInfoResponse = getApplicationInfo(instance.name)
-    if (isStatusOK(taskInfoResponse)) {
-      val ignore = marathonEntitySerializer.getIgnoreUnknown()
-      marathonEntitySerializer.setIgnoreUnknown(true)
-      val entity = marathonEntitySerializer.deserialize[MarathonRequest](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
-      marathonEntitySerializer.setIgnoreUnknown(ignore)
-      if (entity.instances < 1) {
-        Right(scaleMarathonApplication(instance.name, 1))
-      } else {
-        Left(true)
-      }
+  private def isGeneratorAvailableForStarting(stream: TStreamSjStream) = {
+    hasGeneratorToHandle(stream.name) || hasGeneratorFailed(instance, stream.name)
+  }
+
+  private def hasGeneratorToHandle(name: String) = {
+    val stage = instance.stages.get(name)
+    stage.state.equals(toHandle)
+  }
+
+  private def startGenerator(stream: TStreamSjStream) = {
+    updateGeneratorState(instance, stream.name, starting)
+    val applicationID = getGeneratorApplicationID(stream)
+    val generatorApplicationInfo = getApplicationInfo(applicationID)
+    if (isStatusOK(generatorApplicationInfo)) {
+      launchGenerator(stream, applicationID)
     } else {
-      var applicationEnvs = Map(
-        "MONGO_HOST" -> ConnectionConstants.mongoHost,
-        "MONGO_PORT" -> s"${ConnectionConstants.mongoPort}",
-        "INSTANCE_ID" -> instance.name,
-        "MESOS_MASTER" -> mesosMaster
-      )
-      applicationEnvs = applicationEnvs ++ mapAsScalaMap(instance.environmentVariables)
-      applicationEnvs = applicationEnvs ++ getAuthenticationEnvironmentVariables()
-      val request = new MarathonRequest(instance.name,
-        "java -jar " + frameworkJarName + " $PORT",
-        1,
-        Map(applicationEnvs.toList: _*),
-        List(restUrl.toString))
-
-      Right(startMarathonApplication(request))
+      createGenerator(stream, applicationID)
     }
+  }
+
+  private def launchGenerator(stream: TStreamSjStream, applicationID: String) = {
+    val instanceCount = stream.generator.instanceCount
+    val response = scaleMarathonApplication(applicationID, instanceCount)
+    if (isStatusOK(response)) {
+      waitForGeneratorToStart(applicationID, stream.name, instanceCount)
+    } else {
+      updateGeneratorState(instance, stream.name, failed)
+    }
+  }
+
+  private def hasGeneratorStarted(response: CloseableHttpResponse, instanceCount: Int) = {
+    val tasksRunning = getNumberOfRunningTasks(response)
+
+    tasksRunning == instanceCount
+  }
+
+  private def createGenerator(stream: TStreamSjStream, applicationID: String) = {
+    val request = createRequestForGeneratorCreation(stream, applicationID)
+    val response = startMarathonApplication(request)
+    if (isStatusCreated(response)) {
+      waitForGeneratorToStart(applicationID, stream.name, stream.generator.instanceCount)
+    } else {
+      updateGeneratorState(instance, stream.name, failed)
+    }
+  }
+
+  private def createRequestForGeneratorCreation(stream: TStreamSjStream, applicationID: String) = {
+    val transactionGeneratorJar = ConfigSettingsUtils.getTransactionGeneratorJarName()
+    val command = "java -jar " + transactionGeneratorJar + " $PORT"
+    val restUrl = new URI(s"$restAddress/v1/custom/jars/$transactionGeneratorJar")
+    val environmentVariables = getGeneratorEnvironmentVariables(stream)
+    val marathonRequest = MarathonRequest(
+      applicationID,
+      command,
+      stream.generator.instanceCount,
+      environmentVariables,
+      List(restUrl.toString))
+
+    marathonRequest
+  }
+
+  private def getGeneratorEnvironmentVariables(stream: TStreamSjStream) = {
+    val zkService = stream.generator.service.asInstanceOf[ZKService]
+    val generatorProvider = zkService.provider
+    val prefix = createZookeeperPrefix(zkService.namespace, stream.generator.generatorType, stream.name)
+
+    Map("ZK_SERVERS" -> generatorProvider.hosts.mkString(";"), "PREFIX" -> prefix)
+  }
+
+  private def createZookeeperPrefix(namespace: String, generatorType: String, name: String) = {
+    var prefix = namespace
+    if (generatorType == GeneratorLiterals.perStreamType) {
+      prefix += s"/$name"
+    } else {
+      prefix += "/global"
+    }
+
+    prefix
+  }
+
+  private def waitForGeneratorToStart(applicationID: String, name: String, instanceCount: Int) = {
+    var isStarted = false
+    while (!isStarted) {
+      val generatorApplicationInfo = getApplicationInfo(applicationID)
+      if (isStatusOK(generatorApplicationInfo)) {
+        if (hasGeneratorStarted(generatorApplicationInfo, instanceCount)) {
+          updateGeneratorState(instance, name, started)
+          isStarted = true
+        } else {
+          updateGeneratorState(instance, name, starting)
+          Thread.sleep(delay)
+        }
+      } else {
+        //todo error?
+      }
+    }
+  }
+
+  private def tryToStartFramework(marathonMaster: String) = {
+    updateFrameworkState(instance, starting)
+    if (haveGeneratorsStarted()) {
+      startFramework(marathonMaster)
+    } else {
+      updateFrameworkState(instance, failed)
+      updateInstanceStatus(instance, failed)
+    }
+  }
+
+  private def haveGeneratorsStarted() = {
+    val stages = mapAsScalaMap(instance.stages)
+
+    !stages.exists(_._2.state == failed)
+  }
+
+  private def startFramework(marathonMaster: String) = {
+    val frameworkApplicationInfo = getApplicationInfo(instance.name)
+    if (isStatusOK(frameworkApplicationInfo)) {
+      launchFramework()
+    } else {
+      createFramework(marathonMaster)
+    }
+  }
+
+  private def launchFramework() = {
+    val startFrameworkResult = scaleMarathonApplication(instance.name, 1)
+    if (isStatusOK(startFrameworkResult)) {
+      waitForFrameworkToStart()
+    } else {
+      updateFrameworkState(instance, failed)
+      updateInstanceStatus(instance, failed)
+    }
+  }
+
+  private def createFramework(marathonMaster: String) = {
+    val request = createRequestForFrameworkCreation(marathonMaster)
+    val startFrameworkResult = startMarathonApplication(request)
+    if (isStatusCreated(startFrameworkResult)) {
+      waitForFrameworkToStart()
+    } else {
+      updateFrameworkState(instance, failed)
+      updateInstanceStatus(instance, failed)
+    }
+  }
+
+  private def createRequestForFrameworkCreation(marathonMaster: String) = {
+    val frameworkJarName = ConfigSettingsUtils.getFrameworkJarName()
+    val command = "java -jar " + frameworkJarName + " $PORT"
+    val restUrl = new URI(s"$restAddress/v1/custom/jars/$frameworkJarName")
+    val environmentVariables = getFrameworkEnvironmentVariables(marathonMaster)
+    val request = MarathonRequest(
+      instance.name,
+      command,
+      1,
+      environmentVariables,
+      List(restUrl.toString))
+
+    request
+  }
+
+  private def getFrameworkEnvironmentVariables(marathonMaster: String) = {
+    var environmentVariables = Map(
+      "MONGO_HOST" -> ConnectionConstants.mongoHost,
+      "MONGO_PORT" -> s"${ConnectionConstants.mongoPort}",
+      "INSTANCE_ID" -> instance.name,
+      "MESOS_MASTER" -> marathonMaster
+    )
+    environmentVariables = environmentVariables ++ mapAsScalaMap(instance.environmentVariables)
+    environmentVariables = environmentVariables ++ getAuthenticationEnvironmentVariables()
+
+    environmentVariables
   }
 
   private def getAuthenticationEnvironmentVariables() = {
@@ -207,105 +291,28 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
     environmentVariables
   }
 
-  /**
-   * Starting generators for streams of instance
-   *
-   * @param streams - Streams
-   * @return - Future of started generators
-   */
-  def startGenerators(streams: Set[TStreamSjStream]) = {
-    streams.foreach { stream =>
-      val generatorName = stream.name
-      logger.debug(s"Instance: ${instance.name}. Try starting generator $generatorName.")
-      val stage = instance.stages.get(generatorName)
-      if (stage.state.equals(toHandle) || stage.state.equals(failed)) {
-        var isStarted = false
-        updateInstanceStage(instance, stream.name, starting)
-        val startGeneratorResult: Either[String, CloseableHttpResponse] with Product with Serializable = startGenerator(stream)
-        startGeneratorResult match {
-          case Right(response) =>
-            if (isStatusOK(response) || isStatusCreated(response)) {
-              while (!isStarted) {
-                Thread.sleep(delay)
-                val taskInfoResponse = getApplicationInfo(getGeneratorApplicationID(stream))
-                if (isStatusOK(taskInfoResponse)) {
-                  val entity = marathonEntitySerializer.deserialize[Map[String, Any]](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
-                  val tasksRunning = entity("app").asInstanceOf[Map[String, Any]]("tasksRunning").asInstanceOf[Int]
-                  if (tasksRunning == stream.generator.instanceCount) {
-                    updateInstanceStage(instance, stream.name, started)
-                    isStarted = true
-                  } else {
-                    updateInstanceStage(instance, stream.name, starting)
-                  }
-                }
-              }
-            } else {
-              updateInstanceStage(instance, stream.name, failed)
-            }
-
-          case Left(msg) => updateInstanceStage(instance, stream.name, failed)
+  private def waitForFrameworkToStart() = {
+    var isStarted = false
+    while (!isStarted) {
+      val frameworkApplicationInfo = getApplicationInfo(instance.name)
+      if (isStatusOK(frameworkApplicationInfo)) {
+        if (hasFrameworkStarted(frameworkApplicationInfo)) {
+          updateFrameworkState(instance, started)
+          updateInstanceStatus(instance, started)
+          isStarted = true
+        } else {
+          updateFrameworkState(instance, starting)
+          Thread.sleep(delay)
         }
-      }
-      updateInstanceStages(instance)
-    }
-  }
-
-  /**
-   * Starting transaction generator for stream on mesos
-   *
-   * @param stream - Stream for running generator
-   * @return - Future with response from request to marathon
-   */
-  private def startGenerator(stream: TStreamSjStream) = {
-    logger.debug(s"Instance: ${instance.name}. Start generator for stream ${stream.name}.")
-    val transactionGeneratorJar = ConfigSettingsUtils.getTransactionGeneratorJarName()
-    val zkService = stream.generator.service.asInstanceOf[ZKService]
-    val generatorProvider = zkService.provider
-    var prefix = zkService.namespace
-    val id = getGeneratorApplicationID(stream)
-    if (stream.generator.generatorType.equals(GeneratorLiterals.perStreamType)) {
-      prefix += s"/${stream.name}"
-    } else {
-      prefix += "/global"
-    }
-
-    val restUrl = new URI(s"$restAddress/v1/custom/jars/$transactionGeneratorJar")
-
-    val marathonRequest = MarathonRequest(id,
-      "java -jar " + transactionGeneratorJar + " $PORT",
-      stream.generator.instanceCount,
-      Map("ZK_SERVERS" -> generatorProvider.hosts.mkString(";"), "PREFIX" -> prefix),
-      List(restUrl.toString))
-
-    val taskInfoResponse = getApplicationInfo(marathonRequest.id)
-    if (isStatusOK(taskInfoResponse)) {
-      val ignore = marathonEntitySerializer.getIgnoreUnknown()
-      marathonEntitySerializer.setIgnoreUnknown(true)
-      val entity = marathonEntitySerializer.deserialize[MarathonRequest](EntityUtils.toString(taskInfoResponse.getEntity, "UTF-8"))
-      marathonEntitySerializer.setIgnoreUnknown(ignore)
-      if (entity.instances < marathonRequest.instances) {
-        logger.debug(s"Instance: ${instance.name}. Scaling generator ${marathonRequest.id}.")
-        Right(scaleMarathonApplication(marathonRequest.id, marathonRequest.instances))
       } else {
-        logger.debug(s"Instance: ${instance.name}. Generator ${marathonRequest.id} already started.")
-        Left(s"Generator $id is already created")
+        //todo error?
       }
-    } else {
-      logger.debug(s"Instance: ${instance.name}. Generator ${marathonRequest.id} is starting.")
-      Right(startMarathonApplication(marathonRequest))
     }
   }
 
+  private def hasFrameworkStarted(response: CloseableHttpResponse) = {
+    val tasksRunning = getNumberOfRunningTasks(response)
 
-  /**
-   * Updating duration for all stages of instance
-   *
-   * @param instance - Instance for updating
-   */
-  private def updateInstanceStages(instance: Instance) = {
-    logger.debug(s"Update stages of instance ${instance.name}")
-    instance.stages.foreach { (stageNameWithStage: (String, InstanceStage)) =>
-      updateInstanceStage(instance, stageNameWithStage._1, stageNameWithStage._2.state)
-    }
+    tasksRunning == 1
   }
 }

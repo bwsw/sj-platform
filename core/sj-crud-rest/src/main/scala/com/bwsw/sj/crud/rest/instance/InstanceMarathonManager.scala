@@ -1,16 +1,14 @@
 package com.bwsw.sj.crud.rest.instance
 
 import java.net.URI
-import java.util.Calendar
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.DAL.model.TStreamSjStream
-import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.rest.entities.MarathonRequest
 import com.bwsw.sj.common.utils.{ConfigSettingsUtils, GeneratorLiterals}
 import org.apache.http.client.methods._
 import org.apache.http.entity.StringEntity
+import org.apache.http.util.EntityUtils
 import org.slf4j.LoggerFactory
 
 /**
@@ -21,10 +19,16 @@ import org.slf4j.LoggerFactory
  */
 trait InstanceMarathonManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
+  private val marathonEntitySerializer = new JsonSerializer
   private lazy val marathonConnect = ConfigSettingsUtils.getMarathonConnect()
   private lazy val marathonTimeout = ConfigSettingsUtils.getMarathonTimeout()
 
-  val marathonEntitySerializer: Serializer = new JsonSerializer
+  def getMarathonMaster(marathonInfo: CloseableHttpResponse) = {
+    val entity = marathonEntitySerializer.deserialize[Map[String, Any]](EntityUtils.toString(marathonInfo.getEntity, "UTF-8"))
+    val master = entity.get("marathon_config").get.asInstanceOf[Map[String, Any]].get("master").get.asInstanceOf[String]
+
+    master
+  }
 
   def isStatusOK(response: CloseableHttpResponse) = {
     response.getStatusLine.getStatusCode == 200
@@ -48,7 +52,7 @@ trait InstanceMarathonManager {
     name.replaceAll("_", "-")
   }
 
-  def getMarathonInfo = {
+  def getMarathonInfo() = {
     logger.debug(s"Get info about the marathon")
     val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/info")
@@ -85,11 +89,6 @@ trait InstanceMarathonManager {
 
   def stopMarathonApplication(applicationID: String) = {
     logger.debug(s"Stop application $applicationID")
-    suspendMarathonApplication(applicationID)
-  }
-
-  private def suspendMarathonApplication(applicationID: String) = {
-    logger.debug(s"Suspend application $applicationID")
     scaleMarathonApplication(applicationID, 0)
   }
 
@@ -103,21 +102,4 @@ trait InstanceMarathonManager {
     httpPut.setEntity(entity)
     client.execute(httpPut)
   }
-
-  def updateInstanceStatus(instance: Instance, status: String) = {
-    instance.status = status
-  } //todo вынести в отдельный трейт, от которого будут наследоваться starter, destroyer, stopper
-
-  def updateInstanceStage(instance: Instance, stageName: String, status: String) = {
-    logger.debug(s"Update stage $stageName of instance ${instance.name} to state $status")
-    val stage = instance.stages.get(stageName)
-    if (stage.state.equals(status)) {
-      stage.duration = Calendar.getInstance().getTime.getTime - stage.datetime.getTime
-    } else {
-      stage.state = status
-      stage.datetime = Calendar.getInstance().getTime
-      stage.duration = 0
-    }
-    instance.stages.replace(stageName, stage)
-  } //todo вынести в отдельный трейт, от которого будут наследоваться starter, destroyer, stopper
 }
