@@ -6,16 +6,19 @@
 input {
   width: 250px;
 }
+
 .modules-list {
   width: 75%;
   display: inline-block;
   margin-top: 30px;
 }
+
 .modules-list ul {
   list-style-type: none;
   padding: 0 0 0 8px;
   padding-top: 60px;
 }
+
 .modules-list ul li {
   cursor: pointer;
 }
@@ -56,9 +59,11 @@ h2 {
   float: right;
   margin-right: 15px;
 }
+
 .right-inner-addon input {
   padding-right: 30px;
 }
+
 .right-inner-addon i {
   position: absolute;
   right: 0;
@@ -100,6 +105,7 @@ h2 {
 .form-desc {
   width: 70% !important;
 }
+
 .form-add-host {
   margin-left: 25%;
   margin-top: 5px;
@@ -107,9 +113,11 @@ h2 {
   padding: 0;
   color: #07c;
 }
+
 .form-submit {
   width: 35%;
 }
+
 .form-actions {
   text-align: right;
   margin-right: 5%;
@@ -137,7 +145,7 @@ h2 {
   display: block;
   float: right;
   padding: 0 16px;
-  height:100%;
+  height: 100%;
   width: 24%;
   border-left: 2px solid #ececec;
   top: 0;
@@ -162,6 +170,7 @@ h2 {
   margin-top: 70px;
   margin-bottom: -40px;
 }
+
 .main-alerts .custom-alert div {
   margin-bottom: 0 !important;
 }
@@ -177,6 +186,7 @@ h2 {
   font-size: 16px;
   font-weight: normal;
 }
+
 .upload-module.inProgress {
   pointer-events: none;
 }

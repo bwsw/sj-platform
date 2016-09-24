@@ -6,16 +6,19 @@
 input {
   width: 250px;
 }
+
 .instances-list {
   width: 75%;
   display: inline-block;
   margin-top: 30px;
 }
+
 .instances-list ul {
   list-style-type: none;
   padding: 0 0 0 8px;
   padding-top: 60px;
 }
+
 .instances-list ul li {
   cursor: pointer;
 }
@@ -47,22 +50,28 @@ input {
 .status-started {
   background-color: rgba(54, 239, 78, 0.99);
 }
+
 .status-stopped {
   background-color: rgba(0, 0, 0, 0.2);
 }
+
 .status-stopping {
   background-color: rgba(243, 243, 46, 0.63);
 }
+
 .status-failed {
   background-color: rgba(249, 27, 27, 0.65);
 }
+
 .status-starting {
   background-color: rgba(119, 214, 114, 0.54);
 }
+
 .status-ready {
   background-color: white;
   border: 1px solid grey;
 }
+
 .start-stop-icon {
   margin-right: 5px;
 }
@@ -81,9 +90,11 @@ h2 {
   float: right;
   margin-right: 15px;
 }
+
 .right-inner-addon input {
   padding-right: 30px;
 }
+
 .right-inner-addon i {
   position: absolute;
   right: 0;
@@ -125,6 +136,7 @@ h2 {
 .form-desc {
   width: 70% !important;
 }
+
 .form-add-host {
   margin-left: 25%;
   margin-top: 5px;
@@ -132,9 +144,11 @@ h2 {
   padding: 0;
   color: #07c;
 }
+
 .form-submit {
   width: 35%;
 }
+
 .form-actions {
   text-align: right;
   margin-right: 5%;
@@ -193,6 +207,7 @@ h2 {
   margin-top: 70px;
   margin-bottom: -40px;
 }
+
 .main-alerts .custom-alert div {
   margin-bottom: 0 !important;
 }
@@ -202,10 +217,12 @@ h2 {
   margin-left: 25% !important;
   margin-top: 5px !important;
 }
+
 .instance-inputs select:nth-of-type(1) {
   width: 54% !important;
   margin-right: 1%;
 }
+
 .instance-inputs select:nth-of-type(2) {
   width: 15% !important;
   margin-top: 5px !important;
@@ -223,14 +240,17 @@ h2 {
   border-radius: 4px;
   margin-bottom: 2px;
 }
+
 :host .instance-tasks .panel span {
   color: rgb(55, 58, 60);
   font-size: 17px;
   word-break: break-all;
 }
+
 .accordion-toogle {
   color: #000;
 }
+
 .clone-checkbox {
   width: 20px;
 }
