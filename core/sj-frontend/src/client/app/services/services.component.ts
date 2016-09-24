@@ -1,60 +1,45 @@
-import {
-    CORE_DIRECTIVES,
-    FormBuilder,
-    ControlGroup
-} from '@angular/common';
-import {FORM_DIRECTIVES, REACTIVE_FORM_DIRECTIVES} from '@angular/forms';
-import { Component, OnInit} from '@angular/core';
-import { MODAL_DIRECTIVES, BS_VIEW_PROVIDERS, AlertComponent } from 'ng2-bootstrap/ng2-bootstrap';
-import { ListFilter } from '../shared/listFilter/list-filter';
-import { OrderBy } from '../shared/orderBy/orderBy-pipe';
-import { ProviderFilter } from './provider-filter';
-import 'rxjs/Rx';
-import { SearchBoxComponent } from '../shared/searchBox/search-box';
-import { Service } from './service';
-import { ServiceService } from './service.service';
-import { Provider } from '../providers/provider';
-import { ProviderService } from '../providers/provider.service';
-import { Stream } from '../streams/stream';
-import { StreamService } from '../streams/stream.service';
-import {ModalDirective} from 'ng2-bootstrap/ng2-bootstrap';
+import { Component, OnInit } from '@angular/core';
+import { FormGroup, FormBuilder } from '@angular/forms';
+import { ModalDirective } from 'ng2-bootstrap';
+
+import { ServiceModel } from '../shared/models/service.model';
+import { StreamModel } from '../shared/models/stream.model';
+import { ProviderModel } from '../shared/models/provider.model';
+import { ServicesService } from '../shared/services/services.service';
+import { StreamsService } from '../shared/services/streams.service';
+import { ProvidersService } from '../shared/services/providers.service';
 
 @Component({
   moduleId: module.id,
-  selector: 'sd-services',
+  selector: 'sj-services',
   templateUrl: 'services.component.html',
-  styleUrls: ['services.component.css'],
-  directives: [FORM_DIRECTIVES, CORE_DIRECTIVES, MODAL_DIRECTIVES, REACTIVE_FORM_DIRECTIVES, SearchBoxComponent, AlertComponent],
-  pipes: [ListFilter, ProviderFilter, OrderBy],
-  viewProviders: [BS_VIEW_PROVIDERS],
-  providers: [ProviderService, ServiceService, StreamService]
+  styleUrls: ['services.component.css']
 })
 export class ServicesComponent implements OnInit {
-  errorMessage:string;
-  public alerts:Array<Object> = [];
-  serviceList:Service[];
-  providerList: Provider[];
-  streamList: Stream[];
-  blockingStreams: Stream[] = [];
-  current_service: Service;
-  current_service_provider: Provider;
-  service_to_delete: Service;
-  new_service: Service;
-  serviceForm: ControlGroup;
+  public errorMessage: string;
+  public alerts: Array<Object> = [];
+  public serviceList: ServiceModel[];
+  public providerList: ProviderModel[];
+  public streamList: StreamModel[];
+  public blockingStreams: StreamModel[] = [];
+  public current_service: ServiceModel;
+  public current_service_provider: ProviderModel;
+  public service_to_delete: ServiceModel;
+  public new_service: ServiceModel;
+  public serviceForm: FormGroup;
 
-  constructor(
-      private serviceService:ServiceService,
-      private providerService:ProviderService,
-      private streamService:StreamService,
-      private fb: FormBuilder
-  ) {}
+  constructor(private _servicesService: ServicesService,
+              private _providersService: ProvidersService,
+              private _streamsService: StreamsService,
+              private _fb: FormBuilder) {
+  }
 
-  ngOnInit() {
+  public ngOnInit() {
     this.getServiceList();
     this.getProviderList();
     this.getStreamList();
-    this.new_service = new Service();
-    this.serviceForm = this.fb.group({
+    this.new_service = new ServiceModel();
+    this.serviceForm = this._fb.group({
       //firstName: ['', Validators.required],
       //lastName: ['', Validators.required],
       //email: ['', Validators.compose([Validators.required])],
@@ -62,44 +47,50 @@ export class ServicesComponent implements OnInit {
     });
   }
 
-  getServiceList() {
-    this.serviceService.getServiceList()
-        .subscribe(
-            serviceList => {
-              this.serviceList = serviceList;
-              if (serviceList.length > 0) {
-                this.current_service = serviceList[0];
-              }
-            },
-            error => this.errorMessage = <any>error);
-  }
-  getProviderList() {
-    this.providerService.getProviderList()
-        .subscribe(
-            providerList => this.providerList = providerList,
-            error => this.errorMessage = <any>error);
-  }
-  getStreamList() {
-    this.streamService.getStreamList()
+  public getServiceList() {
+    this._servicesService.getServiceList()
       .subscribe(
-        streamList => { this.streamList = streamList;
+        serviceList => {
+          this.serviceList = serviceList;
+          if (serviceList.length > 0) {
+            this.current_service = serviceList[0];
+          }
         },
         error => this.errorMessage = <any>error);
   }
-  getProvider(providerName:string) {
-    this.providerService.getProvider(providerName)
-        .subscribe(
-            provider => this.current_service_provider = provider,
-            error => this.errorMessage = <any>error);
+
+  public getProviderList() {
+    this._providersService.getProviderList()
+      .subscribe(
+        providerList => this.providerList = providerList,
+        error => this.errorMessage = <any>error);
   }
-  get_provider_info(Modal:ModalDirective, providerName:string) {
+
+  public getStreamList() {
+    this._streamsService.getStreamList()
+      .subscribe(
+        streamList => {
+          this.streamList = streamList;
+        },
+        error => this.errorMessage = <any>error);
+  }
+
+  public getProvider(providerName: string) {
+    this._providersService.getProvider(providerName)
+      .subscribe(
+        provider => this.current_service_provider = provider,
+        error => this.errorMessage = <any>error);
+  }
+
+  public get_provider_info(Modal: ModalDirective, providerName: string) {
     this.getProvider(providerName);
     Modal.show();
   }
-  delete_service_confirm(modal:ModalDirective, service:Service) {
+
+  public delete_service_confirm(modal: ModalDirective, service: ServiceModel) {
     this.service_to_delete = service;
     this.blockingStreams = [];
-    this.streamList.forEach(function(item:Stream, i:number) {
+    this.streamList.forEach((item: StreamModel) => {
       if (typeof item.service !== 'undefined') {
         if (item.service === this.service_to_delete.name) {
           this.blockingStreams.push(item);
@@ -109,42 +100,46 @@ export class ServicesComponent implements OnInit {
           this.blockingStreams.push(item);
         }
       }
-    }.bind(this));
+    });
     modal.show();
   }
-  closeAlert(i:number):void {
+
+  public closeAlert(i: number): void {
     this.alerts.splice(i, 1);
   }
-  delete_service(modal:ModalDirective, service: Service) {
-    this.serviceService.deleteService(service)
-        .subscribe(
-            status => {
-              this.alerts.push({msg: status, type: 'success', closable: true, timeout:3000});
-              this.getServiceList();
-            },
-            error => this.alerts.push({msg: error, type: 'danger', closable: true, timeout:0}));
+
+  public delete_service(modal: ModalDirective, service: ServiceModel) {
+    this._servicesService.deleteService(service)
+      .subscribe(
+        status => {
+          this.alerts.push({ msg: status, type: 'success', closable: true, timeout: 3000 });
+          this.getServiceList();
+        },
+        error => this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 }));
     this.service_to_delete = null;
     modal.hide();
   }
-  createService(modal:ModalDirective) {
-    this.serviceService.saveService(this.new_service)
-        .subscribe(
-            service => {
-              modal.hide();
-              this.new_service = new Service;
-              this.getServiceList();
-              this.current_service = service;
-            },
-            error => {
-              this.alerts.push({msg: error, type: 'danger', closable: true, timeout:0});
-              modal.hide();
-            });
+
+  public createService(modal: ModalDirective) {
+    this._servicesService.saveService(this.new_service)
+      .subscribe(
+        service => {
+          modal.hide();
+          this.new_service = new ServiceModel();
+          this.getServiceList();
+          this.current_service = service;
+        },
+        error => {
+          this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 });
+          modal.hide();
+        });
   }
-  service_select(service: Service) {
+
+  public service_select(service: ServiceModel) {
     this.current_service = service;
   }
 
-  isSelected(service : Service) {
+  public isSelected(service: ServiceModel) {
     return service === this.current_service;
   }
 }

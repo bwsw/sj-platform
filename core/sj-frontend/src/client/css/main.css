@@ -61,3 +61,7 @@ button {
 button:hover {
   background-color: #28739e;
 }
+
+.page-wrapper {
+  margin: 60px 0 0 180px;
+}

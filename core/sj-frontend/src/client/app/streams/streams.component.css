@@ -15,20 +15,24 @@ ul {
 .detail-info {
   margin-right: 10px;
 }
+
 .streams-list {
   width: 75%;
   display: inline-block;
   margin-top: 30px;
 }
+
 .streams-list ul {
   list-style-type: none;
   padding: 0 0 0 8px;
   padding-top: 60px;
 }
+
 .streams-list ul li:hover {
   cursor: pointer;
   background-color: rgba(155, 228, 175, 0.1);
 }
+
 .streams-list ul > li:nth-of-type(1):hover {
   cursor: default !important;
   background-color: white !important;
@@ -38,7 +42,7 @@ ul {
   display: block;
   padding: 0 16px;
   float: right;
-  height:100%;
+  height: 100%;
   width: 24%;
   border-left: 2px solid #ececec;
   top: 0;
@@ -62,9 +66,11 @@ h2 {
   float: right;
   margin-right: 15px;
 }
+
 .right-inner-addon input {
   padding-right: 30px;
 }
+
 .right-inner-addon i {
   position: absolute;
   right: 0;
@@ -76,15 +82,18 @@ h2 {
 .form-desc {
   width: 70% !important;
 }
+
 .form-add-host {
   margin-left: 23%;
   margin-top: 5px;
   width: 10%;
   color: #07c;
 }
+
 .form-submit {
   width: 35%;
 }
+
 .form-actions {
   text-align: right;
   margin-right: 5%;
@@ -101,6 +110,7 @@ h2 {
 .streams-list ul .selected {
   background-color: rgba(155, 228, 175, 0.42);
 }
+
 .btn-lookup {
   height: 25px;
   display: inline-block;
@@ -110,6 +120,7 @@ h2 {
   background-color: #00b697;
   border: 1px solid #7d7d7d;
 }
+
 .btn-show-provider {
   float: right;
   height: 25px;
@@ -146,17 +157,21 @@ h2 {
 .generator-fieldset select {
   margin-top: 10px;
 }
+
 .main-alerts {
   margin-top: 70px;
   margin-bottom: -40px;
 }
+
 .main-alerts .custom-alert div {
   margin-bottom: 0 !important;
 }
+
 .stream-name {
   width: 30%;
   display: inline-block;
 }
+
 .stream-description {
   width: 40%;
   display: inline-block;
