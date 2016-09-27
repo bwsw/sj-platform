@@ -67,7 +67,7 @@ class KafkaSjStreamData() extends SjStreamData() {
     val errors = new ArrayBuffer[String]()
     val zkUtils = createZkUtils()
     val topicMetadata = AdminUtils.fetchTopicMetadataFromZk(this.name, zkUtils)
-    if (topicMetadata.partitionsMetadata.size != this.partitions) {
+    if (topicMetadata.partitionsMetadata.nonEmpty && topicMetadata.partitionsMetadata.size != this.partitions) {
       errors += s"Partitions count of stream '${this.name}' mismatch. Kafka stream partitions (${this.partitions}) " +
         s"mismatch partitions of exists kafka topic (${topicMetadata.partitionsMetadata.size})"
     }
