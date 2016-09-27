@@ -273,20 +273,6 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
       "MESOS_MASTER" -> marathonMaster
     )
     environmentVariables = environmentVariables ++ mapAsScalaMap(instance.environmentVariables)
-    environmentVariables = environmentVariables ++ getAuthenticationEnvironmentVariables()
-
-    environmentVariables
-  }
-
-  private def getAuthenticationEnvironmentVariables() = {
-    val environmentVariables = scala.collection.mutable.Map[String, String]()
-    val configService = ConnectionRepository.getConfigService
-    val maybeLogin = configService.get(ConfigLiterals.mesosLoginTag)
-    val maybePassword = configService.get(ConfigLiterals.mesosPasswordTag)
-    if (maybeLogin.isDefined && maybePassword.isDefined) {
-      environmentVariables += ("LOGIN" -> maybeLogin.get.value)
-      environmentVariables += ("PASSWORD" -> maybePassword.get.value)
-    }
 
     environmentVariables
   }

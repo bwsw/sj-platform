@@ -134,8 +134,8 @@ object ConfigLiterals {
   val portOfCrudRestTag = s"$systemDomain.crud-rest-port"
   val marathonTag = s"$systemDomain.marathon-connect"
   val marathonTimeoutTag = s"$systemDomain.marathon-connect-timeout"
-  val mesosLoginTag = s"$systemDomain.mesos-login"
-  val mesosPasswordTag = s"$systemDomain.mesos-password"
+  val frameworkPrincipalTag = s"$systemDomain.framework-principal"
+  val frameworkSecretTag = s"$systemDomain.framework-secret"
   val zkSessionTimeoutTag= s"$zookeeperDomain.session-timeout"
 
   val jdbcTimeoutTag = s"$jdbcDomain.timeout"
