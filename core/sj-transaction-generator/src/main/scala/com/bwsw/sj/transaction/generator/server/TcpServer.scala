@@ -1,8 +1,11 @@
 package com.bwsw.sj.transaction.generator.server
 
+import java.net.URI
 import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
 
-import com.bwsw.sj.common.utils.TransactionGeneratorLiterals
+import com.bwsw.sj.common.utils.{ConfigSettingsUtils, TransactionGeneratorLiterals}
+import com.twitter.common.zookeeper.DistributedLock.LockingException
+import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.nio.NioEventLoopGroup
@@ -12,6 +15,7 @@ import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter, Ch
 import io.netty.handler.codec.string.{StringDecoder, StringEncoder}
 import io.netty.handler.logging.{LogLevel, LoggingHandler}
 import org.apache.log4j.Logger
+import org.apache.zookeeper.{CreateMode, ZooDefs}
 
 /**
  * Simple tcp server for creating transaction ID
@@ -19,10 +23,24 @@ import org.apache.log4j.Logger
  *
  * @author Kseniya Tomskikh
  */
-class TcpServer(host: String, port: Int) {
+class TcpServer(prefix: String, zkClient: ZooKeeperClient, host: String, port: Int) {
   private val logger = Logger.getLogger(getClass)
+  private val retryPeriod = ConfigSettingsUtils.getServerRetryPeriod()
 
   def listen() = {
+    var isMaster = false
+    val zkLockNode = new URI(s"/$prefix/lock").normalize()
+    val distributedLock = new DistributedLockImpl(zkClient, zkLockNode.toString)
+    while (!isMaster) {
+      try {
+        distributedLock.lock()
+        updateMaster()
+        isMaster = true
+      } catch {
+        case e: LockingException => Thread.sleep(retryPeriod)
+      }
+    }
+
     logger.info(s"Launch a tcp server on: '$host:$port'\n")
     val bossGroup: EventLoopGroup = new NioEventLoopGroup()
     val workerGroup = new NioEventLoopGroup()
@@ -39,6 +57,17 @@ class TcpServer(host: String, port: Int) {
       workerGroup.shutdownGracefully()
       bossGroup.shutdownGracefully()
     }
+  }
+
+   private def updateMaster() = {
+    val node = new URI(s"/$prefix/master").normalize().toString
+    val value = s"$host:$port".getBytes("UTF-8")
+    if (zkClient.get.exists(node, null) != null) {
+      zkClient.get().setData(node, value, -1)
+    } else {
+      zkClient.get().create(node, value, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT)
+    }
+    logger.debug("Master server address has been updated")
   }
 }
 

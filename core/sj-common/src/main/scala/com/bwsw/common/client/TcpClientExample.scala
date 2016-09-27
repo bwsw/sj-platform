@@ -12,7 +12,12 @@ object TcpClientExample {
   private val logger = Logger.getLogger(getClass)
 
   def main(args: Array[String]) = {
-    val options = new TcpClientOptions("192.168.1.174", 8000)
+    val zkServers = Array("176.120.25.19:2181")
+    val prefix = "zk_test/global"
+
+    val options = new TcpClientOptions()
+      .setZkServers(zkServers)
+      .setPrefix(prefix)
 
     val client = new TcpClient(options)
     //val consoleReader = new BufferedReader(new InputStreamReader(System.in))

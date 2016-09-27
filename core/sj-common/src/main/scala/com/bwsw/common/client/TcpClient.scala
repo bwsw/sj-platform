@@ -1,7 +1,11 @@
 package com.bwsw.common.client
 
+import java.net.{URI, InetSocketAddress}
 import java.util.concurrent.ArrayBlockingQueue
 
+import com.bwsw.sj.common.utils.ConfigSettingsUtils
+import com.twitter.common.quantity.{Time, Amount}
+import com.twitter.common.zookeeper.ZooKeeperClient
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.nio.NioEventLoopGroup
@@ -9,6 +13,7 @@ import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter, ChannelInitializer}
 import io.netty.handler.codec.string.{StringDecoder, StringEncoder}
+import org.apache.log4j.Logger
 
 /**
  * Simple tcp client for retrieving transaction ID
@@ -33,7 +38,26 @@ class TcpClient(options: TcpClientOptions) {
 }
 
 class Client(in: ArrayBlockingQueue[Byte], out: ArrayBlockingQueue[Long], options: TcpClientOptions) extends Runnable {
+  private val logger = Logger.getLogger(getClass)
+  private val messageForServer = "get"
+  private val zkSessionTimeout = ConfigSettingsUtils.getZkSessionTimeout()
+  private val zkClient = createZooKeeperClient()
+
+  private def createZooKeeperClient() = {
+    val zkServers = createZooKeeperServers()
+    new ZooKeeperClient(Amount.of(zkSessionTimeout, Time.MILLISECONDS), zkServers)
+  }
+
+  private def createZooKeeperServers() = {
+    val zooKeeperServers = new java.util.ArrayList[InetSocketAddress]()
+    options.zkServers.map(x => (x.split(":")(0), x.split(":")(1).toInt))
+      .foreach(zkServer => zooKeeperServers.add(new InetSocketAddress(zkServer._1, zkServer._2)))
+
+    zooKeeperServers
+  }
+
   override def run(): Unit = {
+    val master = getMasterServer()
     val workerGroup = new NioEventLoopGroup()
     try {
       val bootstrap = new Bootstrap()
@@ -41,15 +65,22 @@ class Client(in: ArrayBlockingQueue[Byte], out: ArrayBlockingQueue[Long], option
         .channel(classOf[NioSocketChannel])
         .handler(new TcpClientChannelInitializer(out))
 
-      val channel = bootstrap.connect(options.host, options.port).sync().channel()
+      val channel = bootstrap.connect(master(0), master(1).toInt).sync().channel()
 
       while (true) {
         in.take()
-        channel.writeAndFlush("get")
+        channel.writeAndFlush(messageForServer)
       }
     } finally {
       workerGroup.shutdownGracefully()
     }
+  }
+
+  private def getMasterServer() = {
+    val zkNode = new URI(s"/${options.prefix}/master").normalize()
+    val master = new String(zkClient.get().getData(zkNode.toString, null, null), "UTF-8")
+    logger.debug(s"Master server address: $master")
+    master.split(":")
   }
 }
 
