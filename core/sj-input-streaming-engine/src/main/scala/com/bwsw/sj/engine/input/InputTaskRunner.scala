@@ -42,7 +42,6 @@ object InputTaskRunner extends {override val threadName = "InputTaskRunner-%d"} 
       val inputStreamingServer = new InputStreamingServer(
         manager.agentsHost,
         manager.entryPort,
-        inputTaskEngine.executor,
         channelContextQueue,
         bufferForEachContext
       )

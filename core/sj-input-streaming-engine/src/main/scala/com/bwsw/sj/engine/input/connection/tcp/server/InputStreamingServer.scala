@@ -1,8 +1,7 @@
 package com.bwsw.sj.engine.input.connection.tcp.server
 
-import java.util.concurrent.{Callable, ArrayBlockingQueue}
+import java.util.concurrent.{ArrayBlockingQueue, Callable}
 
-import com.bwsw.sj.engine.core.input.InputStreamingExecutor
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.buffer.ByteBuf
 import io.netty.channel._
@@ -20,13 +19,11 @@ import scala.collection.concurrent
  * Than wait until the server socket is closed gracefully shut down the server.
  * @param host Host of server
  * @param port Port of server
- * @param executor Executor of an input streaming module that is defined by a user
  * @param channelContextQueue Queue for keeping a channel context to process messages (byte buffer) in their turn
  * @param bufferForEachContext Map for keeping a buffer containing incoming bytes with the appropriate channel context
  */
 class InputStreamingServer(host: String,
                            port: Int,
-                           executor: InputStreamingExecutor,
                            channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
                            bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf]) extends Callable[Unit] {
 
@@ -41,7 +38,7 @@ class InputStreamingServer(host: String,
       bootstrapServer.group(bossGroup, workerGroup)
         .channel(classOf[NioServerSocketChannel])
         .handler(new LoggingHandler(LogLevel.INFO))
-        .childHandler(new InputStreamingChannelInitializer(executor,  channelContextQueue, bufferForEachContext))
+        .childHandler(new InputStreamingChannelInitializer(channelContextQueue, bufferForEachContext))
 
       bootstrapServer.bind(host, port).sync().channel().closeFuture().sync()
     } finally {

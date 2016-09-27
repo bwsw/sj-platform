@@ -16,18 +16,12 @@ import org.slf4j.LoggerFactory
 class NetworkTransactionGenerator(zkServers: Array[String],
                                   prefix: String,
                                   retryInterval: Int,
-                                  retryCount: Int) extends ITransactionGenerator {
+                                  retryCount: Int) extends ITransactionGenerator { //todo host port of server instead of zkServers and etc
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val scale = TransactionGeneratorLiterals.scale
-  private val options = new TcpClientOptions()
-    .setZkServers(zkServers)
-    .setPrefix(prefix)
-    .setRetryPeriod(retryInterval)
-    .setRetryCount(retryCount)
-
+  private val options = new TcpClientOptions("localhost", 8000)
   private val client = new TcpClient(options)
-  client.open()
 
   /**
    * @return ID

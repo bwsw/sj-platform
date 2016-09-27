@@ -39,11 +39,11 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
   protected val logger = LoggerFactory.getLogger(this.getClass)
   protected val producers: Map[String, Producer[Array[Byte]]] = manager.outputProducers
   protected val streams = producers.keySet
-  protected var txnsByStreamPartitions = createTxnsStorage(streams)
+  protected var transactionsByStreamPartitions = createTxnsStorage(streams)
   protected val checkpointGroup = new CheckpointGroup()
   protected val instance = manager.instance.asInstanceOf[InputInstance]
   protected val environmentManager = createModuleEnvironmentManager()
-  val executor = manager.getExecutor(environmentManager).asInstanceOf[InputStreamingExecutor]
+  private val executor = manager.getExecutor(environmentManager).asInstanceOf[InputStreamingExecutor]
   protected val evictionPolicy = createEvictionPolicy()
   protected val isNotOnlyCustomCheckpoint: Boolean
 
@@ -51,7 +51,7 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
    * Set of channel contexts related with the input envelopes to send a message about an event
    * that a checkpoint has been initiated,
    */
-  private val ctxs = collection.mutable.Set[ChannelHandlerContext]()
+  private val setOfContexts = collection.mutable.Set[ChannelHandlerContext]()
 
   addProducersToCheckpointGroup()
 
@@ -124,7 +124,7 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
       var channelContext = channelContextQueue.poll()
       if (channelContext == null) channelContext = getCtxOfNonEmptyBuffer()
       if (channelContext != null) {
-        ctxs.add(channelContext)
+        setOfContexts.add(channelContext)
         logger.debug(s"Task name: ${manager.taskName}. Invoke tokenize() method of executor\n")
         val buffer = bufferForEachContext(channelContext)
         val maybeInterval = executor.tokenize(buffer)
@@ -235,7 +235,7 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
     logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
     checkpointGroup.checkpoint()
     checkpointInitiated()
-    txnsByStreamPartitions = createTxnsStorage(streams)
+    transactionsByStreamPartitions = createTxnsStorage(streams)
     prepareForNextCheckpoint()
   }
 
@@ -245,8 +245,8 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
    */
   protected def checkpointInitiated() = {
     val inputStreamingResponse = executor.createCheckpointResponse()
-    if (inputStreamingResponse.isBuffered) ctxs.foreach(x => x.write(inputStreamingResponse.message))
-    else ctxs.foreach(x => x.writeAndFlush(inputStreamingResponse.message))
+    if (inputStreamingResponse.isBuffered) setOfContexts.foreach(x => x.write(inputStreamingResponse.message))
+    else setOfContexts.foreach(x => x.writeAndFlush(inputStreamingResponse.message))
   }
 
   protected def prepareForNextCheckpoint(): Unit
@@ -266,8 +266,8 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
   private def getTxn(stream: String, partition: Int) = {
     logger.debug(s"Task name: ${manager.taskName}. " +
       s"Try to get txn by stream: $stream, partition: $partition\n")
-    if (txnsByStreamPartitions(stream).isDefinedAt(partition)) {
-      Some(txnsByStreamPartitions(stream)(partition))
+    if (transactionsByStreamPartitions(stream).isDefinedAt(partition)) {
+      Some(transactionsByStreamPartitions(stream)(partition))
     } else None
   }
 
@@ -280,7 +280,7 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
   private def putTxn(stream: String, partition: Int, transaction: ProducerTransaction[Array[Byte]]) = {
     logger.debug(s"Task name: ${manager.taskName}. " +
       s"Put txn for stream: $stream, partition: $partition\n")
-    txnsByStreamPartitions(stream) += (partition -> transaction)
+    transactionsByStreamPartitions(stream) += (partition -> transaction)
   }
 
   /**

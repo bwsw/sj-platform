@@ -1,140 +1,84 @@
 package com.bwsw.common.client
 
-import java.io._
-import java.net._
-import java.nio.ByteBuffer
-import java.nio.channels.SocketChannel
-import java.util
+import java.util.concurrent.ArrayBlockingQueue
 
-import com.bwsw.sj.common.utils.ConfigSettingsUtils
-import com.twitter.common.quantity.{Amount, Time}
-import com.twitter.common.zookeeper.ZooKeeperClient
-import org.apache.log4j.Logger
+import io.netty.bootstrap.Bootstrap
+import io.netty.channel.ChannelHandler.Sharable
+import io.netty.channel.nio.NioEventLoopGroup
+import io.netty.channel.socket.SocketChannel
+import io.netty.channel.socket.nio.NioSocketChannel
+import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter, ChannelInitializer}
+import io.netty.handler.codec.string.{StringDecoder, StringEncoder}
 
 /**
  * Simple tcp client for retrieving transaction ID
  *
  * @author Kseniya Tomskikh
  */
+
 class TcpClient(options: TcpClientOptions) {
-  private val logger = Logger.getLogger(getClass)
-  private val oneByteForServer = 84
-  private var client: SocketChannel = null
-  private var retryCount = options.retryCount
-  private val zkSessionTimeout = ConfigSettingsUtils.getZkSessionTimeout()
-  private val inputBuffer = ByteBuffer.allocate(8)
-  private var outputStream: OutputStream = new ByteArrayOutputStream()
-  private val zkClient = createZooKeeperClient()
+  private val out = new ArrayBlockingQueue[Long](1000)
+  private val in = new ArrayBlockingQueue[Byte](1)
 
-  private def createZooKeeperClient() = {
-    val zkServers = createZooKeeperServers()
-    new ZooKeeperClient(Amount.of(zkSessionTimeout, Time.MILLISECONDS), zkServers)
+  startClient()
+
+  private def startClient() = {
+    new Thread(new Client(in, out, options)).start()
   }
 
-  private def createZooKeeperServers() = {
-    val zooKeeperServers = new util.ArrayList[InetSocketAddress]()
-    options.zkServers.map(x => (x.split(":")(0), x.split(":")(1).toInt))
-      .foreach(zkServer => zooKeeperServers.add(new InetSocketAddress(zkServer._1, zkServer._2)))
-
-    zooKeeperServers
+  def get() = {
+    in.put(1)
+    out.take()
   }
+}
 
-  def open() = {
-    var isConnected = false
-    while (!isConnected && retryCount > 0) {
-      try {
-        isConnected = connect()
-        if (!isConnected) {
-          delay()
-        }
-      } catch {
-        case ex: Exception => delay()
-      }
-    }
-    if (!isConnected) {
-      logger.info("Could not connect to server")
-      throw new Exception("Could not connect to server")
-    } else {
-      logger.info("Connected to server")
-    }
-  }
-
-  private def connect() = {
+class Client(in: ArrayBlockingQueue[Byte], out: ArrayBlockingQueue[Long], options: TcpClientOptions) extends Runnable {
+  override def run(): Unit = {
+    val workerGroup = new NioEventLoopGroup()
     try {
-      val master = getMasterServer()
-      client = SocketChannel.open(new InetSocketAddress(master(0), master(1).toInt))
-      client.socket.setSoTimeout(zkSessionTimeout)
-      outputStream = client.socket().getOutputStream
-      true
-    } catch {
-      case ex: IOException => false
-    }
-  }
+      val bootstrap = new Bootstrap()
+      bootstrap.group(workerGroup)
+        .channel(classOf[NioSocketChannel])
+        .handler(new TcpClientChannelInitializer(out))
 
-  private def getMasterServer() = {
-    val zkNode = new URI(s"/${options.prefix}/master").normalize()
-    val master = new String(zkClient.get().getData(zkNode.toString, null, null), "UTF-8")
-    logger.debug(s"Master server: $master")
-    master.split(":")
-  }
+      val channel = bootstrap.connect(options.host, options.port).sync().channel()
 
-  def get(): Long = {
-    retryCount = options.retryCount
-    var serverIsNotAvailable = true
-    var id: Option[Long] = None
-    while (serverIsNotAvailable && retryCount > 0) {
-      try {
-        sendRequest()
-        if (isServerAvailable) {
-          id = deserializeResponse()
-          serverIsNotAvailable = false
-          retryCount = options.retryCount
-        } else {
-          reconnect()
-        }
-      } catch {
-        case ex: Exception => logger.info("Reconnect...")
-          reconnect()
+      while (true) {
+        in.take()
+        channel.writeAndFlush("get")
       }
+    } finally {
+      workerGroup.shutdownGracefully()
     }
-    if (id.isDefined) id.get
-    else throw new ConnectException("Server is not available")
+  }
+}
+
+class TcpClientChannelInitializer(out: ArrayBlockingQueue[Long]) extends ChannelInitializer[SocketChannel] {
+
+  def initChannel(channel: SocketChannel) = {
+    val pipeline = channel.pipeline()
+
+    pipeline.addLast("encoder", new StringEncoder())
+    pipeline.addLast("decoder", new StringDecoder())
+    pipeline.addLast("handler", new TcpClientChannel(out))
+  }
+}
+
+@Sharable
+class TcpClientChannel(out: ArrayBlockingQueue[Long]) extends ChannelInboundHandlerAdapter {
+  override def channelRead(ctx: ChannelHandlerContext, msg: Any) = {
+    val buffer = msg.asInstanceOf[String]
+    val id = buffer.toLong
+    out.put(id)
   }
 
-  private def sendRequest() {
-    outputStream.write(oneByteForServer)
-  }
-
-  private def isServerAvailable = {
-    val responseStatus = readFromServer()
-
-    responseStatus != -1
-  }
-
-  private def readFromServer() = {
-    inputBuffer.clear()
-    client.read(inputBuffer)
-  }
-
-  private def deserializeResponse() = {
-    inputBuffer.rewind()
-    val id = inputBuffer.getLong
-
-    Some(id)
-  }
-
-  private def reconnect() = {
-    close()
-    delay()
-    connect()
-  }
-
-  def close() = {
-    client.close()
-  }
-
-  private def delay() = {
-    Thread.sleep(options.retryPeriod)
-    retryCount -= 1
+  /**
+   * Exception handler that print stack trace and than close the connection when an exception is raised.
+   * @param ctx Channel handler context
+   * @param cause What has caused an exception
+   */
+  override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) = {
+    cause.printStackTrace()
+    ctx.close()
   }
 }
