@@ -24,16 +24,27 @@ object Server extends App {
   val prefix = System.getenv("PREFIX")
 
   try {
+    val zooKeeperClient = createZooKeeperClient()
+    val server = new TcpServer(prefix, zooKeeperClient, host, port)
+
+    server.listen()
+  } catch {
+    case ex: IOException => logger.debug(s"Error: ${ex.getMessage}")
+  }
+
+  private def createZooKeeperClient() = {
+    val zooKeeperServers = createZooKeeperServers()
+
+    new ZooKeeperClient(Amount.of(retryPeriod, Time.MILLISECONDS), zooKeeperServers)
+  }
+
+  private def createZooKeeperServers() = {
     val zooKeeperServers = new java.util.ArrayList[InetSocketAddress]()
     zkServers.split(";")
       .map(x => (x.split(":")(0), x.split(":")(1).toInt))
       .foreach(zkServer => zooKeeperServers.add(new InetSocketAddress(zkServer._1, zkServer._2)))
-    val zkClient = new ZooKeeperClient(Amount.of(retryPeriod, Time.MILLISECONDS), zooKeeperServers)
 
-    val server = new TcpServer(prefix, zkClient, host, port)
-    server.listen()
-  } catch {
-    case ex: IOException => logger.debug(s"Error: ${ex.getMessage}")
+    zooKeeperServers
   }
 }
 

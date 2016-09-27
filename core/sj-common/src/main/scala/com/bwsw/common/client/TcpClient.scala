@@ -1,10 +1,10 @@
 package com.bwsw.common.client
 
-import java.net.{URI, InetSocketAddress}
+import java.net.{InetSocketAddress, URI}
 import java.util.concurrent.ArrayBlockingQueue
 
 import com.bwsw.sj.common.utils.ConfigSettingsUtils
-import com.twitter.common.quantity.{Time, Amount}
+import com.twitter.common.quantity.{Amount, Time}
 import com.twitter.common.zookeeper.ZooKeeperClient
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.ChannelHandler.Sharable
@@ -22,8 +22,9 @@ import org.apache.log4j.Logger
  */
 
 class TcpClient(options: TcpClientOptions) {
-  private val out = new ArrayBlockingQueue[Long](1000)
-  private val in = new ArrayBlockingQueue[Byte](1)
+  private val messageForServer = "get"
+  private val out = new ArrayBlockingQueue[Long](1)
+  private val in = new ArrayBlockingQueue[String](1)
 
   startClient()
 
@@ -32,20 +33,20 @@ class TcpClient(options: TcpClientOptions) {
   }
 
   def get() = {
-    in.put(1)
+    in.offer(messageForServer)
     out.take()
   }
 }
 
-class Client(in: ArrayBlockingQueue[Byte], out: ArrayBlockingQueue[Long], options: TcpClientOptions) extends Runnable {
+class Client(in: ArrayBlockingQueue[String], out: ArrayBlockingQueue[Long], options: TcpClientOptions) extends Runnable {
   private val logger = Logger.getLogger(getClass)
-  private val messageForServer = "get"
   private val zkSessionTimeout = ConfigSettingsUtils.getZkSessionTimeout()
   private val zkClient = createZooKeeperClient()
 
   private def createZooKeeperClient() = {
-    val zkServers = createZooKeeperServers()
-    new ZooKeeperClient(Amount.of(zkSessionTimeout, Time.MILLISECONDS), zkServers)
+    val zooKeeperServers = createZooKeeperServers()
+
+    new ZooKeeperClient(Amount.of(zkSessionTimeout, Time.MILLISECONDS), zooKeeperServers)
   }
 
   private def createZooKeeperServers() = {
@@ -68,7 +69,7 @@ class Client(in: ArrayBlockingQueue[Byte], out: ArrayBlockingQueue[Long], option
       val channel = bootstrap.connect(master(0), master(1).toInt).sync().channel()
 
       while (true) {
-        in.take()
+        val messageForServer = in.take()
         channel.writeAndFlush(messageForServer)
       }
     } finally {
@@ -100,7 +101,7 @@ class TcpClientChannel(out: ArrayBlockingQueue[Long]) extends ChannelInboundHand
   override def channelRead(ctx: ChannelHandlerContext, msg: Any) = {
     val buffer = msg.asInstanceOf[String]
     val id = buffer.toLong
-    out.put(id)
+    out.offer(id)
   }
 
   /**
