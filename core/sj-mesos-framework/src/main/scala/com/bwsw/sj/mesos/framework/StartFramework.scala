@@ -4,6 +4,7 @@ import com.bwsw.sj.mesos.framework.rest.Rest
 import com.bwsw.sj.mesos.framework.schedule.FrameworkScheduler
 import org.apache.mesos.MesosSchedulerDriver
 import org.apache.mesos.Protos.FrameworkInfo
+import org.apache.mesos.Protos.Credential
 import scala.util.Properties
 
 object StartFramework {
@@ -19,14 +20,21 @@ object StartFramework {
     val framework = FrameworkInfo.newBuilder.
       setName("JugglerFramework").
       setUser("root").
-      setRole("*").
       setCheckpoint(false).
       setFailoverTimeout(0.0d).
+      setRole("*").
       build()
+
+    val credential = Credential.newBuilder.
+      setPrincipal(Properties.envOrElse("MESOS_PRINCIPAL", "")).
+      setSecret(Properties.envOrElse("MESOS_SECRET", "")).
+      build()
+
 
     val scheduler = new FrameworkScheduler
     val master_path = Properties.envOrElse("MESOS_MASTER", "zk://127.0.0.1:2181/mesos")
     val driver = new MesosSchedulerDriver(scheduler, framework, master_path)
+
 
     driver.start()
     driver.join()
