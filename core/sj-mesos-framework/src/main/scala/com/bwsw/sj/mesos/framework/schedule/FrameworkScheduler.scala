@@ -184,11 +184,6 @@ class FrameworkScheduler extends Scheduler {
           .addVariables(Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(currentOffer._1.getUrl.getAddress.getIp))
           .addVariables(Environment.Variable.newBuilder.setName("AGENTS_PORTS").setValue(agentPorts))
 
-        //        if (instance.moduleType.equals(ModuleConstants.inputStreamingType)) {
-        //          logger.debug(s"Task: $currTask. Task port: $taskPort")
-        //          environments.addVariables(Environment.Variable.newBuilder.setName("ENTRY_PORT").setValue(taskPort))
-        //        }
-
         cmd
           .addUris(CommandInfo.URI.newBuilder.setValue(getModuleUrl(instance.get)))
           .setValue("java -jar " + jarName)
@@ -267,19 +262,6 @@ class FrameworkScheduler extends Scheduler {
       return
     }
     logger.debug(s"Got instance ${instance.get.name}")
-
-    //    //framework blocking
-    //    try {
-    //      val zkHostString = instance.coordinationService.provider.hosts(0)
-    //      val zkHost = new InetSocketAddress(InetAddress.getByName(zkHostString.split(":")(0)), zkHostString.split(":")(1).toInt)
-    //      val zkClient = new ZooKeeperClient(Amount.of(1, Time.MINUTES), zkHost)
-    //      val lockPath = s"/mesos-framework/${instance.coordinationService.namespace}/${params{"instanceId"}}/lock"
-    //      val dli = new DistributedLockImpl(zkClient, lockPath)
-    //      dli.lock()
-    //      logger.info("Framework locked")
-    //    } catch {
-    //      case e:Exception => FrameworkUtil.handleSchedulerException(e, driver, logger)
-    //    }
 
     perTaskCores = instance.get.perTaskCores
     perTaskMem = instance.get.perTaskRam
