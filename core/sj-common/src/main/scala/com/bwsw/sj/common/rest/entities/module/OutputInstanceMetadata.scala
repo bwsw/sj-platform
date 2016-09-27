@@ -18,6 +18,7 @@ class OutputInstanceMetadata extends InstanceMetadata {
     modelInstance.inputs = Array(this.input)
     modelInstance.outputs = Array(this.output)
     modelInstance.startFrom = this.startFrom
+    modelInstance.executionPlan = this.executionPlan
 
     modelInstance
   }

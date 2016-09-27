@@ -28,6 +28,7 @@ class WindowedInstanceMetadata extends InstanceMetadata {
     modelInstance.inputs = this.inputs
     modelInstance.outputs = this.outputs
     modelInstance.startFrom = this.startFrom
+    modelInstance.executionPlan = this.executionPlan
 
     modelInstance
   }
