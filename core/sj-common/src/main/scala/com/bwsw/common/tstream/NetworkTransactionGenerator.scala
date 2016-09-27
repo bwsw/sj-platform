@@ -42,4 +42,8 @@ class NetworkTransactionGenerator(zkServers: Array[String],
     logger.debug("Create a new transaction ID based on a timestamp")
     timestamp * scale
   }
+
+  def close() = {
+    client.close()
+  }
 }

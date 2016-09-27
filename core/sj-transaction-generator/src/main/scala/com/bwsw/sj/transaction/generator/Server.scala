@@ -27,7 +27,7 @@ object Server extends App {
     val zooKeeperClient = createZooKeeperClient()
     val server = new TcpServer(prefix, zooKeeperClient, host, port)
 
-    server.listen()
+    server.launch()
   } catch {
     case ex: IOException => logger.debug(s"Error: ${ex.getMessage}")
   }

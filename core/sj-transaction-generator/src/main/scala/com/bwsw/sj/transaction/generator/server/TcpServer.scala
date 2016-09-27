@@ -12,7 +12,6 @@ import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter, ChannelInitializer, EventLoopGroup}
-import io.netty.handler.codec.string.{StringDecoder, StringEncoder}
 import io.netty.handler.logging.{LogLevel, LoggingHandler}
 import org.apache.log4j.Logger
 import org.apache.zookeeper.{CreateMode, ZooDefs}
@@ -27,7 +26,7 @@ class TcpServer(prefix: String, zkClient: ZooKeeperClient, host: String, port: I
   private val logger = Logger.getLogger(getClass)
   private val retryPeriod = ConfigSettingsUtils.getServerRetryPeriod()
 
-  def listen() = {
+  def launch() = {
     var isMaster = false
     val zkLockNode = new URI(s"/$prefix/lock").normalize()
     val distributedLock = new DistributedLockImpl(zkClient, zkLockNode.toString)
@@ -76,8 +75,6 @@ class TcpServerChannelInitializer() extends ChannelInitializer[SocketChannel] {
   def initChannel(channel: SocketChannel) = {
     val pipeline = channel.pipeline()
 
-    pipeline.addLast("encoder", new StringEncoder())
-    pipeline.addLast("decoder", new StringDecoder())
     pipeline.addLast("handler", new TransactionGenerator())
   }
 }
@@ -89,8 +86,9 @@ class TransactionGenerator() extends ChannelInboundHandlerAdapter {
   private val scale = TransactionGeneratorLiterals.scale
 
   override def channelRead(ctx: ChannelHandlerContext, msg: Any) = {
-    val a = generateID()
-    ctx.writeAndFlush(a.toString)
+    val id = generateID()
+    val response = ctx.alloc().buffer(8).writeLong(id)
+    ctx.writeAndFlush(response)
   }
 
   private def generateID() = this.synchronized {
