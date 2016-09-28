@@ -41,7 +41,7 @@ class TcpServer(prefix: String, zkClient: ZooKeeperClient, host: String, port: I
     }
 
     logger.info(s"Launch a tcp server on: '$host:$port'\n")
-    val bossGroup: EventLoopGroup = new NioEventLoopGroup()
+    val bossGroup: EventLoopGroup = new NioEventLoopGroup(1)
     val workerGroup = new NioEventLoopGroup()
     try {
       val bootstrapServer = new ServerBootstrap()
@@ -58,7 +58,7 @@ class TcpServer(prefix: String, zkClient: ZooKeeperClient, host: String, port: I
     }
   }
 
-   private def updateMaster() = {
+  private def updateMaster() = {
     val node = new URI(s"/$prefix/master").normalize().toString
     val value = s"$host:$port".getBytes("UTF-8")
     if (zkClient.get.exists(node, null) != null) {
@@ -73,6 +73,11 @@ class TcpServer(prefix: String, zkClient: ZooKeeperClient, host: String, port: I
 class TcpServerChannelInitializer() extends ChannelInitializer[SocketChannel] {
 
   def initChannel(channel: SocketChannel) = {
+    channel.config().setTcpNoDelay(true)
+    channel.config().setKeepAlive(true)
+    channel.config().setTrafficClass(0x10)
+    channel.config().setPerformancePreferences(0, 1, 0)
+
     val pipeline = channel.pipeline()
 
     pipeline.addLast("handler", new TransactionGenerator())
