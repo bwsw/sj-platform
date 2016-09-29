@@ -52,6 +52,7 @@ val commonSettings = Seq(
   fork in run := true,
   fork in Test := true,
   licenses := Seq("Apache 2" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+  homepage := Some(url("http://bitworks.software/de/content/edv-plattform-juggler/")),
   pomIncludeRepository := { _ => false },
   scalacOptions += "-feature",
   scalacOptions += "-deprecation",
