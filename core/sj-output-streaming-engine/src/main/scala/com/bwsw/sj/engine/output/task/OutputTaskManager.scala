@@ -22,7 +22,7 @@ class OutputTaskManager() extends TaskManager {
       s"and it's impossible to retrieve their producers")
   }
   
-  assert(agentsPorts.length == 2, "Not enough ports for t-stream consumers/producers ")
+  assert(numberOfAgentsPorts == 2, "Not enough ports for t-stream consumers/producers ")
 
   def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = {
     logger.debug(s"Task: $taskName. Start loading of executor class from module jar\n")

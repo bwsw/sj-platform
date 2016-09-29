@@ -11,10 +11,9 @@ import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
  *
  * @author Kseniya Mikhaleva
  */
-trait TaskInputService extends Callable[Unit] {
+abstract class TaskInputService extends Callable[Unit] {
 
   def registerEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics)
 
   def doCheckpoint()
 }
-

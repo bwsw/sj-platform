@@ -39,7 +39,8 @@ abstract class TaskManager() {
 
   val instanceName = System.getenv("INSTANCE_NAME")
   val agentsHost = System.getenv("AGENTS_HOST")
-  protected val agentsPorts = System.getenv("AGENTS_PORTS").split(",").map(_.toInt)
+  private val agentsPorts = System.getenv("AGENTS_PORTS").split(",").map(_.toInt)
+  protected val numberOfAgentsPorts = agentsPorts.length
   val taskName = System.getenv("TASK_NAME")
   val instance: Instance = getInstance()
   protected val auxiliarySJTStream = getAuxiliaryTStream()

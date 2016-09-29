@@ -24,7 +24,7 @@ class InputTaskManager() extends TaskManager {
   val entryPort = getEntryPort()
   val outputProducers =  createOutputProducers()
 
-  assert(agentsPorts.length >=
+  assert(numberOfAgentsPorts >=
     (instance.outputs.length + 1),
     "Not enough ports for t-stream consumers/producers ")
 
