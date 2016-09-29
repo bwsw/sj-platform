@@ -1,9 +1,9 @@
 <div class="providers-list">
   <h2>Providers list</h2>
 
-<button type="button" class="btn create-provider" (click)="CreateProvider.show()">+ Create provider</button>
+  <button type="button" class="btn create-provider" (click)="CreateProvider.show()">+ Create provider</button>
 
-<search-box (update)="term = $event"></search-box>
+  <sj-search-box (update)="term = $event"></sj-search-box>
 
   <div bsModal #CreateProvider="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -15,10 +15,12 @@
           <h4 class="modal-title">Create Provider</h4>
         </div>
         <div class="modal-body">
-          <form *ngIf="new_provider" (ngSubmit)="createProvider(CreateProvider)" class="form-create-provider" >
+          <form *ngIf="new_provider" (ngSubmit)="createProvider(CreateProvider)" class="form-create-provider">
             <fieldset class="form-group">
-              <label  class="col-sm-3 form-control-label required">Choose type</label>
-              <select [(ngModel)]="new_provider.type"  name="providerType" required class="form-control form-type col-sm-10" > <!-- [(ngModel)]="form_providerType" #item (change)="onChange(item.value)"  -->
+              <label class="col-sm-3 form-control-label required">Choose type</label>
+              <select [(ngModel)]="new_provider.type" name="providerType" required
+                      class="form-control form-type col-sm-10">
+                <!-- [(ngModel)]="form_providerType" #item (change)="onChange(item.value)"  -->
                 <option value="zookeeper">Zookeeper</option>
                 <option value="kafka">Kafka</option>
                 <option value="redis">Redis</option>
@@ -29,19 +31,25 @@
             </fieldset>
 
             <fieldset class="form-group">
-              <label  class="col-sm-3 form-control-label required">Name</label>
-              <input required [(ngModel)]="new_provider.name" name="providerName" type="text" class="form-control col-sm-10" placeholder="Enter provider name">
+              <label class="col-sm-3 form-control-label required">Name</label>
+              <input required [(ngModel)]="new_provider.name" name="providerName" type="text"
+                     class="form-control col-sm-10" placeholder="Enter provider name">
             </fieldset>
             <fieldset class="form-group">
               <label class="col-sm-3 form-control-label required">Description</label>
               <textarea [(ngModel)]="new_provider.description" name="providerDescription"
-                        class="form-control form-type col-sm-10" placeholder="Enter provider description" required></textarea>
+                        class="form-control form-type col-sm-10" placeholder="Enter provider description"
+                        required></textarea>
             </fieldset>
             <fieldset *ngIf="provider_hosts" class="form-group">
               <label class="col-sm-3 form-control-label required">Hosts</label>
-              <div *ngFor='let host of new_provider.hosts; let i = index' class="provider-host">
-                <input [ngClass]="{kafkaStyle: isKafka}" required [(ngModel)]="new_provider.hosts[i]" name="providerHosts"
-                       type="text" class="form-control col-sm-10 "  placeholder="IPv4:port"><div *ngIf="i!==0" (click)="delete_host(i)">Close</div>
+              <div *ngFor='let host of new_provider.hosts; let i = index; trackBy:customTrackBy' class="provider-host">
+                <input [ngClass]="{kafkaStyle: isKafka}"
+                       required
+                       [value]="new_provider.hosts[i]" (input)="new_provider.hosts[i] = $event.target.value"
+                       name="providerHosts"
+                       type="text" class="form-control " placeholder="IPv4:port">
+                <div class="fa fa-remove" *ngIf="i!==0" (click)="delete_host(i)"></div>
                 <!--<input *ngIf="form_template == 'Kafka'" required [(ngModel)]="form_hosts_prefixes[i]" type="text" class="form-control col-sm-10 kafka-zk-prefix"  placeholder="ZK prefix">-->
                 <!--pattern="^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5]):(6553[0-5]|655[0-2][0-9]\d|65[0-4](\d){2}|6[0-4](\d){3}|[1-5](\d){4}|[1-9](\d){0,3})$"-->
               </div>
@@ -50,15 +58,17 @@
             </fieldset>
             <fieldset class="form-group">
               <label class="col-sm-3 form-control-label">Login</label>
-              <input [(ngModel)]="new_provider.login" name="providerLogin" type="text" class="form-control col-sm-10" placeholder="Enter provider login">
+              <input [(ngModel)]="new_provider.login" name="providerLogin" type="text" class="form-control col-sm-10"
+                     placeholder="Enter provider login">
             </fieldset>
             <fieldset class="form-group">
               <label class="col-sm-3 form-control-label">Password</label>
-              <input [(ngModel)]="new_provider.password" name="providerPassword" type="text" class="form-control col-sm-10" placeholder="Enter provider password">
+              <input [(ngModel)]="new_provider.password" name="providerPassword" type="text"
+                     class="form-control col-sm-10" placeholder="Enter provider password">
             </fieldset>
             <fieldset class="form-actions">
               <button type="submit" class="btn btn-primary form-submit">Create</button>
-              <button type="button" class="btn btn-danger"  (click)="CreateProvider.hide()">Cancel</button>
+              <button type="button" class="btn btn-danger" (click)="CreateProvider.hide()">Cancel</button>
             </fieldset>
           </form>
         </div>
@@ -67,7 +77,8 @@
   </div>
 
   <div class="main-alerts">
-    <alert class="custom-alert" *ngFor="let alert of alerts; let i = index" [type]="alert.type" dismissible="true" [dismissOnTimeout]="alert.timeout" (close)="closeAlert(i)">
+    <alert class="custom-alert" *ngFor="let alert of alerts; let i = index" [type]="alert.type" dismissible="true"
+           [dismissOnTimeout]="alert.timeout" (close)="closeAlert(i)">
       {{ alert.msg }}
     </alert>
   </div>
@@ -78,10 +89,11 @@
       <span class="provider-description">Description</span>
     </li>
     <li class="list-group-item" [ngClass]="{selected:isSelected(provider)}" (click)="provider_select(provider)"
-        *ngFor="let provider of providerList | orderBy: 'name' | listFilter : term " >
+        *ngFor="let provider of providerList | orderBy: 'name' | listFilter : term ">
       <span class="provider-name">{{ provider.name }}</span>
       <span class="provider-description">{{ provider.description }}</span>
-      <i class="fa fa-trash  pull-right" (click)="delete_provider_confirm(DeleteProvider, provider)" aria-hidden="true"></i>
+      <i class="fa fa-trash  pull-right" (click)="delete_provider_confirm(DeleteProvider, provider)"
+         aria-hidden="true"></i>
       <i class="fa fa-file-text pull-right detail-info" aria-hidden="true" title="Show detailed info"></i>
       <i class="fa fa-refresh  pull-right" [ngClass]="{'fa-spin':isConnecting(provider)}"
          (click)="testConnection(provider)" aria-hidden="true" title="Test connection"></i>
@@ -102,17 +114,19 @@
       <div class="modal-body" *ngIf="provider_to_delete && (blockingServices.length === 0)">
         <p>Do you really want to delete provider " {{ provider_to_delete.name }} " ? This action can not be undone!</p>
         <fieldset class="form-actions">
-          <button type="button" class="btn btn-danger pull-left"  (click)="delete_provider(DeleteProvider, provider_to_delete)">Delete</button>
-          <button type="button" class="btn btn-primary "  (click)="DeleteProvider.hide()">Cancel</button>
+          <button type="button" class="btn btn-danger pull-left"
+                  (click)="delete_provider(DeleteProvider, provider_to_delete)">Delete
+          </button>
+          <button type="button" class="btn btn-primary " (click)="DeleteProvider.hide()">Cancel</button>
         </fieldset>
       </div>
       <div class="modal-body" *ngIf="provider_to_delete && (blockingServices.length > 0)">
         <p>Unable to delete provider! Next services using provider " {{ provider_to_delete.name }} "</p>
         <ul>
-        <li *ngFor="let service of blockingServices | orderBy: 'name' ">{{service.name}}</li>
+          <li *ngFor="let service of blockingServices | orderBy: 'name' ">{{service.name}}</li>
         </ul>
         <fieldset class="form-actions">
-          <button type="button" class="btn btn-primary "  (click)="DeleteProvider.hide()">Ok</button>
+          <button type="button" class="btn btn-primary " (click)="DeleteProvider.hide()">Ok</button>
         </fieldset>
       </div>
     </div>

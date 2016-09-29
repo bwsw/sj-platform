@@ -6,16 +6,19 @@
 input {
   width: 250px;
 }
+
 .providers-list {
   width: 75%;
   display: inline-block;
   margin-top: 30px;
 }
+
 .providers-list ul {
   list-style-type: none;
   padding: 0 0 0 8px;
   padding-top: 60px;
 }
+
 .providers-list ul li {
   cursor: pointer;
 }
@@ -44,9 +47,11 @@ h2 {
   float: right;
   margin-right: 15px;
 }
+
 .right-inner-addon input {
   padding-right: 30px;
 }
+
 .right-inner-addon i {
   position: absolute;
   right: 0;
@@ -88,6 +93,7 @@ h2 {
 .form-desc {
   width: 70% !important;
 }
+
 .form-add-host {
   margin-left: 25%;
   margin-top: 5px;
@@ -95,9 +101,11 @@ h2 {
   padding: 0;
   color: #07c;
 }
+
 .form-submit {
   width: 35%;
 }
+
 .form-actions {
   text-align: right;
   margin-right: 5%;
@@ -148,6 +156,7 @@ h2 {
   margin-top: 70px;
   margin-bottom: -40px;
 }
+
 .main-alerts .custom-alert div {
   margin-bottom: 0 !important;
 }
@@ -156,7 +165,19 @@ h2 {
   width: 30%;
   display: inline-block;
 }
+
 .provider-description {
   width: 40%;
   display: inline-block;
+}
+
+.provider-host {
+  position: relative;
+}
+
+.provider-host .fa.fa-remove {
+  position: absolute;
+  right: 16px;
+  top: 12px;
+  cursor: pointer;
 }

@@ -1,28 +1,28 @@
-
 <div class="modules-list">
-<h2>Modules list</h2>
+  <h2>Modules list</h2>
 
   <!--<div *ngIf="upload_in_progress == true" class="upload-progress">-->
-    <!--<div class="progress-bar" [style.width]="basicProgress + '%'"></div>-->
-    <!--<span class="percent">{{ basicProgress }}%</span>-->
+  <!--<div class="progress-bar" [style.width]="basicProgress + '%'"></div>-->
+  <!--<span class="percent">{{ basicProgress }}%</span>-->
   <!--</div>-->
   <label [ngClass]="{inProgress:upload_in_progress}" class="btn upload-module">
     <div *ngIf="!upload_in_progress"><i class="fa fa-upload icon is-small"></i> Upload module</div>
     <i *ngIf="upload_in_progress" class="fa fa-spinner fa-spin" aria-hidden="true"></i>
     <input type="file" (change)="fileUpload($event)"> <!--[ng-file-select]="options" -->
   </label>
-<!--<button type="button" class="btn upload-module create-provider">-->
+  <!--<button type="button" class="btn upload-module create-provider">-->
   <!--&lt;!&ndash;<i *ngIf="upload_in_progress" class="fa fa-spinner fa-spin" aria-hidden="true"></i>&ndash;&gt;-->
   <!--&lt;!&ndash;<span *ngIf="!upload_in_progress">+ Upload module</span>&ndash;&gt;-->
   <!--<div *ngIf="!upload_in_progress"><i class="fa fa-upload icon is-small"></i> Upload module</div>-->
   <!--<i *ngIf="upload_in_progress" class="fa fa-spinner fa-spin" aria-hidden="true"></i>-->
   <!--<input type="file" (change)="onChange($event)"> &lt;!&ndash;[ng-file-select]="options" &ndash;&gt;-->
-<!--</button>-->
+  <!--</button>-->
 
-<search-box (update)="term = $event"></search-box>
+  <sj-search-box (update)="term = $event"></sj-search-box>
 
   <div class="main-alerts">
-    <alert class="custom-alert" *ngFor="let alert of alerts; let i = index" [type]="alert.type" dismissible="true" [dismissOnTimeout]="alert.timeout" (close)="closeAlert(i)">
+    <alert class="custom-alert" *ngFor="let alert of alerts; let i = index" [type]="alert.type" dismissible="true"
+           [dismissOnTimeout]="alert.timeout" (close)="closeAlert(i)">
       {{ alert.msg }}
     </alert>
   </div>
@@ -38,9 +38,11 @@
       <span class="module-name">{{module["module-name"]}}</span>
       <span class="module-type">{{ module["module-type"] }}</span>
       <span class="module-version">{{ module["module-version"] }}</span>
-      <i class="fa fa-download pull-right" (click)="download_module(module)" aria-hidden="true" title="Download file"></i>
+      <i class="fa fa-download pull-right" (click)="download_module(module)" aria-hidden="true"
+         title="Download file"></i>
       <i class="fa fa-file-text pull-right detail-info" aria-hidden="true" title="Show detailed info"></i>
-      <i class="fa fa-trash  pull-right" (click)="delete_module_confirm(DeleteModule, module)" aria-hidden="true"></i></li>
+      <i class="fa fa-trash  pull-right" (click)="delete_module_confirm(DeleteModule, module)" aria-hidden="true"></i>
+    </li>
 
   </ul>
 </div>
@@ -56,10 +58,13 @@
         <h4 class="modal-title">Delete confirmation</h4>
       </div>
       <div class="modal-body" *ngIf="module_to_delete && (blockingInstances.length === 0)">
-        <p>Do you really want to delete module " {{ module_to_delete["module-name"] }} " ? This action can not be undone!</p>
+        <p>Do you really want to delete module " {{ module_to_delete["module-name"] }} " ? This action can not be
+          undone!</p>
         <fieldset class="form-actions">
-          <button type="button" class="btn btn-danger pull-left"  (click)="delete_module(DeleteModule, module_to_delete)">Delete</button>
-          <button type="button" class="btn btn-primary "  (click)="DeleteModule.hide()">Cancel</button>
+          <button type="button" class="btn btn-danger pull-left"
+                  (click)="delete_module(DeleteModule, module_to_delete)">Delete
+          </button>
+          <button type="button" class="btn btn-primary " (click)="DeleteModule.hide()">Cancel</button>
         </fieldset>
       </div>
       <div class="modal-body" *ngIf="module_to_delete && (blockingInstances.length > 0)">
@@ -68,7 +73,7 @@
           <li *ngFor="let instance of blockingInstances | orderBy: 'name' ">{{instance.name}}</li>
         </ul>
         <fieldset class="form-actions">
-          <button type="button" class="btn btn-primary "  (click)="DeleteModule.hide()">Ok</button>
+          <button type="button" class="btn btn-primary " (click)="DeleteModule.hide()">Ok</button>
         </fieldset>
       </div>
     </div>
@@ -80,7 +85,7 @@
   <ul *ngIf="current_module_specification">
     <li>Name: {{current_module_specification.name}}</li>
     <li>Description: {{current_module_specification.description}}</li>
-    <li>Version:  {{current_module_specification.version}}</li>
+    <li>Version: {{current_module_specification.version}}</li>
     <li>Author: {{current_module_specification.author}}</li>
     <li>Licence: {{current_module_specification.license}}</li>
     <li>Inputs:
@@ -99,17 +104,17 @@
     </li>
     <li>Outputs:
       <ul>
-      <li>Cardinality:
-        <ul>
-          <li *ngFor="let parameter of current_module_specification['outputs']['cardinality']">{{parameter}}</li>
-        </ul>
-      </li>
-      <li>Types:
-        <ul>
-          <li *ngFor="let type of current_module_specification['outputs']['cardinality']">{{type}}</li>
-        </ul>
-      </li>
-    </ul>
+        <li>Cardinality:
+          <ul>
+            <li *ngFor="let parameter of current_module_specification['outputs']['cardinality']">{{parameter}}</li>
+          </ul>
+        </li>
+        <li>Types:
+          <ul>
+            <li *ngFor="let type of current_module_specification['outputs']['cardinality']">{{type}}</li>
+          </ul>
+        </li>
+      </ul>
     </li>
     <li>Module-type: {{current_module_specification["module-type"]}}</li>
     <li>Engine: {{current_module_specification.engine}}</li>

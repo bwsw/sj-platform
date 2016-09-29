@@ -1,24 +1,16 @@
-import { provideRouter, RouterConfig } from '@angular/router';
+import { Routes } from '@angular/router';
 
-import { ProvidersRoutes } from './providers/index';
-import { ServicesRoutes } from './services/index';
-import { StreamsRoutes } from './streams/index';
-import { ModulesRoutes } from './modules/index';
-import { InstancesRoutes } from './instances/index';
+import { ProvidersRoutes } from './providers/providers.routes';
+import { ServicesRoutes } from './services/services.routes';
+import { StreamsRoutes } from './streams/streams.routes';
+import { ModulesRoutes } from './modules/modules.routes';
+import { InstancesRoutes } from './instances/instances.routes';
 
-const routes: RouterConfig = [
+export const routes: Routes = [
   ...ProvidersRoutes,
   ...ServicesRoutes,
   ...StreamsRoutes,
   ...ModulesRoutes,
   ...InstancesRoutes,
-  {
-    path: '',
-    redirectTo: '/providers',
-    pathMatch: 'full'
-  }
-];
-
-export const APP_ROUTER_PROVIDERS = [
-  provideRouter(routes),
+  { path: '', redirectTo: '/providers', pathMatch: 'full' }
 ];
