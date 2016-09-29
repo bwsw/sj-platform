@@ -49,7 +49,7 @@ class KafkaSjStream() extends SjStream {
       }
     } catch {
       case ex: TopicAlreadyMarkedForDeletionException =>
-        throw new Exception(s"Cannot create a kafka topic ${this.name}. Topic is marked for deletion. It means that kafka doesn't support deleti")
+        throw new Exception(s"Cannot create a kafka topic ${this.name}. Topic is marked for deletion. It means that kafka doesn't support deletion")
     }
   }
 
@@ -61,7 +61,7 @@ class KafkaSjStream() extends SjStream {
       }
     } catch {
       case ex: TopicAlreadyMarkedForDeletionException =>
-        throw new Exception(s"Cannot delete a kafka topic '${this.name}'. Topic is already marked for deletion. It means that kafka doesn't support deleti")
+        throw new Exception(s"Cannot delete a kafka topic '${this.name}'. Topic is already marked for deletion. It means that kafka doesn't support deletion")
     }
   }
 
