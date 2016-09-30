@@ -5,7 +5,7 @@ import java.util.logging.LogManager
 import com.bwsw.sj.engine.output.OutputTaskRunner
 
 /**
-  * Created: 20/06/2016
+  *
   *
   * @author Kseniya Tomskikh
   */

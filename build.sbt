@@ -1,23 +1,36 @@
 name := "sj"
+scalaVersion := Dependencies.Versions.scala
+val sjVersion = "1.0.0"
 
 addCommandAlias("rebuild", ";clean; compile; package")
 
 val commonSettings = Seq(
-  version := "1.0",
+  version := sjVersion,
   scalaVersion := Dependencies.Versions.scala,
   scalacOptions ++= Seq(
     "-unchecked",
     "-deprecation",
     "-feature"
   ),
-  resolvers +=
-    "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
 
+  pomExtra := (
+    <scm>
+      <url>git@github.com:bwsw/sj-platform.git</url>
+      <connection>scm:git@github.com:bwsw/sj-platform.git</connection>
+    </scm>
+      <developers>
+        <developer>
+          <id>bitworks</id>
+          <name>Bitworks Software, Ltd.</name>
+          <url>http://bitworks.software/</url>
+        </developer>
+      </developers>
+    ),
+
+  resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/service/local/staging/deploy/maven2",
   resolvers += "Twitter Repository" at "http://maven.twttr.com",
 
   libraryDependencies ++= Seq(
-    ("com.bwsw" % "t-streams_2.11" % "1.0-SNAPSHOT")
-      .exclude("org.slf4j", "slf4j-simple"),
     "org.slf4j" % "slf4j-log4j12" % "1.7.21"
   ),
 
@@ -34,11 +47,16 @@ val commonSettings = Seq(
   },
 
   assemblyJarName in assembly := s"${name.value}-${version.value}.jar",
+  scalacOptions in(Compile, doc) ++= Seq("-groups", "-implicits"),
 
   fork in run := true,
   fork in Test := true,
+  licenses := Seq("Apache 2" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+  homepage := Some(url("http://stream-juggler.com/")),
+  pomIncludeRepository := { _ => false },
+  scalacOptions += "-feature",
+  scalacOptions += "-deprecation",
   parallelExecution in Test := false,
-
   organization := "com.bwsw",
   publishMavenStyle := true,
   pomIncludeRepository := { _ => false },
@@ -47,18 +65,20 @@ val commonSettings = Seq(
     if (isSnapshot.value)
       Some("snapshots" at nexus + "content/repositories/snapshots")
     else
-      Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+      Some("releases" at nexus + "service/local/staging/deploy/maven2")
   },
   publishArtifact in Test := false
 )
 
-lazy val sj = (project in file(".")) settings (publish := { }) aggregate(common,
-  engineCore, crudRest,
-  inputStreamingEngine, regularStreamingEngine, windowedStreamingEngine, outputStreamingEngine,
-  framework, transactionGenerator,
-  stubInput, stubRegular, stubOutput,
-  pmOutput,
-  sflowProcess, sflowOutput
+lazy val sj = (project in file(".")).settings(publish := {})
+  .settings(unidocSettings: _*)
+  .aggregate(common,
+    engineCore, crudRest,
+    inputStreamingEngine, regularStreamingEngine, windowedStreamingEngine, outputStreamingEngine,
+    framework, transactionGenerator,
+    stubInput, stubRegular, stubOutput,
+    pmOutput,
+    sflowProcess, sflowOutput
   )
 
 lazy val common = Project(id = "sj-common",
@@ -71,13 +91,17 @@ lazy val common = Project(id = "sj-common",
 lazy val engineCore = Project(id = "sj-engine-core",
   base = file("./core/sj-engine-core"))
   .settings(commonSettings: _*)
+  .settings(
+    libraryDependencies ++= Dependencies.sjEngineCoreDependencies.value
+  )
   .dependsOn(common)
 
 lazy val crudRest = Project(id = "sj-crud-rest",
   base = file("./core/sj-crud-rest"))
   .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= Dependencies.sjRestDependencies.value
+    libraryDependencies ++= Dependencies.sjRestDependencies.value,
+    assemblyJarName in assembly := s"${name.value}-1.0.jar"
   )
   .dependsOn(common)
 

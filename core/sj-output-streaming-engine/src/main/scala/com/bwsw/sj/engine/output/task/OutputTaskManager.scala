@@ -1,60 +1,50 @@
 package com.bwsw.sj.engine.output.task
 
+import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.engine.StreamingExecutor
-import com.bwsw.sj.engine.core.entities.OutputEntity
+import com.bwsw.sj.engine.core.entities.OutputData
 import com.bwsw.sj.engine.core.environment.EnvironmentManager
 import com.bwsw.sj.engine.core.managment.TaskManager
-import com.bwsw.sj.engine.core.output.OutputStreamingHandler
-
-import scala.collection.JavaConverters._
-import scala.collection.mutable
-import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 /**
  * Task manager for working with streams of output-streaming module
- * Created: 27/05/2016
  *
  * @author Kseniya Tomskikh
  */
 class OutputTaskManager() extends TaskManager {
 
-  val task: mutable.Map[String, Array[Int]] = instance.executionPlan.tasks.get(taskName).inputs.asScala
+  private val outputInstance = instance.asInstanceOf[OutputInstance]
+  val inputs = getInputs(outputInstance.executionPlan)
+  lazy val outputProducers = {
+    logger.error(s"Instance of Output module hasn't got t-stream outputs " +
+      s"and it's impossible to retrieve their producers")
+    throw new Exception(s"Instance of Output module hasn't got t-stream outputs " +
+      s"and it's impossible to retrieve their producers")
+  }
+  
+  assert(agentsPorts.length == 2, "Not enough ports for t-stream consumers/producers ")
 
-  /**
-   * Returns an instance of executor of module
-   *
-   * @return An instance of executor of module
-   */
-  def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = ???
-
-  /**
-   * Returns instance of executor of module
-   *
-   * @return An instance of executor of module
-   */
-  def getExecutor: StreamingExecutor = {
+  def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = {
     logger.debug(s"Task: $taskName. Start loading of executor class from module jar\n")
-    val moduleJar = getModuleJar
-    val classLoader = getClassLoader(moduleJar.getAbsolutePath)
-
     logger.debug(s"Task: $taskName. Create instance of executor class\n")
-    val executor = classLoader
-      .loadClass(fileMetadata.specification.executorClass)
+    val executor = moduleClassLoader
+      .loadClass(executorClassName)
       .newInstance()
-      .asInstanceOf[OutputStreamingHandler]
+      .asInstanceOf[StreamingExecutor]
+    logger.debug(s"Task: $taskName. Create instance of executor class\n")
 
     executor
   }
 
-  /**
-   * Getting instance of entity object from output module jar
-   */
-  def getOutputModuleEntity() = {
-    val file = getModuleJar
+  def getOutputModuleEntity(): OutputData = {
+    logger.info(s"Task: $taskName. Getting entity object from jar of file: " +
+      instance.moduleType + "-" + instance.moduleName + "-" + instance.moduleVersion)
     val entityClassName = fileMetadata.specification.entityClass
-    logger.info(s"Task: $taskName. Getting entity object from jar of file: ${instance.moduleType}-${instance.moduleName}-${instance.moduleVersion}")
-    val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
-    val clazz = loader.loadClass(entityClassName)
-    clazz.newInstance().asInstanceOf[OutputEntity]
+    val outputEntity = moduleClassLoader
+      .loadClass(entityClassName)
+      .newInstance()
+      .asInstanceOf[OutputData]
+
+    outputEntity
   }
 }

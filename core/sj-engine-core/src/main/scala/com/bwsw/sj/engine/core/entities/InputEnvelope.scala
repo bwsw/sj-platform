@@ -1,16 +1,14 @@
 package com.bwsw.sj.engine.core.entities
 
-import com.bwsw.sj.common.StreamConstants
+import com.bwsw.sj.common.utils.StreamLiterals
 
 /**
- * Provides a wrapper for t-stream transactions (if outputMetadata has more than one element) that is formed by input engine.
- * Created: 12/04/2016
- * @author Kseniya Mikhaleva
+ * Provides a wrapper for t-stream transaction that is formed by input engine.
  */
 
 class InputEnvelope(var key: String,
                     var outputMetadata: Array[(String, Int)],
                     var duplicateCheck: Boolean,
                     var data: Array[Byte]) extends Envelope {
-  streamType = StreamConstants.input
+  streamType = StreamLiterals.inputDummy
 }

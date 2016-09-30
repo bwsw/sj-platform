@@ -1,23 +1,20 @@
 package com.bwsw.sj.crud.rest
 
-import java.net.InetSocketAddress
 import java.text.MessageFormat
 import java.util.ResourceBundle
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.model.{Service, _}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.utils.CassandraFactory
+import com.bwsw.sj.common.utils.{GeneratorLiterals, ProviderLiterals, _}
 
 /**
- * Created: 4/14/16
- *
  * @author Kseniya Tomskikh
  */
 object SjTest {
 
-  import com.bwsw.sj.common.StreamConstants._
+  import StreamLiterals._
 
   val serializer = new JsonSerializer
 
@@ -63,7 +60,7 @@ object SjTest {
     val name3 = "dasfd-4fs-ds"
     val name4 = "s9ds?saf_ds"
 
-    if (name1.matches("""^([a-zA-Z][a-zA-Z0-9-]+)$""")) {
+    if (name1.matches("""^([a-z][a-z0-9-]*)$""")) {
       println("name 1 OK")
     } else {
       println("name 1 NOT OK")
@@ -92,7 +89,7 @@ object SjTest {
 
   def prepareCassandra() = {
     val cassandraFactory = new CassandraFactory()
-    cassandraFactory.open(Set(new InetSocketAddress("stream-juggler.z1.netpoint-dc.com", 9042)))
+    cassandraFactory.open(Set(("stream-juggler.z1.netpoint-dc.com", 9042)))
     cassandraFactory.createKeyspace("test_keyspace")
     cassandraFactory.createMetadataTables("test_keyspace")
     cassandraFactory.createDataTable("test_keyspace")
@@ -104,7 +101,7 @@ object SjTest {
     val providerDAO = ConnectionRepository.getProviderService
     createProviders(providerDAO)
     createServices(serviceDAO, providerDAO)
-    val tService = serviceDAO.get("tstrq_service")
+    val tService = serviceDAO.get("tstrq_service").get
     createStreams(tService, serviceDAO.get("zk_service").asInstanceOf[ZKService])
   }
 
@@ -116,13 +113,13 @@ object SjTest {
     val provider = new Provider()
     provider.name = "kafka"
     provider.hosts = Array("stream-juggler.z1.netpoint-dc.com:9092")
-    provider.providerType = "kafka"
+    provider.providerType = ProviderLiterals.kafkaType
     providerDAO.save(provider)
 
     val service = new KafkaService()
     service.provider = provider
     service.name = "kafka_service"
-    service.serviceType = "KfkQ"
+    service.serviceType = ServiceLiterals.kafkaType
     serviceDAO.save(service)
 
     val stream = new KafkaSjStream()
@@ -142,13 +139,13 @@ object SjTest {
     val provider = new Provider()
     provider.name = "es_prov"
     provider.hosts = Array("localhost:9300")
-    provider.providerType = "ES"
+    provider.providerType = ProviderLiterals.elasticsearchType
     providerDAO.save(provider)
 
     val service = new ESService()
     service.provider = provider
     service.name = "es_service"
-    service.serviceType = "ESInd"
+    service.serviceType = ServiceLiterals.elasticsearchType
     service.index = "sj"
     serviceDAO.save(service)
 
@@ -168,13 +165,13 @@ object SjTest {
     val provider = new Provider()
     provider.name = "jdbc_prov"
     provider.hosts = Array("localhost:9092")
-    provider.providerType = "JDBC"
+    provider.providerType = ProviderLiterals.jdbcType
     providerDAO.save(provider)
 
     val service = new JDBCService()
     service.provider = provider
     service.name = "jdbc_service"
-    service.serviceType = "JDBC"
+    service.serviceType = ServiceLiterals.jdbcType
     serviceDAO.save(service)
 
     val stream = new JDBCSjStream()
@@ -187,48 +184,39 @@ object SjTest {
 
   def createServices(serviceDAO: GenericMongoService[Service], providerDAO: GenericMongoService[Provider]) = {
     val cassService = new CassandraService
-    val cassProv = providerDAO.get("cass_prov")
+    val cassProv = providerDAO.get("cass_prov").get
     cassService.keyspace = "test_keyspace"
     cassService.name = "cass_service"
     cassService.description = "cassandra test service"
     cassService.provider = cassProv
-    cassService.serviceType = "CassDB"
+    cassService.serviceType = ServiceLiterals.cassandraType
     serviceDAO.save(cassService)
 
     val zkService = new ZKService
-    val zkProv = providerDAO.get("zk_prov")
+    val zkProv = providerDAO.get("zk_prov").get
     zkService.namespace = "zk_test"
     zkService.name = "zk_service"
     zkService.description = "zookeeper test service"
     zkService.provider = zkProv
-    zkService.serviceType = "ZKCoord"
+    zkService.serviceType = ServiceLiterals.zookeeperType
     serviceDAO.save(zkService)
 
     val aeroService = new AerospikeService
-    val aeroProv = providerDAO.get("aero_prov")
+    val aeroProv = providerDAO.get("aero_prov").get
     aeroService.namespace = "test"
     aeroService.name = "aero_service"
     aeroService.description = "aerospike test service"
     aeroService.provider = aeroProv
-    aeroService.serviceType = "ArspkDB"
+    aeroService.serviceType = ServiceLiterals.aerospikeType
     serviceDAO.save(aeroService)
 
-    val redisService = new RedisService
-    val redisProv = providerDAO.get("redis_prov")
-    redisService.namespace = "test"
-    redisService.name = "rd_service"
-    redisService.description = "redis test service"
-    redisService.provider = redisProv
-    redisService.serviceType = "RdsCoord"
-    serviceDAO.save(redisService)
-
     val zkService1 = new ZKService
-    val zk1Prov = providerDAO.get("zk1_prov")
+    val zk1Prov = providerDAO.get("zk1_prov").get
     zkService1.namespace = "zk_test1"
     zkService1.name = "zk1_service"
     zkService1.description = "zookeeper test service"
     zkService1.provider = zk1Prov
-    zkService1.serviceType = "ZKCoord"
+    zkService1.serviceType = ServiceLiterals.zookeeperType
     serviceDAO.save(zkService1)
 
     val tstrqService = new TStreamService
@@ -244,7 +232,7 @@ object SjTest {
 
   def createProviders(providerDAO: GenericMongoService[Provider]) = {
     val cassProv = new Provider
-    cassProv.providerType = "cassandra"
+    cassProv.providerType = ProviderLiterals.cassandraType
     cassProv.name = "cass_prov"
     cassProv.login = ""
     cassProv.password = ""
@@ -253,7 +241,7 @@ object SjTest {
     providerDAO.save(cassProv)
 
     val aeroProv = new Provider
-    aeroProv.providerType = "aerospike"
+    aeroProv.providerType = ProviderLiterals.aerospikeType
     aeroProv.name = "aero_prov"
     aeroProv.login = ""
     aeroProv.password = ""
@@ -261,17 +249,8 @@ object SjTest {
     aeroProv.hosts = Array("stream-juggler.z1.netpoint-dc.com:3000", "stream-juggler.z1.netpoint-dc.com:3001")
     providerDAO.save(aeroProv)
 
-    val redisProv = new Provider
-    redisProv.providerType = "zookeeper"
-    redisProv.name = "zk1_prov"
-    redisProv.login = ""
-    redisProv.password = ""
-    redisProv.description = "zk provider test"
-    redisProv.hosts = Array("stream-juggler.z1.netpoint-dc.com:2181")
-    providerDAO.save(redisProv)
-
     val zkProv = new Provider
-    zkProv.providerType = "zookeeper"
+    zkProv.providerType = ProviderLiterals.zookeeperType
     zkProv.name = "zk_prov"
     zkProv.login = ""
     zkProv.password = ""
@@ -282,7 +261,7 @@ object SjTest {
 
   def createStreams(tService: Service, service: ZKService) = {
     val generator1 = new Generator
-    generator1.generatorType = "global"
+    generator1.generatorType = GeneratorLiterals.globalType
     generator1.instanceCount = 1
     generator1.service = service
 
@@ -298,7 +277,7 @@ object SjTest {
     sjStreamDAO.save(s1)
 
     val generator2 = new Generator
-    generator2.generatorType = "global"
+    generator2.generatorType = GeneratorLiterals.globalType
     generator2.instanceCount = 2
     generator2.service = service
     val s2 = new TStreamSjStream
@@ -312,7 +291,7 @@ object SjTest {
     sjStreamDAO.save(s2)
 
     val generator3 = new Generator
-    generator3.generatorType = "global"
+    generator3.generatorType = GeneratorLiterals.globalType
     generator3.instanceCount = 3
     generator3.service = service
     val s3 = new TStreamSjStream
@@ -326,7 +305,7 @@ object SjTest {
     sjStreamDAO.save(s3)
 
     val generator10 = new Generator
-    generator10.generatorType = "local"
+    generator10.generatorType = GeneratorLiterals.localType
     val s10 = new TStreamSjStream
     s10.name = "s10"
     s10.description = "s10 stream"

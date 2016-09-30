@@ -7,13 +7,13 @@ import com.bwsw.sj.engine.core.managment.TaskManager
 import org.slf4j.LoggerFactory
 
 /**
- * Provides methods are responsible for a basic execution logic of task engine that has a checkpoint based on time
+ * Provides methods for a basic execution logic of task engine that has a checkpoint based on time
  */
 trait TimeCheckpointTaskEngine {
   private val logger = LoggerFactory.getLogger(this.getClass)
   protected val instance: Instance
   protected val manager: TaskManager
-  protected val moduleEnvironmentManager: EnvironmentManager
+  protected val environmentManager: EnvironmentManager
 
   private val checkpointTimer: Option[SjTimer] = createTimer()
   val isNotOnlyCustomCheckpoint = checkpointTimer.isDefined
@@ -22,7 +22,7 @@ trait TimeCheckpointTaskEngine {
 
   private def createTimer() = {
     if (instance.checkpointInterval > 0) {
-      logger.debug(s"Task: ${manager.taskName}. Create a checkpoint timer for input module\n")
+      logger.debug(s"Task: ${manager.taskName}. Create a checkpoint timer for an input module\n")
       Some(new SjTimer())
     } else {
       logger.debug(s"Task: ${manager.taskName}. Input module has not programmatic checkpoint. Manually only\n")
@@ -35,7 +35,7 @@ trait TimeCheckpointTaskEngine {
   }
 
   def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean = {
-    isNotOnlyCustomCheckpoint && checkpointTimer.get.isTime || moduleEnvironmentManager.isCheckpointInitiated
+    isNotOnlyCustomCheckpoint && checkpointTimer.get.isTime || environmentManager.isCheckpointInitiated
   }
 
   def prepareForNextCheckpoint() = {

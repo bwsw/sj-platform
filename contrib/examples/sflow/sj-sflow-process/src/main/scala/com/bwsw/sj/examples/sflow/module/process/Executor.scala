@@ -2,14 +2,14 @@ package com.bwsw.sj.examples.sflow.module.process
 
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
-import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
+import com.bwsw.sj.engine.core.environment.RegularEnvironmentManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.state.StateStorage
 import com.bwsw.sj.examples.sflow.module.process.udf.GeoIp
 import com.bwsw.sj.examples.sflow.module.process.utils.SflowParser
 
 
-class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor(manager) {
+class Executor(manager: RegularEnvironmentManager) extends RegularStreamingExecutor(manager) {
 
   val objectSerializer = new ObjectSerializer()
   val state: StateStorage = manager.getState

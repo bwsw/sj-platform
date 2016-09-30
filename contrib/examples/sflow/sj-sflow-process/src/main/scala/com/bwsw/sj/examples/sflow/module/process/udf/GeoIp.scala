@@ -1,10 +1,9 @@
 package com.bwsw.sj.examples.sflow.module.process.udf
 
-import java.net.{Inet6Address, Inet4Address, InetAddress}
+import java.net.{Inet4Address, Inet6Address, InetAddress}
 
-
-import com.bwsw.sj.common.ConfigConstants
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.utils.ConfigSettingsUtils
 import com.maxmind.geoip.LookupService
 import org.slf4j.LoggerFactory
 
@@ -12,7 +11,6 @@ object GeoIp {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   private val fileStorage = ConnectionRepository.getFileStorage
-  private val configService = ConnectionRepository.getConfigService
 
   private lazy val ipv4AsNumLookup = getAsLookupServiceIpv4
   private lazy val ipv6AsNumLookup = getAsLookupServiceIpv6
@@ -35,17 +33,17 @@ object GeoIp {
   }
 
   private def getAsLookupServiceIpv4 = {
-    val geoIpFileName = configService.get(ConfigConstants.geoIpAsNum).value
+    val geoIpFileName = ConfigSettingsUtils.getGeoIpAsNumFileName()
 
     createLookupService(geoIpFileName)
   }
 
   private def getAsLookupServiceIpv6 = {
-    val geoIpFileName = configService.get(ConfigConstants.geoIpAsNumv6).value
+    val geoIpFileName = ConfigSettingsUtils.getGeoIpAsNumv6FileName()
 
     createLookupService(geoIpFileName)
   }
-
+  
   private def createLookupService(filename: String) = {
     val databaseFile = fileStorage.get(filename, filename)
 

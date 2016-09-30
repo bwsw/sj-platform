@@ -5,8 +5,8 @@ import java.util.concurrent.Executors
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.{StreamConstants, ModuleConstants}
-import com.bwsw.sj.engine.core.PersistentBlockingQueue
+import com.bwsw.sj.common.utils.{StreamLiterals, EngineLiterals}
+import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.KafkaEnvelope
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.TopicPartition
@@ -19,7 +19,7 @@ object KafkaSubscribingConsumer {
     val logger = LoggerFactory.getLogger(this.getClass)
     val executorService = Executors.newCachedThreadPool()
     var kafkaMessageAmount = 0
-    val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(ModuleConstants.persistentBlockingQueue)
+    val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(EngineLiterals.persistentBlockingQueue)
     val kafkaConsumer = createKafkaConsumer(List(("test", List(0, 2))))
     val timeout = 10
 
@@ -29,10 +29,10 @@ object KafkaSubscribingConsumer {
     val inputs = Map(("sflow-kafka-2", Array(0,2))).map(x => {
       val service = ConnectionRepository.getStreamService
 
-      (service.get(x._1), x._2)
+      (service.get(x._1).get, x._2)
     })
 
-    val kafkaInputs = inputs.filter(x => x._1.streamType == StreamConstants.kafkaStreamType)
+    val kafkaInputs = inputs.filter(x => x._1.streamType == StreamLiterals.kafkaStreamType)
 
     executorService.execute(new Runnable() {
       def run() = {

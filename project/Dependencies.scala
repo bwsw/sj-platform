@@ -7,10 +7,18 @@ object Dependencies {
   }
 
   lazy val sjCommonDependencies = Def.setting(Seq(
+    ("com.bwsw" % "t-streams_2.11" % "1.0.3.2")
+      .exclude("org.slf4j", "slf4j-simple"),
     "org.mongodb" % "casbah_2.11" % "3.0.0",
     "org.mongodb.morphia" % "morphia" % "1.1.1",
     "org.apache.commons" % "commons-io" % "1.3.2",
-    "com.typesafe" % "config" % "1.3.0"
+    "com.typesafe" % "config" % "1.3.0",
+    "org.apache.kafka" % "kafka_2.11" % "0.9.0.1",
+    "org.elasticsearch" % "elasticsearch" % "2.3.2"
+  ))
+
+  lazy val sjEngineCoreDependencies = Def.setting(Seq(
+    "net.openhft" % "chronicle-queue" % "4.2.6"
   ))
 
   lazy val sjRestDependencies = Def.setting(Seq(
@@ -19,8 +27,6 @@ object Dependencies {
       .exclude("commons-logging", "commons-logging"),
     ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
       .exclude("commons-logging", "commons-logging"),
-    "org.elasticsearch" % "elasticsearch" % "2.3.2",
-    "org.apache.kafka" % "kafka_2.11" % "0.9.0.1",
     "com.typesafe.akka" % "akka-slf4j_2.11" % "2.4.4"
   ))
 

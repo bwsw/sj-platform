@@ -16,7 +16,7 @@ trait FileStorage {
 
   def delete(fileName: String): Boolean
 
-  def getContent(path: String = null): Seq[String]
+  def getContent(): Seq[String]
 
   def exists(fileName: String): Boolean
 

@@ -20,23 +20,22 @@ import com.bwsw.tstreams.agents.group.CheckpointGroup
 class StatefulRegularTaskEngineService(manager: RegularTaskManager, checkpointGroup: CheckpointGroup, performanceMetrics: RegularStreamingPerformanceMetrics)
   extends RegularTaskEngineService(manager, performanceMetrics) {
 
+  private val streamService = ConnectionRepository.getStreamService
   private var countOfCheckpoints = 1
-
   private val stateService = new RAMStateService(manager, checkpointGroup)
 
-  val moduleEnvironmentManager = new StatefulModuleEnvironmentManager(
+  val regularEnvironmentManager = new StatefulModuleEnvironmentManager(
     new StateStorage(stateService),
-    optionsSerializer.deserialize[Map[String, Any]](regularInstance.options),
+    regularInstance.getOptionsAsMap(),
     outputProducers,
     regularInstance.outputs
-      .map(ConnectionRepository.getStreamService.get)
-      .filter(_.tags != null),
+      .flatMap(x => streamService.get(x)),
     outputTags,
     moduleTimer,
     performanceMetrics
   )
 
-  val executor = manager.getExecutor(moduleEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
+  val executor = manager.getExecutor(regularEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
 
   /**
    * Does group checkpoint of t-streams state consumers/producers

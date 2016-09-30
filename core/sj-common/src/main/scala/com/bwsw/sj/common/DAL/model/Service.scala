@@ -1,5 +1,6 @@
 package com.bwsw.sj.common.DAL.model
 
+import com.bwsw.sj.common.rest.entities.service.ServiceData
 import org.mongodb.morphia.annotations.{Entity, Id, Property}
 
 @Entity("services")
@@ -13,5 +14,17 @@ class Service() {
     this.name = name
     this.serviceType = serviceType
     this.description = description
+  }
+
+  def prepare(): Unit = {}
+  
+  def destroy(): Unit = {}
+
+  def asProtocolService(): ServiceData = ???
+
+  protected def fillProtocolService(protocolService: ServiceData) = {
+    protocolService.name = this.name
+    protocolService.description = this.description
+    protocolService.serviceType = this.serviceType
   }
 }

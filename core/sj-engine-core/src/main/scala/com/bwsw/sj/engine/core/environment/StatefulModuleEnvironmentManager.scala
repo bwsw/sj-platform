@@ -8,10 +8,10 @@ import com.bwsw.sj.engine.core.state.StateStorage
 import com.bwsw.tstreams.agents.producer.Producer
 
 import scala.collection.mutable
-
+import scala.collection._
 /**
  * Class allowing to manage environment of module that has state
- * Created: 15/04/2016
+ *
  *
  * @author Kseniya Mikhaleva
  * @param stateStorage Storage of state of module
@@ -26,10 +26,10 @@ class StatefulModuleEnvironmentManager(stateStorage: StateStorage,
                                        options: Map[String, Any],
                                        producers: Map[String, Producer[Array[Byte]]],
                                        outputs: Array[SjStream],
-                                       outputTags: mutable.Map[String, (String, ModuleOutput)],
+                                       outputTags: mutable.Map[String, (String, RegularModuleOutput)],
                                        moduleTimer: SjTimer,
                                        performanceMetrics: PerformanceMetrics)
-  extends ModuleEnvironmentManager(options, producers, outputs, outputTags, moduleTimer, performanceMetrics) {
+  extends RegularEnvironmentManager(options, producers, outputs, outputTags, moduleTimer, performanceMetrics) {
   /**
    * Returns specific state of module
    *

@@ -5,11 +5,6 @@ import com.bwsw.sj.common.DAL.model.module.InputInstance
 /**
  * Provides methods are responsible for a fix time eviction policy of input envelope duplicates.
  * In this case a specific key will be kept within fix time
- * Created: 14/07/2016
- *
- * @param instance Input instance contains a settings of an eviction policy
- *                 (message TTL, a default eviction policy and a maximum size of message queue)
- * @author Kseniya Mikhaleva
  */
 
 class FixTimeEvictionPolicy(instance: InputInstance) extends InputInstanceEvictionPolicy(instance) {
@@ -17,7 +12,7 @@ class FixTimeEvictionPolicy(instance: InputInstance) extends InputInstanceEvicti
   /**
    * Checks whether a specific key is duplicate or not
    * @param key Key that will be checked
-   * @param value In case there has to update duplicate key this value will be used
+   * @param value In case there is a need to update duplicate key this value will be used
    * @return True if the key is not duplicate and false in other case
    */
   def checkForDuplication(key: String, value: Array[Byte]): Boolean = {

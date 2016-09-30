@@ -9,7 +9,7 @@ import scala.collection.mutable
 
 /**
  * Class represents a set of metrics that characterize performance of a regular streaming module
- * Created: 07/06/2016
+ *
  * @author Kseniya Mikhaleva
  */
 
@@ -20,7 +20,7 @@ class RegularStreamingPerformanceMetrics(manager: RegularTaskManager)
   private var totalIdleTime = 0L
   private var numberOfStateVariables = 0
   private val inputStreamNames =  manager.inputs.map(_._1.name).toArray
-  private val outputStreamNames = manager.getInstance.outputs
+  private val outputStreamNames = manager.instance.outputs
 
   override protected var inputEnvelopesPerStream = createStorageForInputEnvelopes(inputStreamNames)
   override protected var outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
@@ -30,7 +30,6 @@ class RegularStreamingPerformanceMetrics(manager: RegularTaskManager)
    */
   def increaseTotalIdleTime(idle: Long) = {
     mutex.lock()
-    logger.debug(s"Increase total idle time on $idle ms\n")
     totalIdleTime += idle
     mutex.unlock()
   }

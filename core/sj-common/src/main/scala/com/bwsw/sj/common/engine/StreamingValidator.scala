@@ -1,14 +1,16 @@
 package com.bwsw.sj.common.engine
 
 /**
- * Trait for validating a launch parameters of module
- * Created: 07/04/2016
+ * Trait for validating a launch parameters of a module of a specific type
+ * (input, regular, output)
+ *
  * @author Kseniya Mikhaleva
  */
 
 trait StreamingValidator {
   /**
-   * Provides a validation function that checks a propriety of option parameters
+   * Provides a validation function that checks a propriety of option parameter of instance
+   * (custom options)
    * @param options Option parameters
    * @return The result of the validation. True by default
    */

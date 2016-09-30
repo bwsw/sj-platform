@@ -7,12 +7,11 @@ import scala.collection.Map
 
 /**
  * A common class providing for user methods that can be used in a module of specific type
- * Created: 20/07/2016
  *
  * @author Kseniya Mikhaleva
  *
  * @param options User defined options from instance parameters
- * @param outputs Set of output streams of instance parameters that have tags
+ * @param outputs Set of output streams of instance parameters
  */
 
 abstract class EnvironmentManager(val options: Map[String, Any], outputs: Array[SjStream]) {
@@ -23,5 +22,13 @@ abstract class EnvironmentManager(val options: Map[String, Any], outputs: Array[
 
   def initiateCheckpoint() = {
     isCheckpointInitiated = true
+  }
+
+  /**
+   * Returns a set of names of the output streams according to the set of tags
+   */
+  def getStreamsByTags(tags: Array[String]) = {
+    logger.info(s"Get names of the streams that have set of tags: ${tags.mkString(",")}\n")
+    outputs.filter(x => tags.forall(x.tags.contains)).map(_.name)
   }
 }

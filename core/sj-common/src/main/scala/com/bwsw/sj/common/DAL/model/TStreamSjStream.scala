@@ -1,10 +1,14 @@
 package com.bwsw.sj.common.DAL.model
 
+import com.bwsw.sj.common.rest.entities.stream.TStreamSjStreamData
+import com.bwsw.sj.common.utils._
+import com.bwsw.tstreams.services.BasicStreamService
 import org.mongodb.morphia.annotations.Embedded
+import SjStreamUtilsForCreation._
 
 class TStreamSjStream() extends SjStream {
   var partitions: Int = 0
-  @Embedded var generator: Generator = null
+  @Embedded var generator: Generator = new Generator(GeneratorLiterals.localType)
 
   def this(name: String,
            description: String,
@@ -21,5 +25,40 @@ class TStreamSjStream() extends SjStream {
     this.streamType = streamType
     this.tags = tags
     this.generator = generator
+  }
+
+  override def asProtocolStream() = {
+    val streamData = new TStreamSjStreamData
+    super.fillProtocolStream(streamData)
+
+    streamData.partitions = this.partitions
+    streamData.generator = this.generator.asProtocolGenerator()
+
+    streamData
+  }
+
+  override def create() = {
+    val service = this.service.asInstanceOf[TStreamService]
+    val dataStorage = createDataStorage(service)
+    val metadataStorage = createMetadataStorage(service)
+
+    if (!BasicStreamService.isExist(this.name, metadataStorage)) {
+      BasicStreamService.createStream(
+        this.name,
+        this.partitions,
+        StreamLiterals.ttl,
+        this.description,
+        metadataStorage,
+        dataStorage
+      )
+    }
+  }
+
+  override def delete() = {
+    val service = this.service.asInstanceOf[TStreamService]
+    val metadataStorage = createMetadataStorage(service)
+    if (BasicStreamService.isExist(this.name, metadataStorage)) {
+      BasicStreamService.deleteStream(this.name, metadataStorage)
+    }
   }
 }

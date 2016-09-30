@@ -2,9 +2,6 @@ package com.bwsw.sj.mesos.framework.task
 
 import scala.collection.mutable
 
-/**
-  * Created by diryavkin_dn on 18.05.16.
-  */
 object TasksList {
 
   private val tasksToLaunch: mutable.ListBuffer[String] = mutable.ListBuffer()

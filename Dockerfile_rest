@@ -1,6 +1,6 @@
 FROM ubuntu:trusty
 
-MAINTAINER BITWORKS mendelbaum_nm@bw-sw.com
+MAINTAINER BITWORKS
 
 # Install Oracle JDK 8
 RUN echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main" | tee /etc/apt/sources.list.d/webupd8team-java.list && \
@@ -17,12 +17,34 @@ RUN echo "deb http://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Install npm and node.js
+RUN set -x && apt-get update && \
+    apt-get install -y curl bzip2 git make build-essential && \
+    curl -sL https://deb.nodesource.com/setup_4.x | bash - && apt-get update && \
+    apt-get install -y ca-certificates nodejs && rm -rf /var/lib/apt/lists/*
+
 # see .dockerignore in root dir
 COPY ./project /opt/bin/juggler/project
 COPY ./build.sbt /opt/bin/juggler/
 COPY ./core/sj-common /opt/bin/juggler/core/sj-common
 COPY ./core/sj-crud-rest /opt/bin/juggler/core/sj-crud-rest
+COPY ./core/sj-frontend /opt/bin/juggler/core/sj-frontend
 
+#Prepare UI
+WORKDIR /opt/bin/juggler/core/sj-frontend
+
+
+RUN npm cache clear
+RUN npm install -g npm
+RUN npm install -g n
+RUN npm install -g typings
+RUN npm install --unsafe-perm
+RUN npm run-script build.prod
+RUN mkdir /var/www
+RUN cp dist/prod/. /var/www/ -R
+RUN rm -rf *
+
+# Prepare Rest
 WORKDIR /opt/bin/juggler
 
 RUN mkdir -p /root/.sbt/0.13 && \
@@ -36,6 +58,8 @@ RUN ln -s /opt/bin/juggler/docker/rest/rest-supervisor.conf /etc/supervisor/conf
     ln -s /opt/bin/juggler/docker/rest/rest-nginx.conf /etc/nginx/conf.d/ && \
     rm /etc/nginx/sites-available/default && \
     echo 'daemon off;' >> /etc/nginx/nginx.conf
+
+
 
 ENTRYPOINT ["/bin/bash"]
 

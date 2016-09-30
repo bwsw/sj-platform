@@ -1,62 +1,50 @@
 package com.bwsw.sj.engine.regular.task
 
 import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.StreamConstants
+import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.engine.StreamingExecutor
-import com.bwsw.sj.engine.core.environment.{EnvironmentManager, ModuleEnvironmentManager, ModuleOutput}
+import com.bwsw.sj.common.utils.StreamLiterals
+import com.bwsw.sj.engine.core.environment.{RegularEnvironmentManager, EnvironmentManager, RegularModuleOutput}
 import com.bwsw.sj.engine.core.managment.TaskManager
-import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
-import com.bwsw.sj.engine.core.utils.EngineUtils
 import com.bwsw.tstreams.agents.consumer.Consumer
-import com.bwsw.tstreams.agents.consumer.Offsets.IOffset
+import com.bwsw.tstreams.agents.consumer.Offset.IOffset
 
-import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 /**
  * Class allowing to manage an environment of regular streaming task
- * Created: 13/04/2016
+ *
  *
  * @author Kseniya Mikhaleva
  */
 class RegularTaskManager() extends TaskManager {
 
-  val inputs = instance.executionPlan.tasks.get(taskName).inputs.asScala
-    .map(x => {
-    val service = ConnectionRepository.getStreamService
-
-    (service.get(x._1), x._2)
-  })
-
+  private val regularInstance = instance.asInstanceOf[RegularInstance]
+  val inputs = getInputs(regularInstance.executionPlan)
+  val outputProducers =  createOutputProducers()
   val outputTags = createOutputTags()
 
-  assert(agentsPorts.length >=
-    (inputs.count(x => x._1.streamType == StreamConstants.tStreamType) + instance.outputs.length + 3),
-    "Not enough ports for t-stream consumers/producers ")
 
-  /**
-   * Returns instance of executor of module
-   *
-   * @return An instance of executor of module
-   */
+  assert(agentsPorts.length >=
+    (inputs.count(x => x._1.streamType == StreamLiterals.tStreamType) + instance.outputs.length + 3),
+    "Not enough ports for t-stream consumers/producers." +
+      s"${inputs.count(x => x._1.streamType == StreamLiterals.tStreamType) + instance.outputs.length + 3} ports are required")
+
   def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = {
     logger.debug(s"Task: $taskName. Start loading of executor class from module jar\n")
-    val moduleJar = getModuleJar
-    val classLoader = getClassLoader(moduleJar.getAbsolutePath)
-    val executor = classLoader.loadClass(fileMetadata.specification.executorClass)
-      .getConstructor(classOf[ModuleEnvironmentManager])
-      .newInstance(environmentManager).asInstanceOf[RegularStreamingExecutor]
+    val executor = moduleClassLoader
+      .loadClass(executorClassName)
+      .getConstructor(classOf[RegularEnvironmentManager])
+      .newInstance(environmentManager)
+      .asInstanceOf[StreamingExecutor]
     logger.debug(s"Task: $taskName. Create instance of executor class\n")
 
     executor
   }
 
-  def getExecutor: StreamingExecutor = ???
-
   private def createOutputTags() = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. Get tags for each output stream\n")
-    mutable.Map[String, (String, ModuleOutput)]()
+    mutable.Map[String, (String, RegularModuleOutput)]()
   }
 
   /**
@@ -71,15 +59,15 @@ class RegularTaskManager() extends TaskManager {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
 
-    val timeUuidGenerator = EngineUtils.getUUIDGenerator(stream.asInstanceOf[TStreamSjStream])
+    val transactionGenerator = getTransactionGenerator(stream)
 
     setStreamOptions(stream)
 
     tstreamFactory.getConsumer[Array[Byte]](
       "consumer_for_" + taskName + "_" + stream.name,
-      timeUuidGenerator,
+      transactionGenerator,
       converter,
-      (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList,
+      (0 until stream.partitions).toSet,
       offset)
   }
 }

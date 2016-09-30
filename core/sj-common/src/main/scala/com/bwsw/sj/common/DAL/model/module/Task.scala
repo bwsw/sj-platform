@@ -2,15 +2,14 @@ package com.bwsw.sj.common.DAL.model.module
 
 /**
  * Entity for task of execution plan
- * Created: 14/04/2016
+ *
  *
  * @author Kseniya Tomskikh
  */
 class Task() {
-  var inputs: java.util.Map[String, Array[Int]] = null
+  var inputs: java.util.Map[String, Array[Int]] = new java.util.HashMap()
 
-  def this(inputs: java.util.Map[String, Array[Int]]) = {
-    this()
-    this.inputs = inputs
+  def addInput(name: String, partitions: Array[Int]) = {
+    inputs.put(name, partitions)
   }
 }

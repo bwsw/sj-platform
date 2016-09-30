@@ -1,21 +1,13 @@
 package com.bwsw.common.client
 
-import com.bwsw.sj.common.ConfigConstants
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-
-/**
-  * Options for TcpClient
-  * Created: 18/04/2016
-  *
-  * @author Kseniya Tomskikh
-  */
+import com.bwsw.sj.common.utils.ConfigSettingsUtils
 
 class TcpClientOptions() {
   var zkServers = Array(s"127.0.0.1:2181")
   var prefix = ""
-  private val configService = ConnectionRepository.getConfigService
-  var retryPeriod = configService.get(ConfigConstants.tgClientRetryPeriodTag).value.toLong
-  var retryCount = configService.get(ConfigConstants.tgRetryCountTag).value.toInt
+
+  var retryPeriod = ConfigSettingsUtils.getClientRetryPeriod()
+  var retryCount = ConfigSettingsUtils.getRetryCount()
 
   def setZkServers(hosts: Array[String]): TcpClientOptions = {
     zkServers = hosts
@@ -27,7 +19,7 @@ class TcpClientOptions() {
     this
   }
 
-  def setRetryPeriod(period: Long): TcpClientOptions = {
+  def setRetryPeriod(period: Int): TcpClientOptions = {
     retryPeriod = period
     this
   }
@@ -36,5 +28,4 @@ class TcpClientOptions() {
     retryCount = count
     this
   }
-
 }

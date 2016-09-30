@@ -1,13 +1,27 @@
 package com.bwsw.sj.common.DAL.model.module
 
-import org.mongodb.morphia.annotations.Property
+import com.bwsw.sj.common.rest.entities.module.{ExecutionPlan, InstanceMetadata, OutputInstanceMetadata}
+import org.mongodb.morphia.annotations.{Embedded, Property}
 
 /**
-  * Entity for output-streaming instance-json
-  * Created: 23/05/2016
-  *
-  * @author Kseniya Tomskikh
-  */
+ * Entity for output-streaming instance-json
+ *
+ *
+ * @author Kseniya Tomskikh
+ */
 class OutputInstance() extends Instance {
-  @Property("start-from") var startFrom: String = null
+  @Embedded("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan()
+  @Property("start-from") var startFrom: String = "newest"
+
+  override def asProtocolInstance(): InstanceMetadata = {
+    val protocolInstance = new OutputInstanceMetadata()
+    super.fillProtocolInstance(protocolInstance)
+
+    protocolInstance.executionPlan = this.executionPlan
+    protocolInstance.input = this.inputs.head
+    protocolInstance.output = this.outputs.head
+    protocolInstance.startFrom = this.startFrom
+
+    protocolInstance
+  }
 }

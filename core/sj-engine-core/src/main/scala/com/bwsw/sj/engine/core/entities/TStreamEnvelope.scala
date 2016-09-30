@@ -1,20 +1,16 @@
 package com.bwsw.sj.engine.core.entities
 
-import java.util.UUID
-
-import com.bwsw.sj.common.StreamConstants
+import com.bwsw.sj.common.utils.StreamLiterals
 
 /**
  * Provides a wrapper for t-stream transaction.
- * Created: 12/04/2016
- * @author Kseniya Mikhaleva
  */
 
 class TStreamEnvelope() extends Envelope() {
-  var txnUUID: UUID = null
+  var id: Long = 0
   var consumerName: String = null
-  var data: List[Array[Byte]] = null
-  streamType = StreamConstants.tStreamType
+  var data: List[Array[Byte]] = List()
+  streamType = StreamLiterals.tStreamType
 }
 
 

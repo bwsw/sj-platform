@@ -16,7 +16,7 @@ import scala.collection.concurrent
  * Also a logger is included into channel pipeline
  * @param executor Executor of an input streaming module that is defined by a user
  * @param channelContextQueue Queue for keeping a channel context to process messages (byte buffer) in their turn
- * @param bufferForEachContext Map for keeping a buffer containing incoming bytes with the channel context
+ * @param bufferForEachContext Map for keeping a buffer containing incoming bytes with the appropriate channel context
  */
 class InputStreamingChannelInitializer(executor: InputStreamingExecutor,
                                        channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],

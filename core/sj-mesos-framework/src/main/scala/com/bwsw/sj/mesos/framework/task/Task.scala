@@ -6,7 +6,7 @@ import java.util.Date
 import com.bwsw.sj.common.DAL.model.module.{Task => InstanceTask}
 
 /**
-  * Created: 21/07/2016
+  *
   *
   * @author Kseniya Tomskikh
   */

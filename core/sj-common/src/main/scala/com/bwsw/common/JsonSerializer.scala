@@ -9,14 +9,12 @@ import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import org.slf4j.LoggerFactory
 
-/**
- * Class represents a json serializer
- * Created: 11/04/2016
- *
- * @author Kseniya Mikhaleva
- */
-
 class JsonSerializer extends Serializer {
+
+  def this(ignore: Boolean) = {
+    this()
+    this.setIgnoreUnknown(ignore)
+  }
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 

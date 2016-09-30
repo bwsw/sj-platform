@@ -2,15 +2,15 @@ package com.bwsw.sj.module.output.pm.data
 
 import java.util.Date
 
-import com.bwsw.sj.engine.core.entities.EsEntity
+import com.bwsw.sj.engine.core.entities.OutputData
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
-  * Created: 23/06/2016
+  *
   *
   * @author Kseniya Mikhaleva
   */
-class PerformanceMetrics extends EsEntity {
+class PerformanceMetrics extends OutputData {
   @JsonProperty("pm-datetime") var pmDatetime: Date = null
   @JsonProperty("task-id") var taskId: String= null
   var host: String = null
@@ -31,12 +31,12 @@ class PerformanceMetrics extends EsEntity {
   var uptime: Long = 0
 
   @JsonProperty("total-idle-time") var totalIdleTime: Long = 0
-  @JsonProperty("input-envelopes-per-stream") var inputEnvelopesPerStream: Map[String, Any] = null
-  @JsonProperty("input-elements-per-stream") var inputElementsPerStream: Map[String, Any] = null
-  @JsonProperty("input-bytes-per-stream") var inputBytesPerStream: Map[String, Any] = null
-  @JsonProperty("output-envelopes-per-stream") var outputEnvelopesPerStream: Map[String, Any] = null
-  @JsonProperty("output-elements-per-stream") var outputElementsPerStream: Map[String, Any] = null
-  @JsonProperty("output-bytes-per-stream") var outputBytesPerStream: Map[String, Any] = null
+  @JsonProperty("input-envelopes-per-stream") var inputEnvelopesPerStream: Map[String, Any] = Map()
+  @JsonProperty("input-elements-per-stream") var inputElementsPerStream: Map[String, Any] = Map()
+  @JsonProperty("input-bytes-per-stream") var inputBytesPerStream: Map[String, Any] = Map()
+  @JsonProperty("output-envelopes-per-stream") var outputEnvelopesPerStream: Map[String, Any] = Map()
+  @JsonProperty("output-elements-per-stream") var outputElementsPerStream: Map[String, Any] = Map()
+  @JsonProperty("output-bytes-per-stream") var outputBytesPerStream: Map[String, Any] = Map()
   @JsonProperty("state-variables-number") var stateVariablesNumber: Int = 0
 
   @JsonProperty("input-stream-name") var inputStreamName: String = null

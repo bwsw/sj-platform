@@ -15,7 +15,7 @@ import scala.collection.concurrent
  * because of a handler should not contain an execution logic of incoming data
  * @param executor Executor of an input streaming module that is defined by a user
  * @param channelContextQueue Queue for keeping a channel context to process messages (byte buffer) in their turn
- * @param bufferForEachContext Map for keeping a buffer containing incoming bytes with the channel context
+ * @param bufferForEachContext Map for keeping a buffer containing incoming bytes with the appropriate channel context
  */
 
 @Sharable
@@ -39,7 +39,7 @@ class InputStreamingServerHandler(executor: InputStreamingExecutor,
   /**
    * Exception handler that print stack trace and than close the connection when an exception is raised.
    * @param ctx Channel handler context
-   * @param cause What is caused of exception
+   * @param cause What has caused an exception
    */
   override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) = {
     cause.printStackTrace()

@@ -1,5 +1,7 @@
 package com.bwsw.sj.common.DAL.model
 
+import com.bwsw.sj.common.rest.entities.stream.JDBCSjStreamData
+
 class JDBCSjStream() extends SjStream {
   def this(name: String,
            description: String,
@@ -12,5 +14,12 @@ class JDBCSjStream() extends SjStream {
     this.service = service
     this.streamType = streamType
     this.tags = tags
+  }
+
+  override def asProtocolStream() = {
+    val streamData = new JDBCSjStreamData
+    super.fillProtocolStream(streamData)
+
+    streamData
   }
 }

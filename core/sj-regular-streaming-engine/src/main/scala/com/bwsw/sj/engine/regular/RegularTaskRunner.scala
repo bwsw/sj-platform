@@ -1,43 +1,22 @@
 package com.bwsw.sj.engine.regular
 
-import java.util.concurrent.{ExecutorCompletionService, Executors}
-
-import com.bwsw.sj.common.ModuleConstants
-import com.bwsw.sj.engine.core.PersistentBlockingQueue
+import com.bwsw.sj.engine.core.engine.TaskRunner
+import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
-import com.bwsw.sj.engine.regular.task.engine.input.RegularTaskInputService
 import com.bwsw.sj.engine.regular.task.engine.{RegularTaskEngine, RegularTaskEngineFactory}
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
-import com.google.common.util.concurrent.ThreadFactoryBuilder
 import org.slf4j.LoggerFactory
 
 /**
  * Object is responsible for running a task of job that launches regular module
- * Created: 13/04/2016
+ *
  *
  * @author Kseniya Mikhaleva
  */
 
-object RegularTaskRunner {
+object RegularTaskRunner extends {override val threadName = "RegularTaskRunner-%d"} with TaskRunner {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val threadPool = createThreadPool()
-  private val executorService = new ExecutorCompletionService[Unit](threadPool)
-
-  private val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(ModuleConstants.persistentBlockingQueue)
-
-  private def createThreadPool() = {
-    val countOfThreads = 3
-    val threadFactory = createThreadFactory()
-
-    Executors.newFixedThreadPool(countOfThreads, threadFactory)
-  }
-
-  private def createThreadFactory() = {
-    new ThreadFactoryBuilder()
-      .setNameFormat("RegularTaskRunner-%d")
-      .build()
-  }
 
   def main(args: Array[String]) {
     try {
@@ -51,7 +30,7 @@ object RegularTaskRunner {
 
       val regularTaskEngine: RegularTaskEngine = regularTaskEngineFactory.createRegularTaskEngine()
 
-      val regularTaskInputService: RegularTaskInputService = regularTaskEngine.regularTaskInputService
+      val regularTaskInputService: TaskInputService = regularTaskEngine.taskInputService
 
       logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
 
@@ -64,12 +43,5 @@ object RegularTaskRunner {
       case assertionError: Error => handleException(assertionError)
       case exception: Exception => handleException(exception)
     }
-  }
-
-  def handleException(exception: Throwable) = {
-    logger.error("Runtime exception", exception)
-    exception.printStackTrace()
-    threadPool.shutdownNow()
-    System.exit(-1)
   }
 }

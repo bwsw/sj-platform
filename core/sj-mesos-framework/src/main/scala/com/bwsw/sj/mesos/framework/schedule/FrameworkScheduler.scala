@@ -3,9 +3,9 @@ package com.bwsw.sj.mesos.framework.schedule
 import java.net.URI
 import java.util
 
-import com.bwsw.sj.common.DAL.model.module.{InputTask, Instance, InputInstance}
+import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.{ConfigConstants, ModuleConstants}
+import com.bwsw.sj.common.utils.{ConfigLiterals, EngineLiterals}
 import com.bwsw.sj.mesos.framework.task.{StatusHandler, TasksList}
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos._
@@ -29,7 +29,7 @@ class FrameworkScheduler extends Scheduler {
   var perTaskMem: Double = 0.0
   var perTaskPortsCount: Int = 0
   var params = immutable.Map[String, String]()
-  var instance: Instance = null
+  var instance: Option[Instance] = None
   val configFileService = ConnectionRepository.getConfigService
   var jarName: String = null
   val availablePortsForOneInstance: collection.mutable.ListBuffer[Long] = collection.mutable.ListBuffer()
@@ -51,6 +51,11 @@ class FrameworkScheduler extends Scheduler {
     TasksList.message = s"Got framework message: $data"
   }
 
+  /**
+   * Execute when task change status.
+   * @param driver scheduler driver
+   * @param status received status from master
+   */
   def statusUpdate(driver: SchedulerDriver, status: TaskStatus) {
     StatusHandler.handle(status)
   }
@@ -60,16 +65,16 @@ class FrameworkScheduler extends Scheduler {
 
 
   /**
-    * Obtaining slaves
-    *
-    * @param driver:SchedulerDriver
-    * @param offers:util.List[Offer]
-    */
+   * Obtaining resources and lauch tasks.
+   *
+   * @param driver scheduler driver
+   * @param offers resources, that master offered to framework
+   */
   override def resourceOffers(driver: SchedulerDriver, offers: util.List[Offer]) {
     logger.info(s"RESOURCE OFFERS")
     availablePortsForOneInstance.remove(0, availablePortsForOneInstance.length)
 
-    val filteredOffers = filterOffers(offers, this.instance.nodeAttributes)
+    val filteredOffers = filterOffers(offers, this.instance.get.nodeAttributes)
     if (filteredOffers.size == 0) {
       for (offer <- offers.asScala) {
         driver.declineOffer(offer.getId)
@@ -142,7 +147,7 @@ class FrameworkScheduler extends Scheduler {
         .setType(org.apache.mesos.Protos.Value.Type.SCALAR)
         .setName("mem")
         .setScalar(org.apache.mesos.Protos.Value.
-          Scalar.newBuilder.setValue(perTaskMem)
+        Scalar.newBuilder.setValue(perTaskMem)
         ).build
       val ports = getPorts(currentOffer._1, currTask)
 
@@ -150,11 +155,12 @@ class FrameworkScheduler extends Scheduler {
       var taskPort: String = ""
 
       var availablePorts = ports.getRanges.getRangeList.asScala.map(_.getBegin.toString)
-      if (instance.moduleType.equals(ModuleConstants.inputStreamingType)) {
-        taskPort = availablePorts.head; availablePorts = availablePorts.tail
-        val inputInstance = instance.asInstanceOf[InputInstance]
+      if (instance.get.moduleType.equals(EngineLiterals.inputStreamingType)) {
+        taskPort = availablePorts.head;
+        availablePorts = availablePorts.tail
+        val inputInstance = instance.get.asInstanceOf[InputInstance]
         inputInstance.tasks.put(currTask, new InputTask(currentOffer._1.getUrl.getAddress.getIp, taskPort.toInt))
-        ConnectionRepository.getInstanceService.save(instance)
+        ConnectionRepository.getInstanceService.save(instance.get)
       }
       agentPorts = availablePorts.mkString(",")
       agentPorts.dropRight(1)
@@ -165,20 +171,21 @@ class FrameworkScheduler extends Scheduler {
       val cmd = CommandInfo.newBuilder()
       try {
         val environments = Environment.newBuilder
-          .addVariables(Environment.Variable.newBuilder.setName("MONGO_HOST").setValue(params {"mongodbHost"}))
-          .addVariables(Environment.Variable.newBuilder.setName("MONGO_PORT").setValue(params {"mongodbPort"}))
-          .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_NAME").setValue(params {"instanceId"}))
+          .addVariables(Environment.Variable.newBuilder.setName("MONGO_HOST").setValue(params {
+          "mongodbHost"
+        }))
+          .addVariables(Environment.Variable.newBuilder.setName("MONGO_PORT").setValue(params {
+          "mongodbPort"
+        }))
+          .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_NAME").setValue(params {
+          "instanceId"
+        }))
           .addVariables(Environment.Variable.newBuilder.setName("TASK_NAME").setValue(currTask))
           .addVariables(Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(currentOffer._1.getUrl.getAddress.getIp))
           .addVariables(Environment.Variable.newBuilder.setName("AGENTS_PORTS").setValue(agentPorts))
 
-//        if (instance.moduleType.equals(ModuleConstants.inputStreamingType)) {
-//          logger.debug(s"Task: $currTask. Task port: $taskPort")
-//          environments.addVariables(Environment.Variable.newBuilder.setName("ENTRY_PORT").setValue(taskPort))
-//        }
-
         cmd
-          .addUris(CommandInfo.URI.newBuilder.setValue(getModuleUrl(instance)))
+          .addUris(CommandInfo.URI.newBuilder.setValue(getModuleUrl(instance.get)))
           .setValue("java -jar " + jarName)
           .setEnvironment(environments)
       } catch {
@@ -226,16 +233,16 @@ class FrameworkScheduler extends Scheduler {
   }
 
   /**
-    * Reregistering framework
-    */
+   * Reregistering framework after master disconnected.
+   */
   def reregistered(driver: SchedulerDriver, masterInfo: MasterInfo) {
     logger.debug(s"New master $masterInfo")
     TasksList.message = s"New master $masterInfo"
   }
 
   /**
-    * Registering framework
-    */
+   * Registering framework.
+   */
   def registered(driver: SchedulerDriver, frameworkId: FrameworkID, masterInfo: MasterInfo) {
     logger.info(s"Registered framework as: ${frameworkId.getValue}")
     this.driver = driver
@@ -248,33 +255,30 @@ class FrameworkScheduler extends Scheduler {
     logger.debug(s"Got environment variable: $params")
 
     instance = ConnectionRepository.getInstanceService.get(params("instanceId"))
-    if (instance == null) {
+    if (instance.isEmpty) {
       logger.error(s"Not found instance")
       driver.stop()
       TasksList.message = "Framework shut down: not found instance."
       return
     }
-    logger.debug(s"Got instance ${instance.name}")
+    logger.debug(s"Got instance ${instance.get.name}")
 
-//    //framework blocking
-//    try {
-//      val zkHostString = instance.coordinationService.provider.hosts(0)
-//      val zkHost = new InetSocketAddress(InetAddress.getByName(zkHostString.split(":")(0)), zkHostString.split(":")(1).toInt)
-//      val zkClient = new ZooKeeperClient(Amount.of(1, Time.MINUTES), zkHost)
-//      val lockPath = s"/mesos-framework/${instance.coordinationService.namespace}/${params{"instanceId"}}/lock"
-//      val dli = new DistributedLockImpl(zkClient, lockPath)
-//      dli.lock()
-//      logger.info("Framework locked")
-//    } catch {
-//      case e:Exception => FrameworkUtil.handleSchedulerException(e, driver, logger)
-//    }
+    perTaskCores = instance.get.perTaskCores
+    perTaskMem = instance.get.perTaskRam
+    perTaskPortsCount = FrameworkUtil.getCountPorts(instance.get)
+    val tasks =
+      if (instance.get.moduleType.equals(EngineLiterals.inputStreamingType))
+        (0 until instance.get.parallelism).map(tn => instance.get.name + "-task" + tn)
+      else {
+        val executionPlan = instance.get match {
+          case regularInstance: RegularInstance => regularInstance.executionPlan
+          case outputInstance: OutputInstance => outputInstance.executionPlan
+          case windowedInstance: WindowedInstance => windowedInstance.executionPlan
+        }
 
-    perTaskCores = instance.perTaskCores
-    perTaskMem = instance.perTaskRam
-    perTaskPortsCount = FrameworkUtil.getCountPorts(instance)
-    val tasks = if (instance.moduleType.equals(ModuleConstants.inputStreamingType))
-        (0 until instance.parallelism).map(tn => instance.name+"-task"+tn)
-        else instance.executionPlan.tasks.asScala.keys
+        executionPlan.tasks.asScala.keys
+      }
+
     tasks.foreach(task => TasksList.newTask(task))
     logger.debug(s"Got tasks: $TasksList")
 
@@ -289,15 +293,15 @@ class FrameworkScheduler extends Scheduler {
 
 
   /**
-    * Getting list of offers and tasks count for launch on each slave
-    *
-    * @param perTaskCores:Double
-    * @param perTaskRam:Double
-    * @param perTaskPortsCount:Int
-    * @param taskCount:Int
-    * @param offers:util.List[Offer]
-    * @return mutable.ListBuffer[(Offer, Int)]
-    */
+   * Getting list of offers and tasks count for launch on each slave
+   *
+   * @param perTaskCores:Double
+   * @param perTaskRam:Double
+   * @param perTaskPortsCount:Int
+   * @param taskCount:Int
+   * @param offers:util.List[Offer]
+   * @return mutable.ListBuffer[(Offer, Int)]
+   */
   def getOffersForSlave(perTaskCores: Double,
                         perTaskRam: Double,
                         perTaskPortsCount: Int,
@@ -334,30 +338,31 @@ class FrameworkScheduler extends Scheduler {
   }
 
   /**
-    * This method give how much resource of type <name> we have on <offer>
-    *
-    * @param offer:Offer
-    * @param name:String
-    * @return Double
-    */
+   * This method give how much resource of type <name> we have on <offer>
+   *
+   * @param offer:Offer
+   * @param name:String
+   * @return Double
+   */
   def getResource(offer: Offer, name: String): Resource = {
     offer.getResourcesList.asScala.filter(_.getName.equals(name)).head
   }
 
 
   /**
-    * Filter offered slaves
-    * @param offers:util.List[Offer]
-    * @param filters:util.Map[String, String]
-    * @return util.List[Offer]
-    */
+   * Filter offered slaves
+   * @param offers:util.List[Offer]
+   * @param filters:util.Map[String, String]
+   * @return util.List[Offer]
+   */
   def filterOffers(offers: util.List[Offer], filters: util.Map[String, String]): util.List[Offer] = {
     logger.debug(s"FILTER OFFERS")
     var result: mutable.Buffer[Offer] = mutable.Buffer()
-    if (filters != null) {
+    if (!filters.isEmpty) {
+      //todo Дим, подумай, теперь filters не может быть null, мб теперь не понадобится if условие (раньше было условие: filters != null)
       for (filter <- filters.asScala) {
         for (offer <- offers.asScala) {
-          if (filter._1.matches("""\+.+""")) {
+          if (filter._1.matches( """\+.+""")) {
             for (attribute <- offer.getAttributesList.asScala) {
               if (filter._1.toString.substring(1) == attribute.getName &
                 attribute.getText.getValue.matches(filter._2.r.toString)) {
@@ -365,7 +370,7 @@ class FrameworkScheduler extends Scheduler {
               }
             }
           }
-          if (filter._1.matches("""\-.+""")) {
+          if (filter._1.matches( """\-.+""")) {
             for (attribute <- offer.getAttributesList.asScala) {
               if (filter._1.matches(attribute.getName.r.toString) &
                 attribute.getText.getValue.matches(filter._2.r.toString)) {
@@ -376,18 +381,19 @@ class FrameworkScheduler extends Scheduler {
         }
       }
     } else result = offers.asScala
+
     result.asJava
   }
 
   /**
-    * Get jar URI for framework
-    * @param instance:Instance
-    * @return String
-    */
+   * Get jar URI for framework
+   * @param instance:Instance
+   * @return String
+   */
   def getModuleUrl(instance: Instance): String = {
-    jarName = configFileService.get("system." + instance.engine).value
-    val restHost = configFileService.get(ConfigConstants.hostOfCrudRestTag).value
-    val restPort = configFileService.get(ConfigConstants.portOfCrudRestTag).value.toInt
+    jarName = configFileService.get("system." + instance.engine).get.value
+    val restHost = configFileService.get(ConfigLiterals.hostOfCrudRestTag).get.value
+    val restPort = configFileService.get(ConfigLiterals.portOfCrudRestTag).get.value.toInt
     val restAddress = new URI(s"http://$restHost:$restPort/v1/custom/jars/$jarName").toString
     logger.debug(s"Engine downloading URL: $restAddress")
     restAddress
@@ -395,12 +401,12 @@ class FrameworkScheduler extends Scheduler {
 
 
   /**
-    * Get random unused ports
-    * @param offer:Offer
-    * @param task:String
-    * @return Resource
-    */
-  def getPorts(offer: Offer, task: String):Resource = {
+   * Get random unused ports
+   * @param offer:Offer
+   * @param task:String
+   * @return Resource
+   */
+  def getPorts(offer: Offer, task: String): Resource = {
     val portsResource = getResource(offer, "ports")
     for (range <- portsResource.getRanges.getRangeList.asScala) {
       availablePortsForOneInstance ++= (range.getBegin to range.getEnd).to[mutable.ListBuffer]

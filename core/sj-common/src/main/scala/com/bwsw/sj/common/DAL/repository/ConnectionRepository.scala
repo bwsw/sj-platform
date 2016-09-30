@@ -17,19 +17,17 @@ import scala.reflect.ClassTag
 /**
  * Repository for connection to MongoDB and file storage (GridFS)
  */
+
 object ConnectionRepository {
 
   import ConnectionConstants._
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  private val serializer = new JsonSerializer()
-  serializer.setIgnoreUnknown(true)
-
   private lazy val mongoClient = new MongoClient(mongoHost, mongoPort)
 
   private lazy val morphia = new Morphia()
-  morphia.map(classOf[SjStream]).map(classOf[Service]).map(classOf[Provider]).map(classOf[ConfigSetting]).map(classOf[Instance])
+  morphia.map(classOf[SjStream]).map(classOf[Service]).map(classOf[Provider]).map(classOf[ConfigurationSetting]).map(classOf[Instance])
 
   changeGettingClassLoaderForMongo()
 
@@ -49,7 +47,7 @@ object ConnectionRepository {
 
   private lazy val providerService = new GenericMongoService[Provider]()
 
-  private lazy val configService = new GenericMongoService[ConfigSetting]()
+  private lazy val configService = new GenericMongoService[ConfigurationSetting]()
 
   def getFileMetadataService = {
     fileMetadataService
@@ -94,7 +92,7 @@ object ConnectionRepository {
   }
 
   /**
-   * It's necessary because of when a MesosSchedulerDriver (in mesos framework) is being created a something is going wrong
+   * It's necessary because of when a MesosSchedulerDriver (in mesos framework) is being created something is going wrong
    * (probably it should be but it's not our case) and after it the all instances have a null value of class loader.
    * May be it is a temporary measure (if we will find a different solution)
    */

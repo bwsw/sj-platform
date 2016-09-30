@@ -4,35 +4,40 @@ import java.io._
 import java.net._
 import java.nio.ByteBuffer
 import java.nio.channels.SocketChannel
-import java.nio.charset.StandardCharsets
 import java.util
 
-import com.bwsw.sj.common.ConfigConstants
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.utils.ConfigSettingsUtils
 import com.twitter.common.quantity.{Amount, Time}
 import com.twitter.common.zookeeper.ZooKeeperClient
 import org.apache.log4j.Logger
 
 /**
- * Client for transaction generating
- * Created: 18/04/2016
+ * Simple tcp client for retrieving transaction ID
  *
  * @author Kseniya Tomskikh
  */
 class TcpClient(options: TcpClientOptions) {
   private val logger = Logger.getLogger(getClass)
+  private val oneByteForServer = 84
   private var client: SocketChannel = null
   private var retryCount = options.retryCount
-  private val configService = ConnectionRepository.getConfigService
-  private val zkSessionTimeout = configService.get(ConfigConstants.zkSessionTimeoutTag).value.toInt
+  private val zkSessionTimeout = ConfigSettingsUtils.getZkSessionTimeout()
+  private val inputBuffer = ByteBuffer.allocate(8)
+  private var outputStream: OutputStream = new ByteArrayOutputStream()
+  private val zkClient = createZooKeeperClient()
 
-  private var outputStream: OutputStream = null
+  private def createZooKeeperClient() = {
+    val zkServers = createZooKeeperServers()
+    new ZooKeeperClient(Amount.of(zkSessionTimeout, Time.MILLISECONDS), zkServers)
+  }
 
-  val zooKeeperServers = new util.ArrayList[InetSocketAddress]()
-  options.zkServers.map(x => (x.split(":")(0), x.split(":")(1).toInt))
-    .foreach(zkServer => zooKeeperServers.add(new InetSocketAddress(zkServer._1, zkServer._2)))
-  val zkClient = new ZooKeeperClient(Amount.of(zkSessionTimeout, Time.MILLISECONDS), zooKeeperServers)
-  private val inputBuffer = ByteBuffer.allocate(36)
+  private def createZooKeeperServers() = {
+    val zooKeeperServers = new util.ArrayList[InetSocketAddress]()
+    options.zkServers.map(x => (x.split(":")(0), x.split(":")(1).toInt))
+      .foreach(zkServer => zooKeeperServers.add(new InetSocketAddress(zkServer._1, zkServer._2)))
+
+    zooKeeperServers
+  }
 
   def open() = {
     var isConnected = false
@@ -73,15 +78,15 @@ class TcpClient(options: TcpClientOptions) {
     master.split(":")
   }
 
-  def get() = {
+  def get(): Long = {
     retryCount = options.retryCount
     var serverIsNotAvailable = true
-    var uuid: Option[String] = None
+    var id: Option[Long] = None
     while (serverIsNotAvailable && retryCount > 0) {
       try {
         sendRequest()
         if (isServerAvailable) {
-          uuid = deserializeResponse()
+          id = deserializeResponse()
           serverIsNotAvailable = false
           retryCount = options.retryCount
         } else {
@@ -92,12 +97,12 @@ class TcpClient(options: TcpClientOptions) {
           reconnect()
       }
     }
-    if (uuid.isDefined) uuid.get
+    if (id.isDefined) id.get
     else throw new ConnectException("Server is not available")
   }
 
   private def sendRequest() {
-    outputStream.write(84)
+    outputStream.write(oneByteForServer)
   }
 
   private def isServerAvailable = {
@@ -112,9 +117,10 @@ class TcpClient(options: TcpClientOptions) {
   }
 
   private def deserializeResponse() = {
-    val uuid = new String(inputBuffer.array(), StandardCharsets.UTF_8)
+    inputBuffer.rewind()
+    val id = inputBuffer.getLong
 
-    Some(uuid)
+    Some(id)
   }
 
   private def reconnect() = {

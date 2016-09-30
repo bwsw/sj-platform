@@ -3,31 +3,45 @@ package com.bwsw.sj.engine.core.managment
 import java.io.File
 import java.net.URLClassLoader
 
+import com.bwsw.common.tstream.NetworkTransactionGenerator
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.ModuleConstants._
-import com.bwsw.sj.common.StreamConstants._
 import com.bwsw.sj.common.engine.StreamingExecutor
+import com.bwsw.sj.common.rest.entities.module.ExecutionPlan
+import com.bwsw.sj.common.utils.ConfigurationSettingsUtils._
+import com.bwsw.sj.common.utils.EngineLiterals._
+import com.bwsw.sj.common.utils.StreamLiterals._
+import com.bwsw.sj.common.utils.{ConfigLiterals, ConfigSettingsUtils, GeneratorLiterals, ProviderLiterals}
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
 import com.bwsw.sj.engine.core.environment.EnvironmentManager
-import com.bwsw.sj.engine.core.utils.EngineUtils
-import com.bwsw.tstreams.agents.consumer.Offsets.IOffset
+import com.bwsw.tstreams.agents.consumer.Offset.IOffset
 import com.bwsw.tstreams.agents.consumer.subscriber.Callback
+import com.bwsw.tstreams.agents.producer.Producer
 import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
+import com.bwsw.tstreams.generator.LocalTransactionGenerator
 import com.bwsw.tstreams.services.BasicStreamService
 import org.slf4j.LoggerFactory
+
+import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 abstract class TaskManager() {
   protected val logger = LoggerFactory.getLogger(this.getClass)
 
   val streamDAO = ConnectionRepository.getStreamService
 
+  assert(System.getenv("INSTANCE_NAME") != null &&
+    System.getenv("TASK_NAME") != null &&
+    System.getenv("AGENTS_HOST") != null &&
+    System.getenv("AGENTS_PORTS") != null,
+    "No environment variables: INSTANCE_NAME, TASK_NAME, AGENTS_HOST, AGENTS_PORTS")
+
   val instanceName = System.getenv("INSTANCE_NAME")
   val agentsHost = System.getenv("AGENTS_HOST")
-  protected val agentsPorts = System.getenv("AGENTS_PORTS").split(",")
+  protected val agentsPorts = System.getenv("AGENTS_PORTS").split(",").map(_.toInt)
   val taskName = System.getenv("TASK_NAME")
-  protected val instance: Instance = ConnectionRepository.getInstanceService.get(instanceName)
+  val instance: Instance = getInstance()
   protected val auxiliarySJTStream = getAuxiliaryTStream()
   protected val auxiliaryTStreamService = getAuxiliaryTStreamService()
   val tstreamFactory = new TStreamsFactory()
@@ -41,19 +55,25 @@ abstract class TaskManager() {
       "specification.module-type" -> instance.moduleType,
       "specification.version" -> instance.moduleVersion)
   ).head
+  protected val executorClassName = fileMetadata.specification.executorClass
 
-  /**
-   * Converter to convert usertype->storagetype; storagetype->usertype
-   */
+  protected val moduleClassLoader = createClassLoader()
+
   val converter = new ArrayByteConverter
+  val inputs: mutable.Map[SjStream, Array[Int]]
+  val outputProducers: Map[String, Producer[Array[Byte]]]
 
-  lazy val outputProducers = createOutputProducers()
+  private def getInstance() = {
+    val maybeInstance = ConnectionRepository.getInstanceService.get(instanceName)
+    if (maybeInstance.isDefined)
+      maybeInstance.get
+    else throw new NoSuchElementException(s"Instance is named '$instanceName' has not found")
+  }
 
   private def getAuxiliaryTStream() = {
-    val streams = if (instance.inputs != null) {
-      instance.outputs.union(instance.inputs.map(x => x.takeWhile(y => y != '/')))
-    } else instance.outputs
-    val sjStream = streams.map(s => streamDAO.get(s)).filter(s => s.streamType.equals(tStreamType)).head
+    val inputs = clearInputsFromExecutionMode()
+    val streams = inputs.union(instance.outputs)
+    val sjStream = streams.flatMap(s => streamDAO.get(s)).filter(s => s.streamType.equals(tStreamType)).head
 
     sjStream
   }
@@ -63,13 +83,13 @@ abstract class TaskManager() {
   }
 
   private def setTStreamFactoryProperties() = {
-    val tstreamService: TStreamService = getAuxiliaryTStreamService()
-
-    setMetadataClusterProperties(tstreamService)
-    setDataClusterProperties(tstreamService)
-    setCoordinationOptions(tstreamService)
+    setMetadataClusterProperties(auxiliaryTStreamService)
+    setDataClusterProperties(auxiliaryTStreamService)
+    setCoordinationOptions(auxiliaryTStreamService)
     setBindHostForAgents()
     setPersistentQueuePath()
+    setProducerMasterBootstrapMode()
+    applyConfigurationSettings()
   }
 
   private def setMetadataClusterProperties(tStreamService: TStreamService) = {
@@ -82,7 +102,7 @@ abstract class TaskManager() {
 
   private def setDataClusterProperties(tStreamService: TStreamService) = {
     tStreamService.dataProvider.providerType match {
-      case "aerospike" =>
+      case ProviderLiterals.aerospikeType =>
         logger.debug(s"Task name: $taskName. Set properties of aerospike data storage " +
           s"(namespace: ${tStreamService.dataNamespace}, hosts: ${tStreamService.dataProvider.hosts.mkString(",")}) " +
           s"of t-stream factory\n")
@@ -94,8 +114,8 @@ abstract class TaskManager() {
         tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.DRIVER, TSF_Dictionary.Data.Cluster.Consts.DATA_DRIVER_CASSANDRA)
     }
 
-    tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.NAMESPACE, tStreamService.metadataNamespace)
-      .setProperty(TSF_Dictionary.Data.Cluster.ENDPOINTS, tStreamService.metadataProvider.hosts.mkString(","))
+    tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.NAMESPACE, tStreamService.dataNamespace)
+      .setProperty(TSF_Dictionary.Data.Cluster.ENDPOINTS, tStreamService.dataProvider.hosts.mkString(","))
   }
 
   private def setCoordinationOptions(tStreamService: TStreamService) = {
@@ -112,17 +132,55 @@ abstract class TaskManager() {
     tstreamFactory.setProperty(TSF_Dictionary.Consumer.Subscriber.PERSISTENT_QUEUE_PATH, "/tmp/" + persistentQueuePath)
   }
 
+  private def setProducerMasterBootstrapMode() = {
+    tstreamFactory.setProperty(TSF_Dictionary.Producer.MASTER_BOOTSTRAP_MODE, TSF_Dictionary.Producer.Consts.MASTER_BOOTSTRAP_MODE_LAZY_VOTE)
+  }
+
+  private def applyConfigurationSettings() = {
+    val configService = ConnectionRepository.getConfigService
+
+    val tstreamsSettings = configService.getByParameters(Map("domain" -> ConfigLiterals.tstreamsDomain))
+    tstreamsSettings.foreach(x => tstreamFactory.setProperty(clearConfigurationSettingName(x.domain, x.name), x.value))
+  }
+
+  /**
+   * Returns class loader for retrieving classes from jar
+   *
+   * @return Class loader for retrieving classes from jar
+   */
+  protected def createClassLoader() = {
+    val file = getModuleJar
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
+      s"Get class loader for jar file: ${file.getName}\n")
+
+    val classLoaderUrls = Array(file.toURI.toURL)
+
+    new URLClassLoader(classLoaderUrls, ClassLoader.getSystemClassLoader)
+  }
+
+  private def getModuleJar: File = {
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '${instance.moduleName}' module jar\n")
+    storage.get(fileMetadata.filename, s"tmp/${instance.moduleName}")
+  }
+
+  protected def getInputs(executionPlan: ExecutionPlan) = {
+    executionPlan.tasks.get(taskName).inputs.asScala
+      .map(x => (streamDAO.get(x._1).get, x._2))
+  }
+
   /**
    * Create t-stream producers for each output stream
    *
    * @return Map where key is stream name and value is t-stream producer
    */
-  private def createOutputProducers() = {
+  protected def createOutputProducers() = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create the t-stream producers for each output stream\n")
 
+    tstreamFactory.setProperty(TSF_Dictionary.Producer.Transaction.DATA_WRITE_BATCH_SIZE, 20)
+
     instance.outputs
-      .map(x => (x, ConnectionRepository.getStreamService.get(x)))
+      .map(x => (x, streamDAO.get(x).get))
       .map(x => (x._1, createProducer(x._2.asInstanceOf[TStreamSjStream]))).toMap
   }
 
@@ -130,16 +188,16 @@ abstract class TaskManager() {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create producer for stream: ${stream.name}\n")
 
-    val timeUuidGenerator = EngineUtils.getUUIDGenerator(stream)
+    val idGenerator = getTransactionGenerator(stream)
 
-    setStreamOptions(stream)
     setProducerBindPort()
+    setStreamOptions(stream)
 
     tstreamFactory.getProducer[Array[Byte]](
       "producer_for_" + taskName + "_" + stream.name,
-      timeUuidGenerator,
+      idGenerator,
       converter,
-      (0 until stream.partitions).toList)
+      (0 until stream.partitions).toSet)
   }
 
   private def setProducerBindPort() = {
@@ -168,6 +226,10 @@ abstract class TaskManager() {
     }
   }
 
+  private def clearInputsFromExecutionMode() = {
+    instance.inputs.map(x => x.takeWhile(y => y != '/'))
+  }
+
   def getSjStream(name: String, description: String, tags: Array[String], partitions: Int) = {
     new TStreamSjStream(
       name,
@@ -176,26 +238,8 @@ abstract class TaskManager() {
       auxiliaryTStreamService,
       tStreamType,
       tags,
-      new Generator("local")
+      new Generator(GeneratorLiterals.localType)
     )
-  }
-
-  /**
-   * Returns class loader for retrieving classes from jar
-   *
-   * @param pathToJar Absolute path to jar file
-   * @return Class loader for retrieving classes from jar
-   */
-  protected def getClassLoader(pathToJar: String) = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get class loader for class: $pathToJar\n")
-    val classLoaderUrls = Array(new File(pathToJar).toURI.toURL)
-
-    new URLClassLoader(classLoaderUrls)
-  }
-
-  protected def getModuleJar: File = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '${instance.moduleName}' module jar\n")
-    storage.get(fileMetadata.filename, s"tmp/${instance.moduleName}")
   }
 
   /**
@@ -214,19 +258,36 @@ abstract class TaskManager() {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create subscribing consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
 
-    val partitionRange = (partitions.head to partitions.tail.head).toList
-    val timeUuidGenerator = EngineUtils.getUUIDGenerator(stream)
+    val partitionRange = (partitions.head to partitions.tail.head).toSet
+    val idGenerator = getTransactionGenerator(stream)
 
     setStreamOptions(stream)
     setSubscribingConsumerBindPort()
 
     tstreamFactory.getSubscriber[Array[Byte]](
       "subscribing_consumer_for_" + taskName + "_" + stream.name,
-      timeUuidGenerator,
+      idGenerator,
       converter,
       partitionRange,
       callback,
       offset)
+  }
+
+  protected def getTransactionGenerator(stream: TStreamSjStream) = {
+    val retryPeriod = ConfigSettingsUtils.getClientRetryPeriod()
+    val retryCount = ConfigSettingsUtils.getRetryCount()
+
+    stream.generator.generatorType match {
+      case GeneratorLiterals.`localType` => new LocalTransactionGenerator()
+      case generatorType =>
+        val service = stream.generator.service.asInstanceOf[ZKService]
+        val zkHosts = service.provider.hosts
+        val prefix = "/" + service.namespace + "/" + {
+          if (generatorType == GeneratorLiterals.globalType) generatorType else stream.name
+        }
+
+        new NetworkTransactionGenerator(zkHosts, prefix, retryPeriod, retryCount)
+    }
   }
 
   protected def setStreamOptions(stream: TStreamSjStream) = {
@@ -240,19 +301,8 @@ abstract class TaskManager() {
     currentPortNumber += 1
   }
 
-  def getInstance: Instance = {
-    logger.info(s"Task name: $taskName. Get instance\n")
-
-    instance
-  }
-
   /**
    * @return An instance of executor of module that has got an environment manager
    */
   def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor
-
-  /**
-   * @return An instance of executor of module that hasn't got an environment manager
-   */
-  def getExecutor: StreamingExecutor
 }

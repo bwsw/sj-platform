@@ -1,14 +1,15 @@
 package com.bwsw.sj.engine.regular.task.engine.input
 
-import com.bwsw.sj.common.StreamConstants
-import com.bwsw.sj.engine.core.PersistentBlockingQueue
+import com.bwsw.sj.common.utils.StreamLiterals
+import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
+import com.bwsw.sj.engine.core.engine.input.TStreamTaskInputService
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
 /**
  * Factory is in charge of creating of a task input service of regular engine
- * Created: 27/07/2016
+ *
  *
  * @author Kseniya Mikhaleva
  *
@@ -22,14 +23,14 @@ class RegularTaskInputServiceFactory(manager: RegularTaskManager,
                                      checkpointGroup: CheckpointGroup) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val isKafkaInputExist = manager.inputs.exists(x => x._1.streamType == StreamConstants.kafkaStreamType)
-  private val isTstreamInputExist = manager.inputs.exists(x => x._1.streamType == StreamConstants.tStreamType)
+  private val isKafkaInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.kafkaStreamType)
+  private val isTstreamInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.tStreamType)
 
   def createRegularTaskInputService() = {
     (isKafkaInputExist, isTstreamInputExist) match {
-      case (true, true) => new CompleteRegularTaskInputService(manager, blockingQueue, checkpointGroup)
-      case (false, true) => new TStreamRegularTaskInputService(manager, blockingQueue, checkpointGroup)
-      case (true, false) => new KafkaRegularTaskInputService(manager, blockingQueue, checkpointGroup)
+      case (true, true) => new CompleteTaskInputService(manager, blockingQueue, checkpointGroup)
+      case (false, true) => new TStreamTaskInputService(manager, blockingQueue, checkpointGroup)
+      case (true, false) => new KafkaTaskInputService(manager, blockingQueue, checkpointGroup)
       case _ =>
         logger.error("Type of input stream is not 'kafka' or 't-stream'")
         throw new Exception("Type of input stream is not 'kafka' or 't-stream'")

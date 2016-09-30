@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory
 
 /**
  * Class representing a wrapper for java.util.Timer
- * Created: 14/04/2016
+ *
  * @author Kseniya Mikhaleva
  */
 
@@ -49,9 +49,6 @@ class SjTimer {
     isTimerWentOut
   }
 
-  /**
-   * Allows resetting a timer 
-   */
   def reset() = {
     logger.debug(s"Reset a timer\n")
     isTimerWentOut = false

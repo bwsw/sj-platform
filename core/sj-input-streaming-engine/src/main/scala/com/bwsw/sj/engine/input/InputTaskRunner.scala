@@ -2,11 +2,11 @@ package com.bwsw.sj.engine.input
 
 import java.util.concurrent._
 
+import com.bwsw.sj.engine.core.engine.TaskRunner
 import com.bwsw.sj.engine.input.connection.tcp.server.InputStreamingServer
 import com.bwsw.sj.engine.input.task.InputTaskManager
 import com.bwsw.sj.engine.input.task.engine.InputTaskEngineFactory
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
-import com.google.common.util.concurrent.ThreadFactoryBuilder
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import org.slf4j.LoggerFactory
@@ -15,19 +15,15 @@ import scala.collection.convert.decorateAsScala._
 
 /**
  * Object is responsible for running a task of job that launches input module
- * Created: 07/07/2016
+ *
  *
  * @author Kseniya Mikhaleva
  */
 
-object InputTaskRunner {
+object InputTaskRunner extends {override val threadName = "InputTaskRunner-%d"} with TaskRunner {
 
-  val logger = LoggerFactory.getLogger(this.getClass)
-  val countOfThreads = 3
-  val queueSize = 1000
-  val threadFactory = createThreadFactory()
-  val threadPool = Executors.newFixedThreadPool(countOfThreads, threadFactory)
-  val executorService = new ExecutorCompletionService[Unit](threadPool)
+  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val queueSize = 1000
 
   def main(args: Array[String]) {
     try {
@@ -35,7 +31,7 @@ object InputTaskRunner {
       val channelContextQueue = new ArrayBlockingQueue[ChannelHandlerContext](queueSize)
 
       val manager: InputTaskManager = new InputTaskManager()
-      logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for input module\n")
+      logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for an input module\n")
 
       val performanceMetrics = new InputStreamingPerformanceMetrics(manager)
 
@@ -62,19 +58,5 @@ object InputTaskRunner {
       case assertionError: Error => handleException(assertionError)
       case exception: Exception => handleException(exception)
     }
-  }
-
-  def createThreadFactory() = {
-    new ThreadFactoryBuilder()
-      .setNameFormat("InputTaskRunner-%d")
-      .setDaemon(true)
-      .build()
-  }
-
-  def handleException(exception: Throwable) = {
-    logger.error("Runtime exception", exception)
-    exception.printStackTrace()
-    threadPool.shutdownNow()
-    System.exit(-1)
   }
 }

@@ -3,11 +3,6 @@ package com.bwsw.sj.mesos.framework.task
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos._
 
-/**
-  * Created by diryavkin_dn on 10.06.16.
-  */
-
-
 object StatusHandler {
   val logger = Logger.getLogger(getClass)
 

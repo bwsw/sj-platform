@@ -1,27 +1,22 @@
 package com.bwsw.sj.engine.input
 
 import java.io.{BufferedReader, File, InputStreamReader, PrintStream}
-import java.net.{InetSocketAddress, Socket}
+import java.net.Socket
 import java.util
 import java.util.jar.JarFile
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.FileStorage
-import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask, Instance}
+import com.bwsw.sj.common.DAL.model.{Service, _}
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.StreamConstants
-import com.bwsw.sj.common.utils.CassandraFactory
-import com.bwsw.tstreams.agents.consumer.Offsets.Oldest
-import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerOptions}
-
+import com.bwsw.sj.common.utils.{GeneratorLiterals, ProviderLiterals, _}
+import com.bwsw.tstreams.agents.consumer.Consumer
+import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.converter.IConverter
-
-import com.bwsw.tstreams.generator.LocalTimeUUIDGenerator
-
-import com.bwsw.tstreams.policy.RoundRobinPolicy
+import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
+import com.bwsw.tstreams.generator.LocalTransactionGenerator
 import com.bwsw.tstreams.services.BasicStreamService
-import com.bwsw.tstreams.streams.TStream
 
 object DataFactory {
 
@@ -39,8 +34,42 @@ object DataFactory {
   private val partitions = 1
   private val serializer = new JsonSerializer()
   private val cassandraFactory = new CassandraFactory()
+  private val cassandraProvider = new Provider("cassandra-test-provider", "cassandra provider", Array(s"$cassandraHost:$cassandraPort"), "", "", ProviderLiterals.cassandraType)
+  private val zookeeperProvider = new Provider("zookeeper-test-provider", "zookeeper provider", zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
+  private val tstrqService = new TStreamService("tstream-test-service", ServiceLiterals.tstreamsType, "tstream test service",
+    cassandraProvider, cassandraTestKeyspace, cassandraProvider, cassandraTestKeyspace, zookeeperProvider, "unit")
+  private val tstreamFactory = new TStreamsFactory()
+  setTStreamFactoryProperties()
 
   val outputCount = 2
+
+  private def setTStreamFactoryProperties() = {
+    setMetadataClusterProperties(tstrqService)
+    setDataClusterProperties(tstrqService)
+    setCoordinationOptions(tstrqService)
+  }
+
+  private def setMetadataClusterProperties(tStreamService: TStreamService) = {
+    tstreamFactory.setProperty(TSF_Dictionary.Metadata.Cluster.NAMESPACE, tStreamService.metadataNamespace)
+      .setProperty(TSF_Dictionary.Metadata.Cluster.ENDPOINTS, tStreamService.metadataProvider.hosts.mkString(","))
+  }
+
+  private def setDataClusterProperties(tStreamService: TStreamService) = {
+    tStreamService.dataProvider.providerType match {
+      case ProviderLiterals.aerospikeType =>
+        tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.DRIVER, TSF_Dictionary.Data.Cluster.Consts.DATA_DRIVER_AEROSPIKE)
+      case _ =>
+        tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.DRIVER, TSF_Dictionary.Data.Cluster.Consts.DATA_DRIVER_CASSANDRA)
+    }
+
+    tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.NAMESPACE, tStreamService.dataNamespace)
+      .setProperty(TSF_Dictionary.Data.Cluster.ENDPOINTS, tStreamService.dataProvider.hosts.mkString(","))
+  }
+
+  private def setCoordinationOptions(tStreamService: TStreamService) = {
+    tstreamFactory.setProperty(TSF_Dictionary.Coordination.ROOT, s"/${tStreamService.lockNamespace}")
+      .setProperty(TSF_Dictionary.Coordination.ENDPOINTS, tStreamService.lockProvider.hosts.mkString(","))
+  }
 
   def writeData(totalInputElements: Int, totalDuplicateElements: Int) = {
     try {
@@ -77,7 +106,7 @@ object DataFactory {
     override def convert(obj: Array[Byte]): Array[Byte] = obj
   }
 
-  def open() = cassandraFactory.open(Set(new InetSocketAddress(cassandraHost, cassandraPort)))
+  def open() = cassandraFactory.open(Set((cassandraHost, cassandraPort)))
 
   def cassandraSetup() = {
     cassandraFactory.createKeyspace(cassandraTestKeyspace)
@@ -92,10 +121,7 @@ object DataFactory {
   def close() = cassandraFactory.close()
 
   def createProviders(providerService: GenericMongoService[Provider]) = {
-    val cassandraProvider = new Provider("cassandra-test-provider", "cassandra provider", Array(s"$cassandraHost:$cassandraPort"), "", "", "cassandra")
     providerService.save(cassandraProvider)
-
-    val zookeeperProvider = new Provider("zookeeper-test-provider", "zookeeper provider", zookeeperHosts, "", "", "zookeeper")
     providerService.save(zookeeperProvider)
   }
 
@@ -105,16 +131,12 @@ object DataFactory {
   }
 
   def createServices(serviceManager: GenericMongoService[Service], providerService: GenericMongoService[Provider]) = {
-    val cassProv = providerService.get("cassandra-test-provider")
-    val cassService = new CassandraService("cassandra-test-service", "CassDB", "cassandra test service", cassProv, cassandraTestKeyspace)
+    val cassService = new CassandraService("cassandra-test-service", ServiceLiterals.cassandraType, "cassandra test service", cassandraProvider, cassandraTestKeyspace)
     serviceManager.save(cassService)
 
-    val zkProv = providerService.get("zookeeper-test-provider")
-    val zkService = new ZKService("zookeeper-test-service", "ZKCoord", "zookeeper test service", zkProv, testNamespace)
+    val zkService = new ZKService("zookeeper-test-service", ServiceLiterals.zookeeperType, "zookeeper test service", zookeeperProvider, testNamespace)
     serviceManager.save(zkService)
 
-    val tstrqService = new TStreamService("tstream-test-service", "TstrQ", "tstream test service",
-      cassProv, cassandraTestKeyspace, cassProv, cassandraTestKeyspace, zkProv, "unit")
     serviceManager.save(tstrqService)
   }
 
@@ -137,11 +159,9 @@ object DataFactory {
   }
 
   private def createOutputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
-    val localGenerator = new Generator("local")
+    val localGenerator = new Generator(GeneratorLiterals.localType)
 
-    val tService = serviceManager.get("tstream-test-service")
-
-    val s2 = new TStreamSjStream("test-output-tstream" + suffix, "test-output-tstream", partitions, tService, StreamConstants.tStreamType, Array("output", "some tags"), localGenerator)
+    val s2 = new TStreamSjStream("test-output-tstream" + suffix, "test-output-tstream", partitions, tstrqService, StreamLiterals.tStreamType, Array("output", "some tags"), localGenerator)
     sjStreamService.save(s2)
 
     val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
@@ -170,13 +190,13 @@ object DataFactory {
 
     val instance = new InputInstance()
     instance.name = instanceName
-    instance.moduleType = "input-streaming"
+    instance.moduleType = EngineLiterals.inputStreamingType
     instance.moduleName = "input-streaming-stub"
     instance.moduleVersion = "1.0"
-    instance.status = "ready"
+    instance.status = EngineLiterals.ready
     instance.description = "some description of test instance"
     instance.outputs = instanceOutputs
-    instance.checkpointMode = "every-nth"
+    instance.checkpointMode = EngineLiterals.everyNthCheckpointMode
     instance.checkpointInterval = checkpointInterval
     instance.parallelism = 1
     instance.options = """{"hey": "hey"}"""
@@ -184,11 +204,11 @@ object DataFactory {
     instance.perTaskRam = 64
     instance.performanceReportingInterval = 10000
     instance.engine = "com.bwsw.input.streaming.engine-1.0"
-    instance.coordinationService = serviceManager.get("zookeeper-test-service").asInstanceOf[ZKService]
+    instance.coordinationService = serviceManager.get("zookeeper-test-service").get.asInstanceOf[ZKService]
     instance.duplicateCheck = false
     instance.lookupHistory = 100
     instance.queueMaxSize = 100
-    instance.defaultEvictionPolicy = "LRU"
+    instance.defaultEvictionPolicy = EngineLiterals.lruDefaultEvictionPolicy
     instance.evictionPolicy = "expanded-time"
     instance.tasks = tasks
 
@@ -229,30 +249,26 @@ object DataFactory {
   }
 
   def createOutputConsumer(streamService: GenericMongoService[SjStream], suffix: String) = {
-    createConsumer("test-output-tstream" + suffix, streamService, "localhost:805" + suffix)
+    createConsumer("test-output-tstream" + suffix, streamService)
   }
 
-  private def createConsumer(streamName: String, streamService: GenericMongoService[SjStream], address: String): Consumer[Array[Byte]] = {
-    val stream = streamService.get(streamName)
-    val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
-    val dataStorage = cassandraFactory.getDataStorage(cassandraTestKeyspace)
+  private def createConsumer(streamName: String, streamService: GenericMongoService[SjStream]): Consumer[Array[Byte]] = {
+    val stream = streamService.get(streamName).get.asInstanceOf[TStreamSjStream]
+    val transactionGenerator = new LocalTransactionGenerator
 
-    val tStream: TStream[Array[Byte]] =
-      BasicStreamService.loadStream(stream.name, metadataStorage, dataStorage)
+    setStreamOptions(stream)
 
-    val roundRobinPolicy = new RoundRobinPolicy(tStream, (0 until stream.asInstanceOf[TStreamSjStream].partitions).toList)
-
-    val timeUuidGenerator = new LocalTimeUUIDGenerator
-
-    val options = new ConsumerOptions[Array[Byte]](
-      transactionsPreload = 10,
-      dataPreload = 7,
+    tstreamFactory.getConsumer[Array[Byte]](
+      streamName,
+      transactionGenerator,
       converter,
-      roundRobinPolicy,
-      Oldest,
-      timeUuidGenerator,
-      useLastOffset = true)
+      (0 until stream.partitions).toSet,
+      Oldest)
+  }
 
-    new Consumer[Array[Byte]](tStream.name, tStream, options)
+  protected def setStreamOptions(stream: TStreamSjStream) = {
+    tstreamFactory.setProperty(TSF_Dictionary.Stream.NAME, stream.name)
+    tstreamFactory.setProperty(TSF_Dictionary.Stream.PARTITIONS, stream.partitions)
+    tstreamFactory.setProperty(TSF_Dictionary.Stream.DESCRIPTION, stream.description)
   }
 }

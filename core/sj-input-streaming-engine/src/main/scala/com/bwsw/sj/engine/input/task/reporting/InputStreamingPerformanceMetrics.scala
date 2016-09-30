@@ -9,7 +9,7 @@ import scala.collection.mutable
 
 /**
  * Class represents a set of metrics that characterize performance of a input streaming module
- * Created: 14/07/2016
+ *
  * @author Kseniya Mikhaleva
  */
 
@@ -36,7 +36,7 @@ class InputStreamingPerformanceMetrics(manager: InputTaskManager)
    * @return Constructed performance report
    */
   override def getReport(): String = {
-    logger.info(s"Start preparing a report of performance for task: $taskName of input module\n")
+    logger.info(s"Start preparing a report of performance for task: $taskName of an input module\n")
     mutex.lock()
     val bytesOfInputEnvelopes = inputEnvelopesPerStream.map(x => (x._1, x._2.map(_.sum).sum)).head._2
     val inputEnvelopesTotalNumber = inputEnvelopesPerStream.map(x => (x._1, x._2.size)).head._2

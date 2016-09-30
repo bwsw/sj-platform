@@ -1,118 +1,117 @@
 package com.bwsw.sj.crud.rest.validator.module
 
-import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{SjStream, TStreamService, TStreamSjStream}
-import com.bwsw.sj.common.ModuleConstants._
-import com.bwsw.sj.common.StreamConstants._
-import com.bwsw.sj.crud.rest.entities.module.{InstanceMetadata, ModuleSpecification, OutputInstanceMetadata}
-import org.slf4j.{LoggerFactory, Logger}
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, OutputInstanceMetadata, SpecificationData}
+import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.common.utils.EngineLiterals._
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable.ArrayBuffer
+import com.bwsw.sj.common.utils.SjStreamUtils._
 
 /**
-  * Created: 23/05/2016
-  *
-  * @author Kseniya Tomskikh
-  */
+ *
+ *
+ * @author Kseniya Tomskikh
+ */
 class OutputStreamingValidator extends StreamingModuleValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
+  private val streamsDAO = ConnectionRepository.getStreamService
+
+  private def getStream(streamName: String) = {
+    streamsDAO.get(streamName)
+  }
 
   /**
-    * Validating options of streams of instance for module
-    *
-    * @param parameters - Input instance parameters
-    * @param specification - Specification of module
-    * @param errors - List of validating errors
-    * @return - List of errors and validating instance (null, if errors non empty)
-    */
-  override def streamOptionsValidate(parameters: InstanceMetadata, specification: ModuleSpecification, errors: ArrayBuffer[String]) = {
-    if (!parameters.checkpointMode.equals("every-nth")) {
-      errors += s"Checkpoint-mode attribute for output-streaming module must be only 'every-nth'."
+   * Validating input parameters for 'output-streaming' module
+   *
+   * @param parameters - input parameters for running module
+   * @param specification - specification of module
+   * @return - List of errors
+   */
+  override def validate(parameters: InstanceMetadata, specification: SpecificationData) = {
+    logger.debug(s"Instance: ${parameters.name}. Start output-streaming validation.")
+    val errors = new ArrayBuffer[String]()
+    errors ++= super.validateGeneralOptions(parameters)
+    val outputInstanceMetadata = parameters.asInstanceOf[OutputInstanceMetadata]
+
+    Option(parameters.checkpointMode) match {
+      case None =>
+        errors += s"'Checkpoint-mode' is required"
+      case Some(x) =>
+        if (!x.equals(EngineLiterals.everyNthCheckpointMode)) {
+          errors += s"Unknown value of 'checkpoint-mode' attribute: '$x'. " +
+            s"'Checkpoint-mode' attribute for output-streaming module must be only '${EngineLiterals.everyNthCheckpointMode}'"
+        }
     }
 
-    var inputStream: SjStream = null
-    if (parameters.inputs != null) {
-      errors += s"Unknown attribute 'inputs'."
-    }
-    if (parameters.asInstanceOf[OutputInstanceMetadata].input != null) {
-      val inputMode: String = getStreamMode(parameters.asInstanceOf[OutputInstanceMetadata].input)
-      if (!inputMode.equals("split")) {
-        errors += s"Unknown stream mode. Input stream must have modes 'split'."
+    errors ++= validateStreamOptions(outputInstanceMetadata, specification)
+  }
+
+  private def validateStreamOptions(instance: OutputInstanceMetadata,
+                                    specification: SpecificationData) = {
+    logger.debug(s"Instance: ${instance.name}. Stream options validation.")
+    val errors = new ArrayBuffer[String]()
+
+    // 'inputs' field
+    var inputStream: Option[SjStream] = None
+    if (instance.input != null) {
+      val inputMode: String = getStreamMode(instance.input)
+      if (!inputMode.equals(EngineLiterals.splitStreamMode)) {
+        errors += s"Unknown value of 'stream-mode' attribute. Input stream must have the mode '${EngineLiterals.splitStreamMode}'"
       }
 
-      val inputStreamName = parameters.asInstanceOf[OutputInstanceMetadata].input.replaceAll("/split", "")
+      val inputStreamName = clearStreamFromMode(instance.input)
       inputStream = getStream(inputStreamName)
-      if (inputStream == null) {
-        errors += s"Input stream '$inputStreamName' is not exists."
-      } else {
-        if (!inputStream.streamType.equals(tStreamType)) {
-          errors += s"Input streams must be T-stream."
-        }
+      inputStream match {
+        case None =>
+          errors += s"Input stream '$inputStreamName' does not exist"
+        case Some(stream) =>
+          val inputTypes = specification.inputs("types").asInstanceOf[Array[String]]
+          if (!inputTypes.contains(stream.streamType)) {
+            errors += s"Input stream must be one of: ${inputTypes.mkString("[", ", ", "]")}"
+          }
       }
     } else {
-      errors += s"Input stream attribute is empty."
+      errors += s"'Input' attribute is required"
     }
 
-    var outputStream: SjStream = null
-    if (parameters.outputs != null) {
-      errors += s"Unknown attribute 'outputs'."
-    }
-    if (parameters.asInstanceOf[OutputInstanceMetadata].output != null) {
-      outputStream = getStream(parameters.asInstanceOf[OutputInstanceMetadata].output)
-      if (outputStream == null) {
-        errors += s"Output stream '${parameters.asInstanceOf[OutputInstanceMetadata].output}' is not exists."
-      } else {
-        val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
-        if (!outputTypes.contains(outputStream.streamType)) {
-          errors += s"Output streams must be in: ${outputTypes.mkString(", ")}."
-        }
+    if (instance.output != null) {
+      val outputStream = getStream(instance.output)
+      outputStream match {
+        case None =>
+          errors += s"Output stream '${instance.output}' does not exist"
+        case Some(stream) =>
+          val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
+          if (!outputTypes.contains(stream.streamType)) {
+            errors += s"Output streams must be one of: ${outputTypes.mkString("[", ", ", "]")}"
+          }
       }
     } else {
-      errors += s"Output stream attribute is empty."
+      errors += s"'Output' attribute is required"
     }
 
-    val startFrom = parameters.startFrom
+    // 'start-from' field
+    val startFrom = instance.startFrom
     if (!startFromModes.contains(startFrom)) {
       try {
         startFrom.toLong
       } catch {
         case ex: NumberFormatException =>
-          errors += s"Start-from attribute is not 'oldest' or 'newest' or timestamp."
+          errors += s"'Start-from' attribute is not one of: ${startFromModes.mkString("[", ", ", "]")} or timestamp"
       }
     }
 
-    var validatedInstance: Instance = null
-    if (inputStream != null && outputStream != null) {
-      val allStreams = Array(inputStream, outputStream)
-
-      val service = allStreams.head.service
-      if (!service.isInstanceOf[TStreamService]) {
-        errors += s"Service for t-streams must be 'TstrQ'."
-      } else {
-        checkTStreams(errors, allStreams.filter(s => s.streamType.equals(tStreamType)).map(_.asInstanceOf[TStreamSjStream]).toBuffer)
-      }
-
-      parameters.parallelism = checkParallelism(parameters.parallelism, inputStream.asInstanceOf[TStreamSjStream].partitions, errors)
-
-      val partitions = getPartitionForStreams(Array(inputStream))
-      parameters.inputs = Array(parameters.asInstanceOf[OutputInstanceMetadata].input)
-      validatedInstance = createInstance(parameters, partitions, allStreams.filter(s => s.streamType.equals(tStreamType)).toSet)
+    val input = inputStream.get.asInstanceOf[TStreamSjStream]
+    val service = input.service
+    if (!service.isInstanceOf[TStreamService]) {
+      errors += s"Service for t-streams must be 'TstrQ'"
     }
-    (errors, validatedInstance)
-  }
 
-  /**
-    * Validating input parameters for 'output-streaming' module
-    *
-    * @param parameters - input parameters for running module
-    * @param specification - specification of module
-    * @return - List of errors
-    */
-  override def validate(parameters: InstanceMetadata, specification: ModuleSpecification) = {
-    logger.debug(s"Instance: ${parameters.name}. Start output-streaming validation.")
-    val errors = super.generalOptionsValidate(parameters)
-    streamOptionsValidate(parameters, specification, errors)
-  }
+    errors ++= checkParallelism(instance.parallelism, input.partitions)
 
+    errors
+  }
 }

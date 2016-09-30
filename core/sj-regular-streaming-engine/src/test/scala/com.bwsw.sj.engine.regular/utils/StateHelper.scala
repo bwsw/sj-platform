@@ -1,13 +1,13 @@
 package com.bwsw.sj.engine.regular.utils
 
-import java.util.UUID
-
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction}
 
 import scala.collection.mutable
 
 object StateHelper {
+
+  private val partition = 0
 
   def getState(consumer: Consumer[Array[Byte]], objectSerializer: ObjectSerializer) = {
 
@@ -19,12 +19,12 @@ object StateHelper {
         initialState(variable._1.asInstanceOf[String]) = variable._2
         fillFullState(initialState, lastTxn, objectSerializer)
       case _ =>
-        val lastFullTxnUUID = Some(value.asInstanceOf[UUID])
-        val lastFullStateTxn = consumer.getTransactionById(0, lastFullTxnUUID.get).get
-        fillFullState(initialState, lastFullStateTxn, objectSerializer)
-        consumer.setLocalOffset(0, lastFullTxnUUID.get)
+        val lastFullStateID = Some(Long.unbox(value))
+        val lastFullState = consumer.getTransactionById(partition, lastFullStateID.get).get
+        fillFullState(initialState, lastFullState, objectSerializer)
+        consumer.setStreamPartitionOffset(partition, lastFullStateID.get)
 
-        var maybeTxn = consumer.getTransaction
+        var maybeTxn = consumer.getTransaction(partition)
         while (maybeTxn.nonEmpty) {
           val partialState = mutable.Map[String, (String, Any)]()
           val partialStateTxn = maybeTxn.get
@@ -36,7 +36,7 @@ object StateHelper {
             partialState(variable._1) = variable._2
           }
           applyPartialChanges(initialState, partialState)
-          maybeTxn = consumer.getTransaction
+          maybeTxn = consumer.getTransaction(partition)
         }
     }
 

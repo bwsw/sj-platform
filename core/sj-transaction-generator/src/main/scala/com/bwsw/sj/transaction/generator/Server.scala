@@ -4,25 +4,23 @@ import java.io._
 import java.net.InetSocketAddress
 import java.util
 
-import com.bwsw.sj.common.ConfigConstants
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.utils.ConfigSettingsUtils
 import com.bwsw.sj.transaction.generator.server.TcpServer
-import com.twitter.common.quantity.{Time, Amount}
+import com.twitter.common.quantity.{Amount, Time}
 import com.twitter.common.zookeeper.ZooKeeperClient
 import org.apache.log4j.Logger
 
 /**
-  * TCP-Server for transaction generating
-  * Created: 18/04/2016
-  *
-  * @author Kseniya Tomskikh
-  */
+ * TCP-Server for transaction generating
+ *
+ *
+ * @author Kseniya Tomskikh
+ */
 object Server {
   private val logger = Logger.getLogger(getClass)
-  private val configService = ConnectionRepository.getConfigService
-  private val retryPeriod = configService.get(ConfigConstants.tgServerRetryPeriodTag).value.toInt
 
   def main(args: Array[String]) = {
+    val retryPeriod = ConfigSettingsUtils.getServerRetryPeriod()
     val zkServers = System.getenv("ZK_SERVERS")
     val host = System.getenv("HOST")
     val port = System.getenv("PORT0").toInt
@@ -40,9 +38,7 @@ object Server {
     } catch {
       case ex: IOException => logger.debug(s"Error: ${ex.getMessage}")
     }
-
   }
-
 }
 
 

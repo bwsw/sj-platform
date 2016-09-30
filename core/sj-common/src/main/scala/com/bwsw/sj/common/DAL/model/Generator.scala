@@ -1,5 +1,7 @@
 package com.bwsw.sj.common.DAL.model
 
+import com.bwsw.sj.common.rest.entities.stream.GeneratorData
+import com.bwsw.sj.common.utils.GeneratorLiterals
 import org.mongodb.morphia.annotations.{Property, Reference}
 
 class Generator() {
@@ -16,5 +18,12 @@ class Generator() {
     this(generatorType)
     this.service = service
     this.instanceCount = instanceCount
+  }
+
+  def asProtocolGenerator() = {
+    this.generatorType match {
+      case GeneratorLiterals.localType => new GeneratorData(this.generatorType)
+      case _ => new GeneratorData(this.generatorType, this.service.name, this.instanceCount)
+    }
   }
 }

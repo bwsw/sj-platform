@@ -23,31 +23,39 @@ object ModuleStatefulTstreamChecker extends App {
   var outputElements = scala.collection.mutable.ArrayBuffer[Int]()
 
   inputTstreamConsumers.foreach(inputTstreamConsumer => {
-    var maybeTxn = inputTstreamConsumer.getTransaction
+    val partitions = inputTstreamConsumer.getPartitions().toIterator
 
-    while (maybeTxn.isDefined) {
-      val txn = maybeTxn.get
-      while (txn.hasNext()) {
-        val element = objectSerializer.deserialize(txn.next()).asInstanceOf[Int]
-        inputElements.+=(element)
-        totalInputElements += 1
+    while (partitions.hasNext) {
+      val currentPartition = partitions.next()
+      var maybeTxn = inputTstreamConsumer.getTransaction(currentPartition)
+      while (maybeTxn.isDefined) {
+        val transaction = maybeTxn.get
+        while (transaction.hasNext()) {
+          val element = objectSerializer.deserialize(transaction.next()).asInstanceOf[Int]
+          inputElements.+=(element)
+          totalInputElements += 1
+        }
+        maybeTxn = inputTstreamConsumer.getTransaction(currentPartition)
       }
-      maybeTxn = inputTstreamConsumer.getTransaction
     }
   })
 
-
   outputConsumers.foreach(outputConsumer => {
-    var maybeTxn = outputConsumer.getTransaction
+    val partitions = outputConsumer.getPartitions().toIterator
 
-    while (maybeTxn.isDefined) {
-      val txn = maybeTxn.get
-      while (txn.hasNext()) {
-        val element = objectSerializer.deserialize(txn.next()).asInstanceOf[Int]
-        outputElements.+=(element)
-        totalOutputElements += 1
+    while (partitions.hasNext) {
+      val currentPartition = partitions.next()
+      var maybeTxn = outputConsumer.getTransaction(currentPartition)
+
+      while (maybeTxn.isDefined) {
+        val transaction = maybeTxn.get
+        while (transaction.hasNext()) {
+          val element = objectSerializer.deserialize(transaction.next()).asInstanceOf[Int]
+          outputElements.+=(element)
+          totalOutputElements += 1
+        }
+        maybeTxn = outputConsumer.getTransaction(currentPartition)
       }
-      maybeTxn = outputConsumer.getTransaction
     }
   })
 

@@ -1,38 +1,38 @@
 package com.bwsw.sj.engine.core.environment
 
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
-import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer, Transaction}
+import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer, ProducerTransaction}
 
 import scala.collection._
 
 /**
  * Provides an output stream that defined for each partition
- * Created: 20/04/2016
+ *
  *
  * @author Kseniya Mikhaleva
  * @param producer Producer for specific output of stream
  */
 
 class PartitionedOutput(producer: Producer[Array[Byte]],
-                        performanceMetrics: PerformanceMetrics) extends ModuleOutput(performanceMetrics) {
+                        performanceMetrics: PerformanceMetrics) extends RegularModuleOutput(performanceMetrics) {
 
-  private val txns = mutable.Map[Int, Transaction[Array[Byte]]]()
+  private val transactions = mutable.Map[Int, ProducerTransaction[Array[Byte]]]()
   private val streamName = producer.stream.getName
 
   def put(data: Array[Byte], partition: Int) = {
     logger.debug(s"Send a portion of data to stream: '$streamName' partition with number: '$partition'")
-    if (txns.contains(partition)) {
-      txns(partition).send(data)
+    if (transactions.contains(partition)) {
+      transactions(partition).send(data)
     }
     else {
-      txns(partition) = producer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened, partition)
-      txns(partition).send(data)
+      transactions(partition) = producer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened, partition)
+      transactions(partition).send(data)
     }
 
     logger.debug(s"Add an element to output envelope of output stream:  '$streamName'")
     performanceMetrics.addElementToOutputEnvelope(
       streamName,
-      txns(partition).getTransactionUUID().toString,
+      transactions(partition).getTransactionID().toString,
       data.length
     )
   }
