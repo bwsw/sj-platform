@@ -78,6 +78,23 @@ class TStreamTaskInputService(manager: TaskManager,
     }
   }
 
+  def call() = {
+    addConsumersToCheckpointGroup()
+    launchConsumers()
+  }
+
+  private def addConsumersToCheckpointGroup() = {
+    logger.debug(s"Task: ${manager.taskName}. Start adding subscribing consumers to checkpoint group\n")
+    consumers.foreach(x => checkpointGroup.add(x._2.getConsumer()))
+    logger.debug(s"Task: ${manager.taskName}. Adding subscribing consumers to checkpoint group is finished\n")
+  }
+
+  private def launchConsumers() = {
+    logger.debug(s"Task: ${manager.taskName}. Launch subscribing consumers\n")
+    consumers.foreach(_._2.start())
+    logger.debug(s"Task: ${manager.taskName}. Subscribing consumers are launched\n")
+  }
+
   def registerEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics) = {
     logger.info(s"Task: ${manager.taskName}. T-stream envelope is received\n")
     val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
@@ -88,23 +105,6 @@ class TStreamTaskInputService(manager: TaskManager,
       tStreamEnvelope.stream,
       tStreamEnvelope.data.map(_.length)
     )
-  }
-
-  def call() = {
-    addConsumersToCheckpointGroup()
-    launchConsumers()
-  }
-
-  private def launchConsumers() = {
-    logger.debug(s"Task: ${manager.taskName}. Launch subscribing consumers\n")
-    consumers.foreach(_._2.start())
-    logger.debug(s"Task: ${manager.taskName}. Subscribing consumers are launched\n")
-  }
-
-  private def addConsumersToCheckpointGroup() = {
-    logger.debug(s"Task: ${manager.taskName}. Start adding subscribing consumers to checkpoint group\n")
-    consumers.foreach(x => checkpointGroup.add(x._2.getConsumer()))
-    logger.debug(s"Task: ${manager.taskName}. Adding subscribing consumers to checkpoint group is finished\n")
   }
 
   override def doCheckpoint(): Unit = {}
