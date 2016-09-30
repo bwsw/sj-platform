@@ -18,6 +18,7 @@ input {
   display: inline-block;
   margin-top: 30px;
 }
+
 .services-list ul li {
   cursor: pointer;
 }
@@ -26,6 +27,7 @@ input {
   cursor: pointer;
   background-color: rgba(155, 228, 175, 0.1);
 }
+
 .services-list ul > li:nth-of-type(1):hover {
   cursor: default !important;
   background-color: white !important;
@@ -38,6 +40,7 @@ input {
 ul.services-list {
   padding-top: 60px;
 }
+
 h2 {
   text-align: center;
 }
@@ -61,7 +64,7 @@ h2 {
   display: block;
   padding: 0 16px;
   float: right;
-  height:100%;
+  height: 100%;
   width: 24%;
   border-left: 2px solid #ececec;
   top: 0;
@@ -82,9 +85,11 @@ h2 {
   float: right;
   margin-right: 15px;
 }
+
 .right-inner-addon input {
   padding-right: 30px;
 }
+
 .right-inner-addon i {
   position: absolute;
   right: 0px;
@@ -96,15 +101,18 @@ h2 {
 .form-desc {
   width: 70% !important;
 }
+
 .form-add-host {
   margin-left: 23%;
   margin-top: 5px;
   width: 10%;
   color: #07c;
 }
+
 .form-submit {
   width: 35%;
 }
+
 .form-actions {
   text-align: right;
   margin-right: 5%;
@@ -143,14 +151,17 @@ h2 {
   width: 30%;
   display: inline-block;
 }
+
 .service-description {
   width: 40%;
   display: inline-block;
 }
+
 .main-alerts {
   margin-top: 70px;
   margin-bottom: -40px;
 }
+
 .main-alerts .custom-alert div {
   margin-bottom: 0 !important;
 }

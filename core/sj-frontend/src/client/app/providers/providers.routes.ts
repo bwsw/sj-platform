@@ -1,11 +1,11 @@
-import { RouterConfig } from '@angular/router';
+import { Routes } from '@angular/router';
 
-import { ProvidersComponent } from './index';
+import { ProvidersComponent } from './providers.component';
 
-export const ProvidersRoutes: RouterConfig = [
-    {
-        path: 'providers',
-        component: ProvidersComponent
-    },
-];
+export const ProvidersRoutes: Routes = [{
+  path: 'providers',
+  children: [
+    { path: '', component: ProvidersComponent }
+  ]
+}];
 
