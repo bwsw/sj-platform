@@ -54,7 +54,7 @@ trait ValidationUtils {
 
     if (!validateServiceNamespace(namespace)) {
       errors += s"Service has incorrect parameter: $namespace. " +
-        s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+        s"Name must contain digits, lowercase letters or underscore. First symbol must be a letter"
     }
 
     errors

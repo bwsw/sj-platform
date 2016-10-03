@@ -35,7 +35,7 @@ case class ConfigurationSettingData(name: String, value: String) extends Validat
 
         if (!validateConfigSettingName(x)) {
           errors += s"Configuration setting has incorrect name: $x. " +
-            s"Name of configuration setting must be contain lowercase letters, hyphens or periods. First symbol must be a letter"
+            s"Name of configuration setting must contain lowercase letters, hyphens or periods. First symbol must be a letter"
         }
 
         if (domain == ConfigLiterals.tstreamsDomain && !validateTstreamProperty()) {

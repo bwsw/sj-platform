@@ -54,7 +54,7 @@ class SjStreamData() extends ValidationUtils {
 
         if (!validateName(x)) {
           errors += s"Stream has incorrect name: '$x'. " +
-            s"Name of stream must be contain digits, lowercase letters or hyphens. First symbol must be a letter"
+            s"Name of stream must contain digits, lowercase letters or hyphens. First symbol must be a letter"
         }
     }
 

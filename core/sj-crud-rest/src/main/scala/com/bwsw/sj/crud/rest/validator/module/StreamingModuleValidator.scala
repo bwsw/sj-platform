@@ -55,7 +55,7 @@ abstract class StreamingModuleValidator extends ValidationUtils {
 
         if (!validateName(parameters.name)) {
           errors += s"Instance has incorrect name: ${parameters.name}. " +
-            s"Name of instance must be contain digits, lowercase letters or hyphens. First symbol must be a letter"
+            s"Name of instance must contain digits, lowercase letters or hyphens. First symbol must be a letter"
         }
     }
 
