@@ -1,19 +1,33 @@
 name := "sj"
 scalaVersion := Dependencies.Versions.scala
+val sjVersion = "1.0.0"
 
 addCommandAlias("rebuild", ";clean; compile; package")
 
 val commonSettings = Seq(
-  version := "1.0",
+  version := sjVersion,
   scalaVersion := Dependencies.Versions.scala,
   scalacOptions ++= Seq(
     "-unchecked",
     "-deprecation",
     "-feature"
   ),
-  resolvers +=
-    "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
 
+  pomExtra := (
+    <scm>
+      <url>git@github.com:bwsw/sj-platform.git</url>
+      <connection>scm:git@github.com:bwsw/sj-platform.git</connection>
+    </scm>
+      <developers>
+        <developer>
+          <id>bitworks</id>
+          <name>Bitworks Software, Ltd.</name>
+          <url>http://bitworks.software/</url>
+        </developer>
+      </developers>
+    ),
+
+  resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/service/local/staging/deploy/maven2",
   resolvers += "Twitter Repository" at "http://maven.twttr.com",
 
   libraryDependencies ++= Seq(
@@ -37,8 +51,12 @@ val commonSettings = Seq(
 
   fork in run := true,
   fork in Test := true,
+  licenses := Seq("Apache 2" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+  homepage := Some(url("http://bitworks.software/de/content/edv-plattform-juggler/")),
+  pomIncludeRepository := { _ => false },
+  scalacOptions += "-feature",
+  scalacOptions += "-deprecation",
   parallelExecution in Test := false,
-  version := "1.0-SNAPSHOT",
   organization := "com.bwsw",
   publishMavenStyle := true,
   pomIncludeRepository := { _ => false },
