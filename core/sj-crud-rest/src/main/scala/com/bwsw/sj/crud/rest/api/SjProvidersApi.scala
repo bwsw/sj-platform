@@ -117,8 +117,8 @@ trait SjProvidersApi extends Directives with SjCrudValidator with CompletionUtil
         kfkService.provider.name.equals(providerName)
       case tService: TStreamService =>
         tService.metadataProvider.name.equals(providerName) || tService.dataProvider.name.equals(providerName)
-      case _ =>
-        false //todo jdbc
+      case jdbcService: JDBCService =>
+        jdbcService.provider.name.equals(providerName)
     }
   }
 }
