@@ -1,6 +1,6 @@
 name := "sj"
 scalaVersion := Dependencies.Versions.scala
-val sjVersion = "1.0.0"
+val sjVersion = "1.0-SNAPSHOT"
 
 addCommandAlias("rebuild", ";clean; compile; package")
 
@@ -28,6 +28,7 @@ val commonSettings = Seq(
     ),
 
   resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/service/local/staging/deploy/maven2",
+  resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
   resolvers += "Twitter Repository" at "http://maven.twttr.com",
 
   libraryDependencies ++= Seq(

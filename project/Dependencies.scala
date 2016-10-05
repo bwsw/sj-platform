@@ -7,7 +7,7 @@ object Dependencies {
   }
 
   lazy val sjCommonDependencies = Def.setting(Seq(
-    ("com.bwsw" % "t-streams_2.11" % "1.0.3.2")
+    ("com.bwsw" % "t-streams_2.11" % "1.0-SNAPSHOT")
       .exclude("org.slf4j", "slf4j-simple"),
     "org.mongodb" % "casbah_2.11" % "3.0.0",
     "org.mongodb.morphia" % "morphia" % "1.1.1",
