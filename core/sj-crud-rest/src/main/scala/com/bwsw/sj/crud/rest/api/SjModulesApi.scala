@@ -26,6 +26,63 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
 
   import EngineLiterals._
 
+  val modulesApi =
+    pathPrefix("modules") {
+      pathEndOrSingleSlash {
+        creationOfModule ~
+          gettingListOfAllModules
+      } ~
+        pathPrefix("instances") {
+          gettingAllInstances
+        } ~
+        pathPrefix(Segment) { (moduleType: String) =>
+          checkModuleType(moduleType)
+          pathPrefix(Segment) { (moduleName: String) =>
+            pathPrefix(Segment) { (moduleVersion: String) =>
+              checkModuleOnExistence(moduleType, moduleName, moduleVersion)
+              val specification = getSpecification(moduleType, moduleName, moduleVersion)
+              val filename = getFileName(moduleType, moduleName, moduleVersion)
+              pathPrefix("instance") {
+                pathEndOrSingleSlash {
+                  creationOfInstance(moduleType, moduleName, moduleVersion, specification, filename) ~
+                    gettingModuleInstances(moduleType, moduleName, moduleVersion)
+                } ~
+                  pathPrefix(Segment) { (instanceName: String) =>
+                    checkInstanceOnExistence(instanceName)
+                    val instance = instanceDAO.get(instanceName).get
+                    pathEndOrSingleSlash {
+                      gettingInstance(instance) ~
+                        deletingInstance(instance)
+                    } ~
+                      path("start") {
+                        pathEndOrSingleSlash {
+                          launchingOfInstance(instance)
+                        }
+                      } ~
+                      path("stop") {
+                        pathEndOrSingleSlash {
+                          stoppingOfInstance(instance)
+                        }
+                      }
+                  }
+              } ~
+                pathSuffix("specification") {
+                  pathEndOrSingleSlash {
+                    gettingSpecification(specification)
+                  }
+                } ~
+                pathEndOrSingleSlash {
+                  gettingModule(filename) ~
+                    deletingModule(moduleType, moduleName, moduleVersion, filename)
+                }
+            }
+          } ~
+            pathEndOrSingleSlash {
+              gettingModulesByType(moduleType)
+            }
+        }
+    }
+
   private val creationOfModule = post {
     uploadedFile("jar") {
       case (metadata: FileInfo, file: File) =>
@@ -387,61 +444,4 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
     logger.debug(s"Destroying application of instance ${instance.name}")
     new Thread(new InstanceDestroyer(instance)).start()
   }
-
-  val modulesApi =
-    pathPrefix("modules") {
-      pathEndOrSingleSlash {
-        creationOfModule ~
-          gettingListOfAllModules
-      } ~
-        pathPrefix("instances") {
-          gettingAllInstances
-        } ~
-        pathPrefix(Segment) { (moduleType: String) =>
-          checkModuleType(moduleType)
-          pathPrefix(Segment) { (moduleName: String) =>
-            pathPrefix(Segment) { (moduleVersion: String) =>
-              checkModuleOnExistence(moduleType, moduleName, moduleVersion)
-              val specification = getSpecification(moduleType, moduleName, moduleVersion)
-              val filename = getFileName(moduleType, moduleName, moduleVersion)
-              pathPrefix("instance") {
-                pathEndOrSingleSlash {
-                  creationOfInstance(moduleType, moduleName, moduleVersion, specification, filename) ~
-                    gettingModuleInstances(moduleType, moduleName, moduleVersion)
-                } ~
-                  pathPrefix(Segment) { (instanceName: String) =>
-                    checkInstanceOnExistence(instanceName)
-                    val instance = instanceDAO.get(instanceName).get
-                    pathEndOrSingleSlash {
-                      gettingInstance(instance) ~
-                        deletingInstance(instance)
-                    } ~
-                      path("start") {
-                        pathEndOrSingleSlash {
-                          launchingOfInstance(instance)
-                        }
-                      } ~
-                      path("stop") {
-                        pathEndOrSingleSlash {
-                          stoppingOfInstance(instance)
-                        }
-                      }
-                  }
-              } ~
-                pathSuffix("specification") {
-                  pathEndOrSingleSlash {
-                    gettingSpecification(specification)
-                  }
-                } ~
-                pathEndOrSingleSlash {
-                  gettingModule(filename) ~
-                    deletingModule(moduleType, moduleName, moduleVersion, filename)
-                }
-            }
-          } ~
-            pathEndOrSingleSlash {
-              gettingModulesByType(moduleType)
-            }
-        }
-    }
 }

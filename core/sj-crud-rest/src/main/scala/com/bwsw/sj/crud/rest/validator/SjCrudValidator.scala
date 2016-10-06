@@ -96,87 +96,87 @@ trait SjCrudValidator {
       case `inputStreamingType` =>
         //'inputs.cardinality' field
         if (!isZeroCardinality(inputCardinality)) {
-          throw new Exception("Specification.json for input-streaming module has incorrect params: " +
+          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
             "both of cardinality of inputs has to be equal zero.")
         }
 
         //'inputs.types' field
         if (inputTypes.length != 1 || !inputTypes.contains(inputDummy)) {
-          throw new Exception("Specification.json for input-streaming module has incorrect params: " +
+          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
             "inputs must contain only one string: 'input'.")
         }
 
         //'outputs.cardinality' field
         if (!isNonZeroCardinality(outputCardinality)) {
-          throw new Exception("Specification.json for input-streaming module has incorrect params: " +
+          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
             "cardinality of outputs has to be an interval with the left bound that is greater than zero.")
         }
 
         //'outputs.types' field
         if (outputTypes.length != 1 || !doesSourceTypesConsistOf(outputTypes, Set(tStreamType))) {
-          throw new Exception("Specification.json for input-streaming module has incorrect params: " +
+          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
             "outputs must have the streams of t-stream type.")
         }
 
-      case `regularStreamingType` =>
+      case `regularStreamingType` | `windowedStreamingType` =>
         //'inputs.cardinality' field
         if (!isNonZeroCardinality(inputCardinality)) {
-          throw new Exception("Specification.json for regular-streaming module has incorrect params: " +
+          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
             "cardinality of inputs has to be an interval with the left bound that is greater than zero.")
         }
 
         //'inputs.types' field
         if (inputTypes.isEmpty || !doesSourceTypesConsistOf(inputTypes, Set(tStreamType, kafkaStreamType))) {
-          throw new Exception("Specification.json for regular-streaming module has incorrect params: " +
+          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
             "inputs must have the streams of t-stream and kafka type.")
         }
 
         //'outputs.cardinality' field
         if (!isNonZeroCardinality(outputCardinality)) {
-          throw new Exception("Specification.json for regular-streaming module has incorrect params: " +
+          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
             "cardinality of outputs has to be an interval with the left bound that is greater than zero.")
         }
 
         //'outputs.types' field
         if (outputTypes.length != 1 || !doesSourceTypesConsistOf(outputTypes, Set(tStreamType))) {
-          throw new Exception("Specification.json for regular-streaming module has incorrect params: " +
+          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
             "outputs must have the streams of t-stream type.")
         }
 
       case `outputStreamingType` =>
         //'inputs.cardinality' field
         if (!isSingleCardinality(inputCardinality)) {
-          throw new Exception("Specification.json for output-streaming module has incorrect params: " +
+          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
             "both of cardinality of inputs has to be equal 1.")
         }
 
         //'inputs.types' field
         if (inputTypes.length != 1 || !doesSourceTypesConsistOf(inputTypes, Set(tStreamType))) {
-          throw new Exception("Specification.json for output-streaming module has incorrect params: " +
+          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
             "inputs must have the streams of t-stream type.")
         }
 
         //'outputs.cardinality' field
         if (!isSingleCardinality(outputCardinality)) {
-          throw new Exception("Specification.json for output-streaming module has incorrect params: " +
+          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
             "both of cardinality of outputs has to be equal 1.")
         }
 
         //'outputs.types' field
         if (outputTypes.isEmpty || !doesSourceTypesConsistOf(outputTypes, Set(esOutputType, jdbcOutputType))) {
-          throw new Exception("Specification.json for output-streaming module has incorrect params: " +
+          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
             "outputs must have the streams of elasticsearch or jdbc type.")
         }
 
         //'entity-class' field
         if (specification.get("entity-class").isEmpty) {
-          throw new Exception("Specification.json for output-streaming module hasn't got 'entity-class' param.")
+          throw new Exception(s"Specification.json for $moduleType module hasn't got 'entity-class' param.")
         }
     }
 
     val engine = specification("engine-name").asInstanceOf[String] + "-" + specification("engine-version").asInstanceOf[String]
     if (configService.get("system." + engine).isEmpty) {
-      throw new Exception("Specification.json has got the invalid 'engine-name' and 'engine-version' params.")
+      throw new Exception(s"Specification.json for $moduleType module has got the invalid 'engine-name' and 'engine-version' params.")
     }
 
     specification
