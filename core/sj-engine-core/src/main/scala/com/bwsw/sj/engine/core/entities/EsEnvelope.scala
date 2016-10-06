@@ -12,6 +12,7 @@ class EsEnvelope() extends Envelope with Serializable {
   streamType = "elasticsearch-output"
   @JsonProperty("output-date-time") var outputDateTime: String = null
   @JsonProperty("txn-date-time") var transactionDateTime: String = null
+  var txn: String = null
 
   /**
    * Allows adding the field(s) of Date type to a standard set of fields

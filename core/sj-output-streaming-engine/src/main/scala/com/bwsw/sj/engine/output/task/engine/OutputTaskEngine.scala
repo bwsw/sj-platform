@@ -183,11 +183,11 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
       case esEnvelope: EsEnvelope =>
         esEnvelope.outputDateTime = s"${Calendar.getInstance().getTimeInMillis}"
         esEnvelope.transactionDateTime = s"${inputEnvelope.id}"
-        val transactionId = inputEnvelope.id.toString.replaceAll("-", "")
+        esEnvelope.txn = inputEnvelope.id.toString.replaceAll("-", "")
         esEnvelope.stream = inputEnvelope.stream
         esEnvelope.partition = inputEnvelope.partition
         esEnvelope.tags = inputEnvelope.tags
-        registerOutputEnvelope(transactionId, esEnvelope)
+        registerOutputEnvelope(esEnvelope.txn, esEnvelope)
         logger.debug(s"Task: ${manager.taskName}. Write output envelope to elasticsearch.")
         client.write(esEnvelopeSerializer.serialize(esEnvelope), esService.index, outputStream.name)
       case jdbcEnvelope: JdbcEnvelope => writeToJdbc(outputEnvelope)
@@ -223,4 +223,3 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
   protected def prepareForNextCheckpoint(): Unit
 }
-
