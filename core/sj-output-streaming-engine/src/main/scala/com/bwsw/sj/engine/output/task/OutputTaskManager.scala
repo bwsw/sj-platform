@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.output.task
 
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.engine.StreamingExecutor
-import com.bwsw.sj.engine.core.entities.OutputData
+import com.bwsw.sj.engine.core.entities.EsEnvelope
 import com.bwsw.sj.engine.core.environment.EnvironmentManager
 import com.bwsw.sj.engine.core.managment.TaskManager
 
@@ -36,14 +36,14 @@ class OutputTaskManager() extends TaskManager {
     executor
   }
 
-  def getOutputModuleEntity(): OutputData = {
+  def getOutputModuleEntity(): EsEnvelope = {
     logger.info(s"Task: $taskName. Getting entity object from jar of file: " +
       instance.moduleType + "-" + instance.moduleName + "-" + instance.moduleVersion)
     val entityClassName = fileMetadata.specification.entityClass
     val outputEntity = moduleClassLoader
       .loadClass(entityClassName)
       .newInstance()
-      .asInstanceOf[OutputData]
+      .asInstanceOf[EsEnvelope]
 
     outputEntity
   }

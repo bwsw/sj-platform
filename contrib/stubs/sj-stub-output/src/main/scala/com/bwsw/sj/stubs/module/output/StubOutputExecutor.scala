@@ -3,7 +3,7 @@ package com.bwsw.sj.stubs.module.output
 import java.util.Calendar
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.engine.core.entities.{EsEnvelope, Envelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.stubs.module.output.data.StubEsData
 
@@ -31,10 +31,7 @@ class StubOutputExecutor extends OutputStreamingExecutor {
       data.value = value
       data.testDate = Calendar.getInstance().getTime
 
-      val outputEnvelope = new EsEnvelope
-      outputEnvelope.data = data
-
-      outputEnvelope
+      data
     }
 
     list

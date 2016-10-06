@@ -38,7 +38,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"output-task-${manager.taskName}-engine")
   protected val logger = LoggerFactory.getLogger(this.getClass)
-  private val serializer = new JsonSerializer()
+  private val esEnvelopeSerializer = new JsonSerializer()
   protected val checkpointGroup = new CheckpointGroup()
   protected val instance = manager.instance.asInstanceOf[OutputInstance]
   private val outputStream = getOutput()
@@ -48,7 +48,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   protected val isNotOnlyCustomCheckpoint: Boolean
   private val (client, esService) = openDbConnection(outputStream)
   private var wasFirstCheckpoint = false
-  private val outputEnvelopeSerializer = new ObjectSerializer()
+  private val byteSerializer = new ObjectSerializer()
 
 
   private def getOutput() = {
@@ -145,7 +145,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
       fields.put(field, Map("type" -> "date", "format" -> "epoch_millis"))
     }
     val mapping = Map("properties" -> fields)
-    val mappingJson = serializer.serialize(mapping)
+    val mappingJson = esEnvelopeSerializer.serialize(mapping)
 
     client.createMapping(index, streamName, mappingJson)
   }
@@ -183,20 +183,20 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
       case esEnvelope: EsEnvelope =>
         esEnvelope.outputDateTime = s"${Calendar.getInstance().getTimeInMillis}"
         esEnvelope.transactionDateTime = s"${inputEnvelope.id}"
-        esEnvelope.transaction = inputEnvelope.id.toString.replaceAll("-", "")
+        val transactionId = inputEnvelope.id.toString.replaceAll("-", "")
         esEnvelope.stream = inputEnvelope.stream
         esEnvelope.partition = inputEnvelope.partition
         esEnvelope.tags = inputEnvelope.tags
-        registerOutputEnvelope(esEnvelope.transaction, esEnvelope.data)
-        logger.debug(s"Task: ${manager.taskName}. Write output envelope to elasticearch.")
-        client.write(serializer.serialize(esEnvelope.data), esService.index, outputStream.name)
+        registerOutputEnvelope(transactionId, esEnvelope)
+        logger.debug(s"Task: ${manager.taskName}. Write output envelope to elasticsearch.")
+        client.write(esEnvelopeSerializer.serialize(esEnvelope), esService.index, outputStream.name)
       case jdbcEnvelope: JdbcEnvelope => writeToJdbc(outputEnvelope)
       case _ =>
     }
   }
 
-  private def registerOutputEnvelope(envelopeID: String, data: OutputData) = {
-    val elementSize = outputEnvelopeSerializer.serialize(data).length
+  private def registerOutputEnvelope(envelopeID: String, data: EsEnvelope) = {
+    val elementSize = byteSerializer.serialize(data).length
     performanceMetrics.addElementToOutputEnvelope(outputStream.name, envelopeID, elementSize)
   }
 

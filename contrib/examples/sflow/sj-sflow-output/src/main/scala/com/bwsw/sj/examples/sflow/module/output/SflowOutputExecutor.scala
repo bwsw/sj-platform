@@ -3,7 +3,7 @@ package com.bwsw.sj.examples.sflow.module.output
 import java.util.Date
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.engine.core.entities.{EsEnvelope, Envelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.examples.sflow.module.output.data.TrafficMetrics
 
@@ -34,9 +34,8 @@ class SflowOutputExecutor extends OutputStreamingExecutor {
       if (rawData.length == 4) {
         data.dstAs = rawData(2)
       }
-      val outputEnvelope = new EsEnvelope
-      outputEnvelope.data = data
-      outputEnvelope
+
+      data
     }
     list
   }

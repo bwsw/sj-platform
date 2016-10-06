@@ -98,12 +98,12 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
     checkContext(ctx)
     val instanceMetadata = deserializeOptions(getEntityFromContext(ctx), moduleType)
     val errors = validateInstance(instanceMetadata, specification, moduleType)
-    val optionsPassValidation = validateInstanceOptions(specification, filename, instanceMetadata.options)
+    val optionsPassedValidation = validateInstanceOptions(specification, filename, instanceMetadata.options)
     var response: RestResponse = BadRequestRestResponse(Map("message" ->
       createMessage("rest.modules.instances.instance.cannot.create", errors.mkString(";"))))
 
     if (errors.isEmpty) {
-      if (optionsPassValidation) {
+      if (optionsPassedValidation) {
         instanceMetadata.prepareInstance(
           moduleType,
           moduleName,

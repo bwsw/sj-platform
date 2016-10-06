@@ -1,8 +1,7 @@
 package com.bwsw.sj.module.output.pm.data
 
 import java.util.Date
-
-import com.bwsw.sj.engine.core.entities.OutputData
+import com.bwsw.sj.engine.core.entities.EsEnvelope
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
@@ -10,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
   *
   * @author Kseniya Mikhaleva
   */
-class PerformanceMetrics extends OutputData {
+class PerformanceMetrics extends EsEnvelope {
   @JsonProperty("pm-datetime") var pmDatetime: Date = null
   @JsonProperty("task-id") var taskId: String= null
   var host: String = null
