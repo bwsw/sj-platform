@@ -10,6 +10,8 @@ import org.mongodb.morphia.annotations._
  * @author Kseniya Tomskikh
  */
 class RegularInstance() extends Instance {
+  @Property("checkpoint-mode") var checkpointMode: String = null
+  @Property("checkpoint-interval") var checkpointInterval: Long = 0
   @Embedded("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan()
   @Property("start-from") var startFrom: String = EngineLiterals.newestStartMode
   @Property("state-management") var stateManagement: String = EngineLiterals.noneStateMode
@@ -19,7 +21,8 @@ class RegularInstance() extends Instance {
   override def asProtocolInstance(): InstanceMetadata = {
     val protocolInstance = new RegularInstanceMetadata()
     super.fillProtocolInstance(protocolInstance)
-
+    protocolInstance.checkpointMode = this.checkpointMode
+    protocolInstance.checkpointInterval = this.checkpointInterval
     protocolInstance.executionPlan = this.executionPlan
     protocolInstance.stateManagement = this.stateManagement
     protocolInstance.stateFullCheckpoint = this.stateFullCheckpoint

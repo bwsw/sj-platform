@@ -13,7 +13,7 @@ import com.bwsw.sj.engine.core.managment.TaskManager
  */
 class OutputTaskManager() extends TaskManager {
 
-  private val outputInstance = instance.asInstanceOf[OutputInstance]
+  val outputInstance = instance.asInstanceOf[OutputInstance]
   val inputs = getInputs(outputInstance.executionPlan)
   lazy val outputProducers = {
     logger.error(s"Instance of Output module hasn't got t-stream outputs " +

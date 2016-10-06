@@ -12,7 +12,7 @@ import scala.collection.mutable.ArrayBuffer
  *
  * @author Kseniya Tomskikh
  */
-class WindowedStreamingValidator extends StreamingModuleValidator {
+class WindowedInstanceValidator extends InstanceValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
@@ -21,16 +21,6 @@ class WindowedStreamingValidator extends StreamingModuleValidator {
     val errors = new ArrayBuffer[String]()
     errors ++= super.validateGeneralOptions(parameters)
     val windowedInstanceMetadata = parameters.asInstanceOf[WindowedInstanceMetadata]
-
-    // 'checkpoint-mode' field
-    Option(windowedInstanceMetadata.checkpointMode) match {
-      case None =>
-        errors += s"'Checkpoint-mode' is required"
-      case Some(x) =>
-        if (!checkpointModes.contains(windowedInstanceMetadata.checkpointMode)) {
-          errors += s"Unknown value of checkpoint-mode attribute: ${windowedInstanceMetadata.checkpointMode}."
-        }
-    }
 
     // 'state-management' field
     if (!stateManagementModes.contains(windowedInstanceMetadata.stateManagement)) {
@@ -43,16 +33,6 @@ class WindowedStreamingValidator extends StreamingModuleValidator {
           errors += s"'State-full-checkpoint' attribute must be greater than zero"
         }
       }
-    }
-
-    // 'time-windowed' field
-    if (windowedInstanceMetadata.timeWindowed <= 0) {
-      errors += s"Time-windowed attribute must be greater than zero"
-    }
-
-    // 'window-full-max' field
-    if (windowedInstanceMetadata.windowFullMax <= 0) {
-      errors += s"Window-full-max attribute must be greater than zero"
     }
 
     errors ++= validateStreamOptions(windowedInstanceMetadata, specification)

@@ -22,8 +22,6 @@ class InstanceMetadata {
   var status: String = EngineLiterals.ready
   var name: String = null
   var description: String = "No description"
-  @JsonProperty("checkpoint-mode") var checkpointMode: String = null
-  @JsonProperty("checkpoint-interval") var checkpointInterval: Long = 0L
   var parallelism: Any = 1
   var options: Map[String, Any] = Map()
   @JsonProperty("per-task-cores") var perTaskCores: Double = 1.0
@@ -47,8 +45,6 @@ class InstanceMetadata {
     modelInstance.moduleVersion = this.moduleVersion
     modelInstance.name = this.name
     modelInstance.description = this.description
-    modelInstance.checkpointMode = this.checkpointMode
-    modelInstance.checkpointInterval = this.checkpointInterval
     modelInstance.parallelism = this.parallelism.asInstanceOf[Int]
     modelInstance.perTaskCores = this.perTaskCores
     modelInstance.perTaskRam = this.perTaskRam

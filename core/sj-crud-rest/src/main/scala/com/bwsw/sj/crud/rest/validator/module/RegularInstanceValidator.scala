@@ -15,7 +15,7 @@ import scala.collection.mutable.ArrayBuffer
  *
  * @author Kseniya Tomskikh
  */
-class RegularStreamingValidator extends StreamingModuleValidator {
+class RegularInstanceValidator extends InstanceValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
@@ -30,10 +30,15 @@ class RegularStreamingValidator extends StreamingModuleValidator {
       case None =>
         errors += s"'Checkpoint-mode' is required"
       case Some(x) =>
-        if (!checkpointModes.contains(parameters.checkpointMode)) {
+        if (!checkpointModes.contains(regularInstanceMetadata.checkpointMode)) {
           errors += s"Unknown value of 'checkpoint-mode' attribute: '$x'. " +
             s"'Checkpoint-mode' must be one of: ${checkpointModes.mkString("[", ", ", "]")}"
         }
+    }
+
+    // 'checkpoint-interval' field
+    if (regularInstanceMetadata.checkpointInterval <= 0) {
+      errors += s"'Checkpoint-interval' must be greater than zero"
     }
 
     // 'event-wait-time' field

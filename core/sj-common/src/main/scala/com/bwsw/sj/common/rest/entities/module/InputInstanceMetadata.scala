@@ -8,6 +8,8 @@ import scala.collection.JavaConverters._
 
 class InputInstanceMetadata extends InstanceMetadata {
   var outputs: Array[String] = Array()
+  @JsonProperty("checkpoint-mode") var checkpointMode: String = null
+  @JsonProperty("checkpoint-interval") var checkpointInterval: Long = 0L
   @JsonProperty("duplicate-check") var duplicateCheck: Boolean = false
   @JsonProperty("lookup-history") var lookupHistory: Int = 0
   @JsonProperty("queue-max-size") var queueMaxSize: Int = 0
@@ -20,6 +22,8 @@ class InputInstanceMetadata extends InstanceMetadata {
   override def asModelInstance() = {
     val modelInstance = new InputInstance()
     super.fillModelInstance(modelInstance)
+    modelInstance.checkpointMode = this.checkpointMode
+    modelInstance.checkpointInterval = this.checkpointInterval
     modelInstance.outputs = this.outputs
     modelInstance.duplicateCheck = this.duplicateCheck
     modelInstance.defaultEvictionPolicy = this.defaultEvictionPolicy

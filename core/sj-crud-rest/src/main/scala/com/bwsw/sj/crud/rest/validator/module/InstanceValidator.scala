@@ -20,7 +20,7 @@ import scala.collection.mutable.ArrayBuffer
  *
  * @author Kseniya Tomskikh
  */
-abstract class StreamingModuleValidator extends ValidationUtils {
+abstract class InstanceValidator extends ValidationUtils {
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
   var serviceDAO: GenericMongoService[Service] = ConnectionRepository.getServiceManager
   var instanceDAO: GenericMongoService[Instance] = ConnectionRepository.getInstanceService
@@ -57,11 +57,6 @@ abstract class StreamingModuleValidator extends ValidationUtils {
           errors += s"Instance has incorrect name: ${parameters.name}. " +
             s"Name of instance must contain digits, lowercase letters or hyphens. First symbol must be a letter"
         }
-    }
-
-    // 'checkpoint-interval' field
-    if (parameters.checkpointInterval <= 0) {
-      errors += s"'Checkpoint-interval' must be greater than zero"
     }
 
     // 'per-task-cores' field

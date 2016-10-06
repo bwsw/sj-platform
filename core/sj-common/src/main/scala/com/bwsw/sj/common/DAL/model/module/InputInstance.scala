@@ -14,6 +14,8 @@ import scala.collection.JavaConverters._
  * @author Kseniya Tomskikh
  */
 class InputInstance extends Instance {
+  @Property("checkpoint-mode") var checkpointMode: String = null
+  @Property("checkpoint-interval") var checkpointInterval: Long = 0
   @Property("duplicate-check") var duplicateCheck: Boolean = false
   @Property("lookup-history") var lookupHistory: Int = 0
   @Property("queue-max-size") var queueMaxSize: Int = 0

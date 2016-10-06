@@ -17,7 +17,7 @@ import com.bwsw.sj.crud.rest.exceptions._
 import com.bwsw.sj.crud.rest.instance.{InstanceDestroyer, InstanceStarter, InstanceStopper}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
-import com.bwsw.sj.crud.rest.validator.module.StreamingModuleValidator
+import com.bwsw.sj.crud.rest.validator.module.InstanceValidator
 import org.apache.commons.io.FileUtils
 
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
@@ -399,7 +399,7 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
   private def validateInstance(options: InstanceMetadata, specification: SpecificationData, moduleType: String) = {
     val validatorClassName = configService.get(s"system.$moduleType-validator-class").get.value
     val validatorClass = Class.forName(validatorClassName)
-    val validator = validatorClass.newInstance().asInstanceOf[StreamingModuleValidator]
+    val validator = validatorClass.newInstance().asInstanceOf[InstanceValidator]
     validator.validate(options, specification)
   }
 

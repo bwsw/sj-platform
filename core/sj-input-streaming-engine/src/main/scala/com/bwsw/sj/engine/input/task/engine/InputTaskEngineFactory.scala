@@ -1,6 +1,7 @@
 package com.bwsw.sj.engine.input.task.engine
 
 import java.util.concurrent.ArrayBlockingQueue
+
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
 import com.bwsw.sj.engine.input.task.InputTaskManager
@@ -35,7 +36,7 @@ class InputTaskEngineFactory(manager: InputTaskManager,
    * @return Engine of input task
    */
   def createInputTaskEngine(): InputTaskEngine = {
-    manager.instance.checkpointMode match {
+    manager.inputInstance.checkpointMode match {
       case EngineLiterals.timeIntervalCheckpointMode =>
         logger.info(s"Task: ${manager.taskName}. Input module has a '${EngineLiterals.timeIntervalCheckpointMode}' checkpoint mode, create an appropriate task engine\n")
         new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext) with TimeCheckpointTaskEngine

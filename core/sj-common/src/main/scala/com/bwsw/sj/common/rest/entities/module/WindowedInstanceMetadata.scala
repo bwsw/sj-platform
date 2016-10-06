@@ -14,14 +14,10 @@ class WindowedInstanceMetadata extends InstanceMetadata {
   @JsonProperty("state-management") var stateManagement: String = EngineLiterals.noneStateMode
   @JsonProperty("state-full-checkpoint") var stateFullCheckpoint: Int = 100
   @JsonProperty("event-wait-time") var eventWaitTime: Long = 1000
-  @JsonProperty("time-windowed") var timeWindowed: Int = 0
-  @JsonProperty("window-full-max") var windowFullMax: Int = 0
 
   override def asModelInstance() = {
     val modelInstance = new WindowedInstance()
     super.fillModelInstance(modelInstance)
-    modelInstance.timeWindowed = this.timeWindowed
-    modelInstance.windowFullMax = this.windowFullMax
     modelInstance.stateManagement = this.stateManagement
     modelInstance.stateFullCheckpoint = this.stateFullCheckpoint
     modelInstance.eventWaitTime = this.eventWaitTime

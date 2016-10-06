@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.bwsw.sj.common.utils.SjStreamUtils._
 
 class OutputInstanceMetadata extends InstanceMetadata {
+  @JsonProperty("checkpoint-mode") var checkpointMode: String = null
+  @JsonProperty("checkpoint-interval") var checkpointInterval: Long = 0L
   @JsonProperty("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan()
   @JsonProperty("start-from") var startFrom: String = EngineLiterals.newestStartMode
   var input: String = null
@@ -14,7 +16,8 @@ class OutputInstanceMetadata extends InstanceMetadata {
   override def asModelInstance() = {
     val modelInstance = new OutputInstance()
     super.fillModelInstance(modelInstance)
-
+    modelInstance.checkpointMode = this.checkpointMode
+    modelInstance.checkpointInterval = this.checkpointInterval
     modelInstance.inputs = Array(this.input)
     modelInstance.outputs = Array(this.output)
     modelInstance.startFrom = this.startFrom
