@@ -123,12 +123,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   }
 
   private def prepareES() = {
-    val index = esService.index
-    logger.debug(s"Task: ${manager.taskName}. Prepare an elasticsearch index ${esService.index}")
-    if (!client.doesIndexExist(index)) {
-      client.createIndex(index)
-    }
-
+    esService.prepare()
     createIndexMapping()
   }
 
@@ -207,6 +202,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
    */
   private def writeToJdbc(envelope: Envelope) = {
     //todo writing to JDBC
+
   }
 
   /**
