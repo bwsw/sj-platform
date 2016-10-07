@@ -41,9 +41,9 @@ class OutputInstanceValidator extends InstanceValidator {
       case None =>
         errors += s"'Checkpoint-mode' is required"
       case Some(x) =>
-        if (!x.equals(EngineLiterals.everyNthCheckpointMode)) {
+        if (!x.equals(EngineLiterals.everyNthMode)) {
           errors += s"Unknown value of 'checkpoint-mode' attribute: '$x'. " +
-            s"'Checkpoint-mode' attribute for output-streaming module must be only '${EngineLiterals.everyNthCheckpointMode}'"
+            s"'Checkpoint-mode' attribute for output-streaming module must be only '${EngineLiterals.everyNthMode}'"
         }
     }
 

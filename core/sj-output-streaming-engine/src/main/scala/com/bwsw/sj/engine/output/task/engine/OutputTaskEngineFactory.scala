@@ -30,11 +30,11 @@ class OutputTaskEngineFactory(manager: OutputTaskManager,
    */
   def createOutputTaskEngine(): OutputTaskEngine = {
     manager.outputInstance.checkpointMode match {
-      case EngineLiterals.timeIntervalCheckpointMode =>
-        logger.error(s"Task: ${manager.taskName}. Output module can't have a '${EngineLiterals.timeIntervalCheckpointMode}' checkpoint mode\n")
-        throw new Exception(s"Task: ${manager.taskName}. Output module can't have a '${EngineLiterals.timeIntervalCheckpointMode}' checkpoint mode\n")
-      case EngineLiterals.everyNthCheckpointMode =>
-        logger.info(s"Task: ${manager.taskName}. Output module has an '${EngineLiterals.everyNthCheckpointMode}' checkpoint mode, create an appropriate task engine\n")
+      case EngineLiterals.`timeIntervalMode` =>
+        logger.error(s"Task: ${manager.taskName}. Output module can't have a '${EngineLiterals.timeIntervalMode}' checkpoint mode\n")
+        throw new Exception(s"Task: ${manager.taskName}. Output module can't have a '${EngineLiterals.timeIntervalMode}' checkpoint mode\n")
+      case EngineLiterals.`everyNthMode` =>
+        logger.info(s"Task: ${manager.taskName}. Output module has an '${EngineLiterals.everyNthMode}' checkpoint mode, create an appropriate task engine\n")
         new OutputTaskEngine(manager, performanceMetrics, blockingQueue) with NumericalCheckpointTaskEngine
     }
   }

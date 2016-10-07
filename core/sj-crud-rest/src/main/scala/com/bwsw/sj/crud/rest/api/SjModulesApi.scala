@@ -201,7 +201,8 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
   }
 
   private val gettingInstance = (instance: Instance) => get {
-    val response = OkRestResponse(Map("instance" -> instance.asProtocolInstance()))
+    val t = instance.asProtocolInstance()
+    val response = OkRestResponse(Map("instance" -> t))
     complete(restResponseToHttpResponse(response))
   }
 

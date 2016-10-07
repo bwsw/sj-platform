@@ -72,7 +72,7 @@ abstract class TaskManager() {
   }
 
   private def getAuxiliaryTStream() = {
-    val inputs = clearInputsFromExecutionMode()
+    val inputs = instance.getInputsWithoutStreamMode()
     val streams = inputs.union(instance.outputs)
     val sjStream = streams.flatMap(s => streamDAO.get(s)).filter(s => s.streamType.equals(tStreamType)).head
 
@@ -225,10 +225,6 @@ abstract class TaskManager() {
         dataStorage
       )
     }
-  }
-
-  private def clearInputsFromExecutionMode() = {
-    instance.inputs.map(x => x.takeWhile(y => y != '/'))
   }
 
   def getSjStream(name: String, description: String, tags: Array[String], partitions: Int) = {

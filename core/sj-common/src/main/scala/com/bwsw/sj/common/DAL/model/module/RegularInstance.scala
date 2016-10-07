@@ -2,6 +2,7 @@ package com.bwsw.sj.common.DAL.model.module
 
 import com.bwsw.sj.common.rest.entities.module.{ExecutionPlan, InstanceMetadata, RegularInstanceMetadata}
 import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.common.utils.SjStreamUtils._
 import org.mongodb.morphia.annotations._
 
 /**
@@ -10,6 +11,7 @@ import org.mongodb.morphia.annotations._
  * @author Kseniya Tomskikh
  */
 class RegularInstance() extends Instance {
+  var inputs: Array[String] = Array()
   @Property("checkpoint-mode") var checkpointMode: String = null
   @Property("checkpoint-interval") var checkpointInterval: Long = 0
   @Embedded("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan()
@@ -33,6 +35,8 @@ class RegularInstance() extends Instance {
 
     protocolInstance
   }
+
+  override def getInputsWithoutStreamMode() = this.inputs.map(clearStreamFromMode)
 }
 
 

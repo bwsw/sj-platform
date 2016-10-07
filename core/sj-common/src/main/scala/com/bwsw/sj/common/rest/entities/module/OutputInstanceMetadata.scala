@@ -31,13 +31,12 @@ class OutputInstanceMetadata extends InstanceMetadata {
                                moduleVersion: String,
                                engineName: String,
                                engineVersion: String) = {
-
+    val clearInputs = Array(clearStreamFromMode(this.input))
     super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion)
-    castParallelismToNumber(getStreamsPartitions(Array(clearStreamFromMode(this.input))))
+    castParallelismToNumber(getStreamsPartitions(clearInputs))
     this.executionPlan.fillTasks(createTaskStreams(), createTaskNames(this.parallelism.asInstanceOf[Int], this.name))
 
-    val streams = Array(clearStreamFromMode(input))
-    fillStages(streams)
+    fillStages(clearInputs)
   }
 
   override def createStreams() = {

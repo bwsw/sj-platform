@@ -1,6 +1,7 @@
 package com.bwsw.sj.common.DAL.model.module
 
 import com.bwsw.sj.common.rest.entities.module.{ExecutionPlan, InstanceMetadata, OutputInstanceMetadata}
+import com.bwsw.sj.common.utils.SjStreamUtils._
 import org.mongodb.morphia.annotations.{Embedded, Property}
 
 /**
@@ -10,6 +11,7 @@ import org.mongodb.morphia.annotations.{Embedded, Property}
  * @author Kseniya Tomskikh
  */
 class OutputInstance() extends Instance {
+  var inputs: Array[String] = Array()
   @Property("checkpoint-mode") var checkpointMode: String = null
   @Property("checkpoint-interval") var checkpointInterval: Long = 0
   @Embedded("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan()
@@ -27,4 +29,6 @@ class OutputInstance() extends Instance {
 
     protocolInstance
   }
+
+  override def getInputsWithoutStreamMode() = this.inputs.map(clearStreamFromMode)
 }

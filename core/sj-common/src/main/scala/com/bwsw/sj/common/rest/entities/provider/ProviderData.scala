@@ -6,7 +6,7 @@ import com.bwsw.sj.common.DAL.model.Provider
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils
 import com.bwsw.sj.common.utils.ProviderLiterals._
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -17,6 +17,7 @@ case class ProviderData(name: String,
                         hosts: Array[String],
                         description: String = "No description"
                          ) extends ValidationUtils {
+  @JsonIgnore
   def asModelProvider() = {
     val provider = new Provider(
       this.name,
@@ -30,6 +31,7 @@ case class ProviderData(name: String,
     provider
   }
 
+  @JsonIgnore
   def validate() = {
     val errors = new ArrayBuffer[String]()
     val providerDAO = ConnectionRepository.getProviderService

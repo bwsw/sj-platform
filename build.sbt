@@ -27,7 +27,7 @@ val commonSettings = Seq(
       </developers>
     ),
 
-//  resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/service/local/staging/deploy/maven2",
+  //  resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/service/local/staging/deploy/maven2",
   resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
   resolvers += "Twitter Repository" at "http://maven.twttr.com",
 
@@ -77,7 +77,7 @@ lazy val sj = (project in file(".")).settings(publish := {})
     engineCore, crudRest,
     inputStreamingEngine, regularStreamingEngine, windowedStreamingEngine, outputStreamingEngine,
     framework, transactionGenerator,
-    stubInput, stubRegular, stubOutput,
+    stubInput, stubRegular, stubWindowed, stubOutput,
     pmOutput,
     sflowProcess, sflowOutput
   )
@@ -155,6 +155,11 @@ lazy val stubInput = Project(id = "sj-stub-input-streaming",
 
 lazy val stubRegular = Project(id = "sj-stub-regular-streaming",
   base = file("./contrib/stubs/sj-stub-regular-streaming"))
+  .settings(commonSettings: _*)
+  .dependsOn(engineCore)
+
+lazy val stubWindowed = Project(id = "sj-stub-windowed-streaming",
+  base = file("./contrib/stubs/sj-stub-windowed-streaming"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 

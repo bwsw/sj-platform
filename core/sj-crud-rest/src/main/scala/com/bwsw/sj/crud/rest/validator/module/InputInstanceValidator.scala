@@ -35,7 +35,7 @@ class InputInstanceValidator extends InstanceValidator {
       case None =>
         errors += s"'Checkpoint-mode' is required"
       case Some(x) =>
-        if (!checkpointModes.contains(inputInstanceMetadata.checkpointMode)) {
+        if (!checkpointModes.contains(x)) {
           errors += s"Unknown value of 'checkpoint-mode' attribute: '$x'. " +
             s"'Checkpoint-mode' must be one of: ${checkpointModes.mkString("[", ", ", "]")}"
         }
@@ -85,10 +85,10 @@ class InputInstanceValidator extends InstanceValidator {
     if (instance.outputs.length > outputsCardinality(1)) {
       errors += s"Count of outputs cannot be more than ${outputsCardinality(1)}"
     }
-    if (doesContainDoubles(instance.outputs.toList)) {
+    if (doesContainDoubles(instance.outputs)) {
       errors += s"'Outputs' contain the non-unique streams"
     }
-    val outputStreams = getStreams(instance.outputs.toList)
+    val outputStreams = getStreams(instance.outputs)
     instance.outputs.toList.foreach { streamName =>
       if (!outputStreams.exists(s => s.name == streamName)) {
         errors += s"Output stream '$streamName' does not exist"

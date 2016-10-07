@@ -1,8 +1,11 @@
 package com.bwsw.sj.crud.rest.validator.module
 
+import com.bwsw.sj.common.DAL.model.{TStreamService, KafkaService, KafkaSjStream}
 import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, SpecificationData, WindowedInstanceMetadata}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._
+import com.bwsw.sj.common.utils.SjStreamUtils._
+import com.bwsw.sj.common.utils.StreamLiterals._
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable.ArrayBuffer
@@ -35,11 +38,157 @@ class WindowedInstanceValidator extends InstanceValidator {
       }
     }
 
-    errors ++= validateStreamOptions(windowedInstanceMetadata, specification)
+    // 'window' field
+    if (windowedInstanceMetadata.window <= 0) {
+      errors += s"'Window' must be greater than zero"
+    }
+
+    // 'sliding-interval' field
+    if (windowedInstanceMetadata.slidingInterval <= 0) {
+      errors += s"'Sliding-interval' must be greater than zero"
+    }
+
+    if (windowedInstanceMetadata.slidingInterval > windowedInstanceMetadata.window) {
+      errors += s"'Window' must be greater or equal than 'sliding-interval'"
+    }
+
+    //'batch-fill-type' field
+    Option(windowedInstanceMetadata.batchFillType) match {
+      case None =>
+        errors += s"'Batch-fill-type' is required"
+      case Some(batchFillType) =>
+        //'type-name' field
+        Option(batchFillType.typeName) match {
+          case Some(x) =>
+            if (!batchFillTypes.contains(x)) {
+              errors += s"Unknown value of 'type-name' of 'batch-fill-type' attribute: '$x'. " +
+                s"'Type-name' must be one of: ${batchFillTypes.mkString("[", ", ", "]")}"
+            }
+          case None =>
+            errors += s"'Type-name' of 'batch-fill-type' is required"
+        }
+        //'value' field
+        Option(batchFillType.value) match {
+          case Some(x) =>
+            if (x <= 0) {
+              errors += s"'Value' of 'batch-fill-type' must be greater than zero"
+            }
+          case None =>
+            errors += s"'Value' of 'batch-fill-type' is required"
+        }
+
+    }
+
+    Option(windowedInstanceMetadata.mainStream) match {
+      case Some(x) =>
+        errors ++= validateStreamOptions(windowedInstanceMetadata, specification)
+      case None =>
+        errors += s"'Main-stream' is required"
+
+    }
 
     errors
   }
 
-  def validateStreamOptions(parameters: InstanceMetadata,
-                            specification: SpecificationData): ArrayBuffer[String] = ???
+  def validateStreamOptions(instance: WindowedInstanceMetadata,
+                            specification: SpecificationData): ArrayBuffer[String] = {
+    logger.debug(s"Instance: ${instance.name}. Stream options validation.")
+    val errors = new ArrayBuffer[String]()
+    val inputs = instance.getInputs()
+
+    // 'inputs' field
+    val inputModes = inputs.map(i => getStreamMode(i))
+    if (inputModes.exists(m => !streamModes.contains(m))) {
+      errors += s"Unknown stream mode. Input streams must have one of mode: ${streamModes.mkString("[", ", ", "]")}"
+    }
+    val inputsCardinality = specification.inputs("cardinality").asInstanceOf[Array[Int]]
+    if (inputs.length < inputsCardinality(0)) {
+      errors += s"Count of inputs cannot be less than ${inputsCardinality(0)}"
+    }
+    if (inputs.length > inputsCardinality(1)) {
+      errors += s"Count of inputs cannot be more than ${inputsCardinality(1)}"
+    }
+    if (doesContainDoubles(inputs)) {
+      errors += s"Inputs is not unique"
+    }
+
+    val clearInputs = inputs.map(clearStreamFromMode)
+    val inputStreams = getStreams(clearInputs)
+    clearInputs.foreach { streamName =>
+      if (!inputStreams.exists(s => s.name == streamName)) {
+        errors += s"Input stream '$streamName' does not exist"
+      }
+    }
+
+    val inputTypes = specification.inputs("types").asInstanceOf[Array[String]]
+    if (inputStreams.exists(s => !inputTypes.contains(s.streamType))) {
+      errors += s"Input streams must be one of: ${inputTypes.mkString("[", ", ", "]")}"
+    }
+
+    val kafkaStreams = inputStreams.filter(s => s.streamType.equals(kafkaStreamType)).map(_.asInstanceOf[KafkaSjStream])
+    if (kafkaStreams.nonEmpty) {
+      if (kafkaStreams.exists(s => !s.service.isInstanceOf[KafkaService])) {
+        errors += s"Service for kafka streams must be 'KfkQ'"
+      }
+    }
+
+    // 'start-from' field
+    val startFrom = instance.startFrom
+    if (inputStreams.exists(s => s.streamType.equals(kafkaStreamType))) {
+      if (!startFromModes.contains(startFrom)) {
+        errors += s"'Start-from' attribute must be one of: ${startFromModes.mkString("[", ", ", "]")}, if instance have the kafka-streams"
+      }
+    } else {
+      if (!startFromModes.contains(startFrom)) {
+        try {
+          startFrom.toLong
+        } catch {
+          case ex: NumberFormatException =>
+            errors += s"'Start-from' attribute is not one of: ${startFromModes.mkString("[", ", ", "]")} or timestamp"
+        }
+      }
+    }
+
+    // 'outputs' field
+    val outputsCardinality = specification.outputs("cardinality").asInstanceOf[Array[Int]]
+    if (instance.outputs.length < outputsCardinality(0)) {
+      errors += s"Count of outputs cannot be less than ${outputsCardinality(0)}."
+    }
+    if (instance.outputs.length > outputsCardinality(1)) {
+      errors += s"Count of outputs cannot be more than ${outputsCardinality(1)}."
+    }
+    if (doesContainDoubles(instance.outputs)) {
+      errors += s"Outputs is not unique"
+    }
+    val outputStreams = getStreams(instance.outputs)
+    instance.outputs.toList.foreach { streamName =>
+      if (!outputStreams.exists(s => s.name == streamName)) {
+        errors += s"Output stream '$streamName' does not exist"
+      }
+    }
+    val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
+    if (outputStreams.exists(s => !outputTypes.contains(s.streamType))) {
+      errors += s"Output streams must be one of: ${outputTypes.mkString("[", ", ", "]")}"
+    }
+
+    // 'parallelism' field
+    val partitions = getStreamsPartitions(inputStreams)
+    val minPartitionCount = if (partitions.nonEmpty) partitions.values.min else 0
+    errors ++= checkParallelism(instance.parallelism, minPartitionCount)
+
+    val allStreams = inputStreams.union(outputStreams)
+    val tStreamsServices = getStreamServices(allStreams.filter { s =>
+      s.streamType.equals(tStreamType)
+    })
+    if (tStreamsServices.size != 1) {
+      errors += s"All t-streams should have the same service"
+    } else {
+      val service = serviceDAO.get(tStreamsServices.head)
+      if (!service.get.isInstanceOf[TStreamService]) {
+        errors += s"Service for t-streams must be 'TstrQ'"
+      }
+    }
+
+    errors
+  }
 }

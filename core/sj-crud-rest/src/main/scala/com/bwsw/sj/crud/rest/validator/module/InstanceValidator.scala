@@ -92,11 +92,11 @@ abstract class InstanceValidator extends ValidationUtils {
     errors
   }
 
-  protected def doesContainDoubles(list: List[String]): Boolean = {
+  protected def doesContainDoubles(list: Array[String]): Boolean = {
     list.map(x => (x, 1)).groupBy(_._1).map(x => x._2.reduce { (a, b) => (a._1, a._2 + b._2) }).exists(x => x._2 > 1)
   }
 
-  protected def getStreams(streamNames: List[String]): mutable.Buffer[SjStream] = {
+  protected def getStreams(streamNames: Array[String]): mutable.Buffer[SjStream] = {
     val streamsDAO = ConnectionRepository.getStreamService
     streamsDAO.getAll.filter(s => streamNames.contains(s.name))
   }

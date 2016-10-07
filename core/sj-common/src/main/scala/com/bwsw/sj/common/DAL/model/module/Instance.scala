@@ -10,12 +10,13 @@ import org.mongodb.morphia.annotations.{Embedded, Entity, Id, Property}
 
 import scala.collection.JavaConverters._
 import scala.collection.JavaConversions._
+
 /**
-  * Entity for base instance-json
-  *
-  *
-  * @author Kseniya Tomskikh
-  */
+ * Entity for base instance-json
+ *
+ *
+ * @author Kseniya Tomskikh
+ */
 @Entity("instances")
 class Instance {
   @Property("module-type") var moduleType: String = null
@@ -24,7 +25,6 @@ class Instance {
   var status: String = EngineLiterals.ready
   @Id var name: String = null
   var description: String = "No description"
-  var inputs: Array[String] = Array()
   var outputs: Array[String] = Array()
   var parallelism: Int = 1
   var options: String = "{}"
@@ -63,4 +63,6 @@ class Instance {
     val serializer = new JsonSerializer()
     serializer.deserialize[Map[String, Any]](this.options)
   }
+
+  def getInputsWithoutStreamMode(): Array[String] = Array()
 }

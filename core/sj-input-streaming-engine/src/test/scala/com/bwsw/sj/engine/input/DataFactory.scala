@@ -196,7 +196,7 @@ object DataFactory {
     instance.status = EngineLiterals.ready
     instance.description = "some description of test instance"
     instance.outputs = instanceOutputs
-    instance.checkpointMode = EngineLiterals.everyNthCheckpointMode
+    instance.checkpointMode = EngineLiterals.everyNthMode
     instance.checkpointInterval = checkpointInterval
     instance.parallelism = 1
     instance.options = """{"hey": "hey"}"""

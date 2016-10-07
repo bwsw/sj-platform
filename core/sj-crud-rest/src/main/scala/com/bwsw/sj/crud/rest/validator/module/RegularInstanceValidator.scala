@@ -30,7 +30,7 @@ class RegularInstanceValidator extends InstanceValidator {
       case None =>
         errors += s"'Checkpoint-mode' is required"
       case Some(x) =>
-        if (!checkpointModes.contains(regularInstanceMetadata.checkpointMode)) {
+        if (!checkpointModes.contains(x)) {
           errors += s"Unknown value of 'checkpoint-mode' attribute: '$x'. " +
             s"'Checkpoint-mode' must be one of: ${checkpointModes.mkString("[", ", ", "]")}"
         }
@@ -63,7 +63,7 @@ class RegularInstanceValidator extends InstanceValidator {
   }
 
   private def validateStreamOptions(instance: RegularInstanceMetadata,
-                                      specification: SpecificationData) = {
+                                    specification: SpecificationData) = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     val errors = new ArrayBuffer[String]()
 
@@ -79,15 +79,18 @@ class RegularInstanceValidator extends InstanceValidator {
     if (instance.inputs.length > inputsCardinality(1)) {
       errors += s"Count of inputs cannot be more than ${inputsCardinality(1)}"
     }
-    if (doesContainDoubles(instance.inputs.toList)) {
+    if (doesContainDoubles(instance.inputs)) {
       errors += s"Inputs is not unique"
     }
-    val inputStreams = getStreams(instance.inputs.toList.map(clearStreamFromMode))
-    instance.inputs.toList.map(clearStreamFromMode).foreach { streamName =>
+
+    val clearInputs = instance.inputs.map(clearStreamFromMode)
+    val inputStreams = getStreams(clearInputs)
+    clearInputs.foreach { streamName =>
       if (!inputStreams.exists(s => s.name == streamName)) {
         errors += s"Input stream '$streamName' does not exist"
       }
     }
+
     val inputTypes = specification.inputs("types").asInstanceOf[Array[String]]
     if (inputStreams.exists(s => !inputTypes.contains(s.streamType))) {
       errors += s"Input streams must be one of: ${inputTypes.mkString("[", ", ", "]")}"
@@ -125,10 +128,10 @@ class RegularInstanceValidator extends InstanceValidator {
     if (instance.outputs.length > outputsCardinality(1)) {
       errors += s"Count of outputs cannot be more than ${outputsCardinality(1)}."
     }
-    if (doesContainDoubles(instance.outputs.toList)) {
+    if (doesContainDoubles(instance.outputs)) {
       errors += s"Outputs is not unique"
     }
-    val outputStreams = getStreams(instance.outputs.toList)
+    val outputStreams = getStreams(instance.outputs)
     instance.outputs.toList.foreach { streamName =>
       if (!outputStreams.exists(s => s.name == streamName)) {
         errors += s"Output stream '$streamName' does not exist"

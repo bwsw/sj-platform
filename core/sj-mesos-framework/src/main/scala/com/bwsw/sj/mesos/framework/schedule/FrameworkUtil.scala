@@ -2,8 +2,7 @@ package com.bwsw.sj.mesos.framework.schedule
 
 import java.io.{PrintWriter, StringWriter}
 
-import com.bwsw.sj.common.DAL.model.module.Instance
-import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.mesos.framework.task.TasksList
 import org.apache.log4j.Logger
 import org.apache.mesos.SchedulerDriver
@@ -21,11 +20,11 @@ object FrameworkUtil {
     * @return ports count for current task
     */
   def getCountPorts(instance: Instance) = {
-    instance.moduleType match {
-      case EngineLiterals.outputStreamingType => 2
-      case EngineLiterals.regularStreamingType => instance.inputs.length + instance.outputs.length + 4
-      case EngineLiterals.inputStreamingType => instance.outputs.length + 2
-      case _ => 0
+    instance match {
+      case _: OutputInstance => 2
+      case regularInstance: RegularInstance => regularInstance.inputs.length + regularInstance.outputs.length + 4
+      case _: InputInstance => instance.outputs.length + 2
+      case windowedInstance: WindowedInstance => 0 //todo
     }
   }
 
