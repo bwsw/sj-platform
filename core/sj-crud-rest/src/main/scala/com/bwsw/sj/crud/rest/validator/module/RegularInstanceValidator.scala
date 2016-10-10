@@ -79,11 +79,11 @@ class RegularInstanceValidator extends InstanceValidator {
     if (instance.inputs.length > inputsCardinality(1)) {
       errors += s"Count of inputs cannot be more than ${inputsCardinality(1)}"
     }
-    if (doesContainDoubles(instance.inputs)) {
-      errors += s"Inputs is not unique"
-    }
 
     val clearInputs = instance.inputs.map(clearStreamFromMode)
+    if (doesContainDoubles(clearInputs)) {
+      errors += s"Inputs is not unique"
+    }
     val inputStreams = getStreams(clearInputs)
     clearInputs.foreach { streamName =>
       if (!inputStreams.exists(s => s.name == streamName)) {
