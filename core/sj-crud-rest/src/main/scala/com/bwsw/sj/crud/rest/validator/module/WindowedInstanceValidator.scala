@@ -52,33 +52,6 @@ class WindowedInstanceValidator extends InstanceValidator {
       errors += s"'Window' must be greater or equal than 'sliding-interval'"
     }
 
-    //'batch-fill-type' field
-    Option(windowedInstanceMetadata.batchFillType) match {
-      case None =>
-        errors += s"'Batch-fill-type' is required"
-      case Some(batchFillType) =>
-        //'type-name' field
-        Option(batchFillType.typeName) match {
-          case Some(x) =>
-            if (!batchFillTypes.contains(x)) {
-              errors += s"Unknown value of 'type-name' of 'batch-fill-type' attribute: '$x'. " +
-                s"'Type-name' must be one of: ${batchFillTypes.mkString("[", ", ", "]")}"
-            }
-          case None =>
-            errors += s"'Type-name' of 'batch-fill-type' is required"
-        }
-        //'value' field
-        Option(batchFillType.value) match {
-          case Some(x) =>
-            if (x <= 0) {
-              errors += s"'Value' of 'batch-fill-type' must be greater than zero"
-            }
-          case None =>
-            errors += s"'Value' of 'batch-fill-type' is required"
-        }
-
-    }
-
     Option(windowedInstanceMetadata.mainStream) match {
       case Some(x) =>
         errors ++= validateStreamOptions(windowedInstanceMetadata, specification)
@@ -132,11 +105,44 @@ class WindowedInstanceValidator extends InstanceValidator {
       }
     }
 
+    //'batch-fill-type' field
+    Option(instance.batchFillType) match {
+      case None =>
+        errors += s"'Batch-fill-type' is required"
+      case Some(batchFillType) =>
+        //'type-name' field
+        Option(batchFillType.typeName) match {
+          case Some(x) =>
+            if (!batchFillTypes.contains(x)) {
+              errors += s"Unknown value of 'type-name' of 'batch-fill-type' attribute: '$x'. " +
+                s"'Type-name' must be one of: ${batchFillTypes.mkString("[", ", ", "]")}"
+            } else {
+              if (x == transactionIntervalMode && inputStreams.exists(x => x.streamType == kafkaStreamType)) {
+                errors += s"'Type-name' of 'batch-fill-type' cannot be equal '$transactionIntervalMode', " +
+                  s"if there are the '$kafkaStreamType' type inputs"
+              }
+            }
+          case None =>
+            errors += s"'Type-name' of 'batch-fill-type' is required"
+        }
+        //'value' field
+        Option(batchFillType.value) match {
+          case Some(x) =>
+            if (x <= 0) {
+              errors += s"'Value' of 'batch-fill-type' must be greater than zero"
+            }
+          case None =>
+            errors += s"'Value' of 'batch-fill-type' is required"
+        }
+
+    }
+
     // 'start-from' field
     val startFrom = instance.startFrom
     if (inputStreams.exists(s => s.streamType.equals(kafkaStreamType))) {
       if (!startFromModes.contains(startFrom)) {
-        errors += s"'Start-from' attribute must be one of: ${startFromModes.mkString("[", ", ", "]")}, if instance have the kafka-streams"
+        errors += s"'Start-from' attribute must be one of: ${startFromModes.mkString("[", ", ", "]")}, " +
+          s"if instance inputs have the '$kafkaStreamType' type streams"
       }
     } else {
       if (!startFromModes.contains(startFrom)) {
