@@ -34,10 +34,14 @@ class EsIndServiceData() extends ServiceData() {
     errors ++= validateProvider(this.provider, this.serviceType)
 
     // 'index' field
-    errors ++= validateStringFieldRequired(this.index, "Index")
-    if (!validateNamespace(this.index)) {
-      errors += s"Service has incorrect 'index': '$index'. " +
-        s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+    Option(this.index) match {
+      case None =>
+        errors += "'Index' is required"
+      case Some(x) =>
+        if (!validateNamespace(x)) {
+          errors += s"Service has incorrect 'index': '$x'. " +
+            s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+        }
     }
 
     errors

@@ -37,18 +37,6 @@ trait ValidationUtils {
     providerErrors
   }
 
-  def validateStringFieldRequired(fieldData: String, fieldJsonName: String) = {
-    val errors = new ArrayBuffer[String]()
-
-    Option(fieldData) match {
-      case None =>
-        errors += s"'$fieldJsonName' is required"
-      case Some(x) =>
-    }
-
-    errors
-  }
-
   def validateNamespace(namespace: String) = {
     namespace.matches( """^([a-z][a-z0-9_]*)$""")
   }

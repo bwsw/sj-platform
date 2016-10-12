@@ -54,10 +54,14 @@ class TstrQServiceData() extends ServiceData() {
     }
 
     // 'metadataNamespace' field
-    errors ++= validateStringFieldRequired(this.metadataNamespace, "Metadata-namespace")
-    if (!validateNamespace(this.metadataNamespace)) {
-      errors += s"Service has incorrect 'metadata-namespace': '$metadataNamespace'. " +
-        s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+    Option(this.metadataNamespace) match {
+      case None =>
+        errors += "'Metadata-namespace' is required"
+      case Some(x) =>
+        if (!validateNamespace(x)) {
+          errors += s"Service has incorrect 'metadata-namespace': '$x'. " +
+            s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+        }
     }
 
     // 'dataProvider' field
@@ -83,10 +87,14 @@ class TstrQServiceData() extends ServiceData() {
     }
 
     // 'dataNamespace' field
-    errors ++= validateStringFieldRequired(this.dataNamespace, "Data-namespace")
-    if (!validateNamespace(this.dataNamespace)) {
-      errors += s"Service has incorrect 'data-namespace': '$dataNamespace'. " +
-        s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+    Option(this.dataNamespace) match {
+      case None =>
+        errors += "'Data-namespace' is required"
+      case Some(x) =>
+        if (!validateNamespace(x)) {
+          errors += s"Service has incorrect 'data-namespace': '$x'. " +
+            s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+        }
     }
 
     Option(this.lockProvider) match {
@@ -106,10 +114,14 @@ class TstrQServiceData() extends ServiceData() {
     }
 
     // 'lockNamespace' field
-    errors ++= validateStringFieldRequired(this.lockNamespace, "Lock-namespace")
-    if (!validateNamespace(this.lockNamespace)) {
-      errors += s"Service has incorrect 'lock-namespace': '$lockNamespace'. " +
-        s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+    Option(this.lockNamespace) match {
+      case None =>
+        errors += "'Lock-namespace' is required"
+      case Some(x) =>
+        if (!validateNamespace(x)) {
+          errors += s"Service has incorrect 'lock-namespace': '$x'. " +
+            s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+        }
     }
 
     errors

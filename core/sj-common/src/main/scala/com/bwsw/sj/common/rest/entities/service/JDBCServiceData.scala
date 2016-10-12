@@ -34,10 +34,14 @@ class JDBCServiceData() extends ServiceData() {
     errors ++= validateProvider(this.provider, this.serviceType)
 
     // 'namespace'
-    errors ++= validateStringFieldRequired(this.namespace, "Namespace")
-    if (!validateNamespace(this.namespace)) {
-      errors += s"Service has incorrect 'namespace': '$namespace'. " +
-        s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+    Option(this.namespace) match {
+      case None =>
+        errors += "'Namespace' is required"
+      case Some(x) =>
+        if (!validateNamespace(x)) {
+          errors += s"Service has incorrect 'namespace': '$x'. " +
+            s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+        }
     }
 
     errors
