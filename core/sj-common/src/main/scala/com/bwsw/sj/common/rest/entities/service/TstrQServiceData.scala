@@ -58,9 +58,14 @@ class TstrQServiceData() extends ServiceData() {
       case None =>
         errors += "'Metadata-namespace' is required"
       case Some(x) =>
-        if (!validateNamespace(x)) {
-          errors += s"Service has incorrect 'metadata-namespace': '$x'. " +
-            s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+        if (x.isEmpty) {
+          errors += s"'Metadata-namespace' is required"
+        }
+        else {
+          if (!validateNamespace(x)) {
+            errors += s"Service has incorrect 'metadata-namespace': '$x'. " +
+              s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+          }
         }
     }
 
@@ -91,9 +96,14 @@ class TstrQServiceData() extends ServiceData() {
       case None =>
         errors += "'Data-namespace' is required"
       case Some(x) =>
-        if (!validateNamespace(x)) {
-          errors += s"Service has incorrect 'data-namespace': '$x'. " +
-            s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+        if (x.isEmpty) {
+          errors += s"'Data-namespace' is required"
+        }
+        else {
+          if (!validateNamespace(x)) {
+            errors += s"Service has incorrect 'data-namespace': '$x'. " +
+              s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+          }
         }
     }
 
@@ -118,9 +128,14 @@ class TstrQServiceData() extends ServiceData() {
       case None =>
         errors += "'Lock-namespace' is required"
       case Some(x) =>
-        if (!validateNamespace(x)) {
-          errors += s"Service has incorrect 'lock-namespace': '$x'. " +
-            s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+        if (x.isEmpty) {
+          errors += s"'Lock-namespace' is required"
+        }
+        else {
+          if (!validateNamespace(x)) {
+            errors += s"Service has incorrect 'lock-namespace': '$x'. " +
+              s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+          }
         }
     }
 

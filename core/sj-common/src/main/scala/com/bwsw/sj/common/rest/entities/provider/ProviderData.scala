@@ -39,13 +39,18 @@ case class ProviderData(name: String,
       case None =>
         errors += s"'Name' is required"
       case Some(x) =>
-        if (providerDAO.get(x).isDefined) {
-          errors += s"Provider with name '$x' already exists"
+        if (x.isEmpty) {
+          errors += s"'Name' is required"
+        }
+        else {
+          if (!validateName(x)) {
+            errors += s"Provider has incorrect name: '$x'. " +
+              s"Name of provider must be contain digits, lowercase letters or hyphens. First symbol must be a letter"
+          }
         }
 
-        if (!validateName(x)) {
-          errors += s"Provider has incorrect name: '$x'. " +
-            s"Name of provider must be contain digits, lowercase letters or hyphens. First symbol must be a letter"
+        if (providerDAO.get(x).isDefined) {
+          errors += s"Provider with name '$x' already exists"
         }
     }
 
@@ -60,16 +65,22 @@ case class ProviderData(name: String,
     }
 
     //'hosts' field
-    if (Option(this.hosts).isEmpty) {
-      errors += s"'Hosts' is required"
-    } else {
-      if (this.hosts.isEmpty) {
-        errors += s"'Hosts' must contain at least one host"
-      } else {
-        for (host <- this.hosts) {
-          errors ++= validateHost(host)
+    Option(this.hosts) match {
+      case None =>
+        errors += s"'Hosts' is required"
+      case Some(x) =>
+        if (x.isEmpty) {
+          errors += s"'Hosts' must contain at least one host"
+        } else {
+          if (x.head.isEmpty) {
+            errors += s"'Hosts' is required"
+          }
+          else {
+            for (host <- this.hosts) {
+              errors ++= validateHost(host)
+            }
+          }
         }
-      }
     }
 
     errors
@@ -99,6 +110,6 @@ case class ProviderData(name: String,
   }
 
   private def normalizeName(name: String) = {
-    name.replace('\\','/')
+    name.replace('\\', '/')
   }
 }

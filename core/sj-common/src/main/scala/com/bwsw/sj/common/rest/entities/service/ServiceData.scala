@@ -53,13 +53,18 @@ class ServiceData() extends ValidationUtils {
       case None =>
         errors += s"'Name' is required"
       case Some(x) =>
-        if (serviceDAO.get(x).isDefined) {
-          errors += s"Service with name $x already exists"
+        if (x.isEmpty) {
+          errors += s"'Name' is required"
+        }
+        else {
+          if (!validateName(x)) {
+            errors += s"Service has incorrect name: $x. " +
+              s"Name of service must be contain digits, lowercase letters or hyphens. First symbol must be a letter"
+          }
         }
 
-        if (!validateName(x)) {
-          errors += s"Service has incorrect name: $x. " +
-            s"Name of service must be contain digits, lowercase letters or hyphens. First symbol must be a letter"
+        if (serviceDAO.get(x).isDefined) {
+          errors += s"Service with name $x already exists"
         }
     }
 

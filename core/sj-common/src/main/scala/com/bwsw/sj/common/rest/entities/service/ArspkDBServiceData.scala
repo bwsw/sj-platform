@@ -34,9 +34,14 @@ class ArspkDBServiceData() extends ServiceData() {
       case None =>
         errors += "'Namespace' is required"
       case Some(x) =>
-        if (!validateNamespace(x)) {
-          errors += s"Service has incorrect 'namespace': '$x'. " +
-            s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+        if (x.isEmpty) {
+          errors += s"'Namespace' is required"
+        }
+        else {
+          if (!validateNamespace(x)) {
+            errors += s"Service has incorrect 'namespace': '$x'. " +
+              s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+          }
         }
     }
 

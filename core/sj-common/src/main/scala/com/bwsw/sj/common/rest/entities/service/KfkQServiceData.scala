@@ -54,9 +54,14 @@ class KfkQServiceData() extends ServiceData() {
       case None =>
         errors += "'Zk-namespace' is required"
       case Some(x) =>
-        if (!validateNamespace(x)) {
-          errors += s"Service has incorrect 'zk-namespace': '$x'. " +
-            s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+        if (x.isEmpty) {
+          errors += s"'Zk-namespace' is required"
+        }
+        else {
+          if (!validateNamespace(x)) {
+            errors += s"Service has incorrect 'zk-namespace': '$x'. " +
+              s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+          }
         }
     }
 

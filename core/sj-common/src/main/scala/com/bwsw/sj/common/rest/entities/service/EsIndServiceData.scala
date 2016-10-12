@@ -38,9 +38,14 @@ class EsIndServiceData() extends ServiceData() {
       case None =>
         errors += "'Index' is required"
       case Some(x) =>
-        if (!validateNamespace(x)) {
-          errors += s"Service has incorrect 'index': '$x'. " +
-            s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+        if (x.isEmpty) {
+          errors += s"'Index' is required"
+        }
+        else {
+          if (!validateNamespace(x)) {
+            errors += s"Service has incorrect 'index': '$x'. " +
+              s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+          }
         }
     }
 

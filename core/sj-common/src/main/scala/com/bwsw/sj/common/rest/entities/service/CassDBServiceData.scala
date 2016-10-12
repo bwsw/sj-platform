@@ -34,10 +34,14 @@ class CassDBServiceData() extends ServiceData() {
       case None =>
         errors += "'Keyspace' is required"
       case Some(x) =>
-
-        if (!validateNamespace(x)) {
-          errors += s"Service has incorrect 'keyspace': '$x'. " +
-            s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+        if (x.isEmpty) {
+          errors += s"'Keyspace' is required"
+        }
+        else {
+          if (!validateNamespace(x)) {
+            errors += s"Service has incorrect 'keyspace': '$x'. " +
+              s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+          }
         }
     }
 
