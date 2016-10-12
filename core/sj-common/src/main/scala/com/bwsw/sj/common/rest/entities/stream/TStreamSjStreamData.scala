@@ -12,7 +12,7 @@ import scala.collection.mutable.ArrayBuffer
 
 class TStreamSjStreamData() extends SjStreamData() {
   streamType = StreamLiterals.tStreamType
-  var partitions: Int = 0
+  var partitions: Int = Int.MinValue
   var generator: GeneratorData = new GeneratorData(GeneratorLiterals.localType)
 
   override def validate() = {
@@ -40,8 +40,12 @@ class TStreamSjStreamData() extends SjStreamData() {
     }
 
     //partitions
-    if (this.partitions <= 0)
-      errors += s"'Partitions' must be a positive integer"
+    if (this.partitions == Int.MinValue)
+      errors += s"'Partitions' is required"
+    else {
+      if (this.partitions <= 0)
+        errors += s"'Partitions' must be a positive integer"
+    }
 
     //generator
     errors ++= this.generator.validate()
