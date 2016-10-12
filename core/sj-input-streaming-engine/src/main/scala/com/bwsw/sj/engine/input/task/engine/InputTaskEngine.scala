@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.input.task.engine
 
-import java.util.concurrent.{ArrayBlockingQueue, Callable}
+import java.util.concurrent.{TimeUnit, ArrayBlockingQueue, Callable}
 
 import com.bwsw.sj.common.DAL.model.module.InputInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
@@ -121,7 +121,7 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Run input task engine in a separate thread of execution service\n")
     while (true) {
-      var channelContext = channelContextQueue.poll()
+      var channelContext = channelContextQueue.poll(EngineLiterals.eventWaitTimeout, TimeUnit.MILLISECONDS)
       if (channelContext == null) channelContext = getCtxOfNonEmptyBuffer()
       if (channelContext != null) {
         setOfContexts.add(channelContext)
