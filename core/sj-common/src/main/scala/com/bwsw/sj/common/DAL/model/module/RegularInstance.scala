@@ -2,6 +2,7 @@ package com.bwsw.sj.common.DAL.model.module
 
 import com.bwsw.sj.common.rest.entities.module.{ExecutionPlan, InstanceMetadata, RegularInstanceMetadata}
 import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.common.utils.SjStreamUtils._
 import org.mongodb.morphia.annotations._
 
 /**
@@ -10,6 +11,9 @@ import org.mongodb.morphia.annotations._
  * @author Kseniya Tomskikh
  */
 class RegularInstance() extends Instance {
+  var inputs: Array[String] = Array()
+  @Property("checkpoint-mode") var checkpointMode: String = null
+  @Property("checkpoint-interval") var checkpointInterval: Long = 0
   @Embedded("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan()
   @Property("start-from") var startFrom: String = EngineLiterals.newestStartMode
   @Property("state-management") var stateManagement: String = EngineLiterals.noneStateMode
@@ -19,7 +23,8 @@ class RegularInstance() extends Instance {
   override def asProtocolInstance(): InstanceMetadata = {
     val protocolInstance = new RegularInstanceMetadata()
     super.fillProtocolInstance(protocolInstance)
-
+    protocolInstance.checkpointMode = this.checkpointMode
+    protocolInstance.checkpointInterval = this.checkpointInterval
     protocolInstance.executionPlan = this.executionPlan
     protocolInstance.stateManagement = this.stateManagement
     protocolInstance.stateFullCheckpoint = this.stateFullCheckpoint
@@ -30,6 +35,8 @@ class RegularInstance() extends Instance {
 
     protocolInstance
   }
+
+  override def getInputsWithoutStreamMode() = this.inputs.map(clearStreamFromMode)
 }
 
 

@@ -15,7 +15,7 @@ object BenchmarkDataPrepare extends App {
 
   val instanceName: String = "test-bench-instance"
   val checkpointInterval = 3
-  val checkpointMode = EngineLiterals.everyNthCheckpointMode
+  val checkpointMode = EngineLiterals.everyNthMode
   val partitions = 4
 
   val module = new File(getClass.getClassLoader.getResource("sj-stub-output-bench-test.jar").getPath)

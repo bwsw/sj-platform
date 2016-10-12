@@ -4,13 +4,11 @@ import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.stream.SjStreamData
-import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
 import scala.collection.mutable
-import com.bwsw.sj.common.utils.SjStreamUtils._
 
 trait SjStreamsApi extends Directives with SjCrudValidator with CompletionUtils {
 
@@ -92,7 +90,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator with CompletionUtils 
   private def getUsedInstances(streamName: String): mutable.Buffer[Instance] = {
     instanceDAO.getAll.filter { (instance: Instance) =>
       if (!instance.moduleType.equals(inputStreamingType)) {
-        instance.inputs.map(clearStreamFromMode).contains(streamName) || instance.outputs.contains(streamName)
+        instance.getInputsWithoutStreamMode().contains(streamName) || instance.outputs.contains(streamName)
       } else {
         instance.outputs.contains(streamName)
       }

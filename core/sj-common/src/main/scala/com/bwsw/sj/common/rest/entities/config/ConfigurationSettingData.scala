@@ -6,10 +6,12 @@ import com.bwsw.sj.common.rest.utils.ValidationUtils
 import com.bwsw.sj.common.utils.ConfigLiterals
 import com.bwsw.sj.common.utils.ConfigurationSettingsUtils._
 import com.bwsw.tstreams.env.TSF_Dictionary
+import com.fasterxml.jackson.annotation.JsonIgnore
 
 import scala.collection.mutable.ArrayBuffer
 
 case class ConfigurationSettingData(name: String, value: String) extends ValidationUtils {
+  @JsonIgnore
   def asModelConfigurationSetting(domain: String) = {
     val configurationSetting = new ConfigurationSetting(
       createConfigurationSettingName(domain, this.name),
@@ -20,6 +22,7 @@ case class ConfigurationSettingData(name: String, value: String) extends Validat
     configurationSetting
   }
 
+  @JsonIgnore
   def validate(domain: String) = {
     val configService = ConnectionRepository.getConfigService
     val errors = new ArrayBuffer[String]()
@@ -56,6 +59,7 @@ case class ConfigurationSettingData(name: String, value: String) extends Validat
     errors
   }
 
+  @JsonIgnore
   private def validateTstreamProperty(): Boolean = {
     this.name.contains("producer") || this.name.contains("consumer") || this.name == TSF_Dictionary.Producer.Transaction.DISTRIBUTION_POLICY
   }

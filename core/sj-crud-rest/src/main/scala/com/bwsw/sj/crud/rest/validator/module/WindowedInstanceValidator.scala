@@ -1,7 +1,7 @@
 package com.bwsw.sj.crud.rest.validator.module
 
-import com.bwsw.sj.common.DAL.model.{KafkaService, KafkaSjStream, TStreamService}
-import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, RegularInstanceMetadata, SpecificationData}
+import com.bwsw.sj.common.DAL.model.{TStreamService, KafkaService, KafkaSjStream}
+import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, SpecificationData, WindowedInstanceMetadata}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.SjStreamUtils._
@@ -11,78 +11,88 @@ import org.slf4j.{Logger, LoggerFactory}
 import scala.collection.mutable.ArrayBuffer
 
 /**
- * Validator for Stream-processing regular module type
+ * Validator for Stream-processing-windowed module type
  *
  * @author Kseniya Tomskikh
  */
-class RegularStreamingValidator extends StreamingModuleValidator {
+class WindowedInstanceValidator extends InstanceValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
   override def validate(parameters: InstanceMetadata, specification: SpecificationData) = {
-    logger.debug(s"Instance: ${parameters.name}. Start regular-streaming validation.")
+    logger.debug(s"Instance: ${parameters.name}. Start windowed-streaming validation.")
     val errors = new ArrayBuffer[String]()
     errors ++= super.validateGeneralOptions(parameters)
-    val regularInstanceMetadata = parameters.asInstanceOf[RegularInstanceMetadata]
-
-    // 'checkpoint-mode' field
-    Option(regularInstanceMetadata.checkpointMode) match {
-      case None =>
-        errors += s"'Checkpoint-mode' is required"
-      case Some(x) =>
-        if (!checkpointModes.contains(parameters.checkpointMode)) {
-          errors += s"Unknown value of 'checkpoint-mode' attribute: '$x'. " +
-            s"'Checkpoint-mode' must be one of: ${checkpointModes.mkString("[", ", ", "]")}"
-        }
-    }
-
-    // 'event-wait-time' field
-    if (regularInstanceMetadata.eventWaitTime <= 0) {
-      errors += s"'Event-wait-time' attribute must be greater than zero"
-    }
+    val windowedInstanceMetadata = parameters.asInstanceOf[WindowedInstanceMetadata]
 
     // 'state-management' field
-    if (!stateManagementModes.contains(regularInstanceMetadata.stateManagement)) {
-      errors += s"Unknown value of 'state-management' attribute: '${regularInstanceMetadata.stateManagement}'. " +
-        s"'State-management' must be one of: ${stateManagementModes.mkString("[", ", ", "]")}"
+    if (!stateManagementModes.contains(windowedInstanceMetadata.stateManagement)) {
+      errors += s"Unknown value of state-management attribute: ${windowedInstanceMetadata.stateManagement}. " +
+        s"State-management must be one of: ${stateManagementModes.mkString("[", ", ", "]")}"
     } else {
-      if (regularInstanceMetadata.stateManagement != EngineLiterals.noneStateMode) {
+      if (windowedInstanceMetadata.stateManagement != EngineLiterals.noneStateMode) {
         // 'state-full-checkpoint' field
-        if (regularInstanceMetadata.stateFullCheckpoint <= 0) {
+        if (windowedInstanceMetadata.stateFullCheckpoint <= 0) {
           errors += s"'State-full-checkpoint' attribute must be greater than zero"
         }
       }
     }
 
-    errors ++= validateStreamOptions(regularInstanceMetadata, specification)
+    // 'window' field
+    if (windowedInstanceMetadata.window <= 0) {
+      errors += s"'Window' must be greater than zero"
+    }
+
+    // 'sliding-interval' field
+    if (windowedInstanceMetadata.slidingInterval <= 0) {
+      errors += s"'Sliding-interval' must be greater than zero"
+    }
+
+    if (windowedInstanceMetadata.slidingInterval > windowedInstanceMetadata.window) {
+      errors += s"'Window' must be greater or equal than 'sliding-interval'"
+    }
+
+    Option(windowedInstanceMetadata.mainStream) match {
+      case Some(x) =>
+        errors ++= validateStreamOptions(windowedInstanceMetadata, specification)
+      case None =>
+        errors += s"'Main-stream' is required"
+
+    }
+
+    errors
   }
 
-  private def validateStreamOptions(instance: RegularInstanceMetadata,
-                                      specification: SpecificationData) = {
+  def validateStreamOptions(instance: WindowedInstanceMetadata,
+                            specification: SpecificationData): ArrayBuffer[String] = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     val errors = new ArrayBuffer[String]()
+    val inputs = instance.getInputs()
 
     // 'inputs' field
-    val inputModes = instance.inputs.map(i => getStreamMode(i))
+    val inputModes = inputs.map(i => getStreamMode(i))
     if (inputModes.exists(m => !streamModes.contains(m))) {
       errors += s"Unknown stream mode. Input streams must have one of mode: ${streamModes.mkString("[", ", ", "]")}"
     }
     val inputsCardinality = specification.inputs("cardinality").asInstanceOf[Array[Int]]
-    if (instance.inputs.length < inputsCardinality(0)) {
+    if (inputs.length < inputsCardinality(0)) {
       errors += s"Count of inputs cannot be less than ${inputsCardinality(0)}"
     }
-    if (instance.inputs.length > inputsCardinality(1)) {
+    if (inputs.length > inputsCardinality(1)) {
       errors += s"Count of inputs cannot be more than ${inputsCardinality(1)}"
     }
-    if (doesContainDoubles(instance.inputs.toList)) {
+
+    val clearInputs = inputs.map(clearStreamFromMode)
+    if (doesContainDoubles(clearInputs)) {
       errors += s"Inputs is not unique"
     }
-    val inputStreams = getStreams(instance.inputs.toList.map(clearStreamFromMode))
-    instance.inputs.toList.map(clearStreamFromMode).foreach { streamName =>
+    val inputStreams = getStreams(clearInputs)
+    clearInputs.foreach { streamName =>
       if (!inputStreams.exists(s => s.name == streamName)) {
         errors += s"Input stream '$streamName' does not exist"
       }
     }
+
     val inputTypes = specification.inputs("types").asInstanceOf[Array[String]]
     if (inputStreams.exists(s => !inputTypes.contains(s.streamType))) {
       errors += s"Input streams must be one of: ${inputTypes.mkString("[", ", ", "]")}"
@@ -95,11 +105,44 @@ class RegularStreamingValidator extends StreamingModuleValidator {
       }
     }
 
+    //'batch-fill-type' field
+    Option(instance.batchFillType) match {
+      case None =>
+        errors += s"'Batch-fill-type' is required"
+      case Some(batchFillType) =>
+        //'type-name' field
+        Option(batchFillType.typeName) match {
+          case Some(x) =>
+            if (!batchFillTypes.contains(x)) {
+              errors += s"Unknown value of 'type-name' of 'batch-fill-type' attribute: '$x'. " +
+                s"'Type-name' must be one of: ${batchFillTypes.mkString("[", ", ", "]")}"
+            } else {
+              if (x == transactionIntervalMode && inputStreams.exists(x => x.streamType == kafkaStreamType)) {
+                errors += s"'Type-name' of 'batch-fill-type' cannot be equal '$transactionIntervalMode', " +
+                  s"if there are the '$kafkaStreamType' type inputs"
+              }
+            }
+          case None =>
+            errors += s"'Type-name' of 'batch-fill-type' is required"
+        }
+        //'value' field
+        Option(batchFillType.value) match {
+          case Some(x) =>
+            if (x <= 0) {
+              errors += s"'Value' of 'batch-fill-type' must be greater than zero"
+            }
+          case None =>
+            errors += s"'Value' of 'batch-fill-type' is required"
+        }
+
+    }
+
     // 'start-from' field
     val startFrom = instance.startFrom
     if (inputStreams.exists(s => s.streamType.equals(kafkaStreamType))) {
       if (!startFromModes.contains(startFrom)) {
-        errors += s"'Start-from' attribute must be one of: ${startFromModes.mkString("[", ", ", "]")}, if instance inputs have the kafka-streams"
+        errors += s"'Start-from' attribute must be one of: ${startFromModes.mkString("[", ", ", "]")}, " +
+          s"if instance inputs have the '$kafkaStreamType' type streams"
       }
     } else {
       if (!startFromModes.contains(startFrom)) {
@@ -120,10 +163,10 @@ class RegularStreamingValidator extends StreamingModuleValidator {
     if (instance.outputs.length > outputsCardinality(1)) {
       errors += s"Count of outputs cannot be more than ${outputsCardinality(1)}."
     }
-    if (doesContainDoubles(instance.outputs.toList)) {
+    if (doesContainDoubles(instance.outputs)) {
       errors += s"Outputs is not unique"
     }
-    val outputStreams = getStreams(instance.outputs.toList)
+    val outputStreams = getStreams(instance.outputs)
     instance.outputs.toList.foreach { streamName =>
       if (!outputStreams.exists(s => s.name == streamName)) {
         errors += s"Output stream '$streamName' does not exist"

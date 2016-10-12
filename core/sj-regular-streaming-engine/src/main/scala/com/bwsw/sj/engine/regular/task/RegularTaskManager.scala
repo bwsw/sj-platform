@@ -19,7 +19,7 @@ import scala.collection.mutable
  */
 class RegularTaskManager() extends TaskManager {
 
-  private val regularInstance = instance.asInstanceOf[RegularInstance]
+  val regularInstance = instance.asInstanceOf[RegularInstance]
   val inputs = getInputs(regularInstance.executionPlan)
   val outputProducers =  createOutputProducers()
   val outputTags = createOutputTags()

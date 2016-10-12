@@ -1,6 +1,5 @@
 package com.bwsw.sj.engine.core.engine
 
-import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.engine.core.environment.EnvironmentManager
 import com.bwsw.sj.engine.core.managment.TaskManager
 import org.slf4j.LoggerFactory
@@ -12,14 +11,14 @@ import org.slf4j.LoggerFactory
 trait NumericalCheckpointTaskEngine {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-  protected val instance: Instance
   protected val manager: TaskManager
   protected val environmentManager: EnvironmentManager
   private var countOfEnvelopes = 0
-  val isNotOnlyCustomCheckpoint = instance.checkpointInterval > 0
+  private lazy val checkpointInterval = manager.getCheckpointInterval()
+  val isNotOnlyCustomCheckpoint = checkpointInterval > 0
 
   def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean = {
-    isNotOnlyCustomCheckpoint && countOfEnvelopes == instance.checkpointInterval || environmentManager.isCheckpointInitiated
+    isNotOnlyCustomCheckpoint && countOfEnvelopes == checkpointInterval || environmentManager.isCheckpointInitiated
   }
 
   def afterReceivingEnvelope() = {

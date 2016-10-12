@@ -15,7 +15,7 @@ import com.bwsw.sj.common.utils.SjStreamUtils._
  *
  * @author Kseniya Tomskikh
  */
-class OutputStreamingValidator extends StreamingModuleValidator {
+class OutputInstanceValidator extends InstanceValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
   private val streamsDAO = ConnectionRepository.getStreamService
@@ -37,14 +37,19 @@ class OutputStreamingValidator extends StreamingModuleValidator {
     errors ++= super.validateGeneralOptions(parameters)
     val outputInstanceMetadata = parameters.asInstanceOf[OutputInstanceMetadata]
 
-    Option(parameters.checkpointMode) match {
+    Option(outputInstanceMetadata.checkpointMode) match {
       case None =>
         errors += s"'Checkpoint-mode' is required"
       case Some(x) =>
-        if (!x.equals(EngineLiterals.everyNthCheckpointMode)) {
+        if (!x.equals(EngineLiterals.everyNthMode)) {
           errors += s"Unknown value of 'checkpoint-mode' attribute: '$x'. " +
-            s"'Checkpoint-mode' attribute for output-streaming module must be only '${EngineLiterals.everyNthCheckpointMode}'"
+            s"'Checkpoint-mode' attribute for output-streaming module must be only '${EngineLiterals.everyNthMode}'"
         }
+    }
+
+    // 'checkpoint-interval' field
+    if (outputInstanceMetadata.checkpointInterval <= 0) {
+      errors += s"'Checkpoint-interval' must be greater than zero"
     }
 
     errors ++= validateStreamOptions(outputInstanceMetadata, specification)

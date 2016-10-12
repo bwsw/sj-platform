@@ -7,7 +7,6 @@ import com.bwsw.sj.common.DAL.model.TStreamSjStream
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals._
-import com.bwsw.sj.common.utils.SjStreamUtils._
 import com.bwsw.sj.common.utils.{GeneratorLiterals, StreamLiterals}
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.util.EntityUtils
@@ -42,7 +41,7 @@ private[instance] trait InstanceManager extends InstanceMarathonManager {
   private def getInstanceStreams(instance: Instance) = {
     var streams = instance.outputs
     if (!instance.moduleType.equals(inputStreamingType)) {
-      streams = streams.union(instance.inputs.map(clearStreamFromMode))
+      streams = streams.union(instance.getInputsWithoutStreamMode())
     }
 
     streams

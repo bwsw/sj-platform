@@ -10,12 +10,13 @@ import org.mongodb.morphia.annotations.{Embedded, Entity, Id, Property}
 
 import scala.collection.JavaConverters._
 import scala.collection.JavaConversions._
+
 /**
-  * Entity for base instance-json
-  *
-  *
-  * @author Kseniya Tomskikh
-  */
+ * Entity for base instance-json
+ *
+ *
+ * @author Kseniya Tomskikh
+ */
 @Entity("instances")
 class Instance {
   @Property("module-type") var moduleType: String = null
@@ -24,10 +25,7 @@ class Instance {
   var status: String = EngineLiterals.ready
   @Id var name: String = null
   var description: String = "No description"
-  var inputs: Array[String] = Array()
   var outputs: Array[String] = Array()
-  @Property("checkpoint-mode") var checkpointMode: String = null
-  @Property("checkpoint-interval") var checkpointInterval: Long = 0
   var parallelism: Int = 1
   var options: String = "{}"
   @Property("per-task-cores") var perTaskCores: Double = 1.0
@@ -48,8 +46,6 @@ class Instance {
     protocolInstance.status = this.status
     protocolInstance.name = this.name
     protocolInstance.description = this.description
-    protocolInstance.checkpointMode = this.checkpointMode
-    protocolInstance.checkpointInterval = this.checkpointInterval
     protocolInstance.parallelism = this.parallelism
     protocolInstance.options = serializer.deserialize[Map[String, Any]](this.options)
     protocolInstance.perTaskCores = this.perTaskCores
@@ -67,4 +63,6 @@ class Instance {
     val serializer = new JsonSerializer()
     serializer.deserialize[Map[String, Any]](this.options)
   }
+
+  def getInputsWithoutStreamMode(): Array[String] = Array()
 }

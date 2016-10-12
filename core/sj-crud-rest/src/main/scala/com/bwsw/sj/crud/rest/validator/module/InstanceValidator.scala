@@ -20,7 +20,7 @@ import scala.collection.mutable.ArrayBuffer
  *
  * @author Kseniya Tomskikh
  */
-abstract class StreamingModuleValidator extends ValidationUtils {
+abstract class InstanceValidator extends ValidationUtils {
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
   var serviceDAO: GenericMongoService[Service] = ConnectionRepository.getServiceManager
   var instanceDAO: GenericMongoService[Instance] = ConnectionRepository.getInstanceService
@@ -59,11 +59,6 @@ abstract class StreamingModuleValidator extends ValidationUtils {
         }
     }
 
-    // 'checkpoint-interval' field
-    if (parameters.checkpointInterval <= 0) {
-      errors += s"'Checkpoint-interval' must be greater than zero"
-    }
-
     // 'per-task-cores' field
     if (parameters.perTaskCores <= 0) {
       errors += s"'Per-task-cores' must be greater than zero"
@@ -97,11 +92,11 @@ abstract class StreamingModuleValidator extends ValidationUtils {
     errors
   }
 
-  protected def doesContainDoubles(list: List[String]): Boolean = {
+  protected def doesContainDoubles(list: Array[String]): Boolean = {
     list.map(x => (x, 1)).groupBy(_._1).map(x => x._2.reduce { (a, b) => (a._1, a._2 + b._2) }).exists(x => x._2 > 1)
   }
 
-  protected def getStreams(streamNames: List[String]): mutable.Buffer[SjStream] = {
+  protected def getStreams(streamNames: Array[String]): mutable.Buffer[SjStream] = {
     val streamsDAO = ConnectionRepository.getStreamService
     streamsDAO.getAll.filter(s => streamNames.contains(s.name))
   }

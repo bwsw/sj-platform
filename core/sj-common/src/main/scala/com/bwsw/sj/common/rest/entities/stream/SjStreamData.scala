@@ -5,7 +5,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
-import com.fasterxml.jackson.annotation.{JsonProperty, JsonSubTypes, JsonTypeInfo}
+import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes, JsonTypeInfo}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -24,10 +24,13 @@ class SjStreamData() extends ValidationUtils {
   var tags: Array[String] = Array()
   var force: Boolean = false
 
+  @JsonIgnore
   def create(): Unit = {}
 
+  @JsonIgnore
   def asModelStream(): SjStream = ???
 
+  @JsonIgnore
   protected def fillModelStream(stream: SjStream) = {
     val serviceDAO = ConnectionRepository.getServiceManager
     stream.name = this.name
@@ -37,8 +40,10 @@ class SjStreamData() extends ValidationUtils {
     stream.streamType = this.streamType
   }
 
+  @JsonIgnore
   def validate() = validateGeneralFields()
 
+  @JsonIgnore
   protected def validateGeneralFields() = {
     val streamDAO = ConnectionRepository.getStreamService
     val errors = new ArrayBuffer[String]()

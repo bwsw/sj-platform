@@ -9,6 +9,8 @@ import com.bwsw.sj.common.utils.SjStreamUtils._
 class RegularInstanceMetadata extends InstanceMetadata {
   var inputs: Array[String] = Array()
   var outputs: Array[String] = Array()
+  @JsonProperty("checkpoint-mode") var checkpointMode: String = null
+  @JsonProperty("checkpoint-interval") var checkpointInterval: Long = 0L
   @JsonProperty("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan()
   @JsonProperty("start-from") var startFrom: String = EngineLiterals.newestStartMode
   @JsonProperty("state-management") var stateManagement: String = EngineLiterals.noneStateMode
@@ -18,6 +20,8 @@ class RegularInstanceMetadata extends InstanceMetadata {
   override def asModelInstance() = {
     val modelInstance = new RegularInstance()
     super.fillModelInstance(modelInstance)
+    modelInstance.checkpointMode = this.checkpointMode
+    modelInstance.checkpointInterval = this.checkpointInterval
     modelInstance.stateManagement = this.stateManagement
     modelInstance.stateFullCheckpoint = this.stateFullCheckpoint
     modelInstance.eventWaitTime = this.eventWaitTime
@@ -34,11 +38,12 @@ class RegularInstanceMetadata extends InstanceMetadata {
                                moduleVersion: String,
                                engineName: String,
                                engineVersion: String) = {
+    val clearInputs = this.inputs.map(clearStreamFromMode)
     super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion)
-    castParallelismToNumber(getStreamsPartitions(this.inputs.map(clearStreamFromMode)))
+    castParallelismToNumber(getStreamsPartitions(clearInputs))
     this.executionPlan.fillTasks(createTaskStreams(), createTaskNames(this.parallelism.asInstanceOf[Int], this.name))
 
-    val inputStreams = getStreams(this.inputs.map(clearStreamFromMode))
+    val inputStreams = getStreams(clearInputs)
     val outputStreams = this.outputs
     val streams = inputStreams.filter(s => s.streamType.equals(tStreamType)).map(_.name).union(outputStreams)
     fillStages(streams)

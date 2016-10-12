@@ -17,7 +17,7 @@ import com.bwsw.sj.crud.rest.exceptions._
 import com.bwsw.sj.crud.rest.instance.{InstanceDestroyer, InstanceStarter, InstanceStopper}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
-import com.bwsw.sj.crud.rest.validator.module.StreamingModuleValidator
+import com.bwsw.sj.crud.rest.validator.module.InstanceValidator
 import org.apache.commons.io.FileUtils
 
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
@@ -25,6 +25,63 @@ import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils {
 
   import EngineLiterals._
+
+  val modulesApi =
+    pathPrefix("modules") {
+      pathEndOrSingleSlash {
+        creationOfModule ~
+          gettingListOfAllModules
+      } ~
+        pathPrefix("instances") {
+          gettingAllInstances
+        } ~
+        pathPrefix(Segment) { (moduleType: String) =>
+          checkModuleType(moduleType)
+          pathPrefix(Segment) { (moduleName: String) =>
+            pathPrefix(Segment) { (moduleVersion: String) =>
+              checkModuleOnExistence(moduleType, moduleName, moduleVersion)
+              val specification = getSpecification(moduleType, moduleName, moduleVersion)
+              val filename = getFileName(moduleType, moduleName, moduleVersion)
+              pathPrefix("instance") {
+                pathEndOrSingleSlash {
+                  creationOfInstance(moduleType, moduleName, moduleVersion, specification, filename) ~
+                    gettingModuleInstances(moduleType, moduleName, moduleVersion)
+                } ~
+                  pathPrefix(Segment) { (instanceName: String) =>
+                    checkInstanceOnExistence(instanceName)
+                    val instance = instanceDAO.get(instanceName).get
+                    pathEndOrSingleSlash {
+                      gettingInstance(instance) ~
+                        deletingInstance(instance)
+                    } ~
+                      path("start") {
+                        pathEndOrSingleSlash {
+                          launchingOfInstance(instance)
+                        }
+                      } ~
+                      path("stop") {
+                        pathEndOrSingleSlash {
+                          stoppingOfInstance(instance)
+                        }
+                      }
+                  }
+              } ~
+                pathSuffix("specification") {
+                  pathEndOrSingleSlash {
+                    gettingSpecification(specification)
+                  }
+                } ~
+                pathEndOrSingleSlash {
+                  gettingModule(filename) ~
+                    deletingModule(moduleType, moduleName, moduleVersion, filename)
+                }
+            }
+          } ~
+            pathEndOrSingleSlash {
+              gettingModulesByType(moduleType)
+            }
+        }
+    }
 
   private val creationOfModule = post {
     uploadedFile("jar") {
@@ -144,7 +201,8 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
   }
 
   private val gettingInstance = (instance: Instance) => get {
-    val response = OkRestResponse(Map("instance" -> instance.asProtocolInstance()))
+    val t = instance.asProtocolInstance()
+    val response = OkRestResponse(Map("instance" -> t))
     complete(restResponseToHttpResponse(response))
   }
 
@@ -342,7 +400,7 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
   private def validateInstance(options: InstanceMetadata, specification: SpecificationData, moduleType: String) = {
     val validatorClassName = configService.get(s"system.$moduleType-validator-class").get.value
     val validatorClass = Class.forName(validatorClassName)
-    val validator = validatorClass.newInstance().asInstanceOf[StreamingModuleValidator]
+    val validator = validatorClass.newInstance().asInstanceOf[InstanceValidator]
     validator.validate(options, specification)
   }
 
@@ -387,61 +445,4 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
     logger.debug(s"Destroying application of instance ${instance.name}")
     new Thread(new InstanceDestroyer(instance)).start()
   }
-
-  val modulesApi =
-    pathPrefix("modules") {
-      pathEndOrSingleSlash {
-        creationOfModule ~
-          gettingListOfAllModules
-      } ~
-        pathPrefix("instances") {
-          gettingAllInstances
-        } ~
-        pathPrefix(Segment) { (moduleType: String) =>
-          checkModuleType(moduleType)
-          pathPrefix(Segment) { (moduleName: String) =>
-            pathPrefix(Segment) { (moduleVersion: String) =>
-              checkModuleOnExistence(moduleType, moduleName, moduleVersion)
-              val specification = getSpecification(moduleType, moduleName, moduleVersion)
-              val filename = getFileName(moduleType, moduleName, moduleVersion)
-              pathPrefix("instance") {
-                pathEndOrSingleSlash {
-                  creationOfInstance(moduleType, moduleName, moduleVersion, specification, filename) ~
-                    gettingModuleInstances(moduleType, moduleName, moduleVersion)
-                } ~
-                  pathPrefix(Segment) { (instanceName: String) =>
-                    checkInstanceOnExistence(instanceName)
-                    val instance = instanceDAO.get(instanceName).get
-                    pathEndOrSingleSlash {
-                      gettingInstance(instance) ~
-                        deletingInstance(instance)
-                    } ~
-                      path("start") {
-                        pathEndOrSingleSlash {
-                          launchingOfInstance(instance)
-                        }
-                      } ~
-                      path("stop") {
-                        pathEndOrSingleSlash {
-                          stoppingOfInstance(instance)
-                        }
-                      }
-                  }
-              } ~
-                pathSuffix("specification") {
-                  pathEndOrSingleSlash {
-                    gettingSpecification(specification)
-                  }
-                } ~
-                pathEndOrSingleSlash {
-                  gettingModule(filename) ~
-                    deletingModule(moduleType, moduleName, moduleVersion, filename)
-                }
-            }
-          } ~
-            pathEndOrSingleSlash {
-              gettingModulesByType(moduleType)
-            }
-        }
-    }
 }

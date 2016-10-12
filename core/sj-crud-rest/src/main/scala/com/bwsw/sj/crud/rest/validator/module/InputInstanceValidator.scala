@@ -13,7 +13,7 @@ import scala.collection.mutable.ArrayBuffer
  *
  * @author Kseniya Tomskikh
  */
-class InputStreamingValidator extends StreamingModuleValidator {
+class InputInstanceValidator extends InstanceValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
@@ -35,10 +35,15 @@ class InputStreamingValidator extends StreamingModuleValidator {
       case None =>
         errors += s"'Checkpoint-mode' is required"
       case Some(x) =>
-        if (!checkpointModes.contains(parameters.checkpointMode)) {
+        if (!checkpointModes.contains(x)) {
           errors += s"Unknown value of 'checkpoint-mode' attribute: '$x'. " +
             s"'Checkpoint-mode' must be one of: ${checkpointModes.mkString("[", ", ", "]")}"
         }
+    }
+
+    // 'checkpoint-interval' field
+    if (inputInstanceMetadata.checkpointInterval <= 0) {
+      errors += s"'Checkpoint-interval' must be greater than zero"
     }
 
     if (inputInstanceMetadata.lookupHistory < 0) {
@@ -80,10 +85,10 @@ class InputStreamingValidator extends StreamingModuleValidator {
     if (instance.outputs.length > outputsCardinality(1)) {
       errors += s"Count of outputs cannot be more than ${outputsCardinality(1)}"
     }
-    if (doesContainDoubles(instance.outputs.toList)) {
+    if (doesContainDoubles(instance.outputs)) {
       errors += s"'Outputs' contain the non-unique streams"
     }
-    val outputStreams = getStreams(instance.outputs.toList)
+    val outputStreams = getStreams(instance.outputs)
     instance.outputs.toList.foreach { streamName =>
       if (!outputStreams.exists(s => s.name == streamName)) {
         errors += s"Output stream '$streamName' does not exist"

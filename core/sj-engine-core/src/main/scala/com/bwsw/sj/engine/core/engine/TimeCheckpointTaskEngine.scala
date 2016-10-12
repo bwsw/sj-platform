@@ -1,6 +1,5 @@
 package com.bwsw.sj.engine.core.engine
 
-import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.sj.engine.core.environment.EnvironmentManager
 import com.bwsw.sj.engine.core.managment.TaskManager
@@ -11,9 +10,9 @@ import org.slf4j.LoggerFactory
  */
 trait TimeCheckpointTaskEngine {
   private val logger = LoggerFactory.getLogger(this.getClass)
-  protected val instance: Instance
   protected val manager: TaskManager
   protected val environmentManager: EnvironmentManager
+  private lazy val checkpointInterval = manager.getCheckpointInterval()
 
   private val checkpointTimer: Option[SjTimer] = createTimer()
   val isNotOnlyCustomCheckpoint = checkpointTimer.isDefined
@@ -21,7 +20,7 @@ trait TimeCheckpointTaskEngine {
   if (isNotOnlyCustomCheckpoint) setTimer()
 
   private def createTimer() = {
-    if (instance.checkpointInterval > 0) {
+    if (checkpointInterval > 0) {
       logger.debug(s"Task: ${manager.taskName}. Create a checkpoint timer for an input module\n")
       Some(new SjTimer())
     } else {
@@ -31,7 +30,7 @@ trait TimeCheckpointTaskEngine {
   }
 
   private def setTimer() = {
-    checkpointTimer.get.set(instance.checkpointInterval)
+    checkpointTimer.get.set(checkpointInterval)
   }
 
   def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean = {

@@ -4,6 +4,7 @@ import java.util
 
 import com.bwsw.sj.common.DAL.model.module.Task
 import com.bwsw.sj.common.utils.EngineLiterals
+import com.fasterxml.jackson.annotation.JsonIgnore
 
 /**
  * Entity for execution plan of module instance
@@ -19,6 +20,7 @@ class ExecutionPlan {
     this.tasks = tasks
   }
 
+  @JsonIgnore
   def fillTasks(taskStreams: Array[TaskStream], taskNames: Set[String]) = {
     var notProcessedTasks = taskNames.size
 

@@ -1,6 +1,7 @@
 package com.bwsw.sj.engine.input.task.engine
 
 import java.util.concurrent.ArrayBlockingQueue
+
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
 import com.bwsw.sj.engine.input.task.InputTaskManager
@@ -35,12 +36,12 @@ class InputTaskEngineFactory(manager: InputTaskManager,
    * @return Engine of input task
    */
   def createInputTaskEngine(): InputTaskEngine = {
-    manager.instance.checkpointMode match {
-      case EngineLiterals.timeIntervalCheckpointMode =>
-        logger.info(s"Task: ${manager.taskName}. Input module has a '${EngineLiterals.timeIntervalCheckpointMode}' checkpoint mode, create an appropriate task engine\n")
+    manager.inputInstance.checkpointMode match {
+      case EngineLiterals.`timeIntervalMode` =>
+        logger.info(s"Task: ${manager.taskName}. Input module has a '${EngineLiterals.timeIntervalMode}' checkpoint mode, create an appropriate task engine\n")
         new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext) with TimeCheckpointTaskEngine
-      case EngineLiterals.everyNthCheckpointMode =>
-        logger.info(s"Task: ${manager.taskName}. Input module has an '${EngineLiterals.everyNthCheckpointMode}' checkpoint mode, create an appropriate task engine\n")
+      case EngineLiterals.`everyNthMode` =>
+        logger.info(s"Task: ${manager.taskName}. Input module has an '${EngineLiterals.everyNthMode}' checkpoint mode, create an appropriate task engine\n")
         new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext) with NumericalCheckpointTaskEngine
     }
   }

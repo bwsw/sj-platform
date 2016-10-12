@@ -5,7 +5,9 @@ import java.util.UUID
 import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
 
 object EngineLiterals {
-  def persistentQueuePath = UUID.randomUUID().toString //todo: yet t-streams can't remove persistent queue
+  def persistentQueuePath = UUID.randomUUID().toString
+
+  //todo: yet t-streams can't remove persistent queue
   final val persistentBlockingQueue = "persistentBlockingQueue"
   final val eventWaitTimeout = 1000
 
@@ -15,9 +17,11 @@ object EngineLiterals {
   final val regularStreamingType = "regular-streaming"
   val moduleTypes = Set(windowedStreamingType, regularStreamingType, outputStreamingType, inputStreamingType)
 
-  final val everyNthCheckpointMode = "every-nth"
-  final val timeIntervalCheckpointMode = "time-interval"
-  val checkpointModes = Set(everyNthCheckpointMode, timeIntervalCheckpointMode)
+  final val everyNthMode = "every-nth"
+  final val timeIntervalMode = "time-interval"
+  final val transactionIntervalMode = "transaction-interval"
+  val checkpointModes = Set(everyNthMode, timeIntervalMode)
+  val batchFillTypes = Set(everyNthMode, timeIntervalMode, transactionIntervalMode)
 
   final val noneStateMode = "none"
   final val ramStateMode = "ram"
@@ -117,7 +121,7 @@ object ProviderLiterals {
   final val kafkaType = "kafka"
   final val elasticsearchType = "ES"
   final val jdbcType = "JDBC"
-  val providerTypes = Set(cassandraType,aerospikeType, zookeeperType, kafkaType, elasticsearchType, jdbcType)
+  val providerTypes = Set(cassandraType, aerospikeType, zookeeperType, kafkaType, elasticsearchType, jdbcType)
 }
 
 object ConfigLiterals {
@@ -136,7 +140,7 @@ object ConfigLiterals {
   val marathonTimeoutTag = s"$systemDomain.marathon-connect-timeout"
   val frameworkPrincipalTag = s"$systemDomain.framework-principal"
   val frameworkSecretTag = s"$systemDomain.framework-secret"
-  val zkSessionTimeoutTag= s"$zookeeperDomain.session-timeout"
+  val zkSessionTimeoutTag = s"$zookeeperDomain.session-timeout"
 
   val jdbcTimeoutTag = s"$jdbcDomain.timeout"
   val tgClientRetryPeriodTag = s"$systemDomain.transaction-generator-client-retry-period"

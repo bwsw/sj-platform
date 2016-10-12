@@ -5,7 +5,7 @@ import java.net.URLClassLoader
 
 import com.bwsw.common.tstream.NetworkTransactionGenerator
 import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.common.DAL.model.module.Instance
+import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.common.rest.entities.module.ExecutionPlan
@@ -72,7 +72,7 @@ abstract class TaskManager() {
   }
 
   private def getAuxiliaryTStream() = {
-    val inputs = clearInputsFromExecutionMode()
+    val inputs = instance.getInputsWithoutStreamMode()
     val streams = inputs.union(instance.outputs)
     val sjStream = streams.flatMap(s => streamDAO.get(s)).filter(s => s.streamType.equals(tStreamType)).head
 
@@ -231,10 +231,6 @@ abstract class TaskManager() {
     }
   }
 
-  private def clearInputsFromExecutionMode() = {
-    instance.inputs.map(x => x.takeWhile(y => y != '/'))
-  }
-
   def getSjStream(name: String, description: String, tags: Array[String], partitions: Int) = {
     new TStreamSjStream(
       name,
@@ -304,6 +300,19 @@ abstract class TaskManager() {
   private def setSubscribingConsumerBindPort() = {
     tstreamFactory.setProperty(TSF_Dictionary.Consumer.Subscriber.BIND_PORT, agentsPorts(currentPortNumber))
     currentPortNumber += 1
+  }
+
+  def getCheckpointInterval() = {
+    instance match {
+      case inputInstance: InputInstance =>
+        inputInstance.checkpointInterval
+      case regularInstance: RegularInstance =>
+        regularInstance.checkpointInterval
+      case outputInstance: OutputInstance =>
+        outputInstance.checkpointInterval
+      case windowedInstance: WindowedInstance =>
+        throw new Exception("Windowed streaming engine doesn't have a checkpoint interval")
+    }
   }
 
   /**

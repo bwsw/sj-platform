@@ -9,7 +9,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.{EngineLiterals, GeneratorLiterals, StreamLiterals}
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty}
 
 import scala.collection.JavaConversions._
 import com.bwsw.sj.common.utils.SjStreamUtils._
@@ -22,8 +22,6 @@ class InstanceMetadata {
   var status: String = EngineLiterals.ready
   var name: String = null
   var description: String = "No description"
-  @JsonProperty("checkpoint-mode") var checkpointMode: String = null
-  @JsonProperty("checkpoint-interval") var checkpointInterval: Long = 0L
   var parallelism: Any = 1
   var options: Map[String, Any] = Map()
   @JsonProperty("per-task-cores") var perTaskCores: Double = 1.0
@@ -35,8 +33,10 @@ class InstanceMetadata {
   @JsonProperty("performance-reporting-interval") var performanceReportingInterval: Long = 60000
   var engine: String = null
 
+  @JsonIgnore
   def asModelInstance(): Instance = ???
 
+  @JsonIgnore
   protected def fillModelInstance(modelInstance: Instance) = {
     val serializer = new JsonSerializer()
     val serviceDAO = ConnectionRepository.getServiceManager
@@ -47,8 +47,6 @@ class InstanceMetadata {
     modelInstance.moduleVersion = this.moduleVersion
     modelInstance.name = this.name
     modelInstance.description = this.description
-    modelInstance.checkpointMode = this.checkpointMode
-    modelInstance.checkpointInterval = this.checkpointInterval
     modelInstance.parallelism = this.parallelism.asInstanceOf[Int]
     modelInstance.perTaskCores = this.perTaskCores
     modelInstance.perTaskRam = this.perTaskRam
@@ -66,6 +64,7 @@ class InstanceMetadata {
     }
   }
 
+  @JsonIgnore
   def prepareInstance(moduleType: String,
                       moduleName: String,
                       moduleVersion: String,
@@ -77,8 +76,10 @@ class InstanceMetadata {
     this.moduleType = moduleType
   }
 
+  @JsonIgnore
   def createStreams(): Unit = {}
 
+  @JsonIgnore
   protected def castParallelismToNumber(partitions: Array[Int]) = {
     val parallelism = this.parallelism match {
       case max: String => partitions.min
@@ -87,6 +88,7 @@ class InstanceMetadata {
     this.parallelism = parallelism
   }
 
+  @JsonIgnore
   protected def getStreamsPartitions(streamNames: Array[String]): Array[Int] = {
     val streamsDAO = ConnectionRepository.getStreamService
     val streams = streamsDAO.getAll.filter(s => streamNames.contains(s.name))
@@ -100,11 +102,13 @@ class InstanceMetadata {
     }: _*)
   }
 
+  @JsonIgnore
   protected def getStreams(streamNames: Array[String]): Array[SjStream] = {
     val streamsDAO = ConnectionRepository.getStreamService
     streamNames.flatMap(streamsDAO.get)
   }
 
+  @JsonIgnore
   protected def fillStages(streamsWithGenerator: Array[String]) = {
     val streamsDAO = ConnectionRepository.getStreamService
     val initialStage = new InstanceStage(toHandle, Calendar.getInstance().getTime)
@@ -120,6 +124,7 @@ class InstanceMetadata {
     })
   }
 
+  @JsonIgnore
   protected def createTaskStreams() = {
     val streamDAO = ConnectionRepository.getStreamService
     val inputStreamsWithModes = splitStreamsAndModes(getInputs())
@@ -129,6 +134,7 @@ class InstanceMetadata {
     })
   }
 
+  @JsonIgnore
   protected def getInputs(): Array[String] = Array()
 
   private def splitStreamsAndModes(streamsWithModes: Array[String]) = {
@@ -160,6 +166,7 @@ class InstanceMetadata {
     }
   }
 
+  @JsonIgnore
   protected def createTaskNames(parallelism: Int, taskPrefix: String) = {
     (0 until parallelism).map(x => createTaskName(taskPrefix, x)).toSet
   }

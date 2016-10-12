@@ -324,7 +324,7 @@ object DataFactory {
     instance.description = "some description of test instance"
     instance.inputs = instanceInputs
     instance.outputs = instanceOutputs
-    instance.checkpointMode = EngineLiterals.everyNthCheckpointMode
+    instance.checkpointMode = EngineLiterals.everyNthMode
     instance.checkpointInterval = checkpointInterval
     instance.stateManagement = stateManagement
     instance.stateFullCheckpoint = stateFullCheckpoint

@@ -6,7 +6,7 @@ import com.bwsw.sj.common.rest.utils.ValidationUtils
 import com.bwsw.sj.common.utils.ServiceLiterals
 import com.bwsw.sj.common.utils.ServiceLiterals._
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
-import com.fasterxml.jackson.annotation.{JsonProperty, JsonSubTypes, JsonTypeInfo}
+import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes, JsonTypeInfo}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -26,16 +26,20 @@ class ServiceData() extends ValidationUtils {
   var name: String = null
   var description: String = "No description"
 
+  @JsonIgnore
   def asModelService(): Service = ???
 
+  @JsonIgnore
   protected def fillModelService(modelService: Service) = {
     modelService.serviceType = this.serviceType
     modelService.name = this.name
     modelService.description = this.description
   }
 
+  @JsonIgnore
   def validate() = validateGeneralFields()
 
+  @JsonIgnore
   protected def validateGeneralFields() = {
     val serviceDAO = ConnectionRepository.getServiceManager
     val errors = new ArrayBuffer[String]()
