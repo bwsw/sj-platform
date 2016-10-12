@@ -40,20 +40,24 @@ class KfkQServiceData() extends ServiceData() {
       case Some(p) =>
         val zkProviderObj = providerDAO.get(p)
         zkProviderObj match {
-          case Some(zkProvider) =>
-            if (zkProvider.providerType != ProviderLiterals.zookeeperType) {
+          case Some(zkProviderFormDB) =>
+            if (zkProviderFormDB.providerType != ProviderLiterals.zookeeperType) {
               errors += s"'Zk-provider' must be of type '${ProviderLiterals.zookeeperType}' " +
-                s"('${zkProvider.providerType}' is given instead)"
+                s"('${zkProviderFormDB.providerType}' is given instead)"
             }
           case None => errors += s"Zookeeper provider '$p' does not exist"
         }
     }
 
     // 'zkNamespace' field
-    errors ++= validateStringFieldRequired(this.zkNamespace, "ZK-namespace")
-    if (!validateNamespace(this.zkNamespace)) {
-      errors += s"Service has incorrect 'zk-namespace': '$zkNamespace'. " +
-        s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+    Option(this.zkNamespace) match {
+      case None =>
+        errors += "'Zk-namespace' is required"
+      case Some(x) =>
+        if (!validateNamespace(x)) {
+          errors += s"Service has incorrect 'zk-namespace': '$x'. " +
+            s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+        }
     }
 
     errors
