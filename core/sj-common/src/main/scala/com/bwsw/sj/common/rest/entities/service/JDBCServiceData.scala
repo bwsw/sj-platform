@@ -8,19 +8,17 @@ import scala.collection.mutable.ArrayBuffer
 
 class JDBCServiceData() extends ServiceData() {
   serviceType = ServiceLiterals.jdbcType
-  var namespace: String = null
   var provider: String = null
-  var login: String = null
-  var password: String = null
+  var driver: String = null
+  var databaseName: String = null
 
   override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService
     val modelService = new JDBCService()
     super.fillModelService(modelService)
     modelService.provider = providerDAO.get(this.provider).get
-    modelService.namespace = this.namespace
-    modelService.login = this.login
-    modelService.password = this.password
+    modelService.driver = this.driver
+    modelService.databaseName = this.databaseName
 
     modelService
   }
@@ -33,9 +31,9 @@ class JDBCServiceData() extends ServiceData() {
     // 'provider' field
     errors ++= validateProvider(this.provider, this.serviceType)
 
-    // 'namespace'
-    errors ++= validateStringFieldRequired(this.namespace, "Namespace")
-    errors ++= validateNamespace(this.namespace)
+//    // 'namespace'
+//    errors ++= validateStringFieldRequired(this.namespace, "Namespace")
+//    errors ++= validateNamespace(this.namespace)
 
     errors
   }

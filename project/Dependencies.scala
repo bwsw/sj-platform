@@ -14,7 +14,8 @@ object Dependencies {
     "org.apache.commons" % "commons-io" % "1.3.2",
     "com.typesafe" % "config" % "1.3.0",
     "org.apache.kafka" % "kafka_2.11" % "0.9.0.1",
-    "org.elasticsearch" % "elasticsearch" % "2.3.2"
+    "org.elasticsearch" % "elasticsearch" % "2.3.2",
+    "postgresql" % "postgresql" % "9.1-901.jdbc4"
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(

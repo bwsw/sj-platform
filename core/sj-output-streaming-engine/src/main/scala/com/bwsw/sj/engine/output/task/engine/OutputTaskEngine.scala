@@ -3,9 +3,9 @@ package com.bwsw.sj.engine.output.task.engine
 import java.util.Calendar
 import java.util.concurrent.Callable
 
-import com.bwsw.common.{ElasticsearchClient, JsonSerializer, ObjectSerializer}
+import com.bwsw.common.{ElasticsearchClient, JsonSerializer, ObjectSerializer, JdbcClientBuilder}
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
-import com.bwsw.sj.common.DAL.model.{ESService, SjStream}
+import com.bwsw.sj.common.DAL.model.{ESService, SjStream, JDBCService}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory
 import scala.collection.Map
 
 /**
- * Provides methods are responsible for a basic execution logic of task of output module
+ * Provided methods are responsible for a basic execution logic of task of output module
  *
  *
  * @param manager Manager of environment of task of output module
@@ -46,7 +46,8 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   protected val executor = manager.getExecutor(environmentManager).asInstanceOf[OutputStreamingExecutor]
   val taskInputService = new TStreamTaskInputService(manager, blockingQueue, checkpointGroup)
   protected val isNotOnlyCustomCheckpoint: Boolean
-  private val (client, esService) = openDbConnection(outputStream)
+  private val (esClient, esService) = openEsConnection(outputStream)
+  private val (jdbcClient, jdbcService) = openJdbcConnection(outputStream)
   private var wasFirstCheckpoint = false
   private val byteSerializer = new ObjectSerializer()
 
@@ -73,7 +74,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
    * @param outputStream Output ES stream
    * @return ES Transport client and ES service of stream
    */
-  private def openDbConnection(outputStream: SjStream) = {
+  private def openEsConnection(outputStream: SjStream) = {
     logger.info(s"Task: ${manager.taskName}. Open output elasticsearch connection.\n")
     val esService: ESService = outputStream.service.asInstanceOf[ESService]
     val hosts = esService.provider.hosts.map { host =>
@@ -84,6 +85,29 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
 
     (client, esService)
+  }
+
+
+  /**
+    * Open JDBC connection
+    *
+    * @param outputStream Output ES stream
+    * @return JDBC connection
+    */
+  private def openJdbcConnection(outputStream: SjStream) = {
+    logger.info(s"Task: ${manager.taskName}. Open output JDBC connection.\n")
+    val jdbcService: JDBCService = outputStream.service.asInstanceOf[JDBCService]
+    println(jdbcService.provider.hosts)
+    val hosts = jdbcService.provider.hosts
+
+    val client = JdbcClientBuilder.
+      setHosts(hosts).
+      setDriver(jdbcService.driver).
+      setUsername(jdbcService.provider.login).
+      setPassword(jdbcService.provider.password).
+      build()
+
+    (client, jdbcService)
   }
 
   /**
@@ -142,7 +166,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     val mapping = Map("properties" -> fields)
     val mappingJson = esEnvelopeSerializer.serialize(mapping)
 
-    client.createMapping(index, streamName, mappingJson)
+    esClient.createMapping(index, streamName, mappingJson)
   }
 
   protected def afterReceivingEnvelope(): Unit
@@ -158,13 +182,13 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     val index = esService.index
     val streamName = outputStream.name
     logger.info(s"Task: ${manager.taskName}. Delete transaction $transaction from ES stream.")
-    if (client.doesIndexExist(index)) {
+    if (esClient.doesIndexExist(index)) {
       val query = QueryBuilders.matchQuery("txn", transaction)
-      val outputData = client.search(index, streamName, query)
+      val outputData = esClient.search(index, streamName, query)
 
       outputData.getHits.foreach { hit =>
         val id = hit.getId
-        client.deleteDocumentByTypeAndId(index, streamName, id)
+        esClient.deleteDocumentByTypeAndId(index, streamName, id)
       }
     }
   }
@@ -184,7 +208,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
         esEnvelope.tags = inputEnvelope.tags
         registerOutputEnvelope(transactionId, esEnvelope)
         logger.debug(s"Task: ${manager.taskName}. Write output envelope to elasticsearch.")
-        client.write(esEnvelopeSerializer.serialize(esEnvelope), esService.index, outputStream.name)
+        esClient.write(esEnvelopeSerializer.serialize(esEnvelope), esService.index, outputStream.name)
       case jdbcEnvelope: JdbcEnvelope => writeToJdbc(outputEnvelope)
       case _ =>
     }
@@ -202,7 +226,6 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
    */
   private def writeToJdbc(envelope: Envelope) = {
     //todo writing to JDBC
-
   }
 
   /**
