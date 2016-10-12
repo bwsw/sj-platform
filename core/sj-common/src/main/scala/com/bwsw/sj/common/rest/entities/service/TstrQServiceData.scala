@@ -55,7 +55,10 @@ class TstrQServiceData() extends ServiceData() {
 
     // 'metadataNamespace' field
     errors ++= validateStringFieldRequired(this.metadataNamespace, "Metadata-namespace")
-    errors ++= validateNamespace(this.metadataNamespace)
+    if (!validateNamespace(this.metadataNamespace)) {
+      errors += s"Service has incorrect 'metadata-namespace': '$metadataNamespace'. " +
+        s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+    }
 
     // 'dataProvider' field
     Option(this.dataProvider) match {
@@ -81,7 +84,10 @@ class TstrQServiceData() extends ServiceData() {
 
     // 'dataNamespace' field
     errors ++= validateStringFieldRequired(this.dataNamespace, "Data-namespace")
-    errors ++= validateNamespace(this.dataNamespace)
+    if (!validateNamespace(this.dataNamespace)) {
+      errors += s"Service has incorrect 'data-namespace': '$dataNamespace'. " +
+        s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+    }
 
     Option(this.lockProvider) match {
       case None =>
@@ -101,7 +107,10 @@ class TstrQServiceData() extends ServiceData() {
 
     // 'lockNamespace' field
     errors ++= validateStringFieldRequired(this.lockNamespace, "Lock-namespace")
-    errors ++= validateNamespace(this.lockNamespace)
+    if (!validateNamespace(this.lockNamespace)) {
+      errors += s"Service has incorrect 'lock-namespace': '$lockNamespace'. " +
+        s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+    }
 
     errors
   }

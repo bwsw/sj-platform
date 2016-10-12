@@ -31,7 +31,10 @@ class ZKCoordServiceData() extends ServiceData() {
 
     // 'namespace' field
     errors ++= validateStringFieldRequired(this.namespace, "Namespace")
-    errors ++= validateNamespace(this.namespace)
+    if (!validateNamespace(this.namespace)) {
+      errors += s"Service has incorrect 'namespace': '$namespace'. " +
+        s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+    }
 
     errors
   }

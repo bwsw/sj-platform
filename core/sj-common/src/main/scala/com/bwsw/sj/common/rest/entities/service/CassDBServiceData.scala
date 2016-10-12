@@ -31,7 +31,10 @@ class CassDBServiceData() extends ServiceData() {
 
     // 'keyspace' field
     errors ++= validateStringFieldRequired(this.keyspace, "Keyspace")
-    errors ++= validateNamespace(this.keyspace)
+    if (!validateNamespace(this.keyspace)) {
+      errors += s"Service has incorrect 'keyspace': '$keyspace'. " +
+        s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+    }
 
     errors
   }

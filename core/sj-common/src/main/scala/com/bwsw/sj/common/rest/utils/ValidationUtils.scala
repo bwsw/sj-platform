@@ -50,17 +50,6 @@ trait ValidationUtils {
   }
 
   def validateNamespace(namespace: String) = {
-    val errors = new ArrayBuffer[String]()
-
-    if (!validateServiceNamespace(namespace)) {
-      errors += s"Service has incorrect parameter: $namespace. " +
-        s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
-    }
-
-    errors
-  }
-
-  private def validateServiceNamespace(namespace: String) = {
     namespace.matches( """^([a-z][a-z0-9_]*)$""")
   }
 }

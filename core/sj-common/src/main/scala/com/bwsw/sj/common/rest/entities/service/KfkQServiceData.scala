@@ -51,7 +51,10 @@ class KfkQServiceData() extends ServiceData() {
 
     // 'zkNamespace' field
     errors ++= validateStringFieldRequired(this.zkNamespace, "ZK-namespace")
-    errors ++= validateNamespace(this.zkNamespace)
+    if (!validateNamespace(this.zkNamespace)) {
+      errors += s"Service has incorrect 'zk-namespace': '$zkNamespace'. " +
+        s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+    }
 
     errors
   }

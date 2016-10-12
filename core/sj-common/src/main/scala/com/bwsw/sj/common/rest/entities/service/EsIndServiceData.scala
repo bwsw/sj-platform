@@ -35,7 +35,10 @@ class EsIndServiceData() extends ServiceData() {
 
     // 'index' field
     errors ++= validateStringFieldRequired(this.index, "Index")
-    errors ++= validateNamespace(this.index)
+    if (!validateNamespace(this.index)) {
+      errors += s"Service has incorrect 'index': '$index'. " +
+        s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+    }
 
     errors
   }
