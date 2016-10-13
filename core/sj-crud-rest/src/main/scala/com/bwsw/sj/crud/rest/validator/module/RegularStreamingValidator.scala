@@ -30,9 +30,14 @@ class RegularStreamingValidator extends StreamingModuleValidator {
       case None =>
         errors += s"'Checkpoint-mode' is required"
       case Some(x) =>
-        if (!checkpointModes.contains(parameters.checkpointMode)) {
-          errors += s"Unknown value of 'checkpoint-mode' attribute: '$x'. " +
-            s"'Checkpoint-mode' must be one of: ${checkpointModes.mkString("[", ", ", "]")}"
+        if (x.isEmpty) {
+          errors += s"'Checkpoint-mode' is required"
+        }
+        else {
+          if (!checkpointModes.contains(x)) {
+            errors += s"Unknown value of 'checkpoint-mode' attribute: '$x'. " +
+              s"'Checkpoint-mode' must be one of: ${checkpointModes.mkString("[", ", ", "]")}"
+          }
         }
     }
 
@@ -58,7 +63,7 @@ class RegularStreamingValidator extends StreamingModuleValidator {
   }
 
   private def validateStreamOptions(instance: RegularInstanceMetadata,
-                                      specification: SpecificationData) = {
+                                    specification: SpecificationData) = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     val errors = new ArrayBuffer[String]()
 

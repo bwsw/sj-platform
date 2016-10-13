@@ -25,17 +25,22 @@ class TStreamSjStreamData() extends SjStreamData() {
       case None =>
         errors += s"'Service' is required"
       case Some(x) =>
-        val serviceObj = serviceDAO.get(this.service)
-        serviceObj match {
-          case None =>
-            errors += s"Service '${this.service}' does not exist"
-          case Some(modelService) =>
-            if (modelService.serviceType != ServiceLiterals.tstreamsType) {
-              errors += s"Service for ${StreamLiterals.tStreamType} stream " +
-                s"must be of '${ServiceLiterals.tstreamsType}' type ('${modelService.serviceType}' is given instead)"
-            } else {
-              errors ++= checkStreamPartitionsOnConsistency(modelService.asInstanceOf[TStreamService])
-            }
+        if (x.isEmpty) {
+          errors += s"'Service' is required"
+        }
+        else {
+          val serviceObj = serviceDAO.get(x)
+          serviceObj match {
+            case None =>
+              errors += s"Service '$x' does not exist"
+            case Some(modelService) =>
+              if (modelService.serviceType != ServiceLiterals.tstreamsType) {
+                errors += s"Service for ${StreamLiterals.tStreamType} stream " +
+                  s"must be of '${ServiceLiterals.tstreamsType}' type ('${modelService.serviceType}' is given instead)"
+              } else {
+                if (this.name != null && this.name.nonEmpty) errors ++= checkStreamPartitionsOnConsistency(modelService.asInstanceOf[TStreamService])
+              }
+          }
         }
     }
 

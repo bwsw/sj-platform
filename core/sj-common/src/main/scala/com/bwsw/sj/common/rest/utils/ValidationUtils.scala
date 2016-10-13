@@ -17,24 +17,27 @@ trait ValidationUtils {
   }
 
   def validateProvider(provider: String, serviceType: String) = {
-    val providerErrors = new ArrayBuffer[String]()
-    serviceType match {
-      case _ if types.contains(serviceType) =>
-        Option(provider) match {
-          case None =>
-            providerErrors += s"'Provider' is required"
-          case Some(p) =>
-            val providerObj = providerDAO.get(p)
-            if (providerObj.isEmpty) {
-              providerErrors += s"Provider '$p' does not exist"
-            } else if (providerObj.get.providerType != typeToProviderType(serviceType)) {
-              providerErrors += s"Provider for '$serviceType' service must be of type '${typeToProviderType(serviceType)}' " +
-                s"('${providerObj.get.providerType}' is given instead)"
-            }
+    val errors = new ArrayBuffer[String]()
+
+    Option(provider) match {
+      case None =>
+        errors += "'Provider' is required"
+      case Some(x) =>
+        if (x.isEmpty) {
+          errors += "'Provider' is required"
+        }
+        else {
+          val providerObj = providerDAO.get(x)
+          if (providerObj.isEmpty) {
+            errors += s"Provider '$x' does not exist"
+          } else if (providerObj.get.providerType != typeToProviderType(serviceType)) {
+            errors += s"Provider for '$serviceType' service must be of type '${typeToProviderType(serviceType)}' " +
+              s"('${providerObj.get.providerType}' is given instead)"
+          }
         }
     }
 
-    providerErrors
+    errors
   }
 
   def validateNamespace(namespace: String) = {

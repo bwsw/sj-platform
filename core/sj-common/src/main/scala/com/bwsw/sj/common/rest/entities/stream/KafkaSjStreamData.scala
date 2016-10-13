@@ -28,17 +28,22 @@ class KafkaSjStreamData() extends SjStreamData() {
       case None =>
         errors += s"'Service' is required"
       case Some(x) =>
-        val serviceObj = serviceDAO.get(this.service)
-        serviceObj match {
-          case None =>
-            errors += s"Service '${this.service}' does not exist"
-          case Some(modelService) =>
-            if (modelService.serviceType != ServiceLiterals.kafkaType) {
-              errors += s"Service for ${StreamLiterals.kafkaStreamType} stream " +
-                s"must be of '${ServiceLiterals.kafkaType}' type ('${modelService.serviceType}' is given instead)"
-            } else {
-              errors ++= checkStreamPartitionsOnConsistency(modelService.asInstanceOf[KafkaService])
-            }
+        if (x.isEmpty) {
+          errors += s"'Service' is required"
+        }
+        else {
+          val serviceObj = serviceDAO.get(x)
+          serviceObj match {
+            case None =>
+              errors += s"Service '$x' does not exist"
+            case Some(modelService) =>
+              if (modelService.serviceType != ServiceLiterals.kafkaType) {
+                errors += s"Service for ${StreamLiterals.kafkaStreamType} stream " +
+                  s"must be of '${ServiceLiterals.kafkaType}' type ('${modelService.serviceType}' is given instead)"
+              } else {
+                if (this.name != null && this.name.nonEmpty) errors ++= checkStreamPartitionsOnConsistency(modelService.asInstanceOf[KafkaService])
+              }
+          }
         }
     }
 

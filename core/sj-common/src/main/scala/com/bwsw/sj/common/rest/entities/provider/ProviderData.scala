@@ -47,10 +47,10 @@ case class ProviderData(name: String,
             errors += s"Provider has incorrect name: '$x'. " +
               s"Name of provider must be contain digits, lowercase letters or hyphens. First symbol must be a letter"
           }
-        }
 
-        if (providerDAO.get(x).isDefined) {
-          errors += s"Provider with name '$x' already exists"
+          if (providerDAO.get(x).isDefined) {
+            errors += s"Provider with name '$x' already exists"
+          }
         }
     }
 
@@ -59,8 +59,13 @@ case class ProviderData(name: String,
       case None =>
         errors += s"'Type' is required"
       case Some(x) =>
-        if (!providerTypes.contains(x)) {
-          errors += s"Unknown type '$x' provided. Must be one of: ${providerTypes.mkString("[", ", ", "]")}"
+        if (x.isEmpty) {
+          errors += s"'Type' is required"
+        }
+        else {
+          if (!providerTypes.contains(x)) {
+            errors += s"Unknown type '$x' provided. Must be one of: ${providerTypes.mkString("[", ", ", "]")}"
+          }
         }
     }
 

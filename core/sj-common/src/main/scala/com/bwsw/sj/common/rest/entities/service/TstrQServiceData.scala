@@ -39,17 +39,22 @@ class TstrQServiceData() extends ServiceData() {
     // 'metadataProvider' field
     Option(this.metadataProvider) match {
       case None =>
-        errors += s"'Metadata-provider' is required"
+        errors += "'Metadata-provider' is required"
       case Some(x) =>
-        val metadataProviderObj = providerDAO.get(x)
-        metadataProviderObj match {
-          case Some(provider) =>
-            if (provider.providerType != ProviderLiterals.cassandraType) {
-              errors += s"'Metadata-provider' must be of type '${ProviderLiterals.cassandraType}' " +
-                s"('${provider.providerType}' is given instead)"
-            }
-          case None => errors += s"Metadata-provider '$x' does not exist"
-
+        if (x.isEmpty) {
+          errors += "'Metadata-provider' is required"
+        }
+        else {
+          val metadataProviderObj = providerDAO.get(x)
+          metadataProviderObj match {
+            case None =>
+              errors += s"Metadata-provider '$x' does not exist"
+            case Some(provider) =>
+              if (provider.providerType != ProviderLiterals.cassandraType) {
+                errors += s"'Metadata-provider' must be of type '${ProviderLiterals.cassandraType}' " +
+                  s"('${provider.providerType}' is given instead)"
+              }
+          }
         }
     }
 
@@ -59,7 +64,7 @@ class TstrQServiceData() extends ServiceData() {
         errors += "'Metadata-namespace' is required"
       case Some(x) =>
         if (x.isEmpty) {
-          errors += s"'Metadata-namespace' is required"
+          errors += "'Metadata-namespace' is required"
         }
         else {
           if (!validateNamespace(x)) {
@@ -72,21 +77,21 @@ class TstrQServiceData() extends ServiceData() {
     // 'dataProvider' field
     Option(this.dataProvider) match {
       case None =>
-        errors += s"'data-provider' is required"
+        errors += "'Data-provider' is required"
       case Some(x) =>
         if (x.isEmpty) {
-          errors += s"'data-provider' can not be empty"
+          errors += "'Data-provider' is required"
         } else {
           val dataProviderObj = providerDAO.get(x)
           val allowedTypes = List(ProviderLiterals.cassandraType, ProviderLiterals.aerospikeType)
           dataProviderObj match {
+            case None =>
+              errors += s"Data-provider '$x' does not exist"
             case Some(provider) =>
               if (!allowedTypes.contains(provider.providerType)) {
                 errors += s"Data-provider must be one of type: ${allowedTypes.mkString("[", ", ", "]")} " +
                   s"('${provider.providerType}' is given instead)"
               }
-            case None =>
-              errors += s"Data-provider '$x' does not exist"
           }
         }
     }
@@ -111,15 +116,19 @@ class TstrQServiceData() extends ServiceData() {
       case None =>
         errors += s"'Lock-provider' is required"
       case Some(x) =>
-        val lockProviderObj = providerDAO.get(x)
-        lockProviderObj match {
-          case Some(provider) =>
-            if (provider.providerType != ProviderLiterals.zookeeperType) {
-              errors += s"'Lock-provider' must be of type '${ProviderLiterals.zookeeperType}' " +
-                s"('${provider.providerType}' is given instead)"
-            }
-          case None =>
-            errors += s"Lock-provider '$x' does not exist"
+        if (x.isEmpty) {
+          errors += "'Lock-provider' is required"
+        } else {
+          val lockProviderObj = providerDAO.get(x)
+          lockProviderObj match {
+            case None =>
+              errors += s"Lock-provider '$x' does not exist"
+            case Some(provider) =>
+              if (provider.providerType != ProviderLiterals.zookeeperType) {
+                errors += s"'Lock-provider' must be of type '${ProviderLiterals.zookeeperType}' " +
+                  s"('${provider.providerType}' is given instead)"
+              }
+          }
         }
     }
 

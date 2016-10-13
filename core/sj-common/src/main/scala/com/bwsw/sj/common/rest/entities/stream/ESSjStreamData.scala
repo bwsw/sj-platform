@@ -20,15 +20,20 @@ class ESSjStreamData() extends SjStreamData() {
       case None =>
         errors += s"'Service' is required"
       case Some(x) =>
-        val serviceObj = serviceDAO.get(this.service)
-        serviceObj match {
-          case None =>
-            errors += s"Service '${this.service}' does not exist"
-          case Some(service) =>
-            if (service.serviceType != ServiceLiterals.elasticsearchType) {
-              errors += s"Service for ${StreamLiterals.esOutputType} stream " +
-                s"must be of '${ServiceLiterals.elasticsearchType}' type ('${service.serviceType}' is given instead)"
-            }
+        if (x.isEmpty) {
+          errors += s"'Service' is required"
+        }
+        else {
+          val serviceObj = serviceDAO.get(x)
+          serviceObj match {
+            case None =>
+              errors += s"Service '$x' does not exist"
+            case Some(someService) =>
+              if (someService.serviceType != ServiceLiterals.elasticsearchType) {
+                errors += s"Service for ${StreamLiterals.esOutputType} stream " +
+                  s"must be of '${ServiceLiterals.elasticsearchType}' type ('${someService.serviceType}' is given instead)"
+              }
+          }
         }
     }
 

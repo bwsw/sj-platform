@@ -45,7 +45,12 @@ class ServiceData() extends ValidationUtils {
       case None =>
         errors += s"'Type' is required"
       case Some(x) =>
-        if (!types.contains(x)) errors += s"Unknown 'type' provided. Must be one of: ${types.mkString("[", ", ", "]")}"
+        if (x.isEmpty) {
+          errors += s"'Type' is required"
+        }
+        else {
+          if (!types.contains(x)) errors += s"Unknown 'type' provided. Must be one of: ${types.mkString("[", ", ", "]")}"
+        }
     }
 
     // 'name' field
@@ -61,10 +66,10 @@ class ServiceData() extends ValidationUtils {
             errors += s"Service has incorrect name: $x. " +
               s"Name of service must be contain digits, lowercase letters or hyphens. First symbol must be a letter"
           }
-        }
 
-        if (serviceDAO.get(x).isDefined) {
-          errors += s"Service with name $x already exists"
+          if (serviceDAO.get(x).isDefined) {
+            errors += s"Service with name $x already exists"
+          }
         }
     }
 
