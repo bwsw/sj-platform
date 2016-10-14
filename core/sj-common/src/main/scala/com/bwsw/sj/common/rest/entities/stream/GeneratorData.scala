@@ -27,46 +27,55 @@ case class GeneratorData(@JsonProperty("generator-type") generatorType: String,
     val errors = new ArrayBuffer[String]()
 
     Option(this.generatorType) match {
-      case Some(t) =>
-        if (!types.contains(t)) {
-          errors += s"Unknown 'generator-type' provided. Must be one of: ${types.mkString("[", ", ", "]")}"
-        } else {
-          if (this.generatorType != GeneratorLiterals.localType) {
-            //instacneCount
-            if (this.instanceCount <= 0)
-              errors += s"Generator 'instance-count' must be a positive integer for a non-local generator type"
+      case None =>
+        errors += s"'Generator-type' is required"
+      case Some(x) =>
+        if (x.isEmpty) {
+          errors += "'Generator-type' is required"
+        }
+        else {
+          if (!types.contains(x)) {
+            errors += s"Unknown 'generator-type' provided. Must be one of: ${types.mkString("[", ", ", "]")}"
+          } else {
+            if (this.generatorType != GeneratorLiterals.localType) {
+              //instacneCount
+              if (this.instanceCount <= 0)
+                errors += s"Generator 'instance-count' must be a positive integer for a non-local generator type"
 
-            //service
-            Option(this.service) match {
-              case None =>
-                errors += s"Generator 'service' is required for a non-local generator type"
-              case Some(s) =>
-                var serviceName: String = ""
-                if (s contains "://") {
-                  val generatorUrl = new URI(s)
-                  if (!generatorUrl.getScheme.equals("service-zk")) {
-                    errors += s"Generator 'service' uri protocol prefix must be 'service-zk://'. Or use a plain service name instead"
-                  } else {
-                    serviceName = generatorUrl.getAuthority
+              //service
+              Option(this.service) match {
+                case None =>
+                  errors += s"Generator 'service' is required for a non-local generator type"
+                case Some(s) =>
+                  if (x.isEmpty) {
+                    errors += "Generator 'service' is required for a non-local generator type"
                   }
-                } else {
-                  serviceName = this.service
-                }
+                  else {
+                    var serviceName: String = ""
+                    if (s contains "://") {
+                      val generatorUrl = new URI(s)
+                      if (!generatorUrl.getScheme.equals("service-zk")) {
+                        errors += s"Generator 'service' uri protocol prefix must be 'service-zk://'. Or use a plain service name instead"
+                      } else {
+                        serviceName = generatorUrl.getAuthority
+                      }
+                    } else {
+                      serviceName = this.service
+                    }
 
-                val serviceObj = serviceDAO.get(serviceName)
-                if (serviceObj.isEmpty) {
-                  errors += s"Generator 'service' does not exist"
-                } else {
-                  if (serviceObj.get.serviceType != ServiceLiterals.zookeeperType) {
-                    errors += s"Provided generator service '$serviceName' is not of type ${ServiceLiterals.zookeeperType}"
+                    val serviceObj = serviceDAO.get(serviceName)
+                    if (serviceObj.isEmpty) {
+                      errors += s"Generator 'service' does not exist"
+                    } else {
+                      if (serviceObj.get.serviceType != ServiceLiterals.zookeeperType) {
+                        errors += s"Provided generator service '$serviceName' is not of type ${ServiceLiterals.zookeeperType}"
+                      }
+                    }
                   }
-                }
+              }
             }
           }
         }
-      case None =>
-        errors += s"'Generator-type' is required"
-      case _ =>
     }
 
     errors
