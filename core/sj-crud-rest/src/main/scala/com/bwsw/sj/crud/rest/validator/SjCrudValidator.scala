@@ -1,6 +1,7 @@
 package com.bwsw.sj.crud.rest.validator
 
 import java.io._
+import java.net.URLClassLoader
 import java.util.jar.JarFile
 
 import akka.actor.ActorSystem
@@ -14,6 +15,7 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
+import com.bwsw.sj.common.engine.{StreamingExecutor, StreamingValidator}
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import org.everit.json.schema.loader.SchemaLoader
 import org.json.{JSONObject, JSONTokener}
@@ -70,6 +72,7 @@ trait SjCrudValidator {
       throw new Exception("No entity was received to parse")
     }
   }
+
   /**
    * Check specification of uploading jar file
    *
@@ -78,6 +81,7 @@ trait SjCrudValidator {
    */
   def checkJarFile(jarFile: File) = {
     val configService = ConnectionRepository.getConfigService
+    val classLoader = new URLClassLoader(Array(jarFile.toURI.toURL), ClassLoader.getSystemClassLoader)
     val json = getSpecificationFromJar(jarFile)
     if (isEmptyOrNullString(json)) {
       logger.debug(s"File specification.json not found in module jar ${jarFile.getName}.")
@@ -92,6 +96,8 @@ trait SjCrudValidator {
     val outputs = specification("outputs").asInstanceOf[Map[String, Any]]
     val outputCardinality = outputs("cardinality").asInstanceOf[List[Int]]
     val outputTypes = outputs("types").asInstanceOf[List[String]]
+    val validatorClass = specification("validator-class").asInstanceOf[String]
+    val executorClass = specification("executor-class").asInstanceOf[String]
     moduleType match {
       case `inputStreamingType` =>
         //'inputs.cardinality' field
@@ -169,11 +175,30 @@ trait SjCrudValidator {
         }
 
         //'entity-class' field
-        if (specification.get("entity-class").isEmpty) {
-          throw new Exception(s"Specification.json for $moduleType module hasn't got 'entity-class' param.")
+        specification.get("entity-class") match {
+          case None =>
+            throw new Exception(s"Specification.json for $moduleType module hasn't got 'entity-class' param.")
+          case Some(x) =>
+            val entityClassName = x.asInstanceOf[String]
+            getClassInterfaces(entityClassName, classLoader)
         }
     }
 
+    //'validator-class' field
+    val validatorClassInterfaces = getClassInterfaces(validatorClass, classLoader)
+    if (!validatorClassInterfaces.exists(x => x.equals(classOf[StreamingValidator]))) {
+      throw new Exception(s"Specification.json for $moduleType module has got the invalid 'validator-class' param: " +
+        s"a validator class should implements StreamingValidator.")
+    }
+
+    //'executor-class' field
+    val executorClassInterfaces = getExecutorClassInterfaces(executorClass, classLoader)
+    if (!executorClassInterfaces.exists(x => x.equals(classOf[StreamingExecutor]))) {
+      throw new Exception(s"Specification.json for $moduleType module has got the invalid 'executor-class' param: " +
+        s"a validator class should implements StreamingExecutor.")
+    }
+
+    //'engine-name' and 'engine-version' fields
     val engine = specification("engine-name").asInstanceOf[String] + "-" + specification("engine-version").asInstanceOf[String]
     if (configService.get("system." + engine).isEmpty) {
       throw new Exception(s"Specification.json for $moduleType module has got the invalid 'engine-name' and 'engine-version' params.")
@@ -197,6 +222,28 @@ trait SjCrudValidator {
   private def isSingleCardinality(cardinality: List[Int]): Boolean = {
     cardinality.head == 1 && cardinality.last == 1
   }
+
+  private def getClassInterfaces(className: String, classLoader: URLClassLoader) = {
+    try {
+      classLoader.loadClass(className).getAnnotatedInterfaces.map(x => x.getType)
+    } catch {
+      case _: ClassNotFoundException =>
+        throw new Exception(s"Specification.json for module has got the invalid 'validator-class' or 'entity-class' param: " +
+          s"class '$className' indicated in the specification isn't found.")
+    }
+  }
+
+  private def getExecutorClassInterfaces(className: String, classLoader: URLClassLoader) = {
+    try {
+      classLoader.loadClass(className).getAnnotatedSuperclass.getType.asInstanceOf[Class[Object]]
+        .getAnnotatedInterfaces.map(x => x.getType)
+    } catch {
+      case _: ClassNotFoundException =>
+        throw new Exception(s"Specification.json for module has got the invalid 'executor-class' param: " +
+          s"class '$className' indicated in the specification isn't found.")
+    }
+  }
+
 
   /**
    * Check specification of uploading custom jar file
