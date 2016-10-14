@@ -21,6 +21,15 @@ class TStreamSjStreamData() extends SjStreamData() {
 
     errors ++= super.validateGeneralFields()
 
+
+    //partitions
+    if (this.partitions == Int.MinValue)
+      errors += s"'Partitions' is required"
+    else {
+      if (this.partitions <= 0)
+        errors += s"'Partitions' must be a positive integer"
+    }
+
     Option(this.service) match {
       case None =>
         errors += s"'Service' is required"
@@ -38,18 +47,10 @@ class TStreamSjStreamData() extends SjStreamData() {
                 errors += s"Service for ${StreamLiterals.tStreamType} stream " +
                   s"must be of '${ServiceLiterals.tstreamsType}' type ('${modelService.serviceType}' is given instead)"
               } else {
-                if (this.name != null && this.name.nonEmpty) errors ++= checkStreamPartitionsOnConsistency(modelService.asInstanceOf[TStreamService])
+                if (errors.isEmpty) errors ++= checkStreamPartitionsOnConsistency(modelService.asInstanceOf[TStreamService])
               }
           }
         }
-    }
-
-    //partitions
-    if (this.partitions == Int.MinValue)
-      errors += s"'Partitions' is required"
-    else {
-      if (this.partitions <= 0)
-        errors += s"'Partitions' must be a positive integer"
     }
 
     //generator
