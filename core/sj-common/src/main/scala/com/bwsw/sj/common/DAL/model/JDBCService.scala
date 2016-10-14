@@ -15,7 +15,7 @@ class JDBCService() extends Service {
   var databaseName: String = null
 
   def this(name: String, serviceType: String, description: String, provider: Provider, namespace: String, driver: String, databaseName: String) = {
-    this()
+    this
     this.name = name
     this.serviceType = serviceType
     this.description = description
@@ -27,9 +27,20 @@ class JDBCService() extends Service {
   override def asProtocolService(): ServiceData = {
     val protocolService = new JDBCServiceData()
     super.fillProtocolService(protocolService)
-
     protocolService.provider = this.provider.name
-
     protocolService
+  }
+
+  override def prepare() = {
+    //todo realize
+  }
+
+  override def destroy() = {
+    //todo realize
+  }
+
+  private def getProviderHosts = {
+    this.provider.hosts
+    //todo realize
   }
 }
