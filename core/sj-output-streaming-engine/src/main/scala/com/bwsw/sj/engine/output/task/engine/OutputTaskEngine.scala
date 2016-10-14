@@ -38,23 +38,29 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"output-task-${manager.taskName}-engine")
   protected val logger = LoggerFactory.getLogger(this.getClass)
-  private val esEnvelopeSerializer = new JsonSerializer()
+
+//  private val esEnvelopeSerializer = new JsonSerializer()
   protected val checkpointGroup = new CheckpointGroup()
-  protected val instance = manager.instance.asInstanceOf[OutputInstance]
-  private val outputStream = getOutput()
-  protected val environmentManager = createModuleEnvironmentManager()
-  protected val executor = manager.getExecutor(environmentManager).asInstanceOf[OutputStreamingExecutor]
+  protected val instance = manager.instance
+  private val envelopeSerializer = new JsonSerializer(true)
+
+  private lazy val outputStream = getOutput()
+  protected lazy val environmentManager = createModuleEnvironmentManager()
+  protected lazy val executor = manager.getExecutor(environmentManager)
+
+
   val taskInputService = new TStreamTaskInputService(manager, blockingQueue, checkpointGroup)
   protected val isNotOnlyCustomCheckpoint: Boolean
-  private val (esClient, esService) = openEsConnection(outputStream)
-  private val (jdbcClient, jdbcService) = openJdbcConnection(outputStream)
+  private lazy val (esClient, esService) = openEsConnection(outputStream)
+  private lazy val (jdbcClient, jdbcService) =  openJdbcConnection(outputStream)
   private var wasFirstCheckpoint = false
   private val byteSerializer = new ObjectSerializer()
 
 
-  private def getOutput() = {
-    val streamService = ConnectionRepository.getStreamService
 
+
+  private def getOutput(): SjStream = {
+    val streamService = ConnectionRepository.getStreamService
     instance.outputs.flatMap(x => streamService.get(x)).head
   }
 
@@ -68,10 +74,14 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     new OutputEnvironmentManager(options, outputs)
   }
 
+  def openConnection(outputStream: SjStream) = {
+
+  }
+
   /**
    * Open elasticsearch connection
    *
-   * @param outputStream Output ES stream
+   * @param outputStream Output stream
    * @return ES Transport client and ES service of stream
    */
   private def openEsConnection(outputStream: SjStream) = {
@@ -91,8 +101,8 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   /**
     * Open JDBC connection
     *
-    * @param outputStream Output ES stream
-    * @return JDBC connection
+    * @param outputStream Output stream
+    * @return JDBC connection client and JDBC service of stream
     */
   private def openJdbcConnection(outputStream: SjStream) = {
     logger.info(s"Task: ${manager.taskName}. Open output JDBC connection.\n")
@@ -105,10 +115,35 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
       setDriver(jdbcService.driver).
       setUsername(jdbcService.provider.login).
       setPassword(jdbcService.provider.password).
+      setTable(outputStream.name).
       build()
 
     (client, jdbcService)
   }
+
+  /**
+    * It is in charge of running a basic execution logic of output task engine
+    */
+  override def call(): Unit = {
+
+    logger.info(s"Task name: ${manager.taskName}. " +
+      s"Run output task engine in a separate thread of execution service\n")
+
+    while (true) {
+      var maybeEnvelope = blockingQueue.get(EngineLiterals.eventWaitTimeout)
+
+      //todo remove
+      maybeEnvelope = Some("{'id':'some_id', 'consumerName':'consumer', ''}")
+
+      maybeEnvelope match {
+        case Some(serializedEnvelope) =>
+          processOutputEnvelope(serializedEnvelope)
+        case _ =>
+      }
+      if (isItTimeToCheckpoint(environmentManager.isCheckpointInitiated)) doCheckpoint()
+    }
+  }
+
 
   /**
    * Check whether a group checkpoint of t-streams consumers/producers have to be done or not
@@ -116,39 +151,15 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
    */
   protected def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean
 
-  /**
-   * It is in charge of running a basic execution logic of output task engine
-   */
-  override def call(): Unit = {
-    val envelopeSerializer = new JsonSerializer(true)
-    logger.info(s"Task name: ${manager.taskName}. " +
-      s"Run output task engine in a separate thread of execution service\n")
-    prepareES()
-
-    while (true) {
-      val maybeEnvelope = blockingQueue.get(EngineLiterals.eventWaitTimeout)
-
-      maybeEnvelope match {
-        case Some(serializedEnvelope) =>
-          val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope).asInstanceOf[TStreamEnvelope]
-          afterReceivingEnvelope()
-          taskInputService.registerEnvelope(envelope, performanceMetrics)
-          removeFromES(envelope)
-          logger.debug(s"Task: ${
-            manager.taskName
-          }. Invoke onMessage() handler\n")
-          val outputEnvelopes: List[Envelope] = executor.onMessage(envelope)
-          outputEnvelopes.foreach(outputEnvelope => processOutputEnvelope(outputEnvelope, envelope))
-        case _ =>
-      }
-
-      if (isItTimeToCheckpoint(environmentManager.isCheckpointInitiated)) doCheckpoint()
-    }
-  }
 
   private def prepareES() = {
     esService.prepare()
     createIndexMapping()
+  }
+
+  private def prepareJDBC() = {
+    jdbcService.prepare()
+    createTableMapping()
   }
 
   private def createIndexMapping() = {
@@ -164,12 +175,16 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
       fields.put(field, Map("type" -> "date", "format" -> "epoch_millis"))
     }
     val mapping = Map("properties" -> fields)
-    val mappingJson = esEnvelopeSerializer.serialize(mapping)
+    val mappingJson = envelopeSerializer.serialize(mapping)
 
     esClient.createMapping(index, streamName, mappingJson)
   }
 
-  protected def afterReceivingEnvelope(): Unit
+  private def createTableMapping() = {
+
+  }
+
+  protected def afterReceivingEnvelope()
 
   private def removeFromES(envelope: TStreamEnvelope) = {
     if (!wasFirstCheckpoint) {
@@ -193,40 +208,61 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     }
   }
 
-  private def processOutputEnvelope(outputEnvelope: Envelope, inputEnvelope: TStreamEnvelope) = {
-    registerAndSendOutputEnvelope(outputEnvelope, inputEnvelope)
+  private def processOutputEnvelope(serializedEnvelope: String) = {
+    val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope).asInstanceOf[TStreamEnvelope]
+    afterReceivingEnvelope()
+    taskInputService.registerEnvelope(envelope, performanceMetrics)
+    logger.debug(s"Task: ${
+      manager.taskName
+    }. Invoke onMessage() handler\n")
+    val outputEnvelopes: List[Envelope] = executor.onMessage(envelope)
+    outputEnvelopes.foreach(outputEnvelope => registerAndSendOutputEnvelope(outputEnvelope, envelope))
   }
 
   private def registerAndSendOutputEnvelope(outputEnvelope: Envelope, inputEnvelope: TStreamEnvelope) = {
     outputEnvelope match {
-      case esEnvelope: EsEnvelope =>
-        esEnvelope.outputDateTime = s"${Calendar.getInstance().getTimeInMillis}"
-        esEnvelope.transactionDateTime = s"${inputEnvelope.id}"
-        esEnvelope.txn = inputEnvelope.id.toString.replaceAll("-", "")
-        esEnvelope.stream = inputEnvelope.stream
-        esEnvelope.partition = inputEnvelope.partition
-        esEnvelope.tags = inputEnvelope.tags
-        registerOutputEnvelope(esEnvelope.txn, esEnvelope)
-        logger.debug(s"Task: ${manager.taskName}. Write output envelope to elasticsearch.")
-        esClient.write(esEnvelopeSerializer.serialize(esEnvelope), esService.index, outputStream.name)
-      case jdbcEnvelope: JdbcEnvelope => writeToJdbc(outputEnvelope)
+      case esEnvelope: EsEnvelope => writeToES(esEnvelope, inputEnvelope)
+      case jdbcEnvelope: JdbcEnvelope => writeToJdbc(jdbcEnvelope)
       case _ =>
     }
   }
 
-  private def registerOutputEnvelope(envelopeID: String, data: EsEnvelope) = {
+  private def registerOutputEnvelope(envelopeID: String, data: Envelope) = {
     val elementSize = byteSerializer.serialize(data).length
     performanceMetrics.addElementToOutputEnvelope(outputStream.name, envelopeID, elementSize)
   }
 
   /**
+    * Writing entity to elasticsearch
+    * @param esEnvelope:
+    * @param inputEnvelope:
+    */
+  private def writeToES(esEnvelope: EsEnvelope, inputEnvelope: TStreamEnvelope) = {
+    prepareES()
+    removeFromES(inputEnvelope)
+    esEnvelope.outputDateTime = s"${Calendar.getInstance().getTimeInMillis}"
+    esEnvelope.transactionDateTime = s"${inputEnvelope.id}"
+    esEnvelope.txn = inputEnvelope.id.toString.replaceAll("-", "")
+    esEnvelope.stream = inputEnvelope.stream
+    esEnvelope.partition = inputEnvelope.partition
+    esEnvelope.tags = inputEnvelope.tags
+    registerOutputEnvelope(esEnvelope.txn, esEnvelope)
+    logger.debug(s"Task: ${manager.taskName}. Write output envelope to elasticsearch.")
+    esClient.write(envelopeSerializer.serialize(esEnvelope), esService.index, outputStream.name)
+  }
+
+  /**
    * Writing entity to JDBC
    *
-   * @param envelope Output envelope for writing to sql database
+   * @param jdbcEnvelope: Output envelope for writing to JDBC
    */
-  private def writeToJdbc(envelope: Envelope) = {
+  private def writeToJdbc(jdbcEnvelope: JdbcEnvelope) = {
+    prepareJDBC()
+    jdbcEnvelope.stream = ""
+    jdbcClient.write()
     //todo writing to JDBC
   }
+
 
   /**
    * Does group checkpoint of t-streams consumers/producers
