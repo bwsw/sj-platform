@@ -41,9 +41,14 @@ class OutputInstanceValidator extends InstanceValidator {
       case None =>
         errors += s"'Checkpoint-mode' is required"
       case Some(x) =>
-        if (!x.equals(EngineLiterals.everyNthMode)) {
-          errors += s"Unknown value of 'checkpoint-mode' attribute: '$x'. " +
-            s"'Checkpoint-mode' attribute for output-streaming module must be only '${EngineLiterals.everyNthMode}'"
+        if (x.isEmpty) {
+          errors += s"'Checkpoint-mode' is required"
+        }
+        else {
+          if (!x.equals(EngineLiterals.everyNthMode)) {
+            errors += s"Unknown value of 'checkpoint-mode' attribute: '$x'. " +
+              s"'Checkpoint-mode' attribute for output-streaming module must be only '${EngineLiterals.everyNthMode}'"
+          }
         }
     }
 
@@ -62,40 +67,52 @@ class OutputInstanceValidator extends InstanceValidator {
 
     // 'inputs' field
     var inputStream: Option[SjStream] = None
-    if (instance.input != null) {
-      val inputMode: String = getStreamMode(instance.input)
-      if (!inputMode.equals(EngineLiterals.splitStreamMode)) {
-        errors += s"Unknown value of 'stream-mode' attribute. Input stream must have the mode '${EngineLiterals.splitStreamMode}'"
-      }
-
-      val inputStreamName = clearStreamFromMode(instance.input)
-      inputStream = getStream(inputStreamName)
-      inputStream match {
-        case None =>
-          errors += s"Input stream '$inputStreamName' does not exist"
-        case Some(stream) =>
-          val inputTypes = specification.inputs("types").asInstanceOf[Array[String]]
-          if (!inputTypes.contains(stream.streamType)) {
-            errors += s"Input stream must be one of: ${inputTypes.mkString("[", ", ", "]")}"
+    Option(instance.input) match {
+      case None =>
+        errors += s"'Input' attribute is required"
+      case Some(x) =>
+        if (x.isEmpty) {
+          errors += s"'Input' attribute is required"
+        }
+        else {
+          val inputMode: String = getStreamMode(x)
+          if (!inputMode.equals(EngineLiterals.splitStreamMode)) {
+            errors += s"Unknown value of 'stream-mode' attribute. Input stream must have the mode '${EngineLiterals.splitStreamMode}'"
           }
-      }
-    } else {
-      errors += s"'Input' attribute is required"
+
+          val inputStreamName = clearStreamFromMode(x)
+          inputStream = getStream(inputStreamName)
+          inputStream match {
+            case None =>
+              errors += s"Input stream '$inputStreamName' does not exist"
+            case Some(stream) =>
+              val inputTypes = specification.inputs("types").asInstanceOf[Array[String]]
+              if (!inputTypes.contains(stream.streamType)) {
+                errors += s"Input stream must be one of: ${inputTypes.mkString("[", ", ", "]")}"
+              }
+          }
+        }
     }
 
-    if (instance.output != null) {
-      val outputStream = getStream(instance.output)
-      outputStream match {
-        case None =>
-          errors += s"Output stream '${instance.output}' does not exist"
-        case Some(stream) =>
-          val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
-          if (!outputTypes.contains(stream.streamType)) {
-            errors += s"Output streams must be one of: ${outputTypes.mkString("[", ", ", "]")}"
+    Option(instance.output) match {
+      case None =>
+        errors += "'Output' attribute is required"
+      case Some(x) =>
+        if (x.isEmpty) {
+          errors += "'Output' attribute is required"
+        }
+        else {
+          val outputStream = getStream(x)
+          outputStream match {
+            case None =>
+              errors += s"Output stream '$x' does not exist"
+            case Some(stream) =>
+              val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
+              if (!outputTypes.contains(stream.streamType)) {
+                errors += s"Output streams must be one of: ${outputTypes.mkString("[", ", ", "]")}"
+              }
           }
-      }
-    } else {
-      errors += s"'Output' attribute is required"
+        }
     }
 
     // 'start-from' field

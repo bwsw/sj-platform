@@ -49,13 +49,18 @@ abstract class InstanceValidator extends ValidationUtils {
       case None =>
         errors += s"'Name' is required"
       case Some(x) =>
-        if (instanceDAO.get(parameters.name).isDefined) {
-          errors += s"Instance with name ${parameters.name} already exists"
+        if (x.isEmpty) {
+          errors += s"'Name' is required"
         }
+        else {
+          if (instanceDAO.get(x).isDefined) {
+            errors += s"Instance with name $x already exists"
+          }
 
-        if (!validateName(parameters.name)) {
-          errors += s"Instance has incorrect name: ${parameters.name}. " +
-            s"Name of instance must contain digits, lowercase letters or hyphens. First symbol must be a letter"
+          if (!validateName(x)) {
+            errors += s"Instance has incorrect name: $x. " +
+              s"Name of instance must be contain digits, lowercase letters or hyphens. First symbol must be a letter"
+          }
         }
     }
 
@@ -79,13 +84,18 @@ abstract class InstanceValidator extends ValidationUtils {
       case None =>
         errors += s"'Coordination-service' is required"
       case Some(x) =>
-        val coordService = serviceDAO.get(parameters.coordinationService)
-        if (coordService.isDefined) {
-          if (!coordService.get.isInstanceOf[ZKService]) {
-            errors += s"'Coordination-service' ${parameters.coordinationService} is not ZKCoord"
+        if (x.isEmpty) {
+          errors += s"'Coordination-service' is required"
+        }
+        else {
+          val coordService = serviceDAO.get(x)
+          if (coordService.isDefined) {
+            if (!coordService.get.isInstanceOf[ZKService]) {
+              errors += s"'Coordination-service' $x is not ZKCoord"
+            }
+          } else {
+            errors += s"'Coordination-service' $x} does not exist"
           }
-        } else {
-          errors += s"'Coordination-service' ${parameters.coordinationService} does not exist"
         }
     }
 

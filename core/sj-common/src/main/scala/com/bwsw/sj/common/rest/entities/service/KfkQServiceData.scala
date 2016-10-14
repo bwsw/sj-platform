@@ -2,7 +2,7 @@ package com.bwsw.sj.common.rest.entities.service
 
 import com.bwsw.sj.common.DAL.model.KafkaService
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{ServiceLiterals, ProviderLiterals}
+import com.bwsw.sj.common.utils.{ProviderLiterals, ServiceLiterals}
 import com.fasterxml.jackson.annotation.JsonProperty
 
 import scala.collection.mutable.ArrayBuffer
@@ -36,22 +36,40 @@ class KfkQServiceData() extends ServiceData() {
     // 'zkProvider' field
     Option(this.zkProvider) match {
       case None =>
-        errors += s"'Zk-provider' is required"
-      case Some(p) =>
-        val zkProviderObj = providerDAO.get(p)
-        zkProviderObj match {
-          case Some(zkProvider) =>
-            if (zkProvider.providerType != ProviderLiterals.zookeeperType) {
-              errors += s"'Zk-provider' must be of type '${ProviderLiterals.zookeeperType}' " +
-                s"('${zkProvider.providerType}' is given instead)"
-            }
-          case None => errors += s"Zookeeper provider '$p' does not exist"
+        errors += "'Zk-provider' is required"
+      case Some(x) =>
+        if (x.isEmpty) {
+          errors += "'Zk-provider' is required"
+        }
+        else {
+          val zkProviderObj = providerDAO.get(x)
+          zkProviderObj match {
+            case None =>
+              errors += s"Zookeeper provider '$x' does not exist"
+            case Some(zkProviderFormDB) =>
+              if (zkProviderFormDB.providerType != ProviderLiterals.zookeeperType) {
+                errors += s"'Zk-provider' must be of type '${ProviderLiterals.zookeeperType}' " +
+                  s"('${zkProviderFormDB.providerType}' is given instead)"
+              }
+          }
         }
     }
 
     // 'zkNamespace' field
-    errors ++= validateStringFieldRequired(this.zkNamespace, "ZK-namespace")
-    errors ++= validateNamespace(this.zkNamespace)
+    Option(this.zkNamespace) match {
+      case None =>
+        errors += "'Zk-namespace' is required"
+      case Some(x) =>
+        if (x.isEmpty) {
+          errors += "'Zk-namespace' is required"
+        }
+        else {
+          if (!validateNamespace(x)) {
+            errors += s"Service has incorrect 'zk-namespace': '$x'. " +
+              s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+          }
+        }
+    }
 
     errors
   }

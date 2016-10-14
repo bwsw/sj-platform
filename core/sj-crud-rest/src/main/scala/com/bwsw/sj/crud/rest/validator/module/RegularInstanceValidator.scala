@@ -30,9 +30,14 @@ class RegularInstanceValidator extends InstanceValidator {
       case None =>
         errors += s"'Checkpoint-mode' is required"
       case Some(x) =>
-        if (!checkpointModes.contains(x)) {
-          errors += s"Unknown value of 'checkpoint-mode' attribute: '$x'. " +
-            s"'Checkpoint-mode' must be one of: ${checkpointModes.mkString("[", ", ", "]")}"
+        if (x.isEmpty) {
+          errors += s"'Checkpoint-mode' is required"
+        }
+        else {
+          if (!checkpointModes.contains(x)) {
+            errors += s"Unknown value of 'checkpoint-mode' attribute: '$x'. " +
+              s"'Checkpoint-mode' must be one of: ${checkpointModes.mkString("[", ", ", "]")}"
+          }
         }
     }
 

@@ -15,8 +15,8 @@ import scala.collection.mutable.ArrayBuffer
 
 class KafkaSjStreamData() extends SjStreamData() {
   streamType = StreamLiterals.kafkaStreamType
-  var partitions: Int = 0
-  @JsonProperty("replication-factor") var replicationFactor: Int = 0
+  var partitions: Int = Int.MinValue
+  @JsonProperty("replication-factor") var replicationFactor: Int = Int.MinValue
 
   override def validate() = {
     val serviceDAO = ConnectionRepository.getServiceManager
@@ -24,31 +24,44 @@ class KafkaSjStreamData() extends SjStreamData() {
 
     errors ++= super.validateGeneralFields()
 
+    //partitions
+    if (this.partitions == Int.MinValue)
+      errors += s"'Partitions' is required"
+    else {
+      if (this.partitions <= 0)
+        errors += s"'Partitions' must be a positive integer"
+    }
+
     Option(this.service) match {
       case None =>
         errors += s"'Service' is required"
       case Some(x) =>
-        val serviceObj = serviceDAO.get(this.service)
-        serviceObj match {
-          case None =>
-            errors += s"Service '${this.service}' does not exist"
-          case Some(modelService) =>
-            if (modelService.serviceType != ServiceLiterals.kafkaType) {
-              errors += s"Service for ${StreamLiterals.kafkaStreamType} stream " +
-                s"must be of '${ServiceLiterals.kafkaType}' type ('${modelService.serviceType}' is given instead)"
-            } else {
-              errors ++= checkStreamPartitionsOnConsistency(modelService.asInstanceOf[KafkaService])
-            }
+        if (x.isEmpty) {
+          errors += s"'Service' is required"
+        }
+        else {
+          val serviceObj = serviceDAO.get(x)
+          serviceObj match {
+            case None =>
+              errors += s"Service '$x' does not exist"
+            case Some(modelService) =>
+              if (modelService.serviceType != ServiceLiterals.kafkaType) {
+                errors += s"Service for ${StreamLiterals.kafkaStreamType} stream " +
+                  s"must be of '${ServiceLiterals.kafkaType}' type ('${modelService.serviceType}' is given instead)"
+              } else {
+                if (errors.isEmpty) errors ++= checkStreamPartitionsOnConsistency(modelService.asInstanceOf[KafkaService])
+              }
+          }
         }
     }
 
-    //partitions
-    if (this.partitions <= 0)
-      errors += s"'Partitions' must be a positive integer"
-
     //replicationFactor
-    if (this.replicationFactor <= 0) {
-      errors += s"'Replication-factor' must be a positive integer"
+    if (this.replicationFactor == Int.MinValue)
+      errors += s"'Replication-factor' is required"
+    else {
+      if (this.replicationFactor <= 0) {
+        errors += s"'Replication-factor' must be a positive integer"
+      }
     }
 
     errors

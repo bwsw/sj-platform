@@ -27,7 +27,6 @@ val commonSettings = Seq(
       </developers>
     ),
 
-  //  resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/service/local/staging/deploy/maven2",
   resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
   resolvers += "Twitter Repository" at "http://maven.twttr.com",
 
@@ -53,7 +52,7 @@ val commonSettings = Seq(
   fork in run := true,
   fork in Test := true,
   licenses := Seq("Apache 2" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
-  homepage := Some(url("http://bitworks.software/de/content/edv-plattform-juggler/")),
+  homepage := Some(url("http://stream-juggler.com/")),
   pomIncludeRepository := { _ => false },
   scalacOptions += "-feature",
   scalacOptions += "-deprecation",

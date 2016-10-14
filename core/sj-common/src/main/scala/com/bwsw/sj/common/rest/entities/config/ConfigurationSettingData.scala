@@ -32,18 +32,23 @@ case class ConfigurationSettingData(name: String, value: String) extends Validat
       case None =>
         errors += s"'Name' is required"
       case Some(x) =>
-        if (configService.get(x).isDefined) {
-          errors += s"Configuration setting with name '$x' already exists"
+        if (x.isEmpty) {
+          errors += "'Name' is required"
         }
+        else {
+          if (configService.get(x).isDefined) {
+            errors += s"Configuration setting with name '$x' already exists"
+          }
 
         if (!validateConfigSettingName(x)) {
           errors += s"Configuration setting has incorrect name: $x. " +
             s"Name of configuration setting must contain lowercase letters, hyphens or periods. First symbol must be a letter"
         }
 
-        if (domain == ConfigLiterals.tstreamsDomain && !validateTstreamProperty()) {
-          errors += s"Configuration setting has incorrect name: $x. " +
-            s"T-streams domain configuration setting must be only for consumer or producer"
+          if (domain == ConfigLiterals.tstreamsDomain && !validateTstreamProperty()) {
+            errors += s"Configuration setting has incorrect name: $x. " +
+              s"T-streams domain configuration setting must be only for consumer or producer"
+          }
         }
     }
 
@@ -53,7 +58,7 @@ case class ConfigurationSettingData(name: String, value: String) extends Validat
         errors += s"'Value' is required"
       case Some(x) =>
         if (x.isEmpty)
-          errors += s"'Value' can not be empty"
+          errors += s"'Value' is required"
     }
 
     errors

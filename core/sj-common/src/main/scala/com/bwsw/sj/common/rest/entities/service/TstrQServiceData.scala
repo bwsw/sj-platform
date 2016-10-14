@@ -39,69 +39,114 @@ class TstrQServiceData() extends ServiceData() {
     // 'metadataProvider' field
     Option(this.metadataProvider) match {
       case None =>
-        errors += s"'Metadata-provider' is required"
+        errors += "'Metadata-provider' is required"
       case Some(x) =>
-        val metadataProviderObj = providerDAO.get(x)
-        metadataProviderObj match {
-          case Some(provider) =>
-            if (provider.providerType != ProviderLiterals.cassandraType) {
-              errors += s"'Metadata-provider' must be of type '${ProviderLiterals.cassandraType}' " +
-                s"('${provider.providerType}' is given instead)"
-            }
-          case None => errors += s"Metadata-provider '$x' does not exist"
-
+        if (x.isEmpty) {
+          errors += "'Metadata-provider' is required"
+        }
+        else {
+          val metadataProviderObj = providerDAO.get(x)
+          metadataProviderObj match {
+            case None =>
+              errors += s"Metadata-provider '$x' does not exist"
+            case Some(provider) =>
+              if (provider.providerType != ProviderLiterals.cassandraType) {
+                errors += s"'Metadata-provider' must be of type '${ProviderLiterals.cassandraType}' " +
+                  s"('${provider.providerType}' is given instead)"
+              }
+          }
         }
     }
 
     // 'metadataNamespace' field
-    errors ++= validateStringFieldRequired(this.metadataNamespace, "Metadata-namespace")
-    errors ++= validateNamespace(this.metadataNamespace)
+    Option(this.metadataNamespace) match {
+      case None =>
+        errors += "'Metadata-namespace' is required"
+      case Some(x) =>
+        if (x.isEmpty) {
+          errors += "'Metadata-namespace' is required"
+        }
+        else {
+          if (!validateNamespace(x)) {
+            errors += s"Service has incorrect 'metadata-namespace': '$x'. " +
+              s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+          }
+        }
+    }
 
     // 'dataProvider' field
     Option(this.dataProvider) match {
       case None =>
-        errors += s"'data-provider' is required"
+        errors += "'Data-provider' is required"
       case Some(x) =>
         if (x.isEmpty) {
-          errors += s"'data-provider' can not be empty"
+          errors += "'Data-provider' is required"
         } else {
           val dataProviderObj = providerDAO.get(x)
           val allowedTypes = List(ProviderLiterals.cassandraType, ProviderLiterals.aerospikeType)
           dataProviderObj match {
+            case None =>
+              errors += s"Data-provider '$x' does not exist"
             case Some(provider) =>
               if (!allowedTypes.contains(provider.providerType)) {
                 errors += s"Data-provider must be one of type: ${allowedTypes.mkString("[", ", ", "]")} " +
                   s"('${provider.providerType}' is given instead)"
               }
-            case None =>
-              errors += s"Data-provider '$x' does not exist"
           }
         }
     }
 
     // 'dataNamespace' field
-    errors ++= validateStringFieldRequired(this.dataNamespace, "Data-namespace")
-    errors ++= validateNamespace(this.dataNamespace)
+    Option(this.dataNamespace) match {
+      case None =>
+        errors += "'Data-namespace' is required"
+      case Some(x) =>
+        if (x.isEmpty) {
+          errors += s"'Data-namespace' is required"
+        }
+        else {
+          if (!validateNamespace(x)) {
+            errors += s"Service has incorrect 'data-namespace': '$x'. " +
+              s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+          }
+        }
+    }
 
     Option(this.lockProvider) match {
       case None =>
         errors += s"'Lock-provider' is required"
       case Some(x) =>
-        val lockProviderObj = providerDAO.get(x)
-        lockProviderObj match {
-          case Some(provider) =>
-            if (provider.providerType != ProviderLiterals.zookeeperType) {
-              errors += s"'Lock-provider' must be of type '${ProviderLiterals.zookeeperType}' " +
-                s"('${provider.providerType}' is given instead)"
-            }
-          case None =>
-            errors += s"Lock-provider '$x' does not exist"
+        if (x.isEmpty) {
+          errors += "'Lock-provider' is required"
+        } else {
+          val lockProviderObj = providerDAO.get(x)
+          lockProviderObj match {
+            case None =>
+              errors += s"Lock-provider '$x' does not exist"
+            case Some(provider) =>
+              if (provider.providerType != ProviderLiterals.zookeeperType) {
+                errors += s"'Lock-provider' must be of type '${ProviderLiterals.zookeeperType}' " +
+                  s"('${provider.providerType}' is given instead)"
+              }
+          }
         }
     }
 
     // 'lockNamespace' field
-    errors ++= validateStringFieldRequired(this.lockNamespace, "Lock-namespace")
-    errors ++= validateNamespace(this.lockNamespace)
+    Option(this.lockNamespace) match {
+      case None =>
+        errors += "'Lock-namespace' is required"
+      case Some(x) =>
+        if (x.isEmpty) {
+          errors += s"'Lock-namespace' is required"
+        }
+        else {
+          if (!validateNamespace(x)) {
+            errors += s"Service has incorrect 'lock-namespace': '$x'. " +
+              s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+          }
+        }
+    }
 
     errors
   }

@@ -52,14 +52,19 @@ class SjStreamData() extends ValidationUtils {
       case None =>
         errors += s"'Name' is required"
       case Some(x) =>
-        val streamObj = streamDAO.get(x)
-        if (streamObj.isDefined) {
-          errors += s"Stream with name $x already exists"
+        if (x.isEmpty) {
+          errors += s"'Name' is required"
         }
+        else {
+          if (!validateName(x)) {
+            errors += s"Stream has incorrect name: '$x'. " +
+              s"Name of stream must be contain digits, lowercase letters or hyphens. First symbol must be a letter"
+          }
 
-        if (!validateName(x)) {
-          errors += s"Stream has incorrect name: '$x'. " +
-            s"Name of stream must contain digits, lowercase letters or hyphens. First symbol must be a letter"
+          val streamObj = streamDAO.get(x)
+          if (streamObj.isDefined) {
+            errors += s"Stream with name $x already exists"
+          }
         }
     }
 

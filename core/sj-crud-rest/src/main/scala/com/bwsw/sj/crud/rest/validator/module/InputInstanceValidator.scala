@@ -35,9 +35,14 @@ class InputInstanceValidator extends InstanceValidator {
       case None =>
         errors += s"'Checkpoint-mode' is required"
       case Some(x) =>
-        if (!checkpointModes.contains(x)) {
-          errors += s"Unknown value of 'checkpoint-mode' attribute: '$x'. " +
-            s"'Checkpoint-mode' must be one of: ${checkpointModes.mkString("[", ", ", "]")}"
+        if (x.isEmpty) {
+          errors += s"'Checkpoint-mode' is required"
+        }
+        else {
+          if (!checkpointModes.contains(x)) {
+            errors += s"Unknown value of 'checkpoint-mode' attribute: '$x'. " +
+              s"'Checkpoint-mode' must be one of: ${checkpointModes.mkString("[", ", ", "]")}"
+          }
         }
     }
 
@@ -130,7 +135,7 @@ class InputInstanceValidator extends InstanceValidator {
   private def checkBackupNumber(parameters: InputInstanceMetadata, errors: ArrayBuffer[String]) = {
     val parallelism = parameters.parallelism.asInstanceOf[Int]
     if (parallelism <= 0) {
-      errors += "'Parallelism' must be greater than 0"
+      errors += "'Parallelism' must be greater than zero"
     }
     if (parallelism <= (parameters.backupCount + parameters.asyncBackupCount)) {
       errors += "'Parallelism' must be greater than the total number of backups"
