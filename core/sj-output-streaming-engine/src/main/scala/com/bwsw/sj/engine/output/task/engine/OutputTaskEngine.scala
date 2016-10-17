@@ -107,7 +107,6 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private def openJdbcConnection(outputStream: SjStream) = {
     logger.info(s"Task: ${manager.taskName}. Open output JDBC connection.\n")
     val jdbcService: JDBCService = outputStream.service.asInstanceOf[JDBCService]
-    println(jdbcService.provider.hosts)
     val hosts = jdbcService.provider.hosts
 
     val client = JdbcClientBuilder.
@@ -117,7 +116,6 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
       setPassword(jdbcService.provider.password).
       setTable(outputStream.name).
       build()
-
     (client, jdbcService)
   }
 
@@ -130,10 +128,8 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
       s"Run output task engine in a separate thread of execution service\n")
 
     while (true) {
-      var maybeEnvelope = blockingQueue.get(EngineLiterals.eventWaitTimeout)
+      val maybeEnvelope = blockingQueue.get(EngineLiterals.eventWaitTimeout)
 
-      //todo remove
-      maybeEnvelope = Some("{'id':'some_id', 'consumerName':'consumer', ''}")
       maybeEnvelope match {
         case Some(serializedEnvelope) =>
           processOutputEnvelope(serializedEnvelope)
