@@ -4,12 +4,13 @@ package com.bwsw.common
   * Created by diryavkin_dn on 10.10.16.
   */
 
-import java.sql.{Connection, DriverManager}
+import java.sql.{Connection, DriverManager, SQLException}
 
 
 // todo: Add multiple connection to databases.
 /**
   * JDBC client - JDBC connection wrapper
+  *
   * @param jdbcCCD: connection data provider
   */
 protected class JdbcClient (private var jdbcCCD: JdbcClientConnectionData) {
@@ -30,8 +31,41 @@ protected class JdbcClient (private var jdbcCCD: JdbcClientConnectionData) {
 
   def isConnected: Boolean = _connection.isDefined
 
-  def write() = {
+  def write(data: Object) = {
+    createDatatable(data)
+    if (!checkTableExists()) {throw new RuntimeException("There is no table in database")}
 
+    val attrs = getObjectAttributes(data)
+
+    val columns = attrs.map(a => a._1).mkString(", ")
+    val values = attrs.map(a => a._3.toString.mkString("'","","'")).mkString(", ")
+    val sql = s"INSERT INTO ${jdbcCCD.table} ($columns) VALUES ($values);"
+
+    val stmt = connection.createStatement()
+    try stmt.executeUpdate(sql) catch {case e:Exception => throw new SQLException(e.getMessage)}
+
+  }
+
+  private def checkTableExists(): Boolean = {
+    var result:Boolean = false
+    val dbResult = connection.getMetaData.getTables(null, null, this.jdbcCCD.table, null)
+    while (dbResult.next) {
+      if (!dbResult.getString(3).isEmpty) result = true
+    }
+    result
+  }
+
+  /**
+    * Method for catching attributes from object.
+    * @param data: Some object
+    * @return Array of (Attribute name, Type, Value)
+    */
+  private def getObjectAttributes(data: Object):Array[(java.lang.String, java.lang.Class[_], AnyRef)] = {
+    data.getClass.getDeclaredMethods.filter {_.getReturnType != Void.TYPE}
+      .map { method => (method.getName, method.getReturnType, method.invoke(data))}
+  }
+
+  private def createDatatable(data: Object): Unit = {
   }
 
 }
@@ -49,6 +83,7 @@ class JdbcClientConnectionData {
 
   /**
     * This method return driver class name, related to driver name provided in service
+    *
     * @return String: name of class of using driver
     */
   def driverClass: String = driver.toLowerCase match {
@@ -60,6 +95,7 @@ class JdbcClientConnectionData {
 
   /**
     * This method return prefix of server url: (prefix)://(host:port)/(database)
+    *
     * @return String: prefix of server url
     */
   def driverPrefix: String = driver.toLowerCase match {
@@ -107,6 +143,7 @@ protected class JdbcClientBuilder{
 
   /**
     * Use this method if you have JDBC connection data provider
+    *
     * @param jdbcClientConnectionData: JdbcClientConnectionData
     * @return this
     */
@@ -122,7 +159,17 @@ object JdbcClientBuilder extends JdbcClientBuilder {}
 
 
 
-// todo remove
+//
+//
+//// todo remove
+//
+//object a {
+//  val age = 683242
+//  val first = "LOLIK2"
+//  val last = "LKILL"
+//  val id = 10
+//}
+//
 //object ap extends App {
 ////  Class.forName("org.postgresql.Driver")
 ////  val client = new JdbcClient(Set(("192", 5432)), "post", "root", "root")
@@ -130,22 +177,28 @@ object JdbcClientBuilder extends JdbcClientBuilder {}
 ////  client.connection_= (url, "root1", "root1")
 ////  val conn = client.connection
 //  val jdbcClient = JdbcClientBuilder.
-//    setHosts(Array("0.0.0.0:5433")).
+//    setHosts(Array("0.0.0.0:5432")).
 //    setDriver("postgresql").
 //    setPassword("root").
 //    setUsername("root").
-//    setDatabase("test123").
+//    setDatabase("test").
+//    setTable("registration").
 //    build()
 //
-//  val stmp = jdbcClient.connection.createStatement()
-//  stmp.executeUpdate("CREATE TABLE REGISTRATION3 " +
-//    "(id INTEGER not NULL, " +
-//    " first VARCHAR(255), " +
-//    " last VARCHAR(255), " +
-//    " age INTEGER, " +
-//    " PRIMARY KEY ( id ))")
+////  println(jdbcClient.jdbcCCD.table)
+//
+//  jdbcClient.write(a)
+//
+////  val stmp = jdbcClient.connection.createStatement()
+////  stmp.executeUpdate("CREATE TABLE REGISTRATION3 " +
+////    "(id INTEGER not NULL, " +
+////    " first VARCHAR(255), " +
+////    " last VARCHAR(255), " +
+////    " age INTEGER, " +
+////    " PRIMARY KEY ( id ))")
+//
 //}
-//
-//
-////jdbc:postgresql://0.0.0.0:5432,0.0.0.0:5433/test
-////jdbc:postgresql://0.0.0.0:5432,0.0.0.0:5433/test
+//////
+//////
+////////jdbc:postgresql://0.0.0.0:5432,0.0.0.0:5433/test
+//////jdbc:postgresql://0.0.0.0:5432,0.0.0.0:5433/test

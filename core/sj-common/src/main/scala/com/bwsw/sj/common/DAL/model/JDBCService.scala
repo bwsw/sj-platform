@@ -30,17 +30,4 @@ class JDBCService() extends Service {
     protocolService.provider = this.provider.name
     protocolService
   }
-
-  override def prepare() = {
-    //todo realize
-  }
-
-  override def destroy() = {
-    //todo realize
-  }
-
-  private def getProviderHosts = {
-    this.provider.hosts
-    //todo realize
-  }
 }

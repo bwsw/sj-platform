@@ -41,12 +41,12 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
 //  private val esEnvelopeSerializer = new JsonSerializer()
   protected val checkpointGroup = new CheckpointGroup()
-  protected val instance = manager.instance
+  protected val instance = manager.instance.asInstanceOf[OutputInstance]
   private val envelopeSerializer = new JsonSerializer(true)
 
   private lazy val outputStream = getOutput()
   protected lazy val environmentManager = createModuleEnvironmentManager()
-  protected lazy val executor = manager.getExecutor(environmentManager)
+  protected lazy val executor = manager.getExecutor(environmentManager).asInstanceOf[OutputStreamingExecutor]
 
 
   val taskInputService = new TStreamTaskInputService(manager, blockingQueue, checkpointGroup)
@@ -134,7 +134,6 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
       //todo remove
       maybeEnvelope = Some("{'id':'some_id', 'consumerName':'consumer', ''}")
-
       maybeEnvelope match {
         case Some(serializedEnvelope) =>
           processOutputEnvelope(serializedEnvelope)
@@ -157,11 +156,6 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     createIndexMapping()
   }
 
-  private def prepareJDBC() = {
-    jdbcService.prepare()
-    createTableMapping()
-  }
-
   private def createIndexMapping() = {
     val index = esService.index
     logger.debug(s"Task: ${manager.taskName}. Create the mapping for the elasticsearch index $index")
@@ -178,10 +172,6 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     val mappingJson = envelopeSerializer.serialize(mapping)
 
     esClient.createMapping(index, streamName, mappingJson)
-  }
-
-  private def createTableMapping() = {
-
   }
 
   protected def afterReceivingEnvelope()
@@ -220,6 +210,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   }
 
   private def registerAndSendOutputEnvelope(outputEnvelope: Envelope, inputEnvelope: TStreamEnvelope) = {
+    registerOutputEnvelope(inputEnvelope.id.toString.replaceAll("-", ""), outputEnvelope)
     outputEnvelope match {
       case esEnvelope: EsEnvelope => writeToES(esEnvelope, inputEnvelope)
       case jdbcEnvelope: JdbcEnvelope => writeToJdbc(jdbcEnvelope)
@@ -246,7 +237,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     esEnvelope.stream = inputEnvelope.stream
     esEnvelope.partition = inputEnvelope.partition
     esEnvelope.tags = inputEnvelope.tags
-    registerOutputEnvelope(esEnvelope.txn, esEnvelope)
+
     logger.debug(s"Task: ${manager.taskName}. Write output envelope to elasticsearch.")
     esClient.write(envelopeSerializer.serialize(esEnvelope), esService.index, outputStream.name)
   }
@@ -257,10 +248,8 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
    * @param jdbcEnvelope: Output envelope for writing to JDBC
    */
   private def writeToJdbc(jdbcEnvelope: JdbcEnvelope) = {
-    prepareJDBC()
     jdbcEnvelope.stream = ""
-    jdbcClient.write()
-    //todo writing to JDBC
+    jdbcClient.write(jdbcEnvelope)
   }
 
 
