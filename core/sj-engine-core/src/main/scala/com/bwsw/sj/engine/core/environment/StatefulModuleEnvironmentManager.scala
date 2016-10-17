@@ -26,7 +26,7 @@ class StatefulModuleEnvironmentManager(stateStorage: StateStorage,
                                        options: Map[String, Any],
                                        producers: Map[String, Producer[Array[Byte]]],
                                        outputs: Array[SjStream],
-                                       outputTags: mutable.Map[String, (String, RegularModuleOutput)],
+                                       outputTags: mutable.Map[String, (String, ModuleOutput)],
                                        moduleTimer: SjTimer,
                                        performanceMetrics: PerformanceMetrics)
   extends RegularEnvironmentManager(options, producers, outputs, outputTags, moduleTimer, performanceMetrics) {

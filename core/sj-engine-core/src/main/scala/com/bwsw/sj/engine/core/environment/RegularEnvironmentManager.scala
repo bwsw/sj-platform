@@ -22,7 +22,7 @@ import scala.collection._
 class RegularEnvironmentManager(options: Map[String, Any],
                                producers: Map[String, Producer[Array[Byte]]],
                                outputs: Array[SjStream],
-                               outputTags: mutable.Map[String, (String, RegularModuleOutput)],
+                               outputTags: mutable.Map[String, (String, ModuleOutput)],
                                moduleTimer: SjTimer,
                                performanceMetrics: PerformanceMetrics) extends EnvironmentManager(options, outputs) {
   /**

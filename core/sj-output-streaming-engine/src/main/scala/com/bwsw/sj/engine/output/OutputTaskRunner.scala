@@ -25,7 +25,7 @@ object OutputTaskRunner extends {override val threadName = "OutputTaskRunner-%d"
 
       val performanceMetrics = new OutputStreamingPerformanceMetrics(manager)
 
-      val outputTaskEngineFactory = new OutputTaskEngineFactory(manager, performanceMetrics, blockingQueue)
+      val outputTaskEngineFactory = new OutputTaskEngineFactory(manager, performanceMetrics)
 
       val outputTaskEngine = outputTaskEngineFactory.createOutputTaskEngine()
 

@@ -27,17 +27,16 @@ import scala.collection.Map
  *
  * @param manager Manager of environment of task of output module
  * @param performanceMetrics Set of metrics that characterize performance of a output streaming module
- * @param blockingQueue Blocking queue for keeping incoming envelopes that are serialized into a string,
- *                      which will be retrieved into a module
+
  * @author Kseniya Mikhaleva
  */
 abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
-                                performanceMetrics: OutputStreamingPerformanceMetrics,
-                                blockingQueue: PersistentBlockingQueue) extends Callable[Unit] {
+                                performanceMetrics: OutputStreamingPerformanceMetrics) extends Callable[Unit] {
 
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"output-task-${manager.taskName}-engine")
   protected val logger = LoggerFactory.getLogger(this.getClass)
+  private val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(EngineLiterals.persistentBlockingQueue)
   private val esEnvelopeSerializer = new JsonSerializer()
   protected val checkpointGroup = new CheckpointGroup()
   protected val instance = manager.instance.asInstanceOf[OutputInstance]

@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.regular.task.engine
+package com.bwsw.sj.engine.windowed.task.engine
 
 import java.util.concurrent.Callable
 
@@ -7,10 +7,10 @@ import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.Envelope
-import com.bwsw.sj.engine.regular.task.RegularTaskManager
-import com.bwsw.sj.engine.regular.task.engine.input.RegularTaskInputServiceFactory
-import com.bwsw.sj.engine.regular.task.engine.state.{RegularTaskEngineService, StatefulRegularTaskEngineService, StatelessRegularTaskEngineService}
-import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
+import com.bwsw.sj.engine.windowed.task.WindowedTaskManager
+import com.bwsw.sj.engine.windowed.task.engine.input.WindowedTaskInputServiceFactory
+import com.bwsw.sj.engine.windowed.task.engine.state.{StatefulWindowedTaskEngineService, StatelessWindowedTaskEngineService}
+import com.bwsw.sj.engine.windowed.task.reporting.WindowedStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.Producer
 import org.slf4j.LoggerFactory
@@ -26,8 +26,8 @@ import scala.collection.Map
 
  * @author Kseniya Mikhaleva
  */
-abstract class RegularTaskEngine(protected val manager: RegularTaskManager,
-                                 performanceMetrics: RegularStreamingPerformanceMetrics) extends Callable[Unit] {
+abstract class WindowedTaskEngine(protected val manager: WindowedTaskManager,
+                                 performanceMetrics: WindowedStreamingPerformanceMetrics) extends Callable[Unit] {
 
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"regular-task-${manager.taskName}-engine")
@@ -41,7 +41,7 @@ abstract class RegularTaskEngine(protected val manager: RegularTaskManager,
   protected val executor = regularTaskEngineService.executor
   private val moduleTimer = regularTaskEngineService.moduleTimer
   protected val outputTags = regularTaskEngineService.outputTags
-  private val regularTaskInputServiceFactory = new RegularTaskInputServiceFactory(manager, blockingQueue, checkpointGroup)
+  private val regularTaskInputServiceFactory = new WindowedTaskInputServiceFactory(manager, blockingQueue, checkpointGroup)
   val taskInputService = regularTaskInputServiceFactory.createRegularTaskInputService()
   protected val isNotOnlyCustomCheckpoint: Boolean
 
@@ -49,13 +49,13 @@ abstract class RegularTaskEngine(protected val manager: RegularTaskManager,
 
   addProducersToCheckpointGroup()
 
-  protected def createRegularTaskEngineService(): RegularTaskEngineService = {
+  protected def createRegularTaskEngineService() = {
     instance.stateManagement match {
       case EngineLiterals.noneStateMode =>
         logger.debug(s"Task: ${manager.taskName}. Start preparing of regular module without state\n")
-        new StatelessRegularTaskEngineService(manager, performanceMetrics)
+        new StatelessWindowedTaskEngineService(manager, performanceMetrics)
       case EngineLiterals.ramStateMode =>
-        new StatefulRegularTaskEngineService(manager, checkpointGroup, performanceMetrics)
+        new StatefulWindowedTaskEngineService(manager, checkpointGroup, performanceMetrics)
     }
   }
 

@@ -1,10 +1,10 @@
-package com.bwsw.sj.engine.regular.task
+package com.bwsw.sj.engine.windowed.task
 
 import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.common.DAL.model.module.RegularInstance
+import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.common.utils.StreamLiterals
-import com.bwsw.sj.engine.core.environment.{RegularEnvironmentManager, EnvironmentManager, ModuleOutput}
+import com.bwsw.sj.engine.core.environment.{EnvironmentManager, RegularEnvironmentManager, ModuleOutput}
 import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
@@ -17,10 +17,10 @@ import scala.collection.mutable
  *
  * @author Kseniya Mikhaleva
  */
-class RegularTaskManager() extends TaskManager {
+class WindowedTaskManager() extends TaskManager {
 
-  val regularInstance = instance.asInstanceOf[RegularInstance]
-  val inputs = getInputs(regularInstance.executionPlan)
+  val windowedInstance = instance.asInstanceOf[WindowedInstance]
+  val inputs = getInputs(windowedInstance.executionPlan)
   val outputProducers =  createOutputProducers()
   val outputTags = createOutputTags()
 

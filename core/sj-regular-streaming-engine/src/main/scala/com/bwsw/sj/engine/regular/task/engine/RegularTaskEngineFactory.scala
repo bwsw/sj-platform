@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.regular.task.engine
 
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, PersistentBlockingQueue, TimeCheckpointTaskEngine}
+import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
@@ -12,15 +12,12 @@ import org.slf4j.LoggerFactory
  *
  * @param manager Manager of environment of task of regular module
  * @param performanceMetrics Set of metrics that characterize performance of a regular streaming module
- * @param blockingQueue Blocking queue for keeping incoming envelopes that are serialized into a string,
- *                      which will be retrieved into a module
 
  * @author Kseniya Mikhaleva
  */
 
 class RegularTaskEngineFactory(manager: RegularTaskManager,
-                               performanceMetrics: RegularStreamingPerformanceMetrics,
-                               blockingQueue: PersistentBlockingQueue) {
+                               performanceMetrics: RegularStreamingPerformanceMetrics) {
 
   protected val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -32,10 +29,10 @@ class RegularTaskEngineFactory(manager: RegularTaskManager,
     manager.regularInstance.checkpointMode match {
       case EngineLiterals.`timeIntervalMode` =>
         logger.info(s"Task: ${manager.taskName}. Regular module has a '${EngineLiterals.timeIntervalMode}' checkpoint mode, create an appropriate task engine\n")
-        new RegularTaskEngine(manager, performanceMetrics, blockingQueue) with TimeCheckpointTaskEngine
+        new RegularTaskEngine(manager, performanceMetrics) with TimeCheckpointTaskEngine
       case EngineLiterals.`everyNthMode` =>
         logger.info(s"Task: ${manager.taskName}. Regular module has an '${EngineLiterals.everyNthMode}' checkpoint mode, create an appropriate task engine\n")
-        new RegularTaskEngine(manager, performanceMetrics, blockingQueue) with NumericalCheckpointTaskEngine
+        new RegularTaskEngine(manager, performanceMetrics) with NumericalCheckpointTaskEngine
 
     }
   }

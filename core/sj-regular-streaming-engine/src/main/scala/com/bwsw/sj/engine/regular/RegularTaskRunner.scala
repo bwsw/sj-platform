@@ -26,7 +26,7 @@ object RegularTaskRunner extends {override val threadName = "RegularTaskRunner-%
 
       val performanceMetrics: RegularStreamingPerformanceMetrics = new RegularStreamingPerformanceMetrics(manager)
 
-      val regularTaskEngineFactory = new RegularTaskEngineFactory(manager, performanceMetrics, blockingQueue)
+      val regularTaskEngineFactory = new RegularTaskEngineFactory(manager, performanceMetrics)
 
       val regularTaskEngine: RegularTaskEngine = regularTaskEngineFactory.createRegularTaskEngine()
 
