@@ -3,8 +3,17 @@ package com.bwsw.sj.mesos.framework.task
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos._
 
+/**
+  * Handler for mesos task status.
+  */
+// todo Refactor this class, to use different handler for each status.
 object StatusHandler {
   val logger = Logger.getLogger(getClass)
+
+  /**
+    * Determine type of status and restart task, if status "failed" or "error"
+    * @param status: mesos task status
+    */
 
   def handle(status: TaskStatus) = {
     logger.debug(s"STATUS UPDATE")

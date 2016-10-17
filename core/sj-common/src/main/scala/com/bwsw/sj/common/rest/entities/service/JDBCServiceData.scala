@@ -10,8 +10,8 @@ class JDBCServiceData() extends ServiceData() {
   serviceType = ServiceLiterals.jdbcType
   var namespace: String = null
   var provider: String = null
-  var login: String = null
-  var password: String = null
+  var driver: String = null
+  var databaseName: String = null
 
   override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService
@@ -19,8 +19,8 @@ class JDBCServiceData() extends ServiceData() {
     super.fillModelService(modelService)
     modelService.provider = providerDAO.get(this.provider).get
     modelService.namespace = this.namespace
-    modelService.login = this.login
-    modelService.password = this.password
+    modelService.driver = this.driver
+    modelService.databaseName = this.databaseName
 
     modelService
   }

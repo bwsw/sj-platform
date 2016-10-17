@@ -7,5 +7,5 @@ package com.bwsw.sj.engine.core.entities
  */
 
 class JdbcEnvelope extends Envelope {
-
+  streamType = "jdbc-output"
 }

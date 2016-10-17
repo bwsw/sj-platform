@@ -40,7 +40,7 @@ class PersistentBlockingQueue(path: String) {
    * @param idle Timeout of waiting
    * @return Some received message or None
    */
-  def get(idle: Long) = {
+  def get(idle: Long): Option[String] = {
     logger.info(s"Get next message from queue\n")
     mutex.lock()
     var data = reader.readText()
