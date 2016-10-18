@@ -5,7 +5,7 @@ import java.util.jar.JarFile
 
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.common.traits.Serializer
-import com.bwsw.common.{ElasticsearchClient, JsonSerializer, ObjectSerializer}
+import com.bwsw.common.{ElasticsearchClient, JdbcClientConnectionData, JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.{ESService, Generator, _}
 import com.bwsw.sj.common.DAL.model.module.{OutputInstance, Task}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
@@ -45,9 +45,9 @@ object BenchmarkDataFactory {
   val esServiceName: String = "test-esserv-1"
   val esStreamName: String = "test-es-1"
 
-  val sqldbProviderName: String = "test-sqlprov-1"
-  val sqldbServiceName: String = "test-sqlserv-1"
-  val sqldbStreamName: String = "test-sqlstr-1"
+  val jdbcProviderName: String = "test-jdbcprov-1"
+  val jdbcServiceName: String = "test-jdbcserv-1"
+  val jdbcStreamName: String = "test-jdbcstr-1"
 
   val zkServiceName: String = "test-zkserv-1"
 
@@ -66,7 +66,7 @@ object BenchmarkDataFactory {
   private val esProviderHosts = System.getenv("ES_HOSTS").split(",").map(host => host.trim)
   private val cassandraHosts = System.getenv("CASSANDRA_HOSTS").split(",").map(host => host.trim)
   private val dataProviderHosts = System.getenv("AEROSPIKE_HOSTS").split(",").map(host => host.trim)
-  private val sqldbProvideHosts = System.getenv("SQLDB_HOSTS").split(",").map(host => host.trim)
+  private val jdbcHosts = System.getenv("JDBC_HOSTS").split(",").map(host => host.trim)
   private val zookeeperHosts = System.getenv("ZOOKEEPER_HOSTS").split(",").map(host => host.trim)
 
   private val cassandraFactory = new CassandraFactory()
@@ -150,7 +150,7 @@ object BenchmarkDataFactory {
     }
   }
 
-  def openDbConnection(outputStream: SjStream) = {
+  def openEsConnection(outputStream: SjStream) = {
     val esService: ESService = outputStream.service.asInstanceOf[ESService]
     val hosts = esService.provider.hosts.map { host =>
       val parts = host.split(":")
@@ -161,9 +161,15 @@ object BenchmarkDataFactory {
     (client, esService)
   }
 
+  def openJdbcConnection(outputStream: SjStream) = {
+    val jdbcService: JDBCService = outputStream.service.asInstanceOf[JDBCService]
+    val hosts = jdbcService.provider.hosts
+    val client = new JdbcClientConnectionData()
+  }
+
   def clearEsStream() = {
     val stream = streamService.get(esStreamName).get.asInstanceOf[ESSjStream]
-    val (client, service) = openDbConnection(stream)
+    val (client, service) = openEsConnection(stream)
     var outputData: Option[SearchHits] = None
     try {outputData = Some(client.search(service.index, stream.name))}
     catch {case _:Exception => }
@@ -263,16 +269,17 @@ object BenchmarkDataFactory {
     lockProvider.password = ""
     providerService.save(lockProvider)
 
-    val sqldbProvider = new Provider()
-    sqldbProvider.name = sqldbProviderName
-    sqldbProvider.hosts = sqldbProvideHosts
-    sqldbProvider.providerType = ProviderLiterals.jdbcType
-    sqldbProvider.login = ""
-    sqldbProvider.password = ""
-    providerService.save(sqldbProvider)
+    val jdbcProvider = new Provider()
+    jdbcProvider.name = jdbcProviderName
+    jdbcProvider.hosts = jdbcHosts
+    jdbcProvider.providerType = ProviderLiterals.jdbcType
+    jdbcProvider.login = ""
+    jdbcProvider.password = ""
+    providerService.save(jdbcProvider)
   }
 
   def createServices() = {
+
     val esProv: Provider = providerService.get(esProviderName).get
     val esService: ESService = new ESService()
     esService.name = esServiceName
@@ -283,6 +290,7 @@ object BenchmarkDataFactory {
     esService.login = ""
     esService.password = ""
     serviceManager.save(esService)
+
 
     val metadataProvider: Provider = providerService.get(metadataProviderName).get
     val dataProvider: Provider = providerService.get(dataProviderName).get
@@ -307,12 +315,23 @@ object BenchmarkDataFactory {
     zkService.namespace = "bench"
     serviceManager.save(zkService)
 
-    // todo val sqlService =
+    val jdbcProvider: Provider = providerService.get(jdbcProviderName).get
+    val jdbcService = new JDBCService()
+    jdbcService.name = jdbcServiceName
+    jdbcService.driver = "postgresql"
+    jdbcService.description = "jdbc service for benchmark"
+    jdbcService.provider = jdbcProvider
+    jdbcService.database = indexName
+
+  }
+
+  def createTable() = {
+    val stream = streamService.get(esStreamName)
   }
 
   def createIndex() = {
     val stream = streamService.get(esStreamName).get.asInstanceOf[ESSjStream]
-    val esClient = openDbConnection(stream)
+    val esClient = openEsConnection(stream)
     esClient._1.createIndex(indexName)
   }
 
@@ -336,6 +355,9 @@ object BenchmarkDataFactory {
     tStream.partitions = partitions
     tStream.generator = new Generator(GeneratorLiterals.localType)
     streamService.save(tStream)
+
+    // todo val jdbcStream: JDBCSjStream = new JDBCSjStream()
+
 
     val metadataHosts = splitHosts(tService.metadataProvider.hosts)
     val cassandraFactory = new CassandraFactory()

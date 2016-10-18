@@ -11,18 +11,18 @@ import org.mongodb.morphia.annotations.Reference
 class JDBCService() extends Service {
   serviceType = ServiceLiterals.jdbcType
   @Reference var provider: Provider = null
-  var namespace: String = null
   var driver: String = null
-  var databaseName: String = null
 
-  def this(name: String, serviceType: String, description: String, provider: Provider, namespace: String, driver: String, databaseName: String) = {
+  var database: String = null
+
+  def this(name: String, serviceType: String, description: String, provider: Provider, driver: String, database: String) = {
     this
     this.name = name
     this.serviceType = serviceType
     this.description = description
     this.provider = provider
     this.driver = driver
-    this.databaseName = databaseName
+    this.database = database
   }
 
   override def asProtocolService(): ServiceData = {
