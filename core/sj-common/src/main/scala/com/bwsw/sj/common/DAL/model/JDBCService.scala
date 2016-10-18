@@ -11,6 +11,7 @@ import org.mongodb.morphia.annotations.Reference
 class JDBCService() extends Service {
   serviceType = ServiceLiterals.jdbcType
   @Reference var provider: Provider = null
+  var namespace: String = null
   var driver: String = null
   var databaseName: String = null
 

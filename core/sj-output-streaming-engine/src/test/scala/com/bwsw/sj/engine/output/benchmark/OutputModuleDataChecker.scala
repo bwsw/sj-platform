@@ -16,8 +16,9 @@ import scala.collection.mutable.ArrayBuffer
 object OutputModuleDataChecker extends App {
 
   val streamService: GenericMongoService[SjStream] = ConnectionRepository.getStreamService
-  val tStream: TStreamSjStream = streamService.get(tStreamName).asInstanceOf[TStreamSjStream]
+  val tStream: TStreamSjStream = streamService.get(tStreamName).get.asInstanceOf[TStreamSjStream]
   val inputConsumer = createConsumer(tStream)
+  inputConsumer.start()
 
   val inputElements = new ArrayBuffer[Int]()
   val partitions = inputConsumer.getPartitions().toIterator
@@ -35,7 +36,7 @@ object OutputModuleDataChecker extends App {
     }
   }
 
-  val esStream: ESSjStream = streamService.get(esStreamName).asInstanceOf[ESSjStream]
+  val esStream: ESSjStream = streamService.get(esStreamName).get.asInstanceOf[ESSjStream]
 
   val (esClient, esService) = openDbConnection(esStream)
 
@@ -49,13 +50,14 @@ object OutputModuleDataChecker extends App {
   }
 
   assert(inputElements.size == outputElements.size,
-    "Count of all txns elements that are consumed from output stream should equals count of all txns elements that are consumed from input stream")
+    s"Count of all txns elements that are consumed from output stream (${outputElements.size}) should equals count of all txns elements that are consumed from input stream (${inputElements.size})")
 
   assert(inputElements.forall(x => outputElements.contains(x)) && outputElements.forall(x => inputElements.contains(x)),
     "All txns elements that are consumed from output stream should equals all txns elements that are consumed from input stream")
 
   esClient.close()
   ConnectionRepository.close()
+  inputConsumer.stop()
 
   println("DONE")
 

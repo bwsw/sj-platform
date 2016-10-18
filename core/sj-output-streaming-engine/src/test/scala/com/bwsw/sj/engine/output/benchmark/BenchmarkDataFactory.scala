@@ -6,7 +6,7 @@ import java.util.jar.JarFile
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.common.traits.Serializer
 import com.bwsw.common.{ElasticsearchClient, JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.model.{ESService, Generator, _}
 import com.bwsw.sj.common.DAL.model.module.{OutputInstance, Task}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
@@ -19,6 +19,7 @@ import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
 import com.bwsw.tstreams.generator.LocalTransactionGenerator
 import com.bwsw.tstreams.services.BasicStreamService
+import org.elasticsearch.search.SearchHits
 
 import scala.collection.JavaConverters._
 
@@ -28,6 +29,9 @@ import scala.collection.JavaConverters._
  * @author Kseniya Tomskikh
  */
 object BenchmarkDataFactory {
+
+
+
   val metadataProviderName: String = "test-metprov-1"
   val metadataNamespace: String = "bench"
   val dataProviderName: String = "test-dataprov-1"
@@ -41,7 +45,13 @@ object BenchmarkDataFactory {
   val esServiceName: String = "test-esserv-1"
   val esStreamName: String = "test-es-1"
 
+  val sqldbProviderName: String = "test-sqlprov-1"
+  val sqldbServiceName: String = "test-sqlserv-1"
+  val sqldbStreamName: String = "test-sqlstr-1"
+
   val zkServiceName: String = "test-zkserv-1"
+
+  val indexName: String = "bench"
 
   val streamService = ConnectionRepository.getStreamService
   val serviceManager = ConnectionRepository.getServiceManager
@@ -52,17 +62,31 @@ object BenchmarkDataFactory {
 
   val objectSerializer = new ObjectSerializer()
   private val serializer: Serializer = new JsonSerializer
-  private val cassandraHost = System.getenv("CASSANDRA_HOST")
-  private val cassandraPort = System.getenv("CASSANDRA_PORT").toInt
+
+  private val esProviderHosts = System.getenv("ES_HOSTS").split(",").map(host => host.trim)
+  private val cassandraHosts = System.getenv("CASSANDRA_HOSTS").split(",").map(host => host.trim)
+  private val dataProviderHosts = System.getenv("AEROSPIKE_HOSTS").split(",").map(host => host.trim)
+  private val sqldbProvideHosts = System.getenv("SQLDB_HOSTS").split(",").map(host => host.trim)
+  private val zookeeperHosts = System.getenv("ZOOKEEPER_HOSTS").split(",").map(host => host.trim)
+
   private val cassandraFactory = new CassandraFactory()
+
+  private val cassandraTestKeyspace = "test_keyspace_for_regular_engine"
+  private val cassandraProvider = new Provider("cassandra-test-provider", "cassandra provider", cassandraHosts, "", "", ProviderLiterals.cassandraType)
+  private val zookeeperProvider = new Provider("zookeeper-test-provider", "zookeeper provider", zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
+  private val tstrqService = new TStreamService("test-tserv-1", ServiceLiterals.tstreamsType, "tstream test service",
+    cassandraProvider, cassandraTestKeyspace, cassandraProvider, cassandraTestKeyspace, zookeeperProvider, "unit")
   private val tstreamFactory = new TStreamsFactory()
+
+
+
+
   setTStreamFactoryProperties()
 
   private def setTStreamFactoryProperties() = {
-    val inputStreamService = serviceManager.get(tServiceName).get.asInstanceOf[TStreamService]
-    setMetadataClusterProperties(inputStreamService)
-    setDataClusterProperties(inputStreamService)
-    setCoordinationOptions(inputStreamService)
+    setMetadataClusterProperties(tstrqService)
+    setDataClusterProperties(tstrqService)
+    setCoordinationOptions(tstrqService)
     setBindHostForAgents()
   }
 
@@ -99,7 +123,7 @@ object BenchmarkDataFactory {
   }
 
   def createData(countTxns: Int, countElements: Int) = {
-    val tStream: TStreamSjStream = streamService.get(tStreamName).asInstanceOf[TStreamSjStream]
+    val tStream: TStreamSjStream = new TStreamSjStream(tStreamName, "", 4, tstrqService, "stream.t-stream", Array("tag"), new Generator())
     val producer = createProducer(tStream)
     val s = System.currentTimeMillis()
     writeData(countTxns,
@@ -138,15 +162,19 @@ object BenchmarkDataFactory {
   }
 
   def clearEsStream() = {
-    val stream = streamService.get(esStreamName).asInstanceOf[ESSjStream]
+    val stream = streamService.get(esStreamName).get.asInstanceOf[ESSjStream]
     val (client, service) = openDbConnection(stream)
-    val outputData = client.search(service.index, stream.name)
+    var outputData: Option[SearchHits] = None
+    try {outputData = Some(client.search(service.index, stream.name))}
+    catch {case _:Exception => }
 
-    outputData.getHits.foreach { hit =>
-      val id = hit.getId
-      client.deleteDocumentByTypeAndId(service.index, stream.name, id)
+    if (outputData.isDefined) {
+      outputData.get.getHits.foreach { hit =>
+        val id = hit.getId
+        client.deleteDocumentByTypeAndId(service.index, stream.name, id)
+      }
+      client.deleteIndex(indexName)
     }
-
     client.close()
   }
 
@@ -186,7 +214,7 @@ object BenchmarkDataFactory {
     tstreamFactory.setProperty(TSF_Dictionary.Stream.DESCRIPTION, stream.description)
   }
 
-  def open() = cassandraFactory.open(Set((cassandraHost, cassandraPort)))
+  def open() = cassandraFactory.open(splitHosts(cassandraHosts))
 
   def prepareCassandra(keyspace: String) = {
     cassandraFactory.createKeyspace(keyspace)
@@ -199,10 +227,13 @@ object BenchmarkDataFactory {
     tstreamFactory.close()
   }
 
+
+
+
   def createProviders() = {
     val esProvider = new Provider()
     esProvider.name = esProviderName
-    esProvider.hosts = Array("127.0.0.1:9300")
+    esProvider.hosts = esProviderHosts
     esProvider.providerType = ProviderLiterals.elasticsearchType
     esProvider.login = ""
     esProvider.password = ""
@@ -210,7 +241,7 @@ object BenchmarkDataFactory {
 
     val metadataProvider = new Provider()
     metadataProvider.name = metadataProviderName
-    metadataProvider.hosts = Array("127.0.0.1:9042")
+    metadataProvider.hosts = cassandraHosts
     metadataProvider.providerType = ProviderLiterals.cassandraType
     metadataProvider.login = ""
     metadataProvider.password = ""
@@ -218,7 +249,7 @@ object BenchmarkDataFactory {
 
     val dataProvider = new Provider()
     dataProvider.name = dataProviderName
-    dataProvider.hosts = Array("127.0.0.1:3000", "127.0.0.1:3001")
+    dataProvider.hosts = dataProviderHosts
     dataProvider.providerType = ProviderLiterals.aerospikeType
     dataProvider.login = ""
     dataProvider.password = ""
@@ -226,11 +257,19 @@ object BenchmarkDataFactory {
 
     val lockProvider = new Provider()
     lockProvider.name = lockProviderName
-    lockProvider.hosts = Array("127.0.0.1:2181")
+    lockProvider.hosts = zookeeperHosts
     lockProvider.providerType = ProviderLiterals.zookeeperType
     lockProvider.login = ""
     lockProvider.password = ""
     providerService.save(lockProvider)
+
+    val sqldbProvider = new Provider()
+    sqldbProvider.name = sqldbProviderName
+    sqldbProvider.hosts = sqldbProvideHosts
+    sqldbProvider.providerType = ProviderLiterals.jdbcType
+    sqldbProvider.login = ""
+    sqldbProvider.password = ""
+    providerService.save(sqldbProvider)
   }
 
   def createServices() = {
@@ -240,7 +279,7 @@ object BenchmarkDataFactory {
     esService.serviceType = ServiceLiterals.elasticsearchType
     esService.description = "es service for benchmarks"
     esService.provider = esProv
-    esService.index = "bench"
+    esService.index = indexName
     esService.login = ""
     esService.password = ""
     serviceManager.save(esService)
@@ -267,10 +306,18 @@ object BenchmarkDataFactory {
     zkService.provider = lockProvider
     zkService.namespace = "bench"
     serviceManager.save(zkService)
+
+    // todo val sqlService =
+  }
+
+  def createIndex() = {
+    val stream = streamService.get(esStreamName).get.asInstanceOf[ESSjStream]
+    val esClient = openDbConnection(stream)
+    esClient._1.createIndex(indexName)
   }
 
   def createStreams(partitions: Int) = {
-    val esService: ESService = serviceManager.get(esServiceName).asInstanceOf[ESService]
+     val esService = serviceManager.get(esServiceName).get.asInstanceOf[ESService]
     val esStream: ESSjStream = new ESSjStream()
     esStream.name = esStreamName
     esStream.description = "es stream for benchmarks"
@@ -279,7 +326,7 @@ object BenchmarkDataFactory {
     esStream.tags = Array("tag1")
     streamService.save(esStream)
 
-    val tService: TStreamService = serviceManager.get(tServiceName).asInstanceOf[TStreamService]
+    val tService: TStreamService = serviceManager.get(tServiceName).get.asInstanceOf[TStreamService]
     val tStream: TStreamSjStream = new TStreamSjStream()
     tStream.name = tStreamName
     tStream.description = "t-stream for benchmarks"
@@ -336,7 +383,7 @@ object BenchmarkDataFactory {
     instance.performanceReportingInterval = 10000
     instance.executionPlan = executionPlan
     instance.engine = "com.bwsw.output.streaming.engine-1.0"
-    instance.coordinationService = serviceManager.get(zkServiceName).asInstanceOf[ZKService]
+    instance.coordinationService = serviceManager.get(zkServiceName).get.asInstanceOf[ZKService]
 
     instanceService.save(instance)
   }

@@ -18,7 +18,8 @@ object BenchmarkDataPrepare extends App {
   val checkpointMode = EngineLiterals.everyNthMode
   val partitions = 4
 
-  val module = new File(getClass.getClassLoader.getResource("sj-stub-output-bench-test.jar").getPath)
+  val module = new File("./contrib/stubs/sj-stub-output/target/scala-2.11/sj-stub-output-1.0-SNAPSHOT.jar")
+
   println("module upload")
   uploadModule(module)
   open()
@@ -32,6 +33,9 @@ object BenchmarkDataPrepare extends App {
   createStreams(partitions)
   println("create instance")
   createInstance(instanceName, checkpointMode, checkpointInterval)
+
+  println
+  createIndex()
 
   println("create test data")
   createData(50, 20)

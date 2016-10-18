@@ -13,7 +13,7 @@ import com.bwsw.sj.engine.output.benchmark.BenchmarkDataFactory._
 object BenchmarkDestroyer extends App {
   open()
   val instanceName: String = "test-bench-instance"
-  val module = new File(getClass.getClassLoader.getResource("sj-stub-output-bench-test.jar").getPath)
+  val module = new File("./contrib/stubs/sj-stub-output/target/scala-2.11/sj-stub-output-1.0-SNAPSHOT.jar")
 
   clearEsStream()
   deleteStreams()
