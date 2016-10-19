@@ -47,7 +47,7 @@ object BenchmarkDataFactory {
 
   val jdbcProviderName: String = "test-jdbcprov-1"
   val jdbcServiceName: String = "test-jdbcserv-1"
-  val jdbcStreamName: String = "test-jdbcstr-1"
+  val jdbcStreamName: String = "testjdbcstr1"
   val jdbcDriver: String = "postgresql"
 
   val zkServiceName: String = "test-zkserv-1"
@@ -165,30 +165,49 @@ object BenchmarkDataFactory {
 
   def openJdbcConnection(outputStream: SjStream) = {
     val jdbcService: JDBCService = outputStream.service.asInstanceOf[JDBCService]
-    val hosts = jdbcService.provider.hosts
     val client = JdbcClientBuilder.
-      setHosts(hosts).
+      setHosts(jdbcService.provider.hosts).
       setDriver(jdbcDriver).
+      setUsername(jdbcService.provider.login).
+      setPassword(jdbcService.provider.password).
+      setDatabase(jdbcService.database).
+      setTable(outputStream.name).
       build()
 
     (client, jdbcService)
   }
 
   def clearEsStream() = {
-    val stream = streamService.get(esStreamName).get.asInstanceOf[ESSjStream]
-    val (client, service) = openEsConnection(stream)
-    var outputData: Option[SearchHits] = None
-    try {outputData = Some(client.search(service.index, stream.name))}
-    catch {case _:Exception => }
-
-    if (outputData.isDefined) {
-      outputData.get.getHits.foreach { hit =>
-        val id = hit.getId
-        client.deleteDocumentByTypeAndId(service.index, stream.name, id)
+    if (streamService.get(esStreamName).isDefined) {
+      val stream = streamService.get(esStreamName).get.asInstanceOf[ESSjStream]
+      val (client, service) = openEsConnection(stream)
+      var outputData: Option[SearchHits] = None
+      try {
+        outputData = Some(client.search(service.index, stream.name))
       }
-      client.deleteIndex(indexName)
+      catch {
+        case _: Exception =>
+      }
+
+      if (outputData.isDefined) {
+        outputData.get.getHits.foreach { hit =>
+          val id = hit.getId
+          client.deleteDocumentByTypeAndId(service.index, stream.name, id)
+        }
+        client.deleteIndex(indexName)
+      }
+      client.close()
     }
-    client.close()
+  }
+
+  def clearDatabase() = {
+    if (streamService.get(jdbcStreamName).isDefined) {
+      val stream = streamService.get(jdbcStreamName).get.asInstanceOf[JDBCSjStream]
+      val client = openJdbcConnection(stream)
+      val sql = s"DROP TABLE $jdbcStreamName"
+      client._1.execute(sql)
+      client._1.close()
+    }
   }
 
   def createProducer(stream: TStreamSjStream) = {
@@ -235,24 +254,13 @@ object BenchmarkDataFactory {
     cassandraFactory.createDataTable(keyspace)
   }
 
-  // todo
-  def prepareDatabase() = {
-    val stream = streamService.get(jdbcStreamName).get.asInstanceOf[JDBCSjStream]
-    val client = openJdbcConnection(stream)
-    client._1.execute(create_database)
-  }
-
   def create_table: String = {
-    "CREATE TABLE REGISTRATION " +
+    s"CREATE TABLE $jdbcStreamName " +
     "(id INTEGER not NULL, " +
     " first VARCHAR(255), " +
     " last VARCHAR(255), " +
     " age INTEGER, " +
     " PRIMARY KEY ( id ))"
-  }
-
-  def create_database: String = {
-    "CREATE DATABASE testdbcc"
   }
 
   def close() = {
@@ -300,8 +308,8 @@ object BenchmarkDataFactory {
     jdbcProvider.name = jdbcProviderName
     jdbcProvider.hosts = jdbcHosts
     jdbcProvider.providerType = ProviderLiterals.jdbcType
-    jdbcProvider.login = ""
-    jdbcProvider.password = ""
+    jdbcProvider.login = "root"
+    jdbcProvider.password = "root"
     providerService.save(jdbcProvider)
   }
 
@@ -349,6 +357,7 @@ object BenchmarkDataFactory {
     jdbcService.description = "jdbc service for benchmark"
     jdbcService.provider = jdbcProvider
     jdbcService.database = databaseName
+    serviceManager.save(jdbcService)
   }
 
   def createIndex() = {
@@ -358,7 +367,7 @@ object BenchmarkDataFactory {
   }
 
   def createTable() = {
-    val stream = streamService.get(esStreamName).get.asInstanceOf[JDBCSjStream]
+    val stream = streamService.get(jdbcStreamName).get.asInstanceOf[JDBCSjStream]
     val client = openJdbcConnection(stream)
     client._1.execute(create_table)
   }
@@ -403,11 +412,11 @@ object BenchmarkDataFactory {
     val dataHosts = splitHosts(tService.dataProvider.hosts)
     val dataStorage = aerospikeFactory.getDataStorage(namespace, dataHosts)
 
-    BasicStreamService.createStream(tStreamName,
-      partitions,
-      60000,
-      "", metadataStorage,
-      dataStorage)
+//    BasicStreamService.createStream(tStreamName,
+//      partitions,
+//      60000,
+//      "", metadataStorage,
+//      dataStorage)
 
     cassandraFactory.close()
   }

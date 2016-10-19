@@ -8,7 +8,7 @@ import scala.collection.mutable.ArrayBuffer
 
 class JDBCServiceData() extends ServiceData() {
   serviceType = ServiceLiterals.jdbcType
-  var namespace: String = null
+//  var namespace: String = null
   var provider: String = null
   var driver: String = null
   var databaseName: String = null
@@ -18,9 +18,9 @@ class JDBCServiceData() extends ServiceData() {
     val modelService = new JDBCService()
     super.fillModelService(modelService)
     modelService.provider = providerDAO.get(this.provider).get
-    modelService.namespace = this.namespace
+//    modelService.namespace = this.namespace
     modelService.driver = this.driver
-    modelService.databaseName = this.databaseName
+    modelService.database = this.databaseName
 
     modelService
   }
@@ -32,22 +32,22 @@ class JDBCServiceData() extends ServiceData() {
 
     // 'provider' field
     errors ++= validateProvider(this.provider, this.serviceType)
-
-    // 'namespace'
-    Option(this.namespace) match {
-      case None =>
-        errors += "'Namespace' is required"
-      case Some(x) =>
-        if (x.isEmpty) {
-          errors += s"'Namespace' is required"
-        }
-        else {
-          if (!validateNamespace(x)) {
-            errors += s"Service has incorrect 'namespace': '$x'. " +
-              s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
-          }
-        }
-    }
+    // todo
+//    // 'namespace'
+//    Option(this.namespace) match {
+//      case None =>
+//        errors += "'Namespace' is required"
+//      case Some(x) =>
+//        if (x.isEmpty) {
+//          errors += s"'Namespace' is required"
+//        }
+//        else {
+//          if (!validateNamespace(x)) {
+//            errors += s"Service has incorrect 'namespace': '$x'. " +
+//              s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+//          }
+//        }
+//    }
 
     errors
   }

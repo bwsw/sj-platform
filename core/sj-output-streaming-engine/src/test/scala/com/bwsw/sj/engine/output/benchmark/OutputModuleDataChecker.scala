@@ -38,7 +38,7 @@ object OutputModuleDataChecker extends App {
 
   val esStream: ESSjStream = streamService.get(esStreamName).get.asInstanceOf[ESSjStream]
 
-  val (esClient, esService) = openDbConnection(esStream)
+  val (esClient, esService) = openEsConnection(esStream)
 
   val outputData = esClient.search(esService.index, esStream.name)
 

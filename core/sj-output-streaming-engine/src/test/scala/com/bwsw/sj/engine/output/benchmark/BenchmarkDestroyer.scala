@@ -16,6 +16,7 @@ object BenchmarkDestroyer extends App {
   val module = new File("./contrib/stubs/sj-stub-output/target/scala-2.11/sj-stub-output-1.0-SNAPSHOT.jar")
 
   clearEsStream()
+  clearDatabase()
   deleteStreams()
   deleteServices()
   deleteProviders()

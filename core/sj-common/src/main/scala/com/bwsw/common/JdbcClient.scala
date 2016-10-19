@@ -71,6 +71,10 @@ protected class JdbcClient (private var jdbcCCD: JdbcClientConnectionData) {
   private def createDatatable(data: Object): Unit = {
   }
 
+  def close() = {
+    connection.close()
+  }
+
 }
 
 /**
@@ -81,7 +85,7 @@ class JdbcClientConnectionData {
   var driver: String = _
   var username: String = _
   var password: String = _
-  var database: String = _
+  var database: String = ""
   var table: String = _
 
   /**
