@@ -5,7 +5,7 @@ import java.util.jar.JarFile
 
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.common.traits.Serializer
-import com.bwsw.common.{ElasticsearchClient, JdbcClientConnectionData, JsonSerializer, ObjectSerializer}
+import com.bwsw.common._
 import com.bwsw.sj.common.DAL.model.{ESService, Generator, _}
 import com.bwsw.sj.common.DAL.model.module.{OutputInstance, Task}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
@@ -48,10 +48,12 @@ object BenchmarkDataFactory {
   val jdbcProviderName: String = "test-jdbcprov-1"
   val jdbcServiceName: String = "test-jdbcserv-1"
   val jdbcStreamName: String = "test-jdbcstr-1"
+  val jdbcDriver: String = "postgresql"
 
   val zkServiceName: String = "test-zkserv-1"
 
   val indexName: String = "bench"
+  val databaseName: String = "test"
 
   val streamService = ConnectionRepository.getStreamService
   val serviceManager = ConnectionRepository.getServiceManager
@@ -164,7 +166,12 @@ object BenchmarkDataFactory {
   def openJdbcConnection(outputStream: SjStream) = {
     val jdbcService: JDBCService = outputStream.service.asInstanceOf[JDBCService]
     val hosts = jdbcService.provider.hosts
-    val client = new JdbcClientConnectionData()
+    val client = JdbcClientBuilder.
+      setHosts(hosts).
+      setDriver(jdbcDriver).
+      build()
+
+    (client, jdbcService)
   }
 
   def clearEsStream() = {
@@ -226,6 +233,26 @@ object BenchmarkDataFactory {
     cassandraFactory.createKeyspace(keyspace)
     cassandraFactory.createMetadataTables(keyspace)
     cassandraFactory.createDataTable(keyspace)
+  }
+
+  // todo
+  def prepareDatabase() = {
+    val stream = streamService.get(jdbcStreamName).get.asInstanceOf[JDBCSjStream]
+    val client = openJdbcConnection(stream)
+    client._1.execute(create_database)
+  }
+
+  def create_table: String = {
+    "CREATE TABLE REGISTRATION " +
+    "(id INTEGER not NULL, " +
+    " first VARCHAR(255), " +
+    " last VARCHAR(255), " +
+    " age INTEGER, " +
+    " PRIMARY KEY ( id ))"
+  }
+
+  def create_database: String = {
+    "CREATE DATABASE testdbcc"
   }
 
   def close() = {
@@ -318,21 +345,22 @@ object BenchmarkDataFactory {
     val jdbcProvider: Provider = providerService.get(jdbcProviderName).get
     val jdbcService = new JDBCService()
     jdbcService.name = jdbcServiceName
-    jdbcService.driver = "postgresql"
+    jdbcService.driver = jdbcDriver
     jdbcService.description = "jdbc service for benchmark"
     jdbcService.provider = jdbcProvider
-    jdbcService.database = indexName
-
-  }
-
-  def createTable() = {
-    val stream = streamService.get(esStreamName)
+    jdbcService.database = databaseName
   }
 
   def createIndex() = {
     val stream = streamService.get(esStreamName).get.asInstanceOf[ESSjStream]
     val esClient = openEsConnection(stream)
     esClient._1.createIndex(indexName)
+  }
+
+  def createTable() = {
+    val stream = streamService.get(esStreamName).get.asInstanceOf[JDBCSjStream]
+    val client = openJdbcConnection(stream)
+    client._1.execute(create_table)
   }
 
   def createStreams(partitions: Int) = {
@@ -356,8 +384,14 @@ object BenchmarkDataFactory {
     tStream.generator = new Generator(GeneratorLiterals.localType)
     streamService.save(tStream)
 
-    // todo val jdbcStream: JDBCSjStream = new JDBCSjStream()
-
+    val jdbcService: JDBCService = serviceManager.get(jdbcServiceName).get.asInstanceOf[JDBCService]
+    val jdbcStream: JDBCSjStream = new JDBCSjStream()
+    jdbcStream.name = jdbcStreamName
+    jdbcStream.description = "jdbc stream for benchmarks"
+    jdbcStream.streamType = "jdbc-output"
+    jdbcStream.service = jdbcService
+    jdbcStream.tags = Array("tag1")
+    streamService.save(jdbcStream)
 
     val metadataHosts = splitHosts(tService.metadataProvider.hosts)
     val cassandraFactory = new CassandraFactory()
@@ -417,12 +451,14 @@ object BenchmarkDataFactory {
   def deleteStreams() = {
     streamService.delete(esStreamName)
     streamService.delete(tStreamName)
+    streamService.delete(jdbcStreamName)
   }
 
   def deleteServices() = {
     serviceManager.delete(esServiceName)
     serviceManager.delete(tServiceName)
     serviceManager.delete(zkServiceName)
+    serviceManager.delete(jdbcServiceName)
   }
 
   def deleteProviders() = {
@@ -430,6 +466,7 @@ object BenchmarkDataFactory {
     providerService.delete(metadataProviderName)
     providerService.delete(lockProviderName)
     providerService.delete(esProviderName)
+    providerService.delete(jdbcProviderName)
   }
 
   def cassandraDestroy(keyspace: String) = {

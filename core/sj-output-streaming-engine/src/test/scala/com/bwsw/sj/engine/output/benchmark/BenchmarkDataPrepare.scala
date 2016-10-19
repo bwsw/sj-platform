@@ -25,6 +25,8 @@ object BenchmarkDataPrepare extends App {
   open()
   println("cassandra prepare")
   prepareCassandra("bench")
+  println("database prepare")
+  prepareDatabase()
   println("create providers")
   createProviders()
   println("create services")
@@ -36,6 +38,7 @@ object BenchmarkDataPrepare extends App {
 
   println
   createIndex()
+  createTable()
 
   println("create test data")
   createData(50, 20)

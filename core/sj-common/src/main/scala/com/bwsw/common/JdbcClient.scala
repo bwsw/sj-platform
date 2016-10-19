@@ -31,19 +31,22 @@ protected class JdbcClient (private var jdbcCCD: JdbcClientConnectionData) {
 
   def isConnected: Boolean = _connection.isDefined
 
+  def execute(sql: String) = {
+    val stmt = connection.createStatement()
+    try stmt.executeUpdate(sql) catch {case e:Exception => throw new SQLException(e.getMessage)}
+  }
+
+  private def prepareObject(data: Object): String = {
+    val attrs = getObjectAttributes(data)
+    val columns = attrs.map(a => a._1).mkString(", ")
+    val values = attrs.map(a => a._3.toString.mkString("'","","'")).mkString(", ")
+    s"INSERT INTO ${jdbcCCD.table} ($columns) VALUES ($values);"
+  }
+
   def write(data: Object) = {
     createDatatable(data)
     if (!checkTableExists()) {throw new RuntimeException("There is no table in database")}
-
-    val attrs = getObjectAttributes(data)
-
-    val columns = attrs.map(a => a._1).mkString(", ")
-    val values = attrs.map(a => a._3.toString.mkString("'","","'")).mkString(", ")
-    val sql = s"INSERT INTO ${jdbcCCD.table} ($columns) VALUES ($values);"
-
-    val stmt = connection.createStatement()
-    try stmt.executeUpdate(sql) catch {case e:Exception => throw new SQLException(e.getMessage)}
-
+    execute(prepareObject(data))
   }
 
   private def checkTableExists(): Boolean = {
