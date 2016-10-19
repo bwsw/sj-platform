@@ -8,7 +8,7 @@ import com.bwsw.sj.engine.windowed.task.WindowedTaskManager
 import scala.collection.mutable
 
 /**
- * Class represents a set of metrics that characterize performance of a regular streaming module
+ * Class represents a set of metrics that characterize performance of a windowed streaming module
  *
  * @author Kseniya Mikhaleva
  */
@@ -50,7 +50,7 @@ class WindowedStreamingPerformanceMetrics(manager: WindowedTaskManager)
    * @return Constructed performance report
    */
   override def getReport(): String = {
-    logger.info(s"Start preparing a report of performance for task: ${manager.taskName} of regular module\n")
+    logger.info(s"Start preparing a report of performance for task: ${manager.taskName} of windowed module\n")
     mutex.lock()
     val numberOfInputEnvelopesPerStream = inputEnvelopesPerStream.map(x => (x._1, x._2.size))
     val numberOfOutputEnvelopesPerStream = outputEnvelopesPerStream.map(x => (x._1, x._2.size))

@@ -4,7 +4,7 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.common.utils.StreamLiterals
-import com.bwsw.sj.engine.core.environment.{RegularEnvironmentManager, EnvironmentManager, ModuleOutput}
+import com.bwsw.sj.engine.core.environment.{ModuleEnvironmentManager, EnvironmentManager, ModuleOutput}
 import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
@@ -34,7 +34,7 @@ class RegularTaskManager() extends TaskManager {
     logger.debug(s"Task: $taskName. Start loading of executor class from module jar\n")
     val executor = moduleClassLoader
       .loadClass(executorClassName)
-      .getConstructor(classOf[RegularEnvironmentManager])
+      .getConstructor(classOf[ModuleEnvironmentManager])
       .newInstance(environmentManager)
       .asInstanceOf[StreamingExecutor]
     logger.debug(s"Task: $taskName. Create instance of executor class\n")

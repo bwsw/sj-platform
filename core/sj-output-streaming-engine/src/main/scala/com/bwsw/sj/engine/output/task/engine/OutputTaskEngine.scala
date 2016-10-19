@@ -35,14 +35,14 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"output-task-${manager.taskName}-engine")
-  protected val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = LoggerFactory.getLogger(this.getClass)
   private val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(EngineLiterals.persistentBlockingQueue)
   private val esEnvelopeSerializer = new JsonSerializer()
-  protected val checkpointGroup = new CheckpointGroup()
-  protected val instance = manager.instance.asInstanceOf[OutputInstance]
+  private val checkpointGroup = new CheckpointGroup()
+  private val instance = manager.instance.asInstanceOf[OutputInstance]
   private val outputStream = getOutput()
   protected val environmentManager = createModuleEnvironmentManager()
-  protected val executor = manager.getExecutor(environmentManager).asInstanceOf[OutputStreamingExecutor]
+  private val executor = manager.getExecutor(environmentManager).asInstanceOf[OutputStreamingExecutor]
   val taskInputService = new TStreamTaskInputService(manager, blockingQueue, checkpointGroup)
   protected val isNotOnlyCustomCheckpoint: Boolean
   private val (client, esService) = openDbConnection(outputStream)

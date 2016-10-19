@@ -1,39 +1,42 @@
 package com.bwsw.sj.engine.windowed.task.engine
 
-import com.bwsw.sj.engine.core.engine.NumericalCheckpointTaskEngine
+import java.util.concurrent.ArrayBlockingQueue
+
+import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.windowed.task.WindowedTaskManager
+import com.bwsw.sj.engine.windowed.task.engine.collecting.BatchCollector
+import com.bwsw.sj.engine.windowed.task.engine.entities.Batch
 import com.bwsw.sj.engine.windowed.task.reporting.WindowedStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
 
 /**
- * Factory is in charge of creating of a task engine of regular module
+ * Factory is in charge of creating of a task engine of windowed module
  *
  *
- * @param manager Manager of environment of task of regular module
- * @param performanceMetrics Set of metrics that characterize performance of a regular streaming module
+ * @param manager Manager of environment of task of windowed module
+ * @param performanceMetrics Set of metrics that characterize performance of a windowed streaming module
 
  * @author Kseniya Mikhaleva
  */
 
 class WindowedTaskEngineFactory(manager: WindowedTaskManager,
-                               performanceMetrics: WindowedStreamingPerformanceMetrics) {
+                               performanceMetrics: WindowedStreamingPerformanceMetrics,
+                                batchQueue: ArrayBlockingQueue[Batch]) {
 
   protected val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
-   * Creates RWindowedTaskEngine is in charge of a basic execution logic of task of regular module
-   * @return Engine of regular task
+   * Creates WindowedTaskEngine is in charge of a basic execution logic of task of windowed module
+   * @return Engine of windowed task
    */
-  def createWindowedTaskEngine(): WindowedTaskEngine = {
-//    manager.windowedInstance.checkpointMode match {
-//      case EngineLiterals.`timeIntervalMode` =>
-//        logger.info(s"Task: ${manager.taskName}. Regular module has a '${EngineLiterals.timeIntervalMode}' checkpoint mode, create an appropriate task engine\n")
-//        new WindowedTaskEngine(manager, performanceMetrics) with TimeCheckpointTaskEngine
-//      case EngineLiterals.`everyNthMode` =>
-//        logger.info(s"Task: ${manager.taskName}. Regular module has an '${EngineLiterals.everyNthMode}' checkpoint mode, create an appropriate task engine\n")
-//        new WindowedTaskEngine(manager, performanceMetrics) with NumericalCheckpointTaskEngine
-//
-//    }
-    new WindowedTaskEngine(manager, performanceMetrics) with NumericalCheckpointTaskEngine
+  def createWindowedTaskEngine(): BatchCollector = {
+    manager.windowedInstance.relatedStreams.nonEmpty match {
+      case true =>
+        logger.info(s"Task: ${manager.taskName}. Regular module has a '${EngineLiterals.timeIntervalMode}' checkpoint mode, create an appropriate task engine\n")
+        new BatchCollector(manager, batchQueue, performanceMetrics)
+      case false =>
+        new BatchCollector(manager, batchQueue, performanceMetrics)
+
+    }
   }
 }

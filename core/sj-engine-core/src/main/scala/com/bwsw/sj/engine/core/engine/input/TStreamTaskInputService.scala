@@ -3,7 +3,7 @@ package com.bwsw.sj.engine.core.engine.input
 import java.util.Date
 
 import com.bwsw.sj.common.DAL.model.TStreamSjStream
-import com.bwsw.sj.common.DAL.model.module.{OutputInstance, RegularInstance}
+import com.bwsw.sj.common.DAL.model.module.{WindowedInstance, OutputInstance, RegularInstance}
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
@@ -54,10 +54,11 @@ class TStreamTaskInputService(manager: TaskManager,
     val instance = manager.instance
     val offset = instance match {
       case instance: RegularInstance => instance.startFrom
+      case instance: WindowedInstance => instance.startFrom
       case instance: OutputInstance => instance.startFrom
       case badInstance =>
         throw new TypeNotPresentException(badInstance.getClass.getName,
-          new Throwable("Instance should be or RegularInstance or OutputInstance"))
+          new Throwable("Instance type isn't supported"))
     }
 
     chooseOffset(offset)

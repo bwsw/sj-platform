@@ -3,11 +3,11 @@ package com.bwsw.sj.engine.windowed.task.engine.input
 import java.util.Properties
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.common.DAL.model.module.RegularInstance
+import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.common.DAL.model.{KafkaService, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.ConfigurationSettingsUtils._
-import com.bwsw.sj.common.utils.{EngineLiterals, ConfigLiterals, StreamLiterals, ConfigSettingsUtils}
+import com.bwsw.sj.common.utils.{ConfigLiterals, ConfigSettingsUtils, EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope}
@@ -31,7 +31,7 @@ import scala.collection.mutable
  *
  * @author Kseniya Mikhaleva
  *
- * @param manager Manager of environment of task of regular module
+ * @param manager Manager of environment of task of windowed module
  * @param blockingQueue Blocking queue for keeping incoming envelopes that are serialized into a string,
  *                      which will be retrieved into a module
  * @param checkpointGroup Group of t-stream agents that have to make a checkpoint at the same time
@@ -42,10 +42,10 @@ class KafkaTaskInputService(manager: WindowedTaskManager,
   extends TaskInputService {
 
   private val currentThread = Thread.currentThread()
-  currentThread.setName(s"regular-task-${manager.taskName}-kafka-consumer")
+  currentThread.setName(s"windowed-task-${manager.taskName}-kafka-consumer")
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val offsetSerializer = new ObjectSerializer()
-  private val regularInstance = manager.instance.asInstanceOf[RegularInstance]
+  private val windowedInstance = manager.instance.asInstanceOf[WindowedInstance]
   private val kafkaSubscriberTimeout = ConfigSettingsUtils.getKafkaSubscriberTimeout()
   private val kafkaInputs = getKafkaInputs()
   private var kafkaOffsetsStorage = mutable.Map[(String, Int), Long]()
@@ -123,7 +123,7 @@ class KafkaTaskInputService(manager: WindowedTaskManager,
   }
 
   private def chooseOffset() = {
-    regularInstance.startFrom match {
+    windowedInstance.startFrom match {
       case EngineLiterals.oldestStartMode => "earliest"
       case _ => "latest"
     }
@@ -184,7 +184,7 @@ class KafkaTaskInputService(manager: WindowedTaskManager,
 
   override def call() = {
     logger.info(s"Task name: ${manager.taskName}. " +
-      s"Run a kafka consumer for regular task in a separate thread of execution service\n")
+      s"Run a kafka consumer for windowed task in a separate thread of execution service\n")
 
     val envelopeSerializer = new JsonSerializer()
     val streamNamesToTags = kafkaInputs.map(x => (x._1.name, x._1.tags)).toMap

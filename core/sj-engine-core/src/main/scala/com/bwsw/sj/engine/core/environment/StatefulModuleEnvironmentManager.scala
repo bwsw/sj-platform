@@ -29,7 +29,7 @@ class StatefulModuleEnvironmentManager(stateStorage: StateStorage,
                                        outputTags: mutable.Map[String, (String, ModuleOutput)],
                                        moduleTimer: SjTimer,
                                        performanceMetrics: PerformanceMetrics)
-  extends RegularEnvironmentManager(options, producers, outputs, outputTags, moduleTimer, performanceMetrics) {
+  extends ModuleEnvironmentManager(options, producers, outputs, outputTags, moduleTimer, performanceMetrics) {
   /**
    * Returns specific state of module
    *

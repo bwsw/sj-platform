@@ -31,25 +31,25 @@ abstract class RegularTaskEngine(protected val manager: RegularTaskManager,
 
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"regular-task-${manager.taskName}-engine")
-  protected val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger = LoggerFactory.getLogger(this.getClass)
   private val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(EngineLiterals.persistentBlockingQueue)
-  protected val producers: Map[String, Producer[Array[Byte]]] = manager.outputProducers
-  protected val checkpointGroup = new CheckpointGroup()
-  protected val instance = manager.instance.asInstanceOf[RegularInstance]
-  protected val regularTaskEngineService = createRegularTaskEngineService()
+  private val producers: Map[String, Producer[Array[Byte]]] = manager.outputProducers
+  private val checkpointGroup = new CheckpointGroup()
+  private val instance = manager.instance.asInstanceOf[RegularInstance]
+  private val regularTaskEngineService = createRegularTaskEngineService()
   protected val environmentManager = regularTaskEngineService.regularEnvironmentManager
-  protected val executor = regularTaskEngineService.executor
+  private val executor = regularTaskEngineService.executor
   private val moduleTimer = regularTaskEngineService.moduleTimer
-  protected val outputTags = regularTaskEngineService.outputTags
+  private val outputTags = regularTaskEngineService.outputTags
   private val regularTaskInputServiceFactory = new RegularTaskInputServiceFactory(manager, blockingQueue, checkpointGroup)
   val taskInputService = regularTaskInputServiceFactory.createRegularTaskInputService()
   protected val isNotOnlyCustomCheckpoint: Boolean
 
-  protected val envelopeSerializer = new JsonSerializer(true)
+  private val envelopeSerializer = new JsonSerializer(true)
 
   addProducersToCheckpointGroup()
 
-  protected def createRegularTaskEngineService(): RegularTaskEngineService = {
+  private def createRegularTaskEngineService(): RegularTaskEngineService = {
     instance.stateManagement match {
       case EngineLiterals.noneStateMode =>
         logger.debug(s"Task: ${manager.taskName}. Start preparing of regular module without state\n")
@@ -112,7 +112,7 @@ abstract class RegularTaskEngine(protected val manager: RegularTaskManager,
   /**
    * Does group checkpoint of t-streams consumers/producers
    */
-  protected def doCheckpoint() = {
+  private def doCheckpoint() = {
     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
     logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeCheckpoint() handler\n")
     executor.onBeforeCheckpoint()

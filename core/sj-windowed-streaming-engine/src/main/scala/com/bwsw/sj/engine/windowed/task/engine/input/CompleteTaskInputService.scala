@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
  *
  * @author Kseniya Mikhaleva
  *
- * @param manager Manager of environment of task of regular module
+ * @param manager Manager of environment of task of windowed module
  * @param blockingQueue Blocking queue for keeping incoming envelopes that are serialized into a string,
  *                      which will be retrieved into a module
  * @param checkpointGroup Group of t-stream agents that have to make a checkpoint at the same time
@@ -35,8 +35,8 @@ class CompleteTaskInputService(manager: WindowedTaskManager,
       case _ : KafkaEnvelope =>
         kafkaRegularTaskInputService.registerEnvelope(envelope, performanceMetrics)
       case envelope =>
-        logger.error(s"Incoming envelope with type: ${envelope.getClass} is not defined for regular streaming engine")
-        throw new Exception(s"Incoming envelope with type: ${envelope.getClass} is not defined for regular streaming engine")
+        logger.error(s"Incoming envelope with type: ${envelope.getClass} is not defined for windowed streaming engine")
+        throw new Exception(s"Incoming envelope with type: ${envelope.getClass} is not defined for windowed streaming engine")
     }
   }
 

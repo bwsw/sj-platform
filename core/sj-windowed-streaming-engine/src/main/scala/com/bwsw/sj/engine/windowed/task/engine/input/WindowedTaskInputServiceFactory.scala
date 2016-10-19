@@ -8,12 +8,12 @@ import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
 /**
- * Factory is in charge of creating of a task input service of regular engine
+ * Factory is in charge of creating of a task input service of windowed engine
  *
  *
  * @author Kseniya Mikhaleva
  *
- * @param manager Manager of environment of task of regular module
+ * @param manager Manager of environment of task of windowed module
  * @param blockingQueue Blocking queue for keeping incoming envelopes that are serialized into a string,
  *                      which will be retrieved into a module
  * @param checkpointGroup Group of t-stream agents that have to make a checkpoint at the same time

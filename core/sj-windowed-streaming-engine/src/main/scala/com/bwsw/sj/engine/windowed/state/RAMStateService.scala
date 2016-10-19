@@ -15,7 +15,7 @@ import scala.collection.mutable
  *
  * @author Kseniya Mikhaleva
  *
- * @param manager Manager of environment of regular module task
+ * @param manager Manager of environment of windowed module task
  * @param checkpointGroup Group of t-stream agents that have to make a checkpoint at the same time
  */
 

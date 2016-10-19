@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.regular.task.engine.state
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.engine.core.environment.RegularEnvironmentManager
+import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
@@ -16,7 +16,7 @@ class StatelessRegularTaskEngineService(manager: RegularTaskManager, performance
   extends RegularTaskEngineService(manager, performanceMetrics) {
   private val streamService = ConnectionRepository.getStreamService
 
-  val regularEnvironmentManager = new RegularEnvironmentManager(
+  val regularEnvironmentManager = new ModuleEnvironmentManager(
     regularInstance.getOptionsAsMap(),
     outputProducers,
     regularInstance.outputs

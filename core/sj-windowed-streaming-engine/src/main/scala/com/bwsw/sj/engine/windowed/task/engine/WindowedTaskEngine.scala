@@ -1,62 +1,53 @@
 package com.bwsw.sj.engine.windowed.task.engine
 
-import java.util.concurrent.Callable
+import java.util.concurrent.{TimeUnit, Callable, ArrayBlockingQueue}
 
-import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.DAL.model.module.RegularInstance
+import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
-import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.sj.engine.windowed.task.WindowedTaskManager
-import com.bwsw.sj.engine.windowed.task.engine.input.WindowedTaskInputServiceFactory
+import com.bwsw.sj.engine.windowed.task.engine.entities.{Window, Batch}
 import com.bwsw.sj.engine.windowed.task.engine.state.{StatefulWindowedTaskEngineService, StatelessWindowedTaskEngineService}
 import com.bwsw.sj.engine.windowed.task.reporting.WindowedStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.Producer
 import org.slf4j.LoggerFactory
 
-import scala.collection.Map
-
-/**
- * Provides methods are responsible for a basic execution logic of task of regular module
- *
- *
- * @param manager Manager of environment of task of regular module
- * @param performanceMetrics Set of metrics that characterize performance of a regular streaming module
-
- * @author Kseniya Mikhaleva
- */
-abstract class WindowedTaskEngine(protected val manager: WindowedTaskManager,
-                                 performanceMetrics: WindowedStreamingPerformanceMetrics) extends Callable[Unit] {
+class WindowedTaskEngine(protected val manager: WindowedTaskManager,
+                      batchQueue: ArrayBlockingQueue[Batch],
+                      performanceMetrics: WindowedStreamingPerformanceMetrics) extends Callable[Unit] {
 
   private val currentThread = Thread.currentThread()
-  currentThread.setName(s"regular-task-${manager.taskName}-engine")
-  protected val logger = LoggerFactory.getLogger(this.getClass)
-  private val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(EngineLiterals.persistentBlockingQueue)
-  protected val producers: Map[String, Producer[Array[Byte]]] = manager.outputProducers
-  protected val checkpointGroup = new CheckpointGroup()
-  protected val instance = manager.instance.asInstanceOf[RegularInstance]
-  protected val regularTaskEngineService = createRegularTaskEngineService()
-  protected val environmentManager = regularTaskEngineService.regularEnvironmentManager
-  protected val executor = regularTaskEngineService.executor
-  private val moduleTimer = regularTaskEngineService.moduleTimer
-  protected val outputTags = regularTaskEngineService.outputTags
-  private val regularTaskInputServiceFactory = new WindowedTaskInputServiceFactory(manager, blockingQueue, checkpointGroup)
-  val taskInputService = regularTaskInputServiceFactory.createRegularTaskInputService()
-  protected val isNotOnlyCustomCheckpoint: Boolean
-
-  protected val envelopeSerializer = new JsonSerializer(true)
+  currentThread.setName(s"windowed-task-${manager.taskName}-engine")
+  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val producers: Map[String, Producer[Array[Byte]]] = manager.outputProducers
+  private val checkpointGroup = new CheckpointGroup()
+  private val instance = manager.instance.asInstanceOf[WindowedInstance]
+  private val windowedTaskEngineService = createWindowedTaskEngineService()
+  private val executor = windowedTaskEngineService.executor
+  private val moduleTimer = windowedTaskEngineService.moduleTimer
+  private val countersOfBatches = createBatchCounters()
+  private val windowPerStream = createStorageOfWindows()
+  private val windows = createStorageOfWindows()
+  private var lastBatchId = ""
 
   addProducersToCheckpointGroup()
 
-  protected def createRegularTaskEngineService() = {
+  protected def createWindowedTaskEngineService() = {
     instance.stateManagement match {
       case EngineLiterals.noneStateMode =>
-        logger.debug(s"Task: ${manager.taskName}. Start preparing of regular module without state\n")
+        logger.debug(s"Task: ${manager.taskName}. Start preparing of windowed module without state\n")
         new StatelessWindowedTaskEngineService(manager, performanceMetrics)
       case EngineLiterals.ramStateMode =>
         new StatefulWindowedTaskEngineService(manager, checkpointGroup, performanceMetrics)
     }
+  }
+
+  private def createBatchCounters() = {
+    manager.inputs.map(x => (x._1.name, 0))
+  }
+
+  private def createStorageOfWindows() = {
+    manager.inputs.map(x => (x._1.name, new Window(instance.slidingInterval)))
   }
 
   private def addProducersToCheckpointGroup() = {
@@ -66,32 +57,34 @@ abstract class WindowedTaskEngine(protected val manager: WindowedTaskManager,
   }
 
   /**
-   * It is in charge of running a basic execution logic of regular task engine
+   * It is in charge of running a basic execution logic of windowed task engine
    */
   override def call(): Unit = {
     logger.info(s"Task name: ${manager.taskName}. " +
-      s"Run regular task engine in a separate thread of execution service\n")
+      s"Run windowed task engine in a separate thread of execution service\n")
     logger.debug(s"Task: ${manager.taskName}. Invoke onInit() handler\n")
     executor.onInit()
 
     while (true) {
-      val maybeEnvelope = blockingQueue.get(instance.eventWaitTime)
+      val maybeBatch = Option(batchQueue.poll(instance.eventWaitTime, TimeUnit.MILLISECONDS))
 
-      maybeEnvelope match {
-        case Some(serializedEnvelope) => {
-          val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope)
-          afterReceivingEnvelope()
-          taskInputService.registerEnvelope(envelope, performanceMetrics)
-          logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
-          executor.onMessage(envelope)
+      maybeBatch match {
+        case Some(batch) => {
+          println("batch: " + batch.stream + ":" + batch.transactions.size)
+          addBatchToWindow(batch)
+
+          if (isItTimeToCollectWindow()) {
+            collectWindow() //todo либо класть в очередь батчей сначала все батчи для завивимых потоков, потом для основного
+            //todo либо кол-чо батчей не будет совпадать у главного окна и зависимых окон
+            executor.onWindow() //todo сделать доступ к windows
+            println("onWindow() " + windows.map(x => (x._1, x._2.batches.flatMap(x=> x.transactions.map(_.id)))))
+          }
         }
         case None => {
           performanceMetrics.increaseTotalIdleTime(instance.eventWaitTime)
           executor.onIdle()
         }
       }
-
-      if (isItTimeToCheckpoint(environmentManager.isCheckpointInitiated)) doCheckpoint()
 
       if (moduleTimer.isTime) {
         logger.debug(s"Task: ${manager.taskName}. Invoke onTimer() handler\n")
@@ -101,30 +94,38 @@ abstract class WindowedTaskEngine(protected val manager: WindowedTaskManager,
     }
   }
 
-  protected def afterReceivingEnvelope(): Unit
-
-  /**
-   * Check whether a group checkpoint of t-streams consumers/producers have to be done or not
-   * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside regular module (not on the schedule) or not.
-   */
-  protected def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean
-
-  /**
-   * Does group checkpoint of t-streams consumers/producers
-   */
-  protected def doCheckpoint() = {
-    logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
-    logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeCheckpoint() handler\n")
-    executor.onBeforeCheckpoint()
-    regularTaskEngineService.doCheckpoint()
-    taskInputService.doCheckpoint()
-    logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
-    checkpointGroup.checkpoint()
-    outputTags.clear()
-    logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
-    executor.onAfterCheckpoint()
-    prepareForNextCheckpoint()
+  private def addBatchToWindow(batch: Batch) = {
+    lastBatchId = batch.stream
+    windowPerStream(lastBatchId).batches += batch
+    afterReceivingBatch()
   }
 
-  protected def prepareForNextCheckpoint(): Unit
+  private def isItTimeToCollectWindow(): Boolean = {
+    countersOfBatches(lastBatchId) == instance.window
+  }
+
+  private def collectWindow() = {
+    logger.info(s"Task: ${manager.taskName}. It's time to collect batch\n")
+    windows(lastBatchId) = windowPerStream(lastBatchId).copy() //todo сделать доступным в onWindow()
+    prepareWindowForNextCollecting()
+  }
+
+  private def afterReceivingBatch() = {
+    increaseCounter()
+  }
+
+  private def increaseCounter() = {
+    logger.debug(s"Increase count of batches\n")
+    countersOfBatches(lastBatchId) += 1
+  }
+
+  private def prepareWindowForNextCollecting() = {
+    windowPerStream(lastBatchId).batches.clear()
+    resetCounter()
+  }
+
+  private def resetCounter() = {
+    logger.debug(s"Reset a counter of batches to 0\n")
+    countersOfBatches(lastBatchId) = 0
+  }
 }
