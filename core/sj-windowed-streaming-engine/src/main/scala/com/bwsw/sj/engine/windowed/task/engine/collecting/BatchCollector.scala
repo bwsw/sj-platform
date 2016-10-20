@@ -25,8 +25,8 @@ import scala.collection.Map
  * @author Kseniya Mikhaleva
  */
 abstract class BatchCollector(protected val manager: WindowedTaskManager,
-                     batchQueue: ArrayBlockingQueue[Batch],
-                     performanceMetrics: WindowedStreamingPerformanceMetrics) extends Callable[Unit] {
+                              batchQueue: ArrayBlockingQueue[Batch],
+                              performanceMetrics: WindowedStreamingPerformanceMetrics) extends Callable[Unit] {
 
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"windowed-task-${manager.taskName}-batch-collector")
@@ -77,14 +77,22 @@ abstract class BatchCollector(protected val manager: WindowedTaskManager,
 
   protected def collectBatch() = {
     logger.info(s"Task: ${manager.taskName}. It's time to collect batch\n")
+    val (mainStreamBatches: Map[String, Batch], relatedStreamBatches) = batchPerStream.partition(x => x._1 == instance.mainStream)
+    putBatchesIntoQueue(relatedStreamBatches)
+    putBatchesIntoQueue(mainStreamBatches)
+    clearBatches()
+    prepareForNextBatchCollecting()
+  }
+
+  private def putBatchesIntoQueue(batchPerStream: Map[String, Batch]) = {
     batchPerStream.foreach(x => {
       batchQueue.put(x._2.copy())
       println("put batch: " + x._1)
     })
-    //todo либо класть в очередь батчей сначала все батчи для завивимых потоков, потом для основного
-    //todo либо кол-чо батчей не будет совпадать у главного окна и зависимых окон
+  }
+
+  private def clearBatches() = {
     batchPerStream.foreach(x => x._2.transactions.clear())
-    prepareForNextBatchCollecting()
   }
 
   protected def afterReceivingTransaction(transaction: Transaction)

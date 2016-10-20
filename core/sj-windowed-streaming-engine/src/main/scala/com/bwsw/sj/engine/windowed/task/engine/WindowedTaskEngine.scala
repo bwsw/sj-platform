@@ -26,10 +26,9 @@ class WindowedTaskEngine(protected val manager: WindowedTaskManager,
   private val windowedTaskEngineService = createWindowedTaskEngineService()
   private val executor = windowedTaskEngineService.executor
   private val moduleTimer = windowedTaskEngineService.moduleTimer
-  private val countersOfBatches = createBatchCounters()
+  private var countersOfBatches = 0
   private val windowPerStream = createStorageOfWindows()
   private val windowRepository = new WindowRepository(instance, manager.inputs)
-  private var currentWindowId = ""
 
   addProducersToCheckpointGroup()
 
@@ -41,10 +40,6 @@ class WindowedTaskEngine(protected val manager: WindowedTaskManager,
       case EngineLiterals.ramStateMode =>
         new StatefulWindowedTaskEngineService(manager, checkpointGroup, performanceMetrics)
     }
-  }
-
-  private def createBatchCounters() = {
-    manager.inputs.map(x => (x._1.name, 0))
   }
 
   private def createStorageOfWindows() = {
@@ -75,12 +70,13 @@ class WindowedTaskEngine(protected val manager: WindowedTaskManager,
           addBatchToWindow(batch)
 
           if (isItTimeToCollectWindow()) {
-            collectWindow() //todo либо класть в очередь батчей сначала все батчи для завивимых потоков, потом для основного
-            //todo либо кол-чо батчей не будет совпадать у главного окна и зависимых окон
-           // println("before sliding " + windowPerStream.map(x => (x._1, x._2.batches.map(x => x.transactions.map(_.id)))))
-            executor.onWindow(batch.stream, windowRepository)
+            collectWindow()
+            println("before sliding " + windowPerStream.map(x => (x._1, x._2.batches.map(x => x.transactions.map(_.id)))))
+            println("before sliding " + windowPerStream.map(x => (x._1, x._2.batches.map(x => x.countOfAppearing))))
+            executor.onWindow(windowRepository)
             slideWindow()
-            //println("after sliding " + windowPerStream.map(x => (x._1, x._2.batches.map(x => x.transactions.map(_.id)))))
+            println("after sliding " + windowPerStream.map(x => (x._1, x._2.batches.map(x => x.transactions.map(_.id)))))
+            println("after sliding " + windowPerStream.map(x => (x._1, x._2.batches.map(x => x.countOfAppearing))))
           }
         }
         case None => {
@@ -98,27 +94,22 @@ class WindowedTaskEngine(protected val manager: WindowedTaskManager,
   }
 
   private def addBatchToWindow(batch: Batch) = {
-    currentWindowId = batch.stream
-    windowPerStream(currentWindowId).batches += batch
-    afterReceivingBatch()
+    windowPerStream(batch.stream).batches += batch
+    if (batch.stream == instance.mainStream) increaseBatchCounter()
   }
 
   private def isItTimeToCollectWindow(): Boolean = {
-    countersOfBatches(currentWindowId) == instance.window
+    countersOfBatches == instance.window
   }
 
   private def collectWindow() = {
     logger.info(s"Task: ${manager.taskName}. It's time to collect batch\n")
-    windowRepository.put(currentWindowId, windowPerStream(currentWindowId).copy())
+    windowPerStream.foreach(x => windowRepository.put(x._1, x._2.copy()))
   }
 
-  private def afterReceivingBatch() = {
-    increaseCounter()
-  }
-
-  private def increaseCounter() = {
+  private def increaseBatchCounter() = {
     logger.debug(s"Increase count of batches\n")
-    countersOfBatches(currentWindowId) += 1
+    countersOfBatches += 1
   }
 
   private def slideWindow() = {
@@ -128,15 +119,15 @@ class WindowedTaskEngine(protected val manager: WindowedTaskManager,
   }
 
   private def deleteBatches() = {
-    windowPerStream(currentWindowId).batches.remove(0, instance.slidingInterval)
+    windowPerStream.foreach(x => x._2.batches.remove(0, instance.slidingInterval))
   }
 
   private def increaseBatchesCounterOfAppearing() = {
-    windowPerStream(currentWindowId).batches.foreach(x => x.countOfAppearing += 1)
+    windowPerStream.foreach(x => x._2.batches.foreach(x => x.countOfAppearing += 1))
   }
 
   private def resetCounter() = {
     logger.debug(s"Reset a counter of batches to 0\n")
-    countersOfBatches(currentWindowId) -= instance.slidingInterval
+    countersOfBatches -= instance.slidingInterval
   }
 }
