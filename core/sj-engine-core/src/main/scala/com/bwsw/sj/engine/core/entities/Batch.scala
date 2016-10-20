@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.windowed.task.engine.entities
+package com.bwsw.sj.engine.core.entities
 
 import scala.collection.mutable.ArrayBuffer
 

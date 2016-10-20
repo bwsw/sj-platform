@@ -4,9 +4,9 @@ import java.util.concurrent.ArrayBlockingQueue
 
 import com.bwsw.sj.engine.core.engine.TaskRunner
 import com.bwsw.sj.engine.core.engine.input.TaskInputService
+import com.bwsw.sj.engine.core.entities.Batch
 import com.bwsw.sj.engine.windowed.task.WindowedTaskManager
 import com.bwsw.sj.engine.windowed.task.engine.collecting.BatchCollector
-import com.bwsw.sj.engine.windowed.task.engine.entities.Batch
 import com.bwsw.sj.engine.windowed.task.engine.WindowedTaskEngine
 import com.bwsw.sj.engine.windowed.task.reporting.WindowedStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory

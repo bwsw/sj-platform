@@ -4,8 +4,9 @@ import java.util.concurrent.{TimeUnit, Callable, ArrayBlockingQueue}
 
 import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.engine.core.entities.{Batch, Window}
+import com.bwsw.sj.engine.core.windowed.WindowRepository
 import com.bwsw.sj.engine.windowed.task.WindowedTaskManager
-import com.bwsw.sj.engine.windowed.task.engine.entities.{Window, Batch}
 import com.bwsw.sj.engine.windowed.task.engine.state.{StatefulWindowedTaskEngineService, StatelessWindowedTaskEngineService}
 import com.bwsw.sj.engine.windowed.task.reporting.WindowedStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
@@ -13,8 +14,8 @@ import com.bwsw.tstreams.agents.producer.Producer
 import org.slf4j.LoggerFactory
 
 class WindowedTaskEngine(protected val manager: WindowedTaskManager,
-                      batchQueue: ArrayBlockingQueue[Batch],
-                      performanceMetrics: WindowedStreamingPerformanceMetrics) extends Callable[Unit] {
+                         batchQueue: ArrayBlockingQueue[Batch],
+                         performanceMetrics: WindowedStreamingPerformanceMetrics) extends Callable[Unit] {
 
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"windowed-task-${manager.taskName}-engine")
@@ -27,7 +28,7 @@ class WindowedTaskEngine(protected val manager: WindowedTaskManager,
   private val moduleTimer = windowedTaskEngineService.moduleTimer
   private val countersOfBatches = createBatchCounters()
   private val windowPerStream = createStorageOfWindows()
-  private val windows = createStorageOfWindows()
+  private val windowRepository = new WindowRepository(instance, manager.inputs)
   private var lastBatchId = ""
 
   addProducersToCheckpointGroup()
@@ -76,8 +77,8 @@ class WindowedTaskEngine(protected val manager: WindowedTaskManager,
           if (isItTimeToCollectWindow()) {
             collectWindow() //todo либо класть в очередь батчей сначала все батчи для завивимых потоков, потом для основного
             //todo либо кол-чо батчей не будет совпадать у главного окна и зависимых окон
-            executor.onWindow() //todo сделать доступ к windows
-            println("onWindow() " + windows.map(x => (x._1, x._2.batches.flatMap(x=> x.transactions.map(_.id)))))
+            executor.onWindow(batch.stream, windowRepository)
+            //println("onWindow() " + windowRepository.getAll().map(x => (x._1, x._2.batches.flatMap(x => x.transactions.map(_.id)))))
           }
         }
         case None => {
@@ -106,7 +107,7 @@ class WindowedTaskEngine(protected val manager: WindowedTaskManager,
 
   private def collectWindow() = {
     logger.info(s"Task: ${manager.taskName}. It's time to collect batch\n")
-    windows(lastBatchId) = windowPerStream(lastBatchId).copy() //todo сделать доступным в onWindow()
+    windowRepository.put(lastBatchId, windowPerStream(lastBatchId).copy())
     prepareWindowForNextCollecting()
   }
 

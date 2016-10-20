@@ -21,10 +21,12 @@ class WindowedStreamingExecutor(manager: ModuleEnvironmentManager) extends Strea
   /**
    * Used for processing one envelope. It is invoked for every received message
    * from one of the inputs that are defined within the instance.
-   * @param envelope A message that can have different type depending on a type of input
-   *                 so you should cast the message to get certain fields.
+   * @param stream A stream name in which a window is collected.
+   *
    */
-  def onWindow(): Unit = {}
+  def onWindow(stream: String, windowRepository: WindowRepository): Unit = {
+    println("onWindow() " + windowRepository.getAll().map(x => (x._1, x._2.batches.flatMap(x => x.transactions.map(_.id)))))
+  }
 
   /**
    * Handler triggered before every checkpoint

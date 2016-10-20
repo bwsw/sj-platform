@@ -6,9 +6,8 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
-import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.windowed.task.WindowedTaskManager
-import com.bwsw.sj.engine.windowed.task.engine.entities.{Batch, Transaction}
 import com.bwsw.sj.engine.windowed.task.engine.input.WindowedTaskInputServiceFactory
 import com.bwsw.sj.engine.windowed.task.reporting.WindowedStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
