@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.windowed.task.engine
 
-import java.util.concurrent.{TimeUnit, Callable, ArrayBlockingQueue}
+import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
 
 import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.common.utils.EngineLiterals
@@ -29,7 +29,7 @@ class WindowedTaskEngine(protected val manager: WindowedTaskManager,
   private val countersOfBatches = createBatchCounters()
   private val windowPerStream = createStorageOfWindows()
   private val windowRepository = new WindowRepository(instance, manager.inputs)
-  private var lastBatchId = ""
+  private var currentWindowId = ""
 
   addProducersToCheckpointGroup()
 
@@ -77,8 +77,10 @@ class WindowedTaskEngine(protected val manager: WindowedTaskManager,
           if (isItTimeToCollectWindow()) {
             collectWindow() //todo либо класть в очередь батчей сначала все батчи для завивимых потоков, потом для основного
             //todo либо кол-чо батчей не будет совпадать у главного окна и зависимых окон
+           // println("before sliding " + windowPerStream.map(x => (x._1, x._2.batches.map(x => x.transactions.map(_.id)))))
             executor.onWindow(batch.stream, windowRepository)
-            //println("onWindow() " + windowRepository.getAll().map(x => (x._1, x._2.batches.flatMap(x => x.transactions.map(_.id)))))
+            slideWindow()
+            //println("after sliding " + windowPerStream.map(x => (x._1, x._2.batches.map(x => x.transactions.map(_.id)))))
           }
         }
         case None => {
@@ -96,19 +98,18 @@ class WindowedTaskEngine(protected val manager: WindowedTaskManager,
   }
 
   private def addBatchToWindow(batch: Batch) = {
-    lastBatchId = batch.stream
-    windowPerStream(lastBatchId).batches += batch
+    currentWindowId = batch.stream
+    windowPerStream(currentWindowId).batches += batch
     afterReceivingBatch()
   }
 
   private def isItTimeToCollectWindow(): Boolean = {
-    countersOfBatches(lastBatchId) == instance.window
+    countersOfBatches(currentWindowId) == instance.window
   }
 
   private def collectWindow() = {
     logger.info(s"Task: ${manager.taskName}. It's time to collect batch\n")
-    windowRepository.put(lastBatchId, windowPerStream(lastBatchId).copy())
-    prepareWindowForNextCollecting()
+    windowRepository.put(currentWindowId, windowPerStream(currentWindowId).copy())
   }
 
   private def afterReceivingBatch() = {
@@ -117,16 +118,25 @@ class WindowedTaskEngine(protected val manager: WindowedTaskManager,
 
   private def increaseCounter() = {
     logger.debug(s"Increase count of batches\n")
-    countersOfBatches(lastBatchId) += 1
+    countersOfBatches(currentWindowId) += 1
   }
 
-  private def prepareWindowForNextCollecting() = {
-    windowPerStream(lastBatchId).batches.clear()
+  private def slideWindow() = {
+    deleteBatches()
+    increaseBatchesCounterOfAppearing()
     resetCounter()
+  }
+
+  private def deleteBatches() = {
+    windowPerStream(currentWindowId).batches.remove(0, instance.slidingInterval)
+  }
+
+  private def increaseBatchesCounterOfAppearing() = {
+    windowPerStream(currentWindowId).batches.foreach(x => x.countOfAppearing += 1)
   }
 
   private def resetCounter() = {
     logger.debug(s"Reset a counter of batches to 0\n")
-    countersOfBatches(lastBatchId) = 0
+    countersOfBatches(currentWindowId) -= instance.slidingInterval
   }
 }
