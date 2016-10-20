@@ -22,14 +22,14 @@ object SjModuleSetup extends App {
   val module = new File("./contrib/stubs/sj-stub-regular-streaming/target/scala-2.11/sj-stub-regular-streaming-1.0.jar")
 
   open()
-  cassandraSetup()
-  loadModule(module, fileStorage)
-  createProviders(providerService)
-  createServices(serviceManager, providerService)
-  createStreams(streamService, serviceManager, partitions, _type, inputCount, outputCount)
-  createInstance(serviceManager, instanceService, checkpointInterval, stateManagement, stateFullCheckpoint)
+//  cassandraSetup()
+//  loadModule(module, fileStorage)
+//  createProviders(providerService)
+//  createServices(serviceManager, providerService)
+//  createStreams(streamService, serviceManager, partitions, _type, inputCount, outputCount)
+//  createInstance(serviceManager, instanceService, checkpointInterval, stateManagement, stateFullCheckpoint)
 
-  createData(12, 4, streamService, _type, inputCount)
+  createData(12, 4, streamService, "tstream", 1)
   close()
   ConnectionRepository.close()
 

@@ -24,9 +24,9 @@ import scala.collection.Map
 
  * @author Kseniya Mikhaleva
  */
-class BatchCollector(protected val manager: WindowedTaskManager,
+abstract class BatchCollector(protected val manager: WindowedTaskManager,
                      batchQueue: ArrayBlockingQueue[Batch],
-                     performanceMetrics: WindowedStreamingPerformanceMetrics) extends Callable[Unit] with NumericalBatchCollecting {
+                     performanceMetrics: WindowedStreamingPerformanceMetrics) extends Callable[Unit] {
 
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"windowed-task-${manager.taskName}-batch-collector")
@@ -53,16 +53,16 @@ class BatchCollector(protected val manager: WindowedTaskManager,
       maybeEnvelope match {
         case Some(serializedEnvelope) => {
           val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope)
-          println("envelope: " + envelope.stream)
           lastEnvelopesByStreams((envelope.stream, envelope.partition)) = envelope
 
           val transaction = envelope match {
             case kafkaEnvelope: KafkaEnvelope => Transaction(kafkaEnvelope.partition, kafkaEnvelope.offset, List(kafkaEnvelope.data))
             case tstreamEnvelope: TStreamEnvelope => Transaction(tstreamEnvelope.partition, tstreamEnvelope.id, tstreamEnvelope.data)
           }
+          println("txn: " + envelope.stream + ", id: " + transaction.id)
           batchPerStream(envelope.stream).transactions += transaction
 
-          if (instance.mainStream == envelope.stream) afterReceivingEnvelope()
+          if (instance.mainStream == envelope.stream) afterReceivingTransaction(transaction)
         }
         case None =>
       }
@@ -75,9 +75,6 @@ class BatchCollector(protected val manager: WindowedTaskManager,
     manager.inputs.flatMap(x => x._2.map(y => ((x._1.name, y), new Envelope())))
   }
 
-  /**
-   * Does group checkpoint of t-streams consumers/producers
-   */
   protected def collectBatch() = {
     logger.info(s"Task: ${manager.taskName}. It's time to collect batch\n")
     batchPerStream.foreach(x => {
@@ -89,6 +86,12 @@ class BatchCollector(protected val manager: WindowedTaskManager,
     batchPerStream.foreach(x => x._2.transactions.clear())
     prepareForNextBatchCollecting()
   }
+
+  protected def afterReceivingTransaction(transaction: Transaction)
+
+  protected def isItTimeToCollectBatch(): Boolean
+
+  protected def prepareForNextBatchCollecting()
 }
 
 

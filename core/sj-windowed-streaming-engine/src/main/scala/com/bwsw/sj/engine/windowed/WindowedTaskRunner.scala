@@ -6,8 +6,7 @@ import com.bwsw.sj.engine.core.engine.TaskRunner
 import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.core.entities.Batch
 import com.bwsw.sj.engine.windowed.task.WindowedTaskManager
-import com.bwsw.sj.engine.windowed.task.engine.collecting.BatchCollector
-import com.bwsw.sj.engine.windowed.task.engine.WindowedTaskEngine
+import com.bwsw.sj.engine.windowed.task.engine.{BatchCollectorFactory, WindowedTaskEngine}
 import com.bwsw.sj.engine.windowed.task.reporting.WindowedStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
 
@@ -26,7 +25,7 @@ object WindowedTaskRunner extends {
       val performanceMetrics = new WindowedStreamingPerformanceMetrics(manager)
       val batchQueue: ArrayBlockingQueue[Batch] = new ArrayBlockingQueue(1000)
 
-      val batchCollector = new BatchCollector(manager, batchQueue, performanceMetrics)
+      val batchCollector = new BatchCollectorFactory(manager, batchQueue, performanceMetrics).createBatchCollector()
       val windowedTaskEngine = new WindowedTaskEngine(manager, batchQueue, performanceMetrics)
 
       val windowedTaskInputService: TaskInputService = batchCollector.taskInputService
