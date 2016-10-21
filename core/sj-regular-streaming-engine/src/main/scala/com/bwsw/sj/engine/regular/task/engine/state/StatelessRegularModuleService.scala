@@ -5,6 +5,7 @@ import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
+import com.bwsw.tstreams.agents.group.CheckpointGroup
 
 /**
  * Class is in charge of creating a ModuleEnvironmentManager (and executor)
@@ -12,8 +13,8 @@ import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetr
  * @param manager Manager of environment of task of regular module
  * @param performanceMetrics Set of metrics that characterize performance of a regular streaming module
  */
-class StatelessRegularTaskEngineService(manager: RegularTaskManager, performanceMetrics: RegularStreamingPerformanceMetrics)
-  extends RegularTaskEngineService(manager, performanceMetrics) {
+class StatelessRegularModuleService(manager: RegularTaskManager, checkpointGroup: CheckpointGroup, performanceMetrics: RegularStreamingPerformanceMetrics)
+  extends RegularModuleService(manager, checkpointGroup, performanceMetrics) {
   private val streamService = ConnectionRepository.getStreamService
 
   val regularEnvironmentManager = new ModuleEnvironmentManager(
@@ -28,5 +29,5 @@ class StatelessRegularTaskEngineService(manager: RegularTaskManager, performance
 
   val executor = manager.getExecutor(regularEnvironmentManager).asInstanceOf[RegularStreamingExecutor]
 
-  override def doCheckpoint(): Unit = {}
+  override def doCheckpoint() = {}
 }

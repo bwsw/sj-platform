@@ -77,7 +77,7 @@ abstract class BatchCollector(protected val manager: WindowedTaskManager,
 
   protected def collectBatch() = {
     logger.info(s"Task: ${manager.taskName}. It's time to collect batch\n")
-    val (mainStreamBatches: Map[String, Batch], relatedStreamBatches) = batchPerStream.partition(x => x._1 == instance.mainStream)
+    val (mainStreamBatches, relatedStreamBatches) = batchPerStream.partition(x => x._1 == instance.mainStream)
     putBatchesIntoQueue(relatedStreamBatches)
     putBatchesIntoQueue(mainStreamBatches)
     clearBatches()

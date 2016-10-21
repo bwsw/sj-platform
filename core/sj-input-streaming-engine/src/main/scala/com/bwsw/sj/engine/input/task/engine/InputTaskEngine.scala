@@ -291,7 +291,7 @@ abstract class InputTaskEngine(protected val manager: TaskManager,
    */
   private def createTxnsStorage(streams: Set[String]) = {
     logger.debug(s"Task name: ${manager.taskName}. " +
-      s"Create storage for keeping txns for each partition of output streams\n")
+      s"Create a storage for keeping txns for each partition of output streams\n")
     streams.map(x => (x, mutable.Map[Int, ProducerTransaction[Array[Byte]]]())).toMap
   }
 }

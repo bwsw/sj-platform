@@ -9,7 +9,7 @@ import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
 import com.bwsw.sj.engine.regular.task.engine.input.RegularTaskInputServiceFactory
-import com.bwsw.sj.engine.regular.task.engine.state.{RegularTaskEngineService, StatefulRegularTaskEngineService, StatelessRegularTaskEngineService}
+import com.bwsw.sj.engine.regular.task.engine.state.{StatelessRegularModuleService, StatefulRegularModuleService, RegularModuleService}
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.Producer
@@ -37,7 +37,7 @@ abstract class RegularTaskEngine(protected val manager: RegularTaskManager,
   private val checkpointGroup = new CheckpointGroup()
   private val instance = manager.instance.asInstanceOf[RegularInstance]
   private val regularTaskEngineService = createRegularTaskEngineService()
-  protected val environmentManager = regularTaskEngineService.regularEnvironmentManager
+  private val environmentManager = regularTaskEngineService.regularEnvironmentManager
   private val executor = regularTaskEngineService.executor
   private val moduleTimer = regularTaskEngineService.moduleTimer
   private val outputTags = regularTaskEngineService.outputTags
@@ -49,13 +49,13 @@ abstract class RegularTaskEngine(protected val manager: RegularTaskManager,
 
   addProducersToCheckpointGroup()
 
-  private def createRegularTaskEngineService(): RegularTaskEngineService = {
+  private def createRegularTaskEngineService(): RegularModuleService = {
     instance.stateManagement match {
       case EngineLiterals.noneStateMode =>
         logger.debug(s"Task: ${manager.taskName}. Start preparing of regular module without state\n")
-        new StatelessRegularTaskEngineService(manager, performanceMetrics)
+        new StatelessRegularModuleService(manager, checkpointGroup, performanceMetrics)
       case EngineLiterals.ramStateMode =>
-        new StatefulRegularTaskEngineService(manager, checkpointGroup, performanceMetrics)
+        new StatefulRegularModuleService(manager, checkpointGroup, performanceMetrics)
     }
   }
 

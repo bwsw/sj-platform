@@ -72,11 +72,9 @@ class WindowedTaskEngine(protected val manager: WindowedTaskManager,
           if (isItTimeToCollectWindow()) {
             collectWindow()
             println("before sliding " + windowPerStream.map(x => (x._1, x._2.batches.map(x => x.transactions.map(_.id)))))
-            println("before sliding " + windowPerStream.map(x => (x._1, x._2.batches.map(x => x.countOfAppearing))))
             executor.onWindow(windowRepository)
             slideWindow()
             println("after sliding " + windowPerStream.map(x => (x._1, x._2.batches.map(x => x.transactions.map(_.id)))))
-            println("after sliding " + windowPerStream.map(x => (x._1, x._2.batches.map(x => x.countOfAppearing))))
           }
         }
         case None => {
@@ -130,4 +128,21 @@ class WindowedTaskEngine(protected val manager: WindowedTaskManager,
     logger.debug(s"Reset a counter of batches to 0\n")
     countersOfBatches -= instance.slidingInterval
   }
+
+//  /**
+//   * Does group checkpoint of t-streams consumers/producers
+//   */
+//  private def doCheckpoint() = {
+//    logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
+//    logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeCheckpoint() handler\n")
+//    executor.onBeforeCheckpoint()
+//    regularTaskEngineService.doCheckpoint()
+//    taskInputService.doCheckpoint()
+//    logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
+//    checkpointGroup.checkpoint()
+//    outputTags.clear()
+//    logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
+//    executor.onAfterCheckpoint()
+//    prepareForNextCheckpoint()
+//  }
 }

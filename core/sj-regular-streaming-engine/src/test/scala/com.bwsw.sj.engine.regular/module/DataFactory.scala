@@ -380,8 +380,7 @@ object DataFactory {
     val policy = producer.NewTransactionProducerPolicy.ErrorIfOpened
 
     def createTstreamData(countTxns: Int, countElements: Int, streamService: GenericMongoService[SjStream], suffix: String) = {
-      //val producer = createProducer(streamService.get("test-input-tstream" + suffix).get.asInstanceOf[TStreamSjStream])
-      val producer = createProducer(streamService.get("uwindowed-stream2").get.asInstanceOf[TStreamSjStream])
+      val producer = createProducer(streamService.get("test-input-tstream" + suffix).get.asInstanceOf[TStreamSjStream])
       val s = System.currentTimeMillis()
       (0 until countTxns) foreach { (x: Int) =>
         val transaction = producer.newTransaction(policy)

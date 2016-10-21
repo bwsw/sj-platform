@@ -6,6 +6,7 @@ import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.regular.task.RegularTaskManager
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
+import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
 /**
@@ -15,7 +16,7 @@ import org.slf4j.LoggerFactory
  * @param manager Manager of environment of task of regular module
  * @param performanceMetrics Set of metrics that characterize performance of a regular streaming module
  */
-abstract class RegularTaskEngineService(manager: RegularTaskManager, performanceMetrics: RegularStreamingPerformanceMetrics) {
+abstract class RegularModuleService(manager: RegularTaskManager, checkpointGroup: CheckpointGroup,  performanceMetrics: RegularStreamingPerformanceMetrics) {
 
   protected val logger = LoggerFactory.getLogger(this.getClass)
   protected val regularInstance = manager.instance.asInstanceOf[RegularInstance]
