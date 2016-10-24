@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.windowed.task.engine.collecting
 
 import com.bwsw.sj.common.DAL.model.module.WindowedInstance
-import com.bwsw.sj.engine.core.entities.Transaction
+import com.bwsw.sj.engine.core.entities.Envelope
 import org.slf4j.LoggerFactory
 
 trait NumericalBatchCollecting {
@@ -14,7 +14,7 @@ trait NumericalBatchCollecting {
     countOfEnvelopes == instance.batchFillType.value
   }
 
-  def afterReceivingTransaction(transaction: Transaction) = {
+  def afterReceivingEnvelope(envelope: Envelope) = {
     increaseCounter()
   }
 

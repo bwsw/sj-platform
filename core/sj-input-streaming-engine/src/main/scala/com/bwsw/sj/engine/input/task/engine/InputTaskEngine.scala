@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.input.task.engine
 
-import java.util.concurrent.{TimeUnit, ArrayBlockingQueue, Callable}
+import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
 
 import com.bwsw.sj.common.DAL.model.module.InputInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
@@ -8,8 +8,8 @@ import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.entities.InputEnvelope
 import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.engine.core.input.InputStreamingExecutor
-import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.sj.engine.input.eviction_policy.{ExpandedTimeEvictionPolicy, FixTimeEvictionPolicy}
+import com.bwsw.sj.engine.input.task.InputTaskManager
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer, ProducerTransaction}
@@ -29,7 +29,7 @@ import scala.collection._
  * @param bufferForEachContext Map for keeping a buffer containing incoming bytes with the channel context
  * @author Kseniya Mikhaleva
  */
-abstract class InputTaskEngine(protected val manager: TaskManager,
+abstract class InputTaskEngine(protected val manager: InputTaskManager,
                                performanceMetrics: InputStreamingPerformanceMetrics,
                                channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
                                bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf]) extends Callable[Unit] {

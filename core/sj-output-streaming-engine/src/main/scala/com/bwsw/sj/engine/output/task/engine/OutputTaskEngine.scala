@@ -15,7 +15,6 @@ import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
-import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.elasticsearch.index.query.QueryBuilders
 import org.slf4j.LoggerFactory
 
@@ -38,12 +37,11 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(EngineLiterals.persistentBlockingQueue)
   private val esEnvelopeSerializer = new JsonSerializer()
-  private val checkpointGroup = new CheckpointGroup()
   private val instance = manager.instance.asInstanceOf[OutputInstance]
   private val outputStream = getOutput()
   protected val environmentManager = createModuleEnvironmentManager()
   private val executor = manager.getExecutor(environmentManager).asInstanceOf[OutputStreamingExecutor]
-  val taskInputService = new TStreamTaskInputService(manager, blockingQueue, checkpointGroup)
+  val taskInputService = new TStreamTaskInputService(manager, blockingQueue)
   protected val isNotOnlyCustomCheckpoint: Boolean
   private val (client, esService) = openDbConnection(outputStream)
   private var wasFirstCheckpoint = false
@@ -215,7 +213,6 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
     taskInputService.doCheckpoint()
     logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
-    checkpointGroup.checkpoint()
     prepareForNextCheckpoint()
     wasFirstCheckpoint = true
   }

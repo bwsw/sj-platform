@@ -2,8 +2,8 @@ package com.bwsw.sj.engine.regular.task.reporting
 
 import java.util.Calendar
 
+import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
-import com.bwsw.sj.engine.regular.task.RegularTaskManager
 
 import scala.collection.mutable
 
@@ -13,7 +13,7 @@ import scala.collection.mutable
  * @author Kseniya Mikhaleva
  */
 
-class RegularStreamingPerformanceMetrics(manager: RegularTaskManager)
+class RegularStreamingPerformanceMetrics(manager: CommonTaskManager)
   extends PerformanceMetrics(manager) {
 
   currentThread.setName(s"regular-task-${manager.taskName}-performance-metrics")

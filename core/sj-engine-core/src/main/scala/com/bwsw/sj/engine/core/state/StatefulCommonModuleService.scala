@@ -1,51 +1,51 @@
-package com.bwsw.sj.engine.windowed.task.engine.state
+package com.bwsw.sj.engine.core.state
 
+import com.bwsw.sj.common.DAL.model.module.{WindowedInstance, RegularInstance}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.engine.core.environment.StatefulModuleEnvironmentManager
-import com.bwsw.sj.engine.core.windowed.WindowedStreamingExecutor
-import com.bwsw.sj.engine.core.state.StateStorage
-import com.bwsw.sj.engine.windowed.state.RAMStateService
-import com.bwsw.sj.engine.windowed.task.WindowedTaskManager
-import com.bwsw.sj.engine.windowed.task.reporting.WindowedStreamingPerformanceMetrics
+import com.bwsw.sj.engine.core.managment.CommonTaskManager
+import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
+import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 
 /**
  * Class is in charge of creating a StatefulModuleEnvironmentManager (and executor)
  * and performing a saving of state
  *
- * @param manager Manager of environment of task of windowed module
+ * @param manager Manager of environment of task of regular module
  * @param checkpointGroup Group of t-stream agents that have to make a checkpoint at the same time
- * @param performanceMetrics Set of metrics that characterize performance of a windowed streaming module
+ * @param performanceMetrics Set of metrics that characterize performance of a regular streaming module
  */
-class StatefulWindowedTaskEngineService(manager: WindowedTaskManager, checkpointGroup: CheckpointGroup, performanceMetrics: WindowedStreamingPerformanceMetrics)
-  extends WindowedTaskEngineService(manager, performanceMetrics) {
+class StatefulCommonModuleService(manager: CommonTaskManager, checkpointGroup: CheckpointGroup, performanceMetrics: PerformanceMetrics)
+  extends CommonModuleService(manager, checkpointGroup, performanceMetrics) {
 
   private val streamService = ConnectionRepository.getStreamService
   private var countOfCheckpoints = 1
   private val stateService = new RAMStateService(manager, checkpointGroup)
 
-  val windowedEnvironmentManager = new StatefulModuleEnvironmentManager(
+  val environmentManager = new StatefulModuleEnvironmentManager(
     new StateStorage(stateService),
-    windowedInstance.getOptionsAsMap(),
+    instance.getOptionsAsMap(),
     outputProducers,
-    windowedInstance.outputs
+    instance.outputs
       .flatMap(x => streamService.get(x)),
-    outputTags,
+    producerPolicyByOutput,
     moduleTimer,
     performanceMetrics
   )
 
-  val executor = manager.getExecutor(windowedEnvironmentManager).asInstanceOf[WindowedStreamingExecutor]
+  val executor = manager.getExecutor(environmentManager).asInstanceOf[RegularStreamingExecutor] //todo подумать над тем, как преобразовать к regular/window одновременно
 
   /**
    * Does group checkpoint of t-streams state consumers/producers
    */
   override def doCheckpoint() = {
-    if (countOfCheckpoints != windowedInstance.stateFullCheckpoint) {
+    if (countOfCheckpoints != getStateFullCheckpoint()) {
       doCheckpointOfPartOfState()
     } else {
       doCheckpointOfFullState()
     }
+    super.doCheckpoint()
   }
 
   /**
@@ -72,5 +72,12 @@ class StatefulWindowedTaskEngineService(manager: WindowedTaskManager, checkpoint
     logger.debug(s"Task: ${manager.taskName}. Invoke onAfterStateSave() handler\n")
     executor.onAfterStateSave(true)
     countOfCheckpoints = 1
+  }
+
+  private def getStateFullCheckpoint() = {
+    instance match {
+      case regularInstance: RegularInstance =>  regularInstance.stateFullCheckpoint
+      case windowedInstance: WindowedInstance =>  windowedInstance.stateFullCheckpoint
+    }
   }
 }

@@ -4,13 +4,11 @@ import java.util.concurrent.{ArrayBlockingQueue, Callable}
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module.WindowedInstance
-import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
+import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.core.entities._
-import com.bwsw.sj.engine.windowed.task.WindowedTaskManager
-import com.bwsw.sj.engine.windowed.task.engine.input.WindowedTaskInputServiceFactory
+import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.windowed.task.reporting.WindowedStreamingPerformanceMetrics
-import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
 import scala.collection.Map
@@ -24,19 +22,16 @@ import scala.collection.Map
 
  * @author Kseniya Mikhaleva
  */
-abstract class BatchCollector(protected val manager: WindowedTaskManager,
+abstract class BatchCollector(protected val manager: CommonTaskManager,
+                              taskInputService: TaskInputService,
+                              envelopeQueue: PersistentBlockingQueue,
                               batchQueue: ArrayBlockingQueue[Batch],
                               performanceMetrics: WindowedStreamingPerformanceMetrics) extends Callable[Unit] {
 
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"windowed-task-${manager.taskName}-batch-collector")
   protected val logger = LoggerFactory.getLogger(this.getClass)
-  private val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(EngineLiterals.persistentBlockingQueue)
-  protected val checkpointGroup = new CheckpointGroup()
   protected val instance = manager.instance.asInstanceOf[WindowedInstance]
-  private val windowedTaskInputServiceFactory = new WindowedTaskInputServiceFactory(manager, blockingQueue, checkpointGroup)
-  val taskInputService = windowedTaskInputServiceFactory.createRegularTaskInputService()
-
   private val envelopeSerializer = new JsonSerializer(true)
   private val batchPerStream: Map[String, Batch] = createStorageOfBatches()
 
@@ -45,34 +40,22 @@ abstract class BatchCollector(protected val manager: WindowedTaskManager,
   }
 
   override def call(): Unit = {
-    val lastEnvelopesByStreams = createStorageOfLastEnvelopes()
-
     while (true) {
-      val maybeEnvelope = blockingQueue.get(instance.eventWaitTime)
+      val maybeEnvelope = envelopeQueue.get(instance.eventWaitTime)
 
       maybeEnvelope match {
         case Some(serializedEnvelope) => {
           val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope)
-          lastEnvelopesByStreams((envelope.stream, envelope.partition)) = envelope
+          println("envelope: " + envelope.asInstanceOf[TStreamEnvelope].id)
+          batchPerStream(envelope.stream).envelopes += envelope
 
-          val transaction = envelope match {
-            case kafkaEnvelope: KafkaEnvelope => Transaction(kafkaEnvelope.partition, kafkaEnvelope.offset, List(kafkaEnvelope.data))
-            case tstreamEnvelope: TStreamEnvelope => Transaction(tstreamEnvelope.partition, tstreamEnvelope.id, tstreamEnvelope.data)
-          }
-          println("txn: " + envelope.stream + ", id: " + transaction.id)
-          batchPerStream(envelope.stream).transactions += transaction
-
-          if (instance.mainStream == envelope.stream) afterReceivingTransaction(transaction)
+          if (instance.mainStream == envelope.stream) afterReceivingEnvelope(envelope)
         }
         case None =>
       }
 
       if (isItTimeToCollectBatch()) collectBatch()
     }
-  }
-
-  private def createStorageOfLastEnvelopes() = {
-    manager.inputs.flatMap(x => x._2.map(y => ((x._1.name, y), new Envelope())))
   }
 
   protected def collectBatch() = {
@@ -85,17 +68,14 @@ abstract class BatchCollector(protected val manager: WindowedTaskManager,
   }
 
   private def putBatchesIntoQueue(batchPerStream: Map[String, Batch]) = {
-    batchPerStream.foreach(x => {
-      batchQueue.put(x._2.copy())
-      println("put batch: " + x._1)
-    })
+    batchPerStream.foreach(x => batchQueue.put(x._2.copy()))
   }
 
   private def clearBatches() = {
-    batchPerStream.foreach(x => x._2.transactions.clear())
+    batchPerStream.foreach(x => x._2.envelopes.clear())
   }
 
-  protected def afterReceivingTransaction(transaction: Transaction)
+  protected def afterReceivingEnvelope(envelope: Envelope)
 
   protected def isItTimeToCollectBatch(): Boolean
 

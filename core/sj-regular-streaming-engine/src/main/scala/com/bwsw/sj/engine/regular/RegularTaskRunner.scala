@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.regular
 
 import com.bwsw.sj.engine.core.engine.TaskRunner
 import com.bwsw.sj.engine.core.engine.input.TaskInputService
-import com.bwsw.sj.engine.regular.task.RegularTaskManager
+import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.regular.task.engine.{RegularTaskEngine, RegularTaskEngineFactory}
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
@@ -20,7 +20,7 @@ object RegularTaskRunner extends {override val threadName = "RegularTaskRunner-%
 
   def main(args: Array[String]) {
     try {
-      val manager = new RegularTaskManager()
+      val manager = new CommonTaskManager()
 
       logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for regular module\n")
 

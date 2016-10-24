@@ -1,8 +1,7 @@
-package com.bwsw.sj.engine.regular.state
+package com.bwsw.sj.engine.core.state
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.engine.core.state.IStateService
-import com.bwsw.sj.engine.regular.task.RegularTaskManager
+import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.consumer.ConsumerTransaction
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.group.CheckpointGroup
@@ -19,7 +18,7 @@ import scala.collection.mutable
  * @param checkpointGroup Group of t-stream agents that have to make a checkpoint at the same time
  */
 
-class RAMStateService(manager: RegularTaskManager, checkpointGroup: CheckpointGroup) extends IStateService {
+class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGroup) extends IStateService {
 
   private val partition = 0
   private val stateStreamName = manager.taskName + "_state"

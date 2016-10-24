@@ -1,11 +1,9 @@
-package com.bwsw.sj.engine.regular.task
+package com.bwsw.sj.engine.core.managment
 
 import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.common.utils.StreamLiterals
-import com.bwsw.sj.engine.core.environment.{ModuleEnvironmentManager, EnvironmentManager, ModuleOutput}
-import com.bwsw.sj.engine.core.managment.TaskManager
+import com.bwsw.sj.engine.core.environment.{EnvironmentManager, ModuleEnvironmentManager}
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
 
@@ -17,13 +15,10 @@ import scala.collection.mutable
  *
  * @author Kseniya Mikhaleva
  */
-class RegularTaskManager() extends TaskManager {
+class CommonTaskManager() extends TaskManager {
 
-  val regularInstance = instance.asInstanceOf[RegularInstance]
-  val inputs = getInputs(regularInstance.executionPlan)
+  val inputs: mutable.Map[SjStream, Array[Int]] = getInputs(getExecutionPlan)
   val outputProducers =  createOutputProducers()
-  val outputTags = createOutputTags()
-
 
   assert(numberOfAgentsPorts >=
     (inputs.count(x => x._1.streamType == StreamLiterals.tStreamType) + instance.outputs.length + 3),
@@ -40,11 +35,6 @@ class RegularTaskManager() extends TaskManager {
     logger.debug(s"Task: $taskName. Create instance of executor class\n")
 
     executor
-  }
-
-  private def createOutputTags() = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get tags for each output stream\n")
-    mutable.Map[String, (String, ModuleOutput)]()
   }
 
   /**

@@ -18,7 +18,7 @@ import scala.collection._
  * @param options User defined options from instance parameters
  * @param producers T-streams producers for each output stream of instance parameters
  * @param outputs Set of output streams of instance parameters that have tags
- * @param outputTags Keeps a tag (partitioned or round-robin output) corresponding to the output for each output stream
+ * @param producerPolicyByOutput Keeps a tag (partitioned or round-robin output) corresponding to the output for each output stream
  * @param moduleTimer Provides a possibility to set a timer inside a module
  */
 
@@ -26,10 +26,10 @@ class StatefulModuleEnvironmentManager(stateStorage: StateStorage,
                                        options: Map[String, Any],
                                        producers: Map[String, Producer[Array[Byte]]],
                                        outputs: Array[SjStream],
-                                       outputTags: mutable.Map[String, (String, ModuleOutput)],
+                                       producerPolicyByOutput: mutable.Map[String, (String, ModuleOutput)],
                                        moduleTimer: SjTimer,
                                        performanceMetrics: PerformanceMetrics)
-  extends ModuleEnvironmentManager(options, producers, outputs, outputTags, moduleTimer, performanceMetrics) {
+  extends ModuleEnvironmentManager(options, producers, outputs, producerPolicyByOutput, moduleTimer, performanceMetrics) {
   /**
    * Returns specific state of module
    *

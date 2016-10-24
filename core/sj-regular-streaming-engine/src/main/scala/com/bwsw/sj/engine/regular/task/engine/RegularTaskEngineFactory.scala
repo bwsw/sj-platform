@@ -1,8 +1,9 @@
 package com.bwsw.sj.engine.regular.task.engine
 
+import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
-import com.bwsw.sj.engine.regular.task.RegularTaskManager
+import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
 
@@ -16,17 +17,18 @@ import org.slf4j.LoggerFactory
  * @author Kseniya Mikhaleva
  */
 
-class RegularTaskEngineFactory(manager: RegularTaskManager,
+class RegularTaskEngineFactory(manager: CommonTaskManager,
                                performanceMetrics: RegularStreamingPerformanceMetrics) {
 
   protected val logger = LoggerFactory.getLogger(this.getClass)
+  private val regularInstance = manager.instance.asInstanceOf[RegularInstance]
 
   /**
    * Creates RegularTaskEngine is in charge of a basic execution logic of task of regular module
    * @return Engine of regular task
    */
   def createRegularTaskEngine(): RegularTaskEngine = {
-    manager.regularInstance.checkpointMode match {
+    regularInstance.checkpointMode match {
       case EngineLiterals.`timeIntervalMode` =>
         logger.info(s"Task: ${manager.taskName}. Regular module has a '${EngineLiterals.timeIntervalMode}' checkpoint mode, create an appropriate task engine\n")
         new RegularTaskEngine(manager, performanceMetrics) with TimeCheckpointTaskEngine

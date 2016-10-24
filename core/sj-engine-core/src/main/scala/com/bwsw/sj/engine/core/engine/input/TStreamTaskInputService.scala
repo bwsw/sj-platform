@@ -3,14 +3,13 @@ package com.bwsw.sj.engine.core.engine.input
 import java.util.Date
 
 import com.bwsw.sj.common.DAL.model.TStreamSjStream
-import com.bwsw.sj.common.DAL.model.module.{WindowedInstance, OutputInstance, RegularInstance}
+import com.bwsw.sj.common.DAL.model.module.{OutputInstance, RegularInstance, WindowedInstance}
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Oldest}
-import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
 /**
@@ -23,14 +22,12 @@ import org.slf4j.LoggerFactory
  * @param manager Manager of environment of task of regular module
  * @param blockingQueue Blocking queue for keeping incoming envelopes that are serialized into a string,
  *                      which will be retrieved into a module
- * @param checkpointGroup Group of t-stream agents that have to make a checkpoint at the same time
  * @author Kseniya Mikhaleva
  *
  */
 class TStreamTaskInputService(manager: TaskManager,
-                              blockingQueue: PersistentBlockingQueue,
-                              checkpointGroup: CheckpointGroup)
-  extends TaskInputService {
+                              blockingQueue: PersistentBlockingQueue)
+  extends TaskInputService(manager.inputs) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val consumers = createSubscribingConsumers()
@@ -96,17 +93,25 @@ class TStreamTaskInputService(manager: TaskManager,
     logger.debug(s"Task: ${manager.taskName}. Subscribing consumers are launched\n")
   }
 
-  def registerEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics) = {
+  override def registerEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics) = {
+    super.registerEnvelope(envelope, performanceMetrics)
     logger.info(s"Task: ${manager.taskName}. T-stream envelope is received\n")
     val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
-    logger.debug(s"Task: ${manager.taskName}. " +
-      s"Change local offset of consumer: ${tStreamEnvelope.consumerName} to txn: ${tStreamEnvelope.id}\n")
-    consumers(tStreamEnvelope.consumerName).getConsumer().setStreamPartitionOffset(tStreamEnvelope.partition, tStreamEnvelope.id)
     performanceMetrics.addEnvelopeToInputStream(
       tStreamEnvelope.stream,
       tStreamEnvelope.data.map(_.length)
     )
   }
 
-  override def doCheckpoint(): Unit = {}
+  override def setConsumerOffset(envelope: Envelope) = {
+    val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
+    logger.debug(s"Task: ${manager.taskName}. " +
+      s"Change local offset of consumer: ${tStreamEnvelope.consumerName} to txn: ${tStreamEnvelope.id}\n")
+    consumers(tStreamEnvelope.consumerName).getConsumer().setStreamPartitionOffset(tStreamEnvelope.partition, tStreamEnvelope.id)
+  }
+
+  override def doCheckpoint() = {
+    setConsumerOffsetToLastEnvelope()
+    super.doCheckpoint()
+  }
 }

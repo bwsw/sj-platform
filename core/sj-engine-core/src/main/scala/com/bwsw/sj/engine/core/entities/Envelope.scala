@@ -20,4 +20,8 @@ class Envelope() {
   var stream: String = null
   var partition: Int = 0
   var tags: Array[String] = Array()
+
+  def isEmpty() = {
+    streamType == null
+  }
 }
