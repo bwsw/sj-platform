@@ -36,7 +36,7 @@ protected class JdbcClient (private var jdbcCCD: JdbcClientConnectionData) {
     try stmt.executeUpdate(sql) catch {case e:Exception => throw new SQLException(e.getMessage)}
   }
 
-  private def prepareObject(data: Object): String = {
+  private def prepareObjectToSQL(data: Object): String = {
     val attrs = getObjectAttributes(data)
     val columns = attrs.map(a => a._1).mkString(", ")
     val values = attrs.map(a => a._3.toString.mkString("'","","'")).mkString(", ")
@@ -46,7 +46,7 @@ protected class JdbcClient (private var jdbcCCD: JdbcClientConnectionData) {
   def write(data: Object) = {
     createDatatable(data)
     if (!checkTableExists()) {throw new RuntimeException("There is no table in database")}
-    execute(prepareObject(data))
+    execute(prepareObjectToSQL(data))
   }
 
   private def checkTableExists(): Boolean = {

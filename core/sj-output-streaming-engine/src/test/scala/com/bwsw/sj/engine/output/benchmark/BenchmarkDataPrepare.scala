@@ -1,7 +1,6 @@
 package com.bwsw.sj.engine.output.benchmark
 
 import java.io.File
-
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.output.benchmark.BenchmarkDataFactory._
@@ -24,7 +23,7 @@ object BenchmarkDataPrepare extends App {
   uploadModule(module)
   open()
   println("cassandra prepare")
-  prepareCassandra("bench")
+  prepareCassandra()
   println("create providers")
   createProviders()
   println("create services")

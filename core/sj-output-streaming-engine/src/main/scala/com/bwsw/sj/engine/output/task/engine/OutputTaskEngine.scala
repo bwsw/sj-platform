@@ -3,14 +3,14 @@ package com.bwsw.sj.engine.output.task.engine
 import java.util.Calendar
 import java.util.concurrent.Callable
 
-import com.bwsw.common.{ElasticsearchClient, JsonSerializer, ObjectSerializer, JdbcClientBuilder}
+import com.bwsw.common.{ElasticsearchClient, JdbcClientBuilder, JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
-import com.bwsw.sj.common.DAL.model.{ESService, SjStream, JDBCService}
+import com.bwsw.sj.common.DAL.model.{ESService, JDBCService, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.engine.input.TStreamTaskInputService
-import com.bwsw.sj.engine.core.entities._
+import com.bwsw.sj.engine.core.entities.{EsEnvelope, _}
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.output.task.OutputTaskManager
@@ -24,8 +24,7 @@ import scala.collection.Map
 /**
  * Provided methods are responsible for a basic execution logic of task of output module
  *
- *
- * @param manager Manager of environment of task of output module
+  * @param manager Manager of environment of task of output module
  * @param performanceMetrics Set of metrics that characterize performance of a output streaming module
  * @param blockingQueue Blocking queue for keeping incoming envelopes that are serialized into a string,
  *                      which will be retrieved into a module
@@ -39,7 +38,6 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   currentThread.setName(s"output-task-${manager.taskName}-engine")
   protected val logger = LoggerFactory.getLogger(this.getClass)
 
-//  private val esEnvelopeSerializer = new JsonSerializer()
   protected val checkpointGroup = new CheckpointGroup()
   protected val instance = manager.instance.asInstanceOf[OutputInstance]
   private val envelopeSerializer = new JsonSerializer(true)
@@ -75,7 +73,6 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   }
 
   def openConnection(outputStream: SjStream) = {
-
   }
 
   /**
@@ -127,11 +124,14 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Run output task engine in a separate thread of execution service\n")
 
+
+
     while (true) {
       val maybeEnvelope = blockingQueue.get(EngineLiterals.eventWaitTimeout)
 
       maybeEnvelope match {
         case Some(serializedEnvelope) =>
+          println("envelope")
           processOutputEnvelope(serializedEnvelope)
         case _ =>
       }
@@ -142,7 +142,8 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
   /**
    * Check whether a group checkpoint of t-streams consumers/producers have to be done or not
-   * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside output module (not on the schedule) or not.
+    *
+    * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside output module (not on the schedule) or not.
    */
   protected def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean
 
@@ -194,18 +195,25 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     }
   }
 
-  private def processOutputEnvelope(serializedEnvelope: String) = {
+  // todo private
+  def processOutputEnvelope(serializedEnvelope: String) = {
+    println("process")
     val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope).asInstanceOf[TStreamEnvelope]
+    prepareES()
+    removeFromES(envelope)
     afterReceivingEnvelope()
     taskInputService.registerEnvelope(envelope, performanceMetrics)
     logger.debug(s"Task: ${
       manager.taskName
     }. Invoke onMessage() handler\n")
     val outputEnvelopes: List[Envelope] = executor.onMessage(envelope)
+
     outputEnvelopes.foreach(outputEnvelope => registerAndSendOutputEnvelope(outputEnvelope, envelope))
   }
 
+
   private def registerAndSendOutputEnvelope(outputEnvelope: Envelope, inputEnvelope: TStreamEnvelope) = {
+    println("register")
     registerOutputEnvelope(inputEnvelope.id.toString.replaceAll("-", ""), outputEnvelope)
     outputEnvelope match {
       case esEnvelope: EsEnvelope => writeToES(esEnvelope, inputEnvelope)
@@ -221,14 +229,15 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
   /**
     * Writing entity to elasticsearch
+    *
     * @param esEnvelope:
     * @param inputEnvelope:
     */
   private def writeToES(esEnvelope: EsEnvelope, inputEnvelope: TStreamEnvelope) = {
-    prepareES()
-    removeFromES(inputEnvelope)
+    println("write")
     esEnvelope.outputDateTime = s"${Calendar.getInstance().getTimeInMillis}"
-    esEnvelope.transactionDateTime = s"${inputEnvelope.id}"
+    // todo REMOVED 4 zeros from transactionDateTime
+    esEnvelope.transactionDateTime = s"${inputEnvelope.id}".dropRight(4)
     esEnvelope.txn = inputEnvelope.id.toString.replaceAll("-", "")
     esEnvelope.stream = inputEnvelope.stream
     esEnvelope.partition = inputEnvelope.partition
@@ -236,6 +245,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
     logger.debug(s"Task: ${manager.taskName}. Write output envelope to elasticsearch.")
     esClient.write(envelopeSerializer.serialize(esEnvelope), esService.index, outputStream.name)
+    println("end")
   }
 
   /**
