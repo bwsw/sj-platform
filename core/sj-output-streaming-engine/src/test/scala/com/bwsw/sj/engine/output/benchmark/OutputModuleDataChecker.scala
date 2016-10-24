@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.output.benchmark
 
-import com.bwsw.sj.common.DAL.model.{ESSjStream, SjStream, TStreamSjStream}
+import com.bwsw.sj.common.DAL.model.{ESSjStream, JDBCSjStream, SjStream, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.engine.output.benchmark.BenchmarkDataFactory._
@@ -37,10 +37,18 @@ object OutputModuleDataChecker extends App {
   }
 
   val esStream: ESSjStream = streamService.get(esStreamName).get.asInstanceOf[ESSjStream]
+  val jdbcStream: JDBCSjStream = streamService.get(jdbcStreamName).get.asInstanceOf[JDBCSjStream]
 
   val (esClient, esService) = openEsConnection(esStream)
+  val (jdbcClient, jdbcService) = openJdbcConnection(jdbcStream)
 
   val outputData = esClient.search(esService.index, esStream.name)
+
+  val stmt = jdbcClient.connection.createStatement()
+  var jdbcOutputDataSize = 0
+  val res = stmt.executeQuery(s"SELECT COUNT(1) FROM ${jdbcStream.name}")
+  while (res.next()) {jdbcOutputDataSize = res.getInt(1)}
+
 
   val outputElements = new ArrayBuffer[Int]()
   outputData.getHits.foreach { hit =>
@@ -49,12 +57,16 @@ object OutputModuleDataChecker extends App {
     outputElements.append(value.asInstanceOf[Int])
   }
 
-  assert(inputElements.size == outputElements.size,
-    s"Count of all txns elements that are consumed from output stream (${outputElements.size}) should equals count of all txns elements that are consumed from input stream (${inputElements.size})")
+  if (jdbcOutputDataSize < outputElements.size) {
+    assert(inputElements.size == outputElements.size,
+      s"Count of all txns elements that are consumed from output stream (${outputElements.size}) should equals count of all txns elements that are consumed from input stream (${inputElements.size})")
 
-  assert(inputElements.forall(x => outputElements.contains(x)) && outputElements.forall(x => inputElements.contains(x)),
-    "All txns elements that are consumed from output stream should equals all txns elements that are consumed from input stream")
-
+    assert(inputElements.forall(x => outputElements.contains(x)) && outputElements.forall(x => inputElements.contains(x)),
+      "All txns elements that are consumed from output stream should equals all txns elements that are consumed from input stream")
+  } else {
+    assert(inputElements.size == jdbcOutputDataSize,
+      s"Count of all txns elements that are consumed from output stream ($jdbcOutputDataSize) should equals count of all txns elements that are consumed from input stream (${inputElements.size})")
+  }
   esClient.close()
   ConnectionRepository.close()
   inputConsumer.stop()

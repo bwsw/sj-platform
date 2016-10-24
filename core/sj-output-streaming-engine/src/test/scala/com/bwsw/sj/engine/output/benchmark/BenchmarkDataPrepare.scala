@@ -12,15 +12,16 @@ import com.bwsw.sj.engine.output.benchmark.BenchmarkDataFactory._
  */
 object BenchmarkDataPrepare extends App {
 
-  val instanceName: String = "test-bench-instance"
   val checkpointInterval = 3
   val checkpointMode = EngineLiterals.everyNthMode
   val partitions = 4
 
   val module = new File("./contrib/stubs/sj-stub-output/target/scala-2.11/sj-stub-output-1.0-SNAPSHOT.jar")
+  val jdbcModule = new File("./contrib/stubs/sj-stub-output-jdbc/target/scala-2.11/sj-stub-output-jdbc-1.0-SNAPSHOT.jar")
 
   println("module upload")
   uploadModule(module)
+  uploadModule(jdbcModule)
   open()
   println("cassandra prepare")
   prepareCassandra()
@@ -31,7 +32,10 @@ object BenchmarkDataPrepare extends App {
   println("create streams")
   createStreams(partitions)
   println("create instance")
-  createInstance(instanceName, checkpointMode, checkpointInterval)
+  createInstance("test-es-bench-instance", checkpointMode, checkpointInterval,
+    esStreamName, "com.bwsw.stub.output-bench-test")
+  createInstance("test-jdbc-bench-instance", checkpointMode, checkpointInterval,
+    jdbcStreamName, "com.bwsw.stub.output-bench-test-jdbc")
 
   println("Prepare Stream")
   createIndex()

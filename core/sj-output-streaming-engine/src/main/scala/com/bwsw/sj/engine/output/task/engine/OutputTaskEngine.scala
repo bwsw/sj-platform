@@ -112,6 +112,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
       setUsername(jdbcService.provider.login).
       setPassword(jdbcService.provider.password).
       setTable(outputStream.name).
+      setDatabase(jdbcService.database).
       build()
     (client, jdbcService)
   }
@@ -120,11 +121,8 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     * It is in charge of running a basic execution logic of output task engine
     */
   override def call(): Unit = {
-
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Run output task engine in a separate thread of execution service\n")
-
-
 
     while (true) {
       val maybeEnvelope = blockingQueue.get(EngineLiterals.eventWaitTimeout)
@@ -152,7 +150,6 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     esService.prepare()
     createIndexMapping()
   }
-
   private def createIndexMapping() = {
     val index = esService.index
     logger.debug(s"Task: ${manager.taskName}. Create the mapping for the elasticsearch index $index")
@@ -199,8 +196,6 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   def processOutputEnvelope(serializedEnvelope: String) = {
     println("process")
     val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope).asInstanceOf[TStreamEnvelope]
-    prepareES()
-    removeFromES(envelope)
     afterReceivingEnvelope()
     taskInputService.registerEnvelope(envelope, performanceMetrics)
     logger.debug(s"Task: ${
@@ -234,9 +229,11 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     * @param inputEnvelope:
     */
   private def writeToES(esEnvelope: EsEnvelope, inputEnvelope: TStreamEnvelope) = {
-    println("write")
+    println("write es")
+    prepareES()
+    removeFromES(inputEnvelope)
     esEnvelope.outputDateTime = s"${Calendar.getInstance().getTimeInMillis}"
-    // todo REMOVED 4 zeros from transactionDateTime
+    // todo REMOVED 4 zeros from transactionDateTime (check it)
     esEnvelope.transactionDateTime = s"${inputEnvelope.id}".dropRight(4)
     esEnvelope.txn = inputEnvelope.id.toString.replaceAll("-", "")
     esEnvelope.stream = inputEnvelope.stream
@@ -254,6 +251,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
    * @param jdbcEnvelope: Output envelope for writing to JDBC
    */
   private def writeToJdbc(jdbcEnvelope: JdbcEnvelope) = {
+    println("write jdbc")
     jdbcEnvelope.stream = ""
     jdbcClient.write(jdbcEnvelope)
   }

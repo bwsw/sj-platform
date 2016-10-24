@@ -423,7 +423,8 @@ object BenchmarkDataFactory {
     cassandraFactory.close()
   }
 
-  def createInstance(instanceName: String, checkpointMode: String, checkpointInterval: Long) = {
+  def createInstance(instanceName: String, checkpointMode: String, checkpointInterval: Long,
+                     streamName: String, moduleName: String) = {
 
     val task1 = new Task()
     task1.inputs = Map(tStreamName -> Array(0, 3)).asJava
@@ -432,12 +433,12 @@ object BenchmarkDataFactory {
     val instance = new OutputInstance()
     instance.name = instanceName
     instance.moduleType = EngineLiterals.outputStreamingType
-    instance.moduleName = "com.bwsw.stub.output-bench-test"
+    instance.moduleName = moduleName
     instance.moduleVersion = "1.0"
     instance.status = EngineLiterals.started
     instance.description = "some description of test instance"
     instance.inputs = Array(tStreamName)
-    instance.outputs = Array(esStreamName)
+    instance.outputs = Array(streamName)
     instance.checkpointMode = checkpointMode
     instance.checkpointInterval = checkpointInterval
     instance.parallelism = 1
