@@ -35,7 +35,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   currentThread.setName(s"output-task-${manager.taskName}-engine")
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(EngineLiterals.persistentBlockingQueue)
-  private val esEnvelopeSerializer = new JsonSerializer()
+  private val envelopeSerializer = new JsonSerializer()
   private val instance = manager.instance.asInstanceOf[OutputInstance]
   private val outputStream = getOutput()
   protected val environmentManager = createModuleEnvironmentManager()
@@ -156,7 +156,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
       fields.put(field, Map("type" -> "date", "format" -> "epoch_millis"))
     }
     val mapping = Map("properties" -> fields)
-    val mappingJson = esEnvelopeSerializer.serialize(mapping)
+    val mappingJson = envelopeSerializer.serialize(mapping)
 
     esClient.createMapping(index, streamName, mappingJson)
   }
@@ -188,7 +188,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   // todo private
   def processOutputEnvelope(serializedEnvelope: String) = {
     println("process")
-    val envelope = esEnvelopeSerializer.deserialize[Envelope](serializedEnvelope).asInstanceOf[TStreamEnvelope]
+    val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope).asInstanceOf[TStreamEnvelope]
     afterReceivingEnvelope()
     taskInputService.registerEnvelope(envelope, performanceMetrics)
     logger.debug(s"Task: ${
@@ -234,7 +234,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     esEnvelope.tags = inputEnvelope.tags
 
     logger.debug(s"Task: ${manager.taskName}. Write output envelope to elasticsearch.")
-    esClient.write(esEnvelopeSerializer.serialize(esEnvelope), esService.index, outputStream.name)
+    esClient.write(envelopeSerializer.serialize(esEnvelope), esService.index, outputStream.name)
     println("end")
   }
 
