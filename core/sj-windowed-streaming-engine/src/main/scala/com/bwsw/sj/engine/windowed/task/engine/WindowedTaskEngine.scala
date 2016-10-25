@@ -4,7 +4,7 @@ import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
 
 import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.engine.core.engine.input.TaskInputService
+import com.bwsw.sj.engine.core.engine.input.TStreamTaskInputService
 import com.bwsw.sj.engine.core.entities.{Batch, Window}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.state.{StatefulCommonModuleService, StatelessCommonModuleService}
@@ -14,7 +14,7 @@ import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
 class WindowedTaskEngine(protected val manager: CommonTaskManager,
-                         taskInputService: TaskInputService,
+                         taskInputService: TStreamTaskInputService,
                          batchQueue: ArrayBlockingQueue[Batch],
                          performanceMetrics: WindowedStreamingPerformanceMetrics) extends Callable[Unit] {
 
@@ -112,6 +112,18 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
     windowPerStream.foreach(x => {
       x._2.batches.slice(0, instance.slidingInterval)
         .foreach(x => x.envelopes.foreach(x => taskInputService.registerEnvelope(x, performanceMetrics)))
+    })
+  }
+
+  private def temp() = {
+    windowPerStream.foreach(x => {
+      x._2.batches.slice(0, instance.slidingInterval)
+        .foreach(x => {
+        val envelopesByPartitions = x.envelopes.groupBy(x => x.partition)
+        envelopesByPartitions.foreach(partition => {
+
+        })
+      })
     })
   }
 

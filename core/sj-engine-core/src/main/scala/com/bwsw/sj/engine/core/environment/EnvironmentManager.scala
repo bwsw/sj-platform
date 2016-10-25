@@ -18,10 +18,14 @@ abstract class EnvironmentManager(val options: Map[String, Any], outputs: Array[
 
   protected val logger = LoggerFactory.getLogger(this.getClass)
 
-  var isCheckpointInitiated: Boolean = false
+  private var checkpointInitiated: Boolean = false
 
   def initiateCheckpoint() = {
-    isCheckpointInitiated = true
+    checkpointInitiated = true
+  }
+
+  def isCheckpointInitiated() = {
+    checkpointInitiated
   }
 
   /**

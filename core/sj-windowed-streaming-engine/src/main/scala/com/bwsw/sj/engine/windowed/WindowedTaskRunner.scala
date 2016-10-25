@@ -3,7 +3,7 @@ package com.bwsw.sj.engine.windowed
 import java.util.concurrent.ArrayBlockingQueue
 
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.engine.core.engine.input.{TaskInputService, CommonTaskInputServiceFactory}
+import com.bwsw.sj.engine.core.engine.input.TStreamTaskInputService
 import com.bwsw.sj.engine.core.engine.{PersistentBlockingQueue, TaskRunner}
 import com.bwsw.sj.engine.core.entities.Batch
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
@@ -26,9 +26,9 @@ object WindowedTaskRunner extends {
       logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for windowed module\n")
 
       val performanceMetrics = new WindowedStreamingPerformanceMetrics(manager)
-      val taskInputService: TaskInputService = new CommonTaskInputServiceFactory(manager, envelopeQueue).createTaskInputService()
+      val taskInputService = new TStreamTaskInputService(manager, envelopeQueue)
 
-      val batchCollector = new BatchCollectorFactory(manager, taskInputService, envelopeQueue, batchQueue, performanceMetrics).createBatchCollector()
+      val batchCollector = new BatchCollectorFactory(manager, envelopeQueue, batchQueue, performanceMetrics).createBatchCollector()
       val windowedTaskEngine = new WindowedTaskEngine(manager, taskInputService, batchQueue, performanceMetrics)
 
       logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
