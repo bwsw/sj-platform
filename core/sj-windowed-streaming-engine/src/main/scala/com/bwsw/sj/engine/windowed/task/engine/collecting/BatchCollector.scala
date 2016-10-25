@@ -23,6 +23,7 @@ import scala.collection.Map
  * @author Kseniya Mikhaleva
  */
 abstract class BatchCollector(protected val manager: CommonTaskManager,
+                              taskInputService: TaskInputService,
                               envelopeQueue: PersistentBlockingQueue,
                               batchQueue: ArrayBlockingQueue[Batch],
                               performanceMetrics: WindowedStreamingPerformanceMetrics) extends Callable[Unit] {

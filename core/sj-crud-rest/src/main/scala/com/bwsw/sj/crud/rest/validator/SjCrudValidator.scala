@@ -124,7 +124,7 @@ trait SjCrudValidator {
             "outputs must have the streams of t-stream type.")
         }
 
-      case `regularStreamingType` =>
+      case `regularStreamingType` | `windowedStreamingType` =>
         //'inputs.cardinality' field
         if (!isNonZeroCardinality(inputCardinality)) {
           throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
@@ -135,31 +135,6 @@ trait SjCrudValidator {
         if (inputTypes.isEmpty || !doesSourceTypesConsistOf(inputTypes, Set(tStreamType, kafkaStreamType))) {
           throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
             "inputs must have the streams of t-stream and kafka type.")
-        }
-
-        //'outputs.cardinality' field
-        if (!isNonZeroCardinality(outputCardinality)) {
-          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
-            "cardinality of outputs has to be an interval with the left bound that is greater than zero.")
-        }
-
-        //'outputs.types' field
-        if (outputTypes.length != 1 || !doesSourceTypesConsistOf(outputTypes, Set(tStreamType))) {
-          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
-            "outputs must have the streams of t-stream type.")
-        }
-
-      case `windowedStreamingType` =>
-        //'inputs.cardinality' field
-        if (!isNonZeroCardinality(inputCardinality)) {
-          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
-            "cardinality of inputs has to be an interval with the left bound that is greater than zero.")
-        }
-
-        //'inputs.types' field
-        if (inputTypes.isEmpty || !doesSourceTypesConsistOf(inputTypes, Set(tStreamType))) {
-          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
-            "inputs must have the streams of t-stream type.")
         }
 
         //'outputs.cardinality' field

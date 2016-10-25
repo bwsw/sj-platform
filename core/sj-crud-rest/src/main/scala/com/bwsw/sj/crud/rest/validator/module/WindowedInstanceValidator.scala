@@ -1,6 +1,6 @@
 package com.bwsw.sj.crud.rest.validator.module
 
-import com.bwsw.sj.common.DAL.model.TStreamService
+import com.bwsw.sj.common.DAL.model.{TStreamService, KafkaService, KafkaSjStream}
 import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, SpecificationData, WindowedInstanceMetadata}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._
@@ -98,6 +98,13 @@ class WindowedInstanceValidator extends InstanceValidator {
       errors += s"Input streams must be one of: ${inputTypes.mkString("[", ", ", "]")}"
     }
 
+    val kafkaStreams = inputStreams.filter(s => s.streamType.equals(kafkaStreamType)).map(_.asInstanceOf[KafkaSjStream])
+    if (kafkaStreams.nonEmpty) {
+      if (kafkaStreams.exists(s => !s.service.isInstanceOf[KafkaService])) {
+        errors += s"Service for kafka streams must be 'KfkQ'"
+      }
+    }
+
     //'batch-fill-type' field
     Option(instance.batchFillType) match {
       case None =>
@@ -109,6 +116,11 @@ class WindowedInstanceValidator extends InstanceValidator {
             if (!batchFillTypes.contains(x)) {
               errors += s"Unknown value of 'type-name' of 'batch-fill-type' attribute: '$x'. " +
                 s"'Type-name' must be one of: ${batchFillTypes.mkString("[", ", ", "]")}"
+            } else {
+              if (x == transactionIntervalMode && inputStreams.exists(x => x.streamType == kafkaStreamType)) {
+                errors += s"'Type-name' of 'batch-fill-type' cannot be equal '$transactionIntervalMode', " +
+                  s"if there are the '$kafkaStreamType' type inputs"
+              }
             }
           case None =>
             errors += s"'Type-name' of 'batch-fill-type' is required"
@@ -127,12 +139,19 @@ class WindowedInstanceValidator extends InstanceValidator {
 
     // 'start-from' field
     val startFrom = instance.startFrom
-    if (!startFromModes.contains(startFrom)) {
-      try {
-        startFrom.toLong
-      } catch {
-        case ex: NumberFormatException =>
-          errors += s"'Start-from' attribute is not one of: ${startFromModes.mkString("[", ", ", "]")} or timestamp"
+    if (inputStreams.exists(s => s.streamType.equals(kafkaStreamType))) {
+      if (!startFromModes.contains(startFrom)) {
+        errors += s"'Start-from' attribute must be one of: ${startFromModes.mkString("[", ", ", "]")}, " +
+          s"if instance inputs have the '$kafkaStreamType' type streams"
+      }
+    } else {
+      if (!startFromModes.contains(startFrom)) {
+        try {
+          startFrom.toLong
+        } catch {
+          case ex: NumberFormatException =>
+            errors += s"'Start-from' attribute is not one of: ${startFromModes.mkString("[", ", ", "]")} or timestamp"
+        }
       }
     }
 

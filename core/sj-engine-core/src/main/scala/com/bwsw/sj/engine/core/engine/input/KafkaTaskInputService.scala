@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.regular.task.engine.input
+package com.bwsw.sj.engine.core.engine.input
 
 import java.util.Properties
 
@@ -9,7 +9,6 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.utils.{ConfigLiterals, ConfigSettingsUtils, EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
-import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics

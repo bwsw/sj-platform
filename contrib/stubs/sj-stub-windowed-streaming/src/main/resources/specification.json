@@ -10,6 +10,7 @@
       10
     ],
     "types": [
+      "stream.kafka",
       "stream.t-stream"
     ]
   },
