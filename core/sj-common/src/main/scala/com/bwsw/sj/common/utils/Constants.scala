@@ -8,6 +8,7 @@ object EngineLiterals {
   def persistentQueuePath = UUID.randomUUID().toString
 
   //todo: yet t-streams can't remove persistent queue
+  final val queueSize = 1000
   final val persistentBlockingQueue = "persistentBlockingQueue"
   final val eventWaitTimeout = 1000
 

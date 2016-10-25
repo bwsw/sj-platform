@@ -1,10 +1,10 @@
 package com.bwsw.sj.engine.core.state
 
-import com.bwsw.sj.common.DAL.model.module.{WindowedInstance, RegularInstance}
+import com.bwsw.sj.common.DAL.model.module.{RegularInstance, WindowedInstance}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.engine.StateHandlers
 import com.bwsw.sj.engine.core.environment.StatefulModuleEnvironmentManager
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
-import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 
@@ -34,8 +34,9 @@ class StatefulCommonModuleService(manager: CommonTaskManager, checkpointGroup: C
     performanceMetrics
   )
 
-  val executor = manager.getExecutor(environmentManager).asInstanceOf[RegularStreamingExecutor] //todo подумать над тем, как преобразовать к regular/window одновременно
+  val executor = manager.getExecutor(environmentManager)
 
+  private val statefulExecutor = executor.asInstanceOf[StateHandlers]
   /**
    * Does group checkpoint of t-streams state consumers/producers
    */
@@ -54,10 +55,10 @@ class StatefulCommonModuleService(manager: CommonTaskManager, checkpointGroup: C
   private def doCheckpointOfPartOfState() = {
     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint of a part of state\n")
     logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeStateSave() handler\n")
-    executor.onBeforeStateSave(false)
+    statefulExecutor.onBeforeStateSave(false)
     stateService.savePartialState()
     logger.debug(s"Task: ${manager.taskName}. Invoke onAfterStateSave() handler\n")
-    executor.onAfterStateSave(false)
+    statefulExecutor.onAfterStateSave(false)
     countOfCheckpoints += 1
   }
 
@@ -67,10 +68,10 @@ class StatefulCommonModuleService(manager: CommonTaskManager, checkpointGroup: C
   private def doCheckpointOfFullState() = {
     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint of full state\n")
     logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeStateSave() handler\n")
-    executor.onBeforeStateSave(true)
+     statefulExecutor.onBeforeStateSave(true)
     stateService.saveFullState()
     logger.debug(s"Task: ${manager.taskName}. Invoke onAfterStateSave() handler\n")
-    executor.onAfterStateSave(true)
+     statefulExecutor.onAfterStateSave(true)
     countOfCheckpoints = 1
   }
 

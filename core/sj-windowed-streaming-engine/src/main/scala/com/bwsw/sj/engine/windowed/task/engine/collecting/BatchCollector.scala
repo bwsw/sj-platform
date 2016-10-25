@@ -5,7 +5,6 @@ import java.util.concurrent.{ArrayBlockingQueue, Callable}
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
-import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.windowed.task.reporting.WindowedStreamingPerformanceMetrics
@@ -23,7 +22,6 @@ import scala.collection.Map
  * @author Kseniya Mikhaleva
  */
 abstract class BatchCollector(protected val manager: CommonTaskManager,
-                              taskInputService: TaskInputService,
                               envelopeQueue: PersistentBlockingQueue,
                               batchQueue: ArrayBlockingQueue[Batch],
                               performanceMetrics: WindowedStreamingPerformanceMetrics) extends Callable[Unit] {

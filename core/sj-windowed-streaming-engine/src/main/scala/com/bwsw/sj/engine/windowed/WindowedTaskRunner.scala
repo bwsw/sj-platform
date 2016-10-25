@@ -16,7 +16,7 @@ object WindowedTaskRunner extends {
 } with TaskRunner {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val batchQueue: ArrayBlockingQueue[Batch] = new ArrayBlockingQueue(1000)
+  private val batchQueue: ArrayBlockingQueue[Batch] = new ArrayBlockingQueue(EngineLiterals.queueSize)
   private val envelopeQueue: PersistentBlockingQueue = new PersistentBlockingQueue(EngineLiterals.persistentBlockingQueue)
 
   def main(args: Array[String]) {
@@ -28,7 +28,7 @@ object WindowedTaskRunner extends {
       val performanceMetrics = new WindowedStreamingPerformanceMetrics(manager)
       val taskInputService: TaskInputService = new CommonTaskInputServiceFactory(manager, envelopeQueue).createTaskInputService()
 
-      val batchCollector = new BatchCollectorFactory(manager, taskInputService, envelopeQueue, batchQueue, performanceMetrics).createBatchCollector()
+      val batchCollector = new BatchCollectorFactory(manager, envelopeQueue, batchQueue, performanceMetrics).createBatchCollector()
       val windowedTaskEngine = new WindowedTaskEngine(manager, taskInputService, batchQueue, performanceMetrics)
 
       logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")

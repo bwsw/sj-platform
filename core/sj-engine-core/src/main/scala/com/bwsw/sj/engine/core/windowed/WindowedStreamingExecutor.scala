@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.core.windowed
 
-import com.bwsw.sj.common.engine.StreamingExecutor
+import com.bwsw.sj.common.engine.{StreamingExecutor, StateHandlers}
 import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 
 /**
@@ -12,7 +12,7 @@ import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
  */
 
 
-class WindowedStreamingExecutor(manager: ModuleEnvironmentManager) extends StreamingExecutor {
+class WindowedStreamingExecutor(manager: ModuleEnvironmentManager) extends StreamingExecutor with StateHandlers {
   /**
    * Is invoked only once at the beginning of launching of module
    */
@@ -48,20 +48,4 @@ class WindowedStreamingExecutor(manager: ModuleEnvironmentManager) extends Strea
    * Nothing to execute
    */
   def onIdle(): Unit = {}
-
-  /**
-   * Handler triggered before saving of the state
-   *
-   * @param isFullState Flag denotes that the full state (true) or partial changes of state (false) will be saved
-   */
-  def onBeforeStateSave(isFullState: Boolean): Unit = {}
-
-  /**
-   * Handler triggered after saving of the state
-   *
-   * @param isFullState Flag denotes that there was(were) a saving of the full state (true) or partial changes of state(false)
-   */
-  def onAfterStateSave(isFullState: Boolean): Unit = {}
-
 }
-
