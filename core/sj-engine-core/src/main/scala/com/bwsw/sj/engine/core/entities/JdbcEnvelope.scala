@@ -6,6 +6,6 @@ package com.bwsw.sj.engine.core.entities
  * Provides a wrapper for jdbc entity.
  */
 
-class JdbcEnvelope extends Envelope {
-
+class JdbcEnvelope extends Envelope with Serializable {
+  streamType = "jdbc-output"
 }

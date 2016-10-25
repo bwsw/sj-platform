@@ -1,5 +1,5 @@
 {
-  "name": "com.bwsw.stub.output-bench-test",
+  "name": "com.bwsw.stub.output-bench-test-jdbc",
   "description": "Stub output-module by BW",
   "version": "1.0",
   "author": "Kseniya Tomskikh",
@@ -29,6 +29,6 @@
     "opt": 1
   },
   "validator-class": "com.bwsw.sj.stubs.module.output.StubOutputValidator",
-  "executor-class": "com.bwsw.sj.stubs.module.output.StubOutputExecutor",
+  "executor-class": "com.bwsw.sj.stubs.module.output.StubOutputExecutorJdbc",
   "entity-class" : "com.bwsw.sj.stubs.module.output.data.StubEsData"
 }

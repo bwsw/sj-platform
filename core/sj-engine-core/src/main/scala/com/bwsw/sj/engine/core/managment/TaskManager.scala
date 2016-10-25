@@ -162,9 +162,13 @@ abstract class TaskManager() {
     storage.get(fileMetadata.filename, s"tmp/${instance.moduleName}")
   }
 
-  protected def getInputs(executionPlan: ExecutionPlan): mutable.Map[SjStream, Array[Int]] = {
-    executionPlan.tasks.get(taskName).inputs.asScala
-      .map(x => (streamDAO.get(x._1).get, x._2))
+  @throws(classOf[Exception])
+  protected def getInputs(executionPlan: ExecutionPlan) = {
+    val task = executionPlan.tasks.get(taskName)
+    task match {
+      case null => throw new NullPointerException("There is no task with that name in the execution plan.")
+      case _ => task.inputs.asScala.map(x => (streamDAO.get(x._1).get, x._2))
+    }
   }
 
   /**
