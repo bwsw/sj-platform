@@ -247,7 +247,8 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
    * @param jdbcEnvelope: Output envelope for writing to JDBC
    */
   private def writeToJdbc(jdbcEnvelope: JdbcEnvelope, inputEnvelope: TStreamEnvelope) = {
-    jdbcClient.remove(inputEnvelope.id)
+    if (!wasFirstCheckpoint)
+      jdbcClient.remove(inputEnvelope.id)
     jdbcClient.write(jdbcEnvelope, inputEnvelope.id)
   }
 
