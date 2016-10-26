@@ -13,6 +13,7 @@ import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.tstreams.agents.consumer.Offset.Newest
+import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.NewTransactionProducerPolicy
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.TopicPartition
@@ -34,7 +35,8 @@ import scala.collection.mutable
  *                      which will be retrieved into a module
  */
 class KafkaTaskInputService(manager: CommonTaskManager,
-                            blockingQueue: PersistentBlockingQueue)
+                            blockingQueue: PersistentBlockingQueue,
+                            override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
   extends TaskInputService(manager.inputs) {
 
   private val currentThread = Thread.currentThread()
@@ -218,12 +220,9 @@ class KafkaTaskInputService(manager: CommonTaskManager,
     kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
   }
 
-  override def doCheckpoint() = {
-    logger.debug(s"Task: ${manager.taskName}. Save kafka offsets for each kafka input\n")
-    setConsumerOffsetToLastEnvelope()
-    offsetProducer
-      .newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
+  override def setConsumerOffsetToLastEnvelope() = {
+    super.setConsumerOffsetToLastEnvelope()
+    offsetProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
       .send(offsetSerializer.serialize(kafkaOffsetsStorage))
-    super.doCheckpoint()
   }
 }

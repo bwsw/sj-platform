@@ -14,8 +14,8 @@ import com.bwsw.tstreams.agents.group.CheckpointGroup
  * @author Kseniya Mikhaleva
  */
 abstract class TaskInputService(inputs: scala.collection.mutable.Map[SjStream, Array[Int]]) extends Callable[Unit] {
-  protected val lastEnvelopesByStreams = createStorageOfLastEnvelopes()
-  val checkpointGroup = new CheckpointGroup()
+  private val lastEnvelopesByStreams = createStorageOfLastEnvelopes() //todo сделать заполнение только для потоков конкретного типа
+  val checkpointGroup: CheckpointGroup
 
   private def createStorageOfLastEnvelopes() = {
     inputs.flatMap(x => x._2.map(y => ((x._1.name, y), new Envelope())))
@@ -25,15 +25,17 @@ abstract class TaskInputService(inputs: scala.collection.mutable.Map[SjStream, A
     lastEnvelopesByStreams((envelope.stream, envelope.partition)) = envelope
   }
 
-  protected def setConsumerOffsetToLastEnvelope() = {
+  def setConsumerOffsetToLastEnvelope() = {
     lastEnvelopesByStreams.values.filterNot(_.isEmpty()).foreach(envelope => {
       setConsumerOffset(envelope)
     })
+    lastEnvelopesByStreams.clear()
   }
 
   protected def setConsumerOffset(envelope: Envelope)
 
   def doCheckpoint() = {
+    setConsumerOffsetToLastEnvelope()
     checkpointGroup.checkpoint()
   }
 }
