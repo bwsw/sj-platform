@@ -36,17 +36,24 @@ protected class JdbcClient (private var jdbcCCD: JdbcClientConnectionData) {
     try stmt.executeUpdate(sql) catch {case e:Exception => throw new SQLException(e.getMessage)}
   }
 
-  private def prepareObjectToSQL(data: Object): String = {
-    val attrs = getObjectAttributes(data)
+  private def prepareObjectToSQL(data: Object, id: Long): String = {
+    var attrs = getObjectAttributes(data)
+    attrs = attrs:+Tuple3("id", id.getClass, id)
     val columns = attrs.map(a => a._1).mkString(", ")
     val values = attrs.map(a => a._3.toString.mkString("'","","'")).mkString(", ")
     s"INSERT INTO ${jdbcCCD.table} ($columns) VALUES ($values);"
   }
 
-  def write(data: Object) = {
-    createDatatable(data)
+  def write(data: Object, id: Long) = {
+    createTable(data)
     if (!checkTableExists()) {throw new RuntimeException("There is no table in database")}
-    execute(prepareObjectToSQL(data))
+    val sql = prepareObjectToSQL(data, id)
+    execute(sql)
+  }
+
+  def remove(id: Long) = {
+    val sql = s"DELETE FROM ${jdbcCCD.table} WHERE id = $id"
+    execute(sql)
   }
 
   private def checkTableExists(): Boolean = {
@@ -63,12 +70,12 @@ protected class JdbcClient (private var jdbcCCD: JdbcClientConnectionData) {
     * @param data: Some object
     * @return Array of (Attribute name, Type, Value)
     */
-  private def getObjectAttributes(data: Object):Array[(java.lang.String, java.lang.Class[_], AnyRef)] = {
+  private def getObjectAttributes(data: Object):Array[(java.lang.String, java.lang.Class[_], Any)] = {
     data.getClass.getDeclaredMethods.filter {_.getReturnType != Void.TYPE}
       .map { method => (method.getName, method.getReturnType, method.invoke(data))}
   }
 
-  private def createDatatable(data: Object): Unit = {
+  private def createTable(data: Object): Unit = {
   }
 
   def close() = {

@@ -264,7 +264,7 @@ object BenchmarkDataFactory {
 
   def create_table: String = {
     s"CREATE TABLE $jdbcStreamName " +
-    "(id INTEGER not NULL, " +
+    "(id BIGINT not NULL, " +
     " value INTEGER, " +
     " PRIMARY KEY ( id ))"
   }

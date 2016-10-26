@@ -8,4 +8,5 @@ package com.bwsw.sj.engine.core.entities
 
 class JdbcEnvelope extends Envelope with Serializable {
   streamType = "jdbc-output"
+  var id: Long = _
 }

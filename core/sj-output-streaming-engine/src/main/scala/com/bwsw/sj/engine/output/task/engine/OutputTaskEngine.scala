@@ -129,7 +129,6 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
       maybeEnvelope match {
         case Some(serializedEnvelope) =>
-          println("envelope")
           processOutputEnvelope(serializedEnvelope)
         case _ =>
       }
@@ -194,7 +193,6 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
   // todo private
   def processOutputEnvelope(serializedEnvelope: String) = {
-    println("process")
     val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope).asInstanceOf[TStreamEnvelope]
     afterReceivingEnvelope()
     taskInputService.registerEnvelope(envelope, performanceMetrics)
@@ -208,11 +206,10 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
 
   private def registerAndSendOutputEnvelope(outputEnvelope: Envelope, inputEnvelope: TStreamEnvelope) = {
-    println("register")
     registerOutputEnvelope(inputEnvelope.id.toString.replaceAll("-", ""), outputEnvelope)
     outputEnvelope match {
       case esEnvelope: EsEnvelope => writeToES(esEnvelope, inputEnvelope)
-      case jdbcEnvelope: JdbcEnvelope => writeToJdbc(jdbcEnvelope)
+      case jdbcEnvelope: JdbcEnvelope => writeToJdbc(jdbcEnvelope, inputEnvelope)
       case _ =>
     }
   }
@@ -229,7 +226,6 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     * @param inputEnvelope:
     */
   private def writeToES(esEnvelope: EsEnvelope, inputEnvelope: TStreamEnvelope) = {
-    println("write es")
     prepareES()
     removeFromES(inputEnvelope)
     esEnvelope.outputDateTime = s"${Calendar.getInstance().getTimeInMillis}"
@@ -250,10 +246,9 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
    *
    * @param jdbcEnvelope: Output envelope for writing to JDBC
    */
-  private def writeToJdbc(jdbcEnvelope: JdbcEnvelope) = {
-    println("write jdbc")
-    jdbcEnvelope.stream = ""
-    jdbcClient.write(jdbcEnvelope)
+  private def writeToJdbc(jdbcEnvelope: JdbcEnvelope, inputEnvelope: TStreamEnvelope) = {
+    jdbcClient.remove(inputEnvelope.id)
+    jdbcClient.write(jdbcEnvelope, inputEnvelope.id)
   }
 
 
