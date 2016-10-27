@@ -5,7 +5,7 @@ import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
 import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.input.TaskInputService
-import com.bwsw.sj.engine.core.entities.{Batch, Window}
+import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.state.{StatefulCommonModuleService, StatelessCommonModuleService}
 import com.bwsw.sj.engine.core.windowed.{WindowRepository, WindowedStreamingExecutor}
@@ -14,7 +14,7 @@ import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
 class WindowedTaskEngine(protected val manager: CommonTaskManager,
-                         taskInputService: TaskInputService,
+                         taskInputService: TaskInputService[_ >: TStreamEnvelope with KafkaEnvelope <: Envelope],
                          batchQueue: ArrayBlockingQueue[Batch],
                          performanceMetrics: WindowedStreamingPerformanceMetrics) extends Callable[Unit] {
 

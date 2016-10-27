@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.core.engine.input
 
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
-import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.entities.{TStreamEnvelope, Envelope, KafkaEnvelope}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory
 class CompleteTaskInputService(manager: CommonTaskManager,
                                blockingQueue: PersistentBlockingQueue) extends {
   override val checkpointGroup = new CheckpointGroup()
-} with TaskInputService(manager.inputs) {
+} with TaskInputService[Envelope](manager.inputs) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val kafkaRegularTaskInputService = new KafkaTaskInputService(manager, blockingQueue, checkpointGroup)
@@ -27,10 +27,10 @@ class CompleteTaskInputService(manager: CommonTaskManager,
 
   override def registerEnvelope(envelope: Envelope) = {
     envelope match {
-      case _: TStreamEnvelope =>
-        tStreamRegularTaskInputService.registerEnvelope(envelope)
-      case _: KafkaEnvelope =>
-        kafkaRegularTaskInputService.registerEnvelope(envelope)
+      case tstreamEnvelope: TStreamEnvelope =>
+        tStreamRegularTaskInputService.registerEnvelope(tstreamEnvelope)
+      case kafkaEnvelope: KafkaEnvelope =>
+        kafkaRegularTaskInputService.registerEnvelope(kafkaEnvelope)
       case wrongEnvelope =>
         logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/windowed streaming engine")
         throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/windowed streaming engine")
@@ -49,10 +49,10 @@ class CompleteTaskInputService(manager: CommonTaskManager,
 
   override def setConsumerOffset(envelope: Envelope) = {
     envelope match {
-      case _: TStreamEnvelope =>
-        tStreamRegularTaskInputService.setConsumerOffset(envelope)
-      case _: KafkaEnvelope =>
-        kafkaRegularTaskInputService.setConsumerOffset(envelope)
+      case tstreamEnvelope: TStreamEnvelope =>
+        tStreamRegularTaskInputService.setConsumerOffset(tstreamEnvelope)
+      case kafkaEnvelope: KafkaEnvelope =>
+        kafkaRegularTaskInputService.setConsumerOffset(kafkaEnvelope)
       case wrongEnvelope =>
         logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/windowed streaming engine")
         throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/windowed streaming engine")

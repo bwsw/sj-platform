@@ -1,7 +1,6 @@
 package com.bwsw.sj.engine.output
 
 import com.bwsw.sj.engine.core.engine.TaskRunner
-import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.engine.OutputTaskEngineFactory
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
@@ -29,7 +28,7 @@ object OutputTaskRunner extends {override val threadName = "OutputTaskRunner-%d"
 
       val outputTaskEngine = outputTaskEngineFactory.createOutputTaskEngine()
 
-      val outputTaskInputService: TaskInputService = outputTaskEngine.taskInputService
+      val outputTaskInputService = outputTaskEngine.taskInputService
 
       logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
 

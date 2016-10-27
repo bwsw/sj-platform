@@ -1,7 +1,6 @@
 package com.bwsw.sj.engine.regular
 
 import com.bwsw.sj.engine.core.engine.TaskRunner
-import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.regular.task.engine.{RegularTaskEngine, RegularTaskEngineFactory}
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
@@ -30,7 +29,7 @@ object RegularTaskRunner extends {override val threadName = "RegularTaskRunner-%
 
       val regularTaskEngine: RegularTaskEngine = regularTaskEngineFactory.createRegularTaskEngine()
 
-      val regularTaskInputService: TaskInputService = regularTaskEngine.taskInputService
+      val regularTaskInputService = regularTaskEngine.taskInputService
 
       logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
 

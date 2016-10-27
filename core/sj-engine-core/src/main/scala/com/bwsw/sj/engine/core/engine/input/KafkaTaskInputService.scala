@@ -9,7 +9,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.utils.{ConfigLiterals, ConfigSettingsUtils, EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
-import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope}
+import com.bwsw.sj.engine.core.entities.KafkaEnvelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.consumer.Offset.Newest
 import com.bwsw.tstreams.agents.group.CheckpointGroup
@@ -36,8 +36,7 @@ import scala.collection.mutable
 class KafkaTaskInputService(manager: CommonTaskManager,
                             blockingQueue: PersistentBlockingQueue,
                             override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
-  extends TaskInputService(manager.inputs) {
-
+  extends TaskInputService[KafkaEnvelope](manager.inputs) {
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"regular-task-${manager.taskName}-kafka-consumer")
   private val logger = LoggerFactory.getLogger(this.getClass)
@@ -202,11 +201,10 @@ class KafkaTaskInputService(manager: CommonTaskManager,
     }
   }
 
-  override def setConsumerOffset(envelope: Envelope) = {
-    val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
-    logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${kafkaEnvelope.stream} " +
-      s"for partition: ${kafkaEnvelope.partition} to ${kafkaEnvelope.offset}\n")
-    kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
+  override def setConsumerOffset(envelope: KafkaEnvelope) = {
+    logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${envelope.stream} " +
+      s"for partition: ${envelope.partition} to ${envelope.offset}\n")
+    kafkaOffsetsStorage((envelope.stream, envelope.partition)) = envelope.offset
   }
 
   override def setConsumerOffsetToLastEnvelope() = {

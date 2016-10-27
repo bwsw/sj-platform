@@ -6,7 +6,7 @@ import com.bwsw.sj.common.DAL.model.TStreamSjStream
 import com.bwsw.sj.common.DAL.model.module.{OutputInstance, RegularInstance, WindowedInstance}
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
-import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.group.CheckpointGroup
@@ -28,8 +28,7 @@ import org.slf4j.LoggerFactory
 class TStreamTaskInputService(manager: TaskManager,
                               blockingQueue: PersistentBlockingQueue,
                               override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
-  extends TaskInputService(manager.inputs) {
-
+  extends TaskInputService[TStreamEnvelope](manager.inputs) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val consumers = createSubscribingConsumers()
 
@@ -94,10 +93,9 @@ class TStreamTaskInputService(manager: TaskManager,
     logger.debug(s"Task: ${manager.taskName}. Subscribing consumers are launched\n")
   }
 
-  override def setConsumerOffset(envelope: Envelope) = {
-    val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
+  override def setConsumerOffset(envelope: TStreamEnvelope) = {
     logger.debug(s"Task: ${manager.taskName}. " +
-      s"Change local offset of consumer: ${tStreamEnvelope.consumerName} to txn: ${tStreamEnvelope.id}\n")
-    consumers(tStreamEnvelope.consumerName).getConsumer().setStreamPartitionOffset(tStreamEnvelope.partition, tStreamEnvelope.id)
+      s"Change local offset of consumer: ${envelope.consumerName} to txn: ${envelope.id}\n")
+    consumers(envelope.consumerName).getConsumer().setStreamPartitionOffset(envelope.partition, envelope.id)
   }
 }
