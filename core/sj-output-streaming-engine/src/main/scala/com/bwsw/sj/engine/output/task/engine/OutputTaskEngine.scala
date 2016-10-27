@@ -23,7 +23,7 @@ import scala.collection.Map
 /**
  * Provided methods are responsible for a basic execution logic of task of output module
  *
-  * @param manager Manager of environment of task of output module
+ * @param manager Manager of environment of task of output module
  * @param performanceMetrics Set of metrics that characterize performance of a output streaming module
 
  * @author Kseniya Mikhaleva
@@ -43,11 +43,9 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   val taskInputService = new TStreamTaskInputService(manager, blockingQueue)
   protected val isNotOnlyCustomCheckpoint: Boolean
   private lazy val (esClient, esService) = openEsConnection(outputStream)
-  private lazy val (jdbcClient, jdbcService) =  openJdbcConnection(outputStream)
+  private lazy val (jdbcClient, jdbcService) = openJdbcConnection(outputStream)
   private var wasFirstCheckpoint = false
   private val byteSerializer = new ObjectSerializer()
-
-
 
 
   private def getOutput(): SjStream = {
@@ -89,11 +87,11 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
 
   /**
-    * Open JDBC connection
-    *
-    * @param outputStream Output stream
-    * @return JDBC connection client and JDBC service of stream
-    */
+   * Open JDBC connection
+   *
+   * @param outputStream Output stream
+   * @return JDBC connection client and JDBC service of stream
+   */
   private def openJdbcConnection(outputStream: SjStream) = {
     logger.info(s"Task: ${manager.taskName}. Open output JDBC connection.\n")
     val jdbcService: JDBCService = outputStream.service.asInstanceOf[JDBCService]
@@ -111,8 +109,8 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   }
 
   /**
-    * It is in charge of running a basic execution logic of output task engine
-    */
+   * It is in charge of running a basic execution logic of output task engine
+   */
   override def call(): Unit = {
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Run output task engine in a separate thread of execution service\n")
@@ -133,8 +131,8 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
   /**
    * Check whether a group checkpoint of t-streams consumers/producers have to be done or not
-    *
-    * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside output module (not on the schedule) or not.
+   *
+   * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside output module (not on the schedule) or not.
    */
   protected def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean
 
@@ -143,6 +141,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     esService.prepare()
     createIndexMapping()
   }
+
   private def createIndexMapping() = {
     val index = esService.index
     logger.debug(s"Task: ${manager.taskName}. Create the mapping for the elasticsearch index $index")
@@ -189,16 +188,18 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   def processOutputEnvelope(serializedEnvelope: String) = {
     println("process")
     val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope).asInstanceOf[TStreamEnvelope]
-    afterReceivingEnvelope()
-    taskInputService.registerEnvelope(envelope, performanceMetrics)
-    logger.debug(s"Task: ${
-      manager.taskName
-    }. Invoke onMessage() handler\n")
+    registerEnvelope(envelope)
+    logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
     val outputEnvelopes: List[Envelope] = executor.onMessage(envelope)
 
     outputEnvelopes.foreach(outputEnvelope => registerAndSendOutputEnvelope(outputEnvelope, envelope))
   }
 
+  private def registerEnvelope(envelope: Envelope) = {
+    afterReceivingEnvelope()
+    taskInputService.registerEnvelope(envelope)
+    performanceMetrics.addEnvelopeToInputStream(envelope)
+  }
 
   private def registerAndSendOutputEnvelope(outputEnvelope: Envelope, inputEnvelope: TStreamEnvelope) = {
     println("register")
@@ -216,11 +217,11 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   }
 
   /**
-    * Writing entity to elasticsearch
-    *
-    * @param esEnvelope:
-    * @param inputEnvelope:
-    */
+   * Writing entity to elasticsearch
+   *
+   * @param esEnvelope:
+   * @param inputEnvelope:
+   */
   private def writeToES(esEnvelope: EsEnvelope, inputEnvelope: TStreamEnvelope) = {
     println("write es")
     prepareES()

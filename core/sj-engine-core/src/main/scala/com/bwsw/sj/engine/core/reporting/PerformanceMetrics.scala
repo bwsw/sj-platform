@@ -11,6 +11,7 @@ import java.util.concurrent.{Callable, TimeUnit}
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.TStreamSjStream
+import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.tstreams.agents.producer.NewTransactionProducerPolicy
 import org.slf4j.LoggerFactory
@@ -25,8 +26,8 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
   protected val mutex: ReentrantLock = new ReentrantLock(true)
   protected val reportSerializer = new JsonSerializer()
   protected val startTime = System.currentTimeMillis()
-  protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Int]]]
-  protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Int]]]
+  protected val inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Int]]]
+  protected val outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Int]]]
   protected val taskName = manager.taskName
   protected val instance = manager.instance
   private val reportingInterval = instance.performanceReportingInterval
@@ -82,12 +83,19 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
    */
   protected def clear(): Unit
 
-  /**
-   * Invokes when a new envelope from some input stream is received
-   * @param name Stream name
-   * @param elementsSize Set of sizes of elements
-   */
-  def addEnvelopeToInputStream(name: String, elementsSize: List[Int]) = {
+  def addEnvelopeToInputStream(envelope: Envelope): Unit = {
+    envelope match {
+      case tStreamEnvelope: TStreamEnvelope =>
+        addEnvelopeToInputStream(tStreamEnvelope.stream, tStreamEnvelope.data.map(_.length))
+      case kafkaEnvelope: KafkaEnvelope =>
+        addEnvelopeToInputStream(kafkaEnvelope.stream, List(kafkaEnvelope.data.length))
+      case wrongEnvelope =>
+        logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined")
+        throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined")
+    }
+  }
+
+  protected def addEnvelopeToInputStream(name: String, elementsSize: List[Int]) = {
     mutex.lock()
     logger.debug(s"Indicate that a new envelope is received from input stream: $name\n")
     if (inputEnvelopesPerStream.contains(name)) {

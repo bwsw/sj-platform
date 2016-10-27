@@ -59,10 +59,11 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
       maybeBatch match {
         case Some(batch) => {
           println("batch: " + batch.stream + ":" + batch.envelopes.size)
-          addBatchToWindow(batch)
+          registerBatch(batch)
 
           if (isItTimeToCollectWindow()) {
             collectWindow()
+            registerWindow()
             executor.onWindow(windowRepository)
             slideWindow()
             doCheckpoint()
@@ -82,6 +83,11 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
     }
   }
 
+  private def registerBatch(batch: Batch) = {
+    addBatchToWindow(batch)
+    performanceMetrics.addBatch(batch)
+  }
+
   private def addBatchToWindow(batch: Batch) = {
     windowPerStream(batch.stream).batches += batch
     if (batch.stream == instance.mainStream) increaseBatchCounter()
@@ -94,6 +100,10 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
   private def collectWindow() = {
     logger.info(s"Task: ${manager.taskName}. It's time to collect batch\n")
     windowPerStream.foreach(x => windowRepository.put(x._1, x._2.copy()))
+  }
+
+  private def registerWindow() = {
+    windowPerStream.foreach(x => performanceMetrics.addWindow(x._2))
   }
 
   private def increaseBatchCounter() = {
@@ -111,7 +121,7 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
   private def registerBatches() = {
     windowPerStream.foreach(x => {
       x._2.batches.slice(0, instance.slidingInterval)
-        .foreach(x => x.envelopes.foreach(x => taskInputService.registerEnvelope(x, performanceMetrics)))
+        .foreach(x => x.envelopes.foreach(x => taskInputService.registerEnvelope(x)))
     })
   }
 

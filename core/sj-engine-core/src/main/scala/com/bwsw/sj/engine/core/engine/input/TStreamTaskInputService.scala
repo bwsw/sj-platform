@@ -8,7 +8,6 @@ import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.TaskManager
-import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
@@ -93,16 +92,6 @@ class TStreamTaskInputService(manager: TaskManager,
     logger.debug(s"Task: ${manager.taskName}. Launch subscribing consumers\n")
     consumers.foreach(_._2.start())
     logger.debug(s"Task: ${manager.taskName}. Subscribing consumers are launched\n")
-  }
-
-  override def registerEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics) = {
-    super.registerEnvelope(envelope, performanceMetrics)
-    logger.info(s"Task: ${manager.taskName}. T-stream envelope is received\n")
-    val tStreamEnvelope = envelope.asInstanceOf[TStreamEnvelope]
-    performanceMetrics.addEnvelopeToInputStream(
-      tStreamEnvelope.stream,
-      tStreamEnvelope.data.map(_.length)
-    )
   }
 
   override def setConsumerOffset(envelope: Envelope) = {

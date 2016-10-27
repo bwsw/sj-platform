@@ -44,8 +44,7 @@ abstract class BatchCollector(protected val manager: CommonTaskManager,
       maybeEnvelope match {
         case Some(serializedEnvelope) => {
           val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope)
-          println("envelope: " + envelope.asInstanceOf[TStreamEnvelope].id)
-          batchPerStream(envelope.stream).envelopes += envelope
+          registerEnvelope(envelope)
 
           if (instance.mainStream == envelope.stream) afterReceivingEnvelope(envelope)
         }
@@ -54,6 +53,12 @@ abstract class BatchCollector(protected val manager: CommonTaskManager,
 
       if (isItTimeToCollectBatch()) collectBatch()
     }
+  }
+
+  private def registerEnvelope(envelope: Envelope) = {
+    println("envelope: " + envelope.asInstanceOf[TStreamEnvelope].id) //todo remove
+    batchPerStream(envelope.stream).envelopes += envelope
+    performanceMetrics.addEnvelopeToInputStream(envelope)
   }
 
   protected def collectBatch() = {

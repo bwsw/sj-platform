@@ -180,7 +180,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
       logger.info(s"Task name: ${manager.taskName}. Envelope is defined. Process it\n")
       val inputEnvelope = envelope.get
       logger.debug(s"Task name: ${manager.taskName}. Add envelope to input stream in performance metrics \n")
-      performanceMetrics.addEnvelopeToInputStream(List(inputEnvelope.data.length))
+      performanceMetrics.addEnvelopeToInputStream(inputEnvelope)
       if (checkForDuplication(inputEnvelope.key, inputEnvelope.duplicateCheck, inputEnvelope.data)) {
         logger.debug(s"Task name: ${manager.taskName}. Envelope is not duplicate so send it\n")
         inputEnvelope.outputMetadata.foreach(x => {

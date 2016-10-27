@@ -36,7 +36,7 @@ object WindowedTaskRunner extends {
       executorService.submit(taskInputService)
       executorService.submit(batchCollector)
       executorService.submit(windowedTaskEngine)
-      //executorService.submit(performanceMetrics)
+      executorService.submit(performanceMetrics)
 
       executorService.take().get()
     } catch {

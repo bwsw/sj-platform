@@ -3,7 +3,6 @@ package com.bwsw.sj.engine.core.engine.input
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
-import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
@@ -26,12 +25,12 @@ class CompleteTaskInputService(manager: CommonTaskManager,
   private val kafkaRegularTaskInputService = new KafkaTaskInputService(manager, blockingQueue, checkpointGroup)
   private val tStreamRegularTaskInputService = new TStreamTaskInputService(manager, blockingQueue, checkpointGroup)
 
-  override def registerEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics) = {
+  override def registerEnvelope(envelope: Envelope) = {
     envelope match {
       case _: TStreamEnvelope =>
-        tStreamRegularTaskInputService.registerEnvelope(envelope, performanceMetrics)
+        tStreamRegularTaskInputService.registerEnvelope(envelope)
       case _: KafkaEnvelope =>
-        kafkaRegularTaskInputService.registerEnvelope(envelope, performanceMetrics)
+        kafkaRegularTaskInputService.registerEnvelope(envelope)
       case wrongEnvelope =>
         logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/windowed streaming engine")
         throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/windowed streaming engine")

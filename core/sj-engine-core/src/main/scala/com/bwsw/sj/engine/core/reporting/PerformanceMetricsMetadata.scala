@@ -2,11 +2,12 @@ package com.bwsw.sj.engine.core.reporting
 
 import java.util.Date
 
+import com.bwsw.sj.common.rest.entities.module.BatchFillType
 import com.fasterxml.jackson.annotation.JsonProperty
 
 class PerformanceMetricsMetadata {
   @JsonProperty("pm-datetime") var pmDatetime: Date = null
-  @JsonProperty("task-id") var taskId: String= null
+  @JsonProperty("task-id") var taskId: String = null
   var host: String = null
   @JsonProperty("total-input-envelopes") var totalInputEnvelopes: Int = 0
   @JsonProperty("total-input-elements") var totalInputElements: Int = 0
@@ -31,10 +32,19 @@ class PerformanceMetricsMetadata {
   @JsonProperty("output-envelopes-per-stream") var outputEnvelopesPerStream: Map[String, Any] = null
   @JsonProperty("output-elements-per-stream") var outputElementsPerStream: Map[String, Any] = null
   @JsonProperty("output-bytes-per-stream") var outputBytesPerStream: Map[String, Any] = null
-  @JsonProperty("state-variables-number") var stateVariablesNumber: Int = 0
 
   @JsonProperty("input-stream-name") var inputStreamName: String = null
-  @JsonProperty("output-stream-name") var outputStreamName:  String = null
+  @JsonProperty("output-stream-name") var outputStreamName: String = null
 
   @JsonProperty("entry-point-port") var entryPointPort: Int = 0
+
+  var window: Int = 0
+  @JsonProperty("batch-fill-type") var batchFillType: BatchFillType = null
+  @JsonProperty("batches-per-stream") var batchesPerStream: Map[String, Int] = null
+  @JsonProperty("average-size-batch-per-stream") var averageSizeBatchPerStream: Map[String, Int] = null
+  @JsonProperty("total-batches") var totalBatches: Int = 0
+  @JsonProperty("average-size-batch") var averageSizeBatch: Int = 0
+  @JsonProperty("max-size-batch") var maxSizeBatch: Int = 0
+  @JsonProperty("min-size-batch") var minSizeBatch: Int = 0
+  @JsonProperty("windows-per-stream") var windowsPerStream: Map[String, Int] = null
 }

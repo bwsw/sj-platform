@@ -65,8 +65,7 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
       maybeEnvelope match {
         case Some(serializedEnvelope) => {
           val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope)
-          afterReceivingEnvelope()
-          taskInputService.registerEnvelope(envelope, performanceMetrics)
+          registerEnvelope(envelope)
           logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
           executor.onMessage(envelope)
         }
@@ -84,6 +83,12 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
         moduleTimer.reset()
       }
     }
+  }
+
+  private def registerEnvelope(envelope: Envelope) = {
+    afterReceivingEnvelope()
+    taskInputService.registerEnvelope(envelope)
+    performanceMetrics.addEnvelopeToInputStream(envelope)
   }
 
   protected def afterReceivingEnvelope(): Unit

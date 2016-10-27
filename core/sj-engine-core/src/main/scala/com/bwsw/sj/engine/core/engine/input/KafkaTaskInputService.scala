@@ -11,7 +11,6 @@ import com.bwsw.sj.common.utils.{ConfigLiterals, ConfigSettingsUtils, EngineLite
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
-import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.tstreams.agents.consumer.Offset.Newest
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.NewTransactionProducerPolicy
@@ -201,16 +200,6 @@ class KafkaTaskInputService(manager: CommonTaskManager,
         blockingQueue.put(envelopeSerializer.serialize(envelope))
       })
     }
-  }
-
-  override def registerEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics) = {
-    super.registerEnvelope(envelope, performanceMetrics)
-    logger.info(s"Task: ${manager.taskName}. Kafka envelope is received\n")
-    val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
-    performanceMetrics.addEnvelopeToInputStream(
-      kafkaEnvelope.stream,
-      List(kafkaEnvelope.data.length)
-    )
   }
 
   override def setConsumerOffset(envelope: Envelope) = {

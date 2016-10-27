@@ -2,10 +2,13 @@ package com.bwsw.sj.engine.windowed.task.reporting
 
 import java.util.Calendar
 
+import com.bwsw.sj.common.DAL.model.module.WindowedInstance
+import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 
 /**
  * Class represents a set of metrics that characterize performance of a windowed streaming module
@@ -18,12 +21,16 @@ class WindowedStreamingPerformanceMetrics(manager: CommonTaskManager)
 
   currentThread.setName(s"windowed-task-${manager.taskName}-performance-metrics")
   private var totalIdleTime = 0L
-  private var numberOfStateVariables = 0
-  private val inputStreamNames =  manager.inputs.map(_._1.name).toArray
-  private val outputStreamNames = manager.instance.outputs
+  private val windowedInstance = manager.instance.asInstanceOf[WindowedInstance]
+  private val inputStreamNames = manager.inputs.map(_._1.name).toArray
+  private val outputStreamNames = windowedInstance.outputs
 
-  override protected var inputEnvelopesPerStream = createStorageForInputEnvelopes(inputStreamNames)
-  override protected var outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
+  override protected val inputEnvelopesPerStream = createStorageForInputEnvelopes(inputStreamNames)
+  override protected val outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
+
+  private val batchesPerStream = createStorageForBatches(inputStreamNames)
+  private val windowsPerStream = createStorageForWindows(inputStreamNames)
+
   /**
    * Increases time when there are no messages (envelopes)
    * @param idle How long waiting a new envelope was
@@ -31,17 +38,6 @@ class WindowedStreamingPerformanceMetrics(manager: CommonTaskManager)
   def increaseTotalIdleTime(idle: Long) = {
     mutex.lock()
     totalIdleTime += idle
-    mutex.unlock()
-  }
-
-  /**
-   * Sets an amount of how many state variables are
-   * @param amount Number of state variables
-   */
-  def setNumberOfStateVariables(amount: Int) = {
-    mutex.lock()
-    logger.debug(s"Set number of state variables to $amount\n")
-    numberOfStateVariables = amount
     mutex.unlock()
   }
 
@@ -64,6 +60,9 @@ class WindowedStreamingPerformanceMetrics(manager: CommonTaskManager)
     val outputElementsTotalNumber = numberOfOutputElementsPerStream.values.sum
     val inputEnvelopesSize = inputEnvelopesPerStream.flatMap(x => x._2.map(_.size))
     val outputEnvelopesSize = outputEnvelopesPerStream.flatMap(x => x._2.map(_._2.size))
+    val numberOfBatchesPerStream = batchesPerStream.map(x => (x._1, x._2.size))
+    val batchesElementsTotalNumber = batchesPerStream.map(x => x._2.sum).sum
+    val batchesTotalNumber = numberOfBatchesPerStream.values.sum
 
     report.pmDatetime = Calendar.getInstance().getTime
     report.totalIdleTime = totalIdleTime
@@ -87,21 +86,52 @@ class WindowedStreamingPerformanceMetrics(manager: CommonTaskManager)
     report.maxSizeOutputEnvelope = if (outputEnvelopesSize.nonEmpty) outputEnvelopesSize.max else 0
     report.minSizeOutputEnvelope = if (outputEnvelopesSize.nonEmpty) outputEnvelopesSize.min else 0
     report.averageSizeOutputElement = if (outputEnvelopesTotalNumber != 0) bytesOfOutputEnvelopesPerStream.values.sum / outputElementsTotalNumber else 0
-    report.stateVariablesNumber = numberOfStateVariables
+    report.window = windowedInstance.window
+    report.batchFillType = windowedInstance.batchFillType
+    report.batchesPerStream = numberOfBatchesPerStream.toMap
+    report.averageSizeBatchPerStream = batchesPerStream.map(x => (x._1, average(x._2))).toMap
+    report.totalBatches = batchesTotalNumber
+    report.averageSizeBatch = if (batchesTotalNumber != 0) batchesElementsTotalNumber / batchesTotalNumber else 0
+    report.maxSizeBatch = if (batchesTotalNumber != 0) batchesPerStream.map(x => x._2.max).max else 0
+    report.minSizeBatch = if (batchesTotalNumber != 0) batchesPerStream.map(x => x._2.min).min else 0
+    report.windowsPerStream = windowsPerStream.toMap
     report.uptime = (System.currentTimeMillis() - startTime) / 1000
 
     clear()
 
     mutex.unlock()
-
     reportSerializer.serialize(report)
   }
 
   override def clear() = {
     logger.debug(s"Reset variables for performance report for next reporting\n")
-    inputEnvelopesPerStream = mutable.Map(inputStreamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
-    outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
+    inputEnvelopesPerStream.clear()
+    outputEnvelopesPerStream.clear()
+    batchesPerStream.clear()
+    windowsPerStream.clear()
     totalIdleTime = 0L
-    numberOfStateVariables = 0
   }
+
+  def addBatch(batch: Batch) = {
+    batchesPerStream(batch.stream) += batch.envelopes.size
+  }
+
+  def addWindow(window: Window) = {
+    windowsPerStream(window.stream) += 1
+  }
+
+  private def createStorageForBatches(inputStreamNames: Array[String]) = {
+    mutable.Map(inputStreamNames.map(x => (x, mutable.ListBuffer[Int]())): _*)
+  }
+
+  private def createStorageForWindows(inputStreamNames: Array[String]) = {
+    mutable.Map(inputStreamNames.map(x => (x, 0)): _*)
+  }
+
+  private def average(elements: ListBuffer[Int]) = {
+    val totalBatches = elements.size
+    val sum = elements.sum
+    if (totalBatches != 0) sum / totalBatches else 0
+  }
+
 }

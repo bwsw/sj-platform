@@ -4,7 +4,6 @@ import java.util.concurrent.Callable
 
 import com.bwsw.sj.common.DAL.model.SjStream
 import com.bwsw.sj.engine.core.entities.Envelope
-import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 
 /**
@@ -21,7 +20,7 @@ abstract class TaskInputService(inputs: scala.collection.mutable.Map[SjStream, A
     inputs.flatMap(x => x._2.map(y => ((x._1.name, y), new Envelope())))
   }
 
-  def registerEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics) = {
+  def registerEnvelope(envelope: Envelope) = {
     lastEnvelopesByStreams((envelope.stream, envelope.partition)) = envelope
   }
 
