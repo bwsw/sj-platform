@@ -264,8 +264,9 @@ object BenchmarkDataFactory {
 
   def create_table: String = {
     s"CREATE TABLE $jdbcStreamName " +
-    "(id BIGINT not NULL, " +
+    "(id VARCHAR(255) not NULL, " +
     " value INTEGER, " +
+    " txn VARCHAR(255), " +
     " PRIMARY KEY ( id ))"
   }
 
@@ -400,6 +401,7 @@ object BenchmarkDataFactory {
     val jdbcService: JDBCService = serviceManager.get(jdbcServiceName).get.asInstanceOf[JDBCService]
     val jdbcStream: JDBCSjStream = new JDBCSjStream()
     jdbcStream.name = jdbcStreamName
+    jdbcStream.primary = "id"
     jdbcStream.description = "jdbc stream for benchmarks"
     jdbcStream.streamType = "jdbc-output"
     jdbcStream.service = jdbcService

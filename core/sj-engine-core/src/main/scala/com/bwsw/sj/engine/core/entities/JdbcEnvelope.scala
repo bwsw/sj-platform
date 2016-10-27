@@ -8,5 +8,19 @@ package com.bwsw.sj.engine.core.entities
 
 class JdbcEnvelope extends Envelope with Serializable {
   streamType = "jdbc-output"
-  var id: Long = _
+
+  /**
+    * Get field value by name.
+    * @param name field name
+    * @return
+    */
+  def getV(name: String): Any = this.getClass.getMethods.find(_.getName == name).get.invoke(this)
+
+  /**
+    * Set field value by name.
+    * @param name field name
+    * @param value field value
+    */
+  def setV(name: String, value: Any): Unit = this.getClass.getMethods.find(_.getName == name + "_$eq").get.invoke(this, value.asInstanceOf[AnyRef])
+  var txn: String = ""
 }

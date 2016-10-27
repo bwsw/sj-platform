@@ -27,7 +27,7 @@ object BenchmarkDestroyer extends App {
   val jdbcModule = new File("./contrib/stubs/sj-stub-output-jdbc/target/scala-2.11/sj-stub-output-jdbc-1.0-SNAPSHOT.jar")
 
   clearEsStream()
-  clearDatabase()
+  try {clearDatabase()} catch {case e: Exception => e}
   deleteStreams()
   deleteServices()
   deleteProviders()
