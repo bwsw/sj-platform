@@ -39,7 +39,7 @@
             <fieldset class="form-group">
               <label class="col-sm-3 form-control-label">Description</label>
               <textarea [(ngModel)]="new_service.description" name="serviceDescription"
-                        class="form-control form-type col-sm-10" required></textarea>
+                        class="form-control form-type col-sm-10"></textarea>
             </fieldset>
             <fieldset *ngIf="new_service.type == 'CassDB'" class="form-group">
               <label class="col-sm-3 form-control-label">Keyspace</label>
@@ -52,72 +52,73 @@
               <input [(ngModel)]="new_service.namespace" name="serviceNamespace" type="text"
                      class="form-control col-sm-10" required>
             </fieldset>
-            <fieldset *ngIf="new_service.type== 'ESInd'" class="form-group">
+            <fieldset *ngIf="new_service.type == 'ESInd'" class="form-group">
               <label class="col-sm-3 form-control-label">Index</label>
               <input [(ngModel)]="new_service.index" name="serviceIndex" type="text" class="form-control col-sm-10"
                      required>
             </fieldset>
-            <fieldset *ngIf="new_service.type!= 'TstrQ' && new_service.type!= 'Init'" class="form-group">
+            <fieldset *ngIf="new_service.type && new_service.type != 'TstrQ'" class="form-group">
               <label class="col-sm-3 form-control-label">Provider</label>
-              <select [(ngModel)]="new_service.provider" name="streamService" class="form-control form-type col-sm-10">
+              <select [(ngModel)]="new_service.provider" name="streamService" required
+                      class="form-control form-type col-sm-10">
                 <option *ngFor="let provider of providerList | providerFilter : new_service.type "
                         value={{provider.name}}>{{provider.name}}
                 </option>
               </select>
             </fieldset>
-            <fieldset *ngIf="new_service.type== 'TstrQ' " class="form-group">
+            <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group">
               <label class="col-sm-3 form-control-label">Metadata provider</label>
               <select [(ngModel)]="new_service['metadata-provider']" name="serviceMetadataProvider"
-                      class="form-control form-type col-sm-10">
+                      required class="form-control form-type col-sm-10">
                 <option *ngFor="let provider of providerList | providerFilter : 'CassDB' " value={{provider.name}}>
                   {{provider.name}}
                 </option>
               </select>
             </fieldset>
-            <fieldset *ngIf="new_service.type== 'TstrQ' " class="form-group">
+            <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group">
               <label class="col-sm-3 form-control-label">Metadata namespace</label>
               <input [(ngModel)]="new_service['metadata-namespace']" name="serviceMetadataNamespace" type="text"
                      class="form-control col-sm-10" required>
             </fieldset>
-            <fieldset *ngIf="new_service.type== 'TstrQ' " class="form-group">
+            <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group">
               <label class="col-sm-3 form-control-label">Data provider</label>
               <select [(ngModel)]="new_service['data-provider']" name="serviceDataProvider"
-                      class="form-control form-type col-sm-10">
+                      required class="form-control form-type col-sm-10">
                 <option *ngFor="let provider of providerList | providerFilter : 'DataProvider' "
                         value={{provider.name}}>{{provider.name}}
                 </option>
               </select>
             </fieldset>
-            <fieldset *ngIf="new_service.type== 'TstrQ' " class="form-group">
+            <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group">
               <label class="col-sm-3 form-control-label">Data namespace</label>
               <input [(ngModel)]="new_service['data-namespace']" name="serviceDataNamespace" type="text"
                      class="form-control col-sm-10" required>
             </fieldset>
-            <fieldset *ngIf="new_service.type== 'TstrQ' " class="form-group">
+            <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group">
               <label class="col-sm-3 form-control-label">Lock provider</label>
               <select [(ngModel)]="new_service['lock-provider']" name="serviceLockProvider"
-                      class="form-control form-type col-sm-10">
+                      required class="form-control form-type col-sm-10">
                 <option *ngFor="let provider of providerList | providerFilter : 'LockProvider' "
                         value={{provider.name}}>{{provider.name}}
                 </option>
               </select>
             </fieldset>
-            <fieldset *ngIf="new_service.type== 'TstrQ' " class="form-group">
+            <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group">
               <label class="col-sm-3 form-control-label">Lock namespace</label>
               <input [(ngModel)]="new_service['lock-namespace']" name="serviceLockNamespace" type="text"
                      class="form-control col-sm-10" required>
             </fieldset>
-            <fieldset *ngIf="new_service.type== 'ESInd' " class="form-group">
+            <fieldset *ngIf="new_service.type == 'ESInd'" class="form-group">
               <label class="col-sm-3 form-control-label">Login</label>
               <input [(ngModel)]="new_service.login" name="serviceLogin" type="text" class="form-control col-sm-10"
                      placeholder="Enter service login">
             </fieldset>
-            <fieldset *ngIf="new_service.type== 'ESInd' " class="form-group">
+            <fieldset *ngIf="new_service.type== 'ESInd'" class="form-group">
               <label class="col-sm-3 form-control-label">Password</label>
               <input [(ngModel)]="new_service.password" name="servicePassword" type="text"
                      class="form-control col-sm-10" placeholder="Enter service password">
             </fieldset>
-            <fieldset *ngIf="new_service.type== 'KfkQ' && new_service.type!= 'Init'" class="form-group">
+            <fieldset *ngIf="new_service.type == 'KfkQ'" class="form-group">
               <label class="col-sm-3 form-control-label">ZK provider</label>
               <select [(ngModel)]="new_service['zk-provider']" name="serviceZkProvider"
                       class="form-control form-type col-sm-10">
@@ -126,7 +127,7 @@
                 </option>
               </select>
             </fieldset>
-            <fieldset *ngIf="new_service.type== 'KfkQ' " class="form-group">
+            <fieldset *ngIf="new_service.type == 'KfkQ'" class="form-group">
               <label class="col-sm-3 form-control-label">ZK namespace</label>
               <input [(ngModel)]="new_service['zk-namespace']" name="serviceZkNamespace" type="text"
                      class="form-control col-sm-10" required>

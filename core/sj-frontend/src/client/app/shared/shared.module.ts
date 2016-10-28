@@ -14,6 +14,7 @@ import { InstancesService } from './services/instances.service';
 import { ModulesService } from './services/modules.service';
 import { ProvidersService } from './services/providers.service';
 import { ServicesService } from './services/services.service';
+import { SpinnerComponent } from '../shared/spinner/spinner.component';
 import { StreamsService } from './services/streams.service';
 import { Ng2BootstrapModule } from 'ng2-bootstrap';
 
@@ -28,6 +29,7 @@ import { Ng2BootstrapModule } from 'ng2-bootstrap';
     ToolbarComponent,
     NavbarComponent,
     SearchBoxComponent,
+    SpinnerComponent,
     // Pipes
     ListFilterPipe,
     OrderByPipe,
@@ -46,6 +48,7 @@ import { Ng2BootstrapModule } from 'ng2-bootstrap';
     ToolbarComponent,
     NavbarComponent,
     SearchBoxComponent,
+    SpinnerComponent,
     // Pipes
     ListFilterPipe,
     OrderByPipe,

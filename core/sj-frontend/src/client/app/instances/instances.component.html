@@ -1,3 +1,5 @@
+<sj-spinner [isRunning]="showSpinner"></sj-spinner>
+
 <div class="instances-list">
   <h2>Instances list</h2>
 
@@ -53,13 +55,12 @@
             <div *ngIf="new_instance.module">
               <fieldset class="form-group">
                 <label class="col-sm-3 form-control-label">Name</label>
-                <input [(ngModel)]="new_instance.name" name="instanceName" type="text" class="form-control col-sm-10"
-                       required>
+                <input [(ngModel)]="new_instance.name" name="instanceName" type="text" required class="form-control col-sm-10">
               </fieldset>
               <fieldset class="form-group">
                 <label class="col-sm-3 form-control-label">Description</label>
                 <textarea [(ngModel)]="new_instance.description" name="instanceDescription"
-                          class="form-control form-type col-sm-10" required></textarea>
+                          class="form-control form-type col-sm-10"></textarea>
               </fieldset>
               <fieldset
                 *ngIf="new_instance.module && new_instance.module['module-type'] === 'regular-streaming' && new_instance.inputs"
@@ -77,8 +78,11 @@
                   </select>
                 </div>
                 <button type="button" (click)="addInput()" class="btn btn-link form-add-host">+ Add</button>
+                <!--TODO: change to x button for every line (get code from providers-hosts form element)-->
+                <button *ngIf="new_instance.inputs.length > 1" type="button" (click)="removeLastInput()"
+                        class="btn btn-link form-remove-host">- Remove</button>
               </fieldset>
-              <!--<fieldset *ngIf="new_instance.module['module-type'] === 'regular-streaming'" class="form-group">-->
+              <!--<fieldset *ngIf="new_instance.module && new_instance.module['module-type'] === 'regular-streaming' && new_instance.inputs" class="form-group">-->
               <!--<label class="col-sm-3 form-control-label">Outputs</label>-->
               <!--<div *ngFor='let output of new_instance.outputs; let i = index' class="instance-outputs">-->
               <!--<select [(ngModel)]="new_instance.outputs[i]" required class="form-control form-type col-sm-10" >-->
@@ -89,7 +93,7 @@
               <!--</fieldset>-->
               <fieldset *ngIf="new_instance.module['module-type'] === 'output-streaming'" class="form-group">
                 <label class="col-sm-3 form-control-label">Input</label>
-                <div class="instance-outputs">
+                <div class="instance-input">
                   <select [(ngModel)]="new_instance.input" name="instanceInput" required
                           class="form-control form-type col-sm-10">
                     <option *ngFor="let stream of streamList" value="{{stream.name}}">{{stream.name}}</option>
@@ -98,7 +102,7 @@
               </fieldset>
               <fieldset *ngIf="new_instance.module['module-type'] === 'output-streaming'" class="form-group">
                 <label class="col-sm-3 form-control-label">Output</label>
-                <div class="instance-outputs">
+                <div class="instance-output">
                   <select [(ngModel)]="new_instance.output" name="instanceOutput" required
                           class="form-control form-type col-sm-10">
                     <option *ngFor="let stream of streamList" value="{{stream.name}}">{{stream.name}}</option>
@@ -115,7 +119,9 @@
                     <option *ngFor="let stream of streamList">{{stream.name}}</option>
                   </select>
                 </div>
-                <!--<button type="button" (click)="addOutput()" class="btn btn-link form-add-host">+ Add</button>-->
+                <button type="button" (click)="addOutput()" class="btn btn-link form-add-host">+ Add</button>
+                <!--TODO: change to x button for every line (get code from providers-hosts form element)-->
+                <button *ngIf="new_instance.outputs.length > 1" type="button" (click)="removeLastOutput()" class="btn btn-link form-remove-host">- Remove</button>
               </fieldset>
               <fieldset class="form-group">
                 <label class="col-sm-3 form-control-label">Checkpoint mode</label>
@@ -128,7 +134,7 @@
               <fieldset class="form-group">
                 <label class="col-sm-3 form-control-label">Checkpoint interval</label>
                 <input [(ngModel)]="new_instance['checkpoint-interval']" name="instanceCheckpointInterval" type="number"
-                       class="form-control col-sm-10">
+                       required class="form-control col-sm-10">
               </fieldset>
               <fieldset *ngIf="new_instance.module['module-type'] === 'regular-streaming'" class="form-group">
                 <label class="col-sm-3 form-control-label">State management</label>
@@ -187,7 +193,7 @@
               <fieldset class="form-group">
                 <label class="col-sm-3 form-control-label">Coordination service</label>
                 <select [(ngModel)]="new_instance['coordination-service']" name="instanceCoordinationService"
-                        class="form-control form-type col-sm-10">
+                        required class="form-control form-type col-sm-10">
                   <option *ngFor="let service of serviceList | serviceFilter : 'zookeeper' " value={{service.name}}>
                     {{service.name}}
                   </option>
@@ -219,12 +225,12 @@
               <fieldset *ngIf="new_instance.module['module-type'] === 'input-streaming'" class="form-group">
                 <label class="col-sm-3 form-control-label">Lookup history</label>
                 <input [(ngModel)]="new_instance['lookup-history']" name="instanceLookupHistory" type="number"
-                       class="form-control col-sm-10">
+                       required class="form-control col-sm-10">
               </fieldset>
               <fieldset *ngIf="new_instance.module['module-type'] === 'input-streaming'" class="form-group">
                 <label class="col-sm-3 form-control-label">Queue max size</label>
                 <input [(ngModel)]="new_instance['queue-max-size']" name="instanceQueueMaxSize" type="number"
-                       class="form-control col-sm-10">
+                       required class="form-control col-sm-10">
               </fieldset>
               <fieldset *ngIf="new_instance.module['module-type'] === 'input-streaming'" class="form-group">
                 <label class="col-sm-3 form-control-label">Default eviction policy</label>
@@ -236,14 +242,14 @@
                 <input [(ngModel)]="new_instance['eviction-policy']" name="instanceEvictionPolicy" type="text"
                        class="form-control col-sm-10">
               </fieldset>
-              <fieldset *ngIf="new_instance.module['module-type'] === 'regular-streaming'" class="form-group">
-                <label class="col-sm-3 form-control-label">Service</label>
-                <div class="instance-inputs">
-                  <select [(ngModel)]="new_instance.service" name="instanceService" class="form-control form-type">
-                    <option *ngFor="let stream of streamList" value="stream.name">{{stream.name}}</option>
-                  </select>
-                </div>
-              </fieldset>
+              <!--<fieldset *ngIf="new_instance.module['module-type'] === 'regular-streaming'" class="form-group">-->
+                <!--<label class="col-sm-3 form-control-label">Service</label>-->
+                <!--<div class="instance-inputs">-->
+                  <!--<select [(ngModel)]="new_instance.service" name="instanceService" class="form-control form-type">-->
+                    <!--<option *ngFor="let stream of streamList" value="stream.name">{{stream.name}}</option>-->
+                  <!--</select>-->
+                <!--</div>-->
+              <!--</fieldset>-->
               <fieldset class="form-actions">
                 <button type="submit" class="btn btn-primary form-submit">Create</button>
                 <button type="button" class="btn btn-danger" (click)="CreateInstance.hide()">Cancel</button>
@@ -332,8 +338,8 @@
     <li>Engine : {{current_instance_info.engine}}</li>
     <li *ngIf="current_instance_info.inputs">Inputs: {{current_instance_info.inputs}}</li>
     <li *ngIf="current_instance_info.outputs">Outputs: {{current_instance_info.outputs}}</li>
-    <li *ngIf="current_instance_info.input">Inputs: {{current_instance_info.input}}</li>
-    <li *ngIf="current_instance_info.output">Outputs: {{current_instance_info.output}}</li>
+    <li *ngIf="current_instance_info.input">Input: {{current_instance_info.input}}</li>
+    <li *ngIf="current_instance_info.output">Output: {{current_instance_info.output}}</li>
     <li>Checkpoint-mode : {{current_instance_info["checkpoint-mode"]}}</li>
     <li>Checkpoint-interval : {{current_instance_info["checkpoint-interval"]}}</li>
     <li *ngIf="current_instance_info['state-manegement']">State-management :
