@@ -1,5 +1,7 @@
 package com.bwsw.sj.engine.core.entities
 
+import com.fasterxml.jackson.annotation.JsonProperty
+
 /**
  * Represents a message that is received from an OutputExecutor
  *
@@ -22,5 +24,11 @@ class JdbcEnvelope extends Envelope with Serializable {
     * @param value field value
     */
   def setV(name: String, value: Any): Unit = this.getClass.getMethods.find(_.getName == name + "_$eq").get.invoke(this, value.asInstanceOf[AnyRef])
+
+  /**
+    * Unique identifier for stream transaction.
+    */
   var txn: String = ""
+
+  def getTxnName="txn"
 }

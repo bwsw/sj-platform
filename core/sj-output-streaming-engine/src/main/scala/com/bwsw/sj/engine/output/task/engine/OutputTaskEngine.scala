@@ -11,7 +11,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.engine.input.TStreamTaskInputService
-import com.bwsw.sj.engine.core.entities.{EsEnvelope, _}
+import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.output.task.OutputTaskManager
@@ -54,7 +54,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private lazy val (jdbcClient, jdbcService) =  openJdbcConnection(outputStream)
   private var wasFirstCheckpoint = false
   private val byteSerializer = new ObjectSerializer()
-  private val txnFieldForJdbc = "txn"
+  private var txnFieldForJdbc: String = new JdbcEnvelope().getTxnName
 
 
 
@@ -263,7 +263,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
    * @param jdbcEnvelope: Output envelope for writing to JDBC
    */
   private def writeToJdbc(jdbcEnvelope: JdbcEnvelope, inputEnvelope: TStreamEnvelope) = {
-    println("write")
+    txnFieldForJdbc = jdbcEnvelope.getTxnName
     val jdbcStream = outputStream.asInstanceOf[JDBCSjStream]
     jdbcEnvelope.txn = inputEnvelope.id.toString.replaceAll("-", "")
     jdbcEnvelope.setV(jdbcStream.primary, UUID.randomUUID().toString)
