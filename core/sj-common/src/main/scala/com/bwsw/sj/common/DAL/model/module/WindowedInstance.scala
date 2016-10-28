@@ -14,7 +14,7 @@ import org.mongodb.morphia.annotations.{Embedded, Property}
 class WindowedInstance() extends Instance {
   @JsonProperty("main-stream") var mainStream: String = null
   @JsonProperty("related-streams") var relatedStreams: Array[String] = Array()
-  @JsonProperty("batch-fill-type") var batchFillType: BatchFillType = null
+  @JsonProperty("batch-fill-type") var batchFillType: BatchFillType = new BatchFillType()
   var window: Int = 1
   @JsonProperty("sliding-interval") var slidingInterval: Int = 1
   @Embedded("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan()

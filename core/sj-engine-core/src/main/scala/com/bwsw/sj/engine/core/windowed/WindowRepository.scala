@@ -8,9 +8,11 @@ import scala.collection.mutable
 
 class WindowRepository(instance: WindowedInstance, inputs: mutable.Map[SjStream, Array[Int]]) {
   private val windowPerStream: mutable.Map[String, Window] = createStorageOfWindows()
+  val window = instance.window
+  val slidingInterval = instance.slidingInterval
 
   private def createStorageOfWindows() = {
-    inputs.map(x => (x._1.name, new Window(x._1.name, instance.slidingInterval)))
+    inputs.map(x => (x._1.name, new Window(x._1.name)))
   }
 
   def get(stream: String) = {
@@ -22,6 +24,6 @@ class WindowRepository(instance: WindowedInstance, inputs: mutable.Map[SjStream,
   }
 
   def getAll() = {
-    windowPerStream.clone()
+    Map(windowPerStream.toList: _*)
   }
 }

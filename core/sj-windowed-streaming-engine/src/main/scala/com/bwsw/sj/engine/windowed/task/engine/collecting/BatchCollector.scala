@@ -4,6 +4,7 @@ import java.util.concurrent.{ArrayBlockingQueue, Callable}
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module.WindowedInstance
+import com.bwsw.sj.common.utils.SjStreamUtils
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
@@ -30,6 +31,7 @@ abstract class BatchCollector(protected val manager: CommonTaskManager,
   currentThread.setName(s"windowed-task-${manager.taskName}-batch-collector")
   protected val logger = LoggerFactory.getLogger(this.getClass)
   protected val instance = manager.instance.asInstanceOf[WindowedInstance]
+  private val mainStream = SjStreamUtils.clearStreamFromMode(instance.mainStream)
   private val envelopeSerializer = new JsonSerializer(true)
   private val batchPerStream: Map[String, Batch] = createStorageOfBatches()
 
@@ -46,7 +48,9 @@ abstract class BatchCollector(protected val manager: CommonTaskManager,
           val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope)
           registerEnvelope(envelope)
 
-          if (instance.mainStream == envelope.stream) afterReceivingEnvelope(envelope)
+          if (mainStream == envelope.stream) {
+            afterReceivingEnvelope(envelope)
+          }
         }
         case None =>
       }
@@ -56,22 +60,21 @@ abstract class BatchCollector(protected val manager: CommonTaskManager,
   }
 
   private def registerEnvelope(envelope: Envelope) = {
-    println("envelope: " + envelope.asInstanceOf[TStreamEnvelope].id) //todo remove
     batchPerStream(envelope.stream).envelopes += envelope
     performanceMetrics.addEnvelopeToInputStream(envelope)
   }
 
   protected def collectBatch() = {
     logger.info(s"Task: ${manager.taskName}. It's time to collect batch\n")
-    val (mainStreamBatches, relatedStreamBatches) = batchPerStream.partition(x => x._1 == instance.mainStream)
-    putBatchesIntoQueue(relatedStreamBatches)
-    putBatchesIntoQueue(mainStreamBatches)
+    val (mainStreamBatches, relatedStreamBatches) = batchPerStream.partition(x => x._1 == mainStream)
+    putBatchesIntoQueue(relatedStreamBatches.values)
+    putBatchesIntoQueue(mainStreamBatches.values)
     clearBatches()
     prepareForNextBatchCollecting()
   }
 
-  private def putBatchesIntoQueue(batchPerStream: Map[String, Batch]) = {
-    batchPerStream.foreach(x => batchQueue.put(x._2.copy()))
+  private def putBatchesIntoQueue(batchPerStream: Iterable[Batch]) = {
+    batchPerStream.foreach(x => batchQueue.put(x.copy()))
   }
 
   private def clearBatches() = {

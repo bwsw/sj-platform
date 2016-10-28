@@ -3,7 +3,7 @@ package com.bwsw.sj.engine.core.engine.input
 import java.util.Properties
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.common.DAL.model.module.RegularInstance
+import com.bwsw.sj.common.DAL.model.module.{RegularInstance, WindowedInstance}
 import com.bwsw.sj.common.DAL.model.{KafkaService, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.ConfigurationSettingsUtils._
@@ -41,7 +41,7 @@ class KafkaTaskInputService(manager: CommonTaskManager,
   currentThread.setName(s"regular-task-${manager.taskName}-kafka-consumer")
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val offsetSerializer = new ObjectSerializer()
-  private val regularInstance = manager.instance.asInstanceOf[RegularInstance]
+  private val instance = manager.instance
   private val kafkaSubscriberTimeout = ConfigSettingsUtils.getKafkaSubscriberTimeout()
   private val kafkaInputs = getKafkaInputs()
   private var kafkaOffsetsStorage = mutable.Map[(String, Int), Long]()
@@ -119,7 +119,14 @@ class KafkaTaskInputService(manager: CommonTaskManager,
   }
 
   private def chooseOffset() = {
-    regularInstance.startFrom match {
+    val startFrom = instance match {
+      case regularInstance: RegularInstance =>
+        regularInstance.startFrom
+      case windowedInstance: WindowedInstance =>
+        windowedInstance.startFrom
+    }
+
+    startFrom match {
       case EngineLiterals.oldestStartMode => "earliest"
       case _ => "latest"
     }

@@ -23,7 +23,7 @@ class WindowedStreamingExecutor(manager: ModuleEnvironmentManager) extends Strea
    * from one of the inputs that are defined within the instance.
    */
   def onWindow(windowRepository: WindowRepository): Unit = {
-    println("onWindow() " + windowRepository.getAll().map(x => (x._1, x._2.batches.size)))
+    //println("onWindow() " + windowRepository.getAll().map(x => (x._1, x._2.batches.size))) //todo
   }
 
   /**

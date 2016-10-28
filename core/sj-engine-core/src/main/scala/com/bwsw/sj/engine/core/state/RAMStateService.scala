@@ -172,6 +172,7 @@ class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGro
 
   override def set(key: String, value: Any): Unit = {
     logger.info(s"Set a state variable: $key to $value\n")
+    println(s"SUUUUM Set a state variable: $key to $value\n") //todo
     stateVariables(key) = value
   }
 

@@ -3,14 +3,13 @@ package com.bwsw.sj.engine.windowed.task.engine
 import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
 
 import com.bwsw.sj.common.DAL.model.module.WindowedInstance
-import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.common.utils.{EngineLiterals, SjStreamUtils}
 import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.state.{StatefulCommonModuleService, StatelessCommonModuleService}
 import com.bwsw.sj.engine.core.windowed.{WindowRepository, WindowedStreamingExecutor}
 import com.bwsw.sj.engine.windowed.task.reporting.WindowedStreamingPerformanceMetrics
-import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
 class WindowedTaskEngine(protected val manager: CommonTaskManager,
@@ -21,8 +20,8 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"windowed-task-${manager.taskName}-engine")
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val checkpointGroup = new CheckpointGroup()
   private val instance = manager.instance.asInstanceOf[WindowedInstance]
+  private val mainStream = SjStreamUtils.clearStreamFromMode(instance.mainStream)
   private val moduleService = createWindowedModuleService()
   private val executor = moduleService.executor.asInstanceOf[WindowedStreamingExecutor]
   private val moduleTimer = moduleService.moduleTimer
@@ -34,14 +33,14 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
     instance.stateManagement match {
       case EngineLiterals.noneStateMode =>
         logger.debug(s"Task: ${manager.taskName}. Start preparing of windowed module without state\n")
-        new StatelessCommonModuleService(manager, checkpointGroup, performanceMetrics)
+        new StatelessCommonModuleService(manager, taskInputService.checkpointGroup, performanceMetrics)
       case EngineLiterals.ramStateMode =>
-        new StatefulCommonModuleService(manager, checkpointGroup, performanceMetrics)
+        new StatefulCommonModuleService(manager, taskInputService.checkpointGroup, performanceMetrics)
     }
   }
 
   private def createStorageOfWindows() = {
-    manager.inputs.map(x => (x._1.name, new Window(x._1.name, instance.slidingInterval)))
+    manager.inputs.map(x => (x._1.name, new Window(x._1.name)))
   }
 
   /**
@@ -58,7 +57,7 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
 
       maybeBatch match {
         case Some(batch) => {
-          println("batch: " + batch.stream + ":" + batch.envelopes.size)
+          println("batch: " + batch.stream + ":" + batch.envelopes.size) //todo
           registerBatch(batch)
 
           if (isItTimeToCollectWindow()) {
@@ -90,7 +89,7 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
 
   private def addBatchToWindow(batch: Batch) = {
     windowPerStream(batch.stream).batches += batch
-    if (batch.stream == instance.mainStream) increaseBatchCounter()
+    if (batch.stream == mainStream) increaseBatchCounter()
   }
 
   private def isItTimeToCollectWindow(): Boolean = {

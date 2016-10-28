@@ -300,7 +300,7 @@ abstract class TaskManager() {
     currentPortNumber += 1
   }
 
-  def getCheckpointInterval() = {
+  def getCheckpointInterval() = { //todo переделать
     instance match {
       case inputInstance: InputInstance =>
         inputInstance.checkpointInterval
@@ -313,7 +313,7 @@ abstract class TaskManager() {
     }
   }
 
-  def getExecutionPlan() = {
+  def getExecutionPlan() = { //todo переделать
     instance match {
       case inputInstance: InputInstance =>
         throw new Exception("Input streaming engine doesn't have an execution plan")
