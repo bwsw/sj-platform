@@ -55,7 +55,7 @@ object SjWindowedModuleDestroy extends App {
   val module = new File("./contrib/stubs/sj-stub-windowed-streaming/target/scala-2.11/sj-stub-windowed-streaming-1.0-SNAPSHOT.jar")
 
   open()
-  //deleteStreams(streamService, _type, inputCount, outputCount)
+  deleteStreams(streamService, _type, inputCount, outputCount)
   deleteServices(serviceManager)
   deleteProviders(providerService)
   deleteInstance(instanceService)

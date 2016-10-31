@@ -57,7 +57,6 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
 
       maybeBatch match {
         case Some(batch) => {
-          println("batch: " + batch.stream + ":" + batch.envelopes.size) //todo
           registerBatch(batch)
 
           if (isItTimeToCollectWindow()) {
