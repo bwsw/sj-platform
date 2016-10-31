@@ -11,6 +11,7 @@ class JDBCServiceData() extends ServiceData() {
   var provider: String = null
   var driver: String = null
   var database: String = null
+  val validDrivers: List[String] = List("postgresql", "oracle", "mysql")
 
   override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService
@@ -29,6 +30,32 @@ class JDBCServiceData() extends ServiceData() {
 
     // 'provider' field
     errors ++= validateProvider(this.provider, this.serviceType)
+    // todo
+
+    // 'driver' field
+    Option(this.driver) match {
+      case None =>
+        errors += "'Driver' is required"
+      case Some(x) =>
+        if (x.isEmpty) {
+          errors += s"'Driver' is required"
+        }
+        else {
+          if (!validDrivers.contains(x)) {
+            errors += s"'Driver' can be one of: $validDrivers"
+          }
+        }
+    }
+
+    // 'database' field
+    Option(this.database) match {
+      case None =>
+        errors += "'Database' is required"
+      case Some(x) =>
+        if (x.isEmpty) {
+          errors += s"'Database' is required"
+        }
+    }
 
     errors
   }
