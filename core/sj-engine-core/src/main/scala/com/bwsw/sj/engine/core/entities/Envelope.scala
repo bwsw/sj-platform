@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
   new Type(value = classOf[EsEnvelope], name = "elasticsearch-output"),
   new Type(value = classOf[JdbcEnvelope], name = "jdbc-output")
 ))
-class Envelope() {
+class Envelope() extends Serializable {
   protected var streamType: String = null
   var stream: String = null
   var partition: Int = 0

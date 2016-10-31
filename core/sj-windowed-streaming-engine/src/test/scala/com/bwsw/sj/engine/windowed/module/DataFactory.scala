@@ -54,8 +54,6 @@ object DataFactory {
   val inputCount = 2
   val outputCount = 2
   val partitions = 4
-  val window = 1
-  val slidingInterval = 1
 
   private def setTStreamFactoryProperties() = {
     setMetadataClusterProperties(tstrqService)

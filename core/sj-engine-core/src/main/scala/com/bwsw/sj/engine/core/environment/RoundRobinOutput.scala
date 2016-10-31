@@ -19,7 +19,6 @@ class RoundRobinOutput(producer: Producer[Array[Byte]],
   private val streamName = producer.stream.getName
 
   def put(data: Array[Byte]) = {
-    println("PUUUT ELEMENT")//todo
     logger.debug(s"Send a portion of data to stream: '$streamName'")
     if (maybeTransaction.isDefined) {
       maybeTransaction.get.send(data)

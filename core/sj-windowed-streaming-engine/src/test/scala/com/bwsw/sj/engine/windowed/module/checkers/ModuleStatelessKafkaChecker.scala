@@ -2,6 +2,7 @@ package com.bwsw.sj.engine.windowed.module.checkers
 
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.engine.core.entities.{KafkaEnvelope, TStreamEnvelope, Batch}
 import com.bwsw.sj.engine.windowed.module.DataFactory._
 import scala.collection.JavaConverters._
 
@@ -40,9 +41,16 @@ object ModuleStatelessKafkaChecker extends App {
       while (maybeTxn.isDefined) {
         val transaction = maybeTxn.get
         while (transaction.hasNext()) {
-          val element = objectSerializer.deserialize(transaction.next()).asInstanceOf[Int]
-          outputElements.+=(element)
-          totalOutputElements += 1
+          val batch = objectSerializer.deserialize(transaction.next()).asInstanceOf[Batch]
+          batch.envelopes.foreach {
+            case tstreamEnvelope: TStreamEnvelope => tstreamEnvelope.data.foreach(x => {
+              outputElements.+=(objectSerializer.deserialize(x).asInstanceOf[Int])
+              totalOutputElements += 1
+            })
+            case kafkaEnvelope: KafkaEnvelope =>
+              outputElements.+=(objectSerializer.deserialize(kafkaEnvelope.data).asInstanceOf[Int])
+              totalOutputElements += 1
+          }
         }
         maybeTxn = outputConsumer.getTransaction(currentPartition)
       }

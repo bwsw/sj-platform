@@ -2,6 +2,7 @@ package com.bwsw.sj.engine.windowed.module.checkers
 
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.engine.core.entities.{KafkaEnvelope, TStreamEnvelope, Batch}
 import com.bwsw.sj.engine.windowed.module.DataFactory._
 import com.bwsw.sj.engine.windowed.utils.StateHelper
 
@@ -24,6 +25,11 @@ object ModuleStatefulChecker extends App {
 
   var inputElements = scala.collection.mutable.ArrayBuffer[Int]()
   var outputElements = scala.collection.mutable.ArrayBuffer[Int]()
+
+  val consumer = createStateConsumer(streamService)
+  consumer.start()
+  val initialState = StateHelper.getState(consumer, objectSerializer)
+  var sum = initialState("sum").asInstanceOf[Int]
 
   inputTstreamConsumers.foreach(inputTstreamConsumer => {
     val partitions = inputTstreamConsumer.getPartitions().toIterator
@@ -61,28 +67,29 @@ object ModuleStatefulChecker extends App {
       while (maybeTxn.isDefined) {
         val transaction = maybeTxn.get
         while (transaction.hasNext()) {
-          val element = objectSerializer.deserialize(transaction.next()).asInstanceOf[Int]
-          outputElements.+=(element)
-          totalOutputElements += 1
+          val batch = objectSerializer.deserialize(transaction.next()).asInstanceOf[Batch]
+          batch.envelopes.foreach {
+            case tstreamEnvelope: TStreamEnvelope => tstreamEnvelope.data.foreach(x => {
+              outputElements.+=(objectSerializer.deserialize(x).asInstanceOf[Int])
+              totalOutputElements += 1
+            })
+            case kafkaEnvelope: KafkaEnvelope =>
+              outputElements.+=(objectSerializer.deserialize(kafkaEnvelope.data).asInstanceOf[Int])
+              totalOutputElements += 1
+          }
         }
         maybeTxn = outputConsumer.getTransaction(currentPartition)
       }
     }
   })
 
-  val consumer = createStateConsumer(streamService)
-  consumer.start()
-  val initialState = StateHelper.getState(consumer, objectSerializer)
-
-  totalOutputElements -= ((totalInputElements - window) / slidingInterval) * (window - slidingInterval)
-
   assert(totalInputElements == totalOutputElements,
     "Count of all txns elements that are consumed from output stream should equals count of all txns elements that are consumed from input stream")
 
-  if (window == slidingInterval) assert(inputElements.forall(x => outputElements.contains(x)) && outputElements.forall(x => inputElements.contains(x)),
+  assert(inputElements.forall(x => outputElements.contains(x)) && outputElements.forall(x => inputElements.contains(x)),
     "All txns elements that are consumed from output stream should equals all txns elements that are consumed from input stream")
 
-  assert(initialState("sum") == inputElements.sum,
+  assert(sum == inputElements.sum,
     "Sum of all txns elements that are consumed from input stream should equals state variable sum")
 
   consumer.stop()

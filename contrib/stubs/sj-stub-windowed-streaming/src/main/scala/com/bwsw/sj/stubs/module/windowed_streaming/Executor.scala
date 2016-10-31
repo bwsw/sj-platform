@@ -29,23 +29,14 @@ class Executor(manager: ModuleEnvironmentManager) extends WindowedStreamingExecu
     val allWindows = windowRepository.getAll()
 
     if (new Random().nextInt(100) < 5) throw new Exception("it happened")
-    allWindows.flatMap(x => x._2.batches).flatMap(x => x.envelopes)
-      .foreach(envelope => {
-      envelope match {
-        case kafkaEnvelope: KafkaEnvelope =>
-          println("element: " +
-            objectSerializer.deserialize(kafkaEnvelope.data).asInstanceOf[Int])
-          output.put(kafkaEnvelope.data)
-        case tstreamEnvelope: TStreamEnvelope =>
-          println("elements: " +
-            tstreamEnvelope.data.map(x => objectSerializer.deserialize(x).asInstanceOf[Int]).mkString(","))
-          tstreamEnvelope.data.foreach(output.put)
-      }
-      println("stream name = " + envelope.stream)
+    val begin = if (sum != 0) windowRepository.window - windowRepository.slidingInterval else 0
+    val end = windowRepository.window
+
+    allWindows.flatMap(x => x._2.batches.slice(begin, end)).foreach(x => {
+      output.put(objectSerializer.serialize(x))
+      println("stream name = " + x.stream)
     })
 
-    val begin = if (windowRepository.window != windowRepository.slidingInterval) windowRepository.window - windowRepository.slidingInterval else 0
-    val end = windowRepository.window
     allWindows.flatMap(x => x._2.batches.slice(begin, end)).flatMap(x => x.envelopes).foreach {
       case kafkaEnvelope: KafkaEnvelope =>
         sum += objectSerializer.deserialize(kafkaEnvelope.data).asInstanceOf[Int]

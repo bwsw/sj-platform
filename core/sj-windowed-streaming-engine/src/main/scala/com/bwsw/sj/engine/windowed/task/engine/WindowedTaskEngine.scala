@@ -113,7 +113,6 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
   private def slideWindow() = {
     registerBatches()
     deleteBatches()
-    increaseBatchesCounterOfAppearing()
     resetCounter()
   }
 
@@ -126,10 +125,6 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
 
   private def deleteBatches() = {
     windowPerStream.foreach(x => x._2.batches.remove(0, instance.slidingInterval))
-  }
-
-  private def increaseBatchesCounterOfAppearing() = {
-    windowPerStream.foreach(x => x._2.batches.foreach(x => x.countOfAppearing += 1))
   }
 
   private def resetCounter() = {
