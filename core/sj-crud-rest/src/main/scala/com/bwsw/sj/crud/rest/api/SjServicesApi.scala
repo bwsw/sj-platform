@@ -6,6 +6,8 @@ import com.bwsw.sj.common.rest.entities.service.ServiceData
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
+import scala.collection.mutable
+
 trait SjServicesApi extends Directives with SjCrudValidator with CompletionUtils {
 
   val servicesApi = {
@@ -29,10 +31,9 @@ trait SjServicesApi extends Directives with SjCrudValidator with CompletionUtils
         } ~
           get {
             val services = serviceDAO.getAll
-            var response: RestResponse = NotFoundRestResponse(Map("message" -> getMessage("rest.services.notfound")))
+            val response = OkRestResponse(Map("services" -> mutable.Buffer()))
             if (services.nonEmpty) {
-              val entity = Map("services" -> services.map(_.asProtocolService()))
-              response = OkRestResponse(entity)
+              response.entity = Map("services" -> services.map(_.asProtocolService()))
             }
 
             complete(restResponseToHttpResponse(response))
