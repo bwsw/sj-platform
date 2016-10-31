@@ -29,6 +29,8 @@ class JDBCService() extends Service {
     val protocolService = new JDBCServiceData()
     super.fillProtocolService(protocolService)
     protocolService.provider = this.provider.name
+    protocolService.driver = this.driver
+    protocolService.database = this.database
     protocolService
   }
 }
