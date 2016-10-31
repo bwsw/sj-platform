@@ -27,7 +27,6 @@ class StubOutputExecutorJdbc extends OutputStreamingExecutor {
 
       val dataJDBC: StubJdbcData = new StubJdbcData
       dataJDBC.value = value
-
       dataJDBC
     }
 

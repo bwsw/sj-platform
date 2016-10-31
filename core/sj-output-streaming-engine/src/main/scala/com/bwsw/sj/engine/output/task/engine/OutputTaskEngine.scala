@@ -1,16 +1,17 @@
 package com.bwsw.sj.engine.output.task.engine
 
-import java.util.Calendar
+import java.util.{Calendar, UUID}
 import java.util.concurrent.Callable
 
 import com.bwsw.common.{ElasticsearchClient, JdbcClientBuilder, JsonSerializer, ObjectSerializer}
+import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
-import com.bwsw.sj.common.DAL.model.{ESService, JDBCService, SjStream}
+import com.bwsw.sj.common.DAL.model.{ESService, JDBCService, JDBCSjStream, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.engine.input.TStreamTaskInputService
-import com.bwsw.sj.engine.core.entities.{EsEnvelope, _}
+import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.output.task.OutputTaskManager
@@ -46,6 +47,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private lazy val (jdbcClient, jdbcService) = openJdbcConnection(outputStream)
   private var wasFirstCheckpoint = false
   private val byteSerializer = new ObjectSerializer()
+  private var txnFieldForJdbc: String = new JdbcEnvelope().getTxnName
 
 
   private def getOutput(): SjStream = {
@@ -104,6 +106,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
       setPassword(jdbcService.provider.password).
       setTable(outputStream.name).
       setDatabase(jdbcService.database).
+      setTxnField(txnFieldForJdbc).
       build()
     (client, jdbcService)
   }
@@ -190,6 +193,13 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
     val outputEnvelopes: List[Envelope] = executor.onMessage(envelope)
 
+    outputStream.streamType match {
+      case StreamLiterals.esOutputType =>
+        prepareES()
+        removeFromES(envelope)
+      case StreamLiterals.jdbcOutputType =>
+        removeFromJdbc(envelope)
+    }
     outputEnvelopes.foreach(outputEnvelope => registerAndSendOutputEnvelope(outputEnvelope, envelope))
   }
 
@@ -220,8 +230,6 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
    * @param inputEnvelope:
    */
   private def writeToES(esEnvelope: EsEnvelope, inputEnvelope: TStreamEnvelope) = {
-    prepareES()
-    removeFromES(inputEnvelope)
     esEnvelope.outputDateTime = s"${Calendar.getInstance().getTimeInMillis}"
     // todo REMOVED 4 zeros from transactionDateTime (check it)
     esEnvelope.transactionDateTime = s"${inputEnvelope.id}".dropRight(4)
@@ -232,7 +240,15 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
     logger.debug(s"Task: ${manager.taskName}. Write output envelope to elasticsearch.")
     esClient.write(envelopeSerializer.serialize(esEnvelope), esService.index, outputStream.name)
-    println("end")
+  }
+
+
+
+  private def removeFromJdbc(envelope: TStreamEnvelope): Unit = {
+    if (!wasFirstCheckpoint) {
+      val transaction = envelope.id.toString.replaceAll("-", "")
+      jdbcClient.removeByTransactionId(transaction)
+    }
   }
 
   /**
@@ -241,9 +257,11 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
    * @param jdbcEnvelope: Output envelope for writing to JDBC
    */
   private def writeToJdbc(jdbcEnvelope: JdbcEnvelope, inputEnvelope: TStreamEnvelope) = {
-    if (!wasFirstCheckpoint)
-      jdbcClient.remove(inputEnvelope.id)
-    jdbcClient.write(jdbcEnvelope, inputEnvelope.id)
+    txnFieldForJdbc = jdbcEnvelope.getTxnName
+    val jdbcStream = outputStream.asInstanceOf[JDBCSjStream]
+    jdbcEnvelope.txn = inputEnvelope.id.toString.replaceAll("-", "")
+    jdbcEnvelope.setV(jdbcStream.primary, UUID.randomUUID().toString)
+    jdbcClient.write(jdbcEnvelope)
   }
 
 

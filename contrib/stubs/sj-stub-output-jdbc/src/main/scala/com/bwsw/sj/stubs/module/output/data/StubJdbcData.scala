@@ -8,4 +8,6 @@ import com.bwsw.sj.engine.core.entities.JdbcEnvelope
 
 class StubJdbcData extends JdbcEnvelope {
   var value: Int = 0
+  var id: String = ""
+
 }

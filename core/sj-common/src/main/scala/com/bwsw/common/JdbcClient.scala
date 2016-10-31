@@ -36,24 +36,37 @@ protected class JdbcClient (private var jdbcCCD: JdbcClientConnectionData) {
     try stmt.executeUpdate(sql) catch {case e:Exception => throw new SQLException(e.getMessage)}
   }
 
-  private def prepareObjectToSQL(data: Object, id: Long): String = {
+  /**
+    * Prepare object to sql with txn field.
+    * @param data
+    * @return
+    */
+  private def prepareObjectToSQL(data: Object): String = {
     var attrs = getObjectAttributes(data)
-    attrs = attrs:+Tuple3("id", id.getClass, id)
+    attrs = attrs:+(jdbcCCD.txnFiled, classOf[String], data.getClass.getMethods.find(_.getName == jdbcCCD.txnFiled).get.invoke(data))
     val columns = attrs.map(a => a._1).mkString(", ")
     val values = attrs.map(a => a._3.toString.mkString("'","","'")).mkString(", ")
     s"INSERT INTO ${jdbcCCD.table} ($columns) VALUES ($values);"
   }
 
-  def write(data: Object, id: Long) = {
+  def write(data: Object) = {
     createTable(data)
     if (!checkTableExists()) {throw new RuntimeException("There is no table in database")}
-    val sql = prepareObjectToSQL(data, id)
+    val sql = prepareObjectToSQL(data)
     execute(sql)
   }
 
-  def remove(id: Long) = {
-    val sql = s"DELETE FROM ${jdbcCCD.table} WHERE id = $id"
-    execute(sql)
+  def removeByTransactionId(transactionId: String) = {
+    println("delete")
+    val sql = s"DELETE FROM ${jdbcCCD.table} WHERE ${jdbcCCD.txnFiled} = '$transactionId'"
+    def checkExists():Boolean = {
+      val esql = s"SELECT * FROM ${jdbcCCD.table} WHERE ${jdbcCCD.txnFiled} = '$transactionId'"
+      val stmt = connection.createStatement()
+      val res = stmt.executeQuery(esql)
+      res.next
+    }
+    if (checkExists())
+      execute(sql)
   }
 
   private def checkTableExists(): Boolean = {
@@ -92,8 +105,9 @@ class JdbcClientConnectionData {
   var driver: String = _
   var username: String = _
   var password: String = _
-  var database: String = ""
+  var database: String = _
   var table: String = _
+  var txnFiled: String = _
 
   /**
     * This method return driver class name, related to driver name provided in service
@@ -119,7 +133,7 @@ class JdbcClientConnectionData {
     case _ => throw new RuntimeException("Existing drivers: postgresql, mysql, oracle")
   }
 
-  def this(hosts:Array[String], driver:String, username:String, password:String, database:String, table:String) = {
+  def this(hosts:Array[String], driver:String, username:String, password:String, database:String, table:String, txnField:String) = {
     this
     this.hosts = hosts
     this.driver = driver
@@ -127,6 +141,7 @@ class JdbcClientConnectionData {
     this.password = password
     this.database = database
     this.table = table
+    this.txnFiled = txnField
   }
 }
 
@@ -154,6 +169,7 @@ protected class JdbcClientBuilder{
   def setPassword(password: String) = {jdbcClientConnectionData.password=password; this}
   def setDatabase(database: String) = {jdbcClientConnectionData.database=database; this}
   def setTable(table: String) = {jdbcClientConnectionData.table=table; this}
+  def setTxnField(txnField:String) = {jdbcClientConnectionData.txnFiled=txnField; this}
 
   /**
     * Use this method if you have JDBC connection data provider
