@@ -143,8 +143,10 @@ export class InstancesService {
 
     let objectFields = ['environment-variables', 'jvm-options', 'node-attributes', 'options'];
     for (let fieldName of objectFields) {
-      inst[fieldName] = inst[fieldName].length === 0 ? '{}' : inst[fieldName] ;
-      inst[fieldName] = JSON.parse(inst[fieldName].toString());
+      if (inst[fieldName] !== undefined) {
+        inst[fieldName] = inst[fieldName].length === 0 ? '{}' : inst[fieldName];
+        inst[fieldName] = JSON.parse(inst[fieldName].toString());
+      }
     }
 
     return inst;

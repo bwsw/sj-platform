@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder, NgForm } from '@angular/forms';
 import { ModalDirective } from 'ng2-bootstrap';
 
 import { InstanceModel } from '../shared/models/instance.model';
@@ -34,7 +34,7 @@ export class InstancesComponent implements OnInit {
   public new_instance_module: ModuleModel;
   public instance_to_delete: InstanceModel;
   public instance_to_clone: InstanceModel;
-  public instanceForm: FormGroup;
+  public instanceForm: NgForm;
   public showSpinner: boolean;
 
   constructor(private _instancesService: InstancesService,
@@ -64,12 +64,12 @@ export class InstancesComponent implements OnInit {
       this.getInstanceList();
     }.bind(this), 2000);
     this.new_instance = new InstanceModel();
-    this.instanceForm = this._fb.group({
-      //firstName: ['', Validators.required],
-      //lastName: ['', Validators.required],
-      //email: ['', Validators.compose([Validators.required])],
-      //phone: ['', Validators.required],
-    });
+    // this.instanceForm = this._fb.group({
+    //   //firstName: ['', Validators.required],
+    //   //lastName: ['', Validators.required],
+    //   //email: ['', Validators.compose([Validators.required])],
+    //   //phone: ['', Validators.required],
+    // });
   }
 
   public getInstanceList() {
@@ -229,20 +229,75 @@ export class InstancesComponent implements OnInit {
 
   public addInput() {
     this.new_instance.inputs.push('');
+    this.new_instance['input-type'].push('');
   }
 
   public addOutput() {
     this.new_instance.outputs.push('');
   }
 
-  // TODO: change to x button for every line (get code from providers-hosts form element)
-  removeLastInput() {
-    this.new_instance.inputs.pop();
-    this.new_instance['input-type'].pop();
+  public removeInput(i: number): void {
+    this.new_instance.inputs.splice(i, 1);
+    this.new_instance['input-type'].splice(i, 1);
   }
 
-  removeLastOutput() {
-    this.new_instance.outputs.pop();
+  public removeOutput(i: number): void {
+    this.new_instance.outputs.splice(i, 1);
+  }
+
+  @ViewChild('instanceForm') currentForm: NgForm;
+
+  ngAfterViewChecked() {
+    this.formChanged();
+  }
+
+  formChanged() {
+    if (this.currentForm === this.instanceForm) { return; }
+    this.instanceForm = this.currentForm;
+    if (this.instanceForm) {
+      this.instanceForm.valueChanges
+        .subscribe(data => this.onValueChanged(data));
+    }
+  }
+
+  formErrors: { [key: string]: string } = {
+    'instanceJvmOptions': '',
+    'instanceNodeAttributes': '',
+    'instanceEnvironmentVariables': '',
+  };
+
+  validationMessages: { [key: string]: { [key: string]: string } } = {
+    'instanceJvmOptions': {
+      'validJson': 'JVM options value is not a valid json'
+    },
+    'instanceNodeAttributes': {
+      'validJson': 'Node attributes value is not a valid json'
+    },
+    'instanceEnvironmentVariables': {
+      'validJson': 'Environment variables value is not a valid json'
+    }
+  };
+
+  onValueChanged(data?: any) {
+    if (!this.instanceForm) { return; }
+    const form = this.instanceForm.form;
+
+    for (const field in this.formErrors) {
+      // clear previous error message (if any)
+      this.formErrors[field] = '';
+      const control = form.get(field);
+      if (control && control.dirty && !control.valid) {
+        const messages = this.validationMessages[field];
+        for (const key in control.errors) {
+          this.formErrors[field] += messages[key] + ' ';
+        }
+      }
+    }
+  }
+
+  /* @hack: for nested ngFor and ngModel */
+  public customTrackBy(index: number, obj: any): any {
+    return index;
   }
 
 }

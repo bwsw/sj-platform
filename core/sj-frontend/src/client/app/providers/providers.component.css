@@ -170,14 +170,3 @@ h2 {
   width: 40%;
   display: inline-block;
 }
-
-.provider-host {
-  position: relative;
-}
-
-.provider-host .fa.fa-remove {
-  position: absolute;
-  right: 16px;
-  top: 12px;
-  cursor: pointer;
-}
