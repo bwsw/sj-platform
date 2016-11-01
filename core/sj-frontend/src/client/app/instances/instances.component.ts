@@ -18,6 +18,7 @@ import { ServicesService } from '../shared/services/services.service';
   templateUrl: 'instances.component.html',
 })
 export class InstancesComponent implements OnInit {
+
   public alerts: Array<Object> = [];
   public errorMessage: string;
   public form_ready: boolean = false;
@@ -36,6 +37,26 @@ export class InstancesComponent implements OnInit {
   public instance_to_clone: InstanceModel;
   public instanceForm: NgForm;
   public showSpinner: boolean;
+
+  @ViewChild('instanceForm') currentForm: NgForm;
+
+  private _formErrors: { [key: string]: string } = {
+    'instanceJvmOptions': '',
+    'instanceNodeAttributes': '',
+    'instanceEnvironmentVariables': '',
+  };
+
+  private _validationMessages: { [key: string]: { [key: string]: string } } = {
+    'instanceJvmOptions': {
+      'validJson': 'JVM options value is not a valid json'
+    },
+    'instanceNodeAttributes': {
+      'validJson': 'Node attributes value is not a valid json'
+    },
+    'instanceEnvironmentVariables': {
+      'validJson': 'Environment variables value is not a valid json'
+    }
+  };
 
   constructor(private _instancesService: InstancesService,
               private _modulesService: ModulesService,
@@ -80,10 +101,10 @@ export class InstancesComponent implements OnInit {
           //if (this.cloneInstanceList.length === 0) {
           //  this.cloneInstanceList = instanceList;
           //}
-          if (this.instanceList.length > 0) {
+          // if (this.instanceList.length > 0) {
             //this.current_instance = instanceList[0];
             //this.get_instance_info(this.current_instance);
-          }
+          // }
         },
         error => this.errorMessage = <any>error);
   }
@@ -245,8 +266,6 @@ export class InstancesComponent implements OnInit {
     this.new_instance.outputs.splice(i, 1);
   }
 
-  @ViewChild('instanceForm') currentForm: NgForm;
-
   ngAfterViewChecked() {
     this.formChanged();
   }
@@ -260,36 +279,18 @@ export class InstancesComponent implements OnInit {
     }
   }
 
-  formErrors: { [key: string]: string } = {
-    'instanceJvmOptions': '',
-    'instanceNodeAttributes': '',
-    'instanceEnvironmentVariables': '',
-  };
-
-  validationMessages: { [key: string]: { [key: string]: string } } = {
-    'instanceJvmOptions': {
-      'validJson': 'JVM options value is not a valid json'
-    },
-    'instanceNodeAttributes': {
-      'validJson': 'Node attributes value is not a valid json'
-    },
-    'instanceEnvironmentVariables': {
-      'validJson': 'Environment variables value is not a valid json'
-    }
-  };
-
   onValueChanged(data?: any) {
     if (!this.instanceForm) { return; }
     const form = this.instanceForm.form;
 
-    for (const field in this.formErrors) {
+    for (const field in this._formErrors) {
       // clear previous error message (if any)
-      this.formErrors[field] = '';
+      this._formErrors[field] = '';
       const control = form.get(field);
       if (control && control.dirty && !control.valid) {
-        const messages = this.validationMessages[field];
+        const messages = this._validationMessages[field];
         for (const key in control.errors) {
-          this.formErrors[field] += messages[key] + ' ';
+          this._formErrors[field] += messages[key] + ' ';
         }
       }
     }

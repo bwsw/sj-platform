@@ -288,7 +288,6 @@
       <span class="instance-name">Name</span>
       <span class="instance-status">Status</span>
     </li>
-    <div *ngIf="!instanceList && term" class="empty-list-message">There are no items to display</div>
     <li class="list-group-item" (click)="instance_select(instance)"
         *ngFor="let instance of instanceList | orderBy: 'name' | listFilter : term">
       <span class="instance-name">{{ instance.name }}</span>
