@@ -111,7 +111,8 @@
                 *ngIf="new_instance.module['module-type'] === 'input-streaming' || new_instance.module['module-type'] === 'regular-streaming'"
                 class="form-group">
                 <label class="col-sm-3 form-control-label required-label">Outputs</label>
-                <div *ngFor='let output of new_instance.outputs; let i = index;  trackBy:customTrackBy' class="instance-outputs with-item-removal">
+                <div *ngFor='let output of new_instance.outputs; let i = index;  trackBy:customTrackBy'
+                     class="instance-outputs with-item-removal clearfix">
                   <select [value]="new_instance.outputs[i]" (input)="new_instance.outputs[i] = $event.target.value"
                           name="instanceOutputs" required class="form-control form-type col-sm-10">
                     <option *ngFor="let stream of streamList">{{stream.name}}</option>
@@ -190,7 +191,7 @@
               <fieldset class="form-group">
                 <label class="col-sm-3 form-control-label">Jvm options</label>
                 <input [(ngModel)]="new_instance['jvm-options']" name="instanceJvmOptions" type="text"
-                       #instanceJvmOptions="ngModel" validJson class="form-control col-sm-10">
+                       class="form-control col-sm-10">
               </fieldset>
               <div *ngIf="formErrors.instanceJvmOptions && instanceJvmOptions.touched" class="alert alert-warning">
                 {{ formErrors.instanceJvmOptions }}

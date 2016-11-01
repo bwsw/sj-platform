@@ -40,13 +40,13 @@ export class InstancesComponent implements OnInit {
 
   @ViewChild('instanceForm') currentForm: NgForm;
 
-  private _formErrors: { [key: string]: string } = {
+  public formErrors: { [key: string]: string } = {
     'instanceJvmOptions': '',
     'instanceNodeAttributes': '',
     'instanceEnvironmentVariables': '',
   };
 
-  private _validationMessages: { [key: string]: { [key: string]: string } } = {
+  public validationMessages: { [key: string]: { [key: string]: string } } = {
     'instanceJvmOptions': {
       'validJson': 'JVM options value is not a valid json'
     },
@@ -283,14 +283,14 @@ export class InstancesComponent implements OnInit {
     if (!this.instanceForm) { return; }
     const form = this.instanceForm.form;
 
-    for (const field in this._formErrors) {
+    for (const field in this.formErrors) {
       // clear previous error message (if any)
-      this._formErrors[field] = '';
+      this.formErrors[field] = '';
       const control = form.get(field);
       if (control && control.dirty && !control.valid) {
-        const messages = this._validationMessages[field];
+        const messages = this.validationMessages[field];
         for (const key in control.errors) {
-          this._formErrors[field] += messages[key] + ' ';
+          this.formErrors[field] += messages[key] + ' ';
         }
       }
     }
