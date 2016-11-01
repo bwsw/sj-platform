@@ -34,4 +34,4 @@ export UI_HOST=0.0.0.0
 mkdir -p /var/log/rest
 touch /var/log/rest/supervisor.log
 echo "Running. See logs in /var/log/rest"
-supervisord -n > /var/log/rest/supervisor.log 2>&1
+exec supervisord -n > /var/log/rest/supervisor.log 2>&1

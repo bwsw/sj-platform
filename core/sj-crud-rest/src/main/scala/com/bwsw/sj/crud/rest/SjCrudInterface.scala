@@ -8,7 +8,7 @@ import com.bwsw.sj.crud.rest.cors.CorsSupport
 import com.bwsw.sj.crud.rest.exceptions._
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
-import kafka.common.TopicAlreadyMarkedForDeletionException
+import org.everit.json.schema.ValidationException
 
 /**
  * Route for CRUD Rest-API
@@ -43,6 +43,10 @@ with SjConfigurationSettingsApi with CompletionUtils {
     case ex: UnrecognizedPropertyException =>
       val response = InternalServerErrorRestResponse(Map("message" ->
         createMessage("rest.errors.unrecognized_property", ex.getPropertyName, ex.getKnownPropertyIds.toArray.mkString(", "))))
+      complete(restResponseToHttpResponse(response))
+    case jsonSchemaValidationException:ValidationException =>
+      val response = InternalServerErrorRestResponse(Map("message" ->
+        s"Specification.json of module fails to meet a json schema: ${jsonSchemaValidationException.getMessage}"))
       complete(restResponseToHttpResponse(response))
     case ex: Exception =>
       ex.printStackTrace()

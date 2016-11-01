@@ -8,7 +8,9 @@ RUN echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main" | te
     apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys EEA14886 && \
     apt-get update && \
     echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | debconf-set-selections && \
-    apt-get install -y --no-install-recommends oracle-java8-installer
+    apt-get install -y --no-install-recommends oracle-java8-installer && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN echo "deb http://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list.d/sbt.list && \
     apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 642AC823 && \
@@ -18,10 +20,14 @@ RUN echo "deb http://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list
     rm -rf /var/lib/apt/lists/*
 
 # Install npm and node.js
-RUN set -x && apt-get update && \
+RUN set -x && \
+    apt-get update && \
     apt-get install -y curl bzip2 git make build-essential && \
-    curl -sL https://deb.nodesource.com/setup_4.x | bash - && apt-get update && \
-    apt-get install -y ca-certificates nodejs && rm -rf /var/lib/apt/lists/*
+    curl -sL https://deb.nodesource.com/setup_4.x | bash - && \
+    apt-get update && \
+    apt-get install -y ca-certificates nodejs && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # see .dockerignore in root dir
 COPY ./project /opt/bin/juggler/project
@@ -31,26 +37,23 @@ COPY ./core/sj-crud-rest /opt/bin/juggler/core/sj-crud-rest
 COPY ./core/sj-frontend /opt/bin/juggler/core/sj-frontend
 
 #Prepare UI
-WORKDIR /opt/bin/juggler/core/sj-frontend
-
-
-RUN npm cache clear
-RUN npm install -g npm
-RUN npm install -g n
-RUN npm install -g typings
-RUN npm install --unsafe-perm
-RUN npm run-script build.prod
-RUN mkdir /var/www
-RUN cp dist/prod/. /var/www/ -R
-RUN rm -rf *
+RUN cd /opt/bin/juggler/core/sj-frontend && \
+    npm cache clear && \
+    npm install -g npm && \
+    npm install -g n && \
+    npm install -g typings && \
+    npm install --unsafe-perm && \
+    npm run-script build.prod && \
+    mkdir /var/www && \
+    cp dist/prod/. /var/www/ -R && \
+    rm -rf /root/.npm *
 
 # Prepare Rest
 WORKDIR /opt/bin/juggler
 
 RUN mkdir -p /root/.sbt/0.13 && \
-    echo 'scalacOptions ++= Seq("-Xmax-classfile-name","100")' > /root/.sbt/0.13/local.sbt
-
-RUN sbt sj-crud-rest/assembly
+    echo 'scalacOptions ++= Seq("-Xmax-classfile-name","100")' > /root/.sbt/0.13/local.sbt && \
+    sbt sj-crud-rest/assembly
 
 COPY ./docker/rest /opt/bin/juggler/docker/rest
 
@@ -59,8 +62,4 @@ RUN ln -s /opt/bin/juggler/docker/rest/rest-supervisor.conf /etc/supervisor/conf
     rm /etc/nginx/sites-available/default && \
     echo 'daemon off;' >> /etc/nginx/nginx.conf
 
-
-
-ENTRYPOINT ["/bin/bash"]
-
-CMD ["/opt/bin/juggler/docker/rest/rest-run.sh"]
+CMD ["/bin/bash", "/opt/bin/juggler/docker/rest/rest-run.sh"]
