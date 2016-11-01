@@ -48,7 +48,8 @@ object Dependencies {
   lazy val sjFrameworkDependencies = Def.setting(Seq(
     "org.apache.mesos" % "mesos" % "0.28.1",
     "net.databinder" % "unfiltered-filter_2.11" % "0.8.4",
-    "net.databinder" % "unfiltered-jetty_2.11" % "0.8.4"
+    "net.databinder" % "unfiltered-jetty_2.11" % "0.8.4",
+    "org.apache.httpcomponents" % "httpclient" % "4.5.2"
   ))
 
   lazy val sjSflowProcessDependencies = Def.setting(Seq(

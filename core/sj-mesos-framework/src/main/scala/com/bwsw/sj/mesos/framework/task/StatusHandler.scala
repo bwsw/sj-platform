@@ -15,7 +15,7 @@ object StatusHandler {
     * @param status: mesos task status
     */
 
-  def handle(status: TaskStatus) = {
+  def handle(status: TaskStatus, currentDirectory:String) = {
     logger.debug(s"STATUS UPDATE")
 
     if (status != null) {
@@ -27,15 +27,28 @@ object StatusHandler {
       ))
       logger.debug(s"Task: ${status.getTaskId.getValue}")
       logger.info(s"Status: ${status.getState}")
-      if (status.getState.toString == "TASK_FAILED" || status.getState.toString == "TASK_ERROR") {
-        TasksList(status.getTaskId.getValue).foreach(x => x.update(
-          node = "", reason = status.getMessage
-        ))
-        logger.error(s"Error: ${status.getMessage}")
-
-        TasksList.addToLaunch(status.getTaskId.getValue)
-        logger.info(s"Added task ${status.getTaskId.getValue} to launch after failure.")
-      }
+      if (status.getState.toString == "TASK_FAILED" ||
+        status.getState.toString == "TASK_ERROR") failure_handle(status)
+      if (status.getState.toString == "TASK_RUNNING") success_handle(status, currentDirectory)
     }
   }
+
+
+  private def failure_handle(status: TaskStatus) = {
+    TasksList(status.getTaskId.getValue).foreach(task => task.update(
+      node = "", reason = status.getMessage
+    ))
+    logger.error(s"Error: ${status.getMessage}")
+
+    TasksList.addToLaunch(status.getTaskId.getValue)
+    logger.info(s"Added task ${status.getTaskId.getValue} to launch after failure.")
+  }
+
+  private def success_handle(status: TaskStatus, dir: String) = {
+    TasksList(status.getTaskId.getValue).foreach(task => task.update(
+      directory = dir
+    ))
+    logger.debug(s"Running task: ${status.getTaskId.getValue}")
+  }
+
 }

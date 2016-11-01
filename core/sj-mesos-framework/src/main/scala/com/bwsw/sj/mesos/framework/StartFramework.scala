@@ -29,6 +29,7 @@ object StartFramework {
       setPrincipal("sherman").
       build()
 
+
     val frameworkPrincipal = ConnectionRepository.getConfigService.get(ConfigLiterals.frameworkPrincipalTag)
     val frameworkSecret = ConnectionRepository.getConfigService.get(ConfigLiterals.frameworkSecretTag)
     var credential: Option[Credential] = None

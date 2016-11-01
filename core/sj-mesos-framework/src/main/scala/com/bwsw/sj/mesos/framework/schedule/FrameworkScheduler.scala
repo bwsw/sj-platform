@@ -15,6 +15,8 @@ import scala.collection.JavaConverters._
 import scala.collection.immutable
 import scala.collection.mutable
 import scala.util.Properties
+import com.bwsw.common.JsonSerializer
+
 
 
 /*
@@ -24,6 +26,8 @@ class FrameworkScheduler extends Scheduler {
 
   private val logger = Logger.getLogger(this.getClass)
 
+  var frameworkId: String = null
+  var master: MasterInfo = null
   var driver: SchedulerDriver = null
   var perTaskCores: Double = 0.0
   var perTaskMem: Double = 0.0
@@ -54,10 +58,22 @@ class FrameworkScheduler extends Scheduler {
   /**
    * Execute when task change status.
    * @param driver scheduler driver
-   * @param status received status from master
+   * @param status received status from masterdocker
    */
   def statusUpdate(driver: SchedulerDriver, status: TaskStatus) {
-    StatusHandler.handle(status)
+    val serializer = new JsonSerializer()
+    val masterStateUrl = s"http://${master.getHostname}:${master.getPort}/state.json"
+    val masterResponse = scala.io.Source.fromURL(masterStateUrl).mkString
+    val masterObj = serializer.deserialize[masterState](masterResponse)
+    val currentSlave = masterObj.slaves.filter(a => a.id == status.getSlaveId.getValue).head
+    val slaveHost = currentSlave.pid.split("@").last
+    val slaveStateUrl = s"http://$slaveHost/state.json"
+    val slaveResponse = scala.io.Source.fromURL(slaveStateUrl).mkString
+    val obj = serializer.deserialize[slaveState](slaveResponse)
+    val frm = obj.frameworks.filter(a => a.id == this.frameworkId).head
+    val dir = frm.executors.head.directory
+    //todo return url on dir
+    StatusHandler.handle(status, dir)
   }
 
   def offerRescinded(driver: SchedulerDriver, offerId: OfferID) {
@@ -65,7 +81,7 @@ class FrameworkScheduler extends Scheduler {
 
 
   /**
-   * Obtaining resources and lauch tasks.
+   * Obtaining resources and launch tasks.
    *
    * @param driver scheduler driver
    * @param offers resources, that master offered to framework
@@ -156,7 +172,7 @@ class FrameworkScheduler extends Scheduler {
 
       var availablePorts = ports.getRanges.getRangeList.asScala.map(_.getBegin.toString)
       if (instance.get.moduleType.equals(EngineLiterals.inputStreamingType)) {
-        taskPort = availablePorts.head;
+        taskPort = availablePorts.head
         availablePorts = availablePorts.tail
         val inputInstance = instance.get.asInstanceOf[InputInstance]
         inputInstance.tasks.put(currTask, new InputTask(currentOffer._1.getUrl.getAddress.getIp, taskPort.toInt))
@@ -246,6 +262,8 @@ class FrameworkScheduler extends Scheduler {
   def registered(driver: SchedulerDriver, frameworkId: FrameworkID, masterInfo: MasterInfo) {
     logger.info(s"Registered framework as: ${frameworkId.getValue}")
     this.driver = driver
+    this.frameworkId = frameworkId.getValue
+    this.master = masterInfo
 
     params = Map(
       ("instanceId", Properties.envOrElse("INSTANCE_ID", "00000000-0000-0000-0000-000000000000")),
