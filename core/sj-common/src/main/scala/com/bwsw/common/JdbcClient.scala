@@ -7,6 +7,7 @@ package com.bwsw.common
 import java.sql.{Connection, DriverManager, SQLException}
 
 
+
 // todo: Add multiple connection to databases.
 /**
   * JDBC client - JDBC connection wrapper
@@ -118,7 +119,7 @@ class JdbcClientConnectionData {
     case "postgresql" => "org.postgresql.Driver"
     case "oracle" => "oracle.jdbc.driver.OracleDriver"
     case "mysql" => "com.mysql.jdbc.Driver"
-    case _ => throw new RuntimeException("Existing drivers: postgresql, mysql, oracle")
+    case _ => throw new RuntimeException(s"Existing drivers: ${JdbcClientBuilder.validDrivers}")
   }
 
   /**
@@ -130,7 +131,7 @@ class JdbcClientConnectionData {
     case "postgresql" => "jdbc:postgresql"
     case "oracle" => "jdbc:oracle:thin"
     case "mysql" => "jdbc:mysql"
-    case _ => throw new RuntimeException("Existing drivers: postgresql, mysql, oracle")
+    case _ => throw new RuntimeException(s"Existing drivers: ${JdbcClientBuilder.validDrivers}")
   }
 
   def this(hosts:Array[String], driver:String, username:String, password:String, database:String, table:String, txnField:String) = {
@@ -148,13 +149,38 @@ class JdbcClientConnectionData {
 /**
   * Builder class for JDBC client
   */
-protected class JdbcClientBuilder{
+object JdbcClientBuilder{
   private var jdbcClientConnectionData = new JdbcClientConnectionData()
+  val validDrivers = List("postgresql", "oracle", "mysql")
 
   def buildCheck() = {
     jdbcClientConnectionData.database match {
-      case ""|null => throw new RuntimeException("Database name must be declared.")
+      case ""|null => throw new RuntimeException("database field must be declared.")
       case _:String =>
+    }
+    jdbcClientConnectionData.driver match {
+      case ""|null => throw new RuntimeException("driver field must be declared.")
+      case _:String =>
+    }
+    jdbcClientConnectionData.table match {
+      case ""|null => throw new RuntimeException("table field must be declared.")
+      case _:String =>
+    }
+    jdbcClientConnectionData.txnFiled match {
+      case ""|null => throw new RuntimeException("txnField field must be declared.")
+      case _:String =>
+    }
+    jdbcClientConnectionData.username match {
+      case ""|null => throw new RuntimeException("username field must be declared.")
+      case _:String =>
+    }
+    jdbcClientConnectionData.password match {
+      case ""|null => throw new RuntimeException("password field must be declared.")
+      case _:String =>
+    }
+    jdbcClientConnectionData.hosts match {
+      case Array.empty|null => throw new RuntimeException("hosts field must be declared.")
+      case _ =>
     }
   }
 
@@ -181,8 +207,3 @@ protected class JdbcClientBuilder{
     this.jdbcClientConnectionData = jdbcClientConnectionData; this
   }
 }
-
-/**
-  * JDBC client builder instance
-  */
-object JdbcClientBuilder extends JdbcClientBuilder {}

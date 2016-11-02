@@ -1,6 +1,5 @@
 package com.bwsw.sj.engine.core.entities
 
-import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
  * Represents a message that is received from an OutputExecutor
@@ -8,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
  * Provides a wrapper for jdbc entity.
  */
 
-class JdbcEnvelope extends Envelope with Serializable {
+class JdbcEnvelope extends Envelope {
   streamType = "jdbc-output"
 
   /**
