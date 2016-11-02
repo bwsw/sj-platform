@@ -73,7 +73,8 @@ class FrameworkScheduler extends Scheduler {
     val frm = obj.frameworks.filter(a => a.id == this.frameworkId).head
     val dir = frm.executors.head.directory
     //todo return url on dir
-    StatusHandler.handle(status, dir)
+    val sandbox = s"http://${master.getHostname}:${master.getPort}/#/slaves/${currentSlave.id}/browse?path=$dir"
+    StatusHandler.handle(status, sandbox)
   }
 
   def offerRescinded(driver: SchedulerDriver, offerId: OfferID) {

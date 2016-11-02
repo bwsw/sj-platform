@@ -5,6 +5,8 @@ import java.util.Date
 
 import com.bwsw.sj.common.DAL.model.module.{Task => InstanceTask}
 
+import scala.util.Properties
+
 
 class Task(taskId: String) {
   val id: String = taskId
@@ -14,7 +16,7 @@ class Task(taskId: String) {
   var node: String = ""
   var lastNode: String = ""
   val description: InstanceTask = null
-  var maxDirectories = 10
+  var maxDirectories = Properties.envOrElse("MAX_SANDBOX_VIEW", "7").toInt
   var directories: Array[String] = Array()
 
 
