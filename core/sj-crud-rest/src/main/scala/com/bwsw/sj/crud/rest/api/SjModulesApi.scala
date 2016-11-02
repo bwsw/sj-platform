@@ -30,30 +30,33 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
   private val creationOfModule = post {
     uploadedFile("jar") {
       case (metadata: FileInfo, file: File) =>
-        var response: RestResponse = BadRequestRestResponse(Map("message" ->
-          createMessage("rest.modules.modules.extension.unknown", metadata.fileName)))
+        try {
+          println(file.toString)
+          var response: RestResponse = BadRequestRestResponse(Map("message" ->
+            createMessage("rest.modules.modules.extension.unknown", metadata.fileName)))
 
-        if (metadata.fileName.endsWith(".jar")) {
-          val specification = checkJarFile(file)
-          response = ConflictRestResponse(Map("message" ->
-            createMessage("rest.modules.module.exists", metadata.fileName)))
-
-          if (!doesModuleExist(specification)) {
+          if (metadata.fileName.endsWith(".jar")) {
+            val specification = checkJarFile(file)
             response = ConflictRestResponse(Map("message" ->
-              createMessage("rest.modules.module.file.exists", metadata.fileName)))
+              createMessage("rest.modules.module.exists", metadata.fileName)))
 
-            if (!storage.exists(metadata.fileName)) {
-              val uploadingFile = new File(metadata.fileName)
-              FileUtils.copyFile(file, uploadingFile)
-              storage.put(uploadingFile, metadata.fileName, specification, "module")
-              response = OkRestResponse(Map("message" ->
-                createMessage("rest.modules.module.uploaded", metadata.fileName)))
+            if (!doesModuleExist(specification)) {
+              response = ConflictRestResponse(Map("message" ->
+                createMessage("rest.modules.module.file.exists", metadata.fileName)))
+
+              if (!storage.exists(metadata.fileName)) {
+                val uploadingFile = new File(metadata.fileName)
+                FileUtils.copyFile(file, uploadingFile)
+                storage.put(uploadingFile, metadata.fileName, specification, "module")
+                response = OkRestResponse(Map("message" ->
+                  createMessage("rest.modules.module.uploaded", metadata.fileName)))
+              }
             }
           }
+          complete(restResponseToHttpResponse(response))
+        } finally {
+          file.delete()
         }
-        file.delete()
-
-        complete(restResponseToHttpResponse(response))
     }
   }
 
