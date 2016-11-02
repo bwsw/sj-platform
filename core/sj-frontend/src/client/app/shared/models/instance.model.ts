@@ -44,7 +44,7 @@ export class SubtypedInstance {
   'name': string;
   'node-attributes': Object;
   'options': Object;
-  'parallelism': string;
+  'parallelism': string|number;
   'per-task-cores': number;
   'per-task-ram': number;
   'performance-reporting-interval': number;

@@ -13,7 +13,10 @@ export class InstancesService {
   private static fillInstanceGeneralFields(originalInstance: InstanceModel, instance: SubtypedInstance) {
     instance['name'] = originalInstance['name'];
     instance['description'] = originalInstance['description'];
-    instance['parallelism'] = originalInstance['parallelism'];
+    // Checking if string 'max' or numeric is passed
+    instance['parallelism'] = /^\+?(0|[1-9]\d*)$/.test(originalInstance['parallelism'])
+      ? parseInt(originalInstance['parallelism'])
+      : originalInstance['parallelism'];
     instance['options'] = originalInstance['options'];
     instance['per-task-cores'] = originalInstance['per-task-cores'];
     instance['per-task-ram'] = originalInstance['per-task-ram'];

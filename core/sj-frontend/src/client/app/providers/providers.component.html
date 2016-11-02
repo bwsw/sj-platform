@@ -36,10 +36,9 @@
                      class="form-control col-sm-10" placeholder="Enter provider name">
             </fieldset>
             <fieldset class="form-group">
-              <label class="col-sm-3 form-control-label required">Description</label>
+              <label class="col-sm-3 form-control-label">Description</label>
               <textarea [(ngModel)]="new_provider.description" name="providerDescription"
-                        class="form-control form-type col-sm-10" placeholder="Enter provider description"
-                        required></textarea>
+                        class="form-control form-type col-sm-10" placeholder="Enter provider description"></textarea>
             </fieldset>
             <fieldset *ngIf="provider_hosts" class="form-group">
               <label class="col-sm-3 form-control-label required">Hosts</label>
