@@ -1,8 +1,8 @@
 package com.bwsw.sj.engine.core.regular
 
-import com.bwsw.sj.common.engine.StreamingExecutor
+import com.bwsw.sj.common.engine.{StateHandlers, StreamingExecutor}
 import com.bwsw.sj.engine.core.entities.Envelope
-import com.bwsw.sj.engine.core.environment.RegularEnvironmentManager
+import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 
 /**
  * Class is responsible for regular module execution logic.
@@ -12,7 +12,7 @@ import com.bwsw.sj.engine.core.environment.RegularEnvironmentManager
  * @author Kseniya Mikhaleva
  */
 
-class RegularStreamingExecutor(manager: RegularEnvironmentManager) extends StreamingExecutor {
+class RegularStreamingExecutor(manager: ModuleEnvironmentManager) extends StreamingExecutor with StateHandlers {
   /**
    * Is invoked only once at the beginning of launching of module
    */
@@ -48,19 +48,4 @@ class RegularStreamingExecutor(manager: RegularEnvironmentManager) extends Strea
    * Nothing to execute
    */
   def onIdle(): Unit = {}
-
-  /**
-   * Handler triggered before saving of the state
-   *
-   * @param isFullState Flag denotes that the full state (true) or partial changes of state (false) will be saved
-   */
-  def onBeforeStateSave(isFullState: Boolean): Unit = {}
-
-  /**
-   * Handler triggered after saving of the state
-   *
-   * @param isFullState Flag denotes that there was(were) a saving of the full state (true) or partial changes of state(false)
-   */
-  def onAfterStateSave(isFullState: Boolean): Unit = {}
-
 }

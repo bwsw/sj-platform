@@ -1,8 +1,7 @@
 package com.bwsw.sj.engine.core.engine
 
-import java.util.concurrent.{ExecutorService, ExecutorCompletionService, Executors}
+import java.util.concurrent.{ExecutorCompletionService, ExecutorService, Executors}
 
-import com.bwsw.sj.common.utils.EngineLiterals
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import org.slf4j.LoggerFactory
 
@@ -21,10 +20,9 @@ trait TaskRunner {
   protected val threadName: String
   private val threadPool: ExecutorService = createThreadPool(threadName)
   protected val executorService = new ExecutorCompletionService[Unit](threadPool)
-  protected val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(EngineLiterals.persistentBlockingQueue)
 
   private def createThreadPool(factoryName: String) = {
-    val countOfThreads = 3
+    val countOfThreads = 4
     val threadFactory = createThreadFactory(factoryName)
 
     Executors.newFixedThreadPool(countOfThreads, threadFactory)

@@ -16,13 +16,13 @@ import scala.collection._
  * @param options User defined options from instance parameters
  * @param producers T-streams producers for each output stream of instance parameters
  * @param outputs Set of output streams of instance parameters that have tags
- * @param outputTags Keeps a tag (partitioned or round-robin output) corresponding to the output for each output stream
+ * @param producerPolicyByOutput Keeps a tag (partitioned or round-robin output) corresponding to the output for each output stream
  * @param moduleTimer Provides a possibility to set a timer inside a module
  */
-class RegularEnvironmentManager(options: Map[String, Any],
+class ModuleEnvironmentManager(options: Map[String, Any],
                                producers: Map[String, Producer[Array[Byte]]],
                                outputs: Array[SjStream],
-                               outputTags: mutable.Map[String, (String, RegularModuleOutput)],
+                               producerPolicyByOutput: mutable.Map[String, (String, ModuleOutput)],
                                moduleTimer: SjTimer,
                                performanceMetrics: PerformanceMetrics) extends EnvironmentManager(options, outputs) {
   /**
@@ -34,18 +34,18 @@ class RegularEnvironmentManager(options: Map[String, Any],
   def getPartitionedOutput(streamName: String) = {
     logger.info(s"Get partitioned output for stream: $streamName\n")
     if (producers.contains(streamName)) {
-      if (outputTags.contains(streamName)) {
-        if (outputTags(streamName)._1 == "partitioned") {
-          outputTags(streamName)._2.asInstanceOf[PartitionedOutput]
+      if (producerPolicyByOutput.contains(streamName)) {
+        if (producerPolicyByOutput(streamName)._1 == "partitioned") {
+          producerPolicyByOutput(streamName)._2.asInstanceOf[PartitionedOutput]
         }
         else {
           logger.error(s"For output stream: $streamName partitioned output is set")
           throw new Exception(s"For output stream: $streamName partitioned output is set")
         }
       } else {
-        outputTags(streamName) = ("partitioned", new PartitionedOutput(producers(streamName), performanceMetrics))
+        producerPolicyByOutput(streamName) = ("partitioned", new PartitionedOutput(producers(streamName), performanceMetrics))
 
-        outputTags(streamName)._2.asInstanceOf[PartitionedOutput]
+        producerPolicyByOutput(streamName)._2.asInstanceOf[PartitionedOutput]
       }
     } else {
       logger.error(s"There is no output for name $streamName")
@@ -62,18 +62,18 @@ class RegularEnvironmentManager(options: Map[String, Any],
   def getRoundRobinOutput(streamName: String) = {
     logger.info(s"Get round-robin output for stream: $streamName\n")
     if (producers.contains(streamName)) {
-      if (outputTags.contains(streamName)) {
-        if (outputTags(streamName)._1 == "round-robin") {
-          outputTags(streamName)._2.asInstanceOf[RoundRobinOutput]
+      if (producerPolicyByOutput.contains(streamName)) {
+        if (producerPolicyByOutput(streamName)._1 == "round-robin") {
+          producerPolicyByOutput(streamName)._2.asInstanceOf[RoundRobinOutput]
         }
         else {
           logger.error(s"For output stream: $streamName partitioned output is set")
           throw new Exception(s"For output stream: $streamName partitioned output is set")
         }
       } else {
-        outputTags(streamName) = ("round-robin", new RoundRobinOutput(producers(streamName), performanceMetrics))
+        producerPolicyByOutput(streamName) = ("round-robin", new RoundRobinOutput(producers(streamName), performanceMetrics))
 
-        outputTags(streamName)._2.asInstanceOf[RoundRobinOutput]
+        producerPolicyByOutput(streamName)._2.asInstanceOf[RoundRobinOutput]
       }
     } else {
       logger.error(s"There is no output for name $streamName")

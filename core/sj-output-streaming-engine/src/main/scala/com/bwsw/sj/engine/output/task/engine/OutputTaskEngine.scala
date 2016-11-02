@@ -16,7 +16,6 @@ import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
-import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.elasticsearch.index.query.QueryBuilders
 import org.slf4j.LoggerFactory
 
@@ -25,38 +24,30 @@ import scala.collection.Map
 /**
  * Provided methods are responsible for a basic execution logic of task of output module
  *
-  * @param manager Manager of environment of task of output module
+ * @param manager Manager of environment of task of output module
  * @param performanceMetrics Set of metrics that characterize performance of a output streaming module
- * @param blockingQueue Blocking queue for keeping incoming envelopes that are serialized into a string,
- *                      which will be retrieved into a module
+
  * @author Kseniya Mikhaleva
  */
 abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
-                                performanceMetrics: OutputStreamingPerformanceMetrics,
-                                blockingQueue: PersistentBlockingQueue) extends Callable[Unit] {
+                                performanceMetrics: OutputStreamingPerformanceMetrics) extends Callable[Unit] {
 
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"output-task-${manager.taskName}-engine")
-  protected val logger = LoggerFactory.getLogger(this.getClass)
-
-  protected val checkpointGroup = new CheckpointGroup()
-  protected val instance = manager.instance.asInstanceOf[OutputInstance]
-  private val envelopeSerializer = new JsonSerializer(true)
-
-  private lazy val outputStream = getOutput()
-  protected lazy val environmentManager = createModuleEnvironmentManager()
-  protected lazy val executor = manager.getExecutor(environmentManager).asInstanceOf[OutputStreamingExecutor]
-
-
-  val taskInputService = new TStreamTaskInputService(manager, blockingQueue, checkpointGroup)
+  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(EngineLiterals.persistentBlockingQueue)
+  private val envelopeSerializer = new JsonSerializer()
+  private val instance = manager.instance.asInstanceOf[OutputInstance]
+  private val outputStream = getOutput()
+  protected val environmentManager = createModuleEnvironmentManager()
+  private val executor = manager.getExecutor(environmentManager).asInstanceOf[OutputStreamingExecutor]
+  val taskInputService = new TStreamTaskInputService(manager, blockingQueue)
   protected val isNotOnlyCustomCheckpoint: Boolean
   private lazy val (esClient, esService) = openEsConnection(outputStream)
-  private lazy val (jdbcClient, jdbcService) =  openJdbcConnection(outputStream)
+  private lazy val (jdbcClient, jdbcService) = openJdbcConnection(outputStream)
   private var wasFirstCheckpoint = false
   private val byteSerializer = new ObjectSerializer()
   private var txnFieldForJdbc: String = new JdbcEnvelope().getTxnName
-
-
 
 
   private def getOutput(): SjStream = {
@@ -98,11 +89,11 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
 
   /**
-    * Open JDBC connection
-    *
-    * @param outputStream Output stream
-    * @return JDBC connection client and JDBC service of stream
-    */
+   * Open JDBC connection
+   *
+   * @param outputStream Output stream
+   * @return JDBC connection client and JDBC service of stream
+   */
   private def openJdbcConnection(outputStream: SjStream) = {
     logger.info(s"Task: ${manager.taskName}. Open output JDBC connection.\n")
     val jdbcService: JDBCService = outputStream.service.asInstanceOf[JDBCService]
@@ -121,8 +112,8 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   }
 
   /**
-    * It is in charge of running a basic execution logic of output task engine
-    */
+   * It is in charge of running a basic execution logic of output task engine
+   */
   override def call(): Unit = {
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Run output task engine in a separate thread of execution service\n")
@@ -142,8 +133,8 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
   /**
    * Check whether a group checkpoint of t-streams consumers/producers have to be done or not
-    *
-    * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside output module (not on the schedule) or not.
+   *
+   * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside output module (not on the schedule) or not.
    */
   protected def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean
 
@@ -152,6 +143,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     esService.prepare()
     createIndexMapping()
   }
+
   private def createIndexMapping() = {
     val index = esService.index
     logger.debug(s"Task: ${manager.taskName}. Create the mapping for the elasticsearch index $index")
@@ -197,11 +189,8 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   // todo private
   def processOutputEnvelope(serializedEnvelope: String) = {
     val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope).asInstanceOf[TStreamEnvelope]
-    afterReceivingEnvelope()
-    taskInputService.registerEnvelope(envelope, performanceMetrics)
-    logger.debug(s"Task: ${
-      manager.taskName
-    }. Invoke onMessage() handler\n")
+    registerEnvelope(envelope)
+    logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
     val outputEnvelopes: List[Envelope] = executor.onMessage(envelope)
 
     outputStream.streamType match {
@@ -214,6 +203,11 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     outputEnvelopes.foreach(outputEnvelope => registerAndSendOutputEnvelope(outputEnvelope, envelope))
   }
 
+  private def registerEnvelope(envelope: Envelope) = {
+    afterReceivingEnvelope()
+    taskInputService.registerEnvelope(envelope)
+    performanceMetrics.addEnvelopeToInputStream(envelope)
+  }
 
   private def registerAndSendOutputEnvelope(outputEnvelope: Envelope, inputEnvelope: TStreamEnvelope) = {
     registerOutputEnvelope(inputEnvelope.id.toString.replaceAll("-", ""), outputEnvelope)
@@ -230,11 +224,11 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   }
 
   /**
-    * Writing entity to elasticsearch
-    *
-    * @param esEnvelope:
-    * @param inputEnvelope:
-    */
+   * Writing entity to elasticsearch
+   *
+   * @param esEnvelope:
+   * @param inputEnvelope:
+   */
   private def writeToES(esEnvelope: EsEnvelope, inputEnvelope: TStreamEnvelope) = {
     esEnvelope.outputDateTime = s"${Calendar.getInstance().getTimeInMillis}"
     // todo REMOVED 4 zeros from transactionDateTime (check it)
@@ -278,7 +272,6 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
     taskInputService.doCheckpoint()
     logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
-    checkpointGroup.checkpoint()
     prepareForNextCheckpoint()
     wasFirstCheckpoint = true
   }

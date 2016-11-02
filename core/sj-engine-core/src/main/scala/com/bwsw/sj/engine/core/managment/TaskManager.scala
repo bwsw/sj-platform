@@ -17,7 +17,6 @@ import com.bwsw.sj.engine.core.converter.ArrayByteConverter
 import com.bwsw.sj.engine.core.environment.EnvironmentManager
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
 import com.bwsw.tstreams.agents.consumer.subscriber.Callback
-import com.bwsw.tstreams.agents.producer.Producer
 import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
 import com.bwsw.tstreams.generator.LocalTransactionGenerator
 import com.bwsw.tstreams.services.BasicStreamService
@@ -62,7 +61,6 @@ abstract class TaskManager() {
 
   val converter = new ArrayByteConverter
   val inputs: mutable.Map[SjStream, Array[Int]]
-  val outputProducers: Map[String, Producer[Array[Byte]]]
 
   private def getInstance() = {
     val maybeInstance = ConnectionRepository.getInstanceService.get(instanceName)
@@ -302,7 +300,7 @@ abstract class TaskManager() {
     currentPortNumber += 1
   }
 
-  def getCheckpointInterval() = {
+  def getCheckpointInterval() = { //todo переделать
     instance match {
       case inputInstance: InputInstance =>
         inputInstance.checkpointInterval
@@ -312,6 +310,19 @@ abstract class TaskManager() {
         outputInstance.checkpointInterval
       case windowedInstance: WindowedInstance =>
         throw new Exception("Windowed streaming engine doesn't have a checkpoint interval")
+    }
+  }
+
+  def getExecutionPlan() = { //todo переделать
+    instance match {
+      case inputInstance: InputInstance =>
+        throw new Exception("Input streaming engine doesn't have an execution plan")
+      case regularInstance: RegularInstance =>
+        regularInstance.executionPlan
+      case outputInstance: OutputInstance =>
+        outputInstance.executionPlan
+      case windowedInstance: WindowedInstance =>
+        windowedInstance.executionPlan
     }
   }
 

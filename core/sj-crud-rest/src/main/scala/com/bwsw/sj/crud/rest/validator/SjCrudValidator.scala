@@ -18,7 +18,7 @@ import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.engine.{StreamingExecutor, StreamingValidator}
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import org.everit.json.schema.loader.SchemaLoader
-import org.json.{JSONObject, JSONTokener}
+import org.json.{JSONException, JSONObject, JSONTokener}
 
 import scala.concurrent.{Await, ExecutionContextExecutor}
 
@@ -82,13 +82,10 @@ trait SjCrudValidator {
   def checkJarFile(jarFile: File) = {
     val configService = ConnectionRepository.getConfigService
     val classLoader = new URLClassLoader(Array(jarFile.toURI.toURL), ClassLoader.getSystemClassLoader)
-    val json = getSpecificationFromJar(jarFile)
-    if (isEmptyOrNullString(json)) {
-      logger.debug(s"File specification.json not found in module jar ${jarFile.getName}.")
-      throw new FileNotFoundException(s"Specification.json for ${jarFile.getName} is not found!")
-    }
-    schemaValidate(json, getClass.getClassLoader.getResourceAsStream("schema.json"))
-    val specification = serializer.deserialize[Map[String, Any]](json)
+    val specificationJson = getSpecificationFromJar(jarFile)
+    validateJson(specificationJson)
+    schemaValidate(specificationJson, getClass.getClassLoader.getResourceAsStream("schema.json"))
+    val specification = serializer.deserialize[Map[String, Any]](specificationJson)
     val moduleType = specification("module-type").asInstanceOf[String]
     val inputs = specification("inputs").asInstanceOf[Map[String, Any]]
     val inputCardinality = inputs("cardinality").asInstanceOf[List[Int]]
@@ -294,6 +291,17 @@ trait SjCrudValidator {
     builder.toString()
   }
 
+  def validateJson(specificationJson: String) = {
+    if (isEmptyOrNullString(specificationJson)) {
+      logger.error(s"File specification.json is not found in module jar.")
+      throw new FileNotFoundException(s"Specification.json is not found in module jar.")
+    }
+    if (!isJSONValid(specificationJson)) {
+      logger.error(s"Specification.json of module is an invalid json.")
+      throw new FileNotFoundException(s"Specification.json of module is an invalid json")
+    }
+  }
+
   /**
    * Check String object
    *
@@ -301,6 +309,15 @@ trait SjCrudValidator {
    * @return - boolean result of checking
    */
   private def isEmptyOrNullString(value: String): Boolean = value == null || value.isEmpty
+
+  private def isJSONValid(json: String): Boolean = {
+    try {
+      new JSONObject(json)
+    } catch {
+      case ex: JSONException => return false
+    }
+    true
+  }
 
   /**
    * Validate json for such schema
@@ -313,7 +330,8 @@ trait SjCrudValidator {
     if (schemaStream != null) {
       val rawSchema = new JSONObject(new JSONTokener(schemaStream))
       val schema = SchemaLoader.load(rawSchema)
-      schema.validate(new JSONObject(json))
+      val specification = new JSONObject(json)
+      schema.validate(specification)
     } else {
       throw new Exception("Json schema for specification is not found")
     }

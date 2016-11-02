@@ -15,12 +15,6 @@ class OutputTaskManager() extends TaskManager {
 
   val outputInstance = instance.asInstanceOf[OutputInstance]
   val inputs = getInputs(outputInstance.executionPlan)
-  lazy val outputProducers = {
-    logger.error(s"Instance of Output module hasn't got t-stream outputs " +
-      s"and it's impossible to retrieve their producers")
-    throw new Exception(s"Instance of Output module hasn't got t-stream outputs " +
-      s"and it's impossible to retrieve their producers")
-  }
   
   assert(numberOfAgentsPorts == 2, "Not enough ports for t-stream consumers/producers ")
 

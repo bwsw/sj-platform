@@ -6,16 +6,13 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
+import com.bwsw.sj.engine.core.engine.input.CommonTaskInputServiceFactory
 import com.bwsw.sj.engine.core.entities.Envelope
-import com.bwsw.sj.engine.regular.task.RegularTaskManager
-import com.bwsw.sj.engine.regular.task.engine.input.RegularTaskInputServiceFactory
-import com.bwsw.sj.engine.regular.task.engine.state.{RegularTaskEngineService, StatefulRegularTaskEngineService, StatelessRegularTaskEngineService}
+import com.bwsw.sj.engine.core.managment.CommonTaskManager
+import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
+import com.bwsw.sj.engine.core.state.{StatelessCommonModuleService, StatefulCommonModuleService, CommonModuleService}
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
-import com.bwsw.tstreams.agents.group.CheckpointGroup
-import com.bwsw.tstreams.agents.producer.Producer
 import org.slf4j.LoggerFactory
-
-import scala.collection.Map
 
 /**
  * Provides methods are responsible for a basic execution logic of task of regular module
@@ -23,47 +20,34 @@ import scala.collection.Map
  *
  * @param manager Manager of environment of task of regular module
  * @param performanceMetrics Set of metrics that characterize performance of a regular streaming module
- * @param blockingQueue Blocking queue for keeping incoming envelopes that are serialized into a string,
- *                      which will be retrieved into a module
+
  * @author Kseniya Mikhaleva
  */
-abstract class RegularTaskEngine(protected val manager: RegularTaskManager,
-                                 performanceMetrics: RegularStreamingPerformanceMetrics,
-                                 blockingQueue: PersistentBlockingQueue) extends Callable[Unit] {
+abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
+                                 performanceMetrics: RegularStreamingPerformanceMetrics) extends Callable[Unit] {
 
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"regular-task-${manager.taskName}-engine")
-  protected val logger = LoggerFactory.getLogger(this.getClass)
-  protected val producers: Map[String, Producer[Array[Byte]]] = manager.outputProducers
-  protected val checkpointGroup = new CheckpointGroup()
-  protected val instance = manager.instance.asInstanceOf[RegularInstance]
-  protected val regularTaskEngineService = createRegularTaskEngineService()
-  protected val environmentManager = regularTaskEngineService.regularEnvironmentManager
-  protected val executor = regularTaskEngineService.executor
-  private val moduleTimer = regularTaskEngineService.moduleTimer
-  protected val outputTags = regularTaskEngineService.outputTags
-  private val regularTaskInputServiceFactory = new RegularTaskInputServiceFactory(manager, blockingQueue, checkpointGroup)
-  val taskInputService = regularTaskInputServiceFactory.createRegularTaskInputService()
+  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(EngineLiterals.persistentBlockingQueue)
+  private val instance = manager.instance.asInstanceOf[RegularInstance]
+  private val taskInputServiceFactory = new CommonTaskInputServiceFactory(manager, blockingQueue)
+  val taskInputService = taskInputServiceFactory.createTaskInputService()
+  private val moduleService = createRegularModuleService()
+  private val executor = moduleService.executor.asInstanceOf[RegularStreamingExecutor]
+  private val moduleTimer = moduleService.moduleTimer
   protected val isNotOnlyCustomCheckpoint: Boolean
 
-  protected val envelopeSerializer = new JsonSerializer(true)
+  private val envelopeSerializer = new JsonSerializer(true)
 
-  addProducersToCheckpointGroup()
-
-  protected def createRegularTaskEngineService(): RegularTaskEngineService = {
+  private def createRegularModuleService(): CommonModuleService = {
     instance.stateManagement match {
       case EngineLiterals.noneStateMode =>
         logger.debug(s"Task: ${manager.taskName}. Start preparing of regular module without state\n")
-        new StatelessRegularTaskEngineService(manager, performanceMetrics)
+        new StatelessCommonModuleService(manager, taskInputService.checkpointGroup, performanceMetrics)
       case EngineLiterals.ramStateMode =>
-        new StatefulRegularTaskEngineService(manager, checkpointGroup, performanceMetrics)
+        new StatefulCommonModuleService(manager, taskInputService.checkpointGroup, performanceMetrics)
     }
-  }
-
-  private def addProducersToCheckpointGroup() = {
-    logger.debug(s"Task: ${manager.taskName}. Start adding t-stream producers to checkpoint group\n")
-    producers.foreach(x => checkpointGroup.add(x._2))
-    logger.debug(s"Task: ${manager.taskName}. The t-stream producers are added to checkpoint group\n")
   }
 
   /**
@@ -81,8 +65,7 @@ abstract class RegularTaskEngine(protected val manager: RegularTaskManager,
       maybeEnvelope match {
         case Some(serializedEnvelope) => {
           val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope)
-          afterReceivingEnvelope()
-          taskInputService.registerEnvelope(envelope, performanceMetrics)
+          registerEnvelope(envelope)
           logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
           executor.onMessage(envelope)
         }
@@ -92,7 +75,7 @@ abstract class RegularTaskEngine(protected val manager: RegularTaskManager,
         }
       }
 
-      if (isItTimeToCheckpoint(environmentManager.isCheckpointInitiated)) doCheckpoint()
+      if (isItTimeToCheckpoint(moduleService.isCheckpointInitiated)) doCheckpoint()
 
       if (moduleTimer.isTime) {
         logger.debug(s"Task: ${manager.taskName}. Invoke onTimer() handler\n")
@@ -100,6 +83,12 @@ abstract class RegularTaskEngine(protected val manager: RegularTaskManager,
         moduleTimer.reset()
       }
     }
+  }
+
+  private def registerEnvelope(envelope: Envelope) = {
+    afterReceivingEnvelope()
+    taskInputService.registerEnvelope(envelope)
+    performanceMetrics.addEnvelopeToInputStream(envelope)
   }
 
   protected def afterReceivingEnvelope(): Unit
@@ -113,15 +102,13 @@ abstract class RegularTaskEngine(protected val manager: RegularTaskManager,
   /**
    * Does group checkpoint of t-streams consumers/producers
    */
-  protected def doCheckpoint() = {
+  private def doCheckpoint() = {
     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
     logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeCheckpoint() handler\n")
     executor.onBeforeCheckpoint()
-    regularTaskEngineService.doCheckpoint()
-    taskInputService.doCheckpoint()
     logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
-    checkpointGroup.checkpoint()
-    outputTags.clear()
+    moduleService.doCheckpoint()
+    taskInputService.doCheckpoint()
     logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
     executor.onAfterCheckpoint()
     prepareForNextCheckpoint()

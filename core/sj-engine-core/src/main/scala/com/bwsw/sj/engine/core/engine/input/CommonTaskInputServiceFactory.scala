@@ -1,10 +1,8 @@
-package com.bwsw.sj.engine.regular.task.engine.input
+package com.bwsw.sj.engine.core.engine.input
 
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
-import com.bwsw.sj.engine.core.engine.input.TStreamTaskInputService
-import com.bwsw.sj.engine.regular.task.RegularTaskManager
-import com.bwsw.tstreams.agents.group.CheckpointGroup
+import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import org.slf4j.LoggerFactory
 
 /**
@@ -16,21 +14,19 @@ import org.slf4j.LoggerFactory
  * @param manager Manager of environment of task of regular module
  * @param blockingQueue Blocking queue for keeping incoming envelopes that are serialized into a string,
  *                      which will be retrieved into a module
- * @param checkpointGroup Group of t-stream agents that have to make a checkpoint at the same time
  */
-class RegularTaskInputServiceFactory(manager: RegularTaskManager,
-                                     blockingQueue: PersistentBlockingQueue,
-                                     checkpointGroup: CheckpointGroup) {
+class CommonTaskInputServiceFactory(manager: CommonTaskManager,
+                                     blockingQueue: PersistentBlockingQueue) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val isKafkaInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.kafkaStreamType)
   private val isTstreamInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.tStreamType)
 
-  def createRegularTaskInputService() = {
+  def createTaskInputService() = {
     (isKafkaInputExist, isTstreamInputExist) match {
-      case (true, true) => new CompleteTaskInputService(manager, blockingQueue, checkpointGroup)
-      case (false, true) => new TStreamTaskInputService(manager, blockingQueue, checkpointGroup)
-      case (true, false) => new KafkaTaskInputService(manager, blockingQueue, checkpointGroup)
+      case (true, true) => new CompleteTaskInputService(manager, blockingQueue)
+      case (false, true) => new TStreamTaskInputService(manager, blockingQueue)
+      case (true, false) => new KafkaTaskInputService(manager, blockingQueue)
       case _ =>
         logger.error("Type of input stream is not 'kafka' or 't-stream'")
         throw new Exception("Type of input stream is not 'kafka' or 't-stream'")

@@ -1,18 +1,16 @@
-package com.bwsw.sj.engine.regular.task.engine.input
+package com.bwsw.sj.engine.core.engine.input
 
 import java.util.Properties
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.common.DAL.model.module.RegularInstance
+import com.bwsw.sj.common.DAL.model.module.{RegularInstance, WindowedInstance}
 import com.bwsw.sj.common.DAL.model.{KafkaService, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.ConfigurationSettingsUtils._
-import com.bwsw.sj.common.utils.{EngineLiterals, ConfigLiterals, StreamLiterals, ConfigSettingsUtils}
+import com.bwsw.sj.common.utils.{ConfigLiterals, ConfigSettingsUtils, EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
-import com.bwsw.sj.engine.core.engine.input.TaskInputService
-import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope}
-import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
-import com.bwsw.sj.engine.regular.task.RegularTaskManager
+import com.bwsw.sj.engine.core.entities.KafkaEnvelope
+import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.consumer.Offset.Newest
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.NewTransactionProducerPolicy
@@ -34,18 +32,16 @@ import scala.collection.mutable
  * @param manager Manager of environment of task of regular module
  * @param blockingQueue Blocking queue for keeping incoming envelopes that are serialized into a string,
  *                      which will be retrieved into a module
- * @param checkpointGroup Group of t-stream agents that have to make a checkpoint at the same time
  */
-class KafkaTaskInputService(manager: RegularTaskManager,
+class KafkaTaskInputService(manager: CommonTaskManager,
                             blockingQueue: PersistentBlockingQueue,
-                            checkpointGroup: CheckpointGroup)
-  extends TaskInputService {
-
+                            override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
+  extends TaskInputService[KafkaEnvelope](manager.inputs) {
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"regular-task-${manager.taskName}-kafka-consumer")
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val offsetSerializer = new ObjectSerializer()
-  private val regularInstance = manager.instance.asInstanceOf[RegularInstance]
+  private val instance = manager.instance
   private val kafkaSubscriberTimeout = ConfigSettingsUtils.getKafkaSubscriberTimeout()
   private val kafkaInputs = getKafkaInputs()
   private var kafkaOffsetsStorage = mutable.Map[(String, Int), Long]()
@@ -123,7 +119,14 @@ class KafkaTaskInputService(manager: RegularTaskManager,
   }
 
   private def chooseOffset() = {
-    regularInstance.startFrom match {
+    val startFrom = instance match {
+      case regularInstance: RegularInstance =>
+        regularInstance.startFrom
+      case windowedInstance: WindowedInstance =>
+        windowedInstance.startFrom
+    }
+
+    startFrom match {
       case EngineLiterals.oldestStartMode => "earliest"
       case _ => "latest"
     }
@@ -179,7 +182,7 @@ class KafkaTaskInputService(manager: RegularTaskManager,
     val configService = ConnectionRepository.getConfigService
 
     val kafkaSettings = configService.getByParameters(Map("domain" -> ConfigLiterals.kafkaDomain))
-     kafkaSettings.foreach(x => properties.put(clearConfigurationSettingName(x.domain, x.name), x.value))
+    kafkaSettings.foreach(x => properties.put(clearConfigurationSettingName(x.domain, x.name), x.value))
   }
 
   override def call() = {
@@ -205,22 +208,15 @@ class KafkaTaskInputService(manager: RegularTaskManager,
     }
   }
 
-  def registerEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics) = {
-    logger.info(s"Task: ${manager.taskName}. Kafka envelope is received\n")
-    val kafkaEnvelope = envelope.asInstanceOf[KafkaEnvelope]
-    logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${kafkaEnvelope.stream} " +
-      s"for partition: ${kafkaEnvelope.partition} to ${kafkaEnvelope.offset}\n")
-    kafkaOffsetsStorage((kafkaEnvelope.stream, kafkaEnvelope.partition)) = kafkaEnvelope.offset
-    performanceMetrics.addEnvelopeToInputStream(
-      kafkaEnvelope.stream,
-      List(kafkaEnvelope.data.length)
-    )
+  override def setConsumerOffset(envelope: KafkaEnvelope) = {
+    logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${envelope.stream} " +
+      s"for partition: ${envelope.partition} to ${envelope.offset}\n")
+    kafkaOffsetsStorage((envelope.stream, envelope.partition)) = envelope.offset
   }
 
-  override def doCheckpoint() = {
-    logger.debug(s"Task: ${manager.taskName}. Save kafka offsets for each kafka input\n")
-    offsetProducer
-      .newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
+  override def setConsumerOffsetToLastEnvelope() = {
+    super.setConsumerOffsetToLastEnvelope()
+    offsetProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
       .send(offsetSerializer.serialize(kafkaOffsetsStorage))
   }
 }

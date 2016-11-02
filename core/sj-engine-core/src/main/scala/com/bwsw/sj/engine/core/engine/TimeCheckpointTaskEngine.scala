@@ -1,7 +1,6 @@
 package com.bwsw.sj.engine.core.engine
 
 import com.bwsw.sj.common.utils.SjTimer
-import com.bwsw.sj.engine.core.environment.EnvironmentManager
 import com.bwsw.sj.engine.core.managment.TaskManager
 import org.slf4j.LoggerFactory
 
@@ -11,7 +10,6 @@ import org.slf4j.LoggerFactory
 trait TimeCheckpointTaskEngine {
   private val logger = LoggerFactory.getLogger(this.getClass)
   protected val manager: TaskManager
-  protected val environmentManager: EnvironmentManager
   private lazy val checkpointInterval = manager.getCheckpointInterval()
 
   private val checkpointTimer: Option[SjTimer] = createTimer()
@@ -34,7 +32,7 @@ trait TimeCheckpointTaskEngine {
   }
 
   def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean = {
-    isNotOnlyCustomCheckpoint && checkpointTimer.get.isTime || environmentManager.isCheckpointInitiated
+    isNotOnlyCustomCheckpoint && checkpointTimer.get.isTime || isCheckpointInitiated
   }
 
   def prepareForNextCheckpoint() = {

@@ -2,8 +2,9 @@ package com.bwsw.sj.engine.core.engine.input
 
 import java.util.concurrent.Callable
 
+import com.bwsw.sj.common.DAL.model.SjStream
 import com.bwsw.sj.engine.core.entities.Envelope
-import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
+import com.bwsw.tstreams.agents.group.CheckpointGroup
 
 /**
  * Class is responsible for handling an input streams of specific type(types),
@@ -11,9 +12,29 @@ import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
  *
  * @author Kseniya Mikhaleva
  */
-abstract class TaskInputService extends Callable[Unit] {
+abstract class TaskInputService[T <: Envelope](inputs: scala.collection.mutable.Map[SjStream, Array[Int]]) extends Callable[Unit] {
+  private val lastEnvelopesByStreams = createStorageOfLastEnvelopes() //todo сделать заполнение только для потоков конкретного типа
+  val checkpointGroup: CheckpointGroup
 
-  def registerEnvelope(envelope: Envelope, performanceMetrics: PerformanceMetrics)
+  private def createStorageOfLastEnvelopes() = {
+    inputs.flatMap(x => x._2.map(y => ((x._1.name, y), new Envelope())))
+  }
 
-  def doCheckpoint()
+  def registerEnvelope(envelope: Envelope) = {
+    lastEnvelopesByStreams((envelope.stream, envelope.partition)) = envelope
+  }
+
+  def setConsumerOffsetToLastEnvelope() = {
+    lastEnvelopesByStreams.values.filterNot(_.isEmpty()).foreach(envelope => {
+      setConsumerOffset(envelope.asInstanceOf[T])
+    })
+    lastEnvelopesByStreams.clear()
+  }
+
+  protected def setConsumerOffset(envelope: T)
+
+  def doCheckpoint() = {
+    setConsumerOffsetToLastEnvelope()
+    checkpointGroup.checkpoint()
+  }
 }

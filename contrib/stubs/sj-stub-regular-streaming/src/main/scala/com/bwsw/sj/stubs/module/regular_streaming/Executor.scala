@@ -1,13 +1,14 @@
 package com.bwsw.sj.stubs.module.regular_streaming
 
+import java.util.Random
+
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.engine.core.entities.{TStreamEnvelope, Envelope, KafkaEnvelope}
-import com.bwsw.sj.engine.core.environment.RegularEnvironmentManager
+import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.state.StateStorage
 
-
-class Executor(manager: RegularEnvironmentManager) extends RegularStreamingExecutor(manager) {
+class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor(manager) {
 
   val objectSerializer = new ObjectSerializer()
   val state: StateStorage = manager.getState
@@ -23,10 +24,10 @@ class Executor(manager: RegularEnvironmentManager) extends RegularStreamingExecu
 
   override def onMessage(envelope: Envelope): Unit = {
     val outputs = manager.getStreamsByTags(Array("output"))
-    val output = manager.getRoundRobinOutput(outputs(scala.util.Random.nextInt(outputs.length)))
+    val output = manager.getRoundRobinOutput(outputs(new Random().nextInt(outputs.length)))
     var sum = state.get("sum").asInstanceOf[Int]
 
-    if (scala.util.Random.nextInt(100) < 20) throw new Exception("it happened")
+    if (new Random().nextInt(100) < 20) throw new Exception("it happened")
     envelope match {
       case kafkaEnvelope: KafkaEnvelope =>
         println("element: " +

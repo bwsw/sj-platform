@@ -2,10 +2,8 @@ package com.bwsw.sj.engine.regular.task.reporting
 
 import java.util.Calendar
 
+import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
-import com.bwsw.sj.engine.regular.task.RegularTaskManager
-
-import scala.collection.mutable
 
 /**
  * Class represents a set of metrics that characterize performance of a regular streaming module
@@ -13,17 +11,16 @@ import scala.collection.mutable
  * @author Kseniya Mikhaleva
  */
 
-class RegularStreamingPerformanceMetrics(manager: RegularTaskManager)
+class RegularStreamingPerformanceMetrics(manager: CommonTaskManager)
   extends PerformanceMetrics(manager) {
 
   currentThread.setName(s"regular-task-${manager.taskName}-performance-metrics")
   private var totalIdleTime = 0L
-  private var numberOfStateVariables = 0
   private val inputStreamNames =  manager.inputs.map(_._1.name).toArray
   private val outputStreamNames = manager.instance.outputs
 
-  override protected var inputEnvelopesPerStream = createStorageForInputEnvelopes(inputStreamNames)
-  override protected var outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
+  override protected val inputEnvelopesPerStream = createStorageForInputEnvelopes(inputStreamNames)
+  override protected val outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
   /**
    * Increases time when there are no messages (envelopes)
    * @param idle How long waiting a new envelope was
@@ -31,17 +28,6 @@ class RegularStreamingPerformanceMetrics(manager: RegularTaskManager)
   def increaseTotalIdleTime(idle: Long) = {
     mutex.lock()
     totalIdleTime += idle
-    mutex.unlock()
-  }
-
-  /**
-   * Sets an amount of how many state variables are
-   * @param amount Number of state variables
-   */
-  def setNumberOfStateVariables(amount: Int) = {
-    mutex.lock()
-    logger.debug(s"Set number of state variables to $amount\n")
-    numberOfStateVariables = amount
     mutex.unlock()
   }
 
@@ -87,7 +73,6 @@ class RegularStreamingPerformanceMetrics(manager: RegularTaskManager)
     report.maxSizeOutputEnvelope = if (outputEnvelopesSize.nonEmpty) outputEnvelopesSize.max else 0
     report.minSizeOutputEnvelope = if (outputEnvelopesSize.nonEmpty) outputEnvelopesSize.min else 0
     report.averageSizeOutputElement = if (outputEnvelopesTotalNumber != 0) bytesOfOutputEnvelopesPerStream.values.sum / outputElementsTotalNumber else 0
-    report.stateVariablesNumber = numberOfStateVariables
     report.uptime = (System.currentTimeMillis() - startTime) / 1000
 
     clear()
@@ -99,9 +84,8 @@ class RegularStreamingPerformanceMetrics(manager: RegularTaskManager)
 
   override def clear() = {
     logger.debug(s"Reset variables for performance report for next reporting\n")
-    inputEnvelopesPerStream = mutable.Map(inputStreamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
-    outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
+    inputEnvelopesPerStream.clear()
+    outputEnvelopesPerStream.clear()
     totalIdleTime = 0L
-    numberOfStateVariables = 0
   }
 }
