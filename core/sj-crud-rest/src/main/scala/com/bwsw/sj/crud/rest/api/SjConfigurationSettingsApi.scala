@@ -9,6 +9,8 @@ import com.bwsw.sj.crud.rest.exceptions.UnknownConfigSettingDomain
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
+import scala.collection.mutable
+
 trait SjConfigurationSettingsApi extends Directives with SjCrudValidator with CompletionUtils {
 
   val configSettingsApi = {
@@ -34,11 +36,9 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator with Co
             } ~
               get {
                 val configElements = configService.getByParameters(Map("domain" -> domain))
-                var response: RestResponse = NotFoundRestResponse(Map("message" ->
-                  createMessage("rest.config.settings.domain.notfound", domain)))
+                val response = OkRestResponse(Map(s"$domain-config-settings" -> mutable.Buffer()))
                 if (configElements.nonEmpty) {
-                  val entity = Map(s"$domain-config-settings" -> configElements.map(x => x.asProtocolConfigurationSetting()))
-                  response = OkRestResponse(entity)
+                  response.entity = Map(s"$domain-config-settings" -> configElements.map(x => x.asProtocolConfigurationSetting()))
                 }
 
                 complete(restResponseToHttpResponse(response))
@@ -77,10 +77,9 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator with Co
         } ~ pathEndOrSingleSlash {
           get {
             val configElements = configService.getAll
-            var response: RestResponse = OkRestResponse(Map("message" -> getMessage("rest.config.settings.notfound")))
+            val response = OkRestResponse(Map(s"config-settings" -> mutable.Buffer()))
             if (configElements.nonEmpty) {
-              val entity = Map("config-settings" -> configElements.map(x => (x.domain, x.asProtocolConfigurationSetting())).toMap)
-              response = OkRestResponse(entity)
+              response.entity = Map("config-settings" -> configElements.map(x => (x.domain, x.asProtocolConfigurationSetting())).toMap)
             }
 
             complete(restResponseToHttpResponse(response))

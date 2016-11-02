@@ -20,6 +20,7 @@ import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.module.InstanceValidator
 import org.apache.commons.io.FileUtils
 
+import scala.collection.mutable
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils {
@@ -86,42 +87,44 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
   private val creationOfModule = post {
     uploadedFile("jar") {
       case (metadata: FileInfo, file: File) =>
-        var response: RestResponse = BadRequestRestResponse(Map("message" ->
-          createMessage("rest.modules.modules.extension.unknown", metadata.fileName)))
+        try {
+          println(file.toString)
+          var response: RestResponse = BadRequestRestResponse(Map("message" ->
+            createMessage("rest.modules.modules.extension.unknown", metadata.fileName)))
 
-        if (metadata.fileName.endsWith(".jar")) {
-          val specification = checkJarFile(file)
-          response = ConflictRestResponse(Map("message" ->
-            createMessage("rest.modules.module.exists", metadata.fileName)))
-
-          if (!doesModuleExist(specification)) {
+          if (metadata.fileName.endsWith(".jar")) {
+            val specification = checkJarFile(file)
             response = ConflictRestResponse(Map("message" ->
-              createMessage("rest.modules.module.file.exists", metadata.fileName)))
+              createMessage("rest.modules.module.exists", metadata.fileName)))
 
-            if (!storage.exists(metadata.fileName)) {
-              val uploadingFile = new File(metadata.fileName)
-              FileUtils.copyFile(file, uploadingFile)
-              storage.put(uploadingFile, metadata.fileName, specification, "module")
-              response = OkRestResponse(Map("message" ->
-                createMessage("rest.modules.module.uploaded", metadata.fileName)))
+            if (!doesModuleExist(specification)) {
+              response = ConflictRestResponse(Map("message" ->
+                createMessage("rest.modules.module.file.exists", metadata.fileName)))
+
+              if (!storage.exists(metadata.fileName)) {
+                val uploadingFile = new File(metadata.fileName)
+                FileUtils.copyFile(file, uploadingFile)
+                storage.put(uploadingFile, metadata.fileName, specification, "module")
+                response = OkRestResponse(Map("message" ->
+                  createMessage("rest.modules.module.uploaded", metadata.fileName)))
+              }
             }
           }
+          complete(restResponseToHttpResponse(response))
+        } finally {
+          file.delete()
         }
-        file.delete()
-
-        complete(restResponseToHttpResponse(response))
     }
   }
 
   private val gettingListOfAllModules = get {
     val files = fileMetadataDAO.getByParameters(Map("filetype" -> "module"))
-    var response: RestResponse = NotFoundRestResponse(Map("message" -> getMessage("rest.modules.notfound")))
+    val response = OkRestResponse(Map("modules" -> mutable.Buffer()))
 
     if (files.nonEmpty) {
-      val entity = Map("modules" -> files.map(f => Map("module-type" -> f.specification.moduleType,
+      response.entity = Map("modules" -> files.map(f => Map("module-type" -> f.specification.moduleType,
         "module-name" -> f.specification.name,
         "module-version" -> f.specification.version)))
-      response = OkRestResponse(entity)
     }
 
     complete(restResponseToHttpResponse(response))
@@ -131,16 +134,14 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
     get {
       val allInstances = instanceDAO.getAll
 
-      var response: RestResponse = NotFoundRestResponse(Map("message" -> getMessage("rest.modules.instances.notfound")))
+      val response = OkRestResponse(Map("instances" -> mutable.Buffer()))
       if (allInstances.nonEmpty) {
-        val entity = Map("instances" -> allInstances.map(x => ShortInstanceMetadata(x.name,
+        response.entity = Map("instances" -> allInstances.map(x => ShortInstanceMetadata(x.name,
           x.moduleType,
           x.moduleName,
           x.moduleVersion,
           x.description,
           x.status)))
-
-        response = OkRestResponse(entity)
       }
 
       complete(restResponseToHttpResponse(response))
@@ -190,11 +191,9 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
       "module-type" -> moduleType,
       "module-version" -> moduleVersion)
     )
-    var response: RestResponse = NotFoundRestResponse(Map("message" ->
-      createMessage("rest.modules.module.instances.notfound", s"$moduleType-$moduleName-$moduleVersion"))
-    )
+    val response = OkRestResponse(Map("instances" -> mutable.Buffer()))
     if (instances.nonEmpty) {
-      response = OkRestResponse(Map("instances" -> instances.map(_.asProtocolInstance())))
+      response.entity = Map("instances" -> instances.map(_.asProtocolInstance()))
     }
 
     complete(restResponseToHttpResponse(response))
@@ -290,15 +289,12 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
 
   private val gettingModulesByType = (moduleType: String) => get {
     val files = fileMetadataDAO.getByParameters(Map("specification.module-type" -> moduleType))
-    var response: RestResponse = NotFoundRestResponse(Map("message" ->
-      createMessage("rest.modules.type.notfound", moduleType))
-    )
+    val response = OkRestResponse(Map("modules" -> mutable.Buffer()))
     if (files.nonEmpty) {
-      val entity = Map("message" -> s"Uploaded modules for type $moduleType",
+      response.entity = Map("message" -> s"Uploaded modules for type $moduleType",
         "modules" -> files.map(f => Map("module-type" -> f.specification.moduleType,
           "module-name" -> f.specification.name,
           "module-version" -> f.specification.version)))
-      response = OkRestResponse(entity)
     }
 
     complete(restResponseToHttpResponse(response))

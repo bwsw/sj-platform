@@ -5,6 +5,7 @@ import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.stream.SjStreamData
 import com.bwsw.sj.common.utils.EngineLiterals._
+import com.bwsw.sj.common.utils.SjStreamUtils._
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
@@ -33,10 +34,9 @@ trait SjStreamsApi extends Directives with SjCrudValidator with CompletionUtils 
         } ~
           get {
             val streams = streamDAO.getAll
-            var response: RestResponse = NotFoundRestResponse(Map("message" -> getMessage("rest.streams.notfound")))
+            val response = OkRestResponse(Map("streams" -> mutable.Buffer()))
             if (streams.nonEmpty) {
-              val entity = Map("streams" -> streams.map(s => s.asProtocolStream()))
-              response = OkRestResponse(entity)
+              response.entity = Map("streams" -> streams.map(s => s.asProtocolStream()))
             }
 
             complete(restResponseToHttpResponse(response))

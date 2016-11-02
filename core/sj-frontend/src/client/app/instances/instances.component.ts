@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder, NgForm } from '@angular/forms';
 import { ModalDirective } from 'ng2-bootstrap';
 
 import { InstanceModel } from '../shared/models/instance.model';
@@ -14,10 +14,11 @@ import { ServicesService } from '../shared/services/services.service';
 @Component({
   moduleId: module.id,
   selector: 'sj-instances',
+  styleUrls: ['instances.component.css'],
   templateUrl: 'instances.component.html',
-  styleUrls: ['instances.component.css']
 })
 export class InstancesComponent implements OnInit {
+
   public alerts: Array<Object> = [];
   public errorMessage: string;
   public form_ready: boolean = false;
@@ -34,7 +35,28 @@ export class InstancesComponent implements OnInit {
   public new_instance_module: ModuleModel;
   public instance_to_delete: InstanceModel;
   public instance_to_clone: InstanceModel;
-  public instanceForm: FormGroup;
+  public instanceForm: NgForm;
+  public showSpinner: boolean;
+
+  @ViewChild('instanceForm') currentForm: NgForm;
+
+  public formErrors: { [key: string]: string } = {
+    'instanceJvmOptions': '',
+    'instanceNodeAttributes': '',
+    'instanceEnvironmentVariables': '',
+  };
+
+  public validationMessages: { [key: string]: { [key: string]: string } } = {
+    'instanceJvmOptions': {
+      'validJson': 'JVM options value is not a valid json'
+    },
+    'instanceNodeAttributes': {
+      'validJson': 'Node attributes value is not a valid json'
+    },
+    'instanceEnvironmentVariables': {
+      'validJson': 'Environment variables value is not a valid json'
+    }
+  };
 
   constructor(private _instancesService: InstancesService,
               private _modulesService: ModulesService,
@@ -63,12 +85,12 @@ export class InstancesComponent implements OnInit {
       this.getInstanceList();
     }.bind(this), 2000);
     this.new_instance = new InstanceModel();
-    this.instanceForm = this._fb.group({
-      //firstName: ['', Validators.required],
-      //lastName: ['', Validators.required],
-      //email: ['', Validators.compose([Validators.required])],
-      //phone: ['', Validators.required],
-    });
+    // this.instanceForm = this._fb.group({
+    //   //firstName: ['', Validators.required],
+    //   //lastName: ['', Validators.required],
+    //   //email: ['', Validators.compose([Validators.required])],
+    //   //phone: ['', Validators.required],
+    // });
   }
 
   public getInstanceList() {
@@ -79,10 +101,10 @@ export class InstancesComponent implements OnInit {
           //if (this.cloneInstanceList.length === 0) {
           //  this.cloneInstanceList = instanceList;
           //}
-          if (this.instanceList.length > 0) {
+          // if (this.instanceList.length > 0) {
             //this.current_instance = instanceList[0];
             //this.get_instance_info(this.current_instance);
-          }
+          // }
         },
         error => this.errorMessage = <any>error);
   }
@@ -141,14 +163,12 @@ export class InstancesComponent implements OnInit {
     this._instancesService.getInstanceInfo(instance)
       .subscribe(
         instanceInfo => {
-          //console.log(this.new_instance.inputs);
           this.new_instance = instanceInfo;
           this.new_instance.options = JSON.stringify(instanceInfo.options);
           this.new_instance['jvm-options'] = JSON.stringify(instanceInfo['jvm-options']);
           this.new_instance['node-attributes'] = JSON.stringify(instanceInfo['node-attributes']);
           this.new_instance['environment-variables'] = JSON.stringify(instanceInfo['environment-variables']);
           this.new_instance.name = '';
-          //this.new_instance = instanceInfo;
           this.new_instance.module = new ModuleModel();
           this.new_instance.module['module-name'] = instance['module-name'];
           this.new_instance.module['module-type'] = instance['module-type'];
@@ -161,7 +181,6 @@ export class InstancesComponent implements OnInit {
               this.new_instance['input-type'][i] = parsedInput[1];
             }.bind(this));
           }
-          console.log(this.new_instance);
           //this.current_instance_tasks = Object.keys(this.current_instance_info['execution-plan']['tasks']);
         },
         error => this.errorMessage = <any>error);
@@ -169,18 +188,19 @@ export class InstancesComponent implements OnInit {
   }
 
   public createInstance(modal: ModalDirective) {
-    console.log(this.new_instance);
-    //this.instanceService.saveInstance(this.new_instance)
-    //    .subscribe(
-    //        status => {
-    //          modal.hide();
-    //          //this.new_instance = new Instance();
-    //          this.alerts.push({msg: status, type: 'success', closable: true, timeout:3000});
-    //          //this.getInstanceList();
-    //        },
-    //        error => { this.alerts.push({msg: error, type: 'danger', closable: true, timeout:0});
-    //          modal.hide();
-    //        });
+    let req = this._instancesService.saveInstance(this.new_instance);
+    this.showSpinner = true;
+    req.subscribe(
+      status => {
+        modal.hide();
+        this.showSpinner = false;
+        this.alerts.push({msg: status, type: 'success', closable: true, timeout:3000});
+      },
+      error => {
+        this.showSpinner = false;
+        modal.hide();
+        this.alerts.push({msg: error, type: 'danger', closable: true, timeout:0});
+      });
   }
 
   public closeAlert(i: number): void {
@@ -230,9 +250,55 @@ export class InstancesComponent implements OnInit {
 
   public addInput() {
     this.new_instance.inputs.push('');
+    this.new_instance['input-type'].push('');
   }
 
   public addOutput() {
     this.new_instance.outputs.push('');
   }
+
+  public removeInput(i: number): void {
+    this.new_instance.inputs.splice(i, 1);
+    this.new_instance['input-type'].splice(i, 1);
+  }
+
+  public removeOutput(i: number): void {
+    this.new_instance.outputs.splice(i, 1);
+  }
+
+  ngAfterViewChecked() {
+    this.formChanged();
+  }
+
+  formChanged() {
+    if (this.currentForm === this.instanceForm) { return; }
+    this.instanceForm = this.currentForm;
+    if (this.instanceForm) {
+      this.instanceForm.valueChanges
+        .subscribe(data => this.onValueChanged(data));
+    }
+  }
+
+  onValueChanged(data?: any) {
+    if (!this.instanceForm) { return; }
+    const form = this.instanceForm.form;
+
+    for (const field in this.formErrors) {
+      // clear previous error message (if any)
+      this.formErrors[field] = '';
+      const control = form.get(field);
+      if (control && control.dirty && !control.valid) {
+        const messages = this.validationMessages[field];
+        for (const key in control.errors) {
+          this.formErrors[field] += messages[key] + ' ';
+        }
+      }
+    }
+  }
+
+  /* @hack: for nested ngFor and ngModel */
+  public customTrackBy(index: number, obj: any): any {
+    return index;
+  }
+
 }

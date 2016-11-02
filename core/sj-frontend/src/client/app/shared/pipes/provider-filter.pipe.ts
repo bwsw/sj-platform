@@ -8,7 +8,7 @@ export class ProviderFilterPipe implements PipeTransform {
   public transform(value: [ProviderModel], term: string) {
     var service_types = ['CassDB', 'ESInd', 'KfkQ', 'TstrQ', 'ZKCoord', 'RdsCoord', 'ArspkDB'];
     var provider_types = ['cassandra', 'ES', 'kafka', '', 'zookeeper', 'redis', 'aerospike'];
-    if (term !== undefined) {
+    if (term !== undefined && value !== undefined) {
       if (term === 'DataProvider') {
         return value.filter(function (item) {
           return item.type === 'cassandra' || item.type === 'aerospike';
