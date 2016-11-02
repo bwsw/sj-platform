@@ -43,13 +43,14 @@
             </fieldset>
             <fieldset *ngIf="provider_hosts" class="form-group">
               <label class="col-sm-3 form-control-label required">Hosts</label>
-              <div *ngFor='let host of new_provider.hosts; let i = index; trackBy:customTrackBy' class="provider-host">
+              <div *ngFor='let host of new_provider.hosts; let i = index; trackBy:customTrackBy'
+                   class="provider-host with-item-removal">
                 <input [ngClass]="{kafkaStyle: isKafka}"
                        required
                        [value]="new_provider.hosts[i]" (input)="new_provider.hosts[i] = $event.target.value"
                        name="providerHosts"
                        type="text" class="form-control " placeholder="IPv4:port">
-                <div class="fa fa-remove" *ngIf="i!==0" (click)="delete_host(i)"></div>
+                <div class="remove-item fa fa-remove" *ngIf="i!==0" (click)="delete_host(i)"></div>
                 <!--<input *ngIf="form_template == 'Kafka'" required [(ngModel)]="form_hosts_prefixes[i]" type="text" class="form-control col-sm-10 kafka-zk-prefix"  placeholder="ZK prefix">-->
                 <!--pattern="^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5]):(6553[0-5]|655[0-2][0-9]\d|65[0-4](\d){2}|6[0-4](\d){3}|[1-5](\d){4}|[1-9](\d){0,3})$"-->
               </div>

@@ -65,3 +65,20 @@ button:hover {
 .page-wrapper {
   margin: 60px 0 0 180px;
 }
+
+label.required-label::after {
+  color: red;
+  content: '*';
+  padding-left: 3px;
+}
+
+.with-item-removal {
+  position: relative;
+}
+
+.remove-item.fa.fa-remove {
+  position: absolute;
+  right: 16px;
+  top: 12px;
+  cursor: pointer;
+}
