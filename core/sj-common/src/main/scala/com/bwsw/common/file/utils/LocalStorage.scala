@@ -1,6 +1,6 @@
 package com.bwsw.common.file.utils
 
-import java.io.{FileNotFoundException, File}
+import java.io.{File, FileNotFoundException, InputStream}
 import java.nio.file.FileAlreadyExistsException
 
 import org.apache.commons.io.FileUtils
@@ -35,6 +35,10 @@ class LocalStorage(pathToLocalStorage: String) extends FileStorage {
       logger.error(s"File with name: '$fileName' doesn't exist in a local storage")
       throw new FileNotFoundException(s"$fileName doesn't exist")
     }
+  }
+
+  override def getStream(fileName: String): InputStream = {
+    ??? //todo
   }
 
   override def delete(fileName: String): Boolean = {

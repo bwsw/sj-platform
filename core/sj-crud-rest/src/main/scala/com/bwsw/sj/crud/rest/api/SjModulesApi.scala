@@ -2,12 +2,10 @@ package com.bwsw.sj.crud.rest.api
 
 import java.io.File
 
-import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.http.scaladsl.server.{Directives, RequestContext}
-import akka.stream.scaladsl._
+import akka.stream.scaladsl.StreamConverters
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.engine.StreamingValidator
 import com.bwsw.sj.common.rest.entities._
@@ -200,11 +198,10 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
   }
 
   private val gettingModule = (filename: String) => get {
-    val jarFile = storage.get(filename, s"tmp/$filename")
-    complete(HttpResponse(
-      headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> filename))),
-      entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
-    ))
+    val inputStream = storage.getStream(filename)
+    val source = StreamConverters.fromInputStream(() => inputStream)
+
+    complete(HttpResponse(StatusCodes.OK, entity = HttpEntity.Chunked.fromData(ContentTypes.`application/octet-stream`, source)))
   }
 
   private val deletingModule = (moduleType: String,

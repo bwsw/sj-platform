@@ -2,13 +2,11 @@ package com.bwsw.sj.crud.rest.api
 
 import java.io.{File, FileOutputStream}
 
-import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model.Multipart.FormData.BodyPart
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Disposition`}
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.{Source, StreamConverters}
 import akka.util.ByteString
 import com.bwsw.sj.common.DAL.model.ConfigurationSetting
 import com.bwsw.sj.common.rest.entities._
@@ -53,11 +51,10 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
           pathEndOrSingleSlash {
             get {
               if (storage.exists(name)) {
-                val jarFile = storage.get(name, s"tmp/rest/$name")
-                complete(HttpResponse(
-                  headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> name))),
-                  entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
-                ))
+                val inputStream = storage.getStream(name)
+                val source = StreamConverters.fromInputStream(() => inputStream)
+
+                complete(HttpResponse(StatusCodes.OK, entity = HttpEntity.Chunked.fromData(ContentTypes.`application/octet-stream`, source)))
               } else {
                 val response = NotFoundRestResponse(Map("message" -> createMessage("rest.custom.jars.file.notfound", name)))
                 complete(restResponseToHttpResponse(response))
@@ -75,11 +72,10 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
                 val filename = fileMetadatas.head.filename
                 get {
                   if (storage.exists(filename)) {
-                    val jarFile = storage.get(filename, s"tmp/$filename")
-                    complete(HttpResponse(
-                      headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> filename))),
-                      entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
-                    ))
+                    val inputStream = storage.getStream(filename)
+                    val source = StreamConverters.fromInputStream(() => inputStream)
+
+                    complete(HttpResponse(StatusCodes.OK, entity = HttpEntity.Chunked.fromData(ContentTypes.`application/octet-stream`, source)))
                   } else {
                     val response = NotFoundRestResponse(Map("message" ->
                       createMessage("rest.custom.jars.file.notfound", name)))
@@ -200,29 +196,27 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
                 complete(restResponseToHttpResponse(response))
               }
           } ~
-            pathPrefix(Segment) { (name: String) =>
+            pathPrefix(Segment) { (filename: String) =>
               pathEndOrSingleSlash {
                 get {
-                  if (storage.exists(name)) {
-                    val file = storage.get(name, s"tmp/rest/$name")
+                  if (storage.exists(filename)) {
+                    val inputStream = storage.getStream(filename)
+                    val source = StreamConverters.fromInputStream(() => inputStream)
 
-                    complete(HttpResponse(
-                      headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> name))),
-                      entity = HttpEntity.Chunked.fromData(`application/x-www-form-urlencoded`, Source.file(file))
-                    ))
+                    complete(HttpResponse(StatusCodes.OK, entity = HttpEntity.Chunked.fromData(ContentTypes.`application/octet-stream`, source)))
                   } else {
                     val response: RestResponse = NotFoundRestResponse(Map("message" ->
-                      createMessage("rest.custom.files.file.notfound", name)))
+                      createMessage("rest.custom.files.file.notfound", filename)))
 
                     complete(restResponseToHttpResponse(response))
                   }
                 } ~
                   delete {
                     var response : RestResponse = NotFoundRestResponse(Map("message" ->
-                      createMessage("rest.custom.files.file.notfound", name)))
+                      createMessage("rest.custom.files.file.notfound", filename)))
 
-                    if (storage.delete(name)) {
-                      response = OkRestResponse(Map("message" -> createMessage("rest.custom.files.file.deleted", name)))
+                    if (storage.delete(filename)) {
+                      response = OkRestResponse(Map("message" -> createMessage("rest.custom.files.file.deleted", filename)))
                     }
 
                     complete(restResponseToHttpResponse(response))
