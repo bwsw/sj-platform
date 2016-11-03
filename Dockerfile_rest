@@ -53,7 +53,10 @@ WORKDIR /opt/bin/juggler
 
 RUN mkdir -p /root/.sbt/0.13 && \
     echo 'scalacOptions ++= Seq("-Xmax-classfile-name","100")' > /root/.sbt/0.13/local.sbt && \
-    sbt sj-crud-rest/assembly
+    sbt sj-crud-rest/assembly && \
+    mv core/sj-crud-rest/target/scala-2.11/sj-crud-rest-1.0.jar . && \
+    sbt clean clean-files && \
+    rm -rf /root/.ivy2/cache
 
 COPY ./docker/rest /opt/bin/juggler/docker/rest
 

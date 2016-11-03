@@ -18,6 +18,7 @@ import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import org.apache.commons.io.FileUtils
 
+import scala.collection.mutable
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
@@ -131,13 +132,12 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
             } ~
               get {
                 val files = fileMetadataDAO.getByParameters(Map("filetype" -> "custom"))
-                var response: RestResponse = NotFoundRestResponse(Map("message" -> getMessage("rest.custom.jars.notfound")))
+                val response = OkRestResponse(Map("custom-jars" -> mutable.Buffer()))
                 if (files.nonEmpty) {
-                  val entity = Map("custom-jars" -> files.map(metadata =>
+                  response.entity = Map("custom-jars" -> files.map(metadata =>
                     Map("name" -> metadata.specification.name,
                       "version" -> metadata.specification.version))
                   )
-                  response = OkRestResponse(entity)
                 }
 
                 complete(restResponseToHttpResponse(response))
@@ -188,14 +188,13 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
             } ~
               get {
                 val files = fileMetadataDAO.getByParameters(Map("filetype" -> "custom-file"))
-                var response: RestResponse = NotFoundRestResponse(Map("message" -> getMessage("rest.custom.files.notfound")))
+                val response = OkRestResponse(Map("custom-files" -> mutable.Buffer()))
                 if (files.nonEmpty) {
-                  val entity = Map("custom-files" -> files.map(metadata =>
+                  response.entity = Map("custom-files" -> files.map(metadata =>
                     Map("name" -> metadata.filename,
                       "description" -> metadata.specification.description,
                       "upload-date" -> metadata.uploadDate.toString))
                   )
-                  response = OkRestResponse(entity)
                 }
 
                 complete(restResponseToHttpResponse(response))

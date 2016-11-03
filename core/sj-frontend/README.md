@@ -8,7 +8,7 @@ In order to start the project use:
 
 ```bash
 git clone 
-cd sj-frontend
+cd core/sj-frontend
 # install the project's dependencies
 npm install
 # serve in develop mode

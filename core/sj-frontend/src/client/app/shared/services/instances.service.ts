@@ -2,11 +2,32 @@ import { Injectable } from '@angular/core';
 import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 
-import { InstanceModel } from '../models/instance.model';
+import {
+  InstanceModel, SubtypedInstance, RegularStreamingInstance, OutputStreamingInstance, InputStreamingInstance
+} from '../models/instance.model';
 
 @Injectable()
 export class InstancesService {
   private _dataUrl = '/v1/';
+
+  private static fillInstanceGeneralFields(originalInstance: InstanceModel, instance: SubtypedInstance) {
+    instance['name'] = originalInstance['name'];
+    instance['description'] = originalInstance['description'];
+    // Checking if string 'max' or numeric is passed
+    instance['parallelism'] = /^\+?(0|[1-9]\d*)$/.test(originalInstance['parallelism'])
+      ? parseInt(originalInstance['parallelism'])
+      : originalInstance['parallelism'];
+    instance['options'] = originalInstance['options'];
+    instance['per-task-cores'] = originalInstance['per-task-cores'];
+    instance['per-task-ram'] = originalInstance['per-task-ram'];
+    instance['jvm-options'] = originalInstance['jvm-options'];
+    instance['node-attributes'] = originalInstance['node-attributes'];
+    instance['coordination-service'] = originalInstance['coordination-service'];
+    instance['environment-variables'] = originalInstance['environment-variables'];
+    instance['performance-reporting-interval'] = originalInstance['performance-reporting-interval'];
+
+    return instance;
+  }
 
   constructor(private _http: Http) {
   }
@@ -31,26 +52,13 @@ export class InstancesService {
   }
 
   public saveInstance(instance: InstanceModel): Observable<InstanceModel> {
-    let instance_body = Object.assign({}, instance);
-    if (instance_body.module['module-type'] === 'regular-streaming') {
-      instance_body['inputs'].forEach(function (item: string, i: number) {
-        instance_body['inputs'][i] = instance_body['inputs'][i] + '/' + instance_body['input-type'][i];
-      });
-      delete instance_body['input-type'];
-    }
-    delete instance_body.module;
-    //delete instance_body.outputs;
-    //delete instance_body.inputs;
-    //instance_body.options = JSON.stringify(instance.options);
-    instance_body.options = JSON.parse(instance_body.options.toString());
-    instance_body['jvm-options'] = JSON.parse(instance_body['jvm-options'].toString());
-    //instance_body['node-attributes'] = JSON.parse(instance_body['node-attributes']);
-    //instance_body['environment-variables'] = JSON.parse(instance_body['environment-variables']);
-    console.log(instance_body);
+    let subtypedInstance = this.getPreparedInstance(instance);
+    let instance_body = Object.assign({}, subtypedInstance);
     let body = JSON.stringify(instance_body);
-    let headers = new Headers({ 'Content-Type': 'application/json' });
+    let headers = new Headers({'Content-Type': 'application/json'});
     let options = new RequestOptions({ headers: headers });
-    return this._http.post(this._dataUrl + '/modules/' + instance.module['module-type'] + '/' + instance.module['module-name'] + '/' +
+
+    return this._http.post(this._dataUrl + 'modules/' + instance.module['module-type'] + '/' + instance.module['module-name'] + '/' +
       instance.module['module-version'] + '/instance', body, options)
       .map(this.extractData)
       .catch(this.handleError);
@@ -84,6 +92,67 @@ export class InstancesService {
       instance['module-version'] + '/instance' + '/' + instance['name'] + '/stop', options)
       .map(this.extractData)
       .catch(this.handleError);
+  }
+
+  private getPreparedInstance(originalInstance: InstanceModel) {
+    let inst: SubtypedInstance;
+
+    switch (originalInstance.module['module-type']) {
+
+      case 'regular-streaming':
+        inst = new RegularStreamingInstance();
+        inst = InstancesService.fillInstanceGeneralFields(originalInstance, inst);
+        inst['checkpoint-mode'] = originalInstance['checkpoint-mode'];
+        inst['checkpoint-interval'] = originalInstance['checkpoint-interval'];
+        inst['event-wait-time'] = originalInstance['event-wait-time'];
+        originalInstance['inputs'].forEach(function(item:string, i:number) {
+          inst['inputs'][i] = originalInstance['inputs'][i] + '/' + originalInstance['input-type'][i];
+        });
+        inst['outputs'] = originalInstance['outputs'];
+        inst['state-management'] = originalInstance['state-management'];
+        inst['start-from'] = originalInstance['start-from'];
+        inst['state-full-checkpoint'] = originalInstance['state-full-checkpoint'];
+
+        break;
+
+      // case 'windowed-streaming':
+      //   break;
+
+      case 'output-streaming':
+        inst = new OutputStreamingInstance();
+        inst = InstancesService.fillInstanceGeneralFields(originalInstance, inst);
+        inst['checkpoint-mode'] = originalInstance['checkpoint-mode'];
+        inst['checkpoint-interval'] = originalInstance['checkpoint-interval'];
+        inst['input'] = originalInstance['input'];
+        inst['output'] = originalInstance['output'];
+        inst['start-from'] = originalInstance['start-from'];
+        break;
+
+      case 'input-streaming':
+        inst = new InputStreamingInstance();
+        inst = InstancesService.fillInstanceGeneralFields(originalInstance, inst);
+        inst['async-backup-count'] = originalInstance['async-backup-count'];
+        inst['backup-count'] = originalInstance['backup-count'];
+        inst['checkpoint-interval'] = originalInstance['checkpoint-interval'];
+        inst['checkpoint-mode'] = originalInstance['checkpoint-mode'];
+        inst['default-eviction-policy'] = originalInstance['default-eviction-policy'];
+        inst['duplicate-check'] = originalInstance['duplicate-check'];
+        inst['eviction-policy'] = originalInstance['eviction-policy'];
+        inst['lookup-history'] = originalInstance['lookup-history'];
+        inst['outputs'] = originalInstance['outputs'];
+        inst['queue-max-size'] = originalInstance['queue-max-size'];
+        break;
+    }
+
+    let objectFields = ['environment-variables', 'jvm-options', 'node-attributes', 'options'];
+    for (let fieldName of objectFields) {
+      if (inst[fieldName] !== undefined) {
+        inst[fieldName] = inst[fieldName].length === 0 ? '{}' : inst[fieldName];
+        inst[fieldName] = JSON.parse(inst[fieldName].toString());
+      }
+    }
+
+    return inst;
   }
 
   private extractData(res: Response) { //TODO Write good response parser
