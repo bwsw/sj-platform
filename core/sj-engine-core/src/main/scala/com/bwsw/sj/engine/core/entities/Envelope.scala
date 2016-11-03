@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.core.entities
 
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
-import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
+import com.fasterxml.jackson.annotation.{JsonIgnore, JsonSubTypes, JsonTypeInfo}
 
 /**
  * Represents a message envelope that is received by an Executor for each message
@@ -20,8 +20,8 @@ class Envelope() extends Serializable {
   var stream: String = null
   var partition: Int = 0
   var tags: Array[String] = Array()
-  var empty: Boolean = true
 
+  @JsonIgnore()
   def isEmpty() = {
     streamType == null
   }
