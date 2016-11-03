@@ -12,6 +12,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.rest.entities.module.ExecutionPlan
 import com.bwsw.sj.common.utils.{GeneratorLiterals, ProviderLiterals, ServiceLiterals, _}
+import com.bwsw.sj.engine.core.entities.JdbcEnvelope
 import com.bwsw.tstreams.agents.consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer}
@@ -31,7 +32,7 @@ import scala.collection.JavaConverters._
 object BenchmarkDataFactory {
 
 
-
+  private var txnFieldForJdbc: String = new JdbcEnvelope().getTxnName
   val metadataProviderName: String = "test-metprov-1"
   val cassandraTestKeyspace: String = "bench"
   val dataProviderName: String = "test-dataprov-1"
@@ -180,6 +181,7 @@ object BenchmarkDataFactory {
       setPassword(jdbcService.provider.password).
       setDatabase(jdbcService.database).
       setTable(outputStream.name).
+      setTxnField(txnFieldForJdbc).
       build()
 
     (client, jdbcService)

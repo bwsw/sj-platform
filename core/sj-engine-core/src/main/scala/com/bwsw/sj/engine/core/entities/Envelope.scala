@@ -20,6 +20,7 @@ class Envelope() extends Serializable {
   var stream: String = null
   var partition: Int = 0
   var tags: Array[String] = Array()
+  var empty: Boolean = true
 
   def isEmpty() = {
     streamType == null

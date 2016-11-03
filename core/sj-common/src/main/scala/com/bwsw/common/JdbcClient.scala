@@ -44,7 +44,7 @@ protected class JdbcClient (private var jdbcCCD: JdbcClientConnectionData) {
     */
   private def prepareObjectToSQL(data: Object): String = {
     var attrs = getObjectAttributes(data)
-    attrs = attrs:+(jdbcCCD.txnFiled, classOf[String], data.getClass.getMethods.find(_.getName == jdbcCCD.txnFiled).get.invoke(data))
+    attrs = attrs:+(jdbcCCD.txnField, classOf[String], data.getClass.getMethods.find(_.getName == jdbcCCD.txnField).get.invoke(data))
     val columns = attrs.map(a => a._1).mkString(", ")
     val values = attrs.map(a => a._3.toString.mkString("'","","'")).mkString(", ")
     s"INSERT INTO ${jdbcCCD.table} ($columns) VALUES ($values);"
@@ -59,9 +59,9 @@ protected class JdbcClient (private var jdbcCCD: JdbcClientConnectionData) {
 
   def removeByTransactionId(transactionId: String) = {
     println("delete")
-    val sql = s"DELETE FROM ${jdbcCCD.table} WHERE ${jdbcCCD.txnFiled} = '$transactionId'"
+    val sql = s"DELETE FROM ${jdbcCCD.table} WHERE ${jdbcCCD.txnField} = '$transactionId'"
     def checkExists():Boolean = {
-      val esql = s"SELECT * FROM ${jdbcCCD.table} WHERE ${jdbcCCD.txnFiled} = '$transactionId'"
+      val esql = s"SELECT * FROM ${jdbcCCD.table} WHERE ${jdbcCCD.txnField} = '$transactionId'"
       val stmt = connection.createStatement()
       val res = stmt.executeQuery(esql)
       res.next
@@ -108,7 +108,7 @@ class JdbcClientConnectionData {
   var password: String = _
   var database: String = _
   var table: String = _
-  var txnFiled: String = _
+  var txnField: String = _
 
   /**
     * This method return driver class name, related to driver name provided in service
@@ -142,7 +142,7 @@ class JdbcClientConnectionData {
     this.password = password
     this.database = database
     this.table = table
-    this.txnFiled = txnField
+    this.txnField = txnField
   }
 }
 
@@ -166,7 +166,7 @@ object JdbcClientBuilder{
       case ""|null => throw new RuntimeException("table field must be declared.")
       case _:String =>
     }
-    jdbcClientConnectionData.txnFiled match {
+    jdbcClientConnectionData.txnField match {
       case ""|null => throw new RuntimeException("txnField field must be declared.")
       case _:String =>
     }
@@ -179,7 +179,7 @@ object JdbcClientBuilder{
       case _:String =>
     }
     jdbcClientConnectionData.hosts match {
-      case Array.empty|null => throw new RuntimeException("hosts field must be declared.")
+      case null => throw new RuntimeException("hosts field must be declared.")
       case _ =>
     }
   }
@@ -195,7 +195,7 @@ object JdbcClientBuilder{
   def setPassword(password: String) = {jdbcClientConnectionData.password=password; this}
   def setDatabase(database: String) = {jdbcClientConnectionData.database=database; this}
   def setTable(table: String) = {jdbcClientConnectionData.table=table; this}
-  def setTxnField(txnField:String) = {jdbcClientConnectionData.txnFiled=txnField; this}
+  def setTxnField(txnField:String) = {jdbcClientConnectionData.txnField=txnField; this}
 
   /**
     * Use this method if you have JDBC connection data provider

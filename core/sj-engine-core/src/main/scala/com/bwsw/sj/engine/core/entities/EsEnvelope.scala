@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
  * Provides a wrapper for elasticsearch entity.
  */
 
-class EsEnvelope() extends Envelope with Serializable {
+class EsEnvelope() extends Envelope {
   streamType = "elasticsearch-output"
   @JsonProperty("output-date-time") var outputDateTime: String = null
   @JsonProperty("txn-date-time") var transactionDateTime: String = null
