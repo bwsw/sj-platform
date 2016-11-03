@@ -188,15 +188,9 @@ class FrameworkScheduler extends Scheduler {
       val cmd = CommandInfo.newBuilder()
       try {
         val environments = Environment.newBuilder
-          .addVariables(Environment.Variable.newBuilder.setName("MONGO_HOST").setValue(params {
-          "mongodbHost"
-        }))
-          .addVariables(Environment.Variable.newBuilder.setName("MONGO_PORT").setValue(params {
-          "mongodbPort"
-        }))
-          .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_NAME").setValue(params {
-          "instanceId"
-        }))
+          .addVariables(Environment.Variable.newBuilder.setName("MONGO_HOST").setValue(params {"mongodbHost"}))
+          .addVariables(Environment.Variable.newBuilder.setName("MONGO_PORT").setValue(params {"mongodbPort"}))
+          .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_NAME").setValue(params {"instanceId"}))
           .addVariables(Environment.Variable.newBuilder.setName("TASK_NAME").setValue(currTask))
           .addVariables(Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(currentOffer._1.getUrl.getAddress.getIp))
           .addVariables(Environment.Variable.newBuilder.setName("AGENTS_PORTS").setValue(agentPorts))
