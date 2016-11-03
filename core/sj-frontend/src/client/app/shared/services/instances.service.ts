@@ -37,8 +37,8 @@ export class InstancesService {
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
     return this._http.get(this._dataUrl + '/modules/instances', options)
-      .map(this.extractData)
-      .catch(this.handleError);
+      .map(this._extractData)
+      .catch(this._handleError);
   }
 
   public getInstanceInfo(instance: InstanceModel): Observable<InstanceModel> {
@@ -47,8 +47,8 @@ export class InstancesService {
     let options = new RequestOptions({ headers: headers });
     return this._http.get(this._dataUrl + '/modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
       instance['module-version'] + '/instance' + '/' + instance['name'], options)
-      .map(this.extractData)
-      .catch(this.handleError);
+      .map(this._extractData)
+      .catch(this._handleError);
   }
 
   public saveInstance(instance: InstanceModel): Observable<InstanceModel> {
@@ -60,16 +60,8 @@ export class InstancesService {
 
     return this._http.post(this._dataUrl + 'modules/' + instance.module['module-type'] + '/' + instance.module['module-name'] + '/' +
       instance.module['module-version'] + '/instance', body, options)
-      .map(this.extractData)
-      .catch(this.handleError);
-  }
-
-  private _cleanupBodyValues(key: string, value: any): any {
-    if ( [null, ""].indexOf(value) > -1 ) {
-      return undefined;
-    } else {
-      return value;
-    }
+      .map(this._extractData)
+      .catch(this._handleError);
   }
 
   public deleteInstance(instance: InstanceModel): Observable<InstanceModel> {
@@ -78,8 +70,8 @@ export class InstancesService {
     let options = new RequestOptions({ headers: headers });
     return this._http.delete(this._dataUrl + '/modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
       instance['module-version'] + '/instance' + '/' + instance['name'], options)
-      .map(this.extractData)
-      .catch(this.handleError);
+      .map(this._extractData)
+      .catch(this._handleError);
   }
 
   public startInstance(instance: InstanceModel): Observable<InstanceModel> {
@@ -88,8 +80,8 @@ export class InstancesService {
     let options = new RequestOptions({ headers: headers });
     return this._http.get(this._dataUrl + '/modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
       instance['module-version'] + '/instance' + '/' + instance['name'] + '/start', options)
-      .map(this.extractData)
-      .catch(this.handleError);
+      .map(this._extractData)
+      .catch(this._handleError);
   }
 
   public stopInstance(instance: InstanceModel): Observable<InstanceModel> {
@@ -98,8 +90,8 @@ export class InstancesService {
     let options = new RequestOptions({ headers: headers });
     return this._http.get(this._dataUrl + '/modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
       instance['module-version'] + '/instance' + '/' + instance['name'] + '/stop', options)
-      .map(this.extractData)
-      .catch(this.handleError);
+      .map(this._extractData)
+      .catch(this._handleError);
   }
 
   private getPreparedInstance(orig: InstanceModel) {
@@ -163,7 +155,7 @@ export class InstancesService {
     return inst;
   }
 
-  private extractData(res: Response) { //TODO Write good response parser
+  private _extractData(res: Response) { //TODO Write good response parser
     let body = {};
     if (typeof res.json()['entity']['instances'] !== 'undefined') {
       body = res.json()['entity']['instances'];
@@ -175,11 +167,22 @@ export class InstancesService {
     return body;
   }
 
-  private handleError(error: any) {
+  private _handleError(error: any) {
     let errMsg = (error._body) ? error._body :
       error.status ? `${error.status} - ${error.statusText}` : 'Server error';
     errMsg = JSON.parse(errMsg);
     let errMsgYo = errMsg.entity.message;
     return Observable.throw(errMsgYo);
   }
+
+
+  private _cleanupBodyValues(key: string, value: any): any {
+    if ( [null, ''].indexOf(value) > -1 ) {
+      return undefined;
+    } else {
+      return value;
+    }
+  }
+
+
 }
