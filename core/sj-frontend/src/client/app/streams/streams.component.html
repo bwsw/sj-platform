@@ -1,7 +1,7 @@
 <div class="streams-list">
   <h2>Streams list</h2>
 
-  <button type="button" class="btn create-provider" (click)="CreateStream.show()">+ Create stream</button>
+  <button type="button" class="btn create-entity" (click)="CreateStream.show()">+ Create stream</button>
 
   <sj-search-box (update)="term = $event"></sj-search-box>
 
@@ -15,7 +15,7 @@
           <h4 class="modal-title">Create Stream</h4>
         </div>
         <div class="modal-body">
-          <form (ngSubmit)="createStream(CreateStream)" class="form-create-provider">
+          <form (ngSubmit)="createStream(CreateStream)" class="form-create-entity">
             <fieldset class="form-group">
               <label class="col-sm-3 form-control-label ">Choose type</label>
               <select [(ngModel)]="new_stream['stream-type']" name="streamType"
@@ -40,9 +40,9 @@
               <input [(ngModel)]="new_stream.partitions" name="streamPartitions" type="number"
                      class="form-control col-sm-10">
             </fieldset>
-            <fieldset class="form-group">
+            <fieldset *ngIf="new_stream['stream-type']" class="form-group">
               <label class="col-sm-3 form-control-label">Service</label>
-              <select *ngIf="new_stream['stream-type']" [(ngModel)]="new_stream.service" name="streamService"
+              <select [(ngModel)]="new_stream.service" name="streamService"
                       class="form-control form-type col-sm-10">
                 <option *ngFor="let service of serviceList | serviceFilter : new_stream['stream-type'] "
                         value={{service.name}}>{{service.name}}

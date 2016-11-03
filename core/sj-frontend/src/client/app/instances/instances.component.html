@@ -3,7 +3,7 @@
 <div class="instances-list">
   <h2>Instances list</h2>
 
-  <button type="button" class="btn create-provider" (click)="CreateInstance.show()">+ Create instance</button>
+  <button type="button" class="btn create-entity" (click)="CreateInstance.show()">+ Create instance</button>
 
   <sj-search-box (update)="term = $event"></sj-search-box>
 
@@ -22,7 +22,7 @@
             <input [(ngModel)]="cloneInstance" type="checkbox" class="form-control checkbox clone-checkbox">
           </fieldset>
 
-          <form #instanceForm="ngForm" *ngIf="form_ready" (ngSubmit)="createInstance(CreateInstance)" class="form-create-provider">
+          <form #instanceForm="ngForm" *ngIf="form_ready" (ngSubmit)="createInstance(CreateInstance)" class="form-create-entity">
 
             <fieldset *ngIf="cloneInstance" class="form-group">
               <label class="col-sm-3 form-control-label required-label">Choose instance</label>
@@ -83,7 +83,7 @@
                   </select>
                   <div class="remove-item fa fa-remove" *ngIf="i!==0" (click)="removeInput(i)"></div>
                 </div>
-                <button type="button" (click)="addInput()" class="btn btn-link form-add-host">+ Add</button>
+                <button type="button" (click)="addInput()" class="btn btn-link form-add-item">+ Add</button>
 
               </fieldset>
 
@@ -119,7 +119,7 @@
                   </select>
                   <div class="remove-item fa fa-remove" *ngIf="i!==0" (click)="removeOutput(i)"></div>
                 </div>
-                <button type="button" (click)="addOutput()" class="btn btn-link form-add-host">+ Add</button>
+                <button type="button" (click)="addOutput()" class="btn btn-link form-add-item">+ Add</button>
               </fieldset>
 
               <fieldset class="form-group">

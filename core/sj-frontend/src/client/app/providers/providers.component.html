@@ -1,7 +1,7 @@
 <div class="providers-list">
   <h2>Providers list</h2>
 
-  <button type="button" class="btn create-provider" (click)="CreateProvider.show()">+ Create provider</button>
+  <button type="button" class="btn create-entity" (click)="CreateProvider.show()">+ Create provider</button>
 
   <sj-search-box (update)="term = $event"></sj-search-box>
 
@@ -15,7 +15,7 @@
           <h4 class="modal-title">Create Provider</h4>
         </div>
         <div class="modal-body">
-          <form *ngIf="new_provider" (ngSubmit)="createProvider(CreateProvider)" class="form-create-provider">
+          <form *ngIf="new_provider" (ngSubmit)="createProvider(CreateProvider)" class="form-create-entity">
             <fieldset class="form-group">
               <label class="col-sm-3 form-control-label required">Choose type</label>
               <select [(ngModel)]="new_provider.type" name="providerType" required
@@ -53,7 +53,7 @@
                 <!--<input *ngIf="form_template == 'Kafka'" required [(ngModel)]="form_hosts_prefixes[i]" type="text" class="form-control col-sm-10 kafka-zk-prefix"  placeholder="ZK prefix">-->
                 <!--pattern="^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5]):(6553[0-5]|655[0-2][0-9]\d|65[0-4](\d){2}|6[0-4](\d){3}|[1-5](\d){4}|[1-9](\d){0,3})$"-->
               </div>
-              <button type="button" (click)="addHost()" class="btn btn-link form-add-host">+ Add</button>
+              <button type="button" (click)="addHost()" class="btn btn-link form-add-item">+ Add</button>
 
             </fieldset>
             <fieldset class="form-group">

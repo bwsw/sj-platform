@@ -82,3 +82,25 @@ label.required-label::after {
   top: 12px;
   cursor: pointer;
 }
+
+button.create-entity {
+  float: right;
+  color: white;
+}
+
+button.form-add-item {
+  margin-left: 25%;
+  margin-top: 5px;
+  width: 50px;
+  padding: 0;
+  color: #07c;
+}
+
+.form-create-entity .form-control {
+  width: 70%;
+}
+
+.form-create-entity label.required:after {
+  content: ' *';
+  color: #ff706f;
+}
