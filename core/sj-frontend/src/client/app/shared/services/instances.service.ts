@@ -10,21 +10,21 @@ import {
 export class InstancesService {
   private _dataUrl = '/v1/';
 
-  private static fillInstanceGeneralFields(originalInstance: InstanceModel, instance: SubtypedInstance) {
-    instance['name'] = originalInstance['name'];
-    instance['description'] = originalInstance['description'];
+  private static fillInstanceGeneralFields(orig: InstanceModel, instance: SubtypedInstance) {
+    instance['name'] = orig['name'];
+    instance['description'] = orig['description'];
     // Checking if string 'max' or numeric is passed
-    instance['parallelism'] = /^\+?(0|[1-9]\d*)$/.test(originalInstance['parallelism'])
-      ? parseInt(originalInstance['parallelism'])
-      : originalInstance['parallelism'];
-    instance['options'] = originalInstance['options'];
-    instance['per-task-cores'] = originalInstance['per-task-cores'];
-    instance['per-task-ram'] = originalInstance['per-task-ram'];
-    instance['jvm-options'] = originalInstance['jvm-options'];
-    instance['node-attributes'] = originalInstance['node-attributes'];
-    instance['coordination-service'] = originalInstance['coordination-service'];
-    instance['environment-variables'] = originalInstance['environment-variables'];
-    instance['performance-reporting-interval'] = originalInstance['performance-reporting-interval'];
+    instance['parallelism'] = /^\+?(0|[1-9]\d*)$/.test(orig['parallelism'])
+      ? parseInt(orig['parallelism'])
+      : orig['parallelism'];
+    instance['options'] = orig['options'];
+    instance['per-task-cores'] = orig['per-task-cores'];
+    instance['per-task-ram'] = orig['per-task-ram'];
+    instance['jvm-options'] = orig['jvm-options'];
+    instance['node-attributes'] = orig['node-attributes'];
+    instance['coordination-service'] = orig['coordination-service'];
+    instance['environment-variables'] = orig['environment-variables'];
+    instance['performance-reporting-interval'] = orig['performance-reporting-interval'];
 
     return instance;
   }
@@ -54,7 +54,7 @@ export class InstancesService {
   public saveInstance(instance: InstanceModel): Observable<InstanceModel> {
     let subtypedInstance = this.getPreparedInstance(instance);
     let instance_body = Object.assign({}, subtypedInstance);
-    let body = JSON.stringify(instance_body);
+    let body = JSON.stringify(instance_body, this._cleanupBodyValues);
     let headers = new Headers({'Content-Type': 'application/json'});
     let options = new RequestOptions({ headers: headers });
 
@@ -62,6 +62,14 @@ export class InstancesService {
       instance.module['module-version'] + '/instance', body, options)
       .map(this.extractData)
       .catch(this.handleError);
+  }
+
+  private _cleanupBodyValues(key: string, value: any): any {
+    if ( [null, ""].indexOf(value) > -1 ) {
+      return undefined;
+    } else {
+      return value;
+    }
   }
 
   public deleteInstance(instance: InstanceModel): Observable<InstanceModel> {
@@ -94,24 +102,24 @@ export class InstancesService {
       .catch(this.handleError);
   }
 
-  private getPreparedInstance(originalInstance: InstanceModel) {
+  private getPreparedInstance(orig: InstanceModel) {
     let inst: SubtypedInstance;
 
-    switch (originalInstance.module['module-type']) {
+    switch (orig.module['module-type']) {
 
       case 'regular-streaming':
         inst = new RegularStreamingInstance();
-        inst = InstancesService.fillInstanceGeneralFields(originalInstance, inst);
-        inst['checkpoint-mode'] = originalInstance['checkpoint-mode'];
-        inst['checkpoint-interval'] = originalInstance['checkpoint-interval'];
-        inst['event-wait-time'] = originalInstance['event-wait-time'];
-        originalInstance['inputs'].forEach(function(item:string, i:number) {
-          inst['inputs'][i] = originalInstance['inputs'][i] + '/' + originalInstance['input-type'][i];
+        inst = InstancesService.fillInstanceGeneralFields(orig, inst);
+        inst['checkpoint-mode'] = orig['checkpoint-mode'];
+        inst['checkpoint-interval'] = orig['checkpoint-interval'];
+        inst['event-wait-time'] = orig['event-wait-time'];
+        orig['inputs'].forEach(function(item:string, i:number) {
+          inst['inputs'][i] = orig['inputs'][i] + '/' + orig['input-type'][i];
         });
-        inst['outputs'] = originalInstance['outputs'];
-        inst['state-management'] = originalInstance['state-management'];
-        inst['start-from'] = originalInstance['start-from'];
-        inst['state-full-checkpoint'] = originalInstance['state-full-checkpoint'];
+        inst['outputs'] = orig['outputs'];
+        inst['state-management'] = orig['state-management'];
+        inst['start-from'] = orig['start-from'];
+        inst['state-full-checkpoint'] = orig['state-full-checkpoint'];
 
         break;
 
@@ -120,27 +128,27 @@ export class InstancesService {
 
       case 'output-streaming':
         inst = new OutputStreamingInstance();
-        inst = InstancesService.fillInstanceGeneralFields(originalInstance, inst);
-        inst['checkpoint-mode'] = originalInstance['checkpoint-mode'];
-        inst['checkpoint-interval'] = originalInstance['checkpoint-interval'];
-        inst['input'] = originalInstance['input'];
-        inst['output'] = originalInstance['output'];
-        inst['start-from'] = originalInstance['start-from'];
+        inst = InstancesService.fillInstanceGeneralFields(orig, inst);
+        inst['checkpoint-mode'] = orig['checkpoint-mode'];
+        inst['checkpoint-interval'] = orig['checkpoint-interval'];
+        inst['input'] = orig['input'];
+        inst['output'] = orig['output'];
+        inst['start-from'] = orig['start-from'];
         break;
 
       case 'input-streaming':
         inst = new InputStreamingInstance();
-        inst = InstancesService.fillInstanceGeneralFields(originalInstance, inst);
-        inst['async-backup-count'] = originalInstance['async-backup-count'];
-        inst['backup-count'] = originalInstance['backup-count'];
-        inst['checkpoint-interval'] = originalInstance['checkpoint-interval'];
-        inst['checkpoint-mode'] = originalInstance['checkpoint-mode'];
-        inst['default-eviction-policy'] = originalInstance['default-eviction-policy'];
-        inst['duplicate-check'] = originalInstance['duplicate-check'];
-        inst['eviction-policy'] = originalInstance['eviction-policy'];
-        inst['lookup-history'] = originalInstance['lookup-history'];
-        inst['outputs'] = originalInstance['outputs'];
-        inst['queue-max-size'] = originalInstance['queue-max-size'];
+        inst = InstancesService.fillInstanceGeneralFields(orig, inst);
+        inst['async-backup-count'] = orig['async-backup-count'];
+        inst['backup-count'] = orig['backup-count'];
+        inst['checkpoint-interval'] = orig['checkpoint-interval'];
+        inst['checkpoint-mode'] = orig['checkpoint-mode'];
+        inst['default-eviction-policy'] = orig['default-eviction-policy'];
+        inst['duplicate-check'] = orig['duplicate-check'];
+        inst['eviction-policy'] = orig['eviction-policy'];
+        inst['lookup-history'] = orig['lookup-history'];
+        inst['outputs'] = orig['outputs'];
+        inst['queue-max-size'] = orig['queue-max-size'];
         break;
     }
 
