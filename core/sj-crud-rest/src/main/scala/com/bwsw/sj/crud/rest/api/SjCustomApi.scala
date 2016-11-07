@@ -3,7 +3,6 @@ package com.bwsw.sj.crud.rest.api
 import java.io.{File, FileOutputStream}
 import java.nio.file.Paths
 
-import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model.Multipart.FormData.BodyPart
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Disposition`}
@@ -68,7 +67,7 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
                 val source = FileIO.fromPath(Paths.get(jarFile.getAbsolutePath))
                 complete(HttpResponse(
                   headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> name))),
-                  entity = HttpEntity.Chunked.fromData(`application/java-archive`, source)
+                  entity = HttpEntity.Chunked.fromData(MediaTypes.`application/java-archive`, source)
                 ))
               } else {
                 val response = NotFoundRestResponse(Map("message" -> createMessage("rest.custom.jars.file.notfound", name)))
@@ -93,7 +92,7 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
                     val source = FileIO.fromPath(Paths.get(jarFile.getAbsolutePath))
                     complete(HttpResponse(
                       headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> filename))),
-                      entity = HttpEntity.Chunked.fromData(`application/java-archive`, source)
+                      entity = HttpEntity.Chunked.fromData(MediaTypes.`application/java-archive`, source)
                     ))
                   } else {
                     val response = NotFoundRestResponse(Map("message" ->
@@ -215,31 +214,31 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
                 complete(restResponseToHttpResponse(response))
               }
           } ~
-            pathPrefix(Segment) { (name: String) =>
+            pathPrefix(Segment) { (filename: String) =>
               pathEndOrSingleSlash {
                 get {
-                  if (storage.exists(name)) {
+                  if (storage.exists(filename)) {
                     deletePreviousFile()
-                    val file = storage.get(name, RestLiterals.tmpDirectory + name)
+                    val file = storage.get(filename, RestLiterals.tmpDirectory + filename)
                     previousFileName = Some(file.getAbsolutePath)
                     val source = FileIO.fromPath(Paths.get(file.getAbsolutePath))
                     complete(HttpResponse(
-                      headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> name))),
+                      headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> filename))),
                       entity = HttpEntity.Chunked.fromData(ContentTypes.`application/octet-stream`, source)
                     ))
                   } else {
                     val response: RestResponse = NotFoundRestResponse(Map("message" ->
-                      createMessage("rest.custom.files.file.notfound", name)))
+                      createMessage("rest.custom.files.file.notfound", filename)))
 
                     complete(restResponseToHttpResponse(response))
                   }
                 } ~
                   delete {
                     var response: RestResponse = NotFoundRestResponse(Map("message" ->
-                      createMessage("rest.custom.files.file.notfound", name)))
+                      createMessage("rest.custom.files.file.notfound", filename)))
 
-                    if (storage.delete(name)) {
-                      response = OkRestResponse(Map("message" -> createMessage("rest.custom.files.file.deleted", name)))
+                    if (storage.delete(filename)) {
+                      response = OkRestResponse(Map("message" -> createMessage("rest.custom.files.file.deleted", filename)))
                     }
 
                     complete(restResponseToHttpResponse(response))

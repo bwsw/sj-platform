@@ -3,12 +3,11 @@ package com.bwsw.sj.crud.rest.api
 import java.io.File
 import java.nio.file.Paths
 
-import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers._
+import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Disposition`}
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.http.scaladsl.server.{Directives, RequestContext}
-import akka.stream.scaladsl._
+import akka.stream.scaladsl.{FileIO, StreamConverters}
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.engine.StreamingValidator
 import com.bwsw.sj.common.rest.entities._
@@ -209,7 +208,7 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
     val source = FileIO.fromPath(Paths.get(jarFile.getAbsolutePath))
     complete(HttpResponse(
       headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> filename))),
-      entity = HttpEntity.Chunked.fromData(`application/java-archive`, source)
+      entity = HttpEntity.Chunked.fromData(MediaTypes.`application/java-archive`, source)
     ))
   }
 
