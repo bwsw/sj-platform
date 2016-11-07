@@ -1,6 +1,7 @@
 package com.bwsw.sj.crud.rest.api
 
 import java.io.{File, FileOutputStream}
+import java.nio.file.Paths
 
 import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model.Multipart.FormData.BodyPart
@@ -8,11 +9,11 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Disposition`}
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.{FileIO, Source}
 import akka.util.ByteString
 import com.bwsw.sj.common.DAL.model.ConfigurationSetting
 import com.bwsw.sj.common.rest.entities._
-import com.bwsw.sj.common.utils.ConfigLiterals
+import com.bwsw.sj.common.utils.{RestLiterals, ConfigLiterals}
 import com.bwsw.sj.common.utils.ConfigurationSettingsUtils._
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
@@ -30,6 +31,7 @@ import scala.concurrent.duration._
  * @author Kseniya Tomskikh
  */
 trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
+  private var previousFileName: Option[String] = None
 
   private def fileUpload(filename: String, part: BodyPart) = {
     val fileOutput = new FileOutputStream(filename)
@@ -46,6 +48,13 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
     fileOutput.close()
   }
 
+  private def deletePreviousFile() = {
+    if (previousFileName.isDefined) {
+      val file = new File(previousFileName.get)
+      if (file.exists()) file.delete()
+    }
+  }
+
   val customApi = {
     pathPrefix("custom") {
       pathPrefix("jars") {
@@ -53,10 +62,13 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
           pathEndOrSingleSlash {
             get {
               if (storage.exists(name)) {
-                val jarFile = storage.get(name, s"tmp/rest/$name")
+                deletePreviousFile()
+                val jarFile = storage.get(name, RestLiterals.tmpDirectory + name)
+                previousFileName = Some(jarFile.getAbsolutePath)
+                val source = FileIO.fromPath(Paths.get(jarFile.getAbsolutePath))
                 complete(HttpResponse(
                   headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> name))),
-                  entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
+                  entity = HttpEntity.Chunked.fromData(`application/java-archive`, source)
                 ))
               } else {
                 val response = NotFoundRestResponse(Map("message" -> createMessage("rest.custom.jars.file.notfound", name)))
@@ -75,10 +87,13 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
                 val filename = fileMetadatas.head.filename
                 get {
                   if (storage.exists(filename)) {
-                    val jarFile = storage.get(filename, s"tmp/$filename")
+                    deletePreviousFile()
+                    val jarFile = storage.get(filename, RestLiterals.tmpDirectory + filename)
+                    previousFileName = Some(jarFile.getAbsolutePath)
+                    val source = FileIO.fromPath(Paths.get(jarFile.getAbsolutePath))
                     complete(HttpResponse(
                       headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> filename))),
-                      entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
+                      entity = HttpEntity.Chunked.fromData(`application/java-archive`, source)
                     ))
                   } else {
                     val response = NotFoundRestResponse(Map("message" ->
@@ -88,7 +103,7 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
                 } ~
                   delete {
                     var response: RestResponse = NotFoundRestResponse(Map("message" ->
-                     createMessage("rest.custom.jars.file.notfound", name)))
+                      createMessage("rest.custom.jars.file.notfound", name)))
                     if (storage.delete(filename)) {
                       configService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, name + "-" + version))
                       response = OkRestResponse(
@@ -204,11 +219,13 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
               pathEndOrSingleSlash {
                 get {
                   if (storage.exists(name)) {
-                    val file = storage.get(name, s"tmp/rest/$name")
-
+                    deletePreviousFile()
+                    val file = storage.get(name, RestLiterals.tmpDirectory + name)
+                    previousFileName = Some(file.getAbsolutePath)
+                    val source = FileIO.fromPath(Paths.get(file.getAbsolutePath))
                     complete(HttpResponse(
                       headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> name))),
-                      entity = HttpEntity.Chunked.fromData(`application/x-www-form-urlencoded`, Source.file(file))
+                      entity = HttpEntity.Chunked.fromData(ContentTypes.`application/octet-stream`, source)
                     ))
                   } else {
                     val response: RestResponse = NotFoundRestResponse(Map("message" ->
@@ -218,7 +235,7 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
                   }
                 } ~
                   delete {
-                    var response : RestResponse = NotFoundRestResponse(Map("message" ->
+                    var response: RestResponse = NotFoundRestResponse(Map("message" ->
                       createMessage("rest.custom.files.file.notfound", name)))
 
                     if (storage.delete(name)) {
