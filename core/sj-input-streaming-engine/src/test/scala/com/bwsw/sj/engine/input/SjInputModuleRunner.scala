@@ -15,7 +15,7 @@ object SjInputModuleSetup extends App {
   val fileStorage = ConnectionRepository.getFileStorage
   val checkpointInterval = 10
 
-  val inputModule = new File("./contrib/stubs/sj-stub-input-streaming/target/scala-2.11/sj-stub-input-streaming-1.0.jar")
+  val inputModule = new File("./contrib/stubs/sj-stub-input-streaming/target/scala-2.11/sj-stub-input-streaming-1.0-SNAPSHOT.jar")
 
   open()
   cassandraSetup()
