@@ -4,6 +4,7 @@ export class InstanceModel {
   'inputs-types': string[] = [''];
   'module': ModuleModel;
   'start-from-timestamp': number;
+  'status': string;
 
   'async-backup-count': number;
   'backup-count': number;

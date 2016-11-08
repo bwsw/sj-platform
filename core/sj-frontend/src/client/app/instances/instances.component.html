@@ -74,7 +74,7 @@
                      class="instance-inputs with-item-removal clearfix">
                   <!--TODO: fix validation changing (make value-input -> ngModel (see bug http://stackoverflow.com/questions/33346677/angular2-ngmodel-against-ngfor-variables)-->
                   <select [value]="new_instance.inputs[i]" (input)="new_instance.inputs[i] = $event.target.value"
-                          (change)="ifTimestampAcceptable()"
+                          (change)="checkTimestampAcceptable()"
                           name="instanceInputs" required class="form-control form-type col-sm-10">
                     <option *ngFor="let stream of streamList">{{stream.name}}</option>
                   </select>
@@ -140,8 +140,8 @@
               </fieldset>
 
               <fieldset *ngIf="new_instance.module['module-type'] === 'regular-streaming'" class="form-group">
-                <label class="col-sm-3 form-control-label required">State management</label>
-                <select [(ngModel)]="new_instance['state-management']" name="instanceStateManagement" required
+                <label class="col-sm-3 form-control-label">State management</label>
+                <select [(ngModel)]="new_instance['state-management']" name="instanceStateManagement"
                         class="form-control form-type col-sm-10">
                   <option>none</option>
                   <option>ram</option>
@@ -308,6 +308,9 @@
       <span class="instance-name">Name</span>
       <span class="instance-status">Status</span>
     </li>
+    <li *ngIf="!instanceList || (instanceList && instanceList.length === 0)">
+      <span class="col-sm-12">No instances have been found.</span>
+    </li>
     <li class="list-group-item" (click)="instance_select(instance)"
         *ngFor="let instance of instanceList | orderBy: 'name' | listFilter : term">
       <span class="instance-name">{{ instance.name }}</span>
@@ -337,19 +340,18 @@
         <h4 class="modal-title">Delete confirmation</h4>
       </div>
       <div class="modal-body" *ngIf="instance_to_delete">
-        <div *ngIf="instance_to_delete.status !== 'starting'"> <!-- TODO other statuses -->
-          <p>Do you really want to delete instance " {{ instance_to_delete.name }} " ? This action can not be
+        <div *ngIf="ifInstanceCanBeRemoved()">
+          <p>Do you really want to delete instance "{{ instance_to_delete.name }}"? This action can not be
             undone!</p>
           <fieldset class="form-actions">
-            <button type="button" class="btn btn-danger pull-left"
+            <button type="button" class="btn btn-danger pull-left0"
                     (click)="delete_instance(DeleteInstance, instance_to_delete)">Delete
             </button>
             <button type="button" class="btn btn-primary " (click)="DeleteInstance.hide()">Cancel</button>
           </fieldset>
         </div>
-        <div *ngIf="instance_to_delete.status === 'starting' || instance_to_delete.status === 'started'
-                      || instance_to_delete.status === 'stopping'">
-          <p>You can not delete instance which status is "starting" or "started" </p>
+        <div *ngIf="!ifInstanceCanBeRemoved()">
+          <p>You can not delete instance whose status is "starting", "started" or "stopping" </p>
           <fieldset class="form-actions">
             <button type="button" class="btn btn-primary " (click)="DeleteInstance.hide()">Ok</button>
           </fieldset>

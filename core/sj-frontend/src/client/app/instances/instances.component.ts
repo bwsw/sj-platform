@@ -247,7 +247,7 @@ export class InstancesComponent implements OnInit {
   public addInput() {
     this.new_instance.inputs.push('');
     this.new_instance['inputs-types'].push('');
-    this.ifTimestampAcceptable();
+    this.checkTimestampAcceptable();
   }
 
   public addOutput() {
@@ -257,14 +257,14 @@ export class InstancesComponent implements OnInit {
   public removeInput(i: number): void {
     this.new_instance.inputs.splice(i, 1);
     this.new_instance['inputs-types'].splice(i, 1);
-    this.ifTimestampAcceptable();
+    this.checkTimestampAcceptable();
   }
 
   public removeOutput(i: number): void {
     this.new_instance.outputs.splice(i, 1);
   }
 
-  public ifTimestampAcceptable(): void {
+  public checkTimestampAcceptable(): void {
     switch (this.new_instance.module['module-type']) {
       case 'regular-streaming':
       case 'windowed-streaming':
@@ -288,6 +288,10 @@ export class InstancesComponent implements OnInit {
     if (!this.startFromTimestampAcceptable && this.new_instance['start-from'] === 'timestamp') {
       this.new_instance['start-from'] = '';
     }
+  }
+
+  public ifInstanceCanBeRemoved(): boolean {
+    return ['starting', 'started', 'stopping'].indexOf(this.instance_to_delete.status) === -1;
   }
 
   ngAfterViewChecked() {

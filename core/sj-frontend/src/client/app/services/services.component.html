@@ -155,6 +155,9 @@
       <span class="service-description">Description</span>
       <span class="service-provider-link">Provider</span>
     </li>
+    <li *ngIf="!serviceList || (serviceList && serviceList.length === 0)">
+      <span class="col-sm-12">No services have been found.</span>
+    </li>
     <li class="list-group-item" [ngClass]="{selected:isSelected(service)}" (click)="service_select(service)"
         *ngFor="let service of serviceList | orderBy: 'name' | listFilter : term">
       <span class="service-name">{{ service.name }}</span>
@@ -247,7 +250,7 @@
       <div class="modal-body" *ngIf="service_to_delete && (blockingStreams.length === 0)">
         <p>Do you really want to delete service " {{ service_to_delete.name }} " ? This action can not be undone!</p>
         <fieldset class="form-actions">
-          <button type="button" class="btn btn-danger pull-left"
+          <button type="button" class="btn btn-danger pull-left0"
                   (click)="delete_service(DeleteService, service_to_delete)">Delete
           </button>
           <button type="button" class="btn btn-primary " (click)="DeleteService.hide()">Cancel</button>

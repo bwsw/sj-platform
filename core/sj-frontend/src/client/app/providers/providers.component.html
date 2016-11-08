@@ -91,6 +91,9 @@
       <span class="provider-name">Name</span>
       <span class="provider-description">Description</span>
     </li>
+    <li *ngIf="!providerList || (providerList && providerList.length === 0)">
+      <span class="col-sm-12">No providers have been found.</span>
+    </li>
     <li class="list-group-item" [ngClass]="{selected:isSelected(provider)}" (click)="provider_select(provider)"
         *ngFor="let provider of providerList | orderBy: 'name' | listFilter : term ">
       <span class="provider-name">{{ provider.name }}</span>
@@ -117,7 +120,7 @@
       <div class="modal-body" *ngIf="provider_to_delete && (blockingServices.length === 0)">
         <p>Do you really want to delete provider " {{ provider_to_delete.name }} " ? This action can not be undone!</p>
         <fieldset class="form-actions">
-          <button type="button" class="btn btn-danger pull-left"
+          <button type="button" class="btn btn-danger pull-left0"
                   (click)="delete_provider(DeleteProvider, provider_to_delete)">Delete
           </button>
           <button type="button" class="btn btn-primary " (click)="DeleteProvider.hide()">Cancel</button>

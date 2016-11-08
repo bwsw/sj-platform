@@ -72,8 +72,13 @@ input {
   border: 1px solid grey;
 }
 
-.start-stop-icon {
+.start-stop-icon:not(.fa-spin) {
   margin-right: 5px;
+}
+
+.start-stop-icon.fa-spin {
+  margin-left: -3px;
+  margin-right: 4px;
 }
 
 h2 {
