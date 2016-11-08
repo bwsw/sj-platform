@@ -53,14 +53,12 @@ class JDBCServiceData() extends ServiceData() {
       case Some(x) =>
         if (x.isEmpty) {
           errors += s"'Database' is required"
-        }
-      case Some(x) =>
-        if (x.nonEmpty) {
+        } else {
           val providerDAO = ConnectionRepository.getProviderService
           val provider = providerDAO.get(this.provider).get
           var database_not_exists: Boolean = true
           try {
-              JdbcClientBuilder.
+            JdbcClientBuilder.
               setTxnField("txn").
               setDriver(this.driver).
               setDatabase(x).
@@ -77,7 +75,6 @@ class JDBCServiceData() extends ServiceData() {
           }
         }
     }
-
     errors
   }
 }
