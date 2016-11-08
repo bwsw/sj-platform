@@ -58,7 +58,6 @@ protected class JdbcClient (private var jdbcCCD: JdbcClientConnectionData) {
   }
 
   def removeByTransactionId(transactionId: String) = {
-    println("delete")
     val sql = s"DELETE FROM ${jdbcCCD.table} WHERE ${jdbcCCD.txnField} = '$transactionId'"
     def checkExists():Boolean = {
       val esql = s"SELECT * FROM ${jdbcCCD.table} WHERE ${jdbcCCD.txnField} = '$transactionId'"

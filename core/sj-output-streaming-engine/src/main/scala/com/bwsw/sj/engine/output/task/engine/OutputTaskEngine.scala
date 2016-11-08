@@ -10,13 +10,13 @@ import com.bwsw.sj.common.DAL.model.{ESService, JDBCService, JDBCSjStream, SjStr
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.DAL.model.Service
-import com.bwsw.common.client.{OutputClient, JdbcClient}
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.engine.input.TStreamTaskInputService
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.output.task.OutputTaskManager
+import com.bwsw.sj.engine.output.task.engine.Handler.{EsOutputHandler, JdbcOutputHandler, OutputHandler}
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import org.elasticsearch.index.query.QueryBuilders
 import org.slf4j.LoggerFactory
@@ -45,14 +45,16 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private val executor = manager.getExecutor(environmentManager).asInstanceOf[OutputStreamingExecutor]
   val taskInputService = new TStreamTaskInputService(manager, blockingQueue)
   protected val isNotOnlyCustomCheckpoint: Boolean
-  private lazy val (client, service) = openConnection(outputStream)
+//  private lazy val (client, service) = openConnection(outputStream)
+
+  private val handler = createHandler(outputStream)
 
 //  private lazy val (esClient, esService) = openEsConnection(outputStream)
 //  private lazy val (jdbcClient, jdbcService) = openJdbcConnection(outputStream)
 
   private var wasFirstCheckpoint = false
-  private val byteSerializer = new ObjectSerializer()
-  private var txnFieldForJdbc: String = new JdbcEnvelope().getTxnName
+//  private val byteSerializer = new ObjectSerializer()
+
 
 
   private def getOutputStream: SjStream = {
@@ -64,22 +66,29 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     val streamService = ConnectionRepository.getStreamService
     val outputs = instance.outputs
       .flatMap(x => streamService.get(x))
-
     val options = instance.getOptionsAsMap()
-
     new OutputEnvironmentManager(options, outputs)
   }
 
 
-  /**
-    * Open connection for output data storage.
-    *
-    * @param outputStream: stream provide data.
-    */
-  def openConnection(outputStream: SjStream):(OutputClient, Service) = {
-    val jdbcClient = new JdbcClient()
-    val jdbcService: JDBCService = outputStream.service.asInstanceOf[JDBCService]
-    (jdbcClient, jdbcService)
+//  /**
+//    * Open connection for output data storage.
+//    *
+//    * @param outputStream: stream provide data.
+//    */
+//  def openConnection(outputStream: SjStream):(OutputClient, Service) = {
+//    val jdbcClient = new JdbcClient()
+//    val jdbcService: JDBCService = outputStream.service.asInstanceOf[JDBCService]
+//    (jdbcClient, jdbcService)
+//  }
+
+  def createHandler(outputStream: SjStream): OutputHandler = {
+    outputStream.streamType match {
+      case StreamLiterals.esOutputType =>
+        new EsOutputHandler(outputStream, performanceMetrics, manager)
+      case StreamLiterals.jdbcOutputType =>
+        new JdbcOutputHandler(outputStream, performanceMetrics, manager)
+    }
   }
 
 
@@ -118,12 +127,13 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     */
   // todo private
   private def processOutputEnvelope(serializedEnvelope: String) = {
-    afterReceivingEnvelope()
+// todo    afterReceivingEnvelope()
     val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope).asInstanceOf[TStreamEnvelope]
     registerInputEnvelope(envelope)
     logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
     val outputEnvelopes: List[Envelope] = executor.onMessage(envelope)
-    storagePrepare()
+    handler.process(outputEnvelopes, envelope, wasFirstCheckpoint)
+//    storagePrepare()
 //    outputStream.streamType match {
 //      case StreamLiterals.esOutputType =>
 //        prepareES()
@@ -131,7 +141,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 //      case StreamLiterals.jdbcOutputType =>
 //        removeFromJdbc(envelope)
 //    }
-    outputEnvelopes.foreach(outputEnvelope => registerAndSendOutputEnvelope(outputEnvelope, envelope))
+//    outputEnvelopes.foreach(outputEnvelope => registerAndSendOutputEnvelope(outputEnvelope, envelope))
   }
 
 
@@ -145,61 +155,64 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     performanceMetrics.addEnvelopeToInputStream(envelope)
   }
 
+//
+//  /**
+//    * Register processed envelope in performance metrics.
+//    *
+//    * @param envelopeID
+//    * @param data: processed envelope
+//    */
+//  private def registerOutputEnvelope(envelopeID: String, data: Envelope) = {
+//    val elementSize = byteSerializer.serialize(data).length
+//    performanceMetrics.addElementToOutputEnvelope(outputStream.name, envelopeID, elementSize)
+//  }
 
-  /**
-    * Register and send envelope to storage.
-    *
-    * @param outputEnvelope
-    * @param inputEnvelope
-    */
-  private def registerAndSendOutputEnvelope(outputEnvelope: Envelope, inputEnvelope: TStreamEnvelope) = {
-    registerOutputEnvelope(inputEnvelope.id.toString.replaceAll("-", ""), outputEnvelope)
-    storageWrite()
+
+//  /**
+//    * Register and send envelope to storage.
+//    *
+//    * @param outputEnvelope
+//    * @param inputEnvelope
+//    */
+//  private def registerAndSendOutputEnvelope(outputEnvelope: Envelope, inputEnvelope: TStreamEnvelope) = {
+//    registerOutputEnvelope(inputEnvelope.id.toString.replaceAll("-", ""), outputEnvelope)
+//    storageWrite()
     //    outputEnvelope match {
     //      case esEnvelope: EsEnvelope => writeToES(esEnvelope, inputEnvelope)
     //      case jdbcEnvelope: JdbcEnvelope => writeToJdbc(jdbcEnvelope, inputEnvelope)
     //      case _ =>
     //    }
-  }
+//  }
 
 
-  /**
-    * Register processed envelope in performance metrics.
-    *
-    * @param envelopeID
-    * @param data: processed envelope
-    */
-  private def registerOutputEnvelope(envelopeID: String, data: Envelope) = {
-    val elementSize = byteSerializer.serialize(data).length
-    performanceMetrics.addElementToOutputEnvelope(outputStream.name, envelopeID, elementSize)
-  }
 
 
-  /**
-    * Doing smth after catch envelope.
-    */
-  protected def afterReceivingEnvelope() = {}
+// todo
+//  /**
+//    * Doing smth after catch envelope.
+//    */
+//  protected def afterReceivingEnvelope() = {}
 
-  /**
-    *Prepare storage for processed envelopes.
-    */
-  def storagePrepare() = {
-    //todo realize
-  }
-
-  /**
-    * Put processed envelopes to storage.
-    */
-  def storageWrite() = {
-    //todo realize
-  }
-
-  /**
-    * Remove envelopes from storage.
-    */
-  def storageRemove() = {
-    //todo realize
-  }
+//  /**
+//    *Prepare storage for processed envelopes.
+//    */
+//  def storagePrepare() = {
+//    //todo realize
+//  }
+//
+//  /**
+//    * Put processed envelopes to storage.
+//    */
+//  def storageWrite() = {
+//    //todo realize
+//  }
+//
+//  /**
+//    * Remove envelopes from storage.
+//    */
+//  def storageRemove() = {
+//    //todo realize
+//  }
 
 
   /**
