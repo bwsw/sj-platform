@@ -169,9 +169,10 @@
 
               <fieldset *ngIf="new_instance.module['module-type'] === 'regular-streaming' ||
                 new_instance.module['module-type'] === 'output-streaming'" class="form-group">
-                <label class="col-sm-3 form-control-label required">Start-from</label>
-                <select [(ngModel)]="new_instance['start-from']" name="instanceStartFrom" required
+                <label class="col-sm-3 form-control-label">Start-from</label>
+                <select [(ngModel)]="new_instance['start-from']" name="instanceStartFrom"
                         class="form-control form-type col-sm-10">
+                  <option value=""></option>
                   <option value="newest">newest</option>
                   <option value="oldest">oldest</option>
                   <option value="timestamp" *ngIf="startFromTimestampAcceptable">timestamp</option>
