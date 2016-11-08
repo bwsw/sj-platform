@@ -1,6 +1,6 @@
 package com.bwsw.common.file.utils
 
-import java.io.File
+import java.io.{InputStream, File}
 
 import org.slf4j.LoggerFactory
 
@@ -13,6 +13,8 @@ trait FileStorage {
   def put(file: File, fileName: String, specification: Map[String, Any], filetype: String)
 
   def get(fileName: String, newFileName: String): File
+
+  def getStream(fileName: String): InputStream
 
   def delete(fileName: String): Boolean
 

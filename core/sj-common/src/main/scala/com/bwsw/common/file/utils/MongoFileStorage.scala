@@ -1,6 +1,6 @@
 package com.bwsw.common.file.utils
 
-import java.io.{File, FileNotFoundException}
+import java.io.{InputStream, File, FileNotFoundException}
 import java.nio.file.FileAlreadyExistsException
 
 import com.mongodb.casbah.MongoDB
@@ -55,6 +55,18 @@ class MongoFileStorage(mongoDB: MongoDB) extends FileStorage {
         logger.error(s"MongoFileStorage.get file: '$fileName' failed")
         throw new Exception(s"MongoFileStorage.get $fileName failed")
       }
+    } else {
+      logger.error(s"File with name: '$fileName' doesn't exist in a mongo storage")
+      throw new FileNotFoundException(s"$fileName doesn't exist")
+    }
+  }
+
+  override def getStream(fileName: String): InputStream = {
+    logger.debug(s"Try to get a file: '$fileName' from a mongo storage: ${mongoDB.name}")
+    val storageFile = gridFS.findOne(fileName)
+    logger.debug(s"Check whether a mongo storage contains a file with name: '$fileName' or not")
+    if (storageFile.isDefined) {
+      storageFile.get.inputStream
     } else {
       logger.error(s"File with name: '$fileName' doesn't exist in a mongo storage")
       throw new FileNotFoundException(s"$fileName doesn't exist")
