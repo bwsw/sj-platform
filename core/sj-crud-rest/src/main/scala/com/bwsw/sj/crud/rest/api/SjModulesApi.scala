@@ -7,12 +7,12 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Disposition`}
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.http.scaladsl.server.{Directives, RequestContext}
-import akka.stream.scaladsl.{FileIO, StreamConverters}
+import akka.stream.scaladsl.FileIO
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.engine.StreamingValidator
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.module._
-import com.bwsw.sj.common.utils.{RestLiterals, EngineLiterals}
+import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 import com.bwsw.sj.crud.rest.exceptions._
 import com.bwsw.sj.crud.rest.instance.{InstanceDestroyer, InstanceStarter, InstanceStopper}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
@@ -33,7 +33,6 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
     uploadedFile("jar") {
       case (metadata: FileInfo, file: File) =>
         try {
-          println(file.toString)
           var response: RestResponse = BadRequestRestResponse(Map("message" ->
             createMessage("rest.modules.modules.extension.unknown", metadata.fileName)))
 

@@ -118,30 +118,34 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
             post {
               uploadedFile("jar") {
                 case (metadata: FileInfo, file: File) =>
-                  var response: RestResponse = ConflictRestResponse(Map("message" ->
-                    createMessage("rest.custom.jars.file.exists", metadata.fileName)))
+                  try {
+                    var response: RestResponse = ConflictRestResponse(Map("message" ->
+                      createMessage("rest.custom.jars.file.exists", metadata.fileName)))
 
-                  if (!storage.exists(metadata.fileName)) {
-                    if (checkSpecification(file)) {
-                      val specification = getSpecification(file)
-                      val uploadingFile = new File(metadata.fileName)
-                      FileUtils.copyFile(file, uploadingFile)
-                      storage.put(uploadingFile, metadata.fileName, specification, "custom")
-                      val name = specification("name").toString + "-" + specification("version").toString
-                      val customJarConfigElement = new ConfigurationSetting(
-                        createConfigurationSettingName(ConfigLiterals.systemDomain, name),
-                        metadata.fileName,
-                        ConfigLiterals.systemDomain
-                      )
-                      configService.save(customJarConfigElement)
-                      response = OkRestResponse(Map("message" ->
-                        createMessage("rest.custom.jars.file.uploaded", metadata.fileName)))
-                    } else {
-                      response = BadRequestRestResponse(Map("message" -> getMessage("rest.errors.invalid.specification")))
+                    if (!storage.exists(metadata.fileName)) {
+                      if (checkSpecification(file)) {
+                        val specification = getSpecification(file)
+                        val uploadingFile = new File(metadata.fileName)
+                        FileUtils.copyFile(file, uploadingFile)
+                        storage.put(uploadingFile, metadata.fileName, specification, "custom")
+                        val name = specification("name").toString + "-" + specification("version").toString
+                        val customJarConfigElement = new ConfigurationSetting(
+                          createConfigurationSettingName(ConfigLiterals.systemDomain, name),
+                          metadata.fileName,
+                          ConfigLiterals.systemDomain
+                        )
+                        configService.save(customJarConfigElement)
+                        response = OkRestResponse(Map("message" ->
+                          createMessage("rest.custom.jars.file.uploaded", metadata.fileName)))
+                      } else {
+                        response = BadRequestRestResponse(Map("message" -> getMessage("rest.errors.invalid.specification")))
+                      }
                     }
-                  }
 
-                  complete(restResponseToHttpResponse(response))
+                    complete(restResponseToHttpResponse(response))
+                  } finally {
+                    file.delete()
+                  }
               }
             } ~
               get {
@@ -162,42 +166,42 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
           pathEndOrSingleSlash {
             post {
               entity(as[Multipart.FormData]) { (entity: Multipart.FormData) =>
-                val parts: Source[BodyPart, Any] = entity.parts
-                var filename = ""
-                var description = ""
-                val partsResult = parts.runForeach { (part: BodyPart) =>
-                  if (part.name.equals("file")) {
-                    filename = part.filename.get
-                    fileUpload(filename, part)
-                    logger.debug(s"File $filename is uploaded")
-                  } else if (part.name.equals("description")) {
-                    val bytes = part.entity.dataBytes
+                  val parts: Source[BodyPart, Any] = entity.parts
+                  var filename = ""
+                  var description = ""
+                  val partsResult = parts.runForeach { (part: BodyPart) =>
+                    if (part.name.equals("file")) {
+                      filename = part.filename.get
+                      fileUpload(filename, part)
+                      logger.debug(s"File $filename is uploaded")
+                    } else if (part.name.equals("description")) {
+                      val bytes = part.entity.dataBytes
 
-                    def writeContent(array: Array[Byte], byteString: ByteString): Array[Byte] = {
-                      val byteArray: Array[Byte] = byteString.toArray
-                      description = new String(byteArray)
-                      array ++ byteArray
+                      def writeContent(array: Array[Byte], byteString: ByteString): Array[Byte] = {
+                        val byteArray: Array[Byte] = byteString.toArray
+                        description = new String(byteArray)
+                        array ++ byteArray
+                      }
+
+                      val future = bytes.runFold(Array[Byte]())(writeContent)
+                      Await.result(future, 30.seconds)
                     }
-
-                    val future = bytes.runFold(Array[Byte]())(writeContent)
-                    Await.result(future, 30.seconds)
                   }
-                }
-                Await.result(partsResult, 30.seconds)
+                  Await.result(partsResult, 30.seconds)
 
-                var response: RestResponse = ConflictRestResponse(Map("message" ->
-                  createMessage("rest.custom.files.file.exists", filename)))
+                  var response: RestResponse = ConflictRestResponse(Map("message" ->
+                    createMessage("rest.custom.files.file.exists", filename)))
 
-                if (!storage.exists(filename)) {
-                  val uploadingFile = new File(filename)
-                  val spec = Map("description" -> description)
-                  storage.put(uploadingFile, filename, spec, "custom-file")
-                  uploadingFile.delete()
+                  if (!storage.exists(filename)) {
+                    val uploadingFile = new File(filename)
+                    val spec = Map("description" -> description)
+                    storage.put(uploadingFile, filename, spec, "custom-file")
+                    uploadingFile.delete()
 
-                  response = OkRestResponse(Map("message" -> createMessage("rest.custom.files.file.uploaded", filename)))
-                }
+                    response = OkRestResponse(Map("message" -> createMessage("rest.custom.files.file.uploaded", filename)))
+                  }
 
-                complete(restResponseToHttpResponse(response))
+                  complete(restResponseToHttpResponse(response))
               }
             } ~
               get {
