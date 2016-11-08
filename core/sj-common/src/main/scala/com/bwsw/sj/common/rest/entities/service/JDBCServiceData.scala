@@ -73,7 +73,7 @@ class JDBCServiceData() extends ServiceData() {
             case e:Exception =>
           }
           if (database_not_exists) {
-            errors += s"Database '$x' doesn't exists."
+            errors += s"Database '$x' doesn't exist."
           }
         }
     }
