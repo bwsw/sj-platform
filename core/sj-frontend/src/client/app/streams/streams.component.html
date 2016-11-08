@@ -15,11 +15,11 @@
           <h4 class="modal-title">Create Stream</h4>
         </div>
         <div class="modal-body">
-          <form (ngSubmit)="createStream(CreateStream)" class="form-create-entity">
+          <form #streamForm="ngForm" (ngSubmit)="createStream(CreateStream)" class="form-create-entity">
             <fieldset class="form-group">
-              <label class="col-sm-3 form-control-label ">Choose type</label>
+              <label class="col-sm-3 form-control-label required">Choose type</label>
               <select [(ngModel)]="new_stream['stream-type']" name="streamType"
-                      class="form-control form-type col-sm-10">
+                      required class="form-control form-type col-sm-10">
                 <option selected value="stream.t-stream">T-stream</option>
                 <!-- TODO Change values to match values in rest service-->
                 <option value="stream.kafka">Kafka</option>
@@ -27,8 +27,9 @@
               </select>
             </fieldset>
             <fieldset class="form-group">
-              <label class="col-sm-3 form-control-label">Name</label>
-              <input [(ngModel)]="new_stream.name" name="streamName" type="text" class="form-control col-sm-10">
+              <label class="col-sm-3 form-control-label required">Name</label>
+              <input [(ngModel)]="new_stream.name" name="streamName" type="text"
+                     required class="form-control col-sm-10">
             </fieldset>
             <fieldset class="form-group">
               <label class="col-sm-3 form-control-label">Description</label>
@@ -36,14 +37,14 @@
                         class="form-control form-type col-sm-10"></textarea>
             </fieldset>
             <fieldset *ngIf="new_stream['stream-type'] != 'elasticsearch-output'" class="form-group">
-              <label class="col-sm-3 form-control-label">Partitions</label>
+              <label class="col-sm-3 form-control-label required">Partitions</label>
               <input [(ngModel)]="new_stream.partitions" name="streamPartitions" type="number"
-                     class="form-control col-sm-10">
+                     required class="form-control col-sm-10">
             </fieldset>
             <fieldset *ngIf="new_stream['stream-type']" class="form-group">
-              <label class="col-sm-3 form-control-label">Service</label>
+              <label class="col-sm-3 form-control-label required">Service</label>
               <select [(ngModel)]="new_stream.service" name="streamService"
-                      class="form-control form-type col-sm-10">
+                      required class="form-control form-type col-sm-10">
                 <option *ngFor="let service of serviceList | serviceFilter : new_stream['stream-type'] "
                         value={{service.name}}>{{service.name}}
                 </option>
@@ -74,12 +75,12 @@
                      type="number" class="form-control col-sm-10">
             </fieldset>
             <fieldset *ngIf="new_stream['stream-type'] == 'stream.kafka'" class="form-group">
-              <label class="col-sm-3 form-control-label">Replication factor</label>
+              <label class="col-sm-3 form-control-label required">Replication factor</label>
               <input [(ngModel)]="new_stream['replication-factor']" name="streamReplicationFactor" type="text"
-                     class="form-control col-sm-10">
+                     required class="form-control col-sm-10">
             </fieldset>
             <fieldset class="form-actions">
-              <button type="submit" class="btn btn-primary form-submit">Create</button>
+              <button [disabled]="!streamForm.form.valid" type="submit" class="btn btn-primary form-submit">Create</button>
               <button type="button" class="btn btn-danger" (click)="CreateStream.hide()">Cancel</button>
             </fieldset>
           </form>

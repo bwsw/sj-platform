@@ -106,11 +106,11 @@ export class InstancesService {
         inst['checkpoint-interval'] = orig['checkpoint-interval'];
         inst['event-wait-time'] = orig['event-wait-time'];
         orig['inputs'].forEach(function(item:string, i:number) {
-          inst['inputs'][i] = orig['inputs'][i] + '/' + orig['input-type'][i];
+          inst['inputs'][i] = orig['inputs'][i] + '/' + orig['inputs-types'][i];
         });
         inst['outputs'] = orig['outputs'];
         inst['state-management'] = orig['state-management'];
-        inst['start-from'] = orig['start-from'];
+        inst['start-from'] = orig['start-from'] === 'timestamp' ? orig['start-from-timestamp'] : orig['start-from'];
         inst['state-full-checkpoint'] = orig['state-full-checkpoint'];
 
         break;
@@ -125,7 +125,7 @@ export class InstancesService {
         inst['checkpoint-interval'] = orig['checkpoint-interval'];
         inst['input'] = orig['input'];
         inst['output'] = orig['output'];
-        inst['start-from'] = orig['start-from'];
+        inst['start-from'] = orig['start-from'] === 'timestamp' ? orig['start-from-datetime'] : orig['start-from'];
         break;
 
       case 'input-streaming':

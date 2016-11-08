@@ -16,9 +16,9 @@
           <h4 class="modal-title">Create Service</h4>
         </div>
         <div class="modal-body">
-          <form (ngSubmit)="createService(CreateService)" class="form-create-entity">
+          <form #serviceForm="ngForm" (ngSubmit)="createService(CreateService)" class="form-create-entity">
             <fieldset class="form-group">
-              <label class="col-sm-3 form-control-label ">Choose type</label>
+              <label class="col-sm-3 form-control-label required">Choose type</label>
               <select required [(ngModel)]="new_service.type" name="serviceType"
                       class="form-control form-type col-sm-10">
                 <option value="ArspkDB">Aerospike DB</option>
@@ -32,7 +32,7 @@
             </fieldset>
 
             <fieldset class="form-group">
-              <label class="col-sm-3 form-control-label">Name</label>
+              <label class="col-sm-3 form-control-label required">Name</label>
               <input [(ngModel)]="new_service.name" name="serviceName" type="text" class="form-control col-sm-10"
                      required>
             </fieldset>
@@ -42,23 +42,23 @@
                         class="form-control form-type col-sm-10"></textarea>
             </fieldset>
             <fieldset *ngIf="new_service.type == 'CassDB'" class="form-group">
-              <label class="col-sm-3 form-control-label">Keyspace</label>
+              <label class="col-sm-3 form-control-label required">Keyspace</label>
               <input [(ngModel)]="new_service.keyspace" name="serviceKeyspace" type="text"
                      class="form-control col-sm-10" required>
             </fieldset>
             <fieldset *ngIf="new_service.type == 'ZKCoord' ||
                       new_service.type == 'RdsCoord' ||  new_service.type == 'ArspkDB' " class="form-group">
-              <label class="col-sm-3 form-control-label">Namespace</label>
+              <label class="col-sm-3 form-control-label required">Namespace</label>
               <input [(ngModel)]="new_service.namespace" name="serviceNamespace" type="text"
                      class="form-control col-sm-10" required>
             </fieldset>
             <fieldset *ngIf="new_service.type == 'ESInd'" class="form-group">
-              <label class="col-sm-3 form-control-label">Index</label>
+              <label class="col-sm-3 form-control-label required">Index</label>
               <input [(ngModel)]="new_service.index" name="serviceIndex" type="text" class="form-control col-sm-10"
                      required>
             </fieldset>
             <fieldset *ngIf="new_service.type && new_service.type != 'TstrQ'" class="form-group">
-              <label class="col-sm-3 form-control-label">Provider</label>
+              <label class="col-sm-3 form-control-label required">Provider</label>
               <select [(ngModel)]="new_service.provider" name="streamService" required
                       class="form-control form-type col-sm-10">
                 <option *ngFor="let provider of providerList | providerFilter : new_service.type "
@@ -67,7 +67,7 @@
               </select>
             </fieldset>
             <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group">
-              <label class="col-sm-3 form-control-label">Metadata provider</label>
+              <label class="col-sm-3 form-control-label required">Metadata provider</label>
               <select [(ngModel)]="new_service['metadata-provider']" name="serviceMetadataProvider"
                       required class="form-control form-type col-sm-10">
                 <option *ngFor="let provider of providerList | providerFilter : 'CassDB' " value={{provider.name}}>
@@ -76,12 +76,12 @@
               </select>
             </fieldset>
             <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group">
-              <label class="col-sm-3 form-control-label">Metadata namespace</label>
+              <label class="col-sm-3 form-control-label required">Metadata namespace</label>
               <input [(ngModel)]="new_service['metadata-namespace']" name="serviceMetadataNamespace" type="text"
                      class="form-control col-sm-10" required>
             </fieldset>
             <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group">
-              <label class="col-sm-3 form-control-label">Data provider</label>
+              <label class="col-sm-3 form-control-label required">Data provider</label>
               <select [(ngModel)]="new_service['data-provider']" name="serviceDataProvider"
                       required class="form-control form-type col-sm-10">
                 <option *ngFor="let provider of providerList | providerFilter : 'DataProvider' "
@@ -90,12 +90,12 @@
               </select>
             </fieldset>
             <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group">
-              <label class="col-sm-3 form-control-label">Data namespace</label>
+              <label class="col-sm-3 form-control-label required">Data namespace</label>
               <input [(ngModel)]="new_service['data-namespace']" name="serviceDataNamespace" type="text"
                      class="form-control col-sm-10" required>
             </fieldset>
             <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group">
-              <label class="col-sm-3 form-control-label">Lock provider</label>
+              <label class="col-sm-3 form-control-label required">Lock provider</label>
               <select [(ngModel)]="new_service['lock-provider']" name="serviceLockProvider"
                       required class="form-control form-type col-sm-10">
                 <option *ngFor="let provider of providerList | providerFilter : 'LockProvider' "
@@ -104,7 +104,7 @@
               </select>
             </fieldset>
             <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group">
-              <label class="col-sm-3 form-control-label">Lock namespace</label>
+              <label class="col-sm-3 form-control-label required">Lock namespace</label>
               <input [(ngModel)]="new_service['lock-namespace']" name="serviceLockNamespace" type="text"
                      class="form-control col-sm-10" required>
             </fieldset>
@@ -128,12 +128,12 @@
               </select>
             </fieldset>
             <fieldset *ngIf="new_service.type == 'KfkQ'" class="form-group">
-              <label class="col-sm-3 form-control-label">ZK namespace</label>
+              <label class="col-sm-3 form-control-label required">ZK namespace</label>
               <input [(ngModel)]="new_service['zk-namespace']" name="serviceZkNamespace" type="text"
                      class="form-control col-sm-10" required>
             </fieldset>
             <fieldset class="form-actions">
-              <button type="submit" class="btn btn-primary form-submit">Create</button>
+              <button [disabled]="!serviceForm.form.valid" type="submit" class="btn btn-primary form-submit">Create</button>
               <button type="button" class="btn btn-danger" (click)="CreateService.hide()">Cancel</button>
             </fieldset>
           </form>

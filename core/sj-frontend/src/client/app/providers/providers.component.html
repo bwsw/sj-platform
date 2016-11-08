@@ -15,7 +15,7 @@
           <h4 class="modal-title">Create Provider</h4>
         </div>
         <div class="modal-body">
-          <form *ngIf="new_provider" (ngSubmit)="createProvider(CreateProvider)" class="form-create-entity">
+          <form #providerForm="ngForm" *ngIf="new_provider" (ngSubmit)="createProvider(CreateProvider)" class="form-create-entity">
             <fieldset class="form-group">
               <label class="col-sm-3 form-control-label required">Choose type</label>
               <select [(ngModel)]="new_provider.type" name="providerType" required
@@ -40,18 +40,21 @@
               <textarea [(ngModel)]="new_provider.description" name="providerDescription"
                         class="form-control form-type col-sm-10" placeholder="Enter provider description"></textarea>
             </fieldset>
-            <fieldset *ngIf="provider_hosts" class="form-group">
+            <fieldset class="form-group">
               <label class="col-sm-3 form-control-label required">Hosts</label>
               <div *ngFor='let host of new_provider.hosts; let i = index; trackBy:customTrackBy'
                    class="provider-host with-item-removal">
-                <input [ngClass]="{kafkaStyle: isKafka}"
-                       required
+                <!--TODO: fix validation changing (make value-input -> ngModel (see bug http://stackoverflow.com/questions/33346677/angular2-ngmodel-against-ngfor-variables)-->
+                <input required
+                       validHostPort
                        [value]="new_provider.hosts[i]" (input)="new_provider.hosts[i] = $event.target.value"
                        name="providerHosts"
                        type="text" class="form-control " placeholder="IPv4:port">
                 <div class="remove-item fa fa-remove" *ngIf="i!==0" (click)="delete_host(i)"></div>
-                <!--<input *ngIf="form_template == 'Kafka'" required [(ngModel)]="form_hosts_prefixes[i]" type="text" class="form-control col-sm-10 kafka-zk-prefix"  placeholder="ZK prefix">-->
-                <!--pattern="^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5]):(6553[0-5]|655[0-2][0-9]\d|65[0-4](\d){2}|6[0-4](\d){3}|[1-5](\d){4}|[1-9](\d){0,3})$"-->
+                <!--<div *ngIf="formErrors.providerHosts && providerHosts.touched" class="alert alert-warning">-->
+                  <!--{{ formErrors.providerHosts }}-->
+                <!--</div>-->
+
               </div>
               <button type="button" (click)="addHost()" class="btn btn-link form-add-item">+ Add</button>
 
@@ -67,7 +70,7 @@
                      class="form-control col-sm-10" placeholder="Enter provider password">
             </fieldset>
             <fieldset class="form-actions">
-              <button type="submit" class="btn btn-primary form-submit">Create</button>
+              <button [disabled]="!providerForm.form.valid" type="submit" class="btn btn-primary form-submit">Create</button>
               <button type="button" class="btn btn-danger" (click)="CreateProvider.hide()">Cancel</button>
             </fieldset>
           </form>

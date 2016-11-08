@@ -1,8 +1,9 @@
 import { ModuleModel } from './module.model';
 
 export class InstanceModel {
-  'input-type': string[] = [''];
+  'inputs-types': string[] = [''];
   'module': ModuleModel;
+  'start-from-timestamp': number;
 
   'async-backup-count': number;
   'backup-count': number;
@@ -58,7 +59,7 @@ export class RegularStreamingInstance extends SubtypedInstance {
   'event-wait-time': number;
   'inputs': string[] = [''];
   'outputs': string[] = [''];
-  'start-from': string;
+  'start-from': string|number;
   'state-full-checkpoint': string;
   'state-management': string;
 }
@@ -70,7 +71,7 @@ export class OutputStreamingInstance extends SubtypedInstance {
   'checkpoint-mode': string;
   'input': string;
   'output': string;
-  'start-from': string;
+  'start-from': string|number;
 }
 
 export class InputStreamingInstance extends SubtypedInstance {

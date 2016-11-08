@@ -66,12 +66,6 @@ button:hover {
   margin: 60px 0 0 180px;
 }
 
-label.required-label::after {
-  color: red;
-  content: '*';
-  padding-left: 3px;
-}
-
 .with-item-removal {
   position: relative;
 }
@@ -100,7 +94,8 @@ button.form-add-item {
   width: 70%;
 }
 
-.form-create-entity label.required:after {
-  content: ' *';
+.form-create-entity label.required::after {
   color: #ff706f;
+  content: '*';
+  padding-left: 3px;
 }
