@@ -4,6 +4,7 @@ import java.util.Calendar
 
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.output.task.OutputTaskManager
+import scala.collection.mutable
 
 /**
  * Class represents a set of metrics that characterize performance of an output streaming module
@@ -18,8 +19,8 @@ class OutputStreamingPerformanceMetrics(manager: OutputTaskManager)
   private val inputStreamNames = instance.getInputsWithoutStreamMode()
   private val outputStreamNames = instance.outputs
 
-  override protected val inputEnvelopesPerStream = createStorageForInputEnvelopes(inputStreamNames)
-  override protected val outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
+  override protected var inputEnvelopesPerStream = createStorageForInputEnvelopes(inputStreamNames)
+  override protected var outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
 
   override def getReport() = {
     logger.info(s"Start preparing a report of performance for task: $taskName of output module\n")
@@ -61,7 +62,7 @@ class OutputStreamingPerformanceMetrics(manager: OutputTaskManager)
 
   override def clear() = {
     logger.debug(s"Reset variables for performance report for next reporting\n")
-    inputEnvelopesPerStream.clear()
-    outputEnvelopesPerStream.clear()
+    inputEnvelopesPerStream = mutable.Map(inputStreamNames.head -> mutable.ListBuffer[List[Int]]())
+    outputEnvelopesPerStream = mutable.Map(outputStreamNames.head -> mutable.Map[String, mutable.ListBuffer[Int]]())
   }
 }

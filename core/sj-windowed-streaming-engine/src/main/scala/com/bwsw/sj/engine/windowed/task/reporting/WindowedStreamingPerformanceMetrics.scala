@@ -25,11 +25,11 @@ class WindowedStreamingPerformanceMetrics(manager: CommonTaskManager)
   private val inputStreamNames = manager.inputs.map(_._1.name).toArray
   private val outputStreamNames = windowedInstance.outputs
 
-  override protected val inputEnvelopesPerStream = createStorageForInputEnvelopes(inputStreamNames)
-  override protected val outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
+  override protected var inputEnvelopesPerStream = createStorageForInputEnvelopes(inputStreamNames)
+  override protected var outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
 
-  private val batchesPerStream = createStorageForBatches(inputStreamNames)
-  private val windowsPerStream = createStorageForWindows(inputStreamNames)
+  private var batchesPerStream = createStorageForBatches()
+  private var windowsPerStream = createStorageForWindows()
 
   /**
    * Increases time when there are no messages (envelopes)
@@ -105,10 +105,10 @@ class WindowedStreamingPerformanceMetrics(manager: CommonTaskManager)
 
   override def clear() = {
     logger.debug(s"Reset variables for performance report for next reporting\n")
-    inputEnvelopesPerStream.clear()
-    outputEnvelopesPerStream.clear()
-    batchesPerStream.clear()
-    windowsPerStream.clear()
+    inputEnvelopesPerStream = mutable.Map(inputStreamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
+    outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
+    batchesPerStream = createStorageForBatches()
+    windowsPerStream = createStorageForWindows()
     totalIdleTime = 0L
   }
 
@@ -120,11 +120,11 @@ class WindowedStreamingPerformanceMetrics(manager: CommonTaskManager)
     windowsPerStream(window.stream) += 1
   }
 
-  private def createStorageForBatches(inputStreamNames: Array[String]) = {
+  private def createStorageForBatches() = {
     mutable.Map(inputStreamNames.map(x => (x, mutable.ListBuffer[Int]())): _*)
   }
 
-  private def createStorageForWindows(inputStreamNames: Array[String]) = {
+  private def createStorageForWindows() = {
     mutable.Map(inputStreamNames.map(x => (x, 0)): _*)
   }
 

@@ -26,8 +26,8 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
   protected val mutex: ReentrantLock = new ReentrantLock(true)
   protected val reportSerializer = new JsonSerializer()
   protected val startTime = System.currentTimeMillis()
-  protected val inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Int]]]
-  protected val outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Int]]]
+  protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Int]]]
+  protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Int]]]
   protected val taskName = manager.taskName
   protected val instance = manager.instance
   private val reportingInterval = instance.performanceReportingInterval

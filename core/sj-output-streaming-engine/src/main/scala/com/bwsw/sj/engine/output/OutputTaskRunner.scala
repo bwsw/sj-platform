@@ -38,8 +38,12 @@ object OutputTaskRunner extends {override val threadName = "OutputTaskRunner-%d"
 
       executorService.take().get()
     } catch {
-      case assertionError: Error => handleException(assertionError)
-      case exception: Exception => handleException(exception)
+      case assertionError: Error =>
+        handleException(assertionError)
+        assertionError.printStackTrace()
+      case exception: Exception =>
+        handleException(exception)
+        exception.printStackTrace()
     }
   }
 }

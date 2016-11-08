@@ -5,6 +5,7 @@ import java.util.Calendar
 import com.bwsw.sj.engine.core.entities.{Envelope, InputEnvelope}
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.input.task.InputTaskManager
+import scala.collection.mutable
 
 /**
  * Class represents a set of metrics that characterize performance of a input streaming module
@@ -19,8 +20,8 @@ class InputStreamingPerformanceMetrics(manager: InputTaskManager)
   private val inputStreamName = manager.agentsHost + ":" + manager.entryPort
   private val outputStreamNames = instance.outputs
 
-  override protected val inputEnvelopesPerStream = createStorageForInputEnvelopes(Array(inputStreamName))
-  override protected val outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
+  override protected var inputEnvelopesPerStream = createStorageForInputEnvelopes(Array(inputStreamName))
+  override protected var outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
 
   /**
    * Invokes when a new envelope from the input stream is received
@@ -78,7 +79,7 @@ class InputStreamingPerformanceMetrics(manager: InputTaskManager)
 
   override def clear() = {
     logger.debug(s"Reset variables for performance report for next reporting\n")
-    inputEnvelopesPerStream.clear()
-    outputEnvelopesPerStream.clear()
+    inputEnvelopesPerStream = mutable.Map(inputStreamName -> mutable.ListBuffer[List[Int]]())
+    outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
   }
 }

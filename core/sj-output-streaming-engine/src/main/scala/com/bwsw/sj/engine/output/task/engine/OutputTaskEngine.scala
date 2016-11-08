@@ -8,7 +8,7 @@ import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.DAL.model.SjStream
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
+import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, PersistentBlockingQueue}
 import com.bwsw.sj.engine.core.engine.input.TStreamTaskInputService
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory
  * @author Kseniya Mikhaleva
  */
 abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
-                                performanceMetrics: OutputStreamingPerformanceMetrics) extends Callable[Unit] {
+                                performanceMetrics: OutputStreamingPerformanceMetrics) extends Callable[Unit]{
 
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"output-task-${manager.taskName}-engine")
@@ -60,7 +60,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   }
 
 
-  def createHandler(outputStream: SjStream): OutputHandler = {
+  private def createHandler(outputStream: SjStream): OutputHandler = {
     outputStream.streamType match {
       case StreamLiterals.esOutputType =>
         new EsOutputHandler(outputStream, performanceMetrics, manager)
@@ -99,12 +99,12 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
 
   /**
-    * Handler of envelope.
+    * Handler for sending data to storage.
     *
     * @param serializedEnvelope: original envelope.
     */
   private def processOutputEnvelope(serializedEnvelope: String) = {
-// todo    afterReceivingEnvelope()
+    afterReceivingEnvelope()
     val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope).asInstanceOf[TStreamEnvelope]
     registerInputEnvelope(envelope)
     logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
@@ -124,13 +124,10 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   }
 
 
-
-// todo
-//  /**
-//    * Doing smth after catch envelope.
-//    */
-//  protected def afterReceivingEnvelope() = {}
-
+  /**
+    * Doing smth after catch envelope.
+    */
+  protected def afterReceivingEnvelope(): Unit
 
 
   /**
@@ -145,13 +142,5 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   }
 
   protected def prepareForNextCheckpoint(): Unit
-
-
-
-
-
-
-
-
 
 }

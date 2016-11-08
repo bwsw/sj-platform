@@ -65,7 +65,6 @@ class EsOutputHandler(outputStream: SjStream,
     if (esClient.doesIndexExist(index)) {
       val query = QueryBuilders.matchQuery("txn", transaction)
       val outputData = esClient.search(index, streamName, query)
-
       outputData.getHits.foreach { hit =>
         val id = hit.getId
         esClient.deleteDocumentByTypeAndId(index, streamName, id)

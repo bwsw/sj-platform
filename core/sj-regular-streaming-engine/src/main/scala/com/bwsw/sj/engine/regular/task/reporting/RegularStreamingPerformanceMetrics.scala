@@ -4,6 +4,7 @@ import java.util.Calendar
 
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
+import scala.collection.mutable
 
 /**
  * Class represents a set of metrics that characterize performance of a regular streaming module
@@ -19,8 +20,8 @@ class RegularStreamingPerformanceMetrics(manager: CommonTaskManager)
   private val inputStreamNames =  manager.inputs.map(_._1.name).toArray
   private val outputStreamNames = manager.instance.outputs
 
-  override protected val inputEnvelopesPerStream = createStorageForInputEnvelopes(inputStreamNames)
-  override protected val outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
+  override protected var inputEnvelopesPerStream = createStorageForInputEnvelopes(inputStreamNames)
+  override protected var outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
   /**
    * Increases time when there are no messages (envelopes)
    * @param idle How long waiting a new envelope was
@@ -84,8 +85,8 @@ class RegularStreamingPerformanceMetrics(manager: CommonTaskManager)
 
   override def clear() = {
     logger.debug(s"Reset variables for performance report for next reporting\n")
-    inputEnvelopesPerStream.clear()
-    outputEnvelopesPerStream.clear()
+    inputEnvelopesPerStream = mutable.Map(inputStreamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
+    outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
     totalIdleTime = 0L
   }
 }
