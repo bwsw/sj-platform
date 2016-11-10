@@ -28,7 +28,10 @@ class Executor(manager: ModuleEnvironmentManager) extends WindowedStreamingExecu
     var sum = state.get("sum").asInstanceOf[Int]
     val allWindows = windowRepository.getAll()
 
-    if (new Random().nextInt(100) < 5) throw new Exception("it happened")
+    if (new Random().nextInt(100) < 5) {
+      println("it happened")
+      throw new Exception("it happened")
+    }
     val begin = if (sum != 0) windowRepository.window - windowRepository.slidingInterval else 0
     val end = windowRepository.window
 

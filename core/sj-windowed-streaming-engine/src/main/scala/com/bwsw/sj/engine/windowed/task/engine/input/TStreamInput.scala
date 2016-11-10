@@ -8,6 +8,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
+import com.bwsw.tstreams.agents.consumer.{ConsumerTransaction, Consumer}
 import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
@@ -62,27 +63,40 @@ class TStreamInput(manager: CommonTaskManager,
   override def get() = {
     consumers.flatMap(x => {
       val consumer = x._2
-      val stream = ConnectionRepository.getStreamService.get(consumer.stream.getName).get
-      val txns = consumer.getPartitions().toSeq.flatMap(partition => {
-        val fromOffset = if (tstreamOffsetsStorage.isDefinedAt((consumer.name, partition))) tstreamOffsetsStorage((consumer.name, partition))
-        else consumer.getCurrentOffset(partition)
-        val toOffset = if (consumer.getLastTransaction(partition).isDefined) consumer.getLastTransaction(partition).get.getTransactionID() else fromOffset
-        consumer.getTransactionsFromTo(partition, fromOffset, toOffset)
-      })
-      txns.map(transaction => {
-        val tempTransaction = consumer.buildTransactionObject(transaction.getPartition(), transaction.getTransactionID(), transaction.getCount()).get //todo fix it
-        tstreamOffsetsStorage((x._2.name, tempTransaction.getPartition())) = tempTransaction.getTransactionID()
-        val envelope = new TStreamEnvelope()
-        envelope.stream = stream.name
-        envelope.partition = tempTransaction.getPartition()
-        envelope.id = tempTransaction.getTransactionID()
-        envelope.consumerName = x._2.name
-        envelope.data = tempTransaction.getAll()
-        envelope.tags = stream.tags
-
-        envelope
-      })
+      val transactions = getAvailableTransactions(consumer)
+      transactionsToEnvelopes(transactions, consumer)
     })
+  }
+
+  private def getAvailableTransactions(consumer: Consumer[Array[Byte]]) = {
+    consumer.getPartitions().toSeq.flatMap(partition => {
+      val fromOffset = getFromOffset(consumer, partition)
+      val lastTransaction = consumer.getLastTransaction(partition)
+      val toOffset = if (lastTransaction.isDefined) lastTransaction.get.getTransactionID() else fromOffset
+      consumer.getTransactionsFromTo(partition, fromOffset, toOffset)
+    })
+  }
+
+  private def transactionsToEnvelopes(transactions: Seq[ConsumerTransaction[Array[Byte]]], consumer: Consumer[Array[Byte]]) = {
+    val stream = ConnectionRepository.getStreamService.get(consumer.stream.getName).get
+    transactions.map((transaction: ConsumerTransaction[Array[Byte]]) => {
+      val tempTransaction = consumer.buildTransactionObject(transaction.getPartition(), transaction.getTransactionID(), transaction.getCount()).get //todo fix it
+      tstreamOffsetsStorage((consumer.name, tempTransaction.getPartition())) = tempTransaction.getTransactionID()
+      val envelope = new TStreamEnvelope()
+      envelope.stream = stream.name
+      envelope.partition = tempTransaction.getPartition()
+      envelope.id = tempTransaction.getTransactionID()
+      envelope.consumerName = consumer.name
+      envelope.data = tempTransaction.getAll()
+      envelope.tags = stream.tags
+
+      envelope
+    })
+  }
+
+  private def getFromOffset(consumer: Consumer[Array[Byte]], partition: Int) = {
+    if (tstreamOffsetsStorage.isDefinedAt((consumer.name, partition))) tstreamOffsetsStorage((consumer.name, partition))
+    else consumer.getCurrentOffset(partition)
   }
 
   private def addConsumersToCheckpointGroup() = {

@@ -38,6 +38,7 @@ object DataFactory {
   private val cassandraTestKeyspace = "test_keyspace_for_windowed_engine"
   private val testNamespace = "test"
   private val instanceName = "test-instance-for-windowed-engine"
+  private val kafkaInputName = "kafka-input-test"
   private var instanceInputs: Array[String] = Array()
   private var instanceOutputs: Array[String] = Array()
   private val task: Task = new Task()
@@ -47,7 +48,7 @@ object DataFactory {
   private val cassandraProvider = new Provider("cassandra-test-provider", "cassandra provider", Array(s"$cassandraHost:$cassandraPort"), "", "", ProviderLiterals.cassandraType)
   private val zookeeperProvider = new Provider("zookeeper-test-provider", "zookeeper provider", zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
   private val tstrqService = new TStreamService("tstream-test-service", ServiceLiterals.tstreamsType, "tstream test service",
-    cassandraProvider, cassandraTestKeyspace, cassandraProvider, cassandraTestKeyspace, zookeeperProvider, "unit")
+    cassandraProvider, cassandraTestKeyspace, cassandraProvider, cassandraTestKeyspace, zookeeperProvider, "window_engine")
   private val tstreamFactory = new TStreamsFactory()
   setTStreamFactoryProperties()
 
@@ -163,10 +164,10 @@ object DataFactory {
           createOutputTStream(sjStreamService, serviceManager, partitions, x.toString)
           instanceOutputs = instanceOutputs :+ s"test-output-tstream$x"
         })
-        instanceInputs = instanceInputs :+ "kafka-input1/split"
-        task.inputs.put(s"kafka-input1", Array(0, partitions - 1))
-        instanceInputs = instanceInputs :+ "kafka-input2/split"
-        task.inputs.put(s"kafka-input2", Array(0, partitions - 1))
+        instanceInputs = instanceInputs :+ s"${kafkaInputName}1/split"
+        task.inputs.put(s"${kafkaInputName}1", Array(0, partitions - 1))
+        instanceInputs = instanceInputs :+ s"${kafkaInputName}2/split"
+        task.inputs.put(s"${kafkaInputName}2", Array(0, partitions - 1))
       case "both" =>
         (1 to inputCount).foreach(x => {
           createInputTStream(sjStreamService, serviceManager, partitions, x.toString)
@@ -178,10 +179,10 @@ object DataFactory {
           createOutputTStream(sjStreamService, serviceManager, partitions, x.toString)
           instanceOutputs = instanceOutputs :+ s"test-output-tstream$x"
         })
-        instanceInputs = instanceInputs :+ "kafka-input1/split"
-        task.inputs.put(s"kafka-input1", Array(0, partitions - 1))
-        instanceInputs = instanceInputs :+ "kafka-input2/split"
-        task.inputs.put(s"kafka-input2", Array(0, partitions - 1))
+        instanceInputs = instanceInputs :+ s"${kafkaInputName}1/split"
+        task.inputs.put(s"${kafkaInputName}1", Array(0, partitions - 1))
+        instanceInputs = instanceInputs :+ s"${kafkaInputName}2/split"
+        task.inputs.put(s"${kafkaInputName}2", Array(0, partitions - 1))
       case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: 'tstream', 'kafka', 'both'")
     }
   }
@@ -262,10 +263,10 @@ object DataFactory {
     val kService = serviceManager.get("kafka-test-service").get.asInstanceOf[KafkaService]
     val replicationFactor = 1
 
-    val s1 = new KafkaSjStream("kafka-input1", "kafka-input1", partitions, kService, StreamLiterals.kafkaStreamType, Array("kafka input"), replicationFactor)
+    val s1 = new KafkaSjStream(s"${kafkaInputName}1", s"${kafkaInputName}1", partitions, kService, StreamLiterals.kafkaStreamType, Array("kafka input"), replicationFactor)
     sjStreamService.save(s1)
 
-    val s2 = new KafkaSjStream("kafka-input2", "kafka-input2", partitions, kService, StreamLiterals.kafkaStreamType, Array("kafka input"), replicationFactor)
+    val s2 = new KafkaSjStream(s"${kafkaInputName}2", s"${kafkaInputName}2", partitions, kService, StreamLiterals.kafkaStreamType, Array("kafka input"), replicationFactor)
     sjStreamService.save(s2)
 
     try {
@@ -285,8 +286,8 @@ object DataFactory {
   }
 
   private def deleteKafkaStream(streamService: GenericMongoService[SjStream]) = {
-    streamService.delete("kafka-input1")
-    streamService.delete("kafka-input2")
+    streamService.delete(s"${kafkaInputName}1")
+    streamService.delete(s"${kafkaInputName}2")
   }
 
 
@@ -384,7 +385,7 @@ object DataFactory {
       //createKafkaData(countTxns, countElements) //needed only once because of kafka doesn't allow delete topics
       case "both" =>
         (1 to count).foreach(x => createTstreamData(countTxns, countElements, streamService, x.toString))
-      createKafkaData(countTxns, countElements) //needed only one because of kafka doesn't allow delete topics
+      //createKafkaData(countTxns, countElements) //needed only one because of kafka doesn't allow delete topics
       case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: 'tstream', 'kafka', 'both'")
     }
   }
@@ -401,8 +402,8 @@ object DataFactory {
     (0 until countTxns) foreach { (x: Int) =>
       (0 until countElements) foreach { (y: Int) =>
         number += 1
-        val record = new ProducerRecord[Array[Byte], Array[Byte]]("kafka-input1", Array[Byte](100), objectSerializer.serialize(number.asInstanceOf[Object]))
-        val record2 = new ProducerRecord[Array[Byte], Array[Byte]]("kafka-input2", Array[Byte](100), objectSerializer.serialize(number.asInstanceOf[Object]))
+        val record = new ProducerRecord[Array[Byte], Array[Byte]](s"${kafkaInputName}1", Array[Byte](100), objectSerializer.serialize(number.asInstanceOf[Object]))
+        val record2 = new ProducerRecord[Array[Byte], Array[Byte]](s"${kafkaInputName}2", Array[Byte](100), objectSerializer.serialize(number.asInstanceOf[Object]))
         producer.send(record)
         producer.send(record2)
       }
@@ -443,7 +444,7 @@ object DataFactory {
     val consumer = new KafkaConsumer[Array[Byte], Array[Byte]](props)
 
     val topicPartitions = (0 until partitionNumber).flatMap(y => {
-      Array(new TopicPartition("kafka-input1", y), new TopicPartition("kafka-input2", y))
+      Array(new TopicPartition(s"${kafkaInputName}1", y), new TopicPartition(s"${kafkaInputName}2", y))
     }).asJava
 
     consumer.assign(topicPartitions)
