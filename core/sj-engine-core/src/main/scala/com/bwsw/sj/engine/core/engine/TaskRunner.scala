@@ -22,7 +22,7 @@ trait TaskRunner {
   protected val executorService = new ExecutorCompletionService[Unit](threadPool)
 
   private def createThreadPool(factoryName: String) = {
-    val countOfThreads = 4
+    val countOfThreads = 3
     val threadFactory = createThreadFactory(factoryName)
 
     Executors.newFixedThreadPool(countOfThreads, threadFactory)

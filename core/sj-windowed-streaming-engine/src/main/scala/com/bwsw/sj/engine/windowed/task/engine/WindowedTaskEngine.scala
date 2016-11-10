@@ -4,16 +4,16 @@ import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
 
 import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.common.utils.{EngineLiterals, SjStreamUtils}
-import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.state.{StatefulCommonModuleService, StatelessCommonModuleService}
 import com.bwsw.sj.engine.core.windowed.{WindowRepository, WindowedStreamingExecutor}
+import com.bwsw.sj.engine.windowed.task.engine.input.Input
 import com.bwsw.sj.engine.windowed.task.reporting.WindowedStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
 
 class WindowedTaskEngine(protected val manager: CommonTaskManager,
-                         taskInputService: TaskInputService[_ >: TStreamEnvelope with KafkaEnvelope <: Envelope],
+                         inputService: Input[_ >: TStreamEnvelope with KafkaEnvelope <: Envelope],
                          batchQueue: ArrayBlockingQueue[Batch],
                          performanceMetrics: WindowedStreamingPerformanceMetrics) extends Callable[Unit] {
 
@@ -25,7 +25,7 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
   private val moduleService = createWindowedModuleService()
   private val executor = moduleService.executor.asInstanceOf[WindowedStreamingExecutor]
   private val moduleTimer = moduleService.moduleTimer
-  private var countersOfBatches = 0
+  private var counterOfBatches = 0
   private val windowPerStream = createStorageOfWindows()
   private val windowRepository = new WindowRepository(instance, manager.inputs)
 
@@ -33,9 +33,9 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
     instance.stateManagement match {
       case EngineLiterals.noneStateMode =>
         logger.debug(s"Task: ${manager.taskName}. Start preparing of windowed module without state\n")
-        new StatelessCommonModuleService(manager, taskInputService.checkpointGroup, performanceMetrics)
+        new StatelessCommonModuleService(manager, inputService.checkpointGroup, performanceMetrics)
       case EngineLiterals.ramStateMode =>
-        new StatefulCommonModuleService(manager, taskInputService.checkpointGroup, performanceMetrics)
+        new StatefulCommonModuleService(manager, inputService.checkpointGroup, performanceMetrics)
     }
   }
 
@@ -92,7 +92,7 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
   }
 
   private def isItTimeToCollectWindow(): Boolean = {
-    countersOfBatches == instance.window
+    counterOfBatches == instance.window
   }
 
   private def collectWindow() = {
@@ -106,7 +106,7 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
 
   private def increaseBatchCounter() = {
     logger.debug(s"Increase count of batches\n")
-    countersOfBatches += 1
+    counterOfBatches += 1
   }
 
   private def slideWindow() = {
@@ -118,7 +118,7 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
   private def registerBatches() = {
     windowPerStream.foreach(x => {
       x._2.batches.slice(0, instance.slidingInterval)
-        .foreach(x => x.envelopes.foreach(x => taskInputService.registerEnvelope(x)))
+        .foreach(x => x.envelopes.foreach(x => inputService.registerEnvelope(x)))
     })
   }
 
@@ -128,7 +128,7 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
 
   private def resetCounter() = {
     logger.debug(s"Reset a counter of batches to 0\n")
-    countersOfBatches -= instance.slidingInterval
+    counterOfBatches -= instance.slidingInterval
   }
 
   /**
@@ -140,7 +140,7 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
     executor.onBeforeCheckpoint()
     logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
     moduleService.doCheckpoint()
-    taskInputService.doCheckpoint()
+    inputService.doCheckpoint()
     logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
     executor.onAfterCheckpoint()
   }

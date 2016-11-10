@@ -25,7 +25,6 @@ class PersistentBlockingQueue(path: String) {
 
   /**
    * Put a message in a queue using blocking
-   * @param message
    */
   def put(message: String) = {
     logger.info(s"Put a message: $message to queue\n")

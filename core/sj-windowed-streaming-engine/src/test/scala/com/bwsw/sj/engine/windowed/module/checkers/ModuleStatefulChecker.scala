@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.windowed.module.checkers
 
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.engine.core.entities.{KafkaEnvelope, TStreamEnvelope, Batch}
+import com.bwsw.sj.engine.core.entities.{Batch, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.windowed.module.DataFactory._
 import com.bwsw.sj.engine.windowed.utils.StateHelper
 

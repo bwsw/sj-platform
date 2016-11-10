@@ -19,7 +19,7 @@ object SjWindowedModuleSetup extends App {
   val batchCheckpointInterval = 2
   val window = 4
   val slidingInterval = 2
-  val _type = "tstream"
+  val _type = "both"
 
   val module = new File("./contrib/stubs/sj-stub-windowed-streaming/target/scala-2.11/sj-stub-windowed-streaming-1.0-SNAPSHOT.jar")
 
@@ -31,7 +31,7 @@ object SjWindowedModuleSetup extends App {
   createStreams(streamService, serviceManager, partitions, _type, inputCount, outputCount)
   createInstance(serviceManager, instanceService, batchCheckpointInterval, window, slidingInterval, stateManagement, stateFullCheckpoint)
 
-  createData(12, 4, streamService, _type, inputCount)
+  createData(12, 1, streamService, _type, inputCount)
   close()
   ConnectionRepository.close()
 
@@ -50,7 +50,7 @@ object SjWindowedModuleDestroy extends App {
   val providerService = ConnectionRepository.getProviderService
   val instanceService = ConnectionRepository.getInstanceService
   val fileStorage = ConnectionRepository.getFileStorage
-  val _type = "tstream"
+  val _type = "both"
 
   val module = new File("./contrib/stubs/sj-stub-windowed-streaming/target/scala-2.11/sj-stub-windowed-streaming-1.0-SNAPSHOT.jar")
 

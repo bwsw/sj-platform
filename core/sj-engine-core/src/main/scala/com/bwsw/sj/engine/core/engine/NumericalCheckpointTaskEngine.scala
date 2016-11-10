@@ -12,7 +12,7 @@ trait NumericalCheckpointTaskEngine {
   private val logger = LoggerFactory.getLogger(this.getClass)
   protected val manager: TaskManager
   private var countOfEnvelopes = 0
-  private lazy val checkpointInterval = manager.getCheckpointInterval()
+  private lazy val checkpointInterval = manager.instance.getCheckpointInterval()
   val isNotOnlyCustomCheckpoint = checkpointInterval > 0
 
   def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean = {

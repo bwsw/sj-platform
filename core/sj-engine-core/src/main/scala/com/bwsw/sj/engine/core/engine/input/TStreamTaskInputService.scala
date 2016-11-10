@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory
  *
  *
  *
- * @param manager Manager of environment of task of regular module
+ * @param manager Manager of environment of task
  * @param blockingQueue Blocking queue for keeping incoming envelopes that are serialized into a string,
  *                      which will be retrieved into a module
  * @author Kseniya Mikhaleva

@@ -31,4 +31,6 @@ class OutputInstance() extends Instance {
   }
 
   override def getInputsWithoutStreamMode() = this.inputs.map(clearStreamFromMode)
+
+  override def getCheckpointInterval() = this.checkpointInterval
 }

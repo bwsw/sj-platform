@@ -65,4 +65,6 @@ class Instance {
   }
 
   def getInputsWithoutStreamMode(): Array[String] = Array()
+
+  def getCheckpointInterval(): Long = ???
 }

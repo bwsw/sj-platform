@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 trait TimeCheckpointTaskEngine {
   private val logger = LoggerFactory.getLogger(this.getClass)
   protected val manager: TaskManager
-  private lazy val checkpointInterval = manager.getCheckpointInterval()
+  private lazy val checkpointInterval = manager.instance.getCheckpointInterval()
 
   private val checkpointTimer: Option[SjTimer] = createTimer()
   val isNotOnlyCustomCheckpoint = checkpointTimer.isDefined

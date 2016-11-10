@@ -38,4 +38,6 @@ class InputInstance extends Instance {
 
     protocolInstance
   }
+
+  override def getCheckpointInterval() = this.checkpointInterval
 }

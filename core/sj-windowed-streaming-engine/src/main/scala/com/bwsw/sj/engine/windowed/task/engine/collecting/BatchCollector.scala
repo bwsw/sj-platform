@@ -2,12 +2,11 @@ package com.bwsw.sj.engine.windowed.task.engine.collecting
 
 import java.util.concurrent.{ArrayBlockingQueue, Callable}
 
-import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.common.utils.SjStreamUtils
-import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
+import com.bwsw.sj.engine.windowed.task.engine.input.Input
 import com.bwsw.sj.engine.windowed.task.reporting.WindowedStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
 
@@ -23,7 +22,7 @@ import scala.collection.Map
  * @author Kseniya Mikhaleva
  */
 abstract class BatchCollector(protected val manager: CommonTaskManager,
-                              envelopeQueue: PersistentBlockingQueue,
+                              inputService: Input[_ >: TStreamEnvelope with KafkaEnvelope <: Envelope],
                               batchQueue: ArrayBlockingQueue[Batch],
                               performanceMetrics: WindowedStreamingPerformanceMetrics) extends Callable[Unit] {
 
@@ -32,7 +31,6 @@ abstract class BatchCollector(protected val manager: CommonTaskManager,
   protected val logger = LoggerFactory.getLogger(this.getClass)
   protected val instance = manager.instance.asInstanceOf[WindowedInstance]
   private val mainStream = SjStreamUtils.clearStreamFromMode(instance.mainStream)
-  private val envelopeSerializer = new JsonSerializer(true)
   private val batchPerStream: Map[String, Batch] = createStorageOfBatches()
 
   private def createStorageOfBatches() = {
@@ -41,21 +39,15 @@ abstract class BatchCollector(protected val manager: CommonTaskManager,
 
   override def call(): Unit = {
     while (true) {
-      val maybeEnvelope = envelopeQueue.get(instance.eventWaitTime)
+      inputService.get().foreach(envelope => {
+        registerEnvelope(envelope)
 
-      maybeEnvelope match {
-        case Some(serializedEnvelope) => {
-          val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope)
-          registerEnvelope(envelope)
-
-          if (mainStream == envelope.stream) {
-            afterReceivingEnvelope(envelope)
-          }
+        if (mainStream == envelope.stream) {
+          afterReceivingEnvelope(envelope)
         }
-        case None =>
-      }
 
-      if (isItTimeToCollectBatch()) collectBatch()
+        if (isItTimeToCollectBatch()) collectBatch()
+      })
     }
   }
 

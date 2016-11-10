@@ -62,7 +62,6 @@ class MongoFileStorage(mongoDB: MongoDB) extends FileStorage {
   }
 
   override def getStream(fileName: String): InputStream = {
-    logger.debug(s"Try to get a file: '$fileName' from a mongo storage: ${mongoDB.name}")
     val storageFile = gridFS.findOne(fileName)
     logger.debug(s"Check whether a mongo storage contains a file with name: '$fileName' or not")
     if (storageFile.isDefined) {

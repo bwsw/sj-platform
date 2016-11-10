@@ -1,6 +1,6 @@
 package com.bwsw.common.file.utils
 
-import java.io.{File, FileNotFoundException, InputStream}
+import java.io.{FileInputStream, File, FileNotFoundException, InputStream}
 import java.nio.file.FileAlreadyExistsException
 
 import org.apache.commons.io.FileUtils
@@ -38,7 +38,15 @@ class LocalStorage(pathToLocalStorage: String) extends FileStorage {
   }
 
   override def getStream(fileName: String): InputStream = {
-    ??? //todo
+    logger.debug(s"Try to get a file: '$fileName' from a local storage (path to local storage: $pathToLocalStorage)")
+    val storageFile = new File(pathToLocalStorage + fileName)
+    logger.debug(s"Check whether a local storage contains a file with name: '$fileName' or not")
+    if (storageFile.exists()) {
+      new FileInputStream(storageFile)
+    } else {
+      logger.error(s"File with name: '$fileName' doesn't exist in a local storage")
+      throw new FileNotFoundException(s"$fileName doesn't exist")
+    }
   }
 
   override def delete(fileName: String): Boolean = {

@@ -1,6 +1,7 @@
 package com.bwsw.sj.engine.core.managment
 
 import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.model.module.{RegularInstance, WindowedInstance}
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.environment.{EnvironmentManager, ModuleEnvironmentManager}
@@ -18,7 +19,7 @@ import scala.collection.mutable
 class CommonTaskManager() extends TaskManager {
 
   val inputs: mutable.Map[SjStream, Array[Int]] = getInputs(getExecutionPlan)
-  val outputProducers =  createOutputProducers()
+  val outputProducers = createOutputProducers()
 
   assert(numberOfAgentsPorts >=
     (inputs.count(x => x._1.streamType == StreamLiterals.tStreamType) + instance.outputs.length + 3),
@@ -59,5 +60,15 @@ class CommonTaskManager() extends TaskManager {
       converter,
       (0 until stream.partitions).toSet,
       offset)
+  }
+
+  private def getExecutionPlan() = {
+    instance match {
+      case regularInstance: RegularInstance =>
+        regularInstance.executionPlan
+      case windowedInstance: WindowedInstance =>
+        windowedInstance.executionPlan
+      case _ => throw new RuntimeException("CommonTaskManager can be used only for regular or windowed engine")
+    }
   }
 }

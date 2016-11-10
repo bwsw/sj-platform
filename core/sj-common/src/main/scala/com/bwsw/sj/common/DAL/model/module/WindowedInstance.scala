@@ -43,4 +43,6 @@ class WindowedInstance() extends Instance {
   }
 
   override def getInputsWithoutStreamMode() = (this.relatedStreams :+ this.mainStream).map(clearStreamFromMode)
+
+  override def getCheckpointInterval() = throw new RuntimeException("Windowed instance doesn't have a checkpoint interval")
 }

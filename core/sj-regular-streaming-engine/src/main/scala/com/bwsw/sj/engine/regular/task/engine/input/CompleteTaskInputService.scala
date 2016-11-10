@@ -1,7 +1,8 @@
-package com.bwsw.sj.engine.core.engine.input
+package com.bwsw.sj.engine.regular.task.engine.input
 
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
-import com.bwsw.sj.engine.core.entities.{TStreamEnvelope, Envelope, KafkaEnvelope}
+import com.bwsw.sj.engine.core.engine.input.{TStreamTaskInputService, TaskInputService}
+import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory

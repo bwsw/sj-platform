@@ -300,32 +300,6 @@ abstract class TaskManager() {
     currentPortNumber += 1
   }
 
-  def getCheckpointInterval() = { //todo переделать
-    instance match {
-      case inputInstance: InputInstance =>
-        inputInstance.checkpointInterval
-      case regularInstance: RegularInstance =>
-        regularInstance.checkpointInterval
-      case outputInstance: OutputInstance =>
-        outputInstance.checkpointInterval
-      case windowedInstance: WindowedInstance =>
-        throw new Exception("Windowed streaming engine doesn't have a checkpoint interval")
-    }
-  }
-
-  def getExecutionPlan() = { //todo переделать
-    instance match {
-      case inputInstance: InputInstance =>
-        throw new Exception("Input streaming engine doesn't have an execution plan")
-      case regularInstance: RegularInstance =>
-        regularInstance.executionPlan
-      case outputInstance: OutputInstance =>
-        outputInstance.executionPlan
-      case windowedInstance: WindowedInstance =>
-        windowedInstance.executionPlan
-    }
-  }
-
   /**
    * @return An instance of executor of module that has got an environment manager
    */
