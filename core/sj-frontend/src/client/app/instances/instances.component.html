@@ -269,8 +269,23 @@
 
               <fieldset *ngIf="new_instance.module['module-type'] === 'input-streaming'" class="form-group">
                 <label class="col-sm-3 form-control-label">Default eviction policy</label>
-                <input [(ngModel)]="new_instance['default-eviction-policy']" name="instanceDefaultEvictionPolicy"
-                       type="text" class="form-control col-sm-10">
+                <!--<input [(ngModel)]="new_instance['default-eviction-policy']" name="instanceDefaultEvictionPolicy"-->
+                       <!--type="text" class="form-control col-sm-10">-->
+                <select [(ngModel)]="new_instance['default-eviction-policy']" name="instanceDefaultEvictionPolicy"
+                        class="form-control form-type col-sm-10">
+                  <option>LRU</option>
+                  <option>LFU</option>
+                  <option>NONE</option>
+                </select>
+              </fieldset>
+
+              <fieldset *ngIf="new_instance.module['module-type'] === 'input-streaming'" class="form-group">
+                <label class="col-sm-3 form-control-label">Eviction policy</label>
+                <select [(ngModel)]="new_instance['eviction-policy']" name="instanceEvictionPolicy"
+                        class="form-control form-type col-sm-10">
+                  <option>fix-time</option>
+                  <option>expanded-time</option>
+                </select>
               </fieldset>
 
               <fieldset *ngIf="new_instance.module['module-type'] === 'input-streaming'" class="form-group">
