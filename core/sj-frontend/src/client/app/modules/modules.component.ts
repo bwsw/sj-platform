@@ -124,6 +124,7 @@ export class ModulesComponent implements OnInit {
   }
 
   public module_select(module: ModuleModel) {
+    this.current_module = module;
     this.get_module_specification(module);
   }
 
