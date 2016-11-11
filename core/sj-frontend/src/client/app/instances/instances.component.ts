@@ -223,7 +223,7 @@ export class InstancesComponent implements OnInit {
   }
 
   isSelected(instance: InstanceModel) {
-    return instance === this.current_instance;
+    return this.current_instance && instance.name === this.current_instance.name;
   }
 
   public start_instance(instance: InstanceModel) {

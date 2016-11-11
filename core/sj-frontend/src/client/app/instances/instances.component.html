@@ -269,8 +269,6 @@
 
               <fieldset *ngIf="new_instance.module['module-type'] === 'input-streaming'" class="form-group">
                 <label class="col-sm-3 form-control-label">Default eviction policy</label>
-                <!--<input [(ngModel)]="new_instance['default-eviction-policy']" name="instanceDefaultEvictionPolicy"-->
-                       <!--type="text" class="form-control col-sm-10">-->
                 <select [(ngModel)]="new_instance['default-eviction-policy']" name="instanceDefaultEvictionPolicy"
                         class="form-control form-type col-sm-10">
                   <option>LRU</option>
@@ -326,7 +324,7 @@
     <li *ngIf="!instanceList || (instanceList && instanceList.length === 0)">
       <span class="col-sm-12">No instances have been found.</span>
     </li>
-    <li class="list-group-item" (click)="instance_select(instance)"
+    <li class="list-group-item" [ngClass]="{selected:isSelected(instance)}" (click)="instance_select(instance)"
         *ngFor="let instance of instanceList | orderBy: 'name' | listFilter : term">
       <span class="instance-name">{{ instance.name }}</span>
       <i class="fa fa-play start-stop-icon"
