@@ -1,7 +1,7 @@
 <div class="streams-list">
   <h2>Streams list</h2>
 
-  <button type="button" class="btn create-provider" (click)="CreateStream.show()">+ Create stream</button>
+  <button type="button" class="btn create-entity" (click)="CreateStream.show()">+ Create stream</button>
 
   <sj-search-box (update)="term = $event"></sj-search-box>
 
@@ -15,11 +15,11 @@
           <h4 class="modal-title">Create Stream</h4>
         </div>
         <div class="modal-body">
-          <form (ngSubmit)="createStream(CreateStream)" class="form-create-provider">
+          <form #streamForm="ngForm" (ngSubmit)="createStream(CreateStream)" class="form-create-entity">
             <fieldset class="form-group">
-              <label class="col-sm-3 form-control-label ">Choose type</label>
+              <label class="col-sm-3 form-control-label required">Choose type</label>
               <select [(ngModel)]="new_stream['stream-type']" name="streamType"
-                      class="form-control form-type col-sm-10">
+                      required class="form-control form-type col-sm-10">
                 <option selected value="stream.t-stream">T-stream</option>
                 <!-- TODO Change values to match values in rest service-->
                 <option value="stream.kafka">Kafka</option>
@@ -27,8 +27,9 @@
               </select>
             </fieldset>
             <fieldset class="form-group">
-              <label class="col-sm-3 form-control-label">Name</label>
-              <input [(ngModel)]="new_stream.name" name="streamName" type="text" class="form-control col-sm-10">
+              <label class="col-sm-3 form-control-label required">Name</label>
+              <input [(ngModel)]="new_stream.name" name="streamName" type="text"
+                     required class="form-control col-sm-10">
             </fieldset>
             <fieldset class="form-group">
               <label class="col-sm-3 form-control-label">Description</label>
@@ -36,14 +37,14 @@
                         class="form-control form-type col-sm-10"></textarea>
             </fieldset>
             <fieldset *ngIf="new_stream['stream-type'] != 'elasticsearch-output'" class="form-group">
-              <label class="col-sm-3 form-control-label">Partitions</label>
+              <label class="col-sm-3 form-control-label required">Partitions</label>
               <input [(ngModel)]="new_stream.partitions" name="streamPartitions" type="number"
-                     class="form-control col-sm-10">
+                     required class="form-control col-sm-10">
             </fieldset>
-            <fieldset class="form-group">
-              <label class="col-sm-3 form-control-label">Service</label>
-              <select *ngIf="new_stream['stream-type']" [(ngModel)]="new_stream.service" name="streamService"
-                      class="form-control form-type col-sm-10">
+            <fieldset *ngIf="new_stream['stream-type']" class="form-group">
+              <label class="col-sm-3 form-control-label required">Service</label>
+              <select [(ngModel)]="new_stream.service" name="streamService"
+                      required class="form-control form-type col-sm-10">
                 <option *ngFor="let service of serviceList | serviceFilter : new_stream['stream-type'] "
                         value={{service.name}}>{{service.name}}
                 </option>
@@ -74,12 +75,12 @@
                      type="number" class="form-control col-sm-10">
             </fieldset>
             <fieldset *ngIf="new_stream['stream-type'] == 'stream.kafka'" class="form-group">
-              <label class="col-sm-3 form-control-label">Replication factor</label>
+              <label class="col-sm-3 form-control-label required">Replication factor</label>
               <input [(ngModel)]="new_stream['replication-factor']" name="streamReplicationFactor" type="text"
-                     class="form-control col-sm-10">
+                     required class="form-control col-sm-10">
             </fieldset>
             <fieldset class="form-actions">
-              <button type="submit" class="btn btn-primary form-submit">Create</button>
+              <button [disabled]="!streamForm.form.valid" type="submit" class="btn btn-primary form-submit">Create</button>
               <button type="button" class="btn btn-danger" (click)="CreateStream.hide()">Cancel</button>
             </fieldset>
           </form>
@@ -100,6 +101,9 @@
       <span class="stream-name">Name</span>
       <span class="stream-description">Description</span>
       <span class="stream-service-link">Service</span>
+    </li>
+    <li *ngIf="!streamList || (streamList && streamList.length === 0)">
+      <span class="col-sm-12">No streams have been found.</span>
     </li>
     <li class="list-group-item" [ngClass]="{selected:isSelected(stream)}" (click)="stream_select(stream)"
         *ngFor="let stream of streamList | orderBy: 'name' | listFilter : term ">
@@ -195,7 +199,7 @@
       <div class="modal-body" *ngIf="stream_to_delete">
         <p>Do you really want to delete stream " {{ stream_to_delete.name }} " ? This action can not be undone!</p>
         <fieldset class="form-actions">
-          <button type="button" class="btn btn-danger pull-left"
+          <button type="button" class="btn btn-danger pull-left0"
                   (click)="delete_stream(DeleteStream, stream_to_delete)">Delete
           </button>
           <button type="button" class="btn btn-primary " (click)="DeleteStream.hide()">Cancel</button>

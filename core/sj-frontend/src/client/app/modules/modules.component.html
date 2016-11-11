@@ -1,3 +1,5 @@
+<sj-spinner [isRunning]="showSpinner"></sj-spinner>
+
 <div class="modules-list">
   <h2>Modules list</h2>
 
@@ -10,7 +12,7 @@
     <i *ngIf="upload_in_progress" class="fa fa-spinner fa-spin" aria-hidden="true"></i>
     <input type="file" (change)="fileUpload($event)"> <!--[ng-file-select]="options" -->
   </label>
-  <!--<button type="button" class="btn upload-module create-provider">-->
+  <!--<button type="button" class="btn upload-module create-entity">-->
   <!--&lt;!&ndash;<i *ngIf="upload_in_progress" class="fa fa-spinner fa-spin" aria-hidden="true"></i>&ndash;&gt;-->
   <!--&lt;!&ndash;<span *ngIf="!upload_in_progress">+ Upload module</span>&ndash;&gt;-->
   <!--<div *ngIf="!upload_in_progress"><i class="fa fa-upload icon is-small"></i> Upload module</div>-->
@@ -32,6 +34,9 @@
       <span class="module-name">Name</span>
       <span class="module-type">Type</span>
       <span class="module-version">Version</span>
+    </li>
+    <li *ngIf="!moduleList || (moduleList && moduleList.length === 0)">
+      <span class="col-sm-12">No uploaded modules have been found.</span>
     </li>
     <li class="list-group-item" [ngClass]="{selected:isSelected(module)}" (click)="module_select(module)"
         *ngFor="let module of moduleList | orderBy: 'module-name' | listFilter : term">
@@ -58,17 +63,17 @@
         <h4 class="modal-title">Delete confirmation</h4>
       </div>
       <div class="modal-body" *ngIf="module_to_delete && (blockingInstances.length === 0)">
-        <p>Do you really want to delete module " {{ module_to_delete["module-name"] }} " ? This action can not be
+        <p>Do you really want to delete module "{{ module_to_delete["module-name"] }}"? This action can not be
           undone!</p>
         <fieldset class="form-actions">
-          <button type="button" class="btn btn-danger pull-left"
+          <button type="button" class="btn btn-danger pull-left0"
                   (click)="delete_module(DeleteModule, module_to_delete)">Delete
           </button>
           <button type="button" class="btn btn-primary " (click)="DeleteModule.hide()">Cancel</button>
         </fieldset>
       </div>
       <div class="modal-body" *ngIf="module_to_delete && (blockingInstances.length > 0)">
-        <p>Unable to delete module! Next instances using module " {{ module_to_delete['module-name'] }} "</p>
+        <p>Unable to delete module! Following instances are using the module: "{{ module_to_delete['module-name'] }}"</p>
         <ul>
           <li *ngFor="let instance of blockingInstances | orderBy: 'name' ">{{instance.name}}</li>
         </ul>

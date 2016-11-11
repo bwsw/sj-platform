@@ -155,3 +155,7 @@ object ConfigLiterals {
 object TransactionGeneratorLiterals {
   val scale: Int = 10000
 }
+
+object RestLiterals {
+  val tmpDirectory = "/tmp/"
+}

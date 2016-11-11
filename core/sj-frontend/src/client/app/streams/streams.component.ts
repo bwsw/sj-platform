@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
 import { ModalDirective } from 'ng2-bootstrap';
 
 import { StreamModel } from '../shared/models/stream.model';
@@ -22,11 +21,9 @@ export class StreamsComponent implements OnInit {
   public current_stream_service: ServiceModel;
   public stream_to_delete: StreamModel;
   public new_stream: StreamModel;
-  //streamForm: ControlGroup;
 
   constructor(private _streamsService: StreamsService,
-              private _servicesService: ServicesService,
-              private _fb: FormBuilder) {
+              private _servicesService: ServicesService) {
   }
 
   public ngOnInit() {
@@ -38,12 +35,6 @@ export class StreamsComponent implements OnInit {
       service: '',
       'instance-count': 0
     };
-    //this.streamForm = this.fb.group({
-    //  //firstName: ['', Validators.required],
-    //  //lastName: ['', Validators.required],
-    //  //email: ['', Validators.compose([Validators.required])],
-    //  //phone: ['', Validators.required],
-    //});
   }
 
   public getStreamList() {

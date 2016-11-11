@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, NgForm } from '@angular/forms';
+import { NgForm } from '@angular/forms';
 import { ModalDirective } from 'ng2-bootstrap';
 
 import { InstanceModel } from '../shared/models/instance.model';
@@ -27,6 +27,7 @@ export class InstancesComponent implements OnInit {
   public moduleList: ModuleModel[];
   public serviceList: ServiceModel[];
   public streamList: StreamModel[];
+  public streamTypesList: { [key: string]: string } = {};
   public current_instance: InstanceModel;
   public current_instance_info: InstanceModel;
   public current_instance_tasks: string[];
@@ -37,6 +38,7 @@ export class InstancesComponent implements OnInit {
   public instance_to_clone: InstanceModel;
   public instanceForm: NgForm;
   public showSpinner: boolean;
+  public startFromTimestampAcceptable: boolean = true;
 
   @ViewChild('instanceForm') currentForm: NgForm;
 
@@ -61,8 +63,7 @@ export class InstancesComponent implements OnInit {
   constructor(private _instancesService: InstancesService,
               private _modulesService: ModulesService,
               private _streamsService: StreamsService,
-              private _servicesService: ServicesService,
-              private _fb: FormBuilder) {
+              private _servicesService: ServicesService) {
   }
 
   public ngOnInit() {
@@ -78,19 +79,11 @@ export class InstancesComponent implements OnInit {
           //}
         },
         error => this.errorMessage = <any>error);
-    //if (this.serviceList.length > 0) {
-    //  this.form_ready = true;
-    //}
+
     setInterval(function () {
       this.getInstanceList();
     }.bind(this), 2000);
     this.new_instance = new InstanceModel();
-    // this.instanceForm = this._fb.group({
-    //   //firstName: ['', Validators.required],
-    //   //lastName: ['', Validators.required],
-    //   //email: ['', Validators.compose([Validators.required])],
-    //   //phone: ['', Validators.required],
-    // });
   }
 
   public getInstanceList() {
@@ -123,6 +116,9 @@ export class InstancesComponent implements OnInit {
       .subscribe(
         streamList => {
           this.streamList = streamList;
+          for (let stream of streamList) {
+            this.streamTypesList[stream.name] = stream['stream-type'];
+          }
         },
         error => this.errorMessage = <any>error);
   }
@@ -174,11 +170,11 @@ export class InstancesComponent implements OnInit {
           this.new_instance.module['module-type'] = instance['module-type'];
           this.new_instance.module['module-version'] = instance['module-version'];
           if (this.new_instance.module['module-type'] === 'regular-streaming') {
-            this.new_instance['input-type'] = [];
+            this.new_instance['inputs-types'] = [];
             this.new_instance.inputs.forEach(function (item: string, i: number) {
               let parsedInput = item.split('/');
               this.new_instance.inputs[i] = parsedInput[0];
-              this.new_instance['input-type'][i] = parsedInput[1];
+              this.new_instance['inputs-types'][i] = parsedInput[1];
             }.bind(this));
           }
           //this.current_instance_tasks = Object.keys(this.current_instance_info['execution-plan']['tasks']);
@@ -227,7 +223,7 @@ export class InstancesComponent implements OnInit {
   }
 
   isSelected(instance: InstanceModel) {
-    return instance === this.current_instance;
+    return this.current_instance && instance.name === this.current_instance.name;
   }
 
   public start_instance(instance: InstanceModel) {
@@ -250,7 +246,8 @@ export class InstancesComponent implements OnInit {
 
   public addInput() {
     this.new_instance.inputs.push('');
-    this.new_instance['input-type'].push('');
+    this.new_instance['inputs-types'].push('');
+    this.checkTimestampAcceptable();
   }
 
   public addOutput() {
@@ -259,11 +256,42 @@ export class InstancesComponent implements OnInit {
 
   public removeInput(i: number): void {
     this.new_instance.inputs.splice(i, 1);
-    this.new_instance['input-type'].splice(i, 1);
+    this.new_instance['inputs-types'].splice(i, 1);
+    this.checkTimestampAcceptable();
   }
 
   public removeOutput(i: number): void {
     this.new_instance.outputs.splice(i, 1);
+  }
+
+  public checkTimestampAcceptable(): void {
+    switch (this.new_instance.module['module-type']) {
+      case 'regular-streaming':
+      case 'windowed-streaming':
+        if (this.new_instance.inputs &&  this.new_instance.inputs.length > 0 && this.new_instance.inputs[0]) {
+          this.startFromTimestampAcceptable = true;
+          for (let inputName of this.new_instance.inputs) {
+            if (this.streamTypesList[inputName] !== 'stream.t-stream') {
+              this.startFromTimestampAcceptable = false;
+              break;
+            }
+          }
+        }
+        break;
+      case 'output-streaming':
+        this.startFromTimestampAcceptable = true;
+        break;
+      default:
+        console.error('start-from field is not provided for module-type '+this.new_instance.module['module-type']);
+        break;
+    }
+    if (!this.startFromTimestampAcceptable && this.new_instance['start-from'] === 'timestamp') {
+      this.new_instance['start-from'] = '';
+    }
+  }
+
+  public ifInstanceCanBeRemoved(): boolean {
+    return ['starting', 'started', 'stopping'].indexOf(this.instance_to_delete.status) === -1;
   }
 
   ngAfterViewChecked() {

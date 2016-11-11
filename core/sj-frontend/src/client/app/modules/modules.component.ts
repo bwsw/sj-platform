@@ -22,6 +22,7 @@ export class ModulesComponent implements OnInit {
   public current_module_specification: ModuleModel;
   public module_to_delete: ModuleModel;
   public upload_in_progress: boolean = false;
+  public showSpinner: boolean;
 
   constructor(private _modulesService: ModulesService,
               private _instancesService: InstancesService) {
@@ -87,12 +88,26 @@ export class ModulesComponent implements OnInit {
   }
 
   public download_module(module: ModuleModel) {
+    this.showSpinner = true;
     this._modulesService.downloadModule(module)
       .subscribe(
         data => {
-          window.open(window.URL.createObjectURL(data));
+          let a = document.createElement('a');
+          let innerUrl = window.URL.createObjectURL(data['blob']);
+          a.style.display = 'none';
+          a.href = innerUrl;
+          a.download = data['filename'] ? data['filename'] : 'module.jar';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          // Clean the blob (with timeout (firefox fix))
+          setTimeout(()=>window.URL.revokeObjectURL(innerUrl), 1000);
+          this.showSpinner = false;
         },
-        error => this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+        error => {
+          this.showSpinner = false;
+          this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 });
+        });
   }
 
   public fileUpload(event: any) {
