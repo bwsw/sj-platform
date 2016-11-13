@@ -3,6 +3,7 @@ import { join } from 'path';
 import * as runSequence from 'run-sequence';
 
 import Config from '../../config';
+import { changeFileManager } from './code_change_tools';
 import { notifyLiveReload } from '../../utils';
 
 const plugins = <any>gulpLoadPlugins();
@@ -17,8 +18,21 @@ export function watch(taskname: string) {
       join(Config.APP_SRC,'**')
     ].concat(Config.TEMP_FILES.map((p) => { return '!'+p; }));
 
-    plugins.watch(paths, (e:any) =>
-      runSequence(taskname, () => notifyLiveReload(e))
-    );
+    plugins.watch(paths, (e: any) => {
+      changeFileManager.addFile(e.path);
+
+
+      // Resolves issue in IntelliJ and other IDEs/text editors which
+      // save multiple files at once.
+      // https://github.com/mgechev/angular-seed/issues/1615 for more details.
+      setTimeout(() => {
+
+        runSequence(taskname, () => {
+          changeFileManager.clear();
+          notifyLiveReload(e);
+        });
+
+      }, 100);
+    });
   };
 }

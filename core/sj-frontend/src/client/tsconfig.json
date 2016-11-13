@@ -24,9 +24,14 @@
       "express",
       "jasmine",
       "node",
-      "protractor",
-      "systemjs"
+      "systemjs",
+      "jquery"
     ]
   },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src"
+  ],
   "compileOnSave": false
 }

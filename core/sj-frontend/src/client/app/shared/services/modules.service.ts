@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {Http, Response, Headers, RequestOptions, ResponseContentType} from '@angular/http';
+import { Http, Response, Headers, RequestOptions, ResponseContentType } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 
 import { ModuleModel } from '../models/module.model';
@@ -40,7 +40,7 @@ export class ModulesService {
         let contDispos = res.headers.get('content-disposition');
         return {
           blob: res.blob(),
-          filename: contDispos.substring(contDispos.indexOf('filename=')+9, contDispos.length)
+          filename: contDispos.substring(contDispos.indexOf('filename=') + 9, contDispos.length)
         };
       })
       .catch(this.handleError);
