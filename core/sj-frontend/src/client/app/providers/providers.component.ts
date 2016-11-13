@@ -10,8 +10,7 @@ import { ServicesService } from '../shared/services/services.service';
 @Component({
   moduleId: module.id,
   selector: 'sj-providers',
-  templateUrl: 'providers.component.html',
-  styleUrls: ['providers.component.css']
+  templateUrl: 'providers.component.html'
 })
 export class ProvidersComponent implements OnInit, AfterViewChecked {
   @Input() public provider: ProviderModel;

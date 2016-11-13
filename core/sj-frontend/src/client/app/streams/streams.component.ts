@@ -9,8 +9,7 @@ import { StreamsService } from '../shared/services/streams.service';
 @Component({
   moduleId: module.id,
   selector: 'sj-streams',
-  templateUrl: 'streams.component.html',
-  styleUrls: ['streams.component.css']
+  templateUrl: 'streams.component.html'
 })
 export class StreamsComponent implements OnInit {
   public errorMessage: string;

@@ -1,25 +1,121 @@
-<div class="providers-list">
-  <h2>Providers list</h2>
+<div class="row">
+  <!-- Content -->
+  <div class="col col-xs-8">
+    <div class="card">
+      <div class="card-block">
+        <!-- Card title -->
+        <div class="row">
+          <div class="col col-xs-6"><h4 class="card-title">Providers list</h4></div>
+          <div class="col col-xs-6">
+            <button type="button"
+                    class="btn btn-primary pull-right ml-1 mb-1"
+                    (click)="CreateProvider.show()"><i class="fa fa-plus mr-1"></i>Create Provider
+            </button>
 
-  <button type="button" class="btn create-entity" (click)="CreateProvider.show()">+ Create provider</button>
-
-  <sj-search-box (update)="term = $event"></sj-search-box>
-
-  <div bsModal #CreateProvider="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" aria-label="Close" (click)="CreateProvider.hide()">
-            <span aria-hidden="true">&times;</span>
-          </button>
-          <h4 class="modal-title">Create Provider</h4>
+            <sj-search-box class="pull-right"
+                           (update)="term = $event"></sj-search-box>
+          </div>
         </div>
-        <div class="modal-body">
-          <form #providerForm="ngForm" *ngIf="new_provider" (ngSubmit)="createProvider(CreateProvider)" class="form-create-entity">
-            <fieldset class="form-group">
-              <label class="col-sm-3 form-control-label required">Choose type</label>
-              <select [(ngModel)]="new_provider.type" name="providerType" required
-                      class="form-control form-type col-sm-10">
+
+        <!-- Alerts -->
+        <div class="main-alerts mt-1">
+          <alert class="custom-alert"
+                 *ngFor="let alert of alerts; let i = index"
+                 [type]="alert.type"
+                 dismissible="true"
+                 [dismissOnTimeout]="alert.timeout"
+                 (close)="closeAlert(i)">
+            {{ alert.msg }}
+          </alert>
+        </div>
+
+        <!-- Providers list -->
+        <table class="table table-hover table-sm mt-1 mb-0">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th class="actions-column">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="!providerList || (providerList && providerList.length === 0)">
+              <td colspan="20" class="text-center">No providers have been found.</td>
+            </tr>
+
+            <tr *ngFor="let provider of providerList | orderBy: 'name' | listFilter : term "
+                [ngClass]="{ 'table-info': isSelected(provider) }"
+                (click)="provider_select(provider)">
+              <td>{{ provider.name }}</td>
+              <td>{{ provider.description }}</td>
+              <td class="actions-column">
+                <button type="button"
+                        class="btn btn-sm btn-secondary"
+                        title="Delete provider"
+                        (click)="delete_provider_confirm(DeleteProvider, provider)">
+                  <i class="fa fa-trash"></i>
+                </button>
+                <button type="button"
+                        class="btn btn-sm btn-secondary"
+                        title="Test connection"
+                        (click)="testConnection(provider)">
+                  <i class="fa fa-refresh"
+                     [ngClass]="{ 'fa-spin': isConnecting(provider) }"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed info -->
+  <div class="col col-xs-4">
+    <div class="card">
+      <div class="card-header">Detailed information about node</div>
+      <div class="card-block">
+        <ul *ngIf="current_provider">
+          <li>Name: {{current_provider.name}}</li>
+          <li>Type: {{current_provider.type}}</li>
+          <li>Description: {{current_provider.description}}</li>
+          <li>Hosts:
+            <ul>
+              <li *ngFor="let host of current_provider.hosts">{{host}}</li>
+            </ul>
+          </li>
+          <li *ngIf="current_provider.login">Login: {{current_provider.login}}</li>
+          <li *ngIf="current_provider.password">Password: {{current_provider.password}}</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div bsModal #CreateProvider="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" (click)="CreateProvider.hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Create Provider</h4>
+      </div>
+
+      <div class="modal-body">
+        <form #providerForm="ngForm"
+              *ngIf="new_provider"
+              (ngSubmit)="createProvider(CreateProvider)">
+
+          <!-- Type -->
+          <fieldset class="form-group row">
+            <label class="col-form-label col-sm-2 required">Choose type</label>
+            <div class="col-sm-10">
+              <select class="form-control"
+                      [(ngModel)]="new_provider.type"
+                      name="providerType"
+                      required>
                 <!-- [(ngModel)]="form_providerType" #item (change)="onChange(item.value)"  -->
                 <option value="zookeeper">Zookeeper</option>
                 <option value="kafka">Kafka</option>
@@ -28,85 +124,86 @@
                 <option value="cassandra">Cassandra</option>
                 <option value="ES">ElasticSearch</option>
               </select>
-            </fieldset>
+            </div>
+          </fieldset>
 
-            <fieldset class="form-group">
-              <label class="col-sm-3 form-control-label required">Name</label>
+          <!-- Name -->
+          <fieldset class="form-group row">
+            <label class="col-form-label col-sm-2 required">Name</label>
+            <div class="col-sm-10">
               <input required [(ngModel)]="new_provider.name" name="providerName" type="text"
-                     class="form-control col-sm-10" placeholder="Enter provider name">
-            </fieldset>
-            <fieldset class="form-group">
-              <label class="col-sm-3 form-control-label">Description</label>
+                     class="form-control" placeholder="Enter provider name">
+            </div>
+          </fieldset>
+
+          <!-- Description -->
+          <fieldset class="form-group row">
+            <label class="col-form-label col-sm-2">Description</label>
+            <div class="col-sm-10">
               <textarea [(ngModel)]="new_provider.description" name="providerDescription"
-                        class="form-control form-type col-sm-10" placeholder="Enter provider description"></textarea>
-            </fieldset>
-            <fieldset class="form-group">
-              <label class="col-sm-3 form-control-label required">Hosts</label>
+                        class="form-control" placeholder="Enter provider description"></textarea>
+            </div>
+          </fieldset>
+
+
+          <!-- Hosts -->
+          <fieldset class="form-group row">
+            <label class="col-sm-2 col-form-label required">Hosts</label>
+            <div class="col-sm-10">
               <div *ngFor='let host of new_provider.hosts; let i = index; trackBy:customTrackBy'
-                   class="provider-host with-item-removal">
+                   class="input-group mb-1">
                 <!--TODO: fix validation changing (make value-input -> ngModel (see bug http://stackoverflow.com/questions/33346677/angular2-ngmodel-against-ngfor-variables)-->
                 <input required
                        validHostPort
                        [value]="new_provider.hosts[i]" (input)="new_provider.hosts[i] = $event.target.value"
                        name="providerHosts"
                        type="text" class="form-control " placeholder="IPv4:port">
-                <div class="remove-item fa fa-remove" *ngIf="i!==0" (click)="delete_host(i)"></div>
+                <span class="input-group-btn" *ngIf="i!==0">
+                  <button type="button"
+                          class="btn btn-secondary"
+                          (click)="delete_host(i)">
+                    <i class="fa fa-remove"></i>
+                  </button>
+                </span>
                 <!--<div *ngIf="formErrors.providerHosts && providerHosts.touched" class="alert alert-warning">-->
-                  <!--{{ formErrors.providerHosts }}-->
+                <!--{{ formErrors.providerHosts }}-->
                 <!--</div>-->
-
               </div>
-              <button type="button" (click)="addHost()" class="btn btn-link form-add-item">+ Add</button>
 
-            </fieldset>
-            <fieldset class="form-group">
-              <label class="col-sm-3 form-control-label">Login</label>
-              <input [(ngModel)]="new_provider.login" name="providerLogin" type="text" class="form-control col-sm-10"
+              <button type="button" (click)="addHost()" class="btn btn-sm btn-secondary">+ Add Host</button>
+            </div>
+          </fieldset>
+
+          <!-- Login -->
+          <fieldset class="form-group row">
+            <label class="col-sm-2 col-form-label">Login</label>
+            <div class="col-sm-10">
+              <input [(ngModel)]="new_provider.login" name="providerLogin" type="text" class="form-control"
                      placeholder="Enter provider login">
-            </fieldset>
-            <fieldset class="form-group">
-              <label class="col-sm-3 form-control-label">Password</label>
+            </div>
+          </fieldset>
+
+          <!-- Password -->
+          <fieldset class="form-group row">
+            <label class="col-sm-2 col-form-label">Password</label>
+            <div class="col-sm-10">
               <input [(ngModel)]="new_provider.password" name="providerPassword" type="text"
-                     class="form-control col-sm-10" placeholder="Enter provider password">
-            </fieldset>
-            <fieldset class="form-actions">
-              <button [disabled]="!providerForm.form.valid" type="submit" class="btn btn-primary form-submit">Create</button>
-              <button type="button" class="btn btn-danger" (click)="CreateProvider.hide()">Cancel</button>
-            </fieldset>
-          </form>
-        </div>
+                     class="form-control" placeholder="Enter provider password">
+            </div>
+          </fieldset>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="CreateProvider.hide()">Cancel</button>
+        <button [disabled]="!(new_provider && providerForm?.form.valid)" type="submit" class="btn btn-primary"
+                (click)="createProvider(CreateProvider)">Create
+        </button>
       </div>
     </div>
   </div>
-
-  <div class="main-alerts">
-    <alert class="custom-alert" *ngFor="let alert of alerts; let i = index" [type]="alert.type" dismissible="true"
-           [dismissOnTimeout]="alert.timeout" (close)="closeAlert(i)">
-      {{ alert.msg }}
-    </alert>
-  </div>
-
-  <ul>
-    <li class="list-group-item">
-      <span class="provider-name">Name</span>
-      <span class="provider-description">Description</span>
-    </li>
-    <li *ngIf="!providerList || (providerList && providerList.length === 0)">
-      <span class="col-sm-12">No providers have been found.</span>
-    </li>
-    <li class="list-group-item" [ngClass]="{selected:isSelected(provider)}" (click)="provider_select(provider)"
-        *ngFor="let provider of providerList | orderBy: 'name' | listFilter : term ">
-      <span class="provider-name">{{ provider.name }}</span>
-      <span class="provider-description">{{ provider.description }}</span>
-      <i class="fa fa-trash  pull-right" (click)="delete_provider_confirm(DeleteProvider, provider)"
-         aria-hidden="true"></i>
-      <i class="fa fa-file-text pull-right detail-info" aria-hidden="true" title="Show detailed info"></i>
-      <i class="fa fa-refresh  pull-right" [ngClass]="{'fa-spin':isConnecting(provider)}"
-         (click)="testConnection(provider)" aria-hidden="true" title="Test connection"></i>
-
-    </li>
-  </ul>
 </div>
+
 
 <div bsModal #DeleteProvider="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-md">
@@ -117,40 +214,30 @@
         </button>
         <h4 class="modal-title">Delete confirmation</h4>
       </div>
+
       <div class="modal-body" *ngIf="provider_to_delete && (blockingServices.length === 0)">
-        <p>Do you really want to delete provider " {{ provider_to_delete.name }} " ? This action can not be undone!</p>
-        <fieldset class="form-actions">
-          <button type="button" class="btn btn-danger pull-left0"
-                  (click)="delete_provider(DeleteProvider, provider_to_delete)">Delete
-          </button>
-          <button type="button" class="btn btn-primary " (click)="DeleteProvider.hide()">Cancel</button>
-        </fieldset>
+        <p>Do you really want to delete provider "{{ provider_to_delete.name }}" ? This action can not be undone!</p>
       </div>
+
       <div class="modal-body" *ngIf="provider_to_delete && (blockingServices.length > 0)">
-        <p>Unable to delete provider! Next services using provider " {{ provider_to_delete.name }} "</p>
+        <p>Unable to delete provider! Next services using provider "{{ provider_to_delete.name }}"</p>
         <ul>
           <li *ngFor="let service of blockingServices | orderBy: 'name' ">{{service.name}}</li>
         </ul>
-        <fieldset class="form-actions">
-          <button type="button" class="btn btn-primary " (click)="DeleteProvider.hide()">Ok</button>
-        </fieldset>
+      </div>
+
+      <div class="modal-footer">
+        <template [ngIf]="provider_to_delete && (blockingServices.length === 0)">
+          <button type="button" class="btn btn-secondary" (click)="DeleteProvider.hide()">Cancel</button>
+          <button type="button" class="btn btn-danger"
+                  (click)="delete_provider(DeleteProvider, provider_to_delete)">Delete
+          </button>
+        </template>
+
+        <template [ngIf]="provider_to_delete && (blockingServices.length > 0)">
+          <button type="button" class="btn btn-primary" (click)="DeleteProvider.hide()">OK</button>
+        </template>
       </div>
     </div>
   </div>
-</div>
-
-<div class="right-detail">
-  <p>Detailed information about node</p>
-  <ul *ngIf="current_provider">
-    <li>Name: {{current_provider.name}}</li>
-    <li>Type: {{current_provider.type}}</li>
-    <li>Description: {{current_provider.description}}</li>
-    <li>Hosts:
-      <ul>
-        <li *ngFor="let host of current_provider.hosts">{{host}}</li>
-      </ul>
-    </li>
-    <li *ngIf="current_provider.login">Login: {{current_provider.login}}</li>
-    <li *ngIf="current_provider.password">Password: {{current_provider.password}}</li>
-  </ul>
 </div>

@@ -1,10 +1,11 @@
-import { Routes } from '@angular/router';
+import { AppRoutes } from '../shared/models/routes.model';
 import { InstancesComponent } from './instances.component';
 
-export const InstancesRoutes: Routes = [{
+export const InstancesRoutes: AppRoutes = [{
   path: 'instances',
+  breadcrumbIgnore: true,
   children: [
-    { path: '', component: InstancesComponent }
+    { path: '', component: InstancesComponent, breadcrumb: 'Instances' }
   ]
 }];
 

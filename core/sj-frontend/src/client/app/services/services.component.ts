@@ -11,8 +11,7 @@ import { ProvidersService } from '../shared/services/providers.service';
 @Component({
   moduleId: module.id,
   selector: 'sj-services',
-  templateUrl: 'services.component.html',
-  styleUrls: ['services.component.css']
+  templateUrl: 'services.component.html'
 })
 export class ServicesComponent implements OnInit {
   public errorMessage: string;

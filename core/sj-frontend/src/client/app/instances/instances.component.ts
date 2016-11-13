@@ -14,8 +14,7 @@ import { ServicesService } from '../shared/services/services.service';
 @Component({
   moduleId: module.id,
   selector: 'sj-instances',
-  styleUrls: ['instances.component.css'],
-  templateUrl: 'instances.component.html',
+  templateUrl: 'instances.component.html'
 })
 export class InstancesComponent implements OnInit, AfterViewChecked {
 

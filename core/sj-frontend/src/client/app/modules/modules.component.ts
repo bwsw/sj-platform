@@ -9,8 +9,7 @@ import { ModalDirective } from 'ng2-bootstrap';
 @Component({
   moduleId: module.id,
   selector: 'sj-modules',
-  templateUrl: 'modules.component.html',
-  styleUrls: ['modules.component.css']
+  templateUrl: 'modules.component.html'
 })
 export class ModulesComponent implements OnInit {
   public errorMessage: string;
