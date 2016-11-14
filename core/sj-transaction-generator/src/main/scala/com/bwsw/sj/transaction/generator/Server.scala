@@ -17,10 +17,9 @@ object Server extends App {
   val host = System.getenv("HOST")
   val port = System.getenv("PORT0").toInt
   val prefix = System.getenv("PREFIX")
-  val address = host  + ":" + port
 
   try {
-    val server = new TcpServer(zkServers, prefix, address)
+    val server = new TcpServer(zkServers, prefix, host, port)
 
     server.launch()
   } catch {

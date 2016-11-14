@@ -1,7 +1,7 @@
 package com.bwsw.common.tstream
 
 import com.bwsw.common.client.{TcpClient, TcpClientOptions}
-import com.bwsw.sj.common.utils.TransactionGeneratorLiterals
+import com.bwsw.sj.common.utils.GeneratorLiterals
 import com.bwsw.tstreams.generator.ITransactionGenerator
 import org.slf4j.LoggerFactory
 
@@ -19,7 +19,7 @@ class NetworkTransactionGenerator(zkServers: Array[String],
                                   retryCount: Int) extends ITransactionGenerator {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val scale = TransactionGeneratorLiterals.scale
+  private val scale = GeneratorLiterals.scale
   private val options = new TcpClientOptions()
     .setZkServers(zkServers)
     .setPrefix(prefix)

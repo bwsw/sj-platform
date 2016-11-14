@@ -85,6 +85,11 @@ object GeneratorLiterals {
   final val globalType = "global"
   final val perStreamType = "per-stream"
   val types = Set(globalType, localType, perStreamType)
+
+  val scale: Int = 10000
+  val masterDirectory = "/master"
+  val globalDirectory = "/global"
+  val messageForServer = "get"
 }
 
 object ServiceLiterals {
@@ -152,10 +157,7 @@ object ConfigLiterals {
   val geoIpAsNumv6 = s"$systemDomain.geo-ip-as-num-v6"
 }
 
-object TransactionGeneratorLiterals {
-  val scale: Int = 10000
-}
-
 object RestLiterals {
   val tmpDirectory = "/tmp/"
+  val masterNode = "/rest/instance/lock"
 }

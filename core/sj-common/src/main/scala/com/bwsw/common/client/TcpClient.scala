@@ -2,6 +2,8 @@ package com.bwsw.common.client
 
 import java.util.concurrent.ArrayBlockingQueue
 
+import com.bwsw.common.LeaderLatch
+import com.bwsw.sj.common.utils.GeneratorLiterals
 import io.netty.bootstrap.Bootstrap
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandler.Sharable
@@ -10,12 +12,6 @@ import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.handler.codec.string.StringEncoder
-import org.apache.curator.framework.CuratorFrameworkFactory
-import org.apache.curator.framework.recipes.leader.LeaderLatch
-import org.apache.curator.retry.ExponentialBackoffRetry
-import org.apache.zookeeper.KeeperException
-
-import scala.annotation.tailrec
 
 /**
  * Simple tcp client for retrieving transaction ID
@@ -24,43 +20,21 @@ import scala.annotation.tailrec
  */
 
 class TcpClient(options: TcpClientOptions) {
-  private val messageForServer = "get"
   private val out = new ArrayBlockingQueue[ByteBuf](1)
   private var channel: Channel = null
   private val workerGroup = new NioEventLoopGroup()
   private val bootstrap = new Bootstrap()
-  private val curatorClient = createCuratorClient()
   private val (host, port) = getMasterAddress()
 
   createChannel()
 
   private def getMasterAddress() = {
-    val leader = new LeaderLatch(curatorClient, options.prefix + "/master", "client")
-    var leaderInfo = getLeaderId(leader)
-    while(leaderInfo == "") {
-      leaderInfo = getLeaderId(leader)
-      Thread.sleep(50)
-    }
+    val leader = new LeaderLatch(Set(options.zkServers), options.prefix + GeneratorLiterals.masterDirectory)
+    val leaderInfo = leader.getLeaderInfo()
     val address = leaderInfo.split(":")
+    leader.close()
+
     (address(0), address(1).toInt)
-  }
-
-  @tailrec
-  private def getLeaderId(leaderLatch: LeaderLatch): String = {
-    try {
-      leaderLatch.getLeader.getId
-    } catch {
-      case e: KeeperException =>
-        Thread.sleep(50)
-        getLeaderId(leaderLatch)
-    }
-  }
-
-  private def createCuratorClient() = {
-    val curatorClient = CuratorFrameworkFactory.newClient(options.zkServers, new ExponentialBackoffRetry(1000, 3))
-    curatorClient.start()
-    curatorClient.getZookeeperClient.blockUntilConnectedOrTimedOut()
-    curatorClient
   }
 
   private def createChannel() = {
@@ -72,7 +46,7 @@ class TcpClient(options: TcpClientOptions) {
   }
 
   def get() = {
-    channel.writeAndFlush(messageForServer)
+    channel.writeAndFlush(GeneratorLiterals.messageForServer)
     val serializedId = out.take()
     serializedId.readLong()
   }

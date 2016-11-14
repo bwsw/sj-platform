@@ -1,17 +1,13 @@
 package com.bwsw.sj.crud.rest.instance
 
-import java.net.{InetSocketAddress, URI}
-import java.util
+import java.net.URI
 
+import com.bwsw.common.LeaderLatch
 import com.bwsw.sj.common.DAL.ConnectionConstants
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{TStreamSjStream, ZKService}
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.entities.MarathonRequest
 import com.bwsw.sj.common.utils._
-import com.twitter.common.quantity.{Amount, Time}
-import com.twitter.common.zookeeper.DistributedLock.LockingException
-import com.twitter.common.zookeeper.{DistributedLockImpl, ZooKeeperClient}
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.slf4j.LoggerFactory
 
@@ -51,44 +47,33 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
     val marathonInfo = getMarathonInfo()
     if (isStatusOK(marathonInfo)) {
       val marathonMaster = getMarathonMaster(marathonInfo)
-      val distributedLock = becomeMaster(marathonMaster)
+      val leaderLatch = createLeaderLatch(marathonMaster)
       startGenerators()
       tryToStartFramework(marathonMaster)
-      distributedLock.unlock()
+      leaderLatch.close()
     } else {
       updateInstanceStatus(instance, failed)
     }
   }
 
-  private def becomeMaster(marathonMaster: String) = {
-    val zooKeeperServers = getZooKeeperServers(marathonMaster)
-    val zkSessionTimeout = ConfigSettingsUtils.getZkSessionTimeout()
-    val zkClient = new ZooKeeperClient(Amount.of(zkSessionTimeout, Time.MILLISECONDS), zooKeeperServers)
-    var isMaster = false
-    val zkLockNode = new URI(s"/rest/instance/lock").normalize()
-    val distributedLock = new DistributedLockImpl(zkClient, zkLockNode.toString)
-    while (!isMaster) {
-      try {
-        distributedLock.lock()
-        isMaster = true
-      } catch {
-        case e: LockingException => Thread.sleep(delay)
-      }
-    }
+  private def createLeaderLatch(marathonMaster: String) = {
+    val zkServers = getZooKeeperServers(marathonMaster)
+    val leader = new LeaderLatch(Set(zkServers), RestLiterals.masterNode)
+    leader.start()
+    leader.takeLeadership(delay)
 
-    distributedLock
+    leader
   }
 
-  private def getZooKeeperServers(mesosMaster: String) = {
-    val zooKeeperServers = new util.ArrayList[InetSocketAddress]()
-    val restHost = System.getenv("ZOOKEEPER_HOST")
-    val restPort = System.getenv("ZOOKEEPER_PORT")
-    if (restHost != null && restPort != null) {
-      zooKeeperServers.add(new InetSocketAddress(restHost, restPort.toInt))
+  private def getZooKeeperServers(marathonMaster: String) = {
+    var zooKeeperServers = ""
+    val zkHost = System.getenv("ZOOKEEPER_HOST")
+    val zkPort = System.getenv("ZOOKEEPER_PORT")
+    if (zkHost != null && zkPort != null) {
+      zooKeeperServers = zkHost + ":" + zkPort
     } else {
-      val mesosMasterUrl = new URI(mesosMaster)
-      val address = new InetSocketAddress(mesosMasterUrl.getHost, mesosMasterUrl.getPort)
-      zooKeeperServers.add(address)
+      val marathonMasterUrl = new URI(marathonMaster)
+      zooKeeperServers = marathonMasterUrl.getHost + ":" + marathonMasterUrl.getPort
     }
 
     zooKeeperServers
@@ -180,7 +165,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
     if (generatorType == GeneratorLiterals.perStreamType) {
       prefix += s"/$name"
     } else {
-      prefix += "/global"
+      prefix += GeneratorLiterals.globalDirectory
     }
 
     prefix

@@ -25,7 +25,6 @@ object Dependencies {
 
   lazy val sjRestDependencies = Def.setting(Seq(
     "com.typesafe.akka" % "akka-http-experimental_2.11" % "2.4.11",
-    "org.apache.curator" % "curator-recipes" % "2.11.0",
     ("org.everit.json" % "org.everit.json.schema" % "1.2.0")
       .exclude("commons-logging", "commons-logging"),
     ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
@@ -55,10 +54,6 @@ object Dependencies {
     ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
       .exclude("commons-logging", "commons-logging")
 
-  ))
-
-  lazy val sjTransactionGenerator = Def.setting(Seq(
-    "org.apache.curator" % "curator-recipes" % "2.11.0"
   ))
 
   lazy val sjSflowProcessDependencies = Def.setting(Seq(

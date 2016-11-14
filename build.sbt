@@ -145,9 +145,6 @@ lazy val framework = Project(id = "sj-mesos-framework",
 lazy val transactionGenerator = Project(id = "sj-transaction-generator",
   base = file("./core/sj-transaction-generator"))
   .settings(commonSettings: _*)
-  .settings(
-    libraryDependencies ++= Dependencies.sjTransactionGenerator.value
-  )
   .dependsOn(common)
 
 lazy val stubInput = Project(id = "sj-stub-input-streaming",
