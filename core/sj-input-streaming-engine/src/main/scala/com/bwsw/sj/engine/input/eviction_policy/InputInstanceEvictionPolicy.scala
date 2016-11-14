@@ -24,7 +24,6 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
   private val config = createHazelcastConfig()
   private val hazelcastInstance = Hazelcast.newHazelcastInstance(config)
   protected val uniqueEnvelopes = getUniqueEnvelopes
-  private val hosts: Array[String] = System.getenv("INSTANCE_HOSTS").split(",")
 
   /**
    * Checks whether a specific key is duplicate or not
@@ -47,13 +46,12 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
   private def createHazelcastConfig() = {
     logger.debug(s"Create a Hazelcast map configuration is named '$hazelcastMapName'\n")
     val config = new XmlConfigBuilder().build()
+    val networkConfig = createNetworkConfig()
     val evictionPolicy = createEvictionPolicy()
     val maxSizeConfig = createMaxSizeConfig()
 
-    val networkConfig = createNetworkConfig()
     config.setNetworkConfig(networkConfig)
-
-    config.getMapConfig(hazelcastMapName)
+      .getMapConfig(hazelcastMapName)
       .setTimeToLiveSeconds(instance.lookupHistory)
       .setEvictionPolicy(evictionPolicy)
       .setMaxSizeConfig(maxSizeConfig)
@@ -72,16 +70,23 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
     }
   }
 
-  private def createNetworkConfig():NetworkConfig = {
+  private def createNetworkConfig(): NetworkConfig = {
     val networkConfig = new NetworkConfig()
+    networkConfig.setJoin(createJoinConfig())
+  }
+
+  private def createJoinConfig() = {
     val joinConfig = new JoinConfig()
     joinConfig.setMulticastConfig(new MulticastConfig().setEnabled(false))
-    val ips = hosts.toList.asJava
-    val tcpIpConfig = new TcpIpConfig()
-    tcpIpConfig.setMembers(ips).setEnabled(true)
-    joinConfig.setTcpIpConfig(tcpIpConfig)
-    networkConfig.setJoin(joinConfig)
+    joinConfig.setTcpIpConfig(createTcpIpConfig())
   }
+
+  private def createTcpIpConfig() = {
+    val tcpIpConfig = new TcpIpConfig()
+    val hosts = System.getenv("INSTANCE_HOSTS").split(",").toList.asJava
+    tcpIpConfig.setMembers(hosts).setEnabled(true)
+  }
+
 
   /**
    * Creates a config that defines a max size of Hazelcast map
