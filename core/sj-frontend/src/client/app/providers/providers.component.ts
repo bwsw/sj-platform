@@ -1,5 +1,5 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { FormGroup, FormBuilder } from '@angular/forms';
+import { Component, OnInit, Input, Output, EventEmitter, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
 import { ModalDirective } from 'ng2-bootstrap';
 
 import { ProviderModel } from '../shared/models/provider.model';
@@ -23,15 +23,23 @@ export class ProvidersComponent implements OnInit {
   public current_provider: ProviderModel;
   public provider_to_delete: ProviderModel;
   public new_provider: ProviderModel;
-  public errorMessage: string;
   public current_connectors: [String] = [''];
-  public provider_hosts = ['']; //TODO Refactor
+  public providerForm: NgForm;
 
-  public form: FormGroup;
+  @ViewChild('providerForm') currentForm: NgForm;
+
+  public formErrors: { [key: string]: string } = {
+    'providerHosts': '',
+  };
+
+  public validationMessages: { [key: string]: { [key: string]: string } } = {
+    'providerHosts': {
+      'validHostPort': 'The format of one of hosts is invalid',
+    },
+  };
 
   constructor(private _providersService: ProvidersService,
-              private _servicesService: ServicesService,
-              private _fb: FormBuilder) {
+              private _servicesService: ServicesService) {
   }
 
 
@@ -39,12 +47,6 @@ export class ProvidersComponent implements OnInit {
     this.getProviderList();
     this.getServiceList();
     this.new_provider = new ProviderModel();
-    this.form = this._fb.group({
-      //firstName: ['', Validators.required],
-      //lastName: ['', Validators.required],
-      //email: ['', Validators.compose([Validators.required])],
-      //phone: ['', Validators.required],
-    });
   }
 
   public getProviderList() {
@@ -170,6 +172,36 @@ export class ProvidersComponent implements OnInit {
 
   public addHost() {
     this.new_provider.hosts.push('');
+  }
+
+  ngAfterViewChecked() {
+    this.formChanged();
+  }
+
+  formChanged() {
+    if (this.currentForm === this.providerForm) { return; }
+    this.providerForm = this.currentForm;
+    if (this.providerForm) {
+      this.providerForm.valueChanges
+        .subscribe(data => this.onValueChanged(data));
+    }
+  }
+
+  onValueChanged(data?: any) {
+    if (!this.providerForm) { return; }
+    const form = this.providerForm.form;
+
+    for (const field in this.formErrors) {
+      // clear previous error message (if any)
+      this.formErrors[field] = '';
+      const control = form.get(field);
+      if (control && control.dirty && !control.valid) {
+        const messages = this.validationMessages[field];
+        for (const key in control.errors) {
+          this.formErrors[field] += messages[key] + ' ';
+        }
+      }
+    }
   }
 
   /* @hack: for nested ngFor and ngModel */

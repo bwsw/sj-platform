@@ -54,49 +54,6 @@ h2 {
   color: white;
 }
 
-.right-inner-addon {
-  position: relative;
-  float: right;
-  margin-right: 15px;
-}
-
-.right-inner-addon input {
-  padding-right: 30px;
-}
-
-.right-inner-addon i {
-  position: absolute;
-  right: 0;
-  padding: 10px 12px;
-  pointer-events: none;
-}
-
-.kafkaStyle {
-  width: 50% !important;
-}
-
-.kafka-zk-prefix {
-  width: 20% !important;
-}
-
-.provider-host .kafka-zk-prefix {
-  margin-top: 5px;
-}
-
-.provider-host:nth-of-type(1) .kafka-zk-prefix {
-  margin-top: 0;
-}
-
-.provider-host.kafkaStyle input {
-  margin-left: 25%;
-  margin-top: 5px;
-}
-
-.provider-host:nth-of-type(1) input {
-  margin-left: 0;
-  margin-top: 0;
-}
-
 .detail-info {
   margin-right: 10px;
 }
@@ -106,14 +63,6 @@ h2 {
   width: 70% !important;
 }
 
-.form-add-host {
-  margin-left: 25%;
-  margin-top: 5px;
-  width: 50px;
-  padding: 0;
-  color: #07c;
-}
-
 .form-submit {
   width: 35%;
 }
@@ -121,15 +70,6 @@ h2 {
 .form-actions {
   text-align: right;
   margin-right: 5%;
-}
-
-.form-create-provider .form-control {
-  width: 70%;
-}
-
-.form-create-provider label.required:after {
-  content: ' *';
-  color: #ff706f;
 }
 
 .modal-title {
@@ -154,16 +94,6 @@ h2 {
 
 .right-detail p {
   text-align: center;
-}
-
-.provider-host input:nth-of-type(1) {
-  margin-left: 25% !important;
-  margin-top: 5px !important;
-}
-
-.provider-host:nth-of-type(1) input:nth-of-type(1) {
-  margin-left: 0 !important;
-  margin-top: 0 !important;
 }
 
 .main-alerts {

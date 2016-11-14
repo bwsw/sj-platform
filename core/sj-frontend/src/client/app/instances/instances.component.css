@@ -72,77 +72,26 @@ input {
   border: 1px solid grey;
 }
 
-.start-stop-icon {
+.start-stop-icon:not(.fa-spin) {
   margin-right: 5px;
+}
+
+.start-stop-icon.fa-spin {
+  margin-left: -3px;
+  margin-right: 4px;
 }
 
 h2 {
   text-align: center;
 }
 
-.create-provider {
-  float: right;
-  color: white;
-}
-
-.right-inner-addon {
-  position: relative;
-  float: right;
-  margin-right: 15px;
-}
-
-.right-inner-addon input {
-  padding-right: 30px;
-}
-
-.right-inner-addon i {
-  position: absolute;
-  right: 0;
-  padding: 10px 12px;
-  pointer-events: none;
-}
-
-.kafkaStyle {
-  width: 50% !important;
-}
-
-.kafka-zk-prefix {
-  width: 20% !important;
-}
-
-.provider-host .kafka-zk-prefix {
-  margin-top: 5px;
-}
-
-.provider-host:nth-of-type(1) .kafka-zk-prefix {
-  margin-top: 0;
-}
-
-.provider-host.kafkaStyle input {
-  margin-left: 25%;
-  margin-top: 5px;
-}
-
-.provider-host:nth-of-type(1) input {
-  margin-left: 0;
-  margin-top: 0;
-}
-
 .detail-info {
-  margin-left: 10px !important;
+  margin-left: 10px;
 }
 
 .form-type,
 .form-desc {
   width: 70% !important;
-}
-
-.form-add-host {
-  margin-left: 25%;
-  margin-top: 5px;
-  width: 50px;
-  padding: 0;
-  color: #07c;
 }
 
 .form-submit {
@@ -152,15 +101,6 @@ h2 {
 .form-actions {
   text-align: right;
   margin-right: 5%;
-}
-
-.form-create-provider .form-control {
-  width: 70%;
-}
-
-.form-create-provider label.required::after {
-  content: ' *';
-  color: #ff706f;
 }
 
 .modal-title {
