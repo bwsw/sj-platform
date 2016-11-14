@@ -58,7 +58,7 @@ class FrameworkScheduler extends Scheduler {
   /**
    * Execute when task change status.
    * @param driver scheduler driver
-   * @param status received status from masterdocker
+   * @param status received status from master
    */
   def statusUpdate(driver: SchedulerDriver, status: TaskStatus) {
     val serializer = new JsonSerializer()

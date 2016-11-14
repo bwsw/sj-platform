@@ -2,7 +2,9 @@ package com.bwsw.sj.engine.input.eviction_policy
 
 import com.bwsw.sj.common.DAL.model.module.InputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.hazelcast.config.{EvictionPolicy, MaxSizeConfig, XmlConfigBuilder}
+
+import scala.collection.JavaConverters._
+import com.hazelcast.config._
 import com.hazelcast.core.Hazelcast
 import org.slf4j.LoggerFactory
 
@@ -47,6 +49,9 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
     val evictionPolicy = createEvictionPolicy()
     val maxSizeConfig = createMaxSizeConfig()
 
+    val networkConfig = createNetworkConfig()
+    config.setNetworkConfig(networkConfig)
+
     config.getMapConfig(hazelcastMapName)
       .setTimeToLiveSeconds(instance.lookupHistory)
       .setEvictionPolicy(evictionPolicy)
@@ -64,6 +69,19 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
       case EngineLiterals.lfuDefaultEvictionPolicy => EvictionPolicy.LFU
       case _ => EvictionPolicy.NONE
     }
+  }
+
+  private def createNetworkConfig():NetworkConfig = {
+    val networkConfig = new NetworkConfig()
+    val joinConfig = new JoinConfig()
+
+    joinConfig.setMulticastConfig(new MulticastConfig().setEnabled(false))
+
+    val ips = List("192.168.1.225", "192.168.1.192").asJava
+    val tcpIpConfig = new TcpIpConfig()
+    tcpIpConfig.setMembers(ips).setEnabled(true)
+    joinConfig.setTcpIpConfig(tcpIpConfig)
+    networkConfig.setJoin(joinConfig)
   }
 
   /**
