@@ -37,11 +37,6 @@ h2 {
   text-align: center;
 }
 
-.create-provider {
-  float: right;
-  color: white;
-}
-
 .right-inner-addon {
   position: relative;
   float: right;
@@ -94,14 +89,6 @@ h2 {
   width: 70% !important;
 }
 
-.form-add-host {
-  margin-left: 25%;
-  margin-top: 5px;
-  width: 50px;
-  padding: 0;
-  color: #07c;
-}
-
 .form-submit {
   width: 35%;
 }
@@ -109,15 +96,6 @@ h2 {
 .form-actions {
   text-align: right;
   margin-right: 5%;
-}
-
-.form-create-provider .form-control {
-  width: 70%;
-}
-
-.form-create-provider label.required:after {
-  content: ' *';
-  color: #ff706f;
 }
 
 .modal-title {

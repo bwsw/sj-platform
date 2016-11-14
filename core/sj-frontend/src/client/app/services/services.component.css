@@ -45,11 +45,6 @@ h2 {
   text-align: center;
 }
 
-.create-provider {
-  float: right;
-  color: white;
-}
-
 .btn-lookup {
   height: 25px;
   display: inline-block;
@@ -80,33 +75,9 @@ h2 {
   padding-top: 60px;
 }
 
-.right-inner-addon {
-  position: relative;
-  float: right;
-  margin-right: 15px;
-}
-
-.right-inner-addon input {
-  padding-right: 30px;
-}
-
-.right-inner-addon i {
-  position: absolute;
-  right: 0px;
-  padding: 10px 12px;
-  pointer-events: none;
-}
-
 .form-type,
 .form-desc {
   width: 70% !important;
-}
-
-.form-add-host {
-  margin-left: 23%;
-  margin-top: 5px;
-  width: 10%;
-  color: #07c;
 }
 
 .form-submit {
@@ -116,10 +87,6 @@ h2 {
 .form-actions {
   text-align: right;
   margin-right: 5%;
-}
-
-.form-create-provider .form-control {
-  width: 70%;
 }
 
 .modal-title {

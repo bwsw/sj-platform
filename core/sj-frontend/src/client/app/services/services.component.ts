@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder } from '@angular/forms';
 import { ModalDirective } from 'ng2-bootstrap';
 
 import { ServiceModel } from '../shared/models/service.model';
@@ -26,12 +25,10 @@ export class ServicesComponent implements OnInit {
   public current_service_provider: ProviderModel;
   public service_to_delete: ServiceModel;
   public new_service: ServiceModel;
-  public serviceForm: FormGroup;
 
   constructor(private _servicesService: ServicesService,
               private _providersService: ProvidersService,
-              private _streamsService: StreamsService,
-              private _fb: FormBuilder) {
+              private _streamsService: StreamsService) {
   }
 
   public ngOnInit() {
@@ -39,12 +36,6 @@ export class ServicesComponent implements OnInit {
     this.getProviderList();
     this.getStreamList();
     this.new_service = new ServiceModel();
-    this.serviceForm = this._fb.group({
-      //firstName: ['', Validators.required],
-      //lastName: ['', Validators.required],
-      //email: ['', Validators.compose([Validators.required])],
-      //phone: ['', Validators.required],
-    });
   }
 
   public getServiceList() {

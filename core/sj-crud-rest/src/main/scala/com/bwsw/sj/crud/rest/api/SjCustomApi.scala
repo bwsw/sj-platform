@@ -1,18 +1,18 @@
 package com.bwsw.sj.crud.rest.api
 
 import java.io.{File, FileOutputStream}
+import java.nio.file.Paths
 
-import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model.Multipart.FormData.BodyPart
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Disposition`}
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.{FileIO, Source}
 import akka.util.ByteString
 import com.bwsw.sj.common.DAL.model.ConfigurationSetting
 import com.bwsw.sj.common.rest.entities._
-import com.bwsw.sj.common.utils.ConfigLiterals
+import com.bwsw.sj.common.utils.{RestLiterals, ConfigLiterals}
 import com.bwsw.sj.common.utils.ConfigurationSettingsUtils._
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
@@ -30,6 +30,7 @@ import scala.concurrent.duration._
  * @author Kseniya Tomskikh
  */
 trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
+  private var previousFileName: Option[String] = None
 
   private def fileUpload(filename: String, part: BodyPart) = {
     val fileOutput = new FileOutputStream(filename)
@@ -46,6 +47,13 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
     fileOutput.close()
   }
 
+  private def deletePreviousFile() = {
+    if (previousFileName.isDefined) {
+      val file = new File(previousFileName.get)
+      if (file.exists()) file.delete()
+    }
+  }
+
   val customApi = {
     pathPrefix("custom") {
       pathPrefix("jars") {
@@ -53,10 +61,13 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
           pathEndOrSingleSlash {
             get {
               if (storage.exists(name)) {
-                val jarFile = storage.get(name, s"tmp/rest/$name")
+                deletePreviousFile()
+                val jarFile = storage.get(name, RestLiterals.tmpDirectory + name)
+                previousFileName = Some(jarFile.getAbsolutePath)
+                val source = FileIO.fromPath(Paths.get(jarFile.getAbsolutePath))
                 complete(HttpResponse(
                   headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> name))),
-                  entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
+                  entity = HttpEntity.Chunked.fromData(MediaTypes.`application/java-archive`, source)
                 ))
               } else {
                 val response = NotFoundRestResponse(Map("message" -> createMessage("rest.custom.jars.file.notfound", name)))
@@ -75,10 +86,13 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
                 val filename = fileMetadatas.head.filename
                 get {
                   if (storage.exists(filename)) {
-                    val jarFile = storage.get(filename, s"tmp/$filename")
+                    deletePreviousFile()
+                    val jarFile = storage.get(filename, RestLiterals.tmpDirectory + filename)
+                    previousFileName = Some(jarFile.getAbsolutePath)
+                    val source = FileIO.fromPath(Paths.get(jarFile.getAbsolutePath))
                     complete(HttpResponse(
                       headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> filename))),
-                      entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
+                      entity = HttpEntity.Chunked.fromData(MediaTypes.`application/java-archive`, source)
                     ))
                   } else {
                     val response = NotFoundRestResponse(Map("message" ->
@@ -88,7 +102,7 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
                 } ~
                   delete {
                     var response: RestResponse = NotFoundRestResponse(Map("message" ->
-                     createMessage("rest.custom.jars.file.notfound", name)))
+                      createMessage("rest.custom.jars.file.notfound", name)))
                     if (storage.delete(filename)) {
                       configService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, name + "-" + version))
                       response = OkRestResponse(
@@ -104,30 +118,34 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
             post {
               uploadedFile("jar") {
                 case (metadata: FileInfo, file: File) =>
-                  var response: RestResponse = ConflictRestResponse(Map("message" ->
-                    createMessage("rest.custom.jars.file.exists", metadata.fileName)))
+                  try {
+                    var response: RestResponse = ConflictRestResponse(Map("message" ->
+                      createMessage("rest.custom.jars.file.exists", metadata.fileName)))
 
-                  if (!storage.exists(metadata.fileName)) {
-                    if (checkSpecification(file)) {
-                      val specification = getSpecification(file)
-                      val uploadingFile = new File(metadata.fileName)
-                      FileUtils.copyFile(file, uploadingFile)
-                      storage.put(uploadingFile, metadata.fileName, specification, "custom")
-                      val name = specification("name").toString + "-" + specification("version").toString
-                      val customJarConfigElement = new ConfigurationSetting(
-                        createConfigurationSettingName(ConfigLiterals.systemDomain, name),
-                        metadata.fileName,
-                        ConfigLiterals.systemDomain
-                      )
-                      configService.save(customJarConfigElement)
-                      response = OkRestResponse(Map("message" ->
-                        createMessage("rest.custom.jars.file.uploaded", metadata.fileName)))
-                    } else {
-                      response = BadRequestRestResponse(Map("message" -> getMessage("rest.errors.invalid.specification")))
+                    if (!storage.exists(metadata.fileName)) {
+                      if (checkSpecification(file)) {
+                        val specification = getSpecification(file)
+                        val uploadingFile = new File(metadata.fileName)
+                        FileUtils.copyFile(file, uploadingFile)
+                        storage.put(uploadingFile, metadata.fileName, specification, "custom")
+                        val name = specification("name").toString + "-" + specification("version").toString
+                        val customJarConfigElement = new ConfigurationSetting(
+                          createConfigurationSettingName(ConfigLiterals.systemDomain, name),
+                          metadata.fileName,
+                          ConfigLiterals.systemDomain
+                        )
+                        configService.save(customJarConfigElement)
+                        response = OkRestResponse(Map("message" ->
+                          createMessage("rest.custom.jars.file.uploaded", metadata.fileName)))
+                      } else {
+                        response = BadRequestRestResponse(Map("message" -> getMessage("rest.errors.invalid.specification")))
+                      }
                     }
-                  }
 
-                  complete(restResponseToHttpResponse(response))
+                    complete(restResponseToHttpResponse(response))
+                  } finally {
+                    file.delete()
+                  }
               }
             } ~
               get {
@@ -148,42 +166,42 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
           pathEndOrSingleSlash {
             post {
               entity(as[Multipart.FormData]) { (entity: Multipart.FormData) =>
-                val parts: Source[BodyPart, Any] = entity.parts
-                var filename = ""
-                var description = ""
-                val partsResult = parts.runForeach { (part: BodyPart) =>
-                  if (part.name.equals("file")) {
-                    filename = part.filename.get
-                    fileUpload(filename, part)
-                    logger.debug(s"File $filename is uploaded")
-                  } else if (part.name.equals("description")) {
-                    val bytes = part.entity.dataBytes
+                  val parts: Source[BodyPart, Any] = entity.parts
+                  var filename = ""
+                  var description = ""
+                  val partsResult = parts.runForeach { (part: BodyPart) =>
+                    if (part.name.equals("file")) {
+                      filename = part.filename.get
+                      fileUpload(filename, part)
+                      logger.debug(s"File $filename is uploaded")
+                    } else if (part.name.equals("description")) {
+                      val bytes = part.entity.dataBytes
 
-                    def writeContent(array: Array[Byte], byteString: ByteString): Array[Byte] = {
-                      val byteArray: Array[Byte] = byteString.toArray
-                      description = new String(byteArray)
-                      array ++ byteArray
+                      def writeContent(array: Array[Byte], byteString: ByteString): Array[Byte] = {
+                        val byteArray: Array[Byte] = byteString.toArray
+                        description = new String(byteArray)
+                        array ++ byteArray
+                      }
+
+                      val future = bytes.runFold(Array[Byte]())(writeContent)
+                      Await.result(future, 30.seconds)
                     }
-
-                    val future = bytes.runFold(Array[Byte]())(writeContent)
-                    Await.result(future, 30.seconds)
                   }
-                }
-                Await.result(partsResult, 30.seconds)
+                  Await.result(partsResult, 30.seconds)
 
-                var response: RestResponse = ConflictRestResponse(Map("message" ->
-                  createMessage("rest.custom.files.file.exists", filename)))
+                  var response: RestResponse = ConflictRestResponse(Map("message" ->
+                    createMessage("rest.custom.files.file.exists", filename)))
 
-                if (!storage.exists(filename)) {
-                  val uploadingFile = new File(filename)
-                  val spec = Map("description" -> description)
-                  storage.put(uploadingFile, filename, spec, "custom-file")
-                  uploadingFile.delete()
+                  if (!storage.exists(filename)) {
+                    val uploadingFile = new File(filename)
+                    val spec = Map("description" -> description)
+                    storage.put(uploadingFile, filename, spec, "custom-file")
+                    uploadingFile.delete()
 
-                  response = OkRestResponse(Map("message" -> createMessage("rest.custom.files.file.uploaded", filename)))
-                }
+                    response = OkRestResponse(Map("message" -> createMessage("rest.custom.files.file.uploaded", filename)))
+                  }
 
-                complete(restResponseToHttpResponse(response))
+                  complete(restResponseToHttpResponse(response))
               }
             } ~
               get {
@@ -200,29 +218,31 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
                 complete(restResponseToHttpResponse(response))
               }
           } ~
-            pathPrefix(Segment) { (name: String) =>
+            pathPrefix(Segment) { (filename: String) =>
               pathEndOrSingleSlash {
                 get {
-                  if (storage.exists(name)) {
-                    val file = storage.get(name, s"tmp/rest/$name")
-
+                  if (storage.exists(filename)) {
+                    deletePreviousFile()
+                    val file = storage.get(filename, RestLiterals.tmpDirectory + filename)
+                    previousFileName = Some(file.getAbsolutePath)
+                    val source = FileIO.fromPath(Paths.get(file.getAbsolutePath))
                     complete(HttpResponse(
-                      headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> name))),
-                      entity = HttpEntity.Chunked.fromData(`application/x-www-form-urlencoded`, Source.file(file))
+                      headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> filename))),
+                      entity = HttpEntity.Chunked.fromData(ContentTypes.`application/octet-stream`, source)
                     ))
                   } else {
                     val response: RestResponse = NotFoundRestResponse(Map("message" ->
-                      createMessage("rest.custom.files.file.notfound", name)))
+                      createMessage("rest.custom.files.file.notfound", filename)))
 
                     complete(restResponseToHttpResponse(response))
                   }
                 } ~
                   delete {
-                    var response : RestResponse = NotFoundRestResponse(Map("message" ->
-                      createMessage("rest.custom.files.file.notfound", name)))
+                    var response: RestResponse = NotFoundRestResponse(Map("message" ->
+                      createMessage("rest.custom.files.file.notfound", filename)))
 
-                    if (storage.delete(name)) {
-                      response = OkRestResponse(Map("message" -> createMessage("rest.custom.files.file.deleted", name)))
+                    if (storage.delete(filename)) {
+                      response = OkRestResponse(Map("message" -> createMessage("rest.custom.files.file.deleted", filename)))
                     }
 
                     complete(restResponseToHttpResponse(response))

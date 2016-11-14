@@ -3,7 +3,7 @@
 <div class="instances-list">
   <h2>Instances list</h2>
 
-  <button type="button" class="btn create-provider" (click)="CreateInstance.show()">+ Create instance</button>
+  <button type="button" class="btn create-entity" (click)="CreateInstance.show()">+ Create instance</button>
 
   <sj-search-box (update)="term = $event"></sj-search-box>
 
@@ -11,7 +11,7 @@
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-          <button type="button" class="close" aria-label="Close" (click)="CreateInstance.hide()">
+          <button type="button" class="close" aria-label="Close" (click)="CreateInstance.hide();">
             <span aria-hidden="true">&times;</span>
           </button>
           <h4 class="modal-title">Create instance</h4>
@@ -22,10 +22,10 @@
             <input [(ngModel)]="cloneInstance" type="checkbox" class="form-control checkbox clone-checkbox">
           </fieldset>
 
-          <form #instanceForm="ngForm" *ngIf="form_ready" (ngSubmit)="createInstance(CreateInstance)" class="form-create-provider">
+          <form #instanceForm="ngForm" *ngIf="form_ready" (ngSubmit)="createInstance(CreateInstance)" class="form-create-entity">
 
             <fieldset *ngIf="cloneInstance" class="form-group">
-              <label class="col-sm-3 form-control-label required-label">Choose instance</label>
+              <label class="col-sm-3 form-control-label required">Choose instance</label>
               <select [(ngModel)]="instance_to_clone" name="instanceToClone"
                       (change)="createByClone($event.target.selectedIndex)" required
                       class="form-control form-type col-sm-10">
@@ -34,7 +34,7 @@
             </fieldset>
 
             <fieldset *ngIf="!cloneInstance" class="form-group">
-              <label class="col-sm-3 form-control-label required-label">Choose module</label>
+              <label class="col-sm-3 form-control-label required">Choose module</label>
               <select [(ngModel)]="new_instance.module" name="instanceModule" required
                       class="form-control form-type col-sm-10">
                 <option *ngFor="let module of moduleList" [ngValue]="module">{{module["module-name"]}}
@@ -44,7 +44,7 @@
             </fieldset>
 
             <fieldset *ngIf="cloneInstance && new_instance.module" class="form-group">
-              <label class="col-sm-3 form-control-label required-label">Module</label>
+              <label class="col-sm-3 form-control-label required">Module</label>
               <select disabled [(ngModel)]="new_instance.module" name="instanceModule" required
                       class="form-control form-type col-sm-10" ngClass="">
                 <option [ngValue]="new_instance.module">{{new_instance.module["module-name"]}}
@@ -56,7 +56,7 @@
             <div *ngIf="new_instance.module">
 
               <fieldset class="form-group">
-                <label class="col-sm-3 form-control-label required-label">Name</label>
+                <label class="col-sm-3 form-control-label required">Name</label>
                 <input [(ngModel)]="new_instance.name" name="instanceName" type="text" required class="form-control col-sm-10">
               </fieldset>
 
@@ -69,26 +69,27 @@
               <fieldset
                 *ngIf="new_instance.module && new_instance.module['module-type'] === 'regular-streaming' && new_instance.inputs"
                 class="form-group">
-                <label class="col-sm-3 form-control-label required-label">Inputs</label>
+                <label class="col-sm-3 form-control-label required">Inputs</label>
                 <div *ngFor='let input of new_instance.inputs; let i = index; trackBy:customTrackBy'
                      class="instance-inputs with-item-removal clearfix">
+                  <!--TODO: fix validation changing (make value-input -> ngModel (see bug http://stackoverflow.com/questions/33346677/angular2-ngmodel-against-ngfor-variables)-->
                   <select [value]="new_instance.inputs[i]" (input)="new_instance.inputs[i] = $event.target.value"
+                          (change)="checkTimestampAcceptable()"
                           name="instanceInputs" required class="form-control form-type col-sm-10">
                     <option *ngFor="let stream of streamList">{{stream.name}}</option>
                   </select>
-                  <select [value]="new_instance['input-type'][i]" (input)="new_instance['input-type'][i] = $event.target.value"
+                  <select [value]="new_instance['inputs-types'][i]" (input)="new_instance['inputs-types'][i] = $event.target.value"
                            name="instanceInputType" required class="form-control form-type col-sm-10">
                     <option>full</option>
                     <option>split</option>
                   </select>
                   <div class="remove-item fa fa-remove" *ngIf="i!==0" (click)="removeInput(i)"></div>
                 </div>
-                <button type="button" (click)="addInput()" class="btn btn-link form-add-host">+ Add</button>
-
+                <button type="button" (click)="addInput()" class="btn btn-link form-add-item">+ Add</button>
               </fieldset>
 
               <fieldset *ngIf="new_instance.module['module-type'] === 'output-streaming'" class="form-group">
-                <label class="col-sm-3 form-control-label required-label">Input</label>
+                <label class="col-sm-3 form-control-label required">Input</label>
                 <div class="instance-input">
                   <select [(ngModel)]="new_instance.input" name="instanceInput" required
                           class="form-control form-type col-sm-10">
@@ -98,7 +99,7 @@
               </fieldset>
 
               <fieldset *ngIf="new_instance.module['module-type'] === 'output-streaming'" class="form-group">
-                <label class="col-sm-3 form-control-label required-label">Output</label>
+                <label class="col-sm-3 form-control-label required">Output</label>
                 <div class="instance-output">
                   <select [(ngModel)]="new_instance.output" name="instanceOutput" required
                           class="form-control form-type col-sm-10">
@@ -108,38 +109,39 @@
               </fieldset>
 
               <fieldset
-                *ngIf="new_instance.module['module-type'] === 'input-streaming' || new_instance.module['module-type'] === 'regular-streaming'"
+                *ngIf="new_instance.module['module-type'] !== 'output-streaming'"
                 class="form-group">
-                <label class="col-sm-3 form-control-label required-label">Outputs</label>
+                <label class="col-sm-3 form-control-label required">Outputs</label>
                 <div *ngFor='let output of new_instance.outputs; let i = index;  trackBy:customTrackBy'
                      class="instance-outputs with-item-removal clearfix">
+                  <!--TODO: fix validation changing (make value-input -> ngModel (see bug http://stackoverflow.com/questions/33346677/angular2-ngmodel-against-ngfor-variables)-->
                   <select [value]="new_instance.outputs[i]" (input)="new_instance.outputs[i] = $event.target.value"
                           name="instanceOutputs" required class="form-control form-type col-sm-10">
                     <option *ngFor="let stream of streamList">{{stream.name}}</option>
                   </select>
                   <div class="remove-item fa fa-remove" *ngIf="i!==0" (click)="removeOutput(i)"></div>
                 </div>
-                <button type="button" (click)="addOutput()" class="btn btn-link form-add-host">+ Add</button>
+                <button type="button" (click)="addOutput()" class="btn btn-link form-add-item">+ Add</button>
               </fieldset>
 
               <fieldset class="form-group">
-                <label class="col-sm-3 form-control-label required-label">Checkpoint mode</label>
+                <label class="col-sm-3 form-control-label required">Checkpoint mode</label>
                 <select [(ngModel)]="new_instance['checkpoint-mode']" name="instanceCheckpointMode" required
                         class="form-control form-type col-sm-10">
-                  <option *ngIf="!new_instance.module['module-type'] === 'output-streaming'"> time interval</option>
-                  <option> every-nth</option>
+                  <option *ngIf="new_instance.module['module-type'] !== 'output-streaming'">time-interval</option>
+                  <option>every-nth</option>
                 </select>
               </fieldset>
 
               <fieldset class="form-group">
-                <label class="col-sm-3 form-control-label required-label">Checkpoint interval</label>
+                <label class="col-sm-3 form-control-label required">Checkpoint interval</label>
                 <input [(ngModel)]="new_instance['checkpoint-interval']" name="instanceCheckpointInterval" type="number"
                        required class="form-control col-sm-10">
               </fieldset>
 
               <fieldset *ngIf="new_instance.module['module-type'] === 'regular-streaming'" class="form-group">
-                <label class="col-sm-3 form-control-label required-label">State management</label>
-                <select [(ngModel)]="new_instance['state-management']" name="instanceStateManagement" required
+                <label class="col-sm-3 form-control-label">State management</label>
+                <select [(ngModel)]="new_instance['state-management']" name="instanceStateManagement"
                         class="form-control form-type col-sm-10">
                   <option>none</option>
                   <option>ram</option>
@@ -167,13 +169,20 @@
 
               <fieldset *ngIf="new_instance.module['module-type'] === 'regular-streaming' ||
                 new_instance.module['module-type'] === 'output-streaming'" class="form-group">
-                <label class="col-sm-3 form-control-label required-label">Start-from</label>
-                <select [(ngModel)]="new_instance['start-from']" name="instanceStartFrom" required
+                <label class="col-sm-3 form-control-label">Start-from</label>
+                <select [(ngModel)]="new_instance['start-from']" name="instanceStartFrom"
                         class="form-control form-type col-sm-10">
-                  <option>oldest</option>
-                  <option>newest</option>
-                  <option>datetime</option>
+                  <option value=""></option>
+                  <option value="newest">newest</option>
+                  <option value="oldest">oldest</option>
+                  <option value="timestamp" *ngIf="startFromTimestampAcceptable">timestamp</option>
                 </select>
+              </fieldset>
+
+              <fieldset *ngIf="new_instance['start-from'] === 'timestamp'" class="form-group">
+                <label class="col-sm-3 form-control-label required">Start-from timestamp</label>
+                <input [(ngModel)]="new_instance['start-from-timestamp']" name="instanceStartFromTimestamp" type="number"
+                       required class="form-control col-sm-10">
               </fieldset>
 
               <fieldset class="form-group">
@@ -207,7 +216,7 @@
               </div>
 
               <fieldset class="form-group">
-                <label class="col-sm-3 form-control-label required-label">Coordination service</label>
+                <label class="col-sm-3 form-control-label required">Coordination service</label>
                 <select [(ngModel)]="new_instance['coordination-service']" name="instanceCoordinationService"
                         required class="form-control form-type col-sm-10">
                   <option *ngFor="let service of serviceList | serviceFilter : 'zookeeper' " value={{service.name}}>
@@ -245,24 +254,47 @@
                   <option>True</option>
                 </select>
               </fieldset>
+
               <fieldset *ngIf="new_instance.module['module-type'] === 'input-streaming'" class="form-group">
-                <label class="col-sm-3 form-control-label required-label">Lookup history</label>
+                <label class="col-sm-3 form-control-label required">Lookup history</label>
                 <input [(ngModel)]="new_instance['lookup-history']" name="instanceLookupHistory" type="number"
                        required class="form-control col-sm-10">
               </fieldset>
+
               <fieldset *ngIf="new_instance.module['module-type'] === 'input-streaming'" class="form-group">
-                <label class="col-sm-3 form-control-label required-label">Queue max size</label>
+                <label class="col-sm-3 form-control-label required">Queue max size</label>
                 <input [(ngModel)]="new_instance['queue-max-size']" name="instanceQueueMaxSize" type="number"
                        required class="form-control col-sm-10">
               </fieldset>
+
               <fieldset *ngIf="new_instance.module['module-type'] === 'input-streaming'" class="form-group">
                 <label class="col-sm-3 form-control-label">Default eviction policy</label>
-                <input [(ngModel)]="new_instance['default-eviction-policy']" name="instanceDefaultEvictionPolicy"
-                       type="text" class="form-control col-sm-10">
+                <select [(ngModel)]="new_instance['default-eviction-policy']" name="instanceDefaultEvictionPolicy"
+                        class="form-control form-type col-sm-10">
+                  <option>LRU</option>
+                  <option>LFU</option>
+                  <option>NONE</option>
+                </select>
               </fieldset>
+
               <fieldset *ngIf="new_instance.module['module-type'] === 'input-streaming'" class="form-group">
                 <label class="col-sm-3 form-control-label">Eviction policy</label>
-                <input [(ngModel)]="new_instance['eviction-policy']" name="instanceEvictionPolicy" type="text"
+                <select [(ngModel)]="new_instance['eviction-policy']" name="instanceEvictionPolicy"
+                        class="form-control form-type col-sm-10">
+                  <option>fix-time</option>
+                  <option>expanded-time</option>
+                </select>
+              </fieldset>
+
+              <fieldset *ngIf="new_instance.module['module-type'] === 'input-streaming'" class="form-group">
+                <label class="col-sm-3 form-control-label">Backup count</label>
+                <input [(ngModel)]="new_instance['backup-count']" name="instanceBackupCount" type="number"
+                       class="form-control col-sm-10">
+              </fieldset>
+
+              <fieldset *ngIf="new_instance.module['module-type'] === 'input-streaming'" class="form-group">
+                <label class="col-sm-3 form-control-label">Async backup count</label>
+                <input [(ngModel)]="new_instance['async-backup-count']" name="instanceAsyncBackupCount" type="number"
                        class="form-control col-sm-10">
               </fieldset>
 
@@ -289,7 +321,10 @@
       <span class="instance-name">Name</span>
       <span class="instance-status">Status</span>
     </li>
-    <li class="list-group-item" (click)="instance_select(instance)"
+    <li *ngIf="!instanceList || (instanceList && instanceList.length === 0)">
+      <span class="col-sm-12">No instances have been found.</span>
+    </li>
+    <li class="list-group-item" [ngClass]="{selected:isSelected(instance)}" (click)="instance_select(instance)"
         *ngFor="let instance of instanceList | orderBy: 'name' | listFilter : term">
       <span class="instance-name">{{ instance.name }}</span>
       <i class="fa fa-play start-stop-icon"
@@ -318,19 +353,18 @@
         <h4 class="modal-title">Delete confirmation</h4>
       </div>
       <div class="modal-body" *ngIf="instance_to_delete">
-        <div *ngIf="instance_to_delete.status !== 'starting'"> <!-- TODO other statuses -->
-          <p>Do you really want to delete instance " {{ instance_to_delete.name }} " ? This action can not be
+        <div *ngIf="ifInstanceCanBeRemoved()">
+          <p>Do you really want to delete instance "{{ instance_to_delete.name }}"? This action can not be
             undone!</p>
           <fieldset class="form-actions">
-            <button type="button" class="btn btn-danger pull-left"
+            <button type="button" class="btn btn-danger pull-left0"
                     (click)="delete_instance(DeleteInstance, instance_to_delete)">Delete
             </button>
             <button type="button" class="btn btn-primary " (click)="DeleteInstance.hide()">Cancel</button>
           </fieldset>
         </div>
-        <div *ngIf="instance_to_delete.status === 'starting' || instance_to_delete.status === 'started'
-                      || instance_to_delete.status === 'stopping'">
-          <p>You can not delete instance which status is "starting" or "started" </p>
+        <div *ngIf="!ifInstanceCanBeRemoved()">
+          <p>You can not delete instance whose status is "starting", "started" or "stopping" </p>
           <fieldset class="form-actions">
             <button type="button" class="btn btn-primary " (click)="DeleteInstance.hide()">Ok</button>
           </fieldset>

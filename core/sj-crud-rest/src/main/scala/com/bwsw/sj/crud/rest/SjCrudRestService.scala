@@ -73,7 +73,7 @@ object SjCrudRestService extends App with SjCrudInterface {
 
   private def entityAsString(entity: HttpEntity): Future[String] = {
     entity.dataBytes
-      .map(_.decodeString(entity.contentType().charset().value))
+      .map(_.decodeString(entity.contentType.getCharsetOption.get().nioCharset()))
       .runWith(Sink.head)
   }
 

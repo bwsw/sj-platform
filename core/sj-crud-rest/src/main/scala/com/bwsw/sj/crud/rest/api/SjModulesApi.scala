@@ -1,18 +1,18 @@
 package com.bwsw.sj.crud.rest.api
 
 import java.io.File
+import java.nio.file.Paths
 
-import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers._
+import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Disposition`}
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.http.scaladsl.server.{Directives, RequestContext}
-import akka.stream.scaladsl._
+import akka.stream.scaladsl.FileIO
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.engine.StreamingValidator
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.module._
-import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 import com.bwsw.sj.crud.rest.exceptions._
 import com.bwsw.sj.crud.rest.instance.{InstanceDestroyer, InstanceStarter, InstanceStopper}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
@@ -24,6 +24,8 @@ import scala.collection.mutable
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils {
+
+  private var previousFileName: Option[String] = None
 
   import EngineLiterals._
 
@@ -88,7 +90,6 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
     uploadedFile("jar") {
       case (metadata: FileInfo, file: File) =>
         try {
-          println(file.toString)
           var response: RestResponse = BadRequestRestResponse(Map("message" ->
             createMessage("rest.modules.modules.extension.unknown", metadata.fileName)))
 
@@ -258,11 +259,21 @@ trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils 
   }
 
   private val gettingModule = (filename: String) => get {
-    val jarFile = storage.get(filename, s"tmp/$filename")
+    deletePreviousFile()
+    val jarFile = storage.get(filename, RestLiterals.tmpDirectory + filename)
+    previousFileName = Some(jarFile.getAbsolutePath)
+    val source = FileIO.fromPath(Paths.get(jarFile.getAbsolutePath))
     complete(HttpResponse(
       headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> filename))),
-      entity = HttpEntity.Chunked.fromData(`application/java-archive`, Source.file(jarFile))
+      entity = HttpEntity.Chunked.fromData(MediaTypes.`application/java-archive`, source)
     ))
+  }
+
+  private def deletePreviousFile() = {
+    if (previousFileName.isDefined) {
+      val file = new File(previousFileName.get)
+        if (file.exists()) file.delete()
+    }
   }
 
   private val deletingModule = (moduleType: String,
