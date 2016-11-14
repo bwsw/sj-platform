@@ -10,7 +10,7 @@ import org.apache.log4j.Logger
 object TcpClientExample extends App {
   private val logger = Logger.getLogger(getClass)
   val zkServers = Array("176.120.25.19:2181")
-  val prefix = "zk_test/global"
+  val prefix = "/zk_test/global"
 
   val options = new TcpClientOptions()
     .setZkServers(zkServers)

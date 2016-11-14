@@ -1,11 +1,7 @@
 package com.bwsw.common.client
 
-import java.net.{InetSocketAddress, URI}
 import java.util.concurrent.ArrayBlockingQueue
 
-import com.bwsw.sj.common.utils.ConfigSettingsUtils
-import com.twitter.common.quantity.{Amount, Time}
-import com.twitter.common.zookeeper.ZooKeeperClient
 import io.netty.bootstrap.Bootstrap
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandler.Sharable
@@ -14,7 +10,12 @@ import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.handler.codec.string.StringEncoder
-import org.apache.log4j.Logger
+import org.apache.curator.framework.CuratorFrameworkFactory
+import org.apache.curator.framework.recipes.leader.LeaderLatch
+import org.apache.curator.retry.ExponentialBackoffRetry
+import org.apache.zookeeper.KeeperException
+
+import scala.annotation.tailrec
 
 /**
  * Simple tcp client for retrieving transaction ID
@@ -23,37 +24,43 @@ import org.apache.log4j.Logger
  */
 
 class TcpClient(options: TcpClientOptions) {
-  private val logger = Logger.getLogger(getClass)
   private val messageForServer = "get"
   private val out = new ArrayBlockingQueue[ByteBuf](1)
   private var channel: Channel = null
   private val workerGroup = new NioEventLoopGroup()
   private val bootstrap = new Bootstrap()
-  private val zkSessionTimeout = ConfigSettingsUtils.getZkSessionTimeout()
-  private val zkClient = createZooKeeperClient()
-  private val master = getMasterServer()
+  private val curatorClient = createCuratorClient()
+  private val (host, port) = getMasterAddress()
 
   createChannel()
 
-  private def createZooKeeperClient() = {
-    val zooKeeperServers = createZooKeeperServers()
-
-    new ZooKeeperClient(Amount.of(zkSessionTimeout, Time.MILLISECONDS), zooKeeperServers)
+  private def getMasterAddress() = {
+    val leader = new LeaderLatch(curatorClient, options.prefix + "/master", "client")
+    var leaderInfo = getLeaderId(leader)
+    while(leaderInfo == "") {
+      leaderInfo = getLeaderId(leader)
+      Thread.sleep(50)
+    }
+    val address = leaderInfo.split(":")
+    (address(0), address(1).toInt)
   }
 
-  private def createZooKeeperServers() = {
-    val zooKeeperServers = new java.util.ArrayList[InetSocketAddress]()
-    options.zkServers.map(x => (x.split(":")(0), x.split(":")(1).toInt))
-      .foreach(zkServer => zooKeeperServers.add(new InetSocketAddress(zkServer._1, zkServer._2)))
-
-    zooKeeperServers
+  @tailrec
+  private def getLeaderId(leaderLatch: LeaderLatch): String = {
+    try {
+      leaderLatch.getLeader.getId
+    } catch {
+      case e: KeeperException =>
+        Thread.sleep(50)
+        getLeaderId(leaderLatch)
+    }
   }
 
-  private def getMasterServer() = {
-    val zkNode = new URI(s"/${options.prefix}/master").normalize()
-    val master = new String(zkClient.get().getData(zkNode.toString, null, null), "UTF-8")
-    logger.debug(s"Master server address: $master")
-    master.split(":")
+  private def createCuratorClient() = {
+    val curatorClient = CuratorFrameworkFactory.newClient(options.zkServers, new ExponentialBackoffRetry(1000, 3))
+    curatorClient.start()
+    curatorClient.getZookeeperClient.blockUntilConnectedOrTimedOut()
+    curatorClient
   }
 
   private def createChannel() = {
@@ -61,7 +68,7 @@ class TcpClient(options: TcpClientOptions) {
       .channel(classOf[NioSocketChannel])
       .handler(new TcpClientChannelInitializer(out))
 
-    channel = bootstrap.connect(master(0), master(1).toInt).sync().channel()
+    channel = bootstrap.connect(host, port).sync().channel()
   }
 
   def get() = {

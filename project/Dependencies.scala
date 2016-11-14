@@ -14,6 +14,7 @@ object Dependencies {
     "org.apache.commons" % "commons-io" % "1.3.2",
     "com.typesafe" % "config" % "1.3.0",
     "org.apache.kafka" % "kafka_2.11" % "0.9.0.1",
+    "org.apache.curator" % "curator-recipes" % "2.11.0",
     "org.elasticsearch" % "elasticsearch" % "2.3.2",
     "postgresql" % "postgresql" % "9.1-901.jdbc4"
   ))
@@ -24,6 +25,7 @@ object Dependencies {
 
   lazy val sjRestDependencies = Def.setting(Seq(
     "com.typesafe.akka" % "akka-http-experimental_2.11" % "2.4.11",
+    "org.apache.curator" % "curator-recipes" % "2.11.0",
     ("org.everit.json" % "org.everit.json.schema" % "1.2.0")
       .exclude("commons-logging", "commons-logging"),
     ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
@@ -49,9 +51,14 @@ object Dependencies {
     "org.apache.mesos" % "mesos" % "0.28.1",
     "net.databinder" % "unfiltered-filter_2.11" % "0.8.4",
     "net.databinder" % "unfiltered-jetty_2.11" % "0.8.4",
+    "org.apache.curator" % "curator-recipes" % "2.11.0",
     ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
       .exclude("commons-logging", "commons-logging")
 
+  ))
+
+  lazy val sjTransactionGenerator = Def.setting(Seq(
+    "org.apache.curator" % "curator-recipes" % "2.11.0"
   ))
 
   lazy val sjSflowProcessDependencies = Def.setting(Seq(
