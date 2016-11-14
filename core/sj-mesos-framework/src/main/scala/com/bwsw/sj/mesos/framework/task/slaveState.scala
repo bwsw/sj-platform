@@ -1,17 +1,16 @@
-package com.bwsw.sj.mesos.framework.schedule
-
+package com.bwsw.sj.mesos.framework.task
 
 /**
   * Created by diryavkin_dn on 01.11.16.
   */
-class slaveState() {
+class SlaveState() {
   var start_time:Any = _
   var hostname:Any = _
   var master_hostname:Any = _
   var git_tag:Any = _
   var flags:Any = _
   var log_dir:Any = _
-  var frameworks:Array[framework] = _
+  var frameworks:Array[Framework] = _
   var git_sha:Any = _
   var build_date:Any = _
   var attributes:Any = _
@@ -24,7 +23,7 @@ class slaveState() {
   var build_time:Any = _
 }
 
-class framework() {
+class Framework() {
   var capabilities:Array[Any] = _
   var name:String = _
   var completed_executors:Array[Map[String, Any]] = _
@@ -32,7 +31,7 @@ class framework() {
   var role:String = _
   var registered_time:Double = _
   var unregistered_time:Double = _
-  var executors:Array[executor] = _
+  var executors:Array[Executor] = _
   var completed_tasks:Array[Any] = _
   var offered_resources:Map[String,Any] = _
   var id:String = _
@@ -50,7 +49,7 @@ class framework() {
   var reregistered_time:Double = _
 }
 
-class executor() {
+class Executor() {
   var name:String = _
   var source:String = _
   var container:String = _

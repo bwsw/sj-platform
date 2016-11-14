@@ -10,12 +10,10 @@ import com.bwsw.sj.mesos.framework.task.{StatusHandler, TasksList}
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos._
 import org.apache.mesos.{Scheduler, SchedulerDriver}
-
 import scala.collection.JavaConverters._
 import scala.collection.immutable
 import scala.collection.mutable
 import scala.util.Properties
-import com.bwsw.common.JsonSerializer
 
 
 
@@ -25,19 +23,15 @@ import com.bwsw.common.JsonSerializer
 class FrameworkScheduler extends Scheduler {
 
   private val logger = Logger.getLogger(this.getClass)
-
-  var frameworkId: String = null
-  var master: MasterInfo = null
   var driver: SchedulerDriver = null
   var perTaskCores: Double = 0.0
   var perTaskMem: Double = 0.0
   var perTaskPortsCount: Int = 0
   var params = immutable.Map[String, String]()
-  var instance: Option[Instance] = None
   val configFileService = ConnectionRepository.getConfigService
   var jarName: String = null
-  val availablePortsForOneInstance: collection.mutable.ListBuffer[Long] = collection.mutable.ListBuffer()
   var uniqueHosts = false
+
 
   def error(driver: SchedulerDriver, message: String) {
     logger.error(s"Got error message: $message")
@@ -61,20 +55,11 @@ class FrameworkScheduler extends Scheduler {
    * @param status received status from master
    */
   def statusUpdate(driver: SchedulerDriver, status: TaskStatus) {
-    val serializer = new JsonSerializer()
-    val masterStateUrl = s"http://${master.getHostname}:${master.getPort}/state.json"
-    val masterResponse = scala.io.Source.fromURL(masterStateUrl).mkString
-    val masterObj = serializer.deserialize[masterState](masterResponse)
-    val currentSlave = masterObj.slaves.filter(a => a.id == status.getSlaveId.getValue).head
-    val slaveHost = currentSlave.pid.split("@").last
-    val slaveStateUrl = s"http://$slaveHost/state.json"
-    val slaveResponse = scala.io.Source.fromURL(slaveStateUrl).mkString
-    val obj = serializer.deserialize[slaveState](slaveResponse)
-    val frm = obj.frameworks.filter(a => a.id == this.frameworkId).head
-    val dir = frm.executors.head.directory
-    //todo return url on dir
-    val sandbox = s"http://${master.getHostname}:${master.getPort}/#/slaves/${currentSlave.id}/browse?path=$dir"
-    StatusHandler.handle(status, sandbox)
+    StatusHandler.handle(status)
+  }
+
+  def getOfferIp(offer:Offer) = {
+    offer.getUrl.getAddress.getIp
   }
 
   def offerRescinded(driver: SchedulerDriver, offerId: OfferID) {
@@ -89,9 +74,8 @@ class FrameworkScheduler extends Scheduler {
    */
   override def resourceOffers(driver: SchedulerDriver, offers: util.List[Offer]) {
     logger.info(s"RESOURCE OFFERS")
-    availablePortsForOneInstance.remove(0, availablePortsForOneInstance.length)
-
-    val filteredOffers = filterOffers(offers, this.instance.get.nodeAttributes)
+    TasksList.clearAvailablePorts()
+    val filteredOffers = filterOffers(offers, FrameworkUtil.instance.nodeAttributes)
     if (filteredOffers.size == 0) {
       for (offer <- offers.asScala) {
         driver.declineOffer(offer.getId)
@@ -106,11 +90,10 @@ class FrameworkScheduler extends Scheduler {
       logger.debug(s"Slave ID: ${offer.getSlaveId.getValue}")
     }
 
-    val tasksCount = TasksList.toLaunch.size
     var tasksCountOnSlaves = getOffersForSlave(perTaskCores,
       perTaskMem,
       perTaskPortsCount,
-      tasksCount,
+      TasksList.count,
       filteredOffers)
 
     var overTasks = 0
@@ -125,9 +108,9 @@ class FrameworkScheduler extends Scheduler {
 
 
     logger.debug(s"Count tasks can be launched: $overTasks")
-    logger.debug(s"Count tasks must be launched: $tasksCount")
+    logger.debug(s"Count tasks must be launched: ${TasksList.count}")
 
-    if (tasksCount > overTasks) {
+    if (TasksList.count > overTasks) {
       logger.info(s"Can not launch tasks: no required resources")
       TasksList.message = "Can not launch tasks: no required resources"
       for (offer <- offers.asScala) {
@@ -172,12 +155,15 @@ class FrameworkScheduler extends Scheduler {
       var taskPort: String = ""
 
       var availablePorts = ports.getRanges.getRangeList.asScala.map(_.getBegin.toString)
-      if (instance.get.moduleType.equals(EngineLiterals.inputStreamingType)) {
+
+      if (FrameworkUtil.instance.moduleType.equals(EngineLiterals.inputStreamingType)) {
         taskPort = availablePorts.head
         availablePorts = availablePorts.tail
-        val inputInstance = instance.get.asInstanceOf[InputInstance]
-        inputInstance.tasks.put(currTask, new InputTask(currentOffer._1.getUrl.getAddress.getIp, taskPort.toInt))
-        ConnectionRepository.getInstanceService.save(instance.get)
+        val inputInstance = FrameworkUtil.instance.asInstanceOf[InputInstance]
+        val host = getOfferIp(currentOffer._1)
+        TasksList(currTask).foreach(task => task.update(host=host))
+        inputInstance.tasks.put(currTask, new InputTask(host, taskPort.toInt))
+        ConnectionRepository.getInstanceService.save(FrameworkUtil.instance)
       }
       agentPorts = availablePorts.mkString(",")
       agentPorts.dropRight(1)
@@ -186,17 +172,22 @@ class FrameworkScheduler extends Scheduler {
       logger.debug(s"Task: $currTask. Agent ports: $agentPorts")
 
       val cmd = CommandInfo.newBuilder()
+      val hosts: collection.mutable.ListBuffer[String] = collection.mutable.ListBuffer()
+      TasksList.toLaunch.foreach(task =>
+        if (TasksList.getTask(task).host.nonEmpty) hosts.append(TasksList.getTask(task).host.get)
+      )
       try {
         val environments = Environment.newBuilder
           .addVariables(Environment.Variable.newBuilder.setName("MONGO_HOST").setValue(params {"mongodbHost"}))
           .addVariables(Environment.Variable.newBuilder.setName("MONGO_PORT").setValue(params {"mongodbPort"}))
           .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_NAME").setValue(params {"instanceId"}))
           .addVariables(Environment.Variable.newBuilder.setName("TASK_NAME").setValue(currTask))
-          .addVariables(Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(currentOffer._1.getUrl.getAddress.getIp))
+          .addVariables(Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(getOfferIp(currentOffer._1)))
           .addVariables(Environment.Variable.newBuilder.setName("AGENTS_PORTS").setValue(agentPorts))
+          .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_HOSTS").setValue(hosts.mkString(",")))
 
         cmd
-          .addUris(CommandInfo.URI.newBuilder.setValue(getModuleUrl(instance.get)))
+          .addUris(CommandInfo.URI.newBuilder.setValue(getModuleUrl(FrameworkUtil.instance)))
           .setValue("java -jar " + jarName)
           .setEnvironment(environments)
       } catch {
@@ -257,8 +248,8 @@ class FrameworkScheduler extends Scheduler {
   def registered(driver: SchedulerDriver, frameworkId: FrameworkID, masterInfo: MasterInfo) {
     logger.info(s"Registered framework as: ${frameworkId.getValue}")
     this.driver = driver
-    this.frameworkId = frameworkId.getValue
-    this.master = masterInfo
+    FrameworkUtil.frameworkId = frameworkId.getValue
+    FrameworkUtil.master = masterInfo
 
     params = Map(
       ("instanceId", Properties.envOrElse("INSTANCE_ID", "00000000-0000-0000-0000-000000000000")),
@@ -267,23 +258,23 @@ class FrameworkScheduler extends Scheduler {
     )
     logger.debug(s"Got environment variable: $params")
 
-    instance = ConnectionRepository.getInstanceService.get(params("instanceId"))
-    if (instance.isEmpty) {
+    val optionInstance = ConnectionRepository.getInstanceService.get(params("instanceId"))
+    if (optionInstance.isEmpty) {
       logger.error(s"Not found instance")
       driver.stop()
       TasksList.message = "Framework shut down: not found instance."
       return
-    }
-    logger.debug(s"Got instance ${instance.get.name}")
+    } else { FrameworkUtil.instance = optionInstance.get}
+    logger.debug(s"Got instance ${FrameworkUtil.instance.name}")
 
-    perTaskCores = instance.get.perTaskCores
-    perTaskMem = instance.get.perTaskRam
-    perTaskPortsCount = FrameworkUtil.getCountPorts(instance.get)
+    perTaskCores = FrameworkUtil.instance.perTaskCores
+    perTaskMem = FrameworkUtil.instance.perTaskRam
+    perTaskPortsCount = FrameworkUtil.getCountPorts(FrameworkUtil.instance)
     val tasks =
-      if (instance.get.moduleType.equals(EngineLiterals.inputStreamingType))
-        (0 until instance.get.parallelism).map(tn => instance.get.name + "-task" + tn)
+      if (FrameworkUtil.instance.moduleType.equals(EngineLiterals.inputStreamingType))
+        (0 until FrameworkUtil.instance.parallelism).map(tn => FrameworkUtil.instance.name + "-task" + tn)
       else {
-        val executionPlan = instance.get match {
+        val executionPlan = FrameworkUtil.instance match {
           case regularInstance: RegularInstance => regularInstance.executionPlan
           case outputInstance: OutputInstance => outputInstance.executionPlan
           case windowedInstance: WindowedInstance => windowedInstance.executionPlan
@@ -422,11 +413,11 @@ class FrameworkScheduler extends Scheduler {
   def getPorts(offer: Offer, task: String): Resource = {
     val portsResource = getResource(offer, "ports")
     for (range <- portsResource.getRanges.getRangeList.asScala) {
-      availablePortsForOneInstance ++= (range.getBegin to range.getEnd).to[mutable.ListBuffer]
+      TasksList.availablePorts ++= (range.getBegin to range.getEnd).to[mutable.ListBuffer]
     }
 
-    val ports: mutable.ListBuffer[Long] = availablePortsForOneInstance.take(perTaskPortsCount)
-    availablePortsForOneInstance.remove(0, perTaskPortsCount)
+    val ports: mutable.ListBuffer[Long] = TasksList.availablePorts.take(perTaskPortsCount)
+    TasksList.availablePorts.remove(0, perTaskPortsCount)
 
     val ranges = Value.Ranges.newBuilder
     for (port <- ports) {

@@ -20,10 +20,11 @@ import org.slf4j.LoggerFactory
 
 abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
   protected val logger = LoggerFactory.getLogger(this.getClass)
-  private val hazelcastMapName = "inputEngine"
+  private val hazelcastMapName = instance.name + "-" + "inputEngine"
   private val config = createHazelcastConfig()
   private val hazelcastInstance = Hazelcast.newHazelcastInstance(config)
   protected val uniqueEnvelopes = getUniqueEnvelopes
+  private val hosts: Array[String] = System.getenv("INSTANCE_HOSTS").split(",")
 
   /**
    * Checks whether a specific key is duplicate or not
@@ -74,10 +75,8 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
   private def createNetworkConfig():NetworkConfig = {
     val networkConfig = new NetworkConfig()
     val joinConfig = new JoinConfig()
-
     joinConfig.setMulticastConfig(new MulticastConfig().setEnabled(false))
-
-    val ips = List("192.168.1.225", "192.168.1.192").asJava
+    val ips = hosts.toList.asJava
     val tcpIpConfig = new TcpIpConfig()
     tcpIpConfig.setMembers(ips).setEnabled(true)
     joinConfig.setTcpIpConfig(tcpIpConfig)

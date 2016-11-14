@@ -7,6 +7,7 @@ object TasksList {
   private val tasksToLaunch: mutable.ListBuffer[String] = mutable.ListBuffer()
   private val listTasks : mutable.Map[String, Task] = mutable.Map()
   var message: String = "Initialization"
+  var availablePorts: collection.mutable.ListBuffer[Long] = collection.mutable.ListBuffer()
 
   def newTask(taskId: String) = {
     val task = new Task(taskId)
@@ -42,5 +43,13 @@ object TasksList {
   def apply(taskId: String): Option[Task] = {
     listTasks.get(taskId)
   }
-}
 
+  def clearAvailablePorts() = {
+    availablePorts.remove(0, availablePorts.length)
+  }
+
+  def count = {
+    toLaunch.size
+  }
+
+}
