@@ -2,7 +2,9 @@ package com.bwsw.sj.engine.input.eviction_policy
 
 import com.bwsw.sj.common.DAL.model.module.InputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.hazelcast.config.{EvictionPolicy, MaxSizeConfig, XmlConfigBuilder}
+
+import scala.collection.JavaConverters._
+import com.hazelcast.config._
 import com.hazelcast.core.Hazelcast
 import org.slf4j.LoggerFactory
 
@@ -18,7 +20,7 @@ import org.slf4j.LoggerFactory
 
 abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
   protected val logger = LoggerFactory.getLogger(this.getClass)
-  private val hazelcastMapName = "inputEngine"
+  private val hazelcastMapName = instance.name + "-" + "inputEngine"
   private val config = createHazelcastConfig()
   private val hazelcastInstance = Hazelcast.newHazelcastInstance(config)
   protected val uniqueEnvelopes = getUniqueEnvelopes
@@ -44,10 +46,12 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
   private def createHazelcastConfig() = {
     logger.debug(s"Create a Hazelcast map configuration is named '$hazelcastMapName'\n")
     val config = new XmlConfigBuilder().build()
+    val networkConfig = createNetworkConfig()
     val evictionPolicy = createEvictionPolicy()
     val maxSizeConfig = createMaxSizeConfig()
 
-    config.getMapConfig(hazelcastMapName)
+    config.setNetworkConfig(networkConfig)
+      .getMapConfig(hazelcastMapName)
       .setTimeToLiveSeconds(instance.lookupHistory)
       .setEvictionPolicy(evictionPolicy)
       .setMaxSizeConfig(maxSizeConfig)
@@ -65,6 +69,24 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
       case _ => EvictionPolicy.NONE
     }
   }
+
+  private def createNetworkConfig(): NetworkConfig = {
+    val networkConfig = new NetworkConfig()
+    networkConfig.setJoin(createJoinConfig())
+  }
+
+  private def createJoinConfig() = {
+    val joinConfig = new JoinConfig()
+    joinConfig.setMulticastConfig(new MulticastConfig().setEnabled(false))
+    joinConfig.setTcpIpConfig(createTcpIpConfig())
+  }
+
+  private def createTcpIpConfig() = {
+    val tcpIpConfig = new TcpIpConfig()
+    val hosts = System.getenv("INSTANCE_HOSTS").split(",").toList.asJava
+    tcpIpConfig.setMembers(hosts).setEnabled(true)
+  }
+
 
   /**
    * Creates a config that defines a max size of Hazelcast map

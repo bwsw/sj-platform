@@ -5,6 +5,7 @@ import java.io.{PrintWriter, StringWriter}
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.mesos.framework.task.TasksList
 import org.apache.log4j.Logger
+import org.apache.mesos.Protos.MasterInfo
 import org.apache.mesos.SchedulerDriver
 
 /**
@@ -13,6 +14,11 @@ import org.apache.mesos.SchedulerDriver
   * @author Kseniya Tomskikh
   */
 object FrameworkUtil {
+
+  var master: MasterInfo = null
+  var frameworkId: String = null
+
+  var instance: Instance = null
 
   /**
     * Count how much ports must be for current task.

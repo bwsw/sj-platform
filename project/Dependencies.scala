@@ -33,7 +33,7 @@ object Dependencies {
   ))
 
   lazy val sjInputEngineDependencies = Def.setting(Seq(
-    "com.hazelcast" % "hazelcast" % "3.6.4"
+    "com.hazelcast" % "hazelcast" % "3.7.1"
   ))
 
   lazy val sjRegularEngineDependencies = Def.setting(Seq(

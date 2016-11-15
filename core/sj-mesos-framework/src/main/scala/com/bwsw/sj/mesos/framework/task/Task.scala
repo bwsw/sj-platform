@@ -18,6 +18,7 @@ class Task(taskId: String) {
   val description: InstanceTask = null
   var maxDirectories = Properties.envOrElse("MAX_SANDBOX_VIEW", "7").toInt
   var directories: Array[String] = Array()
+  var host: Option[String] = None
 
 
   def update(state: String = state,
@@ -25,12 +26,14 @@ class Task(taskId: String) {
              reason: String = reason,
              node: String = node,
              lastNode: String = lastNode,
-             directory: String = "") = {
+             directory: String = "",
+             host: String = this.host.get) = {
     this.state = state
     this.stateChanged = stateChanged
     this.reason = reason
     this.node = node
     this.lastNode = lastNode
+    this.host = Some(host)
     if (!directories.contains(directory) && directory.nonEmpty) directories = (directories :+ directory).reverse
     if (directories.length > maxDirectories) directories = directories.reverse.tail.reverse
 

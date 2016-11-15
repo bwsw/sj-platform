@@ -34,7 +34,7 @@ object DuplicateChecker extends App {
   })
 
   assert(totalOutputElements == totalInputElements - totalDuplicates,
-    "Count of all txns elements that are consumed from output stream should equals count of the elements that are consumed from input socket excluding the duplicates")
+    s"Count of all txns elements that are consumed from output stream($totalOutputElements) should equals count of the elements that are consumed from input socket excluding the duplicates(${totalInputElements - totalDuplicates})")
 
   outputConsumers.foreach(x => x.stop())
   close()

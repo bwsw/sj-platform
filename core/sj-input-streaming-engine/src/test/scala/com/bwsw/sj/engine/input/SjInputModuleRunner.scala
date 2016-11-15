@@ -6,24 +6,30 @@ import java.util.logging.LogManager
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.engine.input.DataFactory._
 
-object SjInputModuleSetup extends App {
-  LogManager.getLogManager.reset()
+
+object SjInputInfoExp {
   val streamService = ConnectionRepository.getStreamService
   val serviceManager = ConnectionRepository.getServiceManager
   val providerService = ConnectionRepository.getProviderService
   val instanceService = ConnectionRepository.getInstanceService
   val fileStorage = ConnectionRepository.getFileStorage
+
+  val inputModule = new File("./contrib/stubs/sj-stub-input-streaming/target/scala-2.11/sj-stub-input-streaming-1.0-SNAPSHOT.jar")
+}
+
+object SjInputModuleSetup extends App {
+  LogManager.getLogManager.reset()
+
   val checkpointInterval = 10
 
-  val inputModule = new File("./contrib/stubs/sj-stub-input-streaming/target/scala-2.11/sj-stub-input-streaming-1.0.jar")
 
   open()
   cassandraSetup()
-  loadModule(inputModule, fileStorage)
-  createProviders(providerService)
-  createServices(serviceManager, providerService)
-  createStreams(streamService, serviceManager, outputCount)
-  createInstance(serviceManager, instanceService, checkpointInterval)
+  loadModule(SjInputInfoExp.inputModule, SjInputInfoExp.fileStorage)
+  createProviders(SjInputInfoExp.providerService)
+  createServices(SjInputInfoExp.serviceManager, SjInputInfoExp.providerService)
+  createStreams(SjInputInfoExp.streamService, SjInputInfoExp.serviceManager, outputCount)
+  createInstance(SjInputInfoExp.serviceManager, SjInputInfoExp.instanceService, checkpointInterval)
   close()
   ConnectionRepository.close()
 
@@ -49,20 +55,13 @@ object DuplicateCheckerRunner extends App {
 
 object SjInputModuleDestroy extends App {
   LogManager.getLogManager.reset()
-  val streamService = ConnectionRepository.getStreamService
-  val serviceManager = ConnectionRepository.getServiceManager
-  val providerService = ConnectionRepository.getProviderService
-  val instanceService = ConnectionRepository.getInstanceService
-  val fileStorage = ConnectionRepository.getFileStorage
-
-  val inputModule = new File("./contrib/stubs/sj-stub-input-streaming/target/scala-2.11/sj-stub-input-streaming-1.0.jar")
 
   open()
-  deleteStreams(streamService, outputCount)
-  deleteServices(serviceManager)
-  deleteProviders(providerService)
-  deleteInstance(instanceService)
-  deleteModule(fileStorage, inputModule.getName)
+  deleteStreams(SjInputInfoExp.streamService, outputCount)
+  deleteServices(SjInputInfoExp.serviceManager)
+  deleteProviders(SjInputInfoExp.providerService)
+  deleteInstance(SjInputInfoExp.instanceService)
+  deleteModule(SjInputInfoExp.fileStorage, SjInputInfoExp.inputModule.getName)
   cassandraDestroy()
   close()
   ConnectionRepository.close()
