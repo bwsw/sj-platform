@@ -78,7 +78,8 @@ lazy val sj = (project in file(".")).settings(publish := {})
     framework, transactionGenerator,
     stubInput, stubRegular, stubWindowed, stubOutput, stubOutputJdbc,
     pmOutput,
-    sflowProcess, sflowOutput
+    sflowProcess, sflowOutput,
+    sumWindowed
   )
 
 lazy val common = Project(id = "sj-common",
@@ -187,5 +188,10 @@ lazy val sflowProcess = Project(id = "sj-sflow-process",
 
 lazy val sflowOutput = Project(id = "sj-sflow-output",
   base = file("./contrib/examples/sflow/sj-sflow-output"))
+  .settings(commonSettings: _*)
+  .dependsOn(engineCore)
+
+lazy val sumWindowed = Project(id = "sj-windowed-sum",
+  base = file("./contrib/examples/sj-windowed-sum"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
