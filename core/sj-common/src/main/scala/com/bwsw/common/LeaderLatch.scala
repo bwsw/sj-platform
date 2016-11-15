@@ -32,7 +32,7 @@ class LeaderLatch(zkServers: Set[String], masterNode: String, id: String = "") {
   }
 
   def takeLeadership(delay: Long) = {
-    while (!leaderLatch.hasLeadership) {
+    while (!hasLeadership) {
       Thread.sleep(delay)
     }
   }
@@ -56,6 +56,10 @@ class LeaderLatch(zkServers: Set[String], masterNode: String, id: String = "") {
         Thread.sleep(50)
         getLeaderId()
     }
+  }
+
+  def hasLeadership() = {
+    leaderLatch.hasLeadership
   }
 
   def close() = {

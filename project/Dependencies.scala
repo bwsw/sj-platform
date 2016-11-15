@@ -42,6 +42,10 @@ object Dependencies {
     "net.openhft" % "chronicle-queue" % "4.2.6"
   ))
 
+  lazy val sjWindowedEngineDependencies = Def.setting(Seq(
+    "org.apache.curator" % "curator-recipes" % "2.11.0"
+  ))
+
   lazy val sjOutputEngineDependencies = Def.setting(Seq(
     "org.elasticsearch" % "elasticsearch" % "2.3.2"
   ))

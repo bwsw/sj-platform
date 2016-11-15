@@ -125,6 +125,9 @@ lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
 lazy val windowedStreamingEngine = Project(id = "sj-windowed-streaming-engine",
   base = file("./core/sj-windowed-streaming-engine"))
   .settings(commonSettings: _*)
+  .settings(
+    libraryDependencies ++= Dependencies.sjWindowedEngineDependencies.value
+  )
   .dependsOn(engineCore)
 
 lazy val outputStreamingEngine = Project(id = "sj-output-streaming-engine",

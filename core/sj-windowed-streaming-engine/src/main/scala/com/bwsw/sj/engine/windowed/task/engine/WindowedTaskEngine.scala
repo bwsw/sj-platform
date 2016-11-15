@@ -2,6 +2,7 @@ package com.bwsw.sj.engine.windowed.task.engine
 
 import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
 
+import com.bwsw.common.LeaderLatch
 import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.common.utils.{EngineLiterals, SjStreamUtils}
 import com.bwsw.sj.engine.core.entities._
@@ -10,6 +11,9 @@ import com.bwsw.sj.engine.core.state.{StatefulCommonModuleService, StatelessComm
 import com.bwsw.sj.engine.core.windowed.{WindowRepository, WindowedStreamingExecutor}
 import com.bwsw.sj.engine.windowed.task.engine.input.Input
 import com.bwsw.sj.engine.windowed.task.reporting.WindowedStreamingPerformanceMetrics
+import org.apache.curator.framework.CuratorFrameworkFactory
+import org.apache.curator.framework.recipes.barriers.DistributedDoubleBarrier
+import org.apache.curator.retry.ExponentialBackoffRetry
 import org.slf4j.LoggerFactory
 
 class WindowedTaskEngine(protected val manager: CommonTaskManager,
@@ -28,6 +32,12 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
   private var counterOfBatches = 0
   private val windowPerStream = createStorageOfWindows()
   private val windowRepository = new WindowRepository(instance, manager.inputs)
+  private val masterNode = EngineLiterals.windowedInstanceBarrierPrefix + instance.name
+  private val zkHosts = instance.coordinationService.provider.hosts.toSet
+  private val curatorClient = createCuratorClient()
+  private val barrier = new DistributedDoubleBarrier(curatorClient, masterNode, instance.executionPlan.tasks.size())
+  private val leaderLatch = new LeaderLatch(zkHosts, masterNode)
+  leaderLatch.start()
 
   protected def createWindowedModuleService() = {
     instance.stateManagement match {
@@ -41,6 +51,14 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
 
   private def createStorageOfWindows() = {
     manager.inputs.map(x => (x._1.name, new Window(x._1.name)))
+  }
+
+  private def createCuratorClient() = {
+    val curatorClient = CuratorFrameworkFactory.newClient(zkHosts.mkString(","), new ExponentialBackoffRetry(1000, 3))
+    curatorClient.start()
+    curatorClient.getZookeeperClient.blockUntilConnectedOrTimedOut()
+
+    curatorClient
   }
 
   /**
@@ -63,6 +81,12 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
             collectWindow()
             registerWindow()
             executor.onWindow(windowRepository)
+            barrier.enter()
+            executor.onEnter()
+            if (leaderLatch.hasLeadership()) executor.onLeaderEnter()
+            barrier.leave()
+            executor.onLeave()
+            if (leaderLatch.hasLeadership()) executor.onLeaderLeave()
             slideWindow()
             doCheckpoint()
           }

@@ -78,4 +78,20 @@ class Executor(manager: ModuleEnvironmentManager) extends WindowedStreamingExecu
   override def onBeforeStateSave(isFullState: Boolean): Unit = {
     println("on before state saving")
   }
+
+  override def onEnter() = {
+    println("on enter")
+  }
+
+  override def onLeaderEnter() = {
+    println("on leader enter")
+  }
+
+  override def onLeave() = {
+    println("on leave")
+  }
+
+  override def onLeaderLeave() = {
+     println("on leader leave")
+  }
 }
