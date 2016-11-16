@@ -32,11 +32,12 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
   private var counterOfBatches = 0
   private val windowPerStream = createStorageOfWindows()
   private val windowRepository = new WindowRepository(instance, manager.inputs)
-  private val masterNode = EngineLiterals.windowedInstanceBarrierPrefix + instance.name
+  private val barrierMasterNode = EngineLiterals.windowedInstanceBarrierPrefix + instance.name
+  private val leaderMasterNode = EngineLiterals.windowedInstanceLeaderPrefix + instance.name
   private val zkHosts = instance.coordinationService.provider.hosts.toSet
   private val curatorClient = createCuratorClient()
-  private val barrier = new DistributedDoubleBarrier(curatorClient, masterNode, instance.executionPlan.tasks.size())
-  private val leaderLatch = new LeaderLatch(zkHosts, masterNode)
+  private val barrier = new DistributedDoubleBarrier(curatorClient, barrierMasterNode, instance.executionPlan.tasks.size())
+  private val leaderLatch = new LeaderLatch(zkHosts, leaderMasterNode)
   leaderLatch.start()
 
   protected def createWindowedModuleService() = {
