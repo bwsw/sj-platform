@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.windowed.task.engine.collecting
+package com.bwsw.sj.engine.windowed.collecting
 
 import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.engine.core.entities.{TStreamEnvelope, Envelope}

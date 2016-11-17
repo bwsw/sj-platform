@@ -1,8 +1,7 @@
 package com.bwsw.sj.engine.output
 
 import com.bwsw.sj.engine.core.engine.TaskRunner
-import com.bwsw.sj.engine.output.task.OutputTaskManager
-import com.bwsw.sj.engine.output.task.engine.OutputTaskEngine
+import com.bwsw.sj.engine.output.task.{OutputTaskEngine, OutputTaskManager}
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
 

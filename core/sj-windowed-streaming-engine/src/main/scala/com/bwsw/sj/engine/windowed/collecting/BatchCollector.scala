@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.windowed.task.engine.collecting
+package com.bwsw.sj.engine.windowed.collecting
 
 import java.util.concurrent.{ArrayBlockingQueue, Callable}
 
@@ -6,7 +6,7 @@ import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.common.utils.{EngineLiterals, SjStreamUtils}
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
-import com.bwsw.sj.engine.windowed.task.engine.input.TaskInput
+import com.bwsw.sj.engine.windowed.task.input.TaskInput
 
 import com.bwsw.sj.engine.windowed.task.reporting.WindowedStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory

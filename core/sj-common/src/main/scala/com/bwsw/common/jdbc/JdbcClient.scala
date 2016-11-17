@@ -1,9 +1,5 @@
 package com.bwsw.common.jdbc
 
-/**
-  * Created by diryavkin_dn on 10.10.16.
-  */
-
 import java.sql.{Connection, DriverManager, SQLException}
 
 

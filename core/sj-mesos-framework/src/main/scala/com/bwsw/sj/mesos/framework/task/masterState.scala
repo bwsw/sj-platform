@@ -1,8 +1,5 @@
 package com.bwsw.sj.mesos.framework.task
 
-/**
-  * Created by diryavkin_dn on 01.11.16.
-  */
 class MasterState {
   var start_time:Double = _
   var hostname:String = _

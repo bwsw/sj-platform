@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.output.task.engine
+package com.bwsw.sj.engine.output.task
 
 import java.util.concurrent.Callable
 
@@ -6,14 +6,13 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.SjStream
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
-import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, PersistentBlockingQueue}
+import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.input.TStreamTaskInputService
+import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, PersistentBlockingQueue}
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
-import com.bwsw.sj.engine.output.task.OutputTaskManager
-import com.bwsw.sj.engine.output.task.engine.handler.{EsOutputHandler, JdbcOutputHandler, OutputHandler}
+import com.bwsw.sj.engine.output.processing.OutputProcessor
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
 
@@ -40,9 +39,8 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private val executor = manager.getExecutor(environmentManager).asInstanceOf[OutputStreamingExecutor]
   val taskInputService = new TStreamTaskInputService(manager, blockingQueue)
   protected val isNotOnlyCustomCheckpoint: Boolean
-  private val handler = createHandler(outputStream)
+  private val outputProcessor = OutputProcessor(outputStream, performanceMetrics, manager)
   private var wasFirstCheckpoint = false
-
 
   private def getOutputStream: SjStream = {
     val streamService = ConnectionRepository.getStreamService
@@ -56,17 +54,6 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     val options = instance.getOptionsAsMap()
     new OutputEnvironmentManager(options, outputs)
   }
-
-
-  private def createHandler(outputStream: SjStream): OutputHandler = {
-    outputStream.streamType match {
-      case StreamLiterals.esOutputType =>
-        new EsOutputHandler(outputStream, performanceMetrics, manager)
-      case StreamLiterals.jdbcOutputType =>
-        new JdbcOutputHandler(outputStream, performanceMetrics, manager)
-    }
-  }
-
 
   /**
    * Check whether a group checkpoint of t-streams consumers/producers have to be done or not
@@ -103,11 +90,11 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
    */
   private def processOutputEnvelope(serializedEnvelope: String) = {
     afterReceivingEnvelope()
-    val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope).asInstanceOf[TStreamEnvelope]
-    registerInputEnvelope(envelope)
+    val inputEnvelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope).asInstanceOf[TStreamEnvelope]
+    registerInputEnvelope(inputEnvelope)
     logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
-    val outputEnvelopes: List[Envelope] = executor.onMessage(envelope)
-    handler.process(outputEnvelopes, envelope, wasFirstCheckpoint)
+    val outputEnvelopes: List[Envelope] = executor.onMessage(inputEnvelope)
+    outputProcessor.process(outputEnvelopes, inputEnvelope, wasFirstCheckpoint)
   }
 
 

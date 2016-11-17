@@ -36,11 +36,11 @@ class ElasticsearchClient(hosts: Set[(String, Int)]) {
     client.admin().indices().prepareDelete(index).execute().actionGet()
   }
 
-  def createMapping(index: String, mappingType: String, mappingDefinition: String) = {
+  def createMapping(index: String, mappingType: String, mappingSource: String) = {
     client.admin().indices()
       .preparePutMapping(index)
       .setType(mappingType)
-      .setSource(mappingDefinition)
+      .setSource(mappingSource)
       .execute()
       .actionGet()
   }

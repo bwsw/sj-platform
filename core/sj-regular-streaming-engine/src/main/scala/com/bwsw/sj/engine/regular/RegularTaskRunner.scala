@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.regular
 
 import com.bwsw.sj.engine.core.engine.TaskRunner
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
-import com.bwsw.sj.engine.regular.task.engine.RegularTaskEngine
+import com.bwsw.sj.engine.regular.task.RegularTaskEngine
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
 

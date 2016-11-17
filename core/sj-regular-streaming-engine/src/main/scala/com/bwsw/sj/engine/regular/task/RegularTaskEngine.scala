@@ -1,16 +1,16 @@
-package com.bwsw.sj.engine.regular.task.engine
+package com.bwsw.sj.engine.regular.task
 
 import java.util.concurrent.Callable
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine, PersistentBlockingQueue}
+import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, PersistentBlockingQueue, TimeCheckpointTaskEngine}
 import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
-import com.bwsw.sj.engine.core.state.{StatelessCommonModuleService, StatefulCommonModuleService, CommonModuleService}
-import com.bwsw.sj.engine.regular.task.engine.input.TaskInputServiceFactory
+import com.bwsw.sj.engine.core.state.{CommonModuleService, StatefulCommonModuleService, StatelessCommonModuleService}
+import com.bwsw.sj.engine.regular.task.input.TaskInputServiceFactory
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
 

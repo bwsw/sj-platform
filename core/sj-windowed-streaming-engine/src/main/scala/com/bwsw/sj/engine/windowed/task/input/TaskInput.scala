@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.windowed.task.engine.input
+package com.bwsw.sj.engine.windowed.task.input
 
 import com.bwsw.sj.common.DAL.model.SjStream
 import com.bwsw.sj.common.utils.StreamLiterals

@@ -6,9 +6,9 @@ import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.TaskRunner
 import com.bwsw.sj.engine.core.entities.Batch
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
-import com.bwsw.sj.engine.windowed.task.engine.WindowedTaskEngine
-import com.bwsw.sj.engine.windowed.task.engine.collecting.BatchCollector
-import com.bwsw.sj.engine.windowed.task.engine.input.TaskInput
+import com.bwsw.sj.engine.windowed.collecting.BatchCollector
+import com.bwsw.sj.engine.windowed.task.WindowedTaskEngine
+import com.bwsw.sj.engine.windowed.task.input.TaskInput
 import com.bwsw.sj.engine.windowed.task.reporting.WindowedStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
 

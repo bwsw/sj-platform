@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.regular.task.engine.input
+package com.bwsw.sj.engine.regular.task.input
 
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.engine.input.{TStreamTaskInputService, TaskInputService}

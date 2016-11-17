@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.windowed.task.engine.input
+package com.bwsw.sj.engine.windowed.task.input
 
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager

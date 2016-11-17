@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.windowed.task.engine
+package com.bwsw.sj.engine.windowed.task
 
 import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
 
@@ -9,7 +9,7 @@ import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.state.{StatefulCommonModuleService, StatelessCommonModuleService}
 import com.bwsw.sj.engine.core.windowed.{WindowRepository, WindowedStreamingExecutor}
-import com.bwsw.sj.engine.windowed.task.engine.input.TaskInput
+import com.bwsw.sj.engine.windowed.task.input.TaskInput
 import com.bwsw.sj.engine.windowed.task.reporting.WindowedStreamingPerformanceMetrics
 import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.framework.recipes.barriers.DistributedDoubleBarrier

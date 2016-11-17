@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.windowed.task.engine.input
+package com.bwsw.sj.engine.windowed.task.input
 
 import java.util.Date
 
