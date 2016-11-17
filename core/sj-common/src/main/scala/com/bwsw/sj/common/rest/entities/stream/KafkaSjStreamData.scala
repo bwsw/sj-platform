@@ -4,7 +4,8 @@ import java.util.Properties
 
 import com.bwsw.sj.common.DAL.model.{KafkaService, KafkaSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{ConfigSettingsUtils, ServiceLiterals, StreamLiterals}
+import com.bwsw.sj.common.config.ConfigurationSettingsUtils
+import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonProperty
 import kafka.admin.AdminUtils
 import kafka.common.{TopicAlreadyMarkedForDeletionException, TopicExistsException}
@@ -110,7 +111,7 @@ class KafkaSjStreamData() extends SjStreamData() {
     val service = serviceDAO.get(this.service).get.asInstanceOf[KafkaService]
     val zkHost = service.zkProvider.hosts
     val zkConnect = new ZkConnection(zkHost.mkString(";"))
-    val zkTimeout = ConfigSettingsUtils.getZkSessionTimeout()
+    val zkTimeout = ConfigurationSettingsUtils.getZkSessionTimeout()
     val zkClient = ZkUtils.createZkClient(zkHost.mkString(";"), zkTimeout, zkTimeout)
     val zkUtils = new ZkUtils(zkClient, zkConnect, false)
 

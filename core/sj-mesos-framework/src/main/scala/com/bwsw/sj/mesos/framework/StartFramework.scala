@@ -1,9 +1,9 @@
 package com.bwsw.sj.mesos.framework
 
+import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.mesos.framework.rest.Rest
 import com.bwsw.sj.mesos.framework.schedule.FrameworkScheduler
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.ConfigLiterals
 import org.apache.mesos.MesosSchedulerDriver
 import org.apache.mesos.Protos.FrameworkInfo
 import org.apache.mesos.Protos.Credential

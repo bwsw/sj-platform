@@ -11,9 +11,10 @@ import akka.http.scaladsl.server.directives.FileInfo
 import akka.stream.scaladsl.{FileIO, Source}
 import akka.util.ByteString
 import com.bwsw.sj.common.DAL.model.ConfigurationSetting
+import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
 import com.bwsw.sj.common.rest.entities._
-import com.bwsw.sj.common.utils.{RestLiterals, ConfigLiterals}
-import com.bwsw.sj.common.utils.ConfigurationSettingsUtils._
+import ConfigurationSettingsUtils._
+import com.bwsw.sj.crud.rest.RestLiterals
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import org.apache.commons.io.FileUtils

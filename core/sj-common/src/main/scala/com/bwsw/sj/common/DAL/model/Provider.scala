@@ -7,8 +7,9 @@ import java.util.Collections
 import com.aerospike.client.{AerospikeClient, AerospikeException}
 import com.bwsw.common.ElasticsearchClient
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.rest.entities.provider.ProviderData
-import com.bwsw.sj.common.utils.{ConfigLiterals, ProviderLiterals}
+import com.bwsw.sj.common.utils.ProviderLiterals
 import com.datastax.driver.core.Cluster
 import com.datastax.driver.core.exceptions.NoHostAvailableException
 import kafka.javaapi.TopicMetadataRequest

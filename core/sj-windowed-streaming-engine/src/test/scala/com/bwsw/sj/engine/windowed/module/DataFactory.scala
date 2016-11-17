@@ -10,6 +10,7 @@ import com.bwsw.sj.common.DAL.model.module.{Instance, Task, WindowedInstance}
 import com.bwsw.sj.common.DAL.model.{Provider, Service, _}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
+import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.rest.entities.module.ExecutionPlan
 import com.bwsw.sj.common.utils.{GeneratorLiterals, _}
 import com.bwsw.tstreams.agents.consumer.Consumer
@@ -146,7 +147,7 @@ object DataFactory {
 
   def createStreams(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service],
                     partitions: Int, _type: String, inputCount: Int, outputCount: Int) = {
-    assert(partitions >= 1, "Partitions must be a positive integer")
+    require(partitions >= 1, "Partitions must be a positive integer")
     _type match {
       case "tstream" =>
         (1 to inputCount).foreach(x => {

@@ -1,0 +1,32 @@
+{
+  "name": "windowed-sum",
+  "description": "Module by BW of numbers summation",
+  "version": "1.0",
+  "author": "Ksenia Mikhaleva",
+  "license": "Apache 2.0",
+  "inputs": {
+    "cardinality": [
+      1,
+      10
+    ],
+    "types": [
+      "stream.kafka"
+    ]
+  },
+  "outputs": {
+    "cardinality": [
+      1,
+      10
+    ],
+    "types": [
+      "stream.t-stream"
+    ]
+  },
+  "module-type": "windowed-streaming",
+  "engine-name": "com.bwsw.windowed.streaming.engine",
+  "engine-version": "1.0",
+  "options": {
+  },
+  "validator-class": "com.bwsw.sj.examples.sum.Validator",
+  "executor-class": "com.bwsw.sj.examples.sum.Executor"
+}

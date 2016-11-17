@@ -3,7 +3,8 @@ package com.bwsw.sj.transaction.generator.server
 import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
 
 import com.bwsw.common.LeaderLatch
-import com.bwsw.sj.common.utils.{ConfigSettingsUtils, GeneratorLiterals}
+import com.bwsw.sj.common.config.ConfigurationSettingsUtils
+import com.bwsw.sj.common.utils.GeneratorLiterals
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.nio.NioEventLoopGroup
@@ -21,7 +22,7 @@ import org.apache.log4j.Logger
  */
 class TcpServer(zkServers: String, prefix: String, host: String, port: Int) {
   private val logger = Logger.getLogger(getClass)
-  private val retryPeriod = ConfigSettingsUtils.getServerRetryPeriod()
+  private val retryPeriod = ConfigurationSettingsUtils.getServerRetryPeriod()
   private val masterNode = prefix + GeneratorLiterals.masterDirectory
   private val address = host + ":" + port
 

@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory
 class TStreamTaskInputService(manager: TaskManager,
                               blockingQueue: PersistentBlockingQueue,
                               override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
-  extends TaskInputService[TStreamEnvelope](manager.inputs) {
+  extends CallableTaskInputService[TStreamEnvelope](manager.inputs) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val consumers = createSubscribingConsumers()
 

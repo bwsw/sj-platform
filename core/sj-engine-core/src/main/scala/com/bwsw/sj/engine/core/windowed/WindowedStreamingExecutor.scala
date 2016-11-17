@@ -46,4 +46,12 @@ class WindowedStreamingExecutor(manager: ModuleEnvironmentManager) extends Strea
    * Nothing to execute
    */
   def onIdle(): Unit = {}
+
+  def onEnter() = {}
+
+  def onLeaderEnter() = {}
+
+  def onLeave() = {}
+
+  def onLeaderLeave() = {}
 }

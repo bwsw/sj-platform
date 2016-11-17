@@ -1,7 +1,7 @@
 package com.bwsw.sj.common.DAL
 
 object ConnectionConstants {
-  assert(System.getenv("MONGO_HOST") != null && System.getenv("MONGO_PORT") != null,
+  require(System.getenv("MONGO_HOST") != null && System.getenv("MONGO_PORT") != null,
     "No environment variables: MONGO_HOST, MONGO_PORT")
   
   val mongoHost = System.getenv("MONGO_HOST")

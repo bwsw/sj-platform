@@ -87,7 +87,6 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
     tcpIpConfig.setMembers(hosts).setEnabled(true)
   }
 
-
   /**
    * Creates a config that defines a max size of Hazelcast map
    *
@@ -97,5 +96,19 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
     logger.debug(s"Create MaxSizeConfig\n")
     new MaxSizeConfig()
       .setSize(instance.queueMaxSize)
+  }
+}
+
+object InputInstanceEvictionPolicy {
+  /**
+   * Creates an eviction policy that defines a way of eviction of duplicate envelope
+   * @return Eviction policy of duplicate envelopes
+   */
+  def apply(instance: InputInstance) = {
+    instance.evictionPolicy match {
+      case EngineLiterals.fixTimeEvictionPolicy => new FixTimeEvictionPolicy(instance)
+      case EngineLiterals.expandedTimeEvictionPolicy => new ExpandedTimeEvictionPolicy(instance)
+      case _ => throw new RuntimeException(s"There is no eviction policy named: ${instance.evictionPolicy}")
+    }
   }
 }

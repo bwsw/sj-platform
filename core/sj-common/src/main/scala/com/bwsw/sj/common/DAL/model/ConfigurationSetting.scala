@@ -1,7 +1,8 @@
 package com.bwsw.sj.common.DAL.model
 
+import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.rest.entities.config.ConfigurationSettingData
-import com.bwsw.sj.common.utils.ConfigurationSettingsUtils._
+import ConfigurationSettingsUtils._
 import org.mongodb.morphia.annotations.{Id, Entity}
 
 /**

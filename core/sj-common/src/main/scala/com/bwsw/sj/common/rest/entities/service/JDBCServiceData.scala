@@ -1,9 +1,9 @@
 package com.bwsw.sj.common.rest.entities.service
 
+import com.bwsw.common.jdbc.JdbcClientBuilder
 import com.bwsw.sj.common.DAL.model.JDBCService
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.ServiceLiterals
-import com.bwsw.common.JdbcClientBuilder
+import com.bwsw.sj.common.utils.{JdbcLiterals, ServiceLiterals}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -40,8 +40,8 @@ class JDBCServiceData() extends ServiceData() {
           errors += s"'Driver' is required"
         }
         else {
-          if (!JdbcClientBuilder.validDrivers.contains(x)) {
-            errors += s"Existing drivers: ${JdbcClientBuilder.validDrivers}"
+          if (!JdbcLiterals.validDrivers.contains(x)) {
+            errors += s"Existing drivers: ${JdbcLiterals.validDrivers}"
           }
         }
     }

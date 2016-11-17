@@ -33,7 +33,7 @@ object FrameworkUtil {
       case _: OutputInstance => 2
       case regularInstance: RegularInstance => regularInstance.inputs.length + regularInstance.outputs.length + 4
       case _: InputInstance => instance.outputs.length + 2
-      case windowedInstance: WindowedInstance => 1 //todo
+      case windowedInstance: WindowedInstance => 1 + windowedInstance.relatedStreams.length + windowedInstance.outputs.length + 4
     }
   }
 
