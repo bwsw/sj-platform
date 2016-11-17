@@ -35,12 +35,12 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private val envelopeSerializer = new JsonSerializer()
   private val instance = manager.instance.asInstanceOf[OutputInstance]
   private val outputStream = getOutputStream
-  protected val environmentManager = createModuleEnvironmentManager()
+  private val environmentManager = createModuleEnvironmentManager()
   private val executor = manager.getExecutor(environmentManager).asInstanceOf[OutputStreamingExecutor]
   val taskInputService = new TStreamTaskInputService(manager, blockingQueue)
-  protected val isNotOnlyCustomCheckpoint: Boolean
   private val outputProcessor = OutputProcessor(outputStream, performanceMetrics, manager)
   private var wasFirstCheckpoint = false
+  protected val checkpointInterval = instance.checkpointInterval
 
   private def getOutputStream: SjStream = {
     val streamService = ConnectionRepository.getStreamService

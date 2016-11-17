@@ -2,9 +2,9 @@ package com.bwsw.sj.engine.windowed.task.input
 
 import com.bwsw.sj.common.DAL.model.SjStream
 import com.bwsw.sj.common.utils.StreamLiterals
+import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
-import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
 /**
@@ -13,33 +13,8 @@ import org.slf4j.LoggerFactory
  *
  * @author Kseniya Mikhaleva
  */
-abstract class TaskInput[T <: Envelope](inputs: scala.collection.mutable.Map[SjStream, Array[Int]]) {
-  private val lastEnvelopesByStreams = createStorageOfLastEnvelopes()
-  val checkpointGroup: CheckpointGroup
-
-  private def createStorageOfLastEnvelopes() = {
-    inputs.flatMap(x => x._2.map(y => ((x._1.name, y), new Envelope())))
-  }
-
+abstract class TaskInput[T <: Envelope](inputs: scala.collection.mutable.Map[SjStream, Array[Int]]) extends TaskInputService[T](inputs) {
   def get(): Iterable[T]
-
-  def registerEnvelope(envelope: Envelope) = {
-    lastEnvelopesByStreams((envelope.stream, envelope.partition)) = envelope
-  }
-
-  def setConsumerOffsetToLastEnvelope() = {
-    lastEnvelopesByStreams.values.filterNot(_.isEmpty()).foreach(envelope => {
-      setConsumerOffset(envelope.asInstanceOf[T])
-    })
-    lastEnvelopesByStreams.clear()
-  }
-
-  protected def setConsumerOffset(envelope: T)
-
-  def doCheckpoint() = {
-    setConsumerOffsetToLastEnvelope()
-    checkpointGroup.checkpoint()
-  }
 }
 
 object TaskInput {

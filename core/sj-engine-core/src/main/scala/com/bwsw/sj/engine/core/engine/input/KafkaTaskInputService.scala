@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.regular.task.input
+package com.bwsw.sj.engine.core.engine.input
 
 import java.util.Properties
 
@@ -6,11 +6,10 @@ import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.module.{RegularInstance, WindowedInstance}
 import com.bwsw.sj.common.DAL.model.{KafkaService, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
-import ConfigurationSettingsUtils._
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
-import com.bwsw.sj.engine.core.engine.input.TaskInputService
 import com.bwsw.sj.engine.core.entities.KafkaEnvelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.consumer.Offset.Newest
@@ -38,7 +37,7 @@ import scala.collection.mutable
 class KafkaTaskInputService(manager: CommonTaskManager,
                             blockingQueue: PersistentBlockingQueue,
                             override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
-  extends TaskInputService[KafkaEnvelope](manager.inputs) {
+  extends CallableTaskInputService[KafkaEnvelope](manager.inputs) {
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"regular-task-${manager.taskName}-kafka-consumer")
   private val logger = LoggerFactory.getLogger(this.getClass)

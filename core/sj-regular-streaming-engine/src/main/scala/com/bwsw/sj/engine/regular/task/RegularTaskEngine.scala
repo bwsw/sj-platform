@@ -5,12 +5,12 @@ import java.util.concurrent.Callable
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.engine.core.engine.input.CallableTaskInputService
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, PersistentBlockingQueue, TimeCheckpointTaskEngine}
 import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.state.{CommonModuleService, StatefulCommonModuleService, StatelessCommonModuleService}
-import com.bwsw.sj.engine.regular.task.input.TaskInputServiceFactory
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
 
@@ -31,12 +31,11 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(EngineLiterals.persistentBlockingQueue)
   private val instance = manager.instance.asInstanceOf[RegularInstance]
-  private val taskInputServiceFactory = new TaskInputServiceFactory(manager, blockingQueue)
-  val taskInputService = taskInputServiceFactory.createTaskInputService()
+  val taskInputService = CallableTaskInputService(manager, blockingQueue)
   private val moduleService = createRegularModuleService()
   private val executor = moduleService.executor.asInstanceOf[RegularStreamingExecutor]
   private val moduleTimer = moduleService.moduleTimer
-  protected val isNotOnlyCustomCheckpoint: Boolean
+  protected val checkpointInterval = instance.checkpointInterval
 
   private val envelopeSerializer = new JsonSerializer(true)
 

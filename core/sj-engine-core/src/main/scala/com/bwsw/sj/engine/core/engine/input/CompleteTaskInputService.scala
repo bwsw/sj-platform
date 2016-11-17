@@ -1,7 +1,6 @@
-package com.bwsw.sj.engine.regular.task.input
+package com.bwsw.sj.engine.core.engine.input
 
 import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
-import com.bwsw.sj.engine.core.engine.input.{TStreamTaskInputService, TaskInputService}
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
@@ -20,7 +19,7 @@ import org.slf4j.LoggerFactory
 class CompleteTaskInputService(manager: CommonTaskManager,
                                blockingQueue: PersistentBlockingQueue) extends {
   override val checkpointGroup = new CheckpointGroup()
-} with TaskInputService[Envelope](manager.inputs) {
+} with CallableTaskInputService[Envelope](manager.inputs) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val kafkaRegularTaskInputService = new KafkaTaskInputService(manager, blockingQueue, checkpointGroup)

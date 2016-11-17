@@ -1,6 +1,5 @@
 package com.bwsw.sj.engine.core.engine
 
-import com.bwsw.sj.engine.core.managment.TaskManager
 import org.slf4j.LoggerFactory
 
 /**
@@ -8,12 +7,10 @@ import org.slf4j.LoggerFactory
  */
 
 trait NumericalCheckpointTaskEngine {
-
   private val logger = LoggerFactory.getLogger(this.getClass)
-  protected val manager: TaskManager
   private var countOfEnvelopes = 0
-  private lazy val checkpointInterval = manager.instance.getCheckpointInterval()
-  val isNotOnlyCustomCheckpoint = checkpointInterval > 0
+  protected val checkpointInterval: Long
+  private val isNotOnlyCustomCheckpoint = checkpointInterval > 0
 
   def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean = {
     isNotOnlyCustomCheckpoint && countOfEnvelopes == checkpointInterval || isCheckpointInitiated
@@ -24,7 +21,7 @@ trait NumericalCheckpointTaskEngine {
   }
 
   private def increaseCounter() = {
-    logger.debug(s"Task: ${manager.taskName}. Increase count of envelopes to: $countOfEnvelopes\n")
+    logger.debug(s"Increase count of envelopes to: $countOfEnvelopes\n")
     countOfEnvelopes += 1
   }
 
@@ -33,7 +30,7 @@ trait NumericalCheckpointTaskEngine {
   }
 
   private def resetCounter() = {
-    logger.debug(s"Task: ${manager.taskName}. Reset a counter of envelopes to 0\n")
+    logger.debug(s"Reset a counter of envelopes to 0\n")
     countOfEnvelopes = 0
   }
 }
