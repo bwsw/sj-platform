@@ -21,6 +21,7 @@ protected class JdbcClient (private var jdbcCCD: JdbcClientConnectionData) {
   private def createConnection(): Unit = {
     val url = Array(jdbcCCD.driverPrefix, jdbcCCD.hosts.mkString("://", ",", "/"), jdbcCCD.database).mkString
     java.util.Locale.setDefault(java.util.Locale.ENGLISH)
+    Class.forName(jdbcCCD.driverClass)
     _connection = Some(DriverManager.getConnection(url, jdbcCCD.username, jdbcCCD.password))
   }
 
