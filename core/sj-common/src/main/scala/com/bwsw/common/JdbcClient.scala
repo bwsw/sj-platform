@@ -7,7 +7,6 @@ package com.bwsw.common
 import java.sql.{Connection, DriverManager, SQLException}
 
 
-
 // todo: Add multiple connection to databases.
 /**
   * JDBC client - JDBC connection wrapper
@@ -206,3 +205,8 @@ object JdbcClientBuilder{
     this.jdbcClientConnectionData = jdbcClientConnectionData; this
   }
 }
+
+
+
+
+

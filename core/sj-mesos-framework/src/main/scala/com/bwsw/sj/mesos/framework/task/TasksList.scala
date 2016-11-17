@@ -1,5 +1,11 @@
 package com.bwsw.sj.mesos.framework.task
 
+import com.bwsw.sj.common.DAL.model.module._
+import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.mesos.framework.schedule.FrameworkUtil
+import scala.collection.JavaConverters._
+
+
 import scala.collection.mutable
 
 object TasksList {
@@ -8,6 +14,10 @@ object TasksList {
   private val listTasks : mutable.Map[String, Task] = mutable.Map()
   var message: String = "Initialization"
   var availablePorts: collection.mutable.ListBuffer[Long] = collection.mutable.ListBuffer()
+
+  var perTaskCores: Double = 0.0
+  var perTaskMem: Double = 0.0
+  var perTaskPortsCount: Int = 0
 
   def newTask(taskId: String) = {
     val task = new Task(taskId)
@@ -52,9 +62,23 @@ object TasksList {
     toLaunch.size
   }
 
+  def prepare(instance: Instance) = {
+    perTaskCores = FrameworkUtil.instance.perTaskCores
+    perTaskMem = FrameworkUtil.instance.perTaskRam
+    perTaskPortsCount = FrameworkUtil.getCountPorts(FrameworkUtil.instance)
 
-// todo  def prepare() = {
-//
-//  }
+    val tasks = FrameworkUtil.instance.moduleType match {
+      case EngineLiterals.inputStreamingType =>
+        (0 until FrameworkUtil.instance.parallelism).map(tn => FrameworkUtil.instance.name + "-task" + tn)
+      case _ =>
+        val executionPlan = FrameworkUtil.instance match {
+          case regularInstance: RegularInstance => regularInstance.executionPlan
+          case outputInstance: OutputInstance => outputInstance.executionPlan
+          case windowedInstance: WindowedInstance => windowedInstance.executionPlan
+        }
+        executionPlan.tasks.asScala.keys
+    }
+    tasks.foreach(task => newTask(task))
+  }
 
 }

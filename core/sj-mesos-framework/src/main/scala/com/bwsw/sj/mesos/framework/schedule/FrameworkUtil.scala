@@ -6,7 +6,7 @@ import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.mesos.framework.task.TasksList
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos.MasterInfo
-import org.apache.mesos.{MesosSchedulerDriver, SchedulerDriver}
+import org.apache.mesos.SchedulerDriver
 
 import scala.util.Properties
 

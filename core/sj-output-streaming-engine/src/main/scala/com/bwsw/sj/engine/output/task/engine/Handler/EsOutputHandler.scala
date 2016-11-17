@@ -75,7 +75,6 @@ class EsOutputHandler(outputStream: SjStream,
   def send(envelope: Envelope, inputEnvelope: TStreamEnvelope) = {
     val esEnvelope = envelope.asInstanceOf[EsEnvelope]
     esEnvelope.outputDateTime = s"${Calendar.getInstance().getTimeInMillis}"
-    // todo REMOVED 4 zeros from transactionDateTime (check it)
     esEnvelope.transactionDateTime = s"${inputEnvelope.id}".dropRight(4)
     esEnvelope.txn = inputEnvelope.id.toString.replaceAll("-", "")
     esEnvelope.stream = inputEnvelope.stream

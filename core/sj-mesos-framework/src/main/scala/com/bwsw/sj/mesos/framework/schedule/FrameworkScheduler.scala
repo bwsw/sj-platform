@@ -11,12 +11,9 @@ import com.bwsw.sj.mesos.framework.task.{StatusHandler, TasksList}
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos._
 import org.apache.mesos.{Scheduler, SchedulerDriver}
-
 import scala.collection.JavaConverters._
 import scala.collection.immutable
 import scala.collection.mutable
-import scala.util.Properties
-
 
 
 /**
@@ -25,9 +22,6 @@ import scala.util.Properties
 class FrameworkScheduler extends Scheduler {
 
   private val logger = Logger.getLogger(this.getClass)
-  var perTaskCores: Double = 0.0
-  var perTaskMem: Double = 0.0
-  var perTaskPortsCount: Int = 0
   var params = immutable.Map[String, String]()
   val configFileService = ConnectionRepository.getConfigService
   var jarName: String = null
@@ -39,16 +33,23 @@ class FrameworkScheduler extends Scheduler {
     TasksList.message = s"Got error message: $message"
   }
 
-  def executorLost(driver: SchedulerDriver, executorId: ExecutorID, slaveId: SlaveID, status: Int) {}
+  def executorLost(driver: SchedulerDriver, executorId: ExecutorID, slaveId: SlaveID, status: Int): Unit = {
+    /// TODO:
+  }
 
-  def slaveLost(driver: SchedulerDriver, slaveId: SlaveID) {}
+  def slaveLost(driver: SchedulerDriver, slaveId: SlaveID): Unit = {
+    /// TODO:
+  }
 
-  def disconnected(driver: SchedulerDriver) {}
+  def disconnected(driver: SchedulerDriver): Unit = {
+    /// TODO:
+  }
 
   def frameworkMessage(driver: SchedulerDriver, executorId: ExecutorID, slaveId: SlaveID, data: Array[Byte]) {
     logger.debug(s"Got framework message: $data")
     TasksList.message = s"Got framework message: $data"
   }
+
 
   /**
    * Execute when task change status.
@@ -63,7 +64,8 @@ class FrameworkScheduler extends Scheduler {
     offer.getUrl.getAddress.getIp
   }
 
-  def offerRescinded(driver: SchedulerDriver, offerId: OfferID) {
+  def offerRescinded(driver: SchedulerDriver, offerId: OfferID): Unit = {
+    /// TODO:
   }
 
 
@@ -76,8 +78,8 @@ class FrameworkScheduler extends Scheduler {
   override def resourceOffers(driver: SchedulerDriver, offers: util.List[Offer]) {
     logger.info(s"RESOURCE OFFERS")
     TasksList.clearAvailablePorts()
-    val filteredOffers = OfferHandler.filter(offers, FrameworkUtil.instance.nodeAttributes)
-    if (filteredOffers.size == 0) {
+    OfferHandler.filter(offers, FrameworkUtil.instance.nodeAttributes)
+    if (OfferHandler.filteredOffers.size == 0) {
       for (offer <- offers.asScala) {
         driver.declineOffer(offer.getId)
       }
@@ -86,16 +88,16 @@ class FrameworkScheduler extends Scheduler {
       return
     }
 
-    for (offer <- filteredOffers.asScala) {
+    for (offer <- OfferHandler.filteredOffers.asScala) {
       logger.debug(s"Offer ID: ${offer.getId.getValue}")
       logger.debug(s"Slave ID: ${offer.getSlaveId.getValue}")
     }
 
-    var tasksCountOnSlaves = OfferHandler.getOffersForSlave(perTaskCores,
-      perTaskMem,
-      perTaskPortsCount,
+    var tasksCountOnSlaves = OfferHandler.getOffersForSlave(TasksList.perTaskCores,
+      TasksList.perTaskMem,
+      TasksList.perTaskPortsCount,
       TasksList.count,
-      filteredOffers)
+      OfferHandler.filteredOffers)
 
     var overTasks = 0
     for (slave <- tasksCountOnSlaves) {
@@ -142,13 +144,13 @@ class FrameworkScheduler extends Scheduler {
       val cpus = Resource.newBuilder
         .setType(Value.Type.SCALAR)
         .setName("cpus")
-        .setScalar(Value.Scalar.newBuilder.setValue(perTaskCores))
+        .setScalar(Value.Scalar.newBuilder.setValue(TasksList.perTaskCores))
         .build
       val mem = Resource.newBuilder
         .setType(org.apache.mesos.Protos.Value.Type.SCALAR)
         .setName("mem")
         .setScalar(org.apache.mesos.Protos.Value.
-        Scalar.newBuilder.setValue(perTaskMem)
+        Scalar.newBuilder.setValue(TasksList.perTaskMem)
         ).build
       val ports = getPorts(currentOffer._1, currTask)
 
@@ -235,6 +237,7 @@ class FrameworkScheduler extends Scheduler {
     TasksList.message = "Tasks launched"
   }
 
+
   /**
    * Reregistering framework after master disconnected.
    */
@@ -242,6 +245,7 @@ class FrameworkScheduler extends Scheduler {
     logger.debug(s"New master $masterInfo")
     TasksList.message = s"New master $masterInfo"
   }
+
 
   /**
    * Registering framework.
@@ -256,50 +260,23 @@ class FrameworkScheduler extends Scheduler {
     params = FrameworkUtil.getEnvParams()
     logger.debug(s"Got environment variable: $params")
 
-
-
     val optionInstance = ConnectionRepository.getInstanceService.get(params("instanceId"))
-
-    // todo TasksList.prepare(optionInstance)
 
     if (optionInstance.isEmpty) {
       logger.error(s"Not found instance")
-      driver.stop()
       TasksList.message = "Framework shut down: not found instance."
+      driver.stop()
       return
     } else { FrameworkUtil.instance = optionInstance.get}
     logger.debug(s"Got instance ${FrameworkUtil.instance.name}")
 
-    perTaskCores = FrameworkUtil.instance.perTaskCores
-    perTaskMem = FrameworkUtil.instance.perTaskRam
-    perTaskPortsCount = FrameworkUtil.getCountPorts(FrameworkUtil.instance)
-    val tasks =
-      if (FrameworkUtil.instance.moduleType.equals(EngineLiterals.inputStreamingType))
-        (0 until FrameworkUtil.instance.parallelism).map(tn => FrameworkUtil.instance.name + "-task" + tn)
-      else {
-        val executionPlan = FrameworkUtil.instance match {
-          case regularInstance: RegularInstance => regularInstance.executionPlan
-          case outputInstance: OutputInstance => outputInstance.executionPlan
-          case windowedInstance: WindowedInstance => windowedInstance.executionPlan
-        }
-
-        executionPlan.tasks.asScala.keys
-      }
-
-    tasks.foreach(task => TasksList.newTask(task))
+    TasksList.prepare(FrameworkUtil.instance)
     logger.debug(s"Got tasks: $TasksList")
 
-    try {
-      uniqueHosts = Properties.envOrElse("UNIQUE_HOSTS", "false").toBoolean
-    } catch {
-      case e: Exception =>
-    }
+    scala.util.Try(System.getenv("UNIQUE_HOSTS").toBoolean).getOrElse(false)
 
     TasksList.message = s"Registered framework as: ${frameworkId.getValue}"
   }
-
-
-
 
 
   /**
@@ -329,8 +306,8 @@ class FrameworkScheduler extends Scheduler {
       TasksList.availablePorts ++= (range.getBegin to range.getEnd).to[mutable.ListBuffer]
     }
 
-    val ports: mutable.ListBuffer[Long] = TasksList.availablePorts.take(perTaskPortsCount)
-    TasksList.availablePorts.remove(0, perTaskPortsCount)
+    val ports: mutable.ListBuffer[Long] = TasksList.availablePorts.take(TasksList.perTaskPortsCount)
+    TasksList.availablePorts.remove(0, TasksList.perTaskPortsCount)
 
     val ranges = Value.Ranges.newBuilder
     for (port <- ports) {
