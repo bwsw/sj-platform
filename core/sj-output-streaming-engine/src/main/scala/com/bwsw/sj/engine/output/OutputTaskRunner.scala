@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.output
 
 import com.bwsw.sj.engine.core.engine.TaskRunner
 import com.bwsw.sj.engine.output.task.OutputTaskManager
-import com.bwsw.sj.engine.output.task.engine.OutputTaskEngineFactory
+import com.bwsw.sj.engine.output.task.engine.OutputTaskEngine
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
 
@@ -24,9 +24,7 @@ object OutputTaskRunner extends {override val threadName = "OutputTaskRunner-%d"
 
       val performanceMetrics = new OutputStreamingPerformanceMetrics(manager)
 
-      val outputTaskEngineFactory = new OutputTaskEngineFactory(manager, performanceMetrics)
-
-      val outputTaskEngine = outputTaskEngineFactory.createOutputTaskEngine()
+      val outputTaskEngine = OutputTaskEngine(manager, performanceMetrics)
 
       val outputTaskInputService = outputTaskEngine.taskInputService
 

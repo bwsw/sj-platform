@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.output.task.engine.Handler
+package com.bwsw.sj.engine.output.task.engine.handler
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.SjStream

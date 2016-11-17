@@ -1,15 +1,15 @@
-package com.bwsw.sj.engine.input.task.engine
+package com.bwsw.sj.engine.input.task
 
 import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
 
 import com.bwsw.sj.common.DAL.model.module.InputInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
 import com.bwsw.sj.engine.core.entities.InputEnvelope
 import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.engine.core.input.InputStreamingExecutor
 import com.bwsw.sj.engine.input.eviction_policy.{ExpandedTimeEvictionPolicy, FixTimeEvictionPolicy}
-import com.bwsw.sj.engine.input.task.InputTaskManager
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer, ProducerTransaction}
@@ -293,5 +293,28 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
     logger.debug(s"Task name: ${manager.taskName}. " +
       s"Create a storage for keeping txns for each partition of output streams\n")
     streams.map(x => (x, mutable.Map[Int, ProducerTransaction[Array[Byte]]]())).toMap
+  }
+}
+
+object InputTaskEngine {
+  protected val logger = LoggerFactory.getLogger(this.getClass)
+
+  /**
+   * Creates InputTaskEngine is in charge of a basic execution logic of task of input module
+   * @return Engine of input task
+   */
+  def apply(manager: InputTaskManager,
+            performanceMetrics: InputStreamingPerformanceMetrics,
+            channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
+            bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf]): InputTaskEngine = {
+
+    manager.inputInstance.checkpointMode match {
+      case EngineLiterals.`timeIntervalMode` =>
+        logger.info(s"Task: ${manager.taskName}. Input module has a '${EngineLiterals.timeIntervalMode}' checkpoint mode, create an appropriate task engine\n")
+        new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext) with TimeCheckpointTaskEngine
+      case EngineLiterals.`everyNthMode` =>
+        logger.info(s"Task: ${manager.taskName}. Input module has an '${EngineLiterals.everyNthMode}' checkpoint mode, create an appropriate task engine\n")
+        new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext) with NumericalCheckpointTaskEngine
+    }
   }
 }

@@ -3,18 +3,17 @@ package com.bwsw.sj.engine.output.task.engine
 import java.util.concurrent.Callable
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.utils.StreamLiterals
-import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.DAL.model.SjStream
+import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, PersistentBlockingQueue}
 import com.bwsw.sj.engine.core.engine.input.TStreamTaskInputService
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.output.task.OutputTaskManager
-import com.bwsw.sj.engine.output.task.engine.Handler.{EsOutputHandler, JdbcOutputHandler, OutputHandler}
+import com.bwsw.sj.engine.output.task.engine.handler.{EsOutputHandler, JdbcOutputHandler, OutputHandler}
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
 
@@ -28,7 +27,7 @@ import org.slf4j.LoggerFactory
  * @author Kseniya Mikhaleva
  */
 abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
-                                performanceMetrics: OutputStreamingPerformanceMetrics) extends Callable[Unit]{
+                                performanceMetrics: OutputStreamingPerformanceMetrics) extends Callable[Unit] {
 
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"output-task-${manager.taskName}-engine")
@@ -43,7 +42,6 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   protected val isNotOnlyCustomCheckpoint: Boolean
   private val handler = createHandler(outputStream)
   private var wasFirstCheckpoint = false
-
 
 
   private def getOutputStream: SjStream = {
@@ -71,16 +69,16 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
 
   /**
-    * Check whether a group checkpoint of t-streams consumers/producers have to be done or not
-    *
-    * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside output module (not on the schedule) or not.
-    */
+   * Check whether a group checkpoint of t-streams consumers/producers have to be done or not
+   *
+   * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside output module (not on the schedule) or not.
+   */
   protected def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean
 
 
   /**
-    * It is in charge of running a basic execution logic of output task engine
-    */
+   * It is in charge of running a basic execution logic of output task engine
+   */
   override def call(): Unit = {
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Run output task engine in a separate thread of execution service\n")
@@ -99,10 +97,10 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
 
   /**
-    * Handler for sending data to storage.
-    *
-    * @param serializedEnvelope: original envelope.
-    */
+   * Handler for sending data to storage.
+   *
+   * @param serializedEnvelope: original envelope.
+   */
   private def processOutputEnvelope(serializedEnvelope: String) = {
     afterReceivingEnvelope()
     val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope).asInstanceOf[TStreamEnvelope]
@@ -114,10 +112,10 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
 
   /**
-    * Register received envelope in performance metrics.
-    *
-    * @param envelope: received data
-    */
+   * Register received envelope in performance metrics.
+   *
+   * @param envelope: received data
+   */
   private def registerInputEnvelope(envelope: Envelope) = {
     taskInputService.registerEnvelope(envelope)
     performanceMetrics.addEnvelopeToInputStream(envelope)
@@ -125,14 +123,14 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
 
   /**
-    * Doing smth after catch envelope.
-    */
+   * Doing smth after catch envelope.
+   */
   protected def afterReceivingEnvelope(): Unit
 
 
   /**
-    * Does group checkpoint of t-streams consumers/producers
-    */
+   * Does group checkpoint of t-streams consumers/producers
+   */
   protected def doCheckpoint() = {
     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
     taskInputService.doCheckpoint()
@@ -143,4 +141,25 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
   protected def prepareForNextCheckpoint(): Unit
 
+}
+
+object OutputTaskEngine {
+  protected val logger = LoggerFactory.getLogger(this.getClass)
+
+  /**
+   * Creates OutputTaskEngine is in charge of a basic execution logic of task of output module
+   * @return Engine of output task
+   */
+  def apply(manager: OutputTaskManager,
+            performanceMetrics: OutputStreamingPerformanceMetrics): OutputTaskEngine = {
+
+    manager.outputInstance.checkpointMode match {
+      case EngineLiterals.`timeIntervalMode` =>
+        logger.error(s"Task: ${manager.taskName}. Output module can't have a '${EngineLiterals.timeIntervalMode}' checkpoint mode\n")
+        throw new Exception(s"Task: ${manager.taskName}. Output module can't have a '${EngineLiterals.timeIntervalMode}' checkpoint mode\n")
+      case EngineLiterals.`everyNthMode` =>
+        logger.info(s"Task: ${manager.taskName}. Output module has an '${EngineLiterals.everyNthMode}' checkpoint mode, create an appropriate task engine\n")
+        new OutputTaskEngine(manager, performanceMetrics) with NumericalCheckpointTaskEngine
+    }
+  }
 }

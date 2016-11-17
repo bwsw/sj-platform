@@ -9,7 +9,7 @@ import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.state.{StatefulCommonModuleService, StatelessCommonModuleService}
 import com.bwsw.sj.engine.core.windowed.{WindowRepository, WindowedStreamingExecutor}
-import com.bwsw.sj.engine.windowed.task.engine.input.Input
+import com.bwsw.sj.engine.windowed.task.engine.input.TaskInput
 import com.bwsw.sj.engine.windowed.task.reporting.WindowedStreamingPerformanceMetrics
 import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.framework.recipes.barriers.DistributedDoubleBarrier
@@ -17,7 +17,7 @@ import org.apache.curator.retry.ExponentialBackoffRetry
 import org.slf4j.LoggerFactory
 
 class WindowedTaskEngine(protected val manager: CommonTaskManager,
-                         inputService: Input[_ >: TStreamEnvelope with KafkaEnvelope <: Envelope],
+                         inputService: TaskInput[_ >: TStreamEnvelope with KafkaEnvelope <: Envelope],
                          batchQueue: ArrayBlockingQueue[Batch],
                          performanceMetrics: WindowedStreamingPerformanceMetrics) extends Callable[Unit] {
 

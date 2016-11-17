@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.regular
 
 import com.bwsw.sj.engine.core.engine.TaskRunner
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
-import com.bwsw.sj.engine.regular.task.engine.{RegularTaskEngine, RegularTaskEngineFactory}
+import com.bwsw.sj.engine.regular.task.engine.RegularTaskEngine
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
 
@@ -25,9 +25,7 @@ object RegularTaskRunner extends {override val threadName = "RegularTaskRunner-%
 
       val performanceMetrics: RegularStreamingPerformanceMetrics = new RegularStreamingPerformanceMetrics(manager)
 
-      val regularTaskEngineFactory = new RegularTaskEngineFactory(manager, performanceMetrics)
-
-      val regularTaskEngine: RegularTaskEngine = regularTaskEngineFactory.createRegularTaskEngine()
+      val regularTaskEngine = RegularTaskEngine(manager, performanceMetrics)
 
       val regularTaskInputService = regularTaskEngine.taskInputService
 

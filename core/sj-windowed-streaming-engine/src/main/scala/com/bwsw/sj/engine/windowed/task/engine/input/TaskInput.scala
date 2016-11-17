@@ -1,8 +1,11 @@
 package com.bwsw.sj.engine.windowed.task.engine.input
 
 import com.bwsw.sj.common.DAL.model.SjStream
+import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.entities.Envelope
+import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
+import org.slf4j.LoggerFactory
 
 /**
  * Class is responsible for handling an input streams of specific type(types),
@@ -10,7 +13,7 @@ import com.bwsw.tstreams.agents.group.CheckpointGroup
  *
  * @author Kseniya Mikhaleva
  */
-abstract class Input[T <: Envelope](inputs: scala.collection.mutable.Map[SjStream, Array[Int]]) {
+abstract class TaskInput[T <: Envelope](inputs: scala.collection.mutable.Map[SjStream, Array[Int]]) {
   private val lastEnvelopesByStreams = createStorageOfLastEnvelopes()
   val checkpointGroup: CheckpointGroup
 
@@ -36,5 +39,23 @@ abstract class Input[T <: Envelope](inputs: scala.collection.mutable.Map[SjStrea
   def doCheckpoint() = {
     setConsumerOffsetToLastEnvelope()
     checkpointGroup.checkpoint()
+  }
+}
+
+object TaskInput {
+  private val logger = LoggerFactory.getLogger(this.getClass)
+
+  def apply(manager: CommonTaskManager) = {
+    val isKafkaInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.kafkaStreamType)
+    val isTstreamInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.tStreamType)
+
+    (isKafkaInputExist, isTstreamInputExist) match {
+      case (true, true) => new CompleteTaskInput(manager)
+      case (false, true) => new TStreamTaskInput(manager)
+      case (true, false) => new KafkaTaskInput(manager)
+      case _ =>
+        logger.error("Type of input stream is not 'kafka' or 't-stream'")
+        throw new RuntimeException("Type of input stream is not 'kafka' or 't-stream'")
+    }
   }
 }

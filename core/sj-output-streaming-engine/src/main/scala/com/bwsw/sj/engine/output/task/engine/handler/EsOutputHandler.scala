@@ -1,12 +1,13 @@
-package com.bwsw.sj.engine.output.task.engine.Handler
+package com.bwsw.sj.engine.output.task.engine.handler
 
+import java.util.Calendar
+
+import com.bwsw.common.ElasticsearchClient
 import com.bwsw.sj.common.DAL.model.{ESService, SjStream}
+import com.bwsw.sj.engine.core.entities.{Envelope, EsEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
-import com.bwsw.common.ElasticsearchClient
-import com.bwsw.sj.engine.core.entities.{Envelope, EsEnvelope, TStreamEnvelope}
 import org.elasticsearch.index.query.QueryBuilders
-import java.util.{Calendar, UUID}
 
 /**
   * Created by diryavkin_dn on 07.11.16.

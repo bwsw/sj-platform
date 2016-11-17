@@ -4,8 +4,7 @@ import java.util.concurrent._
 
 import com.bwsw.sj.engine.core.engine.TaskRunner
 import com.bwsw.sj.engine.input.connection.tcp.server.InputStreamingServer
-import com.bwsw.sj.engine.input.task.InputTaskManager
-import com.bwsw.sj.engine.input.task.engine.InputTaskEngineFactory
+import com.bwsw.sj.engine.input.task.{InputTaskEngine, InputTaskManager}
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
@@ -35,9 +34,7 @@ object InputTaskRunner extends {override val threadName = "InputTaskRunner-%d"} 
 
       val performanceMetrics = new InputStreamingPerformanceMetrics(manager)
 
-      val inputTaskEngineFactory = new InputTaskEngineFactory(manager, performanceMetrics, channelContextQueue, bufferForEachContext)
-
-      val inputTaskEngine = inputTaskEngineFactory.createInputTaskEngine()
+      val inputTaskEngine = InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext)
 
       val inputStreamingServer = new InputStreamingServer(
         manager.agentsHost,

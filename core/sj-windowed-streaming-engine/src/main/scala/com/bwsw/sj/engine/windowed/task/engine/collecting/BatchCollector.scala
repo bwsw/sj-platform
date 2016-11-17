@@ -3,10 +3,11 @@ package com.bwsw.sj.engine.windowed.task.engine.collecting
 import java.util.concurrent.{ArrayBlockingQueue, Callable}
 
 import com.bwsw.sj.common.DAL.model.module.WindowedInstance
-import com.bwsw.sj.common.utils.SjStreamUtils
+import com.bwsw.sj.common.utils.{EngineLiterals, SjStreamUtils}
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
-import com.bwsw.sj.engine.windowed.task.engine.input.Input
+import com.bwsw.sj.engine.windowed.task.engine.input.TaskInput
+
 import com.bwsw.sj.engine.windowed.task.reporting.WindowedStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
 
@@ -22,13 +23,14 @@ import scala.collection.Map
  * @author Kseniya Mikhaleva
  */
 abstract class BatchCollector(protected val manager: CommonTaskManager,
-                              inputService: Input[_ >: TStreamEnvelope with KafkaEnvelope <: Envelope],
+                              inputService: TaskInput[_ >: TStreamEnvelope with KafkaEnvelope <: Envelope],
                               batchQueue: ArrayBlockingQueue[Batch],
                               performanceMetrics: WindowedStreamingPerformanceMetrics) extends Callable[Unit] {
 
+  import BatchCollector._
+
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"windowed-task-${manager.taskName}-batch-collector")
-  protected val logger = LoggerFactory.getLogger(this.getClass)
   protected val instance = manager.instance.asInstanceOf[WindowedInstance]
   private val mainStream = SjStreamUtils.clearStreamFromMode(instance.mainStream)
   private val batchPerStream: Map[String, Batch] = createStorageOfBatches()
@@ -80,9 +82,28 @@ abstract class BatchCollector(protected val manager: CommonTaskManager,
   protected def prepareForNextBatchCollecting()
 }
 
+object BatchCollector {
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
+  def apply(manager: CommonTaskManager,
+            inputService: TaskInput[_ >: TStreamEnvelope with KafkaEnvelope <: Envelope],
+            batchQueue: ArrayBlockingQueue[Batch],
+            performanceMetrics: WindowedStreamingPerformanceMetrics) = {
+    val windowedInstance = manager.instance.asInstanceOf[WindowedInstance]
 
-
+    windowedInstance.batchFillType.typeName match {
+      case EngineLiterals.everyNthMode =>
+        logger.info(s"Task: ${manager.taskName}. Windowed module has an '${EngineLiterals.everyNthMode}' batch fill type, create an appropriate batch collector\n")
+        new BatchCollector(manager, inputService, batchQueue, performanceMetrics) with NumericalBatchCollecting
+      case EngineLiterals.timeIntervalMode =>
+        logger.info(s"Task: ${manager.taskName}. Windowed module has a '${EngineLiterals.timeIntervalMode}' batch fill type, create an appropriate batch collector\n")
+        new BatchCollector(manager, inputService, batchQueue, performanceMetrics) with TimeBatchCollecting
+      case EngineLiterals.transactionIntervalMode =>
+        logger.info(s"Task: ${manager.taskName}. Windowed module has a '${EngineLiterals.transactionIntervalMode}' batch fill type, create an appropriate batch collector\n")
+        new BatchCollector(manager, inputService, batchQueue, performanceMetrics) with TransactionBatchCollecting
+    }
+  }
+}
 
 
 

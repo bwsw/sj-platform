@@ -10,13 +10,13 @@ import org.slf4j.LoggerFactory
  *
  * @author Kseniya Mikhaleva
  */
-class CompleteInput(manager: CommonTaskManager) extends {
+class CompleteTaskInput(manager: CommonTaskManager) extends {
   override val checkpointGroup = new CheckpointGroup()
-} with Input[Envelope](manager.inputs) {
+} with TaskInput[Envelope](manager.inputs) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val kafkaRegularTaskInputService = new KafkaInput(manager, checkpointGroup)
-  private val tStreamRegularTaskInputService = new TStreamInput(manager, checkpointGroup)
+  private val kafkaRegularTaskInputService = new KafkaTaskInput(manager, checkpointGroup)
+  private val tStreamRegularTaskInputService = new TStreamTaskInput(manager, checkpointGroup)
 
   override def registerEnvelope(envelope: Envelope) = {
     envelope match {

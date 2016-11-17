@@ -22,9 +22,9 @@ import scala.collection.mutable
  * @author Kseniya Mikhaleva
  *
  */
-class TStreamInput(manager: CommonTaskManager,
+class TStreamTaskInput(manager: CommonTaskManager,
                    override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
-  extends Input[TStreamEnvelope](manager.inputs) {
+  extends TaskInput[TStreamEnvelope](manager.inputs) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val instance = manager.instance.asInstanceOf[WindowedInstance]
   private val tstreamOffsetsStorage = mutable.Map[(String, Int), Long]()

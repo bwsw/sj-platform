@@ -5,7 +5,7 @@ import java.util.concurrent.Callable
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
+import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine, PersistentBlockingQueue}
 import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
@@ -115,4 +115,27 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
   }
 
   protected def prepareForNextCheckpoint(): Unit
+}
+
+object RegularTaskEngine {
+  protected val logger = LoggerFactory.getLogger(this.getClass)
+
+  /**
+   * Creates RegularTaskEngine is in charge of a basic execution logic of task of regular module
+   * @return Engine of regular task
+   */
+  def apply(manager: CommonTaskManager,
+                               performanceMetrics: RegularStreamingPerformanceMetrics): RegularTaskEngine = {
+    val regularInstance = manager.instance.asInstanceOf[RegularInstance]
+
+    regularInstance.checkpointMode match {
+      case EngineLiterals.`timeIntervalMode` =>
+        logger.info(s"Task: ${manager.taskName}. Regular module has a '${EngineLiterals.timeIntervalMode}' checkpoint mode, create an appropriate task engine\n")
+        new RegularTaskEngine(manager, performanceMetrics) with TimeCheckpointTaskEngine
+      case EngineLiterals.`everyNthMode` =>
+        logger.info(s"Task: ${manager.taskName}. Regular module has an '${EngineLiterals.everyNthMode}' checkpoint mode, create an appropriate task engine\n")
+        new RegularTaskEngine(manager, performanceMetrics) with NumericalCheckpointTaskEngine
+
+    }
+  }
 }

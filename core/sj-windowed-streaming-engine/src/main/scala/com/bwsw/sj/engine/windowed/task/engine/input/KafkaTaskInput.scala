@@ -29,9 +29,9 @@ import scala.collection.mutable
  *
  * @author Kseniya Mikhaleva
  */
-class KafkaInput(manager: CommonTaskManager,
+class KafkaTaskInput(manager: CommonTaskManager,
                  override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
-  extends Input[KafkaEnvelope](manager.inputs) {
+  extends TaskInput[KafkaEnvelope](manager.inputs) {
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"windowed-task-${manager.taskName}-kafka-consumer")
   private val logger = LoggerFactory.getLogger(this.getClass)

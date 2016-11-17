@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.output.task.engine.Handler
+package com.bwsw.sj.engine.output.task.engine.handler
 
 import com.bwsw.common.jdbc.JdbcClientBuilder
 import com.bwsw.sj.engine.core.entities.{Envelope, JdbcEnvelope, TStreamEnvelope}
