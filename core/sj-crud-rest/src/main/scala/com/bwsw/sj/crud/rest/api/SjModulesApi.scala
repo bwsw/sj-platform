@@ -10,15 +10,15 @@ import akka.http.scaladsl.server.{Directives, RequestContext}
 import akka.stream.scaladsl.FileIO
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.engine.StreamingValidator
-import com.bwsw.sj.common.rest.RestLiterals
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.module._
 import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.crud.rest.RestLiterals
 import com.bwsw.sj.crud.rest.exceptions._
 import com.bwsw.sj.crud.rest.instance.{InstanceDestroyer, InstanceStarter, InstanceStopper}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
-import com.bwsw.sj.crud.rest.validator.module.InstanceValidator
+import com.bwsw.sj.crud.rest.validator.instance.InstanceValidator
 import org.apache.commons.io.FileUtils
 
 import scala.collection.mutable

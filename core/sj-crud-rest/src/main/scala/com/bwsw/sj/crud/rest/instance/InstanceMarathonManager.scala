@@ -7,6 +7,7 @@ import com.bwsw.sj.common.DAL.model.TStreamSjStream
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.rest.entities.MarathonRequest
 import com.bwsw.sj.common.utils.GeneratorLiterals
+import com.bwsw.sj.crud.rest.RestLiterals
 import org.apache.http.client.methods._
 import org.apache.http.entity.StringEntity
 import org.apache.http.util.EntityUtils
@@ -46,9 +47,9 @@ trait InstanceMarathonManager {
   def getGeneratorApplicationID(stream: TStreamSjStream) = {
     var name = ""
     if (stream.generator.generatorType.equals(GeneratorLiterals.perStreamType)) {
-      name = s"${stream.generator.service.name}-${stream.name}-tg"
+      name = s"${stream.generator.service.name}-${stream.name}-${RestLiterals.generatorAppIdSuffix}"
     } else {
-      name = s"${stream.generator.service.name}-global-tg"
+      name = s"${stream.generator.service.name}-${RestLiterals.globalGeneratorAppIdSuffix}"
     }
     name.replaceAll("_", "-")
   }

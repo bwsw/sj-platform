@@ -1,4 +1,4 @@
-package com.bwsw.sj.crud.rest.validator.module
+package com.bwsw.sj.crud.rest.validator.instance
 
 import com.bwsw.sj.common.DAL.model.{TStreamService, KafkaService, KafkaSjStream}
 import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, SpecificationData, WindowedInstanceMetadata}

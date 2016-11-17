@@ -7,9 +7,9 @@ import com.bwsw.sj.common.DAL.ConnectionConstants
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{TStreamSjStream, ZKService}
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
-import com.bwsw.sj.common.rest.RestLiterals
 import com.bwsw.sj.common.rest.entities.MarathonRequest
 import com.bwsw.sj.common.utils._
+import com.bwsw.sj.crud.rest.RestLiterals
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.slf4j.LoggerFactory
 

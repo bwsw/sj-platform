@@ -1,4 +1,4 @@
-package com.bwsw.sj.crud.rest.validator.module
+package com.bwsw.sj.crud.rest.validator.instance
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.traits.Serializer
