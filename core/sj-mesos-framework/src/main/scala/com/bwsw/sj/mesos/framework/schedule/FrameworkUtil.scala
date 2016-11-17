@@ -6,7 +6,9 @@ import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.mesos.framework.task.TasksList
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos.MasterInfo
-import org.apache.mesos.SchedulerDriver
+import org.apache.mesos.{MesosSchedulerDriver, SchedulerDriver}
+
+import scala.util.Properties
 
 /**
   *
@@ -17,6 +19,7 @@ object FrameworkUtil {
 
   var master: MasterInfo = null
   var frameworkId: String = null
+  var driver: SchedulerDriver = null
 
   var instance: Instance = null
 
@@ -37,13 +40,22 @@ object FrameworkUtil {
   /**
     * Handler for Scheduler Exception
     */
-  def handleSchedulerException(e: Exception, driver: SchedulerDriver, logger: Logger) = {
+  def handleSchedulerException(e: Exception, logger: Logger) = {
     val sw = new StringWriter
     e.printStackTrace(new PrintWriter(sw))
     TasksList.message = e.getMessage
     logger.error(s"Framework error: ${sw.toString}")
     driver.stop()
     System.exit(1)
+  }
+
+
+  def getEnvParams() = {
+    Map(
+      ("instanceId", Properties.envOrElse("INSTANCE_ID", "00000000-0000-0000-0000-000000000000")),
+      ("mongodbHost", Properties.envOrElse("MONGO_HOST", "127.0.0.1")),
+      ("mongodbPort", Properties.envOrElse("MONGO_PORT", "27017"))
+    )
   }
 
 }

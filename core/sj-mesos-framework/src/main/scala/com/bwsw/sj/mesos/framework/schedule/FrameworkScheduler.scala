@@ -6,10 +6,12 @@ import java.util
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.{ConfigLiterals, EngineLiterals}
+import com.bwsw.sj.mesos.framework.offer.OfferHandler
 import com.bwsw.sj.mesos.framework.task.{StatusHandler, TasksList}
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos._
 import org.apache.mesos.{Scheduler, SchedulerDriver}
+
 import scala.collection.JavaConverters._
 import scala.collection.immutable
 import scala.collection.mutable
@@ -17,13 +19,12 @@ import scala.util.Properties
 
 
 
-/*
- * Mesos scheduler implementation
- */
+/**
+  * Mesos scheduler implementation
+  */
 class FrameworkScheduler extends Scheduler {
 
   private val logger = Logger.getLogger(this.getClass)
-  var driver: SchedulerDriver = null
   var perTaskCores: Double = 0.0
   var perTaskMem: Double = 0.0
   var perTaskPortsCount: Int = 0
@@ -75,7 +76,7 @@ class FrameworkScheduler extends Scheduler {
   override def resourceOffers(driver: SchedulerDriver, offers: util.List[Offer]) {
     logger.info(s"RESOURCE OFFERS")
     TasksList.clearAvailablePorts()
-    val filteredOffers = filterOffers(offers, FrameworkUtil.instance.nodeAttributes)
+    val filteredOffers = OfferHandler.filter(offers, FrameworkUtil.instance.nodeAttributes)
     if (filteredOffers.size == 0) {
       for (offer <- offers.asScala) {
         driver.declineOffer(offer.getId)
@@ -90,7 +91,7 @@ class FrameworkScheduler extends Scheduler {
       logger.debug(s"Slave ID: ${offer.getSlaveId.getValue}")
     }
 
-    var tasksCountOnSlaves = getOffersForSlave(perTaskCores,
+    var tasksCountOnSlaves = OfferHandler.getOffersForSlave(perTaskCores,
       perTaskMem,
       perTaskPortsCount,
       TasksList.count,
@@ -191,7 +192,7 @@ class FrameworkScheduler extends Scheduler {
           .setValue("java -jar " + jarName)
           .setEnvironment(environments)
       } catch {
-        case e: Exception => FrameworkUtil.handleSchedulerException(e, driver, logger)
+        case e: Exception => FrameworkUtil.handleSchedulerException(e, logger)
       }
 
       while (tasksCountOnSlaves(offerNumber)._2 == 0) {
@@ -247,18 +248,20 @@ class FrameworkScheduler extends Scheduler {
    */
   def registered(driver: SchedulerDriver, frameworkId: FrameworkID, masterInfo: MasterInfo) {
     logger.info(s"Registered framework as: ${frameworkId.getValue}")
-    this.driver = driver
+
+    FrameworkUtil.driver = driver
     FrameworkUtil.frameworkId = frameworkId.getValue
     FrameworkUtil.master = masterInfo
 
-    params = Map(
-      ("instanceId", Properties.envOrElse("INSTANCE_ID", "00000000-0000-0000-0000-000000000000")),
-      ("mongodbHost", Properties.envOrElse("MONGO_HOST", "127.0.0.1")),
-      ("mongodbPort", Properties.envOrElse("MONGO_PORT", "27017"))
-    )
+    params = FrameworkUtil.getEnvParams()
     logger.debug(s"Got environment variable: $params")
 
+
+
     val optionInstance = ConnectionRepository.getInstanceService.get(params("instanceId"))
+
+    // todo TasksList.prepare(optionInstance)
+
     if (optionInstance.isEmpty) {
       logger.error(s"Not found instance")
       driver.stop()
@@ -296,98 +299,8 @@ class FrameworkScheduler extends Scheduler {
   }
 
 
-  /**
-   * Getting list of offers and tasks count for launch on each slave
-   *
-   * @param perTaskCores:Double
-   * @param perTaskRam:Double
-   * @param perTaskPortsCount:Int
-   * @param taskCount:Int
-   * @param offers:util.List[Offer]
-   * @return mutable.ListBuffer[(Offer, Int)]
-   */
-  def getOffersForSlave(perTaskCores: Double,
-                        perTaskRam: Double,
-                        perTaskPortsCount: Int,
-                        taskCount: Int,
-                        offers: util.List[Offer]): mutable.ListBuffer[(Offer, Int)] = {
-    var overCpus = 0.0
-    var overMem = 0.0
-    var overPorts = 0
-
-    val reqCpus = perTaskCores * taskCount
-    val reqMem = perTaskRam * taskCount
-    val reqPorts = perTaskPortsCount * taskCount
-
-    val tasksCountOnSlave: mutable.ListBuffer[(Offer, Int)] = mutable.ListBuffer()
-    for (offer: Offer <- offers.asScala) {
-      val portsResource = getResource(offer, "ports")
-      var offerPorts = 0
-      for (range <- portsResource.getRanges.getRangeList.asScala) {
-        overPorts += (range.getEnd - range.getBegin + 1).toInt
-        offerPorts += (range.getEnd - range.getBegin + 1).toInt
-      }
-
-      tasksCountOnSlave.append(Tuple2(offer, List[Double](
-        getResource(offer, "cpus").getScalar.getValue / perTaskCores,
-        getResource(offer, "mem").getScalar.getValue / perTaskRam,
-        offerPorts / perTaskPortsCount
-      ).min.floor.toInt))
-      overCpus += getResource(offer, "cpus").getScalar.getValue
-      overMem += getResource(offer, "mem").getScalar.getValue
-    }
-    logger.debug(s"Have resources: $overCpus cpus, $overMem mem, $overPorts ports")
-    logger.debug(s"Need resources: $reqCpus cpus, $reqMem mem, $reqPorts ports")
-    tasksCountOnSlave
-  }
-
-  /**
-   * This method give how much resource of type <name> we have on <offer>
-   *
-   * @param offer:Offer
-   * @param name:String
-   * @return Double
-   */
-  def getResource(offer: Offer, name: String): Resource = {
-    offer.getResourcesList.asScala.filter(_.getName.equals(name)).head
-  }
 
 
-  /**
-   * Filter offered slaves
-   * @param offers:util.List[Offer]
-   * @param filters:util.Map[String, String]
-   * @return util.List[Offer]
-   */
-  def filterOffers(offers: util.List[Offer], filters: util.Map[String, String]): util.List[Offer] = {
-    logger.debug(s"FILTER OFFERS")
-    var result: mutable.Buffer[Offer] = mutable.Buffer()
-    if (!filters.isEmpty) {
-      //todo Дим, подумай, теперь filters не может быть null, мб теперь не понадобится if условие (раньше было условие: filters != null)
-      for (filter <- filters.asScala) {
-        for (offer <- offers.asScala) {
-          if (filter._1.matches( """\+.+""")) {
-            for (attribute <- offer.getAttributesList.asScala) {
-              if (filter._1.toString.substring(1) == attribute.getName &
-                attribute.getText.getValue.matches(filter._2.r.toString)) {
-                result += offer
-              }
-            }
-          }
-          if (filter._1.matches( """\-.+""")) {
-            for (attribute <- offer.getAttributesList.asScala) {
-              if (filter._1.matches(attribute.getName.r.toString) &
-                attribute.getText.getValue.matches(filter._2.r.toString)) {
-                result = result.filterNot(elem => elem == offer)
-              }
-            }
-          }
-        }
-      }
-    } else result = offers.asScala
-
-    result.asJava
-  }
 
   /**
    * Get jar URI for framework
@@ -411,7 +324,7 @@ class FrameworkScheduler extends Scheduler {
    * @return Resource
    */
   def getPorts(offer: Offer, task: String): Resource = {
-    val portsResource = getResource(offer, "ports")
+    val portsResource = OfferHandler.getResource(offer, "ports")
     for (range <- portsResource.getRanges.getRangeList.asScala) {
       TasksList.availablePorts ++= (range.getBegin to range.getEnd).to[mutable.ListBuffer]
     }
