@@ -1,13 +1,17 @@
 package com.bwsw.sj.mesos.framework.schedule
 
 import java.io.{PrintWriter, StringWriter}
+import java.net.URI
 
 import com.bwsw.sj.common.DAL.model.module._
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.mesos.framework.task.TasksList
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos.MasterInfo
 import org.apache.mesos.SchedulerDriver
 
+import scala.collection.immutable
 import scala.util.Properties
 
 /**
@@ -20,8 +24,11 @@ object FrameworkUtil {
   var master: MasterInfo = null
   var frameworkId: String = null
   var driver: SchedulerDriver = null
-
+  var jarName: String = null
   var instance: Instance = null
+  val configFileService = ConnectionRepository.getConfigService
+  private val logger = Logger.getLogger(this.getClass)
+  var params = immutable.Map[String, String]()
 
   /**
     * Count how much ports must be for current task.
@@ -56,6 +63,21 @@ object FrameworkUtil {
       ("mongodbHost", Properties.envOrElse("MONGO_HOST", "127.0.0.1")),
       ("mongodbPort", Properties.envOrElse("MONGO_PORT", "27017"))
     )
+  }
+
+
+  /**
+    * Get jar URI for framework
+    * @param instance:Instance
+    * @return String
+    */
+  def getModuleUrl(instance: Instance): String = {
+    jarName = configFileService.get("system." + instance.engine).get.value
+    val restHost = configFileService.get(ConfigLiterals.hostOfCrudRestTag).get.value
+    val restPort = configFileService.get(ConfigLiterals.portOfCrudRestTag).get.value.toInt
+    val restAddress = new URI(s"http://$restHost:$restPort/v1/custom/jars/$jarName").toString
+    logger.debug(s"Engine downloading URL: $restAddress")
+    restAddress
   }
 
 }

@@ -1,7 +1,8 @@
-package com.bwsw.sj.mesos.framework.offer
+package com.bwsw.sj.mesos.framework.schedule
 
 import java.util
 
+import com.bwsw.sj.mesos.framework.task.TasksList
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos._
 
@@ -18,6 +19,7 @@ import scala.collection.mutable
 object OfferHandler {
 
   private val logger = Logger.getLogger(this.getClass)
+  var filteredOffers: util.List[Offer] = _
 
 
   /**
@@ -26,12 +28,11 @@ object OfferHandler {
     * @param filters:util.Map[String, String]
     * @return util.List[Offer]
     */
-  def filter(offers: util.List[Offer], filters: util.Map[String, String]): util.List[Offer] =
+  def filter(offers: util.List[Offer], filters: util.Map[String, String]) =
   {
     logger.debug(s"FILTER OFFERS")
     var result: mutable.Buffer[Offer] = mutable.Buffer()
     if (!filters.isEmpty) {
-      //todo Дим, подумай, теперь filters не может быть null, мб теперь не понадобится if условие (раньше было условие: filters != null)
       for (filter <- filters.asScala) {
         for (offer <- offers.asScala) {
           if (filter._1.matches( """\+.+""")) {
@@ -53,8 +54,7 @@ object OfferHandler {
         }
       }
     } else result = offers.asScala
-
-    result.asJava
+    filteredOffers = result.asJava
   }
 
 
@@ -71,44 +71,35 @@ object OfferHandler {
 
 
   /**
-    * Getting list of offers and tasks count for launch on each slave
+    * Getting list of offers and count tasks for launch on each slave
     *
-    * @param perTaskCores:Double
-    * @param perTaskRam:Double
-    * @param perTaskPortsCount:Int
-    * @param taskCount:Int
-    * @param offers:util.List[Offer]
     * @return mutable.ListBuffer[(Offer, Int)]
     */
-  def getOffersForSlave(perTaskCores: Double,
-                        perTaskRam: Double,
-                        perTaskPortsCount: Int,
-                        taskCount: Int,
-                        offers: util.List[Offer]): mutable.ListBuffer[(Offer, Int)] = {
+  def getOffersForSlave(): mutable.ListBuffer[(Offer, Int)] = {
     var overCpus = 0.0
     var overMem = 0.0
     var overPorts = 0
 
-    val reqCpus = perTaskCores * taskCount
-    val reqMem = perTaskRam * taskCount
-    val reqPorts = perTaskPortsCount * taskCount
+    val reqCpus = TasksList.perTaskCores * TasksList.count
+    val reqMem = TasksList.perTaskMem * TasksList.count
+    val reqPorts = TasksList.perTaskPortsCount * TasksList.count
 
     val tasksCountOnSlave: mutable.ListBuffer[(Offer, Int)] = mutable.ListBuffer()
-    for (offer: Offer <- offers.asScala) {
+    for (offer: Offer <- OfferHandler.filteredOffers.asScala) {
       val portsResource = OfferHandler.getResource(offer, "ports")
-      var offerPorts = 0
+      var ports = 0
       for (range <- portsResource.getRanges.getRangeList.asScala) {
         overPorts += (range.getEnd - range.getBegin + 1).toInt
-        offerPorts += (range.getEnd - range.getBegin + 1).toInt
+        ports += (range.getEnd - range.getBegin + 1).toInt
       }
 
       val cpus = OfferHandler.getResource(offer, "cpus").getScalar.getValue
       val mem = OfferHandler.getResource(offer, "mem").getScalar.getValue
 
       tasksCountOnSlave.append(Tuple2(offer, List[Double](
-        cpus / perTaskCores,
-        mem / perTaskRam,
-        offerPorts / perTaskPortsCount
+        cpus / TasksList.perTaskCores,
+        mem / TasksList.perTaskMem,
+        ports / TasksList.perTaskPortsCount
       ).min.floor.toInt))
       overCpus += cpus
       overMem += mem
@@ -116,6 +107,10 @@ object OfferHandler {
     logger.debug(s"Have resources: $overCpus cpus, $overMem mem, $overPorts ports")
     logger.debug(s"Need resources: $reqCpus cpus, $reqMem mem, $reqPorts ports")
     tasksCountOnSlave
+  }
+
+  def getOfferIp(offer:Offer) = {
+    offer.getUrl.getAddress.getIp
   }
 
 }
