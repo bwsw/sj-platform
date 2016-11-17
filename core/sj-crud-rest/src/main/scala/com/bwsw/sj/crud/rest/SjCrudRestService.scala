@@ -14,7 +14,8 @@ import akka.stream.scaladsl.Sink
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.ConfigurationSetting
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{ConfigLiterals, EngineLiterals}
+import com.bwsw.sj.common.config.ConfigLiterals
+import com.bwsw.sj.common.utils.EngineLiterals
 import EngineLiterals._
 import com.bwsw.sj.crud.rest.instance.InstanceStopper
 

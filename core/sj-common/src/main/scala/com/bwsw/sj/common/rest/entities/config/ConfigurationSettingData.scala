@@ -2,9 +2,9 @@ package com.bwsw.sj.common.rest.entities.config
 
 import com.bwsw.sj.common.DAL.model.ConfigurationSetting
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
 import com.bwsw.sj.common.rest.utils.ValidationUtils
-import com.bwsw.sj.common.utils.ConfigLiterals
-import com.bwsw.sj.common.utils.ConfigurationSettingsUtils._
+import ConfigurationSettingsUtils._
 import com.bwsw.tstreams.env.TSF_Dictionary
 import com.fasterxml.jackson.annotation.JsonIgnore
 

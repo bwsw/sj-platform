@@ -1,8 +1,8 @@
-package com.bwsw.sj.common.utils
+package com.bwsw.sj.common.config
 
 import com.bwsw.sj.common.DAL.model.ConfigurationSetting
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.ConfigurationSettingsUtils._
+import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 
 object TempHelperForConfigSetup extends App {
 

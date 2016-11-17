@@ -1,9 +1,8 @@
 package com.bwsw.sj.common.DAL.model
 
 import java.util.Properties
-
+import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.rest.entities.stream.KafkaSjStreamData
-import com.bwsw.sj.common.utils.ConfigSettingsUtils
 import kafka.admin.AdminUtils
 import kafka.common.TopicAlreadyMarkedForDeletionException
 import kafka.utils.ZkUtils
@@ -69,7 +68,7 @@ class KafkaSjStream() extends SjStream {
     val service = this.service.asInstanceOf[KafkaService]
     val zkHost = service.zkProvider.hosts
     val zkConnect = new ZkConnection(zkHost.mkString(";"))
-    val zkTimeout = ConfigSettingsUtils.getZkSessionTimeout()
+    val zkTimeout = ConfigurationSettingsUtils.getZkSessionTimeout()
     val zkClient = ZkUtils.createZkClient(zkHost.mkString(";"), zkTimeout, zkTimeout)
     val zkUtils = new ZkUtils(zkClient, zkConnect, false)
 

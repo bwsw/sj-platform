@@ -3,7 +3,7 @@ package com.bwsw.sj.examples.sflow.module.process.udf
 import java.net.{Inet4Address, Inet6Address, InetAddress}
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.ConfigSettingsUtils
+import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.maxmind.geoip.LookupService
 import org.slf4j.LoggerFactory
 
@@ -33,13 +33,13 @@ object GeoIp {
   }
 
   private def getAsLookupServiceIpv4 = {
-    val geoIpFileName = ConfigSettingsUtils.getGeoIpAsNumFileName()
+    val geoIpFileName = ConfigurationSettingsUtils.getGeoIpAsNumFileName()
 
     createLookupService(geoIpFileName)
   }
 
   private def getAsLookupServiceIpv6 = {
-    val geoIpFileName = ConfigSettingsUtils.getGeoIpAsNumv6FileName()
+    val geoIpFileName = ConfigurationSettingsUtils.getGeoIpAsNumv6FileName()
 
     createLookupService(geoIpFileName)
   }

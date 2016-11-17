@@ -1,7 +1,6 @@
 package com.bwsw.sj.engine.output.task.engine.Handler
 
-
-import com.bwsw.common.JdbcClientBuilder
+import com.bwsw.common.jdbc.JdbcClientBuilder
 import com.bwsw.sj.engine.core.entities.{Envelope, JdbcEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics

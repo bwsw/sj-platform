@@ -1,6 +1,6 @@
 package com.bwsw.common.tstream
 
-import com.bwsw.common.client.{TcpClient, TcpClientOptions}
+import com.bwsw.common.tcp.client.{TcpClientOptions, TcpClient}
 import com.bwsw.sj.common.utils.GeneratorLiterals
 import com.bwsw.tstreams.generator.ITransactionGenerator
 import org.slf4j.LoggerFactory

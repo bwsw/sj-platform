@@ -1,13 +1,13 @@
-package com.bwsw.common.client
+package com.bwsw.common.tcp.client
 
-import com.bwsw.sj.common.utils.ConfigSettingsUtils
+import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 
 class TcpClientOptions() {
   var zkServers = "127.0.0.1:2181"
   var prefix = ""
 
-  var retryPeriod = ConfigSettingsUtils.getClientRetryPeriod()
-  var retryCount = ConfigSettingsUtils.getRetryCount()
+  var retryPeriod = ConfigurationSettingsUtils.getClientRetryPeriod()
+  var retryCount = ConfigurationSettingsUtils.getRetryCount()
 
   def setZkServers(hosts: Array[String]): TcpClientOptions = {
     zkServers = hosts.mkString(",")

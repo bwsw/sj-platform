@@ -7,12 +7,13 @@ import com.bwsw.common.tstream.NetworkTransactionGenerator
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.common.rest.entities.module.ExecutionPlan
-import com.bwsw.sj.common.utils.ConfigurationSettingsUtils._
+import ConfigurationSettingsUtils._
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.StreamLiterals._
-import com.bwsw.sj.common.utils.{ConfigLiterals, ConfigSettingsUtils, GeneratorLiterals, ProviderLiterals}
+import com.bwsw.sj.common.utils.{GeneratorLiterals, ProviderLiterals}
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
 import com.bwsw.sj.engine.core.environment.EnvironmentManager
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
@@ -273,8 +274,8 @@ abstract class TaskManager() {
   }
 
   protected def getTransactionGenerator(stream: TStreamSjStream) = {
-    val retryPeriod = ConfigSettingsUtils.getClientRetryPeriod()
-    val retryCount = ConfigSettingsUtils.getRetryCount()
+    val retryPeriod = ConfigurationSettingsUtils.getClientRetryPeriod()
+    val retryCount = ConfigurationSettingsUtils.getRetryCount()
 
     stream.generator.generatorType match {
       case GeneratorLiterals.`localType` => new LocalTransactionGenerator()

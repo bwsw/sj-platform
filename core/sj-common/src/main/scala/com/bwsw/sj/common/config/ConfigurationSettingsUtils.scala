@@ -1,13 +1,18 @@
-package com.bwsw.sj.common.utils
+package com.bwsw.sj.common.config
 
-
-import ConfigLiterals._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.ConfigurationSettingsUtils._
+import com.bwsw.sj.common.config.ConfigLiterals._
 
-object ConfigSettingsUtils {
-
+object ConfigurationSettingsUtils {
   private val configService = ConnectionRepository.getConfigService
+
+  def createConfigurationSettingName(domain: String, name: String) = {
+    domain + "." + name
+  }
+
+  def clearConfigurationSettingName(domain: String, name: String) = {
+    name.replace(domain + ".", "")
+  }
 
   def getClientRetryPeriod() = {
     getIntConfigSetting(tgClientRetryPeriodTag)

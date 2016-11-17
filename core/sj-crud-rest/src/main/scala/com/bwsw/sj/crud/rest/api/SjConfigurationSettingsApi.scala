@@ -1,10 +1,10 @@
 package com.bwsw.sj.crud.rest.api
 
 import akka.http.scaladsl.server.{Directives, RequestContext}
+import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.config.ConfigurationSettingData
-import com.bwsw.sj.common.utils.ConfigLiterals
-import com.bwsw.sj.common.utils.ConfigurationSettingsUtils._
+import ConfigurationSettingsUtils._
 import com.bwsw.sj.crud.rest.exceptions.UnknownConfigSettingDomain
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator

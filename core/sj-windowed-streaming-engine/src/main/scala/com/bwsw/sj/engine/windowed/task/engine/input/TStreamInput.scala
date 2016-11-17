@@ -80,7 +80,7 @@ class TStreamInput(manager: CommonTaskManager,
   private def transactionsToEnvelopes(transactions: Seq[ConsumerTransaction[Array[Byte]]], consumer: Consumer[Array[Byte]]) = {
     val stream = ConnectionRepository.getStreamService.get(consumer.stream.getName).get
     transactions.map((transaction: ConsumerTransaction[Array[Byte]]) => {
-      val tempTransaction = consumer.buildTransactionObject(transaction.getPartition(), transaction.getTransactionID(), transaction.getCount()).get //todo fix it
+      val tempTransaction = consumer.buildTransactionObject(transaction.getPartition(), transaction.getTransactionID(), transaction.getCount()).get //todo fix it next milestone TR1216
       tstreamOffsetsStorage((consumer.name, tempTransaction.getPartition())) = tempTransaction.getTransactionID()
       val envelope = new TStreamEnvelope()
       envelope.stream = stream.name

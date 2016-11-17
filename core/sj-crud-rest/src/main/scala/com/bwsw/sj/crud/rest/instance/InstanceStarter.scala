@@ -6,6 +6,8 @@ import com.bwsw.common.LeaderLatch
 import com.bwsw.sj.common.DAL.ConnectionConstants
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{TStreamSjStream, ZKService}
+import com.bwsw.sj.common.config.ConfigurationSettingsUtils
+import com.bwsw.sj.common.rest.RestLiterals
 import com.bwsw.sj.common.rest.entities.MarathonRequest
 import com.bwsw.sj.common.utils._
 import org.apache.http.client.methods.CloseableHttpResponse
@@ -25,8 +27,8 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   import EngineLiterals._
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
-  private lazy val restHost = ConfigSettingsUtils.getCrudRestHost()
-  private lazy val restPort = ConfigSettingsUtils.getCrudRestPort()
+  private lazy val restHost = ConfigurationSettingsUtils.getCrudRestHost()
+  private lazy val restPort = ConfigurationSettingsUtils.getCrudRestPort()
   private lazy val restAddress = new URI(s"http://$restHost:$restPort").toString
 
   def run() = {
@@ -138,7 +140,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   }
 
   private def createRequestForGeneratorCreation(stream: TStreamSjStream, applicationID: String) = {
-    val transactionGeneratorJar = ConfigSettingsUtils.getTransactionGeneratorJarName()
+    val transactionGeneratorJar = ConfigurationSettingsUtils.getTransactionGeneratorJarName()
     val command = "java -jar " + transactionGeneratorJar + " $PORT"
     val restUrl = new URI(s"$restAddress/v1/custom/jars/$transactionGeneratorJar")
     val environmentVariables = getGeneratorEnvironmentVariables(stream)
@@ -236,7 +238,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   }
 
   private def createRequestForFrameworkCreation(marathonMaster: String) = {
-    val frameworkJarName = ConfigSettingsUtils.getFrameworkJarName()
+    val frameworkJarName = ConfigurationSettingsUtils.getFrameworkJarName()
     val command = "java -jar " + frameworkJarName + " $PORT"
     val restUrl = new URI(s"$restAddress/v1/custom/jars/$frameworkJarName")
     val environmentVariables = getFrameworkEnvironmentVariables(marathonMaster)

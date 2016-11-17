@@ -1,4 +1,4 @@
-package com.bwsw.common.client
+package com.bwsw.common.tcp.client
 
 import org.apache.log4j.Logger
 

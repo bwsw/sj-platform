@@ -10,6 +10,7 @@ import com.bwsw.sj.common.DAL.model.module.{Instance, Task, WindowedInstance}
 import com.bwsw.sj.common.DAL.model.{Provider, Service, _}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
+import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.rest.entities.module.ExecutionPlan
 import com.bwsw.sj.common.utils.{GeneratorLiterals, _}
 import com.bwsw.tstreams.agents.consumer.Consumer
