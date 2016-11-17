@@ -21,7 +21,7 @@ class CommonTaskManager() extends TaskManager {
   val inputs: mutable.Map[SjStream, Array[Int]] = getInputs(getExecutionPlan)
   val outputProducers = createOutputProducers()
 
-  assert(numberOfAgentsPorts >=
+  require(numberOfAgentsPorts >=
     (inputs.count(x => x._1.streamType == StreamLiterals.tStreamType) + instance.outputs.length + 3),
     "Not enough ports for t-stream consumers/producers." +
       s"${inputs.count(x => x._1.streamType == StreamLiterals.tStreamType) + instance.outputs.length + 3} ports are required")

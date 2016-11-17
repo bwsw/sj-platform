@@ -30,7 +30,7 @@ abstract class TaskManager() {
 
   val streamDAO = ConnectionRepository.getStreamService
 
-  assert(System.getenv("INSTANCE_NAME") != null &&
+  require(System.getenv("INSTANCE_NAME") != null &&
     System.getenv("TASK_NAME") != null &&
     System.getenv("AGENTS_HOST") != null &&
     System.getenv("AGENTS_PORTS") != null,

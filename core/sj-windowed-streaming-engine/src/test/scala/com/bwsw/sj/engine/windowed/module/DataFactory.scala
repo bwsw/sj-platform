@@ -146,7 +146,7 @@ object DataFactory {
 
   def createStreams(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service],
                     partitions: Int, _type: String, inputCount: Int, outputCount: Int) = {
-    assert(partitions >= 1, "Partitions must be a positive integer")
+    require(partitions >= 1, "Partitions must be a positive integer")
     _type match {
       case "tstream" =>
         (1 to inputCount).foreach(x => {

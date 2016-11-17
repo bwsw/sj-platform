@@ -54,7 +54,7 @@ object InputTaskRunner extends {override val threadName = "InputTaskRunner-%d"} 
 
       executorService.take().get()
     } catch {
-      case assertionError: Error => handleException(assertionError)
+      case requiringError: IllegalArgumentException => handleException(requiringError)
       case exception: Exception => handleException(exception)
     }
   }
