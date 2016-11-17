@@ -318,7 +318,8 @@ object DataFactory {
     instance.stateManagement = stateManagement
     instance.stateFullCheckpoint = stateFullCheckpoint
     instance.startFrom = EngineLiterals.oldestStartMode
-    instance.executionPlan = new ExecutionPlan(Map((instanceName + "-task0", task), (instanceName + "-task1", task)).asJava)
+    //instance.executionPlan = new ExecutionPlan(Map((instanceName + "-task0", task), (instanceName + "-task1", task)).asJava) //for barriers
+    instance.executionPlan = new ExecutionPlan(Map((instanceName + "-task0", task)).asJava)
     instance.engine = "com.bwsw.windowed.streaming.engine-1.0"
     instance.coordinationService = serviceManager.get("zookeeper-test-service").get.asInstanceOf[ZKService]
 
