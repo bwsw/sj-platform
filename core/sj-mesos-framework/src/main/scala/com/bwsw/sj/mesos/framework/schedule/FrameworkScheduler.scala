@@ -68,7 +68,8 @@ class FrameworkScheduler extends Scheduler {
   override def resourceOffers(driver: SchedulerDriver, offers: util.List[Offer]) {
     logger.info(s"RESOURCE OFFERS")
     TasksList.clearAvailablePorts()
-    OfferHandler.filter(offers, FrameworkUtil.instance.nodeAttributes)
+    OfferHandler.setOffers(offers)
+    OfferHandler.filter(FrameworkUtil.instance.nodeAttributes)
     if (OfferHandler.filteredOffers.size == 0) {
       logger.info("No one node selected")
       TasksList.message = "No one node selected"
@@ -81,9 +82,8 @@ class FrameworkScheduler extends Scheduler {
       logger.debug(s"Slave ID: ${offer.getSlaveId.getValue}")
     })
 
-    var tasksCountOnSlaves = OfferHandler.getOffersForSlave()
+    var tasksCountOnSlaves: mutable.ListBuffer[(Offer, Int)] = OfferHandler.getOffersForSlave()
     var overTasks = tasksCountOnSlaves.foldLeft(0)(_+_._2)
-
     if (uniqueHosts && tasksCountOnSlaves.length < overTasks) overTasks = tasksCountOnSlaves.length
 
     logger.debug(s"Count tasks can be launched: $overTasks")
@@ -100,40 +100,24 @@ class FrameworkScheduler extends Scheduler {
     logger.debug(s"Tasks to launch: ${TasksList.toLaunch}")
 
 
-    var offerNumber = 0
-    var launchedTasks: mutable.Map[OfferID, mutable.ListBuffer[TaskInfo]] = mutable.Map()
+    OfferHandler.offerNumber = 0
+    TasksList.launchedTasks = mutable.Map()
     for (currTask <- TasksList.toLaunch) {
 
-      val currentOffer = tasksCountOnSlaves(offerNumber)
-      if (offerNumber >= tasksCountOnSlaves.size - 1) {
-        offerNumber = 0
-      } else {
-        offerNumber += 1
-      }
-
-      if (offers.asScala.contains(currentOffer._1)) {
-        offers.asScala.remove(offers.asScala.indexOf(currentOffer._1))
-      }
-
+      val currentOffer = OfferHandler.getNextOffer(tasksCountOnSlaves)
       val task = TasksList.createTaskToLaunch(currTask, currentOffer._1)
 
-      if (launchedTasks.contains(currentOffer._1.getId)) {
-        launchedTasks(currentOffer._1.getId) += task
-      } else {
-        launchedTasks += (currentOffer._1.getId -> mutable.ListBuffer(task))
-      }
+      TasksList.addTaskToSlave(task, currentOffer)
 
       // update how much tasks we can run on slave when launch current task
       tasksCountOnSlaves.update(tasksCountOnSlaves.indexOf(currentOffer), Tuple2(currentOffer._1, currentOffer._2 - 1))
       TasksList.launched(currTask)
 
-      while (tasksCountOnSlaves(offerNumber)._2 == 0) {
-        tasksCountOnSlaves = tasksCountOnSlaves.filterNot(_ == tasksCountOnSlaves(offerNumber))
-        if (offerNumber > tasksCountOnSlaves.size - 1) offerNumber = 0
-      }
+      tasksCountOnSlaves = OfferHandler.updateOfferNumber(tasksCountOnSlaves)
+
     }
 
-    for (task <- launchedTasks) {
+    for (task <- TasksList.launchedTasks) {
       driver.launchTasks(List(task._1).asJava, task._2.asJava)
     }
 

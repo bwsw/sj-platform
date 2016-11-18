@@ -16,6 +16,7 @@ object TasksList {
   private val listTasks : mutable.Map[String, Task] = mutable.Map()
   var message: String = "Initialization"
   var availablePorts: collection.mutable.ListBuffer[Long] = collection.mutable.ListBuffer()
+  var launchedTasks: mutable.Map[OfferID, mutable.ListBuffer[TaskInfo]] = mutable.Map()
 
   var perTaskCores: Double = 0.0
   var perTaskMem: Double = 0.0
@@ -104,15 +105,16 @@ object TasksList {
 
     var availablePorts = ports.getRanges.getRangeList.asScala.map(_.getBegin.toString)
 
+    val host = OfferHandler.getOfferIp(offer)
+    TasksList(task).foreach(task => task.update(host=host))
     if (FrameworkUtil.instance.moduleType.equals(EngineLiterals.inputStreamingType)) {
       taskPort = availablePorts.head
       availablePorts = availablePorts.tail
       val inputInstance = FrameworkUtil.instance.asInstanceOf[InputInstance]
-      val host = OfferHandler.getOfferIp(offer)
-      TasksList(task).foreach(task => task.update(host=host))
       inputInstance.tasks.put(task, new InputTask(host, taskPort.toInt))
       ConnectionRepository.getInstanceService.save(FrameworkUtil.instance)
     }
+
     agentPorts = availablePorts.mkString(",")
     agentPorts.dropRight(1)
 
@@ -180,6 +182,15 @@ object TasksList {
       .setType(Value.Type.RANGES)
       .setRanges(ranges)
       .build
+  }
+
+
+  def addTaskToSlave(task: TaskInfo, offer: (Offer, Int)) = {
+    if (launchedTasks.contains(offer._1.getId)) {
+      launchedTasks(offer._1.getId) += task
+    } else {
+      launchedTasks += (offer._1.getId -> mutable.ListBuffer(task))
+    }
   }
 
 }

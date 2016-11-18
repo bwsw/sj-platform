@@ -20,15 +20,17 @@ object OfferHandler {
 
   private val logger = Logger.getLogger(this.getClass)
   var filteredOffers: util.List[Offer] = _
+  var offerNumber: Int = 0
+  var offers: util.List[Offer] = _
 
 
   /**
     * Filter offered slaves
-    * @param offers:util.List[Offer]
+    *
     * @param filters:util.Map[String, String]
     * @return util.List[Offer]
     */
-  def filter(offers: util.List[Offer], filters: util.Map[String, String]) =
+  def filter(filters: util.Map[String, String]) =
   {
     logger.debug(s"FILTER OFFERS")
     var result: mutable.Buffer[Offer] = mutable.Buffer()
@@ -111,6 +113,32 @@ object OfferHandler {
 
   def getOfferIp(offer:Offer) = {
     offer.getUrl.getAddress.getIp
+  }
+
+  def setOffers(offers: util.List[Offer]) = {
+    this.offers = offers
+  }
+
+  def getNextOffer(tasksOnSlaves: mutable.ListBuffer[(Offer, Int)]): (Offer, Int) = {
+    val offer = tasksOnSlaves(offerNumber)
+    if (offerNumber >= tasksOnSlaves.size - 1) {
+      offerNumber = 0
+    } else {
+      offerNumber += 1
+    }
+    if (offers.asScala.contains(offer._1)) {
+      offers.asScala.remove(offers.asScala.indexOf(offer._1))
+    }
+    offer
+  }
+
+  def updateOfferNumber(tasksOnSlaves: mutable.ListBuffer[(Offer, Int)]): mutable.ListBuffer[(Offer, Int)] = {
+    var result: mutable.ListBuffer[(Offer, Int)] = null
+    while (tasksOnSlaves(offerNumber)._2 == 0) {
+      result = tasksOnSlaves.filterNot(_ == tasksOnSlaves(offerNumber))
+      if (offerNumber > tasksOnSlaves.size - 1) offerNumber = 0
+    }
+    result
   }
 
 }
