@@ -22,7 +22,6 @@ object SjInputModuleSetup extends App {
 
   val checkpointInterval = 10
 
-
   open()
   cassandraSetup()
   loadModule(SjInputInfoExp.inputModule, SjInputInfoExp.fileStorage)
