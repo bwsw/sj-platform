@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.windowed.task.input
 
 import com.bwsw.sj.common.DAL.model.SjStream
 import com.bwsw.sj.common.utils.StreamLiterals
-import com.bwsw.sj.engine.core.engine.input.TaskInputService
+import com.bwsw.sj.engine.core.engine.input.TaskInput
 import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import org.slf4j.LoggerFactory
@@ -13,11 +13,11 @@ import org.slf4j.LoggerFactory
  *
  * @author Kseniya Mikhaleva
  */
-abstract class TaskInput[T <: Envelope](inputs: scala.collection.mutable.Map[SjStream, Array[Int]]) extends TaskInputService[T](inputs) {
+abstract class RetrievableTaskInput[T <: Envelope](inputs: scala.collection.mutable.Map[SjStream, Array[Int]]) extends TaskInput[T](inputs) {
   def get(): Iterable[T]
 }
 
-object TaskInput {
+object RetrievableTaskInput {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   def apply(manager: CommonTaskManager) = {
@@ -25,9 +25,9 @@ object TaskInput {
     val isTstreamInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.tStreamType)
 
     (isKafkaInputExist, isTstreamInputExist) match {
-      case (true, true) => new CompleteTaskInput(manager)
-      case (false, true) => new TStreamTaskInput(manager)
-      case (true, false) => new KafkaTaskInput(manager)
+      case (true, true) => new RetrievableCompleteTaskInput(manager)
+      case (false, true) => new RetrievableTStreamTaskInput(manager)
+      case (true, false) => new RetrievableKafkaTaskInput(manager)
       case _ =>
         logger.error("Type of input stream is not 'kafka' or 't-stream'")
         throw new RuntimeException("Type of input stream is not 'kafka' or 't-stream'")

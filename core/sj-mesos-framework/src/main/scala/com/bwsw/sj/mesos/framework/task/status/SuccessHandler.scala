@@ -28,7 +28,7 @@ object SuccessHandler extends TaskStatusHandler {
     StatusHandler.logger.debug(s"Running task: ${status.getTaskId.getValue}")
 
     if (FrameworkUtil.instance.moduleType.equals(EngineLiterals.inputStreamingType)) {
-      currentSlave.hostname
+      currentSlave.hostname //todo Дима, почему-тто warning выпадает: a pure expression does nothing in statement position; you may be omitting necessary parentheses
     }
   }
 

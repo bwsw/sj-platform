@@ -7,7 +7,7 @@ import com.bwsw.sj.common.DAL.model.SjStream
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.engine.core.engine.input.TStreamTaskInputService
+import com.bwsw.sj.engine.core.engine.input.CallableTStreamTaskInput
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, PersistentBlockingQueue}
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
@@ -37,7 +37,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private val outputStream = getOutputStream
   private val environmentManager = createModuleEnvironmentManager()
   private val executor = manager.getExecutor(environmentManager).asInstanceOf[OutputStreamingExecutor]
-  val taskInputService = new TStreamTaskInputService(manager, blockingQueue)
+  val taskInputService = new CallableTStreamTaskInput(manager, blockingQueue)
   private val outputProcessor = OutputProcessor(outputStream, performanceMetrics, manager)
   private var wasFirstCheckpoint = false
   protected val checkpointInterval = instance.checkpointInterval
