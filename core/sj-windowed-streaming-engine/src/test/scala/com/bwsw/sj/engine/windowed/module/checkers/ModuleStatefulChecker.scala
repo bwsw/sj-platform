@@ -4,6 +4,7 @@ import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.engine.core.entities.{Batch, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.windowed.module.DataFactory._
+import com.bwsw.sj.engine.windowed.utils.StateHelper
 
 import scala.collection.JavaConverters._
 
@@ -25,10 +26,10 @@ object ModuleStatefulChecker extends App {
   var inputElements = scala.collection.mutable.ArrayBuffer[Int]()
   var outputElements = scala.collection.mutable.ArrayBuffer[Int]()
 
-  //  val consumer = createStateConsumer(streamService)
-  //  consumer.start()
-  //  val initialState = StateHelper.getState(consumer, objectSerializer)
-  //  var sum = initialState("sum").asInstanceOf[Int]
+  val consumer = createStateConsumer(streamService)
+  consumer.start()
+  val initialState = StateHelper.getState(consumer, objectSerializer)
+  var sum = initialState("sum").asInstanceOf[Int]
 
   inputTstreamConsumers.foreach(inputTstreamConsumer => {
     val partitions = inputTstreamConsumer.getPartitions().toIterator
@@ -87,11 +88,11 @@ object ModuleStatefulChecker extends App {
 
   assert(inputElements.forall(x => outputElements.contains(x)) && outputElements.forall(x => inputElements.contains(x)),
     "All txns elements that are consumed from output stream should equals all txns elements that are consumed from input stream")
-  //
-  //  assert(sum == inputElements.sum,
-  //    "Sum of all txns elements that are consumed from input stream should equals state variable sum")
-  //
-  //  consumer.stop()
+
+  assert(sum == inputElements.sum,
+    "Sum of all txns elements that are consumed from input stream should equals state variable sum")
+
+  consumer.stop()
   inputTstreamConsumers.foreach(x => x.stop())
   outputConsumers.foreach(x => x.stop())
   close()

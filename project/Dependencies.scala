@@ -13,7 +13,7 @@ object Dependencies {
     "org.mongodb.morphia" % "morphia" % "1.1.1",
     "org.apache.commons" % "commons-io" % "1.3.2",
     "com.typesafe" % "config" % "1.3.0",
-    "org.apache.kafka" % "kafka_2.11" % "0.9.0.1",
+    "org.apache.kafka" % "kafka_2.11" % "0.10.1.0",
     "org.apache.curator" % "curator-recipes" % "2.11.0",
     "org.elasticsearch" % "elasticsearch" % "2.3.2",
     "postgresql" % "postgresql" % "9.1-901.jdbc4"
