@@ -39,7 +39,7 @@ object DataFactory {
   private val cassandraTestKeyspace = "test_keyspace_for_windowed_engine"
   private val testNamespace = "test"
   private val instanceName = "test-instance-for-windowed-engine"
-  private val kafkaInputName = "kafka-input-test"
+  private val kafkaInputName = "windowed-kafka-input"
   private var instanceInputs: Array[String] = Array()
   private var instanceOutputs: Array[String] = Array()
   private val task: Task = new Task()
@@ -436,7 +436,6 @@ object DataFactory {
   }
 
   def createInputKafkaConsumer(streamService: GenericMongoService[SjStream], partitionNumber: Int) = {
-
     val props = new Properties()
     props.put("bootstrap.servers", System.getenv("KAFKA_HOSTS"))
     props.put("enable.auto.commit", "false")

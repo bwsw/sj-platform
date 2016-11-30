@@ -16,14 +16,14 @@ import org.slf4j.LoggerFactory
  * @param blockingQueue Blocking queue for keeping incoming envelopes that are serialized into a string,
  *                      which will be retrieved into a module
  */
-class CompleteTaskInputService(manager: CommonTaskManager,
+class CallableCompleteTaskInput(manager: CommonTaskManager,
                                blockingQueue: PersistentBlockingQueue) extends {
   override val checkpointGroup = new CheckpointGroup()
-} with CallableTaskInputService[Envelope](manager.inputs) {
+} with CallableTaskInput[Envelope](manager.inputs) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val kafkaRegularTaskInputService = new KafkaTaskInputService(manager, blockingQueue, checkpointGroup)
-  private val tStreamRegularTaskInputService = new TStreamTaskInputService(manager, blockingQueue, checkpointGroup)
+  private val kafkaRegularTaskInputService = new CallableKafkaTaskInput(manager, blockingQueue, checkpointGroup)
+  private val tStreamRegularTaskInputService = new CallableTStreamTaskInput(manager, blockingQueue, checkpointGroup)
 
   override def registerEnvelope(envelope: Envelope) = {
     envelope match {

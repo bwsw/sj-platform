@@ -6,7 +6,7 @@ import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.common.utils.{EngineLiterals, SjStreamUtils}
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
-import com.bwsw.sj.engine.windowed.task.input.TaskInput
+import com.bwsw.sj.engine.windowed.task.input.RetrievableTaskInput
 
 import com.bwsw.sj.engine.windowed.task.reporting.WindowedStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
@@ -23,7 +23,7 @@ import scala.collection.Map
  * @author Kseniya Mikhaleva
  */
 abstract class BatchCollector(protected val manager: CommonTaskManager,
-                              inputService: TaskInput[_ >: TStreamEnvelope with KafkaEnvelope <: Envelope],
+                              inputService: RetrievableTaskInput[_ >: TStreamEnvelope with KafkaEnvelope <: Envelope],
                               batchQueue: ArrayBlockingQueue[Batch],
                               performanceMetrics: WindowedStreamingPerformanceMetrics) extends Callable[Unit] {
 
@@ -86,7 +86,7 @@ object BatchCollector {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   def apply(manager: CommonTaskManager,
-            inputService: TaskInput[_ >: TStreamEnvelope with KafkaEnvelope <: Envelope],
+            inputService: RetrievableTaskInput[_ >: TStreamEnvelope with KafkaEnvelope <: Envelope],
             batchQueue: ArrayBlockingQueue[Batch],
             performanceMetrics: WindowedStreamingPerformanceMetrics) = {
     val windowedInstance = manager.instance.asInstanceOf[WindowedInstance]

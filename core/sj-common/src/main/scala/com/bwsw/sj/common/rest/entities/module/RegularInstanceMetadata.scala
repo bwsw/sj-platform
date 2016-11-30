@@ -54,5 +54,5 @@ class RegularInstanceMetadata extends InstanceMetadata {
     sjStreams.foreach(_.create())
   }
 
-  override def getInputs() = this.inputs
+  override def inputsOrEmptyList() = this.inputs
 }

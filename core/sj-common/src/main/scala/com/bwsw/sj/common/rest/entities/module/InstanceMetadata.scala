@@ -127,7 +127,7 @@ class InstanceMetadata {
   @JsonIgnore
   protected def createTaskStreams() = {
     val streamDAO = ConnectionRepository.getStreamService
-    val inputStreamsWithModes = splitStreamsAndModes(getInputs())
+    val inputStreamsWithModes = splitStreamsAndModes(inputsOrEmptyList())
     inputStreamsWithModes.map(streamWithMode => {
       val partitions = getPartitions(streamWithMode.streamName, streamDAO)
       TaskStream(streamWithMode.streamName, streamWithMode.mode, partitions)
@@ -135,7 +135,7 @@ class InstanceMetadata {
   }
 
   @JsonIgnore
-  protected def getInputs(): Array[String] = Array()
+  protected def inputsOrEmptyList(): Array[String] = Array()
 
   private def splitStreamsAndModes(streamsWithModes: Array[String]) = {
     streamsWithModes.map(x => {
