@@ -67,7 +67,7 @@ class WindowedInstanceValidator extends InstanceValidator {
                             specification: SpecificationData): ArrayBuffer[String] = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     val errors = new ArrayBuffer[String]()
-    val inputs = instance.getInputs()
+    val inputs = instance.inputsOrEmptyList()
 
     // 'inputs' field
     val inputModes = inputs.map(i => getStreamMode(i))

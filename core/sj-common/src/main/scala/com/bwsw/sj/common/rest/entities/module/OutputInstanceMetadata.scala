@@ -44,5 +44,5 @@ class OutputInstanceMetadata extends InstanceMetadata {
     sjStreams.foreach(_.create())
   }
 
-  override def getInputs() = Array(this.input)
+  override def inputsOrEmptyList() = Array(this.input)
 }

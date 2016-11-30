@@ -42,7 +42,7 @@ class WindowedInstanceMetadata extends InstanceMetadata {
                                moduleVersion: String,
                                engineName: String,
                                engineVersion: String) = {
-    val clearInputs = getInputs().map(clearStreamFromMode)
+    val clearInputs = inputsOrEmptyList().map(clearStreamFromMode)
     super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion)
     castParallelismToNumber(getStreamsPartitions(clearInputs))
     this.executionPlan.fillTasks(createTaskStreams(), createTaskNames(this.parallelism.asInstanceOf[Int], this.name))
@@ -54,10 +54,10 @@ class WindowedInstanceMetadata extends InstanceMetadata {
   }
 
   override def createStreams() = {
-    val inputs = getInputs()
+    val inputs = inputsOrEmptyList()
     val sjStreams = getStreams(inputs.map(clearStreamFromMode) ++ this.outputs)
     sjStreams.foreach(_.create())
   }
 
-  override def getInputs() = this.relatedStreams :+ this.mainStream
+  override def inputsOrEmptyList() = this.relatedStreams :+ this.mainStream
 }
