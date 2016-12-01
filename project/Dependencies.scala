@@ -13,13 +13,16 @@ object Dependencies {
     "org.mongodb.morphia" % "morphia" % "1.1.1",
     "org.apache.commons" % "commons-io" % "1.3.2",
     "com.typesafe" % "config" % "1.3.0",
-    "org.apache.kafka" % "kafka_2.11" % "0.10.1.0",
+    ("org.apache.kafka" % "kafka_2.11" % "0.10.1.0")
+      .exclude("org.slf4j", "slf4j-log4j12"),
     "org.apache.curator" % "curator-recipes" % "2.11.0",
     "org.elasticsearch" % "elasticsearch" % "2.3.2",
     "postgresql" % "postgresql" % "9.1-901.jdbc4"
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(
+    ("org.apache.kafka" % "kafka_2.11" % "0.10.1.0")
+      .exclude("org.slf4j", "slf4j-log4j12"),
     "net.openhft" % "chronicle-queue" % "4.2.6"
   ))
 
@@ -37,12 +40,14 @@ object Dependencies {
   ))
 
   lazy val sjRegularEngineDependencies = Def.setting(Seq(
-    ("org.apache.kafka" % "kafka_2.11" % "0.9.0.1")
+    ("org.apache.kafka" % "kafka_2.11" % "0.10.1.0")
       .exclude("org.slf4j", "slf4j-log4j12"),
     "net.openhft" % "chronicle-queue" % "4.2.6"
   ))
 
   lazy val sjWindowedEngineDependencies = Def.setting(Seq(
+    ("org.apache.kafka" % "kafka_2.11" % "0.10.1.0")
+      .exclude("org.slf4j", "slf4j-log4j12"),
     "org.apache.curator" % "curator-recipes" % "2.11.0"
   ))
 
