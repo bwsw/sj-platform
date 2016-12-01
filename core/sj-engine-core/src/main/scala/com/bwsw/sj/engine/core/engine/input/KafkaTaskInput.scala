@@ -3,8 +3,9 @@ package com.bwsw.sj.engine.core.engine.input
 import java.util.Properties
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.common.DAL.model.{SjStream, KafkaService}
+import com.bwsw.sj.common.DAL.model.{KafkaService, SjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.entities.KafkaEnvelope
@@ -17,7 +18,6 @@ import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
-import ConfigurationSettingsUtils._
 
 trait KafkaTaskInput {
   protected val manager: CommonTaskManager

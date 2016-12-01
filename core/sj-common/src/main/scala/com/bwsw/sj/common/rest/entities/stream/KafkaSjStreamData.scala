@@ -8,9 +8,10 @@ import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonProperty
 import kafka.admin.AdminUtils
-import kafka.common.{TopicAlreadyMarkedForDeletionException, TopicExistsException}
+import kafka.common.TopicAlreadyMarkedForDeletionException
 import kafka.utils.ZkUtils
 import org.I0Itec.zkclient.ZkConnection
+import org.apache.kafka.common.errors.TopicExistsException
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -81,9 +82,9 @@ class KafkaSjStreamData() extends SjStreamData() {
     val errors = new ArrayBuffer[String]()
     val zkUtils = createZkUtils()
     val topicMetadata = AdminUtils.fetchTopicMetadataFromZk(this.name, zkUtils)
-    if (topicMetadata.partitionsMetadata.nonEmpty && topicMetadata.partitionsMetadata.size != this.partitions) {
+    if (!topicMetadata.partitionMetadata().isEmpty && topicMetadata.partitionMetadata().size != this.partitions) {
       errors += s"Partitions count of stream '${this.name}' mismatch. Kafka stream partitions (${this.partitions}) " +
-        s"mismatch partitions of exists kafka topic (${topicMetadata.partitionsMetadata.size})"
+        s"mismatch partitions of exists kafka topic (${topicMetadata.partitionMetadata().size})"
     }
 
     errors
