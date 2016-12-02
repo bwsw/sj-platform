@@ -59,7 +59,7 @@ abstract class InstanceValidator extends ValidationUtils {
 
           if (!validateName(x)) {
             errors += s"Instance has incorrect name: $x. " +
-              s"Name of instance must be contain digits, lowercase letters or hyphens. First symbol must be a letter"
+              s"Name of instance must contain digits, lowercase letters or hyphens. First symbol must be a letter"
           }
         }
     }

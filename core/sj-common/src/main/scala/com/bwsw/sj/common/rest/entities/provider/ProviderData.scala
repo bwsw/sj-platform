@@ -47,7 +47,7 @@ case class ProviderData(name: String,
         else {
           if (!validateName(x)) {
             errors += s"Provider has incorrect name: '$x'. " +
-              s"Name of provider must be contain digits, lowercase letters or hyphens. First symbol must be a letter"
+              s"Name of provider must contain digits, lowercase letters or hyphens. First symbol must be a letter"
           }
 
           if (providerDAO.get(x).isDefined) {

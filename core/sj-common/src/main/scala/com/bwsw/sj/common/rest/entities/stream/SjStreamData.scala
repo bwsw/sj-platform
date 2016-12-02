@@ -58,7 +58,7 @@ class SjStreamData() extends ValidationUtils {
         else {
           if (!validateName(x)) {
             errors += s"Stream has incorrect name: '$x'. " +
-              s"Name of stream must be contain digits, lowercase letters or hyphens. First symbol must be a letter"
+              s"Name of stream must contain digits, lowercase letters or hyphens. First symbol must be a letter"
           }
 
           val streamObj = streamDAO.get(x)

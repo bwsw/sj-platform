@@ -68,7 +68,7 @@ class ServiceData() extends ValidationUtils {
         else {
           if (!validateName(x)) {
             errors += s"Service has incorrect name: $x. " +
-              s"Name of service must be contain digits, lowercase letters or hyphens. First symbol must be a letter"
+              s"Name of service must contain digits, lowercase letters or hyphens. First symbol must be a letter"
           }
 
           if (serviceDAO.get(x).isDefined) {

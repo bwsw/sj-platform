@@ -43,7 +43,7 @@ class EsIndServiceData() extends ServiceData() {
         else {
           if (!validateNamespace(x)) {
             errors += s"Service has incorrect 'index': '$x'. " +
-              s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+              s"Name must contain digits, lowercase letters or underscore. First symbol must be a letter"
           }
         }
     }
