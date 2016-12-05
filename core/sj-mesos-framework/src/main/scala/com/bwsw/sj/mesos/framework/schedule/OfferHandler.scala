@@ -10,33 +10,26 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 /**
-  * Created by diryavkin_dn on 15.11.16.
-  */
-
-/**
-  * Object for filter offers.
-  */
+ * Object for filter offers.
+ */
 object OfferHandler {
-
   private val logger = Logger.getLogger(this.getClass)
-  var filteredOffers: util.List[Offer] = _
+  var filteredOffers = mutable.Buffer[Offer]()
   var offerNumber: Int = 0
-  var offers: util.List[Offer] = _
-
+  private var offers = mutable.Buffer[Offer]()
 
   /**
-    * Filter offered slaves
-    *
-    * @param filters:util.Map[String, String]
-    * @return util.List[Offer]
-    */
-  def filter(filters: util.Map[String, String]) =
-  {
+   * Filter offered slaves
+   *
+   * @param filters:util.Map[String, String]
+   * @return util.List[Offer]
+   */
+  def filter(filters: util.Map[String, String]) = {
     logger.debug(s"FILTER OFFERS")
     var result: mutable.Buffer[Offer] = mutable.Buffer()
     if (!filters.isEmpty) {
       for (filter <- filters.asScala) {
-        for (offer <- offers.asScala) {
+        for (offer <- offers) {
           if (filter._1.matches( """\+.+""")) {
             for (attribute <- offer.getAttributesList.asScala) {
               if (filter._1.toString.substring(1) == attribute.getName &
@@ -55,28 +48,26 @@ object OfferHandler {
           }
         }
       }
-    } else result = offers.asScala
-    filteredOffers = result.asJava
+    } else result = offers
+    filteredOffers = result
   }
 
-
   /**
-    * This method give how much resource of type <name> we have on <offer>
-    *
-    * @param offer:Offer
-    * @param name:String
-    * @return Double
-    */
+   * This method give how much resource of type <name> we have on <offer>
+   *
+   * @param offer:Offer
+   * @param name:String
+   * @return Double
+   */
   def getResource(offer: Offer, name: String): Resource = {
     offer.getResourcesList.asScala.filter(_.getName.equals(name)).head
   }
 
-
   /**
-    * Getting list of offers and count tasks for launch on each slave
-    *
-    * @return mutable.ListBuffer[(Offer, Int)]
-    */
+   * Getting list of offers and count tasks for launch on each slave
+   *
+   * @return mutable.ListBuffer[(Offer, Int)]
+   */
   def getOffersForSlave(): mutable.ListBuffer[(Offer, Int)] = {
     var overCpus = 0.0
     var overMem = 0.0
@@ -87,7 +78,7 @@ object OfferHandler {
     val reqPorts = TasksList.perTaskPortsCount * TasksList.count
 
     val tasksCountOnSlave: mutable.ListBuffer[(Offer, Int)] = mutable.ListBuffer()
-    for (offer: Offer <- OfferHandler.filteredOffers.asScala) {
+    for (offer: Offer <- OfferHandler.filteredOffers) {
       val portsResource = OfferHandler.getResource(offer, "ports")
       var ports = 0
       for (range <- portsResource.getRanges.getRangeList.asScala) {
@@ -111,11 +102,11 @@ object OfferHandler {
     tasksCountOnSlave
   }
 
-  def getOfferIp(offer:Offer) = {
+  def getOfferIp(offer: Offer) = {
     offer.getUrl.getAddress.getIp
   }
 
-  def setOffers(offers: util.List[Offer]) = {
+  def setOffers(offers: mutable.Buffer[Offer]) = {
     this.offers = offers
   }
 
@@ -126,8 +117,8 @@ object OfferHandler {
     } else {
       offerNumber += 1
     }
-    if (offers.asScala.contains(offer._1)) {
-      offers.asScala.remove(offers.asScala.indexOf(offer._1))
+    if (offers.contains(offer._1)) {
+      offers.remove(offers.indexOf(offer._1))
     }
     offer
   }
@@ -140,5 +131,4 @@ object OfferHandler {
     }
     result
   }
-
 }

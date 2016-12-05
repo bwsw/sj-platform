@@ -3,9 +3,6 @@ package com.bwsw.sj.mesos.framework.task.status
 import com.bwsw.sj.mesos.framework.task.{TasksList, StatusHandler}
 import org.apache.mesos.Protos.TaskStatus
 
-/**
-  * Created by diryavkin_dn on 17.11.16.
-  */
 object FailureHandler extends TaskStatusHandler {
   protected var status: TaskStatus = null
 
@@ -15,9 +12,7 @@ object FailureHandler extends TaskStatusHandler {
   }
 
   def process() = {
-    TasksList(status.getTaskId.getValue).foreach(task => task.update(
-      node = "", reason = status.getMessage
-    ))
+    TasksList(status.getTaskId.getValue).foreach(task => task.update(node = "", reason = status.getMessage))
     StatusHandler.logger.error(s"Error: ${status.getMessage}")
 
     TasksList.addToLaunch(status.getTaskId.getValue)
