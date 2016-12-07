@@ -8,7 +8,7 @@ import scala.collection.JavaConverters._
 
 class InputInstanceMetadata extends InstanceMetadata {
   var outputs: Array[String] = Array()
-  @JsonProperty("checkpoint-mode") var checkpointMode: String = null
+  @JsonProperty("checkpoint-mode") var checkpointMode: String = _
   @JsonProperty("checkpoint-interval") var checkpointInterval: Long = 0L
   @JsonProperty("duplicate-check") var duplicateCheck: Boolean = false
   @JsonProperty("lookup-history") var lookupHistory: Int = 0
