@@ -60,42 +60,42 @@ abstract class InstanceValidator extends ValidationUtils with CompletionUtils {
 
           if (!validateName(x)) {
             errors += createMessage("rest.modules.instances.instance.name.incorrect", s"$x") +
-              s"Name of instance must contain digits, lowercase letters or hyphens. First symbol must be a letter"
+              createMessage("rest.modules.instances.instance.name.must.contain")
           }
         }
     }
 
     // 'per-task-cores' field
     if (parameters.perTaskCores <= 0) {
-      errors += s"'Per-task-cores' must be greater than zero"
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "'Per-task-cores'")
     }
 
     // 'per-task-ram' field
     if (parameters.perTaskRam <= 0) {
-      errors += s"'Per-task-ram' must be greater than zero"
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "'Per-task-cores'")
     }
 
     // 'performance-reporting-interval' field
     if (parameters.performanceReportingInterval <= 0) {
-      errors += "'Performance-reporting-interval' must be greater than zero"
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "'Performance-reporting-interval'")
     }
 
     // 'coordination-service' field
     Option(parameters.coordinationService) match {
       case None =>
-        errors += s"'Coordination-service' is required"
+        errors += createMessage("rest.validator.attribute.required", "'Coordination-service'")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += s"'Coordination-service' is required"
+          errors += createMessage("rest.validator.attribute.required", "'Coordination-service'")
         }
         else {
           val coordService = serviceDAO.get(x)
           if (coordService.isDefined) {
             if (!coordService.get.isInstanceOf[ZKService]) {
-              errors += s"'Coordination-service' $x is not ZKCoord"
+              errors += createMessage("rest.validator.is_not", "'Coordination-service'", "ZKCoord")
             }
           } else {
-            errors += s"'Coordination-service' $x does not exist"
+            errors += createMessage("rest.validator.does_not_exist", s"'Coordination-service' $x")
           }
         }
     }
@@ -137,22 +137,22 @@ abstract class InstanceValidator extends ValidationUtils with CompletionUtils {
     val errors = new ArrayBuffer[String]()
     Option(parallelism) match {
       case None =>
-        errors += s"'Parallelism' is required"
+        errors += createMessage("rest.validator.attribute.required", "'Parallelism'")
       case Some(x) =>
         x match {
           case dig: Int =>
             if (dig <= 0) {
-              errors += "'Parallelism' must be greater than zero"
+              errors += createMessage("rest.validator.attribute.must.greater.than.zero", "'Parallelism'")
             }
             if (dig > minimumNumberOfPartitions) {
-              errors += s"'Parallelism' ($dig) is greater than minimum of partitions count ($minimumNumberOfPartitions) of input streams"
+              errors += createMessage("rest.validator.attribute.must.greater.than.parallelism", s"$dig", s"$minimumNumberOfPartitions")
             }
           case s: String =>
             if (!s.equals("max")) {
-              errors += "Unknown type of 'parallelism' parameter. Must be a digit or 'max'"
+              errors += createMessage("rest.validator.parameter.unknown.type", "'parallelism'", "digit or 'max'")
             }
           case _ =>
-            errors += "Unknown type of 'parallelism' parameter. Must be a digit or 'max'"
+            errors += createMessage("rest.validator.parameter.unknown.type", "'parallelism'", "digit or 'max'")
         }
     }
 
