@@ -3,6 +3,7 @@ package com.bwsw.sj.crud.rest.validator.instance
 import com.bwsw.sj.common.DAL.model.TStreamService
 import com.bwsw.sj.common.rest.entities.module.{InputInstanceMetadata, InstanceMetadata, SpecificationData}
 import com.bwsw.sj.common.utils.EngineLiterals._
+import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable.ArrayBuffer
@@ -13,7 +14,7 @@ import scala.collection.mutable.ArrayBuffer
  *
  * @author Kseniya Tomskikh
  */
-class InputInstanceValidator extends InstanceValidator {
+class InputInstanceValidator extends InstanceValidator with CompletionUtils {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
@@ -33,44 +34,44 @@ class InputInstanceValidator extends InstanceValidator {
     // 'checkpoint-mode' field
     Option(inputInstanceMetadata.checkpointMode) match {
       case None =>
-        errors += s"'Checkpoint-mode' is required"
+        errors += createMessage("rest.validator.attribute.required", "'Checkpoint-mode'")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += s"'Checkpoint-mode' is required"
+          errors += createMessage("rest.validator.attribute.required", "'Checkpoint-mode'")
         }
         else {
           if (!checkpointModes.contains(x)) {
-            errors += s"Unknown value of 'checkpoint-mode' attribute: '$x'. " +
-              s"'Checkpoint-mode' must be one of: ${checkpointModes.mkString("[", ", ", "]")}"
+            errors += createMessage("rest.validator.attribute.unknown.value", "'checkpoint-mode'", s"'$x'") +
+              createMessage("rest.validator.attribute.must.one_of", "'checkpoint-mode'", s"${checkpointModes.mkString("[", ", ", "]")}")
           }
         }
     }
 
     // 'checkpoint-interval' field
     if (inputInstanceMetadata.checkpointInterval <= 0) {
-      errors += s"'Checkpoint-interval' must be greater than zero"
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "'Checkpoint-interval'")
     }
 
     if (inputInstanceMetadata.lookupHistory < 0) {
-      errors += s"'Lookup-history' attribute must be greater than zero or equal to zero"
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero.equal", "'Lookup-history'")
     }
 
     if (inputInstanceMetadata.queueMaxSize < 0) {
-      errors += s"'Queue-max-size' attribute must be greater than zero or equal to zero"
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero.equal", "'Queue-max-size'")
     }
 
     if (!defaultEvictionPolicies.contains(inputInstanceMetadata.defaultEvictionPolicy)) {
-      errors += s"Unknown value of 'default-eviction-policy' attribute: '${inputInstanceMetadata.defaultEvictionPolicy}'. " +
-        s"'Default-eviction-policy' must be one of: ${defaultEvictionPolicies.mkString("[", ", ", "]")}"
+      errors += createMessage("rest.validator.attribute.unknown.value", "'default-eviction-policy'", s"'${inputInstanceMetadata.defaultEvictionPolicy}'") +
+        createMessage("rest.validator.attribute.must.one_of", "'Default-eviction-policy'", s"${defaultEvictionPolicies.mkString("[", ", ", "]")}")
     }
 
     if (!evictionPolicies.contains(inputInstanceMetadata.evictionPolicy)) {
-      errors += s"Unknown value of 'eviction-policy' attribute: '${inputInstanceMetadata.evictionPolicy}'. " +
-        s"'Eviction-policy' must be one of: ${evictionPolicies.mkString("[", ", ", "]")}"
+      errors += createMessage("rest.validator.attribute.unknown.value", "'eviction-policy'", s"'${inputInstanceMetadata.evictionPolicy}'") +
+        createMessage("rest.validator.attribute.must.one_of", "'Eviction-policy'", s"${evictionPolicies.mkString("[", ", ", "]")}")
     }
 
     if (inputInstanceMetadata.backupCount < 0 || inputInstanceMetadata.backupCount > 6)
-      errors += "'Backup-count' must be in the interval from 0 to 6"
+      errors += createMessage("rest.validator.attribute.must.interval.from_to", "''Backup-count''", "0", "6")
 
     errors ++= validateStreamOptions(inputInstanceMetadata, specification)
 
@@ -85,46 +86,46 @@ class InputInstanceValidator extends InstanceValidator {
     // 'outputs' field
     val outputsCardinality = specification.outputs("cardinality").asInstanceOf[Array[Int]]
     if (instance.outputs.length < outputsCardinality(0)) {
-      errors += s"Count of outputs cannot be less than ${outputsCardinality(0)}"
+      errors += createMessage("rest.validator.outputs.cannot.less_than", s"${outputsCardinality(0)}")
     }
     if (instance.outputs.length > outputsCardinality(1)) {
-      errors += s"Count of outputs cannot be more than ${outputsCardinality(1)}"
+      errors += createMessage("rest.validator.outputs.cannot.more_than", s"${outputsCardinality(1)}")
     }
     if (doesContainDoubles(instance.outputs)) {
-      errors += s"'Outputs' contain the non-unique streams"
+      errors += createMessage("rest.validator.outputs.non_unique.streams")
     }
     val outputStreams = getStreams(instance.outputs)
     instance.outputs.toList.foreach { streamName =>
       if (!outputStreams.exists(s => s.name == streamName)) {
-        errors += s"Output stream '$streamName' does not exist"
+        errors += createMessage("rest.validator.output_stream.does_not_exist", s"'$streamName'")
       }
     }
     val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
     if (outputStreams.exists(s => !outputTypes.contains(s.streamType))) {
-      errors += s"Output streams must be one of the following type: ${outputTypes.mkString("[", ", ", "]")}"
+      errors += createMessage("rest.validator.output_stream.must.one_of.type", s"${outputTypes.mkString("[", ", ", "]")}")
     }
 
     if (outputStreams.nonEmpty) {
       val tStreamsServices = getStreamServices(outputStreams)
       if (tStreamsServices.size != 1) {
-        errors += s"All t-streams should have the same service"
+        errors += createMessage("rest.validator.t_stream.same.service")
       } else {
         val service = serviceDAO.get(tStreamsServices.head)
         if (!service.get.isInstanceOf[TStreamService]) {
-          errors += s"Service for t-streams must be 'TstrQ'"
+          errors += createMessage("rest.validator.service.must", "t-streams", "'TstrQ'")
         }
       }
 
       // 'parallelism' field
       Option(instance.parallelism) match {
         case None =>
-          errors += s"'Parallelism' is required"
+          errors += createMessage("rest.validator.attribute.required", "'Parallelism'")
         case Some(x) =>
           x match {
             case dig: Int =>
               checkBackupNumber(instance, errors)
             case _ =>
-              errors += "Unknown type of 'parallelism' parameter. Must be a digit"
+              errors += createMessage("rest.validator.parameter.unknown.type", "'parallelism'", "digit")
           }
       }
     }

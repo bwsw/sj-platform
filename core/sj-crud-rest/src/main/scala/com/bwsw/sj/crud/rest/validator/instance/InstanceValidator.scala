@@ -9,6 +9,7 @@ import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, SpecificationData}
 import com.bwsw.sj.common.rest.utils.ValidationUtils
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
+import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable
@@ -20,7 +21,7 @@ import scala.collection.mutable.ArrayBuffer
  *
  * @author Kseniya Tomskikh
  */
-abstract class InstanceValidator extends ValidationUtils {
+abstract class InstanceValidator extends ValidationUtils with CompletionUtils {
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
   var serviceDAO: GenericMongoService[Service] = ConnectionRepository.getServiceManager
   var instanceDAO: GenericMongoService[Instance] = ConnectionRepository.getInstanceService
@@ -47,18 +48,18 @@ abstract class InstanceValidator extends ValidationUtils {
     // 'name' field
     Option(parameters.name) match {
       case None =>
-        errors += s"'Name' is required"
+        errors += createMessage("rest.validator.attribute.required", "'Name'")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += s"'Name' is required"
+          errors += createMessage("rest.validator.attribute.required", "'Name'")
         }
         else {
           if (instanceDAO.get(x).isDefined) {
-            errors += s"Instance with name $x already exists"
+            errors += createMessage("rest.modules.instances.instance.exists", s"$x")
           }
 
           if (!validateName(x)) {
-            errors += s"Instance has incorrect name: $x. " +
+            errors += createMessage("rest.modules.instances.instance.name.incorrect", s"$x") +
               s"Name of instance must contain digits, lowercase letters or hyphens. First symbol must be a letter"
           }
         }
@@ -94,7 +95,7 @@ abstract class InstanceValidator extends ValidationUtils {
               errors += s"'Coordination-service' $x is not ZKCoord"
             }
           } else {
-            errors += s"'Coordination-service' $x} does not exist"
+            errors += s"'Coordination-service' $x does not exist"
           }
         }
     }
