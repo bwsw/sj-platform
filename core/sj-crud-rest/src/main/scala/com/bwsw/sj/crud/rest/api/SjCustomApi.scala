@@ -53,7 +53,7 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
       if (file.exists()) file.delete()
     }
   }
-
+  //todo добавить проверку на существование не только по имени файла, но и по имени+версии из спецификации
   val customApi = {
     pathPrefix("custom") {
       pathPrefix("jars") {
