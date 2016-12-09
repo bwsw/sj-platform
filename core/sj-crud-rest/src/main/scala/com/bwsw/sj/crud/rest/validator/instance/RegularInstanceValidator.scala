@@ -28,38 +28,38 @@ class RegularInstanceValidator extends InstanceValidator {
     // 'checkpoint-mode' field
     Option(regularInstanceMetadata.checkpointMode) match {
       case None =>
-        errors += s"'Checkpoint-mode' is required"
+        errors += createMessage("rest.validator.attribute.required", "'Checkpoint-mode'")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += s"'Checkpoint-mode' is required"
+          errors += createMessage("rest.validator.attribute.required", "'Checkpoint-mode'")
         }
         else {
           if (!checkpointModes.contains(x)) {
-            errors += s"Unknown value of 'checkpoint-mode' attribute: '$x'. " +
-              s"'Checkpoint-mode' must be one of: ${checkpointModes.mkString("[", ", ", "]")}"
+            errors += createMessage("rest.validator.attribute.unknown.value", "'checkpoint-mode'", s"'$x'") +
+              createMessage("rest.validator.attribute.must.one_of", "'checkpoint-mode'", s"${checkpointModes.mkString("[", ", ", "]")}")
           }
         }
     }
 
     // 'checkpoint-interval' field
     if (regularInstanceMetadata.checkpointInterval <= 0) {
-      errors += s"'Checkpoint-interval' must be greater than zero"
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "'Checkpoint-interval'")
     }
 
     // 'event-wait-time' field
     if (regularInstanceMetadata.eventWaitTime <= 0) {
-      errors += s"'Event-wait-time' attribute must be greater than zero"
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "'Event-wait-time'")
     }
 
     // 'state-management' field
     if (!stateManagementModes.contains(regularInstanceMetadata.stateManagement)) {
-      errors += s"Unknown value of 'state-management' attribute: '${regularInstanceMetadata.stateManagement}'. " +
-        s"'State-management' must be one of: ${stateManagementModes.mkString("[", ", ", "]")}"
+      errors += createMessage("rest.validator.attribute.unknown.value", "'state-management'", s"'${regularInstanceMetadata.stateManagement}'")+
+        createMessage("rest.validator.attribute.must.one_of", "'State-management'", s"${stateManagementModes.mkString("[", ", ", "]")}")
     } else {
       if (regularInstanceMetadata.stateManagement != EngineLiterals.noneStateMode) {
         // 'state-full-checkpoint' field
         if (regularInstanceMetadata.stateFullCheckpoint <= 0) {
-          errors += s"'State-full-checkpoint' attribute must be greater than zero"
+          errors += createMessage("rest.validator.attribute.must.greater.than.zero", "'State-full-checkpoint'")
         }
       }
     }
@@ -75,36 +75,36 @@ class RegularInstanceValidator extends InstanceValidator {
     // 'inputs' field
     val inputModes = instance.inputs.map(i => getStreamMode(i))
     if (inputModes.exists(m => !streamModes.contains(m))) {
-      errors += s"Unknown stream mode. Input streams must have one of mode: ${streamModes.mkString("[", ", ", "]")}"
+      errors += createMessage("rest.validator.unknown.input.stream.mode", s"${streamModes.mkString("[", ", ", "]")}")
     }
     val inputsCardinality = specification.inputs("cardinality").asInstanceOf[Array[Int]]
     if (instance.inputs.length < inputsCardinality(0)) {
-      errors += s"Count of inputs cannot be less than ${inputsCardinality(0)}"
+      errors += createMessage("rest.validator.inputs.cannot.less_than", s"${inputsCardinality(0)}")
     }
     if (instance.inputs.length > inputsCardinality(1)) {
-      errors += s"Count of inputs cannot be more than ${inputsCardinality(1)}"
+      errors += createMessage("rest.validator.inputs.cannot.more_than", s"${inputsCardinality(1)}")
     }
 
     val clearInputs = instance.inputs.map(clearStreamFromMode)
     if (doesContainDoubles(clearInputs)) {
-      errors += s"Inputs is not unique"
+      errors += createMessage("rest.validator.inputs.not.unique")
     }
     val inputStreams = getStreams(clearInputs)
     clearInputs.foreach { streamName =>
       if (!inputStreams.exists(s => s.name == streamName)) {
-        errors += s"Input stream '$streamName' does not exist"
+        errors += createMessage("rest.validator.input_stream.does_not_exist", s"'$streamName'")
       }
     }
 
     val inputTypes = specification.inputs("types").asInstanceOf[Array[String]]
     if (inputStreams.exists(s => !inputTypes.contains(s.streamType))) {
-      errors += s"Input streams must be one of: ${inputTypes.mkString("[", ", ", "]")}"
+      errors += createMessage("rest.validator.input_stream.must.one_of.type", s"${inputTypes.mkString("[", ", ", "]")}")
     }
 
     val kafkaStreams = inputStreams.filter(s => s.streamType.equals(kafkaStreamType)).map(_.asInstanceOf[KafkaSjStream])
     if (kafkaStreams.nonEmpty) {
       if (kafkaStreams.exists(s => !s.service.isInstanceOf[KafkaService])) {
-        errors += s"Service for kafka streams must be 'KfkQ'"
+        errors += createMessage("rest.validator.service.must", "kafka streams", "'KfkQ'")
       }
     }
 
@@ -112,7 +112,7 @@ class RegularInstanceValidator extends InstanceValidator {
     val startFrom = instance.startFrom
     if (inputStreams.exists(s => s.streamType.equals(kafkaStreamType))) {
       if (!startFromModes.contains(startFrom)) {
-        errors += s"'Start-from' attribute must be one of: ${startFromModes.mkString("[", ", ", "]")}, if instance inputs have the kafka-streams"
+        errors += createMessage("rest.validator.attribute.must.if.instance.have", "'Start-from'", s"${startFromModes.mkString("[", ", ", "]")}")
       }
     } else {
       if (!startFromModes.contains(startFrom)) {
@@ -120,7 +120,7 @@ class RegularInstanceValidator extends InstanceValidator {
           startFrom.toLong
         } catch {
           case ex: NumberFormatException =>
-            errors += s"'Start-from' attribute is not one of: ${startFromModes.mkString("[", ", ", "]")} or timestamp"
+            errors += createMessage("rest.validator.is_not.one_of", "'Start-from'", s"${startFromModes.mkString("[", ", ", "]")} or timestamp")
         }
       }
     }
@@ -128,23 +128,23 @@ class RegularInstanceValidator extends InstanceValidator {
     // 'outputs' field
     val outputsCardinality = specification.outputs("cardinality").asInstanceOf[Array[Int]]
     if (instance.outputs.length < outputsCardinality(0)) {
-      errors += s"Count of outputs cannot be less than ${outputsCardinality(0)}."
+      errors += createMessage("rest.validator.outputs.cannot.less_than", s"${outputsCardinality(0)}")
     }
     if (instance.outputs.length > outputsCardinality(1)) {
-      errors += s"Count of outputs cannot be more than ${outputsCardinality(1)}."
+      errors += createMessage("rest.validator.outputs.cannot.more_than", s"${outputsCardinality(1)}")
     }
     if (doesContainDoubles(instance.outputs)) {
-      errors += s"Outputs is not unique"
+      errors += createMessage("rest.validator.outputs.not.unique")
     }
     val outputStreams = getStreams(instance.outputs)
     instance.outputs.toList.foreach { streamName =>
       if (!outputStreams.exists(s => s.name == streamName)) {
-        errors += s"Output stream '$streamName' does not exist"
+        errors += createMessage("rest.validator.output_stream.does_not_exist", s"'$streamName'")
       }
     }
     val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
     if (outputStreams.exists(s => !outputTypes.contains(s.streamType))) {
-      errors += s"Output streams must be one of: ${outputTypes.mkString("[", ", ", "]")}"
+      errors += createMessage("rest.validator.output_stream.must.one_of.type", s"${outputTypes.mkString("[", ", ", "]")}")
     }
 
     // 'parallelism' field
@@ -157,11 +157,11 @@ class RegularInstanceValidator extends InstanceValidator {
       s.streamType.equals(tStreamType)
     })
     if (tStreamsServices.size != 1) {
-      errors += s"All t-streams should have the same service"
+      errors += createMessage("rest.validator.t_stream.same.service")
     } else {
       val service = serviceDAO.get(tStreamsServices.head)
       if (!service.get.isInstanceOf[TStreamService]) {
-        errors += s"Service for t-streams must be 'TstrQ'"
+        errors += createMessage("rest.validator.t_stream.same.service", "t-streams", "'TstrQ'")
       }
     }
 
