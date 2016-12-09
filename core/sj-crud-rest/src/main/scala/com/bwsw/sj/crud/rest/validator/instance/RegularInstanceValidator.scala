@@ -36,7 +36,7 @@ class RegularInstanceValidator extends InstanceValidator {
         else {
           if (!checkpointModes.contains(x)) {
             errors += createMessage("rest.validator.attribute.unknown.value", "'checkpoint-mode'", s"'$x'") +
-              createMessage("rest.validator.attribute.must.one_of", "'checkpoint-mode'", s"${checkpointModes.mkString("[", ", ", "]")}")
+              createMessage("rest.validator.attribute.must.one_of", "'Checkpoint-mode'", s"${checkpointModes.mkString("[", ", ", "]")}")
           }
         }
     }
