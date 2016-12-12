@@ -30,43 +30,45 @@
         </div>
 
         <!-- Services list -->
-        <table class="table table-hover table-sm mt-1 mb-0">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Provider</th>
-              <th class="actions-column">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngIf="!serviceList || (serviceList && serviceList.length === 0)">
-              <td colspan="20" class="text-center">No services have been found.</td>
-            </tr>
+        <div class="table-wrapper">
+          <table class="table table-hover table-sm mt-1 mb-0">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Provider</th>
+                <th class="actions-column">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="!serviceList || (serviceList && serviceList.length === 0)">
+                <td colspan="20" class="text-center">No services have been found.</td>
+              </tr>
 
-            <tr *ngFor="let service of serviceList | orderBy: 'name' | listFilter : term"
-                [ngClass]="{ 'table-info': isSelected(service) }"
-                (click)="service_select(service)">
-              <td>{{ service.name }}</td>
-              <td>{{ service.description }}</td>
-              <td>
+              <tr *ngFor="let service of serviceList | orderBy: 'name' | listFilter : term"
+                  [ngClass]="{ 'table-info': isSelected(service) }"
+                  (click)="service_select(service)">
+                <td>{{ service.name }}</td>
+                <td>{{ service.description }}</td>
+                <td>
                 <span *ngIf="service.type != 'TstrQ'">
                   <span>Provider:</span>
                   <span class="btn-lookup action-link"
                         (click)="get_provider_info(ProviderInfo, service.provider)">{{ service.provider }}</span>
                 </span>
-              </td>
-              <td class="actions-column">
-                <button type="button"
-                        class="btn btn-sm btn-secondary"
-                        title="Delete service"
-                        (click)="delete_service_confirm(DeleteService, service)">
-                  <i class="fa fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                </td>
+                <td class="actions-column">
+                  <button type="button"
+                          class="btn btn-sm btn-secondary"
+                          title="Delete service"
+                          (click)="delete_service_confirm(DeleteService, service)">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -76,34 +78,36 @@
     <div class="card">
       <div class="card-header">Detailed information about node</div>
       <div class="card-block">
-        <ul *ngIf="current_service">
-          <li>Name: {{current_service.name}}</li>
-          <li>Type: {{current_service.type}}</li>
-          <li>Description: {{current_service.description}}</li>
-          <li *ngIf="current_service.type == 'CassDB'">Keyspace: {{current_service.keyspace}}</li>
-          <li *ngIf="current_service.type == 'ESInd'">Index: {{current_service.index}}</li>
-          <li *ngIf="current_service.type == 'TstrQ' || current_service.type == 'ZKCoord'
+        <div class="overflow-x-scroll">
+          <ul *ngIf="current_service">
+            <li>Name: {{current_service.name}}</li>
+            <li>Type: {{current_service.type}}</li>
+            <li>Description: {{current_service.description}}</li>
+            <li *ngIf="current_service.type == 'CassDB'">Keyspace: {{current_service.keyspace}}</li>
+            <li *ngIf="current_service.type == 'ESInd'">Index: {{current_service.index}}</li>
+            <li *ngIf="current_service.type == 'TstrQ' || current_service.type == 'ZKCoord'
               || current_service.type == 'RdsCoord' || current_service.type == 'ArspkDB'">
-            Namespace: {{current_service.namespace}}
-          </li>
-          <li *ngIf="current_service.type != 'TstrQ'">Provider:
-            <span class="btn-lookup action-link" (click)="get_provider_info(ProviderInfo, current_service.provider)">
+              Namespace: {{current_service.namespace}}
+            </li>
+            <li *ngIf="current_service.type != 'TstrQ'">Provider:
+              <span class="btn-lookup action-link" (click)="get_provider_info(ProviderInfo, current_service.provider)">
         {{ current_service.provider }}
       </span>
-          </li>
-          <li *ngIf="current_service.type == 'TstrQ'">Metadata provider: <span class="btn-lookup action-link"
-                                                                               (click)="get_provider_info(ProviderInfo, current_service.metadata_provider)">{{current_service['metadata-provider']}}</span>
-          </li>
-          <li *ngIf="current_service.type == 'TstrQ'">Metadata namespace: {{current_service['metadata-namespace']}}</li>
-          <li *ngIf="current_service.type == 'TstrQ'">Data provider: <span class="btn-lookup action-link"
-                                                                           (click)="get_provider_info(ProviderInfo, current_service.data_provider)">{{current_service['data-provider']}}</span>
-          </li>
-          <li *ngIf="current_service.type == 'TstrQ'">Data namespace: {{current_service['data-namespace']}}</li>
-          <li *ngIf="current_service.type == 'TstrQ'">Lock provider: <span class="btn-lookup action-link"
-                                                                           (click)="get_provider_info(ProviderInfo, current_service.lock_provider)">{{current_service['lock-provider']}}</span>
-          </li>
-          <li *ngIf="current_service.type == 'TstrQ'">Lock namespace: {{current_service['lock-namespace']}}</li>
-        </ul>
+            </li>
+            <li *ngIf="current_service.type == 'TstrQ'">Metadata provider: <span class="btn-lookup action-link"
+                                                                                 (click)="get_provider_info(ProviderInfo, current_service.metadata_provider)">{{current_service['metadata-provider']}}</span>
+            </li>
+            <li *ngIf="current_service.type == 'TstrQ'">Metadata namespace: {{current_service['metadata-namespace']}}</li>
+            <li *ngIf="current_service.type == 'TstrQ'">Data provider: <span class="btn-lookup action-link"
+                                                                             (click)="get_provider_info(ProviderInfo, current_service.data_provider)">{{current_service['data-provider']}}</span>
+            </li>
+            <li *ngIf="current_service.type == 'TstrQ'">Data namespace: {{current_service['data-namespace']}}</li>
+            <li *ngIf="current_service.type == 'TstrQ'">Lock provider: <span class="btn-lookup action-link"
+                                                                             (click)="get_provider_info(ProviderInfo, current_service.lock_provider)">{{current_service['lock-provider']}}</span>
+            </li>
+            <li *ngIf="current_service.type == 'TstrQ'">Lock namespace: {{current_service['lock-namespace']}}</li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>

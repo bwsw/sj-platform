@@ -96,7 +96,10 @@ export class StreamsComponent implements OnInit {
           this.alerts.push({ msg: status, type: 'success', closable: true, timeout: 3000 });
           this.getStreamList();
         },
-        error => this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+        error => {
+          modal.hide();
+          this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 });
+        });
   }
 
   public stream_select(stream: StreamModel) {

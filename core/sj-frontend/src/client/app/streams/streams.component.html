@@ -30,43 +30,45 @@
         </div>
 
         <!-- Steams list -->
-        <table class="table table-hover table-sm mt-1 mb-0">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Service</th>
-              <th class="actions-column">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngIf="!streamList || (streamList && streamList.length === 0)">
-              <td colspan="20" class="text-center">No streams have been found.</td>
-            </tr>
+        <div class="table-wrapper">
+          <table class="table table-hover table-sm mt-1 mb-0">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Service</th>
+                <th class="actions-column">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="!streamList || (streamList && streamList.length === 0)">
+                <td colspan="20" class="text-center">No streams have been found.</td>
+              </tr>
 
-            <tr *ngFor="let stream of streamList | orderBy: 'name' | listFilter : term"
-                [ngClass]="{ 'table-info': isSelected(stream) }"
-                (click)="stream_select(stream)">
-              <td>{{ stream.name }}</td>
-              <td>{{ stream.description }}</td>
-              <td>
+              <tr *ngFor="let stream of streamList | orderBy: 'name' | listFilter : term"
+                  [ngClass]="{ 'table-info': isSelected(stream) }"
+                  (click)="stream_select(stream)">
+                <td>{{ stream.name }}</td>
+                <td>{{ stream.description }}</td>
+                <td>
                 <span class="stream-action-link">
                   Service:
                   <span class="btn-lookup action-link"
                         (click)="get_service_info(ServiceInfo, stream.service)">{{ stream.service }}</span>
                 </span>
-              </td>
-              <td class="actions-column">
-                <button type="button"
-                        class="btn btn-sm btn-secondary"
-                        title="Delete stream"
-                        (click)="delete_stream_confirm(DeleteStream, stream)">
-                  <i class="fa fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                </td>
+                <td class="actions-column">
+                  <button type="button"
+                          class="btn btn-sm btn-secondary"
+                          title="Delete stream"
+                          (click)="delete_stream_confirm(DeleteStream, stream)">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -76,22 +78,24 @@
     <div class="card">
       <div class="card-header">Detailed information about node</div>
       <div class="card-block">
-        <ul *ngIf="current_stream">
-          <li>Name: {{current_stream.name}}</li>
-          <li>Type: {{current_stream.type}}</li>
-          <li>Description: {{current_stream.description}}</li>
-          <li>Partitions: {{current_stream.partitions}}</li>
-          <li>Tags: {{current_stream.tags}}</li>
-          <li>Service: <span class="btn-lookup action-link" (click)="get_service_info(ServiceInfo, current_stream.service)">{{ current_stream.service }}</span>
-          </li>
-          <li *ngIf="current_stream.type == 'Tstream'">Generator:
-            <ul>
-              <li>Type: {{current_stream.generator.type}}</li>
-              <li>Service: {{current_stream.generator.service}}</li>
-              <li>Instance count: {{current_stream.generator.instanceCount}}</li>
-            </ul>
-          </li>
-        </ul>
+        <div class="overflow-x-scroll">
+          <ul *ngIf="current_stream">
+            <li>Name: {{current_stream.name}}</li>
+            <li>Type: {{current_stream.type}}</li>
+            <li>Description: {{current_stream.description}}</li>
+            <li>Partitions: {{current_stream.partitions}}</li>
+            <li>Tags: {{current_stream.tags}}</li>
+            <li>Service: <span class="btn-lookup action-link" (click)="get_service_info(ServiceInfo, current_stream.service)">{{ current_stream.service }}</span>
+            </li>
+            <li *ngIf="current_stream.type == 'Tstream'">Generator:
+              <ul>
+                <li>Type: {{current_stream.generator.type}}</li>
+                <li>Service: {{current_stream.generator.service}}</li>
+                <li>Instance count: {{current_stream.generator.instanceCount}}</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -295,7 +299,7 @@
       </div>
 
       <div class="modal-body" *ngIf="stream_to_delete">
-        <p>Do you really want to delete stream " {{ stream_to_delete.name }} " ? This action can not be undone!</p>
+        <p>Do you really want to delete stream "{{ stream_to_delete.name }}"? This action can not be undone!</p>
       </div>
 
       <div class="modal-footer">

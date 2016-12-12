@@ -33,43 +33,45 @@
         </div>
 
         <!-- Modules list -->
-        <table class="table table-hover table-sm mt-1 mb-0">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Type</th>
-              <th>Version</th>
-              <th class="actions-column">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngIf="!moduleList || (moduleList && moduleList.length === 0)">
-              <td colspan="20" class="text-center">No modules have been found.</td>
-            </tr>
+        <div class="table-wrapper">
+          <table class="table table-hover table-sm mt-1 mb-0">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Version</th>
+                <th class="actions-column">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="!moduleList || (moduleList && moduleList.length === 0)">
+                <td colspan="20" class="text-center">No modules have been found.</td>
+              </tr>
 
-            <tr *ngFor="let module of moduleList | orderBy: 'module-name' | listFilter : term"
-                [ngClass]="{ 'table-info': isSelected(module) }"
-                (click)="module_select(module)">
-              <td>{{ module["module-name"] }}</td>
-              <td>{{ module["module-type"] }}</td>
-              <td>{{ module["module-version"] }}</td>
-              <td class="actions-column">
-                <button type="button"
-                        class="btn btn-sm btn-secondary"
-                        title="Download module"
-                        (click)="download_module(module)">
-                  <i class="fa fa-download"></i>
-                </button>
-                <button type="button"
-                        class="btn btn-sm btn-secondary"
-                        title="Delete module"
-                        (click)="delete_module_confirm(DeleteModule, module)">
-                  <i class="fa fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              <tr *ngFor="let module of moduleList | orderBy: 'module-name' | listFilter : term"
+                  [ngClass]="{ 'table-info': isSelected(module) }"
+                  (click)="module_select(module)">
+                <td>{{ module["module-name"] }}</td>
+                <td>{{ module["module-type"] }}</td>
+                <td>{{ module["module-version"] }}</td>
+                <td class="actions-column">
+                  <button type="button"
+                          class="btn btn-sm btn-secondary"
+                          title="Download module"
+                          (click)="download_module(module)">
+                    <i class="fa fa-download"></i>
+                  </button>
+                  <button type="button"
+                          class="btn btn-sm btn-secondary"
+                          title="Delete module"
+                          (click)="delete_module_confirm(DeleteModule, module)">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -79,46 +81,48 @@
     <div class="card">
       <div class="card-header">Detailed information about node</div>
       <div class="card-block">
-        <ul *ngIf="current_module_specification">
-          <li>Name: {{current_module_specification.name}}</li>
-          <li>Description: {{current_module_specification.description}}</li>
-          <li>Version: {{current_module_specification.version}}</li>
-          <li>Author: {{current_module_specification.author}}</li>
-          <li>Licence: {{current_module_specification.license}}</li>
-          <li>Inputs:
-            <ul>
-              <li>Cardinality:
-                <ul>
-                  <li *ngFor="let parameter of current_module_specification['inputs']['cardinality']">{{parameter}}</li>
-                </ul>
-              </li>
-              <li>Types:
-                <ul>
-                  <li *ngFor="let type of current_module_specification['inputs']['types']">{{type}}</li>
-                </ul>
-              </li>
-            </ul>
-          </li>
-          <li>Outputs:
-            <ul>
-              <li>Cardinality:
-                <ul>
-                  <li *ngFor="let parameter of current_module_specification['outputs']['cardinality']">{{parameter}}</li>
-                </ul>
-              </li>
-              <li>Types:
-                <ul>
-                  <li *ngFor="let type of current_module_specification['outputs']['cardinality']">{{type}}</li>
-                </ul>
-              </li>
-            </ul>
-          </li>
-          <li>Module-type: {{current_module_specification["module-type"]}}</li>
-          <li>Engine: {{current_module_specification.engine}}</li>
-          <li>Options : {{current_module_specification.options | json}}</li>
-          <li>Validator-class: {{current_module_specification["validator-class"]}}</li>
-          <li>Executor-class: {{current_module_specification["executor-class"]}}</li>
-        </ul>
+        <div class="overflow-x-scroll">
+          <ul *ngIf="current_module_specification">
+            <li>Name: {{current_module_specification.name}}</li>
+            <li>Description: {{current_module_specification.description}}</li>
+            <li>Version: {{current_module_specification.version}}</li>
+            <li>Author: {{current_module_specification.author}}</li>
+            <li>Licence: {{current_module_specification.license}}</li>
+            <li>Inputs:
+              <ul>
+                <li>Cardinality:
+                  <ul>
+                    <li *ngFor="let parameter of current_module_specification['inputs']['cardinality']">{{parameter}}</li>
+                  </ul>
+                </li>
+                <li>Types:
+                  <ul>
+                    <li *ngFor="let type of current_module_specification['inputs']['types']">{{type}}</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>Outputs:
+              <ul>
+                <li>Cardinality:
+                  <ul>
+                    <li *ngFor="let parameter of current_module_specification['outputs']['cardinality']">{{parameter}}</li>
+                  </ul>
+                </li>
+                <li>Types:
+                  <ul>
+                    <li *ngFor="let type of current_module_specification['outputs']['cardinality']">{{type}}</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>Module-type: {{current_module_specification["module-type"]}}</li>
+            <li>Engine: {{current_module_specification.engine}}</li>
+            <li>Options : {{current_module_specification.options | json}}</li>
+            <li>Validator-class: {{current_module_specification["validator-class"]}}</li>
+            <li>Executor-class: {{current_module_specification["executor-class"]}}</li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>

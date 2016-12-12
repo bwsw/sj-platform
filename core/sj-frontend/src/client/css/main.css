@@ -59,3 +59,7 @@ label.required::after {
   margin-left: 10px;
   margin-top: 8px;
 }
+
+.table-wrapper, .overflow-x-scroll {
+  overflow-x: scroll;
+}

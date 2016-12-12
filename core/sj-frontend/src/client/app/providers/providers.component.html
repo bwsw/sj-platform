@@ -30,42 +30,44 @@
         </div>
 
         <!-- Providers list -->
-        <table class="table table-hover table-sm mt-1 mb-0">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th class="actions-column">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngIf="!providerList || (providerList && providerList.length === 0)">
-              <td colspan="20" class="text-center">No providers have been found.</td>
-            </tr>
+        <div class="table-wrapper">
+          <table class="table table-hover table-sm mt-1 mb-0">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th class="actions-column">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="!providerList || (providerList && providerList.length === 0)">
+                <td colspan="20" class="text-center">No providers have been found.</td>
+              </tr>
 
-            <tr *ngFor="let provider of providerList | orderBy: 'name' | listFilter : term "
-                [ngClass]="{ 'table-info': isSelected(provider) }"
-                (click)="provider_select(provider)">
-              <td>{{ provider.name }}</td>
-              <td>{{ provider.description }}</td>
-              <td class="actions-column">
-                <button type="button"
-                        class="btn btn-sm btn-secondary"
-                        title="Delete provider"
-                        (click)="delete_provider_confirm(DeleteProvider, provider)">
-                  <i class="fa fa-trash"></i>
-                </button>
-                <button type="button"
-                        class="btn btn-sm btn-secondary"
-                        title="Test connection"
-                        (click)="testConnection(provider)">
-                  <i class="fa fa-refresh"
-                     [ngClass]="{ 'fa-spin': isConnecting(provider) }"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              <tr *ngFor="let provider of providerList | orderBy: 'name' | listFilter : term "
+                  [ngClass]="{ 'table-info': isSelected(provider) }"
+                  (click)="provider_select(provider)">
+                <td>{{ provider.name }}</td>
+                <td>{{ provider.description }}</td>
+                <td class="actions-column">
+                  <button type="button"
+                          class="btn btn-sm btn-secondary"
+                          title="Delete provider"
+                          (click)="delete_provider_confirm(DeleteProvider, provider)">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                  <button type="button"
+                          class="btn btn-sm btn-secondary"
+                          title="Test connection"
+                          (click)="testConnection(provider)">
+                    <i class="fa fa-refresh"
+                       [ngClass]="{ 'fa-spin': isConnecting(provider) }"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -75,18 +77,20 @@
     <div class="card">
       <div class="card-header">Detailed information about node</div>
       <div class="card-block">
-        <ul *ngIf="current_provider">
-          <li>Name: {{current_provider.name}}</li>
-          <li>Type: {{current_provider.type}}</li>
-          <li>Description: {{current_provider.description}}</li>
-          <li>Hosts:
-            <ul>
-              <li *ngFor="let host of current_provider.hosts">{{host}}</li>
-            </ul>
-          </li>
-          <li *ngIf="current_provider.login">Login: {{current_provider.login}}</li>
-          <li *ngIf="current_provider.password">Password: {{current_provider.password}}</li>
-        </ul>
+        <div class="overflow-x-scroll">
+          <ul *ngIf="current_provider">
+            <li>Name: {{current_provider.name}}</li>
+            <li>Type: {{current_provider.type}}</li>
+            <li>Description: {{current_provider.description}}</li>
+            <li>Hosts:
+              <ul>
+                <li *ngFor="let host of current_provider.hosts">{{host}}</li>
+              </ul>
+            </li>
+            <li *ngIf="current_provider.login">Login: {{current_provider.login}}</li>
+            <li *ngIf="current_provider.password">Password: {{current_provider.password}}</li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>

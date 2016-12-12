@@ -32,24 +32,25 @@
         </div>
 
         <!-- Instances list -->
-        <table class="table table-hover table-sm mt-1 mb-0">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Status</th>
-              <th class="actions-column">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngIf="!instanceList || (instanceList && instanceList.length === 0)">
-              <td colspan="20" class="text-center">No instances have been found.</td>
-            </tr>
+        <div class="table-wrapper">
+          <table class="table table-hover table-sm mt-1 mb-0">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th class="actions-column">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="!instanceList || (instanceList && instanceList.length === 0)">
+                <td colspan="20" class="text-center">No instances have been found.</td>
+              </tr>
 
-            <tr *ngFor="let instance of instanceList | orderBy: 'name' | listFilter : term"
-                [ngClass]="{ 'table-info': isSelected(instance) }"
-                (click)="instance_select(instance)">
-              <td>{{ instance.name }}</td>
-              <td>
+              <tr *ngFor="let instance of instanceList | orderBy: 'name' | listFilter : term"
+                  [ngClass]="{ 'table-info': isSelected(instance) }"
+                  (click)="instance_select(instance)">
+                <td>{{ instance.name }}</td>
+                <td>
                 <span class="tag tag-default"
                       [ngClass]="{
                         'tag-default': instance.status === 'stopped',
@@ -58,37 +59,38 @@
                         'tag-danger': instance.status === 'failed',
                         'tag-primary': instance.status === 'ready'
                       }">{{ instance.status }}</span>
-              </td>
-              <td class="actions-column">
-                <i class="fa fa-spinner fa-spin btn btn-sm btn-secondary"
-                   *ngIf="instance.status == 'starting' || instance.status == 'stopping' " aria-hidden="true"></i>
+                </td>
+                <td class="actions-column">
+                  <i class="fa fa-spinner fa-spin btn btn-sm btn-secondary"
+                     *ngIf="instance.status == 'starting' || instance.status == 'stopping' " aria-hidden="true"></i>
 
-                <button type="button"
-                        class="btn btn-sm btn-secondary"
-                        *ngIf="instance.status == 'stopped' || instance.status == 'failed' || instance.status == 'ready'"
-                        title="Start instance"
-                        (click)="start_instance(instance)">
-                  <i class="fa fa-play"></i>
-                </button>
+                  <button type="button"
+                          class="btn btn-sm btn-secondary"
+                          *ngIf="instance.status == 'stopped' || instance.status == 'failed' || instance.status == 'ready'"
+                          title="Start instance"
+                          (click)="start_instance(instance)">
+                    <i class="fa fa-play"></i>
+                  </button>
 
-                <button type="button"
-                        class="btn btn-sm btn-secondary"
-                        *ngIf="instance.status == 'started'"
-                        title="Stop instance"
-                        (click)="stop_instance(instance)">
-                  <i class="fa fa-stop"></i>
-                </button>
+                  <button type="button"
+                          class="btn btn-sm btn-secondary"
+                          *ngIf="instance.status == 'started'"
+                          title="Stop instance"
+                          (click)="stop_instance(instance)">
+                    <i class="fa fa-stop"></i>
+                  </button>
 
-                <button type="button"
-                        class="btn btn-sm btn-secondary"
-                        title="Delete instance"
-                        (click)="delete_instance_confirm(DeleteInstance, instance)">
-                  <i class="fa fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                  <button type="button"
+                          class="btn btn-sm btn-secondary"
+                          title="Delete instance"
+                          (click)="delete_instance_confirm(DeleteInstance, instance)">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -98,76 +100,78 @@
     <div class="card">
       <div class="card-header">Detailed information about node</div>
       <div class="card-block">
-        <ul *ngIf="current_instance_info">
+        <div class="overflow-x-scroll">
+          <ul *ngIf="current_instance_info">
 
-          <li>Status: {{current_instance_info.status}}</li>
-          <li>Name : {{current_instance_info.name}}</li>
-          <li>Module-type : {{current_instance["module-type"]}}</li>
-          <li>Module-name : {{current_instance["module-name"]}}</li>
-          <li>Module-version: {{current_instance["module-version"]}}</li>
-          <li *ngIf="current_instance_info.description">Description : {{current_instance_info.description}}</li>
-          <li>Engine : {{current_instance_info.engine}}</li>
-          <li *ngIf="current_instance_info.inputs">Inputs: {{current_instance_info.inputs}}</li>
-          <li *ngIf="current_instance_info.outputs">Outputs: {{current_instance_info.outputs}}</li>
-          <li *ngIf="current_instance_info.input">Input: {{current_instance_info.input}}</li>
-          <li *ngIf="current_instance_info.output">Output: {{current_instance_info.output}}</li>
-          <li>Checkpoint-mode : {{current_instance_info["checkpoint-mode"]}}</li>
-          <li>Checkpoint-interval : {{current_instance_info["checkpoint-interval"]}}</li>
-          <li *ngIf="current_instance_info['state-manegement']">State-management :
-            {{current_instance_info["state-management"]}}
-          </li>
-          <li *ngIf="current_instance_info['duplicate-check']">Duplicate-check :
-            {{current_instance_info["duplicate-check"]}}
-          </li>
-          <li *ngIf="current_instance_info['lookup-history']">Lookup-history : {{current_instance_info["lookup-history"]}}
-          </li>
-          <li *ngIf="current_instance_info['queue-max-size']">Queue-max-size : {{current_instance_info["queue-max-size"]}}
-          </li>
-          <li *ngIf="current_instance_info['default-eviction-policy']">Default-eviction-policy :
-            {{current_instance_info["default-eviction-policy"]}}
-          </li>
-          <li *ngIf="current_instance_info['eviction-policy']">Eviction-policy :
-            {{current_instance_info["eviction-policy"]}}
-          </li>
-          <li *ngIf="current_instance_info['state-full-checkpoint']">State-full-checkpoint :
-            {{current_instance_info["state-full-checkpoint"]}}
-          </li>
-          <li>Parallelism : {{current_instance_info.parallelism}}</li>
-          <li>Options : {{current_instance_info.options | json }}</li>
-          <li *ngIf="current_instance_info['start-from']">Start-from : {{current_instance_info["start-from"]}}</li>
-          <li>Per-task-cores : {{current_instance_info["per-task-cores"]}}</li>
-          <li>Per-task-ram" : {{current_instance_info["per-task-ram"]}}</li>
-          <li>Coordination-service : {{current_instance_info["coordination-service"]}}</li>
-          <li *ngIf="current_instance_info['event-wait-time']">Event-wait-time :
-            {{current_instance_info["event-wait-time"]}}
-          </li>
-          <li *ngIf="current_instance_info['performance-reporting-interval']">Performance-reporting-interval :
-            {{current_instance_info['performance-reporting-interval']}}
-          </li>
-          <li>Jvm-options : {{current_instance_info["jvm-options"] | json}}</li>
-          <li *ngIf="current_instance_info['environment-variables']">Environment variables :
-            {{current_instance_info["environment-variables"] | json}}
-          </li>
-          <li *ngIf="current_instance_info['node-attributes']">Node attributes : {{current_instance_info['node-attributes'] |
-            json}}
-          </li> <!--TODO Node attributes were tags -->
-          <li *ngIf="current_instance_info['backup-count']">Backup-count : {{current_instance_info["backup-count"]}}</li>
-          <li *ngIf="current_instance_info['async-backup-count']">Async-backup-count :
-            {{current_instance_info["async-backup-count"]}}
-          </li>
-          <li>Execution-plan:</li>
-          <p>Tasks</p>
-          <div *ngIf="current_instance !== 'undefined'" class="instance-tasks">
-            <!-- @todo: ng2-bootstrap has issues with bootstrap 4 accordion -->
-            <accordion>
-              <accordion-group *ngFor="let task of current_instance_tasks" [heading]="task">
-                <ul>
-                  <li>{{current_instance_info['execution-plan']['tasks'][task] | json}}</li>
-                </ul>
-              </accordion-group>
-            </accordion>
-          </div>
-        </ul>
+            <li>Status: {{current_instance_info.status}}</li>
+            <li>Name : {{current_instance_info.name}}</li>
+            <li>Module-type : {{current_instance["module-type"]}}</li>
+            <li>Module-name : {{current_instance["module-name"]}}</li>
+            <li>Module-version: {{current_instance["module-version"]}}</li>
+            <li *ngIf="current_instance_info.description">Description : {{current_instance_info.description}}</li>
+            <li>Engine : {{current_instance_info.engine}}</li>
+            <li *ngIf="current_instance_info.inputs">Inputs: {{current_instance_info.inputs}}</li>
+            <li *ngIf="current_instance_info.outputs">Outputs: {{current_instance_info.outputs}}</li>
+            <li *ngIf="current_instance_info.input">Input: {{current_instance_info.input}}</li>
+            <li *ngIf="current_instance_info.output">Output: {{current_instance_info.output}}</li>
+            <li>Checkpoint-mode : {{current_instance_info["checkpoint-mode"]}}</li>
+            <li>Checkpoint-interval : {{current_instance_info["checkpoint-interval"]}}</li>
+            <li *ngIf="current_instance_info['state-manegement']">State-management :
+              {{current_instance_info["state-management"]}}
+            </li>
+            <li *ngIf="current_instance_info['duplicate-check']">Duplicate-check :
+              {{current_instance_info["duplicate-check"]}}
+            </li>
+            <li *ngIf="current_instance_info['lookup-history']">Lookup-history : {{current_instance_info["lookup-history"]}}
+            </li>
+            <li *ngIf="current_instance_info['queue-max-size']">Queue-max-size : {{current_instance_info["queue-max-size"]}}
+            </li>
+            <li *ngIf="current_instance_info['default-eviction-policy']">Default-eviction-policy :
+              {{current_instance_info["default-eviction-policy"]}}
+            </li>
+            <li *ngIf="current_instance_info['eviction-policy']">Eviction-policy :
+              {{current_instance_info["eviction-policy"]}}
+            </li>
+            <li *ngIf="current_instance_info['state-full-checkpoint']">State-full-checkpoint :
+              {{current_instance_info["state-full-checkpoint"]}}
+            </li>
+            <li>Parallelism : {{current_instance_info.parallelism}}</li>
+            <li>Options : {{current_instance_info.options | json }}</li>
+            <li *ngIf="current_instance_info['start-from']">Start-from : {{current_instance_info["start-from"]}}</li>
+            <li>Per-task-cores : {{current_instance_info["per-task-cores"]}}</li>
+            <li>Per-task-ram" : {{current_instance_info["per-task-ram"]}}</li>
+            <li>Coordination-service : {{current_instance_info["coordination-service"]}}</li>
+            <li *ngIf="current_instance_info['event-wait-time']">Event-wait-time :
+              {{current_instance_info["event-wait-time"]}}
+            </li>
+            <li *ngIf="current_instance_info['performance-reporting-interval']">Performance-reporting-interval :
+              {{current_instance_info['performance-reporting-interval']}}
+            </li>
+            <li>Jvm-options : {{current_instance_info["jvm-options"] | json}}</li>
+            <li *ngIf="current_instance_info['environment-variables']">Environment variables :
+              {{current_instance_info["environment-variables"] | json}}
+            </li>
+            <li *ngIf="current_instance_info['node-attributes']">Node attributes : {{current_instance_info['node-attributes'] |
+              json}}
+            </li> <!--TODO Node attributes were tags -->
+            <li *ngIf="current_instance_info['backup-count']">Backup-count : {{current_instance_info["backup-count"]}}</li>
+            <li *ngIf="current_instance_info['async-backup-count']">Async-backup-count :
+              {{current_instance_info["async-backup-count"]}}
+            </li>
+            <li>Execution-plan:</li>
+            <p>Tasks</p>
+            <div *ngIf="current_instance !== 'undefined'" class="instance-tasks">
+              <!-- @todo: ng2-bootstrap has issues with bootstrap 4 accordion -->
+              <accordion>
+                <accordion-group *ngFor="let task of current_instance_tasks" [heading]="task">
+                  <ul>
+                    <li>{{current_instance_info['execution-plan']['tasks'][task] | json}}</li>
+                  </ul>
+                </accordion-group>
+              </accordion>
+            </div>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -591,7 +595,7 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="CreateInstance.hide()">Cancel</button>
         <!-- @toto: Fix issue with validation [disabled]="!(new_instance && instanceForm?.form.valid)" -->
-        <button  type="submit" class="btn btn-primary"
+        <button type="submit" class="btn btn-primary"
                 (click)="createInstance(CreateInstance)">Create
         </button>
       </div>
