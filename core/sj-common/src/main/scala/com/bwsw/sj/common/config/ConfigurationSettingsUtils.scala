@@ -66,19 +66,35 @@ object ConfigurationSettingsUtils {
     getIntConfigSetting(marathonTimeoutTag)
   }
 
+  def getFrameworkBackoffSeconds() = {
+    getIntConfigSetting(frameworkBackoffSeconds)
+  }
+
+  def getFrameworkBackoffFactor() = {
+    getDoubleConfigSettings(frameworkBackoffFactor)
+  }
+
+  def getFrameworkMaxLaunchDelaySeconds() = {
+    getIntConfigSetting(frameworkMaxLaunchDelaySeconds)
+  }
+
   private def getIntConfigSetting(name: String) = {
-    val maybeSetting = configService.get(name)
-    if (maybeSetting.isDefined)
-      maybeSetting.get.value.toInt
-    else
-      throw new NoSuchFieldException(s"Config setting is named '$name' has not found")
+    getConfigSettings(name).toInt
   }
 
   private def getStringConfigSetting(name: String) = {
+    getConfigSettings(name)
+  }
+
+  private def getDoubleConfigSettings(name: String) = {
+    getConfigSettings(name).toDouble
+  }
+
+  private def getConfigSettings(name: String) = {
     val maybeSetting = configService.get(name)
-    if (maybeSetting.isDefined)
-      maybeSetting.get.value
-    else
+    if (maybeSetting.isEmpty)
       throw new NoSuchFieldException(s"Config setting is named '$name' has not found")
+    else
+      maybeSetting.get.value
   }
 }

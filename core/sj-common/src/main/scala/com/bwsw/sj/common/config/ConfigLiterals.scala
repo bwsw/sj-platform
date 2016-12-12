@@ -9,13 +9,10 @@ object ConfigLiterals {
   final val jdbcDomain = "jdbc"
   val domains = Array(systemDomain, tstreamsDomain, kafkaDomain, elasticsearchDomain, zookeeperDomain, jdbcDomain)
   val transactionGeneratorTag = s"$systemDomain.current-transaction-generator"
-  val frameworkTag = s"$systemDomain.current-framework"
   val hostOfCrudRestTag = s"$systemDomain.crud-rest-host"
   val portOfCrudRestTag = s"$systemDomain.crud-rest-port"
   val marathonTag = s"$systemDomain.marathon-connect"
   val marathonTimeoutTag = s"$systemDomain.marathon-connect-timeout"
-  val frameworkPrincipalTag = s"$systemDomain.framework-principal"
-  val frameworkSecretTag = s"$systemDomain.framework-secret"
   val zkSessionTimeoutTag = s"$zookeeperDomain.session-timeout"
 
   val jdbcTimeoutTag = s"$jdbcDomain.timeout"
@@ -25,4 +22,11 @@ object ConfigLiterals {
   val kafkaSubscriberTimeoutTag = s"$systemDomain.subscriber-timeout"
   val geoIpAsNum = s"$systemDomain.geo-ip-as-num"
   val geoIpAsNumv6 = s"$systemDomain.geo-ip-as-num-v6"
+
+  val frameworkTag = s"$systemDomain.current-framework"
+  val frameworkPrincipalTag = s"$systemDomain.framework-principal"
+  val frameworkSecretTag = s"$systemDomain.framework-secret"
+  val frameworkBackoffSeconds = s"$systemDomain.framework-backoff-seconds"
+  val frameworkBackoffFactor = s"$systemDomain.framework-backoff-factor"
+  val frameworkMaxLaunchDelaySeconds = s"$systemDomain.framework-max-launch-delay-seconds"
 }
