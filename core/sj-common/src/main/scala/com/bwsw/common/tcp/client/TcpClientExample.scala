@@ -22,7 +22,7 @@ object TcpClientExample extends App {
   val t0 = System.currentTimeMillis()
   while (i <= 1000000) {
     //while (consoleReader.readLine() != null) {
-    logger.debug("send request")
+   //logger.debug("send request")
     client.get()
     //println(client.get())
     i += 1

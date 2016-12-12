@@ -34,44 +34,44 @@ class InputInstanceValidator extends InstanceValidator with CompletionUtils {
     // 'checkpoint-mode' field
     Option(inputInstanceMetadata.checkpointMode) match {
       case None =>
-        errors += createMessage("rest.validator.attribute.required", "'Checkpoint-mode'")
+        errors += createMessage("rest.validator.attribute.required", "Checkpoint-mode")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("rest.validator.attribute.required", "'Checkpoint-mode'")
+          errors += createMessage("rest.validator.attribute.required", "Checkpoint-mode")
         }
         else {
           if (!checkpointModes.contains(x)) {
-            errors += createMessage("rest.validator.attribute.unknown.value", "'checkpoint-mode'", s"'$x'") +
-              createMessage("rest.validator.attribute.must.one_of", "'checkpoint-mode'", s"${checkpointModes.mkString("[", ", ", "]")}")
+            errors += createMessage("rest.validator.attribute.unknown.value", "checkpoint-mode", s"'$x'") +
+              createMessage("rest.validator.attribute.must.one_of", "Checkpoint-mode", s"${checkpointModes.mkString("[", ", ", "]")}")
           }
         }
     }
 
     // 'checkpoint-interval' field
     if (inputInstanceMetadata.checkpointInterval <= 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "'Checkpoint-interval'")
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Checkpoint-interval")
     }
 
     if (inputInstanceMetadata.lookupHistory < 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero.equal", "'Lookup-history'")
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero.equal", "Lookup-history")
     }
 
     if (inputInstanceMetadata.queueMaxSize < 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero.equal", "'Queue-max-size'")
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero.equal", "Queue-max-size")
     }
 
     if (!defaultEvictionPolicies.contains(inputInstanceMetadata.defaultEvictionPolicy)) {
-      errors += createMessage("rest.validator.attribute.unknown.value", "'default-eviction-policy'", s"'${inputInstanceMetadata.defaultEvictionPolicy}'") +
-        createMessage("rest.validator.attribute.must.one_of", "'Default-eviction-policy'", s"${defaultEvictionPolicies.mkString("[", ", ", "]")}")
+      errors += createMessage("rest.validator.attribute.unknown.value", "default-eviction-policy", s"'${inputInstanceMetadata.defaultEvictionPolicy}'") +
+        createMessage("rest.validator.attribute.must.one_of", "Default-eviction-policy", s"${defaultEvictionPolicies.mkString("[", ", ", "]")}")
     }
 
     if (!evictionPolicies.contains(inputInstanceMetadata.evictionPolicy)) {
-      errors += createMessage("rest.validator.attribute.unknown.value", "'eviction-policy'", s"'${inputInstanceMetadata.evictionPolicy}'") +
-        createMessage("rest.validator.attribute.must.one_of", "'Eviction-policy'", s"${evictionPolicies.mkString("[", ", ", "]")}")
+      errors += createMessage("rest.validator.attribute.unknown.value", "eviction-policy", s"'${inputInstanceMetadata.evictionPolicy}'") +
+        createMessage("rest.validator.attribute.must.one_of", "Eviction-policy", s"${evictionPolicies.mkString("[", ", ", "]")}")
     }
 
     if (inputInstanceMetadata.backupCount < 0 || inputInstanceMetadata.backupCount > 6)
-      errors += createMessage("rest.validator.attribute.must.interval.from_to", "''Backup-count''", "0", "6")
+      errors += createMessage("rest.validator.attribute.must.interval.from_to", "Backup-count", "0", "6")
 
     errors ++= validateStreamOptions(inputInstanceMetadata, specification)
 
@@ -97,7 +97,7 @@ class InputInstanceValidator extends InstanceValidator with CompletionUtils {
     val outputStreams = getStreams(instance.outputs)
     instance.outputs.toList.foreach { streamName =>
       if (!outputStreams.exists(s => s.name == streamName)) {
-        errors += createMessage("rest.validator.output_stream.does_not_exist", s"'$streamName'")
+        errors += createMessage("rest.validator.output_stream.does_not_exist", s"$streamName")
       }
     }
     val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
@@ -112,20 +112,20 @@ class InputInstanceValidator extends InstanceValidator with CompletionUtils {
       } else {
         val service = serviceDAO.get(tStreamsServices.head)
         if (!service.get.isInstanceOf[TStreamService]) {
-          errors += createMessage("rest.validator.service.must", "t-streams", "'TstrQ'")
+          errors += createMessage("rest.validator.service.must", "t-streams", "TstrQ")
         }
       }
 
       // 'parallelism' field
       Option(instance.parallelism) match {
         case None =>
-          errors += createMessage("rest.validator.attribute.required", "'Parallelism'")
+          errors += createMessage("rest.validator.attribute.required", "Parallelism")
         case Some(x) =>
           x match {
             case dig: Int =>
               checkBackupNumber(instance, errors)
             case _ =>
-              errors += createMessage("rest.validator.parameter.unknown.type", "'parallelism'", "digit")
+              errors += createMessage("rest.validator.parameter.unknown.type", "parallelism", "digit")
           }
       }
     }
@@ -136,10 +136,10 @@ class InputInstanceValidator extends InstanceValidator with CompletionUtils {
   private def checkBackupNumber(parameters: InputInstanceMetadata, errors: ArrayBuffer[String]) = {
     val parallelism = parameters.parallelism.asInstanceOf[Int]
     if (parallelism <= 0) {
-      errors += "'Parallelism' must be greater than zero"
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Parallelism")
     }
     if (parallelism <= (parameters.backupCount + parameters.asyncBackupCount)) {
-      errors += "'Parallelism' must be greater than the total number of backups"
+      errors += createMessage("rest.validator.attribute.must.greater.than.total.number.backups", "Parallelism")
     }
   }
 }
