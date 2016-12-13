@@ -11,7 +11,7 @@ import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
 import scala.collection.mutable
 
-trait SjStreamsApi extends Directives with SjCrudValidator with CompletionUtils {
+trait SjStreamsApi extends Directives with SjCrudValidator {
 
   val streamsApi = {
     pathPrefix("streams") {

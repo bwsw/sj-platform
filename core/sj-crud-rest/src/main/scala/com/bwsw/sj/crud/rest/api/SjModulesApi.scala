@@ -24,7 +24,7 @@ import org.apache.commons.io.FileUtils
 import scala.collection.mutable
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
-trait SjModulesApi extends Directives with SjCrudValidator with CompletionUtils {
+trait SjModulesApi extends Directives with SjCrudValidator {
 
   private var previousFileName: Option[String] = None
 

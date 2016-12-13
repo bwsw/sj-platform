@@ -23,7 +23,7 @@ with SjCustomApi
 with SjStreamsApi
 with SjServicesApi
 with SjProvidersApi
-with SjConfigurationSettingsApi with CompletionUtils {
+with SjConfigurationSettingsApi {
   val exceptionHandler = ExceptionHandler {
     case InstanceNotFound(msg, key) =>
       val response = NotFoundRestResponse(Map("message" -> msg, "key" -> key))
@@ -46,7 +46,7 @@ with SjConfigurationSettingsApi with CompletionUtils {
       complete(restResponseToHttpResponse(response))
     case jsonSchemaValidationException:ValidationException =>
       val response = InternalServerErrorRestResponse(Map("message" ->
-        createMessage("rest.modules.specification.json", s"${jsonSchemaValidationException.getMessage}")))
+        createMessage("rest.modules.specification.json.schema.failed", s"${jsonSchemaValidationException.getMessage}")))
       complete(restResponseToHttpResponse(response))
     case ex: Exception =>
       ex.printStackTrace()

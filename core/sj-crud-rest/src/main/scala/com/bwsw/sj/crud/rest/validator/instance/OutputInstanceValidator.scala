@@ -39,22 +39,22 @@ class OutputInstanceValidator extends InstanceValidator {
 
     Option(outputInstanceMetadata.checkpointMode) match {
       case None =>
-        errors += createMessage("rest.validator.attribute.required", "'Checkpoint-mode'")
+        errors += createMessage("rest.validator.attribute.required", "Checkpoint-mode")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("rest.validator.attribute.required", "'Checkpoint-mode'")
+          errors += createMessage("rest.validator.attribute.required", "Checkpoint-mode")
         }
         else {
           if (!x.equals(EngineLiterals.everyNthMode)) {
-            errors += createMessage("rest.validator.attribute.unknown.value", "'checkpoint-mode'", s"'$x'") +
-              createMessage("rest.validator.attribute.must.one_of", "'checkpoint-mode'", s"${checkpointModes.mkString("[", ", ", "]")}")
+            errors += createMessage("rest.validator.attribute.unknown.value", "checkpoint-mode", s"$x") + ". " +
+              createMessage("rest.validator.attribute.must.one_of", "Checkpoint-mode", checkpointModes.mkString("[", ", ", "]"))
           }
         }
     }
 
     // 'checkpoint-interval' field
     if (outputInstanceMetadata.checkpointInterval <= 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "'Checkpoint-interval'")
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Checkpoint-interval")
     }
 
     errors ++= validateStreamOptions(outputInstanceMetadata, specification)
@@ -69,26 +69,26 @@ class OutputInstanceValidator extends InstanceValidator {
     var inputStream: Option[SjStream] = None
     Option(instance.input) match {
       case None =>
-        errors += createMessage("rest.validator.attribute.required", "'Input'")
+        errors += createMessage("rest.validator.attribute.required", "Input")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("rest.validator.attribute.required", "'Input'")
+          errors += createMessage("rest.validator.attribute.required", "Input")
         }
         else {
           val inputMode: String = getStreamMode(x)
           if (!inputMode.equals(EngineLiterals.splitStreamMode)) {
-            errors += createMessage("rest.validator.attribute.unknown.value", "'stream-mode'", s"'${EngineLiterals.splitStreamMode}'")
+            errors += createMessage("rest.validator.attribute.unknown.value", "stream-mode", EngineLiterals.splitStreamMode)
           }
 
           val inputStreamName = clearStreamFromMode(x)
           inputStream = getStream(inputStreamName)
           inputStream match {
             case None =>
-              errors += createMessage("rest.validator.does_not_exist", s"Input stream '$inputStreamName'")
+              errors += createMessage("rest.validator.not.exist", s"Input stream '$inputStreamName'")
             case Some(stream) =>
               val inputTypes = specification.inputs("types").asInstanceOf[Array[String]]
               if (!inputTypes.contains(stream.streamType)) {
-                errors += createMessage("rest.validator.attribute.must.one_of", "Input stream", s"${inputTypes.mkString("[", ", ", "]")}")
+                errors += createMessage("rest.validator.attribute.must.one_of", "Input stream", inputTypes.mkString("[", ", ", "]"))
               }
           }
         }
@@ -96,20 +96,20 @@ class OutputInstanceValidator extends InstanceValidator {
 
     Option(instance.output) match {
       case None =>
-        errors += createMessage("rest.validator.attribute.required", "'Output'")
+        errors += createMessage("rest.validator.attribute.required", "Output")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("rest.validator.attribute.required", "'Output'")
+          errors += createMessage("rest.validator.attribute.required", "Output")
         }
         else {
           val outputStream = getStream(x)
           outputStream match {
             case None =>
-              errors += createMessage("rest.validator.does_not_exist", s"Output stream '$x'")
+              errors += createMessage("rest.validator.not.exist", s"Output stream '$x'")
             case Some(stream) =>
               val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
               if (!outputTypes.contains(stream.streamType)) {
-                errors += createMessage("rest.validator.attribute.must.one_of", "Output streams", s"${outputTypes.mkString("[", ", ", "]")}")
+                errors += createMessage("rest.validator.attribute.must.one_of", "Output streams", outputTypes.mkString("[", ", ", "]"))
               }
           }
         }
@@ -122,14 +122,14 @@ class OutputInstanceValidator extends InstanceValidator {
         startFrom.toLong
       } catch {
         case ex: NumberFormatException =>
-          errors += createMessage("rest.validator.is_not.one_of", "'Start-from'", s"${startFromModes.mkString("[", ", ", "]")} or timestamp")
+          errors += createMessage("rest.validator.attribute.must.one_of", "Start-from", s"${startFromModes.mkString("[", ", ", "]")} or timestamp")
       }
     }
 
     val input = inputStream.get.asInstanceOf[TStreamSjStream]
     val service = input.service
     if (!service.isInstanceOf[TStreamService]) {
-      errors += createMessage("rest.validator.service.must", "t-streams", "'TstrQ'")
+      errors += createMessage("rest.validator.service.must", "t-streams", "TstrQ")
     }
 
     errors ++= checkParallelism(instance.parallelism, input.partitions)

@@ -3,12 +3,11 @@ package com.bwsw.sj.crud.rest.api
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.service.ServiceData
-import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
 import scala.collection.mutable
 
-trait SjServicesApi extends Directives with SjCrudValidator with CompletionUtils {
+trait SjServicesApi extends Directives with SjCrudValidator {
 
   val servicesApi = {
     pathPrefix("services") {

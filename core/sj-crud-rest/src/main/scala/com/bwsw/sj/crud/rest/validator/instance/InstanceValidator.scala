@@ -48,18 +48,18 @@ abstract class InstanceValidator extends ValidationUtils with CompletionUtils {
     // 'name' field
     Option(parameters.name) match {
       case None =>
-        errors += createMessage("rest.validator.attribute.required", "'Name'")
+        errors += createMessage("rest.validator.attribute.required", "Name")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("rest.validator.attribute.required", "'Name'")
+          errors += createMessage("rest.validator.attribute.required", "Name")
         }
         else {
           if (instanceDAO.get(x).isDefined) {
-            errors += createMessage("rest.modules.instances.instance.exists", s"$x")
+            errors += createMessage("rest.modules.instances.instance.exists", x)
           }
 
           if (!validateName(x)) {
-            errors += createMessage("rest.modules.instances.instance.name.incorrect", s"$x") +
+            errors += createMessage("rest.modules.instances.instance.name.incorrect", x) +
               createMessage("rest.modules.instances.instance.name.must.contain")
           }
         }
@@ -67,35 +67,35 @@ abstract class InstanceValidator extends ValidationUtils with CompletionUtils {
 
     // 'per-task-cores' field
     if (parameters.perTaskCores <= 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "'Per-task-cores'")
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Per-task-cores")
     }
 
     // 'per-task-ram' field
     if (parameters.perTaskRam <= 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "'Per-task-cores'")
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Per-task-cores")
     }
 
     // 'performance-reporting-interval' field
     if (parameters.performanceReportingInterval <= 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "'Performance-reporting-interval'")
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Performance-reporting-interval")
     }
 
     // 'coordination-service' field
     Option(parameters.coordinationService) match {
       case None =>
-        errors += createMessage("rest.validator.attribute.required", "'Coordination-service'")
+        errors += createMessage("rest.validator.attribute.required", "Coordination-service")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("rest.validator.attribute.required", "'Coordination-service'")
+          errors += createMessage("rest.validator.attribute.required", "Coordination-service")
         }
         else {
           val coordService = serviceDAO.get(x)
           if (coordService.isDefined) {
             if (!coordService.get.isInstanceOf[ZKService]) {
-              errors += createMessage("rest.validator.is_not", "'Coordination-service'", "ZKCoord")
+              errors += createMessage("rest.validator.attribute.not", "Coordination-service", "ZKCoord")
             }
           } else {
-            errors += createMessage("rest.validator.does_not_exist", s"'Coordination-service' $x")
+            errors += createMessage("rest.validator.not.exist", s"'Coordination-service' $x")
           }
         }
     }
@@ -137,22 +137,22 @@ abstract class InstanceValidator extends ValidationUtils with CompletionUtils {
     val errors = new ArrayBuffer[String]()
     Option(parallelism) match {
       case None =>
-        errors += createMessage("rest.validator.attribute.required", "'Parallelism'")
+        errors += createMessage("rest.validator.attribute.required", "Parallelism")
       case Some(x) =>
         x match {
           case dig: Int =>
             if (dig <= 0) {
-              errors += createMessage("rest.validator.attribute.must.greater.than.zero", "'Parallelism'")
+              errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Parallelism")
             }
             if (dig > minimumNumberOfPartitions) {
               errors += createMessage("rest.validator.attribute.must.greater.than.parallelism", s"$dig", s"$minimumNumberOfPartitions")
             }
           case s: String =>
             if (!s.equals("max")) {
-              errors += createMessage("rest.validator.parameter.unknown.type", "'parallelism'", "digit or 'max'")
+              errors += createMessage("rest.validator.parameter.unknown.type", "parallelism", "digit or 'max'")
             }
           case _ =>
-            errors += createMessage("rest.validator.parameter.unknown.type", "'parallelism'", "digit or 'max'")
+            errors += createMessage("rest.validator.parameter.unknown.type", "parallelism", "digit or 'max'")
         }
     }
 

@@ -1,17 +1,16 @@
 package com.bwsw.sj.crud.rest.api
 
 import akka.http.scaladsl.server.{Directives, RequestContext}
+import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.config.ConfigurationSettingData
-import ConfigurationSettingsUtils._
 import com.bwsw.sj.crud.rest.exceptions.UnknownConfigSettingDomain
-import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
 import scala.collection.mutable
 
-trait SjConfigurationSettingsApi extends Directives with SjCrudValidator with CompletionUtils {
+trait SjConfigurationSettingsApi extends Directives with SjCrudValidator {
 
   val configSettingsApi = {
     pathPrefix("config") {

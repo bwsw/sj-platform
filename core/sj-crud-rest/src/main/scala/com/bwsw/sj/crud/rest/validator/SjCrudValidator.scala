@@ -17,20 +17,19 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.engine.{StreamingExecutor, StreamingValidator}
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
+import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import org.everit.json.schema.loader.SchemaLoader
 import org.json.{JSONException, JSONObject, JSONTokener}
 
 import scala.concurrent.{Await, ExecutionContextExecutor}
 
 /**
- * Trait for validation of crud-rest-api
- * and contains common methods for routes
- *
- *
- *
- * @author Kseniya Tomskikh
- */
-trait SjCrudValidator {
+  * Trait for validation of crud-rest-api
+  * and contains common methods for routes
+  *
+  * @author Kseniya Tomskikh
+  */
+trait SjCrudValidator extends CompletionUtils {
   val logger: LoggingAdapter
 
   implicit val materializer: Materializer
@@ -53,11 +52,11 @@ trait SjCrudValidator {
   import StreamLiterals._
 
   /**
-   * Getting entity from HTTP-request
-   *
-   * @param ctx - request context
-   * @return - entity from http-request as string
-   */
+    * Getting entity from HTTP-request
+    *
+    * @param ctx - request context
+    * @return - entity from http-request as string
+    */
   def getEntityFromContext(ctx: RequestContext): String = {
     getEntityAsString(ctx.request.entity)
   }
@@ -74,11 +73,11 @@ trait SjCrudValidator {
   }
 
   /**
-   * Check specification of uploading jar file
-   *
-   * @param jarFile - input jar file
-   * @return - content of specification.json
-   */
+    * Check specification of uploading jar file
+    *
+    * @param jarFile - input jar file
+    * @return - content of specification.json
+    */
   def checkJarFile(jarFile: File) = {
     val configService = ConnectionRepository.getConfigService
     val classLoader = new URLClassLoader(Array(jarFile.toURI.toURL), ClassLoader.getSystemClassLoader)
@@ -99,82 +98,70 @@ trait SjCrudValidator {
       case `inputStreamingType` =>
         //'inputs.cardinality' field
         if (!isZeroCardinality(inputCardinality)) {
-          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
-            "both of cardinality of inputs has to be equal zero.")
+          throw new Exception(createMessage("rest.validator.specification.both.input.cardinality", moduleType, "zero"))
         }
 
         //'inputs.types' field
         if (inputTypes.length != 1 || !inputTypes.contains(inputDummy)) {
-          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
-            "inputs must contain only one string: 'input'.")
+          throw new Exception(createMessage("rest.validator.specification.input.type", moduleType, "input"))
         }
 
         //'outputs.cardinality' field
         if (!isNonZeroCardinality(outputCardinality)) {
-          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
-            "cardinality of outputs has to be an interval with the left bound that is greater than zero.")
+          throw new Exception(createMessage("rest.validator.specification.cardinality.left.bound.greater.zero", moduleType, "outputs"))
         }
 
         //'outputs.types' field
         if (outputTypes.length != 1 || !doesSourceTypesConsistOf(outputTypes, Set(tStreamType))) {
-          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
-            "outputs must have the streams of t-stream type.")
+          throw new Exception(createMessage("rest.validator.specification.sources.must.t-stream", moduleType, "outputs"))
         }
 
       case `regularStreamingType` | `windowedStreamingType` =>
         //'inputs.cardinality' field
         if (!isNonZeroCardinality(inputCardinality)) {
-          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
-            "cardinality of inputs has to be an interval with the left bound that is greater than zero.")
+          throw new Exception(createMessage("rest.validator.specification.cardinality.left.bound.greater.zero", moduleType, "inputs"))
         }
 
         //'inputs.types' field
         if (inputTypes.isEmpty || !doesSourceTypesConsistOf(inputTypes, Set(tStreamType, kafkaStreamType))) {
-          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
-            "inputs must have the streams of t-stream and kafka type.")
+          throw new Exception(createMessage("rest.validator.specification.sources.t-stream.kafka", moduleType, "inputs"))
         }
 
         //'outputs.cardinality' field
         if (!isNonZeroCardinality(outputCardinality)) {
-          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
-            "cardinality of outputs has to be an interval with the left bound that is greater than zero.")
+          throw new Exception(createMessage("rest.validator.specification.cardinality.left.bound.greater.zero", moduleType, "outputs"))
         }
 
         //'outputs.types' field
         if (outputTypes.length != 1 || !doesSourceTypesConsistOf(outputTypes, Set(tStreamType))) {
-          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
-            "outputs must have the streams of t-stream type.")
+          throw new Exception(createMessage("rest.validator.specification.sources.must.t-stream", moduleType, "outputs"))
         }
 
       case `outputStreamingType` =>
         //'inputs.cardinality' field
         if (!isSingleCardinality(inputCardinality)) {
-          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
-            "both of cardinality of inputs has to be equal 1.")
+          throw new Exception(createMessage("rest.validator.specification.both.input.cardinality", moduleType, "1"))
         }
 
         //'inputs.types' field
         if (inputTypes.length != 1 || !doesSourceTypesConsistOf(inputTypes, Set(tStreamType))) {
-          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
-            "inputs must have the streams of t-stream type.")
+          throw new Exception(createMessage("rest.validator.specification.sources.must.t-stream", moduleType, "inputs"))
         }
 
         //'outputs.cardinality' field
         if (!isSingleCardinality(outputCardinality)) {
-          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
-            "both of cardinality of outputs has to be equal 1.")
+          throw new Exception(createMessage("rest.validator.specification.both.input.cardinality", moduleType, "1"))
         }
 
         //'outputs.types' field
         if (outputTypes.isEmpty || !doesSourceTypesConsistOf(outputTypes, Set(esOutputType, jdbcOutputType))) {
-          throw new Exception(s"Specification.json for $moduleType module has incorrect params: " +
-            "outputs must have the streams of elasticsearch or jdbc type.")
+          throw new Exception(createMessage("rest.validator.specification.sources.es.jdbc", moduleType, "outputs"))
         }
 
         //'entity-class' field
         specification.get("entity-class") match {
           case None =>
-            throw new Exception(s"Specification.json for $moduleType module hasn't got 'entity-class' param.")
+            throw new Exception(createMessage("rest.validator.specification.no.entity-class", moduleType))
           case Some(x) =>
             val entityClassName = x.asInstanceOf[String]
             getClassInterfaces(entityClassName, classLoader)
@@ -184,21 +171,19 @@ trait SjCrudValidator {
     //'validator-class' field
     val validatorClassInterfaces = getClassInterfaces(validatorClass, classLoader)
     if (!validatorClassInterfaces.exists(x => x.equals(classOf[StreamingValidator]))) {
-      throw new Exception(s"Specification.json for $moduleType module has got the invalid 'validator-class' param: " +
-        s"a validator class should implements StreamingValidator.")
+      throw new Exception(createMessage("rest.validator.specification.class.should.implement", moduleType, "validator-class", "StreamingValidator"))
     }
 
     //'executor-class' field
     val executorClassInterfaces = getExecutorClassInterfaces(executorClass, classLoader)
     if (!executorClassInterfaces.exists(x => x.equals(classOf[StreamingExecutor]))) {
-      throw new Exception(s"Specification.json for $moduleType module has got the invalid 'executor-class' param: " +
-        s"a validator class should implements StreamingExecutor.")
+      throw new Exception(createMessage("rest.validator.specification.class.should.implement", moduleType, "executor-class", "StreamingExecutor"))
     }
 
     //'engine-name' and 'engine-version' fields
     val engine = specification("engine-name").asInstanceOf[String] + "-" + specification("engine-version").asInstanceOf[String]
     if (configService.get("system." + engine).isEmpty) {
-      throw new Exception(s"Specification.json for $moduleType module has got the invalid 'engine-name' and 'engine-version' params.")
+      throw new Exception(createMessage("rest.validator.specification.invalid.engine.params", moduleType))
     }
 
     specification
@@ -225,8 +210,7 @@ trait SjCrudValidator {
       classLoader.loadClass(className).getAnnotatedInterfaces.map(x => x.getType)
     } catch {
       case _: ClassNotFoundException =>
-        throw new Exception(s"Specification.json for module has got the invalid 'validator-class' or 'entity-class' param: " +
-          s"class '$className' indicated in the specification isn't found.")
+        throw new Exception(createMessage("rest.validator.specification.class.not.found", "validator-class' or 'entity-class", className))
     }
   }
 
@@ -236,18 +220,17 @@ trait SjCrudValidator {
         .getAnnotatedInterfaces.map(x => x.getType)
     } catch {
       case _: ClassNotFoundException =>
-        throw new Exception(s"Specification.json for module has got the invalid 'executor-class' param: " +
-          s"class '$className' indicated in the specification isn't found.")
+        throw new Exception(createMessage("rest.validator.specification.class.not.found", "executor-class", className))
     }
   }
 
 
   /**
-   * Check specification of uploading custom jar file
-   *
-   * @param jarFile - input jar file
-   * @return - content of specification.json
-   */
+    * Check specification of uploading custom jar file
+    *
+    * @param jarFile - input jar file
+    * @return - content of specification.json
+    */
   def checkSpecification(jarFile: File): Boolean = {
     val json = getSpecificationFromJar(jarFile)
     if (isEmptyOrNullString(json)) {
@@ -264,11 +247,11 @@ trait SjCrudValidator {
   }
 
   /**
-   * Return content of specification.json file from root of jar
-   *
-   * @param file - Input jar file
-   * @return - json-string from specification.json
-   */
+    * Return content of specification.json file from root of jar
+    *
+    * @param file - Input jar file
+    * @return - json-string from specification.json
+    */
   private def getSpecificationFromJar(file: File): String = {
     val builder = new StringBuilder
     val jar = new JarFile(file)
@@ -293,21 +276,23 @@ trait SjCrudValidator {
 
   def validateJson(specificationJson: String) = {
     if (isEmptyOrNullString(specificationJson)) {
-      logger.error(s"File specification.json is not found in module jar.")
-      throw new FileNotFoundException(s"Specification.json is not found in module jar.")
+      val message = createMessage("rest.modules.specification.json.not.found")
+      logger.error(message)
+      throw new FileNotFoundException(message)
     }
     if (!isJSONValid(specificationJson)) {
-      logger.error(s"Specification.json of module is an invalid json.")
-      throw new FileNotFoundException(s"Specification.json of module is an invalid json")
+      val message = createMessage("rest.modules.specification.json.invalid")
+      logger.error(message)
+      throw new FileNotFoundException(message)
     }
   }
 
   /**
-   * Check String object
-   *
-   * @param value - input string
-   * @return - boolean result of checking
-   */
+    * Check String object
+    *
+    * @param value - input string
+    * @return - boolean result of checking
+    */
   private def isEmptyOrNullString(value: String): Boolean = value == null || value.isEmpty
 
   private def isJSONValid(json: String): Boolean = {
@@ -320,12 +305,12 @@ trait SjCrudValidator {
   }
 
   /**
-   * Validate json for such schema
-   *
-   * @param json - input json
-   * @param schemaStream - schema
-   * @return - true, if schema is valid
-   */
+    * Validate json for such schema
+    *
+    * @param json         - input json
+    * @param schemaStream - schema
+    * @return - true, if schema is valid
+    */
   private def schemaValidate(json: String, schemaStream: InputStream): Boolean = {
     if (schemaStream != null) {
       val rawSchema = new JSONObject(new JSONTokener(schemaStream))
@@ -333,7 +318,7 @@ trait SjCrudValidator {
       val specification = new JSONObject(json)
       schema.validate(specification)
     } else {
-      throw new Exception("Json schema for specification is not found")
+      throw new Exception(createMessage("rest.modules.specification.schema.not.found"))
     }
     true
   }

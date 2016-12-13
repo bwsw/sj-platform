@@ -9,7 +9,7 @@ import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
 import scala.collection.mutable
 
-trait SjProvidersApi extends Directives with SjCrudValidator with CompletionUtils {
+trait SjProvidersApi extends Directives with SjCrudValidator {
 
   val providersApi = {
     pathPrefix("providers") {

@@ -3,27 +3,25 @@ package com.bwsw.sj.crud.rest.validator.instance
 import com.bwsw.sj.common.DAL.model.TStreamService
 import com.bwsw.sj.common.rest.entities.module.{InputInstanceMetadata, InstanceMetadata, SpecificationData}
 import com.bwsw.sj.common.utils.EngineLiterals._
-import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable.ArrayBuffer
 
 /**
- * Validator for input-streaming instance
- *
- *
- * @author Kseniya Tomskikh
- */
-class InputInstanceValidator extends InstanceValidator with CompletionUtils {
+  * Validator for input-streaming instance
+  *
+  * @author Kseniya Tomskikh
+  */
+class InputInstanceValidator extends InstanceValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
   /**
-   * Validating input parameters for input-streaming module
-   *
-   * @param parameters - input parameters for running module
-   * @return - List of errors
-   */
+    * Validating input parameters for input-streaming module
+    *
+    * @param parameters - input parameters for running module
+    * @return - List of errors
+    */
   override def validate(parameters: InstanceMetadata,
                         specification: SpecificationData) = {
     logger.debug(s"Instance: ${parameters.name}. Start input-streaming validation.")
@@ -41,8 +39,8 @@ class InputInstanceValidator extends InstanceValidator with CompletionUtils {
         }
         else {
           if (!checkpointModes.contains(x)) {
-            errors += createMessage("rest.validator.attribute.unknown.value", "checkpoint-mode", s"'$x'") +
-              createMessage("rest.validator.attribute.must.one_of", "Checkpoint-mode", s"${checkpointModes.mkString("[", ", ", "]")}")
+            errors += createMessage("rest.validator.attribute.unknown.value", "checkpoint-mode", s"$x") + ". " +
+              createMessage("rest.validator.attribute.must.one_of", "Checkpoint-mode", checkpointModes.mkString("[", ", ", "]"))
           }
         }
     }
@@ -53,25 +51,25 @@ class InputInstanceValidator extends InstanceValidator with CompletionUtils {
     }
 
     if (inputInstanceMetadata.lookupHistory < 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero.equal", "Lookup-history")
+      errors += createMessage("rest.validator.attribute.must.greater.or.equal.zero", "Lookup-history")
     }
 
     if (inputInstanceMetadata.queueMaxSize < 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero.equal", "Queue-max-size")
+      errors += createMessage("rest.validator.attribute.must.greater.or.equal.zero", "Queue-max-size")
     }
 
     if (!defaultEvictionPolicies.contains(inputInstanceMetadata.defaultEvictionPolicy)) {
-      errors += createMessage("rest.validator.attribute.unknown.value", "default-eviction-policy", s"'${inputInstanceMetadata.defaultEvictionPolicy}'") +
-        createMessage("rest.validator.attribute.must.one_of", "Default-eviction-policy", s"${defaultEvictionPolicies.mkString("[", ", ", "]")}")
+      errors += createMessage("rest.validator.attribute.unknown.value", "default-eviction-policy", inputInstanceMetadata.defaultEvictionPolicy) + ". " +
+        createMessage("rest.validator.attribute.must.one_of", "Default-eviction-policy", defaultEvictionPolicies.mkString("[", ", ", "]"))
     }
 
     if (!evictionPolicies.contains(inputInstanceMetadata.evictionPolicy)) {
-      errors += createMessage("rest.validator.attribute.unknown.value", "eviction-policy", s"'${inputInstanceMetadata.evictionPolicy}'") +
-        createMessage("rest.validator.attribute.must.one_of", "Eviction-policy", s"${evictionPolicies.mkString("[", ", ", "]")}")
+      errors += createMessage("rest.validator.attribute.unknown.value", "eviction-policy", inputInstanceMetadata.evictionPolicy) + ". " +
+        createMessage("rest.validator.attribute.must.one_of", "Eviction-policy", evictionPolicies.mkString("[", ", ", "]"))
     }
 
     if (inputInstanceMetadata.backupCount < 0 || inputInstanceMetadata.backupCount > 6)
-      errors += createMessage("rest.validator.attribute.must.interval.from_to", "Backup-count", "0", "6")
+      errors += createMessage("rest.validator.attribute.must.from.to", "Backup-count", "0", "6")
 
     errors ++= validateStreamOptions(inputInstanceMetadata, specification)
 
@@ -86,23 +84,23 @@ class InputInstanceValidator extends InstanceValidator with CompletionUtils {
     // 'outputs' field
     val outputsCardinality = specification.outputs("cardinality").asInstanceOf[Array[Int]]
     if (instance.outputs.length < outputsCardinality(0)) {
-      errors += createMessage("rest.validator.outputs.cannot.less_than", s"${outputsCardinality(0)}")
+      errors += createMessage("rest.validator.cardinality.cannot.less", "outputs", s"${outputsCardinality(0)}")
     }
     if (instance.outputs.length > outputsCardinality(1)) {
-      errors += createMessage("rest.validator.outputs.cannot.more_than", s"${outputsCardinality(1)}")
+      errors += createMessage("rest.validator.cardinality.cannot.more", "outputs", s"${outputsCardinality(1)}")
     }
     if (doesContainDoubles(instance.outputs)) {
-      errors += createMessage("rest.validator.outputs.non_unique.streams")
+      errors += createMessage("rest.validator.sources.not.unique", "Outputs")
     }
     val outputStreams = getStreams(instance.outputs)
     instance.outputs.toList.foreach { streamName =>
       if (!outputStreams.exists(s => s.name == streamName)) {
-        errors += createMessage("rest.validator.output_stream.does_not_exist", s"$streamName")
+        errors += createMessage("rest.validator.source_stream.not.exist", "Output", streamName)
       }
     }
     val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
     if (outputStreams.exists(s => !outputTypes.contains(s.streamType))) {
-      errors += createMessage("rest.validator.output_stream.must.one_of.type", s"${outputTypes.mkString("[", ", ", "]")}")
+      errors += createMessage("rest.validator.source_stream.must.one.of", "Output", outputTypes.mkString("[", ", ", "]"))
     }
 
     if (outputStreams.nonEmpty) {
@@ -139,7 +137,7 @@ class InputInstanceValidator extends InstanceValidator with CompletionUtils {
       errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Parallelism")
     }
     if (parallelism <= (parameters.backupCount + parameters.asyncBackupCount)) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.total.number.backups", "Parallelism")
+      errors += createMessage("rest.validator.attribute.must.greater.than.backups", "Parallelism")
     }
   }
 }

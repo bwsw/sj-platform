@@ -29,7 +29,7 @@ import scala.concurrent.duration._
   *
   * @author Kseniya Tomskikh
   */
-trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
+trait SjCustomApi extends Directives with SjCrudValidator {
   private var previousFileName: Option[String] = None
 
   private def fileUpload(filename: String, part: BodyPart) = {

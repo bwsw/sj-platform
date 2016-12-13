@@ -11,10 +11,10 @@ import org.slf4j.{Logger, LoggerFactory}
 import scala.collection.mutable.ArrayBuffer
 
 /**
- * Validator for Stream-processing regular module type
- *
- * @author Kseniya Tomskikh
- */
+  * Validator for Stream-processing regular module type
+  *
+  * @author Kseniya Tomskikh
+  */
 class RegularInstanceValidator extends InstanceValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
@@ -28,38 +28,38 @@ class RegularInstanceValidator extends InstanceValidator {
     // 'checkpoint-mode' field
     Option(regularInstanceMetadata.checkpointMode) match {
       case None =>
-        errors += createMessage("rest.validator.attribute.required", "'Checkpoint-mode'")
+        errors += createMessage("rest.validator.attribute.required", "Checkpoint-mode")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("rest.validator.attribute.required", "'Checkpoint-mode'")
+          errors += createMessage("rest.validator.attribute.required", "Checkpoint-mode")
         }
         else {
           if (!checkpointModes.contains(x)) {
-            errors += createMessage("rest.validator.attribute.unknown.value", "'checkpoint-mode'", s"'$x'") +
-              createMessage("rest.validator.attribute.must.one_of", "'Checkpoint-mode'", s"${checkpointModes.mkString("[", ", ", "]")}")
+            errors += createMessage("rest.validator.attribute.unknown.value", "checkpoint-mode", x) + ". " +
+              createMessage("rest.validator.attribute.must.one_of", "Checkpoint-mode", checkpointModes.mkString("[", ", ", "]"))
           }
         }
     }
 
     // 'checkpoint-interval' field
     if (regularInstanceMetadata.checkpointInterval <= 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "'Checkpoint-interval'")
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Checkpoint-interval")
     }
 
     // 'event-wait-time' field
     if (regularInstanceMetadata.eventWaitTime <= 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "'Event-wait-time'")
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Event-wait-time")
     }
 
     // 'state-management' field
     if (!stateManagementModes.contains(regularInstanceMetadata.stateManagement)) {
-      errors += createMessage("rest.validator.attribute.unknown.value", "'state-management'", s"'${regularInstanceMetadata.stateManagement}'")+
-        createMessage("rest.validator.attribute.must.one_of", "'State-management'", s"${stateManagementModes.mkString("[", ", ", "]")}")
+      errors += createMessage("rest.validator.attribute.unknown.value", "state-management", regularInstanceMetadata.stateManagement) + ". " +
+        createMessage("rest.validator.attribute.must.one_of", "State-management", stateManagementModes.mkString("[", ", ", "]"))
     } else {
       if (regularInstanceMetadata.stateManagement != EngineLiterals.noneStateMode) {
         // 'state-full-checkpoint' field
         if (regularInstanceMetadata.stateFullCheckpoint <= 0) {
-          errors += createMessage("rest.validator.attribute.must.greater.than.zero", "'State-full-checkpoint'")
+          errors += createMessage("rest.validator.attribute.must.greater.than.zero", "State-full-checkpoint")
         }
       }
     }
@@ -75,36 +75,36 @@ class RegularInstanceValidator extends InstanceValidator {
     // 'inputs' field
     val inputModes = instance.inputs.map(i => getStreamMode(i))
     if (inputModes.exists(m => !streamModes.contains(m))) {
-      errors += createMessage("rest.validator.unknown.input.stream.mode", s"${streamModes.mkString("[", ", ", "]")}")
+      errors += createMessage("rest.validator.unknown.stream.mode", streamModes.mkString("[", ", ", "]"))
     }
     val inputsCardinality = specification.inputs("cardinality").asInstanceOf[Array[Int]]
     if (instance.inputs.length < inputsCardinality(0)) {
-      errors += createMessage("rest.validator.inputs.cannot.less_than", s"${inputsCardinality(0)}")
+      errors += createMessage("rest.validator.cardinality.cannot.less", "inputs", s"${inputsCardinality(0)}")
     }
     if (instance.inputs.length > inputsCardinality(1)) {
-      errors += createMessage("rest.validator.inputs.cannot.more_than", s"${inputsCardinality(1)}")
+      errors += createMessage("rest.validator.cardinality.cannot.more", "inputs", s"${inputsCardinality(1)}")
     }
 
     val clearInputs = instance.inputs.map(clearStreamFromMode)
     if (doesContainDoubles(clearInputs)) {
-      errors += createMessage("rest.validator.inputs.not.unique")
+      errors += createMessage("rest.validator.sources.not.unique", "Inputs")
     }
     val inputStreams = getStreams(clearInputs)
     clearInputs.foreach { streamName =>
       if (!inputStreams.exists(s => s.name == streamName)) {
-        errors += createMessage("rest.validator.input_stream.does_not_exist", s"'$streamName'")
+        errors += createMessage("rest.validator.source_stream.not.exist", "Input", streamName)
       }
     }
 
     val inputTypes = specification.inputs("types").asInstanceOf[Array[String]]
     if (inputStreams.exists(s => !inputTypes.contains(s.streamType))) {
-      errors += createMessage("rest.validator.input_stream.must.one_of.type", s"${inputTypes.mkString("[", ", ", "]")}")
+      errors += createMessage("rest.validator.source_stream.must.one.of", "Input", inputTypes.mkString("[", ", ", "]"))
     }
 
     val kafkaStreams = inputStreams.filter(s => s.streamType.equals(kafkaStreamType)).map(_.asInstanceOf[KafkaSjStream])
     if (kafkaStreams.nonEmpty) {
       if (kafkaStreams.exists(s => !s.service.isInstanceOf[KafkaService])) {
-        errors += createMessage("rest.validator.service.must", "kafka streams", "'KfkQ'")
+        errors += createMessage("rest.validator.service.must", "kafka streams", "KfkQ")
       }
     }
 
@@ -112,7 +112,7 @@ class RegularInstanceValidator extends InstanceValidator {
     val startFrom = instance.startFrom
     if (inputStreams.exists(s => s.streamType.equals(kafkaStreamType))) {
       if (!startFromModes.contains(startFrom)) {
-        errors += createMessage("rest.validator.attribute.must.if.instance.have", "'Start-from'", s"${startFromModes.mkString("[", ", ", "]")}")
+        errors += createMessage("rest.validator.attribute.must.if.instance.have", "Start-from", startFromModes.mkString("[", ", ", "]"))
       }
     } else {
       if (!startFromModes.contains(startFrom)) {
@@ -120,7 +120,7 @@ class RegularInstanceValidator extends InstanceValidator {
           startFrom.toLong
         } catch {
           case ex: NumberFormatException =>
-            errors += createMessage("rest.validator.is_not.one_of", "'Start-from'", s"${startFromModes.mkString("[", ", ", "]")} or timestamp")
+            errors += createMessage("rest.validator.attribute.must.one_of", "Start-from", s"${startFromModes.mkString("[", ", ", "]")} or timestamp")
         }
       }
     }
@@ -128,23 +128,23 @@ class RegularInstanceValidator extends InstanceValidator {
     // 'outputs' field
     val outputsCardinality = specification.outputs("cardinality").asInstanceOf[Array[Int]]
     if (instance.outputs.length < outputsCardinality(0)) {
-      errors += createMessage("rest.validator.outputs.cannot.less_than", s"${outputsCardinality(0)}")
+      errors += createMessage("rest.validator.cardinality.cannot.less", "outputs", s"${outputsCardinality(0)}")
     }
     if (instance.outputs.length > outputsCardinality(1)) {
-      errors += createMessage("rest.validator.outputs.cannot.more_than", s"${outputsCardinality(1)}")
+      errors += createMessage("rest.validator.cardinality.cannot.more", "outputs", s"${outputsCardinality(1)}")
     }
     if (doesContainDoubles(instance.outputs)) {
-      errors += createMessage("rest.validator.outputs.not.unique")
+      errors += createMessage("rest.validator.sources.not.unique", "Outputs")
     }
     val outputStreams = getStreams(instance.outputs)
     instance.outputs.toList.foreach { streamName =>
       if (!outputStreams.exists(s => s.name == streamName)) {
-        errors += createMessage("rest.validator.output_stream.does_not_exist", s"'$streamName'")
+        errors += createMessage("rest.validator.source_stream.not.exist", "Output", streamName)
       }
     }
     val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
     if (outputStreams.exists(s => !outputTypes.contains(s.streamType))) {
-      errors += createMessage("rest.validator.output_stream.must.one_of.type", s"${outputTypes.mkString("[", ", ", "]")}")
+      errors += createMessage("rest.validator.source_stream.must.one.of", "Output", outputTypes.mkString("[", ", ", "]"))
     }
 
     // 'parallelism' field
@@ -161,7 +161,7 @@ class RegularInstanceValidator extends InstanceValidator {
     } else {
       val service = serviceDAO.get(tStreamsServices.head)
       if (!service.get.isInstanceOf[TStreamService]) {
-        errors += createMessage("rest.validator.t_stream.same.service", "t-streams", "'TstrQ'")
+        errors += createMessage("rest.validator.service.must", "t-streams", "TstrQ")
       }
     }
 
