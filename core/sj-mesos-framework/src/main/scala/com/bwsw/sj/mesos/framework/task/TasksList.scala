@@ -140,8 +140,7 @@ object TasksList {
     )
     try {
       val environments = Environment.newBuilder
-        .addVariables(Environment.Variable.newBuilder.setName("MONGO_HOST").setValue(FrameworkUtil.params {"mongodbHost"}))
-        .addVariables(Environment.Variable.newBuilder.setName("MONGO_PORT").setValue(FrameworkUtil.params {"mongodbPort"}))
+        .addVariables(Environment.Variable.newBuilder.setName("MONGO_HOSTS").setValue(FrameworkUtil.params {"mongodbHosts"}))
         .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_NAME").setValue(FrameworkUtil.params {"instanceId"}))
         .addVariables(Environment.Variable.newBuilder.setName("TASK_NAME").setValue(task))
         .addVariables(Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(OfferHandler.getOfferIp(offer)))
