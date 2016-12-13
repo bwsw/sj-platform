@@ -1,26 +1,137 @@
-<div class="services-list">
-  <h2>Services list</h2>
+<div class="row">
+  <!-- Content -->
+  <div class="col col-xs-8">
+    <div class="card">
+      <div class="card-block">
+        <!-- Card title -->
+        <div class="row">
+          <div class="col col-xs-6"><h4 class="card-title">Services list</h4></div>
+          <div class="col col-xs-6">
+            <button type="button"
+                    class="btn btn-primary pull-right ml-1 mb-1"
+                    (click)="CreateService.show()"><i class="fa fa-plus mr-1"></i>Create Service
+            </button>
 
-  <button type="button" class="btn create-entity" (click)="CreateService.show()">+ Create service</button>
-
-  <sj-search-box (update)="term = $event"></sj-search-box>
-
-
-  <div bsModal #CreateService="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" aria-label="Close" (click)="CreateService.hide()">
-            <span aria-hidden="true">&times;</span>
-          </button>
-          <h4 class="modal-title">Create Service</h4>
+            <sj-search-box class="pull-right"
+                           (update)="term = $event"></sj-search-box>
+          </div>
         </div>
-        <div class="modal-body">
-          <form #serviceForm="ngForm" (ngSubmit)="createService(CreateService)" class="form-create-entity">
-            <fieldset class="form-group">
-              <label class="col-sm-3 form-control-label required">Choose type</label>
+
+        <!-- Alerts -->
+        <div class="main-alerts mt-1">
+          <alert class="custom-alert"
+                 *ngFor="let alert of alerts; let i = index"
+                 [type]="alert.type"
+                 dismissible="true"
+                 [dismissOnTimeout]="alert.timeout"
+                 (close)="closeAlert(i)">
+            {{ alert.msg }}
+          </alert>
+        </div>
+
+        <!-- Services list -->
+        <div class="table-wrapper">
+          <table class="table table-hover table-sm mt-1 mb-0">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Provider</th>
+                <th class="actions-column">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="!serviceList || (serviceList && serviceList.length === 0)">
+                <td colspan="20" class="text-center">No services have been found.</td>
+              </tr>
+
+              <tr *ngFor="let service of serviceList | orderBy: 'name' | listFilter : term"
+                  [ngClass]="{ 'table-info': isSelected(service) }"
+                  (click)="service_select(service)">
+                <td>{{ service.name }}</td>
+                <td>{{ service.description }}</td>
+                <td>
+                <span *ngIf="service.type != 'TstrQ'">
+                  <span>Provider:</span>
+                  <span class="btn-lookup action-link"
+                        (click)="get_provider_info(ProviderInfo, service.provider)">{{ service.provider }}</span>
+                </span>
+                </td>
+                <td class="actions-column">
+                  <button type="button"
+                          class="btn btn-sm btn-secondary"
+                          title="Delete service"
+                          (click)="delete_service_confirm(DeleteService, service)">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed info -->
+  <div class="col col-xs-4">
+    <div class="card">
+      <div class="card-header">Detailed information about node</div>
+      <div class="card-block">
+        <div class="overflow-x-scroll">
+          <ul *ngIf="current_service">
+            <li>Name: {{current_service.name}}</li>
+            <li>Type: {{current_service.type}}</li>
+            <li>Description: {{current_service.description}}</li>
+            <li *ngIf="current_service.type == 'CassDB'">Keyspace: {{current_service.keyspace}}</li>
+            <li *ngIf="current_service.type == 'ESInd'">Index: {{current_service.index}}</li>
+            <li *ngIf="current_service.type == 'TstrQ' || current_service.type == 'ZKCoord'
+              || current_service.type == 'RdsCoord' || current_service.type == 'ArspkDB'">
+              Namespace: {{current_service.namespace}}
+            </li>
+            <li *ngIf="current_service.type != 'TstrQ'">Provider:
+              <span class="btn-lookup action-link" (click)="get_provider_info(ProviderInfo, current_service.provider)">
+        {{ current_service.provider }}
+      </span>
+            </li>
+            <li *ngIf="current_service.type == 'TstrQ'">Metadata provider: <span class="btn-lookup action-link"
+                                                                                 (click)="get_provider_info(ProviderInfo, current_service.metadata_provider)">{{current_service['metadata-provider']}}</span>
+            </li>
+            <li *ngIf="current_service.type == 'TstrQ'">Metadata namespace: {{current_service['metadata-namespace']}}</li>
+            <li *ngIf="current_service.type == 'TstrQ'">Data provider: <span class="btn-lookup action-link"
+                                                                             (click)="get_provider_info(ProviderInfo, current_service.data_provider)">{{current_service['data-provider']}}</span>
+            </li>
+            <li *ngIf="current_service.type == 'TstrQ'">Data namespace: {{current_service['data-namespace']}}</li>
+            <li *ngIf="current_service.type == 'TstrQ'">Lock provider: <span class="btn-lookup action-link"
+                                                                             (click)="get_provider_info(ProviderInfo, current_service.lock_provider)">{{current_service['lock-provider']}}</span>
+            </li>
+            <li *ngIf="current_service.type == 'TstrQ'">Lock namespace: {{current_service['lock-namespace']}}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div bsModal #CreateService="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" (click)="CreateService.hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Create Service</h4>
+      </div>
+
+      <div class="modal-body">
+        <form #serviceForm="ngForm" (ngSubmit)="createService(CreateService)" class="form-create-entity">
+          <!-- Type -->
+          <fieldset class="form-group row">
+            <label class="col-sm-2 col-form-label required">Choose type</label>
+            <div class="col-sm-10">
               <select required [(ngModel)]="new_service.type" name="serviceType"
-                      class="form-control form-type col-sm-10">
+                      class="form-control">
                 <option value="ArspkDB">Aerospike DB</option>
                 <option value="CassDB">Cassandra DB</option>
                 <option value="ESInd">Elasticsearch Index</option>
@@ -29,183 +140,192 @@
                 <option value="RdsCoord">Redis coordination</option>
                 <option value="ZKCoord">Zookeeper coordination</option>
               </select>
-            </fieldset>
+            </div>
+          </fieldset>
 
-            <fieldset class="form-group">
-              <label class="col-sm-3 form-control-label required">Name</label>
-              <input [(ngModel)]="new_service.name" name="serviceName" type="text" class="form-control col-sm-10"
+          <!-- Service name -->
+          <fieldset class="form-group row">
+            <label class="col-sm-2 col-form-label required">Name</label>
+            <div class="col-sm-10">
+              <input [(ngModel)]="new_service.name" name="serviceName" type="text" class="form-control"
                      required>
-            </fieldset>
-            <fieldset class="form-group">
-              <label class="col-sm-3 form-control-label">Description</label>
-              <textarea [(ngModel)]="new_service.description" name="serviceDescription"
-                        class="form-control form-type col-sm-10"></textarea>
-            </fieldset>
-            <fieldset *ngIf="new_service.type == 'CassDB'" class="form-group">
-              <label class="col-sm-3 form-control-label required">Keyspace</label>
+            </div>
+          </fieldset>
+
+          <!-- Description -->
+          <fieldset class="form-group row">
+            <label class="col-sm-2 col-form-label">Description</label>
+            <div class="col-sm-10">
+              <textarea [(ngModel)]="new_service.description"
+                        name="serviceDescription"
+                        class="form-control"></textarea>
+            </div>
+          </fieldset>
+
+          <!-- Key space -->
+          <fieldset *ngIf="new_service.type == 'CassDB'" class="form-group row">
+            <label class="col-sm-2 col-form-label required">Keyspace</label>
+            <div class="col-sm-10">
               <input [(ngModel)]="new_service.keyspace" name="serviceKeyspace" type="text"
-                     class="form-control col-sm-10" required>
-            </fieldset>
-            <fieldset *ngIf="new_service.type == 'ZKCoord' ||
-                      new_service.type == 'RdsCoord' ||  new_service.type == 'ArspkDB' " class="form-group">
-              <label class="col-sm-3 form-control-label required">Namespace</label>
+                     class="form-control" required>
+            </div>
+          </fieldset>
+
+          <!-- Namespace -->
+          <fieldset *ngIf="new_service.type == 'ZKCoord' ||
+                      new_service.type == 'RdsCoord' ||  new_service.type == 'ArspkDB' " class="form-group row">
+            <label class="col-sm-2 col-form-label required">Namespace</label>
+            <div class="col-sm-10">
               <input [(ngModel)]="new_service.namespace" name="serviceNamespace" type="text"
-                     class="form-control col-sm-10" required>
-            </fieldset>
-            <fieldset *ngIf="new_service.type == 'ESInd'" class="form-group">
-              <label class="col-sm-3 form-control-label required">Index</label>
-              <input [(ngModel)]="new_service.index" name="serviceIndex" type="text" class="form-control col-sm-10"
+                     class="form-control" required>
+            </div>
+          </fieldset>
+
+          <!-- Index -->
+          <fieldset *ngIf="new_service.type == 'ESInd'" class="form-group row">
+            <label class="col-sm-2 col-form-label required">Index</label>
+            <div class="col-sm-10">
+              <input [(ngModel)]="new_service.index" name="serviceIndex" type="text" class="form-control"
                      required>
-            </fieldset>
-            <fieldset *ngIf="new_service.type && new_service.type != 'TstrQ'" class="form-group">
-              <label class="col-sm-3 form-control-label required">Provider</label>
+            </div>
+          </fieldset>
+
+          <!-- Provider -->
+          <fieldset *ngIf="new_service.type && new_service.type != 'TstrQ'" class="form-group row">
+            <label class="col-sm-2 col-form-label required">Provider</label>
+            <div class="col-sm-10">
               <select [(ngModel)]="new_service.provider" name="streamService" required
-                      class="form-control form-type col-sm-10">
+                      class="form-control">
                 <option *ngFor="let provider of providerList | providerFilter : new_service.type "
                         value={{provider.name}}>{{provider.name}}
                 </option>
               </select>
-            </fieldset>
-            <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group">
-              <label class="col-sm-3 form-control-label required">Metadata provider</label>
+            </div>
+          </fieldset>
+
+          <!-- Metadata -->
+          <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group row">
+            <label class="col-sm-2 col-form-label required">Metadata provider</label>
+            <div class="col-sm-10">
               <select [(ngModel)]="new_service['metadata-provider']" name="serviceMetadataProvider"
-                      required class="form-control form-type col-sm-10">
+                      required class="form-control">
                 <option *ngFor="let provider of providerList | providerFilter : 'CassDB' " value={{provider.name}}>
                   {{provider.name}}
                 </option>
               </select>
-            </fieldset>
-            <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group">
-              <label class="col-sm-3 form-control-label required">Metadata namespace</label>
+            </div>
+          </fieldset>
+
+          <!-- Metadata namespace -->
+          <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group row">
+            <label class="col-sm-2 col-form-label required">Metadata namespace</label>
+            <div class="col-sm-10">
               <input [(ngModel)]="new_service['metadata-namespace']" name="serviceMetadataNamespace" type="text"
-                     class="form-control col-sm-10" required>
-            </fieldset>
-            <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group">
-              <label class="col-sm-3 form-control-label required">Data provider</label>
+                     class="form-control" required>
+            </div>
+          </fieldset>
+
+          <!-- Data provider -->
+          <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group row">
+            <label class="col-sm-2 col-form-label required">Data provider</label>
+            <div class="col-sm-10">
               <select [(ngModel)]="new_service['data-provider']" name="serviceDataProvider"
-                      required class="form-control form-type col-sm-10">
+                      required class="form-control">
                 <option *ngFor="let provider of providerList | providerFilter : 'DataProvider' "
                         value={{provider.name}}>{{provider.name}}
                 </option>
               </select>
-            </fieldset>
-            <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group">
-              <label class="col-sm-3 form-control-label required">Data namespace</label>
+            </div>
+          </fieldset>
+
+          <!-- Data namespace -->
+          <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group row">
+            <label class="col-sm-2 col-form-label required">Data namespace</label>
+            <div class="col-sm-10">
               <input [(ngModel)]="new_service['data-namespace']" name="serviceDataNamespace" type="text"
-                     class="form-control col-sm-10" required>
-            </fieldset>
-            <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group">
-              <label class="col-sm-3 form-control-label required">Lock provider</label>
+                     class="form-control" required>
+            </div>
+          </fieldset>
+
+          <!-- Lock provider -->
+          <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group row">
+            <label class="col-sm-2 col-form-label required">Lock provider</label>
+            <div class="col-sm-10">
               <select [(ngModel)]="new_service['lock-provider']" name="serviceLockProvider"
-                      required class="form-control form-type col-sm-10">
+                      required class="form-control">
                 <option *ngFor="let provider of providerList | providerFilter : 'LockProvider' "
                         value={{provider.name}}>{{provider.name}}
                 </option>
               </select>
-            </fieldset>
-            <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group">
-              <label class="col-sm-3 form-control-label required">Lock namespace</label>
+            </div>
+          </fieldset>
+
+          <!-- Lock namespace -->
+          <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group row">
+            <label class="col-sm-2 col-form-label required">Lock namespace</label>
+            <div class="col-sm-10">
               <input [(ngModel)]="new_service['lock-namespace']" name="serviceLockNamespace" type="text"
-                     class="form-control col-sm-10" required>
-            </fieldset>
-            <fieldset *ngIf="new_service.type == 'ESInd'" class="form-group">
-              <label class="col-sm-3 form-control-label">Login</label>
-              <input [(ngModel)]="new_service.login" name="serviceLogin" type="text" class="form-control col-sm-10"
+                     class="form-control" required>
+            </div>
+          </fieldset>
+
+          <!-- Login -->
+          <fieldset *ngIf="new_service.type == 'ESInd'" class="form-group row">
+            <label class="col-sm-2 col-form-label">Login</label>
+            <div class="col-sm-10">
+              <input [(ngModel)]="new_service.login" name="serviceLogin" type="text" class="form-control"
                      placeholder="Enter service login">
-            </fieldset>
-            <fieldset *ngIf="new_service.type== 'ESInd'" class="form-group">
-              <label class="col-sm-3 form-control-label">Password</label>
+            </div>
+          </fieldset>
+
+          <!-- Password -->
+          <fieldset *ngIf="new_service.type== 'ESInd'" class="form-group row">
+            <label class="col-sm-2 col-form-label">Password</label>
+            <div class="col-sm-10">
               <input [(ngModel)]="new_service.password" name="servicePassword" type="text"
-                     class="form-control col-sm-10" placeholder="Enter service password">
-            </fieldset>
-            <fieldset *ngIf="new_service.type == 'KfkQ'" class="form-group">
-              <label class="col-sm-3 form-control-label">ZK provider</label>
+                     class="form-control" placeholder="Enter service password">
+            </div>
+          </fieldset>
+
+          <!-- ZK Provider -->
+          <fieldset *ngIf="new_service.type == 'KfkQ'" class="form-group row">
+            <label class="col-sm-2 col-form-label">ZK provider</label>
+            <div class="col-sm-10">
               <select [(ngModel)]="new_service['zk-provider']" name="serviceZkProvider"
-                      class="form-control form-type col-sm-10">
+                      class="form-control">
                 <option *ngFor="let provider of providerList | providerFilter : 'ZKCoord' " value={{provider.name}}>
                   {{provider.name}}
                 </option>
               </select>
-            </fieldset>
-            <fieldset *ngIf="new_service.type == 'KfkQ'" class="form-group">
-              <label class="col-sm-3 form-control-label required">ZK namespace</label>
+            </div>
+          </fieldset>
+
+          <!-- ZK namespace -->
+          <fieldset *ngIf="new_service.type == 'KfkQ'" class="form-group row">
+            <label class="col-sm-2 col-form-label required">ZK namespace</label>
+            <div class="col-sm-10">
               <input [(ngModel)]="new_service['zk-namespace']" name="serviceZkNamespace" type="text"
                      class="form-control col-sm-10" required>
-            </fieldset>
-            <fieldset class="form-actions">
-              <button [disabled]="!serviceForm.form.valid" type="submit" class="btn btn-primary form-submit">Create</button>
-              <button type="button" class="btn btn-danger" (click)="CreateService.hide()">Cancel</button>
-            </fieldset>
-          </form>
-        </div>
+            </div>
+          </fieldset>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button"
+                class="btn btn-secondary"
+                (click)="CreateService.hide()">
+          Cancel
+        </button>
+        <button type="button"
+                class="btn btn-primary"
+                [disabled]="!serviceForm.form.valid"
+                (click)="createService(CreateService)">
+          Create
+        </button>
       </div>
     </div>
   </div>
-
-  <div class="main-alerts">
-    <alert class="custom-alert" *ngFor="let alert of alerts; let i = index" [type]="alert.type" dismissible="true"
-           [dismissOnTimeout]="alert.timeout" (close)="closeAlert(i)">
-      {{ alert.msg }}
-    </alert>
-  </div>
-
-  <ul>
-    <li class="list-group-item">
-      <span class="service-name">Name</span>
-      <span class="service-description">Description</span>
-      <span class="service-provider-link">Provider</span>
-    </li>
-    <li *ngIf="!serviceList || (serviceList && serviceList.length === 0)">
-      <span class="col-sm-12">No services have been found.</span>
-    </li>
-    <li class="list-group-item" [ngClass]="{selected:isSelected(service)}" (click)="service_select(service)"
-        *ngFor="let service of serviceList | orderBy: 'name' | listFilter : term">
-      <span class="service-name">{{ service.name }}</span>
-      <span class="service-description">{{ service.description }}</span>
-      <span *ngIf="service.type != 'TstrQ'" class="service-provider-link">Provider:
-        <span class="btn-lookup provider-link" (click)="get_provider_info(ProviderInfo, service.provider)">
-          {{ service.provider }}
-        </span>
-      </span>
-
-      <i class="fa fa-file-text pull-right detail-info" aria-hidden="true" title="Show detailed info"></i>
-      <i class="fa fa-trash  pull-right" (click)="delete_service_confirm(DeleteService, service)"
-         aria-hidden="true"></i></li>
-
-  </ul>
-
-</div>
-
-<div class="right-detail">
-  <p>Detailed information about node</p>
-  <ul *ngIf="current_service">
-    <li>Name: {{current_service.name}}</li>
-    <li>Type: {{current_service.type}}</li>
-    <li>Description: {{current_service.description}}</li>
-    <li *ngIf="current_service.type == 'CassDB'">Keyspace: {{current_service.keyspace}}</li>
-    <li *ngIf="current_service.type == 'ESInd'">Index: {{current_service.index}}</li>
-    <li *ngIf="current_service.type == 'TstrQ' || current_service.type == 'ZKCoord'
-              || current_service.type == 'RdsCoord' || current_service.type == 'ArspkDB'">
-      Namespace: {{current_service.namespace}}
-    </li>
-    <li *ngIf="current_service.type != 'TstrQ'">Provider:
-      <span class="btn-lookup provider-link" (click)="get_provider_info(ProviderInfo, current_service.provider)">
-        {{ current_service.provider }}
-      </span>
-    </li>
-    <li *ngIf="current_service.type == 'TstrQ'">Metadata provider: <span class="btn-lookup provider-link"
-                                                                         (click)="get_provider_info(ProviderInfo, current_service.metadata_provider)">{{current_service['metadata-provider']}}</span>
-    </li>
-    <li *ngIf="current_service.type == 'TstrQ'">Metadata namespace: {{current_service['metadata-namespace']}}</li>
-    <li *ngIf="current_service.type == 'TstrQ'">Data provider: <span class="btn-lookup provider-link"
-                                                                     (click)="get_provider_info(ProviderInfo, current_service.data_provider)">{{current_service['data-provider']}}</span>
-    </li>
-    <li *ngIf="current_service.type == 'TstrQ'">Data namespace: {{current_service['data-namespace']}}</li>
-    <li *ngIf="current_service.type == 'TstrQ'">Lock provider: <span class="btn-lookup provider-link"
-                                                                     (click)="get_provider_info(ProviderInfo, current_service.lock_provider)">{{current_service['lock-provider']}}</span>
-    </li>
-    <li *ngIf="current_service.type == 'TstrQ'">Lock namespace: {{current_service['lock-namespace']}}</li>
-  </ul>
 </div>
 
 <div bsModal #ProviderInfo="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
@@ -230,9 +350,9 @@
           <li *ngIf="current_service_provider.login">Login: {{current_service_provider.login}}</li>
           <li *ngIf="current_service_provider.password">Password: {{current_service_provider.password}}</li>
         </ul>
-        <fieldset class="form-actions">
-          <button type="button" class="btn btn-success" (click)="ProviderInfo.hide()">OK</button>
-        </fieldset>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="ProviderInfo.hide()">OK</button>
       </div>
     </div>
   </div>
@@ -247,23 +367,28 @@
         </button>
         <h4 class="modal-title">Delete confirmation</h4>
       </div>
+
       <div class="modal-body" *ngIf="service_to_delete && (blockingStreams.length === 0)">
-        <p>Do you really want to delete service " {{ service_to_delete.name }} " ? This action can not be undone!</p>
-        <fieldset class="form-actions">
-          <button type="button" class="btn btn-danger pull-left0"
-                  (click)="delete_service(DeleteService, service_to_delete)">Delete
-          </button>
-          <button type="button" class="btn btn-primary " (click)="DeleteService.hide()">Cancel</button>
-        </fieldset>
+        <p>Do you really want to delete service "{{ service_to_delete.name }}" ? This action can not be undone!</p>
       </div>
+
       <div class="modal-body" *ngIf="service_to_delete && (blockingStreams.length > 0)">
-        <p>Unable to delete service! Next streams using service " {{ service_to_delete.name }} "</p>
+        <p>Unable to delete service! Next streams using service "{{ service_to_delete.name }}"</p>
         <ul>
           <li *ngFor="let stream of blockingStreams | orderBy: 'name' ">{{stream.name}}</li>
         </ul>
-        <fieldset class="form-actions">
-          <button type="button" class="btn btn-primary " (click)="DeleteService.hide()">Ok</button>
-        </fieldset>
+      </div>
+
+      <div class="modal-footer">
+        <template [ngIf]="service_to_delete && (blockingStreams.length === 0)">
+          <button type="button" class="btn btn-secondary" (click)="DeleteService.hide()">Cancel</button>
+          <button type="button" class="btn btn-danger"
+                  (click)="delete_service(DeleteService, service_to_delete)">Delete
+          </button>
+        </template>
+        <template [ngIf]="service_to_delete && (blockingStreams.length > 0)">
+          <button type="button" class="btn btn-primary" (click)="DeleteService.hide()">Ok</button>
+        </template>
       </div>
     </div>
   </div>

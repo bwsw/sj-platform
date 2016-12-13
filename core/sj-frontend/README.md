@@ -2,6 +2,10 @@
 
 Stream Juggler project front-end
 
+# CoreUI Theme Docs
+
+http://coreui.io/docs/
+
 # How to start
 
 In order to start the project use:

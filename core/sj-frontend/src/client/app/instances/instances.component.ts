@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewChecked } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ModalDirective } from 'ng2-bootstrap';
 
@@ -14,10 +14,9 @@ import { ServicesService } from '../shared/services/services.service';
 @Component({
   moduleId: module.id,
   selector: 'sj-instances',
-  styleUrls: ['instances.component.css'],
-  templateUrl: 'instances.component.html',
+  templateUrl: 'instances.component.html'
 })
-export class InstancesComponent implements OnInit {
+export class InstancesComponent implements OnInit, AfterViewChecked {
 
   public alerts: Array<Object> = [];
   public errorMessage: string;
@@ -294,11 +293,11 @@ export class InstancesComponent implements OnInit {
     return ['starting', 'started', 'stopping'].indexOf(this.instance_to_delete.status) === -1;
   }
 
-  ngAfterViewChecked() {
+  public ngAfterViewChecked() {
     this.formChanged();
   }
 
-  formChanged() {
+  public formChanged() {
     if (this.currentForm === this.instanceForm) { return; }
     this.instanceForm = this.currentForm;
     if (this.instanceForm) {
@@ -307,7 +306,7 @@ export class InstancesComponent implements OnInit {
     }
   }
 
-  onValueChanged(data?: any) {
+  public onValueChanged(data?: any) {
     if (!this.instanceForm) { return; }
     const form = this.instanceForm.form;
 

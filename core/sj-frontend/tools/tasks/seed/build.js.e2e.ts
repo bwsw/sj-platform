@@ -18,12 +18,12 @@ export = () => {
     Config.TOOLS_DIR + '/manual_typings/**/*.d.ts',
     join(Config.APP_SRC, '**/*.ts'),
     '!' + join(Config.APP_SRC, '**/*.spec.ts'),
-    '!' + join(Config.APP_SRC, `**/${Config.BOOTSTRAP_FACTORY_PROD_MODULE}.ts`)
+    '!' + join(Config.APP_SRC, `**/${Config.NG_FACTORY_FILE}.ts`)
   ];
   let result = gulp.src(src)
     .pipe(plugins.plumber())
     .pipe(plugins.sourcemaps.init())
-    .pipe(plugins.typescript(tsProject));
+    .pipe(tsProject());
 
   return result.js
     .pipe(plugins.sourcemaps.write())

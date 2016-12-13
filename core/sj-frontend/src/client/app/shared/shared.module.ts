@@ -17,6 +17,8 @@ import { ServicesService } from './services/services.service';
 import { SpinnerComponent } from '../shared/spinner/spinner.component';
 import { StreamsService } from './services/streams.service';
 import { Ng2BootstrapModule } from 'ng2-bootstrap';
+import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
+import { FooterComponent } from './components/footer/footer.component';
 
 @NgModule({
   imports: [
@@ -30,6 +32,8 @@ import { Ng2BootstrapModule } from 'ng2-bootstrap';
     NavbarComponent,
     SearchBoxComponent,
     SpinnerComponent,
+    BreadcrumbsComponent,
+    FooterComponent,
     // Pipes
     ListFilterPipe,
     OrderByPipe,
@@ -49,6 +53,8 @@ import { Ng2BootstrapModule } from 'ng2-bootstrap';
     NavbarComponent,
     SearchBoxComponent,
     SpinnerComponent,
+    BreadcrumbsComponent,
+    FooterComponent,
     // Pipes
     ListFilterPipe,
     OrderByPipe,

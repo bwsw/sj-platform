@@ -7,6 +7,10 @@ import { platformBrowser } from '@angular/platform-browser';
 
 import { AppModuleNgFactory } from './app.module.ngfactory';
 
+import { Ng2BootstrapConfig, Ng2BootstrapTheme } from 'ng2-bootstrap';
+
+Ng2BootstrapConfig.theme = Ng2BootstrapTheme.BS4;
+
 enableProdMode();
 
 platformBrowser().bootstrapModuleFactory(AppModuleNgFactory);

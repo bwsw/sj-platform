@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, ViewChild } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewChild, AfterViewChecked } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ModalDirective } from 'ng2-bootstrap';
 
@@ -10,10 +10,9 @@ import { ServicesService } from '../shared/services/services.service';
 @Component({
   moduleId: module.id,
   selector: 'sj-providers',
-  templateUrl: 'providers.component.html',
-  styleUrls: ['providers.component.css']
+  templateUrl: 'providers.component.html'
 })
-export class ProvidersComponent implements OnInit {
+export class ProvidersComponent implements OnInit, AfterViewChecked {
   @Input() public provider: ProviderModel;
   @Output() public close = new EventEmitter();
   public alerts: Array<Object> = [];
@@ -174,11 +173,11 @@ export class ProvidersComponent implements OnInit {
     this.new_provider.hosts.push('');
   }
 
-  ngAfterViewChecked() {
+  public ngAfterViewChecked() {
     this.formChanged();
   }
 
-  formChanged() {
+  public formChanged() {
     if (this.currentForm === this.providerForm) { return; }
     this.providerForm = this.currentForm;
     if (this.providerForm) {
@@ -187,7 +186,7 @@ export class ProvidersComponent implements OnInit {
     }
   }
 
-  onValueChanged(data?: any) {
+  public onValueChanged(data?: any) {
     if (!this.providerForm) { return; }
     const form = this.providerForm.form;
 
