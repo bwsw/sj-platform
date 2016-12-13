@@ -10,10 +10,9 @@ import org.apache.mesos.{Scheduler, SchedulerDriver}
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
-
 /**
-  * Mesos scheduler implementation
-  */
+ * Mesos scheduler implementation
+ */
 class FrameworkScheduler extends Scheduler {
 
   private val logger = Logger.getLogger(this.getClass)
@@ -22,7 +21,7 @@ class FrameworkScheduler extends Scheduler {
 
   def error(driver: SchedulerDriver, message: String) {
     logger.error(s"Got error message: $message")
-    TasksList.message = s"Got error message: $message"
+    TasksList.setMessage(s"Got error message: $message")
   }
 
   def executorLost(driver: SchedulerDriver, executorId: ExecutorID, slaveId: SlaveID, status: Int): Unit = {
@@ -39,7 +38,7 @@ class FrameworkScheduler extends Scheduler {
 
   def frameworkMessage(driver: SchedulerDriver, executorId: ExecutorID, slaveId: SlaveID, data: Array[Byte]) {
     logger.debug(s"Got framework message: $data")
-    TasksList.message = s"Got framework message: $data"
+    TasksList.setMessage(s"Got framework message: $data")
   }
 
 
@@ -52,38 +51,37 @@ class FrameworkScheduler extends Scheduler {
     StatusHandler.handle(status)
   }
 
-
-
   def offerRescinded(driver: SchedulerDriver, offerId: OfferID): Unit = {
     /// TODO:
   }
 
 
   /**
-   * Obtaining resources and launch tasks.
+   * Obtain resources and launch tasks.
    *
    * @param driver scheduler driver
    * @param offers resources, that master offered to framework
    */
-  override def resourceOffers(driver: SchedulerDriver, offers: util.List[Offer]) {
+  override def resourceOffers(driver: SchedulerDriver, offers: util.List[Offer]): Unit = {
+    val internalOffers: mutable.Buffer[Offer] = offers.asScala
     logger.info(s"RESOURCE OFFERS")
     TasksList.clearAvailablePorts()
-    OfferHandler.setOffers(offers)
+    OfferHandler.setOffers(internalOffers)
     OfferHandler.filter(FrameworkUtil.instance.nodeAttributes)
-    if (OfferHandler.filteredOffers.size == 0) {
+    if (OfferHandler.filteredOffers.isEmpty) {
       logger.info("No one node selected")
-      TasksList.message = "No one node selected"
-      for (offer <- offers.asScala) driver.declineOffer(offer.getId)
+      TasksList.setMessage("No one node selected")
+      declineOffers(driver, internalOffers)
       return
     }
 
-    OfferHandler.filteredOffers.asScala.foreach(offer => {
+    OfferHandler.filteredOffers.foreach(offer => {
       logger.debug(s"Offer ID: ${offer.getId.getValue}")
       logger.debug(s"Slave ID: ${offer.getSlaveId.getValue}")
     })
 
     var tasksCountOnSlaves: mutable.ListBuffer[(Offer, Int)] = OfferHandler.getOffersForSlave()
-    var overTasks = tasksCountOnSlaves.foldLeft(0)(_+_._2)
+    var overTasks = tasksCountOnSlaves.foldLeft(0)(_ + _._2)
     if (uniqueHosts && tasksCountOnSlaves.length < overTasks) overTasks = tasksCountOnSlaves.length
 
     logger.debug(s"Count tasks can be launched: $overTasks")
@@ -91,49 +89,51 @@ class FrameworkScheduler extends Scheduler {
 
     if (TasksList.count > overTasks) {
       logger.info(s"Can not launch tasks: no required resources")
-      TasksList.message = "Can not launch tasks: no required resources"
-      for (offer <- offers.asScala) {
-        driver.declineOffer(offer.getId)
-      }
+      TasksList.setMessage("Can not launch tasks: no required resources")
+      declineOffers(driver, internalOffers)
       return
     }
     logger.debug(s"Tasks to launch: ${TasksList.toLaunch}")
 
-
     OfferHandler.offerNumber = 0
-    TasksList.launchedTasks = mutable.Map()
+    TasksList.clearLaunchedTasks()
     for (currTask <- TasksList.toLaunch) {
-
-      val currentOffer = OfferHandler.getNextOffer(tasksCountOnSlaves)
-      val task = TasksList.createTaskToLaunch(currTask, currentOffer._1)
-
-      TasksList.addTaskToSlave(task, currentOffer)
-
-      // update how much tasks we can run on slave when launch current task
-      tasksCountOnSlaves.update(tasksCountOnSlaves.indexOf(currentOffer), Tuple2(currentOffer._1, currentOffer._2 - 1))
-      TasksList.launched(currTask)
-
+      createTaskToLaunch(currTask, tasksCountOnSlaves)
       tasksCountOnSlaves = OfferHandler.updateOfferNumber(tasksCountOnSlaves)
-
     }
 
-    for (task <- TasksList.launchedTasks) {
-      driver.launchTasks(List(task._1).asJava, task._2.asJava)
-    }
-
-    for (offer <- offers.asScala) {
-      driver.declineOffer(offer.getId)
-    }
-    TasksList.message = "Tasks launched"
+    launchTasks(driver)
+    declineOffers(driver, internalOffers)
+    TasksList.setMessage("Tasks have been launched")
   }
 
+  private def declineOffers(driver: SchedulerDriver, offers: mutable.Buffer[Offer]) = {
+    offers.foreach(offer => driver.declineOffer(offer.getId))
+  }
+
+  private def createTaskToLaunch(taskName: String, tasksCountOnSlaves: mutable.ListBuffer[(Offer, Int)]) = {
+    val currentOffer = OfferHandler.getNextOffer(tasksCountOnSlaves)
+    val task = TasksList.createTaskToLaunch(taskName, currentOffer._1)
+
+    TasksList.addTaskToSlave(task, currentOffer)
+
+    // update how much tasks we can run on slave when launch current task
+    tasksCountOnSlaves.update(tasksCountOnSlaves.indexOf(currentOffer), Tuple2(currentOffer._1, currentOffer._2 - 1))
+    TasksList.launched(taskName)
+  }
+
+  private def launchTasks(driver: SchedulerDriver) = {
+    for (task <- TasksList.getLaunchedTasks()) {
+      driver.launchTasks(List(task._1).asJava, task._2.asJava)
+    }
+  }
 
   /**
-   * Reregistering framework after master disconnected.
+   * Perform a reregistration of framework after master disconnected.
    */
   def reregistered(driver: SchedulerDriver, masterInfo: MasterInfo) {
     logger.debug(s"New master $masterInfo")
-    TasksList.message = s"New master $masterInfo"
+    TasksList.setMessage(s"New master $masterInfo")
   }
 
 
@@ -154,10 +154,12 @@ class FrameworkScheduler extends Scheduler {
 
     if (optionInstance.isEmpty) {
       logger.error(s"Not found instance")
-      TasksList.message = "Framework shut down: not found instance."
+      TasksList.setMessage("Framework shut down: not found instance.")
       driver.stop()
       return
-    } else { FrameworkUtil.instance = optionInstance.get}
+    } else {
+      FrameworkUtil.instance = optionInstance.get
+    }
     logger.debug(s"Got instance ${FrameworkUtil.instance.name}")
 
     TasksList.prepare(FrameworkUtil.instance)
@@ -165,8 +167,7 @@ class FrameworkScheduler extends Scheduler {
 
     uniqueHosts = scala.util.Try(System.getenv("UNIQUE_HOSTS").toBoolean).getOrElse(false)
 
-    TasksList.message = s"Registered framework as: ${frameworkId.getValue}"
+    TasksList.setMessage(s"Registered framework as: ${frameworkId.getValue}")
   }
-
 }
 

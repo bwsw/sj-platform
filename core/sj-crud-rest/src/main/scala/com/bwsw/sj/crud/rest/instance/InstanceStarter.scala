@@ -242,12 +242,16 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
     val command = "java -jar " + frameworkJarName + " $PORT"
     val restUrl = new URI(s"$restAddress/v1/custom/jars/$frameworkJarName")
     val environmentVariables = getFrameworkEnvironmentVariables(marathonMaster)
+    val backoffSettings = getBackoffSettings()
     val request = MarathonRequest(
       instance.name,
       command,
       1,
       environmentVariables,
-      List(restUrl.toString))
+      List(restUrl.toString),
+      backoffSettings._1,
+      backoffSettings._2,
+      backoffSettings._3)
 
     request
   }
@@ -262,6 +266,17 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
     environmentVariables = environmentVariables ++ mapAsScalaMap(instance.environmentVariables)
 
     environmentVariables
+  }
+
+  private def getBackoffSettings(): (Int, Double, Int) = {
+    try {
+      val backoffSeconds = ConfigurationSettingsUtils.getFrameworkBackoffSeconds()
+      val backoffFactor = ConfigurationSettingsUtils.getFrameworkBackoffFactor()
+      val maxLaunchDelaySeconds = ConfigurationSettingsUtils.getFrameworkMaxLaunchDelaySeconds()
+      (backoffSeconds, backoffFactor, maxLaunchDelaySeconds)
+    } catch {
+      case e: NoSuchFieldException => (7, 7, 600)
+    }
   }
 
   private def waitForFrameworkToStart() = {

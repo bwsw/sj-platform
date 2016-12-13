@@ -15,12 +15,11 @@ import scala.collection.immutable
 import scala.util.Properties
 
 /**
-  *
-  *
-  * @author Kseniya Tomskikh
-  */
+ *
+ *
+ * @author Kseniya Tomskikh
+ */
 object FrameworkUtil {
-
   var master: MasterInfo = null
   var frameworkId: String = null
   var driver: SchedulerDriver = null
@@ -31,10 +30,10 @@ object FrameworkUtil {
   var params = immutable.Map[String, String]()
 
   /**
-    * Count how much ports must be for current task.
-    * @param instance current launched task
-    * @return ports count for current task
-    */
+   * Count how much ports must be for current task.
+   * @param instance current launched task
+   * @return ports count for current task
+   */
   def getCountPorts(instance: Instance) = {
     instance match {
       case _: OutputInstance => 2
@@ -45,17 +44,16 @@ object FrameworkUtil {
   }
 
   /**
-    * Handler for Scheduler Exception
-    */
+   * Handler for Scheduler Exception
+   */
   def handleSchedulerException(e: Exception, logger: Logger) = {
     val sw = new StringWriter
     e.printStackTrace(new PrintWriter(sw))
-    TasksList.message = e.getMessage
+    TasksList.setMessage(e.getMessage)
     logger.error(s"Framework error: ${sw.toString}")
     driver.stop()
     System.exit(1)
   }
-
 
   def getEnvParams() = {
     Map(
@@ -65,12 +63,11 @@ object FrameworkUtil {
     )
   }
 
-
   /**
-    * Get jar URI for framework
-    * @param instance:Instance
-    * @return String
-    */
+   * Get jar URI for framework
+   * @param instance:Instance
+   * @return String
+   */
   def getModuleUrl(instance: Instance): String = {
     jarName = configFileService.get("system." + instance.engine).get.value
     val restHost = configFileService.get(ConfigLiterals.hostOfCrudRestTag).get.value
@@ -79,5 +76,4 @@ object FrameworkUtil {
     logger.debug(s"Engine downloading URL: $restAddress")
     restAddress
   }
-
 }

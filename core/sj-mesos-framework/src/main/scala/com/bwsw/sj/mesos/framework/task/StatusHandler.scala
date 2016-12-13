@@ -16,7 +16,6 @@ object StatusHandler {
     * Determine type of status and restart task, if status "failed" or "error"
     * @param status: mesos task status
     */
-
   def handle(status: TaskStatus) = {
     logger.debug(s"STATUS UPDATE")
 

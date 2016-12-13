@@ -8,13 +8,14 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Disposition`}
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
-import akka.stream.scaladsl.{FileIO, Source}
+import akka.stream.scaladsl.FileIO
 import akka.util.ByteString
 import com.bwsw.sj.common.DAL.model.ConfigurationSetting
-import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
+import com.bwsw.sj.common.config.ConfigLiterals
+import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.rest.entities._
-import ConfigurationSettingsUtils._
 import com.bwsw.sj.crud.rest.RestLiterals
+import com.bwsw.sj.crud.rest.exceptions.CustomJarNotFound
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import org.apache.commons.io.FileUtils
@@ -24,12 +25,10 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 
 /**
- * Rest-api for sj-platform executive units and custom files
- *
- *
- *
- * @author Kseniya Tomskikh
- */
+  * Rest-api for sj-platform executive units and custom files
+  *
+  * @author Kseniya Tomskikh
+  */
 trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
   private var previousFileName: Option[String] = None
 
@@ -54,7 +53,7 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
       if (file.exists()) file.delete()
     }
   }
-
+  //todo добавить проверку на существование не только по имени файла, но и по имени+версии из спецификации
   val customApi = {
     pathPrefix("custom") {
       pathPrefix("jars") {
@@ -80,35 +79,23 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
               pathEndOrSingleSlash {
                 val fileMetadatas = fileMetadataDAO.getByParameters(Map("specification.name" -> name, "specification.version" -> version))
                 if (fileMetadatas.isEmpty) {
-                  val response: RestResponse = NotFoundRestResponse(Map("message" ->
-                    createMessage("rest.custom.jars.file.notfound", name)))
-                  complete(restResponseToHttpResponse(response))
+                  throw CustomJarNotFound(createMessage("rest.custom.jars.file.notfound", s"$name-$version"), s"$name-$version")
                 }
                 val filename = fileMetadatas.head.filename
                 get {
-                  if (storage.exists(filename)) {
-                    deletePreviousFile()
-                    val jarFile = storage.get(filename, RestLiterals.tmpDirectory + filename)
-                    previousFileName = Some(jarFile.getAbsolutePath)
-                    val source = FileIO.fromPath(Paths.get(jarFile.getAbsolutePath))
-                    complete(HttpResponse(
-                      headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> filename))),
-                      entity = HttpEntity.Chunked.fromData(MediaTypes.`application/java-archive`, source)
-                    ))
-                  } else {
-                    val response = NotFoundRestResponse(Map("message" ->
-                      createMessage("rest.custom.jars.file.notfound", name)))
-                    complete(restResponseToHttpResponse(response))
-                  }
+                  deletePreviousFile()
+                  val jarFile = storage.get(filename, RestLiterals.tmpDirectory + filename)
+                  previousFileName = Some(jarFile.getAbsolutePath)
+                  val source = FileIO.fromPath(Paths.get(jarFile.getAbsolutePath))
+                  complete(HttpResponse(
+                    headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> filename))),
+                    entity = HttpEntity.Chunked.fromData(MediaTypes.`application/java-archive`, source)
+                  ))
                 } ~
                   delete {
-                    var response: RestResponse = NotFoundRestResponse(Map("message" ->
-                      createMessage("rest.custom.jars.file.notfound", name)))
-                    if (storage.delete(filename)) {
-                      configService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, name + "-" + version))
-                      response = OkRestResponse(
-                        Map("message" -> createMessage("rest.custom.jars.file.deleted", name, version)))
-                    }
+                    configService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, name + "-" + version))
+                    val response = OkRestResponse(
+                      Map("message" -> createMessage("rest.custom.jars.file.deleted", name, version)))
 
                     complete(restResponseToHttpResponse(response))
                   }
@@ -166,43 +153,25 @@ trait SjCustomApi extends Directives with SjCrudValidator with CompletionUtils {
         pathPrefix("files") {
           pathEndOrSingleSlash {
             post {
-              entity(as[Multipart.FormData]) { (entity: Multipart.FormData) =>
-                  val parts: Source[BodyPart, Any] = entity.parts
-                  var filename = ""
-                  var description = ""
-                  val partsResult = parts.runForeach { (part: BodyPart) =>
-                    if (part.name.equals("file")) {
-                      filename = part.filename.get
-                      fileUpload(filename, part)
-                      logger.debug(s"File $filename is uploaded")
-                    } else if (part.name.equals("description")) {
-                      val bytes = part.entity.dataBytes
+              uploadedFile("file") {
+                case (metadata: FileInfo, file: File) =>
+                  try {
+                    var response: RestResponse = ConflictRestResponse(Map("message" ->
+                      createMessage("rest.custom.files.file.exists", metadata.fileName)))
 
-                      def writeContent(array: Array[Byte], byteString: ByteString): Array[Byte] = {
-                        val byteArray: Array[Byte] = byteString.toArray
-                        description = new String(byteArray)
-                        array ++ byteArray
-                      }
+                    if (!storage.exists(metadata.fileName)) {
+                        val uploadingFile = new File(metadata.fileName)
+                        FileUtils.copyFile(file, uploadingFile)
+                        storage.put(uploadingFile, metadata.fileName, Map("description" -> ""), "custom-file")   //todo description
 
-                      val future = bytes.runFold(Array[Byte]())(writeContent)
-                      Await.result(future, 30.seconds)
+                        response = OkRestResponse(Map("message" ->
+                          createMessage("rest.custom.files.file.uploaded", metadata.fileName)))
                     }
+
+                    complete(restResponseToHttpResponse(response))
+                  } finally {
+                    file.delete()
                   }
-                  Await.result(partsResult, 30.seconds)
-
-                  var response: RestResponse = ConflictRestResponse(Map("message" ->
-                    createMessage("rest.custom.files.file.exists", filename)))
-
-                  if (!storage.exists(filename)) {
-                    val uploadingFile = new File(filename)
-                    val spec = Map("description" -> description)
-                    storage.put(uploadingFile, filename, spec, "custom-file")
-                    uploadingFile.delete()
-
-                    response = OkRestResponse(Map("message" -> createMessage("rest.custom.files.file.uploaded", filename)))
-                  }
-
-                  complete(restResponseToHttpResponse(response))
               }
             } ~
               get {

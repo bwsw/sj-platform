@@ -72,6 +72,8 @@ val commonSettings = Seq(
 
 lazy val sj = (project in file(".")).settings(publish := {})
   .settings(unidocSettings: _*)
+  .settings(updateOptions :=
+    updateOptions.value.withCachedResolution(true))
   .aggregate(common,
     engineCore, crudRest,
     inputStreamingEngine, regularStreamingEngine, windowedStreamingEngine, outputStreamingEngine,

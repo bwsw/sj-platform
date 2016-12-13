@@ -6,9 +6,6 @@ import com.bwsw.sj.mesos.framework.task.{MasterState, Slave, SlaveState, TasksLi
 import org.apache.mesos.Protos.{SlaveID, TaskID, TaskStatus}
 import com.bwsw.sj.mesos.framework.task.StatusHandler
 
-/**
-  * Created by diryavkin_dn on 17.11.16.
-  */
 object SuccessHandler extends TaskStatusHandler {
   protected var status: TaskStatus = null
 

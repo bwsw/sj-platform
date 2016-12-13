@@ -46,7 +46,7 @@ with SjConfigurationSettingsApi with CompletionUtils {
       complete(restResponseToHttpResponse(response))
     case jsonSchemaValidationException:ValidationException =>
       val response = InternalServerErrorRestResponse(Map("message" ->
-        s"Specification.json of module fails to meet a json schema: ${jsonSchemaValidationException.getMessage}"))
+        createMessage("rest.modules.specification.json", s"${jsonSchemaValidationException.getMessage}")))
       complete(restResponseToHttpResponse(response))
     case ex: Exception =>
       ex.printStackTrace()

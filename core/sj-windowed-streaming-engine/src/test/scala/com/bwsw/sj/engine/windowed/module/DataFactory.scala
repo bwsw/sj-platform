@@ -26,6 +26,7 @@ import org.I0Itec.zkclient.ZkConnection
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import org.apache.kafka.common.TopicPartition
+import org.apache.kafka.common.errors.TopicExistsException
 
 import scala.collection.JavaConverters._
 
@@ -281,7 +282,7 @@ object DataFactory {
       AdminUtils.createTopic(zkUtils, s1.name, partitions, replications)
       AdminUtils.createTopic(zkUtils, s2.name, partitions, replications)
     } catch {
-      case e: kafka.common.TopicExistsException =>
+      case e: TopicExistsException =>
         println("It's normal if kafka doesn't support deleting of topics")
     }
   }

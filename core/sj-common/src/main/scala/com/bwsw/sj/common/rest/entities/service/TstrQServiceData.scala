@@ -69,7 +69,7 @@ class TstrQServiceData() extends ServiceData() {
         else {
           if (!validateNamespace(x)) {
             errors += s"Service has incorrect 'metadata-namespace': '$x'. " +
-              s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+              s"Name must contain digits, lowercase letters or underscore. First symbol must be a letter"
           }
         }
     }
@@ -107,7 +107,7 @@ class TstrQServiceData() extends ServiceData() {
         else {
           if (!validateNamespace(x)) {
             errors += s"Service has incorrect 'data-namespace': '$x'. " +
-              s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+              s"Name must contain digits, lowercase letters or underscore. First symbol must be a letter"
           }
         }
     }
@@ -143,7 +143,7 @@ class TstrQServiceData() extends ServiceData() {
         else {
           if (!validateNamespace(x)) {
             errors += s"Service has incorrect 'lock-namespace': '$x'. " +
-              s"Name must be contain digits, lowercase letters or underscore. First symbol must be a letter"
+              s"Name must contain digits, lowercase letters or underscore. First symbol must be a letter"
           }
         }
     }

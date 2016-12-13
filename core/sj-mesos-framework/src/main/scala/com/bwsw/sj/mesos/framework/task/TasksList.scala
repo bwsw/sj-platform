@@ -14,9 +14,9 @@ object TasksList {
   private val logger = Logger.getLogger(this.getClass)
   private val tasksToLaunch: mutable.ListBuffer[String] = mutable.ListBuffer()
   private val listTasks : mutable.Map[String, Task] = mutable.Map()
-  var message: String = "Initialization"
-  var availablePorts: collection.mutable.ListBuffer[Long] = collection.mutable.ListBuffer()
-  var launchedTasks: mutable.Map[OfferID, mutable.ListBuffer[TaskInfo]] = mutable.Map()
+  private var message: String = "Initialization"
+  private var availablePorts: collection.mutable.ListBuffer[Long] = collection.mutable.ListBuffer()
+  private var launchedTasks: mutable.Map[OfferID, mutable.ListBuffer[TaskInfo]] = mutable.Map()
 
   var perTaskCores: Double = 0.0
   var perTaskMem: Double = 0.0
@@ -63,6 +63,18 @@ object TasksList {
 
   def count = {
     toLaunch.size
+  }
+
+  def getLaunchedTasks() = {
+    launchedTasks
+  }
+
+  def clearLaunchedTasks() = {
+    launchedTasks.clear()
+  }
+
+  def setMessage(message: String) = {
+    this.message = message
   }
 
   def prepare(instance: Instance) = {
