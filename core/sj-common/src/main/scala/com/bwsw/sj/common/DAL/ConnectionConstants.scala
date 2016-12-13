@@ -1,11 +1,12 @@
 package com.bwsw.sj.common.DAL
 
+import com.mongodb.ServerAddress
+
 object ConnectionConstants {
-  require(System.getenv("MONGO_HOST") != null && System.getenv("MONGO_PORT") != null,
-    "No environment variables: MONGO_HOST, MONGO_PORT")
-  
-  val mongoHost = System.getenv("MONGO_HOST")
-  val mongoPort = System.getenv("MONGO_PORT").toInt
+  require(System.getenv("MONGO_HOSTS") != null,
+    "No environment variables: MONGO_HOSTS")
+
+  val mongoHosts = System.getenv("MONGO_HOSTS").split(",").toList.map(x => new ServerAddress(x.trim))
 
   val databaseName = "stream_juggler"
   lazy val fileMetadataCollection = "fs.files"

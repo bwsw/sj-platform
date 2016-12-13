@@ -13,6 +13,7 @@ import org.mongodb.morphia.mapping.DefaultCreator
 import org.slf4j.LoggerFactory
 
 import scala.reflect.ClassTag
+import collection.JavaConverters._
 
 /**
  * Repository for connection to MongoDB and file storage (GridFS)
@@ -24,7 +25,7 @@ object ConnectionRepository {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  private lazy val mongoClient = new MongoClient(mongoHost, mongoPort)
+  private lazy val mongoClient = new MongoClient(mongoHosts.asJava)
 
   private lazy val morphia = new Morphia()
   morphia.map(classOf[SjStream]).map(classOf[Service]).map(classOf[Provider]).map(classOf[ConfigurationSetting]).map(classOf[Instance])
@@ -33,7 +34,7 @@ object ConnectionRepository {
 
   private lazy val datastore = morphia.createDatastore(mongoClient, databaseName)
 
-  private lazy val mongoConnection = com.mongodb.casbah.MongoClient(mongoHost, mongoPort)
+  private lazy val mongoConnection = com.mongodb.casbah.MongoClient(mongoHosts)
 
   private lazy val fileStorage: MongoFileStorage = new MongoFileStorage(mongoConnection(databaseName))
 
