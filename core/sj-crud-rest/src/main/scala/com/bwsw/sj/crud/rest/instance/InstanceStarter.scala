@@ -268,14 +268,18 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   }
 
   private def getBackoffSettings(): (Int, Double, Int) = {
-    try {
-      val backoffSeconds = ConfigurationSettingsUtils.getFrameworkBackoffSeconds()
-      val backoffFactor = ConfigurationSettingsUtils.getFrameworkBackoffFactor()
-      val maxLaunchDelaySeconds = ConfigurationSettingsUtils.getFrameworkMaxLaunchDelaySeconds()
-      (backoffSeconds, backoffFactor, maxLaunchDelaySeconds)
-    } catch {
-      case e: NoSuchFieldException => (7, 7, 600)
-    }
+    val backoffSeconds = try ConfigurationSettingsUtils.getFrameworkBackoffSeconds() catch {case e:NoSuchFieldException => 7}
+    val backoffFactor = try ConfigurationSettingsUtils.getFrameworkBackoffFactor() catch {case e:NoSuchFieldException => 7}
+    val maxLaunchDelaySeconds = try ConfigurationSettingsUtils.getFrameworkMaxLaunchDelaySeconds() catch {case e:NoSuchFieldException => 600}
+//    try {
+//      val backoffSeconds = ConfigurationSettingsUtils.getFrameworkBackoffSeconds()
+//      val backoffFactor = ConfigurationSettingsUtils.getFrameworkBackoffFactor()
+//      val maxLaunchDelaySeconds = ConfigurationSettingsUtils.getFrameworkMaxLaunchDelaySeconds()
+//      (backoffSeconds, backoffFactor, maxLaunchDelaySeconds)
+//    } catch {
+//      case e: NoSuchFieldException => (7, 7, 600)
+//    }
+    (backoffSeconds, backoffFactor, maxLaunchDelaySeconds)
   }
 
   private def waitForFrameworkToStart() = {
