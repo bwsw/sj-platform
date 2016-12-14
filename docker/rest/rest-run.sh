@@ -1,18 +1,18 @@
 #!/bin/bash
 
-echo MONGO_HOST: ${MONGO_HOST?Please provide MONGO_HOST}
+echo MONGO_HOSTS: ${MONGO_HOSTS?Please provide MONGO_HOSTS}
 
 if [ -n "$REST_PORT" ]; then echo "REST_PORT env var is voided" && exit; fi
 
 if [ -n "$REST_PORT" ]; then echo "REST_PORT env var is voided" && exit; fi
 
-if [ -z "$MONGO_PORT" ]
-then
-   export MONGO_PORT=27017
-   echo "Using default MONGO_PORT 27017"
-else
-   echo "Using MONGO_PORT $MONGO_PORT"
-fi
+#if [ -z "$MONGO_PORT" ]
+#then
+#   export MONGO_PORT=27017
+#   echo "Using default MONGO_PORT 27017"
+#else
+#   echo "Using MONGO_PORT $MONGO_PORT"
+#fi
 
 if [ -z "$REST_PORT" ]
 then

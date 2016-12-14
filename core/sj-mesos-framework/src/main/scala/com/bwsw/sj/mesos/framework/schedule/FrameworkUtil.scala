@@ -58,7 +58,7 @@ object FrameworkUtil {
   def getEnvParams() = {
     Map(
       ("instanceId", Properties.envOrElse("INSTANCE_ID", "00000000-0000-0000-0000-000000000000")),
-      ("mongodbHosts", Properties.envOrElse("MONGO_HOSTS", "127.0.0.1"))
+      ("mongodbHosts", Properties.envOrElse("MONGO_HOSTS", "127.0.0.1:27017"))
     )
   }
 

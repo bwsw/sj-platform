@@ -10,8 +10,7 @@ import com.bwsw.sj.engine.output.OutputTaskRunner
   * @author Kseniya Tomskikh
   *
   *
-  *         MONGO_HOST=176.120.25.19
-  *         MONGO_PORT=27017
+  *         MONGO_HOST=176.120.25.19:27017
 
   *         AGENTS_HOST=localhost
   *         AGENTS_PORTS=31000,31001
