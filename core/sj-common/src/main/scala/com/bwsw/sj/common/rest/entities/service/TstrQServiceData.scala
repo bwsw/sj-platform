@@ -89,7 +89,7 @@ class TstrQServiceData() extends ServiceData() {
               errors += s"Data-provider '$x' does not exist"
             case Some(provider) =>
               if (!allowedTypes.contains(provider.providerType)) {
-                errors += s"Data-provider must be one of type: ${allowedTypes.mkString("[", ", ", "]")} " +
+                errors += s"'Data-provider' must be one of type: ${allowedTypes.mkString("[", ", ", "]")} " +
                   s"('${provider.providerType}' is given instead)"
               }
           }
