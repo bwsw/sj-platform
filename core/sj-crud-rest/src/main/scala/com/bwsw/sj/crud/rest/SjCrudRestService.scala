@@ -38,6 +38,7 @@ object SjCrudRestService extends App with SjCrudInterface {
   val restHost = System.getenv("CRUD_REST_HOST")
   val restPort = System.getenv("CRUD_REST_PORT").toInt
   val serializer = new JsonSerializer()
+  serializer.setIgnoreUnknown(true)
   val storage = ConnectionRepository.getFileStorage
   val fileMetadataDAO = ConnectionRepository.getFileMetadataService
   val instanceDAO = ConnectionRepository.getInstanceService

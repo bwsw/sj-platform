@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes,
 import scala.collection.mutable.ArrayBuffer
 
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[ServiceData], visible = true)
 @JsonSubTypes(Array(
   new Type(value = classOf[CassDBServiceData], name = ServiceLiterals.cassandraType),
   new Type(value = classOf[EsIndServiceData], name = ServiceLiterals.elasticsearchType),
@@ -22,8 +22,8 @@ import scala.collection.mutable.ArrayBuffer
   new Type(value = classOf[JDBCServiceData], name = ServiceLiterals.jdbcType)
 ))
 class ServiceData() extends ValidationUtils {
-  @JsonProperty("type") var serviceType: String = null
-  var name: String = null
+  @JsonProperty("type") var serviceType: String = _
+  var name: String = _
   var description: String = "No description"
 
   @JsonIgnore
@@ -53,7 +53,7 @@ class ServiceData() extends ValidationUtils {
           errors += s"'Type' is required"
         }
         else {
-          if (!types.contains(x)) errors += s"Unknown 'type' provided. Must be one of: ${types.mkString("[", ", ", "]")}"
+          if (!types.contains(x)) errors += s"Unknown type '$x' provided. Must be one of: ${types.mkString("[", ", ", "]")}"
         }
     }
 

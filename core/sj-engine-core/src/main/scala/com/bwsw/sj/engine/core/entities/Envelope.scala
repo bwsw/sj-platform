@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.{JsonIgnore, JsonSubTypes, JsonTypeInfo}
  * that is received from a partition of a specific input (kafka, t-stream, elasticsearch, jdbc)
  */
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "streamType")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "streamType", defaultImpl = classOf[Envelope], visible = true)
 @JsonSubTypes(Array(
   new Type(value = classOf[TStreamEnvelope], name = "stream.t-stream"),
   new Type(value = classOf[KafkaEnvelope], name = "stream.kafka"),
