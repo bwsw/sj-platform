@@ -63,7 +63,7 @@ class SjStreamData() extends ValidationUtils {
 
           val streamObj = streamDAO.get(x)
           if (streamObj.isDefined) {
-            errors += s"Stream with name $x already exists"
+            errors += s"Stream with name '$x' already exists"
           }
         }
     }

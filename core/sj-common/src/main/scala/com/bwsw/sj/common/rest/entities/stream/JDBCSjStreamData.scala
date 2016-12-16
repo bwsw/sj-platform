@@ -29,7 +29,7 @@ class JDBCSjStreamData() extends SjStreamData() {
               errors += s"Service '$x' does not exist"
             case Some(someService) =>
               if (someService.serviceType != ServiceLiterals.jdbcType) {
-                errors += s"Service for ${StreamLiterals.jdbcOutputType} stream " +
+                errors += s"Service for '${StreamLiterals.jdbcOutputType}' stream " +
                   s"must be of '${ServiceLiterals.jdbcType}' type ('${someService.serviceType}' is given instead)"
               }
           }

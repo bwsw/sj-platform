@@ -44,7 +44,7 @@ class TStreamSjStreamData() extends SjStreamData() {
               errors += s"Service '$x' does not exist"
             case Some(modelService) =>
               if (modelService.serviceType != ServiceLiterals.tstreamsType) {
-                errors += s"Service for ${StreamLiterals.tStreamType} stream " +
+                errors += s"Service for '${StreamLiterals.tStreamType}' stream " +
                   s"must be of '${ServiceLiterals.tstreamsType}' type ('${modelService.serviceType}' is given instead)"
               } else {
                 if (errors.isEmpty) errors ++= checkStreamPartitionsOnConsistency(modelService.asInstanceOf[TStreamService])

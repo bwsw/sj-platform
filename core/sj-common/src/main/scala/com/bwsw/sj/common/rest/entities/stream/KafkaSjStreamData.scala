@@ -48,7 +48,7 @@ class KafkaSjStreamData() extends SjStreamData() {
               errors += s"Service '$x' does not exist"
             case Some(modelService) =>
               if (modelService.serviceType != ServiceLiterals.kafkaType) {
-                errors += s"Service for ${StreamLiterals.kafkaStreamType} stream " +
+                errors += s"Service for '${StreamLiterals.kafkaStreamType}' stream " +
                   s"must be of '${ServiceLiterals.kafkaType}' type ('${modelService.serviceType}' is given instead)"
               } else {
                 if (errors.isEmpty) errors ++= checkStreamPartitionsOnConsistency(modelService.asInstanceOf[KafkaService])

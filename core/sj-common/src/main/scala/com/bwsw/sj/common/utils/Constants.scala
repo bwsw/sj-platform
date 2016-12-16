@@ -76,7 +76,7 @@ object StreamLiterals {
   final val kafkaStreamType = "stream.kafka"
   final val esOutputType = "elasticsearch-output"
   final val jdbcOutputType = "jdbc-output"
-  val types = Seq(tStreamType, kafkaStreamType, esOutputType, jdbcOutputType)
+  val types = Seq(tStreamType, kafkaStreamType, jdbcOutputType, esOutputType)
 
   private val tstreamFactory = new TStreamsFactory()
   final val ttl = tstreamFactory.getProperty(TSF_Dictionary.Stream.TTL).asInstanceOf[Int]

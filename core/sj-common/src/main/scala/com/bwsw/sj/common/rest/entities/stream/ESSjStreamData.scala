@@ -30,7 +30,7 @@ class ESSjStreamData() extends SjStreamData() {
               errors += s"Service '$x' does not exist"
             case Some(someService) =>
               if (someService.serviceType != ServiceLiterals.elasticsearchType) {
-                errors += s"Service for ${StreamLiterals.esOutputType} stream " +
+                errors += s"Service for '${StreamLiterals.esOutputType}' stream " +
                   s"must be of '${ServiceLiterals.elasticsearchType}' type ('${someService.serviceType}' is given instead)"
               }
           }
