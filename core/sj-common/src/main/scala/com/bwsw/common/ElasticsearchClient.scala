@@ -3,14 +3,17 @@ package com.bwsw.common
 import java.net.InetAddress
 import java.util.UUID
 
-import org.elasticsearch.client.transport.TransportClient
+import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.InetSocketTransportAddress
 import org.elasticsearch.index.query.{QueryBuilder, QueryBuilders}
 import org.elasticsearch.search.SearchHits
+import org.elasticsearch.transport.client.PreBuiltTransportClient
 
-class ElasticsearchClient(hosts: Set[(String, Int)]) {
 
-  private val client = TransportClient.builder().build()
+class ElasticsearchClient(hosts: Set[(String, Int)]){
+
+  private val settings = Settings.builder().build()
+  private val client = new PreBuiltTransportClient(settings)
   hosts.foreach(x => setTransportAddressToClient(x._1, x._2))
 
   def setTransportAddressToClient(host: String, port: Int) = {
