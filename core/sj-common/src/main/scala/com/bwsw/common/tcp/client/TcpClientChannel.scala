@@ -5,12 +5,17 @@ import java.util.concurrent.ArrayBlockingQueue
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
+import io.netty.util.ReferenceCountUtil
 
 @Sharable
-class TcpClientChannel(out: ArrayBlockingQueue[ByteBuf]) extends ChannelInboundHandlerAdapter {
+class TcpClientChannel(out: ArrayBlockingQueue[Long]) extends ChannelInboundHandlerAdapter {
   override def channelRead(ctx: ChannelHandlerContext, msg: Any) = {
-    val serializedId = msg.asInstanceOf[ByteBuf]
-    out.offer(serializedId)
+    try {
+      val serializedId = msg.asInstanceOf[ByteBuf]
+      out.offer(serializedId.readLong())
+    } finally {
+      ReferenceCountUtil.release(msg)
+    }
   }
 
   /**

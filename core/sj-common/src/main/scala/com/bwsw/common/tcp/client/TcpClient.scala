@@ -5,10 +5,12 @@ import java.util.concurrent.ArrayBlockingQueue
 import com.bwsw.common.LeaderLatch
 import com.bwsw.sj.common.utils.GeneratorLiterals
 import io.netty.bootstrap.Bootstrap
-import io.netty.buffer.ByteBuf
+import io.netty.buffer.PooledByteBufAllocator
 import io.netty.channel._
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioSocketChannel
+import io.netty.util.ResourceLeakDetector
+import io.netty.util.ResourceLeakDetector.Level
 
 /**
  * Simple tcp client for retrieving transaction ID
@@ -17,10 +19,10 @@ import io.netty.channel.socket.nio.NioSocketChannel
  */
 
 class TcpClient(options: TcpClientOptions) {
-  private val out = new ArrayBlockingQueue[ByteBuf](1)
+  private val out = new ArrayBlockingQueue[Long](1)
   private var channel: Channel = null
   private val workerGroup = new NioEventLoopGroup()
-  private val bootstrap = new Bootstrap()
+  private val bootstrap = new Bootstrap().option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
   private val (host, port) = getMasterAddress()
 
   createChannel()
@@ -35,6 +37,7 @@ class TcpClient(options: TcpClientOptions) {
   }
 
   private def createChannel() = {
+    ResourceLeakDetector.setLevel(Level.ADVANCED)
     bootstrap.group(workerGroup)
       .channel(classOf[NioSocketChannel])
       .handler(new TcpClientChannelInitializer(out))
@@ -44,8 +47,9 @@ class TcpClient(options: TcpClientOptions) {
 
   def get() = {
     channel.writeAndFlush(GeneratorLiterals.messageForServer)
-    val serializedId = out.take()
-    serializedId.readLong()
+    val id = out.take()
+
+    id
   }
 
   def close() = {
