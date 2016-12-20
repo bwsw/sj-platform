@@ -5,16 +5,16 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, OutputInstanceMetadata, SpecificationData}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._
+import com.bwsw.sj.common.utils.SjStreamUtils._
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable.ArrayBuffer
-import com.bwsw.sj.common.utils.SjStreamUtils._
 
 /**
- *
- *
- * @author Kseniya Tomskikh
- */
+  *
+  *
+  * @author Kseniya Tomskikh
+  */
 class OutputInstanceValidator extends InstanceValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
@@ -25,12 +25,12 @@ class OutputInstanceValidator extends InstanceValidator {
   }
 
   /**
-   * Validating input parameters for 'output-streaming' module
-   *
-   * @param parameters - input parameters for running module
-   * @param specification - specification of module
-   * @return - List of errors
-   */
+    * Validating input parameters for 'output-streaming' module
+    *
+    * @param parameters    - input parameters for running module
+    * @param specification - specification of module
+    * @return - List of errors
+    */
   override def validate(parameters: InstanceMetadata, specification: SpecificationData) = {
     logger.debug(s"Instance: ${parameters.name}. Start output-streaming validation.")
     val errors = new ArrayBuffer[String]()
@@ -89,6 +89,14 @@ class OutputInstanceValidator extends InstanceValidator {
               val inputTypes = specification.inputs("types").asInstanceOf[Array[String]]
               if (!inputTypes.contains(stream.streamType)) {
                 errors += createMessage("rest.validator.attribute.must.one_of", "Input stream", inputTypes.mkString("[", ", ", "]"))
+              } else {
+                val input = stream.asInstanceOf[TStreamSjStream]
+                val service = input.service
+                if (!service.isInstanceOf[TStreamService]) {
+                  errors += createMessage("rest.validator.service.must", "t-streams", "TstrQ")
+                }
+
+                errors ++= checkParallelism(instance.parallelism, input.partitions)
               }
           }
         }
@@ -125,14 +133,6 @@ class OutputInstanceValidator extends InstanceValidator {
           errors += createMessage("rest.validator.attribute.must.one_of", "Start-from", s"${startFromModes.mkString("[", ", ", "]")} or timestamp")
       }
     }
-
-    val input = inputStream.get.asInstanceOf[TStreamSjStream]
-    val service = input.service
-    if (!service.isInstanceOf[TStreamService]) {
-      errors += createMessage("rest.validator.service.must", "t-streams", "TstrQ")
-    }
-
-    errors ++= checkParallelism(instance.parallelism, input.partitions)
 
     errors
   }
