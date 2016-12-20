@@ -1,6 +1,7 @@
 package com.bwsw.sj.common.DAL.model
 
 import com.bwsw.common.ElasticsearchClient
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.entities.service.{EsIndServiceData, ServiceData}
 import com.bwsw.sj.common.utils.ServiceLiterals
 import org.mongodb.morphia.annotations.Reference
@@ -46,9 +47,11 @@ class ESService() extends Service {
   }
 
   override def destroy() = {
-    val client = new ElasticsearchClient(getProviderHosts())
-    client.deleteIndex(this.index)
-    client.close()
+    if (!isIndexUsed) {
+      val client = new ElasticsearchClient(getProviderHosts())
+      client.deleteIndex(this.index)
+      client.close()
+    }
   }
 
   private def getProviderHosts() = {
@@ -59,5 +62,11 @@ class ESService() extends Service {
 
       (host, port)
     }).toSet
+  }
+
+  private def isIndexUsed = {
+    ConnectionRepository.getServiceManager.getByParameters(Map("type" -> this.serviceType))
+      .map(x => x.asInstanceOf[ESService])
+      .exists(x => x.index == this.index && x.name != this.name)
   }
 }

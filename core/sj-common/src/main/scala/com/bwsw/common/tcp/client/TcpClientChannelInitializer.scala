@@ -2,12 +2,11 @@ package com.bwsw.common.tcp.client
 
 import java.util.concurrent.ArrayBlockingQueue
 
-import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
 import io.netty.handler.codec.string.StringEncoder
 
-class TcpClientChannelInitializer(out: ArrayBlockingQueue[ByteBuf]) extends ChannelInitializer[SocketChannel] {
+class TcpClientChannelInitializer(out: ArrayBlockingQueue[Long]) extends ChannelInitializer[SocketChannel] {
 
   def initChannel(channel: SocketChannel) = {
     channel.config().setTcpNoDelay(true)

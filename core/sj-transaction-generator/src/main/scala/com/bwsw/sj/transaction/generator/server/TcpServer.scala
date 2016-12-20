@@ -6,20 +6,21 @@ import com.bwsw.common.LeaderLatch
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.utils.GeneratorLiterals
 import io.netty.bootstrap.ServerBootstrap
+import io.netty.buffer.PooledByteBufAllocator
 import io.netty.channel.ChannelHandler.Sharable
+import io.netty.channel._
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
-import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter, ChannelInitializer, EventLoopGroup}
 import io.netty.handler.logging.{LogLevel, LoggingHandler}
+import io.netty.util.ReferenceCountUtil
 import org.apache.log4j.Logger
 
 /**
- * Simple tcp server for creating transaction ID
- *
- *
- * @author Kseniya Tomskikh
- */
+  * Simple tcp server for creating transaction ID
+  *
+  * @author Kseniya Tomskikh
+  */
 class TcpServer(zkServers: String, prefix: String, host: String, port: Int) {
   private val logger = Logger.getLogger(getClass)
   private val retryPeriod = ConfigurationSettingsUtils.getServerRetryPeriod()
@@ -35,6 +36,7 @@ class TcpServer(zkServers: String, prefix: String, host: String, port: Int) {
     val workerGroup = new NioEventLoopGroup()
     try {
       val bootstrapServer = new ServerBootstrap()
+      bootstrapServer.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
       bootstrapServer.group(bossGroup, workerGroup)
         .channel(classOf[NioServerSocketChannel])
         .handler(new LoggingHandler(LogLevel.INFO))
@@ -60,6 +62,7 @@ class TcpServerChannelInitializer() extends ChannelInitializer[SocketChannel] {
     val pipeline = channel.pipeline()
 
     pipeline.addLast("handler", new TransactionGenerator())
+    pipeline.addLast()
   }
 }
 
@@ -68,15 +71,17 @@ class TransactionGenerator() extends ChannelInboundHandlerAdapter {
   private val counter = new AtomicInteger(0)
   private val currentMillis = new AtomicLong(0)
   private val scale = GeneratorLiterals.scale
+  private var now = 0L
 
   override def channelRead(ctx: ChannelHandlerContext, msg: Any) = {
+    ReferenceCountUtil.release(msg)
     val id = generateID()
     val response = ctx.alloc().buffer(8).writeLong(id)
     ctx.writeAndFlush(response)
   }
 
   private def generateID() = this.synchronized {
-    val now = System.currentTimeMillis()
+    now = System.currentTimeMillis()
     if (now - currentMillis.get > 0) {
       currentMillis.set(now)
       counter.set(0)
@@ -85,10 +90,11 @@ class TransactionGenerator() extends ChannelInboundHandlerAdapter {
   }
 
   /**
-   * Exception handler that print stack trace and than close the connection when an exception is raised.
-   * @param ctx Channel handler context
-   * @param cause What has caused an exception
-   */
+    * Exception handler that print stack trace and than close the connection when an exception is raised.
+    *
+    * @param ctx   Channel handler context
+    * @param cause What has caused an exception
+    */
   override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) = {
     cause.printStackTrace()
     ctx.channel().close()
