@@ -26,10 +26,10 @@ object Dependencies {
     ("org.elasticsearch" % "elasticsearch" % "5.1.1")
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
-      .exclude("log4j", "log4j"), //todo update and check
-    "org.elasticsearch.client" % "transport" % "5.1.1",
+      .exclude("log4j", "log4j"),
     "org.apache.logging.log4j" % "log4j-core" % "2.7",
     "org.apache.logging.log4j" % "log4j-api" % "2.7",
+    "org.elasticsearch.client" % "transport" % "5.1.1",
     "postgresql" % "postgresql" % "9.1-901.jdbc4"
   ))
 
@@ -77,10 +77,11 @@ object Dependencies {
     ("org.elasticsearch" % "elasticsearch" % "5.1.1")
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
-      .exclude("log4j", "log4j"), ////todo update and check
-    "org.elasticsearch.client" % "transport" % "5.1.1",
+      .exclude("log4j", "log4j"),
     "org.apache.logging.log4j" % "log4j-core" % "2.7",
-    "org.apache.logging.log4j" % "log4j-api" % "2.7"
+    "org.apache.logging.log4j" % "log4j-api" % "2.7",
+    "org.elasticsearch.client" % "transport" % "5.1.1"
+
   ))
 
   lazy val sjFrameworkDependencies = Def.setting(Seq(
