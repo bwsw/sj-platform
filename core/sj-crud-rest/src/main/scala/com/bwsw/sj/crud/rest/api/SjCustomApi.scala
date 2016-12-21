@@ -21,6 +21,7 @@ import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import org.apache.commons.io.FileUtils
 
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
@@ -30,7 +31,7 @@ import scala.concurrent.duration._
   * @author Kseniya Tomskikh
   */
 trait SjCustomApi extends Directives with SjCrudValidator {
-  private var previousFileName: Option[String] = None
+  private val previousFilesNames: ListBuffer[String] = ListBuffer[String]()
 
   private def fileUpload(filename: String, part: BodyPart) = {
     val fileOutput = new FileOutputStream(filename)
@@ -48,10 +49,11 @@ trait SjCustomApi extends Directives with SjCrudValidator {
   }
 
   private def deletePreviousFile() = {
-    if (previousFileName.isDefined) {
-      val file = new File(previousFileName.get)
+    previousFilesNames.foreach(filename => {
+      val file = new File(filename)
       if (file.exists()) file.delete()
-    }
+    })
+
   }
   //todo добавить проверку на существование не только по имени файла, но и по имени+версии из спецификации
   val customApi = {
@@ -63,7 +65,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
               if (storage.exists(name)) {
                 deletePreviousFile()
                 val jarFile = storage.get(name, RestLiterals.tmpDirectory + name)
-                previousFileName = Some(jarFile.getAbsolutePath)
+                previousFilesNames.append(jarFile.getAbsolutePath)
                 val source = FileIO.fromPath(Paths.get(jarFile.getAbsolutePath))
                 complete(HttpResponse(
                   headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> name))),
@@ -85,7 +87,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                 get {
                   deletePreviousFile()
                   val jarFile = storage.get(filename, RestLiterals.tmpDirectory + filename)
-                  previousFileName = Some(jarFile.getAbsolutePath)
+                  previousFilesNames.append(jarFile.getAbsolutePath)
                   val source = FileIO.fromPath(Paths.get(jarFile.getAbsolutePath))
                   complete(HttpResponse(
                     headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> filename))),
@@ -193,9 +195,9 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                 get {
                   if (storage.exists(filename)) {
                     deletePreviousFile()
-                    val file = storage.get(filename, RestLiterals.tmpDirectory + filename)
-                    previousFileName = Some(file.getAbsolutePath)
-                    val source = FileIO.fromPath(Paths.get(file.getAbsolutePath))
+                    val jarFile = storage.get(filename, RestLiterals.tmpDirectory + filename)
+                    previousFilesNames.append(jarFile.getAbsolutePath)
+                    val source = FileIO.fromPath(Paths.get(jarFile.getAbsolutePath))
                     complete(HttpResponse(
                       headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> filename))),
                       entity = HttpEntity.Chunked.fromData(ContentTypes.`application/octet-stream`, source)
