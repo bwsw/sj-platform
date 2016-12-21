@@ -5,5 +5,5 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 class BatchFillType {
   @JsonProperty("type-name") var typeName: String = null
-  var value: Long = 0
+  var value: Long = Long.MinValue
 }

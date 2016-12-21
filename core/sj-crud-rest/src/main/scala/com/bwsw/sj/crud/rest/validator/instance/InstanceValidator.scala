@@ -129,6 +129,7 @@ abstract class InstanceValidator extends ValidationUtils with CompletionUtils {
           stream.name -> stream.asInstanceOf[TStreamSjStream].partitions
         case StreamLiterals.`kafkaStreamType` =>
           stream.name -> stream.asInstanceOf[KafkaSjStream].partitions
+        case _ => stream.name -> 0
       }
     }: _*)
   }

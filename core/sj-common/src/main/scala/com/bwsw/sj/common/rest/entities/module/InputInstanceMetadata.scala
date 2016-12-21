@@ -9,14 +9,14 @@ import scala.collection.JavaConverters._
 class InputInstanceMetadata extends InstanceMetadata {
   var outputs: Array[String] = Array()
   @JsonProperty("checkpoint-mode") var checkpointMode: String = _
-  @JsonProperty("checkpoint-interval") var checkpointInterval: Long = 0L
+  @JsonProperty("checkpoint-interval") var checkpointInterval: Long = Long.MinValue
   @JsonProperty("duplicate-check") var duplicateCheck: Boolean = false
-  @JsonProperty("lookup-history") var lookupHistory: Int = 0
-  @JsonProperty("queue-max-size") var queueMaxSize: Int = 0
+  @JsonProperty("lookup-history") var lookupHistory: Int = Int.MinValue
+  @JsonProperty("queue-max-size") var queueMaxSize: Int = Int.MinValue
   @JsonProperty("default-eviction-policy") var defaultEvictionPolicy: String = EngineLiterals.noneDefaultEvictionPolicy
   @JsonProperty("eviction-policy") var evictionPolicy: String = EngineLiterals.fixTimeEvictionPolicy
-  @JsonProperty("backup-count") var backupCount: Int = 0
-  @JsonProperty("async-backup-count") var asyncBackupCount: Int = 0
+  @JsonProperty("backup-count") var backupCount: Int = Int.MinValue
+  @JsonProperty("async-backup-count") var asyncBackupCount: Int = Int.MinValue
   var tasks: Map[String, InputTask] = Map()
 
   override def asModelInstance() = {

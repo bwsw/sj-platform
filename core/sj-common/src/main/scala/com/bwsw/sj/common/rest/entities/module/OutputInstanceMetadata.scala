@@ -7,7 +7,7 @@ import com.bwsw.sj.common.utils.SjStreamUtils._
 
 class OutputInstanceMetadata extends InstanceMetadata {
   @JsonProperty("checkpoint-mode") var checkpointMode: String = null
-  @JsonProperty("checkpoint-interval") var checkpointInterval: Long = 0L
+  @JsonProperty("checkpoint-interval") var checkpointInterval: Long = Long.MinValue
   @JsonProperty("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan()
   @JsonProperty("start-from") var startFrom: String = EngineLiterals.newestStartMode
   var input: String = null

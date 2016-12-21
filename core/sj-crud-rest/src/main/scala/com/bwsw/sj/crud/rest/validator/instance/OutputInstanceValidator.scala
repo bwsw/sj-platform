@@ -54,7 +54,8 @@ class OutputInstanceValidator extends InstanceValidator {
 
     // 'checkpoint-interval' field
     if (outputInstanceMetadata.checkpointInterval <= 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Checkpoint-interval")
+      errors += createMessage("rest.validator.attribute.required", "Checkpoint-interval") + ". " +
+        createMessage("rest.validator.attribute.must.greater.than.zero", "Checkpoint-interval")
     }
 
     errors ++= validateStreamOptions(outputInstanceMetadata, specification)

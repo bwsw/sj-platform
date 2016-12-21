@@ -3,6 +3,7 @@ package com.bwsw.sj.crud.rest.validator.instance
 import com.bwsw.sj.common.DAL.model.TStreamService
 import com.bwsw.sj.common.rest.entities.module.{InputInstanceMetadata, InstanceMetadata, SpecificationData}
 import com.bwsw.sj.common.utils.EngineLiterals._
+import com.bwsw.sj.common.utils.ServiceLiterals
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable.ArrayBuffer
@@ -47,15 +48,18 @@ class InputInstanceValidator extends InstanceValidator {
 
     // 'checkpoint-interval' field
     if (inputInstanceMetadata.checkpointInterval <= 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Checkpoint-interval")
+      errors += createMessage("rest.validator.attribute.required", "Checkpoint-interval") + ". " +
+        createMessage("rest.validator.attribute.must.greater.than.zero", "Checkpoint-interval")
     }
 
     if (inputInstanceMetadata.lookupHistory < 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.or.equal.zero", "Lookup-history")
+      errors += createMessage("rest.validator.attribute.required", "Lookup-history") + ". " +
+        createMessage("rest.validator.attribute.must.greater.or.equal.zero", "Lookup-history")
     }
 
     if (inputInstanceMetadata.queueMaxSize < 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.or.equal.zero", "Queue-max-size")
+      errors += createMessage("rest.validator.attribute.required", "Queue-max-size") + ". " +
+        createMessage("rest.validator.attribute.must.greater.or.equal.zero", "Queue-max-size")
     }
 
     if (!defaultEvictionPolicies.contains(inputInstanceMetadata.defaultEvictionPolicy)) {
@@ -103,7 +107,7 @@ class InputInstanceValidator extends InstanceValidator {
       errors += createMessage("rest.validator.source_stream.must.one.of", "Output", outputTypes.mkString("[", ", ", "]"))
     }
 
-    if (outputStreams.nonEmpty) {
+    if (outputStreams.nonEmpty && !outputStreams.exists(_.streamType != ServiceLiterals.tstreamsType)) {
       val tStreamsServices = getStreamServices(outputStreams)
       if (tStreamsServices.size != 1) {
         errors += createMessage("rest.validator.t_stream.same.service")
@@ -113,19 +117,19 @@ class InputInstanceValidator extends InstanceValidator {
           errors += createMessage("rest.validator.service.must", "t-streams", "TstrQ")
         }
       }
+    }
 
-      // 'parallelism' field
-      Option(instance.parallelism) match {
-        case None =>
-          errors += createMessage("rest.validator.attribute.required", "Parallelism")
-        case Some(x) =>
-          x match {
-            case dig: Int =>
-              checkBackupNumber(instance, errors)
-            case _ =>
-              errors += createMessage("rest.validator.parameter.unknown.type", "parallelism", "digit")
-          }
-      }
+    // 'parallelism' field
+    Option(instance.parallelism) match {
+      case None =>
+        errors += createMessage("rest.validator.attribute.required", "Parallelism")
+      case Some(x) =>
+        x match {
+          case dig: Int =>
+            checkBackupNumber(instance, errors)
+          case _ =>
+            errors += createMessage("rest.validator.parameter.unknown.type", "parallelism", "digit")
+        }
     }
 
     errors

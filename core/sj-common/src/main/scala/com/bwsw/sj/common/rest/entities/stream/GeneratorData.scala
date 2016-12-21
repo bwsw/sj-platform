@@ -12,7 +12,7 @@ import scala.collection.mutable.ArrayBuffer
 
 case class GeneratorData(@JsonProperty("generator-type") generatorType: String,
                          service: String = null,
-                         @JsonProperty("instance-count") instanceCount: Int = 0) {
+                         @JsonProperty("instance-count") instanceCount: Int = Int.MinValue) {
 
   def asModelGenerator() = {
     val serviceDAO = ConnectionRepository.getServiceManager
@@ -40,7 +40,8 @@ case class GeneratorData(@JsonProperty("generator-type") generatorType: String,
             if (this.generatorType != GeneratorLiterals.localType) {
               //instacneCount
               if (this.instanceCount <= 0)
-                errors += s"Generator 'instance-count' must be a positive integer for a non-local generator type"
+                errors += "Generator 'instance-count' attribute is required for a non-local generator type" + ". " +
+                  s"Generator 'instance-count' must be a positive integer for a non-local generator type"
 
               //service
               Option(this.service) match {

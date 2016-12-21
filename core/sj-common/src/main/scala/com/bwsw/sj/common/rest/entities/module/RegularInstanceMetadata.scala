@@ -10,7 +10,7 @@ class RegularInstanceMetadata extends InstanceMetadata {
   var inputs: Array[String] = Array()
   var outputs: Array[String] = Array()
   @JsonProperty("checkpoint-mode") var checkpointMode: String = null
-  @JsonProperty("checkpoint-interval") var checkpointInterval: Long = 0L
+  @JsonProperty("checkpoint-interval") var checkpointInterval: Long = Long.MinValue
   @JsonProperty("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan()
   @JsonProperty("start-from") var startFrom: String = EngineLiterals.newestStartMode
   @JsonProperty("state-management") var stateManagement: String = EngineLiterals.noneStateMode

@@ -43,7 +43,8 @@ class RegularInstanceValidator extends InstanceValidator {
 
     // 'checkpoint-interval' field
     if (regularInstanceMetadata.checkpointInterval <= 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Checkpoint-interval")
+      errors += createMessage("rest.validator.attribute.required", "Checkpoint-interval") + ". " +
+        createMessage("rest.validator.attribute.must.greater.than.zero", "Checkpoint-interval")
     }
 
     // 'event-wait-time' field
@@ -149,8 +150,7 @@ class RegularInstanceValidator extends InstanceValidator {
 
     // 'parallelism' field
     val partitions = getStreamsPartitions(inputStreams)
-    val minPartitionCount = if (partitions.nonEmpty) partitions.values.min else 0
-    errors ++= checkParallelism(instance.parallelism, minPartitionCount)
+    errors ++= checkParallelism(instance.parallelism, partitions.values.min)
 
     val allStreams = inputStreams.union(outputStreams)
     val tStreamsServices = getStreamServices(allStreams.filter { s =>

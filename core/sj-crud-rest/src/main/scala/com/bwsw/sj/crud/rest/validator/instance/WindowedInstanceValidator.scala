@@ -128,16 +128,12 @@ class WindowedInstanceValidator extends InstanceValidator {
           case None =>
             errors += createMessage("rest.validator.attribute.required", "Type-name' of 'batch-fill-type")
         }
-        //'value' field
-        Option(batchFillType.value) match {
-          case Some(x) =>
-            if (x <= 0) {
-              errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Value' of 'batch-fill-type")
-            }
-          case None =>
-            errors += createMessage("rest.validator.attribute.required", "Value' of 'batch-fill-type")
-        }
 
+        //'value' field
+        if (batchFillType.value <= 0) {
+          errors += createMessage("rest.validator.attribute.required", "Value' of 'batch-fill-type") + ". " +
+            createMessage("rest.validator.attribute.must.greater.than.zero", "Value' of 'batch-fill-type")
+        }
     }
 
     // 'start-from' field
