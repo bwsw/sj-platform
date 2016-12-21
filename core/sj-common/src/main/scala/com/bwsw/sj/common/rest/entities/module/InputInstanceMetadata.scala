@@ -15,8 +15,8 @@ class InputInstanceMetadata extends InstanceMetadata {
   @JsonProperty("queue-max-size") var queueMaxSize: Int = Int.MinValue
   @JsonProperty("default-eviction-policy") var defaultEvictionPolicy: String = EngineLiterals.noneDefaultEvictionPolicy
   @JsonProperty("eviction-policy") var evictionPolicy: String = EngineLiterals.fixTimeEvictionPolicy
-  @JsonProperty("backup-count") var backupCount: Int = 0
-  @JsonProperty("async-backup-count") var asyncBackupCount: Int = 0
+  @JsonProperty("backup-count") var backupCount: Int = Int.MinValue
+  @JsonProperty("async-backup-count") var asyncBackupCount: Int = Int.MinValue
   var tasks: Map[String, InputTask] = Map()
 
   override def asModelInstance() = {

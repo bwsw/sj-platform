@@ -23,12 +23,9 @@ class TStreamSjStreamData() extends SjStreamData() {
 
 
     //partitions
-    if (this.partitions == Int.MinValue)
-      errors += s"'Partitions' is required"
-    else {
-      if (this.partitions <= 0)
-        errors += s"'Partitions' must be a positive integer"
-    }
+    if (this.partitions <= 0)
+      errors += "'Partitions' attribute is required" + ". " +
+        s"'Partitions' must be a positive integer"
 
     Option(this.service) match {
       case None =>

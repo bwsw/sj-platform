@@ -43,7 +43,8 @@ class RegularInstanceValidator extends InstanceValidator {
 
     // 'checkpoint-interval' field
     if (regularInstanceMetadata.checkpointInterval <= 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Checkpoint-interval")
+      errors += createMessage("rest.validator.attribute.required", "Checkpoint-interval") + ". " +
+        createMessage("rest.validator.attribute.must.greater.than.zero", "Checkpoint-interval")
     }
 
     // 'event-wait-time' field

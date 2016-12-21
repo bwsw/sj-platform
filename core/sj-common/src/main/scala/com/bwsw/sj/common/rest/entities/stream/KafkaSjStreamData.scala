@@ -27,12 +27,10 @@ class KafkaSjStreamData() extends SjStreamData() {
     errors ++= super.validateGeneralFields()
 
     //partitions
-    if (this.partitions == Int.MinValue)
-      errors += s"'Partitions' is required"
-    else {
-      if (this.partitions <= 0)
-        errors += s"'Partitions' must be a positive integer"
-    }
+    if (this.partitions <= 0)
+      errors += "'Partitions' attribute is required" + ". " +
+        s"'Partitions' must be a positive integer"
+
 
     Option(this.service) match {
       case None =>
@@ -58,13 +56,11 @@ class KafkaSjStreamData() extends SjStreamData() {
     }
 
     //replicationFactor
-    if (this.replicationFactor == Int.MinValue)
-      errors += s"'Replication-factor' is required"
-    else {
-      if (this.replicationFactor <= 0) {
-        errors += s"'Replication-factor' must be a positive integer"
-      }
+    if (this.replicationFactor <= 0) {
+      errors += "'Replication-factor' attribute is required" + ". " +
+        s"'Replication-factor' must be a positive integer"
     }
+
 
     errors
   }
