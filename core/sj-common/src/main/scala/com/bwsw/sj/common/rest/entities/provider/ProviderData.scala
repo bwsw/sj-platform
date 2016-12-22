@@ -5,6 +5,7 @@ import java.net.{URI, URISyntaxException}
 import com.bwsw.sj.common.DAL.model.Provider
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils
+import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.common.utils.ProviderLiterals._
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty}
 
@@ -16,7 +17,7 @@ case class ProviderData(name: String,
                         @JsonProperty("type") providerType: String,
                         hosts: Array[String],
                         description: String = "No description"
-                       ) extends ValidationUtils {
+                       ) extends ValidationUtils with MessageResourceUtils {
   @JsonIgnore
   def asModelProvider() = {
     val provider = new Provider(

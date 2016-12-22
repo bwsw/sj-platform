@@ -3,7 +3,7 @@ package com.bwsw.sj.common.rest.entities.stream
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils
-import com.bwsw.sj.common.utils.StreamLiterals
+import com.bwsw.sj.common.utils.{MessageResourceUtils, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes, JsonTypeInfo}
 
@@ -16,7 +16,7 @@ import scala.collection.mutable.ArrayBuffer
   new Type(value = classOf[ESSjStreamData], name = StreamLiterals.esOutputType),
   new Type(value = classOf[JDBCSjStreamData], name = StreamLiterals.jdbcOutputType)
 ))
-class SjStreamData() extends ValidationUtils {
+class SjStreamData() extends ValidationUtils with MessageResourceUtils {
   @JsonProperty("stream-type") var streamType: String = null
   var name: String = null
   var description: String = "No description"

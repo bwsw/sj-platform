@@ -3,7 +3,7 @@ package com.bwsw.sj.common.rest.entities.service
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils
-import com.bwsw.sj.common.utils.ServiceLiterals
+import com.bwsw.sj.common.utils.{MessageResourceUtils, ServiceLiterals}
 import com.bwsw.sj.common.utils.ServiceLiterals._
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes, JsonTypeInfo}
@@ -21,7 +21,7 @@ import scala.collection.mutable.ArrayBuffer
   new Type(value = classOf[ArspkDBServiceData], name = ServiceLiterals.aerospikeType),
   new Type(value = classOf[JDBCServiceData], name = ServiceLiterals.jdbcType)
 ))
-class ServiceData() extends ValidationUtils {
+class ServiceData() extends ValidationUtils with MessageResourceUtils {
   @JsonProperty("type") var serviceType: String = _
   var name: String = _
   var description: String = "No description"

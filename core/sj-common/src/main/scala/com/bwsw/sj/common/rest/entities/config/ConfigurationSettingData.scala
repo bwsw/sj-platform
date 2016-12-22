@@ -5,12 +5,13 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.rest.utils.ValidationUtils
+import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.tstreams.env.TSF_Dictionary
 import com.fasterxml.jackson.annotation.JsonIgnore
 
 import scala.collection.mutable.ArrayBuffer
 
-case class ConfigurationSettingData(name: String, value: String) extends ValidationUtils {
+case class ConfigurationSettingData(name: String, value: String) extends ValidationUtils with MessageResourceUtils {
   @JsonIgnore
   def asModelConfigurationSetting(domain: String) = {
     val configurationSetting = new ConfigurationSetting(

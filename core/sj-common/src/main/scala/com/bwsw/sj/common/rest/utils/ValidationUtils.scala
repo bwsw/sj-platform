@@ -1,12 +1,11 @@
 package com.bwsw.sj.common.rest.utils
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.common.utils.ServiceLiterals._
 
 import scala.collection.mutable.ArrayBuffer
 
-trait ValidationUtils extends MessageResourceUtils {
+trait ValidationUtils {
   private val providerDAO = ConnectionRepository.getProviderService
 
   def validateName(name: String) = {
