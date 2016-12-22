@@ -115,8 +115,4 @@ case class ProviderData(name: String,
 
     errors
   }
-
-  private def normalizeName(name: String) = {
-    name.replace('\\', '/')
-  }
 }

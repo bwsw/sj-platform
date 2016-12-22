@@ -1,10 +1,11 @@
 package com.bwsw.sj.common.rest.entities.stream
 
-import java.net.URI
+import java.net.{URI, URISyntaxException}
 
 import com.bwsw.sj.common.DAL.model.Generator
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{ServiceLiterals, GeneratorLiterals}
+import com.bwsw.sj.common.rest.utils.ValidationUtils
+import com.bwsw.sj.common.utils.{GeneratorLiterals, ServiceLiterals}
 import com.bwsw.sj.common.utils.GeneratorLiterals._
 import com.fasterxml.jackson.annotation.JsonProperty
 
@@ -12,7 +13,7 @@ import scala.collection.mutable.ArrayBuffer
 
 case class GeneratorData(@JsonProperty("generator-type") generatorType: String,
                          service: String = null,
-                         @JsonProperty("instance-count") instanceCount: Int = Int.MinValue) {
+                         @JsonProperty("instance-count") instanceCount: Int = Int.MinValue) extends ValidationUtils {
 
   def asModelGenerator() = {
     val serviceDAO = ConnectionRepository.getServiceManager
@@ -23,7 +24,6 @@ case class GeneratorData(@JsonProperty("generator-type") generatorType: String,
   }
 
   def validate() = {
-    val serviceDAO = ConnectionRepository.getServiceManager
     val errors = new ArrayBuffer[String]()
 
     Option(this.generatorType) match {
@@ -52,31 +52,48 @@ case class GeneratorData(@JsonProperty("generator-type") generatorType: String,
                     errors += "Generator 'service' is required for a non-local generator type"
                   }
                   else {
-                    var serviceName: String = ""
-                    if (s contains "://") {
-                      val generatorUrl = new URI(s)
-                      if (!generatorUrl.getScheme.equals("service-zk")) {
-                        errors += s"Generator 'service' uri protocol prefix must be 'service-zk://'. Or use a plain service name instead"
-                      } else {
-                        serviceName = generatorUrl.getAuthority
-                      }
-                    } else {
-                      serviceName = this.service
-                    }
-
-                    val serviceObj = serviceDAO.get(serviceName)
-                    if (serviceObj.isEmpty) {
-                      errors += s"Generator 'service' does not exist"
-                    } else {
-                      if (serviceObj.get.serviceType != ServiceLiterals.zookeeperType) {
-                        errors += s"Provided generator service '$serviceName' is not of type ${ServiceLiterals.zookeeperType}"
-                      }
-                    }
+                    errors ++= validateService(s)
                   }
               }
             }
           }
         }
+    }
+
+    errors
+  }
+
+  private def validateService(service: String) = {
+    val serviceDAO = ConnectionRepository.getServiceManager
+    val errors = new ArrayBuffer[String]()
+    try {
+      val uri = new URI(normalizeName(service))
+      var serviceName: String = ""
+      if (uri.getScheme != null) {
+        if (!uri.getScheme.equals("service-zk")) {
+          errors += s"Generator 'service' uri protocol prefix must be 'service-zk://'. Or use a plain service name instead"
+        } else {
+          serviceName = uri.getAuthority
+        }
+      } else {
+        if (uri.toString.contains('/')) {
+          errors += s"Generator 'service' uri protocol prefix must be 'service-zk://'. Or use a plain service name instead"
+        } else {
+          serviceName = this.service
+        }
+      }
+
+      val serviceObj = serviceDAO.get(serviceName)
+      if (serviceObj.isEmpty) {
+        errors += s"Generator 'service' does not exist"
+      } else {
+        if (serviceObj.get.serviceType != ServiceLiterals.zookeeperType) {
+          errors += s"Provided generator service '$serviceName' is not of type ${ServiceLiterals.zookeeperType}"
+        }
+      }
+    } catch {
+      case _: URISyntaxException =>
+        errors += s"Generator 'service' uri protocol prefix must be 'service-zk://'. Or use a plain service name instead"
     }
 
     errors

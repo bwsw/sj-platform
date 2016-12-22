@@ -43,4 +43,8 @@ trait ValidationUtils {
   def validateNamespace(namespace: String) = {
     namespace.matches( """^([a-z][a-z0-9_]*)$""")
   }
+
+  def normalizeName(name: String) = {
+    name.replace('\\', '/')
+  }
 }
