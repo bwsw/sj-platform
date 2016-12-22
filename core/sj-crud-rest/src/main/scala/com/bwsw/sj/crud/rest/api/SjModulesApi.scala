@@ -21,11 +21,12 @@ import com.bwsw.sj.crud.rest.validator.instance.InstanceValidator
 import org.apache.commons.io.FileUtils
 
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 trait SjModulesApi extends Directives with SjCrudValidator {
 
-  private var previousFileName: Option[String] = None
+  private val previousFilesNames: ListBuffer[String] = ListBuffer[String]()
 
   import EngineLiterals._
 
@@ -259,9 +260,9 @@ trait SjModulesApi extends Directives with SjCrudValidator {
   }
 
   private val gettingModule = (filename: String) => get {
-    deletePreviousFile()
+    deletePreviousFiles()
     val jarFile = storage.get(filename, RestLiterals.tmpDirectory + filename)
-    previousFileName = Some(jarFile.getAbsolutePath)
+    previousFilesNames.append(jarFile.getAbsolutePath)
     val source = FileIO.fromPath(Paths.get(jarFile.getAbsolutePath))
     complete(HttpResponse(
       headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> filename))),
@@ -269,11 +270,11 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     ))
   }
 
-  private def deletePreviousFile() = {
-    if (previousFileName.isDefined) {
-      val file = new File(previousFileName.get)
-        if (file.exists()) file.delete()
-    }
+  private def deletePreviousFiles() = {
+    previousFilesNames.foreach(filename => {
+      val file = new File(filename)
+      if (file.exists()) file.delete()
+    })
   }
 
   private val deletingModule = (moduleType: String,

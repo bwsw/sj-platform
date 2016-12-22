@@ -16,7 +16,6 @@ import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.crud.rest.RestLiterals
 import com.bwsw.sj.crud.rest.exceptions.CustomJarNotFound
-import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import org.apache.commons.io.FileUtils
 
@@ -48,13 +47,13 @@ trait SjCustomApi extends Directives with SjCrudValidator {
     fileOutput.close()
   }
 
-  private def deletePreviousFile() = {
+  private def deletePreviousFiles() = {
     previousFilesNames.foreach(filename => {
       val file = new File(filename)
       if (file.exists()) file.delete()
     })
-
   }
+
   //todo добавить проверку на существование не только по имени файла, но и по имени+версии из спецификации
   val customApi = {
     pathPrefix("custom") {
@@ -63,7 +62,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
           pathEndOrSingleSlash {
             get {
               if (storage.exists(name)) {
-                deletePreviousFile()
+                deletePreviousFiles()
                 val jarFile = storage.get(name, RestLiterals.tmpDirectory + name)
                 previousFilesNames.append(jarFile.getAbsolutePath)
                 val source = FileIO.fromPath(Paths.get(jarFile.getAbsolutePath))
@@ -85,7 +84,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                 }
                 val filename = fileMetadatas.head.filename
                 get {
-                  deletePreviousFile()
+                  deletePreviousFiles()
                   val jarFile = storage.get(filename, RestLiterals.tmpDirectory + filename)
                   previousFilesNames.append(jarFile.getAbsolutePath)
                   val source = FileIO.fromPath(Paths.get(jarFile.getAbsolutePath))
@@ -194,7 +193,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
               pathEndOrSingleSlash {
                 get {
                   if (storage.exists(filename)) {
-                    deletePreviousFile()
+                    deletePreviousFiles()
                     val jarFile = storage.get(filename, RestLiterals.tmpDirectory + filename)
                     previousFilesNames.append(jarFile.getAbsolutePath)
                     val source = FileIO.fromPath(Paths.get(jarFile.getAbsolutePath))
