@@ -33,7 +33,7 @@ import scala.collection.JavaConverters._
 object BenchmarkDataFactory {
 
 
-  private var txnFieldForJdbc: String = new JdbcEnvelope().getTxnName
+  private val txnFieldForJdbc: String = JdbcEnvelope.getTxnName
   val metadataProviderName: String = "test-metprov-1"
   val cassandraTestKeyspace: String = "bench"
   val dataProviderName: String = "test-dataprov-1"

@@ -28,6 +28,13 @@ class JdbcEnvelope extends Envelope {
     * Unique identifier for stream transaction.
     */
   var txn: String = ""
+}
 
+
+object JdbcEnvelope extends Envelope {
+  /**
+    * Return txn field name.
+    * @return
+    */
   def getTxnName="txn"
 }

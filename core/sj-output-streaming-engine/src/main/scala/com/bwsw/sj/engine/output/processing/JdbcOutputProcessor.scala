@@ -25,7 +25,7 @@ class JdbcOutputProcessor(outputStream: SjStream,
       setPassword(jdbcService.provider.password).
       setTable(outputStream.name).
       setDatabase(jdbcService.database).
-      setTxnField(new JdbcEnvelope().getTxnName).
+      setTxnField(JdbcEnvelope.getTxnName).
       build()
     client
   }
