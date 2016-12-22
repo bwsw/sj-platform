@@ -36,20 +36,19 @@ class KfkQServiceData() extends ServiceData() {
     // 'zkProvider' field
     Option(this.zkProvider) match {
       case None =>
-        errors += "'Zk-provider' is required"
+        errors += createMessage("entity.error.attribute.required", "Zk-provider")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += "'Zk-provider' is required"
+          errors += createMessage("entity.error.attribute.required", "Zk-provider")
         }
         else {
           val zkProviderObj = providerDAO.get(x)
           zkProviderObj match {
             case None =>
-              errors += s"Zookeeper provider '$x' does not exist"
+              errors += createMessage("entity.error.doesnot.exist", "Zookeeper provider", x)
             case Some(zkProviderFormDB) =>
               if (zkProviderFormDB.providerType != ProviderLiterals.zookeeperType) {
-                errors += s"'Zk-provider' must be of type '${ProviderLiterals.zookeeperType}' " +
-                  s"('${zkProviderFormDB.providerType}' is given instead)"
+                errors += createMessage("entity.error.must.one.type.other.given", "Zk-provider", ProviderLiterals.zookeeperType, zkProviderFormDB.providerType)
               }
           }
         }
@@ -58,15 +57,14 @@ class KfkQServiceData() extends ServiceData() {
     // 'zkNamespace' field
     Option(this.zkNamespace) match {
       case None =>
-        errors += "'Zk-namespace' is required"
+        errors += createMessage("entity.error.attribute.required", "Zk-namespace")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += "'Zk-namespace' is required"
+          errors += createMessage("entity.error.attribute.required", "Zk-namespace")
         }
         else {
           if (!validateNamespace(x)) {
-            errors += s"Service has incorrect 'zk-namespace': '$x'. " +
-              s"Name must contain digits, lowercase letters or underscore. First symbol must be a letter"
+            errors += createMessage("entity.error.incorrect.service.namespace", "zk-namespace", x)
           }
         }
     }

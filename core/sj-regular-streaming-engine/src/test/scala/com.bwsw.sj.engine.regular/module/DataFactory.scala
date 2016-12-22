@@ -226,7 +226,7 @@ object DataFactory {
 
     val tService = serviceManager.get("tstream-test-service").get
 
-    val s1 = new TStreamSjStream("test-input-tstream" + suffix, "test-input-tstream", partitions, tService, StreamLiterals.tStreamType, Array("input"), localGenerator)
+    val s1 = new TStreamSjStream("test-input-tstream" + suffix, "test-input-tstream", partitions, tService, StreamLiterals.tstreamType, Array("input"), localGenerator)
     sjStreamService.save(s1)
 
     val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
@@ -247,7 +247,7 @@ object DataFactory {
 
     val tService = serviceManager.get("tstream-test-service").get
 
-    val s2 = new TStreamSjStream("test-output-tstream" + suffix, "test-output-tstream", partitions, tService, StreamLiterals.tStreamType, Array("output", "some tags"), localGenerator)
+    val s2 = new TStreamSjStream("test-output-tstream" + suffix, "test-output-tstream", partitions, tService, StreamLiterals.tstreamType, Array("output", "some tags"), localGenerator)
     sjStreamService.save(s2)
 
     val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)

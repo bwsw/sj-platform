@@ -94,7 +94,7 @@ class InstanceMetadata {
     val streams = streamsDAO.getAll.filter(s => streamNames.contains(s.name))
     Array(streams.map { stream =>
       stream.streamType match {
-        case StreamLiterals.`tStreamType` =>
+        case StreamLiterals.`tstreamType` =>
           stream.asInstanceOf[TStreamSjStream].partitions
         case StreamLiterals.`kafkaStreamType` =>
           stream.asInstanceOf[KafkaSjStream].partitions
@@ -149,7 +149,7 @@ class InstanceMetadata {
   private def getPartitions(streamName: String, streamDAO: GenericMongoService[SjStream]) = {
     val stream = streamDAO.get(streamName).get
     val partitions = stream.streamType match {
-      case StreamLiterals.`tStreamType` =>
+      case StreamLiterals.`tstreamType` =>
         stream.asInstanceOf[TStreamSjStream].partitions
       case StreamLiterals.`kafkaStreamType` =>
         stream.asInstanceOf[KafkaSjStream].partitions

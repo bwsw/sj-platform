@@ -37,7 +37,7 @@ class RetrievableTStreamTaskInput(manager: CommonTaskManager,
     val inputs = manager.inputs
     val offset = chooseOffset(instance.startFrom)
 
-    val consumers = inputs.filter(x => x._1.streamType == StreamLiterals.tStreamType)
+    val consumers = inputs.filter(x => x._1.streamType == StreamLiterals.tstreamType)
       .map(x => (x._1.asInstanceOf[TStreamSjStream], x._2.toList))
       .map(x => manager.createConsumer(x._1, x._2, offset))
       .map(x => (x.name, x)).toMap

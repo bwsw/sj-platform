@@ -10,7 +10,7 @@ class TStreamEnvelope() extends Envelope() {
   var id: Long = 0
   var consumerName: String = null
   var data: List[Array[Byte]] = List()
-  streamType = StreamLiterals.tStreamType
+  streamType = StreamLiterals.tstreamType
 }
 
 

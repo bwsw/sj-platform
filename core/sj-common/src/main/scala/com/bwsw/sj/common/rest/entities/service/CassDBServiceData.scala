@@ -32,15 +32,14 @@ class CassDBServiceData() extends ServiceData() {
     // 'keyspace' field
     Option(this.keyspace) match {
       case None =>
-        errors += "'Keyspace' is required"
+        errors += createMessage("entity.error.attribute.required", "Keyspace")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += s"'Keyspace' is required"
+          errors += createMessage("entity.error.attribute.required", "Keyspace")
         }
         else {
           if (!validateNamespace(x)) {
-            errors += s"Service has incorrect 'keyspace': '$x'. " +
-              s"Name must contain digits, lowercase letters or underscore. First symbol must be a letter"
+            errors += createMessage("entity.error.incorrect.service.namespace", "keyspace", x)
           }
         }
     }

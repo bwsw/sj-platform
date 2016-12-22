@@ -32,15 +32,14 @@ class ZKCoordServiceData() extends ServiceData() {
     // 'namespace' field
     Option(this.namespace) match {
       case None =>
-        errors += "'Namespace' is required"
+        errors += createMessage("entity.error.attribute.required", "Namespace")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += "'Namespace' is required"
+          errors += createMessage("entity.error.attribute.required", "Namespace")
         }
         else {
           if (!validateNamespace(x)) {
-            errors += s"Service has incorrect 'namespace': '$x'. " +
-              s"Name must contain digits, lowercase letters or underscore. First symbol must be a letter"
+            errors += createMessage("entity.error.incorrect.service.namespace", "namespace", x)
           }
         }
     }

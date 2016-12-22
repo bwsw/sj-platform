@@ -45,7 +45,7 @@ class RegularInstanceMetadata extends InstanceMetadata {
 
     val inputStreams = getStreams(clearInputs)
     val outputStreams = this.outputs
-    val streams = inputStreams.filter(s => s.streamType.equals(tStreamType)).map(_.name).union(outputStreams)
+    val streams = inputStreams.filter(s => s.streamType.equals(tstreamType)).map(_.name).union(outputStreams)
     fillStages(streams)
   }
 

@@ -34,14 +34,14 @@ class JDBCServiceData() extends ServiceData() {
     // 'driver' field
     Option(this.driver) match {
       case None =>
-        errors += "'Driver' is required"
+        errors += createMessage("entity.error.attribute.required", "Driver")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += s"'Driver' is required"
+          errors += createMessage("entity.error.attribute.required", "Driver")
         }
         else {
           if (!JdbcLiterals.validDrivers.contains(x)) {
-            errors += s"Existing drivers: ${JdbcLiterals.validDrivers}"
+            errors += createMessage("entity.error.unknown.type.must.one.of", x, "driver", JdbcLiterals.validDrivers.mkString("[", ", ", "]"))
           }
         }
     }
@@ -49,10 +49,10 @@ class JDBCServiceData() extends ServiceData() {
     // 'database' field
     Option(this.database) match {
       case None =>
-        errors += "'Database' is required"
+        errors += createMessage("entity.error.attribute.required", "Database")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += s"'Database' is required"
+          errors += createMessage("entity.error.attribute.required", "Database")
         } else {
           val providerDAO = ConnectionRepository.getProviderService
           val provider = providerDAO.get(this.provider).get
@@ -71,7 +71,7 @@ class JDBCServiceData() extends ServiceData() {
             case e:Exception =>
           }
           if (database_not_exists) {
-            errors += s"Database '$x' doesn't exist."
+            errors += createMessage("entity.error.doesnot.exist", "Database", x)
           }
         }
     }

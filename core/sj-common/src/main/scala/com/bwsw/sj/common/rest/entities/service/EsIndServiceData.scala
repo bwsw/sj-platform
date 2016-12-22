@@ -35,15 +35,14 @@ class EsIndServiceData() extends ServiceData() {
     // 'index' field
     Option(this.index) match {
       case None =>
-        errors += "'Index' is required"
+        errors += createMessage("entity.error.attribute.required", "Index")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += s"'Index' is required"
+          errors += createMessage("entity.error.attribute.required", "Index")
         }
         else {
           if (!validateNamespace(x)) {
-            errors += s"Service has incorrect 'index': '$x'. " +
-              s"Name must contain digits, lowercase letters or underscore. First symbol must be a letter"
+            errors += createMessage("entity.error.incorrect.service.namespace", "index", x)
           }
         }
     }

@@ -28,28 +28,30 @@ class KafkaSjStreamData() extends SjStreamData() {
 
     //partitions
     if (this.partitions <= 0)
-      errors += "'Partitions' attribute is required" + ". " +
-        s"'Partitions' must be a positive integer"
+      errors += createMessage("entity.error.attribute.required", "Partitions") + ". " +
+        createMessage("entity.error.attribute.must.be.positive.integer", "Partitions")
 
 
     Option(this.service) match {
       case None =>
-        errors += s"'Service' is required"
+        errors += createMessage("entity.error.attribute.required", "Service")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += s"'Service' is required"
+          errors += createMessage("entity.error.attribute.required", "Service")
         }
         else {
           val serviceObj = serviceDAO.get(x)
           serviceObj match {
             case None =>
-              errors += s"Service '$x' does not exist"
-            case Some(modelService) =>
-              if (modelService.serviceType != ServiceLiterals.kafkaType) {
-                errors += s"Service for '${StreamLiterals.kafkaStreamType}' stream " +
-                  s"must be of '${ServiceLiterals.kafkaType}' type ('${modelService.serviceType}' is given instead)"
+              errors += createMessage("entity.error.doesnot.exist", "Service", x)
+            case Some(someService) =>
+              if (someService.serviceType != ServiceLiterals.kafkaType) {
+                errors += createMessage("entity.error.must.one.type.other.given",
+                  s"Service for '${StreamLiterals.kafkaStreamType}' stream",
+                  ServiceLiterals.kafkaType,
+                  someService.serviceType)
               } else {
-                if (errors.isEmpty) errors ++= checkStreamPartitionsOnConsistency(modelService.asInstanceOf[KafkaService])
+                if (errors.isEmpty) errors ++= checkStreamPartitionsOnConsistency(someService.asInstanceOf[KafkaService])
               }
           }
         }
@@ -57,8 +59,8 @@ class KafkaSjStreamData() extends SjStreamData() {
 
     //replicationFactor
     if (this.replicationFactor <= 0) {
-      errors += "'Replication-factor' attribute is required" + ". " +
-        s"'Replication-factor' must be a positive integer"
+      errors += createMessage("entity.error.attribute.required", "Replication-factor") + ". " +
+        createMessage("entity.error.attribute.must.be.positive.integer", "Replication-factor")
     }
 
 
@@ -79,8 +81,7 @@ class KafkaSjStreamData() extends SjStreamData() {
     val zkUtils = createZkUtils()
     val topicMetadata = AdminUtils.fetchTopicMetadataFromZk(this.name, zkUtils)
     if (!topicMetadata.partitionMetadata().isEmpty && topicMetadata.partitionMetadata().size != this.partitions) {
-      errors += s"Partitions count of stream '${this.name}' mismatch. Kafka stream partitions (${this.partitions}) " +
-        s"mismatch partitions of exists kafka topic (${topicMetadata.partitionMetadata().size})"
+      errors += createMessage("entity.error.mismatch.partitions", this.name, s"${this.partitions}", s"${topicMetadata.partitionMetadata().size}")
     }
 
     errors

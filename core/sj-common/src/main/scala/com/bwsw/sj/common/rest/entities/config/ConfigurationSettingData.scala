@@ -2,9 +2,9 @@ package com.bwsw.sj.common.rest.entities.config
 
 import com.bwsw.sj.common.DAL.model.ConfigurationSetting
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
+import com.bwsw.sj.common.config.ConfigLiterals
+import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.rest.utils.ValidationUtils
-import ConfigurationSettingsUtils._
 import com.bwsw.tstreams.env.TSF_Dictionary
 import com.fasterxml.jackson.annotation.JsonIgnore
 
@@ -30,24 +30,22 @@ case class ConfigurationSettingData(name: String, value: String) extends Validat
     // 'name' field
     Option(this.name) match {
       case None =>
-        errors += s"'Name' is required"
+        errors += createMessage("entity.error.attribute.required", "Name")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += "'Name' is required"
+          errors += createMessage("entity.error.attribute.required", "Name")
         }
         else {
           if (configService.get(x).isDefined) {
-            errors += s"Configuration setting with name '$x' already exists"
+            errors += createMessage("entity.error.already.exists", "Config setting", x)
           }
 
-        if (!validateConfigSettingName(x)) {
-          errors += s"Configuration setting has incorrect name: $x. " +
-            s"Name of configuration setting must contain lowercase letters, hyphens or periods. First symbol must be a letter"
-        }
+          if (!validateConfigSettingName(x)) {
+            errors += createMessage("entity.error.incorrect.name", "Config setting", x, "config setting")
+          }
 
           if (domain == ConfigLiterals.tstreamsDomain && !validateTstreamProperty()) {
-            errors += s"Configuration setting has incorrect name: $x. " +
-              s"T-streams domain configuration setting must be only for consumer or producer"
+            errors += createMessage("entity.error.incorrect.name.tstreams.domain", "Config setting", x)
           }
         }
     }
@@ -55,10 +53,10 @@ case class ConfigurationSettingData(name: String, value: String) extends Validat
     // 'value' field
     Option(this.value) match {
       case None =>
-        errors += s"'Value' is required"
+        errors += createMessage("entity.error.attribute.required", "Value")
       case Some(x) =>
         if (x.isEmpty)
-          errors += s"'Value' is required"
+          errors += createMessage("entity.error.attribute.required", "Value")
     }
 
     errors

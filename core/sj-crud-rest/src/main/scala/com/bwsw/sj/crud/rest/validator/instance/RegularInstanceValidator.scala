@@ -154,7 +154,7 @@ class RegularInstanceValidator extends InstanceValidator {
 
     val allStreams = inputStreams.union(outputStreams)
     val tStreamsServices = getStreamServices(allStreams.filter { s =>
-      s.streamType.equals(tStreamType)
+      s.streamType.equals(tstreamType)
     })
     if (tStreamsServices.size != 1) {
       errors += createMessage("rest.validator.t_stream.same.service")

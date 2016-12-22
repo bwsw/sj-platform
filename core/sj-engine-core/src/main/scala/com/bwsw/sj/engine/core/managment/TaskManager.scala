@@ -73,7 +73,7 @@ abstract class TaskManager() {
   private def getAuxiliaryTStream() = {
     val inputs = instance.getInputsWithoutStreamMode()
     val streams = inputs.union(instance.outputs)
-    val sjStream = streams.flatMap(s => streamDAO.get(s)).filter(s => s.streamType.equals(tStreamType)).head
+    val sjStream = streams.flatMap(s => streamDAO.get(s)).filter(s => s.streamType.equals(tstreamType)).head
 
     sjStream
   }
@@ -236,7 +236,7 @@ abstract class TaskManager() {
       description,
       partitions,
       auxiliaryTStreamService,
-      tStreamType,
+      tstreamType,
       tags,
       new Generator(GeneratorLiterals.localType)
     )

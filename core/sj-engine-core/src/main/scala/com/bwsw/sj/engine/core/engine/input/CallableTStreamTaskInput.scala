@@ -38,7 +38,7 @@ class CallableTStreamTaskInput(manager: TaskManager,
     val offset = getOffset()
     val callback = new ConsumerCallback(blockingQueue)
 
-    val consumers = inputs.filter(x => x._1.streamType == StreamLiterals.tStreamType)
+    val consumers = inputs.filter(x => x._1.streamType == StreamLiterals.tstreamType)
       .map(x => (x._1.asInstanceOf[TStreamSjStream], x._2.toList))
       .map(x => manager.createSubscribingConsumer(x._1, x._2, offset, callback))
       .map(x => (x.name, x)).toMap

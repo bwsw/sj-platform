@@ -31,7 +31,7 @@ private[instance] trait InstanceManager extends InstanceMarathonManager {
   protected def getStreamsHavingGenerator(instance: Instance) = {
     val streams = getInstanceStreams(instance)
     val sjStreamsHavingGenerator = streams.flatMap(streamDAO.get)
-      .filter(_.streamType == StreamLiterals.tStreamType)
+      .filter(_.streamType == StreamLiterals.tstreamType)
       .map(_.asInstanceOf[TStreamSjStream])
       .filter(_.generator.generatorType != GeneratorLiterals.localType)
 

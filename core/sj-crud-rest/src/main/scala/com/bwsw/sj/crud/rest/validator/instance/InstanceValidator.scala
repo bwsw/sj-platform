@@ -125,7 +125,7 @@ abstract class InstanceValidator extends ValidationUtils with CompletionUtils {
   protected def getStreamsPartitions(streams: Seq[SjStream]): Map[String, Int] = {
     Map(streams.map { stream =>
       stream.streamType match {
-        case StreamLiterals.`tStreamType` =>
+        case StreamLiterals.`tstreamType` =>
           stream.name -> stream.asInstanceOf[TStreamSjStream].partitions
         case StreamLiterals.`kafkaStreamType` =>
           stream.name -> stream.asInstanceOf[KafkaSjStream].partitions

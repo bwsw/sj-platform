@@ -16,7 +16,7 @@ case class ProviderData(name: String,
                         @JsonProperty("type") providerType: String,
                         hosts: Array[String],
                         description: String = "No description"
-                         ) extends ValidationUtils {
+                       ) extends ValidationUtils {
   @JsonIgnore
   def asModelProvider() = {
     val provider = new Provider(
@@ -39,19 +39,18 @@ case class ProviderData(name: String,
     // 'name' field
     Option(this.name) match {
       case None =>
-        errors += s"'Name' is required"
+        errors += createMessage("entity.error.attribute.required", "Name")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += s"'Name' is required"
+          errors += createMessage("entity.error.attribute.required", "Name")
         }
         else {
           if (!validateName(x)) {
-            errors += s"Provider has incorrect name: '$x'. " +
-              s"Name of provider must contain digits, lowercase letters or hyphens. First symbol must be a letter"
+            errors += createMessage("entity.error.incorrect.name", "Provider", x, "provider")
           }
 
           if (providerDAO.get(x).isDefined) {
-            errors += s"Provider with name '$x' already exists"
+            errors += createMessage("entity.error.already.exists", "Provider", x)
           }
         }
     }
@@ -59,14 +58,14 @@ case class ProviderData(name: String,
     // 'providerType field
     Option(this.providerType) match {
       case None =>
-        errors += s"'Type' is required"
+        errors += createMessage("entity.error.attribute.required", "Type")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += s"'Type' is required"
+          errors += createMessage("entity.error.attribute.required", "Type")
         }
         else {
           if (!providerTypes.contains(x)) {
-            errors += s"Unknown type '$x' provided. Must be one of: ${providerTypes.mkString("[", ", ", "]")}"
+            errors += createMessage("entity.error.unknown.type.must.one.of", x, "provider", providerTypes.mkString("[", ", ", "]"))
           }
         }
     }
@@ -74,13 +73,13 @@ case class ProviderData(name: String,
     //'hosts' field
     Option(this.hosts) match {
       case None =>
-        errors += s"'Hosts' is required"
+        errors += createMessage("entity.error.attribute.required", "Hosts")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += s"'Hosts' must contain at least one host"
+          errors += createMessage("entity.error.hosts.should.be.non.empty")
         } else {
           if (x.head.isEmpty) {
-            errors += s"'Hosts' is required"
+            errors += createMessage("entity.error.attribute.required", "Hosts")
           }
           else {
             for (host <- this.hosts) {
@@ -100,17 +99,17 @@ case class ProviderData(name: String,
       val hostname = uri.getHost
 
       if (hostname == null) {
-        errors += s"Wrong host provided: '$host'"
+        errors += createMessage("entity.error.wrong.host", host)
       }
 
       val path = uri.getPath
 
       if (path.length > 0)
-        errors += s"Host cannot contain any uri path ('$path')"
+        errors += createMessage("entity.error.host.should.not.contain.uri", path)
 
     } catch {
       case ex: URISyntaxException =>
-        errors += s"Wrong host provided: '$host'"
+        errors += createMessage("entity.error.wrong.host", host)
     }
 
     errors

@@ -72,11 +72,11 @@ object EngineLiterals {
 
 object StreamLiterals {
   final val inputDummy = "input"
-  final val tStreamType = "stream.t-stream"
+  final val tstreamType = "stream.t-stream"
   final val kafkaStreamType = "stream.kafka"
   final val esOutputType = "elasticsearch-output"
   final val jdbcOutputType = "jdbc-output"
-  val types = Seq(tStreamType, kafkaStreamType, jdbcOutputType, esOutputType)
+  val types = Seq(tstreamType, kafkaStreamType, jdbcOutputType, esOutputType)
 
   private val tstreamFactory = new TStreamsFactory()
   final val ttl = tstreamFactory.getProperty(TSF_Dictionary.Stream.TTL).asInstanceOf[Int]

@@ -11,7 +11,7 @@ import scala.collection.mutable.ArrayBuffer
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "stream-type", defaultImpl = classOf[SjStreamData], visible = true)
 @JsonSubTypes(Array(
-  new Type(value = classOf[TStreamSjStreamData], name = StreamLiterals.tStreamType),
+  new Type(value = classOf[TStreamSjStreamData], name = StreamLiterals.tstreamType),
   new Type(value = classOf[KafkaSjStreamData], name = StreamLiterals.kafkaStreamType),
   new Type(value = classOf[ESSjStreamData], name = StreamLiterals.esOutputType),
   new Type(value = classOf[JDBCSjStreamData], name = StreamLiterals.jdbcOutputType)
@@ -50,20 +50,19 @@ class SjStreamData() extends ValidationUtils {
 
     Option(this.name) match {
       case None =>
-        errors += s"'Name' is required"
+        errors += createMessage("entity.error.attribute.required", "Name")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += s"'Name' is required"
+          errors += createMessage("entity.error.attribute.required", "Name")
         }
         else {
           if (!validateName(x)) {
-            errors += s"Stream has incorrect name: '$x'. " +
-              s"Name of stream must contain digits, lowercase letters or hyphens. First symbol must be a letter"
+            errors += createMessage("entity.error.incorrect.name", "Stream", x, "stream")
           }
 
           val streamObj = streamDAO.get(x)
           if (streamObj.isDefined) {
-            errors += s"Stream with name '$x' already exists"
+            errors += createMessage("entity.error.already.exists", "Stream", x)
           }
         }
     }
@@ -71,10 +70,10 @@ class SjStreamData() extends ValidationUtils {
     Option(this.streamType) match {
       case Some(t) =>
         if (!StreamLiterals.types.contains(t)) {
-          errors += s"Unknown type '$t' provided. Must be one of: ${StreamLiterals.types.mkString("[", ", ", "]")}"
+          errors += createMessage("entity.error.unknown.type.must.one.of", t, "stream", StreamLiterals.types.mkString("[", ", ", "]"))
         }
       case None =>
-        errors += s"'Type' is required"
+        errors += createMessage("entity.error.attribute.required", "Type")
     }
 
     errors

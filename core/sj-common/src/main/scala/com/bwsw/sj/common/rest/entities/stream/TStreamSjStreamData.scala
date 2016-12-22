@@ -11,9 +11,9 @@ import SjStreamUtilsForCreation._
 import scala.collection.mutable.ArrayBuffer
 
 class TStreamSjStreamData() extends SjStreamData() {
-  streamType = StreamLiterals.tStreamType
+  streamType = StreamLiterals.tstreamType
   var partitions: Int = Int.MinValue
-  var generator: GeneratorData = new GeneratorData(GeneratorLiterals.localType)
+  var generator: GeneratorData = GeneratorData(GeneratorLiterals.localType)
 
   override def validate() = {
     val serviceDAO = ConnectionRepository.getServiceManager
@@ -24,27 +24,29 @@ class TStreamSjStreamData() extends SjStreamData() {
 
     //partitions
     if (this.partitions <= 0)
-      errors += "'Partitions' attribute is required" + ". " +
-        s"'Partitions' must be a positive integer"
+      errors += createMessage("entity.error.attribute.required", "Partitions") + ". " +
+        createMessage("entity.error.attribute.must.be.positive.integer", "Partitions")
 
     Option(this.service) match {
       case None =>
-        errors += s"'Service' is required"
+        errors += createMessage("entity.error.attribute.required", "Service")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += s"'Service' is required"
+          errors += createMessage("entity.error.attribute.required", "Service")
         }
         else {
           val serviceObj = serviceDAO.get(x)
           serviceObj match {
             case None =>
-              errors += s"Service '$x' does not exist"
-            case Some(modelService) =>
-              if (modelService.serviceType != ServiceLiterals.tstreamsType) {
-                errors += s"Service for '${StreamLiterals.tStreamType}' stream " +
-                  s"must be of '${ServiceLiterals.tstreamsType}' type ('${modelService.serviceType}' is given instead)"
+              errors += createMessage("entity.error.doesnot.exist", "Service", x)
+            case Some(someService) =>
+              if (someService.serviceType != ServiceLiterals.tstreamsType) {
+                errors += createMessage("entity.error.must.one.type.other.given",
+                  s"Service for '${StreamLiterals.tstreamType}' stream",
+                  ServiceLiterals.tstreamsType,
+                  someService.serviceType)
               } else {
-                if (errors.isEmpty) errors ++= checkStreamPartitionsOnConsistency(modelService.asInstanceOf[TStreamService])
+                if (errors.isEmpty) errors ++= checkStreamPartitionsOnConsistency(someService.asInstanceOf[TStreamService])
               }
           }
         }
@@ -77,8 +79,7 @@ class TStreamSjStreamData() extends SjStreamData() {
         dataStorage
       )
       if (tStream.getPartitions != this.partitions) {
-        errors += s"Partitions count of stream '${this.name}' mismatch. T-stream partitions (${this.partitions}) " +
-          s"mismatch with partitions of existent t-stream (${tStream.getPartitions})"
+        errors += createMessage("entity.error.mismatch.partitions", this.name, s"${this.partitions}", s"${tStream.getPartitions}")
       }
     }
 

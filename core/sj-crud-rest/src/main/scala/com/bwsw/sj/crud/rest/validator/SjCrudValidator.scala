@@ -112,7 +112,7 @@ trait SjCrudValidator extends CompletionUtils {
         }
 
         //'outputs.types' field
-        if (outputTypes.length != 1 || !doesSourceTypesConsistOf(outputTypes, Set(tStreamType))) {
+        if (outputTypes.length != 1 || !doesSourceTypesConsistOf(outputTypes, Set(tstreamType))) {
           throw new Exception(createMessage("rest.validator.specification.sources.must.t-stream", moduleType, "outputs"))
         }
 
@@ -123,7 +123,7 @@ trait SjCrudValidator extends CompletionUtils {
         }
 
         //'inputs.types' field
-        if (inputTypes.isEmpty || !doesSourceTypesConsistOf(inputTypes, Set(tStreamType, kafkaStreamType))) {
+        if (inputTypes.isEmpty || !doesSourceTypesConsistOf(inputTypes, Set(tstreamType, kafkaStreamType))) {
           throw new Exception(createMessage("rest.validator.specification.sources.t-stream.kafka", moduleType, "inputs"))
         }
 
@@ -133,7 +133,7 @@ trait SjCrudValidator extends CompletionUtils {
         }
 
         //'outputs.types' field
-        if (outputTypes.length != 1 || !doesSourceTypesConsistOf(outputTypes, Set(tStreamType))) {
+        if (outputTypes.length != 1 || !doesSourceTypesConsistOf(outputTypes, Set(tstreamType))) {
           throw new Exception(createMessage("rest.validator.specification.sources.must.t-stream", moduleType, "outputs"))
         }
 
@@ -144,7 +144,7 @@ trait SjCrudValidator extends CompletionUtils {
         }
 
         //'inputs.types' field
-        if (inputTypes.length != 1 || !doesSourceTypesConsistOf(inputTypes, Set(tStreamType))) {
+        if (inputTypes.length != 1 || !doesSourceTypesConsistOf(inputTypes, Set(tstreamType))) {
           throw new Exception(createMessage("rest.validator.specification.sources.must.t-stream", moduleType, "inputs"))
         }
 

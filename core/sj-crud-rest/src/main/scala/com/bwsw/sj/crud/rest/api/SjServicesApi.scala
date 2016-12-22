@@ -85,7 +85,7 @@ trait SjServicesApi extends Directives with SjCrudValidator {
   }
 
   private def usedInGenerator(stream: SjStream, serviceName: String) = {
-    if (stream.streamType == StreamLiterals.tStreamType) {
+    if (stream.streamType == StreamLiterals.tstreamType) {
       val tstream = stream.asInstanceOf[TStreamSjStream]
 
       tstream.generator.generatorType != GeneratorLiterals.localType && tstream.generator.service.name == serviceName

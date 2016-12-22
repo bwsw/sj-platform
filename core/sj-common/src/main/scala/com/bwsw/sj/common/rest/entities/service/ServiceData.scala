@@ -47,32 +47,32 @@ class ServiceData() extends ValidationUtils {
     // 'serviceType field
     Option(this.serviceType) match {
       case None =>
-        errors += s"'Type' is required"
+        errors += createMessage("entity.error.attribute.required", "Type")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += s"'Type' is required"
+          errors += createMessage("entity.error.attribute.required", "Type")
         }
         else {
-          if (!types.contains(x)) errors += s"Unknown type '$x' provided. Must be one of: ${types.mkString("[", ", ", "]")}"
+          if (!types.contains(x))
+            errors += createMessage("entity.error.unknown.type.must.one.of", x, "service", types.mkString("[", ", ", "]"))
         }
     }
 
     // 'name' field
     Option(this.name) match {
       case None =>
-        errors += s"'Name' is required"
+        errors += createMessage("entity.error.attribute.required", "Name")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += s"'Name' is required"
+          errors += createMessage("entity.error.attribute.required", "Name")
         }
         else {
           if (!validateName(x)) {
-            errors += s"Service has incorrect name: '$x'. " +
-              s"Name of service must contain digits, lowercase letters or hyphens. First symbol must be a letter"
+            errors += createMessage("entity.error.incorrect.name", "Service", x, "service")
           }
 
           if (serviceDAO.get(x).isDefined) {
-            errors += s"Service with name '$x' already exists"
+            errors += createMessage("entity.error.already.exists", "Service", x)
           }
         }
     }

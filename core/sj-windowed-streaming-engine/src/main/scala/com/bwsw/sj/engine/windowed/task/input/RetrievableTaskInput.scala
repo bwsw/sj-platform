@@ -22,7 +22,7 @@ object RetrievableTaskInput {
 
   def apply(manager: CommonTaskManager) = {
     val isKafkaInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.kafkaStreamType)
-    val isTstreamInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.tStreamType)
+    val isTstreamInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.tstreamType)
 
     (isKafkaInputExist, isTstreamInputExist) match {
       case (true, true) => new RetrievableCompleteTaskInput(manager)
