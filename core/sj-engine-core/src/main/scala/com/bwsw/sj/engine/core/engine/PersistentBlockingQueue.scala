@@ -18,7 +18,7 @@ class PersistentBlockingQueue(path: String) {
   private val tempDirectory: Path = Files.createTempDirectory(path)
   tempDirectory.toFile.deleteOnExit()
   val chronicleQueue = ChronicleQueueBuilder.single(tempDirectory.toString).build()
-  private val writer = chronicleQueue.createAppender()
+  private val writer = chronicleQueue.acquireAppender()
   private val reader = chronicleQueue.createTailer()
   private val mutex = new ReentrantLock(true)
   private val cond = mutex.newCondition()
