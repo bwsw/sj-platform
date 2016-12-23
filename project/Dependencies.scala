@@ -20,7 +20,7 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j"),
-    ("org.apache.curator" % "curator-recipes" % "3.2.1")
+    ("org.apache.curator" % "curator-recipes" % "2.11.1")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j"),
     ("org.elasticsearch" % "elasticsearch" % "5.1.1")
@@ -68,7 +68,7 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j"),
-    ("org.apache.curator" % "curator-recipes" % "3.2.1")
+    ("org.apache.curator" % "curator-recipes" % "2.11.1")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
   ))

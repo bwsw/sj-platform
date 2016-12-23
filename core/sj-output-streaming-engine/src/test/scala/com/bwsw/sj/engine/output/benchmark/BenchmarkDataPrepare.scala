@@ -12,7 +12,6 @@ import com.bwsw.sj.engine.output.benchmark.BenchmarkDataFactory._
   *
   *    Environment for Prepare
   *         MONGO_HOSTS=176.120.25.19:27017
-  *         MONGO_PORT=27017
   *         AGENTS_HOST=176.120.25.19
   *         AGENTS_PORTS=31000,31001
   *         CASSANDRA_HOSTS=176.120.25.19:9042
