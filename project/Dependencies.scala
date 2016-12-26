@@ -10,7 +10,8 @@ object Dependencies {
     ("com.bwsw" % "t-streams_2.11" % "1.0-SNAPSHOT")
       .exclude("org.slf4j", "slf4j-simple")
       .exclude("org.slf4j", "slf4j-api")
-      .exclude("log4j", "log4j"),
+      .exclude("log4j", "log4j")
+      .exclude("io.netty", "netty"),
     ("org.mongodb" % "casbah_2.11" % "3.1.1")
       .exclude("org.slf4j", "slf4j-api"),
     "org.mongodb.morphia" % "morphia" % "1.3.0",
