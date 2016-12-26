@@ -1,6 +1,5 @@
 package com.bwsw.sj.mesos.framework.task.status
 
-import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.mesos.framework.schedule.FrameworkUtil
 import com.bwsw.sj.mesos.framework.task.{MasterState, Slave, SlaveState, TasksList}
 import org.apache.mesos.Protos.{SlaveID, TaskID, TaskStatus}
@@ -23,10 +22,6 @@ object SuccessHandler extends TaskStatusHandler {
       directory = dirUrl
     ))
     StatusHandler.logger.debug(s"Running task: ${status.getTaskId.getValue}")
-
-    if (FrameworkUtil.instance.moduleType.equals(EngineLiterals.inputStreamingType)) {
-      currentSlave.hostname //todo Дима, почему-тто warning выпадает: a pure expression does nothing in statement position; you may be omitting necessary parentheses
-    }
   }
 
   def getCurrentSlave(slaveId: SlaveID) = {

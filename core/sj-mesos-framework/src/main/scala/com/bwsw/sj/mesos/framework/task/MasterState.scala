@@ -21,6 +21,8 @@ class MasterState {
   var build_time:Double = _
   var activated_slaves:Double = _
   var slaves:Array[Slave] = _
+  var cluster:String = _
+  var log_dir:String = _
 }
 
 

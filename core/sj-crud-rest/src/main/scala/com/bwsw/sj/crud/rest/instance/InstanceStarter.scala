@@ -258,7 +258,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
 
   private def getFrameworkEnvironmentVariables(marathonMaster: String) = {
     var environmentVariables = Map(
-      "MONGO_HOSTS" -> s"${ConnectionConstants.mongoHosts}",
+      "MONGO_HOSTS" -> ConnectionConstants.mongoHosts.map(hostport=>hostport.getHost+":"+hostport.getPort.toString).mkString(","),
       "INSTANCE_ID" -> instance.name,
       "MESOS_MASTER" -> marathonMaster
     )
