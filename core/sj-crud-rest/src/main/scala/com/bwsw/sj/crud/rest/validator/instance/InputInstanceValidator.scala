@@ -75,6 +75,10 @@ class InputInstanceValidator extends InstanceValidator {
     if (inputInstanceMetadata.backupCount < 0 || inputInstanceMetadata.backupCount > 6)
       errors += createMessage("rest.validator.attribute.must.from.to", "Backup-count", "0", "6")
 
+    if (inputInstanceMetadata.asyncBackupCount < 0) {
+      errors += createMessage("rest.validator.attribute.must.greater.or.equal.zero", "Async-backup-count")
+    }
+
     errors ++= validateStreamOptions(inputInstanceMetadata, specification)
 
     errors
