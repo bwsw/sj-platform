@@ -49,7 +49,7 @@
     },
     "performance-reporting-interval": {
       "description": "How often a report of instance work performance will be",
-      "type": "object"
+      "type": "number"
     },
     "outputs": {
       "description": "The set of outputs",
