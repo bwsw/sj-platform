@@ -8,7 +8,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, SpecificationData}
 import com.bwsw.sj.common.rest.utils.ValidationUtils
-import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
+import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils, StreamLiterals}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -21,7 +21,7 @@ import scala.collection.mutable.ArrayBuffer
  *
  * @author Kseniya Tomskikh
  */
-abstract class InstanceValidator extends ValidationUtils with CompletionUtils {
+abstract class InstanceValidator extends ValidationUtils with CompletionUtils with MessageResourceUtils {
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
   var serviceDAO: GenericMongoService[Service] = ConnectionRepository.getServiceManager
   var instanceDAO: GenericMongoService[Instance] = ConnectionRepository.getInstanceService

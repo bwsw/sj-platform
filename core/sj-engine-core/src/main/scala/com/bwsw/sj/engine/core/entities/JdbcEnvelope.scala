@@ -31,10 +31,10 @@ class JdbcEnvelope extends Envelope {
 }
 
 
-object JdbcEnvelope extends Envelope {
+object JdbcEnvelope {
   /**
-    * Return txn field name.
-    * @return
+    * Return txn field name that is declared above.
+    * If this (top) field was changed the implementation of method would be changed too
     */
   def getTxnName="txn"
 }

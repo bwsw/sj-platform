@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Stream",
+  "type": "object",
+  "properties": {
+    "name": {
+      "description": "The unique name of a stream",
+      "type": "string"
+    },
+    "description": {
+      "description": "The description of a stream",
+      "type": "string"
+    },
+    "type": {
+      "description": "The stream type",
+      "type": "string"
+    },
+    "service": {
+      "description": "The stream service",
+      "type": "string"
+    },
+    "tags": {
+      "description": "The set of stream tags",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "partitions": {
+      "description": "The number of stream partitions if the stream is tstream or kafka type",
+      "type": "number"
+    },
+    "generator": {
+      "description": "A generator of transaction id if the stream is tstream type",
+      "type": "object",
+      "properties": {
+        "generator-type": {
+          "description": "The generator type",
+          "type": "string"
+        },
+        "service": {
+          "description": "The generator service",
+          "type": "string"
+        },
+        "instance-count": {
+          "description": "A number of generator instances",
+          "type": "number"
+        }
+      }
+    },
+    "replication-factor": {
+      "description": "The number of replication if the stream is kafka type",
+      "type": "number"
+    },
+    "primary": {
+      "description": "A name of primary key of table if the stream is JDBC type",
+      "type": "number"
+    }
+  }
+}

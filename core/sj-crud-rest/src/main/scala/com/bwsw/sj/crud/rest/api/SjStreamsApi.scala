@@ -5,8 +5,6 @@ import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.stream.SjStreamData
 import com.bwsw.sj.common.utils.EngineLiterals._
-import com.bwsw.sj.common.utils.SjStreamUtils._
-import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
 import scala.collection.mutable
@@ -17,7 +15,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
     pathPrefix("streams") {
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>
-          checkContext(ctx)
+          validateContextWithSchema(ctx, "streamSchema.json")
           val streamData = serializer.deserialize[SjStreamData](getEntityFromContext(ctx))
           val errors = streamData.validate()
           var response: RestResponse = BadRequestRestResponse(Map("message" ->

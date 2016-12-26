@@ -155,7 +155,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                                     moduleVersion: String,
                                     specification: SpecificationData,
                                     filename: String) => post { (ctx: RequestContext) =>
-    checkContext(ctx)
+    validateContextWithSchema(ctx, "instanceSchema.json")
     val instanceMetadata = deserializeOptions(getEntityFromContext(ctx), moduleType)
     val errors = validateInstance(instanceMetadata, specification, moduleType)
     val optionsPassedValidation = validateInstanceOptions(specification, filename, instanceMetadata.options)

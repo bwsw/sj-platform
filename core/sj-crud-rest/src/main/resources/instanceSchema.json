@@ -1,0 +1,132 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Instance",
+  "type": "object",
+  "properties": {
+    "name": {
+      "description": "The unique name of an instance",
+      "type": "string"
+    },
+    "description": {
+      "description": "The description of an instance",
+      "type": "string"
+    },
+    "checkpoint-mode": {
+      "description": "A mode of checkpoint",
+      "type": "string"
+    },
+    "checkpoint-interval": {
+      "description": "An interval of checkpoint",
+      "type": "number"
+    },
+    "options": {
+      "description": "The set of some optional parameters",
+      "type": "object"
+    },
+    "per-task-cores": {
+      "description": "Number of cores that will be dedicated for a task of instance",
+      "type": "number"
+    },
+    "per-task-ram": {
+      "description": "Size of ram that will be dedicated for a task of instance",
+      "type": "number"
+    },
+    "jvm-options": {
+      "description": "The set of jvm parameters",
+      "type": "object"
+    },
+    "node-attributes": {
+      "description": "The set of mesos parameters",
+      "type": "object"
+    },
+    "coordination-service": {
+      "description": "A zookeeper service for a leader latch",
+      "type": "string"
+    },
+    "environment-variables": {
+      "description": "The set of environment variables",
+      "type": "object"
+    },
+    "performance-reporting-interval": {
+      "description": "How often a report of instance work performance will be",
+      "type": "object"
+    },
+    "outputs": {
+      "description": "The set of outputs",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "duplicate-check": {
+      "type": "boolean"
+    },
+    "lookup-history": {
+      "type": "number"
+    },
+    "queue-max-size": {
+      "type": "number"
+    },
+    "default-eviction-policy": {
+      "type": "string"
+    },
+    "eviction-policy": {
+      "type": "string"
+    },
+    "backup-count": {
+      "type": "number"
+    },
+    "async-backup-count": {
+      "type": "number"
+    },
+    "inputs": {
+      "description": "The set of inputs",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "state-management": {
+      "type": "string"
+    },
+    "state-full-checkpoint": {
+      "type": "number"
+    },
+    "event-wait-time": {
+      "type": "number"
+    },
+    "window": {
+      "type": "number"
+    },
+    "sliding-interval": {
+      "type": "number"
+    },
+    "main-stream": {
+      "type": "string"
+    },
+    "related-streams": {
+      "description": "The set of streams that are related",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "batch-fill-type": {
+      "type": "object",
+      "properties": {
+        "type-name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        }
+      }
+    },
+    "input": {
+      "type": "string"
+    },
+    "output": {
+      "type": "string"
+    }
+  }
+}

@@ -107,7 +107,7 @@ class WindowedInstanceValidator extends InstanceValidator {
     //'batch-fill-type' field
     Option(instance.batchFillType) match {
       case None =>
-        errors += s"Batch-fill-type is required"
+        errors += createMessage("rest.validator.attribute.required", "Batch-fill-type")
       case Some(batchFillType) =>
         //'type-name' field
         Option(batchFillType.typeName) match {
