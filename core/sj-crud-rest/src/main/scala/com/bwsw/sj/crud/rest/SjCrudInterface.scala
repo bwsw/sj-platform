@@ -6,7 +6,6 @@ import com.bwsw.sj.common.rest.entities.{InternalServerErrorRestResponse, NotFou
 import com.bwsw.sj.crud.rest.api._
 import com.bwsw.sj.crud.rest.cors.CorsSupport
 import com.bwsw.sj.crud.rest.exceptions._
-import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
 import org.everit.json.schema.ValidationException
 
@@ -46,7 +45,7 @@ with SjConfigurationSettingsApi {
       complete(restResponseToHttpResponse(response))
     case jsonSchemaValidationException:ValidationException =>
       val response = InternalServerErrorRestResponse(Map("message" ->
-        createMessage("rest.modules.specification.json.schema.failed", s"${jsonSchemaValidationException.getMessage}")))
+        createMessage("rest.errors.entity.json.schema.failed", s"${jsonSchemaValidationException.getMessage}")))
       complete(restResponseToHttpResponse(response))
     case ex: Exception =>
       ex.printStackTrace()

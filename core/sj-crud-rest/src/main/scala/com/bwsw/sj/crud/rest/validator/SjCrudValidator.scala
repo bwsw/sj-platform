@@ -16,10 +16,8 @@ import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.engine.{StreamingExecutor, StreamingValidator}
-import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
+import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils, StreamLiterals}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
-import org.everit.json.schema.loader.SchemaLoader
-import org.json.{JSONException, JSONObject, JSONTokener}
 
 import scala.concurrent.{Await, ExecutionContextExecutor}
 
@@ -29,7 +27,7 @@ import scala.concurrent.{Await, ExecutionContextExecutor}
   *
   * @author Kseniya Tomskikh
   */
-trait SjCrudValidator extends CompletionUtils {
+trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageResourceUtils {
   val logger: LoggingAdapter
 
   implicit val materializer: Materializer
@@ -66,10 +64,27 @@ trait SjCrudValidator extends CompletionUtils {
     Await.result(entity.toStrict(1.second), 1.seconds).data.decodeString("UTF-8")
   }
 
-  def checkContext(ctx: RequestContext) = {
+  def validateContextWithSchema(ctx: RequestContext, schema: String) = {
+    checkContext(ctx)
+    val entity = checkEntity(ctx)
+    validateWithSchema(entity, schema)
+  }
+
+  private def checkContext(ctx: RequestContext) = {
     if (ctx.request.entity.isKnownEmpty()) {
-      throw new Exception("No entity was received to parse")
+      throw new Exception(createMessage("rest.errors.empty.entity"))
     }
+  }
+
+  private def checkEntity(ctx: RequestContext) = {
+    val entity = getEntityFromContext(ctx)
+    if (!isJSONValid(entity)) {
+      val message = createMessage("rest.errors.entity.invalid.json")
+      logger.error(message)
+      throw new Exception(message)
+    }
+
+    entity
   }
 
   /**
@@ -83,7 +98,7 @@ trait SjCrudValidator extends CompletionUtils {
     val classLoader = new URLClassLoader(Array(jarFile.toURI.toURL), ClassLoader.getSystemClassLoader)
     val specificationJson = getSpecificationFromJar(jarFile)
     validateJson(specificationJson)
-    schemaValidate(specificationJson, getClass.getClassLoader.getResourceAsStream("schema.json"))
+    validateWithSchema(specificationJson, "schema.json")
     val specification = serializer.deserialize[Map[String, Any]](specificationJson)
     val moduleType = specification("module-type").asInstanceOf[String]
     val inputs = specification("inputs").asInstanceOf[Map[String, Any]]
@@ -237,7 +252,7 @@ trait SjCrudValidator extends CompletionUtils {
       return false
     }
 
-    schemaValidate(json, getClass.getClassLoader.getResourceAsStream("customschema.json"))
+    validateWithSchema(json, "customschema.json")
   }
 
   def getSpecification(jarFile: File) = {
@@ -285,41 +300,5 @@ trait SjCrudValidator extends CompletionUtils {
       logger.error(message)
       throw new FileNotFoundException(message)
     }
-  }
-
-  /**
-    * Check String object
-    *
-    * @param value - input string
-    * @return - boolean result of checking
-    */
-  private def isEmptyOrNullString(value: String): Boolean = value == null || value.isEmpty
-
-  private def isJSONValid(json: String): Boolean = {
-    try {
-      new JSONObject(json)
-    } catch {
-      case ex: JSONException => return false
-    }
-    true
-  }
-
-  /**
-    * Validate json for such schema
-    *
-    * @param json         - input json
-    * @param schemaStream - schema
-    * @return - true, if schema is valid
-    */
-  private def schemaValidate(json: String, schemaStream: InputStream): Boolean = {
-    if (schemaStream != null) {
-      val rawSchema = new JSONObject(new JSONTokener(schemaStream))
-      val schema = SchemaLoader.load(rawSchema)
-      val specification = new JSONObject(json)
-      schema.validate(specification)
-    } else {
-      throw new Exception(createMessage("rest.modules.specification.schema.not.found"))
-    }
-    true
   }
 }

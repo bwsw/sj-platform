@@ -15,7 +15,7 @@ trait SjServicesApi extends Directives with SjCrudValidator {
     pathPrefix("services") {
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>
-          checkContext(ctx)
+          validateContextWithSchema(ctx, "serviceSchema.json")
           val protocolService = serializer.deserialize[ServiceData](getEntityFromContext(ctx))
           val errors = protocolService.validate()
           var response: RestResponse = BadRequestRestResponse(Map("message" ->
