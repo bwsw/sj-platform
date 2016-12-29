@@ -1,4 +1,4 @@
-package com.bwsw.sj.examples.sflow.module.process
+package com.bwsw.sj.common.utils
 
 import java.net.{Inet4Address, Inet6Address, InetAddress}
 

@@ -189,9 +189,6 @@ lazy val pmOutput = Project(id = "sj-performance-metrics-output-es",
 lazy val sflowProcess = Project(id = "sj-sflow-process",
   base = file("./contrib/examples/sflow/sj-sflow-process"))
   .settings(commonSettings: _*)
-  .settings(
-    libraryDependencies ++= Dependencies.sjSflowProcessDependencies.value
-  )
   .dependsOn(engineCore)
 
 lazy val sflowOutput = Project(id = "sj-sflow-output",
@@ -206,5 +203,10 @@ lazy val sumWindowed = Project(id = "sj-windowed-sum",
 
 lazy val sflowDemoInput = Project(id = "sflow-input",
   base = file("./contrib/examples/sj-sflow-demo/sflow-input"))
+  .settings(commonSettings: _*)
+  .dependsOn(engineCore)
+
+lazy val sflowDemoProcess = Project(id = "sflow-process",
+  base = file("./contrib/examples/sj-sflow-demo/sflow-process"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)

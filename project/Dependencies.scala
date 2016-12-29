@@ -32,7 +32,8 @@ object Dependencies {
     "org.elasticsearch.client" % "transport" % "5.1.1",
     "org.apache.logging.log4j" % "log4j-core" % "2.7",
     "org.apache.logging.log4j" % "log4j-api" % "2.7",
-    "postgresql" % "postgresql" % "9.1-901.jdbc4"
+    "postgresql" % "postgresql" % "9.1-901.jdbc4",
+    "com.maxmind.geoip" % "geoip-api" % "1.3.1"
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(
@@ -92,9 +93,5 @@ object Dependencies {
     "net.databinder" % "unfiltered-jetty_2.11" % "0.8.4",
     ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
       .exclude("commons-logging", "commons-logging")
-  ))
-
-  lazy val sjSflowProcessDependencies = Def.setting(Seq(
-    "com.maxmind.geoip" % "geoip-api" % "1.3.1"
   ))
 }

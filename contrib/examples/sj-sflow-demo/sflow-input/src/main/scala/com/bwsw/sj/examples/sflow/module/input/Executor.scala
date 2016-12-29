@@ -45,7 +45,7 @@ class Executor(manager: InputEnvironmentManager) extends InputStreamingExecutor(
     maybeRecord match {
       case Some(sflowRecord) =>
         println(sflowRecord.toString + ";")//todo for testing
-        val serializedResponse = objectSerializer.serialize(jsonSerializer.serialize(sflowRecord))
+        val serializedResponse = objectSerializer.serialize(sflowRecord)
 
         Some(new InputEnvelope(
           sflowRecord.timestamp.toString,
