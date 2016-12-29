@@ -29,6 +29,7 @@ private[common] object SjStreamUtilsForCreation {
       case ProviderLiterals.aerospikeType =>
         val aerospikeFactory = new AerospikeFactory
         dataStorage = aerospikeFactory.getDataStorage(service.dataNamespace, hosts)
+        aerospikeFactory.close()
     }
 
     dataStorage

@@ -203,3 +203,8 @@ lazy val sumWindowed = Project(id = "sj-windowed-sum",
   base = file("./contrib/examples/sj-windowed-sum"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
+
+lazy val sflowDemoInput = Project(id = "sflow-input",
+  base = file("./contrib/examples/sj-sflow-demo/sflow-input"))
+  .settings(commonSettings: _*)
+  .dependsOn(engineCore)

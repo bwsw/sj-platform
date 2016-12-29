@@ -5,6 +5,7 @@ import java.util.concurrent.ArrayBlockingQueue
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
+import io.netty.util.ReferenceCountUtil
 
 import scala.collection.concurrent
 
@@ -22,15 +23,19 @@ class InputStreamingServerHandler(channelContextQueue: ArrayBlockingQueue[Channe
   extends ChannelInboundHandlerAdapter {
 
   override def channelRead(ctx: ChannelHandlerContext, msg: Any) = {
-    val message = msg.asInstanceOf[ByteBuf]
+    try {
+      val message = msg.asInstanceOf[ByteBuf]
 
-    if (bufferForEachContext.contains(ctx)) {
-      bufferForEachContext(ctx).writeBytes(message)
-    } else {
-      bufferForEachContext += ctx -> message
+      if (bufferForEachContext.contains(ctx)) {
+        bufferForEachContext(ctx).writeBytes(message)
+      } else {
+        bufferForEachContext += ctx -> ctx.alloc().buffer().writeBytes(message)
+      }
+
+      channelContextQueue.add(ctx)
+    } finally {
+      ReferenceCountUtil.release(msg)
     }
-
-    channelContextQueue.add(ctx)
   }
 
   /**

@@ -6,7 +6,6 @@ import io.netty.buffer.ByteBuf
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.{ChannelHandlerContext, ChannelInitializer}
 import io.netty.handler.codec.string.StringEncoder
-import io.netty.handler.logging.{LogLevel, LoggingHandler}
 
 import scala.collection.concurrent
 
@@ -21,9 +20,13 @@ class InputStreamingChannelInitializer(channelContextQueue: ArrayBlockingQueue[C
   extends ChannelInitializer[SocketChannel] {
 
   def initChannel(channel: SocketChannel) = {
+    channel.config().setTcpNoDelay(true)
+    channel.config().setKeepAlive(true)
+    channel.config().setTrafficClass(0x10)
+    channel.config().setPerformancePreferences(0, 1, 0)
+
     val pipeline = channel.pipeline()
 
-    pipeline.addLast("logger", new LoggingHandler(LogLevel.WARN))
     pipeline.addLast("encoder", new StringEncoder())
     pipeline.addLast("handler", new InputStreamingServerHandler(channelContextQueue, bufferForEachContext))
   }

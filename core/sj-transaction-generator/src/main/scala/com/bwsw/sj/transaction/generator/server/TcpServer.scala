@@ -62,7 +62,6 @@ class TcpServerChannelInitializer() extends ChannelInitializer[SocketChannel] {
     val pipeline = channel.pipeline()
 
     pipeline.addLast("handler", new TransactionGenerator())
-    pipeline.addLast()
   }
 }
 

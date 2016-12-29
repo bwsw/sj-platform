@@ -1,12 +1,11 @@
 package com.bwsw.sj.examples.sflow.module.process
 
 import com.bwsw.common.ObjectSerializer
+import com.bwsw.sj.common.utils.SflowParser
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.state.StateStorage
-import com.bwsw.sj.examples.sflow.module.process.udf.GeoIp
-import com.bwsw.sj.examples.sflow.module.process.utils.SflowParser
 
 
 class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor(manager) {
@@ -29,15 +28,15 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
       case kafkaEnvelope: KafkaEnvelope =>
         val maybeSflow = SflowParser.parse(kafkaEnvelope.data)
         if (maybeSflow.isDefined) {
-          val sflow = maybeSflow.get
-          lastTs = sflow("ts").toLong * 1000
-          val srcAs = GeoIp.resolveAs(sflow("srcIP"))
-          val dstAs = GeoIp.resolveAs(sflow("dstIP"))
+          val sflowRecord = maybeSflow.get
+          lastTs = sflowRecord.timestamp * 1000
+          val srcAs = GeoIp.resolveAs(sflowRecord.srcIP)
+          val dstAs = GeoIp.resolveAs(sflowRecord.dstIP)
           val prefixAsToAs = s"$srcAs-$dstAs"
           if (!state.isExist(s"traffic-sum-$srcAs")) state.set(s"traffic-sum-$srcAs", 0L)
           if (!state.isExist(s"traffic-sum-between-$prefixAsToAs")) state.set(s"traffic-sum-between-$prefixAsToAs", 0L)
 
-          val bandwidth = sflow("packetSize").toInt * sflow("samplingRate").toInt
+          val bandwidth = sflowRecord.packetSize * sflowRecord.samplingRate
 
           var trafficSum = state.get(s"traffic-sum-$srcAs").asInstanceOf[Long]
           trafficSum += bandwidth

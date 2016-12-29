@@ -1,0 +1,31 @@
+{
+  "name": "sflow-input",
+  "description": "Input module by BW for sflow demo",
+  "version": "1.0",
+  "author": "Ksenia Mikhaleva",
+  "license": "Apache 2.0",
+  "inputs": {
+    "cardinality": [
+      0,
+      0
+    ],
+    "types": [
+      "input"
+    ]
+  },
+  "outputs": {
+    "cardinality": [
+      2,
+      2
+    ],
+    "types": [
+      "stream.t-stream"
+    ]
+  },
+  "module-type": "input-streaming",
+  "engine-name": "com.bwsw.input.streaming.engine",
+  "engine-version": "1.0",
+  "options": {},
+  "validator-class": "com.bwsw.sj.examples.sflow.module.input.Validator",
+  "executor-class": "com.bwsw.sj.examples.sflow.module.input.Executor"
+}

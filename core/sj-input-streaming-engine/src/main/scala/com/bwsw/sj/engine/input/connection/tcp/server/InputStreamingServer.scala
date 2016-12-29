@@ -3,7 +3,7 @@ package com.bwsw.sj.engine.input.connection.tcp.server
 import java.util.concurrent.{ArrayBlockingQueue, Callable}
 
 import io.netty.bootstrap.ServerBootstrap
-import io.netty.buffer.ByteBuf
+import io.netty.buffer.{ByteBuf, PooledByteBufAllocator}
 import io.netty.channel._
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
@@ -31,10 +31,11 @@ class InputStreamingServer(host: String,
 
   override def call() = {
     logger.info(s"Launch input streaming server on: '$host:$port'\n")
-    val bossGroup: EventLoopGroup = new NioEventLoopGroup()
+    val bossGroup: EventLoopGroup = new NioEventLoopGroup(1)
     val workerGroup = new NioEventLoopGroup()
     try {
       val bootstrapServer = new ServerBootstrap()
+      bootstrapServer.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
       bootstrapServer.group(bossGroup, workerGroup)
         .channel(classOf[NioServerSocketChannel])
         .handler(new LoggingHandler(LogLevel.INFO))

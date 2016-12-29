@@ -15,4 +15,8 @@ class AerospikeFactory() {
 
     dataStorageFactory.getInstance(options)
   }
+
+  def close() = {
+    dataStorageFactory.closeFactory()
+  }
 }
