@@ -1,11 +1,13 @@
 package com.bwsw.sj.examples.sflow.module.process
 
+import java.util.Random
+
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.utils.{GeoIp, SflowRecord}
-import com.bwsw.sj.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.engine.core.windowed.{WindowRepository, WindowedStreamingExecutor}
 import com.bwsw.sj.examples.sflow.module.process.mapreduce.Generator
+import com.bwsw.sj.engine.core.entities.TStreamEnvelope
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -30,17 +32,23 @@ class Executor(manager: ModuleEnvironmentManager) extends WindowedStreamingExecu
   }
 
   override def onEnter(): Unit = {
-
     val gen = new Generator()
-
     gen.putRecords(storage.asInstanceOf[Array[SflowRecord]])
 
-    println(gen.SrcAsReduceResult())
-    println(gen.DstAsReduceResult())
-    println(gen.SrcDstReduceResult())
-    println(gen.SrcIpReduceResult())
-    println(gen.DstIpReduceResult())
-    println("Final")
+    var output = manager.getRoundRobinOutput("SrcAsStream")
+    output.put(gen.SrcAsReduceResult().toArray[Byte])
+
+    output = manager.getRoundRobinOutput("DstAsStream")
+    output.put(gen.DstAsReduceResult().toArray[Byte])
+
+    output = manager.getRoundRobinOutput("SrcDstStream")
+    output.put(gen.SrcDstReduceResult().toArray[Byte])
+
+    output = manager.getRoundRobinOutput("SrcIpStream")
+    output.put(gen.SrcIpReduceResult().toArray[Byte])
+
+    output = manager.getRoundRobinOutput("DstIpStream")
+    output.put(gen.DstIpReduceResult().toArray[Byte])
   }
 
 }
