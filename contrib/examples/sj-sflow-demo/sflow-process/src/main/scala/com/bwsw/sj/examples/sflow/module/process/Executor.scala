@@ -36,19 +36,19 @@ class Executor(manager: ModuleEnvironmentManager) extends WindowedStreamingExecu
     gen.putRecords(storage.asInstanceOf[Array[SflowRecord]])
 
     var output = manager.getRoundRobinOutput("SrcAsStream")
-    output.put(gen.SrcAsReduceResult().toArray[Byte])
+    output.put(objectSerializer.serialize(gen.SrcAsReduceResult()))
 
     output = manager.getRoundRobinOutput("DstAsStream")
-    output.put(gen.DstAsReduceResult().toArray[Byte])
+    output.put(objectSerializer.serialize(gen.DstAsReduceResult()))
 
     output = manager.getRoundRobinOutput("SrcDstStream")
-    output.put(gen.SrcDstReduceResult().toArray[Byte])
+    output.put(objectSerializer.serialize(gen.SrcDstReduceResult()))
 
     output = manager.getRoundRobinOutput("SrcIpStream")
-    output.put(gen.SrcIpReduceResult().toArray[Byte])
+    output.put(objectSerializer.serialize(gen.SrcIpReduceResult()))
 
     output = manager.getRoundRobinOutput("DstIpStream")
-    output.put(gen.DstIpReduceResult().toArray[Byte])
+    output.put(objectSerializer.serialize(gen.DstIpReduceResult()))
   }
 
 }
