@@ -210,3 +210,8 @@ lazy val sflowDemoProcess = Project(id = "sflow-process",
   base = file("./contrib/examples/sj-sflow-demo/sflow-process"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
+
+lazy val sflowDemoOutput = Project(id = "sflow-output",
+  base = file("./contrib/examples/sj-sflow-demo/sflow-output"))
+  .settings(commonSettings: _*)
+  .dependsOn(engineCore)
