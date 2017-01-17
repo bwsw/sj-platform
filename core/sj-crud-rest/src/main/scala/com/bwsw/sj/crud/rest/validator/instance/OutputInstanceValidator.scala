@@ -66,7 +66,7 @@ class OutputInstanceValidator extends InstanceValidator {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     val errors = new ArrayBuffer[String]()
 
-    // 'inputs' field
+    // 'input' field
     var inputStream: Option[SjStream] = None
     Option(instance.input) match {
       case None =>
@@ -103,6 +103,7 @@ class OutputInstanceValidator extends InstanceValidator {
         }
     }
 
+    // 'output' field
     Option(instance.output) match {
       case None =>
         errors += createMessage("rest.validator.attribute.required", "Output")
@@ -118,7 +119,7 @@ class OutputInstanceValidator extends InstanceValidator {
             case Some(stream) =>
               val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
               if (!outputTypes.contains(stream.streamType)) {
-                errors += createMessage("rest.validator.attribute.must.one_of", "Output streams", outputTypes.mkString("[", ", ", "]"))
+                errors += createMessage("rest.validator.attribute.must.one_of", "Output stream", outputTypes.mkString("[", ", ", "]"))
               }
           }
         }
