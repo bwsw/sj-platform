@@ -1,11 +1,9 @@
 package com.bwsw.sj.examples.sflow.module.output
 
-import java.util.Date
-
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
-import com.bwsw.sj.examples.sflow.module.output.data.StubData
+import com.bwsw.sj.examples.sflow.module.output.data.SrcAsData
 
 /**
   * Created by diryavkin_dn on 13.01.17.
@@ -21,12 +19,10 @@ class Executor extends OutputStreamingExecutor {
     * @return List of output envelopes
     */
   override def onMessage(envelope: TStreamEnvelope): List[Envelope] = {
-    val list = envelope.data.map { row =>
-      val value = objectSerializer.deserialize(row).asInstanceOf[collection.mutable.Map[Any, Any]]
-
-      val dataJDBC: StubData = new StubData
-      dataJDBC.reducedValue = value
-      dataJDBC
+    val list:List[Envelope] = List[Envelope]()
+    envelope.data.foreach { row =>
+      val value = objectSerializer.deserialize(row).asInstanceOf[collection.mutable.Map[Int, Int]]
+      list ::: value.map(pair => new SrcAsData(pair._1, pair._2)).toList
     }
     list
   }

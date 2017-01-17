@@ -6,8 +6,8 @@ import com.bwsw.sj.engine.core.entities.JdbcEnvelope
   * Created by diryavkin_dn on 16.01.17.
   */
 
-class StubData extends JdbcEnvelope {
-  var reducedValue: collection.mutable.Map[Any, Any] = collection.mutable.Map()
-  var reduceType: String = ""
+class SrcAsData(srcId: Int, valueSum: Int) extends JdbcEnvelope {
+  var src: Int = srcId
+  var value: Int = valueSum
   var id: String = ""
 }
