@@ -11,8 +11,4 @@ class DstIpData(dst_ip_field: String, traffic_field: Int) extends Envelope{
   var id: String = ""
 }
 
-object DstIpBuilder extends DataBuilder {
-  def build(dst_ip_field: String, traffic_field: Int): DstIpData = {
-    new DstIpData(dst_ip_field, traffic_field)
-  }
-}
+

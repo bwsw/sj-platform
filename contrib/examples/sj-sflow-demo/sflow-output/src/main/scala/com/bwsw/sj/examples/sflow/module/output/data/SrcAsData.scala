@@ -12,8 +12,3 @@ class SrcAsData(src_as_field: Int, traffic_field: Int) extends JdbcEnvelope {
   var id: String = ""
 }
 
-class SrcAsBuilder extends DataBuilder {
-  def build(src_as_field: Int, traffic_field: Int) : SrcAsData = {
-    new SrcAsData(src_as_field, traffic_field)
-  }
-}

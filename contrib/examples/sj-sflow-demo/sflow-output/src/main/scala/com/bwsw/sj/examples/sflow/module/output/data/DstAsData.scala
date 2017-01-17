@@ -9,7 +9,5 @@ class DstAsData(dst_as_field: Int, traffic_field: Int) {
   var id: String = ""
 }
 
-object DstAsBuilder extends DataBuilder{
-  def build(dst_as_field: Int, traffic_field: Int): DstAsData = new DstAsData(dst_as_field, traffic_field)
-}
+
 
