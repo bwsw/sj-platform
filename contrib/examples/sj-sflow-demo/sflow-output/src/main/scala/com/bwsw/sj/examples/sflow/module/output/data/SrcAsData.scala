@@ -6,8 +6,14 @@ import com.bwsw.sj.engine.core.entities.JdbcEnvelope
   * Created by diryavkin_dn on 16.01.17.
   */
 
-class SrcAsData(srcId: Int, valueSum: Int) extends JdbcEnvelope {
-  var src: Int = srcId
-  var value: Int = valueSum
+class SrcAsData(src_as_field: Int, traffic_field: Int) extends JdbcEnvelope {
+  var src_as: Int = src_as_field
+  var traffic: Int = traffic_field
   var id: String = ""
+}
+
+class SrcAsBuilder extends DataBuilder {
+  def build(src_as_field: Int, traffic_field: Int) : SrcAsData = {
+    new SrcAsData(src_as_field, traffic_field)
+  }
 }
