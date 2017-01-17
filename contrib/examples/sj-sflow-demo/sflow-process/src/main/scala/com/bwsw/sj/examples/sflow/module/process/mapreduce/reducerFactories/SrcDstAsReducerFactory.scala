@@ -6,6 +6,6 @@ import com.bwsw.sj.examples.sflow.module.process.mapreduce.reducers.SrcDstAsRedu
 
 class SrcDstAsReducerFactory extends ReducerFactory[Int Tuple2 Int, Int, Int] {
   override def newReducer(key: Int Tuple2 Int) = {
-    new SrcDstAsReducer()
+    new CommonReducer()
   }
 }
