@@ -3,7 +3,7 @@ package com.bwsw.sj.examples.sflow.module.process.mapreduce.reducers
 import com.hazelcast.mapreduce.Reducer
 
 
-class AsReducer extends Reducer[Int, Int] {
+class AsIpReducer extends Reducer[Int, Int] {
   var sum: Int = 0
 
   override def reduce(value: Int) = {
