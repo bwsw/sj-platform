@@ -6,6 +6,6 @@ import com.hazelcast.mapreduce.ReducerFactory
 
 class IpReducerFactory extends ReducerFactory[String, Int, Int] {
   override def newReducer(key: String) = {
-    new AsIpReducer()
+    new CommonReducer()
   }
 }
