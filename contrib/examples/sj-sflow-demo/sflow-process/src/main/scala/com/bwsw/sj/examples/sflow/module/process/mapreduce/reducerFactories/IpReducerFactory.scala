@@ -1,6 +1,6 @@
 package com.bwsw.sj.examples.sflow.module.process.mapreduce.reducerFactories
 
-import com.bwsw.sj.examples.sflow.module.process.mapreduce.reducers.AsIpReducer
+import com.bwsw.sj.examples.sflow.module.process.mapreduce.reducers.CommonReducer
 import com.hazelcast.mapreduce.ReducerFactory
 
 
