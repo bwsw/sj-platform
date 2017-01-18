@@ -19,20 +19,6 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator {
           if (!ConfigLiterals.domains.contains(domain))
             throw UnknownConfigSettingDomain(createMessage("rest.config.setting.domain.unknown", ConfigLiterals.domains.mkString(", ")), domain)
           pathEndOrSingleSlash {
-            post { (ctx: RequestContext) =>
-              validateContextWithSchema(ctx, "configSchema.json")
-              val data = serializer.deserialize[ConfigurationSettingData](getEntityFromContext(ctx))
-              val errors = data.validate(domain)
-              var response: RestResponse = BadRequestRestResponse(Map("message" ->
-                createMessage("rest.config.setting.cannot.create", errors.mkString("\n"))))
-              if (errors.isEmpty) {
-                configService.save(data.asModelConfigurationSetting(domain))
-                response = CreatedRestResponse(Map("message" ->
-                  createMessage("rest.config.setting.created", domain, data.name)))
-              }
-
-              ctx.complete(restResponseToHttpResponse(response))
-            } ~
               get {
                 val configElements = configService.getByParameters(Map("domain" -> domain))
                 val response = OkRestResponse(Map(s"$domain-config-settings" -> mutable.Buffer()))
@@ -74,11 +60,25 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator {
               }
             }
         } ~ pathEndOrSingleSlash {
+          post { (ctx: RequestContext) =>
+            validateContextWithSchema(ctx, "configSchema.json")
+            val data = serializer.deserialize[ConfigurationSettingData](getEntityFromContext(ctx))
+            val errors = data.validate()
+            var response: RestResponse = BadRequestRestResponse(Map("message" ->
+              createMessage("rest.config.setting.cannot.create", errors.mkString("\n"))))
+            if (errors.isEmpty) {
+              configService.save(data.asModelConfigurationSetting)
+              response = CreatedRestResponse(Map("message" ->
+                createMessage("rest.config.setting.created", data.domain, data.name)))
+            }
+
+            ctx.complete(restResponseToHttpResponse(response))
+          } ~
           get {
             val configElements = configService.getAll
             val response = OkRestResponse(Map(s"config-settings" -> mutable.Buffer()))
             if (configElements.nonEmpty) {
-              response.entity = Map("config-settings" -> configElements.map(x => (x.domain, x.asProtocolConfigurationSetting())).toMap)
+              response.entity = Map("config-settings" -> configElements)
             }
 
             complete(restResponseToHttpResponse(response))
