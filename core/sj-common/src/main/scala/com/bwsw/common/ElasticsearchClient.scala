@@ -12,8 +12,7 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient
 
 class ElasticsearchClient(hosts: Set[(String, Int)]){
 
-  private val settings = Settings.builder().build()
-  private val client = new PreBuiltTransportClient(settings)
+  private val client = new PreBuiltTransportClient(Settings.EMPTY)
   hosts.foreach(x => setTransportAddressToClient(x._1, x._2))
 
   def setTransportAddressToClient(host: String, port: Int) = {
