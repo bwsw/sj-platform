@@ -30,7 +30,8 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j"),
-    "org.elasticsearch.client" % "transport" % "5.1.1",
+    ("org.elasticsearch.client" % "transport" % "5.1.1")
+      .exclude("io.netty", "netty"),
     "org.apache.logging.log4j" % "log4j-core" % "2.7",
     "org.apache.logging.log4j" % "log4j-api" % "2.7",
     "postgresql" % "postgresql" % "9.1-901.jdbc4",
@@ -87,7 +88,7 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j"),
     ("org.elasticsearch.client" % "transport" % "5.1.1")
-      .exclude("org.elasticsearch.plugin", "transport-netty3-client"),
+      .exclude("io.netty", "netty"),
     "org.apache.logging.log4j" % "log4j-core" % "2.7",
     "org.apache.logging.log4j" % "log4j-api" % "2.7"
   ))
