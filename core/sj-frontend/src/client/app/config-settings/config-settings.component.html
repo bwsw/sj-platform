@@ -60,7 +60,7 @@
       </div>
 
       <div class="modal-body">
-        <form #settingForm="ngForm" (ngSubmit)="CreateSetting(AddSetting)" class="form-create-entity">
+        <form #settingForm="ngForm" (ngSubmit)="createSetting(AddSetting)" class="form-create-entity">
 
           <!-- name -->
           <fieldset class="form-group row">
@@ -107,7 +107,7 @@
         <button type="button"
                 class="btn btn-primary"
                 [disabled]="!settingForm.form.valid"
-                (click)="CreateSetting(AddSetting)">
+                (click)="createSetting(AddSetting)">
           Create
         </button>
       </div>

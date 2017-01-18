@@ -22,7 +22,7 @@ export class ConfigSettingsComponent implements OnInit {
     this.new_setting = new SettingModel();
   }
 
-  public createService(modal: ModalDirective) {
+  public createSetting(modal: ModalDirective) {
     this._configSettingsService.saveSetting(this.new_setting)
       .subscribe(
         setting => {
