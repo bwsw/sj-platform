@@ -23,7 +23,7 @@ class Generator {
     val tracker = getTracker
     val source = getSource
     val job = tracker.newJob(source)
-    val future = job.mapper(new SrcAsMapper()).reducer[Int](new AsReducerFactory()).submit()
+    val future = job.mapper(new SrcAsMapper()).reducer[Int](new CommonReducerFactory[Int]()).submit()
     future.get().asScala
   }
 
@@ -31,7 +31,7 @@ class Generator {
     val tracker = getTracker
     val source = getSource
     val job = tracker.newJob(source)
-    val future = job.mapper(new DstAsMapper()).reducer[Int](new AsReducerFactory()).submit()
+    val future = job.mapper(new DstAsMapper()).reducer[Int](new CommonReducerFactory[Int]).submit()
     future.get().asScala
   }
 
@@ -39,7 +39,7 @@ class Generator {
     val tracker = getTracker
     val source = getSource
     val job = tracker.newJob(source)
-    val future = job.mapper(new SrcDstAsMapper()).reducer[Int](new SrcDstAsReducerFactory()).submit()
+    val future = job.mapper(new SrcDstAsMapper()).reducer[Int](new CommonReducerFactory[Int Tuple2 Int]).submit()
     future.get().asScala
   }
 
@@ -47,7 +47,7 @@ class Generator {
     val tracker = getTracker
     val source = getSource
     val job = tracker.newJob(source)
-    val future = job.mapper(new SrcIpMapper()).reducer[Int](new IpReducerFactory()).submit()
+    val future = job.mapper(new SrcIpMapper()).reducer[Int](new CommonReducerFactory[String]).submit()
     future.get().asScala
   }
 
@@ -55,7 +55,7 @@ class Generator {
     val tracker = getTracker
     val source = getSource
     val job = tracker.newJob(source)
-    val future = job.mapper(new DstIpMapper()).reducer[Int](new IpReducerFactory()).submit()
+    val future = job.mapper(new DstIpMapper()).reducer[Int](new CommonReducerFactory[String]).submit()
     future.get().asScala
   }
 
