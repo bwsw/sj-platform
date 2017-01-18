@@ -1,7 +1,7 @@
 package com.bwsw.sj.examples.sflow.module.process.mapreduce.reducerFactories
 
+import com.bwsw.sj.examples.sflow.module.process.mapreduce.CommonReducer
 import com.hazelcast.mapreduce.ReducerFactory
-import com.bwsw.sj.examples.sflow.module.process.mapreduce.reducers.CommonReducer
 
 
 class AsReducerFactory extends ReducerFactory[Int, Int, Int] {

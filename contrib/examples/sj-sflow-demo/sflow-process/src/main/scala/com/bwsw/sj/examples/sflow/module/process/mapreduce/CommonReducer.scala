@@ -1,4 +1,4 @@
-package com.bwsw.sj.examples.sflow.module.process.mapreduce.reducers
+package com.bwsw.sj.examples.sflow.module.process.mapreduce
 
 import com.hazelcast.mapreduce.Reducer
 
