@@ -33,26 +33,24 @@ class Executor(manager: ModuleEnvironmentManager) extends WindowedStreamingExecu
 
   override def onEnter(): Unit = {
     val gen = new Generator()
-
     gen.putRecords(storage.asInstanceOf[Array[SflowRecord]])
+
     var output = manager.getRoundRobinOutput("SrcAsStream")
     output.put(objectSerializer.serialize(gen.SrcAsReduceResult()))
 
-    gen.putRecords(storage.asInstanceOf[Array[SflowRecord]])
     output = manager.getRoundRobinOutput("DstAsStream")
     output.put(objectSerializer.serialize(gen.DstAsReduceResult()))
 
-    gen.putRecords(storage.asInstanceOf[Array[SflowRecord]])
     output = manager.getRoundRobinOutput("SrcDstStream")
     output.put(objectSerializer.serialize(gen.SrcDstReduceResult()))
 
-    gen.putRecords(storage.asInstanceOf[Array[SflowRecord]])
     output = manager.getRoundRobinOutput("SrcIpStream")
     output.put(objectSerializer.serialize(gen.SrcIpReduceResult()))
 
-    gen.putRecords(storage.asInstanceOf[Array[SflowRecord]])
     output = manager.getRoundRobinOutput("DstIpStream")
     output.put(objectSerializer.serialize(gen.DstIpReduceResult()))
+
+    gen.clear()
   }
 
 }

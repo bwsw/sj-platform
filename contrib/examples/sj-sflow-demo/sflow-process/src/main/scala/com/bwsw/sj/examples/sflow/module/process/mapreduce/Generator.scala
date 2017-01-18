@@ -22,45 +22,40 @@ class Generator {
     val tracker = getTracker
     val source = getSource
     val job = tracker.newJob(source)
-    val result = job.mapper(new SrcAsMapper()).reducer[Int](new CommonReducerFactory[Int]()).submit().get()
-    clear()
-    result.asScala
+    val future = job.mapper(new SrcAsMapper()).reducer[Int](new CommonReducerFactory[Int]()).submit()
+    future.get().asScala
   }
 
   def DstAsReduceResult(): collection.mutable.Map[Int, Int] = {
     val tracker = getTracker
     val source = getSource
     val job = tracker.newJob(source)
-    val result = job.mapper(new DstAsMapper()).reducer[Int](new CommonReducerFactory[Int]).submit().get()
-    clear()
-    result.asScala
+    val future = job.mapper(new DstAsMapper()).reducer[Int](new CommonReducerFactory[Int]).submit()
+    future.get().asScala
   }
 
   def SrcDstReduceResult(): collection.mutable.Map[Int Tuple2 Int, Int] = {
     val tracker = getTracker
     val source = getSource
     val job = tracker.newJob(source)
-    val result = job.mapper(new SrcDstAsMapper()).reducer[Int](new CommonReducerFactory[Int Tuple2 Int]).submit().get()
-    clear()
-    result.asScala
+    val future = job.mapper(new SrcDstAsMapper()).reducer[Int](new CommonReducerFactory[Int Tuple2 Int]).submit()
+    future.get().asScala
   }
 
   def SrcIpReduceResult(): collection.mutable.Map[String, Int] = {
     val tracker = getTracker
     val source = getSource
     val job = tracker.newJob(source)
-    val result = job.mapper(new SrcIpMapper()).reducer[Int](new CommonReducerFactory[String]).submit().get()
-    clear()
-    result.asScala
+    val future = job.mapper(new SrcIpMapper()).reducer[Int](new CommonReducerFactory[String]).submit()
+    future.get().asScala
   }
 
   def DstIpReduceResult(): collection.mutable.Map[String, Int] = {
     val tracker = getTracker
     val source = getSource
     val job = tracker.newJob(source)
-    val result = job.mapper(new DstIpMapper()).reducer[Int](new CommonReducerFactory[String]).submit().get()
-    clear()
-    result.asScala
+    val future = job.mapper(new DstIpMapper()).reducer[Int](new CommonReducerFactory[String]).submit()
+    future.get().asScala
   }
 
   def getSource: KeyValueSource[String, SflowRecord] = {
