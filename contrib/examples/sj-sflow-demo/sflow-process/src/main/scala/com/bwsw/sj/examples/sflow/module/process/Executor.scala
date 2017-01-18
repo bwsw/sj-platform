@@ -49,6 +49,8 @@ class Executor(manager: ModuleEnvironmentManager) extends WindowedStreamingExecu
 
     output = manager.getRoundRobinOutput("DstIpStream")
     output.put(objectSerializer.serialize(gen.DstIpReduceResult()))
+
+    gen.clear()
   }
 
 }
