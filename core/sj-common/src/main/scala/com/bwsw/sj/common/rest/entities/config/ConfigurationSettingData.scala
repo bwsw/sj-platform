@@ -11,9 +11,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 
 import scala.collection.mutable.ArrayBuffer
 
-case class ConfigurationSettingData(name: String, value: String) extends ValidationUtils with MessageResourceUtils {
+case class ConfigurationSettingData(name: String, value: String, domain:String) extends ValidationUtils with MessageResourceUtils {
   @JsonIgnore
-  def asModelConfigurationSetting(domain: String) = {
+  def asModelConfigurationSetting = {
     val configurationSetting = new ConfigurationSetting(
       createConfigurationSettingName(domain, this.name),
       this.value,
@@ -24,7 +24,7 @@ case class ConfigurationSettingData(name: String, value: String) extends Validat
   }
 
   @JsonIgnore
-  def validate(domain: String) = {
+  def validate() = {
     val configService = ConnectionRepository.getConfigService
     val errors = new ArrayBuffer[String]()
 

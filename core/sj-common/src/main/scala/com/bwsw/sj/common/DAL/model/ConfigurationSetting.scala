@@ -26,7 +26,8 @@ class ConfigurationSetting {
   def asProtocolConfigurationSetting() = {
     val configurationSettingData = new ConfigurationSettingData(
       clearConfigurationSettingName(domain, name),
-      this.value
+      this.value,
+      this.domain
     )
     
     configurationSettingData
