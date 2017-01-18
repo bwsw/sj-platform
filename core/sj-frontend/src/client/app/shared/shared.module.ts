@@ -14,7 +14,8 @@ import { InstancesService } from './services/instances.service';
 import { ModulesService } from './services/modules.service';
 import { ProvidersService } from './services/providers.service';
 import { ServicesService } from './services/services.service';
-import { SpinnerComponent } from '../shared/spinner/spinner.component';
+import { ConfigSettingsService } from './services/config-settings.service';
+import { SpinnerComponent } from './spinner/spinner.component';
 import { StreamsService } from './services/streams.service';
 import { Ng2BootstrapModule } from 'ng2-bootstrap';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
@@ -45,7 +46,8 @@ import { FooterComponent } from './components/footer/footer.component';
     ModulesService,
     ProvidersService,
     ServicesService,
-    StreamsService
+    StreamsService,
+    ConfigSettingsService
   ],
   exports: [
     // Components
@@ -76,7 +78,8 @@ export class SharedModule {
         ModulesService,
         ProvidersService,
         ServicesService,
-        StreamsService
+        StreamsService,
+        ConfigSettingsService
       ]
     };
   }
