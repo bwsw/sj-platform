@@ -15,7 +15,7 @@ export class StreamsService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.get(this._dataUrl + '/streams', options)
+    return this._http.get(this._dataUrl + 'streams', options)
       .map(this.extractData)
       .catch(this.handleError);
   }
@@ -24,7 +24,7 @@ export class StreamsService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.get(this._dataUrl + '/streams/' + stream.name, options)
+    return this._http.get(this._dataUrl + 'streams/' + stream.name, options)
       .map(this.extractData)
       .catch(this.handleError);
   }

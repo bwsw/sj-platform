@@ -23,7 +23,16 @@ export class ConfigSettingsService {
     let body = JSON.stringify(setting);
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
-    return this._http.post(this._dataUrl + 'config-settings/', body, options)
+    return this._http.post(this._dataUrl + 'config/settings', body, options)
+      .map(this.extractData)
+      .catch(this.handleError);
+  }
+
+  public deleteSetting(setting: SettingModel): Observable<SettingModel> {
+    let headers = new Headers();
+    headers.append('Content-Type', 'application/json');
+    let options = new RequestOptions({ headers: headers });
+    return this._http.delete(this._dataUrl + 'config/settings/' + setting.domain + '/' + setting.name.split('.')[1], options)
       .map(this.extractData)
       .catch(this.handleError);
   }

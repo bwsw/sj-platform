@@ -18,6 +18,18 @@
           </div>
         </div>
 
+        <!-- Alerts -->
+        <div class="main-alerts mt-1">
+          <alert class="custom-alert"
+                 *ngFor="let alert of alerts; let i = index"
+                 [type]="alert.type"
+                 dismissible="true"
+                 [dismissOnTimeout]="alert.timeout"
+                 (close)="closeAlert(i)">
+            {{ alert.msg }}
+          </alert>
+        </div>
+
         <!-- Settings list -->
         <div class="table-wrapper">
           <table class="table table-hover table-sm mt-1 mb-0">
@@ -26,19 +38,28 @@
               <th>Name</th>
               <th>Value</th>
               <th>Config domain</th>
+              <th class="actions-column">Actions</th>
             </tr>
             </thead>
             <tbody>
-            <tr *ngIf="!serviceList || (serviceList && serviceList.length === 0)">
+            <tr *ngIf="!settingsList || (settingsList && settingsList.length === 0)">
               <td colspan="20" class="text-center">No settings have been found.</td>
             </tr>
 
             <tr *ngFor="let setting of settingsList | orderBy: 'name' | listFilter : term"
                 [ngClass]="{ 'table-info': isSelected(setting) }"
-                (click)="setting_select(service)">
+                (click)="selectSetting(service)">
               <td>{{ setting.name }}</td>
               <td>{{ setting.value }}</td>
               <td>{{ setting.domain }}</td>
+              <td class="actions-column">
+                <button type="button"
+                        class="btn btn-sm btn-secondary"
+                        title="Delete service"
+                        (click)="deleteSettingConfirm(DeleteSetting, setting)">
+                  <i class="fa fa-trash"></i>
+                </button>
+              </td>
             </tr>
             </tbody>
           </table>
@@ -67,7 +88,7 @@
             <label class="col-sm-2 col-form-label required">Name</label>
             <div class="col-sm-10">
               <input [(ngModel)]="new_setting.name" name="settingName" type="text" class="form-control"
-                     required>
+                     required pattern="[a-z\-]+">
             </div>
           </fieldset>
 
@@ -110,6 +131,32 @@
                 (click)="createSetting(AddSetting)">
           Create
         </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div bsModal #DeleteSetting="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" (click)="DeleteSetting.hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Delete confirmation</h4>
+      </div>
+
+      <div class="modal-body" *ngIf="setting_to_delete">
+        <p>Do you really want to delete setting "{{ setting_to_delete.name }}" ? This action can not be undone!</p>
+      </div>
+
+      <div class="modal-footer">
+        <template [ngIf]="setting_to_delete">
+          <button type="button" class="btn btn-secondary" (click)="DeleteSetting.hide()">Cancel</button>
+          <button type="button" class="btn btn-danger"
+                  (click)="deleteSetting(DeleteSetting, setting_to_delete)">Delete
+          </button>
+        </template>
       </div>
     </div>
   </div>
