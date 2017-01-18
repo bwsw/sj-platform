@@ -10,7 +10,8 @@ object Dependencies {
     ("com.bwsw" % "t-streams_2.11" % "1.0-SNAPSHOT")
       .exclude("org.slf4j", "slf4j-simple")
       .exclude("org.slf4j", "slf4j-api")
-      .exclude("log4j", "log4j"),
+      .exclude("log4j", "log4j")
+      .exclude("io.netty", "netty"),
     ("org.mongodb" % "casbah_2.11" % "3.1.1")
       .exclude("org.slf4j", "slf4j-api"),
     "org.mongodb.morphia" % "morphia" % "1.3.0",
@@ -19,7 +20,8 @@ object Dependencies {
     ("org.apache.kafka" % "kafka_2.11" % "0.10.1.0")
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
-      .exclude("log4j", "log4j"),
+      .exclude("log4j", "log4j")
+      .exclude("io.netty", "netty"),
     ("org.apache.curator" % "curator-recipes" % "2.11.1")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
@@ -27,8 +29,7 @@ object Dependencies {
     ("org.elasticsearch" % "elasticsearch" % "5.1.1")
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
-      .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty"),
+      .exclude("log4j", "log4j"),
     "org.elasticsearch.client" % "transport" % "5.1.1",
     "org.apache.logging.log4j" % "log4j-core" % "2.7",
     "org.apache.logging.log4j" % "log4j-api" % "2.7",
@@ -40,7 +41,8 @@ object Dependencies {
     ("org.apache.kafka" % "kafka_2.11" % "0.10.1.0")
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
-      .exclude("log4j", "log4j"),
+      .exclude("log4j", "log4j")
+      .exclude("io.netty", "netty"),
     ("net.openhft" % "chronicle-queue" % "4.5.19")
       .exclude("org.slf4j", "slf4j-api")
   ))
@@ -62,7 +64,8 @@ object Dependencies {
     ("org.apache.kafka" % "kafka_2.11" % "0.10.1.0")
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
-      .exclude("log4j", "log4j"),
+      .exclude("log4j", "log4j")
+      .exclude("io.netty", "netty"),
     "net.openhft" % "chronicle-queue" % "4.5.19"
   ))
 
@@ -70,19 +73,21 @@ object Dependencies {
     ("org.apache.kafka" % "kafka_2.11" % "0.10.1.0")
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
-      .exclude("log4j", "log4j"),
+      .exclude("log4j", "log4j")
+      .exclude("io.netty", "netty"),
     ("org.apache.curator" % "curator-recipes" % "2.11.1")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
+      .exclude("io.netty", "netty")
   ))
 
   lazy val sjOutputEngineDependencies = Def.setting(Seq(
     ("org.elasticsearch" % "elasticsearch" % "5.1.1")
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
-      .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty"),
-    "org.elasticsearch.client" % "transport" % "5.1.1",
+      .exclude("log4j", "log4j"),
+    ("org.elasticsearch.client" % "transport" % "5.1.1")
+      .exclude("org.elasticsearch.plugin", "transport-netty3-client"),
     "org.apache.logging.log4j" % "log4j-core" % "2.7",
     "org.apache.logging.log4j" % "log4j-api" % "2.7"
   ))
