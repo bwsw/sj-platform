@@ -5,7 +5,6 @@ import com.hazelcast.config._
 import com.hazelcast.core.{Hazelcast, HazelcastInstance, IMap}
 import com.hazelcast.mapreduce.{JobTracker, KeyValueSource, Job}
 import com.bwsw.sj.examples.sflow.module.process.mapreduce.mappers._
-import com.bwsw.sj.examples.sflow.module.process.mapreduce.reducerFactories._
 
 import scala.collection.JavaConverters._
 
@@ -103,6 +102,8 @@ class Generator {
   }
 
   def uuid = java.util.UUID.randomUUID.toString
+
+  def clear() = getMap.destroy()
 }
 
 
