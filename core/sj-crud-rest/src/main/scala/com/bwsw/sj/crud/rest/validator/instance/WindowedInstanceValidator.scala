@@ -177,7 +177,7 @@ class WindowedInstanceValidator extends InstanceValidator {
 
     // 'parallelism' field
     val partitions = getStreamsPartitions(inputStreams)
-    val minPartitionCount = if (partitions.nonEmpty) partitions.values.min else 0
+    val minPartitionCount = if (partitions.nonEmpty) partitions.min else 0
     errors ++= checkParallelism(instance.parallelism, minPartitionCount)
 
     val allStreams = inputStreams.union(outputStreams)

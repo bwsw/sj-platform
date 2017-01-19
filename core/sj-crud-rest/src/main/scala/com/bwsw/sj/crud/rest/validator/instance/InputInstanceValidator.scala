@@ -3,7 +3,7 @@ package com.bwsw.sj.crud.rest.validator.instance
 import com.bwsw.sj.common.DAL.model.TStreamService
 import com.bwsw.sj.common.rest.entities.module.{InputInstanceMetadata, InstanceMetadata, SpecificationData}
 import com.bwsw.sj.common.utils.EngineLiterals._
-import com.bwsw.sj.common.utils.ServiceLiterals
+import com.bwsw.sj.common.utils.StreamLiterals.tstreamType
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable.ArrayBuffer
@@ -111,15 +111,15 @@ class InputInstanceValidator extends InstanceValidator {
       errors += createMessage("rest.validator.source_stream.must.one.of", "Output", outputTypes.mkString("[", ", ", "]"))
     }
 
-    if (outputStreams.nonEmpty && !outputStreams.exists(_.streamType != ServiceLiterals.tstreamsType)) {
-      val tStreamsServices = getStreamServices(outputStreams)
-      if (tStreamsServices.size != 1) {
-        errors += createMessage("rest.validator.t_stream.same.service")
-      } else {
-        val service = serviceDAO.get(tStreamsServices.head)
-        if (!service.get.isInstanceOf[TStreamService]) {
-          errors += createMessage("rest.validator.service.must", "t-streams", "TstrQ")
-        }
+    val tStreamsServices = getStreamServices(outputStreams.filter { s =>
+      s.streamType.equals(tstreamType)
+    })
+    if (tStreamsServices.size != 1) {
+      errors += createMessage("rest.validator.t_stream.same.service")
+    } else {
+      val service = serviceDAO.get(tStreamsServices.head)
+      if (!service.get.isInstanceOf[TStreamService]) {
+        errors += createMessage("rest.validator.service.must", "t-streams", "TstrQ")
       }
     }
 
