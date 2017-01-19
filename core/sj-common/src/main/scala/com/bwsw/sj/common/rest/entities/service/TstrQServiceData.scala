@@ -87,7 +87,7 @@ class TstrQServiceData() extends ServiceData() {
               errors += s"Data-provider '$x' does not exist"
             case Some(provider) =>
               if (!allowedTypes.contains(provider.providerType)) {
-                errors += createMessage("entity.error.must.one.type.other.given", "Data-provider", allowedTypes.mkString("[", ", ", "]"), provider.providerType)
+                errors += createMessage("entity.error.must.one.type.other.given", "Data-provider", allowedTypes.mkString("' or '"), provider.providerType)
               }
           }
         }
