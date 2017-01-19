@@ -263,6 +263,14 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
     this.new_instance.outputs.splice(i, 1);
   }
 
+  public addRelatedStream() {
+    this.new_instance['related-streams'].push('');
+  }
+
+  public removeRelatedStream(i: number): void {
+    this.new_instance['related-streams'].splice(i, 1);
+  }
+
   public checkTimestampAcceptable(): void {
     switch (this.new_instance.module['module-type']) {
       case 'regular-streaming':

@@ -3,7 +3,12 @@ import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 
 import {
-  InstanceModel, SubtypedInstance, RegularStreamingInstance, OutputStreamingInstance, InputStreamingInstance
+  InstanceModel,
+  SubtypedInstance,
+  RegularStreamingInstance,
+  OutputStreamingInstance,
+  InputStreamingInstance,
+  WindowedStreamingInstance
 } from '../models/instance.model';
 
 @Injectable()
@@ -115,8 +120,20 @@ export class InstancesService {
 
         break;
 
-      // case 'windowed-streaming':
-      //   break;
+      case 'windowed-streaming':
+        inst = new WindowedStreamingInstance();
+        inst = InstancesService.fillInstanceGeneralFields(orig, inst);
+        inst['outputs'] = orig['outputs'];
+        inst['state-management'] = orig['state-management'];
+        inst['window'] = orig['window'];
+        inst['related-streams'] = orig['related-streams'];
+        inst['state-full-checkpoint'] = orig['state-full-checkpoint'];
+        inst['event-wait-time'] = orig['event-wait-time'];
+        inst['main-stream'] = orig['main-stream'];
+        inst['batch-fill-type'] = orig['batch-fill-type'];
+        inst['sliding-interval'] = orig['sliding-interval'];
+        inst['start-from'] = orig['start-from'] === 'timestamp' ? orig['start-from-timestamp'] : orig['start-from'];
+        break;
 
       case 'output-streaming':
         inst = new OutputStreamingInstance();

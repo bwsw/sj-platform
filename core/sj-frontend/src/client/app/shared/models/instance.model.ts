@@ -8,6 +8,7 @@ export class InstanceModel {
 
   'async-backup-count': number;
   'backup-count': number;
+  'batch-fill-type' : Object;
   'checkpoint-interval': number;
   'checkpoint-mode': string;
   'coordination-service': string;
@@ -21,6 +22,7 @@ export class InstanceModel {
   'inputs': string[] = [''];
   'jvm-options': Object;
   'lookup-history': number;
+  'main-stream' : string;
   'name': string;
   'node-attributes': Object;
   'options': Object;
@@ -31,9 +33,12 @@ export class InstanceModel {
   'per-task-ram': number;
   'performance-reporting-interval': number;
   'queue-max-size': number;
+  'related-streams' : string[] = [''];
+  'sliding-interval' : number;
   'start-from': string;
   'state-full-checkpoint': string;
   'state-management': string;
+  'window' : number;
 
   [key: string]: any;
 }
@@ -65,7 +70,18 @@ export class RegularStreamingInstance extends SubtypedInstance {
   'state-management': string;
 }
 
-// export class WindowedStreamingInstance extends SubtypedInstance {}
+export class WindowedStreamingInstance extends SubtypedInstance {
+  'outputs': string[] = [''];
+  'window' : number;
+  'sliding-interval' : number;
+  'main-stream' : string;
+  'related-streams' : string[] = [''];
+  'batch-fill-type' : Object;
+  'start-from' : string|number;
+  'state-management' : string;
+  'state-full-checkpoint' : number;
+  'event-wait-time' : number;
+}
 
 export class OutputStreamingInstance extends SubtypedInstance {
   'checkpoint-interval': number;

@@ -343,8 +343,107 @@
               </div>
             </fieldset>
 
+            <!-- Window -->
+            <fieldset *ngIf="new_instance.module['module-type'] === 'windowed-streaming'" class="form-group row">
+              <label class="col-form-label col-sm-2 required">Window</label>
+              <div class="col col-sm-10">
+                <input [(ngModel)]="new_instance['window']" name="instanceWindow" type="number" pattern="[1-9][0-9]+" required class="form-control">
+              </div>
+            </fieldset>
+
+            <!-- sliding-interval -->
+            <fieldset *ngIf="new_instance.module['module-type'] === 'windowed-streaming'" class="form-group row">
+              <label class="col-form-label col-sm-2 required">Sliding interval</label>
+              <div class="col col-sm-10">
+                <input [(ngModel)]="new_instance['sliding-interval']" name="instanceSlidingInterval" type="number" pattern="[1-9][0-9]+" required class="form-control">
+              </div>
+            </fieldset>
+
+            <!-- main-stream -->
+            <fieldset *ngIf="new_instance.module['module-type'] === 'windowed-streaming'" class="form-group row">
+              <label class="col-form-label col-sm-2 required">Main stream</label>
+              <div class="col col-sm-10">
+                <div class="mb-1 row">
+                  <div class="col-sm-6">
+                    <select [value]="new_instance['main-stream']" (input)="new_instance['main-stream'] = $event.target.value"
+                            name="instanceMainStream" required class="form-control">
+                      <option *ngFor="let stream of streamList">{{stream.name}}</option>
+                    </select>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="input-group">
+                      <select [value]="new_instance['main-stream-type']" (input)="new_instance['main-stream-type'] = $event.target.value"
+                              name="instanceMainStreaInputType" required class="form-control">
+                        <option>full</option>
+                        <option>split</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+
+            <!-- related-streams -->
+            <fieldset *ngIf="new_instance.module['module-type'] === 'windowed-streaming'"
+              class="form-group row">
+              <label class="col-form-label col-sm-2 required">Related streams</label>
+
+              <div class="col col-sm-10">
+                <div *ngFor="let relatedStream of new_instance['related-streams']; let i = index;  trackBy:customTrackBy"
+                     class="input-group mb-1">
+                  <div class="col-sm-6">
+                    <select [(ngModel)]="new_instance['related-streams'][i]"
+                            name="instanceRelatedStream" required class="form-control">
+                      <option *ngFor="let stream of streamList">{{stream.name}}</option>
+                    </select>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="input-group">
+                      <select [(ngModel)]="new_instance['related-stream-type']"
+                        name="instanceRelatedStreaInputType" required class="form-control">
+                        <option>full</option>
+                        <option>split</option>
+                      </select>
+                    </div>
+                  </div>
+                  <span class="input-group-btn" *ngIf="i!==0">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            (click)="removeRelatedStream(i)">
+                      <i class="fa fa-remove"></i>
+                    </button>
+                  </span>
+                </div>
+
+                <button type="button" (click)="addRelatedStream()" class="btn btn-sm btn-secondary">+ Add related stream</button>
+              </div>
+            </fieldset>
+
+            <!-- batch-fill-type -->
+            <fieldset *ngIf="new_instance.module['module-type'] === 'windowed-streaming'" class="form-group row">
+              <label class="col-form-label col-sm-2 required">Batch fill type</label>
+              <div class="col col-sm-10">
+                <div class="mb-1 row">
+                  <div class="col-sm-6">
+                    <select [value]="new_instance['batch-fill-type']" (input)="new_instance['batch-fill-type'] = $event.target.value"
+                            name="instanceBatchFillType']" required class="form-control">
+                      <option>every-nth</option>
+                      <option>time-interval</option>
+                      <option>transaction-interval</option>
+                    </select>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="input-group">
+                      <input [(ngModel)]="new_instance['batch-fill-type-value']" name="instanceBatchFillTypeValue" type="text"
+                             required class="form-control">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+
             <!-- Checkpoint mode -->
-            <fieldset class="form-group row">
+            <fieldset *ngIf="new_instance.module['module-type'] !== 'windowed-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2 required">Checkpoint mode</label>
               <div class="col col-sm-10">
                 <select [(ngModel)]="new_instance['checkpoint-mode']" name="instanceCheckpointMode" required
@@ -356,7 +455,7 @@
             </fieldset>
 
             <!-- Checkpoint interval -->
-            <fieldset class="form-group row">
+            <fieldset *ngIf="new_instance.module['module-type'] !== 'windowed-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2 required">Checkpoint interval</label>
               <div class="col col-sm-10">
                 <input [(ngModel)]="new_instance['checkpoint-interval']" name="instanceCheckpointInterval" type="number"
@@ -365,7 +464,8 @@
             </fieldset>
 
             <!-- State management -->
-            <fieldset *ngIf="new_instance.module['module-type'] === 'regular-streaming'" class="form-group row">
+            <fieldset *ngIf="new_instance.module['module-type'] === 'regular-streaming' ||
+                              new_instance.module['module-type'] === 'windowed-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2">State management</label>
               <div class="col col-sm-10">
                 <select [(ngModel)]="new_instance['state-management']" name="instanceStateManagement"
@@ -378,7 +478,8 @@
             </fieldset>
 
             <!-- State full checkpoint -->
-            <fieldset *ngIf="new_instance.module['module-type'] === 'regular-streaming'" class="form-group row">
+            <fieldset *ngIf="new_instance.module['module-type'] === 'regular-streaming' ||
+                              new_instance.module['module-type'] === 'windowed-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2">State full checkpoint</label>
               <div class="col col-sm-10">
                 <input [(ngModel)]="new_instance['state-full-checkpoint']" name="instanceStateFullCheckpoint"
@@ -405,8 +506,7 @@
             </fieldset>
 
             <!-- Start-from -->
-            <fieldset *ngIf="new_instance.module['module-type'] === 'regular-streaming' ||
-                new_instance.module['module-type'] === 'output-streaming'" class="form-group row">
+            <fieldset *ngIf="new_instance.module['module-type'] !== 'input-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2">Start-from</label>
               <div class="col col-sm-10">
                 <select [(ngModel)]="new_instance['start-from']" name="instanceStartFrom"
@@ -495,7 +595,8 @@
             </fieldset>
 
             <!-- Event-wait-time -->
-            <fieldset *ngIf="new_instance.module['module-type'] === 'regular-streaming'" class="form-group row">
+            <fieldset *ngIf="new_instance.module['module-type'] === 'regular-streaming' ||
+                              new_instance.module['module-type'] === 'windowed-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2">Event-wait-time</label>
               <div class="col col-sm-10">
                 <input [(ngModel)]="new_instance['event-wait-time']" name="instanceEventWaitTime" type="number"
