@@ -60,6 +60,21 @@ case class ConfigurationSettingData(name: String, value: String, domain:String) 
           errors += createMessage("entity.error.attribute.required", "Value")
     }
 
+    // 'domain' field
+    Option(this.domain) match {
+      case None =>
+        errors += createMessage("entity.error.attribute.required", "Domain")
+      case Some(x) =>
+        if (x.isEmpty)
+          errors += createMessage("entity.error.attribute.required", "Domain")
+        else {
+          if (!ConfigLiterals.domains.contains(x)) {
+            errors += createMessage("rest.validator.attribute.unknown.value", "domain", s"$x") + ". " +
+              createMessage("rest.validator.attribute.must.one_of", "Domain", ConfigLiterals.domains.mkString("[", ", ", "]"))
+          }
+        }
+    }
+
     errors
   }
 
