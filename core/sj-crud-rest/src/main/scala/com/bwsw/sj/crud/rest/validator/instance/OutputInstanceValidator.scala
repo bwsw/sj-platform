@@ -47,7 +47,7 @@ class OutputInstanceValidator extends InstanceValidator {
         else {
           if (!x.equals(EngineLiterals.everyNthMode)) {
             errors += createMessage("rest.validator.attribute.unknown.value", "checkpoint-mode", s"$x") + ". " +
-              createMessage("rest.validator.attribute.must.one_of", "Checkpoint-mode", checkpointModes.mkString("[", ", ", "]"))
+              createMessage("rest.validator.attribute.not", "Checkpoint-mode", EngineLiterals.everyNthMode)
           }
         }
     }
