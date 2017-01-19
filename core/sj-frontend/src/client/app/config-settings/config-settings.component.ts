@@ -43,7 +43,7 @@ export class ConfigSettingsComponent implements OnInit {
           modal.hide()
           this.new_setting = new SettingModel();
           this.getSettingsList();
-          this.current_setting = this.new_setting;
+          this.alerts.push({ msg: setting, type: 'success', closable: true, timeout: 3000 });
         },
         error => {
           modal.hide();
