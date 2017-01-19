@@ -15,9 +15,9 @@ case class ConfigurationSettingData(name: String, value: String, domain:String) 
   @JsonIgnore
   def asModelConfigurationSetting = {
     val configurationSetting = new ConfigurationSetting(
-      createConfigurationSettingName(domain, this.name),
+      createConfigurationSettingName(this.domain, this.name),
       this.value,
-      domain
+      this.domain
     )
 
     configurationSetting
@@ -37,7 +37,8 @@ case class ConfigurationSettingData(name: String, value: String, domain:String) 
           errors += createMessage("entity.error.attribute.required", "Name")
         }
         else {
-          if (configService.get(x).isDefined) {
+          val modelConfigName = createConfigurationSettingName(this.domain, this.name)
+          if (configService.get(modelConfigName).isDefined) {
             errors += createMessage("entity.error.already.exists", "Config setting", x)
           }
 
@@ -45,7 +46,7 @@ case class ConfigurationSettingData(name: String, value: String, domain:String) 
             errors += createMessage("entity.error.incorrect.name", "Config setting", x, "config setting")
           }
 
-          if (domain == ConfigLiterals.tstreamsDomain && !validateTstreamProperty()) {
+          if (this.domain == ConfigLiterals.tstreamsDomain && !validateTstreamProperty()) {
             errors += createMessage("entity.error.incorrect.name.tstreams.domain", "Config setting", x)
           }
         }
