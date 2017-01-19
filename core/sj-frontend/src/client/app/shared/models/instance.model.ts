@@ -2,6 +2,8 @@ import { ModuleModel } from './module.model';
 
 export class InstanceModel {
   'inputs-types': string[] = [''];
+  'main-stream-type': string = '';
+  'related-streams-type': string[] = [''];
   'module': ModuleModel;
   'start-from-timestamp': number;
   'status': string;
@@ -9,6 +11,7 @@ export class InstanceModel {
   'async-backup-count': number;
   'backup-count': number;
   'batch-fill-type' : Object;
+  'batch-fill-type-value': string;
   'checkpoint-interval': number;
   'checkpoint-mode': string;
   'coordination-service': string;

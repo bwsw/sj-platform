@@ -373,7 +373,7 @@
                   <div class="col-sm-6">
                     <div class="input-group">
                       <select [value]="new_instance['main-stream-type']" (input)="new_instance['main-stream-type'] = $event.target.value"
-                              name="instanceMainStreaInputType" required class="form-control">
+                              name="instanceMainStreamType" required class="form-control">
                         <option>full</option>
                         <option>split</option>
                       </select>
@@ -392,14 +392,14 @@
                 <div *ngFor="let relatedStream of new_instance['related-streams']; let i = index;  trackBy:customTrackBy"
                      class="input-group mb-1">
                   <div class="col-sm-6">
-                    <select [(ngModel)]="new_instance['related-streams'][i]"
+                    <select [value]="new_instance['related-streams'][i]" (input)="new_instance['related-streams'][i] = $event.target.value"
                             name="instanceRelatedStream" required class="form-control">
                       <option *ngFor="let stream of streamList">{{stream.name}}</option>
                     </select>
                   </div>
                   <div class="col-sm-6">
                     <div class="input-group">
-                      <select [(ngModel)]="new_instance['related-stream-type']"
+                      <select [value]="new_instance['related-streams-type'][i]" (input)="new_instance['related-streams-type'][i] = $event.target.value"
                         name="instanceRelatedStreaInputType" required class="form-control">
                         <option>full</option>
                         <option>split</option>
@@ -434,7 +434,7 @@
                   </div>
                   <div class="col-sm-6">
                     <div class="input-group">
-                      <input [(ngModel)]="new_instance['batch-fill-type-value']" name="instanceBatchFillTypeValue" type="text"
+                      <input [(ngModel)]="new_instance['batch-fill-type-value']" name="instanceBatchFillTypeValue" type="number"
                              required class="form-control">
                     </div>
                   </div>
@@ -483,7 +483,7 @@
               <label class="col-form-label col-sm-2">State full checkpoint</label>
               <div class="col col-sm-10">
                 <input [(ngModel)]="new_instance['state-full-checkpoint']" name="instanceStateFullCheckpoint"
-                       type="text" class="form-control">
+                       type="number" class="form-control">
               </div>
             </fieldset>
 
@@ -500,10 +500,14 @@
             <fieldset class="form-group row">
               <label class="col-form-label col-sm-2">Options</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="new_instance.options" name="instanceOptions" type="text"
-                       class="form-control">
+                <input [(ngModel)]="new_instance.options" validJson name="instanceOptions" type="text"
+                       #instanceOptions="ngModel"class="form-control">
               </div>
             </fieldset>
+
+            <div *ngIf="formErrors.instanceOptions && instanceOptions.touched" class="alert alert-warning">
+              {{ formErrors.instanceOptions }}
+            </div>
 
             <!-- Start-from -->
             <fieldset *ngIf="new_instance.module['module-type'] !== 'input-streaming'" class="form-group row">
@@ -511,7 +515,6 @@
               <div class="col col-sm-10">
                 <select [(ngModel)]="new_instance['start-from']" name="instanceStartFrom"
                         class="form-control">
-                  <option value=""></option>
                   <option value="newest">newest</option>
                   <option value="oldest">oldest</option>
                   <option value="timestamp" *ngIf="startFromTimestampAcceptable">timestamp</option>
@@ -550,8 +553,8 @@
             <fieldset class="form-group row">
               <label class="col-form-label col-sm-2">JVM options</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="new_instance['jvm-options']" name="instanceJvmOptions" type="text"
-                       class="form-control">
+                <input [(ngModel)]="new_instance['jvm-options']" validJson name="instanceJvmOptions" type="text"
+                       #instanceJvmOptions="ngModel" class="form-control">
               </div>
             </fieldset>
 

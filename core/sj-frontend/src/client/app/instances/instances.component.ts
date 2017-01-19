@@ -43,11 +43,15 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
 
   public formErrors: { [key: string]: string } = {
     'instanceJvmOptions': '',
+    'instanceOptions': '',
     'instanceNodeAttributes': '',
     'instanceEnvironmentVariables': '',
   };
 
   public validationMessages: { [key: string]: { [key: string]: string } } = {
+    'instanceOptions': {
+      'validJson': 'JVM options value is not a valid json'
+    },
     'instanceJvmOptions': {
       'validJson': 'JVM options value is not a valid json'
     },
@@ -161,6 +165,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
           this.new_instance = instanceInfo;
           this.new_instance.options = JSON.stringify(instanceInfo.options);
           this.new_instance['jvm-options'] = JSON.stringify(instanceInfo['jvm-options']);
+          this.new_instance['options'] = JSON.stringify(instanceInfo['options']);
           this.new_instance['node-attributes'] = JSON.stringify(instanceInfo['node-attributes']);
           this.new_instance['environment-variables'] = JSON.stringify(instanceInfo['environment-variables']);
           this.new_instance.name = '';
@@ -188,6 +193,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
     req.subscribe(
       status => {
         modal.hide();
+        this.new_instance = new InstanceModel();
         this.showSpinner = false;
         this.alerts.push({msg: status, type: 'success', closable: true, timeout:3000});
       },
