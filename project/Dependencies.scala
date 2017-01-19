@@ -3,7 +3,7 @@ import sbt._
 object Dependencies {
 
   object Versions {
-    val scala = "2.11.8"
+    val scala = "2.12.1"
   }
 
   lazy val sjCommonDependencies = Def.setting(Seq(
@@ -12,8 +12,9 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
       .exclude("io.netty", "netty")
-      .exclude("io.netty", "netty-all"),
-    ("org.mongodb" % "casbah_2.11" % "3.1.1")
+      .exclude("io.netty", "netty-all")
+      .exclude("org.scalatest", "scalatest_2.11"),
+    ("org.mongodb" %% "casbah" % "3.1.1")
       .exclude("org.slf4j", "slf4j-api"),
     "org.mongodb.morphia" % "morphia" % "1.3.0",
     "org.apache.commons" % "commons-io" % "1.3.2",
