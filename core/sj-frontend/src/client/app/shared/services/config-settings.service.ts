@@ -2,55 +2,45 @@ import { Injectable } from '@angular/core';
 import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 
-import { StreamModel } from '../models/stream.model';
+import { SettingModel } from '../models/setting.model';
 
 @Injectable()
-export class StreamsService {
+export class ConfigSettingsService {
   private _dataUrl = '/v1/';
 
-  constructor(private _http: Http) {
-  }
+  constructor(private _http: Http) {}
 
-  public getStreamList(): Observable<StreamModel[]> {
+  public getConfigSettingsList(): Observable<SettingModel[]> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.get(this._dataUrl + 'streams', options)
+    return this._http.get(this._dataUrl + 'config/settings', options)
       .map(this.extractData)
       .catch(this.handleError);
   }
 
-  public getStream(stream: StreamModel): Observable<StreamModel> {
-    let headers = new Headers();
-    headers.append('Content-Type', 'application/json');
-    let options = new RequestOptions({ headers: headers });
-    return this._http.get(this._dataUrl + 'streams/' + stream.name, options)
-      .map(this.extractData)
-      .catch(this.handleError);
-  }
-
-  public saveStream(stream: StreamModel): Observable<StreamModel> {
-    let body = JSON.stringify(stream);
+  public saveSetting(setting: SettingModel): Observable<SettingModel> {
+    let body = JSON.stringify(setting);
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
-    return this._http.post(this._dataUrl + 'streams', body, options)
+    return this._http.post(this._dataUrl + 'config/settings', body, options)
       .map(this.extractData)
       .catch(this.handleError);
   }
 
-  public deleteStream(stream: StreamModel): Observable<StreamModel> {
+  public deleteSetting(setting: SettingModel): Observable<SettingModel> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.delete(this._dataUrl + 'streams/' + stream.name, options)
+    return this._http.delete(this._dataUrl + 'config/settings/' + setting.domain + '/' + setting.name, options)
       .map(this.extractData)
       .catch(this.handleError);
   }
 
   private extractData(res: Response) { //TODO Write good response parser
     let body = {};
-    if (typeof res.json()['entity']['streams'] !== 'undefined') {
-      body = res.json()['entity']['streams'];
+    if (typeof res.json()['entity']['config-settings'] !== 'undefined') {
+      body = res.json()['entity']['config-settings'];
     } else if (typeof res.json()['entity']['message'] !== 'undefined') {
       body = res.json()['entity']['message'];
     } else {

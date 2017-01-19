@@ -13,6 +13,7 @@ import { ModulesModule } from './modules/modules.module';
 import { ProvidersModule } from './providers/providers.module';
 import { ServicesModule } from './services/services.module';
 import { StreamsModule } from './streams/streams.module';
+import { ConfigSettingsModule } from './config-settings/config-settings.module';
 
 
 @NgModule({
@@ -26,7 +27,8 @@ import { StreamsModule } from './streams/streams.module';
     ModulesModule,
     ProvidersModule,
     ServicesModule,
-    StreamsModule
+    StreamsModule,
+    ConfigSettingsModule
   ],
   declarations: [
     AppComponent
