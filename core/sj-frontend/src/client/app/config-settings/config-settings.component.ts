@@ -40,14 +40,15 @@ export class ConfigSettingsComponent implements OnInit {
     this._configSettingsService.saveSetting(this.new_setting)
       .subscribe(
         setting => {
-          modal.hide();
+          modal.hide()
           this.new_setting = new SettingModel();
           this.getSettingsList();
           this.current_setting = this.new_setting;
         },
         error => {
-          this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 });
           modal.hide();
+          this.new_setting = new SettingModel();
+          this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 });
         });
   }
 
