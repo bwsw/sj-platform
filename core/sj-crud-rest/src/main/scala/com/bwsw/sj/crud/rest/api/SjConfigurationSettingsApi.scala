@@ -78,7 +78,7 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator {
             val configElements = configService.getAll
             val response = OkRestResponse(Map(s"config-settings" -> mutable.Buffer()))
             if (configElements.nonEmpty) {
-              response.entity = Map("config-settings" -> configElements)
+              response.entity = Map("config-settings" -> configElements.map(_.asProtocolConfigurationSetting()))
             }
 
             complete(restResponseToHttpResponse(response))

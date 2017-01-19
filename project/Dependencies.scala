@@ -11,7 +11,8 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-simple")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty"),
+      .exclude("io.netty", "netty")
+      .exclude("io.netty", "netty-all"),
     ("org.mongodb" % "casbah_2.11" % "3.1.1")
       .exclude("org.slf4j", "slf4j-api"),
     "org.mongodb.morphia" % "morphia" % "1.3.0",
@@ -30,8 +31,7 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j"),
-    ("org.elasticsearch.client" % "transport" % "5.1.1")
-      .exclude("io.netty", "netty"),
+    "org.elasticsearch.client" % "transport" % "5.1.1",
     "org.apache.logging.log4j" % "log4j-core" % "2.7",
     "org.apache.logging.log4j" % "log4j-api" % "2.7",
     "postgresql" % "postgresql" % "9.1-901.jdbc4",
@@ -87,8 +87,7 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j"),
-    ("org.elasticsearch.client" % "transport" % "5.1.1")
-      .exclude("io.netty", "netty"),
+    "org.elasticsearch.client" % "transport" % "5.1.1",
     "org.apache.logging.log4j" % "log4j-core" % "2.7",
     "org.apache.logging.log4j" % "log4j-api" % "2.7"
   ))

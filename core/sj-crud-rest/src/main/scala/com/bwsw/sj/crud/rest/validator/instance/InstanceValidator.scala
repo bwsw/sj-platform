@@ -72,7 +72,7 @@ abstract class InstanceValidator extends ValidationUtils with CompletionUtils wi
 
     // 'per-task-ram' field
     if (parameters.perTaskRam <= 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Per-task-cores")
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Per-task-ram")
     }
 
     // 'performance-reporting-interval' field

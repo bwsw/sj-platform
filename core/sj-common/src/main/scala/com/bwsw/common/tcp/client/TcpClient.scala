@@ -9,8 +9,6 @@ import io.netty.buffer.PooledByteBufAllocator
 import io.netty.channel._
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioSocketChannel
-import io.netty.util.ResourceLeakDetector
-import io.netty.util.ResourceLeakDetector.Level
 
 /**
  * Simple tcp client for retrieving transaction ID
@@ -37,7 +35,6 @@ class TcpClient(options: TcpClientOptions) {
   }
 
   private def createChannel() = {
-    ResourceLeakDetector.setLevel(Level.ADVANCED)
     bootstrap.group(workerGroup)
       .channel(classOf[NioSocketChannel])
       .handler(new TcpClientChannelInitializer(out))
