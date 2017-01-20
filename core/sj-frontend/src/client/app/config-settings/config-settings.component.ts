@@ -15,8 +15,7 @@ export class ConfigSettingsComponent implements OnInit {
   public newSetting: SettingModel;
   public currentSetting: SettingModel;
 
-  constructor(private _configSettingsService: ConfigSettingsService) {
-  }
+  constructor(private configSettingsService: ConfigSettingsService) { }
 
   public ngOnInit() {
     this.newSetting = new SettingModel();
@@ -24,7 +23,7 @@ export class ConfigSettingsComponent implements OnInit {
   }
 
   public getSettingsList() {
-    this._configSettingsService.getConfigSettingsList()
+    this.configSettingsService.getConfigSettingsList()
       .subscribe(
         settingsList => {
           this.settingsList = settingsList;
@@ -36,7 +35,7 @@ export class ConfigSettingsComponent implements OnInit {
   }
 
   public createSetting(modal: ModalDirective) {
-    this._configSettingsService.saveSetting(this.newSetting)
+    this.configSettingsService.saveSetting(this.newSetting)
       .subscribe(
         setting => {
           modal.hide()
@@ -52,7 +51,7 @@ export class ConfigSettingsComponent implements OnInit {
   }
 
   public deleteSetting(modal: ModalDirective) {
-    this._configSettingsService.deleteSetting(this.currentSetting)
+    this.configSettingsService.deleteSetting(this.currentSetting)
       .subscribe(
         status => {
           this.alerts.push({ msg: status, type: 'success', closable: true, timeout: 3000 });
