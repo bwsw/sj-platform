@@ -3,7 +3,12 @@ import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 
 import {
-  InstanceModel, SubtypedInstance, RegularStreamingInstance, OutputStreamingInstance, InputStreamingInstance
+  InstanceModel,
+  SubtypedInstance,
+  RegularStreamingInstance,
+  OutputStreamingInstance,
+  InputStreamingInstance,
+  WindowedStreamingInstance
 } from '../models/instance.model';
 
 @Injectable()
@@ -115,8 +120,26 @@ export class InstancesService {
 
         break;
 
-      // case 'windowed-streaming':
-      //   break;
+      case 'windowed-streaming':
+        inst = new WindowedStreamingInstance();
+        inst = InstancesService.fillInstanceGeneralFields(orig, inst);
+        inst['outputs'] = orig['outputs'];
+        inst['state-management'] = orig['state-management'];
+        inst['window'] = orig['window'];
+        inst['state-full-checkpoint'] = orig['state-full-checkpoint'];
+        inst['event-wait-time'] = orig['event-wait-time'];
+        inst['main-stream'] = orig['main-stream'] + '/' + orig['main-stream-type'];
+        if (orig['related-streams'].length > 0 && orig['related-streams'][0] !== '') {
+          orig['related-streams'].forEach(function(item:string, i:number) {
+            inst['related-streams'][i] = orig['related-streams'][i] + '/' + orig['related-streams-type'][i];
+          });
+        } else {
+          inst['related-streams'] = [];
+        }
+        inst['batch-fill-type'] = {"type-name": orig['batch-fill-type'], value: orig['batch-fill-type-value']}
+        inst['sliding-interval'] = orig['sliding-interval'];
+        inst['start-from'] = orig['start-from'] === 'timestamp' ? orig['start-from-timestamp'] : orig['start-from'];
+        break;
 
       case 'output-streaming':
         inst = new OutputStreamingInstance();
@@ -151,7 +174,6 @@ export class InstancesService {
         inst[fieldName] = JSON.parse(inst[fieldName].toString());
       }
     }
-
     return inst;
   }
 

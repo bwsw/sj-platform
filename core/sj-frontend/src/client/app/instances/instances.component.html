@@ -325,9 +325,9 @@
 
             <!-- Window -->
             <fieldset *ngIf="new_instance.module['module-type'] === 'windowed-streaming'" class="form-group row">
-              <label class="col-form-label col-sm-2 required">Window</label>
+              <label class="col-form-label col-sm-2">Window</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="new_instance['window']" name="instanceWindow" type="number" pattern="[1-9][0-9]*" required class="form-control">
+                <input [(ngModel)]="new_instance['window']" name="instanceWindow" type="number" pattern="[1-9][0-9]*" class="form-control">
               </div>
             </fieldset>
 
@@ -366,27 +366,27 @@
             <!-- Related-streams -->
             <fieldset *ngIf="new_instance.module['module-type'] === 'windowed-streaming'"
                       class="form-group row">
-              <label class="col-form-label col-sm-2 required">Related streams</label>
+              <label class="col-form-label col-sm-2">Related streams</label>
 
               <div class="col col-sm-10">
                 <div *ngFor="let relatedStream of new_instance['related-streams']; let i = index;  trackBy:customTrackBy"
                      class="input-group mb-1">
                   <div class="col-sm-6">
                     <select [value]="new_instance['related-streams'][i]" (input)="new_instance['related-streams'][i] = $event.target.value"
-                            name="instanceRelatedStream" required class="form-control">
+                            name="instanceRelatedStream" class="form-control">
                       <option *ngFor="let stream of streamList">{{stream.name}}</option>
                     </select>
                   </div>
                   <div class="col-sm-6">
                     <div class="input-group">
                       <select [value]="new_instance['related-streams-type'][i]" (input)="new_instance['related-streams-type'][i] = $event.target.value"
-                              name="instanceRelatedStreaInputType" required class="form-control">
+                              name="instanceRelatedStreaInputType" class="form-control">
                         <option>full</option>
                         <option>split</option>
                       </select>
                     </div>
                   </div>
-                  <span class="input-group-btn" *ngIf="i!==0">
+                  <span class="input-group-btn">
                     <button type="button"
                             class="btn btn-secondary"
                             (click)="removeRelatedStream(i)">
