@@ -87,7 +87,7 @@
           <fieldset class="form-group row">
             <label class="col-sm-2 col-form-label required">Name</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="new_setting.name" name="settingName" type="text" class="form-control"
+              <input [(ngModel)]="newSetting.name" name="settingName" type="text" class="form-control"
                      required pattern="[a-z\-\.]+">
             </div>
           </fieldset>
@@ -96,7 +96,7 @@
           <fieldset class="form-group row">
             <label class="col-sm-2 col-form-label required">Value</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="new_setting.value" name="settingValue" type="text" class="form-control"
+              <input [(ngModel)]="newSetting.value" name="settingValue" type="text" class="form-control"
                      required>
             </div>
           </fieldset>
@@ -105,7 +105,7 @@
           <fieldset class="form-group row">
             <label class="col-sm-2 col-form-label required">Domain</label>
             <div class="col-sm-10">
-              <select required [(ngModel)]="new_setting.domain" name="settingDomain"
+              <select required [(ngModel)]="newSetting.domain" name="settingDomain"
                       class="form-control">
                 <option value="system">system</option>
                 <option value="t-streams">t-streams</option>

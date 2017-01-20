@@ -12,15 +12,15 @@ import { ConfigSettingsService } from "../shared/services/config-settings.servic
 export class ConfigSettingsComponent implements OnInit {
   public settingsList: SettingModel[];
   public alerts: Array<Object> = [];
-  public new_setting: SettingModel;
-  public current_setting: SettingModel;
+  public newSetting: SettingModel;
+  public currentSetting: SettingModel;
   public setting_to_delete: SettingModel;
 
   constructor(private _configSettingsService: ConfigSettingsService) {
   }
 
   public ngOnInit() {
-    this.new_setting = new SettingModel();
+    this.newSetting = new SettingModel();
     this.getSettingsList();
   }
 
@@ -30,24 +30,24 @@ export class ConfigSettingsComponent implements OnInit {
         settingsList => {
           this.settingsList = settingsList;
           if (settingsList.length > 0) {
-            this.current_setting = settingsList[0];
+            this.currentSetting = settingsList[0];
           }
         },
         error => this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 }));
   }
 
   public createSetting(modal: ModalDirective) {
-    this._configSettingsService.saveSetting(this.new_setting)
+    this._configSettingsService.saveSetting(this.newSetting)
       .subscribe(
         setting => {
           modal.hide()
-          this.new_setting = new SettingModel();
+          this.newSetting = new SettingModel();
           this.getSettingsList();
           this.alerts.push({ msg: setting, type: 'success', closable: true, timeout: 3000 });
         },
         error => {
           modal.hide();
-          this.new_setting = new SettingModel();
+          this.newSetting = new SettingModel();
           this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 });
         });
   }
@@ -72,10 +72,10 @@ export class ConfigSettingsComponent implements OnInit {
   }
 
   public selectSetting(setting: SettingModel) {
-    this.current_setting = setting;
+    this.currentSetting = setting;
   }
 
   public isSelected(setting: SettingModel) {
-    return setting === this.current_setting;
+    return setting === this.currentSetting;
   }
 }
