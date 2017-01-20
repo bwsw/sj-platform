@@ -20,6 +20,7 @@ export class StreamsComponent implements OnInit {
   public current_stream_service: ServiceModel;
   public stream_to_delete: StreamModel;
   public new_stream: StreamModel;
+  public showSpinner: boolean;
 
   constructor(private _streamsService: StreamsService,
               private _servicesService: ServicesService) {
@@ -30,7 +31,7 @@ export class StreamsComponent implements OnInit {
     this.getServiceList();
     this.new_stream = new StreamModel();
     this.new_stream.generator = {
-      'generator-type': '',
+      'generator-type': 'local',
       service: '',
       'instance-count': 0
     };
@@ -85,7 +86,7 @@ export class StreamsComponent implements OnInit {
   }
 
   public createStream(modal: ModalDirective) {
-    console.log(this.new_stream);
+    this.showSpinner = true;
     if (this.new_stream['stream-type'] !== 'stream.t-stream') {
       delete this.new_stream.generator;
     }
@@ -93,11 +94,13 @@ export class StreamsComponent implements OnInit {
       .subscribe(
         status => {
           modal.hide();
+          this.showSpinner = false;
           this.alerts.push({ msg: status, type: 'success', closable: true, timeout: 3000 });
           this.getStreamList();
         },
         error => {
           modal.hide();
+          this.showSpinner = false;
           this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 });
         });
   }

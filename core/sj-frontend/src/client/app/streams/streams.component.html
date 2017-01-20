@@ -1,3 +1,5 @@
+<sj-spinner [isRunning]="showSpinner"></sj-spinner>
+
 <div class="row">
   <!-- Content -->
   <div class="col col-xs-8">
@@ -33,39 +35,39 @@
         <div class="table-wrapper">
           <table class="table table-hover table-sm mt-1 mb-0">
             <thead>
-              <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Service</th>
-                <th class="actions-column">Actions</th>
-              </tr>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Service</th>
+              <th class="actions-column">Actions</th>
+            </tr>
             </thead>
             <tbody>
-              <tr *ngIf="!streamList || (streamList && streamList.length === 0)">
-                <td colspan="20" class="text-center">No streams have been found.</td>
-              </tr>
+            <tr *ngIf="!streamList || (streamList && streamList.length === 0)">
+              <td colspan="20" class="text-center">No streams have been found.</td>
+            </tr>
 
-              <tr *ngFor="let stream of streamList | orderBy: 'name' | listFilter : term"
-                  [ngClass]="{ 'table-info': isSelected(stream) }"
-                  (click)="stream_select(stream)">
-                <td>{{ stream.name }}</td>
-                <td>{{ stream.description }}</td>
-                <td>
+            <tr *ngFor="let stream of streamList | orderBy: 'name' | listFilter : term"
+                [ngClass]="{ 'table-info': isSelected(stream) }"
+                (click)="stream_select(stream)">
+              <td>{{ stream.name }}</td>
+              <td>{{ stream.description }}</td>
+              <td>
                 <span class="stream-action-link">
                   Service:
                   <span class="btn-lookup action-link"
                         (click)="get_service_info(ServiceInfo, stream.service)">{{ stream.service }}</span>
                 </span>
-                </td>
-                <td class="actions-column">
-                  <button type="button"
-                          class="btn btn-sm btn-secondary"
-                          title="Delete stream"
-                          (click)="delete_stream_confirm(DeleteStream, stream)">
-                    <i class="fa fa-trash"></i>
-                  </button>
-                </td>
-              </tr>
+              </td>
+              <td class="actions-column">
+                <button type="button"
+                        class="btn btn-sm btn-secondary"
+                        title="Delete stream"
+                        (click)="delete_stream_confirm(DeleteStream, stream)">
+                  <i class="fa fa-trash"></i>
+                </button>
+              </td>
+            </tr>
             </tbody>
           </table>
         </div>
@@ -81,7 +83,7 @@
         <div class="overflow-x-scroll">
           <ul *ngIf="current_stream">
             <li>Name: {{current_stream.name}}</li>
-            <li>Type: {{current_stream.type}}</li>
+            <li>Type: {{current_stream['stream-type']}}</li>
             <li>Description: {{current_stream.description}}</li>
             <li>Partitions: {{current_stream.partitions}}</li>
             <li>Tags: {{current_stream.tags}}</li>
@@ -113,6 +115,7 @@
 
       <div class="modal-body">
         <form #streamForm="ngForm" (ngSubmit)="createStream(CreateStream)" class="form-create-entity">
+
           <!-- Type -->
           <fieldset class="form-group row">
             <label class="col-sm-2 col-form-label required">Choose type</label>
@@ -172,19 +175,10 @@
           <fieldset *ngIf="new_stream['stream-type'] == 'stream.kafka'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Replication factor</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="new_stream['replication-factor']" name="streamReplicationFactor" type="text"
+              <input [(ngModel)]="new_stream['replication-factor']" name="streamReplicationFactor" type="number"
                      required class="form-control">
             </div>
           </fieldset>
-
-          <!--<fieldset class="form-group">-->
-          <!--<label class="col-sm-2 col-form-label">Tags</label>-->
-          <!--<tag-input-->
-          <!--placeholder="Add a tag"-->
-          <!--[(ngModel)]="new_stream.tags" name="streamTags"-->
-          <!--delimiterCode="188">-->
-          <!--</tag-input>-->
-          <!--</fieldset>-->
 
           <!-- Generator -->
           <template [ngIf]="new_stream['stream-type'] == 'stream.t-stream'">
@@ -223,15 +217,11 @@
               </div>
             </fieldset>
           </template>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="CreateStream.hide()">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="!streamForm.form.valid">Create</button>
+          </div>
         </form>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="CreateStream.hide()">Cancel</button>
-        <button type="submit" class="btn btn-primary"
-                [disabled]="!streamForm.form.valid"
-                (click)="createStream(CreateStream)">Create
-        </button>
       </div>
     </div>
   </div>
