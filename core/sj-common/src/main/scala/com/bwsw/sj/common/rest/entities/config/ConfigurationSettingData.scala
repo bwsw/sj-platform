@@ -43,7 +43,7 @@ case class ConfigurationSettingData(name: String, value: String, domain:String) 
           }
 
           if (!validateConfigSettingName(x)) {
-            errors += createMessage("entity.error.incorrect.name", "Config setting", x, "config setting")
+            errors += createMessage("entity.error.incorrect.config.name", x)
           }
 
           if (this.domain == ConfigLiterals.tstreamsDomain && !validateTstreamProperty()) {

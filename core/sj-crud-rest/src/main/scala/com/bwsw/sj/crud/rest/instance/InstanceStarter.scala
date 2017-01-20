@@ -262,7 +262,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
       "INSTANCE_ID" -> instance.name,
       "MESOS_MASTER" -> marathonMaster
     )
-    environmentVariables = environmentVariables ++ mapAsScalaMap(instance.environmentVariables)
+    environmentVariables = environmentVariables ++ instance.environmentVariables.asScala
 
     environmentVariables
   }
