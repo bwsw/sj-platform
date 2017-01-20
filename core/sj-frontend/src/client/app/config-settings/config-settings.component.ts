@@ -14,7 +14,6 @@ export class ConfigSettingsComponent implements OnInit {
   public alerts: Array<Object> = [];
   public newSetting: SettingModel;
   public currentSetting: SettingModel;
-  public setting_to_delete: SettingModel;
 
   constructor(private _configSettingsService: ConfigSettingsService) {
   }
@@ -52,8 +51,8 @@ export class ConfigSettingsComponent implements OnInit {
         });
   }
 
-  public deleteSetting(modal: ModalDirective, setting: SettingModel) {
-    this._configSettingsService.deleteSetting(setting)
+  public deleteSetting(modal: ModalDirective) {
+    this._configSettingsService.deleteSetting(this.currentSetting)
       .subscribe(
         status => {
           this.alerts.push({ msg: status, type: 'success', closable: true, timeout: 3000 });
@@ -62,8 +61,9 @@ export class ConfigSettingsComponent implements OnInit {
         error => this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 }));
     modal.hide();
   }
+
   public deleteSettingConfirm(modal: ModalDirective, setting: SettingModel) {
-    this.setting_to_delete = setting;
+    this.currentSetting = setting;
     modal.show();
   }
 

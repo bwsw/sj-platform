@@ -48,7 +48,7 @@
 
             <tr *ngFor="let setting of settingsList | orderBy: 'name' | listFilter : term"
                 [ngClass]="{ 'table-info': isSelected(setting) }"
-                (click)="selectSetting(service)">
+                (click)="selectSetting(setting)">
               <td>{{ setting.name }}</td>
               <td>{{ setting.value }}</td>
               <td>{{ setting.domain }}</td>
@@ -146,15 +146,15 @@
         <h4 class="modal-title">Delete confirmation</h4>
       </div>
 
-      <div class="modal-body" *ngIf="setting_to_delete">
-        <p>Do you really want to delete setting "{{ setting_to_delete.name }}" ? This action can not be undone!</p>
+      <div class="modal-body" *ngIf="currentSetting">
+        <p>Do you really want to delete setting "{{ currentSetting.name }}" ? This action can not be undone!</p>
       </div>
 
       <div class="modal-footer">
-        <template [ngIf]="setting_to_delete">
+        <template [ngIf]="currentSetting">
           <button type="button" class="btn btn-secondary" (click)="DeleteSetting.hide()">Cancel</button>
           <button type="button" class="btn btn-danger"
-                  (click)="deleteSetting(DeleteSetting, setting_to_delete)">Delete
+                  (click)="deleteSetting(DeleteSetting)">Delete
           </button>
         </template>
       </div>
