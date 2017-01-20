@@ -17,7 +17,7 @@ class WindowedInstanceMetadata extends InstanceMetadata {
   @JsonProperty("start-from") var startFrom: String = EngineLiterals.newestStartMode
   @JsonProperty("state-management") var stateManagement: String = EngineLiterals.noneStateMode
   @JsonProperty("state-full-checkpoint") var stateFullCheckpoint: Int = 100
-  @JsonProperty("event-wait-time") var eventWaitTime: Long = 1000
+  @JsonProperty("event-wait-idle-time") var eventWaitIdleTime: Long = 1000
 
   override def asModelInstance() = {
     val modelInstance = new WindowedInstance()
@@ -27,7 +27,7 @@ class WindowedInstanceMetadata extends InstanceMetadata {
     modelInstance.batchFillType = this.batchFillType
     modelInstance.window = this.window
     modelInstance.slidingInterval = this.slidingInterval
-    modelInstance.eventWaitTime = this.eventWaitTime
+    modelInstance.eventWaitIdleTime = this.eventWaitIdleTime
     modelInstance.stateManagement = this.stateManagement
     modelInstance.stateFullCheckpoint = this.stateFullCheckpoint
     modelInstance.outputs = this.outputs

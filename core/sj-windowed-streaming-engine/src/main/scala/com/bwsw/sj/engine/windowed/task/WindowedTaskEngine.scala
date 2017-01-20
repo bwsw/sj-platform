@@ -72,7 +72,7 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
     executor.onInit()
 
     while (true) {
-      val maybeBatch = Option(batchQueue.poll(instance.eventWaitTime, TimeUnit.MILLISECONDS))
+      val maybeBatch = Option(batchQueue.poll(instance.eventWaitIdleTime, TimeUnit.MILLISECONDS))
 
       maybeBatch match {
         case Some(batch) => {
@@ -93,7 +93,7 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
           }
         }
         case None => {
-          performanceMetrics.increaseTotalIdleTime(instance.eventWaitTime)
+          performanceMetrics.increaseTotalIdleTime(instance.eventWaitIdleTime)
           executor.onIdle()
         }
       }

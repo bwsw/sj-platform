@@ -21,7 +21,7 @@ class WindowedInstance() extends Instance {
   @Property("start-from") var startFrom: String = EngineLiterals.newestStartMode
   @Property("state-management") var stateManagement: String = EngineLiterals.noneStateMode
   @Property("state-full-checkpoint") var stateFullCheckpoint: Int = 100
-  @Property("event-wait-time") var eventWaitTime: Long = 1000
+  @Property("event-wait-idle-time") var eventWaitIdleTime: Long = 1000
 
   override def asProtocolInstance(): InstanceMetadata = {
     val protocolInstance = new WindowedInstanceMetadata()
@@ -32,7 +32,7 @@ class WindowedInstance() extends Instance {
     protocolInstance.batchFillType = this.batchFillType
     protocolInstance.window = this.window
     protocolInstance.slidingInterval = this.slidingInterval
-    protocolInstance.eventWaitTime = this.eventWaitTime
+    protocolInstance.eventWaitIdleTime = this.eventWaitIdleTime
     protocolInstance.executionPlan = this.executionPlan
     protocolInstance.stateManagement = this.stateManagement
     protocolInstance.stateFullCheckpoint = this.stateFullCheckpoint

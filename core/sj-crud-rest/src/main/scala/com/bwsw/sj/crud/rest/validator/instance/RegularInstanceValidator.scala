@@ -47,9 +47,9 @@ class RegularInstanceValidator extends InstanceValidator {
         createMessage("rest.validator.attribute.must.greater.than.zero", "Checkpoint-interval")
     }
 
-    // 'event-wait-time' field
-    if (regularInstanceMetadata.eventWaitTime <= 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Event-wait-time")
+    // 'event-wait-idle-time' field
+    if (regularInstanceMetadata.eventWaitIdleTime <= 0) {
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Event-wait-idle-time")
     }
 
     // 'state-management' field
