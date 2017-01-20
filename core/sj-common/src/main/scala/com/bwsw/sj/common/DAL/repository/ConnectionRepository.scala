@@ -25,7 +25,7 @@ object ConnectionRepository {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  private lazy val mongoClient = new MongoClient(mongoHosts.asJava)
+  private lazy val Left(mongoClient) = createClient("mongodb-driver") // new MongoClient(mongoHosts.asJava, mongoCredential.asJava)
 
   private lazy val morphia = new Morphia()
   morphia.map(classOf[SjStream]).map(classOf[Service]).map(classOf[Provider]).map(classOf[ConfigurationSetting]).map(classOf[Instance])
@@ -34,7 +34,7 @@ object ConnectionRepository {
 
   private lazy val datastore = morphia.createDatastore(mongoClient, databaseName)
 
-  private lazy val mongoConnection = com.mongodb.casbah.MongoClient(mongoHosts)
+  private lazy val Right(mongoConnection) = createClient("casbah") // com.mongodb.casbah.MongoClient(replicaSetSeeds = mongoHosts, credentials = mongoCredential)
 
   private lazy val fileStorage: MongoFileStorage = new MongoFileStorage(mongoConnection(databaseName))
 
@@ -82,6 +82,21 @@ object ConnectionRepository {
     logger.debug("Close the mongo connections")
     mongoConnection.close()
     mongoClient.close()
+  }
+
+  def createClient(clientType: String): Either[MongoClient, com.mongodb.casbah.MongoClient] = {
+    if (auth) {
+      clientType match {
+        case "mongodb-driver" => Left(new MongoClient(mongoHosts.asJava, mongoCredential.asJava))
+        case "casbah" => Right(com.mongodb.casbah.MongoClient(replicaSetSeeds = mongoHosts, credentials = mongoCredential))
+      }
+    }
+    else {
+      clientType match {
+        case "mongodb-driver" => Left(new MongoClient(mongoHosts.asJava))
+        case "casbah" => Right(com.mongodb.casbah.MongoClient(replicaSetSeeds = mongoHosts))
+      }
+    }
   }
 
   private[DAL] def getGenericDAO[T: ClassTag] = {
