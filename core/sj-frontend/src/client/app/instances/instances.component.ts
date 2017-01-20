@@ -32,7 +32,6 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   public current_instance_tasks: string[];
   public new_instance: InstanceModel;
   public cloneInstance: boolean = false;
-  public new_instance_module: ModuleModel;
   public instance_to_delete: InstanceModel;
   public instance_to_clone: InstanceModel;
   public instanceForm: NgForm;
@@ -43,11 +42,15 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
 
   public formErrors: { [key: string]: string } = {
     'instanceJvmOptions': '',
+    'instanceOptions': '',
     'instanceNodeAttributes': '',
     'instanceEnvironmentVariables': '',
   };
 
   public validationMessages: { [key: string]: { [key: string]: string } } = {
+    'instanceOptions': {
+      'validJson': 'JVM options value is not a valid json'
+    },
     'instanceJvmOptions': {
       'validJson': 'JVM options value is not a valid json'
     },
@@ -66,23 +69,11 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   }
 
   public ngOnInit() {
+    this.new_instance = new InstanceModel();
     this.getInstanceList();
     this.getModuleList();
     this.getStreamList();
     this.getServiceList();
-    this._instancesService.getInstanceList()
-      .subscribe(
-        instanceList => {
-          //if (this.cloneInstanceList.length === 0) {
-          this.cloneInstanceList = instanceList;
-          //}
-        },
-        error => this.errorMessage = <any>error);
-
-    setInterval(function () {
-      this.getInstanceList();
-    }.bind(this), 2000);
-    this.new_instance = new InstanceModel();
   }
 
   public getInstanceList() {
@@ -90,13 +81,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
       .subscribe(
         instanceList => {
           this.instanceList = instanceList;
-          //if (this.cloneInstanceList.length === 0) {
-          //  this.cloneInstanceList = instanceList;
-          //}
-          // if (this.instanceList.length > 0) {
-            //this.current_instance = instanceList[0];
-            //this.get_instance_info(this.current_instance);
-          // }
+          this.cloneInstanceList = instanceList;
         },
         error => this.errorMessage = <any>error);
   }
@@ -138,12 +123,13 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
       .subscribe(
         instanceInfo => {
           this.current_instance_info = instanceInfo;
-          //this.new_instance = instanceInfo;
           this.current_instance_info.module = new ModuleModel();
           this.current_instance_info.module['module-name'] = instance['module-name'];
           this.current_instance_info.module['module-type'] = instance['module-type'];
           this.current_instance_info.module['module-version'] = instance['module-version'];
-          this.current_instance_tasks = Object.keys(this.current_instance_info['execution-plan']['tasks']);
+          this.current_instance_tasks = this.current_instance_info.module['module-type'] !== 'input-streaming' ?
+            this.current_instance_info['execution-plan']['tasks']:
+            this.current_instance_info['tasks'];
         },
         error => this.errorMessage = <any>error);
   }
@@ -159,10 +145,12 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
       .subscribe(
         instanceInfo => {
           this.new_instance = instanceInfo;
-          this.new_instance.options = JSON.stringify(instanceInfo.options);
           this.new_instance['jvm-options'] = JSON.stringify(instanceInfo['jvm-options']);
+          this.new_instance['options'] = JSON.stringify(instanceInfo['options']);
           this.new_instance['node-attributes'] = JSON.stringify(instanceInfo['node-attributes']);
           this.new_instance['environment-variables'] = JSON.stringify(instanceInfo['environment-variables']);
+          this.new_instance['coordination-service'] =
+            this.serviceList.find(service => service.name === instanceInfo['coordination-service']) ? instanceInfo['coordination-service']: '';
           this.new_instance.name = '';
           this.new_instance.module = new ModuleModel();
           this.new_instance.module['module-name'] = instance['module-name'];
@@ -176,10 +164,8 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
               this.new_instance['inputs-types'][i] = parsedInput[1];
             }.bind(this));
           }
-          //this.current_instance_tasks = Object.keys(this.current_instance_info['execution-plan']['tasks']);
         },
         error => this.errorMessage = <any>error);
-    //this.new_instance = instanceName;
   }
 
   public createInstance(modal: ModalDirective) {
@@ -188,6 +174,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
     req.subscribe(
       status => {
         modal.hide();
+        this.new_instance = new InstanceModel();
         this.showSpinner = false;
         this.alerts.push({msg: status, type: 'success', closable: true, timeout:3000});
       },
@@ -196,6 +183,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
         modal.hide();
         this.alerts.push({msg: error, type: 'danger', closable: true, timeout:0});
       });
+    this.getInstanceList();
   }
 
   public closeAlert(i: number): void {
@@ -261,6 +249,14 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
 
   public removeOutput(i: number): void {
     this.new_instance.outputs.splice(i, 1);
+  }
+
+  public addRelatedStream() {
+    this.new_instance['related-streams'].push('');
+  }
+
+  public removeRelatedStream(i: number): void {
+    this.new_instance['related-streams'].splice(i, 1);
   }
 
   public checkTimestampAcceptable(): void {
