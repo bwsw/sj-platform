@@ -47,21 +47,21 @@
 
               <tr *ngFor="let stream of streamList | orderBy: 'name' | listFilter : term"
                   [ngClass]="{ 'table-info': isSelected(stream) }"
-                  (click)="stream_select(stream)">
+                  (click)="selectStream(stream)">
                 <td>{{ stream.name }}</td>
                 <td>{{ stream.description }}</td>
                 <td>
                 <span class="stream-action-link">
                   Service:
                   <span class="btn-lookup action-link"
-                        (click)="get_service_info(ServiceInfo, stream.service)">{{ stream.service }}</span>
+                        (click)="getServiceInfo(ServiceInfo, stream.service)">{{ stream.service }}</span>
                 </span>
                 </td>
                 <td class="actions-column">
                   <button type="button"
                           class="btn btn-sm btn-secondary"
                           title="Delete stream"
-                          (click)="delete_stream_confirm(DeleteStream, stream)">
+                          (click)="deleteStreamConfirm(DeleteStream, stream)">
                     <i class="fa fa-trash"></i>
                   </button>
                 </td>
@@ -79,19 +79,19 @@
       <div class="card-header">Detailed information about node</div>
       <div class="card-block">
         <div class="overflow-x-scroll">
-          <ul *ngIf="current_stream">
-            <li>Name: {{current_stream.name}}</li>
-            <li>Type: {{current_stream.type}}</li>
-            <li>Description: {{current_stream.description}}</li>
-            <li>Partitions: {{current_stream.partitions}}</li>
-            <li>Tags: {{current_stream.tags}}</li>
-            <li>Service: <span class="btn-lookup action-link" (click)="get_service_info(ServiceInfo, current_stream.service)">{{ current_stream.service }}</span>
+          <ul *ngIf="currentStream">
+            <li>Name: {{currentStream.name}}</li>
+            <li>Type: {{currentStream.type}}</li>
+            <li>Description: {{currentStream.description}}</li>
+            <li>Partitions: {{currentStream.partitions}}</li>
+            <li>Tags: {{currentStream.tags}}</li>
+            <li>Service: <span class="btn-lookup action-link" (click)="getServiceInfo(ServiceInfo, currentStream.service)">{{ currentStream.service }}</span>
             </li>
-            <li *ngIf="current_stream.type == 'Tstream'">Generator:
+            <li *ngIf="currentStream.type == 'Tstream'">Generator:
               <ul>
-                <li>Type: {{current_stream.generator.type}}</li>
-                <li>Service: {{current_stream.generator.service}}</li>
-                <li>Instance count: {{current_stream.generator.instanceCount}}</li>
+                <li>Type: {{currentStream.generator.type}}</li>
+                <li>Service: {{currentStream.generator.service}}</li>
+                <li>Instance count: {{currentStream.generator.instanceCount}}</li>
               </ul>
             </li>
           </ul>
@@ -117,7 +117,7 @@
           <fieldset class="form-group row">
             <label class="col-sm-2 col-form-label required">Choose type</label>
             <div class="col-sm-10">
-              <select [(ngModel)]="new_stream['stream-type']" name="streamType"
+              <select [(ngModel)]="newStream['stream-type']" name="streamType"
                       required class="form-control">
                 <option selected value="stream.t-stream">T-stream</option>
                 <!-- TODO Change values to match values in rest service-->
@@ -131,7 +131,7 @@
           <fieldset class="form-group row">
             <label class="col-sm-2 col-form-label required">Name</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="new_stream.name" name="streamName" type="text"
+              <input [(ngModel)]="newStream.name" name="streamName" type="text"
                      required class="form-control" pattern="[a-zA-z][a-zA-Z0-9]*">
             </div>
           </fieldset>
@@ -140,28 +140,28 @@
           <fieldset class="form-group row">
             <label class="col-sm-2 col-form-label">Description</label>
             <div class="col-sm-10">
-              <textarea [(ngModel)]="new_stream.description"
+              <textarea [(ngModel)]="newStream.description"
                         name="streamDescription"
                         class="form-control"></textarea>
             </div>
           </fieldset>
 
           <!-- Partitions -->
-          <fieldset *ngIf="new_stream['stream-type'] != 'elasticsearch-output'" class="form-group row">
+          <fieldset *ngIf="newStream['stream-type'] != 'elasticsearch-output'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Partitions</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="new_stream.partitions" name="streamPartitions" type="number"
+              <input [(ngModel)]="newStream.partitions" name="streamPartitions" type="number"
                      required class="form-control">
             </div>
           </fieldset>
 
           <!-- Service  -->
-          <fieldset *ngIf="new_stream['stream-type']" class="form-group row">
+          <fieldset *ngIf="newStream['stream-type']" class="form-group row">
             <label class="col-sm-2 col-form-label required">Service</label>
             <div class="col-sm-10">
-              <select [(ngModel)]="new_stream.service" name="streamService"
+              <select [(ngModel)]="newStream.service" name="streamService"
                       required class="form-control">
-                <option *ngFor="let service of serviceList | serviceFilter : new_stream['stream-type'] "
+                <option *ngFor="let service of serviceList | serviceFilter : newStream['stream-type'] "
                         value={{service.name}}>{{service.name}}
                 </option>
               </select>
@@ -169,25 +169,35 @@
           </fieldset>
 
           <!-- Replication factor -->
-          <fieldset *ngIf="new_stream['stream-type'] == 'stream.kafka'" class="form-group row">
+          <fieldset *ngIf="newStream['stream-type'] == 'stream.kafka'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Replication factor</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="new_stream['replication-factor']" name="streamReplicationFactor" type="text"
+              <input [(ngModel)]="newStream['replication-factor']" name="streamReplicationFactor" type="number"
                      required class="form-control">
             </div>
           </fieldset>
 
-          <!--<fieldset class="form-group">-->
-          <!--<label class="col-sm-2 col-form-label">Tags</label>-->
-          <!--<tag-input-->
-          <!--placeholder="Add a tag"-->
-          <!--[(ngModel)]="new_stream.tags" name="streamTags"-->
-          <!--delimiterCode="188">-->
-          <!--</tag-input>-->
-          <!--</fieldset>-->
+          <!-- Tags -->
+          <fieldset class="form-group row">
+            <label class="col-sm-2 col-form-label">Tags</label>
+            <div class="col-sm-10">
+              <ul class="tags" (click)="focus()">
+                <li class="tag" *ngFor="let tag of newStream.tags">{{tag}}</li>
+                <li class="tag nopadding">
+                  <input id="tagInput" class="form-control"
+                    name="streamTags"
+                         [(ngModel)]="currentTag"
+                         #streamtags = "ngModel"
+                         (keyup)="keyUp($event)"
+                         (blur)="blur()" />
+                </li>
+              </ul>
+              <!--input [(ngModel)]="newStream.tags" name="streamTags" type="text" class="form-control"-->
+              </div>
+          </fieldset>
 
           <!-- Generator -->
-          <template [ngIf]="new_stream['stream-type'] == 'stream.t-stream'">
+          <template [ngIf]="newStream['stream-type'] == 'stream.t-stream'">
             <div class="mb-1">
               <b>Generator:</b>
             </div>
@@ -196,7 +206,7 @@
             <fieldset class="form-group row">
               <label class="col-sm-2 col-form-label required">Type</label>
               <div class="col-sm-10">
-                <select [(ngModel)]="new_stream['generator']['generator-type']" name="streamGeneratorType"
+                <select [(ngModel)]="newStream['generator']['generator-type']" name="streamGeneratorType"
                         required class="form-control">
                   <option value="global">Global</option>
                   <option value="local">Local</option>
@@ -209,7 +219,7 @@
             <fieldset class="form-group row">
               <label class="col-sm-2 col-form-label">Service</label>
               <div class="col-sm-10">
-                <input [(ngModel)]="new_stream['generator'].service" name="streamGeneratorService" type="text"
+                <input [(ngModel)]="newStream['generator'].service" name="streamGeneratorService" type="text"
                        class="form-control">
               </div>
             </fieldset>
@@ -218,7 +228,7 @@
             <fieldset class="form-group row">
               <label class="col-sm-2 col-form-label required">Instance count</label>
               <div class="col-sm-10">
-                <input [(ngModel)]="new_stream['generator']['instance-count']" name="streamGeneratorInstanceCount"
+                <input [(ngModel)]="newStream['generator']['instance-count']" name="streamGeneratorInstanceCount"
                        type="number" required class="form-control">
               </div>
             </fieldset>
@@ -305,7 +315,7 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="DeleteStream.hide()">Cancel</button>
         <button type="button" class="btn btn-danger"
-                (click)="delete_stream(DeleteStream, stream_to_delete)">Delete
+                (click)="deleteStream(DeleteStream, stream_to_delete)">Delete
         </button>
       </div>
     </div>
