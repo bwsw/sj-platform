@@ -9,8 +9,6 @@ import com.bwsw.sj.common.utils.EngineLiterals
 import org.mongodb.morphia.annotations.{Embedded, Entity, Id, Property}
 
 import scala.collection.JavaConverters._
-import scala.collection.JavaConversions._
-
 /**
  * Entity for base instance-json
  *
@@ -56,7 +54,7 @@ class Instance {
     protocolInstance.nodeAttributes = Map(this.nodeAttributes.asScala.toList: _*)
     protocolInstance.environmentVariables = Map(this.environmentVariables.asScala.toList: _*)
     protocolInstance.coordinationService = this.coordinationService.name
-    protocolInstance.stages = mapAsScalaMap(this.stages)
+    protocolInstance.stages = this.stages.asScala
   }
 
   def getOptionsAsMap() = {

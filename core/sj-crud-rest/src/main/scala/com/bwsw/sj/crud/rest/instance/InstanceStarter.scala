@@ -13,7 +13,7 @@ import com.bwsw.sj.crud.rest.RestLiterals
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.slf4j.LoggerFactory
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 /**
  * One-thread starting object for instance
@@ -204,7 +204,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   }
 
   private def haveGeneratorsStarted() = {
-    val stages = mapAsScalaMap(instance.stages)
+    val stages = instance.stages.asScala
 
     !stages.exists(_._2.state == failed)
   }
@@ -264,7 +264,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
       "INSTANCE_ID" -> instance.name,
       "MESOS_MASTER" -> marathonMaster
     )
-    environmentVariables = environmentVariables ++ mapAsScalaMap(instance.environmentVariables)
+    environmentVariables = environmentVariables ++ instance.environmentVariables.asScala
 
     environmentVariables
   }

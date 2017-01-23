@@ -48,7 +48,7 @@ case class GeneratorData(@JsonProperty("generator-type") generatorType: String,
                 case None =>
                   errors += createMessage("entity.error.generator.attribute.required", "service")
                 case Some(s) =>
-                  if (x.isEmpty) {
+                  if (s.isEmpty) {
                     errors += createMessage("entity.error.generator.attribute.required", "service")
                   }
                   else {

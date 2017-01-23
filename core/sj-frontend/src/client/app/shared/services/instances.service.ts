@@ -36,7 +36,7 @@ export class InstancesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.get(this._dataUrl + '/modules/instances', options)
+    return this._http.get(this._dataUrl + 'modules/instances', options)
       .map(this._extractData)
       .catch(this._handleError);
   }
@@ -45,7 +45,7 @@ export class InstancesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.get(this._dataUrl + '/modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
+    return this._http.get(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
       instance['module-version'] + '/instance' + '/' + instance['name'], options)
       .map(this._extractData)
       .catch(this._handleError);
@@ -68,7 +68,7 @@ export class InstancesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.delete(this._dataUrl + '/modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
+    return this._http.delete(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
       instance['module-version'] + '/instance' + '/' + instance['name'], options)
       .map(this._extractData)
       .catch(this._handleError);
@@ -78,7 +78,7 @@ export class InstancesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.get(this._dataUrl + '/modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
+    return this._http.get(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
       instance['module-version'] + '/instance' + '/' + instance['name'] + '/start', options)
       .map(this._extractData)
       .catch(this._handleError);
@@ -88,7 +88,7 @@ export class InstancesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.get(this._dataUrl + '/modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
+    return this._http.get(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
       instance['module-version'] + '/instance' + '/' + instance['name'] + '/stop', options)
       .map(this._extractData)
       .catch(this._handleError);

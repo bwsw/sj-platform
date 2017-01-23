@@ -10,7 +10,7 @@ import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import org.slf4j.LoggerFactory
 
-import scala.collection.convert.decorateAsScala._
+import scala.collection.JavaConverters._
 
 /**
  * Object is responsible for running a task of job that launches input module
@@ -26,7 +26,7 @@ object InputTaskRunner extends {override val threadName = "InputTaskRunner-%d"} 
 
   def main(args: Array[String]) {
     try {
-      val bufferForEachContext = (new ConcurrentHashMap[ChannelHandlerContext, ByteBuf]()).asScala
+      val bufferForEachContext = new ConcurrentHashMap[ChannelHandlerContext, ByteBuf]().asScala
       val channelContextQueue = new ArrayBlockingQueue[ChannelHandlerContext](queueSize)
 
       val manager: InputTaskManager = new InputTaskManager()
