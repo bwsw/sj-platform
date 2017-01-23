@@ -31,7 +31,7 @@ val commonSettings = Seq(
   resolvers += "Twitter Repository" at "http://maven.twttr.com",
 
   libraryDependencies ++= Seq(
-    "org.slf4j" % "slf4j-log4j12" % "1.7.21"
+    "org.slf4j" % "slf4j-log4j12" % "1.7.22"
   ),
 
   assemblyMergeStrategy in assembly := {
@@ -39,8 +39,8 @@ val commonSettings = Seq(
     case PathList("org", "slf4j", xs@_*) => MergeStrategy.first
     case PathList("io", "netty", xs@_*) => MergeStrategy.first
     case PathList("org", "joda", xs@_*) => MergeStrategy.first
-    case PathList("org","apache","commons", "logging", xs@_*) => MergeStrategy.first
-    case PathList("org","apache","commons", "logging", "impl", xs@_*) => MergeStrategy.first
+    case PathList("org", "apache", "commons", "logging", xs@_*) => MergeStrategy.first
+    case PathList("org", "apache", "commons", "logging", "impl", xs@_*) => MergeStrategy.first
     case x if x.endsWith("io.netty.versions.properties") => MergeStrategy.concat
     case "library.properties" => MergeStrategy.concat
     case "log4j.properties" => MergeStrategy.concat

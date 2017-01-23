@@ -150,7 +150,8 @@ class RegularInstanceValidator extends InstanceValidator {
 
     // 'parallelism' field
     val partitions = getStreamsPartitions(inputStreams)
-    errors ++= checkParallelism(instance.parallelism, partitions.values.min)
+    val minPartitionCount = if (partitions.nonEmpty) partitions.min else 0
+    errors ++= checkParallelism(instance.parallelism, minPartitionCount)
 
     val allStreams = inputStreams.union(outputStreams)
     val tStreamsServices = getStreamServices(allStreams.filter { s =>

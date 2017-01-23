@@ -11,7 +11,7 @@ import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.{EngineLiterals, GeneratorLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import com.bwsw.sj.common.utils.SjStreamUtils._
 
 class InstanceMetadata {
@@ -53,10 +53,10 @@ class InstanceMetadata {
     modelInstance.performanceReportingInterval = this.performanceReportingInterval
     modelInstance.engine = this.engine
     modelInstance.options = serializer.serialize(this.options)
-    modelInstance.jvmOptions = mapAsJavaMap(this.jvmOptions)
-    modelInstance.nodeAttributes = mapAsJavaMap(this.nodeAttributes)
-    modelInstance.environmentVariables = mapAsJavaMap(this.environmentVariables)
-    modelInstance.stages = mapAsJavaMap(this.stages)
+    modelInstance.jvmOptions = this.jvmOptions.asJava
+    modelInstance.nodeAttributes = this.nodeAttributes.asJava
+    modelInstance.environmentVariables = this.environmentVariables.asJava
+    modelInstance.stages = this.stages.asJava
 
     val service = serviceDAO.get(this.coordinationService)
     if (service.isDefined && service.get.isInstanceOf[ZKService]) {

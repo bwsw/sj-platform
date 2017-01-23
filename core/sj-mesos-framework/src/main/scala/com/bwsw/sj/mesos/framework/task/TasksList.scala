@@ -9,14 +9,15 @@ import org.apache.mesos.Protos.{TaskID, TaskInfo, _}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 object TasksList {
   private val logger = Logger.getLogger(this.getClass)
-  private val tasksToLaunch: mutable.ListBuffer[String] = mutable.ListBuffer()
-  private val listTasks : mutable.Map[String, Task] = mutable.Map()
+  private val tasksToLaunch = mutable.ListBuffer[String]()
+  private val listTasks = mutable.Map[String, Task]()
   private var message: String = "Initialization"
-  private var availablePorts: collection.mutable.ListBuffer[Long] = collection.mutable.ListBuffer()
-  private var launchedTasks: mutable.Map[OfferID, mutable.ListBuffer[TaskInfo]] = mutable.Map()
+  private val availablePorts = collection.mutable.ListBuffer[Long]()
+  private var launchedTasks = Map[OfferID, ArrayBuffer[TaskInfo]]()
 
   var perTaskCores: Double = 0.0
   var perTaskMem: Double = 0.0
@@ -49,8 +50,7 @@ object TasksList {
   }
 
   def toJson: Map[String, Any] = {
-    Map(("tasks", listTasks.values.map(_.toJson)),
-      ("message", message))
+    Map("tasks" -> listTasks.values.map(_.toJson), "message" -> message)
   }
 
   def apply(taskId: String): Option[Task] = {
@@ -70,7 +70,7 @@ object TasksList {
   }
 
   def clearLaunchedTasks() = {
-    launchedTasks.clear()
+    launchedTasks = Map[OfferID, ArrayBuffer[TaskInfo]]()
   }
 
   def setMessage(message: String) = {
@@ -200,7 +200,7 @@ object TasksList {
     if (launchedTasks.contains(offer._1.getId)) {
       launchedTasks(offer._1.getId) += task
     } else {
-      launchedTasks += (offer._1.getId -> mutable.ListBuffer(task))
+      launchedTasks += offer._1.getId -> ArrayBuffer(task)
     }
   }
 

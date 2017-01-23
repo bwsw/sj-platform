@@ -54,10 +54,7 @@ object SjCrudRestService extends App with SjCrudInterface {
   stopInstances()
 
   val serverBinding: Future[ServerBinding] = Http().bindAndHandle(routeLogged, interface = restHost, port = restPort)
-  serverBinding onFailure {
-    case ex: Exception =>
-      logger.error("Failed to bind to {}:{}!", restHost, restPort)
-  }
+  serverBinding.failed.foreach(_ => logger.error("Failed to bind to {}:{}!", restHost, restPort))
   logger.info(s"Server online at http://$restHost:$restPort/")
 
   private def logRequestResult(level: LogLevel, route: Route) = {
