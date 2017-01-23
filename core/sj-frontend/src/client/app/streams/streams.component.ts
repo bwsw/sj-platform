@@ -30,7 +30,7 @@ export class StreamsComponent implements OnInit {
     this.getServiceList();
     this.new_stream = new StreamModel();
     this.new_stream.generator = {
-      'generator-type': '',
+      'generator-type': 'local',
       service: '',
       'instance-count': 0
     };

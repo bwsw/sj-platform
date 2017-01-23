@@ -115,6 +115,7 @@ export class ServicesComponent implements OnInit {
       .subscribe(
         service => {
           modal.hide();
+          this.alerts.push({ msg: service, type: 'success', closable: true, timeout: 3000 });
           this.new_service = new ServiceModel();
           this.getServiceList();
           this.current_service = service;
