@@ -188,7 +188,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   }
 
   public deleteInstanceConfirm(modal: ModalDirective, instance: InstanceModel) {
-    this.currentInstance = instance;
+    this.getInstanceInfo(instance);
     modal.show();
   }
 

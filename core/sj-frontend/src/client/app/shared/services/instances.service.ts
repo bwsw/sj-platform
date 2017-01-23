@@ -73,8 +73,8 @@ export class InstancesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.delete(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
-      instance['module-version'] + '/instance' + '/' + instance['name'], options)
+    return this._http.delete(this._dataUrl + 'modules/' + instance.module['module-type'] + '/' + instance.module['module-name'] + '/' +
+      instance.module['module-version'] + '/instance' + '/' + instance['name'], options)
       .map(this._extractData)
       .catch(this._handleError);
   }
