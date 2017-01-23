@@ -10,6 +10,7 @@ import org.apache.mesos.Protos.{TaskID, TaskInfo, _}
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
+import com.bwsw.sj.common.DAL.ConnectionConstants
 
 object TasksList {
   private val logger = Logger.getLogger(this.getClass)
@@ -138,14 +139,22 @@ object TasksList {
     TasksList.toLaunch.foreach(task =>
       if (TasksList.getTask(task).host.nonEmpty) hosts.append(TasksList.getTask(task).host.get)
     )
+
+    var environmentVariables = List(
+//      Environment.Variable.newBuilder.setName("MONGO_HOSTS").setValue(FrameworkUtil.params {"mongodbHosts"}),
+      Environment.Variable.newBuilder.setName("INSTANCE_NAME").setValue(FrameworkUtil.params {"instanceId"}),
+      Environment.Variable.newBuilder.setName("TASK_NAME").setValue(task),
+      Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(OfferHandler.getOfferIp(offer)),
+      Environment.Variable.newBuilder.setName("AGENTS_PORTS").setValue(agentPorts),
+      Environment.Variable.newBuilder.setName("INSTANCE_HOSTS").setValue(hosts.mkString(","))
+    )
+    ConnectionConstants.mongoEnvironment.foreach(variable =>
+      environmentVariables = environmentVariables :+ Environment.Variable.newBuilder.setName(variable._1).setValue(variable._2)
+    )
+
     try {
       val environments = Environment.newBuilder
-        .addVariables(Environment.Variable.newBuilder.setName("MONGO_HOSTS").setValue(FrameworkUtil.params {"mongodbHosts"}))
-        .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_NAME").setValue(FrameworkUtil.params {"instanceId"}))
-        .addVariables(Environment.Variable.newBuilder.setName("TASK_NAME").setValue(task))
-        .addVariables(Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(OfferHandler.getOfferIp(offer)))
-        .addVariables(Environment.Variable.newBuilder.setName("AGENTS_PORTS").setValue(agentPorts))
-        .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_HOSTS").setValue(hosts.mkString(",")))
+      environmentVariables.foreach(variable => environments.addVariables(variable))
 
       cmd
         .addUris(CommandInfo.URI.newBuilder.setValue(FrameworkUtil.getModuleUrl(FrameworkUtil.instance)))

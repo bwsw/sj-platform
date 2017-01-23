@@ -9,9 +9,17 @@ object ConnectionConstants {
   val mongoHosts = System.getenv("MONGO_HOSTS").split(",").toList.map(host => new ServerAddress(host.trim.split(":")(0), host.trim.split(":")(1).toInt))
   val mongoUser:Option[String] = Option(System.getenv("MONGO_USER"))
   val mongoPassword:Option[String] = Option(System.getenv("MONGO_PASSWORD"))
-  var auth: Boolean = false
+  var authEnable: Boolean = false
 
-  if (mongoUser.isDefined && mongoPassword.isDefined) auth = true
+  if (mongoUser.isDefined && mongoPassword.isDefined) authEnable = true
+
+  var mongoEnvironment = Map[String, String]("MONGO_HOSTS" -> System.getenv("MONGO_HOSTS"))
+  if (authEnable) {
+    mongoEnvironment = mongoEnvironment ++ Map[String, String](
+      "MONGO_USER" -> mongoUser.get,
+      "MONGO_PASSWORD" -> mongoPassword.get
+    )
+  }
 
   val databaseName = "stream_juggler"
   lazy val fileMetadataCollection = "fs.files"

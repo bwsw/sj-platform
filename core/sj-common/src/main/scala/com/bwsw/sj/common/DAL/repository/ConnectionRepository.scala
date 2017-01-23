@@ -85,7 +85,7 @@ object ConnectionRepository {
   }
 
   def createClient(clientType: String): Either[MongoClient, com.mongodb.casbah.MongoClient] = {
-    if (auth) {
+    if (authEnable) {
       clientType match {
         case "mongodb-driver" => Left(new MongoClient(mongoHosts.asJava, mongoCredential.asJava))
         case "casbah" => Right(com.mongodb.casbah.MongoClient(replicaSetSeeds = mongoHosts, credentials = mongoCredential))
