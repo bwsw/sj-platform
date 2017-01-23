@@ -1,0 +1,7 @@
+{
+  "name": "zookeeper-sflow-service",
+  "description": "Zookeeper service for demo",
+  "provider": "zookeeper-sflow-provider",
+  "namespace": "sflow",
+  "type": "ZKCoord"
+}
