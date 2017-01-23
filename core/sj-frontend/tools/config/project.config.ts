@@ -76,7 +76,7 @@ export class ProjectConfig extends SeedConfig {
       middleware: [
         proxy({
           hostname: '192.168.1.174',
-          port: 18080,
+          port: 28080,
           pathname: '/v1',
           route: '/v1'
         }),
