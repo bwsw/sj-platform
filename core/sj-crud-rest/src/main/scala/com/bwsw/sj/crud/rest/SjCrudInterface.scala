@@ -8,6 +8,7 @@ import com.bwsw.sj.crud.rest.cors.CorsSupport
 import com.bwsw.sj.crud.rest.exceptions._
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
 import org.everit.json.schema.ValidationException
+import scala.concurrent.duration._
 
 /**
  * Route for CRUD Rest-API
@@ -58,15 +59,16 @@ with SjConfigurationSettingsApi {
     handleExceptions(exceptionHandler) {
       corsHandler {
         pathPrefix("v1") {
-          modulesApi ~
-            customApi ~
-            streamsApi ~
-            servicesApi ~
-            providersApi ~
-            configSettingsApi
+          withRequestTimeout(30.seconds) {
+            modulesApi ~
+              customApi ~
+              streamsApi ~
+              servicesApi ~
+              providersApi ~
+              configSettingsApi
+          }
         }
       }
     }
   }
-
 }
