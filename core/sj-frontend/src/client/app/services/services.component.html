@@ -177,7 +177,7 @@
             <label class="col-sm-2 col-form-label required">Namespace</label>
             <div class="col-sm-10">
               <input [(ngModel)]="new_service.namespace" name="serviceNamespace" type="text"
-                     class="form-control" required>
+                     class="form-control" required pattern="[a-zA-z][a-zA-Z0-9]*">
             </div>
           </fieldset>
 
