@@ -104,9 +104,9 @@
           <ul *ngIf="currentInstance">
             <li>Status: {{currentInstance.status}}</li>
             <li>Name : {{currentInstance.name}}</li>
-            <li>Module-type : {{currentInstance["module-type"]}}</li>
-            <li>Module-name : {{currentInstance["module-name"]}}</li>
-            <li>Module-version: {{currentInstance["module-version"]}}</li>
+            <li>Module-type : {{currentInstance.module["module-type"]}}</li>
+            <li>Module-name : {{currentInstance.module["module-name"]}}</li>
+            <li>Module-version: {{currentInstance.module["module-version"]}}</li>
             <li *ngIf="currentInstance.description">Description : {{currentInstance.description}}</li>
             <li>Engine : {{currentInstance.engine}}</li>
             <li *ngIf="currentInstance.inputs">Inputs: {{currentInstance.inputs}}</li>
@@ -333,9 +333,9 @@
 
             <!-- Sliding-interval -->
             <fieldset *ngIf="newInstance.module['module-type'] === 'windowed-streaming'" class="form-group row">
-              <label class="col-form-label col-sm-2 required">Sliding interval</label>
+              <label class="col-form-label col-sm-2">Sliding interval</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="newInstance['sliding-interval']" name="instanceSlidingInterval" type="number" pattern="[1-9][0-9]*" required class="form-control">
+                <input [(ngModel)]="newInstance['sliding-interval']" name="instanceSlidingInterval" type="number" pattern="[1-9][0-9]*" class="form-control">
               </div>
             </fieldset>
 
@@ -405,8 +405,8 @@
               <div class="col col-sm-10">
                 <div class="mb-1 row">
                   <div class="col-sm-6">
-                    <select [value]="newInstance['batch-fill-type']" (input)="newInstance['batch-fill-type'] = $event.target.value"
-                            name="instanceBatchFillType']" required class="form-control">
+                    <select [value]="newInstance['batch-fill-type-name']" (input)="newInstance['batch-fill-type-name'] = $event.target.value"
+                            name="instanceBatchFillTypeName" required class="form-control">
                       <option>every-nth</option>
                       <option>time-interval</option>
                       <option>transaction-interval</option>
@@ -677,7 +677,6 @@
           <!-- Action buttons -->
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" (click)="CreateInstance.hide()">Cancel</button>
-            <!-- @toto: Fix issue with validation [disabled]="!(newInstance && instanceForm?.form.valid)" -->
             <button type="submit"
                     [disabled]="!(instanceForm.form.valid)"
                     class="btn btn-primary">Create</button>

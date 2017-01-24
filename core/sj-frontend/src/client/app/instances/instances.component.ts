@@ -153,12 +153,29 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
           this.newInstance.module['module-name'] = instance['module-name'];
           this.newInstance.module['module-type'] = instance['module-type'];
           this.newInstance.module['module-version'] = instance['module-version'];
+          if (this.newInstance.module['module-type'] === 'windowed-streaming') {
+            let batchFillType : { [key: string]: any } = instanceInfo['batch-fill-type'];
+            this.newInstance['batch-fill-type-name'] = batchFillType['type-name'];
+            this.newInstance['batch-fill-type-value'] = batchFillType['value'];
+          }
+          if (this.newInstance.module['module-type'] === 'windowed-streaming') {
+            let mainStream = instanceInfo['main-stream'].split('/');
+            this.newInstance['main-stream'] = mainStream[0];
+            this.newInstance['main-stream-type'] = mainStream[1];
+            this.newInstance['related-streams-type'] = [];
+            instanceInfo['related-streams'].forEach((item: string, i: number) => {
+              let related = item.split('/');
+              this.newInstance['related-streams'][i] = related[0];
+              this.newInstance['related-streams-type'][i] = related[1];
+            });
+
+          }
           if (this.newInstance.module['module-type'] === 'regular-streaming') {
             this.newInstance['inputs-types'] = [];
             this.newInstance.inputs.forEach(function (item: string, i: number) {
-              let parsedInput = item.split('/');
-              this.newInstance.inputs[i] = parsedInput[0];
-              this.newInstance['inputs-types'][i] = parsedInput[1];
+              let input = item.split('/');
+              this.newInstance.inputs[i] = input[0];
+              this.newInstance['inputs-types'][i] = input[1];
             }.bind(this));
           }
         },
@@ -251,6 +268,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
 
   public removeRelatedStream(i: number): void {
     this.newInstance['related-streams'].splice(i, 1);
+    this.newInstance['related-streams-type'].splice(i, 1);
   }
 
   public checkTimestampAcceptable(): void {

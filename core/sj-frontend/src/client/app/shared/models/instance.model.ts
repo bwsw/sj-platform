@@ -10,8 +10,9 @@ export class InstanceModel {
 
   'async-backup-count': number;
   'backup-count': number;
-  'batch-fill-type' : Object;
-  'batch-fill-type-value': string;
+  'batch-fill-type' : {};
+  'batch-fill-type-name': string;
+  'batch-fill-type-value': number;
   'checkpoint-interval': number;
   'checkpoint-mode': string;
   'coordination-service': string;
