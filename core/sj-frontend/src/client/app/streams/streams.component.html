@@ -152,7 +152,7 @@
           <fieldset *ngIf="newStream['stream-type'] != 'elasticsearch-output'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Partitions</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="newStream.partitions" name="streamPartitions" type="number"
+              <input [(ngModel)]="newStream.partitions" name="streamPartitions" type="number" min="1"
                      required class="form-control">
             </div>
           </fieldset>
