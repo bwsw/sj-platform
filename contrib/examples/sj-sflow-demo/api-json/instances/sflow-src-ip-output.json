@@ -1,0 +1,13 @@
+{
+  "name" : "sflow-src-ip-output",
+  "description" : "Output module for sflow example",
+  "input" : "SrcIpStream",
+  "output" : "SrcIpData",
+  "checkpoint-mode" : "every-nth" ,
+  "checkpoint-interval" : 1000,
+  "parallelism" : 1,
+  "start-from" : "oldest",
+  "per-task-cores" : 0.1,
+  "per-task-ram" : 64,
+  "coordination-service" : "zookeeper-sflow-service"
+}

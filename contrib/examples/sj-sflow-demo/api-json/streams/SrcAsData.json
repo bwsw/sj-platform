@@ -1,0 +1,11 @@
+{
+  "name": "SrcAsData",
+  "description": "JDBC stream for demo",
+  "service": "jdbc-sflow-service",
+  "tags": [
+    "sflow",
+    "output"
+  ],
+  "primary": "id",
+  "stream-type": "jdbc-output"
+}

@@ -26,12 +26,12 @@ class RegularInstance() extends Instance {
     protocolInstance.checkpointMode = this.checkpointMode
     protocolInstance.checkpointInterval = this.checkpointInterval
     protocolInstance.executionPlan = this.executionPlan
+    protocolInstance.startFrom = this.startFrom
     protocolInstance.stateManagement = this.stateManagement
     protocolInstance.stateFullCheckpoint = this.stateFullCheckpoint
     protocolInstance.eventWaitIdleTime = this.eventWaitIdleTime
     protocolInstance.inputs = this.inputs
     protocolInstance.outputs = this.outputs
-    protocolInstance.startFrom = this.startFrom
 
     protocolInstance
   }
