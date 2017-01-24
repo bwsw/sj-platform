@@ -75,7 +75,7 @@ export class ProjectConfig extends SeedConfig {
     this.mergeObject(this.PLUGIN_CONFIGS['browser-sync'], {
       middleware: [
         proxy({
-          hostname: '176.120.25.19', // 176.120.25.19:28080
+          hostname: '176.120.25.19', // 176.120.25.19:28080  192.168.1.174:18080
           port: 28080,
           pathname: '/v1',
           route: '/v1'
