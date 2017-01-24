@@ -15,7 +15,7 @@ class RegularInstanceMetadata extends InstanceMetadata {
   @JsonProperty("start-from") var startFrom: String = EngineLiterals.newestStartMode
   @JsonProperty("state-management") var stateManagement: String = EngineLiterals.noneStateMode
   @JsonProperty("state-full-checkpoint") var stateFullCheckpoint: Int = 100
-  @JsonProperty("event-wait-time") var eventWaitTime: Long = 1000
+  @JsonProperty("event-wait-idle-time") var eventWaitIdleTime: Long = 1000
 
   override def asModelInstance() = {
     val modelInstance = new RegularInstance()
@@ -24,7 +24,7 @@ class RegularInstanceMetadata extends InstanceMetadata {
     modelInstance.checkpointInterval = this.checkpointInterval
     modelInstance.stateManagement = this.stateManagement
     modelInstance.stateFullCheckpoint = this.stateFullCheckpoint
-    modelInstance.eventWaitTime = this.eventWaitTime
+    modelInstance.eventWaitIdleTime = this.eventWaitIdleTime
     modelInstance.inputs = this.inputs
     modelInstance.outputs = this.outputs
     modelInstance.startFrom = this.startFrom

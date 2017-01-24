@@ -20,7 +20,7 @@ export class InstanceModel {
   'description': string;
   'duplicate-check': boolean;
   'environment-variables': Object;
-  'event-wait-time': number;
+  'event-wait-idle-time': number;
   'eviction-policy': string;
   'input': string;
   'inputs': string[] = [''];
@@ -66,7 +66,7 @@ export class SubtypedInstance {
 export class RegularStreamingInstance extends SubtypedInstance {
   'checkpoint-interval': number;
   'checkpoint-mode': string;
-  'event-wait-time': number;
+  'event-wait-idle-time': number;
   'inputs': string[] = [''];
   'outputs': string[] = [''];
   'start-from': string|number;
