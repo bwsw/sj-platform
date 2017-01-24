@@ -106,6 +106,8 @@
                                                                             (click)="getProviderInfo(ProviderInfo, currentService.lock_provider)">{{currentService['lock-provider']}}</span>
             </li>
             <li *ngIf="currentService.type === 'TstrQ'">Lock namespace: {{currentService['lock-namespace']}}</li>
+            <li *ngIf="currentService.type === 'KfkQ'">ZK provider: {{currentService['zk-provider']}}</li>
+            <li *ngIf="currentService.type === 'KfkQ'">ZK namespace: {{currentService['zk-namespace']}}</li>
           </ul>
         </div>
       </div>
