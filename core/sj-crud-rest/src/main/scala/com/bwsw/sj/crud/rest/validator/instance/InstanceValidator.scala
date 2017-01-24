@@ -59,8 +59,7 @@ abstract class InstanceValidator extends ValidationUtils with CompletionUtils wi
           }
 
           if (!validateName(x)) {
-            errors += createMessage("rest.modules.instances.instance.name.incorrect", x) +
-              createMessage("rest.modules.instances.instance.name.must.contain")
+            errors += createMessage("entity.error.incorrect.name", "Instance", x, "instance")
           }
         }
     }

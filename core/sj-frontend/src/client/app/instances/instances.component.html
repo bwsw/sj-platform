@@ -141,8 +141,8 @@
             <li>Per-task-cores : {{current_instance_info["per-task-cores"]}}</li>
             <li>Per-task-ram" : {{current_instance_info["per-task-ram"]}}</li>
             <li>Coordination-service : {{current_instance_info["coordination-service"]}}</li>
-            <li *ngIf="current_instance_info['event-wait-time']">Event-wait-time :
-              {{current_instance_info["event-wait-time"]}}
+            <li *ngIf="current_instance_info['event-wait-idle-time']">Event-wait-idle-time :
+              {{current_instance_info["event-wait-idle-time"]}}
             </li>
             <li *ngIf="current_instance_info['performance-reporting-interval']">Performance-reporting-interval :
               {{current_instance_info['performance-reporting-interval']}}
@@ -597,12 +597,12 @@
               </div>
             </fieldset>
 
-            <!-- Event-wait-time -->
+            <!-- Event-wait-idle-time -->
             <fieldset *ngIf="new_instance.module['module-type'] === 'regular-streaming' ||
                               new_instance.module['module-type'] === 'windowed-streaming'" class="form-group row">
-              <label class="col-form-label col-sm-2">Event-wait-time</label>
+              <label class="col-form-label col-sm-2">Event-wait-idle-time</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="new_instance['event-wait-time']" name="instanceEventWaitTime" type="number"
+                <input [(ngModel)]="new_instance['event-wait-idle-time']" name="instanceEventWaitTime" type="number"
                        class="form-control">
               </div>
             </fieldset>

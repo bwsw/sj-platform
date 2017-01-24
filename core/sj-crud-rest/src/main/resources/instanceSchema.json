@@ -92,7 +92,7 @@
     "state-full-checkpoint": {
       "type": "number"
     },
-    "event-wait-time": {
+    "event-wait-idle-time": {
       "type": "number"
     },
     "window": {

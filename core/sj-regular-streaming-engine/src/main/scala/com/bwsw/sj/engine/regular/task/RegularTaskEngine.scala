@@ -59,7 +59,7 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
     executor.onInit()
 
     while (true) {
-      val maybeEnvelope = blockingQueue.get(instance.eventWaitTime)
+      val maybeEnvelope = blockingQueue.get(instance.eventWaitIdleTime)
 
       maybeEnvelope match {
         case Some(serializedEnvelope) => {
@@ -69,7 +69,7 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
           executor.onMessage(envelope)
         }
         case None => {
-          performanceMetrics.increaseTotalIdleTime(instance.eventWaitTime)
+          performanceMetrics.increaseTotalIdleTime(instance.eventWaitIdleTime)
           executor.onIdle()
         }
       }

@@ -1,0 +1,11 @@
+{
+  "name": "tstream-sflow-service",
+  "description": "Tstream service for demo",
+  "type": "TstrQ",
+  "metadata-provider": "cassandra-sflow-provider",
+  "metadata-namespace": "sflow",
+  "data-provider": "cassandra-sflow-provider",
+  "data-namespace": "sflow",
+  "lock-provider": "zookeeper-sflow-provider",
+  "lock-namespace": "unit"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "jdbc-sflow-service",
+  "description": "JDBC service for demo",
+  "provider": "jdbc-sflow-provider",
+  "database": "sflow",
+  "driver": "postgresql",
+  "type": "JDBC"
+}

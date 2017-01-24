@@ -111,10 +111,12 @@ object OfferHandler {
   }
 
   def getNextOffer(tasksOnSlaves: mutable.ListBuffer[(Offer, Int)]): (Offer, Int) = {
+
     val offer = tasksOnSlaves(offerNumber)
     if (offerNumber >= tasksOnSlaves.size - 1) {
       offerNumber = 0
-    } else {
+    }
+    else {
       offerNumber += 1
     }
     if (offers.contains(offer._1)) {
@@ -124,7 +126,7 @@ object OfferHandler {
   }
 
   def updateOfferNumber(tasksOnSlaves: mutable.ListBuffer[(Offer, Int)]): mutable.ListBuffer[(Offer, Int)] = {
-    var result: mutable.ListBuffer[(Offer, Int)] = null
+    var result: mutable.ListBuffer[(Offer, Int)] = tasksOnSlaves
     while (tasksOnSlaves(offerNumber)._2 == 0) {
       result = tasksOnSlaves.filterNot(_ == tasksOnSlaves(offerNumber))
       if (offerNumber > tasksOnSlaves.size - 1) offerNumber = 0

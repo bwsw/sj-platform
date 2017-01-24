@@ -1,0 +1,8 @@
+{
+  "name": "jdbc-sflow-provider",
+  "description": "JDBC provider for demo",
+  "type": "JDBC",
+  "hosts": [
+    "176.120.25.19:5432"
+  ]
+}

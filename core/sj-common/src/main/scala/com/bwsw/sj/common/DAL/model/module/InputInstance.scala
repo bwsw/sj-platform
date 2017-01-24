@@ -30,10 +30,15 @@ class InputInstance extends Instance {
     super.fillProtocolInstance(protocolInstance)
 
     protocolInstance.outputs = this.outputs
-    protocolInstance.defaultEvictionPolicy = this.defaultEvictionPolicy
-    protocolInstance.evictionPolicy = this.evictionPolicy
+    protocolInstance.checkpointMode = this.checkpointMode
+    protocolInstance.checkpointInterval = this.checkpointInterval
+    protocolInstance.duplicateCheck = this.duplicateCheck
     protocolInstance.lookupHistory = this.lookupHistory
     protocolInstance.queueMaxSize = this.queueMaxSize
+    protocolInstance.defaultEvictionPolicy = this.defaultEvictionPolicy
+    protocolInstance.evictionPolicy = this.evictionPolicy
+    protocolInstance.backupCount = this.backupCount
+    protocolInstance.asyncBackupCount = this.asyncBackupCount
     protocolInstance.tasks = Map(this.tasks.asScala.toList: _*)
 
     protocolInstance

@@ -68,12 +68,17 @@ class SjStreamData() extends ValidationUtils with MessageResourceUtils {
     }
 
     Option(this.streamType) match {
-      case Some(t) =>
-        if (!StreamLiterals.types.contains(t)) {
-          errors += createMessage("entity.error.unknown.type.must.one.of", t, "stream", StreamLiterals.types.mkString("[", ", ", "]"))
-        }
       case None =>
         errors += createMessage("entity.error.attribute.required", "Type")
+      case Some(t) =>
+        if (t.isEmpty) {
+          errors += createMessage("entity.error.attribute.required", "Type")
+        }
+        else {
+          if (!StreamLiterals.types.contains(t)) {
+            errors += createMessage("entity.error.unknown.type.must.one.of", t, "stream", StreamLiterals.types.mkString("[", ", ", "]"))
+          }
+        }
     }
 
     errors

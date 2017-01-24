@@ -13,7 +13,7 @@ object Dependencies {
       .exclude("log4j", "log4j")
       .exclude("io.netty", "netty")
       .exclude("io.netty", "netty-all"),
-    ("org.mongodb" % "casbah_2.11" % "3.1.1")
+    ("org.mongodb" %% "casbah" % "3.1.1")
       .exclude("org.slf4j", "slf4j-api"),
     "org.mongodb.morphia" % "morphia" % "1.3.0",
     "org.apache.commons" % "commons-io" % "1.3.2",
@@ -22,7 +22,8 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty"),
+      .exclude("io.netty", "netty")
+      .exclude("org.scala-lang.modules", "scala-parser-combinators_2.11"),
     ("org.apache.curator" % "curator-recipes" % "2.11.1")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
@@ -50,12 +51,12 @@ object Dependencies {
   ))
 
   lazy val sjRestDependencies = Def.setting(Seq(
-    "com.typesafe.akka" % "akka-http-experimental_2.11" % "2.4.11",
+    "com.typesafe.akka" %% "akka-http" % "10.0.1",
     ("org.everit.json" % "org.everit.json.schema" % "1.4.1")
       .exclude("commons-logging", "commons-logging"),
     ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
       .exclude("commons-logging", "commons-logging"),
-    "com.typesafe.akka" % "akka-slf4j_2.11" % "2.4.14"
+    "com.typesafe.akka" %% "akka-slf4j" % "2.4.16"
   ))
 
   lazy val sjInputEngineDependencies = Def.setting(Seq(
