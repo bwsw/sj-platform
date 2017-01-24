@@ -172,7 +172,7 @@
 
         <!-- Clone from existing component -->
         <fieldset class="form-check">
-          <label class="form-check-label"><input class="form-check-input" [(ngModel)]="cloneInstance" type="checkbox">&nbsp;Clone from
+          <label class="form-check-label"><input class="form-check-input" [(ngModel)]="cloneInstance" (click)="clearInstance()" type="checkbox">&nbsp;Clone from
             existing instance</label>
         </fieldset>
 
@@ -183,7 +183,7 @@
           <fieldset *ngIf="cloneInstance" class="form-group row">
             <label class="col-form-label col-sm-2 required">Choose instance</label>
             <div class="col col-sm-10">
-              <select [(ngModel)]="instance_to_clone" name="instanceToClone"
+              <select [(ngModel)]="cloningInstance" name="instanceToClone"
                       (change)="createByClone($event.target.selectedIndex)" required
                       class="form-control">
                 <option *ngFor="let instance of cloneInstancesList" [ngValue]="instance">{{instance.name}}</option>

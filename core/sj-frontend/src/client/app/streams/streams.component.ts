@@ -18,6 +18,7 @@ export class StreamsComponent implements OnInit {
   public streamList: StreamModel[];
   public serviceList: ServiceModel[];
   public currentStream: StreamModel;
+  public showSpinner: boolean = false;
   public currentTag: string;
   public currentStreamService: ServiceModel;
   public newStream: StreamModel;

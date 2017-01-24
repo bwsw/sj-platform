@@ -31,7 +31,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   public currentInstanceTasks: string[];
   public newInstance: InstanceModel;
   public cloneInstance: boolean = false;
-  public instance_to_clone: InstanceModel;
+  public cloningInstance: InstanceModel;
   public instanceForm: NgForm;
   public showSpinner: boolean;
   public startFromTimestampAcceptable: boolean = true;
@@ -222,6 +222,11 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
 
   public isSelected(instance: InstanceModel) {
     return this.currentInstance && instance.name === this.currentInstance.name;
+  }
+
+  public clearInstance() {
+    this.newInstance = new InstanceModel();
+    this.cloningInstance = new InstanceModel();
   }
 
   public startInstance(instance: InstanceModel) {
