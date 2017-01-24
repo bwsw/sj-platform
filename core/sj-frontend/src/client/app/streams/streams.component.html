@@ -96,6 +96,7 @@
                 <li>Instance count: {{currentStream.generator['instance-count']}}</li>
               </ul>
             </li>
+            <li *ngIf="currentStream['replication-factor']">Replication factor: {{currentStream['replication-factor']}}</li>
           </ul>
         </div>
       </div>
