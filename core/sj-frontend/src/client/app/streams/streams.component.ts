@@ -18,6 +18,7 @@ export class StreamsComponent implements OnInit {
   public streamList: StreamModel[];
   public serviceList: ServiceModel[];
   public currentStream: StreamModel;
+  public showSpinner: boolean = false;
   public currentTag: string;
   public currentStreamService: ServiceModel;
   public newStream: StreamModel;
@@ -106,7 +107,7 @@ export class StreamsComponent implements OnInit {
   }
 
   public createStream(modal: ModalDirective) {
-    console.log(this.newStream);
+    this.showSpinner = true;
     if (this.newStream['stream-type'] !== 'stream.t-stream') {
       delete this.newStream.generator;
     }
@@ -114,6 +115,7 @@ export class StreamsComponent implements OnInit {
       .subscribe(
         status => {
           modal.hide();
+          this.showSpinner = false;
           this.alerts.push({ msg: status, type: 'success', closable: true, timeout: 3000 });
           this.getStreamList();
           this.newStream = new StreamModel();
@@ -121,6 +123,7 @@ export class StreamsComponent implements OnInit {
         },
         error => {
           modal.hide();
+          this.showSpinner = false;
           this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 });
         });
   }

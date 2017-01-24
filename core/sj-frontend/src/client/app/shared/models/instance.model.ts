@@ -3,15 +3,16 @@ import { ModuleModel } from './module.model';
 export class InstanceModel {
   'inputs-types': string[] = [''];
   'main-stream-type': string = '';
-  'related-streams-type': string[] = [''];
+  'related-streams-type': string[] = [];
   'module': ModuleModel;
   'start-from-timestamp': number;
   'status': string;
 
   'async-backup-count': number;
   'backup-count': number;
-  'batch-fill-type' : Object;
-  'batch-fill-type-value': string;
+  'batch-fill-type' : {};
+  'batch-fill-type-name': string;
+  'batch-fill-type-value': number;
   'checkpoint-interval': number;
   'checkpoint-mode': string;
   'coordination-service': string;
@@ -36,7 +37,7 @@ export class InstanceModel {
   'per-task-ram': number;
   'performance-reporting-interval': number;
   'queue-max-size': number;
-  'related-streams' : string[] = [''];
+  'related-streams' : string[] = [];
   'sliding-interval' : number;
   'start-from': string;
   'state-full-checkpoint': string;
@@ -78,7 +79,7 @@ export class WindowedStreamingInstance extends SubtypedInstance {
   'window' : number;
   'sliding-interval' : number;
   'main-stream' : string;
-  'related-streams' : string[] = [''];
+  'related-streams' : string[] = [];
   'batch-fill-type' : Object;
   'start-from' : string|number;
   'state-management' : string;

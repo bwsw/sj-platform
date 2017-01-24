@@ -1,3 +1,5 @@
+<sj-spinner [isRunning]="showSpinner"></sj-spinner>
+
 <div class="row">
   <!-- Content -->
   <div class="col col-xs-8">
@@ -33,17 +35,17 @@
         <div class="table-wrapper">
           <table class="table table-hover table-sm mt-1 mb-0">
             <thead>
-              <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Service</th>
-                <th class="actions-column">Actions</th>
-              </tr>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Service</th>
+              <th class="actions-column">Actions</th>
+            </tr>
             </thead>
             <tbody>
-              <tr *ngIf="!streamList || (streamList && streamList.length === 0)">
-                <td colspan="20" class="text-center">No streams have been found.</td>
-              </tr>
+            <tr *ngIf="!streamList || (streamList && streamList.length === 0)">
+              <td colspan="20" class="text-center">No streams have been found.</td>
+            </tr>
 
               <tr *ngFor="let stream of streamList | orderBy: 'name' | listFilter : term"
                   [ngClass]="{ 'table-info': isSelected(stream) }"
@@ -233,15 +235,11 @@
               </div>
             </fieldset>
           </template>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="CreateStream.hide()">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="!streamForm.form.valid">Create</button>
+          </div>
         </form>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="CreateStream.hide()">Cancel</button>
-        <button type="submit" class="btn btn-primary"
-                [disabled]="!streamForm.form.valid"
-                (click)="createStream(CreateStream)">Create
-        </button>
       </div>
     </div>
   </div>

@@ -12,48 +12,46 @@ import { ConfigSettingsService } from "../shared/services/config-settings.servic
 export class ConfigSettingsComponent implements OnInit {
   public settingsList: SettingModel[];
   public alerts: Array<Object> = [];
-  public new_setting: SettingModel;
-  public current_setting: SettingModel;
-  public setting_to_delete: SettingModel;
+  public newSetting: SettingModel;
+  public currentSetting: SettingModel;
 
-  constructor(private _configSettingsService: ConfigSettingsService) {
-  }
+  constructor(private configSettingsService: ConfigSettingsService) { }
 
   public ngOnInit() {
-    this.new_setting = new SettingModel();
+    this.newSetting = new SettingModel();
     this.getSettingsList();
   }
 
   public getSettingsList() {
-    this._configSettingsService.getConfigSettingsList()
+    this.configSettingsService.getConfigSettingsList()
       .subscribe(
         settingsList => {
           this.settingsList = settingsList;
           if (settingsList.length > 0) {
-            this.current_setting = settingsList[0];
+            this.currentSetting = settingsList[0];
           }
         },
         error => this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 }));
   }
 
   public createSetting(modal: ModalDirective) {
-    this._configSettingsService.saveSetting(this.new_setting)
+    this.configSettingsService.saveSetting(this.newSetting)
       .subscribe(
         setting => {
           modal.hide()
-          this.new_setting = new SettingModel();
+          this.newSetting = new SettingModel();
           this.getSettingsList();
           this.alerts.push({ msg: setting, type: 'success', closable: true, timeout: 3000 });
         },
         error => {
           modal.hide();
-          this.new_setting = new SettingModel();
+          this.newSetting = new SettingModel();
           this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 });
         });
   }
 
-  public deleteSetting(modal: ModalDirective, setting: SettingModel) {
-    this._configSettingsService.deleteSetting(setting)
+  public deleteSetting(modal: ModalDirective) {
+    this.configSettingsService.deleteSetting(this.currentSetting)
       .subscribe(
         status => {
           this.alerts.push({ msg: status, type: 'success', closable: true, timeout: 3000 });
@@ -62,8 +60,9 @@ export class ConfigSettingsComponent implements OnInit {
         error => this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 }));
     modal.hide();
   }
+
   public deleteSettingConfirm(modal: ModalDirective, setting: SettingModel) {
-    this.setting_to_delete = setting;
+    this.currentSetting = setting;
     modal.show();
   }
 
@@ -72,10 +71,10 @@ export class ConfigSettingsComponent implements OnInit {
   }
 
   public selectSetting(setting: SettingModel) {
-    this.current_setting = setting;
+    this.currentSetting = setting;
   }
 
   public isSelected(setting: SettingModel) {
-    return setting === this.current_setting;
+    return setting === this.currentSetting;
   }
 }
