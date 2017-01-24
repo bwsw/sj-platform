@@ -83,17 +83,17 @@
         <div class="overflow-x-scroll">
           <ul *ngIf="currentStream">
             <li>Name: {{currentStream.name}}</li>
-            <li>Type: {{currentStream.type}}</li>
+            <li>Type: {{currentStream['stream-type']}}</li>
             <li>Description: {{currentStream.description}}</li>
-            <li>Partitions: {{currentStream.partitions}}</li>
+            <li *ngIf="currentStream['stream-type'] !== 'elasticsearch-output'">Partitions: {{currentStream.partitions}}</li>
             <li>Tags: {{currentStream.tags}}</li>
             <li>Service: <span class="btn-lookup action-link" (click)="getServiceInfo(ServiceInfo, currentStream.service)">{{ currentStream.service }}</span>
             </li>
-            <li *ngIf="currentStream.type == 'Tstream'">Generator:
+            <li *ngIf="currentStream['stream-type'] === 'stream.t-stream'">Generator:
               <ul>
-                <li>Type: {{currentStream.generator.type}}</li>
-                <li>Service: {{currentStream.generator.service}}</li>
-                <li>Instance count: {{currentStream.generator.instanceCount}}</li>
+                <li>Type: {{currentStream.generator['generator-type']}}</li>
+                <li>Service: {{currentStream.generator['service']}}</li>
+                <li>Instance count: {{currentStream.generator['instance-count']}}</li>
               </ul>
             </li>
           </ul>
@@ -134,7 +134,7 @@
             <label class="col-sm-2 col-form-label required">Name</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newStream.name" name="streamName" type="text"
-                     required class="form-control" pattern="[a-zA-z][a-zA-Z0-9]*">
+                     required class="form-control" pattern="[a-zA-z][a-zA-Z0-9-]*">
             </div>
           </fieldset>
 
