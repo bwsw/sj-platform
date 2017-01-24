@@ -243,19 +243,17 @@
               <div class="col-sm-10">
                 <div *ngFor='let input of newInstance.inputs; let i = index; trackBy:customTrackBy'
                      class="mb-1 row">
-                  <!--TODO: fix validation changing (make value-input -> ngModel (see bug http://stackoverflow.com/questions/33346677/angular2-ngmodel-against-ngfor-variables)-->
                   <div class="col-sm-6">
-                    <select [value]="newInstance.inputs[i]" (input)="newInstance.inputs[i] = $event.target.value"
+                    <select [(ngModel)]="newInstance.inputs[i]"
                             (change)="checkTimestampAcceptable()"
-                            name="instanceInputs" required class="form-control">
+                            name="instanceInputs{{i}}" required class="form-control">
                       <option *ngFor="let stream of streamsList">{{stream.name}}</option>
                     </select>
                   </div>
-
                   <div class="col-sm-6">
                     <div class="input-group">
-                      <select [value]="newInstance['inputs-types'][i]" (input)="newInstance['inputs-types'][i] = $event.target.value"
-                              name="instanceInputType" required class="form-control">
+                      <select [(ngModel)]="newInstance['inputs-types'][i]"
+                              name="instanceInputType{{i}}" required class="form-control">
                         <option>full</option>
                         <option>split</option>
                       </select>
@@ -305,9 +303,8 @@
               <div class="col col-sm-10">
                 <div *ngFor='let output of newInstance.outputs; let i = index;  trackBy:customTrackBy'
                      class="input-group mb-1">
-                  <!--TODO: fix validation changing (make value-input -> ngModel (see bug http://stackoverflow.com/questions/33346677/angular2-ngmodel-against-ngfor-variables)-->
-                  <select [value]="newInstance.outputs[i]" (input)="newInstance.outputs[i] = $event.target.value"
-                          name="instanceOutputs" required class="form-control">
+                  <select [(ngModel)]="newInstance.outputs[i]"
+                          name="instanceOutputs{{i}}" required class="form-control">
                     <option *ngFor="let stream of streamsList">{{stream.name}}</option>
                   </select>
                   <span class="input-group-btn" *ngIf="i!==0">
