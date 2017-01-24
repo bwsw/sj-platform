@@ -83,29 +83,29 @@
             <li>Name: {{currentService.name}}</li>
             <li>Type: {{currentService.type}}</li>
             <li>Description: {{currentService.description}}</li>
-            <li *ngIf="currentService.type == 'CassDB'">Keyspace: {{currentService.keyspace}}</li>
-            <li *ngIf="currentService.type == 'ESInd'">Index: {{currentService.index}}</li>
-            <li *ngIf="currentService.type == 'TstrQ' || currentService.type == 'ZKCoord'
-              || currentService.type == 'RdsCoord' || currentService.type == 'ArspkDB'">
+            <li *ngIf="currentService.type === 'CassDB'">Keyspace: {{currentService.keyspace}}</li>
+            <li *ngIf="currentService.type === 'ESInd'">Index: {{currentService.index}}</li>
+            <li *ngIf="currentService.type === 'ZKCoord'
+              || currentService.type === 'RdsCoord' || currentService.type === 'ArspkDB'">
               Namespace: {{currentService.namespace}}
             </li>
-            <li *ngIf="currentService.type != 'TstrQ'">Provider:
+            <li *ngIf="currentService.type !== 'TstrQ'">Provider:
               <span class="btn-lookup action-link" (click)="getProviderInfo(ProviderInfo, currentService.provider)">
         {{ currentService.provider }}
       </span>
             </li>
-            <li *ngIf="currentService.type == 'TstrQ'">Metadata provider: <span class="btn-lookup action-link"
+            <li *ngIf="currentService.type === 'TstrQ'">Metadata provider: <span class="btn-lookup action-link"
                                                                                 (click)="getProviderInfo(ProviderInfo, currentService.metadata_provider)">{{currentService['metadata-provider']}}</span>
             </li>
-            <li *ngIf="currentService.type == 'TstrQ'">Metadata namespace: {{currentService['metadata-namespace']}}</li>
-            <li *ngIf="currentService.type == 'TstrQ'">Data provider: <span class="btn-lookup action-link"
+            <li *ngIf="currentService.type === 'TstrQ'">Metadata namespace: {{currentService['metadata-namespace']}}</li>
+            <li *ngIf="currentService.type === 'TstrQ'">Data provider: <span class="btn-lookup action-link"
                                                                             (click)="getProviderInfo(ProviderInfo, currentService.data_provider)">{{currentService['data-provider']}}</span>
             </li>
-            <li *ngIf="currentService.type == 'TstrQ'">Data namespace: {{currentService['data-namespace']}}</li>
-            <li *ngIf="currentService.type == 'TstrQ'">Lock provider: <span class="btn-lookup action-link"
+            <li *ngIf="currentService.type === 'TstrQ'">Data namespace: {{currentService['data-namespace']}}</li>
+            <li *ngIf="currentService.type === 'TstrQ'">Lock provider: <span class="btn-lookup action-link"
                                                                             (click)="getProviderInfo(ProviderInfo, currentService.lock_provider)">{{currentService['lock-provider']}}</span>
             </li>
-            <li *ngIf="currentService.type == 'TstrQ'">Lock namespace: {{currentService['lock-namespace']}}</li>
+            <li *ngIf="currentService.type === 'TstrQ'">Lock namespace: {{currentService['lock-namespace']}}</li>
           </ul>
         </div>
       </div>
