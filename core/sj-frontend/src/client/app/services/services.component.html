@@ -47,21 +47,21 @@
 
               <tr *ngFor="let service of serviceList | orderBy: 'name' | listFilter : term"
                   [ngClass]="{ 'table-info': isSelected(service) }"
-                  (click)="service_select(service)">
+                  (click)="selectService(service)">
                 <td>{{ service.name }}</td>
                 <td>{{ service.description }}</td>
                 <td>
                 <span *ngIf="service.type != 'TstrQ'">
                   <span>Provider:</span>
                   <span class="btn-lookup action-link"
-                        (click)="get_provider_info(ProviderInfo, service.provider)">{{ service.provider }}</span>
+                        (click)="getProviderInfo(ProviderInfo, service.provider)">{{ service.provider }}</span>
                 </span>
                 </td>
                 <td class="actions-column">
                   <button type="button"
                           class="btn btn-sm btn-secondary"
                           title="Delete service"
-                          (click)="delete_service_confirm(DeleteService, service)">
+                          (click)="deleteServiceConfirm(DeleteService, service)">
                     <i class="fa fa-trash"></i>
                   </button>
                 </td>
@@ -79,33 +79,33 @@
       <div class="card-header">Detailed information about node</div>
       <div class="card-block">
         <div class="overflow-x-scroll">
-          <ul *ngIf="current_service">
-            <li>Name: {{current_service.name}}</li>
-            <li>Type: {{current_service.type}}</li>
-            <li>Description: {{current_service.description}}</li>
-            <li *ngIf="current_service.type == 'CassDB'">Keyspace: {{current_service.keyspace}}</li>
-            <li *ngIf="current_service.type == 'ESInd'">Index: {{current_service.index}}</li>
-            <li *ngIf="current_service.type == 'TstrQ' || current_service.type == 'ZKCoord'
-              || current_service.type == 'RdsCoord' || current_service.type == 'ArspkDB'">
-              Namespace: {{current_service.namespace}}
+          <ul *ngIf="currentService">
+            <li>Name: {{currentService.name}}</li>
+            <li>Type: {{currentService.type}}</li>
+            <li>Description: {{currentService.description}}</li>
+            <li *ngIf="currentService.type == 'CassDB'">Keyspace: {{currentService.keyspace}}</li>
+            <li *ngIf="currentService.type == 'ESInd'">Index: {{currentService.index}}</li>
+            <li *ngIf="currentService.type == 'TstrQ' || currentService.type == 'ZKCoord'
+              || currentService.type == 'RdsCoord' || currentService.type == 'ArspkDB'">
+              Namespace: {{currentService.namespace}}
             </li>
-            <li *ngIf="current_service.type != 'TstrQ'">Provider:
-              <span class="btn-lookup action-link" (click)="get_provider_info(ProviderInfo, current_service.provider)">
-        {{ current_service.provider }}
+            <li *ngIf="currentService.type != 'TstrQ'">Provider:
+              <span class="btn-lookup action-link" (click)="getProviderInfo(ProviderInfo, currentService.provider)">
+        {{ currentService.provider }}
       </span>
             </li>
-            <li *ngIf="current_service.type == 'TstrQ'">Metadata provider: <span class="btn-lookup action-link"
-                                                                                 (click)="get_provider_info(ProviderInfo, current_service.metadata_provider)">{{current_service['metadata-provider']}}</span>
+            <li *ngIf="currentService.type == 'TstrQ'">Metadata provider: <span class="btn-lookup action-link"
+                                                                                (click)="getProviderInfo(ProviderInfo, currentService.metadata_provider)">{{currentService['metadata-provider']}}</span>
             </li>
-            <li *ngIf="current_service.type == 'TstrQ'">Metadata namespace: {{current_service['metadata-namespace']}}</li>
-            <li *ngIf="current_service.type == 'TstrQ'">Data provider: <span class="btn-lookup action-link"
-                                                                             (click)="get_provider_info(ProviderInfo, current_service.data_provider)">{{current_service['data-provider']}}</span>
+            <li *ngIf="currentService.type == 'TstrQ'">Metadata namespace: {{currentService['metadata-namespace']}}</li>
+            <li *ngIf="currentService.type == 'TstrQ'">Data provider: <span class="btn-lookup action-link"
+                                                                            (click)="getProviderInfo(ProviderInfo, currentService.data_provider)">{{currentService['data-provider']}}</span>
             </li>
-            <li *ngIf="current_service.type == 'TstrQ'">Data namespace: {{current_service['data-namespace']}}</li>
-            <li *ngIf="current_service.type == 'TstrQ'">Lock provider: <span class="btn-lookup action-link"
-                                                                             (click)="get_provider_info(ProviderInfo, current_service.lock_provider)">{{current_service['lock-provider']}}</span>
+            <li *ngIf="currentService.type == 'TstrQ'">Data namespace: {{currentService['data-namespace']}}</li>
+            <li *ngIf="currentService.type == 'TstrQ'">Lock provider: <span class="btn-lookup action-link"
+                                                                            (click)="getProviderInfo(ProviderInfo, currentService.lock_provider)">{{currentService['lock-provider']}}</span>
             </li>
-            <li *ngIf="current_service.type == 'TstrQ'">Lock namespace: {{current_service['lock-namespace']}}</li>
+            <li *ngIf="currentService.type == 'TstrQ'">Lock namespace: {{currentService['lock-namespace']}}</li>
           </ul>
         </div>
       </div>
@@ -130,7 +130,7 @@
           <fieldset class="form-group row">
             <label class="col-sm-2 col-form-label required">Choose type</label>
             <div class="col-sm-10">
-              <select required [(ngModel)]="new_service.type" name="serviceType"
+              <select required [(ngModel)]="newService.type" name="serviceType"
                       class="form-control">
                 <option value="ArspkDB">Aerospike DB</option>
                 <option value="CassDB">Cassandra DB</option>
@@ -147,7 +147,7 @@
           <fieldset class="form-group row">
             <label class="col-sm-2 col-form-label required">Name</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="new_service.name" name="serviceName" type="text" class="form-control"
+              <input [(ngModel)]="newService.name" name="serviceName" type="text" class="form-control"
                      required pattern="[a-zA-z][a-zA-Z0-9]*">
             </div>
           </fieldset>
@@ -156,47 +156,47 @@
           <fieldset class="form-group row">
             <label class="col-sm-2 col-form-label">Description</label>
             <div class="col-sm-10">
-              <textarea [(ngModel)]="new_service.description"
+              <textarea [(ngModel)]="newService.description"
                         name="serviceDescription"
                         class="form-control"></textarea>
             </div>
           </fieldset>
 
           <!-- Key space -->
-          <fieldset *ngIf="new_service.type == 'CassDB'" class="form-group row">
+          <fieldset *ngIf="newService.type === 'CassDB'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Keyspace</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="new_service.keyspace" name="serviceKeyspace" type="text"
+              <input [(ngModel)]="newService.keyspace" name="serviceKeyspace" type="text"
                      class="form-control" required>
             </div>
           </fieldset>
 
           <!-- Namespace -->
-          <fieldset *ngIf="new_service.type == 'ZKCoord' ||
-                      new_service.type == 'RdsCoord' ||  new_service.type == 'ArspkDB' " class="form-group row">
+          <fieldset *ngIf="newService.type === 'ZKCoord' ||
+                      newService.type === 'RdsCoord' ||  newService.type == 'ArspkDB' " class="form-group row">
             <label class="col-sm-2 col-form-label required">Namespace</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="new_service.namespace" name="serviceNamespace" type="text"
+              <input [(ngModel)]="newService.namespace" name="serviceNamespace" type="text"
                      class="form-control" required pattern="[a-zA-z][a-zA-Z0-9]*">
             </div>
           </fieldset>
 
           <!-- Index -->
-          <fieldset *ngIf="new_service.type == 'ESInd'" class="form-group row">
+          <fieldset *ngIf="newService.type === 'ESInd'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Index</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="new_service.index" name="serviceIndex" type="text" class="form-control"
+              <input [(ngModel)]="newService.index" name="serviceIndex" type="text" class="form-control"
                      required>
             </div>
           </fieldset>
 
           <!-- Provider -->
-          <fieldset *ngIf="new_service.type && new_service.type != 'TstrQ'" class="form-group row">
+          <fieldset *ngIf="newService.type && newService.type !== 'TstrQ'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Provider</label>
             <div class="col-sm-10">
-              <select [(ngModel)]="new_service.provider" name="streamService" required
+              <select [(ngModel)]="newService.provider" name="streamService" required
                       class="form-control">
-                <option *ngFor="let provider of providerList | providerFilter : new_service.type "
+                <option *ngFor="let provider of providerList | providerFilter : newService.type "
                         value={{provider.name}}>{{provider.name}}
                 </option>
               </select>
@@ -204,10 +204,10 @@
           </fieldset>
 
           <!-- Metadata -->
-          <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group row">
+          <fieldset *ngIf="newService.type === 'TstrQ'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Metadata provider</label>
             <div class="col-sm-10">
-              <select [(ngModel)]="new_service['metadata-provider']" name="serviceMetadataProvider"
+              <select [(ngModel)]="newService['metadata-provider']" name="serviceMetadataProvider"
                       required class="form-control">
                 <option *ngFor="let provider of providerList | providerFilter : 'CassDB' " value={{provider.name}}>
                   {{provider.name}}
@@ -217,19 +217,19 @@
           </fieldset>
 
           <!-- Metadata namespace -->
-          <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group row">
+          <fieldset *ngIf="newService.type === 'TstrQ'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Metadata namespace</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="new_service['metadata-namespace']" name="serviceMetadataNamespace" type="text"
+              <input [(ngModel)]="newService['metadata-namespace']" name="serviceMetadataNamespace" type="text"
                      class="form-control" required>
             </div>
           </fieldset>
 
           <!-- Data provider -->
-          <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group row">
+          <fieldset *ngIf="newService.type === 'TstrQ'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Data provider</label>
             <div class="col-sm-10">
-              <select [(ngModel)]="new_service['data-provider']" name="serviceDataProvider"
+              <select [(ngModel)]="newService['data-provider']" name="serviceDataProvider"
                       required class="form-control">
                 <option *ngFor="let provider of providerList | providerFilter : 'DataProvider' "
                         value={{provider.name}}>{{provider.name}}
@@ -239,19 +239,19 @@
           </fieldset>
 
           <!-- Data namespace -->
-          <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group row">
+          <fieldset *ngIf="newService.type === 'TstrQ'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Data namespace</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="new_service['data-namespace']" name="serviceDataNamespace" type="text"
+              <input [(ngModel)]="newService['data-namespace']" name="serviceDataNamespace" type="text"
                      class="form-control" required>
             </div>
           </fieldset>
 
           <!-- Lock provider -->
-          <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group row">
+          <fieldset *ngIf="newService.type === 'TstrQ'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Lock provider</label>
             <div class="col-sm-10">
-              <select [(ngModel)]="new_service['lock-provider']" name="serviceLockProvider"
+              <select [(ngModel)]="newService['lock-provider']" name="serviceLockProvider"
                       required class="form-control">
                 <option *ngFor="let provider of providerList | providerFilter : 'LockProvider' "
                         value={{provider.name}}>{{provider.name}}
@@ -261,37 +261,37 @@
           </fieldset>
 
           <!-- Lock namespace -->
-          <fieldset *ngIf="new_service.type == 'TstrQ'" class="form-group row">
+          <fieldset *ngIf="newService.type === 'TstrQ'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Lock namespace</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="new_service['lock-namespace']" name="serviceLockNamespace" type="text"
+              <input [(ngModel)]="newService['lock-namespace']" name="serviceLockNamespace" type="text"
                      class="form-control" required>
             </div>
           </fieldset>
 
           <!-- Login -->
-          <fieldset *ngIf="new_service.type == 'ESInd'" class="form-group row">
+          <fieldset *ngIf="newService.type === 'ESInd'" class="form-group row">
             <label class="col-sm-2 col-form-label">Login</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="new_service.login" name="serviceLogin" type="text" class="form-control"
+              <input [(ngModel)]="newService.login" name="serviceLogin" type="text" class="form-control"
                      placeholder="Enter service login">
             </div>
           </fieldset>
 
           <!-- Password -->
-          <fieldset *ngIf="new_service.type== 'ESInd'" class="form-group row">
+          <fieldset *ngIf="newService.type === 'ESInd'" class="form-group row">
             <label class="col-sm-2 col-form-label">Password</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="new_service.password" name="servicePassword" type="text"
+              <input [(ngModel)]="newService.password" name="servicePassword" type="text"
                      class="form-control" placeholder="Enter service password">
             </div>
           </fieldset>
 
           <!-- ZK Provider -->
-          <fieldset *ngIf="new_service.type == 'KfkQ'" class="form-group row">
+          <fieldset *ngIf="newService.type === 'KfkQ'" class="form-group row">
             <label class="col-sm-2 col-form-label required">ZK provider</label>
             <div class="col-sm-10">
-              <select [(ngModel)]="new_service['zk-provider']" name="serviceZkProvider"
+              <select [(ngModel)]="newService['zk-provider']" name="serviceZkProvider"
                       required class="form-control">
                 <option *ngFor="let provider of providerList | providerFilter : 'ZKCoord' " value={{provider.name}}>
                   {{provider.name}}
@@ -301,12 +301,12 @@
           </fieldset>
 
           <!-- ZK namespace -->
-          <fieldset *ngIf="new_service.type == 'KfkQ'" class="form-group row">
+          <fieldset *ngIf="newService.type === 'KfkQ'" class="form-group row">
             <label class="col-sm-2 col-form-label required">ZK namespace</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="new_service['zk-namespace']" name="serviceZkNamespace" type="text"
+              <input [(ngModel)]="newService['zk-namespace']" name="serviceZkNamespace" type="text"
                      class="form-control col-sm-10" required
-              pattern="[a-zA-z][a-zA-Z0-9]*">
+                     pattern="[a-zA-z][a-zA-Z0-9]*">
             </div>
           </fieldset>
         </form>
@@ -339,17 +339,17 @@
         <h4 class="modal-title">Provider info</h4>
       </div>
       <div class="modal-body">
-        <ul *ngIf="current_service_provider">
-          <li>Name: {{current_service_provider.name}}</li>
-          <li>Type: {{current_service_provider.type}}</li>
-          <li>Description: {{current_service_provider.description}}</li>
+        <ul *ngIf="currentServiceProvider">
+          <li>Name: {{currentServiceProvider.name}}</li>
+          <li>Type: {{currentServiceProvider.type}}</li>
+          <li>Description: {{currentServiceProvider.description}}</li>
           <li>Hosts:
             <ul>
-              <li *ngFor="let host of current_service_provider.hosts">{{host}}</li>
+              <li *ngFor="let host of currentServiceProvider.hosts">{{host}}</li>
             </ul>
           </li>
-          <li *ngIf="current_service_provider.login">Login: {{current_service_provider.login}}</li>
-          <li *ngIf="current_service_provider.password">Password: {{current_service_provider.password}}</li>
+          <li *ngIf="currentServiceProvider.login">Login: {{currentServiceProvider.login}}</li>
+          <li *ngIf="currentServiceProvider.password">Password: {{currentServiceProvider.password}}</li>
         </ul>
       </div>
       <div class="modal-footer">
@@ -369,25 +369,25 @@
         <h4 class="modal-title">Delete confirmation</h4>
       </div>
 
-      <div class="modal-body" *ngIf="service_to_delete && (blockingStreams.length === 0)">
-        <p>Do you really want to delete service "{{ service_to_delete.name }}" ? This action can not be undone!</p>
+      <div class="modal-body" *ngIf="currentService && (blockingStreams.length === 0)">
+        <p>Do you really want to delete service "{{ currentService.name }}" ? This action can not be undone!</p>
       </div>
 
-      <div class="modal-body" *ngIf="service_to_delete && (blockingStreams.length > 0)">
-        <p>Unable to delete service! Next streams using service "{{ service_to_delete.name }}"</p>
+      <div class="modal-body" *ngIf="currentService && (blockingStreams.length > 0)">
+        <p>Unable to delete service! Next streams using service "{{ currentService.name }}"</p>
         <ul>
           <li *ngFor="let stream of blockingStreams | orderBy: 'name' ">{{stream.name}}</li>
         </ul>
       </div>
 
       <div class="modal-footer">
-        <template [ngIf]="service_to_delete && (blockingStreams.length === 0)">
+        <template [ngIf]="currentService && (blockingStreams.length === 0)">
           <button type="button" class="btn btn-secondary" (click)="DeleteService.hide()">Cancel</button>
           <button type="button" class="btn btn-danger"
-                  (click)="delete_service(DeleteService, service_to_delete)">Delete
+                  (click)="deleteService(DeleteService)">Delete
           </button>
         </template>
-        <template [ngIf]="service_to_delete && (blockingStreams.length > 0)">
+        <template [ngIf]="currentService && (blockingStreams.length > 0)">
           <button type="button" class="btn btn-primary" (click)="DeleteService.hide()">Ok</button>
         </template>
       </div>
