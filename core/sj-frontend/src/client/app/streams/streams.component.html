@@ -209,6 +209,7 @@
               <label class="col-sm-2 col-form-label required">Type</label>
               <div class="col-sm-10">
                 <select [(ngModel)]="newStream['generator']['generator-type']" name="streamGeneratorType"
+                        #streamGeneratorType = "ngModel"
                         required class="form-control">
                   <option value="global">Global</option>
                   <option value="local">Local</option>
@@ -219,19 +220,27 @@
 
             <!-- Service -->
             <fieldset class="form-group row">
-              <label class="col-sm-2 col-form-label">Service</label>
+              <label class="col-sm-2 col-form-label" [class.required]="streamGeneratorType.value!=='local'">Service</label>
               <div class="col-sm-10">
-                <input [(ngModel)]="newStream['generator'].service" name="streamGeneratorService" type="text"
-                       class="form-control">
+                <!--input [(ngModel)]="newStream['generator'].service" name="streamGeneratorService" type="text"
+                       class="form-control"-->
+                <select [(ngModel)]="newStream['generator'].service" name="streamGeneratorService"
+                        class="form-control"
+                        [required]="streamGeneratorType.value!=='local'">
+                  <option *ngFor="let service of serviceList | serviceFilter : newStream['stream-type'] "
+                          value={{service.name}}>{{service.name}}
+                  </option>
+                </select>
               </div>
             </fieldset>
 
             <!-- Instance count -->
             <fieldset class="form-group row">
-              <label class="col-sm-2 col-form-label required">Instance count</label>
+              <label class="col-sm-2 col-form-label" [class.required]="streamGeneratorType.value!=='local'">Instance count</label>
               <div class="col-sm-10">
                 <input [(ngModel)]="newStream['generator']['instance-count']" name="streamGeneratorInstanceCount"
-                       type="number" required class="form-control">
+                       type="number" class="form-control"
+                       [required]="streamGeneratorType.value!=='local'">
               </div>
             </fieldset>
           </template>
