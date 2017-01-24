@@ -257,34 +257,34 @@
         <h4 class="modal-title">Service info</h4>
       </div>
       <div class="modal-body">
-        <ul *ngIf="current_stream_service">
-          <li>Name: {{current_stream_service.name}}</li>
-          <li>Type: {{current_stream_service.type}}</li>
-          <li>Description: {{current_stream_service.description}}</li>
-          <li *ngIf="current_stream_service.type == 'CassDB'">Keyspace: {{current_stream_service.keyspace}}</li>
-          <li *ngIf="current_stream_service.type == 'ESInd'">Index: {{current_stream_service.index}}</li>
-          <li *ngIf="current_stream_service.type == 'TstrQ' || current_stream_service.type == 'ZKCoord'
-              || current_stream_service.type == 'RdsCoord' || current_stream_service.type == 'ArspkDB'">
-            Namespace: {{current_stream_service.namespace}}
+        <ul *ngIf="currentStreamService">
+          <li>Name: {{currentStreamService.name}}</li>
+          <li>Type: {{currentStreamService.type}}</li>
+          <li>Description: {{currentStreamService.description}}</li>
+          <li *ngIf="currentStreamService.type == 'CassDB'">Keyspace: {{currentStreamService.keyspace}}</li>
+          <li *ngIf="currentStreamService.type == 'ESInd'">Index: {{currentStreamService.index}}</li>
+          <li *ngIf="currentStreamService.type == 'TstrQ' || currentStreamService.type == 'ZKCoord'
+              || currentStreamService.type == 'RdsCoord' || currentStreamService.type == 'ArspkDB'">
+            Namespace: {{currentStreamService.namespace}}
           </li>
-          <li *ngIf="current_stream_service.type != 'TstrQ'">Provider: {{ current_stream_service.provider }}</li>
-          <li *ngIf="current_stream_service.type == 'TstrQ'">Metadata provider:
-            {{current_stream_service['metadata-provider']}}
+          <li *ngIf="currentStreamService.type != 'TstrQ'">Provider: {{ currentStreamService.provider }}</li>
+          <li *ngIf="currentStreamService.type == 'TstrQ'">Metadata provider:
+            {{currentStreamService['metadata-provider']}}
           </li>
-          <li *ngIf="current_stream_service.type == 'TstrQ'">Metadata namespace:
-            {{current_stream_service['metadata-namespace']}}
+          <li *ngIf="currentStreamService.type == 'TstrQ'">Metadata namespace:
+            {{currentStreamService['metadata-namespace']}}
           </li>
-          <li *ngIf="current_stream_service.type == 'TstrQ'">Data provider:
-            {{current_stream_service['data-provider']}}
+          <li *ngIf="currentStreamService.type == 'TstrQ'">Data provider:
+            {{currentStreamService['data-provider']}}
           </li>
-          <li *ngIf="current_stream_service.type == 'TstrQ'">Data namespace:
-            {{current_stream_service['data-namespace']}}
+          <li *ngIf="currentStreamService.type == 'TstrQ'">Data namespace:
+            {{currentStreamService['data-namespace']}}
           </li>
-          <li *ngIf="current_stream_service.type == 'TstrQ'">Lock provider:
-            {{current_stream_service['lock-provider']}}
+          <li *ngIf="currentStreamService.type == 'TstrQ'">Lock provider:
+            {{currentStreamService['lock-provider']}}
           </li>
-          <li *ngIf="current_stream_service.type == 'TstrQ'">Lock namespace:
-            {{current_stream_service['lock-namespace']}}
+          <li *ngIf="currentStreamService.type == 'TstrQ'">Lock namespace:
+            {{currentStreamService['lock-namespace']}}
           </li>
         </ul>
         <fieldset class="form-actions">
@@ -308,14 +308,14 @@
         <h4 class="modal-title">Delete confirmation</h4>
       </div>
 
-      <div class="modal-body" *ngIf="stream_to_delete">
-        <p>Do you really want to delete stream "{{ stream_to_delete.name }}"? This action can not be undone!</p>
+      <div class="modal-body" *ngIf="currentStream">
+        <p>Do you really want to delete stream "{{ currentStream.name }}"? This action can not be undone!</p>
       </div>
 
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="DeleteStream.hide()">Cancel</button>
         <button type="button" class="btn btn-danger"
-                (click)="deleteStream(DeleteStream, stream_to_delete)">Delete
+                (click)="deleteStream(DeleteStream)">Delete
         </button>
       </div>
     </div>

@@ -19,12 +19,11 @@ export class StreamsComponent implements OnInit {
   public serviceList: ServiceModel[];
   public currentStream: StreamModel;
   public currentTag: string;
-  public current_stream_service: ServiceModel;
-  public stream_to_delete: StreamModel;
+  public currentStreamService: ServiceModel;
   public newStream: StreamModel;
 
   constructor(private streamsService: StreamsService,
-              private _servicesService: ServicesService) {
+              private servicesService: ServicesService) {
   }
 
   public ngOnInit() {
@@ -72,16 +71,16 @@ export class StreamsComponent implements OnInit {
   }
 
   public getServiceList() {
-    this._servicesService.getServiceList()
+    this.servicesService.getServiceList()
       .subscribe(
         serviceList => this.serviceList = serviceList,
         error => this.errorMessage = <any>error);
   }
 
   public getService(serviceName: string) {
-    this._servicesService.getService(serviceName)
+    this.servicesService.getService(serviceName)
       .subscribe(
-        service => this.current_stream_service = service,
+        service => this.currentStreamService = service,
         error => this.errorMessage = <any>error);
   }
 
@@ -91,19 +90,18 @@ export class StreamsComponent implements OnInit {
   }
 
   public deleteStreamConfirm(modal: ModalDirective, stream: StreamModel) {
-    this.stream_to_delete = stream;
+    this.currentStream = stream;
     modal.show();
   }
 
-  public deleteStream(modal: ModalDirective, stream: StreamModel) {
-    this.streamsService.deleteStream(stream)
+  public deleteStream(modal: ModalDirective) {
+    this.streamsService.deleteStream(this.currentStream)
       .subscribe(
         status => {
           this.alerts.push({ msg: status, type: 'success', closable: true, timeout: 3000 });
           this.getStreamList();
         },
         error => this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 }));
-    this.stream_to_delete = null;
     modal.hide();
   }
 

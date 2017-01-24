@@ -4,5 +4,5 @@ export class ProviderModel {
   login: string;
   password: string;
   type: string;
-  hosts: [string] = [''];
+  hosts: string[] = [''];
 }
