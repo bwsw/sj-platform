@@ -54,7 +54,7 @@
     },
     "primary": {
       "description": "A name of primary key of table if the stream is JDBC type",
-      "type": "number"
+      "type": "string"
     }
   }
 }
