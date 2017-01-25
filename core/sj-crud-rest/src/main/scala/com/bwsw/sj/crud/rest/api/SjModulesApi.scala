@@ -9,6 +9,7 @@ import akka.http.scaladsl.server.directives.FileInfo
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import akka.stream.scaladsl.FileIO
 import com.bwsw.sj.common.DAL.model.module._
+import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.engine.StreamingValidator
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.module._
@@ -406,7 +407,11 @@ trait SjModulesApi extends Directives with SjCrudValidator {
    * @return - list of errors
    */
   private def validateInstance(options: InstanceMetadata, specification: SpecificationData, moduleType: String) = {
-    val validatorClassName = configService.get(s"system.$moduleType-validator-class").get.value
+    val validatorClassName = configService.get(s"system.$moduleType-validator-class") match {
+      case Some(configurationSetting) => configurationSetting.value
+      case None => throw new ConfigSettingNotFound(
+        createMessage("rest.config.setting.notfound", ConfigLiterals.systemDomain, s"$moduleType-validator-class"))
+    }
     val validatorClass = Class.forName(validatorClassName)
     val validator = validatorClass.newInstance().asInstanceOf[InstanceValidator]
     validator.validate(options, specification)
