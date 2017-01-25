@@ -228,7 +228,7 @@
                 <select [(ngModel)]="newStream['generator'].service" name="streamGeneratorService"
                         class="form-control"
                         [required]="streamGeneratorType.value!=='local'">
-                  <option *ngFor="let service of serviceList | serviceFilter : newStream['stream-type'] "
+                  <option *ngFor="let service of serviceList | serviceFilter : 'zookeeper' "
                           value={{service.name}}>{{service.name}}
                   </option>
                 </select>
