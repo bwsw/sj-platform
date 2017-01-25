@@ -39,6 +39,7 @@ export class InstanceModel {
   'queue-max-size': number;
   'related-streams' : string[] = [];
   'sliding-interval' : number;
+  'stages': Object;
   'start-from': string;
   'state-full-checkpoint': string;
   'state-management': string;
