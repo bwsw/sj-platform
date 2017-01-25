@@ -109,7 +109,7 @@ export class ModulesComponent implements OnInit {
 
   public uploadFile(event: any) {
     this.isUploading = true;
-    let file = event.srcElement.files[0];
+    let file = event.target.files[0];
     if (file) {
       this.modulesService.uploadModule(file).then((result: any) => {
         this.isUploading = false;
@@ -120,8 +120,9 @@ export class ModulesComponent implements OnInit {
         this.isUploading = false;
         this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 });
       });
+    } else {
+      this.isUploading = false;
     }
-    this.isUploading = false;
   }
 
   public selectModule(module: ModuleModel) {

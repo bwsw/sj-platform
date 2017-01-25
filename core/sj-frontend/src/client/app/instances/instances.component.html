@@ -102,7 +102,7 @@
       <div class="card-block">
         <div class="overflow-x-scroll">
           <ul *ngIf="currentInstance">
-            <li>Stages: {{currentInstance['stages'] | json}}</li>
+            <li>Stages: {{currentInstance.stages | json}}</li>
             <li>Status: {{currentInstance.status}}</li>
             <li>Name : {{currentInstance.name}}</li>
             <li>Module-type : {{currentInstance.module["module-type"]}}</li>
@@ -479,7 +479,7 @@
               <label class="col-form-label col-sm-2">Options</label>
               <div class="col col-sm-10">
                 <input [(ngModel)]="newInstance['options']" validJson name="instanceOptions" type="text"
-                       #instanceOptions="ngModel"class="form-control">
+                       #instanceOptions="ngModel" class="form-control">
               </div>
             </fieldset>
 
