@@ -63,3 +63,15 @@ label.required::after {
 .table-wrapper, .overflow-x-scroll {
   overflow-x: scroll;
 }
+
+:invalid {
+  box-shadow: none;
+}
+
+:-moz-submit-invalid {
+  box-shadow: none;
+}
+
+:-moz-ui-invalid {
+  box-shadow:none;
+}

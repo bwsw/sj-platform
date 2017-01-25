@@ -3,7 +3,12 @@ import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 
 import {
-  InstanceModel, SubtypedInstance, RegularStreamingInstance, OutputStreamingInstance, InputStreamingInstance
+  InstanceModel,
+  SubtypedInstance,
+  RegularStreamingInstance,
+  OutputStreamingInstance,
+  InputStreamingInstance,
+  WindowedStreamingInstance
 } from '../models/instance.model';
 
 @Injectable()
@@ -37,8 +42,8 @@ export class InstancesService {
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
     return this._http.get(this._dataUrl + 'modules/instances', options)
-      .map(this._extractData)
-      .catch(this._handleError);
+      .map(this.extractData)
+      .catch(this.handleError);
   }
 
   public getInstanceInfo(instance: InstanceModel): Observable<InstanceModel> {
@@ -47,31 +52,31 @@ export class InstancesService {
     let options = new RequestOptions({ headers: headers });
     return this._http.get(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
       instance['module-version'] + '/instance' + '/' + instance['name'], options)
-      .map(this._extractData)
-      .catch(this._handleError);
+      .map(this.extractData)
+      .catch(this.handleError);
   }
 
   public saveInstance(instance: InstanceModel): Observable<InstanceModel> {
     let subtypedInstance = this.getPreparedInstance(instance);
     let instance_body = Object.assign({}, subtypedInstance);
-    let body = JSON.stringify(instance_body, this._cleanupBodyValues);
+    let body = JSON.stringify(instance_body, this.cleanupBodyValues);
     let headers = new Headers({'Content-Type': 'application/json'});
     let options = new RequestOptions({ headers: headers });
 
     return this._http.post(this._dataUrl + 'modules/' + instance.module['module-type'] + '/' + instance.module['module-name'] + '/' +
       instance.module['module-version'] + '/instance', body, options)
-      .map(this._extractData)
-      .catch(this._handleError);
+      .map(this.extractData)
+      .catch(this.handleError);
   }
 
   public deleteInstance(instance: InstanceModel): Observable<InstanceModel> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.delete(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
-      instance['module-version'] + '/instance' + '/' + instance['name'], options)
-      .map(this._extractData)
-      .catch(this._handleError);
+    return this._http.delete(this._dataUrl + 'modules/' + instance.module['module-type'] + '/' + instance.module['module-name'] + '/' +
+      instance.module['module-version'] + '/instance' + '/' + instance['name'], options)
+      .map(this.extractData)
+      .catch(this.handleError);
   }
 
   public startInstance(instance: InstanceModel): Observable<InstanceModel> {
@@ -80,8 +85,8 @@ export class InstancesService {
     let options = new RequestOptions({ headers: headers });
     return this._http.get(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
       instance['module-version'] + '/instance' + '/' + instance['name'] + '/start', options)
-      .map(this._extractData)
-      .catch(this._handleError);
+      .map(this.extractData)
+      .catch(this.handleError);
   }
 
   public stopInstance(instance: InstanceModel): Observable<InstanceModel> {
@@ -90,8 +95,8 @@ export class InstancesService {
     let options = new RequestOptions({ headers: headers });
     return this._http.get(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
       instance['module-version'] + '/instance' + '/' + instance['name'] + '/stop', options)
-      .map(this._extractData)
-      .catch(this._handleError);
+      .map(this.extractData)
+      .catch(this.handleError);
   }
 
   private getPreparedInstance(orig: InstanceModel) {
@@ -115,8 +120,26 @@ export class InstancesService {
 
         break;
 
-      // case 'windowed-streaming':
-      //   break;
+      case 'windowed-streaming':
+        inst = new WindowedStreamingInstance();
+        inst = InstancesService.fillInstanceGeneralFields(orig, inst);
+        inst['outputs'] = orig['outputs'];
+        inst['state-management'] = orig['state-management'];
+        inst['window'] = orig['window'];
+        inst['state-full-checkpoint'] = orig['state-full-checkpoint'];
+        inst['event-wait-time'] = orig['event-wait-time'];
+        inst['main-stream'] = orig['main-stream'] + '/' + orig['main-stream-type'];
+        if (orig['related-streams'].length > 0 && orig['related-streams'][0] !== '') {
+          orig['related-streams'].forEach(function(item:string, i:number) {
+            inst['related-streams'][i] = orig['related-streams'][i] + '/' + orig['related-streams-type'][i];
+          });
+        } else {
+          inst['related-streams'] = [];
+        }
+        inst['batch-fill-type'] = {"type-name": orig['batch-fill-type-name'], value: orig['batch-fill-type-value']}
+        inst['sliding-interval'] = orig['sliding-interval'];
+        inst['start-from'] = orig['start-from'] === 'timestamp' ? orig['start-from-timestamp'] : orig['start-from'];
+        break;
 
       case 'output-streaming':
         inst = new OutputStreamingInstance();
@@ -151,11 +174,10 @@ export class InstancesService {
         inst[fieldName] = JSON.parse(inst[fieldName].toString());
       }
     }
-
     return inst;
   }
 
-  private _extractData(res: Response) { //TODO Write good response parser
+  private extractData(res: Response) { //TODO Write good response parser
     let body = {};
     if (typeof res.json()['entity']['instances'] !== 'undefined') {
       body = res.json()['entity']['instances'];
@@ -167,7 +189,7 @@ export class InstancesService {
     return body;
   }
 
-  private _handleError(error: any) {
+  private handleError(error: any) {
     let errMsg = (error._body) ? error._body :
       error.status ? `${error.status} - ${error.statusText}` : 'Server error';
     errMsg = JSON.parse(errMsg);
@@ -176,7 +198,7 @@ export class InstancesService {
   }
 
 
-  private _cleanupBodyValues(key: string, value: any): any {
+  private cleanupBodyValues(key: string, value: any): any {
     if ( [null, ''].indexOf(value) > -1 ) {
       return undefined;
     } else {

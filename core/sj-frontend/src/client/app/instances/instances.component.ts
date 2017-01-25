@@ -20,21 +20,18 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
 
   public alerts: Array<Object> = [];
   public errorMessage: string;
-  public form_ready: boolean = false;
-  public instanceList: InstanceModel[];
-  public cloneInstanceList: InstanceModel[] = [];
-  public moduleList: ModuleModel[];
-  public serviceList: ServiceModel[];
-  public streamList: StreamModel[];
+  public isFormReady: boolean = false;
+  public instancesList: InstanceModel[];
+  public cloneInstancesList: InstanceModel[] = [];
+  public modulesList: ModuleModel[];
+  public servicesList: ServiceModel[];
+  public streamsList: StreamModel[];
   public streamTypesList: { [key: string]: string } = {};
-  public current_instance: InstanceModel;
-  public current_instance_info: InstanceModel;
-  public current_instance_tasks: string[];
-  public new_instance: InstanceModel;
+  public currentInstance: InstanceModel;
+  public currentInstanceTasks: string[];
+  public newInstance: InstanceModel;
   public cloneInstance: boolean = false;
-  public new_instance_module: ModuleModel;
-  public instance_to_delete: InstanceModel;
-  public instance_to_clone: InstanceModel;
+  public cloningInstance: InstanceModel;
   public instanceForm: NgForm;
   public showSpinner: boolean;
   public startFromTimestampAcceptable: boolean = true;
@@ -43,11 +40,15 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
 
   public formErrors: { [key: string]: string } = {
     'instanceJvmOptions': '',
+    'instanceOptions': '',
     'instanceNodeAttributes': '',
     'instanceEnvironmentVariables': '',
   };
 
   public validationMessages: { [key: string]: { [key: string]: string } } = {
+    'instanceOptions': {
+      'validJson': 'JVM options value is not a valid json'
+    },
     'instanceJvmOptions': {
       'validJson': 'JVM options value is not a valid json'
     },
@@ -59,137 +60,138 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
     }
   };
 
-  constructor(private _instancesService: InstancesService,
-              private _modulesService: ModulesService,
-              private _streamsService: StreamsService,
-              private _servicesService: ServicesService) {
-  }
+  constructor(
+    private instancesService: InstancesService,
+    private modulesService: ModulesService,
+    private streamsService: StreamsService,
+    private servicesService: ServicesService) { }
 
   public ngOnInit() {
-    this.getInstanceList();
-    this.getModuleList();
-    this.getStreamList();
-    this.getServiceList();
-    this._instancesService.getInstanceList()
-      .subscribe(
-        instanceList => {
-          //if (this.cloneInstanceList.length === 0) {
-          this.cloneInstanceList = instanceList;
-          //}
-        },
-        error => this.errorMessage = <any>error);
-
-    setInterval(function () {
-      this.getInstanceList();
-    }.bind(this), 2000);
-    this.new_instance = new InstanceModel();
+    this.newInstance = new InstanceModel();
+    this.getInstancesList();
+    this.getModulesList();
+    this.getStreamsList();
+    this.getServicesList();
   }
 
-  public getInstanceList() {
-    this._instancesService.getInstanceList()
+  public getInstancesList() {
+    this.instancesService.getInstanceList()
       .subscribe(
-        instanceList => {
-          this.instanceList = instanceList;
-          //if (this.cloneInstanceList.length === 0) {
-          //  this.cloneInstanceList = instanceList;
-          //}
-          // if (this.instanceList.length > 0) {
-            //this.current_instance = instanceList[0];
-            //this.get_instance_info(this.current_instance);
-          // }
+        instancesList => {
+          this.instancesList = instancesList;
+          this.cloneInstancesList = instancesList;
         },
         error => this.errorMessage = <any>error);
   }
 
-  public getModuleList() {
-    this._modulesService.getModuleList()
+  public getModulesList() {
+    this.modulesService.getModuleList()
       .subscribe(
-        moduleList => {
-          this.moduleList = moduleList;
+        modulesList => {
+          this.modulesList = modulesList;
         },
         error => this.errorMessage = <any>error);
   }
 
-  public getStreamList() {
-    this._streamsService.getStreamList()
+  public getStreamsList() {
+    this.streamsService.getStreamList()
       .subscribe(
-        streamList => {
-          this.streamList = streamList;
-          for (let stream of streamList) {
+        streamsList => {
+          this.streamsList = streamsList;
+          for (let stream of streamsList) {
             this.streamTypesList[stream.name] = stream['stream-type'];
           }
         },
         error => this.errorMessage = <any>error);
   }
 
-  public getServiceList() {
-    this._servicesService.getServiceList()
+  public getServicesList() {
+    this.servicesService.getServiceList()
       .subscribe(
-        serviceList => {
-          this.serviceList = serviceList;
-          this.form_ready = true;
+        servicesList => {
+          this.servicesList = servicesList;
+          this.isFormReady = true;
         },
 
         error => this.errorMessage = <any>error);
   }
 
-  public get_instance_info(instance: InstanceModel) {
-    this._instancesService.getInstanceInfo(instance)
+  public getInstanceInfo(currentInstance: InstanceModel) {
+    this.instancesService.getInstanceInfo(currentInstance)
       .subscribe(
-        instanceInfo => {
-          this.current_instance_info = instanceInfo;
-          //this.new_instance = instanceInfo;
-          this.current_instance_info.module = new ModuleModel();
-          this.current_instance_info.module['module-name'] = instance['module-name'];
-          this.current_instance_info.module['module-type'] = instance['module-type'];
-          this.current_instance_info.module['module-version'] = instance['module-version'];
-          this.current_instance_tasks = Object.keys(this.current_instance_info['execution-plan']['tasks']);
+        instance => {
+          this.currentInstance = instance;
+          this.currentInstance.module = new ModuleModel();
+          this.currentInstance.module['module-name'] = currentInstance['module-name'];
+          this.currentInstance.module['module-type'] = currentInstance['module-type'];
+          this.currentInstance.module['module-version'] = currentInstance['module-version'];
+          this.currentInstanceTasks = this.currentInstance.module['module-type'] !== 'input-streaming' ?
+            this.currentInstance['execution-plan']['tasks']:
+            this.currentInstance['tasks'];
         },
         error => this.errorMessage = <any>error);
   }
 
-  public instance_select(instance: InstanceModel) {
-    this.current_instance = instance;
-    this.get_instance_info(instance);
+  public selectInstance(instance: InstanceModel) {
+    this.getInstanceInfo(instance);
   }
 
   public createByClone(instanceIndex: number) {
-    let instance = this.cloneInstanceList[instanceIndex];
-    this._instancesService.getInstanceInfo(instance)
+    let instance = this.cloneInstancesList[instanceIndex];
+    this.instancesService.getInstanceInfo(instance)
       .subscribe(
         instanceInfo => {
-          this.new_instance = instanceInfo;
-          this.new_instance.options = JSON.stringify(instanceInfo.options);
-          this.new_instance['jvm-options'] = JSON.stringify(instanceInfo['jvm-options']);
-          this.new_instance['node-attributes'] = JSON.stringify(instanceInfo['node-attributes']);
-          this.new_instance['environment-variables'] = JSON.stringify(instanceInfo['environment-variables']);
-          this.new_instance.name = '';
-          this.new_instance.module = new ModuleModel();
-          this.new_instance.module['module-name'] = instance['module-name'];
-          this.new_instance.module['module-type'] = instance['module-type'];
-          this.new_instance.module['module-version'] = instance['module-version'];
-          if (this.new_instance.module['module-type'] === 'regular-streaming') {
-            this.new_instance['inputs-types'] = [];
-            this.new_instance.inputs.forEach(function (item: string, i: number) {
-              let parsedInput = item.split('/');
-              this.new_instance.inputs[i] = parsedInput[0];
-              this.new_instance['inputs-types'][i] = parsedInput[1];
+          this.newInstance = instanceInfo;
+          this.newInstance['jvm-options'] = JSON.stringify(instanceInfo['jvm-options']);
+          this.newInstance['options'] = JSON.stringify(instanceInfo['options']);
+          this.newInstance['node-attributes'] = JSON.stringify(instanceInfo['node-attributes']);
+          this.newInstance['environment-variables'] = JSON.stringify(instanceInfo['environment-variables']);
+          this.newInstance['coordination-service'] =
+            this.servicesList.find(service => service.name === instanceInfo['coordination-service']) ? instanceInfo['coordination-service']: '';
+          this.newInstance.name = '';
+          this.newInstance.module = new ModuleModel();
+          this.newInstance.module['module-name'] = instance['module-name'];
+          this.newInstance.module['module-type'] = instance['module-type'];
+          this.newInstance.module['module-version'] = instance['module-version'];
+          if (this.newInstance.module['module-type'] === 'windowed-streaming') {
+            let batchFillType : { [key: string]: any } = instanceInfo['batch-fill-type'];
+            this.newInstance['batch-fill-type-name'] = batchFillType['type-name'];
+            this.newInstance['batch-fill-type-value'] = batchFillType['value'];
+          }
+          if (this.newInstance.module['module-type'] === 'windowed-streaming') {
+            let mainStream = instanceInfo['main-stream'].split('/');
+            this.newInstance['main-stream'] = mainStream[0];
+            this.newInstance['main-stream-type'] = mainStream[1];
+            this.newInstance['related-streams-type'] = [];
+            instanceInfo['related-streams'].forEach((item: string, i: number) => {
+              let related = item.split('/');
+              this.newInstance['related-streams'][i] = related[0];
+              this.newInstance['related-streams-type'][i] = related[1];
+            });
+
+          }
+          if (this.newInstance.module['module-type'] === 'regular-streaming') {
+            this.newInstance['inputs-types'] = [];
+            this.newInstance.inputs.forEach(function (item: string, i: number) {
+              let input = item.split('/');
+              this.newInstance.inputs[i] = input[0];
+              this.newInstance['inputs-types'][i] = input[1];
             }.bind(this));
           }
-          //this.current_instance_tasks = Object.keys(this.current_instance_info['execution-plan']['tasks']);
         },
         error => this.errorMessage = <any>error);
-    //this.new_instance = instanceName;
   }
 
   public createInstance(modal: ModalDirective) {
-    let req = this._instancesService.saveInstance(this.new_instance);
+    let req = this.instancesService.saveInstance(this.newInstance);
     this.showSpinner = true;
     req.subscribe(
       status => {
         modal.hide();
+        this.newInstance = new InstanceModel();
         this.showSpinner = false;
         this.alerts.push({msg: status, type: 'success', closable: true, timeout:3000});
+        this.getInstancesList();
       },
       error => {
         this.showSpinner = false;
@@ -202,74 +204,85 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
     this.alerts.splice(i, 1);
   }
 
-  public delete_instance_confirm(modal: ModalDirective, instance: InstanceModel) {
-    //console.log(typeof modal);
-    //debugger;
-    this.instance_to_delete = instance;
+  public deleteInstanceConfirm(modal: ModalDirective, instance: InstanceModel) {
+    this.getInstanceInfo(instance);
     modal.show();
   }
 
-  public delete_instance(modal: ModalDirective, instance: InstanceModel) {
-    this._instancesService.deleteInstance(instance)
+  public deleteInstance(modal: ModalDirective) {
+    this.instancesService.deleteInstance(this.currentInstance)
       .subscribe(
         status => {
           this.alerts.push({ msg: status, type: 'success', closable: true, timeout: 3000 });
-          this.getInstanceList();
+          this.getInstancesList();
         },
         error => this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 }));
-    this.instance_to_delete = null;
     modal.hide();
   }
 
-  isSelected(instance: InstanceModel) {
-    return this.current_instance && instance.name === this.current_instance.name;
+  public isSelected(instance: InstanceModel) {
+    return this.currentInstance && instance.name === this.currentInstance.name;
   }
 
-  public start_instance(instance: InstanceModel) {
-    this._instancesService.startInstance(instance)
-      .subscribe(
-        status => {
-          //alerts add status message
-        },
-        error => this.errorMessage = <any>error);
+  public clearInstance() {
+    this.newInstance = new InstanceModel();
+    this.cloningInstance = new InstanceModel();
   }
 
-  public stop_instance(instance: InstanceModel) {
-    this._instancesService.stopInstance(instance)
+  public startInstance(instance: InstanceModel) {
+    this.instancesService.startInstance(instance)
       .subscribe(
         status => {
-          //alerts add status message
+          this.alerts.push({ msg: status, type: 'success', closable: true, timeout: 3000 });
         },
-        error => this.errorMessage = <any>error);
+        error => this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+  }
+
+  public stopInstance(instance: InstanceModel) {
+    this.instancesService.stopInstance(instance)
+      .subscribe(
+        status => {
+          this.alerts.push({ msg: status, type: 'success', closable: true, timeout: 3000 });
+        },
+        error => this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 }));
   }
 
   public addInput() {
-    this.new_instance.inputs.push('');
-    this.new_instance['inputs-types'].push('');
+    this.newInstance.inputs.push('');
+    this.newInstance['inputs-types'].push('');
     this.checkTimestampAcceptable();
   }
 
   public addOutput() {
-    this.new_instance.outputs.push('');
+    this.newInstance.outputs.push('');
   }
 
   public removeInput(i: number): void {
-    this.new_instance.inputs.splice(i, 1);
-    this.new_instance['inputs-types'].splice(i, 1);
+    this.newInstance.inputs.splice(i, 1);
+    this.newInstance['inputs-types'].splice(i, 1);
     this.checkTimestampAcceptable();
   }
 
   public removeOutput(i: number): void {
-    this.new_instance.outputs.splice(i, 1);
+    this.newInstance.outputs.splice(i, 1);
+  }
+
+  public addRelatedStream() {
+    this.newInstance['related-streams'].push('');
+  }
+
+  public removeRelatedStream(i: number): void {
+    this.newInstance['related-streams'].splice(i, 1);
+    this.newInstance['related-streams-type'].splice(i, 1);
   }
 
   public checkTimestampAcceptable(): void {
-    switch (this.new_instance.module['module-type']) {
+    switch (this.newInstance.module['module-type']) {
       case 'regular-streaming':
       case 'windowed-streaming':
-        if (this.new_instance.inputs &&  this.new_instance.inputs.length > 0 && this.new_instance.inputs[0]) {
+        if (this.newInstance.inputs &&  this.newInstance.inputs.length > 0 && this.newInstance.inputs[0]) {
           this.startFromTimestampAcceptable = true;
-          for (let inputName of this.new_instance.inputs) {
+          for (let inputName of this.newInstance.inputs) {
             if (this.streamTypesList[inputName] !== 'stream.t-stream') {
               this.startFromTimestampAcceptable = false;
               break;
@@ -281,16 +294,16 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
         this.startFromTimestampAcceptable = true;
         break;
       default:
-        console.error('start-from field is not provided for module-type '+this.new_instance.module['module-type']);
+        console.error('start-from field is not provided for module-type '+this.newInstance.module['module-type']);
         break;
     }
-    if (!this.startFromTimestampAcceptable && this.new_instance['start-from'] === 'timestamp') {
-      this.new_instance['start-from'] = '';
+    if (!this.startFromTimestampAcceptable && this.newInstance['start-from'] === 'timestamp') {
+      this.newInstance['start-from'] = '';
     }
   }
 
   public ifInstanceCanBeRemoved(): boolean {
-    return ['starting', 'started', 'stopping'].indexOf(this.instance_to_delete.status) === -1;
+    return ['starting', 'started', 'stopping'].indexOf(this.currentInstance.status) === -1;
   }
 
   public ngAfterViewChecked() {

@@ -52,7 +52,7 @@ export class ModulesService {
       xhr.onreadystatechange = () => {
         if (xhr.readyState === 4) {
           if (xhr.status === 200) {
-            resolve(JSON.parse(xhr.response));
+            resolve(JSON.parse(xhr.response).entity.message);
           } else {
             reject(JSON.parse(xhr.response).entity.message);
           }

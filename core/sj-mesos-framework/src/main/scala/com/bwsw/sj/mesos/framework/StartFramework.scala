@@ -52,5 +52,6 @@ object StartFramework {
 
     driver.start()
     driver.join()
+    System.exit(0)
   }
 }

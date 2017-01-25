@@ -3,7 +3,7 @@ export class StreamModel {
   description: string;
   service: string;
   'stream-type': string;
-  tags: [string];
+  tags: string[];
   partitions: number;
   generator: {
     'generator-type': string;

@@ -17,14 +17,13 @@ export class ModulesComponent implements OnInit {
   public instanceList: InstanceModel[];
   public blockingInstances: InstanceModel[] = [];
   public alerts: Array<Object> = [];
-  public current_module: ModuleModel;
-  public current_module_specification: ModuleModel;
-  public module_to_delete: ModuleModel;
-  public upload_in_progress: boolean = false;
+  public currentModule: ModuleModel;
+  public currentModuleSpecification: ModuleModel;
+  public isUploading: boolean = false;
   public showSpinner: boolean;
 
-  constructor(private _modulesService: ModulesService,
-              private _instancesService: InstancesService) {
+  constructor(private modulesService: ModulesService,
+              private instancesService: InstancesService) {
   }
 
   public ngOnInit() {
@@ -33,20 +32,20 @@ export class ModulesComponent implements OnInit {
   }
 
   public getModuleList() {
-    this._modulesService.getModuleList()
+    this.modulesService.getModuleList()
       .subscribe(
         moduleList => {
           this.moduleList = moduleList;
           if (moduleList.length > 0) {
-            this.current_module = moduleList[0];
-            this.get_module_specification(this.current_module);
+            this.currentModule = moduleList[0];
+            this.getModuleSpecification(this.currentModule);
           }
         },
         error => this.errorMessage = <any>error);
   }
 
   public getInstanceList() {
-    this._instancesService.getInstanceList()
+    this.instancesService.getInstanceList()
       .subscribe(
         instanceList => {
           this.instanceList = instanceList;
@@ -54,41 +53,40 @@ export class ModulesComponent implements OnInit {
         error => this.errorMessage = <any>error);
   }
 
-  public get_module_specification(module: ModuleModel) {
-    this._modulesService.getModuleSpecification(module)
+  public getModuleSpecification(module: ModuleModel) {
+    this.modulesService.getModuleSpecification(module)
       .subscribe(
-        moduleSpec => this.current_module_specification = moduleSpec,
+        moduleSpec => this.currentModuleSpecification = moduleSpec,
         error => this.errorMessage = <any>error);
   }
 
-  public delete_module_confirm(modal: ModalDirective, module: ModuleModel) {
-    this.module_to_delete = module;
+  public deleteModuleConfirm(modal: ModalDirective, module: ModuleModel) {
+    this.currentModule = module;
     this.blockingInstances = [];
     this.instanceList.forEach((item: InstanceModel) => {
-      if (item['module-name'] === this.module_to_delete['module-name'] &&
-        item['module-type'] === this.module_to_delete['module-type'] &&
-        item['module-version'] === this.module_to_delete['module-version']) {
+      if (item['module-name'] === this.currentModule['module-name'] &&
+        item['module-type'] === this.currentModule['module-type'] &&
+        item['module-version'] === this.currentModule['module-version']) {
         this.blockingInstances.push(item);
       }
     });
     modal.show();
   }
 
-  public delete_module(modal: ModalDirective, module: ModuleModel) {
-    this._modulesService.deleteModule(module)
+  public deleteModule(modal: ModalDirective) {
+    this.modulesService.deleteModule(this.currentModule)
       .subscribe(
         status => {
           this.alerts.push({ msg: status, type: 'success', closable: true, timeout: 3000 });
           this.getModuleList();
         },
         error => this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 }));
-    this.module_to_delete = null;
     modal.hide();
   }
 
-  public download_module(module: ModuleModel) {
+  public downloadModule(module: ModuleModel) {
     this.showSpinner = true;
-    this._modulesService.downloadModule(module)
+    this.modulesService.downloadModule(module)
       .subscribe(
         data => {
           let a = document.createElement('a');
@@ -109,22 +107,27 @@ export class ModulesComponent implements OnInit {
         });
   }
 
-  public fileUpload(event: any) {
-    this.upload_in_progress = true;
-    var file = event.srcElement.files[0];
-    this._modulesService.uploadModule(file).then((result: any) => {
-      this.upload_in_progress = false;
-      this.alerts.push({ msg: result, type: 'success', closable: true, timeout: 3000 });
-      this.getModuleList();
-    }, (error: any) => {
-      this.upload_in_progress = false;
-      this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 });
-    });
+  public uploadFile(event: any) {
+    this.isUploading = true;
+    let file = event.target.files[0];
+    if (file) {
+      this.modulesService.uploadModule(file).then((result: any) => {
+        this.isUploading = false;
+        this.alerts.push({ msg: result, type: 'success', closable: true, timeout: 3000 });
+        this.getModuleList();
+      },
+        (error: any) => {
+        this.isUploading = false;
+        this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 });
+      });
+    } else {
+      this.isUploading = false;
+    }
   }
 
-  public module_select(module: ModuleModel) {
-    this.current_module = module;
-    this.get_module_specification(module);
+  public selectModule(module: ModuleModel) {
+    this.currentModule = module;
+    this.getModuleSpecification(module);
   }
 
   public closeAlert(i: number): void {
@@ -132,6 +135,6 @@ export class ModulesComponent implements OnInit {
   }
 
   public isSelected(module: ModuleModel) {
-    return module === this.current_module;
+    return module === this.currentModule;
   }
 }

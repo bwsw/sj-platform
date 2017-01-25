@@ -10,6 +10,7 @@ import unfiltered.response._
   */
 object Rest {
   val serializer: JsonSerializer = new JsonSerializer()
+  var thread: Thread = null
 
   val echo = unfiltered.filter.Planify{
     case GET (Path("/")) => ResponseString(getResponse)
@@ -22,7 +23,9 @@ object Rest {
   })
 
   def start(port:Int) = {
-    rest(port).start()
+    thread = rest(port)
+    thread.setDaemon(true)
+    thread.start()
   }
 
   def getResponse: String = {
