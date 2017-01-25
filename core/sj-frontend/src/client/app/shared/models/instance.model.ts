@@ -60,6 +60,7 @@ export class SubtypedInstance {
   'per-task-cores': number;
   'per-task-ram': number;
   'performance-reporting-interval': number;
+  'stages': Object;
 
   [key: string]: any;
 }
