@@ -111,6 +111,12 @@ class FrameworkScheduler extends Scheduler {
     offers.foreach(offer => driver.declineOffer(offer.getId))
   }
 
+  /**
+    * Create task to launch.
+    * @param taskName
+    * @param tasksCountOnSlaves
+    * @return
+    */
   private def createTaskToLaunch(taskName: String, tasksCountOnSlaves: mutable.ListBuffer[(Offer, Int)]) = {
     val currentOffer = OfferHandler.getNextOffer(tasksCountOnSlaves)
     val task = TasksList.createTaskToLaunch(taskName, currentOffer._1)
@@ -122,6 +128,10 @@ class FrameworkScheduler extends Scheduler {
     TasksList.launched(taskName)
   }
 
+  /**
+    * Ask driver to launch prepared tasks.
+    * @param driver
+    */
   private def launchTasks(driver: SchedulerDriver) = {
     for (task <- TasksList.getLaunchedTasks()) {
       driver.launchTasks(List(task._1).asJava, task._2.asJava)
