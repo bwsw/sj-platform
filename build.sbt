@@ -30,10 +30,6 @@ val commonSettings = Seq(
   resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
   resolvers += "Twitter Repository" at "http://maven.twttr.com",
 
-  libraryDependencies ++= Seq(
-    "org.slf4j" % "slf4j-log4j12" % "1.7.22"
-  ),
-
   assemblyMergeStrategy in assembly := {
     case PathList("scala", xs@_*) => MergeStrategy.first
     case PathList("org", "slf4j", xs@_*) => MergeStrategy.first

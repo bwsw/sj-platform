@@ -37,6 +37,9 @@ with SjConfigurationSettingsApi {
     case UnknownModuleType(msg, key) =>
       val response = NotFoundRestResponse(Map("message" -> msg, "key" -> key))
       complete(restResponseToHttpResponse(response))
+    case ConfigSettingNotFound(msg) =>
+      val response = NotFoundRestResponse(Map("message" -> msg))
+      complete(restResponseToHttpResponse(response))
     case ex: EntityStreamSizeException =>
       val response = InternalServerErrorRestResponse(Map("message" -> getMessage("rest.errors.large_file")))
       complete(restResponseToHttpResponse(response))
