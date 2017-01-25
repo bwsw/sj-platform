@@ -7,6 +7,7 @@ object Dependencies {
   }
 
   lazy val sjCommonDependencies = Def.setting(Seq(
+    "org.slf4j" % "slf4j-log4j12" % "1.7.22",
     ("com.bwsw" % "t-streams_2.11" % "1.0-SNAPSHOT")
       .exclude("org.slf4j", "slf4j-simple")
       .exclude("org.slf4j", "slf4j-api")
@@ -41,16 +42,14 @@ object Dependencies {
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(
-    ("org.apache.kafka" % "kafka_2.11" % "0.10.1.0")
-      .exclude("org.slf4j", "slf4j-log4j12")
-      .exclude("org.slf4j", "slf4j-api")
-      .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty"),
+    "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
+    "org.apache.kafka" % "kafka_2.11" % "0.10.1.0" % "provided",
     ("net.openhft" % "chronicle-queue" % "4.5.19")
       .exclude("org.slf4j", "slf4j-api")
   ))
 
   lazy val sjRestDependencies = Def.setting(Seq(
+    "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
     "com.typesafe.akka" %% "akka-http" % "10.0.1",
     ("org.everit.json" % "org.everit.json.schema" % "1.4.1")
       .exclude("commons-logging", "commons-logging"),
@@ -60,41 +59,32 @@ object Dependencies {
   ))
 
   lazy val sjInputEngineDependencies = Def.setting(Seq(
+    "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
     "com.hazelcast" % "hazelcast" % "3.7.3"
   ))
 
   lazy val sjRegularEngineDependencies = Def.setting(Seq(
-    ("org.apache.kafka" % "kafka_2.11" % "0.10.1.0")
-      .exclude("org.slf4j", "slf4j-log4j12")
-      .exclude("org.slf4j", "slf4j-api")
-      .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty"),
+    "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
+    "org.apache.kafka" % "kafka_2.11" % "0.10.1.0" % "provided",
     "net.openhft" % "chronicle-queue" % "4.5.19"
   ))
 
   lazy val sjWindowedEngineDependencies = Def.setting(Seq(
-    ("org.apache.kafka" % "kafka_2.11" % "0.10.1.0")
-      .exclude("org.slf4j", "slf4j-log4j12")
-      .exclude("org.slf4j", "slf4j-api")
-      .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty"),
-    ("org.apache.curator" % "curator-recipes" % "2.11.1")
-      .exclude("org.slf4j", "slf4j-api")
-      .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty")
+    "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
+    "org.apache.kafka" % "kafka_2.11" % "0.10.1.0" % "provided",
+    "org.apache.curator" % "curator-recipes" % "2.11.1" % "provided"
   ))
 
   lazy val sjOutputEngineDependencies = Def.setting(Seq(
-    ("org.elasticsearch" % "elasticsearch" % "5.1.1")
-      .exclude("org.slf4j", "slf4j-log4j12")
-      .exclude("org.slf4j", "slf4j-api")
-      .exclude("log4j", "log4j"),
-    "org.elasticsearch.client" % "transport" % "5.1.1",
-    "org.apache.logging.log4j" % "log4j-core" % "2.7",
-    "org.apache.logging.log4j" % "log4j-api" % "2.7"
+    "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
+    "org.elasticsearch" % "elasticsearch" % "5.1.1" % "provided",
+    "org.elasticsearch.client" % "transport" % "5.1.1" % "provided",
+    "org.apache.logging.log4j" % "log4j-core" % "2.7" % "provided",
+    "org.apache.logging.log4j" % "log4j-api" % "2.7" % "provided"
   ))
 
   lazy val sjFrameworkDependencies = Def.setting(Seq(
+    "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
     "org.apache.mesos" % "mesos" % "0.28.1",
     "net.databinder" % "unfiltered-filter_2.11" % "0.8.4",
     "net.databinder" % "unfiltered-jetty_2.11" % "0.8.4",
