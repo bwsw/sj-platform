@@ -76,7 +76,7 @@ export class ProvidersService {
     let errMsg = (error._body) ? error._body :
       error.status ? `${error.status} - ${error.statusText}` : 'Server error';
     errMsg = JSON.parse(errMsg);
-    let errMsgYo = errMsg.entity.message;
+    let errMsgYo = errMsg.entity.message ? errMsg.entity.message : errMsg.entity.errors ;
     return Observable.throw(errMsgYo);
   }
 }

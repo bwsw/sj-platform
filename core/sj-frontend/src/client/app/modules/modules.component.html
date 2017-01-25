@@ -9,10 +9,10 @@
         <div class="row">
           <div class="col col-xs-6"><h4 class="card-title">Modules list</h4></div>
           <div class="col col-xs-6">
-            <label [ngClass]="{inProgress:upload_in_progress}" class="btn btn-primary btn-upload pull-right ml-1 mb-1">
-              <div *ngIf="!upload_in_progress"><i class="fa fa-upload mr-1"></i>Upload module</div>
-              <i *ngIf="upload_in_progress" class="fa fa-spinner fa-spin" aria-hidden="true"></i>
-              <input type="file" (change)="fileUpload($event)">
+            <label [ngClass]="{inProgress:isUploading}" class="btn btn-primary btn-upload pull-right ml-1 mb-1">
+              <div *ngIf="!isUploading"><i class="fa fa-upload mr-1"></i>Upload module</div>
+              <i *ngIf="isUploading" class="fa fa-spinner fa-spin" aria-hidden="true"></i>
+              <input type="file" (change)="uploadFile($event)">
             </label>
 
             <sj-search-box class="pull-right"
@@ -50,7 +50,7 @@
 
               <tr *ngFor="let module of moduleList | orderBy: 'module-name' | listFilter : term"
                   [ngClass]="{ 'table-info': isSelected(module) }"
-                  (click)="module_select(module)">
+                  (click)="selectModule(module)">
                 <td>{{ module["module-name"] }}</td>
                 <td>{{ module["module-type"] }}</td>
                 <td>{{ module["module-version"] }}</td>
@@ -58,13 +58,13 @@
                   <button type="button"
                           class="btn btn-sm btn-secondary"
                           title="Download module"
-                          (click)="download_module(module)">
+                          (click)="downloadModule(module)">
                     <i class="fa fa-download"></i>
                   </button>
                   <button type="button"
                           class="btn btn-sm btn-secondary"
                           title="Delete module"
-                          (click)="delete_module_confirm(DeleteModule, module)">
+                          (click)="deleteModuleConfirm(DeleteModule, module)">
                     <i class="fa fa-trash"></i>
                   </button>
                 </td>
@@ -82,22 +82,22 @@
       <div class="card-header">Detailed information about node</div>
       <div class="card-block">
         <div class="overflow-x-scroll">
-          <ul *ngIf="current_module_specification">
-            <li>Name: {{current_module_specification.name}}</li>
-            <li>Description: {{current_module_specification.description}}</li>
-            <li>Version: {{current_module_specification.version}}</li>
-            <li>Author: {{current_module_specification.author}}</li>
-            <li>Licence: {{current_module_specification.license}}</li>
+          <ul *ngIf="currentModuleSpecification">
+            <li>Name: {{currentModuleSpecification.name}}</li>
+            <li>Description: {{currentModuleSpecification.description}}</li>
+            <li>Version: {{currentModuleSpecification.version}}</li>
+            <li>Author: {{currentModuleSpecification.author}}</li>
+            <li>Licence: {{currentModuleSpecification.license}}</li>
             <li>Inputs:
               <ul>
                 <li>Cardinality:
                   <ul>
-                    <li *ngFor="let parameter of current_module_specification['inputs']['cardinality']">{{parameter}}</li>
+                    <li *ngFor="let parameter of currentModuleSpecification['inputs']['cardinality']">{{parameter}}</li>
                   </ul>
                 </li>
                 <li>Types:
                   <ul>
-                    <li *ngFor="let type of current_module_specification['inputs']['types']">{{type}}</li>
+                    <li *ngFor="let type of currentModuleSpecification['inputs']['types']">{{type}}</li>
                   </ul>
                 </li>
               </ul>
@@ -106,21 +106,21 @@
               <ul>
                 <li>Cardinality:
                   <ul>
-                    <li *ngFor="let parameter of current_module_specification['outputs']['cardinality']">{{parameter}}</li>
+                    <li *ngFor="let parameter of currentModuleSpecification['outputs']['cardinality']">{{parameter}}</li>
                   </ul>
                 </li>
                 <li>Types:
                   <ul>
-                    <li *ngFor="let type of current_module_specification['outputs']['cardinality']">{{type}}</li>
+                    <li *ngFor="let type of currentModuleSpecification['outputs']['cardinality']">{{type}}</li>
                   </ul>
                 </li>
               </ul>
             </li>
-            <li>Module-type: {{current_module_specification["module-type"]}}</li>
-            <li>Engine: {{current_module_specification.engine}}</li>
-            <li>Options : {{current_module_specification.options | json}}</li>
-            <li>Validator-class: {{current_module_specification["validator-class"]}}</li>
-            <li>Executor-class: {{current_module_specification["executor-class"]}}</li>
+            <li>Module-type: {{currentModuleSpecification["module-type"]}}</li>
+            <li>Engine: {{currentModuleSpecification.engine}}</li>
+            <li>Options : {{currentModuleSpecification.options | json}}</li>
+            <li>Validator-class: {{currentModuleSpecification["validator-class"]}}</li>
+            <li>Executor-class: {{currentModuleSpecification["executor-class"]}}</li>
           </ul>
         </div>
       </div>
@@ -138,26 +138,26 @@
         <h4 class="modal-title">Delete confirmation</h4>
       </div>
 
-      <div class="modal-body" *ngIf="module_to_delete && (blockingInstances.length === 0)">
-        <p>Do you really want to delete module "{{ module_to_delete["module-name"] }}"? This action can not be
+      <div class="modal-body" *ngIf="currentModule && (blockingInstances.length === 0)">
+        <p>Do you really want to delete module "{{ currentModule["module-name"] }}"? This action can not be
           undone!</p>
       </div>
 
-      <div class="modal-body" *ngIf="module_to_delete && (blockingInstances.length > 0)">
-        <p>Unable to delete module! Following instances are using the module: "{{ module_to_delete['module-name'] }}"</p>
+      <div class="modal-body" *ngIf="currentModule && (blockingInstances.length > 0)">
+        <p>Unable to delete module! Following instances are using the module: "{{ currentModule['module-name'] }}"</p>
         <ul>
           <li *ngFor="let instance of blockingInstances | orderBy: 'name' ">{{instance.name}}</li>
         </ul>
       </div>
 
       <div class="modal-footer">
-        <template [ngIf]="module_to_delete && (blockingInstances.length === 0)">
+        <template [ngIf]="currentModule && (blockingInstances.length === 0)">
           <button type="button" class="btn btn-secondary" (click)="DeleteModule.hide()">Cancel</button>
           <button type="button" class="btn btn-danger"
-                  (click)="delete_module(DeleteModule, module_to_delete)">Delete
+                  (click)="deleteModule(DeleteModule)">Delete
           </button>
         </template>
-        <template [ngIf]="module_to_delete && (blockingInstances.length > 0)">
+        <template [ngIf]="currentModule && (blockingInstances.length > 0)">
           <button type="button" class="btn btn-primary" (click)="DeleteModule.hide()">OK</button>
         </template>
       </div>
