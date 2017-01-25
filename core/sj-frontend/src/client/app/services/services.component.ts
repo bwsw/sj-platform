@@ -23,6 +23,7 @@ export class ServicesComponent implements OnInit {
   public currentService: ServiceModel;
   public currentServiceProvider: ProviderModel;
   public newService: ServiceModel;
+  public showSpinner: boolean;
 
   constructor(private servicesService: ServicesService,
               private providersService: ProvidersService,
@@ -109,18 +110,21 @@ export class ServicesComponent implements OnInit {
   }
 
   public createService(modal: ModalDirective) {
+    this.showSpinner = true;
     this.servicesService.saveService(this.newService)
       .subscribe(
         service => {
           modal.hide();
           this.alerts.push({ msg: service, type: 'success', closable: true, timeout: 3000 });
           this.newService = new ServiceModel();
+          this.showSpinner = false;
           this.getServiceList();
           this.currentService = service;
         },
         error => {
           this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 });
           modal.hide();
+          this.showSpinner = false;
         });
   }
 
