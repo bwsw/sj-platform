@@ -2,6 +2,8 @@ export class ServiceModel {
   type: string;
   name: string;
   description: string;
+  database: string;
+  driver: string;
   keyspace: string;
   namespace: string;
   provider: string;

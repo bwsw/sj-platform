@@ -123,7 +123,7 @@
               <select [(ngModel)]="newStream['stream-type']" name="streamType"
                       required class="form-control">
                 <option selected value="stream.t-stream">T-stream</option>
-                <!-- TODO Change values to match values in rest service-->
+                <option selected value="jdbc-output">JDBC</option>
                 <option value="stream.kafka">Kafka</option>
                 <option value="elasticsearch-output">ElasticSearch output</option>
               </select>
@@ -150,7 +150,7 @@
           </fieldset>
 
           <!-- Partitions -->
-          <fieldset *ngIf="newStream['stream-type'] != 'elasticsearch-output'" class="form-group row">
+          <fieldset *ngIf="newStream['stream-type'] !== 'elasticsearch-output'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Partitions</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newStream.partitions" name="streamPartitions" type="number" min="1"
@@ -172,11 +172,20 @@
           </fieldset>
 
           <!-- Replication factor -->
-          <fieldset *ngIf="newStream['stream-type'] == 'stream.kafka'" class="form-group row">
+          <fieldset *ngIf="newStream['stream-type'] === 'stream.kafka'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Replication factor</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newStream['replication-factor']" name="streamReplicationFactor" type="number"
                      required class="form-control">
+            </div>
+          </fieldset>
+
+          <!--Primary -->
+          <fieldset *ngIf="newStream['stream-type'] === 'jdbc-output'" class="form-group row">
+            <label class="col-sm-2 col-form-label">Primary</label>
+            <div class="col-sm-10">
+              <input [(ngModel)]="newStream['primary']" name="streamPrimary" type="text"
+                     class="form-control">
             </div>
           </fieldset>
 
@@ -212,7 +221,7 @@
           </fieldset>
 
           <!-- Generator -->
-          <template [ngIf]="newStream['stream-type'] == 'stream.t-stream'">
+          <template [ngIf]="newStream['stream-type'] === 'stream.t-stream'">
             <div class="mb-1">
               <b>Generator:</b>
             </div>
