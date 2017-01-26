@@ -66,7 +66,7 @@ object Dependencies {
   lazy val sjRegularEngineDependencies = Def.setting(Seq(
     "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
     "org.apache.kafka" % "kafka_2.11" % "0.10.1.0" % "provided",
-    "net.openhft" % "chronicle-queue" % "4.5.19"
+    "net.openhft" % "chronicle-queue" % "4.5.19" % "provided"
   ))
 
   lazy val sjWindowedEngineDependencies = Def.setting(Seq(

@@ -160,10 +160,9 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
     val prefix = createZookeeperPrefix(zkService.namespace, stream.generator.generatorType, stream.name)
 
     var environmentVariables = Map("ZK_SERVERS" -> generatorProvider.hosts.mkString(";"),
-      "PREFIX" -> prefix)
-    environmentVariables = environmentVariables ++ ConnectionConstants.mongoEnvironment
+      "PREFIX" -> prefix) ++ ConnectionConstants.mongoEnvironment
+
     environmentVariables
-//      "MONGO_HOSTS" -> ConnectionConstants.mongoHosts.map(hostport=>hostport.getHost+":"+hostport.getPort.toString).mkString(","))
   }
 
   private def createZookeeperPrefix(namespace: String, generatorType: String, name: String) = {

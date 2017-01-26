@@ -26,5 +26,3 @@ object Server extends App {
     case ex: IOException => logger.debug(s"Error: ${ex.getMessage}")
   }
 }
-
-
