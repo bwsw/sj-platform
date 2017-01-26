@@ -204,6 +204,10 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
     this.alerts.splice(i, 1);
   }
 
+  public clearAlert(): void {
+    this.alerts = [];
+  }
+
   public deleteInstanceConfirm(modal: ModalDirective, instance: InstanceModel) {
     this.getInstanceInfo(instance);
     modal.show();

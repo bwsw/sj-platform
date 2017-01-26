@@ -14,6 +14,7 @@ export class ConfigSettingsComponent implements OnInit {
   public alerts: Array<Object> = [];
   public newSetting: SettingModel;
   public currentSetting: SettingModel;
+  public showSpinner: boolean;
 
   constructor(private configSettingsService: ConfigSettingsService) { }
 
@@ -35,16 +36,19 @@ export class ConfigSettingsComponent implements OnInit {
   }
 
   public createSetting(modal: ModalDirective) {
+    this.showSpinner = true;
     this.configSettingsService.saveSetting(this.newSetting)
       .subscribe(
         setting => {
           modal.hide()
           this.newSetting = new SettingModel();
           this.getSettingsList();
+          this.showSpinner = false;
           this.alerts.push({ msg: setting, type: 'success', closable: true, timeout: 3000 });
         },
         error => {
           modal.hide();
+          this.showSpinner = false;
           this.newSetting = new SettingModel();
           this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 });
         });
@@ -68,6 +72,10 @@ export class ConfigSettingsComponent implements OnInit {
 
   public closeAlert(i: number): void {
     this.alerts.splice(i, 1);
+  }
+
+  public clearAlert(): void {
+    this.alerts = [];
   }
 
   public selectSetting(setting: SettingModel) {

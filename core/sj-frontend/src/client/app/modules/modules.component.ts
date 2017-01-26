@@ -134,6 +134,10 @@ export class ModulesComponent implements OnInit {
     this.alerts.splice(i, 1);
   }
 
+  public clearAlert(): void {
+    this.alerts = [];
+  }
+
   public isSelected(module: ModuleModel) {
     return module === this.currentModule;
   }

@@ -162,6 +162,10 @@ export class ProvidersComponent implements OnInit, AfterViewChecked {
     this.alerts.splice(i, 1);
   }
 
+  public clearAlert(): void {
+    this.alerts = [];
+  }
+
   public deleteHost(i: number): void {
     this.newProvider.hosts.splice(i, 1);
   }

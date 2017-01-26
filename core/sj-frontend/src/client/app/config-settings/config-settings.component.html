@@ -1,3 +1,5 @@
+<sj-spinner [isRunning]="showSpinner"></sj-spinner>
+
 <div class="row">
   <!-- Content -->
   <div class="col col-xs-12">
@@ -9,7 +11,7 @@
           <div class="col col-xs-6">
             <button type="button"
                     class="btn btn-primary pull-right ml-1 mb-1"
-                    (click)="AddSetting.show()">
+                    (click)="clearAlert();AddSetting.show()">
               <i class="fa fa-plus mr-1"></i>Add settings
             </button>
 
