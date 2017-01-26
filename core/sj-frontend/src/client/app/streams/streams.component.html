@@ -11,7 +11,7 @@
           <div class="col col-xs-6">
             <button type="button"
                     class="btn btn-primary pull-right ml-1 mb-1"
-                    (click)="CreateStream.show()"><i class="fa fa-plus mr-1"></i>Create Stream
+                    (click)="clearAlert();CreateStream.show()"><i class="fa fa-plus mr-1"></i>Create Stream
             </button>
 
             <sj-search-box class="pull-right"
@@ -228,7 +228,7 @@
                 <select [(ngModel)]="newStream['generator'].service" name="streamGeneratorService"
                         class="form-control"
                         [required]="streamGeneratorType.value!=='local'">
-                  <option *ngFor="let service of serviceList | serviceFilter : newStream['stream-type'] "
+                  <option *ngFor="let service of serviceList | serviceFilter : 'zookeeper' "
                           value={{service.name}}>{{service.name}}
                   </option>
                 </select>

@@ -98,6 +98,10 @@ export class ServicesComponent implements OnInit {
     this.alerts.splice(i, 1);
   }
 
+  public clearAlert(): void {
+    this.alerts = [];
+  }
+
   public deleteService(modal: ModalDirective) {
     this.servicesService.deleteService(this.currentService)
       .subscribe(

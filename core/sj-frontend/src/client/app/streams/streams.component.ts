@@ -55,7 +55,7 @@ export class StreamsComponent implements OnInit {
     }
   }
 
-  focus() {
+  public focus() {
     document.getElementById('tagInput').focus();
   }
 
@@ -138,5 +138,9 @@ export class StreamsComponent implements OnInit {
 
   public closeAlert(i: number): void {
     this.alerts.splice(i, 1);
+  }
+
+  public clearAlert(): void {
+    this.alerts = [];
   }
 }
