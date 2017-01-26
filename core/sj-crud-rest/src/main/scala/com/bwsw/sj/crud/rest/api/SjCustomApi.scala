@@ -181,7 +181,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                     if (!storage.exists(metadata.fileName)) {
                       val uploadingFile = new File(metadata.fileName)
                       FileUtils.copyFile(file, uploadingFile)
-                      storage.put(uploadingFile, metadata.fileName, Map("description" -> ""), "custom-file") //todo description
+                      storage.put(uploadingFile, metadata.fileName, Map(), "custom-file")
 
                       response = OkRestResponse(Map("message" ->
                         createMessage("rest.custom.files.file.uploaded", metadata.fileName)))
