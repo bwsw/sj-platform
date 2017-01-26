@@ -77,10 +77,10 @@ export class ModulesComponent implements OnInit {
     this.modulesService.deleteModule(this.currentModule)
       .subscribe(
         status => {
-          this.alerts.push({ msg: status, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
           this.getModuleList();
         },
-        error => this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
     modal.hide();
   }
 
@@ -103,7 +103,7 @@ export class ModulesComponent implements OnInit {
         },
         error => {
           this.showSpinner = false;
-          this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 });
+          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
         });
   }
 
@@ -113,12 +113,12 @@ export class ModulesComponent implements OnInit {
     if (file) {
       this.modulesService.uploadModule(file).then((result: any) => {
         this.isUploading = false;
-        this.alerts.push({ msg: result, type: 'success', closable: true, timeout: 3000 });
+        this.showAlert({ msg: result, type: 'success', closable: true, timeout: 3000 });
         this.getModuleList();
       },
         (error: any) => {
         this.isUploading = false;
-        this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 });
+        this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
       });
     } else {
       this.isUploading = false;
@@ -134,8 +134,9 @@ export class ModulesComponent implements OnInit {
     this.alerts.splice(i, 1);
   }
 
-  public clearAlert(): void {
+  public showAlert(message: Object): void {
     this.alerts = [];
+    this.alerts.push(message);
   }
 
   public isSelected(module: ModuleModel) {
