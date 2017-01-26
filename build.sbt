@@ -31,14 +31,8 @@ val commonSettings = Seq(
   resolvers += "Twitter Repository" at "http://maven.twttr.com",
 
   assemblyMergeStrategy in assembly := {
-    case PathList("scala", xs@_*) => MergeStrategy.first
-    case PathList("org", "slf4j", xs@_*) => MergeStrategy.first
-    case PathList("io", "netty", xs@_*) => MergeStrategy.first
-    case PathList("org", "joda", xs@_*) => MergeStrategy.first
     case PathList("org", "apache", "commons", "logging", xs@_*) => MergeStrategy.first
-    case PathList("org", "apache", "commons", "logging", "impl", xs@_*) => MergeStrategy.first
     case x if x.endsWith("io.netty.versions.properties") => MergeStrategy.concat
-    case "library.properties" => MergeStrategy.concat
     case "log4j.properties" => MergeStrategy.concat
     case x =>
       val oldStrategy = (assemblyMergeStrategy in assembly).value
@@ -102,8 +96,7 @@ lazy val crudRest = Project(id = "sj-crud-rest",
   base = file("./core/sj-crud-rest"))
   .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= Dependencies.sjRestDependencies.value,
-    assemblyJarName in assembly := s"${name.value}-1.0.jar"
+    libraryDependencies ++= Dependencies.sjRestDependencies.value
   )
   .dependsOn(common)
 

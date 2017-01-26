@@ -54,7 +54,13 @@ trait SjCustomApi extends Directives with SjCrudValidator {
     })
   }
 
-  //todo добавить проверку на существование не только по имени файла, но и по имени+версии из спецификации
+  private def doesCustomJarExist(specification: Map[String, Any]) = {
+    fileMetadataDAO.getByParameters(
+      Map("specification.name" -> specification("name").asInstanceOf[String],
+        "specification.version" -> specification("version").asInstanceOf[String]
+      )).nonEmpty
+  }
+
   val customApi = {
     pathPrefix("custom") {
       pathPrefix("jars") {
@@ -94,9 +100,16 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                   ))
                 } ~
                   delete {
-                    configService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, name + "-" + version))
-                    val response = OkRestResponse(
-                      Map("message" -> createMessage("rest.custom.jars.file.deleted", name, version)))
+                    var response: RestResponse = InternalServerErrorRestResponse(
+                      Map("message" -> s"Can't delete jar '${filename}' for some reason. It needs to be debuged")
+                    )
+
+                    if (storage.delete(filename)) {
+                      configService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, name + "-" + version))
+                      response = OkRestResponse(
+                        Map("message" -> createMessage("rest.custom.jars.file.deleted", name, version))
+                      )
+                    }
 
                     complete(restResponseToHttpResponse(response))
                   }
@@ -112,22 +125,27 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                       createMessage("rest.custom.jars.file.exists", metadata.fileName)))
 
                     if (!storage.exists(metadata.fileName)) {
+                      response = BadRequestRestResponse(Map("message" -> getMessage("rest.errors.invalid.specification")))
+
                       if (checkSpecification(file)) {
                         val specification = getSpecification(file)
-                        val uploadingFile = new File(metadata.fileName)
-                        FileUtils.copyFile(file, uploadingFile)
-                        storage.put(uploadingFile, metadata.fileName, specification, "custom")
-                        val name = specification("name").toString + "-" + specification("version").toString
-                        val customJarConfigElement = new ConfigurationSetting(
-                          createConfigurationSettingName(ConfigLiterals.systemDomain, name),
-                          metadata.fileName,
-                          ConfigLiterals.systemDomain
-                        )
-                        configService.save(customJarConfigElement)
-                        response = OkRestResponse(Map("message" ->
-                          createMessage("rest.custom.jars.file.uploaded", metadata.fileName)))
-                      } else {
-                        response = BadRequestRestResponse(Map("message" -> getMessage("rest.errors.invalid.specification")))
+                        response = ConflictRestResponse(Map("message" ->
+                          createMessage("rest.custom.jars.exists", metadata.fileName)))
+
+                        if (!doesCustomJarExist(specification)) {
+                          val uploadingFile = new File(metadata.fileName)
+                          FileUtils.copyFile(file, uploadingFile)
+                          storage.put(uploadingFile, metadata.fileName, specification, "custom")
+                          val name = specification("name").toString + "-" + specification("version").toString
+                          val customJarConfigElement = new ConfigurationSetting(
+                            createConfigurationSettingName(ConfigLiterals.systemDomain, name),
+                            metadata.fileName,
+                            ConfigLiterals.systemDomain
+                          )
+                          configService.save(customJarConfigElement)
+                          response = OkRestResponse(Map("message" ->
+                            createMessage("rest.custom.jars.file.uploaded", metadata.fileName)))
+                        }
                       }
                     }
 
@@ -161,12 +179,12 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                       createMessage("rest.custom.files.file.exists", metadata.fileName)))
 
                     if (!storage.exists(metadata.fileName)) {
-                        val uploadingFile = new File(metadata.fileName)
-                        FileUtils.copyFile(file, uploadingFile)
-                        storage.put(uploadingFile, metadata.fileName, Map("description" -> ""), "custom-file")   //todo description
+                      val uploadingFile = new File(metadata.fileName)
+                      FileUtils.copyFile(file, uploadingFile)
+                      storage.put(uploadingFile, metadata.fileName, Map("description" -> ""), "custom-file") //todo description
 
-                        response = OkRestResponse(Map("message" ->
-                          createMessage("rest.custom.files.file.uploaded", metadata.fileName)))
+                      response = OkRestResponse(Map("message" ->
+                        createMessage("rest.custom.files.file.uploaded", metadata.fileName)))
                     }
 
                     complete(restResponseToHttpResponse(response))
