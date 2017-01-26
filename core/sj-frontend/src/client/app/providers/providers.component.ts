@@ -23,6 +23,7 @@ export class ProvidersComponent implements OnInit, AfterViewChecked {
   public newProvider: ProviderModel;
   public currentConnectors: [String] = [''];
   public providerForm: NgForm;
+  public showSpinner: boolean = false;
 
   @ViewChild('providerForm') currentForm: NgForm;
 
@@ -135,10 +136,12 @@ export class ProvidersComponent implements OnInit, AfterViewChecked {
   }
 
   public createProvider(modal: ModalDirective) {
+    this.showSpinner = true;
     this.providersService.saveProvider(this.newProvider)
       .subscribe(
         message => {
           modal.hide();
+          this.showSpinner = false;
           this.alerts.push({ msg: message, type: 'success', closable: true, timeout: 3000 });
           this.getProviderList();
           this.newProvider = new ProviderModel;
@@ -146,6 +149,7 @@ export class ProvidersComponent implements OnInit, AfterViewChecked {
         },
         error => {
           modal.hide();
+          this.showSpinner = false;
           this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 });
         });
   }
