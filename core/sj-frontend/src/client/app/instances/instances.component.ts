@@ -190,13 +190,13 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
         modal.hide();
         this.newInstance = new InstanceModel();
         this.showSpinner = false;
-        this.alerts.push({msg: status, type: 'success', closable: true, timeout:3000});
+        this.showAlert({msg: status, type: 'success', closable: true, timeout:3000});
         this.getInstancesList();
       },
       error => {
         this.showSpinner = false;
         modal.hide();
-        this.alerts.push({msg: error, type: 'danger', closable: true, timeout:0});
+        this.showAlert({msg: error, type: 'danger', closable: true, timeout:0});
       });
   }
 
@@ -204,8 +204,9 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
     this.alerts.splice(i, 1);
   }
 
-  public clearAlert(): void {
+  public showAlert(message: Object): void {
     this.alerts = [];
+    this.alerts.push(message);
   }
 
   public deleteInstanceConfirm(modal: ModalDirective, instance: InstanceModel) {
@@ -217,10 +218,12 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
     this.instancesService.deleteInstance(this.currentInstance)
       .subscribe(
         status => {
-          this.alerts.push({ msg: status, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
           this.getInstancesList();
         },
-        error => this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+        error => {
+          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
+        });
     modal.hide();
   }
 
@@ -237,18 +240,22 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
     this.instancesService.startInstance(instance)
       .subscribe(
         status => {
-          this.alerts.push({ msg: status, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
         },
-        error => this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+        error => {
+          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
+        });
   }
 
   public stopInstance(instance: InstanceModel) {
     this.instancesService.stopInstance(instance)
       .subscribe(
         status => {
-          this.alerts.push({ msg: status, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
         },
-        error => this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+        error =>{
+          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
+        });
   }
 
   public addInput() {

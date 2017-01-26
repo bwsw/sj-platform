@@ -12,7 +12,7 @@
             <label [ngClass]="{inProgress:isUploading}" class="btn btn-primary btn-upload pull-right ml-1 mb-1">
               <div *ngIf="!isUploading"><i class="fa fa-upload mr-1"></i>Upload module</div>
               <i *ngIf="isUploading" class="fa fa-spinner fa-spin" aria-hidden="true"></i>
-              <input type="file" (change)="clearAlert();uploadFile($event)">
+              <input type="file" (change)="uploadFile($event)">
             </label>
 
             <sj-search-box class="pull-right"

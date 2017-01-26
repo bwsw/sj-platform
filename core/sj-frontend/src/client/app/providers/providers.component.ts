@@ -57,7 +57,7 @@ export class ProvidersComponent implements OnInit, AfterViewChecked {
             this.currentProvider = providerList[0];
           }
         },
-        error => this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
   }
 
   public getServiceList() {
@@ -66,7 +66,7 @@ export class ProvidersComponent implements OnInit, AfterViewChecked {
         serviceList => {
           this.serviceList = serviceList;
         },
-        error => this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
   }
 
   public testConnection(provider: ProviderModel) {
@@ -75,22 +75,24 @@ export class ProvidersComponent implements OnInit, AfterViewChecked {
       .subscribe(
         status => {
           if (status === true) {
-            this.alerts.push({
+            this.showAlert({
               msg: 'ProviderModel "' + provider.name + '" available',
               type: 'success',
-              closable: true
+              closable: true,
+              timeout: 3000
             });
           } else {
-            this.alerts.push({
+            this.showAlert({
               msg: 'ProviderModel "' + provider.name + '" not available',
               type: 'danger',
-              closable: true
+              closable: true,
+              timeout: 0
             });
           }
           this.currentConnectors.splice(this.currentConnectors.indexOf(provider.name));
         },
         error => {
-          this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 });
+          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
           this.currentConnectors.splice(this.currentConnectors.indexOf(provider.name));
         });
   }
@@ -128,10 +130,10 @@ export class ProvidersComponent implements OnInit, AfterViewChecked {
     this.providersService.deleteProvider(this.currentProvider)
       .subscribe(
         status => {
-          this.alerts.push({ msg: status, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
           this.getProviderList();
         },
-        error => this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
     modal.hide();
   }
 
@@ -142,7 +144,7 @@ export class ProvidersComponent implements OnInit, AfterViewChecked {
         message => {
           modal.hide();
           this.showSpinner = false;
-          this.alerts.push({ msg: message, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ msg: message, type: 'success', closable: true, timeout: 3000 });
           this.getProviderList();
           this.newProvider = new ProviderModel;
 
@@ -150,7 +152,7 @@ export class ProvidersComponent implements OnInit, AfterViewChecked {
         error => {
           modal.hide();
           this.showSpinner = false;
-          this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 });
+          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
         });
   }
 
@@ -166,8 +168,9 @@ export class ProvidersComponent implements OnInit, AfterViewChecked {
     this.alerts.splice(i, 1);
   }
 
-  public clearAlert(): void {
+  public showAlert(message: Object): void {
     this.alerts = [];
+    this.alerts.push(message);
   }
 
   public deleteHost(i: number): void {

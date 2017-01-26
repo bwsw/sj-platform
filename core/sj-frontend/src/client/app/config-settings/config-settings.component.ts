@@ -32,7 +32,7 @@ export class ConfigSettingsComponent implements OnInit {
             this.currentSetting = settingsList[0];
           }
         },
-        error => this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
   }
 
   public createSetting(modal: ModalDirective) {
@@ -44,13 +44,13 @@ export class ConfigSettingsComponent implements OnInit {
           this.newSetting = new SettingModel();
           this.getSettingsList();
           this.showSpinner = false;
-          this.alerts.push({ msg: setting, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ msg: setting, type: 'success', closable: true, timeout: 3000 });
         },
         error => {
           modal.hide();
           this.showSpinner = false;
           this.newSetting = new SettingModel();
-          this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 });
+          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
         });
   }
 
@@ -58,10 +58,10 @@ export class ConfigSettingsComponent implements OnInit {
     this.configSettingsService.deleteSetting(this.currentSetting)
       .subscribe(
         status => {
-          this.alerts.push({ msg: status, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
           this.getSettingsList();
         },
-        error => this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
     modal.hide();
   }
 
@@ -74,8 +74,9 @@ export class ConfigSettingsComponent implements OnInit {
     this.alerts.splice(i, 1);
   }
 
-  public clearAlert(): void {
+  public showAlert(message: Object): void {
     this.alerts = [];
+    this.alerts.push(message);
   }
 
   public selectSetting(setting: SettingModel) {

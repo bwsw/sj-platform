@@ -98,10 +98,10 @@ export class StreamsComponent implements OnInit {
     this.streamsService.deleteStream(this.currentStream)
       .subscribe(
         status => {
-          this.alerts.push({ msg: status, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
           this.getStreamList();
         },
-        error => this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
     modal.hide();
   }
 
@@ -115,7 +115,7 @@ export class StreamsComponent implements OnInit {
         status => {
           modal.hide();
           this.showSpinner = false;
-          this.alerts.push({ msg: status, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
           this.getStreamList();
           this.newStream = new StreamModel();
           this.newStream.tags = [];
@@ -123,7 +123,7 @@ export class StreamsComponent implements OnInit {
         error => {
           modal.hide();
           this.showSpinner = false;
-          this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 });
+          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
         });
   }
 
@@ -139,7 +139,8 @@ export class StreamsComponent implements OnInit {
     this.alerts.splice(i, 1);
   }
 
-  public clearAlert(): void {
+  public showAlert(message: Object): void {
     this.alerts = [];
+    this.alerts.push(message);
   }
 }

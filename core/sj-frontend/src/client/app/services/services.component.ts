@@ -98,18 +98,19 @@ export class ServicesComponent implements OnInit {
     this.alerts.splice(i, 1);
   }
 
-  public clearAlert(): void {
+  public showAlert(message: Object): void {
     this.alerts = [];
+    this.alerts.push(message);
   }
 
   public deleteService(modal: ModalDirective) {
     this.servicesService.deleteService(this.currentService)
       .subscribe(
         status => {
-          this.alerts.push({ msg: status, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
           this.getServiceList();
         },
-        error => this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
     modal.hide();
   }
 
@@ -119,14 +120,14 @@ export class ServicesComponent implements OnInit {
       .subscribe(
         service => {
           modal.hide();
-          this.alerts.push({ msg: service, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ msg: service, type: 'success', closable: true, timeout: 3000 });
           this.newService = new ServiceModel();
           this.showSpinner = false;
           this.getServiceList();
           this.currentService = service;
         },
         error => {
-          this.alerts.push({ msg: error, type: 'danger', closable: true, timeout: 0 });
+          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
           modal.hide();
           this.showSpinner = false;
         });
