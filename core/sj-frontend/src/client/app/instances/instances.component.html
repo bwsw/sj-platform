@@ -223,7 +223,8 @@
             <fieldset class="form-group row">
               <label class="col-form-label col-sm-2 required">Name</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="newInstance.name" name="instanceName" type="text" required class="form-control">
+                <input [(ngModel)]="newInstance.name" name="instanceName" type="text" required
+                       pattern="[a-zA-z][a-zA-Z0-9-]*"  class="form-control">
               </div>
             </fieldset>
 
@@ -604,8 +605,8 @@
               <div class="col col-sm-10">
                 <select [(ngModel)]="newInstance['duplicate-check']" name="instanceDuplicateCheck"
                         class="form-control">
-                  <option>False</option>
-                  <option>True</option>
+                  <option>false</option>
+                  <option>true</option>
                 </select>
               </div>
             </fieldset>
@@ -657,7 +658,7 @@
             <fieldset *ngIf="newInstance.module['module-type'] === 'input-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2">Backup count</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="newInstance['backup-count']" name="instanceBackupCount" type="number"
+                <input [(ngModel)]="newInstance['backup-count']" name="instanceBackupCount" type="number" max="6"
                        class="form-control">
               </div>
             </fieldset>

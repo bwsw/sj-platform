@@ -138,7 +138,7 @@
             <label class="col-form-label col-sm-2 required">Name</label>
             <div class="col-sm-10">
               <input required [(ngModel)]="newProvider.name" name="providerName" type="text"
-                     class="form-control" placeholder="Enter provider name">
+                     class="form-control" pattern="[a-zA-z][a-zA-Z0-9-]*" placeholder="Enter provider name">
             </div>
           </fieldset>
 
