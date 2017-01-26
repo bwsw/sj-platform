@@ -11,4 +11,5 @@ export class StreamModel {
     'instance-count': number;
   };
   'replication-factor': number;
+  force: boolean = false;
 }
