@@ -33,15 +33,19 @@ trait InstanceMarathonManager {
   }
 
   def isStatusOK(response: CloseableHttpResponse) = {
-    response.getStatusLine.getStatusCode == 200
+    getStatusCode(response) == 200
   }
 
   def isStatusCreated(response: CloseableHttpResponse) = {
-    response.getStatusLine.getStatusCode == 201
+    getStatusCode(response) == 201
   }
 
   def isStatusNotFound(response: CloseableHttpResponse) = {
-    response.getStatusLine.getStatusCode == 404
+    getStatusCode(response) == 404
+  }
+
+  def getStatusCode(response: CloseableHttpResponse) = {
+    response.getStatusLine.getStatusCode
   }
 
   def getGeneratorApplicationID(stream: TStreamSjStream) = {

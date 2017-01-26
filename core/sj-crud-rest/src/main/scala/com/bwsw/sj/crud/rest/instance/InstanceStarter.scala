@@ -189,7 +189,9 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
           Thread.sleep(delay)
         }
       } else {
-        //todo error?
+        updateGeneratorState(instance, name, failed)
+        throw new Exception(s"Marathon returns status code: ${getStatusCode(generatorApplicationInfo)} " +
+          s"during a start of generator. Generator '${name}' is marked as failed.")
       }
     }
   }
@@ -261,7 +263,6 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
 
   private def getFrameworkEnvironmentVariables(marathonMaster: String) = {
     var environmentVariables = Map(
-//      "MONGO_HOSTS" -> ConnectionConstants.mongoHosts.map(hostport=>hostport.getHost+":"+hostport.getPort.toString).mkString(","),
       "INSTANCE_ID" -> instance.name,
       "MESOS_MASTER" -> marathonMaster
     )
@@ -292,7 +293,9 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
           Thread.sleep(delay)
         }
       } else {
-        //todo error?
+        updateFrameworkState(instance, failed)
+        throw new Exception(s"Marathon returns status code: ${getStatusCode(frameworkApplicationInfo)} " +
+          s"during a start of framework. Framework '${instance.name}' is marked as failed.")
       }
     }
   }
