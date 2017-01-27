@@ -1,7 +1,9 @@
 package com.bwsw.sj.engine.output.benchmark
 
 import java.io.File
+
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.output.benchmark.BenchmarkDataFactory._
 
@@ -20,7 +22,7 @@ import com.bwsw.sj.engine.output.benchmark.BenchmarkDataFactory._
   *         JDBC_HOSTS=176.120.25.19:5432  -postgresql
  */
 object BenchmarkDataPrepare extends App {
-
+  TempHelperForConfigSetup.main(Array())
   val checkpointInterval = 3
   val checkpointMode = EngineLiterals.everyNthMode
   val partitions = 4
