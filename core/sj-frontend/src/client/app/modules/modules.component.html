@@ -144,7 +144,7 @@
       </div>
 
       <div class="modal-body" *ngIf="currentModule && (blockingInstances.length > 0)">
-        <p>Unable to delete module! Following instances are using the module: "{{ currentModule['module-name'] }}"</p>
+        <p>Unable to delete module! Next instances are using the module: "{{ currentModule['module-name'] }}"</p>
         <ul>
           <li *ngFor="let instance of blockingInstances">{{instance}}</li>
         </ul>
