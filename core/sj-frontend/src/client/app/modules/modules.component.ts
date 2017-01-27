@@ -114,10 +114,12 @@ export class ModulesComponent implements OnInit {
       this.modulesService.uploadModule(file).then((result: any) => {
         this.isUploading = false;
         this.showAlert({ msg: result, type: 'success', closable: true, timeout: 3000 });
+        event.target.value = null;
         this.getModuleList();
       },
         (error: any) => {
         this.isUploading = false;
+        event.target.value = null;
         this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
       });
     } else {
