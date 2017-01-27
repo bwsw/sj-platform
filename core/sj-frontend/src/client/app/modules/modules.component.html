@@ -111,13 +111,13 @@
                 </li>
                 <li>Types:
                   <ul>
-                    <li *ngFor="let type of currentModuleSpecification['outputs']['cardinality']">{{type}}</li>
+                    <li *ngFor="let type of currentModuleSpecification['outputs']['types']">{{type}}</li>
                   </ul>
                 </li>
               </ul>
             </li>
             <li>Module-type: {{currentModuleSpecification["module-type"]}}</li>
-            <li>Engine: {{currentModuleSpecification.engine}}</li>
+            <li>Engine name: {{currentModuleSpecification['engine-name']}}</li>
             <li>Options : {{currentModuleSpecification.options | json}}</li>
             <li>Validator-class: {{currentModuleSpecification["validator-class"]}}</li>
             <li>Executor-class: {{currentModuleSpecification["executor-class"]}}</li>
