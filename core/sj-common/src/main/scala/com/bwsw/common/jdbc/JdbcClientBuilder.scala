@@ -16,7 +16,7 @@ object JdbcClientBuilder {
        case _:String =>
      }
      jdbcClientConnectionData.table match {
-       case ""|null => throw new RuntimeException("table field must be declared.")
+//       case ""|null => throw new RuntimeException("table field must be declared.")
        case _:String =>
      }
      jdbcClientConnectionData.txnField match {
