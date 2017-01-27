@@ -50,28 +50,30 @@ class JDBCServiceData() extends ServiceData() {
     Option(this.database) match {
       case None =>
         errors += createMessage("entity.error.attribute.required", "Database")
-      case Some(x) =>
-        if (x.isEmpty) {
+      case Some(dbName) =>
+        if (dbName.isEmpty) {
           errors += createMessage("entity.error.attribute.required", "Database")
         } else {
           val providerDAO = ConnectionRepository.getProviderService
           val provider = providerDAO.get(this.provider).get
-          var database_not_exists: Boolean = true
+          var database_exists: Boolean = false
           try {
             JdbcClientBuilder.
               setTxnField("txn").
               setDriver(this.driver).
-              setDatabase(x).
+              setDatabase(dbName).
               setHosts(provider.hosts).
               setUsername(provider.login).
               setPassword(provider.password).
               build()
-            database_not_exists = false
+            database_exists = true
           } catch {
             case e:Exception =>
+            case e:RuntimeException =>
+              errors += createMessage("jdbc.error.cannot.create.client", e.getMessage)
           }
-          if (database_not_exists) {
-            errors += createMessage("entity.error.doesnot.exist", "Database", x)
+          if (database_exists) {
+            errors += createMessage("entity.error.doesnot.exist", "Database", dbName)
           }
         }
     }
