@@ -4,6 +4,10 @@ import { Observable } from 'rxjs/Rx';
 
 import { ServiceModel } from '../models/service.model';
 
+interface ISomeObject {
+  [key: string]: string[];
+}
+
 @Injectable()
 export class ServicesService {
 
@@ -21,7 +25,7 @@ export class ServicesService {
       .catch(this.handleError);
   }
 
-  public getRelatedStreamsList(serviceName: string): Observable<string[]> {
+  public getRelatedStreamsList(serviceName: string): Observable<ISomeObject> {
     return this._http.get(this._dataUrl + 'services/' + serviceName + '/related')
       .map(this.extractData)
       .catch(this.handleError);
@@ -60,8 +64,8 @@ export class ServicesService {
       body = res.json()['entity']['services'];
     } else if (typeof res.json()['entity']['message'] !== 'undefined') {
       body = res.json()['entity']['message'];
-    } else if (typeof res.json()['entity']['streams'] !== 'undefined') {
-      body = res.json()['entity']['streams'];
+    } else if (typeof res.json()['entity']['streams'] !== 'undefined' && typeof res.json()['entity']['instances'] !== 'undefined') {
+      body = res.json()['entity'];
     } else {
       body = res.json();
     }
