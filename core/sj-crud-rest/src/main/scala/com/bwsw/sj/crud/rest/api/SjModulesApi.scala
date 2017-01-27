@@ -71,7 +71,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                       }
                   }
               } ~
-                pathSuffix("specification") {
+                pathPrefix("specification") {
                   pathEndOrSingleSlash {
                     gettingSpecification(specification)
                   }
@@ -79,6 +79,11 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                 pathEndOrSingleSlash {
                   gettingModule(filename) ~
                     deletingModule(moduleType, moduleName, moduleVersion, filename)
+                } ~
+                pathPrefix("related") {
+                  pathEndOrSingleSlash {
+                    gettingRelatedInstances(moduleType, moduleName, moduleVersion)
+                  }
                 }
             }
           } ~
@@ -285,11 +290,8 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     var response: RestResponse = UnprocessableEntityRestResponse(Map("message" ->
       createMessage("rest.modules.module.cannot.delete", s"$moduleType-$moduleName-$moduleVersion")))
 
-    val instances = instanceDAO.getByParameters(Map(
-      "module-name" -> moduleName,
-      "module-type" -> moduleType,
-      "module-version" -> moduleVersion)
-    )
+    val instances = getRelatedInstances(moduleType, moduleName, moduleVersion)
+
     if (instances.isEmpty) {
       storage.delete(filename)
       response = OkRestResponse(Map("message" ->
@@ -300,8 +302,24 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     complete(restResponseToHttpResponse(response))
   }
 
+  private val gettingRelatedInstances = (moduleType: String,
+                                         moduleName: String,
+                                         moduleVersion: String) => get {
+    val response = OkRestResponse(Map("instances" -> getRelatedInstances(moduleType, moduleName, moduleVersion)))
+
+    complete(restResponseToHttpResponse(response))
+  }
+
+  private def getRelatedInstances(moduleType: String, moduleName: String, moduleVersion: String) = {
+    instanceDAO.getByParameters(Map(
+      "module-name" -> moduleName,
+      "module-type" -> moduleType,
+      "module-version" -> moduleVersion)
+    ).map(_.name)
+  }
+
   private val gettingModulesByType = (moduleType: String) => get {
-    val files = fileMetadataDAO.getByParameters(Map("specification.module-type" -> moduleType))
+    val files = fileMetadataDAO.getByParameters(Map("filetype" -> "module", "specification.module-type" -> moduleType))
     val response = OkRestResponse(Map("modules" -> mutable.Buffer()))
     if (files.nonEmpty) {
       response.entity = Map("message" -> s"Uploaded modules for type $moduleType",
@@ -314,12 +332,10 @@ trait SjModulesApi extends Directives with SjCrudValidator {
   }
 
   private def doesModuleExist(specification: Map[String, Any]) = {
-    fileMetadataDAO.getByParameters(
-      Map("specification.name" ->
+      getFilesMetadata(specification("module-type").asInstanceOf[String],
         specification("name").asInstanceOf[String],
-        "specification.module-type" -> specification("module-type").asInstanceOf[String],
-        "specification.version" -> specification("version").asInstanceOf[String]
-      )).nonEmpty
+        specification("version").asInstanceOf[String]
+      ).nonEmpty
   }
 
   private def checkModuleType(moduleType: String) = {
@@ -365,7 +381,8 @@ trait SjModulesApi extends Directives with SjCrudValidator {
   }
 
   private def getFilesMetadata(moduleType: String, moduleName: String, moduleVersion: String) = {
-    fileMetadataDAO.getByParameters(Map("specification.name" -> moduleName,
+    fileMetadataDAO.getByParameters(Map("filetype" -> "module",
+      "specification.name" -> moduleName,
       "specification.module-type" -> moduleType,
       "specification.version" -> moduleVersion)
     )
@@ -379,12 +396,12 @@ trait SjModulesApi extends Directives with SjCrudValidator {
   }
 
   /**
-   * Deserialization json string to object
-   *
-   * @param options - json-string
-   * @param moduleType - type name of module
-   * @return - json as object InstanceMetadata
-   */
+    * Deserialization json string to object
+    *
+    * @param options    - json-string
+    * @param moduleType - type name of module
+    * @return - json as object InstanceMetadata
+    */
   private def deserializeOptions(options: String, moduleType: String) = {
     if (moduleType.equals(windowedStreamingType)) {
       serializer.deserialize[WindowedInstanceMetadata](options)
@@ -400,12 +417,12 @@ trait SjModulesApi extends Directives with SjCrudValidator {
   }
 
   /**
-   * Validation of options for created module instance
-   *
-   * @param options - options for instance
-   * @param moduleType - type name of module
-   * @return - list of errors
-   */
+    * Validation of options for created module instance
+    *
+    * @param options    - options for instance
+    * @param moduleType - type name of module
+    * @return - list of errors
+    */
   private def validateInstance(options: InstanceMetadata, specification: SpecificationData, moduleType: String) = {
     val validatorClassName = configService.get(s"system.$moduleType-validator-class") match {
       case Some(configurationSetting) => configurationSetting.value
@@ -427,33 +444,33 @@ trait SjModulesApi extends Directives with SjCrudValidator {
   }
 
   /**
-   * Starting generators (or scaling) for streams and framework for instance on mesos
-   *
-   * @param instance - Starting instance
-   * @return
-   */
+    * Starting generators (or scaling) for streams and framework for instance on mesos
+    *
+    * @param instance - Starting instance
+    * @return
+    */
   private def startInstance(instance: Instance) = {
     logger.debug(s"Starting application of instance ${instance.name}")
     new Thread(new InstanceStarter(instance)).start()
   }
 
   /**
-   * Stopping instance application on mesos
-   *
-   * @param instance - Instance for stopping
-   * @return - Message about successful stopping
-   */
+    * Stopping instance application on mesos
+    *
+    * @param instance - Instance for stopping
+    * @return - Message about successful stopping
+    */
   private def stopInstance(instance: Instance) = {
     logger.debug(s"Stopping application of instance ${instance.name}")
     new Thread(new InstanceStopper(instance)).start()
   }
 
   /**
-   * Destroying application on mesos
-   *
-   * @param instance - Instance for destroying
-   * @return - Message of destroying instance
-   */
+    * Destroying application on mesos
+    *
+    * @param instance - Instance for destroying
+    * @return - Message of destroying instance
+    */
   private def destroyInstance(instance: Instance) = {
     logger.debug(s"Destroying application of instance ${instance.name}")
     new Thread(new InstanceDestroyer(instance)).start()
