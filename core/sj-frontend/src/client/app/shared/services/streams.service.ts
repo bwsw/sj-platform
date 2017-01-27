@@ -20,6 +20,12 @@ export class StreamsService {
       .catch(this.handleError);
   }
 
+  public getRelatedInstancesList(streamName: string): Observable<string[]> {
+    return this._http.get(this._dataUrl + 'streams/' + streamName + '/related')
+      .map(this.extractData)
+      .catch(this.handleError);
+  }
+
   public getStream(stream: StreamModel): Observable<StreamModel> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
@@ -53,6 +59,8 @@ export class StreamsService {
       body = res.json()['entity']['streams'];
     } else if (typeof res.json()['entity']['message'] !== 'undefined') {
       body = res.json()['entity']['message'];
+    } else if (typeof res.json()['entity']['instances'] !== 'undefined') {
+      body = res.json()['entity']['instances'];
     } else {
       body = res.json();
     }

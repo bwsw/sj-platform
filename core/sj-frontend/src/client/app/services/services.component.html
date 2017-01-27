@@ -380,7 +380,7 @@
       <div class="modal-body" *ngIf="currentService && (blockingStreams.length > 0)">
         <p>Unable to delete service! Next streams using service "{{ currentService.name }}"</p>
         <ul>
-          <li *ngFor="let stream of blockingStreams | orderBy: 'name' ">{{stream.name}}</li>
+          <li *ngFor="let stream of blockingStreams">{{stream}}</li>
         </ul>
       </div>
 

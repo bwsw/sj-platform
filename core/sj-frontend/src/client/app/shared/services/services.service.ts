@@ -21,6 +21,12 @@ export class ServicesService {
       .catch(this.handleError);
   }
 
+  public getRelatedStreamsList(serviceName: string): Observable<string[]> {
+    return this._http.get(this._dataUrl + 'services/' + serviceName + '/related')
+      .map(this.extractData)
+      .catch(this.handleError);
+  }
+
   public getService(serviceName: string): Observable<ServiceModel> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
@@ -54,6 +60,8 @@ export class ServicesService {
       body = res.json()['entity']['services'];
     } else if (typeof res.json()['entity']['message'] !== 'undefined') {
       body = res.json()['entity']['message'];
+    } else if (typeof res.json()['entity']['streams'] !== 'undefined') {
+      body = res.json()['entity']['streams'];
     } else {
       body = res.json();
     }
