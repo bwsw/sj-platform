@@ -114,11 +114,11 @@
             <li *ngIf="currentInstance.outputs">Outputs: {{currentInstance.outputs}}</li>
             <li *ngIf="currentInstance.input">Input: {{currentInstance.input}}</li>
             <li *ngIf="currentInstance.output">Output: {{currentInstance.output}}</li>
-            <li>Checkpoint-mode : {{currentInstance["checkpoint-mode"]}}</li>
-            <li>Checkpoint-interval : {{currentInstance["checkpoint-interval"]}}</li>
-            <li *ngIf="currentInstance['state-manegement']">State-management :
+            <li *ngIf="currentInstance['checkpoint-mode']">Checkpoint-mode : {{currentInstance["checkpoint-mode"]}}</li>
+            <li *ngIf="currentInstance['checkpoint-interval']">Checkpoint-interval : {{currentInstance["checkpoint-interval"]}}</li>
+            <li *ngIf="currentInstance['state-management']">State-management :
               {{currentInstance["state-management"]}}</li>
-            <li *ngIf="currentInstance['duplicate-check']">Duplicate-check :
+            <li *ngIf="currentInstance['duplicate-check'] || currentInstance['duplicate-check'] === false">Duplicate-check :
               {{currentInstance["duplicate-check"]}}</li>
             <li *ngIf="currentInstance['lookup-history']">Lookup-history : {{currentInstance["lookup-history"]}}</li>
             <li *ngIf="currentInstance['queue-max-size']">Queue-max-size : {{currentInstance["queue-max-size"]}}</li>
@@ -134,17 +134,29 @@
             <li>Per-task-cores : {{currentInstance["per-task-cores"]}}</li>
             <li>Per-task-ram" : {{currentInstance["per-task-ram"]}}</li>
             <li>Coordination-service : {{currentInstance["coordination-service"]}}</li>
-            <li *ngIf="currentInstance['event-wait-time']">Event-wait-time :
-              {{currentInstance["event-wait-time"]}}</li>
+            <li *ngIf="currentInstance['event-wait-idle-time']">Event-wait-idle-time :
+              {{currentInstance["event-wait-idle-time"]}}</li>
+            <li *ngIf="currentInstance['window']">Window :
+              {{currentInstance['window']}}</li>
+            <li *ngIf="currentInstance['sliding-interval']">Sliding interval :
+              {{currentInstance['sliding-interval']}}</li>
+            <li *ngIf="currentInstance['main-stream']">Main stream :
+              {{currentInstance['main-stream']}}</li>
+            <li *ngIf="currentInstance['related-streams']">Related streams :
+              {{currentInstance['related-streams']}}</li>
+            <li *ngIf="currentInstance['window']">Window :
+              {{currentInstance['window']}}</li>
+            <li *ngIf="currentInstance['batch-fill-type']">Batch-fill-type :
+              {{currentInstance['batch-fill-type'] | json}}</li>
             <li *ngIf="currentInstance['performance-reporting-interval']">Performance-reporting-interval :
               {{currentInstance['performance-reporting-interval']}}</li>
-            <li>Jvm-options : {{currentInstance["jvm-options"] | json}}</li>
+            <li *ngIf="currentInstance['jvm-options']">Jvm-options : {{currentInstance["jvm-options"] | json}}</li>
             <li *ngIf="currentInstance['environment-variables']">Environment variables :
               {{currentInstance["environment-variables"] | json}}</li>
             <li *ngIf="currentInstance['node-attributes']">Node attributes : {{currentInstance['node-attributes'] |
               json}}</li>
-            <li *ngIf="currentInstance['backup-count']">Backup-count : {{currentInstance["backup-count"]}}</li>
-            <li *ngIf="currentInstance['async-backup-count']">Async-backup-count :
+            <li *ngIf="currentInstance['backup-count'] || currentInstance['backup-count'] === 0">Backup-count : {{currentInstance["backup-count"]}}</li>
+            <li *ngIf="currentInstance['async-backup-count'] || currentInstance['async-backup-count'] === 0">Async-backup-count :
               {{currentInstance["async-backup-count"]}}</li>
             <li>{{currentInstance.module['module-type'] !== 'input-streaming' ? 'Execution-plan:': 'Tasks:'}}
               <ul *ngIf="currentInstance !== 'undefined'">
@@ -581,7 +593,7 @@
                               newInstance.module['module-type'] === 'windowed-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2">Event-wait-idle-time</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="newInstance['event-wait-idle-time']" name="instanceEventWaitTime" type="number"
+                <input [(ngModel)]="newInstance['event-wait-idle-time']" name="instanceEventWaitIdleTime" type="number"
                        class="form-control">
               </div>
             </fieldset>
