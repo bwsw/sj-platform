@@ -5,6 +5,7 @@ import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.stream.SjStreamData
 import com.bwsw.sj.common.utils.EngineLiterals._
+import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
 import scala.collection.mutable
@@ -40,6 +41,16 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
             complete(restResponseToHttpResponse(response))
           }
       } ~
+        pathPrefix("types") {
+          //todo if a stream has a name 'types' then there is a collision
+          pathEndOrSingleSlash {
+            get {
+              val response = OkRestResponse(Map("types" -> StreamLiterals.types))
+
+              complete(restResponseToHttpResponse(response))
+            }
+          }
+        } ~
         pathPrefix(Segment) { (streamName: String) =>
           pathEndOrSingleSlash {
             get {
