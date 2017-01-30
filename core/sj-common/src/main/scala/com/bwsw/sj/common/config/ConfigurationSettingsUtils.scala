@@ -11,7 +11,7 @@ object ConfigurationSettingsUtils {
   }
 
   def clearConfigurationSettingName(domain: String, name: String) = {
-    name.replace(domain + ".", "")
+    name.replaceFirst(domain + ".", "")
   }
 
   def getClientRetryPeriod() = {
