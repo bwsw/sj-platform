@@ -20,6 +20,13 @@ export class ModulesService {
       .catch(this.handleError);
   }
 
+  public getRelatedInstancesList(module: ModuleModel): Observable<string[]> {
+    return this._http.get(this._dataUrl + 'modules/' + module['module-type'] + '/' + module['module-name'] + '/' +
+      module['module-version'] + '/related')
+      .map(this.extractData)
+      .catch(this.handleError);
+  }
+
   public getModuleSpecification(module: ModuleModel): Observable<ModuleModel> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
@@ -84,6 +91,8 @@ export class ModulesService {
         body = res.json()['entity']['modules'];
       } else if (typeof res.json()['entity']['message'] !== 'undefined') {
         body = res.json()['entity']['message'];
+      } else if (typeof res.json()['entity']['instances'] !== 'undefined') {
+        body = res.json()['entity']['instances'];
       } else {
         body = res.json();
       }

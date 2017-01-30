@@ -274,12 +274,12 @@ abstract class TaskManager() {
   }
 
   protected def getTransactionGenerator(stream: TStreamSjStream) = {
-    val retryPeriod = ConfigurationSettingsUtils.getClientRetryPeriod()
-    val retryCount = ConfigurationSettingsUtils.getRetryCount()
-
     stream.generator.generatorType match {
       case GeneratorLiterals.`localType` => new LocalTransactionGenerator()
       case generatorType =>
+        val retryPeriod = ConfigurationSettingsUtils.getClientRetryPeriod()
+        val retryCount = ConfigurationSettingsUtils.getRetryCount()
+
         val service = stream.generator.service.asInstanceOf[ZKService]
         val zkHosts = service.provider.hosts
         val prefix = "/" + service.namespace + "/" + {

@@ -19,7 +19,8 @@ export class ServicesComponent implements OnInit {
   public serviceList: ServiceModel[];
   public providerList: ProviderModel[];
   public streamList: StreamModel[];
-  public blockingStreams: StreamModel[] = [];
+  public blockingStreams: string[] = [];
+  public blockingInstances: string[] = [];
   public currentService: ServiceModel;
   public currentServiceProvider: ProviderModel;
   public newService: ServiceModel;
@@ -80,17 +81,11 @@ export class ServicesComponent implements OnInit {
   public deleteServiceConfirm(modal: ModalDirective, service: ServiceModel) {
     this.currentService = service;
     this.blockingStreams = [];
-    this.streamList.forEach((item: StreamModel) => {
-      if (typeof item.service !== 'undefined') {
-        if (item.service === this.currentService.name) {
-          this.blockingStreams.push(item);
-        }
-      } else if (typeof item.generator !== 'undefined') {
-        if (item.generator.service === this.currentService.name) {
-          this.blockingStreams.push(item);
-        }
-      }
-    });
+    this.servicesService.getRelatedStreamsList(service.name)
+      .subscribe(response => {
+        this.blockingStreams = Object.assign({},response)['streams'];
+        this.blockingInstances = Object.assign({},response)['instances'];
+      });
     modal.show();
   }
 

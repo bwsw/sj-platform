@@ -17,6 +17,7 @@ export class StreamsComponent implements OnInit {
   public streamList: StreamModel[];
   public serviceList: ServiceModel[];
   public currentStream: StreamModel;
+  public blockingInstances: string[] = [];
   public showSpinner: boolean = false;
   public currentTag: string;
   public currentStreamService: ServiceModel;
@@ -91,6 +92,8 @@ export class StreamsComponent implements OnInit {
 
   public deleteStreamConfirm(modal: ModalDirective, stream: StreamModel) {
     this.currentStream = stream;
+    this.streamsService.getRelatedInstancesList(stream.name)
+      .subscribe(response => this.blockingInstances = response);
     modal.show();
   }
 
