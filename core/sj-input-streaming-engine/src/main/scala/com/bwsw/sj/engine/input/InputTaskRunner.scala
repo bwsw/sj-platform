@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.input
 
 import java.util.concurrent._
 
-import com.bwsw.sj.engine.core.engine.TaskRunner
+import com.bwsw.sj.engine.core.engine.{InstanceStatusObserver, TaskRunner}
 import com.bwsw.sj.engine.input.connection.tcp.server.InputStreamingServer
 import com.bwsw.sj.engine.input.task.{InputTaskEngine, InputTaskManager}
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
@@ -43,11 +43,14 @@ object InputTaskRunner extends {override val threadName = "InputTaskRunner-%d"} 
         bufferForEachContext
       )
 
+      val instanceStatusObserver = new InstanceStatusObserver(manager.instanceName)
+
       logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
 
       executorService.submit(inputTaskEngine)
       executorService.submit(performanceMetrics)
       executorService.submit(inputStreamingServer)
+      executorService.submit(instanceStatusObserver)
 
       executorService.take().get()
     } catch {

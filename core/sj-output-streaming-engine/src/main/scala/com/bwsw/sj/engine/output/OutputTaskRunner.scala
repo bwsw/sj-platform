@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.output
 
-import com.bwsw.sj.engine.core.engine.TaskRunner
+import com.bwsw.sj.engine.core.engine.{InstanceStatusObserver, TaskRunner}
 import com.bwsw.sj.engine.output.task.{OutputTaskEngine, OutputTaskManager}
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
@@ -27,11 +27,14 @@ object OutputTaskRunner extends {override val threadName = "OutputTaskRunner-%d"
 
       val outputTaskInputService = outputTaskEngine.taskInputService
 
+      val instanceStatusObserver = new InstanceStatusObserver(manager.instanceName)
+
       logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
 
       executorService.submit(outputTaskInputService)
       executorService.submit(outputTaskEngine)
       executorService.submit(performanceMetrics)
+      executorService.submit(instanceStatusObserver)
 
       executorService.take().get()
     } catch {
