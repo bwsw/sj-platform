@@ -61,6 +61,15 @@
                       }">{{ instance.status }}</span>
               </td>
               <td class="actions-column">
+
+                <button type="button"
+                        class="btn btn-sm btn-secondary"
+                        *ngIf="instance.status == 'stopped' || instance.status == 'failed' || instance.status == 'ready'"
+                        title="Start instance"
+                        (click)="ShowInstanceTasks.show()">
+                  <i class="fa fa-info-circle"></i>
+                </button>
+
                 <i class="fa fa-spinner fa-spin btn btn-sm btn-secondary"
                    *ngIf="instance.status == 'starting' || instance.status == 'stopping' " aria-hidden="true"></i>
 
@@ -159,7 +168,7 @@
             <li *ngIf="currentInstance['async-backup-count'] || currentInstance['async-backup-count'] === 0">Async-backup-count :
               {{currentInstance["async-backup-count"]}}</li>
             <li>{{currentInstance.module['module-type'] !== 'input-streaming' ? 'Execution-plan:': 'Tasks:'}}
-              <ul *ngIf="currentInstance !== 'undefined'">
+              <ul *ngIf="currentInstance !== undefined">
                 <li>{{currentInstanceTasks | json}}</li>
               </ul>
             </li>
@@ -729,6 +738,29 @@
 
         <template [ngIf]="currentInstance && !ifInstanceCanBeRemoved()">
           <button type="button" class="btn btn-primary" (click)="DeleteInstance.hide()">OK</button>
+        </template>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div bsModal #ShowInstanceTasks="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" (click)="ShowInstanceTasks.hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Mesos framework tasks</h4>
+      </div>
+
+      <div class="modal-body">
+        <p>Show it</p>
+      </div>
+
+      <div class="modal-footer">
+        <template>
+          <button type="button" class="btn btn-primary" (click)="ShowInstanceTasks.hide()">OK</button>
         </template>
       </div>
     </div>

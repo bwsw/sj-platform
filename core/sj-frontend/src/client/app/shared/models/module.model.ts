@@ -9,6 +9,7 @@ export class ModuleModel {
   license: string;
   'engine-name': string;
   'engine-version': string;
+  options: Object;
   'validator-class': string;
   'executor-class': string;
 }

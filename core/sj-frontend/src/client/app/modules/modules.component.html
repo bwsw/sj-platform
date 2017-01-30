@@ -10,7 +10,7 @@
           <div class="col col-xs-6"><h4 class="card-title">Modules list</h4></div>
           <div class="col col-xs-6">
             <label [ngClass]="{inProgress:isUploading}" class="btn btn-primary btn-upload pull-right ml-1 mb-1">
-              <div *ngIf="!isUploading"><i class="fa fa-upload mr-1"></i>Upload module</div>
+              <span *ngIf="!isUploading"><i class="fa fa-upload mr-1"></i>Upload module</span>
               <i *ngIf="isUploading" class="fa fa-spinner fa-spin" aria-hidden="true"></i>
               <input type="file" (change)="uploadFile($event)">
             </label>
