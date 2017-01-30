@@ -14,14 +14,14 @@ import org.apache.http.client.methods.CloseableHttpResponse
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
+import com.bwsw.sj.common.utils.FrameworkLiterals._
 
 /**
- * One-thread starting object for instance
- * using synchronous apache http client
- *
- *
- * @author Kseniya Tomskikh
- */
+  * One-thread starting object for instance
+  * using synchronous apache http client
+  *
+  * @author Kseniya Tomskikh
+  */
 class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable with InstanceManager {
 
   import EngineLiterals._
@@ -38,7 +38,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
       startInstance()
     } catch {
       case e: Exception =>
-        logger.debug(s"Instance: ${instance.name}. Failed instance.")
+        logger.debug(s"Instance: ${instance.name}. Instance is failed during the start process.")
         logger.debug(e.getMessage)
         e.printStackTrace()
         updateInstanceStatus(instance, failed)
@@ -191,7 +191,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
       } else {
         updateGeneratorState(instance, name, failed)
         throw new Exception(s"Marathon returns status code: ${getStatusCode(generatorApplicationInfo)} " +
-          s"during a start of generator. Generator '${name}' is marked as failed.")
+          s"during the start process of generator. Generator '${name}' is marked as failed.")
       }
     }
   }
@@ -263,8 +263,9 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
 
   private def getFrameworkEnvironmentVariables(marathonMaster: String) = {
     var environmentVariables = Map(
-      "INSTANCE_ID" -> instance.name,
-      "MESOS_MASTER" -> marathonMaster
+      instanceIdLabel -> instance.name,
+      frameworkIdLabel -> instance.frameworkId,
+      mesosMasterLabel -> marathonMaster
     )
     environmentVariables = environmentVariables ++ ConnectionConstants.mongoEnvironment
     environmentVariables = environmentVariables ++ instance.environmentVariables.asScala
@@ -273,9 +274,15 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   }
 
   private def getBackoffSettings(): (Int, Double, Int) = {
-    val backoffSeconds = try ConfigurationSettingsUtils.getFrameworkBackoffSeconds() catch {case e:NoSuchFieldException => 7}
-    val backoffFactor = try ConfigurationSettingsUtils.getFrameworkBackoffFactor() catch {case e:NoSuchFieldException => 7}
-    val maxLaunchDelaySeconds = try ConfigurationSettingsUtils.getFrameworkMaxLaunchDelaySeconds() catch {case e:NoSuchFieldException => 600}
+    val backoffSeconds = try ConfigurationSettingsUtils.getFrameworkBackoffSeconds() catch {
+      case e: NoSuchFieldException => 7
+    }
+    val backoffFactor = try ConfigurationSettingsUtils.getFrameworkBackoffFactor() catch {
+      case e: NoSuchFieldException => 7
+    }
+    val maxLaunchDelaySeconds = try ConfigurationSettingsUtils.getFrameworkMaxLaunchDelaySeconds() catch {
+      case e: NoSuchFieldException => 600
+    }
     (backoffSeconds, backoffFactor, maxLaunchDelaySeconds)
   }
 
@@ -295,7 +302,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
       } else {
         updateFrameworkState(instance, failed)
         throw new Exception(s"Marathon returns status code: ${getStatusCode(frameworkApplicationInfo)} " +
-          s"during a start of framework. Framework '${instance.name}' is marked as failed.")
+          s"during the start process of framework. Framework '${instance.name}' is marked as failed.")
       }
     }
   }

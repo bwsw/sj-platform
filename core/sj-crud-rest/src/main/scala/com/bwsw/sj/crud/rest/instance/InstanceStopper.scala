@@ -8,14 +8,14 @@ import org.slf4j.LoggerFactory
 import scala.collection.JavaConverters._
 
 /**
- * One-thread stopper object for instance
- * using synchronous apache http client
- *
- *
- * @author Kseniya Tomskikh
- */
+  * One-thread stopper object for instance
+  * using synchronous apache http client
+  *
+  * @author Kseniya Tomskikh
+  */
 class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable with InstanceManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
+
   import EngineLiterals._
 
   def run() = {
@@ -24,7 +24,11 @@ class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable w
       stopFramework()
       markInstanceAsStopped()
     } catch {
-      case e: Exception => //todo что тут подразумевалось? зачем try catch, если непонятен результат при падении
+      case e: Exception =>
+        logger.debug(s"Instance: ${instance.name}. Instance is failed during the stopping process.")
+        logger.debug(e.getMessage)
+        e.printStackTrace()
+        updateInstanceStatus(instance, error)
     }
   }
 
@@ -33,6 +37,10 @@ class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable w
     val response = stopMarathonApplication(instance.name)
     if (isStatusOK(response)) {
       waitForFrameworkToStop()
+    } else {
+      updateFrameworkState(instance, error)
+      throw new Exception(s"Marathon returns status code: ${getStatusCode(response)} " +
+        s"during the stopping process of framework. Framework '${instance.name}' is marked as error.")
     }
   }
 
@@ -49,7 +57,9 @@ class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable w
           Thread.sleep(delay)
         }
       } else {
-        //todo error?
+        updateFrameworkState(instance, error)
+        throw new Exception(s"Marathon returns status code: ${getStatusCode(frameworkApplicationInfo)} " +
+          s"during the stopping process of framework. Framework '${instance.name}' is marked as error.")
       }
     }
   }

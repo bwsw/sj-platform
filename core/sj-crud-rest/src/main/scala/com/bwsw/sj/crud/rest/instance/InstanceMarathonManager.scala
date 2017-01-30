@@ -6,6 +6,7 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.TStreamSjStream
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.rest.entities.MarathonRequest
+import com.bwsw.sj.common.utils.FrameworkLiterals._
 import com.bwsw.sj.common.utils.GeneratorLiterals
 import com.bwsw.sj.crud.rest.RestLiterals
 import org.apache.http.client.methods._
@@ -46,6 +47,13 @@ trait InstanceMarathonManager {
 
   def getStatusCode(response: CloseableHttpResponse) = {
     response.getStatusLine.getStatusCode
+  }
+
+  def getFrameworkID(marathonInfo: CloseableHttpResponse) = {
+    val entity = marathonEntitySerializer.deserialize[MarathonApplicationById](EntityUtils.toString(marathonInfo.getEntity, "UTF-8"))
+    val id = entity.apps.head.env.get(frameworkIdLabel)
+
+    id
   }
 
   def getGeneratorApplicationID(stream: TStreamSjStream) = {

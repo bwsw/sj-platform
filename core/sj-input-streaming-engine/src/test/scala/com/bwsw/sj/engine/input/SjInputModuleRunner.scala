@@ -4,7 +4,7 @@ import java.io.File
 import java.util.logging.LogManager
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.config.{TempHelperForConfigDestroy, TempHelperForConfigSetup}
+import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.engine.input.DataFactory._
 
 
@@ -65,7 +65,7 @@ object SjInputModuleDestroy extends App {
   deleteModule(SjInputInfoExp.fileStorage, SjInputInfoExp.inputModule.getName)
   cassandraDestroy()
   close()
-  TempHelperForConfigDestroy.main(Array())
+  ConnectionRepository.getConfigService.deleteAll()
   ConnectionRepository.close()
 
   println("DONE")

@@ -51,6 +51,7 @@ object EngineLiterals {
   final val deleting = "deleting"
   final val deleted = "deleted"
   final val failed = "failed"
+  final val error = "error"
   val instanceStatusModes = Seq(starting,
     started,
     stopping,
@@ -58,7 +59,8 @@ object EngineLiterals {
     ready,
     deleting,
     deleted,
-    failed
+    failed,
+    error
   )
 
   val toHandle = "to-handle"
@@ -144,4 +146,10 @@ object JdbcLiterals {
   final val postgresqlDriverPrefix = "jdbc:postgresql"
   final val oracleDriverPrefix = "jdbc:oracle:thin"
   final val mysqlDriverPrefix = "jdbc:mysql"
+}
+
+object FrameworkLiterals {
+  val instanceIdLabel = "INSTANCE_ID"
+  val frameworkIdLabel = "FRAMEWORK_ID"
+  val mesosMasterLabel = "MESOS_MASTER"
 }

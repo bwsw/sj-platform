@@ -26,7 +26,11 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
       deleteFramework()
       deleteInstance()
     } catch {
-      case e: Exception => //todo что тут подразумевалось? зачем try catch, если непонятен результат при падении
+      case e: Exception =>
+        logger.debug(s"Instance: ${instance.name}. Instance is failed during the destroying process.")
+        logger.debug(e.getMessage)
+        e.printStackTrace()
+        updateInstanceStatus(instance, error)
     }
   }
 
@@ -74,6 +78,8 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
     val response = destroyMarathonApplication(applicationID)
     if (isStatusOK(response)) {
       waitForGeneratorToDelete(streamName, applicationID)
+    } else {
+     //generator will be removed later
     }
   }
 
@@ -96,6 +102,10 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
     val response = destroyMarathonApplication(instance.name)
     if (isStatusOK(response)) {
       waitForFrameworkToDelete()
+    } else {
+      updateFrameworkState(instance, error)
+      throw new Exception(s"Marathon returns status code: ${getStatusCode(response)} " +
+        s"during the destroying process of framework. Framework '${instance.name}' is marked as error.")
     }
   }
 
@@ -110,7 +120,7 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
         updateFrameworkState(instance, deleted)
         hasDeleted = true
       }
-    }
+    }     //todo will see about it, maybe get stuck implicitly
   }
 
   private def deleteInstance() = {
