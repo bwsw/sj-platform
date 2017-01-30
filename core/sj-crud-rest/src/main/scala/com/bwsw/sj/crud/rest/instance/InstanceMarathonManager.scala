@@ -32,6 +32,18 @@ trait InstanceMarathonManager {
     master
   }
 
+  def getLeaderTask(marathonTasks: CloseableHttpResponse): Option[Map[String, Any]] = {
+    //TODO: must get real framework leader!
+    val entity = marathonEntitySerializer.deserialize[Map[String, Any]](EntityUtils.toString(marathonTasks.getEntity, "UTF-8"))
+    var leaderTask: Option[Map[String, Any]] = None
+    if (entity.contains("tasks")) {
+      val tasks = entity.get("tasks").get.asInstanceOf[List[Map[String, Any]]]
+      if (tasks.nonEmpty) leaderTask = Some(entity.get("tasks").get.asInstanceOf[List[Map[String, Any]]].head)
+    }
+    println("!!!!!!!!!!!!!!" + leaderTask)
+    leaderTask
+  }
+
   def isStatusOK(response: CloseableHttpResponse) = {
     response.getStatusLine.getStatusCode == 200
   }
@@ -58,6 +70,14 @@ trait InstanceMarathonManager {
     logger.debug(s"Get info about the marathon")
     val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/info")
+    val httpGet = new HttpGet(url.toString)
+    client.execute(httpGet)
+  }
+
+  def getTasksByAppName(appName: String) = {
+    logger.debug(s"Get marathon tasks by app name")
+    val client = new HttpClient(marathonTimeout).client
+    val url = new URI(s"$marathonConnect/v2/apps/$appName/tasks")
     val httpGet = new HttpGet(url.toString)
     client.execute(httpGet)
   }

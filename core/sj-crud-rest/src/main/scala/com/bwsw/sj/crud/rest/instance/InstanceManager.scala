@@ -57,6 +57,17 @@ private[instance] trait InstanceManager extends InstanceMarathonManager {
     instanceDAO.save(instance)
   }
 
+  protected def updateInstanceRestAddress(instance: Instance, restAddress: String) = {
+    instance.restAddress = restAddress
+    instanceDAO.save(instance)
+  }
+
+  protected def getRestAddress(leaderTask: Option[Map[String, Any]]) = {
+    var res: String = null
+    if (leaderTask.isDefined) res = s"${leaderTask.get("host")}:${leaderTask.get("ports").asInstanceOf[List[String]].head}"
+    res
+  }
+
   protected def updateGeneratorState(instance: Instance, name: String, status: String) = {
     updateInstanceStage(instance, name, status)
     instanceDAO.save(instance)

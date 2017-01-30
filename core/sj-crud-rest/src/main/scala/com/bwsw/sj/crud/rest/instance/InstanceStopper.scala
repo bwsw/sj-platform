@@ -65,6 +65,8 @@ class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable w
       clearTasks()
     }
     updateInstanceStatus(instance, stopped)
+    //TODO this not working correctly, task cant start. Always in starting status
+    updateInstanceRestAddress(instance, null)
   }
 
   private def isInputInstance() = {

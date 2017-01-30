@@ -21,13 +21,14 @@ class Instance {
   @Property("module-name") var moduleName: String = null
   @Property("module-version") var moduleVersion: String = null
   var status: String = EngineLiterals.ready
+  @Property("rest-address") var restAddress: String = null
   @Id var name: String = null
   var description: String = "No description"
   var outputs: Array[String] = Array()
   var parallelism: Int = 1
   var options: String = "{}"
-  @Property("per-task-cores") var perTaskCores: Double = 1.0
-  @Property("per-task-ram") var perTaskRam: Int = 1024
+  @Property("per-task-cores") var perTaskCores: Double = 0.1
+  @Property("per-task-ram") var perTaskRam: Int = 32
   @Embedded("jvm-options") var jvmOptions: java.util.Map[String, String] = new util.HashMap[String, String]()
   @Property("node-attributes") var nodeAttributes: java.util.Map[String, String] = new util.HashMap[String, String]()
   @Embedded("coordination-service") var coordinationService: ZKService = null
