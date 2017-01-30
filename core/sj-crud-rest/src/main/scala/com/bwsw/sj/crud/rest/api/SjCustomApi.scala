@@ -56,7 +56,8 @@ trait SjCustomApi extends Directives with SjCrudValidator {
 
   private def doesCustomJarExist(specification: Map[String, Any]) = {
     fileMetadataDAO.getByParameters(
-      Map("specification.name" -> specification("name").asInstanceOf[String],
+      Map("filetype" -> "custom",
+        "specification.name" -> specification("name").asInstanceOf[String],
         "specification.version" -> specification("version").asInstanceOf[String]
       )).nonEmpty
   }
@@ -84,7 +85,10 @@ trait SjCustomApi extends Directives with SjCrudValidator {
           } ~
             pathSuffix(Segment) { (version: String) =>
               pathEndOrSingleSlash {
-                val fileMetadatas = fileMetadataDAO.getByParameters(Map("specification.name" -> name, "specification.version" -> version))
+                val fileMetadatas = fileMetadataDAO.getByParameters(Map("filetype" -> "custom",
+                  "specification.name" -> name,
+                  "specification.version" -> version)
+                )
                 if (fileMetadatas.isEmpty) {
                   throw CustomJarNotFound(createMessage("rest.custom.jars.file.notfound", s"$name-$version"), s"$name-$version")
                 }

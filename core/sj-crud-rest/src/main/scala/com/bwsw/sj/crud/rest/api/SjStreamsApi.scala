@@ -60,7 +60,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
                 var response: RestResponse = UnprocessableEntityRestResponse(Map("message" ->
                   createMessage("rest.streams.stream.cannot.delete", streamName)))
 
-                val instances = getUsedInstances(streamName)
+                val instances = getRelatedInstances(streamName)
 
                 if (instances.isEmpty) {
                   val stream = streamDAO.get(streamName)
@@ -80,18 +80,36 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
 
                 complete(restResponseToHttpResponse(response))
               }
-          }
+          } ~
+            pathPrefix("related") {
+              pathEndOrSingleSlash {
+                get {
+                  val stream = streamDAO.get(streamName)
+                  var response: RestResponse = NotFoundRestResponse(
+                    Map("message" -> createMessage("rest.streams.stream.notfound", streamName)))
+
+                  stream match {
+                    case Some(x) =>
+                      response = OkRestResponse(Map("instances" -> getRelatedInstances(streamName)))
+                    case None =>
+                  }
+
+                  complete(restResponseToHttpResponse(response))
+                }
+              }
+            }
         }
     }
   }
 
-  private def getUsedInstances(streamName: String): mutable.Buffer[Instance] = {
-    instanceDAO.getAll.filter { (instance: Instance) =>
-      if (!instance.moduleType.equals(inputStreamingType)) {
-        instance.getInputsWithoutStreamMode().contains(streamName) || instance.outputs.contains(streamName)
-      } else {
-        instance.outputs.contains(streamName)
-      }
-    }
+  private def getRelatedInstances(streamName: String) = {
+    instanceDAO.getAll.filter {
+      (instance: Instance) =>
+        if (!instance.moduleType.equals(inputStreamingType)) {
+          instance.getInputsWithoutStreamMode().contains(streamName) || instance.outputs.contains(streamName)
+        } else {
+          instance.outputs.contains(streamName)
+        }
+    }.map(_.name)
   }
 }

@@ -223,7 +223,7 @@
       <div class="modal-body" *ngIf="currentProvider && (blockingServices.length > 0)">
         <p>Unable to delete provider! Next services using provider "{{ currentProvider.name }}"</p>
         <ul>
-          <li *ngFor="let service of blockingServices | orderBy: 'name' ">{{service.name}}</li>
+          <li *ngFor="let service of blockingServices">{{service}}</li>
         </ul>
       </div>
 

@@ -56,7 +56,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
               delete {
                 var response: RestResponse = UnprocessableEntityRestResponse(Map("message" ->
                   createMessage("rest.providers.provider.cannot.delete", providerName)))
-                val providers = getUsedProviders(providerName)
+                val providers = getRelatedServices(providerName)
                 if (providers.isEmpty) {
                   val provider = providerDAO.get(providerName)
                   provider match {
@@ -98,12 +98,29 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
                   complete(restResponseToHttpResponse(response))
                 }
               }
+            } ~
+            pathPrefix("related") {
+              pathEndOrSingleSlash {
+                get {
+                  val provider = providerDAO.get(providerName)
+                  var response: RestResponse = NotFoundRestResponse(
+                    Map("message" -> createMessage("rest.providers.provider.notfound", providerName)))
+
+                  provider match {
+                    case Some(x) =>
+                      response = OkRestResponse(Map("services" -> getRelatedServices(providerName)))
+                    case None =>
+                  }
+
+                  complete(restResponseToHttpResponse(response))
+                }
+              }
             }
         }
     }
   }
 
-  private def getUsedProviders(providerName: String) = {
+  private def getRelatedServices(providerName: String) = {
     serviceDAO.getAll.filter {
       case esService: ESService =>
         esService.provider.name.equals(providerName)
@@ -119,6 +136,6 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
         tService.metadataProvider.name.equals(providerName) || tService.dataProvider.name.equals(providerName)
       case jdbcService: JDBCService =>
         jdbcService.provider.name.equals(providerName)
-    }
+    }.map(_.name)
   }
 }

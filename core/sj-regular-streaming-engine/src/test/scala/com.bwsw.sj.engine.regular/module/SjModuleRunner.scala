@@ -4,11 +4,13 @@ import java.io.File
 import java.util.logging.LogManager
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.config.{TempHelperForConfigDestroy, TempHelperForConfigSetup}
 import com.bwsw.sj.engine.regular.module.DataFactory._
 import com.bwsw.sj.engine.regular.RegularTaskRunner
 
 object SjModuleSetup extends App {
   LogManager.getLogManager.reset()
+  TempHelperForConfigSetup.main(Array())
   val streamService = ConnectionRepository.getStreamService
   val serviceManager = ConnectionRepository.getServiceManager
   val providerService = ConnectionRepository.getProviderService
@@ -60,6 +62,7 @@ object SjModuleDestroy extends App {
   deleteModule(fileStorage, module.getName)
   cassandraDestroy()
   close()
+  TempHelperForConfigDestroy.main(Array())
   ConnectionRepository.close()
 
   println("DONE")
