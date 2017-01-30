@@ -65,8 +65,8 @@ case class ProviderData(name: String,
           errors += createMessage("entity.error.attribute.required", "Type")
         }
         else {
-          if (!providerTypes.contains(x)) {
-            errors += createMessage("entity.error.unknown.type.must.one.of", x, "provider", providerTypes.mkString("[", ", ", "]"))
+          if (!types.contains(x)) {
+            errors += createMessage("entity.error.unknown.type.must.one.of", x, "provider", types.mkString("[", ", ", "]"))
           }
         }
     }

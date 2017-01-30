@@ -4,6 +4,7 @@ import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.provider.ProviderData
+import com.bwsw.sj.common.utils.ProviderLiterals
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
 import scala.collection.mutable
@@ -38,6 +39,16 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
             complete(restResponseToHttpResponse(response))
           }
       } ~
+        pathPrefix("types") {
+          //todo if a provider has a name 'types' then there is a collision
+          pathEndOrSingleSlash {
+            get {
+              val response = OkRestResponse(Map("types" -> ProviderLiterals.types))
+
+              complete(restResponseToHttpResponse(response))
+            }
+          }
+        } ~
         pathPrefix(Segment) { (providerName: String) =>
           pathEndOrSingleSlash {
             get {
