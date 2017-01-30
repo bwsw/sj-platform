@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
 import com.bwsw.sj.common.utils.FrameworkLiterals._
+import com.bwsw.sj.common.utils.GeneratorLiterals._
 
 /**
   * One-thread starting object for instance
@@ -30,6 +31,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   private lazy val restHost = ConfigurationSettingsUtils.getCrudRestHost()
   private lazy val restPort = ConfigurationSettingsUtils.getCrudRestPort()
   private lazy val restAddress = new URI(s"http://$restHost:$restPort").toString
+  private val frameworkName = getFrameworkName(instance)
 
   def run() = {
     logger.debug(s"Instance: ${instance.name}. Start instance.")
@@ -103,10 +105,10 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   }
 
   private def startGenerator(stream: TStreamSjStream) = {
-    updateGeneratorState(instance, stream.name, starting)
     val applicationID = getGeneratorApplicationID(stream)
     val generatorApplicationInfo = getApplicationInfo(applicationID)
     if (isStatusOK(generatorApplicationInfo)) {
+      updateGeneratorState(instance, stream.name, starting)
       launchGenerator(stream, applicationID)
     } else {
       createGenerator(stream, applicationID)
@@ -159,18 +161,18 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
     val generatorProvider = zkService.provider
     val prefix = createZookeeperPrefix(zkService.namespace, stream.generator.generatorType, stream.name)
 
-    val environmentVariables = Map("ZK_SERVERS" -> generatorProvider.hosts.mkString(";"),
-      "PREFIX" -> prefix) ++ ConnectionConstants.mongoEnvironment
+    val environmentVariables = Map(zkServersLabel -> generatorProvider.hosts.mkString(";"),
+      prefixLabel -> prefix) ++ ConnectionConstants.mongoEnvironment
 
     environmentVariables
   }
 
   private def createZookeeperPrefix(namespace: String, generatorType: String, name: String) = {
     var prefix = s"/$namespace"
-    if (generatorType == GeneratorLiterals.perStreamType) {
+    if (generatorType == perStreamType) {
       prefix += s"/$name"
     } else {
-      prefix += GeneratorLiterals.globalDirectory
+      prefix += globalDirectory
     }
 
     prefix
@@ -197,8 +199,8 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   }
 
   private def tryToStartFramework(marathonMaster: String) = {
-    updateFrameworkState(instance, starting)
     if (haveGeneratorsStarted()) {
+      updateFrameworkState(instance, starting)
       startFramework(marathonMaster)
     } else {
       updateFrameworkState(instance, failed)
@@ -213,7 +215,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   }
 
   private def startFramework(marathonMaster: String) = {
-    val frameworkApplicationInfo = getApplicationInfo(instance.name)
+    val frameworkApplicationInfo = getApplicationInfo(frameworkName)
     if (isStatusOK(frameworkApplicationInfo)) {
       launchFramework()
     } else {
@@ -222,7 +224,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   }
 
   private def launchFramework() = {
-    val startFrameworkResult = scaleMarathonApplication(instance.name, 1)
+    val startFrameworkResult = scaleMarathonApplication(frameworkName, 1)
     if (isStatusOK(startFrameworkResult)) {
       waitForFrameworkToStart()
     } else {
@@ -249,7 +251,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
     val environmentVariables = getFrameworkEnvironmentVariables(marathonMaster)
     val backoffSettings = getBackoffSettings()
     val request = MarathonRequest(
-      instance.name,
+      frameworkName,
       command,
       1,
       environmentVariables,
@@ -263,8 +265,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
 
   private def getFrameworkEnvironmentVariables(marathonMaster: String) = {
     var environmentVariables = Map(
-      instanceIdLabel -> instance.name,
-      frameworkIdLabel -> instance.frameworkId,
+      instanceIdLabel -> frameworkName,
       mesosMasterLabel -> marathonMaster
     )
     environmentVariables = environmentVariables ++ ConnectionConstants.mongoEnvironment
@@ -289,7 +290,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   private def waitForFrameworkToStart() = {
     var isStarted = false
     while (!isStarted) {
-      val frameworkApplicationInfo = getApplicationInfo(instance.name)
+      val frameworkApplicationInfo = getApplicationInfo(frameworkName)
       if (isStatusOK(frameworkApplicationInfo)) {
         if (hasFrameworkStarted(frameworkApplicationInfo)) {
           updateFrameworkState(instance, started)
@@ -302,7 +303,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
       } else {
         updateFrameworkState(instance, failed)
         throw new Exception(s"Marathon returns status code: ${getStatusCode(frameworkApplicationInfo)} " +
-          s"during the start process of framework. Framework '${instance.name}' is marked as failed.")
+          s"during the start process of framework. Framework '${frameworkName}' is marked as failed.")
       }
     }
   }

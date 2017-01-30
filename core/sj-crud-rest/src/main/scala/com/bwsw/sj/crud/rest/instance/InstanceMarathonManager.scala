@@ -22,13 +22,20 @@ import org.slf4j.LoggerFactory
  */
 trait InstanceMarathonManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
-  private val marathonEntitySerializer = new JsonSerializer
+  private val marathonEntitySerializer = new JsonSerializer(true)
   private lazy val marathonConnect = ConfigurationSettingsUtils.getMarathonConnect()
   private lazy val marathonTimeout = ConfigurationSettingsUtils.getMarathonTimeout()
 
+  def getNumberOfRunningTasks(response: CloseableHttpResponse) = {
+    val entity = marathonEntitySerializer.deserialize[MarathonApplicationById](EntityUtils.toString(response.getEntity, "UTF-8"))
+    val tasksRunning = entity.app.tasksRunning
+
+    tasksRunning
+  }
+
   def getMarathonMaster(marathonInfo: CloseableHttpResponse) = {
-    val entity = marathonEntitySerializer.deserialize[Map[String, Any]](EntityUtils.toString(marathonInfo.getEntity, "UTF-8"))
-    val master = entity.get("marathon_config").get.asInstanceOf[Map[String, Any]].get("master").get.asInstanceOf[String]
+    val entity = marathonEntitySerializer.deserialize[MarathonInfo](EntityUtils.toString(marathonInfo.getEntity, "UTF-8"))
+    val master = entity.marathonConfig.master
 
     master
   }
@@ -51,7 +58,7 @@ trait InstanceMarathonManager {
 
   def getFrameworkID(marathonInfo: CloseableHttpResponse) = {
     val entity = marathonEntitySerializer.deserialize[MarathonApplicationById](EntityUtils.toString(marathonInfo.getEntity, "UTF-8"))
-    val id = entity.apps.head.env.get(frameworkIdLabel)
+    val id = entity.app.env.get(frameworkIdLabel)
 
     id
   }

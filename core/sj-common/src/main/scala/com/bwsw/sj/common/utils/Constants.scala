@@ -93,6 +93,9 @@ object GeneratorLiterals {
   val masterDirectory = "/master"
   val globalDirectory = "/global"
   val messageForServer = "get"
+
+  val zkServersLabel = "ZK_SERVERS"
+  val prefixLabel = "PREFIX"
 }
 
 object ServiceLiterals {

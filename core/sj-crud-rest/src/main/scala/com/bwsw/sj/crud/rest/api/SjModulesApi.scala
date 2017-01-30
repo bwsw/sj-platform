@@ -218,7 +218,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     var response: RestResponse = UnprocessableEntityRestResponse(Map("message" ->
       createMessage("rest.modules.instances.instance.cannot.delete", instanceName)))
 
-    if (instance.status.equals(stopped) || instance.status.equals(failed)) {
+    if (instance.status.equals(stopped) || instance.status.equals(failed) || instance.status.equals(error)) {
       destroyInstance(instance)
       response = OkRestResponse(Map("message" ->
         createMessage("rest.modules.instances.instance.deleting", instanceName)))

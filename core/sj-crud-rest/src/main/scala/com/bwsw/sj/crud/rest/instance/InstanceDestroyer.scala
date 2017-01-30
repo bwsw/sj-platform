@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory
 class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable with InstanceManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
   private val instanceDAO = ConnectionRepository.getInstanceService
+  private val frameworkName = getFrameworkName(instance)
 
   import EngineLiterals._
 
@@ -74,9 +75,9 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
   }
 
   private def deleteGenerator(streamName: String, applicationID: String) = {
-    updateGeneratorState(instance, streamName, deleting)
     val response = destroyMarathonApplication(applicationID)
     if (isStatusOK(response)) {
+      updateGeneratorState(instance, streamName, deleting)
       waitForGeneratorToDelete(streamName, applicationID)
     } else {
      //generator will be removed later
@@ -98,21 +99,21 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
   }
 
   private def deleteFramework() = {
-    updateFrameworkState(instance, deleting)
-    val response = destroyMarathonApplication(instance.name)
+    val response = destroyMarathonApplication(frameworkName)
     if (isStatusOK(response)) {
+      updateFrameworkState(instance, deleting)
       waitForFrameworkToDelete()
     } else {
       updateFrameworkState(instance, error)
       throw new Exception(s"Marathon returns status code: ${getStatusCode(response)} " +
-        s"during the destroying process of framework. Framework '${instance.name}' is marked as error.")
+        s"during the destroying process of framework. Framework '${frameworkName}' is marked as error.")
     }
   }
 
   private def waitForFrameworkToDelete() = {
     var hasDeleted = false
     while (!hasDeleted) {
-      val frameworkApplicationInfo = getApplicationInfo(instance.name)
+      val frameworkApplicationInfo = getApplicationInfo(frameworkName)
       if (!isStatusNotFound(frameworkApplicationInfo)) {
         updateFrameworkState(instance, deleting)
         Thread.sleep(delay)
