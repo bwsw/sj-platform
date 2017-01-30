@@ -47,7 +47,7 @@
                 <td colspan="20" class="text-center">No services have been found.</td>
               </tr>
 
-              <tr *ngFor="let service of serviceList | orderBy: 'name' | listFilter : ''"
+              <tr *ngFor="let service of serviceList | orderBy: 'name' | listFilter : term"
                   [ngClass]="{ 'table-info': isSelected(service) }"
                   (click)="selectService(service)">
                 <td>{{ service.name }}</td>

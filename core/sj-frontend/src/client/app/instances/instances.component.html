@@ -46,7 +46,7 @@
               <td colspan="20" class="text-center">No instances have been found.</td>
             </tr>
 
-            <tr *ngFor="let instance of instancesList | orderBy: 'name' | listFilter : ''"
+            <tr *ngFor="let instance of instancesList | orderBy: 'name' | listFilter : term"
                 [ngClass]="{ 'table-info': isSelected(instance) }"
                 (click)="selectInstance(instance)">
               <td>{{ instance.name }}</td>

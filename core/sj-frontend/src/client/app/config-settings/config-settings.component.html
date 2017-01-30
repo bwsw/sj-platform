@@ -48,7 +48,7 @@
               <td colspan="20" class="text-center">No settings have been found.</td>
             </tr>
 
-            <tr *ngFor="let setting of settingsList | orderBy: 'name' | listFilter : ''"
+            <tr *ngFor="let setting of settingsList | orderBy: 'name' | listFilter : term"
                 [ngClass]="{ 'table-info': isSelected(setting) }"
                 (click)="selectSetting(setting)">
               <td>{{ setting.name }}</td>
