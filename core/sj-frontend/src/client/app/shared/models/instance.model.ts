@@ -19,6 +19,7 @@ export class InstanceModel {
   'default-eviction-policy': string = 'NONE';
   'description': string;
   'duplicate-check': boolean = false;
+  engine: string;
   'environment-variables': Object;
   'event-wait-idle-time': number = 1000;
   'eviction-policy': string = 'fix-time';
