@@ -3,6 +3,7 @@ package com.bwsw.sj.engine.output.benchmark
 import java.io.File
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.config.TempHelperForConfigDestroy
 import com.bwsw.sj.engine.output.benchmark.BenchmarkDataFactory._
 
 /**
@@ -36,6 +37,7 @@ object BenchmarkDestroyer extends App {
   deleteModule(jdbcModule.getName)
   cassandraDestroy("bench")
   close()
+  TempHelperForConfigDestroy.main(Array())
   ConnectionRepository.close()
 
   println("DONE")

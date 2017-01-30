@@ -337,15 +337,27 @@
         <h4 class="modal-title">Delete confirmation</h4>
       </div>
 
-      <div class="modal-body" *ngIf="currentStream">
+      <div class="modal-body" *ngIf="currentStream && (blockingInstances.length === 0)">
         <p>Do you really want to delete stream "{{ currentStream.name }}"? This action can not be undone!</p>
       </div>
 
+      <div class="modal-body" *ngIf="currentStream && (blockingInstances.length > 0)">
+        <p>Unable to delete stream! Next instances using stream "{{ currentStream.name }}"</p>
+        <ul>
+          <li *ngFor="let instance of blockingInstances">{{instance}}</li>
+        </ul>
+      </div>
+
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="DeleteStream.hide()">Cancel</button>
-        <button type="button" class="btn btn-danger"
-                (click)="deleteStream(DeleteStream)">Delete
-        </button>
+        <template [ngIf]="currentStream && (blockingInstances.length === 0)">
+          <button type="button" class="btn btn-secondary" (click)="DeleteStream.hide()">Cancel</button>
+          <button type="button" class="btn btn-danger"
+                  (click)="DeleteStream(DeleteStream)">Delete
+          </button>
+        </template>
+        <template [ngIf]="currentStream && (blockingInstances.length > 0)">
+          <button type="button" class="btn btn-primary" (click)="DeleteStream.hide()">Ok</button>
+        </template>
       </div>
     </div>
   </div>

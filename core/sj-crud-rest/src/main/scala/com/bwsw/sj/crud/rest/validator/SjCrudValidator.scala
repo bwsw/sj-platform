@@ -172,15 +172,6 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageRes
         if (outputTypes.isEmpty || !doesSourceTypesConsistOf(outputTypes, Set(esOutputType, jdbcOutputType))) {
           throw new Exception(createMessage("rest.validator.specification.sources.es.jdbc", moduleType, "outputs"))
         }
-
-        //'entity-class' field
-        specification.get("entity-class") match {
-          case None =>
-            throw new Exception(createMessage("rest.validator.specification.no.entity-class", moduleType))
-          case Some(x) =>
-            val entityClassName = x.asInstanceOf[String]
-            getClassInterfaces(entityClassName, classLoader)
-        }
     }
 
     //'validator-class' field
@@ -225,7 +216,7 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageRes
       classLoader.loadClass(className).getAnnotatedInterfaces.map(x => x.getType)
     } catch {
       case _: ClassNotFoundException =>
-        throw new Exception(createMessage("rest.validator.specification.class.not.found", "validator-class' or 'entity-class", className))
+        throw new Exception(createMessage("rest.validator.specification.class.not.found", "validator-class", className))
     }
   }
 

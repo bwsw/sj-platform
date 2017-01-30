@@ -15,7 +15,7 @@ export class ModulesComponent implements OnInit {
   public errorMessage: string;
   public moduleList: ModuleModel[];
   public instanceList: InstanceModel[];
-  public blockingInstances: InstanceModel[] = [];
+  public blockingInstances: string[] = [];
   public alerts: Array<Object> = [];
   public currentModule: ModuleModel;
   public currentModuleSpecification: ModuleModel;
@@ -63,13 +63,8 @@ export class ModulesComponent implements OnInit {
   public deleteModuleConfirm(modal: ModalDirective, module: ModuleModel) {
     this.currentModule = module;
     this.blockingInstances = [];
-    this.instanceList.forEach((item: InstanceModel) => {
-      if (item['module-name'] === this.currentModule['module-name'] &&
-        item['module-type'] === this.currentModule['module-type'] &&
-        item['module-version'] === this.currentModule['module-version']) {
-        this.blockingInstances.push(item);
-      }
-    });
+    this.modulesService.getRelatedInstancesList(module)
+      .subscribe(response => this.blockingInstances = response);
     modal.show();
   }
 

@@ -57,31 +57,56 @@ trait SjServicesApi extends Directives with SjCrudValidator {
             } ~
               delete {
                 var response: RestResponse = UnprocessableEntityRestResponse(Map("message" ->
-                  createMessage("rest.services.service.cannot.delete", serviceName)))
-                val streams = getUsedStreams(serviceName)
+                  createMessage("rest.services.service.cannot.delete.due.to.streams", serviceName)))
+                val streams = getRelatedStreams(serviceName)
                 if (streams.isEmpty) {
-                  val service = serviceDAO.get(serviceName)
-                  service match {
-                    case Some(x) =>
-                      x.destroy()
-                      serviceDAO.delete(serviceName)
-                      response = OkRestResponse(Map("message" ->
-                        createMessage("rest.services.service.deleted", serviceName)))
-                    case None =>
-                      response = NotFoundRestResponse(Map("message" ->
-                        createMessage("rest.services.service.notfound", serviceName)))
+                  response = UnprocessableEntityRestResponse(Map("message" ->
+                    createMessage("rest.services.service.cannot.delete.due.to.instances", serviceName)))
+                  val instances = getRelatedInstances(serviceName)
+
+                  if (instances.isEmpty) {
+                    val service = serviceDAO.get(serviceName)
+                    service match {
+                      case Some(x) =>
+                        x.destroy()
+                        serviceDAO.delete(serviceName)
+                        response = OkRestResponse(Map("message" ->
+                          createMessage("rest.services.service.deleted", serviceName)))
+                      case None =>
+                        response = NotFoundRestResponse(Map("message" ->
+                          createMessage("rest.services.service.notfound", serviceName)))
+                    }
                   }
                 }
 
                 complete(restResponseToHttpResponse(response))
               }
-          }
+          } ~
+            pathPrefix("related") {
+              pathEndOrSingleSlash {
+                get {
+                  val service = serviceDAO.get(serviceName)
+                  var response: RestResponse = NotFoundRestResponse(
+                    Map("message" -> createMessage("rest.services.service.notfound", serviceName)))
+
+                  service match {
+                    case Some(x) =>
+                      response = OkRestResponse(Map("streams" -> getRelatedStreams(serviceName), "instances" -> getRelatedInstances(serviceName)))
+                    case None =>
+                  }
+
+                  complete(restResponseToHttpResponse(response))
+                }
+              }
+            }
         }
     }
   }
 
-  private def getUsedStreams(serviceName: String) = {
-    streamDAO.getAll.filter(s => s.service.name.equals(serviceName) || usedInGenerator(s, serviceName))
+  private def getRelatedStreams(serviceName: String) = {
+    streamDAO.getAll.filter(
+      s => s.service.name.equals(serviceName) || usedInGenerator(s, serviceName)
+    ).map(_.name)
   }
 
   private def usedInGenerator(stream: SjStream, serviceName: String) = {
@@ -90,5 +115,11 @@ trait SjServicesApi extends Directives with SjCrudValidator {
 
       tstream.generator.generatorType != GeneratorLiterals.localType && tstream.generator.service.name == serviceName
     } else false
+  }
+
+  private def getRelatedInstances(serviceName: String) = {
+    instanceDAO.getAll.filter(
+      s => s.coordinationService.name.equals(serviceName)
+    ).map(_.name)
   }
 }

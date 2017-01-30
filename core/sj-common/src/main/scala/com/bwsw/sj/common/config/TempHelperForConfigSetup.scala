@@ -16,13 +16,13 @@ object TempHelperForConfigSetup extends App {
   configService.save(new ConfigurationSetting(ConfigLiterals.frameworkTag, "com.bwsw.fw-1.0", ConfigLiterals.systemDomain))
 
   configService.save(new ConfigurationSetting(createConfigurationSettingName(ConfigLiterals.systemDomain, "regular-streaming-validator-class"),
-    "com.bwsw.sj.crud.rest.validator.module.RegularStreamingValidator", ConfigLiterals.systemDomain))
+    "com.bwsw.sj.crud.rest.validator.instance.RegularInstanceValidator", ConfigLiterals.systemDomain))
   configService.save(new ConfigurationSetting(createConfigurationSettingName(ConfigLiterals.systemDomain, "windowed-streaming-validator-class"),
-    "com.bwsw.sj.crud.rest.validator.module.WindowedStreamingValidator", ConfigLiterals.systemDomain))
+    "com.bwsw.sj.crud.rest.validator.instance.WindowedInstanceValidator", ConfigLiterals.systemDomain))
   configService.save(new ConfigurationSetting(createConfigurationSettingName(ConfigLiterals.systemDomain, "output-streaming-validator-class"),
-    "com.bwsw.sj.crud.rest.validator.module.OutputStreamingValidator", ConfigLiterals.systemDomain))
+    "com.bwsw.sj.crud.rest.validator.instance.OutputInstanceValidator", ConfigLiterals.systemDomain))
   configService.save(new ConfigurationSetting(createConfigurationSettingName(ConfigLiterals.systemDomain, "input-streaming-validator-class"),
-    "com.bwsw.sj.crud.rest.validator.module.InputStreamingValidator", ConfigLiterals.systemDomain))
+    "com.bwsw.sj.crud.rest.validator.instance.InputInstanceValidator", ConfigLiterals.systemDomain))
 
   configService.save(new ConfigurationSetting(ConfigLiterals.marathonTag, "http://stream-juggler.z1.netpoint-dc.com:8080", ConfigLiterals.systemDomain))
   configService.save(new ConfigurationSetting(ConfigLiterals.marathonTimeoutTag, "60000", ConfigLiterals.systemDomain))
@@ -39,4 +39,8 @@ object TempHelperForConfigSetup extends App {
 
   configService.save(new ConfigurationSetting(ConfigLiterals.geoIpAsNum, "GeoIPASNum.dat", ConfigLiterals.systemDomain))
   configService.save(new ConfigurationSetting(ConfigLiterals.geoIpAsNumv6, "GeoIPASNumv6.dat", ConfigLiterals.systemDomain))
+}
+
+object TempHelperForConfigDestroy extends App {
+  ConnectionRepository.getConfigService.deleteAll()
 }
