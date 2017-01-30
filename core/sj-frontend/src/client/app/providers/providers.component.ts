@@ -18,7 +18,7 @@ export class ProvidersComponent implements OnInit, AfterViewChecked {
   public alerts: Array<Object> = [];
   public providerList: ProviderModel[];
   public serviceList: ServiceModel[];
-  public blockingServices: ServiceModel[] = [];
+  public blockingServices: string[] = [];
   public currentProvider: ProviderModel;
   public newProvider: ProviderModel;
   public currentConnectors: [String] = [''];
@@ -104,25 +104,8 @@ export class ProvidersComponent implements OnInit, AfterViewChecked {
   public deleteProviderConfirm(modal: ModalDirective, provider: ProviderModel) {
     this.currentProvider = provider;
     this.blockingServices = [];
-    this.serviceList.forEach((item: ServiceModel) => {
-      if (typeof item.provider !== 'undefined') {
-        if (item.provider === this.currentProvider.name) {
-          this.blockingServices.push(item);
-        }
-      } else if (typeof item['metadata-provider'] !== 'undefined') {
-        if (item['metadata-provider'] === this.currentProvider.name) {
-          this.blockingServices.push(item);
-        }
-      } else if (typeof item['data-provider'] !== 'undefined') {
-        if (item['data-provider'] === this.currentProvider.name) {
-          this.blockingServices.push(item);
-        }
-      } else if (typeof item['lock-provider'] !== 'undefined') {
-        if (item['lock-provider'] === this.currentProvider.name) {
-          this.blockingServices.push(item);
-        }
-      }
-    });
+    this.providersService.getRelatedServicesList(this.currentProvider.name)
+      .subscribe(response => this.blockingServices = response);
     modal.show();
   }
 
