@@ -16,7 +16,7 @@ import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
 import com.bwsw.tstreams.generator.LocalTransactionGenerator
-import com.bwsw.tstreams.services.BasicStreamService
+import com.bwsw.tstreams.streams.StreamService
 
 object DataFactory {
 
@@ -167,7 +167,7 @@ object DataFactory {
     val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
     val dataStorage = cassandraFactory.getDataStorage(cassandraTestKeyspace)
 
-    BasicStreamService.createStream(
+    StreamService.createStream(
       "test-output-tstream" + suffix,
       partitions,
       1000 * 60,
@@ -180,7 +180,7 @@ object DataFactory {
   private def deleteOutputTStream(streamService: GenericMongoService[SjStream], suffix: String) = {
     streamService.delete("test-output-tstream" + suffix)
     val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
-    BasicStreamService.deleteStream("test-output-tstream" + suffix, metadataStorage)
+    StreamService.deleteStream("test-output-tstream" + suffix, metadataStorage)
   }
 
   def createInstance(serviceManager: GenericMongoService[Service],

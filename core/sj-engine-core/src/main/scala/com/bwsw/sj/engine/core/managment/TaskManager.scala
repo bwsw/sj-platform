@@ -20,7 +20,7 @@ import com.bwsw.tstreams.agents.consumer.Offset.IOffset
 import com.bwsw.tstreams.agents.consumer.subscriber.Callback
 import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
 import com.bwsw.tstreams.generator.LocalTransactionGenerator
-import com.bwsw.tstreams.services.BasicStreamService
+import com.bwsw.tstreams.streams.StreamService
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
@@ -141,7 +141,7 @@ abstract class TaskManager() {
   }
 
   private def setProducerMasterBootstrapMode() = {
-    tstreamFactory.setProperty(TSF_Dictionary.Producer.MASTER_BOOTSTRAP_MODE, TSF_Dictionary.Producer.Consts.MASTER_BOOTSTRAP_MODE_LAZY_VOTE)
+    //tstreamFactory.setProperty(TSF_Dictionary.Producer.MASTER_BOOTSTRAP_MODE, TSF_Dictionary.Producer.Consts.MASTER_BOOTSTRAP_MODE_LAZY_VOTE) //todo ask Ivan
   }
 
   private def applyConfigurationSettings() = {
@@ -224,10 +224,10 @@ abstract class TaskManager() {
     val metadataStorage = auxiliaryTStream.metadataStorage
     val dataStorage = auxiliaryTStream.dataStorage
 
-    if (!BasicStreamService.isExist(name, metadataStorage)) {
+    if (!StreamService.isExist(name, metadataStorage)) {
       logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
         s"Create t-stream: $name to $description\n")
-      BasicStreamService.createStream(
+      StreamService.createStream(
         name,
         partitions,
         streamTTL,
