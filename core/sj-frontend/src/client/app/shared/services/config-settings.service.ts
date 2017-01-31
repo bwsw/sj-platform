@@ -19,6 +19,12 @@ export class ConfigSettingsService {
       .catch(this.handleError);
   }
 
+  public getConfigSettingsDomains(): Observable<string[]> {
+    return this.http.get(this._dataUrl + 'config/settings/domains')
+      .map(this.extractData)
+      .catch(this.handleError);
+  }
+
   public saveSetting(setting: SettingModel): Observable<SettingModel> {
     let body = JSON.stringify(setting);
     let headers = new Headers({ 'Content-Type': 'application/json' });
@@ -43,6 +49,8 @@ export class ConfigSettingsService {
       body = res.json()['entity']['config-settings'];
     } else if (typeof res.json()['entity']['message'] !== 'undefined') {
       body = res.json()['entity']['message'];
+    } else if (typeof res.json()['entity']['domains'] !== 'undefined') {
+      body = res.json()['entity']['domains'];
     } else {
       body = res.json();
     }

@@ -15,7 +15,16 @@
             </button>
 
             <sj-search-box class="pull-right"
-                           (update)="term = $event"></sj-search-box>
+                           (update)="nameterm = $event"></sj-search-box>
+
+            <div class="right-inner-addon">
+              <select class="form-control"
+                      [(ngModel)]="typeterm"
+                      name="providerType">
+                <option></option>
+                <option *ngFor="let type of providerTypes" value="{{type}}">{{type}}</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -46,7 +55,7 @@
                 <td colspan="20" class="text-center">No providers have been found.</td>
               </tr>
 
-              <tr *ngFor="let provider of providerList | orderBy: 'name' | listFilter : term "
+              <tr *ngFor="let provider of providerList | orderBy: 'name' | listFilter : {name : nameterm, type: typeterm} "
                   [ngClass]="{ 'table-info': isSelected(provider) }"
                   (click)="selectProvider(provider)">
                 <td>{{ provider.name }}</td>

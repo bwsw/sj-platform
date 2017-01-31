@@ -17,6 +17,14 @@
 
             <sj-search-box class="pull-right"
                            (update)="term = $event"></sj-search-box>
+            <div class="right-inner-addon">
+              <select class="form-control"
+                      [(ngModel)]="typeterm"
+                      name="providerType">
+                <option></option>
+                <option *ngFor="let type of moduleTypes" value="{{type}}">{{type}}</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -48,7 +56,7 @@
                 <td colspan="20" class="text-center">No modules have been found.</td>
               </tr>
 
-              <tr *ngFor="let module of moduleList | orderBy: 'module-name' | listFilter : term"
+              <tr *ngFor="let module of moduleList | orderBy: 'module-name' | listFilter : { name: term, type: typeterm}"
                   [ngClass]="{ 'table-info': isSelected(module) }"
                   (click)="selectModule(module)">
                 <td>{{ module["module-name"] }}</td>
