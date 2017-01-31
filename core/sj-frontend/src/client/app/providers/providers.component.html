@@ -111,7 +111,6 @@
 
       <div class="modal-body">
         <form #providerForm="ngForm"
-              *ngIf="newProvider"
               (ngSubmit)="createProvider(CreateProvider)">
 
           <!-- Type -->
@@ -123,12 +122,8 @@
                       name="providerType"
                       required>
                 <!-- [(ngModel)]="form_providerType" #item (change)="onChange(item.value)"  -->
-                <option value="zookeeper">Zookeeper</option>
-                <option value="kafka">Kafka</option>
-                <option value="redis">Redis</option>
-                <option disabled value="aerospike">Aerospike</option>
-                <option disabled value="cassandra">Cassandra</option>
-                <option value="ES">ElasticSearch</option>
+                <option *ngFor="let type of providerTypes" value="{{type}}"
+                        [disabled]="type ==='aerospike' || type === 'cassandra'">{{type}}</option>
               </select>
             </div>
           </fieldset>
@@ -196,7 +191,7 @@
 
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="CreateProvider.hide()">Cancel</button>
-        <button [disabled]="!(newProvider && providerForm?.form.valid)" type="submit" class="btn btn-primary"
+        <button [disabled]="!providerForm.form.valid" type="submit" class="btn btn-primary"
                 (click)="createProvider(CreateProvider)">Create
         </button>
       </div>
