@@ -32,6 +32,7 @@ class InstanceMetadata {
   @JsonProperty("environment-variables") var environmentVariables: Map[String, String] = Map()
   @JsonProperty("performance-reporting-interval") var performanceReportingInterval: Long = 60000
   var engine: String = null
+  @JsonProperty("rest-address") var restAddress: String = null
 
   @JsonIgnore
   def asModelInstance(): Instance = ???
@@ -57,6 +58,7 @@ class InstanceMetadata {
     modelInstance.nodeAttributes = this.nodeAttributes.asJava
     modelInstance.environmentVariables = this.environmentVariables.asJava
     modelInstance.stages = this.stages.asJava
+    modelInstance.restAddress = this.restAddress
 
     val service = serviceDAO.get(this.coordinationService)
     if (service.isDefined && service.get.isInstanceOf[ZKService]) {

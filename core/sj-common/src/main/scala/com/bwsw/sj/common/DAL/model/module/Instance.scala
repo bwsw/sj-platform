@@ -21,7 +21,7 @@ class Instance {
   @Property("module-name") var moduleName: String = null
   @Property("module-version") var moduleVersion: String = null
   var status: String = EngineLiterals.ready
-  @Property("rest-address") var restAddress: String = null
+  @Property("rest-address") var restAddress: String = ""
   @Id var name: String = null
   var description: String = "No description"
   var outputs: Array[String] = Array()
@@ -57,6 +57,7 @@ class Instance {
     protocolInstance.environmentVariables = Map(this.environmentVariables.asScala.toList: _*)
     protocolInstance.coordinationService = this.coordinationService.name
     protocolInstance.stages = this.stages.asScala
+    protocolInstance.restAddress = this.restAddress
   }
 
   def getOptionsAsMap() = {

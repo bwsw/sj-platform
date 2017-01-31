@@ -12,7 +12,7 @@ private[instance] trait InstanceManager extends InstanceMarathonManager {
   private val instanceDAO = ConnectionRepository.getInstanceService
   private val streamDAO = ConnectionRepository.getStreamService
 
-  def getFrameworkName(instance: Instance) = instance.name + instance.frameworkId
+  def getFrameworkName(instance: Instance) = s"${instance.name}-${instance.frameworkId}"
 
   protected def hasGeneratorFailed(instance: Instance, name: String) = {
     val stage = instance.stages.get(name)
@@ -53,9 +53,9 @@ private[instance] trait InstanceManager extends InstanceMarathonManager {
     instanceDAO.save(instance)
   }
 
-  protected def getRestAddress(leaderTask: Option[Map[String, Any]]) = {
+  protected def getRestAddress(leaderTask: Option[MarathonTask]) = {
     var res: String = null
-    if (leaderTask.isDefined) res = s"${leaderTask.get("host")}:${leaderTask.get("ports").asInstanceOf[List[String]].head}"
+    if (leaderTask.isDefined) res = s"${leaderTask.get.host}:${leaderTask.get.ports.asInstanceOf[List[String]].head}"
     res
   }
 

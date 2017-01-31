@@ -106,7 +106,7 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
     } else {
       updateFrameworkState(instance, error)
       throw new Exception(s"Marathon returns status code: ${getStatusCode(response)} " +
-        s"during the destroying process of framework. Framework '${frameworkName}' is marked as error.")
+        s"during the destroying process of framework. Framework '$frameworkName' is marked as error.")
     }
   }
 

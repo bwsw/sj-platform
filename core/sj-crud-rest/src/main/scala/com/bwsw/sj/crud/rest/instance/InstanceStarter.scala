@@ -205,8 +205,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
     } else {
       updateFrameworkState(instance, failed)
       updateInstanceStatus(instance, failed)
-      //TODO
-      updateInstanceRestAddress(instance, null)
+      updateInstanceRestAddress(instance, "")
     }
   }
 
@@ -232,8 +231,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
     } else {
       updateFrameworkState(instance, failed)
       updateInstanceStatus(instance, failed)
-      //TODO
-      updateInstanceRestAddress(instance, null)
+      updateInstanceRestAddress(instance, "")
     }
   }
 
@@ -245,8 +243,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
     } else {
       updateFrameworkState(instance, failed)
       updateInstanceStatus(instance, failed)
-      //TODO
-      updateInstanceRestAddress(instance, null)
+      updateInstanceRestAddress(instance, "")
     }
   }
 
@@ -301,8 +298,8 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
         if (hasFrameworkStarted(frameworkApplicationInfo)) {
           updateFrameworkState(instance, started)
           updateInstanceStatus(instance, started)
-          //TODO how to update instance correctly
-          val fwRest = getRestAddress(getLeaderTask(getTasksByAppName(instance.name)))
+          var fwRest = getRestAddress(getLeaderTask(getApplicationInfo(frameworkName)))
+          while (fwRest == null) fwRest = getRestAddress(getLeaderTask(getApplicationInfo(frameworkName)))
           updateInstanceRestAddress(instance, fwRest)
           isStarted = true
         } else {
@@ -312,7 +309,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
       } else {
         updateFrameworkState(instance, failed)
         throw new Exception(s"Marathon returns status code: ${getStatusCode(frameworkApplicationInfo)} " +
-          s"during the start process of framework. Framework '${frameworkName}' is marked as failed.")
+          s"during the start process of framework. Framework '$frameworkName' is marked as failed.")
       }
     }
   }

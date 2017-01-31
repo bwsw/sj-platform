@@ -8,4 +8,4 @@ case class ShortInstanceMetadata(var name: String,
                                  @JsonProperty("module-version") var moduleVersion: String,
                                  var description: String,
                                  var status: String,
-                                 var address: String)
+                                 @JsonProperty("rest-address") var restAddress: String)

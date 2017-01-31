@@ -153,12 +153,6 @@ trait SjModulesApi extends Directives with SjCrudValidator {
 
       val response = OkRestResponse(Map("instances" -> mutable.Buffer()))
       if (allInstances.nonEmpty) {
-        //TODO update task rest address
-//        allInstances.foreach(instance =>
-//        if (instance.status.equals(started))
-//          if (instance.restAddress == null)
-//            instance.restAddress = null
-//        )
         response.entity = Map("instances" -> allInstances.map(instance => ShortInstanceMetadata(instance.name,
           instance.moduleType,
           instance.moduleName,
