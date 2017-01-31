@@ -122,10 +122,11 @@
             <div class="col-sm-10">
               <select [(ngModel)]="newStream['stream-type']" name="streamType"
                       required class="form-control">
-                <option selected value="stream.t-stream">T-stream</option>
+                <option *ngFor="let type of streamTypes" value="{{type}}">{{type}}</option>
+                <!--option selected value="stream.t-stream">T-stream</option-->
                 <!-- TODO Change values to match values in rest service-->
-                <option value="stream.kafka">Kafka</option>
-                <option value="elasticsearch-output">ElasticSearch output</option>
+                <!--option value="stream.kafka">Kafka</option>
+                <option value="elasticsearch-output">ElasticSearch output</option-->
               </select>
             </div>
           </fieldset>
