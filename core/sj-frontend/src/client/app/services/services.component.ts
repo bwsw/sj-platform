@@ -17,8 +17,8 @@ export class ServicesComponent implements OnInit {
   public errorMessage: string;
   public alerts: Array<Object> = [];
   public serviceList: ServiceModel[];
+  public serviceTypes: string[];
   public providerList: ProviderModel[];
-  public streamList: StreamModel[];
   public blockingStreams: string[] = [];
   public blockingInstances: string[] = [];
   public currentService: ServiceModel;
@@ -27,14 +27,12 @@ export class ServicesComponent implements OnInit {
   public showSpinner: boolean;
 
   constructor(private servicesService: ServicesService,
-              private providersService: ProvidersService,
-              private streamsService: StreamsService) {
-  }
+              private providersService: ProvidersService) { }
 
   public ngOnInit() {
     this.getServiceList();
     this.getProviderList();
-    this.getStreamList();
+    this.getServiceTypes();
     this.newService = new ServiceModel();
   }
 
@@ -50,19 +48,18 @@ export class ServicesComponent implements OnInit {
         error => this.errorMessage = <any>error);
   }
 
+  public getServiceTypes() {
+    this.servicesService.getServiceTypes()
+      .subscribe(
+        types => this.serviceTypes = types,
+        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 })
+      );
+  }
+
   public getProviderList() {
     this.providersService.getProviderList()
       .subscribe(
         providerList => this.providerList = providerList,
-        error => this.errorMessage = <any>error);
-  }
-
-  public getStreamList() {
-    this.streamsService.getStreamList()
-      .subscribe(
-        streamList => {
-          this.streamList = streamList;
-        },
         error => this.errorMessage = <any>error);
   }
 

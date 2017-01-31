@@ -7,8 +7,8 @@
       <div class="card-block">
         <!-- Card title -->
         <div class="row">
-          <div class="col col-xs-6"><h4 class="card-title">Streams list</h4></div>
-          <div class="col col-xs-6">
+          <div class="col col-xs-4"><h4 class="card-title">Streams list</h4></div>
+          <div class="col col-xs-8">
             <button type="button"
                     class="btn btn-primary pull-right ml-1 mb-1"
                     (click)="CreateStream.show()"><i class="fa fa-plus mr-1"></i>Create Stream
@@ -16,6 +16,8 @@
 
             <sj-search-box class="pull-right"
                            (update)="term = $event"></sj-search-box>
+            <sj-filter class="pull-right" [filterList]="streamTypes"
+                       (update)="typeterm = $event"></sj-filter>
           </div>
         </div>
 
@@ -47,7 +49,7 @@
               <td colspan="20" class="text-center">No streams have been found.</td>
             </tr>
 
-              <tr *ngFor="let stream of streamList | orderBy: 'name' | listFilter : term"
+              <tr *ngFor="let stream of streamList | orderBy: 'name' | listFilter : {name: term, type: typeterm}"
                   [ngClass]="{ 'table-info': isSelected(stream) }"
                   (click)="selectStream(stream)">
                 <td>{{ stream.name }}</td>
@@ -122,10 +124,11 @@
             <div class="col-sm-10">
               <select [(ngModel)]="newStream['stream-type']" name="streamType"
                       required class="form-control">
-                <option selected value="stream.t-stream">T-stream</option>
+                <option *ngFor="let type of streamTypes" value="{{type}}">{{type}}</option>
+                <!--option selected value="stream.t-stream">T-stream</option-->
                 <!-- TODO Change values to match values in rest service-->
-                <option value="stream.kafka">Kafka</option>
-                <option value="elasticsearch-output">ElasticSearch output</option>
+                <!--option value="stream.kafka">Kafka</option>
+                <option value="elasticsearch-output">ElasticSearch output</option-->
               </select>
             </div>
           </fieldset>

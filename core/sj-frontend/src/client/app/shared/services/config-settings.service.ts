@@ -8,13 +8,19 @@ import { SettingModel } from '../models/setting.model';
 export class ConfigSettingsService {
   private _dataUrl = '/v1/';
 
-  constructor(private _http: Http) {}
+  constructor(private http: Http) {}
 
   public getConfigSettingsList(): Observable<SettingModel[]> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.get(this._dataUrl + 'config/settings', options)
+    return this.http.get(this._dataUrl + 'config/settings', options)
+      .map(this.extractData)
+      .catch(this.handleError);
+  }
+
+  public getConfigSettingsDomains(): Observable<string[]> {
+    return this.http.get(this._dataUrl + 'config/settings/domains')
       .map(this.extractData)
       .catch(this.handleError);
   }
@@ -23,7 +29,7 @@ export class ConfigSettingsService {
     let body = JSON.stringify(setting);
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
-    return this._http.post(this._dataUrl + 'config/settings', body, options)
+    return this.http.post(this._dataUrl + 'config/settings', body, options)
       .map(this.extractData)
       .catch(this.handleError);
   }
@@ -32,7 +38,7 @@ export class ConfigSettingsService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.delete(this._dataUrl + 'config/settings/' + setting.domain + '/' + setting.name, options)
+    return this.http.delete(this._dataUrl + 'config/settings/' + setting.domain + '/' + setting.name, options)
       .map(this.extractData)
       .catch(this.handleError);
   }
@@ -43,6 +49,8 @@ export class ConfigSettingsService {
       body = res.json()['entity']['config-settings'];
     } else if (typeof res.json()['entity']['message'] !== 'undefined') {
       body = res.json()['entity']['message'];
+    } else if (typeof res.json()['entity']['domains'] !== 'undefined') {
+      body = res.json()['entity']['domains'];
     } else {
       body = res.json();
     }

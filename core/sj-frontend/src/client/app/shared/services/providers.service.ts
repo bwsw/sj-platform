@@ -8,20 +8,26 @@ import { ProviderModel } from '../models/provider.model';
 export class ProvidersService {
   private   _dataUrl = '/v1/';
 
-  constructor(private _http: Http) {
+  constructor(private http: Http) {
   }
 
   public getProviderList(): Observable<ProviderModel[]> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.get(this._dataUrl + 'providers', options)
+    return this.http.get(this._dataUrl + 'providers', options)
+      .map(this.extractData)
+      .catch(this.handleError);
+  }
+
+  public getProviderTypes(): Observable<string[]> {
+    return this.http.get(this._dataUrl + 'providers/types')
       .map(this.extractData)
       .catch(this.handleError);
   }
 
   public getRelatedServicesList(providerName: string): Observable<string[]> {
-    return this._http.get(this._dataUrl + 'providers/' + providerName + '/related')
+    return this.http.get(this._dataUrl + 'providers/' + providerName + '/related')
       .map(this.extractData)
       .catch(this.handleError);
   }
@@ -30,7 +36,7 @@ export class ProvidersService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.get(this._dataUrl + 'providers/' + providerName, options)
+    return this.http.get(this._dataUrl + 'providers/' + providerName, options)
       .map(this.extractData)
       .catch(this.handleError);
   }
@@ -39,7 +45,7 @@ export class ProvidersService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.get(this._dataUrl + 'providers/' + provider.name + '/connection', options)
+    return this.http.get(this._dataUrl + 'providers/' + provider.name + '/connection', options)
       .map(this.extractData)
       .catch(this.handleError);
   }
@@ -48,7 +54,7 @@ export class ProvidersService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.delete(this._dataUrl + 'providers/' + provider.name, options)
+    return this.http.delete(this._dataUrl + 'providers/' + provider.name, options)
       .map(this.extractData)
       .catch(this.handleError);
   }
@@ -57,7 +63,7 @@ export class ProvidersService {
     let body = JSON.stringify(provider);
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
-    return this._http.post(this._dataUrl + 'providers', body, options)
+    return this.http.post(this._dataUrl + 'providers', body, options)
       .map(this.extractData)
       .catch(this.handleError);
   }
@@ -70,6 +76,8 @@ export class ProvidersService {
       body = res.json()['entity']['message'];
     } else if (typeof res.json()['entity']['services'] !== 'undefined') {
       body = res.json()['entity']['services'];
+    } else if (typeof res.json()['entity']['types'] !== 'undefined') {
+      body = res.json()['entity']['types'];
     } else {
       if (typeof res.json()['id'] === 'undefined') {
         body = res.json()['entity']['providers'];

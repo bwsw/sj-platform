@@ -11,6 +11,7 @@ import { ConfigSettingsService } from "../shared/services/config-settings.servic
 })
 export class ConfigSettingsComponent implements OnInit {
   public settingsList: SettingModel[];
+  public settingsDomains: string[];
   public alerts: Array<Object> = [];
   public newSetting: SettingModel;
   public currentSetting: SettingModel;
@@ -21,6 +22,7 @@ export class ConfigSettingsComponent implements OnInit {
   public ngOnInit() {
     this.newSetting = new SettingModel();
     this.getSettingsList();
+    this.getSettingsDomains();
   }
 
   public getSettingsList() {
@@ -33,6 +35,11 @@ export class ConfigSettingsComponent implements OnInit {
           }
         },
         error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+  }
+
+  public getSettingsDomains() {
+    this.configSettingsService.getConfigSettingsDomains()
+      .subscribe(domains => this.settingsDomains = domains);
   }
 
   public createSetting(modal: ModalDirective) {

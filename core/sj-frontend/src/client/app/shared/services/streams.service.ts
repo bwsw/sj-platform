@@ -8,20 +8,26 @@ import { StreamModel } from '../models/stream.model';
 export class StreamsService {
   private _dataUrl = '/v1/';
 
-  constructor(private _http: Http) {
+  constructor(private http: Http) {
   }
 
   public getStreamList(): Observable<StreamModel[]> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.get(this._dataUrl + 'streams', options)
+    return this.http.get(this._dataUrl + 'streams', options)
+      .map(this.extractData)
+      .catch(this.handleError);
+  }
+
+  public getStreamTypes(): Observable<string[]> {
+    return this.http.get(this._dataUrl + 'streams/types')
       .map(this.extractData)
       .catch(this.handleError);
   }
 
   public getRelatedInstancesList(streamName: string): Observable<string[]> {
-    return this._http.get(this._dataUrl + 'streams/' + streamName + '/related')
+    return this.http.get(this._dataUrl + 'streams/' + streamName + '/related')
       .map(this.extractData)
       .catch(this.handleError);
   }
@@ -30,7 +36,7 @@ export class StreamsService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.get(this._dataUrl + 'streams/' + stream.name, options)
+    return this.http.get(this._dataUrl + 'streams/' + stream.name, options)
       .map(this.extractData)
       .catch(this.handleError);
   }
@@ -39,7 +45,7 @@ export class StreamsService {
     let body = JSON.stringify(stream);
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
-    return this._http.post(this._dataUrl + 'streams', body, options)
+    return this.http.post(this._dataUrl + 'streams', body, options)
       .map(this.extractData)
       .catch(this.handleError);
   }
@@ -48,7 +54,7 @@ export class StreamsService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.delete(this._dataUrl + 'streams/' + stream.name, options)
+    return this.http.delete(this._dataUrl + 'streams/' + stream.name, options)
       .map(this.extractData)
       .catch(this.handleError);
   }
@@ -59,6 +65,8 @@ export class StreamsService {
       body = res.json()['entity']['streams'];
     } else if (typeof res.json()['entity']['message'] !== 'undefined') {
       body = res.json()['entity']['message'];
+    } else if (typeof res.json()['entity']['types'] !== 'undefined') {
+      body = res.json()['entity']['types'];
     } else if (typeof res.json()['entity']['instances'] !== 'undefined') {
       body = res.json()['entity']['instances'];
     } else {

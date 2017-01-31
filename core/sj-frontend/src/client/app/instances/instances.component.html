@@ -7,8 +7,8 @@
       <div class="card-block">
         <!-- Card title -->
         <div class="row">
-          <div class="col col-xs-6"><h4 class="card-title">Instances list</h4></div>
-          <div class="col col-xs-6">
+          <div class="col col-xs-4"><h4 class="card-title">Instances list</h4></div>
+          <div class="col col-xs-8">
             <button type="button"
                     class="btn btn-primary pull-right ml-1 mb-1"
                     (click)="CreateInstance.show()"><i class="fa fa-plus mr-1"></i>Create Instance
@@ -16,6 +16,8 @@
 
             <sj-search-box class="pull-right"
                            (update)="term = $event"></sj-search-box>
+            <sj-filter class="pull-right" [filterList]="moduleTypes"
+                       (update)="typeterm = $event"></sj-filter>
           </div>
         </div>
 
@@ -46,7 +48,7 @@
               <td colspan="20" class="text-center">No instances have been found.</td>
             </tr>
 
-            <tr *ngFor="let instance of instancesList | orderBy: 'name' | listFilter : term"
+            <tr *ngFor="let instance of instancesList | orderBy: 'name' | listFilter : { name: term, type: typeterm}"
                 [ngClass]="{ 'table-info': isSelected(instance) }"
                 (click)="selectInstance(instance)">
               <td>{{ instance.name }}</td>

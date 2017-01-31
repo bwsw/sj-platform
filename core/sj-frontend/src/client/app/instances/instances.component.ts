@@ -24,6 +24,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   public instancesList: InstanceModel[];
   public cloneInstancesList: InstanceModel[] = [];
   public modulesList: ModuleModel[];
+  public moduleTypes: string[];
   public servicesList: ServiceModel[];
   public streamsList: StreamModel[];
   public streamTypesList: { [key: string]: string } = {};
@@ -70,6 +71,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
     this.newInstance = new InstanceModel();
     this.getInstancesList();
     this.getModulesList();
+    this.getModuleTypes();
     this.getStreamsList();
     this.getServicesList();
   }
@@ -91,6 +93,11 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
           this.modulesList = modulesList;
         },
         error => this.errorMessage = <any>error);
+  }
+
+  public getModuleTypes() {
+    this.modulesService.getModuileTypes()
+      .subscribe(types => this.moduleTypes = types);
   }
 
   public getStreamsList() {
