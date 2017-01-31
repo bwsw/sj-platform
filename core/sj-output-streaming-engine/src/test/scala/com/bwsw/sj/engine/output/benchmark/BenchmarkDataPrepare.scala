@@ -27,8 +27,8 @@ object BenchmarkDataPrepare extends App {
   val checkpointMode = EngineLiterals.everyNthMode
   val partitions = 4
 
-  val module = new File("./contrib/stubs/sj-stub-output/target/scala-2.11/sj-stub-output-1.0-SNAPSHOT.jar")
-  val jdbcModule = new File("./contrib/stubs/sj-stub-output-jdbc/target/scala-2.11/sj-stub-output-jdbc-1.0-SNAPSHOT.jar")
+  val module = new File("./contrib/stubs/sj-stub-output/target/scala-2.12/sj-stub-output-1.0-SNAPSHOT.jar")
+  val jdbcModule = new File("./contrib/stubs/sj-stub-output-jdbc/target/scala-2.12/sj-stub-output-jdbc-1.0-SNAPSHOT.jar")
 
   println("module upload")
   uploadModule(module)
