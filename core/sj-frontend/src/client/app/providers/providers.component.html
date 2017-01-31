@@ -126,8 +126,8 @@
                 <option value="zookeeper">Zookeeper</option>
                 <option value="kafka">Kafka</option>
                 <option value="redis">Redis</option>
-                <option value="aerospike">Aerospike</option>
-                <option value="cassandra">Cassandra</option>
+                <option disabled value="aerospike">Aerospike</option>
+                <option disabled value="cassandra">Cassandra</option>
                 <option value="ES">ElasticSearch</option>
               </select>
             </div>
@@ -222,7 +222,7 @@
       <div class="modal-body" *ngIf="currentProvider && (blockingServices.length > 0)">
         <p>Unable to delete provider! Next services using provider "{{ currentProvider.name }}"</p>
         <ul>
-          <li *ngFor="let service of blockingServices | orderBy: 'name' ">{{service.name}}</li>
+          <li *ngFor="let service of blockingServices">{{service}}</li>
         </ul>
       </div>
 

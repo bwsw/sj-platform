@@ -20,7 +20,7 @@ import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
 import com.bwsw.tstreams.generator.LocalTransactionGenerator
-import com.bwsw.tstreams.services.BasicStreamService
+import com.bwsw.tstreams.streams.StreamService
 import org.elasticsearch.search.SearchHits
 
 import scala.collection.JavaConverters._
@@ -419,7 +419,7 @@ object BenchmarkDataFactory {
     val namespace = tService.dataNamespace
     val dataStorage = cassandraFactory.getDataStorage(namespace)
 
-    BasicStreamService.createStream(tStreamName,
+    StreamService.createStream(tStreamName,
       partitions,
       60000,
       "", metadataStorage,
@@ -433,7 +433,7 @@ object BenchmarkDataFactory {
 
     val task1 = new Task()
     task1.inputs = Map(tStreamName -> Array(0, 3)).asJava
-    val executionPlan = new ExecutionPlan(Map((instanceName + "-task0", task1)).asJava)
+    val executionPlan = new ExecutionPlan(Map(instanceName + "-task0" -> task1).asJava)
 
     val instance = new OutputInstance()
     instance.name = instanceName

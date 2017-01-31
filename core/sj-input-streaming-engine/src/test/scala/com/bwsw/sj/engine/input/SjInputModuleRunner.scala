@@ -4,6 +4,7 @@ import java.io.File
 import java.util.logging.LogManager
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.engine.input.DataFactory._
 
 
@@ -14,11 +15,12 @@ object SjInputInfoExp {
   val instanceService = ConnectionRepository.getInstanceService
   val fileStorage = ConnectionRepository.getFileStorage
 
-  val inputModule = new File("./contrib/stubs/sj-stub-input-streaming/target/scala-2.11/sj-stub-input-streaming-1.0-SNAPSHOT.jar")
+  val inputModule = new File("./contrib/stubs/sj-stub-input-streaming/target/scala-2.12/sj-stub-input-streaming-1.0-SNAPSHOT.jar")
 }
 
 object SjInputModuleSetup extends App {
   LogManager.getLogManager.reset()
+  TempHelperForConfigSetup.main(Array())
 
   val checkpointInterval = 10
 
@@ -63,6 +65,7 @@ object SjInputModuleDestroy extends App {
   deleteModule(SjInputInfoExp.fileStorage, SjInputInfoExp.inputModule.getName)
   cassandraDestroy()
   close()
+  ConnectionRepository.getConfigService.deleteAll()
   ConnectionRepository.close()
 
   println("DONE")

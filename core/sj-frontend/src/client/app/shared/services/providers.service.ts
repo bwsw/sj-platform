@@ -6,7 +6,7 @@ import { ProviderModel } from '../models/provider.model';
 
 @Injectable()
 export class ProvidersService {
-  private _dataUrl = '/v1/';
+  private   _dataUrl = '/v1/';
 
   constructor(private _http: Http) {
   }
@@ -16,6 +16,12 @@ export class ProvidersService {
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
     return this._http.get(this._dataUrl + 'providers', options)
+      .map(this.extractData)
+      .catch(this.handleError);
+  }
+
+  public getRelatedServicesList(providerName: string): Observable<string[]> {
+    return this._http.get(this._dataUrl + 'providers/' + providerName + '/related')
       .map(this.extractData)
       .catch(this.handleError);
   }
@@ -62,6 +68,8 @@ export class ProvidersService {
       body = res.json()['entity']['connection'];
     } else if (typeof res.json()['entity']['message'] !== 'undefined') {
       body = res.json()['entity']['message'];
+    } else if (typeof res.json()['entity']['services'] !== 'undefined') {
+      body = res.json()['entity']['services'];
     } else {
       if (typeof res.json()['id'] === 'undefined') {
         body = res.json()['entity']['providers'];

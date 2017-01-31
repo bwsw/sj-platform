@@ -40,6 +40,15 @@ trait SjModulesApi extends Directives with SjCrudValidator {
         pathPrefix("instances") {
           gettingAllInstances
         } ~
+        pathPrefix("types") {
+          pathEndOrSingleSlash {
+            get {
+              val response = OkRestResponse(Map("types" -> EngineLiterals.moduleTypes))
+
+              complete(restResponseToHttpResponse(response))
+            }
+          }
+        } ~
         pathPrefix(Segment) { (moduleType: String) =>
           checkModuleType(moduleType)
           pathPrefix(Segment) { (moduleName: String) =>
@@ -225,7 +234,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     var response: RestResponse = UnprocessableEntityRestResponse(Map("message" ->
       createMessage("rest.modules.instances.instance.cannot.delete", instanceName)))
 
-    if (instance.status.equals(stopped) || instance.status.equals(failed)) {
+    if (instance.status.equals(stopped) || instance.status.equals(failed) || instance.status.equals(error)) {
       destroyInstance(instance)
       response = OkRestResponse(Map("message" ->
         createMessage("rest.modules.instances.instance.deleting", instanceName)))
@@ -339,10 +348,10 @@ trait SjModulesApi extends Directives with SjCrudValidator {
   }
 
   private def doesModuleExist(specification: Map[String, Any]) = {
-      getFilesMetadata(specification("module-type").asInstanceOf[String],
-        specification("name").asInstanceOf[String],
-        specification("version").asInstanceOf[String]
-      ).nonEmpty
+    getFilesMetadata(specification("module-type").asInstanceOf[String],
+      specification("name").asInstanceOf[String],
+      specification("version").asInstanceOf[String]
+    ).nonEmpty
   }
 
   private def checkModuleType(moduleType: String) = {

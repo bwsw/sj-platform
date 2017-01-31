@@ -3,6 +3,7 @@ package com.bwsw.sj.engine.output.benchmark
 import java.io.File
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.config.TempHelperForConfigDestroy
 import com.bwsw.sj.engine.output.benchmark.BenchmarkDataFactory._
 
 /**
@@ -22,8 +23,8 @@ object BenchmarkDestroyer extends App {
   open()
   val instanceName: String = "test-es-bench-instance"
   val instanceNameJDBC: String = "test-jdbc-bench-instance"
-  val module = new File("./contrib/stubs/sj-stub-output/target/scala-2.11/sj-stub-output-1.0-SNAPSHOT.jar")
-  val jdbcModule = new File("./contrib/stubs/sj-stub-output-jdbc/target/scala-2.11/sj-stub-output-jdbc-1.0-SNAPSHOT.jar")
+  val module = new File("./contrib/stubs/sj-stub-output/target/scala-2.12/sj-stub-output-1.0-SNAPSHOT.jar")
+  val jdbcModule = new File("./contrib/stubs/sj-stub-output-jdbc/target/scala-2.12/sj-stub-output-jdbc-1.0-SNAPSHOT.jar")
 
   clearEsStream()
   try {clearDatabase()} catch {case e: Exception => e}
@@ -36,6 +37,7 @@ object BenchmarkDestroyer extends App {
   deleteModule(jdbcModule.getName)
   cassandraDestroy("bench")
   close()
+  TempHelperForConfigDestroy.main(Array())
   ConnectionRepository.close()
 
   println("DONE")

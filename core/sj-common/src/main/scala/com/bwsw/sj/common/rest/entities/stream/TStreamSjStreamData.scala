@@ -5,7 +5,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils._
 import com.bwsw.tstreams.data.IStorage
 import com.bwsw.tstreams.metadata.MetadataStorage
-import com.bwsw.tstreams.services.BasicStreamService
+import com.bwsw.tstreams.streams.StreamService
 import SjStreamUtilsForCreation._
 
 import scala.collection.mutable.ArrayBuffer
@@ -72,14 +72,14 @@ class TStreamSjStreamData() extends SjStreamData() {
     val metadataStorage = createMetadataStorage(service)
     val dataStorage = createDataStorage(service)
 
-    if (BasicStreamService.isExist(this.name, metadataStorage) && !this.force) {
-      val tStream = BasicStreamService.loadStream[Array[Byte]](
+    if (StreamService.isExist(this.name, metadataStorage) && !this.force) {
+      val tStream = StreamService.loadStream[Array[Byte]](
         this.name,
         metadataStorage,
         dataStorage
       )
-      if (tStream.getPartitions != this.partitions) {
-        errors += createMessage("entity.error.mismatch.partitions", this.name, s"${this.partitions}", s"${tStream.getPartitions}")
+      if (tStream.partitionsCount != this.partitions) {
+        errors += createMessage("entity.error.mismatch.partitions", this.name, s"${this.partitions}", s"${tStream.partitionsCount}")
       }
     }
 
@@ -105,14 +105,14 @@ class TStreamSjStreamData() extends SjStreamData() {
   }
 
   private def doesTopicExist(metadataStorage: MetadataStorage) = {
-    BasicStreamService.isExist(this.name, metadataStorage)
+    StreamService.isExist(this.name, metadataStorage)
   }
 
-  private def deleteStream(metadataStorage: MetadataStorage) = BasicStreamService.deleteStream(this.name, metadataStorage)
+  private def deleteStream(metadataStorage: MetadataStorage) = StreamService.deleteStream(this.name, metadataStorage)
 
   private def createTStream(metadataStorage: MetadataStorage,
                             dataStorage: IStorage[Array[Byte]]) = {
-    BasicStreamService.createStream(
+    StreamService.createStream(
       this.name,
       this.partitions,
       StreamLiterals.ttl,

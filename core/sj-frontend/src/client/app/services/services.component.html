@@ -136,8 +136,8 @@
             <div class="col-sm-10">
               <select required [(ngModel)]="newService.type" name="serviceType"
                       class="form-control">
-                <option value="ArspkDB">Aerospike DB</option>
-                <option value="CassDB">Cassandra DB</option>
+                <option disabled value="ArspkDB">Aerospike DB</option>
+                <option disabled value="CassDB">Cassandra DB</option>
                 <option value="ESInd">Elasticsearch Index</option>
                 <option value="KfkQ">Kafka queue</option>
                 <option value="TstrQ">T-streams queue</option>
@@ -373,14 +373,19 @@
         <h4 class="modal-title">Delete confirmation</h4>
       </div>
 
-      <div class="modal-body" *ngIf="currentService && (blockingStreams.length === 0)">
+      <div class="modal-body" *ngIf="currentService && (blockingStreams.length === 0 && blockingInstances.length === 0)">
         <p>Do you really want to delete service "{{ currentService.name }}" ? This action can not be undone!</p>
       </div>
 
-      <div class="modal-body" *ngIf="currentService && (blockingStreams.length > 0)">
-        <p>Unable to delete service! Next streams using service "{{ currentService.name }}"</p>
+      <div class="modal-body" *ngIf="currentService && (blockingStreams.length > 0 || blockingInstances.length > 0)">
+        <p>Unable to delete service!</p>
+        <p *ngIf="currentService && (blockingStreams.length > 0)">Next streams using service "{{ currentService.name }}"</p>
         <ul>
-          <li *ngFor="let stream of blockingStreams | orderBy: 'name' ">{{stream.name}}</li>
+          <li *ngFor="let stream of blockingStreams">{{stream}}</li>
+        </ul>
+        <p *ngIf="currentService && (blockingInstances.length > 0)">Next instances using service "{{ currentService.name }}"</p>
+        <ul>
+          <li *ngFor="let instance of blockingInstances">{{instance}}</li>
         </ul>
       </div>
 

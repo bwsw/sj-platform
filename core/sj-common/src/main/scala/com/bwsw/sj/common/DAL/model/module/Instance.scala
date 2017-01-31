@@ -36,6 +36,7 @@ class Instance {
   var stages: java.util.Map[String, InstanceStage] = new util.HashMap()
   @Property("performance-reporting-interval") var performanceReportingInterval: Long = 60000
   var engine: String = null
+  @Property("framework-id") val frameworkId: String = System.currentTimeMillis().toString
 
   def asProtocolInstance(): InstanceMetadata = ???
 

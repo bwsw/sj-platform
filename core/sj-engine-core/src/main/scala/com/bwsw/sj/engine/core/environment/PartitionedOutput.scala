@@ -17,7 +17,7 @@ class PartitionedOutput(producer: Producer[Array[Byte]],
                         performanceMetrics: PerformanceMetrics) extends ModuleOutput(performanceMetrics) {
 
   private val transactions = mutable.Map[Int, ProducerTransaction[Array[Byte]]]()
-  private val streamName = producer.stream.getName
+  private val streamName = producer.stream.name
 
   def put(data: Array[Byte], partition: Int) = {
     logger.debug(s"Send a portion of data to stream: '$streamName' partition with number: '$partition'")
