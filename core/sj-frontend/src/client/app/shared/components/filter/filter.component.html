@@ -1,0 +1,8 @@
+<div class="right-inner-addon" style="margin-right: 10px">
+  <select #select class="form-control"
+          (input)="update.emit(select.value)"
+          name="providerType">
+    <option></option>
+    <option *ngFor="let type of filterList" value="{{type}}">{{type}}</option>
+  </select>
+</div>

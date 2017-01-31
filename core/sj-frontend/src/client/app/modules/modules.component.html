@@ -7,8 +7,8 @@
       <div class="card-block">
         <!-- Card title -->
         <div class="row">
-          <div class="col col-xs-6"><h4 class="card-title">Modules list</h4></div>
-          <div class="col col-xs-6">
+          <div class="col col-xs-4"><h4 class="card-title">Modules list</h4></div>
+          <div class="col col-xs-8">
             <label [ngClass]="{inProgress:isUploading}" class="btn btn-primary btn-upload pull-right ml-1 mb-1">
               <span *ngIf="!isUploading"><i class="fa fa-upload mr-1"></i>Upload module</span>
               <i *ngIf="isUploading" class="fa fa-spinner fa-spin" aria-hidden="true"></i>
@@ -17,14 +17,8 @@
 
             <sj-search-box class="pull-right"
                            (update)="term = $event"></sj-search-box>
-            <div class="right-inner-addon">
-              <select class="form-control"
-                      [(ngModel)]="typeterm"
-                      name="providerType">
-                <option></option>
-                <option *ngFor="let type of moduleTypes" value="{{type}}">{{type}}</option>
-              </select>
-            </div>
+            <sj-filter class="pull-right" [filterList]="moduleTypes"
+                       (update)="typeterm = $event"></sj-filter>
           </div>
         </div>
 

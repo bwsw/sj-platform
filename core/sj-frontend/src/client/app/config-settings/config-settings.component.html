@@ -7,8 +7,8 @@
       <div class="card-block">
         <!-- Title -->
         <div class="row">
-          <div class="col col-xs-6"><h4 class="card-title">Config Settings</h4></div>
-          <div class="col col-xs-6">
+          <div class="col col-xs-4"><h4 class="card-title">Config Settings</h4></div>
+          <div class="col col-xs-8">
             <button type="button"
                     class="btn btn-primary pull-right ml-1 mb-1"
                     (click)="AddSetting.show()">
@@ -17,14 +17,10 @@
 
             <sj-search-box class="pull-right"
                            (update)="term = $event"></sj-search-box>
-            <div class="right-inner-addon">
-              <select class="form-control"
-                      [(ngModel)]="domainterm"
-                      name="providerType">
-                <option></option>
-                <option *ngFor="let domain of settingsDomains" value="{{domain}}">{{domain}}</option>
-              </select>
-            </div>
+
+            <sj-filter class="pull-right" [filterList]="settingsDomains"
+                       (update)="domainterm = $event"></sj-filter>
+
           </div>
         </div>
 
