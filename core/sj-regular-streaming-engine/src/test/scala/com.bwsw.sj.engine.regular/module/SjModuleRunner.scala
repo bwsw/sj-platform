@@ -21,7 +21,7 @@ object SjModuleSetup extends App {
   val stateFullCheckpoint = 3
   val _type = "both"
 
-  val module = new File("./contrib/stubs/sj-stub-regular-streaming/target/scala-2.11/sj-stub-regular-streaming-1.0-SNAPSHOT.jar")
+  val module = new File("./contrib/stubs/sj-stub-regular-streaming/target/scala-2.12/sj-stub-regular-streaming-1.0-SNAPSHOT.jar")
 
   open()
   cassandraSetup()
@@ -52,7 +52,7 @@ object SjModuleDestroy extends App {
   val fileStorage = ConnectionRepository.getFileStorage
   val _type = "both"
 
-  val module = new File("./contrib/stubs/sj-stub-regular-streaming/target/scala-2.11/sj-stub-regular-streaming-1.0-SNAPSHOT.jar")
+  val module = new File("./contrib/stubs/sj-stub-regular-streaming/target/scala-2.12/sj-stub-regular-streaming-1.0-SNAPSHOT.jar")
 
   open()
   deleteStreams(streamService, _type, inputCount, outputCount)

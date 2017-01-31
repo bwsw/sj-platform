@@ -16,7 +16,7 @@ class RoundRobinOutput(producer: Producer[Array[Byte]],
                        performanceMetrics: PerformanceMetrics) extends ModuleOutput(performanceMetrics) {
 
   private var maybeTransaction: Option[ProducerTransaction[Array[Byte]]] = None
-  private val streamName = producer.stream.getName
+  private val streamName = producer.stream.name
 
   def put(data: Array[Byte]) = {
     logger.debug(s"Send a portion of data to stream: '$streamName'")

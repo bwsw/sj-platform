@@ -19,7 +19,7 @@ import com.bwsw.tstreams.agents.producer
 import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
 import com.bwsw.tstreams.generator.LocalTransactionGenerator
-import com.bwsw.tstreams.services.BasicStreamService
+import com.bwsw.tstreams.streams.StreamService
 import kafka.admin.AdminUtils
 import kafka.utils.ZkUtils
 import org.I0Itec.zkclient.ZkConnection
@@ -216,7 +216,7 @@ object DataFactory {
     val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
     val dataStorage = cassandraFactory.getDataStorage(cassandraTestKeyspace)
 
-    BasicStreamService.createStream(
+    StreamService.createStream(
       "test-input-tstream" + suffix,
       partitions,
       1000 * 60,
@@ -237,7 +237,7 @@ object DataFactory {
     val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
     val dataStorage = cassandraFactory.getDataStorage(cassandraTestKeyspace)
 
-    BasicStreamService.createStream(
+    StreamService.createStream(
       "test-output-tstream" + suffix,
       partitions,
       1000 * 60,
@@ -251,14 +251,14 @@ object DataFactory {
     streamService.delete("test-input-tstream" + suffix)
     val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
 
-    BasicStreamService.deleteStream("test-input-tstream" + suffix, metadataStorage)
+    StreamService.deleteStream("test-input-tstream" + suffix, metadataStorage)
   }
 
   private def deleteOutputTStream(streamService: GenericMongoService[SjStream], suffix: String) = {
     streamService.delete("test-output-tstream" + suffix)
     val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
 
-    BasicStreamService.deleteStream("test-output-tstream" + suffix, metadataStorage)
+    StreamService.deleteStream("test-output-tstream" + suffix, metadataStorage)
   }
 
   private def createKafkaStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int) = {
@@ -320,7 +320,7 @@ object DataFactory {
     instance.stateFullCheckpoint = stateFullCheckpoint
     instance.startFrom = EngineLiterals.oldestStartMode
     //instance.executionPlan = new ExecutionPlan(Map((instanceName + "-task0", task), (instanceName + "-task1", task)).asJava) //for barriers
-    instance.executionPlan = new ExecutionPlan(Map((instanceName + "-task0", task)).asJava)
+    instance.executionPlan = new ExecutionPlan(Map(instanceName + "-task0" -> task).asJava)
     instance.engine = "com.bwsw.windowed.streaming.engine-1.0"
     instance.coordinationService = serviceManager.get("zookeeper-test-service").get.asInstanceOf[ZKService]
 

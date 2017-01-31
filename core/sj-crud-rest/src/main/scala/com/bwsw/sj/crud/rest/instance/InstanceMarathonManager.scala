@@ -6,6 +6,7 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.TStreamSjStream
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.rest.entities.MarathonRequest
+import com.bwsw.sj.common.utils.FrameworkLiterals._
 import com.bwsw.sj.common.utils.GeneratorLiterals
 import com.bwsw.sj.crud.rest.RestLiterals
 import org.apache.http.client.methods._
@@ -21,27 +22,45 @@ import org.slf4j.LoggerFactory
  */
 trait InstanceMarathonManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
-  private val marathonEntitySerializer = new JsonSerializer
+  private val marathonEntitySerializer = new JsonSerializer(true)
   private lazy val marathonConnect = ConfigurationSettingsUtils.getMarathonConnect()
   private lazy val marathonTimeout = ConfigurationSettingsUtils.getMarathonTimeout()
 
+  def getNumberOfRunningTasks(response: CloseableHttpResponse) = {
+    val entity = marathonEntitySerializer.deserialize[MarathonApplicationById](EntityUtils.toString(response.getEntity, "UTF-8"))
+    val tasksRunning = entity.app.tasksRunning
+
+    tasksRunning
+  }
+
   def getMarathonMaster(marathonInfo: CloseableHttpResponse) = {
-    val entity = marathonEntitySerializer.deserialize[Map[String, Any]](EntityUtils.toString(marathonInfo.getEntity, "UTF-8"))
-    val master = entity.get("marathon_config").get.asInstanceOf[Map[String, Any]].get("master").get.asInstanceOf[String]
+    val entity = marathonEntitySerializer.deserialize[MarathonInfo](EntityUtils.toString(marathonInfo.getEntity, "UTF-8"))
+    val master = entity.marathonConfig.master
 
     master
   }
 
   def isStatusOK(response: CloseableHttpResponse) = {
-    response.getStatusLine.getStatusCode == 200
+    getStatusCode(response) == 200
   }
 
   def isStatusCreated(response: CloseableHttpResponse) = {
-    response.getStatusLine.getStatusCode == 201
+    getStatusCode(response) == 201
   }
 
   def isStatusNotFound(response: CloseableHttpResponse) = {
-    response.getStatusLine.getStatusCode == 404
+    getStatusCode(response) == 404
+  }
+
+  def getStatusCode(response: CloseableHttpResponse) = {
+    response.getStatusLine.getStatusCode
+  }
+
+  def getFrameworkID(marathonInfo: CloseableHttpResponse) = {
+    val entity = marathonEntitySerializer.deserialize[MarathonApplicationById](EntityUtils.toString(marathonInfo.getEntity, "UTF-8"))
+    val id = entity.app.env.get(frameworkIdLabel)
+
+    id
   }
 
   def getGeneratorApplicationID(stream: TStreamSjStream) = {

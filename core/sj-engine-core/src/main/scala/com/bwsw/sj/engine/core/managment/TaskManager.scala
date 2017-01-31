@@ -20,7 +20,7 @@ import com.bwsw.tstreams.agents.consumer.Offset.IOffset
 import com.bwsw.tstreams.agents.consumer.subscriber.Callback
 import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
 import com.bwsw.tstreams.generator.LocalTransactionGenerator
-import com.bwsw.tstreams.services.BasicStreamService
+import com.bwsw.tstreams.streams.StreamService
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
@@ -65,9 +65,17 @@ abstract class TaskManager() {
 
   private def getInstance() = {
     val maybeInstance = ConnectionRepository.getInstanceService.get(instanceName)
-    if (maybeInstance.isDefined)
-      maybeInstance.get
+    var instance: Instance = null
+    if (maybeInstance.isDefined) {
+      instance = maybeInstance.get
+
+      if (instance.status != started) {
+        throw new InterruptedException(s"Task cannot be started because of '${instance.status}' status of instance")
+      }
+    }
     else throw new NoSuchElementException(s"Instance is named '$instanceName' has not found")
+
+    instance
   }
 
   private def getAuxiliaryTStream() = {
@@ -133,7 +141,7 @@ abstract class TaskManager() {
   }
 
   private def setProducerMasterBootstrapMode() = {
-    tstreamFactory.setProperty(TSF_Dictionary.Producer.MASTER_BOOTSTRAP_MODE, TSF_Dictionary.Producer.Consts.MASTER_BOOTSTRAP_MODE_LAZY_VOTE)
+    //tstreamFactory.setProperty(TSF_Dictionary.Producer.MASTER_BOOTSTRAP_MODE, TSF_Dictionary.Producer.Consts.MASTER_BOOTSTRAP_MODE_LAZY_VOTE) //todo ask Ivan
   }
 
   private def applyConfigurationSettings() = {
@@ -144,10 +152,10 @@ abstract class TaskManager() {
   }
 
   /**
-   * Returns class loader for retrieving classes from jar
-   *
-   * @return Class loader for retrieving classes from jar
-   */
+    * Returns class loader for retrieving classes from jar
+    *
+    * @return Class loader for retrieving classes from jar
+    */
   protected def createClassLoader() = {
     val file = getModuleJar
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
@@ -173,10 +181,10 @@ abstract class TaskManager() {
   }
 
   /**
-   * Create t-stream producers for each output stream
-   *
-   * @return Map where key is stream name and value is t-stream producer
-   */
+    * Create t-stream producers for each output stream
+    *
+    * @return Map where key is stream name and value is t-stream producer
+    */
   protected def createOutputProducers() = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create the t-stream producers for each output stream\n")
@@ -216,10 +224,10 @@ abstract class TaskManager() {
     val metadataStorage = auxiliaryTStream.metadataStorage
     val dataStorage = auxiliaryTStream.dataStorage
 
-    if (!BasicStreamService.isExist(name, metadataStorage)) {
+    if (!StreamService.isExist(name, metadataStorage)) {
       logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
         s"Create t-stream: $name to $description\n")
-      BasicStreamService.createStream(
+      StreamService.createStream(
         name,
         partitions,
         streamTTL,
@@ -243,14 +251,14 @@ abstract class TaskManager() {
   }
 
   /**
-   * Creates a t-stream consumer with pub/sub property
-   *
-   * @param stream SjStream from which massages are consumed
-   * @param partitions Range of stream partition
-   * @param offset Offset policy that describes where a consumer starts
-   * @param callback Subscriber callback for t-stream consumer
-   * @return T-stream subscribing consumer
-   */
+    * Creates a t-stream consumer with pub/sub property
+    *
+    * @param stream     SjStream from which massages are consumed
+    * @param partitions Range of stream partition
+    * @param offset     Offset policy that describes where a consumer starts
+    * @param callback   Subscriber callback for t-stream consumer
+    * @return T-stream subscribing consumer
+    */
   def createSubscribingConsumer(stream: TStreamSjStream,
                                 partitions: List[Int],
                                 offset: IOffset,
@@ -302,7 +310,7 @@ abstract class TaskManager() {
   }
 
   /**
-   * @return An instance of executor of module that has got an environment manager
-   */
+    * @return An instance of executor of module that has got an environment manager
+    */
   def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor
 }
