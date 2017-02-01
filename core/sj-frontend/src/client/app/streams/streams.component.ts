@@ -15,6 +15,7 @@ export class StreamsComponent implements OnInit {
   public errorMessage: string;
   public alerts: Array<Object> = [];
   public streamList: StreamModel[];
+  public streamTypes: string[];
   public serviceList: ServiceModel[];
   public currentStream: StreamModel;
   public blockingInstances: string[] = [];
@@ -24,12 +25,12 @@ export class StreamsComponent implements OnInit {
   public newStream: StreamModel;
 
   constructor(private streamsService: StreamsService,
-              private servicesService: ServicesService) {
-  }
+              private servicesService: ServicesService) { }
 
   public ngOnInit() {
     this.getStreamList();
     this.getServiceList();
+    this.getStreamTypes();
     this.newStream = new StreamModel();
     this.newStream.tags = [];
     this.newStream.generator = {
@@ -69,6 +70,14 @@ export class StreamsComponent implements OnInit {
           }
         },
         error => this.errorMessage = <any>error);
+  }
+
+  public getStreamTypes() {
+    this.streamsService.getStreamTypes()
+      .subscribe(
+        types => this.streamTypes = types,
+        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 })
+      );
   }
 
   public getServiceList() {

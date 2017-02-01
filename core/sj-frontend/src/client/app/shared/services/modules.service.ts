@@ -8,20 +8,26 @@ import { ModuleModel } from '../models/module.model';
 export class ModulesService {
   private _dataUrl = '/v1/';
 
-  constructor(private _http: Http) {
+  constructor(private http: Http) {
   }
 
   public getModuleList(): Observable<ModuleModel[]> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.get(this._dataUrl + 'modules', options)
+    return this.http.get(this._dataUrl + 'modules', options)
+      .map(this.extractData)
+      .catch(this.handleError);
+  }
+
+  public getModuileTypes(): Observable<string[]> {
+    return this.http.get(this._dataUrl + 'modules/types')
       .map(this.extractData)
       .catch(this.handleError);
   }
 
   public getRelatedInstancesList(module: ModuleModel): Observable<string[]> {
-    return this._http.get(this._dataUrl + 'modules/' + module['module-type'] + '/' + module['module-name'] + '/' +
+    return this.http.get(this._dataUrl + 'modules/' + module['module-type'] + '/' + module['module-name'] + '/' +
       module['module-version'] + '/related')
       .map(this.extractData)
       .catch(this.handleError);
@@ -31,7 +37,7 @@ export class ModulesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.get(this._dataUrl + 'modules/' + module['module-type'] + '/' + module['module-name'] + '/' +
+    return this.http.get(this._dataUrl + 'modules/' + module['module-type'] + '/' + module['module-name'] + '/' +
       module['module-version'] + '/specification', options)
       .map(this.extractData)
       .catch(this.handleError);
@@ -41,7 +47,7 @@ export class ModulesService {
     let headers = new Headers();
     let options = new RequestOptions({ headers: headers, responseType: ResponseContentType.Blob });
 
-    return this._http.get(this._dataUrl + 'modules/' + module['module-type'] + '/' + module['module-name'] + '/' +
+    return this.http.get(this._dataUrl + 'modules/' + module['module-type'] + '/' + module['module-name'] + '/' +
       module['module-version'], options)
       .map((res: Response) => {
         let contDispos = res.headers.get('content-disposition');
@@ -76,7 +82,7 @@ export class ModulesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.delete(this._dataUrl + 'modules/' + module['module-type'] + '/' + module['module-name'] + '/' +
+    return this.http.delete(this._dataUrl + 'modules/' + module['module-type'] + '/' + module['module-name'] + '/' +
       module['module-version'], options)
       .map(this.extractData)
       .catch(this.handleError);
@@ -91,6 +97,8 @@ export class ModulesService {
         body = res.json()['entity']['modules'];
       } else if (typeof res.json()['entity']['message'] !== 'undefined') {
         body = res.json()['entity']['message'];
+      } else if (typeof res.json()['entity']['types'] !== 'undefined') {
+        body = res.json()['entity']['types'];
       } else if (typeof res.json()['entity']['instances'] !== 'undefined') {
         body = res.json()['entity']['instances'];
       } else {

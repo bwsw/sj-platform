@@ -4,7 +4,7 @@ import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.sj.common.DAL.model.{SjStream, TStreamSjStream}
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.service.ServiceData
-import com.bwsw.sj.common.utils.{GeneratorLiterals, StreamLiterals}
+import com.bwsw.sj.common.utils.{GeneratorLiterals, ServiceLiterals, StreamLiterals}
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
 import scala.collection.mutable
@@ -40,6 +40,16 @@ trait SjServicesApi extends Directives with SjCrudValidator {
             complete(restResponseToHttpResponse(response))
           }
       } ~
+        pathPrefix("types") {
+          //todo if a service has a name 'types' then there is a collision
+          pathEndOrSingleSlash {
+            get {
+              val response = OkRestResponse(Map("types" -> ServiceLiterals.types))
+
+              complete(restResponseToHttpResponse(response))
+            }
+          }
+        } ~
         pathPrefix(Segment) { (serviceName: String) =>
           pathEndOrSingleSlash {
             get {

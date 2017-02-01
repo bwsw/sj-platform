@@ -51,6 +51,7 @@ object EngineLiterals {
   final val deleting = "deleting"
   final val deleted = "deleted"
   final val failed = "failed"
+  final val error = "error"
   val instanceStatusModes = Seq(starting,
     started,
     stopping,
@@ -58,7 +59,8 @@ object EngineLiterals {
     ready,
     deleting,
     deleted,
-    failed
+    failed,
+    error
   )
 
   val toHandle = "to-handle"
@@ -91,6 +93,9 @@ object GeneratorLiterals {
   val masterDirectory = "/master"
   val globalDirectory = "/global"
   val messageForServer = "get"
+
+  val zkServersLabel = "ZK_SERVERS"
+  val prefixLabel = "PREFIX"
 }
 
 object ServiceLiterals {
@@ -128,7 +133,7 @@ object ProviderLiterals {
   final val kafkaType = "kafka"
   final val elasticsearchType = "ES"
   final val jdbcType = "JDBC"
-  val providerTypes = Seq(cassandraType, aerospikeType, zookeeperType, kafkaType, elasticsearchType, jdbcType)
+  val types = Seq(cassandraType, aerospikeType, zookeeperType, kafkaType, elasticsearchType, jdbcType)
 }
 
 object JdbcLiterals {
@@ -144,4 +149,10 @@ object JdbcLiterals {
   final val postgresqlDriverPrefix = "jdbc:postgresql"
   final val oracleDriverPrefix = "jdbc:oracle:thin"
   final val mysqlDriverPrefix = "jdbc:mysql"
+}
+
+object FrameworkLiterals {
+  val instanceIdLabel = "INSTANCE_ID"
+  val frameworkIdLabel = "FRAMEWORK_ID"
+  val mesosMasterLabel = "MESOS_MASTER"
 }

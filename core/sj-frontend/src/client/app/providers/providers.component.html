@@ -7,15 +7,19 @@
       <div class="card-block">
         <!-- Card title -->
         <div class="row">
-          <div class="col col-xs-6"><h4 class="card-title">Providers list</h4></div>
-          <div class="col col-xs-6">
+          <div class="col col-xs-4"><h4 class="card-title">Providers list</h4></div>
+          <div class="col col-xs-8">
             <button type="button"
                     class="btn btn-primary pull-right ml-1 mb-1"
                     (click)="CreateProvider.show()"><i class="fa fa-plus mr-1"></i>Create Provider
             </button>
 
             <sj-search-box class="pull-right"
-                           (update)="term = $event"></sj-search-box>
+                           (update)="nameterm = $event"></sj-search-box>
+
+            <sj-filter class="pull-right" [filterList]="providerTypes"
+                           (update)="typeterm = $event"></sj-filter>
+
           </div>
         </div>
 
@@ -46,7 +50,7 @@
                 <td colspan="20" class="text-center">No providers have been found.</td>
               </tr>
 
-              <tr *ngFor="let provider of providerList | orderBy: 'name' | listFilter : term "
+              <tr *ngFor="let provider of providerList | orderBy: 'name' | listFilter : {name : nameterm, type: typeterm} "
                   [ngClass]="{ 'table-info': isSelected(provider) }"
                   (click)="selectProvider(provider)">
                 <td>{{ provider.name }}</td>
@@ -111,7 +115,6 @@
 
       <div class="modal-body">
         <form #providerForm="ngForm"
-              *ngIf="newProvider"
               (ngSubmit)="createProvider(CreateProvider)">
 
           <!-- Type -->
@@ -123,13 +126,8 @@
                       name="providerType"
                       required>
                 <!-- [(ngModel)]="form_providerType" #item (change)="onChange(item.value)"  -->
-                <option value="zookeeper">Zookeeper</option>
-                <option value="kafka">Kafka</option>
-                <option value="redis">Redis</option>
-                <option value="aerospike">Aerospike</option>
-                <option value="cassandra">Cassandra</option>
-                <option value="ES">ElasticSearch</option>
-                <option value="JDBC">JDBC</option>
+                <option *ngFor="let type of providerTypes" value="{{type}}"
+                        [disabled]="type ==='aerospike' || type === 'cassandra'">{{type}}</option>
               </select>
             </div>
           </fieldset>
@@ -197,7 +195,7 @@
 
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="CreateProvider.hide()">Cancel</button>
-        <button [disabled]="!(newProvider && providerForm?.form.valid)" type="submit" class="btn btn-primary"
+        <button [disabled]="!providerForm.form.valid" type="submit" class="btn btn-primary"
                 (click)="createProvider(CreateProvider)">Create
         </button>
       </div>

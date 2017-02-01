@@ -7,8 +7,8 @@
       <div class="card-block">
         <!-- Card title -->
         <div class="row">
-          <div class="col col-xs-6"><h4 class="card-title">Instances list</h4></div>
-          <div class="col col-xs-6">
+          <div class="col col-xs-4"><h4 class="card-title">Instances list</h4></div>
+          <div class="col col-xs-8">
             <button type="button"
                     class="btn btn-primary pull-right ml-1 mb-1"
                     (click)="CreateInstance.show()"><i class="fa fa-plus mr-1"></i>Create Instance
@@ -16,6 +16,8 @@
 
             <sj-search-box class="pull-right"
                            (update)="term = $event"></sj-search-box>
+            <sj-filter class="pull-right" [filterList]="moduleTypes"
+                       (update)="typeterm = $event"></sj-filter>
           </div>
         </div>
 
@@ -46,7 +48,7 @@
               <td colspan="20" class="text-center">No instances have been found.</td>
             </tr>
 
-            <tr *ngFor="let instance of instancesList | orderBy: 'name' | listFilter : term"
+            <tr *ngFor="let instance of instancesList | orderBy: 'name' | listFilter : { name: term, type: typeterm}"
                 [ngClass]="{ 'table-info': isSelected(instance) }"
                 (click)="selectInstance(instance)">
               <td>{{ instance.name }}</td>
@@ -61,6 +63,15 @@
                       }">{{ instance.status }}</span>
               </td>
               <td class="actions-column">
+
+                <button type="button"
+                        class="btn btn-sm btn-secondary"
+                        *ngIf="instance['rest-address']"
+                        title="Show instance tasks"
+                        (click)="showInstanceTasks(ShowInstanceTasks, instance)">
+                  <i class="fa fa-info-circle"></i>
+                </button>
+
                 <i class="fa fa-spinner fa-spin btn btn-sm btn-secondary"
                    *ngIf="instance.status == 'starting' || instance.status == 'stopping' " aria-hidden="true"></i>
 
@@ -114,11 +125,11 @@
             <li *ngIf="currentInstance.outputs">Outputs: {{currentInstance.outputs}}</li>
             <li *ngIf="currentInstance.input">Input: {{currentInstance.input}}</li>
             <li *ngIf="currentInstance.output">Output: {{currentInstance.output}}</li>
-            <li>Checkpoint-mode : {{currentInstance["checkpoint-mode"]}}</li>
-            <li>Checkpoint-interval : {{currentInstance["checkpoint-interval"]}}</li>
-            <li *ngIf="currentInstance['state-manegement']">State-management :
+            <li *ngIf="currentInstance['checkpoint-mode']">Checkpoint-mode : {{currentInstance["checkpoint-mode"]}}</li>
+            <li *ngIf="currentInstance['checkpoint-interval']">Checkpoint-interval : {{currentInstance["checkpoint-interval"]}}</li>
+            <li *ngIf="currentInstance['state-management']">State-management :
               {{currentInstance["state-management"]}}</li>
-            <li *ngIf="currentInstance['duplicate-check']">Duplicate-check :
+            <li *ngIf="currentInstance['duplicate-check'] || currentInstance['duplicate-check'] === false">Duplicate-check :
               {{currentInstance["duplicate-check"]}}</li>
             <li *ngIf="currentInstance['lookup-history']">Lookup-history : {{currentInstance["lookup-history"]}}</li>
             <li *ngIf="currentInstance['queue-max-size']">Queue-max-size : {{currentInstance["queue-max-size"]}}</li>
@@ -134,20 +145,32 @@
             <li>Per-task-cores : {{currentInstance["per-task-cores"]}}</li>
             <li>Per-task-ram" : {{currentInstance["per-task-ram"]}}</li>
             <li>Coordination-service : {{currentInstance["coordination-service"]}}</li>
-            <li *ngIf="currentInstance['event-wait-time']">Event-wait-time :
-              {{currentInstance["event-wait-time"]}}</li>
+            <li *ngIf="currentInstance['event-wait-idle-time']">Event-wait-idle-time :
+              {{currentInstance["event-wait-idle-time"]}}</li>
+            <li *ngIf="currentInstance['window']">Window :
+              {{currentInstance['window']}}</li>
+            <li *ngIf="currentInstance['sliding-interval']">Sliding interval :
+              {{currentInstance['sliding-interval']}}</li>
+            <li *ngIf="currentInstance['main-stream']">Main stream :
+              {{currentInstance['main-stream']}}</li>
+            <li *ngIf="currentInstance['related-streams']">Related streams :
+              {{currentInstance['related-streams']}}</li>
+            <li *ngIf="currentInstance['window']">Window :
+              {{currentInstance['window']}}</li>
+            <li *ngIf="currentInstance['batch-fill-type']">Batch-fill-type :
+              {{currentInstance['batch-fill-type'] | json}}</li>
             <li *ngIf="currentInstance['performance-reporting-interval']">Performance-reporting-interval :
               {{currentInstance['performance-reporting-interval']}}</li>
-            <li>Jvm-options : {{currentInstance["jvm-options"] | json}}</li>
+            <li *ngIf="currentInstance['jvm-options']">Jvm-options : {{currentInstance["jvm-options"] | json}}</li>
             <li *ngIf="currentInstance['environment-variables']">Environment variables :
               {{currentInstance["environment-variables"] | json}}</li>
             <li *ngIf="currentInstance['node-attributes']">Node attributes : {{currentInstance['node-attributes'] |
               json}}</li>
-            <li *ngIf="currentInstance['backup-count']">Backup-count : {{currentInstance["backup-count"]}}</li>
-            <li *ngIf="currentInstance['async-backup-count']">Async-backup-count :
+            <li *ngIf="currentInstance['backup-count'] || currentInstance['backup-count'] === 0">Backup-count : {{currentInstance["backup-count"]}}</li>
+            <li *ngIf="currentInstance['async-backup-count'] || currentInstance['async-backup-count'] === 0">Async-backup-count :
               {{currentInstance["async-backup-count"]}}</li>
             <li>{{currentInstance.module['module-type'] !== 'input-streaming' ? 'Execution-plan:': 'Tasks:'}}
-              <ul *ngIf="currentInstance !== 'undefined'">
+              <ul *ngIf="currentInstance !== undefined">
                 <li>{{currentInstanceTasks | json}}</li>
               </ul>
             </li>
@@ -581,7 +604,7 @@
                               newInstance.module['module-type'] === 'windowed-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2">Event-wait-idle-time</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="newInstance['event-wait-idle-time']" name="instanceEventWaitTime" type="number"
+                <input [(ngModel)]="newInstance['event-wait-idle-time']" name="instanceEventWaitIdleTime" type="number"
                        class="form-control">
               </div>
             </fieldset>
@@ -718,6 +741,38 @@
         <template [ngIf]="currentInstance && !ifInstanceCanBeRemoved()">
           <button type="button" class="btn btn-primary" (click)="DeleteInstance.hide()">OK</button>
         </template>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div bsModal #ShowInstanceTasks="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" (click)="ShowInstanceTasks.hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Mesos framework tasks</h4>
+      </div>
+
+      <div class="modal-body">
+        {{message}}
+      </div>
+      <div class="modal-body">
+        <ul *ngFor="let task of tasks">
+          <li>{{task.id}}</li>
+          <li>{{task.state}}</li>
+          <li>{{task.directories}}</li>
+          <li>{{task['state-change']}}</li>
+          <li>{{task.reason}}</li>
+          <li>{{task['last-node']}}</li>
+          <li>{{task.node}}</li>
+        </ul>
+      </div>
+
+      <div class="modal-footer">
+         <button type="button" class="btn btn-primary" (click)="ShowInstanceTasks.hide()">OK</button>
       </div>
     </div>
   </div>

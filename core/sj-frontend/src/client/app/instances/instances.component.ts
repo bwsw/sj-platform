@@ -3,6 +3,7 @@ import { NgForm } from '@angular/forms';
 import { ModalDirective } from 'ng2-bootstrap';
 
 import { InstanceModel } from '../shared/models/instance.model';
+import { TaskModel } from '../shared/models/task.model';
 import { ModuleModel } from '../shared/models/module.model';
 import { ServiceModel } from '../shared/models/service.model';
 import { StreamModel } from '../shared/models/stream.model';
@@ -24,6 +25,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   public instancesList: InstanceModel[];
   public cloneInstancesList: InstanceModel[] = [];
   public modulesList: ModuleModel[];
+  public moduleTypes: string[];
   public servicesList: ServiceModel[];
   public streamsList: StreamModel[];
   public streamTypesList: { [key: string]: string } = {};
@@ -35,6 +37,8 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   public instanceForm: NgForm;
   public showSpinner: boolean;
   public startFromTimestampAcceptable: boolean = true;
+  public tasks: TaskModel[];
+  public message: string;
 
   @ViewChild('instanceForm') currentForm: NgForm;
 
@@ -70,6 +74,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
     this.newInstance = new InstanceModel();
     this.getInstancesList();
     this.getModulesList();
+    this.getModuleTypes();
     this.getStreamsList();
     this.getServicesList();
   }
@@ -91,6 +96,11 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
           this.modulesList = modulesList;
         },
         error => this.errorMessage = <any>error);
+  }
+
+  public getModuleTypes() {
+    this.modulesService.getModuileTypes()
+      .subscribe(types => this.moduleTypes = types);
   }
 
   public getStreamsList() {
@@ -130,6 +140,16 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
             this.currentInstance['tasks'];
         },
         error => this.errorMessage = <any>error);
+  }
+
+  public getInstanceTasks(instance: InstanceModel) {
+    this.instancesService.getInstanceTasks(instance)
+      .subscribe(
+        response => {
+          this.message = response.message;
+          this.tasks = response.tasks;
+        }
+      );
   }
 
   public selectInstance(instance: InstanceModel) {
@@ -207,6 +227,11 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   public showAlert(message: Object): void {
     this.alerts = [];
     this.alerts.push(message);
+  }
+
+  public showInstanceTasks(modal: ModalDirective, instance: InstanceModel) {
+    this.getInstanceTasks(instance);
+    modal.show();
   }
 
   public deleteInstanceConfirm(modal: ModalDirective, instance: InstanceModel) {

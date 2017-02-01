@@ -23,7 +23,7 @@ object SjWindowedModuleSetup extends App {
   val slidingInterval = 2
   val _type = "both"
 
-  val module = new File("./contrib/stubs/sj-stub-windowed-streaming/target/scala-2.11/sj-stub-windowed-streaming-1.0-SNAPSHOT.jar")
+  val module = new File("./contrib/stubs/sj-stub-windowed-streaming/target/scala-2.12/sj-stub-windowed-streaming-1.0-SNAPSHOT.jar")
 
   open()
   cassandraSetup()
@@ -54,7 +54,7 @@ object SjWindowedModuleDestroy extends App {
   val fileStorage = ConnectionRepository.getFileStorage
   val _type = "both"
 
-  val module = new File("./contrib/stubs/sj-stub-windowed-streaming/target/scala-2.11/sj-stub-windowed-streaming-1.0-SNAPSHOT.jar")
+  val module = new File("./contrib/stubs/sj-stub-windowed-streaming/target/scala-2.12/sj-stub-windowed-streaming-1.0-SNAPSHOT.jar")
 
   open()
   deleteStreams(streamService, _type, inputCount, outputCount)
