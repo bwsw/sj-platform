@@ -193,7 +193,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
       } else {
         updateGeneratorState(instance, name, failed)
         throw new Exception(s"Marathon returns status code: ${getStatusCode(generatorApplicationInfo)} " +
-          s"during the start process of generator. Generator '${name}' is marked as failed.")
+          s"during the start process of generator. Generator '$name' is marked as failed.")
       }
     }
   }
@@ -268,7 +268,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
 
   private def getFrameworkEnvironmentVariables(marathonMaster: String) = {
     var environmentVariables = Map(
-      instanceIdLabel -> frameworkName,
+      instanceIdLabel -> instance.name,
       mesosMasterLabel -> marathonMaster
     )
     environmentVariables = environmentVariables ++ ConnectionConstants.mongoEnvironment
