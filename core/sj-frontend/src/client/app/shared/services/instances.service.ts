@@ -10,6 +10,12 @@ import {
   InputStreamingInstance,
   WindowedStreamingInstance
 } from '../models/instance.model';
+import { TaskModel } from '../models/task.model';
+
+interface ITasksObject {
+  tasks: TaskModel[];
+  message: string;
+}
 
 @Injectable()
 export class InstancesService {
@@ -34,14 +40,14 @@ export class InstancesService {
     return instance;
   }
 
-  constructor(private _http: Http) {
+  constructor(private http: Http) {
   }
 
   public getInstanceList(): Observable<InstanceModel[]> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.get(this._dataUrl + 'modules/instances', options)
+    return this.http.get(this._dataUrl + 'modules/instances', options)
       .map(this.extractData)
       .catch(this.handleError);
   }
@@ -50,8 +56,14 @@ export class InstancesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.get(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
+    return this.http.get(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
       instance['module-version'] + '/instance' + '/' + instance['name'], options)
+      .map(this.extractData)
+      .catch(this.handleError);
+  }
+
+  public getInstanceTasks(instance: InstanceModel): Observable<ITasksObject> {
+    return this.http.get('http://'+instance['rest-address'])
       .map(this.extractData)
       .catch(this.handleError);
   }
@@ -63,7 +75,7 @@ export class InstancesService {
     let headers = new Headers({'Content-Type': 'application/json'});
     let options = new RequestOptions({ headers: headers });
 
-    return this._http.post(this._dataUrl + 'modules/' + instance.module['module-type'] + '/' + instance.module['module-name'] + '/' +
+    return this.http.post(this._dataUrl + 'modules/' + instance.module['module-type'] + '/' + instance.module['module-name'] + '/' +
       instance.module['module-version'] + '/instance', body, options)
       .map(this.extractData)
       .catch(this.handleError);
@@ -73,7 +85,7 @@ export class InstancesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.delete(this._dataUrl + 'modules/' + instance.module['module-type'] + '/' + instance.module['module-name'] + '/' +
+    return this.http.delete(this._dataUrl + 'modules/' + instance.module['module-type'] + '/' + instance.module['module-name'] + '/' +
       instance.module['module-version'] + '/instance' + '/' + instance['name'], options)
       .map(this.extractData)
       .catch(this.handleError);
@@ -83,7 +95,7 @@ export class InstancesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.get(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
+    return this.http.get(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
       instance['module-version'] + '/instance' + '/' + instance['name'] + '/start', options)
       .map(this.extractData)
       .catch(this.handleError);
@@ -93,7 +105,7 @@ export class InstancesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this._http.get(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
+    return this.http.get(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
       instance['module-version'] + '/instance' + '/' + instance['name'] + '/stop', options)
       .map(this.extractData)
       .catch(this.handleError);
@@ -179,7 +191,9 @@ export class InstancesService {
 
   private extractData(res: Response) { //TODO Write good response parser
     let body = {};
-    if (typeof res.json()['entity']['instances'] !== 'undefined') {
+    if (typeof res.json()['tasks'] !== 'undefined') {
+      body = res.json();
+    } else if (typeof res.json()['entity']['instances'] !== 'undefined') {
       body = res.json()['entity']['instances'];
     } else if (typeof res.json()['entity']['message'] !== 'undefined') {
       body = res.json()['entity']['message'];
@@ -192,7 +206,7 @@ export class InstancesService {
   private handleError(error: any) {
     let errMsg = (error._body) ? error._body :
       error.status ? `${error.status} - ${error.statusText}` : 'Server error';
-    errMsg = JSON.parse(errMsg);
+    if (typeof errMsg !== 'object') { errMsg = JSON.parse(errMsg); }
     let errMsgYo = errMsg.entity.message;
     return Observable.throw(errMsgYo);
   }

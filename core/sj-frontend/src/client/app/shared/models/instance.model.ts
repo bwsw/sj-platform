@@ -8,6 +8,8 @@ export class InstanceModel {
   'start-from-timestamp': number;
   'status': string;
 
+  'rest-address': string;
+
   'async-backup-count': number = 0;
   'backup-count': number = 0;
   'batch-fill-type' : {};

@@ -66,9 +66,9 @@
 
                 <button type="button"
                         class="btn btn-sm btn-secondary"
-                        *ngIf="instance.status == 'stopped' || instance.status == 'failed' || instance.status == 'ready'"
-                        title="Start instance"
-                        (click)="ShowInstanceTasks.show()">
+                        *ngIf="instance['rest-address']"
+                        title="Show instance tasks"
+                        (click)="showInstanceTasks(ShowInstanceTasks, instance)">
                   <i class="fa fa-info-circle"></i>
                 </button>
 
@@ -757,13 +757,22 @@
       </div>
 
       <div class="modal-body">
-        <p>Show it</p>
+        {{message}}
+      </div>
+      <div class="modal-body">
+        <ul *ngFor="let task of tasks">
+          <li>{{task.id}}</li>
+          <li>{{task.state}}</li>
+          <li>{{task.directories}}</li>
+          <li>{{task['state-change']}}</li>
+          <li>{{task.reason}}</li>
+          <li>{{task['last-node']}}</li>
+          <li>{{task.node}}</li>
+        </ul>
       </div>
 
       <div class="modal-footer">
-        <template>
-          <button type="button" class="btn btn-primary" (click)="ShowInstanceTasks.hide()">OK</button>
-        </template>
+         <button type="button" class="btn btn-primary" (click)="ShowInstanceTasks.hide()">OK</button>
       </div>
     </div>
   </div>
