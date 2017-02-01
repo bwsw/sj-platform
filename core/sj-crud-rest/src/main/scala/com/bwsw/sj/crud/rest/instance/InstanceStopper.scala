@@ -8,14 +8,15 @@ import org.slf4j.LoggerFactory
 import scala.collection.JavaConverters._
 
 /**
- * One-thread stopper object for instance
- * using synchronous apache http client
- *
- *
- * @author Kseniya Tomskikh
- */
+  * One-thread stopper object for instance
+  * using synchronous apache http client
+  *
+  * @author Kseniya Tomskikh
+  */
 class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable with InstanceManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
+  private val frameworkName = getFrameworkName(instance)
+
   import EngineLiterals._
 
   def run() = {
@@ -24,22 +25,30 @@ class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable w
       stopFramework()
       markInstanceAsStopped()
     } catch {
-      case e: Exception => //todo что тут подразумевалось? зачем try catch, если непонятен результат при падении
+      case e: Exception =>
+        logger.debug(s"Instance: ${instance.name}. Instance is failed during the stopping process.")
+        logger.debug(e.getMessage)
+        e.printStackTrace()
+        updateInstanceStatus(instance, error)
     }
   }
 
   private def stopFramework() = {
-    updateFrameworkState(instance, stopping)
-    val response = stopMarathonApplication(instance.name)
+    val response = stopMarathonApplication(frameworkName)
     if (isStatusOK(response)) {
+      updateFrameworkState(instance, stopping)
       waitForFrameworkToStop()
+    } else {
+      updateFrameworkState(instance, error)
+      throw new Exception(s"Marathon returns status code: ${getStatusCode(response)} " +
+        s"during the stopping process of framework. Framework '${frameworkName}' is marked as error.")
     }
   }
 
   private def waitForFrameworkToStop() = {
     var hasStopped = false
     while (!hasStopped) {
-      val frameworkApplicationInfo = getApplicationInfo(instance.name)
+      val frameworkApplicationInfo = getApplicationInfo(frameworkName)
       if (isStatusOK(frameworkApplicationInfo)) {
         if (hasFrameworkStopped(frameworkApplicationInfo)) {
           updateFrameworkState(instance, stopped)
@@ -49,7 +58,9 @@ class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable w
           Thread.sleep(delay)
         }
       } else {
-        //todo error?
+        updateFrameworkState(instance, error)
+        throw new Exception(s"Marathon returns status code: ${getStatusCode(frameworkApplicationInfo)} " +
+          s"during the stopping process of framework. Framework '$frameworkName' is marked as error.")
       }
     }
   }
@@ -65,6 +76,7 @@ class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable w
       clearTasks()
     }
     updateInstanceStatus(instance, stopped)
+    updateInstanceRestAddress(instance, "")
   }
 
   private def isInputInstance() = {

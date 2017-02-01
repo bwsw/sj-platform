@@ -12,39 +12,25 @@ import { ServicesService } from '../shared/services/services.service';
   selector: 'sj-providers',
   templateUrl: 'providers.component.html'
 })
-export class ProvidersComponent implements OnInit, AfterViewChecked {
+export class ProvidersComponent implements OnInit {
   @Input() public provider: ProviderModel;
   @Output() public close = new EventEmitter();
   public alerts: Array<Object> = [];
   public providerList: ProviderModel[];
-  public serviceList: ServiceModel[];
+  public providerTypes: string[];
   public blockingServices: string[] = [];
   public currentProvider: ProviderModel;
   public newProvider: ProviderModel;
   public currentConnectors: [String] = [''];
-  public providerForm: NgForm;
   public showSpinner: boolean = false;
 
   @ViewChild('providerForm') currentForm: NgForm;
 
-  public formErrors: { [key: string]: string } = {
-    'providerHosts': '',
-  };
-
-  public validationMessages: { [key: string]: { [key: string]: string } } = {
-    'providerHosts': {
-      'validHostPort': 'The format of one of hosts is invalid',
-    },
-  };
-
-  constructor(private providersService: ProvidersService,
-              private servicesService: ServicesService) {
-  }
-
+  constructor(private providersService: ProvidersService) { }
 
   public ngOnInit() {
     this.getProviderList();
-    this.getServiceList();
+    this.getProviderTypes();
     this.newProvider = new ProviderModel();
   }
 
@@ -60,13 +46,12 @@ export class ProvidersComponent implements OnInit, AfterViewChecked {
         error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
   }
 
-  public getServiceList() {
-    this.servicesService.getServiceList()
+  public getProviderTypes() {
+    this.providersService.getProviderTypes()
       .subscribe(
-        serviceList => {
-          this.serviceList = serviceList;
-        },
-        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+        types => this.providerTypes = types,
+        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 })
+      );
   }
 
   public testConnection(provider: ProviderModel) {
@@ -162,36 +147,6 @@ export class ProvidersComponent implements OnInit, AfterViewChecked {
 
   public addHost() {
     this.newProvider.hosts.push('');
-  }
-
-  public ngAfterViewChecked() {
-    this.formChanged();
-  }
-
-  public formChanged() {
-    if (this.currentForm === this.providerForm) { return; }
-    this.providerForm = this.currentForm;
-    if (this.providerForm) {
-      this.providerForm.valueChanges
-        .subscribe(data => this.onValueChanged(data));
-    }
-  }
-
-  public onValueChanged(data?: any) {
-    if (!this.providerForm) { return; }
-    const form = this.providerForm.form;
-
-    for (const field in this.formErrors) {
-      // clear previous error message (if any)
-      this.formErrors[field] = '';
-      const control = form.get(field);
-      if (control && control.dirty && !control.valid) {
-        const messages = this.validationMessages[field];
-        for (const key in control.errors) {
-          this.formErrors[field] += messages[key] + ' ';
-        }
-      }
-    }
   }
 
   /* @hack: for nested ngFor and ngModel */

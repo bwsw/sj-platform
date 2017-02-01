@@ -6,6 +6,7 @@ import { RouterModule } from '@angular/router';
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { SearchBoxComponent } from './components/searchBox/search-box.component';
+import { FilterComponent } from './components/filter/filter.component';
 import { ListFilterPipe } from './pipes/list-filter.pipe';
 import { OrderByPipe } from './pipes/order-by.pipe';
 import { ServiceFilterPipe } from './pipes/service-filter.pipe';
@@ -35,6 +36,7 @@ import { FooterComponent } from './components/footer/footer.component';
     SpinnerComponent,
     BreadcrumbsComponent,
     FooterComponent,
+    FilterComponent,
     // Pipes
     ListFilterPipe,
     OrderByPipe,
@@ -57,6 +59,7 @@ import { FooterComponent } from './components/footer/footer.component';
     SpinnerComponent,
     BreadcrumbsComponent,
     FooterComponent,
+    FilterComponent,
     // Pipes
     ListFilterPipe,
     OrderByPipe,

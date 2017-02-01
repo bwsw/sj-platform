@@ -23,7 +23,7 @@ class ConsumerCallback(blockingQueue: PersistentBlockingQueue) extends Callback[
   override def onTransaction(operator: TransactionOperator[Array[Byte]], transaction: ConsumerTransaction[Array[Byte]]) = {
     val consumer = operator.asInstanceOf[Consumer[Array[Byte]]]
     logger.debug(s"onTransaction handler was invoked by subscriber: ${consumer.name}\n")
-    val stream = ConnectionRepository.getStreamService.get(consumer.stream.getName).get
+    val stream = ConnectionRepository.getStreamService.get(consumer.stream.name).get
 
     val envelope = new TStreamEnvelope()
     envelope.stream = stream.name

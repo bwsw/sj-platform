@@ -2,7 +2,7 @@ package com.bwsw.sj.common.DAL.model
 
 import com.bwsw.sj.common.rest.entities.stream.TStreamSjStreamData
 import com.bwsw.sj.common.utils._
-import com.bwsw.tstreams.services.BasicStreamService
+import com.bwsw.tstreams.streams.StreamService
 import org.mongodb.morphia.annotations.Embedded
 import SjStreamUtilsForCreation._
 
@@ -42,8 +42,8 @@ class TStreamSjStream() extends SjStream {
     val dataStorage = createDataStorage(service)
     val metadataStorage = createMetadataStorage(service)
 
-    if (!BasicStreamService.isExist(this.name, metadataStorage)) {
-      BasicStreamService.createStream(
+    if (!StreamService.isExist(this.name, metadataStorage)) {
+      StreamService.createStream(
         this.name,
         this.partitions,
         StreamLiterals.ttl,
@@ -57,8 +57,8 @@ class TStreamSjStream() extends SjStream {
   override def delete() = {
     val service = this.service.asInstanceOf[TStreamService]
     val metadataStorage = createMetadataStorage(service)
-    if (BasicStreamService.isExist(this.name, metadataStorage)) {
-      BasicStreamService.deleteStream(this.name, metadataStorage)
+    if (StreamService.isExist(this.name, metadataStorage)) {
+      StreamService.deleteStream(this.name, metadataStorage)
     }
   }
 }

@@ -78,7 +78,7 @@ class RetrievableTStreamTaskInput(manager: CommonTaskManager,
   }
 
   private def transactionsToEnvelopes(transactions: Seq[ConsumerTransaction[Array[Byte]]], consumer: Consumer[Array[Byte]]) = {
-    val stream = ConnectionRepository.getStreamService.get(consumer.stream.getName).get
+    val stream = ConnectionRepository.getStreamService.get(consumer.stream.name).get
     transactions.map((transaction: ConsumerTransaction[Array[Byte]]) => {
       val tempTransaction = consumer.buildTransactionObject(transaction.getPartition(), transaction.getTransactionID(), transaction.getCount()).get //todo fix it next milestone TR1216
       tstreamOffsetsStorage((consumer.name, tempTransaction.getPartition())) = tempTransaction.getTransactionID()

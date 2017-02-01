@@ -15,10 +15,19 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator {
   val configSettingsApi = {
     pathPrefix("config") {
       pathPrefix("settings") {
-        pathPrefix(Segment) { (domain: String) =>
-          if (!ConfigLiterals.domains.contains(domain))
-            throw UnknownConfigSettingDomain(createMessage("rest.config.setting.domain.unknown", ConfigLiterals.domains.mkString(", ")), domain)
+        pathPrefix("domains") {
           pathEndOrSingleSlash {
+            get {
+              val response = OkRestResponse(Map("domains" -> ConfigLiterals.domains))
+
+              complete(restResponseToHttpResponse(response))
+            }
+          }
+        } ~
+          pathPrefix(Segment) { (domain: String) =>
+            if (!ConfigLiterals.domains.contains(domain))
+              throw UnknownConfigSettingDomain(createMessage("rest.config.setting.domain.unknown", ConfigLiterals.domains.mkString(", ")), domain)
+            pathEndOrSingleSlash {
               get {
                 val configElements = configService.getByParameters(Map("domain" -> domain))
                 val response = OkRestResponse(Map(s"$domain-config-settings" -> mutable.Buffer()))
@@ -29,61 +38,62 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator {
                 complete(restResponseToHttpResponse(response))
 
               }
-          } ~
-            pathPrefix(Segment) { (name: String) =>
-              pathEndOrSingleSlash {
-                get {
-                  var response: RestResponse = NotFoundRestResponse(Map("message" ->
-                    createMessage("rest.config.setting.notfound", domain, name)))
-                  configService.get(createConfigurationSettingName(domain, name)) match {
-                    case Some(configElement) =>
-                      val entity = Map(s"$domain-config-settings" -> configElement.asProtocolConfigurationSetting())
-                      response = OkRestResponse(entity)
-                    case None =>
-                  }
-
-                  complete(restResponseToHttpResponse(response))
-                } ~
-                  delete {
+            } ~
+              pathPrefix(Segment) { (name: String) =>
+                pathEndOrSingleSlash {
+                  get {
                     var response: RestResponse = NotFoundRestResponse(Map("message" ->
                       createMessage("rest.config.setting.notfound", domain, name)))
                     configService.get(createConfigurationSettingName(domain, name)) match {
-                      case Some(_) =>
-                        configService.delete(createConfigurationSettingName(domain, name))
-                        val entity = Map("message" -> createMessage("rest.config.setting.deleted", domain, name))
+                      case Some(configElement) =>
+                        val entity = Map(s"$domain-config-settings" -> configElement.asProtocolConfigurationSetting())
                         response = OkRestResponse(entity)
                       case None =>
                     }
 
                     complete(restResponseToHttpResponse(response))
-                  }
+                  } ~
+                    delete {
+                      var response: RestResponse = NotFoundRestResponse(Map("message" ->
+                        createMessage("rest.config.setting.notfound", domain, name)))
+                      configService.get(createConfigurationSettingName(domain, name)) match {
+                        case Some(_) =>
+                          configService.delete(createConfigurationSettingName(domain, name))
+                          val entity = Map("message" -> createMessage("rest.config.setting.deleted", domain, name))
+                          response = OkRestResponse(entity)
+                        case None =>
+                      }
+
+                      complete(restResponseToHttpResponse(response))
+                    }
+                }
               }
-            }
-        } ~ pathEndOrSingleSlash {
-          post { (ctx: RequestContext) =>
-            validateContextWithSchema(ctx, "configSchema.json")
-            val data = serializer.deserialize[ConfigurationSettingData](getEntityFromContext(ctx))
-            val errors = data.validate()
-            var response: RestResponse = BadRequestRestResponse(Map("message" ->
-              createMessage("rest.config.setting.cannot.create", errors.mkString("\n"))))
-            if (errors.isEmpty) {
-              configService.save(data.asModelConfigurationSetting)
-              response = CreatedRestResponse(Map("message" ->
-                createMessage("rest.config.setting.created", data.domain, data.name)))
-            }
-
-            ctx.complete(restResponseToHttpResponse(response))
           } ~
-          get {
-            val configElements = configService.getAll
-            val response = OkRestResponse(Map(s"config-settings" -> mutable.Buffer()))
-            if (configElements.nonEmpty) {
-              response.entity = Map("config-settings" -> configElements.map(_.asProtocolConfigurationSetting()))
-            }
+          pathEndOrSingleSlash {
+            post { (ctx: RequestContext) =>
+              validateContextWithSchema(ctx, "configSchema.json")
+              val data = serializer.deserialize[ConfigurationSettingData](getEntityFromContext(ctx))
+              val errors = data.validate()
+              var response: RestResponse = BadRequestRestResponse(Map("message" ->
+                createMessage("rest.config.setting.cannot.create", errors.mkString("\n"))))
+              if (errors.isEmpty) {
+                configService.save(data.asModelConfigurationSetting)
+                response = CreatedRestResponse(Map("message" ->
+                  createMessage("rest.config.setting.created", data.domain, data.name)))
+              }
 
-            complete(restResponseToHttpResponse(response))
+              ctx.complete(restResponseToHttpResponse(response))
+            } ~
+              get {
+                val configElements = configService.getAll
+                val response = OkRestResponse(Map(s"config-settings" -> mutable.Buffer()))
+                if (configElements.nonEmpty) {
+                  response.entity = Map("config-settings" -> configElements.map(_.asProtocolConfigurationSetting()))
+                }
+
+                complete(restResponseToHttpResponse(response))
+              }
           }
-        }
       }
     }
   }

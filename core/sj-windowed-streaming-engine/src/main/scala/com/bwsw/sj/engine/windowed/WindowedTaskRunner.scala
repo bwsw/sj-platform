@@ -3,7 +3,7 @@ package com.bwsw.sj.engine.windowed
 import java.util.concurrent.ArrayBlockingQueue
 
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.engine.core.engine.TaskRunner
+import com.bwsw.sj.engine.core.engine.{InstanceStatusObserver, TaskRunner}
 import com.bwsw.sj.engine.core.entities.Batch
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.windowed.collecting.BatchCollector
@@ -29,13 +29,17 @@ object WindowedTaskRunner extends {
       val inputService = RetrievableTaskInput(manager)
 
       val batchCollector = BatchCollector(manager, inputService, batchQueue, performanceMetrics)
+
       val windowedTaskEngine = new WindowedTaskEngine(manager, inputService, batchQueue, performanceMetrics)
+
+      val instanceStatusObserver = new InstanceStatusObserver(manager.instanceName)
 
       logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
 
       executorService.submit(batchCollector)
       executorService.submit(windowedTaskEngine)
       executorService.submit(performanceMetrics)
+      executorService.submit(instanceStatusObserver)
 
       executorService.take().get()
     } catch {

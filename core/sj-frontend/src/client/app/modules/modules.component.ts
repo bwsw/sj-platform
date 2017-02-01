@@ -14,7 +14,7 @@ import { ModalDirective } from 'ng2-bootstrap';
 export class ModulesComponent implements OnInit {
   public errorMessage: string;
   public moduleList: ModuleModel[];
-  public instanceList: InstanceModel[];
+  public moduleTypes: string[];
   public blockingInstances: string[] = [];
   public alerts: Array<Object> = [];
   public currentModule: ModuleModel;
@@ -22,13 +22,16 @@ export class ModulesComponent implements OnInit {
   public isUploading: boolean = false;
   public showSpinner: boolean;
 
-  constructor(private modulesService: ModulesService,
-              private instancesService: InstancesService) {
-  }
+  constructor(private modulesService: ModulesService) { }
 
   public ngOnInit() {
     this.getModuleList();
-    this.getInstanceList();
+    this.getModuleTypes();
+  }
+
+  public getModuleTypes() {
+    this.modulesService.getModuileTypes()
+      .subscribe(types => this.moduleTypes = types);
   }
 
   public getModuleList() {
@@ -40,15 +43,6 @@ export class ModulesComponent implements OnInit {
             this.currentModule = moduleList[0];
             this.getModuleSpecification(this.currentModule);
           }
-        },
-        error => this.errorMessage = <any>error);
-  }
-
-  public getInstanceList() {
-    this.instancesService.getInstanceList()
-      .subscribe(
-        instanceList => {
-          this.instanceList = instanceList;
         },
         error => this.errorMessage = <any>error);
   }
