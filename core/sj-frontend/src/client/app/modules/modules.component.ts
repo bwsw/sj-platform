@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { ModuleModel } from '../shared/models/module.model';
-import { InstanceModel } from '../shared/models/instance.model';
 import { ModulesService } from '../shared/services/modules.service';
-import { InstancesService } from '../shared/services/instances.service';
 import { ModalDirective } from 'ng2-bootstrap';
 
 @Component({
