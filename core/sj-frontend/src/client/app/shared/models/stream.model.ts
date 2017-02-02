@@ -12,4 +12,5 @@ export class StreamModel {
   };
   'replication-factor': number;
   force: boolean = false;
+  primary: string;
 }

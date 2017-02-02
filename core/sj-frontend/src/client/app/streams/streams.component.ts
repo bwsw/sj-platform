@@ -131,6 +131,11 @@ export class StreamsComponent implements OnInit {
           this.getStreamList();
           this.newStream = new StreamModel();
           this.newStream.tags = [];
+          this.newStream.generator = {
+            'generator-type': 'local',
+            service: '',
+            'instance-count': 0
+          };
         },
         error => {
           modal.hide();

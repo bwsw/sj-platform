@@ -240,12 +240,34 @@
             </div>
           </fieldset>
 
+          <!-- Database -->
+          <fieldset *ngIf="newService.type === 'JDBC'" class="form-group row">
+            <label class="col-sm-2 col-form-label required">Database name</label>
+            <div class="col-sm-10">
+              <input [(ngModel)]="newService['database']" name="serviceDatabase" type="text"
+                     class="form-control" required>
+            </div>
+          </fieldset>
+
           <!-- Data namespace -->
           <fieldset *ngIf="newService.type === 'TstrQ'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Data namespace</label>
             <div class="col-sm-10">
-              <input [(ngModel)]="newService['data-namespace']" name="serviceDataNamespace" type="text"
+              <input [(ngModel)]="newService['database']" name="serviceDatabase" type="text"
                      class="form-control" required>
+            </div>
+          </fieldset>
+
+          <!--Driver -->
+          <fieldset *ngIf="newService.type === 'JDBC'" class="form-group row">
+            <label class="col-sm-2 col-form-label required">Driver</label>
+            <div class="col-sm-10">
+              <select [(ngModel)]="newService['driver']" name="serviceDriver"
+                      required class="form-control">
+                <option>postgresql</option>
+                <option>oracle</option>
+                <option>mysql</option>
+              </select>
             </div>
           </fieldset>
 
