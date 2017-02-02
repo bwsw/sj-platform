@@ -12,7 +12,8 @@
             <label [ngClass]="{inProgress:isUploading}" class="btn btn-primary btn-upload pull-right ml-1 mb-1">
               <span *ngIf="!isUploading"><i class="fa fa-upload mr-1"></i>{{path === 'files'?'Uppload file':'Upload jar'}}</span>
               <i *ngIf="isUploading" class="fa fa-spinner fa-spin" aria-hidden="true"></i>
-              <input type="file" (change)="uploadFile($event)">
+              <input *ngIf="path === 'jars'" type="file" (change)="uploadFile($event)">
+              <input *ngIf="path === 'files'" type="button" (click)="UploadFile.show()">
             </label>
 
             <sj-search-box class="pull-right"
@@ -71,13 +72,13 @@
               <td class="actions-column">
                 <button type="button"
                         class="btn btn-sm btn-secondary"
-                        title="Download module"
+                        title="Download file"
                         (click)="downloadFile(file)">
                   <i class="fa fa-download"></i>
                 </button>
                 <button type="button"
                         class="btn btn-sm btn-secondary"
-                        title="Delete module"
+                        title="Delete file"
                         (click)="deleteFileConfirm(DeleteFile, file)">
                   <i class="fa fa-trash"></i>
                 </button>
@@ -86,6 +87,47 @@
             </tbody>
           </table>
         </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div bsModal #UploadFile="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" (click)="UploadFile.hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Upload file</h4>
+      </div>
+
+      <div class="modal-body">
+        <form #fileForm="ngForm" (ngSubmit)="createSetting(AddSetting)" class="form-create-entity">
+
+          <!-- description -->
+          <fieldset class="form-group row">
+            <label class="col-sm-2 col-form-label required">Description</label>
+            <div class="col-sm-10">
+              <input [(ngModel)]="newDescription" name="fileDescription" type="text" class="form-control"
+                     required pattern="[a-z-. ]+">
+            </div>
+          </fieldset>
+          <fieldset class="form-group row">
+            <label class="col-sm-2 col-form-label required">File</label>
+            <div class="col-sm-10">
+              <input required class="form-control" type="file" (change)="setNewFile($event)" name="fileContent">
+            </div>
+          </fieldset>
+        </form>
+      </div>
+      <div class="modal-footer">
+
+        <button type="button" class="btn btn-secondary" (click)="UploadFile.hide()">Cancel</button>
+        <button [disabled]="!(fileForm.form.valid && newFile)" type="button" class="btn btn-primary"
+                (click)="UploadFile.hide();uploadFile($event)">Upload
+        </button>
 
       </div>
     </div>

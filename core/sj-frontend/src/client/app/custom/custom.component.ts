@@ -15,6 +15,8 @@ export class CustomComponent implements OnInit {
   public path: string = 'files';
   public fileList: FileModel[];
   public currentFile: FileModel;
+  public newDescription: string;
+  public newFile: any;
   public alerts: Array<Object> = [];
   public isUploading: boolean = false;
   public showSpinner: boolean;
@@ -39,11 +41,15 @@ export class CustomComponent implements OnInit {
       );
   }
 
+  public setNewFile(event: any) {
+    this.newFile = event.target.files[0];
+  }
+
   public uploadFile(event: any) {
     this.isUploading = true;
-    let file = event.target.files[0];
+    let file = this.path === 'jars' ? event.target.files[0]: this.newFile;
     if (file) {
-      this.customService.uploadFile(this.path,file).then((result: any) => {
+      this.customService.uploadFile(this.path,file,this.newDescription).then((result: any) => {
           this.isUploading = false;
           this.showAlert({ msg: result, type: 'success', closable: true, timeout: 3000 });
           event.target.value = null;
@@ -56,6 +62,7 @@ export class CustomComponent implements OnInit {
         });
     } else {
       this.isUploading = false;
+      this.newFile = null;
     }
   }
 

@@ -40,24 +40,26 @@ export class CustomService {
       .catch(this.handleError);
   }
 
-  public uploadFile(path: string, file: any) { //TODO Check for image type
+  public uploadFile(path: string, file: any, description?: string) { //TODO Check for image type
     return new Promise((resolve, reject) => {
       let xhr: XMLHttpRequest = new XMLHttpRequest();
       xhr.onreadystatechange = () => {
         if (xhr.readyState === 4) {
           if (xhr.status === 200) {
-            resolve(xhr.response);
+            resolve(JSON.parse(xhr.response).entity.message);
           } else {
             reject(xhr.response);
           }
         }
       };
       xhr.open('POST', this._dataUrl + 'custom/' + path, true);
+      xhr.setRequestHeader("enctype", "multipart/form-data");
       let formData = new FormData();
       if (path === 'jars') {
         formData.append('jar', file, file.name);
       } else {
-        formData.append('file',file)
+        formData.append('file', file);
+        formData.append('description', description);
       }
       xhr.send(formData);
     });
