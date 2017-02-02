@@ -5,11 +5,7 @@ export class StreamModel {
   'stream-type': string;
   tags: string[];
   partitions: number;
-  generator: {
-    'generator-type': string;
-    service: string;
-    'instance-count': number;
-  };
   'replication-factor': number;
   force: boolean = false;
+  primary: string;
 }

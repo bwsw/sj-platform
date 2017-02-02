@@ -5,12 +5,8 @@ export class ServiceModel {
   keyspace: string;
   namespace: string;
   provider: string;
-  'metadata-provider': string;
-  'metadata-namespace': string;
-  'data-provider': string;
-  'data-namespace': string;
-  'lock-provider': string;
-  'lock-namespace': string;
+  prefix: string;
+  token: string;
   'zk-provider': string;
   'zk-namespace': string;
   index: string;
