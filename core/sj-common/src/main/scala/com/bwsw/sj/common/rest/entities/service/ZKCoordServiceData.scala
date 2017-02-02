@@ -40,6 +40,7 @@ class ZKCoordServiceData() extends ServiceData() {
         else {
           if (!validateNamespace(x)) {
             errors += createMessage("entity.error.incorrect.service.namespace", "namespace", x)
+            //todo think about using, maybe this is going to be more correct to check with validatePrefix()
           }
         }
     }

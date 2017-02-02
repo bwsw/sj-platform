@@ -8,7 +8,6 @@ object ConfigLiterals {
   final val zookeeperDomain = "zk"
   final val jdbcDomain = "jdbc"
   val domains = Seq(systemDomain, tstreamsDomain, kafkaDomain, elasticsearchDomain, zookeeperDomain, jdbcDomain)
-  val transactionGeneratorTag = s"$systemDomain.current-transaction-generator"
   val hostOfCrudRestTag = s"$systemDomain.crud-rest-host"
   val portOfCrudRestTag = s"$systemDomain.crud-rest-port"
   val marathonTag = s"$systemDomain.marathon-connect"

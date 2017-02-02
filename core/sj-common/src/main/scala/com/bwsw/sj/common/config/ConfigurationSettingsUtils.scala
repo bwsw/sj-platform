@@ -46,10 +46,6 @@ object ConfigurationSettingsUtils {
     getStringConfigSetting(createConfigurationSettingName(ConfigLiterals.systemDomain, getStringConfigSetting(frameworkTag)))
   }
 
-  def getTransactionGeneratorJarName() = {
-    getStringConfigSetting(createConfigurationSettingName(ConfigLiterals.systemDomain, getStringConfigSetting(transactionGeneratorTag)))
-  }
-
   def getCrudRestHost() = {
     getStringConfigSetting(hostOfCrudRestTag)
   }

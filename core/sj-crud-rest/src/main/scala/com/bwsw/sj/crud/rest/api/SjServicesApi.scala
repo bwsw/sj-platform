@@ -1,10 +1,9 @@
 package com.bwsw.sj.crud.rest.api
 
 import akka.http.scaladsl.server.{Directives, RequestContext}
-import com.bwsw.sj.common.DAL.model.{SjStream, TStreamSjStream}
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.service.ServiceData
-import com.bwsw.sj.common.utils.{GeneratorLiterals, ServiceLiterals, StreamLiterals}
+import com.bwsw.sj.common.utils.ServiceLiterals
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
 import scala.collection.mutable
@@ -115,16 +114,8 @@ trait SjServicesApi extends Directives with SjCrudValidator {
 
   private def getRelatedStreams(serviceName: String) = {
     streamDAO.getAll.filter(
-      s => s.service.name.equals(serviceName) || usedInGenerator(s, serviceName)
+      s => s.service.name.equals(serviceName)
     ).map(_.name)
-  }
-
-  private def usedInGenerator(stream: SjStream, serviceName: String) = {
-    if (stream.streamType == StreamLiterals.tstreamType) {
-      val tstream = stream.asInstanceOf[TStreamSjStream]
-
-      tstream.generator.generatorType != GeneratorLiterals.localType && tstream.generator.service.name == serviceName
-    } else false
   }
 
   private def getRelatedInstances(serviceName: String) = {

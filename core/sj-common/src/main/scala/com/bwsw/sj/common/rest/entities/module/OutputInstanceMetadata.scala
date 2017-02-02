@@ -35,8 +35,6 @@ class OutputInstanceMetadata extends InstanceMetadata {
     super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion)
     castParallelismToNumber(getStreamsPartitions(clearInputs))
     this.executionPlan.fillTasks(createTaskStreams(), createTaskNames(this.parallelism.asInstanceOf[Int], this.name))
-
-    fillStages(clearInputs)
   }
 
   override def createStreams() = {

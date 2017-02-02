@@ -10,7 +10,7 @@ import com.bwsw.sj.common.utils.EngineLiterals._
  *
  * @author Kseniya Tomskikh
  */
-class InstanceStage() {
+class FrameworkStage() {
   var state: String = toHandle
   var datetime: Date = null
   var duration: Long = 0

@@ -10,7 +10,7 @@ import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask, Instance}
 import com.bwsw.sj.common.DAL.model.{Service, _}
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.utils.{GeneratorLiterals, ProviderLiterals, _}
+import com.bwsw.sj.common.utils.{ProviderLiterals, _}
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.converter.IConverter
@@ -21,9 +21,6 @@ import com.bwsw.tstreams.streams.StreamService
 object DataFactory {
 
   private val zookeeperHosts = System.getenv("ZOOKEEPER_HOSTS").split(",")
-  private val cassandraHost = System.getenv("CASSANDRA_HOST")
-  private val cassandraPort = System.getenv("CASSANDRA_PORT").toInt
-  private val cassandraTestKeyspace = "test_keyspace_for_input_engine"
   private val testNamespace = "test"
   private val instanceName = "test-instance-for-input-engine"
   private var instanceOutputs: Array[String] = Array()
@@ -33,11 +30,10 @@ object DataFactory {
   tasks.put(s"$instanceName-task0", new InputTask(host, port))
   private val partitions = 1
   private val serializer = new JsonSerializer()
-  private val cassandraFactory = new CassandraFactory()
-  private val cassandraProvider = new Provider("cassandra-test-provider", "cassandra provider", Array(s"$cassandraHost:$cassandraPort"), "", "", ProviderLiterals.cassandraType)
-  private val zookeeperProvider = new Provider("zookeeper-test-provider", "zookeeper provider", zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
-  private val tstrqService = new TStreamService("tstream-test-service", ServiceLiterals.tstreamsType, "tstream test service",
-    cassandraProvider, cassandraTestKeyspace, cassandraProvider, cassandraTestKeyspace, zookeeperProvider, "unit")
+  private val zookeeperProvider = new Provider("zookeeper-test-provider", "zookeeper provider",
+    zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
+  private val tstrqService = new TStreamService("tstream-test-service", ServiceLiterals.tstreamsType,
+    "tstream test service", zookeeperProvider, "/input_prefix", "token")
   private val tstreamFactory = new TStreamsFactory()
   setTStreamFactoryProperties()
 
@@ -50,26 +46,26 @@ object DataFactory {
   }
 
   private def setMetadataClusterProperties(tStreamService: TStreamService) = {
-    tstreamFactory.setProperty(TSF_Dictionary.Metadata.Cluster.NAMESPACE, tStreamService.metadataNamespace)
-      .setProperty(TSF_Dictionary.Metadata.Cluster.ENDPOINTS, tStreamService.metadataProvider.hosts.mkString(","))
-  }
+//    tstreamFactory.setProperty(TSF_Dictionary.Metadata.Cluster.NAMESPACE, tStreamService.metadataNamespace)
+//      .setProperty(TSF_Dictionary.Metadata.Cluster.ENDPOINTS, tStreamService.metadataProvider.hosts.mkString(","))
+  } //todo after integration with t-streams
 
   private def setDataClusterProperties(tStreamService: TStreamService) = {
-    tStreamService.dataProvider.providerType match {
-      case ProviderLiterals.aerospikeType =>
-        tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.DRIVER, TSF_Dictionary.Data.Cluster.Consts.DATA_DRIVER_AEROSPIKE)
-      case _ =>
-        tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.DRIVER, TSF_Dictionary.Data.Cluster.Consts.DATA_DRIVER_CASSANDRA)
-    }
-
-    tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.NAMESPACE, tStreamService.dataNamespace)
-      .setProperty(TSF_Dictionary.Data.Cluster.ENDPOINTS, tStreamService.dataProvider.hosts.mkString(","))
-  }
+//    tStreamService.dataProvider.providerType match {
+//      case ProviderLiterals.aerospikeType =>
+//        tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.DRIVER, TSF_Dictionary.Data.Cluster.Consts.DATA_DRIVER_AEROSPIKE)
+//      case _ =>
+//        tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.DRIVER, TSF_Dictionary.Data.Cluster.Consts.DATA_DRIVER_CASSANDRA)
+//    }
+//
+//    tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.NAMESPACE, tStreamService.dataNamespace)
+//      .setProperty(TSF_Dictionary.Data.Cluster.ENDPOINTS, tStreamService.dataProvider.hosts.mkString(","))
+  } //todo after integration with t-streams
 
   private def setCoordinationOptions(tStreamService: TStreamService) = {
-    tstreamFactory.setProperty(TSF_Dictionary.Coordination.ROOT, s"/${tStreamService.lockNamespace}")
-      .setProperty(TSF_Dictionary.Coordination.ENDPOINTS, tStreamService.lockProvider.hosts.mkString(","))
-  }
+//    tstreamFactory.setProperty(TSF_Dictionary.Coordination.ROOT, s"/${tStreamService.lockNamespace}")
+//      .setProperty(TSF_Dictionary.Coordination.ENDPOINTS, tStreamService.lockProvider.hosts.mkString(","))
+  } //todo after integration with t-streams
 
   def writeData(totalInputElements: Int, totalDuplicateElements: Int) = {
     try {
@@ -106,34 +102,16 @@ object DataFactory {
     override def convert(obj: Array[Byte]): Array[Byte] = obj
   }
 
-  def open() = cassandraFactory.open(Set((cassandraHost, cassandraPort)))
-
-  def cassandraSetup() = {
-    cassandraFactory.createKeyspace(cassandraTestKeyspace)
-    cassandraFactory.createMetadataTables(cassandraTestKeyspace)
-    cassandraFactory.createDataTable(cassandraTestKeyspace)
-  }
-
-  def cassandraDestroy() = {
-    cassandraFactory.dropKeyspace(cassandraTestKeyspace)
-  }
-
-  def close() = cassandraFactory.close()
 
   def createProviders(providerService: GenericMongoService[Provider]) = {
-    providerService.save(cassandraProvider)
     providerService.save(zookeeperProvider)
   }
 
   def deleteProviders(providerService: GenericMongoService[Provider]) = {
-    providerService.delete("cassandra-test-provider")
     providerService.delete("zookeeper-test-provider")
   }
 
   def createServices(serviceManager: GenericMongoService[Service], providerService: GenericMongoService[Provider]) = {
-    val cassService = new CassandraService("cassandra-test-service", ServiceLiterals.cassandraType, "cassandra test service", cassandraProvider, cassandraTestKeyspace)
-    serviceManager.save(cassService)
-
     val zkService = new ZKService("zookeeper-test-service", ServiceLiterals.zookeeperType, "zookeeper test service", zookeeperProvider, testNamespace)
     serviceManager.save(zkService)
 
@@ -141,7 +119,6 @@ object DataFactory {
   }
 
   def deleteServices(serviceManager: GenericMongoService[Service]) = {
-    serviceManager.delete("cassandra-test-service")
     serviceManager.delete("zookeeper-test-service")
     serviceManager.delete("tstream-test-service")
   }
@@ -159,28 +136,23 @@ object DataFactory {
   }
 
   private def createOutputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
-    val localGenerator = new Generator(GeneratorLiterals.localType)
-
-    val s2 = new TStreamSjStream("test-output-tstream" + suffix, "test-output-tstream", partitions, tstrqService, StreamLiterals.tstreamType, Array("output", "some tags"), localGenerator)
+    val s2 = new TStreamSjStream("test-output-tstream" + suffix, "test-output-tstream", partitions, tstrqService, StreamLiterals.tstreamType, Array("output", "some tags"))
     sjStreamService.save(s2)
-
-    val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
-    val dataStorage = cassandraFactory.getDataStorage(cassandraTestKeyspace)
 
     StreamService.createStream(
       "test-output-tstream" + suffix,
       partitions,
       1000 * 60,
       "description of test output tstream",
-      metadataStorage,
-      dataStorage
-    )
+      null,
+      null
+    )//todo after integration with t-streams
   }
 
   private def deleteOutputTStream(streamService: GenericMongoService[SjStream], suffix: String) = {
     streamService.delete("test-output-tstream" + suffix)
-    val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
-    StreamService.deleteStream("test-output-tstream" + suffix, metadataStorage)
+
+    StreamService.deleteStream("test-output-tstream" + suffix, null) //todo after integration with t-streams
   }
 
   def createInstance(serviceManager: GenericMongoService[Service],

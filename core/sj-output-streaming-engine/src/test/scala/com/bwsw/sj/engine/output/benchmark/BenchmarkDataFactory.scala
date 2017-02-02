@@ -3,16 +3,16 @@ package com.bwsw.sj.engine.output.benchmark
 import java.io.{BufferedReader, File, InputStreamReader}
 import java.util.jar.JarFile
 
+import com.bwsw.common._
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.common.jdbc.JdbcClientBuilder
 import com.bwsw.common.traits.Serializer
-import com.bwsw.common._
-import com.bwsw.sj.common.DAL.model.{ESService, Generator, _}
 import com.bwsw.sj.common.DAL.model.module.{OutputInstance, Task}
+import com.bwsw.sj.common.DAL.model.{ESService, _}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.rest.entities.module.ExecutionPlan
-import com.bwsw.sj.common.utils.{GeneratorLiterals, ProviderLiterals, ServiceLiterals, _}
+import com.bwsw.sj.common.utils.{ProviderLiterals, ServiceLiterals, _}
 import com.bwsw.sj.engine.core.entities.JdbcEnvelope
 import com.bwsw.tstreams.agents.consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
@@ -26,19 +26,13 @@ import org.elasticsearch.search.SearchHits
 import scala.collection.JavaConverters._
 
 /**
- *
- *
- * @author Kseniya Tomskikh
- */
+  * @author Kseniya Tomskikh
+  */
 object BenchmarkDataFactory {
 
 
   private val txnFieldForJdbc: String = JdbcEnvelope.getTxnName
-  val metadataProviderName: String = "test-metprov-1"
-  val cassandraTestKeyspace: String = "bench"
-  val dataProviderName: String = "test-dataprov-1"
-  val lockProviderName: String = "test-lockprov-1"
-  val lockNamespace: String = "bench"
+  val zkProviderName: String = "test-zkprov-1"
   val tServiceName: String = "test-tserv-1"
   val tStreamName: String = "test-tstr-1"
 
@@ -67,20 +61,14 @@ object BenchmarkDataFactory {
   private val serializer: Serializer = new JsonSerializer
 
   private val esProviderHosts = System.getenv("ES_HOSTS").split(",").map(host => host.trim)
-  private val cassandraHosts = System.getenv("CASSANDRA_HOSTS").split(",").map(host => host.trim)
   private val jdbcHosts = System.getenv("JDBC_HOSTS").split(",").map(host => host.trim)
   private val zookeeperHosts = System.getenv("ZOOKEEPER_HOSTS").split(",").map(host => host.trim)
 
-  private val cassandraFactory = new CassandraFactory()
-
-  private val cassandraProvider = new Provider("cassandra-test-provider", "cassandra provider",
-    cassandraHosts, "", "", ProviderLiterals.cassandraType)
   private val zookeeperProvider = new Provider("zookeeper-test-provider", "zookeeper provider",
     zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
-  private val tstrqService = new TStreamService("test-tserv-1", ServiceLiterals.tstreamsType, "tstream test service",
-    cassandraProvider, cassandraTestKeyspace, cassandraProvider, cassandraTestKeyspace, zookeeperProvider, "unit")
+  private val tstrqService = new TStreamService("test-tserv-1", ServiceLiterals.tstreamsType,
+    "tstream test service", zookeeperProvider, "/output_prefix", "token")
   private val tstreamFactory = new TStreamsFactory()
-
 
 
   setTStreamFactoryProperties()
@@ -93,32 +81,32 @@ object BenchmarkDataFactory {
   }
 
   private def setMetadataClusterProperties(tStreamService: TStreamService) = {
-    tstreamFactory.setProperty(TSF_Dictionary.Metadata.Cluster.NAMESPACE, tStreamService.metadataNamespace)
-      .setProperty(TSF_Dictionary.Metadata.Cluster.ENDPOINTS, tStreamService.metadataProvider.hosts.mkString(","))
-  }
+    //    tstreamFactory.setProperty(TSF_Dictionary.Metadata.Cluster.NAMESPACE, tStreamService.metadataNamespace)
+    //      .setProperty(TSF_Dictionary.Metadata.Cluster.ENDPOINTS, tStreamService.metadataProvider.hosts.mkString(","))
+  } //todo after integration with t-streams
 
   private def setDataClusterProperties(tStreamService: TStreamService) = {
-    tStreamService.dataProvider.providerType match {
-      case ProviderLiterals.aerospikeType =>
-        tstreamFactory.setProperty(
-          TSF_Dictionary.Data.Cluster.DRIVER,
-          TSF_Dictionary.Data.Cluster.Consts.DATA_DRIVER_AEROSPIKE
-        )
-      case _ =>
-        tstreamFactory.setProperty(
-          TSF_Dictionary.Data.Cluster.DRIVER,
-          TSF_Dictionary.Data.Cluster.Consts.DATA_DRIVER_CASSANDRA
-        )
-    }
-
-    tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.NAMESPACE, tStreamService.dataNamespace)
-      .setProperty(TSF_Dictionary.Data.Cluster.ENDPOINTS, tStreamService.dataProvider.hosts.mkString(","))
-  }
+    //    tStreamService.dataProvider.providerType match {
+    //      case ProviderLiterals.aerospikeType =>
+    //        tstreamFactory.setProperty(
+    //          TSF_Dictionary.Data.Cluster.DRIVER,
+    //          TSF_Dictionary.Data.Cluster.Consts.DATA_DRIVER_AEROSPIKE
+    //        )
+    //      case _ =>
+    //        tstreamFactory.setProperty(
+    //          TSF_Dictionary.Data.Cluster.DRIVER,
+    //          TSF_Dictionary.Data.Cluster.Consts.DATA_DRIVER_CASSANDRA
+    //        )
+    //    }
+    //
+    //    tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.NAMESPACE, tStreamService.dataNamespace)
+    //      .setProperty(TSF_Dictionary.Data.Cluster.ENDPOINTS, tStreamService.dataProvider.hosts.mkString(","))
+  } //todo after integration with t-streams
 
   private def setCoordinationOptions(tStreamService: TStreamService) = {
-    tstreamFactory.setProperty(TSF_Dictionary.Coordination.ROOT, s"/${tStreamService.lockNamespace}")
-      .setProperty(TSF_Dictionary.Coordination.ENDPOINTS, tStreamService.lockProvider.hosts.mkString(","))
-  }
+    //    tstreamFactory.setProperty(TSF_Dictionary.Coordination.ROOT, s"/${tStreamService.lockNamespace}")
+    //      .setProperty(TSF_Dictionary.Coordination.ENDPOINTS, tStreamService.lockProvider.hosts.mkString(","))
+  } //todo after integration with t-streams
 
   private def setBindHostForAgents() = {
     val agentsHost = "localhost"
@@ -131,10 +119,7 @@ object BenchmarkDataFactory {
   }
 
   def createData(countTxns: Int, countElements: Int) = {
-    val tStream: TStreamSjStream =  new TStreamSjStream (
-      tStreamName, "", 4, tstrqService,
-      "stream.t-stream", Array("tag"), new Generator()
-    )
+    val tStream: TStreamSjStream = new TStreamSjStream(tStreamName, "", 4, tstrqService, "stream.t-stream", Array("tag"))
 
     val producer = createProducer(tStream)
     val s = System.currentTimeMillis()
@@ -257,24 +242,15 @@ object BenchmarkDataFactory {
     tstreamFactory.setProperty(TSF_Dictionary.Stream.DESCRIPTION, stream.description)
   }
 
-  def open() = cassandraFactory.open(splitHosts(cassandraHosts))
-
-  def prepareCassandra() = {
-    cassandraFactory.createKeyspace(cassandraTestKeyspace)
-    cassandraFactory.createMetadataTables(cassandraTestKeyspace)
-    cassandraFactory.createDataTable(cassandraTestKeyspace)
-  }
-
   def create_table: String = {
     s"CREATE TABLE $jdbcStreamName " +
-    "(id VARCHAR(255) not NULL, " +
-    " value INTEGER, " +
-    " txn VARCHAR(255), " +
-    " PRIMARY KEY ( id ))"
+      "(id VARCHAR(255) not NULL, " +
+      " value INTEGER, " +
+      " txn VARCHAR(255), " +
+      " PRIMARY KEY ( id ))"
   }
 
   def close() = {
-    cassandraFactory.close()
     tstreamFactory.close()
   }
 
@@ -288,29 +264,13 @@ object BenchmarkDataFactory {
     esProvider.password = ""
     providerService.save(esProvider)
 
-    val metadataProvider = new Provider()
-    metadataProvider.name = metadataProviderName
-    metadataProvider.hosts = cassandraHosts
-    metadataProvider.providerType = ProviderLiterals.cassandraType
-    metadataProvider.login = ""
-    metadataProvider.password = ""
-    providerService.save(metadataProvider)
-
-    val dataProvider = new Provider()
-    dataProvider.name = dataProviderName
-    dataProvider.hosts = cassandraHosts
-    dataProvider.providerType = ProviderLiterals.cassandraType
-    dataProvider.login = ""
-    dataProvider.password = ""
-    providerService.save(dataProvider)
-
-    val lockProvider = new Provider()
-    lockProvider.name = lockProviderName
-    lockProvider.hosts = zookeeperHosts
-    lockProvider.providerType = ProviderLiterals.zookeeperType
-    lockProvider.login = ""
-    lockProvider.password = ""
-    providerService.save(lockProvider)
+    val zkProvider = new Provider()
+    zkProvider.name = zkProviderName
+    zkProvider.hosts = zookeeperHosts
+    zkProvider.providerType = ProviderLiterals.zookeeperType
+    zkProvider.login = ""
+    zkProvider.password = ""
+    providerService.save(zkProvider)
 
     val jdbcProvider = new Provider()
     jdbcProvider.name = jdbcProviderName
@@ -322,7 +282,6 @@ object BenchmarkDataFactory {
   }
 
   def createServices() = {
-
     val esProv: Provider = providerService.get(esProviderName).get
     val esService: ESService = new ESService()
     esService.name = esServiceName
@@ -334,27 +293,21 @@ object BenchmarkDataFactory {
     esService.password = ""
     serviceManager.save(esService)
 
-
-    val metadataProvider: Provider = providerService.get(metadataProviderName).get
-    val dataProvider: Provider = providerService.get(dataProviderName).get
-    val lockProvider: Provider = providerService.get(lockProviderName).get
     val tStreamService: TStreamService = new TStreamService()
     tStreamService.name = tServiceName
     tStreamService.serviceType = ServiceLiterals.tstreamsType
     tStreamService.description = "t-streams service for benchmarks"
-    tStreamService.metadataProvider = metadataProvider
-    tStreamService.metadataNamespace = cassandraTestKeyspace
-    tStreamService.dataProvider = dataProvider
-    tStreamService.dataNamespace = cassandraTestKeyspace
-    tStreamService.lockProvider = lockProvider
-    tStreamService.lockNamespace = lockNamespace
+    tStreamService.provider = zookeeperProvider
+    tStreamService.prefix = "/output_prefix"
+    tStreamService.token = "token"
     serviceManager.save(tStreamService)
 
+    val zkProvider: Provider = providerService.get(zkProviderName).get
     val zkService = new ZKService()
     zkService.name = zkServiceName
     zkService.serviceType = ServiceLiterals.zookeeperType
     zkService.description = "zk service for benchmarks"
-    zkService.provider = lockProvider
+    zkService.provider = zkProvider
     zkService.namespace = "bench"
     serviceManager.save(zkService)
 
@@ -381,7 +334,7 @@ object BenchmarkDataFactory {
   }
 
   def createStreams(partitions: Int) = {
-     val esService = serviceManager.get(esServiceName).get.asInstanceOf[ESService]
+    val esService = serviceManager.get(esServiceName).get.asInstanceOf[ESService]
     val esStream: ESSjStream = new ESSjStream()
     esStream.name = esStreamName
     esStream.description = "es stream for benchmarks"
@@ -398,7 +351,6 @@ object BenchmarkDataFactory {
     tStream.service = tService
     tStream.tags = Array("tag1")
     tStream.partitions = partitions
-    tStream.generator = new Generator(GeneratorLiterals.localType)
     streamService.save(tStream)
 
     val jdbcService: JDBCService = serviceManager.get(jdbcServiceName).get.asInstanceOf[JDBCService]
@@ -411,21 +363,7 @@ object BenchmarkDataFactory {
     jdbcStream.tags = Array("tag1")
     streamService.save(jdbcStream)
 
-    val metadataHosts = splitHosts(tService.metadataProvider.hosts)
-    val cassandraFactory = new CassandraFactory()
-    cassandraFactory.open(metadataHosts)
-    val metadataStorage = cassandraFactory.getMetadataStorage(tService.metadataNamespace)
-
-    val namespace = tService.dataNamespace
-    val dataStorage = cassandraFactory.getDataStorage(namespace)
-
-    StreamService.createStream(tStreamName,
-      partitions,
-      60000,
-      "", metadataStorage,
-      dataStorage)
-
-    cassandraFactory.close()
+    StreamService.createStream(tStreamName, partitions, 60000, "", null, null) //todo after integration with t-streams
   }
 
   def createInstance(instanceName: String, checkpointMode: String, checkpointInterval: Long,
@@ -477,15 +415,9 @@ object BenchmarkDataFactory {
   }
 
   def deleteProviders() = {
-    providerService.delete(dataProviderName)
-    providerService.delete(metadataProviderName)
-    providerService.delete(lockProviderName)
+    providerService.delete(zkProviderName)
     providerService.delete(esProviderName)
     providerService.delete(jdbcProviderName)
-  }
-
-  def cassandraDestroy(keyspace: String) = {
-    cassandraFactory.dropKeyspace(keyspace)
   }
 
   def uploadModule(moduleJar: File) = {

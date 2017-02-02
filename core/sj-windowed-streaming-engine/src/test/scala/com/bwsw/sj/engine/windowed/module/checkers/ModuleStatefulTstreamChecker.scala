@@ -7,7 +7,6 @@ import com.bwsw.sj.engine.windowed.module.DataFactory._
 import com.bwsw.sj.engine.windowed.utils.StateHelper
 
 object ModuleStatefulTstreamChecker extends App {
-  open()
   val streamService = ConnectionRepository.getStreamService
   val objectSerializer = new ObjectSerializer()
 
@@ -83,7 +82,6 @@ object ModuleStatefulTstreamChecker extends App {
   consumer.stop()
   inputTstreamConsumers.foreach(x => x.stop())
   outputConsumers.foreach(x => x.stop())
-  close()
   ConnectionRepository.close()
 
   println("DONE")

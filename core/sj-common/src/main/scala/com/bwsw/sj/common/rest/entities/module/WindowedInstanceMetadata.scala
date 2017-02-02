@@ -3,7 +3,6 @@ package com.bwsw.sj.common.rest.entities.module
 import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
-import com.bwsw.sj.common.utils.StreamLiterals._
 import com.fasterxml.jackson.annotation.JsonProperty
 
 class WindowedInstanceMetadata extends InstanceMetadata {
@@ -46,11 +45,6 @@ class WindowedInstanceMetadata extends InstanceMetadata {
     super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion)
     castParallelismToNumber(getStreamsPartitions(clearInputs))
     this.executionPlan.fillTasks(createTaskStreams(), createTaskNames(this.parallelism.asInstanceOf[Int], this.name))
-
-    val inputStreams = getStreams(clearInputs)
-    val outputStreams = this.outputs
-    val streams = inputStreams.filter(s => s.streamType.equals(tstreamType)).map(_.name).union(outputStreams)
-    fillStages(streams)
   }
 
   override def createStreams() = {

@@ -14,6 +14,9 @@ class InstanceStatusObserver(instanceName : String) extends Callable[Unit] {
           if (instance.status != EngineLiterals.started) {
             throw new InterruptedException(s"Task cannot continue to work because of '${instance.status}' status of instance")
           }
+
+        case None =>
+          throw new UnknownError(s"Instance: $instanceName has been removed. It seems that there is a bug.")
       }
 
       Thread.sleep(1000)

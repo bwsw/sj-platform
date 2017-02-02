@@ -70,7 +70,7 @@ lazy val sj = (project in file(".")).settings(publish := {})
   .aggregate(common,
     engineCore, crudRest,
     inputStreamingEngine, regularStreamingEngine, windowedStreamingEngine, outputStreamingEngine,
-    framework, transactionGenerator,
+    framework,
     stubInput, stubRegular, stubWindowed, stubOutput, stubOutputJdbc,
     pmOutput,
     sflowProcess, sflowOutput,
@@ -138,11 +138,6 @@ lazy val framework = Project(id = "sj-mesos-framework",
   .settings(
     libraryDependencies ++= Dependencies.sjFrameworkDependencies.value
   )
-  .dependsOn(common)
-
-lazy val transactionGenerator = Project(id = "sj-transaction-generator",
-  base = file("./core/sj-transaction-generator"))
-  .settings(commonSettings: _*)
   .dependsOn(common)
 
 lazy val stubInput = Project(id = "sj-stub-input-streaming",

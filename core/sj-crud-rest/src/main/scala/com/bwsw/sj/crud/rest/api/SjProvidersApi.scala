@@ -144,7 +144,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
       case kfkService: KafkaService =>
         kfkService.provider.name.equals(providerName)
       case tService: TStreamService =>
-        tService.metadataProvider.name.equals(providerName) || tService.dataProvider.name.equals(providerName)
+        tService.provider.name.equals(providerName)
       case jdbcService: JDBCService =>
         jdbcService.provider.name.equals(providerName)
     }.map(_.name)

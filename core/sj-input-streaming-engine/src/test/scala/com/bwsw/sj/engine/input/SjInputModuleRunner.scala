@@ -24,14 +24,11 @@ object SjInputModuleSetup extends App {
 
   val checkpointInterval = 10
 
-  open()
-  cassandraSetup()
   loadModule(SjInputInfoExp.inputModule, SjInputInfoExp.fileStorage)
   createProviders(SjInputInfoExp.providerService)
   createServices(SjInputInfoExp.serviceManager, SjInputInfoExp.providerService)
   createStreams(SjInputInfoExp.streamService, SjInputInfoExp.serviceManager, outputCount)
   createInstance(SjInputInfoExp.serviceManager, SjInputInfoExp.instanceService, checkpointInterval)
-  close()
   ConnectionRepository.close()
 
   println("DONE")
@@ -57,14 +54,11 @@ object DuplicateCheckerRunner extends App {
 object SjInputModuleDestroy extends App {
   LogManager.getLogManager.reset()
 
-  open()
   deleteStreams(SjInputInfoExp.streamService, outputCount)
   deleteServices(SjInputInfoExp.serviceManager)
   deleteProviders(SjInputInfoExp.providerService)
   deleteInstance(SjInputInfoExp.instanceService)
   deleteModule(SjInputInfoExp.fileStorage, SjInputInfoExp.inputModule.getName)
-  cassandraDestroy()
-  close()
   ConnectionRepository.getConfigService.deleteAll()
   ConnectionRepository.close()
 

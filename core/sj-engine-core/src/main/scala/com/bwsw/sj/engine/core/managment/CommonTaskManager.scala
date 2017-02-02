@@ -11,11 +11,10 @@ import com.bwsw.tstreams.agents.consumer.Offset.IOffset
 import scala.collection.mutable
 
 /**
- * Class allowing to manage an environment of regular streaming task
- *
- *
- * @author Kseniya Mikhaleva
- */
+  * Class allowing to manage an environment of regular streaming task
+  *
+  * @author Kseniya Mikhaleva
+  */
 class CommonTaskManager() extends TaskManager {
 
   val inputs: mutable.Map[SjStream, Array[Int]] = getInputs(getExecutionPlan)
@@ -39,24 +38,22 @@ class CommonTaskManager() extends TaskManager {
   }
 
   /**
-   * Creates a t-stream consumer
-   *
-   * @param stream SjStream from which massages are consumed
-   * @param partitions Range of stream partition
-   * @param offset Offset policy that describes where a consumer starts
-   * @return T-stream consumer
-   */
+    * Creates a t-stream consumer
+    *
+    * @param stream     SjStream from which massages are consumed
+    * @param partitions Range of stream partition
+    * @param offset     Offset policy that describes where a consumer starts
+    * @return T-stream consumer
+    */
   def createConsumer(stream: TStreamSjStream, partitions: List[Int], offset: IOffset): Consumer[Array[Byte]] = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
-
-    val transactionGenerator = getTransactionGenerator(stream)
 
     setStreamOptions(stream)
 
     tstreamFactory.getConsumer[Array[Byte]](
       "consumer_for_" + taskName + "_" + stream.name,
-      transactionGenerator,
+      null, //todo after integration with t-streams
       converter,
       (0 until stream.partitions).toSet,
       offset)

@@ -3,6 +3,7 @@ package com.bwsw.sj.common.rest.utils
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.common.utils.ServiceLiterals._
+import org.apache.curator.utils.PathUtils
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -46,5 +47,21 @@ trait ValidationUtils extends MessageResourceUtils {
 
   def normalizeName(name: String) = {
     name.replace('\\', '/')
+  }
+
+  def validatePrefix(prefix: String) = {
+    try {
+      PathUtils.validatePath(prefix)
+
+      true
+    } catch {
+      case _: java.lang.IllegalArgumentException =>
+        //todo think about using, maybe this is going to be more correct to return a reason to a user
+        false
+    }
+  }
+
+  def validateToken(token: String) = {
+    token.length <= 32
   }
 }

@@ -11,8 +11,6 @@ object TempHelperForConfigSetup extends App {
 
   val configService = ConnectionRepository.getConfigService
 
-  configService.save(new ConfigurationSetting(ConfigLiterals.transactionGeneratorTag, "com.bwsw.tg-1.0", ConfigLiterals.systemDomain))
-
   configService.save(new ConfigurationSetting(ConfigLiterals.frameworkTag, "com.bwsw.fw-1.0", ConfigLiterals.systemDomain))
 
   configService.save(new ConfigurationSetting(createConfigurationSettingName(ConfigLiterals.systemDomain, "regular-streaming-validator-class"),

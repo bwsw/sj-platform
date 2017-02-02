@@ -23,16 +23,12 @@ object SjModuleSetup extends App {
 
   val module = new File("./contrib/stubs/sj-stub-regular-streaming/target/scala-2.12/sj-stub-regular-streaming-1.0-SNAPSHOT.jar")
 
-  open()
-  cassandraSetup()
   loadModule(module, fileStorage)
   createProviders(providerService)
   createServices(serviceManager, providerService)
   createStreams(streamService, serviceManager, partitions, _type, inputCount, outputCount)
   createInstance(serviceManager, instanceService, checkpointInterval, stateManagement, stateFullCheckpoint)
-
   createData(12, 4, streamService, _type, inputCount)
-  close()
   ConnectionRepository.close()
 
   println("DONE")
@@ -54,14 +50,12 @@ object SjModuleDestroy extends App {
 
   val module = new File("./contrib/stubs/sj-stub-regular-streaming/target/scala-2.12/sj-stub-regular-streaming-1.0-SNAPSHOT.jar")
 
-  open()
+
   deleteStreams(streamService, _type, inputCount, outputCount)
   deleteServices(serviceManager)
   deleteProviders(providerService)
   deleteInstance(instanceService)
   deleteModule(fileStorage, module.getName)
-  cassandraDestroy()
-  close()
   TempHelperForConfigDestroy.main(Array())
   ConnectionRepository.close()
 
