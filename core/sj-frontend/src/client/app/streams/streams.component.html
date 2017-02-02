@@ -349,7 +349,7 @@
         <template [ngIf]="currentStream && (blockingInstances.length === 0)">
           <button type="button" class="btn btn-secondary" (click)="DeleteStream.hide()">Cancel</button>
           <button type="button" class="btn btn-danger"
-                  (click)="DeleteStream(DeleteStream)">Delete
+                  (click)="deleteStream(DeleteStream)">Delete
           </button>
         </template>
         <template [ngIf]="currentStream && (blockingInstances.length > 0)">
