@@ -68,6 +68,7 @@
                 <button type="button"
                         class="btn btn-sm btn-secondary"
                         *ngIf="instance['rest-address']"
+                        [disabled]="instance.status === 'starting'"
                         title="Show instance tasks"
                         (click)="showInstanceTasks(ShowInstanceTasks, instance)">
                   <i class="fa fa-info-circle"></i>
