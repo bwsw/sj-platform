@@ -3,6 +3,7 @@ import { Http, Response, Headers, RequestOptions, ResponseContentType } from '@a
 import { Observable } from 'rxjs/Rx';
 
 import { FileModel } from '../models/custom.model';
+import { BaseResponse } from '../models/base-response.model';
 
 @Injectable()
 export class CustomService {
@@ -16,7 +17,14 @@ export class CustomService {
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
     return this.http.get(this._dataUrl + 'custom/' + path, options)
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        if (path === 'files') {
+          return data['custom-files']
+        } else {
+          return data['custom-jars'];
+        }
+      })
       .catch(this.handleError);
   }
 
@@ -59,7 +67,9 @@ export class CustomService {
         formData.append('jar', file, file.name);
       } else {
         formData.append('file', file);
-        formData.append('description', description);
+        if (description) {
+          formData.append('description', description);
+        }
       }
       xhr.send(formData);
     });
@@ -76,23 +86,17 @@ export class CustomService {
       deleteLink = path + '/' + file.name + '/' + file.version;
     }
     return this.http.delete(this._dataUrl + 'custom/' + deleteLink, options)
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        let node: string = 'custom'+path;
+        return data.message;
+      })
       .catch(this.handleError);
   }
 
   private extractData(res: Response) {
-    let body = {};
-    if (typeof res.json()['entity']['custom-files'] !== 'undefined') {
-      body = res.json()['entity']['custom-files'];
-    } else if (typeof res.json()['entity']['custom-jars'] !== 'undefined') {
-      body = res.json()['entity']['custom-jars'];
-    } else {
-      if (typeof res.json()['entity']['message'] !== 'undefined') {
-        body = res.json()['entity']['message'];
-      } else {
-        body = res.json();
-      }
-    }
+    let body = new BaseResponse();
+    body.fillFromJSON(res.json()['entity']);
     return body;
   }
 

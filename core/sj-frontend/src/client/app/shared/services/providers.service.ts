@@ -3,6 +3,8 @@ import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 
 import { ProviderModel } from '../models/provider.model';
+import { BaseResponse } from '../models/base-response.model';
+
 
 @Injectable()
 export class ProvidersService {
@@ -16,19 +18,28 @@ export class ProvidersService {
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
     return this.http.get(this._dataUrl + 'providers', options)
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.providers;
+      })
       .catch(this.handleError);
   }
 
   public getProviderTypes(): Observable<string[]> {
     return this.http.get(this._dataUrl + 'providers/types')
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.types;
+      })
       .catch(this.handleError);
   }
 
   public getRelatedServicesList(providerName: string): Observable<string[]> {
     return this.http.get(this._dataUrl + 'providers/' + providerName + '/related')
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.services;
+      })
       .catch(this.handleError);
   }
 
@@ -37,7 +48,10 @@ export class ProvidersService {
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
     return this.http.get(this._dataUrl + 'providers/' + providerName, options)
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.providers;
+      })
       .catch(this.handleError);
   }
 
@@ -46,7 +60,10 @@ export class ProvidersService {
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
     return this.http.get(this._dataUrl + 'providers/' + provider.name + '/connection', options)
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.connection;
+      })
       .catch(this.handleError);
   }
 
@@ -55,7 +72,10 @@ export class ProvidersService {
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
     return this.http.delete(this._dataUrl + 'providers/' + provider.name, options)
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.message;
+      })
       .catch(this.handleError);
   }
 
@@ -64,27 +84,16 @@ export class ProvidersService {
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
     return this.http.post(this._dataUrl + 'providers', body, options)
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.message;
+      })
       .catch(this.handleError);
   }
 
-  private extractData(res: Response) { //TODO Write good response parser
-    let body = {};
-    if (typeof res.json()['entity']['connection'] !== 'undefined') {
-      body = res.json()['entity']['connection'];
-    } else if (typeof res.json()['entity']['message'] !== 'undefined') {
-      body = res.json()['entity']['message'];
-    } else if (typeof res.json()['entity']['services'] !== 'undefined') {
-      body = res.json()['entity']['services'];
-    } else if (typeof res.json()['entity']['types'] !== 'undefined') {
-      body = res.json()['entity']['types'];
-    } else {
-      if (typeof res.json()['id'] === 'undefined') {
-        body = res.json()['entity']['providers'];
-      } else {
-        body = res.json();
-      }
-    }
+  private extractData(res: Response) {
+    let body = new BaseResponse();
+    body.fillFromJSON(res.json()['entity']);
     return body;
   }
 

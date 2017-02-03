@@ -106,18 +106,20 @@
       <div class="modal-body">
         <form #fileForm="ngForm" (ngSubmit)="createSetting(AddSetting)" class="form-create-entity">
 
-          <!-- description -->
-          <fieldset class="form-group row">
-            <label class="col-sm-2 col-form-label required">Description</label>
-            <div class="col-sm-10">
-              <input [(ngModel)]="newDescription" name="fileDescription" type="text" class="form-control"
-                     required pattern="[a-z-. ]+">
-            </div>
-          </fieldset>
+          <!-- file -->
           <fieldset class="form-group row">
             <label class="col-sm-2 col-form-label required">File</label>
             <div class="col-sm-10">
               <input required class="form-control" type="file" (change)="setNewFile($event)" name="fileContent">
+            </div>
+          </fieldset>
+
+          <!-- description -->
+          <fieldset class="form-group row">
+            <label class="col-sm-2 col-form-label">Description</label>
+            <div class="col-sm-10">
+              <input [(ngModel)]="newDescription" name="fileDescription" type="text" class="form-control"
+                     pattern="[a-z-. ]+">
             </div>
           </fieldset>
         </form>
