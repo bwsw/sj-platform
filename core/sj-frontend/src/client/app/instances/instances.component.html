@@ -59,6 +59,7 @@
                         'tag-success': instance.status === 'started',
                         'tag-info': instance.status === 'starting' || instance.status === 'stopping',
                         'tag-danger': instance.status === 'failed',
+                        'tag-warning': instance.status === 'error',
                         'tag-primary': instance.status === 'ready'
                       }">{{ instance.status }}</span>
               </td>

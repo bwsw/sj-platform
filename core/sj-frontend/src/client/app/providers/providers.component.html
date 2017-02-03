@@ -158,7 +158,7 @@
               <div *ngFor="let host of newProvider.hosts; let i = index; trackBy:customTrackBy"
                    class="input-group mb-1">
                 <input required
-                       validHostPort
+                       pattern="\d+(.\d+){3}:\d+"
                        [(ngModel)]="newProvider.hosts[i]"  name="providerHosts{{i}}"
                        type="text" class="form-control " placeholder="IPv4:port">
                 <span class="input-group-btn" *ngIf="i!==0">

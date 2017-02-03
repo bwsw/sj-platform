@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 
 import { ProvidersComponent } from './providers.component';
 import { SharedModule } from '../shared/shared.module';
-import { ValidHostPortDirective } from '../shared/validators/validHostPort.directive';
 
 @NgModule({
   imports: [
@@ -11,12 +10,10 @@ import { ValidHostPortDirective } from '../shared/validators/validHostPort.direc
     SharedModule
   ],
   declarations: [
-    ProvidersComponent,
-    ValidHostPortDirective
+    ProvidersComponent
   ],
   exports: [
-    ProvidersComponent,
-    ValidHostPortDirective
+    ProvidersComponent
   ]
 })
 export class ProvidersModule {
