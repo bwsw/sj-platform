@@ -63,6 +63,10 @@ class FrameworkScheduler extends Scheduler {
    * @param offers resources, that master offered to framework
    */
   override def resourceOffers(driver: SchedulerDriver, offers: util.List[Offer]): Unit = {
+
+    if (!FrameworkUtil.isInstanceStarted) FrameworkUtil.killAllLaunchedTasks()
+
+
     val internalOffers: mutable.Buffer[Offer] = offers.asScala
     logger.info(s"RESOURCE OFFERS")
     TasksList.clearAvailablePorts()
@@ -96,10 +100,12 @@ class FrameworkScheduler extends Scheduler {
     logger.debug(s"Tasks to launch: ${TasksList.toLaunch}")
 
     OfferHandler.offerNumber = 0
-    TasksList.clearLaunchedTasks()
-    for (currTask <- TasksList.toLaunch) {
-      createTaskToLaunch(currTask, tasksCountOnSlaves)
-      tasksCountOnSlaves = OfferHandler.updateOfferNumber(tasksCountOnSlaves)
+    if (FrameworkUtil.isInstanceStarted) {
+      TasksList.clearLaunchedOffers()
+      for (currTask <- TasksList.toLaunch) {
+        createTaskToLaunch(currTask, tasksCountOnSlaves)
+        tasksCountOnSlaves = OfferHandler.updateOfferNumber(tasksCountOnSlaves)
+      }
     }
 
     launchTasks(driver)
@@ -133,7 +139,7 @@ class FrameworkScheduler extends Scheduler {
     * @param driver
     */
   private def launchTasks(driver: SchedulerDriver) = {
-    for (task <- TasksList.getLaunchedTasks()) {
+    for (task <- TasksList.getLaunchedOffers()) {
       driver.launchTasks(List(task._1).asJava, task._2.asJava)
     }
   }
@@ -157,7 +163,7 @@ class FrameworkScheduler extends Scheduler {
     FrameworkUtil.frameworkId = frameworkId.getValue
     FrameworkUtil.master = masterInfo
 
-    FrameworkUtil.params = FrameworkUtil.getEnvParams()
+    FrameworkUtil.params = FrameworkUtil.getEnvParams
     logger.debug(s"Got environment variable: ${FrameworkUtil.params}")
 
     val optionInstance = ConnectionRepository.getInstanceService.get(FrameworkUtil.params("instanceId"))

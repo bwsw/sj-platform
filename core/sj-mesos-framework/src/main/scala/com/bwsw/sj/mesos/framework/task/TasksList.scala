@@ -18,7 +18,9 @@ object TasksList {
   private val listTasks = mutable.Map[String, Task]()
   private var message: String = "Initialization"
   private val availablePorts = collection.mutable.ListBuffer[Long]()
-  private var launchedTasks = Map[OfferID, ArrayBuffer[TaskInfo]]()
+  private var launchedOffers = Map[OfferID, ArrayBuffer[TaskInfo]]()
+
+  private var launchedTasks = mutable.ListBuffer[String]()
 
   var perTaskCores: Double = 0.0
   var perTaskMem: Double = 0.0
@@ -48,6 +50,11 @@ object TasksList {
 
   def launched(taskId: String) = {
     tasksToLaunch -= taskId
+    launchedTasks += taskId
+  }
+
+  def clearLaunchedTasks() = {
+    launchedTasks = mutable.ListBuffer[String]()
   }
 
   def toJson: Map[String, Any] = {
@@ -66,12 +73,16 @@ object TasksList {
     toLaunch.size
   }
 
-  def getLaunchedTasks() = {
+  def getLaunchedOffers() = {
+    launchedOffers
+  }
+
+  def getLaunchedTasks = {
     launchedTasks
   }
 
-  def clearLaunchedTasks() = {
-    launchedTasks = Map[OfferID, ArrayBuffer[TaskInfo]]()
+  def clearLaunchedOffers() = {
+    launchedOffers = Map[OfferID, ArrayBuffer[TaskInfo]]()
   }
 
   def setMessage(message: String) = {
@@ -206,10 +217,10 @@ object TasksList {
 
 
   def addTaskToSlave(task: TaskInfo, offer: (Offer, Int)) = {
-    if (launchedTasks.contains(offer._1.getId)) {
-      launchedTasks(offer._1.getId) += task
+    if (launchedOffers.contains(offer._1.getId)) {
+      launchedOffers(offer._1.getId) += task
     } else {
-      launchedTasks += offer._1.getId -> ArrayBuffer(task)
+      launchedOffers += offer._1.getId -> ArrayBuffer(task)
     }
   }
 

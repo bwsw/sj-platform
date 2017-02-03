@@ -8,7 +8,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.mesos.framework.task.TasksList
 import org.apache.log4j.Logger
-import org.apache.mesos.Protos.MasterInfo
+import org.apache.mesos.Protos.{MasterInfo, TaskID}
 import org.apache.mesos.SchedulerDriver
 
 import scala.collection.immutable
@@ -55,7 +55,7 @@ object FrameworkUtil {
     System.exit(1)
   }
 
-  def getEnvParams() = {
+  def getEnvParams = {
     Map(
       "instanceId" -> Properties.envOrElse("INSTANCE_ID", "00000000-0000-0000-0000-000000000000"),
       "mongodbHosts" -> Properties.envOrElse("MONGO_HOSTS", "127.0.0.1:27017")
@@ -74,5 +74,14 @@ object FrameworkUtil {
     val restAddress = new URI(s"http://$restHost:$restPort/v1/custom/jars/$jarName").toString
     logger.debug(s"Engine downloading URL: $restAddress")
     restAddress
+  }
+
+  def isInstanceStarted: Boolean = {
+    val optionInstance = ConnectionRepository.getInstanceService.get(FrameworkUtil.params("instanceId"))
+    if (optionInstance.isDefined) optionInstance.get.status == "started" else false
+  }
+
+  def killAllLaunchedTasks() = {
+    TasksList.getLaunchedTasks.foreach(task => driver.killTask(TaskID.newBuilder().setValue(task).build))
   }
 }
