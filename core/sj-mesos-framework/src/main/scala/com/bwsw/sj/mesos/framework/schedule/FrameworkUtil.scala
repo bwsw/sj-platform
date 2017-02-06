@@ -76,12 +76,51 @@ object FrameworkUtil {
     restAddress
   }
 
-  def isInstanceStarted: Boolean = {
+  def getInstanceStatus: String = {
     val optionInstance = ConnectionRepository.getInstanceService.get(FrameworkUtil.params("instanceId"))
-    if (optionInstance.isDefined) optionInstance.get.status == "started" else false
+    if (optionInstance.isDefined) optionInstance.get.status
+    // TODO return if instance not defined
+    else ""
+  }
+
+  def isInstanceStarted: Boolean = {
+    updateInstance()
+    instance.status == "started"
   }
 
   def killAllLaunchedTasks() = {
-    TasksList.getLaunchedTasks.foreach(task => driver.killTask(TaskID.newBuilder().setValue(task).build))
+    TasksList.getLaunchedTasks.foreach(taskId => {
+      TasksList.stopTask(taskId)
+    })
   }
+
+  /**
+    * Teardown framework, do it if instance not started.
+    */
+  def teardown() = {
+    println("Launched tasks: ", TasksList.getLaunchedTasks)
+    killAllLaunchedTasks()
+  }
+
+  def prepareTasksToLaunch() = {
+    print("Lanched tasks")
+    TasksList.getList.foreach(task => {
+      print(task.toJson, "\n") // TODO remove print
+      if (!TasksList.getLaunchedTasks.contains(task.id)) TasksList.addToLaunch(task.id)
+    })
+  }
+
+
+  def updateInstance() = {
+    val optionInstance = ConnectionRepository.getInstanceService.get(FrameworkUtil.params("instanceId"))
+
+    if (optionInstance.isEmpty) {
+      logger.error(s"Not found instance")
+      TasksList.setMessage("Framework shut down: not found instance.")
+      driver.stop()
+    } else {
+      FrameworkUtil.instance = optionInstance.get
+    }
+  }
+
 }

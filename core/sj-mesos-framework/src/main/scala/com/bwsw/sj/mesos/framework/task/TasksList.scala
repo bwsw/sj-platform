@@ -1,5 +1,6 @@
 package com.bwsw.sj.mesos.framework.task
 
+import com.bwsw.sj.common.DAL.ConnectionConstants
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
@@ -10,7 +11,6 @@ import org.apache.mesos.Protos.{TaskID, TaskInfo, _}
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
-import com.bwsw.sj.common.DAL.ConnectionConstants
 
 object TasksList {
   private val logger = Logger.getLogger(this.getClass)
@@ -29,7 +29,7 @@ object TasksList {
   def newTask(taskId: String) = {
     val task = new Task(taskId)
     listTasks += taskId -> task
-    tasksToLaunch += taskId
+//    tasksToLaunch += taskId
   }
 
   def getList = {
@@ -51,6 +51,15 @@ object TasksList {
   def launched(taskId: String) = {
     tasksToLaunch -= taskId
     launchedTasks += taskId
+  }
+
+  def stopped(taskId: String) = {
+    launchedTasks -= taskId
+  }
+
+  def stopTask(taskId: String) = {
+    FrameworkUtil.driver.killTask(TaskID.newBuilder().setValue(taskId).build)
+    stopped(taskId)
   }
 
   def clearLaunchedTasks() = {

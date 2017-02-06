@@ -33,6 +33,8 @@ object StatusHandler {
       status.getState.toString match {
         case "TASK_FAILED" | "TASK_ERROR" => FailureHandler.setStatus(status).process()
         case "TASK_RUNNING" => SuccessHandler.setStatus(status).process()
+        case "TASK_KILLED" => KilledHandler.setStatus(status).process()
+        case "TASK_LOST" => LostHandler.setStatus(status).process()
         case _ =>
       }
     }
