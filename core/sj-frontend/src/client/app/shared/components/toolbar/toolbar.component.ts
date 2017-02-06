@@ -16,7 +16,7 @@ export class ToolbarComponent implements AfterViewInit {
       if ($(this).hasClass('layout-toggler') && $('body').hasClass('sidebar-off-canvas')) {
         $('body').toggleClass('sidebar-opened').parent().toggleClass('sidebar-opened');
         //resize charts
-        self._resizeBroadcast();
+        self.resizeBroadcast();
 
       } else if ($(this).hasClass('layout-toggler') && ($('body').hasClass('sidebar-nav') || bodyClass === 'sidebar-nav')) {
         $('body').toggleClass('sidebar-nav');
@@ -25,7 +25,7 @@ export class ToolbarComponent implements AfterViewInit {
           localStorage.clear();
         }
         //resize charts
-        self._resizeBroadcast();
+        self.resizeBroadcast();
       } else {
         $('body').toggleClass('mobile-open');
       }
@@ -35,7 +35,7 @@ export class ToolbarComponent implements AfterViewInit {
       $('body').toggleClass('aside-menu-open');
 
       //resize charts
-      this._resizeBroadcast();
+      this.resizeBroadcast();
     });
 
     $('.sidebar-close').click(() => {
@@ -48,7 +48,7 @@ export class ToolbarComponent implements AfterViewInit {
     });
   }
 
-  private _resizeBroadcast() {
+  private resizeBroadcast() {
     let timesRun = 0;
     let interval = setInterval((e) => {
       timesRun += 1;

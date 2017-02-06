@@ -11,17 +11,15 @@ interface ISomeObject {
 
 @Injectable()
 export class ServicesService {
+  private dataUrl = '/v1/';
 
-  private _dataUrl = '/v1/';
-
-  constructor(private http: Http) {
-  }
+  constructor(private http: Http) { }
 
   public getServiceList(): Observable<ServiceModel[]> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this._dataUrl + 'services', options)
+    return this.http.get(this.dataUrl + 'services', options)
       .map(response => {
         const data = this.extractData(response);
         return data.services;
@@ -30,7 +28,7 @@ export class ServicesService {
   }
 
   public getServiceTypes(): Observable<string[]> {
-    return this.http.get(this._dataUrl + 'services/types')
+    return this.http.get(this.dataUrl + 'services/types')
       .map(response => {
         const data = this.extractData(response);
         return data.types;
@@ -39,7 +37,7 @@ export class ServicesService {
   }
 
   public getRelatedStreamsList(serviceName: string): Observable<ISomeObject> {
-    return this.http.get(this._dataUrl + 'services/' + serviceName + '/related')
+    return this.http.get(this.dataUrl + 'services/' + serviceName + '/related')
       .map(response => {
         const data = this.extractData(response);
         return data;
@@ -51,7 +49,7 @@ export class ServicesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this._dataUrl + 'services/' + serviceName, options)
+    return this.http.get(this.dataUrl + 'services/' + serviceName, options)
       .map(response => {
         const data = this.extractData(response);
         return data.services;
@@ -63,7 +61,7 @@ export class ServicesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.delete(this._dataUrl + 'services/' + service.name, options)
+    return this.http.delete(this.dataUrl + 'services/' + service.name, options)
       .map(response => {
         const data = this.extractData(response);
         return data.message;
@@ -75,7 +73,7 @@ export class ServicesService {
     let body = JSON.stringify(service);
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
-    return this.http.post(this._dataUrl + 'services', body, options)
+    return this.http.post(this.dataUrl + 'services', body, options)
       .map(response => {
         const data = this.extractData(response);
         return data.message;

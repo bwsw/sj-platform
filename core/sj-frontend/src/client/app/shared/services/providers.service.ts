@@ -8,16 +8,15 @@ import { BaseResponse } from '../models/base-response.model';
 
 @Injectable()
 export class ProvidersService {
-  private   _dataUrl = '/v1/';
+  private dataUrl = '/v1/';
 
-  constructor(private http: Http) {
-  }
+  constructor(private http: Http) { }
 
   public getProviderList(): Observable<ProviderModel[]> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this._dataUrl + 'providers', options)
+    return this.http.get(this.dataUrl + 'providers', options)
       .map(response => {
         const data = this.extractData(response);
         return data.providers;
@@ -26,7 +25,7 @@ export class ProvidersService {
   }
 
   public getProviderTypes(): Observable<string[]> {
-    return this.http.get(this._dataUrl + 'providers/types')
+    return this.http.get(this.dataUrl + 'providers/types')
       .map(response => {
         const data = this.extractData(response);
         return data.types;
@@ -35,7 +34,7 @@ export class ProvidersService {
   }
 
   public getRelatedServicesList(providerName: string): Observable<string[]> {
-    return this.http.get(this._dataUrl + 'providers/' + providerName + '/related')
+    return this.http.get(this.dataUrl + 'providers/' + providerName + '/related')
       .map(response => {
         const data = this.extractData(response);
         return data.services;
@@ -47,7 +46,7 @@ export class ProvidersService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this._dataUrl + 'providers/' + providerName, options)
+    return this.http.get(this.dataUrl + 'providers/' + providerName, options)
       .map(response => {
         const data = this.extractData(response);
         return data.providers;
@@ -59,7 +58,7 @@ export class ProvidersService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this._dataUrl + 'providers/' + provider.name + '/connection', options)
+    return this.http.get(this.dataUrl + 'providers/' + provider.name + '/connection', options)
       .map(response => {
         const data = this.extractData(response);
         return data.connection;
@@ -71,7 +70,7 @@ export class ProvidersService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.delete(this._dataUrl + 'providers/' + provider.name, options)
+    return this.http.delete(this.dataUrl + 'providers/' + provider.name, options)
       .map(response => {
         const data = this.extractData(response);
         return data.message;
@@ -83,7 +82,7 @@ export class ProvidersService {
     let body = JSON.stringify(provider);
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
-    return this.http.post(this._dataUrl + 'providers', body, options)
+    return this.http.post(this.dataUrl + 'providers', body, options)
       .map(response => {
         const data = this.extractData(response);
         return data.message;

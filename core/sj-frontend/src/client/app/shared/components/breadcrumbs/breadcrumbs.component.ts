@@ -1,4 +1,3 @@
-
 import { Component, OnInit } from '@angular/core';
 import { Router, NavigationEnd, ActivatedRouteSnapshot } from '@angular/router';
 import { AppRoute } from '../../models/routes.model';
@@ -25,27 +24,27 @@ export class BreadcrumbsComponent implements OnInit {
     return this._currentRoute;
   }
 
-  constructor(private _router: Router) {
+  constructor(private router: Router) {
   }
 
   public ngOnInit() {
     // Apply next state only if navigation was ended
-    this._router.events
+    this.router.events
       .filter(event => event instanceof NavigationEnd)
-      .subscribe(this._applyNextState.bind(this));
+      .subscribe(this.applyNextState.bind(this));
   }
 
-  private _applyNextState() {
+  private applyNextState() {
     let routes: IRouteItem[] = [];
     let path: string[] = [];
 
-    let child = this._router.routerState.snapshot.root.firstChild;
+    let child = this.router.routerState.snapshot.root.firstChild;
 
     while (child) {
       let routeConfig = <AppRoute>child.routeConfig;
 
       if (!routeConfig.breadcrumbIgnore) {
-        let name = this._extractRouteName(child);
+        let name = this.extractRouteName(child);
         let pathPart = child.url.join('/');
 
         if (name || pathPart) {
@@ -64,32 +63,32 @@ export class BreadcrumbsComponent implements OnInit {
     this._routes = routes;
   }
 
-  private _extractRouteName(route: ActivatedRouteSnapshot) {
+  private extractRouteName(route: ActivatedRouteSnapshot) {
     let routeConfig = <AppRoute>route.routeConfig;
     let breadcrumbName = routeConfig.breadcrumb;
 
-    return breadcrumbName || this._extractRouteNameFallback(route);
+    return breadcrumbName || this.extractRouteNameFallback(route);
   }
 
-  private _extractRouteNameFallback(route: ActivatedRouteSnapshot) {
+  private extractRouteNameFallback(route: ActivatedRouteSnapshot) {
     if (route.component) {
       let componentName = typeof route.component === 'string' ? <string>route.component : (<Function>route.component).name;
-      return this._prepareRouteName(componentName);
+      return this.prepareRouteName(componentName);
     } else {
-      return this._prepareRouteName(route.url.join('/'));
+      return this.prepareRouteName(route.url.join('/'));
     }
   }
 
-  private _prepareRouteName(name: string) {
+  private prepareRouteName(name: string) {
     if (name.length > 0) {
       name = name.replace('-', ' ').replace('Component', '').replace(/\/\d+/, '');
-      name = name.split(' ').map(this._capitalizeFirstLetter).join('');
+      name = name.split(' ').map(this.capitalizeFirstLetter).join('');
       name = name.split(/(?=[A-Z])/).join(' ');
     }
     return name;
   }
 
-  private _capitalizeFirstLetter(str: string) {
+  private capitalizeFirstLetter(str: string) {
     return str[0].toUpperCase() + str.slice(1);
   }
 }

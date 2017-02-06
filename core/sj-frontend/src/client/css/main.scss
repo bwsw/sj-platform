@@ -1,29 +1,29 @@
 /* Logo styles */
-header.navbar a.navbar-brand {
-  background-image: none;
-  text-align: center;
-  font-size: 0;
-  line-height: 38px;
+header.navbar {
+  a.navbar-brand {
+    background-image: none;
+    text-align: center;
+    font-size: 0;
+    line-height: 38px;
+    img {
+      max-width: 100%;
+      max-height: 90%;
+    }
+  }
 }
 
-header.navbar a.navbar-brand img {
-  max-width: 100%;
-  max-height: 90%;
-}
 
 /* Table action buttons */
 .actions-column {
   width: 1%;
   white-space: nowrap;
   text-align: right;
+  .btn.btn-sm {
+    padding: 0 0.2rem;
+    border: none;
+    background: none;
+  }
 }
-
-.actions-column .btn.btn-sm {
-  padding: 0 0.2rem;
-  border: none;
-  background: none;
-}
-
 
 /* Form styles */
 label.required::after {
@@ -50,8 +50,10 @@ label.required::after {
   pointer-events: none;
 }
 
-.btn-upload input {
-  display: none;
+.btn-upload {
+  input {
+    display: none;
+  }
 }
 
 .upload-progress {
@@ -94,6 +96,7 @@ li.tag.nopadding input{
   padding: 0px;
 }
 
+/*mozila validated input style disable*/
 :invalid {
   box-shadow: none;
 }

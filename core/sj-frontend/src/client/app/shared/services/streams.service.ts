@@ -7,16 +7,15 @@ import { BaseResponse } from '../models/base-response.model';
 
 @Injectable()
 export class StreamsService {
-  private _dataUrl = '/v1/';
+  private dataUrl = '/v1/';
 
-  constructor(private http: Http) {
-  }
+  constructor(private http: Http) { }
 
   public getStreamList(): Observable<StreamModel[]> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this._dataUrl + 'streams', options)
+    return this.http.get(this.dataUrl + 'streams', options)
       .map(response => {
         const data = this.extractData(response);
         return data.streams;
@@ -25,7 +24,7 @@ export class StreamsService {
   }
 
   public getStreamTypes(): Observable<string[]> {
-    return this.http.get(this._dataUrl + 'streams/types')
+    return this.http.get(this.dataUrl + 'streams/types')
       .map(response => {
         const data = this.extractData(response);
         return data.types;
@@ -34,7 +33,7 @@ export class StreamsService {
   }
 
   public getRelatedInstancesList(streamName: string): Observable<string[]> {
-    return this.http.get(this._dataUrl + 'streams/' + streamName + '/related')
+    return this.http.get(this.dataUrl + 'streams/' + streamName + '/related')
       .map(response => {
         const data = this.extractData(response);
         return data.instances;
@@ -46,7 +45,7 @@ export class StreamsService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this._dataUrl + 'streams/' + stream.name, options)
+    return this.http.get(this.dataUrl + 'streams/' + stream.name, options)
       .map(response => {
         const data = this.extractData(response);
         return data.streams;
@@ -58,7 +57,7 @@ export class StreamsService {
     let body = JSON.stringify(stream);
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
-    return this.http.post(this._dataUrl + 'streams', body, options)
+    return this.http.post(this.dataUrl + 'streams', body, options)
       .map(response => {
         const data = this.extractData(response);
         return data.message;
@@ -70,7 +69,7 @@ export class StreamsService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.delete(this._dataUrl + 'streams/' + stream.name, options)
+    return this.http.delete(this.dataUrl + 'streams/' + stream.name, options)
       .map(response => {
         const data = this.extractData(response);
         return data.message;

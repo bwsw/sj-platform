@@ -20,7 +20,7 @@ interface ITasksObject {
 
 @Injectable()
 export class InstancesService {
-  private _dataUrl = '/v1/';
+  private dataUrl = '/v1/';
 
   private static fillInstanceGeneralFields(orig: InstanceModel, instance: SubtypedInstance) {
     instance['name'] = orig['name'];
@@ -41,14 +41,13 @@ export class InstancesService {
     return instance;
   }
 
-  constructor(private http: Http) {
-  }
+  constructor(private http: Http) { }
 
   public getInstanceList(): Observable<InstanceModel[]> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this._dataUrl + 'modules/instances', options)
+    return this.http.get(this.dataUrl + 'modules/instances', options)
       .map(response => {
         const data = this.extractData(response);
         return data.instances;
@@ -60,7 +59,7 @@ export class InstancesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
+    return this.http.get(this.dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
       instance['module-version'] + '/instance' + '/' + instance['name'], options)
       .map(response => {
         const data = this.extractData(response);
@@ -83,7 +82,7 @@ export class InstancesService {
     let headers = new Headers({'Content-Type': 'application/json'});
     let options = new RequestOptions({ headers: headers });
 
-    return this.http.post(this._dataUrl + 'modules/' + instance.module['module-type'] + '/' + instance.module['module-name'] + '/' +
+    return this.http.post(this.dataUrl + 'modules/' + instance.module['module-type'] + '/' + instance.module['module-name'] + '/' +
       instance.module['module-version'] + '/instance', body, options)
       .map(response => {
         const data = this.extractData(response);
@@ -96,7 +95,7 @@ export class InstancesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.delete(this._dataUrl + 'modules/' + instance.module['module-type'] + '/' + instance.module['module-name'] + '/' +
+    return this.http.delete(this.dataUrl + 'modules/' + instance.module['module-type'] + '/' + instance.module['module-name'] + '/' +
       instance.module['module-version'] + '/instance' + '/' + instance['name'], options)
       .map(response => {
         const data = this.extractData(response);
@@ -109,7 +108,7 @@ export class InstancesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
+    return this.http.get(this.dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
       instance['module-version'] + '/instance' + '/' + instance['name'] + '/start', options)
       .map(response => {
         const data = this.extractData(response);
@@ -122,7 +121,7 @@ export class InstancesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
+    return this.http.get(this.dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
       instance['module-version'] + '/instance' + '/' + instance['name'] + '/stop', options)
       .map(response => {
         const data = this.extractData(response);

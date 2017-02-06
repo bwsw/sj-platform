@@ -7,15 +7,15 @@ import { BaseResponse } from '../models/base-response.model';
 
 @Injectable()
 export class ConfigSettingsService {
-  private _dataUrl = '/v1/';
+  private dataUrl = '/v1/';
 
-  constructor(private http: Http) {}
+  constructor(private http: Http) { }
 
   public getConfigSettingsList(): Observable<SettingModel[]> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this._dataUrl + 'config/settings', options)
+    return this.http.get(this.dataUrl + 'config/settings', options)
       .map(response => {
         const data = this.extractData(response);
         return data['config-settings'];
@@ -24,7 +24,7 @@ export class ConfigSettingsService {
   }
 
   public getConfigSettingsDomains(): Observable<string[]> {
-    return this.http.get(this._dataUrl + 'config/settings/domains')
+    return this.http.get(this.dataUrl + 'config/settings/domains')
       .map(response => {
         const data = this.extractData(response);
         return data.domains;
@@ -36,7 +36,7 @@ export class ConfigSettingsService {
     let body = JSON.stringify(setting);
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
-    return this.http.post(this._dataUrl + 'config/settings', body, options)
+    return this.http.post(this.dataUrl + 'config/settings', body, options)
       .map(response => {
         const data = this.extractData(response);
         return data.message;
@@ -48,7 +48,7 @@ export class ConfigSettingsService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.delete(this._dataUrl + 'config/settings/' + setting.domain + '/' + setting.name, options)
+    return this.http.delete(this.dataUrl + 'config/settings/' + setting.domain + '/' + setting.name, options)
       .map(response => {
         const data = this.extractData(response);
         return data.message;
