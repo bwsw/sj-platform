@@ -5,6 +5,7 @@ import { StreamsRoutes } from './streams/streams.routes';
 import { ModulesRoutes } from './modules/modules.routes';
 import { InstancesRoutes } from './instances/instances.routes';
 import { ConfigSettingsRoutes } from './config-settings/config-settings.routes';
+import { CustomRoutes } from './custom/custom.routes';
 
 export const routes: AppRoutes = [{
   path: '',
@@ -17,5 +18,6 @@ export const routes: AppRoutes = [{
     ...ModulesRoutes,
     ...InstancesRoutes,
     ...ConfigSettingsRoutes,
+    ...CustomRoutes,
   ]
 }];

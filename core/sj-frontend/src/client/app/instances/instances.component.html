@@ -68,6 +68,7 @@
                 <button type="button"
                         class="btn btn-sm btn-secondary"
                         *ngIf="instance['rest-address']"
+                        [disabled]="instance.status === 'starting'"
                         title="Show instance tasks"
                         (click)="showInstanceTasks(ShowInstanceTasks, instance)">
                   <i class="fa fa-info-circle"></i>
@@ -756,11 +757,14 @@
         </button>
         <h4 class="modal-title">Mesos framework tasks</h4>
       </div>
+      <div class="modal-body" *ngIf="!message">
+        <p>The rest-address is not available. Try later.</p>
+      </div>
 
-      <div class="modal-body">
+      <div class="modal-body" *ngIf="message">
         {{message}}
       </div>
-      <div class="modal-body">
+      <div class="modal-body" *ngIf="tasks">
         <ul *ngFor="let task of tasks">
           <li>{{task.id}}</li>
           <li>{{task.state}}</li>

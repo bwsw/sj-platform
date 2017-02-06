@@ -146,8 +146,10 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
     this.instancesService.getInstanceTasks(instance)
       .subscribe(
         response => {
-          this.message = response.message;
-          this.tasks = response.tasks;
+          if(response) {
+            this.message = response.message;
+            this.tasks = response.tasks;
+          };
         }
       );
   }
@@ -266,6 +268,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
       .subscribe(
         status => {
           this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
+          this.getInstancesList();
         },
         error => {
           this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
@@ -277,6 +280,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
       .subscribe(
         status => {
           this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
+          this.getInstancesList();
         },
         error =>{
           this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });

@@ -11,6 +11,7 @@ import {
   WindowedStreamingInstance
 } from '../models/instance.model';
 import { TaskModel } from '../models/task.model';
+import { BaseResponse } from '../models/base-response.model';
 
 interface ITasksObject {
   tasks: TaskModel[];
@@ -48,7 +49,10 @@ export class InstancesService {
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
     return this.http.get(this._dataUrl + 'modules/instances', options)
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.instances;
+      })
       .catch(this.handleError);
   }
 
@@ -58,11 +62,15 @@ export class InstancesService {
     let options = new RequestOptions({ headers: headers });
     return this.http.get(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
       instance['module-version'] + '/instance' + '/' + instance['name'], options)
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.instance;
+      })
       .catch(this.handleError);
   }
 
   public getInstanceTasks(instance: InstanceModel): Observable<ITasksObject> {
+    console.log(instance['rest-address']);
     return this.http.get('http://'+instance['rest-address'])
       .map(this.extractData)
       .catch(this.handleError);
@@ -77,7 +85,10 @@ export class InstancesService {
 
     return this.http.post(this._dataUrl + 'modules/' + instance.module['module-type'] + '/' + instance.module['module-name'] + '/' +
       instance.module['module-version'] + '/instance', body, options)
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.message;
+      })
       .catch(this.handleError);
   }
 
@@ -87,7 +98,10 @@ export class InstancesService {
     let options = new RequestOptions({ headers: headers });
     return this.http.delete(this._dataUrl + 'modules/' + instance.module['module-type'] + '/' + instance.module['module-name'] + '/' +
       instance.module['module-version'] + '/instance' + '/' + instance['name'], options)
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.message;
+      })
       .catch(this.handleError);
   }
 
@@ -97,7 +111,10 @@ export class InstancesService {
     let options = new RequestOptions({ headers: headers });
     return this.http.get(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
       instance['module-version'] + '/instance' + '/' + instance['name'] + '/start', options)
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.message;
+      })
       .catch(this.handleError);
   }
 
@@ -107,7 +124,10 @@ export class InstancesService {
     let options = new RequestOptions({ headers: headers });
     return this.http.get(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
       instance['module-version'] + '/instance' + '/' + instance['name'] + '/stop', options)
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.message;
+      })
       .catch(this.handleError);
   }
 
@@ -189,25 +209,20 @@ export class InstancesService {
     return inst;
   }
 
-  private extractData(res: Response) { //TODO Write good response parser
-    let body = {};
-    if (typeof res.json()['tasks'] !== 'undefined') {
-      body = res.json();
-    } else if (typeof res.json()['entity']['instances'] !== 'undefined') {
-      body = res.json()['entity']['instances'];
-    } else if (typeof res.json()['entity']['message'] !== 'undefined') {
-      body = res.json()['entity']['message'];
-    } else {
-      body = res.json()['entity']['instance'];
+  private extractData(res: Response) {
+    let body = new BaseResponse();
+    if (res.json()['entity'] !== 'undefined') {
+      body.fillFromJSON(res.json()['entity']);
+      return body;
     }
-    return body;
+    return body = res.json();
   }
 
   private handleError(error: any) {
     let errMsg = (error._body) ? error._body :
       error.status ? `${error.status} - ${error.statusText}` : 'Server error';
     if (typeof errMsg !== 'object') { errMsg = JSON.parse(errMsg); }
-    let errMsgYo = errMsg.entity.message;
+    let errMsgYo = errMsg.entity ? errMsg.entity.message : "Undefined error";
     return Observable.throw(errMsgYo);
   }
 

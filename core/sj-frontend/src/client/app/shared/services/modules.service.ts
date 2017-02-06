@@ -3,6 +3,7 @@ import { Http, Response, Headers, RequestOptions, ResponseContentType } from '@a
 import { Observable } from 'rxjs/Rx';
 
 import { ModuleModel } from '../models/module.model';
+import { BaseResponse } from '../models/base-response.model';
 
 @Injectable()
 export class ModulesService {
@@ -16,20 +17,29 @@ export class ModulesService {
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
     return this.http.get(this._dataUrl + 'modules', options)
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.modules;
+      })
       .catch(this.handleError);
   }
 
   public getModuileTypes(): Observable<string[]> {
     return this.http.get(this._dataUrl + 'modules/types')
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.types;
+      })
       .catch(this.handleError);
   }
 
   public getRelatedInstancesList(module: ModuleModel): Observable<string[]> {
     return this.http.get(this._dataUrl + 'modules/' + module['module-type'] + '/' + module['module-name'] + '/' +
       module['module-version'] + '/related')
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.instances;
+      })
       .catch(this.handleError);
   }
 
@@ -39,7 +49,10 @@ export class ModulesService {
     let options = new RequestOptions({ headers: headers });
     return this.http.get(this._dataUrl + 'modules/' + module['module-type'] + '/' + module['module-name'] + '/' +
       module['module-version'] + '/specification', options)
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.specification;
+      })
       .catch(this.handleError);
   }
 
@@ -84,27 +97,16 @@ export class ModulesService {
     let options = new RequestOptions({ headers: headers });
     return this.http.delete(this._dataUrl + 'modules/' + module['module-type'] + '/' + module['module-name'] + '/' +
       module['module-version'], options)
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.message;
+      })
       .catch(this.handleError);
   }
 
   private extractData(res: Response) {
-    let body = {};
-    if (typeof res.json()['entity']['specification'] !== 'undefined') {
-      body = res.json()['entity']['specification'];
-    } else {
-      if (typeof res.json()['entity']['modules'] !== 'undefined') {
-        body = res.json()['entity']['modules'];
-      } else if (typeof res.json()['entity']['message'] !== 'undefined') {
-        body = res.json()['entity']['message'];
-      } else if (typeof res.json()['entity']['types'] !== 'undefined') {
-        body = res.json()['entity']['types'];
-      } else if (typeof res.json()['entity']['instances'] !== 'undefined') {
-        body = res.json()['entity']['instances'];
-      } else {
-        body = res.json();
-      }
-    }
+    let body = new BaseResponse();
+    body.fillFromJSON(res.json()['entity']);
     return body;
   }
 

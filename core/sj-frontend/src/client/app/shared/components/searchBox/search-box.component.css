@@ -2,6 +2,10 @@
   position: relative;
 }
 
+.right-inner-addon{
+  margin: 0 5px 10px;
+}
+
 .right-inner-addon input {
   padding-right: 30px;
 }

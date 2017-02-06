@@ -17,6 +17,7 @@ import { ModulesService } from './services/modules.service';
 import { ProvidersService } from './services/providers.service';
 import { ServicesService } from './services/services.service';
 import { ConfigSettingsService } from './services/config-settings.service';
+import { CustomService } from './services/custom.service';
 import { SpinnerComponent } from './spinner/spinner.component';
 import { StreamsService } from './services/streams.service';
 import { Ng2BootstrapModule } from 'ng2-bootstrap';
@@ -85,7 +86,8 @@ export class SharedModule {
         ProvidersService,
         ServicesService,
         StreamsService,
-        ConfigSettingsService
+        ConfigSettingsService,
+        CustomService
       ]
     };
   }

@@ -3,6 +3,7 @@ import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 
 import { SettingModel } from '../models/setting.model';
+import { BaseResponse } from '../models/base-response.model';
 
 @Injectable()
 export class ConfigSettingsService {
@@ -15,13 +16,19 @@ export class ConfigSettingsService {
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
     return this.http.get(this._dataUrl + 'config/settings', options)
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data['config-settings'];
+      })
       .catch(this.handleError);
   }
 
   public getConfigSettingsDomains(): Observable<string[]> {
     return this.http.get(this._dataUrl + 'config/settings/domains')
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.domains;
+      })
       .catch(this.handleError);
   }
 
@@ -30,7 +37,10 @@ export class ConfigSettingsService {
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
     return this.http.post(this._dataUrl + 'config/settings', body, options)
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.message;
+      })
       .catch(this.handleError);
   }
 
@@ -39,21 +49,16 @@ export class ConfigSettingsService {
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
     return this.http.delete(this._dataUrl + 'config/settings/' + setting.domain + '/' + setting.name, options)
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.message;
+      })
       .catch(this.handleError);
   }
 
-  private extractData(res: Response) { //TODO Write good response parser
-    let body = {};
-    if (typeof res.json()['entity']['config-settings'] !== 'undefined') {
-      body = res.json()['entity']['config-settings'];
-    } else if (typeof res.json()['entity']['message'] !== 'undefined') {
-      body = res.json()['entity']['message'];
-    } else if (typeof res.json()['entity']['domains'] !== 'undefined') {
-      body = res.json()['entity']['domains'];
-    } else {
-      body = res.json();
-    }
+  private extractData(res: Response) {
+    let body = new BaseResponse();
+    body.fillFromJSON(res.json()['entity']);
     return body;
   }
 

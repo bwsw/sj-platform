@@ -113,12 +113,7 @@
             <div class="col-sm-10">
               <select required [(ngModel)]="newSetting.domain" name="settingDomain"
                       class="form-control">
-                <option value="system">system</option>
-                <option value="t-streams">t-streams</option>
-                <option value="kafka">kafka</option>
-                <option value="es">es</option>
-                <option value="zk">zk</option>
-                <option value="jdbc">jdbc</option>
+                <option *ngFor="let domain of settingsDomains" value="{{domain}}">{{domain}}</option>
               </select>
             </div>
           </fieldset>

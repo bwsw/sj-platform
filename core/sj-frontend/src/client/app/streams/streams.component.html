@@ -125,10 +125,6 @@
               <select [(ngModel)]="newStream['stream-type']" name="streamType"
                       required class="form-control">
                 <option *ngFor="let type of streamTypes" value="{{type}}">{{type}}</option>
-                <!--option selected value="stream.t-stream">T-stream</option-->
-                <!-- TODO Change values to match values in rest service-->
-                <!--option value="stream.kafka">Kafka</option>
-                <option value="elasticsearch-output">ElasticSearch output</option-->
               </select>
             </div>
           </fieldset>
@@ -219,7 +215,6 @@
                          (blur)="blur()" />
                 </li>
               </ul>
-              <!--input [(ngModel)]="newStream.tags" name="streamTags" type="text" class="form-control"-->
               </div>
           </fieldset>
 
@@ -247,8 +242,6 @@
             <fieldset class="form-group row">
               <label class="col-sm-2 col-form-label" [class.required]="streamGeneratorType.value!=='local'">Service</label>
               <div class="col-sm-10">
-                <!--input [(ngModel)]="newStream['generator'].service" name="streamGeneratorService" type="text"
-                       class="form-control"-->
                 <select [(ngModel)]="newStream['generator'].service" name="streamGeneratorService"
                         class="form-control"
                         [required]="streamGeneratorType.value!=='local'">

@@ -14,6 +14,7 @@ import { ProvidersModule } from './providers/providers.module';
 import { ServicesModule } from './services/services.module';
 import { StreamsModule } from './streams/streams.module';
 import { ConfigSettingsModule } from './config-settings/config-settings.module';
+import { CustomModule } from './custom/custom.module';
 
 
 @NgModule({
@@ -28,7 +29,8 @@ import { ConfigSettingsModule } from './config-settings/config-settings.module';
     ProvidersModule,
     ServicesModule,
     StreamsModule,
-    ConfigSettingsModule
+    ConfigSettingsModule,
+    CustomModule
   ],
   declarations: [
     AppComponent

@@ -125,7 +125,6 @@
                       [(ngModel)]="newProvider.type"
                       name="providerType"
                       required>
-                <!-- [(ngModel)]="form_providerType" #item (change)="onChange(item.value)"  -->
                 <option *ngFor="let type of providerTypes" value="{{type}}"
                         [disabled]="type ==='aerospike' || type === 'cassandra'">{{type}}</option>
               </select>

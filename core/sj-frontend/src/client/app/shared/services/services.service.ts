@@ -3,6 +3,7 @@ import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 
 import { ServiceModel } from '../models/service.model';
+import { BaseResponse } from '../models/base-response.model';
 
 interface ISomeObject {
   [key: string]: string[];
@@ -21,19 +22,28 @@ export class ServicesService {
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
     return this.http.get(this._dataUrl + 'services', options)
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.services;
+      })
       .catch(this.handleError);
   }
 
   public getServiceTypes(): Observable<string[]> {
     return this.http.get(this._dataUrl + 'services/types')
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.types;
+      })
       .catch(this.handleError);
   }
 
   public getRelatedStreamsList(serviceName: string): Observable<ISomeObject> {
     return this.http.get(this._dataUrl + 'services/' + serviceName + '/related')
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data;
+      })
       .catch(this.handleError);
   }
 
@@ -42,7 +52,10 @@ export class ServicesService {
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
     return this.http.get(this._dataUrl + 'services/' + serviceName, options)
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.services;
+      })
       .catch(this.handleError);
   }
 
@@ -51,7 +64,10 @@ export class ServicesService {
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
     return this.http.delete(this._dataUrl + 'services/' + service.name, options)
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.message;
+      })
       .catch(this.handleError);
   }
 
@@ -60,23 +76,16 @@ export class ServicesService {
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
     return this.http.post(this._dataUrl + 'services', body, options)
-      .map(this.extractData)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.message;
+      })
       .catch(this.handleError);
   }
 
-  private extractData(res: Response) { //TODO Write good response parser
-    let body = {};
-    if (typeof res.json()['entity']['services'] !== 'undefined') {
-      body = res.json()['entity']['services'];
-    } else if (typeof res.json()['entity']['message'] !== 'undefined') {
-      body = res.json()['entity']['message'];
-    } else if (typeof res.json()['entity']['types'] !== 'undefined') {
-      body = res.json()['entity']['types'];
-    } else if (typeof res.json()['entity']['streams'] !== 'undefined' && typeof res.json()['entity']['instances'] !== 'undefined') {
-      body = res.json()['entity'];
-    } else {
-      body = res.json();
-    }
+  private extractData(res: Response) {
+    let body = new BaseResponse();
+    body.fillFromJSON(res.json()['entity']);
     return body;
   }
 
