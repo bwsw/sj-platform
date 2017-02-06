@@ -212,7 +212,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   private def haveGeneratorsStarted() = {
     val stages = instance.stages.asScala
 
-    !stages.exists(_._2.state == failed)
+    !stages.exists(x => (x._2.state == failed) && (x._1 != instance.name))
   }
 
   private def startFramework(marathonMaster: String) = {

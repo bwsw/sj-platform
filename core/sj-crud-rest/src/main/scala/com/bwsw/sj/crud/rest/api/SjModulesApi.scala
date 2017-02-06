@@ -49,7 +49,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
             }
           }
         } ~
-        pathPrefix(Segment) { (moduleType: String) =>g
+        pathPrefix(Segment) { (moduleType: String) =>
           checkModuleType(moduleType)
           pathPrefix(Segment) { (moduleName: String) =>
             pathPrefix(Segment) { (moduleVersion: String) =>
