@@ -40,7 +40,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
         pathPrefix("instances") {
           gettingAllInstances
         } ~
-        pathPrefix("types") {
+        pathPrefix("_types") {
           pathEndOrSingleSlash {
             get {
               val response = OkRestResponse(Map("types" -> EngineLiterals.moduleTypes))
@@ -49,7 +49,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
             }
           }
         } ~
-        pathPrefix(Segment) { (moduleType: String) =>
+        pathPrefix(Segment) { (moduleType: String) =>g
           checkModuleType(moduleType)
           pathPrefix(Segment) { (moduleName: String) =>
             pathPrefix(Segment) { (moduleVersion: String) =>

@@ -40,8 +40,7 @@ trait SjServicesApi extends Directives with SjCrudValidator {
             complete(restResponseToHttpResponse(response))
           }
       } ~
-        pathPrefix("types") {
-          //todo if a service has a name 'types' then there is a collision
+        pathPrefix("_types") {
           pathEndOrSingleSlash {
             get {
               val response = OkRestResponse(Map("types" -> ServiceLiterals.types))
