@@ -167,15 +167,6 @@ class FrameworkScheduler extends Scheduler {
     logger.debug(s"Got environment variable: ${FrameworkUtil.params}.")
 
     FrameworkUtil.updateInstance()
-
-//    if (optionInstance.isEmpty) {
-//      logger.error(s"Not found instance.")
-//      TasksList.setMessage("Framework shut down: not found instance.")
-//      driver.stop()
-//      return
-//    } else {
-//      FrameworkUtil.instance = optionInstance.get
-//    }
     logger.debug(s"Got instance ${FrameworkUtil.instance.name}.")
 
     TasksList.prepare(FrameworkUtil.instance)
