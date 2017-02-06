@@ -163,7 +163,7 @@ class FrameworkScheduler extends Scheduler {
     FrameworkUtil.frameworkId = frameworkId.getValue
     FrameworkUtil.master = masterInfo
 
-    FrameworkUtil.params = FrameworkUtil.getEnvParams()
+    FrameworkUtil.params = FrameworkUtil.getEnvParams
     logger.debug(s"Got environment variable: ${FrameworkUtil.params}.")
 
     FrameworkUtil.updateInstance()
