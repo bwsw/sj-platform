@@ -28,12 +28,14 @@ trait InstanceMarathonManager {
 
   def getNumberOfRunningTasks(response: CloseableHttpResponse) = {
     val entity = marathonEntitySerializer.deserialize[MarathonApplicationById](EntityUtils.toString(response.getEntity, "UTF-8"))
+    logger.debug(s"Get number of running tasks of application: '${entity.app.id}'.")
     val tasksRunning = entity.app.tasksRunning
 
     tasksRunning
   }
 
   def getMarathonMaster(marathonInfo: CloseableHttpResponse) = {
+    logger.debug(s"Get a marathon master.")
     val entity = marathonEntitySerializer.deserialize[MarathonInfo](EntityUtils.toString(marathonInfo.getEntity, "UTF-8"))
     val master = entity.marathonConfig.master
 
@@ -67,6 +69,7 @@ trait InstanceMarathonManager {
   }
 
   def getFrameworkID(marathonInfo: CloseableHttpResponse) = {
+    logger.debug(s"Get a framework id.")
     val entity = marathonEntitySerializer.deserialize[MarathonApplicationById](EntityUtils.toString(marathonInfo.getEntity, "UTF-8"))
     val id = entity.app.env.get(frameworkIdLabel)
 
@@ -88,49 +91,64 @@ trait InstanceMarathonManager {
     val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/info")
     val httpGet = new HttpGet(url.toString)
-    client.execute(httpGet)
+    val marathonInfo = client.execute(httpGet)
+    client.close()
+
+    marathonInfo
   }
 
   def startMarathonApplication(request: MarathonRequest) = {
-    logger.debug(s"Start application on marathon. Request: ${marathonEntitySerializer.serialize(request)}.")
+    logger.debug(s"Start an application on marathon. Request: ${marathonEntitySerializer.serialize(request)}.")
     val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/apps")
     val httpPost = new HttpPost(url.toString)
     httpPost.addHeader("Content-Type", "application/json")
     val entity = new StringEntity(marathonEntitySerializer.serialize(request), "UTF-8")
     httpPost.setEntity(entity)
-    client.execute(httpPost)
+    val marathonInfo = client.execute(httpPost)
+    client.close()
+
+    marathonInfo
   }
 
   def getApplicationInfo(applicationID: String) = {
-    logger.debug(s"Get application info '$applicationID'.")
+    logger.debug(s"Get an application info: '$applicationID'.")
     val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/apps/$applicationID?force=true")
     val httpGet = new HttpGet(url.toString)
-    client.execute(httpGet)
+    val marathonInfo = client.execute(httpGet)
+    client.close()
+
+    marathonInfo
   }
 
   def destroyMarathonApplication(applicationID: String) = {
-    logger.debug(s"Destroy application '$applicationID'.")
+    logger.debug(s"Destroy an application: '$applicationID'.")
     val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/apps/$applicationID")
     val httpDelete = new HttpDelete(url.toString)
-    client.execute(httpDelete)
+    val marathonInfo = client.execute(httpDelete)
+    client.close()
+
+    marathonInfo
   }
 
   def stopMarathonApplication(applicationID: String) = {
-    logger.debug(s"Stop application $applicationID.")
+    logger.debug(s"Stop an application: '$applicationID'.")
     scaleMarathonApplication(applicationID, 0)
   }
 
   def scaleMarathonApplication(applicationID: String, countOfInstances: Int) = {
-    logger.debug(s"Scale application $applicationID to count $countOfInstances.")
+    logger.debug(s"Scale an application: '$applicationID' to count: '$countOfInstances'.")
     val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/apps/$applicationID?force=true")
     val httpPut = new HttpPut(url.toString)
     httpPut.addHeader("Content-Type", "application/json")
     val entity = new StringEntity(marathonEntitySerializer.serialize(Map("instances" -> countOfInstances)), "UTF-8")
     httpPut.setEntity(entity)
-    client.execute(httpPut)
+    val marathonInfo = client.execute(httpPut)
+    client.close()
+
+    marathonInfo
   }
 }
