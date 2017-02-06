@@ -62,8 +62,6 @@
             <tr *ngIf="!fileList || (fileList && fileList.length === 0)">
               <td colspan="20" class="text-center">No files have been found.</td>
             </tr>
-
-            <!--[ngClass]="{ 'table-info': isSelected(file) }" -->
             <tr *ngFor="let file of fileList | orderBy: 'name' | listFilter : { name: term}">
               <td>{{file.name}}</td>
               <td *ngIf="path === 'files'">{{file.description}}</td>
