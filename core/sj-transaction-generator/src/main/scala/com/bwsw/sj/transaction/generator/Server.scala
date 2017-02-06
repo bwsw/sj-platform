@@ -23,6 +23,6 @@ object Server extends App {
 
     server.launch()
   } catch {
-    case ex: IOException => logger.debug(s"Error: ${ex.getMessage}")
+    case ex: IOException => logger.debug(s"Error: ${ex.getMessage}.")
   }
 }

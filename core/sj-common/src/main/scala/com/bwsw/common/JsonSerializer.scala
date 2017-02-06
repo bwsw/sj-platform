@@ -25,14 +25,14 @@ class JsonSerializer extends Serializer {
   def serialize(value: Any): String = {
     import java.io.StringWriter
 
-    logger.debug(s"Serialize a value of class: '${value.getClass}' to string")
+    logger.debug(s"Serialize a value of class: '${value.getClass}' to string.")
     val writer = new StringWriter()
     mapper.writeValue(writer, value)
     writer.toString
   }
 
   def deserialize[T: Manifest](value: String): T = {
-    logger.debug(s"Deserialize a value: '$value' to object")
+    logger.debug(s"Deserialize a value: '$value' to object.")
     mapper.readValue(value, typeReference[T])
   }
 
@@ -54,7 +54,7 @@ class JsonSerializer extends Serializer {
   }
 
   override def setIgnoreUnknown(ignore: Boolean): Unit = {
-    logger.debug(s"Set a value of flag: FAIL_ON_UNKNOWN_PROPERTIES to '$ignore'")
+    logger.debug(s"Set a value of flag: FAIL_ON_UNKNOWN_PROPERTIES to '$ignore'.")
     if (ignore) {
       mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
     } else {
@@ -63,7 +63,7 @@ class JsonSerializer extends Serializer {
   }
 
   override def getIgnoreUnknown(): Boolean = {
-    logger.debug(s"Retrieve a value of flag: FAIL_ON_UNKNOWN_PROPERTIES")
+    logger.debug(s"Retrieve a value of flag: FAIL_ON_UNKNOWN_PROPERTIES.")
     !((mapper.getDeserializationConfig.getDeserializationFeatures & DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES.getMask) == DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES.getMask)
   }
 }

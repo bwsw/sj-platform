@@ -19,7 +19,7 @@ class RoundRobinOutput(producer: Producer[Array[Byte]],
   private val streamName = producer.stream.name
 
   def put(data: Array[Byte]) = {
-    logger.debug(s"Send a portion of data to stream: '$streamName'")
+    logger.debug(s"Send a portion of data to stream: '$streamName'.")
     if (maybeTransaction.isDefined) {
       maybeTransaction.get.send(data)
     }
@@ -28,7 +28,7 @@ class RoundRobinOutput(producer: Producer[Array[Byte]],
       maybeTransaction.get.send(data)
     }
 
-    logger.debug(s"Add an element to output envelope of output stream:  '$streamName'")
+    logger.debug(s"Add an element to output envelope of output stream:  '$streamName'.")
     performanceMetrics.addElementToOutputEnvelope(
       streamName,
       maybeTransaction.get.getTransactionID().toString,

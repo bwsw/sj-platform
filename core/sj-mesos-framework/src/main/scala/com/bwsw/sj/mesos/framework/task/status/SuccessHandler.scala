@@ -21,7 +21,7 @@ object SuccessHandler extends TaskStatusHandler {
     TasksList(status.getTaskId.getValue).foreach(task => task.update(
       directory = dirUrl
     ))
-    StatusHandler.logger.debug(s"Running task: ${status.getTaskId.getValue}")
+    StatusHandler.logger.debug(s"Running task: ${status.getTaskId.getValue}.")
   }
 
   def getCurrentSlave(slaveId: SlaveID) = {

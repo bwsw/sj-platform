@@ -33,7 +33,7 @@ class RetrievableTStreamTaskInput(manager: CommonTaskManager,
   launchConsumers()
 
   private def createConsumers() = {
-    logger.debug(s"Task: ${manager.taskName}. Start creating consumers\n")
+    logger.debug(s"Task: ${manager.taskName}. Start creating consumers.")
     val inputs = manager.inputs
     val offset = chooseOffset(instance.startFrom)
 
@@ -41,7 +41,7 @@ class RetrievableTStreamTaskInput(manager: CommonTaskManager,
       .map(x => (x._1.asInstanceOf[TStreamSjStream], x._2.toList))
       .map(x => manager.createConsumer(x._1, x._2, offset))
       .map(x => (x.name, x)).toMap
-    logger.debug(s"Task: ${manager.taskName}. Creation of consumers is finished\n")
+    logger.debug(s"Task: ${manager.taskName}. Creation of consumers is finished.")
 
     consumers
   }
@@ -52,7 +52,7 @@ class RetrievableTStreamTaskInput(manager: CommonTaskManager,
    * @param startFrom Offset policy name or specific date
    */
   private def chooseOffset(startFrom: String): IOffset = {
-    logger.debug(s"Choose offset policy for t-streams consumer\n")
+    logger.debug(s"Choose offset policy for t-streams consumer.")
     startFrom match {
       case EngineLiterals.oldestStartMode => Oldest
       case EngineLiterals.newestStartMode => Newest
@@ -100,20 +100,20 @@ class RetrievableTStreamTaskInput(manager: CommonTaskManager,
   }
 
   private def addConsumersToCheckpointGroup() = {
-    logger.debug(s"Task: ${manager.taskName}. Start adding subscribing consumers to checkpoint group\n")
+    logger.debug(s"Task: ${manager.taskName}. Start adding subscribing consumers to checkpoint group.")
     consumers.foreach(x => checkpointGroup.add(x._2))
-    logger.debug(s"Task: ${manager.taskName}. Adding subscribing consumers to checkpoint group is finished\n")
+    logger.debug(s"Task: ${manager.taskName}. Adding subscribing consumers to checkpoint group is finished.")
   }
 
   private def launchConsumers() = {
-    logger.debug(s"Task: ${manager.taskName}. Launch subscribing consumers\n")
+    logger.debug(s"Task: ${manager.taskName}. Launch subscribing consumers.")
     consumers.foreach(_._2.start())
-    logger.debug(s"Task: ${manager.taskName}. Subscribing consumers are launched\n")
+    logger.debug(s"Task: ${manager.taskName}. Subscribing consumers are launched.")
   }
 
   override def setConsumerOffset(envelope: TStreamEnvelope) = {
     logger.debug(s"Task: ${manager.taskName}. " +
-      s"Change local offset of consumer: ${envelope.consumerName} to txn: ${envelope.id}\n")
+      s"Change local offset of consumer: ${envelope.consumerName} to txn: ${envelope.id}.")
     consumers(envelope.consumerName).setStreamPartitionOffset(envelope.partition, envelope.id)
   }
 }

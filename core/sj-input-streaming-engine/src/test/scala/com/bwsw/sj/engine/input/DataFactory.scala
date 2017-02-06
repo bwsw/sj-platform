@@ -193,7 +193,7 @@ object DataFactory {
     instance.moduleType = EngineLiterals.inputStreamingType
     instance.moduleName = "input-streaming-stub"
     instance.moduleVersion = "1.0"
-    instance.status = EngineLiterals.ready
+    instance.status = EngineLiterals.started
     instance.description = "some description of test instance"
     instance.outputs = instanceOutputs
     instance.checkpointMode = EngineLiterals.everyNthMode

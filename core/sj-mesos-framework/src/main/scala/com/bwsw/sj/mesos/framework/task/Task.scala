@@ -27,7 +27,7 @@ class Task(taskId: String) {
              node: String = node,
              lastNode: String = lastNode,
              directory: String = "",
-             host: String = this.host.get) = {
+             host: String = if (this.host.isDefined) this.host.get else null) = {
     this.state = state
     this.stateChanged = stateChanged
     this.reason = reason

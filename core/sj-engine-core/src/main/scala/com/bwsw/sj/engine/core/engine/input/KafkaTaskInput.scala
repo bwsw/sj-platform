@@ -54,7 +54,7 @@ trait KafkaTaskInput {
    */
   protected def createOffsetStream() = {
     logger.debug(s"Task name: ${manager.taskName}. " +
-      s"Get stream for keeping kafka offsets\n")
+      s"Get stream for keeping kafka offsets.")
     val description = "store kafka offsets of input streams"
     val tags = Array("offsets")
     val partitions = 1
@@ -66,18 +66,18 @@ trait KafkaTaskInput {
 
 
   protected def createOffsetProducer() = {
-    logger.debug(s"Task: ${manager.taskName}. Start creating a t-stream producer to record kafka offsets\n")
+    logger.debug(s"Task: ${manager.taskName}. Start creating a t-stream producer to record kafka offsets.")
     val streamForOffsets = offsetStream
     val offsetProducer = manager.createProducer(streamForOffsets)
-    logger.debug(s"Task: ${manager.taskName}. Creation of t-stream producer is finished\n")
+    logger.debug(s"Task: ${manager.taskName}. Creation of t-stream producer is finished.")
 
     offsetProducer
   }
 
   protected def addOffsetProducerToCheckpointGroup() = {
-    logger.debug(s"Task: ${manager.taskName}. Start adding the t-stream producer to checkpoint group\n")
+    logger.debug(s"Task: ${manager.taskName}. Start adding the t-stream producer to checkpoint group.")
     checkpointGroup.add(offsetProducer)
-    logger.debug(s"Task: ${manager.taskName}. The t-stream producer is added to checkpoint group\n")
+    logger.debug(s"Task: ${manager.taskName}. The t-stream producer is added to checkpoint group.")
   }
 
   /**
@@ -92,7 +92,7 @@ trait KafkaTaskInput {
    */
   protected def createSubscribingKafkaConsumer(topics: List[(String, List[Int])], hosts: List[String], offset: String) = {
     logger.debug(s"Task name: ${manager.taskName}. Create kafka consumer for topics (with their partitions): " +
-      s"${topics.map(x => s"topic name: ${x._1}, " + s"partitions: ${x._2.mkString(",")}").mkString(",")}\n")
+      s"${topics.map(x => s"topic name: ${x._1}, " + s"partitions: ${x._2.mkString(",")}").mkString(",")}.")
     val consumer: KafkaConsumer[Array[Byte], Array[Byte]] = createKafkaConsumer(hosts, offset)
 
     assignKafkaConsumerOnTopics(consumer, topics)
@@ -142,7 +142,7 @@ trait KafkaTaskInput {
 
     if (maybeTxn.isDefined) {
       val lastTxn = maybeTxn.get
-      logger.debug(s"Task name: ${manager.taskName}. Get saved offsets for kafka consumer and apply their\n")
+      logger.debug(s"Task name: ${manager.taskName}. Get saved offsets for kafka consumer and apply their.")
       kafkaOffsetsStorage = offsetSerializer.deserialize(lastTxn.next()).asInstanceOf[mutable.Map[(String, Int), Long]]
       kafkaOffsetsStorage.foreach(x => consumer.seek(new TopicPartition(x._1._1, x._1._2), x._2 + 1))
     }
@@ -170,7 +170,7 @@ trait KafkaTaskInput {
 
   def setConsumerOffset(envelope: KafkaEnvelope) = {
     logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${envelope.stream} " +
-      s"for partition: ${envelope.partition} to ${envelope.offset}\n")
+      s"for partition: ${envelope.partition} to ${envelope.offset}.")
     kafkaOffsetsStorage((envelope.stream, envelope.partition)) = envelope.offset
   }
 }

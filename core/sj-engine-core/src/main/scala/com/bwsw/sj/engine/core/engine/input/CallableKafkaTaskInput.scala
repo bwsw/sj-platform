@@ -39,12 +39,12 @@ class CallableKafkaTaskInput(override val manager: CommonTaskManager,
 
   override def call() = {
     logger.info(s"Task name: ${manager.taskName}. " +
-      s"Run a kafka consumer for regular task in a separate thread of execution service\n")
+      s"Run a kafka consumer for regular task in a separate thread of execution service.")
 
     val envelopeSerializer = new JsonSerializer()
 
     while (true) {
-      logger.debug(s"Task: ${manager.taskName}. Waiting for records that consumed from kafka for $kafkaSubscriberTimeout milliseconds\n")
+      logger.debug(s"Task: ${manager.taskName}. Waiting for records that consumed from kafka for $kafkaSubscriberTimeout milliseconds.")
       val records = kafkaConsumer.poll(kafkaSubscriberTimeout)
       records.asScala.foreach(x => blockingQueue.put(envelopeSerializer.serialize(consumerRecordToEnvelope(x))))
     }

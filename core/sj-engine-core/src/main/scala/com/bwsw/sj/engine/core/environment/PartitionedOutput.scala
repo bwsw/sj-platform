@@ -20,7 +20,7 @@ class PartitionedOutput(producer: Producer[Array[Byte]],
   private val streamName = producer.stream.name
 
   def put(data: Array[Byte], partition: Int) = {
-    logger.debug(s"Send a portion of data to stream: '$streamName' partition with number: '$partition'")
+    logger.debug(s"Send a portion of data to stream: '$streamName' partition with number: '$partition'.")
     if (transactions.contains(partition)) {
       transactions(partition).send(data)
     }
@@ -29,7 +29,7 @@ class PartitionedOutput(producer: Producer[Array[Byte]],
       transactions(partition).send(data)
     }
 
-    logger.debug(s"Add an element to output envelope of output stream:  '$streamName'")
+    logger.debug(s"Add an element to output envelope of output stream:  '$streamName'.")
     performanceMetrics.addElementToOutputEnvelope(
       streamName,
       transactions(partition).getTransactionID().toString,

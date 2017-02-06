@@ -23,7 +23,7 @@ class OutputStreamingPerformanceMetrics(manager: OutputTaskManager)
   override protected var outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
 
   override def getReport() = {
-    logger.info(s"Start preparing a report of performance for task: $taskName of output module\n")
+    logger.info(s"Start preparing a report of performance for task: $taskName of output module.")
     mutex.lock()
     val bytesOfInputEnvelopes = inputEnvelopesPerStream.map(x => (x._1, x._2.map(_.sum).sum)).head._2
     val bytesOfOutputEnvelopes = outputEnvelopesPerStream.map(x => (x._1, x._2.map(_._2.sum).sum)).head._2
@@ -61,7 +61,7 @@ class OutputStreamingPerformanceMetrics(manager: OutputTaskManager)
   }
 
   override def clear() = {
-    logger.debug(s"Reset variables for performance report for next reporting\n")
+    logger.debug(s"Reset variables for performance report for next reporting.")
     inputEnvelopesPerStream = mutable.Map(inputStreamNames.head -> mutable.ListBuffer[List[Int]]())
     outputEnvelopesPerStream = mutable.Map(outputStreamNames.head -> mutable.Map[String, mutable.ListBuffer[Int]]())
   }

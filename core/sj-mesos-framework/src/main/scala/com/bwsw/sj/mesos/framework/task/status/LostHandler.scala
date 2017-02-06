@@ -1,9 +1,12 @@
 package com.bwsw.sj.mesos.framework.task.status
 
-import com.bwsw.sj.mesos.framework.task.{TasksList, StatusHandler}
+import com.bwsw.sj.mesos.framework.task.{StatusHandler, TasksList}
 import org.apache.mesos.Protos.TaskStatus
 
-object FailureHandler extends TaskStatusHandler {
+/**
+  * Created by diryavkin_dn on 06.02.17.
+  */
+object LostHandler {
   protected var status: TaskStatus = null
 
   def setStatus(status: TaskStatus) = {
@@ -13,9 +16,10 @@ object FailureHandler extends TaskStatusHandler {
 
   def process() = {
     TasksList(status.getTaskId.getValue).foreach(task => task.update(node = "", reason = status.getMessage))
-    StatusHandler.logger.error(s"Error: ${status.getMessage}")
+    StatusHandler.logger.error(s"Killed: ${status.getMessage}")
 
-//    TasksList.addToLaunch(status.getTaskId.getValue)
+    //    TasksList.addToLaunch(status.getTaskId.getValue)
+    TasksList.stopped(status.getTaskId.getValue)
     StatusHandler.logger.info(s"Added task ${status.getTaskId.getValue} to launch after failure.")
     TasksList.getTask(status.getTaskId.getValue).host = None
   }

@@ -39,7 +39,7 @@ class EsOutputProcessor(outputStream: SjStream,
 
   private def createIndexMapping() = {
     val index = esService.index
-    logger.debug(s"Create the mapping for the elasticsearch index $index")
+    logger.debug(s"Create the mapping for the elasticsearch index $index.")
     val streamName = outputStream.name
     val mappingSource = createMappingSource()
 

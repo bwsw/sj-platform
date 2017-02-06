@@ -8,7 +8,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.mesos.framework.task.TasksList
 import org.apache.log4j.Logger
-import org.apache.mesos.Protos.MasterInfo
+import org.apache.mesos.Protos.{MasterInfo, TaskID}
 import org.apache.mesos.SchedulerDriver
 
 import scala.collection.immutable
@@ -55,7 +55,7 @@ object FrameworkUtil {
     System.exit(1)
   }
 
-  def getEnvParams() = {
+  def getEnvParams = {
     Map(
       "instanceId" -> Properties.envOrElse("INSTANCE_ID", "00000000-0000-0000-0000-000000000000"),
       "mongodbHosts" -> Properties.envOrElse("MONGO_HOSTS", "127.0.0.1:27017")
@@ -72,7 +72,55 @@ object FrameworkUtil {
     val restHost = configFileService.get(ConfigLiterals.hostOfCrudRestTag).get.value
     val restPort = configFileService.get(ConfigLiterals.portOfCrudRestTag).get.value.toInt
     val restAddress = new URI(s"http://$restHost:$restPort/v1/custom/jars/$jarName").toString
-    logger.debug(s"Engine downloading URL: $restAddress")
+    logger.debug(s"Engine downloading URL: $restAddress.")
     restAddress
   }
+
+  def getInstanceStatus: String = {
+    val optionInstance = ConnectionRepository.getInstanceService.get(FrameworkUtil.params("instanceId"))
+    if (optionInstance.isDefined) optionInstance.get.status
+    // TODO return if instance not defined
+    else ""
+  }
+
+  def isInstanceStarted: Boolean = {
+    updateInstance()
+    instance.status == "started"
+  }
+
+  def killAllLaunchedTasks() = {
+    TasksList.getLaunchedTasks.foreach(taskId => {
+      TasksList.stopTask(taskId)
+    })
+  }
+
+  /**
+    * Teardown framework, do it if instance not started.
+    */
+  def teardown() = {
+    println("Launched tasks: ", TasksList.getLaunchedTasks)
+    killAllLaunchedTasks()
+  }
+
+  def prepareTasksToLaunch() = {
+    print("Lanched tasks")
+    TasksList.getList.foreach(task => {
+      print(task.toJson, "\n") // TODO remove print
+      if (!TasksList.getLaunchedTasks.contains(task.id)) TasksList.addToLaunch(task.id)
+    })
+  }
+
+
+  def updateInstance() = {
+    val optionInstance = ConnectionRepository.getInstanceService.get(FrameworkUtil.params("instanceId"))
+
+    if (optionInstance.isEmpty) {
+      logger.error(s"Not found instance")
+      TasksList.setMessage("Framework shut down: not found instance.")
+      driver.stop()
+    } else {
+      FrameworkUtil.instance = optionInstance.get
+    }
+  }
+
 }

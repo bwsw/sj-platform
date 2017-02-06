@@ -15,7 +15,7 @@ class JdbcOutputProcessor(outputStream: SjStream,
   private val jdbcClient = openConnection()
 
   private def openConnection() = {
-    logger.info(s"Open output JDBC connection.\n")
+    logger.info(s"Open output JDBC connection.")
     val hosts = jdbcService.provider.hosts
 
     val client = JdbcClientBuilder.

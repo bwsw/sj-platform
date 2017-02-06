@@ -42,7 +42,7 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
   private def createRegularModuleService(): CommonModuleService = {
     instance.stateManagement match {
       case EngineLiterals.noneStateMode =>
-        logger.debug(s"Task: ${manager.taskName}. Start preparing of regular module without state\n")
+        logger.debug(s"Task: ${manager.taskName}. Start preparing of regular module without state.")
         new StatelessCommonModuleService(manager, taskInputService.checkpointGroup, performanceMetrics)
       case EngineLiterals.ramStateMode =>
         new StatefulCommonModuleService(manager, taskInputService.checkpointGroup, performanceMetrics)
@@ -54,8 +54,8 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
    */
   override def call(): Unit = {
     logger.info(s"Task name: ${manager.taskName}. " +
-      s"Run regular task engine in a separate thread of execution service\n")
-    logger.debug(s"Task: ${manager.taskName}. Invoke onInit() handler\n")
+      s"Run regular task engine in a separate thread of execution service.")
+    logger.debug(s"Task: ${manager.taskName}. Invoke onInit() handler.")
     executor.onInit()
 
     while (true) {
@@ -65,7 +65,7 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
         case Some(serializedEnvelope) => {
           val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope)
           registerEnvelope(envelope)
-          logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
+          logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler.")
           executor.onMessage(envelope)
         }
         case None => {
@@ -77,7 +77,7 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
       if (isItTimeToCheckpoint(moduleService.isCheckpointInitiated)) doCheckpoint()
 
       if (moduleTimer.isTime) {
-        logger.debug(s"Task: ${manager.taskName}. Invoke onTimer() handler\n")
+        logger.debug(s"Task: ${manager.taskName}. Invoke onTimer() handler.")
         executor.onTimer(System.currentTimeMillis() - moduleTimer.responseTime)
         moduleTimer.reset()
       }
@@ -102,13 +102,13 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
    * Does group checkpoint of t-streams consumers/producers
    */
   private def doCheckpoint() = {
-    logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
-    logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeCheckpoint() handler\n")
+    logger.info(s"Task: ${manager.taskName}. It's time to checkpoint.")
+    logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeCheckpoint() handler.")
     executor.onBeforeCheckpoint()
-    logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
+    logger.debug(s"Task: ${manager.taskName}. Do group checkpoint.")
     moduleService.doCheckpoint()
     taskInputService.doCheckpoint()
-    logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
+    logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler.")
     executor.onAfterCheckpoint()
     prepareForNextCheckpoint()
   }
@@ -129,10 +129,10 @@ object RegularTaskEngine {
 
     regularInstance.checkpointMode match {
       case EngineLiterals.`timeIntervalMode` =>
-        logger.info(s"Task: ${manager.taskName}. Regular module has a '${EngineLiterals.timeIntervalMode}' checkpoint mode, create an appropriate task engine\n")
+        logger.info(s"Task: ${manager.taskName}. Regular module has a '${EngineLiterals.timeIntervalMode}' checkpoint mode, create an appropriate task engine.")
         new RegularTaskEngine(manager, performanceMetrics) with TimeCheckpointTaskEngine
       case EngineLiterals.`everyNthMode` =>
-        logger.info(s"Task: ${manager.taskName}. Regular module has an '${EngineLiterals.everyNthMode}' checkpoint mode, create an appropriate task engine\n")
+        logger.info(s"Task: ${manager.taskName}. Regular module has an '${EngineLiterals.everyNthMode}' checkpoint mode, create an appropriate task engine.")
         new RegularTaskEngine(manager, performanceMetrics) with NumericalCheckpointTaskEngine
 
     }

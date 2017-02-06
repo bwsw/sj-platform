@@ -71,7 +71,7 @@ object ConfigurationSettingsUtils {
   }
 
   def getFrameworkBackoffFactor() = {
-    getDoubleConfigSettings(frameworkBackoffFactor)
+    getDoubleConfigSetting(frameworkBackoffFactor)
   }
 
   def getFrameworkMaxLaunchDelaySeconds() = {
@@ -86,7 +86,7 @@ object ConfigurationSettingsUtils {
     getConfigSettings(name)
   }
 
-  private def getDoubleConfigSettings(name: String) = {
+  private def getDoubleConfigSetting(name: String) = {
     getConfigSettings(name).toDouble
   }
 

@@ -15,9 +15,9 @@ class InputTaskManager() extends TaskManager {
 
   lazy val inputs = {
     logger.error(s"Instance of Input module hasn't got execution plan " +
-      s"and it's impossible to retrieve inputs")
+      s"and it's impossible to retrieve inputs.")
     throw new Exception(s"Instance of Input module hasn't got execution plan " +
-      s"and it's impossible to retrieve inputs")
+      s"and it's impossible to retrieve inputs.")
   }
 
   val inputInstance = instance.asInstanceOf[InputInstance]
@@ -26,7 +26,7 @@ class InputTaskManager() extends TaskManager {
 
   require(numberOfAgentsPorts >=
     (instance.outputs.length + 1),
-    "Not enough ports for t-stream consumers/producers ")
+    "Not enough ports for t-stream consumers/producers")
 
   def getEntryPort() = {
     if (System.getenv().containsKey("ENTRY_PORT"))
@@ -35,13 +35,13 @@ class InputTaskManager() extends TaskManager {
   }
 
   override def getExecutor(environmentManager: EnvironmentManager) = {
-    logger.debug(s"Task: $taskName. Start loading of executor class from module jar\n")
+    logger.debug(s"Task: $taskName. Start loading of executor class from module jar.")
     val executor = moduleClassLoader
       .loadClass(executorClassName)
       .getConstructor(classOf[InputEnvironmentManager])
       .newInstance(environmentManager)
       .asInstanceOf[InputStreamingExecutor]
-    logger.debug(s"Task: $taskName. Create instance of executor class\n")
+    logger.debug(s"Task: $taskName. Create instance of executor class.")
 
     executor
   }

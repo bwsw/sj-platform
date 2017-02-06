@@ -53,11 +53,11 @@ class StatefulCommonModuleService(manager: CommonTaskManager, checkpointGroup: C
    * Saves a partial state changes
    */
   private def doCheckpointOfPartOfState() = {
-    logger.info(s"Task: ${manager.taskName}. It's time to checkpoint of a part of state\n")
-    logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeStateSave() handler\n")
+    logger.info(s"Task: ${manager.taskName}. It's time to checkpoint of a part of state.")
+    logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeStateSave() handler.")
     statefulExecutor.onBeforeStateSave(false)
     stateService.savePartialState()
-    logger.debug(s"Task: ${manager.taskName}. Invoke onAfterStateSave() handler\n")
+    logger.debug(s"Task: ${manager.taskName}. Invoke onAfterStateSave() handler.")
     statefulExecutor.onAfterStateSave(false)
     countOfCheckpoints += 1
   }
@@ -66,11 +66,11 @@ class StatefulCommonModuleService(manager: CommonTaskManager, checkpointGroup: C
    * Saves a state
    */
   private def doCheckpointOfFullState() = {
-    logger.info(s"Task: ${manager.taskName}. It's time to checkpoint of full state\n")
-    logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeStateSave() handler\n")
+    logger.info(s"Task: ${manager.taskName}. It's time to checkpoint of full state.")
+    logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeStateSave() handler.")
      statefulExecutor.onBeforeStateSave(true)
     stateService.saveFullState()
-    logger.debug(s"Task: ${manager.taskName}. Invoke onAfterStateSave() handler\n")
+    logger.debug(s"Task: ${manager.taskName}. Invoke onAfterStateSave() handler.")
      statefulExecutor.onAfterStateSave(true)
     countOfCheckpoints = 1
   }

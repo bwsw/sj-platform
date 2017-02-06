@@ -24,9 +24,10 @@ class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable w
       updateInstanceStatus(instance, stopping)
       stopFramework()
       markInstanceAsStopped()
+      logger.info(s"Instance: '${instance.name}' has been stopped.")
     } catch {
       case e: Exception =>
-        logger.debug(s"Instance: ${instance.name}. Instance is failed during the stopping process.")
+        logger.debug(s"Instance: '${instance.name}'. Instance is failed during the stopping process.")
         logger.debug(e.getMessage)
         e.printStackTrace()
         updateInstanceStatus(instance, error)
@@ -41,7 +42,7 @@ class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable w
     } else {
       updateFrameworkState(instance, error)
       throw new Exception(s"Marathon returns status code: ${getStatusCode(response)} " +
-        s"during the stopping process of framework. Framework '${frameworkName}' is marked as error.")
+        s"during the stopping process of framework. Framework '$frameworkName' is marked as error.")
     }
   }
 

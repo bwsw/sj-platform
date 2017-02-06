@@ -31,7 +31,7 @@ class NetworkTransactionGenerator(zkServers: Array[String],
    * @return ID
    */
   override def getTransaction(): Long = {
-    logger.debug("Create a new transaction ID using a tcp client")
+    logger.debug("Create a new transaction ID using a tcp client.")
     client.get()
   }
 
@@ -39,7 +39,7 @@ class NetworkTransactionGenerator(zkServers: Array[String],
    * @return ID based on timestamp
    */
   override def getTransaction(timestamp: Long): Long = {
-    logger.debug("Create a new transaction ID based on a timestamp")
+    logger.debug("Create a new transaction ID based on a timestamp.")
     timestamp * scale
   }
 

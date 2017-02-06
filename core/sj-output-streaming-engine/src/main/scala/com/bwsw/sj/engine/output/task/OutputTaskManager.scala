@@ -19,13 +19,13 @@ class OutputTaskManager() extends TaskManager {
   require(numberOfAgentsPorts >= 2, "Not enough ports for t-stream consumers/producers ")
 
   def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = {
-    logger.debug(s"Task: $taskName. Start loading of executor class from module jar\n")
-    logger.debug(s"Task: $taskName. Create instance of executor class\n")
+    logger.debug(s"Task: $taskName. Start loading of executor class from module jar.")
+    logger.debug(s"Task: $taskName. Create instance of executor class.")
     val executor = moduleClassLoader
       .loadClass(executorClassName)
       .newInstance()
       .asInstanceOf[StreamingExecutor]
-    logger.debug(s"Task: $taskName. Create instance of executor class\n")
+    logger.debug(s"Task: $taskName. Create instance of executor class.")
 
     executor
   }

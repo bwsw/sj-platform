@@ -25,7 +25,7 @@ object OfferHandler {
    * @return util.List[Offer]
    */
   def filter(filters: util.Map[String, String]) = {
-    logger.debug(s"FILTER OFFERS")
+    logger.debug(s"FILTER OFFERS.")
     var result: mutable.Buffer[Offer] = mutable.Buffer()
     if (!filters.isEmpty) {
       for (filter <- filters.asScala) {
@@ -97,8 +97,8 @@ object OfferHandler {
       overCpus += cpus
       overMem += mem
     }
-    logger.debug(s"Have resources: $overCpus cpus, $overMem mem, $overPorts ports")
-    logger.debug(s"Need resources: $reqCpus cpus, $reqMem mem, $reqPorts ports")
+    logger.debug(s"Have resources: $overCpus cpus, $overMem mem, $overPorts ports.")
+    logger.debug(s"Need resources: $reqCpus cpus, $reqMem mem, $reqPorts ports.")
     tasksCountOnSlave
   }
 

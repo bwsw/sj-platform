@@ -103,7 +103,7 @@ abstract class TaskManager() {
   private def setMetadataClusterProperties(tStreamService: TStreamService) = {
     logger.debug(s"Task name: $taskName. Set properties of metadata storage " +
       s"(namespace: ${tStreamService.metadataNamespace}, hosts: ${tStreamService.metadataProvider.hosts.mkString(",")}) " +
-      s"of t-stream factory\n")
+      s"of t-stream factory.")
     tstreamFactory.setProperty(TSF_Dictionary.Metadata.Cluster.NAMESPACE, tStreamService.metadataNamespace)
       .setProperty(TSF_Dictionary.Metadata.Cluster.ENDPOINTS, tStreamService.metadataProvider.hosts.mkString(","))
   }
@@ -113,12 +113,12 @@ abstract class TaskManager() {
       case ProviderLiterals.aerospikeType =>
         logger.debug(s"Task name: $taskName. Set properties of aerospike data storage " +
           s"(namespace: ${tStreamService.dataNamespace}, hosts: ${tStreamService.dataProvider.hosts.mkString(",")}) " +
-          s"of t-stream factory\n")
+          s"of t-stream factory.")
         tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.DRIVER, TSF_Dictionary.Data.Cluster.Consts.DATA_DRIVER_AEROSPIKE)
       case _ =>
         logger.debug(s"Task name: $taskName. Set properties of cassandra data storage " +
           s"(namespace: ${tStreamService.dataNamespace}, hosts: ${tStreamService.dataProvider.hosts.mkString(",")}) " +
-          s"of t-stream factory\n")
+          s"of t-stream factory.")
         tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.DRIVER, TSF_Dictionary.Data.Cluster.Consts.DATA_DRIVER_CASSANDRA)
     }
 
@@ -159,7 +159,7 @@ abstract class TaskManager() {
   protected def createClassLoader() = {
     val file = getModuleJar
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-      s"Get class loader for jar file: ${file.getName}\n")
+      s"Get class loader for jar file: ${file.getName}.")
 
     val classLoaderUrls = Array(file.toURI.toURL)
 
@@ -167,7 +167,7 @@ abstract class TaskManager() {
   }
 
   private def getModuleJar: File = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '${instance.moduleName}' module jar\n")
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '${instance.moduleName}' module jar.")
     storage.get(fileMetadata.filename, s"tmp/${instance.moduleName}")
   }
 
@@ -187,7 +187,7 @@ abstract class TaskManager() {
     */
   protected def createOutputProducers() = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-      s"Create the t-stream producers for each output stream\n")
+      s"Create the t-stream producers for each output stream.")
 
     tstreamFactory.setProperty(TSF_Dictionary.Producer.Transaction.DATA_WRITE_BATCH_SIZE, 20)
 
@@ -198,7 +198,7 @@ abstract class TaskManager() {
 
   def createProducer(stream: TStreamSjStream) = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-      s"Create producer for stream: ${stream.name}\n")
+      s"Create producer for stream: ${stream.name}.")
 
     val idGenerator = getTransactionGenerator(stream)
 
@@ -226,7 +226,7 @@ abstract class TaskManager() {
 
     if (!StreamService.isExist(name, metadataStorage)) {
       logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-        s"Create t-stream: $name to $description\n")
+        s"Create t-stream: $name to $description.")
       StreamService.createStream(
         name,
         partitions,
@@ -264,7 +264,7 @@ abstract class TaskManager() {
                                 offset: IOffset,
                                 callback: Callback[Array[Byte]]) = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-      s"Create subscribing consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
+      s"Create subscribing consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head}).")
 
     val partitionRange = (partitions.head to partitions.tail.head).toSet
     val idGenerator = getTransactionGenerator(stream)

@@ -9,9 +9,7 @@ import org.slf4j.LoggerFactory
 
 object GeoIp {
   private val logger = LoggerFactory.getLogger(this.getClass)
-
   private val fileStorage = ConnectionRepository.getFileStorage
-
   private lazy val ipv4AsNumLookup = getAsLookupServiceIpv4
   private lazy val ipv6AsNumLookup = getAsLookupServiceIpv6
 
@@ -25,25 +23,27 @@ object GeoIp {
       }
     } catch {
       case _: java.net.UnknownHostException =>
-        throw new Exception( s"""resolveAs error: "$ip" isn't correct ip address""")
+        throw new Exception(s"""resolveAs error: "$ip" isn't correct ip address""")
       case _: com.maxmind.geoip.InvalidDatabaseException =>
-        logger.error( s"""resolveAs error: "$ip" com.maxmind.geoip.InvalidDatabaseException""")
+        logger.error(s"""resolveAs error: "$ip" com.maxmind.geoip.InvalidDatabaseException.""")
         0
     }
   }
 
   private def getAsLookupServiceIpv4 = {
+    logger.debug("Create a geo ip lookup service of ipv4")
     val geoIpFileName = ConfigurationSettingsUtils.getGeoIpAsNumFileName()
 
     createLookupService(geoIpFileName)
   }
 
   private def getAsLookupServiceIpv6 = {
+    logger.debug("Create a geo ip lookup service of ipv6")
     val geoIpFileName = ConfigurationSettingsUtils.getGeoIpAsNumv6FileName()
 
     createLookupService(geoIpFileName)
   }
-  
+
   private def createLookupService(filename: String) = {
     val databaseFile = fileStorage.get(filename, filename)
 
