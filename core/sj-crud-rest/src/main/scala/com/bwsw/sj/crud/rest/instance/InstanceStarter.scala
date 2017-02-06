@@ -34,13 +34,14 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   private val frameworkName = getFrameworkName(instance)
 
   def run() = {
-    logger.debug(s"Instance: ${instance.name}. Start instance.")
+    logger.debug(s"Instance: '${instance.name}'. Start instance.")
     try {
       updateInstanceStatus(instance, starting)
       startInstance()
+      logger.info(s"Instance: '${instance.name}' has been launched.")
     } catch {
       case e: Exception =>
-        logger.debug(s"Instance: ${instance.name}. Instance is failed during the start process.")
+        logger.debug(s"Instance: '${instance.name}'. Instance is failed during the start process.")
         logger.debug(e.getMessage)
         e.printStackTrace()
         updateInstanceStatus(instance, failed)

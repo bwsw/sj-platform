@@ -27,7 +27,7 @@ class PersistentBlockingQueue(path: String) {
    * Put a message in a queue using blocking
    */
   def put(message: String) = {
-    logger.info(s"Put a message: $message to queue\n")
+    logger.info(s"Put a message: $message to queue.")
     mutex.lock()
     writer.writeText(message)
     cond.signal()
@@ -40,14 +40,14 @@ class PersistentBlockingQueue(path: String) {
    * @return Some received message or None
    */
   def get(idle: Long): Option[String] = {
-    logger.info(s"Get next message from queue\n")
+    logger.info(s"Get next message from queue.")
     mutex.lock()
     var data = reader.readText()
     if (data == null) {
-      logger.debug(s"Waiting the message $idle milliseconds\n")
+      logger.debug(s"Waiting the message $idle milliseconds.")
       cond.await(idle, MILLISECONDS)
       data = reader.readText()
-      logger.debug(s"After $idle milliseconds message: $data was received\n")
+      logger.debug(s"After $idle milliseconds message: $data was received.")
     }
     mutex.unlock()
     Option(data)

@@ -17,10 +17,10 @@ trait TimeCheckpointTaskEngine {
 
   private def createTimer() = {
     if (checkpointInterval > 0) {
-      logger.debug(s"Create a checkpoint timer for an input module\n")
+      logger.debug(s"Create a checkpoint timer for an input module.")
       Some(new SjTimer())
     } else {
-      logger.debug(s"Input module has not programmatic checkpoint. Manually only\n")
+      logger.debug(s"Input module has not programmatic checkpoint. Manually only.")
       None
     }
   }
@@ -39,7 +39,7 @@ trait TimeCheckpointTaskEngine {
 
   private def resetTimer() = {
     if (isNotOnlyCustomCheckpoint) {
-      logger.debug(s"Prepare a checkpoint timer for next cycle\n")
+      logger.debug(s"Prepare a checkpoint timer for next cycle.")
       checkpointTimer.get.reset()
       setTimer()
     }

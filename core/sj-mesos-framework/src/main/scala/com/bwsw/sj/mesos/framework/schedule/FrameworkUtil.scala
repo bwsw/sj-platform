@@ -72,7 +72,7 @@ object FrameworkUtil {
     val restHost = configFileService.get(ConfigLiterals.hostOfCrudRestTag).get.value
     val restPort = configFileService.get(ConfigLiterals.portOfCrudRestTag).get.value.toInt
     val restAddress = new URI(s"http://$restHost:$restPort/v1/custom/jars/$jarName").toString
-    logger.debug(s"Engine downloading URL: $restAddress")
+    logger.debug(s"Engine downloading URL: $restAddress.")
     restAddress
   }
 }

@@ -39,12 +39,12 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
    * @return Storage of keys (Hazelcast map)
    */
   def getUniqueEnvelopes = {
-    logger.debug(s"Get hazelcast map for checking of there are duplicates (input envelopes) or not\n")
+    logger.debug(s"Get hazelcast map for checking of there are duplicates (input envelopes) or not.")
     hazelcastInstance.getMap[String, Array[Byte]](hazelcastMapName)
   }
 
   private def createHazelcastConfig() = {
-    logger.debug(s"Create a Hazelcast map configuration is named '$hazelcastMapName'\n")
+    logger.debug(s"Create a Hazelcast map configuration is named '$hazelcastMapName'.")
     val config = new XmlConfigBuilder().build()
     val networkConfig = createNetworkConfig()
     val evictionPolicy = createEvictionPolicy()
@@ -62,7 +62,7 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
   }
 
   private def createEvictionPolicy() = {
-    logger.debug(s"Create EvictionPolicy\n")
+    logger.debug(s"Create EvictionPolicy.")
     instance.defaultEvictionPolicy match {
       case EngineLiterals.lruDefaultEvictionPolicy => EvictionPolicy.LRU
       case EngineLiterals.lfuDefaultEvictionPolicy => EvictionPolicy.LFU
@@ -93,7 +93,7 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
    * @return Configuration for map's capacity.
    */
   private def createMaxSizeConfig() = {
-    logger.debug(s"Create MaxSizeConfig\n")
+    logger.debug(s"Create MaxSizeConfig.")
     new MaxSizeConfig()
       .setSize(instance.queueMaxSize)
   }

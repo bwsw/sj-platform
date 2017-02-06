@@ -17,7 +17,7 @@ object StatusHandler {
     * @param status: mesos task status
     */
   def handle(status: TaskStatus) = {
-    logger.debug(s"STATUS UPDATE")
+    logger.debug(s"STATUS UPDATE.")
 
     if (status != null) {
 
@@ -27,8 +27,8 @@ object StatusHandler {
         lastNode = if (task.node != "") task.node else task.lastNode, node = status.getSlaveId.getValue
       ))
 
-      logger.debug(s"Task: ${status.getTaskId.getValue}")
-      logger.info(s"Status: ${status.getState}")
+      logger.debug(s"Task: ${status.getTaskId.getValue}.")
+      logger.info(s"Status: ${status.getState}.")
 
       status.getState.toString match {
         case "TASK_FAILED" | "TASK_ERROR" => FailureHandler.setStatus(status).process()

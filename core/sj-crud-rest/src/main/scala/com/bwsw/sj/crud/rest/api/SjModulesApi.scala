@@ -460,7 +460,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @return
     */
   private def startInstance(instance: Instance) = {
-    logger.debug(s"Starting application of instance ${instance.name}")
+    logger.debug(s"Starting application of instance ${instance.name}.")
     new Thread(new InstanceStarter(instance)).start()
   }
 
@@ -471,7 +471,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @return - Message about successful stopping
     */
   private def stopInstance(instance: Instance) = {
-    logger.debug(s"Stopping application of instance ${instance.name}")
+    logger.debug(s"Stopping application of instance ${instance.name}.")
     new Thread(new InstanceStopper(instance)).start()
   }
 
@@ -482,7 +482,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @return - Message of destroying instance
     */
   private def destroyInstance(instance: Instance) = {
-    logger.debug(s"Destroying application of instance ${instance.name}")
+    logger.debug(s"Destroying application of instance ${instance.name}.")
     new Thread(new InstanceDestroyer(instance)).start()
   }
 }

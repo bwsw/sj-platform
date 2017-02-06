@@ -43,7 +43,7 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
   protected def createWindowedModuleService() = {
     instance.stateManagement match {
       case EngineLiterals.noneStateMode =>
-        logger.debug(s"Task: ${manager.taskName}. Start preparing of windowed module without state\n")
+        logger.debug(s"Task: ${manager.taskName}. Start preparing of windowed module without state.")
         new StatelessCommonModuleService(manager, inputService.checkpointGroup, performanceMetrics)
       case EngineLiterals.ramStateMode =>
         new StatefulCommonModuleService(manager, inputService.checkpointGroup, performanceMetrics)
@@ -67,8 +67,8 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
    */
   override def call(): Unit = {
     logger.info(s"Task name: ${manager.taskName}. " +
-      s"Run windowed task engine in a separate thread of execution service\n")
-    logger.debug(s"Task: ${manager.taskName}. Invoke onInit() handler\n")
+      s"Run windowed task engine in a separate thread of execution service.")
+    logger.debug(s"Task: ${manager.taskName}. Invoke onInit() handler.")
     executor.onInit()
 
     while (true) {
@@ -99,7 +99,7 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
       }
 
       if (moduleTimer.isTime) {
-        logger.debug(s"Task: ${manager.taskName}. Invoke onTimer() handler\n")
+        logger.debug(s"Task: ${manager.taskName}. Invoke onTimer() handler.")
         executor.onTimer(System.currentTimeMillis() - moduleTimer.responseTime)
         moduleTimer.reset()
       }
@@ -121,7 +121,7 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
   }
 
   private def collectWindow() = {
-    logger.info(s"Task: ${manager.taskName}. It's time to collect batch\n")
+    logger.info(s"Task: ${manager.taskName}. It's time to collect batch.")
     windowPerStream.foreach(x => windowRepository.put(x._1, x._2.copy()))
   }
 
@@ -130,7 +130,7 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
   }
 
   private def increaseBatchCounter() = {
-    logger.debug(s"Increase count of batches\n")
+    logger.debug(s"Increase count of batches.")
     counterOfBatches += 1
   }
 
@@ -152,7 +152,7 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
   }
 
   private def resetCounter() = {
-    logger.debug(s"Reset a counter of batches to 0\n")
+    logger.debug(s"Reset a counter of batches to 0.")
     counterOfBatches -= instance.slidingInterval
   }
 
@@ -160,13 +160,13 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
    * Does group checkpoint of t-streams consumers/producers
    */
   private def doCheckpoint() = {
-    logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
-    logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeCheckpoint() handler\n")
+    logger.info(s"Task: ${manager.taskName}. It's time to checkpoint.")
+    logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeCheckpoint() handler.")
     executor.onBeforeCheckpoint()
-    logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
+    logger.debug(s"Task: ${manager.taskName}. Do group checkpoint.")
     moduleService.doCheckpoint()
     inputService.doCheckpoint()
-    logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler\n")
+    logger.debug(s"Task: ${manager.taskName}. Invoke onAfterCheckpoint() handler.")
     executor.onAfterCheckpoint()
   }
 }

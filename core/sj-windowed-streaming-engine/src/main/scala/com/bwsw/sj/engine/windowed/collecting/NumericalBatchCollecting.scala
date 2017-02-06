@@ -19,7 +19,7 @@ trait NumericalBatchCollecting {
   }
 
   private def increaseCounter() = {
-    logger.debug(s"Increase count of envelopes to: $countOfEnvelopes\n")
+    logger.debug(s"Increase count of envelopes to: $countOfEnvelopes.")
     countOfEnvelopes += 1
   }
 
@@ -28,7 +28,7 @@ trait NumericalBatchCollecting {
   }
 
   private def resetCounter() = {
-    logger.debug(s"Reset a counter of envelopes to 0\n")
+    logger.debug(s"Reset a counter of envelopes to 0.")
     countOfEnvelopes = 0
   }
 }

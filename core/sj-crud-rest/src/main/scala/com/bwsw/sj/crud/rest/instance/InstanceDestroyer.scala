@@ -26,9 +26,10 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
       deleteGenerators()
       deleteFramework()
       deleteInstance()
+      logger.info(s"Instance: '${instance.name}' has been destroyed.")
     } catch {
       case e: Exception =>
-        logger.debug(s"Instance: ${instance.name}. Instance is failed during the destroying process.")
+        logger.debug(s"Instance: '${instance.name}'. Instance is failed during the destroying process.")
         logger.debug(e.getMessage)
         e.printStackTrace()
         updateInstanceStatus(instance, error)
@@ -36,7 +37,7 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
   }
 
   private def deleteGenerators() = {
-    logger.debug(s"Instance: ${instance.name}. Deleting generators.")
+    logger.debug(s"Instance: '${instance.name}'. Deleting generators.")
     val generators = getGeneratorsToDelete()
     generators.foreach(x => deleteGenerator(x._1, x._2))
   }

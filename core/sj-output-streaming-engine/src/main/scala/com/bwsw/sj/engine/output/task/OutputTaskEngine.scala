@@ -68,7 +68,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
    */
   override def call(): Unit = {
     logger.info(s"Task name: ${manager.taskName}. " +
-      s"Run output task engine in a separate thread of execution service\n")
+      s"Run output task engine in a separate thread of execution service.")
 
     while (true) {
       val maybeEnvelope = blockingQueue.get(EngineLiterals.eventWaitTimeout)
@@ -92,7 +92,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     afterReceivingEnvelope()
     val inputEnvelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope).asInstanceOf[TStreamEnvelope]
     registerInputEnvelope(inputEnvelope)
-    logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler\n")
+    logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler.")
     val outputEnvelopes: List[Envelope] = executor.onMessage(inputEnvelope)
     outputProcessor.process(outputEnvelopes, inputEnvelope, wasFirstCheckpoint)
   }
@@ -119,9 +119,9 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
    * Does group checkpoint of t-streams consumers/producers
    */
   protected def doCheckpoint() = {
-    logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
+    logger.info(s"Task: ${manager.taskName}. It's time to checkpoint.")
     taskInputService.doCheckpoint()
-    logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
+    logger.debug(s"Task: ${manager.taskName}. Do group checkpoint.")
     prepareForNextCheckpoint()
     wasFirstCheckpoint = true
   }
@@ -142,10 +142,10 @@ object OutputTaskEngine {
 
     manager.outputInstance.checkpointMode match {
       case EngineLiterals.`timeIntervalMode` =>
-        logger.error(s"Task: ${manager.taskName}. Output module can't have a '${EngineLiterals.timeIntervalMode}' checkpoint mode\n")
-        throw new Exception(s"Task: ${manager.taskName}. Output module can't have a '${EngineLiterals.timeIntervalMode}' checkpoint mode\n")
+        logger.error(s"Task: ${manager.taskName}. Output module can't have a '${EngineLiterals.timeIntervalMode}' checkpoint mode.")
+        throw new Exception(s"Task: ${manager.taskName}. Output module can't have a '${EngineLiterals.timeIntervalMode}' checkpoint mode.")
       case EngineLiterals.`everyNthMode` =>
-        logger.info(s"Task: ${manager.taskName}. Output module has an '${EngineLiterals.everyNthMode}' checkpoint mode, create an appropriate task engine\n")
+        logger.info(s"Task: ${manager.taskName}. Output module has an '${EngineLiterals.everyNthMode}' checkpoint mode, create an appropriate task engine.")
         new OutputTaskEngine(manager, performanceMetrics) with NumericalCheckpointTaskEngine
     }
   }

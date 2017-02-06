@@ -84,7 +84,7 @@ trait InstanceMarathonManager {
   }
 
   def getMarathonInfo() = {
-    logger.debug(s"Get info about the marathon")
+    logger.debug(s"Get info about the marathon.")
     val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/info")
     val httpGet = new HttpGet(url.toString)
@@ -92,7 +92,7 @@ trait InstanceMarathonManager {
   }
 
   def startMarathonApplication(request: MarathonRequest) = {
-    logger.debug(s"Start application on marathon. Request: ${marathonEntitySerializer.serialize(request)}")
+    logger.debug(s"Start application on marathon. Request: ${marathonEntitySerializer.serialize(request)}.")
     val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/apps")
     val httpPost = new HttpPost(url.toString)
@@ -103,7 +103,7 @@ trait InstanceMarathonManager {
   }
 
   def getApplicationInfo(applicationID: String) = {
-    logger.debug(s"Get application info $applicationID")
+    logger.debug(s"Get application info '$applicationID'.")
     val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/apps/$applicationID?force=true")
     val httpGet = new HttpGet(url.toString)
@@ -111,7 +111,7 @@ trait InstanceMarathonManager {
   }
 
   def destroyMarathonApplication(applicationID: String) = {
-    logger.debug(s"Destroy application $applicationID")
+    logger.debug(s"Destroy application '$applicationID'.")
     val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/apps/$applicationID")
     val httpDelete = new HttpDelete(url.toString)
@@ -119,12 +119,12 @@ trait InstanceMarathonManager {
   }
 
   def stopMarathonApplication(applicationID: String) = {
-    logger.debug(s"Stop application $applicationID")
+    logger.debug(s"Stop application $applicationID.")
     scaleMarathonApplication(applicationID, 0)
   }
 
   def scaleMarathonApplication(applicationID: String, countOfInstances: Int) = {
-    logger.debug(s"Scale application $applicationID to count $countOfInstances")
+    logger.debug(s"Scale application $applicationID to count $countOfInstances.")
     val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/apps/$applicationID?force=true")
     val httpPut = new HttpPut(url.toString)

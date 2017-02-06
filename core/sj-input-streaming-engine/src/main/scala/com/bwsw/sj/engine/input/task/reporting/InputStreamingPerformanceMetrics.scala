@@ -78,7 +78,7 @@ class InputStreamingPerformanceMetrics(manager: InputTaskManager)
   }
 
   override def clear() = {
-    logger.debug(s"Reset variables for performance report for next reporting\n")
+    logger.debug(s"Reset variables of performance report for next reporting.")
     inputEnvelopesPerStream = mutable.Map(inputStreamName -> mutable.ListBuffer[List[Int]]())
     outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
   }

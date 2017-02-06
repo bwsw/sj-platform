@@ -131,8 +131,8 @@ object TasksList {
     agentPorts = availablePorts.mkString(",")
     agentPorts.dropRight(1)
 
-    logger.debug(s"Task: $task. Ports for task: $ports")
-    logger.debug(s"Task: $task. Agent ports: $agentPorts")
+    logger.debug(s"Task: $task. Ports for task: $ports.")
+    logger.debug(s"Task: $task. Agent ports: $agentPorts.")
 
     val cmd = CommandInfo.newBuilder()
     val hosts: collection.mutable.ListBuffer[String] = collection.mutable.ListBuffer()

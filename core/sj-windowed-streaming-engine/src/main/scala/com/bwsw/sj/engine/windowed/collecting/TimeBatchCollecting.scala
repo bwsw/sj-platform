@@ -29,7 +29,7 @@ trait TimeBatchCollecting {
   }
 
   private def resetTimer() = {
-    logger.debug(s"Prepare a batch collecting timer for next cycle\n")
+    logger.debug(s"Prepare a batch collecting timer for next cycle.")
     batchCollectingTimer.reset()
     setTimer()
   }

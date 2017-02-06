@@ -24,9 +24,10 @@ class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable w
       updateInstanceStatus(instance, stopping)
       stopFramework()
       markInstanceAsStopped()
+      logger.info(s"Instance: '${instance.name}' has been stopped.")
     } catch {
       case e: Exception =>
-        logger.debug(s"Instance: ${instance.name}. Instance is failed during the stopping process.")
+        logger.debug(s"Instance: '${instance.name}'. Instance is failed during the stopping process.")
         logger.debug(e.getMessage)
         e.printStackTrace()
         updateInstanceStatus(instance, error)

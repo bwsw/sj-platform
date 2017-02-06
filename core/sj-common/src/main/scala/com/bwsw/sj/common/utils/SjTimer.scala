@@ -31,7 +31,7 @@ class SjTimer {
    * @param delay delay in milliseconds before timer task is to be executed
    */
   def set(delay: Long) = {
-    logger.info(s"Set a timer to $delay\n")
+    logger.info(s"Set a timer to $delay.")
     timer.schedule(new TimerTask {
       def run() {
         isTimerWentOut = true
@@ -45,12 +45,12 @@ class SjTimer {
    * @return The result of checking
    */
   def isTime: Boolean = {
-    logger.debug(s"Check whether a timer has went out or not\n")
+    logger.debug(s"Check whether a timer has went out or not.")
     isTimerWentOut
   }
 
   def reset() = {
-    logger.debug(s"Reset a timer\n")
+    logger.debug(s"Reset a timer.")
     isTimerWentOut = false
     responseTime = 0
   }

@@ -32,7 +32,7 @@ class RetrievableKafkaTaskInput(override val manager: CommonTaskManager,
   }
 
   override def get() = {
-    logger.debug(s"Task: ${manager.taskName}. Waiting for records that consumed from kafka for $kafkaSubscriberTimeout milliseconds\n")
+    logger.debug(s"Task: ${manager.taskName}. Waiting for records that consumed from kafka for $kafkaSubscriberTimeout milliseconds.")
     val records = kafkaConsumer.poll(kafkaSubscriberTimeout)
     records.asScala.map(consumerRecordToEnvelope)
   }

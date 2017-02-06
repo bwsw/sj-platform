@@ -68,26 +68,26 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
   }
 
   private def addProducersToCheckpointGroup() = {
-    logger.debug(s"Task: ${manager.taskName}. Start adding t-stream producers to checkpoint group\n")
+    logger.debug(s"Task: ${manager.taskName}. Start adding t-stream producers to checkpoint group.")
     producers.foreach(x => checkpointGroup.add(x._2))
-    logger.debug(s"Task: ${manager.taskName}. The t-stream producers are added to checkpoint group\n")
+    logger.debug(s"Task: ${manager.taskName}. The t-stream producers are added to checkpoint group.")
   }
 
   /**
    * Sends an input envelope to output steam
    */
   private def sendEnvelope(stream: String, partition: Int, data: Array[Byte]) = {
-    logger.info(s"Task name: ${manager.taskName}. Send envelope to each output stream.\n")
+    logger.info(s"Task name: ${manager.taskName}. Send envelope to each output stream..")
     val maybeTransaction = getTransaction(stream, partition)
     val producerTransaction = maybeTransaction match {
       case Some(transaction) =>
-        logger.debug(s"Task name: ${manager.taskName}. Txn for stream/partition: '$stream/$partition' is defined\n")
+        logger.debug(s"Task name: ${manager.taskName}. Txn for stream/partition: '$stream/$partition' is defined.")
         transaction.send(data)
 
         transaction
       case None =>
         logger.debug(s"Task name: ${manager.taskName}. Txn for stream/partition: '$stream/$partition' is not defined " +
-          s"so create new txn\n")
+          s"so create new txn.")
         val transaction = producers(stream).newTransaction(NewTransactionProducerPolicy.ErrorIfOpened, partition)
         transaction.send(data)
         putTxn(stream, partition, transaction)
@@ -95,7 +95,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
         transaction
     }
 
-    logger.debug(s"Task name: ${manager.taskName}. Add envelope to output stream in performance metrics \n")
+    logger.debug(s"Task name: ${manager.taskName}. Add envelope to output stream in performance metrics .")
     performanceMetrics.addElementToOutputEnvelope(
       stream,
       producerTransaction.getTransactionID().toString,
@@ -108,15 +108,15 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
    */
   def call(): Unit = {
     logger.info(s"Task name: ${manager.taskName}. " +
-      s"Run input task engine in a separate thread of execution service\n")
+      s"Run input task engine in a separate thread of execution service.")
     while (true) {
       getChannelContext() match {
         case Some(channelContext) =>
           setOfContexts.add(channelContext)
-          logger.debug(s"Task name: ${manager.taskName}. Invoke tokenize() method of executor\n")
+          logger.debug(s"Task name: ${manager.taskName}. Invoke tokenize() method of executor.")
           val maybeInterval = executor.tokenize(bufferForEachContext(channelContext))
           if (maybeInterval.isDefined) {
-            logger.debug(s"Task name: ${manager.taskName}. Tokenize() method returned a defined interval\n")
+            logger.debug(s"Task name: ${manager.taskName}. Tokenize() method returned a defined interval.")
             tryToRead(channelContext, maybeInterval.get)
           }
         case None =>
@@ -141,8 +141,8 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
   private def tryToRead(channelContext: ChannelHandlerContext, interval: Interval) = {
     val buffer = bufferForEachContext(channelContext)
     if (buffer.isReadable(interval.finalValue)) {
-      logger.debug(s"Task name: ${manager.taskName}. The end index of interval is valid\n")
-      logger.debug(s"Task name: ${manager.taskName}. Invoke parse() method of executor\n")
+      logger.debug(s"Task name: ${manager.taskName}. The end index of interval is valid.")
+      logger.debug(s"Task name: ${manager.taskName}. Invoke parse() method of executor.")
       val inputEnvelope = executor.parse(buffer, interval)
       clearBufferAfterParse(buffer, interval.finalValue)
       val isNotDuplicateOrEmpty = processEnvelope(inputEnvelope)
@@ -150,7 +150,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
     } else {
       logger.error(s"Task name: ${manager.taskName}. " +
         s"Method tokenize() returned an interval with a final value: ${interval.finalValue} " +
-        s"that an input stream is not defined at (buffer write index: ${buffer.writerIndex()})\n")
+        s"that an input stream is not defined at (buffer write index: ${buffer.writerIndex()}).")
       throw new IndexOutOfBoundsException(s"Task name: ${manager.taskName}. " +
         s"Method tokenize() returned an interval with a final value: ${interval.finalValue} " +
         s"that an input stream is not defined at (buffer write index: ${buffer.writerIndex()})")
@@ -177,10 +177,10 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
   private def processEnvelope(envelope: Option[InputEnvelope]): Boolean = {
     envelope match {
       case Some(inputEnvelope) =>
-        logger.info(s"Task name: ${manager.taskName}. Envelope is defined. Process it\n")
+        logger.info(s"Task name: ${manager.taskName}. Envelope is defined. Process it.")
         performanceMetrics.addEnvelopeToInputStream(inputEnvelope)
         if (checkForDuplication(inputEnvelope.key, inputEnvelope.duplicateCheck, inputEnvelope.data)) {
-          logger.debug(s"Task name: ${manager.taskName}. Envelope is not duplicate so send it\n")
+          logger.debug(s"Task name: ${manager.taskName}. Envelope is not duplicate so send it.")
           inputEnvelope.outputMetadata.foreach(x => {
             sendEnvelope(x._1, x._2, inputEnvelope.data)
           })
@@ -201,10 +201,10 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
   private def checkForDuplication(key: String, duplicateCheck: Boolean, value: Array[Byte]): Boolean = {
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Try to check key: '$key' for duplication with a setting duplicateCheck = '$duplicateCheck' " +
-      s"and an instance setting - 'duplicate-check' : '${instance.duplicateCheck}'\n")
+      s"and an instance setting - 'duplicate-check' : '${instance.duplicateCheck}'.")
     if (instance.duplicateCheck || duplicateCheck) {
       logger.info(s"Task name: ${manager.taskName}. " +
-        s"Check key: '$key' for duplication\n")
+        s"Check key: '$key' for duplication.")
       evictionPolicy.checkForDuplication(key, value)
     } else true
   }
@@ -228,8 +228,8 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
    * Does group checkpoint of t-streams consumers/producers
    */
   private def doCheckpoint(): Unit = {
-    logger.info(s"Task: ${manager.taskName}. It's time to checkpoint\n")
-    logger.debug(s"Task: ${manager.taskName}. Do group checkpoint\n")
+    logger.info(s"Task: ${manager.taskName}. It's time to checkpoint.")
+    logger.debug(s"Task: ${manager.taskName}. Do group checkpoint.")
     checkpointGroup.checkpoint()
     checkpointInitiated()
     transactionsByStreamPartitions = createTxnsStorage()
@@ -262,7 +262,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
    */
   private def getTransaction(stream: String, partition: Int) = {
     logger.debug(s"Task name: ${manager.taskName}. " +
-      s"Try to get txn by stream: $stream, partition: $partition\n")
+      s"Try to get txn by stream: $stream, partition: $partition.")
     if (transactionsByStreamPartitions(stream).isDefinedAt(partition)) {
       Some(transactionsByStreamPartitions(stream)(partition))
     } else None
@@ -276,7 +276,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
    */
   private def putTxn(stream: String, partition: Int, transaction: ProducerTransaction[Array[Byte]]) = {
     logger.debug(s"Task name: ${manager.taskName}. " +
-      s"Put txn for stream: $stream, partition: $partition\n")
+      s"Put txn for stream: $stream, partition: $partition.")
     transactionsByStreamPartitions(stream) += (partition -> transaction)
   }
 
@@ -288,7 +288,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
   private def createTxnsStorage() = {
     val streams = producers.keySet
     logger.debug(s"Task name: ${manager.taskName}. " +
-      s"Create a storage for keeping txns for each partition of output streams\n")
+      s"Create a storage for keeping txns for each partition of output streams.")
     streams.map(x => (x, mutable.Map[Int, ProducerTransaction[Array[Byte]]]())).toMap
   }
 }
@@ -307,10 +307,10 @@ object InputTaskEngine {
 
     manager.inputInstance.checkpointMode match {
       case EngineLiterals.`timeIntervalMode` =>
-        logger.info(s"Task: ${manager.taskName}. Input module has a '${EngineLiterals.timeIntervalMode}' checkpoint mode, create an appropriate task engine\n")
+        logger.info(s"Task: ${manager.taskName}. Input module has a '${EngineLiterals.timeIntervalMode}' checkpoint mode, create an appropriate task engine.")
         new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext) with TimeCheckpointTaskEngine
       case EngineLiterals.`everyNthMode` =>
-        logger.info(s"Task: ${manager.taskName}. Input module has an '${EngineLiterals.everyNthMode}' checkpoint mode, create an appropriate task engine\n")
+        logger.info(s"Task: ${manager.taskName}. Input module has an '${EngineLiterals.everyNthMode}' checkpoint mode, create an appropriate task engine.")
         new InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext) with NumericalCheckpointTaskEngine
     }
   }

@@ -27,13 +27,13 @@ class CommonTaskManager() extends TaskManager {
       s"${inputs.count(x => x._1.streamType == StreamLiterals.tstreamType) + instance.outputs.length + 3} ports are required")
 
   def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = {
-    logger.debug(s"Task: $taskName. Start loading of executor class from module jar\n")
+    logger.debug(s"Task: $taskName. Start loading of executor class from module jar.")
     val executor = moduleClassLoader
       .loadClass(executorClassName)
       .getConstructor(classOf[ModuleEnvironmentManager])
       .newInstance(environmentManager)
       .asInstanceOf[StreamingExecutor]
-    logger.debug(s"Task: $taskName. Create instance of executor class\n")
+    logger.debug(s"Task: $taskName. Create instance of executor class.")
 
     executor
   }
@@ -48,7 +48,7 @@ class CommonTaskManager() extends TaskManager {
    */
   def createConsumer(stream: TStreamSjStream, partitions: List[Int], offset: IOffset): Consumer[Array[Byte]] = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-      s"Create consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
+      s"Create consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head}).")
 
     val transactionGenerator = getTransactionGenerator(stream)
 
