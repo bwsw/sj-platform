@@ -8,8 +8,16 @@ import { Component, Input, OnDestroy } from '@angular/core';
 })
 
 export class SpinnerComponent implements OnDestroy {
-  visible: boolean = false;
-  timeout: any;
+  private _visible: boolean = false;
+  private _timeout: any;
+
+  public get visible(): boolean {
+    return this._visible;
+  }
+
+  public get timeout(): any {
+    return this._timeout;
+  }
 
   @Input()
   public delay: number = 0;
@@ -18,22 +26,22 @@ export class SpinnerComponent implements OnDestroy {
   public set isRunning(value: boolean) {
     if (!value) {
       this.cancel();
-      this.visible = false;
+      this._visible = false;
     }
 
-    if (this.timeout) {
+    if (this._timeout) {
       return;
     }
 
-    this.timeout = setTimeout(() => {
-      this.visible = value;
+    this._timeout = setTimeout(() => {
+      this._visible = value;
       this.cancel();
     }, this.delay);
   }
 
   cancel(): void {
-    clearTimeout(this.timeout);
-    this.timeout = undefined;
+    clearTimeout(this._timeout);
+    this._timeout = undefined;
   }
 
   ngOnDestroy(): any {

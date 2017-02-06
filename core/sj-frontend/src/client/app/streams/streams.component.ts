@@ -94,9 +94,9 @@ export class StreamsComponent implements OnInit {
         error => this.errorMessage = <any>error);
   }
 
-  public getServiceInfo(Modal: ModalDirective, serviceName: string) {
+  public getServiceInfo(modal: ModalDirective, serviceName: string) {
     this.getService(serviceName);
-    Modal.show();
+    modal.show();
   }
 
   public deleteStreamConfirm(modal: ModalDirective, stream: StreamModel) {

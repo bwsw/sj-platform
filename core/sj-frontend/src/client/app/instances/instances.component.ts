@@ -149,9 +149,8 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
           if(response) {
             this.message = response.message;
             this.tasks = response.tasks;
-          };
-        }
-      );
+          }
+        });
   }
 
   public selectInstance(instance: InstanceModel) {
@@ -185,11 +184,12 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
             this.newInstance['main-stream'] = mainStream[0];
             this.newInstance['main-stream-type'] = mainStream[1];
             this.newInstance['related-streams-type'] = [];
-            instanceInfo['related-streams'].forEach((item: string, i: number) => {
-              let related = item.split('/');
-              this.newInstance['related-streams'][i] = related[0];
-              this.newInstance['related-streams-type'][i] = related[1];
-            });
+            instanceInfo['related-streams'].forEach(
+              (item: string, i: number) => {
+                let related = item.split('/');
+                this.newInstance['related-streams'][i] = related[0];
+                this.newInstance['related-streams-type'][i] = related[1];
+              });
 
           }
           if (this.newInstance.module['module-type'] === 'regular-streaming') {
