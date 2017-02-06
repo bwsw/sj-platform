@@ -42,7 +42,7 @@ class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable w
     } else {
       updateFrameworkState(instance, error)
       throw new Exception(s"Marathon returns status code: ${getStatusCode(response)} " +
-        s"during the stopping process of framework. Framework '${frameworkName}' is marked as error.")
+        s"during the stopping process of framework. Framework '$frameworkName' is marked as error.")
     }
   }
 

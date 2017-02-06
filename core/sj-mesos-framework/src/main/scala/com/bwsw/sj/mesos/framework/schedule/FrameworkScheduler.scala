@@ -63,6 +63,10 @@ class FrameworkScheduler extends Scheduler {
    * @param offers resources, that master offered to framework
    */
   override def resourceOffers(driver: SchedulerDriver, offers: util.List[Offer]): Unit = {
+    if (!FrameworkUtil.isInstanceStarted) FrameworkUtil.teardown()
+    else FrameworkUtil.prepareTasksToLaunch()
+
+
     val internalOffers: mutable.Buffer[Offer] = offers.asScala
     logger.info(s"RESOURCE OFFERS.")
     TasksList.clearAvailablePorts()
@@ -96,13 +100,15 @@ class FrameworkScheduler extends Scheduler {
     logger.debug(s"Tasks to launch: ${TasksList.toLaunch}.")
 
     OfferHandler.offerNumber = 0
-    TasksList.clearLaunchedTasks()
-    for (currTask <- TasksList.toLaunch) {
-      createTaskToLaunch(currTask, tasksCountOnSlaves)
-      tasksCountOnSlaves = OfferHandler.updateOfferNumber(tasksCountOnSlaves)
+    if (FrameworkUtil.isInstanceStarted) {
+      for (currTask <- TasksList.toLaunch) {
+        createTaskToLaunch(currTask, tasksCountOnSlaves)
+        tasksCountOnSlaves = OfferHandler.updateOfferNumber(tasksCountOnSlaves)
+      }
     }
 
     launchTasks(driver)
+    TasksList.clearLaunchedOffers()
     declineOffers(driver, internalOffers)
     TasksList.setMessage("Tasks have been launched")
   }
@@ -133,7 +139,7 @@ class FrameworkScheduler extends Scheduler {
     * @param driver
     */
   private def launchTasks(driver: SchedulerDriver) = {
-    for (task <- TasksList.getLaunchedTasks()) {
+    for (task <- TasksList.getLaunchedOffers()) {
       driver.launchTasks(List(task._1).asJava, task._2.asJava)
     }
   }
@@ -160,16 +166,16 @@ class FrameworkScheduler extends Scheduler {
     FrameworkUtil.params = FrameworkUtil.getEnvParams()
     logger.debug(s"Got environment variable: ${FrameworkUtil.params}.")
 
-    val optionInstance = ConnectionRepository.getInstanceService.get(FrameworkUtil.params("instanceId"))
+    FrameworkUtil.updateInstance()
 
-    if (optionInstance.isEmpty) {
-      logger.error(s"Not found instance.")
-      TasksList.setMessage("Framework shut down: not found instance.")
-      driver.stop()
-      return
-    } else {
-      FrameworkUtil.instance = optionInstance.get
-    }
+//    if (optionInstance.isEmpty) {
+//      logger.error(s"Not found instance.")
+//      TasksList.setMessage("Framework shut down: not found instance.")
+//      driver.stop()
+//      return
+//    } else {
+//      FrameworkUtil.instance = optionInstance.get
+//    }
     logger.debug(s"Got instance ${FrameworkUtil.instance.name}.")
 
     TasksList.prepare(FrameworkUtil.instance)
