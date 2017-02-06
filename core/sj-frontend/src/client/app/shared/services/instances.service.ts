@@ -70,6 +70,7 @@ export class InstancesService {
   }
 
   public getInstanceTasks(instance: InstanceModel): Observable<ITasksObject> {
+    console.log(instance['rest-address']);
     return this.http.get('http://'+instance['rest-address'])
       .map(this.extractData)
       .catch(this.handleError);
@@ -221,7 +222,7 @@ export class InstancesService {
     let errMsg = (error._body) ? error._body :
       error.status ? `${error.status} - ${error.statusText}` : 'Server error';
     if (typeof errMsg !== 'object') { errMsg = JSON.parse(errMsg); }
-    let errMsgYo = errMsg.entity.message;
+    let errMsgYo = errMsg.entity ? errMsg.entity.message : "Undefined error";
     return Observable.throw(errMsgYo);
   }
 

@@ -146,8 +146,10 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
     this.instancesService.getInstanceTasks(instance)
       .subscribe(
         response => {
-          this.message = response.message;
-          this.tasks = response.tasks;
+          if(response) {
+            this.message = response.message;
+            this.tasks = response.tasks;
+          };
         }
       );
   }
