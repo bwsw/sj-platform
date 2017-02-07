@@ -3,7 +3,6 @@ package com.bwsw.sj.common.DAL.model.module
 import com.bwsw.sj.common.rest.entities.module.{BatchFillType, ExecutionPlan, InstanceMetadata, WindowedInstanceMetadata}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
-import com.fasterxml.jackson.annotation.JsonProperty
 import org.mongodb.morphia.annotations.{Embedded, Property}
 
 /**
@@ -12,11 +11,11 @@ import org.mongodb.morphia.annotations.{Embedded, Property}
  * @author Kseniya Tomskikh
  */
 class WindowedInstance() extends Instance {
-  @JsonProperty("main-stream") var mainStream: String = null
-  @JsonProperty("related-streams") var relatedStreams: Array[String] = Array()
-  @JsonProperty("batch-fill-type") var batchFillType: BatchFillType = new BatchFillType()
+  @Property("main-stream") var mainStream: String = null
+  @Property("related-streams") var relatedStreams: Array[String] = Array()
+  @Property("batch-fill-type") var batchFillType: BatchFillType = new BatchFillType()
   var window: Int = 1
-  @JsonProperty("sliding-interval") var slidingInterval: Int = 1
+  @Property("sliding-interval") var slidingInterval: Int = 1
   @Embedded("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan()
   @Property("start-from") var startFrom: String = EngineLiterals.newestStartMode
   @Property("state-management") var stateManagement: String = EngineLiterals.noneStateMode

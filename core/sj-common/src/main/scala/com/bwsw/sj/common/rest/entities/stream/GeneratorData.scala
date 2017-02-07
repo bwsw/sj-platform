@@ -7,13 +7,12 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils
 import com.bwsw.sj.common.utils.GeneratorLiterals._
 import com.bwsw.sj.common.utils.{GeneratorLiterals, MessageResourceUtils, ServiceLiterals}
-import com.fasterxml.jackson.annotation.JsonProperty
 
 import scala.collection.mutable.ArrayBuffer
 
-case class GeneratorData(@JsonProperty("generator-type") generatorType: String,
+case class GeneratorData(generatorType: String,
                          service: String = null,
-                         @JsonProperty("instance-count") instanceCount: Int = Int.MinValue) extends ValidationUtils with MessageResourceUtils {
+                         instanceCount: Int = Int.MinValue) extends ValidationUtils with MessageResourceUtils {
 
   def asModelGenerator() = {
     val serviceDAO = ConnectionRepository.getServiceManager

@@ -4,20 +4,19 @@ import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
 import com.bwsw.sj.common.utils.StreamLiterals._
-import com.fasterxml.jackson.annotation.JsonProperty
 
 class WindowedInstanceMetadata extends InstanceMetadata {
-  @JsonProperty("main-stream") var mainStream: String = null
-  @JsonProperty("related-streams") var relatedStreams: Array[String] = Array()
-  @JsonProperty("batch-fill-type") var batchFillType: BatchFillType = null
+  var mainStream: String = null
+  var relatedStreams: Array[String] = Array()
+  var batchFillType: BatchFillType = null
   var window: Int = 1
-  @JsonProperty("sliding-interval") var slidingInterval: Int = 1
+  var slidingInterval: Int = 1
   var outputs: Array[String] = Array()
-  @JsonProperty("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan()
-  @JsonProperty("start-from") var startFrom: String = EngineLiterals.newestStartMode
-  @JsonProperty("state-management") var stateManagement: String = EngineLiterals.noneStateMode
-  @JsonProperty("state-full-checkpoint") var stateFullCheckpoint: Int = 100
-  @JsonProperty("event-wait-idle-time") var eventWaitIdleTime: Long = 1000
+  var executionPlan: ExecutionPlan = new ExecutionPlan()
+  var startFrom: String = EngineLiterals.newestStartMode
+  var stateManagement: String = EngineLiterals.noneStateMode
+  var stateFullCheckpoint: Int = 100
+  var eventWaitIdleTime: Long = 1000
 
   override def asModelInstance() = {
     val modelInstance = new WindowedInstance()

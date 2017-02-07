@@ -6,14 +6,14 @@ import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo, JsonPropert
 /**
   * Stream data case class
   */
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "stream-type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(Array(new Type(value = classOf[CassStream], name = "cassandra"),
   new Type(value = classOf[TestStream], name = "test")
 ))
 class SjStreamTest {
   var name: String = null
   var description: String = "No description"
-  @JsonProperty("stream-type") var streamType: String = null
+  @JsonProperty("type") var streamType: String = null
 }
 
 class CassStream extends  SjStreamTest {

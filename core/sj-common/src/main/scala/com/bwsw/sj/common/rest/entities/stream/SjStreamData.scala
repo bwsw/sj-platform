@@ -17,7 +17,7 @@ import scala.collection.mutable.ArrayBuffer
   new Type(value = classOf[JDBCSjStreamData], name = StreamLiterals.jdbcOutputType)
 ))
 class SjStreamData() extends ValidationUtils with MessageResourceUtils {
-  @JsonProperty("stream-type") var streamType: String = null
+  @JsonProperty("type") var streamType: String = null
   var name: String = null
   var description: String = "No description"
   var service: String = null

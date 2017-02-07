@@ -3,15 +3,14 @@ package com.bwsw.sj.common.rest.entities.service
 import com.bwsw.sj.common.DAL.model.KafkaService
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.{ProviderLiterals, ServiceLiterals}
-import com.fasterxml.jackson.annotation.JsonProperty
 
 import scala.collection.mutable.ArrayBuffer
 
 class KfkQServiceData() extends ServiceData() {
   serviceType = ServiceLiterals.kafkaType
   var provider: String = null
-  @JsonProperty("zk-provider") var zkProvider: String = null
-  @JsonProperty("zk-namespace") var zkNamespace: String = null
+  var zkProvider: String = null
+  var zkNamespace: String = null
 
   override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService

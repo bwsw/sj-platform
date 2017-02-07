@@ -2,19 +2,18 @@ package com.bwsw.sj.common.rest.entities.service
 
 import com.bwsw.sj.common.DAL.model.TStreamService
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{ServiceLiterals, ProviderLiterals}
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.bwsw.sj.common.utils.{ProviderLiterals, ServiceLiterals}
 
 import scala.collection.mutable.ArrayBuffer
 
 class TstrQServiceData() extends ServiceData() {
   serviceType = ServiceLiterals.tstreamsType
-  @JsonProperty("metadata-provider") var metadataProvider: String = null
-  @JsonProperty("metadata-namespace") var metadataNamespace: String = null
-  @JsonProperty("data-provider") var dataProvider: String = null
-  @JsonProperty("data-namespace") var dataNamespace: String = null
-  @JsonProperty("lock-provider") var lockProvider: String = null
-  @JsonProperty("lock-namespace") var lockNamespace: String = null
+  var metadataProvider: String = null
+  var metadataNamespace: String = null
+  var dataProvider: String = null
+  var dataNamespace: String = null
+  var lockProvider: String = null
+  var lockNamespace: String = null
 
   override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService
