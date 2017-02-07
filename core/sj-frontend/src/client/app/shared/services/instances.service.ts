@@ -75,7 +75,7 @@ export class InstancesService {
       .catch(this.handleError);
   }
 
-  public saveInstance(instance: InstanceModel) {
+  public saveInstance(instance: InstanceModel): Observable<InstanceModel> {
     let subtypedInstance = this.getPreparedInstance(instance);
     let instance_body = Object.assign({}, subtypedInstance);
     let body = JSON.stringify(instance_body, this.cleanupBodyValues);
