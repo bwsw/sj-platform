@@ -59,7 +59,7 @@ export class InstancesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this._dataUrl + 'modules/' + instance.moduleType + '/' + instance.moduleName + '/' +
+    return this.http.get(this.dataUrl + 'modules/' + instance.moduleType + '/' + instance.moduleName + '/' +
       instance.moduleVersion + '/instance' + '/' + instance.name, options)
       .map(response => {
         const data = this.extractData(response);
@@ -82,7 +82,7 @@ export class InstancesService {
     let headers = new Headers({'Content-Type': 'application/json'});
     let options = new RequestOptions({ headers: headers });
 
-    return this.http.post(this._dataUrl + 'modules/' + instance.module.moduleType + '/' + instance.module.moduleName + '/' +
+    return this.http.post(this.dataUrl + 'modules/' + instance.module.moduleType + '/' + instance.module.moduleName + '/' +
       instance.module.moduleVersion + '/instance', body, options)
       .map(response => {
         const data = this.extractData(response);
@@ -95,7 +95,7 @@ export class InstancesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.delete(this._dataUrl + 'modules/' + instance.module.moduleType + '/' + instance.module.moduleName + '/' +
+    return this.http.delete(this.dataUrl + 'modules/' + instance.module.moduleType + '/' + instance.module.moduleName + '/' +
     instance.module.moduleVersion + '/instance' + '/' + instance.name, options)
       .map(response => {
         const data = this.extractData(response);
@@ -108,7 +108,7 @@ export class InstancesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this._dataUrl + 'modules/' + instance.module.moduleType + '/' + instance.module.moduleName + '/' +
+    return this.http.get(this.dataUrl + 'modules/' + instance.module.moduleType + '/' + instance.module.moduleName + '/' +
       instance.module.moduleVersion + '/instance' + '/' + instance.name + '/start', options)
       .map(response => {
         const data = this.extractData(response);
@@ -121,7 +121,7 @@ export class InstancesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this._dataUrl + 'modules/' + instance.module.moduleType + '/' + instance.module.moduleName + '/' +
+    return this.http.get(this.dataUrl + 'modules/' + instance.module.moduleType + '/' + instance.module.moduleName + '/' +
       instance.module.moduleVersion + '/instance' + '/' + instance.name + '/stop', options)
       .map(response => {
         const data = this.extractData(response);
