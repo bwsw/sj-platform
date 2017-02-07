@@ -277,7 +277,8 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   private def getFrameworkEnvironmentVariables(marathonMaster: String) = {
     var environmentVariables = Map(
       instanceIdLabel -> instance.name,
-      mesosMasterLabel -> marathonMaster
+      mesosMasterLabel -> marathonMaster,
+      frameworkIdLabel -> frameworkName
     )
     environmentVariables = environmentVariables ++ ConnectionConstants.mongoEnvironment
     environmentVariables = environmentVariables ++ instance.environmentVariables.asScala
