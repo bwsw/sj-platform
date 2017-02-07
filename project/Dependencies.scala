@@ -108,9 +108,9 @@ object Dependencies {
   lazy val sjFrameworkDependencies = Def.setting(Seq(
     "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
     "org.apache.mesos" % "mesos" % "0.28.1",
-    ("net.databinder" % "unfiltered-filter_2.11" % "0.8.4")
-      .exclude("org.scala-lang.modules", "scala-xml_2.11"),
-    "net.databinder" % "unfiltered-jetty_2.11" % "0.8.4",
+    "ws.unfiltered" % "unfiltered-filter_2.12" % "0.9.0",
+//      .exclude("org.scala-lang.modules", "scala-xml_2.11"),
+    "ws.unfiltered" % "unfiltered-jetty_2.12" % "0.9.0",
     ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
       .exclude("commons-logging", "commons-logging")
   ))

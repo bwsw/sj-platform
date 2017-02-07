@@ -1,5 +1,7 @@
 package com.bwsw.sj.mesos.framework
 
+import java.net.URI
+
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.mesos.framework.rest.Rest
 import com.bwsw.sj.mesos.framework.schedule.FrameworkScheduler
@@ -8,6 +10,7 @@ import org.apache.mesos.MesosSchedulerDriver
 import org.apache.mesos.Protos.FrameworkInfo
 import org.apache.mesos.Protos.Credential
 import scala.util.Properties
+import com.bwsw.common.LeaderLatch
 
 
 object StartFramework {
@@ -49,9 +52,24 @@ object StartFramework {
       else new MesosSchedulerDriver(scheduler, framework, master_path)
     }
 
+    val zkServers = getZooKeeperServers(master_path)
+    val leader = new LeaderLatch(Set(zkServers), "/framework/lock")
+
+    leader.start()
+    leader.takeLeadership(5)
+
 
     driver.start()
     driver.join()
+
+    leader.close()
     System.exit(0)
   }
+
+
+  private def getZooKeeperServers(marathonMaster: String) = {
+    val marathonMasterUrl = new URI(marathonMaster)
+    marathonMasterUrl.getHost + ":" + marathonMasterUrl.getPort
+  }
+
 }
