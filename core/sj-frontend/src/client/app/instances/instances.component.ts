@@ -281,7 +281,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
           this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
           this.getInstancesList();
         },
-        error =>{
+        error => {
           this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
         });
   }

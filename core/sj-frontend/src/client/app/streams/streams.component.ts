@@ -44,7 +44,7 @@ export class StreamsComponent implements OnInit {
     if (event.keyCode === 32) {
       this.newStream.tags.push(this.currentTag.substr(0, this.currentTag.length-1));
       this.currentTag = '';
-    } else if (event.keyCode === 8 && this.currentTag.length == 0){
+    } else if (event.keyCode === 8 && this.currentTag.length === 0) {
       this.currentTag = this.newStream.tags.pop();
     }
   }

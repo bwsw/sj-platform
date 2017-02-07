@@ -19,7 +19,7 @@ export class CustomService {
       .map(response => {
         const data = this.extractData(response);
         if (path === 'files') {
-          return data.customFiles
+          return data.customFiles;
         } else {
           return data.customJars;
         }
@@ -60,7 +60,7 @@ export class CustomService {
         }
       };
       xhr.open('POST', this.dataUrl + 'custom/' + path, true);
-      xhr.setRequestHeader("enctype", "multipart/form-data");
+      xhr.setRequestHeader('enctype', 'multipart/form-data');
       let formData = new FormData();
       if (path === 'jars') {
         formData.append('jar', file, file.name);
@@ -87,7 +87,6 @@ export class CustomService {
     return this.http.delete(this.dataUrl + 'custom/' + deleteLink, options)
       .map(response => {
         const data = this.extractData(response);
-        let node: string = 'custom'+path;
         return data.message;
       })
       .catch(this.handleError);

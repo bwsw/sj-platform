@@ -3,11 +3,13 @@ import { Component, Input, OnDestroy } from '@angular/core';
 @Component({
   moduleId: module.id,
   selector: 'sj-spinner',
-  templateUrl: './spinner.component.html',
-  styleUrls: ['./spinner.component.css']
+  templateUrl: 'spinner.component.html',
+  styleUrls: ['spinner.component.css']
 })
 
 export class SpinnerComponent implements OnDestroy {
+  @Input() public delay: number = 0;
+
   private _visible: boolean = false;
   private _timeout: any;
 
@@ -18,9 +20,6 @@ export class SpinnerComponent implements OnDestroy {
   public get timeout(): any {
     return this._timeout;
   }
-
-  @Input()
-  public delay: number = 0;
 
   @Input()
   public set isRunning(value: boolean) {

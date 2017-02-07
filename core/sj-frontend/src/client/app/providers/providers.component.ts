@@ -1,11 +1,9 @@
-import { Component, OnInit, Input, Output, EventEmitter, ViewChild, AfterViewChecked } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ModalDirective } from 'ng2-bootstrap';
 
 import { ProviderModel } from '../shared/models/provider.model';
-import { ServiceModel } from '../shared/models/service.model';
 import { ProvidersService } from '../shared/services/providers.service';
-import { ServicesService } from '../shared/services/services.service';
 
 @Component({
   moduleId: module.id,

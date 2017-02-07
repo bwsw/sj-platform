@@ -147,7 +147,7 @@ export class InstancesService {
         inst.outputs = orig.outputs;
         inst.stateManagement = orig.stateManagement;
         inst.startFrom = orig.startFrom === 'timestamp' ? orig.startFromTimestamp : orig.startFrom;
-        inst.stateFullCheckpoint = orig.stateFullCheckpoint
+        inst.stateFullCheckpoint = orig.stateFullCheckpoint;
 
         break;
 
@@ -169,7 +169,7 @@ export class InstancesService {
         } else {
           inst.relatedStreams = [];
         }
-        inst.batchFillType = { typeName: orig.batchFillType.typeName, value: orig.batchFillType.value}
+        inst.batchFillType = { typeName: orig.batchFillType.typeName, value: orig.batchFillType.value };
         inst.slidingInterval = orig.slidingInterval;
         inst.startFrom = orig.startFrom === 'timestamp' ? orig.startFromTimestamp : orig.startFrom;
         break;
@@ -226,7 +226,7 @@ export class InstancesService {
     let errMsg = (error._body) ? error._body :
       error.status ? `${error.status} - ${error.statusText}` : 'Server error';
     if (typeof errMsg !== 'object') { errMsg = JSON.parse(errMsg); }
-    let errMsgYo = errMsg.entity ? errMsg.entity.message : "Undefined error";
+    let errMsgYo = errMsg.entity ? errMsg.entity.message : 'Undefined error';
     return Observable.throw(errMsgYo);
   }
 

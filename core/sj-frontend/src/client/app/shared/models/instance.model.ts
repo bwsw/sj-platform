@@ -53,7 +53,7 @@ export class InstanceModel {
   window: number = 1;
   executionPlan: {
     tasks: {}
-  }
+  };
   tasks: {};
 
   [key: string]: any;

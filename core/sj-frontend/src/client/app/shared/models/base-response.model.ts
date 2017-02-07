@@ -1,10 +1,10 @@
 import { ProviderModel } from './provider.model';
 import { ServiceModel } from './service.model';
-import { StreamModel } from "./stream.model";
-import { InstanceModel } from "./instance.model";
-import { ModuleModel } from "./module.model";
-import { SettingModel } from "./setting.model";
-import { CustomFileModel, CustomJarModel } from "./custom.model";
+import { StreamModel } from './stream.model';
+import { InstanceModel } from './instance.model';
+import { ModuleModel } from './module.model';
+import { SettingModel } from './setting.model';
+import { CustomFileModel, CustomJarModel } from './custom.model';
 
 export class BaseResponse<>  {
   [key: string]: any;
@@ -25,7 +25,7 @@ export class BaseResponse<>  {
 
   fillFromJSON(json: any) {
     for (let propName in json) {
-      this[propName] = json[propName]
+      this[propName] = json[propName];
     }
   }
 }

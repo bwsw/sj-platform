@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ModalDirective } from 'ng2-bootstrap';
 
 import { SettingModel } from '../shared/models/setting.model';
-import { ConfigSettingsService } from "../shared/services/config-settings.service";
+import { ConfigSettingsService } from '../shared/services/config-settings.service';
 
 @Component({
   moduleId: module.id,
@@ -47,7 +47,7 @@ export class ConfigSettingsComponent implements OnInit {
     this.configSettingsService.saveSetting(this.newSetting)
       .subscribe(
         setting => {
-          modal.hide()
+          modal.hide();
           this.newSetting = new SettingModel();
           this.getSettingsList();
           this.showSpinner = false;

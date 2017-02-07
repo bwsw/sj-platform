@@ -15,9 +15,9 @@ export class ModuleModel {
   inputs: {
     cardinality: number[];
     types: string[];
-  }
+  };
   outputs: {
     cardinality: number[];
     types: string[];
-  }
+  };
 }
