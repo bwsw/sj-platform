@@ -22,6 +22,7 @@ class EsOutputProcessor(outputStream: SjStream,
   prepareIndex()
   
   private def openConnection(): ElasticsearchClient = {
+    logger.info(s"Open a connection to elasticsearch at address: '${esService.provider.hosts}'.")
     val hosts = esService.provider.hosts.map(splitHost).toSet
     new ElasticsearchClient(hosts)
   }
@@ -33,13 +34,14 @@ class EsOutputProcessor(outputStream: SjStream,
   }
 
   def prepareIndex() = {
+    logger.debug(s"Prepare an elasticsearch index.")
     esService.prepare()
     createIndexMapping()
   }
 
   private def createIndexMapping() = {
     val index = esService.index
-    logger.debug(s"Create the mapping for the elasticsearch index $index.")
+    logger.debug(s"Create a mapping for an elasticsearch index: '$index'.")
     val streamName = outputStream.name
     val mappingSource = createMappingSource()
 
@@ -47,6 +49,7 @@ class EsOutputProcessor(outputStream: SjStream,
   }
 
   private def createMappingSource() = {
+    logger.debug(s"Create a mapping source for an elasticsearch index.")
     val fields = createGeneralFields()
     addCustomFields(fields)
     val mapping = Map("properties" -> fields)
@@ -56,12 +59,14 @@ class EsOutputProcessor(outputStream: SjStream,
   }
 
   private def createGeneralFields() = {
+    logger.debug(s"Create a set of general fields for an elasticsearch index.")
     scala.collection.mutable.Map("txn" -> Map("type" -> "string"),
       "stream" -> Map("type" -> "string"),
       "partition" -> Map("type" -> "integer"))
   }
 
   private def addCustomFields(fields: mutable.Map[String, Map[String, String]]) = {
+    logger.debug(s"Get a set of custom fields and add them.")
     val entity = manager.getOutputModuleEntity()
     val dateFields = entity.getDateFields()
     dateFields.foreach { field =>
@@ -77,7 +82,7 @@ class EsOutputProcessor(outputStream: SjStream,
   private def removeTransaction(transaction: String) = {
     val index = esService.index
     val streamName = outputStream.name
-    logger.info(s"Delete transaction $transaction from ES stream.")
+    logger.debug(s"Delete a transaction: '$transaction' from elasticsearch stream.")
     if (esClient.doesIndexExist(index)) {
       val query = QueryBuilders.matchQuery("txn", transaction)
       val outputData = esClient.search(index, streamName, query)
@@ -94,7 +99,11 @@ class EsOutputProcessor(outputStream: SjStream,
     esEnvelope.partition = inputEnvelope.partition
     esEnvelope.tags = inputEnvelope.tags
 
-    logger.debug(s"Task: ${manager.taskName}. Write output envelope to elasticsearch.")
+    logger.debug(s"Task: ${manager.taskName}. Write an output envelope to elasticsearch stream.")
     esClient.write(envelopeSerializer.serialize(esEnvelope), esService.index, outputStream.name)
+  }
+
+  override def close() = {
+    esClient.close()
   }
 }

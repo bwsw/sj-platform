@@ -9,7 +9,9 @@ import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import org.slf4j.LoggerFactory
 
-abstract class CallableTaskInput[T <: Envelope](inputs: scala.collection.mutable.Map[SjStream, Array[Int]]) extends TaskInput[T](inputs) with Callable[Unit]
+abstract class CallableTaskInput[T <: Envelope](inputs: scala.collection.mutable.Map[SjStream, Array[Int]]) extends TaskInput[T](inputs) with Callable[Unit] {
+  def close()
+}
 
 object CallableTaskInput {
   private val logger = LoggerFactory.getLogger(this.getClass)

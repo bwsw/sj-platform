@@ -144,7 +144,7 @@ trait KafkaTaskInput {
 
     if (maybeTxn.isDefined) {
       val lastTxn = maybeTxn.get
-      logger.debug(s"Task name: ${manager.taskName}. Get saved offsets for kafka consumer and apply their.")
+      logger.debug(s"Task name: ${manager.taskName}. Get saved offsets for kafka consumer and apply them.")
       kafkaOffsetsStorage = offsetSerializer.deserialize(lastTxn.next()).asInstanceOf[mutable.Map[(String, Int), Long]]
       kafkaOffsetsStorage.foreach(x => consumer.seek(new TopicPartition(x._1._1, x._1._2), x._2 + 1))
     }
@@ -153,7 +153,7 @@ trait KafkaTaskInput {
   }
 
   protected def applyConfigurationSettings(properties: Properties) = {
-    logger.debug(s"Task name: ${manager.taskName}. Get setting (using a config service) for kafka consumer and apply their.")
+    logger.debug(s"Task name: ${manager.taskName}. Get setting (using a config service) for kafka consumer and apply them.")
     val configService = ConnectionRepository.getConfigService
 
     val kafkaSettings = configService.getByParameters(Map("domain" -> ConfigLiterals.kafkaDomain))

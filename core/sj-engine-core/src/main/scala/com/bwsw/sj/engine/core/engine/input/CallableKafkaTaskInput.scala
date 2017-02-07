@@ -57,5 +57,9 @@ class CallableKafkaTaskInput(override val manager: CommonTaskManager,
     offsetProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
       .send(offsetSerializer.serialize(kafkaOffsetsStorage))
   }
+
+  override def close(): Unit = {
+    kafkaConsumer.close()
+  }
 }
 

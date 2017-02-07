@@ -59,4 +59,9 @@ class CallableCompleteTaskInput(manager: CommonTaskManager,
         throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/windowed streaming engine")
     }
   }
+
+  override def close(): Unit = {
+    tStreamRegularTaskInputService.close()
+    kafkaRegularTaskInputService.close()
+  }
 }

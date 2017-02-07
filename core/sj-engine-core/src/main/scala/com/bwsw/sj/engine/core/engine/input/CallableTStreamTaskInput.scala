@@ -100,4 +100,8 @@ class CallableTStreamTaskInput(manager: TaskManager,
       s"Change local offset of consumer: ${envelope.consumerName} to txn: ${envelope.id}.")
     consumers(envelope.consumerName).getConsumer().setStreamPartitionOffset(envelope.partition, envelope.id)
   }
+
+  override def close(): Unit = {
+    consumers.foreach(_._2.stop())
+  }
 }

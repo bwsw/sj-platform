@@ -25,4 +25,6 @@ class JDBCSjStream() extends SjStream {
 
     streamData
   }
+
+  override def delete(): Unit = {}
 }

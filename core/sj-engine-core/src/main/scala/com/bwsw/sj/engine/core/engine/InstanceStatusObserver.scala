@@ -18,6 +18,8 @@ class InstanceStatusObserver(instanceName : String) extends Callable[Unit] {
             logger.error(s"Task cannot continue to work because of '${instance.status}' status of instance")
             throw new InterruptedException(s"Task cannot continue to work because of '${instance.status}' status of instance")
           }
+
+        case None =>
       }
 
       Thread.sleep(1000)

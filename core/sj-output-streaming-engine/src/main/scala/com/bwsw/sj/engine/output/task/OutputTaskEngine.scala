@@ -128,6 +128,9 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
   protected def prepareForNextCheckpoint(): Unit
 
+  def close() = {
+    outputProcessor.close()
+  }
 }
 
 object OutputTaskEngine {

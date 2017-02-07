@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 
 /**
  * This class used in OutputTaskEngine for sending data to different storage.
- * Create concrete handler and realize prepare() and send() methods.
+ * Create concrete handler and realize remove() and send() methods.
  */
 abstract class OutputProcessor(outputStream: SjStream,
                                performanceMetrics: OutputStreamingPerformanceMetrics) {
@@ -25,11 +25,14 @@ abstract class OutputProcessor(outputStream: SjStream,
    * @param wasFirstCheckpoint: boolean
    */
   def process(envelopes: List[Envelope], inputEnvelope: TStreamEnvelope, wasFirstCheckpoint: Boolean) = {
+    logger.debug("Process a set of envelopes that should be sent to output of specific type.")
     if (!wasFirstCheckpoint) remove(inputEnvelope)
     envelopes.foreach(envelope => registerAndSendEnvelope(envelope, inputEnvelope))
   }
 
   def remove(envelope: TStreamEnvelope)
+
+  def close()
 
   /**
    * Registration envelope in performance metrics, and then sending to storage
@@ -46,6 +49,7 @@ abstract class OutputProcessor(outputStream: SjStream,
    * @param data: processed envelope
    */
   private def registerOutputEnvelope(envelopeID: String, data: Envelope) = {
+    logger.debug(s"Register an output envelope: '$envelopeID'.")
     val elementSize = byteSerializer.serialize(data).length
     performanceMetrics.addElementToOutputEnvelope(outputStream.name, envelopeID, elementSize)
   }
