@@ -25,7 +25,7 @@ export class ModulesService {
   }
 
   public getModuileTypes(): Observable<string[]> {
-    return this.http.get(this._dataUrl + 'modules/types')
+    return this.http.get(this._dataUrl + 'modules/_types')
       .map(response => {
         const data = this.extractData(response);
         return data.types;
@@ -34,8 +34,8 @@ export class ModulesService {
   }
 
   public getRelatedInstancesList(module: ModuleModel): Observable<string[]> {
-    return this.http.get(this._dataUrl + 'modules/' + module['module-type'] + '/' + module['module-name'] + '/' +
-      module['module-version'] + '/related')
+    return this.http.get(this._dataUrl + 'modules/' + module.moduleType + '/' + module.moduleName + '/' +
+      module.moduleVersion + '/related')
       .map(response => {
         const data = this.extractData(response);
         return data.instances;
@@ -47,8 +47,8 @@ export class ModulesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this._dataUrl + 'modules/' + module['module-type'] + '/' + module['module-name'] + '/' +
-      module['module-version'] + '/specification', options)
+    return this.http.get(this._dataUrl + 'modules/' + module.moduleType + '/' + module.moduleName + '/' +
+      module.moduleVersion + '/specification', options)
       .map(response => {
         const data = this.extractData(response);
         return data.specification;
@@ -60,8 +60,8 @@ export class ModulesService {
     let headers = new Headers();
     let options = new RequestOptions({ headers: headers, responseType: ResponseContentType.Blob });
 
-    return this.http.get(this._dataUrl + 'modules/' + module['module-type'] + '/' + module['module-name'] + '/' +
-      module['module-version'], options)
+    return this.http.get(this._dataUrl + 'modules/' + module.moduleType + '/' + module.moduleName + '/' +
+      module.moduleVersion, options)
       .map((res: Response) => {
         let contDispos = res.headers.get('content-disposition');
         return {
@@ -95,8 +95,8 @@ export class ModulesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.delete(this._dataUrl + 'modules/' + module['module-type'] + '/' + module['module-name'] + '/' +
-      module['module-version'], options)
+    return this.http.delete(this._dataUrl + 'modules/' + module.moduleType + '/' + module.moduleName + '/' +
+      module.moduleVersion, options)
       .map(response => {
         const data = this.extractData(response);
         return data.message;

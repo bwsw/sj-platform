@@ -17,10 +17,8 @@ export class ListFilterPipe implements PipeTransform {
       if(typeFilter) {
         if (value[0].type !== undefined) {
           result = result.filter((entity)=> entity.type.toLowerCase().indexOf(typeFilter.toLowerCase()) > -1);
-        } else if (value[0]['stream-type'] !== undefined) {
-          result = result.filter((entity)=> entity['stream-type'].toLowerCase().indexOf(typeFilter.toLowerCase()) > -1);
-        } else if (value[0]['module-type'] !== undefined) {
-          result = result.filter((entity)=> entity['module-type'].toLowerCase().indexOf(typeFilter.toLowerCase()) > -1);
+        } else if (value[0].moduleType !== undefined) {
+          result = result.filter((entity)=> entity.moduleType.toLowerCase().indexOf(typeFilter.toLowerCase()) > -1);
         } else if (value[0].domain !== undefined) {
           result = result.filter((entity)=> entity.domain.toLowerCase().indexOf(typeFilter.toLowerCase()) > -1);
         }
@@ -28,8 +26,8 @@ export class ListFilterPipe implements PipeTransform {
       if(nameFilter) {
         if (value[0].name !== undefined) {
           result = result.filter((entity)=> entity.name.toLowerCase().indexOf(nameFilter.toLowerCase()) > -1);
-        } else if (value[0]['module-name'] !== undefined) {
-          result = result.filter((entity)=> entity['module-name'].toLowerCase().indexOf(nameFilter.toLowerCase()) > -1);
+        } else if (value[0].moduleName !== undefined) {
+          result = result.filter((entity)=> entity.moduleName.toLowerCase().indexOf(nameFilter.toLowerCase()) > -1);
         }
       }
       return result;

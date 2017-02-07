@@ -20,9 +20,9 @@ export class CustomService {
       .map(response => {
         const data = this.extractData(response);
         if (path === 'files') {
-          return data['custom-files']
+          return data.customFiles
         } else {
-          return data['custom-jars'];
+          return data.customJars;
         }
       })
       .catch(this.handleError);

@@ -30,7 +30,7 @@ export class ServicesService {
   }
 
   public getServiceTypes(): Observable<string[]> {
-    return this.http.get(this._dataUrl + 'services/types')
+    return this.http.get(this._dataUrl + 'services/_types')
       .map(response => {
         const data = this.extractData(response);
         return data.types;

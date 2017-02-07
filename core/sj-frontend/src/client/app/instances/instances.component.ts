@@ -30,7 +30,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   public streamsList: StreamModel[];
   public streamTypesList: { [key: string]: string } = {};
   public currentInstance: InstanceModel;
-  public currentInstanceTasks: string[];
+  public currentInstanceTasks: {};
   public newInstance: InstanceModel;
   public cloneInstance: boolean = false;
   public cloningInstance: InstanceModel;
@@ -109,7 +109,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
         streamsList => {
           this.streamsList = streamsList;
           for (let stream of streamsList) {
-            this.streamTypesList[stream.name] = stream['stream-type'];
+            this.streamTypesList[stream.name] = stream.type;
           }
         },
         error => this.errorMessage = <any>error);
@@ -132,12 +132,12 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
         instance => {
           this.currentInstance = instance;
           this.currentInstance.module = new ModuleModel();
-          this.currentInstance.module['module-name'] = currentInstance['module-name'];
-          this.currentInstance.module['module-type'] = currentInstance['module-type'];
-          this.currentInstance.module['module-version'] = currentInstance['module-version'];
-          this.currentInstanceTasks = this.currentInstance.module['module-type'] !== 'input-streaming' ?
-            this.currentInstance['execution-plan']['tasks']:
-            this.currentInstance['tasks'];
+          this.currentInstance.module.moduleName = currentInstance.moduleName;
+          this.currentInstance.module.moduleType = currentInstance.moduleType;
+          this.currentInstance.module.moduleVersion = currentInstance.moduleVersion;
+          this.currentInstanceTasks = this.currentInstance.module.moduleType!== 'input-streaming' ?
+            this.currentInstance.executionPlan.tasks:
+            this.currentInstance.tasks;
         },
         error => this.errorMessage = <any>error);
   }
@@ -164,40 +164,39 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
       .subscribe(
         instanceInfo => {
           this.newInstance = instanceInfo;
-          this.newInstance['jvm-options'] = JSON.stringify(instanceInfo['jvm-options']);
-          this.newInstance['options'] = JSON.stringify(instanceInfo['options']);
-          this.newInstance['node-attributes'] = JSON.stringify(instanceInfo['node-attributes']);
-          this.newInstance['environment-variables'] = JSON.stringify(instanceInfo['environment-variables']);
-          this.newInstance['coordination-service'] =
-            this.servicesList.find(service => service.name === instanceInfo['coordination-service']) ? instanceInfo['coordination-service']: '';
+          this.newInstance.jvmOptions = JSON.stringify(instanceInfo.jvmOptions);
+          this.newInstance.options = JSON.stringify(instanceInfo.options);
+          this.newInstance.nodeAttributes = JSON.stringify(instanceInfo.nodeAttributes);
+          this.newInstance.environmentVariables = JSON.stringify(instanceInfo.environmentVariables);
+          this.newInstance.coordinationService =
+            this.servicesList.find(service => service.name === instanceInfo.coordinationService) ? instanceInfo.coordinationService: '';
           this.newInstance.name = '';
           this.newInstance.module = new ModuleModel();
-          this.newInstance.module['module-name'] = instance['module-name'];
-          this.newInstance.module['module-type'] = instance['module-type'];
-          this.newInstance.module['module-version'] = instance['module-version'];
-          if (this.newInstance.module['module-type'] === 'windowed-streaming') {
-            let batchFillType : { [key: string]: any } = instanceInfo['batch-fill-type'];
-            this.newInstance['batch-fill-type-name'] = batchFillType['type-name'];
-            this.newInstance['batch-fill-type-value'] = batchFillType['value'];
+          this.newInstance.module.moduleName = instance.moduleName;
+          this.newInstance.module.moduleType = instance.moduleType;
+          this.newInstance.module.moduleVersion = instance.moduleVersion;
+          if (this.newInstance.module.moduleType === 'windowed-streaming') {
+            this.newInstance.batchFillType.typeName = instanceInfo.batchFillType.typeName;
+            this.newInstance.batchFillType.value = instanceInfo.batchFillType.value;
           }
-          if (this.newInstance.module['module-type'] === 'windowed-streaming') {
-            let mainStream = instanceInfo['main-stream'].split('/');
-            this.newInstance['main-stream'] = mainStream[0];
-            this.newInstance['main-stream-type'] = mainStream[1];
-            this.newInstance['related-streams-type'] = [];
-            instanceInfo['related-streams'].forEach((item: string, i: number) => {
+          if (this.newInstance.module.moduleType === 'windowed-streaming') {
+            let mainStream = instanceInfo.mainStream.split('/');
+            this.newInstance.mainStream = mainStream[0];
+            this.newInstance.mainStreamType = mainStream[1];
+            this.newInstance.relatedStreamsType = [];
+            instanceInfo.relatedStreams.forEach((item: string, i: number) => {
               let related = item.split('/');
-              this.newInstance['related-streams'][i] = related[0];
-              this.newInstance['related-streams-type'][i] = related[1];
+              this.newInstance.relatedStreams[i] = related[0];
+              this.newInstance.relatedStreamsType[i] = related[1];
             });
 
           }
-          if (this.newInstance.module['module-type'] === 'regular-streaming') {
-            this.newInstance['inputs-types'] = [];
+          if (this.newInstance.module.moduleType === 'regular-streaming') {
+            this.newInstance.inputsTypes = [];
             this.newInstance.inputs.forEach(function (item: string, i: number) {
               let input = item.split('/');
               this.newInstance.inputs[i] = input[0];
-              this.newInstance['inputs-types'][i] = input[1];
+              this.newInstance.inputsTypes[i] = input[1];
             }.bind(this));
           }
         },
@@ -289,7 +288,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
 
   public addInput() {
     this.newInstance.inputs.push('');
-    this.newInstance['inputs-types'].push('');
+    this.newInstance.inputsTypes.push('');
     this.checkTimestampAcceptable();
   }
 
@@ -299,7 +298,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
 
   public removeInput(i: number): void {
     this.newInstance.inputs.splice(i, 1);
-    this.newInstance['inputs-types'].splice(i, 1);
+    this.newInstance.inputsTypes.splice(i, 1);
     this.checkTimestampAcceptable();
   }
 
@@ -312,12 +311,12 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   }
 
   public removeRelatedStream(i: number): void {
-    this.newInstance['related-streams'].splice(i, 1);
-    this.newInstance['related-streams-type'].splice(i, 1);
+    this.newInstance.relatedStreams.splice(i, 1);
+    this.newInstance.relatedStreamsType.splice(i, 1);
   }
 
   public checkTimestampAcceptable(): void {
-    switch (this.newInstance.module['module-type']) {
+    switch (this.newInstance.module.moduleType) {
       case 'regular-streaming':
       case 'windowed-streaming':
         if (this.newInstance.inputs &&  this.newInstance.inputs.length > 0 && this.newInstance.inputs[0]) {
@@ -334,7 +333,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
         this.startFromTimestampAcceptable = true;
         break;
       default:
-        console.error('start-from field is not provided for module-type '+this.newInstance.module['module-type']);
+        console.error('start-from field is not provided for module-type '+this.newInstance.module.moduleType);
         break;
     }
     if (!this.startFromTimestampAcceptable && this.newInstance['start-from'] === 'timestamp') {

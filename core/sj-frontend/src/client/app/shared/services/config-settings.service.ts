@@ -18,7 +18,7 @@ export class ConfigSettingsService {
     return this.http.get(this._dataUrl + 'config/settings', options)
       .map(response => {
         const data = this.extractData(response);
-        return data['config-settings'];
+        return data.configSettings;
       })
       .catch(this.handleError);
   }

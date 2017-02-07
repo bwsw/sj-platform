@@ -26,7 +26,7 @@ export class ProvidersService {
   }
 
   public getProviderTypes(): Observable<string[]> {
-    return this.http.get(this._dataUrl + 'providers/types')
+    return this.http.get(this._dataUrl + 'providers/_types')
       .map(response => {
         const data = this.extractData(response);
         return data.types;

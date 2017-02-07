@@ -1,9 +1,9 @@
 export class TaskModel {
   id: number;
   state: string;
-  'state-change': string;
+  stateChange: string;
   reason: string;
   node: string;
-  'last-node': string;
+  lastNode: string;
   directories: string;
 }

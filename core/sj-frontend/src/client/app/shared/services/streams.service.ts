@@ -25,7 +25,7 @@ export class StreamsService {
   }
 
   public getStreamTypes(): Observable<string[]> {
-    return this.http.get(this._dataUrl + 'streams/types')
+    return this.http.get(this._dataUrl + 'streams/_types')
       .map(response => {
         const data = this.extractData(response);
         return data.types;

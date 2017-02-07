@@ -16,9 +16,9 @@ export class BaseResponse<>  {
   streams: StreamModel[];
   instances: InstanceModel[];
   modules: ModuleModel[];
-  'config-settings': SettingModel[];
-  'custom-files': CustomFileModel[];
-  'custom-jars': CustomJarModel[];
+  configSettings: SettingModel[];
+  customFiles: CustomFileModel[];
+  customJars: CustomJarModel[];
   specification: ModuleModel;
   instance: InstanceModel;
   domains: string[];

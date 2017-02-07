@@ -34,9 +34,9 @@ export class StreamsComponent implements OnInit {
     this.newStream = new StreamModel();
     this.newStream.tags = [];
     this.newStream.generator = {
-      'generator-type': 'local',
+      generatorType: 'local',
       service: '',
-      'instance-count': 0
+      instanceCount: 0
     };
   }
 
@@ -119,7 +119,7 @@ export class StreamsComponent implements OnInit {
 
   public createStream(modal: ModalDirective) {
     this.showSpinner = true;
-    if (this.newStream['stream-type'] !== 'stream.t-stream') {
+    if (this.newStream.type !== 'stream.t-stream') {
       delete this.newStream.generator;
     }
     this.streamsService.saveStream(this.newStream)
@@ -132,9 +132,9 @@ export class StreamsComponent implements OnInit {
           this.newStream = new StreamModel();
           this.newStream.tags = [];
           this.newStream.generator = {
-            'generator-type': 'local',
+            generatorType: 'local',
             service: '',
-            'instance-count': 0
+            instanceCount: 0
           };
         },
         error => {

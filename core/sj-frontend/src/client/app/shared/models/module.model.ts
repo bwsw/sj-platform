@@ -1,15 +1,23 @@
 export class ModuleModel {
-  'module-type': string;
-  'module-name': string;
-  'module-version': string;
+  moduleType: string;
+  moduleName: string;
+  moduleVersion: string;
   name: string;
   description: string;
   version: string;
   author: string;
   license: string;
-  'engine-name': string;
-  'engine-version': string;
+  engineName: string;
+  engineVersion: string;
   options: Object;
-  'validator-class': string;
-  'executor-class': string;
+  validateClass: string;
+  executorClass: string;
+  inputs: {
+    cardinality: number[];
+    types: string[];
+  }
+  outputs: {
+    cardinality: number[];
+    types: string[];
+  }
 }

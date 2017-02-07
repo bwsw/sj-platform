@@ -2,15 +2,15 @@ export class StreamModel {
   name: string;
   description: string;
   service: string;
-  'stream-type': string;
+  type: string;
   tags: string[];
   partitions: number;
   generator: {
-    'generator-type': string;
+    generatorType: string;
     service: string;
-    'instance-count': number;
+    instanceCount: number;
   };
-  'replication-factor': number;
+  replicationFactor: number;
   force: boolean = false;
   primary: string;
 }

@@ -1,114 +1,149 @@
 import { ModuleModel } from './module.model';
 
 export class InstanceModel {
-  'inputs-types': string[] = [''];
-  'main-stream-type': string = '';
-  'related-streams-type': string[] = [];
-  'module': ModuleModel;
-  'start-from-timestamp': number;
-  'status': string;
+  inputsTypes: string[] = [''];
+  mainStreamType: string = '';
+  relatedStreamsType: string[] = [];
+  module: ModuleModel;
+  startFromTimestamp: number;
+  status: string;
 
-  'rest-address': string;
+  moduleType: string;
+  moduleName: string;
+  moduleVersion: string;
+  restAddress: string;
 
-  'async-backup-count': number = 0;
-  'backup-count': number = 0;
-  'batch-fill-type' : {};
-  'batch-fill-type-name': string;
-  'batch-fill-type-value': number;
-  'checkpoint-interval': number;
-  'checkpoint-mode': string;
-  'coordination-service': string;
-  'default-eviction-policy': string = 'NONE';
-  'description': string;
-  'duplicate-check': boolean = false;
+  asyncBackupCount: number = 0;
+  backupCount: number = 0;
+  batchFillType : {
+    typeName: string;
+    value: number;
+  } = {typeName: 'time-interval', value:1};
+  checkpointInterval: number;
+  checkpointMode: string;
+  coordinationService: string;
+  defaultEvictionPolicy: string = 'NONE';
+  description: string;
+  duplicateCheck: boolean = false;
   engine: string;
-  'environment-variables': Object;
-  'event-wait-idle-time': number = 1000;
-  'eviction-policy': string = 'fix-time';
-  'input': string;
-  'inputs': string[] = [''];
-  'jvm-options': Object;
-  'lookup-history': number = 0;
-  'main-stream' : string;
-  'name': string;
-  'node-attributes': Object;
-  'options': Object;
-  'output': string;
-  'outputs': string[] = [''];
-  'parallelism': string = '1';
-  'per-task-cores': number = 1;
-  'per-task-ram': number = 1024;
-  'performance-reporting-interval': number = 60000;
-  'queue-max-size': number;
-  'related-streams' : string[] = [];
-  'sliding-interval' : number;
-  'stages': Object;
-  'start-from': string = 'newest';
-  'state-full-checkpoint': number = 100;
-  'state-management': string = 'none';
-  'window' : number = 1;
+  environmentVariables: Object;
+  eventWaitIdleTime: number = 1000;
+  evictionPolicy: string = 'fix-time';
+  input: string = '';
+  inputs: string[] = [''];
+  jvmOptions: Object;
+  lookupHistory: number = 0;
+  mainStream: string;
+  name: string;
+  nodeAttributes: Object;
+  options: Object;
+  output: string = '';
+  outputs: string[] = [''];
+  parallelism: string = '1';
+  perTaskCores: number = 1;
+  perTaskRam: number = 1024;
+  performanceReportingInterval: number = 60000;
+  queueMaxSize: number;
+  relatedStreams: string[] = [];
+  slidingInterval: number;
+  stages: Object;
+  startFrom: string = 'newest';
+  stateFullCheckpoint: number = 100;
+  stateManagement: string = 'none';
+  window: number = 1;
+  executionPlan: {
+    tasks: {}
+  }
+  tasks: {};
 
   [key: string]: any;
 }
 
 export class SubtypedInstance {
-  'coordination-service': string;
-  'description': string;
-  'environment-variables': Object;
-  'jvm-options': Object;
-  'name': string;
-  'node-attributes': Object;
-  'options': Object;
-  'parallelism': string|number;
-  'per-task-cores': number;
-  'per-task-ram': number;
-  'performance-reporting-interval': number;
-  'stages': Object;
-
+  coordinationService: string;
+  description: string;
+  environmentVariables: Object;
+  jvmOptions: Object;
+  name: string;
+  nodeAttributes: Object;
+  options: Object;
+  parallelism: string|number;
+  perTaskCores: number;
+  perTaskRam: number;
+  performanceReportingInterval: number;
+  stages: Object;
+  checkpointInterval: number;
+  checkpointMode: string;
+  eventWaitIdleTime: number;
+  inputs: string[] = [''];
+  outputs: string[] = [''];
+  startFrom: string|number;
+  stateFullCheckpoint: number;
+  stateManagement: string;
+  window: number;
+  slidingInterval: number;
+  mainStream: string;
+  relatedStreams: string[] = [];
+  batchFillType : {
+    typeName: string;
+    value: number;
+  };
+  input: string;
+  output: string;
+  asyncBackupCount: number;
+  backupCount: number;
+  defaultEvictionPolicy: string;
+  duplicateCheck: boolean;
+  evictionPolicy: string;
+  lookupHistory: number;
+  queueMaxSize: number;
   [key: string]: any;
 }
 
 export class RegularStreamingInstance extends SubtypedInstance {
-  'checkpoint-interval': number;
-  'checkpoint-mode': string;
-  'event-wait-idle-time': number;
-  'inputs': string[] = [''];
-  'outputs': string[] = [''];
-  'start-from': string|number;
-  'state-full-checkpoint': string;
-  'state-management': string;
+  checkpointInterval: number;
+  checkpointMode: string;
+  eventWaitIdleTime: number;
+  inputs: string[] = [''];
+  outputs: string[] = [''];
+  startFrom: string|number;
+  stateFullCheckpoint: number;
+  stateManagement: string;
 }
 
 export class WindowedStreamingInstance extends SubtypedInstance {
-  'outputs': string[] = [''];
-  'window' : number;
-  'sliding-interval' : number;
-  'main-stream' : string;
-  'related-streams' : string[] = [];
-  'batch-fill-type' : Object;
-  'start-from' : string|number;
-  'state-management' : string;
-  'state-full-checkpoint' : number;
-  'event-wait-time' : number;
+  outputs: string[] = [''];
+  window: number;
+  slidingInterval: number;
+  mainStream: string;
+  relatedStreams: string[] = [];
+  batchFillType : {
+    typeName: string;
+    value: number;
+  };
+  startFrom: string|number;
+  stateManagement: string;
+  stateFullCheckpoint: number;
+  eventWaitTime: number;
 }
 
 export class OutputStreamingInstance extends SubtypedInstance {
-  'checkpoint-interval': number;
-  'checkpoint-mode': string;
-  'input': string;
-  'output': string;
-  'start-from': string|number;
+  checkpointInterval: number;
+  checkpointMode: string;
+  input: string;
+  output: string;
+  startFrom: string|number;
 }
 
 export class InputStreamingInstance extends SubtypedInstance {
-  'async-backup-count': number;
-  'backup-count': number;
-  'checkpoint-interval': number;
-  'checkpoint-mode': string;
-  'default-eviction-policy': string;
-  'duplicate-check': boolean;
-  'eviction-policy': string;
-  'lookup-history': number;
-  'outputs': string[] = [''];
-  'queue-max-size': number;
+  asyncBackupCount: number;
+  backupCount: number;
+  checkpointInterval: number;
+  checkpointMode: string;
+  defaultEvictionPolicy: string;
+  duplicateCheck: boolean;
+  evictionPolicy: string;
+  lookupHistory: number;
+  outputs: string[] = [''];
+  queueMaxSize: number;
 }

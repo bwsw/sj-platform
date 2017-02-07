@@ -50,12 +50,12 @@
                 <td colspan="20" class="text-center">No modules have been found.</td>
               </tr>
 
-              <tr *ngFor="let module of moduleList | orderBy: 'module-name' | listFilter : { name: term, type: typeterm}"
+              <tr *ngFor="let module of moduleList | orderBy: 'moduleName' | listFilter : { name: term, type: typeterm}"
                   [ngClass]="{ 'table-info': isSelected(module) }"
                   (click)="selectModule(module)">
-                <td>{{ module["module-name"] }}</td>
-                <td>{{ module["module-type"] }}</td>
-                <td>{{ module["module-version"] }}</td>
+                <td>{{ module.moduleName }}</td>
+                <td>{{ module.moduleType }}</td>
+                <td>{{ module.moduleVersion }}</td>
                 <td class="actions-column">
                   <button type="button"
                           class="btn btn-sm btn-secondary"
@@ -94,12 +94,12 @@
               <ul>
                 <li>Cardinality:
                   <ul>
-                    <li *ngFor="let parameter of currentModuleSpecification['inputs']['cardinality']">{{parameter}}</li>
+                    <li *ngFor="let parameter of currentModuleSpecification.inputs.cardinality">{{parameter}}</li>
                   </ul>
                 </li>
                 <li>Types:
                   <ul>
-                    <li *ngFor="let type of currentModuleSpecification['inputs']['types']">{{type}}</li>
+                    <li *ngFor="let type of currentModuleSpecification.inputs.types">{{type}}</li>
                   </ul>
                 </li>
               </ul>
@@ -108,21 +108,21 @@
               <ul>
                 <li>Cardinality:
                   <ul>
-                    <li *ngFor="let parameter of currentModuleSpecification['outputs']['cardinality']">{{parameter}}</li>
+                    <li *ngFor="let parameter of currentModuleSpecification.outputs.cardinality">{{parameter}}</li>
                   </ul>
                 </li>
                 <li>Types:
                   <ul>
-                    <li *ngFor="let type of currentModuleSpecification['outputs']['types']">{{type}}</li>
+                    <li *ngFor="let type of currentModuleSpecification.outputs.types">{{type}}</li>
                   </ul>
                 </li>
               </ul>
             </li>
-            <li>Module-type: {{currentModuleSpecification["module-type"]}}</li>
-            <li>Engine: {{currentModuleSpecification['engine-name']}} {{currentModuleSpecification['engine-version']}}</li>
+            <li>Module-type: {{currentModuleSpecification.moduleType}}</li>
+            <li>Engine: {{currentModuleSpecification.engineName}} {{currentModuleSpecification.engineVersion}}</li>
             <li>Options : {{currentModuleSpecification.options | json}}</li>
-            <li>Validator-class: {{currentModuleSpecification["validator-class"]}}</li>
-            <li>Executor-class: {{currentModuleSpecification["executor-class"]}}</li>
+            <li>Validator-class: {{currentModuleSpecification.validateClass}}</li>
+            <li>Executor-class: {{currentModuleSpecification.executorClass}}</li>
           </ul>
         </div>
       </div>
@@ -141,12 +141,12 @@
       </div>
 
       <div class="modal-body" *ngIf="currentModule && (blockingInstances.length === 0)">
-        <p>Do you really want to delete module "{{ currentModule["module-name"] }}"? This action can not be
+        <p>Do you really want to delete module "{{ currentModule.moduleName }}"? This action can not be
           undone!</p>
       </div>
 
       <div class="modal-body" *ngIf="currentModule && (blockingInstances.length > 0)">
-        <p>Unable to delete module! Next instances are using the module: "{{ currentModule['module-name'] }}"</p>
+        <p>Unable to delete module! Next instances are using the module: "{{ currentModule.moduleName }}"</p>
         <ul>
           <li *ngFor="let instance of blockingInstances">{{instance}}</li>
         </ul>
