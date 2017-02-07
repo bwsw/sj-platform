@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.rest.entities.module
 
-import com.bwsw.sj.common.DAL.model.module.WindowedInstance
+import com.bwsw.sj.common.DAL.model.module.{BatchFillType, WindowedInstance}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
 import com.bwsw.sj.common.utils.StreamLiterals._
@@ -8,7 +8,7 @@ import com.bwsw.sj.common.utils.StreamLiterals._
 class WindowedInstanceMetadata extends InstanceMetadata {
   var mainStream: String = null
   var relatedStreams: Array[String] = Array()
-  var batchFillType: BatchFillType = null
+  var batchFillType: BatchFillTypeMetadata = null
   var window: Int = 1
   var slidingInterval: Int = 1
   var outputs: Array[String] = Array()
@@ -19,11 +19,15 @@ class WindowedInstanceMetadata extends InstanceMetadata {
   var eventWaitIdleTime: Long = 1000
 
   override def asModelInstance() = {
+    val batchFillType = new BatchFillType
+    batchFillType.typeName = this.batchFillType.typeName
+    batchFillType.value = this.batchFillType.value
+
     val modelInstance = new WindowedInstance()
     super.fillModelInstance(modelInstance)
     modelInstance.mainStream = this.mainStream
     modelInstance.relatedStreams = this.relatedStreams
-    modelInstance.batchFillType = this.batchFillType
+    modelInstance.batchFillType = batchFillType
     modelInstance.window = this.window
     modelInstance.slidingInterval = this.slidingInterval
     modelInstance.eventWaitIdleTime = this.eventWaitIdleTime
