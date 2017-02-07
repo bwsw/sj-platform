@@ -139,9 +139,9 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     val response = OkRestResponse(Map("modules" -> mutable.Buffer()))
 
     if (files.nonEmpty) {
-      response.entity = Map("modules" -> files.map(f => Map("module-type" -> f.specification.moduleType,
-        "module-name" -> f.specification.name,
-        "module-version" -> f.specification.version)))
+      response.entity = Map("modules" -> files.map(f => Map("moduleType" -> f.specification.moduleType,
+        "moduleName" -> f.specification.name,
+        "moduleVersion" -> f.specification.version)))
     }
 
     complete(restResponseToHttpResponse(response))
