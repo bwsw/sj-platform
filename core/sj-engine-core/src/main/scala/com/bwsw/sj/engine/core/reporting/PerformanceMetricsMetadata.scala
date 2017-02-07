@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.core.reporting
 
 import java.util.Date
 
-import com.bwsw.sj.common.rest.entities.module.BatchFillType
+import com.bwsw.sj.common.DAL.model.module.BatchFillType
 import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.annotation.{JsonInclude, JsonProperty}
 

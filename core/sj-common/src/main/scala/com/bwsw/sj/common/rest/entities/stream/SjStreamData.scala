@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes,
 
 import scala.collection.mutable.ArrayBuffer
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "stream-type", defaultImpl = classOf[SjStreamData], visible = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[SjStreamData], visible = true)
 @JsonSubTypes(Array(
   new Type(value = classOf[TStreamSjStreamData], name = StreamLiterals.tstreamType),
   new Type(value = classOf[KafkaSjStreamData], name = StreamLiterals.kafkaStreamType),

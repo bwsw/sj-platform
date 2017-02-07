@@ -1,19 +1,19 @@
 package com.bwsw.sj.common.DAL.model.module
 
-import com.bwsw.sj.common.rest.entities.module.{BatchFillType, ExecutionPlan, InstanceMetadata, WindowedInstanceMetadata}
+import com.bwsw.sj.common.rest.entities.module.{BatchFillTypeMetadata, ExecutionPlan, InstanceMetadata, WindowedInstanceMetadata}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
 import org.mongodb.morphia.annotations.{Embedded, Property}
 
 /**
- * Entity for windowed instance-json
- *
- * @author Kseniya Tomskikh
- */
+  * Entity for windowed instance-json
+  *
+  * @author Kseniya Tomskikh
+  */
 class WindowedInstance() extends Instance {
   @Property("main-stream") var mainStream: String = null
   @Property("related-streams") var relatedStreams: Array[String] = Array()
-  @Property("batch-fill-type") var batchFillType: BatchFillType = new BatchFillType()
+  @Embedded("batch-fill-type") var batchFillType: BatchFillType = new BatchFillType()
   var window: Int = 1
   @Property("sliding-interval") var slidingInterval: Int = 1
   @Embedded("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan()
@@ -23,12 +23,16 @@ class WindowedInstance() extends Instance {
   @Property("event-wait-idle-time") var eventWaitIdleTime: Long = 1000
 
   override def asProtocolInstance(): InstanceMetadata = {
+    val batchFillType = new BatchFillTypeMetadata
+    batchFillType.typeName = this.batchFillType.typeName
+    batchFillType.value = this.batchFillType.value
+
     val protocolInstance = new WindowedInstanceMetadata()
     super.fillProtocolInstance(protocolInstance)
 
     protocolInstance.mainStream = this.mainStream
     protocolInstance.relatedStreams = this.relatedStreams
-    protocolInstance.batchFillType = this.batchFillType
+    protocolInstance.batchFillType = batchFillType
     protocolInstance.window = this.window
     protocolInstance.slidingInterval = this.slidingInterval
     protocolInstance.eventWaitIdleTime = this.eventWaitIdleTime

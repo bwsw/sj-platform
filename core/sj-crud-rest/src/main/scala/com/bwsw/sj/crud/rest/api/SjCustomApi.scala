@@ -162,9 +162,9 @@ trait SjCustomApi extends Directives with SjCrudValidator {
             } ~
               get {
                 val files = fileMetadataDAO.getByParameters(Map("filetype" -> "custom"))
-                val response = OkRestResponse(Map("custom-jars" -> mutable.Buffer()))
+                val response = OkRestResponse(Map("customJars" -> mutable.Buffer()))
                 if (files.nonEmpty) {
-                  response.entity = Map("custom-jars" -> files.map(metadata =>
+                  response.entity = Map("customJars" -> files.map(metadata =>
                     Map("name" -> metadata.specification.name,
                       "version" -> metadata.specification.version))
                   )
@@ -221,9 +221,9 @@ trait SjCustomApi extends Directives with SjCrudValidator {
             } ~
               get {
                 val files = fileMetadataDAO.getByParameters(Map("filetype" -> "custom-file"))
-                val response = OkRestResponse(Map("custom-files" -> mutable.Buffer()))
+                val response = OkRestResponse(Map("customFiles" -> mutable.Buffer()))
                 if (files.nonEmpty) {
-                  response.entity = Map("custom-files" -> files.map(metadata =>
+                  response.entity = Map("customFiles" -> files.map(metadata =>
                     Map("name" -> metadata.filename,
                       "description" -> metadata.specification.description,
                       "upload-date" -> metadata.uploadDate.toString))

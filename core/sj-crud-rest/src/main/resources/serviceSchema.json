@@ -39,35 +39,35 @@
       "description": "The service password if the service is elasticsearch type",
       "type": "string"
     },
-    "zk-namespace": {
+    "zkNamespace": {
       "description": "A zookeeper namespace if the service is kafka type",
       "type": "string"
     },
-    "zk-provider": {
+    "zkProvider": {
       "description": "A zookeeper provider if the service is kafka type",
       "type": "string"
     },
-    "metadata-namespace": {
+    "metadataNamespace": {
       "description": "A cassandra namespace if the service is tstream type",
       "type": "string"
     },
-    "metadata-provider": {
+    "metadataProvider": {
       "description": "A cassandra provider if the service is tstream type",
       "type": "string"
     },
-    "data-namespace": {
+    "dataNamespace": {
       "description": "A cassandra or aerospike namespace if the service is tstream type",
       "type": "string"
     },
-    "data-provider": {
+    "dataProvider": {
       "description": "A cassandra or aerospike provider if the service is tstream type",
       "type": "string"
     },
-    "lock-namespace": {
+    "lockNamespace": {
       "description": "A zookeeper namespace if the service is tstream type",
       "type": "string"
     },
-    "lock-provider": {
+    "lockProvider": {
       "description": "A zookeeper provider if the service is tstream type",
       "type": "string"
     },
