@@ -132,7 +132,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                     if (!storage.exists(metadata.fileName)) {
                       response = BadRequestRestResponse(Map("message" -> getMessage("rest.errors.invalid.specification")))
 
-                      if (checkSpecification(file)) {
+                      if (checkCustomFileSpecification(file)) {
                         val specification = getSpecification(file)
                         response = ConflictRestResponse(Map("message" ->
                           createMessage("rest.custom.jars.exists", metadata.fileName)))

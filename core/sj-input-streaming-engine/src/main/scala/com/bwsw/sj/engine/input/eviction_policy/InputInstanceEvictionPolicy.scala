@@ -39,12 +39,12 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
    * @return Storage of keys (Hazelcast map)
    */
   def getUniqueEnvelopes = {
-    logger.debug(s"Get hazelcast map for checking of there are duplicates (input envelopes) or not.")
+    logger.debug(s"Get a hazelcast map for checking of there are duplicates (input envelopes) or not.")
     hazelcastInstance.getMap[String, Array[Byte]](hazelcastMapName)
   }
 
   private def createHazelcastConfig() = {
-    logger.debug(s"Create a Hazelcast map configuration is named '$hazelcastMapName'.")
+    logger.debug(s"Create a hazelcast map configuration is named '$hazelcastMapName'.")
     val config = new XmlConfigBuilder().build()
     val networkConfig = createNetworkConfig()
     val evictionPolicy = createEvictionPolicy()
@@ -62,7 +62,7 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
   }
 
   private def createEvictionPolicy() = {
-    logger.debug(s"Create EvictionPolicy.")
+    logger.debug(s"Create a hazelcast eviction policy.")
     instance.defaultEvictionPolicy match {
       case EngineLiterals.lruDefaultEvictionPolicy => EvictionPolicy.LRU
       case EngineLiterals.lfuDefaultEvictionPolicy => EvictionPolicy.LFU
@@ -71,17 +71,20 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
   }
 
   private def createNetworkConfig(): NetworkConfig = {
+    logger.debug(s"Create a hazelcast network config.")
     val networkConfig = new NetworkConfig()
     networkConfig.setJoin(createJoinConfig())
   }
 
   private def createJoinConfig() = {
+    logger.debug(s"Create a hazelcast join config.")
     val joinConfig = new JoinConfig()
     joinConfig.setMulticastConfig(new MulticastConfig().setEnabled(false))
     joinConfig.setTcpIpConfig(createTcpIpConfig())
   }
 
   private def createTcpIpConfig() = {
+    logger.debug(s"Create a hazelcast tcp/ip config.")
     val tcpIpConfig = new TcpIpConfig()
     val hosts = System.getenv("INSTANCE_HOSTS").split(",").toList.asJava
     tcpIpConfig.setMembers(hosts).setEnabled(true)
@@ -93,7 +96,7 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
    * @return Configuration for map's capacity.
    */
   private def createMaxSizeConfig() = {
-    logger.debug(s"Create MaxSizeConfig.")
+    logger.debug(s"Create a hazelcast max size config.")
     new MaxSizeConfig()
       .setSize(instance.queueMaxSize)
   }

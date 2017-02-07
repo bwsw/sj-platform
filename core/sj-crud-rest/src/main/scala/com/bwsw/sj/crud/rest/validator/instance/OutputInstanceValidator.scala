@@ -32,7 +32,7 @@ class OutputInstanceValidator extends InstanceValidator {
     * @return - List of errors
     */
   override def validate(parameters: InstanceMetadata, specification: SpecificationData) = {
-    logger.debug(s"Instance: ${parameters.name}. Start output-streaming validation.")
+    logger.debug(s"Instance: ${parameters.name}. Start a validation of instance of output-streaming type.")
     val errors = new ArrayBuffer[String]()
     errors ++= super.validateGeneralOptions(parameters)
     val outputInstanceMetadata = parameters.asInstanceOf[OutputInstanceMetadata]
@@ -97,7 +97,7 @@ class OutputInstanceValidator extends InstanceValidator {
                   errors += createMessage("rest.validator.service.must", "t-streams", "TstrQ")
                 }
 
-                errors ++= checkParallelism(instance.parallelism, input.partitions)
+                errors ++= validateParallelism(instance.parallelism, input.partitions)
               }
           }
         }

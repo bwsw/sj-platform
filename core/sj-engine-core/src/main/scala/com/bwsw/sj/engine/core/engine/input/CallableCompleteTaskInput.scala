@@ -26,6 +26,7 @@ class CallableCompleteTaskInput(manager: CommonTaskManager,
   private val tStreamRegularTaskInputService = new CallableTStreamTaskInput(manager, blockingQueue, checkpointGroup)
 
   override def registerEnvelope(envelope: Envelope) = {
+    logger.debug(s"Register an envelope: ${envelope.toString}")
     envelope match {
       case tstreamEnvelope: TStreamEnvelope =>
         tStreamRegularTaskInputService.registerEnvelope(tstreamEnvelope)

@@ -27,13 +27,13 @@ class CommonTaskManager() extends TaskManager {
       s"${inputs.count(x => x._1.streamType == StreamLiterals.tstreamType) + instance.outputs.length + 3} ports are required")
 
   def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = {
-    logger.debug(s"Task: $taskName. Start loading of executor class from module jar.")
+    logger.debug(s"Task: $taskName. Start loading an executor class from module jar.")
     val executor = moduleClassLoader
       .loadClass(executorClassName)
       .getConstructor(classOf[ModuleEnvironmentManager])
       .newInstance(environmentManager)
       .asInstanceOf[StreamingExecutor]
-    logger.debug(s"Task: $taskName. Create instance of executor class.")
+    logger.debug(s"Task: $taskName. Load an executor class.")
 
     executor
   }
@@ -63,12 +63,15 @@ class CommonTaskManager() extends TaskManager {
   }
 
   private def getExecutionPlan() = {
+    logger.debug("Get an execution plan of instance.")
     instance match {
       case regularInstance: RegularInstance =>
         regularInstance.executionPlan
       case windowedInstance: WindowedInstance =>
         windowedInstance.executionPlan
-      case _ => throw new RuntimeException("CommonTaskManager can be used only for regular or windowed engine")
+      case _ =>
+        logger.error("CommonTaskManager can be used only for regular or windowed engine.")
+        throw new RuntimeException("CommonTaskManager can be used only for regular or windowed engine.")
     }
   }
 }

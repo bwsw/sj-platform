@@ -7,16 +7,15 @@ import { BaseResponse } from '../models/base-response.model';
 
 @Injectable()
 export class ModulesService {
-  private _dataUrl = '/v1/';
+  private dataUrl = '/v1/';
 
-  constructor(private http: Http) {
-  }
+  constructor(private http: Http) { }
 
   public getModuleList(): Observable<ModuleModel[]> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this._dataUrl + 'modules', options)
+    return this.http.get(this.dataUrl + 'modules', options)
       .map(response => {
         const data = this.extractData(response);
         return data.modules;
@@ -25,7 +24,7 @@ export class ModulesService {
   }
 
   public getModuileTypes(): Observable<string[]> {
-    return this.http.get(this._dataUrl + 'modules/_types')
+    return this.http.get(this.dataUrl + 'modules/_types')
       .map(response => {
         const data = this.extractData(response);
         return data.types;
@@ -34,7 +33,7 @@ export class ModulesService {
   }
 
   public getRelatedInstancesList(module: ModuleModel): Observable<string[]> {
-    return this.http.get(this._dataUrl + 'modules/' + module.moduleType + '/' + module.moduleName + '/' +
+    return this.http.get(this.dataUrl + 'modules/' + module.moduleType + '/' + module.moduleName + '/' +
       module.moduleVersion + '/related')
       .map(response => {
         const data = this.extractData(response);
@@ -47,7 +46,7 @@ export class ModulesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this._dataUrl + 'modules/' + module.moduleType + '/' + module.moduleName + '/' +
+    return this.http.get(this.dataUrl + 'modules/' + module.moduleType + '/' + module.moduleName + '/' +
       module.moduleVersion + '/specification', options)
       .map(response => {
         const data = this.extractData(response);
@@ -60,7 +59,7 @@ export class ModulesService {
     let headers = new Headers();
     let options = new RequestOptions({ headers: headers, responseType: ResponseContentType.Blob });
 
-    return this.http.get(this._dataUrl + 'modules/' + module.moduleType + '/' + module.moduleName + '/' +
+    return this.http.get(this.dataUrl + 'modules/' + module.moduleType + '/' + module.moduleName + '/' +
       module.moduleVersion, options)
       .map((res: Response) => {
         let contDispos = res.headers.get('content-disposition');
@@ -84,7 +83,7 @@ export class ModulesService {
           }
         }
       };
-      xhr.open('POST', this._dataUrl + 'modules', true);
+      xhr.open('POST', this.dataUrl + 'modules', true);
       let formData = new FormData();
       formData.append('jar', file, file.name);
       xhr.send(formData);
@@ -95,7 +94,7 @@ export class ModulesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.delete(this._dataUrl + 'modules/' + module.moduleType + '/' + module.moduleName + '/' +
+    return this.http.delete(this.dataUrl + 'modules/' + module.moduleType + '/' + module.moduleName + '/' +
       module.moduleVersion, options)
       .map(response => {
         const data = this.extractData(response);

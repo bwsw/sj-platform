@@ -20,7 +20,7 @@ interface ITasksObject {
 
 @Injectable()
 export class InstancesService {
-  private _dataUrl = '/v1/';
+  private dataUrl = '/v1/';
 
   private static fillInstanceGeneralFields(orig: InstanceModel, instance: SubtypedInstance) {
     instance.name = orig.name;
@@ -41,14 +41,13 @@ export class InstancesService {
     return instance;
   }
 
-  constructor(private http: Http) {
-  }
+  constructor(private http: Http) { }
 
   public getInstanceList(): Observable<InstanceModel[]> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this._dataUrl + 'modules/instances', options)
+    return this.http.get(this.dataUrl + 'modules/instances', options)
       .map(response => {
         const data = this.extractData(response);
         return data.instances;

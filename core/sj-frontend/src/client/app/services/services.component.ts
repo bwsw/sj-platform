@@ -70,9 +70,9 @@ export class ServicesComponent implements OnInit {
         error => this.errorMessage = <any>error);
   }
 
-  public getProviderInfo(Modal: ModalDirective, providerName: string) {
+  public getProviderInfo(modal: ModalDirective, providerName: string) {
     this.getProvider(providerName);
-    Modal.show();
+    modal.show();
   }
 
   public deleteServiceConfirm(modal: ModalDirective, service: ServiceModel) {

@@ -1,7 +1,5 @@
 package com.bwsw.sj.engine.core.state
 
-import org.slf4j.LoggerFactory
-
 /**
  * Trait representing service to manage a state of module that has checkpoints (partial and full)
  *
@@ -9,8 +7,6 @@ import org.slf4j.LoggerFactory
  */
 
 trait IStateService {
-
-  protected val logger = LoggerFactory.getLogger(this.getClass)
 
   def isExist(key: String): Boolean
 

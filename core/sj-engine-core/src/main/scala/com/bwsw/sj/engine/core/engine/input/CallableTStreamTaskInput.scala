@@ -48,12 +48,14 @@ class CallableTStreamTaskInput(manager: TaskManager,
   }
 
   private def getOffset() = {
+    logger.debug(s"Task: ${manager.taskName}. Get an offset parameter from instance.")
     val instance = manager.instance
     val offset = instance match {
       case instance: RegularInstance => instance.startFrom
       case instance: WindowedInstance => instance.startFrom
       case instance: OutputInstance => instance.startFrom
       case badInstance =>
+        logger.error(s"Task: ${manager.taskName}. Instance type isn't supported.")
         throw new TypeNotPresentException(badInstance.getClass.getName,
           new Throwable("Instance type isn't supported"))
     }

@@ -22,6 +22,7 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
 
   def run() = {
     try {
+      logger.info(s"Instance: '${instance.name}'. Destroy an instance.")
       updateInstanceStatus(instance, deleting)
       deleteGenerators()
       deleteFramework()
@@ -100,6 +101,7 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
   }
 
   private def deleteFramework() = {
+    logger.debug(s"Instance: '${instance.name}'. Deleting a framework.")
     val response = destroyMarathonApplication(frameworkName)
     if (isStatusOK(response)) {
       updateFrameworkState(instance, deleting)
@@ -114,6 +116,7 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
   private def waitForFrameworkToDelete() = {
     var hasDeleted = false
     while (!hasDeleted) {
+      logger.debug(s"Instance: '${instance.name}'. Waiting until a framework is deleted.")
       val frameworkApplicationInfo = getApplicationInfo(frameworkName)
       if (!isStatusNotFound(frameworkApplicationInfo)) {
         updateFrameworkState(instance, deleting)
