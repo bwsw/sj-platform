@@ -30,7 +30,7 @@ class InputStreamingServer(host: String,
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   override def call() = {
-    logger.info(s"Launch input streaming server on: '$host:$port'\n")
+    logger.info(s"Launch an input-streaming server on: '$host:$port'.")
     val bossGroup: EventLoopGroup = new NioEventLoopGroup(1)
     val workerGroup = new NioEventLoopGroup()
     try {
@@ -43,6 +43,7 @@ class InputStreamingServer(host: String,
 
       bootstrapServer.bind(host, port).sync().channel().closeFuture().sync()
     } finally {
+      logger.info(s"Shutdown an input-streaming server (address: '$host:$port').")
       workerGroup.shutdownGracefully()
       bossGroup.shutdownGracefully()
     }

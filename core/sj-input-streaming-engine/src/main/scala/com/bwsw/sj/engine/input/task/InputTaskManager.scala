@@ -35,13 +35,13 @@ class InputTaskManager() extends TaskManager {
   }
 
   override def getExecutor(environmentManager: EnvironmentManager) = {
-    logger.debug(s"Task: $taskName. Start loading of executor class from module jar.")
+    logger.debug(s"Task: $taskName. Start loading an executor class from module jar.")
     val executor = moduleClassLoader
       .loadClass(executorClassName)
       .getConstructor(classOf[InputEnvironmentManager])
       .newInstance(environmentManager)
       .asInstanceOf[InputStreamingExecutor]
-    logger.debug(s"Task: $taskName. Create instance of executor class.")
+    logger.debug(s"Task: $taskName. Load an executor class.")
 
     executor
   }

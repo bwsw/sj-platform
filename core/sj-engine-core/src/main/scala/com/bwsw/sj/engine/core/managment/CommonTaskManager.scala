@@ -27,7 +27,7 @@ class CommonTaskManager() extends TaskManager {
       s"${inputs.count(x => x._1.streamType == StreamLiterals.tstreamType) + instance.outputs.length + 3} ports are required")
 
   def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = {
-    logger.debug(s"Task: $taskName. Start loading of executor class from module jar.")
+    logger.debug(s"Task: $taskName. Start loading an executor class from module jar.")
     val executor = moduleClassLoader
       .loadClass(executorClassName)
       .getConstructor(classOf[ModuleEnvironmentManager])
