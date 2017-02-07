@@ -110,7 +110,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
             createMessage("rest.modules.modules.extension.unknown", metadata.fileName)))
 
           if (metadata.fileName.endsWith(".jar")) {
-            val specification = checkJarFile(file)
+            val specification = validateSpecification(file)
             response = ConflictRestResponse(Map("message" ->
               createMessage("rest.modules.module.exists", metadata.fileName)))
 

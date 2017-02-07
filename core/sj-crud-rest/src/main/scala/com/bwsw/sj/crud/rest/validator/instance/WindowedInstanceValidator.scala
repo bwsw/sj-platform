@@ -20,7 +20,7 @@ class WindowedInstanceValidator extends InstanceValidator {
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
   override def validate(parameters: InstanceMetadata, specification: SpecificationData) = {
-    logger.debug(s"Instance: ${parameters.name}. Start windowed-streaming validation.")
+    logger.debug(s"Instance: ${parameters.name}. Start a validation of instance of windowed-streaming type.")
     val errors = new ArrayBuffer[String]()
     errors ++= super.validateGeneralOptions(parameters)
     val windowedInstanceMetadata = parameters.asInstanceOf[WindowedInstanceMetadata]
@@ -178,7 +178,7 @@ class WindowedInstanceValidator extends InstanceValidator {
     // 'parallelism' field
     val partitions = getStreamsPartitions(inputStreams)
     val minPartitionCount = if (partitions.nonEmpty) partitions.min else 0
-    errors ++= checkParallelism(instance.parallelism, minPartitionCount)
+    errors ++= validateParallelism(instance.parallelism, minPartitionCount)
 
     val allStreams = inputStreams.union(outputStreams)
     val tStreamsServices = getStreamServices(allStreams.filter { s =>

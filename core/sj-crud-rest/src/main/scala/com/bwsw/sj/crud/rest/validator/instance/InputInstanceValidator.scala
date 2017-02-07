@@ -25,7 +25,7 @@ class InputInstanceValidator extends InstanceValidator {
     */
   override def validate(parameters: InstanceMetadata,
                         specification: SpecificationData) = {
-    logger.debug(s"Instance: ${parameters.name}. Start input-streaming validation.")
+    logger.debug(s"Instance: ${parameters.name}. Start a validation of instance of input-streaming type.")
     val errors = new ArrayBuffer[String]()
     errors ++= super.validateGeneralOptions(parameters)
     val inputInstanceMetadata = parameters.asInstanceOf[InputInstanceMetadata]

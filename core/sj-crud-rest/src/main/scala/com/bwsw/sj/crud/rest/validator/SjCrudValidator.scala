@@ -93,11 +93,12 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageRes
     * @param jarFile - input jar file
     * @return - content of specification.json
     */
-  def checkJarFile(jarFile: File) = {
+  def validateSpecification(jarFile: File) = {
+    logger.debug(s"Start a validation of module specification.")
     val configService = ConnectionRepository.getConfigService
     val classLoader = new URLClassLoader(Array(jarFile.toURI.toURL), ClassLoader.getSystemClassLoader)
     val specificationJson = getSpecificationFromJar(jarFile)
-    validateJson(specificationJson)
+    validateSerializedSpecification(specificationJson)
     validateWithSchema(specificationJson, "schema.json")
     val specification = serializer.deserialize[Map[String, Any]](specificationJson)
     val moduleType = specification("module-type").asInstanceOf[String]
@@ -212,20 +213,24 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageRes
   }
 
   private def getClassInterfaces(className: String, classLoader: URLClassLoader) = {
+    logger.debug("Try to load a validator class from jar that is indicated on specification.")
     try {
       classLoader.loadClass(className).getAnnotatedInterfaces.map(x => x.getType)
     } catch {
       case _: ClassNotFoundException =>
+        logger.error(s"Specification.json for module has got the invalid 'validator-class' param: class '$className' indicated in the specification isn't found.")
         throw new Exception(createMessage("rest.validator.specification.class.not.found", "validator-class", className))
     }
   }
 
   private def getExecutorClassInterfaces(className: String, classLoader: URLClassLoader) = {
+    logger.debug("Try to load an executor class from jar that is indicated on specification.")
     try {
       classLoader.loadClass(className).getAnnotatedSuperclass.getType.asInstanceOf[Class[Object]]
         .getAnnotatedInterfaces.map(x => x.getType)
     } catch {
       case _: ClassNotFoundException =>
+        logger.error(s"Specification.json for module has got the invalid 'executor-class' param: class '$className' indicated in the specification isn't found.")
         throw new Exception(createMessage("rest.validator.specification.class.not.found", "executor-class", className))
     }
   }
@@ -237,7 +242,8 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageRes
     * @param jarFile - input jar file
     * @return - content of specification.json
     */
-  def checkSpecification(jarFile: File): Boolean = {
+  def checkCustomFileSpecification(jarFile: File): Boolean = {
+    logger.debug(s"Validate a custom jar specification.")
     val json = getSpecificationFromJar(jarFile)
     if (isEmptyOrNullString(json)) {
       return false
@@ -247,6 +253,7 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageRes
   }
 
   def getSpecification(jarFile: File) = {
+    logger.debug(s"Get a specification.")
     val json = getSpecificationFromJar(jarFile)
 
     serializer.deserialize[Map[String, Any]](json)
@@ -259,6 +266,7 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageRes
     * @return - json-string from specification.json
     */
   private def getSpecificationFromJar(file: File): String = {
+    logger.debug(s"Getting a specification from a jar file.")
     val builder = new StringBuilder
     val jar = new JarFile(file)
     val enu = jar.entries()
@@ -280,13 +288,16 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageRes
     builder.toString()
   }
 
-  def validateJson(specificationJson: String) = {
+  private def validateSerializedSpecification(specificationJson: String) = {
+    logger.debug(s"Validate a serialized specification.")
     if (isEmptyOrNullString(specificationJson)) {
+      logger.error(s"Specification.json is not found in module jar.")
       val message = createMessage("rest.modules.specification.json.not.found")
       logger.error(message)
       throw new FileNotFoundException(message)
     }
     if (!isJSONValid(specificationJson)) {
+      logger.error(s"Specification.json of module is an invalid json.")
       val message = createMessage("rest.modules.specification.json.invalid")
       logger.error(message)
       throw new FileNotFoundException(message)

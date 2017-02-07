@@ -133,7 +133,8 @@ abstract class InstanceValidator extends ValidationUtils with CompletionUtils wi
     }
   }
 
-  protected def checkParallelism(parallelism: Any, minimumNumberOfPartitions: Int) = {
+  protected def validateParallelism(parallelism: Any, minimumNumberOfPartitions: Int) = {
+    logger.debug(s"Validate a parallelism parameter.")
     val errors = new ArrayBuffer[String]()
     Option(parallelism) match {
       case None =>
