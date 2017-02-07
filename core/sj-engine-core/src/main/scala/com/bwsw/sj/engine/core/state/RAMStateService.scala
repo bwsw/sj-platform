@@ -6,6 +6,7 @@ import com.bwsw.tstreams.agents.consumer.ConsumerTransaction
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.NewTransactionProducerPolicy
+import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
 
@@ -19,7 +20,7 @@ import scala.collection.mutable
  */
 
 class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGroup) extends IStateService {
-
+  private val logger = LoggerFactory.getLogger(this.getClass)
   private val partition = 0
   private val stateStreamName = manager.taskName + "_state"
   private val stateStream = createStateStream()

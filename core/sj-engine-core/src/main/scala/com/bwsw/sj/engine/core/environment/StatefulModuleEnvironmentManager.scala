@@ -36,7 +36,7 @@ class StatefulModuleEnvironmentManager(stateStorage: StateStorage,
    * @return Module state
    */
   override def getState: StateStorage = {
-    logger.info(s"Get a storage where a state is\n")
+    logger.info(s"Get a storage where a state is.")
     stateStorage
   }
 }

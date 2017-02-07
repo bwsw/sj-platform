@@ -23,12 +23,14 @@ trait TaskRunner {
 
   private def createThreadPool(factoryName: String) = {
     val countOfThreads = 4
+    logger.debug(s"Create a thread pool with $countOfThreads threads for task.")
     val threadFactory = createThreadFactory(factoryName)
 
     Executors.newFixedThreadPool(countOfThreads, threadFactory)
   }
 
   private def createThreadFactory(name: String) = {
+    logger.debug("Create a thread factory.")
     new ThreadFactoryBuilder()
       .setNameFormat(name)
       .build()

@@ -21,6 +21,7 @@ abstract class EnvironmentManager(val options: Map[String, Any], outputs: Array[
   var isCheckpointInitiated: Boolean = false
 
   def initiateCheckpoint() = {
+    logger.debug("Initiate a checkpoint manually.")
     isCheckpointInitiated = true
   }
 

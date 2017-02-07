@@ -53,8 +53,7 @@ trait KafkaTaskInput {
    *         that has successfully processed for each topic for each partition
    */
   protected def createOffsetStream() = {
-    logger.debug(s"Task name: ${manager.taskName}. " +
-      s"Get stream for keeping kafka offsets.")
+    logger.debug(s"Task name: ${manager.taskName}. Get stream for keeping kafka offsets.")
     val description = "store kafka offsets of input streams"
     val tags = Array("offsets")
     val partitions = 1
@@ -105,6 +104,7 @@ trait KafkaTaskInput {
   protected def chooseOffset(): String
 
   protected def createKafkaConsumer(hosts: List[String], offset: String) = {
+    logger.debug(s"Task: ${manager.taskName}. Create a kafka consumer.")
     val properties = new Properties()
     properties.put("bootstrap.servers", hosts.mkString(","))
     properties.put("enable.auto.commit", "false")
@@ -119,6 +119,7 @@ trait KafkaTaskInput {
   }
 
   protected def assignKafkaConsumerOnTopics(consumer: KafkaConsumer[Array[Byte], Array[Byte]], topics: List[(String, List[Int])]) = {
+    logger.debug(s"Task: ${manager.taskName}. Assign a kafka consumer to particular topics.")
     val topicPartitions = topics
       .flatMap(x => (x._2.head to x._2.tail.head)
       .map(y => new TopicPartition(x._1, y))).asJava
@@ -127,6 +128,7 @@ trait KafkaTaskInput {
   }
 
   protected def seekKafkaConsumerOffsets(consumer: KafkaConsumer[Array[Byte], Array[Byte]]) = {
+    logger.debug(s"Task: ${manager.taskName}. Seek a kafka consumer offset.")
     val partition = 0
     val partitionsRange = List(partition, partition)
 
@@ -151,6 +153,7 @@ trait KafkaTaskInput {
   }
 
   protected def applyConfigurationSettings(properties: Properties) = {
+    logger.debug(s"Task name: ${manager.taskName}. Get setting (using a config service) for kafka consumer and apply their.")
     val configService = ConnectionRepository.getConfigService
 
     val kafkaSettings = configService.getByParameters(Map("domain" -> ConfigLiterals.kafkaDomain))
@@ -158,6 +161,7 @@ trait KafkaTaskInput {
   }
 
   protected def consumerRecordToEnvelope(consumerRecord: ConsumerRecord[Array[Byte], Array[Byte]]) = {
+    logger.debug(s"Task name: ${manager.taskName}. Convert a consumed kafka record to kafka envelope.")
     val envelope = new KafkaEnvelope()
     envelope.stream = consumerRecord.topic()
     envelope.partition = consumerRecord.partition()

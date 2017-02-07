@@ -30,6 +30,7 @@ class CallableKafkaTaskInput(override val manager: CommonTaskManager,
   currentThread.setName(s"regular-task-${manager.taskName}-kafka-consumer")
 
   def chooseOffset() = {
+    logger.debug(s"Task: ${manager.taskName}. Get a start-from parameter from instance.")
     val instance = manager.instance.asInstanceOf[RegularInstance]
     instance.startFrom match {
       case EngineLiterals.oldestStartMode => "earliest"
@@ -51,6 +52,7 @@ class CallableKafkaTaskInput(override val manager: CommonTaskManager,
   }
 
   override def setConsumerOffsetToLastEnvelope() = {
+    logger.debug(s"Task: ${manager.taskName}. Set a consumer offset to last envelope for all streams.")
     super.setConsumerOffsetToLastEnvelope()
     offsetProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
       .send(offsetSerializer.serialize(kafkaOffsetsStorage))
