@@ -1,4 +1,4 @@
-package com.bwsw.sj.mesos.framework.task
+package com.bwsw.sj.mesos.framework.task.status.states
 
 class SlaveState() {
   var start_time:Any = _

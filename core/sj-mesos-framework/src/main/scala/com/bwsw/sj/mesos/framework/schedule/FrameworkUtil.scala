@@ -14,11 +14,7 @@ import org.apache.mesos.SchedulerDriver
 import scala.collection.immutable
 import scala.util.Properties
 
-/**
- *
- *
- * @author Kseniya Tomskikh
- */
+
 object FrameworkUtil {
   var master: MasterInfo = null
   var frameworkId: String = null
@@ -90,7 +86,7 @@ object FrameworkUtil {
 
   def killAllLaunchedTasks() = {
     TasksList.getLaunchedTasks.foreach(taskId => {
-      TasksList.stopTask(taskId)
+      TasksList.killTask(taskId)
     })
   }
 
@@ -98,16 +94,18 @@ object FrameworkUtil {
     * Teardown framework, do it if instance not started.
     */
   def teardown() = {
-    println("Launched tasks: ", TasksList.getLaunchedTasks)
+    logger.info(s"Kill all launched tasks: ${TasksList.getLaunchedTasks}")
     killAllLaunchedTasks()
   }
 
+  /**
+    * Selecting which tasks would be launched
+    */
   def prepareTasksToLaunch() = {
-    print("Lanched tasks")
     TasksList.getList.foreach(task => {
-      print(task.toJson, "\n") // TODO remove print
       if (!TasksList.getLaunchedTasks.contains(task.id)) TasksList.addToLaunch(task.id)
     })
+    logger.info(s"Selecting tasks to launch: ${TasksList.toLaunch}")
   }
 
 
@@ -122,5 +120,4 @@ object FrameworkUtil {
       FrameworkUtil.instance = optionInstance.get
     }
   }
-
 }

@@ -2,11 +2,11 @@ package com.bwsw.sj.mesos.framework.schedule
 
 import java.util
 
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.mesos.framework.task.{StatusHandler, TasksList}
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos._
 import org.apache.mesos.{Scheduler, SchedulerDriver}
+
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
@@ -44,10 +44,12 @@ class FrameworkScheduler extends Scheduler {
 
   /**
    * Execute when task change status.
-   * @param driver scheduler driver
+    *
+    * @param driver scheduler driver
    * @param status received status from master
    */
   def statusUpdate(driver: SchedulerDriver, status: TaskStatus) {
+    logger.info(s"GOT STATUS UPDATE")
     StatusHandler.handle(status)
   }
 
@@ -63,68 +65,72 @@ class FrameworkScheduler extends Scheduler {
    * @param offers resources, that master offered to framework
    */
   override def resourceOffers(driver: SchedulerDriver, offers: util.List[Offer]): Unit = {
-    if (!FrameworkUtil.isInstanceStarted) FrameworkUtil.teardown()
-    else FrameworkUtil.prepareTasksToLaunch()
+    logger.info(s"GOT RESOURCE OFFERS")
 
+    val started = FrameworkUtil.isInstanceStarted
+    logger.info(s"Check is instance status 'started': $started")
+    if (started) FrameworkUtil.prepareTasksToLaunch()
+    else FrameworkUtil.teardown()
 
-    val internalOffers: mutable.Buffer[Offer] = offers.asScala
-    logger.info(s"RESOURCE OFFERS.")
     TasksList.clearAvailablePorts()
-    OfferHandler.setOffers(internalOffers)
-    OfferHandler.filter(FrameworkUtil.instance.nodeAttributes)
-    if (OfferHandler.filteredOffers.isEmpty) {
-      logger.info("No one node selected.")
-      TasksList.setMessage("No one node selected")
-      declineOffers(driver, internalOffers)
+    OffersHandler.setOffers(offers.asScala)
+
+    OffersHandler.filter(FrameworkUtil.instance.nodeAttributes)
+    if (OffersHandler.filteredOffers.isEmpty) {
+      declineOffers("No one node selected", OffersHandler.getOffers)
       return
     }
 
-    OfferHandler.filteredOffers.foreach(offer => {
+    logger.debug("Selected resource offers: ")
+    OffersHandler.filteredOffers.foreach(offer => {
       logger.debug(s"Offer ID: ${offer.getId.getValue}.")
       logger.debug(s"Slave ID: ${offer.getSlaveId.getValue}.")
     })
 
-    var tasksCountOnSlaves: mutable.ListBuffer[(Offer, Int)] = OfferHandler.getOffersForSlave()
+    var tasksCountOnSlaves: mutable.ListBuffer[(Offer, Int)] = OffersHandler.getOffersForSlave
     var overTasks = tasksCountOnSlaves.foldLeft(0)(_ + _._2)
     if (uniqueHosts && tasksCountOnSlaves.length < overTasks) overTasks = tasksCountOnSlaves.length
 
-    logger.debug(s"Count tasks can be launched: $overTasks.")
-    logger.debug(s"Count tasks must be launched: ${TasksList.count}.")
+    logger.debug(s"Can be launched: $overTasks tasks.")
+    logger.debug(s"Must be launched: ${TasksList.count} tasks.")
 
     if (TasksList.count > overTasks) {
-      logger.info(s"Can not launch tasks: no required resources.")
-      TasksList.setMessage("Can not launch tasks: no required resources")
-      declineOffers(driver, internalOffers)
+      declineOffers("Can not launch tasks: insufficient resources", OffersHandler.getOffers)
       return
     }
-    logger.debug(s"Tasks to launch: ${TasksList.toLaunch}.")
 
-    OfferHandler.offerNumber = 0
+
+    logger.info(s"Distribute tasks to resource offers")
+    OffersHandler.offerNumber = 0
     if (FrameworkUtil.isInstanceStarted) {
       for (currTask <- TasksList.toLaunch) {
         createTaskToLaunch(currTask, tasksCountOnSlaves)
-        tasksCountOnSlaves = OfferHandler.updateOfferNumber(tasksCountOnSlaves)
+        tasksCountOnSlaves = OffersHandler.updateOfferNumber(tasksCountOnSlaves)
       }
     }
-
+    logger.info(s"Launch tasks")
     launchTasks(driver)
     TasksList.clearLaunchedOffers()
-    declineOffers(driver, internalOffers)
-    TasksList.setMessage("Tasks have been launched")
+    declineOffers("Tasks have been launched", OffersHandler.getOffers)
+    logger.info(s"Launched tasks: ${TasksList.getLaunchedTasks}")
   }
 
-  private def declineOffers(driver: SchedulerDriver, offers: mutable.Buffer[Offer]) = {
-    offers.foreach(offer => driver.declineOffer(offer.getId))
+  private def declineOffers(message: String, offers: mutable.Buffer[Offer]) = {
+    logger.info(message)
+    TasksList.setMessage(message)
+    offers.foreach(offer => FrameworkUtil.driver.declineOffer(offer.getId))
   }
+
 
   /**
     * Create task to launch.
+    *
     * @param taskName
     * @param tasksCountOnSlaves
     * @return
     */
   private def createTaskToLaunch(taskName: String, tasksCountOnSlaves: mutable.ListBuffer[(Offer, Int)]) = {
-    val currentOffer = OfferHandler.getNextOffer(tasksCountOnSlaves)
+    val currentOffer = OffersHandler.getNextOffer(tasksCountOnSlaves)
     val task = TasksList.createTaskToLaunch(taskName, currentOffer._1)
 
     TasksList.addTaskToSlave(task, currentOffer)
@@ -136,10 +142,11 @@ class FrameworkScheduler extends Scheduler {
 
   /**
     * Ask driver to launch prepared tasks.
+    *
     * @param driver
     */
   private def launchTasks(driver: SchedulerDriver) = {
-    for (task <- TasksList.getLaunchedOffers()) {
+    for (task <- TasksList.getLaunchedOffers) {
       driver.launchTasks(List(task._1).asJava, task._2.asJava)
     }
   }
