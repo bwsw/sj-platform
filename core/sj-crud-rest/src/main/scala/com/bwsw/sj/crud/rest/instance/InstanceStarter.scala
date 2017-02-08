@@ -8,14 +8,14 @@ import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.model.{TStreamSjStream, ZKService}
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.rest.entities.MarathonRequest
+import com.bwsw.sj.common.utils.FrameworkLiterals._
+import com.bwsw.sj.common.utils.GeneratorLiterals._
 import com.bwsw.sj.common.utils._
 import com.bwsw.sj.crud.rest.RestLiterals
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
-import com.bwsw.sj.common.utils.FrameworkLiterals._
-import com.bwsw.sj.common.utils.GeneratorLiterals._
 
 /**
   * One-thread starting object for instance
@@ -38,13 +38,13 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
       logger.info(s"Instance: '${instance.name}'. Launch an instance.")
       updateInstanceStatus(instance, starting)
       startInstance()
+      close()
       logger.info(s"Instance: '${instance.name}' has been launched.")
     } catch {
       case e: Exception =>
-        logger.debug(s"Instance: '${instance.name}'. Instance is failed during the start process.")
-        logger.debug(e.getMessage)
-        e.printStackTrace()
+        logger.error(s"Instance: '${instance.name}'. Instance is failed during the start process.", e)
         updateInstanceStatus(instance, failed)
+        close()
     }
   }
 

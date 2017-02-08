@@ -6,25 +6,26 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.TStreamSjStream
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.rest.entities.MarathonRequest
-import com.bwsw.sj.common.utils.FrameworkLiterals._
 import com.bwsw.sj.common.utils.GeneratorLiterals
 import com.bwsw.sj.crud.rest.RestLiterals
+import org.apache.http.HttpStatus
 import org.apache.http.client.methods._
 import org.apache.http.entity.StringEntity
 import org.apache.http.util.EntityUtils
 import org.slf4j.LoggerFactory
 
 /**
- * Instance methods for starting/stopping/scaling/destroying
- * application on marathon
- *
- * @author Kseniya Tomskikh
- */
+  * Instance methods for starting/stopping/scaling/destroying
+  * application on marathon
+  *
+  * @author Kseniya Tomskikh
+  */
 trait InstanceMarathonManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
   private val marathonEntitySerializer = new JsonSerializer(true)
   private lazy val marathonConnect = ConfigurationSettingsUtils.getMarathonConnect()
   private lazy val marathonTimeout = ConfigurationSettingsUtils.getMarathonTimeout()
+  private lazy val client = new HttpClient(marathonTimeout).client
 
   def getNumberOfRunningTasks(response: CloseableHttpResponse) = {
     val entity = marathonEntitySerializer.deserialize[MarathonApplicationById](EntityUtils.toString(response.getEntity, "UTF-8"))
@@ -53,27 +54,23 @@ trait InstanceMarathonManager {
   }
 
   def isStatusOK(response: CloseableHttpResponse) = {
-    getStatusCode(response) == 200
+    getStatusCode(response) == HttpStatus.SC_OK
   }
 
-  def isStatusCreated(response: CloseableHttpResponse) = {
-    getStatusCode(response) == 201
+  def isStatusOK(statusCode: Int) = {
+    statusCode == HttpStatus.SC_OK
+  }
+
+  def isStatusCreated(statusCode: Int) = {
+    statusCode == HttpStatus.SC_CREATED
   }
 
   def isStatusNotFound(response: CloseableHttpResponse) = {
-    getStatusCode(response) == 404
+    getStatusCode(response) == HttpStatus.SC_NOT_FOUND
   }
 
   def getStatusCode(response: CloseableHttpResponse) = {
     response.getStatusLine.getStatusCode
-  }
-
-  def getFrameworkID(marathonInfo: CloseableHttpResponse) = {
-    logger.debug(s"Get a framework id.")
-    val entity = marathonEntitySerializer.deserialize[MarathonApplicationById](EntityUtils.toString(marathonInfo.getEntity, "UTF-8"))
-    val id = entity.app.env.get(frameworkIdLabel)
-
-    id
   }
 
   def getGeneratorApplicationID(stream: TStreamSjStream) = {
@@ -88,49 +85,45 @@ trait InstanceMarathonManager {
 
   def getMarathonInfo() = {
     logger.debug(s"Get info about the marathon.")
-    val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/info")
     val httpGet = new HttpGet(url.toString)
     val marathonInfo = client.execute(httpGet)
-    client.close()
 
     marathonInfo
   }
 
   def startMarathonApplication(request: MarathonRequest) = {
     logger.debug(s"Start an application on marathon. Request: ${marathonEntitySerializer.serialize(request)}.")
-    val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/apps")
     val httpPost = new HttpPost(url.toString)
     httpPost.addHeader("Content-Type", "application/json")
     val entity = new StringEntity(marathonEntitySerializer.serialize(request), "UTF-8")
     httpPost.setEntity(entity)
     val marathonInfo = client.execute(httpPost)
-    client.close()
+    val statusCode = getStatusCode(marathonInfo)
+    discardEntity(marathonInfo)
 
-    marathonInfo
+    statusCode
   }
 
   def getApplicationInfo(applicationID: String) = {
     logger.debug(s"Get an application info: '$applicationID'.")
-    val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/apps/$applicationID?force=true")
     val httpGet = new HttpGet(url.toString)
     val marathonInfo = client.execute(httpGet)
-    client.close()
 
     marathonInfo
   }
 
   def destroyMarathonApplication(applicationID: String) = {
     logger.debug(s"Destroy an application: '$applicationID'.")
-    val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/apps/$applicationID")
     val httpDelete = new HttpDelete(url.toString)
     val marathonInfo = client.execute(httpDelete)
-    client.close()
+    val statusCode = getStatusCode(marathonInfo)
+    discardEntity(marathonInfo)
 
-    marathonInfo
+    statusCode
   }
 
   def stopMarathonApplication(applicationID: String) = {
@@ -140,15 +133,23 @@ trait InstanceMarathonManager {
 
   def scaleMarathonApplication(applicationID: String, countOfInstances: Int) = {
     logger.debug(s"Scale an application: '$applicationID' to count: '$countOfInstances'.")
-    val client = new HttpClient(marathonTimeout).client
     val url = new URI(s"$marathonConnect/v2/apps/$applicationID?force=true")
     val httpPut = new HttpPut(url.toString)
     httpPut.addHeader("Content-Type", "application/json")
     val entity = new StringEntity(marathonEntitySerializer.serialize(Map("instances" -> countOfInstances)), "UTF-8")
     httpPut.setEntity(entity)
     val marathonInfo = client.execute(httpPut)
-    client.close()
+    val statusCode = getStatusCode(marathonInfo)
+    discardEntity(marathonInfo)
 
-    marathonInfo
+    statusCode
+  }
+
+  private def discardEntity(response: CloseableHttpResponse) = {
+    EntityUtils.consumeQuietly(response.getEntity)
+  }
+
+  def close() = {
+    client.close()
   }
 }

@@ -27,13 +27,13 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
       deleteGenerators()
       deleteFramework()
       deleteInstance()
+      close()
       logger.info(s"Instance: '${instance.name}' has been destroyed.")
     } catch {
       case e: Exception =>
-        logger.debug(s"Instance: '${instance.name}'. Instance is failed during the destroying process.")
-        logger.debug(e.getMessage)
-        e.printStackTrace()
+        logger.error(s"Instance: '${instance.name}'. Instance is failed during the destroying process.", e)
         updateInstanceStatus(instance, error)
+        close()
     }
   }
 
@@ -108,7 +108,7 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
       waitForFrameworkToDelete()
     } else {
       updateFrameworkState(instance, error)
-      throw new Exception(s"Marathon returns status code: ${getStatusCode(response)} " +
+      throw new Exception(s"Marathon returns status code: $response " +
         s"during the destroying process of framework. Framework '$frameworkName' is marked as error.")
     }
   }
