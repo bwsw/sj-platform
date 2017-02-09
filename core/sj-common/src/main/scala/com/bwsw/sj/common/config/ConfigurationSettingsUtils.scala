@@ -78,6 +78,10 @@ object ConfigurationSettingsUtils {
     getIntConfigSetting(frameworkMaxLaunchDelaySeconds)
   }
 
+  def getLowWatermark() = {
+    getIntConfigSetting(lowWatermark)
+  }
+
   private def getIntConfigSetting(name: String) = {
     getConfigSettings(name).toInt
   }

@@ -43,9 +43,10 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
   protected def createWindowedModuleService() = {
     instance.stateManagement match {
       case EngineLiterals.noneStateMode =>
-        logger.debug(s"Task: ${manager.taskName}. Start preparing of windowed module without state.")
+        logger.debug(s"Task: ${manager.taskName}. Start preparing of windowed module without a state.")
         new StatelessCommonModuleService(manager, inputService.checkpointGroup, performanceMetrics)
       case EngineLiterals.ramStateMode =>
+        logger.debug(s"Task: ${manager.taskName}. Start preparing of windowed module with a state.")
         new StatefulCommonModuleService(manager, inputService.checkpointGroup, performanceMetrics)
     }
   }
