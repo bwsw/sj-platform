@@ -7,10 +7,10 @@ import com.bwsw.common.tstream.NetworkTransactionGenerator
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.common.rest.entities.module.ExecutionPlan
-import ConfigurationSettingsUtils._
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.StreamLiterals._
 import com.bwsw.sj.common.utils.{GeneratorLiterals, ProviderLiterals}
@@ -28,8 +28,8 @@ import scala.collection.mutable
 
 abstract class TaskManager() {
   protected val logger = LoggerFactory.getLogger(this.getClass)
-
   val streamDAO = ConnectionRepository.getStreamService
+  val _type: _root_.scala.reflect.runtime.universe.Type
 
   require(System.getenv("INSTANCE_NAME") != null &&
     System.getenv("TASK_NAME") != null &&
@@ -56,9 +56,10 @@ abstract class TaskManager() {
       "specification.module-type" -> instance.moduleType,
       "specification.version" -> instance.moduleVersion)
   ).head
-  protected val executorClassName = fileMetadata.specification.executorClass
-
+  private val executorClassName = fileMetadata.specification.executorClass
   protected val moduleClassLoader = createClassLoader()
+
+  protected val executorClass = moduleClassLoader.loadClass(executorClassName)
 
   val converter = new ArrayByteConverter
   val inputs: mutable.Map[SjStream, Array[Int]]

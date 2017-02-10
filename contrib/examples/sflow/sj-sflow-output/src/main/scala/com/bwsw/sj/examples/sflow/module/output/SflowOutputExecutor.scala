@@ -4,6 +4,7 @@ import java.util.Date
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.examples.sflow.module.output.data.TrafficMetrics
 
@@ -14,7 +15,7 @@ import com.bwsw.sj.examples.sflow.module.output.data.TrafficMetrics
  *
  * @author Kseniya Mikhaleva
  */
-class SflowOutputExecutor extends OutputStreamingExecutor {
+class SflowOutputExecutor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor(manager) {
   val jsonSerializer = new JsonSerializer()
   val objectSerializer = new ObjectSerializer()
 

@@ -27,8 +27,8 @@ class InputStreamingPerformanceMetrics(manager: InputTaskManager)
    * Invokes when a new envelope from the input stream is received
    */
   override def addEnvelopeToInputStream(envelope: Envelope) = {
-    val inputEnvelope = envelope.asInstanceOf[InputEnvelope]
-    super.addEnvelopeToInputStream(inputStreamName, List(inputEnvelope.data.length))
+    val inputEnvelope = envelope.asInstanceOf[InputEnvelope[manager._type.type]]
+    super.addEnvelopeToInputStream(inputStreamName, List(inputEnvelope.data.toString.getBytes.length))
   }
 
   /**

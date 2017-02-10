@@ -6,7 +6,7 @@ import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.{InstanceStatusObserver, TaskRunner}
 import com.bwsw.sj.engine.core.entities.Batch
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
-import com.bwsw.sj.engine.windowed.collecting.BatchCollector
+import com.bwsw.sj.engine.windowed.batch.BatchCollector
 import com.bwsw.sj.engine.windowed.task.WindowedTaskEngine
 import com.bwsw.sj.engine.windowed.task.input.RetrievableTaskInput
 import com.bwsw.sj.engine.windowed.task.reporting.WindowedStreamingPerformanceMetrics

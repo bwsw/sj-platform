@@ -2,6 +2,7 @@ package com.bwsw.sj.engine.core.windowed
 
 import com.bwsw.sj.common.engine.{StreamingExecutor, StateHandlers}
 import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
+import scala.reflect.runtime.universe._
 
 /**
  * Class is responsible for windowed module execution logic.
@@ -12,7 +13,9 @@ import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
  */
 
 
-class WindowedStreamingExecutor(manager: ModuleEnvironmentManager) extends StreamingExecutor with StateHandlers {
+class WindowedStreamingExecutor[T: TypeTag](manager: ModuleEnvironmentManager) extends StreamingExecutor with StateHandlers {
+
+  override def getType() = typeOf[T]
   /**
    * Is invoked only once at the beginning of launching of module
    */

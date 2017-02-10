@@ -11,7 +11,6 @@ import com.bwsw.sj.engine.core.engine.input.CallableTStreamTaskInput
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, PersistentBlockingQueue}
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
-import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.output.processing.OutputProcessor
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
@@ -36,7 +35,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private val instance = manager.instance.asInstanceOf[OutputInstance]
   private val outputStream = getOutputStream
   private val environmentManager = createModuleEnvironmentManager()
-  private val executor = manager.getExecutor(environmentManager).asInstanceOf[OutputStreamingExecutor]
+  private val executor = manager.getExecutor(environmentManager)
   val taskInputService = new CallableTStreamTaskInput(manager, blockingQueue)
   private val outputProcessor = OutputProcessor(outputStream, performanceMetrics, manager)
   private var wasFirstCheckpoint = false

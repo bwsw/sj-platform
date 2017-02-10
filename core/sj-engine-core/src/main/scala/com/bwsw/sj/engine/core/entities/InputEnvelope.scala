@@ -6,9 +6,9 @@ import com.bwsw.sj.common.utils.StreamLiterals
  * Provides a wrapper for t-stream transaction that is formed by input engine.
  */
 
-class InputEnvelope(var key: String,
+class InputEnvelope[T](var key: String,
                     var outputMetadata: Array[(String, Int)],
                     var duplicateCheck: Boolean,
-                    var data: Array[Byte]) extends Envelope {
+                    var data: T) extends Envelope {
   streamType = StreamLiterals.inputDummy
 }

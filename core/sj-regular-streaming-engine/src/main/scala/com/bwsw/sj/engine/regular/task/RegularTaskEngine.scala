@@ -33,7 +33,7 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
   private val instance = manager.instance.asInstanceOf[RegularInstance]
   val taskInputService = CallableTaskInput(manager, blockingQueue)
   private val moduleService = createRegularModuleService()
-  private val executor = moduleService.executor.asInstanceOf[RegularStreamingExecutor]
+  private val executor = moduleService.executor.asInstanceOf[RegularStreamingExecutor[manager._type.type]]
   private val moduleTimer = moduleService.moduleTimer
   protected val checkpointInterval = instance.checkpointInterval
 

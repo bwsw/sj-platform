@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class EnvelopeFetcher(taskInput: RetrievableTaskInput[_ >: TStreamEnvelope with KafkaEnvelope <: Envelope]) {
   private val logger = LoggerFactory.getLogger(this.getClass)

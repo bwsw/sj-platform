@@ -4,6 +4,7 @@ import java.util.Calendar
 
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.stubs.module.output.data.StubEsData
 
@@ -13,7 +14,7 @@ import com.bwsw.sj.stubs.module.output.data.StubEsData
  *
  * @author Kseniya Tomskikh
  */
-class StubOutputExecutor extends OutputStreamingExecutor {
+class StubOutputExecutor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor(manager) {
 
   val objectSerializer = new ObjectSerializer()
 

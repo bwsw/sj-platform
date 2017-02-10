@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.windowed.collecting
+package com.bwsw.sj.engine.windowed.batch
 
 import java.util.concurrent.{ArrayBlockingQueue, Callable}
 

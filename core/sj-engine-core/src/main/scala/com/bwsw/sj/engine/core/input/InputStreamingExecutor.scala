@@ -4,6 +4,7 @@ import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.engine.core.entities.InputEnvelope
 import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
 import io.netty.buffer.ByteBuf
+import scala.reflect.runtime.universe._
 
 /**
  * It is responsible for input module execution logic. Module uses a specific instance to personalize its work.
@@ -13,7 +14,10 @@ import io.netty.buffer.ByteBuf
  * @author Kseniya Mikhaleva
  */
 
-class InputStreamingExecutor(manager: InputEnvironmentManager) extends StreamingExecutor {
+class InputStreamingExecutor[T: TypeTag](manager: InputEnvironmentManager) extends StreamingExecutor {
+
+  override def getType() = typeOf[T]
+
   /**
    * Is invoked every time when a new part of data is received.
    * Inside you have an access to a buffer with incoming data (a flow of bytes).
@@ -38,7 +42,7 @@ class InputStreamingExecutor(manager: InputEnvironmentManager) extends Streaming
    * Also you can indicate in the instance the field 'duplicate-check'
    * to set up a default policy for message checking on duplication and use the InputEnvelope flag only for special cases.
    */
-  def parse(buffer: ByteBuf, interval: Interval): Option[InputEnvelope] = {
+  def parse(buffer: ByteBuf, interval: Interval): Option[InputEnvelope[T]] = {
     None
   }
 
@@ -55,7 +59,7 @@ class InputStreamingExecutor(manager: InputEnvironmentManager) extends Streaming
    *                              If it is false it means a processed envelope is duplicate or empty and true in other case
    * @return A response containing a relevant information about a processed envelope
    */
-  def createProcessedMessageResponse(envelope: Option[InputEnvelope], isNotEmptyOrDuplicate: Boolean): InputStreamingResponse = {
+  def createProcessedMessageResponse(envelope: Option[InputEnvelope[T]], isNotEmptyOrDuplicate: Boolean): InputStreamingResponse = {
     var message = ""
     var isBuffered = true
     if (isNotEmptyOrDuplicate) {

@@ -2,6 +2,7 @@ package com.bwsw.sj.stubs.module.output
 
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.stubs.module.output.data.StubJdbcData
 
@@ -11,7 +12,7 @@ import com.bwsw.sj.stubs.module.output.data.StubJdbcData
  *
  * @author Diryavkin Dmitry
  */
-class StubOutputExecutorJdbc extends OutputStreamingExecutor {
+class StubOutputExecutorJdbc(manager: OutputEnvironmentManager) extends OutputStreamingExecutor(manager) {
 
   val objectSerializer = new ObjectSerializer()
 

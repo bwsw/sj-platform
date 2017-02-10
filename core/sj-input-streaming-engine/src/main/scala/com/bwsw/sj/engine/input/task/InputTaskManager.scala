@@ -6,12 +6,15 @@ import com.bwsw.sj.engine.core.input.InputStreamingExecutor
 import com.bwsw.sj.engine.core.managment.TaskManager
 
 /**
- * Class allowing to manage an environment of input streaming task
- *
- *
- * @author Kseniya Mikhaleva
- */
+  * Class allowing to manage an environment of input streaming task
+  *
+  * @author Kseniya Mikhaleva
+  */
 class InputTaskManager() extends TaskManager {
+
+  private val executorInstance =  executorClass.getConstructor(classOf[InputEnvironmentManager])
+    .newInstance(new InputEnvironmentManager(Map(), Array()))
+  val _type = executorInstance.getClass.getMethod("getType").invoke(executorInstance).asInstanceOf[_root_.scala.reflect.runtime.universe.Type]
 
   lazy val inputs = {
     logger.error(s"Instance of Input module hasn't got execution plan " +
@@ -22,7 +25,7 @@ class InputTaskManager() extends TaskManager {
 
   val inputInstance = instance.asInstanceOf[InputInstance]
   val entryPort = getEntryPort()
-  val outputProducers =  createOutputProducers()
+  val outputProducers = createOutputProducers()
 
   require(numberOfAgentsPorts >=
     (instance.outputs.length + 1),
@@ -34,13 +37,11 @@ class InputTaskManager() extends TaskManager {
     else inputInstance.tasks.get(taskName).port
   }
 
-  override def getExecutor(environmentManager: EnvironmentManager) = {
+  def getExecutor(environmentManager: EnvironmentManager) = {
     logger.debug(s"Task: $taskName. Start loading an executor class from module jar.")
-    val executor = moduleClassLoader
-      .loadClass(executorClassName)
-      .getConstructor(classOf[InputEnvironmentManager])
+    val executor = executorClass.getConstructor(classOf[InputEnvironmentManager])
       .newInstance(environmentManager)
-      .asInstanceOf[InputStreamingExecutor]
+      .asInstanceOf[InputStreamingExecutor[_type.type]]
     logger.debug(s"Task: $taskName. Load an executor class.")
 
     executor

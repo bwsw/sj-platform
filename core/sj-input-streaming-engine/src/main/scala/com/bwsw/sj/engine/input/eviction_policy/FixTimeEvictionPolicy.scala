@@ -15,11 +15,11 @@ class FixTimeEvictionPolicy(instance: InputInstance) extends InputInstanceEvicti
    * @param value In case there is a need to update duplicate key this value will be used
    * @return True if the key is not duplicate and false in other case
    */
-  def checkForDuplication(key: String, value: Array[Byte]): Boolean = {
+  def checkForDuplication[T](key: String, value: T): Boolean = {
     logger.debug(s"Check for duplicate a key: $key.")
     if (!uniqueEnvelopes.containsKey(key)) {
       logger.debug(s"The key: $key is not duplicate.")
-      uniqueEnvelopes.put(key, value)
+      uniqueEnvelopes.put(key, value.toString.getBytes)
       true
     }
     else {

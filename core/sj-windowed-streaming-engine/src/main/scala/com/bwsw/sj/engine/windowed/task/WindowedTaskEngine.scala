@@ -27,7 +27,7 @@ class WindowedTaskEngine(protected val manager: CommonTaskManager,
   private val instance = manager.instance.asInstanceOf[WindowedInstance]
   private val mainStream = SjStreamUtils.clearStreamFromMode(instance.mainStream)
   private val moduleService = createWindowedModuleService()
-  private val executor = moduleService.executor.asInstanceOf[WindowedStreamingExecutor]
+  private val executor = moduleService.executor.asInstanceOf[WindowedStreamingExecutor[manager._type.type]]
   private val moduleTimer = moduleService.moduleTimer
   private var counterOfBatches = 0
   private val windowPerStream = createStorageOfWindows()

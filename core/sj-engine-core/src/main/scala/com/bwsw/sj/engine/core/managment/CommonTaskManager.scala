@@ -17,7 +17,9 @@ import scala.collection.mutable
  * @author Kseniya Mikhaleva
  */
 class CommonTaskManager() extends TaskManager {
-
+  private val executorInstance = executorClass.getConstructor(classOf[ModuleEnvironmentManager])
+    .newInstance(new EnvironmentManager(Map(), Array()))
+  val _type = executorInstance.getClass.getMethod("getType").invoke(executorInstance).asInstanceOf[_root_.scala.reflect.runtime.universe.Type]
   val inputs: mutable.Map[SjStream, Array[Int]] = getInputs(getExecutionPlan)
   val outputProducers = createOutputProducers()
 
@@ -28,8 +30,7 @@ class CommonTaskManager() extends TaskManager {
 
   def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = {
     logger.debug(s"Task: $taskName. Start loading an executor class from module jar.")
-    val executor = moduleClassLoader
-      .loadClass(executorClassName)
+    val executor = executorClass
       .getConstructor(classOf[ModuleEnvironmentManager])
       .newInstance(environmentManager)
       .asInstanceOf[StreamingExecutor]
