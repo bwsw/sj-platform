@@ -65,7 +65,7 @@ export class StreamsComponent implements OnInit {
       .subscribe(
         response => {
           this.streamList = response.streams;
-          if (this.streamList.length > 0) {
+          if (this.streamList.length > 0 ) {
             this.currentStream = this.streamList[0];
           }
         },
@@ -101,8 +101,8 @@ export class StreamsComponent implements OnInit {
 
   public deleteStreamConfirm(modal: ModalDirective, stream: StreamModel) {
     this.currentStream = stream;
-    this.streamsService.getRelatedInstancesList(stream.name)
-      .subscribe(response => this.blockingInstances = response);
+    this.streamsService.getRelatedList(stream.name)
+      .subscribe(response => this.blockingInstances = Object.assign({},response)['instances']);
     modal.show();
   }
 

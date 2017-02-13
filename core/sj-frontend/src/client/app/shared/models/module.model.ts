@@ -1,6 +1,6 @@
 import { BaseModel } from "./base.model";
 
-export class ModuleModel extends BaseModel{
+export class ModuleModel extends BaseModel {
   moduleType: string;
   moduleName: string;
   moduleVersion: string;

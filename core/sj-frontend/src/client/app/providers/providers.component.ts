@@ -87,8 +87,8 @@ export class ProvidersComponent implements OnInit {
   public deleteProviderConfirm(modal: ModalDirective, provider: ProviderModel) {
     this.currentProvider = provider;
     this.blockingServices = [];
-    this.providersService.getRelatedServicesList(this.currentProvider.name)
-      .subscribe(response => this.blockingServices = response);
+    this.providersService.getRelatedList(this.currentProvider.name)
+      .subscribe(response => this.blockingServices = Object.assign({},response)['services']);
     modal.show();
   }
 

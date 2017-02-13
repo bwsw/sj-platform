@@ -13,23 +13,12 @@ import { BaseService, BService } from './base.service';
   entityModel: ModuleModel
 })
 export class ModulesService extends BaseService<ModuleModel> {
-  private dataUrl = '/v1/';
-
-  public getRelatedInstancesList(module: ModuleModel): Observable<string[]> {
-    return this.http.get(this.dataUrl + 'modules/' + module.moduleType + '/' + module.moduleName + '/' +
-      module.moduleVersion + '/related')
-      .map(response => {
-        const data = this.extractData(response);
-        return data.instances;
-      })
-      .catch(this.handleError);
-  }
 
   public getModuleSpecification(module: ModuleModel): Observable<ModuleModel> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this.dataUrl + 'modules/' + module.moduleType + '/' + module.moduleName + '/' +
+    return this.http.get(this.requestUrl + '/' + module.moduleType + '/' + module.moduleName + '/' +
       module.moduleVersion + '/specification', options)
       .map(response => {
         const data = this.extractData(response);
@@ -42,7 +31,7 @@ export class ModulesService extends BaseService<ModuleModel> {
     let headers = new Headers();
     let options = new RequestOptions({ headers: headers, responseType: ResponseContentType.Blob });
 
-    return this.http.get(this.dataUrl + 'modules/' + module.moduleType + '/' + module.moduleName + '/' +
+    return this.http.get(this.requestUrl + '/' + module.moduleType + '/' + module.moduleName + '/' +
       module.moduleVersion, options)
       .map((res: Response) => {
         let contDispos = res.headers.get('content-disposition');
@@ -66,7 +55,7 @@ export class ModulesService extends BaseService<ModuleModel> {
           }
         }
       };
-      xhr.open('POST', this.dataUrl + 'modules', true);
+      xhr.open('POST', this.requestUrl, true);
       let formData = new FormData();
       formData.append('jar', file, file.name);
       xhr.send(formData);
@@ -77,7 +66,7 @@ export class ModulesService extends BaseService<ModuleModel> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.delete(this.dataUrl + 'modules/' + module.moduleType + '/' + module.moduleName + '/' +
+    return this.http.delete(this.requestUrl + '/' + module.moduleType + '/' + module.moduleName + '/' +
       module.moduleVersion, options)
       .map(response => {
         const data = this.extractData(response);

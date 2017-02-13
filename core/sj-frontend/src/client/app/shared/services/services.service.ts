@@ -16,15 +16,4 @@ interface ISomeObject {
   requestPath: '',
   entityModel: ServiceModel
 })
-export class ServicesService extends BaseService<ServiceModel> {
-  private dataUrl = '/v1/';
-
-  public getRelatedStreamsList(serviceName: string): Observable<ISomeObject> {
-    return this.http.get(this.dataUrl + 'services/' + serviceName + '/related')
-      .map(response => {
-        const data = this.extractData(response);
-        return data;
-      })
-      .catch(this.handleError);
-  }
-}
+export class ServicesService extends BaseService<ServiceModel> { }

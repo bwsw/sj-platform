@@ -55,8 +55,8 @@ export class ModulesComponent implements OnInit {
   public deleteModuleConfirm(modal: ModalDirective, module: ModuleModel) {
     this.currentModule = module;
     this.blockingInstances = [];
-    this.modulesService.getRelatedInstancesList(module)
-      .subscribe(response => this.blockingInstances = response);
+    this.modulesService.getRelatedList(module.moduleName, module.moduleType, module.moduleVersion)
+      .subscribe(response => this.blockingInstances = Object.assign({},response)['streams']);
     modal.show();
   }
 

@@ -34,13 +34,17 @@ export class IResponse<M extends BaseModel> {
   }
 }
 
+interface IRelatedObject {
+  [key: string]: string[];
+}
+
 interface IBaseServiceSettings<T> {
   endpoint?: string;
   entity: string;
   requestPath?: string;
   entityModel: Type<T>;
 }
-const DEFAULT_API_ENDPOINT = '/v1/';
+const DEFAULT_API_ENDPOINT = '/v1';
 
 export function BService<T>(data: IBaseServiceSettings<T>): ClassDecorator {
   if (!data.endpoint) {
@@ -122,12 +126,32 @@ export abstract class BaseService<M extends BaseModel> {
       .catch(this.handleError);
   }
 
+  public getRelatedList(name?: string, type?: string, version?: string): Observable<IRelatedObject> {
+    return type && version ?
+      this.http
+        .get(`${this.requestUrl}/${type}/${name}/${version}` + '/related', this.getRequestOptions())
+        .map(response => {
+          const data = this.extractData(response);
+          return data;
+        })
+        .catch(this.handleError) :
+      this.http
+      .get(`${this.requestUrl}/${name}` + '/related', this.getRequestOptions())
+      .map(response => {
+        const data = this.extractData(response);
+        return data;
+      })
+      .catch(this.handleError);
+  }
+
+
   public getTypes(): Observable<IResponse<M>> {
     this.requestPath = this.entity + '/_types';
     return this.getList();
   }
 
   public save(model: M): Observable<IResponse<M>> {
+    this.requestPath = this.entity;
     return this.post(model);
   };
 
@@ -139,6 +163,7 @@ export abstract class BaseService<M extends BaseModel> {
   }
 
   public remove(name: string): Observable<void> {
+    this.requestPath = this.entity;
     return this.http
       .delete(`${this.requestUrl}/${name}`, this.getRequestOptions())
       .catch(this.handleError);

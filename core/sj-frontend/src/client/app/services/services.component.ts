@@ -76,7 +76,7 @@ export class ServicesComponent implements OnInit {
   public deleteServiceConfirm(modal: ModalDirective, service: ServiceModel) {
     this.currentService = service;
     this.blockingStreams = [];
-    this.servicesService.getRelatedStreamsList(service.name)
+    this.servicesService.getRelatedList(service.name)
       .subscribe(response => {
         this.blockingStreams = Object.assign({},response)['streams'];
         this.blockingInstances = Object.assign({},response)['instances'];
