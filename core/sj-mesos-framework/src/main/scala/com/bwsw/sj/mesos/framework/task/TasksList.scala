@@ -67,7 +67,7 @@ object TasksList {
   }
 
   def toJson: Map[String, Any] = {
-    Map("tasks" -> listTasks.values.map(_.toJson), "message" -> message)
+    Map("entity" -> Map("tasks" -> listTasks.values.map(_.toJson), "message" -> message))
   }
 
   def apply(taskId: String): Option[Task] = {
