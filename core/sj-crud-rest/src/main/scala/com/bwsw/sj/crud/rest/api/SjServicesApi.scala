@@ -57,7 +57,7 @@ trait SjServicesApi extends Directives with SjCrudValidator {
                 createMessage("rest.services.service.notfound", serviceName)))
               service match {
                 case Some(x) =>
-                  val entity = Map("services" -> x.asProtocolService())
+                  val entity = Map("service" -> x.asProtocolService())
                   response = OkRestResponse(entity)
                 case None =>
               }
