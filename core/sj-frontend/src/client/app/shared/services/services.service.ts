@@ -13,7 +13,6 @@ interface ISomeObject {
 @Injectable()
 @BService({
   entity: 'services',
-  requestPath: '',
   entityModel: ServiceModel
 })
 export class ServicesService extends BaseService<ServiceModel> { }

@@ -21,7 +21,6 @@ interface ITasksObject {
 @Injectable()
 @BService({
   entity: 'modules',
-  requestPath: '',
   entityModel: InstanceModel
 })
 export class InstancesService extends BaseService<InstanceModel> {
@@ -43,11 +42,6 @@ export class InstancesService extends BaseService<InstanceModel> {
     instance.performanceReportingInterval = orig.performanceReportingInterval;
 
     return instance;
-  }
-
-  public getInstanceList(): Observable<IResponse<InstanceModel>> {
-    this.requestPath = this.entity + '/instances';
-    return this.getList();
   }
 
   public getInstanceInfo(instance: InstanceModel): Observable<InstanceModel> {

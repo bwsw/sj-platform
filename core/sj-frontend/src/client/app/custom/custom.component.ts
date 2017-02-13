@@ -35,7 +35,7 @@ export class CustomComponent implements OnInit {
   }
 
   public getCustomList() {
-    this.customService.getCustomList(this.path)
+    this.customService.getList(this.path)
       .subscribe(
         response => this.fileList = this.path === 'files' ? response.customFiles: response.customJars
       );

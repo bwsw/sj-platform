@@ -41,7 +41,6 @@ interface IRelatedObject {
 interface IBaseServiceSettings<T> {
   endpoint?: string;
   entity: string;
-  requestPath?: string;
   entityModel: Type<T>;
 }
 const DEFAULT_API_ENDPOINT = '/v1';
@@ -53,7 +52,6 @@ export function BService<T>(data: IBaseServiceSettings<T>): ClassDecorator {
   return (target: Function) => {
     target.prototype.endpoint = data.endpoint;
     target.prototype.entity = data.entity;
-    target.prototype.requestPath = data.requestPath;
     target.prototype.entityModel = data.entityModel;
     return target;
   };
@@ -66,12 +64,11 @@ export interface IRequestParams {
 export abstract class BaseService<M extends BaseModel> {
   protected endpoint: string;
   protected entity: string;
-  protected requestPath: string = this.entity;
   protected entityModel: Type<M>;
   protected http: Http;
 
   protected get requestUrl(): string {
-    return `${this.endpoint}/${this.requestPath}`;
+    return `${this.endpoint}/${this.entity}`;
   }
 
   protected get requestHeaders(): Headers {
@@ -106,23 +103,16 @@ export abstract class BaseService<M extends BaseModel> {
   }
 
   public get(name?: string): Observable<IResponse<M>> {
-  this.requestPath = this.entity;
   return this.http
     .get(name ? `${this.requestUrl}/${name}` : this.requestUrl, this.getRequestOptions())
-    .map(response => {
-      const data = this.extractData(response);
-      return data;
-    })
+    .map(this.extractData)
     .catch(this.handleError);
 }
 
-  public getList(): Observable<IResponse<M>> {
+  public getList(path?: string): Observable<IResponse<M>> {
     return this.http
-      .get(this.requestUrl, this.getRequestOptions())
-      .map(response => {
-        const data = this.extractData(response);
-        return data;
-      })
+      .get( path? `${this.requestUrl}/${path}`:this.requestUrl, this.getRequestOptions())
+      .map(this.extractData)
       .catch(this.handleError);
   }
 
@@ -130,42 +120,34 @@ export abstract class BaseService<M extends BaseModel> {
     return type && version ?
       this.http
         .get(`${this.requestUrl}/${type}/${name}/${version}` + '/related', this.getRequestOptions())
-        .map(response => {
-          const data = this.extractData(response);
-          return data;
-        })
+        .map(this.extractData)
         .catch(this.handleError) :
       this.http
       .get(`${this.requestUrl}/${name}` + '/related', this.getRequestOptions())
-      .map(response => {
-        const data = this.extractData(response);
-        return data;
-      })
+      .map(this.extractData)
       .catch(this.handleError);
   }
 
 
   public getTypes(): Observable<IResponse<M>> {
-    this.requestPath = this.entity + '/_types';
-    return this.getList();
+    return this.getList('_types');
   }
 
   public save(model: M): Observable<IResponse<M>> {
-    this.requestPath = this.entity;
     return this.post(model);
   };
 
   protected post(model: M): Observable<IResponse<M>> {
     return this.http
       .post(this.requestUrl, model, this.getRequestOptions())
-      .map(response => this.extractData(response))
+      .map(this.extractData)
       .catch(this.handleError);
   }
 
-  public remove(name: string): Observable<void> {
-    this.requestPath = this.entity;
+  public remove(name: string): Observable<IResponse<M>> {
     return this.http
       .delete(`${this.requestUrl}/${name}`, this.getRequestOptions())
+      .map(this.extractData)
       .catch(this.handleError);
   }
 

@@ -80,7 +80,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   }
 
   public getInstancesList() {
-    this.instancesService.getInstanceList()
+    this.instancesService.getList('instances')
       .subscribe(
         response => {
           this.instancesList = response.instances;

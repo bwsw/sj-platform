@@ -8,7 +8,6 @@ import { BaseService, BService } from './base.service';
 @Injectable()
 @BService({
   entity: 'providers',
-  requestPath: '',
   entityModel: ProviderModel
 })
 export class ProvidersService extends BaseService<ProviderModel> {

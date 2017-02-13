@@ -8,15 +8,9 @@ import { BaseService, BService, IResponse } from './base.service';
 @Injectable()
 @BService({
   entity: 'custom',
-  requestPath: '',
   entityModel: FileModel
 })
 export class CustomService extends BaseService<FileModel> {
-
-  public getCustomList(path: string): Observable<IResponse<FileModel>> {
-    this.requestPath = this.entity + '/' + path;
-    return this.getList();
-  }
 
   public downloadFile(path: string, file: FileModel): Observable<any> {
     let headers = new Headers();

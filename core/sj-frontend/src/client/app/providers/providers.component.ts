@@ -95,8 +95,8 @@ export class ProvidersComponent implements OnInit {
   public deleteProvider(modal: ModalDirective) {
     this.providersService.remove(this.currentProvider.name)
       .subscribe(
-        status => {
-          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
+        response => {
+          this.showAlert({ msg: response.message, type: 'success', closable: true, timeout: 3000 });
           this.getProviderList();
         },
         error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
@@ -107,10 +107,10 @@ export class ProvidersComponent implements OnInit {
     this.showSpinner = true;
     this.providersService.save(this.newProvider)
       .subscribe(
-        message => {
+        response => {
           modal.hide();
           this.showSpinner = false;
-          this.showAlert({ msg: message, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ msg: response.message, type: 'success', closable: true, timeout: 3000 });
           this.getProviderList();
           this.newProvider = new ProviderModel;
 

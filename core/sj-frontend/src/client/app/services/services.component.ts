@@ -96,8 +96,8 @@ export class ServicesComponent implements OnInit {
   public deleteService(modal: ModalDirective) {
     this.servicesService.remove(this.currentService.name)
       .subscribe(
-        status => {
-          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
+        response => {
+          this.showAlert({ msg: response.message, type: 'success', closable: true, timeout: 3000 });
           this.getServiceList();
         },
         error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
@@ -110,11 +110,10 @@ export class ServicesComponent implements OnInit {
       .subscribe(
         response => {
           modal.hide();
-          this.showAlert({ msg: response.service, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ msg: response.message, type: 'success', closable: true, timeout: 3000 });
           this.newService = new ServiceModel();
           this.showSpinner = false;
           this.getServiceList();
-          this.currentService = response.service;
         },
         error => {
           this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });

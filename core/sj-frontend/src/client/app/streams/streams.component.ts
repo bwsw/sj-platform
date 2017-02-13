@@ -109,8 +109,8 @@ export class StreamsComponent implements OnInit {
   public deleteStream(modal: ModalDirective) {
     this.streamsService.remove(this.currentStream.name)
       .subscribe(
-        status => {
-          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
+        response => {
+          this.showAlert({ msg: response.message, type: 'success', closable: true, timeout: 3000 });
           this.getStreamList();
         },
         error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
@@ -124,10 +124,10 @@ export class StreamsComponent implements OnInit {
     }
     this.streamsService.save(this.newStream)
       .subscribe(
-        status => {
+        response => {
           modal.hide();
           this.showSpinner = false;
-          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ msg: response.message, type: 'success', closable: true, timeout: 3000 });
           this.getStreamList();
           this.newStream = new StreamModel();
           this.newStream.tags = [];
