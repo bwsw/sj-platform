@@ -300,7 +300,7 @@ object DataFactory {
                      slidingInterval: Int,
                      stateManagement: String = EngineLiterals.noneStateMode,
                      stateFullCheckpoint: Int = 0
-                      ) = {
+                    ) = {
     import scala.collection.JavaConverters._
 
     val instance = new WindowedInstance()
@@ -385,10 +385,10 @@ object DataFactory {
       case "tstream" =>
         (1 to count).foreach(x => createTstreamData(countTxns, countElements, streamService, x.toString))
       case "kafka" =>
-      //createKafkaData(countTxns, countElements) //needed only once because of kafka doesn't allow delete topics
+        createKafkaData(countTxns, countElements) //needed only once because of kafka doesn't allow delete topics
       case "both" =>
         (1 to count).foreach(x => createTstreamData(countTxns, countElements, streamService, x.toString))
-      //createKafkaData(countTxns, countElements) //needed only one because of kafka doesn't allow delete topics
+        createKafkaData(countTxns, countElements) //needed only one because of kafka doesn't allow delete topics
       case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: 'tstream', 'kafka', 'both'")
     }
   }
