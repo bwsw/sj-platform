@@ -14,18 +14,17 @@ object Dependencies {
       .exclude("log4j", "log4j")
       .exclude("io.netty", "netty")
       .exclude("io.netty", "netty-all")
-      .exclude("org.scala-lang.modules", "scala-parser-combinators_2.11"),
+      .exclude("org.scalatest", "scalatest_2.12"),
     ("org.mongodb" %% "casbah" % "3.1.1")
       .exclude("org.slf4j", "slf4j-api"),
     "org.mongodb.morphia" % "morphia" % "1.3.0",
     "org.apache.commons" % "commons-io" % "1.3.2",
     "com.typesafe" % "config" % "1.3.0",
-    ("org.apache.kafka" % "kafka_2.11" % "0.10.1.1")
+    ("org.apache.kafka" % "kafka_2.12" % "0.10.1.1")
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty")
-      .exclude("org.scala-lang.modules", "scala-parser-combinators_2.11"),
+      .exclude("io.netty", "netty"),
     ("org.apache.curator" % "curator-recipes" % "2.11.1")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
@@ -44,12 +43,11 @@ object Dependencies {
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(
     "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
-    ("org.apache.kafka" % "kafka_2.11" % "0.10.1.1" % "provided")
+    ("org.apache.kafka" % "kafka_2.12" % "0.10.1.1" % "provided")
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty")
-      .exclude("org.scala-lang.modules", "scala-parser-combinators_2.11"),
+      .exclude("io.netty", "netty"),
     ("net.openhft" % "chronicle-queue" % "4.5.19")
       .exclude("org.slf4j", "slf4j-api")
   ))
@@ -71,23 +69,21 @@ object Dependencies {
 
   lazy val sjRegularEngineDependencies = Def.setting(Seq(
     "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
-    ("org.apache.kafka" % "kafka_2.11" % "0.10.1.1" % "provided")
+    ("org.apache.kafka" % "kafka_2.12" % "0.10.1.1" % "provided")
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty")
-      .exclude("org.scala-lang.modules", "scala-parser-combinators_2.11"),
+      .exclude("io.netty", "netty"),
     "net.openhft" % "chronicle-queue" % "4.5.19" % "provided"
   ))
 
   lazy val sjWindowedEngineDependencies = Def.setting(Seq(
     "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
-    ("org.apache.kafka" % "kafka_2.11" % "0.10.1.1" % "provided")
+    ("org.apache.kafka" % "kafka_2.12" % "0.10.1.1" % "provided")
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty")
-      .exclude("org.scala-lang.modules", "scala-parser-combinators_2.11"),
+      .exclude("io.netty", "netty"),
     ("org.apache.curator" % "curator-recipes" % "2.11.1" % "provided")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
