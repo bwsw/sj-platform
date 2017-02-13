@@ -3,7 +3,7 @@ import { Response, Headers, RequestOptions, ResponseContentType } from '@angular
 import { Observable } from 'rxjs/Rx';
 
 import { FileModel } from '../models/custom.model';
-import { BaseService, BService, IResponse } from './base.service';
+import { BaseService, BService } from './base.service';
 
 @Injectable()
 @BService({

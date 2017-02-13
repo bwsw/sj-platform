@@ -11,7 +11,7 @@ import {
   WindowedStreamingInstance
 } from '../models/instance.model';
 import { TaskModel } from '../models/task.model';
-import { BaseService, BService, IResponse } from './base.service';
+import { BaseService, BService } from './base.service';
 
 interface ITasksObject {
   tasks: TaskModel[];

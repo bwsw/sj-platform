@@ -1,5 +1,5 @@
 import { ModuleModel } from './module.model';
-import { BaseModel } from "./base.model";
+import { BaseModel } from './base.model';
 
 export class InstanceModel extends BaseModel {
   inputsTypes: string[] = [''];

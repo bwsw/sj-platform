@@ -3,8 +3,6 @@ import { Response, Headers, RequestOptions, ResponseContentType } from '@angular
 import { Observable } from 'rxjs/Rx';
 
 import { ModuleModel } from '../models/module.model';
-import { BaseModel } from '../models/base.model';
-
 import { BaseService, BService } from './base.service';
 
 @Injectable()
