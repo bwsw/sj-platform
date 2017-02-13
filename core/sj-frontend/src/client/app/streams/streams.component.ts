@@ -61,36 +61,36 @@ export class StreamsComponent implements OnInit {
   }
 
   public getStreamList() {
-    this.streamsService.getStreamList()
+    this.streamsService.getList()
       .subscribe(
-        streamList => {
-          this.streamList = streamList;
-          if (streamList.length > 0) {
-            this.currentStream = streamList[0];
+        response => {
+          this.streamList = response.streams;
+          if (this.streamList.length > 0) {
+            this.currentStream = this.streamList[0];
           }
         },
         error => this.errorMessage = <any>error);
   }
 
   public getStreamTypes() {
-    this.streamsService.getStreamTypes()
+    this.streamsService.getTypes()
       .subscribe(
-        types => this.streamTypes = types,
+        response => this.streamTypes = response.types,
         error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 })
       );
   }
 
   public getServiceList() {
-    this.servicesService.getServiceList()
+    this.servicesService.getList()
       .subscribe(
-        serviceList => this.serviceList = serviceList,
+        response => this.serviceList = response.services,
         error => this.errorMessage = <any>error);
   }
 
   public getService(serviceName: string) {
-    this.servicesService.getService(serviceName)
+    this.servicesService.get(serviceName)
       .subscribe(
-        service => this.currentStreamService = service,
+        response => this.currentStreamService = response.service,
         error => this.errorMessage = <any>error);
   }
 
@@ -107,7 +107,7 @@ export class StreamsComponent implements OnInit {
   }
 
   public deleteStream(modal: ModalDirective) {
-    this.streamsService.deleteStream(this.currentStream)
+    this.streamsService.remove(this.currentStream.name)
       .subscribe(
         status => {
           this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
@@ -122,7 +122,7 @@ export class StreamsComponent implements OnInit {
     if (this.newStream.type !== 'stream.t-stream') {
       delete this.newStream.generator;
     }
-    this.streamsService.saveStream(this.newStream)
+    this.streamsService.save(this.newStream)
       .subscribe(
         status => {
           modal.hide();

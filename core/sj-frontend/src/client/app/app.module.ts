@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, Injector } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { APP_BASE_HREF } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -15,6 +15,7 @@ import { ServicesModule } from './services/services.module';
 import { StreamsModule } from './streams/streams.module';
 import { ConfigSettingsModule } from './config-settings/config-settings.module';
 import { CustomModule } from './custom/custom.module';
+import { Locator } from './shared/services/locator.service';
 
 
 @NgModule({
@@ -44,4 +45,10 @@ import { CustomModule } from './custom/custom.module';
   ]
 })
 export class AppModule {
+
+  constructor(
+    private injector: Injector
+  ) {
+    Locator.injector = this.injector;
+  }
 }

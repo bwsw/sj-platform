@@ -1,4 +1,6 @@
-export class ServiceModel {
+import { BaseModel } from "./base.model";
+
+export class ServiceModel extends BaseModel {
   type: string;
   name: string;
   description: string;

@@ -1,4 +1,6 @@
-export class StreamModel {
+import { BaseModel } from "./base.model";
+
+export class StreamModel extends BaseModel {
   name: string;
   description: string;
   service: string;

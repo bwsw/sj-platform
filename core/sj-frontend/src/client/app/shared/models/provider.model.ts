@@ -1,4 +1,6 @@
-export class ProviderModel {
+import { BaseModel } from "./base.model";
+
+export class ProviderModel extends BaseModel {
   name: string;
   description: string;
   login: string;

@@ -1,4 +1,6 @@
-export class FileModel {
+import { BaseModel } from "./base.model";
+
+export class FileModel extends BaseModel{
   name: string;
   description: string;
   'upload-date': string;

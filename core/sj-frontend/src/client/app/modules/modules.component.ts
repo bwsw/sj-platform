@@ -28,17 +28,17 @@ export class ModulesComponent implements OnInit {
   }
 
   public getModuleTypes() {
-    this.modulesService.getModuileTypes()
-      .subscribe(types => this.moduleTypes = types);
+    this.modulesService.getTypes()
+      .subscribe(response => this.moduleTypes = response.types);
   }
 
   public getModuleList() {
-    this.modulesService.getModuleList()
+    this.modulesService.getList()
       .subscribe(
-        moduleList => {
-          this.moduleList = moduleList;
-          if (moduleList.length > 0) {
-            this.currentModule = moduleList[0];
+        response => {
+          this.moduleList = response.modules;
+          if (this.moduleList.length > 0) {
+            this.currentModule = this.moduleList[0];
             this.getModuleSpecification(this.currentModule);
           }
         },

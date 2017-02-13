@@ -33,21 +33,21 @@ export class ProvidersComponent implements OnInit {
   }
 
   public getProviderList() {
-    this.providersService.getProviderList()
+    this.providersService.getList()
       .subscribe(
-        providerList => {
-          this.providerList = providerList;
-          if (providerList.length > 0) {
-            this.currentProvider = providerList[0];
+        response => {
+          this.providerList = response.providers;
+          if (this.providerList.length > 0) {
+            this.currentProvider = this.providerList[0];
           }
         },
         error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
   }
 
   public getProviderTypes() {
-    this.providersService.getProviderTypes()
+    this.providersService.getTypes()
       .subscribe(
-        types => this.providerTypes = types,
+        response => this.providerTypes = response.types,
         error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 })
       );
   }
@@ -93,7 +93,7 @@ export class ProvidersComponent implements OnInit {
   }
 
   public deleteProvider(modal: ModalDirective) {
-    this.providersService.deleteProvider(this.currentProvider)
+    this.providersService.remove(this.currentProvider.name)
       .subscribe(
         status => {
           this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
@@ -105,7 +105,7 @@ export class ProvidersComponent implements OnInit {
 
   public createProvider(modal: ModalDirective) {
     this.showSpinner = true;
-    this.providersService.saveProvider(this.newProvider)
+    this.providersService.save(this.newProvider)
       .subscribe(
         message => {
           modal.hide();

@@ -26,12 +26,12 @@ export class ConfigSettingsComponent implements OnInit {
   }
 
   public getSettingsList() {
-    this.configSettingsService.getConfigSettingsList()
+    this.configSettingsService.getList()
       .subscribe(
-        settingsList => {
-          this.settingsList = settingsList;
-          if (settingsList.length > 0) {
-            this.currentSetting = settingsList[0];
+        response => {
+          this.settingsList = response.configSettings;
+          if (this.settingsList.length > 0) {
+            this.currentSetting = this.settingsList[0];
           }
         },
         error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
@@ -44,7 +44,7 @@ export class ConfigSettingsComponent implements OnInit {
 
   public createSetting(modal: ModalDirective) {
     this.showSpinner = true;
-    this.configSettingsService.saveSetting(this.newSetting)
+    this.configSettingsService.save(this.newSetting)
       .subscribe(
         setting => {
           modal.hide();

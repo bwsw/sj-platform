@@ -35,36 +35,36 @@ export class ServicesComponent implements OnInit {
   }
 
   public getServiceList() {
-    this.servicesService.getServiceList()
+    this.servicesService.getList()
       .subscribe(
-        serviceList => {
-          this.serviceList = serviceList;
-          if (serviceList.length > 0) {
-            this.currentService = serviceList[0];
+        response => {
+          this.serviceList = response.services;
+          if (this.serviceList.length > 0) {
+            this.currentService = this.serviceList[0];
           }
         },
         error => this.errorMessage = <any>error);
   }
 
   public getServiceTypes() {
-    this.servicesService.getServiceTypes()
+    this.servicesService.getTypes()
       .subscribe(
-        types => this.serviceTypes = types,
+        response => this.serviceTypes = response.types,
         error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 })
       );
   }
 
   public getProviderList() {
-    this.providersService.getProviderList()
+    this.providersService.getList()
       .subscribe(
-        providerList => this.providerList = providerList,
+        response => this.providerList = response.providers,
         error => this.errorMessage = <any>error);
   }
 
   public getProvider(providerName: string) {
-    this.providersService.getProvider(providerName)
+    this.providersService.get(providerName)
       .subscribe(
-        provider => this.currentServiceProvider = provider,
+        response => this.currentServiceProvider = response.provider,
         error => this.errorMessage = <any>error);
   }
 
@@ -94,7 +94,7 @@ export class ServicesComponent implements OnInit {
   }
 
   public deleteService(modal: ModalDirective) {
-    this.servicesService.deleteService(this.currentService)
+    this.servicesService.remove(this.currentService.name)
       .subscribe(
         status => {
           this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
@@ -106,15 +106,15 @@ export class ServicesComponent implements OnInit {
 
   public createService(modal: ModalDirective) {
     this.showSpinner = true;
-    this.servicesService.saveService(this.newService)
+    this.servicesService.save(this.newService)
       .subscribe(
-        service => {
+        response => {
           modal.hide();
-          this.showAlert({ msg: service, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ msg: response.service, type: 'success', closable: true, timeout: 3000 });
           this.newService = new ServiceModel();
           this.showSpinner = false;
           this.getServiceList();
-          this.currentService = service;
+          this.currentService = response.service;
         },
         error => {
           this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });

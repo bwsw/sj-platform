@@ -1,30 +1,21 @@
 import { Injectable } from '@angular/core';
-import { Http, Response, Headers, RequestOptions, ResponseContentType } from '@angular/http';
+import { Response, Headers, RequestOptions, ResponseContentType } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 
 import { FileModel } from '../models/custom.model';
-import { BaseResponse } from '../models/base-response.model';
+import { BaseService, BService, IResponse } from './base.service';
 
 @Injectable()
-export class CustomService {
-  private dataUrl = '/v1/';
+@BService({
+  entity: 'custom',
+  requestPath: '',
+  entityModel: FileModel
+})
+export class CustomService extends BaseService<FileModel> {
 
-  constructor(private http: Http) { }
-
-  public getCustomList(path: string): Observable<FileModel[]> {
-    let headers = new Headers();
-    headers.append('Content-Type', 'application/json');
-    let options = new RequestOptions({ headers: headers });
-    return this.http.get(this.dataUrl + 'custom/' + path, options)
-      .map(response => {
-        const data = this.extractData(response);
-        if (path === 'files') {
-          return data.customFiles;
-        } else {
-          return data.customJars;
-        }
-      })
-      .catch(this.handleError);
+  public getCustomList(path: string): Observable<IResponse<FileModel>> {
+    this.requestPath = this.entity + '/' + path;
+    return this.getList();
   }
 
   public downloadFile(path: string, file: FileModel): Observable<any> {
@@ -36,7 +27,7 @@ export class CustomService {
     } else {
       downloadLink = path + '/' + file.name + '/' + file.version;
     }
-    return this.http.get(this.dataUrl + 'custom/' + downloadLink, options)
+    return this.http.get(this.requestUrl + '/' + downloadLink, options)
       .map((res: Response) => {
         let contDispos = res.headers.get('content-disposition');
         return {
@@ -59,7 +50,7 @@ export class CustomService {
           }
         }
       };
-      xhr.open('POST', this.dataUrl + 'custom/' + path, true);
+      xhr.open('POST', this.requestUrl + '/' + path, true);
       xhr.setRequestHeader('enctype', 'multipart/form-data');
       let formData = new FormData();
       if (path === 'jars') {
@@ -84,25 +75,11 @@ export class CustomService {
     } else {
       deleteLink = path + '/' + file.name + '/' + file.version;
     }
-    return this.http.delete(this.dataUrl + 'custom/' + deleteLink, options)
+    return this.http.delete(this.requestUrl + '/' + deleteLink, options)
       .map(response => {
         const data = this.extractData(response);
         return data.message;
       })
       .catch(this.handleError);
-  }
-
-  private extractData(res: Response) {
-    let body = new BaseResponse();
-    body.fillFromJSON(res.json()['entity']);
-    return body;
-  }
-
-  private handleError(error: any) {
-    let errMsg = (error._body) ? error._body :
-      error.status ? `${error.status} - ${error.statusText}` : 'Server error';
-    errMsg = JSON.parse(errMsg);
-    let errMsgYo = errMsg.entity.message;
-    return Observable.throw(errMsgYo);
   }
 }

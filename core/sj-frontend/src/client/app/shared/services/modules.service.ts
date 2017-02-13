@@ -1,36 +1,19 @@
 import { Injectable } from '@angular/core';
-import { Http, Response, Headers, RequestOptions, ResponseContentType } from '@angular/http';
+import { Response, Headers, RequestOptions, ResponseContentType } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 
 import { ModuleModel } from '../models/module.model';
-import { BaseResponse } from '../models/base-response.model';
+import { BaseModel } from '../models/base.model';
+
+import { BaseService, BService } from './base.service';
 
 @Injectable()
-export class ModulesService {
+@BService({
+  entity: 'modules',
+  entityModel: ModuleModel
+})
+export class ModulesService extends BaseService<ModuleModel> {
   private dataUrl = '/v1/';
-
-  constructor(private http: Http) { }
-
-  public getModuleList(): Observable<ModuleModel[]> {
-    let headers = new Headers();
-    headers.append('Content-Type', 'application/json');
-    let options = new RequestOptions({ headers: headers });
-    return this.http.get(this.dataUrl + 'modules', options)
-      .map(response => {
-        const data = this.extractData(response);
-        return data.modules;
-      })
-      .catch(this.handleError);
-  }
-
-  public getModuileTypes(): Observable<string[]> {
-    return this.http.get(this.dataUrl + 'modules/_types')
-      .map(response => {
-        const data = this.extractData(response);
-        return data.types;
-      })
-      .catch(this.handleError);
-  }
 
   public getRelatedInstancesList(module: ModuleModel): Observable<string[]> {
     return this.http.get(this.dataUrl + 'modules/' + module.moduleType + '/' + module.moduleName + '/' +
@@ -101,19 +84,5 @@ export class ModulesService {
         return data.message;
       })
       .catch(this.handleError);
-  }
-
-  private extractData(res: Response) {
-    let body = new BaseResponse();
-    body.fillFromJSON(res.json()['entity']);
-    return body;
-  }
-
-  private handleError(error: any) {
-    let errMsg = (error._body) ? error._body :
-      error.status ? `${error.status} - ${error.statusText}` : 'Server error';
-    errMsg = JSON.parse(errMsg);
-    let errMsgYo = errMsg.entity.message;
-    return Observable.throw(errMsgYo);
   }
 }
