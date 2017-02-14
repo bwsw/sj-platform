@@ -96,7 +96,6 @@ abstract class TaskManager() {
     setCoordinationOptions(auxiliaryTStreamService)
     setBindHostForAgents()
     setPersistentQueuePath()
-    setProducerMasterBootstrapMode()
     applyConfigurationSettings()
   }
 
@@ -138,10 +137,6 @@ abstract class TaskManager() {
 
   private def setPersistentQueuePath() = {
     tstreamFactory.setProperty(TSF_Dictionary.Consumer.Subscriber.PERSISTENT_QUEUE_PATH, "/tmp/" + persistentQueuePath)
-  }
-
-  private def setProducerMasterBootstrapMode() = {
-    //tstreamFactory.setProperty(TSF_Dictionary.Producer.MASTER_BOOTSTRAP_MODE, TSF_Dictionary.Producer.Consts.MASTER_BOOTSTRAP_MODE_LAZY_VOTE) //todo ask Ivan
   }
 
   private def applyConfigurationSettings() = {
