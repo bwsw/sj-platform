@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
-import { StreamModel } from '../models';
-import { BaseService, BService } from './';
+import { StreamModel } from '../models/index';
+import { BaseService, BService } from './index';
 
 @Injectable()
 @BService({

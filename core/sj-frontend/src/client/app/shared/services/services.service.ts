@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { ServiceModel } from '../models';
-import { BaseService, BService } from './';
+import { ServiceModel } from '../models/index';
+import { BaseService, BService } from './index';
 
 @Injectable()
 @BService({

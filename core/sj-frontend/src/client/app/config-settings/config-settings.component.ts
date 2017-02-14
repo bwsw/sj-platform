@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ModalDirective } from 'ng2-bootstrap';
 
-import { SettingModel } from '../shared/models/setting.model';
-import { ConfigSettingsService } from '../shared/services/config-settings.service';
+import { SettingModel } from '../shared/models/index';
+import { ConfigSettingsService } from '../shared/services/index';
 
 @Component({
   moduleId: module.id,

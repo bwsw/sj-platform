@@ -2,8 +2,8 @@ import { Component, OnInit, ViewChild, AfterViewChecked } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ModalDirective } from 'ng2-bootstrap';
 
-import { InstanceModel, TaskModel, ModuleModel, ServiceModel, StreamModel } from '../shared/models';
-import { InstancesService, ModulesService, StreamsService, ServicesService } from '../shared/services';
+import { InstanceModel, TaskModel, ModuleModel, ServiceModel, StreamModel } from '../shared/models/index';
+import { InstancesService, ModulesService, StreamsService, ServicesService } from '../shared/services/index';
 
 @Component({
   moduleId: module.id,

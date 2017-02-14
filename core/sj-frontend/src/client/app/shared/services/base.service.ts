@@ -1,5 +1,5 @@
-import { Locator } from './';
-import { BaseModel } from '../models';
+import { Locator } from './index';
+import { BaseModel } from '../models/index';
 import { Http, Response, Headers, RequestOptions, ResponseContentType } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 

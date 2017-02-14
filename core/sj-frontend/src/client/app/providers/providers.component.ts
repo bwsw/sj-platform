@@ -2,8 +2,8 @@ import { Component, OnInit, Input, Output, EventEmitter, ViewChild } from '@angu
 import { NgForm } from '@angular/forms';
 import { ModalDirective } from 'ng2-bootstrap';
 
-import { ProviderModel } from '../shared/models';
-import { ProvidersService } from '../shared/services';
+import { ProviderModel } from '../shared/models/index';
+import { ProvidersService } from '../shared/services/index';
 
 @Component({
   moduleId: module.id,
