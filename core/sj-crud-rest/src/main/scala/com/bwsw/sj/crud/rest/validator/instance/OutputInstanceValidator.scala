@@ -39,23 +39,23 @@ class OutputInstanceValidator extends InstanceValidator {
 
     Option(outputInstanceMetadata.checkpointMode) match {
       case None =>
-        errors += createMessage("rest.validator.attribute.required", "Checkpoint-mode")
+        errors += createMessage("rest.validator.attribute.required", "checkpointMode")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("rest.validator.attribute.required", "Checkpoint-mode")
+          errors += createMessage("rest.validator.attribute.required", "checkpointMode")
         }
         else {
           if (!x.equals(EngineLiterals.everyNthMode)) {
-            errors += createMessage("rest.validator.attribute.unknown.value", "checkpoint-mode", s"$x") + ". " +
-              createMessage("rest.validator.attribute.not", "Checkpoint-mode", EngineLiterals.everyNthMode)
+            errors += createMessage("rest.validator.attribute.unknown.value", "checkpointMode", s"$x") + ". " +
+              createMessage("rest.validator.attribute.not", "checkpointMode", EngineLiterals.everyNthMode)
           }
         }
     }
 
     // 'checkpoint-interval' field
     if (outputInstanceMetadata.checkpointInterval <= 0) {
-      errors += createMessage("rest.validator.attribute.required", "Checkpoint-interval") + ". " +
-        createMessage("rest.validator.attribute.must.greater.than.zero", "Checkpoint-interval")
+      errors += createMessage("rest.validator.attribute.required", "checkpointInterval") + ". " +
+        createMessage("rest.validator.attribute.must.greater.than.zero", "checkpointInterval")
     }
 
     errors ++= validateStreamOptions(outputInstanceMetadata, specification)
@@ -132,7 +132,7 @@ class OutputInstanceValidator extends InstanceValidator {
         startFrom.toLong
       } catch {
         case ex: NumberFormatException =>
-          errors += createMessage("rest.validator.attribute.must.one_of", "Start-from", s"${startFromModes.mkString("[", ", ", "]")} or timestamp")
+          errors += createMessage("rest.validator.attribute.must.one_of", "startFrom", s"${startFromModes.mkString("[", ", ", "]")} or timestamp")
       }
     }
 

@@ -27,13 +27,13 @@ class WindowedInstanceValidator extends InstanceValidator {
 
     // 'state-management' field
     if (!stateManagementModes.contains(windowedInstanceMetadata.stateManagement)) {
-      errors += createMessage("rest.validator.attribute.unknown.value", "state-management", windowedInstanceMetadata.stateManagement) + ". " +
-        createMessage("rest.validator.attribute.must.one_of", "State-management", stateManagementModes.mkString("[", ", ", "]"))
+      errors += createMessage("rest.validator.attribute.unknown.value", "stateManagement", windowedInstanceMetadata.stateManagement) + ". " +
+        createMessage("rest.validator.attribute.must.one_of", "stateManagement", stateManagementModes.mkString("[", ", ", "]"))
     } else {
       if (windowedInstanceMetadata.stateManagement != EngineLiterals.noneStateMode) {
         // 'state-full-checkpoint' field
         if (windowedInstanceMetadata.stateFullCheckpoint <= 0) {
-          errors += createMessage("rest.validator.attribute.must.greater.than.zero", "State-full-checkpoint")
+          errors += createMessage("rest.validator.attribute.must.greater.than.zero", "stateFullCheckpoint")
         }
       }
     }
@@ -45,18 +45,18 @@ class WindowedInstanceValidator extends InstanceValidator {
 
     // 'sliding-interval' field
     if (windowedInstanceMetadata.slidingInterval <= 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Sliding-interval")
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "slidingInterval")
     }
 
     if (windowedInstanceMetadata.slidingInterval > windowedInstanceMetadata.window) {
-      errors += createMessage("rest.validator.attribute.must.greater.or.equal", "Window", "sliding-interval")
+      errors += createMessage("rest.validator.attribute.must.greater.or.equal", "Window", "slidingInterval")
     }
 
     Option(windowedInstanceMetadata.mainStream) match {
       case Some(x) =>
         errors ++= validateStreamOptions(windowedInstanceMetadata, specification)
       case None =>
-        errors += createMessage("rest.validator.attribute.required", "Main-stream")
+        errors += createMessage("rest.validator.attribute.required", "mainStream")
     }
 
     errors
@@ -107,32 +107,32 @@ class WindowedInstanceValidator extends InstanceValidator {
     //'batch-fill-type' field
     Option(instance.batchFillType) match {
       case None =>
-        errors += createMessage("rest.validator.attribute.required", "Batch-fill-type")
+        errors += createMessage("rest.validator.attribute.required", "batchFillType")
       case Some(batchFillType) =>
         //'type-name' field
         Option(batchFillType.typeName) match {
           case Some(x) =>
             if (!batchFillTypes.contains(x)) {
-              errors += createMessage("rest.validator.attribute.unknown.value", "type-name' of 'batch-fill-type", x) + ". " +
-                createMessage("rest.validator.attribute.must.one_of", "Type-name", batchFillTypes.mkString("[", ", ", "]"))
+              errors += createMessage("rest.validator.attribute.unknown.value", "typeName' of 'batchFillType", x) + ". " +
+                createMessage("rest.validator.attribute.must.one_of", "typeName", batchFillTypes.mkString("[", ", ", "]"))
             } else {
               if (x == transactionIntervalMode && inputStreams.exists(x => x.streamType == kafkaStreamType)) {
                 errors += createMessage(
                   "rest.validator.attribute.cannot.equal.if",
-                  "Type-name' of 'batch-fill-type",
+                  "typeName' of 'batchFillType",
                   transactionIntervalMode,
                   kafkaStreamType
                 )
               }
             }
           case None =>
-            errors += createMessage("rest.validator.attribute.required", "Type-name' of 'batch-fill-type")
+            errors += createMessage("rest.validator.attribute.required", "typeName' of 'batchFillType")
         }
 
         //'value' field
         if (batchFillType.value <= 0) {
-          errors += createMessage("rest.validator.attribute.required", "Value' of 'batch-fill-type") + ". " +
-            createMessage("rest.validator.attribute.must.greater.than.zero", "Value' of 'batch-fill-type")
+          errors += createMessage("rest.validator.attribute.required", "Value' of 'batchFillType") + ". " +
+            createMessage("rest.validator.attribute.must.greater.than.zero", "Value' of 'batchFillType")
         }
     }
 
@@ -140,7 +140,7 @@ class WindowedInstanceValidator extends InstanceValidator {
     val startFrom = instance.startFrom
     if (inputStreams.exists(s => s.streamType.equals(kafkaStreamType))) {
       if (!startFromModes.contains(startFrom)) {
-        errors += createMessage("rest.validator.attribute.must.if.instance.have", "Start-from", startFromModes.mkString("[", ", ", "]"))
+        errors += createMessage("rest.validator.attribute.must.if.instance.have", "startFrom", startFromModes.mkString("[", ", ", "]"))
       }
     } else {
       if (!startFromModes.contains(startFrom)) {
@@ -148,7 +148,7 @@ class WindowedInstanceValidator extends InstanceValidator {
           startFrom.toLong
         } catch {
           case ex: NumberFormatException =>
-            errors += createMessage("rest.validator.attribute.not.one.of", "Start-from", s"${startFromModes.mkString("[", ", ", "]")} or timestamp")
+            errors += createMessage("rest.validator.attribute.not.one.of", "startFrom", s"${startFromModes.mkString("[", ", ", "]")} or timestamp")
         }
       }
     }
