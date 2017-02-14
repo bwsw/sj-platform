@@ -56,12 +56,13 @@ export class ModulesComponent implements OnInit {
     this.currentModule = module;
     this.blockingInstances = [];
     this.modulesService.getRelatedList(module.moduleName, module.moduleType, module.moduleVersion)
-      .subscribe(response => this.blockingInstances = Object.assign({},response)['streams']);
+      .subscribe(response => this.blockingInstances = Object.assign({},response)['instances']);
     modal.show();
   }
 
   public deleteModule(modal: ModalDirective) {
-    this.modulesService.deleteModule(this.currentModule)
+    this.modulesService.removeFile({name: this.currentModule.moduleName,
+      type: this.currentModule.moduleType, version: this.currentModule.moduleVersion})
       .subscribe(
         status => {
           this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
@@ -73,7 +74,7 @@ export class ModulesComponent implements OnInit {
 
   public downloadModule(module: ModuleModel) {
     this.showSpinner = true;
-    this.modulesService.downloadModule(module)
+    this.modulesService.download({name: module.moduleName, type: module.moduleType, version: module.moduleVersion})
       .subscribe(
         data => {
           let a = document.createElement('a');
@@ -98,7 +99,7 @@ export class ModulesComponent implements OnInit {
     this.isUploading = true;
     let file = event.target.files[0];
     if (file) {
-      this.modulesService.uploadModule(file).then((result: any) => {
+      this.modulesService.upload({file:file}).then((result: any) => {
         this.isUploading = false;
         this.showAlert({ msg: result, type: 'success', closable: true, timeout: 3000 });
         event.target.value = null;
