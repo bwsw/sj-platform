@@ -66,17 +66,17 @@ abstract class InstanceValidator extends ValidationUtils with CompletionUtils wi
 
     // 'per-task-cores' field
     if (parameters.perTaskCores <= 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Per-task-cores")
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "perTaskCores")
     }
 
     // 'per-task-ram' field
     if (parameters.perTaskRam <= 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Per-task-ram")
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "perTaskRam")
     }
 
     // 'performance-reporting-interval' field
     if (parameters.performanceReportingInterval <= 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Performance-reporting-interval")
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "performanceReportingInterval")
     }
 
     // 'coordination-service' field

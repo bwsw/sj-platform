@@ -305,6 +305,7 @@ object DataFactory {
 
     val instance = new WindowedInstance()
     instance.name = instanceName
+    instance.status = EngineLiterals.started
     instance.moduleType = EngineLiterals.windowedStreamingType
     instance.moduleName = "windowed-streaming-stub"
     instance.moduleVersion = "1.0"
