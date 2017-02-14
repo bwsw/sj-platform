@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { ModalDirective } from 'ng2-bootstrap';
-import { CustomService } from '../shared/services/custom.service';
-import { FileModel } from '../shared/models/custom.model';
+import { CustomService } from '../shared/services';
+import { FileModel } from '../shared/models';
 
 @Component({
   moduleId: module.id,

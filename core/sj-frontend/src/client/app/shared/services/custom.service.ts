@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
-import { FileModel } from '../models/custom.model';
-import { BaseService, BService } from './base.service';
+import { FileModel } from '../models';
+import { BaseService, BService } from './';
 
 @Injectable()
 @BService({

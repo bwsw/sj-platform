@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 
-import { ProviderModel } from '../models/provider.model';
-import { BaseService, BService } from './base.service';
+import { ProviderModel } from '../models';
+import { BaseService, BService } from './';
 
 @Injectable()
 @BService({

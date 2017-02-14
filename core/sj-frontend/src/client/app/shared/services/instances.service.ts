@@ -8,10 +8,10 @@ import {
   RegularStreamingInstance,
   OutputStreamingInstance,
   InputStreamingInstance,
-  WindowedStreamingInstance
-} from '../models/instance.model';
-import { TaskModel } from '../models/task.model';
-import { BaseService, BService } from './base.service';
+  WindowedStreamingInstance,
+  TaskModel
+} from '../models';
+import { BaseService, BService } from './';
 
 interface ITasksObject {
   tasks: TaskModel[];
