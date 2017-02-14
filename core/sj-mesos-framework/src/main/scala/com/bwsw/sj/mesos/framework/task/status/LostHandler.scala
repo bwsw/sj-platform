@@ -6,13 +6,13 @@ import org.apache.mesos.Protos.TaskStatus
 /**
   * Created by diryavkin_dn on 06.02.17.
   */
-object LostHandler {
+object LostHandler extends TaskStatusHandler {
   protected var status: TaskStatus = null
 
-  def setStatus(status: TaskStatus) = {
-    this.status = status
-    this
-  }
+//  def setStatus(status: TaskStatus) = {
+//    this.status = status
+//    this
+//  }
 
   def process() = {
     TasksList(status.getTaskId.getValue).foreach(task => task.update(node = "", reason = status.getMessage))

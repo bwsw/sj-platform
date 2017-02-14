@@ -15,6 +15,16 @@ import com.bwsw.common.LeaderLatch
 
 object StartFramework {
 
+  val frameworkName = "JugglerFramework"
+  val frameworkUser =  Properties.envOrElse("FRAMEWORK_USER", "root")
+  val frameworkCheckpoint = false
+  val frameworkFailoverTimeout = 0.0d
+  val frameworkRole = "*"
+//  val frameworkPrincipal = "sherman"
+
+  val master_path = Properties.envOrElse("MESOS_MASTER", "zk://127.0.0.1:2181/mesos")
+  val frameworkTaskId = Properties.envOrElse("FRAMEWORK_ID", "broken")
+
   /**
     * Main function to start rest and framework.
     * @param args exposed port for rest service
@@ -23,15 +33,16 @@ object StartFramework {
     val port = if (args.nonEmpty) args(0).toInt else 8080
     Rest.start(port)
 
-    val framework = FrameworkInfo.newBuilder.
-      setName("JugglerFramework").
-      setUser("root").
-      setCheckpoint(false).
-      setFailoverTimeout(0.0d).
-      setRole("*").
+    val frameworkInfo = FrameworkInfo.newBuilder.
+      setName(frameworkName).
+      setUser(frameworkUser).
+      setCheckpoint(frameworkCheckpoint).
+      setFailoverTimeout(frameworkFailoverTimeout).
+      setRole(frameworkRole).
       setPrincipal("sherman").
       build()
 
+    val scheduler = new FrameworkScheduler
 
     val frameworkPrincipal = ConnectionRepository.getConfigService.get(ConfigLiterals.frameworkPrincipalTag)
     val frameworkSecret = ConnectionRepository.getConfigService.get(ConfigLiterals.frameworkSecretTag)
@@ -44,18 +55,17 @@ object StartFramework {
         build())
     }
 
-    val scheduler = new FrameworkScheduler
-    val master_path = Properties.envOrElse("MESOS_MASTER", "zk://127.0.0.1:2181/mesos")
-    val frameworkId = Properties.envOrElse("FRAMEWORK_ID", "broken")
+
 
     val driver: MesosSchedulerDriver = {
-      if (credential.isDefined) new MesosSchedulerDriver(scheduler, framework, master_path, credential.get)
-      else new MesosSchedulerDriver(scheduler, framework, master_path)
+      if (credential.isDefined) new MesosSchedulerDriver(scheduler, frameworkInfo, master_path, credential.get)
+      else new MesosSchedulerDriver(scheduler, frameworkInfo, master_path)
     }
 
-    val zkServers = getZooKeeperServers(master_path)
-    val leader = new LeaderLatch(Set(zkServers), s"/framework/$frameworkId/lock")
 
+
+    val zkServers = getZooKeeperServers(master_path)
+    val leader = new LeaderLatch(Set(zkServers), s"/framework/$frameworkTaskId/lock")
     leader.start()
     leader.takeLeadership(5)
 
@@ -72,8 +82,4 @@ object StartFramework {
     val marathonMasterUrl = new URI(marathonMaster)
     marathonMasterUrl.getHost + ":" + marathonMasterUrl.getPort
   }
-
-
-  def uuid = java.util.UUID.randomUUID.toString
-
 }

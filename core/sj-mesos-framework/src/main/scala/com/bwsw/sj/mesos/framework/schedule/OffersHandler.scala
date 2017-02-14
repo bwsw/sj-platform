@@ -12,11 +12,14 @@ import scala.collection.mutable
 /**
  * Object for filter offers.
  */
-object OfferHandler {
+object OffersHandler {
   private val logger = Logger.getLogger(this.getClass)
   var filteredOffers = mutable.Buffer[Offer]()
   var offerNumber: Int = 0
   private var offers = mutable.Buffer[Offer]()
+
+
+  def getOffers = offers
 
   /**
    * Filter offered slaves
@@ -25,7 +28,7 @@ object OfferHandler {
    * @return util.List[Offer]
    */
   def filter(filters: util.Map[String, String]) = {
-    logger.debug(s"FILTER OFFERS.")
+    logger.info(s"Filtering resource offers")
     var result: mutable.Buffer[Offer] = mutable.Buffer()
     if (!filters.isEmpty) {
       for (filter <- filters.asScala) {
@@ -68,7 +71,8 @@ object OfferHandler {
    *
    * @return mutable.ListBuffer[(Offer, Int)]
    */
-  def getOffersForSlave(): mutable.ListBuffer[(Offer, Int)] = {
+  def getOffersForSlave: mutable.ListBuffer[(Offer, Int)] = {
+    logger.info("Calculating how much tasks can be launched on selected offers for this instance")
     var overCpus = 0.0
     var overMem = 0.0
     var overPorts = 0
@@ -78,16 +82,16 @@ object OfferHandler {
     val reqPorts = TasksList.perTaskPortsCount * TasksList.count
 
     val tasksCountOnSlave: mutable.ListBuffer[(Offer, Int)] = mutable.ListBuffer()
-    for (offer: Offer <- OfferHandler.filteredOffers) {
-      val portsResource = OfferHandler.getResource(offer, "ports")
+    for (offer: Offer <- OffersHandler.filteredOffers) {
+      val portsResource = OffersHandler.getResource(offer, "ports")
       var ports = 0
       for (range <- portsResource.getRanges.getRangeList.asScala) {
         overPorts += (range.getEnd - range.getBegin + 1).toInt
         ports += (range.getEnd - range.getBegin + 1).toInt
       }
 
-      val cpus = OfferHandler.getResource(offer, "cpus").getScalar.getValue
-      val mem = OfferHandler.getResource(offer, "mem").getScalar.getValue
+      val cpus = OffersHandler.getResource(offer, "cpus").getScalar.getValue
+      val mem = OffersHandler.getResource(offer, "mem").getScalar.getValue
 
       tasksCountOnSlave.append(Tuple2(offer, List[Double](
         cpus / TasksList.perTaskCores,
@@ -97,8 +101,6 @@ object OfferHandler {
       overCpus += cpus
       overMem += mem
     }
-    logger.debug(s"Have resources: $overCpus cpus, $overMem mem, $overPorts ports.")
-    logger.debug(s"Need resources: $reqCpus cpus, $reqMem mem, $reqPorts ports.")
     tasksCountOnSlave
   }
 
@@ -132,5 +134,33 @@ object OfferHandler {
       if (offerNumber > tasksOnSlaves.size - 1) offerNumber = 0
     }
     result
+  }
+
+  /**
+    * Get random unused ports
+ *
+    * @param offer:Offer
+    * @param task:String
+    * @return Resource
+    */
+  def getPorts(offer: Offer, task: String): Resource = {
+    val portsResource = OffersHandler.getResource(offer, "ports")
+    for (range <- portsResource.getRanges.getRangeList.asScala) {
+      TasksList.getAvailablePorts ++= (range.getBegin to range.getEnd).to[mutable.ListBuffer]
+    }
+
+    val ports: mutable.ListBuffer[Long] = TasksList.getAvailablePorts.take(TasksList.perTaskPortsCount)
+    TasksList.getAvailablePorts.remove(0, TasksList.perTaskPortsCount)
+
+    val ranges = Value.Ranges.newBuilder
+    for (port <- ports) {
+      ranges.addRange(Value.Range.newBuilder.setBegin(port).setEnd(port))
+    }
+
+    Resource.newBuilder
+      .setName("ports")
+      .setType(Value.Type.RANGES)
+      .setRanges(ranges)
+      .build()
   }
 }

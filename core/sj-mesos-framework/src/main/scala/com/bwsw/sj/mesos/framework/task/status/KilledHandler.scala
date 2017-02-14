@@ -9,10 +9,10 @@ import org.apache.mesos.Protos.TaskStatus
 object KilledHandler extends TaskStatusHandler{
   protected var status: TaskStatus = null
 
-  def setStatus(status: TaskStatus) = {
-    this.status = status
-    this
-  }
+//  def setStatus(status: TaskStatus) = {
+//    this.status = status
+//    this
+//  }
 
   def process() = {
     TasksList(status.getTaskId.getValue).foreach(task => task.update(node = "", reason = status.getMessage))

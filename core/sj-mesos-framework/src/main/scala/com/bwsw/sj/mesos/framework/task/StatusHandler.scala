@@ -17,7 +17,6 @@ object StatusHandler {
     * @param status: mesos task status
     */
   def handle(status: TaskStatus) = {
-    logger.debug(s"STATUS UPDATE.")
 
     if (status != null) {
 

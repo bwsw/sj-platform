@@ -15,7 +15,7 @@ class Task(taskId: String) {
   var reason: String = ""
   var node: String = ""
   var lastNode: String = ""
-  val description: InstanceTask = null
+//  val description: InstanceTask = null
   var maxDirectories = Properties.envOrElse("MAX_SANDBOX_VIEW", "7").toInt
   var directories: Array[String] = Array()
   var host: Option[String] = None
