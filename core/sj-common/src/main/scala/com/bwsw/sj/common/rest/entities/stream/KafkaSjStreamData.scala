@@ -58,8 +58,8 @@ class KafkaSjStreamData() extends SjStreamData() {
 
     //replicationFactor
     if (this.replicationFactor <= 0) {
-      errors += createMessage("entity.error.attribute.required", "Replication-factor") + ". " +
-        createMessage("entity.error.attribute.must.be.positive.integer", "Replication-factor")
+      errors += createMessage("entity.error.attribute.required", "replicationFactor") + ". " +
+        createMessage("entity.error.attribute.must.be.positive.integer", "replicationFactor")
     }
 
 

@@ -1,6 +1,7 @@
 import { ModuleModel } from './module.model';
+import { BaseModel } from './base.model';
 
-export class InstanceModel {
+export class InstanceModel extends BaseModel {
   inputsTypes: string[] = [''];
   mainStreamType: string = '';
   relatedStreamsType: string[] = [];

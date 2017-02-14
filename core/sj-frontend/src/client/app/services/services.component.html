@@ -413,15 +413,15 @@
       </div>
 
       <div class="modal-footer">
-        <template [ngIf]="currentService && (blockingStreams.length === 0)">
+        <div *ngIf="currentService && (blockingStreams.length === 0 && blockingInstances.length === 0)">
           <button type="button" class="btn btn-secondary" (click)="DeleteService.hide()">Cancel</button>
           <button type="button" class="btn btn-danger"
                   (click)="deleteService(DeleteService)">Delete
           </button>
-        </template>
-        <template [ngIf]="currentService && (blockingStreams.length > 0)">
+        </div>
+        <div *ngIf="currentService && (blockingStreams.length > 0 || blockingInstances.length > 0)">
           <button type="button" class="btn btn-primary" (click)="DeleteService.hide()">Ok</button>
-        </template>
+        </div>
       </div>
     </div>
   </div>

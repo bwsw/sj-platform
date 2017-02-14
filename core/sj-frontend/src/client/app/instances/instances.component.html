@@ -731,16 +731,16 @@
       </div>
 
       <div class="modal-footer">
-        <template [ngIf]="currentInstance && ifInstanceCanBeRemoved()">
+        <div *ngIf="currentInstance && ifInstanceCanBeRemoved()">
           <button type="button" class="btn btn-secondary" (click)="DeleteInstance.hide()">Cancel</button>
           <button type="button" class="btn btn-danger"
                   (click)="deleteInstance(DeleteInstance)">Delete
           </button>
-        </template>
+        </div>
 
-        <template [ngIf]="currentInstance && !ifInstanceCanBeRemoved()">
+        <div *ngIf="currentInstance && !ifInstanceCanBeRemoved()">
           <button type="button" class="btn btn-primary" (click)="DeleteInstance.hide()">OK</button>
-        </template>
+        </div>
       </div>
     </div>
   </div>

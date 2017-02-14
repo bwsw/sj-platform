@@ -92,7 +92,8 @@ class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGro
     val maybeTxn = stateConsumer.getLastTransaction(partition)
     if (maybeTxn.nonEmpty) {
       logger.debug(s"Get a transaction that was last. It contains a full or partial state.")
-      val lastTransaction = maybeTxn.get
+      val tempTransaction = maybeTxn.get
+      val lastTransaction = stateConsumer.buildTransactionObject(tempTransaction.getPartition(), tempTransaction.getTransactionID(), tempTransaction.getCount()).get //todo fix it next milestone TR1216
       var value = serializer.deserialize(lastTransaction.next())
       value match {
         case variable: (Any, Any) =>

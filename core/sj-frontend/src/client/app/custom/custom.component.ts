@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { ModalDirective } from 'ng2-bootstrap';
-import { CustomService } from '../shared/services/custom.service';
-import { FileModel } from '../shared/models/custom.model';
+import { CustomService } from '../shared/services/index';
+import { FileModel } from '../shared/models/index';
 
 @Component({
   moduleId: module.id,
@@ -35,9 +35,9 @@ export class CustomComponent implements OnInit {
   }
 
   public getCustomList() {
-    this.customService.getCustomList(this.path)
+    this.customService.getList(this.path)
       .subscribe(
-        response => this.fileList = response
+        response => this.fileList = this.path === 'files' ? response.customFiles: response.customJars
       );
   }
 
@@ -49,7 +49,7 @@ export class CustomComponent implements OnInit {
     this.isUploading = true;
     let file = this.path === 'jars' ? event.target.files[0]: this.newFile;
     if (file) {
-      this.customService.uploadFile(this.path,file,this.newDescription).then((result: any) => {
+      this.customService.upload({path: this.path, file: file, description:  this.newDescription}).then((result: any) => {
           this.isUploading = false;
           this.showAlert({ msg: result, type: 'success', closable: true, timeout: 3000 });
           event.target.value = null;
@@ -68,7 +68,9 @@ export class CustomComponent implements OnInit {
 
   public downloadFile(file: FileModel) {
     this.showSpinner = true;
-    this.customService.downloadFile(this.path, file)
+    let params = this.path === 'files'? {name: file.name, path: this.path} :
+      {name: file.name, version: file.version, path: this.path};
+    this.customService.download(params)
       .subscribe(
         data => {
           let a = document.createElement('a');
@@ -95,7 +97,7 @@ export class CustomComponent implements OnInit {
   }
 
   public deleteFile(modal: ModalDirective) {
-    this.customService.deleteFile(this.path,this.currentFile)
+    this.customService.removeFile({path: this.path, name: this.currentFile.name, version: this.currentFile.version})
       .subscribe(
         status => {
           this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });

@@ -56,7 +56,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
                 createMessage("rest.providers.provider.notfound", providerName)))
               provider match {
                 case Some(x) =>
-                  val entity = Map("providers" -> x.asProtocolProvider())
+                  val entity = Map("provider" -> x.asProtocolProvider())
                   response = OkRestResponse(entity)
                 case None =>
               }

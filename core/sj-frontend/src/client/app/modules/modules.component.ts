@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
-import { ModuleModel } from '../shared/models/module.model';
-import { ModulesService } from '../shared/services/modules.service';
+import { ModuleModel } from '../shared/models/index';
+import { ModulesService } from '../shared/services/index';
 import { ModalDirective } from 'ng2-bootstrap';
 
 @Component({
@@ -28,17 +28,17 @@ export class ModulesComponent implements OnInit {
   }
 
   public getModuleTypes() {
-    this.modulesService.getModuileTypes()
-      .subscribe(types => this.moduleTypes = types);
+    this.modulesService.getTypes()
+      .subscribe(response => this.moduleTypes = response.types);
   }
 
   public getModuleList() {
-    this.modulesService.getModuleList()
+    this.modulesService.getList()
       .subscribe(
-        moduleList => {
-          this.moduleList = moduleList;
-          if (moduleList.length > 0) {
-            this.currentModule = moduleList[0];
+        response => {
+          this.moduleList = response.modules;
+          if (this.moduleList.length > 0) {
+            this.currentModule = this.moduleList[0];
             this.getModuleSpecification(this.currentModule);
           }
         },
@@ -55,13 +55,14 @@ export class ModulesComponent implements OnInit {
   public deleteModuleConfirm(modal: ModalDirective, module: ModuleModel) {
     this.currentModule = module;
     this.blockingInstances = [];
-    this.modulesService.getRelatedInstancesList(module)
-      .subscribe(response => this.blockingInstances = response);
+    this.modulesService.getRelatedList(module.moduleName, module.moduleType, module.moduleVersion)
+      .subscribe(response => this.blockingInstances = Object.assign({},response)['instances']);
     modal.show();
   }
 
   public deleteModule(modal: ModalDirective) {
-    this.modulesService.deleteModule(this.currentModule)
+    this.modulesService.removeFile({name: this.currentModule.moduleName,
+      type: this.currentModule.moduleType, version: this.currentModule.moduleVersion})
       .subscribe(
         status => {
           this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
@@ -73,7 +74,7 @@ export class ModulesComponent implements OnInit {
 
   public downloadModule(module: ModuleModel) {
     this.showSpinner = true;
-    this.modulesService.downloadModule(module)
+    this.modulesService.download({name: module.moduleName, type: module.moduleType, version: module.moduleVersion})
       .subscribe(
         data => {
           let a = document.createElement('a');
@@ -98,7 +99,7 @@ export class ModulesComponent implements OnInit {
     this.isUploading = true;
     let file = event.target.files[0];
     if (file) {
-      this.modulesService.uploadModule(file).then((result: any) => {
+      this.modulesService.upload({file:file}).then((result: any) => {
         this.isUploading = false;
         this.showAlert({ msg: result, type: 'success', closable: true, timeout: 3000 });
         event.target.value = null;

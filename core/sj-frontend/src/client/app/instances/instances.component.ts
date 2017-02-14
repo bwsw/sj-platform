@@ -2,15 +2,8 @@ import { Component, OnInit, ViewChild, AfterViewChecked } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ModalDirective } from 'ng2-bootstrap';
 
-import { InstanceModel } from '../shared/models/instance.model';
-import { TaskModel } from '../shared/models/task.model';
-import { ModuleModel } from '../shared/models/module.model';
-import { ServiceModel } from '../shared/models/service.model';
-import { StreamModel } from '../shared/models/stream.model';
-import { InstancesService } from '../shared/services/instances.service';
-import { ModulesService } from '../shared/services/modules.service';
-import { StreamsService } from '../shared/services/streams.service';
-import { ServicesService } from '../shared/services/services.service';
+import { InstanceModel, TaskModel, ModuleModel, ServiceModel, StreamModel } from '../shared/models/index';
+import { InstancesService, ModulesService, StreamsService, ServicesService } from '../shared/services/index';
 
 @Component({
   moduleId: module.id,
@@ -80,35 +73,35 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   }
 
   public getInstancesList() {
-    this.instancesService.getInstanceList()
+    this.instancesService.getList('instances')
       .subscribe(
-        instancesList => {
-          this.instancesList = instancesList;
-          this.cloneInstancesList = instancesList;
+        response => {
+          this.instancesList = response.instances;
+          this.cloneInstancesList = response.instances;
         },
         error => this.errorMessage = <any>error);
   }
 
   public getModulesList() {
-    this.modulesService.getModuleList()
+    this.modulesService.getList()
       .subscribe(
-        modulesList => {
-          this.modulesList = modulesList;
+        response => {
+          this.modulesList = response.modules;
         },
         error => this.errorMessage = <any>error);
   }
 
   public getModuleTypes() {
-    this.modulesService.getModuileTypes()
-      .subscribe(types => this.moduleTypes = types);
+    this.modulesService.getTypes()
+      .subscribe(response => this.moduleTypes = response.types);
   }
 
   public getStreamsList() {
-    this.streamsService.getStreamList()
+    this.streamsService.getList()
       .subscribe(
-        streamsList => {
-          this.streamsList = streamsList;
-          for (let stream of streamsList) {
+        response => {
+          this.streamsList = response.streams;
+          for (let stream of this.streamsList) {
             this.streamTypesList[stream.name] = stream.type;
           }
         },
@@ -116,10 +109,10 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   }
 
   public getServicesList() {
-    this.servicesService.getServiceList()
+    this.servicesService.getList()
       .subscribe(
-        servicesList => {
-          this.servicesList = servicesList;
+        response => {
+          this.servicesList = response.services;
           this.isFormReady = true;
         },
 

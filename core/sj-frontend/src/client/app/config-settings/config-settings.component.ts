@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ModalDirective } from 'ng2-bootstrap';
 
-import { SettingModel } from '../shared/models/setting.model';
-import { ConfigSettingsService } from '../shared/services/config-settings.service';
+import { SettingModel } from '../shared/models/index';
+import { ConfigSettingsService } from '../shared/services/index';
 
 @Component({
   moduleId: module.id,
@@ -26,12 +26,12 @@ export class ConfigSettingsComponent implements OnInit {
   }
 
   public getSettingsList() {
-    this.configSettingsService.getConfigSettingsList()
+    this.configSettingsService.getList()
       .subscribe(
-        settingsList => {
-          this.settingsList = settingsList;
-          if (settingsList.length > 0) {
-            this.currentSetting = settingsList[0];
+        response => {
+          this.settingsList = response.configSettings;
+          if (this.settingsList.length > 0) {
+            this.currentSetting = this.settingsList[0];
           }
         },
         error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
@@ -44,7 +44,7 @@ export class ConfigSettingsComponent implements OnInit {
 
   public createSetting(modal: ModalDirective) {
     this.showSpinner = true;
-    this.configSettingsService.saveSetting(this.newSetting)
+    this.configSettingsService.save(this.newSetting)
       .subscribe(
         setting => {
           modal.hide();

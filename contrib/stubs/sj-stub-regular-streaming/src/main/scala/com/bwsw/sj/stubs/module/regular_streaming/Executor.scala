@@ -27,7 +27,7 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
     val output = manager.getRoundRobinOutput(outputs(new Random().nextInt(outputs.length)))
     var sum = state.get("sum").asInstanceOf[Int]
 
-    if (new Random().nextInt(100) < 20) throw new Exception("it happened")
+    if (new Random().nextInt(100) < 5) throw new Exception("it happened")
     envelope match {
       case kafkaEnvelope: KafkaEnvelope =>
         println("element: " +

@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ModalDirective } from 'ng2-bootstrap';
 
-import { StreamModel } from '../shared/models/stream.model';
-import { ServiceModel } from '../shared/models/service.model';
-import { ServicesService } from '../shared/services/services.service';
-import { StreamsService } from '../shared/services/streams.service';
+import { StreamModel, ServiceModel } from '../shared/models/index';
+import { ServicesService, StreamsService } from '../shared/services/index';
 
 @Component({
   moduleId: module.id,
@@ -61,36 +59,36 @@ export class StreamsComponent implements OnInit {
   }
 
   public getStreamList() {
-    this.streamsService.getStreamList()
+    this.streamsService.getList()
       .subscribe(
-        streamList => {
-          this.streamList = streamList;
-          if (streamList.length > 0) {
-            this.currentStream = streamList[0];
+        response => {
+          this.streamList = response.streams;
+          if (this.streamList.length > 0 ) {
+            this.currentStream = this.streamList[0];
           }
         },
         error => this.errorMessage = <any>error);
   }
 
   public getStreamTypes() {
-    this.streamsService.getStreamTypes()
+    this.streamsService.getTypes()
       .subscribe(
-        types => this.streamTypes = types,
+        response => this.streamTypes = response.types,
         error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 })
       );
   }
 
   public getServiceList() {
-    this.servicesService.getServiceList()
+    this.servicesService.getList()
       .subscribe(
-        serviceList => this.serviceList = serviceList,
+        response => this.serviceList = response.services,
         error => this.errorMessage = <any>error);
   }
 
   public getService(serviceName: string) {
-    this.servicesService.getService(serviceName)
+    this.servicesService.get(serviceName)
       .subscribe(
-        service => this.currentStreamService = service,
+        response => this.currentStreamService = response.service,
         error => this.errorMessage = <any>error);
   }
 
@@ -101,16 +99,16 @@ export class StreamsComponent implements OnInit {
 
   public deleteStreamConfirm(modal: ModalDirective, stream: StreamModel) {
     this.currentStream = stream;
-    this.streamsService.getRelatedInstancesList(stream.name)
-      .subscribe(response => this.blockingInstances = response);
+    this.streamsService.getRelatedList(stream.name)
+      .subscribe(response => this.blockingInstances = Object.assign({},response)['instances']);
     modal.show();
   }
 
   public deleteStream(modal: ModalDirective) {
-    this.streamsService.deleteStream(this.currentStream)
+    this.streamsService.remove(this.currentStream.name)
       .subscribe(
-        status => {
-          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
+        response => {
+          this.showAlert({ msg: response.message, type: 'success', closable: true, timeout: 3000 });
           this.getStreamList();
         },
         error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
@@ -122,12 +120,12 @@ export class StreamsComponent implements OnInit {
     if (this.newStream.type !== 'stream.t-stream') {
       delete this.newStream.generator;
     }
-    this.streamsService.saveStream(this.newStream)
+    this.streamsService.save(this.newStream)
       .subscribe(
-        status => {
+        response => {
           modal.hide();
           this.showSpinner = false;
-          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ msg: response.message, type: 'success', closable: true, timeout: 3000 });
           this.getStreamList();
           this.newStream = new StreamModel();
           this.newStream.tags = [];

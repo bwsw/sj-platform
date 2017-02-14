@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Http, Response, Headers, RequestOptions } from '@angular/http';
+import { Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 
 import {
@@ -8,10 +8,10 @@ import {
   RegularStreamingInstance,
   OutputStreamingInstance,
   InputStreamingInstance,
-  WindowedStreamingInstance
-} from '../models/instance.model';
-import { TaskModel } from '../models/task.model';
-import { BaseResponse } from '../models/base-response.model';
+  WindowedStreamingInstance,
+  TaskModel
+} from '../models/index';
+import { BaseService, BService } from './index';
 
 interface ITasksObject {
   tasks: TaskModel[];
@@ -19,8 +19,11 @@ interface ITasksObject {
 }
 
 @Injectable()
-export class InstancesService {
-  private dataUrl = '/v1/';
+@BService({
+  entity: 'modules',
+  entityModel: InstanceModel
+})
+export class InstancesService extends BaseService<InstanceModel> {
 
   private static fillInstanceGeneralFields(orig: InstanceModel, instance: SubtypedInstance) {
     instance.name = orig.name;
@@ -41,25 +44,11 @@ export class InstancesService {
     return instance;
   }
 
-  constructor(private http: Http) { }
-
-  public getInstanceList(): Observable<InstanceModel[]> {
-    let headers = new Headers();
-    headers.append('Content-Type', 'application/json');
-    let options = new RequestOptions({ headers: headers });
-    return this.http.get(this.dataUrl + 'modules/instances', options)
-      .map(response => {
-        const data = this.extractData(response);
-        return data.instances;
-      })
-      .catch(this.handleError);
-  }
-
   public getInstanceInfo(instance: InstanceModel): Observable<InstanceModel> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this.dataUrl + 'modules/' + instance.moduleType + '/' + instance.moduleName + '/' +
+    return this.http.get(this.requestUrl + '/' + instance.moduleType + '/' + instance.moduleName + '/' +
       instance.moduleVersion + '/instance' + '/' + instance.name, options)
       .map(response => {
         const data = this.extractData(response);
@@ -82,7 +71,7 @@ export class InstancesService {
     let headers = new Headers({'Content-Type': 'application/json'});
     let options = new RequestOptions({ headers: headers });
 
-    return this.http.post(this.dataUrl + 'modules/' + instance.module.moduleType + '/' + instance.module.moduleName + '/' +
+    return this.http.post(this.requestUrl + '/' + instance.module.moduleType + '/' + instance.module.moduleName + '/' +
       instance.module.moduleVersion + '/instance', body, options)
       .map(response => {
         const data = this.extractData(response);
@@ -95,7 +84,7 @@ export class InstancesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.delete(this.dataUrl + 'modules/' + instance.module.moduleType + '/' + instance.module.moduleName + '/' +
+    return this.http.delete(this.requestUrl + '/' + instance.module.moduleType + '/' + instance.module.moduleName + '/' +
     instance.module.moduleVersion + '/instance' + '/' + instance.name, options)
       .map(response => {
         const data = this.extractData(response);
@@ -108,7 +97,7 @@ export class InstancesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this.dataUrl + 'modules/' + instance.module.moduleType + '/' + instance.module.moduleName + '/' +
+    return this.http.get(this.requestUrl + '/' + instance.module.moduleType + '/' + instance.module.moduleName + '/' +
       instance.module.moduleVersion + '/instance' + '/' + instance.name + '/start', options)
       .map(response => {
         const data = this.extractData(response);
@@ -121,7 +110,7 @@ export class InstancesService {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this.dataUrl + 'modules/' + instance.module.moduleType + '/' + instance.module.moduleName + '/' +
+    return this.http.get(this.requestUrl + '/' + instance.module.moduleType + '/' + instance.module.moduleName + '/' +
       instance.module.moduleVersion + '/instance' + '/' + instance.name + '/stop', options)
       .map(response => {
         const data = this.extractData(response);
@@ -141,7 +130,7 @@ export class InstancesService {
         inst.checkpointMode = orig.checkpointMode;
         inst.checkpointInterval = orig.checkpointInterval;
         inst.eventWaitIdleTime = orig.eventWaitIdleTime;
-        orig.inputs.forEach(function(item:string, i:number) {
+        orig.inputs.forEach(function (item: string, i: number) {
           inst.inputs[i] = orig.inputs[i] + '/' + orig.inputsTypes[i];
         });
         inst.outputs = orig.outputs;
@@ -163,13 +152,13 @@ export class InstancesService {
         inst.eventWaitIdleTime = orig.eventWaitIdleTime;
         inst.mainStream = orig.mainStream + '/' + orig.mainStreamType;
         if (orig.relatedStreams.length > 0 && orig.relatedStreams[0] !== '') {
-          orig.relatedStreams.forEach(function(item:string, i:number) {
+          orig.relatedStreams.forEach(function (item: string, i: number) {
             inst.relatedStreams[i] = orig.relatedStreams[i] + '/' + orig.relatedStreamsType[i];
           });
         } else {
           inst.relatedStreams = [];
         }
-        inst.batchFillType = { typeName: orig.batchFillType.typeName, value: orig.batchFillType.value };
+        inst.batchFillType = {typeName: orig.batchFillType.typeName, value: orig.batchFillType.value};
         inst.slidingInterval = orig.slidingInterval;
         inst.startFrom = orig.startFrom === 'timestamp' ? orig.startFromTimestamp : orig.startFrom;
         break;
@@ -213,24 +202,6 @@ export class InstancesService {
     return inst;
   }
 
-  private extractData(res: Response) {
-    let body = new BaseResponse();
-    if (res.json()['entity'] !== 'undefined') {
-      body.fillFromJSON(res.json()['entity']);
-      return body;
-    }
-    return body = res.json();
-  }
-
-  private handleError(error: any) {
-    let errMsg = (error._body) ? error._body :
-      error.status ? `${error.status} - ${error.statusText}` : 'Server error';
-    if (typeof errMsg !== 'object') { errMsg = JSON.parse(errMsg); }
-    let errMsgYo = errMsg.entity ? errMsg.entity.message : 'Undefined error';
-    return Observable.throw(errMsgYo);
-  }
-
-
   private cleanupBodyValues(key: string, value: any): any {
     if ( [null, ''].indexOf(value) > -1 ) {
       return undefined;
@@ -238,6 +209,5 @@ export class InstancesService {
       return value;
     }
   }
-
 
 }
