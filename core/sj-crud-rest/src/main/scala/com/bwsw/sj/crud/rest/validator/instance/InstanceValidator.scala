@@ -82,19 +82,19 @@ abstract class InstanceValidator extends ValidationUtils with CompletionUtils wi
     // 'coordination-service' field
     Option(parameters.coordinationService) match {
       case None =>
-        errors += createMessage("rest.validator.attribute.required", "Coordination-service")
+        errors += createMessage("rest.validator.attribute.required", "coordinationService")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("rest.validator.attribute.required", "Coordination-service")
+          errors += createMessage("rest.validator.attribute.required", "coordinationService")
         }
         else {
           val coordService = serviceDAO.get(x)
           if (coordService.isDefined) {
             if (!coordService.get.isInstanceOf[ZKService]) {
-              errors += createMessage("rest.validator.attribute.not", "Coordination-service", "ZKCoord")
+              errors += createMessage("rest.validator.attribute.not", "coordinationService", "ZKCoord")
             }
           } else {
-            errors += createMessage("rest.validator.not.exist", s"'Coordination-service' $x")
+            errors += createMessage("rest.validator.not.exist", s"'coordinationService' $x")
           }
         }
     }

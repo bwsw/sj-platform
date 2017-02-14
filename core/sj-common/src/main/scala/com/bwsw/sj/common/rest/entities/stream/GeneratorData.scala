@@ -27,10 +27,10 @@ case class GeneratorData(generatorType: String,
 
     Option(this.generatorType) match {
       case None =>
-        errors += createMessage("entity.error.attribute.required", "Generator-type")
+        errors += createMessage("entity.error.attribute.required", "generatorType")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("entity.error.attribute.required", "Generator-type")
+          errors += createMessage("entity.error.attribute.required", "generatorType")
         }
         else {
           if (!types.contains(x)) {
@@ -39,7 +39,7 @@ case class GeneratorData(generatorType: String,
             if (this.generatorType != GeneratorLiterals.localType) {
               //instacneCount
               if (this.instanceCount <= 0)
-                errors += createMessage("entity.error.generator.attribute.required", "instance-count") + ". " +
+                errors += createMessage("entity.error.generator.attribute.required", "instanceCount") + ". " +
                   createMessage("entity.error.generator.instance.count")
 
               //service

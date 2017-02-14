@@ -35,10 +35,10 @@ class KfkQServiceData() extends ServiceData() {
     // 'zkProvider' field
     Option(this.zkProvider) match {
       case None =>
-        errors += createMessage("entity.error.attribute.required", "Zk-provider")
+        errors += createMessage("entity.error.attribute.required", "zkProvider")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("entity.error.attribute.required", "Zk-provider")
+          errors += createMessage("entity.error.attribute.required", "zkProvider")
         }
         else {
           val zkProviderObj = providerDAO.get(x)
@@ -47,7 +47,7 @@ class KfkQServiceData() extends ServiceData() {
               errors += createMessage("entity.error.doesnot.exist", "Zookeeper provider", x)
             case Some(zkProviderFormDB) =>
               if (zkProviderFormDB.providerType != ProviderLiterals.zookeeperType) {
-                errors += createMessage("entity.error.must.one.type.other.given", "Zk-provider", ProviderLiterals.zookeeperType, zkProviderFormDB.providerType)
+                errors += createMessage("entity.error.must.one.type.other.given", "zkProvider", ProviderLiterals.zookeeperType, zkProviderFormDB.providerType)
               }
           }
         }
@@ -56,14 +56,14 @@ class KfkQServiceData() extends ServiceData() {
     // 'zkNamespace' field
     Option(this.zkNamespace) match {
       case None =>
-        errors += createMessage("entity.error.attribute.required", "Zk-namespace")
+        errors += createMessage("entity.error.attribute.required", "zkNamespace")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("entity.error.attribute.required", "Zk-namespace")
+          errors += createMessage("entity.error.attribute.required", "zkNamespace")
         }
         else {
           if (!validateNamespace(x)) {
-            errors += createMessage("entity.error.incorrect.service.namespace", "zk-namespace", x)
+            errors += createMessage("entity.error.incorrect.service.namespace", "zkNamespace", x)
           }
         }
     }

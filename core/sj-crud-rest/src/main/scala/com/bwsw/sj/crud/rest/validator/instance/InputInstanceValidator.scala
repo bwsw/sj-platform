@@ -33,50 +33,50 @@ class InputInstanceValidator extends InstanceValidator {
     // 'checkpoint-mode' field
     Option(inputInstanceMetadata.checkpointMode) match {
       case None =>
-        errors += createMessage("rest.validator.attribute.required", "Checkpoint-mode")
+        errors += createMessage("rest.validator.attribute.required", "checkpointMode")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("rest.validator.attribute.required", "Checkpoint-mode")
+          errors += createMessage("rest.validator.attribute.required", "checkpointMode")
         }
         else {
           if (!checkpointModes.contains(x)) {
-            errors += createMessage("rest.validator.attribute.unknown.value", "checkpoint-mode", s"$x") + ". " +
-              createMessage("rest.validator.attribute.must.one_of", "Checkpoint-mode", checkpointModes.mkString("[", ", ", "]"))
+            errors += createMessage("rest.validator.attribute.unknown.value", "checkpointMode", s"$x") + ". " +
+              createMessage("rest.validator.attribute.must.one_of", "checkpointMode", checkpointModes.mkString("[", ", ", "]"))
           }
         }
     }
 
     // 'checkpoint-interval' field
     if (inputInstanceMetadata.checkpointInterval <= 0) {
-      errors += createMessage("rest.validator.attribute.required", "Checkpoint-interval") + ". " +
-        createMessage("rest.validator.attribute.must.greater.than.zero", "Checkpoint-interval")
+      errors += createMessage("rest.validator.attribute.required", "checkpointInterval") + ". " +
+        createMessage("rest.validator.attribute.must.greater.than.zero", "checkpointInterval")
     }
 
     if (inputInstanceMetadata.lookupHistory < 0) {
-      errors += createMessage("rest.validator.attribute.required", "Lookup-history") + ". " +
-        createMessage("rest.validator.attribute.must.greater.or.equal.zero", "Lookup-history")
+      errors += createMessage("rest.validator.attribute.required", "lookupHistory") + ". " +
+        createMessage("rest.validator.attribute.must.greater.or.equal.zero", "lookupHistory")
     }
 
     if (inputInstanceMetadata.queueMaxSize < 0) {
-      errors += createMessage("rest.validator.attribute.required", "Queue-max-size") + ". " +
-        createMessage("rest.validator.attribute.must.greater.or.equal.zero", "Queue-max-size")
+      errors += createMessage("rest.validator.attribute.required", "queueMaxSize") + ". " +
+        createMessage("rest.validator.attribute.must.greater.or.equal.zero", "queueMaxSize")
     }
 
     if (!defaultEvictionPolicies.contains(inputInstanceMetadata.defaultEvictionPolicy)) {
-      errors += createMessage("rest.validator.attribute.unknown.value", "default-eviction-policy", inputInstanceMetadata.defaultEvictionPolicy) + ". " +
-        createMessage("rest.validator.attribute.must.one_of", "Default-eviction-policy", defaultEvictionPolicies.mkString("[", ", ", "]"))
+      errors += createMessage("rest.validator.attribute.unknown.value", "defaultEvictionPolicy", inputInstanceMetadata.defaultEvictionPolicy) + ". " +
+        createMessage("rest.validator.attribute.must.one_of", "defaultEvictionPolicy", defaultEvictionPolicies.mkString("[", ", ", "]"))
     }
 
     if (!evictionPolicies.contains(inputInstanceMetadata.evictionPolicy)) {
-      errors += createMessage("rest.validator.attribute.unknown.value", "eviction-policy", inputInstanceMetadata.evictionPolicy) + ". " +
-        createMessage("rest.validator.attribute.must.one_of", "Eviction-policy", evictionPolicies.mkString("[", ", ", "]"))
+      errors += createMessage("rest.validator.attribute.unknown.value", "evictionPolicy", inputInstanceMetadata.evictionPolicy) + ". " +
+        createMessage("rest.validator.attribute.must.one_of", "evictionPolicy", evictionPolicies.mkString("[", ", ", "]"))
     }
 
     if (inputInstanceMetadata.backupCount < 0 || inputInstanceMetadata.backupCount > 6)
-      errors += createMessage("rest.validator.attribute.must.from.to", "Backup-count", "0", "6")
+      errors += createMessage("rest.validator.attribute.must.from.to", "backupCount", "0", "6")
 
     if (inputInstanceMetadata.asyncBackupCount < 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.or.equal.zero", "Async-backup-count")
+      errors += createMessage("rest.validator.attribute.must.greater.or.equal.zero", "asyncBackupCount")
     }
 
     errors ++= validateStreamOptions(inputInstanceMetadata, specification)

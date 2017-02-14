@@ -28,39 +28,39 @@ class RegularInstanceValidator extends InstanceValidator {
     // 'checkpoint-mode' field
     Option(regularInstanceMetadata.checkpointMode) match {
       case None =>
-        errors += createMessage("rest.validator.attribute.required", "Checkpoint-mode")
+        errors += createMessage("rest.validator.attribute.required", "checkpointMode")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("rest.validator.attribute.required", "Checkpoint-mode")
+          errors += createMessage("rest.validator.attribute.required", "checkpointMode")
         }
         else {
           if (!checkpointModes.contains(x)) {
-            errors += createMessage("rest.validator.attribute.unknown.value", "checkpoint-mode", x) + ". " +
-              createMessage("rest.validator.attribute.must.one_of", "Checkpoint-mode", checkpointModes.mkString("[", ", ", "]"))
+            errors += createMessage("rest.validator.attribute.unknown.value", "checkpointMode", x) + ". " +
+              createMessage("rest.validator.attribute.must.one_of", "checkpointMode", checkpointModes.mkString("[", ", ", "]"))
           }
         }
     }
 
     // 'checkpoint-interval' field
     if (regularInstanceMetadata.checkpointInterval <= 0) {
-      errors += createMessage("rest.validator.attribute.required", "Checkpoint-interval") + ". " +
-        createMessage("rest.validator.attribute.must.greater.than.zero", "Checkpoint-interval")
+      errors += createMessage("rest.validator.attribute.required", "checkpointInterval") + ". " +
+        createMessage("rest.validator.attribute.must.greater.than.zero", "checkpointInterval")
     }
 
     // 'event-wait-idle-time' field
     if (regularInstanceMetadata.eventWaitIdleTime <= 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Event-wait-idle-time")
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "eventWaitIdleTime")
     }
 
     // 'state-management' field
     if (!stateManagementModes.contains(regularInstanceMetadata.stateManagement)) {
-      errors += createMessage("rest.validator.attribute.unknown.value", "state-management", regularInstanceMetadata.stateManagement) + ". " +
-        createMessage("rest.validator.attribute.must.one_of", "State-management", stateManagementModes.mkString("[", ", ", "]"))
+      errors += createMessage("rest.validator.attribute.unknown.value", "stateManagement", regularInstanceMetadata.stateManagement) + ". " +
+        createMessage("rest.validator.attribute.must.one_of", "stateManagement", stateManagementModes.mkString("[", ", ", "]"))
     } else {
       if (regularInstanceMetadata.stateManagement != EngineLiterals.noneStateMode) {
         // 'state-full-checkpoint' field
         if (regularInstanceMetadata.stateFullCheckpoint <= 0) {
-          errors += createMessage("rest.validator.attribute.must.greater.than.zero", "State-full-checkpoint")
+          errors += createMessage("rest.validator.attribute.must.greater.than.zero", "stateFullCheckpoint")
         }
       }
     }
@@ -113,7 +113,7 @@ class RegularInstanceValidator extends InstanceValidator {
     val startFrom = instance.startFrom
     if (inputStreams.exists(s => s.streamType.equals(kafkaStreamType))) {
       if (!startFromModes.contains(startFrom)) {
-        errors += createMessage("rest.validator.attribute.must.if.instance.have", "Start-from", startFromModes.mkString("[", ", ", "]"))
+        errors += createMessage("rest.validator.attribute.must.if.instance.have", "startFrom", startFromModes.mkString("[", ", ", "]"))
       }
     } else {
       if (!startFromModes.contains(startFrom)) {
@@ -121,7 +121,7 @@ class RegularInstanceValidator extends InstanceValidator {
           startFrom.toLong
         } catch {
           case ex: NumberFormatException =>
-            errors += createMessage("rest.validator.attribute.must.one_of", "Start-from", s"${startFromModes.mkString("[", ", ", "]")} or timestamp")
+            errors += createMessage("rest.validator.attribute.must.one_of", "startFrom", s"${startFromModes.mkString("[", ", ", "]")} or timestamp")
         }
       }
     }

@@ -38,19 +38,19 @@ class TstrQServiceData() extends ServiceData() {
     // 'metadataProvider' field
     Option(this.metadataProvider) match {
       case None =>
-        errors += createMessage("entity.error.attribute.required", "Metadata-provider")
+        errors += createMessage("entity.error.attribute.required", "metadataProvider")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("entity.error.attribute.required", "Metadata-provider")
+          errors += createMessage("entity.error.attribute.required", "metadataProvider")
         }
         else {
           val metadataProviderObj = providerDAO.get(x)
           metadataProviderObj match {
             case None =>
-              errors += createMessage("entity.error.doesnot.exist", "Metadata-provider", x)
+              errors += createMessage("entity.error.doesnot.exist", "metadataProvider", x)
             case Some(provider) =>
               if (provider.providerType != ProviderLiterals.cassandraType) {
-                errors += createMessage("entity.error.must.one.type.other.given", "Metadata-provider", ProviderLiterals.cassandraType, provider.providerType)
+                errors += createMessage("entity.error.must.one.type.other.given", "metadataProvider", ProviderLiterals.cassandraType, provider.providerType)
               }
           }
         }
@@ -59,14 +59,14 @@ class TstrQServiceData() extends ServiceData() {
     // 'metadataNamespace' field
     Option(this.metadataNamespace) match {
       case None =>
-        errors += createMessage("entity.error.attribute.required", "Metadata-namespace")
+        errors += createMessage("entity.error.attribute.required", "metadataNamespace")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("entity.error.attribute.required", "Metadata-namespace")
+          errors += createMessage("entity.error.attribute.required", "metadataNamespace")
         }
         else {
           if (!validateNamespace(x)) {
-            errors += createMessage("entity.error.incorrect.service.namespace", "metadata-namespace", x)
+            errors += createMessage("entity.error.incorrect.service.namespace", "metadataNamespace", x)
           }
         }
     }
@@ -74,10 +74,10 @@ class TstrQServiceData() extends ServiceData() {
     // 'dataProvider' field
     Option(this.dataProvider) match {
       case None =>
-        errors += createMessage("entity.error.attribute.required", "Data-provider")
+        errors += createMessage("entity.error.attribute.required", "dataProvider")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("entity.error.attribute.required", "Data-provider")
+          errors += createMessage("entity.error.attribute.required", "dataProvider")
         } else {
           val dataProviderObj = providerDAO.get(x)
           val allowedTypes = List(ProviderLiterals.cassandraType, ProviderLiterals.aerospikeType)
@@ -86,7 +86,7 @@ class TstrQServiceData() extends ServiceData() {
               errors += s"Data-provider '$x' does not exist"
             case Some(provider) =>
               if (!allowedTypes.contains(provider.providerType)) {
-                errors += createMessage("entity.error.must.one.type.other.given", "Data-provider", allowedTypes.mkString("' or '"), provider.providerType)
+                errors += createMessage("entity.error.must.one.type.other.given", "dataProvider", allowedTypes.mkString("' or '"), provider.providerType)
               }
           }
         }
@@ -95,24 +95,24 @@ class TstrQServiceData() extends ServiceData() {
     // 'dataNamespace' field
     Option(this.dataNamespace) match {
       case None =>
-        errors += createMessage("entity.error.attribute.required", "Data-namespace")
+        errors += createMessage("entity.error.attribute.required", "dataNamespace")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("entity.error.attribute.required", "Data-namespace")
+          errors += createMessage("entity.error.attribute.required", "dataNamespace")
         }
         else {
           if (!validateNamespace(x)) {
-            errors += createMessage("entity.error.incorrect.service.namespace", "data-namespace", x)
+            errors += createMessage("entity.error.incorrect.service.namespace", "dataNamespace", x)
           }
         }
     }
 
     Option(this.lockProvider) match {
       case None =>
-        errors += createMessage("entity.error.attribute.required", "Lock-provider")
+        errors += createMessage("entity.error.attribute.required", "lockProvider")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("entity.error.attribute.required", "Lock-provider")
+          errors += createMessage("entity.error.attribute.required", "lockProvider")
         } else {
           val lockProviderObj = providerDAO.get(x)
           lockProviderObj match {
@@ -120,7 +120,7 @@ class TstrQServiceData() extends ServiceData() {
               errors += s"Lock-provider '$x' does not exist"
             case Some(provider) =>
               if (provider.providerType != ProviderLiterals.zookeeperType) {
-                errors += createMessage("entity.error.must.one.type.other.given", "Data-provider", ProviderLiterals.zookeeperType, provider.providerType)
+                errors += createMessage("entity.error.must.one.type.other.given", "lockProvider", ProviderLiterals.zookeeperType, provider.providerType)
               }
           }
         }
@@ -129,14 +129,14 @@ class TstrQServiceData() extends ServiceData() {
     // 'lockNamespace' field
     Option(this.lockNamespace) match {
       case None =>
-        errors += createMessage("entity.error.attribute.required", "Lock-namespace")
+        errors += createMessage("entity.error.attribute.required", "lockNamespace")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("entity.error.attribute.required", "Lock-namespace")
+          errors += createMessage("entity.error.attribute.required", "lockNamespace")
         }
         else {
           if (!validateNamespace(x)) {
-            errors += createMessage("entity.error.incorrect.service.namespace", "lock-namespace", x)
+            errors += createMessage("entity.error.incorrect.service.namespace", "lockNamespace", x)
           }
         }
     }
