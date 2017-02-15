@@ -12,6 +12,7 @@ import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.state.{CommonModuleService, StatefulCommonModuleService, StatelessCommonModuleService}
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
+import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
 /**
@@ -31,9 +32,10 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(EngineLiterals.persistentBlockingQueue)
   private val instance = manager.instance.asInstanceOf[RegularInstance]
-  val taskInputService = CallableTaskInput(manager, blockingQueue)
+  private val checkpointGroup = new CheckpointGroup()
   private val moduleService = createRegularModuleService()
   private val executor = moduleService.executor.asInstanceOf[RegularStreamingExecutor[manager._type.type]]
+  val taskInputService = CallableTaskInput[manager._type.type](manager, blockingQueue, checkpointGroup).asInstanceOf[CallableTaskInput[Envelope]]
   private val moduleTimer = moduleService.moduleTimer
   protected val checkpointInterval = instance.checkpointInterval
 
@@ -43,9 +45,9 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
     instance.stateManagement match {
       case EngineLiterals.noneStateMode =>
         logger.debug(s"Task: ${manager.taskName}. Start preparing of regular module without state.")
-        new StatelessCommonModuleService(manager, taskInputService.checkpointGroup, performanceMetrics)
+        new StatelessCommonModuleService(manager, checkpointGroup, performanceMetrics)
       case EngineLiterals.ramStateMode =>
-        new StatefulCommonModuleService(manager, taskInputService.checkpointGroup, performanceMetrics)
+        new StatefulCommonModuleService(manager, checkpointGroup, performanceMetrics)
     }
   }
 

@@ -6,12 +6,11 @@ import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer
 import scala.collection._
 
 /**
- * Provides an output stream that defined for each partition
- *
- *
- * @author Kseniya Mikhaleva
- * @param producer Producer for specific output of stream
- */
+  * Provides an output stream that defined for each partition
+  *
+  * @author Kseniya Mikhaleva
+  * @param producer Producer for specific output of stream
+  */
 
 class PartitionedOutput(producer: Producer[Array[Byte]],
                         performanceMetrics: PerformanceMetrics) extends ModuleOutput(performanceMetrics) {

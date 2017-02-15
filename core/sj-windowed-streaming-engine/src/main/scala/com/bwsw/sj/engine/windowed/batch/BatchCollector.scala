@@ -22,8 +22,8 @@ import scala.collection.Map
 
  * @author Kseniya Mikhaleva
  */
-abstract class BatchCollector(protected val manager: CommonTaskManager,
-                              inputService: RetrievableTaskInput[_ >: TStreamEnvelope with KafkaEnvelope <: Envelope],
+abstract class BatchCollector[T](protected val manager: CommonTaskManager,
+                              inputService: RetrievableTaskInput[Envelope],
                               batchQueue: ArrayBlockingQueue[Batch],
                               performanceMetrics: WindowedStreamingPerformanceMetrics) extends Callable[Unit] {
 
@@ -85,8 +85,8 @@ abstract class BatchCollector(protected val manager: CommonTaskManager,
 object BatchCollector {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  def apply(manager: CommonTaskManager,
-            inputService: RetrievableTaskInput[_ >: TStreamEnvelope with KafkaEnvelope <: Envelope],
+  def apply[T](manager: CommonTaskManager,
+            inputService: RetrievableTaskInput[Envelope],
             batchQueue: ArrayBlockingQueue[Batch],
             performanceMetrics: WindowedStreamingPerformanceMetrics) = {
     val windowedInstance = manager.instance.asInstanceOf[WindowedInstance]
@@ -94,13 +94,13 @@ object BatchCollector {
     windowedInstance.batchFillType.typeName match {
       case EngineLiterals.everyNthMode =>
         logger.info(s"Task: ${manager.taskName}. Windowed module has an '${EngineLiterals.everyNthMode}' batch fill type, create an appropriate batch collector\n")
-        new BatchCollector(manager, inputService, batchQueue, performanceMetrics) with NumericalBatchCollecting
+        new BatchCollector[T](manager, inputService, batchQueue, performanceMetrics) with NumericalBatchCollecting
       case EngineLiterals.timeIntervalMode =>
         logger.info(s"Task: ${manager.taskName}. Windowed module has a '${EngineLiterals.timeIntervalMode}' batch fill type, create an appropriate batch collector\n")
-        new BatchCollector(manager, inputService, batchQueue, performanceMetrics) with TimeBatchCollecting
+        new BatchCollector[T](manager, inputService, batchQueue, performanceMetrics) with TimeBatchCollecting
       case EngineLiterals.transactionIntervalMode =>
         logger.info(s"Task: ${manager.taskName}. Windowed module has a '${EngineLiterals.transactionIntervalMode}' batch fill type, create an appropriate batch collector\n")
-        new BatchCollector(manager, inputService, batchQueue, performanceMetrics) with TransactionBatchCollecting
+        new BatchCollector[T](manager, inputService, batchQueue, performanceMetrics) with TransactionBatchCollecting
     }
   }
 }

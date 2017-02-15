@@ -1,14 +1,14 @@
 package com.bwsw.sj.engine.windowed.task.input
 
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
-import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.entities.Envelope
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-class EnvelopeFetcher(taskInput: RetrievableTaskInput[_ >: TStreamEnvelope with KafkaEnvelope <: Envelope]) {
+class EnvelopeFetcher[T](taskInput: RetrievableTaskInput[Envelope]) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val lowWatermark = ConfigurationSettingsUtils.getLowWatermark()
   private val envelopesByStream = mutable.Map[String, mutable.Queue[Envelope]]()

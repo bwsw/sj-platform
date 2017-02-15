@@ -235,7 +235,7 @@ object DataFactory {
     StreamService.createStream(
       "test-input-tstream" + suffix,
       partitions,
-      1000 * 60,
+      10 * 60,
       "description of test input tstream",
       metadataStorage,
       dataStorage
@@ -256,7 +256,7 @@ object DataFactory {
     StreamService.createStream(
       "test-output-tstream" + suffix,
       partitions,
-      1000 * 60,
+      10 * 60,
       "description of test output tstream",
       metadataStorage,
       dataStorage
@@ -338,7 +338,7 @@ object DataFactory {
     instance.performanceReportingInterval = 10000
     instance.executionPlan = new ExecutionPlan(Map(instanceName + "-task0" -> task, instanceName + "-task1" -> task).asJava)
     instance.engine = "com.bwsw.regular.streaming.engine-1.0"
-    instance.eventWaitIdleTime = 10
+    instance.eventWaitIdleTime = 1000
     instance.coordinationService = serviceManager.get("zookeeper-test-service").get.asInstanceOf[ZKService]
 
     instanceService.save(instance)
@@ -402,10 +402,10 @@ object DataFactory {
       case "tstream" =>
         (1 to count).foreach(x => createTstreamData(countTxns, countElements, streamService, x.toString))
       case "kafka" =>
-        createKafkaData(countTxns, countElements) //needed only once because of kafka doesn't allow delete topics
+        //createKafkaData(countTxns, countElements) //needed only once because of kafka doesn't allow delete topics
       case "both" =>
         (1 to count).foreach(x => createTstreamData(countTxns, countElements, streamService, x.toString))
-        createKafkaData(countTxns, countElements) //needed only one because of kafka doesn't allow delete topics
+        //createKafkaData(countTxns, countElements) //needed only one because of kafka doesn't allow delete topics
       case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: 'tstream', 'kafka', 'both'")
     }
   }

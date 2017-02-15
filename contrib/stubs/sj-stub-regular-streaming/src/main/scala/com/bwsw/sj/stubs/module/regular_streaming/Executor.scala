@@ -8,7 +8,7 @@ import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.state.StateStorage
 
-class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor(manager) {
+class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor[Array[Byte]](manager) {
 
   val objectSerializer = new ObjectSerializer()
   val state: StateStorage = manager.getState
@@ -29,13 +29,13 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
 
     if (new Random().nextInt(100) < 5) throw new Exception("it happened")
     envelope match {
-      case kafkaEnvelope: KafkaEnvelope =>
+      case kafkaEnvelope: KafkaEnvelope[Array[Byte] @unchecked] =>
         println("element: " +
           objectSerializer.deserialize(kafkaEnvelope.data).asInstanceOf[Int])
         output.put(kafkaEnvelope.data)
         sum += objectSerializer.deserialize(kafkaEnvelope.data).asInstanceOf[Int]
         state.set("sum", sum)
-      case tstreamEnvelope: TStreamEnvelope =>
+      case tstreamEnvelope: TStreamEnvelope[Array[Byte] @unchecked] =>
         println("elements: " +
           tstreamEnvelope.data.map(x => objectSerializer.deserialize(x).asInstanceOf[Int]).mkString(","))
 

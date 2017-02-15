@@ -25,13 +25,11 @@ class ConsumerCallback(blockingQueue: PersistentBlockingQueue) extends Callback[
     logger.debug(s"onTransaction handler was invoked by subscriber: ${consumer.name}.")
     val stream = ConnectionRepository.getStreamService.get(consumer.stream.name).get
 
-    val envelope = new TStreamEnvelope()
+    val envelope = new TStreamEnvelope(transaction.getAll(), consumer.name)
     envelope.stream = stream.name
     envelope.partition = transaction.getPartition()
-    envelope.id = transaction.getTransactionID()
-    envelope.consumerName = consumer.name
-    envelope.data = transaction.getAll()
     envelope.tags = stream.tags
+    envelope.id = transaction.getTransactionID()
 
     blockingQueue.put(envelopeSerializer.serialize(envelope))
   }

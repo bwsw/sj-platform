@@ -16,8 +16,8 @@ import org.apache.curator.framework.recipes.barriers.DistributedDoubleBarrier
 import org.apache.curator.retry.ExponentialBackoffRetry
 import org.slf4j.LoggerFactory
 
-class WindowedTaskEngine(protected val manager: CommonTaskManager,
-                         inputService: RetrievableTaskInput[_ >: TStreamEnvelope with KafkaEnvelope <: Envelope],
+class WindowedTaskEngine[T](protected val manager: CommonTaskManager,
+                         inputService: RetrievableTaskInput[Envelope],
                          batchQueue: ArrayBlockingQueue[Batch],
                          performanceMetrics: WindowedStreamingPerformanceMetrics) extends Callable[Unit] {
 

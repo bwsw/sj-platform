@@ -15,7 +15,7 @@ import com.bwsw.sj.examples.sflow.module.output.data.TrafficMetrics
  *
  * @author Kseniya Mikhaleva
  */
-class SflowOutputExecutor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor(manager) {
+class SflowOutputExecutor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[Array[Byte]](manager) {
   val jsonSerializer = new JsonSerializer()
   val objectSerializer = new ObjectSerializer()
 
@@ -25,7 +25,7 @@ class SflowOutputExecutor(manager: OutputEnvironmentManager) extends OutputStrea
    * @param envelope Input T-Stream envelope
    * @return List of output envelopes
    */
-  override def onMessage(envelope: TStreamEnvelope): List[Envelope] = {
+  override def onMessage(envelope: TStreamEnvelope[Array[Byte]]): List[Envelope] = {
     val list = envelope.data.map { bytes =>
       val data = new TrafficMetrics()
       val rawData = objectSerializer.deserialize(bytes).asInstanceOf[String].split(",")

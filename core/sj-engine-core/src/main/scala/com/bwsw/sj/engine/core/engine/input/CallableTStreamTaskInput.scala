@@ -25,10 +25,10 @@ import org.slf4j.LoggerFactory
  * @author Kseniya Mikhaleva
  *
  */
-class CallableTStreamTaskInput(manager: TaskManager,
+class CallableTStreamTaskInput[T](manager: TaskManager,
                               blockingQueue: PersistentBlockingQueue,
                               override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
-  extends CallableTaskInput[TStreamEnvelope](manager.inputs) {
+  extends CallableTaskInput[TStreamEnvelope[T]](manager.inputs) { //todo подумать!!
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val consumers = createSubscribingConsumers()
 
@@ -95,7 +95,7 @@ class CallableTStreamTaskInput(manager: TaskManager,
     logger.debug(s"Task: ${manager.taskName}. Subscribing consumers are launched.")
   }
 
-  override def setConsumerOffset(envelope: TStreamEnvelope) = {
+  override def setConsumerOffset(envelope: TStreamEnvelope[T]) = {
     logger.debug(s"Task: ${manager.taskName}. " +
       s"Change local offset of consumer: ${envelope.consumerName} to txn: ${envelope.id}.")
     consumers(envelope.consumerName).getConsumer().setStreamPartitionOffset(envelope.partition, envelope.id)

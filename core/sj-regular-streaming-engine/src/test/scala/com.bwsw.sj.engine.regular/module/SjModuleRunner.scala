@@ -39,7 +39,7 @@ object SjModuleSetup extends App {
 }
 
 object SjModuleRunner extends App {
-  LogManager.getLogManager.reset()
+  //LogManager.getLogManager.reset()
   RegularTaskRunner.main(Array())
 }
 

@@ -4,13 +4,12 @@ import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer, ProducerTransaction}
 
 /**
- * Provides an output stream that defined for stream in whole.
- * Recording of transaction occurs with the use of round-robin policy
- *
- *
- * @author Kseniya Mikhaleva
- * @param producer Producer for specific output of stream
- */
+  * Provides an output stream that defined for stream in whole.
+  * Recording of transaction occurs with the use of round-robin policy
+  *
+  * @author Kseniya Mikhaleva
+  * @param producer Producer for specific output of stream
+  */
 
 class RoundRobinOutput(producer: Producer[Array[Byte]],
                        performanceMetrics: PerformanceMetrics) extends ModuleOutput(performanceMetrics) {

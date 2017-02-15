@@ -41,10 +41,10 @@ class Executor(manager: ModuleEnvironmentManager) extends WindowedStreamingExecu
     })
 
     allWindows.flatMap(x => x._2.batches.slice(begin, end)).flatMap(x => x.envelopes).foreach {
-      case kafkaEnvelope: KafkaEnvelope =>
+      case kafkaEnvelope: KafkaEnvelope[Array[Byte] @unchecked] =>
         sum += objectSerializer.deserialize(kafkaEnvelope.data).asInstanceOf[Int]
         state.set("sum", sum)
-      case tstreamEnvelope: TStreamEnvelope =>
+      case tstreamEnvelope: TStreamEnvelope[Array[Byte] @unchecked] =>
         tstreamEnvelope.data.foreach(x => {
           sum += objectSerializer.deserialize(x).asInstanceOf[Int]
         })

@@ -9,7 +9,7 @@ import com.bwsw.sj.examples.sflow.module.output.data._
 /**
   * Created by diryavkin_dn on 13.01.17.
   */
-class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor(manager) {
+class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[Array[Byte]](manager) {
   val jsonSerializer = new JsonSerializer()
   val objectSerializer = new ObjectSerializer()
 
@@ -19,7 +19,7 @@ class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecuto
     * @param envelope Input T-Stream envelope
     * @return List of output envelopes
     */
-  override def onMessage(envelope: TStreamEnvelope): List[Envelope] = {
+  override def onMessage(envelope: TStreamEnvelope[Array[Byte]]): List[Envelope] = {
     val list:List[Envelope] = List[Envelope]()
     envelope.data.foreach { row =>
       val value = objectSerializer.deserialize(row)

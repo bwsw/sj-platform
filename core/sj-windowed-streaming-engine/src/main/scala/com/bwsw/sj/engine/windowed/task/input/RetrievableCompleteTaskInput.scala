@@ -10,19 +10,19 @@ import org.slf4j.LoggerFactory
  *
  * @author Kseniya Mikhaleva
  */
-class RetrievableCompleteTaskInput(manager: CommonTaskManager) extends {
+class RetrievableCompleteTaskInput[T](manager: CommonTaskManager) extends {
   override val checkpointGroup = new CheckpointGroup()
 } with RetrievableTaskInput[Envelope](manager.inputs) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val kafkaRegularTaskInputService = new RetrievableKafkaTaskInput(manager, checkpointGroup)
-  private val tStreamRegularTaskInputService = new RetrievableTStreamTaskInput(manager, checkpointGroup)
+  private val kafkaRegularTaskInputService = new RetrievableKafkaTaskInput[T](manager, checkpointGroup)
+  private val tStreamRegularTaskInputService = new RetrievableTStreamTaskInput[T](manager, checkpointGroup)
 
   override def registerEnvelope(envelope: Envelope) = {
     envelope match {
-      case tstreamEnvelope: TStreamEnvelope =>
+      case tstreamEnvelope: TStreamEnvelope[T] =>
         tStreamRegularTaskInputService.registerEnvelope(tstreamEnvelope)
-      case kafkaEnvelope: KafkaEnvelope =>
+      case kafkaEnvelope: KafkaEnvelope[T] =>
         kafkaRegularTaskInputService.registerEnvelope(kafkaEnvelope)
       case wrongEnvelope =>
         logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for windowed streaming engine")
@@ -41,9 +41,9 @@ class RetrievableCompleteTaskInput(manager: CommonTaskManager) extends {
 
   override def setConsumerOffset(envelope: Envelope) = {
     envelope match {
-      case tstreamEnvelope: TStreamEnvelope =>
+      case tstreamEnvelope: TStreamEnvelope[T] =>
         tStreamRegularTaskInputService.setConsumerOffset(tstreamEnvelope)
-      case kafkaEnvelope: KafkaEnvelope =>
+      case kafkaEnvelope: KafkaEnvelope[T] =>
         kafkaRegularTaskInputService.setConsumerOffset(kafkaEnvelope)
       case wrongEnvelope =>
         logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for windowed streaming engine")

@@ -18,9 +18,9 @@ import scala.collection.JavaConverters._
  *
  * @author Kseniya Mikhaleva
  */
-class RetrievableKafkaTaskInput(override val manager: CommonTaskManager,
+class RetrievableKafkaTaskInput[T](override val manager: CommonTaskManager,
                                 override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
-  extends RetrievableTaskInput[KafkaEnvelope](manager.inputs) with KafkaTaskInput {
+  extends RetrievableTaskInput[KafkaEnvelope[T]](manager.inputs) with KafkaTaskInput[T] {
   currentThread.setName(s"windowed-task-${manager.taskName}-kafka-consumer")
 
   override def chooseOffset() = {
@@ -34,7 +34,7 @@ class RetrievableKafkaTaskInput(override val manager: CommonTaskManager,
   override def get() = {
     logger.debug(s"Task: ${manager.taskName}. Waiting for records that consumed from kafka for $kafkaSubscriberTimeout milliseconds.")
     val records = kafkaConsumer.poll(kafkaSubscriberTimeout)
-    records.asScala.map(consumerRecordToEnvelope)
+    records.asScala.map(consumerRecordToEnvelope).map(_.asInstanceOf[KafkaEnvelope[T]]) //todo deserialize
   }
 
   override def setConsumerOffsetToLastEnvelope() = {

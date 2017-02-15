@@ -23,10 +23,10 @@ import scala.collection.JavaConverters._
  * @param blockingQueue Blocking queue for keeping incoming envelopes that are serialized into a string,
  *                      which will be retrieved into a module
  */
-class CallableKafkaTaskInput(override val manager: CommonTaskManager,
+class CallableKafkaTaskInput[T](override val manager: CommonTaskManager,
                             blockingQueue: PersistentBlockingQueue,
                             override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
-  extends CallableTaskInput[KafkaEnvelope](manager.inputs) with KafkaTaskInput {
+  extends CallableTaskInput[KafkaEnvelope[T]](manager.inputs) with KafkaTaskInput[T] {
   currentThread.setName(s"regular-task-${manager.taskName}-kafka-consumer")
 
   def chooseOffset() = {

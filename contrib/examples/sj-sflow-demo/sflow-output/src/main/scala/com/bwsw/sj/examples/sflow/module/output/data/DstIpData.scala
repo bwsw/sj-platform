@@ -8,7 +8,7 @@ import com.bwsw.sj.engine.core.entities.Envelope
 class DstIpData(dst_ip_field: String, traffic_field: Int) extends Envelope{
   val dst_ip: String = dst_ip_field
   val traffic: Int = traffic_field
-  var id: String = ""
+
 }
 
 

@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
-trait KafkaTaskInput {
+trait KafkaTaskInput[T] {
   protected val manager: CommonTaskManager
   protected val checkpointGroup: CheckpointGroup
   protected val currentThread = Thread.currentThread()
@@ -35,7 +35,7 @@ trait KafkaTaskInput {
   protected val offsetProducer = createOffsetProducer()
   addOffsetProducerToCheckpointGroup()
 
-  protected val kafkaConsumer: KafkaConsumer[Array[Byte], Array[Byte]] = createSubscribingKafkaConsumer(
+  protected val kafkaConsumer = createSubscribingKafkaConsumer(
     kafkaInputs.map(x => (x._1.name, x._2.toList)).toList,
     kafkaInputs.flatMap(_._1.service.asInstanceOf[KafkaService].provider.hosts).toList,
     chooseOffset()
@@ -46,12 +46,12 @@ trait KafkaTaskInput {
   }
 
   /**
-   * Creates SJStream is responsible for committing the offsets of last messages
-   * that has successfully processed for each topic for each partition
-   *
-   * @return SJStream is responsible for committing the offsets of last messages
-   *         that has successfully processed for each topic for each partition
-   */
+    * Creates SJStream is responsible for committing the offsets of last messages
+    * that has successfully processed for each topic for each partition
+    *
+    * @return SJStream is responsible for committing the offsets of last messages
+    *         that has successfully processed for each topic for each partition
+    */
   protected def createOffsetStream() = {
     logger.debug(s"Task name: ${manager.taskName}. Get stream for keeping kafka offsets.")
     val description = "store kafka offsets of input streams"
@@ -80,19 +80,19 @@ trait KafkaTaskInput {
   }
 
   /**
-   * Creates a kafka consumer for all input streams of kafka type.
-   * If there was a checkpoint with offsets of last consumed messages for each topic/partition
-   * then consumer will fetch from this offsets otherwise in accordance with offset parameter
-   *
-   * @param topics Set of kafka topic names and range of partitions relatively
-   * @param hosts Addresses of kafka brokers in host:port format
-   * @param offset Default policy for kafka consumer (earliest/latest)
-   * @return Kafka consumer subscribed to topics
-   */
+    * Creates a kafka consumer for all input streams of kafka type.
+    * If there was a checkpoint with offsets of last consumed messages for each topic/partition
+    * then consumer will fetch from this offsets otherwise in accordance with offset parameter
+    *
+    * @param topics Set of kafka topic names and range of partitions relatively
+    * @param hosts  Addresses of kafka brokers in host:port format
+    * @param offset Default policy for kafka consumer (earliest/latest)
+    * @return Kafka consumer subscribed to topics
+    */
   protected def createSubscribingKafkaConsumer(topics: List[(String, List[Int])], hosts: List[String], offset: String) = {
     logger.debug(s"Task name: ${manager.taskName}. Create kafka consumer for topics (with their partitions): " +
       s"${topics.map(x => s"topic name: ${x._1}, " + s"partitions: ${x._2.mkString(",")}").mkString(",")}.")
-    val consumer: KafkaConsumer[Array[Byte], Array[Byte]] = createKafkaConsumer(hosts, offset)
+    val consumer = createKafkaConsumer(hosts, offset)
 
     assignKafkaConsumerOnTopics(consumer, topics)
 
@@ -122,7 +122,7 @@ trait KafkaTaskInput {
     logger.debug(s"Task: ${manager.taskName}. Assign a kafka consumer to particular topics.")
     val topicPartitions = topics
       .flatMap(x => (x._2.head to x._2.tail.head)
-      .map(y => new TopicPartition(x._1, y))).asJava
+        .map(y => new TopicPartition(x._1, y))).asJava
 
     consumer.assign(topicPartitions)
   }
@@ -162,19 +162,18 @@ trait KafkaTaskInput {
 
   protected def consumerRecordToEnvelope(consumerRecord: ConsumerRecord[Array[Byte], Array[Byte]]) = {
     logger.debug(s"Task name: ${manager.taskName}. Convert a consumed kafka record to kafka envelope.")
-    val envelope = new KafkaEnvelope()
+    val envelope = new KafkaEnvelope(consumerRecord.value())
     envelope.stream = consumerRecord.topic()
     envelope.partition = consumerRecord.partition()
-    envelope.data = consumerRecord.value()
-    envelope.offset = consumerRecord.offset()
     envelope.tags = streamNamesToTags(consumerRecord.topic())
+    envelope.id = consumerRecord.offset()
 
     envelope
   }
 
-  def setConsumerOffset(envelope: KafkaEnvelope) = {
+  def setConsumerOffset(envelope: KafkaEnvelope[T]) = {
     logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${envelope.stream} " +
-      s"for partition: ${envelope.partition} to ${envelope.offset}.")
-    kafkaOffsetsStorage((envelope.stream, envelope.partition)) = envelope.offset
+      s"for partition: ${envelope.partition} to ${envelope.id}.")
+    kafkaOffsetsStorage((envelope.stream, envelope.partition)) = envelope.id
   }
 }

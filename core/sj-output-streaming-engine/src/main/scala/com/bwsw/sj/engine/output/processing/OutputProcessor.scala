@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
  * This class used in OutputTaskEngine for sending data to different storage.
  * Create concrete handler and realize remove() and send() methods.
  */
-abstract class OutputProcessor(outputStream: SjStream,
+abstract class OutputProcessor[T](outputStream: SjStream,
                                performanceMetrics: OutputStreamingPerformanceMetrics) {
   protected val logger = LoggerFactory.getLogger(this.getClass)
   private val byteSerializer = new ObjectSerializer()
@@ -24,20 +24,20 @@ abstract class OutputProcessor(outputStream: SjStream,
    * @param inputEnvelope: received envelope
    * @param wasFirstCheckpoint: boolean
    */
-  def process(envelopes: List[Envelope], inputEnvelope: TStreamEnvelope, wasFirstCheckpoint: Boolean) = {
+  def process(envelopes: List[Envelope], inputEnvelope: TStreamEnvelope[T], wasFirstCheckpoint: Boolean) = {
     logger.debug("Process a set of envelopes that should be sent to output of specific type.")
     if (!wasFirstCheckpoint) remove(inputEnvelope)
     envelopes.foreach(envelope => registerAndSendEnvelope(envelope, inputEnvelope))
   }
 
-  def remove(envelope: TStreamEnvelope)
+  def remove(envelope: TStreamEnvelope[T])
 
   def close()
 
   /**
    * Registration envelope in performance metrics, and then sending to storage
    */
-  private def registerAndSendEnvelope(outputEnvelope: Envelope, inputEnvelope: TStreamEnvelope) = {
+  private def registerAndSendEnvelope(outputEnvelope: Envelope, inputEnvelope: TStreamEnvelope[T]) = {
     registerOutputEnvelope(inputEnvelope.id.toString.replaceAll("-", ""), outputEnvelope)
     send(outputEnvelope, inputEnvelope)
   }
@@ -60,16 +60,16 @@ abstract class OutputProcessor(outputStream: SjStream,
    * @param envelope: processed envelope
    * @param inputEnvelope: received envelope
    */
-  protected def send(envelope: Envelope, inputEnvelope: TStreamEnvelope)
+  protected def send(envelope: Envelope, inputEnvelope: TStreamEnvelope[T])
 }
 
 object OutputProcessor {
-  def apply(outputStream: SjStream, performanceMetrics: OutputStreamingPerformanceMetrics, manager: OutputTaskManager) = {
+  def apply[T](outputStream: SjStream, performanceMetrics: OutputStreamingPerformanceMetrics, manager: OutputTaskManager) = {
     outputStream.streamType match {
       case StreamLiterals.esOutputType =>
-        new EsOutputProcessor(outputStream, performanceMetrics, manager)
+        new EsOutputProcessor[T](outputStream, performanceMetrics, manager)
       case StreamLiterals.jdbcOutputType =>
-        new JdbcOutputProcessor(outputStream, performanceMetrics)
+        new JdbcOutputProcessor[T](outputStream, performanceMetrics)
     }
   }
 }

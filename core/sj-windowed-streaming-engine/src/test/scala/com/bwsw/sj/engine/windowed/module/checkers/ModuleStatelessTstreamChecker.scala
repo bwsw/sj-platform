@@ -52,11 +52,11 @@ object ModuleStatelessTstreamChecker extends App {
         while (transaction.hasNext()) {
           val batch = objectSerializer.deserialize(transaction.next()).asInstanceOf[Batch]
           batch.envelopes.foreach {
-            case tstreamEnvelope: TStreamEnvelope => tstreamEnvelope.data.foreach(x => {
+            case tstreamEnvelope: TStreamEnvelope[Array[Byte] @unchecked] => tstreamEnvelope.data.foreach(x => {
               outputElements.+=(objectSerializer.deserialize(x).asInstanceOf[Int])
               totalOutputElements += 1
             })
-            case kafkaEnvelope: KafkaEnvelope =>
+            case kafkaEnvelope: KafkaEnvelope[Array[Byte] @unchecked] =>
               outputElements.+=(objectSerializer.deserialize(kafkaEnvelope.data).asInstanceOf[Int])
               totalOutputElements += 1
           }

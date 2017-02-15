@@ -16,15 +16,15 @@ import org.slf4j.LoggerFactory
 import scala.collection.mutable
 
 /**
- * Class is responsible for launching t-stream consumers
- * that allow to fetching messages, which are wrapped in envelope
- *
- * @author Kseniya Mikhaleva
- *
- */
-class RetrievableTStreamTaskInput(manager: CommonTaskManager,
-                   override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
-  extends RetrievableTaskInput[TStreamEnvelope](manager.inputs) {
+  * Class is responsible for launching t-stream consumers
+  * that allow to fetching messages, which are wrapped in envelope
+  *
+  * @author Kseniya Mikhaleva
+  *
+  */
+class RetrievableTStreamTaskInput[T](manager: CommonTaskManager,
+                                     override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
+  extends RetrievableTaskInput[TStreamEnvelope[T]](manager.inputs) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val instance = manager.instance.asInstanceOf[WindowedInstance]
   private val tstreamOffsetsStorage = mutable.Map[(String, Int), Long]()
@@ -47,10 +47,10 @@ class RetrievableTStreamTaskInput(manager: CommonTaskManager,
   }
 
   /**
-   * Chooses offset policy for t-streams consumers
-   *
-   * @param startFrom Offset policy name or specific date
-   */
+    * Chooses offset policy for t-streams consumers
+    *
+    * @param startFrom Offset policy name or specific date
+    */
   private def chooseOffset(startFrom: String): IOffset = {
     logger.debug(s"Choose offset policy for t-streams consumer.")
     startFrom match {
@@ -65,7 +65,7 @@ class RetrievableTStreamTaskInput(manager: CommonTaskManager,
       val consumer = x._2
       val transactions = getAvailableTransactions(consumer)
       transactionsToEnvelopes(transactions, consumer)
-    })
+    }).map(_.asInstanceOf[TStreamEnvelope[T]]) //todo deserialize
   }
 
   private def getAvailableTransactions(consumer: Consumer[Array[Byte]]) = {
@@ -82,13 +82,11 @@ class RetrievableTStreamTaskInput(manager: CommonTaskManager,
     transactions.map((transaction: ConsumerTransaction[Array[Byte]]) => {
       val tempTransaction = consumer.buildTransactionObject(transaction.getPartition(), transaction.getTransactionID(), transaction.getCount()).get //todo fix it next milestone TR1216
       tstreamOffsetsStorage((consumer.name, tempTransaction.getPartition())) = tempTransaction.getTransactionID()
-      val envelope = new TStreamEnvelope()
+      val envelope = new TStreamEnvelope(tempTransaction.getAll(), consumer.name)
       envelope.stream = stream.name
       envelope.partition = tempTransaction.getPartition()
-      envelope.id = tempTransaction.getTransactionID()
-      envelope.consumerName = consumer.name
-      envelope.data = tempTransaction.getAll()
       envelope.tags = stream.tags
+      envelope.id = tempTransaction.getTransactionID()
 
       envelope
     })
@@ -111,7 +109,7 @@ class RetrievableTStreamTaskInput(manager: CommonTaskManager,
     logger.debug(s"Task: ${manager.taskName}. Subscribing consumers are launched.")
   }
 
-  override def setConsumerOffset(envelope: TStreamEnvelope) = {
+  override def setConsumerOffset(envelope: TStreamEnvelope[T]) = {
     logger.debug(s"Task: ${manager.taskName}. " +
       s"Change local offset of consumer: ${envelope.consumerName} to txn: ${envelope.id}.")
     consumers(envelope.consumerName).setStreamPartitionOffset(envelope.partition, envelope.id)

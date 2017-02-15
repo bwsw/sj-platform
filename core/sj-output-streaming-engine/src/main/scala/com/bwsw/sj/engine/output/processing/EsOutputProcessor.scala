@@ -11,10 +11,10 @@ import org.elasticsearch.index.query.QueryBuilders
 
 import scala.collection.mutable
 
-class EsOutputProcessor(outputStream: SjStream,
+class EsOutputProcessor[T](outputStream: SjStream,
                         performanceMetrics: OutputStreamingPerformanceMetrics,
                         manager: OutputTaskManager)
-  extends OutputProcessor(outputStream, performanceMetrics) {
+  extends OutputProcessor[T](outputStream, performanceMetrics) {
 
   private val envelopeSerializer = new JsonSerializer()
   private val esService = outputStream.service.asInstanceOf[ESService]
@@ -74,7 +74,7 @@ class EsOutputProcessor(outputStream: SjStream,
     }
   }
 
-  def remove(envelope: TStreamEnvelope) = {
+  def remove(envelope: TStreamEnvelope[T]) = {
     val transaction = envelope.id.toString.replaceAll("-", "")
     removeTransaction(transaction)
   }
@@ -90,7 +90,7 @@ class EsOutputProcessor(outputStream: SjStream,
     }
   }
 
-  def send(envelope: Envelope, inputEnvelope: TStreamEnvelope) = {
+  def send(envelope: Envelope, inputEnvelope: TStreamEnvelope[T]) = {
     val esEnvelope = envelope.asInstanceOf[EsEnvelope]
     esEnvelope.outputDateTime = s"${Calendar.getInstance().getTimeInMillis}"
     esEnvelope.transactionDateTime = s"${inputEnvelope.id}".dropRight(4)

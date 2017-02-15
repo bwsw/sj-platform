@@ -26,7 +26,7 @@ class OutputStreamingExecutor[T: TypeTag](manager: OutputEnvironmentManager) ext
     * or JDBC type.
     *
     */
-  def onMessage(envelope: TStreamEnvelope): List[Envelope] = {
+  def onMessage(envelope: TStreamEnvelope[T]): List[Envelope] = {
     List()
   }
 }

@@ -8,6 +8,6 @@ import com.bwsw.sj.engine.core.entities.Envelope
 class SrcIpData(src_ip_field: String, traffic_field: Int) extends Envelope {
   var src_ip: String = src_ip_field
   var traffic: Int = traffic_field
-  var id: String = ""
+
 }
 

@@ -9,7 +9,6 @@ class SrcDstData(src_as_field: Int, dst_as_field: Int, traffic_field: Int) exten
   var src_as: Int = src_as_field
   var dst_as: Int = dst_as_field
   var traffic: Int = traffic_field
-  var id: String = ""
 }
 
 

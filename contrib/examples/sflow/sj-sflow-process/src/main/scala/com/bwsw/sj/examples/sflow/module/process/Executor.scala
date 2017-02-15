@@ -8,7 +8,7 @@ import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.state.StateStorage
 
 
-class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor(manager) {
+class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor[Array[Byte]](manager) {
 
   val objectSerializer = new ObjectSerializer()
   val state: StateStorage = manager.getState
@@ -25,7 +25,7 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
   override def onMessage(envelope: Envelope): Unit = {
 
     envelope match {
-      case kafkaEnvelope: KafkaEnvelope =>
+      case kafkaEnvelope: KafkaEnvelope[Array[Byte] @unchecked] =>
         val maybeSflow = SflowParser.parse(kafkaEnvelope.data)
         if (maybeSflow.isDefined) {
           val sflowRecord = maybeSflow.get
@@ -46,7 +46,7 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
           trafficSumBetweenAs += bandwidth
           state.set(s"traffic-sum-between-$prefixAsToAs", trafficSumBetweenAs)
         }
-      case tstreamEnvelope: TStreamEnvelope =>
+      case tstreamEnvelope: TStreamEnvelope[Array[Byte] @unchecked] =>
         println("t-stream envelope is received")
     }
 
