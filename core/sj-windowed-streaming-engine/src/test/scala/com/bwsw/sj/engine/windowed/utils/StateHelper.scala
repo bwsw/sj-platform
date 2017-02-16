@@ -12,7 +12,8 @@ object StateHelper {
   def getState(consumer: Consumer[Array[Byte]], objectSerializer: ObjectSerializer) = {
 
     val initialState = mutable.Map[String, Any]()
-    val lastTxn = consumer.getLastTransaction(0).get
+    val tempTransaction = consumer.getLastTransaction(0).get
+    val lastTxn = consumer.buildTransactionObject(tempTransaction.getPartition(), tempTransaction.getTransactionID(), tempTransaction.getCount()).get //todo fix it next milestone TR1216
     var value = objectSerializer.deserialize(lastTxn.next())
     value match {
       case variable: (Any, Any) =>
