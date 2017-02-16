@@ -17,7 +17,6 @@ object ConnectionConstants {
   lazy val configCollection = "config.file"
   lazy val mongoUser:Option[String] = Option(System.getenv("MONGO_USER"))
   lazy val mongoPassword:Option[String] = Option(System.getenv("MONGO_PASSWORD"))
-  lazy val mongoAuth:Option[String] = Option(System.getenv("MONGO_AUTH"))
 
   var authEnable: Boolean = isAuthRequired
 
