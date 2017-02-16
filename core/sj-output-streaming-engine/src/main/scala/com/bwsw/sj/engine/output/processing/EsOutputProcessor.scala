@@ -16,7 +16,7 @@ class EsOutputProcessor[T](outputStream: SjStream,
                         manager: OutputTaskManager)
   extends OutputProcessor[T](outputStream, performanceMetrics) {
 
-  private val envelopeSerializer = new JsonSerializer()
+  private val jsonSerializer = new JsonSerializer()
   private val esService = outputStream.service.asInstanceOf[ESService]
   private val esClient = openConnection()
   prepareIndex()
@@ -53,7 +53,7 @@ class EsOutputProcessor[T](outputStream: SjStream,
     val fields = createGeneralFields()
     addCustomFields(fields)
     val mapping = Map("properties" -> fields)
-    val mappingSource = envelopeSerializer.serialize(mapping)
+    val mappingSource = jsonSerializer.serialize(mapping)
 
     mappingSource
   }
@@ -100,7 +100,7 @@ class EsOutputProcessor[T](outputStream: SjStream,
     esEnvelope.tags = inputEnvelope.tags
 
     logger.debug(s"Task: ${manager.taskName}. Write an output envelope to elasticsearch stream.")
-    esClient.write(envelopeSerializer.serialize(esEnvelope), esService.index, outputStream.name)
+    esClient.write(jsonSerializer.serialize(esEnvelope), esService.index, outputStream.name)
   }
 
   override def close() = {

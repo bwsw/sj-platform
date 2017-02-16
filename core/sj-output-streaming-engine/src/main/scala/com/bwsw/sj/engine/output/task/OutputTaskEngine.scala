@@ -2,13 +2,12 @@ package com.bwsw.sj.engine.output.task
 
 import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
 
-import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.SjStream
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.engine.core.engine.input.CallableTStreamTaskInput
 import com.bwsw.sj.engine.core.engine.NumericalCheckpointTaskEngine
+import com.bwsw.sj.engine.core.engine.input.CallableTStreamTaskInput
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.output.processing.OutputProcessor
@@ -31,7 +30,6 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   currentThread.setName(s"output-task-${manager.taskName}-engine")
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val blockingQueue = new ArrayBlockingQueue[Envelope](EngineLiterals.queueSize)
-  private val envelopeSerializer = new JsonSerializer()
   private val instance = manager.instance.asInstanceOf[OutputInstance]
   private val outputStream = getOutputStream
   private val environmentManager = createModuleEnvironmentManager()

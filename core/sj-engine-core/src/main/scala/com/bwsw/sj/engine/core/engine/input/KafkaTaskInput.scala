@@ -10,7 +10,7 @@ import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.entities.KafkaEnvelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
-import com.bwsw.tstreams.agents.consumer.Offset.Newest
+import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.apache.kafka.clients.consumer.{ConsumerRecord, KafkaConsumer}
 import org.apache.kafka.common.TopicPartition
@@ -135,7 +135,7 @@ trait KafkaTaskInput[T] {
     val offsetConsumer = manager.createConsumer(
       offsetStream,
       partitionsRange,
-      Newest
+      Oldest
     )
 
     offsetConsumer.start()
@@ -143,8 +143,9 @@ trait KafkaTaskInput[T] {
     val maybeTxn = offsetConsumer.getLastTransaction(partition)
 
     if (maybeTxn.isDefined) {
-      val lastTxn = maybeTxn.get
+      val tempTransaction = maybeTxn.get
       logger.debug(s"Task name: ${manager.taskName}. Get saved offsets for kafka consumer and apply them.")
+      val lastTxn = offsetConsumer.buildTransactionObject(tempTransaction.getPartition(), tempTransaction.getTransactionID(), tempTransaction.getCount()).get //todo fix it next milestone TR1216
       kafkaOffsetsStorage = offsetSerializer.deserialize(lastTxn.next()).asInstanceOf[mutable.Map[(String, Int), Long]]
       kafkaOffsetsStorage.foreach(x => consumer.seek(new TopicPartition(x._1._1, x._1._2), x._2 + 1))
     }

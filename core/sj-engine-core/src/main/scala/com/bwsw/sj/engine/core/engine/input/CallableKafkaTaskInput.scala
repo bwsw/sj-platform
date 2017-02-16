@@ -2,7 +2,6 @@ package com.bwsw.sj.engine.core.engine.input
 
 import java.util.concurrent.ArrayBlockingQueue
 
-import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope}
@@ -42,8 +41,6 @@ class CallableKafkaTaskInput[T](override val manager: CommonTaskManager,
   override def call() = {
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Run a kafka consumer for regular task in a separate thread of execution service.")
-
-    val envelopeSerializer = new JsonSerializer()
 
     while (true) {
       logger.debug(s"Task: ${manager.taskName}. Waiting for records that consumed from kafka for $kafkaSubscriberTimeout milliseconds.")

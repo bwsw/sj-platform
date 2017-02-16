@@ -2,7 +2,6 @@ package com.bwsw.sj.engine.core.engine.input
 
 import java.util.concurrent.ArrayBlockingQueue
 
-import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.tstreams.agents.consumer.subscriber.Callback
@@ -19,7 +18,6 @@ import org.slf4j.LoggerFactory
 
 class ConsumerCallback(blockingQueue: ArrayBlockingQueue[Envelope]) extends Callback[Array[Byte]] {
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val envelopeSerializer = new JsonSerializer()
 
   override def onTransaction(operator: TransactionOperator[Array[Byte]], transaction: ConsumerTransaction[Array[Byte]]) = {
     val consumer = operator.asInstanceOf[Consumer[Array[Byte]]]
