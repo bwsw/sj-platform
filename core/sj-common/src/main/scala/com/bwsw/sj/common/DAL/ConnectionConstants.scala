@@ -17,6 +17,7 @@ object ConnectionConstants {
   lazy val configCollection = "config.file"
   lazy val mongoUser:Option[String] = Option(System.getenv("MONGO_USER"))
   lazy val mongoPassword:Option[String] = Option(System.getenv("MONGO_PASSWORD"))
+  lazy val mongoAuth:Option[String] = Option(System.getenv("MONGO_AUTH"))
 
   var authEnable: Boolean = isAuthRequired
 
@@ -43,12 +44,12 @@ object ConnectionConstants {
 
   def checkConnection(client:com.mongodb.casbah.MongoClient):Boolean = {
     try {
-      println("CREDENTIALS: ", client.)
       client(databaseName).collectionNames()
       false
     } catch {
       case e: com.mongodb.MongoCommandException => true
-      case e: MongoTimeoutException => true
+      case e: MongoTimeoutException => throw new MongoClientException(s"Something went wrong: timeout exception caught. " +
+        s"Check connection setting: hosts and credentials.")
       case e: MongoException => throw new Exception(s"Unexpected exception: ${e.getMessage}, ${e.getClass}")
     } finally {
       client.close()
