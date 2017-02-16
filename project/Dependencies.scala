@@ -47,9 +47,7 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty"),
-    ("net.openhft" % "chronicle-queue" % "4.5.19")
-      .exclude("org.slf4j", "slf4j-api")
+      .exclude("io.netty", "netty")
   ))
 
   lazy val sjRestDependencies = Def.setting(Seq(
@@ -73,8 +71,7 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty"),
-    "net.openhft" % "chronicle-queue" % "4.5.19" % "provided"
+      .exclude("io.netty", "netty")
   ))
 
   lazy val sjWindowedEngineDependencies = Def.setting(Seq(

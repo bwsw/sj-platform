@@ -19,7 +19,7 @@ object SjModuleSetup extends App {
   val checkpointInterval = 4
   val stateManagement = "ram"
   val stateFullCheckpoint = 3
-  val _type = "tstream"
+  val _type = "both"
 
   val module = new File("./contrib/stubs/sj-stub-regular-streaming/target/scala-2.12/sj-stub-regular-streaming-1.0-SNAPSHOT.jar")
 
@@ -50,7 +50,7 @@ object SjModuleDestroy extends App {
   val providerService = ConnectionRepository.getProviderService
   val instanceService = ConnectionRepository.getInstanceService
   val fileStorage = ConnectionRepository.getFileStorage
-  val _type = "tstream"
+  val _type = "both"
 
   val module = new File("./contrib/stubs/sj-stub-regular-streaming/target/scala-2.12/sj-stub-regular-streaming-1.0-SNAPSHOT.jar")
 

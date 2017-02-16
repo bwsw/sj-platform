@@ -338,15 +338,9 @@ object DataFactory {
     instance.checkpointInterval = checkpointInterval
     instance.stateManagement = stateManagement
     instance.stateFullCheckpoint = stateFullCheckpoint
-    instance.parallelism = 1
-    instance.options = """{"hey": "hey"}"""
     instance.startFrom = EngineLiterals.oldestStartMode
-    instance.perTaskCores = 0.1
-    instance.perTaskRam = 64
-    instance.performanceReportingInterval = 10000
     instance.executionPlan = new ExecutionPlan(Map(instanceName + "-task0" -> task, instanceName + "-task1" -> task).asJava)
     instance.engine = "com.bwsw.regular.streaming.engine-1.0"
-    instance.eventWaitIdleTime = 1000
     instance.coordinationService = serviceManager.get("zookeeper-test-service").get.asInstanceOf[ZKService]
 
     instanceService.save(instance)

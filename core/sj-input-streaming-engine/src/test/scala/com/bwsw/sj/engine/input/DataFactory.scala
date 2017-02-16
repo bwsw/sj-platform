@@ -198,11 +198,6 @@ object DataFactory {
     instance.outputs = instanceOutputs
     instance.checkpointMode = EngineLiterals.everyNthMode
     instance.checkpointInterval = checkpointInterval
-    instance.parallelism = 1
-    instance.options = """{"hey": "hey"}"""
-    instance.perTaskCores = 0.1
-    instance.perTaskRam = 64
-    instance.performanceReportingInterval = 10000
     instance.engine = "com.bwsw.input.streaming.engine-1.0"
     instance.coordinationService = serviceManager.get("zookeeper-test-service").get.asInstanceOf[ZKService]
     instance.duplicateCheck = false
