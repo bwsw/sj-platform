@@ -174,13 +174,12 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     validateContextWithSchema(ctx, "instanceSchema.json")
     val instanceMetadata = deserializeOptions(getEntityFromContext(ctx), moduleType)
     val errors = validateInstance(instanceMetadata, specification, moduleType)
-    val optionsPassedValidation = validateInstanceOptions(specification, filename, instanceMetadata.options)
-    val metadataPassedValidation = validateInstanceMetadata(specification, filename, instanceMetadata)
+    val optionsPassedValidation = validateInstanceOptions(specification, filename, instanceMetadata)
     var response: RestResponse = BadRequestRestResponse(Map("message" ->
       createMessage("rest.modules.instances.instance.cannot.create", errors.mkString(";"))))
 
     if (errors.isEmpty) {
-      if (optionsPassedValidation && metadataPassedValidation) {
+      if (optionsPassedValidation) {
         instanceMetadata.prepareInstance(
           moduleType,
           moduleName,
@@ -445,22 +444,13 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     validator.validate(options, specification)
   }
 
-  private def validateInstanceOptions(specification: SpecificationData, filename: String, options: Map[String, Any]): Boolean = {
+  private def validateInstanceOptions(specification: SpecificationData, filename: String, instanceMetadata: InstanceMetadata): Boolean = {
     val validatorClassName = specification.validateClass
     val file = storage.get(filename, s"tmp/$filename")
     val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
     val clazz = loader.loadClass(validatorClassName)
     val validator = clazz.newInstance().asInstanceOf[StreamingValidator]
-    validator.validate(options)
-  }
-
-  private def validateInstanceMetadata(specification: SpecificationData, filename: String, options: InstanceMetadata): Boolean = {
-    val validatorClassName = specification.validateClass
-    val file = storage.get(filename, s"tmp/$filename")
-    val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
-    val clazz = loader.loadClass(validatorClassName)
-    val validator = clazz.newInstance().asInstanceOf[StreamingValidator]
-    validator.validateMetadata(options)
+    validator.validateMetadata(instanceMetadata) && validator.validate(instanceMetadata.options)
   }
 
   /**
