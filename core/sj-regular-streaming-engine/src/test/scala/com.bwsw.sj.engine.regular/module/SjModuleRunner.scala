@@ -55,7 +55,7 @@ object SjModuleDestroy extends App {
   val module = new File("./contrib/stubs/sj-stub-regular-streaming/target/scala-2.12/sj-stub-regular-streaming-1.0-SNAPSHOT.jar")
 
   open()
-  deleteStreams(streamService, _type, inputCount, outputCount)
+  deleteStreams(streamService, _type, serviceManager, inputCount, outputCount)
   deleteServices(serviceManager)
   deleteProviders(providerService)
   deleteInstance(instanceService)
