@@ -12,44 +12,44 @@ import org.slf4j.LoggerFactory
  * which will be retrieved inside an engine
  * @param path Temporary directory path for queue
  */
-class PersistentBlockingQueue(path: String) {
-
-  private val logger = LoggerFactory.getLogger(this.getClass)
-  private val tempDirectory: Path = Files.createTempDirectory(path)
-  tempDirectory.toFile.deleteOnExit()
-  val chronicleQueue = ChronicleQueueBuilder.single(tempDirectory.toString).build()
-  private val writer = chronicleQueue.acquireAppender()
-  private val reader = chronicleQueue.createTailer()
-  private val mutex = new ReentrantLock(true)
-  private val cond = mutex.newCondition()
-
-  /**
-   * Put a message in a queue using blocking
-   */
-  def put(message: String) = {
-    logger.info(s"Put a message: $message to queue.")
-    mutex.lock()
-    writer.writeText(message)
-    cond.signal()
-    mutex.unlock()
-  }
-
-  /**
-   * Queue is blocked on idle timeout (in milliseconds) after which Option will be returned
-   * @param idle Timeout of waiting
-   * @return Some received message or None
-   */
-  def get(idle: Long): Option[String] = {
-    logger.info(s"Get next message from queue.")
-    mutex.lock()
-    var data = reader.readText()
-    if (data == null) {
-      logger.debug(s"Waiting the message $idle milliseconds.")
-      cond.await(idle, MILLISECONDS)
-      data = reader.readText()
-      logger.debug(s"After $idle milliseconds message: $data was received.")
-    }
-    mutex.unlock()
-    Option(data)
-  }
-}
+//class PersistentBlockingQueue(path: String) {
+//
+//  private val logger = LoggerFactory.getLogger(this.getClass)
+//  private val tempDirectory: Path = Files.createTempDirectory(path)
+//  tempDirectory.toFile.deleteOnExit()
+//  val chronicleQueue = ChronicleQueueBuilder.single(tempDirectory.toString).build()
+//  private val writer = chronicleQueue.acquireAppender()
+//  private val reader = chronicleQueue.createTailer()
+//  private val mutex = new ReentrantLock(true)
+//  private val cond = mutex.newCondition()
+//
+//  /**
+//   * Put a message in a queue using blocking
+//   */
+//  def put(message: String) = {
+//    logger.info(s"Put a message: $message to queue.")
+//    mutex.lock()
+//    writer.writeText(message)
+//    cond.signal()
+//    mutex.unlock()
+//  }
+//
+//  /**
+//   * Queue is blocked on idle timeout (in milliseconds) after which Option will be returned
+//   * @param idle Timeout of waiting
+//   * @return Some received message or None
+//   */
+//  def get(idle: Long): Option[String] = {
+//    logger.info(s"Get next message from queue.")
+//    mutex.lock()
+//    var data = reader.readText()
+//    if (data == null) {
+//      logger.debug(s"Waiting the message $idle milliseconds.")
+//      cond.await(idle, MILLISECONDS)
+//      data = reader.readText()
+//      logger.debug(s"After $idle milliseconds message: $data was received.")
+//    }
+//    mutex.unlock()
+//    Option(data)
+//  }
+//}

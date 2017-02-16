@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.output.task
 
-import java.util.concurrent.Callable
+import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.SjStream
@@ -8,7 +8,7 @@ import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.input.CallableTStreamTaskInput
-import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, PersistentBlockingQueue}
+import com.bwsw.sj.engine.core.engine.NumericalCheckpointTaskEngine
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.output.processing.OutputProcessor
@@ -30,7 +30,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"output-task-${manager.taskName}-engine")
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(EngineLiterals.persistentBlockingQueue)
+  private val blockingQueue = new ArrayBlockingQueue[Envelope](EngineLiterals.queueSize)
   private val envelopeSerializer = new JsonSerializer()
   private val instance = manager.instance.asInstanceOf[OutputInstance]
   private val outputStream = getOutputStream
@@ -70,11 +70,11 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
       s"Run output task engine in a separate thread of execution service.")
 
     while (true) {
-      val maybeEnvelope = blockingQueue.get(EngineLiterals.eventWaitTimeout)
+      val maybeEnvelope = blockingQueue.poll(EngineLiterals.eventWaitTimeout, TimeUnit.MILLISECONDS)
 
-      maybeEnvelope match {
-        case Some(serializedEnvelope) =>
-          processOutputEnvelope(serializedEnvelope)
+      Option(maybeEnvelope) match {
+        case Some(envelope) =>
+          processOutputEnvelope(envelope)
         case _ =>
       }
       if (isItTimeToCheckpoint(environmentManager.isCheckpointInitiated)) doCheckpoint()
@@ -84,12 +84,10 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
   /**
    * Handler for sending data to storage.
-   *
-   * @param serializedEnvelope: original envelope.
    */
-  private def processOutputEnvelope(serializedEnvelope: String) = {
+  private def processOutputEnvelope(envelope: Envelope) = {
     afterReceivingEnvelope()
-    val inputEnvelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope).asInstanceOf[TStreamEnvelope[manager._type.type]]
+    val inputEnvelope = envelope.asInstanceOf[TStreamEnvelope[manager._type.type]]
     registerInputEnvelope(inputEnvelope)
     logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler.")
     val outputEnvelopes: List[Envelope] = executor.onMessage(inputEnvelope)

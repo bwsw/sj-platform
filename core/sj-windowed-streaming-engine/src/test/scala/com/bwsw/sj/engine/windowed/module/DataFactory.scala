@@ -189,16 +189,20 @@ object DataFactory {
     }
   }
 
-  def deleteStreams(streamService: GenericMongoService[SjStream], _type: String, inputCount: Int, outputCount: Int) = {
+  def deleteStreams(streamService: GenericMongoService[SjStream],
+                    _type: String,
+                    serviceManager: GenericMongoService[Service],
+                    inputCount: Int,
+                    outputCount: Int) = {
     _type match {
       case "tstream" =>
         (1 to inputCount).foreach(x => deleteInputTStream(streamService, x.toString))
         (1 to outputCount).foreach(x => deleteOutputTStream(streamService, x.toString))
       case "kafka" =>
-        deleteKafkaStream(streamService)
+        deleteKafkaStream(streamService, serviceManager)
         (1 to outputCount).foreach(x => deleteOutputTStream(streamService, x.toString))
       case "both" =>
-        deleteKafkaStream(streamService)
+        deleteKafkaStream(streamService, serviceManager)
         (1 to inputCount).foreach(x => deleteInputTStream(streamService, x.toString))
         (1 to outputCount).foreach(x => deleteOutputTStream(streamService, x.toString))
       case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: 'tstream', 'kafka', 'both'")
@@ -287,7 +291,17 @@ object DataFactory {
     }
   }
 
-  private def deleteKafkaStream(streamService: GenericMongoService[SjStream]) = {
+  private def deleteKafkaStream(streamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service]) = {
+    val kService = serviceManager.get("kafka-test-service").get.asInstanceOf[KafkaService]
+    val zkHost = kService.zkProvider.hosts
+    val zkConnect = new ZkConnection(zkHost.mkString(";"))
+    val zkTimeout = ConnectionRepository.getConfigService.get(ConfigLiterals.zkSessionTimeoutTag).get.value.toInt
+    val zkClient = ZkUtils.createZkClient(zkHost.mkString(";"), zkTimeout, zkTimeout)
+    val zkUtils = new ZkUtils(zkClient, zkConnect, false)
+
+    AdminUtils.deleteTopic(zkUtils, s"${kafkaInputName}1")
+    AdminUtils.deleteTopic(zkUtils, s"${kafkaInputName}2")
+
     streamService.delete(s"${kafkaInputName}1")
     streamService.delete(s"${kafkaInputName}2")
   }
@@ -386,10 +400,10 @@ object DataFactory {
       case "tstream" =>
         (1 to count).foreach(x => createTstreamData(countTxns, countElements, streamService, x.toString))
       case "kafka" =>
-        createKafkaData(countTxns, countElements) //needed only once because of kafka doesn't allow delete topics
+        createKafkaData(countTxns, countElements)
       case "both" =>
         (1 to count).foreach(x => createTstreamData(countTxns, countElements, streamService, x.toString))
-        createKafkaData(countTxns, countElements) //needed only one because of kafka doesn't allow delete topics
+        createKafkaData(countTxns, countElements)
       case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: 'tstream', 'kafka', 'both'")
     }
   }

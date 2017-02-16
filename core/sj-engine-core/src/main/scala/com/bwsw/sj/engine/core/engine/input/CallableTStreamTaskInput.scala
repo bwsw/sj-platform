@@ -1,12 +1,12 @@
 package com.bwsw.sj.engine.core.engine.input
 
 import java.util.Date
+import java.util.concurrent.ArrayBlockingQueue
 
 import com.bwsw.sj.common.DAL.model.TStreamSjStream
 import com.bwsw.sj.common.DAL.model.module.{OutputInstance, RegularInstance, WindowedInstance}
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
-import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
-import com.bwsw.sj.engine.core.entities.TStreamEnvelope
+import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.group.CheckpointGroup
@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory
  *
  */
 class CallableTStreamTaskInput[T](manager: TaskManager,
-                              blockingQueue: PersistentBlockingQueue,
+                              blockingQueue: ArrayBlockingQueue[Envelope],
                               override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
   extends CallableTaskInput[TStreamEnvelope[T]](manager.inputs) { //todo подумать!!
   private val logger = LoggerFactory.getLogger(this.getClass)

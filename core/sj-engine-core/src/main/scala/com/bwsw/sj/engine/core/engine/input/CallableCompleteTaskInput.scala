@@ -1,6 +1,7 @@
 package com.bwsw.sj.engine.core.engine.input
 
-import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
+import java.util.concurrent.ArrayBlockingQueue
+
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
@@ -15,7 +16,7 @@ import org.slf4j.LoggerFactory
   *                      which will be retrieved into a module
   */
 class CallableCompleteTaskInput[T](manager: CommonTaskManager,
-                                   blockingQueue: PersistentBlockingQueue,
+                                   blockingQueue: ArrayBlockingQueue[Envelope],
                                    override val checkpointGroup: CheckpointGroup =  new CheckpointGroup()) extends CallableTaskInput[Envelope](manager.inputs) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)

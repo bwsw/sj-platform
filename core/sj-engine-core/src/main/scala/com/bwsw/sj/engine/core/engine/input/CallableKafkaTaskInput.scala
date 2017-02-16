@@ -1,10 +1,11 @@
 package com.bwsw.sj.engine.core.engine.input
 
+import java.util.concurrent.ArrayBlockingQueue
+
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
-import com.bwsw.sj.engine.core.entities.KafkaEnvelope
+import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.NewTransactionProducerPolicy
@@ -24,7 +25,7 @@ import scala.collection.JavaConverters._
  *                      which will be retrieved into a module
  */
 class CallableKafkaTaskInput[T](override val manager: CommonTaskManager,
-                            blockingQueue: PersistentBlockingQueue,
+                            blockingQueue: ArrayBlockingQueue[Envelope],
                             override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
   extends CallableTaskInput[KafkaEnvelope[T]](manager.inputs) with KafkaTaskInput[T] {
   currentThread.setName(s"regular-task-${manager.taskName}-kafka-consumer")
@@ -47,7 +48,7 @@ class CallableKafkaTaskInput[T](override val manager: CommonTaskManager,
     while (true) {
       logger.debug(s"Task: ${manager.taskName}. Waiting for records that consumed from kafka for $kafkaSubscriberTimeout milliseconds.")
       val records = kafkaConsumer.poll(kafkaSubscriberTimeout)
-      records.asScala.foreach(x => blockingQueue.put(envelopeSerializer.serialize(consumerRecordToEnvelope(x))))
+      records.asScala.foreach(x => blockingQueue.put(consumerRecordToEnvelope(x)))
     }
   }
 

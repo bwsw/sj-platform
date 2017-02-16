@@ -1,12 +1,11 @@
 package com.bwsw.sj.engine.regular.task
 
-import java.util.concurrent.Callable
+import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
 
-import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.input.CallableTaskInput
-import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, PersistentBlockingQueue, TimeCheckpointTaskEngine}
+import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
 import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
@@ -30,7 +29,7 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"regular-task-${manager.taskName}-engine")
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val blockingQueue: PersistentBlockingQueue = new PersistentBlockingQueue(EngineLiterals.persistentBlockingQueue)
+  private val blockingQueue = new ArrayBlockingQueue[Envelope](EngineLiterals.queueSize)
   private val instance = manager.instance.asInstanceOf[RegularInstance]
   private val checkpointGroup = new CheckpointGroup()
   private val moduleService = createRegularModuleService()
@@ -38,8 +37,6 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
   val taskInputService = CallableTaskInput[manager._type.type](manager, blockingQueue, checkpointGroup).asInstanceOf[CallableTaskInput[Envelope]]
   private val moduleTimer = moduleService.moduleTimer
   protected val checkpointInterval = instance.checkpointInterval
-
-  private val envelopeSerializer = new JsonSerializer(true)
 
   private def createRegularModuleService(): CommonModuleService = {
     instance.stateManagement match {
@@ -61,11 +58,10 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
     executor.onInit()
 
     while (true) {
-      val maybeEnvelope = blockingQueue.get(instance.eventWaitIdleTime)
+      val maybeEnvelope = blockingQueue.poll(instance.eventWaitIdleTime, TimeUnit.MILLISECONDS)
 
-      maybeEnvelope match {
-        case Some(serializedEnvelope) => {
-          val envelope = envelopeSerializer.deserialize[Envelope](serializedEnvelope)
+      Option(maybeEnvelope) match {
+        case Some(envelope) => {
           registerEnvelope(envelope)
           logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler.")
           executor.onMessage(envelope)

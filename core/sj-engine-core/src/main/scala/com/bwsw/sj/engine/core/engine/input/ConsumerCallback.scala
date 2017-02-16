@@ -1,11 +1,12 @@
 package com.bwsw.sj.engine.core.engine.input
 
+import java.util.concurrent.ArrayBlockingQueue
+
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
-import com.bwsw.sj.engine.core.entities.TStreamEnvelope
+import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.tstreams.agents.consumer.subscriber.Callback
-import com.bwsw.tstreams.agents.consumer.{ConsumerTransaction, Consumer, TransactionOperator}
+import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction, TransactionOperator}
 import org.slf4j.LoggerFactory
 
 
@@ -16,7 +17,7 @@ import org.slf4j.LoggerFactory
  * @param blockingQueue Persistent blocking queue for storing transactions
  */
 
-class ConsumerCallback(blockingQueue: PersistentBlockingQueue) extends Callback[Array[Byte]] {
+class ConsumerCallback(blockingQueue: ArrayBlockingQueue[Envelope]) extends Callback[Array[Byte]] {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val envelopeSerializer = new JsonSerializer()
 
@@ -31,6 +32,6 @@ class ConsumerCallback(blockingQueue: PersistentBlockingQueue) extends Callback[
     envelope.tags = stream.tags
     envelope.id = transaction.getTransactionID()
 
-    blockingQueue.put(envelopeSerializer.serialize(envelope))
+    blockingQueue.put(envelope)
   }
 }

@@ -1,10 +1,9 @@
 package com.bwsw.sj.engine.core.engine.input
 
-import java.util.concurrent.Callable
+import java.util.concurrent.{ArrayBlockingQueue, Callable}
 
 import com.bwsw.sj.common.DAL.model.SjStream
 import com.bwsw.sj.common.utils.StreamLiterals
-import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
 import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
@@ -17,7 +16,7 @@ abstract class CallableTaskInput[T <: Envelope](inputs: scala.collection.mutable
 object CallableTaskInput {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  def apply[T](manager: CommonTaskManager, blockingQueue: PersistentBlockingQueue, checkpointGroup: CheckpointGroup) = {
+  def apply[T](manager: CommonTaskManager, blockingQueue: ArrayBlockingQueue[Envelope], checkpointGroup: CheckpointGroup) = {
     val isKafkaInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.kafkaStreamType)
     val isTstreamInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.tstreamType)
 

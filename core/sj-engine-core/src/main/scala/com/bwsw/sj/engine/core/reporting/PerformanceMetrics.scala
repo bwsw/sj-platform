@@ -11,7 +11,7 @@ import java.util.concurrent.{Callable, TimeUnit}
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.TStreamSjStream
-import com.bwsw.sj.engine.core.entities.Envelope
+import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.tstreams.agents.producer.NewTransactionProducerPolicy
 import org.slf4j.LoggerFactory
@@ -85,10 +85,10 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
 
   def addEnvelopeToInputStream(envelope: Envelope): Unit = {
     envelope match {
-      //case tStreamEnvelope: TStreamEnvelope[T] =>
-      //  addEnvelopeToInputStream(tStreamEnvelope.stream, tStreamEnvelope.data.map(_.length)) //todo придумать другой способ извлечения информации
-      //case kafkaEnvelope: KafkaEnvelope[T] =>
-     //   addEnvelopeToInputStream(kafkaEnvelope.stream, List(kafkaEnvelope.data.length)) //todo придумать другой способ извлечения информации
+      case tStreamEnvelope: TStreamEnvelope[_] =>
+        addEnvelopeToInputStream(tStreamEnvelope.stream, tStreamEnvelope.data.map(_.toString.length)) //todo придумать другой способ извлечения информации
+      case kafkaEnvelope: KafkaEnvelope[_] =>
+        addEnvelopeToInputStream(kafkaEnvelope.stream, List(kafkaEnvelope.data.toString.length)) //todo придумать другой способ извлечения информации
       case wrongEnvelope =>
         logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined")
         throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined")
