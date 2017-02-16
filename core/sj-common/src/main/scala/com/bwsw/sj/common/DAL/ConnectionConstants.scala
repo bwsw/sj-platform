@@ -19,7 +19,6 @@ object ConnectionConstants {
   lazy val mongoPassword:Option[String] = Option(System.getenv("MONGO_PASSWORD"))
 
   var authEnable: Boolean = isAuthRequired
-  println("AUTH REQUIRED: ", authEnable)
 
   var mongoEnvironment = Map[String, String]("MONGO_HOSTS" -> System.getenv("MONGO_HOSTS"))
   if (authEnable) {
@@ -44,6 +43,7 @@ object ConnectionConstants {
 
   def checkConnection(client:com.mongodb.casbah.MongoClient):Boolean = {
     try {
+      println("CREDENTIALS: ", client.)
       client(databaseName).collectionNames()
       false
     } catch {
