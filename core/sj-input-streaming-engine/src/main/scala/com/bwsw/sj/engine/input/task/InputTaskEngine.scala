@@ -76,20 +76,21 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
   /**
    * Sends an input envelope data to output steam
    */
-  private def sendData[T](stream: String, partition: Int, data: T) = {
+  private def sendData(stream: String, partition: Int, data: manager._type.type) = {
     logger.info(s"Task name: ${manager.taskName}. Send envelope to each output stream..")
     val maybeTransaction = getTransaction(stream, partition)
+    val bytes = manager.envelopeDataSerializer.serialize(data)
     val producerTransaction = maybeTransaction match {
       case Some(transaction) =>
         logger.debug(s"Task name: ${manager.taskName}. Txn for stream/partition: '$stream/$partition' is defined.")
-        transaction.send(data.toString.getBytes)
+        transaction.send(bytes)
 
         transaction
       case None =>
         logger.debug(s"Task name: ${manager.taskName}. Txn for stream/partition: '$stream/$partition' is not defined " +
           s"so create new txn.")
         val transaction = producers(stream).newTransaction(NewTransactionProducerPolicy.ErrorIfOpened, partition)
-        transaction.send(data.toString.getBytes)
+        transaction.send(bytes)
         putTxn(stream, partition, transaction)
 
         transaction
@@ -99,7 +100,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
     performanceMetrics.addElementToOutputEnvelope(
       stream,
       producerTransaction.getTransactionID().toString,
-      data.toString.getBytes.length
+      bytes.length
     )
   }
 
@@ -179,10 +180,10 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
       case Some(inputEnvelope) =>
         logger.info(s"Task name: ${manager.taskName}. Envelope is defined. Process it.")
         performanceMetrics.addEnvelopeToInputStream(inputEnvelope)
-        if (checkForDuplication[manager._type.type](inputEnvelope.key, inputEnvelope.duplicateCheck, inputEnvelope.data)) {
+        if (checkForDuplication(inputEnvelope.key, inputEnvelope.duplicateCheck, inputEnvelope.data)) {
           logger.debug(s"Task name: ${manager.taskName}. Envelope is not duplicate so send it.")
           inputEnvelope.outputMetadata.foreach(x => {
-            sendData[manager._type.type](x._1, x._2, inputEnvelope.data)
+            sendData(x._1, x._2, inputEnvelope.data)
           })
           afterReceivingEnvelope()
           true
@@ -198,7 +199,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
    * @param value In case there is a need to update duplicate key this value will be used
    * @return True if a processed envelope is not duplicate and false in other case
    */
-  private def checkForDuplication[T](key: String, duplicateCheck: Boolean, value: T): Boolean = {
+  private def checkForDuplication(key: String, duplicateCheck: Boolean, value: Any): Boolean = {
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Try to check key: '$key' for duplication with a setting duplicateCheck = '$duplicateCheck' " +
       s"and an instance setting - 'duplicate-check' : '${instance.duplicateCheck}'.")

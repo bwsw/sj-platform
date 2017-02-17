@@ -6,6 +6,7 @@ import com.bwsw.sj.engine.core.engine.input.TaskInput
 import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import org.slf4j.LoggerFactory
+import scala.reflect.runtime.universe._
 
 /**
  * Class is responsible for handling an input streams of specific type(types),
@@ -20,7 +21,7 @@ abstract class RetrievableTaskInput[T <: Envelope](val inputs: scala.collection.
 object RetrievableTaskInput {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  def apply[T](manager: CommonTaskManager) = {
+  def apply[T: TypeTag](manager: CommonTaskManager) = {
     val isKafkaInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.kafkaStreamType)
     val isTstreamInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.tstreamType)
 

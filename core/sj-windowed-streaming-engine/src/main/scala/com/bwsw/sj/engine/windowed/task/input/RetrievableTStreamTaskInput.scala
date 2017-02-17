@@ -5,15 +5,17 @@ import java.util.Date
 import com.bwsw.sj.common.DAL.model.TStreamSjStream
 import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.engine.EnvelopeDataSerializer
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
-import com.bwsw.tstreams.agents.consumer.{ConsumerTransaction, Consumer}
+import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction}
 import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
+import scala.reflect.runtime.universe._
 
 /**
   * Class is responsible for launching t-stream consumers
@@ -22,12 +24,13 @@ import scala.collection.mutable
   * @author Kseniya Mikhaleva
   *
   */
-class RetrievableTStreamTaskInput[T](manager: CommonTaskManager,
+class RetrievableTStreamTaskInput[T: TypeTag](manager: CommonTaskManager,
                                      override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
   extends RetrievableTaskInput[TStreamEnvelope[T]](manager.inputs) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val instance = manager.instance.asInstanceOf[WindowedInstance]
   private val tstreamOffsetsStorage = mutable.Map[(String, Int), Long]()
+  private val envelopeDataSerializer = manager.envelopeDataSerializer.asInstanceOf[EnvelopeDataSerializer[T]]
   private val consumers = createConsumers()
   addConsumersToCheckpointGroup()
   launchConsumers()
@@ -65,7 +68,7 @@ class RetrievableTStreamTaskInput[T](manager: CommonTaskManager,
       val consumer = x._2
       val transactions = getAvailableTransactions(consumer)
       transactionsToEnvelopes(transactions, consumer)
-    }).map(_.asInstanceOf[TStreamEnvelope[T]]) //todo deserialize
+    })
   }
 
   private def getAvailableTransactions(consumer: Consumer[Array[Byte]]) = {
@@ -82,7 +85,8 @@ class RetrievableTStreamTaskInput[T](manager: CommonTaskManager,
     transactions.map((transaction: ConsumerTransaction[Array[Byte]]) => {
       val tempTransaction = consumer.buildTransactionObject(transaction.getPartition(), transaction.getTransactionID(), transaction.getCount()).get //todo fix it next milestone TR1216
       tstreamOffsetsStorage((consumer.name, tempTransaction.getPartition())) = tempTransaction.getTransactionID()
-      val envelope = new TStreamEnvelope(tempTransaction.getAll(), consumer.name)
+      val data = transaction.getAll().map(envelopeDataSerializer.deserialize)
+      val envelope = new TStreamEnvelope(data, consumer.name)
       envelope.stream = stream.name
       envelope.partition = tempTransaction.getPartition()
       envelope.tags = stream.tags

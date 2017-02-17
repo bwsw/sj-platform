@@ -12,7 +12,7 @@ import com.bwsw.sj.engine.core.entities.KafkaEnvelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.group.CheckpointGroup
-import org.apache.kafka.clients.consumer.{ConsumerRecord, KafkaConsumer}
+import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.TopicPartition
 import org.slf4j.LoggerFactory
 
@@ -159,17 +159,6 @@ trait KafkaTaskInput[T] {
 
     val kafkaSettings = configService.getByParameters(Map("domain" -> ConfigLiterals.kafkaDomain))
     kafkaSettings.foreach(x => properties.put(clearConfigurationSettingName(x.domain, x.name), x.value))
-  }
-
-  protected def consumerRecordToEnvelope(consumerRecord: ConsumerRecord[Array[Byte], Array[Byte]]) = {
-    logger.debug(s"Task name: ${manager.taskName}. Convert a consumed kafka record to kafka envelope.")
-    val envelope = new KafkaEnvelope(consumerRecord.value())
-    envelope.stream = consumerRecord.topic()
-    envelope.partition = consumerRecord.partition()
-    envelope.tags = streamNamesToTags(consumerRecord.topic())
-    envelope.id = consumerRecord.offset()
-
-    envelope
   }
 
   def setConsumerOffset(envelope: KafkaEnvelope[T]) = {

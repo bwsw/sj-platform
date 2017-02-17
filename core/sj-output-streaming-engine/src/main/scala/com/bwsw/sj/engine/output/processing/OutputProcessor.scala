@@ -1,6 +1,5 @@
 package com.bwsw.sj.engine.output.processing
 
-import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.DAL.model.SjStream
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
@@ -15,7 +14,6 @@ import org.slf4j.LoggerFactory
 abstract class OutputProcessor[T](outputStream: SjStream,
                                performanceMetrics: OutputStreamingPerformanceMetrics) {
   protected val logger = LoggerFactory.getLogger(this.getClass)
-  private val byteSerializer = new ObjectSerializer()
 
   /**
    * Main method of handler: prepare, register and send.
@@ -50,7 +48,7 @@ abstract class OutputProcessor[T](outputStream: SjStream,
    */
   private def registerOutputEnvelope(envelopeID: String, data: Envelope) = {
     logger.debug(s"Register an output envelope: '$envelopeID'.")
-    val elementSize = byteSerializer.serialize(data).length
+    val elementSize = data.toString.length //todo придумать другой способ извлечения информации
     performanceMetrics.addElementToOutputEnvelope(outputStream.name, envelopeID, elementSize)
   }
 

@@ -5,12 +5,14 @@ import java.util.concurrent.ArrayBlockingQueue
 
 import com.bwsw.sj.common.DAL.model.TStreamSjStream
 import com.bwsw.sj.common.DAL.model.module.{OutputInstance, RegularInstance, WindowedInstance}
+import com.bwsw.sj.common.engine.EnvelopeDataSerializer
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
+import scala.reflect.runtime.universe._
 
 /**
  * Class is responsible for launching t-stream subscribing consumers
@@ -25,10 +27,10 @@ import org.slf4j.LoggerFactory
  * @author Kseniya Mikhaleva
  *
  */
-class CallableTStreamTaskInput[T](manager: TaskManager,
+class CallableTStreamTaskInput[T: TypeTag](manager: TaskManager,
                               blockingQueue: ArrayBlockingQueue[Envelope],
                               override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
-  extends CallableTaskInput[TStreamEnvelope[T]](manager.inputs) { //todo подумать!!
+  extends CallableTaskInput[TStreamEnvelope[T]](manager.inputs) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val consumers = createSubscribingConsumers()
 
@@ -36,7 +38,7 @@ class CallableTStreamTaskInput[T](manager: TaskManager,
     logger.debug(s"Task: ${manager.taskName}. Start creating subscribing consumers.")
     val inputs = manager.inputs
     val offset = getOffset()
-    val callback = new ConsumerCallback(blockingQueue)
+    val callback = new ConsumerCallback[T](manager.envelopeDataSerializer.asInstanceOf[EnvelopeDataSerializer[T]], blockingQueue)
 
     val consumers = inputs.filter(x => x._1.streamType == StreamLiterals.tstreamType)
       .map(x => (x._1.asInstanceOf[TStreamSjStream], x._2.toList))

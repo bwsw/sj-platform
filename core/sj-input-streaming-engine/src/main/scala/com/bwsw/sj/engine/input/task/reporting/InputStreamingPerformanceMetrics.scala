@@ -28,7 +28,7 @@ class InputStreamingPerformanceMetrics(manager: InputTaskManager)
    */
   override def addEnvelopeToInputStream(envelope: Envelope) = {
     val inputEnvelope = envelope.asInstanceOf[InputEnvelope[manager._type.type]]
-    super.addEnvelopeToInputStream(inputStreamName, List(inputEnvelope.data.toString.getBytes.length))
+    super.addEnvelopeToInputStream(inputStreamName, List(inputEnvelope.data.toString.length)) //todo придумать другой способ извлечения информации
   }
 
   /**

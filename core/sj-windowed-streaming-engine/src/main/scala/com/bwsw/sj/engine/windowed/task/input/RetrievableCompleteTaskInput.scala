@@ -4,13 +4,14 @@ import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelop
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
+import scala.reflect.runtime.universe._
 
 /**
- * Class is responsible for handling kafka input and t-stream input
- *
- * @author Kseniya Mikhaleva
- */
-class RetrievableCompleteTaskInput[T](manager: CommonTaskManager) extends {
+  * Class is responsible for handling kafka input and t-stream input
+  *
+  * @author Kseniya Mikhaleva
+  */
+class RetrievableCompleteTaskInput[T: TypeTag](manager: CommonTaskManager) extends {
   override val checkpointGroup = new CheckpointGroup()
 } with RetrievableTaskInput[Envelope](manager.inputs) {
 

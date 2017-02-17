@@ -31,7 +31,7 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
    * @param value In case there is a need to update duplicate key this value will be used
    * @return True if the key is not duplicate and false in other case
    */
-  def checkForDuplication[T](key: String, value: T): Boolean
+  def checkForDuplication(key: String, value: Any): Boolean
 
   /**
    * Returns a keys storage (Hazelcast map) for checking of there are duplicates (input envelopes) or not
@@ -40,7 +40,7 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
    */
   def getUniqueEnvelopes = {
     logger.debug(s"Get a hazelcast map for checking of there are duplicates (input envelopes) or not.")
-    hazelcastInstance.getMap[String, Array[Byte]](hazelcastMapName)
+    hazelcastInstance.getMap[String, String](hazelcastMapName)
   }
 
   private def createHazelcastConfig() = {

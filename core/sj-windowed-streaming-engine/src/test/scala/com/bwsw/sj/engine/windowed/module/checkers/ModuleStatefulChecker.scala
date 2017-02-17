@@ -49,7 +49,7 @@ object ModuleStatefulChecker extends App {
     }
   })
 
-  var records = inputKafkaConsumer.poll(100 * 60)
+  var records = inputKafkaConsumer.poll(1000 * 20)
   records.asScala.foreach(x => {
     val bytes = x.value()
     val element = objectSerializer.deserialize(bytes).asInstanceOf[Int]

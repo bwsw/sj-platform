@@ -6,7 +6,7 @@ import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.input.CallableTaskInput
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
-import com.bwsw.sj.engine.core.entities.Envelope
+import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.state.{CommonModuleService, StatefulCommonModuleService, StatelessCommonModuleService}
@@ -15,14 +15,12 @@ import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
 /**
- * Provides methods are responsible for a basic execution logic of task of regular module
- *
- *
- * @param manager Manager of environment of task of regular module
- * @param performanceMetrics Set of metrics that characterize performance of a regular streaming module
-
- * @author Kseniya Mikhaleva
- */
+  * Provides methods are responsible for a basic execution logic of task of regular module
+  *
+  * @param manager            Manager of environment of task of regular module
+  * @param performanceMetrics Set of metrics that characterize performance of a regular streaming module
+  * @author Kseniya Mikhaleva
+  */
 abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
                                  performanceMetrics: RegularStreamingPerformanceMetrics) extends Callable[Unit] {
 
@@ -49,8 +47,8 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
   }
 
   /**
-   * It is in charge of running a basic execution logic of regular task engine
-   */
+    * It is in charge of running a basic execution logic of regular task engine
+    */
   override def call(): Unit = {
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Run regular task engine in a separate thread of execution service.")
@@ -64,7 +62,15 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
         case Some(envelope) => {
           registerEnvelope(envelope)
           logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler.")
-          executor.onMessage(envelope)
+          envelope match {
+            case kafkaEnvelope: KafkaEnvelope[manager._type.type@unchecked] =>
+              executor.onMessage(kafkaEnvelope)
+            case tstreamEnvelope: TStreamEnvelope[manager._type.type@unchecked] =>
+              executor.onMessage(tstreamEnvelope)
+            case wrongEnvelope =>
+              logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/windowed streaming engine")
+              throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/windowed streaming engine")
+          }
         }
         case None => {
           performanceMetrics.increaseTotalIdleTime(instance.eventWaitIdleTime)
@@ -91,14 +97,15 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
   protected def afterReceivingEnvelope(): Unit
 
   /**
-   * Check whether a group checkpoint of t-streams consumers/producers have to be done or not
-   * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside regular module (not on the schedule) or not.
-   */
+    * Check whether a group checkpoint of t-streams consumers/producers have to be done or not
+    *
+    * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside regular module (not on the schedule) or not.
+    */
   protected def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean
 
   /**
-   * Does group checkpoint of t-streams consumers/producers
-   */
+    * Does group checkpoint of t-streams consumers/producers
+    */
   private def doCheckpoint() = {
     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint.")
     logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeCheckpoint() handler.")
@@ -118,11 +125,12 @@ object RegularTaskEngine {
   protected val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
-   * Creates RegularTaskEngine is in charge of a basic execution logic of task of regular module
-   * @return Engine of regular task
-   */
+    * Creates RegularTaskEngine is in charge of a basic execution logic of task of regular module
+    *
+    * @return Engine of regular task
+    */
   def apply(manager: CommonTaskManager,
-                               performanceMetrics: RegularStreamingPerformanceMetrics): RegularTaskEngine = {
+            performanceMetrics: RegularStreamingPerformanceMetrics): RegularTaskEngine = {
     val regularInstance = manager.instance.asInstanceOf[RegularInstance]
 
     regularInstance.checkpointMode match {
