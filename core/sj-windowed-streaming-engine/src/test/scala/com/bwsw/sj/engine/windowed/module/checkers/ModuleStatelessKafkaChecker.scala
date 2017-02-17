@@ -22,7 +22,7 @@ object ModuleStatelessKafkaChecker extends App {
   var inputElements = scala.collection.mutable.ArrayBuffer[Int]()
   var outputElements = scala.collection.mutable.ArrayBuffer[Int]()
 
-  var records = inputConsumer.poll(100 * 60)
+  var records = inputConsumer.poll(1000 * 20)
 
   records.asScala.foreach(x => {
     val bytes = x.value()
