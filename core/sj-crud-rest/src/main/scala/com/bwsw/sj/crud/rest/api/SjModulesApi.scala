@@ -174,12 +174,12 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     validateContextWithSchema(ctx, "instanceSchema.json")
     val instanceMetadata = deserializeOptions(getEntityFromContext(ctx), moduleType)
     val errors = validateInstance(instanceMetadata, specification, moduleType)
-    val optionsPassedValidation = validateInstanceOptions(specification, filename, instanceMetadata.options)
+    val instancePassedValidation = validateInstance(specification, filename, instanceMetadata)
     var response: RestResponse = BadRequestRestResponse(Map("message" ->
       createMessage("rest.modules.instances.instance.cannot.create", errors.mkString(";"))))
 
     if (errors.isEmpty) {
-      if (optionsPassedValidation) {
+      if (instancePassedValidation) {
         instanceMetadata.prepareInstance(
           moduleType,
           moduleName,
@@ -194,7 +194,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
           createMessage("rest.modules.instances.instance.created", instanceMetadata.name, s"$moduleType-$moduleName-$moduleVersion")))
       } else {
         response = BadRequestRestResponse(Map("message" ->
-          getMessage("rest.modules.instances.instance.cannot.create.incorrect.options")))
+          getMessage("rest.modules.instances.instance.cannot.create.incorrect.parameters")))
       }
     }
 
@@ -444,13 +444,13 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     validator.validate(options, specification)
   }
 
-  private def validateInstanceOptions(specification: SpecificationData, filename: String, options: Map[String, Any]): Boolean = {
+  private def validateInstance(specification: SpecificationData, filename: String, instanceMetadata: InstanceMetadata): Boolean = {
     val validatorClassName = specification.validateClass
     val file = storage.get(filename, s"tmp/$filename")
     val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
     val clazz = loader.loadClass(validatorClassName)
     val validator = clazz.newInstance().asInstanceOf[StreamingValidator]
-    validator.validate(options)
+    validator.validate(instanceMetadata) && validator.validate(instanceMetadata.options)
   }
 
   /**

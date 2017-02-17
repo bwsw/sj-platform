@@ -19,7 +19,6 @@ object ConnectionConstants {
   lazy val mongoPassword:Option[String] = Option(System.getenv("MONGO_PASSWORD"))
 
   var authEnable: Boolean = isAuthRequired
-  println("AUTH REQUIRED: ", authEnable)
 
   var mongoEnvironment = Map[String, String]("MONGO_HOSTS" -> System.getenv("MONGO_HOSTS"))
   if (authEnable) {
@@ -48,7 +47,8 @@ object ConnectionConstants {
       false
     } catch {
       case e: com.mongodb.MongoCommandException => true
-      case e: MongoTimeoutException => true
+      case e: MongoTimeoutException => throw new MongoClientException(s"Something went wrong: timeout exception caught. " +
+        s"Check connection setting: hosts and credentials.")
       case e: MongoException => throw new Exception(s"Unexpected exception: ${e.getMessage}, ${e.getClass}")
     } finally {
       client.close()
