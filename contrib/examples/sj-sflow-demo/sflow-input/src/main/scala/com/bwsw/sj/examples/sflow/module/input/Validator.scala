@@ -5,7 +5,7 @@ import com.bwsw.sj.common.rest.entities.module.InstanceMetadata
 
 class Validator extends StreamingValidator {
 
-  override def validateMetadata(instanceMetadata: InstanceMetadata): Boolean = {
+  override def validate(instanceMetadata: InstanceMetadata): Boolean = {
     true
   }
 }

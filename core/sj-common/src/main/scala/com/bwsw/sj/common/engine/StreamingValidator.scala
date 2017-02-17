@@ -20,7 +20,7 @@ trait StreamingValidator {
     true
   }
 
-  def validateMetadata(instanceMetadata: InstanceMetadata): Boolean = {
+  def validate(instance: InstanceMetadata): Boolean = {
     true
   }
 }
