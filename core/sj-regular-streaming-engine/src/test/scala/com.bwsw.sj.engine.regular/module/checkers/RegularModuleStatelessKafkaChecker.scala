@@ -3,17 +3,15 @@ package com.bwsw.sj.engine.regular.module.checkers
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.engine.regular.module.DataFactory._
-import com.bwsw.sj.engine.regular.utils.StateHelper
-
 import scala.collection.JavaConverters._
 
-object ModuleStatefulKafkaChecker extends App {
+object RegularModuleStatelessKafkaChecker extends App {
   open()
   val streamService = ConnectionRepository.getStreamService
   val objectSerializer = new ObjectSerializer()
 
-  val inputConsumer = createInputKafkaConsumer(streamService, partitions)
-  val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(streamService, x.toString))
+  val inputConsumer = createInputKafkaConsumer(streamService, inputCount, partitions)
+  val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(partitions, x.toString))
 
   outputConsumers.foreach(x => x.start())
 
@@ -51,20 +49,12 @@ object ModuleStatefulKafkaChecker extends App {
     }
   })
 
-  val consumer = createStateConsumer(streamService)
-  consumer.start()
-  val initialState = StateHelper.getState(consumer, objectSerializer)
-
   assert(totalInputElements == totalOutputElements,
     "Count of all txns elements that are consumed from output stream should equals count of all txns elements that are consumed from input stream")
 
   assert(inputElements.forall(x => outputElements.contains(x)) && outputElements.forall(x => inputElements.contains(x)),
     "All txns elements that are consumed from output stream should equals all txns elements that are consumed from input stream")
 
-  assert(initialState("sum") == inputElements.sum,
-    "Sum of all txns elements that are consumed from input stream should equals state variable sum")
-
-  consumer.stop()
   outputConsumers.foreach(x => x.stop())
   close()
   ConnectionRepository.close()

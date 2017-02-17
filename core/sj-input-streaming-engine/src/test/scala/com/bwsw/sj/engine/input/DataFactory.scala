@@ -26,6 +26,12 @@ object DataFactory {
   private val cassandraTestKeyspace = "test_keyspace_for_input_engine"
   private val testNamespace = "test"
   private val instanceName = "test-instance-for-input-engine"
+  private val cassandraProviderName = "cassandra-test-provider"
+  private val zookeeperProviderName = "zookeeper-test-provider"
+  private val tstreamServiceName = "tstream-test-service"
+  private val zookeeperServiceName = "zookeeper-test-service"
+  private val cassandraServiceName = "cassandra-test-service"
+  private val tstreamOutputNamePrefix = "output-tstream"
   private var instanceOutputs: Array[String] = Array()
   private val tasks = new util.HashMap[String, InputTask]()
   private val host = "localhost"
@@ -34,9 +40,9 @@ object DataFactory {
   private val partitions = 1
   private val serializer = new JsonSerializer()
   private val cassandraFactory = new CassandraFactory()
-  private val cassandraProvider = new Provider("cassandra-test-provider", "cassandra provider", Array(s"$cassandraHost:$cassandraPort"), "", "", ProviderLiterals.cassandraType)
-  private val zookeeperProvider = new Provider("zookeeper-test-provider", "zookeeper provider", zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
-  private val tstrqService = new TStreamService("tstream-test-service", ServiceLiterals.tstreamsType, "tstream test service",
+  private val cassandraProvider = new Provider(cassandraProviderName, cassandraProviderName, Array(s"$cassandraHost:$cassandraPort"), "", "", ProviderLiterals.cassandraType)
+  private val zookeeperProvider = new Provider(zookeeperProviderName, zookeeperProviderName, zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
+  private val tstrqService = new TStreamService(tstreamServiceName, ServiceLiterals.tstreamsType, tstreamServiceName,
     cassandraProvider, cassandraTestKeyspace, cassandraProvider, cassandraTestKeyspace, zookeeperProvider, "unit")
   private val tstreamFactory = new TStreamsFactory()
   setTStreamFactoryProperties()
@@ -126,30 +132,30 @@ object DataFactory {
   }
 
   def deleteProviders(providerService: GenericMongoService[Provider]) = {
-    providerService.delete("cassandra-test-provider")
-    providerService.delete("zookeeper-test-provider")
+    providerService.delete(cassandraProviderName)
+    providerService.delete(zookeeperProviderName)
   }
 
   def createServices(serviceManager: GenericMongoService[Service], providerService: GenericMongoService[Provider]) = {
-    val cassService = new CassandraService("cassandra-test-service", ServiceLiterals.cassandraType, "cassandra test service", cassandraProvider, cassandraTestKeyspace)
+    val cassService = new CassandraService(cassandraServiceName, ServiceLiterals.cassandraType, cassandraServiceName, cassandraProvider, cassandraTestKeyspace)
     serviceManager.save(cassService)
 
-    val zkService = new ZKService("zookeeper-test-service", ServiceLiterals.zookeeperType, "zookeeper test service", zookeeperProvider, testNamespace)
+    val zkService = new ZKService(zookeeperServiceName, ServiceLiterals.zookeeperType, zookeeperServiceName, zookeeperProvider, testNamespace)
     serviceManager.save(zkService)
 
     serviceManager.save(tstrqService)
   }
 
   def deleteServices(serviceManager: GenericMongoService[Service]) = {
-    serviceManager.delete("cassandra-test-service")
-    serviceManager.delete("zookeeper-test-service")
-    serviceManager.delete("tstream-test-service")
+    serviceManager.delete(cassandraServiceName)
+    serviceManager.delete(zookeeperServiceName)
+    serviceManager.delete(tstreamServiceName)
   }
 
   def createStreams(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], outputCount: Int) = {
     (1 to outputCount).foreach(x => {
       createOutputTStream(sjStreamService, serviceManager, partitions, x.toString)
-      instanceOutputs = instanceOutputs :+ s"test-output-tstream$x"
+      instanceOutputs = instanceOutputs :+ (tstreamOutputNamePrefix + x)
     })
   }
 
@@ -161,14 +167,14 @@ object DataFactory {
   private def createOutputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
     val localGenerator = new Generator(GeneratorLiterals.localType)
 
-    val s2 = new TStreamSjStream("test-output-tstream" + suffix, "test-output-tstream", partitions, tstrqService, StreamLiterals.tstreamType, Array("output", "some tags"), localGenerator)
+    val s2 = new TStreamSjStream(tstreamOutputNamePrefix + suffix, tstreamOutputNamePrefix, partitions, tstrqService, StreamLiterals.tstreamType, Array("output", "some tags"), localGenerator)
     sjStreamService.save(s2)
 
     val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
     val dataStorage = cassandraFactory.getDataStorage(cassandraTestKeyspace)
 
     StreamService.createStream(
-      "test-output-tstream" + suffix,
+      tstreamOutputNamePrefix + suffix,
       partitions,
       1000 * 60,
       "description of test output tstream",
@@ -178,15 +184,15 @@ object DataFactory {
   }
 
   private def deleteOutputTStream(streamService: GenericMongoService[SjStream], suffix: String) = {
-    streamService.delete("test-output-tstream" + suffix)
+    streamService.delete(tstreamOutputNamePrefix + suffix)
     val metadataStorage = cassandraFactory.getMetadataStorage(cassandraTestKeyspace)
-    StreamService.deleteStream("test-output-tstream" + suffix, metadataStorage)
+    StreamService.deleteStream(tstreamOutputNamePrefix + suffix, metadataStorage)
   }
 
   def createInstance(serviceManager: GenericMongoService[Service],
                      instanceService: GenericMongoService[Instance],
                      checkpointInterval: Int
-                      ) = {
+                    ) = {
 
     val instance = new InputInstance()
     instance.name = instanceName
@@ -199,7 +205,7 @@ object DataFactory {
     instance.checkpointMode = EngineLiterals.everyNthMode
     instance.checkpointInterval = checkpointInterval
     instance.engine = "com.bwsw.input.streaming.engine-1.0"
-    instance.coordinationService = serviceManager.get("zookeeper-test-service").get.asInstanceOf[ZKService]
+    instance.coordinationService = serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKService]
     instance.duplicateCheck = false
     instance.lookupHistory = 100
     instance.queueMaxSize = 100
@@ -244,7 +250,7 @@ object DataFactory {
   }
 
   def createOutputConsumer(streamService: GenericMongoService[SjStream], suffix: String) = {
-    createConsumer("test-output-tstream" + suffix, streamService)
+    createConsumer(tstreamOutputNamePrefix + suffix, streamService)
   }
 
   private def createConsumer(streamName: String, streamService: GenericMongoService[SjStream]): Consumer[Array[Byte]] = {
