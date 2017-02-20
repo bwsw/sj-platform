@@ -31,8 +31,8 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
   private val instance = manager.instance.asInstanceOf[RegularInstance]
   private val checkpointGroup = new CheckpointGroup()
   private val moduleService = createRegularModuleService()
-  private val executor = moduleService.executor.asInstanceOf[RegularStreamingExecutor[manager._type.type]]
-  val taskInputService = CallableTaskInput[manager._type.type](manager, blockingQueue, checkpointGroup).asInstanceOf[CallableTaskInput[Envelope]]
+  private val executor = moduleService.executor.asInstanceOf[RegularStreamingExecutor[AnyRef]]
+  val taskInputService = CallableTaskInput[AnyRef](manager, blockingQueue, checkpointGroup).asInstanceOf[CallableTaskInput[Envelope]]
   private val moduleTimer = moduleService.moduleTimer
   protected val checkpointInterval = instance.checkpointInterval
 
@@ -63,9 +63,9 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
           registerEnvelope(envelope)
           logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler.")
           envelope match {
-            case kafkaEnvelope: KafkaEnvelope[manager._type.type@unchecked] =>
+            case kafkaEnvelope: KafkaEnvelope[AnyRef@unchecked] =>
               executor.onMessage(kafkaEnvelope)
-            case tstreamEnvelope: TStreamEnvelope[manager._type.type@unchecked] =>
+            case tstreamEnvelope: TStreamEnvelope[AnyRef@unchecked] =>
               executor.onMessage(tstreamEnvelope)
             case wrongEnvelope =>
               logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/windowed streaming engine")

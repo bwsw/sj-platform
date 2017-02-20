@@ -6,7 +6,6 @@ import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelop
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
-import scala.reflect.runtime.universe._
 
 /**
   * Class is responsible for handling kafka inputs and t-stream inputs
@@ -16,7 +15,7 @@ import scala.reflect.runtime.universe._
   * @param blockingQueue Blocking queue for keeping incoming envelopes that are serialized into a string,
   *                      which will be retrieved into a module
   */
-class CallableCompleteTaskInput[T: TypeTag](manager: CommonTaskManager,
+class CallableCompleteTaskInput[T <: AnyRef](manager: CommonTaskManager,
                                    blockingQueue: ArrayBlockingQueue[Envelope],
                                    override val checkpointGroup: CheckpointGroup =  new CheckpointGroup()) extends CallableTaskInput[Envelope](manager.inputs) {
 

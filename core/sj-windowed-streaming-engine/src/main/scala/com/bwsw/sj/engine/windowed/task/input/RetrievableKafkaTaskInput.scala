@@ -11,7 +11,6 @@ import com.bwsw.tstreams.agents.producer.NewTransactionProducerPolicy
 import org.apache.kafka.clients.consumer.ConsumerRecord
 
 import scala.collection.JavaConverters._
-import scala.reflect.runtime.universe._
 
 /**
   * Class is responsible for launching kafka consumers
@@ -20,7 +19,7 @@ import scala.reflect.runtime.universe._
   *
   * @author Kseniya Mikhaleva
   */
-class RetrievableKafkaTaskInput[T: TypeTag](override val manager: CommonTaskManager,
+class RetrievableKafkaTaskInput[T <: AnyRef](override val manager: CommonTaskManager,
                                             override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
   extends RetrievableTaskInput[KafkaEnvelope[T]](manager.inputs) with KafkaTaskInput[T] {
   currentThread.setName(s"windowed-task-${manager.taskName}-kafka-consumer")

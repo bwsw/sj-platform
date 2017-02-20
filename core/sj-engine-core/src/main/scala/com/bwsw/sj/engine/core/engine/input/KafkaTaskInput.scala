@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
-trait KafkaTaskInput[T] {
+trait KafkaTaskInput[T <: AnyRef] {
   protected val manager: CommonTaskManager
   protected val checkpointGroup: CheckpointGroup
   protected val currentThread = Thread.currentThread()

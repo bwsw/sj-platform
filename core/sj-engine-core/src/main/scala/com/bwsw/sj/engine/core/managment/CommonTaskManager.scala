@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.core.managment
 
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.{RegularInstance, WindowedInstance}
-import com.bwsw.sj.common.engine.{DefaultEnvelopeDataSerializer, StreamingExecutor}
+import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.environment.{EnvironmentManager, ModuleEnvironmentManager}
 import com.bwsw.tstreams.agents.consumer.Consumer
@@ -16,9 +16,6 @@ import scala.collection.mutable
   * @author Kseniya Mikhaleva
   */
 class CommonTaskManager() extends TaskManager {
-  private var executorInstance: StreamingExecutor = _
-  lazy val _type = executorInstance.getClass.getMethod("getType").invoke(executorInstance).asInstanceOf[_root_.scala.reflect.runtime.universe.Type]
-  lazy val envelopeDataSerializer = new DefaultEnvelopeDataSerializer[_type.type]()
   val inputs: mutable.Map[SjStream, Array[Int]] = getInputs(getExecutionPlan)
   val outputProducers = createOutputProducers()
 
@@ -29,13 +26,13 @@ class CommonTaskManager() extends TaskManager {
 
   def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = {
     logger.debug(s"Task: $taskName. Start loading an executor class from module jar.")
-    executorInstance = executorClass
+    val executor = executorClass
       .getConstructor(classOf[ModuleEnvironmentManager])
       .newInstance(environmentManager)
       .asInstanceOf[StreamingExecutor]
     logger.debug(s"Task: $taskName. Load an executor class.")
 
-    executorInstance
+    executor
   }
 
   /**

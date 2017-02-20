@@ -16,7 +16,7 @@ import org.apache.curator.framework.recipes.barriers.DistributedDoubleBarrier
 import org.apache.curator.retry.ExponentialBackoffRetry
 import org.slf4j.LoggerFactory
 
-class WindowedTaskEngine[T](protected val manager: CommonTaskManager,
+class WindowedTaskEngine(protected val manager: CommonTaskManager,
                          inputService: RetrievableTaskInput[Envelope],
                          batchQueue: ArrayBlockingQueue[Batch],
                          performanceMetrics: WindowedStreamingPerformanceMetrics) extends Callable[Unit] {
@@ -27,7 +27,7 @@ class WindowedTaskEngine[T](protected val manager: CommonTaskManager,
   private val instance = manager.instance.asInstanceOf[WindowedInstance]
   private val mainStream = SjStreamUtils.clearStreamFromMode(instance.mainStream)
   private val moduleService = createWindowedModuleService()
-  private val executor = moduleService.executor.asInstanceOf[WindowedStreamingExecutor[manager._type.type]]
+  private val executor = moduleService.executor.asInstanceOf[WindowedStreamingExecutor[AnyRef]]
   private val moduleTimer = moduleService.moduleTimer
   private var counterOfBatches = 0
   private val windowPerStream = createStorageOfWindows()

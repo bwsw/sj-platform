@@ -17,21 +17,22 @@ class RoundRobinOutput(producer: Producer[Array[Byte]],
   private var maybeTransaction: Option[ProducerTransaction[Array[Byte]]] = None
   private val streamName = producer.stream.name
 
-  def put(data: Array[Byte]) = {
+  def put(data: AnyRef) = {
+    val bytes = objectSerializer.serialize(data)
     logger.debug(s"Send a portion of data to stream: '$streamName'.")
     if (maybeTransaction.isDefined) {
-      maybeTransaction.get.send(data)
+      maybeTransaction.get.send(bytes)
     }
     else {
       maybeTransaction = Some(producer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened))
-      maybeTransaction.get.send(data)
+      maybeTransaction.get.send(bytes)
     }
 
     logger.debug(s"Add an element to output envelope of output stream:  '$streamName'.")
     performanceMetrics.addElementToOutputEnvelope(
       streamName,
       maybeTransaction.get.getTransactionID().toString,
-      data.length
+      bytes.length
     )
   }
 }

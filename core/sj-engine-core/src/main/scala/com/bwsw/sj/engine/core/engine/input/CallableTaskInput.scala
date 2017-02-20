@@ -8,7 +8,6 @@ import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
-import scala.reflect.runtime.universe._
 
 abstract class CallableTaskInput[T <: Envelope](inputs: scala.collection.mutable.Map[SjStream, Array[Int]]) extends TaskInput[T](inputs) with Callable[Unit] {
   def close()
@@ -17,7 +16,7 @@ abstract class CallableTaskInput[T <: Envelope](inputs: scala.collection.mutable
 object CallableTaskInput {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  def apply[T: TypeTag](manager: CommonTaskManager, blockingQueue: ArrayBlockingQueue[Envelope], checkpointGroup: CheckpointGroup) = {
+  def apply[T <: AnyRef](manager: CommonTaskManager, blockingQueue: ArrayBlockingQueue[Envelope], checkpointGroup: CheckpointGroup) = {
     val isKafkaInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.kafkaStreamType)
     val isTstreamInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.tstreamType)
 

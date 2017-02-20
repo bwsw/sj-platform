@@ -9,13 +9,12 @@ import com.bwsw.sj.common.engine.EnvelopeDataSerializer
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
-import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction}
 import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Oldest}
+import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction}
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
-import scala.reflect.runtime.universe._
 
 /**
   * Class is responsible for launching t-stream consumers
@@ -24,7 +23,7 @@ import scala.reflect.runtime.universe._
   * @author Kseniya Mikhaleva
   *
   */
-class RetrievableTStreamTaskInput[T: TypeTag](manager: CommonTaskManager,
+class RetrievableTStreamTaskInput[T <: AnyRef](manager: CommonTaskManager,
                                      override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
   extends RetrievableTaskInput[TStreamEnvelope[T]](manager.inputs) {
   private val logger = LoggerFactory.getLogger(this.getClass)

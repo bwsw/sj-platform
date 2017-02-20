@@ -11,7 +11,7 @@ import scala.reflect.runtime.universe._
   *
   * @author Kseniya Mikhaleva
   */
-class RetrievableCompleteTaskInput[T: TypeTag](manager: CommonTaskManager) extends {
+class RetrievableCompleteTaskInput[T <: AnyRef](manager: CommonTaskManager) extends {
   override val checkpointGroup = new CheckpointGroup()
 } with RetrievableTaskInput[Envelope](manager.inputs) {
 

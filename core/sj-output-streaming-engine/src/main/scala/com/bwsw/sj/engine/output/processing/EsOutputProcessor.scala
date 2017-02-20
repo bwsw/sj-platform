@@ -11,7 +11,7 @@ import org.elasticsearch.index.query.QueryBuilders
 
 import scala.collection.mutable
 
-class EsOutputProcessor[T](outputStream: SjStream,
+class EsOutputProcessor[T <: AnyRef](outputStream: SjStream,
                         performanceMetrics: OutputStreamingPerformanceMetrics,
                         manager: OutputTaskManager)
   extends OutputProcessor[T](outputStream, performanceMetrics) {

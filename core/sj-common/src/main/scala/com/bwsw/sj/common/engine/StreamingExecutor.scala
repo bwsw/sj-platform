@@ -10,5 +10,4 @@ package com.bwsw.sj.common.engine
 
 trait StreamingExecutor {
 
-  def getType(): _root_.scala.reflect.runtime.universe.Type
 }

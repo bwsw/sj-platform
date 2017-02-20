@@ -4,8 +4,6 @@ import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 
-import scala.reflect.runtime.universe._
-
 /**
   *
   * It is responsible for output module execution logic. Module uses a specific instance to personalize its work.
@@ -13,9 +11,7 @@ import scala.reflect.runtime.universe._
   *
   * @author Kseniya Tomskikh
   */
-class OutputStreamingExecutor[T: TypeTag](manager: OutputEnvironmentManager) extends StreamingExecutor {
-
-  override def getType() = typeOf[T]
+class OutputStreamingExecutor[T <: AnyRef](manager: OutputEnvironmentManager) extends StreamingExecutor {
   /**
     * it is invoked for every received message from one of the inputs that are defined within the instance.
     * Inside the method you have an access to the message that has the TStreamEnvelope type.

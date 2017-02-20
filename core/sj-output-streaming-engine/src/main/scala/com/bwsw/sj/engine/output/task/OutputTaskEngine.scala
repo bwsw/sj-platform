@@ -34,8 +34,8 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private val outputStream = getOutputStream
   private val environmentManager = createModuleEnvironmentManager()
   private val executor = manager.getExecutor(environmentManager)
-  val taskInputService = new CallableTStreamTaskInput[manager._type.type](manager, blockingQueue)
-  private val outputProcessor = OutputProcessor[manager._type.type](outputStream, performanceMetrics, manager)
+  val taskInputService = new CallableTStreamTaskInput[AnyRef](manager, blockingQueue)
+  private val outputProcessor = OutputProcessor[AnyRef](outputStream, performanceMetrics, manager)
   private var wasFirstCheckpoint = false
   protected val checkpointInterval = instance.checkpointInterval
 
@@ -85,7 +85,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
    */
   private def processOutputEnvelope(envelope: Envelope) = {
     afterReceivingEnvelope()
-    val inputEnvelope = envelope.asInstanceOf[TStreamEnvelope[manager._type.type]]
+    val inputEnvelope = envelope.asInstanceOf[TStreamEnvelope[AnyRef]]
     registerInputEnvelope(inputEnvelope)
     logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler.")
     val outputEnvelopes: List[Envelope] = executor.onMessage(inputEnvelope)
@@ -98,7 +98,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
    *
    * @param envelope: received data
    */
-  private def registerInputEnvelope(envelope: TStreamEnvelope[manager._type.type]) = {
+  private def registerInputEnvelope(envelope: TStreamEnvelope[AnyRef]) = {
     taskInputService.registerEnvelope(envelope)
     performanceMetrics.addEnvelopeToInputStream(envelope)
   }

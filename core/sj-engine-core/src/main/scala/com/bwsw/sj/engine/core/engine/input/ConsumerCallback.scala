@@ -8,7 +8,6 @@ import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.tstreams.agents.consumer.subscriber.Callback
 import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction, TransactionOperator}
 import org.slf4j.LoggerFactory
-import scala.reflect.runtime.universe._
 
 /**
  * Provides a handler for sub. consumer that puts a t-stream envelope in a persistent blocking queue
@@ -17,7 +16,7 @@ import scala.reflect.runtime.universe._
  * @param blockingQueue Persistent blocking queue for storing transactions
  */
 
-class ConsumerCallback[T: TypeTag](envelopeDataSerializer: EnvelopeDataSerializer[T], blockingQueue: ArrayBlockingQueue[Envelope]) extends Callback[Array[Byte]] {
+class ConsumerCallback[T <: AnyRef](envelopeDataSerializer: EnvelopeDataSerializer[T], blockingQueue: ArrayBlockingQueue[Envelope]) extends Callback[Array[Byte]] {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   override def onTransaction(operator: TransactionOperator[Array[Byte]], transaction: ConsumerTransaction[Array[Byte]]) = {

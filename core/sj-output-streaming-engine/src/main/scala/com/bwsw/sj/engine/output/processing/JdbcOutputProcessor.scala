@@ -7,8 +7,8 @@ import com.bwsw.sj.common.DAL.model.{JDBCService, JDBCSjStream, SjStream}
 import com.bwsw.sj.engine.core.entities.{Envelope, JdbcEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 
-class JdbcOutputProcessor[T](outputStream: SjStream,
-                          performanceMetrics: OutputStreamingPerformanceMetrics)
+class JdbcOutputProcessor[T <: AnyRef](outputStream: SjStream,
+                                       performanceMetrics: OutputStreamingPerformanceMetrics)
   extends OutputProcessor[T](outputStream, performanceMetrics) {
 
   private val jdbcStream = outputStream.asInstanceOf[JDBCSjStream]

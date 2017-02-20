@@ -9,7 +9,7 @@ import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
-import com.bwsw.sj.common.engine.{EnvelopeDataSerializer, StreamingExecutor}
+import com.bwsw.sj.common.engine.{DefaultEnvelopeDataSerializer, EnvelopeDataSerializer, StreamingExecutor}
 import com.bwsw.sj.common.rest.entities.module.ExecutionPlan
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.StreamLiterals._
@@ -29,7 +29,6 @@ import scala.collection.mutable
 abstract class TaskManager() {
   protected val logger = LoggerFactory.getLogger(this.getClass)
   val streamDAO = ConnectionRepository.getStreamService
-  val _type: _root_.scala.reflect.runtime.universe.Type
 
   require(System.getenv("INSTANCE_NAME") != null &&
     System.getenv("TASK_NAME") != null &&
@@ -62,7 +61,7 @@ abstract class TaskManager() {
   protected val executorClass = moduleClassLoader.loadClass(executorClassName)
 
   val converter = new ArrayByteConverter
-  val envelopeDataSerializer: EnvelopeDataSerializer[_type.type]
+  val envelopeDataSerializer: EnvelopeDataSerializer[AnyRef] = new DefaultEnvelopeDataSerializer
   val inputs: mutable.Map[SjStream, Array[Int]]
 
   private def getInstance() = {

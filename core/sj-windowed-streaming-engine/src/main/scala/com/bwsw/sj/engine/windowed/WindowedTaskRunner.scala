@@ -26,9 +26,9 @@ object WindowedTaskRunner extends {
       logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for windowed module\n")
 
       val performanceMetrics = new WindowedStreamingPerformanceMetrics(manager)
-      val inputService = RetrievableTaskInput[manager._type.type](manager).asInstanceOf[RetrievableTaskInput[Envelope]]
+      val inputService = RetrievableTaskInput[AnyRef](manager).asInstanceOf[RetrievableTaskInput[Envelope]]
 
-      val batchCollector = BatchCollector[manager._type.type](manager, inputService, batchQueue, performanceMetrics)
+      val batchCollector = BatchCollector[AnyRef](manager, inputService, batchQueue, performanceMetrics)
 
       val windowedTaskEngine = new WindowedTaskEngine(manager, inputService, batchQueue, performanceMetrics)
 

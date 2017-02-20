@@ -76,7 +76,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
   /**
    * Sends an input envelope data to output steam
    */
-  private def sendData(stream: String, partition: Int, data: manager._type.type) = {
+  private def sendData(stream: String, partition: Int, data: AnyRef) = {
     logger.info(s"Task name: ${manager.taskName}. Send envelope to each output stream..")
     val maybeTransaction = getTransaction(stream, partition)
     val bytes = manager.envelopeDataSerializer.serialize(data)
@@ -175,7 +175,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
    * @param envelope May be input envelope
    * @return True if a processed envelope is processed, e.i. it is not duplicate or empty, and false in other case
    */
-  private def processEnvelope(envelope: Option[InputEnvelope[manager._type.type]]): Boolean = {
+  private def processEnvelope(envelope: Option[InputEnvelope[AnyRef]]): Boolean = {
     envelope match {
       case Some(inputEnvelope) =>
         logger.info(s"Task name: ${manager.taskName}. Envelope is defined. Process it.")
@@ -219,7 +219,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
    *                              If it is true it means a processed envelope is duplicate or empty and false in other case
    * @param ctx Channel context related with this input envelope to send a message about this event
    */
-  private def sendClientResponse(envelope: Option[InputEnvelope[manager._type.type]], isNotEmptyOrDuplicate: Boolean, ctx: ChannelHandlerContext) = {
+  private def sendClientResponse(envelope: Option[InputEnvelope[AnyRef]], isNotEmptyOrDuplicate: Boolean, ctx: ChannelHandlerContext) = {
     val inputStreamingResponse = executor.createProcessedMessageResponse(envelope, isNotEmptyOrDuplicate)
     if (inputStreamingResponse.isBuffered) ctx.write(inputStreamingResponse.message)
     else ctx.writeAndFlush(inputStreamingResponse.message)

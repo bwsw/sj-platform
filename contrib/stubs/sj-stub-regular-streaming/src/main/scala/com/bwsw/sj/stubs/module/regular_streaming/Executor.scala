@@ -2,7 +2,6 @@ package com.bwsw.sj.stubs.module.regular_streaming
 
 import java.util.Random
 
-import com.bwsw.sj.common.engine.DefaultEnvelopeDataSerializer
 import com.bwsw.sj.engine.core.entities.{KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
@@ -10,9 +9,8 @@ import com.bwsw.sj.engine.core.state.StateStorage
 
 import scala.language.higherKinds
 
-class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor[Int](manager) {
+class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor[Integer](manager) {
 
-  val objectSerializer = new DefaultEnvelopeDataSerializer[Int]()
   val state: StateStorage = manager.getState
   val outputs = manager.getStreamsByTags(Array("output"))
 
@@ -25,7 +23,7 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
     println("on after checkpoint")
   }
 
-  override def onMessage(envelope: TStreamEnvelope[Int]): Unit = {
+  override def onMessage(envelope: TStreamEnvelope[Integer]): Unit = {
     val output = manager.getRoundRobinOutput(outputs(new Random().nextInt(outputs.length)))
     var sum = state.get("sum").asInstanceOf[Int]
 
@@ -33,20 +31,20 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
 
     println("elements: " + envelope.data.mkString(","))
     envelope.data.foreach(x => sum += x)
-    envelope.data.map(objectSerializer.serialize).foreach(output.put)
+    envelope.data.foreach(output.put)
     state.set("sum", sum)
 
     println("stream name = " + envelope.stream)
   }
 
-  override def onMessage(envelope: KafkaEnvelope[Int]): Unit = {
+  override def onMessage(envelope: KafkaEnvelope[Integer]): Unit = {
     val output = manager.getRoundRobinOutput(outputs(new Random().nextInt(outputs.length)))
     var sum = state.get("sum").asInstanceOf[Int]
 
     if (new Random().nextInt(100) < 5) throw new Exception("it happened")
 
     println("element: " + envelope.data)
-    output.put(objectSerializer.serialize(envelope.data))
+    output.put(envelope.data)
     sum += envelope.data
     state.set("sum", sum)
 

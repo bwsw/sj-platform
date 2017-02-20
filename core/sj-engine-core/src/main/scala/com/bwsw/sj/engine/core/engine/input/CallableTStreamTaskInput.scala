@@ -12,7 +12,6 @@ import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
-import scala.reflect.runtime.universe._
 
 /**
  * Class is responsible for launching t-stream subscribing consumers
@@ -27,7 +26,7 @@ import scala.reflect.runtime.universe._
  * @author Kseniya Mikhaleva
  *
  */
-class CallableTStreamTaskInput[T: TypeTag](manager: TaskManager,
+class CallableTStreamTaskInput[T <: AnyRef](manager: TaskManager,
                               blockingQueue: ArrayBlockingQueue[Envelope],
                               override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
   extends CallableTaskInput[TStreamEnvelope[T]](manager.inputs) {

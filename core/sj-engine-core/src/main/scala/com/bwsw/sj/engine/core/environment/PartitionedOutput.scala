@@ -18,21 +18,22 @@ class PartitionedOutput(producer: Producer[Array[Byte]],
   private val transactions = mutable.Map[Int, ProducerTransaction[Array[Byte]]]()
   private val streamName = producer.stream.name
 
-  def put(data: Array[Byte], partition: Int) = {
+  def put(data: AnyRef, partition: Int) = {
+    val bytes = objectSerializer.serialize(data)
     logger.debug(s"Send a portion of data to stream: '$streamName' partition with number: '$partition'.")
     if (transactions.contains(partition)) {
-      transactions(partition).send(data)
+      transactions(partition).send(bytes)
     }
     else {
       transactions(partition) = producer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened, partition)
-      transactions(partition).send(data)
+      transactions(partition).send(bytes)
     }
 
     logger.debug(s"Add an element to output envelope of output stream:  '$streamName'.")
     performanceMetrics.addElementToOutputEnvelope(
       streamName,
       transactions(partition).getTransactionID().toString,
-      data.length
+      bytes.length
     )
   }
 }

@@ -4,8 +4,6 @@ import com.bwsw.sj.common.engine.{StateHandlers, StreamingExecutor}
 import com.bwsw.sj.engine.core.entities.{KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 
-import scala.reflect.runtime.universe._
-
 /**
  * Class is responsible for regular module execution logic.
  * Module uses a specific instance, to personalize its work.
@@ -14,9 +12,7 @@ import scala.reflect.runtime.universe._
  * @author Kseniya Mikhaleva
  */
 
-class RegularStreamingExecutor[T: TypeTag](manager: ModuleEnvironmentManager) extends StreamingExecutor with StateHandlers {
-
-  override def getType() = typeOf[T]
+class RegularStreamingExecutor[T <: AnyRef](manager: ModuleEnvironmentManager) extends StreamingExecutor with StateHandlers {
   /**
    * Is invoked only once at the beginning of launching of module
    */
