@@ -1,110 +1,101 @@
 <sj-spinner [isRunning]="showSpinner"></sj-spinner>
 
-<div class="row">
-  <!-- Content -->
-  <div class="col col-xs-8">
-    <div class="card">
-      <div class="card-block">
-        <!-- Card title -->
-        <div class="row">
-          <div class="col col-xs-4"><h4 class="card-title">Streams list</h4></div>
-          <div class="col col-xs-8">
-            <button type="button"
-                    class="btn btn-primary pull-right ml-1 mb-1"
-                    (click)="CreateStream.show()"><i class="fa fa-plus mr-1"></i>Create Stream
-            </button>
 
-            <sj-search-box class="pull-right"
-                           (update)="term = $event"></sj-search-box>
-            <sj-filter class="pull-right" [filterList]="streamTypes"
-                       (update)="typeterm = $event"></sj-filter>
-          </div>
-        </div>
+<!-- Content -->
+<div class="col col-xs-8">
+  <div class="card">
+    <div class="card-block">
+      <!-- Card title -->
+      <div class="row">
+        <div class="col col-xs-4"><h4 class="card-title">Streams list</h4></div>
+        <div class="col col-xs-8">
+          <button type="button"
+                  class="btn btn-primary pull-right ml-1 mb-1"
+                  (click)="CreateStream.show()"><i class="fa fa-plus mr-1"></i>Create Stream
+          </button>
 
-        <!-- Alerts -->
-        <div class="main-alerts mt-1">
-          <alert class="custom-alert"
-                 *ngFor="let alert of alerts; let i = index"
-                 [type]="alert.type"
-                 dismissible="true"
-                 [dismissOnTimeout]="alert.timeout"
-                 (close)="closeAlert(i)">
-            {{ alert.msg }}
-          </alert>
-        </div>
-
-        <!-- Steams list -->
-        <div class="table-wrapper">
-          <table class="table table-hover table-sm mt-1 mb-0">
-            <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Service</th>
-              <th class="actions-column">Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr *ngIf="!streamList || (streamList && streamList.length === 0)">
-              <td colspan="20" class="text-center">No streams have been found.</td>
-            </tr>
-
-              <tr *ngFor="let stream of streamList | orderBy: 'name' | listFilter : {name: term, type: typeterm}"
-                  [ngClass]="{ 'table-info': isSelected(stream) }"
-                  (click)="selectStream(stream)">
-                <td>{{ stream.name }}</td>
-                <td>{{ stream.description }}</td>
-                <td>
-                <span class="stream-action-link">
-                  Service:
-                  <span class="btn-lookup action-link"
-                        (click)="getServiceInfo(ServiceInfo, stream.service)">{{ stream.service }}</span>
-                </span>
-                </td>
-                <td class="actions-column">
-                  <button type="button"
-                          class="btn btn-sm btn-secondary"
-                          title="Delete stream"
-                          (click)="deleteStreamConfirm(DeleteStream, stream)">
-                    <i class="fa fa-trash"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <sj-search-box class="pull-right"
+                         (update)="term = $event"></sj-search-box>
+          <sj-filter class="pull-right" [filterList]="streamTypes"
+                     (update)="typeterm = $event"></sj-filter>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Detailed info -->
-  <div class="col col-xs-4">
-    <div class="card">
-      <div class="card-header">Detailed information about node</div>
-      <div class="card-block">
-        <div class="overflow-x-scroll">
-          <ul *ngIf="currentStream">
-            <li>Name: {{currentStream.name}}</li>
-            <li>Type: {{currentStream.type}}</li>
-            <li>Description: {{currentStream.description}}</li>
-            <li *ngIf="currentStream.type !== 'elasticsearch-output'">Partitions: {{currentStream.partitions}}</li>
-            <li>Tags: {{currentStream.tags}}</li>
-            <li>Service: <span class="btn-lookup action-link" (click)="getServiceInfo(ServiceInfo, currentStream.service)">{{ currentStream.service }}</span>
-            </li>
-            <li *ngIf="currentStream.type === 'stream.t-stream'">Generator:
-              <ul>
-                <li>Type: {{currentStream.generator.generatorType}}</li>
-                <li>Service: {{currentStream.generator.service}}</li>
-                <li>Instance count: {{currentStream.generator.instanceCount}}</li>
-              </ul>
-            </li>
-            <li *ngIf="currentStream.replicationFactor">Replication factor: {{currentStream.replicationFactor}}</li>
-          </ul>
-        </div>
+      <!-- Alerts -->
+      <sj-alerts [alerts]="alerts"></sj-alerts>
+
+      <!-- Steams list -->
+      <div class="table-wrapper">
+        <table class="table table-hover table-sm mt-1 mb-0">
+          <thead>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Service</th>
+            <th class="actions-column">Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngIf="!streamList || (streamList && streamList.length === 0)">
+            <td colspan="20" class="text-center">No streams have been found.</td>
+          </tr>
+
+            <tr *ngFor="let stream of streamList | orderBy: 'name' | listFilter : {name: term, type: typeterm}"
+                [ngClass]="{ 'table-info': isSelected(stream) }"
+                (click)="selectStream(stream)">
+              <td>{{ stream.name }}</td>
+              <td>{{ stream.description }}</td>
+              <td>
+              <span class="stream-action-link">
+                Service:
+                <span class="btn-lookup action-link"
+                      (click)="getServiceInfo(ServiceInfo, stream.service)">{{ stream.service }}</span>
+              </span>
+              </td>
+              <td class="actions-column">
+                <button type="button"
+                        class="btn btn-sm btn-secondary"
+                        title="Delete stream"
+                        (click)="deleteStreamConfirm(DeleteStream, stream)">
+                  <i class="fa fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Detailed info -->
+<div class="col col-xs-4">
+  <div class="card">
+    <div class="card-header">Detailed information about node</div>
+    <div class="card-block">
+      <div class="overflow-x-scroll">
+        <ul *ngIf="currentStream">
+          <li>Name: {{currentStream.name}}</li>
+          <li>Type: {{currentStream.type}}</li>
+          <li>Description: {{currentStream.description}}</li>
+          <li *ngIf="currentStream.type !== 'elasticsearch-output'">Partitions: {{currentStream.partitions}}</li>
+          <li>Tags: {{currentStream.tags}}</li>
+          <li>Service: <span class="btn-lookup action-link" (click)="getServiceInfo(ServiceInfo, currentStream.service)">{{ currentStream.service }}</span>
+          </li>
+          <li *ngIf="currentStream.type === 'stream.t-stream'">Generator:
+            <ul>
+              <li>Type: {{currentStream.generator.generatorType}}</li>
+              <li>Service: {{currentStream.generator.service}}</li>
+              <li>Instance count: {{currentStream.generator.instanceCount}}</li>
+            </ul>
+          </li>
+          <li *ngIf="currentStream.replicationFactor">Replication factor: {{currentStream.replicationFactor}}</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <div bsModal #CreateStream="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-lg">
