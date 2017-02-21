@@ -1,97 +1,97 @@
 <sj-spinner [isRunning]="showSpinner"></sj-spinner>
 
+<div class="row">
+  <!-- Content -->
+  <div class="col col-xs-8">
+    <div class="card">
+      <div class="card-block">
+        <!-- Card title -->
+        <div class="row">
+          <div class="col col-xs-4"><h4 class="card-title">Providers list</h4></div>
+          <div class="col col-xs-8">
+            <button type="button"
+                    class="btn btn-primary pull-right ml-1 mb-1"
+                    (click)="CreateProvider.show()"><i class="fa fa-plus mr-1"></i>Create Provider
+            </button>
 
-<!-- Content -->
-<div class="col col-xs-8">
-  <div class="card">
-    <div class="card-block">
-      <!-- Card title -->
-      <div class="row">
-        <div class="col col-xs-4"><h4 class="card-title">Providers list</h4></div>
-        <div class="col col-xs-8">
-          <button type="button"
-                  class="btn btn-primary pull-right ml-1 mb-1"
-                  (click)="CreateProvider.show()"><i class="fa fa-plus mr-1"></i>Create Provider
-          </button>
+            <sj-search-box class="pull-right"
+                           (update)="nameterm = $event"></sj-search-box>
 
-          <sj-search-box class="pull-right"
-                         (update)="nameterm = $event"></sj-search-box>
+            <sj-filter class="pull-right" [filterList]="providerTypes"
+                           (update)="typeterm = $event"></sj-filter>
 
-          <sj-filter class="pull-right" [filterList]="providerTypes"
-                         (update)="typeterm = $event"></sj-filter>
+          </div>
+        </div>
 
+        <!-- Alerts -->
+        <sj-alerts [alerts]="alerts"></sj-alerts>
+
+        <!-- Providers list -->
+        <div class="table-wrapper">
+          <table class="table table-hover table-sm mt-1 mb-0">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th class="actions-column">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="!providerList || (providerList && providerList.length === 0)">
+                <td colspan="20" class="text-center">No providers have been found.</td>
+              </tr>
+
+              <tr *ngFor="let provider of providerList | orderBy: 'name' | listFilter : {name : nameterm, type: typeterm} "
+                  [ngClass]="{ 'table-info': isSelected(provider) }"
+                  (click)="selectProvider(provider)">
+                <td>{{ provider.name }}</td>
+                <td>{{ provider.description }}</td>
+                <td class="actions-column">
+                  <button type="button"
+                          class="btn btn-sm btn-secondary"
+                          title="Delete provider"
+                          (click)="deleteProviderConfirm(DeleteProvider, provider)">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                  <button type="button"
+                          class="btn btn-sm btn-secondary"
+                          title="Test connection"
+                          (click)="testConnection(provider)">
+                    <i class="fa fa-refresh"
+                       [ngClass]="{ 'fa-spin': isConnecting(provider) }"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
+    </div>
+  </div>
 
-      <!-- Alerts -->
-      <sj-alerts [alerts]="alerts"></sj-alerts>
-
-      <!-- Providers list -->
-      <div class="table-wrapper">
-        <table class="table table-hover table-sm mt-1 mb-0">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th class="actions-column">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngIf="!providerList || (providerList && providerList.length === 0)">
-              <td colspan="20" class="text-center">No providers have been found.</td>
-            </tr>
-
-            <tr *ngFor="let provider of providerList | orderBy: 'name' | listFilter : {name : nameterm, type: typeterm} "
-                [ngClass]="{ 'table-info': isSelected(provider) }"
-                (click)="selectProvider(provider)">
-              <td>{{ provider.name }}</td>
-              <td>{{ provider.description }}</td>
-              <td class="actions-column">
-                <button type="button"
-                        class="btn btn-sm btn-secondary"
-                        title="Delete provider"
-                        (click)="deleteProviderConfirm(DeleteProvider, provider)">
-                  <i class="fa fa-trash"></i>
-                </button>
-                <button type="button"
-                        class="btn btn-sm btn-secondary"
-                        title="Test connection"
-                        (click)="testConnection(provider)">
-                  <i class="fa fa-refresh"
-                     [ngClass]="{ 'fa-spin': isConnecting(provider) }"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+  <!-- Detailed info -->
+  <div class="col col-xs-4">
+    <div class="card">
+      <div class="card-header">Detailed information about node</div>
+      <div class="card-block">
+        <div class="overflow-x-scroll">
+          <ul *ngIf="currentProvider">
+            <li>Name: {{currentProvider.name}}</li>
+            <li>Type: {{currentProvider.type}}</li>
+            <li>Description: {{currentProvider.description}}</li>
+            <li>Hosts:
+              <ul>
+                <li *ngFor="let host of currentProvider.hosts">{{host}}</li>
+              </ul>
+            </li>
+            <li *ngIf="currentProvider.login">Login: {{currentProvider.login}}</li>
+            <li *ngIf="currentProvider.password">Password: {{currentProvider.password}}</li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
 </div>
-
-<!-- Detailed info -->
-<div class="col col-xs-4">
-  <div class="card">
-    <div class="card-header">Detailed information about node</div>
-    <div class="card-block">
-      <div class="overflow-x-scroll">
-        <ul *ngIf="currentProvider">
-          <li>Name: {{currentProvider.name}}</li>
-          <li>Type: {{currentProvider.type}}</li>
-          <li>Description: {{currentProvider.description}}</li>
-          <li>Hosts:
-            <ul>
-              <li *ngFor="let host of currentProvider.hosts">{{host}}</li>
-            </ul>
-          </li>
-          <li *ngIf="currentProvider.login">Login: {{currentProvider.login}}</li>
-          <li *ngIf="currentProvider.password">Password: {{currentProvider.password}}</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</div>
-
 
 <div bsModal #CreateProvider="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-lg">
