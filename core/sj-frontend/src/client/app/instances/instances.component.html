@@ -303,7 +303,7 @@
               <div class="col col-sm-10">
                 <select [(ngModel)]="newInstance.input" name="instanceInput" required
                         class="form-control">
-                  <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-stream'" value="{{stream.name}}">{{stream.name}}</option>
+                  <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-stream'">{{stream.name}}</option>
                 </select>
               </div>
             </fieldset>
@@ -314,7 +314,7 @@
               <div class="col col-sm-10">
                 <select [(ngModel)]="newInstance.output" name="instanceOutput" required
                         class="form-control">
-                  <option *ngFor="let stream of streamsList | streamFilter: 'jdbc-output,elasticsearch-output'" value="{{stream.name}}">{{stream.name}}</option>
+                  <option *ngFor="let stream of streamsList | streamFilter: 'jdbc-output,elasticsearch-output'">{{stream.name}}</option>
                 </select>
               </div>
             </fieldset>
