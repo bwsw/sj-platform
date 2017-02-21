@@ -214,10 +214,6 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
       });
   }
 
-  public closeAlert(i: number): void {
-    this.alerts.splice(i, 1);
-  }
-
   public showAlert(message: Object): void {
     this.alerts = [];
     this.alerts.push(message);

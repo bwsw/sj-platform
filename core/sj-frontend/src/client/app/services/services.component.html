@@ -100,11 +100,11 @@
                   (click)="getProviderInfo(ProviderInfo, currentService.dataProvider)">{{currentService.dataProvider}}</span>
           </li>
           <li *ngIf="currentService.type === 'TstrQ'">Data namespace: {{currentService.dataNamespace}}</li>
-          <li *ngIf="currentService.type === 'TstrQ'">Lock provider:
+          <li *ngIf="currentService.type === 'TstrQ'">Lock-provider:
             <span class="btn-lookup action-link"
                   (click)="getProviderInfo(ProviderInfo, currentService.lockProvider)">{{currentService.lockProvider}}</span>
           </li>
-          <li *ngIf="currentService.type === 'TstrQ'">Lock namespace: {{currentService.lockNamespace}}</li>
+          <li *ngIf="currentService.type === 'TstrQ'">Lock-namespace: {{currentService.lockNamespace}}</li>
           <li *ngIf="currentService.type === 'KfkQ'">ZK provider: {{currentService.zkProvider}}</li>
           <li *ngIf="currentService.type === 'KfkQ'">ZK namespace: {{currentService.zkNamespace}}</li>
         </ul>
@@ -264,7 +264,7 @@
 
           <!-- Lock provider -->
           <fieldset *ngIf="newService.type === 'TstrQ'" class="form-group row">
-            <label class="col-sm-2 col-form-label required">Lock provider</label>
+            <label class="col-sm-2 col-form-label required">Lock-provider</label>
             <div class="col-sm-10">
               <select [(ngModel)]="newService.lockProvider" name="serviceLockProvider"
                       required class="form-control">
@@ -276,7 +276,7 @@
 
           <!-- Lock namespace -->
           <fieldset *ngIf="newService.type === 'TstrQ'" class="form-group row">
-            <label class="col-sm-2 col-form-label required">Lock namespace</label>
+            <label class="col-sm-2 col-form-label required">Lock-namespace</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newService.lockNamespace" name="serviceLockNamespace" type="text"
                      class="form-control" required>
