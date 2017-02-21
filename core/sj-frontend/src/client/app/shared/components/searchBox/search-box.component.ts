@@ -3,8 +3,7 @@ import { Component, Output, OnInit, EventEmitter } from '@angular/core';
 @Component({
   moduleId: module.id,
   selector: 'sj-search-box',
-  templateUrl: 'search-box.component.html',
-  styleUrls: ['search-box.component.css']
+  templateUrl: 'search-box.component.html'
 })
 export class SearchBoxComponent implements OnInit {
   @Output() public update = new EventEmitter();

@@ -3,8 +3,7 @@ import { Component, Input, Output, OnInit, EventEmitter } from '@angular/core';
 @Component({
   moduleId: module.id,
   selector: 'sj-filter',
-  templateUrl: 'filter.component.html',
-  styleUrls: ['../searchBox/search-box.component.css']
+  templateUrl: 'filter.component.html'
 })
 export class FilterComponent implements OnInit {
 
