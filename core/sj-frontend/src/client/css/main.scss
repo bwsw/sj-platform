@@ -96,24 +96,9 @@ li.tag.nopadding input{
   padding: 0px;
 }
 
-/*Search-box*/
-\:host {
-  position: relative
-}
-
+/*filter-box*/
 .right-inner-addon {
   margin: 0 5px 10px;
-
-  input {
-    padding-right: 30px;
-  }
-
-  i {
-    position: absolute;
-    right: 0;
-    padding: 10px 12px;
-    pointer-events: none;
-  }
 }
 
 /*mozila validated input style disable*/
