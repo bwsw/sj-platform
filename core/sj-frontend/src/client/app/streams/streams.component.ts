@@ -38,12 +38,12 @@ export class StreamsComponent implements OnInit {
     };
   }
 
-  public keyUp(event:KeyboardEvent) {
+  public keyDown(event:KeyboardEvent) {
     if (event.keyCode === 13) {
       this.newStream.tags.push(this.currentTag);
       this.currentTag = '';
     } else if (event.keyCode === 8 && this.currentTag.length === 0) {
-      this.currentTag = this.newStream.tags.pop();
+      this.newStream.tags.pop();
     }
   }
 

@@ -202,7 +202,7 @@
                     name="streamTags"
                          [(ngModel)]="currentTag"
                          #streamtags = "ngModel"
-                         (keyup)="keyUp($event)"
+                         (keydown)="keyDown($event)"
                          (blur)="blur()" />
                 </li>
               </ul>
