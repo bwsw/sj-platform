@@ -83,6 +83,9 @@ li.tag {
   background-color: #20a8d8;
   color: #FFFFFF;
   margin-right: 2px;
+  span {
+    margin-right: 2px;
+  }
 }
 
 li.tag.nopadding {
