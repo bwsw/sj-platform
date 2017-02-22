@@ -69,12 +69,12 @@ object ModuleStatefulChecker extends App {
         while (transaction.hasNext()) {
           val batch = objectSerializer.deserialize(transaction.next()).asInstanceOf[Batch]
           batch.envelopes.foreach {
-            case tstreamEnvelope: TStreamEnvelope[Array[Byte] @unchecked] => tstreamEnvelope.data.foreach(x => {
-              outputElements.+=(objectSerializer.deserialize(x).asInstanceOf[Int])
+            case tstreamEnvelope: TStreamEnvelope[Int @unchecked] => tstreamEnvelope.data.foreach(x => {
+              outputElements.+=(x)
               totalOutputElements += 1
             })
-            case kafkaEnvelope: KafkaEnvelope[Array[Byte] @unchecked] =>
-              outputElements.+=(objectSerializer.deserialize(kafkaEnvelope.data).asInstanceOf[Int])
+            case kafkaEnvelope: KafkaEnvelope[Int @unchecked] =>
+              outputElements.+=(kafkaEnvelope.data)
               totalOutputElements += 1
           }
         }

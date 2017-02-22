@@ -18,7 +18,6 @@ object SjWindowedModuleSetup extends App {
   val fileStorage = ConnectionRepository.getFileStorage
   val stateManagement = "ram"
   val stateFullCheckpoint = 3
-  val batchCheckpointInterval = 2
   val window = 4
   val slidingInterval = 2
   val _type = "both"
@@ -31,9 +30,9 @@ object SjWindowedModuleSetup extends App {
   createProviders(providerService)
   createServices(serviceManager, providerService)
   createStreams(streamService, serviceManager, partitions, _type, inputCount, outputCount)
-  createInstance(serviceManager, instanceService, batchCheckpointInterval, window, slidingInterval, stateManagement, stateFullCheckpoint)
+  createInstance(serviceManager, instanceService, window, slidingInterval, stateManagement, stateFullCheckpoint)
 
-  createData(12, 1, streamService, _type, inputCount)
+  createData(16, 1, streamService, _type, inputCount)
   close()
   ConnectionRepository.close()
 

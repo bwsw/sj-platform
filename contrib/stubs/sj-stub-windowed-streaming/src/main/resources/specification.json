@@ -30,5 +30,6 @@
     "opt": 1
   },
   "validator-class": "com.bwsw.sj.stubs.module.windowed_streaming.Validator",
-  "executor-class": "com.bwsw.sj.stubs.module.windowed_streaming.Executor"
+  "executor-class": "com.bwsw.sj.stubs.module.windowed_streaming.Executor",
+  "batch-collector-class": "com.bwsw.sj.engine.windowed.batch.NumericalBatchCollector"
 }

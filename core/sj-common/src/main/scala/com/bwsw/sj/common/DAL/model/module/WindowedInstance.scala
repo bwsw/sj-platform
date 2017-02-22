@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.DAL.model.module
 
-import com.bwsw.sj.common.rest.entities.module.{BatchFillTypeMetadata, ExecutionPlan, InstanceMetadata, WindowedInstanceMetadata}
+import com.bwsw.sj.common.rest.entities.module.{ExecutionPlan, InstanceMetadata, WindowedInstanceMetadata}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
 import org.mongodb.morphia.annotations.{Embedded, Property}
@@ -11,9 +11,7 @@ import org.mongodb.morphia.annotations.{Embedded, Property}
   * @author Kseniya Tomskikh
   */
 class WindowedInstance() extends Instance {
-  @Property("main-stream") var mainStream: String = null
-  @Property("related-streams") var relatedStreams: Array[String] = Array()
-  @Embedded("batch-fill-type") var batchFillType: BatchFillType = new BatchFillType()
+  var inputs: Array[String] = Array()
   var window: Int = 1
   @Property("sliding-interval") var slidingInterval: Int = 1
   @Embedded("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan()
@@ -23,16 +21,10 @@ class WindowedInstance() extends Instance {
   @Property("event-wait-idle-time") var eventWaitIdleTime: Long = 1000
 
   override def asProtocolInstance(): InstanceMetadata = {
-    val batchFillType = new BatchFillTypeMetadata
-    batchFillType.typeName = this.batchFillType.typeName
-    batchFillType.value = this.batchFillType.value
-
     val protocolInstance = new WindowedInstanceMetadata()
     super.fillProtocolInstance(protocolInstance)
 
-    protocolInstance.mainStream = this.mainStream
-    protocolInstance.relatedStreams = this.relatedStreams
-    protocolInstance.batchFillType = batchFillType
+    protocolInstance.inputs = this.inputs
     protocolInstance.window = this.window
     protocolInstance.slidingInterval = this.slidingInterval
     protocolInstance.eventWaitIdleTime = this.eventWaitIdleTime
@@ -45,5 +37,5 @@ class WindowedInstance() extends Instance {
     protocolInstance
   }
 
-  override def getInputsWithoutStreamMode() = (this.relatedStreams :+ this.mainStream).map(clearStreamFromMode)
+  override def getInputsWithoutStreamMode() = this.inputs.map(clearStreamFromMode)
 }

@@ -309,7 +309,6 @@ object DataFactory {
 
   def createInstance(serviceManager: GenericMongoService[Service],
                      instanceService: GenericMongoService[Instance],
-                     batchCheckpointInterval: Int,
                      window: Int,
                      slidingInterval: Int,
                      stateManagement: String = EngineLiterals.noneStateMode,
@@ -324,10 +323,7 @@ object DataFactory {
     instance.moduleName = "windowed-streaming-stub"
     instance.moduleVersion = "1.0"
     instance.description = "some description of test instance"
-    instance.batchFillType.typeName = EngineLiterals.everyNthMode
-    instance.batchFillType.value = batchCheckpointInterval
-    instance.mainStream = instanceInputs.head
-    instance.relatedStreams = instanceInputs.tail
+    instance.inputs = instanceInputs
     instance.window = window
     instance.slidingInterval = slidingInterval
     instance.outputs = instanceOutputs

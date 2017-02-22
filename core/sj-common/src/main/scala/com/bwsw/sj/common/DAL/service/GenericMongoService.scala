@@ -1,6 +1,7 @@
 package com.bwsw.sj.common.DAL.service
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.mongodb.BasicDBObject
 
 import scala.reflect.ClassTag
 
@@ -17,6 +18,7 @@ class GenericMongoService[T: ClassTag] extends DatabaseService[T] {
    * Allows manipulating with elements of mongo database collection
    */
   private val genericDAO = ConnectionRepository.getGenericDAO[T]
+  private val emptyQuery = new BasicDBObject()
 
   def save(entity: T) = {
     logger.debug(s"Save an entity to a mongo database.")
@@ -47,6 +49,6 @@ class GenericMongoService[T: ClassTag] extends DatabaseService[T] {
 
   def deleteAll() = {
     logger.debug(s"Remove all entities from a mongo database.")
-    genericDAO.getCollection.drop()
+    genericDAO.getCollection.remove(emptyQuery)
   }
 }

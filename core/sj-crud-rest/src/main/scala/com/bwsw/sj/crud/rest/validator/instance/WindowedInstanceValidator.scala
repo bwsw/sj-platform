@@ -52,12 +52,7 @@ class WindowedInstanceValidator extends InstanceValidator {
       errors += createMessage("rest.validator.attribute.must.greater.or.equal", "Window", "slidingInterval")
     }
 
-    Option(windowedInstanceMetadata.mainStream) match {
-      case Some(x) =>
-        errors ++= validateStreamOptions(windowedInstanceMetadata, specification)
-      case None =>
-        errors += createMessage("rest.validator.attribute.required", "mainStream")
-    }
+    errors ++= validateStreamOptions(windowedInstanceMetadata, specification)
 
     errors
   }
@@ -102,38 +97,6 @@ class WindowedInstanceValidator extends InstanceValidator {
       if (kafkaStreams.exists(s => !s.service.isInstanceOf[KafkaService])) {
         errors += createMessage("rest.validator.service.must", "kafka streams", "KfkQ")
       }
-    }
-
-    //'batch-fill-type' field
-    Option(instance.batchFillType) match {
-      case None =>
-        errors += createMessage("rest.validator.attribute.required", "batchFillType")
-      case Some(batchFillType) =>
-        //'type-name' field
-        Option(batchFillType.typeName) match {
-          case Some(x) =>
-            if (!batchFillTypes.contains(x)) {
-              errors += createMessage("rest.validator.attribute.unknown.value", "typeName' of 'batchFillType", x) + ". " +
-                createMessage("rest.validator.attribute.must.one_of", "typeName", batchFillTypes.mkString("[", ", ", "]"))
-            } else {
-              if (x == transactionIntervalMode && inputStreams.exists(x => x.streamType == kafkaStreamType)) {
-                errors += createMessage(
-                  "rest.validator.attribute.cannot.equal.if",
-                  "typeName' of 'batchFillType",
-                  transactionIntervalMode,
-                  kafkaStreamType
-                )
-              }
-            }
-          case None =>
-            errors += createMessage("rest.validator.attribute.required", "typeName' of 'batchFillType")
-        }
-
-        //'value' field
-        if (batchFillType.value <= 0) {
-          errors += createMessage("rest.validator.attribute.required", "Value' of 'batchFillType") + ". " +
-            createMessage("rest.validator.attribute.must.greater.than.zero", "Value' of 'batchFillType")
-        }
     }
 
     // 'start-from' field

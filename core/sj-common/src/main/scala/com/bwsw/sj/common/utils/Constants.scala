@@ -12,6 +12,7 @@ object EngineLiterals {
   final val windowedInstanceBarrierPrefix = "/instance/barriers/"
   final val windowedInstanceLeaderPrefix = "/instance/leaders/"
   final val eventWaitTimeout = 1000
+  final val everyNthCount = 4
 
   final val inputStreamingType = "input-streaming"
   final val outputStreamingType = "output-streaming"

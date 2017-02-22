@@ -1,15 +1,12 @@
 package com.bwsw.sj.engine.windowed
 
-import java.util.concurrent.ArrayBlockingQueue
-
-import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.engine.core.engine.{InstanceStatusObserver, TaskRunner}
-import com.bwsw.sj.engine.core.entities.{Batch, Envelope}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
-import com.bwsw.sj.engine.windowed.batch.BatchCollector
+import com.bwsw.sj.engine.core.reporting.WindowedStreamingPerformanceMetrics
+import com.bwsw.sj.engine.core.state.CommonModuleService
 import com.bwsw.sj.engine.windowed.task.WindowedTaskEngine
-import com.bwsw.sj.engine.windowed.task.input.RetrievableTaskInput
-import com.bwsw.sj.engine.windowed.task.reporting.WindowedStreamingPerformanceMetrics
+import com.bwsw.sj.engine.windowed.task.input.EnvelopeFetcher
 import org.slf4j.LoggerFactory
 
 object WindowedTaskRunner extends {
@@ -17,26 +14,25 @@ object WindowedTaskRunner extends {
 } with TaskRunner {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val batchQueue: ArrayBlockingQueue[Batch] = new ArrayBlockingQueue(EngineLiterals.queueSize)
 
   def main(args: Array[String]) {
     try {
       val manager = new CommonTaskManager()
+      val instance = manager.instance.asInstanceOf[WindowedInstance]
 
       logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for windowed module\n")
 
+      val envelopeFetcher = EnvelopeFetcher(manager)
       val performanceMetrics = new WindowedStreamingPerformanceMetrics(manager)
-      val inputService = RetrievableTaskInput[AnyRef](manager).asInstanceOf[RetrievableTaskInput[Envelope]]
+      val moduleService = CommonModuleService(manager, envelopeFetcher.checkpointGroup, performanceMetrics)
+      val batchCollector = manager.getBatchCollector(instance, performanceMetrics)
 
-      val batchCollector = BatchCollector[AnyRef](manager, inputService, batchQueue, performanceMetrics)
-
-      val windowedTaskEngine = new WindowedTaskEngine(manager, inputService, batchQueue, performanceMetrics)
+      val windowedTaskEngine = new WindowedTaskEngine(batchCollector, instance, moduleService, envelopeFetcher, performanceMetrics)
 
       val instanceStatusObserver = new InstanceStatusObserver(manager.instanceName)
 
       logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
 
-      executorService.submit(batchCollector)
       executorService.submit(windowedTaskEngine)
       executorService.submit(performanceMetrics)
       executorService.submit(instanceStatusObserver)
@@ -47,5 +43,4 @@ object WindowedTaskRunner extends {
       case exception: Exception => handleException(exception)
     }
   }
-
 }
