@@ -1,118 +1,118 @@
 <sj-spinner [isRunning]="showSpinner"></sj-spinner>
 
+<div class="row">
+  <!-- Content -->
+  <div class="col col-xs-8">
+    <div class="card">
+      <div class="card-block">
+        <!-- Card title -->
+        <div class="row">
+          <div class="col col-xs-4"><h4 class="card-title">Services list</h4></div>
+          <div class="col col-xs-8">
+            <button type="button"
+                    class="btn btn-primary pull-right ml-1 mb-1"
+                    (click)="CreateService.show()"><i class="fa fa-plus mr-1"></i>Create Service
+            </button>
 
-<!-- Content -->
-<div class="col col-xs-8">
-  <div class="card">
-    <div class="card-block">
-      <!-- Card title -->
-      <div class="row">
-        <div class="col col-xs-4"><h4 class="card-title">Services list</h4></div>
-        <div class="col col-xs-8">
-          <button type="button"
-                  class="btn btn-primary pull-right ml-1 mb-1"
-                  (click)="CreateService.show()"><i class="fa fa-plus mr-1"></i>Create Service
-          </button>
+            <sj-search-box class="pull-right"
+                           (update)="term = $event"></sj-search-box>
 
-          <sj-search-box class="pull-right"
-                         (update)="term = $event"></sj-search-box>
+            <sj-filter class="pull-right" [filterList]="serviceTypes"
+                       (update)="typeterm = $event"></sj-filter>
+          </div>
+        </div>
 
-          <sj-filter class="pull-right" [filterList]="serviceTypes"
-                     (update)="typeterm = $event"></sj-filter>
+        <!-- Alerts -->
+        <sj-alerts [alerts]="alerts"></sj-alerts>
+
+        <!-- Services list -->
+        <div class="table-wrapper">
+          <table class="table table-hover table-sm mt-1 mb-0">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Provider</th>
+                <th class="actions-column">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="!serviceList || (serviceList && serviceList.length === 0)">
+                <td colspan="20" class="text-center">No services have been found.</td>
+              </tr>
+
+              <tr *ngFor="let service of serviceList | orderBy: 'name' | listFilter : {name: term, type: typeterm}"
+                  [ngClass]="{ 'table-info': isSelected(service) }"
+                  (click)="selectService(service)">
+                <td>{{ service.name }}</td>
+                <td>{{ service.description }}</td>
+                <td>
+                <span *ngIf="service.type != 'TstrQ'">
+                  <span>Provider:</span>
+                  <span class="btn-lookup action-link"
+                        (click)="getProviderInfo(ProviderInfo, service.provider)">{{ service.provider }}</span>
+                </span>
+                </td>
+                <td class="actions-column">
+                  <button type="button"
+                          class="btn btn-sm btn-secondary"
+                          title="Delete service"
+                          (click)="deleteServiceConfirm(DeleteService, service)">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
+    </div>
+  </div>
 
-      <!-- Alerts -->
-      <sj-alerts [alerts]="alerts"></sj-alerts>
-
-      <!-- Services list -->
-      <div class="table-wrapper">
-        <table class="table table-hover table-sm mt-1 mb-0">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Provider</th>
-              <th class="actions-column">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngIf="!serviceList || (serviceList && serviceList.length === 0)">
-              <td colspan="20" class="text-center">No services have been found.</td>
-            </tr>
-
-            <tr *ngFor="let service of serviceList | orderBy: 'name' | listFilter : {name: term, type: typeterm}"
-                [ngClass]="{ 'table-info': isSelected(service) }"
-                (click)="selectService(service)">
-              <td>{{ service.name }}</td>
-              <td>{{ service.description }}</td>
-              <td>
-              <span *ngIf="service.type != 'TstrQ'">
-                <span>Provider:</span>
-                <span class="btn-lookup action-link"
-                      (click)="getProviderInfo(ProviderInfo, service.provider)">{{ service.provider }}</span>
-              </span>
-              </td>
-              <td class="actions-column">
-                <button type="button"
-                        class="btn btn-sm btn-secondary"
-                        title="Delete service"
-                        (click)="deleteServiceConfirm(DeleteService, service)">
-                  <i class="fa fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+  <!-- Detailed info -->
+  <div class="col col-xs-4">
+    <div class="card">
+      <div class="card-header">Detailed information about node</div>
+      <div class="card-block">
+        <div class="overflow-x-scroll">
+          <ul *ngIf="currentService">
+            <li>Name: {{currentService.name}}</li>
+            <li>Type: {{currentService.type}}</li>
+            <li>Description: {{currentService.description}}</li>
+            <li *ngIf="currentService.type === 'CassDB'">Keyspace: {{currentService.keyspace}}</li>
+            <li *ngIf="currentService.type === 'ESInd'">Index: {{currentService.index}}</li>
+            <li *ngIf="currentService.type === 'ZKCoord'
+              || currentService.type === 'RdsCoord' || currentService.type === 'ArspkDB'">
+              Namespace: {{currentService.namespace}}
+            </li>
+            <li *ngIf="currentService.type !== 'TstrQ'">Provider:
+              <span class="btn-lookup action-link" (click)="getProviderInfo(ProviderInfo, currentService.provider)">
+        {{ currentService.provider }}
+      </span>
+            </li>
+            <li *ngIf="currentService.type === 'TstrQ'">Metadata provider:
+              <span class="btn-lookup action-link"
+                    (click)="getProviderInfo(ProviderInfo, currentService.metadataProvider)">{{currentService.metadataProvider}}</span>
+            </li>
+            <li *ngIf="currentService.type === 'TstrQ'">Metadata namespace: {{currentService.metadataNamespace}}</li>
+            <li *ngIf="currentService.type === 'TstrQ'">Data provider:
+              <span class="btn-lookup action-link"
+                    (click)="getProviderInfo(ProviderInfo, currentService.dataProvider)">{{currentService.dataProvider}}</span>
+            </li>
+            <li *ngIf="currentService.type === 'TstrQ'">Data namespace: {{currentService.dataNamespace}}</li>
+            <li *ngIf="currentService.type === 'TstrQ'">Lock-provider:
+              <span class="btn-lookup action-link"
+                    (click)="getProviderInfo(ProviderInfo, currentService.lockProvider)">{{currentService.lockProvider}}</span>
+            </li>
+            <li *ngIf="currentService.type === 'TstrQ'">Lock-namespace: {{currentService.lockNamespace}}</li>
+            <li *ngIf="currentService.type === 'KfkQ'">ZK provider: {{currentService.zkProvider}}</li>
+            <li *ngIf="currentService.type === 'KfkQ'">ZK namespace: {{currentService.zkNamespace}}</li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
 </div>
-
-<!-- Detailed info -->
-<div class="col col-xs-4">
-  <div class="card">
-    <div class="card-header">Detailed information about node</div>
-    <div class="card-block">
-      <div class="overflow-x-scroll">
-        <ul *ngIf="currentService">
-          <li>Name: {{currentService.name}}</li>
-          <li>Type: {{currentService.type}}</li>
-          <li>Description: {{currentService.description}}</li>
-          <li *ngIf="currentService.type === 'CassDB'">Keyspace: {{currentService.keyspace}}</li>
-          <li *ngIf="currentService.type === 'ESInd'">Index: {{currentService.index}}</li>
-          <li *ngIf="currentService.type === 'ZKCoord'
-            || currentService.type === 'RdsCoord' || currentService.type === 'ArspkDB'">
-            Namespace: {{currentService.namespace}}
-          </li>
-          <li *ngIf="currentService.type !== 'TstrQ'">Provider:
-            <span class="btn-lookup action-link" (click)="getProviderInfo(ProviderInfo, currentService.provider)">
-      {{ currentService.provider }}
-    </span>
-          </li>
-          <li *ngIf="currentService.type === 'TstrQ'">Metadata provider:
-            <span class="btn-lookup action-link"
-                  (click)="getProviderInfo(ProviderInfo, currentService.metadataProvider)">{{currentService.metadataProvider}}</span>
-          </li>
-          <li *ngIf="currentService.type === 'TstrQ'">Metadata namespace: {{currentService.metadataNamespace}}</li>
-          <li *ngIf="currentService.type === 'TstrQ'">Data provider:
-            <span class="btn-lookup action-link"
-                  (click)="getProviderInfo(ProviderInfo, currentService.dataProvider)">{{currentService.dataProvider}}</span>
-          </li>
-          <li *ngIf="currentService.type === 'TstrQ'">Data namespace: {{currentService.dataNamespace}}</li>
-          <li *ngIf="currentService.type === 'TstrQ'">Lock-provider:
-            <span class="btn-lookup action-link"
-                  (click)="getProviderInfo(ProviderInfo, currentService.lockProvider)">{{currentService.lockProvider}}</span>
-          </li>
-          <li *ngIf="currentService.type === 'TstrQ'">Lock-namespace: {{currentService.lockNamespace}}</li>
-          <li *ngIf="currentService.type === 'KfkQ'">ZK provider: {{currentService.zkProvider}}</li>
-          <li *ngIf="currentService.type === 'KfkQ'">ZK namespace: {{currentService.zkNamespace}}</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</div>
-
 
 <div bsModal #CreateService="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-lg">
