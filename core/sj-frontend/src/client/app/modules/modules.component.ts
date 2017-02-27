@@ -125,8 +125,4 @@ export class ModulesComponent implements OnInit {
       this.alerts.push(notification);
     }
   }
-
-  public isSelected(module: ModuleModel) {
-    return module === this.currentModule;
-  }
 }

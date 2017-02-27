@@ -150,10 +150,6 @@ export class StreamsComponent implements OnInit {
     this.currentStream = stream;
   }
 
-  public isSelected(stream: StreamModel) {
-    return stream === this.currentStream;
-  }
-
   public showAlert(notification: NotificationModel): void {
     if (!this.alerts.find(msg => msg.message === notification.message)) {
       this.alerts.push(notification);

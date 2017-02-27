@@ -42,7 +42,7 @@
               </tr>
 
               <tr *ngFor="let provider of providerList | orderBy: 'name' | listFilter : {name : nameterm, type: typeterm} "
-                  [ngClass]="{ 'table-info': isSelected(provider) }"
+                  [ngClass]="{ 'table-info': provider === currentProvider }"
                   (click)="selectProvider(provider)">
                 <td>{{ provider.name }}</td>
                 <td>{{ provider.description }}</td>

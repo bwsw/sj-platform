@@ -122,10 +122,6 @@ export class ProvidersComponent implements OnInit {
         });
   }
 
-  public isSelected(provider: ProviderModel) {
-    return provider === this.currentProvider;
-  }
-
   public isConnecting(provider: ProviderModel) {
     return (this.currentConnectors.indexOf(provider.name) >= 0);
   }

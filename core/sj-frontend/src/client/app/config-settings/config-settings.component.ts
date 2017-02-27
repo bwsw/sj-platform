@@ -86,8 +86,4 @@ export class ConfigSettingsComponent implements OnInit {
   public selectSetting(setting: SettingModel) {
     this.currentSetting = setting;
   }
-
-  public isSelected(setting: SettingModel) {
-    return setting === this.currentSetting;
-  }
 }

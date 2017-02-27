@@ -142,7 +142,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
           if(response) {
             this.message = response.message;
             this.tasks = response.tasks;
-          };
+          }
         }
       );
   }
@@ -243,10 +243,6 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
     modal.hide();
   }
 
-  public isSelected(instance: InstanceModel) {
-    return this.currentInstance && instance.name === this.currentInstance.name;
-  }
-
   public clearInstance() {
     this.newInstance = new InstanceModel();
     this.cloningInstance = new InstanceModel();
@@ -336,10 +332,6 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   }
 
   public ngAfterViewChecked() {
-    this.formChanged();
-  }
-
-  public formChanged() {
     if (this.currentForm === this.instanceForm) { return; }
     this.instanceForm = this.currentForm;
     if (this.instanceForm) {

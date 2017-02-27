@@ -120,8 +120,4 @@ export class ServicesComponent implements OnInit {
   public selectService(service: ServiceModel) {
     this.currentService = service;
   }
-
-  public isSelected(service: ServiceModel) {
-    return service === this.currentService;
-  }
 }

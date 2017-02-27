@@ -42,7 +42,7 @@
               </tr>
 
               <tr *ngFor="let module of moduleList | orderBy: 'moduleName' | listFilter : { name: term, type: typeterm}"
-                  [ngClass]="{ 'table-info': isSelected(module) }"
+                  [ngClass]="{ 'table-info': module === currentModule }"
                   (click)="selectModule(module)">
                 <td>{{ module.moduleName }}</td>
                 <td>{{ module.moduleType }}</td>

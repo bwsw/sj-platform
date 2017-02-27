@@ -43,7 +43,7 @@
           </tr>
 
           <tr *ngFor="let setting of settingsList | orderBy: 'name' | listFilter : {name :term, type: domainterm}"
-              [ngClass]="{ 'table-info': isSelected(setting) }"
+              [ngClass]="{ 'table-info': setting === currentSetting }"
               (click)="selectSetting(setting)">
             <td>{{ setting.name }}</td>
             <td>{{ setting.value }}</td>
