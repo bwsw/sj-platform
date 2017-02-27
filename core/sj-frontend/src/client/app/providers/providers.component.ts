@@ -2,7 +2,7 @@ import { Component, OnInit, Input, Output, EventEmitter, ViewChild } from '@angu
 import { NgForm } from '@angular/forms';
 import { ModalDirective } from 'ng2-bootstrap';
 
-import { ProviderModel } from '../shared/models/index';
+import { ProviderModel, NotificationModel } from '../shared/models/index';
 import { ProvidersService } from '../shared/services/index';
 
 @Component({
@@ -13,7 +13,7 @@ import { ProvidersService } from '../shared/services/index';
 export class ProvidersComponent implements OnInit {
   @Input() public provider: ProviderModel;
   @Output() public close = new EventEmitter();
-  public alerts: Array<Object> = [];
+  public alerts: NotificationModel[] = [];
   public providerList: ProviderModel[];
   public providerTypes: string[];
   public blockingServices: string[] = [];
@@ -41,14 +41,14 @@ export class ProvidersComponent implements OnInit {
             this.currentProvider = this.providerList[0];
           }
         },
-        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+        error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 }));
   }
 
   public getProviderTypes() {
     this.providersService.getTypes()
       .subscribe(
         response => this.providerTypes = response.types,
-        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 })
+        error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 })
       );
   }
 
@@ -59,14 +59,14 @@ export class ProvidersComponent implements OnInit {
         status => {
           if (status === true) {
             this.showAlert({
-              msg: 'ProviderModel "' + provider.name + '" available',
+              message: 'ProviderModel "' + provider.name + '" available',
               type: 'success',
               closable: true,
               timeout: 3000
             });
           } else {
             this.showAlert({
-              msg: 'ProviderModel "' + provider.name + '" not available',
+              message: 'ProviderModel "' + provider.name + '" not available',
               type: 'danger',
               closable: true,
               timeout: 0
@@ -75,7 +75,7 @@ export class ProvidersComponent implements OnInit {
           this.currentConnectors.splice(this.currentConnectors.indexOf(provider.name));
         },
         error => {
-          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
+          this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 });
           this.currentConnectors.splice(this.currentConnectors.indexOf(provider.name));
         });
   }
@@ -96,10 +96,10 @@ export class ProvidersComponent implements OnInit {
     this.providersService.remove(this.currentProvider.name)
       .subscribe(
         response => {
-          this.showAlert({ msg: response.message, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
           this.getProviderList();
         },
-        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+        error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 }));
     modal.hide();
   }
 
@@ -110,7 +110,7 @@ export class ProvidersComponent implements OnInit {
         response => {
           modal.hide();
           this.showSpinner = false;
-          this.showAlert({ msg: response.message, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
           this.getProviderList();
           this.newProvider = new ProviderModel;
 
@@ -118,7 +118,7 @@ export class ProvidersComponent implements OnInit {
         error => {
           modal.hide();
           this.showSpinner = false;
-          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
+          this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 });
         });
   }
 
@@ -130,9 +130,10 @@ export class ProvidersComponent implements OnInit {
     return (this.currentConnectors.indexOf(provider.name) >= 0);
   }
 
-  public showAlert(message: Object): void {
-    this.alerts = [];
-    this.alerts.push(message);
+  public showAlert(notification: NotificationModel): void {
+    if (!this.alerts.find(msg => msg.message === notification.message)) {
+      this.alerts.push(notification);
+    }
   }
 
   public deleteHost(i: number): void {

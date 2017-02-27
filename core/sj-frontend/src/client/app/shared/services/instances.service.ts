@@ -9,9 +9,10 @@ import {
   OutputStreamingInstance,
   InputStreamingInstance,
   WindowedStreamingInstance,
-  TaskModel
+  TaskModel,
+  BaseModel
 } from '../models/index';
-import { BaseService, BService } from './index';
+import { BaseService, BService, IResponse } from './index';
 
 interface ITasksObject {
   tasks: TaskModel[];
@@ -64,7 +65,7 @@ export class InstancesService extends BaseService<InstanceModel> {
       .catch(this.handleError);
   }
 
-  public saveInstance(instance: InstanceModel): Observable<InstanceModel> {
+  public saveInstance(instance: InstanceModel): Observable<IResponse<BaseModel>> {
     let subtypedInstance = this.getPreparedInstance(instance);
     let instance_body = Object.assign({}, subtypedInstance);
     let body = JSON.stringify(instance_body, this.cleanupBodyValues);
@@ -75,12 +76,12 @@ export class InstancesService extends BaseService<InstanceModel> {
       instance.module.moduleVersion + '/instance', body, options)
       .map(response => {
         const data = this.extractData(response);
-        return data.message;
+        return data;
       })
       .catch(this.handleError);
   }
 
-  public deleteInstance(instance: InstanceModel): Observable<InstanceModel> {
+  public deleteInstance(instance: InstanceModel): Observable<IResponse<BaseModel>> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
@@ -88,12 +89,12 @@ export class InstancesService extends BaseService<InstanceModel> {
     instance.module.moduleVersion + '/instance' + '/' + instance.name, options)
       .map(response => {
         const data = this.extractData(response);
-        return data.message;
+        return data;
       })
       .catch(this.handleError);
   }
 
-  public startInstance(instance: InstanceModel): Observable<InstanceModel> {
+  public startInstance(instance: InstanceModel): Observable<IResponse<BaseModel>> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
@@ -101,12 +102,12 @@ export class InstancesService extends BaseService<InstanceModel> {
       instance.module.moduleVersion + '/instance' + '/' + instance.name + '/start', options)
       .map(response => {
         const data = this.extractData(response);
-        return data.message;
+        return data;
       })
       .catch(this.handleError);
   }
 
-  public stopInstance(instance: InstanceModel): Observable<InstanceModel> {
+  public stopInstance(instance: InstanceModel): Observable<IResponse<BaseModel>> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
@@ -114,7 +115,7 @@ export class InstancesService extends BaseService<InstanceModel> {
       instance.module.moduleVersion + '/instance' + '/' + instance.name + '/stop', options)
       .map(response => {
         const data = this.extractData(response);
-        return data.message;
+        return data;
       })
       .catch(this.handleError);
   }

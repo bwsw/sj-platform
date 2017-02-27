@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ModalDirective } from 'ng2-bootstrap';
 
-import { StreamModel, ServiceModel } from '../shared/models/index';
+import { StreamModel, ServiceModel, NotificationModel } from '../shared/models/index';
 import { ServicesService, StreamsService } from '../shared/services/index';
 
 @Component({
@@ -11,7 +11,7 @@ import { ServicesService, StreamsService } from '../shared/services/index';
 })
 export class StreamsComponent implements OnInit {
   public errorMessage: string;
-  public alerts: Array<Object> = [];
+  public alerts: NotificationModel[] = [];
   public streamList: StreamModel[];
   public streamTypes: string[];
   public serviceList: ServiceModel[];
@@ -78,7 +78,7 @@ export class StreamsComponent implements OnInit {
     this.streamsService.getTypes()
       .subscribe(
         response => this.streamTypes = response.types,
-        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 })
+        error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 })
       );
   }
 
@@ -112,10 +112,10 @@ export class StreamsComponent implements OnInit {
     this.streamsService.remove(this.currentStream.name)
       .subscribe(
         response => {
-          this.showAlert({ msg: response.message, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
           this.getStreamList();
         },
-        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+        error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 }));
     modal.hide();
   }
 
@@ -129,7 +129,7 @@ export class StreamsComponent implements OnInit {
         response => {
           modal.hide();
           this.showSpinner = false;
-          this.showAlert({ msg: response.message, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
           this.getStreamList();
           this.newStream = new StreamModel();
           this.newStream.tags = [];
@@ -142,7 +142,7 @@ export class StreamsComponent implements OnInit {
         error => {
           modal.hide();
           this.showSpinner = false;
-          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
+          this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 });
         });
   }
 
@@ -154,8 +154,9 @@ export class StreamsComponent implements OnInit {
     return stream === this.currentStream;
   }
 
-  public showAlert(message: Object): void {
-    this.alerts = [];
-    this.alerts.push(message);
+  public showAlert(notification: NotificationModel): void {
+    if (!this.alerts.find(msg => msg.message === notification.message)) {
+      this.alerts.push(notification);
+    }
   }
 }

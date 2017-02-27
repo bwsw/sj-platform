@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { NotificationModel } from "../../models/notification.model";
 
 @Component({
   moduleId: module.id,
@@ -6,7 +7,7 @@ import { Component, Input } from '@angular/core';
   templateUrl: 'alerts.component.html'
 })
 export class AlertsComponent {
-  @Input() alerts: string[];
+  @Input() alerts: NotificationModel[];
 
   public closeAlert(i: number): void {
     this.alerts.splice(i, 1);

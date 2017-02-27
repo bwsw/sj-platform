@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ModalDirective } from 'ng2-bootstrap';
 
-import { ServiceModel, ProviderModel } from '../shared/models/index';
+import { ServiceModel, ProviderModel, NotificationModel } from '../shared/models/index';
 import { ServicesService, ProvidersService } from '../shared/services/index';
 
 @Component({
@@ -11,7 +11,7 @@ import { ServicesService, ProvidersService } from '../shared/services/index';
 })
 export class ServicesComponent implements OnInit {
   public errorMessage: string;
-  public alerts: Array<Object> = [];
+  public alerts: NotificationModel[] = [];
   public serviceList: ServiceModel[];
   public serviceTypes: string[];
   public providerList: ProviderModel[];
@@ -48,7 +48,7 @@ export class ServicesComponent implements OnInit {
     this.servicesService.getTypes()
       .subscribe(
         response => this.serviceTypes = response.types,
-        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 })
+        error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 })
       );
   }
 
@@ -82,19 +82,20 @@ export class ServicesComponent implements OnInit {
     modal.show();
   }
 
-  public showAlert(message: Object): void {
-    this.alerts = [];
-    this.alerts.push(message);
+  public showAlert(notification: NotificationModel): void {
+    if (!this.alerts.find(msg => msg.message === notification.message)) {
+      this.alerts.push(notification);
+    }
   }
 
   public deleteService(modal: ModalDirective) {
     this.servicesService.remove(this.currentService.name)
       .subscribe(
         response => {
-          this.showAlert({ msg: response.message, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
           this.getServiceList();
         },
-        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+        error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 }));
     modal.hide();
   }
 
@@ -104,13 +105,13 @@ export class ServicesComponent implements OnInit {
       .subscribe(
         response => {
           modal.hide();
-          this.showAlert({ msg: response.message, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
           this.newService = new ServiceModel();
           this.showSpinner = false;
           this.getServiceList();
         },
         error => {
-          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
+          this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 });
           modal.hide();
           this.showSpinner = false;
         });
