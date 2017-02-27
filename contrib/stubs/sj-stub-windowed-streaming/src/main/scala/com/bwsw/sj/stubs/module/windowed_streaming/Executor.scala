@@ -2,15 +2,13 @@ package com.bwsw.sj.stubs.module.windowed_streaming
 
 import java.util.Random
 
-import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.engine.core.entities.{TStreamEnvelope, KafkaEnvelope}
+import com.bwsw.sj.engine.core.entities.{KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.engine.core.state.StateStorage
 import com.bwsw.sj.engine.core.windowed.{WindowRepository, WindowedStreamingExecutor}
 
 
-class Executor(manager: ModuleEnvironmentManager) extends WindowedStreamingExecutor(manager) {
-  val objectSerializer = new ObjectSerializer()
+class Executor(manager: ModuleEnvironmentManager) extends WindowedStreamingExecutor[Integer](manager) {
   val state: StateStorage = manager.getState
 
   override def onInit(): Unit = {
@@ -36,17 +34,17 @@ class Executor(manager: ModuleEnvironmentManager) extends WindowedStreamingExecu
     val end = windowRepository.window
 
     allWindows.flatMap(x => x._2.batches.slice(begin, end)).foreach(x => {
-      output.put(objectSerializer.serialize(x))
+      output.put(x)
       println("stream name = " + x.stream)
     })
 
     allWindows.flatMap(x => x._2.batches.slice(begin, end)).flatMap(x => x.envelopes).foreach {
-      case kafkaEnvelope: KafkaEnvelope =>
-        sum += objectSerializer.deserialize(kafkaEnvelope.data).asInstanceOf[Int]
+      case kafkaEnvelope: KafkaEnvelope[Integer @unchecked] =>
+        sum += kafkaEnvelope.data
         state.set("sum", sum)
-      case tstreamEnvelope: TStreamEnvelope =>
+      case tstreamEnvelope: TStreamEnvelope[Integer @unchecked] =>
         tstreamEnvelope.data.foreach(x => {
-          sum += objectSerializer.deserialize(x).asInstanceOf[Int]
+          sum += x
         })
         state.set("sum", sum)
     }

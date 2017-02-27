@@ -1,16 +1,19 @@
-package com.bwsw.sj.engine.regular.module.checkers
+package com.bwsw.sj.engine.windowed.module.checkers
 
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.engine.regular.module.DataFactory._
+import com.bwsw.sj.engine.core.entities.{KafkaEnvelope, TStreamEnvelope, Batch}
+import com.bwsw.sj.engine.windowed.module.DataFactory._
+import scala.collection.JavaConverters._
 
-object ModuleStatelessTstreamChecker extends App {
+object WindowedModuleStatelessChecker extends App {
   open()
   val streamService = ConnectionRepository.getStreamService
   val objectSerializer = new ObjectSerializer()
 
-  val inputTstreamConsumers = (1 to inputCount).map(x => createInputTstreamConsumer(streamService, x.toString))
-  val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(streamService, x.toString))
+  val inputTstreamConsumers = (1 to inputCount).map(x => createInputTstreamConsumer(partitions, x.toString))
+  val inputKafkaConsumer = createInputKafkaConsumer(inputCount, partitions)
+  val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(partitions, x.toString))
 
   inputTstreamConsumers.foreach(x => x.start())
   outputConsumers.foreach(x => x.start())
@@ -39,6 +42,14 @@ object ModuleStatelessTstreamChecker extends App {
     }
   })
 
+  var records = inputKafkaConsumer.poll(1000 * 20)
+  records.asScala.foreach(x => {
+    val bytes = x.value()
+    val element = objectSerializer.deserialize(bytes).asInstanceOf[Int]
+    inputElements.+=(element)
+    totalInputElements += 1
+  })
+
   outputConsumers.foreach(outputConsumer => {
     val partitions = outputConsumer.getPartitions().toIterator
 
@@ -49,9 +60,16 @@ object ModuleStatelessTstreamChecker extends App {
       while (maybeTxn.isDefined) {
         val transaction = maybeTxn.get
         while (transaction.hasNext()) {
-          val element = objectSerializer.deserialize(transaction.next()).asInstanceOf[Int]
-          outputElements.+=(element)
-          totalOutputElements += 1
+          val batch = objectSerializer.deserialize(transaction.next()).asInstanceOf[Batch]
+          batch.envelopes.foreach {
+            case tstreamEnvelope: TStreamEnvelope[Int @unchecked] => tstreamEnvelope.data.foreach(x => {
+              outputElements.+=(x)
+              totalOutputElements += 1
+            })
+            case kafkaEnvelope: KafkaEnvelope[Int @unchecked] =>
+              outputElements.+=(kafkaEnvelope.data)
+              totalOutputElements += 1
+          }
         }
         maybeTxn = outputConsumer.getTransaction(currentPartition)
       }

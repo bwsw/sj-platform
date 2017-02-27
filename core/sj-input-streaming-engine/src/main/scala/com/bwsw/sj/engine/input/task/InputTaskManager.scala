@@ -6,11 +6,10 @@ import com.bwsw.sj.engine.core.input.InputStreamingExecutor
 import com.bwsw.sj.engine.core.managment.TaskManager
 
 /**
- * Class allowing to manage an environment of input streaming task
- *
- *
- * @author Kseniya Mikhaleva
- */
+  * Class allowing to manage an environment of input streaming task
+  *
+  * @author Kseniya Mikhaleva
+  */
 class InputTaskManager() extends TaskManager {
 
   lazy val inputs = {
@@ -22,7 +21,7 @@ class InputTaskManager() extends TaskManager {
 
   val inputInstance = instance.asInstanceOf[InputInstance]
   val entryPort = getEntryPort()
-  val outputProducers =  createOutputProducers()
+  val outputProducers = createOutputProducers()
 
   require(numberOfAgentsPorts >=
     (instance.outputs.length + 1),
@@ -34,13 +33,11 @@ class InputTaskManager() extends TaskManager {
     else inputInstance.tasks.get(taskName).port
   }
 
-  override def getExecutor(environmentManager: EnvironmentManager) = {
+  def getExecutor(environmentManager: EnvironmentManager) = {
     logger.debug(s"Task: $taskName. Start loading an executor class from module jar.")
-    val executor = moduleClassLoader
-      .loadClass(executorClassName)
-      .getConstructor(classOf[InputEnvironmentManager])
+    val executor = executorClass.getConstructor(classOf[InputEnvironmentManager])
       .newInstance(environmentManager)
-      .asInstanceOf[InputStreamingExecutor]
+      .asInstanceOf[InputStreamingExecutor[AnyRef]]
     logger.debug(s"Task: $taskName. Load an executor class.")
 
     executor

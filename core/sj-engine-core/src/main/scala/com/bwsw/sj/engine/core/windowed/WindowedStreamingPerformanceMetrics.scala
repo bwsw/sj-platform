@@ -1,4 +1,4 @@
-package com.bwsw.sj.engine.windowed.task.reporting
+package com.bwsw.sj.engine.core.windowed
 
 import java.util.Calendar
 
@@ -11,10 +11,10 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 /**
- * Class represents a set of metrics that characterize performance of a windowed streaming module
- *
- * @author Kseniya Mikhaleva
- */
+  * Class represents a set of metrics that characterize performance of a windowed streaming module
+  *
+  * @author Kseniya Mikhaleva
+  */
 
 class WindowedStreamingPerformanceMetrics(manager: CommonTaskManager)
   extends PerformanceMetrics(manager) {
@@ -32,9 +32,10 @@ class WindowedStreamingPerformanceMetrics(manager: CommonTaskManager)
   private var windowsPerStream = createStorageForWindows()
 
   /**
-   * Increases time when there are no messages (envelopes)
-   * @param idle How long waiting a new envelope was
-   */
+    * Increases time when there are no messages (envelopes)
+    *
+    * @param idle How long waiting a new envelope was
+    */
   def increaseTotalIdleTime(idle: Long) = {
     mutex.lock()
     totalIdleTime += idle
@@ -42,9 +43,10 @@ class WindowedStreamingPerformanceMetrics(manager: CommonTaskManager)
   }
 
   /**
-   * Constructs a report of performance metrics of task's work
-   * @return Constructed performance report
-   */
+    * Constructs a report of performance metrics of task's work
+    *
+    * @return Constructed performance report
+    */
   override def getReport(): String = {
     logger.info(s"Start preparing a report of performance for task: ${manager.taskName} of windowed module.")
     mutex.lock()
@@ -87,13 +89,12 @@ class WindowedStreamingPerformanceMetrics(manager: CommonTaskManager)
     report.minSizeOutputEnvelope = if (outputEnvelopesSize.nonEmpty) outputEnvelopesSize.min else 0
     report.averageSizeOutputElement = if (outputEnvelopesTotalNumber != 0) bytesOfOutputEnvelopesPerStream.values.sum / outputElementsTotalNumber else 0
     report.window = windowedInstance.window
-    report.batchFillType = windowedInstance.batchFillType
     report.batchesPerStream = numberOfBatchesPerStream.toMap
     report.averageSizeBatchPerStream = batchesPerStream.map(x => (x._1, average(x._2))).toMap
     report.totalBatches = batchesTotalNumber
     report.averageSizeBatch = if (batchesTotalNumber != 0) batchesElementsTotalNumber / batchesTotalNumber else 0
-    report.maxSizeBatch = if (batchesTotalNumber != 0) batchesPerStream.map(x => x._2.max).max else 0
-    report.minSizeBatch = if (batchesTotalNumber != 0) batchesPerStream.map(x => x._2.min).min else 0
+    report.maxSizeBatch = if (batchesTotalNumber != 0) batchesPerStream.map(x => if (x._2.nonEmpty) x._2.max else 0).max else 0
+    report.minSizeBatch = if (batchesTotalNumber != 0) batchesPerStream.map(x => if (x._2.nonEmpty) x._2.max else 0).min else 0
     report.windowsPerStream = windowsPerStream.toMap
     report.uptime = (System.currentTimeMillis() - startTime) / 1000
 

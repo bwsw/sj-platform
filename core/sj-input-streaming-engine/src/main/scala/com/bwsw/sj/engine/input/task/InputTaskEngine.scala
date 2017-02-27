@@ -74,22 +74,23 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
   }
 
   /**
-   * Sends an input envelope to output steam
+   * Sends an input envelope data to output steam
    */
-  private def sendEnvelope(stream: String, partition: Int, data: Array[Byte]) = {
+  private def sendData(stream: String, partition: Int, data: AnyRef) = {
     logger.info(s"Task name: ${manager.taskName}. Send envelope to each output stream..")
     val maybeTransaction = getTransaction(stream, partition)
+    val bytes = manager.envelopeDataSerializer.serialize(data)
     val producerTransaction = maybeTransaction match {
       case Some(transaction) =>
         logger.debug(s"Task name: ${manager.taskName}. Txn for stream/partition: '$stream/$partition' is defined.")
-        transaction.send(data)
+        transaction.send(bytes)
 
         transaction
       case None =>
         logger.debug(s"Task name: ${manager.taskName}. Txn for stream/partition: '$stream/$partition' is not defined " +
           s"so create new txn.")
         val transaction = producers(stream).newTransaction(NewTransactionProducerPolicy.ErrorIfOpened, partition)
-        transaction.send(data)
+        transaction.send(bytes)
         putTxn(stream, partition, transaction)
 
         transaction
@@ -99,7 +100,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
     performanceMetrics.addElementToOutputEnvelope(
       stream,
       producerTransaction.getTransactionID().toString,
-      data.length
+      bytes.length
     )
   }
 
@@ -174,7 +175,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
    * @param envelope May be input envelope
    * @return True if a processed envelope is processed, e.i. it is not duplicate or empty, and false in other case
    */
-  private def processEnvelope(envelope: Option[InputEnvelope]): Boolean = {
+  private def processEnvelope(envelope: Option[InputEnvelope[AnyRef]]): Boolean = {
     envelope match {
       case Some(inputEnvelope) =>
         logger.info(s"Task name: ${manager.taskName}. Envelope is defined. Process it.")
@@ -182,7 +183,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
         if (checkForDuplication(inputEnvelope.key, inputEnvelope.duplicateCheck, inputEnvelope.data)) {
           logger.debug(s"Task name: ${manager.taskName}. Envelope is not duplicate so send it.")
           inputEnvelope.outputMetadata.foreach(x => {
-            sendEnvelope(x._1, x._2, inputEnvelope.data)
+            sendData(x._1, x._2, inputEnvelope.data)
           })
           afterReceivingEnvelope()
           true
@@ -198,7 +199,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
    * @param value In case there is a need to update duplicate key this value will be used
    * @return True if a processed envelope is not duplicate and false in other case
    */
-  private def checkForDuplication(key: String, duplicateCheck: Boolean, value: Array[Byte]): Boolean = {
+  private def checkForDuplication(key: String, duplicateCheck: Boolean, value: Any): Boolean = {
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Try to check key: '$key' for duplication with a setting duplicateCheck = '$duplicateCheck' " +
       s"and an instance setting - 'duplicate-check' : '${instance.duplicateCheck}'.")
@@ -218,7 +219,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
    *                              If it is true it means a processed envelope is duplicate or empty and false in other case
    * @param ctx Channel context related with this input envelope to send a message about this event
    */
-  private def sendClientResponse(envelope: Option[InputEnvelope], isNotEmptyOrDuplicate: Boolean, ctx: ChannelHandlerContext) = {
+  private def sendClientResponse(envelope: Option[InputEnvelope[AnyRef]], isNotEmptyOrDuplicate: Boolean, ctx: ChannelHandlerContext) = {
     val inputStreamingResponse = executor.createProcessedMessageResponse(envelope, isNotEmptyOrDuplicate)
     if (inputStreamingResponse.isBuffered) ctx.write(inputStreamingResponse.message)
     else ctx.writeAndFlush(inputStreamingResponse.message)
@@ -303,7 +304,7 @@ object InputTaskEngine {
   def apply(manager: InputTaskManager,
             performanceMetrics: InputStreamingPerformanceMetrics,
             channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
-            bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf]): InputTaskEngine = {
+            bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf]) = {
 
     manager.inputInstance.checkpointMode match {
       case EngineLiterals.`timeIntervalMode` =>

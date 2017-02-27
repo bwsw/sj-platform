@@ -2,13 +2,14 @@ package com.bwsw.sj.examples.sflow.module.output
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.examples.sflow.module.output.data._
 
 /**
   * Created by diryavkin_dn on 13.01.17.
   */
-class Executor extends OutputStreamingExecutor {
+class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[Array[Byte]](manager) {
   val jsonSerializer = new JsonSerializer()
   val objectSerializer = new ObjectSerializer()
 
@@ -18,7 +19,7 @@ class Executor extends OutputStreamingExecutor {
     * @param envelope Input T-Stream envelope
     * @return List of output envelopes
     */
-  override def onMessage(envelope: TStreamEnvelope): List[Envelope] = {
+  override def onMessage(envelope: TStreamEnvelope[Array[Byte]]): List[Envelope] = {
     val list:List[Envelope] = List[Envelope]()
     envelope.data.foreach { row =>
       val value = objectSerializer.deserialize(row)

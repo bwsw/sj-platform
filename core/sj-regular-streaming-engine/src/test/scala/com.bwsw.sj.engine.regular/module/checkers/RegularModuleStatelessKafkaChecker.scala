@@ -3,17 +3,16 @@ package com.bwsw.sj.engine.regular.module.checkers
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.engine.regular.module.DataFactory._
-import com.bwsw.sj.engine.regular.utils.StateHelper
+import scala.collection.JavaConverters._
 
-object ModuleStatefulTstreamChecker extends App {
+object RegularModuleStatelessKafkaChecker extends App {
   open()
   val streamService = ConnectionRepository.getStreamService
   val objectSerializer = new ObjectSerializer()
 
-  val inputTstreamConsumers = (1 to inputCount).map(x => createInputTstreamConsumer(streamService, x.toString))
-  val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(streamService, x.toString))
+  val inputConsumer = createInputKafkaConsumer(inputCount, partitions)
+  val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(partitions, x.toString))
 
-  inputTstreamConsumers.foreach(x => x.start())
   outputConsumers.foreach(x => x.start())
 
   var totalInputElements = 0
@@ -22,22 +21,13 @@ object ModuleStatefulTstreamChecker extends App {
   var inputElements = scala.collection.mutable.ArrayBuffer[Int]()
   var outputElements = scala.collection.mutable.ArrayBuffer[Int]()
 
-  inputTstreamConsumers.foreach(inputTstreamConsumer => {
-    val partitions = inputTstreamConsumer.getPartitions().toIterator
+  var records = inputConsumer.poll(1000 * 20)
 
-    while (partitions.hasNext) {
-      val currentPartition = partitions.next()
-      var maybeTxn = inputTstreamConsumer.getTransaction(currentPartition)
-      while (maybeTxn.isDefined) {
-        val transaction = maybeTxn.get
-        while (transaction.hasNext()) {
-          val element = objectSerializer.deserialize(transaction.next()).asInstanceOf[Int]
-          inputElements.+=(element)
-          totalInputElements += 1
-        }
-        maybeTxn = inputTstreamConsumer.getTransaction(currentPartition)
-      }
-    }
+  records.asScala.foreach(x => {
+    val bytes = x.value()
+    val element = objectSerializer.deserialize(bytes).asInstanceOf[Int]
+    inputElements.+=(element)
+    totalInputElements += 1
   })
 
   outputConsumers.foreach(outputConsumer => {
@@ -59,21 +49,12 @@ object ModuleStatefulTstreamChecker extends App {
     }
   })
 
-  val consumer = createStateConsumer(streamService)
-  consumer.start()
-  val initialState = StateHelper.getState(consumer, objectSerializer)
-
   assert(totalInputElements == totalOutputElements,
     "Count of all txns elements that are consumed from output stream should equals count of all txns elements that are consumed from input stream")
 
   assert(inputElements.forall(x => outputElements.contains(x)) && outputElements.forall(x => inputElements.contains(x)),
     "All txns elements that are consumed from output stream should equals all txns elements that are consumed from input stream")
 
-  assert(initialState("sum") == inputElements.sum,
-    "Sum of all txns elements that are consumed from input stream should equals state variable sum")
-
-  consumer.stop()
-  inputTstreamConsumers.foreach(x => x.stop())
   outputConsumers.foreach(x => x.stop())
   close()
   ConnectionRepository.close()

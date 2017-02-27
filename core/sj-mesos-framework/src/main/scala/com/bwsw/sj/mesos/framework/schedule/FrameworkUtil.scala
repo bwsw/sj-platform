@@ -8,7 +8,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.mesos.framework.task.TasksList
 import org.apache.log4j.Logger
-import org.apache.mesos.Protos.{MasterInfo, TaskID}
+import org.apache.mesos.Protos.MasterInfo
 import org.apache.mesos.SchedulerDriver
 
 import scala.collection.immutable
@@ -35,7 +35,7 @@ object FrameworkUtil {
       case _: OutputInstance => 2
       case regularInstance: RegularInstance => regularInstance.inputs.length + regularInstance.outputs.length + 4
       case _: InputInstance => instance.outputs.length + 2
-      case windowedInstance: WindowedInstance => 1 + windowedInstance.relatedStreams.length + windowedInstance.outputs.length + 4
+      case windowedInstance: WindowedInstance => windowedInstance.inputs.length + windowedInstance.outputs.length + 4
     }
   }
 

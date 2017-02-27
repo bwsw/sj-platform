@@ -100,6 +100,10 @@
     "entity-class": {
       "description": "The absolute path to class that is responsible for a data entity of output-streaming module",
       "type": "string"
+    },
+    "batch-collector-class": {
+      "description": "The absolute path to class that is responsible for a batch collecting of windowed-streaming module",
+      "type": "string"
     }
   },
   "required": [

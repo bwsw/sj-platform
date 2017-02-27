@@ -1,7 +1,8 @@
 package com.bwsw.sj.engine.core.state
 
+import com.bwsw.sj.common.DAL.model.module.{RegularInstance, WindowedInstance}
 import com.bwsw.sj.common.engine.StreamingExecutor
-import com.bwsw.sj.common.utils.SjTimer
+import com.bwsw.sj.common.utils.{EngineLiterals, SjTimer}
 import com.bwsw.sj.engine.core.environment.{ModuleEnvironmentManager, ModuleOutput}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
@@ -41,4 +42,32 @@ abstract class CommonModuleService(manager: CommonTaskManager, checkpointGroup: 
   }
 
   def isCheckpointInitiated = environmentManager.isCheckpointInitiated
+}
+
+object CommonModuleService {
+  private val logger = LoggerFactory.getLogger(this.getClass)
+
+  def apply(manager: CommonTaskManager,
+            checkpointGroup: CheckpointGroup,
+            performanceMetrics: PerformanceMetrics) = {
+
+    val stateManagement = manager.instance match {
+      case regularInstance: RegularInstance =>
+        regularInstance.stateManagement
+      case windowedInstance: WindowedInstance =>
+        windowedInstance.stateManagement
+      case _ =>
+        logger.error("CommonModuleService can be used only for regular or windowed engine.")
+        throw new RuntimeException("CommonModuleService can be used only for regular or windowed engine.")
+    }
+
+    stateManagement match {
+      case EngineLiterals.noneStateMode =>
+        logger.debug(s"Task: ${manager.taskName}. Start preparing of windowed module without a state.")
+        new StatelessCommonModuleService(manager, checkpointGroup, performanceMetrics)
+      case EngineLiterals.ramStateMode =>
+        logger.debug(s"Task: ${manager.taskName}. Start preparing of windowed module with a state.")
+        new StatefulCommonModuleService(manager, checkpointGroup, performanceMetrics)
+    }
+  }
 }

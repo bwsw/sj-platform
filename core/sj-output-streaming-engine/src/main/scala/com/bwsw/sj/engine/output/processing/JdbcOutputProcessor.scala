@@ -7,9 +7,9 @@ import com.bwsw.sj.common.DAL.model.{JDBCService, JDBCSjStream, SjStream}
 import com.bwsw.sj.engine.core.entities.{Envelope, JdbcEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 
-class JdbcOutputProcessor(outputStream: SjStream,
-                          performanceMetrics: OutputStreamingPerformanceMetrics)
-  extends OutputProcessor(outputStream, performanceMetrics) {
+class JdbcOutputProcessor[T <: AnyRef](outputStream: SjStream,
+                                       performanceMetrics: OutputStreamingPerformanceMetrics)
+  extends OutputProcessor[T](outputStream, performanceMetrics) {
 
   private val jdbcStream = outputStream.asInstanceOf[JDBCSjStream]
   private val jdbcService = outputStream.service.asInstanceOf[JDBCService]
@@ -31,13 +31,13 @@ class JdbcOutputProcessor(outputStream: SjStream,
     client
   }
 
-  def remove(envelope: TStreamEnvelope) = {
+  def remove(envelope: TStreamEnvelope[T]) = {
     logger.debug(s"Delete an envelope: '${envelope.id}' from JDBC.")
     val transaction = envelope.id.toString.replaceAll("-", "")
     jdbcClient.removeByTransactionId(transaction)
   }
 
-  def send(envelope: Envelope, inputEnvelope: TStreamEnvelope) = {
+  def send(envelope: Envelope, inputEnvelope: TStreamEnvelope[T]) = {
     val jdbcEnvelope = envelope.asInstanceOf[JdbcEnvelope]
     logger.debug(s"Send an envelope: '${jdbcEnvelope.txn}' to a JDBC stream: '${jdbcStream.name}'.")
     jdbcEnvelope.txn = inputEnvelope.id.toString.replaceAll("-", "")

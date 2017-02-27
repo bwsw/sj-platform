@@ -11,12 +11,12 @@ import org.elasticsearch.index.query.QueryBuilders
 
 import scala.collection.mutable
 
-class EsOutputProcessor(outputStream: SjStream,
+class EsOutputProcessor[T <: AnyRef](outputStream: SjStream,
                         performanceMetrics: OutputStreamingPerformanceMetrics,
                         manager: OutputTaskManager)
-  extends OutputProcessor(outputStream, performanceMetrics) {
+  extends OutputProcessor[T](outputStream, performanceMetrics) {
 
-  private val envelopeSerializer = new JsonSerializer()
+  private val jsonSerializer = new JsonSerializer()
   private val esService = outputStream.service.asInstanceOf[ESService]
   private val esClient = openConnection()
   prepareIndex()
@@ -53,7 +53,7 @@ class EsOutputProcessor(outputStream: SjStream,
     val fields = createGeneralFields()
     addCustomFields(fields)
     val mapping = Map("properties" -> fields)
-    val mappingSource = envelopeSerializer.serialize(mapping)
+    val mappingSource = jsonSerializer.serialize(mapping)
 
     mappingSource
   }
@@ -74,7 +74,7 @@ class EsOutputProcessor(outputStream: SjStream,
     }
   }
 
-  def remove(envelope: TStreamEnvelope) = {
+  def remove(envelope: TStreamEnvelope[T]) = {
     val transaction = envelope.id.toString.replaceAll("-", "")
     removeTransaction(transaction)
   }
@@ -90,7 +90,7 @@ class EsOutputProcessor(outputStream: SjStream,
     }
   }
 
-  def send(envelope: Envelope, inputEnvelope: TStreamEnvelope) = {
+  def send(envelope: Envelope, inputEnvelope: TStreamEnvelope[T]) = {
     val esEnvelope = envelope.asInstanceOf[EsEnvelope]
     esEnvelope.outputDateTime = s"${Calendar.getInstance().getTimeInMillis}"
     esEnvelope.transactionDateTime = s"${inputEnvelope.id}".dropRight(4)
@@ -100,7 +100,7 @@ class EsOutputProcessor(outputStream: SjStream,
     esEnvelope.tags = inputEnvelope.tags
 
     logger.debug(s"Task: ${manager.taskName}. Write an output envelope to elasticsearch stream.")
-    esClient.write(envelopeSerializer.serialize(esEnvelope), esService.index, outputStream.name)
+    esClient.write(jsonSerializer.serialize(esEnvelope), esService.index, outputStream.name)
   }
 
   override def close() = {

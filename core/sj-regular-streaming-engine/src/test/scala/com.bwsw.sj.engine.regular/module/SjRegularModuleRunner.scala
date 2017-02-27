@@ -8,7 +8,7 @@ import com.bwsw.sj.common.config.{TempHelperForConfigDestroy, TempHelperForConfi
 import com.bwsw.sj.engine.regular.module.DataFactory._
 import com.bwsw.sj.engine.regular.RegularTaskRunner
 
-object SjModuleSetup extends App {
+object SjRegularModuleSetup extends App {
   LogManager.getLogManager.reset()
   TempHelperForConfigSetup.main(Array())
   val streamService = ConnectionRepository.getStreamService
@@ -16,10 +16,10 @@ object SjModuleSetup extends App {
   val providerService = ConnectionRepository.getProviderService
   val instanceService = ConnectionRepository.getInstanceService
   val fileStorage = ConnectionRepository.getFileStorage
-  val checkpointInterval = 4
+  val checkpointInterval = 2
   val stateManagement = "ram"
-  val stateFullCheckpoint = 3
-  val _type = "both"
+  val stateFullCheckpoint = 2
+  val _type = commonMode
 
   val module = new File("./contrib/stubs/sj-stub-regular-streaming/target/scala-2.12/sj-stub-regular-streaming-1.0-SNAPSHOT.jar")
 
@@ -31,26 +31,26 @@ object SjModuleSetup extends App {
   createStreams(streamService, serviceManager, partitions, _type, inputCount, outputCount)
   createInstance(serviceManager, instanceService, checkpointInterval, stateManagement, stateFullCheckpoint)
 
-  createData(12, 4, streamService, _type, inputCount)
+  createData(4, 4, partitions, _type, inputCount)
   close()
   ConnectionRepository.close()
 
   println("DONE")
 }
 
-object SjModuleRunner extends App {
+object SjRegularModuleRunner extends App {
   LogManager.getLogManager.reset()
   RegularTaskRunner.main(Array())
 }
 
-object SjModuleDestroy extends App {
+object SjRegularModuleDestroy extends App {
   LogManager.getLogManager.reset()
   val streamService = ConnectionRepository.getStreamService
   val serviceManager = ConnectionRepository.getServiceManager
   val providerService = ConnectionRepository.getProviderService
   val instanceService = ConnectionRepository.getInstanceService
   val fileStorage = ConnectionRepository.getFileStorage
-  val _type = "both"
+  val _type = commonMode
 
   val module = new File("./contrib/stubs/sj-stub-regular-streaming/target/scala-2.12/sj-stub-regular-streaming-1.0-SNAPSHOT.jar")
 

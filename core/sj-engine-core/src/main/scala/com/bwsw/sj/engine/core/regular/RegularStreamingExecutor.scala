@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.core.regular
 
 import com.bwsw.sj.common.engine.{StateHandlers, StreamingExecutor}
-import com.bwsw.sj.engine.core.entities.Envelope
+import com.bwsw.sj.engine.core.entities.{KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 
 /**
@@ -12,19 +12,23 @@ import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
  * @author Kseniya Mikhaleva
  */
 
-class RegularStreamingExecutor(manager: ModuleEnvironmentManager) extends StreamingExecutor with StateHandlers {
+class RegularStreamingExecutor[T <: AnyRef](manager: ModuleEnvironmentManager) extends StreamingExecutor with StateHandlers {
   /**
    * Is invoked only once at the beginning of launching of module
    */
   def onInit(): Unit = {}
 
   /**
-   * Used for processing one envelope. It is invoked for every received message
+   * Used for processing one t-stream envelope. It is invoked for every received message
    * from one of the inputs that are defined within the instance.
-   * @param envelope A message that can have different type depending on a type of input
-   *                 so you should cast the message to get certain fields.
    */
-  def onMessage(envelope: Envelope): Unit = {}
+  def onMessage(envelope: TStreamEnvelope[T]): Unit = {}
+
+  /**
+    * Used for processing one t-stream envelope. It is invoked for every received message
+    * from one of the inputs that are defined within the instance.
+    */
+  def onMessage(envelope: KafkaEnvelope[T]): Unit = {}
 
   /**
    * Handler triggered before every checkpoint

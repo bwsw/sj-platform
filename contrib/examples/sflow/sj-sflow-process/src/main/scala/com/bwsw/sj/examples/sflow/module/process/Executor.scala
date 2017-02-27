@@ -2,13 +2,13 @@ package com.bwsw.sj.examples.sflow.module.process
 
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.utils.{GeoIp, SflowParser}
-import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.entities.KafkaEnvelope
 import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.engine.core.regular.RegularStreamingExecutor
 import com.bwsw.sj.engine.core.state.StateStorage
 
 
-class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor(manager) {
+class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecutor[Array[Byte]](manager) {
 
   val objectSerializer = new ObjectSerializer()
   val state: StateStorage = manager.getState
@@ -22,34 +22,27 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
     println("on after checkpoint")
   }
 
-  override def onMessage(envelope: Envelope): Unit = {
+  override def onMessage(envelope: KafkaEnvelope[Array[Byte]]): Unit = {
+    val maybeSflow = SflowParser.parse(envelope.data)
+    if (maybeSflow.isDefined) {
+      val sflowRecord = maybeSflow.get
+      lastTs = sflowRecord.timestamp * 1000
+      val srcAs = GeoIp.resolveAs(sflowRecord.srcIP)
+      val dstAs = GeoIp.resolveAs(sflowRecord.dstIP)
+      val prefixAsToAs = s"$srcAs-$dstAs"
+      if (!state.isExist(s"traffic-sum-$srcAs")) state.set(s"traffic-sum-$srcAs", 0L)
+      if (!state.isExist(s"traffic-sum-between-$prefixAsToAs")) state.set(s"traffic-sum-between-$prefixAsToAs", 0L)
 
-    envelope match {
-      case kafkaEnvelope: KafkaEnvelope =>
-        val maybeSflow = SflowParser.parse(kafkaEnvelope.data)
-        if (maybeSflow.isDefined) {
-          val sflowRecord = maybeSflow.get
-          lastTs = sflowRecord.timestamp * 1000
-          val srcAs = GeoIp.resolveAs(sflowRecord.srcIP)
-          val dstAs = GeoIp.resolveAs(sflowRecord.dstIP)
-          val prefixAsToAs = s"$srcAs-$dstAs"
-          if (!state.isExist(s"traffic-sum-$srcAs")) state.set(s"traffic-sum-$srcAs", 0L)
-          if (!state.isExist(s"traffic-sum-between-$prefixAsToAs")) state.set(s"traffic-sum-between-$prefixAsToAs", 0L)
+      val bandwidth = sflowRecord.packetSize * sflowRecord.samplingRate
 
-          val bandwidth = sflowRecord.packetSize * sflowRecord.samplingRate
+      var trafficSum = state.get(s"traffic-sum-$srcAs").asInstanceOf[Long]
+      trafficSum += bandwidth
+      state.set(s"traffic-sum-$srcAs", trafficSum)
 
-          var trafficSum = state.get(s"traffic-sum-$srcAs").asInstanceOf[Long]
-          trafficSum += bandwidth
-          state.set(s"traffic-sum-$srcAs", trafficSum)
-
-          var trafficSumBetweenAs = state.get(s"traffic-sum-between-$prefixAsToAs").asInstanceOf[Long]
-          trafficSumBetweenAs += bandwidth
-          state.set(s"traffic-sum-between-$prefixAsToAs", trafficSumBetweenAs)
-        }
-      case tstreamEnvelope: TStreamEnvelope =>
-        println("t-stream envelope is received")
+      var trafficSumBetweenAs = state.get(s"traffic-sum-between-$prefixAsToAs").asInstanceOf[Long]
+      trafficSumBetweenAs += bandwidth
+      state.set(s"traffic-sum-between-$prefixAsToAs", trafficSumBetweenAs)
     }
-
   }
 
   override def onTimer(jitter: Long): Unit = {
@@ -78,10 +71,10 @@ class Executor(manager: ModuleEnvironmentManager) extends RegularStreamingExecut
   }
 
   /**
-   * Handler triggered before persisting a state
-   *
-   * @param isFullState Flag denotes that full state (true) or partial changes of state (false) will be saved
-   */
+    * Handler triggered before persisting a state
+    *
+    * @param isFullState Flag denotes that full state (true) or partial changes of state (false) will be saved
+    */
   override def onBeforeStateSave(isFullState: Boolean): Unit = {
     println("on before state saving")
     state.clear()

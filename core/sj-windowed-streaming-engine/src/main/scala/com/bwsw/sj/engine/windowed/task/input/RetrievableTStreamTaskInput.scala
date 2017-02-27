@@ -5,29 +5,31 @@ import java.util.Date
 import com.bwsw.sj.common.DAL.model.TStreamSjStream
 import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.engine.EnvelopeDataSerializer
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
-import com.bwsw.tstreams.agents.consumer.{ConsumerTransaction, Consumer}
 import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Oldest}
+import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction}
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
 
 /**
- * Class is responsible for launching t-stream consumers
- * that allow to fetching messages, which are wrapped in envelope
- *
- * @author Kseniya Mikhaleva
- *
- */
-class RetrievableTStreamTaskInput(manager: CommonTaskManager,
-                   override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
-  extends RetrievableTaskInput[TStreamEnvelope](manager.inputs) {
+  * Class is responsible for launching t-stream consumers
+  * that allow to fetching messages, which are wrapped in envelope
+  *
+  * @author Kseniya Mikhaleva
+  *
+  */
+class RetrievableTStreamTaskInput[T <: AnyRef](manager: CommonTaskManager,
+                                     override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
+  extends RetrievableTaskInput[TStreamEnvelope[T]](manager.inputs) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val instance = manager.instance.asInstanceOf[WindowedInstance]
   private val tstreamOffsetsStorage = mutable.Map[(String, Int), Long]()
+  private val envelopeDataSerializer = manager.envelopeDataSerializer.asInstanceOf[EnvelopeDataSerializer[T]]
   private val consumers = createConsumers()
   addConsumersToCheckpointGroup()
   launchConsumers()
@@ -47,10 +49,10 @@ class RetrievableTStreamTaskInput(manager: CommonTaskManager,
   }
 
   /**
-   * Chooses offset policy for t-streams consumers
-   *
-   * @param startFrom Offset policy name or specific date
-   */
+    * Chooses offset policy for t-streams consumers
+    *
+    * @param startFrom Offset policy name or specific date
+    */
   private def chooseOffset(startFrom: String): IOffset = {
     logger.debug(s"Choose offset policy for t-streams consumer.")
     startFrom match {
@@ -82,13 +84,12 @@ class RetrievableTStreamTaskInput(manager: CommonTaskManager,
     transactions.map((transaction: ConsumerTransaction[Array[Byte]]) => {
       val tempTransaction = consumer.buildTransactionObject(transaction.getPartition(), transaction.getTransactionID(), transaction.getCount()).get //todo fix it next milestone TR1216
       tstreamOffsetsStorage((consumer.name, tempTransaction.getPartition())) = tempTransaction.getTransactionID()
-      val envelope = new TStreamEnvelope()
+      val data = transaction.getAll().map(envelopeDataSerializer.deserialize)
+      val envelope = new TStreamEnvelope(data, consumer.name)
       envelope.stream = stream.name
       envelope.partition = tempTransaction.getPartition()
-      envelope.id = tempTransaction.getTransactionID()
-      envelope.consumerName = consumer.name
-      envelope.data = tempTransaction.getAll()
       envelope.tags = stream.tags
+      envelope.id = tempTransaction.getTransactionID()
 
       envelope
     })
@@ -111,7 +112,7 @@ class RetrievableTStreamTaskInput(manager: CommonTaskManager,
     logger.debug(s"Task: ${manager.taskName}. Subscribing consumers are launched.")
   }
 
-  override def setConsumerOffset(envelope: TStreamEnvelope) = {
+  override def setConsumerOffset(envelope: TStreamEnvelope[T]) = {
     logger.debug(s"Task: ${manager.taskName}. " +
       s"Change local offset of consumer: ${envelope.consumerName} to txn: ${envelope.id}.")
     consumers(envelope.consumerName).setStreamPartitionOffset(envelope.partition, envelope.id)

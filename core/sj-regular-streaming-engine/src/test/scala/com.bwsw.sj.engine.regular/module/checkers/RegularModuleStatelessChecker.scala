@@ -5,14 +5,14 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.engine.regular.module.DataFactory._
 import scala.collection.JavaConverters._
 
-object ModuleStatelessChecker extends App {
+object RegularModuleStatelessChecker extends App {
   open()
   val streamService = ConnectionRepository.getStreamService
   val objectSerializer = new ObjectSerializer()
 
-  val inputTstreamConsumers = (1 to inputCount).map(x => createInputTstreamConsumer(streamService, x.toString))
-  val inputKafkaConsumer = createInputKafkaConsumer(streamService, partitions)
-  val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(streamService, x.toString))
+  val inputTstreamConsumers = (1 to inputCount).map(x => createInputTstreamConsumer(partitions, x.toString))
+  val inputKafkaConsumer = createInputKafkaConsumer(inputCount, partitions)
+  val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(partitions, x.toString))
 
   inputTstreamConsumers.foreach(x => x.start())
   outputConsumers.foreach(x => x.start())
@@ -41,7 +41,7 @@ object ModuleStatelessChecker extends App {
     }
   })
 
-  var records = inputKafkaConsumer.poll(100 * 60)
+  var records = inputKafkaConsumer.poll(1000 * 20)
   records.asScala.foreach(x => {
     val bytes = x.value()
     val element = objectSerializer.deserialize(bytes).asInstanceOf[Int]

@@ -421,7 +421,7 @@ object BenchmarkDataFactory {
 
     StreamService.createStream(tStreamName,
       partitions,
-      60000,
+      10 * 60,
       "", metadataStorage,
       dataStorage)
 
@@ -446,12 +446,8 @@ object BenchmarkDataFactory {
     instance.outputs = Array(streamName)
     instance.checkpointMode = checkpointMode
     instance.checkpointInterval = checkpointInterval
-    instance.parallelism = 1
     instance.options = """{"hey": "hey"}"""
     instance.startFrom = EngineLiterals.oldestStartMode
-    instance.perTaskCores = 0.1
-    instance.perTaskRam = 64
-    instance.performanceReportingInterval = 10000
     instance.executionPlan = executionPlan
     instance.engine = "com.bwsw.output.streaming.engine-1.0"
     instance.coordinationService = serviceManager.get(zkServiceName).get.asInstanceOf[ZKService]

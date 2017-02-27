@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.core.windowed
 
-import com.bwsw.sj.common.engine.{StreamingExecutor, StateHandlers}
+import com.bwsw.sj.common.engine.{StateHandlers, StreamingExecutor}
 import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 
 /**
@@ -12,7 +12,8 @@ import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
  */
 
 
-class WindowedStreamingExecutor(manager: ModuleEnvironmentManager) extends StreamingExecutor with StateHandlers {
+class WindowedStreamingExecutor[T <: AnyRef](manager: ModuleEnvironmentManager) extends StreamingExecutor with StateHandlers {
+
   /**
    * Is invoked only once at the beginning of launching of module
    */

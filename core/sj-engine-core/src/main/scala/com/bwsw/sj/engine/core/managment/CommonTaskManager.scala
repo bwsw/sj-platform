@@ -5,19 +5,18 @@ import com.bwsw.sj.common.DAL.model.module.{RegularInstance, WindowedInstance}
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.environment.{EnvironmentManager, ModuleEnvironmentManager}
+import com.bwsw.sj.engine.core.windowed.{BatchCollector, WindowedStreamingPerformanceMetrics}
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
 
 import scala.collection.mutable
 
 /**
- * Class allowing to manage an environment of regular streaming task
- *
- *
- * @author Kseniya Mikhaleva
- */
+  * Class allowing to manage an environment of regular streaming task
+  *
+  * @author Kseniya Mikhaleva
+  */
 class CommonTaskManager() extends TaskManager {
-
   val inputs: mutable.Map[SjStream, Array[Int]] = getInputs(getExecutionPlan)
   val outputProducers = createOutputProducers()
 
@@ -28,8 +27,7 @@ class CommonTaskManager() extends TaskManager {
 
   def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = {
     logger.debug(s"Task: $taskName. Start loading an executor class from module jar.")
-    val executor = moduleClassLoader
-      .loadClass(executorClassName)
+    val executor = executorClass
       .getConstructor(classOf[ModuleEnvironmentManager])
       .newInstance(environmentManager)
       .asInstanceOf[StreamingExecutor]
@@ -38,14 +36,34 @@ class CommonTaskManager() extends TaskManager {
     executor
   }
 
+  def getBatchCollector(instance: WindowedInstance,
+                        performanceMetrics: WindowedStreamingPerformanceMetrics): BatchCollector = {
+    instance match {
+      case _: WindowedInstance =>
+        logger.info(s"Task: $taskName. Getting a batch collector class from jar of file: " +
+          instance.moduleType + "-" + instance.moduleName + "-" + instance.moduleVersion + ".")
+        val batchCollectorClassName = fileMetadata.specification.batchCollectorClass
+        val batchCollector = moduleClassLoader
+          .loadClass(batchCollectorClassName)
+          .getConstructor(classOf[WindowedInstance], classOf[WindowedStreamingPerformanceMetrics])
+          .newInstance(instance, performanceMetrics)
+          .asInstanceOf[BatchCollector]
+
+        batchCollector
+      case _ =>
+        logger.error("A batch collector exists only for windowed engine.")
+        throw new RuntimeException("A batch collector exists only for windowed engine.")
+    }
+  }
+
   /**
-   * Creates a t-stream consumer
-   *
-   * @param stream SjStream from which massages are consumed
-   * @param partitions Range of stream partition
-   * @param offset Offset policy that describes where a consumer starts
-   * @return T-stream consumer
-   */
+    * Creates a t-stream consumer
+    *
+    * @param stream     SjStream from which massages are consumed
+    * @param partitions Range of stream partition
+    * @param offset     Offset policy that describes where a consumer starts
+    * @return T-stream consumer
+    */
   def createConsumer(stream: TStreamSjStream, partitions: List[Int], offset: IOffset): Consumer[Array[Byte]] = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head}).")

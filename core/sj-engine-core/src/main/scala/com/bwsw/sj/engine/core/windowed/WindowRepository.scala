@@ -1,13 +1,12 @@
 package com.bwsw.sj.engine.core.windowed
 
-import com.bwsw.sj.common.DAL.model.SjStream
 import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.engine.core.entities.Window
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
 
-class WindowRepository(instance: WindowedInstance, inputs: mutable.Map[SjStream, Array[Int]]) {
+class WindowRepository(instance: WindowedInstance) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val windowPerStream: mutable.Map[String, Window] = createStorageOfWindows()
   val window = instance.window
@@ -15,7 +14,7 @@ class WindowRepository(instance: WindowedInstance, inputs: mutable.Map[SjStream,
 
   private def createStorageOfWindows() = {
     logger.debug("Create a storage to keep windows.")
-    inputs.map(x => (x._1.name, new Window(x._1.name)))
+    mutable.Map(instance.getInputsWithoutStreamMode().map(x => (x, new Window(x))): _*)
   }
 
   def get(stream: String) = {

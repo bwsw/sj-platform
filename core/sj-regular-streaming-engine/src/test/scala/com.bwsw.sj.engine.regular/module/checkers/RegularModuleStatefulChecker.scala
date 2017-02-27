@@ -7,14 +7,16 @@ import com.bwsw.sj.engine.regular.utils.StateHelper
 
 import scala.collection.JavaConverters._
 
-object ModuleStatefulKafkaChecker extends App {
+object RegularModuleStatefulChecker extends App {
   open()
   val streamService = ConnectionRepository.getStreamService
-  val objectSerializer = new ObjectSerializer()
+  val objectSerializer: ObjectSerializer = new ObjectSerializer()
 
-  val inputConsumer = createInputKafkaConsumer(streamService, partitions)
-  val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(streamService, x.toString))
+  val inputTstreamConsumers = (1 to inputCount).map(x => createInputTstreamConsumer(partitions, x.toString))
+  val inputKafkaConsumer = createInputKafkaConsumer(inputCount, partitions)
+  val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(partitions, x.toString))
 
+  inputTstreamConsumers.foreach(x => x.start())
   outputConsumers.foreach(x => x.start())
 
   var totalInputElements = 0
@@ -23,8 +25,25 @@ object ModuleStatefulKafkaChecker extends App {
   var inputElements = scala.collection.mutable.ArrayBuffer[Int]()
   var outputElements = scala.collection.mutable.ArrayBuffer[Int]()
 
-  var records = inputConsumer.poll(100 * 60)
+  inputTstreamConsumers.foreach(inputTstreamConsumer => {
+    val partitions = inputTstreamConsumer.getPartitions().toIterator
 
+    while (partitions.hasNext) {
+      val currentPartition = partitions.next()
+      var maybeTxn = inputTstreamConsumer.getTransaction(currentPartition)
+      while (maybeTxn.isDefined) {
+        val transaction = maybeTxn.get
+        while (transaction.hasNext()) {
+          val element = objectSerializer.deserialize(transaction.next()).asInstanceOf[Int]
+          inputElements.+=(element)
+          totalInputElements += 1
+        }
+        maybeTxn = inputTstreamConsumer.getTransaction(currentPartition)
+      }
+    }
+  })
+
+  var records = inputKafkaConsumer.poll(1000 * 20)
   records.asScala.foreach(x => {
     val bytes = x.value()
     val element = objectSerializer.deserialize(bytes).asInstanceOf[Int]
@@ -65,6 +84,7 @@ object ModuleStatefulKafkaChecker extends App {
     "Sum of all txns elements that are consumed from input stream should equals state variable sum")
 
   consumer.stop()
+  inputTstreamConsumers.foreach(x => x.stop())
   outputConsumers.foreach(x => x.stop())
   close()
   ConnectionRepository.close()

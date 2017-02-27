@@ -14,7 +14,7 @@ import scala.collection.Map
  * @param outputs Set of output streams of instance parameters
  */
 
-abstract class EnvironmentManager(val options: Map[String, Any], outputs: Array[SjStream]) {
+class EnvironmentManager(val options: Map[String, Any], outputs: Array[SjStream]) {
 
   protected val logger = LoggerFactory.getLogger(this.getClass)
 

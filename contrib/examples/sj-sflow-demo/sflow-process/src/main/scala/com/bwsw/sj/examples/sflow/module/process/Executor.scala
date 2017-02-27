@@ -1,25 +1,23 @@
 package com.bwsw.sj.examples.sflow.module.process
 
-import java.util.Random
-
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.utils.{GeoIp, SflowRecord}
+import com.bwsw.sj.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.engine.core.windowed.{WindowRepository, WindowedStreamingExecutor}
 import com.bwsw.sj.examples.sflow.module.process.mapreduce.Generator
-import com.bwsw.sj.engine.core.entities.TStreamEnvelope
 
 import scala.collection.mutable.ArrayBuffer
 
 
-class Executor(manager: ModuleEnvironmentManager) extends WindowedStreamingExecutor(manager) {
+class Executor(manager: ModuleEnvironmentManager) extends WindowedStreamingExecutor[Array[Byte]](manager) {
   private val objectSerializer = new ObjectSerializer()
   private val storage = ArrayBuffer[SflowRecord]()
 
   override def onWindow(windowRepository: WindowRepository): Unit = {
     val allWindows = windowRepository.getAll()
 
-    val envelopes = allWindows.flatMap(_._2.batches).flatMap(_.envelopes).map(_.asInstanceOf[TStreamEnvelope])
+    val envelopes = allWindows.flatMap(_._2.batches).flatMap(_.envelopes).map(_.asInstanceOf[TStreamEnvelope[Array[Byte]]])
     val sflowRecords = envelopes.flatMap(_.data.map(bytes => {
       val sflowRecord = objectSerializer.deserialize(bytes).asInstanceOf[SflowRecord]
       sflowRecord.srcAs = GeoIp.resolveAs(sflowRecord.srcIP)
