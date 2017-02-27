@@ -58,7 +58,7 @@
                           title="Test connection"
                           (click)="testConnection(provider)">
                     <i class="fa fa-refresh"
-                       [ngClass]="{ 'fa-spin': isConnecting(provider) }"></i>
+                       [ngClass]="{ 'fa-spin': currentConnectors.indexOf(provider.name) >= 0 }"></i>
                   </button>
                 </td>
               </tr>

@@ -293,7 +293,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   }
 
   public addRelatedStream() {
-    this.newInstance['related-streams'].push('');
+    this.newInstance.relatedStreams.push('');
   }
 
   public removeRelatedStream(i: number): void {
@@ -322,8 +322,8 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
         console.error('start-from field is not provided for module-type '+this.newInstance.module.moduleType);
         break;
     }
-    if (!this.startFromTimestampAcceptable && this.newInstance['start-from'] === 'timestamp') {
-      this.newInstance['start-from'] = '';
+    if (!this.startFromTimestampAcceptable && this.newInstance.startFrom === 'timestamp') {
+      this.newInstance.startFrom = '';
     }
   }
 

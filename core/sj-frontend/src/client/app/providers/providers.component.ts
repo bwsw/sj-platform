@@ -122,10 +122,6 @@ export class ProvidersComponent implements OnInit {
         });
   }
 
-  public isConnecting(provider: ProviderModel) {
-    return (this.currentConnectors.indexOf(provider.name) >= 0);
-  }
-
   public showAlert(notification: NotificationModel): void {
     if (!this.alerts.find(msg => msg.message === notification.message)) {
       this.alerts.push(notification);
