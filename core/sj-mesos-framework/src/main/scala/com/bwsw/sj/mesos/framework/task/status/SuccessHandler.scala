@@ -9,11 +9,6 @@ import com.bwsw.sj.mesos.framework.task.status.states.{MasterState, Slave, Slave
 object SuccessHandler extends TaskStatusHandler {
   protected var status: TaskStatus = null
 
-//  def setStatus(status:TaskStatus): TaskStatusHandler = {
-//    this.status = status
-//    this
-//  }
-
   def process() = {
     val currentSlave = getCurrentSlave(status.getSlaveId)
     val dir = extractSandbox(currentSlave, status.getTaskId)
