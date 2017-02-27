@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { NotificationModel } from "../../models/notification.model";
+import { NotificationModel } from '../../models/index';
 
 @Component({
   moduleId: module.id,
