@@ -12,7 +12,7 @@ object RegularModuleStatefulKafkaChecker extends App {
   val streamService = ConnectionRepository.getStreamService
   val objectSerializer = new ObjectSerializer()
 
-  val inputConsumer = createInputKafkaConsumer(streamService, inputCount, partitions)
+  val inputConsumer = createInputKafkaConsumer(inputCount, partitions)
   val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(partitions, x.toString))
 
   outputConsumers.foreach(x => x.start())

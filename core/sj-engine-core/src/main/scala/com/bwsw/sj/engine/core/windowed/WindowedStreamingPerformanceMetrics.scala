@@ -1,10 +1,11 @@
-package com.bwsw.sj.engine.core.reporting
+package com.bwsw.sj.engine.core.windowed
 
 import java.util.Calendar
 
 import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
+import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer

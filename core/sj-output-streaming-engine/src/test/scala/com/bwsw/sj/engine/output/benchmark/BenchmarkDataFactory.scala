@@ -421,7 +421,7 @@ object BenchmarkDataFactory {
 
     StreamService.createStream(tStreamName,
       partitions,
-      60000,
+      10 * 60,
       "", metadataStorage,
       dataStorage)
 

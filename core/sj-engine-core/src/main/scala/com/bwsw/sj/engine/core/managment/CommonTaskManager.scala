@@ -5,8 +5,7 @@ import com.bwsw.sj.common.DAL.model.module.{RegularInstance, WindowedInstance}
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.environment.{EnvironmentManager, ModuleEnvironmentManager}
-import com.bwsw.sj.engine.core.reporting.WindowedStreamingPerformanceMetrics
-import com.bwsw.sj.engine.core.windowed.BatchCollector
+import com.bwsw.sj.engine.core.windowed.{BatchCollector, WindowedStreamingPerformanceMetrics}
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
 

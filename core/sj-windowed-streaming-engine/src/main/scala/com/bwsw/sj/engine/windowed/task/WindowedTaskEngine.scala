@@ -6,9 +6,8 @@ import com.bwsw.common.LeaderLatch
 import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.entities._
-import com.bwsw.sj.engine.core.reporting.WindowedStreamingPerformanceMetrics
 import com.bwsw.sj.engine.core.state.CommonModuleService
-import com.bwsw.sj.engine.core.windowed.{BatchCollector, WindowRepository, WindowedStreamingExecutor}
+import com.bwsw.sj.engine.core.windowed.{BatchCollector, WindowRepository, WindowedStreamingExecutor, WindowedStreamingPerformanceMetrics}
 import com.bwsw.sj.engine.windowed.task.input.EnvelopeFetcher
 import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.framework.recipes.barriers.DistributedDoubleBarrier

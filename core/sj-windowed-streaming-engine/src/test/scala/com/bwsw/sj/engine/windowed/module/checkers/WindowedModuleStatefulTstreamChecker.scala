@@ -4,16 +4,15 @@ import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.engine.core.entities.{KafkaEnvelope, TStreamEnvelope, Batch}
 import com.bwsw.sj.engine.windowed.module.DataFactory._
-import scala.collection.JavaConverters._
+import com.bwsw.sj.engine.windowed.utils.StateHelper
 
-object ModuleStatelessChecker extends App {
+object WindowedModuleStatefulTstreamChecker extends App {
   open()
   val streamService = ConnectionRepository.getStreamService
   val objectSerializer = new ObjectSerializer()
 
-  val inputTstreamConsumers = (1 to inputCount).map(x => createInputTstreamConsumer(streamService, x.toString))
-  val inputKafkaConsumer = createInputKafkaConsumer(streamService, partitions)
-  val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(streamService, x.toString))
+  val inputTstreamConsumers = (1 to inputCount).map(x => createInputTstreamConsumer(partitions, x.toString))
+  val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(partitions, x.toString))
 
   inputTstreamConsumers.foreach(x => x.start())
   outputConsumers.foreach(x => x.start())
@@ -42,14 +41,6 @@ object ModuleStatelessChecker extends App {
     }
   })
 
-  var records = inputKafkaConsumer.poll(100 * 60)
-  records.asScala.foreach(x => {
-    val bytes = x.value()
-    val element = objectSerializer.deserialize(bytes).asInstanceOf[Int]
-    inputElements.+=(element)
-    totalInputElements += 1
-  })
-
   outputConsumers.foreach(outputConsumer => {
     val partitions = outputConsumer.getPartitions().toIterator
 
@@ -62,12 +53,12 @@ object ModuleStatelessChecker extends App {
         while (transaction.hasNext()) {
           val batch = objectSerializer.deserialize(transaction.next()).asInstanceOf[Batch]
           batch.envelopes.foreach {
-            case tstreamEnvelope: TStreamEnvelope[Array[Byte] @unchecked] => tstreamEnvelope.data.foreach(x => {
-              outputElements.+=(objectSerializer.deserialize(x).asInstanceOf[Int])
+            case tstreamEnvelope: TStreamEnvelope[Int @unchecked] => tstreamEnvelope.data.foreach(x => {
+              outputElements.+=(x)
               totalOutputElements += 1
             })
-            case kafkaEnvelope: KafkaEnvelope[Array[Byte] @unchecked] =>
-              outputElements.+=(objectSerializer.deserialize(kafkaEnvelope.data).asInstanceOf[Int])
+            case kafkaEnvelope: KafkaEnvelope[Int @unchecked] =>
+              outputElements.+=(kafkaEnvelope.data)
               totalOutputElements += 1
           }
         }
@@ -76,12 +67,20 @@ object ModuleStatelessChecker extends App {
     }
   })
 
+  val consumer = createStateConsumer(streamService)
+  consumer.start()
+  val initialState = StateHelper.getState(consumer, objectSerializer)
+
   assert(totalInputElements == totalOutputElements,
     "Count of all txns elements that are consumed from output stream should equals count of all txns elements that are consumed from input stream")
 
   assert(inputElements.forall(x => outputElements.contains(x)) && outputElements.forall(x => inputElements.contains(x)),
     "All txns elements that are consumed from output stream should equals all txns elements that are consumed from input stream")
 
+  assert(initialState("sum") == inputElements.sum,
+    "Sum of all txns elements that are consumed from input stream should equals state variable sum")
+
+  consumer.stop()
   inputTstreamConsumers.foreach(x => x.stop())
   outputConsumers.foreach(x => x.stop())
   close()

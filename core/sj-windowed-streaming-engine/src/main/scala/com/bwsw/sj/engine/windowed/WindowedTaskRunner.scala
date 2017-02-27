@@ -3,8 +3,8 @@ package com.bwsw.sj.engine.windowed
 import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.engine.core.engine.{InstanceStatusObserver, TaskRunner}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
-import com.bwsw.sj.engine.core.reporting.WindowedStreamingPerformanceMetrics
 import com.bwsw.sj.engine.core.state.CommonModuleService
+import com.bwsw.sj.engine.core.windowed.WindowedStreamingPerformanceMetrics
 import com.bwsw.sj.engine.windowed.task.WindowedTaskEngine
 import com.bwsw.sj.engine.windowed.task.input.EnvelopeFetcher
 import org.slf4j.LoggerFactory

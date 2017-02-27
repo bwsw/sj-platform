@@ -13,7 +13,7 @@ object RegularModuleStatefulChecker extends App {
   val objectSerializer: ObjectSerializer = new ObjectSerializer()
 
   val inputTstreamConsumers = (1 to inputCount).map(x => createInputTstreamConsumer(partitions, x.toString))
-  val inputKafkaConsumer = createInputKafkaConsumer(streamService, inputCount, partitions)
+  val inputKafkaConsumer = createInputKafkaConsumer(inputCount, partitions)
   val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(partitions, x.toString))
 
   inputTstreamConsumers.foreach(x => x.start())

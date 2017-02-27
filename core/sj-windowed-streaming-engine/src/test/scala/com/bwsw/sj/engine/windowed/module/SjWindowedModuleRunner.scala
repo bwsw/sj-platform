@@ -18,9 +18,9 @@ object SjWindowedModuleSetup extends App {
   val fileStorage = ConnectionRepository.getFileStorage
   val stateManagement = "ram"
   val stateFullCheckpoint = 3
-  val window = 4
+  val window = 2
   val slidingInterval = 2
-  val _type = "both"
+  val _type = commonMode
 
   val module = new File("./contrib/stubs/sj-stub-windowed-streaming/target/scala-2.12/sj-stub-windowed-streaming-1.0-SNAPSHOT.jar")
 
@@ -32,7 +32,7 @@ object SjWindowedModuleSetup extends App {
   createStreams(streamService, serviceManager, partitions, _type, inputCount, outputCount)
   createInstance(serviceManager, instanceService, window, slidingInterval, stateManagement, stateFullCheckpoint)
 
-  createData(16, 1, streamService, _type, inputCount)
+  createData(8, 1, streamService, _type, inputCount)
   close()
   ConnectionRepository.close()
 
@@ -51,7 +51,7 @@ object SjWindowedModuleDestroy extends App {
   val providerService = ConnectionRepository.getProviderService
   val instanceService = ConnectionRepository.getInstanceService
   val fileStorage = ConnectionRepository.getFileStorage
-  val _type = "both"
+  val _type = commonMode
 
   val module = new File("./contrib/stubs/sj-stub-windowed-streaming/target/scala-2.12/sj-stub-windowed-streaming-1.0-SNAPSHOT.jar")
 

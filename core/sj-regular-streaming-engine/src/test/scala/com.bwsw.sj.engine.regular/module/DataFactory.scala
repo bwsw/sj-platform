@@ -33,7 +33,7 @@ object DataFactory {
 
   //private val aerospikeHosts: Array[String] = System.getenv("AEROSPIKE_HOSTS").split(",")
   private val zookeeperHosts = System.getenv("ZOOKEEPER_HOSTS").split(",")
-  private val kafkaHosts = System.getenv("KAFKA_HOSTS").split(",")
+  private val kafkaHosts = System.getenv("KAFKA_HOSTS")
   private val cassandraHost = System.getenv("CASSANDRA_HOST")
   private val cassandraPort = System.getenv("CASSANDRA_PORT").toInt
   val kafkaMode = "kafka"
@@ -43,16 +43,16 @@ object DataFactory {
   private val cassandraTestKeyspace = "test_keyspace_for_regular_engine"
   private val testNamespace = "test"
   private val instanceName = "test-instance-for-regular-engine"
-  private val tstreamInputNamePrefix = "tstream-input"
-  private val tstreamOutputNamePrefix = "output-tstream"
-  private val kafkaInputNamePrefix = "kafka-input"
-  private val kafkaProviderName = "kafka-test-provider"
-  private val cassandraProviderName = "cassandra-test-provider"
-  private val zookeeperProviderName = "zookeeper-test-provider"
-  private val tstreamServiceName = "tstream-test-service"
-  private val cassandraServiceName = "cassandra-test-service"
-  private val kafkaServiceName = "kafka-test-service"
-  private val zookeeperServiceName = "zookeeper-test-service"
+  private val tstreamInputNamePrefix = "regular-tstream-input"
+  private val tstreamOutputNamePrefix = "regular-tstream-output"
+  private val kafkaInputNamePrefix = "regular-kafka-input"
+  private val kafkaProviderName = "regular-kafka-test-provider"
+  private val cassandraProviderName = "regular-cassandra-test-provider"
+  private val zookeeperProviderName = "regular-zookeeper-test-provider"
+  private val tstreamServiceName = "regular-tstream-test-service"
+  private val cassandraServiceName = "regular-cassandra-test-service"
+  private val kafkaServiceName = "regular-kafka-test-service"
+  private val zookeeperServiceName = "regular-zookeeper-test-service"
   private val replicationFactor = 1
   private var instanceInputs: Array[String] = Array()
   private var instanceOutputs: Array[String] = Array()
@@ -63,7 +63,7 @@ object DataFactory {
   private val cassandraProvider = new Provider(cassandraProviderName, cassandraProviderName, Array(s"$cassandraHost:$cassandraPort"), "", "", ProviderLiterals.cassandraType)
   private val zookeeperProvider = new Provider(zookeeperProviderName, zookeeperProviderName, zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
   private val tstrqService = new TStreamService(tstreamServiceName, ServiceLiterals.tstreamsType, tstreamServiceName,
-    cassandraProvider, cassandraTestKeyspace, cassandraProvider, cassandraTestKeyspace, zookeeperProvider, "unit")
+    cassandraProvider, cassandraTestKeyspace, cassandraProvider, cassandraTestKeyspace, zookeeperProvider, "regular_engine")
   private val tstreamFactory = new TStreamsFactory()
   setTStreamFactoryProperties()
 
@@ -137,7 +137,7 @@ object DataFactory {
     //    val aerospikeProvider = new Provider("aerospike-test-provider", "aerospike provider", aerospikeHosts, "", "", Provider.aerospikeType)
     //    providerService.save(aerospikeProvider)
 
-    val kafkaProvider = new Provider(kafkaProviderName, kafkaProviderName, kafkaHosts, "", "", ProviderLiterals.kafkaType)
+    val kafkaProvider = new Provider(kafkaProviderName, kafkaProviderName, kafkaHosts.split(","), "", "", ProviderLiterals.kafkaType)
     providerService.save(kafkaProvider)
 
     providerService.save(zookeeperProvider)
@@ -261,7 +261,7 @@ object DataFactory {
       tstreamInputNamePrefix + suffix,
       partitions,
       10 * 60,
-      "description of test input tstream",
+      tstreamInputNamePrefix + suffix,
       metadataStorage,
       dataStorage
     )
@@ -289,7 +289,7 @@ object DataFactory {
       tstreamOutputNamePrefix + suffix,
       partitions,
       10 * 60,
-      "description of test output tstream",
+      tstreamOutputNamePrefix + suffix,
       metadataStorage,
       dataStorage
     )
@@ -348,8 +348,7 @@ object DataFactory {
                      instanceService: GenericMongoService[Instance],
                      checkpointInterval: Int,
                      stateManagement: String = EngineLiterals.noneStateMode,
-                     stateFullCheckpoint: Int = 0
-                    ) = {
+                     stateFullCheckpoint: Int = 0) = {
     import scala.collection.JavaConverters._
 
     val instance = new RegularInstance()
@@ -358,7 +357,6 @@ object DataFactory {
     instance.moduleName = "regular-streaming-stub"
     instance.moduleVersion = "1.0"
     instance.status = EngineLiterals.started
-    instance.description = "some description of test instance"
     instance.inputs = instanceInputs
     instance.outputs = instanceOutputs
     instance.checkpointMode = EngineLiterals.everyNthMode
@@ -429,7 +427,7 @@ object DataFactory {
 
     def createKafkaData(countTxns: Int, countElements: Int, suffix: String) = {
       val props = new Properties()
-      props.put("bootstrap.servers", kafkaHosts.mkString(","))
+      props.put("bootstrap.servers", kafkaHosts)
       props.put("key.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
       props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
 
@@ -484,10 +482,10 @@ object DataFactory {
       Oldest)
   }
 
-  def createInputKafkaConsumer(streamService: GenericMongoService[SjStream], inputCount: Int, partitionNumber: Int) = {
+  def createInputKafkaConsumer(inputCount: Int, partitionNumber: Int) = {
 
     val props = new Properties()
-    props.put("bootstrap.servers", kafkaHosts.mkString(","))
+    props.put("bootstrap.servers", kafkaHosts)
     props.put("enable.auto.commit", "false")
     props.put("auto.offset.reset", "earliest")
     props.put("key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")

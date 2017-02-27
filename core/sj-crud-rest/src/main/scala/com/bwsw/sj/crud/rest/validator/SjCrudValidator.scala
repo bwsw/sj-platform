@@ -15,7 +15,7 @@ import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.engine.{StreamingExecutor, StreamingValidator}
+import com.bwsw.sj.common.engine.{IBatchCollector, StreamingValidator}
 import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils, StreamLiterals}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 
@@ -132,27 +132,6 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageRes
           throw new Exception(createMessage("rest.validator.specification.sources.must.t-stream", moduleType, "outputs"))
         }
 
-      case `regularStreamingType` | `windowedStreamingType` =>
-        //'inputs.cardinality' field
-        if (!isNonZeroCardinality(inputCardinality)) {
-          throw new Exception(createMessage("rest.validator.specification.cardinality.left.bound.greater.zero", moduleType, "inputs"))
-        }
-
-        //'inputs.types' field
-        if (inputTypes.isEmpty || !doesSourceTypesConsistOf(inputTypes, Set(tstreamType, kafkaStreamType))) {
-          throw new Exception(createMessage("rest.validator.specification.sources.t-stream.kafka", moduleType, "inputs"))
-        }
-
-        //'outputs.cardinality' field
-        if (!isNonZeroCardinality(outputCardinality)) {
-          throw new Exception(createMessage("rest.validator.specification.cardinality.left.bound.greater.zero", moduleType, "outputs"))
-        }
-
-        //'outputs.types' field
-        if (outputTypes.length != 1 || !doesSourceTypesConsistOf(outputTypes, Set(tstreamType))) {
-          throw new Exception(createMessage("rest.validator.specification.sources.must.t-stream", moduleType, "outputs"))
-        }
-
       case `outputStreamingType` =>
         //'inputs.cardinality' field
         if (!isSingleCardinality(inputCardinality)) {
@@ -173,18 +152,44 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageRes
         if (outputTypes.isEmpty || !doesSourceTypesConsistOf(outputTypes, Set(esOutputType, jdbcOutputType))) {
           throw new Exception(createMessage("rest.validator.specification.sources.es.jdbc", moduleType, "outputs"))
         }
+
+
+      case _ =>
+        //'inputs.cardinality' field
+        if (!isNonZeroCardinality(inputCardinality)) {
+          throw new Exception(createMessage("rest.validator.specification.cardinality.left.bound.greater.zero", moduleType, "inputs"))
+        }
+
+        //'inputs.types' field
+        if (inputTypes.isEmpty || !doesSourceTypesConsistOf(inputTypes, Set(tstreamType, kafkaStreamType))) {
+          throw new Exception(createMessage("rest.validator.specification.sources.t-stream.kafka", moduleType, "inputs"))
+        }
+
+        //'outputs.cardinality' field
+        if (!isNonZeroCardinality(outputCardinality)) {
+          throw new Exception(createMessage("rest.validator.specification.cardinality.left.bound.greater.zero", moduleType, "outputs"))
+        }
+
+        //'outputs.types' field
+        if (outputTypes.length != 1 || !doesSourceTypesConsistOf(outputTypes, Set(tstreamType))) {
+          throw new Exception(createMessage("rest.validator.specification.sources.must.t-stream", moduleType, "outputs"))
+        }
+
+        if (moduleType == windowedStreamingType) {
+          val batchCollectorClass = specification("batch-collector-class").asInstanceOf[String]
+
+          //'batch-collector-class' field
+          val batchCollectorClassInterfaces = getBatchCollectorClassInterfaces(batchCollectorClass, classLoader)
+          if (!batchCollectorClassInterfaces.exists(x => x.equals(classOf[IBatchCollector]))) {
+            throw new Exception(createMessage("rest.validator.specification.class.should.implement", moduleType, "batch-collector-class", "BatchCollector"))
+          }
+        }
     }
 
     //'validator-class' field
-    val validatorClassInterfaces = getClassInterfaces(validatorClass, classLoader)
+    val validatorClassInterfaces = getValidatorClassInterfaces(validatorClass, classLoader)
     if (!validatorClassInterfaces.exists(x => x.equals(classOf[StreamingValidator]))) {
       throw new Exception(createMessage("rest.validator.specification.class.should.implement", moduleType, "validator-class", "StreamingValidator"))
-    }
-
-    //'executor-class' field
-    val executorClassInterfaces = getExecutorClassInterfaces(executorClass, classLoader)
-    if (!executorClassInterfaces.exists(x => x.equals(classOf[StreamingExecutor]))) {
-      throw new Exception(createMessage("rest.validator.specification.class.should.implement", moduleType, "executor-class", "StreamingExecutor"))
     }
 
     //'engine-name' and 'engine-version' fields
@@ -212,29 +217,30 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageRes
     cardinality.head == 1 && cardinality.last == 1
   }
 
-  private def getClassInterfaces(className: String, classLoader: URLClassLoader) = {
+  private def getValidatorClassInterfaces(className: String, classLoader: URLClassLoader) = {
     logger.debug("Try to load a validator class from jar that is indicated on specification.")
     try {
       classLoader.loadClass(className).getAnnotatedInterfaces.map(x => x.getType)
     } catch {
       case _: ClassNotFoundException =>
-        logger.error(s"Specification.json for module has got the invalid 'validator-class' param: class '$className' indicated in the specification isn't found.")
+        logger.error(s"Specification.json for module has got the invalid 'validator-class' param: " +
+          s"class '$className' indicated in the specification isn't found.")
         throw new Exception(createMessage("rest.validator.specification.class.not.found", "validator-class", className))
     }
   }
 
-  private def getExecutorClassInterfaces(className: String, classLoader: URLClassLoader) = {
-    logger.debug("Try to load an executor class from jar that is indicated on specification.")
+  private def getBatchCollectorClassInterfaces(className: String, classLoader: URLClassLoader) = {
+    logger.debug("Try to load a batch collector class from jar that is indicated on specification.")
     try {
       classLoader.loadClass(className).getAnnotatedSuperclass.getType.asInstanceOf[Class[Object]]
         .getAnnotatedInterfaces.map(x => x.getType)
     } catch {
       case _: ClassNotFoundException =>
-        logger.error(s"Specification.json for module has got the invalid 'executor-class' param: class '$className' indicated in the specification isn't found.")
-        throw new Exception(createMessage("rest.validator.specification.class.not.found", "executor-class", className))
+        logger.error(s"Specification.json for module has got the invalid 'batch-collector-class' param: " +
+          s"class '$className' indicated in the specification isn't found.")
+        throw new Exception(createMessage("rest.validator.specification.class.not.found", "batch-collector", className))
     }
   }
-
 
   /**
     * Check specification of uploading custom jar file

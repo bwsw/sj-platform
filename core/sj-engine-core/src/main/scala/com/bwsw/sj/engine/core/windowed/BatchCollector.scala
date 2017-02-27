@@ -2,8 +2,8 @@ package com.bwsw.sj.engine.core.windowed
 
 import com.bwsw.sj.common.DAL.model.module.WindowedInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.engine.core.entities._
-import com.bwsw.sj.engine.core.reporting.WindowedStreamingPerformanceMetrics
+import com.bwsw.sj.common.engine.IBatchCollector
+import com.bwsw.sj.engine.core.entities.{Batch, Envelope}
 import org.slf4j.LoggerFactory
 
 import scala.collection.Map
@@ -15,7 +15,7 @@ import scala.collection.Map
   * @author Kseniya Mikhaleva
   */
 abstract class BatchCollector(protected val instance: WindowedInstance,
-                              performanceMetrics: WindowedStreamingPerformanceMetrics) {
+                              performanceMetrics: WindowedStreamingPerformanceMetrics) extends IBatchCollector {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val streamDAO = ConnectionRepository.getStreamService
