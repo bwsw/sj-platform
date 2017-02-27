@@ -23,6 +23,7 @@ import { StreamsService } from './services/streams.service';
 import { Ng2BootstrapModule } from 'ng2-bootstrap';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 import { FooterComponent } from './components/footer/footer.component';
+import { AlertsComponent } from './components/alerts/alerts.component';
 
 @NgModule({
   imports: [
@@ -39,6 +40,7 @@ import { FooterComponent } from './components/footer/footer.component';
     BreadcrumbsComponent,
     FooterComponent,
     FilterComponent,
+    AlertsComponent,
     // Pipes
     ListFilterPipe,
     OrderByPipe,
@@ -63,6 +65,7 @@ import { FooterComponent } from './components/footer/footer.component';
     BreadcrumbsComponent,
     FooterComponent,
     FilterComponent,
+    AlertsComponent,
     // Pipes
     ListFilterPipe,
     OrderByPipe,

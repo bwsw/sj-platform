@@ -23,16 +23,7 @@
         </div>
 
         <!-- Alerts -->
-        <div class="main-alerts mt-1">
-          <alert class="custom-alert"
-                 *ngFor="let alert of alerts; let i = index"
-                 [type]="alert.type"
-                 dismissible="true"
-                 [dismissOnTimeout]="alert.timeout"
-                 (close)="closeAlert(i)">
-            {{ alert.msg }}
-          </alert>
-        </div>
+        <sj-alerts [alerts]="alerts"></sj-alerts>
 
         <!-- Services list -->
         <div class="table-wrapper">
@@ -109,11 +100,11 @@
                     (click)="getProviderInfo(ProviderInfo, currentService.dataProvider)">{{currentService.dataProvider}}</span>
             </li>
             <li *ngIf="currentService.type === 'TstrQ'">Data namespace: {{currentService.dataNamespace}}</li>
-            <li *ngIf="currentService.type === 'TstrQ'">Lock provider:
+            <li *ngIf="currentService.type === 'TstrQ'">Lock-provider:
               <span class="btn-lookup action-link"
                     (click)="getProviderInfo(ProviderInfo, currentService.lockProvider)">{{currentService.lockProvider}}</span>
             </li>
-            <li *ngIf="currentService.type === 'TstrQ'">Lock namespace: {{currentService.lockNamespace}}</li>
+            <li *ngIf="currentService.type === 'TstrQ'">Lock-namespace: {{currentService.lockNamespace}}</li>
             <li *ngIf="currentService.type === 'KfkQ'">ZK provider: {{currentService.zkProvider}}</li>
             <li *ngIf="currentService.type === 'KfkQ'">ZK namespace: {{currentService.zkNamespace}}</li>
           </ul>
@@ -142,7 +133,7 @@
             <div class="col-sm-10">
               <select required [(ngModel)]="newService.type" name="serviceType"
                       class="form-control">
-                <option *ngFor="let type of serviceTypes" value="{{type}}"
+                <option *ngFor="let type of serviceTypes"
                         [disabled]="type ==='ArspkDB' || type === 'CassDB'">{{type}}</option>
               </select>
             </div>
@@ -201,8 +192,7 @@
             <div class="col-sm-10">
               <select [(ngModel)]="newService.provider" name="streamService" required
                       class="form-control">
-                <option *ngFor="let provider of providerList | providerFilter : newService.type "
-                        value={{provider.name}}>{{provider.name}}
+                <option *ngFor="let provider of providerList | providerFilter : newService.type ">{{provider.name}}
                 </option>
               </select>
             </div>
@@ -214,8 +204,7 @@
             <div class="col-sm-10">
               <select [(ngModel)]="newService.metadataProvider" name="serviceMetadataProvider"
                       required class="form-control">
-                <option *ngFor="let provider of providerList | providerFilter : 'CassDB' " value={{provider.name}}>
-                  {{provider.name}}
+                <option *ngFor="let provider of providerList | providerFilter : 'CassDB' ">{{provider.name}}
                 </option>
               </select>
             </div>
@@ -236,8 +225,7 @@
             <div class="col-sm-10">
               <select [(ngModel)]="newService.dataProvider" name="serviceDataProvider"
                       required class="form-control">
-                <option *ngFor="let provider of providerList | providerFilter : 'DataProvider' "
-                        value={{provider.name}}>{{provider.name}}
+                <option *ngFor="let provider of providerList | providerFilter : 'DataProvider' ">{{provider.name}}
                 </option>
               </select>
             </div>
@@ -276,12 +264,11 @@
 
           <!-- Lock provider -->
           <fieldset *ngIf="newService.type === 'TstrQ'" class="form-group row">
-            <label class="col-sm-2 col-form-label required">Lock provider</label>
+            <label class="col-sm-2 col-form-label required">Lock-provider</label>
             <div class="col-sm-10">
               <select [(ngModel)]="newService.lockProvider" name="serviceLockProvider"
                       required class="form-control">
-                <option *ngFor="let provider of providerList | providerFilter : 'LockProvider' "
-                        value={{provider.name}}>{{provider.name}}
+                <option *ngFor="let provider of providerList | providerFilter : 'LockProvider' ">{{provider.name}}
                 </option>
               </select>
             </div>
@@ -289,7 +276,7 @@
 
           <!-- Lock namespace -->
           <fieldset *ngIf="newService.type === 'TstrQ'" class="form-group row">
-            <label class="col-sm-2 col-form-label required">Lock namespace</label>
+            <label class="col-sm-2 col-form-label required">Lock-namespace</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newService.lockNamespace" name="serviceLockNamespace" type="text"
                      class="form-control" required>
@@ -320,8 +307,7 @@
             <div class="col-sm-10">
               <select [(ngModel)]="newService.zkProvider" name="serviceZkProvider"
                       required class="form-control">
-                <option *ngFor="let provider of providerList | providerFilter : 'ZKCoord' " value={{provider.name}}>
-                  {{provider.name}}
+                <option *ngFor="let provider of providerList | providerFilter : 'ZKCoord' ">{{provider.name}}
                 </option>
               </select>
             </div>

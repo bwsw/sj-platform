@@ -22,16 +22,7 @@
         </div>
 
         <!-- Alerts -->
-        <div class="main-alerts mt-1">
-          <alert class="custom-alert"
-                 *ngFor="let alert of alerts; let i = index"
-                 [type]="alert.type"
-                 dismissible="true"
-                 [dismissOnTimeout]="alert.timeout"
-                 (close)="closeAlert(i)">
-            {{ alert.msg }}
-          </alert>
-        </div>
+        <sj-alerts [alerts]="alerts"></sj-alerts>
 
         <!-- Steams list -->
         <div class="table-wrapper">
@@ -124,7 +115,7 @@
             <div class="col-sm-10">
               <select [(ngModel)]="newStream.type" name="streamType"
                       required class="form-control">
-                <option *ngFor="let type of streamTypes" value="{{type}}">{{type}}</option>
+                <option *ngFor="let type of streamTypes">{{type}}</option>
               </select>
             </div>
           </fieldset>
@@ -163,8 +154,7 @@
             <div class="col-sm-10">
               <select [(ngModel)]="newStream.service" name="streamService"
                       required class="form-control">
-                <option *ngFor="let service of serviceList | serviceFilter : newStream.type"
-                        value={{service.name}}>{{service.name}}
+                <option *ngFor="let service of serviceList | serviceFilter : newStream.type">{{service.name}}
                 </option>
               </select>
             </div>
@@ -205,13 +195,14 @@
             <label class="col-sm-2 col-form-label">Tags</label>
             <div class="col-sm-10">
               <ul class="tags" (click)="focus()">
-                <li class="tag" *ngFor="let tag of newStream.tags">{{tag}}</li>
+                <li class="tag" *ngFor="let tag of newStream.tags; let i = index"><span>{{tag}}</span>
+                  <a (click)="deleteTag(i)" class="fa fa-close"></a></li>
                 <li class="tag nopadding">
                   <input id="tagInput" class="form-control"
                     name="streamTags"
                          [(ngModel)]="currentTag"
                          #streamtags = "ngModel"
-                         (keyup)="keyUp($event)"
+                         (keydown)="keyDown($event)"
                          (blur)="blur()" />
                 </li>
               </ul>
@@ -245,8 +236,7 @@
                 <select [(ngModel)]="newStream.generator.service" name="streamGeneratorService"
                         class="form-control"
                         [required]="streamGeneratorType.value!=='local'">
-                  <option *ngFor="let service of serviceList | serviceFilter : 'zookeeper' "
-                          value={{service.name}}>{{service.name}}
+                  <option *ngFor="let service of serviceList | serviceFilter : 'zookeeper' ">{{service.name}}
                   </option>
                 </select>
               </div>
@@ -305,10 +295,10 @@
           <li *ngIf="currentStreamService.type == 'TstrQ'">Data namespace:
             {{currentStreamService.dataNamespace}}
           </li>
-          <li *ngIf="currentStreamService.type == 'TstrQ'">Lock provider:
+          <li *ngIf="currentStreamService.type == 'TstrQ'">Lock-provider:
             {{currentStreamService.lockProvider}}
           </li>
-          <li *ngIf="currentStreamService.type == 'TstrQ'">Lock namespace:
+          <li *ngIf="currentStreamService.type == 'TstrQ'">Lock-namespace:
             {{currentStreamService.lockNamespace}}
           </li>
         </ul>

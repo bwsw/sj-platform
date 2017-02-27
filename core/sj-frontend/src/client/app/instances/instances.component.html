@@ -22,16 +22,7 @@
         </div>
 
         <!-- Alerts -->
-        <div class="main-alerts mt-1">
-          <alert class="custom-alert"
-                 *ngFor="let alert of alerts; let i = index"
-                 [type]="alert.type"
-                 dismissible="true"
-                 [dismissOnTimeout]="alert.timeout"
-                 (close)="closeAlert(i)">
-            {{ alert.msg }}
-          </alert>
-        </div>
+        <sj-alerts [alerts]="alerts"></sj-alerts>
 
         <!-- Instances list -->
         <div class="table-wrapper">
@@ -127,26 +118,26 @@
             <li *ngIf="currentInstance.outputs">Outputs: {{currentInstance.outputs}}</li>
             <li *ngIf="currentInstance.input">Input: {{currentInstance.input}}</li>
             <li *ngIf="currentInstance.output">Output: {{currentInstance.output}}</li>
-            <li *ngIf="currentInstance.checkpointMode">Checkpoint-mode : {{currentInstance.checkpointMode}}</li>
-            <li *ngIf="currentInstance.checkpointInterval">Checkpoint-interval : {{currentInstance.checkpointInterval}}</li>
-            <li *ngIf="currentInstance.stateManagement">State-management :
+            <li *ngIf="currentInstance.checkpointMode">Checkpoint mode : {{currentInstance.checkpointMode}}</li>
+            <li *ngIf="currentInstance.checkpointInterval">Checkpoint interval : {{currentInstance.checkpointInterval}}</li>
+            <li *ngIf="currentInstance.stateManagement">State management :
               {{currentInstance.stateManagement}}</li>
-            <li *ngIf="currentInstance.duplicateCheck || currentInstance.duplicateCheck === false">Duplicate-check :
+            <li *ngIf="currentInstance.duplicateCheck || currentInstance.duplicateCheck === false">Duplicate check :
               {{currentInstance.duplicateCheck}}</li>
-            <li *ngIf="currentInstance.lookupHistory">Lookup-history : {{currentInstance.lookupHistory}}</li>
-            <li *ngIf="currentInstance.queueMaxSize">Queue-max-size : {{currentInstance.queueMaxSize}}</li>
-            <li *ngIf="currentInstance.defaultEvictionPolicy">Default-eviction-policy :
+            <li *ngIf="currentInstance.lookupHistory">Lookup history : {{currentInstance.lookupHistory}}</li>
+            <li *ngIf="currentInstance.queueMaxSize">Queue max-size : {{currentInstance.queueMaxSize}}</li>
+            <li *ngIf="currentInstance.defaultEvictionPolicy">Default eviction policy :
               {{currentInstance.defaultEvictionPolicy}}</li>
-            <li *ngIf="currentInstance.evictionPolicy">Eviction-policy :
+            <li *ngIf="currentInstance.evictionPolicy">Eviction policy :
               {{currentInstance.evictionPolicy}}</li>
-            <li *ngIf="currentInstance.stateFullCheckpoint">State-full-checkpoint :
+            <li *ngIf="currentInstance.stateFullCheckpoint">State full checkpoint :
               {{currentInstance.stateFullCheckpoint}}</li>
             <li>Parallelism : {{currentInstance.parallelism}}</li>
             <li>Options : {{currentInstance.options | json }}</li>
             <li *ngIf="currentInstance.startFrom">Start-from : {{currentInstance.startFrom}}</li>
-            <li>Per-task-cores : {{currentInstance.perTaskCorese}}</li>
-            <li>Per-task-ram" : {{currentInstance.perTaskRam}}</li>
-            <li>Coordination-service : {{currentInstance.coordinationService}}</li>
+            <li>Per-task cores : {{currentInstance.perTaskCorese}}</li>
+            <li>Per-task ram" : {{currentInstance.perTaskRam}}</li>
+            <li>Coordination service : {{currentInstance.coordinationService}}</li>
             <li *ngIf="currentInstance.eventWaitIdleTime">Event-wait-idle-time :
               {{currentInstance.eventWaitIdleTime}}</li>
             <li *ngIf="currentInstance.window">Window :
@@ -159,15 +150,15 @@
               {{currentInstance.relatedStreams}}</li>
             <li *ngIf="currentInstance.batchFillType">Batch-fill-type :
               {{currentInstance.batchFillType | json}}</li>
-            <li *ngIf="currentInstance.performanceReportingInterval">Performance-reporting-interval :
+            <li *ngIf="currentInstance.performanceReportingInterval">Performance reporting interval :
               {{currentInstance.performanceReportingInterval}}</li>
-            <li *ngIf="currentInstance.jvmOptions">Jvm-options : {{currentInstance.jvmOptions | json}}</li>
+            <li *ngIf="currentInstance.jvmOptions">Jvm options : {{currentInstance.jvmOptions | json}}</li>
             <li *ngIf="currentInstance.environmentVariables">Environment variables :
               {{currentInstance.environmentVariables| json}}</li>
             <li *ngIf="currentInstance.nodeAttributes">Node attributes : {{currentInstance.nodeAttributes |
               json}}</li>
-            <li *ngIf="currentInstance.backupCount || currentInstance.backupCount === 0">Backup-count : {{currentInstance.backupCount}}</li>
-            <li *ngIf="currentInstance.asyncBackupCount || currentInstance.asyncBackupCount === 0">Async-backup-count :
+            <li *ngIf="currentInstance.backupCount || currentInstance.backupCount === 0">Backup count : {{currentInstance.backupCount}}</li>
+            <li *ngIf="currentInstance.asyncBackupCount || currentInstance.asyncBackupCount === 0">Async-backup count :
               {{currentInstance.asyncBackupCount}}</li>
             <li>{{currentInstance.module.moduleType !== 'input-streaming' ? 'Execution-plan:': 'Tasks:'}}
               <ul *ngIf="currentInstance !== undefined">
@@ -303,7 +294,7 @@
               <div class="col col-sm-10">
                 <select [(ngModel)]="newInstance.input" name="instanceInput" required
                         class="form-control">
-                  <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-stream'" value="{{stream.name}}">{{stream.name}}</option>
+                  <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-stream'">{{stream.name}}</option>
                 </select>
               </div>
             </fieldset>
@@ -314,7 +305,7 @@
               <div class="col col-sm-10">
                 <select [(ngModel)]="newInstance.output" name="instanceOutput" required
                         class="form-control">
-                  <option *ngFor="let stream of streamsList | streamFilter: 'jdbc-output,elasticsearch-output'" value="{{stream.name}}">{{stream.name}}</option>
+                  <option *ngFor="let stream of streamsList | streamFilter: 'jdbc-output,elasticsearch-output'">{{stream.name}}</option>
                 </select>
               </div>
             </fieldset>
@@ -423,7 +414,7 @@
 
             <!-- Batch-fill-type -->
             <fieldset *ngIf="newInstance.module.moduleType === 'windowed-streaming'" class="form-group row">
-              <label class="col-form-label col-sm-2 required">Batch fill type</label>
+              <label class="col-form-label col-sm-2 required">Batch-fill-type</label>
               <div class="col col-sm-10">
                 <div class="mb-1 row">
                   <div class="col-sm-6">
@@ -513,7 +504,7 @@
 
             <!-- Start-from -->
             <fieldset *ngIf="newInstance.module.moduleType === 'input-streaming'" class="form-group row">
-              <label class="col-form-label col-sm-2">Start-from</label>
+              <label class="col-form-label col-sm-2">Start from</label>
               <div class="col col-sm-10">
                 <select [(ngModel)]="newInstance.startFrom" name="instanceStartFrom"
                         class="form-control">
@@ -526,7 +517,7 @@
 
             <!-- Start-from timestamp -->
             <fieldset *ngIf="newInstance.startFrom === 'timestamp'" class="form-group row">
-              <label class="col-form-label col-sm-2 required">Start-from timestamp</label>
+              <label class="col-form-label col-sm-2 required">Start from timestamp</label>
               <div class="col col-sm-10">
                 <input [(ngModel)]="newInstance.startFromTimestamp" name="instanceStartFromTimestamp" type="number"
                        required class="form-control">
@@ -535,7 +526,7 @@
 
             <!-- Per-task-cores -->
             <fieldset class="form-group row">
-              <label class="col-form-label col-sm-2">Per task cores</label>
+              <label class="col-form-label col-sm-2">Per-task cores</label>
               <div class="col col-sm-10">
                 <input [(ngModel)]="newInstance.perTaskCores" name="instancePerTaskCores" type="number" step="0.01"
                        class="form-control">
@@ -544,7 +535,7 @@
 
             <!-- Per-task-ram -->
             <fieldset class="form-group row">
-              <label class="col-form-label col-sm-2">Per task ram</label>
+              <label class="col-form-label col-sm-2">Per-task ram</label>
               <div class="col col-sm-10">
                 <input [(ngModel)]="newInstance.perTaskRam" name="instancePerTaskRam" type="number"
                        class="form-control">
@@ -602,7 +593,7 @@
             <!-- Event-wait-idle-time -->
             <fieldset *ngIf="newInstance.module.moduleType === 'regular-streaming' ||
                               newInstance.module.moduleType === 'windowed-streaming'" class="form-group row">
-              <label class="col-form-label col-sm-2">Event wait idle time</label>
+              <label class="col-form-label col-sm-2">Event-wait-idle-time</label>
               <div class="col col-sm-10">
                 <input [(ngModel)]="newInstance.eventWaitIdleTime" name="instanceEventWaitIdleTime" type="number"
                        class="form-control">
@@ -645,7 +636,7 @@
 
             <!-- Queue max size -->
             <fieldset *ngIf="newInstance.module.moduleType === 'input-streaming'" class="form-group row">
-              <label class="col-form-label col-sm-2 required">Queue max size</label>
+              <label class="col-form-label col-sm-2 required">Queue max-size</label>
               <div class="col col-sm-10">
                 <input [(ngModel)]="newInstance.queueMaxSize" name="instanceQueueMaxSize" type="number"
                        required class="form-control">
@@ -688,7 +679,7 @@
 
             <!-- Async backup count -->
             <fieldset *ngIf="newInstance.module.moduleType === 'input-streaming'" class="form-group row">
-              <label class="col-form-label col-sm-2">Async backup count</label>
+              <label class="col-form-label col-sm-2">Async-backup count</label>
               <div class="col col-sm-10">
                 <input [(ngModel)]="newInstance.asyncBackupCount" name="instanceAsyncBackupCount" type="number"
                        class="form-control">

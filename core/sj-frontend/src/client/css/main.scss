@@ -83,6 +83,9 @@ li.tag {
   background-color: #20a8d8;
   color: #FFFFFF;
   margin-right: 2px;
+  span {
+    margin-right: 2px;
+  }
 }
 
 li.tag.nopadding {
@@ -94,6 +97,11 @@ li.tag.nopadding input{
   border: 0px none;
   outline: none;
   padding: 0px;
+}
+
+/*filter-box*/
+.right-inner-addon {
+  margin: 0 5px 10px;
 }
 
 /*mozila validated input style disable*/

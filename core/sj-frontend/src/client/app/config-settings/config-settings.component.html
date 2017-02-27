@@ -1,75 +1,64 @@
 <sj-spinner [isRunning]="showSpinner"></sj-spinner>
 
-<div class="row">
-  <!-- Content -->
-  <div class="col col-xs-12">
-    <div class="card">
-      <div class="card-block">
-        <!-- Title -->
-        <div class="row">
-          <div class="col col-xs-4"><h4 class="card-title">Config Settings</h4></div>
-          <div class="col col-xs-8">
-            <button type="button"
-                    class="btn btn-primary pull-right ml-1 mb-1"
-                    (click)="AddSetting.show()">
-              <i class="fa fa-plus mr-1"></i>Add settings
-            </button>
+<!-- Content -->
+<div class="col col-xs-12">
+  <div class="card">
+    <div class="card-block">
+      <!-- Title -->
+      <div class="row">
+        <div class="col col-xs-4"><h4 class="card-title">Config Settings</h4></div>
+        <div class="col col-xs-8">
+          <button type="button"
+                  class="btn btn-primary pull-right ml-1 mb-1"
+                  (click)="AddSetting.show()">
+            <i class="fa fa-plus mr-1"></i>Add settings
+          </button>
 
-            <sj-search-box class="pull-right"
-                           (update)="term = $event"></sj-search-box>
+          <sj-search-box class="pull-right"
+                         (update)="term = $event"></sj-search-box>
 
-            <sj-filter class="pull-right" [filterList]="settingsDomains"
-                       (update)="domainterm = $event"></sj-filter>
+          <sj-filter class="pull-right" [filterList]="settingsDomains"
+                     (update)="domainterm = $event"></sj-filter>
 
-          </div>
         </div>
+      </div>
 
-        <!-- Alerts -->
-        <div class="main-alerts mt-1">
-          <alert class="custom-alert"
-                 *ngFor="let alert of alerts; let i = index"
-                 [type]="alert.type"
-                 dismissible="true"
-                 [dismissOnTimeout]="alert.timeout"
-                 (close)="closeAlert(i)">
-            {{ alert.msg }}
-          </alert>
-        </div>
+      <!-- Alerts -->
+      <sj-alerts [alerts]="alerts"></sj-alerts>
 
-        <!-- Settings list -->
-        <div class="table-wrapper">
-          <table class="table table-hover table-sm mt-1 mb-0">
-            <thead>
-            <tr>
-              <th>Name</th>
-              <th>Value</th>
-              <th>Config domain</th>
-              <th class="actions-column">Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr *ngIf="!settingsList || (settingsList && settingsList.length === 0)">
-              <td colspan="20" class="text-center">No settings have been found.</td>
-            </tr>
+      <!-- Settings list -->
+      <div class="table-wrapper">
+        <table class="table table-hover table-sm mt-1 mb-0">
+          <thead>
+          <tr>
+            <th>Name</th>
+            <th>Value</th>
+            <th>Config domain</th>
+            <th class="actions-column">Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngIf="!settingsList || (settingsList && settingsList.length === 0)">
+            <td colspan="20" class="text-center">No settings have been found.</td>
+          </tr>
 
-            <tr *ngFor="let setting of settingsList | orderBy: 'name' | listFilter : {name :term, type: domainterm}"
-                [ngClass]="{ 'table-info': isSelected(setting) }"
-                (click)="selectSetting(setting)">
-              <td>{{ setting.name }}</td>
-              <td>{{ setting.value }}</td>
-              <td>{{ setting.domain }}</td>
-              <td class="actions-column">
-                <button type="button"
-                        class="btn btn-sm btn-secondary"
-                        title="Delete setting"
-                        (click)="deleteSettingConfirm(DeleteSetting, setting)">
-                  <i class="fa fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
+          <tr *ngFor="let setting of settingsList | orderBy: 'name' | listFilter : {name :term, type: domainterm}"
+              [ngClass]="{ 'table-info': isSelected(setting) }"
+              (click)="selectSetting(setting)">
+            <td>{{ setting.name }}</td>
+            <td>{{ setting.value }}</td>
+            <td>{{ setting.domain }}</td>
+            <td class="actions-column">
+              <button type="button"
+                      class="btn btn-sm btn-secondary"
+                      title="Delete setting"
+                      (click)="deleteSettingConfirm(DeleteSetting, setting)">
+                <i class="fa fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -113,7 +102,7 @@
             <div class="col-sm-10">
               <select required [(ngModel)]="newSetting.domain" name="settingDomain"
                       class="form-control">
-                <option *ngFor="let domain of settingsDomains" value="{{domain}}">{{domain}}</option>
+                <option *ngFor="let domain of settingsDomains">{{domain}}</option>
               </select>
             </div>
           </fieldset>
