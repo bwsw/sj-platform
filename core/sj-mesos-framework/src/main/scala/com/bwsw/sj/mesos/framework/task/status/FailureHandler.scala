@@ -16,6 +16,7 @@ object FailureHandler extends TaskStatusHandler {
     StatusHandler.logger.error(s"Error: ${status.getMessage}")
 
 //    TasksList.addToLaunch(status.getTaskId.getValue)
+    TasksList.stopped(status.getTaskId.getValue)
     StatusHandler.logger.info(s"Added task ${status.getTaskId.getValue} to launch after failure.")
     TasksList.getTask(status.getTaskId.getValue).host = None
   }
