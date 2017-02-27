@@ -41,3 +41,6 @@ to provide code that is easier to maintain, debug, and scale
 4. Run tests
 5. Merge your branch into develop
 6. Delete branch
+
+## Environment setting
+Set API_BACKEND_HOST and API_BACKEND_PORT as Rest API host and port
