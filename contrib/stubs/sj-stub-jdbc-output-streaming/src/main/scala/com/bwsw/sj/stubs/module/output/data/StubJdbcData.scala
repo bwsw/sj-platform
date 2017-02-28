@@ -7,6 +7,6 @@ import com.bwsw.sj.engine.core.entities.JdbcEnvelope
   */
 
 class StubJdbcData extends JdbcEnvelope {
-  var value: Int = 0
-
+  var value: Int = null
+  var testId: String = null
 }

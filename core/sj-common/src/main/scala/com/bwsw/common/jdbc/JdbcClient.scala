@@ -67,7 +67,7 @@ protected class JdbcClient(private var jdbcCCD: JdbcClientConnectionData) {
     val values = attrs.map(a => a._3.toString.mkString("'", "", "'")).mkString(", ")
     logger.debug(s"A conversion of a data object to a sql request has finished.")
 
-    s"INSERT INTO ${jdbcCCD.table} ($columns) VALUES ($values);"
+    s"INSERT INTO `${jdbcCCD.table}` ($columns) VALUES ($values);"
   }
 
 
@@ -87,7 +87,7 @@ protected class JdbcClient(private var jdbcCCD: JdbcClientConnectionData) {
 
   def removeByTransactionId(transactionId: String) = {
     def checkExistence(): Boolean = {
-      val esql = s"SELECT * FROM ${jdbcCCD.table} WHERE ${jdbcCCD.txnField} = '$transactionId'"
+      val esql = s"SELECT * FROM `${jdbcCCD.table}` WHERE `${jdbcCCD.txnField}` = '$transactionId'"
       val stmt = connection.createStatement()
       val res = stmt.executeQuery(esql)
       res.next
@@ -95,7 +95,7 @@ protected class JdbcClient(private var jdbcCCD: JdbcClientConnectionData) {
 
     if (checkExistence()) {
       logger.debug(s"Remove a record from the table: '${jdbcCCD.table}' by id: '$transactionId'.")
-      val sql = s"DELETE FROM ${jdbcCCD.table} WHERE ${jdbcCCD.txnField} = '$transactionId'"
+      val sql = s"DELETE FROM `${jdbcCCD.table}` WHERE `${jdbcCCD.txnField}` = '$transactionId'"
       execute(sql)
     }
   }

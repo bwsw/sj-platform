@@ -39,9 +39,9 @@ class JdbcOutputProcessor[T <: AnyRef](outputStream: SjStream,
 
   def send(envelope: Envelope, inputEnvelope: TStreamEnvelope[T]) = {
     val jdbcEnvelope = envelope.asInstanceOf[JdbcEnvelope]
-    logger.debug(s"Send an envelope: '${jdbcEnvelope.txn}' to a JDBC stream: '${jdbcStream.name}'.")
     jdbcEnvelope.txn = inputEnvelope.id.toString.replaceAll("-", "")
     jdbcEnvelope.setV(jdbcStream.primary, UUID.randomUUID().toString)
+    logger.debug(s"Send an envelope: '${jdbcEnvelope.txn}' to a JDBC stream: '${jdbcStream.name}'.")
     jdbcClient.write(jdbcEnvelope)
   }
 
