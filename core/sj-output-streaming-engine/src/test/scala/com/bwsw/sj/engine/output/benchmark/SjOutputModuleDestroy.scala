@@ -22,7 +22,7 @@ import com.bwsw.sj.engine.output.benchmark.DataFactory._
 object SjESOutputModuleDestroy extends App {
   open()
 
-  val module = new File("./contrib/stubs/sj-stub-output/target/scala-2.12/sj-stub-output-1.0-SNAPSHOT.jar")
+  val module = new File("./contrib/stubs/sj-stub-output/target/scala-2.12/sj-stub-es-output-streaming-1.0-SNAPSHOT.jar")
 
   clearEsStream()
   deleteStreams()
@@ -41,7 +41,7 @@ object SjESOutputModuleDestroy extends App {
 object SjJDBCOutputModuleDestroy extends App {
   open()
 
-  val jdbcModule = new File("./contrib/stubs/sj-stub-output-jdbc/target/scala-2.12/sj-stub-output-jdbc-1.0-SNAPSHOT.jar")
+  val jdbcModule = new File("./contrib/stubs/sj-stub-output-jdbc/target/scala-2.12/sj-stub-jdbc-output-streaming-1.0-SNAPSHOT.jar")
 
   try {clearDatabase()} catch {case e: Exception => e}
   deleteStreams()
