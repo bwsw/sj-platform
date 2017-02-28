@@ -27,7 +27,7 @@ object SjESOutputModuleSetup extends App {
   val checkpointMode = EngineLiterals.everyNthMode
   val partitions = 4
 
-  val module = new File("./contrib/stubs/sj-stub-output/target/scala-2.12/sj-stub-es-output-streaming-1.0-SNAPSHOT.jar")
+  val module = new File("./contrib/stubs/sj-stub-es-output-streaming/target/scala-2.12/sj-stub-es-output-streaming-1.0-SNAPSHOT.jar")
 
   println("module upload")
   uploadModule(module)
@@ -64,7 +64,7 @@ object SjJDBCOutputModuleSetup extends App {
   val checkpointMode = EngineLiterals.everyNthMode
   val partitions = 4
 
-  val jdbcModule = new File("./contrib/stubs/sj-stub-output-jdbc/target/scala-2.12/sj-stub-jdbc-output-streaming-1.0-SNAPSHOT.jar")
+  val jdbcModule = new File("./contrib/stubs/sj-stub-jdbc-output-streaming/target/scala-2.12/sj-stub-jdbc-output-streaming-1.0-SNAPSHOT.jar")
 
   println("module upload")
   uploadModule(jdbcModule)
