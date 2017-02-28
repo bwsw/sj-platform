@@ -41,7 +41,7 @@ object SjESOutputModuleSetup extends App {
   println("create streams")
   createStreams(partitions)
   println("create instance")
-  createInstpuance(esInstanceName, checkpointMode, checkpointInterval,
+  createInstance(esInstanceName, checkpointMode, checkpointInterval,
     esStreamName, "com.bwsw.stub.output-bench-test")
 
   println("prepare a storage")
