@@ -5,7 +5,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.ServiceLiterals
 import scala.collection.mutable.ArrayBuffer
 
-class EsIndServiceData() extends ServiceData() {
+class EsServiceData() extends ServiceData() {
   serviceType = ServiceLiterals.elasticsearchType
   var provider: String = null
   var index: String = null

@@ -25,7 +25,7 @@ class RegularStreamingExecutor[T <: AnyRef](manager: ModuleEnvironmentManager) e
   def onMessage(envelope: TStreamEnvelope[T]): Unit = {}
 
   /**
-    * Used for processing one t-stream envelope. It is invoked for every received message
+    * Used for processing one kafka envelope. It is invoked for every received message
     * from one of the inputs that are defined within the instance.
     */
   def onMessage(envelope: KafkaEnvelope[T]): Unit = {}

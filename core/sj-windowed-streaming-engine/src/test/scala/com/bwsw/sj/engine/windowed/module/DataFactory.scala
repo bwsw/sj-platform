@@ -40,7 +40,7 @@ object DataFactory {
   val commonMode = "both"
   private val agentsHost = "localhost"
   private val cassandraTestKeyspace = "test_keyspace_for_windowed_engine"
-  private val testNamespace = "test"
+  private val testNamespace = "test_namespace_for_windowed_engine"
   private val instanceName = "test-instance-for-windowed-engine"
   private val tstreamInputNamePrefix = "windowed-tstream-input"
   private val tstreamOutputNamePrefix = "windowed-tstream-output"
