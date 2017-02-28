@@ -2,7 +2,6 @@ package com.bwsw.sj.examples.sflow.module.output
 
 import java.util.Date
 
-import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
@@ -15,20 +14,17 @@ import com.bwsw.sj.examples.sflow.module.output.data.TrafficMetrics
  *
  * @author Kseniya Mikhaleva
  */
-class SflowOutputExecutor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[Array[Byte]](manager) {
-  val jsonSerializer = new JsonSerializer()
-  val objectSerializer = new ObjectSerializer()
-
+class SflowOutputExecutor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[String](manager) {
   /**
    * Transform t-stream transaction to output entities
    *
    * @param envelope Input T-Stream envelope
    * @return List of output envelopes
    */
-  override def onMessage(envelope: TStreamEnvelope[Array[Byte]]): List[Envelope] = {
-    val list = envelope.data.map { bytes =>
+  override def onMessage(envelope: TStreamEnvelope[String]): List[Envelope] = {
+    val list = envelope.data.map { s =>
       val data = new TrafficMetrics()
-      val rawData = objectSerializer.deserialize(bytes).asInstanceOf[String].split(",")
+      val rawData = s.split(",")
       data.ts = new Date(rawData(0).toLong)
       data.srcAs = rawData(1).toInt
       data.trafficSum = rawData.last.toLong

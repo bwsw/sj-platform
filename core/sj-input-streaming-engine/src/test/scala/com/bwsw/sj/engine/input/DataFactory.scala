@@ -24,14 +24,14 @@ object DataFactory {
   private val cassandraHost = System.getenv("CASSANDRA_HOST")
   private val cassandraPort = System.getenv("CASSANDRA_PORT").toInt
   private val cassandraTestKeyspace = "test_keyspace_for_input_engine"
-  private val testNamespace = "test"
+  private val testNamespace = "test_namespace_for_input_engine"
   private val instanceName = "test-instance-for-input-engine"
   private val cassandraProviderName = "cassandra-test-provider"
   private val zookeeperProviderName = "zookeeper-test-provider"
   private val tstreamServiceName = "tstream-test-service"
   private val zookeeperServiceName = "zookeeper-test-service"
   private val cassandraServiceName = "cassandra-test-service"
-  private val tstreamOutputNamePrefix = "output-tstream"
+  private val tstreamOutputNamePrefix = "tstream-output"
   private var instanceOutputs: Array[String] = Array()
   private val tasks = new util.HashMap[String, InputTask]()
   private val host = "localhost"

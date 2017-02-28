@@ -18,12 +18,12 @@ import com.bwsw.sj.engine.output.OutputTaskRunner
   *         ZOOKEEPER_HOSTS=176.120.25.19:2181
   *         ES_HOSTS=176.120.25.19:9300
   *         JDBC_HOSTS=0.0.0.0:5432
-  *         test-jdbc-bench-instance -for jdbc
-  *         test-es-bench-instance   -for elasticsearch
-  *         INSTANCE_NAME=test-jdbc-bench-instance
-  *         TASK_NAME=test-jdbc-bench-instance-task0
+  *         test-jdbc-instance-for-output-engine -for jdbc
+  *         test-es-instance-for-output-engine   -for elasticsearch
+  *         INSTANCE_NAME=test-jdbc-instance-for-output-engine or test-es-instance-for-output-engine
+  *         TASK_NAME=test-jdbc-instance-for-output-engine-task0 or test-es-instance-for-output-engine-task0
   */
-object BenchmarkRunner extends App {
+object SjOutputModuleRunner extends App {
   LogManager.getLogManager.reset()
   OutputTaskRunner.main(Array())
 }

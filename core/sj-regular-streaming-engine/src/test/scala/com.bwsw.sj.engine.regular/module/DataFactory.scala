@@ -41,7 +41,7 @@ object DataFactory {
   val commonMode = "both"
   private val agentsHost = "localhost"
   private val cassandraTestKeyspace = "test_keyspace_for_regular_engine"
-  private val testNamespace = "test"
+  private val testNamespace = "test_namespace_for_regular_engine"
   private val instanceName = "test-instance-for-regular-engine"
   private val tstreamInputNamePrefix = "regular-tstream-input"
   private val tstreamOutputNamePrefix = "regular-tstream-output"

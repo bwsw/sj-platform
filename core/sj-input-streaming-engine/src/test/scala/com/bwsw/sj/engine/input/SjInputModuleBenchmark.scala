@@ -8,7 +8,7 @@ import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.engine.input.DataFactory._
 
 
-object SjInputInfoExp {
+object SjInputServices {
   val streamService = ConnectionRepository.getStreamService
   val serviceManager = ConnectionRepository.getServiceManager
   val providerService = ConnectionRepository.getProviderService
@@ -26,11 +26,11 @@ object SjInputModuleSetup extends App {
 
   open()
   cassandraSetup()
-  loadModule(SjInputInfoExp.inputModule, SjInputInfoExp.fileStorage)
-  createProviders(SjInputInfoExp.providerService)
-  createServices(SjInputInfoExp.serviceManager, SjInputInfoExp.providerService)
-  createStreams(SjInputInfoExp.streamService, SjInputInfoExp.serviceManager, outputCount)
-  createInstance(SjInputInfoExp.serviceManager, SjInputInfoExp.instanceService, checkpointInterval)
+  loadModule(SjInputServices.inputModule, SjInputServices.fileStorage)
+  createProviders(SjInputServices.providerService)
+  createServices(SjInputServices.serviceManager, SjInputServices.providerService)
+  createStreams(SjInputServices.streamService, SjInputServices.serviceManager, outputCount)
+  createInstance(SjInputServices.serviceManager, SjInputServices.instanceService, checkpointInterval)
   close()
   ConnectionRepository.close()
 
@@ -42,7 +42,7 @@ object SjInputModuleRunner extends App {
   InputTaskRunner.main(Array())
 }
 
-object SjInputDataWriterRunner extends App {
+object SjInputDataWriter extends App {
   LogManager.getLogManager.reset()
   writeData(15, 5)
 
@@ -58,11 +58,11 @@ object SjInputModuleDestroy extends App {
   LogManager.getLogManager.reset()
 
   open()
-  deleteStreams(SjInputInfoExp.streamService, outputCount)
-  deleteServices(SjInputInfoExp.serviceManager)
-  deleteProviders(SjInputInfoExp.providerService)
-  deleteInstance(SjInputInfoExp.instanceService)
-  deleteModule(SjInputInfoExp.fileStorage, SjInputInfoExp.inputModule.getName)
+  deleteStreams(SjInputServices.streamService, outputCount)
+  deleteServices(SjInputServices.serviceManager)
+  deleteProviders(SjInputServices.providerService)
+  deleteInstance(SjInputServices.instanceService)
+  deleteModule(SjInputServices.fileStorage, SjInputServices.inputModule.getName)
   cassandraDestroy()
   close()
   ConnectionRepository.getConfigService.deleteAll()

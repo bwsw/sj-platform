@@ -109,7 +109,6 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageRes
     val outputCardinality = outputs("cardinality").asInstanceOf[List[Int]]
     val outputTypes = outputs("types").asInstanceOf[List[String]]
     val validatorClass = specification("validator-class").asInstanceOf[String]
-    val executorClass = specification("executor-class").asInstanceOf[String]
     moduleType match {
       case `inputStreamingType` =>
         //'inputs.cardinality' field

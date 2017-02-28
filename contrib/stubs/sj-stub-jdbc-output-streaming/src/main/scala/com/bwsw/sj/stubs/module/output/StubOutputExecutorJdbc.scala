@@ -12,7 +12,7 @@ import com.bwsw.sj.stubs.module.output.data.StubJdbcData
  *
  * @author Diryavkin Dmitry
  */
-class StubOutputExecutorJdbc(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[Array[Byte]](manager) {
+class StubOutputExecutorJdbc(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[Integer](manager) {
 
   val objectSerializer = new ObjectSerializer()
 
@@ -22,10 +22,10 @@ class StubOutputExecutorJdbc(manager: OutputEnvironmentManager) extends OutputSt
    * @param envelope Input T-Stream envelope
    * @return List of output envelopes
    */
-  override def onMessage(envelope: TStreamEnvelope[Array[Byte]]): List[Envelope] = {
-    val list = envelope.data.map { row =>
-      val value = objectSerializer.deserialize(row).asInstanceOf[Int]
+  override def onMessage(envelope: TStreamEnvelope[Integer]): List[Envelope] = {
+    println("Processed: " + envelope.data.size + " elements")
 
+    val list = envelope.data.map { value =>
       val dataJDBC: StubJdbcData = new StubJdbcData
       dataJDBC.value = value
       dataJDBC
