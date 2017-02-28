@@ -38,21 +38,19 @@ label.required::after {
   color: #20a8d8;
   border-bottom: 1px dashed transparent;
   cursor: pointer;
-}
-
-.action-link:hover, .action-link:focus {
-  color: #167495;
-  border-bottom: 1px dashed #167495;
+  &:hover, &:focus {
+    color: #167495;
+    border-bottom: 1px dashed #167495;
+  }
 }
 
 /* Button upload */
-.btn-upload.inProgress {
-  pointer-events: none;
-}
-
 .btn-upload {
   input {
     display: none;
+  }
+  &.inProgress {
+    pointer-events: none;
   }
 }
 
@@ -86,17 +84,16 @@ li.tag {
   span {
     margin-right: 2px;
   }
-}
-
-li.tag.nopadding {
-  color: #20a8d8;
-  background-color: #FFFFFF;
-  padding: 0px;
-}
-li.tag.nopadding input{
-  border: 0px none;
-  outline: none;
-  padding: 0px;
+  &.nopadding {
+    color: #20a8d8;
+    background-color: #FFFFFF;
+    padding: 0px;
+    input{
+      border: 0px none;
+      outline: none;
+      padding: 0px;
+    }
+  }
 }
 
 /*filter-box*/

@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 
 import { ModalDirective } from 'ng2-bootstrap';
 import { CustomService } from '../shared/services/index';
-import { FileModel } from '../shared/models/index';
+import { FileModel, NotificationModel } from '../shared/models/index';
 
 @Component({
   moduleId: module.id,
@@ -17,7 +17,7 @@ export class CustomComponent implements OnInit {
   public currentFile: FileModel;
   public newDescription: string;
   public newFile: any;
-  public alerts: Array<Object> = [];
+  public alerts: NotificationModel[] = [];
   public isUploading: boolean = false;
   public showSpinner: boolean;
 
@@ -51,14 +51,14 @@ export class CustomComponent implements OnInit {
     if (file) {
       this.customService.upload({path: this.path, file: file, description:  this.newDescription}).then((result: any) => {
           this.isUploading = false;
-          this.showAlert({ msg: result, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ message: result, type: 'success', closable: true, timeout: 3000 });
           event.target.value = null;
           this.getCustomList();
         },
         (error: any) => {
           this.isUploading = false;
           event.target.value = null;
-          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
+          this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 });
         });
     } else {
       this.isUploading = false;
@@ -87,7 +87,7 @@ export class CustomComponent implements OnInit {
         },
         error => {
           this.showSpinner = false;
-          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
+          this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 });
         });
   }
 
@@ -99,16 +99,17 @@ export class CustomComponent implements OnInit {
   public deleteFile(modal: ModalDirective) {
     this.customService.removeFile({path: this.path, name: this.currentFile.name, version: this.currentFile.version})
       .subscribe(
-        status => {
-          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
+        response => {
+          this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
           this.getCustomList();
         },
-        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+        error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 }));
     modal.hide();
   }
 
-  public showAlert(message: Object): void {
-    this.alerts = [];
-    this.alerts.push(message);
+  public showAlert(notification: NotificationModel): void {
+    if (!this.alerts.find(msg => msg.message === notification.message)) {
+      this.alerts.push(notification);
+    }
   }
 }

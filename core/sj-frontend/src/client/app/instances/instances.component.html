@@ -40,7 +40,7 @@
             </tr>
 
             <tr *ngFor="let instance of instancesList | orderBy: 'name' | listFilter : { name: term, type: typeterm}"
-                [ngClass]="{ 'table-info': isSelected(instance) }"
+                [ngClass]="{ 'table-info': currentInstance && instance.name === currentInstance.name }"
                 (click)="selectInstance(instance)">
               <td>{{ instance.name }}</td>
               <td>

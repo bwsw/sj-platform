@@ -71,12 +71,12 @@ export class ProjectConfig extends SeedConfig {
     this.addPackagesBundles(additionalPackages);
 
     /* Add to or override NPM module configurations: */
-    /* @todo: Fetch API url from environment config */
+    /* @todo: Fetch API url from environment config - resolved */
     this.mergeObject(this.PLUGIN_CONFIGS['browser-sync'], {
       middleware: [
         proxy({
-          hostname: '176.120.25.19', // 176.120.25.19:28080  192.168.1.174:18080 192.168.1.225:8880 192.168.1.174:28080
-          port: 28080,
+          hostname: process.env.API_BACKEND_HOST,  // 176.120.25.19:28080  192.168.1.174:18080 192.168.1.225:8880 192.168.1.174:28080
+          port: process.env.API_BACKEND_PORT,
           pathname: '/v1',
           route: '/v1'
         }),

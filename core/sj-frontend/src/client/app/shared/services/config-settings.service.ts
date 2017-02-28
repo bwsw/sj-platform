@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 
-import { SettingModel } from '../models/index';
-import { BaseService, BService } from './index';
+import { SettingModel, BaseModel } from '../models/index';
+import { BaseService, BService, IResponse } from './index';
 
 @Injectable()
 @BService({
@@ -21,14 +21,14 @@ export class ConfigSettingsService extends BaseService<SettingModel> {
       .catch(this.handleError);
   }
 
-  public deleteSetting(setting: SettingModel): Observable<SettingModel> {
+  public deleteSetting(setting: SettingModel): Observable<IResponse<BaseModel>> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
     return this.http.delete(this.requestUrl + '/' + setting.domain + '/' + setting.name, options)
       .map(response => {
         const data = this.extractData(response);
-        return data.message;
+        return data;
       })
       .catch(this.handleError);
   }

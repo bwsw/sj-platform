@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild, AfterViewChecked } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ModalDirective } from 'ng2-bootstrap';
 
-import { InstanceModel, TaskModel, ModuleModel, ServiceModel, StreamModel } from '../shared/models/index';
+import { InstanceModel, TaskModel, ModuleModel, ServiceModel, StreamModel, NotificationModel } from '../shared/models/index';
 import { InstancesService, ModulesService, StreamsService, ServicesService } from '../shared/services/index';
 
 @Component({
@@ -12,7 +12,7 @@ import { InstancesService, ModulesService, StreamsService, ServicesService } fro
 })
 export class InstancesComponent implements OnInit, AfterViewChecked {
 
-  public alerts: Array<Object> = [];
+  public alerts: NotificationModel[] = [];
   public errorMessage: string;
   public isFormReady: boolean = false;
   public instancesList: InstanceModel[];
@@ -142,7 +142,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
           if(response) {
             this.message = response.message;
             this.tasks = response.tasks;
-          };
+          }
         }
       );
   }
@@ -200,23 +200,24 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
     let req = this.instancesService.saveInstance(this.newInstance);
     this.showSpinner = true;
     req.subscribe(
-      status => {
+      response => {
         modal.hide();
         this.newInstance = new InstanceModel();
         this.showSpinner = false;
-        this.showAlert({msg: status, type: 'success', closable: true, timeout:3000});
+        this.showAlert({message: response.message, type: 'success', closable: true, timeout:3000});
         this.getInstancesList();
       },
       error => {
         this.showSpinner = false;
         modal.hide();
-        this.showAlert({msg: error, type: 'danger', closable: true, timeout:0});
+        this.showAlert({message: error, type: 'danger', closable: true, timeout:0});
       });
   }
 
-  public showAlert(message: Object): void {
-    this.alerts = [];
-    this.alerts.push(message);
+  public showAlert(notification: NotificationModel): void {
+    if (!this.alerts.find(msg => msg.message === notification.message)) {
+      this.alerts.push(notification);
+    }
   }
 
   public showInstanceTasks(modal: ModalDirective, instance: InstanceModel) {
@@ -232,18 +233,14 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   public deleteInstance(modal: ModalDirective) {
     this.instancesService.deleteInstance(this.currentInstance)
       .subscribe(
-        status => {
-          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
+        response => {
+          this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
           this.getInstancesList();
         },
         error => {
-          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
+          this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 });
         });
     modal.hide();
-  }
-
-  public isSelected(instance: InstanceModel) {
-    return this.currentInstance && instance.name === this.currentInstance.name;
   }
 
   public clearInstance() {
@@ -254,24 +251,24 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   public startInstance(instance: InstanceModel) {
     this.instancesService.startInstance(instance)
       .subscribe(
-        status => {
-          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
+        response => {
+          this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
           this.getInstancesList();
         },
         error => {
-          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
+          this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 });
         });
   }
 
   public stopInstance(instance: InstanceModel) {
     this.instancesService.stopInstance(instance)
       .subscribe(
-        status => {
-          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
+        response => {
+          this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
           this.getInstancesList();
         },
         error => {
-          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
+          this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 });
         });
   }
 
@@ -296,7 +293,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   }
 
   public addRelatedStream() {
-    this.newInstance['related-streams'].push('');
+    this.newInstance.relatedStreams.push('');
   }
 
   public removeRelatedStream(i: number): void {
@@ -325,8 +322,8 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
         console.error('start-from field is not provided for module-type '+this.newInstance.module.moduleType);
         break;
     }
-    if (!this.startFromTimestampAcceptable && this.newInstance['start-from'] === 'timestamp') {
-      this.newInstance['start-from'] = '';
+    if (!this.startFromTimestampAcceptable && this.newInstance.startFrom === 'timestamp') {
+      this.newInstance.startFrom = '';
     }
   }
 
@@ -335,10 +332,6 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   }
 
   public ngAfterViewChecked() {
-    this.formChanged();
-  }
-
-  public formChanged() {
     if (this.currentForm === this.instanceForm) { return; }
     this.instanceForm = this.currentForm;
     if (this.instanceForm) {

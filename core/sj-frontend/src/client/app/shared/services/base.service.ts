@@ -209,7 +209,7 @@ export abstract class BaseService<M extends BaseModel> {
         `${this.requestUrl}/${params['path']}/${params['name']}/${params['version']}`, options)
       .map(response => {
         const data = this.extractData(response);
-        return data.message;
+        return data;
       })
       .catch(this.handleError);
   }

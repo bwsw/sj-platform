@@ -42,7 +42,7 @@
               </tr>
 
               <tr *ngFor="let provider of providerList | orderBy: 'name' | listFilter : {name : nameterm, type: typeterm} "
-                  [ngClass]="{ 'table-info': isSelected(provider) }"
+                  [ngClass]="{ 'table-info': provider === currentProvider }"
                   (click)="selectProvider(provider)">
                 <td>{{ provider.name }}</td>
                 <td>{{ provider.description }}</td>
@@ -58,7 +58,7 @@
                           title="Test connection"
                           (click)="testConnection(provider)">
                     <i class="fa fa-refresh"
-                       [ngClass]="{ 'fa-spin': isConnecting(provider) }"></i>
+                       [ngClass]="{ 'fa-spin': currentConnectors.indexOf(provider.name) >= 0 }"></i>
                   </button>
                 </td>
               </tr>

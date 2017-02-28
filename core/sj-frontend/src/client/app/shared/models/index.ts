@@ -8,4 +8,5 @@ export * from './provider.model';
 export * from './service.model';
 export * from './stream.model';
 export * from './task.model';
+export * from './notification.model';
 

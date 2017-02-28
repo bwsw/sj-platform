@@ -42,7 +42,7 @@
               </tr>
 
               <tr *ngFor="let service of serviceList | orderBy: 'name' | listFilter : {name: term, type: typeterm}"
-                  [ngClass]="{ 'table-info': isSelected(service) }"
+                  [ngClass]="{ 'table-info': service === currentService }"
                   (click)="selectService(service)">
                 <td>{{ service.name }}</td>
                 <td>{{ service.description }}</td>
