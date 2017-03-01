@@ -28,8 +28,9 @@ class StatefulModuleEnvironmentManager(stateStorage: StateStorage,
                                        outputs: Array[SjStream],
                                        producerPolicyByOutput: mutable.Map[String, (String, ModuleOutput)],
                                        moduleTimer: SjTimer,
-                                       performanceMetrics: PerformanceMetrics)
-  extends ModuleEnvironmentManager(options, producers, outputs, producerPolicyByOutput, moduleTimer, performanceMetrics) {
+                                       performanceMetrics: PerformanceMetrics,
+                                       classLoader: ClassLoader)
+  extends ModuleEnvironmentManager(options, producers, outputs, producerPolicyByOutput, moduleTimer, performanceMetrics, classLoader) {
   /**
    * Returns specific state of module
    *
