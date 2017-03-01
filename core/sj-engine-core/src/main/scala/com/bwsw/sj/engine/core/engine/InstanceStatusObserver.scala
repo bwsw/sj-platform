@@ -6,7 +6,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import org.slf4j.LoggerFactory
 
-class InstanceStatusObserver(instanceName : String) extends Callable[Unit] {
+class InstanceStatusObserver(instanceName: String) extends Callable[Unit] {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   override def call(): Unit = {

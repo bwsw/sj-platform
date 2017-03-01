@@ -16,31 +16,26 @@ object WindowedTaskRunner extends {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   def main(args: Array[String]) {
-    try {
-      val manager = new CommonTaskManager()
-      val instance = manager.instance.asInstanceOf[WindowedInstance]
+    val manager = new CommonTaskManager()
+    val instance = manager.instance.asInstanceOf[WindowedInstance]
 
-      logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for windowed module\n")
+    logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for windowed module\n")
 
-      val envelopeFetcher = EnvelopeFetcher(manager)
-      val performanceMetrics = new WindowedStreamingPerformanceMetrics(manager)
-      val moduleService = CommonModuleService(manager, envelopeFetcher.checkpointGroup, performanceMetrics)
-      val batchCollector = manager.getBatchCollector(instance, performanceMetrics)
+    val envelopeFetcher = EnvelopeFetcher(manager)
+    val performanceMetrics = new WindowedStreamingPerformanceMetrics(manager)
+    val moduleService = CommonModuleService(manager, envelopeFetcher.checkpointGroup, performanceMetrics)
+    val batchCollector = manager.getBatchCollector(instance, performanceMetrics)
 
-      val windowedTaskEngine = new WindowedTaskEngine(batchCollector, instance, moduleService, envelopeFetcher, performanceMetrics)
+    val windowedTaskEngine = new WindowedTaskEngine(batchCollector, instance, moduleService, envelopeFetcher, performanceMetrics)
 
-      val instanceStatusObserver = new InstanceStatusObserver(manager.instanceName)
+    val instanceStatusObserver = new InstanceStatusObserver(manager.instanceName)
 
-      logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
+    logger.info(s"Task: ${manager.taskName}. The preparation finished. Launch task\n")
 
-      executorService.submit(windowedTaskEngine)
-      executorService.submit(performanceMetrics)
-      executorService.submit(instanceStatusObserver)
+    executorService.submit(windowedTaskEngine)
+    executorService.submit(performanceMetrics)
+    executorService.submit(instanceStatusObserver)
 
-      executorService.take().get()
-    } catch {
-      case requiringError: IllegalArgumentException => handleException(requiringError)
-      case exception: Exception => handleException(exception)
-    }
+    waitForCompletion()
   }
 }
