@@ -8,6 +8,7 @@ import scala.collection.mutable.ArrayBuffer
 
 class JDBCSjStreamData() extends SjStreamData() {
   streamType = StreamLiterals.jdbcOutputType
+  var primary: String = null
 
   override def validate() = {
     val serviceDAO = ConnectionRepository.getServiceManager
@@ -44,6 +45,7 @@ class JDBCSjStreamData() extends SjStreamData() {
    override def asModelStream() = {
     val modelStream = new JDBCSjStream()
     super.fillModelStream(modelStream)
+     modelStream.primary = this.primary
 
     modelStream
   }
