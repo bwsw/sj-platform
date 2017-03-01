@@ -13,7 +13,8 @@ import scala.collection._
   */
 
 class PartitionedOutput(producer: Producer[Array[Byte]],
-                        performanceMetrics: PerformanceMetrics) extends ModuleOutput(performanceMetrics) {
+                        performanceMetrics: PerformanceMetrics,
+                        classLoader: ClassLoader) extends ModuleOutput(performanceMetrics, classLoader) {
 
   private val transactions = mutable.Map[Int, ProducerTransaction[Array[Byte]]]()
   private val streamName = producer.stream.name

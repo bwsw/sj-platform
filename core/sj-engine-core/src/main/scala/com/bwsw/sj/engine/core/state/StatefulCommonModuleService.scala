@@ -27,11 +27,11 @@ class StatefulCommonModuleService(manager: CommonTaskManager, checkpointGroup: C
     new StateStorage(stateService),
     instance.getOptionsAsMap(),
     outputProducers,
-    instance.outputs
-      .flatMap(x => streamService.get(x)),
+    instance.outputs.flatMap(x => streamService.get(x)),
     producerPolicyByOutput,
     moduleTimer,
-    performanceMetrics
+    performanceMetrics,
+    manager.moduleClassLoader
   )
 
   val executor = manager.getExecutor(environmentManager)

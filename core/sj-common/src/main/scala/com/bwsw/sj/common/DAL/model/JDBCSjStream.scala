@@ -23,6 +23,8 @@ class JDBCSjStream() extends SjStream {
     val streamData = new JDBCSjStreamData
     super.fillProtocolStream(streamData)
 
+    streamData.primary = this.primary
+
     streamData
   }
 

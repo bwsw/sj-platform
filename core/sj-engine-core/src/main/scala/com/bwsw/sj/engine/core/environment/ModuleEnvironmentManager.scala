@@ -23,7 +23,8 @@ class ModuleEnvironmentManager(options: Map[String, Any],
                                outputs: Array[SjStream],
                                producerPolicyByOutput: mutable.Map[String, (String, ModuleOutput)],
                                moduleTimer: SjTimer,
-                               performanceMetrics: PerformanceMetrics) extends EnvironmentManager(options, outputs) {
+                               performanceMetrics: PerformanceMetrics,
+                               classLoader: ClassLoader) extends EnvironmentManager(options, outputs) {
   /**
     * Allows getting partitioned output for specific output stream
     *
@@ -42,7 +43,7 @@ class ModuleEnvironmentManager(options: Map[String, Any],
           throw new Exception(s"For output stream: $streamName partitioned output is set")
         }
       } else {
-        producerPolicyByOutput(streamName) = ("partitioned", new PartitionedOutput(producers(streamName), performanceMetrics))
+        producerPolicyByOutput(streamName) = ("partitioned", new PartitionedOutput(producers(streamName), performanceMetrics, classLoader))
 
         producerPolicyByOutput(streamName)._2.asInstanceOf[PartitionedOutput]
       }
@@ -70,7 +71,7 @@ class ModuleEnvironmentManager(options: Map[String, Any],
           throw new Exception(s"For output stream: $streamName partitioned output is set")
         }
       } else {
-        producerPolicyByOutput(streamName) = ("round-robin", new RoundRobinOutput(producers(streamName), performanceMetrics))
+        producerPolicyByOutput(streamName) = ("round-robin", new RoundRobinOutput(producers(streamName), performanceMetrics, classLoader))
 
         producerPolicyByOutput(streamName)._2.asInstanceOf[RoundRobinOutput]
       }

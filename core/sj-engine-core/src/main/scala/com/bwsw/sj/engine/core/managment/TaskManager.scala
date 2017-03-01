@@ -56,12 +56,12 @@ abstract class TaskManager() {
       "specification.version" -> instance.moduleVersion)
   ).head
   private val executorClassName = fileMetadata.specification.executorClass
-  protected val moduleClassLoader = createClassLoader()
+  val moduleClassLoader = createClassLoader()
 
   protected val executorClass = moduleClassLoader.loadClass(executorClassName)
 
   val converter = new ArrayByteConverter
-  val envelopeDataSerializer: EnvelopeDataSerializer[AnyRef] = new DefaultEnvelopeDataSerializer
+  val envelopeDataSerializer: EnvelopeDataSerializer[AnyRef] = new DefaultEnvelopeDataSerializer(moduleClassLoader)
   val inputs: mutable.Map[SjStream, Array[Int]]
 
   private def getInstance() = {

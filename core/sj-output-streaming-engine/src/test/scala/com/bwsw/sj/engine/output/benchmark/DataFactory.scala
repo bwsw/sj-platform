@@ -47,7 +47,7 @@ object DataFactory {
   val jdbcProviderName: String = "output-jdbc-test-provider"
   val jdbcServiceName: String = "output-jdbc-test-service"
   val jdbcStreamName: String = "jdbc-output"
-  val jdbcDriver: String = "postgresql"
+  val jdbcDriver: String = "mysql"
 
   val zookeeperServiceName: String = "output-zookeeper-test-service"
   val testNamespace = "test_namespace"
@@ -217,7 +217,7 @@ object DataFactory {
     if (streamService.get(jdbcStreamName).isDefined) {
       val stream = streamService.get(jdbcStreamName).get.asInstanceOf[JDBCSjStream]
       val client = openJdbcConnection(stream)
-      val sql = s"DROP TABLE $jdbcStreamName"
+      val sql = s"DROP TABLE `$jdbcStreamName`"
       client._1.execute(sql)
       client._1.close()
     }
@@ -268,11 +268,11 @@ object DataFactory {
   }
 
   def create_table: String = {
-    s"CREATE TABLE $jdbcStreamName " +
-    "(id VARCHAR(255) not NULL, " +
+    s"CREATE TABLE `$jdbcStreamName` " +
+    "(test VARCHAR(255) not NULL, " +
     " value INTEGER, " +
     " txn VARCHAR(255), " +
-    " PRIMARY KEY ( id ))"
+    " PRIMARY KEY ( test ))"
   }
 
   def close() = {
@@ -297,8 +297,8 @@ object DataFactory {
     jdbcProvider.name = jdbcProviderName
     jdbcProvider.hosts = jdbcHosts
     jdbcProvider.providerType = ProviderLiterals.jdbcType
-    jdbcProvider.login = "root"
-    jdbcProvider.password = "root"
+    jdbcProvider.login = "admin"
+    jdbcProvider.password = "admin"
     providerService.save(jdbcProvider)
   }
 
@@ -372,7 +372,7 @@ object DataFactory {
     val jdbcService: JDBCService = serviceManager.get(jdbcServiceName).get.asInstanceOf[JDBCService]
     val jdbcStream: JDBCSjStream = new JDBCSjStream()
     jdbcStream.name = jdbcStreamName
-    jdbcStream.primary = "id"
+    jdbcStream.primary = "test"
     jdbcStream.description = "jdbc stream for benchmarks"
     jdbcStream.streamType = StreamLiterals.jdbcOutputType
     jdbcStream.service = jdbcService

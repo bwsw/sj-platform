@@ -16,13 +16,12 @@ import org.slf4j.LoggerFactory
 
 
 /**
- * Provided methods are responsible for a basic execution logic of task of output module
- *
- * @param manager Manager of environment of task of output module
- * @param performanceMetrics Set of metrics that characterize performance of a output streaming module
-
- * @author Kseniya Mikhaleva
- */
+  * Provided methods are responsible for a basic execution logic of task of output module
+  *
+  * @param manager            Manager of environment of task of output module
+  * @param performanceMetrics Set of metrics that characterize performance of a output streaming module
+  * @author Kseniya Mikhaleva
+  */
 abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
                                 performanceMetrics: OutputStreamingPerformanceMetrics) extends Callable[Unit] {
 
@@ -53,16 +52,15 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   }
 
   /**
-   * Check whether a group checkpoint of t-streams consumers/producers have to be done or not
-   *
-   * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside output module (not on the schedule) or not.
-   */
+    * Check whether a group checkpoint of t-streams consumers/producers have to be done or not
+    *
+    * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside output module (not on the schedule) or not.
+    */
   protected def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean
 
-
   /**
-   * It is in charge of running a basic execution logic of output task engine
-   */
+    * It is in charge of running a basic execution logic of output task engine
+    */
   override def call(): Unit = {
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Run output task engine in a separate thread of execution service.")
@@ -79,10 +77,9 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     }
   }
 
-
   /**
-   * Handler for sending data to storage.
-   */
+    * Handler for sending data to storage.
+    */
   private def processOutputEnvelope(envelope: Envelope) = {
     afterReceivingEnvelope()
     val inputEnvelope = envelope.asInstanceOf[TStreamEnvelope[AnyRef]]
@@ -92,27 +89,24 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     outputProcessor.process(outputEnvelopes, inputEnvelope, wasFirstCheckpoint)
   }
 
-
   /**
-   * Register received envelope in performance metrics.
-   *
-   * @param envelope: received data
-   */
+    * Register received envelope in performance metrics.
+    *
+    * @param envelope : received data
+    */
   private def registerInputEnvelope(envelope: TStreamEnvelope[AnyRef]) = {
     taskInputService.registerEnvelope(envelope)
     performanceMetrics.addEnvelopeToInputStream(envelope)
   }
 
-
   /**
-   * Doing smth after catch envelope.
-   */
+    * Doing smth after catch envelope.
+    */
   protected def afterReceivingEnvelope(): Unit
 
-
   /**
-   * Does group checkpoint of t-streams consumers/producers
-   */
+    * Does group checkpoint of t-streams consumers/producers
+    */
   protected def doCheckpoint() = {
     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint.")
     taskInputService.doCheckpoint()
@@ -132,12 +126,12 @@ object OutputTaskEngine {
   protected val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
-   * Creates OutputTaskEngine is in charge of a basic execution logic of task of output module
-   * @return Engine of output task
-   */
+    * Creates OutputTaskEngine is in charge of a basic execution logic of task of output module
+    *
+    * @return Engine of output task
+    */
   def apply(manager: OutputTaskManager,
             performanceMetrics: OutputStreamingPerformanceMetrics): OutputTaskEngine = {
-
     manager.outputInstance.checkpointMode match {
       case EngineLiterals.`timeIntervalMode` =>
         logger.error(s"Task: ${manager.taskName}. Output module can't have a '${EngineLiterals.timeIntervalMode}' checkpoint mode.")
