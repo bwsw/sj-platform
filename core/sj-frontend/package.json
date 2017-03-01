@@ -10,7 +10,7 @@
   "scripts": {
     "build.dev": "gulp build.dev --color --scss --env-config dev",
     "build.dev.watch": "gulp build.dev.watch --color",
-    "build.e2e": "gulp build.e2e --color",
+    "build.e2e": "gulp build.e2e --color --scss",
     "build.prod": "gulp build.prod --color --scss --env-config prod --build-type prod",
     "build.prod.exp": "gulp build.prod.exp --color --scss --env-config prod --build-type prod",
     "build.test": "gulp build.test --color --scss",
