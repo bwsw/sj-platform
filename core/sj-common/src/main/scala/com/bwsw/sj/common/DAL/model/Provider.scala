@@ -39,6 +39,11 @@ class Provider {
     this.providerType = providerType
   }
 
+  override def equals(obj: scala.Any): Boolean = obj match {
+    case that: Provider => that.name.equals(this.name) && that.providerType.equals(this.providerType)
+    case _ => false
+  }
+
   def getHosts() = {
     val inetSocketAddresses = this.hosts.map { host =>
       val parts = host.split(":")

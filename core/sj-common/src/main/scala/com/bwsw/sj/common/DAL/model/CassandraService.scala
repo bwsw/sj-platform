@@ -46,8 +46,21 @@ class CassandraService() extends Service {
   }
 
   private def isKeyspaceUsed = {
-    ConnectionRepository.getServiceManager.getByParameters(Map("type" -> this.serviceType))
+    val serviceManager = ConnectionRepository.getServiceManager
+
+    val isKeyspaceUsedByCassandra = serviceManager.getByParameters(Map("type" -> this.serviceType))
       .map(x => x.asInstanceOf[CassandraService])
       .exists(x => x.keyspace == this.keyspace && x.name != this.name)
+
+    val isKeyspaceUsedByTstreams = serviceManager.getByParameters(Map("type" -> ServiceLiterals.tstreamsType))
+      .map(x => x.asInstanceOf[TStreamService])
+      .exists(isKeyspaceUsedByTstreamService)
+
+    isKeyspaceUsedByCassandra || isKeyspaceUsedByTstreams
+  }
+
+  private def isKeyspaceUsedByTstreamService(tStreamService: TStreamService): Boolean = {
+    tStreamService.metadataProvider == this.provider && tStreamService.metadataNamespace == this.keyspace ||
+      tStreamService.dataProvider == this.provider && tStreamService.dataNamespace == this.keyspace
   }
 }
