@@ -24,10 +24,8 @@ export = () => {
     join(Config.APP_SRC, '**'),
     '!' + join(Config.APP_SRC, 'tsconfig.json'),
     '!' + join(Config.APP_SRC, '**', '*.ts'),
-    '!' + join(Config.APP_SRC, '**', '*.css'),
-    '!' + join(Config.APP_SRC, '**', '*.html'),
     '!' + join(Config.APP_SRC, '**', '*.scss'),
-    '!' + join(Config.APP_SRC, '**', '*.sass') 
+    '!' + join(Config.APP_SRC, '**', '*.sass')
   ].concat(Config.TEMP_FILES.map((p) => { return '!' + p; })))
     .pipe(onlyDirs(es))
     .pipe(gulp.dest(Config.APP_DEST));
