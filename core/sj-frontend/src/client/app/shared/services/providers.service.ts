@@ -3,14 +3,14 @@ import { Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 
 import { ProviderModel } from '../models/index';
-import { BaseService, BService, IRelatedObject } from './index';
+import { CrudService, BService, IRelatedObject } from './index';
 
 @Injectable()
 @BService({
   entity: 'providers',
   entityModel: ProviderModel
 })
-export class ProvidersService extends BaseService<ProviderModel> {
+export class ProvidersService extends CrudService<ProviderModel> {
 
   public testConnection(provider: ProviderModel): Observable<Boolean> {
     let headers = new Headers();

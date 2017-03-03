@@ -1,6 +1,6 @@
 import { Locator } from './index';
 import { BaseModel } from '../models/index';
-import { Http, Response, Headers, RequestOptions, ResponseContentType } from '@angular/http';
+import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 
 interface Type<T> {
@@ -121,24 +121,6 @@ export abstract class BaseService<M extends BaseModel> {
 
   public getTypes(): Observable<IResponse<M>> {
     return this.getList('_types');
-  }
-
-  public save(model: M): Observable<IResponse<M>> {
-    return this.post(model);
-  };
-
-  protected post(model: M): Observable<IResponse<M>> {
-    return this.http
-      .post(this.requestUrl, model, this.getRequestOptions())
-      .map(this.extractData)
-      .catch(this.handleError);
-  }
-
-  public remove(name: string): Observable<IResponse<M>> {
-    return this.http
-      .delete(`${this.requestUrl}/${name}`, this.getRequestOptions())
-      .map(this.extractData)
-      .catch(this.handleError);
   }
 
 }

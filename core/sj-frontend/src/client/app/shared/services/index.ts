@@ -1,4 +1,5 @@
 export * from './base.service';
+export * from './crud.service';
 export * from './crud-file.service';
 export * from './config-settings.service';
 export * from './custom.service';

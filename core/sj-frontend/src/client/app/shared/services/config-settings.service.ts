@@ -3,14 +3,14 @@ import { Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 
 import { SettingModel, BaseModel } from '../models/index';
-import { BaseService, BService, IResponse } from './index';
+import { CrudService, BService, IResponse } from './index';
 
 @Injectable()
 @BService({
   entity: 'config/settings',
   entityModel: SettingModel
 })
-export class ConfigSettingsService extends BaseService<SettingModel> {
+export class ConfigSettingsService extends CrudService<SettingModel> {
 
   public getConfigSettingsDomains(): Observable<string[]> {
     return this.http.get(this.requestUrl + '/domains')
