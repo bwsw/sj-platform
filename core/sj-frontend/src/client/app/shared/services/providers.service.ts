@@ -3,7 +3,7 @@ import { Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 
 import { ProviderModel } from '../models/index';
-import { BaseService, BService } from './index';
+import { BaseService, BService, IRelatedObject } from './index';
 
 @Injectable()
 @BService({
@@ -22,5 +22,12 @@ export class ProvidersService extends BaseService<ProviderModel> {
         return data.connection;
       })
       .catch(this.handleError);
+  }
+
+  public getRelatedList(name: string): Observable<IRelatedObject> {
+    return this.http
+        .get(`${this.requestUrl}/${name}` + '/related', this.getRequestOptions())
+        .map(this.extractData)
+        .catch(this.handleError);
   }
 }
