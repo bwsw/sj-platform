@@ -245,6 +245,7 @@ export class SeedConfig {
    * @type {string}
    */
   JS_DEST = `${this.APP_DEST}/js`;
+  JS_ASSETS_DEST = `${this.APP_DEST}/assets/js`;
 
   /**
    * The version of the application as defined in the `package.json`.
@@ -255,7 +256,7 @@ export class SeedConfig {
    * The name of the bundle file to includes all CSS files.
    * @type {string}
    */
-  CSS_PROD_BUNDLE = 'main.css';
+  CSS_PROD_BUNDLE = 'main.css'; // 'main.css';
 
   /**
    * The name of the bundle file to include all JavaScript shims.
