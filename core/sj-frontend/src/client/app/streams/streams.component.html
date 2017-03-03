@@ -115,7 +115,7 @@
             <div class="col-sm-10">
               <select [(ngModel)]="newStream.type" name="streamType"
                       required class="form-control">
-                <option *ngFor="let type of streamTypes">{{type}}</option>
+                <option *ngFor="let type of streamTypes" value="{{type}}">{{type}}</option>
               </select>
             </div>
           </fieldset>
@@ -154,7 +154,7 @@
             <div class="col-sm-10">
               <select [(ngModel)]="newStream.service" name="streamService"
                       required class="form-control">
-                <option *ngFor="let service of serviceList | serviceFilter : newStream.type">{{service.name}}
+                <option *ngFor="let service of serviceList | serviceFilter : newStream.type" value="{{service.name}}">{{service.name}}
                 </option>
               </select>
             </div>
@@ -236,7 +236,8 @@
                 <select [(ngModel)]="newStream.generator.service" name="streamGeneratorService"
                         class="form-control"
                         [required]="streamGeneratorType.value!=='local'">
-                  <option *ngFor="let service of serviceList | serviceFilter : 'zookeeper' ">{{service.name}}
+                  <option></option>
+                  <option *ngFor="let service of serviceList | serviceFilter : 'zookeeper' " value="{{service.name}}">{{service.name}}
                   </option>
                 </select>
               </div>

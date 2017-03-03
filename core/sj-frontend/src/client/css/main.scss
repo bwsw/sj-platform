@@ -102,14 +102,15 @@ li.tag {
 }
 
 /*mozila validated input style disable*/
-:invalid {
-  box-shadow: none;
-}
-
 :-moz-submit-invalid {
   box-shadow: none;
 }
 
 :-moz-ui-invalid {
   box-shadow:none;
+}
+input, select {
+  &:invalid {
+    box-shadow: 0.5px 0.5px 0.5px 0.5px rgba(255, 0, 0, 0.25);
+  }
 }

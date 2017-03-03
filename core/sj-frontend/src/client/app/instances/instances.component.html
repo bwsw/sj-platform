@@ -294,7 +294,7 @@
               <div class="col col-sm-10">
                 <select [(ngModel)]="newInstance.input" name="instanceInput" required
                         class="form-control">
-                  <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-stream'">{{stream.name}}</option>
+                  <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-stream'" value="{{stream.name}}">{{stream.name}}</option>
                 </select>
               </div>
             </fieldset>
@@ -305,7 +305,7 @@
               <div class="col col-sm-10">
                 <select [(ngModel)]="newInstance.output" name="instanceOutput" required
                         class="form-control">
-                  <option *ngFor="let stream of streamsList | streamFilter: 'jdbc-output,elasticsearch-output'">{{stream.name}}</option>
+                  <option *ngFor="let stream of streamsList | streamFilter: 'jdbc-output,elasticsearch-output'" value="{{stream.name}}">{{stream.name}}</option>
                 </select>
               </div>
             </fieldset>
@@ -321,7 +321,7 @@
                      class="input-group mb-1">
                   <select [(ngModel)]="newInstance.outputs[i]"
                           name="instanceOutputs{{i}}" required class="form-control">
-                    <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-stream'">{{stream.name}}</option>
+                    <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-stream'" value="{{stream.name}}">{{stream.name}}</option>
                   </select>
                   <span class="input-group-btn" *ngIf="i!==0">
                     <button type="button"
@@ -360,7 +360,7 @@
                   <div class="col-sm-6">
                     <select [value]="newInstance.mainStream" (input)="newInstance.mainStream = $event.target.value"
                             name="instanceMainStream" required class="form-control">
-                      <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-stream,stream.kafka'">{{stream.name}}</option>
+                      <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-stream,stream.kafka'" value="{{stream.name}}">{{stream.name}}</option>
                     </select>
                   </div>
                   <div class="col-sm-6">
@@ -387,7 +387,7 @@
                   <div class="col-sm-6">
                     <select [value]="newInstance.relatedStreams[i]" (input)="newInstance.relatedStreams[i] = $event.target.value"
                             name="instanceRelatedStream" class="form-control">
-                      <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-stream,stream.kafka'">{{stream.name}}</option>
+                      <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-stream,stream.kafka'" value="{{stream.name}}">{{stream.name}}</option>
                     </select>
                   </div>
                   <div class="col-sm-6">
