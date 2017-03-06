@@ -71,13 +71,14 @@ export class CustomComponent implements OnInit {
     let params = this.path === 'files'? {name: file.name, path: this.path} :
       {name: file.name, version: file.version, path: this.path};
     this.customService.download(params)
-      .subscribe(
-        data => {
+      .then(
+        (result: any) => {
           let a = document.createElement('a');
-          let innerUrl = window.URL.createObjectURL(data['blob']);
+          // console.log(result);
+          let innerUrl = window.URL.createObjectURL(result['blob']);
           a.style.display = 'none';
           a.href = innerUrl;
-          a.download = data['filename'];
+          a.download = result['filename'] ? result['filename'] : 'file';
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
@@ -87,8 +88,9 @@ export class CustomComponent implements OnInit {
         },
         error => {
           this.showSpinner = false;
-          this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 });
-        });
+          this.showAlert({ message: error.error, type: 'danger', closable: true, timeout: 0 });
+        }
+      );
   }
 
   public deleteFileConfirm(modal: ModalDirective, file: FileModel) {

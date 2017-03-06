@@ -5,6 +5,7 @@ export class FileModel extends BaseModel {
   description: string;
   'upload-date': string;
   version: string;
+  size: number;
 }
 
 export class CustomFileModel extends FileModel {

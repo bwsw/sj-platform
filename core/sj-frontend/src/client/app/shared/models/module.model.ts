@@ -5,6 +5,7 @@ export class ModuleModel extends BaseModel {
   moduleName: string;
   moduleVersion: string;
   name: string;
+  size: number;
   description: string;
   version: string;
   author: string;

@@ -74,25 +74,26 @@ export class ModulesComponent implements OnInit {
 
   public downloadModule(module: ModuleModel) {
     this.showSpinner = true;
-    this.modulesService.download({name: module.moduleName, type: module.moduleType, version: module.moduleVersion})
-      .subscribe(
-        data => {
-          let a = document.createElement('a');
-          let innerUrl = window.URL.createObjectURL(data['blob']);
-          a.style.display = 'none';
-          a.href = innerUrl;
-          a.download = data['filename'] ? data['filename'] : 'module.jar';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          // Clean the blob (with timeout (firefox fix))
-          setTimeout(()=>window.URL.revokeObjectURL(innerUrl), 1000);
-          this.showSpinner = false;
-        },
-        error => {
-          this.showSpinner = false;
-          this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 });
-        });
+    this.modulesService.download({name: module.moduleName, type: module.moduleType, version: module.moduleVersion}).then(
+      (result: any) => {
+        let a = document.createElement('a');
+        // console.log(result);
+        let innerUrl = window.URL.createObjectURL(result['blob']);
+        a.style.display = 'none';
+        a.href = innerUrl;
+        a.download = result['filename'] ? result['filename'] : 'module.jar';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        // Clean the blob (with timeout (firefox fix))
+        setTimeout(()=>window.URL.revokeObjectURL(innerUrl), 1000);
+        this.showSpinner = false;
+      },
+      error => {
+        this.showSpinner = false;
+        this.showAlert({ message: error.error, type: 'danger', closable: true, timeout: 0 });
+      }
+    );
   }
 
   public uploadFile(event: any) {
