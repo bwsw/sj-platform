@@ -1,4 +1,4 @@
-import { Response, Headers, RequestOptions, ResponseContentType } from '@angular/http';
+import { Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 import { BaseService, IRequestParams, IResponse } from './index';
 import { BaseModel } from '../models/index';
@@ -22,7 +22,7 @@ export abstract class CrudFileService<M extends BaseModel> extends BaseService<M
         }
       };
       xhr.onprogress = event => {
-        return (event.loaded)*100;
+        (<HTMLInputElement>document.getElementById('spinner-progress')).value = (event.loaded/10000).toString();
       };
       xhr.open('GET',  params['type'] ? `${this.requestUrl}/${params['type']}/${params['name']}/${params['version']}` :
         params['path'] === 'files' ? `${this.requestUrl}/${params['path']}/${params['name']}` :
