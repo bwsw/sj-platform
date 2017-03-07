@@ -22,7 +22,7 @@ export abstract class CrudFileService<M extends BaseModel> extends BaseService<M
         }
       };
       xhr.onprogress = event => {
-        (<HTMLInputElement>document.getElementById('spinner-progress')).value = (event.loaded/10000).toString();
+        (<HTMLInputElement>document.getElementById('spinner-progress')).value = (event.loaded/params['size']*100).toString();
       };
       xhr.open('GET',  params['type'] ? `${this.requestUrl}/${params['type']}/${params['name']}/${params['version']}` :
         params['path'] === 'files' ? `${this.requestUrl}/${params['path']}/${params['name']}` :
@@ -44,7 +44,9 @@ export abstract class CrudFileService<M extends BaseModel> extends BaseService<M
           }
         }
       };
-
+      xhr.upload.onprogress = event => {
+        (<HTMLInputElement>document.getElementById('spinner-progress')).value = (event.loaded/event.total*100).toString();
+      };
       xhr.open('POST', params['path'] ? `${this.requestUrl}/${params['path']}` : this.requestUrl, true);
       xhr.setRequestHeader('enctype', 'multipart/form-data');
       let formData = new FormData();

@@ -47,29 +47,33 @@ export class CustomComponent implements OnInit {
 
   public uploadFile(event: any) {
     this.isUploading = true;
+    this.showSpinner = true;
     let file = this.path === 'jars' ? event.target.files[0]: this.newFile;
     if (file) {
       this.customService.upload({path: this.path, file: file, description:  this.newDescription}).then((result: any) => {
           this.isUploading = false;
+          this.showSpinner = false;
           this.showAlert({ message: result, type: 'success', closable: true, timeout: 3000 });
           event.target.value = null;
           this.getCustomList();
         },
         (error: any) => {
           this.isUploading = false;
+          this.showSpinner = false;
           event.target.value = null;
           this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 });
         });
     } else {
       this.isUploading = false;
+      this.showSpinner = false;
       this.newFile = null;
     }
   }
 
   public downloadFile(file: FileModel) {
     this.showSpinner = true;
-    let params = this.path === 'files'? {name: file.name, path: this.path} :
-      {name: file.name, version: file.version, path: this.path};
+    let params = this.path === 'files'? {name: file.name, path: this.path, size: file.size} :
+      {name: file.name, version: file.version, path: this.path, size: file.size};
     this.customService.download(params)
       .then(
         (result: any) => {
@@ -112,6 +116,16 @@ export class CustomComponent implements OnInit {
   public showAlert(notification: NotificationModel): void {
     if (!this.alerts.find(msg => msg.message === notification.message)) {
       this.alerts.push(notification);
+    }
+  }
+
+  public sizeView(size: number): string {
+    if (size/(1024*1024) >= 1) {
+      return Math.round(size/(1024*1024)) + ' Mb';
+    } else if (size/(1024) >= 1) {
+      return Math.round(size/(1024)) + ' Kb';
+    } else {
+      return Math.round(size) + ' b';
     }
   }
 }

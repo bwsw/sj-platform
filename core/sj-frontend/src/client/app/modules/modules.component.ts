@@ -74,7 +74,7 @@ export class ModulesComponent implements OnInit {
 
   public downloadModule(module: ModuleModel) {
     this.showSpinner = true;
-    this.modulesService.download({name: module.moduleName, type: module.moduleType, version: module.moduleVersion}).then(
+    this.modulesService.download({name: module.moduleName, type: module.moduleType, version: module.moduleVersion, size: module.size}).then(
       (result: any) => {
         let a = document.createElement('a');
         // console.log(result);
@@ -124,6 +124,16 @@ export class ModulesComponent implements OnInit {
   public showAlert(notification: NotificationModel): void {
     if (!this.alerts.find(msg => msg.message === notification.message)) {
       this.alerts.push(notification);
+    }
+  }
+
+  public sizeView(size: number): string {
+    if (size/(1024*1024) >= 1) {
+      return Math.round(size/(1024*1024)) + ' Mb';
+    } else if (size/(1024) >= 1) {
+      return Math.round(size/(1024)) + ' Kb';
+    } else {
+      return Math.round(size) + ' b';
     }
   }
 }
