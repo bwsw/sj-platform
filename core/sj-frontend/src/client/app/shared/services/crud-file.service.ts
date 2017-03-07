@@ -5,7 +5,7 @@ import { BaseModel } from '../models/index';
 
 export abstract class CrudFileService<M extends BaseModel> extends BaseService<M>  {
 
-  public download(params?: IRequestParams){
+  public download(params?: IRequestParams) {
     return new Promise((resolve, reject) => {
       let xhr: XMLHttpRequest = new XMLHttpRequest();
       xhr.onreadystatechange = () => {
