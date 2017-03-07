@@ -25,4 +25,6 @@ class OutputStreamingExecutor[T <: AnyRef](manager: OutputEnvironmentManager) ex
   def onMessage(envelope: TStreamEnvelope[T]): List[Envelope] = {
     List()
   }
+
+  def getEntity[T]: Entity[T] = ???
 }
