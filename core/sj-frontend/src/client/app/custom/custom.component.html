@@ -59,7 +59,7 @@
               <td *ngIf="path === 'files'">{{file.description}}</td>
               <td *ngIf="path === 'jars'">{{file.version}}</td>
               <td *ngIf="path === 'files'">{{file['upload-date']}}</td>
-              <td>{{ sizeView(file.size)}}</td>
+              <td>{{ cusService.sizeView(file.size)}}</td>
               <td class="actions-column">
                 <button type="button"
                         class="btn btn-sm btn-secondary"

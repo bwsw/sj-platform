@@ -21,11 +21,15 @@ export class CustomComponent implements OnInit {
   public isUploading: boolean = false;
   public showSpinner: boolean;
 
+  public cusService: CustomService;
+
 
   constructor(
     private route: ActivatedRoute,
     private customService: CustomService
-  ) {}
+  ) {
+    this.cusService = customService;
+  }
 
   public ngOnInit() {
     this.route.params.subscribe(params => {
@@ -116,16 +120,6 @@ export class CustomComponent implements OnInit {
   public showAlert(notification: NotificationModel): void {
     if (!this.alerts.find(msg => msg.message === notification.message)) {
       this.alerts.push(notification);
-    }
-  }
-
-  public sizeView(size: number): string {
-    if (size/(1024*1024) >= 1) {
-      return Math.round(size/(1024*1024)) + ' Mb';
-    } else if (size/(1024) >= 1) {
-      return Math.round(size/(1024)) + ' Kb';
-    } else {
-      return Math.round(size) + ' b';
     }
   }
 }

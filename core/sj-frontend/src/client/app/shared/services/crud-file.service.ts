@@ -76,4 +76,14 @@ export abstract class CrudFileService<M extends BaseModel> extends BaseService<M
       })
       .catch(this.handleError);
   }
+
+  public sizeView(size: number): string {
+    if (size/(1024*1024) >= 1) {
+      return Math.round(size/(1024*1024)) + ' Mb';
+    } else if (size/(1024) >= 1) {
+      return Math.round(size/(1024)) + ' Kb';
+    } else {
+      return Math.round(size) + ' b';
+    }
+  }
 }

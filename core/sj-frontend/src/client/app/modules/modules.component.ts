@@ -19,8 +19,11 @@ export class ModulesComponent implements OnInit {
   public currentModuleSpecification: ModuleModel;
   public isUploading: boolean = false;
   public showSpinner: boolean;
+  public modService: ModulesService;
 
-  constructor(private modulesService: ModulesService) { }
+  constructor(private modulesService: ModulesService) {
+    this.modService = modulesService;
+  }
 
   public ngOnInit() {
     this.getModuleList();
@@ -124,16 +127,6 @@ export class ModulesComponent implements OnInit {
   public showAlert(notification: NotificationModel): void {
     if (!this.alerts.find(msg => msg.message === notification.message)) {
       this.alerts.push(notification);
-    }
-  }
-
-  public sizeView(size: number): string {
-    if (size/(1024*1024) >= 1) {
-      return Math.round(size/(1024*1024)) + ' Mb';
-    } else if (size/(1024) >= 1) {
-      return Math.round(size/(1024)) + ' Kb';
-    } else {
-      return Math.round(size) + ' b';
     }
   }
 }
