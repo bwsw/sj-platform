@@ -13,6 +13,7 @@ export class ConfigSettingsComponent implements OnInit {
   public settingsList: SettingModel[];
   public settingsDomains: string[];
   public alerts: NotificationModel[] = [];
+  public formAlerts: NotificationModel[] = [];
   public newSetting: SettingModel;
   public currentSetting: SettingModel;
   public showSpinner: boolean;
@@ -54,10 +55,9 @@ export class ConfigSettingsComponent implements OnInit {
           this.showAlert({ message: setting.message, type: 'success', closable: true, timeout: 3000 });
         },
         error => {
-          modal.hide();
           this.showSpinner = false;
           this.newSetting = new SettingModel();
-          this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 });
+          this.formAlerts.push({ message: error, type: 'danger', closable: true, timeout: 0 });
         });
   }
 

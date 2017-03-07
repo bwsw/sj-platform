@@ -12,6 +12,7 @@ import { ServicesService, StreamsService } from '../shared/services/index';
 export class StreamsComponent implements OnInit {
   public errorMessage: string;
   public alerts: NotificationModel[] = [];
+  public formAlerts: NotificationModel[] = [];
   public streamList: StreamModel[];
   public streamTypes: string[];
   public serviceList: ServiceModel[];
@@ -140,9 +141,8 @@ export class StreamsComponent implements OnInit {
           };
         },
         error => {
-          modal.hide();
           this.showSpinner = false;
-          this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 });
+          this.formAlerts.push({ message: error, type: 'danger', closable: true, timeout: 0 });
         });
   }
 

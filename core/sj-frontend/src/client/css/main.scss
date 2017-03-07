@@ -113,4 +113,7 @@ input, select {
   &:invalid {
     box-shadow: 0.5px 0.5px 0.5px 0.5px rgba(255, 0, 0, 0.25);
   }
+  &.ng-untouched {
+    box-shadow:none;
+  }
 }

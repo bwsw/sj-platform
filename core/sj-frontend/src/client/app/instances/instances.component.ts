@@ -13,6 +13,7 @@ import { InstancesService, ModulesService, StreamsService, ServicesService } fro
 export class InstancesComponent implements OnInit, AfterViewChecked {
 
   public alerts: NotificationModel[] = [];
+  public formAlerts: NotificationModel[] = [];
   public errorMessage: string;
   public isFormReady: boolean = false;
   public instancesList: InstanceModel[];
@@ -209,8 +210,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
       },
       error => {
         this.showSpinner = false;
-        modal.hide();
-        this.showAlert({message: error, type: 'danger', closable: true, timeout:0});
+        this.formAlerts.push({message: error, type: 'danger', closable: true, timeout:0});
       });
   }
 

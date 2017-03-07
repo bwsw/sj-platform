@@ -12,6 +12,7 @@ import { ServicesService, ProvidersService } from '../shared/services/index';
 export class ServicesComponent implements OnInit {
   public errorMessage: string;
   public alerts: NotificationModel[] = [];
+  public formAlerts: NotificationModel[] = [];
   public serviceList: ServiceModel[];
   public serviceTypes: string[];
   public providerList: ProviderModel[];
@@ -111,8 +112,7 @@ export class ServicesComponent implements OnInit {
           this.getServiceList();
         },
         error => {
-          this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 });
-          modal.hide();
+          this.formAlerts.push({ message: error, type: 'danger', closable: true, timeout: 0 });
           this.showSpinner = false;
         });
   }

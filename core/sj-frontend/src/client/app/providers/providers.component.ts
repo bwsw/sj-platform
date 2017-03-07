@@ -14,6 +14,7 @@ export class ProvidersComponent implements OnInit {
   @Input() public provider: ProviderModel;
   @Output() public close = new EventEmitter();
   public alerts: NotificationModel[] = [];
+  public formAlerts: NotificationModel[] = [];
   public providerList: ProviderModel[];
   public providerTypes: string[];
   public blockingServices: string[] = [];
@@ -116,9 +117,8 @@ export class ProvidersComponent implements OnInit {
 
         },
         error => {
-          modal.hide();
           this.showSpinner = false;
-          this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 });
+          this.formAlerts.push({ message: error, type: 'danger', closable: true, timeout: 0 });
         });
   }
 
