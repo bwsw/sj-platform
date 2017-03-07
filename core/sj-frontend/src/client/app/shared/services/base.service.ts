@@ -98,11 +98,14 @@ export abstract class BaseService<M extends BaseModel> {
     let errSatus = error.status ? `${error.status} - ${error.statusText}` : (error._body) ? error._body : 'Server error';
       try {
         let errMsg = (error._body) ? JSON.parse(error._body) : 'Server error';
-        let errMsgYo = errMsg.entity ? errMsg.entity.message ?  errMsg.entity.message:  errMsg.entity.errors : errMsg;
+        let errMsgYo = errMsg.entity ? errMsg.entity.message ?  this.makeUserFriendly(errMsg.entity.message):  this.makeUserFriendly(errMsg.entity.errors) : errMsg;
         return Observable.throw(errMsgYo);
       } catch (e) {
         return Observable.throw(errSatus);
       }
+  }
+  private makeUserFriendly(msg: string): string {
+    return msg.replace(/([a-z])([A-Z])/g, '$1 $2');
   }
 
   public get(name?: string): Observable<IResponse<M>> {
