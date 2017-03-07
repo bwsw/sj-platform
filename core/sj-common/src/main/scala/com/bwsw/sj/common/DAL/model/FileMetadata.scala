@@ -13,5 +13,6 @@ class FileMetadata() {
   val filename: String = null
   val filetype: String = null
   val uploadDate: Date = null
+  val length: Long = 0
   val specification: Specification = null
 }

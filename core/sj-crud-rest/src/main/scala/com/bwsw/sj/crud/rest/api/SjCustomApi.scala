@@ -166,7 +166,8 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                 if (files.nonEmpty) {
                   response.entity = Map("customJars" -> files.map(metadata =>
                     Map("name" -> metadata.specification.name,
-                      "version" -> metadata.specification.version))
+                      "version" -> metadata.specification.version,
+                      "size" -> metadata.length))
                   )
                 }
 
@@ -226,7 +227,8 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                   response.entity = Map("customFiles" -> files.map(metadata =>
                     Map("name" -> metadata.filename,
                       "description" -> metadata.specification.description,
-                      "upload-date" -> metadata.uploadDate.toString))
+                      "upload-date" -> metadata.uploadDate.toString,
+                      "size" -> metadata.length))
                   )
                 }
 

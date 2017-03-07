@@ -141,7 +141,8 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     if (files.nonEmpty) {
       response.entity = Map("modules" -> files.map(f => Map("moduleType" -> f.specification.moduleType,
         "moduleName" -> f.specification.name,
-        "moduleVersion" -> f.specification.version)))
+        "moduleVersion" -> f.specification.version,
+        "size" -> f.length)))
     }
 
     complete(restResponseToHttpResponse(response))
