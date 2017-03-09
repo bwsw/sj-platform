@@ -26,5 +26,19 @@ class OutputStreamingExecutor[T <: AnyRef](manager: OutputEnvironmentManager) ex
     List()
   }
 
-  def getEntity[T]: Entity[T] = ???
+  /***
+    * This method return current working entity.
+    * Must be implemented.
+    * For example:
+    * {{{
+    *   val entityBuilder = new EntityBuilder[String]()
+    *   val entity = entityBuilder
+    *     .field(new IntegerField("id"))
+    *     .field(new JavaStringField("name"))
+    *     .build()
+    *   return entity
+    * }}}
+    * @return
+    */
+  def getOutputModule[ET]: Entity[ET] = ???
 }
