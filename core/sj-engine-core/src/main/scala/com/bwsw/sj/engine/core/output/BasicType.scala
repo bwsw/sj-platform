@@ -6,15 +6,15 @@ package com.bwsw.sj.engine.core.output
 
 
 trait TransformableType[T] {
-  def transform(o: Object): T
+  def transform(o: AnyRef): T
 }
 
-abstract class NamedType[T](name: String, default: Object) extends TransformableType[T] {
+abstract class NamedType[T](name: String, default: AnyRef) extends TransformableType[T] {
   def getName = name
 
-  def getDefaultValue: Object = default
+  def getDefaultValue: AnyRef = default
 }
 
-abstract class BasicType[RT, DT](name: String, default: DT) extends NamedType[RT](name, default.asInstanceOf[Object])
+abstract class BasicType[RT, DT](name: String, default: DT) extends NamedType[RT](name, default.asInstanceOf[AnyRef])
 
 class IncompatibleTypeException(msg: String) extends Exception(msg)
