@@ -1,9 +1,12 @@
 package com.bwsw.sj.stubs.module.output
 
+import java.sql.PreparedStatement
+
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
+import com.bwsw.sj.engine.core.output.types.jdbc.{IntegerField, JavaStringField}
 import com.bwsw.sj.stubs.module.output.data.StubJdbcData
 
 /**
@@ -12,7 +15,7 @@ import com.bwsw.sj.stubs.module.output.data.StubJdbcData
  *
  * @author Diryavkin Dmitry
  */
-class StubOutputExecutorJdbc(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[Integer](manager) {
+class StubOutputExecutorJdbc(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[Integer, (PreparedStatement, Int) => Unit](manager) {
 
   val objectSerializer = new ObjectSerializer()
 
@@ -32,5 +35,13 @@ class StubOutputExecutorJdbc(manager: OutputEnvironmentManager) extends OutputSt
     }
 
     list
+  }
+
+  override def getOutputModule = {
+    val entity = entityBuilder
+      .field(new IntegerField("id"))
+      .field(new JavaStringField("name"))
+      .build()
+    entity
   }
 }

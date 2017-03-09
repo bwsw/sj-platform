@@ -5,6 +5,7 @@ import java.util.Calendar
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
+import com.bwsw.sj.engine.core.output.types.es._
 import com.bwsw.sj.stubs.module.output.data.StubEsData
 
 /**
@@ -13,7 +14,7 @@ import com.bwsw.sj.stubs.module.output.data.StubEsData
  *
  * @author Kseniya Tomskikh
  */
-class StubOutputExecutor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[Integer](manager) {
+class StubOutputExecutor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[Integer, String](manager) {
 
   /**
    * Transform t-stream transaction to output entities
@@ -34,5 +35,13 @@ class StubOutputExecutor(manager: OutputEnvironmentManager) extends OutputStream
     }
 
     list
+  }
+
+  override def getOutputModule = {
+    val entity = entityBuilder
+      .field(new IntegerField("id"))
+      .field(new JavaStringField("name"))
+      .build()
+    entity
   }
 }
