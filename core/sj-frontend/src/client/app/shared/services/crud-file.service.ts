@@ -78,7 +78,7 @@ export abstract class CrudFileService<M extends BaseModel> extends BaseService<M
   }
 
   public sizeView(size: number, decimals: number): string {
-    if(size == 0) return '0 Bytes';
+    if(size === 0) return '0 Bytes';
     let k = 1000;
     let dm = decimals + 1 || 3;
     let sizes = ['Bytes', 'KB', 'MB'];
