@@ -14,7 +14,7 @@ import com.bwsw.sj.stubs.module.output.data.StubEsData
  *
  * @author Kseniya Tomskikh
  */
-class StubOutputExecutor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[Integer, String](manager) {
+class StubOutputExecutor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[Integer](manager) {
 
   /**
    * Transform t-stream transaction to output entities
@@ -38,9 +38,10 @@ class StubOutputExecutor(manager: OutputEnvironmentManager) extends OutputStream
   }
 
   override def getOutputModule = {
+    val entityBuilder = new ElasticsearchEntityBuilder()
     val entity = entityBuilder
-      .field(new IntegerField("id"))
-      .field(new JavaStringField("name"))
+      .field(new IntegerField("id", 10))
+      .field(new JavaStringField("name", "someString"))
       .build()
     entity
   }

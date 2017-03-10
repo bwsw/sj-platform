@@ -11,7 +11,7 @@ import scala.util.parsing.json.{JSON, JSONObject}
   */
 class ElasticsearchCommandBuilderTests extends FlatSpec with Matchers {
   it should "work properly" in {
-    val eb = new ElasticsearchEntityBuilder[String]()
+    val eb = new ElasticsearchEntityBuilder()
 
     val e = eb
       .field(new LongField("id"))

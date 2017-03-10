@@ -1,6 +1,6 @@
 package com.bwsw.common.jdbc
 
-import java.sql.{Connection, DriverManager, SQLException}
+import java.sql.{Connection, DriverManager, PreparedStatement, SQLException}
 
 import org.slf4j.LoggerFactory
 
@@ -85,19 +85,23 @@ protected class JdbcClient(private var jdbcCCD: JdbcClientConnectionData) {
       .map { method => (method.getName, method.getReturnType, method.invoke(data)) }
   }
 
-  def removeByTransactionId(transactionId: String) = {
-    def checkExistence(): Boolean = {
-      val esql = s"SELECT * FROM `${jdbcCCD.table}` WHERE `${jdbcCCD.txnField}` = '$transactionId'"
-      val stmt = connection.createStatement()
-      val res = stmt.executeQuery(esql)
-      res.next
-    }
+//  def removeByTransactionId(transactionId: Long) = {
+//    def checkExistence(): Boolean = {
+//      val esql = s"SELECT * FROM `${jdbcCCD.table}` WHERE `${jdbcCCD.txnField}` = '$transactionId'"
+//      val stmt = connection.createStatement()
+//      val res = stmt.executeQuery(esql)
+//      res.next
+//    }
+//
+//    if (checkExistence()) {
+//      logger.debug(s"Remove a record from the table: '${jdbcCCD.table}' by id: '$transactionId'.")
+//      val sql = s"DELETE FROM `${jdbcCCD.table}` WHERE `${jdbcCCD.txnField}` = '$transactionId'"
+//      execute(sql)
+//    }
+//  }
 
-    if (checkExistence()) {
-      logger.debug(s"Remove a record from the table: '${jdbcCCD.table}' by id: '$transactionId'.")
-      val sql = s"DELETE FROM `${jdbcCCD.table}` WHERE `${jdbcCCD.txnField}` = '$transactionId'"
-      execute(sql)
-    }
+  def removeByTransactionId(prepparedStatement: PreparedStatement) = {
+
   }
 
   def execute(sql: String) = {

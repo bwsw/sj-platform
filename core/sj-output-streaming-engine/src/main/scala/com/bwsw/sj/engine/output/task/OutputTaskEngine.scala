@@ -37,6 +37,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private val outputProcessor = OutputProcessor[AnyRef](outputStream, performanceMetrics, manager)
   private var wasFirstCheckpoint = false
   protected val checkpointInterval = instance.checkpointInterval
+  protected val entity = executor.getOutputModule
 
   private def getOutputStream: SjStream = {
     val streamService = ConnectionRepository.getStreamService
@@ -86,7 +87,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     registerInputEnvelope(inputEnvelope)
     logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler.")
     val outputEnvelopes: List[Envelope] = executor.onMessage(inputEnvelope)
-    outputProcessor.process(outputEnvelopes, inputEnvelope, wasFirstCheckpoint)
+    outputProcessor.process(outputEnvelopes, inputEnvelope, wasFirstCheckpoint, entity)
   }
 
   /**

@@ -11,7 +11,7 @@ import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
   *
   * @author Kseniya Tomskikh
   */
-abstract class OutputStreamingExecutor[T <: AnyRef, ET](manager: OutputEnvironmentManager) extends StreamingExecutor {
+abstract class OutputStreamingExecutor[T <: AnyRef](manager: OutputEnvironmentManager) extends StreamingExecutor {
   /**
     * it is invoked for every received message from one of the inputs that are defined within the instance.
     * Inside the method you have an access to the message that has the TStreamEnvelope type.
@@ -26,13 +26,12 @@ abstract class OutputStreamingExecutor[T <: AnyRef, ET](manager: OutputEnvironme
     List()
   }
 
-  val entityBuilder = new EntityBuilder[ET]()
-
   /***
     * This method return current working entity.
     * Must be implemented.
     * For example:
     * {{{
+    *   val entityBuilder = new ConcreteEntityBuilder()
     *   val entity = entityBuilder
     *     .field(new IntegerField("id"))
     *     .field(new JavaStringField("name"))
@@ -42,5 +41,5 @@ abstract class OutputStreamingExecutor[T <: AnyRef, ET](manager: OutputEnvironme
 //    * @tparam ET: Used for specify type of returned Entity.
     * @return Current working Entity.
     */
-  def getOutputModule: Entity[ET]
+  def getOutputModule: AnyRef
 }

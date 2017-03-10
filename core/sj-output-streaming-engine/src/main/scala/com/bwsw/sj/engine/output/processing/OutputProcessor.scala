@@ -6,6 +6,7 @@ import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
+import com.bwsw.sj.engine.core.output.Entity
 
 /**
   * This class used in OutputTaskEngine for sending data to different storage.
@@ -22,22 +23,22 @@ abstract class OutputProcessor[T <: AnyRef](outputStream: SjStream,
     * @param inputEnvelope      : received envelope
     * @param wasFirstCheckpoint : boolean
     */
-  def process(envelopes: List[Envelope], inputEnvelope: TStreamEnvelope[T], wasFirstCheckpoint: Boolean) = {
+  def process(envelopes: List[Envelope], inputEnvelope: TStreamEnvelope[T], wasFirstCheckpoint: Boolean, entity: Entity[AnyRef]) = {
     logger.debug("Process a set of envelopes that should be sent to output of specific type.")
-    if (!wasFirstCheckpoint) remove(inputEnvelope)
-    envelopes.foreach(envelope => registerAndSendEnvelope(envelope, inputEnvelope))
+    if (!wasFirstCheckpoint) remove(inputEnvelope, entity)
+    envelopes.foreach(envelope => registerAndSendEnvelope(envelope, inputEnvelope, entity))
   }
 
-  def remove(envelope: TStreamEnvelope[T])
+  def remove(envelope: TStreamEnvelope[T], entity: Entity[AnyRef])
 
   def close()
 
   /**
     * Registration envelope in performance metrics, and then sending to storage
     */
-  private def registerAndSendEnvelope(outputEnvelope: Envelope, inputEnvelope: TStreamEnvelope[T]) = {
+  private def registerAndSendEnvelope(outputEnvelope: Envelope, inputEnvelope: TStreamEnvelope[T], entity: Entity[AnyRef]) = {
     registerOutputEnvelope(inputEnvelope.id.toString.replaceAll("-", ""), outputEnvelope)
-    send(outputEnvelope, inputEnvelope)
+    send(outputEnvelope, inputEnvelope, entity)
   }
 
   /**
@@ -58,7 +59,7 @@ abstract class OutputProcessor[T <: AnyRef](outputStream: SjStream,
     * @param envelope      : processed envelope
     * @param inputEnvelope : received envelope
     */
-  protected def send(envelope: Envelope, inputEnvelope: TStreamEnvelope[T])
+  protected def send(envelope: Envelope, inputEnvelope: TStreamEnvelope[T], entity: Entity[AnyRef])
 }
 
 object OutputProcessor {

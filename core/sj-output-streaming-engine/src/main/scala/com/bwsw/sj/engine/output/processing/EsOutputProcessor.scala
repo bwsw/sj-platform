@@ -8,6 +8,8 @@ import com.bwsw.sj.engine.core.entities.{Envelope, EsEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import org.elasticsearch.index.query.QueryBuilders
+import com.bwsw.sj.engine.core.output.Entity
+import com.bwsw.sj.engine.core.output.types.es.ElasticsearchCommandBuilder
 
 import scala.collection.mutable
 
@@ -16,9 +18,12 @@ class EsOutputProcessor[T <: AnyRef](outputStream: SjStream,
                         manager: OutputTaskManager)
   extends OutputProcessor[T](outputStream, performanceMetrics) {
 
+  // TODO Here use es command builder for create string
+
   private val jsonSerializer = new JsonSerializer()
   private val esService = outputStream.service.asInstanceOf[ESService]
   private val esClient = openConnection()
+  private var esCommandBuilder = null // new ElasticsearchCommandBuilder()
   prepareIndex()
   
   private def openConnection(): ElasticsearchClient = {
@@ -50,36 +55,43 @@ class EsOutputProcessor[T <: AnyRef](outputStream: SjStream,
 
   private def createMappingSource() = {
     logger.debug(s"Create a mapping source for an elasticsearch index.")
-    val fields = createGeneralFields()
-    addCustomFields(fields)
+//    val fields = createGeneralFields()
+//    addCustomFields(fields)
+
     val mapping = Map("properties" -> fields)
     val mappingSource = jsonSerializer.serialize(mapping)
 
     mappingSource
   }
 
-  private def createGeneralFields() = {
-    logger.debug(s"Create a set of general fields for an elasticsearch index.")
-    scala.collection.mutable.Map("txn" -> Map("type" -> "string"),
-      "stream" -> Map("type" -> "string"),
-      "partition" -> Map("type" -> "integer"))
-  }
+  // TODO use it if custom fields enabled.
+//  private def createGeneralFields() = {
+//    logger.debug(s"Create a set of general fields for an elasticsearch index.")
+//    scala.collection.mutable.Map("txn" -> Map("type" -> "string"),
+//      "stream" -> Map("type" -> "string"),
+//      "partition" -> Map("type" -> "integer"))
+//  }
 
-  private def addCustomFields(fields: mutable.Map[String, Map[String, String]]) = {
-    logger.debug(s"Get a set of custom fields and add them.")
-    val entity: EsEnvelope = _// TODO getOutputModule //
-    val dateFields = entity.getDateFields()
-    dateFields.foreach { field =>
-      fields.put(field, Map("type" -> "date", "format" -> "epoch_millis"))
-    }
-  }
+  // TODO think about custom fields.
+//  private def addCustomFields(fields: mutable.Map[String, Map[String, String]]) = {
+//    logger.debug(s"Get a set of custom fields and add them.")
+//    val entityBuilder: EntityBuilder =  manager.getOutputModuleEntity
+//    // getOutputModule //
+//    entityBuilder
+//    val dateFields = entity.getFields()
+//    dateFields.foreach { field =>
+//      fields.put(field, Map("type" -> "date", "format" -> "epoch_millis"))
+//    }
+//  }
 
-  def remove(envelope: TStreamEnvelope[T]) = {
-    val transaction = envelope.id.toString.replaceAll("-", "")
+  def remove(envelope: TStreamEnvelope[T], entity: Entity[String]) = {
+    this.esCommandBuilder = new ElasticsearchCommandBuilder("txn", entity)
+    val transaction = envelope.id //.toString.replaceAll("-", "")
     removeTransaction(transaction)
   }
 
-  private def removeTransaction(transaction: String) = {
+  private def removeTransaction(transaction: Long) = {
+    val removeData = esCommandBuilder.buildDelete(transaction)
     val index = esService.index
     val streamName = outputStream.name
     logger.debug(s"Delete a transaction: '$transaction' from elasticsearch stream.")
@@ -90,7 +102,7 @@ class EsOutputProcessor[T <: AnyRef](outputStream: SjStream,
     }
   }
 
-  def send(envelope: Envelope, inputEnvelope: TStreamEnvelope[T]) = {
+  def send(envelope: Envelope, inputEnvelope: TStreamEnvelope[T], entity: Entity[AnyRef]) = {
     val esEnvelope = envelope.asInstanceOf[EsEnvelope]
     esEnvelope.outputDateTime = s"${Calendar.getInstance().getTimeInMillis}"
     esEnvelope.transactionDateTime = s"${inputEnvelope.id}".dropRight(4)
@@ -99,6 +111,9 @@ class EsOutputProcessor[T <: AnyRef](outputStream: SjStream,
     esEnvelope.partition = inputEnvelope.partition
     esEnvelope.tags = inputEnvelope.tags
 
+    val transaction = inputEnvelope.id
+    esCommandBuilder.buildIndex(transaction)
+    val data =
     logger.debug(s"Task: ${manager.taskName}. Write an output envelope to elasticsearch stream.")
     esClient.write(jsonSerializer.serialize(esEnvelope), esService.index, outputStream.name)
   }

@@ -33,7 +33,6 @@ class StubOutputExecutorJdbc(manager: OutputEnvironmentManager) extends OutputSt
       dataJDBC.value = value
       dataJDBC
     }
-
     list
   }
 

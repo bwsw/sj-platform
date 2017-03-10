@@ -15,6 +15,6 @@ class EntityBuilder[T] (m: Map[String, NamedType[T]] = Map[String, NamedType[T]]
   def build(): Entity[T] = new Entity[T](m)
 
   def field(c: NamedType[T]): EntityBuilder[T] = {
-    new EntityBuilder(m + (c.getName -> c))
+    new EntityBuilder[T](m + (c.getName -> c))
   }
 }
