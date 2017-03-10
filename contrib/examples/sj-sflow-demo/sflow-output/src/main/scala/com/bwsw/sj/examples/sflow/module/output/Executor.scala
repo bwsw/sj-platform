@@ -9,7 +9,7 @@ import com.bwsw.sj.examples.sflow.module.output.data._
 /**
   * Created by diryavkin_dn on 13.01.17.
   */
-class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[Array[Byte]](manager) {
+class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[Array[Byte], String](manager) {
   val jsonSerializer = new JsonSerializer()
   val objectSerializer = new ObjectSerializer()
 
@@ -44,4 +44,8 @@ class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecuto
     list
   }
 
+  override def getOutputModule = {
+    entityBuilder
+      .build()
+  }
 }

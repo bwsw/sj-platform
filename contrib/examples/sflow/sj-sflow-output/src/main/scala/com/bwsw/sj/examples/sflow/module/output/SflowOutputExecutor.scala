@@ -14,7 +14,7 @@ import com.bwsw.sj.examples.sflow.module.output.data.TrafficMetrics
  *
  * @author Kseniya Mikhaleva
  */
-class SflowOutputExecutor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[String](manager) {
+class SflowOutputExecutor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[String, String](manager) {
   /**
    * Transform t-stream transaction to output entities
    *
@@ -35,6 +35,11 @@ class SflowOutputExecutor(manager: OutputEnvironmentManager) extends OutputStrea
       data
     }
     list
+  }
+
+  override def getOutputModule = {
+    entityBuilder
+      .build()
   }
 }
 

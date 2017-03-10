@@ -21,7 +21,7 @@ class OutputTaskManager() extends TaskManager {
     logger.debug(s"Task: $taskName. Start loading of executor class from module jar.")
     val executor = executorClass.getConstructor(classOf[OutputEnvironmentManager])
       .newInstance(environmentManager)
-      .asInstanceOf[OutputStreamingExecutor[AnyRef]]
+      .asInstanceOf[OutputStreamingExecutor[AnyRef, AnyRef]]
     logger.debug(s"Task: $taskName. Create an instance of executor class.")
 
     executor

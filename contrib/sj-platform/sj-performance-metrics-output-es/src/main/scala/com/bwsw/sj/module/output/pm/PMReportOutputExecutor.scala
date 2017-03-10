@@ -13,7 +13,7 @@ import com.bwsw.sj.module.output.pm.data.PerformanceMetrics
  *
  * @author Kseniya Mikhaleva
  */
-class PMReportOutputExecutor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[String](manager) {
+class PMReportOutputExecutor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[String, String](manager) {
   val jsonSerializer = new JsonSerializer()
   val objectSerializer = new ObjectSerializer()
 
@@ -30,6 +30,11 @@ class PMReportOutputExecutor(manager: OutputEnvironmentManager) extends OutputSt
       data
     }
     list
+  }
+
+  override def getOutputModule = {
+    entityBuilder
+      .build()
   }
 }
 
