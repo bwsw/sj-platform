@@ -38,7 +38,7 @@ class StubOutputExecutor(manager: OutputEnvironmentManager) extends OutputStream
   }
 
   override def getOutputModule = {
-    val entityBuilder = new ElasticsearchEntityBuilder()
+    val entityBuilder = new ElasticsearchEntityBuilder[String]()
     val entity = entityBuilder
       .field(new IntegerField("id", 10))
       .field(new JavaStringField("name", "someString"))

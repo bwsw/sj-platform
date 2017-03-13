@@ -5,6 +5,7 @@ import java.util.Date
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
+import com.bwsw.sj.engine.core.output.types.es.{ElasticsearchEntityBuilder, IntegerField, JavaStringField}
 import com.bwsw.sj.examples.sflow.module.output.data.TrafficMetrics
 
 /**
@@ -14,7 +15,7 @@ import com.bwsw.sj.examples.sflow.module.output.data.TrafficMetrics
  *
  * @author Kseniya Mikhaleva
  */
-class SflowOutputExecutor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[String, String](manager) {
+class SflowOutputExecutor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[String](manager) {
   /**
    * Transform t-stream transaction to output entities
    *
@@ -38,8 +39,12 @@ class SflowOutputExecutor(manager: OutputEnvironmentManager) extends OutputStrea
   }
 
   override def getOutputModule = {
-    entityBuilder
+    val entityBuilder = new ElasticsearchEntityBuilder[String]()
+    val entity = entityBuilder
+      .field(new IntegerField("id", 10))
+      .field(new JavaStringField("name", "someString"))
       .build()
+    entity
   }
 }
 

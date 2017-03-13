@@ -48,7 +48,7 @@
                 <td>{{ module.moduleName }}</td>
                 <td>{{ module.moduleType }}</td>
                 <td>{{ module.moduleVersion }}</td>
-                <td>{{ modService.sizeView(module.size,1) }}</td>
+                <td>{{ module.size | fileSize : { decimals: 1 } }}</td>
                 <td class="actions-column">
                   <button type="button"
                           class="btn btn-sm btn-secondary"

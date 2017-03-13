@@ -12,6 +12,7 @@ import { OrderByPipe } from './pipes/order-by.pipe';
 import { ServiceFilterPipe } from './pipes/service-filter.pipe';
 import { ProviderFilterPipe } from './pipes/provider-filter.pipe';
 import { StreamFilterPipe } from './pipes/stream-filter.pipe';
+import { FileSizePipe } from './pipes/file-size.pipe';
 import { InstancesService } from './services/instances.service';
 import { ModulesService } from './services/modules.service';
 import { ProvidersService } from './services/providers.service';
@@ -46,7 +47,8 @@ import { AlertsComponent } from './components/alerts/alerts.component';
     OrderByPipe,
     ServiceFilterPipe,
     ProviderFilterPipe,
-    StreamFilterPipe
+    StreamFilterPipe,
+    FileSizePipe
   ],
   providers: [
     InstancesService,
@@ -72,6 +74,7 @@ import { AlertsComponent } from './components/alerts/alerts.component';
     ServiceFilterPipe,
     ProviderFilterPipe,
     StreamFilterPipe,
+    FileSizePipe,
     // Modules
     CommonModule,
     FormsModule,
