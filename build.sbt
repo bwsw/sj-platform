@@ -74,7 +74,7 @@ lazy val sj = (project in file(".")).settings(publish := {})
     inputStreamingEngine, regularStreamingEngine, windowedStreamingEngine, outputStreamingEngine,
     framework, transactionGenerator,
     stubInput, stubRegular, stubWindowed, stubESOutput, stubJDBCOutput,
-    pmOutput,
+    pmOutput, csvInput,
     sflowProcess, sflowOutput,
     sumWindowed
   )
@@ -204,5 +204,10 @@ lazy val sflowDemoProcess = Project(id = "sflow-process",
 
 lazy val sflowDemoOutput = Project(id = "sflow-output",
   base = file("./contrib/examples/sj-sflow-demo/sflow-output"))
+  .settings(commonSettings: _*)
+  .dependsOn(engineCore)
+
+lazy val csvInput = Project(id = "sj-csv-input",
+  base = file("./contrib/sj-platform/sj-csv-input"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
