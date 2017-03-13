@@ -32,7 +32,7 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
   val fields: Seq[String] = manager.options("fields").asInstanceOf[Seq[String]]
   val fieldsNumber = fields.length
   val schema = {
-    var scheme = SchemaBuilder.record(outputStream).fields()
+    var scheme = SchemaBuilder.record("csv").fields()
     fields.foreach { field =>
       scheme = scheme.name(field).`type`().stringType().noDefault()
     }
@@ -43,9 +43,9 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
   val writerOutput = new ByteArrayOutputStream()
   val encoder = EncoderFactory.get().binaryEncoder(writerOutput, null)
 
-  val uniqueKey = manager.options("unique-key").asInstanceOf[Option[Seq[String]]] match {
-    case Some(uniqueFields) => uniqueFields
-    case None => fields
+  val uniqueKey = manager.options.get("unique-key") match {
+    case Some(uniqueFields: Seq[String]) => uniqueFields
+    case _ => fields
   }
 
   val csvParser = {
