@@ -4,6 +4,7 @@ import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
+import com.bwsw.sj.engine.core.output.types.es.{ElasticsearchEntityBuilder, IntegerField, JavaStringField}
 import com.bwsw.sj.module.output.pm.data.PerformanceMetrics
 
 /**
@@ -13,7 +14,7 @@ import com.bwsw.sj.module.output.pm.data.PerformanceMetrics
  *
  * @author Kseniya Mikhaleva
  */
-class PMReportOutputExecutor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[String, String](manager) {
+class PMReportOutputExecutor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[String](manager) {
   val jsonSerializer = new JsonSerializer()
   val objectSerializer = new ObjectSerializer()
 
@@ -33,8 +34,12 @@ class PMReportOutputExecutor(manager: OutputEnvironmentManager) extends OutputSt
   }
 
   override def getOutputModule = {
-    entityBuilder
+    val entityBuilder = new ElasticsearchEntityBuilder[String]()
+    val entity = entityBuilder
+      .field(new IntegerField("id", 10))
+      .field(new JavaStringField("name", "someString"))
       .build()
+    entity
   }
 }
 
