@@ -48,6 +48,7 @@ Set API_BACKEND_HOST and API_BACKEND_PORT as Rest API host and port
 ## Commit policy for contributors
 
 ### Guidelines
+
 1. Your commit must always compile
 2. Your commit must work by itself
 3. Use code style agreements
