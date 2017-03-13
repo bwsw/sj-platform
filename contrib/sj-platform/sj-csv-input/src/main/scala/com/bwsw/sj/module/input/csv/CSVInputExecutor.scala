@@ -44,7 +44,7 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
   val encoder = EncoderFactory.get().binaryEncoder(writerOutput, null)
 
   val uniqueKey = manager.options.get("unique-key") match {
-    case Some(uniqueFields: Seq[String]) => uniqueFields
+    case Some(uniqueFields: Seq[Any]) => uniqueFields.map(_.asInstanceOf[String])
     case _ => fields
   }
 
@@ -81,16 +81,16 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
       encoder.flush()
       val serialized = writerOutput.toByteArray
       writerOutput.reset()
-      val key = uniqueKey.foldLeft("") { (acc, field) => acc + record.get(field) }
+      val key = uniqueKey.foldLeft("") { (acc, field) => acc + "," + record.get(field) }
 
       Some(new InputEnvelope(
-        key,
+        s"$outputStream$key",
         Array((outputStream, partition)),
         true,
         serialized))
     } else {
       Some(new InputEnvelope(
-        line,
+        s"$fallbackStream,$line",
         Array((fallbackStream, partition)),
         true,
         data))
