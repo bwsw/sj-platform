@@ -4,12 +4,13 @@ import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
+import com.bwsw.sj.engine.core.output.types.es.{ElasticsearchEntityBuilder, IntegerField, JavaStringField}
 import com.bwsw.sj.examples.sflow.module.output.data._
 
 /**
   * Created by diryavkin_dn on 13.01.17.
   */
-class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[Array[Byte], String](manager) {
+class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[Array[Byte]](manager) {
   val jsonSerializer = new JsonSerializer()
   val objectSerializer = new ObjectSerializer()
 
@@ -45,7 +46,11 @@ class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecuto
   }
 
   override def getOutputModule = {
-    entityBuilder
+    val entityBuilder = new ElasticsearchEntityBuilder[String]()
+    val entity = entityBuilder
+      .field(new IntegerField("id", 10))
+      .field(new JavaStringField("name", "someString"))
       .build()
+    entity
   }
 }
