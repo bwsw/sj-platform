@@ -60,14 +60,14 @@ export class ProvidersComponent implements OnInit {
         status => {
           if (status === true) {
             this.showAlert({
-              message: 'ProviderModel "' + provider.name + '" available',
+              message: 'ProviderModel \'' + provider.name + '\' is available',
               type: 'success',
               closable: true,
               timeout: 3000
             });
           } else {
             this.showAlert({
-              message: 'ProviderModel "' + provider.name + '" not available',
+              message: 'ProviderModel \'' + provider.name + '\' is not available',
               type: 'danger',
               closable: true,
               timeout: 0
