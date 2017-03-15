@@ -1,7 +1,5 @@
 package com.bwsw.sj.module.input.csv
 
-import java.io.ByteArrayOutputStream
-
 import com.bwsw.sj.engine.core.entities.InputEnvelope
 import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.engine.core.input.{InputStreamingExecutor, Interval}
@@ -9,8 +7,6 @@ import com.opencsv.CSVParserBuilder
 import io.netty.buffer.ByteBuf
 import org.apache.avro.SchemaBuilder
 import org.apache.avro.generic.GenericData.Record
-import org.apache.avro.generic.{GenericDatumWriter, GenericRecord}
-import org.apache.avro.io.EncoderFactory
 
 import scala.io.Source
 
@@ -19,7 +15,7 @@ import scala.io.Source
   *
   * @author Pavel Tomskikh
   */
-class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingExecutor[Array[Byte]](manager) {
+class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingExecutor[Record](manager) {
 
   val outputStream: String = manager.options(CSVInputOptionNames.outputStream).asInstanceOf[String]
   val fallbackStream: String = manager.options(CSVInputOptionNames.fallbackStream).asInstanceOf[String]
@@ -39,9 +35,9 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
     scheme.endRecord()
   }
 
-  val writer = new GenericDatumWriter[GenericRecord](schema)
-  val writerOutput = new ByteArrayOutputStream()
-  val encoder = EncoderFactory.get().binaryEncoder(writerOutput, null)
+  val fallbackFieldName = "data"
+  val fallbackSchema = SchemaBuilder.record("fallback").fields()
+    .name(fallbackFieldName).`type`().stringType().noDefault().endRecord()
 
   val uniqueKey = manager.options.get(CSVInputOptionNames.uniqueKey) match {
     case Some(uniqueFields: Seq[Any]) => uniqueFields.map(_.asInstanceOf[String])
@@ -64,7 +60,7 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
     else None
   }
 
-  override def parse(buffer: ByteBuf, interval: Interval): Option[InputEnvelope[Array[Byte]]] = {
+  override def parse(buffer: ByteBuf, interval: Interval): Option[InputEnvelope[Record]] = {
     val length = interval.finalValue - interval.initialValue
     val dataBuffer = buffer.slice(interval.initialValue, length)
     val data = new Array[Byte](length)
@@ -74,26 +70,23 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
     val values = csvParser.parseLine(line)
 
     if (values.length == fieldsNumber) {
-
       val record = new Record(schema)
       fields.zip(values).foreach { case (field, value) => record.put(field, value) }
-      writer.write(record, encoder)
-      encoder.flush()
-      val serialized = writerOutput.toByteArray
-      writerOutput.reset()
       val key = uniqueKey.foldLeft("") { (acc, field) => acc + "," + record.get(field) }
 
       Some(new InputEnvelope(
         s"$outputStream$key",
         Array((outputStream, partition)),
         true,
-        serialized))
+        record))
     } else {
+      val record = new Record(schema)
+      record.put(fallbackFieldName, line)
       Some(new InputEnvelope(
         s"$fallbackStream,$line",
         Array((fallbackStream, partition)),
         true,
-        data))
+        record))
     }
   }
 }
