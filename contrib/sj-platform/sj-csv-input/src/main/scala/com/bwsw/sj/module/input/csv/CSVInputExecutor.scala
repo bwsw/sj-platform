@@ -21,15 +21,15 @@ import scala.io.Source
   */
 class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingExecutor[Array[Byte]](manager) {
 
-  val outputStream: String = manager.options("output-stream").asInstanceOf[String]
-  val fallbackStream: String = manager.options("fallback-stream").asInstanceOf[String]
-  val lineSeparator: Byte = manager.options("line-separator").asInstanceOf[String].head.toByte
-  val fieldSeparator: Option[Char] = manager.options.get("field-separator").asInstanceOf[Option[String]].map(_.head)
-  val quoteSymbol: Option[Char] = manager.options.get("quote-symbol").asInstanceOf[Option[String]].map(_.head)
-  val encoding: String = manager.options("encoding").asInstanceOf[String]
+  val outputStream: String = manager.options(CSVInputOptionNames.outputStream).asInstanceOf[String]
+  val fallbackStream: String = manager.options(CSVInputOptionNames.fallbackStream).asInstanceOf[String]
+  val lineSeparator: Byte = manager.options(CSVInputOptionNames.lineSeparator).asInstanceOf[String].head.toByte
+  val fieldSeparator: Option[Char] = manager.options.get(CSVInputOptionNames.fieldSeparator).asInstanceOf[Option[String]].map(_.head)
+  val quoteSymbol: Option[Char] = manager.options.get(CSVInputOptionNames.quoteSymbol).asInstanceOf[Option[String]].map(_.head)
+  val encoding: String = manager.options(CSVInputOptionNames.encoding).asInstanceOf[String]
   val partition = 0
 
-  val fields: Seq[String] = manager.options("fields").asInstanceOf[Seq[String]]
+  val fields: Seq[String] = manager.options(CSVInputOptionNames.fields).asInstanceOf[Seq[String]]
   val fieldsNumber = fields.length
   val schema = {
     var scheme = SchemaBuilder.record("csv").fields()
@@ -43,7 +43,7 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
   val writerOutput = new ByteArrayOutputStream()
   val encoder = EncoderFactory.get().binaryEncoder(writerOutput, null)
 
-  val uniqueKey = manager.options.get("unique-key") match {
+  val uniqueKey = manager.options.get(CSVInputOptionNames.uniqueKey) match {
     case Some(uniqueFields: Seq[Any]) => uniqueFields.map(_.asInstanceOf[String])
     case _ => fields
   }
