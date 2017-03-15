@@ -14,5 +14,6 @@ object CSVInputOptionNames {
   val fieldSeparator = "field-separator"
   val quoteSymbol = "quote-symbol"
   val uniqueKey = "unique-key"
+  val distribution = "distribution"
 
 }

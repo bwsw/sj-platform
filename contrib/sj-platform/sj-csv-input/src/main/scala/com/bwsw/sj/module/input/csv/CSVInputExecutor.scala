@@ -2,6 +2,9 @@ package com.bwsw.sj.module.input.csv
 
 import java.io.IOException
 
+import com.bwsw.sj.common.DAL.model.{KafkaSjStream, SjStream, TStreamSjStream}
+import com.bwsw.sj.common.utils.stream_distributor.{ByHash, SjStreamDistributor}
+import com.bwsw.sj.common.utils.{AvroUtils, StreamLiterals}
 import com.bwsw.sj.engine.core.entities.InputEnvelope
 import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.engine.core.input.{InputStreamingExecutor, Interval}
@@ -25,7 +28,6 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
   val fieldSeparator: Option[Char] = manager.options.get(CSVInputOptionNames.fieldSeparator).asInstanceOf[Option[String]].map(_.head)
   val quoteSymbol: Option[Char] = manager.options.get(CSVInputOptionNames.quoteSymbol).asInstanceOf[Option[String]].map(_.head)
   val encoding: String = manager.options(CSVInputOptionNames.encoding).asInstanceOf[String]
-  val partition = 0
 
   val fields: Seq[String] = manager.options(CSVInputOptionNames.fields).asInstanceOf[Seq[String]]
   val fieldsNumber = fields.length
@@ -45,6 +47,16 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
     case Some(uniqueFields: Seq[Any]) => uniqueFields.map(_.asInstanceOf[String])
     case _ => fields
   }
+
+  val partitionCount = getPartitionCount(manager.outputs.find(_.name == outputStream).get)
+  val distribution = manager.options.get(CSVInputOptionNames.distribution).map(_.asInstanceOf[Seq[String]])
+  val distributor = {
+    if (distribution.isEmpty) new SjStreamDistributor(partitionCount)
+    else new SjStreamDistributor(partitionCount, ByHash, distribution.get)
+  }
+
+  val fallbackPartitionCount = getPartitionCount(manager.outputs.find(_.name == fallbackStream).get)
+  val fallbackDistributor = new SjStreamDistributor(fallbackPartitionCount)
 
   val csvParser = {
     val csvParserBuilder = new CSVParserBuilder
@@ -75,11 +87,11 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
       if (values.length == fieldsNumber) {
         val record = new Record(schema)
         fields.zip(values).foreach { case (field, value) => record.put(field, value) }
-        val key = uniqueKey.foldLeft("") { (acc, field) => acc + "," + record.get(field) }
+        val key = AvroUtils.concatFields(uniqueKey, record)
 
         Some(new InputEnvelope(
           s"$outputStream$key",
-          Array((outputStream, partition)),
+          Array((outputStream, distributor.getNextPartition(record))),
           true,
           record))
       } else {
@@ -95,8 +107,17 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
     record.put(fallbackFieldName, data)
     Some(new InputEnvelope(
       s"$fallbackStream,$data",
-      Array((fallbackStream, partition)),
+      Array((fallbackStream, fallbackDistributor.getNextPartition())),
       false,
       record))
+  }
+
+  private def getPartitionCount(sjStream: SjStream) = {
+    sjStream match {
+      case s: TStreamSjStream => s.partitions
+      case s: KafkaSjStream => s.partitions
+      case _ => throw new IllegalArgumentException(s"stream type must be ${StreamLiterals.tstreamType} or " +
+        s"${StreamLiterals.kafkaStreamType}")
+    }
   }
 }
