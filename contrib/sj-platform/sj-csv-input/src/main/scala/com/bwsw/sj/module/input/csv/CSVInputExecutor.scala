@@ -7,6 +7,7 @@ import com.bwsw.sj.common.utils.stream_distributor.{ByHash, SjStreamDistributor}
 import com.bwsw.sj.common.utils.{AvroUtils, StreamLiterals}
 import com.bwsw.sj.engine.core.entities.InputEnvelope
 import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
+import com.bwsw.sj.engine.core.input.utils.SeparateTokenizer
 import com.bwsw.sj.engine.core.input.{InputStreamingExecutor, Interval}
 import com.opencsv.CSVParserBuilder
 import io.netty.buffer.ByteBuf
@@ -24,10 +25,11 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
 
   val outputStream: String = manager.options(CSVInputOptionNames.outputStream).asInstanceOf[String]
   val fallbackStream: String = manager.options(CSVInputOptionNames.fallbackStream).asInstanceOf[String]
-  val lineSeparator: Byte = manager.options(CSVInputOptionNames.lineSeparator).asInstanceOf[String].head.toByte
   val fieldSeparator: Option[Char] = manager.options.get(CSVInputOptionNames.fieldSeparator).asInstanceOf[Option[String]].map(_.head)
   val quoteSymbol: Option[Char] = manager.options.get(CSVInputOptionNames.quoteSymbol).asInstanceOf[Option[String]].map(_.head)
   val encoding: String = manager.options(CSVInputOptionNames.encoding).asInstanceOf[String]
+  val lineSeparator: String = manager.options(CSVInputOptionNames.lineSeparator).asInstanceOf[String]
+  val tokenizer = new SeparateTokenizer(lineSeparator)
 
   val fields: Seq[String] = manager.options(CSVInputOptionNames.fields).asInstanceOf[Seq[String]]
   val fieldsNumber = fields.length
@@ -65,14 +67,7 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
     csvParserBuilder.build()
   }
 
-  override def tokenize(buffer: ByteBuf): Option[Interval] = {
-    val startIndex = buffer.readerIndex()
-    val writerIndex = buffer.writerIndex()
-    val endIndex = buffer.indexOf(startIndex, writerIndex, lineSeparator)
-
-    if (endIndex != -1) Some(Interval(startIndex, endIndex))
-    else None
-  }
+  override def tokenize(buffer: ByteBuf): Option[Interval] = tokenizer.tokenize(buffer)
 
   override def parse(buffer: ByteBuf, interval: Interval): Option[InputEnvelope[Record]] = {
     val length = interval.finalValue - interval.initialValue
