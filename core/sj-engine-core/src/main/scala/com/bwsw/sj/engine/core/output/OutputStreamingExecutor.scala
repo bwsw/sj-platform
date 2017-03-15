@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.core.output
 
 import com.bwsw.sj.common.engine.StreamingExecutor
-import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.entities.{Envelope, OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 
 /**
@@ -22,7 +22,7 @@ abstract class OutputStreamingExecutor[T <: AnyRef](manager: OutputEnvironmentMa
     * or JDBC type.
     *
     */
-  def onMessage(envelope: TStreamEnvelope[T]): List[Envelope] = {
+  def onMessage(envelope: TStreamEnvelope[T]): List[OutputEnvelope] = {
     List()
   }
 
@@ -38,8 +38,7 @@ abstract class OutputStreamingExecutor[T <: AnyRef](manager: OutputEnvironmentMa
     *     .build()
     *   return entity
     * }}}
-//    * @tparam ET: Used for specify type of returned Entity.
     * @return Current working Entity.
     */
-  def getOutputModule: AnyRef
+  def getOutputEntity: Entity[_]
 }
