@@ -1,7 +1,7 @@
 package com.bwsw.sj.examples.sflow.module.output
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.core.output.types.es.{ElasticsearchEntityBuilder, IntegerField, JavaStringField}
@@ -20,8 +20,8 @@ class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecuto
     * @param envelope Input T-Stream envelope
     * @return List of output envelopes
     */
-  override def onMessage(envelope: TStreamEnvelope[Array[Byte]]): List[Envelope] = {
-    val list:List[Envelope] = List[Envelope]()
+  override def onMessage(envelope: TStreamEnvelope[Array[Byte]]): List[OutputEnvelope] = {
+    val list:List[OutputEnvelope] = List[OutputEnvelope]()
     envelope.data.foreach { row =>
       val value = objectSerializer.deserialize(row)
       envelope.stream match {
@@ -45,8 +45,8 @@ class Executor(manager: OutputEnvironmentManager) extends OutputStreamingExecuto
     list
   }
 
-  override def getOutputModule = {
-    val entityBuilder = new ElasticsearchEntityBuilder[String]()
+  override def getOutputEntity = {
+    val entityBuilder = new ElasticsearchEntityBuilder()
     val entity = entityBuilder
       .field(new IntegerField("id", 10))
       .field(new JavaStringField("name", "someString"))
