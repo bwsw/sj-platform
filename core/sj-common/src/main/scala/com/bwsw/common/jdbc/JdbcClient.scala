@@ -1,6 +1,6 @@
 package com.bwsw.common.jdbc
 
-import java.sql.{Connection, DriverManager, PreparedStatement, SQLException}
+import java.sql.{Connection, DriverManager, SQLException}
 
 import org.slf4j.LoggerFactory
 

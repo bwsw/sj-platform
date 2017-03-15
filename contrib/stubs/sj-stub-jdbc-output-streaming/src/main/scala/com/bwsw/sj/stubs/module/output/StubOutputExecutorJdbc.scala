@@ -3,7 +3,7 @@ package com.bwsw.sj.stubs.module.output
 import java.sql.PreparedStatement
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.core.output.types.jdbc.{IntegerField, JavaStringField, JdbcEntityBuilder}
@@ -25,7 +25,7 @@ class StubOutputExecutorJdbc(manager: OutputEnvironmentManager) extends OutputSt
    * @param envelope Input T-Stream envelope
    * @return List of output envelopes
    */
-  override def onMessage(envelope: TStreamEnvelope[Integer]): List[Envelope] = {
+  override def onMessage(envelope: TStreamEnvelope[Integer]): List[OutputEnvelope] = {
     println("Processed: " + envelope.data.size + " elements")
 
     val list = envelope.data.map { value =>
@@ -36,7 +36,7 @@ class StubOutputExecutorJdbc(manager: OutputEnvironmentManager) extends OutputSt
     list
   }
 
-  override def getOutputModule = {
+  override def getOutputEntity = {
     val entity = new JdbcEntityBuilder[(PreparedStatement, Int) => Unit]()
       .field(new IntegerField("id"))
       .field(new JavaStringField("name"))
