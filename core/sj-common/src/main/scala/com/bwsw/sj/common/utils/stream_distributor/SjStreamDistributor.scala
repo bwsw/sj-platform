@@ -24,7 +24,7 @@ class SjStreamDistributor(
 
   private var currentPartition = -1
 
-  def getNextPartition(record: Record = _): Int = policy match {
+  def getNextPartition(record: Record = null): Int = policy match {
     case RoundRobin =>
       currentPartition = (currentPartition + 1) % partitionCount
       currentPartition
