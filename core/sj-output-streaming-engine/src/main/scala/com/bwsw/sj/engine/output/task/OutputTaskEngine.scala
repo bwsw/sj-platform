@@ -33,11 +33,11 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private val outputStream = getOutputStream
   private val environmentManager = createModuleEnvironmentManager()
   private val executor = manager.getExecutor(environmentManager)
+  protected val entity = executor.getOutputEntity
   val taskInputService = new CallableTStreamTaskInput[AnyRef](manager, blockingQueue)
-  private val outputProcessor = OutputProcessor[AnyRef](outputStream, performanceMetrics, manager)
+  private val outputProcessor = OutputProcessor[AnyRef](outputStream, performanceMetrics, manager, entity)
   private var wasFirstCheckpoint = false
   protected val checkpointInterval = instance.checkpointInterval
-  protected val entity = executor.getOutputModule
 
   private def getOutputStream: SjStream = {
     val streamService = ConnectionRepository.getStreamService
@@ -86,8 +86,8 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     val inputEnvelope = envelope.asInstanceOf[TStreamEnvelope[AnyRef]]
     registerInputEnvelope(inputEnvelope)
     logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler.")
-    val outputEnvelopes: List[Envelope] = executor.onMessage(inputEnvelope)
-    outputProcessor.process(outputEnvelopes, inputEnvelope, wasFirstCheckpoint, entity)
+    val outputEnvelopes = executor.onMessage(inputEnvelope)
+    outputProcessor.process(outputEnvelopes, inputEnvelope, wasFirstCheckpoint)
   }
 
   /**
