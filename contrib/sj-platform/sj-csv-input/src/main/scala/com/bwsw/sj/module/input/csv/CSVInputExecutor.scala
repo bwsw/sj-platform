@@ -1,5 +1,7 @@
 package com.bwsw.sj.module.input.csv
 
+import java.io.IOException
+
 import com.bwsw.sj.engine.core.entities.InputEnvelope
 import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.engine.core.input.{InputStreamingExecutor, Interval}
@@ -67,26 +69,34 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
     dataBuffer.getBytes(0, data)
     buffer.readerIndex(interval.finalValue + 1)
     val line = Source.fromBytes(data, encoding).mkString
-    val values = csvParser.parseLine(line)
+    try {
+      val values = csvParser.parseLine(line)
 
-    if (values.length == fieldsNumber) {
-      val record = new Record(schema)
-      fields.zip(values).foreach { case (field, value) => record.put(field, value) }
-      val key = uniqueKey.foldLeft("") { (acc, field) => acc + "," + record.get(field) }
+      if (values.length == fieldsNumber) {
+        val record = new Record(schema)
+        fields.zip(values).foreach { case (field, value) => record.put(field, value) }
+        val key = uniqueKey.foldLeft("") { (acc, field) => acc + "," + record.get(field) }
 
-      Some(new InputEnvelope(
-        s"$outputStream$key",
-        Array((outputStream, partition)),
-        true,
-        record))
-    } else {
-      val record = new Record(schema)
-      record.put(fallbackFieldName, line)
-      Some(new InputEnvelope(
-        s"$fallbackStream,$line",
-        Array((fallbackStream, partition)),
-        false,
-        record))
+        Some(new InputEnvelope(
+          s"$outputStream$key",
+          Array((outputStream, partition)),
+          true,
+          record))
+      } else {
+        buildFallbackEnvelope(line)
+      }
+    } catch {
+      case _: IOException => buildFallbackEnvelope(line)
     }
+  }
+
+  private def buildFallbackEnvelope(data: String): Option[InputEnvelope[Record]] = {
+    val record = new Record(fallbackSchema)
+    record.put(fallbackFieldName, data)
+    Some(new InputEnvelope(
+      s"$fallbackStream,$data",
+      Array((fallbackStream, partition)),
+      false,
+      record))
   }
 }
