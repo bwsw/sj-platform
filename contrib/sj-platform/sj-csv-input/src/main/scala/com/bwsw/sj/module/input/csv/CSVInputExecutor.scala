@@ -85,7 +85,7 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
       Some(new InputEnvelope(
         s"$fallbackStream,$line",
         Array((fallbackStream, partition)),
-        true,
+        false,
         record))
     }
   }
