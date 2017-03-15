@@ -26,17 +26,4 @@ class OutputTaskManager() extends TaskManager {
 
     executor
   }
-
-  def getOutputModuleEntity: EntityBuilder = {
-//    logger.info(s"Task: $taskName. Getting entity object from jar of file: " +
-//      instance.moduleType + "-" + instance.moduleName + "-" + instance.moduleVersion + ".")
-//    val entityClassName = fileMetadata.specification.entityClass
-//    val outputEntity = moduleClassLoader
-//      .loadClass(entityClassName)
-//      .newInstance()
-//      .asInstanceOf[EsEnvelope]
-//
-//    outputEntity
-
-  }
 }
