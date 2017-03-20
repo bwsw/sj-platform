@@ -1,6 +1,6 @@
 {
   "name" : "sflow-process",
-  "description" : "Windowed module for sflow example",
+  "description" : "Batch module for sflow example",
   "window" : "1",
   "sliding-interval" : "1",
   "main-stream" : "sflow",

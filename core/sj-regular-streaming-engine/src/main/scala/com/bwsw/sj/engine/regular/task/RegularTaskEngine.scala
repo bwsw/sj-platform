@@ -68,8 +68,8 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
             case tstreamEnvelope: TStreamEnvelope[AnyRef@unchecked] =>
               executor.onMessage(tstreamEnvelope)
             case wrongEnvelope =>
-              logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/windowed streaming engine")
-              throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/windowed streaming engine")
+              logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/batch streaming engine")
+              throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/batch streaming engine")
           }
         }
         case None => {

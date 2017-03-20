@@ -4,13 +4,13 @@ import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.utils.{GeoIp, SflowRecord}
 import com.bwsw.sj.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
-import com.bwsw.sj.engine.core.windowed.{WindowRepository, WindowedStreamingExecutor}
+import com.bwsw.sj.engine.core.batch.{WindowRepository, BatchStreamingExecutor}
 import com.bwsw.sj.examples.sflow.module.process.mapreduce.Generator
 
 import scala.collection.mutable.ArrayBuffer
 
 
-class Executor(manager: ModuleEnvironmentManager) extends WindowedStreamingExecutor[Array[Byte]](manager) {
+class Executor(manager: ModuleEnvironmentManager) extends BatchStreamingExecutor[Array[Byte]](manager) {
   private val objectSerializer = new ObjectSerializer()
   private val storage = ArrayBuffer[SflowRecord]()
 

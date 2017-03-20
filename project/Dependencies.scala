@@ -76,7 +76,7 @@ object Dependencies {
       .exclude("io.netty", "netty")
   ))
 
-  lazy val sjWindowedEngineDependencies = Def.setting(Seq(
+  lazy val sjBatchEngineDependencies = Def.setting(Seq(
     "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
     ("org.apache.kafka" % "kafka_2.12" % "0.10.1.1" % "provided")
       .exclude("org.slf4j", "slf4j-log4j12")

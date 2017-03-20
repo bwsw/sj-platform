@@ -22,8 +22,8 @@
       "stream.t-stream"
     ]
   },
-  "module-type": "windowed-streaming",
-  "engine-name": "com.bwsw.windowed.streaming.engine",
+  "module-type": "batch-streaming",
+  "engine-name": "com.bwsw.batch.streaming.engine",
   "engine-version": "1.0",
   "options": {
   },
