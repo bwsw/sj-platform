@@ -29,7 +29,7 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
   val quoteSymbol: Option[Char] = manager.options.get(CSVInputOptionNames.quoteSymbol).asInstanceOf[Option[String]].map(_.head)
   val encoding: String = manager.options(CSVInputOptionNames.encoding).asInstanceOf[String]
   val lineSeparator: String = manager.options(CSVInputOptionNames.lineSeparator).asInstanceOf[String]
-  val tokenizer = new SeparateTokenizer(lineSeparator)
+  val tokenizer = new SeparateTokenizer(lineSeparator, encoding)
 
   val fields: Seq[String] = manager.options(CSVInputOptionNames.fields).asInstanceOf[Seq[String]]
   val fieldsNumber = fields.length
