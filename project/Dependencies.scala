@@ -40,7 +40,9 @@ object Dependencies {
     "mysql" % "mysql-connector-java" % "5.1.6",
     // "com.oracle" % "ojdbc6" % "11.1.0.7.0",
     "com.maxmind.geoip" % "geoip-api" % "1.3.1",
-    "io.netty" % "netty-all" % "4.1.7.Final"
+    "io.netty" % "netty-all" % "4.1.7.Final",
+    ("org.apache.avro" % "avro" % "1.8.1")
+      .exclude("org.slf4j", "slf4j-api")
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(

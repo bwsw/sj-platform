@@ -6,7 +6,8 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.ZKService
 import com.bwsw.sj.common.rest.entities.module.InstanceMetadata
 import com.bwsw.sj.common.utils.EngineLiterals
-import org.mongodb.morphia.annotations.{Embedded, Entity, Id, Property}
+import org.apache.avro.Schema
+import org.mongodb.morphia.annotations.{Embedded, Entity, Id, Property, NotSaved}
 
 import scala.collection.JavaConverters._
 /**
@@ -37,6 +38,9 @@ class Instance {
   @Property("performance-reporting-interval") var performanceReportingInterval: Long = 60000
   var engine: String = null
   @Property("framework-id") val frameworkId: String = System.currentTimeMillis().toString
+  @Property("input-avro-schema") var inputAvroSchema: String = null
+
+  @NotSaved private lazy val schemaParser = new Schema.Parser()
 
   def asProtocolInstance(): InstanceMetadata = ???
 
@@ -58,11 +62,17 @@ class Instance {
     protocolInstance.coordinationService = this.coordinationService.name
     protocolInstance.stages = this.stages.asScala
     protocolInstance.restAddress = this.restAddress
+    protocolInstance.inputAvroSchema = getInputAvroSchema
   }
 
   def getOptionsAsMap() = {
     val serializer = new JsonSerializer()
     serializer.deserialize[Map[String, Any]](this.options)
+  }
+
+  def getInputAvroSchema: Schema = {
+    if (inputAvroSchema != null) schemaParser.parse(inputAvroSchema)
+    else null
   }
 
   def getInputsWithoutStreamMode(): Array[String] = Array()

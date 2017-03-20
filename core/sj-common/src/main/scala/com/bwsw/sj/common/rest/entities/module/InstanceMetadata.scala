@@ -11,6 +11,7 @@ import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.SjStreamUtils._
 import com.bwsw.sj.common.utils.{EngineLiterals, GeneratorLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonIgnore
+import org.apache.avro.Schema
 
 import scala.collection.JavaConverters._
 
@@ -33,6 +34,7 @@ class InstanceMetadata {
   var performanceReportingInterval: Long = 60000
   var engine: String = null
   var restAddress: String = null
+  var inputAvroSchema: Schema = null
 
   @JsonIgnore
   def asModelInstance(): Instance = ???
@@ -59,6 +61,7 @@ class InstanceMetadata {
     modelInstance.environmentVariables = this.environmentVariables.asJava
     modelInstance.stages = this.stages.asJava
     modelInstance.restAddress = this.restAddress
+    modelInstance.inputAvroSchema = this.inputAvroSchema.toString
 
     val service = serviceDAO.get(this.coordinationService)
     if (service.isDefined && service.get.isInstanceOf[ZKService]) {

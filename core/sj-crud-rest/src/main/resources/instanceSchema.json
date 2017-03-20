@@ -127,6 +127,10 @@
     },
     "output": {
       "type": "string"
+    },
+    "inputAvroSchema": {
+      "description": "Avro schema for input entities",
+      "type": "object"
     }
   }
 }
