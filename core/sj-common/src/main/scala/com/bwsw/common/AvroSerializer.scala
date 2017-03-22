@@ -2,7 +2,6 @@ package com.bwsw.common
 
 import java.io.ByteArrayOutputStream
 
-import com.bwsw.common.traits.Serializer
 import org.apache.avro.Schema
 import org.apache.avro.generic.{GenericDatumReader, GenericDatumWriter, GenericRecord}
 import org.apache.avro.io.{DecoderFactory, EncoderFactory}
@@ -14,7 +13,7 @@ import org.slf4j.LoggerFactory
   * @param schema avro schema for deserialization
   * @author Pavel Tomskikh
   */
-class AvroSerializer(schema: Schema = null) extends Serializer {
+class AvroSerializer(schema: Schema = null) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val writerOutput = new ByteArrayOutputStream()
