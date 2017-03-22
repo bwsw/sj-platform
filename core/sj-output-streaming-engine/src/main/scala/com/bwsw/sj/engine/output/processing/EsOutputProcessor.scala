@@ -67,7 +67,7 @@ class EsOutputProcessor[T <: AnyRef](outputStream: SjStream,
 
   private def addCustomFields(fields: mutable.Map[String, Map[String, String]]) = {
     logger.debug(s"Get a set of custom fields and add them.")
-    val entity = manager.getOutputModuleEntity()
+    val entity: EsEnvelope = _// TODO getOutputModule //
     val dateFields = entity.getDateFields()
     dateFields.foreach { field =>
       fields.put(field, Map("type" -> "date", "format" -> "epoch_millis"))

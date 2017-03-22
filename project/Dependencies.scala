@@ -49,7 +49,10 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty")
+      .exclude("io.netty", "netty"),
+    "org.apache.commons" % "commons-lang3" % "3.5",
+    "com.mockrunner" % "mockrunner-jdbc" % "1.1.2",
+    "org.scalatest" % "scalatest_2.12" % "3.0.1"
   ))
 
   lazy val sjRestDependencies = Def.setting(Seq(
