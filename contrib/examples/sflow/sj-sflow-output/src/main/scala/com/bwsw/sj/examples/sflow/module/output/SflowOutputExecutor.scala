@@ -2,10 +2,10 @@ package com.bwsw.sj.examples.sflow.module.output
 
 import java.util.Date
 
-import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
-import com.bwsw.sj.engine.core.output.types.es.{ElasticsearchEntityBuilder, IntegerField, JavaStringField}
+import com.bwsw.sj.engine.core.output.types.es._
 import com.bwsw.sj.examples.sflow.module.output.data.TrafficMetrics
 
 /**
@@ -22,7 +22,7 @@ class SflowOutputExecutor(manager: OutputEnvironmentManager) extends OutputStrea
    * @param envelope Input T-Stream envelope
    * @return List of output envelopes
    */
-  override def onMessage(envelope: TStreamEnvelope[String]): List[Envelope] = {
+  override def onMessage(envelope: TStreamEnvelope[String]): List[OutputEnvelope] = {
     val list = envelope.data.map { s =>
       val data = new TrafficMetrics()
       val rawData = s.split(",")
@@ -38,11 +38,13 @@ class SflowOutputExecutor(manager: OutputEnvironmentManager) extends OutputStrea
     list
   }
 
-  override def getOutputModule = {
-    val entityBuilder = new ElasticsearchEntityBuilder[String]()
+  override def getOutputEntity = {
+    val entityBuilder = new ElasticsearchEntityBuilder()
     val entity = entityBuilder
-      .field(new IntegerField("id", 10))
-      .field(new JavaStringField("name", "someString"))
+      .field(new DateField("ts"))
+      .field(new IntegerField("src-as"))
+      .field(new JavaStringField("dst-as"))
+      .field(new LongField("sum-of-traffic"))
       .build()
     entity
   }

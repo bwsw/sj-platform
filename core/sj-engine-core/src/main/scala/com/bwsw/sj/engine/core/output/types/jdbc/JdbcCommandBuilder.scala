@@ -10,7 +10,7 @@ import com.bwsw.sj.engine.core.output.Entity
 class JdbcCommandBuilder(transactionFieldName: String, entity: Entity[(PreparedStatement, Int) => Unit]) {
   def buildInsert(transaction: Long, m: Map[String, AnyRef], preparedStatement: PreparedStatement): PreparedStatement = {
     var t = 0
-    val mv = entity.getFields().map(f => if (m.contains(f)) {
+    val mv = entity.getFields.map(f => if (m.contains(f)) {
       t+=1
       t -> entity.getField(f).transform(m(f))
     }
@@ -24,10 +24,17 @@ class JdbcCommandBuilder(transactionFieldName: String, entity: Entity[(PreparedS
     preparedStatement.setLong(t, transaction)
     preparedStatement
   }
+
   def buildDelete(transaction: Long, preparedStatement: PreparedStatement): PreparedStatement = {
     preparedStatement.setLong(1, transaction)
     preparedStatement
   }
 
-  def getTransactionFieldName = this.transactionFieldName
+  def exists(transaction: Long, preparedStatement: PreparedStatement): Boolean = {
+    preparedStatement.setLong(1, transaction)
+    val res = preparedStatement.executeQuery()
+    res.next()
+  }
+
+  def getTransactionFieldName: String = transactionFieldName
 }

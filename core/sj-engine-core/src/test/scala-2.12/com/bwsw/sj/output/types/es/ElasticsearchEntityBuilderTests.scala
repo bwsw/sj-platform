@@ -10,7 +10,7 @@ import org.scalatest.{FlatSpec, Matchers}
   */
 class ElasticsearchEntityBuilderTests extends FlatSpec with Matchers {
   it should "work properly" in {
-    val eb = new ElasticsearchEntityBuilder[String]()
+    val eb = new ElasticsearchEntityBuilder()
 
     val id = new LongField("id")
     val name = new JavaStringField("name")

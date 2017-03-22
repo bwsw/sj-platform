@@ -4,7 +4,7 @@ import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.engine.core.entities.EsEnvelope
 import com.bwsw.sj.engine.core.environment.{EnvironmentManager, OutputEnvironmentManager}
 import com.bwsw.sj.engine.core.managment.TaskManager
-import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
+import com.bwsw.sj.engine.core.output.{EntityBuilder, OutputStreamingExecutor}
 
 /**
   * Task manager for working with streams of output-streaming module

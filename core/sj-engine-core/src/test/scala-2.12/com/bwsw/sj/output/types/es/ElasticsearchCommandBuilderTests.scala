@@ -11,7 +11,7 @@ import scala.util.parsing.json.{JSON, JSONObject}
   */
 class ElasticsearchCommandBuilderTests extends FlatSpec with Matchers {
   it should "work properly" in {
-    val eb = new ElasticsearchEntityBuilder[String]()
+    val eb = new ElasticsearchEntityBuilder()
 
     val e = eb
       .field(new LongField("id"))
@@ -28,7 +28,7 @@ class ElasticsearchCommandBuilderTests extends FlatSpec with Matchers {
       ("age" -> new java.lang.Integer(32)) +
       ("married" -> new java.lang.Boolean(true))
 
-    JSON.parseRaw(escb.buildIndex(1, data)).get.isInstanceOf[JSONObject] shouldBe true
+    JSON.parseRaw(escb.buildInsert(1, data)).get.isInstanceOf[JSONObject] shouldBe true
 
   }
 }
