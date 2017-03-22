@@ -30,7 +30,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   public cloningInstance: InstanceModel;
   public instanceForm: NgForm;
   public showSpinner: boolean;
-  public startFromTimestampAcceptable: boolean = true;
+  public startFromDateTimeAcceptable: boolean = true;
   public tasks: TaskModel[];
   public message: string;
 
@@ -169,21 +169,13 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
           this.newInstance.module.moduleName = instance.moduleName;
           this.newInstance.module.moduleType = instance.moduleType;
           this.newInstance.module.moduleVersion = instance.moduleVersion;
-          if (this.newInstance.module.moduleType === 'windowed-streaming') {
-            this.newInstance.batchFillType.typeName = instanceInfo.batchFillType.typeName;
-            this.newInstance.batchFillType.value = instanceInfo.batchFillType.value;
-          }
-          if (this.newInstance.module.moduleType === 'windowed-streaming') {
-            let mainStream = instanceInfo.mainStream.split('/');
-            this.newInstance.mainStream = mainStream[0];
-            this.newInstance.mainStreamType = mainStream[1];
-            this.newInstance.relatedStreamsType = [];
-            instanceInfo.relatedStreams.forEach((item: string, i: number) => {
-              let related = item.split('/');
-              this.newInstance.relatedStreams[i] = related[0];
-              this.newInstance.relatedStreamsType[i] = related[1];
-            });
-
+          if (this.newInstance.module.moduleType === 'batch-streaming') {
+            this.newInstance.inputsTypes = [];
+            this.newInstance.inputs.forEach(function (item: string, i: number) {
+              let input = item.split('/');
+              this.newInstance.inputs[i] = input[0];
+              this.newInstance.inputsTypes[i] = input[1];
+            }.bind(this));
           }
           if (this.newInstance.module.moduleType === 'regular-streaming') {
             this.newInstance.inputsTypes = [];
@@ -292,37 +284,28 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
     this.newInstance.outputs.splice(i, 1);
   }
 
-  public addRelatedStream() {
-    this.newInstance.relatedStreams.push('');
-  }
-
-  public removeRelatedStream(i: number): void {
-    this.newInstance.relatedStreams.splice(i, 1);
-    this.newInstance.relatedStreamsType.splice(i, 1);
-  }
-
-  public checkTimestampAcceptable(): void {
+    public checkTimestampAcceptable(): void {
     switch (this.newInstance.module.moduleType) {
       case 'regular-streaming':
-      case 'windowed-streaming':
+      case 'batch-streaming':
         if (this.newInstance.inputs &&  this.newInstance.inputs.length > 0 && this.newInstance.inputs[0]) {
-          this.startFromTimestampAcceptable = true;
+          this.startFromDateTimeAcceptable = true;
           for (let inputName of this.newInstance.inputs) {
-            if (this.streamTypesList[inputName] !== 'stream.t-stream') {
-              this.startFromTimestampAcceptable = false;
+            if (this.streamTypesList[inputName] !== 'stream.kafka') {
+              this.startFromDateTimeAcceptable = false;
               break;
             }
           }
         }
         break;
       case 'output-streaming':
-        this.startFromTimestampAcceptable = true;
+        this.startFromDateTimeAcceptable = false;
         break;
       default:
         console.error('start-from field is not provided for module-type '+this.newInstance.module.moduleType);
         break;
     }
-    if (!this.startFromTimestampAcceptable && this.newInstance.startFrom === 'timestamp') {
+    if (!this.startFromDateTimeAcceptable && this.newInstance.startFrom === 'timestamp') {
       this.newInstance.startFrom = '';
     }
   }
