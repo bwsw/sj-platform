@@ -59,7 +59,6 @@ class JDBCServiceData() extends ServiceData() {
           var database_exists: Boolean = false
           try {
             JdbcClientBuilder.
-              setTxnField("txn").
               setDriver(this.driver).
               setDatabase(dbName).
               setHosts(provider.hosts).
