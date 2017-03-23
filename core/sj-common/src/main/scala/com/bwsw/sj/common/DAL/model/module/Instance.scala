@@ -38,7 +38,7 @@ class Instance {
   @Property("performance-reporting-interval") var performanceReportingInterval: Long = 60000
   var engine: String = null
   @Property("framework-id") val frameworkId: String = System.currentTimeMillis().toString
-  @Property("input-avro-schema") var inputAvroSchema: String = null
+  @Property("input-avro-schema") var inputAvroSchema: String = "{}"
 
   @NotSaved private lazy val schemaParser = new Schema.Parser()
 
@@ -62,7 +62,7 @@ class Instance {
     protocolInstance.coordinationService = this.coordinationService.name
     protocolInstance.stages = this.stages.asScala
     protocolInstance.restAddress = this.restAddress
-    protocolInstance.inputAvroSchema = getInputAvroSchema
+    protocolInstance.inputAvroSchema = serializer.deserialize[Map[String, Any]](this.inputAvroSchema)
   }
 
   def getOptionsAsMap() = {
@@ -71,7 +71,7 @@ class Instance {
   }
 
   def getInputAvroSchema: Schema = {
-    if (inputAvroSchema != null) schemaParser.parse(inputAvroSchema)
+    if (inputAvroSchema != null && inputAvroSchema != "{}") schemaParser.parse(inputAvroSchema)
     else null
   }
 
