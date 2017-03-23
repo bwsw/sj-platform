@@ -16,7 +16,7 @@ class TrafficMetrics extends OutputEnvelope {
   @JsonProperty("dst-as") var dstAs: String= null
   @JsonProperty("sum-of-traffic") var trafficSum: Long= 0
 
-  def getMapFields: Map[String, Any] = {
+  def getFieldsValue: Map[String, Any] = {
     Map(
       "ts" -> ts,
       "src-as" -> srcAs,

@@ -10,7 +10,7 @@ class StubJdbcData extends OutputEnvelope {
   var value: Int = 0
   var id: String = java.util.UUID.randomUUID.toString
 
-  override def getMapFields: Map[String, Any] = {
+  override def getFieldsValue: Map[String, Any] = {
     Map("value" -> value, "id" -> id)
   }
 }

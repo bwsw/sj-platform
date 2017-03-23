@@ -67,7 +67,7 @@ class JdbcOutputProcessor[T <: AnyRef](outputStream: SjStream,
     val fieldsParams = List.fill(fields.split(",").length)("?").mkString(",")
     val sqlInsert = s"INSERT INTO `${jdbcClient.jdbcCCD.table}` ($fields) VALUES ($fieldsParams);"
     val preparedStatement = jdbcClient.connection.prepareStatement(sqlInsert)
-    val jdbcFieldsValue = envelope.getMapFields
+    val jdbcFieldsValue = envelope.getFieldsValue
     val readyStatement = jdbcCommandBuilder.buildInsert(inputEnvelope.id, jdbcFieldsValue, preparedStatement)
     if (tableExists()) readyStatement.executeUpdate()
   }

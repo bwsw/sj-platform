@@ -45,7 +45,7 @@ class EsOutputProcessor[T <: AnyRef](outputStream: SjStream,
 
   def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]) = {
 
-    val esFieldsValue = envelope.getMapFields
+    val esFieldsValue = envelope.getFieldsValue
 
     val data = esCommandBuilder.buildInsert(inputEnvelope.id, esFieldsValue)
     logger.debug(s"Task: ${manager.taskName}. Write an output envelope to elasticsearch stream.")

@@ -10,7 +10,7 @@ class SrcAsData(src_as_field: Int, traffic_field: Int) extends OutputEnvelope {
   var src_as: Int = src_as_field
   var traffic: Int = traffic_field
 
-  def getMapFields: Map[String, Any] = {
+  def getFieldsValue: Map[String, Any] = {
     Map("value" -> src_as, "testId" -> traffic)
   }
 

@@ -12,7 +12,7 @@ class StubEsData extends OutputEnvelope {
   @JsonProperty("test-date") var testDate: Date = null
   var value: Int = 0
 
-  override def getMapFields: Map[String, Any] = {
+  override def getFieldsValue: Map[String, Any] = {
     Map("test-date" -> testDate.getTime, "value" -> value)
   }
 }
