@@ -44,7 +44,7 @@ class PerformanceMetrics extends OutputEnvelope {
   @JsonProperty("input-stream-name") var inputStreamName: String = null
   @JsonProperty("output-stream-name") var outputStreamName:  String = null
 
-  def getMapFields: Map[String, AnyRef] = {
+  def getMapFields: Map[String, Any] = {
     Map(
       "pm-datetime" -> pmDatetime,
       "task-id" -> taskId,

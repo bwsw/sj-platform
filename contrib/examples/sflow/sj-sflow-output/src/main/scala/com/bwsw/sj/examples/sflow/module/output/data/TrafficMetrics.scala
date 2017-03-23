@@ -2,7 +2,7 @@ package com.bwsw.sj.examples.sflow.module.output.data
 
 import java.util.Date
 
-import com.bwsw.sj.engine.core.entities.{EsEnvelope, OutputEnvelope}
+import com.bwsw.sj.engine.core.entities.OutputEnvelope
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
@@ -16,7 +16,7 @@ class TrafficMetrics extends OutputEnvelope {
   @JsonProperty("dst-as") var dstAs: String= null
   @JsonProperty("sum-of-traffic") var trafficSum: Long= 0
 
-  def getMapFields: Map[String, AnyRef] = {
+  def getMapFields: Map[String, Any] = {
     Map(
       "ts" -> ts,
       "src-as" -> srcAs,

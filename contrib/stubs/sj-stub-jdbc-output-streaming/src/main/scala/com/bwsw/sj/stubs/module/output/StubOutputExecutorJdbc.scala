@@ -38,8 +38,8 @@ class StubOutputExecutorJdbc(manager: OutputEnvironmentManager) extends OutputSt
 
   override def getOutputEntity = {
     val entity = new JdbcEntityBuilder[(PreparedStatement, Int) => Unit]()
-      .field(new IntegerField("id"))
-      .field(new JavaStringField("name"))
+      .field(new JavaStringField("id"))
+      .field(new IntegerField("value"))
       .build()
     entity
   }

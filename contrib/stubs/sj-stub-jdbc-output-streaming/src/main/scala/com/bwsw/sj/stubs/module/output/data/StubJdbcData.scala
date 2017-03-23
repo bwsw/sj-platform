@@ -1,6 +1,6 @@
 package com.bwsw.sj.stubs.module.output.data
 
-import com.bwsw.sj.engine.core.entities.{JdbcEnvelope, OutputEnvelope}
+import com.bwsw.sj.engine.core.entities.OutputEnvelope
 
 /**
   * @author Diryavkin Dmitry
@@ -8,9 +8,9 @@ import com.bwsw.sj.engine.core.entities.{JdbcEnvelope, OutputEnvelope}
 
 class StubJdbcData extends OutputEnvelope {
   var value: Int = 0
-  var testId: String = null
+  var id: String = java.util.UUID.randomUUID.toString
 
-  override def getMapFields: Map[String, AnyRef] = {
-    Map("value" -> value, "testId" -> testId)
+  override def getMapFields: Map[String, Any] = {
+    Map("value" -> value, "id" -> id)
   }
 }
