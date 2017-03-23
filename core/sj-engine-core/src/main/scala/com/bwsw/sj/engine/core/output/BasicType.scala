@@ -6,7 +6,7 @@ package com.bwsw.sj.engine.core.output
 
 
 trait TransformableType[T] {
-  def transform(o: AnyRef): T
+  def transform(o: Any): T
 }
 
 abstract class NamedType[T](name: String, default: AnyRef) extends TransformableType[T] {

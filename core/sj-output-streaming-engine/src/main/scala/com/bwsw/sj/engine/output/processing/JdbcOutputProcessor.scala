@@ -22,7 +22,7 @@ class JdbcOutputProcessor[T <: AnyRef](outputStream: SjStream,
   private val jdbcStream = outputStream.asInstanceOf[JDBCSjStream]
   private val jdbcService = outputStream.service.asInstanceOf[JDBCService]
   private val jdbcClient = openConnection()
-  private val jdbcCommandBuilder = new JdbcCommandBuilder(JdbcEnvelope.getTxnName, entity.asInstanceOf[Entity[(PreparedStatement, Int) => Unit]])
+  private val jdbcCommandBuilder = new JdbcCommandBuilder("txn", entity.asInstanceOf[Entity[(PreparedStatement, Int) => Unit]])
 
   private def openConnection() = {
     logger.info(s"Open a JDBC connection at address: '${jdbcService.provider.hosts}'.")
@@ -35,7 +35,6 @@ class JdbcOutputProcessor[T <: AnyRef](outputStream: SjStream,
       setPassword(jdbcService.provider.password).
       setTable(outputStream.name).
       setDatabase(jdbcService.database).
-      setTxnField(JdbcEnvelope.getTxnName).
       build()
     client
   }
@@ -64,8 +63,8 @@ class JdbcOutputProcessor[T <: AnyRef](outputStream: SjStream,
 
   def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]) = {
     logger.debug(s"Send an envelope: '${inputEnvelope.id}' to a JDBC stream: '${jdbcStream.name}'.")
-    val fields = entity.asInstanceOf[Entity[(PreparedStatement, Int) => Unit]].getFields.mkString(",")
-    val fieldsParams = List.fill(fields.length)("?").mkString(",")
+    val fields = entity.asInstanceOf[Entity[(PreparedStatement, Int) => Unit]].getFields.mkString(",") + "," + jdbcCommandBuilder.getTransactionFieldName
+    val fieldsParams = List.fill(fields.split(",").length)("?").mkString(",")
     val sqlInsert = s"INSERT INTO `${jdbcClient.jdbcCCD.table}` ($fields) VALUES ($fieldsParams);"
     val preparedStatement = jdbcClient.connection.prepareStatement(sqlInsert)
     val jdbcFieldsValue = envelope.getMapFields

@@ -8,9 +8,8 @@ import org.elasticsearch.index.query.QueryBuilders
   * Created by Ivan Kudryavtsev on 05.03.2017.
   */
 class ElasticsearchCommandBuilder(transactionFieldName: String, entity: Entity[String]) {
-  private val jsonSerializer = new JsonSerializer()
 
-  def buildInsert(transaction: Long, m: Map[String, AnyRef]): String = {
+  def buildInsert(transaction: Long, m: Map[String, Any]): String = {
     val mv = entity.getFields.map(f => if (m.contains(f))
       f -> entity.getField(f).transform(m(f))
     else
@@ -20,11 +19,6 @@ class ElasticsearchCommandBuilder(transactionFieldName: String, entity: Entity[S
   }
 
   def buildDelete(transaction: Long): String = s"""{"$transactionFieldName": $transaction }"""
-
-//  def buildIndex(index: String, streamName: String, client: ElasticsearchClient) = {
-//    val fields = entity.getFieldsMap
-//    client.createMapping(index, streamName, jsonSerializer.serialize(fields))
-//  }
 
   def buildIndexExists(index: String, client: ElasticsearchClient): Boolean = {
     client.doesIndexExist(index)

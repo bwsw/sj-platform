@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.output.processing
 
 import com.bwsw.sj.common.DAL.model.SjStream
 import com.bwsw.sj.common.utils.StreamLiterals
-import com.bwsw.sj.engine.core.entities.{Envelope, EsEnvelope, OutputEnvelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
