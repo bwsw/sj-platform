@@ -451,7 +451,9 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
     val clazz = loader.loadClass(validatorClassName)
     val validator = clazz.newInstance().asInstanceOf[StreamingValidator]
-    validator.validate(instanceMetadata) && validator.validate(instanceMetadata.options)
+    validator.validate(instanceMetadata) &&
+      validator.validate(instanceMetadata.options) &&
+      instanceMetadata.validateAvroSchema
   }
 
   /**

@@ -11,6 +11,7 @@ import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.SjStreamUtils._
 import com.bwsw.sj.common.utils.{EngineLiterals, GeneratorLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonIgnore
+import org.apache.avro.Schema
 
 import scala.collection.JavaConverters._
 
@@ -177,6 +178,19 @@ class InstanceMetadata {
 
   private def createTaskName(taskPrefix: String, taskNumber: Int) = {
     taskPrefix + "-task" + taskNumber
+  }
+
+  def validateAvroSchema: Boolean = {
+    val schemaParser = new Schema.Parser()
+    val serializer = new JsonSerializer()
+    inputAvroSchema == Map.empty || {
+      try {
+        schemaParser.parse(serializer.serialize(inputAvroSchema))
+        true
+      } catch {
+        case _: Throwable => false
+      }
+    }
   }
 }
 
