@@ -10,7 +10,7 @@ import org.apache.avro.generic.GenericRecord
   * @param schema avro schema for deserialization
   * @author Pavel Tomskikh
   */
-class AvroEnvelopeDataSerializer(classLoader: ClassLoader, schema: Schema)
+class AvroEnvelopeDataSerializer(classLoader: ClassLoader, schema: Option[Schema] = None)
   extends DefaultEnvelopeDataSerializer(classLoader) {
 
   private val avroSerializer = new AvroSerializer(schema)
@@ -21,7 +21,7 @@ class AvroEnvelopeDataSerializer(classLoader: ClassLoader, schema: Schema)
   }
 
   override def deserialize(bytes: Array[Byte]) = {
-    if (schema != null) avroSerializer.deserialize(bytes)
+    if (schema.nonEmpty) avroSerializer.deserialize(bytes)
     else super.deserialize(bytes)
   }
 }

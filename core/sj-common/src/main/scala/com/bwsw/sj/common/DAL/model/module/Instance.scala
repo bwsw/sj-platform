@@ -10,12 +10,12 @@ import org.apache.avro.Schema
 import org.mongodb.morphia.annotations.{Embedded, Entity, Id, Property, NotSaved}
 
 import scala.collection.JavaConverters._
+
 /**
- * Entity for base instance-json
- *
- *
- * @author Kseniya Tomskikh
- */
+  * Entity for base instance-json
+  *
+  * @author Kseniya Tomskikh
+  */
 @Entity("instances")
 class Instance {
   @Property("module-type") var moduleType: String = null
@@ -39,8 +39,6 @@ class Instance {
   var engine: String = null
   @Property("framework-id") val frameworkId: String = System.currentTimeMillis().toString
   @Property("input-avro-schema") var inputAvroSchema: String = "{}"
-
-  @NotSaved private lazy val schemaParser = new Schema.Parser()
 
   def asProtocolInstance(): InstanceMetadata = ???
 
@@ -70,9 +68,10 @@ class Instance {
     serializer.deserialize[Map[String, Any]](this.options)
   }
 
-  def getInputAvroSchema: Schema = {
-    if (inputAvroSchema != null && inputAvroSchema != "{}") schemaParser.parse(inputAvroSchema)
-    else null
+  def getInputAvroSchema: Option[Schema] = {
+    val schemaParser = new Schema.Parser()
+    if (inputAvroSchema != null && inputAvroSchema != "{}") Some(schemaParser.parse(inputAvroSchema))
+    else None
   }
 
   def getInputsWithoutStreamMode(): Array[String] = Array()

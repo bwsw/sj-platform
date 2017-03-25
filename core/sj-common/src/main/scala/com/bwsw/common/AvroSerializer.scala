@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
   * @param schema avro schema for deserialization
   * @author Pavel Tomskikh
   */
-class AvroSerializer(schema: Schema = null) {
+class AvroSerializer(schema: Option[Schema] = None) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val writerOutput = new ByteArrayOutputStream()
@@ -30,11 +30,11 @@ class AvroSerializer(schema: Schema = null) {
   }
 
   def deserialize(bytes: Array[Byte]): GenericRecord = {
-    require(schema != null, "avro schema must be defined")
+    require(schema.nonEmpty, "avro schema must be defined")
     logger.debug("perform deserialization")
 
     val decoder = DecoderFactory.get().binaryDecoder(bytes, null)
-    val reader = new GenericDatumReader[GenericRecord](schema)
+    val reader = new GenericDatumReader[GenericRecord](schema.get)
     reader.read(null, decoder)
   }
 }
