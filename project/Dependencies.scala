@@ -54,7 +54,8 @@ object Dependencies {
       .exclude("io.netty", "netty"),
     "org.apache.commons" % "commons-lang3" % "3.5",
     ("com.mockrunner" % "mockrunner-jdbc" % "1.1.2")
-      .exclude("jakarta-regexp", "jakarta-regexp"),
+      .exclude("jakarta-regexp", "jakarta-regexp")
+      .exclude("xerces", "xerces"),
     "org.scalatest" % "scalatest_2.12" % "3.0.1"
   ))
 
