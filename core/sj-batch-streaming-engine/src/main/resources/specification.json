@@ -1,0 +1,7 @@
+{
+  "name": "com.bwsw.batch.streaming.engine",
+  "description": "Batch streaming engine by BW",
+  "version": "1.0",
+  "author": "Ksenia Mikhaleva",
+  "license": "Apache 2.0"
+}

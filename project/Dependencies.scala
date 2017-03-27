@@ -38,7 +38,7 @@ object Dependencies {
     "org.apache.logging.log4j" % "log4j-api" % "2.7",
     "postgresql" % "postgresql" % "9.1-901.jdbc4",
     "mysql" % "mysql-connector-java" % "5.1.6",
-    // "com.oracle" % "ojdbc6" % "11.1.0.7.0",
+//    "com.oracle" % "ojdbc6" % "11.1.0.7.0",
     "com.maxmind.geoip" % "geoip-api" % "1.3.1",
     "io.netty" % "netty-all" % "4.1.7.Final",
     "com.opencsv" % "opencsv" % "3.9",
@@ -52,7 +52,11 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty")
+      .exclude("io.netty", "netty"),
+    "org.apache.commons" % "commons-lang3" % "3.5",
+    ("com.mockrunner" % "mockrunner-jdbc" % "1.1.2")
+      .exclude("jakarta-regexp", "jakarta-regexp"),
+    "org.scalatest" % "scalatest_2.12" % "3.0.1"
   ))
 
   lazy val sjRestDependencies = Def.setting(Seq(
@@ -79,7 +83,7 @@ object Dependencies {
       .exclude("io.netty", "netty")
   ))
 
-  lazy val sjWindowedEngineDependencies = Def.setting(Seq(
+  lazy val sjBatchEngineDependencies = Def.setting(Seq(
     "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
     ("org.apache.kafka" % "kafka_2.12" % "0.10.1.1" % "provided")
       .exclude("org.slf4j", "slf4j-log4j12")

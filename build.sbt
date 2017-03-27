@@ -71,12 +71,11 @@ lazy val sj = (project in file(".")).settings(publish := {})
     updateOptions.value.withCachedResolution(true))
   .aggregate(common,
     engineCore, crudRest,
-    inputStreamingEngine, regularStreamingEngine, windowedStreamingEngine, outputStreamingEngine,
+    inputStreamingEngine, regularStreamingEngine, batchStreamingEngine, outputStreamingEngine,
     framework, transactionGenerator,
-    stubInput, stubRegular, stubWindowed, stubESOutput, stubJDBCOutput,
+    stubInput, stubRegular, stubBatch, stubESOutput, stubJDBCOutput,
     pmOutput, csvInput,
-    sflowProcess, sflowOutput,
-    sumWindowed
+    sumBatch
   )
 
 lazy val common = Project(id = "sj-common",
@@ -118,11 +117,11 @@ lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
   )
   .dependsOn(engineCore)
 
-lazy val windowedStreamingEngine = Project(id = "sj-windowed-streaming-engine",
-  base = file("./core/sj-windowed-streaming-engine"))
+lazy val batchStreamingEngine = Project(id = "sj-batch-streaming-engine",
+  base = file("./core/sj-batch-streaming-engine"))
   .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= Dependencies.sjWindowedEngineDependencies.value
+    libraryDependencies ++= Dependencies.sjBatchEngineDependencies.value
   )
   .dependsOn(engineCore)
 
@@ -157,8 +156,8 @@ lazy val stubRegular = Project(id = "sj-stub-regular-streaming",
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 
-lazy val stubWindowed = Project(id = "sj-stub-windowed-streaming",
-  base = file("./contrib/stubs/sj-stub-windowed-streaming"))
+lazy val stubBatch = Project(id = "sj-stub-batch-streaming",
+  base = file("./contrib/stubs/sj-stub-batch-streaming"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 
@@ -177,33 +176,8 @@ lazy val pmOutput = Project(id = "sj-performance-metrics-output-es",
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 
-lazy val sflowProcess = Project(id = "sj-sflow-process",
-  base = file("./contrib/examples/sflow/sj-sflow-process"))
-  .settings(commonSettings: _*)
-  .dependsOn(engineCore)
-
-lazy val sflowOutput = Project(id = "sj-sflow-output",
-  base = file("./contrib/examples/sflow/sj-sflow-output"))
-  .settings(commonSettings: _*)
-  .dependsOn(engineCore)
-
-lazy val sumWindowed = Project(id = "sj-windowed-sum",
-  base = file("./contrib/examples/sj-windowed-sum"))
-  .settings(commonSettings: _*)
-  .dependsOn(engineCore)
-
-lazy val sflowDemoInput = Project(id = "sflow-input",
-  base = file("./contrib/examples/sj-sflow-demo/sflow-input"))
-  .settings(commonSettings: _*)
-  .dependsOn(engineCore)
-
-lazy val sflowDemoProcess = Project(id = "sflow-process",
-  base = file("./contrib/examples/sj-sflow-demo/sflow-process"))
-  .settings(commonSettings: _*)
-  .dependsOn(engineCore)
-
-lazy val sflowDemoOutput = Project(id = "sflow-output",
-  base = file("./contrib/examples/sj-sflow-demo/sflow-output"))
+lazy val sumBatch = Project(id = "sj-batch-sum",
+  base = file("./contrib/examples/sj-batch-sum"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 

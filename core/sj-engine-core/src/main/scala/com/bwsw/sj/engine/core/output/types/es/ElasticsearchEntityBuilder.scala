@@ -5,10 +5,10 @@ import com.bwsw.sj.engine.core.output.{NamedType, EntityBuilder, IncompatibleTyp
 /**
   * Created by Ivan Kudryavtsev on 05.03.2017.
   */
-class ElasticsearchEntityBuilder[T](m: Map[String, NamedType[T]] = Map[String, NamedType[T]]()) extends EntityBuilder[T](m) {
-  def field[DV](c: ElasticsearchField[DV])= {
-    new ElasticsearchEntityBuilder[T](m + (c.getName -> c.asInstanceOf[NamedType[T]]))
+class ElasticsearchEntityBuilder(m: Map[String, NamedType[String]] = Map[String, NamedType[String]]()) extends EntityBuilder[String](m) {
+  def field[DV](c: ElasticsearchField[DV]): ElasticsearchEntityBuilder = {
+    new ElasticsearchEntityBuilder(m + (c.getName -> c.asInstanceOf[NamedType[String]]))
   }
 
-  override def field(c: NamedType[T]): EntityBuilder[T] = throw new IncompatibleTypeException("Use more specific method field. Parent method is locked.")
+  override def field(c: NamedType[String]): EntityBuilder[String] = throw new IncompatibleTypeException("Use more specific method field. Parent method is locked.")
 }

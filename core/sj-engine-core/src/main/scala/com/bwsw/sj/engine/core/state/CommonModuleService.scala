@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.core.state
 
-import com.bwsw.sj.common.DAL.model.module.{RegularInstance, WindowedInstance}
+import com.bwsw.sj.common.DAL.model.module.{RegularInstance, BatchInstance}
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.common.utils.{EngineLiterals, SjTimer}
 import com.bwsw.sj.engine.core.environment.{ModuleEnvironmentManager, ModuleOutput}
@@ -54,19 +54,19 @@ object CommonModuleService {
     val stateManagement = manager.instance match {
       case regularInstance: RegularInstance =>
         regularInstance.stateManagement
-      case windowedInstance: WindowedInstance =>
-        windowedInstance.stateManagement
+      case batchInstance: BatchInstance =>
+        batchInstance.stateManagement
       case _ =>
-        logger.error("CommonModuleService can be used only for regular or windowed engine.")
-        throw new RuntimeException("CommonModuleService can be used only for regular or windowed engine.")
+        logger.error("CommonModuleService can be used only for regular or batch engine.")
+        throw new RuntimeException("CommonModuleService can be used only for regular or batch engine.")
     }
 
     stateManagement match {
       case EngineLiterals.noneStateMode =>
-        logger.debug(s"Task: ${manager.taskName}. Start preparing of windowed module without a state.")
+        logger.debug(s"Task: ${manager.taskName}. Start preparing of batch module without a state.")
         new StatelessCommonModuleService(manager, checkpointGroup, performanceMetrics)
       case EngineLiterals.ramStateMode =>
-        logger.debug(s"Task: ${manager.taskName}. Start preparing of windowed module with a state.")
+        logger.debug(s"Task: ${manager.taskName}. Start preparing of batch module with a state.")
         new StatefulCommonModuleService(manager, checkpointGroup, performanceMetrics)
     }
   }

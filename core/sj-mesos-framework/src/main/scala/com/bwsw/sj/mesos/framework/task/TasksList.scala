@@ -114,7 +114,7 @@ object TasksList {
         val executionPlan = FrameworkUtil.instance match {
           case regularInstance: RegularInstance => regularInstance.executionPlan
           case outputInstance: OutputInstance => outputInstance.executionPlan
-          case windowedInstance: WindowedInstance => windowedInstance.executionPlan
+          case batchInstance: BatchInstance => batchInstance.executionPlan
         }
         executionPlan.tasks.asScala.keys
     }

@@ -35,7 +35,7 @@ object FrameworkUtil {
       case _: OutputInstance => 2
       case regularInstance: RegularInstance => regularInstance.inputs.length + regularInstance.outputs.length + 4
       case _: InputInstance => instance.outputs.length + 2
-      case windowedInstance: WindowedInstance => windowedInstance.inputs.length + windowedInstance.outputs.length + 4
+      case batchInstance: BatchInstance => batchInstance.inputs.length + batchInstance.outputs.length + 4
     }
   }
 

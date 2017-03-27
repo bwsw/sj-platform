@@ -1,7 +1,9 @@
 package com.bwsw.sj.module.output.pm.data
 
 import java.util.Date
-import com.bwsw.sj.engine.core.entities.EsEnvelope
+
+import com.bwsw.common.JsonSerializer
+import com.bwsw.sj.engine.core.entities.OutputEnvelope
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
@@ -9,7 +11,8 @@ import com.fasterxml.jackson.annotation.JsonProperty
   *
   * @author Kseniya Mikhaleva
   */
-class PerformanceMetrics extends EsEnvelope {
+class PerformanceMetrics extends OutputEnvelope {
+  val jsonSerializer = new JsonSerializer()
   @JsonProperty("pm-datetime") var pmDatetime: Date = null
   @JsonProperty("task-id") var taskId: String= null
   var host: String = null
@@ -41,9 +44,33 @@ class PerformanceMetrics extends EsEnvelope {
   @JsonProperty("input-stream-name") var inputStreamName: String = null
   @JsonProperty("output-stream-name") var outputStreamName:  String = null
 
-  override def getDateFields(): Array[String] = {
-    val fields = super.getDateFields().toBuffer
-    fields.append("pm-datetime")
-    fields.toArray
+  def getFieldsValue: Map[String, Any] = {
+    Map(
+      "pm-datetime" -> pmDatetime,
+      "task-id" -> taskId,
+      "total-input-envelopes" -> totalInputEnvelopes,
+      "total-input-elements" -> totalInputElements,
+      "total-input-bytes" -> totalInputBytes,
+      "average-size-input-envelope" -> averageSizeInputEnvelope,
+      "max-size-input-envelope" -> maxSizeInputEnvelope,
+      "min-size-input-envelope" -> minSizeInputEnvelope,
+      "average-size-input-element" -> averageSizeInputElement,
+      "total-output-envelopes" -> totalOutputEnvelopes,
+      "total-output-bytes" -> totalOutputBytes,
+      "average-size-output-envelope" -> averageSizeOutputEnvelope,
+      "max-size-output-envelope" -> maxSizeOutputEnvelope,
+      "min-size-output-envelope" -> minSizeOutputEnvelope,
+      "average-size-output-element" -> averageSizeOutputElement,
+      "total-idle-time" -> totalIdleTime,
+      "input-envelopes-per-stream" -> jsonSerializer.serialize(inputEnvelopesPerStream),
+      "input-elements-per-stream" -> jsonSerializer.serialize(inputElementsPerStream),
+      "input-bytes-per-stream" -> jsonSerializer.serialize(inputBytesPerStream),
+      "output-envelopes-per-stream" -> jsonSerializer.serialize(outputEnvelopesPerStream),
+      "output-elements-per-stream" -> jsonSerializer.serialize(outputElementsPerStream),
+      "output-bytes-per-stream" -> jsonSerializer.serialize(outputBytesPerStream),
+      "state-variables-number" -> stateVariablesNumber,
+      "input-stream-name" -> inputStreamName,
+      "output-stream-name" -> outputStreamName
+    )
   }
 }

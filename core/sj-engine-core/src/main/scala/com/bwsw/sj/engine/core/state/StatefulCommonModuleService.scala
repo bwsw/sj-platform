@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.core.state
 
-import com.bwsw.sj.common.DAL.model.module.{RegularInstance, WindowedInstance}
+import com.bwsw.sj.common.DAL.model.module.{RegularInstance, BatchInstance}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.StateHandlers
 import com.bwsw.sj.engine.core.environment.StatefulModuleEnvironmentManager
@@ -78,7 +78,7 @@ class StatefulCommonModuleService(manager: CommonTaskManager, checkpointGroup: C
   private def getStateFullCheckpoint() = {
     instance match {
       case regularInstance: RegularInstance =>  regularInstance.stateFullCheckpoint
-      case windowedInstance: WindowedInstance =>  windowedInstance.stateFullCheckpoint
+      case batchInstance: BatchInstance =>  batchInstance.stateFullCheckpoint
     }
   }
 }
