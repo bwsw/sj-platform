@@ -1,8 +1,0 @@
-{
-  "name": "cassandra-sflow-provider",
-  "description": "Cassandra provider for demo",
-  "type": "cassandra",
-  "hosts": [
-    "176.120.25.19:9042"
-  ]
-}

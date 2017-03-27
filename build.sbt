@@ -75,7 +75,6 @@ lazy val sj = (project in file(".")).settings(publish := {})
     framework, transactionGenerator,
     stubInput, stubRegular, stubWindowed, stubESOutput, stubJDBCOutput,
     pmOutput,
-    sflowProcess, sflowOutput,
     sumWindowed
   )
 
@@ -177,32 +176,7 @@ lazy val pmOutput = Project(id = "sj-performance-metrics-output-es",
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 
-lazy val sflowProcess = Project(id = "sj-sflow-process",
-  base = file("./contrib/examples/sflow/sj-sflow-process"))
-  .settings(commonSettings: _*)
-  .dependsOn(engineCore)
-
-lazy val sflowOutput = Project(id = "sj-sflow-output",
-  base = file("./contrib/examples/sflow/sj-sflow-output"))
-  .settings(commonSettings: _*)
-  .dependsOn(engineCore)
-
 lazy val sumWindowed = Project(id = "sj-windowed-sum",
   base = file("./contrib/examples/sj-windowed-sum"))
-  .settings(commonSettings: _*)
-  .dependsOn(engineCore)
-
-lazy val sflowDemoInput = Project(id = "sflow-input",
-  base = file("./contrib/examples/sj-sflow-demo/sflow-input"))
-  .settings(commonSettings: _*)
-  .dependsOn(engineCore)
-
-lazy val sflowDemoProcess = Project(id = "sflow-process",
-  base = file("./contrib/examples/sj-sflow-demo/sflow-process"))
-  .settings(commonSettings: _*)
-  .dependsOn(engineCore)
-
-lazy val sflowDemoOutput = Project(id = "sflow-output",
-  base = file("./contrib/examples/sj-sflow-demo/sflow-output"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
