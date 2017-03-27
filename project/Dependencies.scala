@@ -40,7 +40,9 @@ object Dependencies {
     "mysql" % "mysql-connector-java" % "5.1.6",
 //    "com.oracle" % "ojdbc6" % "11.1.0.7.0",
     "com.maxmind.geoip" % "geoip-api" % "1.3.1",
-    "io.netty" % "netty-all" % "4.1.7.Final"
+    "io.netty" % "netty-all" % "4.1.7.Final",
+    ("org.apache.avro" % "avro" % "1.8.1")
+      .exclude("org.slf4j", "slf4j-api")
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(
@@ -80,7 +82,7 @@ object Dependencies {
       .exclude("io.netty", "netty")
   ))
 
-  lazy val sjWindowedEngineDependencies = Def.setting(Seq(
+  lazy val sjBatchEngineDependencies = Def.setting(Seq(
     "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
     ("org.apache.kafka" % "kafka_2.12" % "0.10.1.1" % "provided")
       .exclude("org.slf4j", "slf4j-log4j12")

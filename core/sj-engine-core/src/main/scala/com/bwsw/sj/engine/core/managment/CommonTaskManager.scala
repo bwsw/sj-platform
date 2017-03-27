@@ -1,11 +1,11 @@
 package com.bwsw.sj.engine.core.managment
 
 import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.common.DAL.model.module.{RegularInstance, WindowedInstance}
+import com.bwsw.sj.common.DAL.model.module.{RegularInstance, BatchInstance}
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.environment.{EnvironmentManager, ModuleEnvironmentManager}
-import com.bwsw.sj.engine.core.windowed.{BatchCollector, WindowedStreamingPerformanceMetrics}
+import com.bwsw.sj.engine.core.batch.{BatchCollector, BatchStreamingPerformanceMetrics}
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
 
@@ -36,23 +36,23 @@ class CommonTaskManager() extends TaskManager {
     executor
   }
 
-  def getBatchCollector(instance: WindowedInstance,
-                        performanceMetrics: WindowedStreamingPerformanceMetrics): BatchCollector = {
+  def getBatchCollector(instance: BatchInstance,
+                        performanceMetrics: BatchStreamingPerformanceMetrics): BatchCollector = {
     instance match {
-      case _: WindowedInstance =>
+      case _: BatchInstance =>
         logger.info(s"Task: $taskName. Getting a batch collector class from jar of file: " +
           instance.moduleType + "-" + instance.moduleName + "-" + instance.moduleVersion + ".")
         val batchCollectorClassName = fileMetadata.specification.batchCollectorClass
         val batchCollector = moduleClassLoader
           .loadClass(batchCollectorClassName)
-          .getConstructor(classOf[WindowedInstance], classOf[WindowedStreamingPerformanceMetrics])
+          .getConstructor(classOf[BatchInstance], classOf[BatchStreamingPerformanceMetrics])
           .newInstance(instance, performanceMetrics)
           .asInstanceOf[BatchCollector]
 
         batchCollector
       case _ =>
-        logger.error("A batch collector exists only for windowed engine.")
-        throw new RuntimeException("A batch collector exists only for windowed engine.")
+        logger.error("A batch collector exists only for batch engine.")
+        throw new RuntimeException("A batch collector exists only for batch engine.")
     }
   }
 
@@ -85,11 +85,11 @@ class CommonTaskManager() extends TaskManager {
     instance match {
       case regularInstance: RegularInstance =>
         regularInstance.executionPlan
-      case windowedInstance: WindowedInstance =>
-        windowedInstance.executionPlan
+      case batchInstance: BatchInstance =>
+        batchInstance.executionPlan
       case _ =>
-        logger.error("CommonTaskManager can be used only for regular or windowed engine.")
-        throw new RuntimeException("CommonTaskManager can be used only for regular or windowed engine.")
+        logger.error("CommonTaskManager can be used only for regular or batch engine.")
+        throw new RuntimeException("CommonTaskManager can be used only for regular or batch engine.")
     }
   }
 }

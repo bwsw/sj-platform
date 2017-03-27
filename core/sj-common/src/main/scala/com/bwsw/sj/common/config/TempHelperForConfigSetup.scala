@@ -17,8 +17,8 @@ object TempHelperForConfigSetup extends App {
 
   configService.save(new ConfigurationSetting(createConfigurationSettingName(ConfigLiterals.systemDomain, "regular-streaming-validator-class"),
     "com.bwsw.sj.crud.rest.validator.instance.RegularInstanceValidator", ConfigLiterals.systemDomain))
-  configService.save(new ConfigurationSetting(createConfigurationSettingName(ConfigLiterals.systemDomain, "windowed-streaming-validator-class"),
-    "com.bwsw.sj.crud.rest.validator.instance.WindowedInstanceValidator", ConfigLiterals.systemDomain))
+  configService.save(new ConfigurationSetting(createConfigurationSettingName(ConfigLiterals.systemDomain, "batch-streaming-validator-class"),
+    "com.bwsw.sj.crud.rest.validator.instance.BatchInstanceValidator", ConfigLiterals.systemDomain))
   configService.save(new ConfigurationSetting(createConfigurationSettingName(ConfigLiterals.systemDomain, "output-streaming-validator-class"),
     "com.bwsw.sj.crud.rest.validator.instance.OutputInstanceValidator", ConfigLiterals.systemDomain))
   configService.save(new ConfigurationSetting(createConfigurationSettingName(ConfigLiterals.systemDomain, "input-streaming-validator-class"),
@@ -46,7 +46,7 @@ object TempHelperForConfigDestroy extends App {
   ConnectionRepository.getConfigService.delete(ConfigLiterals.transactionGeneratorTag)
   ConnectionRepository.getConfigService.delete(ConfigLiterals.frameworkTag)
   ConnectionRepository.getConfigService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, "regular-streaming-validator-class"))
-  ConnectionRepository.getConfigService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, "windowed-streaming-validator-class"))
+  ConnectionRepository.getConfigService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, "batch-streaming-validator-class"))
   ConnectionRepository.getConfigService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, "output-streaming-validator-class"))
   ConnectionRepository.getConfigService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, "input-streaming-validator-class"))
   ConnectionRepository.getConfigService.delete(ConfigLiterals.marathonTag)

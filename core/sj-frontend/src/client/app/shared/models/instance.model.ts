@@ -3,10 +3,8 @@ import { BaseModel } from './base.model';
 
 export class InstanceModel extends BaseModel {
   inputsTypes: string[] = [''];
-  mainStreamType: string = '';
-  relatedStreamsType: string[] = [];
   module: ModuleModel;
-  startFromTimestamp: number;
+  startFromDateTime: string;
   status: string;
 
   moduleType: string;
@@ -16,10 +14,6 @@ export class InstanceModel extends BaseModel {
 
   asyncBackupCount: number = 0;
   backupCount: number = 0;
-  batchFillType : {
-    typeName: string;
-    value: number;
-  } = {typeName: 'time-interval', value:1};
   checkpointInterval: number;
   checkpointMode: string;
   coordinationService: string;
@@ -34,7 +28,6 @@ export class InstanceModel extends BaseModel {
   inputs: string[] = [''];
   jvmOptions: Object;
   lookupHistory: number = 0;
-  mainStream: string;
   name: string;
   nodeAttributes: Object;
   options: Object;
@@ -45,7 +38,6 @@ export class InstanceModel extends BaseModel {
   perTaskRam: number = 1024;
   performanceReportingInterval: number = 60000;
   queueMaxSize: number;
-  relatedStreams: string[] = [];
   slidingInterval: number;
   stages: Object;
   startFrom: string = 'newest';
@@ -78,17 +70,11 @@ export class SubtypedInstance {
   eventWaitIdleTime: number;
   inputs: string[] = [''];
   outputs: string[] = [''];
-  startFrom: string|number;
+  startFrom: string;
   stateFullCheckpoint: number;
   stateManagement: string;
   window: number;
   slidingInterval: number;
-  mainStream: string;
-  relatedStreams: string[] = [];
-  batchFillType : {
-    typeName: string;
-    value: number;
-  };
   input: string;
   output: string;
   asyncBackupCount: number;
@@ -107,22 +93,17 @@ export class RegularStreamingInstance extends SubtypedInstance {
   eventWaitIdleTime: number;
   inputs: string[] = [''];
   outputs: string[] = [''];
-  startFrom: string|number;
+  startFrom: string;
   stateFullCheckpoint: number;
   stateManagement: string;
 }
 
-export class WindowedStreamingInstance extends SubtypedInstance {
+export class BatchStreamingInstance extends SubtypedInstance {
   outputs: string[] = [''];
   window: number;
   slidingInterval: number;
-  mainStream: string;
-  relatedStreams: string[] = [];
-  batchFillType : {
-    typeName: string;
-    value: number;
-  };
-  startFrom: string|number;
+  inputs: string[] = [''];
+  startFrom: string;
   stateManagement: string;
   stateFullCheckpoint: number;
   eventWaitTime: number;
@@ -133,7 +114,7 @@ export class OutputStreamingInstance extends SubtypedInstance {
   checkpointMode: string;
   input: string;
   output: string;
-  startFrom: string|number;
+  startFrom: string;
 }
 
 export class InputStreamingInstance extends SubtypedInstance {

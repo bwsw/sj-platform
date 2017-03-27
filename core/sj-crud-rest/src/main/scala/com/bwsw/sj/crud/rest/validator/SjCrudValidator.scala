@@ -174,7 +174,7 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageRes
           throw new Exception(createMessage("rest.validator.specification.sources.must.t-stream", moduleType, "outputs"))
         }
 
-        if (moduleType == windowedStreamingType) {
+        if (moduleType == batchStreamingType) {
           val batchCollectorClass = specification("batch-collector-class").asInstanceOf[String]
 
           //'batch-collector-class' field
