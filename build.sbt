@@ -74,7 +74,7 @@ lazy val sj = (project in file(".")).settings(publish := {})
     inputStreamingEngine, regularStreamingEngine, batchStreamingEngine, outputStreamingEngine,
     framework, transactionGenerator,
     stubInput, stubRegular, stubBatch, stubESOutput, stubJDBCOutput,
-    pmOutput,
+    pmOutput, csvInput,
     sumBatch
   )
 
@@ -178,5 +178,10 @@ lazy val pmOutput = Project(id = "sj-performance-metrics-output-es",
 
 lazy val sumBatch = Project(id = "sj-batch-sum",
   base = file("./contrib/examples/sj-batch-sum"))
+  .settings(commonSettings: _*)
+  .dependsOn(engineCore)
+
+lazy val csvInput = Project(id = "sj-csv-input",
+  base = file("./contrib/sj-platform/sj-csv-input"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
