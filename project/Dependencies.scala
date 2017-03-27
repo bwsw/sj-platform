@@ -38,7 +38,7 @@ object Dependencies {
     "org.apache.logging.log4j" % "log4j-api" % "2.7",
     "postgresql" % "postgresql" % "9.1-901.jdbc4",
     "mysql" % "mysql-connector-java" % "5.1.6",
-    // "com.oracle" % "ojdbc6" % "11.1.0.7.0",
+//    "com.oracle" % "ojdbc6" % "11.1.0.7.0",
     "com.maxmind.geoip" % "geoip-api" % "1.3.1",
     "io.netty" % "netty-all" % "4.1.7.Final"
   ))

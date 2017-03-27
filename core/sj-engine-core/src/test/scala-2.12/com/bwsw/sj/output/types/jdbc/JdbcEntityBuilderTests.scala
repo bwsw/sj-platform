@@ -8,7 +8,7 @@ import org.scalatest.{FlatSpec, Matchers}
   */
 class JdbcEntityBuilderTests extends FlatSpec with Matchers {
   it should "work properly" in {
-    val jdbcBuilder = new JdbcEntityBuilder[String]()
+    val jdbcBuilder = new JdbcEntityBuilder()
 
     val age = new IntegerField("age")
 

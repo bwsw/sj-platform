@@ -55,9 +55,9 @@ class JDBCServiceData() extends ServiceData() {
           errors += createMessage("entity.error.attribute.required", "Database")
         } else {
           val providerDAO = ConnectionRepository.getProviderService
-          val provider = providerDAO.get(this.provider).get
           var database_exists: Boolean = false
           try {
+            val provider = providerDAO.get(this.provider).get
             JdbcClientBuilder.
               setDriver(this.driver).
               setDatabase(dbName).
