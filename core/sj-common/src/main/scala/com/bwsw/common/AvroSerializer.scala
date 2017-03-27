@@ -20,7 +20,8 @@ class AvroSerializer(schema: Option[Schema] = None) {
   private val encoder = EncoderFactory.get().binaryEncoder(writerOutput, null)
 
   def serialize(record: GenericRecord): Array[Byte] = {
-    logger.debug("perform serialization")
+    logger.debug(s"Serialize an avro record to a byte array.")
+
     val writer = new GenericDatumWriter[GenericRecord](record.getSchema)
     writer.write(record, encoder)
     encoder.flush()
@@ -31,7 +32,7 @@ class AvroSerializer(schema: Option[Schema] = None) {
 
   def deserialize(bytes: Array[Byte]): GenericRecord = {
     require(schema.nonEmpty, "avro schema must be defined")
-    logger.debug("perform deserialization")
+    logger.debug("Deserialize a byte array to an avro record.")
 
     val decoder = DecoderFactory.get().binaryDecoder(bytes, null)
     val reader = new GenericDatumReader[GenericRecord](schema.get)
