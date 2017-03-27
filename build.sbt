@@ -71,11 +71,11 @@ lazy val sj = (project in file(".")).settings(publish := {})
     updateOptions.value.withCachedResolution(true))
   .aggregate(common,
     engineCore, crudRest,
-    inputStreamingEngine, regularStreamingEngine, windowedStreamingEngine, outputStreamingEngine,
+    inputStreamingEngine, regularStreamingEngine, batchStreamingEngine, outputStreamingEngine,
     framework, transactionGenerator,
-    stubInput, stubRegular, stubWindowed, stubESOutput, stubJDBCOutput,
+    stubInput, stubRegular, stubBatch, stubESOutput, stubJDBCOutput,
     pmOutput,
-    sumWindowed
+    sumBatch
   )
 
 lazy val common = Project(id = "sj-common",
@@ -117,11 +117,11 @@ lazy val regularStreamingEngine = Project(id = "sj-regular-streaming-engine",
   )
   .dependsOn(engineCore)
 
-lazy val windowedStreamingEngine = Project(id = "sj-windowed-streaming-engine",
-  base = file("./core/sj-windowed-streaming-engine"))
+lazy val batchStreamingEngine = Project(id = "sj-batch-streaming-engine",
+  base = file("./core/sj-batch-streaming-engine"))
   .settings(commonSettings: _*)
   .settings(
-    libraryDependencies ++= Dependencies.sjWindowedEngineDependencies.value
+    libraryDependencies ++= Dependencies.sjBatchEngineDependencies.value
   )
   .dependsOn(engineCore)
 
@@ -156,8 +156,8 @@ lazy val stubRegular = Project(id = "sj-stub-regular-streaming",
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 
-lazy val stubWindowed = Project(id = "sj-stub-windowed-streaming",
-  base = file("./contrib/stubs/sj-stub-windowed-streaming"))
+lazy val stubBatch = Project(id = "sj-stub-batch-streaming",
+  base = file("./contrib/stubs/sj-stub-batch-streaming"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 
@@ -176,7 +176,7 @@ lazy val pmOutput = Project(id = "sj-performance-metrics-output-es",
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 
-lazy val sumWindowed = Project(id = "sj-windowed-sum",
-  base = file("./contrib/examples/sj-windowed-sum"))
+lazy val sumBatch = Project(id = "sj-batch-sum",
+  base = file("./contrib/examples/sj-batch-sum"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)

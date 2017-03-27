@@ -8,7 +8,7 @@ import {
   RegularStreamingInstance,
   OutputStreamingInstance,
   InputStreamingInstance,
-  WindowedStreamingInstance,
+  BatchStreamingInstance,
   TaskModel,
   BaseModel
 } from '../models/index';
@@ -136,32 +136,26 @@ export class InstancesService extends BaseService<InstanceModel> {
         });
         inst.outputs = orig.outputs;
         inst.stateManagement = orig.stateManagement;
-        inst.startFrom = orig.startFrom === 'timestamp' ? orig.startFromTimestamp : orig.startFrom;
+        inst.startFrom = orig.startFrom === 'datetime' ? orig.startFromDateTime : orig.startFrom;
         inst.stateFullCheckpoint = orig.stateFullCheckpoint;
 
         break;
 
-      case 'windowed-streaming':
-        inst = new WindowedStreamingInstance();
+      case 'batch-streaming':
+        inst = new BatchStreamingInstance();
 
         inst = InstancesService.fillInstanceGeneralFields(orig, inst);
         inst.outputs = orig.outputs;
-        delete inst.inputs;
+        inst.inputs = orig.inputs;
         inst.stateManagement = orig.stateManagement;
         inst.window = orig.window;
         inst.stateFullCheckpoint = orig.stateFullCheckpoint;
         inst.eventWaitIdleTime = orig.eventWaitIdleTime;
-        inst.mainStream = orig.mainStream + '/' + orig.mainStreamType;
-        if (orig.relatedStreams.length > 0 && orig.relatedStreams[0] !== '') {
-          orig.relatedStreams.forEach(function (item: string, i: number) {
-            inst.relatedStreams[i] = orig.relatedStreams[i] + '/' + orig.relatedStreamsType[i];
-          });
-        } else {
-          inst.relatedStreams = [];
-        }
-        inst.batchFillType = {typeName: orig.batchFillType.typeName, value: orig.batchFillType.value};
+        orig.inputs.forEach(function (item: string, i: number) {
+          inst.inputs[i] = orig.inputs[i] + '/' + orig.inputsTypes[i];
+        });
         inst.slidingInterval = orig.slidingInterval;
-        inst.startFrom = orig.startFrom === 'timestamp' ? orig.startFromTimestamp : orig.startFrom;
+        inst.startFrom = orig.startFrom === 'datetime' ? orig.startFromDateTime : orig.startFrom;
         break;
 
       case 'output-streaming':
@@ -173,7 +167,7 @@ export class InstancesService extends BaseService<InstanceModel> {
         inst.checkpointInterval = orig.checkpointInterval;
         inst.input = orig.input;
         inst.output = orig.output;
-        inst.startFrom = orig.startFrom === 'timestamp' ? orig.startFromTimestamp : orig.startFrom;
+        inst.startFrom = orig.startFrom;
         break;
 
       case 'input-streaming':

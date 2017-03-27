@@ -4,7 +4,7 @@ import java.util.Date
 import java.util.concurrent.ArrayBlockingQueue
 
 import com.bwsw.sj.common.DAL.model.TStreamSjStream
-import com.bwsw.sj.common.DAL.model.module.{OutputInstance, RegularInstance, WindowedInstance}
+import com.bwsw.sj.common.DAL.model.module.{OutputInstance, RegularInstance, BatchInstance}
 import com.bwsw.sj.common.engine.EnvelopeDataSerializer
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
@@ -53,7 +53,7 @@ class CallableTStreamTaskInput[T <: AnyRef](manager: TaskManager,
     val instance = manager.instance
     val offset = instance match {
       case instance: RegularInstance => instance.startFrom
-      case instance: WindowedInstance => instance.startFrom
+      case instance: BatchInstance => instance.startFrom
       case instance: OutputInstance => instance.startFrom
       case badInstance =>
         logger.error(s"Task: ${manager.taskName}. Instance type isn't supported.")

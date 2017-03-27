@@ -72,7 +72,7 @@
       "type": "string",
       "enum": [
         "regular-streaming",
-        "windowed-streaming",
+        "batch-streaming",
         "output-streaming",
         "input-streaming"
       ]
@@ -102,7 +102,7 @@
       "type": "string"
     },
     "batch-collector-class": {
-      "description": "The absolute path to class that is responsible for a batch collecting of windowed-streaming module",
+      "description": "The absolute path to class that is responsible for a batch collecting of batch-streaming module",
       "type": "string"
     }
   },
