@@ -23,7 +23,6 @@ class Specification {
   val options: String = "{}"
   @Property("validator-class") val validateClass: String = null
   @Property("executor-class") val executorClass: String = null
-  @Property("entity-class") val entityClass: String = null
   @Property("batch-collector-class") val batchCollectorClass: String = null
 
   def asSpecificationData() = {

@@ -19,10 +19,6 @@ object JdbcClientBuilder {
        case "" => jdbcClientConnectionData.table = null
        case _:String =>
      }
-     jdbcClientConnectionData.txnField match {
-       case ""|null => throw new RuntimeException("txnField field must be declared.")
-       case _:String =>
-     }
      jdbcClientConnectionData.username match {
        case ""|null => throw new RuntimeException("username field must be declared.")
        case _:String =>
@@ -48,7 +44,6 @@ object JdbcClientBuilder {
    def setPassword(password: String) = {jdbcClientConnectionData.password=password; this}
    def setDatabase(database: String) = {jdbcClientConnectionData.database=database; this}
    def setTable(table: String) = {jdbcClientConnectionData.table=table; this}
-   def setTxnField(txnField:String) = {jdbcClientConnectionData.txnField=txnField; this}
 
    /**
      * Use this method if you have JDBC connection data provider

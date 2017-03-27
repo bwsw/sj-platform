@@ -414,8 +414,8 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @return - json as object InstanceMetadata
     */
   private def deserializeOptions(options: String, moduleType: String) = {
-    if (moduleType.equals(windowedStreamingType)) {
-      serializer.deserialize[WindowedInstanceMetadata](options)
+    if (moduleType.equals(batchStreamingType)) {
+      serializer.deserialize[BatchInstanceMetadata](options)
     } else if (moduleType.equals(regularStreamingType)) {
       serializer.deserialize[RegularInstanceMetadata](options)
     } else if (moduleType.equals(outputStreamingType)) {

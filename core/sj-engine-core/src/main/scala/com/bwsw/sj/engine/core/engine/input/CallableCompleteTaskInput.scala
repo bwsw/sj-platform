@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
   * Class is responsible for handling kafka inputs and t-stream inputs
   *
   * @author Kseniya Mikhaleva
-  * @param manager       Manager of environment of task of regular/windowed module
+  * @param manager       Manager of environment of task of regular/batch module
   * @param blockingQueue Blocking queue for keeping incoming envelopes that are serialized into a string,
   *                      which will be retrieved into a module
   */
@@ -31,8 +31,8 @@ class CallableCompleteTaskInput[T <: AnyRef](manager: CommonTaskManager,
       case kafkaEnvelope: KafkaEnvelope[T] =>
         kafkaRegularTaskInputService.registerEnvelope(kafkaEnvelope)
       case wrongEnvelope =>
-        logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/windowed streaming engine")
-        throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/windowed streaming engine")
+        logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/batch streaming engine")
+        throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/batch streaming engine")
     }
   }
 
@@ -53,8 +53,8 @@ class CallableCompleteTaskInput[T <: AnyRef](manager: CommonTaskManager,
       case kafkaEnvelope: KafkaEnvelope[T] =>
         kafkaRegularTaskInputService.setConsumerOffset(kafkaEnvelope)
       case wrongEnvelope =>
-        logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/windowed streaming engine")
-        throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/windowed streaming engine")
+        logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/batch streaming engine")
+        throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined for regular/batch streaming engine")
     }
   }
 

@@ -1,8 +1,0 @@
-{
-  "name": "zookeeper-sflow-provider",
-  "description": "Zookeeper provider for demo",
-  "type": "zookeeper",
-  "hosts": [
-    "176.120.25.19:2181"
-  ]
-}

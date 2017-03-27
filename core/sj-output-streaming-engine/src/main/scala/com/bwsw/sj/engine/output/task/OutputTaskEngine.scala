@@ -10,6 +10,7 @@ import com.bwsw.sj.engine.core.engine.NumericalCheckpointTaskEngine
 import com.bwsw.sj.engine.core.engine.input.CallableTStreamTaskInput
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
+import com.bwsw.sj.engine.core.output.Entity
 import com.bwsw.sj.engine.output.processing.OutputProcessor
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
@@ -33,8 +34,9 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private val outputStream = getOutputStream
   private val environmentManager = createModuleEnvironmentManager()
   private val executor = manager.getExecutor(environmentManager)
+  private val entity: Entity[_] = executor.getOutputEntity
   val taskInputService = new CallableTStreamTaskInput[AnyRef](manager, blockingQueue)
-  private val outputProcessor = OutputProcessor[AnyRef](outputStream, performanceMetrics, manager)
+  private val outputProcessor = OutputProcessor[AnyRef](outputStream, performanceMetrics, manager, entity)
   private var wasFirstCheckpoint = false
   protected val checkpointInterval = instance.checkpointInterval
 
@@ -85,7 +87,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     val inputEnvelope = envelope.asInstanceOf[TStreamEnvelope[AnyRef]]
     registerInputEnvelope(inputEnvelope)
     logger.debug(s"Task: ${manager.taskName}. Invoke onMessage() handler.")
-    val outputEnvelopes: List[Envelope] = executor.onMessage(inputEnvelope)
+    val outputEnvelopes = executor.onMessage(inputEnvelope)
     outputProcessor.process(outputEnvelopes, inputEnvelope, wasFirstCheckpoint)
   }
 

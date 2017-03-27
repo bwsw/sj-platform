@@ -2,7 +2,7 @@ package com.bwsw.sj.stubs.module.output
 
 import java.util.Calendar
 
-import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.core.output.types.es._
@@ -22,7 +22,7 @@ class StubOutputExecutor(manager: OutputEnvironmentManager) extends OutputStream
    * @param envelope Input T-Stream envelope
    * @return List of output envelopes
    */
-  override def onMessage(envelope: TStreamEnvelope[Integer]): List[Envelope] = {
+  override def onMessage(envelope: TStreamEnvelope[Integer]): List[OutputEnvelope] = {
     println("Processed: " + envelope.data.size + " elements")
 
     val list = envelope.data.map { value =>
@@ -37,11 +37,11 @@ class StubOutputExecutor(manager: OutputEnvironmentManager) extends OutputStream
     list
   }
 
-  override def getOutputModule = {
-    val entityBuilder = new ElasticsearchEntityBuilder[String]()
+  override def getOutputEntity = {
+    val entityBuilder = new ElasticsearchEntityBuilder()
     val entity = entityBuilder
-      .field(new IntegerField("id", 10))
-      .field(new JavaStringField("name", "someString"))
+      .field(new DateField("test-date"))
+      .field(new IntegerField("value"))
       .build()
     entity
   }
