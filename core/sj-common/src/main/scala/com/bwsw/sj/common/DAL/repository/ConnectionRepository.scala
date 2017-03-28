@@ -1,19 +1,19 @@
 package com.bwsw.sj.common.DAL.repository
 
-import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.sj.common.DAL.ConnectionConstants
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.service.GenericMongoService
+import com.bwsw.tstreams.common.JsonSerializer
 import com.mongodb.MongoClient
 import org.mongodb.morphia.Morphia
 import org.mongodb.morphia.dao.BasicDAO
 import org.mongodb.morphia.mapping.DefaultCreator
 import org.slf4j.LoggerFactory
 
+import scala.collection.JavaConverters._
 import scala.reflect.ClassTag
-import collection.JavaConverters._
 
 /**
  * Repository for connection to MongoDB and file storage (GridFS)

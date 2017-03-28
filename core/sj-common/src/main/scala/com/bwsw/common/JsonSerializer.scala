@@ -2,25 +2,19 @@ package com.bwsw.common
 
 import java.lang.reflect.{ParameterizedType, Type}
 
-import com.bwsw.common.traits.Serializer
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.`type`.TypeReference
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import org.slf4j.LoggerFactory
 
-class JsonSerializer extends Serializer {
-
-  def this(ignore: Boolean) = {
-    this()
-    this.setIgnoreUnknown(ignore)
-  }
-
+object JsonSerializer {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   val mapper = new ObjectMapper()
   mapper.registerModule(DefaultScalaModule)
   mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+  mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
 
   def serialize(value: Any): String = {
     import java.io.StringWriter
@@ -51,19 +45,5 @@ class JsonSerializer extends Serializer {
 
       def getOwnerType = null
     }
-  }
-
-  override def setIgnoreUnknown(ignore: Boolean): Unit = {
-    logger.debug(s"Set a value of flag: FAIL_ON_UNKNOWN_PROPERTIES to '$ignore'.")
-    if (ignore) {
-      mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-    } else {
-      mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-    }
-  }
-
-  override def getIgnoreUnknown(): Boolean = {
-    logger.debug(s"Retrieve a value of flag: FAIL_ON_UNKNOWN_PROPERTIES.")
-    !((mapper.getDeserializationConfig.getDeserializationFeatures & DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES.getMask) == DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES.getMask)
   }
 }

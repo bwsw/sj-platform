@@ -1,16 +1,14 @@
 package com.bwsw.sj.mesos.framework.task
 
-import com.bwsw.common.JsonSerializer
+import com.bwsw.sj.mesos.framework.task.status._
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos._
-import com.bwsw.sj.mesos.framework.task.status._
 
 /**
   * Handler for mesos task status.
   */
 object StatusHandler {
   val logger = Logger.getLogger(getClass)
-  val serializer = new JsonSerializer()
 
   /**
     * Determine type of status and restart task, if status "failed" or "error"

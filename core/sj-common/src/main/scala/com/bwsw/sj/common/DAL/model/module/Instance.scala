@@ -7,7 +7,7 @@ import com.bwsw.sj.common.DAL.model.ZKService
 import com.bwsw.sj.common.rest.entities.module.InstanceMetadata
 import com.bwsw.sj.common.utils.EngineLiterals
 import org.apache.avro.Schema
-import org.mongodb.morphia.annotations.{Embedded, Entity, Id, Property, NotSaved}
+import org.mongodb.morphia.annotations.{Embedded, Entity, Id, Property}
 
 import scala.collection.JavaConverters._
 
@@ -43,13 +43,11 @@ class Instance {
   def asProtocolInstance(): InstanceMetadata = ???
 
   protected def fillProtocolInstance(protocolInstance: InstanceMetadata) = {
-    val serializer = new JsonSerializer()
-
     protocolInstance.status = this.status
     protocolInstance.name = this.name
     protocolInstance.description = this.description
     protocolInstance.parallelism = this.parallelism
-    protocolInstance.options = serializer.deserialize[Map[String, Any]](this.options)
+    protocolInstance.options = JsonSerializer.deserialize[Map[String, Any]](this.options)
     protocolInstance.perTaskCores = this.perTaskCores
     protocolInstance.performanceReportingInterval = this.performanceReportingInterval
     protocolInstance.engine = this.engine
@@ -60,12 +58,11 @@ class Instance {
     protocolInstance.coordinationService = this.coordinationService.name
     protocolInstance.stages = this.stages.asScala
     protocolInstance.restAddress = this.restAddress
-    protocolInstance.inputAvroSchema = serializer.deserialize[Map[String, Any]](this.inputAvroSchema)
+    protocolInstance.inputAvroSchema = JsonSerializer.deserialize[Map[String, Any]](this.inputAvroSchema)
   }
 
   def getOptionsAsMap() = {
-    val serializer = new JsonSerializer()
-    serializer.deserialize[Map[String, Any]](this.options)
+    JsonSerializer.deserialize[Map[String, Any]](this.options)
   }
 
   def getInputAvroSchema: Option[Schema] = {

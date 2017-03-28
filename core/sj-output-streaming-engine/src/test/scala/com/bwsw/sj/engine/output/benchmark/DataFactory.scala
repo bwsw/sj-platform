@@ -5,7 +5,6 @@ import java.util.jar.JarFile
 
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.common.jdbc.JdbcClientBuilder
-import com.bwsw.common.traits.Serializer
 import com.bwsw.common._
 import com.bwsw.sj.common.DAL.model.{ESService, Generator, _}
 import com.bwsw.sj.common.DAL.model.module.{OutputInstance, Task}
@@ -64,7 +63,6 @@ object DataFactory {
   val jdbcInstanceName: String = "test-jdbc-instance-for-output-engine"
 
   val objectSerializer = new ObjectSerializer()
-  private val serializer: Serializer = new JsonSerializer
 
   private val esProviderHosts = System.getenv("ES_HOSTS").split(",").map(host => host.trim)
   private val cassandraHosts = System.getenv("CASSANDRA_HOSTS").split(",").map(host => host.trim)
@@ -469,7 +467,7 @@ object DataFactory {
       }
     }
 
-    val specification = serializer.deserialize[Map[String, Any]](builder.toString())
+    val specification = JsonSerializer.deserialize[Map[String, Any]](builder.toString())
 
     fileStorage.put(moduleJar, moduleJar.getName, specification, "module")
   }

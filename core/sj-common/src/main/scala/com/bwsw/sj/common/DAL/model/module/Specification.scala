@@ -26,7 +26,6 @@ class Specification {
   @Property("batch-collector-class") val batchCollectorClass: String = null
 
   def asSpecificationData() = {
-    val serializer = new JsonSerializer
     SpecificationData(this.name,
       this.description,
       this.version,
@@ -39,7 +38,7 @@ class Specification {
       this.moduleType,
       this.engineName,
       this.engineVersion,
-      serializer.deserialize[Map[String, Any]](this.options),
+      JsonSerializer.deserialize[Map[String, Any]](this.options),
       this.validateClass,
       this.executorClass)
   }

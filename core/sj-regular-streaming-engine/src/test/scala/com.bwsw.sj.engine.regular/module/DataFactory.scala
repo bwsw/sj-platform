@@ -57,7 +57,6 @@ object DataFactory {
   private var instanceInputs: Array[String] = Array()
   private var instanceOutputs: Array[String] = Array()
   private val task: Task = new Task()
-  private val serializer = new JsonSerializer()
   private val objectSerializer = new ObjectSerializer()
   private val cassandraFactory = new CassandraFactory()
   private val cassandraProvider = new Provider(cassandraProviderName, cassandraProviderName, Array(s"$cassandraHost:$cassandraPort"), "", "", ProviderLiterals.cassandraType)
@@ -395,7 +394,7 @@ object DataFactory {
       }
     }
 
-    val specification = serializer.deserialize[Map[String, Any]](builder.toString())
+    val specification = JsonSerializer.deserialize[Map[String, Any]](builder.toString())
 
     storage.put(file, file.getName, specification, "module")
   }

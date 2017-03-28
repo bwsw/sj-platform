@@ -22,13 +22,12 @@ import org.slf4j.LoggerFactory
   */
 trait InstanceMarathonManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
-  private val marathonEntitySerializer = new JsonSerializer(true)
   private lazy val marathonConnect = ConfigurationSettingsUtils.getMarathonConnect()
   private lazy val marathonTimeout = ConfigurationSettingsUtils.getMarathonTimeout()
   private lazy val client = new HttpClient(marathonTimeout).client
 
   def getNumberOfRunningTasks(response: CloseableHttpResponse) = {
-    val entity = marathonEntitySerializer.deserialize[MarathonApplicationById](EntityUtils.toString(response.getEntity, "UTF-8"))
+    val entity = JsonSerializer.deserialize[MarathonApplicationById](EntityUtils.toString(response.getEntity, "UTF-8"))
     logger.debug(s"Get number of running tasks of application: '${entity.app.id}'.")
     val tasksRunning = entity.app.tasksRunning
 
@@ -37,7 +36,7 @@ trait InstanceMarathonManager {
 
   def getMarathonMaster(marathonInfo: CloseableHttpResponse) = {
     logger.debug(s"Get a marathon master.")
-    val entity = marathonEntitySerializer.deserialize[MarathonInfo](EntityUtils.toString(marathonInfo.getEntity, "UTF-8"))
+    val entity = JsonSerializer.deserialize[MarathonInfo](EntityUtils.toString(marathonInfo.getEntity, "UTF-8"))
     val master = entity.marathonConfig.master
 
     master
@@ -45,7 +44,7 @@ trait InstanceMarathonManager {
 
   def getLeaderTask(marathonTasks: CloseableHttpResponse): Option[MarathonTask] = {
     //TODO: must get real framework leader!
-    val entity = marathonEntitySerializer.deserialize[MarathonApplicationById](EntityUtils.toString(marathonTasks.getEntity, "UTF-8"))
+    val entity = JsonSerializer.deserialize[MarathonApplicationById](EntityUtils.toString(marathonTasks.getEntity, "UTF-8"))
     var leaderTask: Option[MarathonTask] = None
     if (entity.app.tasks != null)
       if (entity.app.tasks.nonEmpty) leaderTask = Some(entity.app.tasks.head)
@@ -93,11 +92,12 @@ trait InstanceMarathonManager {
   }
 
   def startMarathonApplication(request: MarathonRequest) = {
-    logger.debug(s"Start an application on marathon. Request: ${marathonEntitySerializer.serialize(request)}.")
+    val serializedRequest = JsonSerializer.serialize(request)
+    logger.debug(s"Start an application on marathon. Request: $serializedRequest.")
     val url = new URI(s"$marathonConnect/v2/apps")
     val httpPost = new HttpPost(url.toString)
     httpPost.addHeader("Content-Type", "application/json")
-    val entity = new StringEntity(marathonEntitySerializer.serialize(request), "UTF-8")
+    val entity = new StringEntity(serializedRequest, "UTF-8")
     httpPost.setEntity(entity)
     val marathonInfo = client.execute(httpPost)
     val statusCode = getStatusCode(marathonInfo)
@@ -136,7 +136,7 @@ trait InstanceMarathonManager {
     val url = new URI(s"$marathonConnect/v2/apps/$applicationID?force=true")
     val httpPut = new HttpPut(url.toString)
     httpPut.addHeader("Content-Type", "application/json")
-    val entity = new StringEntity(marathonEntitySerializer.serialize(Map("instances" -> countOfInstances)), "UTF-8")
+    val entity = new StringEntity(JsonSerializer.serialize(Map("instances" -> countOfInstances)), "UTF-8")
     httpPut.setEntity(entity)
     val marathonInfo = client.execute(httpPut)
     val statusCode = getStatusCode(marathonInfo)

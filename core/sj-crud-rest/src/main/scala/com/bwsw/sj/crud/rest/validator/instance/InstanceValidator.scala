@@ -1,7 +1,5 @@
 package com.bwsw.sj.crud.rest.validator.instance
 
-import com.bwsw.common.JsonSerializer
-import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
@@ -25,7 +23,6 @@ abstract class InstanceValidator extends ValidationUtils with CompletionUtils wi
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
   var serviceDAO: GenericMongoService[Service] = ConnectionRepository.getServiceManager
   var instanceDAO: GenericMongoService[Instance] = ConnectionRepository.getInstanceService
-  val serializer: Serializer = new JsonSerializer
 
   /**
    * Validating input parameters for streaming module

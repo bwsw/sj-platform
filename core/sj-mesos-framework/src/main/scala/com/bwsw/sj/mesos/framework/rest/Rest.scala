@@ -9,7 +9,6 @@ import unfiltered.response._
   * Rest object used for show some information about framework tasks.
   */
 object Rest {
-  val serializer: JsonSerializer = new JsonSerializer()
   var thread: Thread = null
 
   val echo = unfiltered.filter.Planify{
@@ -29,6 +28,6 @@ object Rest {
   }
 
   def getResponse: String = {
-    serializer.serialize(TasksList.toJson)
+    JsonSerializer.serialize(TasksList.toJson)
   }
 }

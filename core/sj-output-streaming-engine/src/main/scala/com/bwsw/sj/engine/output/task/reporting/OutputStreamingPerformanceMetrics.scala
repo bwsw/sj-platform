@@ -2,8 +2,10 @@ package com.bwsw.sj.engine.output.task.reporting
 
 import java.util.Calendar
 
+import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.output.task.OutputTaskManager
+
 import scala.collection.mutable
 
 /**
@@ -57,7 +59,7 @@ class OutputStreamingPerformanceMetrics(manager: OutputTaskManager)
 
     mutex.unlock()
 
-    reportSerializer.serialize(report)
+    JsonSerializer.serialize(report)
   }
 
   override def clear() = {

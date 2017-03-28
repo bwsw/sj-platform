@@ -1,6 +1,7 @@
 package com.bwsw.sj.crud.rest.api
 
 import akka.http.scaladsl.server.{Directives, RequestContext}
+import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.rest.entities._
@@ -72,7 +73,7 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator {
           pathEndOrSingleSlash {
             post { (ctx: RequestContext) =>
               validateContextWithSchema(ctx, "configSchema.json")
-              val data = serializer.deserialize[ConfigurationSettingData](getEntityFromContext(ctx))
+              val data = JsonSerializer.deserialize[ConfigurationSettingData](getEntityFromContext(ctx))
               val errors = data.validate()
               var response: RestResponse = BadRequestRestResponse(Map("message" ->
                 createMessage("rest.config.setting.cannot.create", errors.mkString("\n"))))

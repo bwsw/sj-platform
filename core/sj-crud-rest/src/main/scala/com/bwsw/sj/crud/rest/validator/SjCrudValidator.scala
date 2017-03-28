@@ -9,8 +9,8 @@ import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.server.RequestContext
 import akka.stream.Materializer
+import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.FileStorage
-import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
@@ -35,7 +35,6 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageRes
 
   implicit def executor: ExecutionContextExecutor
 
-  val serializer: Serializer
   val fileMetadataDAO: GenericMongoService[FileMetadata]
   val storage: FileStorage
   val instanceDAO: GenericMongoService[Instance]
@@ -100,7 +99,7 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageRes
     val specificationJson = getSpecificationFromJar(jarFile)
     validateSerializedSpecification(specificationJson)
     validateWithSchema(specificationJson, "schema.json")
-    val specification = serializer.deserialize[Map[String, Any]](specificationJson)
+    val specification = JsonSerializer.deserialize[Map[String, Any]](specificationJson)
     val moduleType = specification("module-type").asInstanceOf[String]
     val inputs = specification("inputs").asInstanceOf[Map[String, Any]]
     val inputCardinality = inputs("cardinality").asInstanceOf[List[Int]]
@@ -261,7 +260,7 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageRes
     logger.debug(s"Get a specification.")
     val json = getSpecificationFromJar(jarFile)
 
-    serializer.deserialize[Map[String, Any]](json)
+    JsonSerializer.deserialize[Map[String, Any]](json)
   }
 
   /**
