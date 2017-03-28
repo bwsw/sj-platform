@@ -149,12 +149,26 @@ object DataFactory {
                         countElements: Int,
                         producer: Producer[Array[Byte]]) = {
     var number = 0
+    var string = "abc"
     (0 until countTxns) foreach { (x: Int) =>
       val transaction = producer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
       (0 until countElements) foreach { (y: Int) =>
         number += 1
-        println("write data " + number)
-        val msg = objectSerializer.serialize(number.asInstanceOf[Object])
+        number % 8 match {
+          case 0 => string = "abc"
+          case 1 => string = "a'b"
+          case 2 => string = "a\\"
+          case 3 => string = "a\nc"
+          case 4 => string = "a\""
+          case 5 => string = """r"t"""
+          case 6 => string = """r\t"""
+          case 7 => string =
+            """r
+              |t
+            """.stripMargin
+        }
+        println(s"write data $number, |$string|")
+        val msg = objectSerializer.serialize((number, string).asInstanceOf[Object])
         transaction.send(msg)
       }
       println("checkpoint")
@@ -268,6 +282,7 @@ object DataFactory {
     s"CREATE TABLE `$jdbcStreamName` " +
     "(id VARCHAR(255) not NULL, " +
     " value INTEGER, " +
+    " string_value VARCHAR(255), " +
     " txn VARCHAR(255), " +
     " PRIMARY KEY ( id ))"
   }
