@@ -3,6 +3,7 @@ package com.bwsw.sj.crud.rest
 import java.text.MessageFormat
 import java.util.ResourceBundle
 
+import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.{Service, _}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
@@ -12,7 +13,10 @@ import com.bwsw.sj.common.utils.{GeneratorLiterals, ProviderLiterals, _}
  * @author Kseniya Tomskikh
  */
 object SjTest {
+
   import StreamLiterals._
+
+  val serializer = new JsonSerializer
 
   private val instanceJson = "{\n  " +
     "\"uuid\" : \"qwe-123-dsf\",\n  " +
@@ -43,6 +47,8 @@ object SjTest {
     "\"options\": {\n    \"opt\": 1\n  },\n  " +
     "\"validator-class\": \"com.bwsw.sj.stub.Validator\",\n  " +
     "\"executor-class\": \"com.bwsw.sj.stub.Executor\"\n}"
+
+  serializer.setIgnoreUnknown(true)
 
 
   val cassStreamJson = "{\n\t\"name\" : \"cass\",\n\t\"description\" : \"dasgf\",\n\t\"stream-type\" : \"cassandra\",\n\t\"keyspace\" : \"testing\"\n}"

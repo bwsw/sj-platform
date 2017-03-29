@@ -8,7 +8,6 @@ import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Dispo
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import akka.stream.scaladsl.FileIO
-import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.engine.StreamingValidator
@@ -416,15 +415,15 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     */
   private def deserializeOptions(options: String, moduleType: String) = {
     if (moduleType.equals(batchStreamingType)) {
-      JsonSerializer.deserialize[BatchInstanceMetadata](options)
+      serializer.deserialize[BatchInstanceMetadata](options)
     } else if (moduleType.equals(regularStreamingType)) {
-      JsonSerializer.deserialize[RegularInstanceMetadata](options)
+      serializer.deserialize[RegularInstanceMetadata](options)
     } else if (moduleType.equals(outputStreamingType)) {
-      JsonSerializer.deserialize[OutputInstanceMetadata](options)
+      serializer.deserialize[OutputInstanceMetadata](options)
     } else if (moduleType.equals(inputStreamingType)) {
-      JsonSerializer.deserialize[InputInstanceMetadata](options)
+      serializer.deserialize[InputInstanceMetadata](options)
     } else {
-      JsonSerializer.deserialize[InstanceMetadata](options)
+      serializer.deserialize[InstanceMetadata](options)
     }
   }
 

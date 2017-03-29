@@ -11,10 +11,12 @@ import akka.http.scaladsl.server._
 import akka.http.scaladsl.server.directives.{DebuggingDirectives, LogEntry, LoggingMagnet}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
+import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.ConfigurationSetting
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals
-import com.bwsw.sj.common.utils.EngineLiterals._
+import com.bwsw.sj.common.utils.EngineLiterals
+import EngineLiterals._
 import com.bwsw.sj.crud.rest.instance.InstanceStopper
 
 import scala.concurrent.Future
@@ -35,6 +37,8 @@ object SjCrudRestService extends App with SjCrudInterface {
 
   val restHost = System.getenv("CRUD_REST_HOST")
   val restPort = System.getenv("CRUD_REST_PORT").toInt
+  val serializer = new JsonSerializer()
+  serializer.setIgnoreUnknown(true)
   val storage = ConnectionRepository.getFileStorage
   val fileMetadataDAO = ConnectionRepository.getFileMetadataService
   val instanceDAO = ConnectionRepository.getInstanceService

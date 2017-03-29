@@ -9,7 +9,7 @@ package com.bwsw.sj.engine.core.reporting
 import java.util.concurrent.locks.ReentrantLock
 import java.util.concurrent.{Callable, TimeUnit}
 
-import com.bwsw.common.ObjectSerializer
+import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.TStreamSjStream
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.TaskManager
@@ -24,6 +24,7 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
   protected val currentThread = Thread.currentThread()
   protected val logger = LoggerFactory.getLogger(this.getClass)
   protected val mutex: ReentrantLock = new ReentrantLock(true)
+  protected val reportSerializer = new JsonSerializer()
   protected val startTime = System.currentTimeMillis()
   protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Int]]]
   protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Int]]]

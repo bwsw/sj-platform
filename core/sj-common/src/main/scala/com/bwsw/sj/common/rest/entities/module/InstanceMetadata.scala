@@ -41,6 +41,7 @@ class InstanceMetadata {
 
   @JsonIgnore
   protected def fillModelInstance(modelInstance: Instance) = {
+    val serializer = new JsonSerializer()
     val serviceDAO = ConnectionRepository.getServiceManager
 
     modelInstance.status = this.status
@@ -54,13 +55,13 @@ class InstanceMetadata {
     modelInstance.perTaskRam = this.perTaskRam
     modelInstance.performanceReportingInterval = this.performanceReportingInterval
     modelInstance.engine = this.engine
-    modelInstance.options = JsonSerializer.serialize(this.options)
+    modelInstance.options = serializer.serialize(this.options)
     modelInstance.jvmOptions = this.jvmOptions.asJava
     modelInstance.nodeAttributes = this.nodeAttributes.asJava
     modelInstance.environmentVariables = this.environmentVariables.asJava
     modelInstance.stages = this.stages.asJava
     modelInstance.restAddress = this.restAddress
-    modelInstance.inputAvroSchema = JsonSerializer.serialize(this.inputAvroSchema)
+    modelInstance.inputAvroSchema = serializer.serialize(this.inputAvroSchema)
 
     val service = serviceDAO.get(this.coordinationService)
     if (service.isDefined && service.get.isInstanceOf[ZKService]) {
@@ -181,9 +182,10 @@ class InstanceMetadata {
 
   def validateAvroSchema: Boolean = {
     val schemaParser = new Schema.Parser()
+    val serializer = new JsonSerializer()
     inputAvroSchema == Map.empty || {
       try {
-        schemaParser.parse(JsonSerializer.serialize(inputAvroSchema))
+        schemaParser.parse(serializer.serialize(inputAvroSchema))
         true
       } catch {
         case _: Throwable => false

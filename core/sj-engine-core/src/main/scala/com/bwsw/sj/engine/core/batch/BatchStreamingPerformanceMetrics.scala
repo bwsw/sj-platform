@@ -2,7 +2,6 @@ package com.bwsw.sj.engine.core.batch
 
 import java.util.Calendar
 
-import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module.BatchInstance
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
@@ -102,7 +101,7 @@ class BatchStreamingPerformanceMetrics(manager: CommonTaskManager)
     clear()
 
     mutex.unlock()
-    JsonSerializer.serialize(report)
+    reportSerializer.serialize(report)
   }
 
   override def clear() = {

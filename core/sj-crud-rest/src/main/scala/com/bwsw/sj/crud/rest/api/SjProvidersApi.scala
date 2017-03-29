@@ -1,7 +1,6 @@
 package com.bwsw.sj.crud.rest.api
 
 import akka.http.scaladsl.server.{Directives, RequestContext}
-import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.provider.ProviderData
@@ -17,7 +16,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>
           validateContextWithSchema(ctx, "providerSchema.json")
-          val data = JsonSerializer.deserialize[ProviderData](getEntityFromContext(ctx))
+          val data = serializer.deserialize[ProviderData](getEntityFromContext(ctx))
           val errors = data.validate()
           var response: RestResponse = BadRequestRestResponse(Map("message" ->
             createMessage("rest.providers.provider.cannot.create", errors.mkString(";"))))

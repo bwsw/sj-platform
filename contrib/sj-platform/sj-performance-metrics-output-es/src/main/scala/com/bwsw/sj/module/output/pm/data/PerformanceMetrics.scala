@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
   * @author Kseniya Mikhaleva
   */
 class PerformanceMetrics extends OutputEnvelope {
+  val jsonSerializer = new JsonSerializer()
   @JsonProperty("pm-datetime") var pmDatetime: Date = null
   @JsonProperty("task-id") var taskId: String= null
   var host: String = null
@@ -61,12 +62,12 @@ class PerformanceMetrics extends OutputEnvelope {
       "min-size-output-envelope" -> minSizeOutputEnvelope,
       "average-size-output-element" -> averageSizeOutputElement,
       "total-idle-time" -> totalIdleTime,
-      "input-envelopes-per-stream" -> JsonSerializer.serialize(inputEnvelopesPerStream),
-      "input-elements-per-stream" -> JsonSerializer.serialize(inputElementsPerStream),
-      "input-bytes-per-stream" -> JsonSerializer.serialize(inputBytesPerStream),
-      "output-envelopes-per-stream" -> JsonSerializer.serialize(outputEnvelopesPerStream),
-      "output-elements-per-stream" -> JsonSerializer.serialize(outputElementsPerStream),
-      "output-bytes-per-stream" -> JsonSerializer.serialize(outputBytesPerStream),
+      "input-envelopes-per-stream" -> jsonSerializer.serialize(inputEnvelopesPerStream),
+      "input-elements-per-stream" -> jsonSerializer.serialize(inputElementsPerStream),
+      "input-bytes-per-stream" -> jsonSerializer.serialize(inputBytesPerStream),
+      "output-envelopes-per-stream" -> jsonSerializer.serialize(outputEnvelopesPerStream),
+      "output-elements-per-stream" -> jsonSerializer.serialize(outputElementsPerStream),
+      "output-bytes-per-stream" -> jsonSerializer.serialize(outputBytesPerStream),
       "state-variables-number" -> stateVariablesNumber,
       "input-stream-name" -> inputStreamName,
       "output-stream-name" -> outputStreamName

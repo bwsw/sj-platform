@@ -38,6 +38,7 @@ object DataFactory {
   private val port = 8888
   tasks.put(s"$instanceName-task0", new InputTask(host, port))
   private val partitions = 1
+  private val serializer = new JsonSerializer()
   private val cassandraFactory = new CassandraFactory()
   private val cassandraProvider = new Provider(cassandraProviderName, cassandraProviderName, Array(s"$cassandraHost:$cassandraPort"), "", "", ProviderLiterals.cassandraType)
   private val zookeeperProvider = new Provider(zookeeperProviderName, zookeeperProviderName, zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
@@ -239,7 +240,7 @@ object DataFactory {
       }
     }
 
-    val specification = JsonSerializer.deserialize[Map[String, Any]](builder.toString())
+    val specification = serializer.deserialize[Map[String, Any]](builder.toString())
 
     storage.put(file, file.getName, specification, "module")
   }
