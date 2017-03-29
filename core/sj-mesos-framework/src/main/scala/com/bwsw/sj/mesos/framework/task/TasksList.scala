@@ -179,9 +179,11 @@ object TasksList {
       val environments = Environment.newBuilder
       environmentVariables.foreach(variable => environments.addVariables(variable))
 
+      val jvmOptions = FrameworkUtil.instance.jvmOptions.asScala
+        .foldLeft("")((acc, option) => s"$acc ${option._1}${option._2}")
       cmd
         .addUris(CommandInfo.URI.newBuilder.setValue(FrameworkUtil.getModuleUrl(FrameworkUtil.instance)))
-        .setValue("java -jar " + FrameworkUtil.jarName)
+        .setValue("java " + jvmOptions + " -jar " + FrameworkUtil.jarName)
         .setEnvironment(environments)
     } catch {
       case e: Exception => FrameworkUtil.handleSchedulerException(e, logger)
