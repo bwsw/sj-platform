@@ -1,13 +1,13 @@
 package com.bwsw.sj.engine.input.eviction_policy
 
 import com.bwsw.sj.common.DAL.model.module.InputInstance
-
 /**
  * Provides methods are responsible for an expanded time eviction policy of input envelope duplicates
  * In this case time, within which a specific key is kept, will increase if a duplicate appears
  */
 
 class ExpandedTimeEvictionPolicy(instance: InputInstance) extends InputInstanceEvictionPolicy(instance) {
+  private val stubValue = "stub"
 
   /**
    * Checks whether a specific key is duplicate or not and if it is update a value by the key
@@ -19,12 +19,12 @@ class ExpandedTimeEvictionPolicy(instance: InputInstance) extends InputInstanceE
     logger.debug(s"Check for duplicate a key: $key.")
     if (!uniqueEnvelopes.containsKey(key)) {
       logger.debug(s"The key: $key is not duplicate.")
-      uniqueEnvelopes.put(key, value.toString)
+      uniqueEnvelopes.set(key, stubValue)
       true
     }
     else {
       logger.debug(s"The key: $key is duplicate so update the TTL of key.")
-      uniqueEnvelopes.replace(key, value.toString)
+      uniqueEnvelopes.set(key, stubValue)
       false
     }
   }

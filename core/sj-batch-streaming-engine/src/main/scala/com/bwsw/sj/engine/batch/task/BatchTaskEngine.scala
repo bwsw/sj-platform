@@ -127,8 +127,8 @@ class BatchTaskEngine(batchCollector: BatchCollector,
   }
 
   private def increaseBatchCounter(stream: String) = {
-    logger.debug(s"Increase count of batches.")
     counterOfBatchesPerStream(stream) += 1
+    logger.debug(s"Increase count of batches of stream: $stream to: ${counterOfBatchesPerStream(stream)}.")
   }
 
   private def isItTimeToCollectWindow(stream: String): Boolean = {

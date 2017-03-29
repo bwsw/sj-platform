@@ -23,8 +23,8 @@ class NumericalBatchCollector(instance: BatchInstance,
   }
 
   private def increaseCounter(envelope: Envelope) = {
-    logger.debug(s"Increase count of envelopes of stream: ${envelope.stream}.")
     countOfEnvelopesPerStream(envelope.stream) += 1
+    logger.debug(s"Increase count of envelopes of stream: ${envelope.stream} to: ${countOfEnvelopesPerStream(envelope.stream)}.")
   }
 
   def prepareForNextCollecting(streamName: String) = {

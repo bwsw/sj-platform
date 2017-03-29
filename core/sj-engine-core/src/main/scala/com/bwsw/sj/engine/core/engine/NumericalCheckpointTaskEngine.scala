@@ -21,8 +21,8 @@ trait NumericalCheckpointTaskEngine {
   }
 
   private def increaseCounter() = {
-    logger.debug(s"Increase count of envelopes to: $countOfEnvelopes.")
     countOfEnvelopes += 1
+    logger.debug(s"Increase count of envelopes to: $countOfEnvelopes.")
   }
 
   def prepareForNextCheckpoint() = {

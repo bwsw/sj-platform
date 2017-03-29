@@ -208,7 +208,7 @@ object DataFactory {
     instance.coordinationService = serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKService]
     instance.duplicateCheck = false
     instance.lookupHistory = 100
-    instance.queueMaxSize = 100
+    instance.queueMaxSize = 500
     instance.defaultEvictionPolicy = EngineLiterals.lruDefaultEvictionPolicy
     instance.evictionPolicy = "expanded-time"
     instance.tasks = tasks
