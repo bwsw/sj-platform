@@ -8,9 +8,10 @@ import com.bwsw.sj.engine.core.entities.OutputEnvelope
 
 class StubJdbcData extends OutputEnvelope {
   var value: Int = 0
+  var stringValue = ""
   var id: String = java.util.UUID.randomUUID.toString
 
   override def getFieldsValue: Map[String, Any] = {
-    Map("value" -> value, "id" -> id)
+    Map("value" -> value, "string_value" -> stringValue, "id" -> id)
   }
 }

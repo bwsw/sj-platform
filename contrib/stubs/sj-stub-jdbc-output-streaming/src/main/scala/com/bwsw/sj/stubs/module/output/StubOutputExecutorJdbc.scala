@@ -1,7 +1,5 @@
 package com.bwsw.sj.stubs.module.output
 
-import java.sql.PreparedStatement
-
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
@@ -15,7 +13,7 @@ import com.bwsw.sj.stubs.module.output.data.StubJdbcData
  *
  * @author Diryavkin Dmitry
  */
-class StubOutputExecutorJdbc(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[Integer](manager) {
+class StubOutputExecutorJdbc(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[(Integer, String)](manager) {
 
   val objectSerializer = new ObjectSerializer()
 
@@ -25,13 +23,15 @@ class StubOutputExecutorJdbc(manager: OutputEnvironmentManager) extends OutputSt
    * @param envelope Input T-Stream envelope
    * @return List of output envelopes
    */
-  override def onMessage(envelope: TStreamEnvelope[Integer]): List[OutputEnvelope] = {
+  override def onMessage(envelope: TStreamEnvelope[(Integer, String)]): List[OutputEnvelope] = {
     println("Processed: " + envelope.data.size + " elements")
 
-    val list = envelope.data.map { value =>
-      val dataJDBC: StubJdbcData = new StubJdbcData
-      dataJDBC.value = value
-      dataJDBC
+    val list = envelope.data.map {
+      case (i, s) =>
+        val dataJDBC: StubJdbcData = new StubJdbcData
+        dataJDBC.value = i
+        dataJDBC.stringValue = s
+        dataJDBC
     }
     list
   }
@@ -40,6 +40,7 @@ class StubOutputExecutorJdbc(manager: OutputEnvironmentManager) extends OutputSt
     val entity = new JdbcEntityBuilder()
       .field(new JavaStringField("id"))
       .field(new IntegerField("value"))
+      .field(new JavaStringField("string_value"))
       .build()
     entity
   }
