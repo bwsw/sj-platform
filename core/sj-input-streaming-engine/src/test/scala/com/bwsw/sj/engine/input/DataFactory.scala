@@ -77,7 +77,7 @@ object DataFactory {
       .setProperty(TSF_Dictionary.Coordination.ENDPOINTS, tStreamService.lockProvider.hosts.mkString(","))
   }
 
-  def writeData(totalInputElements: Int, totalDuplicateElements: Int) = {
+  def writeData(totalInputElements: Int, numberOfDuplicates: Int) = {
     try {
       val socket = new Socket(host, port)
       var amountOfDuplicates = -1
@@ -86,7 +86,7 @@ object DataFactory {
       val out = new PrintStream(socket.getOutputStream)
 
       while (amountOfElements < totalInputElements) {
-        if (amountOfDuplicates != totalDuplicateElements) {
+        if (amountOfDuplicates != numberOfDuplicates) {
           out.println(currentElement)
           out.flush()
           amountOfElements += 1

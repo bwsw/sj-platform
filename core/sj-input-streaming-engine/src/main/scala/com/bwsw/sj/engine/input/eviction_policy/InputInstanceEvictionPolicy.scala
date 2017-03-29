@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory
 
 abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
   protected val logger = LoggerFactory.getLogger(this.getClass)
+  protected val stubValue = "stub"
   private val hazelcastMapName = instance.name + "-" + "inputEngine"
   private val config = createHazelcastConfig()
   private val hazelcastInstance = Hazelcast.newHazelcastInstance(config)
@@ -28,10 +29,9 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
   /**
    * Checks whether a specific key is duplicate or not
    * @param key Key that will be checked
-   * @param value In case there is a need to update duplicate key this value will be used
    * @return True if the key is not duplicate and false in other case
    */
-  def checkForDuplication(key: String, value: Any): Boolean
+  def checkForDuplication(key: String): Boolean
 
   /**
    * Returns a keys storage (Hazelcast map) for checking of there are duplicates (input envelopes) or not

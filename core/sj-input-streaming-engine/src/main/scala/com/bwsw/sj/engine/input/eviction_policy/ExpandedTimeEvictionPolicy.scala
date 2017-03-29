@@ -7,15 +7,12 @@ import com.bwsw.sj.common.DAL.model.module.InputInstance
  */
 
 class ExpandedTimeEvictionPolicy(instance: InputInstance) extends InputInstanceEvictionPolicy(instance) {
-  private val stubValue = "stub"
-
   /**
    * Checks whether a specific key is duplicate or not and if it is update a value by the key
    * @param key Key that will be checked
-   * @param value In case there is a need to update duplicate key this value will be used
    * @return True if the key is not duplicate and false in other case
    */
-  def checkForDuplication(key: String, value: Any): Boolean = {
+  def checkForDuplication(key: String): Boolean = {
     logger.debug(s"Check for duplicate a key: $key.")
     if (!uniqueEnvelopes.containsKey(key)) {
       logger.debug(s"The key: $key is not duplicate.")

@@ -180,7 +180,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
       case Some(inputEnvelope) =>
         logger.info(s"Task name: ${manager.taskName}. Envelope is defined. Process it.")
         performanceMetrics.addEnvelopeToInputStream(inputEnvelope)
-        if (checkForDuplication(inputEnvelope.key, inputEnvelope.duplicateCheck, inputEnvelope.data)) {
+        if (checkForDuplication(inputEnvelope.key, inputEnvelope.duplicateCheck)) {
           logger.debug(s"Task name: ${manager.taskName}. Envelope is not duplicate so send it.")
           inputEnvelope.outputMetadata.foreach(x => {
             sendData(x._1, x._2, inputEnvelope.data)
@@ -196,17 +196,16 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
    * Checks whether a key is duplicate or not if it's necessary
    * @param key Key for checking
    * @param duplicateCheck Flag points a key has to be checked or not.
-   * @param value In case there is a need to update duplicate key this value will be used
    * @return True if a processed envelope is not duplicate and false in other case
    */
-  private def checkForDuplication(key: String, duplicateCheck: Boolean, value: Any): Boolean = {
+  private def checkForDuplication(key: String, duplicateCheck: Boolean): Boolean = {
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Try to check key: '$key' for duplication with a setting duplicateCheck = '$duplicateCheck' " +
       s"and an instance setting - 'duplicate-check' : '${instance.duplicateCheck}'.")
     if (instance.duplicateCheck || duplicateCheck) {
       logger.info(s"Task name: ${manager.taskName}. " +
         s"Check key: '$key' for duplication.")
-      evictionPolicy.checkForDuplication(key, value)
+      evictionPolicy.checkForDuplication(key)
     } else true
   }
 
