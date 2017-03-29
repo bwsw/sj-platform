@@ -57,9 +57,9 @@ class InputInstanceValidator extends InstanceValidator {
         createMessage("rest.validator.attribute.must.greater.or.equal.zero", "lookupHistory")
     }
 
-    if (inputInstanceMetadata.queueMaxSize < 0) {
+    if (inputInstanceMetadata.queueMaxSize < 271) {
       errors += createMessage("rest.validator.attribute.required", "queueMaxSize") + ". " +
-        createMessage("rest.validator.attribute.must.greater.or.equal.zero", "queueMaxSize")
+        createMessage("rest.validator.attribute.must.greater.or.equal", "queueMaxSize", "271")
     }
 
     if (!defaultEvictionPolicies.contains(inputInstanceMetadata.defaultEvictionPolicy)) {
