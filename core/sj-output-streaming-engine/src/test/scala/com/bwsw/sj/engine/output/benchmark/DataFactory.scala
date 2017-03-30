@@ -3,12 +3,12 @@ package com.bwsw.sj.engine.output.benchmark
 import java.io.{BufferedReader, File, InputStreamReader}
 import java.util.jar.JarFile
 
+import com.bwsw.common._
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.common.jdbc.JdbcClientBuilder
 import com.bwsw.common.traits.Serializer
-import com.bwsw.common._
-import com.bwsw.sj.common.DAL.model.{ESService, Generator, _}
 import com.bwsw.sj.common.DAL.model.module.{OutputInstance, Task}
+import com.bwsw.sj.common.DAL.model.{ESService, Generator, _}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.rest.entities.module.ExecutionPlan
@@ -20,15 +20,14 @@ import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
 import com.bwsw.tstreams.generator.LocalTransactionGenerator
 import com.bwsw.tstreams.streams.StreamService
-import org.elasticsearch.search.SearchHits
 
 import scala.collection.JavaConverters._
 
 /**
- *
- *
- * @author Kseniya Tomskikh
- */
+  *
+  *
+  * @author Kseniya Tomskikh
+  */
 object DataFactory {
 
 
@@ -82,7 +81,6 @@ object DataFactory {
   private val tstreamFactory = new TStreamsFactory()
 
 
-
   setTStreamFactoryProperties()
 
   private def setTStreamFactoryProperties() = {
@@ -131,7 +129,7 @@ object DataFactory {
   }
 
   def createData(countTxns: Int, countElements: Int) = {
-    val tStream: TStreamSjStream =  new TStreamSjStream (
+    val tStream: TStreamSjStream = new TStreamSjStream(
       tstreamInputName, "", 4, tstrqService,
       StreamLiterals.tstreamType, Array("tag"), new Generator()
     )
@@ -167,8 +165,8 @@ object DataFactory {
               |t
             """.stripMargin
         }
-        println(s"write data $number, |$string|")
-        val msg = objectSerializer.serialize((number, string).asInstanceOf[Object])
+        println(s"write data $number")
+        val msg = objectSerializer.serialize(number.asInstanceOf[Object])
         transaction.send(msg)
       }
       println("checkpoint")
@@ -201,25 +199,12 @@ object DataFactory {
     (client, jdbcService)
   }
 
-  def clearEsStream() = {
+  def deleteIndex() = {
     if (streamService.get(esStreamName).isDefined) {
       val stream = streamService.get(esStreamName).get.asInstanceOf[ESSjStream]
-      val (client, service) = openEsConnection(stream)
-      var outputData: Option[SearchHits] = None
-      try {
-        outputData = Some(client.search(service.index, stream.name))
-      }
-      catch {
-        case _: Exception =>
-      }
+      val (client, _) = openEsConnection(stream)
+      client.deleteIndex(esIndex)
 
-      if (outputData.isDefined) {
-        outputData.get.getHits.foreach { hit =>
-          val id = hit.getId
-          client.deleteDocumentByTypeAndId(service.index, stream.name, id)
-        }
-        client.deleteIndex(esIndex)
-      }
       client.close()
     }
   }
@@ -280,11 +265,11 @@ object DataFactory {
 
   def create_table: String = {
     s"CREATE TABLE `$jdbcStreamName` " +
-    "(id VARCHAR(255) not NULL, " +
-    " value INTEGER, " +
-    " string_value VARCHAR(255), " +
-    " txn VARCHAR(255), " +
-    " PRIMARY KEY ( id ))"
+      "(id VARCHAR(255) not NULL, " +
+      " value INTEGER, " +
+      " string_value VARCHAR(255), " +
+      " txn VARCHAR(255), " +
+      " PRIMARY KEY ( id ))"
   }
 
   def close() = {
@@ -361,7 +346,7 @@ object DataFactory {
   }
 
   def createStreams(partitions: Int) = {
-     val esService = serviceManager.get(esServiceName).get.asInstanceOf[ESService]
+    val esService = serviceManager.get(esServiceName).get.asInstanceOf[ESService]
     val esStream: ESSjStream = new ESSjStream()
     esStream.name = esStreamName
     esStream.description = "es stream for benchmarks"

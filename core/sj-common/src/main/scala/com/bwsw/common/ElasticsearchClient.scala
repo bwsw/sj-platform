@@ -6,6 +6,7 @@ import java.util.UUID
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.InetSocketTransportAddress
 import org.elasticsearch.index.query.{QueryBuilder, QueryBuilders}
+import org.elasticsearch.index.reindex.DeleteByQueryAction
 import org.elasticsearch.search.SearchHits
 import org.elasticsearch.transport.client.PreBuiltTransportClient
 import org.slf4j.LoggerFactory
@@ -34,24 +35,16 @@ class ElasticsearchClient(hosts: Set[(String, Int)]) {
     client.admin().indices().prepareCreate(index).execute().actionGet()
   }
 
-  def deleteDocumentByTypeAndId(index: String, documentType: String, documentId: String) = {
-    logger.debug(s"Delete a document from index: '$index' by id: '$documentId'.")
-    client.prepareDelete(index, documentType, documentId).execute().actionGet()
+  def deleteDocuments(index: String, documentType: String, query: QueryBuilder = QueryBuilders.matchAllQuery()) = {
+      DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
+        .filter(query)
+        .source(index)
+        .get()
   }
 
   def deleteIndex(index: String) = {
     logger.info(s"Delete an index: '$index' from Elasticsearch.")
     client.admin().indices().prepareDelete(index).execute().actionGet()
-  }
-
-  def createMapping(index: String, mappingType: String, mappingSource: String) = {
-    logger.debug(s"Create a new index: '$index' in Elasticsearch.")
-    client.admin().indices()
-      .preparePutMapping(index)
-      .setType(mappingType)
-      .setSource(mappingSource)
-      .execute()
-      .actionGet()
   }
 
   def search(index: String, documentType: String, queryBuilder: QueryBuilder = QueryBuilders.matchAllQuery()): SearchHits = {
