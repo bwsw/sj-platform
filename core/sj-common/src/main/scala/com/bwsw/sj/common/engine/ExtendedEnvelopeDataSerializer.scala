@@ -6,12 +6,12 @@ import org.apache.avro.generic.GenericRecord
 import org.slf4j.LoggerFactory
 
 /**
-  * Serializer from [[org.apache.avro.generic.GenericRecord GenericRecord]] and vice versa.
+  * Serializer that extend the default functionality for [[org.apache.avro.generic.GenericRecord GenericRecord]]
   *
   * @param schema avro schema for deserialization
   * @author Pavel Tomskikh
   */
-class AvroEnvelopeDataSerializer(classLoader: ClassLoader, schema: Option[Schema] = None)
+class ExtendedEnvelopeDataSerializer(classLoader: ClassLoader, schema: Option[Schema] = None)
   extends DefaultEnvelopeDataSerializer(classLoader) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
@@ -22,7 +22,9 @@ class AvroEnvelopeDataSerializer(classLoader: ClassLoader, schema: Option[Schema
 
     data match {
       case record: GenericRecord => avroSerializer.serialize(record)
-      case _ => super.serialize(data)
+      case _: Serializable => super.serialize(data)
+      case wrongClass => throw new NotImplementedError(s"Method serialize isn't defined for ${wrongClass.getClass}. " +
+        s"It should have a GenericRecord type or it should be serializable (implement a Serializable trait)")
     }
   }
 

@@ -9,7 +9,7 @@ import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
-import com.bwsw.sj.common.engine.{AvroEnvelopeDataSerializer, EnvelopeDataSerializer, StreamingExecutor}
+import com.bwsw.sj.common.engine.{ExtendedEnvelopeDataSerializer, EnvelopeDataSerializer, StreamingExecutor}
 import com.bwsw.sj.common.rest.entities.module.ExecutionPlan
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.StreamLiterals._
@@ -62,7 +62,7 @@ abstract class TaskManager() {
 
   val converter = new ArrayByteConverter
   val envelopeDataSerializer: EnvelopeDataSerializer[AnyRef] =
-    new AvroEnvelopeDataSerializer(moduleClassLoader, instance.getInputAvroSchema)
+    new ExtendedEnvelopeDataSerializer(moduleClassLoader, instance.getInputAvroSchema)
   val inputs: mutable.Map[SjStream, Array[Int]]
 
   private def getInstance() = {
