@@ -22,9 +22,7 @@ class ExtendedEnvelopeDataSerializer(classLoader: ClassLoader, schema: Option[Sc
 
     data match {
       case record: GenericRecord => avroSerializer.serialize(record)
-      case _: Serializable => super.serialize(data)
-      case wrongClass => throw new NotImplementedError(s"Method serialize isn't defined for ${wrongClass.getClass}. " +
-        s"It should have a GenericRecord type or it should be serializable (implement a Serializable trait)")
+      case _ => super.serialize(data)
     }
   }
 

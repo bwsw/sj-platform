@@ -20,7 +20,6 @@ object StartFramework {
   val frameworkCheckpoint = false
   val frameworkFailoverTimeout = 0.0d
   val frameworkRole = "*"
-//  val frameworkPrincipal = "sherman"
 
   val master_path = Properties.envOrElse("MESOS_MASTER", "zk://127.0.0.1:2181/mesos")
   val frameworkTaskId = Properties.envOrElse("FRAMEWORK_ID", "broken")
