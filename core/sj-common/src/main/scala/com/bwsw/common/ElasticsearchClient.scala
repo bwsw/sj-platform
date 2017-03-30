@@ -5,7 +5,7 @@ import java.util.UUID
 
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.InetSocketTransportAddress
-import org.elasticsearch.index.query.{QueryBuilder, QueryBuilders}
+import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilder, QueryBuilders}
 import org.elasticsearch.index.reindex.DeleteByQueryAction
 import org.elasticsearch.search.SearchHits
 import org.elasticsearch.transport.client.PreBuiltTransportClient
@@ -14,8 +14,12 @@ import org.slf4j.LoggerFactory
 
 class ElasticsearchClient(hosts: Set[(String, Int)]) {
   private val logger = LoggerFactory.getLogger(this.getClass)
+  private val typeName = "_type"
   private val client = new PreBuiltTransportClient(Settings.EMPTY)
   hosts.foreach(x => setTransportAddressToClient(x._1, x._2))
+  private val deleteByQueryAction = DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
+  private val queryBuilder = new BoolQueryBuilder()
+
 
   def setTransportAddressToClient(host: String, port: Int) = {
     logger.debug(s"Add a new transport address: '$host:$port' to an elasticsearch client.")
@@ -36,10 +40,11 @@ class ElasticsearchClient(hosts: Set[(String, Int)]) {
   }
 
   def deleteDocuments(index: String, documentType: String, query: QueryBuilder = QueryBuilders.matchAllQuery()) = {
-      DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
-        .filter(query)
-        .source(index)
-        .get()
+    val queryWithType = queryBuilder.must(query).must(QueryBuilders.matchQuery(typeName, documentType))
+    deleteByQueryAction
+      .filter(queryWithType)
+      .source(index)
+      .get()
   }
 
   def deleteIndex(index: String) = {
@@ -76,4 +81,21 @@ class ElasticsearchClient(hosts: Set[(String, Int)]) {
     logger.info(s"Close an elasticsearch database connection.")
     client.close()
   }
+}
+
+
+object a extends App {
+    private val client = new PreBuiltTransportClient(Settings.EMPTY)
+   val transportAddress = new InetSocketTransportAddress(InetAddress.getByName("176.120.25.19"), 9300)
+    client.addTransportAddress(transportAddress)
+  private val deleteByQueryAction = DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
+  private val queryBuilder = new BoolQueryBuilder()
+
+  val queryWithType=  queryBuilder.must(QueryBuilders.matchQuery("txn",14908651709850000L)).must(QueryBuilders.matchQuery("_type", "es-output"))
+    val n = deleteByQueryAction
+      .filter(queryWithType)
+      .source("test_index_for_output_engine")
+      .get()
+
+  println(n.getDeleted)
 }
