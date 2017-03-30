@@ -81,6 +81,7 @@ class DateField(name: String, default: java.lang.String = "0000-00-00") extends 
     case null => "null"
     case s: java.lang.String => "\"" + s + "\""
     case l: java.lang.Long => l.toString
+    case d: java.util.Date => d.getTime.toString
     case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be java.lang.String or Long.")
   }
 }
