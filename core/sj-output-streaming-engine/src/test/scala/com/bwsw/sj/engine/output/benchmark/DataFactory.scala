@@ -283,7 +283,7 @@ object DataFactory {
     "(id VARCHAR(255) not NULL, " +
     " value INTEGER, " +
     " string_value VARCHAR(255), " +
-    " txn VARCHAR(255), " +
+    " txn BIGINT, " +
     " PRIMARY KEY ( id ))"
   }
 
