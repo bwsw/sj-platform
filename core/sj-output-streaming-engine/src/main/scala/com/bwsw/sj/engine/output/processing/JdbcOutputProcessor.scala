@@ -41,9 +41,9 @@ class JdbcOutputProcessor[T <: AnyRef](outputStream: SjStream,
 
   def remove(inputEnvelope: TStreamEnvelope[T]) = {
     logger.debug(s"Delete an envelope: '${inputEnvelope.id}' from JDBC.")
-    val sqlRemove = s"DELETE FROM `${jdbcClient.jdbcCCD.table}` WHERE `${jdbcCommandBuilder.getTransactionFieldName}` = ?'"
+    val sqlRemove = s"DELETE FROM ${jdbcClient.jdbcCCD.table} WHERE ${jdbcCommandBuilder.getTransactionFieldName} = ?'"
     val removePreparedStatement = jdbcClient.connection.prepareStatement(sqlRemove)
-    val sqlSelect = s"SELECT * FROM `${jdbcClient.jdbcCCD.table}` WHERE `${jdbcCommandBuilder.getTransactionFieldName}` = ?"
+    val sqlSelect = s"SELECT * FROM ${jdbcClient.jdbcCCD.table} WHERE ${jdbcCommandBuilder.getTransactionFieldName} = ?"
     val selectPreparedStatement = jdbcClient.connection.prepareStatement(sqlSelect)
     if (jdbcCommandBuilder.exists(inputEnvelope.id, selectPreparedStatement)) {
       val preparedStatement = jdbcCommandBuilder.buildDelete(inputEnvelope.id, removePreparedStatement)
@@ -65,7 +65,7 @@ class JdbcOutputProcessor[T <: AnyRef](outputStream: SjStream,
     logger.debug(s"Send an envelope: '${inputEnvelope.id}' to a JDBC stream: '${jdbcStream.name}'.")
     val fields = entity.asInstanceOf[Entity[(PreparedStatement, Int) => Unit]].getFields.mkString(",") + "," + jdbcCommandBuilder.getTransactionFieldName
     val fieldsParams = List.fill(fields.split(",").length)("?").mkString(",")
-    val sqlInsert = s"INSERT INTO `${jdbcClient.jdbcCCD.table}` ($fields) VALUES ($fieldsParams);"
+    val sqlInsert = s"INSERT INTO ${jdbcClient.jdbcCCD.table} ($fields) VALUES ($fieldsParams);"
     val preparedStatement = jdbcClient.connection.prepareStatement(sqlInsert)
     val jdbcFieldsValue = envelope.getFieldsValue
     val readyStatement = jdbcCommandBuilder.buildInsert(inputEnvelope.id, jdbcFieldsValue, preparedStatement)

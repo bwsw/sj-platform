@@ -14,7 +14,7 @@ import com.bwsw.sj.stubs.module.output.data.StubEsData
  *
  * @author Kseniya Tomskikh
  */
-class StubOutputExecutor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[Integer](manager) {
+class StubOutputExecutor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[(Integer, String)](manager) {
 
   /**
    * Transform t-stream transaction to output entities
@@ -22,13 +22,15 @@ class StubOutputExecutor(manager: OutputEnvironmentManager) extends OutputStream
    * @param envelope Input T-Stream envelope
    * @return List of output envelopes
    */
-  override def onMessage(envelope: TStreamEnvelope[Integer]): List[OutputEnvelope] = {
+  override def onMessage(envelope: TStreamEnvelope[(Integer, String)]): List[OutputEnvelope] = {
     println("Processed: " + envelope.data.size + " elements")
 
-    val list = envelope.data.map { value =>
+    val list = envelope.data.map {
+      case (i, s) =>
 
       val data: StubEsData = new StubEsData
-      data.value = value
+      data.value = i
+        data.stringValue = s
       data.testDate = Calendar.getInstance().getTime
 
       data
@@ -42,6 +44,7 @@ class StubOutputExecutor(manager: OutputEnvironmentManager) extends OutputStream
     val entity = entityBuilder
       .field(new DateField("test-date"))
       .field(new IntegerField("value"))
+      .field(new JavaStringField("string-value"))
       .build()
     entity
   }

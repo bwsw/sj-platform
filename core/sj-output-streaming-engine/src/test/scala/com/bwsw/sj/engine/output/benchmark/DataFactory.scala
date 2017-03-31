@@ -44,7 +44,7 @@ object DataFactory {
 
   val jdbcProviderName: String = "output-jdbc-test-provider"
   val jdbcServiceName: String = "output-jdbc-test-service"
-  val jdbcStreamName: String = "jdbc-output"
+  val jdbcStreamName: String = "jdbcoutput"
   val jdbcDriver: String = "mysql"
 
   val zookeeperServiceName: String = "output-zookeeper-test-service"
@@ -279,7 +279,7 @@ object DataFactory {
   }
 
   def create_table: String = {
-    s"CREATE TABLE `$jdbcStreamName` " +
+    s"CREATE TABLE $jdbcStreamName " +
     "(id VARCHAR(255) not NULL, " +
     " value INTEGER, " +
     " string_value VARCHAR(255), " +

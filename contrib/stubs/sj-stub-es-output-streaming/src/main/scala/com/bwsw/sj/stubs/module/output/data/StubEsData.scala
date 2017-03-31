@@ -11,8 +11,9 @@ import com.fasterxml.jackson.annotation.JsonProperty
 class StubEsData extends OutputEnvelope {
   @JsonProperty("test-date") var testDate: Date = null
   var value: Int = 0
+  var stringValue = ""
 
   override def getFieldsValue: Map[String, Any] = {
-    Map("test-date" -> testDate.getTime, "value" -> value)
+    Map("test-date" -> testDate, "string-value" -> stringValue, "value" -> value)
   }
 }
