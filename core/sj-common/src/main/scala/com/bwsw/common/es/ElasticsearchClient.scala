@@ -1,4 +1,4 @@
-package com.bwsw.common
+package com.bwsw.common.es
 
 import java.net.InetAddress
 import java.util.UUID
@@ -20,8 +20,7 @@ class ElasticsearchClient(hosts: Set[(String, Int)]) {
   private val deleteByQueryAction = DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
   private val queryBuilder = new BoolQueryBuilder()
 
-
-  def setTransportAddressToClient(host: String, port: Int) = {
+  private def setTransportAddressToClient(host: String, port: Int) = {
     logger.debug(s"Add a new transport address: '$host:$port' to an elasticsearch client.")
     val transportAddress = new InetSocketTransportAddress(InetAddress.getByName(host), port)
     client.addTransportAddress(transportAddress)
@@ -74,28 +73,11 @@ class ElasticsearchClient(hosts: Set[(String, Int)]) {
 
   def isConnected() = {
     logger.debug(s"Check a connection to an elasticsearch database.")
-    client.connectedNodes().size() < 1
+    client.connectedNodes().size() > 0
   }
 
   def close() = {
     logger.info(s"Close an elasticsearch database connection.")
     client.close()
   }
-}
-
-
-object a extends App {
-    private val client = new PreBuiltTransportClient(Settings.EMPTY)
-   val transportAddress = new InetSocketTransportAddress(InetAddress.getByName("176.120.25.19"), 9300)
-    client.addTransportAddress(transportAddress)
-  private val deleteByQueryAction = DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
-  private val queryBuilder = new BoolQueryBuilder()
-
-  val queryWithType=  queryBuilder.must(QueryBuilders.matchQuery("txn",14908651709850000L)).must(QueryBuilders.matchQuery("_type", "es-output"))
-    val n = deleteByQueryAction
-      .filter(queryWithType)
-      .source("test_index_for_output_engine")
-      .get()
-
-  println(n.getDeleted)
 }

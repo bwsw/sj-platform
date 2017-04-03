@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.core.output.types.es
 
-import com.bwsw.common.ElasticsearchClient
+import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.sj.engine.core.output.Entity
 import org.elasticsearch.index.query.{QueryBuilder, QueryBuilders}
 

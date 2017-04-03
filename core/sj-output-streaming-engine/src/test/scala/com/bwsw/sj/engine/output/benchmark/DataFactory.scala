@@ -4,6 +4,7 @@ import java.io.{BufferedReader, File, InputStreamReader}
 import java.util.jar.JarFile
 
 import com.bwsw.common._
+import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.common.jdbc.JdbcClientBuilder
 import com.bwsw.common.traits.Serializer

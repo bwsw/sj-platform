@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.rest.entities.stream
 
-import com.bwsw.common.ElasticsearchClient
+import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.sj.common.DAL.model.{ESService, ESSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
