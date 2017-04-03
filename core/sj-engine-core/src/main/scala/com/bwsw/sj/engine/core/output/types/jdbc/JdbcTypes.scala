@@ -15,7 +15,7 @@ class DecimalField(name: String, default: java.math.BigDecimal = java.math.BigDe
   override def transform(fieldValue: Any): (PreparedStatement, Int) => Unit = fieldValue match {
     case null => (ps: PreparedStatement, idx: Int) => ps.setBigDecimal(idx, null)
     case i: java.math.BigDecimal => (ps: PreparedStatement, idx: Int) => ps.setBigDecimal(idx, i)
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be java.math.BigDecimal.")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be java.math.BigDecimal.")
   }
 }
 
@@ -23,7 +23,7 @@ class IntegerField(name: String, default: java.lang.Integer = 0) extends JdbcFie
   override def transform(fieldValue: Any): (PreparedStatement, Int) => Unit = fieldValue match {
     case null => (ps: PreparedStatement, idx: Int) => ps.setInt(idx, null.asInstanceOf[java.lang.Integer])
     case i: java.lang.Integer => (ps: PreparedStatement, idx: Int) => ps.setInt(idx, i)
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Integer.")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Integer.")
   }
 }
 
@@ -31,7 +31,7 @@ class LongField(name: String, default: java.lang.Long = 0L) extends JdbcField[ja
   override def transform(fieldValue: Any): (PreparedStatement, Int) => Unit = fieldValue match {
     case null => (ps: PreparedStatement, idx: Int) => ps.setLong(idx, null.asInstanceOf[java.lang.Long])
     case i: java.lang.Long => (ps: PreparedStatement, idx: Int) => ps.setLong(idx, i)
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Long.")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Long.")
   }
 }
 
@@ -39,7 +39,7 @@ class FloatField(name: String, default: java.lang.Float = 0.0f) extends JdbcFiel
   override def transform(fieldValue: Any): (PreparedStatement, Int) => Unit = fieldValue match {
     case null => (ps: PreparedStatement, idx: Int) => ps.setFloat(idx, null.asInstanceOf[java.lang.Float])
     case i: java.lang.Float => (ps: PreparedStatement, idx: Int) => ps.setFloat(idx, i)
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Float.")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Float.")
   }
 }
 //
@@ -47,7 +47,7 @@ class DoubleField(name: String, default: java.lang.Double = 0.0) extends JdbcFie
   override def transform(fieldValue: Any): (PreparedStatement, Int) => Unit = fieldValue match {
     case null => (ps: PreparedStatement, idx: Int) => ps.setDouble(idx, null.asInstanceOf[java.lang.Double])
     case i: java.lang.Double => (ps: PreparedStatement, idx: Int) => ps.setDouble(idx, i)
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Double.")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Double.")
   }
 }
 //
@@ -55,7 +55,7 @@ class ByteField(name: String, default: java.lang.Byte = 0.toByte) extends JdbcFi
   override def transform(fieldValue: Any): (PreparedStatement, Int) => Unit = fieldValue match {
     case null => (ps: PreparedStatement, idx: Int) => ps.setByte(idx, null.asInstanceOf[java.lang.Byte])
     case i: java.lang.Byte => (ps: PreparedStatement, idx: Int) => ps.setByte(idx, i)
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Byte.")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Byte.")
   }
 }
 //
@@ -63,7 +63,7 @@ class CharField(name: String, default: java.lang.Character = 0.toChar) extends J
   override def transform(fieldValue: Any): (PreparedStatement, Int) => Unit = fieldValue match {
     case null => (ps: PreparedStatement, idx: Int) => ps.setString(idx, null.asInstanceOf[java.lang.String])
     case i: java.lang.Character => (ps: PreparedStatement, idx: Int) => ps.setString(idx, i.toString)
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Character.")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Character.")
   }
 }
 
@@ -71,7 +71,7 @@ class ShortField(name: String, default: java.lang.Short = 0.toShort) extends Jdb
   override def transform(fieldValue: Any): (PreparedStatement, Int) => Unit = fieldValue match {
     case null => (ps: PreparedStatement, idx: Int) => ps.setShort(idx, null.asInstanceOf[java.lang.Short])
     case i: java.lang.Short => (ps: PreparedStatement, idx: Int) => ps.setShort(idx, i)
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Short.")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Short.")
   }
 }
 
@@ -79,7 +79,7 @@ class BooleanField(name: String, default: java.lang.Boolean = true) extends Jdbc
   override def transform(fieldValue: Any): (PreparedStatement, Int) => Unit = fieldValue match {
     case null => (ps: PreparedStatement, idx: Int) => ps.setBoolean(idx, null.asInstanceOf[java.lang.Boolean])
     case i: java.lang.Boolean => (ps: PreparedStatement, idx: Int) => ps.setBoolean(idx, i)
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Boolean.")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Boolean.")
   }
 }
 
@@ -88,7 +88,7 @@ class DateField(name: String, default: java.sql.Date = new java.sql.Date(0L)) ex
     case null => (ps: PreparedStatement, idx: Int) => ps.setDate(idx, null.asInstanceOf[java.sql.Date])
     case i: java.sql.Date => (ps: PreparedStatement, idx: Int) => ps.setDate(idx, i)
     case i: java.lang.Long => (ps: PreparedStatement, idx: Int) => ps.setDate(idx, new java.sql.Date(i))
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be java.sql.Date.")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be java.sql.Date.")
   }
 }
 
@@ -96,7 +96,7 @@ class BinaryField(name: String, default: Array[Byte] = new Array[Byte](0)) exten
   override def transform(fieldValue: Any): (PreparedStatement, Int) => Unit = fieldValue match {
     case null => (ps: PreparedStatement, idx: Int) => ps.setBytes(idx, null.asInstanceOf[Array[Byte]])
     case i: Array[Byte] => (ps: PreparedStatement, idx: Int) => ps.setBytes(idx, i)
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Array[Byte].")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Array[Byte].")
   }
 }
 

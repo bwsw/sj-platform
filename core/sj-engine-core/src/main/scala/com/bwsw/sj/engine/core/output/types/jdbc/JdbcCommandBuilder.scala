@@ -7,7 +7,7 @@ import com.bwsw.sj.engine.core.output.Entity
 /**
   * Created by diryavkin_dn on 07.03.17.
   */
-class JdbcCommandBuilder(transactionFieldName: String, entity: Entity[(PreparedStatement, Int) => Unit]) {
+class JdbcCommandBuilder(val transactionFieldName: String, entity: Entity[(PreparedStatement, Int) => Unit]) {
   def buildInsert(transaction: Long, m: Map[String, Any], preparedStatement: PreparedStatement): PreparedStatement = {
     var t = 0
     val mv = entity.getFields.map(f => if (m.contains(f)) {
@@ -30,11 +30,8 @@ class JdbcCommandBuilder(transactionFieldName: String, entity: Entity[(PreparedS
     preparedStatement
   }
 
-  def exists(transaction: Long, preparedStatement: PreparedStatement): Boolean = {
+  def exists(transaction: Long, preparedStatement: PreparedStatement): PreparedStatement = {
     preparedStatement.setLong(1, transaction)
-    val res = preparedStatement.executeQuery()
-    res.next()
+    preparedStatement
   }
-
-  def getTransactionFieldName: String = transactionFieldName
 }

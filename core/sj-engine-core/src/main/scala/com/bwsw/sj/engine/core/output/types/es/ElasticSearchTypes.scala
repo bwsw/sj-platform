@@ -16,7 +16,7 @@ class IntegerField(name: String, default: java.lang.Integer = 0) extends Elastic
   override def transform(fieldValue: Any): String = fieldValue match {
     case null => "null"
     case i: java.lang.Integer => i.toString
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Integer.")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Integer.")
   }
 }
 
@@ -24,7 +24,7 @@ class LongField(name: String, default: java.lang.Long = 0L) extends Elasticsearc
   override def transform(fieldValue: Any): String = fieldValue match {
     case null => "null"
     case l: java.lang.Long => l.toString
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Long.")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Long.")
   }
 }
 
@@ -32,7 +32,7 @@ class FloatField(name: String, default: java.lang.Float = 0.0f) extends Elastics
   override def transform(fieldValue: Any): String = fieldValue match {
     case null => "null"
     case f: java.lang.Float => f.toString
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Float.")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Float.")
   }
 }
 
@@ -40,7 +40,7 @@ class DoubleField(name: String, default: java.lang.Double = 0.0) extends Elastic
   override def transform(fieldValue: Any): String = fieldValue match {
     case null => "null"
     case d: java.lang.Double => d.toString
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Double.")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Double.")
   }
 }
 
@@ -48,7 +48,7 @@ class ByteField(name: String, default: java.lang.Byte = 0.toByte) extends Elasti
   override def transform(fieldValue: Any): String = fieldValue match {
     case null => "null"
     case b: java.lang.Byte => b.toString
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Byte.")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Byte.")
   }
 }
 
@@ -56,7 +56,7 @@ class CharField(name: String, default: java.lang.Character = 0.toChar) extends E
   override def transform(fieldValue: Any): String = fieldValue match {
     case null => "null"
     case c: java.lang.Character => c.toString
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Character.")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Character.")
   }
 }
 
@@ -64,7 +64,7 @@ class ShortField(name: String, default: java.lang.Short = 0.toShort) extends Ela
   override def transform(fieldValue: Any): String = fieldValue match {
     case null => "null"
     case s: java.lang.Short => s.toString
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Short.")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Short.")
   }
 }
 
@@ -72,7 +72,7 @@ class BooleanField(name: String, default: java.lang.Boolean = true) extends Elas
   override def transform(fieldValue: Any): String = fieldValue match {
     case null => "null"
     case b: java.lang.Boolean => b.toString
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Boolean.")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be java.lang.Boolean.")
   }
 }
 
@@ -82,7 +82,7 @@ class DateField(name: String, default: java.lang.String = "0000-00-00") extends 
     case s: java.lang.String => "\"" + s + "\""
     case l: java.lang.Long => l.toString
     case d: java.util.Date => d.getTime.toString
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be java.lang.String or Long.")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be java.lang.String or Long.")
   }
 }
 
@@ -90,7 +90,7 @@ class BinaryField(name: String, default: Array[Byte] = new Array[Byte](0)) exten
   override def transform(fieldValue: Any): String = fieldValue match {
     case null => "null"
     case ab: Array[Byte] => Base64.getEncoder.encodeToString(ab)
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be Array[Byte]")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be Array[Byte]")
   }
 }
 
@@ -123,7 +123,7 @@ class RangeField[T](name: String, default: String = "") extends ElasticsearchFie
       s"""{"gte": $from, "lte": $to}"""
     case (from: String, to: String) =>
       s"""{"gte": "${StringEscapeUtils.escapeJava(from)}", "lte": "${StringEscapeUtils.escapeJava(to)}"}"""
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be (Integer, Integer), (Long, Long), (Float, Float) or (String, String).")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be (Integer, Integer), (Long, Long), (Float, Float) or (String, String).")
   }
 }
 
@@ -133,9 +133,9 @@ class ArrayField(name: String, default: String = "[]") extends ElasticsearchFiel
     case s: String =>
       JSON.parseRaw(s).orNull match {
         case _: JSONArray => s
-        case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be JSON Array in String form.")
+        case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be JSON Array in String form.")
       }
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be JSON Array in String form.")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be JSON Array in String form.")
   }
 }
 
@@ -145,8 +145,8 @@ class ObjectField(name: String, default: String = "{}") extends ElasticsearchFie
     case s: String =>
       JSON.parseRaw(s).orNull match {
         case _: JSONObject => s
-        case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be JSON Object in String form.")
+        case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be JSON Object in String form.")
       }
-    case _ => throw new IncompatibleTypeException(s"Field '$name' has incompatible type ${fieldValue.getClass.getName}. Must be JSON Object in String form.")
+    case _ => throw new IncompatibleTypeException(s"Field '$name' has an incompatible type ${fieldValue.getClass.getName}. Must be JSON Object in String form.")
   }
 }

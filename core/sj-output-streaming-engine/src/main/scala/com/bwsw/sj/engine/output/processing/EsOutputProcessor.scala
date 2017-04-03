@@ -13,12 +13,12 @@ import org.elasticsearch.index.query.QueryBuilders
 class EsOutputProcessor[T <: AnyRef](outputStream: SjStream,
                         performanceMetrics: OutputStreamingPerformanceMetrics,
                         manager: OutputTaskManager,
-                                     entity: AnyRef)
+                                     entity: Entity[_])
   extends OutputProcessor[T](outputStream, performanceMetrics) {
 
   private val esService = outputStream.service.asInstanceOf[ESService]
   private val esClient = openConnection()
-  private val esCommandBuilder = new ElasticsearchCommandBuilder("txn", entity.asInstanceOf[Entity[String]])
+  private val esCommandBuilder = new ElasticsearchCommandBuilder(txnFieldName, entity.asInstanceOf[Entity[String]])
   
   private def openConnection(): ElasticsearchClient = {
     logger.info(s"Open a connection to elasticsearch at address: '${esService.provider.hosts}'.")
@@ -38,7 +38,7 @@ class EsOutputProcessor[T <: AnyRef](outputStream: SjStream,
     val streamName = outputStream.name
     logger.debug(s"Delete a transaction: '$transaction' from elasticsearch stream.")
     if (esClient.doesIndexExist(index)) {
-      val query = QueryBuilders.matchQuery("txn", transaction)
+      val query = QueryBuilders.matchQuery(txnFieldName, transaction)
       esClient.deleteDocuments(index, streamName, query)
     }
   }

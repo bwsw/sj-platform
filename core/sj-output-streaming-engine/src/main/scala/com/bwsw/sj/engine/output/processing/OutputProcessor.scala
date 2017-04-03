@@ -3,6 +3,7 @@ package com.bwsw.sj.engine.output.processing
 import com.bwsw.sj.common.DAL.model.SjStream
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.output.Entity
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory
 abstract class OutputProcessor[T <: AnyRef](outputStream: SjStream,
                                             performanceMetrics: OutputStreamingPerformanceMetrics) {
   protected val logger = LoggerFactory.getLogger(this.getClass)
+  protected def txnFieldName = "txn"
 
   /**
     * Main method of handler: prepare, register and send.
@@ -62,7 +64,7 @@ abstract class OutputProcessor[T <: AnyRef](outputStream: SjStream,
 }
 
 object OutputProcessor {
-  def apply[T <: AnyRef](outputStream: SjStream, performanceMetrics: OutputStreamingPerformanceMetrics, manager: OutputTaskManager, entity: AnyRef) = {
+  def apply[T <: AnyRef](outputStream: SjStream, performanceMetrics: OutputStreamingPerformanceMetrics, manager: OutputTaskManager, entity: Entity[_]) = {
     outputStream.streamType match {
       case StreamLiterals.esOutputType =>
         new EsOutputProcessor[T](outputStream, performanceMetrics, manager, entity)
