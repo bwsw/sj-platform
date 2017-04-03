@@ -348,10 +348,24 @@ object DataFactory {
     serviceManager.save(jdbcService)
   }
 
+  def mapping: java.util.Map[String, String] = Map[String, String](
+    "test-date" -> "type=date",
+    "value" -> "type=integer",
+    "string-value" -> "type=string",
+    "txn" -> "type=long"
+  ).asJava
+
   def createIndex() = {
     val stream = streamService.get(esStreamName).get.asInstanceOf[ESSjStream]
     val esClient = openEsConnection(stream)
     esClient._1.createIndex(esIndex)
+    createIndexMapping(mapping)
+  }
+
+  def createIndexMapping(mapping: java.util.Map[String, String]) = {
+    val stream = streamService.get(esStreamName).get.asInstanceOf[ESSjStream]
+    val esClient = openEsConnection(stream)
+    esClient._1.createMapping(esIndex, esStreamName, mapping)
   }
 
   def createTable() = {

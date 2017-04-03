@@ -44,7 +44,7 @@ class ElasticsearchClient(hosts: Set[(String, Int)]) {
     client.admin().indices().prepareDelete(index).execute().actionGet()
   }
 
-  def createMapping(index: String, mappingType: String, mappingSource: String) = {
+  def createMapping(index: String, mappingType: String, mappingSource: java.util.Map[String, String]) = {
     logger.debug(s"Create a new index: '$index' in Elasticsearch.")
     client.admin().indices()
       .preparePutMapping(index)
