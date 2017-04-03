@@ -10,5 +10,5 @@ class ElasticsearchEntityBuilder(m: Map[String, NamedType[String]] = Map[String,
     new ElasticsearchEntityBuilder(m + (c.getName -> c.asInstanceOf[NamedType[String]]))
   }
 
-  override def field(c: NamedType[String]): EntityBuilder[String] = throw new IncompatibleTypeException("Use more specific method field. Parent method is locked.")
+  override def field(c: NamedType[String]): EntityBuilder[String] = throw new IncompatibleTypeException("Use a more specific method field. Parent method is locked.")
 }
