@@ -5,6 +5,7 @@ import java.util.UUID
 
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.InetSocketTransportAddress
+import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.index.query.{QueryBuilder, QueryBuilders}
 import org.elasticsearch.search.SearchHits
 import org.elasticsearch.transport.client.PreBuiltTransportClient
@@ -44,7 +45,7 @@ class ElasticsearchClient(hosts: Set[(String, Int)]) {
     client.admin().indices().prepareDelete(index).execute().actionGet()
   }
 
-  def createMapping(index: String, mappingType: String, mappingSource: java.util.Map[String, String]) = {
+  def createMapping(index: String, mappingType: String, mappingSource: XContentBuilder) = {
     logger.debug(s"Create a new index: '$index' in Elasticsearch.")
     client.admin().indices()
       .preparePutMapping(index)
