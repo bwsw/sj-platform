@@ -169,8 +169,8 @@ object DataFactory {
               |t
             """.stripMargin
         }
-        println(s"write data $number")
-        val msg = objectSerializer.serialize(number.asInstanceOf[Object])
+        println(s"write data $number, |$string|")
+        val msg = objectSerializer.serialize((number, string).asInstanceOf[Object])
         transaction.send(msg)
       }
       println("checkpoint")
