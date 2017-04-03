@@ -18,12 +18,9 @@ class ElasticsearchCommandBuilder(transactionFieldName: String, entity: Entity[S
     s"""{"$transactionFieldName": $transaction, """ + mv.map({ case (k: String, v: String) => s""""$k": $v""" }).mkString(", ") + "}"
   }
 
-  def buildDelete(transaction: Long): QueryBuilder = QueryBuilders.matchQuery(transactionFieldName, transaction)
-
-
   def buildRemove(index: String, streamName: String, transaction: Long, client: ElasticsearchClient) = {
     val query = QueryBuilders.matchQuery("txn", transaction)
     val outputData = client.search(index, streamName, query)
-   // outputData.getHits.foreach(hit => client.deleteDocumentByTypeAndId(index, streamName, hit.getId))
+    outputData.getHits.foreach(hit => client.deleteDocumentByTypeAndId(index, streamName, hit.getId))
   }
 }
