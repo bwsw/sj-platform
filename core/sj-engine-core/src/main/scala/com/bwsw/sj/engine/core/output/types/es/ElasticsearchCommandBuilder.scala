@@ -20,9 +20,6 @@ class ElasticsearchCommandBuilder(transactionFieldName: String, entity: Entity[S
 
   def buildDelete(transaction: Long): QueryBuilder = QueryBuilders.matchQuery(transactionFieldName, transaction)
 
-  def buildIndexExists(index: String, client: ElasticsearchClient): Boolean = {
-    client.doesIndexExist(index)
-  }
 
   def buildRemove(index: String, streamName: String, transaction: Long, client: ElasticsearchClient) = {
     val query = QueryBuilders.matchQuery("txn", transaction)

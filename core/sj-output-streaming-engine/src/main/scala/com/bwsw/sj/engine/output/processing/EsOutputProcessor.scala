@@ -36,7 +36,7 @@ class EsOutputProcessor[T <: AnyRef](outputStream: SjStream,
     val index = esService.index
     val streamName = outputStream.name
     logger.debug(s"Delete a transaction: '$transaction' from elasticsearch stream.")
-    if (esCommandBuilder.buildIndexExists(index, esClient)) {
+    if (esClient.doesIndexExist(index)) {
       esCommandBuilder.buildRemove(index, streamName, transaction, esClient)
     }
   }
