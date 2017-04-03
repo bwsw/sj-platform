@@ -24,7 +24,7 @@ object SjESOutputModuleDestroy extends App {
 
   val module = new File("./contrib/stubs/sj-stub-es-output-streaming/target/scala-2.12/sj-stub-es-output-streaming-1.0-SNAPSHOT.jar")
 
-  clearEsStream()
+  deleteIndex()
   deleteStreams()
   deleteServices()
   deleteProviders()

@@ -43,7 +43,8 @@ object Dependencies {
     "io.netty" % "netty-all" % "4.1.7.Final",
     "com.opencsv" % "opencsv" % "3.9",
     ("org.apache.avro" % "avro" % "1.8.1")
-      .exclude("org.slf4j", "slf4j-api")
+      .exclude("org.slf4j", "slf4j-api"),
+    "org.scalatest" % "scalatest_2.12" % "3.0.1"
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(
@@ -57,7 +58,7 @@ object Dependencies {
     ("com.mockrunner" % "mockrunner-jdbc" % "1.1.2")
       .exclude("jakarta-regexp", "jakarta-regexp")
       .exclude("xerces", "xerces"),
-    "org.scalatest" % "scalatest_2.12" % "3.0.1"
+    "org.scalatest" % "scalatest_2.12" % "3.0.1" % "provided"
   ))
 
   lazy val sjRestDependencies = Def.setting(Seq(
