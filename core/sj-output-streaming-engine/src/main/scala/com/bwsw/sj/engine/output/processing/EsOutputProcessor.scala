@@ -7,6 +7,7 @@ import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import com.bwsw.sj.engine.core.output.Entity
 import com.bwsw.sj.engine.core.output.types.es.ElasticsearchCommandBuilder
+import org.elasticsearch.index.query.QueryBuilders
 
 
 class EsOutputProcessor[T <: AnyRef](outputStream: SjStream,
@@ -37,7 +38,8 @@ class EsOutputProcessor[T <: AnyRef](outputStream: SjStream,
     val streamName = outputStream.name
     logger.debug(s"Delete a transaction: '$transaction' from elasticsearch stream.")
     if (esClient.doesIndexExist(index)) {
-      esCommandBuilder.buildRemove(index, streamName, transaction, esClient)
+      val query = QueryBuilders.matchQuery("txn", transaction)
+      esClient.deleteDocuments(index, streamName, query)
     }
   }
 
