@@ -21,8 +21,11 @@ import com.bwsw.tstreams.converter.IConverter
 import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
 import com.bwsw.tstreams.generator.LocalTransactionGenerator
 import com.bwsw.tstreams.streams.StreamService
+import org.elasticsearch.common.xcontent.XContentBuilder
+import org.elasticsearch.search.SearchHits
 
 import scala.collection.JavaConverters._
+import org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder
 
 /**
   *
@@ -334,12 +337,15 @@ object DataFactory {
     serviceManager.save(jdbcService)
   }
 
-  def mapping: java.util.Map[String, String] = Map[String, String](
-    "test-date" -> "type=date",
-    "value" -> "type=integer",
-    "string-value" -> "type=string",
-    "txn" -> "type=long"
-  ).asJava
+  def mapping: XContentBuilder = jsonBuilder()
+    .startObject()
+      .startObject("properties")
+        .startObject("txn").field("type", "long").endObject()
+        .startObject("test-date").field("type", "date").endObject()
+        .startObject("value").field("type", "integer").endObject()
+        .startObject("string-value").field("type", "string").endObject()
+      .endObject()
+    .endObject()
 
   def createIndex() = {
     val stream = streamService.get(esStreamName).get.asInstanceOf[ESSjStream]
@@ -348,7 +354,7 @@ object DataFactory {
     createIndexMapping(mapping)
   }
 
-  def createIndexMapping(mapping: java.util.Map[String, String]) = {
+  def createIndexMapping(mapping: XContentBuilder) = {
     val stream = streamService.get(esStreamName).get.asInstanceOf[ESSjStream]
     val esClient = openEsConnection(stream)
     esClient._1.createMapping(esIndex, esStreamName, mapping)
@@ -500,4 +506,3 @@ object DataFactory {
     }).toSet
   }
 }
-
