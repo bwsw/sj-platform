@@ -35,20 +35,4 @@ class ESService() extends Service {
 
     protocolService
   }
-
-  private def getProviderHosts() = {
-    this.provider.hosts.map(address => {
-      val hostAndPort = address.split(":")
-      val host = hostAndPort(0)
-      val port = hostAndPort(1).toInt
-
-      (host, port)
-    }).toSet
-  }
-
-  private def isIndexUsed = {
-    ConnectionRepository.getServiceManager.getByParameters(Map("type" -> this.serviceType))
-      .map(x => x.asInstanceOf[ESService])
-      .exists(x => x.index == this.index && x.name != this.name)
-  }
 }
