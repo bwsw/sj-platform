@@ -66,35 +66,35 @@ abstract class InstanceValidator extends ValidationUtils with CompletionUtils wi
 
     // 'per-task-cores' field
     if (parameters.perTaskCores <= 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Per-task-cores")
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "perTaskCores")
     }
 
     // 'per-task-ram' field
     if (parameters.perTaskRam <= 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Per-task-ram")
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "perTaskRam")
     }
 
     // 'performance-reporting-interval' field
     if (parameters.performanceReportingInterval <= 0) {
-      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Performance-reporting-interval")
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "performanceReportingInterval")
     }
 
     // 'coordination-service' field
     Option(parameters.coordinationService) match {
       case None =>
-        errors += createMessage("rest.validator.attribute.required", "Coordination-service")
+        errors += createMessage("rest.validator.attribute.required", "coordinationService")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("rest.validator.attribute.required", "Coordination-service")
+          errors += createMessage("rest.validator.attribute.required", "coordinationService")
         }
         else {
           val coordService = serviceDAO.get(x)
           if (coordService.isDefined) {
             if (!coordService.get.isInstanceOf[ZKService]) {
-              errors += createMessage("rest.validator.attribute.not", "Coordination-service", "ZKCoord")
+              errors += createMessage("rest.validator.attribute.not", "coordinationService", "ZKCoord")
             }
           } else {
-            errors += createMessage("rest.validator.not.exist", s"'Coordination-service' $x")
+            errors += createMessage("rest.validator.not.exist", s"'coordinationService' $x")
           }
         }
     }
@@ -133,7 +133,8 @@ abstract class InstanceValidator extends ValidationUtils with CompletionUtils wi
     }
   }
 
-  protected def checkParallelism(parallelism: Any, minimumNumberOfPartitions: Int) = {
+  protected def validateParallelism(parallelism: Any, minimumNumberOfPartitions: Int) = {
+    logger.debug(s"Validate a parallelism parameter.")
     val errors = new ArrayBuffer[String]()
     Option(parallelism) match {
       case None =>

@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes,
 
 import scala.collection.mutable.ArrayBuffer
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "stream-type", defaultImpl = classOf[SjStreamData], visible = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[SjStreamData], visible = true)
 @JsonSubTypes(Array(
   new Type(value = classOf[TStreamSjStreamData], name = StreamLiterals.tstreamType),
   new Type(value = classOf[KafkaSjStreamData], name = StreamLiterals.kafkaStreamType),
@@ -17,7 +17,7 @@ import scala.collection.mutable.ArrayBuffer
   new Type(value = classOf[JDBCSjStreamData], name = StreamLiterals.jdbcOutputType)
 ))
 class SjStreamData() extends ValidationUtils with MessageResourceUtils {
-  @JsonProperty("stream-type") var streamType: String = null
+  @JsonProperty("type") var streamType: String = null
   var name: String = null
   var description: String = "No description"
   var service: String = null

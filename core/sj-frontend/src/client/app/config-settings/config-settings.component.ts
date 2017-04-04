@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ModalDirective } from 'ng2-bootstrap';
 
-import { SettingModel } from '../shared/models/setting.model';
-import { ConfigSettingsService } from "../shared/services/config-settings.service";
+import { SettingModel, NotificationModel } from '../shared/models/index';
+import { ConfigSettingsService } from '../shared/services/index';
 
 @Component({
   moduleId: module.id,
@@ -12,7 +12,8 @@ import { ConfigSettingsService } from "../shared/services/config-settings.servic
 export class ConfigSettingsComponent implements OnInit {
   public settingsList: SettingModel[];
   public settingsDomains: string[];
-  public alerts: Array<Object> = [];
+  public alerts: NotificationModel[] = [];
+  public formAlerts: NotificationModel[] = [];
   public newSetting: SettingModel;
   public currentSetting: SettingModel;
   public showSpinner: boolean;
@@ -26,15 +27,15 @@ export class ConfigSettingsComponent implements OnInit {
   }
 
   public getSettingsList() {
-    this.configSettingsService.getConfigSettingsList()
+    this.configSettingsService.getList()
       .subscribe(
-        settingsList => {
-          this.settingsList = settingsList;
-          if (settingsList.length > 0) {
-            this.currentSetting = settingsList[0];
+        response => {
+          this.settingsList = response.configSettings;
+          if (this.settingsList.length > 0) {
+            this.currentSetting = this.settingsList[0];
           }
         },
-        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+        error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 }));
   }
 
   public getSettingsDomains() {
@@ -44,31 +45,30 @@ export class ConfigSettingsComponent implements OnInit {
 
   public createSetting(modal: ModalDirective) {
     this.showSpinner = true;
-    this.configSettingsService.saveSetting(this.newSetting)
+    this.configSettingsService.save(this.newSetting)
       .subscribe(
         setting => {
-          modal.hide()
+          modal.hide();
           this.newSetting = new SettingModel();
           this.getSettingsList();
           this.showSpinner = false;
-          this.showAlert({ msg: setting, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ message: setting.message, type: 'success', closable: true, timeout: 3000 });
         },
         error => {
-          modal.hide();
           this.showSpinner = false;
           this.newSetting = new SettingModel();
-          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
+          this.formAlerts.push({ message: error, type: 'danger', closable: true, timeout: 0 });
         });
   }
 
   public deleteSetting(modal: ModalDirective) {
     this.configSettingsService.deleteSetting(this.currentSetting)
       .subscribe(
-        status => {
-          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
+        response => {
+          this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
           this.getSettingsList();
         },
-        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+        error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 }));
     modal.hide();
   }
 
@@ -77,20 +77,13 @@ export class ConfigSettingsComponent implements OnInit {
     modal.show();
   }
 
-  public closeAlert(i: number): void {
-    this.alerts.splice(i, 1);
-  }
-
-  public showAlert(message: Object): void {
-    this.alerts = [];
-    this.alerts.push(message);
+  public showAlert(notification: NotificationModel): void {
+    if (!this.alerts.find(msg => msg.message === notification.message)) {
+      this.alerts.push(notification);
+    }
   }
 
   public selectSetting(setting: SettingModel) {
     this.currentSetting = setting;
-  }
-
-  public isSelected(setting: SettingModel) {
-    return setting === this.currentSetting;
   }
 }

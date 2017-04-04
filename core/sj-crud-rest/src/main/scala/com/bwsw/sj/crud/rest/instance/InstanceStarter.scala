@@ -32,16 +32,17 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   private val frameworkName = getFrameworkName(instance)
 
   def run() = {
-    logger.debug(s"Instance: ${instance.name}. Start instance.")
     try {
+      logger.info(s"Instance: '${instance.name}'. Launch an instance.")
       updateInstanceStatus(instance, starting)
       startInstance()
+      close()
+      logger.info(s"Instance: '${instance.name}' has been launched.")
     } catch {
       case e: Exception =>
-        logger.debug(s"Instance: ${instance.name}. Instance is failed during the start process.")
-        logger.debug(e.getMessage)
-        e.printStackTrace()
+        logger.error(s"Instance: '${instance.name}'. Instance is failed during the start process.", e)
         updateInstanceStatus(instance, failed)
+        close()
     }
   }
 
@@ -59,6 +60,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   }
 
   private def createLeaderLatch(marathonMaster: String) = {
+    logger.debug(s"Instance: '${instance.name}'. Creating a leader latch to start the instance.")
     val zkServers = getZooKeeperServers(marathonMaster)
     val leader = new LeaderLatch(Set(zkServers), RestLiterals.masterNode)
     leader.start()
@@ -68,20 +70,24 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   }
 
   private def getZooKeeperServers(marathonMaster: String) = {
+    logger.debug(s"Instance: '${instance.name}'. Getting a zookeeper address.")
     var zooKeeperServers = ""
     val zkHost = System.getenv("ZOOKEEPER_HOST")
     val zkPort = System.getenv("ZOOKEEPER_PORT")
     if (zkHost != null && zkPort != null) {
       zooKeeperServers = zkHost + ":" + zkPort
+      logger.debug(s"Instance: '${instance.name}'. Get a zookeeper address: '$zooKeeperServers' from environment variables.")
     } else {
       val marathonMasterUrl = new URI(marathonMaster)
       zooKeeperServers = marathonMasterUrl.getHost + ":" + marathonMasterUrl.getPort
+      logger.debug(s"Instance: '${instance.name}'. Get a zookeeper address: '$zooKeeperServers' from marathon.")
     }
 
     zooKeeperServers
   }
-
+  
   private def startFramework(marathonMaster: String) = {
+    logger.debug(s"Instance: '${instance.name}'. Try to launch or create a framework: '$frameworkName'.")
     val frameworkApplicationInfo = getApplicationInfo(frameworkName)
     if (isStatusOK(frameworkApplicationInfo)) {
       launchFramework()
@@ -91,6 +97,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   }
 
   private def launchFramework() = {
+    logger.debug(s"Instance: '${instance.name}'. Launch a framework: '$frameworkName'.")
     val startFrameworkResult = scaleMarathonApplication(frameworkName, 1)
     if (isStatusOK(startFrameworkResult)) {
       waitForFrameworkToStart()
@@ -102,6 +109,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   }
 
   private def createFramework(marathonMaster: String) = {
+    logger.debug(s"Instance: '${instance.name}'. Create a framework: '$frameworkName'.")
     val request = createRequestForFrameworkCreation(marathonMaster)
     val startFrameworkResult = startMarathonApplication(request)
     if (isStatusCreated(startFrameworkResult)) {
@@ -135,7 +143,8 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   private def getFrameworkEnvironmentVariables(marathonMaster: String) = {
     var environmentVariables = Map(
       instanceIdLabel -> instance.name,
-      mesosMasterLabel -> marathonMaster
+      mesosMasterLabel -> marathonMaster,
+      frameworkIdLabel -> frameworkName
     )
     environmentVariables = environmentVariables ++ ConnectionConstants.mongoEnvironment
     environmentVariables = environmentVariables ++ instance.environmentVariables.asScala
@@ -159,6 +168,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   private def waitForFrameworkToStart() = {
     var isStarted = false
     while (!isStarted) {
+      logger.debug(s"Instance: '${instance.name}'. Waiting until a framework: '$frameworkName' is launched.")
       val frameworkApplicationInfo = getApplicationInfo(frameworkName)
       if (isStatusOK(frameworkApplicationInfo)) {
         if (hasFrameworkStarted(frameworkApplicationInfo)) {

@@ -24,7 +24,7 @@ export class ValidJsonDirective implements Validator, OnChanges {
   @Input() validJson: string;
   private valFn = Validators.nullValidator;
 
-  ngOnChanges(changes: SimpleChanges): void {
+  public ngOnChanges(changes: SimpleChanges): void {
     const change = changes['validJson'];
     if (change) {
       this.valFn = validJsonValidator();
@@ -33,7 +33,7 @@ export class ValidJsonDirective implements Validator, OnChanges {
     }
   }
 
-  validate(control: AbstractControl): {[key: string]: any} {
+  public validate(control: AbstractControl): {[key: string]: any} {
     return this.valFn(control);
   }
 }

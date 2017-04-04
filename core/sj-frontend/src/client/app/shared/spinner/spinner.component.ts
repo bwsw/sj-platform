@@ -3,37 +3,45 @@ import { Component, Input, OnDestroy } from '@angular/core';
 @Component({
   moduleId: module.id,
   selector: 'sj-spinner',
-  templateUrl: './spinner.component.html',
-  styleUrls: ['./spinner.component.css']
+  templateUrl: 'spinner.component.html',
+  styleUrls: ['spinner.component.css']
 })
 
 export class SpinnerComponent implements OnDestroy {
-  visible: boolean = false;
-  timeout: any;
+  @Input() public delay: number = 0;
+  @Input() public progress: boolean = false;
 
-  @Input()
-  public delay: number = 0;
+  private _visible: boolean = false;
+  private _timeout: any;
+
+  public get visible(): boolean {
+    return this._visible;
+  }
+
+  public get timeout(): any {
+    return this._timeout;
+  }
 
   @Input()
   public set isRunning(value: boolean) {
     if (!value) {
       this.cancel();
-      this.visible = false;
+      this._visible = false;
     }
 
-    if (this.timeout) {
+    if (this._timeout) {
       return;
     }
 
-    this.timeout = setTimeout(() => {
-      this.visible = value;
+    this._timeout = setTimeout(() => {
+      this._visible = value;
       this.cancel();
     }, this.delay);
   }
 
   cancel(): void {
-    clearTimeout(this.timeout);
-    this.timeout = undefined;
+    clearTimeout(this._timeout);
+    this._timeout = undefined;
   }
 
   ngOnDestroy(): any {

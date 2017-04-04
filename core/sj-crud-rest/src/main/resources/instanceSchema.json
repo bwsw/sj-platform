@@ -11,11 +11,11 @@
       "description": "The description of an instance",
       "type": "string"
     },
-    "checkpoint-mode": {
+    "checkpointMode": {
       "description": "A mode of checkpoint",
       "type": "string"
     },
-    "checkpoint-interval": {
+    "checkpointInterval": {
       "description": "An interval of checkpoint",
       "type": "number"
     },
@@ -23,31 +23,31 @@
       "description": "The set of some optional parameters",
       "type": "object"
     },
-    "per-task-cores": {
+    "perTaskCores": {
       "description": "Number of cores that will be dedicated for a task of instance",
       "type": "number"
     },
-    "per-task-ram": {
+    "perTaskRam": {
       "description": "Size of ram that will be dedicated for a task of instance",
       "type": "number"
     },
-    "jvm-options": {
+    "jvmOptions": {
       "description": "The set of jvm parameters",
       "type": "object"
     },
-    "node-attributes": {
+    "nodeAttributes": {
       "description": "The set of mesos parameters",
       "type": "object"
     },
-    "coordination-service": {
+    "coordinationService": {
       "description": "A zookeeper service for a leader latch",
       "type": "string"
     },
-    "environment-variables": {
+    "environmentVariables": {
       "description": "The set of environment variables",
       "type": "object"
     },
-    "performance-reporting-interval": {
+    "performanceReportingInterval": {
       "description": "How often a report of instance work performance will be",
       "type": "number"
     },
@@ -58,25 +58,25 @@
         "type": "string"
       }
     },
-    "duplicate-check": {
+    "duplicateCheck": {
       "type": "boolean"
     },
-    "lookup-history": {
+    "lookupHistory": {
       "type": "number"
     },
-    "queue-max-size": {
+    "queueMaxSize": {
       "type": "number"
     },
-    "default-eviction-policy": {
+    "defaultEvictionPolicy": {
       "type": "string"
     },
-    "eviction-policy": {
+    "evictionPolicy": {
       "type": "string"
     },
-    "backup-count": {
+    "backupCount": {
       "type": "number"
     },
-    "async-backup-count": {
+    "asyncBackupCount": {
       "type": "number"
     },
     "inputs": {
@@ -86,35 +86,35 @@
         "type": "string"
       }
     },
-    "state-management": {
+    "stateManagement": {
       "type": "string"
     },
-    "state-full-checkpoint": {
+    "stateFullCheckpoint": {
       "type": "number"
     },
-    "event-wait-idle-time": {
+    "eventWaitIdleTime": {
       "type": "number"
     },
     "window": {
       "type": "number"
     },
-    "sliding-interval": {
+    "slidingInterval": {
       "type": "number"
     },
-    "main-stream": {
+    "mainStream": {
       "type": "string"
     },
-    "related-streams": {
+    "relatedStreams": {
       "description": "The set of streams that are related",
       "type": "array",
       "items": {
         "type": "string"
       }
     },
-    "batch-fill-type": {
+    "batchFillType": {
       "type": "object",
       "properties": {
-        "type-name": {
+        "typeName": {
           "type": "string"
         },
         "value": {
@@ -127,6 +127,10 @@
     },
     "output": {
       "type": "string"
+    },
+    "inputAvroSchema": {
+      "description": "Avro schema for input entities",
+      "type": "object"
     }
   }
 }

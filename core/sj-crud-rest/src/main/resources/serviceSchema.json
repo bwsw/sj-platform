@@ -39,11 +39,11 @@
       "description": "The service password if the service is elasticsearch type",
       "type": "string"
     },
-    "zk-namespace": {
+    "zkNamespace": {
       "description": "A zookeeper namespace if the service is kafka type",
       "type": "string"
     },
-    "zk-provider": {
+    "zkProvider": {
       "description": "A zookeeper provider if the service is kafka type",
       "type": "string"
     },

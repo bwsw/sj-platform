@@ -21,33 +21,37 @@ class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable w
 
   def run() = {
     try {
+      logger.info(s"Instance: '${instance.name}'. Stop an instance.")
       updateInstanceStatus(instance, stopping)
       stopFramework()
       markInstanceAsStopped()
+      close()
+      logger.info(s"Instance: '${instance.name}' has been stopped.")
     } catch {
       case e: Exception =>
-        logger.debug(s"Instance: ${instance.name}. Instance is failed during the stopping process.")
-        logger.debug(e.getMessage)
-        e.printStackTrace()
+        logger.error(s"Instance: '${instance.name}'. Instance is failed during the stopping process.", e)
         updateInstanceStatus(instance, error)
+        close()
     }
   }
 
   private def stopFramework() = {
+    logger.debug(s"Instance: '${instance.name}'. Stopping a framework.")
     val response = stopMarathonApplication(frameworkName)
     if (isStatusOK(response)) {
       updateFrameworkStage(instance, stopping)
       waitForFrameworkToStop()
     } else {
       updateFrameworkStage(instance, error)
-      throw new Exception(s"Marathon returns status code: ${getStatusCode(response)} " +
-        s"during the stopping process of framework. Framework '${frameworkName}' is marked as error.")
+      throw new Exception(s"Marathon returns status code: $response " +
+        s"during the stopping process of framework. Framework '$frameworkName' is marked as error.")
     }
   }
 
   private def waitForFrameworkToStop() = {
     var hasStopped = false
     while (!hasStopped) {
+      logger.debug(s"Instance: '${instance.name}'. Waiting until a framework is stopped.")
       val frameworkApplicationInfo = getApplicationInfo(frameworkName)
       if (isStatusOK(frameworkApplicationInfo)) {
         if (hasFrameworkStopped(frameworkApplicationInfo)) {
@@ -72,6 +76,7 @@ class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable w
   }
 
   private def markInstanceAsStopped() = {
+    logger.debug(s"Instance: '${instance.name}'. Mark an instance as stopped.")
     if (isInputInstance()) {
       clearTasks()
     }
@@ -84,6 +89,7 @@ class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable w
   }
 
   private def clearTasks() = {
+    logger.debug(s"Instance: '${instance.name}'. Clear the input instance tasks.")
     instance.asInstanceOf[InputInstance].tasks.asScala.foreach(x => x._2.clear())
   }
 }

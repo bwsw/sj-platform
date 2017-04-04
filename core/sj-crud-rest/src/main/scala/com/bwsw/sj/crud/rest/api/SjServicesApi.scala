@@ -39,8 +39,7 @@ trait SjServicesApi extends Directives with SjCrudValidator {
             complete(restResponseToHttpResponse(response))
           }
       } ~
-        pathPrefix("types") {
-          //todo if a service has a name 'types' then there is a collision
+        pathPrefix("_types") {
           pathEndOrSingleSlash {
             get {
               val response = OkRestResponse(Map("types" -> ServiceLiterals.types))
@@ -57,7 +56,7 @@ trait SjServicesApi extends Directives with SjCrudValidator {
                 createMessage("rest.services.service.notfound", serviceName)))
               service match {
                 case Some(x) =>
-                  val entity = Map("services" -> x.asProtocolService())
+                  val entity = Map("service" -> x.asProtocolService())
                   response = OkRestResponse(entity)
                 case None =>
               }

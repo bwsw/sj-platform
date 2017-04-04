@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Http, Response, Headers, RequestOptions } from '@angular/http';
+import { Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Rx';
 
 import {
@@ -8,9 +8,11 @@ import {
   RegularStreamingInstance,
   OutputStreamingInstance,
   InputStreamingInstance,
-  WindowedStreamingInstance
-} from '../models/instance.model';
-import { TaskModel } from '../models/task.model';
+  BatchStreamingInstance,
+  TaskModel,
+  BaseModel
+} from '../models/index';
+import { BaseService, BService, IResponse } from './index';
 
 interface ITasksObject {
   tasks: TaskModel[];
@@ -18,168 +20,174 @@ interface ITasksObject {
 }
 
 @Injectable()
-export class InstancesService {
-  private _dataUrl = '/v1/';
+@BService({
+  entity: 'modules',
+  entityModel: InstanceModel
+})
+export class InstancesService extends BaseService<InstanceModel> {
 
   private static fillInstanceGeneralFields(orig: InstanceModel, instance: SubtypedInstance) {
-    instance['name'] = orig['name'];
-    instance['description'] = orig['description'];
+    instance.name = orig.name;
+    instance.description = orig.description;
     // Checking if string 'max' or numeric is passed
-    instance['parallelism'] = /^\+?(0|[1-9]\d*)$/.test(orig['parallelism'])
-      ? parseInt(orig['parallelism'])
-      : orig['parallelism'];
-    instance['options'] = orig['options'];
-    instance['per-task-cores'] = orig['per-task-cores'];
-    instance['per-task-ram'] = orig['per-task-ram'];
-    instance['jvm-options'] = orig['jvm-options'];
-    instance['node-attributes'] = orig['node-attributes'];
-    instance['coordination-service'] = orig['coordination-service'];
-    instance['environment-variables'] = orig['environment-variables'];
-    instance['performance-reporting-interval'] = orig['performance-reporting-interval'];
+    instance.parallelism = /^\+?(0|[1-9]\d*)$/.test(orig.parallelism)
+      ? parseInt(orig.parallelism)
+      : orig.parallelism;
+    instance.options = orig.options;
+    instance.perTaskCores = orig.perTaskCores;
+    instance.perTaskRam = orig.perTaskRam;
+    instance.jvmOptions = orig.jvmOptions;
+    instance.nodeAttributes = orig.nodeAttributes;
+    instance.coordinationService = orig.coordinationService;
+    instance.environmentVariables = orig.environmentVariables;
+    instance.performanceReportingInterval = orig.performanceReportingInterval;
 
     return instance;
-  }
-
-  constructor(private http: Http) {
-  }
-
-  public getInstanceList(): Observable<InstanceModel[]> {
-    let headers = new Headers();
-    headers.append('Content-Type', 'application/json');
-    let options = new RequestOptions({ headers: headers });
-    return this.http.get(this._dataUrl + 'modules/instances', options)
-      .map(this.extractData)
-      .catch(this.handleError);
   }
 
   public getInstanceInfo(instance: InstanceModel): Observable<InstanceModel> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
-      instance['module-version'] + '/instance' + '/' + instance['name'], options)
-      .map(this.extractData)
+    return this.http.get(this.requestUrl + '/' + instance.moduleType + '/' + instance.moduleName + '/' +
+      instance.moduleVersion + '/instance' + '/' + instance.name, options)
+      .map(response => {
+        const data = this.extractData(response);
+        return data.instance;
+      })
       .catch(this.handleError);
   }
 
   public getInstanceTasks(instance: InstanceModel): Observable<ITasksObject> {
+    console.log(instance.restAddress);
     return this.http.get('http://'+instance['rest-address'])
       .map(this.extractData)
       .catch(this.handleError);
   }
 
-  public saveInstance(instance: InstanceModel): Observable<InstanceModel> {
+  public saveInstance(instance: InstanceModel): Observable<IResponse<BaseModel>> {
     let subtypedInstance = this.getPreparedInstance(instance);
     let instance_body = Object.assign({}, subtypedInstance);
     let body = JSON.stringify(instance_body, this.cleanupBodyValues);
     let headers = new Headers({'Content-Type': 'application/json'});
     let options = new RequestOptions({ headers: headers });
 
-    return this.http.post(this._dataUrl + 'modules/' + instance.module['module-type'] + '/' + instance.module['module-name'] + '/' +
-      instance.module['module-version'] + '/instance', body, options)
-      .map(this.extractData)
+    return this.http.post(this.requestUrl + '/' + instance.module.moduleType + '/' + instance.module.moduleName + '/' +
+      instance.module.moduleVersion + '/instance', body, options)
+      .map(response => {
+        const data = this.extractData(response);
+        return data;
+      })
       .catch(this.handleError);
   }
 
-  public deleteInstance(instance: InstanceModel): Observable<InstanceModel> {
+  public deleteInstance(instance: InstanceModel): Observable<IResponse<BaseModel>> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.delete(this._dataUrl + 'modules/' + instance.module['module-type'] + '/' + instance.module['module-name'] + '/' +
-      instance.module['module-version'] + '/instance' + '/' + instance['name'], options)
-      .map(this.extractData)
+    return this.http.delete(this.requestUrl + '/' + instance.module.moduleType + '/' + instance.module.moduleName + '/' +
+    instance.module.moduleVersion + '/instance' + '/' + instance.name, options)
+      .map(response => {
+        const data = this.extractData(response);
+        return data;
+      })
       .catch(this.handleError);
   }
 
-  public startInstance(instance: InstanceModel): Observable<InstanceModel> {
+  public startInstance(instance: InstanceModel): Observable<IResponse<BaseModel>> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
-      instance['module-version'] + '/instance' + '/' + instance['name'] + '/start', options)
-      .map(this.extractData)
+    return this.http.get(this.requestUrl + '/' + instance.module.moduleType + '/' + instance.module.moduleName + '/' +
+      instance.module.moduleVersion + '/instance' + '/' + instance.name + '/start', options)
+      .map(response => {
+        const data = this.extractData(response);
+        return data;
+      })
       .catch(this.handleError);
   }
 
-  public stopInstance(instance: InstanceModel): Observable<InstanceModel> {
+  public stopInstance(instance: InstanceModel): Observable<IResponse<BaseModel>> {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-    return this.http.get(this._dataUrl + 'modules/' + instance['module-type'] + '/' + instance['module-name'] + '/' +
-      instance['module-version'] + '/instance' + '/' + instance['name'] + '/stop', options)
-      .map(this.extractData)
+    return this.http.get(this.requestUrl + '/' + instance.module.moduleType + '/' + instance.module.moduleName + '/' +
+      instance.module.moduleVersion + '/instance' + '/' + instance.name + '/stop', options)
+      .map(response => {
+        const data = this.extractData(response);
+        return data;
+      })
       .catch(this.handleError);
   }
 
   private getPreparedInstance(orig: InstanceModel) {
     let inst: SubtypedInstance;
 
-    switch (orig.module['module-type']) {
+    switch (orig.module.moduleType) {
 
       case 'regular-streaming':
         inst = new RegularStreamingInstance();
         inst = InstancesService.fillInstanceGeneralFields(orig, inst);
-        inst['checkpoint-mode'] = orig['checkpoint-mode'];
-        inst['checkpoint-interval'] = orig['checkpoint-interval'];
-        inst['event-wait-time'] = orig['event-wait-time'];
-        orig['inputs'].forEach(function(item:string, i:number) {
-          inst['inputs'][i] = orig['inputs'][i] + '/' + orig['inputs-types'][i];
+        inst.checkpointMode = orig.checkpointMode;
+        inst.checkpointInterval = orig.checkpointInterval;
+        inst.eventWaitIdleTime = orig.eventWaitIdleTime;
+        orig.inputs.forEach(function (item: string, i: number) {
+          inst.inputs[i] = orig.inputs[i] + '/' + orig.inputsTypes[i];
         });
-        inst['outputs'] = orig['outputs'];
-        inst['state-management'] = orig['state-management'];
-        inst['start-from'] = orig['start-from'] === 'timestamp' ? orig['start-from-timestamp'] : orig['start-from'];
-        inst['state-full-checkpoint'] = orig['state-full-checkpoint'];
+        inst.outputs = orig.outputs;
+        inst.stateManagement = orig.stateManagement;
+        inst.startFrom = orig.startFrom === 'datetime' ? orig.startFromDateTime : orig.startFrom;
+        inst.stateFullCheckpoint = orig.stateFullCheckpoint;
 
         break;
 
-      case 'windowed-streaming':
-        inst = new WindowedStreamingInstance();
+      case 'batch-streaming':
+        inst = new BatchStreamingInstance();
+
         inst = InstancesService.fillInstanceGeneralFields(orig, inst);
-        inst['outputs'] = orig['outputs'];
-        inst['state-management'] = orig['state-management'];
-        inst['window'] = orig['window'];
-        inst['state-full-checkpoint'] = orig['state-full-checkpoint'];
-        inst['event-wait-time'] = orig['event-wait-time'];
-        inst['main-stream'] = orig['main-stream'] + '/' + orig['main-stream-type'];
-        if (orig['related-streams'].length > 0 && orig['related-streams'][0] !== '') {
-          orig['related-streams'].forEach(function(item:string, i:number) {
-            inst['related-streams'][i] = orig['related-streams'][i] + '/' + orig['related-streams-type'][i];
-          });
-        } else {
-          inst['related-streams'] = [];
-        }
-        inst['batch-fill-type'] = {"type-name": orig['batch-fill-type-name'], value: orig['batch-fill-type-value']}
-        inst['sliding-interval'] = orig['sliding-interval'];
-        inst['start-from'] = orig['start-from'] === 'timestamp' ? orig['start-from-timestamp'] : orig['start-from'];
+        inst.outputs = orig.outputs;
+        inst.inputs = orig.inputs;
+        inst.stateManagement = orig.stateManagement;
+        inst.window = orig.window;
+        inst.stateFullCheckpoint = orig.stateFullCheckpoint;
+        inst.eventWaitIdleTime = orig.eventWaitIdleTime;
+        orig.inputs.forEach(function (item: string, i: number) {
+          inst.inputs[i] = orig.inputs[i] + '/' + orig.inputsTypes[i];
+        });
+        inst.slidingInterval = orig.slidingInterval;
+        inst.startFrom = orig.startFrom === 'datetime' ? orig.startFromDateTime : orig.startFrom;
         break;
 
       case 'output-streaming':
         inst = new OutputStreamingInstance();
         inst = InstancesService.fillInstanceGeneralFields(orig, inst);
-        inst['checkpoint-mode'] = orig['checkpoint-mode'];
-        inst['checkpoint-interval'] = orig['checkpoint-interval'];
-        inst['input'] = orig['input'];
-        inst['output'] = orig['output'];
-        inst['start-from'] = orig['start-from'] === 'timestamp' ? orig['start-from-datetime'] : orig['start-from'];
+        delete inst.inputs;
+        delete inst.outputs;
+        inst.checkpointMode = orig.checkpointMode;
+        inst.checkpointInterval = orig.checkpointInterval;
+        inst.input = orig.input;
+        inst.output = orig.output;
+        inst.startFrom = orig.startFrom;
         break;
 
       case 'input-streaming':
         inst = new InputStreamingInstance();
         inst = InstancesService.fillInstanceGeneralFields(orig, inst);
-        inst['async-backup-count'] = orig['async-backup-count'];
-        inst['backup-count'] = orig['backup-count'];
-        inst['checkpoint-interval'] = orig['checkpoint-interval'];
-        inst['checkpoint-mode'] = orig['checkpoint-mode'];
-        inst['default-eviction-policy'] = orig['default-eviction-policy'];
-        inst['duplicate-check'] = orig['duplicate-check'];
-        inst['eviction-policy'] = orig['eviction-policy'];
-        inst['lookup-history'] = orig['lookup-history'];
-        inst['outputs'] = orig['outputs'];
-        inst['queue-max-size'] = orig['queue-max-size'];
+        delete inst.inputs;
+        inst.asyncBackupCount = orig.asyncBackupCount;
+        inst.backupCount = orig.backupCount;
+        inst.checkpointInterval = orig.checkpointInterval;
+        inst.checkpointMode = orig.checkpointMode;
+        inst.defaultEvictionPolicy = orig.defaultEvictionPolicy;
+        inst.duplicateCheck = orig.duplicateCheck;
+        inst.evictionPolicy = orig.evictionPolicy;
+        inst.lookupHistory = orig.lookupHistory;
+        inst.outputs = orig.outputs;
+        inst.queueMaxSize = orig.queueMaxSize;
         break;
     }
 
-    let objectFields = ['environment-variables', 'jvm-options', 'node-attributes', 'options'];
+    let objectFields = ['environmentVariables', 'jvmOptions', 'nodeAttributes', 'options'];
     for (let fieldName of objectFields) {
       if (inst[fieldName] !== undefined) {
         inst[fieldName] = inst[fieldName].length === 0 ? '{}' : inst[fieldName];
@@ -189,29 +197,6 @@ export class InstancesService {
     return inst;
   }
 
-  private extractData(res: Response) { //TODO Write good response parser
-    let body = {};
-    if (typeof res.json()['tasks'] !== 'undefined') {
-      body = res.json();
-    } else if (typeof res.json()['entity']['instances'] !== 'undefined') {
-      body = res.json()['entity']['instances'];
-    } else if (typeof res.json()['entity']['message'] !== 'undefined') {
-      body = res.json()['entity']['message'];
-    } else {
-      body = res.json()['entity']['instance'];
-    }
-    return body;
-  }
-
-  private handleError(error: any) {
-    let errMsg = (error._body) ? error._body :
-      error.status ? `${error.status} - ${error.statusText}` : 'Server error';
-    if (typeof errMsg !== 'object') { errMsg = JSON.parse(errMsg); }
-    let errMsgYo = errMsg.entity.message;
-    return Observable.throw(errMsgYo);
-  }
-
-
   private cleanupBodyValues(key: string, value: any): any {
     if ( [null, ''].indexOf(value) > -1 ) {
       return undefined;
@@ -219,6 +204,5 @@ export class InstancesService {
       return value;
     }
   }
-
 
 }

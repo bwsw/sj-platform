@@ -6,27 +6,26 @@ import com.bwsw.sj.engine.core.input.InputStreamingExecutor
 import com.bwsw.sj.engine.core.managment.TaskManager
 
 /**
- * Class allowing to manage an environment of input streaming task
- *
- *
- * @author Kseniya Mikhaleva
- */
+  * Class allowing to manage an environment of input streaming task
+  *
+  * @author Kseniya Mikhaleva
+  */
 class InputTaskManager() extends TaskManager {
 
   lazy val inputs = {
     logger.error(s"Instance of Input module hasn't got execution plan " +
-      s"and it's impossible to retrieve inputs")
+      s"and it's impossible to retrieve inputs.")
     throw new Exception(s"Instance of Input module hasn't got execution plan " +
-      s"and it's impossible to retrieve inputs")
+      s"and it's impossible to retrieve inputs.")
   }
 
   val inputInstance = instance.asInstanceOf[InputInstance]
   val entryPort = getEntryPort()
-  val outputProducers =  createOutputProducers()
+  val outputProducers = createOutputProducers()
 
   require(numberOfAgentsPorts >=
     (instance.outputs.length + 1),
-    "Not enough ports for t-stream consumers/producers ")
+    "Not enough ports for t-stream consumers/producers")
 
   def getEntryPort() = {
     if (System.getenv().containsKey("ENTRY_PORT"))
@@ -34,14 +33,12 @@ class InputTaskManager() extends TaskManager {
     else inputInstance.tasks.get(taskName).port
   }
 
-  override def getExecutor(environmentManager: EnvironmentManager) = {
-    logger.debug(s"Task: $taskName. Start loading of executor class from module jar\n")
-    val executor = moduleClassLoader
-      .loadClass(executorClassName)
-      .getConstructor(classOf[InputEnvironmentManager])
+  def getExecutor(environmentManager: EnvironmentManager) = {
+    logger.debug(s"Task: $taskName. Start loading an executor class from module jar.")
+    val executor = executorClass.getConstructor(classOf[InputEnvironmentManager])
       .newInstance(environmentManager)
-      .asInstanceOf[InputStreamingExecutor]
-    logger.debug(s"Task: $taskName. Create instance of executor class\n")
+      .asInstanceOf[InputStreamingExecutor[AnyRef]]
+    logger.debug(s"Task: $taskName. Load an executor class.")
 
     executor
   }

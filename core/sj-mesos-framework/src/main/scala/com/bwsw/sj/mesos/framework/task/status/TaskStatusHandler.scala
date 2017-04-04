@@ -4,6 +4,10 @@ import org.apache.mesos.Protos.TaskStatus
 
 abstract class TaskStatusHandler {
   protected var status: TaskStatus
-  def setStatus(status: TaskStatus): TaskStatusHandler
+  //TODO must be implemented and provided in inheritable class
+  def setStatus(status: TaskStatus): TaskStatusHandler = {
+    this.status = status
+    this
+  }
   def process()
 }

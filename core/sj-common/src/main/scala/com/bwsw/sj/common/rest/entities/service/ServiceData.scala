@@ -14,7 +14,7 @@ import scala.collection.mutable.ArrayBuffer
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[ServiceData], visible = true)
 @JsonSubTypes(Array(
   new Type(value = classOf[CassDBServiceData], name = ServiceLiterals.cassandraType),
-  new Type(value = classOf[EsIndServiceData], name = ServiceLiterals.elasticsearchType),
+  new Type(value = classOf[EsServiceData], name = ServiceLiterals.elasticsearchType),
   new Type(value = classOf[KfkQServiceData], name = ServiceLiterals.kafkaType),
   new Type(value = classOf[TstrQServiceData], name = ServiceLiterals.tstreamsType),
   new Type(value = classOf[ZKCoordServiceData], name = ServiceLiterals.zookeeperType),

@@ -22,16 +22,7 @@
         </div>
 
         <!-- Alerts -->
-        <div class="main-alerts mt-1">
-          <alert class="custom-alert"
-                 *ngFor="let alert of alerts; let i = index"
-                 [type]="alert.type"
-                 dismissible="true"
-                 [dismissOnTimeout]="alert.timeout"
-                 (close)="closeAlert(i)">
-            {{ alert.msg }}
-          </alert>
-        </div>
+        <sj-alerts [alerts]="alerts"></sj-alerts>
 
         <!-- Instances list -->
         <div class="table-wrapper">
@@ -49,7 +40,7 @@
             </tr>
 
             <tr *ngFor="let instance of instancesList | orderBy: 'name' | listFilter : { name: term, type: typeterm}"
-                [ngClass]="{ 'table-info': isSelected(instance) }"
+                [ngClass]="{ 'table-info': currentInstance && instance.name === currentInstance.name }"
                 (click)="selectInstance(instance)">
               <td>{{ instance.name }}</td>
               <td>
@@ -59,6 +50,7 @@
                         'tag-success': instance.status === 'started',
                         'tag-info': instance.status === 'starting' || instance.status === 'stopping',
                         'tag-danger': instance.status === 'failed',
+                        'tag-warning': instance.status === 'error',
                         'tag-primary': instance.status === 'ready'
                       }">{{ instance.status }}</span>
               </td>
@@ -66,7 +58,8 @@
 
                 <button type="button"
                         class="btn btn-sm btn-secondary"
-                        *ngIf="instance['rest-address']"
+                        *ngIf="instance.restAddress"
+                        [disabled]="instance.status === 'starting'"
                         title="Show instance tasks"
                         (click)="showInstanceTasks(ShowInstanceTasks, instance)">
                   <i class="fa fa-info-circle"></i>
@@ -116,60 +109,58 @@
             <li>Stages: {{currentInstance.stages | json}}</li>
             <li>Status: {{currentInstance.status}}</li>
             <li>Name : {{currentInstance.name}}</li>
-            <li>Module-type : {{currentInstance.module["module-type"]}}</li>
-            <li>Module-name : {{currentInstance.module["module-name"]}}</li>
-            <li>Module-version: {{currentInstance.module["module-version"]}}</li>
+            <li>Module-type : {{currentInstance.module.moduleType}}</li>
+            <li>Module-name : {{currentInstance.module.moduleName}}</li>
+            <li>Module-version: {{currentInstance.module.moduleVersion}}</li>
             <li *ngIf="currentInstance.description">Description : {{currentInstance.description}}</li>
             <li>Engine : {{currentInstance.engine}}</li>
             <li *ngIf="currentInstance.inputs">Inputs: {{currentInstance.inputs}}</li>
             <li *ngIf="currentInstance.outputs">Outputs: {{currentInstance.outputs}}</li>
             <li *ngIf="currentInstance.input">Input: {{currentInstance.input}}</li>
             <li *ngIf="currentInstance.output">Output: {{currentInstance.output}}</li>
-            <li *ngIf="currentInstance['checkpoint-mode']">Checkpoint-mode : {{currentInstance["checkpoint-mode"]}}</li>
-            <li *ngIf="currentInstance['checkpoint-interval']">Checkpoint-interval : {{currentInstance["checkpoint-interval"]}}</li>
-            <li *ngIf="currentInstance['state-management']">State-management :
-              {{currentInstance["state-management"]}}</li>
-            <li *ngIf="currentInstance['duplicate-check'] || currentInstance['duplicate-check'] === false">Duplicate-check :
-              {{currentInstance["duplicate-check"]}}</li>
-            <li *ngIf="currentInstance['lookup-history']">Lookup-history : {{currentInstance["lookup-history"]}}</li>
-            <li *ngIf="currentInstance['queue-max-size']">Queue-max-size : {{currentInstance["queue-max-size"]}}</li>
-            <li *ngIf="currentInstance['default-eviction-policy']">Default-eviction-policy :
-              {{currentInstance["default-eviction-policy"]}}</li>
-            <li *ngIf="currentInstance['eviction-policy']">Eviction-policy :
-              {{currentInstance["eviction-policy"]}}</li>
-            <li *ngIf="currentInstance['state-full-checkpoint']">State-full-checkpoint :
-              {{currentInstance["state-full-checkpoint"]}}</li>
+            <li *ngIf="currentInstance.checkpointMode">Checkpoint mode : {{currentInstance.checkpointMode}}</li>
+            <li *ngIf="currentInstance.checkpointInterval">Checkpoint interval : {{currentInstance.checkpointInterval}}</li>
+            <li *ngIf="currentInstance.stateManagement">State management :
+              {{currentInstance.stateManagement}}</li>
+            <li *ngIf="currentInstance.duplicateCheck || currentInstance.duplicateCheck === false">Duplicate check :
+              {{currentInstance.duplicateCheck}}</li>
+            <li *ngIf="currentInstance.lookupHistory">Lookup history : {{currentInstance.lookupHistory}}</li>
+            <li *ngIf="currentInstance.queueMaxSize">Queue max-size : {{currentInstance.queueMaxSize}}</li>
+            <li *ngIf="currentInstance.defaultEvictionPolicy">Default eviction policy :
+              {{currentInstance.defaultEvictionPolicy}}</li>
+            <li *ngIf="currentInstance.evictionPolicy">Eviction policy :
+              {{currentInstance.evictionPolicy}}</li>
+            <li *ngIf="currentInstance.stateFullCheckpoint">State full checkpoint :
+              {{currentInstance.stateFullCheckpoint}}</li>
             <li>Parallelism : {{currentInstance.parallelism}}</li>
             <li>Options : {{currentInstance.options | json }}</li>
-            <li *ngIf="currentInstance['start-from']">Start-from : {{currentInstance["start-from"]}}</li>
-            <li>Per-task-cores : {{currentInstance["per-task-cores"]}}</li>
-            <li>Per-task-ram" : {{currentInstance["per-task-ram"]}}</li>
-            <li>Coordination-service : {{currentInstance["coordination-service"]}}</li>
-            <li *ngIf="currentInstance['event-wait-idle-time']">Event-wait-idle-time :
-              {{currentInstance["event-wait-idle-time"]}}</li>
-            <li *ngIf="currentInstance['window']">Window :
-              {{currentInstance['window']}}</li>
-            <li *ngIf="currentInstance['sliding-interval']">Sliding interval :
-              {{currentInstance['sliding-interval']}}</li>
-            <li *ngIf="currentInstance['main-stream']">Main stream :
-              {{currentInstance['main-stream']}}</li>
-            <li *ngIf="currentInstance['related-streams']">Related streams :
-              {{currentInstance['related-streams']}}</li>
-            <li *ngIf="currentInstance['window']">Window :
-              {{currentInstance['window']}}</li>
-            <li *ngIf="currentInstance['batch-fill-type']">Batch-fill-type :
-              {{currentInstance['batch-fill-type'] | json}}</li>
-            <li *ngIf="currentInstance['performance-reporting-interval']">Performance-reporting-interval :
-              {{currentInstance['performance-reporting-interval']}}</li>
-            <li *ngIf="currentInstance['jvm-options']">Jvm-options : {{currentInstance["jvm-options"] | json}}</li>
-            <li *ngIf="currentInstance['environment-variables']">Environment variables :
-              {{currentInstance["environment-variables"] | json}}</li>
-            <li *ngIf="currentInstance['node-attributes']">Node attributes : {{currentInstance['node-attributes'] |
+            <li *ngIf="currentInstance.startFrom">Start-from : {{currentInstance.startFrom}}</li>
+            <li>Per-task cores : {{currentInstance.perTaskCorese}}</li>
+            <li>Per-task ram" : {{currentInstance.perTaskRam}}</li>
+            <li>Coordination service : {{currentInstance.coordinationService}}</li>
+            <li *ngIf="currentInstance.eventWaitIdleTime">Event-wait-idle-time :
+              {{currentInstance.eventWaitIdleTime}}</li>
+            <li *ngIf="currentInstance.window">Window :
+              {{currentInstance.window}}</li>
+            <li *ngIf="currentInstance.slidingInterval">Sliding interval :
+              {{currentInstance.slidingInterval}}</li>
+            <li *ngIf="currentInstance.mainStream">Main stream :
+              {{currentInstance.mainStream}}</li>
+            <li *ngIf="currentInstance.relatedStreams">Related streams :
+              {{currentInstance.relatedStreams}}</li>
+            <li *ngIf="currentInstance.batchFillType">Batch-fill-type :
+              {{currentInstance.batchFillType | json}}</li>
+            <li *ngIf="currentInstance.performanceReportingInterval">Performance reporting interval :
+              {{currentInstance.performanceReportingInterval}}</li>
+            <li *ngIf="currentInstance.jvmOptions">Jvm options : {{currentInstance.jvmOptions | json}}</li>
+            <li *ngIf="currentInstance.environmentVariables">Environment variables :
+              {{currentInstance.environmentVariables| json}}</li>
+            <li *ngIf="currentInstance.nodeAttributes">Node attributes : {{currentInstance.nodeAttributes |
               json}}</li>
-            <li *ngIf="currentInstance['backup-count'] || currentInstance['backup-count'] === 0">Backup-count : {{currentInstance["backup-count"]}}</li>
-            <li *ngIf="currentInstance['async-backup-count'] || currentInstance['async-backup-count'] === 0">Async-backup-count :
-              {{currentInstance["async-backup-count"]}}</li>
-            <li>{{currentInstance.module['module-type'] !== 'input-streaming' ? 'Execution-plan:': 'Tasks:'}}
+            <li *ngIf="currentInstance.backupCount || currentInstance.backupCount === 0">Backup count : {{currentInstance.backupCount}}</li>
+            <li *ngIf="currentInstance.asyncBackupCount || currentInstance.asyncBackupCount === 0">Async-backup count :
+              {{currentInstance.asyncBackupCount}}</li>
+            <li>{{currentInstance.module.moduleType !== 'input-streaming' ? 'Execution-plan:': 'Tasks:'}}
               <ul *ngIf="currentInstance !== undefined">
                 <li>{{currentInstanceTasks | json}}</li>
               </ul>
@@ -190,6 +181,7 @@
           <span aria-hidden="true">&times;</span>
         </button>
         <h4 class="modal-title">Create instance</h4>
+        <sj-alerts [alerts]="formAlerts"></sj-alerts>
       </div>
 
       <div class="modal-body">
@@ -221,8 +213,8 @@
             <div class="col col-sm-10">
               <select [(ngModel)]="newInstance.module" name="instanceModule" required
                       class="form-control">
-                <option *ngFor="let module of modulesList" [ngValue]="module">{{module["module-name"]}}
-                  {{module["module-type"]}} {{module["module-version"]}}
+                <option *ngFor="let module of modulesList" [ngValue]="module">{{module.moduleName}}
+                  {{module.moduleType}} {{module.moduleVersion}}
                 </option>
               </select>
             </div>
@@ -234,8 +226,8 @@
             <div class="col col-sm-10">
               <select disabled [(ngModel)]="newInstance.module" name="instanceModule" required
                       class="form-control">
-                <option [ngValue]="newInstance.module">{{newInstance.module["module-name"]}}
-                  {{newInstance.module["module-type"]}} {{newInstance.module["module-version"]}}
+                <option [ngValue]="newInstance.module">{{newInstance.module.moduleName}}
+                  {{newInstance.module.moduleType}} {{newInstance.module.moduleVersion}}
                 </option>
               </select>
             </div>
@@ -262,7 +254,7 @@
 
             <!-- Inputs -->
             <fieldset class="form-group row"
-                      *ngIf="newInstance.module && newInstance.module['module-type'] === 'regular-streaming' && newInstance.inputs">
+                      *ngIf="newInstance.module && (newInstance.module.moduleType === 'regular-streaming' || newInstance.module.moduleType === 'batch-streaming') && newInstance.inputs">
 
               <label class="col-form-label col-sm-2 required">Inputs</label>
               <div class="col-sm-10">
@@ -272,12 +264,12 @@
                     <select [(ngModel)]="newInstance.inputs[i]"
                             (change)="checkTimestampAcceptable()"
                             name="instanceInputs{{i}}" required class="form-control">
-                      <option *ngFor="let stream of streamsList">{{stream.name}}</option>
+                      <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-stream,stream.kafka'">{{stream.name}}</option>
                     </select>
                   </div>
                   <div class="col-sm-6">
                     <div class="input-group">
-                      <select [(ngModel)]="newInstance['inputs-types'][i]"
+                      <select [(ngModel)]="newInstance.inputsTypes[i]"
                               name="instanceInputType{{i}}" required class="form-control">
                         <option>full</option>
                         <option>split</option>
@@ -298,30 +290,30 @@
             </fieldset>
 
             <!-- Input -->
-            <fieldset *ngIf="newInstance.module['module-type'] === 'output-streaming'" class="form-group row">
+            <fieldset *ngIf="newInstance.module.moduleType === 'output-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2 required">Input</label>
               <div class="col col-sm-10">
                 <select [(ngModel)]="newInstance.input" name="instanceInput" required
                         class="form-control">
-                  <option *ngFor="let stream of streamsList" value="{{stream.name}}">{{stream.name}}</option>
+                  <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-stream'" value="{{stream.name}}">{{stream.name}}</option>
                 </select>
               </div>
             </fieldset>
 
             <!-- Output -->
-            <fieldset *ngIf="newInstance.module['module-type'] === 'output-streaming'" class="form-group row">
+            <fieldset *ngIf="newInstance.module.moduleType === 'output-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2 required">Output</label>
               <div class="col col-sm-10">
                 <select [(ngModel)]="newInstance.output" name="instanceOutput" required
                         class="form-control">
-                  <option *ngFor="let stream of streamsList" value="{{stream.name}}">{{stream.name}}</option>
+                  <option *ngFor="let stream of streamsList | streamFilter: 'jdbc-output,elasticsearch-output'" value="{{stream.name}}">{{stream.name}}</option>
                 </select>
               </div>
             </fieldset>
 
             <!-- Outputs -->
             <fieldset
-              *ngIf="newInstance.module['module-type'] !== 'output-streaming'"
+              *ngIf="newInstance.module.moduleType !== 'output-streaming' "
               class="form-group row">
               <label class="col-form-label col-sm-2 required">Outputs</label>
 
@@ -330,7 +322,7 @@
                      class="input-group mb-1">
                   <select [(ngModel)]="newInstance.outputs[i]"
                           name="instanceOutputs{{i}}" required class="form-control">
-                    <option *ngFor="let stream of streamsList">{{stream.name}}</option>
+                    <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-stream'" value="{{stream.name}}">{{stream.name}}</option>
                   </select>
                   <span class="input-group-btn" *ngIf="i!==0">
                     <button type="button"
@@ -346,35 +338,35 @@
             </fieldset>
 
             <!-- Window -->
-            <fieldset *ngIf="newInstance.module['module-type'] === 'windowed-streaming'" class="form-group row">
+            <fieldset *ngIf="newInstance.module.moduleType === 'batch-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2">Window</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="newInstance['window']" name="instanceWindow" type="number" pattern="[1-9][0-9]*" class="form-control">
+                <input [(ngModel)]="newInstance.window" name="instanceWindow" type="number" pattern="[1-9][0-9]*" class="form-control">
               </div>
             </fieldset>
 
             <!-- Sliding-interval -->
-            <fieldset *ngIf="newInstance.module['module-type'] === 'windowed-streaming'" class="form-group row">
+            <fieldset *ngIf="newInstance.module.moduleType === 'batch-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2">Sliding interval</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="newInstance['sliding-interval']" name="instanceSlidingInterval" type="number" pattern="[1-9][0-9]*" class="form-control">
+                <input [(ngModel)]="newInstance.slidingInterval" name="instanceSlidingInterval" type="number" pattern="[1-9][0-9]*" class="form-control">
               </div>
             </fieldset>
 
             <!-- Main-stream -->
-            <fieldset *ngIf="newInstance.module['module-type'] === 'windowed-streaming'" class="form-group row">
+            <!--fieldset *ngIf="newInstance.module.moduleType === 'batch-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2 required">Main stream</label>
               <div class="col col-sm-10">
                 <div class="mb-1 row">
                   <div class="col-sm-6">
-                    <select [value]="newInstance['main-stream']" (input)="newInstance['main-stream'] = $event.target.value"
+                    <select [value]="newInstance.mainStream" (input)="newInstance.mainStream = $event.target.value"
                             name="instanceMainStream" required class="form-control">
-                      <option *ngFor="let stream of streamsList">{{stream.name}}</option>
+                      <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-stream,stream.kafka'" value="{{stream.name}}">{{stream.name}}</option>
                     </select>
                   </div>
                   <div class="col-sm-6">
                     <div class="input-group">
-                      <select [value]="newInstance['main-stream-type']" (input)="newInstance['main-stream-type'] = $event.target.value"
+                      <select [value]="newInstance.mainStreamType" (input)="newInstance.mainStreamType = $event.target.value"
                               name="instanceMainStreamType" required class="form-control">
                         <option>full</option>
                         <option>split</option>
@@ -383,25 +375,25 @@
                   </div>
                 </div>
               </div>
-            </fieldset>
+            </fieldset-->
 
             <!-- Related-streams -->
-            <fieldset *ngIf="newInstance.module['module-type'] === 'windowed-streaming'"
+            <!--fieldset *ngIf="newInstance.module.moduleType === 'batch-streaming'"
                       class="form-group row">
               <label class="col-form-label col-sm-2">Related streams</label>
 
               <div class="col col-sm-10">
-                <div *ngFor="let relatedStream of newInstance['related-streams']; let i = index;  trackBy:customTrackBy"
+                <div *ngFor="let relatedStream of newInstance.relatedStreams; let i = index;  trackBy:customTrackBy"
                      class="input-group mb-1">
                   <div class="col-sm-6">
-                    <select [value]="newInstance['related-streams'][i]" (input)="newInstance['related-streams'][i] = $event.target.value"
+                    <select [value]="newInstance.relatedStreams[i]" (input)="newInstance.relatedStreams[i] = $event.target.value"
                             name="instanceRelatedStream" class="form-control">
-                      <option *ngFor="let stream of streamsList">{{stream.name}}</option>
+                      <option *ngFor="let stream of streamsList | streamFilter: 'stream.t-stream,stream.kafka'" value="{{stream.name}}">{{stream.name}}</option>
                     </select>
                   </div>
                   <div class="col-sm-6">
                     <div class="input-group">
-                      <select [value]="newInstance['related-streams-type'][i]" (input)="newInstance['related-streams-type'][i] = $event.target.value"
+                      <select [value]="newInstance.relatedStreamsType[i]" (input)="newInstance.relatedStreamsType[i] = $event.target.value"
                               name="instanceRelatedStreaInputType" class="form-control">
                         <option>full</option>
                         <option>split</option>
@@ -419,15 +411,15 @@
 
                 <button type="button" (click)="addRelatedStream()" class="btn btn-sm btn-secondary">+ Add related stream</button>
               </div>
-            </fieldset>
+            </fieldset-->
 
             <!-- Batch-fill-type -->
-            <fieldset *ngIf="newInstance.module['module-type'] === 'windowed-streaming'" class="form-group row">
-              <label class="col-form-label col-sm-2 required">Batch fill type</label>
+            <!--fieldset *ngIf="newInstance.module.moduleType === 'batch-streaming'" class="form-group row">
+              <label class="col-form-label col-sm-2 required">Batch-fill-type</label>
               <div class="col col-sm-10">
                 <div class="mb-1 row">
                   <div class="col-sm-6">
-                    <select [value]="newInstance['batch-fill-type-name']" (input)="newInstance['batch-fill-type-name'] = $event.target.value"
+                    <select [value]="newInstance.batchFillType.typeName" (input)="newInstance.batchFillType.typeName = $event.target.value"
                             name="instanceBatchFillTypeName" required class="form-control">
                       <option>every-nth</option>
                       <option>time-interval</option>
@@ -436,41 +428,41 @@
                   </div>
                   <div class="col-sm-6">
                     <div class="input-group">
-                      <input [(ngModel)]="newInstance['batch-fill-type-value']" name="instanceBatchFillTypeValue" type="number"
-                             required class="form-control">
+                      <input [(ngModel)]="newInstance.batchFillType.value" name="instanceBatchFillTypeValue" type="number"
+                             required class="form-control" min="1">
                     </div>
                   </div>
                 </div>
               </div>
-            </fieldset>
+            </fieldset-->
 
             <!-- Checkpoint mode -->
-            <fieldset *ngIf="newInstance.module['module-type'] !== 'windowed-streaming'" class="form-group row">
+            <fieldset *ngIf="newInstance.module.moduleType!== 'batch-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2 required">Checkpoint mode</label>
               <div class="col col-sm-10">
-                <select [(ngModel)]="newInstance['checkpoint-mode']" name="instanceCheckpointMode" required
+                <select [(ngModel)]="newInstance.checkpointMode" name="instanceCheckpointMode" required
                         class="form-control">
-                  <option *ngIf="newInstance.module['module-type'] !== 'output-streaming'">time-interval</option>
+                  <option *ngIf="newInstance.module.moduleType !== 'output-streaming'">time-interval</option>
                   <option>every-nth</option>
                 </select>
               </div>
             </fieldset>
 
             <!-- Checkpoint interval -->
-            <fieldset *ngIf="newInstance.module['module-type'] !== 'windowed-streaming'" class="form-group row">
+            <fieldset *ngIf="newInstance.module.moduleType !== 'batch-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2 required">Checkpoint interval</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="newInstance['checkpoint-interval']" name="instanceCheckpointInterval" type="number"
+                <input [(ngModel)]="newInstance.checkpointInterval" name="instanceCheckpointInterval" type="number"
                        required class="form-control">
               </div>
             </fieldset>
 
             <!-- State management -->
-            <fieldset *ngIf="newInstance.module['module-type'] === 'regular-streaming' ||
-                              newInstance.module['module-type'] === 'windowed-streaming'" class="form-group row">
+            <fieldset *ngIf="newInstance.module.moduleType === 'regular-streaming' ||
+                              newInstance.module.moduleType === 'batch-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2">State management</label>
               <div class="col col-sm-10">
-                <select [(ngModel)]="newInstance['state-management']" name="instanceStateManagement"
+                <select [(ngModel)]="newInstance.stateManagement" name="instanceStateManagement"
                         class="form-control">
                   <option>none</option>
                   <option>ram</option>
@@ -480,11 +472,11 @@
             </fieldset>
 
             <!-- State full checkpoint -->
-            <fieldset *ngIf="newInstance.module['module-type'] === 'regular-streaming' ||
-                              newInstance.module['module-type'] === 'windowed-streaming'" class="form-group row">
+            <fieldset *ngIf="newInstance.module.moduleType === 'regular-streaming' ||
+                              newInstance.module.moduleType === 'batch-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2">State full checkpoint</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="newInstance['state-full-checkpoint']" name="instanceStateFullCheckpoint"
+                <input [(ngModel)]="newInstance.stateFullCheckpoint" name="instanceStateFullCheckpoint"
                        type="number" class="form-control">
               </div>
             </fieldset>
@@ -502,7 +494,7 @@
             <fieldset class="form-group row">
               <label class="col-form-label col-sm-2">Options</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="newInstance['options']" validJson name="instanceOptions" type="text"
+                <input [(ngModel)]="newInstance.options" validJson name="instanceOptions" type="text"
                        #instanceOptions="ngModel" class="form-control">
               </div>
             </fieldset>
@@ -512,41 +504,41 @@
             </div>
 
             <!-- Start-from -->
-            <fieldset *ngIf="newInstance.module['module-type'] !== 'input-streaming'" class="form-group row">
-              <label class="col-form-label col-sm-2">Start-from</label>
+            <fieldset *ngIf="newInstance.module.moduleType !== 'input-streaming'" class="form-group row">
+              <label class="col-form-label col-sm-2">Start from</label>
               <div class="col col-sm-10">
-                <select [(ngModel)]="newInstance['start-from']" name="instanceStartFrom"
+                <select [(ngModel)]="newInstance.startFrom" name="instanceStartFrom"
                         class="form-control">
                   <option value="newest">newest</option>
                   <option value="oldest">oldest</option>
-                  <option value="timestamp" *ngIf="startFromTimestampAcceptable">timestamp</option>
+                  <option value="datetime" *ngIf="startFromDateTimeAcceptable">dateime</option>
                 </select>
               </div>
             </fieldset>
 
-            <!-- Start-from timestamp -->
-            <fieldset *ngIf="newInstance['start-from'] === 'timestamp'" class="form-group row">
-              <label class="col-form-label col-sm-2 required">Start-from timestamp</label>
+            <!-- DateTime -->
+            <fieldset *ngIf="newInstance.startFrom === 'datetime'" class="form-group row">
+              <label class="col-form-label col-sm-2 required">Start from timestamp</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="newInstance['start-from-timestamp']" name="instanceStartFromTimestamp" type="number"
+                <input [(ngModel)]="newInstance.startFromDateTime" name="instanceStartFromDateTime" type="datetime"
                        required class="form-control">
               </div>
             </fieldset>
 
             <!-- Per-task-cores -->
             <fieldset class="form-group row">
-              <label class="col-form-label col-sm-2">Per-task-cores</label>
+              <label class="col-form-label col-sm-2">Per-task cores</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="newInstance['per-task-cores']" name="instancePerTaskCores" type="number" step="0.01"
+                <input [(ngModel)]="newInstance.perTaskCores" name="instancePerTaskCores" type="number" step="0.01"
                        class="form-control">
               </div>
             </fieldset>
 
             <!-- Per-task-ram -->
             <fieldset class="form-group row">
-              <label class="col-form-label col-sm-2">Per-task-ram</label>
+              <label class="col-form-label col-sm-2">Per-task ram</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="newInstance['per-task-ram']" name="instancePerTaskRam" type="number"
+                <input [(ngModel)]="newInstance.perTaskRam" name="instancePerTaskRam" type="number"
                        class="form-control">
               </div>
             </fieldset>
@@ -555,7 +547,7 @@
             <fieldset class="form-group row">
               <label class="col-form-label col-sm-2">JVM options</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="newInstance['jvm-options']" validJson name="instanceJvmOptions" type="text"
+                <input [(ngModel)]="newInstance.jvmOptions" validJson name="instanceJvmOptions" type="text"
                        #instanceJvmOptions="ngModel" class="form-control">
               </div>
             </fieldset>
@@ -566,9 +558,9 @@
 
             <!-- Node -->
             <fieldset class="form-group row">
-              <label class="col-form-label col-sm-2">Node-attributes</label>
+              <label class="col-form-label col-sm-2">Node attributes</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="newInstance['node-attributes']" name="instanceNodeAttributes" type="text"
+                <input [(ngModel)]="newInstance.nodeAttributes" name="instanceNodeAttributes" type="text"
                        #instanceNodeAttributes="ngModel" validJson class="form-control">
               </div>
             </fieldset>
@@ -581,7 +573,7 @@
             <fieldset class="form-group row">
               <label class="col-form-label col-sm-2 required">Coordination service</label>
               <div class="col col-sm-10">
-                <select [(ngModel)]="newInstance['coordination-service']" name="instanceCoordinationService"
+                <select [(ngModel)]="newInstance.coordinationService" name="instanceCoordinationService"
                         required class="form-control">
                   <option *ngFor="let service of servicesList | serviceFilter : 'zookeeper' " value={{service.name}}>
                     {{service.name}}
@@ -594,17 +586,17 @@
             <fieldset class="form-group row">
               <label class="col-form-label col-sm-2">Performance reporting interval</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="newInstance['performance-reporting-interval']"
+                <input [(ngModel)]="newInstance.performanceReportingInterval"
                        name="instancePerformanceReportingInterval" type="number" class="form-control">
               </div>
             </fieldset>
 
             <!-- Event-wait-idle-time -->
-            <fieldset *ngIf="newInstance.module['module-type'] === 'regular-streaming' ||
-                              newInstance.module['module-type'] === 'windowed-streaming'" class="form-group row">
+            <fieldset *ngIf="newInstance.module.moduleType === 'regular-streaming' ||
+                              newInstance.module.moduleType === 'batch-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2">Event-wait-idle-time</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="newInstance['event-wait-idle-time']" name="instanceEventWaitIdleTime" type="number"
+                <input [(ngModel)]="newInstance.eventWaitIdleTime" name="instanceEventWaitIdleTime" type="number"
                        class="form-control">
               </div>
             </fieldset>
@@ -613,7 +605,7 @@
             <fieldset class="form-group row">
               <label class="col-form-label col-sm-2">Environment variables</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="newInstance['environment-variables']" name="instanceEnvironmentVariables"
+                <input [(ngModel)]="newInstance.environmentVariables" name="instanceEnvironmentVariables"
                        type="text" #instanceEnvironmentVariables="ngModel" validJson class="form-control">
               </div>
             </fieldset>
@@ -623,10 +615,10 @@
             </div>
 
             <!-- Duplicate check -->
-            <fieldset *ngIf="newInstance.module['module-type'] === 'input-streaming'" class="form-group row">
+            <fieldset *ngIf="newInstance.module.moduleType === 'input-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2">Duplicate check</label>
               <div class="col col-sm-10">
-                <select [(ngModel)]="newInstance['duplicate-check']" name="instanceDuplicateCheck"
+                <select [(ngModel)]="newInstance.duplicateCheck" name="instanceDuplicateCheck"
                         class="form-control">
                   <option>false</option>
                   <option>true</option>
@@ -635,28 +627,28 @@
             </fieldset>
 
             <!-- Lookup history -->
-            <fieldset *ngIf="newInstance.module['module-type'] === 'input-streaming'" class="form-group row">
+            <fieldset *ngIf="newInstance.module.moduleType === 'input-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2 required">Lookup history</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="newInstance['lookup-history']" name="instanceLookupHistory" type="number"
+                <input [(ngModel)]="newInstance.lookupHistory" name="instanceLookupHistory" type="number"
                        required class="form-control">
               </div>
             </fieldset>
 
             <!-- Queue max size -->
-            <fieldset *ngIf="newInstance.module['module-type'] === 'input-streaming'" class="form-group row">
-              <label class="col-form-label col-sm-2 required">Queue max size</label>
+            <fieldset *ngIf="newInstance.module.moduleType === 'input-streaming'" class="form-group row">
+              <label class="col-form-label col-sm-2 required">Queue max-size</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="newInstance['queue-max-size']" name="instanceQueueMaxSize" type="number"
+                <input [(ngModel)]="newInstance.queueMaxSize" name="instanceQueueMaxSize" type="number"
                        required class="form-control">
               </div>
             </fieldset>
 
             <!-- Default eviction policy -->
-            <fieldset *ngIf="newInstance.module['module-type'] === 'input-streaming'" class="form-group row">
+            <fieldset *ngIf="newInstance.module.moduleType === 'input-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2">Default eviction policy</label>
               <div class="col col-sm-10">
-                <select [(ngModel)]="newInstance['default-eviction-policy']" name="instanceDefaultEvictionPolicy"
+                <select [(ngModel)]="newInstance.defaultEvictionPolicy" name="instanceDefaultEvictionPolicy"
                         class="form-control">
                   <option>LRU</option>
                   <option>LFU</option>
@@ -666,10 +658,10 @@
             </fieldset>
 
             <!-- Eviction policy -->
-            <fieldset *ngIf="newInstance.module['module-type'] === 'input-streaming'" class="form-group row">
+            <fieldset *ngIf="newInstance.module.moduleType === 'input-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2">Eviction policy</label>
               <div class="col col-sm-10">
-                <select [(ngModel)]="newInstance['eviction-policy']" name="instanceEvictionPolicy"
+                <select [(ngModel)]="newInstance.evictionPolicy" name="instanceEvictionPolicy"
                         class="form-control">
                   <option>fix-time</option>
                   <option>expanded-time</option>
@@ -678,19 +670,19 @@
             </fieldset>
 
             <!-- Backup count -->
-            <fieldset *ngIf="newInstance.module['module-type'] === 'input-streaming'" class="form-group row">
+            <fieldset *ngIf="newInstance.module.moduleType === 'input-streaming'" class="form-group row">
               <label class="col-form-label col-sm-2">Backup count</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="newInstance['backup-count']" name="instanceBackupCount" type="number" max="6"
+                <input [(ngModel)]="newInstance.backupCount" name="instanceBackupCount" type="number" max="6"
                        class="form-control">
               </div>
             </fieldset>
 
             <!-- Async backup count -->
-            <fieldset *ngIf="newInstance.module['module-type'] === 'input-streaming'" class="form-group row">
-              <label class="col-form-label col-sm-2">Async backup count</label>
+            <fieldset *ngIf="newInstance.module.moduleType === 'input-streaming'" class="form-group row">
+              <label class="col-form-label col-sm-2">Async-backup count</label>
               <div class="col col-sm-10">
-                <input [(ngModel)]="newInstance['async-backup-count']" name="instanceAsyncBackupCount" type="number"
+                <input [(ngModel)]="newInstance.asyncBackupCount" name="instanceAsyncBackupCount" type="number"
                        class="form-control">
               </div>
             </fieldset>
@@ -701,6 +693,7 @@
             <button type="button" class="btn btn-secondary" (click)="CreateInstance.hide()">Cancel</button>
             <button type="submit"
                     [disabled]="!(instanceForm.form.valid)"
+                    (click)="createInstance(CreateInstance)"
                     class="btn btn-primary">Create</button>
           </div>
         </form>
@@ -731,16 +724,16 @@
       </div>
 
       <div class="modal-footer">
-        <template [ngIf]="currentInstance && ifInstanceCanBeRemoved()">
+        <div *ngIf="currentInstance && ifInstanceCanBeRemoved()">
           <button type="button" class="btn btn-secondary" (click)="DeleteInstance.hide()">Cancel</button>
           <button type="button" class="btn btn-danger"
                   (click)="deleteInstance(DeleteInstance)">Delete
           </button>
-        </template>
+        </div>
 
-        <template [ngIf]="currentInstance && !ifInstanceCanBeRemoved()">
+        <div *ngIf="currentInstance && !ifInstanceCanBeRemoved()">
           <button type="button" class="btn btn-primary" (click)="DeleteInstance.hide()">OK</button>
-        </template>
+        </div>
       </div>
     </div>
   </div>
@@ -755,18 +748,21 @@
         </button>
         <h4 class="modal-title">Mesos framework tasks</h4>
       </div>
+      <div class="modal-body" *ngIf="!message">
+        <p>The rest-address is not available. Try later.</p>
+      </div>
 
-      <div class="modal-body">
+      <div class="modal-body" *ngIf="message">
         {{message}}
       </div>
-      <div class="modal-body">
+      <div class="modal-body" *ngIf="tasks">
         <ul *ngFor="let task of tasks">
           <li>{{task.id}}</li>
           <li>{{task.state}}</li>
           <li>{{task.directories}}</li>
-          <li>{{task['state-change']}}</li>
+          <li>{{task.stateChange}}</li>
           <li>{{task.reason}}</li>
-          <li>{{task['last-node']}}</li>
+          <li>{{task.lastNode}}</li>
           <li>{{task.node}}</li>
         </ul>
       </div>

@@ -2,7 +2,6 @@ package com.bwsw.sj.engine.core.reporting
 
 import java.util.Date
 
-import com.bwsw.sj.common.rest.entities.module.BatchFillType
 import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.annotation.{JsonInclude, JsonProperty}
 
@@ -40,7 +39,6 @@ class PerformanceMetricsMetadata {
   @JsonInclude(Include.NON_DEFAULT) @JsonProperty("entry-point-port") var entryPointPort: Int = -1
 
   @JsonInclude(Include.NON_DEFAULT) var window: Int = 0
-  @JsonProperty("batch-fill-type") var batchFillType: BatchFillType = null
   @JsonProperty("batches-per-stream") var batchesPerStream: Map[String, Int] = null
   @JsonProperty("average-size-batch-per-stream") var averageSizeBatchPerStream: Map[String, Int] = null
   @JsonInclude(Include.NON_DEFAULT) @JsonProperty("total-batches") var totalBatches: Int = -1

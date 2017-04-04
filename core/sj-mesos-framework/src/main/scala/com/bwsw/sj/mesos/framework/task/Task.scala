@@ -15,7 +15,7 @@ class Task(taskId: String) {
   var reason: String = ""
   var node: String = ""
   var lastNode: String = ""
-  val description: InstanceTask = null
+//  val description: InstanceTask = null
   var maxDirectories = Properties.envOrElse("MAX_SANDBOX_VIEW", "7").toInt
   var directories: Array[String] = Array()
   var host: Option[String] = None
@@ -27,7 +27,7 @@ class Task(taskId: String) {
              node: String = node,
              lastNode: String = lastNode,
              directory: String = "",
-             host: String = this.host.get) = {
+             host: String = if (this.host.isDefined) this.host.get else null) = {
     this.state = state
     this.stateChanged = stateChanged
     this.reason = reason

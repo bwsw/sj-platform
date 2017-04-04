@@ -14,44 +14,51 @@ object Dependencies {
       .exclude("log4j", "log4j")
       .exclude("io.netty", "netty")
       .exclude("io.netty", "netty-all")
-      .exclude("org.scala-lang.modules", "scala-parser-combinators_2.11"),
+      .exclude("org.scalatest", "scalatest_2.12"),
     ("org.mongodb" %% "casbah" % "3.1.1")
       .exclude("org.slf4j", "slf4j-api"),
     "org.mongodb.morphia" % "morphia" % "1.3.0",
     "org.apache.commons" % "commons-io" % "1.3.2",
     "com.typesafe" % "config" % "1.3.0",
-    ("org.apache.kafka" % "kafka_2.11" % "0.10.1.1")
+    ("org.apache.kafka" % "kafka_2.12" % "0.10.1.1")
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty")
-      .exclude("org.scala-lang.modules", "scala-parser-combinators_2.11"),
+      .exclude("io.netty", "netty"),
     ("org.apache.curator" % "curator-recipes" % "2.11.1")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
       .exclude("io.netty", "netty"),
-    ("org.elasticsearch" % "elasticsearch" % "5.1.1")
+    ("org.elasticsearch" % "elasticsearch" % "5.2.2")
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j"),
-    "org.elasticsearch.client" % "transport" % "5.1.1",
+    "org.elasticsearch.client" % "transport" % "5.2.2",
     "org.apache.logging.log4j" % "log4j-core" % "2.7",
     "org.apache.logging.log4j" % "log4j-api" % "2.7",
     "postgresql" % "postgresql" % "9.1-901.jdbc4",
+    "mysql" % "mysql-connector-java" % "5.1.6",
+//    "com.oracle" % "ojdbc6" % "11.1.0.7.0",
     "com.maxmind.geoip" % "geoip-api" % "1.3.1",
-    "io.netty" % "netty-all" % "4.1.6.Final"
+    "io.netty" % "netty-all" % "4.1.7.Final",
+    "com.opencsv" % "opencsv" % "3.9",
+    ("org.apache.avro" % "avro" % "1.8.1")
+      .exclude("org.slf4j", "slf4j-api"),
+    "org.scalatest" % "scalatest_2.12" % "3.0.1"
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(
     "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
-    ("org.apache.kafka" % "kafka_2.11" % "0.10.1.1" % "provided")
+    ("org.apache.kafka" % "kafka_2.12" % "0.10.1.1" % "provided")
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty")
-      .exclude("org.scala-lang.modules", "scala-parser-combinators_2.11"),
-    ("net.openhft" % "chronicle-queue" % "4.5.19")
-      .exclude("org.slf4j", "slf4j-api")
+      .exclude("io.netty", "netty"),
+    "org.apache.commons" % "commons-lang3" % "3.5",
+    ("com.mockrunner" % "mockrunner-jdbc" % "1.1.2")
+      .exclude("jakarta-regexp", "jakarta-regexp")
+      .exclude("xerces", "xerces"),
+    "org.scalatest" % "scalatest_2.12" % "3.0.1" % "provided"
   ))
 
   lazy val sjRestDependencies = Def.setting(Seq(
@@ -71,23 +78,20 @@ object Dependencies {
 
   lazy val sjRegularEngineDependencies = Def.setting(Seq(
     "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
-    ("org.apache.kafka" % "kafka_2.11" % "0.10.1.1" % "provided")
+    ("org.apache.kafka" % "kafka_2.12" % "0.10.1.1" % "provided")
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
       .exclude("io.netty", "netty")
-      .exclude("org.scala-lang.modules", "scala-parser-combinators_2.11"),
-    "net.openhft" % "chronicle-queue" % "4.5.19" % "provided"
   ))
 
-  lazy val sjWindowedEngineDependencies = Def.setting(Seq(
+  lazy val sjBatchEngineDependencies = Def.setting(Seq(
     "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
-    ("org.apache.kafka" % "kafka_2.11" % "0.10.1.1" % "provided")
+    ("org.apache.kafka" % "kafka_2.12" % "0.10.1.1" % "provided")
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
-      .exclude("io.netty", "netty")
-      .exclude("org.scala-lang.modules", "scala-parser-combinators_2.11"),
+      .exclude("io.netty", "netty"),
     ("org.apache.curator" % "curator-recipes" % "2.11.1" % "provided")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
@@ -96,11 +100,11 @@ object Dependencies {
 
   lazy val sjOutputEngineDependencies = Def.setting(Seq(
     "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
-    ("org.elasticsearch" % "elasticsearch" % "5.1.1" % "provided")
+    ("org.elasticsearch" % "elasticsearch" % "5.2.2" % "provided")
       .exclude("org.slf4j", "slf4j-log4j12")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j"),
-    "org.elasticsearch.client" % "transport" % "5.1.1" % "provided",
+    "org.elasticsearch.client" % "transport" % "5.2.2" % "provided",
     "org.apache.logging.log4j" % "log4j-core" % "2.7" % "provided",
     "org.apache.logging.log4j" % "log4j-api" % "2.7" % "provided"
   ))
@@ -108,9 +112,8 @@ object Dependencies {
   lazy val sjFrameworkDependencies = Def.setting(Seq(
     "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
     "org.apache.mesos" % "mesos" % "0.28.1",
-    ("net.databinder" % "unfiltered-filter_2.11" % "0.8.4")
-      .exclude("org.scala-lang.modules", "scala-xml_2.11"),
-    "net.databinder" % "unfiltered-jetty_2.11" % "0.8.4",
+    "ws.unfiltered" % "unfiltered-filter_2.12" % "0.9.0",
+    "ws.unfiltered" % "unfiltered-jetty_2.12" % "0.9.0",
     ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
       .exclude("commons-logging", "commons-logging")
   ))

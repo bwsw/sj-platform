@@ -9,15 +9,15 @@ object EngineLiterals {
 
   final val queueSize = 1000
   final val persistentBlockingQueue = "persistentBlockingQueue"
-  final val windowedInstanceBarrierPrefix = "/instance/barriers/"
-  final val windowedInstanceLeaderPrefix = "/instance/leaders/"
+  final val batchInstanceBarrierPrefix = "/instance/barriers/"
+  final val batchInstanceLeaderPrefix = "/instance/leaders/"
   final val eventWaitTimeout = 1000
 
   final val inputStreamingType = "input-streaming"
   final val outputStreamingType = "output-streaming"
-  final val windowedStreamingType = "windowed-streaming"
+  final val batchStreamingType = "batch-streaming"
   final val regularStreamingType = "regular-streaming"
-  val moduleTypes = Seq(windowedStreamingType, regularStreamingType, outputStreamingType, inputStreamingType)
+  val moduleTypes = Seq(batchStreamingType, regularStreamingType, outputStreamingType, inputStreamingType)
 
   final val everyNthMode = "every-nth"
   final val timeIntervalMode = "time-interval"

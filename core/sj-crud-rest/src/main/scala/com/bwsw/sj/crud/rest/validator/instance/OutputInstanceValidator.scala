@@ -32,30 +32,30 @@ class OutputInstanceValidator extends InstanceValidator {
     * @return - List of errors
     */
   override def validate(parameters: InstanceMetadata, specification: SpecificationData) = {
-    logger.debug(s"Instance: ${parameters.name}. Start output-streaming validation.")
+    logger.debug(s"Instance: ${parameters.name}. Start a validation of instance of output-streaming type.")
     val errors = new ArrayBuffer[String]()
     errors ++= super.validateGeneralOptions(parameters)
     val outputInstanceMetadata = parameters.asInstanceOf[OutputInstanceMetadata]
 
     Option(outputInstanceMetadata.checkpointMode) match {
       case None =>
-        errors += createMessage("rest.validator.attribute.required", "Checkpoint-mode")
+        errors += createMessage("rest.validator.attribute.required", "checkpointMode")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("rest.validator.attribute.required", "Checkpoint-mode")
+          errors += createMessage("rest.validator.attribute.required", "checkpointMode")
         }
         else {
           if (!x.equals(EngineLiterals.everyNthMode)) {
-            errors += createMessage("rest.validator.attribute.unknown.value", "checkpoint-mode", s"$x") + ". " +
-              createMessage("rest.validator.attribute.not", "Checkpoint-mode", EngineLiterals.everyNthMode)
+            errors += createMessage("rest.validator.attribute.unknown.value", "checkpointMode", s"$x") + ". " +
+              createMessage("rest.validator.attribute.not", "checkpointMode", EngineLiterals.everyNthMode)
           }
         }
     }
 
     // 'checkpoint-interval' field
     if (outputInstanceMetadata.checkpointInterval <= 0) {
-      errors += createMessage("rest.validator.attribute.required", "Checkpoint-interval") + ". " +
-        createMessage("rest.validator.attribute.must.greater.than.zero", "Checkpoint-interval")
+      errors += createMessage("rest.validator.attribute.required", "checkpointInterval") + ". " +
+        createMessage("rest.validator.attribute.must.greater.than.zero", "checkpointInterval")
     }
 
     errors ++= validateStreamOptions(outputInstanceMetadata, specification)
@@ -97,7 +97,7 @@ class OutputInstanceValidator extends InstanceValidator {
                   errors += createMessage("rest.validator.service.must", "t-streams", "TstrQ")
                 }
 
-                errors ++= checkParallelism(instance.parallelism, input.partitions)
+                errors ++= validateParallelism(instance.parallelism, input.partitions)
               }
           }
         }
@@ -132,7 +132,7 @@ class OutputInstanceValidator extends InstanceValidator {
         startFrom.toLong
       } catch {
         case ex: NumberFormatException =>
-          errors += createMessage("rest.validator.attribute.must.one_of", "Start-from", s"${startFromModes.mkString("[", ", ", "]")} or timestamp")
+          errors += createMessage("rest.validator.attribute.must.one_of", "startFrom", s"${startFromModes.mkString("[", ", ", "]")} or timestamp")
       }
     }
 

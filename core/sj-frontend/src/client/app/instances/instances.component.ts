@@ -2,15 +2,8 @@ import { Component, OnInit, ViewChild, AfterViewChecked } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ModalDirective } from 'ng2-bootstrap';
 
-import { InstanceModel } from '../shared/models/instance.model';
-import { TaskModel } from '../shared/models/task.model';
-import { ModuleModel } from '../shared/models/module.model';
-import { ServiceModel } from '../shared/models/service.model';
-import { StreamModel } from '../shared/models/stream.model';
-import { InstancesService } from '../shared/services/instances.service';
-import { ModulesService } from '../shared/services/modules.service';
-import { StreamsService } from '../shared/services/streams.service';
-import { ServicesService } from '../shared/services/services.service';
+import { InstanceModel, TaskModel, ModuleModel, ServiceModel, StreamModel, NotificationModel } from '../shared/models/index';
+import { InstancesService, ModulesService, StreamsService, ServicesService } from '../shared/services/index';
 
 @Component({
   moduleId: module.id,
@@ -19,7 +12,8 @@ import { ServicesService } from '../shared/services/services.service';
 })
 export class InstancesComponent implements OnInit, AfterViewChecked {
 
-  public alerts: Array<Object> = [];
+  public alerts: NotificationModel[] = [];
+  public formAlerts: NotificationModel[] = [];
   public errorMessage: string;
   public isFormReady: boolean = false;
   public instancesList: InstanceModel[];
@@ -30,13 +24,13 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   public streamsList: StreamModel[];
   public streamTypesList: { [key: string]: string } = {};
   public currentInstance: InstanceModel;
-  public currentInstanceTasks: string[];
+  public currentInstanceTasks: {};
   public newInstance: InstanceModel;
   public cloneInstance: boolean = false;
   public cloningInstance: InstanceModel;
   public instanceForm: NgForm;
   public showSpinner: boolean;
-  public startFromTimestampAcceptable: boolean = true;
+  public startFromDateTimeAcceptable: boolean = true;
   public tasks: TaskModel[];
   public message: string;
 
@@ -80,46 +74,46 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   }
 
   public getInstancesList() {
-    this.instancesService.getInstanceList()
+    this.instancesService.getList('instances')
       .subscribe(
-        instancesList => {
-          this.instancesList = instancesList;
-          this.cloneInstancesList = instancesList;
+        response => {
+          this.instancesList = response.instances;
+          this.cloneInstancesList = response.instances;
         },
         error => this.errorMessage = <any>error);
   }
 
   public getModulesList() {
-    this.modulesService.getModuleList()
+    this.modulesService.getList()
       .subscribe(
-        modulesList => {
-          this.modulesList = modulesList;
+        response => {
+          this.modulesList = response.modules;
         },
         error => this.errorMessage = <any>error);
   }
 
   public getModuleTypes() {
-    this.modulesService.getModuileTypes()
-      .subscribe(types => this.moduleTypes = types);
+    this.modulesService.getTypes()
+      .subscribe(response => this.moduleTypes = response.types);
   }
 
   public getStreamsList() {
-    this.streamsService.getStreamList()
+    this.streamsService.getList()
       .subscribe(
-        streamsList => {
-          this.streamsList = streamsList;
-          for (let stream of streamsList) {
-            this.streamTypesList[stream.name] = stream['stream-type'];
+        response => {
+          this.streamsList = response.streams;
+          for (let stream of this.streamsList) {
+            this.streamTypesList[stream.name] = stream.type;
           }
         },
         error => this.errorMessage = <any>error);
   }
 
   public getServicesList() {
-    this.servicesService.getServiceList()
+    this.servicesService.getList()
       .subscribe(
-        servicesList => {
-          this.servicesList = servicesList;
+        response => {
+          this.servicesList = response.services;
           this.isFormReady = true;
         },
 
@@ -132,12 +126,12 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
         instance => {
           this.currentInstance = instance;
           this.currentInstance.module = new ModuleModel();
-          this.currentInstance.module['module-name'] = currentInstance['module-name'];
-          this.currentInstance.module['module-type'] = currentInstance['module-type'];
-          this.currentInstance.module['module-version'] = currentInstance['module-version'];
-          this.currentInstanceTasks = this.currentInstance.module['module-type'] !== 'input-streaming' ?
-            this.currentInstance['execution-plan']['tasks']:
-            this.currentInstance['tasks'];
+          this.currentInstance.module.moduleName = currentInstance.moduleName;
+          this.currentInstance.module.moduleType = currentInstance.moduleType;
+          this.currentInstance.module.moduleVersion = currentInstance.moduleVersion;
+          this.currentInstanceTasks = this.currentInstance.module.moduleType!== 'input-streaming' ?
+            this.currentInstance.executionPlan.tasks:
+            this.currentInstance.tasks;
         },
         error => this.errorMessage = <any>error);
   }
@@ -146,8 +140,10 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
     this.instancesService.getInstanceTasks(instance)
       .subscribe(
         response => {
-          this.message = response.message;
-          this.tasks = response.tasks;
+          if(response) {
+            this.message = response.message;
+            this.tasks = response.tasks;
+          }
         }
       );
   }
@@ -162,40 +158,31 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
       .subscribe(
         instanceInfo => {
           this.newInstance = instanceInfo;
-          this.newInstance['jvm-options'] = JSON.stringify(instanceInfo['jvm-options']);
-          this.newInstance['options'] = JSON.stringify(instanceInfo['options']);
-          this.newInstance['node-attributes'] = JSON.stringify(instanceInfo['node-attributes']);
-          this.newInstance['environment-variables'] = JSON.stringify(instanceInfo['environment-variables']);
-          this.newInstance['coordination-service'] =
-            this.servicesList.find(service => service.name === instanceInfo['coordination-service']) ? instanceInfo['coordination-service']: '';
+          this.newInstance.jvmOptions = JSON.stringify(instanceInfo.jvmOptions);
+          this.newInstance.options = JSON.stringify(instanceInfo.options);
+          this.newInstance.nodeAttributes = JSON.stringify(instanceInfo.nodeAttributes);
+          this.newInstance.environmentVariables = JSON.stringify(instanceInfo.environmentVariables);
+          this.newInstance.coordinationService =
+            this.servicesList.find(service => service.name === instanceInfo.coordinationService) ? instanceInfo.coordinationService: '';
           this.newInstance.name = '';
           this.newInstance.module = new ModuleModel();
-          this.newInstance.module['module-name'] = instance['module-name'];
-          this.newInstance.module['module-type'] = instance['module-type'];
-          this.newInstance.module['module-version'] = instance['module-version'];
-          if (this.newInstance.module['module-type'] === 'windowed-streaming') {
-            let batchFillType : { [key: string]: any } = instanceInfo['batch-fill-type'];
-            this.newInstance['batch-fill-type-name'] = batchFillType['type-name'];
-            this.newInstance['batch-fill-type-value'] = batchFillType['value'];
-          }
-          if (this.newInstance.module['module-type'] === 'windowed-streaming') {
-            let mainStream = instanceInfo['main-stream'].split('/');
-            this.newInstance['main-stream'] = mainStream[0];
-            this.newInstance['main-stream-type'] = mainStream[1];
-            this.newInstance['related-streams-type'] = [];
-            instanceInfo['related-streams'].forEach((item: string, i: number) => {
-              let related = item.split('/');
-              this.newInstance['related-streams'][i] = related[0];
-              this.newInstance['related-streams-type'][i] = related[1];
-            });
-
-          }
-          if (this.newInstance.module['module-type'] === 'regular-streaming') {
-            this.newInstance['inputs-types'] = [];
+          this.newInstance.module.moduleName = instance.moduleName;
+          this.newInstance.module.moduleType = instance.moduleType;
+          this.newInstance.module.moduleVersion = instance.moduleVersion;
+          if (this.newInstance.module.moduleType === 'batch-streaming') {
+            this.newInstance.inputsTypes = [];
             this.newInstance.inputs.forEach(function (item: string, i: number) {
               let input = item.split('/');
               this.newInstance.inputs[i] = input[0];
-              this.newInstance['inputs-types'][i] = input[1];
+              this.newInstance.inputsTypes[i] = input[1];
+            }.bind(this));
+          }
+          if (this.newInstance.module.moduleType === 'regular-streaming') {
+            this.newInstance.inputsTypes = [];
+            this.newInstance.inputs.forEach(function (item: string, i: number) {
+              let input = item.split('/');
+              this.newInstance.inputs[i] = input[0];
+              this.newInstance.inputsTypes[i] = input[1];
             }.bind(this));
           }
         },
@@ -206,27 +193,23 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
     let req = this.instancesService.saveInstance(this.newInstance);
     this.showSpinner = true;
     req.subscribe(
-      status => {
+      response => {
         modal.hide();
         this.newInstance = new InstanceModel();
         this.showSpinner = false;
-        this.showAlert({msg: status, type: 'success', closable: true, timeout:3000});
+        this.showAlert({message: response.message, type: 'success', closable: true, timeout:3000});
         this.getInstancesList();
       },
       error => {
         this.showSpinner = false;
-        modal.hide();
-        this.showAlert({msg: error, type: 'danger', closable: true, timeout:0});
+        this.formAlerts.push({message: error, type: 'danger', closable: true, timeout:0});
       });
   }
 
-  public closeAlert(i: number): void {
-    this.alerts.splice(i, 1);
-  }
-
-  public showAlert(message: Object): void {
-    this.alerts = [];
-    this.alerts.push(message);
+  public showAlert(notification: NotificationModel): void {
+    if (!this.alerts.find(msg => msg.message === notification.message)) {
+      this.alerts.push(notification);
+    }
   }
 
   public showInstanceTasks(modal: ModalDirective, instance: InstanceModel) {
@@ -242,18 +225,14 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   public deleteInstance(modal: ModalDirective) {
     this.instancesService.deleteInstance(this.currentInstance)
       .subscribe(
-        status => {
-          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
+        response => {
+          this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
           this.getInstancesList();
         },
         error => {
-          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
+          this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 });
         });
     modal.hide();
-  }
-
-  public isSelected(instance: InstanceModel) {
-    return this.currentInstance && instance.name === this.currentInstance.name;
   }
 
   public clearInstance() {
@@ -264,28 +243,30 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   public startInstance(instance: InstanceModel) {
     this.instancesService.startInstance(instance)
       .subscribe(
-        status => {
-          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
+        response => {
+          this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
+          this.getInstancesList();
         },
         error => {
-          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
+          this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 });
         });
   }
 
   public stopInstance(instance: InstanceModel) {
     this.instancesService.stopInstance(instance)
       .subscribe(
-        status => {
-          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
+        response => {
+          this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
+          this.getInstancesList();
         },
-        error =>{
-          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
+        error => {
+          this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 });
         });
   }
 
   public addInput() {
     this.newInstance.inputs.push('');
-    this.newInstance['inputs-types'].push('');
+    this.newInstance.inputsTypes.push('');
     this.checkTimestampAcceptable();
   }
 
@@ -295,7 +276,7 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
 
   public removeInput(i: number): void {
     this.newInstance.inputs.splice(i, 1);
-    this.newInstance['inputs-types'].splice(i, 1);
+    this.newInstance.inputsTypes.splice(i, 1);
     this.checkTimestampAcceptable();
   }
 
@@ -303,38 +284,29 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
     this.newInstance.outputs.splice(i, 1);
   }
 
-  public addRelatedStream() {
-    this.newInstance['related-streams'].push('');
-  }
-
-  public removeRelatedStream(i: number): void {
-    this.newInstance['related-streams'].splice(i, 1);
-    this.newInstance['related-streams-type'].splice(i, 1);
-  }
-
-  public checkTimestampAcceptable(): void {
-    switch (this.newInstance.module['module-type']) {
+    public checkTimestampAcceptable(): void {
+    switch (this.newInstance.module.moduleType) {
       case 'regular-streaming':
-      case 'windowed-streaming':
+      case 'batch-streaming':
         if (this.newInstance.inputs &&  this.newInstance.inputs.length > 0 && this.newInstance.inputs[0]) {
-          this.startFromTimestampAcceptable = true;
+          this.startFromDateTimeAcceptable = true;
           for (let inputName of this.newInstance.inputs) {
-            if (this.streamTypesList[inputName] !== 'stream.t-stream') {
-              this.startFromTimestampAcceptable = false;
+            if (this.streamTypesList[inputName] !== 'stream.kafka') {
+              this.startFromDateTimeAcceptable = false;
               break;
             }
           }
         }
         break;
       case 'output-streaming':
-        this.startFromTimestampAcceptable = true;
+        this.startFromDateTimeAcceptable = false;
         break;
       default:
-        console.error('start-from field is not provided for module-type '+this.newInstance.module['module-type']);
+        console.error('start-from field is not provided for module-type '+this.newInstance.module.moduleType);
         break;
     }
-    if (!this.startFromTimestampAcceptable && this.newInstance['start-from'] === 'timestamp') {
-      this.newInstance['start-from'] = '';
+    if (!this.startFromDateTimeAcceptable && this.newInstance.startFrom === 'timestamp') {
+      this.newInstance.startFrom = '';
     }
   }
 
@@ -343,10 +315,6 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   }
 
   public ngAfterViewChecked() {
-    this.formChanged();
-  }
-
-  public formChanged() {
     if (this.currentForm === this.instanceForm) { return; }
     this.instanceForm = this.currentForm;
     if (this.instanceForm) {

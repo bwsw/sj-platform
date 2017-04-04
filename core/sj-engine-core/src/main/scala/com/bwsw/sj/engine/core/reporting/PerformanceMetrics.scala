@@ -46,7 +46,7 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
    */
   private def getReportStream(): TStreamSjStream = {
     logger.debug(s"Task name: $taskName. " +
-      s"Get stream for performance metrics\n")
+      s"Get stream for performance metrics.")
     val tags = Array("report", "performance")
     val description = "store reports of performance metrics"
     val partitions = instance.parallelism
@@ -66,9 +66,9 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
    * @return Producer for reporting performance metrics
    */
   private def createReportProducer() = {
-    logger.debug(s"Task: $taskName. Start creating a t-stream producer to record performance reports\n")
+    logger.debug(s"Task: $taskName. Start creating a t-stream producer to record performance reports.")
     val reportProducer = manager.createProducer(reportStream)
-    logger.debug(s"Task: $taskName. Creation of t-stream producer is finished\n")
+    logger.debug(s"Task: $taskName. Creation of t-stream producer is finished.")
 
     reportProducer
   }
@@ -85,10 +85,10 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
 
   def addEnvelopeToInputStream(envelope: Envelope): Unit = {
     envelope match {
-      case tStreamEnvelope: TStreamEnvelope =>
-        addEnvelopeToInputStream(tStreamEnvelope.stream, tStreamEnvelope.data.map(_.length))
-      case kafkaEnvelope: KafkaEnvelope =>
-        addEnvelopeToInputStream(kafkaEnvelope.stream, List(kafkaEnvelope.data.length))
+      case tStreamEnvelope: TStreamEnvelope[_] =>
+        addEnvelopeToInputStream(tStreamEnvelope.stream, tStreamEnvelope.data.map(_.toString.length)) //todo придумать другой способ извлечения информации
+      case kafkaEnvelope: KafkaEnvelope[_] =>
+        addEnvelopeToInputStream(kafkaEnvelope.stream, List(kafkaEnvelope.data.toString.length)) //todo придумать другой способ извлечения информации
       case wrongEnvelope =>
         logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined")
         throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined")
@@ -97,11 +97,11 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
 
   protected def addEnvelopeToInputStream(name: String, elementsSize: List[Int]) = {
     mutex.lock()
-    logger.debug(s"Indicate that a new envelope is received from input stream: $name\n")
+    logger.debug(s"Indicate that a new envelope is received from input stream: $name.")
     if (inputEnvelopesPerStream.contains(name)) {
       inputEnvelopesPerStream(name) += elementsSize
     } else {
-      logger.error(s"Input stream with name: $name doesn't exist\n")
+      logger.error(s"Input stream with name: $name doesn't exist.")
       throw new Exception(s"Input stream with name: $name doesn't exist")
     }
     mutex.unlock()
@@ -115,16 +115,16 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
    */
   def addElementToOutputEnvelope(name: String, envelopeID: String, elementSize: Int) = {
     mutex.lock()
-    logger.debug(s"Indicate that a new element is sent to txn: $envelopeID of output stream: $name\n")
+    logger.debug(s"Indicate that a new element is sent to txn: $envelopeID of output stream: $name.")
     if (outputEnvelopesPerStream.contains(name)) {
       if (outputEnvelopesPerStream(name).contains(envelopeID)) {
         outputEnvelopesPerStream(name)(envelopeID) += elementSize
       } else {
-        logger.debug(s"Output stream with name: $name doesn't contain txn: $envelopeID\n")
+        logger.debug(s"Output stream with name: $name doesn't contain txn: $envelopeID.")
         outputEnvelopesPerStream(name) += (envelopeID -> ListBuffer(elementSize))
       }
     } else {
-      logger.error(s"Output stream with name: $name doesn't exist\n")
+      logger.error(s"Output stream with name: $name doesn't exist.")
       throw new Exception(s"Output stream with name: $name doesn't exist")
     }
     mutex.unlock()
@@ -134,17 +134,17 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
    * It is in charge of running of input module
    */
   override def call() = {
-    logger.debug(s"Task: $taskName. Launch a new thread to report performance metrics \n")
+    logger.debug(s"Task: $taskName. Launch a new thread to report performance metrics .")
     val currentThread = Thread.currentThread()
     currentThread.setName(s"report-task-$taskName")
 
     while (true) {
-      logger.info(s"Task: $taskName. Wait $reportingInterval ms to report performance metrics\n")
+      logger.info(s"Task: $taskName. Wait $reportingInterval ms to report performance metrics.")
       TimeUnit.MILLISECONDS.sleep(reportingInterval)
       val report = getReport()
-      logger.info(s"Task: $taskName. Performance metrics: $report \n")
+      logger.info(s"Task: $taskName. Performance metrics: $report .")
       sendReport(report)
-      logger.debug(s"Task: $taskName. Do checkpoint of producer for performance reporting\n")
+      logger.debug(s"Task: $taskName. Do checkpoint of producer for performance reporting.")
       reportProducer.checkpoint()
     }
   }
@@ -158,9 +158,9 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
   private def sendReport(report: String) = {
     val reportSerializerForTxn = new ObjectSerializer()
     val taskNumber = taskName.replace(s"${manager.instanceName}-task", "").toInt
-    logger.debug(s"Task: $taskName. Create a new txn for sending performance metrics\n")
+    logger.debug(s"Task: $taskName. Create a new txn for sending performance metrics.")
     val reportTxn = reportProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened, taskNumber)
-    logger.debug(s"Task: $taskName. Send performance metrics\n")
+    logger.debug(s"Task: $taskName. Send performance metrics.")
     reportTxn.send(reportSerializerForTxn.serialize(report))
   }
 

@@ -9,7 +9,8 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.utils.SjStreamUtils._
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
-import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty}
+import com.fasterxml.jackson.annotation.JsonIgnore
+import org.apache.avro.Schema
 
 import scala.collection.JavaConverters._
 
@@ -23,15 +24,16 @@ class InstanceMetadata {
   var description: String = "No description"
   var parallelism: Any = 1
   var options: Map[String, Any] = Map()
-  @JsonProperty("per-task-cores") var perTaskCores: Double = 1.0
-  @JsonProperty("per-task-ram") var perTaskRam: Int = 1024
-  @JsonProperty("jvm-options") var jvmOptions: Map[String, String] = Map()
-  @JsonProperty("node-attributes") var nodeAttributes: Map[String, String] = Map()
-  @JsonProperty("coordination-service") var coordinationService: String = null
-  @JsonProperty("environment-variables") var environmentVariables: Map[String, String] = Map()
-  @JsonProperty("performance-reporting-interval") var performanceReportingInterval: Long = 60000
+  var perTaskCores: Double = 1.0
+  var perTaskRam: Int = 1024
+  var jvmOptions: Map[String, String] = Map()
+  var nodeAttributes: Map[String, String] = Map()
+  var coordinationService: String = null
+  var environmentVariables: Map[String, String] = Map()
+  var performanceReportingInterval: Long = 60000
   var engine: String = null
-  @JsonProperty("rest-address") var restAddress: String = null
+  var restAddress: String = null
+  var inputAvroSchema: Map[String, Any] = Map()
 
   @JsonIgnore
   def asModelInstance(): Instance = ???
@@ -58,6 +60,7 @@ class InstanceMetadata {
     modelInstance.environmentVariables = this.environmentVariables.asJava
     modelInstance.stage = this.stage
     modelInstance.restAddress = this.restAddress
+    modelInstance.inputAvroSchema = serializer.serialize(this.inputAvroSchema)
 
     val service = serviceDAO.get(this.coordinationService)
     if (service.isDefined && service.get.isInstanceOf[ZKService]) {
@@ -158,6 +161,19 @@ class InstanceMetadata {
 
   private def createTaskName(taskPrefix: String, taskNumber: Int) = {
     taskPrefix + "-task" + taskNumber
+  }
+
+  def validateAvroSchema: Boolean = {
+    val schemaParser = new Schema.Parser()
+    val serializer = new JsonSerializer()
+    inputAvroSchema == Map.empty || {
+      try {
+        schemaParser.parse(serializer.serialize(inputAvroSchema))
+        true
+      } catch {
+        case _: Throwable => false
+      }
+    }
   }
 }
 

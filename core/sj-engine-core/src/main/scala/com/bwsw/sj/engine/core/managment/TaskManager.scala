@@ -6,9 +6,9 @@ import java.net.URLClassLoader
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
-import com.bwsw.sj.common.engine.StreamingExecutor
+import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
+import com.bwsw.sj.common.engine.{ExtendedEnvelopeDataSerializer, EnvelopeDataSerializer, StreamingExecutor}
 import com.bwsw.sj.common.rest.entities.module.ExecutionPlan
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.StreamLiterals._
@@ -25,7 +25,6 @@ import scala.collection.mutable
 
 abstract class TaskManager() {
   protected val logger = LoggerFactory.getLogger(this.getClass)
-
   val streamDAO = ConnectionRepository.getStreamService
 
   require(System.getenv("INSTANCE_NAME") != null &&
@@ -42,7 +41,7 @@ abstract class TaskManager() {
   val instance: Instance = getInstance()
   protected val auxiliarySJTStream = getAuxiliaryTStream()
   protected val auxiliaryTStreamService = getAuxiliaryTStreamService()
-  val tstreamFactory = new TStreamsFactory()
+  protected val tstreamFactory = new TStreamsFactory()
   setTStreamFactoryProperties()
 
   protected var currentPortNumber = 0
@@ -53,11 +52,14 @@ abstract class TaskManager() {
       "specification.module-type" -> instance.moduleType,
       "specification.version" -> instance.moduleVersion)
   ).head
-  protected val executorClassName = fileMetadata.specification.executorClass
+  private val executorClassName = fileMetadata.specification.executorClass
+  val moduleClassLoader = createClassLoader()
 
-  protected val moduleClassLoader = createClassLoader()
+  protected val executorClass = moduleClassLoader.loadClass(executorClassName)
 
   val converter = new ArrayByteConverter
+  val envelopeDataSerializer: EnvelopeDataSerializer[AnyRef] =
+    new ExtendedEnvelopeDataSerializer(moduleClassLoader, instance.getInputAvroSchema)
   val inputs: mutable.Map[SjStream, Array[Int]]
 
   private def getInstance() = {
@@ -151,7 +153,7 @@ abstract class TaskManager() {
   protected def createClassLoader() = {
     val file = getModuleJar
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-      s"Get class loader for jar file: ${file.getName}\n")
+      s"Get class loader for jar file: ${file.getName}.")
 
     val classLoaderUrls = Array(file.toURI.toURL)
 
@@ -159,7 +161,7 @@ abstract class TaskManager() {
   }
 
   private def getModuleJar: File = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '${instance.moduleName}' module jar\n")
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. Get file contains uploaded '${instance.moduleName}' module jar.")
     storage.get(fileMetadata.filename, s"tmp/${instance.moduleName}")
   }
 
@@ -179,7 +181,7 @@ abstract class TaskManager() {
     */
   protected def createOutputProducers() = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-      s"Create the t-stream producers for each output stream\n")
+      s"Create the t-stream producers for each output stream.")
 
     tstreamFactory.setProperty(TSF_Dictionary.Producer.Transaction.DATA_WRITE_BATCH_SIZE, 20)
 
@@ -190,7 +192,7 @@ abstract class TaskManager() {
 
   def createProducer(stream: TStreamSjStream) = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-      s"Create producer for stream: ${stream.name}\n")
+      s"Create producer for stream: ${stream.name}.")
 
     setProducerBindPort()
     setStreamOptions(stream)
@@ -216,7 +218,7 @@ abstract class TaskManager() {
 
     if (!StreamService.isExist(name, metadataStorage)) {
       logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-        s"Create t-stream: $name to $description\n")
+        s"Create t-stream: $name to $description.")
       StreamService.createStream(
         name,
         partitions,
@@ -253,7 +255,7 @@ abstract class TaskManager() {
                                 offset: IOffset,
                                 callback: Callback[Array[Byte]]) = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-      s"Create subscribing consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
+      s"Create subscribing consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head}).")
 
     val partitionRange = (partitions.head to partitions.tail.head).toSet
 

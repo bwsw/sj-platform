@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ModalDirective } from 'ng2-bootstrap';
 
-import { StreamModel } from '../shared/models/stream.model';
-import { ServiceModel } from '../shared/models/service.model';
-import { ServicesService } from '../shared/services/services.service';
-import { StreamsService } from '../shared/services/streams.service';
+import { StreamModel, ServiceModel, NotificationModel } from '../shared/models/index';
+import { ServicesService, StreamsService } from '../shared/services/index';
 
 @Component({
   moduleId: module.id,
@@ -13,7 +11,8 @@ import { StreamsService } from '../shared/services/streams.service';
 })
 export class StreamsComponent implements OnInit {
   public errorMessage: string;
-  public alerts: Array<Object> = [];
+  public alerts: NotificationModel[] = [];
+  public formAlerts: NotificationModel[] = [];
   public streamList: StreamModel[];
   public streamTypes: string[];
   public serviceList: ServiceModel[];
@@ -34,19 +33,23 @@ export class StreamsComponent implements OnInit {
     this.newStream = new StreamModel();
     this.newStream.tags = [];
     this.newStream.generator = {
-      'generator-type': 'local',
+      generatorType: 'local',
       service: '',
-      'instance-count': 0
+      instanceCount: 0
     };
   }
 
-  public keyUp(event:KeyboardEvent) {
-    if (event.keyCode === 32) {
-      this.newStream.tags.push(this.currentTag.substr(0, this.currentTag.length-1));
+  public keyDown(event:KeyboardEvent) {
+    if (event.keyCode === 13) {
+      this.newStream.tags.push(this.currentTag);
       this.currentTag = '';
-    } else if (event.keyCode === 8 && this.currentTag.length == 0){
-      this.currentTag = this.newStream.tags.pop();
+    } else if (event.keyCode === 8 && this.currentTag.length === 0) {
+      this.newStream.tags.pop();
     }
+  }
+
+  public deleteTag(index: number) {
+    this.newStream.tags.splice(index,1);
   }
 
   public blur() {
@@ -61,81 +64,85 @@ export class StreamsComponent implements OnInit {
   }
 
   public getStreamList() {
-    this.streamsService.getStreamList()
+    this.streamsService.getList()
       .subscribe(
-        streamList => {
-          this.streamList = streamList;
-          if (streamList.length > 0) {
-            this.currentStream = streamList[0];
+        response => {
+          this.streamList = response.streams;
+          if (this.streamList.length > 0 ) {
+            this.currentStream = this.streamList[0];
           }
         },
         error => this.errorMessage = <any>error);
   }
 
   public getStreamTypes() {
-    this.streamsService.getStreamTypes()
+    this.streamsService.getTypes()
       .subscribe(
-        types => this.streamTypes = types,
-        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 })
+        response => this.streamTypes = response.types,
+        error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 })
       );
   }
 
   public getServiceList() {
-    this.servicesService.getServiceList()
+    this.servicesService.getList()
       .subscribe(
-        serviceList => this.serviceList = serviceList,
+        response => this.serviceList = response.services,
         error => this.errorMessage = <any>error);
   }
 
   public getService(serviceName: string) {
-    this.servicesService.getService(serviceName)
+    this.servicesService.get(serviceName)
       .subscribe(
-        service => this.currentStreamService = service,
+        response => this.currentStreamService = response.service,
         error => this.errorMessage = <any>error);
   }
 
-  public getServiceInfo(Modal: ModalDirective, serviceName: string) {
+  public getServiceInfo(modal: ModalDirective, serviceName: string) {
     this.getService(serviceName);
-    Modal.show();
+    modal.show();
   }
 
   public deleteStreamConfirm(modal: ModalDirective, stream: StreamModel) {
     this.currentStream = stream;
-    this.streamsService.getRelatedInstancesList(stream.name)
-      .subscribe(response => this.blockingInstances = response);
+    this.streamsService.getRelatedList(stream.name)
+      .subscribe(response => this.blockingInstances = Object.assign({},response)['instances']);
     modal.show();
   }
 
   public deleteStream(modal: ModalDirective) {
-    this.streamsService.deleteStream(this.currentStream)
+    this.streamsService.remove(this.currentStream.name)
       .subscribe(
-        status => {
-          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
+        response => {
+          this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
           this.getStreamList();
         },
-        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+        error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 }));
     modal.hide();
   }
 
   public createStream(modal: ModalDirective) {
     this.showSpinner = true;
-    if (this.newStream['stream-type'] !== 'stream.t-stream') {
+    if (this.newStream.type !== 'stream.t-stream') {
       delete this.newStream.generator;
     }
-    this.streamsService.saveStream(this.newStream)
+    this.streamsService.save(this.newStream)
       .subscribe(
-        status => {
+        response => {
           modal.hide();
           this.showSpinner = false;
-          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
           this.getStreamList();
           this.newStream = new StreamModel();
           this.newStream.tags = [];
+          this.newStream.generator = {
+            generatorType: 'local',
+            service: '',
+            instanceCount: 0
+          };
         },
         error => {
-          modal.hide();
           this.showSpinner = false;
-          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
+          this.formAlerts.push({ message: error, type: 'danger', closable: true, timeout: 0 });
         });
   }
 
@@ -143,16 +150,9 @@ export class StreamsComponent implements OnInit {
     this.currentStream = stream;
   }
 
-  public isSelected(stream: StreamModel) {
-    return stream === this.currentStream;
-  }
-
-  public closeAlert(i: number): void {
-    this.alerts.splice(i, 1);
-  }
-
-  public showAlert(message: Object): void {
-    this.alerts = [];
-    this.alerts.push(message);
+  public showAlert(notification: NotificationModel): void {
+    if (!this.alerts.find(msg => msg.message === notification.message)) {
+      this.alerts.push(notification);
+    }
   }
 }

@@ -1,12 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ModalDirective } from 'ng2-bootstrap';
 
-import { ServiceModel } from '../shared/models/service.model';
-import { StreamModel } from '../shared/models/stream.model';
-import { ProviderModel } from '../shared/models/provider.model';
-import { ServicesService } from '../shared/services/services.service';
-import { StreamsService } from '../shared/services/streams.service';
-import { ProvidersService } from '../shared/services/providers.service';
+import { ServiceModel, ProviderModel, NotificationModel } from '../shared/models/index';
+import { ServicesService, ProvidersService } from '../shared/services/index';
 
 @Component({
   moduleId: module.id,
@@ -15,7 +11,8 @@ import { ProvidersService } from '../shared/services/providers.service';
 })
 export class ServicesComponent implements OnInit {
   public errorMessage: string;
-  public alerts: Array<Object> = [];
+  public alerts: NotificationModel[] = [];
+  public formAlerts: NotificationModel[] = [];
   public serviceList: ServiceModel[];
   public serviceTypes: string[];
   public providerList: ProviderModel[];
@@ -37,48 +34,48 @@ export class ServicesComponent implements OnInit {
   }
 
   public getServiceList() {
-    this.servicesService.getServiceList()
+    this.servicesService.getList()
       .subscribe(
-        serviceList => {
-          this.serviceList = serviceList;
-          if (serviceList.length > 0) {
-            this.currentService = serviceList[0];
+        response => {
+          this.serviceList = response.services;
+          if (this.serviceList.length > 0) {
+            this.currentService = this.serviceList[0];
           }
         },
         error => this.errorMessage = <any>error);
   }
 
   public getServiceTypes() {
-    this.servicesService.getServiceTypes()
+    this.servicesService.getTypes()
       .subscribe(
-        types => this.serviceTypes = types,
-        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 })
+        response => this.serviceTypes = response.types,
+        error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 })
       );
   }
 
   public getProviderList() {
-    this.providersService.getProviderList()
+    this.providersService.getList()
       .subscribe(
-        providerList => this.providerList = providerList,
+        response => this.providerList = response.providers,
         error => this.errorMessage = <any>error);
   }
 
   public getProvider(providerName: string) {
-    this.providersService.getProvider(providerName)
+    this.providersService.get(providerName)
       .subscribe(
-        provider => this.currentServiceProvider = provider,
+        response => this.currentServiceProvider = response.provider,
         error => this.errorMessage = <any>error);
   }
 
-  public getProviderInfo(Modal: ModalDirective, providerName: string) {
+  public getProviderInfo(modal: ModalDirective, providerName: string) {
     this.getProvider(providerName);
-    Modal.show();
+    modal.show();
   }
 
   public deleteServiceConfirm(modal: ModalDirective, service: ServiceModel) {
     this.currentService = service;
     this.blockingStreams = [];
-    this.servicesService.getRelatedStreamsList(service.name)
+    this.servicesService.getRelatedList(service.name)
       .subscribe(response => {
         this.blockingStreams = Object.assign({},response)['streams'];
         this.blockingInstances = Object.assign({},response)['instances'];
@@ -86,50 +83,41 @@ export class ServicesComponent implements OnInit {
     modal.show();
   }
 
-  public closeAlert(i: number): void {
-    this.alerts.splice(i, 1);
-  }
-
-  public showAlert(message: Object): void {
-    this.alerts = [];
-    this.alerts.push(message);
+  public showAlert(notification: NotificationModel): void {
+    if (!this.alerts.find(msg => msg.message === notification.message)) {
+      this.alerts.push(notification);
+    }
   }
 
   public deleteService(modal: ModalDirective) {
-    this.servicesService.deleteService(this.currentService)
+    this.servicesService.remove(this.currentService.name)
       .subscribe(
-        status => {
-          this.showAlert({ msg: status, type: 'success', closable: true, timeout: 3000 });
+        response => {
+          this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
           this.getServiceList();
         },
-        error => this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 }));
+        error => this.showAlert({ message: error, type: 'danger', closable: true, timeout: 0 }));
     modal.hide();
   }
 
   public createService(modal: ModalDirective) {
     this.showSpinner = true;
-    this.servicesService.saveService(this.newService)
+    this.servicesService.save(this.newService)
       .subscribe(
-        service => {
+        response => {
           modal.hide();
-          this.showAlert({ msg: service, type: 'success', closable: true, timeout: 3000 });
+          this.showAlert({ message: response.message, type: 'success', closable: true, timeout: 3000 });
           this.newService = new ServiceModel();
           this.showSpinner = false;
           this.getServiceList();
-          this.currentService = service;
         },
         error => {
-          this.showAlert({ msg: error, type: 'danger', closable: true, timeout: 0 });
-          modal.hide();
+          this.formAlerts.push({ message: error, type: 'danger', closable: true, timeout: 0 });
           this.showSpinner = false;
         });
   }
 
   public selectService(service: ServiceModel) {
     this.currentService = service;
-  }
-
-  public isSelected(service: ServiceModel) {
-    return service === this.currentService;
   }
 }

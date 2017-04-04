@@ -1,13 +1,13 @@
 package com.bwsw.sj.engine.core.engine.input
 
-import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
-import com.bwsw.sj.engine.core.entities.TStreamEnvelope
-import com.bwsw.tstreams.agents.consumer.subscriber.Callback
-import com.bwsw.tstreams.agents.consumer.{ConsumerTransaction, Consumer, TransactionOperator}
-import org.slf4j.LoggerFactory
+import java.util.concurrent.ArrayBlockingQueue
 
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.engine.EnvelopeDataSerializer
+import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
+import com.bwsw.tstreams.agents.consumer.subscriber.Callback
+import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction, TransactionOperator}
+import org.slf4j.LoggerFactory
 
 /**
  * Provides a handler for sub. consumer that puts a t-stream envelope in a persistent blocking queue
@@ -16,23 +16,21 @@ import org.slf4j.LoggerFactory
  * @param blockingQueue Persistent blocking queue for storing transactions
  */
 
-class ConsumerCallback(blockingQueue: PersistentBlockingQueue) extends Callback[Array[Byte]] {
+class ConsumerCallback[T <: AnyRef](envelopeDataSerializer: EnvelopeDataSerializer[T], blockingQueue: ArrayBlockingQueue[Envelope]) extends Callback[Array[Byte]] {
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val envelopeSerializer = new JsonSerializer()
 
   override def onTransaction(operator: TransactionOperator[Array[Byte]], transaction: ConsumerTransaction[Array[Byte]]) = {
     val consumer = operator.asInstanceOf[Consumer[Array[Byte]]]
-    logger.debug(s"onTransaction handler was invoked by subscriber: ${consumer.name}\n")
+    logger.debug(s"onTransaction handler was invoked by subscriber: ${consumer.name}.")
     val stream = ConnectionRepository.getStreamService.get(consumer.stream.name).get
 
-    val envelope = new TStreamEnvelope()
+    val data = transaction.getAll().map(envelopeDataSerializer.deserialize)
+    val envelope = new TStreamEnvelope(data, consumer.name)
     envelope.stream = stream.name
     envelope.partition = transaction.getPartition()
-    envelope.id = transaction.getTransactionID()
-    envelope.consumerName = consumer.name
-    envelope.data = transaction.getAll()
     envelope.tags = stream.tags
+    envelope.id = transaction.getTransactionID()
 
-    blockingQueue.put(envelopeSerializer.serialize(envelope))
+    blockingQueue.put(envelope)
   }
 }

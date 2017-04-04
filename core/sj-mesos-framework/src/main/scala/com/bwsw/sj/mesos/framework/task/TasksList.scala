@@ -1,16 +1,16 @@
 package com.bwsw.sj.mesos.framework.task
 
+import com.bwsw.sj.common.DAL.ConnectionConstants
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.mesos.framework.schedule.{FrameworkUtil, OfferHandler}
+import com.bwsw.sj.mesos.framework.schedule.{FrameworkUtil, OffersHandler}
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos.{TaskID, TaskInfo, _}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
-import com.bwsw.sj.common.DAL.ConnectionConstants
 
 object TasksList {
   private val logger = Logger.getLogger(this.getClass)
@@ -18,7 +18,9 @@ object TasksList {
   private val listTasks = mutable.Map[String, Task]()
   private var message: String = "Initialization"
   private val availablePorts = collection.mutable.ListBuffer[Long]()
-  private var launchedTasks = Map[OfferID, ArrayBuffer[TaskInfo]]()
+  private var launchedOffers = Map[OfferID, ArrayBuffer[TaskInfo]]()
+
+  private var launchedTasks = mutable.ListBuffer[String]()
 
   var perTaskCores: Double = 0.0
   var perTaskMem: Double = 0.0
@@ -27,7 +29,7 @@ object TasksList {
   def newTask(taskId: String) = {
     val task = new Task(taskId)
     listTasks += taskId -> task
-    tasksToLaunch += taskId
+//    tasksToLaunch += taskId
   }
 
   def getList = {
@@ -48,10 +50,24 @@ object TasksList {
 
   def launched(taskId: String) = {
     tasksToLaunch -= taskId
+    launchedTasks += taskId
+  }
+
+  def stopped(taskId: String) = {
+    launchedTasks -= taskId
+  }
+
+  def killTask(taskId: String) = {
+    FrameworkUtil.driver.killTask(TaskID.newBuilder().setValue(taskId).build)
+    stopped(taskId)
+  }
+
+  def clearLaunchedTasks() = {
+    launchedTasks = mutable.ListBuffer[String]()
   }
 
   def toJson: Map[String, Any] = {
-    Map("tasks" -> listTasks.values.map(_.toJson), "message" -> message)
+    Map("entity" -> Map("tasks" -> listTasks.values.map(_.toJson), "message" -> message))
   }
 
   def apply(taskId: String): Option[Task] = {
@@ -62,16 +78,24 @@ object TasksList {
     availablePorts.remove(0, availablePorts.length)
   }
 
+  def getAvailablePorts = {
+    availablePorts
+  }
+
   def count = {
     toLaunch.size
   }
 
-  def getLaunchedTasks() = {
+  def getLaunchedOffers = {
+    launchedOffers
+  }
+
+  def getLaunchedTasks = {
     launchedTasks
   }
 
-  def clearLaunchedTasks() = {
-    launchedTasks = Map[OfferID, ArrayBuffer[TaskInfo]]()
+  def clearLaunchedOffers() = {
+    launchedOffers = Map[OfferID, ArrayBuffer[TaskInfo]]()
   }
 
   def setMessage(message: String) = {
@@ -90,7 +114,7 @@ object TasksList {
         val executionPlan = FrameworkUtil.instance match {
           case regularInstance: RegularInstance => regularInstance.executionPlan
           case outputInstance: OutputInstance => outputInstance.executionPlan
-          case windowedInstance: WindowedInstance => windowedInstance.executionPlan
+          case batchInstance: BatchInstance => batchInstance.executionPlan
         }
         executionPlan.tasks.asScala.keys
     }
@@ -111,14 +135,14 @@ object TasksList {
       .setScalar(org.apache.mesos.Protos.Value.
         Scalar.newBuilder.setValue(TasksList.perTaskMem)
       ).build
-    val ports = getPorts(offer, task)
+    val ports = OffersHandler.getPorts(offer, task)
 
     var agentPorts: String = ""
     var taskPort: String = ""
 
     var availablePorts = ports.getRanges.getRangeList.asScala.map(_.getBegin.toString)
 
-    val host = OfferHandler.getOfferIp(offer)
+    val host = OffersHandler.getOfferIp(offer)
     TasksList(task).foreach(task => task.update(host=host))
     if (FrameworkUtil.instance.moduleType.equals(EngineLiterals.inputStreamingType)) {
       taskPort = availablePorts.head
@@ -131,8 +155,7 @@ object TasksList {
     agentPorts = availablePorts.mkString(",")
     agentPorts.dropRight(1)
 
-    logger.debug(s"Task: $task. Ports for task: $ports")
-    logger.debug(s"Task: $task. Agent ports: $agentPorts")
+    logger.debug(s"Task: $task. Ports for task: ${availablePorts.mkString(",")}.")
 
     val cmd = CommandInfo.newBuilder()
     val hosts: collection.mutable.ListBuffer[String] = collection.mutable.ListBuffer()
@@ -144,7 +167,7 @@ object TasksList {
 //      Environment.Variable.newBuilder.setName("MONGO_HOSTS").setValue(FrameworkUtil.params {"mongodbHosts"}),
       Environment.Variable.newBuilder.setName("INSTANCE_NAME").setValue(FrameworkUtil.params {"instanceId"}),
       Environment.Variable.newBuilder.setName("TASK_NAME").setValue(task),
-      Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(OfferHandler.getOfferIp(offer)),
+      Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(OffersHandler.getOfferIp(offer)),
       Environment.Variable.newBuilder.setName("AGENTS_PORTS").setValue(agentPorts),
       Environment.Variable.newBuilder.setName("INSTANCE_HOSTS").setValue(hosts.mkString(","))
     )
@@ -156,9 +179,11 @@ object TasksList {
       val environments = Environment.newBuilder
       environmentVariables.foreach(variable => environments.addVariables(variable))
 
+      val jvmOptions = FrameworkUtil.instance.jvmOptions.asScala
+        .foldLeft("")((acc, option) => s"$acc ${option._1}${option._2}")
       cmd
         .addUris(CommandInfo.URI.newBuilder.setValue(FrameworkUtil.getModuleUrl(FrameworkUtil.instance)))
-        .setValue("java -jar " + FrameworkUtil.jarName)
+        .setValue("java " + jvmOptions + " -jar " + FrameworkUtil.jarName)
         .setEnvironment(environments)
     } catch {
       case e: Exception => FrameworkUtil.handleSchedulerException(e, logger)
@@ -177,39 +202,14 @@ object TasksList {
   }
 
 
-  /**
-    * Get random unused ports
-    * @param offer:Offer
-    * @param task:String
-    * @return Resource
-    */
-  def getPorts(offer: Offer, task: String): Resource = {
-    val portsResource = OfferHandler.getResource(offer, "ports")
-    for (range <- portsResource.getRanges.getRangeList.asScala) {
-      TasksList.availablePorts ++= (range.getBegin to range.getEnd).to[mutable.ListBuffer]
-    }
 
-    val ports: mutable.ListBuffer[Long] = TasksList.availablePorts.take(TasksList.perTaskPortsCount)
-    TasksList.availablePorts.remove(0, TasksList.perTaskPortsCount)
-
-    val ranges = Value.Ranges.newBuilder
-    for (port <- ports) {
-      ranges.addRange(Value.Range.newBuilder.setBegin(port).setEnd(port))
-    }
-
-    Resource.newBuilder
-      .setName("ports")
-      .setType(Value.Type.RANGES)
-      .setRanges(ranges)
-      .build
-  }
 
 
   def addTaskToSlave(task: TaskInfo, offer: (Offer, Int)) = {
-    if (launchedTasks.contains(offer._1.getId)) {
-      launchedTasks(offer._1.getId) += task
+    if (launchedOffers.contains(offer._1.getId)) {
+      launchedOffers(offer._1.getId) += task
     } else {
-      launchedTasks += offer._1.getId -> ArrayBuffer(task)
+      launchedOffers += offer._1.getId -> ArrayBuffer(task)
     }
   }
 

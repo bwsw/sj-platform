@@ -1,12 +1,13 @@
 package com.bwsw.sj.engine.core.engine.input
 
 import java.util.Date
+import java.util.concurrent.ArrayBlockingQueue
 
 import com.bwsw.sj.common.DAL.model.TStreamSjStream
-import com.bwsw.sj.common.DAL.model.module.{OutputInstance, RegularInstance, WindowedInstance}
+import com.bwsw.sj.common.DAL.model.module.{OutputInstance, RegularInstance, BatchInstance}
+import com.bwsw.sj.common.engine.EnvelopeDataSerializer
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
-import com.bwsw.sj.engine.core.engine.PersistentBlockingQueue
-import com.bwsw.sj.engine.core.entities.TStreamEnvelope
+import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.group.CheckpointGroup
@@ -25,35 +26,37 @@ import org.slf4j.LoggerFactory
  * @author Kseniya Mikhaleva
  *
  */
-class CallableTStreamTaskInput(manager: TaskManager,
-                              blockingQueue: PersistentBlockingQueue,
+class CallableTStreamTaskInput[T <: AnyRef](manager: TaskManager,
+                              blockingQueue: ArrayBlockingQueue[Envelope],
                               override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
-  extends CallableTaskInput[TStreamEnvelope](manager.inputs) {
+  extends CallableTaskInput[TStreamEnvelope[T]](manager.inputs) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val consumers = createSubscribingConsumers()
 
   private def createSubscribingConsumers() = {
-    logger.debug(s"Task: ${manager.taskName}. Start creating subscribing consumers\n")
+    logger.debug(s"Task: ${manager.taskName}. Start creating subscribing consumers.")
     val inputs = manager.inputs
     val offset = getOffset()
-    val callback = new ConsumerCallback(blockingQueue)
+    val callback = new ConsumerCallback[T](manager.envelopeDataSerializer.asInstanceOf[EnvelopeDataSerializer[T]], blockingQueue)
 
     val consumers = inputs.filter(x => x._1.streamType == StreamLiterals.tstreamType)
       .map(x => (x._1.asInstanceOf[TStreamSjStream], x._2.toList))
       .map(x => manager.createSubscribingConsumer(x._1, x._2, offset, callback))
       .map(x => (x.name, x)).toMap
-    logger.debug(s"Task: ${manager.taskName}. Creation of subscribing consumers is finished\n")
+    logger.debug(s"Task: ${manager.taskName}. Creation of subscribing consumers is finished.")
 
     consumers
   }
 
   private def getOffset() = {
+    logger.debug(s"Task: ${manager.taskName}. Get an offset parameter from instance.")
     val instance = manager.instance
     val offset = instance match {
       case instance: RegularInstance => instance.startFrom
-      case instance: WindowedInstance => instance.startFrom
+      case instance: BatchInstance => instance.startFrom
       case instance: OutputInstance => instance.startFrom
       case badInstance =>
+        logger.error(s"Task: ${manager.taskName}. Instance type isn't supported.")
         throw new TypeNotPresentException(badInstance.getClass.getName,
           new Throwable("Instance type isn't supported"))
     }
@@ -68,7 +71,7 @@ class CallableTStreamTaskInput(manager: TaskManager,
    * @return Offset
    */
   private def chooseOffset(startFrom: String): IOffset = {
-    logger.debug(s"Choose offset policy for t-streams consumer\n")
+    logger.debug(s"Choose offset policy for t-streams consumer.")
     startFrom match {
       case EngineLiterals.oldestStartMode => Oldest
       case EngineLiterals.newestStartMode => Newest
@@ -82,20 +85,24 @@ class CallableTStreamTaskInput(manager: TaskManager,
   }
 
   private def addConsumersToCheckpointGroup() = {
-    logger.debug(s"Task: ${manager.taskName}. Start adding subscribing consumers to checkpoint group\n")
+    logger.debug(s"Task: ${manager.taskName}. Start adding subscribing consumers to checkpoint group.")
     consumers.foreach(x => checkpointGroup.add(x._2.getConsumer()))
-    logger.debug(s"Task: ${manager.taskName}. Adding subscribing consumers to checkpoint group is finished\n")
+    logger.debug(s"Task: ${manager.taskName}. Adding subscribing consumers to checkpoint group is finished.")
   }
 
   private def launchConsumers() = {
-    logger.debug(s"Task: ${manager.taskName}. Launch subscribing consumers\n")
+    logger.debug(s"Task: ${manager.taskName}. Launch subscribing consumers.")
     consumers.foreach(_._2.start())
-    logger.debug(s"Task: ${manager.taskName}. Subscribing consumers are launched\n")
+    logger.debug(s"Task: ${manager.taskName}. Subscribing consumers are launched.")
   }
 
-  override def setConsumerOffset(envelope: TStreamEnvelope) = {
+  override def setConsumerOffset(envelope: TStreamEnvelope[T]) = {
     logger.debug(s"Task: ${manager.taskName}. " +
-      s"Change local offset of consumer: ${envelope.consumerName} to txn: ${envelope.id}\n")
+      s"Change local offset of consumer: ${envelope.consumerName} to txn: ${envelope.id}.")
     consumers(envelope.consumerName).getConsumer().setStreamPartitionOffset(envelope.partition, envelope.id)
+  }
+
+  override def close(): Unit = {
+    consumers.foreach(_._2.stop())
   }
 }

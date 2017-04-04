@@ -41,8 +41,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
             complete(restResponseToHttpResponse(response))
           }
       } ~
-        pathPrefix("types") {
-          //todo if a stream has a name 'types' then there is a collision
+        pathPrefix("_types") {
           pathEndOrSingleSlash {
             get {
               val response = OkRestResponse(Map("types" -> StreamLiterals.types))
@@ -60,7 +59,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
               )
               stream match {
                 case Some(x) =>
-                  val entity = Map("streams" -> x.asProtocolStream())
+                  val entity = Map("stream" -> x.asProtocolStream())
                   response = OkRestResponse(entity)
                 case None =>
               }

@@ -6,7 +6,6 @@ import com.bwsw.sj.common.DAL.model.{KafkaService, KafkaSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
-import com.fasterxml.jackson.annotation.JsonProperty
 import kafka.admin.AdminUtils
 import kafka.common.TopicAlreadyMarkedForDeletionException
 import kafka.utils.ZkUtils
@@ -18,7 +17,7 @@ import scala.collection.mutable.ArrayBuffer
 class KafkaSjStreamData() extends SjStreamData() {
   streamType = StreamLiterals.kafkaStreamType
   var partitions: Int = Int.MinValue
-  @JsonProperty("replication-factor") var replicationFactor: Int = Int.MinValue
+  var replicationFactor: Int = Int.MinValue
 
   override def validate() = {
     val serviceDAO = ConnectionRepository.getServiceManager
@@ -59,8 +58,8 @@ class KafkaSjStreamData() extends SjStreamData() {
 
     //replicationFactor
     if (this.replicationFactor <= 0) {
-      errors += createMessage("entity.error.attribute.required", "Replication-factor") + ". " +
-        createMessage("entity.error.attribute.must.be.positive.integer", "Replication-factor")
+      errors += createMessage("entity.error.attribute.required", "replicationFactor") + ". " +
+        createMessage("entity.error.attribute.must.be.positive.integer", "replicationFactor")
     }
 
 

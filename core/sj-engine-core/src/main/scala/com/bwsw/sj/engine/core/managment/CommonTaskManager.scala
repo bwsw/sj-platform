@@ -1,10 +1,11 @@
 package com.bwsw.sj.engine.core.managment
 
 import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.common.DAL.model.module.{RegularInstance, WindowedInstance}
+import com.bwsw.sj.common.DAL.model.module.{RegularInstance, BatchInstance}
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.environment.{EnvironmentManager, ModuleEnvironmentManager}
+import com.bwsw.sj.engine.core.batch.{BatchCollector, BatchStreamingPerformanceMetrics}
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
 
@@ -16,7 +17,6 @@ import scala.collection.mutable
   * @author Kseniya Mikhaleva
   */
 class CommonTaskManager() extends TaskManager {
-
   val inputs: mutable.Map[SjStream, Array[Int]] = getInputs(getExecutionPlan)
   val outputProducers = createOutputProducers()
 
@@ -26,15 +26,34 @@ class CommonTaskManager() extends TaskManager {
       s"${inputs.count(x => x._1.streamType == StreamLiterals.tstreamType) + instance.outputs.length + 3} ports are required")
 
   def getExecutor(environmentManager: EnvironmentManager): StreamingExecutor = {
-    logger.debug(s"Task: $taskName. Start loading of executor class from module jar\n")
-    val executor = moduleClassLoader
-      .loadClass(executorClassName)
+    logger.debug(s"Task: $taskName. Start loading an executor class from module jar.")
+    val executor = executorClass
       .getConstructor(classOf[ModuleEnvironmentManager])
       .newInstance(environmentManager)
       .asInstanceOf[StreamingExecutor]
-    logger.debug(s"Task: $taskName. Create instance of executor class\n")
+    logger.debug(s"Task: $taskName. Load an executor class.")
 
     executor
+  }
+
+  def getBatchCollector(instance: BatchInstance,
+                        performanceMetrics: BatchStreamingPerformanceMetrics): BatchCollector = {
+    instance match {
+      case _: BatchInstance =>
+        logger.info(s"Task: $taskName. Getting a batch collector class from jar of file: " +
+          instance.moduleType + "-" + instance.moduleName + "-" + instance.moduleVersion + ".")
+        val batchCollectorClassName = fileMetadata.specification.batchCollectorClass
+        val batchCollector = moduleClassLoader
+          .loadClass(batchCollectorClassName)
+          .getConstructor(classOf[BatchInstance], classOf[BatchStreamingPerformanceMetrics])
+          .newInstance(instance, performanceMetrics)
+          .asInstanceOf[BatchCollector]
+
+        batchCollector
+      case _ =>
+        logger.error("A batch collector exists only for batch engine.")
+        throw new RuntimeException("A batch collector exists only for batch engine.")
+    }
   }
 
   /**
@@ -47,7 +66,7 @@ class CommonTaskManager() extends TaskManager {
     */
   def createConsumer(stream: TStreamSjStream, partitions: List[Int], offset: IOffset): Consumer[Array[Byte]] = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-      s"Create consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head})\n")
+      s"Create consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head}).")
 
     setStreamOptions(stream)
 
@@ -60,12 +79,15 @@ class CommonTaskManager() extends TaskManager {
   }
 
   private def getExecutionPlan() = {
+    logger.debug("Get an execution plan of instance.")
     instance match {
       case regularInstance: RegularInstance =>
         regularInstance.executionPlan
-      case windowedInstance: WindowedInstance =>
-        windowedInstance.executionPlan
-      case _ => throw new RuntimeException("CommonTaskManager can be used only for regular or windowed engine")
+      case batchInstance: BatchInstance =>
+        batchInstance.executionPlan
+      case _ =>
+        logger.error("CommonTaskManager can be used only for regular or batch engine.")
+        throw new RuntimeException("CommonTaskManager can be used only for regular or batch engine.")
     }
   }
 }

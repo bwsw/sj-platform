@@ -37,7 +37,7 @@ class RegularStreamingPerformanceMetrics(manager: CommonTaskManager)
    * @return Constructed performance report
    */
   override def getReport(): String = {
-    logger.info(s"Start preparing a report of performance for task: ${manager.taskName} of regular module\n")
+    logger.info(s"Start preparing a report of performance for task: ${manager.taskName} of regular module.")
     mutex.lock()
     val numberOfInputEnvelopesPerStream = inputEnvelopesPerStream.map(x => (x._1, x._2.size))
     val numberOfOutputEnvelopesPerStream = outputEnvelopesPerStream.map(x => (x._1, x._2.size))
@@ -84,7 +84,7 @@ class RegularStreamingPerformanceMetrics(manager: CommonTaskManager)
   }
 
   override def clear() = {
-    logger.debug(s"Reset variables for performance report for next reporting\n")
+    logger.debug(s"Reset variables for performance report for next reporting.")
     inputEnvelopesPerStream = mutable.Map(inputStreamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
     outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
     totalIdleTime = 0L

@@ -13,49 +13,45 @@ import org.slf4j.LoggerFactory
 import scala.collection.JavaConverters._
 
 /**
- * Object is responsible for running a task of job that launches input module
- *
- *
- * @author Kseniya Mikhaleva
- */
+  * Object is responsible for running a task of job that launches input module
+  *
+  * @author Kseniya Mikhaleva
+  */
 
-object InputTaskRunner extends {override val threadName = "InputTaskRunner-%d"} with TaskRunner {
+object InputTaskRunner extends {
+  override val threadName = "InputTaskRunner-%d"
+} with TaskRunner {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val queueSize = 1000
 
   def main(args: Array[String]) {
-    try {
-      val bufferForEachContext = new ConcurrentHashMap[ChannelHandlerContext, ByteBuf]().asScala
-      val channelContextQueue = new ArrayBlockingQueue[ChannelHandlerContext](queueSize)
+    val bufferForEachContext = new ConcurrentHashMap[ChannelHandlerContext, ByteBuf]().asScala
+    val channelContextQueue = new ArrayBlockingQueue[ChannelHandlerContext](queueSize)
 
-      val manager: InputTaskManager = new InputTaskManager()
-      logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for an input module\n")
+    val manager: InputTaskManager = new InputTaskManager()
+    logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for an input module.")
 
-      val performanceMetrics = new InputStreamingPerformanceMetrics(manager)
+    val performanceMetrics = new InputStreamingPerformanceMetrics(manager)
 
-      val inputTaskEngine = InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext)
+    val inputTaskEngine = InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext)
 
-      val inputStreamingServer = new InputStreamingServer(
-        manager.agentsHost,
-        manager.entryPort,
-        channelContextQueue,
-        bufferForEachContext
-      )
+    val inputStreamingServer = new InputStreamingServer(
+      manager.agentsHost,
+      manager.entryPort,
+      channelContextQueue,
+      bufferForEachContext
+    )
 
-      val instanceStatusObserver = new InstanceStatusObserver(manager.instanceName)
+    val instanceStatusObserver = new InstanceStatusObserver(manager.instanceName)
 
-      logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
+    logger.info(s"Task: ${manager.taskName}. The preparation finished. Launch task.")
 
-      executorService.submit(inputTaskEngine)
-      executorService.submit(performanceMetrics)
-      executorService.submit(inputStreamingServer)
-      executorService.submit(instanceStatusObserver)
+    executorService.submit(inputTaskEngine)
+    executorService.submit(performanceMetrics)
+    executorService.submit(inputStreamingServer)
+    executorService.submit(instanceStatusObserver)
 
-      executorService.take().get()
-    } catch {
-      case requiringError: IllegalArgumentException => handleException(requiringError)
-      case exception: Exception => handleException(exception)
-    }
+    waitForCompletion()
   }
 }

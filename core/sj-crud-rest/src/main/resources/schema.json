@@ -72,7 +72,7 @@
       "type": "string",
       "enum": [
         "regular-streaming",
-        "windowed-streaming",
+        "batch-streaming",
         "output-streaming",
         "input-streaming"
       ]
@@ -99,6 +99,10 @@
     },
     "entity-class": {
       "description": "The absolute path to class that is responsible for a data entity of output-streaming module",
+      "type": "string"
+    },
+    "batch-collector-class": {
+      "description": "The absolute path to class that is responsible for a batch collecting of batch-streaming module",
       "type": "string"
     }
   },

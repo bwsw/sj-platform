@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.DAL.model
 
-import com.bwsw.common.ElasticsearchClient
+import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.sj.common.rest.entities.stream.ESSjStreamData
 
 class ESSjStream() extends SjStream {
@@ -31,12 +31,7 @@ class ESSjStream() extends SjStream {
       (parts(0), parts(1).toInt)
     }.toSet
     val client = new ElasticsearchClient(hosts)
-    val outputData = client.search(service.index, this.name)
-
-    outputData.getHits.foreach { hit =>
-      val id = hit.getId
-      client.deleteDocumentByTypeAndId(service.index, this.name, id)
-    }
+    client.deleteDocuments(service.index, this.name)
 
     client.close()
   }

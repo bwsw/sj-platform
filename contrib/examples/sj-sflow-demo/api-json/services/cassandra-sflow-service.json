@@ -1,7 +1,0 @@
-{
-  "name": "cassandra-sflow-service",
-  "description": "Cassandra service for demo",
-  "provider": "cassandra-sflow-provider",
-  "keyspace": "sflow",
-  "type": "CassDB"
-}

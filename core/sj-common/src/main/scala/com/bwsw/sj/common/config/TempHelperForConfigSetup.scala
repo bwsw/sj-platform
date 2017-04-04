@@ -15,8 +15,8 @@ object TempHelperForConfigSetup extends App {
 
   configService.save(new ConfigurationSetting(createConfigurationSettingName(ConfigLiterals.systemDomain, "regular-streaming-validator-class"),
     "com.bwsw.sj.crud.rest.validator.instance.RegularInstanceValidator", ConfigLiterals.systemDomain))
-  configService.save(new ConfigurationSetting(createConfigurationSettingName(ConfigLiterals.systemDomain, "windowed-streaming-validator-class"),
-    "com.bwsw.sj.crud.rest.validator.instance.WindowedInstanceValidator", ConfigLiterals.systemDomain))
+  configService.save(new ConfigurationSetting(createConfigurationSettingName(ConfigLiterals.systemDomain, "batch-streaming-validator-class"),
+    "com.bwsw.sj.crud.rest.validator.instance.BatchInstanceValidator", ConfigLiterals.systemDomain))
   configService.save(new ConfigurationSetting(createConfigurationSettingName(ConfigLiterals.systemDomain, "output-streaming-validator-class"),
     "com.bwsw.sj.crud.rest.validator.instance.OutputInstanceValidator", ConfigLiterals.systemDomain))
   configService.save(new ConfigurationSetting(createConfigurationSettingName(ConfigLiterals.systemDomain, "input-streaming-validator-class"),
@@ -34,11 +34,27 @@ object TempHelperForConfigSetup extends App {
   configService.save(new ConfigurationSetting(ConfigLiterals.tgServerRetryPeriodTag, "500", ConfigLiterals.systemDomain))
   configService.save(new ConfigurationSetting(ConfigLiterals.tgRetryCountTag, "10", ConfigLiterals.systemDomain))
   configService.save(new ConfigurationSetting(ConfigLiterals.kafkaSubscriberTimeoutTag, "100", ConfigLiterals.systemDomain))
+  configService.save(new ConfigurationSetting(ConfigLiterals.lowWatermark, "100", ConfigLiterals.systemDomain))
 
   configService.save(new ConfigurationSetting(ConfigLiterals.geoIpAsNum, "GeoIPASNum.dat", ConfigLiterals.systemDomain))
   configService.save(new ConfigurationSetting(ConfigLiterals.geoIpAsNumv6, "GeoIPASNumv6.dat", ConfigLiterals.systemDomain))
 }
 
 object TempHelperForConfigDestroy extends App {
-  ConnectionRepository.getConfigService.deleteAll()
+  //ConnectionRepository.getConfigService.delete(ConfigLiterals.transactionGeneratorTag) //todo after integration with t-streams
+  ConnectionRepository.getConfigService.delete(ConfigLiterals.frameworkTag)
+  ConnectionRepository.getConfigService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, "regular-streaming-validator-class"))
+  ConnectionRepository.getConfigService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, "batch-streaming-validator-class"))
+  ConnectionRepository.getConfigService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, "output-streaming-validator-class"))
+  ConnectionRepository.getConfigService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, "input-streaming-validator-class"))
+  ConnectionRepository.getConfigService.delete(ConfigLiterals.marathonTag)
+  ConnectionRepository.getConfigService.delete(ConfigLiterals.marathonTimeoutTag)
+  ConnectionRepository.getConfigService.delete(ConfigLiterals.zkSessionTimeoutTag)
+  ConnectionRepository.getConfigService.delete(ConfigLiterals.tgClientRetryPeriodTag)
+  ConnectionRepository.getConfigService.delete(ConfigLiterals.tgServerRetryPeriodTag)
+  ConnectionRepository.getConfigService.delete(ConfigLiterals.tgRetryCountTag)
+  ConnectionRepository.getConfigService.delete(ConfigLiterals.kafkaSubscriberTimeoutTag)
+  ConnectionRepository.getConfigService.delete(ConfigLiterals.lowWatermark)
+  ConnectionRepository.getConfigService.delete(ConfigLiterals.geoIpAsNum)
+  ConnectionRepository.getConfigService.delete(ConfigLiterals.geoIpAsNumv6)
 }

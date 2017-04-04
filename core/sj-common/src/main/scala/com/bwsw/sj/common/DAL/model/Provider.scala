@@ -5,7 +5,7 @@ import java.nio.channels.ClosedChannelException
 import java.util.Collections
 
 import com.aerospike.client.{AerospikeClient, AerospikeException}
-import com.bwsw.common.ElasticsearchClient
+import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.rest.entities.provider.ProviderData
@@ -37,6 +37,11 @@ class Provider {
     this.login = login
     this.password = password
     this.providerType = providerType
+  }
+
+  override def equals(obj: scala.Any): Boolean = obj match {
+    case that: Provider => that.name.equals(this.name) && that.providerType.equals(this.providerType)
+    case _ => false
   }
 
   def getHosts() = {
@@ -176,7 +181,7 @@ class Provider {
   private def checkESConnection(address: String) = {
     val errors = ArrayBuffer[String]()
     val client = new ElasticsearchClient(Set(getHostAndPort(address)))
-    if (client.isConnected()) {
+    if (!client.isConnected()) {
       errors += s"Can not establish connection to ElasticSearch on '$address'"
     }
     client.close()

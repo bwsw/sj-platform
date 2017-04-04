@@ -4,21 +4,26 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.common.utils.ServiceLiterals._
 import org.apache.curator.utils.PathUtils
+import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
 
 trait ValidationUtils extends MessageResourceUtils {
+  private val logger = LoggerFactory.getLogger(this.getClass)
   private val providerDAO = ConnectionRepository.getProviderService
 
   def validateName(name: String) = {
+    logger.debug(s"Validate a name: '$name'.")
     name.matches( """^([a-z][a-z0-9-]*)$""")
   }
 
   def validateConfigSettingName(name: String) = {
+    logger.debug(s"Validate a configuration name: '$name'.")
     name.matches( """^([a-z][a-z-\.]*)$""")
   }
 
   def validateProvider(provider: String, serviceType: String) = {
+    logger.debug(s"Validate a provider: '$provider' of service: '$serviceType'.")
     val errors = new ArrayBuffer[String]()
 
     Option(provider) match {
@@ -42,10 +47,12 @@ trait ValidationUtils extends MessageResourceUtils {
   }
 
   def validateNamespace(namespace: String) = {
+    logger.debug(s"Validate a namespace: '$namespace'.")
     namespace.matches( """^([a-z][a-z0-9_]*)$""")
   }
 
   def normalizeName(name: String) = {
+    logger.debug(s"Normalize a name: '$name'.")
     name.replace('\\', '/')
   }
 

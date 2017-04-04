@@ -3,18 +3,17 @@ package com.bwsw.sj.common.rest.entities.module
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
-import com.fasterxml.jackson.annotation.JsonProperty
 
 class RegularInstanceMetadata extends InstanceMetadata {
   var inputs: Array[String] = Array()
   var outputs: Array[String] = Array()
-  @JsonProperty("checkpoint-mode") var checkpointMode: String = null
-  @JsonProperty("checkpoint-interval") var checkpointInterval: Long = Long.MinValue
-  @JsonProperty("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan()
-  @JsonProperty("start-from") var startFrom: String = EngineLiterals.newestStartMode
-  @JsonProperty("state-management") var stateManagement: String = EngineLiterals.noneStateMode
-  @JsonProperty("state-full-checkpoint") var stateFullCheckpoint: Int = 100
-  @JsonProperty("event-wait-idle-time") var eventWaitIdleTime: Long = 1000
+  var checkpointMode: String = null
+  var checkpointInterval: Long = Long.MinValue
+  var executionPlan: ExecutionPlan = new ExecutionPlan()
+  var startFrom: String = EngineLiterals.newestStartMode
+  var stateManagement: String = EngineLiterals.noneStateMode
+  var stateFullCheckpoint: Int = 100
+  var eventWaitIdleTime: Long = 1000
 
   override def asModelInstance() = {
     val modelInstance = new RegularInstance()

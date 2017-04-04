@@ -3,15 +3,14 @@ package com.bwsw.sj.common.rest.entities.service
 import com.bwsw.sj.common.DAL.model.KafkaService
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.{ProviderLiterals, ServiceLiterals}
-import com.fasterxml.jackson.annotation.JsonProperty
 
 import scala.collection.mutable.ArrayBuffer
 
 class KfkQServiceData() extends ServiceData() {
   serviceType = ServiceLiterals.kafkaType
   var provider: String = null
-  @JsonProperty("zk-provider") var zkProvider: String = null
-  @JsonProperty("zk-namespace") var zkNamespace: String = null
+  var zkProvider: String = null
+  var zkNamespace: String = null
 
   override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService
@@ -36,10 +35,10 @@ class KfkQServiceData() extends ServiceData() {
     // 'zkProvider' field
     Option(this.zkProvider) match {
       case None =>
-        errors += createMessage("entity.error.attribute.required", "Zk-provider")
+        errors += createMessage("entity.error.attribute.required", "zkProvider")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("entity.error.attribute.required", "Zk-provider")
+          errors += createMessage("entity.error.attribute.required", "zkProvider")
         }
         else {
           val zkProviderObj = providerDAO.get(x)
@@ -48,7 +47,7 @@ class KfkQServiceData() extends ServiceData() {
               errors += createMessage("entity.error.doesnot.exist", "Zookeeper provider", x)
             case Some(zkProviderFormDB) =>
               if (zkProviderFormDB.providerType != ProviderLiterals.zookeeperType) {
-                errors += createMessage("entity.error.must.one.type.other.given", "Zk-provider", ProviderLiterals.zookeeperType, zkProviderFormDB.providerType)
+                errors += createMessage("entity.error.must.one.type.other.given", "zkProvider", ProviderLiterals.zookeeperType, zkProviderFormDB.providerType)
               }
           }
         }
@@ -57,14 +56,14 @@ class KfkQServiceData() extends ServiceData() {
     // 'zkNamespace' field
     Option(this.zkNamespace) match {
       case None =>
-        errors += createMessage("entity.error.attribute.required", "Zk-namespace")
+        errors += createMessage("entity.error.attribute.required", "zkNamespace")
       case Some(x) =>
         if (x.isEmpty) {
-          errors += createMessage("entity.error.attribute.required", "Zk-namespace")
+          errors += createMessage("entity.error.attribute.required", "zkNamespace")
         }
         else {
           if (!validateNamespace(x)) {
-            errors += createMessage("entity.error.incorrect.service.namespace", "zk-namespace", x)
+            errors += createMessage("entity.error.incorrect.service.namespace", "zkNamespace", x)
           }
         }
     }

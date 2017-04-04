@@ -27,8 +27,8 @@ class InputStreamingPerformanceMetrics(manager: InputTaskManager)
    * Invokes when a new envelope from the input stream is received
    */
   override def addEnvelopeToInputStream(envelope: Envelope) = {
-    val inputEnvelope = envelope.asInstanceOf[InputEnvelope]
-    super.addEnvelopeToInputStream(inputStreamName, List(inputEnvelope.data.length))
+    val inputEnvelope = envelope.asInstanceOf[InputEnvelope[AnyRef]]
+    super.addEnvelopeToInputStream(inputStreamName, List(inputEnvelope.data.toString.length)) //todo придумать другой способ извлечения информации
   }
 
   /**
@@ -36,7 +36,7 @@ class InputStreamingPerformanceMetrics(manager: InputTaskManager)
    * @return Constructed performance report
    */
   override def getReport(): String = {
-    logger.info(s"Start preparing a report of performance for task: $taskName of an input module\n")
+    logger.info(s"Start preparing a report of performance for task: $taskName of an input module.")
     mutex.lock()
     val bytesOfInputEnvelopes = inputEnvelopesPerStream.map(x => (x._1, x._2.map(_.sum).sum)).head._2
     val inputEnvelopesTotalNumber = inputEnvelopesPerStream.map(x => (x._1, x._2.size)).head._2
@@ -78,7 +78,7 @@ class InputStreamingPerformanceMetrics(manager: InputTaskManager)
   }
 
   override def clear() = {
-    logger.debug(s"Reset variables for performance report for next reporting\n")
+    logger.debug(s"Reset variables of performance report for next reporting.")
     inputEnvelopesPerStream = mutable.Map(inputStreamName -> mutable.ListBuffer[List[Int]]())
     outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
   }

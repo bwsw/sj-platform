@@ -46,7 +46,7 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator {
                       createMessage("rest.config.setting.notfound", domain, name)))
                     configService.get(createConfigurationSettingName(domain, name)) match {
                       case Some(configElement) =>
-                        val entity = Map(s"$domain-config-settings" -> configElement.asProtocolConfigurationSetting())
+                        val entity = Map(s"$domain-config-setting" -> configElement.asProtocolConfigurationSetting())
                         response = OkRestResponse(entity)
                       case None =>
                     }
@@ -86,9 +86,9 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator {
             } ~
               get {
                 val configElements = configService.getAll
-                val response = OkRestResponse(Map(s"config-settings" -> mutable.Buffer()))
+                val response = OkRestResponse(Map(s"configSettings" -> mutable.Buffer()))
                 if (configElements.nonEmpty) {
-                  response.entity = Map("config-settings" -> configElements.map(_.asProtocolConfigurationSetting()))
+                  response.entity = Map("configSettings" -> configElements.map(_.asProtocolConfigurationSetting()))
                 }
 
                 complete(restResponseToHttpResponse(response))

@@ -1,17 +1,13 @@
 package com.bwsw.sj.mesos.framework.task.status
 
 import com.bwsw.sj.mesos.framework.schedule.FrameworkUtil
-import com.bwsw.sj.mesos.framework.task.{MasterState, Slave, SlaveState, TasksList}
+import com.bwsw.sj.mesos.framework.task.TasksList
 import org.apache.mesos.Protos.{SlaveID, TaskID, TaskStatus}
 import com.bwsw.sj.mesos.framework.task.StatusHandler
+import com.bwsw.sj.mesos.framework.task.status.states.{MasterState, Slave, SlaveState}
 
 object SuccessHandler extends TaskStatusHandler {
   protected var status: TaskStatus = null
-
-  def setStatus(status:TaskStatus): TaskStatusHandler = {
-    this.status = status
-    this
-  }
 
   def process() = {
     val currentSlave = getCurrentSlave(status.getSlaveId)
@@ -21,7 +17,7 @@ object SuccessHandler extends TaskStatusHandler {
     TasksList(status.getTaskId.getValue).foreach(task => task.update(
       directory = dirUrl
     ))
-    StatusHandler.logger.debug(s"Running task: ${status.getTaskId.getValue}")
+    StatusHandler.logger.debug(s"Running task: ${status.getTaskId.getValue}.")
   }
 
   def getCurrentSlave(slaveId: SlaveID) = {

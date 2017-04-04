@@ -13,6 +13,7 @@ object ConfigLiterals {
   val marathonTag = s"$systemDomain.marathon-connect"
   val marathonTimeoutTag = s"$systemDomain.marathon-connect-timeout"
   val zkSessionTimeoutTag = s"$zookeeperDomain.session-timeout"
+  val lowWatermark = s"$systemDomain.low-watermark"
 
   val jdbcTimeoutTag = s"$jdbcDomain.timeout"
   val tgClientRetryPeriodTag = s"$systemDomain.transaction-generator-client-retry-period"

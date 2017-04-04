@@ -19,11 +19,11 @@ class StatelessCommonModuleService(manager: CommonTaskManager, checkpointGroup: 
   val environmentManager = new ModuleEnvironmentManager(
     instance.getOptionsAsMap(),
     outputProducers,
-    instance.outputs
-      .flatMap(x => streamService.get(x)),
+    instance.outputs.flatMap(x => streamService.get(x)),
     producerPolicyByOutput,
     moduleTimer,
-    performanceMetrics
+    performanceMetrics,
+    manager.moduleClassLoader
   )
 
   val executor = manager.getExecutor(environmentManager)

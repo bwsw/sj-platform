@@ -28,15 +28,16 @@ class StatefulModuleEnvironmentManager(stateStorage: StateStorage,
                                        outputs: Array[SjStream],
                                        producerPolicyByOutput: mutable.Map[String, (String, ModuleOutput)],
                                        moduleTimer: SjTimer,
-                                       performanceMetrics: PerformanceMetrics)
-  extends ModuleEnvironmentManager(options, producers, outputs, producerPolicyByOutput, moduleTimer, performanceMetrics) {
+                                       performanceMetrics: PerformanceMetrics,
+                                       classLoader: ClassLoader)
+  extends ModuleEnvironmentManager(options, producers, outputs, producerPolicyByOutput, moduleTimer, performanceMetrics, classLoader) {
   /**
    * Returns specific state of module
    *
    * @return Module state
    */
   override def getState: StateStorage = {
-    logger.info(s"Get a storage where a state is\n")
+    logger.info(s"Get a storage where a state is.")
     stateStorage
   }
 }

@@ -6,40 +6,36 @@ import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetric
 import org.slf4j.LoggerFactory
 
 /**
- * Runner object for engine of output-streaming module
- *
- *
- * @author Kseniya Tomskikh
- */
-object OutputTaskRunner extends {override val threadName = "OutputTaskRunner-%d"} with TaskRunner {
+  * Runner object for engine of output-streaming module
+  *
+  * @author Kseniya Tomskikh
+  */
+object OutputTaskRunner extends {
+  override val threadName = "OutputTaskRunner-%d"
+} with TaskRunner {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   def main(args: Array[String]) {
-    try {
-      val manager = new OutputTaskManager()
+    val manager = new OutputTaskManager()
 
-      logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for output module\n")
+    logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for output module\n")
 
-      val performanceMetrics = new OutputStreamingPerformanceMetrics(manager)
+    val performanceMetrics = new OutputStreamingPerformanceMetrics(manager)
 
-      val outputTaskEngine = OutputTaskEngine(manager, performanceMetrics)
+    val outputTaskEngine = OutputTaskEngine(manager, performanceMetrics)
 
-      val outputTaskInputService = outputTaskEngine.taskInputService
+    val outputTaskInputService = outputTaskEngine.taskInputService
 
-      val instanceStatusObserver = new InstanceStatusObserver(manager.instanceName)
+    val instanceStatusObserver = new InstanceStatusObserver(manager.instanceName)
 
-      logger.info(s"Task: ${manager.taskName}. Preparing finished. Launch task\n")
+    logger.info(s"Task: ${manager.taskName}. The preparation finished. Launch task\n")
 
-      executorService.submit(outputTaskInputService)
-      executorService.submit(outputTaskEngine)
-      executorService.submit(performanceMetrics)
-      executorService.submit(instanceStatusObserver)
+    executorService.submit(outputTaskInputService)
+    executorService.submit(outputTaskEngine)
+    executorService.submit(performanceMetrics)
+    executorService.submit(instanceStatusObserver)
 
-      executorService.take().get()
-    } catch {
-      case requiringError: IllegalArgumentException => handleException(requiringError)
-      case exception: Exception => handleException(exception)
-    }
+    waitForCompletion()
   }
 }

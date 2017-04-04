@@ -11,16 +11,20 @@ import { ListFilterPipe } from './pipes/list-filter.pipe';
 import { OrderByPipe } from './pipes/order-by.pipe';
 import { ServiceFilterPipe } from './pipes/service-filter.pipe';
 import { ProviderFilterPipe } from './pipes/provider-filter.pipe';
+import { StreamFilterPipe } from './pipes/stream-filter.pipe';
+import { FileSizePipe } from './pipes/file-size.pipe';
 import { InstancesService } from './services/instances.service';
 import { ModulesService } from './services/modules.service';
 import { ProvidersService } from './services/providers.service';
 import { ServicesService } from './services/services.service';
 import { ConfigSettingsService } from './services/config-settings.service';
+import { CustomService } from './services/custom.service';
 import { SpinnerComponent } from './spinner/spinner.component';
 import { StreamsService } from './services/streams.service';
 import { Ng2BootstrapModule } from 'ng2-bootstrap';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 import { FooterComponent } from './components/footer/footer.component';
+import { AlertsComponent } from './components/alerts/alerts.component';
 
 @NgModule({
   imports: [
@@ -37,11 +41,14 @@ import { FooterComponent } from './components/footer/footer.component';
     BreadcrumbsComponent,
     FooterComponent,
     FilterComponent,
+    AlertsComponent,
     // Pipes
     ListFilterPipe,
     OrderByPipe,
     ServiceFilterPipe,
-    ProviderFilterPipe
+    ProviderFilterPipe,
+    StreamFilterPipe,
+    FileSizePipe
   ],
   providers: [
     InstancesService,
@@ -60,11 +67,14 @@ import { FooterComponent } from './components/footer/footer.component';
     BreadcrumbsComponent,
     FooterComponent,
     FilterComponent,
+    AlertsComponent,
     // Pipes
     ListFilterPipe,
     OrderByPipe,
     ServiceFilterPipe,
     ProviderFilterPipe,
+    StreamFilterPipe,
+    FileSizePipe,
     // Modules
     CommonModule,
     FormsModule,
@@ -82,7 +92,8 @@ export class SharedModule {
         ProvidersService,
         ServicesService,
         StreamsService,
-        ConfigSettingsService
+        ConfigSettingsService,
+        CustomService
       ]
     };
   }

@@ -79,12 +79,13 @@ object ConnectionRepository {
   }
 
   def close() = {
-    logger.debug("Close the mongo connections")
+    logger.debug("Close a repository of connection.")
     mongoConnection.close()
     mongoClient.close()
   }
 
   def createClient(clientType: String): Either[MongoClient, com.mongodb.casbah.MongoClient] = {
+    logger.debug("Create a new mongo client.")
     if (authEnable) {
       clientType match {
         case "mongodb-driver" => Left(new MongoClient(mongoHosts.asJava, mongoCredential.asJava))
@@ -102,7 +103,7 @@ object ConnectionRepository {
   private[DAL] def getGenericDAO[T: ClassTag] = {
     import scala.reflect.classTag
 
-    logger.debug(s"Create a basic DAO of a mongo collection of type: '${classTag[T].toString()}'")
+    logger.debug(s"Create a basic DAO for a mongo collection of type: '${classTag[T].toString()}'.")
     val clazz: Class[T] = classTag[T].runtimeClass.asInstanceOf[Class[T]]
     new BasicDAO[T, String](clazz, datastore)
   }

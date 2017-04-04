@@ -35,6 +35,7 @@ class TstrQServiceData() extends ServiceData() {
     // 'prefix' field
     Option(this.prefix) match {
       case None =>
+
         errors += createMessage("entity.error.attribute.required", "Prefix")
       case Some(x) =>
         if (x.isEmpty) {

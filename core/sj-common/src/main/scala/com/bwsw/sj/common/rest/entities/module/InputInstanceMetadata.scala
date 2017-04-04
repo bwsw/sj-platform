@@ -2,21 +2,20 @@ package com.bwsw.sj.common.rest.entities.module
 
 import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask}
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.fasterxml.jackson.annotation.JsonProperty
 
 import scala.collection.JavaConverters._
 
 class InputInstanceMetadata extends InstanceMetadata {
   var outputs: Array[String] = Array()
-  @JsonProperty("checkpoint-mode") var checkpointMode: String = _
-  @JsonProperty("checkpoint-interval") var checkpointInterval: Long = Long.MinValue
-  @JsonProperty("duplicate-check") var duplicateCheck: Boolean = false
-  @JsonProperty("lookup-history") var lookupHistory: Int = Int.MinValue
-  @JsonProperty("queue-max-size") var queueMaxSize: Int = Int.MinValue
-  @JsonProperty("default-eviction-policy") var defaultEvictionPolicy: String = EngineLiterals.noneDefaultEvictionPolicy
-  @JsonProperty("eviction-policy") var evictionPolicy: String = EngineLiterals.fixTimeEvictionPolicy
-  @JsonProperty("backup-count") var backupCount: Int = 0
-  @JsonProperty("async-backup-count") var asyncBackupCount: Int = 0
+  var checkpointMode: String = _
+  var checkpointInterval: Long = Long.MinValue
+  var duplicateCheck: Boolean = false
+  var lookupHistory: Int = Int.MinValue
+  var queueMaxSize: Int = Int.MinValue
+  var defaultEvictionPolicy: String = EngineLiterals.noneDefaultEvictionPolicy
+  var evictionPolicy: String = EngineLiterals.fixTimeEvictionPolicy
+  var backupCount: Int = 0
+  var asyncBackupCount: Int = 0
   var tasks: Map[String, InputTask] = Map()
 
   override def asModelInstance() = {

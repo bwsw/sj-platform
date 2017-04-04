@@ -39,8 +39,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
             complete(restResponseToHttpResponse(response))
           }
       } ~
-        pathPrefix("types") {
-          //todo if a provider has a name 'types' then there is a collision
+        pathPrefix("_types") {
           pathEndOrSingleSlash {
             get {
               val response = OkRestResponse(Map("types" -> ProviderLiterals.types))
@@ -57,7 +56,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
                 createMessage("rest.providers.provider.notfound", providerName)))
               provider match {
                 case Some(x) =>
-                  val entity = Map("providers" -> x.asProtocolProvider())
+                  val entity = Map("provider" -> x.asProtocolProvider())
                   response = OkRestResponse(entity)
                 case None =>
               }

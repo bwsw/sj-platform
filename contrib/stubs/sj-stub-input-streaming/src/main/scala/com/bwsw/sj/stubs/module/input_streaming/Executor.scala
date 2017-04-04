@@ -6,9 +6,7 @@ import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.engine.core.input.{InputStreamingExecutor, Interval}
 import io.netty.buffer.ByteBuf
 
-
-class Executor(manager: InputEnvironmentManager) extends InputStreamingExecutor(manager) {
-
+class Executor(manager: InputEnvironmentManager) extends InputStreamingExecutor[String](manager) {
   val objectSerializer = new ObjectSerializer()
   val outputs = manager.getStreamsByTags(Array("output"))
 
@@ -29,7 +27,7 @@ class Executor(manager: InputEnvironmentManager) extends InputStreamingExecutor(
    * @param buffer Input stream is a flow of bytes
    * @return Input envelope or None
    */
-  override def parse(buffer: ByteBuf, interval: Interval): Option[InputEnvelope] = {
+  override def parse(buffer: ByteBuf, interval: Interval) = {
 
     val rawData = buffer.slice(interval.initialValue, interval.finalValue)
 
@@ -42,7 +40,7 @@ class Executor(manager: InputEnvironmentManager) extends InputStreamingExecutor(
       new String(data),
       outputs.map(x => (x, 0)),
       true,
-      data
+      new String(data)
     )
 
     Some(envelope)

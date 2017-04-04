@@ -67,11 +67,15 @@ object ConfigurationSettingsUtils {
   }
 
   def getFrameworkBackoffFactor() = {
-    getDoubleConfigSettings(frameworkBackoffFactor)
+    getDoubleConfigSetting(frameworkBackoffFactor)
   }
 
   def getFrameworkMaxLaunchDelaySeconds() = {
     getIntConfigSetting(frameworkMaxLaunchDelaySeconds)
+  }
+
+  def getLowWatermark() = {
+    getIntConfigSetting(lowWatermark)
   }
 
   private def getIntConfigSetting(name: String) = {
@@ -82,7 +86,7 @@ object ConfigurationSettingsUtils {
     getConfigSettings(name)
   }
 
-  private def getDoubleConfigSettings(name: String) = {
+  private def getDoubleConfigSetting(name: String) = {
     getConfigSettings(name).toDouble
   }
 

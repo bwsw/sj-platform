@@ -1,6 +1,8 @@
 package com.bwsw.common
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream}
+import java.io._
+
+import org.slf4j.LoggerFactory
 
 /**
  * Class represents a serializer from object to byte array and vice versa
@@ -8,9 +10,11 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, 
  * @author Kseniya Mikhaleva
  */
 
-class ObjectSerializer {
+class ObjectSerializer(classLoader: ClassLoader = ClassLoader.getSystemClassLoader) {
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   def serialize(obj: Object): Array[Byte] = {
+    logger.debug(s"Serialize an object of class: '${obj.getClass}' to a byte array.")
     val byteArrayOutputStream = new ByteArrayOutputStream()
     val objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)
     objectOutputStream.writeObject(obj)
@@ -18,8 +22,12 @@ class ObjectSerializer {
   }
 
   def deserialize(bytes: Array[Byte]): Object = {
+    logger.debug(s"Deserialize a byte array to an object.")
     val b = new ByteArrayInputStream(bytes)
-    val o = new ObjectInputStream(b)
+    val o = new CustomObjectInputStream(classLoader, b)
     o.readObject()
   }
 }
+
+
+

@@ -23,6 +23,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import scala.util.{Failure, Success}
 
 /**
   * Rest-api for sj-platform executive units and custom files
@@ -151,7 +152,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                     if (!storage.exists(metadata.fileName)) {
                       response = BadRequestRestResponse(Map("message" -> getMessage("rest.errors.invalid.specification")))
 
-                      if (checkSpecification(file)) {
+                      if (checkCustomFileSpecification(file)) {
                         val specification = getSpecification(file)
                         response = ConflictRestResponse(Map("message" ->
                           createMessage("rest.custom.jars.exists", metadata.fileName)))
@@ -181,11 +182,12 @@ trait SjCustomApi extends Directives with SjCrudValidator {
             } ~
               get {
                 val files = fileMetadataDAO.getByParameters(Map("filetype" -> "custom"))
-                val response = OkRestResponse(Map("custom-jars" -> mutable.Buffer()))
+                val response = OkRestResponse(Map("customJars" -> mutable.Buffer()))
                 if (files.nonEmpty) {
-                  response.entity = Map("custom-jars" -> files.map(metadata =>
+                  response.entity = Map("customJars" -> files.map(metadata =>
                     Map("name" -> metadata.specification.name,
-                      "version" -> metadata.specification.version))
+                      "version" -> metadata.specification.version,
+                      "size" -> metadata.length))
                   )
                 }
 
@@ -196,35 +198,57 @@ trait SjCustomApi extends Directives with SjCrudValidator {
         pathPrefix("files") {
           pathEndOrSingleSlash {
             post {
-              uploadedFile("file") {
-                case (metadata: FileInfo, file: File) =>
-                  try {
-                    var response: RestResponse = ConflictRestResponse(Map("message" ->
-                      createMessage("rest.custom.files.file.exists", metadata.fileName)))
+              entity(as[Multipart.FormData]) { formData =>
+                var filename: Option[String] = None
+                val file = File.createTempFile("restCustomFile", "")
+                val parts = formData.parts.mapAsync[(String, Any)](1) {
 
-                    if (!storage.exists(metadata.fileName)) {
-                      val uploadingFile = new File(metadata.fileName)
+                  case b: BodyPart if b.name == "file" =>
+                    filename = b.filename
+                    b.entity.dataBytes.runWith(FileIO.toPath(file.toPath)).map(_ => b.name -> file)
+
+                  case b: BodyPart =>
+                    b.toStrict(2.seconds).map(strict => b.name -> strict.entity.data.utf8String)
+
+                }.runFold(Map.empty[String, Any])((map, tuple) => map + tuple)
+
+                onComplete(parts) {
+                  case Success(allParts) =>
+                    val file = allParts("file").asInstanceOf[File]
+                    val description = if (allParts.isDefinedAt("description")) {
+                      allParts("description").asInstanceOf[String]
+                    } else ""
+                    var response: RestResponse = ConflictRestResponse(Map("message" ->
+                      createMessage("rest.custom.files.file.exists", filename.get)))
+
+                    if (!storage.exists(filename.get)) {
+                      val uploadingFile = new File(filename.get)
                       FileUtils.copyFile(file, uploadingFile)
-                      storage.put(uploadingFile, metadata.fileName, Map(), "custom-file")
+                      storage.put(uploadingFile, filename.get, Map("description" -> description), "custom-file")
+                      uploadingFile.delete()
 
                       response = OkRestResponse(Map("message" ->
-                        createMessage("rest.custom.files.file.uploaded", metadata.fileName)))
+                        createMessage("rest.custom.files.file.uploaded", filename.get)))
                     }
+                    file.delete()
 
                     complete(restResponseToHttpResponse(response))
-                  } finally {
+
+                  case Failure(throwable) =>
                     file.delete()
-                  }
+                    throw throwable
+                }
               }
             } ~
               get {
                 val files = fileMetadataDAO.getByParameters(Map("filetype" -> "custom-file"))
-                val response = OkRestResponse(Map("custom-files" -> mutable.Buffer()))
+                val response = OkRestResponse(Map("customFiles" -> mutable.Buffer()))
                 if (files.nonEmpty) {
-                  response.entity = Map("custom-files" -> files.map(metadata =>
+                  response.entity = Map("customFiles" -> files.map(metadata =>
                     Map("name" -> metadata.filename,
                       "description" -> metadata.specification.description,
-                      "upload-date" -> metadata.uploadDate.toString))
+                      "upload-date" -> metadata.uploadDate.toString,
+                      "size" -> metadata.length))
                   )
                 }
 
