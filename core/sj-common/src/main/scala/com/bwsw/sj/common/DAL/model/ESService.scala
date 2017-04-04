@@ -35,38 +35,4 @@ class ESService() extends Service {
 
     protocolService
   }
-
-  override def prepare() = {
-    val client = new ElasticsearchClient(getProviderHosts())
-
-    if (!client.doesIndexExist(this.index)) {
-      client.createIndex(this.index)
-    }
-
-    client.close()
-  }
-
-  override def destroy() = {
-    if (!isIndexUsed) {
-      val client = new ElasticsearchClient(getProviderHosts())
-      client.deleteIndex(this.index)
-      client.close()
-    }
-  }
-
-  private def getProviderHosts() = {
-    this.provider.hosts.map(address => {
-      val hostAndPort = address.split(":")
-      val host = hostAndPort(0)
-      val port = hostAndPort(1).toInt
-
-      (host, port)
-    }).toSet
-  }
-
-  private def isIndexUsed = {
-    ConnectionRepository.getServiceManager.getByParameters(Map("type" -> this.serviceType))
-      .map(x => x.asInstanceOf[ESService])
-      .exists(x => x.index == this.index && x.name != this.name)
-  }
 }

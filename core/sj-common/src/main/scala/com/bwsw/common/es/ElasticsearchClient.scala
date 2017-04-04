@@ -5,6 +5,7 @@ import java.util.UUID
 
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.InetSocketTransportAddress
+import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilder, QueryBuilders}
 import org.elasticsearch.index.reindex.DeleteByQueryAction
 import org.elasticsearch.search.SearchHits
@@ -49,6 +50,16 @@ class ElasticsearchClient(hosts: Set[(String, Int)]) {
   def deleteIndex(index: String) = {
     logger.info(s"Delete an index: '$index' from Elasticsearch.")
     client.admin().indices().prepareDelete(index).execute().actionGet()
+  }
+
+  def createMapping(index: String, mappingType: String, mappingSource: XContentBuilder) = {
+    logger.debug(s"Create a new index: '$index' in Elasticsearch.")
+    client.admin().indices()
+      .preparePutMapping(index)
+      .setType(mappingType)
+      .setSource(mappingSource)
+      .execute()
+      .actionGet()
   }
 
   def search(index: String, documentType: String, queryBuilder: QueryBuilder = QueryBuilders.matchAllQuery()): SearchHits = {
