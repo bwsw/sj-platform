@@ -51,6 +51,6 @@ class JdbcCommandBuilderTests extends FlatSpec with Matchers {
 
     val jdbccb = new JdbcCommandBuilder("txn", e)
 
-    jdbccb.exists(1, jdbcMock.stmt) shouldBe false
+    jdbccb.exists(1, jdbcMock.stmt).isInstanceOf[PreparedStatement] shouldBe true
   }
 }
