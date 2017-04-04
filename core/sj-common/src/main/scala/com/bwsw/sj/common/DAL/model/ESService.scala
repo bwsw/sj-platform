@@ -36,24 +36,6 @@ class ESService() extends Service {
     protocolService
   }
 
-  override def prepare() = {
-    val client = new ElasticsearchClient(getProviderHosts())
-
-    if (!client.doesIndexExist(this.index)) {
-      client.createIndex(this.index)
-    }
-
-    client.close()
-  }
-
-  override def destroy() = {
-    if (!isIndexUsed) {
-      val client = new ElasticsearchClient(getProviderHosts())
-      client.deleteIndex(this.index)
-      client.close()
-    }
-  }
-
   private def getProviderHosts() = {
     this.provider.hosts.map(address => {
       val hostAndPort = address.split(":")
