@@ -100,12 +100,11 @@ class BinaryField(name: String, default: Array[Byte] = new Array[Byte](0)) exten
   }
 }
 
-// TODO check correct data
 class JavaStringField(name: String, default: java.lang.String = "") extends JdbcField[java.lang.String](name, default) {
   override def transform(fieldValue: Any): (PreparedStatement, Int) => Unit = fieldValue match {
     case null => (ps: PreparedStatement, idx: Int) => ps.setString(idx, null.asInstanceOf[java.lang.String])
-    case i: java.lang.String => (ps: PreparedStatement, idx: Int) => ps.setString(idx, StringEscapeUtils.escapeJava(i))
-    case _ => (ps: PreparedStatement, idx: Int) => ps.setString(idx, s"${StringEscapeUtils.escapeJava(fieldValue.toString)}")
+    case i: java.lang.String => (ps: PreparedStatement, idx: Int) => ps.setString(idx, i)
+    case _ => (ps: PreparedStatement, idx: Int) => ps.setString(idx, fieldValue.toString)
   }
 }
 
