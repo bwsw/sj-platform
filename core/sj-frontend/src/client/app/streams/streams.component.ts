@@ -32,11 +32,14 @@ export class StreamsComponent implements OnInit {
     this.getStreamTypes();
     this.newStream = new StreamModel();
     this.newStream.tags = [];
+<<<<<<< HEAD
     this.newStream.generator = {
       generatorType: 'local',
       service: '',
       instanceCount: 0
     };
+=======
+>>>>>>> 01640c1d319f8c567c3e95f4153f5eb27f1e8945
   }
 
   public keyDown(event:KeyboardEvent) {
@@ -122,10 +125,17 @@ export class StreamsComponent implements OnInit {
 
   public createStream(modal: ModalDirective) {
     this.showSpinner = true;
+<<<<<<< HEAD
     if (this.newStream.type !== 'stream.t-stream') {
       delete this.newStream.generator;
     }
     this.streamsService.save(this.newStream)
+=======
+    /*if (this.newStream['stream-type'] !== 'stream.t-stream') {
+      delete this.newStream.generator;
+    }*/
+    this.streamsService.saveStream(this.newStream)
+>>>>>>> 01640c1d319f8c567c3e95f4153f5eb27f1e8945
       .subscribe(
         response => {
           modal.hide();

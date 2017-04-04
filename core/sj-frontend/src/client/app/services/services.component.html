@@ -188,7 +188,7 @@
           </fieldset>
 
           <!-- Provider -->
-          <fieldset *ngIf="newService.type && newService.type !== 'TstrQ'" class="form-group row">
+          <fieldset *ngIf="newService.type" class="form-group row">
             <label class="col-sm-2 col-form-label required">Provider</label>
             <div class="col-sm-10">
               <select [(ngModel)]="newService.provider" name="streamService" required
@@ -199,28 +199,37 @@
             </div>
           </fieldset>
 
-          <!-- Metadata -->
+          <!-- Prefix -->
           <fieldset *ngIf="newService.type === 'TstrQ'" class="form-group row">
-            <label class="col-sm-2 col-form-label required">Metadata provider</label>
+            <label class="col-sm-2 col-form-label required">Prefix</label>
             <div class="col-sm-10">
+<<<<<<< HEAD
               <select [(ngModel)]="newService.metadataProvider" name="serviceMetadataProvider"
                       required class="form-control">
                 <option *ngFor="let provider of providerList | providerFilter : 'CassDB' " value="{{provider.name}}">{{provider.name}}
                 </option>
               </select>
+=======
+              <input [(ngModel)]="newService.prefix" name="servicePrefix" type="text"
+                     class="form-control" required pattern="[\/][a-z0-9 \/]*[a-z0-9]+">
+>>>>>>> 01640c1d319f8c567c3e95f4153f5eb27f1e8945
             </div>
           </fieldset>
 
-          <!-- Metadata namespace -->
+          <!-- Token -->
           <fieldset *ngIf="newService.type === 'TstrQ'" class="form-group row">
-            <label class="col-sm-2 col-form-label required">Metadata namespace</label>
+            <label class="col-sm-2 col-form-label required">Token</label>
             <div class="col-sm-10">
+<<<<<<< HEAD
               <input [(ngModel)]="newService.metadataNamespace" name="serviceMetadataNamespace" type="text"
+=======
+              <input [(ngModel)]="newService.token" name="serviceToken" type="text"  maxlength="32"
+>>>>>>> 01640c1d319f8c567c3e95f4153f5eb27f1e8945
                      class="form-control" required>
             </div>
           </fieldset>
 
-          <!-- Data provider -->
+          <!-- Data provider
           <fieldset *ngIf="newService.type === 'TstrQ'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Data provider</label>
             <div class="col-sm-10">
@@ -230,8 +239,9 @@
                 </option>
               </select>
             </div>
-          </fieldset>
+          </fieldset>-->
 
+<<<<<<< HEAD
           <!-- Database -->
           <fieldset *ngIf="newService.type === 'JDBC'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Database name</label>
@@ -242,14 +252,18 @@
           </fieldset>
 
           <!-- Data namespace -->
+=======
+          <!-- Data namespace
+>>>>>>> 01640c1d319f8c567c3e95f4153f5eb27f1e8945
           <fieldset *ngIf="newService.type === 'TstrQ'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Data namespace</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newService.dataNamespace" name="serviceDatabase" type="text"
                      class="form-control" required>
             </div>
-          </fieldset>
+          </fieldset>-->
 
+<<<<<<< HEAD
           <!--Driver -->
           <fieldset *ngIf="newService.type === 'JDBC'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Driver</label>
@@ -264,6 +278,9 @@
           </fieldset>
 
           <!-- Lock provider -->
+=======
+          <!-- Lock provider
+>>>>>>> 01640c1d319f8c567c3e95f4153f5eb27f1e8945
           <fieldset *ngIf="newService.type === 'TstrQ'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Lock-provider</label>
             <div class="col-sm-10">
@@ -273,16 +290,16 @@
                 </option>
               </select>
             </div>
-          </fieldset>
+          </fieldset>-->
 
-          <!-- Lock namespace -->
+          <!-- Lock namespace
           <fieldset *ngIf="newService.type === 'TstrQ'" class="form-group row">
             <label class="col-sm-2 col-form-label required">Lock-namespace</label>
             <div class="col-sm-10">
               <input [(ngModel)]="newService.lockNamespace" name="serviceLockNamespace" type="text"
                      class="form-control" required>
             </div>
-          </fieldset>
+          </fieldset>-->
 
           <!-- Login -->
           <fieldset *ngIf="newService.type === 'ESInd'" class="form-group row">
