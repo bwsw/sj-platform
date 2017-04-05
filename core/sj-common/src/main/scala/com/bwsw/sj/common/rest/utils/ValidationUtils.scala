@@ -18,7 +18,7 @@ trait ValidationUtils extends MessageResourceUtils {
 
   def validateConfigSettingName(name: String) = {
     logger.debug(s"Validate a configuration name: '$name'.")
-    name.matches( """^([a-z][a-z-\.]*)$""")
+    name.matches( """^([a-z][a-z0-9-\.]*)$""")
   }
 
   def validateProvider(provider: String, serviceType: String) = {
