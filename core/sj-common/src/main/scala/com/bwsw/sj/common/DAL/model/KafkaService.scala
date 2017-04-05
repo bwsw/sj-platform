@@ -2,13 +2,13 @@ package com.bwsw.sj.common.DAL.model
 
 import com.bwsw.sj.common.rest.entities.service.{KfkQServiceData, ServiceData}
 import com.bwsw.sj.common.utils.ServiceLiterals
-import org.mongodb.morphia.annotations.Reference
+import org.mongodb.morphia.annotations.{Property, Reference}
 
 class KafkaService() extends Service {
   serviceType = ServiceLiterals.kafkaType
   @Reference var provider: Provider = null
-  @Reference var zkProvider: Provider = null
-  var zkNamespace: String = null
+  @Reference(value = "zk-provider") var zkProvider: Provider = null
+  @Property("zk-namespace") var zkNamespace: String = null
 
   def this(name: String, serviceType: String, description: String, provider: Provider, zkProvider: Provider, zkNamespace: String) = {
     this()
