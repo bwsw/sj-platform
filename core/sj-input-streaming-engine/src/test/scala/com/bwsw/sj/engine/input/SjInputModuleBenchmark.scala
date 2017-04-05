@@ -43,14 +43,14 @@ object SjInputModuleRunner extends App {
   InputTaskRunner.main(Array())
 }
 
-object SjInputDataWriter extends App {
+object SjInputModuleDataWriter extends App {
   LogManager.getLogManager.reset()
   writeData(totalInputElements, numberOfDuplicates)
 
   ConnectionRepository.close()
 }
 
-object DuplicateCheckerRunner extends App {
+object SjInputModuleDuplicateCheckerRunner extends App {
   LogManager.getLogManager.reset()
   DuplicateChecker.main(Array(totalInputElements.toString, numberOfDuplicates.toString))
 }

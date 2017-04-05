@@ -4,8 +4,9 @@ import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.engine.core.entities.{KafkaEnvelope, TStreamEnvelope, Batch}
 import com.bwsw.sj.engine.batch.module.DataFactory._
+import com.bwsw.sj.engine.batch.utils.StateHelper
 
-object BatchModuleStatelessTstreamChecker extends App {
+object SjBatchModuleStatefulTstreamChecker extends App {
   open()
   val streamService = ConnectionRepository.getStreamService
   val objectSerializer = new ObjectSerializer()
@@ -66,12 +67,20 @@ object BatchModuleStatelessTstreamChecker extends App {
     }
   })
 
+  val consumer = createStateConsumer(streamService)
+  consumer.start()
+  val initialState = StateHelper.getState(consumer, objectSerializer)
+
   assert(totalInputElements == totalOutputElements,
     "Count of all txns elements that are consumed from output stream should equals count of all txns elements that are consumed from input stream")
 
   assert(inputElements.forall(x => outputElements.contains(x)) && outputElements.forall(x => inputElements.contains(x)),
     "All txns elements that are consumed from output stream should equals all txns elements that are consumed from input stream")
 
+  assert(initialState("sum") == inputElements.sum,
+    "Sum of all txns elements that are consumed from input stream should equals state variable sum")
+
+  consumer.stop()
   inputTstreamConsumers.foreach(x => x.stop())
   outputConsumers.foreach(x => x.stop())
   close()

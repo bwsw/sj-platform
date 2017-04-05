@@ -1,13 +1,14 @@
-package com.bwsw.sj.engine.regular.module.checkers
+package com.bwsw.sj.engine.batch.module.checkers
 
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.engine.regular.module.DataFactory._
-import com.bwsw.sj.engine.regular.utils.StateHelper
+import com.bwsw.sj.engine.core.entities.{TStreamEnvelope, Batch, KafkaEnvelope}
+import com.bwsw.sj.engine.batch.module.DataFactory._
+import com.bwsw.sj.engine.batch.utils.StateHelper
 
 import scala.collection.JavaConverters._
 
-object RegularModuleStatefulKafkaChecker extends App {
+object SjBatchModuleStatefulKafkaChecker extends App {
   open()
   val streamService = ConnectionRepository.getStreamService
   val objectSerializer = new ObjectSerializer()
@@ -42,9 +43,16 @@ object RegularModuleStatefulKafkaChecker extends App {
       while (maybeTxn.isDefined) {
         val transaction = maybeTxn.get
         while (transaction.hasNext()) {
-          val element = objectSerializer.deserialize(transaction.next()).asInstanceOf[Int]
-          outputElements.+=(element)
-          totalOutputElements += 1
+          val batch = objectSerializer.deserialize(transaction.next()).asInstanceOf[Batch]
+          batch.envelopes.foreach {
+            case tstreamEnvelope: TStreamEnvelope[Int @unchecked] => tstreamEnvelope.data.foreach(x => {
+              outputElements.+=(x)
+              totalOutputElements += 1
+            })
+            case kafkaEnvelope: KafkaEnvelope[Int @unchecked] =>
+              outputElements.+=(kafkaEnvelope.data)
+              totalOutputElements += 1
+          }
         }
         maybeTxn = outputConsumer.getTransaction(currentPartition)
       }
