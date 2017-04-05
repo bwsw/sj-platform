@@ -1,20 +1,24 @@
 package com.bwsw.sj.common.engine
 
 import com.bwsw.common.AvroSerializer
-import org.apache.avro.Schema
+import com.bwsw.sj.common.DAL.model.module.{AvroSchemaForInstance, Instance}
 import org.apache.avro.generic.GenericRecord
 import org.slf4j.LoggerFactory
 
 /**
   * Serializer that extend the default functionality for [[org.apache.avro.generic.GenericRecord GenericRecord]]
   *
-  * @param schema avro schema for deserialization
   * @author Pavel Tomskikh
   */
-class ExtendedEnvelopeDataSerializer(classLoader: ClassLoader, schema: Option[Schema] = None)
+class ExtendedEnvelopeDataSerializer(classLoader: ClassLoader, instance: Instance)
   extends DefaultEnvelopeDataSerializer(classLoader) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
+  private val schema = instance match {
+    case i: AvroSchemaForInstance => i.getInputAvroSchema
+    case _ => None
+  }
+
   private val avroSerializer = new AvroSerializer(schema)
 
   override def serialize(data: AnyRef): Array[Byte] = {

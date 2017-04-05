@@ -1,6 +1,7 @@
 package com.bwsw.sj.common.DAL.model.module
 
-import com.bwsw.sj.common.rest.entities.module.{ExecutionPlan, InstanceMetadata, BatchInstanceMetadata}
+import com.bwsw.common.JsonSerializer
+import com.bwsw.sj.common.rest.entities.module.{BatchInstanceMetadata, ExecutionPlan, InstanceMetadata}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
 import org.mongodb.morphia.annotations.{Embedded, Property}
@@ -10,7 +11,7 @@ import org.mongodb.morphia.annotations.{Embedded, Property}
   *
   * @author Kseniya Tomskikh
   */
-class BatchInstance() extends Instance {
+class BatchInstance() extends Instance with AvroSchemaForInstance {
   var inputs: Array[String] = Array()
   var window: Int = 1
   @Property("sliding-interval") var slidingInterval: Int = 1
@@ -33,6 +34,9 @@ class BatchInstance() extends Instance {
     protocolInstance.stateFullCheckpoint = this.stateFullCheckpoint
     protocolInstance.outputs = this.outputs
     protocolInstance.startFrom = this.startFrom
+
+    val serializer = new JsonSerializer()
+    protocolInstance.inputAvroSchema = serializer.deserialize[Map[String, Any]](this.inputAvroSchema)
 
     protocolInstance
   }

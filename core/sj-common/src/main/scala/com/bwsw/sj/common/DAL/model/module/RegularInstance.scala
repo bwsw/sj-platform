@@ -1,16 +1,17 @@
 package com.bwsw.sj.common.DAL.model.module
 
+import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.rest.entities.module.{ExecutionPlan, InstanceMetadata, RegularInstanceMetadata}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
 import org.mongodb.morphia.annotations._
 
 /**
- * Entity for regular instance-json
- *
- * @author Kseniya Tomskikh
- */
-class RegularInstance() extends Instance {
+  * Entity for regular instance-json
+  *
+  * @author Kseniya Tomskikh
+  */
+class RegularInstance() extends Instance with AvroSchemaForInstance {
   var inputs: Array[String] = Array()
   @Property("checkpoint-mode") var checkpointMode: String = null
   @Property("checkpoint-interval") var checkpointInterval: Long = 0
@@ -32,6 +33,9 @@ class RegularInstance() extends Instance {
     protocolInstance.eventWaitIdleTime = this.eventWaitIdleTime
     protocolInstance.inputs = this.inputs
     protocolInstance.outputs = this.outputs
+
+    val serializer = new JsonSerializer()
+    protocolInstance.inputAvroSchema = serializer.deserialize[Map[String, Any]](this.inputAvroSchema)
 
     protocolInstance
   }

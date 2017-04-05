@@ -446,6 +446,13 @@ trait SjModulesApi extends Directives with SjCrudValidator {
   }
 
   private def validateInstance(specification: SpecificationData, filename: String, instanceMetadata: InstanceMetadata): Boolean = {
+    def validateAvroSchema: Boolean = {
+      instanceMetadata match {
+        case metadata: AvroSchemaForInstanceMetadata => metadata.validateAvroSchema
+        case _ => true
+      }
+    }
+
     val validatorClassName = specification.validateClass
     val file = storage.get(filename, s"tmp/$filename")
     val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
@@ -453,7 +460,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     val validator = clazz.newInstance().asInstanceOf[StreamingValidator]
     validator.validate(instanceMetadata) &&
       validator.validate(instanceMetadata.options) &&
-      instanceMetadata.validateAvroSchema
+      validateAvroSchema
   }
 
   /**

@@ -62,7 +62,7 @@ abstract class TaskManager() {
 
   val converter = new ArrayByteConverter
   val envelopeDataSerializer: EnvelopeDataSerializer[AnyRef] =
-    new ExtendedEnvelopeDataSerializer(moduleClassLoader, instance.getInputAvroSchema)
+    new ExtendedEnvelopeDataSerializer(moduleClassLoader, instance)
   val inputs: mutable.Map[SjStream, Array[Int]]
 
   private def getInstance() = {

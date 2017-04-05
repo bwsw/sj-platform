@@ -1,10 +1,11 @@
 package com.bwsw.sj.common.rest.entities.module
 
+import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
 
-class OutputInstanceMetadata extends InstanceMetadata {
+class OutputInstanceMetadata extends InstanceMetadata with AvroSchemaForInstanceMetadata{
   var checkpointMode: String = null
   var checkpointInterval: Long = Long.MinValue
   var executionPlan: ExecutionPlan = new ExecutionPlan()
@@ -21,6 +22,9 @@ class OutputInstanceMetadata extends InstanceMetadata {
     modelInstance.outputs = Array(this.output)
     modelInstance.startFrom = this.startFrom
     modelInstance.executionPlan = this.executionPlan
+
+    val serializer = new JsonSerializer()
+    modelInstance.inputAvroSchema = serializer.serialize(this.inputAvroSchema)
 
     modelInstance
   }

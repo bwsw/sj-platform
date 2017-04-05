@@ -1,11 +1,12 @@
 package com.bwsw.sj.common.rest.entities.module
 
+import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module.BatchInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
 import com.bwsw.sj.common.utils.StreamLiterals._
 
-class BatchInstanceMetadata extends InstanceMetadata {
+class BatchInstanceMetadata extends InstanceMetadata with AvroSchemaForInstanceMetadata {
   var inputs: Array[String] = Array()
   var window: Int = 1
   var slidingInterval: Int = 1
@@ -28,6 +29,9 @@ class BatchInstanceMetadata extends InstanceMetadata {
     modelInstance.outputs = this.outputs
     modelInstance.startFrom = this.startFrom
     modelInstance.executionPlan = this.executionPlan
+
+    val serializer = new JsonSerializer()
+    modelInstance.inputAvroSchema = serializer.serialize(this.inputAvroSchema)
 
     modelInstance
   }
