@@ -1,0 +1,30 @@
+{
+  "name": "com.bwsw.input.regex",
+  "description": "Input module for reading stream with filtering and transforming using regex",
+  "version": "1.0",
+  "author": "Ruslan Komarov",
+  "license": "Apache 2.0",
+  "inputs": {
+    "cardinality": [
+      0,
+      0
+    ],
+    "types": [
+      "input"
+    ]
+  },
+  "outputs": {
+    "cardinality": [
+      2,
+      2
+    ],
+    "types": [
+      "stream.t-stream"
+    ]
+  },
+  "module-type": "input-streaming",
+  "engine-name": "com.bwsw.input.streaming.engine",
+  "engine-version": "1.0",
+  "executor-class": "com.bwsw.sj.module.input.regex.RegexInputExecutor",
+  "validator-class": "com.bwsw.sj.module.input.regex.RegexInputValidator"
+}
