@@ -43,6 +43,7 @@ class RegexInputValidator extends StreamingValidator {
       isRequiredString(options, RegexInputOptionsNames.policy) &&
       Charset.isSupported(options(RegexInputOptionsNames.encoding).asInstanceOf[String]) &&
       isRequiredString(options, RegexInputOptionsNames.fallbackStream) &&
+      rules.nonEmpty &&
       rules.forall(validateRule)
   }
 }

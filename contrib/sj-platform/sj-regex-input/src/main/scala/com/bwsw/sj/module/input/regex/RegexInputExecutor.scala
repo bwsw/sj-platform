@@ -64,6 +64,9 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
     .map(serializer.serialize)
     .map(serializer.deserialize[Rule])
 
+  private val outputSchemas = rules.map(r => r -> createOutputSchema(r.fields)).toMap
+  private val outputDistributors = rules.map(r => r -> createOutputDistributor(r)).toMap
+
   private val fallbackSchema = SchemaBuilder.record(RegexInputOptionsNames.fallbackRecordName).fields()
     .name(RegexInputOptionsNames.fallbackFieldName).`type`().stringType().noDefault().endRecord()
 
@@ -71,6 +74,12 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
   private val fallbackDistributor = new SjStreamDistributor(fallbackPartitionCount)
 
   private val tokenizer = new SeparateTokenizer(lineSeparator, encoding)
+
+  private val policyHandler: String => Option[InputEnvelope[Record]] = policy match {
+    case RegexInputOptionsNames.checkEveryPolicy => handleDataWithCheckEveryPolicy
+    case RegexInputOptionsNames.firstMatchWinPolicy => handleDataWithFirstMatchWinPolicy
+    case _ => throw new IllegalArgumentException(s"Incorrect or unsupported policy: $policy")
+  }
 
   logger.info(s"Started with $policy policy")
 
@@ -99,11 +108,7 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
 
     logger.info(s"Received data $line")
 
-    policy match {
-      case RegexInputOptionsNames.checkEveryPolicy => handleDataWithCheckEveryPolicy(line)
-      case RegexInputOptionsNames.firstMatchWinPolicy => handleDataWithFirstMatchWinPolicy(line)
-      case _ => throw new IllegalArgumentException(s"Incorrect or unsupported policy: $policy")
-    }
+    policyHandler(line)
   }
 
   private def handleDataWithCheckEveryPolicy(data: String): Option[InputEnvelope[Record]] = {
@@ -136,29 +141,14 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
   private def buildOutputEnvelope(data: String, rule: Rule) = {
     logger.debug(s"Create input envelope: convert received data $data to Avro format using rule: $rule")
 
-    @tailrec
-    def createSchema(fieldList: List[Field], scheme: FieldAssembler[Schema]) : Schema = {
-      fieldList match {
-        case Nil => scheme.endRecord()
-        case f :: fs => createSchema(fs, scheme.name(f.name).`type`().stringType().stringDefault(f.defaultValue))
-      }
-    }
-
-    val schema = createSchema(rule.fields, SchemaBuilder.record(RegexInputOptionsNames.outputRecordName).fields())
-
-    val outputPartitionCount = getPartitionCount(manager.outputs.find(_.name == rule.outputStream).get)
-    val outputDistributor = {
-      if (rule.distribution.isEmpty) new SjStreamDistributor(outputPartitionCount)
-      else new SjStreamDistributor(outputPartitionCount, ByHash, rule.distribution)
-    }
-
     val uniqueKey =
       if (rule.uniqueKey.nonEmpty) rule.uniqueKey
       else rule.fields.map(_.name)
 
     val ruleMatcher = Pattern.compile(rule.regex).matcher(data)
-    val record = new Record(schema)
+    val record = new Record(outputSchemas(rule))
 
+    // Used to find the match in the data using the regex pattern
     if (ruleMatcher.find()) {
       rule.fields.foreach { field =>
         val fieldValue = Try[String](ruleMatcher.group(field.name)) match {
@@ -175,7 +165,7 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
 
     Some(new InputEnvelope(
       s"${rule.outputStream}$key",
-      Array((rule.outputStream, outputDistributor.getNextPartition(record))),
+      Array((rule.outputStream, outputDistributors(rule).getNextPartition(record))),
       true,
       record))
   }
@@ -199,5 +189,23 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
       case _ => throw new IllegalArgumentException(s"stream type must be ${StreamLiterals.tstreamType} or " +
         s"${StreamLiterals.kafkaStreamType}")
     }
+  }
+
+  private def createOutputSchema(fieldList: List[Field]) = {
+    @tailrec
+    def createSchemaInner(fieldList: List[Field], scheme: FieldAssembler[Schema]) : Schema = {
+      fieldList match {
+        case Nil => scheme.endRecord()
+        case f :: fs => createSchemaInner(fs, scheme.name(f.name).`type`().stringType().stringDefault(f.defaultValue))
+      }
+    }
+    createSchemaInner(fieldList, SchemaBuilder.record(RegexInputOptionsNames.outputRecordName).fields())
+  }
+
+  private def createOutputDistributor(rule: Rule) = {
+    val outputPartitionCount = getPartitionCount(manager.outputs.find(_.name == rule.outputStream).get)
+
+    if (rule.distribution.isEmpty) new SjStreamDistributor(outputPartitionCount)
+    else new SjStreamDistributor(outputPartitionCount, ByHash, rule.distribution)
   }
 }
