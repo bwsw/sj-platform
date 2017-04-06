@@ -52,6 +52,11 @@ class OutputInstanceValidator extends InstanceValidator {
         }
     }
 
+    // 'inputAvroSchema' field
+    if (!outputInstanceMetadata.validateAvroSchema) {
+      errors += createMessage("rest.validator.attribute.not", "inputAvroSchema", "Avro Schema")
+    }
+
     // 'checkpoint-interval' field
     if (outputInstanceMetadata.checkpointInterval <= 0) {
       errors += createMessage("rest.validator.attribute.required", "checkpointInterval") + ". " +

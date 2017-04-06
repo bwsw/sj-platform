@@ -1,7 +1,7 @@
 package com.bwsw.sj.crud.rest.validator.instance
 
-import com.bwsw.sj.common.DAL.model.{TStreamService, KafkaService, KafkaSjStream}
-import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, SpecificationData, BatchInstanceMetadata}
+import com.bwsw.sj.common.DAL.model.{KafkaService, KafkaSjStream, TStreamService}
+import com.bwsw.sj.common.rest.entities.module.{BatchInstanceMetadata, InstanceMetadata, SpecificationData}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.SjStreamUtils._
@@ -50,6 +50,11 @@ class BatchInstanceValidator extends InstanceValidator {
 
     if (batchInstanceMetadata.slidingInterval > batchInstanceMetadata.window) {
       errors += createMessage("rest.validator.attribute.must.greater.or.equal", "Window", "slidingInterval")
+    }
+
+    // 'inputAvroSchema' field
+    if (!batchInstanceMetadata.validateAvroSchema) {
+      errors += createMessage("rest.validator.attribute.not", "inputAvroSchema", "Avro Schema")
     }
 
     errors ++= validateStreamOptions(batchInstanceMetadata, specification)

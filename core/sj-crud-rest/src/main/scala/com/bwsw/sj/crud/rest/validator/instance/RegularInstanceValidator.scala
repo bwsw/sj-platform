@@ -65,6 +65,11 @@ class RegularInstanceValidator extends InstanceValidator {
       }
     }
 
+    // 'inputAvroSchema' field
+    if (!regularInstanceMetadata.validateAvroSchema) {
+      errors += createMessage("rest.validator.attribute.not", "inputAvroSchema", "Avro Schema")
+    }
+
     errors ++= validateStreamOptions(regularInstanceMetadata, specification)
   }
 
