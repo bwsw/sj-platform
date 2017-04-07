@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.DAL.model
 
-import com.bwsw.sj.common.rest.entities.stream.TStreamSjStreamData
+import com.bwsw.sj.common.rest.entities.stream.TStreamStreamData
 import com.bwsw.sj.common.utils._
 import com.bwsw.tstreams.streams.StreamService
 import org.mongodb.morphia.annotations.Embedded
@@ -28,7 +28,7 @@ class TStreamSjStream() extends SjStream {
   }
 
   override def asProtocolStream() = {
-    val streamData = new TStreamSjStreamData
+    val streamData = new TStreamStreamData
     super.fillProtocolStream(streamData)
 
     streamData.partitions = this.partitions

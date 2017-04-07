@@ -10,7 +10,7 @@ import SjStreamUtilsForCreation._
 
 import scala.collection.mutable.ArrayBuffer
 
-class TStreamSjStreamData() extends SjStreamData() {
+class TStreamStreamData() extends StreamData() {
   streamType = StreamLiterals.tstreamType
   var partitions: Int = Int.MinValue
   var generator: GeneratorData = GeneratorData(GeneratorLiterals.localType)

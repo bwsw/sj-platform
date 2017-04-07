@@ -3,12 +3,10 @@ package com.bwsw.sj.crud.rest.api
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.rest.entities._
-import com.bwsw.sj.common.rest.entities.stream.SjStreamData
+import com.bwsw.sj.common.rest.entities.stream.StreamData
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
-
-import scala.collection.mutable
 
 trait SjStreamsApi extends Directives with SjCrudValidator {
 
@@ -17,25 +15,25 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>
           validateContextWithSchema(ctx, "streamSchema.json")
-          val streamData = serializer.deserialize[SjStreamData](getEntityFromContext(ctx))
+          val streamData = serializer.deserialize[StreamData](getEntityFromContext(ctx))
           val errors = streamData.validate()
-          var response: RestResponse = BadRequestRestResponse(Map("message" ->
-            createMessage("rest.streams.stream.cannot.create", errors.mkString(";"))))
+          var response: RestResponse = BadRequestRestResponse(MessageResponseEntity(
+            createMessage("rest.streams.stream.cannot.create", errors.mkString(";"))
+          ))
 
           if (errors.isEmpty) {
             streamData.create()
             streamDAO.save(streamData.asModelStream())
-            response = CreatedRestResponse(Map("message" ->
-              createMessage("rest.streams.stream.created", streamData.name)))
+            response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.streams.stream.created", streamData.name)))
           }
 
           ctx.complete(restResponseToHttpResponse(response))
         } ~
           get {
             val streams = streamDAO.getAll
-            val response = OkRestResponse(Map("streams" -> mutable.Buffer()))
+            val response = OkRestResponse(StreamsResponseEntity())
             if (streams.nonEmpty) {
-              response.entity = Map("streams" -> streams.map(s => s.asProtocolStream()))
+              response.entity = StreamsResponseEntity(streams.map(s => s.asProtocolStream()))
             }
 
             complete(restResponseToHttpResponse(response))
@@ -44,7 +42,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
         pathPrefix("_types") {
           pathEndOrSingleSlash {
             get {
-              val response = OkRestResponse(Map("types" -> StreamLiterals.types))
+              val response = OkRestResponse(TypesResponseEntity(StreamLiterals.types))
 
               complete(restResponseToHttpResponse(response))
             }
@@ -54,20 +52,19 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
           pathEndOrSingleSlash {
             get {
               val stream = streamDAO.get(streamName)
-              var response: RestResponse = NotFoundRestResponse(Map("message" ->
+              var response: RestResponse = NotFoundRestResponse(MessageResponseEntity(
                 createMessage("rest.streams.stream.notfound", streamName))
               )
               stream match {
                 case Some(x) =>
-                  val entity = Map("stream" -> x.asProtocolStream())
-                  response = OkRestResponse(entity)
+                  response = OkRestResponse(StreamResponseEntity(x.asProtocolStream()))
                 case None =>
               }
 
               complete(restResponseToHttpResponse(response))
             } ~
               delete {
-                var response: RestResponse = UnprocessableEntityRestResponse(Map("message" ->
+                var response: RestResponse = UnprocessableEntityRestResponse(MessageResponseEntity(
                   createMessage("rest.streams.stream.cannot.delete", streamName)))
 
                 val instances = getRelatedInstances(streamName)
@@ -78,11 +75,11 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
                     case Some(x) =>
                       x.delete()
                       streamDAO.delete(streamName)
-                      response = OkRestResponse(Map("message" ->
+                      response = OkRestResponse(MessageResponseEntity(
                         createMessage("rest.streams.stream.deleted", streamName))
                       )
                     case None =>
-                      response = NotFoundRestResponse(Map("message" ->
+                      response = NotFoundRestResponse(MessageResponseEntity(
                         createMessage("rest.streams.stream.notfound", streamName))
                       )
                   }
@@ -96,11 +93,11 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
                 get {
                   val stream = streamDAO.get(streamName)
                   var response: RestResponse = NotFoundRestResponse(
-                    Map("message" -> createMessage("rest.streams.stream.notfound", streamName)))
+                    MessageResponseEntity(createMessage("rest.streams.stream.notfound", streamName)))
 
                   stream match {
                     case Some(x) =>
-                      response = OkRestResponse(Map("instances" -> getRelatedInstances(streamName)))
+                      response = OkRestResponse(RelatedToStreamResponseEntity(getRelatedInstances(streamName)))
                     case None =>
                   }
 

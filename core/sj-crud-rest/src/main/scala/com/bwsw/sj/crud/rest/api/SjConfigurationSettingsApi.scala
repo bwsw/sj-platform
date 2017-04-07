@@ -8,8 +8,6 @@ import com.bwsw.sj.common.rest.entities.config.ConfigurationSettingData
 import com.bwsw.sj.crud.rest.exceptions.UnknownConfigSettingDomain
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
-import scala.collection.mutable
-
 trait SjConfigurationSettingsApi extends Directives with SjCrudValidator {
 
   val configSettingsApi = {
@@ -18,7 +16,7 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator {
         pathPrefix("domains") {
           pathEndOrSingleSlash {
             get {
-              val response = OkRestResponse(Map("domains" -> ConfigLiterals.domains))
+              val response = OkRestResponse(DomainsResponseEntity())
 
               complete(restResponseToHttpResponse(response))
             }
@@ -30,9 +28,9 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator {
             pathEndOrSingleSlash {
               get {
                 val configElements = configService.getByParameters(Map("domain" -> domain))
-                val response = OkRestResponse(Map(s"$domain-config-settings" -> mutable.Buffer()))
+                val response = OkRestResponse(ConfigSettingsResponseEntity())
                 if (configElements.nonEmpty) {
-                  response.entity = Map(s"$domain-config-settings" -> configElements.map(x => x.asProtocolConfigurationSetting()))
+                  response.entity = ConfigSettingsResponseEntity(configElements.map(x => x.asProtocolConfigurationSetting()))
                 }
 
                 complete(restResponseToHttpResponse(response))
@@ -42,11 +40,11 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator {
               pathPrefix(Segment) { (name: String) =>
                 pathEndOrSingleSlash {
                   get {
-                    var response: RestResponse = NotFoundRestResponse(Map("message" ->
+                    var response: RestResponse = NotFoundRestResponse(MessageResponseEntity(
                       createMessage("rest.config.setting.notfound", domain, name)))
                     configService.get(createConfigurationSettingName(domain, name)) match {
                       case Some(configElement) =>
-                        val entity = Map(s"$domain-config-setting" -> configElement.asProtocolConfigurationSetting())
+                        val entity = ConfigSettingResponseEntity(configElement.asProtocolConfigurationSetting())
                         response = OkRestResponse(entity)
                       case None =>
                     }
@@ -54,12 +52,12 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator {
                     complete(restResponseToHttpResponse(response))
                   } ~
                     delete {
-                      var response: RestResponse = NotFoundRestResponse(Map("message" ->
+                      var response: RestResponse = NotFoundRestResponse(MessageResponseEntity(
                         createMessage("rest.config.setting.notfound", domain, name)))
                       configService.get(createConfigurationSettingName(domain, name)) match {
                         case Some(_) =>
                           configService.delete(createConfigurationSettingName(domain, name))
-                          val entity = Map("message" -> createMessage("rest.config.setting.deleted", domain, name))
+                          val entity = MessageResponseEntity(createMessage("rest.config.setting.deleted", domain, name))
                           response = OkRestResponse(entity)
                         case None =>
                       }
@@ -74,21 +72,22 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator {
               validateContextWithSchema(ctx, "configSchema.json")
               val data = serializer.deserialize[ConfigurationSettingData](getEntityFromContext(ctx))
               val errors = data.validate()
-              var response: RestResponse = BadRequestRestResponse(Map("message" ->
-                createMessage("rest.config.setting.cannot.create", errors.mkString("\n"))))
+              var response: RestResponse = BadRequestRestResponse(MessageResponseEntity(
+                createMessage("rest.config.setting.cannot.create", errors.mkString("\n"))
+              ))
+
               if (errors.isEmpty) {
                 configService.save(data.asModelConfigurationSetting)
-                response = CreatedRestResponse(Map("message" ->
-                  createMessage("rest.config.setting.created", data.domain, data.name)))
+                response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.config.setting.created", data.domain, data.name)))
               }
 
               ctx.complete(restResponseToHttpResponse(response))
             } ~
               get {
                 val configElements = configService.getAll
-                val response = OkRestResponse(Map(s"configSettings" -> mutable.Buffer()))
+                val response = OkRestResponse(ConfigSettingsResponseEntity())
                 if (configElements.nonEmpty) {
-                  response.entity = Map("configSettings" -> configElements.map(_.asProtocolConfigurationSetting()))
+                  response.entity = ConfigSettingsResponseEntity(configElements.map(_.asProtocolConfigurationSetting()))
                 }
 
                 complete(restResponseToHttpResponse(response))

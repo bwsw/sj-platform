@@ -2,7 +2,7 @@ package com.bwsw.sj.common.DAL.model
 
 import java.util.Properties
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
-import com.bwsw.sj.common.rest.entities.stream.KafkaSjStreamData
+import com.bwsw.sj.common.rest.entities.stream.KafkaStreamData
 import kafka.admin.AdminUtils
 import kafka.common.TopicAlreadyMarkedForDeletionException
 import kafka.utils.ZkUtils
@@ -31,7 +31,7 @@ class KafkaSjStream() extends SjStream {
   }
 
   override def asProtocolStream() = {
-    val streamData = new KafkaSjStreamData
+    val streamData = new KafkaStreamData
     super.fillProtocolStream(streamData)
 
     streamData.partitions = this.partitions

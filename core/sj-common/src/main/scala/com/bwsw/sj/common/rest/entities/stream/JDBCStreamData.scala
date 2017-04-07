@@ -6,7 +6,7 @@ import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
 
 import scala.collection.mutable.ArrayBuffer
 
-class JDBCSjStreamData() extends SjStreamData() {
+class JDBCStreamData() extends StreamData() {
   streamType = StreamLiterals.jdbcOutputType
   var primary: String = null
 
