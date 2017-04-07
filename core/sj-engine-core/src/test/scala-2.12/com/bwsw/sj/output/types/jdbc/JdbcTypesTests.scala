@@ -202,7 +202,7 @@ class JdbcTypesTests extends FlatSpec with Matchers {
     val field = new JavaStringField("field")
     jdbcMock.apply(field.transform("""John "Smith"""), 0)
     var parameterString = jdbcMock.stmt.asInstanceOf[MockPreparedStatement].getParameter(0).asInstanceOf[java.lang.String]
-    parameterString.length - """John "Smith""".length shouldBe 1
+    parameterString.length - """John "Smith""".length shouldBe 0
 
     jdbcMock.apply(field.transform(new java.lang.Integer(0)), 1)
     parameterString = jdbcMock.stmt.asInstanceOf[MockPreparedStatement].getParameter(1).asInstanceOf[java.lang.String]
