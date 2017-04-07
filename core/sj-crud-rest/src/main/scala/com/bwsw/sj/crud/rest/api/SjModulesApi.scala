@@ -10,7 +10,7 @@ import akka.http.scaladsl.server.{Directives, RequestContext}
 import akka.stream.scaladsl.FileIO
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.config.ConfigLiterals
-import com.bwsw.sj.common.engine.StreamingValidator
+import com.bwsw.sj.common.engine.{StreamingValidator, ValidationInfo}
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.module._
 import com.bwsw.sj.common.utils.EngineLiterals
@@ -180,7 +180,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       createMessage("rest.modules.instances.instance.cannot.create", errors.mkString(";"))))
 
     if (errors.isEmpty) {
-      if (instancePassedValidation) {
+      if (instancePassedValidation.result) {
         instanceMetadata.prepareInstance(
           moduleType,
           moduleName,
@@ -195,7 +195,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
           createMessage("rest.modules.instances.instance.created", instanceMetadata.name, s"$moduleType-$moduleName-$moduleVersion")))
       } else {
         response = BadRequestRestResponse(Map("message" ->
-          getMessage("rest.modules.instances.instance.cannot.create.incorrect.parameters")))
+          createMessage("rest.modules.instances.instance.cannot.create.incorrect.parameters", instancePassedValidation.errors.mkString(";"))))
       }
     }
 
@@ -445,14 +445,19 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     validator.validate(options, specification)
   }
 
-  private def validateInstance(specification: SpecificationData, filename: String, instanceMetadata: InstanceMetadata): Boolean = {
+  private def validateInstance(specification: SpecificationData, filename: String, instanceMetadata: InstanceMetadata): ValidationInfo = {
     val validatorClassName = specification.validateClass
     val file = storage.get(filename, s"tmp/$filename")
     val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
     val clazz = loader.loadClass(validatorClassName)
     val validator = clazz.newInstance().asInstanceOf[StreamingValidator]
-    validator.validate(instanceMetadata) &&
-      validator.validate(instanceMetadata.options)
+    val optionsValidationInfo = validator.validate(instanceMetadata)
+    val instanceValidationInfo = validator.validate(instanceMetadata.options)
+
+    ValidationInfo(
+      optionsValidationInfo.result && instanceValidationInfo.result,
+      optionsValidationInfo.errors ++= instanceValidationInfo.errors
+    )
   }
 
   /**

@@ -9,7 +9,7 @@ import scala.util.Random
 
 class ElasticsearchClientTestSuite extends FlatSpec with Matchers with BeforeAndAfterEach {
   val hosts = Set(("localhost", 9300))
-  var embeddedElasticsearch = new EmbeddedElasticsearch()
+  var embeddedElasticsearch: EmbeddedElasticsearch = _
 
   override protected def beforeEach(): Unit = {
     embeddedElasticsearch = new EmbeddedElasticsearch()
