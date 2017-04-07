@@ -4,8 +4,8 @@ import java.io.{File, FileOutputStream}
 import java.nio.file.Paths
 
 import akka.http.scaladsl.model.Multipart.FormData.BodyPart
-import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Disposition`}
+import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.stream.scaladsl.FileIO
@@ -19,7 +19,6 @@ import com.bwsw.sj.crud.rest.exceptions.CustomJarNotFound
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import org.apache.commons.io.FileUtils
 
-import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -79,7 +78,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                   entity = HttpEntity.Chunked.fromData(MediaTypes.`application/java-archive`, source)
                 ))
               } else {
-                val response = NotFoundRestResponse(Map("message" -> createMessage("rest.custom.jars.file.notfound", name)))
+                val response = NotFoundRestResponse(MessageResponseEntity(createMessage("rest.custom.jars.file.notfound", name)))
                 complete(restResponseToHttpResponse(response))
               }
             }
@@ -106,13 +105,13 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                 } ~
                   delete {
                     var response: RestResponse = InternalServerErrorRestResponse(
-                      Map("message" -> s"Can't delete jar '${filename}' for some reason. It needs to be debuged")
+                      MessageResponseEntity(s"Can't delete jar '${filename}' for some reason. It needs to be debuged")
                     )
 
                     if (storage.delete(filename)) {
                       configService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, name + "-" + version))
                       response = OkRestResponse(
-                        Map("message" -> createMessage("rest.custom.jars.file.deleted", name, version))
+                        MessageResponseEntity(createMessage("rest.custom.jars.file.deleted", name, version))
                       )
                     }
 
@@ -126,15 +125,15 @@ trait SjCustomApi extends Directives with SjCrudValidator {
               uploadedFile("jar") {
                 case (metadata: FileInfo, file: File) =>
                   try {
-                    var response: RestResponse = ConflictRestResponse(Map("message" ->
+                    var response: RestResponse = ConflictRestResponse(MessageResponseEntity(
                       createMessage("rest.custom.jars.file.exists", metadata.fileName)))
 
                     if (!storage.exists(metadata.fileName)) {
-                      response = BadRequestRestResponse(Map("message" -> getMessage("rest.errors.invalid.specification")))
+                      response = BadRequestRestResponse(MessageResponseEntity(getMessage("rest.errors.invalid.specification")))
 
                       if (checkCustomFileSpecification(file)) {
                         val specification = getSpecification(file)
-                        response = ConflictRestResponse(Map("message" ->
+                        response = ConflictRestResponse(MessageResponseEntity(
                           createMessage("rest.custom.jars.exists", metadata.fileName)))
 
                         if (!doesCustomJarExist(specification)) {
@@ -148,7 +147,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                             ConfigLiterals.systemDomain
                           )
                           configService.save(customJarConfigElement)
-                          response = OkRestResponse(Map("message" ->
+                          response = OkRestResponse(MessageResponseEntity(
                             createMessage("rest.custom.jars.file.uploaded", metadata.fileName)))
                         }
                       }
@@ -162,13 +161,11 @@ trait SjCustomApi extends Directives with SjCrudValidator {
             } ~
               get {
                 val files = fileMetadataDAO.getByParameters(Map("filetype" -> "custom"))
-                val response = OkRestResponse(Map("customJars" -> mutable.Buffer()))
+                val response = OkRestResponse(CustomJarsResponseEntity())
                 if (files.nonEmpty) {
-                  response.entity = Map("customJars" -> files.map(metadata =>
-                    Map("name" -> metadata.specification.name,
-                      "version" -> metadata.specification.version,
-                      "size" -> metadata.length))
-                  )
+                  val jarsInfo = files.map(metadata =>
+                    CustomJarInfo(metadata.specification.name, metadata.specification.version, metadata.length))
+                  response.entity = CustomJarsResponseEntity(jarsInfo)
                 }
 
                 complete(restResponseToHttpResponse(response))
@@ -198,7 +195,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                     val description = if (allParts.isDefinedAt("description")) {
                       allParts("description").asInstanceOf[String]
                     } else ""
-                    var response: RestResponse = ConflictRestResponse(Map("message" ->
+                    var response: RestResponse = ConflictRestResponse(MessageResponseEntity(
                       createMessage("rest.custom.files.file.exists", filename.get)))
 
                     if (!storage.exists(filename.get)) {
@@ -207,7 +204,7 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                       storage.put(uploadingFile, filename.get, Map("description" -> description), "custom-file")
                       uploadingFile.delete()
 
-                      response = OkRestResponse(Map("message" ->
+                      response = OkRestResponse(MessageResponseEntity(
                         createMessage("rest.custom.files.file.uploaded", filename.get)))
                     }
                     file.delete()
@@ -222,14 +219,11 @@ trait SjCustomApi extends Directives with SjCrudValidator {
             } ~
               get {
                 val files = fileMetadataDAO.getByParameters(Map("filetype" -> "custom-file"))
-                val response = OkRestResponse(Map("customFiles" -> mutable.Buffer()))
+                val response = OkRestResponse(CustomFilesResponseEntity())
                 if (files.nonEmpty) {
-                  response.entity = Map("customFiles" -> files.map(metadata =>
-                    Map("name" -> metadata.filename,
-                      "description" -> metadata.specification.description,
-                      "upload-date" -> metadata.uploadDate.toString,
-                      "size" -> metadata.length))
-                  )
+                  val filesInfo = files.map(metadata =>
+                    CustomFileInfo(metadata.filename, metadata.specification.description, metadata.uploadDate.toString, metadata.length))
+                  response.entity = CustomFilesResponseEntity(filesInfo)
                 }
 
                 complete(restResponseToHttpResponse(response))
@@ -248,18 +242,18 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                       entity = HttpEntity.Chunked.fromData(ContentTypes.`application/octet-stream`, source)
                     ))
                   } else {
-                    val response: RestResponse = NotFoundRestResponse(Map("message" ->
+                    val response: RestResponse = NotFoundRestResponse(MessageResponseEntity(
                       createMessage("rest.custom.files.file.notfound", filename)))
 
                     complete(restResponseToHttpResponse(response))
                   }
                 } ~
                   delete {
-                    var response: RestResponse = NotFoundRestResponse(Map("message" ->
+                    var response: RestResponse = NotFoundRestResponse(MessageResponseEntity(
                       createMessage("rest.custom.files.file.notfound", filename)))
 
                     if (storage.delete(filename)) {
-                      response = OkRestResponse(Map("message" -> createMessage("rest.custom.files.file.deleted", filename)))
+                      response = OkRestResponse(MessageResponseEntity(createMessage("rest.custom.files.file.deleted", filename)))
                     }
 
                     complete(restResponseToHttpResponse(response))

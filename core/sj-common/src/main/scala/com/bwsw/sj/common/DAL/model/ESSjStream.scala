@@ -1,7 +1,7 @@
 package com.bwsw.sj.common.DAL.model
 
 import com.bwsw.common.es.ElasticsearchClient
-import com.bwsw.sj.common.rest.entities.stream.ESSjStreamData
+import com.bwsw.sj.common.rest.entities.stream.ESStreamData
 
 class ESSjStream() extends SjStream {
   def this(name: String,
@@ -18,7 +18,7 @@ class ESSjStream() extends SjStream {
   }
 
   override def asProtocolStream() = {
-    val streamData = new ESSjStreamData
+    val streamData = new ESStreamData
     super.fillProtocolStream(streamData)
 
     streamData

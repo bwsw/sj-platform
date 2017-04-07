@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.DAL.model
 
-import com.bwsw.sj.common.rest.entities.stream.JDBCSjStreamData
+import com.bwsw.sj.common.rest.entities.stream.JDBCStreamData
 
 class JDBCSjStream() extends SjStream {
   var primary: String = _
@@ -20,7 +20,7 @@ class JDBCSjStream() extends SjStream {
   }
 
   override def asProtocolStream() = {
-    val streamData = new JDBCSjStreamData
+    val streamData = new JDBCStreamData
     super.fillProtocolStream(streamData)
 
     streamData.primary = this.primary

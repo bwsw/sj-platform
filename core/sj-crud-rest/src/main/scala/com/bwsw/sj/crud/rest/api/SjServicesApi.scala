@@ -7,8 +7,6 @@ import com.bwsw.sj.common.rest.entities.service.ServiceData
 import com.bwsw.sj.common.utils.{GeneratorLiterals, ServiceLiterals, StreamLiterals}
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
-import scala.collection.mutable
-
 trait SjServicesApi extends Directives with SjCrudValidator {
 
   val servicesApi = {
@@ -18,23 +16,24 @@ trait SjServicesApi extends Directives with SjCrudValidator {
           validateContextWithSchema(ctx, "serviceSchema.json")
           val protocolService = serializer.deserialize[ServiceData](getEntityFromContext(ctx))
           val errors = protocolService.validate()
-          var response: RestResponse = BadRequestRestResponse(Map("message" ->
-            createMessage("rest.services.service.cannot.create", errors.mkString(";"))))
+          var response: RestResponse = BadRequestRestResponse(MessageResponseEntity(
+            createMessage("rest.services.service.cannot.create", errors.mkString(";"))
+          ))
 
           if (errors.isEmpty) {
             val service = protocolService.asModelService()
             service.prepare()
             serviceDAO.save(service)
-            response = CreatedRestResponse(Map("message" -> createMessage("rest.services.service.created", service.name)))
+            response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.services.service.created", service.name)))
           }
 
           ctx.complete(restResponseToHttpResponse(response))
         } ~
           get {
             val services = serviceDAO.getAll
-            val response = OkRestResponse(Map("services" -> mutable.Buffer()))
+            val response = OkRestResponse(ServicesResponseEntity())
             if (services.nonEmpty) {
-              response.entity = Map("services" -> services.map(_.asProtocolService()))
+              response.entity = ServicesResponseEntity(services.map(_.asProtocolService()))
             }
 
             complete(restResponseToHttpResponse(response))
@@ -43,7 +42,7 @@ trait SjServicesApi extends Directives with SjCrudValidator {
         pathPrefix("_types") {
           pathEndOrSingleSlash {
             get {
-              val response = OkRestResponse(Map("types" -> ServiceLiterals.types))
+              val response = OkRestResponse(TypesResponseEntity(ServiceLiterals.types))
 
               complete(restResponseToHttpResponse(response))
             }
@@ -53,23 +52,22 @@ trait SjServicesApi extends Directives with SjCrudValidator {
           pathEndOrSingleSlash {
             get {
               val service = serviceDAO.get(serviceName)
-              var response: RestResponse = NotFoundRestResponse(Map("message" ->
+              var response: RestResponse = NotFoundRestResponse(MessageResponseEntity(
                 createMessage("rest.services.service.notfound", serviceName)))
               service match {
                 case Some(x) =>
-                  val entity = Map("service" -> x.asProtocolService())
-                  response = OkRestResponse(entity)
+                  response = OkRestResponse(ServiceResponseEntity(x.asProtocolService()))
                 case None =>
               }
 
               complete(restResponseToHttpResponse(response))
             } ~
               delete {
-                var response: RestResponse = UnprocessableEntityRestResponse(Map("message" ->
+                var response: RestResponse = UnprocessableEntityRestResponse(MessageResponseEntity(
                   createMessage("rest.services.service.cannot.delete.due.to.streams", serviceName)))
                 val streams = getRelatedStreams(serviceName)
                 if (streams.isEmpty) {
-                  response = UnprocessableEntityRestResponse(Map("message" ->
+                  response = UnprocessableEntityRestResponse(MessageResponseEntity(
                     createMessage("rest.services.service.cannot.delete.due.to.instances", serviceName)))
                   val instances = getRelatedInstances(serviceName)
 
@@ -79,10 +77,10 @@ trait SjServicesApi extends Directives with SjCrudValidator {
                       case Some(x) =>
                         x.destroy()
                         serviceDAO.delete(serviceName)
-                        response = OkRestResponse(Map("message" ->
+                        response = OkRestResponse(MessageResponseEntity(
                           createMessage("rest.services.service.deleted", serviceName)))
                       case None =>
-                        response = NotFoundRestResponse(Map("message" ->
+                        response = NotFoundRestResponse(MessageResponseEntity(
                           createMessage("rest.services.service.notfound", serviceName)))
                     }
                   }
@@ -96,11 +94,12 @@ trait SjServicesApi extends Directives with SjCrudValidator {
                 get {
                   val service = serviceDAO.get(serviceName)
                   var response: RestResponse = NotFoundRestResponse(
-                    Map("message" -> createMessage("rest.services.service.notfound", serviceName)))
+                    MessageResponseEntity(createMessage("rest.services.service.notfound", serviceName)))
 
                   service match {
                     case Some(x) =>
-                      response = OkRestResponse(Map("streams" -> getRelatedStreams(serviceName), "instances" -> getRelatedInstances(serviceName)))
+                      response = OkRestResponse(
+                        RelatedToServiceResponseEntity(getRelatedStreams(serviceName), getRelatedInstances(serviceName)))
                     case None =>
                   }
 
