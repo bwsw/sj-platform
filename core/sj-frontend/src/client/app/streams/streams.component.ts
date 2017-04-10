@@ -15,7 +15,7 @@ export class StreamsComponent implements OnInit {
   public formAlerts: NotificationModel[] = [];
   public streamList: StreamModel[];
   public streamTypes: string[];
-  public serviceList: ServiceModel[];
+  public serviceList: ServiceModel[] = [];
   public currentStream: StreamModel;
   public blockingInstances: string[] = [];
   public showSpinner: boolean = false;
@@ -32,20 +32,13 @@ export class StreamsComponent implements OnInit {
     this.getStreamTypes();
     this.newStream = new StreamModel();
     this.newStream.tags = [];
-<<<<<<< HEAD
-    this.newStream.generator = {
-      generatorType: 'local',
-      service: '',
-      instanceCount: 0
-    };
-=======
->>>>>>> 01640c1d319f8c567c3e95f4153f5eb27f1e8945
   }
 
   public keyDown(event:KeyboardEvent) {
     if (event.keyCode === 13) {
       this.newStream.tags.push(this.currentTag);
       this.currentTag = '';
+      event.preventDefault();
     } else if (event.keyCode === 8 && this.currentTag.length === 0) {
       this.newStream.tags.pop();
     }
@@ -125,17 +118,10 @@ export class StreamsComponent implements OnInit {
 
   public createStream(modal: ModalDirective) {
     this.showSpinner = true;
-<<<<<<< HEAD
-    if (this.newStream.type !== 'stream.t-stream') {
-      delete this.newStream.generator;
-    }
-    this.streamsService.save(this.newStream)
-=======
     /*if (this.newStream['stream-type'] !== 'stream.t-stream') {
       delete this.newStream.generator;
     }*/
-    this.streamsService.saveStream(this.newStream)
->>>>>>> 01640c1d319f8c567c3e95f4153f5eb27f1e8945
+    this.streamsService.save(this.newStream)
       .subscribe(
         response => {
           modal.hide();
@@ -144,11 +130,6 @@ export class StreamsComponent implements OnInit {
           this.getStreamList();
           this.newStream = new StreamModel();
           this.newStream.tags = [];
-          this.newStream.generator = {
-            generatorType: 'local',
-            service: '',
-            instanceCount: 0
-          };
         },
         error => {
           this.showSpinner = false;
