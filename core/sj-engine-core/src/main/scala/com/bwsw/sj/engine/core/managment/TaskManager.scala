@@ -3,7 +3,6 @@ package com.bwsw.sj.engine.core.managment
 import java.io.File
 import java.net.URLClassLoader
 
-import com.bwsw.common.tstream.NetworkTransactionGenerator
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
@@ -13,13 +12,11 @@ import com.bwsw.sj.common.engine.{ExtendedEnvelopeDataSerializer, EnvelopeDataSe
 import com.bwsw.sj.common.rest.entities.module.ExecutionPlan
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.StreamLiterals._
-import com.bwsw.sj.common.utils.{GeneratorLiterals, ProviderLiterals}
 import com.bwsw.sj.engine.core.converter.ArrayByteConverter
 import com.bwsw.sj.engine.core.environment.EnvironmentManager
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
 import com.bwsw.tstreams.agents.consumer.subscriber.Callback
 import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
-import com.bwsw.tstreams.generator.LocalTransactionGenerator
 import com.bwsw.tstreams.streams.StreamService
 import org.slf4j.LoggerFactory
 
@@ -102,34 +99,34 @@ abstract class TaskManager() {
   }
 
   private def setMetadataClusterProperties(tStreamService: TStreamService) = {
-    logger.debug(s"Task name: $taskName. Set properties of metadata storage " +
-      s"(namespace: ${tStreamService.metadataNamespace}, hosts: ${tStreamService.metadataProvider.hosts.mkString(",")}) " +
-      s"of t-stream factory.")
-    tstreamFactory.setProperty(TSF_Dictionary.Metadata.Cluster.NAMESPACE, tStreamService.metadataNamespace)
-      .setProperty(TSF_Dictionary.Metadata.Cluster.ENDPOINTS, tStreamService.metadataProvider.hosts.mkString(","))
+//    logger.debug(s"Task name: $taskName. Set properties of metadata storage " +
+//      s"(namespace: ${tStreamService.metadataNamespace}, hosts: ${tStreamService.metadataProvider.hosts.mkString(",")}) " +
+//      s"of t-stream factory\n")
+//    tstreamFactory.setProperty(TSF_Dictionary.Metadata.Cluster.NAMESPACE, tStreamService.metadataNamespace)
+//      .setProperty(TSF_Dictionary.Metadata.Cluster.ENDPOINTS, tStreamService.metadataProvider.hosts.mkString(","))
   }
 
   private def setDataClusterProperties(tStreamService: TStreamService) = {
-    tStreamService.dataProvider.providerType match {
-      case ProviderLiterals.aerospikeType =>
-        logger.debug(s"Task name: $taskName. Set properties of aerospike data storage " +
-          s"(namespace: ${tStreamService.dataNamespace}, hosts: ${tStreamService.dataProvider.hosts.mkString(",")}) " +
-          s"of t-stream factory.")
-        tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.DRIVER, TSF_Dictionary.Data.Cluster.Consts.DATA_DRIVER_AEROSPIKE)
-      case _ =>
-        logger.debug(s"Task name: $taskName. Set properties of cassandra data storage " +
-          s"(namespace: ${tStreamService.dataNamespace}, hosts: ${tStreamService.dataProvider.hosts.mkString(",")}) " +
-          s"of t-stream factory.")
-        tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.DRIVER, TSF_Dictionary.Data.Cluster.Consts.DATA_DRIVER_CASSANDRA)
-    }
-
-    tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.NAMESPACE, tStreamService.dataNamespace)
-      .setProperty(TSF_Dictionary.Data.Cluster.ENDPOINTS, tStreamService.dataProvider.hosts.mkString(","))
+//    tStreamService.dataProvider.providerType match {
+//      case ProviderLiterals.aerospikeType =>
+//        logger.debug(s"Task name: $taskName. Set properties of aerospike data storage " +
+//          s"(namespace: ${tStreamService.dataNamespace}, hosts: ${tStreamService.dataProvider.hosts.mkString(",")}) " +
+//          s"of t-stream factory\n")
+//        tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.DRIVER, TSF_Dictionary.Data.Cluster.Consts.DATA_DRIVER_AEROSPIKE)
+//      case _ =>
+//        logger.debug(s"Task name: $taskName. Set properties of cassandra data storage " +
+//          s"(namespace: ${tStreamService.dataNamespace}, hosts: ${tStreamService.dataProvider.hosts.mkString(",")}) " +
+//          s"of t-stream factory\n")
+//        tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.DRIVER, TSF_Dictionary.Data.Cluster.Consts.DATA_DRIVER_CASSANDRA)
+//    }
+//
+//    tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.NAMESPACE, tStreamService.dataNamespace)
+//      .setProperty(TSF_Dictionary.Data.Cluster.ENDPOINTS, tStreamService.dataProvider.hosts.mkString(","))
   }
 
   private def setCoordinationOptions(tStreamService: TStreamService) = {
-    tstreamFactory.setProperty(TSF_Dictionary.Coordination.ROOT, s"/${tStreamService.lockNamespace}")
-      .setProperty(TSF_Dictionary.Coordination.ENDPOINTS, tStreamService.lockProvider.hosts.mkString(","))
+//    tstreamFactory.setProperty(TSF_Dictionary.Coordination.ROOT, s"/${tStreamService.lockNamespace}")
+//      .setProperty(TSF_Dictionary.Coordination.ENDPOINTS, tStreamService.lockProvider.hosts.mkString(","))
   }
 
   private def setBindHostForAgents() = {
@@ -197,14 +194,12 @@ abstract class TaskManager() {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create producer for stream: ${stream.name}.")
 
-    val idGenerator = getTransactionGenerator(stream)
-
     setProducerBindPort()
     setStreamOptions(stream)
 
     tstreamFactory.getProducer[Array[Byte]](
       "producer_for_" + taskName + "_" + stream.name,
-      idGenerator,
+      null, //todo after integration with t-streams
       converter,
       (0 until stream.partitions).toSet)
   }
@@ -242,8 +237,7 @@ abstract class TaskManager() {
       partitions,
       auxiliaryTStreamService,
       tstreamType,
-      tags,
-      new Generator(GeneratorLiterals.localType)
+      tags
     )
   }
 
@@ -264,35 +258,17 @@ abstract class TaskManager() {
       s"Create subscribing consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head}).")
 
     val partitionRange = (partitions.head to partitions.tail.head).toSet
-    val idGenerator = getTransactionGenerator(stream)
 
     setStreamOptions(stream)
     setSubscribingConsumerBindPort()
 
     tstreamFactory.getSubscriber[Array[Byte]](
       "subscribing_consumer_for_" + taskName + "_" + stream.name,
-      idGenerator,
+      null, //todo after integration with t-streams
       converter,
       partitionRange,
       callback,
       offset)
-  }
-
-  protected def getTransactionGenerator(stream: TStreamSjStream) = {
-    stream.generator.generatorType match {
-      case GeneratorLiterals.`localType` => new LocalTransactionGenerator()
-      case generatorType =>
-        val retryPeriod = ConfigurationSettingsUtils.getClientRetryPeriod()
-        val retryCount = ConfigurationSettingsUtils.getRetryCount()
-
-        val service = stream.generator.service.asInstanceOf[ZKService]
-        val zkHosts = service.provider.hosts
-        val prefix = "/" + service.namespace + "/" + {
-          if (generatorType == GeneratorLiterals.globalType) generatorType else stream.name
-        }
-
-        new NetworkTransactionGenerator(zkHosts, prefix, retryPeriod, retryCount)
-    }
   }
 
   protected def setStreamOptions(stream: TStreamSjStream) = {

@@ -6,14 +6,12 @@ import com.bwsw.sj.common.utils._
 import com.bwsw.tstreams.data.IStorage
 import com.bwsw.tstreams.metadata.MetadataStorage
 import com.bwsw.tstreams.streams.StreamService
-import SjStreamUtilsForCreation._
 
 import scala.collection.mutable.ArrayBuffer
 
 class TStreamStreamData() extends StreamData() {
   streamType = StreamLiterals.tstreamType
   var partitions: Int = Int.MinValue
-  var generator: GeneratorData = GeneratorData(GeneratorLiterals.localType)
 
   override def validate() = {
     val serviceDAO = ConnectionRepository.getServiceManager
@@ -52,9 +50,6 @@ class TStreamStreamData() extends StreamData() {
         }
     }
 
-    //generator
-    errors ++= this.generator.validate()
-
     errors
   }
 
@@ -62,26 +57,25 @@ class TStreamStreamData() extends StreamData() {
     val modelStream = new TStreamSjStream()
     super.fillModelStream(modelStream)
     modelStream.partitions = this.partitions
-    modelStream.generator = this.generator.asModelGenerator()
 
     modelStream
   }
 
   private def checkStreamPartitionsOnConsistency(service: TStreamService) = {
     val errors = new ArrayBuffer[String]()
-    val metadataStorage = createMetadataStorage(service)
-    val dataStorage = createDataStorage(service)
-
-    if (StreamService.isExist(this.name, metadataStorage) && !this.force) {
-      val tStream = StreamService.loadStream[Array[Byte]](
-        this.name,
-        metadataStorage,
-        dataStorage
-      )
-      if (tStream.partitionsCount != this.partitions) {
-        errors += createMessage("entity.error.mismatch.partitions", this.name, s"${this.partitions}", s"${tStream.partitionsCount}")
-      }
-    }
+//    val metadataStorage = createMetadataStorage(service)
+//    val dataStorage = createDataStorage(service)
+//
+//    if (StreamService.isExist(this.name, metadataStorage) && !this.force) {
+//      val tStream = StreamService.loadStream[Array[Byte]](
+//        this.name,
+//        metadataStorage,
+//        dataStorage
+//      )
+//      if (tStream.partitionsCount != this.partitions) {
+//        errors += createMessage("entity.error.mismatch.partitions", this.name, s"${this.partitions}", s"${tStream.partitionsCount}")
+//      }
+//    }
 
     errors
   }
@@ -89,15 +83,15 @@ class TStreamStreamData() extends StreamData() {
   override def create() = {
     val serviceDAO = ConnectionRepository.getServiceManager
     val service = serviceDAO.get(this.service).get.asInstanceOf[TStreamService]
-    val metadataStorage = createMetadataStorage(service)
-    val dataStorage = createDataStorage(service)
-
-    if (doesStreamHaveForcedCreation(metadataStorage)) {
-      deleteStream(metadataStorage)
-      createTStream(metadataStorage, dataStorage)
-    } else {
-      if (!doesTopicExist(metadataStorage)) createTStream(metadataStorage, dataStorage)
-    }
+//    val metadataStorage = createMetadataStorage(service)
+    //    val dataStorage = createDataStorage(service)
+    //
+    //    if (doesStreamHaveForcedCreation(metadataStorage)) {
+    //      deleteStream(metadataStorage)
+    //      createTStream(metadataStorage, dataStorage)
+    //    } else {
+    //      if (!doesTopicExist(metadataStorage)) createTStream(metadataStorage, dataStorage)
+    //    }
   }
 
   private def doesStreamHaveForcedCreation(metadataStorage: MetadataStorage) = {

@@ -20,8 +20,8 @@ export class InstancesComponent implements OnInit, AfterViewChecked {
   public cloneInstancesList: InstanceModel[] = [];
   public modulesList: ModuleModel[];
   public moduleTypes: string[];
-  public servicesList: ServiceModel[];
-  public streamsList: StreamModel[];
+  public servicesList: ServiceModel[] = [];
+  public streamsList: StreamModel[] = [];
   public streamTypesList: { [key: string]: string } = {};
   public currentInstance: InstanceModel;
   public currentInstanceTasks: {};

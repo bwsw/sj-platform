@@ -60,7 +60,8 @@ class CassandraService() extends Service {
   }
 
   private def isKeyspaceUsedByTstreamService(tStreamService: TStreamService): Boolean = {
-    tStreamService.metadataProvider == this.provider && tStreamService.metadataNamespace == this.keyspace ||
-      tStreamService.dataProvider == this.provider && tStreamService.dataNamespace == this.keyspace
+//    tStreamService.metadataProvider == this.provider && tStreamService.metadataNamespace == this.keyspace ||
+//      tStreamService.dataProvider == this.provider && tStreamService.dataNamespace == this.keyspace
+    true //todo after integration with t-streams
   }
 }

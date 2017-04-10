@@ -7,7 +7,6 @@ import com.bwsw.sj.engine.batch.module.DataFactory._
 import scala.collection.JavaConverters._
 
 object SjBatchModuleStatelessChecker extends App {
-  open()
   val streamService = ConnectionRepository.getStreamService
   val objectSerializer = new ObjectSerializer()
 
@@ -84,7 +83,6 @@ object SjBatchModuleStatelessChecker extends App {
 
   inputTstreamConsumers.foreach(x => x.stop())
   outputConsumers.foreach(x => x.stop())
-  close()
   ConnectionRepository.close()
 
   println("DONE")

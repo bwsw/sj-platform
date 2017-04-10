@@ -20,6 +20,7 @@ class InstanceStatusObserver(instanceName: String) extends Callable[Unit] {
           }
 
         case None =>
+          throw new UnknownError(s"Instance: $instanceName has been removed. It seems that there is a bug.")
       }
 
       Thread.sleep(1000)

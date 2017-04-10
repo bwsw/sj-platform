@@ -39,10 +39,10 @@ class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable w
     logger.debug(s"Instance: '${instance.name}'. Stopping a framework.")
     val response = stopMarathonApplication(frameworkName)
     if (isStatusOK(response)) {
-      updateFrameworkState(instance, stopping)
+      updateFrameworkStage(instance, stopping)
       waitForFrameworkToStop()
     } else {
-      updateFrameworkState(instance, error)
+      updateFrameworkStage(instance, error)
       throw new Exception(s"Marathon returns status code: $response " +
         s"during the stopping process of framework. Framework '$frameworkName' is marked as error.")
     }
@@ -55,14 +55,14 @@ class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable w
       val frameworkApplicationInfo = getApplicationInfo(frameworkName)
       if (isStatusOK(frameworkApplicationInfo)) {
         if (hasFrameworkStopped(frameworkApplicationInfo)) {
-          updateFrameworkState(instance, stopped)
+          updateFrameworkStage(instance, stopped)
           hasStopped = true
         } else {
-          updateFrameworkState(instance, stopping)
+          updateFrameworkStage(instance, stopping)
           Thread.sleep(delay)
         }
       } else {
-        updateFrameworkState(instance, error)
+        updateFrameworkStage(instance, error)
         throw new Exception(s"Marathon returns status code: ${getStatusCode(frameworkApplicationInfo)} " +
           s"during the stopping process of framework. Framework '$frameworkName' is marked as error.")
       }

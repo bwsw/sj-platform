@@ -23,8 +23,6 @@ object SjBatchModuleSetup extends App {
 
   val module = new File("./contrib/stubs/sj-stub-batch-streaming/target/scala-2.12/sj-stub-batch-streaming-1.0-SNAPSHOT.jar")
 
-  open()
-  cassandraSetup()
   loadModule(module, fileStorage)
   createProviders(providerService)
   createServices(serviceManager, providerService)
@@ -32,7 +30,6 @@ object SjBatchModuleSetup extends App {
   createInstance(serviceManager, instanceService, window, slidingInterval, stateManagement, stateFullCheckpoint)
 
   createData(6, 1, streamService, _type, inputCount)
-  close()
   ConnectionRepository.close()
 
   println("DONE")

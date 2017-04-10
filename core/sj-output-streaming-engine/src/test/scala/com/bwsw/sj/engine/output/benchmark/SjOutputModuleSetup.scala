@@ -31,9 +31,7 @@ object SjESOutputModuleSetup extends App {
 
   println("module upload")
   uploadModule(module)
-  open()
-  println("cassandra prepare")
-  prepareCassandra()
+
   println("create providers")
   createProviders()
   println("create services")
@@ -68,9 +66,7 @@ object SjJDBCOutputModuleSetup extends App {
 
   println("module upload")
   uploadModule(jdbcModule)
-  open()
-  println("cassandra prepare")
-  prepareCassandra()
+
   println("create providers")
   createProviders()
   println("create services")

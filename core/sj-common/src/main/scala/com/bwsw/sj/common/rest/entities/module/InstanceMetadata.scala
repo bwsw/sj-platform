@@ -3,13 +3,12 @@ package com.bwsw.sj.common.rest.entities.module
 import java.util.Calendar
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.DAL.model.module.{Instance, InstanceStage}
+import com.bwsw.sj.common.DAL.model.module.{Instance, FrameworkStage}
 import com.bwsw.sj.common.DAL.model.{KafkaSjStream, SjStream, TStreamSjStream, ZKService}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.SjStreamUtils._
-import com.bwsw.sj.common.utils.{EngineLiterals, GeneratorLiterals, StreamLiterals}
+import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonIgnore
 
 import scala.collection.JavaConverters._
@@ -18,7 +17,7 @@ class InstanceMetadata {
   private var moduleName: String = null
   private var moduleVersion: String = null
   private var moduleType: String = null
-  var stages = scala.collection.mutable.Map[String, InstanceStage]()
+  var stage = new FrameworkStage(EngineLiterals.toHandle, Calendar.getInstance().getTime)
   var status: String = EngineLiterals.ready
   var name: String = null
   var description: String = "No description"
@@ -57,7 +56,7 @@ class InstanceMetadata {
     modelInstance.jvmOptions = this.jvmOptions.asJava
     modelInstance.nodeAttributes = this.nodeAttributes.asJava
     modelInstance.environmentVariables = this.environmentVariables.asJava
-    modelInstance.stages = this.stages.asJava
+    modelInstance.stage = this.stage
     modelInstance.restAddress = this.restAddress
 
     val service = serviceDAO.get(this.coordinationService)
@@ -108,22 +107,6 @@ class InstanceMetadata {
   protected def getStreams(streamNames: Array[String]): Array[SjStream] = {
     val streamsDAO = ConnectionRepository.getStreamService
     streamNames.flatMap(streamsDAO.get)
-  }
-
-  @JsonIgnore
-  protected def fillStages(streamsWithGenerator: Array[String]) = {
-    val streamsDAO = ConnectionRepository.getStreamService
-    val initialStage = new InstanceStage(toHandle, Calendar.getInstance().getTime)
-    val stageForLocalGenerator = new InstanceStage(started, Calendar.getInstance().getTime)
-    this.stages.put(this.name, initialStage)
-
-    streamsWithGenerator.foreach(stream => {
-      val tstream = streamsDAO.get(stream).get.asInstanceOf[TStreamSjStream]
-      tstream.generator.generatorType match {
-        case GeneratorLiterals.localType => this.stages.put(stream, stageForLocalGenerator)
-        case _ => this.stages.put(stream, initialStage)
-      }
-    })
   }
 
   @JsonIgnore

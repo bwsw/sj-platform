@@ -82,13 +82,13 @@
             <li>Tags: {{currentStream.tags}}</li>
             <li>Service: <span class="btn-lookup action-link" (click)="getServiceInfo(ServiceInfo, currentStream.service)">{{ currentStream.service }}</span>
             </li>
-            <li *ngIf="currentStream.type === 'stream.t-stream'">Generator:
+            <!--<li *ngIf="currentStream['stream-type'] === 'stream.t-stream'">Generator:
               <ul>
                 <li>Type: {{currentStream.generator.generatorType}}</li>
                 <li>Service: {{currentStream.generator.service}}</li>
                 <li>Instance count: {{currentStream.generator.instanceCount}}</li>
               </ul>
-            </li>
+            </li-->
             <li *ngIf="currentStream.replicationFactor">Replication factor: {{currentStream.replicationFactor}}</li>
           </ul>
         </div>
@@ -210,13 +210,14 @@
               </div>
           </fieldset>
 
-          <!-- Generator -->
-          <template [ngIf]="newStream.type === 'stream.t-stream'">
+
+          <!-- Generator
+          <template [ngIf]="newStream['stream-type'] == 'stream.t-stream'">
             <div class="mb-1">
               <b>Generator:</b>
-            </div>
+            </div>-->
 
-            <!-- Type -->
+            <!-- Type
             <fieldset class="form-group row">
               <label class="col-sm-2 col-form-label required">Type</label>
               <div class="col-sm-10">
@@ -228,9 +229,9 @@
                   <option value="per-stream">Per-stream</option>
                 </select>
               </div>
-            </fieldset>
+            </fieldset>-->
 
-            <!-- Service -->
+            <!-- Service
             <fieldset class="form-group row">
               <label class="col-sm-2 col-form-label" [class.required]="streamGeneratorType.value!=='local'">Service</label>
               <div class="col-sm-10">
@@ -242,9 +243,9 @@
                   </option>
                 </select>
               </div>
-            </fieldset>
+            </fieldset>-->
 
-            <!-- Instance count -->
+            <!-- Instance count
             <fieldset class="form-group row">
               <label class="col-sm-2 col-form-label" [class.required]="streamGeneratorType.value!=='local'">Instance count</label>
               <div class="col-sm-10">
@@ -253,7 +254,7 @@
                        [required]="streamGeneratorType.value!=='local'">
               </div>
             </fieldset>
-          </template>
+          </template> -->
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" (click)="CreateStream.hide()">Cancel</button>
             <button type="submit" class="btn btn-primary" [disabled]="!streamForm.form.valid">Create</button>

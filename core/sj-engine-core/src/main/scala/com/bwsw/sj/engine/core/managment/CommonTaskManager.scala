@@ -68,13 +68,11 @@ class CommonTaskManager() extends TaskManager {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head}).")
 
-    val transactionGenerator = getTransactionGenerator(stream)
-
     setStreamOptions(stream)
 
     tstreamFactory.getConsumer[Array[Byte]](
       "consumer_for_" + taskName + "_" + stream.name,
-      transactionGenerator,
+      null, //todo after integration with t-streams
       converter,
       (0 until stream.partitions).toSet,
       offset)

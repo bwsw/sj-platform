@@ -11,8 +11,6 @@ object TempHelperForConfigSetup extends App {
 
   val configService = ConnectionRepository.getConfigService
 
-  configService.save(new ConfigurationSetting(ConfigLiterals.transactionGeneratorTag, "com.bwsw.tg-1.0", ConfigLiterals.systemDomain))
-
   configService.save(new ConfigurationSetting(ConfigLiterals.frameworkTag, "com.bwsw.fw-1.0", ConfigLiterals.systemDomain))
 
   configService.save(new ConfigurationSetting(createConfigurationSettingName(ConfigLiterals.systemDomain, "regular-streaming-validator-class"),
@@ -43,7 +41,7 @@ object TempHelperForConfigSetup extends App {
 }
 
 object TempHelperForConfigDestroy extends App {
-  ConnectionRepository.getConfigService.delete(ConfigLiterals.transactionGeneratorTag)
+  //ConnectionRepository.getConfigService.delete(ConfigLiterals.transactionGeneratorTag) //todo after integration with t-streams
   ConnectionRepository.getConfigService.delete(ConfigLiterals.frameworkTag)
   ConnectionRepository.getConfigService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, "regular-streaming-validator-class"))
   ConnectionRepository.getConfigService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, "batch-streaming-validator-class"))

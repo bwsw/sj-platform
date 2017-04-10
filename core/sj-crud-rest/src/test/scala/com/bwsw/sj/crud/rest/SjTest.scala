@@ -7,7 +7,7 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.{Service, _}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.utils.{GeneratorLiterals, ProviderLiterals, _}
+import com.bwsw.sj.common.utils.{ProviderLiterals, _}
 
 /**
  * @author Kseniya Tomskikh
@@ -221,12 +221,9 @@ object SjTest {
 
     val tstrqService = new TStreamService
     tstrqService.name = "tstrq_service"
-    tstrqService.metadataProvider = cassProv
-    tstrqService.metadataNamespace = "test_keyspace"
-    tstrqService.dataProvider = aeroProv
-    tstrqService.dataNamespace = "test"
-    tstrqService.lockProvider = zk1Prov
-    tstrqService.lockNamespace = "test"
+    tstrqService.provider = zkProv
+    tstrqService.prefix = "testkeyspace"
+    tstrqService.token = "test"
     serviceDAO.save(tstrqService)
   }
 
@@ -260,11 +257,6 @@ object SjTest {
   }
 
   def createStreams(tService: Service, service: ZKService) = {
-    val generator1 = new Generator
-    generator1.generatorType = GeneratorLiterals.globalType
-    generator1.instanceCount = 1
-    generator1.service = service
-
     val sjStreamDAO = ConnectionRepository.getStreamService
     val s1 = new TStreamSjStream
     s1.name = "s1"
@@ -273,13 +265,9 @@ object SjTest {
     s1.service = tService
     s1.streamType = tstreamType
     s1.tags = Array("TAG")
-    s1.generator = generator1
     sjStreamDAO.save(s1)
 
-    val generator2 = new Generator
-    generator2.generatorType = GeneratorLiterals.globalType
-    generator2.instanceCount = 2
-    generator2.service = service
+
     val s2 = new TStreamSjStream
     s2.name = "s2"
     s2.description = "s2 stream"
@@ -287,13 +275,8 @@ object SjTest {
     s2.service = tService
     s2.streamType = tstreamType
     s2.tags = Array("TAG")
-    s2.generator = generator2
     sjStreamDAO.save(s2)
 
-    val generator3 = new Generator
-    generator3.generatorType = GeneratorLiterals.globalType
-    generator3.instanceCount = 3
-    generator3.service = service
     val s3 = new TStreamSjStream
     s3.name = "s3"
     s3.description = "s3 stream"
@@ -301,11 +284,8 @@ object SjTest {
     s3.service = tService
     s3.streamType = tstreamType
     s3.tags = Array("TAG")
-    s3.generator = generator3
     sjStreamDAO.save(s3)
 
-    val generator10 = new Generator
-    generator10.generatorType = GeneratorLiterals.localType
     val s10 = new TStreamSjStream
     s10.name = "s10"
     s10.description = "s10 stream"
@@ -313,7 +293,6 @@ object SjTest {
     s10.service = tService
     s10.streamType = tstreamType
     s10.tags = Array("TAG")
-    s10.generator = generator10
     sjStreamDAO.save(s10)
   }
 }

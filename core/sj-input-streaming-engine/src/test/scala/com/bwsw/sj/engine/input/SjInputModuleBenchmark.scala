@@ -25,14 +25,12 @@ object SjInputModuleSetup extends App {
   LogManager.getLogManager.reset()
   TempHelperForConfigSetup.main(Array())
 
-  open()
-  cassandraSetup()
   loadModule(SjInputServices.inputModule, SjInputServices.fileStorage)
   createProviders(SjInputServices.providerService)
   createServices(SjInputServices.serviceManager, SjInputServices.providerService)
   createStreams(SjInputServices.streamService, SjInputServices.serviceManager, outputCount)
   createInstance(SjInputServices.serviceManager, SjInputServices.instanceService, checkpointInterval)
-  close()
+
   ConnectionRepository.close()
 
   println("DONE")
@@ -58,14 +56,12 @@ object SjInputModuleDuplicateCheckerRunner extends App {
 object SjInputModuleDestroy extends App {
   LogManager.getLogManager.reset()
 
-  open()
   deleteStreams(SjInputServices.streamService, outputCount)
   deleteServices(SjInputServices.serviceManager)
   deleteProviders(SjInputServices.providerService)
   deleteInstance(SjInputServices.instanceService)
   deleteModule(SjInputServices.fileStorage, SjInputServices.inputModule.getName)
-  cassandraDestroy()
-  close()
+
   ConnectionRepository.getConfigService.deleteAll()
   ConnectionRepository.close()
 

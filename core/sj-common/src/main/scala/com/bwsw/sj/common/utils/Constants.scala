@@ -64,7 +64,6 @@ object EngineLiterals {
   )
 
   val toHandle = "to-handle"
-  val generatorStatusModes = Seq(starting, started, failed, toHandle)
 
   final val splitStreamMode = "split"
   final val fullStreamMode = "full"
@@ -81,21 +80,6 @@ object StreamLiterals {
 
   private val tstreamFactory = new TStreamsFactory()
   final val ttl = tstreamFactory.getProperty(TSF_Dictionary.Stream.TTL).asInstanceOf[Int]
-}
-
-object GeneratorLiterals {
-  final val localType = "local"
-  final val globalType = "global"
-  final val perStreamType = "per-stream"
-  val types = Seq(globalType, localType, perStreamType)
-
-  val scale: Int = 10000
-  val masterDirectory = "/master"
-  val globalDirectory = "/global"
-  val messageForServer = "get"
-
-  val zkServersLabel = "ZK_SERVERS"
-  val prefixLabel = "PREFIX"
 }
 
 object ServiceLiterals {
@@ -116,13 +100,15 @@ object ServiceLiterals {
     aerospikeType,
     jdbcType
   )
+
   val typeToProviderType = Map(
     cassandraType -> ProviderLiterals.cassandraType,
     elasticsearchType -> ProviderLiterals.elasticsearchType,
     kafkaType -> ProviderLiterals.kafkaType,
     zookeeperType -> ProviderLiterals.zookeeperType,
     aerospikeType -> ProviderLiterals.aerospikeType,
-    jdbcType -> ProviderLiterals.jdbcType
+    jdbcType -> ProviderLiterals.jdbcType,
+    tstreamsType -> ProviderLiterals.zookeeperType
   )
 }
 

@@ -33,7 +33,7 @@ class Instance {
   @Property("node-attributes") var nodeAttributes: java.util.Map[String, String] = new util.HashMap[String, String]()
   @Embedded("coordination-service") var coordinationService: ZKService = null
   @Property("environment-variables") var environmentVariables: java.util.Map[String, String] = new util.HashMap[String, String]()
-  var stages: java.util.Map[String, InstanceStage] = new util.HashMap()
+  var stage: FrameworkStage = new FrameworkStage()
   @Property("performance-reporting-interval") var performanceReportingInterval: Long = 60000
   var engine: String = null
   @Property("framework-id") val frameworkId: String = System.currentTimeMillis().toString
@@ -56,7 +56,7 @@ class Instance {
     protocolInstance.nodeAttributes = Map(this.nodeAttributes.asScala.toList: _*)
     protocolInstance.environmentVariables = Map(this.environmentVariables.asScala.toList: _*)
     protocolInstance.coordinationService = this.coordinationService.name
-    protocolInstance.stages = this.stages.asScala
+    protocolInstance.stage = this.stage
     protocolInstance.restAddress = this.restAddress
   }
 

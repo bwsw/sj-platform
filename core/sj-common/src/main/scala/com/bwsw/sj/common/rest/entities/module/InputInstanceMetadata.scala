@@ -43,7 +43,6 @@ class InputInstanceMetadata extends InstanceMetadata {
                             engineVersion: String) = {
     super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion)
     fillTasks()
-    fillStages(this.outputs)
   }
 
   override def createStreams() = {
