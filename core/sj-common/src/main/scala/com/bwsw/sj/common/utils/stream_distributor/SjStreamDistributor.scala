@@ -28,8 +28,10 @@ class SjStreamDistributor(
     case RoundRobin =>
       currentPartition = (currentPartition + 1) % partitionCount
       currentPartition
-    case ByHash => AvroUtils.concatFields(fieldNames, record).hashCode % partitionCount
+    case ByHash => positiveMod(AvroUtils.concatFields(fieldNames, record).hashCode, partitionCount)
   }
+
+  private def positiveMod(dividend: Int, divider: Int) = (dividend % divider + divider) % divider
 }
 
 trait SjStreamDistributionPolicy
