@@ -1,7 +1,6 @@
 package com.bwsw.sj.engine.input
 
-import java.io.{BufferedReader, File, InputStreamReader, PrintStream}
-import java.net.Socket
+import java.io.{BufferedReader, File, InputStreamReader}
 import java.util
 import java.util.jar.JarFile
 
@@ -11,16 +10,13 @@ import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask, Instance}
 import com.bwsw.sj.common.DAL.model.{Service, _}
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.utils.{ProviderLiterals, _}
+import com.bwsw.sj.engine.core.testutils.TestStorageServer
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
-import com.bwsw.tstreams.converter.IConverter
-import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
-import com.bwsw.tstreams.generator.LocalTransactionGenerator
-import com.bwsw.tstreams.streams.StreamService
+import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 
 object DataFactory {
-
-  private val zookeeperHosts = System.getenv("ZOOKEEPER_HOSTS").split(",")
+  private val zookeeperHosts = System.getenv("ZOOKEEPER_HOSTS")
   private val testNamespace = "test_namespace_for_input_engine"
   private val instanceName = "test-instance-for-input-engine"
   private val zookeeperProviderName = "zookeeper-test-provider"
@@ -29,82 +25,36 @@ object DataFactory {
   private val tstreamOutputNamePrefix = "tstream-output"
   private var instanceOutputs: Array[String] = Array()
   private val tasks = new util.HashMap[String, InputTask]()
-  private val host = "localhost"
-  private val port = 8888
-  tasks.put(s"$instanceName-task0", new InputTask(host, port))
+  tasks.put(s"$instanceName-task0", new InputTask(SjInputServices.host, SjInputServices.port))
   private val partitions = 1
   private val serializer = new JsonSerializer()
-  private val zookeeperProvider = new Provider(zookeeperProviderName, zookeeperProviderName, zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
+  private val zookeeperProvider = new Provider(zookeeperProviderName, zookeeperProviderName, zookeeperHosts.split(","), "", "", ProviderLiterals.zookeeperType)
   private val tstrqService = new TStreamService(tstreamServiceName, ServiceLiterals.tstreamsType,
-    tstreamServiceName, zookeeperProvider, "/input_prefix", "token")
+    tstreamServiceName, zookeeperProvider, "/input_prefix", TestStorageServer.token)
   private val tstreamFactory = new TStreamsFactory()
   setTStreamFactoryProperties()
+  val storageClient = tstreamFactory.getStorageClient()
 
   val outputCount = 2
 
   private def setTStreamFactoryProperties() = {
-    setMetadataClusterProperties(tstrqService)
-    setDataClusterProperties(tstrqService)
+    setAuthOptions(tstrqService)
+    setStorageOptions(tstrqService)
     setCoordinationOptions(tstrqService)
   }
 
-  private def setMetadataClusterProperties(tStreamService: TStreamService) = {
-    //    tstreamFactory.setProperty(TSF_Dictionary.Metadata.Cluster.NAMESPACE, tStreamService.metadataNamespace)
-    //      .setProperty(TSF_Dictionary.Metadata.Cluster.ENDPOINTS, tStreamService.metadataProvider.hosts.mkString(","))
-  } //todo after integration with t-streams
+  private def setAuthOptions(tStreamService: TStreamService) = {
+    tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Auth.key, tStreamService.token)
+  }
 
-  private def setDataClusterProperties(tStreamService: TStreamService) = {
-    //    tStreamService.dataProvider.providerType match {
-    //      case ProviderLiterals.aerospikeType =>
-    //        tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.DRIVER, TSF_Dictionary.Data.Cluster.Consts.DATA_DRIVER_AEROSPIKE)
-    //      case _ =>
-    //        tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.DRIVER, TSF_Dictionary.Data.Cluster.Consts.DATA_DRIVER_CASSANDRA)
-    //    }
-    //
-    //    tstreamFactory.setProperty(TSF_Dictionary.Data.Cluster.NAMESPACE, tStreamService.dataNamespace)
-    //      .setProperty(TSF_Dictionary.Data.Cluster.ENDPOINTS, tStreamService.dataProvider.hosts.mkString(","))
-  } //todo after integration with t-streams
+  private def setStorageOptions(tStreamService: TStreamService) = {
+    tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, tStreamService.provider.hosts.mkString(","))
+  }
 
   private def setCoordinationOptions(tStreamService: TStreamService) = {
-    //    tstreamFactory.setProperty(TSF_Dictionary.Coordination.ROOT, s"/${tStreamService.lockNamespace}")
-    //      .setProperty(TSF_Dictionary.Coordination.ENDPOINTS, tStreamService.lockProvider.hosts.mkString(","))
-  } //todo after integration with t-streams
-
-  def writeData(totalInputElements: Int, numberOfDuplicates: Int) = {
-    try {
-      val socket = new Socket(host, port)
-      var amountOfDuplicates = -1
-      var amountOfElements = 0
-      var currentElement = 1
-      val out = new PrintStream(socket.getOutputStream)
-
-      while (amountOfElements < totalInputElements) {
-        if (amountOfDuplicates != numberOfDuplicates) {
-          out.println(currentElement)
-          out.flush()
-          amountOfElements += 1
-          amountOfDuplicates += 1
-        }
-        else {
-          currentElement += 1
-          out.println(currentElement)
-          out.flush()
-          amountOfElements += 1
-        }
-      }
-
-      socket.close()
-    }
-    catch {
-      case e: Exception =>
-        System.out.println("init error: " + e)
-    }
+    tstreamFactory.setProperty(ConfigurationOptions.Coordination.prefix, tStreamService.prefix)
+      .setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.hosts.mkString(","))
   }
-
-  private val converter = new IConverter[Array[Byte], Array[Byte]] {
-    override def convert(obj: Array[Byte]): Array[Byte] = obj
-  }
-
 
   def createProviders(providerService: GenericMongoService[Provider]) = {
     providerService.save(zookeeperProvider)
@@ -135,7 +85,6 @@ object DataFactory {
 
   def deleteStreams(streamService: GenericMongoService[SjStream], outputCount: Int) = {
     (1 to outputCount).foreach(x => deleteOutputTStream(streamService, x.toString))
-
   }
 
   private def createOutputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
@@ -149,20 +98,17 @@ object DataFactory {
 
     sjStreamService.save(s2)
 
-    StreamService.createStream(
+    storageClient.createStream(
       tstreamOutputNamePrefix + suffix,
       partitions,
       1000 * 60,
-      "description of test output tstream",
-      null,
-      null
-    ) //todo after integration with t-streams
+      "description of test output tstream")
   }
 
   private def deleteOutputTStream(streamService: GenericMongoService[SjStream], suffix: String) = {
     streamService.delete(tstreamOutputNamePrefix + suffix)
 
-    StreamService.deleteStream(tstreamOutputNamePrefix + suffix, null) //todo after integration with t-streams
+    storageClient.deleteStream(tstreamOutputNamePrefix + suffix)
   }
 
   def createInstance(serviceManager: GenericMongoService[Service],
@@ -229,23 +175,20 @@ object DataFactory {
     createConsumer(tstreamOutputNamePrefix + suffix, streamService)
   }
 
-  private def createConsumer(streamName: String, streamService: GenericMongoService[SjStream]): Consumer[Array[Byte]] = {
+  private def createConsumer(streamName: String, streamService: GenericMongoService[SjStream]): Consumer = {
     val stream = streamService.get(streamName).get.asInstanceOf[TStreamSjStream]
-    val transactionGenerator = new LocalTransactionGenerator
 
     setStreamOptions(stream)
 
-    tstreamFactory.getConsumer[Array[Byte]](
+    tstreamFactory.getConsumer(
       streamName,
-      transactionGenerator,
-      converter,
       (0 until stream.partitions).toSet,
       Oldest)
   }
 
   protected def setStreamOptions(stream: TStreamSjStream) = {
-    tstreamFactory.setProperty(TSF_Dictionary.Stream.NAME, stream.name)
-    tstreamFactory.setProperty(TSF_Dictionary.Stream.PARTITIONS, stream.partitions)
-    tstreamFactory.setProperty(TSF_Dictionary.Stream.DESCRIPTION, stream.description)
+    tstreamFactory.setProperty(ConfigurationOptions.Stream.name, stream.name)
+    tstreamFactory.setProperty(ConfigurationOptions.Stream.partitionsCount, stream.partitions)
+    tstreamFactory.setProperty(ConfigurationOptions.Stream.description, stream.description)
   }
 }

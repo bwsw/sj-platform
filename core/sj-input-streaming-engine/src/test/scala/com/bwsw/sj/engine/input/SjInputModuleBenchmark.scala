@@ -1,12 +1,13 @@
 package com.bwsw.sj.engine.input
 
-import java.io.File
+import java.io.{File, PrintStream}
+import java.net.Socket
 import java.util.logging.LogManager
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.engine.input.DataFactory._
-import SjInputServices._
+import com.bwsw.sj.engine.input.SjInputServices._
 
 object SjInputServices {
   val streamService = ConnectionRepository.getStreamService
@@ -15,6 +16,8 @@ object SjInputServices {
   val instanceService = ConnectionRepository.getInstanceService
   val fileStorage = ConnectionRepository.getFileStorage
 
+  val host = "localhost"
+  val port = 8888
   val inputModule = new File("./contrib/stubs/sj-stub-input-streaming/target/scala-2.12/sj-stub-input-streaming-1.0-SNAPSHOT.jar")
   val checkpointInterval = 10
   val numberOfDuplicates = 10
@@ -37,7 +40,6 @@ object SjInputModuleSetup extends App {
 }
 
 object SjInputModuleRunner extends App {
-  LogManager.getLogManager.reset()
   InputTaskRunner.main(Array())
 }
 
@@ -45,11 +47,39 @@ object SjInputModuleDataWriter extends App {
   LogManager.getLogManager.reset()
   writeData(totalInputElements, numberOfDuplicates)
 
-  ConnectionRepository.close()
+  private def writeData(totalInputElements: Int, numberOfDuplicates: Int) = {
+    try {
+      val socket = new Socket(host, port)
+      var amountOfDuplicates = -1
+      var amountOfElements = 0
+      var currentElement = 1
+      val out = new PrintStream(socket.getOutputStream)
+
+      while (amountOfElements < totalInputElements) {
+        if (amountOfDuplicates != numberOfDuplicates) {
+          out.println(currentElement)
+          out.flush()
+          amountOfElements += 1
+          amountOfDuplicates += 1
+        }
+        else {
+          currentElement += 1
+          out.println(currentElement)
+          out.flush()
+          amountOfElements += 1
+        }
+      }
+
+      socket.close()
+    }
+    catch {
+      case e: Exception =>
+        System.out.println("init error: " + e)
+    }
+  }
 }
 
 object SjInputModuleDuplicateCheckerRunner extends App {
-  LogManager.getLogManager.reset()
   DuplicateChecker.main(Array(totalInputElements.toString, numberOfDuplicates.toString))
 }
 

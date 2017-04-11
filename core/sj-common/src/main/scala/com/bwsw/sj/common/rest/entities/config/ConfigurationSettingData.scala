@@ -6,7 +6,7 @@ import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.rest.utils.ValidationUtils
 import com.bwsw.sj.common.utils.MessageResourceUtils
-import com.bwsw.tstreams.env.TSF_Dictionary
+import com.bwsw.tstreams.env.ConfigurationOptions
 import com.fasterxml.jackson.annotation.JsonIgnore
 
 import scala.collection.mutable.ArrayBuffer
@@ -81,6 +81,6 @@ case class ConfigurationSettingData(name: String, value: String, domain:String) 
 
   @JsonIgnore
   private def validateTstreamProperty(): Boolean = {
-    this.name.contains("producer") || this.name.contains("consumer") || this.name == TSF_Dictionary.Producer.Transaction.DISTRIBUTION_POLICY
+    this.name.contains("producer") || this.name.contains("consumer") || this.name == ConfigurationOptions.Producer.Transaction.distributionPolicy
   }
 }

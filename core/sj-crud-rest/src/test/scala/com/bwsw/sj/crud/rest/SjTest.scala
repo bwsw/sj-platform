@@ -87,15 +87,6 @@ object SjTest {
     println("Ok")
   }
 
-  def prepareCassandra() = {
-    val cassandraFactory = new CassandraFactory()
-    cassandraFactory.open(Set(("stream-juggler.z1.netpoint-dc.com", 9042)))
-    cassandraFactory.createKeyspace("test_keyspace")
-    cassandraFactory.createMetadataTables("test_keyspace")
-    cassandraFactory.createDataTable("test_keyspace")
-    cassandraFactory.close()
-  }
-
   def createData() = {
     val serviceDAO: GenericMongoService[Service] = ConnectionRepository.getServiceManager
     val providerDAO = ConnectionRepository.getProviderService

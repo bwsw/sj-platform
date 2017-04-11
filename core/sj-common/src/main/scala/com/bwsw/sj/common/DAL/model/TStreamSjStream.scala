@@ -1,10 +1,9 @@
 package com.bwsw.sj.common.DAL.model
 
 import com.bwsw.sj.common.rest.entities.stream.TStreamStreamData
-import com.bwsw.sj.common.utils._
-import com.bwsw.tstreams.streams.StreamService
-import org.mongodb.morphia.annotations.Embedded
-import SjStreamUtilsForCreation._
+import com.bwsw.sj.common.utils.StreamLiterals
+import com.bwsw.tstreams.common.StorageClient
+import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 
 class TStreamSjStream() extends SjStream {
   var partitions: Int = 0
@@ -34,27 +33,37 @@ class TStreamSjStream() extends SjStream {
   }
 
   override def create() = {
-    val service = this.service.asInstanceOf[TStreamService]
-//    val dataStorage = createDataStorage(service)
-//    val metadataStorage = createMetadataStorage(service)
-//
-//    if (!StreamService.isExist(this.name, metadataStorage)) {
-//      StreamService.createStream(
-//        this.name,
-//        this.partitions,
-//        StreamLiterals.ttl,
-//        this.description,
-//        metadataStorage,
-//        dataStorage
-//      )
-//    }
+    val tStreamService = this.service.asInstanceOf[TStreamService]
+    val factory = new TStreamsFactory()
+    factory.setProperty(ConfigurationOptions.Coordination.prefix, tStreamService.prefix)
+      .setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.hosts.mkString(","))
+      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, tStreamService.provider.hosts.mkString(","))
+      .setProperty(ConfigurationOptions.Stream.name, name)
+      .setProperty(ConfigurationOptions.StorageClient.Auth.key, tStreamService.token)
+    val storageClient: StorageClient = factory.getStorageClient()
+
+    if (!storageClient.checkStreamExists(this.name)) {
+      storageClient.createStream(
+        this.name,
+        this.partitions,
+        StreamLiterals.ttl,
+        this.description
+      )
+    }
   }
 
   override def delete() = {
-    val service = this.service.asInstanceOf[TStreamService]
-//    val metadataStorage = createMetadataStorage(service)
-//    if (StreamService.isExist(this.name, metadataStorage)) {
-//      StreamService.deleteStream(this.name, metadataStorage)
-//    }
+    val tStreamService = this.service.asInstanceOf[TStreamService]
+    val factory = new TStreamsFactory()
+    factory.setProperty(ConfigurationOptions.Coordination.prefix, tStreamService.prefix)
+      .setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.hosts.mkString(","))
+      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, tStreamService.provider.hosts.mkString(","))
+      .setProperty(ConfigurationOptions.Stream.name, name)
+      .setProperty(ConfigurationOptions.StorageClient.Auth.key, tStreamService.token)
+    val storageClient = factory.getStorageClient()
+
+    if (storageClient.checkStreamExists(this.name)) {
+      storageClient.deleteStream(this.name)
+    }
   }
 }

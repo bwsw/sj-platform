@@ -3,9 +3,7 @@ package com.bwsw.sj.common.rest.entities.stream
 import com.bwsw.sj.common.DAL.model.{TStreamService, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils._
-import com.bwsw.tstreams.data.IStorage
-import com.bwsw.tstreams.metadata.MetadataStorage
-import com.bwsw.tstreams.streams.StreamService
+import com.bwsw.tstreams.common.StorageClient
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -75,7 +73,7 @@ class TStreamStreamData() extends StreamData() {
 //      if (tStream.partitionsCount != this.partitions) {
 //        errors += createMessage("entity.error.mismatch.partitions", this.name, s"${this.partitions}", s"${tStream.partitionsCount}")
 //      }
-//    }
+//    } //todo after integration with t-streams
 
     errors
   }
@@ -91,28 +89,25 @@ class TStreamStreamData() extends StreamData() {
     //      createTStream(metadataStorage, dataStorage)
     //    } else {
     //      if (!doesTopicExist(metadataStorage)) createTStream(metadataStorage, dataStorage)
-    //    }
+    //    } //todo after integration with t-streams
   }
 
-  private def doesStreamHaveForcedCreation(metadataStorage: MetadataStorage) = {
-    doesTopicExist(metadataStorage) && this.force
+  private def doesStreamHaveForcedCreation(storageClient: StorageClient) = {
+    doesTopicExist(storageClient) && this.force
   }
 
-  private def doesTopicExist(metadataStorage: MetadataStorage) = {
-    StreamService.isExist(this.name, metadataStorage)
+  private def doesTopicExist(storageClient: StorageClient) = {
+    storageClient.checkStreamExists(this.name)
   }
 
-  private def deleteStream(metadataStorage: MetadataStorage) = StreamService.deleteStream(this.name, metadataStorage)
+  private def deleteStream(storageClient: StorageClient) = storageClient.deleteStream(this.name)
 
-  private def createTStream(metadataStorage: MetadataStorage,
-                            dataStorage: IStorage[Array[Byte]]) = {
-    StreamService.createStream(
+  private def createTStream(storageClient: StorageClient) = {
+    storageClient.createStream(
       this.name,
       this.partitions,
       StreamLiterals.ttl,
-      this.description,
-      metadataStorage,
-      dataStorage
+      this.description
     )
   }
 }

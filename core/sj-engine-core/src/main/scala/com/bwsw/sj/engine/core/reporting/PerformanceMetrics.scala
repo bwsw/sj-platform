@@ -86,7 +86,7 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
   def addEnvelopeToInputStream(envelope: Envelope): Unit = {
     envelope match {
       case tStreamEnvelope: TStreamEnvelope[_] =>
-        addEnvelopeToInputStream(tStreamEnvelope.stream, tStreamEnvelope.data.map(_.toString.length)) //todo придумать другой способ извлечения информации
+        addEnvelopeToInputStream(tStreamEnvelope.stream, tStreamEnvelope.data.map(_.toString.length).toList) //todo придумать другой способ извлечения информации
       case kafkaEnvelope: KafkaEnvelope[_] =>
         addEnvelopeToInputStream(kafkaEnvelope.stream, List(kafkaEnvelope.data.toString.length)) //todo придумать другой способ извлечения информации
       case wrongEnvelope =>

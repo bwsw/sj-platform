@@ -24,7 +24,7 @@ import scala.collection._
 
 class StatefulModuleEnvironmentManager(stateStorage: StateStorage,
                                        options: Map[String, Any],
-                                       producers: Map[String, Producer[Array[Byte]]],
+                                       producers: Map[String, Producer],
                                        outputs: Array[SjStream],
                                        producerPolicyByOutput: mutable.Map[String, (String, ModuleOutput)],
                                        moduleTimer: SjTimer,

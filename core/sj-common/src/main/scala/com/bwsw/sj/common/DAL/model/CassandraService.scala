@@ -2,7 +2,7 @@ package com.bwsw.sj.common.DAL.model
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.entities.service.{CassDBServiceData, ServiceData}
-import com.bwsw.sj.common.utils.{CassandraFactory, ServiceLiterals}
+import com.bwsw.sj.common.utils.ServiceLiterals
 import org.mongodb.morphia.annotations.Reference
 
 class CassandraService() extends Service {
@@ -27,22 +27,6 @@ class CassandraService() extends Service {
     protocolService.provider = this.provider.name
 
     protocolService
-  }
-
-  override def prepare() = {
-    val cassandraFactory = new CassandraFactory
-    cassandraFactory.open(this.provider.getHosts())
-    cassandraFactory.createKeyspace(this.keyspace)
-    cassandraFactory.close()
-  }
-
-  override def destroy() = {
-    if (!isKeyspaceUsed) {
-      val cassandraFactory = new CassandraFactory
-      cassandraFactory.open(this.provider.getHosts())
-      cassandraFactory.dropKeyspace(this.keyspace)
-      cassandraFactory.close()
-    }
   }
 
   private def isKeyspaceUsed = {

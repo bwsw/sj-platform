@@ -59,11 +59,16 @@ object SjRegularModuleStatefulChecker extends App {
 
       while (maybeTxn.isDefined) {
         val transaction = maybeTxn.get
-        while (transaction.hasNext()) {
-          val element = objectSerializer.deserialize(transaction.next()).asInstanceOf[Int]
+        //        while (transaction.hasNext()) {
+        //          val element = objectSerializer.deserialize(transaction.next()).asInstanceOf[Int]
+        //          outputElements.+=(element)
+        //          totalOutputElements += 1
+        //        } //todo
+        transaction.getAll().foreach(x => {
+          val element = objectSerializer.deserialize(x).asInstanceOf[Int]
           outputElements.+=(element)
           totalOutputElements += 1
-        }
+        })
         maybeTxn = outputConsumer.getTransaction(currentPartition)
       }
     }
@@ -74,13 +79,14 @@ object SjRegularModuleStatefulChecker extends App {
   val initialState = StateHelper.getState(consumer, objectSerializer)
 
   assert(totalInputElements == totalOutputElements,
-    "Count of all txns elements that are consumed from output stream should equals count of all txns elements that are consumed from input stream")
+    s"Count of all txns elements that are consumed from input stream ($totalInputElements) " +
+      s"should equals count of all txns elements that are consumed from output stream ($totalOutputElements)")
 
   assert(inputElements.forall(x => outputElements.contains(x)) && outputElements.forall(x => inputElements.contains(x)),
     "All txns elements that are consumed from output stream should equals all txns elements that are consumed from input stream")
 
   assert(initialState("sum") == inputElements.sum,
-    "Sum of all txns elements that are consumed from input stream should equals state variable sum")
+    s"Sum of all txns elements that are consumed from input stream (${initialState("sum")}) should equals state variable sum (${inputElements.sum})")
 
   consumer.stop()
   inputTstreamConsumers.foreach(x => x.stop())

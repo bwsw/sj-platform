@@ -9,12 +9,13 @@ object StateHelper {
 
   private val partition = 0
 
-  def getState(consumer: Consumer[Array[Byte]], objectSerializer: ObjectSerializer) = {
+  def getState(consumer: Consumer, objectSerializer: ObjectSerializer) = {
 
     val initialState = mutable.Map[String, Any]()
     val tempTransaction = consumer.getLastTransaction(0).get
     val lastTxn = consumer.buildTransactionObject(tempTransaction.getPartition(), tempTransaction.getTransactionID(), tempTransaction.getCount()).get //todo fix it next milestone TR1216
-    var value = objectSerializer.deserialize(lastTxn.next())
+    //    var value = objectSerializer.deserialize(lastTxn.next()) //todo
+    var value = objectSerializer.deserialize(lastTxn.getAll().dequeue())
     value match {
       case variable: (Any, Any) =>
         initialState(variable._1.asInstanceOf[String]) = variable._2
@@ -31,11 +32,16 @@ object StateHelper {
           val partialStateTxn = maybeTxn.get
 
           partialStateTxn.next()
-          while (partialStateTxn.hasNext()) {
-            value = objectSerializer.deserialize(partialStateTxn.next())
+//          while (partialStateTxn.hasNext()) {
+//            value = objectSerializer.deserialize(partialStateTxn.next())
+//            val variable = value.asInstanceOf[(String, (String, Any))]
+//            partialState(variable._1) = variable._2
+//          } //todo
+          partialStateTxn.getAll().foreach(x=> {
+            value = objectSerializer.deserialize(x)
             val variable = value.asInstanceOf[(String, (String, Any))]
             partialState(variable._1) = variable._2
-          }
+          })
           applyPartialChanges(initialState, partialState)
           maybeTxn = consumer.getTransaction(partition)
         }
@@ -44,15 +50,20 @@ object StateHelper {
     initialState
   }
 
-  def fillFullState(initialState: mutable.Map[String, Any], transaction: ConsumerTransaction[Array[Byte]], objectSerializer: ObjectSerializer) = {
+  def fillFullState(initialState: mutable.Map[String, Any], transaction: ConsumerTransaction, objectSerializer: ObjectSerializer) = {
     var value: Object = null
     var variable: (String, Any) = null
 
-    while (transaction.hasNext()) {
-      value = objectSerializer.deserialize(transaction.next())
+//    while (transaction.hasNext()) {
+//      value = objectSerializer.deserialize(transaction.next())
+//      variable = value.asInstanceOf[(String, Any)]
+//      initialState(variable._1) = variable._2
+//    }//todo
+    transaction.getAll().foreach(x => {
+      value = objectSerializer.deserialize(x)
       variable = value.asInstanceOf[(String, Any)]
       initialState(variable._1) = variable._2
-    }
+    })
   }
 
   def applyPartialChanges(fullState: mutable.Map[String, Any], partialState: mutable.Map[String, (String, Any)]) = {

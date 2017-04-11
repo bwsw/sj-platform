@@ -8,7 +8,7 @@ object Dependencies {
 
   lazy val sjCommonDependencies = Def.setting(Seq(
     "org.slf4j" % "slf4j-log4j12" % "1.7.22",
-    ("com.bwsw" % "t-streams_2.12" % "2.0.1-SNAPSHOT")
+    ("com.bwsw" % "t-streams_2.12" % "2.0.2-SNAPSHOT")
       .exclude("org.slf4j", "slf4j-simple")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
@@ -38,7 +38,6 @@ object Dependencies {
     "org.apache.logging.log4j" % "log4j-api" % "2.7",
     "postgresql" % "postgresql" % "9.1-901.jdbc4",
     "mysql" % "mysql-connector-java" % "5.1.6",
-//    "com.oracle" % "ojdbc6" % "11.1.0.7.0",
     "com.maxmind.geoip" % "geoip-api" % "1.3.1",
     "io.netty" % "netty-all" % "4.1.7.Final",
     "com.opencsv" % "opencsv" % "3.9",
@@ -113,7 +112,8 @@ object Dependencies {
     "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
     "org.apache.mesos" % "mesos" % "0.28.1",
     "ws.unfiltered" % "unfiltered-filter_2.12" % "0.9.0",
-    "ws.unfiltered" % "unfiltered-jetty_2.12" % "0.9.0",
+    ("ws.unfiltered" % "unfiltered-jetty_2.12" % "0.9.0")
+      .exclude("javax.servlet", "javax.servlet-api"),
     ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
       .exclude("commons-logging", "commons-logging")
   ))

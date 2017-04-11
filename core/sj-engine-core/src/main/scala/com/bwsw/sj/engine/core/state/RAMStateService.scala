@@ -11,13 +11,12 @@ import org.slf4j.LoggerFactory
 import scala.collection.mutable
 
 /**
- * Class representing a service for managing by a storage for default state that is kept in RAM and use t-stream for checkpoints
- *
- * @author Kseniya Mikhaleva
- *
- * @param manager Manager of environment of regular module task
- * @param checkpointGroup Group of t-stream agents that have to make a checkpoint at the same time
- */
+  * Class representing a service for managing by a storage for default state that is kept in RAM and use t-stream for checkpoints
+  *
+  * @author Kseniya Mikhaleva
+  * @param manager         Manager of environment of regular module task
+  * @param checkpointGroup Group of t-stream agents that have to make a checkpoint at the same time
+  */
 
 class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGroup) extends IStateService {
   private val logger = LoggerFactory.getLogger(this.getClass)
@@ -25,41 +24,41 @@ class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGro
   private val stateStreamName = manager.taskName + "_state"
   private val stateStream = createStateStream()
   /**
-   * Producer is responsible for saving a partial changes of state or a full state
-   */
+    * Producer is responsible for saving a partial changes of state or a full state
+    */
   private val stateProducer = manager.createProducer(stateStream)
 
   /**
-   * Consumer is responsible for retrieving a partial or full state
-   */
+    * Consumer is responsible for retrieving a partial or full state
+    */
   private val stateConsumer = manager.createConsumer(stateStream, List(partition, partition), Oldest)
   stateConsumer.start()
 
   addAgentsToCheckpointGroup()
 
   /**
-   * Number of a last transaction that keeps a state. Used for saving partial changes of state
-   */
+    * Number of a last transaction that keeps a state. Used for saving partial changes of state
+    */
   private var lastFullStateID: Option[Long] = None
 
   /**
-   * Provides a serialization from a transaction data to a state variable or state change
-   */
+    * Provides a serialization from a transaction data to a state variable or state change
+    */
   private val serializer: ObjectSerializer = new ObjectSerializer()
 
   /**
-   * Provides key/value storage to keep state changes. It's used to do checkpoint of partial changes of state
-   */
+    * Provides key/value storage to keep state changes. It's used to do checkpoint of partial changes of state
+    */
   protected val stateChanges: mutable.Map[String, (String, Any)] = mutable.Map[String, (String, Any)]()
 
   /**
-   * Provides key/value storage to keep state
-   */
+    * Provides key/value storage to keep state
+    */
   private val stateVariables: mutable.Map[String, Any] = loadLastState()
 
   /**
-   * Creates SJStream to keep a module state
-   */
+    * Creates SJStream to keep a module state
+    */
   private def createStateStream() = {
     logger.debug(s"Task name: ${manager.taskName} " +
       s"Get stream for keeping state of module.")
@@ -73,8 +72,8 @@ class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGro
   }
 
   /**
-   * Adds a state producer and a state consumer to checkpoint group
-   */
+    * Adds a state producer and a state consumer to checkpoint group
+    */
   private def addAgentsToCheckpointGroup() = {
     logger.debug(s"Task: ${manager.taskName}. Start adding state consumer and producer to checkpoint group.")
     checkpointGroup.add(stateConsumer)
@@ -83,9 +82,10 @@ class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGro
   }
 
   /**
-   * Allows getting last state. Needed for restoring after crashing
-   * @return State variables
-   */
+    * Allows getting last state. Needed for restoring after crashing
+    *
+    * @return State variables
+    */
   private def loadLastState(): mutable.Map[String, Any] = {
     logger.debug(s"Restore a state.")
     val initialState = mutable.Map[String, Any]()
@@ -94,7 +94,8 @@ class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGro
       logger.debug(s"Get a transaction that was last. It contains a full or partial state.")
       val tempTransaction = maybeTxn.get
       val lastTransaction = stateConsumer.buildTransactionObject(tempTransaction.getPartition(), tempTransaction.getTransactionID(), tempTransaction.getCount()).get //todo fix it next milestone TR1216
-      var value = serializer.deserialize(lastTransaction.next())
+     // var value = serializer.deserialize(lastTransaction.next()) //todo
+      var value = serializer.deserialize(lastTransaction.getAll().dequeue())
       value match {
         case variable: (Any, Any) =>
           logger.debug(s"Last transaction contains a full state.")
@@ -115,11 +116,16 @@ class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGro
             val partialStateTxn = maybeTxn.get
 
             partialStateTxn.next()
-            while (partialStateTxn.hasNext()) {
-              value = serializer.deserialize(partialStateTxn.next())
+            //          while (partialStateTxn.hasNext()) {
+            //            value = serializer.deserialize(partialStateTxn.next())
+            //            val variable = value.asInstanceOf[(String, (String, Any))]
+            //            partialState(variable._1) = variable._2
+            //          } //todo
+            partialStateTxn.getAll().foreach(x=> {
+              value = serializer.deserialize(x)
               val variable = value.asInstanceOf[(String, (String, Any))]
               partialState(variable._1) = variable._2
-            }
+            })
             applyPartialChanges(initialState, partialState)
             maybeTxn = stateConsumer.getTransaction(partition)
           }
@@ -133,27 +139,36 @@ class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGro
   }
 
   /**
-   * Allow getting a state by gathering together all data from transaction
-   * @param initialState State from which to need start
-   * @param transaction Transaction containing a state
-   */
-  private def fillFullState(initialState: mutable.Map[String, Any], transaction: ConsumerTransaction[Array[Byte]]) = {
+    * Allow getting a state by gathering together all data from transaction
+    *
+    * @param initialState State from which to need start
+    * @param transaction  Transaction containing a state
+    */
+  private def fillFullState(initialState: mutable.Map[String, Any], transaction: ConsumerTransaction) = {
     logger.debug(s"Fill full state.")
     var value: Object = null
     var variable: (String, Any) = null
 
-    while (transaction.hasNext()) {
-      value = serializer.deserialize(transaction.next())
+    //    while (transaction.hasNext()) {
+    //      value = serializer.deserialize(transaction.next())
+    //      variable = value.asInstanceOf[(String, Any)]
+    //      initialState(variable._1) = variable._2
+    //    } //todo there is a bug
+
+    transaction.getAll().foreach(x => {
+      value = serializer.deserialize(x)
       variable = value.asInstanceOf[(String, Any)]
+      println(variable)
       initialState(variable._1) = variable._2
-    }
+    })
   }
 
   /**
-   * Allows restoring a state consistently applying all partial changes of state
-   * @param fullState Last state that has been saved
-   * @param partialState Partial changes of state
-   */
+    * Allows restoring a state consistently applying all partial changes of state
+    *
+    * @param fullState    Last state that has been saved
+    * @param partialState Partial changes of state
+    */
   private def applyPartialChanges(fullState: mutable.Map[String, Any], partialState: mutable.Map[String, (String, Any)]) = {
     logger.debug(s"Apply partial changes to state sequentially.")
     partialState.foreach {
@@ -188,27 +203,29 @@ class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGro
   }
 
   /**
-   * Indicates that a state variable has been changed
-   * @param key State variable name
-   * @param value Value of the state variable
-   */
+    * Indicates that a state variable has been changed
+    *
+    * @param key   State variable name
+    * @param value Value of the state variable
+    */
   override def setChange(key: String, value: Any): Unit = {
     logger.info(s"Indicate that a state variable: $key value changed to $value.")
     stateChanges(key) = ("set", value)
   }
 
   /**
-   * Indicates that a state variable has been deleted
-   * @param key State variable name
-   */
+    * Indicates that a state variable has been deleted
+    *
+    * @param key State variable name
+    */
   override def deleteChange(key: String): Unit = {
     logger.info(s"Indicate that a state variable: $key with value: ${stateVariables(key)} deleted.")
     stateChanges(key) = ("delete", stateVariables(key))
   }
 
   /**
-   * Indicates that all state variables have been deleted
-   */
+    * Indicates that all state variables have been deleted
+    */
   override def clearChange(): Unit = {
     logger.info(s"Indicate that all state variables deleted.")
     stateVariables.foreach(x => deleteChange(x._1))
@@ -231,10 +248,11 @@ class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGro
   }
 
   /**
-   * Does checkpoint of changes of state
-   * @param id Transaction ID for which a changes was applied
-   * @param changes State changes
-   */
+    * Does checkpoint of changes of state
+    *
+    * @param id      Transaction ID for which a changes was applied
+    * @param changes State changes
+    */
   private def sendChanges(id: Long, changes: mutable.Map[String, (String, Any)]) = {
     logger.debug(s"Save a partial state in t-stream intended for storing/restoring a state.")
     val transaction = stateProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
@@ -251,10 +269,11 @@ class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGro
   }
 
   /**
-   * Does checkpoint of state
-   * @param state State variables
-   * @return ID of transaction
-   */
+    * Does checkpoint of state
+    *
+    * @param state State variables
+    * @return ID of transaction
+    */
   private def sendState(state: mutable.Map[String, Any]) = {
     logger.debug(s"Save a full state in t-stream intended for storing/restoring a state.")
     val transaction = stateProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)

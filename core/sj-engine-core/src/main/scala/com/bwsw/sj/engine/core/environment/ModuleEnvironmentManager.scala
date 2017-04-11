@@ -19,7 +19,7 @@ import scala.collection._
   * @param moduleTimer            Provides a possibility to set a timer inside a module
   */
 class ModuleEnvironmentManager(options: Map[String, Any],
-                               producers: Map[String, Producer[Array[Byte]]],
+                               producers: Map[String, Producer],
                                outputs: Array[SjStream],
                                producerPolicyByOutput: mutable.Map[String, (String, ModuleOutput)],
                                moduleTimer: SjTimer,

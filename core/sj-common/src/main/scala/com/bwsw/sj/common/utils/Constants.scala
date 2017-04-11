@@ -2,7 +2,7 @@ package com.bwsw.sj.common.utils
 
 import java.util.UUID
 
-import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
+import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 
 object EngineLiterals {
   val persistentQueuePath = UUID.randomUUID().toString
@@ -79,7 +79,7 @@ object StreamLiterals {
   val types = Seq(tstreamType, kafkaStreamType, jdbcOutputType, esOutputType)
 
   private val tstreamFactory = new TStreamsFactory()
-  final val ttl = tstreamFactory.getProperty(TSF_Dictionary.Stream.TTL).asInstanceOf[Int]
+  final val ttl = tstreamFactory.getProperty(ConfigurationOptions.Stream.ttlSec).asInstanceOf[Int]
 }
 
 object ServiceLiterals {

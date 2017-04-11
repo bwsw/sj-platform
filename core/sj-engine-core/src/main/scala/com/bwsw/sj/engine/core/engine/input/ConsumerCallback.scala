@@ -16,11 +16,11 @@ import org.slf4j.LoggerFactory
  * @param blockingQueue Persistent blocking queue for storing transactions
  */
 
-class ConsumerCallback[T <: AnyRef](envelopeDataSerializer: EnvelopeDataSerializer[T], blockingQueue: ArrayBlockingQueue[Envelope]) extends Callback[Array[Byte]] {
+class ConsumerCallback[T <: AnyRef](envelopeDataSerializer: EnvelopeDataSerializer[T], blockingQueue: ArrayBlockingQueue[Envelope]) extends Callback {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  override def onTransaction(operator: TransactionOperator[Array[Byte]], transaction: ConsumerTransaction[Array[Byte]]) = {
-    val consumer = operator.asInstanceOf[Consumer[Array[Byte]]]
+  override def onTransaction(operator: TransactionOperator, transaction: ConsumerTransaction) = {
+    val consumer = operator.asInstanceOf[Consumer]
     logger.debug(s"onTransaction handler was invoked by subscriber: ${consumer.name}.")
     val stream = ConnectionRepository.getStreamService.get(consumer.stream.name).get
 
