@@ -9,14 +9,14 @@ import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes,
 
 import scala.collection.mutable.ArrayBuffer
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[SjStreamData], visible = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[StreamData], visible = true)
 @JsonSubTypes(Array(
-  new Type(value = classOf[TStreamSjStreamData], name = StreamLiterals.tstreamType),
-  new Type(value = classOf[KafkaSjStreamData], name = StreamLiterals.kafkaStreamType),
-  new Type(value = classOf[ESSjStreamData], name = StreamLiterals.esOutputType),
-  new Type(value = classOf[JDBCSjStreamData], name = StreamLiterals.jdbcOutputType)
+  new Type(value = classOf[TStreamStreamData], name = StreamLiterals.tstreamType),
+  new Type(value = classOf[KafkaStreamData], name = StreamLiterals.kafkaStreamType),
+  new Type(value = classOf[ESStreamData], name = StreamLiterals.esOutputType),
+  new Type(value = classOf[JDBCStreamData], name = StreamLiterals.jdbcOutputType)
 ))
-class SjStreamData() extends ValidationUtils with MessageResourceUtils {
+class StreamData() extends ValidationUtils with MessageResourceUtils {
   @JsonProperty("type") var streamType: String = null
   var name: String = null
   var description: String = "No description"

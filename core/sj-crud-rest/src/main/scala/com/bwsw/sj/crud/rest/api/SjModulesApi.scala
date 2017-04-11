@@ -3,14 +3,14 @@ package com.bwsw.sj.crud.rest.api
 import java.io.File
 import java.nio.file.Paths
 
-import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Disposition`}
+import akka.http.scaladsl.model.{HttpEntity, HttpResponse, MediaTypes}
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import akka.stream.scaladsl.FileIO
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.config.ConfigLiterals
-import com.bwsw.sj.common.engine.StreamingValidator
+import com.bwsw.sj.common.engine.{StreamingValidator, ValidationInfo}
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.module._
 import com.bwsw.sj.common.utils.EngineLiterals
@@ -21,7 +21,6 @@ import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.instance.InstanceValidator
 import org.apache.commons.io.FileUtils
 
-import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
@@ -43,7 +42,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
         pathPrefix("_types") {
           pathEndOrSingleSlash {
             get {
-              val response = OkRestResponse(Map("types" -> EngineLiterals.moduleTypes))
+              val response = OkRestResponse(TypesResponseEntity(EngineLiterals.moduleTypes))
 
               complete(restResponseToHttpResponse(response))
             }
@@ -106,23 +105,23 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     uploadedFile("jar") {
       case (metadata: FileInfo, file: File) =>
         try {
-          var response: RestResponse = BadRequestRestResponse(Map("message" ->
-            createMessage("rest.modules.modules.extension.unknown", metadata.fileName)))
+          var response: RestResponse = BadRequestRestResponse(
+            MessageResponseEntity(createMessage("rest.modules.modules.extension.unknown", metadata.fileName)))
 
           if (metadata.fileName.endsWith(".jar")) {
             val specification = validateSpecification(file)
-            response = ConflictRestResponse(Map("message" ->
+            response = ConflictRestResponse(MessageResponseEntity(
               createMessage("rest.modules.module.exists", metadata.fileName)))
 
             if (!doesModuleExist(specification)) {
-              response = ConflictRestResponse(Map("message" ->
+              response = ConflictRestResponse(MessageResponseEntity(
                 createMessage("rest.modules.module.file.exists", metadata.fileName)))
 
               if (!storage.exists(metadata.fileName)) {
                 val uploadingFile = new File(metadata.fileName)
                 FileUtils.copyFile(file, uploadingFile)
                 storage.put(uploadingFile, metadata.fileName, specification, "module")
-                response = OkRestResponse(Map("message" ->
+                response = OkRestResponse(MessageResponseEntity(
                   createMessage("rest.modules.module.uploaded", metadata.fileName)))
               }
             }
@@ -136,13 +135,11 @@ trait SjModulesApi extends Directives with SjCrudValidator {
 
   private val gettingListOfAllModules = get {
     val files = fileMetadataDAO.getByParameters(Map("filetype" -> "module"))
-    val response = OkRestResponse(Map("modules" -> mutable.Buffer()))
+    val response = OkRestResponse(ModulesResponseEntity())
 
     if (files.nonEmpty) {
-      response.entity = Map("modules" -> files.map(f => Map("moduleType" -> f.specification.moduleType,
-        "moduleName" -> f.specification.name,
-        "moduleVersion" -> f.specification.version,
-        "size" -> f.length)))
+      val modulesInfo = files.map(f => ModuleInfo(f.specification.moduleType, f.specification.name, f.specification.version, f.length))
+      response.entity = ModulesResponseEntity(modulesInfo)
     }
 
     complete(restResponseToHttpResponse(response))
@@ -152,15 +149,17 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     get {
       val allInstances = instanceDAO.getAll
 
-      val response = OkRestResponse(Map("instances" -> mutable.Buffer()))
+      val response = OkRestResponse(ShortInstancesResponseEntity())
       if (allInstances.nonEmpty) {
-        response.entity = Map("instances" -> allInstances.map(instance => ShortInstanceMetadata(instance.name,
-          instance.moduleType,
-          instance.moduleName,
-          instance.moduleVersion,
-          instance.description,
-          instance.status,
-          instance.restAddress)))
+        response.entity = ShortInstancesResponseEntity(allInstances.map(instance =>
+          ShortInstance(instance.name,
+            instance.moduleType,
+            instance.moduleName,
+            instance.moduleVersion,
+            instance.description,
+            instance.status,
+            instance.restAddress)
+        ))
       }
 
       complete(restResponseToHttpResponse(response))
@@ -176,11 +175,11 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     val instanceMetadata = deserializeOptions(getEntityFromContext(ctx), moduleType)
     val errors = validateInstance(instanceMetadata, specification, moduleType)
     val instancePassedValidation = validateInstance(specification, filename, instanceMetadata)
-    var response: RestResponse = BadRequestRestResponse(Map("message" ->
-      createMessage("rest.modules.instances.instance.cannot.create", errors.mkString(";"))))
+    var response: RestResponse = BadRequestRestResponse(
+      MessageResponseEntity(createMessage("rest.modules.instances.instance.cannot.create", errors.mkString(";"))))
 
     if (errors.isEmpty) {
-      if (instancePassedValidation) {
+      if (instancePassedValidation.result) {
         instanceMetadata.prepareInstance(
           moduleType,
           moduleName,
@@ -191,11 +190,16 @@ trait SjModulesApi extends Directives with SjCrudValidator {
         instanceMetadata.createStreams()
         instanceDAO.save(instanceMetadata.asModelInstance())
 
-        response = CreatedRestResponse(Map("message" ->
-          createMessage("rest.modules.instances.instance.created", instanceMetadata.name, s"$moduleType-$moduleName-$moduleVersion")))
+        response = CreatedRestResponse(MessageResponseEntity(createMessage(
+          "rest.modules.instances.instance.created",
+          instanceMetadata.name,
+          s"$moduleType-$moduleName-$moduleVersion"
+        )))
       } else {
-        response = BadRequestRestResponse(Map("message" ->
-          getMessage("rest.modules.instances.instance.cannot.create.incorrect.parameters")))
+        response = BadRequestRestResponse(MessageResponseEntity(createMessage(
+          "rest.modules.instances.instance.cannot.create.incorrect.parameters",
+          instancePassedValidation.errors.mkString(";")
+        )))
       }
     }
 
@@ -210,32 +214,31 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       "module-type" -> moduleType,
       "module-version" -> moduleVersion)
     )
-    val response = OkRestResponse(Map("instances" -> mutable.Buffer()))
+    val response = OkRestResponse(InstancesResponseEntity())
     if (instances.nonEmpty) {
-      response.entity = Map("instances" -> instances.map(_.asProtocolInstance()))
+      response.entity = InstancesResponseEntity(instances.map(_.asProtocolInstance()))
     }
 
     complete(restResponseToHttpResponse(response))
   }
 
   private val gettingInstance = (instance: Instance) => get {
-    val t = instance.asProtocolInstance()
-    val response = OkRestResponse(Map("instance" -> t))
+    val response = OkRestResponse(InstanceResponseEntity(instance.asProtocolInstance()))
     complete(restResponseToHttpResponse(response))
   }
 
   private val deletingInstance = (instance: Instance) => delete {
     val instanceName = instance.name
-    var response: RestResponse = UnprocessableEntityRestResponse(Map("message" ->
+    var response: RestResponse = UnprocessableEntityRestResponse(MessageResponseEntity(
       createMessage("rest.modules.instances.instance.cannot.delete", instanceName)))
 
     if (instance.status.equals(stopped) || instance.status.equals(failed) || instance.status.equals(error)) {
       destroyInstance(instance)
-      response = OkRestResponse(Map("message" ->
+      response = OkRestResponse(MessageResponseEntity(
         createMessage("rest.modules.instances.instance.deleting", instanceName)))
     } else if (instance.status.equals(ready)) {
       instanceDAO.delete(instanceName)
-      response = OkRestResponse(Map("message" ->
+      response = OkRestResponse(MessageResponseEntity(
         createMessage("rest.modules.instances.instance.deleted", instanceName)))
     }
 
@@ -244,13 +247,13 @@ trait SjModulesApi extends Directives with SjCrudValidator {
 
   private val launchingOfInstance = (instance: Instance) => get {
     val instanceName = instance.name
-    var response: RestResponse = UnprocessableEntityRestResponse(Map("message" ->
+    var response: RestResponse = UnprocessableEntityRestResponse(MessageResponseEntity(
       createMessage("rest.modules.instances.instance.cannot.start", instanceName)))
     if (instance.status.equals(ready) ||
       instance.status.equals(stopped) ||
       instance.status.equals(failed)) {
       startInstance(instance)
-      response = OkRestResponse(Map("message" ->
+      response = OkRestResponse(MessageResponseEntity(
         createMessage("rest.modules.instances.instance.starting", instanceName)))
     }
 
@@ -259,12 +262,12 @@ trait SjModulesApi extends Directives with SjCrudValidator {
 
   private val stoppingOfInstance = (instance: Instance) => get {
     val instanceName = instance.name
-    var response: RestResponse = UnprocessableEntityRestResponse(Map("message" ->
+    var response: RestResponse = UnprocessableEntityRestResponse(MessageResponseEntity(
       createMessage("rest.modules.instances.instance.cannot.stop", instanceName)))
 
     if (instance.status.equals(started)) {
       stopInstance(instance)
-      response = OkRestResponse(Map("message" ->
+      response = OkRestResponse(MessageResponseEntity(
         createMessage("rest.modules.instances.instance.stopping", instanceName)))
     }
 
@@ -272,7 +275,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
   }
 
   private val gettingSpecification = (specification: SpecificationData) => get {
-    val response = OkRestResponse(Map("specification" -> specification))
+    val response = OkRestResponse(SpecificationResponseEntity(specification))
     complete(restResponseToHttpResponse(response))
   }
 
@@ -298,14 +301,14 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                                 moduleName: String,
                                 moduleVersion: String,
                                 filename: String) => delete {
-    var response: RestResponse = UnprocessableEntityRestResponse(Map("message" ->
+    var response: RestResponse = UnprocessableEntityRestResponse(MessageResponseEntity(
       createMessage("rest.modules.module.cannot.delete", s"$moduleType-$moduleName-$moduleVersion")))
 
     val instances = getRelatedInstances(moduleType, moduleName, moduleVersion)
 
     if (instances.isEmpty) {
       storage.delete(filename)
-      response = OkRestResponse(Map("message" ->
+      response = OkRestResponse(MessageResponseEntity(
         createMessage("rest.modules.module.deleted", s"$moduleType-$moduleName-$moduleVersion"))
       )
     }
@@ -316,7 +319,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
   private val gettingRelatedInstances = (moduleType: String,
                                          moduleName: String,
                                          moduleVersion: String) => get {
-    val response = OkRestResponse(Map("instances" -> getRelatedInstances(moduleType, moduleName, moduleVersion)))
+    val response = OkRestResponse(RelatedToModuleResponseEntity(getRelatedInstances(moduleType, moduleName, moduleVersion)))
 
     complete(restResponseToHttpResponse(response))
   }
@@ -331,12 +334,10 @@ trait SjModulesApi extends Directives with SjCrudValidator {
 
   private val gettingModulesByType = (moduleType: String) => get {
     val files = fileMetadataDAO.getByParameters(Map("filetype" -> "module", "specification.module-type" -> moduleType))
-    val response = OkRestResponse(Map("modules" -> mutable.Buffer()))
+    val response = OkRestResponse(ModulesResponseEntity())
     if (files.nonEmpty) {
-      response.entity = Map("message" -> s"Uploaded modules for type $moduleType",
-        "modules" -> files.map(f => Map("module-type" -> f.specification.moduleType,
-          "module-name" -> f.specification.name,
-          "module-version" -> f.specification.version)))
+      val modulesInfo = files.map(f => ModuleInfo(f.specification.moduleType, f.specification.name, f.specification.version, f.length))
+      response.entity = ModulesResponseEntity(modulesInfo)
     }
 
     complete(restResponseToHttpResponse(response))
@@ -445,14 +446,19 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     validator.validate(options, specification)
   }
 
-  private def validateInstance(specification: SpecificationData, filename: String, instanceMetadata: InstanceMetadata): Boolean = {
+  private def validateInstance(specification: SpecificationData, filename: String, instanceMetadata: InstanceMetadata): ValidationInfo = {
     val validatorClassName = specification.validateClass
     val file = storage.get(filename, s"tmp/$filename")
     val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
     val clazz = loader.loadClass(validatorClassName)
     val validator = clazz.newInstance().asInstanceOf[StreamingValidator]
-    validator.validate(instanceMetadata) &&
-      validator.validate(instanceMetadata.options)
+    val optionsValidationInfo = validator.validate(instanceMetadata)
+    val instanceValidationInfo = validator.validate(instanceMetadata.options)
+
+    ValidationInfo(
+      optionsValidationInfo.result && instanceValidationInfo.result,
+      optionsValidationInfo.errors ++= instanceValidationInfo.errors
+    )
   }
 
   /**

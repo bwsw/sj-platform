@@ -7,8 +7,6 @@ import com.bwsw.sj.common.rest.entities.provider.ProviderData
 import com.bwsw.sj.common.utils.ProviderLiterals
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
-import scala.collection.mutable
-
 trait SjProvidersApi extends Directives with SjCrudValidator {
 
   val providersApi = {
@@ -18,22 +16,22 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
           validateContextWithSchema(ctx, "providerSchema.json")
           val data = serializer.deserialize[ProviderData](getEntityFromContext(ctx))
           val errors = data.validate()
-          var response: RestResponse = BadRequestRestResponse(Map("message" ->
-            createMessage("rest.providers.provider.cannot.create", errors.mkString(";"))))
+          var response: RestResponse = BadRequestRestResponse(MessageResponseEntity(
+            createMessage("rest.providers.provider.cannot.create", errors.mkString(";"))
+          ))
 
           if (errors.isEmpty) {
             providerDAO.save(data.asModelProvider())
-            response = CreatedRestResponse(Map("message" ->
-              createMessage("rest.providers.provider.created", data.name)))
+            response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.providers.provider.created", data.name)))
           }
 
           ctx.complete(restResponseToHttpResponse(response))
         } ~
           get {
             val providers = providerDAO.getAll
-            val response = OkRestResponse(Map("providers" -> mutable.Buffer()))
+            val response = OkRestResponse(ProvidersResponseEntity())
             if (providers.nonEmpty) {
-              response.entity = Map("providers" -> providers.map(p => p.asProtocolProvider()))
+              response.entity = ProvidersResponseEntity(providers.map(p => p.asProtocolProvider()))
             }
 
             complete(restResponseToHttpResponse(response))
@@ -42,7 +40,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
         pathPrefix("_types") {
           pathEndOrSingleSlash {
             get {
-              val response = OkRestResponse(Map("types" -> ProviderLiterals.types))
+              val response = OkRestResponse(TypesResponseEntity(ProviderLiterals.types))
 
               complete(restResponseToHttpResponse(response))
             }
@@ -52,19 +50,18 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
           pathEndOrSingleSlash {
             get {
               val provider = providerDAO.get(providerName)
-              var response: RestResponse = NotFoundRestResponse(Map("message" ->
+              var response: RestResponse = NotFoundRestResponse(MessageResponseEntity(
                 createMessage("rest.providers.provider.notfound", providerName)))
               provider match {
                 case Some(x) =>
-                  val entity = Map("provider" -> x.asProtocolProvider())
-                  response = OkRestResponse(entity)
+                  response = OkRestResponse(ProviderResponseEntity(x.asProtocolProvider()))
                 case None =>
               }
 
               complete(restResponseToHttpResponse(response))
             } ~
               delete {
-                var response: RestResponse = UnprocessableEntityRestResponse(Map("message" ->
+                var response: RestResponse = UnprocessableEntityRestResponse(MessageResponseEntity(
                   createMessage("rest.providers.provider.cannot.delete", providerName)))
                 val providers = getRelatedServices(providerName)
                 if (providers.isEmpty) {
@@ -72,10 +69,10 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
                   provider match {
                     case Some(_) =>
                       providerDAO.delete(providerName)
-                      response = OkRestResponse(Map("message" ->
+                      response = OkRestResponse(MessageResponseEntity(
                         createMessage("rest.providers.provider.deleted", providerName)))
                     case None =>
-                      response = NotFoundRestResponse(Map("message" ->
+                      response = NotFoundRestResponse(MessageResponseEntity(
                         createMessage("rest.providers.provider.notfound", providerName)))
                   }
                 }
@@ -88,19 +85,16 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
                 get {
                   val provider = providerDAO.get(providerName)
                   var response: RestResponse = NotFoundRestResponse(
-                    Map("message" -> createMessage("rest.providers.provider.notfound", providerName)))
+                    MessageResponseEntity(createMessage("rest.providers.provider.notfound", providerName)))
 
                   provider match {
                     case Some(x) =>
                       val errors = x.checkConnection()
                       if (errors.isEmpty) {
-                        response = OkRestResponse(Map("connection" -> true))
+                        response = OkRestResponse(new ConnectionResponseEntity())
                       }
                       else {
-                        response = ConflictRestResponse(Map(
-                          "connection" -> false,
-                          "errors" -> errors.mkString(";")
-                        ))
+                        response = ConflictRestResponse(TestConnectionResponseEntity(connection = false, errors.mkString(";")))
                       }
                     case None =>
                   }
@@ -114,11 +108,11 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
                 get {
                   val provider = providerDAO.get(providerName)
                   var response: RestResponse = NotFoundRestResponse(
-                    Map("message" -> createMessage("rest.providers.provider.notfound", providerName)))
+                    MessageResponseEntity(createMessage("rest.providers.provider.notfound", providerName)))
 
                   provider match {
                     case Some(x) =>
-                      response = OkRestResponse(Map("services" -> getRelatedServices(providerName)))
+                      response = OkRestResponse(RelatedToProviderResponseEntity(getRelatedServices(providerName)))
                     case None =>
                   }
 

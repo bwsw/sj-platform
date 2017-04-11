@@ -7,7 +7,7 @@ import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
 
 import scala.collection.mutable.ArrayBuffer
 
-class ESSjStreamData() extends SjStreamData() {
+class ESStreamData() extends StreamData() {
   streamType = StreamLiterals.esOutputType
 
   override def validate() = {

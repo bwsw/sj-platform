@@ -14,7 +14,7 @@ import org.apache.kafka.common.errors.TopicExistsException
 
 import scala.collection.mutable.ArrayBuffer
 
-class KafkaSjStreamData() extends SjStreamData() {
+class KafkaStreamData() extends StreamData() {
   streamType = StreamLiterals.kafkaStreamType
   var partitions: Int = Int.MinValue
   var replicationFactor: Int = Int.MinValue

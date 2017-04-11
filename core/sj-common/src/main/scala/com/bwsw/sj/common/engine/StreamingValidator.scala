@@ -14,13 +14,13 @@ trait StreamingValidator {
    * Provides a validation function that checks a propriety of option parameter of instance
    * (custom options)
    * @param options Option parameters
-   * @return The result of the validation. True by default
+   * @return The result of the validation and a set of errors if it exists
    */
-  def validate(options: Map[String, Any]): Boolean = {
-    true
+  def validate(options: Map[String, Any]): ValidationInfo = {
+    ValidationInfo()
   }
 
-  def validate(instance: InstanceMetadata): Boolean = {
-    true
+  def validate(instance: InstanceMetadata): ValidationInfo = {
+    ValidationInfo()
   }
 }
