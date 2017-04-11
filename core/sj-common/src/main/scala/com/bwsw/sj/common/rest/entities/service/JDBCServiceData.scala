@@ -31,6 +31,11 @@ class JDBCServiceData() extends ServiceData() {
     // 'provider' field
     errors ++= validateProvider(this.provider, this.serviceType)
 
+    // 'name' field
+    val charSequence: CharSequence = "-"
+    if (this.name.contains(charSequence, ""))
+      errors += createMessage("jdbc.error.service.name.contains", "-")
+
     // 'driver' field
     Option(this.driver) match {
       case None =>
