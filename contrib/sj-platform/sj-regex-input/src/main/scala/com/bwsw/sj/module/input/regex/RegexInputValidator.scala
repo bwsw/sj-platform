@@ -44,20 +44,20 @@ class RegexInputValidator extends StreamingValidator {
       .map(serializer.serialize)
       .map(serializer.deserialize[Rule])
 
-    if (isRequiredString(options, RegexInputOptionsNames.lineSeparator))
+    if (!isRequiredString(options, RegexInputOptionsNames.lineSeparator))
       errors += s"'${RegexInputOptionsNames.lineSeparator}' attribute is required and should be a non-empty string"
-    if (isRequiredString(options, RegexInputOptionsNames.policy))
+    if (!isRequiredString(options, RegexInputOptionsNames.policy))
       errors += s"'${RegexInputOptionsNames.policy}' attribute is required and should be a non-empty string"
 
-    if (Charset.isSupported(options(RegexInputOptionsNames.encoding).asInstanceOf[String]))
+    if (!Charset.isSupported(options(RegexInputOptionsNames.encoding).asInstanceOf[String]))
       errors += s"'${RegexInputOptionsNames.encoding}' is not supported"
 
-    if (isRequiredString(options, RegexInputOptionsNames.fallbackStream))
+    if (!isRequiredString(options, RegexInputOptionsNames.fallbackStream))
       errors += s"'${RegexInputOptionsNames.fallbackStream}' attribute is required and should be a non-empty string"
 
-    if (rules.nonEmpty)
+    if (rules.isEmpty)
       errors += s"'${RegexInputOptionsNames.rules}' attribute is required and should be a non-empty set"
-    if (rules.forall(validateRule))
+    if (!rules.forall(validateRule))
       errors += s"'${RegexInputOptionsNames.rules}' hasn't passed validation"
 
     ValidationInfo(errors.isEmpty, errors)

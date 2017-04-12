@@ -16,7 +16,7 @@
   "outputs": {
     "cardinality": [
       2,
-      2
+      20
     ],
     "types": [
       "stream.t-stream"

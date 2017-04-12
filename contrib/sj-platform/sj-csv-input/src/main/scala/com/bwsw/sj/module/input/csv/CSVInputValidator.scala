@@ -16,26 +16,26 @@ class CSVInputValidator extends StreamingValidator {
 
   override def validate(options: Map[String, Any]): ValidationInfo = {
     val errors = ArrayBuffer[String]()
-    if (isRequired(isString)(options, CSVInputOptionNames.lineSeparator))
+    if (!isRequired(isString)(options, CSVInputOptionNames.lineSeparator))
       errors += s"'${CSVInputOptionNames.lineSeparator}' attribute is required and should be a non-empty string"
-    if (isRequired(isString)(options, CSVInputOptionNames.encoding))
+    if (!isRequired(isString)(options, CSVInputOptionNames.encoding))
       errors += s"'${CSVInputOptionNames.encoding}' attribute is required and should be a non-empty string"
 
-    if (Charset.isSupported(options(CSVInputOptionNames.encoding).asInstanceOf[String]))
+    if (!Charset.isSupported(options(CSVInputOptionNames.encoding).asInstanceOf[String]))
       errors += s"'${CSVInputOptionNames.encoding}' is not supported"
 
-    if (isRequired(isString)(options, CSVInputOptionNames.outputStream))
+    if (!isRequired(isString)(options, CSVInputOptionNames.outputStream))
       errors += s"'${CSVInputOptionNames.outputStream}' attribute is required and should be a non-empty string"
-    if (isRequired(isString)(options, CSVInputOptionNames.fallbackStream))
+    if (!isRequired(isString)(options, CSVInputOptionNames.fallbackStream))
       errors += s"'${CSVInputOptionNames.fallbackStream}' attribute is required and should be a non-empty string"
 
-    if (isOption(isString)(options, CSVInputOptionNames.fieldSeparator))
+    if (!isOption(isString)(options, CSVInputOptionNames.fieldSeparator))
       errors += s"'${CSVInputOptionNames.fieldSeparator}' should be a non-empty string"
 
-    if (isOption(isString)(options, CSVInputOptionNames.quoteSymbol))
+    if (!isOption(isString)(options, CSVInputOptionNames.quoteSymbol))
       errors += s"'${CSVInputOptionNames.fieldSeparator}' should be a non-empty string"
 
-    if (checkAvroFields(
+    if (!checkAvroFields(
       options,
       CSVInputOptionNames.fields,
       Seq(CSVInputOptionNames.uniqueKey, CSVInputOptionNames.distribution)))
