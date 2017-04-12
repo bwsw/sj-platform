@@ -60,10 +60,5 @@ class Instance {
     protocolInstance.restAddress = this.restAddress
   }
 
-  def getOptionsAsMap() = {
-    val serializer = new JsonSerializer()
-    serializer.deserialize[Map[String, Any]](this.options)
-  }
-
   def getInputsWithoutStreamMode(): Array[String] = Array()
 }

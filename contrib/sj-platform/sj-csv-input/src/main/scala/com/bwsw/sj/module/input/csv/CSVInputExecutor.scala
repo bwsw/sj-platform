@@ -2,6 +2,7 @@ package com.bwsw.sj.module.input.csv
 
 import java.io.IOException
 
+import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.{KafkaSjStream, SjStream, TStreamSjStream}
 import com.bwsw.sj.common.utils.stream_distributor.{ByHash, SjStreamDistributor}
 import com.bwsw.sj.common.utils.{AvroUtils, StreamLiterals}
@@ -22,20 +23,16 @@ import scala.io.Source
   * @author Pavel Tomskikh
   */
 class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingExecutor[Record](manager) {
+  private val serializer = new JsonSerializer
+  private val csvInputOptions = serializer.deserialize[CSVInputOptions](manager.options)
+  if (csvInputOptions.uniqueKey.isEmpty) csvInputOptions.uniqueKey = csvInputOptions.fields
 
-  val outputStream: String = manager.options(CSVInputOptionNames.outputStream).asInstanceOf[String]
-  val fallbackStream: String = manager.options(CSVInputOptionNames.fallbackStream).asInstanceOf[String]
-  val fieldSeparator: Option[Char] = manager.options.get(CSVInputOptionNames.fieldSeparator).asInstanceOf[Option[String]].map(_.head)
-  val quoteSymbol: Option[Char] = manager.options.get(CSVInputOptionNames.quoteSymbol).asInstanceOf[Option[String]].map(_.head)
-  val encoding: String = manager.options(CSVInputOptionNames.encoding).asInstanceOf[String]
-  val lineSeparator: String = manager.options(CSVInputOptionNames.lineSeparator).asInstanceOf[String]
-  val tokenizer = new SeparateTokenizer(lineSeparator, encoding)
+  val tokenizer = new SeparateTokenizer(csvInputOptions.lineSeparator, csvInputOptions.encoding)
 
-  val fields: Seq[String] = manager.options(CSVInputOptionNames.fields).asInstanceOf[Seq[String]]
-  val fieldsNumber = fields.length
+  val fieldsNumber = csvInputOptions.fields.length
   val schema = {
     var scheme = SchemaBuilder.record("csv").fields()
-    fields.foreach { field =>
+    csvInputOptions.fields.foreach { field =>
       scheme = scheme.name(field).`type`().stringType().noDefault()
     }
     scheme.endRecord()
@@ -45,25 +42,21 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
   val fallbackSchema = SchemaBuilder.record("fallback").fields()
     .name(fallbackFieldName).`type`().stringType().noDefault().endRecord()
 
-  val uniqueKey = manager.options.get(CSVInputOptionNames.uniqueKey) match {
-    case Some(uniqueFields: Seq[Any]) => uniqueFields.map(_.asInstanceOf[String])
-    case _ => fields
-  }
 
-  val partitionCount = getPartitionCount(manager.outputs.find(_.name == outputStream).get)
-  val distribution = manager.options.get(CSVInputOptionNames.distribution).map(_.asInstanceOf[Seq[String]])
+  val partitionCount = getPartitionCount(manager.outputs.find(_.name == csvInputOptions.outputStream).get)
+
   val distributor = {
-    if (distribution.isEmpty) new SjStreamDistributor(partitionCount)
-    else new SjStreamDistributor(partitionCount, ByHash, distribution.get)
+    if (csvInputOptions.distribution.isEmpty) new SjStreamDistributor(partitionCount)
+    else new SjStreamDistributor(partitionCount, ByHash, csvInputOptions.distribution)
   }
 
-  val fallbackPartitionCount = getPartitionCount(manager.outputs.find(_.name == fallbackStream).get)
+  val fallbackPartitionCount = getPartitionCount(manager.outputs.find(_.name == csvInputOptions.fallbackStream).get)
   val fallbackDistributor = new SjStreamDistributor(fallbackPartitionCount)
 
   val csvParser = {
     val csvParserBuilder = new CSVParserBuilder
-    fieldSeparator.foreach(csvParserBuilder.withSeparator)
-    quoteSymbol.foreach(csvParserBuilder.withQuoteChar)
+    csvInputOptions.fieldSeparator.foreach(x => if (x.nonEmpty) csvParserBuilder.withSeparator(x.head))
+    csvInputOptions.quoteSymbol.foreach(x => if (x.nonEmpty) csvParserBuilder.withQuoteChar(x.head))
     csvParserBuilder.build()
   }
 
@@ -75,18 +68,18 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
     val data = new Array[Byte](length)
     dataBuffer.getBytes(0, data)
     buffer.readerIndex(interval.finalValue + 1)
-    val line = Source.fromBytes(data, encoding).mkString
+    val line = Source.fromBytes(data, csvInputOptions.encoding).mkString
     try {
       val values = csvParser.parseLine(line)
 
       if (values.length == fieldsNumber) {
         val record = new Record(schema)
-        fields.zip(values).foreach { case (field, value) => record.put(field, value) }
-        val key = AvroUtils.concatFields(uniqueKey, record)
+        csvInputOptions.fields.zip(values).foreach { case (field, value) => record.put(field, value) }
+        val key = AvroUtils.concatFields(csvInputOptions.uniqueKey, record)
 
         Some(new InputEnvelope(
-          s"$outputStream$key",
-          Array((outputStream, distributor.getNextPartition(record))),
+          s"${csvInputOptions.outputStream}$key",
+          Array((csvInputOptions.outputStream, distributor.getNextPartition(record))),
           true,
           record))
       } else {
@@ -101,8 +94,8 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
     val record = new Record(fallbackSchema)
     record.put(fallbackFieldName, data)
     Some(new InputEnvelope(
-      s"$fallbackStream,$data",
-      Array((fallbackStream, fallbackDistributor.getNextPartition())),
+      s"${csvInputOptions.fallbackStream},$data",
+      Array((csvInputOptions.fallbackStream, fallbackDistributor.getNextPartition())),
       false,
       record))
   }

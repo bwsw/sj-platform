@@ -25,7 +25,7 @@ class StatefulCommonModuleService(manager: CommonTaskManager, checkpointGroup: C
 
   val environmentManager = new StatefulModuleEnvironmentManager(
     new StateStorage(stateService),
-    instance.getOptionsAsMap(),
+    instance.options,
     outputProducers,
     instance.outputs.flatMap(x => streamService.get(x)),
     producerPolicyByOutput,

@@ -6,14 +6,24 @@ package com.bwsw.sj.module.input.csv
   */
 object CSVInputOptionNames {
 
-  val lineSeparator = "line-separator"
+  val lineSeparator = "lineSeparator"
   val encoding = "encoding"
-  val outputStream = "output-stream"
-  val fallbackStream = "fallback-stream"
+  val outputStream = "outputStream"
+  val fallbackStream = "fallbackStream"
   val fields = "fields"
-  val fieldSeparator = "field-separator"
-  val quoteSymbol = "quote-symbol"
-  val uniqueKey = "unique-key"
+  val fieldSeparator = "fieldSeparator"
+  val quoteSymbol = "quoteSymbol"
+  val uniqueKey = "uniqueKey"
   val distribution = "distribution"
 
 }
+
+case class CSVInputOptions(lineSeparator: String,
+                           encoding: String,
+                           outputStream: String,
+                           fallbackStream: String,
+                           fields: List[String],
+                           fieldSeparator: Option[String],
+                           quoteSymbol: Option[String],
+                           var uniqueKey: List[String],
+                           distribution: List[String])
