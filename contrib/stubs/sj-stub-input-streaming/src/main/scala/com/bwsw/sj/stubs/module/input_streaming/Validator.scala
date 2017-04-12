@@ -6,7 +6,7 @@ import scala.collection.mutable.ArrayBuffer
 
 class Validator extends StreamingValidator {
 
-  override def validate(options: Map[String, Any]): ValidationInfo = {
+  override def validate(options: String): ValidationInfo = {
     ValidationInfo(options.nonEmpty, ArrayBuffer("Options have to be non-empty."))
   }
 }

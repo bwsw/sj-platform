@@ -7,34 +7,17 @@ package com.bwsw.sj.common.utils
   */
 object ValidationUtils {
 
-  def isRequired(p: Any => Boolean)(options: Map[String, Any], key: String) = {
-    val value = options.get(key)
-    value.nonEmpty && p(value.get)
-  }
+  def isOptionStringField(string: Option[String]) = string.isEmpty || string.get.nonEmpty
 
-  def isOption(p: Any => Boolean)(options: Map[String, Any], key: String) = {
-    val value = options.get(key)
-    value.isEmpty || p(value.get)
-  }
+  def isRequiredStringField(string: Option[String]) = string.nonEmpty && string.get.nonEmpty
 
-  def isString(a: Any) = a.isInstanceOf[String] && a.asInstanceOf[String].nonEmpty
-
-  def compareFieldNames(options: Map[String, Any], fieldNames: Seq[Any])(checking: String) = {
-    options.get(checking) match {
-      case Some(checkingFields: Seq[Any]) =>
-        checkingFields.nonEmpty && checkingFields.forall(fieldNames.contains)
-      case None => true
-      case _ => false
-    }
-  }
-
-  def checkAvroFields(options: Map[String, Any], allFields: String, optionFields: Seq[String]) = {
-    val fieldsValue = options.get(allFields)
-    fieldsValue match {
-      case Some(fieldNames: Seq[Any]) =>
+  def checkFields(fields: Option[List[String]], uniqueKey: Option[List[String]], distribution: Option[List[String]]) = {
+    fields match {
+      case Some(fieldNames: List[String]) =>
         fieldNames.nonEmpty &&
-          fieldNames.forall(isString) &&
-          optionFields.forall(compareFieldNames(options, fieldNames))
+          fieldNames.forall(x => isRequiredStringField(Option(x))) &&
+          (uniqueKey.isEmpty || uniqueKey.get.forall(fieldNames.contains)) &&
+          (distribution.isEmpty || distribution.get.forall(fieldNames.contains))
       case _ => false
     }
   }

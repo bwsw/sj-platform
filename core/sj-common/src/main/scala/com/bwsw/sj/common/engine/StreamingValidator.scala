@@ -16,7 +16,7 @@ trait StreamingValidator {
    * @param options Option parameters
    * @return The result of the validation and a set of errors if it exists
    */
-  def validate(options: Map[String, Any]): ValidationInfo = {
+  def validate(options: String): ValidationInfo = {
     ValidationInfo()
   }
 

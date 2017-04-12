@@ -13,9 +13,6 @@ object CSVInputOptionNames {
   val fields = "fields"
   val fieldSeparator = "fieldSeparator"
   val quoteSymbol = "quoteSymbol"
-  val uniqueKey = "uniqueKey"
-  val distribution = "distribution"
-
 }
 
 case class CSVInputOptions(lineSeparator: String,
