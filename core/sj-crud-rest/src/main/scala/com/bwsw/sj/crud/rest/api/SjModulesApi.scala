@@ -453,7 +453,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     val clazz = loader.loadClass(validatorClassName)
     val validator = clazz.newInstance().asInstanceOf[StreamingValidator]
     val optionsValidationInfo = validator.validate(instanceMetadata)
-    val instanceValidationInfo = validator.validate(instanceMetadata.options)
+    val instanceValidationInfo = validator.validate(serializer.serialize(instanceMetadata.options))
 
     ValidationInfo(
       optionsValidationInfo.result && instanceValidationInfo.result,
