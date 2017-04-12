@@ -94,8 +94,7 @@ class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGro
       logger.debug(s"Get a transaction that was last. It contains a full or partial state.")
       val tempTransaction = maybeTxn.get
       val lastTransaction = stateConsumer.buildTransactionObject(tempTransaction.getPartition(), tempTransaction.getTransactionID(), tempTransaction.getCount()).get //todo fix it next milestone TR1216
-     // var value = serializer.deserialize(lastTransaction.next()) //todo
-      var value = serializer.deserialize(lastTransaction.getAll().dequeue())
+      var value = serializer.deserialize(lastTransaction.next())
       value match {
         case variable: (Any, Any) =>
           logger.debug(s"Last transaction contains a full state.")
@@ -116,16 +115,11 @@ class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGro
             val partialStateTxn = maybeTxn.get
 
             partialStateTxn.next()
-            //          while (partialStateTxn.hasNext()) {
-            //            value = serializer.deserialize(partialStateTxn.next())
-            //            val variable = value.asInstanceOf[(String, (String, Any))]
-            //            partialState(variable._1) = variable._2
-            //          } //todo
-            partialStateTxn.getAll().foreach(x=> {
-              value = serializer.deserialize(x)
+            while (partialStateTxn.hasNext()) {
+              value = serializer.deserialize(partialStateTxn.next())
               val variable = value.asInstanceOf[(String, (String, Any))]
               partialState(variable._1) = variable._2
-            })
+            }
             applyPartialChanges(initialState, partialState)
             maybeTxn = stateConsumer.getTransaction(partition)
           }
@@ -149,18 +143,11 @@ class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGro
     var value: Object = null
     var variable: (String, Any) = null
 
-    //    while (transaction.hasNext()) {
-    //      value = serializer.deserialize(transaction.next())
-    //      variable = value.asInstanceOf[(String, Any)]
-    //      initialState(variable._1) = variable._2
-    //    } //todo there is a bug
-
-    transaction.getAll().foreach(x => {
-      value = serializer.deserialize(x)
+    while (transaction.hasNext()) {
+      value = serializer.deserialize(transaction.next())
       variable = value.asInstanceOf[(String, Any)]
-      println(variable)
       initialState(variable._1) = variable._2
-    })
+    }
   }
 
   /**

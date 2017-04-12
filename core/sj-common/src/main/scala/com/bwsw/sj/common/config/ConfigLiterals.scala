@@ -16,9 +16,6 @@ object ConfigLiterals {
   val lowWatermark = s"$systemDomain.low-watermark"
 
   val jdbcTimeoutTag = s"$jdbcDomain.timeout"
-  val tgClientRetryPeriodTag = s"$systemDomain.transaction-generator-client-retry-period"
-  val tgServerRetryPeriodTag = s"$systemDomain.transaction-generator-server-retry-period"
-  val tgRetryCountTag = s"$systemDomain.transaction-generator-retry-count"
   val kafkaSubscriberTimeoutTag = s"$systemDomain.subscriber-timeout"
   val geoIpAsNum = s"$systemDomain.geo-ip-as-num"
   val geoIpAsNumv6 = s"$systemDomain.geo-ip-as-num-v6"

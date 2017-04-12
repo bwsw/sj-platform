@@ -327,12 +327,16 @@ object DataFactory {
   }
 
   def createData(countTxns: Int, countElements: Int, partitions: Int, _type: String, count: Int) = {
-    var number = 0
     val policy = producer.NewTransactionProducerPolicy.ErrorIfOpened
+    val props = new Properties()
+    props.put("bootstrap.servers", kafkaHosts)
+    props.put("key.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
+    props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
 
     def createTstreamData(countTxns: Int, countElements: Int, suffix: String) = {
       val producer = createProducer(tstreamInputNamePrefix + suffix, partitions)
-      val s = System.currentTimeMillis()
+      var number = 0
+
       (0 until countTxns) foreach { (x: Int) =>
         val transaction = producer.newTransaction(policy)
         (0 until countElements) foreach { (y: Int) =>
@@ -347,14 +351,9 @@ object DataFactory {
     }
 
     def createKafkaData(countTxns: Int, countElements: Int, suffix: String) = {
-      val props = new Properties()
-      props.put("bootstrap.servers", kafkaHosts)
-      props.put("key.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
-      props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
-
       val producer = new KafkaProducer[Array[Byte], Array[Byte]](props)
       var number = 0
-      val s = System.currentTimeMillis()
+
       (0 until countTxns) foreach { (x: Int) =>
         (0 until countElements) foreach { (y: Int) =>
           number += 1

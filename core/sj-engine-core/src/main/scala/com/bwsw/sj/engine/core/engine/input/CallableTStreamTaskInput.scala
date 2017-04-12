@@ -14,21 +14,19 @@ import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
 /**
- * Class is responsible for launching t-stream subscribing consumers
- * that put consumed message, which are wrapped in envelope, into a common queue,
- * and processing the envelopes
- *
- *
- *
- * @param manager Manager of environment of task
- * @param blockingQueue Blocking queue for keeping incoming envelopes that are serialized into a string,
- *                      which will be retrieved into a module
- * @author Kseniya Mikhaleva
- *
- */
+  * Class is responsible for launching t-stream subscribing consumers
+  * that put consumed message, which are wrapped in envelope, into a common queue,
+  * and processing the envelopes
+  *
+  * @param manager       Manager of environment of task
+  * @param blockingQueue Blocking queue for keeping incoming envelopes that are serialized into a string,
+  *                      which will be retrieved into a module
+  * @author Kseniya Mikhaleva
+  *
+  */
 class CallableTStreamTaskInput[T <: AnyRef](manager: TaskManager,
-                              blockingQueue: ArrayBlockingQueue[Envelope],
-                              override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
+                                            blockingQueue: ArrayBlockingQueue[Envelope],
+                                            override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
   extends CallableTaskInput[TStreamEnvelope[T]](manager.inputs) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val consumers = createSubscribingConsumers()
@@ -65,11 +63,11 @@ class CallableTStreamTaskInput[T <: AnyRef](manager: TaskManager,
   }
 
   /**
-   * Chooses offset policy for t-streams consumers
-   *
-   * @param startFrom Offset policy name or specific date
-   * @return Offset
-   */
+    * Chooses offset policy for t-streams consumers
+    *
+    * @param startFrom Offset policy name or specific date
+    * @return Offset
+    */
   private def chooseOffset(startFrom: String): IOffset = {
     logger.debug(s"Choose offset policy for t-streams consumer.")
     startFrom match {
@@ -98,7 +96,9 @@ class CallableTStreamTaskInput[T <: AnyRef](manager: TaskManager,
 
   override def setConsumerOffset(envelope: TStreamEnvelope[T]) = {
     logger.debug(s"Task: ${manager.taskName}. " +
-      s"Change local offset of consumer: ${envelope.consumerName} to txn: ${envelope.id}.")
+      s"Change local offset of consumer: ${envelope.consumerName} (partition: ${envelope.partition}) to txn: ${envelope.id}.")
+    println(s"Task: ${manager.taskName}. " +
+      s"Change local offset of consumer: ${envelope.consumerName} (partition: ${envelope.partition}) to txn: ${envelope.id}.") //todo
     consumers(envelope.consumerName).getConsumer().setStreamPartitionOffset(envelope.partition, envelope.id)
   }
 

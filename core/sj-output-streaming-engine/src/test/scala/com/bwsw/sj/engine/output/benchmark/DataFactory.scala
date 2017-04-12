@@ -386,7 +386,11 @@ object DataFactory {
   def deleteStreams() = {
     streamService.delete(esStreamName)
     streamService.delete(tstreamInputName)
-    streamService.delete(jdbcStreamName) //todo delete from storage by using StorageClient
+    streamService.delete(jdbcStreamName)
+
+    storageClient.deleteStream(esStreamName)
+    storageClient.deleteStream(tstreamInputName)
+    storageClient.deleteStream(jdbcStreamName)
   }
 
   def deleteServices() = {

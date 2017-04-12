@@ -28,7 +28,7 @@ object SjRegularModuleSetup extends App {
   createStreams(streamService, serviceManager, partitions, _type, inputCount, outputCount)
   createInstance(serviceManager, instanceService, checkpointInterval, stateManagement, stateFullCheckpoint)
 
-  createData(1, 1, partitions, _type, inputCount)
+  createData(4, 1, partitions, _type, inputCount)
   ConnectionRepository.close()
 
   println("DONE")

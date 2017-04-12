@@ -59,16 +59,11 @@ object SjRegularModuleStatefulChecker extends App {
 
       while (maybeTxn.isDefined) {
         val transaction = maybeTxn.get
-        //        while (transaction.hasNext()) {
-        //          val element = objectSerializer.deserialize(transaction.next()).asInstanceOf[Int]
-        //          outputElements.+=(element)
-        //          totalOutputElements += 1
-        //        } //todo
-        transaction.getAll().foreach(x => {
-          val element = objectSerializer.deserialize(x).asInstanceOf[Int]
+        while (transaction.hasNext()) {
+          val element = objectSerializer.deserialize(transaction.next()).asInstanceOf[Int]
           outputElements.+=(element)
           totalOutputElements += 1
-        })
+        }
         maybeTxn = outputConsumer.getTransaction(currentPartition)
       }
     }

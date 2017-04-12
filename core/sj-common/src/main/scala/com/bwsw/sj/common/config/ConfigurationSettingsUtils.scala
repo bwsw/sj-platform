@@ -14,18 +14,6 @@ object ConfigurationSettingsUtils {
     name.replaceFirst(domain + ".", "")
   }
 
-  def getClientRetryPeriod() = {
-    getIntConfigSetting(tgClientRetryPeriodTag)
-  }
-
-  def getServerRetryPeriod() = {
-    getIntConfigSetting(tgServerRetryPeriodTag)
-  }
-
-  def getRetryCount() = {
-    getIntConfigSetting(tgRetryCountTag)
-  }
-
   def getGeoIpAsNumFileName() = {
     getStringConfigSetting(geoIpAsNum)
   }
