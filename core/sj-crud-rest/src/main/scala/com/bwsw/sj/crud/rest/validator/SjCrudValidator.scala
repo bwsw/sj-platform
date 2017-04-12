@@ -178,10 +178,8 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageRes
           val batchCollectorClass = specification("batch-collector-class").asInstanceOf[String]
 
           //'batch-collector-class' field
-          val batchCollectorClassInterfaces = getBatchCollectorClassInterfaces(batchCollectorClass, classLoader)
-          if (!batchCollectorClassInterfaces.exists(x => x.equals(classOf[IBatchCollector]))) {
-            throw new Exception(createMessage("rest.validator.specification.class.should.implement", moduleType, "batch-collector-class", "BatchCollector"))
-          }
+          if (batchCollectorClass == null || batchCollectorClass.isEmpty)
+            throw new Exception(createMessage("rest.validator.specification.batchcollector.should.defined", moduleType, "batch-collector-class"))
         }
     }
 
