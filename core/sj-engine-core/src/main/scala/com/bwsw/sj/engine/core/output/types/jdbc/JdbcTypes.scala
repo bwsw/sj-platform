@@ -108,7 +108,6 @@ class JavaStringField(name: String, default: java.lang.String = "") extends Jdbc
   }
 }
 
-// TODO check correct data
 class HTMLStringField(name: String, default: java.lang.String = "") extends JdbcField[java.lang.String](name, default) {
   override def transform(fieldValue: Any): (PreparedStatement, Int) => Unit = fieldValue match {
     case null => (ps: PreparedStatement, idx: Int) => ps.setString(idx, null.asInstanceOf[java.lang.String])

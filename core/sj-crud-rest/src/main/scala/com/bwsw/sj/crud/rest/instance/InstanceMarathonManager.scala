@@ -44,7 +44,6 @@ trait InstanceMarathonManager {
   }
 
   def getLeaderTask(marathonTasks: CloseableHttpResponse): Option[MarathonTask] = {
-    //TODO: must get real framework leader!
     val entity = marathonEntitySerializer.deserialize[MarathonApplicationById](EntityUtils.toString(marathonTasks.getEntity, "UTF-8"))
     var leaderTask: Option[MarathonTask] = None
     if (entity.app.tasks != null)

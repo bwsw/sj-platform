@@ -24,23 +24,10 @@ class FrameworkScheduler extends Scheduler {
     TasksList.setMessage(s"Got error message: $message")
   }
 
-  def executorLost(driver: SchedulerDriver, executorId: ExecutorID, slaveId: SlaveID, status: Int): Unit = {
-    /// TODO:
-  }
-
-  def slaveLost(driver: SchedulerDriver, slaveId: SlaveID): Unit = {
-    /// TODO:
-  }
-
-  def disconnected(driver: SchedulerDriver): Unit = {
-    /// TODO:
-  }
-
   def frameworkMessage(driver: SchedulerDriver, executorId: ExecutorID, slaveId: SlaveID, data: Array[Byte]) {
     logger.debug(s"Got framework message: $data.")
     TasksList.setMessage(s"Got framework message: $data")
   }
-
 
   /**
    * Execute when task change status.
@@ -52,11 +39,6 @@ class FrameworkScheduler extends Scheduler {
     logger.info(s"GOT STATUS UPDATE")
     StatusHandler.handle(status)
   }
-
-  def offerRescinded(driver: SchedulerDriver, offerId: OfferID): Unit = {
-    /// TODO:
-  }
-
 
   /**
    * Obtain resources and launch tasks.
