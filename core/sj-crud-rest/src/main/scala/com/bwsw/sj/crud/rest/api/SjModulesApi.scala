@@ -170,9 +170,9 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                                     moduleName: String,
                                     moduleVersion: String,
                                     specification: SpecificationData,
-                                    filename: String) => post { (ctx: RequestContext) =>
-    validateContextWithSchema(ctx, "instanceSchema.json")
-    val instanceMetadata = deserializeOptions(getEntityFromContext(ctx), moduleType)
+                                    filename: String) => post { entity(as[String]) {entity =>
+    validateWithSchema(entity, "instanceSchema.json")
+    val instanceMetadata = deserializeOptions(entity, moduleType)
     val errors = validateInstance(instanceMetadata, specification, moduleType)
     val instancePassedValidation = validateInstance(specification, filename, instanceMetadata)
     var response: RestResponse = BadRequestRestResponse(
@@ -203,8 +203,8 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       }
     }
 
-    ctx.complete(restResponseToHttpResponse(response))
-  }
+    complete(restResponseToHttpResponse(response))
+  }}
 
   private val gettingModuleInstances = (moduleType: String,
                                         moduleName: String,
