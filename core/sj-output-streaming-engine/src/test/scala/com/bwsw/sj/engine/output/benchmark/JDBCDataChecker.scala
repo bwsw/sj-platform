@@ -34,9 +34,9 @@ object JDBCDataChecker extends App {
 
   val (jdbcClient, jdbcService) = openJdbcConnection(jdbcStream)
 
-  val stmt = jdbcClient.connection.createStatement()
+  val stmt = jdbcClient.createPreparedStatement(s"SELECT COUNT(1) FROM ${jdbcStream.name}")
   var jdbcOutputDataSize = 0
-  val res = stmt.executeQuery(s"SELECT COUNT(1) FROM ${jdbcStream.name}")
+  val res = stmt.executeQuery()
   while (res.next()) {
     jdbcOutputDataSize = res.getInt(1)
   }

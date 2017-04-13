@@ -1,8 +1,7 @@
 package com.bwsw.sj.engine.core.output.types.es
 
-import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.sj.engine.core.output.Entity
-import org.elasticsearch.index.query.{QueryBuilder, QueryBuilders}
+import org.elasticsearch.index.query.{MatchQueryBuilder, QueryBuilders}
 
 /**
   * Created by Ivan Kudryavtsev on 05.03.2017.
@@ -17,4 +16,6 @@ class ElasticsearchCommandBuilder(transactionFieldName: String, entity: Entity[S
 
     s"""{"$transactionFieldName": $transaction, """ + mv.map({ case (k: String, v: String) => s""""$k": $v""" }).mkString(", ") + "}"
   }
+
+  def buildDelete(transaction: Long): MatchQueryBuilder = QueryBuilders.matchQuery(transactionFieldName, transaction)
 }
