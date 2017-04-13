@@ -46,7 +46,7 @@ RUN cd /opt/bin/juggler/core/sj-frontend && \
     npm install -g typings && \
     npm install --unsafe-perm && \
     npm run-script build.prod && \
-    mkdir /var/www && \
+#    mkdir /var/www && \
     cp dist/prod/. /var/www/ -R && \
     rm -rf /root/.npm *
 
