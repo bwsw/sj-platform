@@ -133,7 +133,15 @@ object ProviderLiterals {
   final val kafkaType = "kafka"
   final val elasticsearchType = "ES"
   final val jdbcType = "JDBC"
-  val types = Seq(cassandraType, aerospikeType, zookeeperType, kafkaType, elasticsearchType, jdbcType)
+  final val restType = "REST"
+  val types = Seq(
+    cassandraType,
+    aerospikeType,
+    zookeeperType,
+    kafkaType,
+    elasticsearchType,
+    jdbcType,
+    restType)
 }
 
 object JdbcLiterals {
