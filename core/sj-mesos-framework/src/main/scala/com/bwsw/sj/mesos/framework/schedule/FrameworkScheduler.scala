@@ -24,10 +24,26 @@ class FrameworkScheduler extends Scheduler {
     TasksList.setMessage(s"Got error message: $message")
   }
 
+  def executorLost(driver: SchedulerDriver, executorId: ExecutorID, slaveId: SlaveID, status: Int): Unit = {
+    logger.debug(s"Executor ${slaveId.getValue}/${executorId.getValue} lost with status $status.")
+    TasksList.setMessage(s"Executor ${slaveId.getValue}/${executorId.getValue} lost with status $status.")
+  }
+
+  def slaveLost(driver: SchedulerDriver, slaveId: SlaveID): Unit = {
+    logger.debug(s"Slave ${slaveId.getValue} lost.")
+    TasksList.setMessage(s"Slave ${slaveId.getValue} lost.")
+  }
+
+  def disconnected(driver: SchedulerDriver): Unit = {
+    logger.debug(s"Framework disconnected.")
+    TasksList.setMessage(s"Framework disconnected.")
+  }
+
   def frameworkMessage(driver: SchedulerDriver, executorId: ExecutorID, slaveId: SlaveID, data: Array[Byte]) {
     logger.debug(s"Got framework message: $data.")
     TasksList.setMessage(s"Got framework message: $data")
   }
+
 
   /**
    * Execute when task change status.
@@ -39,6 +55,12 @@ class FrameworkScheduler extends Scheduler {
     logger.info(s"GOT STATUS UPDATE")
     StatusHandler.handle(status)
   }
+
+  def offerRescinded(driver: SchedulerDriver, offerId: OfferID): Unit = {
+    logger.debug(s"Offer ${offerId.getValue} rescinded.")
+    TasksList.setMessage(s"Offer ${offerId.getValue} rescinded.")
+  }
+
 
   /**
    * Obtain resources and launch tasks.
