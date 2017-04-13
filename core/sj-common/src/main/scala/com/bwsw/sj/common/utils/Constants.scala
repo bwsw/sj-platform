@@ -106,6 +106,7 @@ object ServiceLiterals {
   final val zookeeperType = "ZKCoord"
   final val aerospikeType = "ArspkDB"
   final val jdbcType = "JDBC"
+  final val restType = "REST"
 
   val types = Seq(
     cassandraType,
@@ -114,7 +115,8 @@ object ServiceLiterals {
     tstreamsType,
     zookeeperType,
     aerospikeType,
-    jdbcType
+    jdbcType,
+    restType
   )
   val typeToProviderType = Map(
     cassandraType -> ProviderLiterals.cassandraType,
@@ -122,7 +124,8 @@ object ServiceLiterals {
     kafkaType -> ProviderLiterals.kafkaType,
     zookeeperType -> ProviderLiterals.zookeeperType,
     aerospikeType -> ProviderLiterals.aerospikeType,
-    jdbcType -> ProviderLiterals.jdbcType
+    jdbcType -> ProviderLiterals.jdbcType,
+    restType -> ProviderLiterals.restType
   )
 }
 
