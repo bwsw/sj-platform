@@ -44,7 +44,8 @@ object Dependencies {
     "com.opencsv" % "opencsv" % "3.9",
     ("org.apache.avro" % "avro" % "1.8.1")
       .exclude("org.slf4j", "slf4j-api"),
-    "org.scalatest" % "scalatest_2.12" % "3.0.1"
+    "org.scalatest" % "scalatest_2.12" % "3.0.1",
+    "org.eclipse.jetty" % "jetty-client" % "9.4.3.v20170317"
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(
