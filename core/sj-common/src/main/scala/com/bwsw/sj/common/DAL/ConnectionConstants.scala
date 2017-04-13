@@ -22,7 +22,7 @@ object ConnectionConstants {
 
   var mongoEnvironment = Map[String, String]("MONGO_HOSTS" -> System.getenv("MONGO_HOSTS"))
   if (authEnable) {
-    if ((mongoUser.isEmpty || mongoPassword.isEmpty) && !isCorrectCredentials)
+    if ((mongoUser.nonEmpty && mongoPassword.nonEmpty) && isCorrectCredentials)
     mongoEnvironment = mongoEnvironment ++ Map[String, String](
       "MONGO_USER" -> mongoUser.get,
       "MONGO_PASSWORD" -> mongoPassword.get
@@ -38,7 +38,7 @@ object ConnectionConstants {
 
   def isCorrectCredentials: Boolean = {
     val client = com.mongodb.casbah.MongoClient(replicaSetSeeds = mongoHosts, credentials = mongoCredential)
-    checkConnection(client)
+    !checkConnection(client)
   }
 
   def checkConnection(client:com.mongodb.casbah.MongoClient):Boolean = {
