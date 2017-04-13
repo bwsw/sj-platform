@@ -6,10 +6,9 @@ import org.apache.mesos.Protos.{SlaveID, TaskID, TaskStatus}
 import com.bwsw.sj.mesos.framework.task.StatusHandler
 import com.bwsw.sj.mesos.framework.task.status.states.{MasterState, Slave, SlaveState}
 
-object SuccessHandler extends TaskStatusHandler {
-  protected var status: TaskStatus = null
+object SuccessHandler {
 
-  def process() = {
+  def process(status: TaskStatus) = {
     val currentSlave = getCurrentSlave(status.getSlaveId)
     val dir = extractSandbox(currentSlave, status.getTaskId)
     val dirUrl = s"http://${FrameworkUtil.master.getHostname}:${FrameworkUtil.master.getPort}/#/slaves/${currentSlave.id}/browse?path=$dir"

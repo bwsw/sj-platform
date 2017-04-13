@@ -3,10 +3,9 @@ package com.bwsw.sj.mesos.framework.task.status
 import com.bwsw.sj.mesos.framework.task.{TasksList, StatusHandler}
 import org.apache.mesos.Protos.TaskStatus
 
-object FailureHandler extends TaskStatusHandler {
-  protected var status: TaskStatus = null
+object FailureHandler {
 
-  def process() = {
+  def process(status: TaskStatus) = {
     TasksList(status.getTaskId.getValue).foreach(task => task.update(node = "", reason = status.getMessage))
     StatusHandler.logger.error(s"Error: ${status.getMessage}")
 

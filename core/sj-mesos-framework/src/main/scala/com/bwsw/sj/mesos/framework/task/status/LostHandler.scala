@@ -6,10 +6,9 @@ import org.apache.mesos.Protos.TaskStatus
 /**
   * Created by diryavkin_dn on 06.02.17.
   */
-object LostHandler extends TaskStatusHandler {
-  protected var status: TaskStatus = null
+object LostHandler {
 
-  def process() = {
+  def process(status: TaskStatus) = {
     TasksList(status.getTaskId.getValue).foreach(task => task.update(node = "", reason = status.getMessage))
     StatusHandler.logger.error(s"Killed: ${status.getMessage}")
 
