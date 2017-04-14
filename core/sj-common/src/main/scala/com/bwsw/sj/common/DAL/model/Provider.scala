@@ -1,17 +1,17 @@
 package com.bwsw.sj.common.DAL.model
 
-import java.net.URI
+import java.net.{InetSocketAddress, URI}
 import java.nio.channels.ClosedChannelException
 import java.util.Collections
 
-//import com.aerospike.client.{AerospikeClient, AerospikeException}
+import com.aerospike.client.{AerospikeClient, AerospikeException}
 import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.rest.entities.provider.ProviderData
 import com.bwsw.sj.common.utils.ProviderLiterals
-//import com.datastax.driver.core.Cluster
-//import com.datastax.driver.core.exceptions.NoHostAvailableException
+import com.datastax.driver.core.Cluster
+import com.datastax.driver.core.exceptions.NoHostAvailableException
 import kafka.javaapi.TopicMetadataRequest
 import kafka.javaapi.consumer.SimpleConsumer
 import org.apache.zookeeper.ZooKeeper
@@ -96,20 +96,20 @@ class Provider {
 
   private def checkCassandraConnection(address: String) = {
     val errors = ArrayBuffer[String]()
-//    try {
-//      val (host, port) = getHostAndPort(address)
-//
-//      val builder = Cluster.builder().addContactPointsWithPorts(new InetSocketAddress(host, port))
-//
-//      val client = builder.build()
-//      client.getMetadata
-//      client.close()
-//    } catch {
-//      case ex: NoHostAvailableException =>
-//        errors += s"Cannot gain an access to Cassandra on '$address'"
-//      case _: Throwable =>
-//        errors += s"Wrong host '$address'"
-//    }
+    try {
+      val (host, port) = getHostAndPort(address)
+
+      val builder = Cluster.builder().addContactPointsWithPorts(new InetSocketAddress(host, port))
+
+      val client = builder.build()
+      client.getMetadata
+      client.close()
+    } catch {
+      case ex: NoHostAvailableException =>
+        errors += s"Cannot gain an access to Cassandra on '$address'"
+      case _: Throwable =>
+        errors += s"Wrong host '$address'"
+    }
 
     errors
   }
@@ -118,16 +118,16 @@ class Provider {
     val errors = ArrayBuffer[String]()
     val (host, port) = getHostAndPort(address)
 
-//    try {
-//      val client = new AerospikeClient(host, port)
-//      if (!client.isConnected) {
-//        errors += s"Cannot gain an access to Aerospike on '$address'"
-//      }
-//      client.close()
-//    } catch {
-//      case ex: AerospikeException =>
-//        errors += s"Cannot gain an access to Aerospike on '$address'"
-//    }
+    try {
+      val client = new AerospikeClient(host, port)
+      if (!client.isConnected) {
+        errors += s"Cannot gain an access to Aerospike on '$address'"
+      }
+      client.close()
+    } catch {
+      case ex: AerospikeException =>
+        errors += s"Cannot gain an access to Aerospike on '$address'"
+    }
 
     errors
   }

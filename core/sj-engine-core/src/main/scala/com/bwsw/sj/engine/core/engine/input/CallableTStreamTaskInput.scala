@@ -97,8 +97,6 @@ class CallableTStreamTaskInput[T <: AnyRef](manager: TaskManager,
   override def setConsumerOffset(envelope: TStreamEnvelope[T]) = {
     logger.debug(s"Task: ${manager.taskName}. " +
       s"Change local offset of consumer: ${envelope.consumerName} (partition: ${envelope.partition}) to txn: ${envelope.id}.")
-    println(s"Task: ${manager.taskName}. " +
-      s"Change local offset of consumer: ${envelope.consumerName} (partition: ${envelope.partition}) to txn: ${envelope.id}.") //todo
     consumers(envelope.consumerName).getConsumer().setStreamPartitionOffset(envelope.partition, envelope.id)
   }
 

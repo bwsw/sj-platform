@@ -29,10 +29,6 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
       .exclude("io.netty", "netty"),
-    ("org.elasticsearch" % "elasticsearch" % "5.3.0")
-      .exclude("org.slf4j", "slf4j-log4j12")
-      .exclude("org.slf4j", "slf4j-api")
-      .exclude("log4j", "log4j"),
     "org.elasticsearch.client" % "transport" % "5.3.0",
     "org.apache.logging.log4j" % "log4j-core" % "2.7",
     "org.apache.logging.log4j" % "log4j-api" % "2.7",
@@ -43,7 +39,9 @@ object Dependencies {
     "com.opencsv" % "opencsv" % "3.9",
     ("org.apache.avro" % "avro" % "1.8.1")
       .exclude("org.slf4j", "slf4j-api"),
-    "org.scalatest" % "scalatest_2.12" % "3.0.1"
+    "com.aerospike" % "aerospike-client" % "3.3.4",
+    "com.datastax.cassandra" % "cassandra-driver-core" % "3.2.0",
+    "org.scalatest" % "scalatest_2.12" % "3.0.1" % "test"
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(
@@ -54,10 +52,10 @@ object Dependencies {
       .exclude("log4j", "log4j")
       .exclude("io.netty", "netty"),
     "org.apache.commons" % "commons-lang3" % "3.5",
-    ("com.mockrunner" % "mockrunner-jdbc" % "1.1.2")
+    ("com.mockrunner" % "mockrunner-jdbc" % "1.1.2" % "test")
       .exclude("jakarta-regexp", "jakarta-regexp")
       .exclude("xerces", "xerces"),
-    "org.scalatest" % "scalatest_2.12" % "3.0.1" % "provided"
+    "org.scalatest" % "scalatest_2.12" % "3.0.1" % "provided" % "test"
   ))
 
   lazy val sjRestDependencies = Def.setting(Seq(
@@ -99,10 +97,6 @@ object Dependencies {
 
   lazy val sjOutputEngineDependencies = Def.setting(Seq(
     "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
-    ("org.elasticsearch" % "elasticsearch" % "5.3.0" % "provided")
-      .exclude("org.slf4j", "slf4j-log4j12")
-      .exclude("org.slf4j", "slf4j-api")
-      .exclude("log4j", "log4j"),
     "org.elasticsearch.client" % "transport" % "5.3.0" % "provided",
     "org.apache.logging.log4j" % "log4j-core" % "2.7" % "provided",
     "org.apache.logging.log4j" % "log4j-api" % "2.7" % "provided"
