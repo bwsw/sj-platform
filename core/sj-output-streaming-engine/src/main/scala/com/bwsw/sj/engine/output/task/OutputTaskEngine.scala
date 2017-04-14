@@ -49,7 +49,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     val streamService = ConnectionRepository.getStreamService
     val outputs = instance.outputs
       .flatMap(x => streamService.get(x))
-    val options = instance.getOptionsAsMap()
+    val options = instance.options
     new OutputEnvironmentManager(options, outputs)
   }
 

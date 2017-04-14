@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 abstract class OutputProcessor[T <: AnyRef](outputStream: SjStream,
                                             performanceMetrics: OutputStreamingPerformanceMetrics) {
   protected val logger = LoggerFactory.getLogger(this.getClass)
-  protected def txnFieldName = "txn"
+  protected def transactionFieldName = "txn"
 
   /**
     * Main method of handler: prepare, register and send.
@@ -26,11 +26,11 @@ abstract class OutputProcessor[T <: AnyRef](outputStream: SjStream,
     */
   def process(envelopes: Seq[OutputEnvelope], inputEnvelope: TStreamEnvelope[T], wasFirstCheckpoint: Boolean) = {
     logger.debug("Process a set of envelopes that should be sent to output of specific type.")
-    if (!wasFirstCheckpoint) remove(inputEnvelope)
+    if (!wasFirstCheckpoint) delete(inputEnvelope)
     envelopes.foreach(envelope => registerAndSendEnvelope(envelope, inputEnvelope))
   }
 
-  def remove(envelope: TStreamEnvelope[T])
+  def delete(envelope: TStreamEnvelope[T])
 
   def close()
 

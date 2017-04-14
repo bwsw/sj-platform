@@ -20,44 +20,42 @@ class RegexInputValidator extends StreamingValidator {
     * @param options Option parameters
     * @return The result of the validation
     */
-  override def validate(options: Map[String, Any]): ValidationInfo = {
-    val isRequiredString = isRequired(isString)(_, _)
-
-    def isRequiredStringForValue(value: Any) = isString(value)
-
+  override def validate(options: String): ValidationInfo = {
     def validateField(field: Field) =
-      isRequiredStringForValue(field._type) &&
-        isRequiredStringForValue(field.defaultValue) &&
-        isRequiredStringForValue(field.name)
+      isRequiredStringField(Option(field._type)) &&
+        isRequiredStringField(Option(field.defaultValue)) &&
+        isRequiredStringField(Option(field.name))
 
     def validateRule(rule: Rule) =
-      isRequiredStringForValue(rule.regex) &&
-        isRequiredStringForValue(rule.outputStream) &&
+      isRequiredStringField(Option(rule.regex)) &&
+        isRequiredStringField(Option(rule.outputStream)) &&
         rule.fields.nonEmpty &&
         rule.fields.forall(validateField) &&
-        rule.distribution.forall(rule.fields.map(_.name).contains) &&
+        rule.uniqueKey.forall(rule.fields.map(_.name).contains) &&
         rule.distribution.forall(rule.fields.map(_.name).contains)
 
     val errors = ArrayBuffer[String]()
     val serializer = new JsonSerializer
-    val rules = options(RegexInputOptionsNames.rules).asInstanceOf[List[Any]]
-      .map(serializer.serialize)
-      .map(serializer.deserialize[Rule])
+    val regexInputOptions = serializer.deserialize[RegexInputOptions](options)
 
-    if (!isRequiredString(options, RegexInputOptionsNames.lineSeparator))
+    if (!isRequiredStringField(Option(regexInputOptions.lineSeparator)))
       errors += s"'${RegexInputOptionsNames.lineSeparator}' attribute is required and should be a non-empty string"
-    if (!isRequiredString(options, RegexInputOptionsNames.policy))
+    if (!isRequiredStringField(Option(regexInputOptions.policy)))
       errors += s"'${RegexInputOptionsNames.policy}' attribute is required and should be a non-empty string"
 
-    if (!Charset.isSupported(options(RegexInputOptionsNames.encoding).asInstanceOf[String]))
-      errors += s"'${RegexInputOptionsNames.encoding}' is not supported"
+    if (!isRequiredStringField(Option(regexInputOptions.encoding)))
+      errors += s"'${RegexInputOptionsNames.encoding}' attribute is required and should be a non-empty string"
+    else {
+      if (!Charset.isSupported(regexInputOptions.encoding))
+        errors += s"'${RegexInputOptionsNames.encoding}' is not supported"
+    }
 
-    if (!isRequiredString(options, RegexInputOptionsNames.fallbackStream))
+    if (!isRequiredStringField(Option(regexInputOptions.fallbackStream)))
       errors += s"'${RegexInputOptionsNames.fallbackStream}' attribute is required and should be a non-empty string"
 
-    if (rules.isEmpty)
+    if (regexInputOptions.rules.isEmpty)
       errors += s"'${RegexInputOptionsNames.rules}' attribute is required and should be a non-empty set"
-    if (!rules.forall(validateRule))
+    if (!regexInputOptions.rules.forall(validateRule))
       errors += s"'${RegexInputOptionsNames.rules}' hasn't passed validation"
 
     ValidationInfo(errors.isEmpty, errors)

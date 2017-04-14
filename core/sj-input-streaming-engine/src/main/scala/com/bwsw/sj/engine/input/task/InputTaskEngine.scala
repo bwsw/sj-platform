@@ -59,12 +59,11 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
    * @return Manager of environment of input streaming module
    */
   private def createModuleEnvironmentManager() = {
-    val options = instance.getOptionsAsMap()
     val streamService = ConnectionRepository.getStreamService
     val taggedOutputs = instance.outputs
       .flatMap(x => streamService.get(x))
 
-    new InputEnvironmentManager(options, taggedOutputs)
+    new InputEnvironmentManager(instance.options, taggedOutputs)
   }
 
   private def addProducersToCheckpointGroup() = {

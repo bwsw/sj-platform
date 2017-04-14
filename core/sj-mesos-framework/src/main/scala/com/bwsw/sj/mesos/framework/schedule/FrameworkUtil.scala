@@ -72,13 +72,6 @@ object FrameworkUtil {
     restAddress
   }
 
-  def getInstanceStatus: String = {
-    val optionInstance = ConnectionRepository.getInstanceService.get(FrameworkUtil.params("instanceId"))
-    if (optionInstance.isDefined) optionInstance.get.status
-    // TODO return if instance not defined
-    else ""
-  }
-
   def isInstanceStarted: Boolean = {
     updateInstance()
     instance.status == "started"

@@ -2,17 +2,45 @@ package com.bwsw.sj.engine.core.output.types.jdbc
 
 import java.sql.PreparedStatement
 
+import com.bwsw.common.jdbc.IJdbcClient
 import com.bwsw.sj.engine.core.output.Entity
 
 /**
   * Created by diryavkin_dn on 07.03.17.
   */
-class JdbcCommandBuilder(val transactionFieldName: String, entity: Entity[(PreparedStatement, Int) => Unit]) {
-  def buildInsert(transaction: Long, m: Map[String, Any], preparedStatement: PreparedStatement): PreparedStatement = {
+class JdbcCommandBuilder(client: IJdbcClient, transactionFieldName: String, entity: Entity[(PreparedStatement, Int) => Unit]) {
+  /**
+    * Create a select prepared statement according to txn field
+    */
+  def select: PreparedStatement = {
+    val sqlSelect = s"SELECT * FROM ${client.jdbcCCD.table} WHERE $transactionFieldName = ?"
+    client.createPreparedStatement(sqlSelect)
+  }
+
+  /**
+    * Create a remove prepared statement according to txn field
+    */
+  def delete: PreparedStatement = {
+    val sqlRemove = s"DELETE FROM ${client.jdbcCCD.table} WHERE $transactionFieldName = ?'"
+    client.createPreparedStatement(sqlRemove)
+  }
+
+  /**
+    * Create an insert prepared statement according to txn field and provided fields.
+    */
+  def insert: PreparedStatement = {
+    val fields = entity.getFields.mkString(",") + "," + transactionFieldName
+    val fieldsParams = List.fill(fields.split(",").length)("?").mkString(",")
+    val sqlInsert = s"INSERT INTO ${client.jdbcCCD.table} ($fields) VALUES ($fieldsParams);"
+    client.createPreparedStatement(sqlInsert)
+  }
+
+  def buildInsert(transaction: Long, fields: Map[String, Any]): PreparedStatement = {
+    val insertPreparedStatement = insert
     var t = 0
-    val mv = entity.getFields.map(f => if (m.contains(f)) {
+    val mv = entity.getFields.map(f => if (fields.contains(f)) {
       t+=1
-      t -> entity.getField(f).transform(m(f))
+      t -> entity.getField(f).transform(fields(f))
     }
     else {
       t+=1
@@ -20,18 +48,23 @@ class JdbcCommandBuilder(val transactionFieldName: String, entity: Entity[(Prepa
     }
     )
     t+=1
-    mv.foreach( {case (key: Int, value: ((PreparedStatement, Int) => Unit) ) => value.apply(preparedStatement, key)})
-    preparedStatement.setLong(t, transaction)
-    preparedStatement
+    mv.foreach( {case (key: Int, value: ((PreparedStatement, Int) => Unit) ) => value.apply(insertPreparedStatement, key)})
+    insertPreparedStatement.setLong(t, transaction)
+
+    insertPreparedStatement
   }
 
-  def buildDelete(transaction: Long, preparedStatement: PreparedStatement): PreparedStatement = {
-    preparedStatement.setLong(1, transaction)
-    preparedStatement
+  def buildDelete(transaction: Long): PreparedStatement = {
+    val deletePreparedStatement = delete
+    deletePreparedStatement.setLong(1, transaction)
+
+    deletePreparedStatement
   }
 
-  def exists(transaction: Long, preparedStatement: PreparedStatement): PreparedStatement = {
-    preparedStatement.setLong(1, transaction)
-    preparedStatement
+  def exists(transaction: Long): PreparedStatement = {
+    val selectPreparedStatement = delete
+    selectPreparedStatement.setLong(1, transaction)
+
+    selectPreparedStatement
   }
 }

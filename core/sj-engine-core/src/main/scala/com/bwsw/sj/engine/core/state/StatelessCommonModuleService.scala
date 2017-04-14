@@ -17,7 +17,7 @@ class StatelessCommonModuleService(manager: CommonTaskManager, checkpointGroup: 
   private val streamService = ConnectionRepository.getStreamService
 
   val environmentManager = new ModuleEnvironmentManager(
-    instance.getOptionsAsMap(),
+    instance.options,
     outputProducers,
     instance.outputs.flatMap(x => streamService.get(x)),
     producerPolicyByOutput,

@@ -2,6 +2,7 @@ package com.bwsw.sj.module.input.csv
 
 import java.nio.charset.Charset
 
+import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.engine.{StreamingValidator, ValidationInfo}
 import com.bwsw.sj.common.utils.ValidationUtils._
 
@@ -14,31 +15,35 @@ import scala.collection.mutable.ArrayBuffer
   */
 class CSVInputValidator extends StreamingValidator {
 
-  override def validate(options: Map[String, Any]): ValidationInfo = {
+  override def validate(options: String): ValidationInfo = {
     val errors = ArrayBuffer[String]()
-    if (!isRequired(isString)(options, CSVInputOptionNames.lineSeparator))
+    val serializer = new JsonSerializer
+    val csvInputOptions = serializer.deserialize[CSVInputOptions](options)
+
+    if (!isRequiredStringField(Option(csvInputOptions.lineSeparator)))
       errors += s"'${CSVInputOptionNames.lineSeparator}' attribute is required and should be a non-empty string"
-    if (!isRequired(isString)(options, CSVInputOptionNames.encoding))
+    if (!isRequiredStringField(Option(csvInputOptions.encoding)))
       errors += s"'${CSVInputOptionNames.encoding}' attribute is required and should be a non-empty string"
+    else {
+      if (!Charset.isSupported(csvInputOptions.encoding))
+        errors += s"'${CSVInputOptionNames.encoding}' is not supported"
+    }
 
-    if (!Charset.isSupported(options(CSVInputOptionNames.encoding).asInstanceOf[String]))
-      errors += s"'${CSVInputOptionNames.encoding}' is not supported"
-
-    if (!isRequired(isString)(options, CSVInputOptionNames.outputStream))
+    if (!isRequiredStringField(Option(csvInputOptions.outputStream)))
       errors += s"'${CSVInputOptionNames.outputStream}' attribute is required and should be a non-empty string"
-    if (!isRequired(isString)(options, CSVInputOptionNames.fallbackStream))
+    if (!isRequiredStringField(Option(csvInputOptions.fallbackStream)))
       errors += s"'${CSVInputOptionNames.fallbackStream}' attribute is required and should be a non-empty string"
 
-    if (!isOption(isString)(options, CSVInputOptionNames.fieldSeparator))
+    if (!isOptionStringField(csvInputOptions.fieldSeparator))
       errors += s"'${CSVInputOptionNames.fieldSeparator}' should be a non-empty string"
 
-    if (!isOption(isString)(options, CSVInputOptionNames.quoteSymbol))
-      errors += s"'${CSVInputOptionNames.fieldSeparator}' should be a non-empty string"
+    if (!isOptionStringField(csvInputOptions.quoteSymbol))
+      errors += s"'${CSVInputOptionNames.quoteSymbol}' should be a non-empty string"
 
-    if (!checkAvroFields(
-      options,
-      CSVInputOptionNames.fields,
-      Seq(CSVInputOptionNames.uniqueKey, CSVInputOptionNames.distribution)))
+    if (!checkFields(
+      Option(csvInputOptions.fields),
+      Option(csvInputOptions.uniqueKey),
+      Option(csvInputOptions.distribution)))
       errors += s"'${CSVInputOptionNames.fields}' hasn't passed validation"
 
     ValidationInfo(errors.isEmpty, errors)

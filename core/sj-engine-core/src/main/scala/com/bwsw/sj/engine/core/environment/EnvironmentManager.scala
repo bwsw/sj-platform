@@ -3,8 +3,6 @@ package com.bwsw.sj.engine.core.environment
 import com.bwsw.sj.common.DAL.model.SjStream
 import org.slf4j.LoggerFactory
 
-import scala.collection.Map
-
 /**
  * A common class providing for user methods that can be used in a module of specific type
  *
@@ -14,7 +12,7 @@ import scala.collection.Map
  * @param outputs Set of output streams of instance parameters
  */
 
-class EnvironmentManager(val options: Map[String, Any], val outputs: Array[SjStream]) {
+class EnvironmentManager(val options: String, val outputs: Array[SjStream]) {
 
   protected val logger = LoggerFactory.getLogger(this.getClass)
 

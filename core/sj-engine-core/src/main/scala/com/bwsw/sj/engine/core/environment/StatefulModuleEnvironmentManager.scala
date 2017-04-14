@@ -23,7 +23,7 @@ import scala.collection._
  */
 
 class StatefulModuleEnvironmentManager(stateStorage: StateStorage,
-                                       options: Map[String, Any],
+                                       options: String,
                                        producers: Map[String, Producer],
                                        outputs: Array[SjStream],
                                        producerPolicyByOutput: mutable.Map[String, (String, ModuleOutput)],

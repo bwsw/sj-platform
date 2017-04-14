@@ -30,10 +30,10 @@ object StatusHandler {
       logger.info(s"Status: ${status.getState}.")
 
       status.getState.toString match {
-        case "TASK_FAILED" | "TASK_ERROR" => FailureHandler.setStatus(status).process()
-        case "TASK_RUNNING" => SuccessHandler.setStatus(status).process()
-        case "TASK_KILLED" => KilledHandler.setStatus(status).process()
-        case "TASK_LOST" => LostHandler.setStatus(status).process()
+        case "TASK_FAILED" | "TASK_ERROR" => FailureHandler.process(status)
+        case "TASK_RUNNING" => SuccessHandler.process(status)
+        case "TASK_KILLED" => KilledHandler.process(status)
+        case "TASK_LOST" => LostHandler.process(status)
         case _ =>
       }
     }
