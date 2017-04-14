@@ -21,7 +21,7 @@ class JdbcCommandBuilder(client: IJdbcClient, transactionFieldName: String, enti
     * Create a remove prepared statement according to txn field
     */
   def delete: PreparedStatement = {
-    val sqlRemove = s"DELETE FROM ${client.jdbcCCD.table} WHERE $transactionFieldName = ?'"
+    val sqlRemove = s"DELETE FROM ${client.jdbcCCD.table} WHERE $transactionFieldName = ?"
     client.createPreparedStatement(sqlRemove)
   }
 
@@ -62,7 +62,7 @@ class JdbcCommandBuilder(client: IJdbcClient, transactionFieldName: String, enti
   }
 
   def exists(transaction: Long): PreparedStatement = {
-    val selectPreparedStatement = delete
+    val selectPreparedStatement = select
     selectPreparedStatement.setLong(1, transaction)
 
     selectPreparedStatement
