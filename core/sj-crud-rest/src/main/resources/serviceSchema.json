@@ -78,6 +78,14 @@
     "database": {
       "description": "A database name if the service is JDBC type",
       "type": "string"
+    },
+    "basePath": {
+      "description": "A base path if the service is REST type",
+      "type": "string"
+    },
+    "httpVersion": {
+      "description": "A version of HTTP if the service is REST type",
+      "type": "string"
     }
   }
 }
