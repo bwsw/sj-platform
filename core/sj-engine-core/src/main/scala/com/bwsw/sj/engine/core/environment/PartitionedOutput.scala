@@ -12,11 +12,11 @@ import scala.collection._
   * @param producer Producer for specific output of stream
   */
 
-class PartitionedOutput(producer: Producer[Array[Byte]],
+class PartitionedOutput(producer: Producer,
                         performanceMetrics: PerformanceMetrics,
                         classLoader: ClassLoader) extends ModuleOutput(performanceMetrics, classLoader) {
 
-  private val transactions = mutable.Map[Int, ProducerTransaction[Array[Byte]]]()
+  private val transactions = mutable.Map[Int, ProducerTransaction]()
   private val streamName = producer.stream.name
 
   def put(data: AnyRef, partition: Int) = {

@@ -9,7 +9,6 @@ import com.bwsw.sj.engine.batch.utils.StateHelper
 import scala.collection.JavaConverters._
 
 object SjBatchModuleStatefulKafkaChecker extends App {
-  open()
   val streamService = ConnectionRepository.getStreamService
   val objectSerializer = new ObjectSerializer()
 
@@ -74,7 +73,6 @@ object SjBatchModuleStatefulKafkaChecker extends App {
 
   consumer.stop()
   outputConsumers.foreach(x => x.stop())
-  close()
   ConnectionRepository.close()
 
   println("DONE")

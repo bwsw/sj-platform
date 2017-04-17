@@ -22,10 +22,10 @@ class StubOutputExecutor(manager: OutputEnvironmentManager) extends OutputStream
    * @param envelope Input T-Stream envelope
    * @return List of output envelopes
    */
-  override def onMessage(envelope: TStreamEnvelope[(Integer, String)]): List[OutputEnvelope] = {
+  override def onMessage(envelope: TStreamEnvelope[(Integer, String)]): Seq[OutputEnvelope] = {
     println("Processed: " + envelope.data.size + " elements")
 
-    val list = envelope.data.map {
+    val list = envelope.data.dequeueAll(_ => true).map {
       case (i, s) =>
 
       val data: StubEsData = new StubEsData

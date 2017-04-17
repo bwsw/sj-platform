@@ -6,7 +6,6 @@ import com.bwsw.sj.engine.core.entities.{KafkaEnvelope, TStreamEnvelope, Batch}
 import com.bwsw.sj.engine.batch.module.DataFactory._
 
 object SjBatchModuleStatelessTstreamChecker extends App {
-  open()
   val streamService = ConnectionRepository.getStreamService
   val objectSerializer = new ObjectSerializer()
 
@@ -74,7 +73,6 @@ object SjBatchModuleStatelessTstreamChecker extends App {
 
   inputTstreamConsumers.foreach(x => x.stop())
   outputConsumers.foreach(x => x.stop())
-  close()
   ConnectionRepository.close()
 
   println("DONE")

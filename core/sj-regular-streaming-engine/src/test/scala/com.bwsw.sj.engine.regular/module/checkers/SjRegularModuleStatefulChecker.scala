@@ -8,7 +8,6 @@ import com.bwsw.sj.engine.regular.utils.StateHelper
 import scala.collection.JavaConverters._
 
 object SjRegularModuleStatefulChecker extends App {
-  open()
   val streamService = ConnectionRepository.getStreamService
   val objectSerializer: ObjectSerializer = new ObjectSerializer()
 
@@ -75,18 +74,18 @@ object SjRegularModuleStatefulChecker extends App {
   val initialState = StateHelper.getState(consumer, objectSerializer)
 
   assert(totalInputElements == totalOutputElements,
-    "Count of all txns elements that are consumed from output stream should equals count of all txns elements that are consumed from input stream")
+    s"Count of all txns elements that are consumed from input stream ($totalInputElements) " +
+      s"should equals count of all txns elements that are consumed from output stream ($totalOutputElements)")
 
   assert(inputElements.forall(x => outputElements.contains(x)) && outputElements.forall(x => inputElements.contains(x)),
     "All txns elements that are consumed from output stream should equals all txns elements that are consumed from input stream")
 
   assert(initialState("sum") == inputElements.sum,
-    "Sum of all txns elements that are consumed from input stream should equals state variable sum")
+    s"Sum of all txns elements that are consumed from input stream (${initialState("sum")}) should equals state variable sum (${inputElements.sum})")
 
   consumer.stop()
   inputTstreamConsumers.foreach(x => x.stop())
   outputConsumers.foreach(x => x.stop())
-  close()
   ConnectionRepository.close()
 
   println("DONE")

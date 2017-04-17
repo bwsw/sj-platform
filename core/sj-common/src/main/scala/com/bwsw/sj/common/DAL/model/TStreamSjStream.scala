@@ -1,22 +1,19 @@
 package com.bwsw.sj.common.DAL.model
 
 import com.bwsw.sj.common.rest.entities.stream.TStreamStreamData
-import com.bwsw.sj.common.utils._
-import com.bwsw.tstreams.streams.StreamService
-import org.mongodb.morphia.annotations.Embedded
-import SjStreamUtilsForCreation._
+import com.bwsw.sj.common.utils.StreamLiterals
+import com.bwsw.tstreams.common.StorageClient
+import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 
 class TStreamSjStream() extends SjStream {
   var partitions: Int = 0
-  @Embedded var generator: Generator = new Generator(GeneratorLiterals.localType)
 
   def this(name: String,
            description: String,
            partitions: Int,
            service: Service,
            streamType: String,
-           tags: Array[String],
-           generator: Generator) = {
+           tags: Array[String]) = {
     this()
     this.name = name
     this.description = description
@@ -24,7 +21,6 @@ class TStreamSjStream() extends SjStream {
     this.service = service
     this.streamType = streamType
     this.tags = tags
-    this.generator = generator
   }
 
   override def asProtocolStream() = {
@@ -32,33 +28,42 @@ class TStreamSjStream() extends SjStream {
     super.fillProtocolStream(streamData)
 
     streamData.partitions = this.partitions
-    streamData.generator = this.generator.asProtocolGenerator()
 
     streamData
   }
 
   override def create() = {
-    val service = this.service.asInstanceOf[TStreamService]
-    val dataStorage = createDataStorage(service)
-    val metadataStorage = createMetadataStorage(service)
+    val tStreamService = this.service.asInstanceOf[TStreamService]
+    val factory = new TStreamsFactory()
+    factory.setProperty(ConfigurationOptions.Coordination.prefix, tStreamService.prefix)
+      .setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.hosts.mkString(","))
+      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, tStreamService.provider.hosts.mkString(","))
+      .setProperty(ConfigurationOptions.Stream.name, name)
+      .setProperty(ConfigurationOptions.StorageClient.Auth.key, tStreamService.token)
+    val storageClient: StorageClient = factory.getStorageClient()
 
-    if (!StreamService.isExist(this.name, metadataStorage)) {
-      StreamService.createStream(
+    if (!storageClient.checkStreamExists(this.name)) {
+      storageClient.createStream(
         this.name,
         this.partitions,
         StreamLiterals.ttl,
-        this.description,
-        metadataStorage,
-        dataStorage
+        this.description
       )
     }
   }
 
   override def delete() = {
-    val service = this.service.asInstanceOf[TStreamService]
-    val metadataStorage = createMetadataStorage(service)
-    if (StreamService.isExist(this.name, metadataStorage)) {
-      StreamService.deleteStream(this.name, metadataStorage)
+    val tStreamService = this.service.asInstanceOf[TStreamService]
+    val factory = new TStreamsFactory()
+    factory.setProperty(ConfigurationOptions.Coordination.prefix, tStreamService.prefix)
+      .setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.hosts.mkString(","))
+      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, tStreamService.provider.hosts.mkString(","))
+      .setProperty(ConfigurationOptions.Stream.name, name)
+      .setProperty(ConfigurationOptions.StorageClient.Auth.key, tStreamService.token)
+    val storageClient = factory.getStorageClient()
+
+    if (storageClient.checkStreamExists(this.name)) {
+      storageClient.deleteStream(this.name)
     }
   }
 }

@@ -5,7 +5,6 @@ import com.bwsw.sj.engine.input.DataFactory._
 
 object DuplicateChecker extends App {
 
-  open()
   val streamService = ConnectionRepository.getStreamService
 
   val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(streamService, x.toString))
@@ -37,7 +36,6 @@ object DuplicateChecker extends App {
     s"Count of all txns elements that are consumed from output stream($totalOutputElements) should equals count of the elements that are consumed from input socket excluding the duplicates(${totalInputElements - totalDuplicates})")
 
   outputConsumers.foreach(x => x.stop())
-  close()
   ConnectionRepository.close()
 
   println("DONE")

@@ -64,18 +64,14 @@ class CommonTaskManager() extends TaskManager {
     * @param offset     Offset policy that describes where a consumer starts
     * @return T-stream consumer
     */
-  def createConsumer(stream: TStreamSjStream, partitions: List[Int], offset: IOffset): Consumer[Array[Byte]] = {
+  def createConsumer(stream: TStreamSjStream, partitions: List[Int], offset: IOffset): Consumer = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head}).")
 
-    val transactionGenerator = getTransactionGenerator(stream)
-
     setStreamOptions(stream)
 
-    tstreamFactory.getConsumer[Array[Byte]](
+    tstreamFactory.getConsumer(
       "consumer_for_" + taskName + "_" + stream.name,
-      transactionGenerator,
-      converter,
       (0 until stream.partitions).toSet,
       offset)
   }

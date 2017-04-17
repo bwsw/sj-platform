@@ -30,25 +30,7 @@
       "description": "The number of stream partitions if the stream is tstream or kafka type",
       "type": "number"
     },
-    "generator": {
-      "description": "A generator of transaction id if the stream is tstream type",
-      "type": "object",
-      "properties": {
-        "generatorType": {
-          "description": "The generator type",
-          "type": "string"
-        },
-        "service": {
-          "description": "The generator service",
-          "type": "string"
-        },
-        "instanceCount": {
-          "description": "A number of generator instances",
-          "type": "number"
-        }
-      }
-    },
-    "replicationFactor": {
+    "replication-factor": {
       "description": "The number of replication if the stream is kafka type",
       "type": "number"
     },

@@ -4,7 +4,6 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
-import com.bwsw.sj.common.utils.StreamLiterals._
 
 class RegularInstanceMetadata extends InstanceMetadata with AvroSchemaForInstanceMetadata {
   var inputs: Array[String] = Array()
@@ -45,11 +44,6 @@ class RegularInstanceMetadata extends InstanceMetadata with AvroSchemaForInstanc
     super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion)
     castParallelismToNumber(getStreamsPartitions(clearInputs))
     this.executionPlan.fillTasks(createTaskStreams(), createTaskNames(this.parallelism.asInstanceOf[Int], this.name))
-
-    val inputStreams = getStreams(clearInputs)
-    val outputStreams = this.outputs
-    val streams = inputStreams.filter(s => s.streamType.equals(tstreamType)).map(_.name).union(outputStreams)
-    fillStages(streams)
   }
 
   override def createStreams() = {

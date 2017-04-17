@@ -31,6 +31,7 @@ val commonSettings = Seq(
 
   resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
   resolvers += "Twitter Repository" at "http://maven.twttr.com",
+  resolvers += "Oracle Maven2 Repo" at "http://download.oracle.com/maven",
 
   assemblyMergeStrategy in assembly := {
     case PathList("org", "apache", "commons", "logging", xs@_*) => MergeStrategy.first
@@ -72,7 +73,7 @@ lazy val sj = (project in file(".")).settings(publish := {})
   .aggregate(common,
     engineCore, crudRest,
     inputStreamingEngine, regularStreamingEngine, batchStreamingEngine, outputStreamingEngine,
-    framework, transactionGenerator,
+    framework,
     stubInput, stubRegular, stubBatch, stubESOutput, stubJDBCOutput,
     pmOutput, csvInput, regexInput,
     sumBatch
@@ -139,11 +140,6 @@ lazy val framework = Project(id = "sj-mesos-framework",
   .settings(
     libraryDependencies ++= Dependencies.sjFrameworkDependencies.value
   )
-  .dependsOn(common)
-
-lazy val transactionGenerator = Project(id = "sj-transaction-generator",
-  base = file("./core/sj-transaction-generator"))
-  .settings(commonSettings: _*)
   .dependsOn(common)
 
 lazy val stubInput = Project(id = "sj-stub-input-streaming",

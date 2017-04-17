@@ -11,11 +11,11 @@ import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer
   * @param producer Producer for specific output of stream
   */
 
-class RoundRobinOutput(producer: Producer[Array[Byte]],
+class RoundRobinOutput(producer: Producer,
                        performanceMetrics: PerformanceMetrics,
                        classLoader: ClassLoader) extends ModuleOutput(performanceMetrics, classLoader) {
 
-  private var maybeTransaction: Option[ProducerTransaction[Array[Byte]]] = None
+  private var maybeTransaction: Option[ProducerTransaction] = None
   private val streamName = producer.stream.name
 
   def put(data: AnyRef) = {

@@ -70,7 +70,7 @@ class RetrievableTStreamTaskInput[T <: AnyRef](manager: CommonTaskManager,
     })
   }
 
-  private def getAvailableTransactions(consumer: Consumer[Array[Byte]]) = {
+  private def getAvailableTransactions(consumer: Consumer) = {
     consumer.getPartitions().toSeq.flatMap(partition => {
       val fromOffset = getFromOffset(consumer, partition)
       val lastTransaction = consumer.getLastTransaction(partition)
@@ -79,9 +79,9 @@ class RetrievableTStreamTaskInput[T <: AnyRef](manager: CommonTaskManager,
     })
   }
 
-  private def transactionsToEnvelopes(transactions: Seq[ConsumerTransaction[Array[Byte]]], consumer: Consumer[Array[Byte]]) = {
+  private def transactionsToEnvelopes(transactions: Seq[ConsumerTransaction], consumer: Consumer) = {
     val stream = ConnectionRepository.getStreamService.get(consumer.stream.name).get
-    transactions.map((transaction: ConsumerTransaction[Array[Byte]]) => {
+    transactions.map((transaction: ConsumerTransaction) => {
       val tempTransaction = consumer.buildTransactionObject(transaction.getPartition(), transaction.getTransactionID(), transaction.getCount()).get //todo fix it next milestone TR1216
       tstreamOffsetsStorage((consumer.name, tempTransaction.getPartition())) = tempTransaction.getTransactionID()
       val data = transaction.getAll().map(envelopeDataSerializer.deserialize)
@@ -95,7 +95,7 @@ class RetrievableTStreamTaskInput[T <: AnyRef](manager: CommonTaskManager,
     })
   }
 
-  private def getFromOffset(consumer: Consumer[Array[Byte]], partition: Int) = {
+  private def getFromOffset(consumer: Consumer, partition: Int) = {
     if (tstreamOffsetsStorage.isDefinedAt((consumer.name, partition))) tstreamOffsetsStorage((consumer.name, partition))
     else consumer.getCurrentOffset(partition)
   }

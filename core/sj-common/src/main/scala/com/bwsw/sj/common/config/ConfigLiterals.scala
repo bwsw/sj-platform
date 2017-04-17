@@ -9,7 +9,6 @@ object ConfigLiterals {
   final val jdbcDomain = "jdbc"
   final val restDomain = "rest"
   val domains = Seq(systemDomain, tstreamsDomain, kafkaDomain, elasticsearchDomain, zookeeperDomain, jdbcDomain, restDomain)
-  val transactionGeneratorTag = s"$systemDomain.current-transaction-generator"
   val hostOfCrudRestTag = s"$systemDomain.crud-rest-host"
   val portOfCrudRestTag = s"$systemDomain.crud-rest-port"
   val marathonTag = s"$systemDomain.marathon-connect"
@@ -19,9 +18,6 @@ object ConfigLiterals {
 
   val jdbcTimeoutTag = s"$jdbcDomain.timeout"
   val restTimeoutTag = s"$restDomain.rest-timeout"
-  val tgClientRetryPeriodTag = s"$systemDomain.transaction-generator-client-retry-period"
-  val tgServerRetryPeriodTag = s"$systemDomain.transaction-generator-server-retry-period"
-  val tgRetryCountTag = s"$systemDomain.transaction-generator-retry-count"
   val kafkaSubscriberTimeoutTag = s"$systemDomain.subscriber-timeout"
   val geoIpAsNum = s"$systemDomain.geo-ip-as-num"
   val geoIpAsNumv6 = s"$systemDomain.geo-ip-as-num-v6"

@@ -19,7 +19,6 @@ class ElasticsearchClient(hosts: Set[(String, Int)]) {
   private val client = new PreBuiltTransportClient(Settings.EMPTY)
   hosts.foreach(x => setTransportAddressToClient(x._1, x._2))
   private val deleteByQueryAction = DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
-  private val queryBuilder = new BoolQueryBuilder()
 
   private def setTransportAddressToClient(host: String, port: Int) = {
     logger.debug(s"Add a new transport address: '$host:$port' to an elasticsearch client.")
@@ -40,7 +39,8 @@ class ElasticsearchClient(hosts: Set[(String, Int)]) {
   }
 
   def deleteDocuments(index: String, documentType: String, query: QueryBuilder = QueryBuilders.matchAllQuery()) = {
-    val queryWithType = queryBuilder.must(query).must(QueryBuilders.matchQuery(typeName, documentType))
+    val queryWithType = new BoolQueryBuilder().must(query).must(QueryBuilders.matchQuery(typeName, documentType))
+
     deleteByQueryAction
       .filter(queryWithType)
       .source(index)

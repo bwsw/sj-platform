@@ -14,18 +14,6 @@ object ConfigurationSettingsUtils {
     name.replaceFirst(domain + ".", "")
   }
 
-  def getClientRetryPeriod() = {
-    getIntConfigSetting(tgClientRetryPeriodTag)
-  }
-
-  def getServerRetryPeriod() = {
-    getIntConfigSetting(tgServerRetryPeriodTag)
-  }
-
-  def getRetryCount() = {
-    getIntConfigSetting(tgRetryCountTag)
-  }
-
   def getGeoIpAsNumFileName() = {
     getStringConfigSetting(geoIpAsNum)
   }
@@ -44,10 +32,6 @@ object ConfigurationSettingsUtils {
 
   def getFrameworkJarName() = {
     getStringConfigSetting(createConfigurationSettingName(ConfigLiterals.systemDomain, getStringConfigSetting(frameworkTag)))
-  }
-
-  def getTransactionGeneratorJarName() = {
-    getStringConfigSetting(createConfigurationSettingName(ConfigLiterals.systemDomain, getStringConfigSetting(transactionGeneratorTag)))
   }
 
   def getCrudRestHost() = {

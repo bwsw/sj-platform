@@ -81,7 +81,27 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                 val response = NotFoundRestResponse(MessageResponseEntity(createMessage("rest.custom.jars.file.notfound", name)))
                 complete(restResponseToHttpResponse(response))
               }
-            }
+            } ~
+              delete {
+                val fileMetadatas = fileMetadataDAO.getByParameters(Map("filetype" -> "custom", "filename" -> name))
+                if (fileMetadatas.isEmpty) {
+                  throw CustomJarNotFound(createMessage("rest.custom.jars.file.notfound", s"$name"), s"$name")
+                }
+                val fileMetadata = fileMetadatas.head
+
+                var response: RestResponse = InternalServerErrorRestResponse(
+                  MessageResponseEntity(s"Can't delete jar '$name' for some reason. It needs to be debugged")
+                )
+
+                if (storage.delete(name)) {
+                  configService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, fileMetadata.specification.name + "-" + fileMetadata.specification.version))
+                  response = OkRestResponse(
+                    MessageResponseEntity(createMessage("rest.custom.jars.file.deleted.by.filename", name))
+                  )
+                }
+
+                complete(restResponseToHttpResponse(response))
+              }
           } ~
             pathSuffix(Segment) { (version: String) =>
               pathEndOrSingleSlash {

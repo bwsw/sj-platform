@@ -6,7 +6,6 @@ import com.bwsw.sj.engine.regular.module.DataFactory._
 import scala.collection.JavaConverters._
 
 object SjRegularModuleStatelessKafkaChecker extends App {
-  open()
   val streamService = ConnectionRepository.getStreamService
   val objectSerializer = new ObjectSerializer()
 
@@ -56,7 +55,6 @@ object SjRegularModuleStatelessKafkaChecker extends App {
     "All txns elements that are consumed from output stream should equals all txns elements that are consumed from input stream")
 
   outputConsumers.foreach(x => x.stop())
-  close()
   ConnectionRepository.close()
 
   println("DONE")

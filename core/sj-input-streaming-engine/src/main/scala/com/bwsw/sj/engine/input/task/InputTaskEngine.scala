@@ -37,7 +37,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"input-task-${manager.taskName}-engine")
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val producers: Map[String, Producer[Array[Byte]]] = manager.outputProducers
+  private val producers: Map[String, Producer] = manager.outputProducers
   private var transactionsByStreamPartitions = createTxnsStorage()
   private val checkpointGroup = new CheckpointGroup()
   private val instance = manager.instance.asInstanceOf[InputInstance]
@@ -273,7 +273,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
    * @param partition Partition of stream
    * @return Current open transaction
    */
-  private def putTxn(stream: String, partition: Int, transaction: ProducerTransaction[Array[Byte]]) = {
+  private def putTxn(stream: String, partition: Int, transaction: ProducerTransaction) = {
     logger.debug(s"Task name: ${manager.taskName}. " +
       s"Put txn for stream: $stream, partition: $partition.")
     transactionsByStreamPartitions(stream) += (partition -> transaction)
@@ -288,7 +288,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
     val streams = producers.keySet
     logger.debug(s"Task name: ${manager.taskName}. " +
       s"Create a storage for keeping txns for each partition of output streams.")
-    streams.map(x => (x, mutable.Map[Int, ProducerTransaction[Array[Byte]]]())).toMap
+    streams.map(x => (x, mutable.Map[Int, ProducerTransaction]())).toMap
   }
 }
 

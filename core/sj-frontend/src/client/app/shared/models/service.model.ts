@@ -9,14 +9,10 @@ export class ServiceModel extends BaseModel {
   keyspace: string;
   namespace: string;
   provider: string;
-  metadataProvider: string;
-  metadataNamespace: string;
-  dataProvider: string;
-  dataNamespace: string;
-  lockProvider: string;
-  lockNamespace: string;
   zkProvider: string;
   zkNamespace: string;
+  prefix: string;
+  token: string;
   index: string;
   login: string;
   password: string;

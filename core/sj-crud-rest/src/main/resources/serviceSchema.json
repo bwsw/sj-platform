@@ -20,7 +20,7 @@
       "type": "string"
     },
     "provider": {
-      "description": "The provider of service if the service is zookeeper/aerospike/elasticsearch/kafka/JDBC type",
+      "description": "The provider of service",
       "type": "string"
     },
     "keyspace": {
@@ -47,28 +47,12 @@
       "description": "A zookeeper provider if the service is kafka type",
       "type": "string"
     },
-    "metadataNamespace": {
-      "description": "A cassandra namespace if the service is tstream type",
+    "prefix": {
+      "description": "A znode path if the service is tstream type",
       "type": "string"
     },
-    "metadataProvider": {
-      "description": "A cassandra provider if the service is tstream type",
-      "type": "string"
-    },
-    "dataNamespace": {
-      "description": "A cassandra or aerospike namespace if the service is tstream type",
-      "type": "string"
-    },
-    "dataProvider": {
-      "description": "A cassandra or aerospike provider if the service is tstream type",
-      "type": "string"
-    },
-    "lockNamespace": {
-      "description": "A zookeeper namespace if the service is tstream type",
-      "type": "string"
-    },
-    "lockProvider": {
-      "description": "A zookeeper provider if the service is tstream type",
+    "token": {
+      "description": "A unique key to connect to server if the service is tstream type",
       "type": "string"
     },
     "driver": {

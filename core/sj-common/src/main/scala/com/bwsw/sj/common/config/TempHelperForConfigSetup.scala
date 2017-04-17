@@ -11,8 +11,6 @@ object TempHelperForConfigSetup extends App {
 
   val configService = ConnectionRepository.getConfigService
 
-  configService.save(new ConfigurationSetting(ConfigLiterals.transactionGeneratorTag, "com.bwsw.tg-1.0", ConfigLiterals.systemDomain))
-
   configService.save(new ConfigurationSetting(ConfigLiterals.frameworkTag, "com.bwsw.fw-1.0", ConfigLiterals.systemDomain))
 
   configService.save(new ConfigurationSetting(createConfigurationSettingName(ConfigLiterals.systemDomain, "regular-streaming-validator-class"),
@@ -33,9 +31,6 @@ object TempHelperForConfigSetup extends App {
   configService.save(new ConfigurationSetting(ConfigLiterals.jdbcTimeoutTag, "6000", ConfigLiterals.jdbcDomain))
   configService.save(new ConfigurationSetting(ConfigLiterals.restTimeoutTag, "5000", ConfigLiterals.restDomain))
 
-  configService.save(new ConfigurationSetting(ConfigLiterals.tgClientRetryPeriodTag, "500", ConfigLiterals.systemDomain))
-  configService.save(new ConfigurationSetting(ConfigLiterals.tgServerRetryPeriodTag, "500", ConfigLiterals.systemDomain))
-  configService.save(new ConfigurationSetting(ConfigLiterals.tgRetryCountTag, "10", ConfigLiterals.systemDomain))
   configService.save(new ConfigurationSetting(ConfigLiterals.kafkaSubscriberTimeoutTag, "100", ConfigLiterals.systemDomain))
   configService.save(new ConfigurationSetting(ConfigLiterals.lowWatermark, "100", ConfigLiterals.systemDomain))
 
@@ -44,7 +39,6 @@ object TempHelperForConfigSetup extends App {
 }
 
 object TempHelperForConfigDestroy extends App {
-  ConnectionRepository.getConfigService.delete(ConfigLiterals.transactionGeneratorTag)
   ConnectionRepository.getConfigService.delete(ConfigLiterals.frameworkTag)
   ConnectionRepository.getConfigService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, "regular-streaming-validator-class"))
   ConnectionRepository.getConfigService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, "batch-streaming-validator-class"))
@@ -53,9 +47,6 @@ object TempHelperForConfigDestroy extends App {
   ConnectionRepository.getConfigService.delete(ConfigLiterals.marathonTag)
   ConnectionRepository.getConfigService.delete(ConfigLiterals.marathonTimeoutTag)
   ConnectionRepository.getConfigService.delete(ConfigLiterals.zkSessionTimeoutTag)
-  ConnectionRepository.getConfigService.delete(ConfigLiterals.tgClientRetryPeriodTag)
-  ConnectionRepository.getConfigService.delete(ConfigLiterals.tgServerRetryPeriodTag)
-  ConnectionRepository.getConfigService.delete(ConfigLiterals.tgRetryCountTag)
   ConnectionRepository.getConfigService.delete(ConfigLiterals.kafkaSubscriberTimeoutTag)
   ConnectionRepository.getConfigService.delete(ConfigLiterals.lowWatermark)
   ConnectionRepository.getConfigService.delete(ConfigLiterals.geoIpAsNum)

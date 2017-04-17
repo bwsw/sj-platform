@@ -18,8 +18,9 @@ import scala.collection._
   * @param producerPolicyByOutput Keeps a tag (partitioned or round-robin output) corresponding to the output for each output stream
   * @param moduleTimer            Provides a possibility to set a timer inside a module
   */
+
 class ModuleEnvironmentManager(options: String,
-                               producers: Map[String, Producer[Array[Byte]]],
+                               producers: Map[String, Producer],
                                outputs: Array[SjStream],
                                producerPolicyByOutput: mutable.Map[String, (String, ModuleOutput)],
                                moduleTimer: SjTimer,

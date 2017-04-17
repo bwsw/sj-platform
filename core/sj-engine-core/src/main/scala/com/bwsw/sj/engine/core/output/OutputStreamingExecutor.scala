@@ -18,7 +18,7 @@ abstract class OutputStreamingExecutor[T <: AnyRef](manager: OutputEnvironmentMa
     * By extension a t-stream envelope should be transformed to output envelopes.
     *
     */
-  def onMessage(envelope: TStreamEnvelope[T]): List[OutputEnvelope] = {
+  def onMessage(envelope: TStreamEnvelope[T]): Seq[OutputEnvelope] = {
     List()
   }
 

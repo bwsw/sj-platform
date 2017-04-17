@@ -5,11 +5,9 @@ import java.net.URI
 import com.bwsw.common.LeaderLatch
 import com.bwsw.sj.common.DAL.ConnectionConstants
 import com.bwsw.sj.common.DAL.model.module.Instance
-import com.bwsw.sj.common.DAL.model.{TStreamSjStream, ZKService}
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.rest.entities.MarathonRequest
 import com.bwsw.sj.common.utils.FrameworkLiterals._
-import com.bwsw.sj.common.utils.GeneratorLiterals._
 import com.bwsw.sj.common.utils._
 import com.bwsw.sj.crud.rest.RestLiterals
 import org.apache.http.client.methods.CloseableHttpResponse
@@ -53,8 +51,8 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
     if (isStatusOK(marathonInfo)) {
       val marathonMaster = getMarathonMaster(marathonInfo)
       val leaderLatch = createLeaderLatch(marathonMaster)
-      startGenerators()
-      tryToStartFramework(marathonMaster)
+      updateFrameworkStage(instance, starting)
+      startFramework(marathonMaster)
       leaderLatch.close()
     } else {
       updateInstanceStatus(instance, failed)
@@ -87,139 +85,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
 
     zooKeeperServers
   }
-
-  private def startGenerators() = {
-    val generators = getGeneratorsToStart()
-    generators.foreach(startGenerator)
-  }
-
-  private def getGeneratorsToStart() = {
-    val streamsHavingGenerator = getStreamsHavingGenerator(instance)
-    val generatorsToStart = streamsHavingGenerator.filter(isGeneratorAvailableForStarting)
-
-    generatorsToStart
-  }
-
-  private def isGeneratorAvailableForStarting(stream: TStreamSjStream) = {
-    hasGeneratorToHandle(stream.name) || hasGeneratorFailed(instance, stream.name)
-  }
-
-  private def hasGeneratorToHandle(name: String) = {
-    val stage = instance.stages.get(name)
-    stage.state.equals(toHandle)
-  }
-
-  private def startGenerator(stream: TStreamSjStream) = {
-    val applicationID = getGeneratorApplicationID(stream)
-    val generatorApplicationInfo = getApplicationInfo(applicationID)
-    if (isStatusOK(generatorApplicationInfo)) {
-      updateGeneratorState(instance, stream.name, starting)
-      launchGenerator(stream, applicationID)
-    } else {
-      createGenerator(stream, applicationID)
-    }
-  }
-
-  private def launchGenerator(stream: TStreamSjStream, applicationID: String) = {
-    val instanceCount = stream.generator.instanceCount
-    val response = scaleMarathonApplication(applicationID, instanceCount)
-    if (isStatusOK(response)) {
-      waitForGeneratorToStart(applicationID, stream.name, instanceCount)
-    } else {
-      updateGeneratorState(instance, stream.name, failed)
-    }
-  }
-
-  private def hasGeneratorStarted(response: CloseableHttpResponse, instanceCount: Int) = {
-    val tasksRunning = getNumberOfRunningTasks(response)
-
-    tasksRunning == instanceCount
-  }
-
-  private def createGenerator(stream: TStreamSjStream, applicationID: String) = {
-    val request = createRequestForGeneratorCreation(stream, applicationID)
-    val response = startMarathonApplication(request)
-    if (isStatusCreated(response)) {
-      waitForGeneratorToStart(applicationID, stream.name, stream.generator.instanceCount)
-    } else {
-      updateGeneratorState(instance, stream.name, failed)
-    }
-  }
-
-  private def createRequestForGeneratorCreation(stream: TStreamSjStream, applicationID: String) = {
-    val transactionGeneratorJar = ConfigurationSettingsUtils.getTransactionGeneratorJarName()
-    val command = "java -jar " + transactionGeneratorJar + " $PORT"
-    val restUrl = new URI(s"$restAddress/v1/custom/jars/$transactionGeneratorJar")
-    val environmentVariables = getGeneratorEnvironmentVariables(stream)
-    val marathonRequest = MarathonRequest(
-      applicationID,
-      command,
-      stream.generator.instanceCount,
-      environmentVariables,
-      List(restUrl.toString))
-
-    marathonRequest
-  }
-
-  private def getGeneratorEnvironmentVariables(stream: TStreamSjStream) = {
-    val zkService = stream.generator.service.asInstanceOf[ZKService]
-    val generatorProvider = zkService.provider
-    val prefix = createZookeeperPrefix(zkService.namespace, stream.generator.generatorType, stream.name)
-
-    val environmentVariables = Map(zkServersLabel -> generatorProvider.hosts.mkString(";"),
-      prefixLabel -> prefix) ++ ConnectionConstants.mongoEnvironment
-
-    environmentVariables
-  }
-
-  private def createZookeeperPrefix(namespace: String, generatorType: String, name: String) = {
-    var prefix = s"/$namespace"
-    if (generatorType == perStreamType) {
-      prefix += s"/$name"
-    } else {
-      prefix += globalDirectory
-    }
-
-    prefix
-  }
-
-  private def waitForGeneratorToStart(applicationID: String, name: String, instanceCount: Int) = {
-    var isStarted = false
-    while (!isStarted) {
-      val generatorApplicationInfo = getApplicationInfo(applicationID)
-      if (isStatusOK(generatorApplicationInfo)) {
-        if (hasGeneratorStarted(generatorApplicationInfo, instanceCount)) {
-          updateGeneratorState(instance, name, started)
-          isStarted = true
-        } else {
-          updateGeneratorState(instance, name, starting)
-          Thread.sleep(delay)
-        }
-      } else {
-        updateGeneratorState(instance, name, failed)
-        throw new Exception(s"Marathon returns status code: ${getStatusCode(generatorApplicationInfo)} " +
-          s"during the start process of generator. Generator '$name' is marked as failed.")
-      }
-    }
-  }
-
-  private def tryToStartFramework(marathonMaster: String) = {
-    if (haveGeneratorsStarted()) {
-      updateFrameworkState(instance, starting)
-      startFramework(marathonMaster)
-    } else {
-      updateFrameworkState(instance, failed)
-      updateInstanceStatus(instance, failed)
-      updateInstanceRestAddress(instance, "")
-    }
-  }
-
-  private def haveGeneratorsStarted() = {
-    val stages = instance.stages.asScala
-
-    !stages.exists(x => (x._2.state == failed) && (x._1 != instance.name))
-  }
-
+  
   private def startFramework(marathonMaster: String) = {
     logger.debug(s"Instance: '${instance.name}'. Try to launch or create a framework: '$frameworkName'.")
     val frameworkApplicationInfo = getApplicationInfo(frameworkName)
@@ -236,7 +102,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
     if (isStatusOK(startFrameworkResult)) {
       waitForFrameworkToStart()
     } else {
-      updateFrameworkState(instance, failed)
+      updateFrameworkStage(instance, failed)
       updateInstanceStatus(instance, failed)
       updateInstanceRestAddress(instance, "")
     }
@@ -249,7 +115,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
     if (isStatusCreated(startFrameworkResult)) {
       waitForFrameworkToStart()
     } else {
-      updateFrameworkState(instance, failed)
+      updateFrameworkStage(instance, failed)
       updateInstanceStatus(instance, failed)
       updateInstanceRestAddress(instance, "")
     }
@@ -306,18 +172,18 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
       val frameworkApplicationInfo = getApplicationInfo(frameworkName)
       if (isStatusOK(frameworkApplicationInfo)) {
         if (hasFrameworkStarted(frameworkApplicationInfo)) {
-          updateFrameworkState(instance, started)
+          updateFrameworkStage(instance, started)
           updateInstanceStatus(instance, started)
           var fwRest = getRestAddress(getLeaderTask(getApplicationInfo(frameworkName)))
           while (fwRest == null) fwRest = getRestAddress(getLeaderTask(getApplicationInfo(frameworkName)))
           updateInstanceRestAddress(instance, fwRest)
           isStarted = true
         } else {
-          updateFrameworkState(instance, starting)
+          updateFrameworkStage(instance, starting)
           Thread.sleep(delay)
         }
       } else {
-        updateFrameworkState(instance, failed)
+        updateFrameworkStage(instance, failed)
         throw new Exception(s"Marathon returns status code: ${getStatusCode(frameworkApplicationInfo)} " +
           s"during the start process of framework. Framework '$frameworkName' is marked as failed.")
       }

@@ -18,14 +18,12 @@ object SjBatchModuleDestroy extends App {
 
   val module = new File("./contrib/stubs/sj-stub-batch-streaming/target/scala-2.12/sj-stub-batch-streaming-1.0-SNAPSHOT.jar")
 
-  open()
   deleteStreams(streamService, _type, serviceManager, inputCount, outputCount)
   deleteServices(serviceManager)
   deleteProviders(providerService)
   deleteInstance(instanceService)
   deleteModule(fileStorage, module.getName)
-  cassandraDestroy()
-  close()
+
   TempHelperForConfigDestroy.main(Array())
   ConnectionRepository.close()
 

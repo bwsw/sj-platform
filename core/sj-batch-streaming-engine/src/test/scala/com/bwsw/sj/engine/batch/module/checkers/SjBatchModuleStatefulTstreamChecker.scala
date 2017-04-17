@@ -7,7 +7,6 @@ import com.bwsw.sj.engine.batch.module.DataFactory._
 import com.bwsw.sj.engine.batch.utils.StateHelper
 
 object SjBatchModuleStatefulTstreamChecker extends App {
-  open()
   val streamService = ConnectionRepository.getStreamService
   val objectSerializer = new ObjectSerializer()
 
@@ -53,11 +52,11 @@ object SjBatchModuleStatefulTstreamChecker extends App {
         while (transaction.hasNext()) {
           val batch = objectSerializer.deserialize(transaction.next()).asInstanceOf[Batch]
           batch.envelopes.foreach {
-            case tstreamEnvelope: TStreamEnvelope[Int @unchecked] => tstreamEnvelope.data.foreach(x => {
+            case tstreamEnvelope: TStreamEnvelope[Int@unchecked] => tstreamEnvelope.data.foreach(x => {
               outputElements.+=(x)
               totalOutputElements += 1
             })
-            case kafkaEnvelope: KafkaEnvelope[Int @unchecked] =>
+            case kafkaEnvelope: KafkaEnvelope[Int@unchecked] =>
               outputElements.+=(kafkaEnvelope.data)
               totalOutputElements += 1
           }
@@ -83,7 +82,6 @@ object SjBatchModuleStatefulTstreamChecker extends App {
   consumer.stop()
   inputTstreamConsumers.foreach(x => x.stop())
   outputConsumers.foreach(x => x.stop())
-  close()
   ConnectionRepository.close()
 
   println("DONE")

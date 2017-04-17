@@ -2,7 +2,7 @@ package com.bwsw.sj.common.utils
 
 import java.util.UUID
 
-import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
+import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 import org.eclipse.jetty.http.HttpVersion
 
 object EngineLiterals {
@@ -65,7 +65,6 @@ object EngineLiterals {
   )
 
   val toHandle = "to-handle"
-  val generatorStatusModes = Seq(starting, started, failed, toHandle)
 
   final val splitStreamMode = "split"
   final val fullStreamMode = "full"
@@ -82,22 +81,7 @@ object StreamLiterals {
   val types = Seq(tstreamType, kafkaStreamType, jdbcOutputType, esOutputType, restOutputType)
 
   private val tstreamFactory = new TStreamsFactory()
-  final val ttl = tstreamFactory.getProperty(TSF_Dictionary.Stream.TTL).asInstanceOf[Int]
-}
-
-object GeneratorLiterals {
-  final val localType = "local"
-  final val globalType = "global"
-  final val perStreamType = "per-stream"
-  val types = Seq(globalType, localType, perStreamType)
-
-  val scale: Int = 10000
-  val masterDirectory = "/master"
-  val globalDirectory = "/global"
-  val messageForServer = "get"
-
-  val zkServersLabel = "ZK_SERVERS"
-  val prefixLabel = "PREFIX"
+  final val ttl = tstreamFactory.getProperty(ConfigurationOptions.Stream.ttlSec).asInstanceOf[Int]
 }
 
 object ServiceLiterals {
@@ -120,6 +104,7 @@ object ServiceLiterals {
     jdbcType,
     restType
   )
+
   val typeToProviderType = Map(
     cassandraType -> ProviderLiterals.cassandraType,
     elasticsearchType -> ProviderLiterals.elasticsearchType,
@@ -127,7 +112,8 @@ object ServiceLiterals {
     zookeeperType -> ProviderLiterals.zookeeperType,
     aerospikeType -> ProviderLiterals.aerospikeType,
     jdbcType -> ProviderLiterals.jdbcType,
-    restType -> ProviderLiterals.restType
+    restType -> ProviderLiterals.restType,
+    tstreamsType -> ProviderLiterals.zookeeperType
   )
 }
 

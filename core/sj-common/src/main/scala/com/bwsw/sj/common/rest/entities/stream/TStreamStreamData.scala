@@ -3,17 +3,14 @@ package com.bwsw.sj.common.rest.entities.stream
 import com.bwsw.sj.common.DAL.model.{TStreamService, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils._
-import com.bwsw.tstreams.data.IStorage
-import com.bwsw.tstreams.metadata.MetadataStorage
-import com.bwsw.tstreams.streams.StreamService
-import SjStreamUtilsForCreation._
+import com.bwsw.tstreams.common.StorageClient
+import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 
 import scala.collection.mutable.ArrayBuffer
 
 class TStreamStreamData() extends StreamData() {
   streamType = StreamLiterals.tstreamType
   var partitions: Int = Int.MinValue
-  var generator: GeneratorData = GeneratorData(GeneratorLiterals.localType)
 
   override def validate() = {
     val serviceDAO = ConnectionRepository.getServiceManager
@@ -52,9 +49,6 @@ class TStreamStreamData() extends StreamData() {
         }
     }
 
-    //generator
-    errors ++= this.generator.validate()
-
     errors
   }
 
@@ -62,22 +56,22 @@ class TStreamStreamData() extends StreamData() {
     val modelStream = new TStreamSjStream()
     super.fillModelStream(modelStream)
     modelStream.partitions = this.partitions
-    modelStream.generator = this.generator.asModelGenerator()
 
     modelStream
   }
 
   private def checkStreamPartitionsOnConsistency(service: TStreamService) = {
     val errors = new ArrayBuffer[String]()
-    val metadataStorage = createMetadataStorage(service)
-    val dataStorage = createDataStorage(service)
+    val tstreamFactory = new TStreamsFactory()
+    tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Auth.key, service.token)
+      .setProperty(ConfigurationOptions.Coordination.prefix, service.prefix)
+      .setProperty(ConfigurationOptions.Coordination.endpoints, service.provider.hosts.mkString(","))
+      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, service.provider.hosts.mkString(","))
 
-    if (StreamService.isExist(this.name, metadataStorage) && !this.force) {
-      val tStream = StreamService.loadStream[Array[Byte]](
-        this.name,
-        metadataStorage,
-        dataStorage
-      )
+    val storageClient = tstreamFactory.getStorageClient()
+
+    if (storageClient.checkStreamExists(this.name) && !this.force) {
+      val tStream = storageClient.loadStream(this.name)
       if (tStream.partitionsCount != this.partitions) {
         errors += createMessage("entity.error.mismatch.partitions", this.name, s"${this.partitions}", s"${tStream.partitionsCount}")
       }
@@ -89,36 +83,35 @@ class TStreamStreamData() extends StreamData() {
   override def create() = {
     val serviceDAO = ConnectionRepository.getServiceManager
     val service = serviceDAO.get(this.service).get.asInstanceOf[TStreamService]
-    val metadataStorage = createMetadataStorage(service)
-    val dataStorage = createDataStorage(service)
+    val tstreamFactory = new TStreamsFactory()
+    tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Auth.key, service.token)
+      .setProperty(ConfigurationOptions.Coordination.prefix, service.prefix)
+      .setProperty(ConfigurationOptions.Coordination.endpoints, service.provider.hosts.mkString(","))
+      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, service.provider.hosts.mkString(","))
 
-    if (doesStreamHaveForcedCreation(metadataStorage)) {
-      deleteStream(metadataStorage)
-      createTStream(metadataStorage, dataStorage)
+    val storageClient = tstreamFactory.getStorageClient()
+    if (doesStreamHaveForcedCreation(storageClient)) {
+      storageClient.deleteStream(this.name)
+      createTStream(storageClient)
     } else {
-      if (!doesTopicExist(metadataStorage)) createTStream(metadataStorage, dataStorage)
+      if (!doesTopicExist(storageClient)) createTStream(storageClient)
     }
   }
 
-  private def doesStreamHaveForcedCreation(metadataStorage: MetadataStorage) = {
-    doesTopicExist(metadataStorage) && this.force
+  private def doesStreamHaveForcedCreation(storageClient: StorageClient) = {
+    doesTopicExist(storageClient) && this.force
   }
 
-  private def doesTopicExist(metadataStorage: MetadataStorage) = {
-    StreamService.isExist(this.name, metadataStorage)
+  private def doesTopicExist(storageClient: StorageClient) = {
+    storageClient.checkStreamExists(this.name)
   }
 
-  private def deleteStream(metadataStorage: MetadataStorage) = StreamService.deleteStream(this.name, metadataStorage)
-
-  private def createTStream(metadataStorage: MetadataStorage,
-                            dataStorage: IStorage[Array[Byte]]) = {
-    StreamService.createStream(
+  private def createTStream(storageClient: StorageClient) = {
+    storageClient.createStream(
       this.name,
       this.partitions,
       StreamLiterals.ttl,
-      this.description,
-      metadataStorage,
-      dataStorage
+      this.description
     )
   }
 }

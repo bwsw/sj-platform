@@ -9,11 +9,12 @@ object StateHelper {
 
   private val partition = 0
 
-  def getState(consumer: Consumer[Array[Byte]], objectSerializer: ObjectSerializer) = {
+  def getState(consumer: Consumer, objectSerializer: ObjectSerializer) = {
 
     val initialState = mutable.Map[String, Any]()
     val tempTransaction = consumer.getLastTransaction(0).get
-    val lastTxn = consumer.buildTransactionObject(tempTransaction.getPartition(), tempTransaction.getTransactionID(), tempTransaction.getCount()).get //todo fix it next milestone TR1216
+    val lastTxn = consumer.buildTransactionObject(tempTransaction.getPartition(), tempTransaction.getTransactionID(), tempTransaction.getCount()).get
+    //todo fix it next milestone TR1216
     var value = objectSerializer.deserialize(lastTxn.next())
     value match {
       case variable: (Any, Any) =>
@@ -44,7 +45,7 @@ object StateHelper {
     initialState
   }
 
-  def fillFullState(initialState: mutable.Map[String, Any], transaction: ConsumerTransaction[Array[Byte]], objectSerializer: ObjectSerializer) = {
+  def fillFullState(initialState: mutable.Map[String, Any], transaction: ConsumerTransaction, objectSerializer: ObjectSerializer) = {
     var value: Object = null
     var variable: (String, Any) = null
 

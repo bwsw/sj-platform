@@ -1,7 +1,7 @@
 package com.bwsw.sj.module.output.pm
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.engine.core.entities.{Envelope, OutputEnvelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import com.bwsw.sj.engine.core.output.types.es._
@@ -24,8 +24,8 @@ class PMReportOutputExecutor(manager: OutputEnvironmentManager) extends OutputSt
    * @param envelope Input T-Stream envelope
    * @return List of output envelopes
    */
-  override def onMessage(envelope: TStreamEnvelope[String]): List[OutputEnvelope] = {
-    val list = envelope.data.map { performanceMetrics =>
+  override def onMessage(envelope: TStreamEnvelope[String]): Seq[OutputEnvelope] = {
+    val list = envelope.data.dequeueAll(_ => true).map { performanceMetrics =>
       val data: PerformanceMetrics = jsonSerializer.deserialize[PerformanceMetrics](performanceMetrics)
 
       data
