@@ -45,11 +45,17 @@ object DataFactory {
   val jdbcStreamName: String = "jdbcoutput"
   val jdbcDriver: String = "mysql"
 
+  val pathToRestModule = "./contrib/stubs/sj-stub-rest-output-streaming/target/scala-2.12/sj-stub-rest-output-streaming-1.0-SNAPSHOT.jar"
+  val restProviderName = "output-rest-test-provider"
+  val restServiceName = "output-rest-test-service"
+  val restStreamName = "rest-output"
+
   val zookeeperServiceName: String = "output-zookeeper-test-service"
   val testNamespace = "test_namespace"
 
   val esIndex: String = "test_index_for_output_engine"
   val databaseName: String = "test_database_for_output_engine"
+  val restBasePath = "/test/base_path/for/output_engine"
 
   val streamService = ConnectionRepository.getStreamService
   val serviceManager = ConnectionRepository.getServiceManager
@@ -60,12 +66,14 @@ object DataFactory {
 
   val esInstanceName: String = "test-es-instance-for-output-engine"
   val jdbcInstanceName: String = "test-jdbc-instance-for-output-engine"
+  val restInstanceName: String = "test-rest-instance-for-output-engine"
 
   val objectSerializer = new ObjectSerializer()
   private val serializer: Serializer = new JsonSerializer
 
   private val esProviderHosts = System.getenv("ES_HOSTS").split(",").map(host => host.trim)
   private val jdbcHosts = System.getenv("JDBC_HOSTS").split(",").map(host => host.trim)
+  private val restHosts = System.getenv("RESTFUL_HOSTS").split(",").map(host => host.trim)
   private val zookeeperHosts = System.getenv("ZOOKEEPER_HOSTS").split(",").map(host => host.trim)
   private val zookeeperProvider = new Provider(zookeeperProviderName, zookeeperProviderName,
     zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
@@ -252,6 +260,14 @@ object DataFactory {
     jdbcProvider.login = "admin"
     jdbcProvider.password = "admin"
     providerService.save(jdbcProvider)
+
+    val restProvider = new Provider
+    restProvider.name = restProviderName
+    restProvider.hosts = restHosts
+    restProvider.providerType = ProviderLiterals.restType
+    restProvider.login = ""
+    restProvider.password = ""
+    providerService.save(restProvider)
   }
 
   def createServices() = {
