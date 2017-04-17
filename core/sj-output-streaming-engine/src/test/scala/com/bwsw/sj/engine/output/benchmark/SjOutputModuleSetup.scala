@@ -20,6 +20,7 @@ import com.bwsw.sj.engine.output.benchmark.DataFactory._
   *         ZOOKEEPER_HOSTS=176.120.25.19:2181
   *         ES_HOSTS=176.120.25.19:9300
   *         JDBC_HOSTS=176.120.25.19:5432  -postgresql
+  *         RESTFUL_HOSTS=
   */
 object SjESOutputModuleSetup extends App {
   TempHelperForConfigSetup.main(Array())
@@ -90,4 +91,39 @@ object SjJDBCOutputModuleSetup extends App {
 
   println("DONE")
 
+}
+
+object SjRestOutputModuleSetup extends App {
+  TempHelperForConfigSetup.main(Array())
+  val checkpointInterval = 3
+  val checkpointMode = EngineLiterals.everyNthMode
+  val partitions = 4
+
+  val restModule = new File(pathToRestModule)
+
+  println("module upload")
+  uploadModule(restModule)
+
+  println("create providers")
+  createProviders()
+  println("create services")
+  createServices()
+  println("create streams")
+  createStreams(partitions)
+  println("create instance")
+
+  createInstance(restInstanceName, checkpointMode, checkpointInterval,
+    restStreamName, "com.bwsw.stub.output-bench-test-rest")
+
+  println("Prepare a storage")
+  createTable()
+
+  println("create test data")
+  createData(50, 20)
+
+  println("close connections")
+  close()
+  ConnectionRepository.close()
+
+  println("DONE")
 }
