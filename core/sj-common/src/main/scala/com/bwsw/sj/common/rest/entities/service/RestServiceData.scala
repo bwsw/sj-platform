@@ -5,6 +5,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.{RestLiterals, ServiceLiterals}
 
 import scala.collection.mutable.ArrayBuffer
+import scala.collection.JavaConverters._
 
 /**
   * @author Pavel Tomskikh
@@ -14,6 +15,7 @@ class RestServiceData extends ServiceData {
   var provider: String = _
   var basePath: String = "/"
   var httpVersion: String = RestLiterals.http_1_1
+  var headers: Map[String, String] = Map()
 
   override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService
@@ -22,6 +24,7 @@ class RestServiceData extends ServiceData {
     modelService.provider = providerDAO.get(provider).get
     modelService.basePath = basePath
     modelService.httpVersion = httpVersion
+    modelService.headers = headers.asJava
     modelService
   }
 

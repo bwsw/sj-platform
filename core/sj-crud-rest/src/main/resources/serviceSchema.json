@@ -86,6 +86,10 @@
     "httpVersion": {
       "description": "A version of HTTP if the service is REST type",
       "type": "string"
+    },
+    "headers": {
+      "description": "A HTTP headers if the service is REST type",
+      "type": "object"
     }
   }
 }
