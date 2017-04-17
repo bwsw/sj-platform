@@ -11,7 +11,6 @@ class JdbcClientConnectionData {
    var password: String = _
    var database: String = _
    var table: String = _
-   var txnField: String = _
 
    /**
      * This method return driver class name, related to driver name provided in service
@@ -37,7 +36,7 @@ class JdbcClientConnectionData {
      case _ => throw new RuntimeException(s"Existing drivers: $validDrivers")
    }
 
-   def this(hosts:Array[String], driver:String, username:String, password:String, database:String, table:String, txnField:String) = {
+   def this(hosts:Array[String], driver:String, username:String, password:String, database:String, table:String) = {
      this
      this.hosts = hosts
      this.driver = driver
@@ -45,6 +44,5 @@ class JdbcClientConnectionData {
      this.password = password
      this.database = database
      this.table = table
-     this.txnField = txnField
    }
  }

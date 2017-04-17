@@ -1,6 +1,6 @@
 package com.bwsw.common.jdbc
 
-import java.sql.{Connection, DriverManager, SQLException}
+import java.sql.{Connection, DriverManager, PreparedStatement, SQLException}
 
 import org.slf4j.LoggerFactory
 
@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory
   *
   * @param jdbcCCD : connection data provider
   */
-protected class JdbcClient(var jdbcCCD: JdbcClientConnectionData) {
+protected class JdbcClient(override val jdbcCCD: JdbcClientConnectionData) extends IJdbcClient {
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private var _connection: Option[Connection] = _
+  override var _connection: Option[Connection] = _
   createConnection()
 
   private def createConnection(): Unit = {
@@ -23,32 +23,59 @@ protected class JdbcClient(var jdbcCCD: JdbcClientConnectionData) {
     Class.forName(jdbcCCD.driverClass)
     _connection = Some(DriverManager.getConnection(url, jdbcCCD.username, jdbcCCD.password))
   }
+}
 
-  def connection: Connection = _connection.get
-
-  def connection_=(url: String, username: String, password: String): Unit = {
-    _connection = Some(DriverManager.getConnection(url, username, password))
-  }
+trait IJdbcClient {
+  private val logger = LoggerFactory.getLogger(this.getClass)
+  protected var _connection: Option[Connection]
+  val jdbcCCD: JdbcClientConnectionData
 
   def isConnected: Boolean = _connection.isDefined
 
+  def tableExists(): Boolean = {
+    _connection match {
+      case Some(connection) =>
+        logger.debug(s"Verify that the table '${jdbcCCD.table}' exists in a database.")
+        var result: Boolean = false
+        val dbResult = connection.getMetaData.getTables(null, null, jdbcCCD.table, null)
+        while (dbResult.next) {
+          if (dbResult.getString(3).nonEmpty) result = true
+        }
+
+        result
+      case None => throw new IllegalStateException("Jdbc client is not started. Start it first.")
+    }
+  }
+
+  def createPreparedStatement(sql: String): PreparedStatement = {
+    _connection match {
+      case Some(connection) =>
+        connection.prepareStatement(sql)
+      case None => throw new IllegalStateException("Jdbc client is not started. Start it first.")
+    }
+  }
+
   def execute(sql: String) = {
     logger.debug(s"Try to execute a sql request: $sql.")
-    val stmt = connection.createStatement()
-    try stmt.executeUpdate(sql) catch {
-      case e: Exception =>
-        logger.error(s"Sql request execution has failed: ${e.getMessage}.")
-        throw new SQLException(e.getMessage)
+    _connection match {
+      case Some(connection) =>
+        val stmt = connection.createStatement()
+        try stmt.executeUpdate(sql) catch {
+          case e: Exception =>
+            logger.error(s"Sql request execution has failed: ${e.getMessage}.")
+            throw new SQLException(e.getMessage)
+        }
+      case None => throw new IllegalStateException("Jdbc client is not started. Start it first.")
     }
   }
 
   def close() = {
     logger.info(s"Close a connection to a jdbc database: '${jdbcCCD.database}'.")
-    connection.close()
+    _connection match {
+      case Some(connection) => connection.close()
+      case None => throw new IllegalStateException("Jdbc client is not started. Start it first.")
+    }
   }
-
 }
-
-
 
 

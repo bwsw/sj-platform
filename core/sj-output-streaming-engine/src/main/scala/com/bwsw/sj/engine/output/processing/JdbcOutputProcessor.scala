@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.output.processing
 
 import java.sql.PreparedStatement
 
-import com.bwsw.common.jdbc.{JdbcClientBuilder, PreparedStatementWrapper}
+import com.bwsw.common.jdbc.JdbcClientBuilder
 import com.bwsw.sj.common.DAL.model.{JDBCService, JDBCSjStream, SjStream}
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
@@ -19,9 +19,7 @@ class JdbcOutputProcessor[T <: AnyRef](outputStream: SjStream,
   private val jdbcStream = outputStream.asInstanceOf[JDBCSjStream]
   private val jdbcService = outputStream.service.asInstanceOf[JDBCService]
   private val jdbcClient = openConnection()
-  private val jdbcCommandBuilder = new JdbcCommandBuilder(txnFieldName, entity.asInstanceOf[Entity[(PreparedStatement, Int) => Unit]])
-  private var preparedStatement: PreparedStatement = null
-  private val preparedStatementWrapper = new PreparedStatementWrapper(jdbcClient, txnFieldName)
+  private val jdbcCommandBuilder = new JdbcCommandBuilder(jdbcClient, transactionFieldName, entity.asInstanceOf[Entity[(PreparedStatement, Int) => Unit]])
 
   private def openConnection() = {
     logger.info(s"Open a JDBC connection at address: '${jdbcService.provider.hosts}'.")
@@ -35,41 +33,28 @@ class JdbcOutputProcessor[T <: AnyRef](outputStream: SjStream,
       setTable(outputStream.name).
       setDatabase(jdbcService.database).
       build()
+
     client
   }
 
-  def remove(inputEnvelope: TStreamEnvelope[T]) = {
+  def delete(inputEnvelope: TStreamEnvelope[T]) = {
     logger.debug(s"Delete an envelope: '${inputEnvelope.id}' from JDBC.")
 
-
-    preparedStatement = jdbcCommandBuilder.exists(inputEnvelope.id, preparedStatementWrapper.select)
-    val res = preparedStatement.executeQuery()
-    val recordExists = res.next()
+    val existPreparedStatement = jdbcCommandBuilder.exists(inputEnvelope.id)
+    val resultSet = existPreparedStatement.executeQuery()
+    val recordExists = resultSet.next()
     if (recordExists) {
-      preparedStatement = jdbcCommandBuilder.buildDelete(inputEnvelope.id, preparedStatementWrapper.remove)
-      preparedStatement.executeUpdate()
+      val deletePreparedStatement = jdbcCommandBuilder.buildDelete(inputEnvelope.id)
+      deletePreparedStatement.executeUpdate()
     }
-  }
-
-  private def tableExists(): Boolean = {
-    logger.debug(s"Verify the table '${jdbcClient.jdbcCCD.table}' exists in a database.")
-    var result: Boolean = false
-    val dbResult = jdbcClient.connection.getMetaData.getTables(null, null, jdbcClient.jdbcCCD.table, null)
-    while (dbResult.next) {
-      if (!dbResult.getString(3).isEmpty) result = true
-    }
-    result
   }
 
   def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]) = {
     logger.debug(s"Send an envelope: '${inputEnvelope.id}' to a JDBC stream: '${jdbcStream.name}'.")
-    if (tableExists()) {
-      val fields = entity.asInstanceOf[Entity[(PreparedStatement, Int) => Unit]].getFields.mkString(",") + "," + txnFieldName
-      val jdbcFieldsValue = envelope.getFieldsValue
-      preparedStatement = jdbcCommandBuilder.buildInsert(inputEnvelope.id, jdbcFieldsValue, preparedStatementWrapper.insert(fields))
+    if (jdbcClient.tableExists()) {
+      val preparedStatement = jdbcCommandBuilder.buildInsert(inputEnvelope.id, envelope.getFieldsValue)
       preparedStatement.executeUpdate()
-    }
-
+    } else throw new RuntimeException(s"A table: '${jdbcStream.name}' doesn't exist so it is impossible to write data.")
   }
 
   override def close(): Unit = {

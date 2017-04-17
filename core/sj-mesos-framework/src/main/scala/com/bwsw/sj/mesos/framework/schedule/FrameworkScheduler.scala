@@ -25,15 +25,18 @@ class FrameworkScheduler extends Scheduler {
   }
 
   def executorLost(driver: SchedulerDriver, executorId: ExecutorID, slaveId: SlaveID, status: Int): Unit = {
-    /// TODO:
+    logger.debug(s"Executor ${slaveId.getValue}/${executorId.getValue} lost with status $status.")
+    TasksList.setMessage(s"Executor ${slaveId.getValue}/${executorId.getValue} lost with status $status.")
   }
 
   def slaveLost(driver: SchedulerDriver, slaveId: SlaveID): Unit = {
-    /// TODO:
+    logger.debug(s"Slave ${slaveId.getValue} lost.")
+    TasksList.setMessage(s"Slave ${slaveId.getValue} lost.")
   }
 
   def disconnected(driver: SchedulerDriver): Unit = {
-    /// TODO:
+    logger.debug(s"Framework disconnected.")
+    TasksList.setMessage(s"Framework disconnected.")
   }
 
   def frameworkMessage(driver: SchedulerDriver, executorId: ExecutorID, slaveId: SlaveID, data: Array[Byte]) {
@@ -54,7 +57,8 @@ class FrameworkScheduler extends Scheduler {
   }
 
   def offerRescinded(driver: SchedulerDriver, offerId: OfferID): Unit = {
-    /// TODO:
+    logger.debug(s"Offer ${offerId.getValue} rescinded.")
+    TasksList.setMessage(s"Offer ${offerId.getValue} rescinded.")
   }
 
 

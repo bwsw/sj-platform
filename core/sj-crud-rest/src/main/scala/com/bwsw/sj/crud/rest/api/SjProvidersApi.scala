@@ -91,7 +91,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
                     case Some(x) =>
                       val errors = x.checkConnection()
                       if (errors.isEmpty) {
-                        response = OkRestResponse(new ConnectionResponseEntity())
+                        response = OkRestResponse(ConnectionResponseEntity())
                       }
                       else {
                         response = ConflictRestResponse(TestConnectionResponseEntity(connection = false, errors.mkString(";")))
