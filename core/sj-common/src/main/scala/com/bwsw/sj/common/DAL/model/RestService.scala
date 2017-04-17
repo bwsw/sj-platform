@@ -15,6 +15,22 @@ class RestService() extends Service {
   var basePath: String = _
   var httpVersion: String = _
 
+  def this(
+      name: String,
+      serviceType: String,
+      description: String,
+      provider: Provider,
+      basePath: String,
+      httpVersion: String) = {
+    this
+    this.name = name
+    this.serviceType = serviceType
+    this.description = description
+    this.provider = provider
+    this.basePath = basePath
+    this.httpVersion = httpVersion
+  }
+
   override def asProtocolService = {
     val protocolService = new RestServiceData
     super.fillProtocolService(protocolService)
