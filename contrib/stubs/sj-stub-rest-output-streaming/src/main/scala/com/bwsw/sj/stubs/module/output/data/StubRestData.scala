@@ -7,12 +7,12 @@ import com.bwsw.sj.engine.core.entities.OutputEnvelope
   */
 class StubRestData extends OutputEnvelope {
 
+  var value: Int = 0
   var stringValue: String = ""
-  var seqValue: Seq[Int] = Seq()
 
   override def getFieldsValue: Map[String, Any] = {
     Map(
-      "stringValue" -> stringValue,
-      "seqValue" -> seqValue)
+      "value" -> value,
+      "stringValue" -> stringValue)
   }
 }

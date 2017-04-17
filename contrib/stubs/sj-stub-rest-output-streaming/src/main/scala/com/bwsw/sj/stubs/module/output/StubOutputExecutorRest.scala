@@ -10,16 +10,16 @@ import com.bwsw.sj.stubs.module.output.data.StubRestData
   * @author Pavel Tomskikh
   */
 class StubOutputExecutorRest(manager: OutputEnvironmentManager)
-  extends OutputStreamingExecutor[(String, Seq[Int])](manager) {
+  extends OutputStreamingExecutor[(Integer, String)](manager) {
 
-  override def onMessage(envelope: TStreamEnvelope[(String, Seq[Int])]) = {
+  override def onMessage(envelope: TStreamEnvelope[(Integer, String)]) = {
     println("Processed: " + envelope.data.size + " elements")
 
     val list = envelope.data.dequeueAll(_ => true).map {
-      case (stringValue, seqValue) =>
+      case (i, s) =>
         val data = new StubRestData
-        data.stringValue = stringValue
-        data.seqValue = seqValue
+        data.value = i
+        data.stringValue = s
 
         data
     }
@@ -30,8 +30,8 @@ class StubOutputExecutorRest(manager: OutputEnvironmentManager)
   override def getOutputEntity = {
     val entityBuilder = new RestEntityBuilder()
     val entity = entityBuilder
+      .field(new RestField("value"))
       .field(new RestField("stringValue"))
-      .field(new RestField("seqValue"))
       .build()
 
     entity
