@@ -74,7 +74,7 @@ lazy val sj = (project in file(".")).settings(publish := {})
     engineCore, crudRest,
     inputStreamingEngine, regularStreamingEngine, batchStreamingEngine, outputStreamingEngine,
     framework,
-    stubInput, stubRegular, stubBatch, stubESOutput, stubJDBCOutput,
+    stubInput, stubRegular, stubBatch, stubESOutput, stubJDBCOutput, stubRestOutput,
     pmOutput, csvInput, regexInput,
     sumBatch
   )
@@ -164,6 +164,11 @@ lazy val stubESOutput = Project(id = "sj-stub-es-output-streaming",
 
 lazy val stubJDBCOutput = Project(id = "sj-stub-jdbc-output-streaming",
   base = file("./contrib/stubs/sj-stub-jdbc-output-streaming"))
+  .settings(commonSettings: _*)
+  .dependsOn(engineCore)
+
+lazy val stubRestOutput = Project(id = "sj-stub-rest-output-streaming",
+  base = file("./contrib/stubs/sj-stub-rest-output-streaming"))
   .settings(commonSettings: _*)
   .dependsOn(engineCore)
 
