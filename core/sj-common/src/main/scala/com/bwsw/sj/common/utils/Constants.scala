@@ -3,6 +3,7 @@ package com.bwsw.sj.common.utils
 import java.util.UUID
 
 import com.bwsw.tstreams.env.{TSF_Dictionary, TStreamsFactory}
+import org.eclipse.jetty.http.HttpVersion
 
 object EngineLiterals {
   val persistentQueuePath = UUID.randomUUID().toString
@@ -137,6 +138,7 @@ object ProviderLiterals {
   final val elasticsearchType = "ES"
   final val jdbcType = "JDBC"
   final val restType = "REST"
+
   val types = Seq(
     cassandraType,
     aerospikeType,
@@ -144,7 +146,8 @@ object ProviderLiterals {
     kafkaType,
     elasticsearchType,
     jdbcType,
-    restType)
+    restType
+  )
 }
 
 object JdbcLiterals {
@@ -160,6 +163,20 @@ object JdbcLiterals {
   final val postgresqlDriverPrefix = "jdbc:postgresql"
   final val oracleDriverPrefix = "jdbc:oracle:thin"
   final val mysqlDriverPrefix = "jdbc:mysql"
+}
+
+object RestLiterals {
+  final val http_1_0 = "1.0"
+  final val http_1_1 = "1.1"
+  final val http_2 = "2"
+
+  final val httpVersions = Seq(http_1_0, http_1_1, http_2)
+
+  final val httpVersionMapping = Map(
+    http_1_0 -> HttpVersion.HTTP_1_0,
+    http_1_1 -> HttpVersion.HTTP_1_1,
+    http_2 -> HttpVersion.HTTP_2
+  )
 }
 
 object FrameworkLiterals {
