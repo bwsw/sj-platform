@@ -3,6 +3,7 @@ package com.bwsw.sj.common.rest.entities.service
 import com.bwsw.sj.common.DAL.model.RestService
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.ServiceLiterals
+import org.eclipse.jetty.http.HttpVersion
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -27,6 +28,7 @@ class RestServiceData extends ServiceData {
 
   override def validate() = {
     val basePathAttributeName = "basePath"
+    val httpVersionAttributeName = "httpVersion"
     val errors = new ArrayBuffer[String]()
     errors ++= super.validate()
 
@@ -41,6 +43,18 @@ class RestServiceData extends ServiceData {
         if (!x.startsWith("/"))
           errors += createMessage("entity.error.attribute.must", basePathAttributeName, "starts with '/'")
       case _ =>
+    }
+
+    // 'httpVersion' field
+    Option(httpVersion) match {
+      case None =>
+        errors += createMessage("entity.error.attribute.required", httpVersionAttributeName)
+      case Some(x) =>
+        if (HttpVersion.fromString(x) == null)
+          errors += createMessage(
+            "entity.error.attribute.must.one_of",
+            httpVersionAttributeName,
+            HttpVersion.values.mkString("[", ", ", "]"))
     }
 
     errors
