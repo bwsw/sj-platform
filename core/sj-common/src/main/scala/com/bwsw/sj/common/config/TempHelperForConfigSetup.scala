@@ -31,6 +31,7 @@ object TempHelperForConfigSetup extends App {
 
   //configService.save(new ConfigurationSetting("session.timeout.ms", "30000", ConfigConstants.kafkaDomain))
   configService.save(new ConfigurationSetting(ConfigLiterals.jdbcTimeoutTag, "6000", ConfigLiterals.jdbcDomain))
+  configService.save(new ConfigurationSetting(ConfigLiterals.restTimeoutTag, "5000", ConfigLiterals.restDomain))
 
   configService.save(new ConfigurationSetting(ConfigLiterals.tgClientRetryPeriodTag, "500", ConfigLiterals.systemDomain))
   configService.save(new ConfigurationSetting(ConfigLiterals.tgServerRetryPeriodTag, "500", ConfigLiterals.systemDomain))

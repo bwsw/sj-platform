@@ -82,6 +82,10 @@ object ConfigurationSettingsUtils {
     getIntConfigSetting(lowWatermark)
   }
 
+  def getRestTimeout = {
+    getIntConfigSetting(restTimeoutTag)
+  }
+
   private def getIntConfigSetting(name: String) = {
     getConfigSettings(name).toInt
   }
