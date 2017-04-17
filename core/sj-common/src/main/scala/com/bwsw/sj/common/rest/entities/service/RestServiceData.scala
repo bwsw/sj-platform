@@ -14,14 +14,14 @@ class RestServiceData extends ServiceData {
   serviceType = ServiceLiterals.restType
   var provider: String = _
   var basePath: String = _
-  var version: String = _
+  var httpVersion: String = _
 
   override def asModelService = {
     val providerDAO = ConnectionRepository.getProviderService
     val modelService = new RestService
     modelService.provider = providerDAO.get(provider).get
     modelService.basePath = basePath
-    modelService.version = version
+    modelService.httpVersion = httpVersion
     modelService
   }
 

@@ -13,14 +13,14 @@ class RestService() extends Service {
   serviceType = ServiceLiterals.restType
   @Reference var provider: Provider = _
   var basePath: String = _
-  var version: String = _
+  var httpVersion: String = _
 
   override def asProtocolService = {
     val protocolService = new RestServiceData
     super.fillProtocolService(protocolService)
     protocolService.provider = provider.name
     protocolService.basePath = basePath
-    protocolService.version = version
+    protocolService.httpVersion = httpVersion
 
     protocolService
   }
