@@ -14,7 +14,7 @@ object JDBCDataChecker extends App {
   val inputConsumer = createConsumer(tStream)
   inputConsumer.start()
 
-  val inputElements = new ArrayBuffer[Int]()
+  val inputElements = new ArrayBuffer[(Int, String)]()
   val partitions = inputConsumer.getPartitions().toIterator
 
   while (partitions.hasNext) {
@@ -23,7 +23,7 @@ object JDBCDataChecker extends App {
     while (maybeTxn.isDefined) {
       val transaction = maybeTxn.get
       while (transaction.hasNext()) {
-        val element = objectSerializer.deserialize(transaction.next()).asInstanceOf[Int]
+        val element = objectSerializer.deserialize(transaction.next()).asInstanceOf[(Int, String)]
         inputElements.append(element)
       }
       maybeTxn = inputConsumer.getTransaction(currentPartition)
@@ -49,6 +49,5 @@ object JDBCDataChecker extends App {
   inputConsumer.stop()
 
   println("DONE")
-
 }
 
