@@ -8,18 +8,20 @@ import org.eclipse.jetty.http.HttpVersion
 import scala.collection.mutable.ArrayBuffer
 
 /**
+  * Service for RESTful output.
   *
   * @author Pavel Tomskikh
   */
 class RestServiceData extends ServiceData {
   serviceType = ServiceLiterals.restType
   var provider: String = _
-  var basePath: String = _
-  var httpVersion: String = _
+  var basePath: String = "/"
+  var httpVersion: String = "HTTP/1.1"
 
-  override def asModelService = {
+  override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService
     val modelService = new RestService
+    super.fillModelService(modelService)
     modelService.provider = providerDAO.get(provider).get
     modelService.basePath = basePath
     modelService.httpVersion = httpVersion
