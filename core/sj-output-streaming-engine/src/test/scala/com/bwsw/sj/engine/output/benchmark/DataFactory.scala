@@ -49,6 +49,11 @@ object DataFactory {
   val restProviderName = "output-rest-test-provider"
   val restServiceName = "output-rest-test-service"
   val restStreamName = "rest-output"
+  val restHeaders = Map(
+    "header1" -> "value1",
+    "header2" -> "value2"
+  ).asJava
+  val restHttpVersion = RestLiterals.http_1_1
 
   val zookeeperServiceName: String = "output-zookeeper-test-service"
   val testNamespace = "test_namespace"
@@ -300,6 +305,17 @@ object DataFactory {
     jdbcService.provider = jdbcProvider
     jdbcService.database = databaseName
     serviceManager.save(jdbcService)
+
+    val restProvider = providerService.get(restProviderName).get
+    val restService = new RestService
+    restService.name = restServiceName
+    restService.serviceType = ServiceLiterals.restType
+    restService.provider = restProvider
+    restService.headers = restHeaders
+    restService.basePath = restBasePath
+    restService.httpVersion = restHttpVersion
+    restService.description = "rest service for benchmark"
+    serviceManager.save(restService)
   }
 
   def mapping: XContentBuilder = jsonBuilder()
