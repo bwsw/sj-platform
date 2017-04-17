@@ -14,7 +14,8 @@ import scala.collection.mutable.ArrayBuffer
   new Type(value = classOf[TStreamStreamData], name = StreamLiterals.tstreamType),
   new Type(value = classOf[KafkaStreamData], name = StreamLiterals.kafkaStreamType),
   new Type(value = classOf[ESStreamData], name = StreamLiterals.esOutputType),
-  new Type(value = classOf[JDBCStreamData], name = StreamLiterals.jdbcOutputType)
+  new Type(value = classOf[JDBCStreamData], name = StreamLiterals.jdbcOutputType),
+  new Type(value = classOf[RestStreamData], name = StreamLiterals.restOutputType)
 ))
 class StreamData() extends ValidationUtils with MessageResourceUtils {
   @JsonProperty("type") var streamType: String = null

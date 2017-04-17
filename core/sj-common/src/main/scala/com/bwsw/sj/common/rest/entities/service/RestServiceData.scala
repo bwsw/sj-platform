@@ -7,8 +7,6 @@ import com.bwsw.sj.common.utils.{RestLiterals, ServiceLiterals}
 import scala.collection.mutable.ArrayBuffer
 
 /**
-  * Service for RESTful output.
-  *
   * @author Pavel Tomskikh
   */
 class RestServiceData extends ServiceData {
@@ -60,6 +58,4 @@ class RestServiceData extends ServiceData {
 
     errors
   }
-
-
 }

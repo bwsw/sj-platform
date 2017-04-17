@@ -9,7 +9,7 @@ import org.mongodb.morphia.annotations.Reference
   *
   * @author Pavel Tomskikh
   */
-class RestService() extends Service {
+class RestService extends Service {
   serviceType = ServiceLiterals.restType
   @Reference var provider: Provider = _
   var basePath: String = _
