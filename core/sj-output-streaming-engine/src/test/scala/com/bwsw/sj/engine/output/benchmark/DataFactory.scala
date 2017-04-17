@@ -377,6 +377,15 @@ object DataFactory {
     jdbcStream.tags = Array("tag1")
     streamService.save(jdbcStream)
 
+    val restService = serviceManager.get(restServiceName).get.asInstanceOf[RestService]
+    val restStream = new RestSjStream
+    restStream.name = restStreamName
+    restStream.description = "rest stream for benchmarks"
+    restStream.streamType = StreamLiterals.restOutputType
+    restStream.service = restService
+    restStream.tags = Array("tag1")
+    streamService.save(restStream)
+
     storageClient.createStream(
       tstreamInputName,
       partitions,
@@ -419,10 +428,12 @@ object DataFactory {
     streamService.delete(esStreamName)
     streamService.delete(tstreamInputName)
     streamService.delete(jdbcStreamName)
+    streamService.delete(restStreamName)
 
     storageClient.deleteStream(esStreamName)
     storageClient.deleteStream(tstreamInputName)
     storageClient.deleteStream(jdbcStreamName)
+    storageClient.deleteStream(restStreamName)
   }
 
   def deleteServices() = {
@@ -430,12 +441,14 @@ object DataFactory {
     serviceManager.delete(tstreamServiceName)
     serviceManager.delete(zookeeperServiceName)
     serviceManager.delete(jdbcServiceName)
+    serviceManager.delete(restServiceName)
   }
 
   def deleteProviders() = {
     providerService.delete(zookeeperProviderName)
     providerService.delete(esProviderName)
     providerService.delete(jdbcProviderName)
+    providerService.delete(restProviderName)
   }
 
   def uploadModule(moduleJar: File) = {
