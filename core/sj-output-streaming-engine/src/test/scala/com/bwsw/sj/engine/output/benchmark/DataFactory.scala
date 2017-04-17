@@ -32,7 +32,7 @@ import scala.collection.JavaConverters._
 object DataFactory {
   private val agentsHost = "localhost"
   val zookeeperProviderName: String = "output-zookeeper-test-provider"
-  val tstreamServiceName = "regular-tstream-test-service"
+  val tstreamServiceName = "output-tstream-test-service"
   val tstreamInputName: String = "tstream-input"
 
 

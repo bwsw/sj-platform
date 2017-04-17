@@ -8,7 +8,7 @@ object Dependencies {
 
   lazy val sjCommonDependencies = Def.setting(Seq(
     "org.slf4j" % "slf4j-log4j12" % "1.7.22",
-    ("com.bwsw" % "t-streams_2.12" % "2.0.5-SNAPSHOT")
+    ("com.bwsw" % "t-streams_2.12" % "2.1.5-SNAPSHOT")
       .exclude("org.slf4j", "slf4j-simple")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
@@ -55,7 +55,7 @@ object Dependencies {
     ("com.mockrunner" % "mockrunner-jdbc" % "1.1.2" % "test")
       .exclude("jakarta-regexp", "jakarta-regexp")
       .exclude("xerces", "xerces"),
-    "org.scalatest" % "scalatest_2.12" % "3.0.1" % "provided" % "test"
+    "org.scalatest" % "scalatest_2.12" % "3.0.1" % "provided"
   ))
 
   lazy val sjRestDependencies = Def.setting(Seq(

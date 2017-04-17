@@ -342,7 +342,6 @@ object DataFactory {
         (0 until countElements) foreach { (y: Int) =>
           number += 1
           transaction.send(objectSerializer.serialize(number.asInstanceOf[Object]))
-          println(s"sent a number: $number to stream: " + producer.stream.name)
         }
         transaction.checkpoint()
       }
@@ -361,7 +360,6 @@ object DataFactory {
             kafkaInputNamePrefix + suffix, Array[Byte](100), objectSerializer.serialize(number.asInstanceOf[Object])
           )
           producer.send(record)
-          println(s"sent a number: $number to stream: " + record.topic())
         }
       }
 

@@ -29,8 +29,8 @@ object ESDataChecker extends App {
     while (maybeTxn.isDefined) {
       val transaction = maybeTxn.get
       while (transaction.hasNext()) {
-        val element = objectSerializer.deserialize(transaction.next()).asInstanceOf[Int]
-        inputElements.append(element)
+        val element = objectSerializer.deserialize(transaction.next()).asInstanceOf[(Int, String)]
+        inputElements.append(element._1)
       }
       maybeTxn = inputConsumer.getTransaction(currentPartition)
     }

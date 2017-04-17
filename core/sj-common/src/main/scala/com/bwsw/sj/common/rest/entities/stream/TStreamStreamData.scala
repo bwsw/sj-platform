@@ -4,6 +4,7 @@ import com.bwsw.sj.common.DAL.model.{TStreamService, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils._
 import com.bwsw.tstreams.common.StorageClient
+import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -61,19 +62,20 @@ class TStreamStreamData() extends StreamData() {
 
   private def checkStreamPartitionsOnConsistency(service: TStreamService) = {
     val errors = new ArrayBuffer[String]()
-//    val metadataStorage = createMetadataStorage(service)
-//    val dataStorage = createDataStorage(service)
-//
-//    if (StreamService.isExist(this.name, metadataStorage) && !this.force) {
-//      val tStream = StreamService.loadStream[Array[Byte]](
-//        this.name,
-//        metadataStorage,
-//        dataStorage
-//      )
-//      if (tStream.partitionsCount != this.partitions) {
-//        errors += createMessage("entity.error.mismatch.partitions", this.name, s"${this.partitions}", s"${tStream.partitionsCount}")
-//      }
-//    } //todo after integration with t-streams
+    val tstreamFactory = new TStreamsFactory()
+    tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Auth.key, service.token)
+      .setProperty(ConfigurationOptions.Coordination.prefix, service.prefix)
+      .setProperty(ConfigurationOptions.Coordination.endpoints, service.provider.hosts.mkString(","))
+      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, service.provider.hosts.mkString(","))
+
+    val storageClient = tstreamFactory.getStorageClient()
+
+    if (storageClient.checkStreamExists(this.name) && !this.force) {
+      val tStream = storageClient.loadStream(this.name)
+      if (tStream.partitionsCount != this.partitions) {
+        errors += createMessage("entity.error.mismatch.partitions", this.name, s"${this.partitions}", s"${tStream.partitionsCount}")
+      }
+    }
 
     errors
   }
@@ -81,15 +83,19 @@ class TStreamStreamData() extends StreamData() {
   override def create() = {
     val serviceDAO = ConnectionRepository.getServiceManager
     val service = serviceDAO.get(this.service).get.asInstanceOf[TStreamService]
-//    val metadataStorage = createMetadataStorage(service)
-    //    val dataStorage = createDataStorage(service)
-    //
-    //    if (doesStreamHaveForcedCreation(metadataStorage)) {
-    //      deleteStream(metadataStorage)
-    //      createTStream(metadataStorage, dataStorage)
-    //    } else {
-    //      if (!doesTopicExist(metadataStorage)) createTStream(metadataStorage, dataStorage)
-    //    } //todo after integration with t-streams
+    val tstreamFactory = new TStreamsFactory()
+    tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Auth.key, service.token)
+      .setProperty(ConfigurationOptions.Coordination.prefix, service.prefix)
+      .setProperty(ConfigurationOptions.Coordination.endpoints, service.provider.hosts.mkString(","))
+      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, service.provider.hosts.mkString(","))
+
+    val storageClient = tstreamFactory.getStorageClient()
+    if (doesStreamHaveForcedCreation(storageClient)) {
+      storageClient.deleteStream(this.name)
+      createTStream(storageClient)
+    } else {
+      if (!doesTopicExist(storageClient)) createTStream(storageClient)
+    }
   }
 
   private def doesStreamHaveForcedCreation(storageClient: StorageClient) = {
@@ -99,8 +105,6 @@ class TStreamStreamData() extends StreamData() {
   private def doesTopicExist(storageClient: StorageClient) = {
     storageClient.checkStreamExists(this.name)
   }
-
-  private def deleteStream(storageClient: StorageClient) = storageClient.deleteStream(this.name)
 
   private def createTStream(storageClient: StorageClient) = {
     storageClient.createStream(
