@@ -36,7 +36,8 @@ class RestOutputProcessor[T <: AnyRef](
 
   override def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]) = {
     logger.debug(createLogMessage("Write an output envelope to RESTful stream."))
-    val data = jsonSerializer.serialize(envelope.getFieldsValue)
+    val entity = envelope.getFieldsValue + (transactionField -> inputEnvelope.id)
+    val data = jsonSerializer.serialize(entity)
     val posted = client.post(data, ContentType.APPLICATION_JSON.toString)
 
     if (!posted) {
