@@ -100,7 +100,8 @@ object Dependencies {
     "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
     "org.elasticsearch.client" % "transport" % "5.3.0" % "provided",
     "org.apache.logging.log4j" % "log4j-core" % "2.7" % "provided",
-    "org.apache.logging.log4j" % "log4j-api" % "2.7" % "provided"
+    "org.apache.logging.log4j" % "log4j-api" % "2.7" % "provided",
+    "org.eclipse.jetty" % "jetty-server" % "9.4.3.v20170317" % "test"
   ))
 
   lazy val sjFrameworkDependencies = Def.setting(Seq(
