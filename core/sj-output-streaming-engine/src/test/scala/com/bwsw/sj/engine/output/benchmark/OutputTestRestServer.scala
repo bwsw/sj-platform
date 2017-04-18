@@ -16,7 +16,7 @@ import scala.collection.mutable.ListBuffer
   */
 object OutputTestRestServer extends App {
 
-  case class Entity(value: Integer, stringValue: String, txn: Long) extends Serializable
+  case class Entity(value: Int, stringValue: String, txn: Long) extends Serializable
 
   val httpPort = System.getenv("HTTP_PORT").toInt
   val jsonSerializer = new JsonSerializer

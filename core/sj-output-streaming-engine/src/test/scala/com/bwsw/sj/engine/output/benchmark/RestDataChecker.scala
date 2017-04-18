@@ -40,7 +40,7 @@ object RestDataChecker extends App {
 
   val hosts = restStream.service.asInstanceOf[RestService].provider.hosts
   val urls = hosts.map("http://" + _)
-  var outputDataSize = 0
+  var outputElements = Seq[(Int, String)]()
   val client = new HttpClient()
   client.start()
   urls.foreach { url =>
@@ -48,16 +48,20 @@ object RestDataChecker extends App {
       val response = client.GET(url)
       val data = response.getContentAsString
       val list = jsonSerializer.deserialize[Iterable[Entity]](data)
-      outputDataSize = list.size
+      outputElements = list.map(e => (e.value, e.stringValue)).toSeq
     } catch {
       case _: Throwable =>
     }
   }
   client.stop()
 
-  assert(inputElements.size == outputDataSize,
-    s"Count of all txns elements that are consumed from output stream ($outputDataSize) " +
+  assert(inputElements.size == outputElements.size,
+    s"Count of all txns elements that are consumed from output stream (${outputElements.size}) " +
       s"should equals count of all txns elements that are consumed from input stream (${inputElements.size})")
+
+  assert(inputElements.forall(x => outputElements.contains(x)) && outputElements.forall(x => inputElements.contains(x)),
+    "All txns elements that are consumed from output stream should equals all txns elements that are consumed from input stream")
+
 
   ConnectionRepository.close()
   inputConsumer.stop()
