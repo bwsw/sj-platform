@@ -115,9 +115,6 @@ object SjRestOutputModuleSetup extends App {
   createInstance(restInstanceName, checkpointMode, checkpointInterval,
     restStreamName, "com.bwsw.stub.output-bench-test-rest")
 
-  println("Prepare a storage")
-  createTable()
-
   println("create test data")
   createData(50, 20)
 
