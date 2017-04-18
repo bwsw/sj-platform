@@ -30,8 +30,8 @@ class RestOutputProcessor[T <: AnyRef](
     service.basePath + "/" + outputStream.name,
     RestLiterals.httpVersionMapping(service.httpVersion),
     Map(service.headers.asScala.toList: _*),
-    Option(service.provider.name),
-    Option(service.provider.password)
+    service.provider.name,
+    service.provider.password
   )
 
   override def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]) = {

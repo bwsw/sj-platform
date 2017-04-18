@@ -26,13 +26,14 @@ class RestClient(
     path: String,
     httpVersion: HttpVersion,
     headers: Map[String, String],
-    username: Option[String] = None,
-    password: Option[String] = None) {
+    username: String = null,
+    password: String = null) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val urls = hosts.map { host => new URI("http://" + host) }
   private val client = new HttpClient
-  if (username.nonEmpty && password.nonEmpty) urls.foreach(addAuthentication)
+  if (username != null && username.nonEmpty && password != null && password.nonEmpty)
+    urls.foreach(addAuthentication)
 
   client.start()
 
@@ -55,7 +56,7 @@ class RestClient(
   private def addAuthentication(url: URI): Unit = {
     val authenticationStore = client.getAuthenticationStore
     authenticationStore.addAuthenticationResult(
-      new BasicAuthentication.BasicResult(url, username.get, password.get))
+      new BasicAuthentication.BasicResult(url, username, password))
   }
 
   private def trySendRequest(requestModification: Request => Request): Boolean = {
