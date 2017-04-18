@@ -6,7 +6,7 @@ import com.bwsw.common.JsonSerializer
 import org.eclipse.jetty.server.handler.AbstractHandler
 import org.eclipse.jetty.server.{Request, Server}
 
-import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 
 /**
   * HTTP server for RESTful-output benchmark.
@@ -20,7 +20,7 @@ object OutputTestRestServer extends App {
 
   val httpPort = System.getenv("HTTP_PORT").toInt
   val jsonSerializer = new JsonSerializer
-  val storage = new mutable.HashMap[Long, Entity]()
+  val storage = new ListBuffer[Entity]()
 
   val handler = new AbstractHandler {
     override def handle(
@@ -34,23 +34,26 @@ object OutputTestRestServer extends App {
           response.setStatus(HttpServletResponse.SC_OK)
           response.setContentType("application/json;charset=utf-8")
           val writer = response.getWriter
-          val data = storage.values.map(jsonSerializer.serialize)
+          val data = jsonSerializer.serialize(storage.toList)
           data.foreach(writer.println)
         case "POST" =>
           println("POST")
           val reader = request.getReader
           val data = reader.lines().toArray.map(_.asInstanceOf[String]).mkString
-          println(data)
           val entity = jsonSerializer.deserialize[Entity](data)
-          storage += (entity.txn -> entity)
+          println(s"  $entity")
+          storage += entity
         case "DELETE" =>
           println("DELETE")
           val txn = request.getParameter("txn").toLong
-          if (storage.contains(txn)) {
-            storage -= txn
-            response.setStatus(HttpServletResponse.SC_OK)
-          } else
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND)
+          println(s"  txn=$txn")
+          storage.find(_.txn == txn) match {
+            case Some(e) =>
+              storage -= e
+              response.setStatus(HttpServletResponse.SC_OK)
+            case None =>
+              response.setStatus(HttpServletResponse.SC_NOT_FOUND)
+          }
         case _ =>
           println("UNKNOWN")
           response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
