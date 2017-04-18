@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "title": "Custom jar Specification",
-  "description": "Common specification for jars that can be uploaded by user. Also for stream-juggler engines, transaction generators and frameworks",
+  "description": "Common specification for jars that can be uploaded by user. Also for stream-juggler engines and frameworks",
   "type": "object",
   "properties": {
     "name": {
