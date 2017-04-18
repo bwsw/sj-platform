@@ -90,11 +90,11 @@ object DataFactory {
 
   private def setStorageOptions(tStreamService: TStreamService) = {
     tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, tStreamService.provider.hosts.mkString(","))
+      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, tStreamService.prefix)
   }
 
   private def setCoordinationOptions(tStreamService: TStreamService) = {
-    tstreamFactory.setProperty(ConfigurationOptions.Coordination.prefix, tStreamService.prefix)
-      .setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.hosts.mkString(","))
+    tstreamFactory.setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.hosts.mkString(","))
   }
 
   private def setBindHostForAgents() = {

@@ -102,14 +102,14 @@ abstract class TaskManager() {
 
   private def setStorageOptions(tStreamService: TStreamService) = {
     logger.debug(s"Task name: $taskName. Set properties of storage " +
-      s"(zookeeper endpoints: ${tStreamService.provider.hosts.mkString(",")}) " +
+      s"(zookeeper endpoints: ${tStreamService.provider.hosts.mkString(",")}, prefix: ${tStreamService.prefix}) " +
       s"of t-stream factory\n")
     tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, tStreamService.provider.hosts.mkString(","))
+      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, tStreamService.prefix)
   }
 
   private def setCoordinationOptions(tStreamService: TStreamService) = {
-    tstreamFactory.setProperty(ConfigurationOptions.Coordination.prefix, tStreamService.prefix)
-      .setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.hosts.mkString(","))
+    tstreamFactory.setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.hosts.mkString(","))
   }
 
   private def setBindHostForAgents() = {
