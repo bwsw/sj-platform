@@ -140,6 +140,8 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
         tService.provider.name.equals(providerName)
       case jdbcService: JDBCService =>
         jdbcService.provider.name.equals(providerName)
+      case restService: RestService =>
+        restService.provider.name.equals(providerName)
     }.map(_.name)
   }
 }
