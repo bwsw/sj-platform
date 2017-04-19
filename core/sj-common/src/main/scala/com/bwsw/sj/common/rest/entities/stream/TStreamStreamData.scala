@@ -115,3 +115,15 @@ class TStreamStreamData() extends StreamData() {
     )
   }
 }
+
+object a extends App {
+  val tstreamFactory = new TStreamsFactory()
+  tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Auth.key, "token")
+    .setProperty(ConfigurationOptions.Coordination.endpoints, "176.120.25.19:2181")
+    .setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, "176.120.25.19:2181")
+    .setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, "/tts")
+
+  val storageClient = tstreamFactory.getStorageClient()
+
+  println("DONE")
+}

@@ -11,10 +11,10 @@ object TestStorageServer {
 
   private def getTmpDir(): String = Files.createTempDir().toString
 
-  val token = "token"
+  val token = "12345678910111213141516171819202"
 
   def start() = {
-    val transactionServer = serverBuilder.withZookeeperOptions(new ZookeeperOptions(endpoints = System.getenv("ZOOKEEPER_HOSTS"), "/masha-test"))
+    val transactionServer = serverBuilder.withZookeeperOptions(new ZookeeperOptions(endpoints = System.getenv("ZOOKEEPER_HOSTS"), "/path"))
       .withBootstrapOptions(new BootstrapOptions("192.168.1.174"))
       .withAuthOptions(new AuthOptions(token))
       .withServerStorageOptions(new StorageOptions(path = "/tmp/masha-test"))
