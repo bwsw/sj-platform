@@ -19,9 +19,9 @@ import scala.collection.JavaConverters._
   *
   * @author Kseniya Mikhaleva
   */
-class RetrievableKafkaTaskInput[T <: AnyRef](override val manager: CommonTaskManager,
-                                            override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
-  extends RetrievableTaskInput[KafkaEnvelope[T]](manager.inputs) with KafkaTaskInput[T] {
+class RetrievableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: CommonTaskManager,
+                                                       override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
+  extends RetrievableCheckpointTaskInput[KafkaEnvelope[T]](manager.inputs) with KafkaTaskInput[T] {
   currentThread.setName(s"batch-task-${manager.taskName}-kafka-consumer")
 
   private val envelopeDataSerializer = manager.envelopeDataSerializer.asInstanceOf[EnvelopeDataSerializer[T]]
@@ -52,7 +52,8 @@ class RetrievableKafkaTaskInput[T <: AnyRef](override val manager: CommonTaskMan
     envelope
   }
 
-  override def setConsumerOffsetToLastEnvelope() = {
+  override def setConsumerOffsetToLastEnvelope(): Unit = {
+    logger.debug(s"Task: ${manager.taskName}. Send a transaction containing kafka consumer offsets for all streams.")
     super.setConsumerOffsetToLastEnvelope()
     offsetProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
       .send(offsetSerializer.serialize(kafkaOffsetsStorage))

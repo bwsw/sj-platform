@@ -70,7 +70,7 @@ object DataFactory {
   private val zookeeperProvider = new Provider(zookeeperProviderName, zookeeperProviderName,
     zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
   private val tstrqService = new TStreamService(tstreamServiceName, ServiceLiterals.tstreamsType,
-    tstreamServiceName, zookeeperProvider, "/output_prefix", TestStorageServer.token)
+    tstreamServiceName, zookeeperProvider, TestStorageServer.prefix, TestStorageServer.token)
   private val tstreamFactory = new TStreamsFactory()
 
   setTStreamFactoryProperties()

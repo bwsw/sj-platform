@@ -52,7 +52,7 @@ object DataFactory {
   private val objectSerializer = new ObjectSerializer()
   private val zookeeperProvider = new Provider(zookeeperProviderName, zookeeperProviderName, zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
   private val tstrqService = new TStreamService(tstreamServiceName, ServiceLiterals.tstreamsType,
-    tstreamServiceName, zookeeperProvider, "/regular_prefix", TestStorageServer.token)
+    tstreamServiceName, zookeeperProvider, TestStorageServer.prefix, TestStorageServer.token)
   private val tstreamFactory = new TStreamsFactory()
   setTStreamFactoryProperties()
   private val storageClient = tstreamFactory.getStorageClient()

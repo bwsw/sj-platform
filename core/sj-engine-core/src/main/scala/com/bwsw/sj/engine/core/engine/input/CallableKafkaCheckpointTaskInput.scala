@@ -23,10 +23,10 @@ import scala.collection.JavaConverters._
   * @param blockingQueue Blocking queue for keeping incoming envelopes that are serialized into a string,
   *                      which will be retrieved into a module
   */
-class CallableKafkaTaskInput[T <: AnyRef](override val manager: CommonTaskManager,
-                                blockingQueue: ArrayBlockingQueue[Envelope],
-                                override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
-  extends CallableTaskInput[KafkaEnvelope[T]](manager.inputs) with KafkaTaskInput[T] {
+class CallableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: CommonTaskManager,
+                                                    blockingQueue: ArrayBlockingQueue[Envelope],
+                                                    override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
+  extends CallableCheckpointTaskInput[KafkaEnvelope[T]](manager.inputs) with KafkaTaskInput[T] {
   currentThread.setName(s"regular-task-${manager.taskName}-kafka-consumer")
   private val envelopeDataSerializer = manager.envelopeDataSerializer.asInstanceOf[EnvelopeDataSerializer[T]]
 
@@ -46,7 +46,11 @@ class CallableKafkaTaskInput[T <: AnyRef](override val manager: CommonTaskManage
     while (true) {
       logger.debug(s"Task: ${manager.taskName}. Waiting for records that consumed from kafka for $kafkaSubscriberTimeout milliseconds.")
       val records = kafkaConsumer.poll(kafkaSubscriberTimeout)
-      records.asScala.foreach(x => blockingQueue.put(consumerRecordToEnvelope(x)))
+      records.asScala.foreach(x => {
+        val envelope = consumerRecordToEnvelope(x)
+        setConsumerOffset(envelope)
+        blockingQueue.put(envelope)
+      })
     }
   }
 
@@ -62,9 +66,8 @@ class CallableKafkaTaskInput[T <: AnyRef](override val manager: CommonTaskManage
     envelope
   }
 
-  override def setConsumerOffsetToLastEnvelope() = {
-    logger.debug(s"Task: ${manager.taskName}. Set a consumer offset to last envelope for all streams.")
-    super.setConsumerOffsetToLastEnvelope()
+  override def doCheckpoint() = {
+    logger.debug(s"Task: ${manager.taskName}. Send a transaction containing kafka consumer offsets for all streams.")
     offsetProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
       .send(offsetSerializer.serialize(kafkaOffsetsStorage))
   }

@@ -4,7 +4,7 @@ import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
 
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.engine.core.engine.input.CallableTaskInput
+import com.bwsw.sj.engine.core.engine.input.CallableCheckpointTaskInput
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
@@ -32,7 +32,7 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
   private val checkpointGroup = new CheckpointGroup()
   private val moduleService = createRegularModuleService()
   private val executor = moduleService.executor.asInstanceOf[RegularStreamingExecutor[AnyRef]]
-  val taskInputService = CallableTaskInput[AnyRef](manager, blockingQueue, checkpointGroup).asInstanceOf[CallableTaskInput[Envelope]]
+  val taskInputService = CallableCheckpointTaskInput[AnyRef](manager, blockingQueue, checkpointGroup).asInstanceOf[CallableCheckpointTaskInput[Envelope]]
   private val moduleTimer = moduleService.moduleTimer
   protected val checkpointInterval = instance.checkpointInterval
 
@@ -90,7 +90,6 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
 
   private def registerEnvelope(envelope: Envelope) = {
     afterReceivingEnvelope()
-    taskInputService.registerEnvelope(envelope)
     performanceMetrics.addEnvelopeToInputStream(envelope)
   }
 

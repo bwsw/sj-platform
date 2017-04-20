@@ -7,7 +7,7 @@ import com.bwsw.sj.common.DAL.model.module.OutputInstance
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.NumericalCheckpointTaskEngine
-import com.bwsw.sj.engine.core.engine.input.CallableTStreamTaskInput
+import com.bwsw.sj.engine.core.engine.input.CallableTStreamCheckpointTaskInput
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 import com.bwsw.sj.engine.core.output.Entity
@@ -35,7 +35,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private val environmentManager = createModuleEnvironmentManager()
   private val executor = manager.getExecutor(environmentManager)
   private val entity: Entity[_] = executor.getOutputEntity
-  val taskInputService = new CallableTStreamTaskInput[AnyRef](manager, blockingQueue)
+  val taskInputService = new CallableTStreamCheckpointTaskInput[AnyRef](manager, blockingQueue)
   private val outputProcessor = OutputProcessor[AnyRef](outputStream, performanceMetrics, manager, entity)
   private var wasFirstCheckpoint = false
   protected val checkpointInterval = instance.checkpointInterval
@@ -97,7 +97,6 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     * @param envelope : received data
     */
   private def registerInputEnvelope(envelope: TStreamEnvelope[AnyRef]) = {
-    taskInputService.registerEnvelope(envelope)
     performanceMetrics.addEnvelopeToInputStream(envelope)
   }
 
