@@ -77,6 +77,8 @@ class TStreamStreamData() extends StreamData() {
       }
     }
 
+    storageClient.shutdown()
+
     errors
   }
 
@@ -96,6 +98,8 @@ class TStreamStreamData() extends StreamData() {
     } else {
       if (!doesTopicExist(storageClient)) createTStream(storageClient)
     }
+
+    storageClient.shutdown()
   }
 
   private def doesStreamHaveForcedCreation(storageClient: StorageClient) = {

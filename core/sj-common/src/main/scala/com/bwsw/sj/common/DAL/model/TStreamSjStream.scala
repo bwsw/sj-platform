@@ -49,6 +49,8 @@ class TStreamSjStream() extends SjStream {
         this.description
       )
     }
+
+    storageClient.shutdown()
   }
 
   override def delete() = {
@@ -63,5 +65,7 @@ class TStreamSjStream() extends SjStream {
     if (storageClient.checkStreamExists(this.name)) {
       storageClient.deleteStream(this.name)
     }
+
+    storageClient.shutdown()
   }
 }

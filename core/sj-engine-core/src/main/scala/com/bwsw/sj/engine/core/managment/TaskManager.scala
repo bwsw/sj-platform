@@ -204,6 +204,8 @@ abstract class TaskManager() {
         description
       )
     }
+
+    storageClient.shutdown()
   }
 
   def getSjStream(name: String, description: String, tags: Array[String], partitions: Int) = {
