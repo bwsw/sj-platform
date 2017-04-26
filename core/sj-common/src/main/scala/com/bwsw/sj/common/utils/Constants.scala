@@ -122,13 +122,6 @@ object ProviderLiterals {
   val types = Seq(cassandraType, aerospikeType, zookeeperType, kafkaType, elasticsearchType, jdbcType)
 }
 
-object JdbcLiterals {
-  final val postgresqlDriverName = "postgresql"
-  final val oracleDriverName = "oracle"
-  final val mysqlDriverName = "mysql"
-  final val validDrivers = List(postgresqlDriverName, oracleDriverName, mysqlDriverName)
-}
-
 object FrameworkLiterals {
   val instanceIdLabel = "INSTANCE_ID"
   val frameworkIdLabel = "FRAMEWORK_ID"
