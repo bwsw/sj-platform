@@ -33,6 +33,7 @@ object TempHelperForConfigSetup extends App {
 
   //configService.save(new ConfigurationSetting("session.timeout.ms", "30000", ConfigConstants.kafkaDomain))
   configService.save(new ConfigurationSetting(ConfigLiterals.jdbcTimeoutTag, "6000", ConfigLiterals.jdbcDomain))
+  configService.save(new ConfigurationSetting(ConfigLiterals.restTimeoutTag, "5000", ConfigLiterals.restDomain))
 
   configService.save(new ConfigurationSetting(ConfigLiterals.kafkaSubscriberTimeoutTag, "100", ConfigLiterals.systemDomain))
   configService.save(new ConfigurationSetting(ConfigLiterals.lowWatermark, "100", ConfigLiterals.systemDomain))
@@ -65,6 +66,7 @@ object TempHelperForConfigDestroy extends App {
   ConnectionRepository.getConfigService.delete(ConfigLiterals.lowWatermark)
   ConnectionRepository.getConfigService.delete(ConfigLiterals.geoIpAsNum)
   ConnectionRepository.getConfigService.delete(ConfigLiterals.geoIpAsNumv6)
+  ConnectionRepository.getConfigService.delete(ConfigLiterals.restTimeoutTag)
 
   val driverName = "mysql"
   ConnectionRepository.getConfigService.delete(s"${ConfigLiterals.jdbcDriver}.$driverName")

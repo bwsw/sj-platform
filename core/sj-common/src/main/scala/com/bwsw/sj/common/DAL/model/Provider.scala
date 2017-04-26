@@ -3,6 +3,7 @@ package com.bwsw.sj.common.DAL.model
 import java.net.{InetSocketAddress, URI}
 import java.nio.channels.ClosedChannelException
 import java.util.Collections
+import java.util.concurrent.TimeUnit
 
 import com.aerospike.client.{AerospikeClient, AerospikeException}
 import com.bwsw.common.es.ElasticsearchClient
@@ -15,6 +16,7 @@ import com.datastax.driver.core.exceptions.NoHostAvailableException
 import kafka.javaapi.TopicMetadataRequest
 import kafka.javaapi.consumer.SimpleConsumer
 import org.apache.zookeeper.ZooKeeper
+import org.eclipse.jetty.client.HttpClient
 import org.mongodb.morphia.annotations.{Entity, Id, Property}
 
 import scala.collection.mutable.ArrayBuffer
@@ -89,6 +91,8 @@ class Provider {
         checkESConnection(host)
       case ProviderLiterals.jdbcType =>
         checkJdbcConnection(host)
+      case ProviderLiterals.restType =>
+        checkHttpConnection(host)
       case _ =>
         throw new Exception(s"Host checking for provider type '$providerType' is not implemented")
     }
@@ -191,6 +195,26 @@ class Provider {
 
   private def checkJdbcConnection(address: String) = {
     val errors = ArrayBuffer[String]()
+
+    errors
+  }
+
+  private def checkHttpConnection(address: String) = {
+    val errors = ArrayBuffer[String]()
+    val uri = new URI("http://" + address)
+    val client = new HttpClient()
+    val timeout = 10
+    client.start()
+    try {
+      client
+        .newRequest(uri)
+        .timeout(timeout, TimeUnit.SECONDS)
+        .send()
+    } catch {
+      case _: Throwable =>
+        errors += s"Can not establish connection to REST on '$address'"
+    }
+    client.stop()
 
     errors
   }

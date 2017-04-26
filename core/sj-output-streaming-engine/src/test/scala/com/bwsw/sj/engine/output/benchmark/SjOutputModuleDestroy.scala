@@ -51,3 +51,19 @@ object SjJDBCOutputModuleDestroy extends App {
 
   println("DONE")
 }
+
+object SjRestOutputModuleDestroy extends App {
+  val restModule = new File(pathToRestModule)
+
+  deleteStreams()
+  deleteServices()
+  deleteProviders()
+  deleteInstance(restInstanceName)
+  deleteModule(restModule.getName)
+
+  close()
+  TempHelperForConfigDestroy.main(Array())
+  ConnectionRepository.close()
+
+  println("DONE")
+}

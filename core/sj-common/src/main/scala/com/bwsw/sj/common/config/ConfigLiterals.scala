@@ -7,7 +7,8 @@ object ConfigLiterals {
   final val elasticsearchDomain = "es"
   final val zookeeperDomain = "zk"
   final val jdbcDomain = "jdbc"
-  val domains = Seq(systemDomain, tstreamsDomain, kafkaDomain, elasticsearchDomain, zookeeperDomain, jdbcDomain)
+  final val restDomain = "rest"
+  val domains = Seq(systemDomain, tstreamsDomain, kafkaDomain, elasticsearchDomain, zookeeperDomain, jdbcDomain, restDomain)
   val hostOfCrudRestTag = s"$systemDomain.crud-rest-host"
   val portOfCrudRestTag = s"$systemDomain.crud-rest-port"
   val marathonTag = s"$systemDomain.marathon-connect"
@@ -18,6 +19,7 @@ object ConfigLiterals {
   val jdbcTimeoutTag = s"$jdbcDomain.timeout"
   val jdbcDriver = s"$jdbcDomain.driver"
 
+  val restTimeoutTag = s"$restDomain.rest-timeout"
   val kafkaSubscriberTimeoutTag = s"$systemDomain.subscriber-timeout"
   val geoIpAsNum = s"$systemDomain.geo-ip-as-num"
   val geoIpAsNumv6 = s"$systemDomain.geo-ip-as-num-v6"

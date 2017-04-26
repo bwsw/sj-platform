@@ -19,6 +19,7 @@ import com.bwsw.tstreams.agents.consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer}
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
+import org.eclipse.jetty.http.HttpVersion
 import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder
 
@@ -45,11 +46,22 @@ object DataFactory {
   val jdbcStreamName: String = "jdbcoutput"
   val jdbcDriver: String = "mysql"
 
+  val pathToRestModule = "./contrib/stubs/sj-stub-rest-output-streaming/target/scala-2.12/sj-stub-rest-output-streaming-1.0-SNAPSHOT.jar"
+  val restProviderName = "output-rest-test-provider"
+  val restServiceName = "output-rest-test-service"
+  val restStreamName = "rest-output"
+  val restHeaders = Map(
+    "header1" -> "value1",
+    "header2" -> "value2"
+  ).asJava
+  val restHttpVersion = HttpVersion.HTTP_1_1
+
   val zookeeperServiceName: String = "output-zookeeper-test-service"
   val testNamespace = "test_namespace"
 
   val esIndex: String = "test_index_for_output_engine"
   val databaseName: String = "test_database_for_output_engine"
+  val restBasePath = "/test/base_path/for/output_engine"
 
   val streamService = ConnectionRepository.getStreamService
   val serviceManager = ConnectionRepository.getServiceManager
@@ -60,12 +72,14 @@ object DataFactory {
 
   val esInstanceName: String = "test-es-instance-for-output-engine"
   val jdbcInstanceName: String = "test-jdbc-instance-for-output-engine"
+  val restInstanceName: String = "test-rest-instance-for-output-engine"
 
   val objectSerializer = new ObjectSerializer()
   private val serializer: Serializer = new JsonSerializer
 
   private val esProviderHosts = System.getenv("ES_HOSTS").split(",").map(host => host.trim)
   private val jdbcHosts = System.getenv("JDBC_HOSTS").split(",").map(host => host.trim)
+  private val restHosts = System.getenv("RESTFUL_HOSTS").split(",").map(host => host.trim)
   private val zookeeperHosts = System.getenv("ZOOKEEPER_HOSTS").split(",").map(host => host.trim)
   private val zookeeperProvider = new Provider(zookeeperProviderName, zookeeperProviderName,
     zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
@@ -252,6 +266,14 @@ object DataFactory {
     jdbcProvider.login = "admin"
     jdbcProvider.password = "admin"
     providerService.save(jdbcProvider)
+
+    val restProvider = new Provider
+    restProvider.name = restProviderName
+    restProvider.hosts = restHosts
+    restProvider.providerType = ProviderLiterals.restType
+    restProvider.login = ""
+    restProvider.password = ""
+    providerService.save(restProvider)
   }
 
   def createServices() = {
@@ -284,6 +306,17 @@ object DataFactory {
     jdbcService.provider = jdbcProvider
     jdbcService.database = databaseName
     serviceManager.save(jdbcService)
+
+    val restProvider = providerService.get(restProviderName).get
+    val restService = new RestService
+    restService.name = restServiceName
+    restService.serviceType = ServiceLiterals.restType
+    restService.provider = restProvider
+    restService.headers = restHeaders
+    restService.basePath = restBasePath
+    restService.httpVersion = restHttpVersion
+    restService.description = "rest service for benchmark"
+    serviceManager.save(restService)
   }
 
   def mapping: XContentBuilder = jsonBuilder()
@@ -345,6 +378,15 @@ object DataFactory {
     jdbcStream.tags = Array("tag1")
     streamService.save(jdbcStream)
 
+    val restService = serviceManager.get(restServiceName).get.asInstanceOf[RestService]
+    val restStream = new RestSjStream
+    restStream.name = restStreamName
+    restStream.description = "rest stream for benchmarks"
+    restStream.streamType = StreamLiterals.restOutputType
+    restStream.service = restService
+    restStream.tags = Array("tag1")
+    streamService.save(restStream)
+
     storageClient.createStream(
       tstreamInputName,
       partitions,
@@ -387,10 +429,12 @@ object DataFactory {
     streamService.delete(esStreamName)
     streamService.delete(tstreamInputName)
     streamService.delete(jdbcStreamName)
+    streamService.delete(restStreamName)
 
     storageClient.deleteStream(esStreamName)
     storageClient.deleteStream(tstreamInputName)
     storageClient.deleteStream(jdbcStreamName)
+    storageClient.deleteStream(restStreamName)
   }
 
   def deleteServices() = {
@@ -398,12 +442,14 @@ object DataFactory {
     serviceManager.delete(tstreamServiceName)
     serviceManager.delete(zookeeperServiceName)
     serviceManager.delete(jdbcServiceName)
+    serviceManager.delete(restServiceName)
   }
 
   def deleteProviders() = {
     providerService.delete(zookeeperProviderName)
     providerService.delete(esProviderName)
     providerService.delete(jdbcProviderName)
+    providerService.delete(restProviderName)
   }
 
   def uploadModule(moduleJar: File) = {

@@ -70,6 +70,8 @@ object OutputProcessor {
         new EsOutputProcessor[T](outputStream, performanceMetrics, manager, entity)
       case StreamLiterals.jdbcOutputType =>
         new JdbcOutputProcessor[T](outputStream, performanceMetrics, manager, entity)
+      case StreamLiterals.restOutputType =>
+        new RestOutputProcessor[T](outputStream, performanceMetrics, manager, entity)
     }
   }
 }

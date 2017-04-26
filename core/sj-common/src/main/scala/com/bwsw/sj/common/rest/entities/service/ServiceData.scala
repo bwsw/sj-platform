@@ -19,7 +19,8 @@ import scala.collection.mutable.ArrayBuffer
   new Type(value = classOf[TstrQServiceData], name = ServiceLiterals.tstreamsType),
   new Type(value = classOf[ZKCoordServiceData], name = ServiceLiterals.zookeeperType),
   new Type(value = classOf[ArspkDBServiceData], name = ServiceLiterals.aerospikeType),
-  new Type(value = classOf[JDBCServiceData], name = ServiceLiterals.jdbcType)
+  new Type(value = classOf[JDBCServiceData], name = ServiceLiterals.jdbcType),
+  new Type(value = classOf[RestServiceData], name = ServiceLiterals.restType)
 ))
 class ServiceData() extends ValidationUtils with MessageResourceUtils {
   @JsonProperty("type") var serviceType: String = _

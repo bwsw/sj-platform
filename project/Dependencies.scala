@@ -41,6 +41,7 @@ object Dependencies {
     "com.aerospike" % "aerospike-client" % "3.3.4",
     "com.datastax.cassandra" % "cassandra-driver-core" % "3.2.0",
     "org.scalatest" % "scalatest_2.12" % "3.0.1" % "test",
+    "org.eclipse.jetty" % "jetty-client" % "9.4.3.v20170317",
     "com.fasterxml.jackson.module" % "jackson-module-scala_2.12" % "2.8.8"
   ))
 
@@ -99,7 +100,8 @@ object Dependencies {
     "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
     "org.elasticsearch.client" % "transport" % "5.1.1" % "provided",
     "org.apache.logging.log4j" % "log4j-core" % "2.7" % "provided",
-    "org.apache.logging.log4j" % "log4j-api" % "2.7" % "provided"
+    "org.apache.logging.log4j" % "log4j-api" % "2.7" % "provided",
+    "org.eclipse.jetty" % "jetty-server" % "9.4.3.v20170317" % "test"
   ))
 
   lazy val sjFrameworkDependencies = Def.setting(Seq(

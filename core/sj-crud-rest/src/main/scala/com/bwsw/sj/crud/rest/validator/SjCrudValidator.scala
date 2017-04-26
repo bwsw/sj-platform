@@ -148,8 +148,8 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageRes
         }
 
         //'outputs.types' field
-        if (outputTypes.isEmpty || !doesSourceTypesConsistOf(outputTypes, Set(esOutputType, jdbcOutputType))) {
-          throw new Exception(createMessage("rest.validator.specification.sources.es.jdbc", moduleType, "outputs"))
+        if (outputTypes.isEmpty || !doesSourceTypesConsistOf(outputTypes, Set(esOutputType, jdbcOutputType, restOutputType))) {
+          throw new Exception(createMessage("rest.validator.specification.sources.es.jdbc.rest", moduleType, "outputs"))
         }
 
 

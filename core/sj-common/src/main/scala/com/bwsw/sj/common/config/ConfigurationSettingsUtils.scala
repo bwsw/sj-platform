@@ -72,6 +72,10 @@ object ConfigurationSettingsUtils {
 
   def getJdbcDriverPrefix(driverName: String) = getStringConfigSetting(s"$jdbcDriver.$driverName.prefix")
 
+  def getRestTimeout = {
+    getIntConfigSetting(restTimeoutTag)
+  }
+
   private def getIntConfigSetting(name: String) = {
     getConfigSettings(name).toInt
   }

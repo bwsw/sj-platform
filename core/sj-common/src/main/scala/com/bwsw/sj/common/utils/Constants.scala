@@ -3,6 +3,7 @@ package com.bwsw.sj.common.utils
 import java.util.UUID
 
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
+import org.eclipse.jetty.http.HttpVersion
 
 object EngineLiterals {
   val persistentQueuePath = UUID.randomUUID().toString
@@ -76,7 +77,8 @@ object StreamLiterals {
   final val kafkaStreamType = "stream.kafka"
   final val esOutputType = "elasticsearch-output"
   final val jdbcOutputType = "jdbc-output"
-  val types = Seq(tstreamType, kafkaStreamType, jdbcOutputType, esOutputType)
+  final val restOutputType = "rest-output"
+  val types = Seq(tstreamType, kafkaStreamType, jdbcOutputType, esOutputType, restOutputType)
 
   private val tstreamFactory = new TStreamsFactory()
   final val ttl = tstreamFactory.getProperty(ConfigurationOptions.Stream.ttlSec).asInstanceOf[Int]
@@ -90,6 +92,7 @@ object ServiceLiterals {
   final val zookeeperType = "ZKCoord"
   final val aerospikeType = "ArspkDB"
   final val jdbcType = "JDBC"
+  final val restType = "REST"
 
   val types = Seq(
     cassandraType,
@@ -98,7 +101,8 @@ object ServiceLiterals {
     tstreamsType,
     zookeeperType,
     aerospikeType,
-    jdbcType
+    jdbcType,
+    restType
   )
 
   val typeToProviderType = Map(
@@ -108,6 +112,7 @@ object ServiceLiterals {
     zookeeperType -> ProviderLiterals.zookeeperType,
     aerospikeType -> ProviderLiterals.aerospikeType,
     jdbcType -> ProviderLiterals.jdbcType,
+    restType -> ProviderLiterals.restType,
     tstreamsType -> ProviderLiterals.zookeeperType
   )
 }
@@ -119,7 +124,37 @@ object ProviderLiterals {
   final val kafkaType = "kafka"
   final val elasticsearchType = "ES"
   final val jdbcType = "JDBC"
-  val types = Seq(cassandraType, aerospikeType, zookeeperType, kafkaType, elasticsearchType, jdbcType)
+  final val restType = "REST"
+
+  val types = Seq(
+    cassandraType,
+    aerospikeType,
+    zookeeperType,
+    kafkaType,
+    elasticsearchType,
+    jdbcType,
+    restType
+  )
+}
+
+object RestLiterals {
+  final val http_1_0 = "1.0"
+  final val http_1_1 = "1.1"
+  final val http_2 = "2"
+
+  final val httpVersions = Seq(http_1_0, http_1_1, http_2)
+
+  final val httpVersionFromString = Map(
+    http_1_0 -> HttpVersion.HTTP_1_0,
+    http_1_1 -> HttpVersion.HTTP_1_1,
+    http_2 -> HttpVersion.HTTP_2
+  )
+
+  final val httpVersionToString = Map(
+    HttpVersion.HTTP_1_0 -> http_1_0,
+    HttpVersion.HTTP_1_1 -> http_1_1,
+    HttpVersion.HTTP_2 -> http_2
+  )
 }
 
 object FrameworkLiterals {
