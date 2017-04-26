@@ -34,7 +34,7 @@ class JDBCServiceData() extends ServiceData() {
 
     // 'name' field
     val charSequence: CharSequence = "-"
-    if (this.name.contains(charSequence))
+    if (Option(this.name).isDefined && this.name.contains(charSequence))
       errors += createMessage("jdbc.error.service.name.contains", "-")
 
     // 'driver' field
