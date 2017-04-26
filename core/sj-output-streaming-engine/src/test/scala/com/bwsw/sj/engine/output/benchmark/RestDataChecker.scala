@@ -25,7 +25,6 @@ object RestDataChecker extends App {
     var maybeTxn = inputConsumer.getTransaction(currentPartition)
     while (maybeTxn.isDefined) {
       val transaction = maybeTxn.get
-      println(transaction.getTransactionID())
       while (transaction.hasNext()) {
         val element = objectSerializer.deserialize(transaction.next()).asInstanceOf[(Int, String)]
         inputElements.append(element)
