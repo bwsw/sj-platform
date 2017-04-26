@@ -1,7 +1,10 @@
 package com.bwsw.common.jdbc
 
-import java.sql.{Connection, DriverManager, PreparedStatement, SQLException}
+import java.net.URLClassLoader
+import java.sql.{Connection, Driver, PreparedStatement, SQLException}
+import java.util.Properties
 
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import org.slf4j.LoggerFactory
 
 
@@ -17,11 +20,21 @@ protected class JdbcClient(override val jdbcCCD: JdbcClientConnectionData) exten
   createConnection()
 
   private def createConnection(): Unit = {
-    val url = Array(jdbcCCD.driverPrefix, jdbcCCD.hosts.mkString("://", ",", "/"), jdbcCCD.database).mkString
+    val url = Array(
+      jdbcCCD.driverPrefix,
+      jdbcCCD.hosts.mkString("://", ",", "/"), jdbcCCD.database).mkString
     logger.info(s"Create a connection to a jdbc database via url: ${url.toString}.")
     java.util.Locale.setDefault(java.util.Locale.ENGLISH)
-    Class.forName(jdbcCCD.driverClass)
-    _connection = Some(DriverManager.getConnection(url, jdbcCCD.username, jdbcCCD.password))
+
+    val driverFileName = jdbcCCD.driverFileName
+    val jarFile = ConnectionRepository.getFileStorage.get(driverFileName, s"tmp/$driverFileName")
+    val classLoader = new URLClassLoader(Array(jarFile.toURI.toURL), ClassLoader.getSystemClassLoader)
+    val driver = classLoader.loadClass(jdbcCCD.driverClass).newInstance().asInstanceOf[Driver]
+
+    val credential = new Properties()
+    credential.setProperty("user", jdbcCCD.username)
+    credential.setProperty("password", jdbcCCD.password)
+    _connection = Some(driver.connect(url, credential))
   }
 }
 
@@ -77,5 +90,3 @@ trait IJdbcClient {
     }
   }
 }
-
-
