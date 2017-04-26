@@ -66,6 +66,10 @@ trait InstanceMarathonManager {
     getStatusCode(response) == HttpStatus.SC_NOT_FOUND
   }
 
+  def isStatusNotFound(statusCode: Int) = {
+    statusCode == HttpStatus.SC_NOT_FOUND
+  }
+
   def getStatusCode(response: CloseableHttpResponse) = {
     response.getStatusLine.getStatusCode
   }

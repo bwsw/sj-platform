@@ -6,12 +6,11 @@ import com.bwsw.sj.common.utils.EngineLiterals
 import org.slf4j.LoggerFactory
 
 /**
- * One-thread deleting object for instance
- * using synchronous apache http client
- *
- *
- * @author Kseniya Tomskikh
- */
+  * One-thread deleting object for instance
+  * using synchronous apache http client
+  *
+  * @author Kseniya Tomskikh
+  */
 class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable with InstanceManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
   private val instanceDAO = ConnectionRepository.getInstanceService
@@ -42,9 +41,13 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
       updateFrameworkStage(instance, deleting)
       waitForFrameworkToDelete()
     } else {
-      updateFrameworkStage(instance, error)
-      throw new Exception(s"Marathon returns status code: $response " +
-        s"during the destroying process of framework. Framework '$frameworkName' is marked as error.")
+      if (isStatusNotFound(response)) {
+        updateFrameworkStage(instance, deleting)
+      } else {
+        updateFrameworkStage(instance, error)
+        throw new Exception(s"Marathon returns status code: $response " +
+          s"during the destroying process of framework. Framework '$frameworkName' is marked as error.")
+      }
     }
   }
 
@@ -60,7 +63,7 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
         updateFrameworkStage(instance, deleted)
         hasDeleted = true
       }
-    }     //todo will see about it, maybe get stuck implicitly
+    } //todo will see about it, maybe get stuck implicitly
   }
 
   private def deleteInstance() = {
