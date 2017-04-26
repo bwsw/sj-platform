@@ -5,7 +5,7 @@ import java.util.UUID
 
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.InetSocketTransportAddress
-import org.elasticsearch.common.xcontent.{XContentBuilder, XContentType}
+import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilder, QueryBuilders}
 import org.elasticsearch.index.reindex.DeleteByQueryAction
 import org.elasticsearch.search.SearchHits
@@ -77,7 +77,7 @@ class ElasticsearchClient(hosts: Set[(String, Int)]) {
     logger.debug(s"Write a data: '$data' to an elasticsearch index: '$index'.")
     client
       .prepareIndex(index, documentType, documentId)
-      .setSource(data, XContentType.JSON)
+      .setSource(data)
       .execute()
       .actionGet()
   }

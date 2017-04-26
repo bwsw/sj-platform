@@ -64,9 +64,9 @@ class TStreamStreamData() extends StreamData() {
     val errors = new ArrayBuffer[String]()
     val tstreamFactory = new TStreamsFactory()
     tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Auth.key, service.token)
-      .setProperty(ConfigurationOptions.Coordination.prefix, service.prefix)
       .setProperty(ConfigurationOptions.Coordination.endpoints, service.provider.hosts.mkString(","))
       .setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, service.provider.hosts.mkString(","))
+      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, service.prefix)
 
     val storageClient = tstreamFactory.getStorageClient()
 
@@ -77,6 +77,8 @@ class TStreamStreamData() extends StreamData() {
       }
     }
 
+    storageClient.shutdown()
+
     errors
   }
 
@@ -85,9 +87,9 @@ class TStreamStreamData() extends StreamData() {
     val service = serviceDAO.get(this.service).get.asInstanceOf[TStreamService]
     val tstreamFactory = new TStreamsFactory()
     tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Auth.key, service.token)
-      .setProperty(ConfigurationOptions.Coordination.prefix, service.prefix)
       .setProperty(ConfigurationOptions.Coordination.endpoints, service.provider.hosts.mkString(","))
       .setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, service.provider.hosts.mkString(","))
+      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, service.prefix)
 
     val storageClient = tstreamFactory.getStorageClient()
     if (doesStreamHaveForcedCreation(storageClient)) {
@@ -96,6 +98,8 @@ class TStreamStreamData() extends StreamData() {
     } else {
       if (!doesTopicExist(storageClient)) createTStream(storageClient)
     }
+
+    storageClient.shutdown()
   }
 
   private def doesStreamHaveForcedCreation(storageClient: StorageClient) = {

@@ -9,11 +9,11 @@ import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
-abstract class CallableTaskInput[T <: Envelope](inputs: scala.collection.mutable.Map[SjStream, Array[Int]]) extends TaskInput[T](inputs) with Callable[Unit] {
-  def close()
+abstract class CallableCheckpointTaskInput[T <: Envelope](inputs: scala.collection.mutable.Map[SjStream, Array[Int]]) extends CheckpointTaskInput with Callable[Unit] {
+   def close()
 }
 
-object CallableTaskInput {
+object CallableCheckpointTaskInput {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   def apply[T <: AnyRef](manager: CommonTaskManager, blockingQueue: ArrayBlockingQueue[Envelope], checkpointGroup: CheckpointGroup) = {
@@ -21,9 +21,9 @@ object CallableTaskInput {
     val isTstreamInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.tstreamType)
 
     (isKafkaInputExist, isTstreamInputExist) match {
-      case (true, true) => new CallableCompleteTaskInput[T](manager, blockingQueue, checkpointGroup)
-      case (false, true) => new CallableTStreamTaskInput[T](manager, blockingQueue, checkpointGroup)
-      case (true, false) => new CallableKafkaTaskInput[T](manager, blockingQueue, checkpointGroup)
+      case (true, true) => new CallableCompleteCheckpointTaskInput[T](manager, blockingQueue, checkpointGroup)
+      case (false, true) => new CallableTStreamCheckpointTaskInput[T](manager, blockingQueue, checkpointGroup)
+      case (true, false) => new CallableKafkaCheckpointTaskInput[T](manager, blockingQueue, checkpointGroup)
       case _ =>
         logger.error("Type of input stream is not 'kafka' or 't-stream'")
         throw new Exception("Type of input stream is not 'kafka' or 't-stream'")

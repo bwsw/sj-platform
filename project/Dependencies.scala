@@ -8,7 +8,7 @@ object Dependencies {
 
   lazy val sjCommonDependencies = Def.setting(Seq(
     "org.slf4j" % "slf4j-log4j12" % "1.7.22",
-    ("com.bwsw" % "t-streams_2.12" % "2.1.5-SNAPSHOT")
+    ("com.bwsw" % "t-streams_2.12" % "2.2.0-SNAPSHOT")
       .exclude("org.slf4j", "slf4j-simple")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
@@ -29,11 +29,10 @@ object Dependencies {
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")
       .exclude("io.netty", "netty"),
-    "org.elasticsearch.client" % "transport" % "5.3.0",
+    ("org.elasticsearch.client" % "transport" % "5.1.1")
+      .exclude("com.fasterxml.jackson.core", "jackson-core"),
     "org.apache.logging.log4j" % "log4j-core" % "2.7",
     "org.apache.logging.log4j" % "log4j-api" % "2.7",
-    "postgresql" % "postgresql" % "9.1-901.jdbc4",
-    "mysql" % "mysql-connector-java" % "5.1.6",
     "com.maxmind.geoip" % "geoip-api" % "1.3.1",
     "io.netty" % "netty-all" % "4.1.7.Final",
     "com.opencsv" % "opencsv" % "3.9",
@@ -42,7 +41,8 @@ object Dependencies {
     "com.aerospike" % "aerospike-client" % "3.3.4",
     "com.datastax.cassandra" % "cassandra-driver-core" % "3.2.0",
     "org.scalatest" % "scalatest_2.12" % "3.0.1" % "test",
-    "org.eclipse.jetty" % "jetty-client" % "9.4.3.v20170317"
+    "org.eclipse.jetty" % "jetty-client" % "9.4.3.v20170317",
+    "com.fasterxml.jackson.module" % "jackson-module-scala_2.12" % "2.8.8"
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(
@@ -98,7 +98,7 @@ object Dependencies {
 
   lazy val sjOutputEngineDependencies = Def.setting(Seq(
     "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
-    "org.elasticsearch.client" % "transport" % "5.3.0" % "provided",
+    "org.elasticsearch.client" % "transport" % "5.1.1" % "provided",
     "org.apache.logging.log4j" % "log4j-core" % "2.7" % "provided",
     "org.apache.logging.log4j" % "log4j-api" % "2.7" % "provided",
     "org.eclipse.jetty" % "jetty-server" % "9.4.3.v20170317" % "test"

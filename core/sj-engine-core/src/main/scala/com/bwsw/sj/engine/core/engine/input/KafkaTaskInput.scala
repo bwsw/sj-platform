@@ -165,6 +165,8 @@ trait KafkaTaskInput[T <: AnyRef] {
   def setConsumerOffset(envelope: KafkaEnvelope[T]) = {
     logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${envelope.stream} " +
       s"for partition: ${envelope.partition} to ${envelope.id}.")
+    println(s"Task: ${manager.taskName}. Change offset for stream: ${envelope.stream} " +
+      s"for partition: ${envelope.partition} to ${envelope.id}.") //todo
     kafkaOffsetsStorage((envelope.stream, envelope.partition)) = envelope.id
   }
 }

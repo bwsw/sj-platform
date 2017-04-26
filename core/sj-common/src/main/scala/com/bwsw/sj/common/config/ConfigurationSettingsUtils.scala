@@ -66,6 +66,12 @@ object ConfigurationSettingsUtils {
     getIntConfigSetting(lowWatermark)
   }
 
+  def getJdbcDriverFileName(driverName: String) = getStringConfigSetting(s"$jdbcDriver.$driverName")
+
+  def getJdbcDriverClass(driverName: String) = getStringConfigSetting(s"$jdbcDriver.$driverName.class")
+
+  def getJdbcDriverPrefix(driverName: String) = getStringConfigSetting(s"$jdbcDriver.$driverName.prefix")
+
   def getRestTimeout = {
     getIntConfigSetting(restTimeoutTag)
   }

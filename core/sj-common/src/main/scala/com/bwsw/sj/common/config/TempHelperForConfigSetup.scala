@@ -1,8 +1,12 @@
 package com.bwsw.sj.common.config
 
+import java.io.File
+import java.net.URL
+
 import com.bwsw.sj.common.DAL.model.ConfigurationSetting
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
+import org.apache.commons.io.FileUtils
 
 object TempHelperForConfigSetup extends App {
 
@@ -36,6 +40,17 @@ object TempHelperForConfigSetup extends App {
 
   configService.save(new ConfigurationSetting(ConfigLiterals.geoIpAsNum, "GeoIPASNum.dat", ConfigLiterals.systemDomain))
   configService.save(new ConfigurationSetting(ConfigLiterals.geoIpAsNumv6, "GeoIPASNumv6.dat", ConfigLiterals.systemDomain))
+
+  val driverName = "mysql"
+  val driverFileName = s"$driverName.jar"
+  private val driver: File = new File(driverFileName)
+  FileUtils.copyURLToFile(
+    new URL("http://central.maven.org/maven2/mysql/mysql-connector-java/5.1.41/mysql-connector-java-5.1.41.jar"),
+    driver)
+  ConnectionRepository.getFileStorage.put(driver, driverFileName)
+  configService.save(new ConfigurationSetting(s"${ConfigLiterals.jdbcDriver}.$driverName", driverFileName, ConfigLiterals.jdbcDomain))
+  configService.save(new ConfigurationSetting(s"${ConfigLiterals.jdbcDriver}.$driverName.class", "com.mysql.jdbc.Driver", ConfigLiterals.jdbcDomain))
+  configService.save(new ConfigurationSetting(s"${ConfigLiterals.jdbcDriver}.$driverName.prefix", "jdbc:mysql", ConfigLiterals.jdbcDomain))
 }
 
 object TempHelperForConfigDestroy extends App {
@@ -52,4 +67,11 @@ object TempHelperForConfigDestroy extends App {
   ConnectionRepository.getConfigService.delete(ConfigLiterals.geoIpAsNum)
   ConnectionRepository.getConfigService.delete(ConfigLiterals.geoIpAsNumv6)
   ConnectionRepository.getConfigService.delete(ConfigLiterals.restTimeoutTag)
+
+  val driverName = "mysql"
+  ConnectionRepository.getConfigService.delete(s"${ConfigLiterals.jdbcDriver}.$driverName")
+  ConnectionRepository.getConfigService.delete(s"${ConfigLiterals.jdbcDriver}.$driverName.class")
+  ConnectionRepository.getConfigService.delete(s"${ConfigLiterals.jdbcDriver}.$driverName.prefix")
+
+  ConnectionRepository.getFileStorage.delete(s"$driverName.jar")
 }

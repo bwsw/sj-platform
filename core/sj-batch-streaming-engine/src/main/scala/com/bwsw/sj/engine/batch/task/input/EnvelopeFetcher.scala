@@ -6,12 +6,13 @@ import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
+import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
 
-class EnvelopeFetcher(taskInput: RetrievableTaskInput[Envelope]) {
+class EnvelopeFetcher(taskInput: RetrievableCheckpointTaskInput[Envelope]) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val scheduledExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("EnvelopeFetcher-%d").build())
   private val lowWatermark = ConfigurationSettingsUtils.getLowWatermark()
@@ -40,16 +41,16 @@ class EnvelopeFetcher(taskInput: RetrievableTaskInput[Envelope]) {
     }
   }
 
-  def registerEnvelope(envelope: Envelope) = taskInput.registerEnvelope(envelope)
+  def registerEnvelope(envelope: Envelope): Unit = taskInput.registerEnvelope(envelope)
 
-  def doCheckpoint() = taskInput.doCheckpoint()
+  def doCheckpoint(): Unit = taskInput.doCheckpoint()
 
-  def checkpointGroup = taskInput.checkpointGroup
+  def checkpointGroup: CheckpointGroup = taskInput.checkpointGroup
 }
 
 object EnvelopeFetcher {
   def apply(manager: CommonTaskManager) = {
-    val taskInput = RetrievableTaskInput[AnyRef](manager).asInstanceOf[RetrievableTaskInput[Envelope]]
+    val taskInput = RetrievableCheckpointTaskInput[AnyRef](manager).asInstanceOf[RetrievableCheckpointTaskInput[Envelope]]
 
     new EnvelopeFetcher(taskInput)
   }
