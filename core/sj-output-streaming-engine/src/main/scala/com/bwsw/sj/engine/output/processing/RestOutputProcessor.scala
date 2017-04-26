@@ -22,7 +22,6 @@ class RestOutputProcessor[T <: AnyRef](
     entity: Entity[_])
   extends OutputProcessor[T](outputStream, performanceMetrics) {
 
-  private val transactionField = "txn"
   private val jsonSerializer = new JsonSerializer
   private val service = outputStream.service.asInstanceOf[RestService]
   private val client = new RestClient(
@@ -36,7 +35,7 @@ class RestOutputProcessor[T <: AnyRef](
 
   override def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]) = {
     logger.debug(createLogMessage("Write an output envelope to RESTful stream."))
-    val entity = envelope.getFieldsValue + (transactionField -> inputEnvelope.id)
+    val entity = envelope.getFieldsValue + (transactionFieldName -> inputEnvelope.id)
     val data = jsonSerializer.serialize(entity)
     val posted = client.post(data, ContentType.APPLICATION_JSON.toString)
 
@@ -50,7 +49,7 @@ class RestOutputProcessor[T <: AnyRef](
 
   override def delete(envelope: TStreamEnvelope[T]) = {
     logger.debug(createLogMessage(s"Delete a transaction: '${envelope.id}' from RESTful stream."))
-    val deleted = client.delete(transactionField, envelope.id.toString)
+    val deleted = client.delete(transactionFieldName, envelope.id.toString)
     if (!deleted)
       logger.warn(createLogMessage(s"Transaction '${envelope.id}' not deleted."))
   }
