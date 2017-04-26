@@ -43,7 +43,7 @@ class TstrQServiceData() extends ServiceData() {
         }
         else {
           if (!validatePrefix(x)) {
-            errors += createMessage("entity.error.incorrect.service.prefix", "prefix", x)
+            errors += createMessage("entity.error.incorrect.service.prefix", x)
           }
         }
     }
@@ -58,7 +58,7 @@ class TstrQServiceData() extends ServiceData() {
         }
         else {
           if (!validateToken(x)) {
-            errors += createMessage("entity.error.incorrect.service.token", "token", x)
+            errors += createMessage("entity.error.incorrect.service.token", x)
           }
         }
     }
