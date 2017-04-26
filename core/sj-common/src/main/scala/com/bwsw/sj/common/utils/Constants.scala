@@ -122,21 +122,6 @@ object ProviderLiterals {
   val types = Seq(cassandraType, aerospikeType, zookeeperType, kafkaType, elasticsearchType, jdbcType)
 }
 
-object JdbcLiterals {
-  final val postgresqlDriverName = "postgresql"
-  final val oracleDriverName = "oracle"
-  final val mysqlDriverName = "mysql"
-  final val validDrivers = List(postgresqlDriverName, oracleDriverName, mysqlDriverName)
-
-  final val postgresqlDriver = "org.postgresql.Driver"
-  final val oracleDriver = "oracle.jdbc.driver.OracleDriver"
-  final val mysqlDriver = "com.mysql.jdbc.Driver"
-
-  final val postgresqlDriverPrefix = "jdbc:postgresql"
-  final val oracleDriverPrefix = "jdbc:oracle:thin"
-  final val mysqlDriverPrefix = "jdbc:mysql"
-}
-
 object FrameworkLiterals {
   val instanceIdLabel = "INSTANCE_ID"
   val frameworkIdLabel = "FRAMEWORK_ID"

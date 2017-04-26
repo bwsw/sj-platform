@@ -3,7 +3,8 @@ package com.bwsw.sj.common.rest.entities.service
 import com.bwsw.common.jdbc.JdbcClientBuilder
 import com.bwsw.sj.common.DAL.model.JDBCService
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{JdbcLiterals, ServiceLiterals}
+import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
+import com.bwsw.sj.common.utils.ServiceLiterals
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -45,8 +46,27 @@ class JDBCServiceData() extends ServiceData() {
           errors += createMessage("entity.error.attribute.required", "Driver")
         }
         else {
-          if (!JdbcLiterals.validDrivers.contains(x)) {
-            errors += createMessage("entity.error.unknown.type.must.one.of", x, "driver", JdbcLiterals.validDrivers.mkString("[", ", ", "]"))
+          try {
+            val driverFileName = ConfigurationSettingsUtils.getJdbcDriverFileName(x)
+            if (!ConnectionRepository.getFileStorage.exists(driverFileName))
+              errors += createMessage("entity.error.file.required", driverFileName)
+          } catch {
+            case _: NoSuchFieldException =>
+              errors += createMessage("entity.error.config.required", s"${ConfigLiterals.jdbcDriver}.$x")
+          }
+
+          try {
+            ConfigurationSettingsUtils.getJdbcDriverClass(x)
+          } catch {
+            case _: NoSuchFieldException =>
+              errors += createMessage("entity.error.config.required", s"${ConfigLiterals.jdbcDriver}.$x.class")
+          }
+
+          try {
+            ConfigurationSettingsUtils.getJdbcDriverPrefix(x)
+          } catch {
+            case _: NoSuchFieldException =>
+              errors += createMessage("entity.error.config.required", s"${ConfigLiterals.jdbcDriver}.$x.prefix")
           }
         }
     }
@@ -72,8 +92,8 @@ class JDBCServiceData() extends ServiceData() {
               build()
             database_exists = true
           } catch {
-            case e:Exception =>
-            case e:RuntimeException =>
+            case e: Exception =>
+            case e: RuntimeException =>
               errors += createMessage("jdbc.error.cannot.create.client", e.getMessage)
           }
           if (database_exists) {
