@@ -23,7 +23,7 @@ class RestServiceData extends ServiceData {
     super.fillModelService(modelService)
     modelService.provider = providerDAO.get(provider).get
     modelService.basePath = basePath
-    modelService.httpVersion = httpVersion
+    modelService.httpVersion = RestLiterals.httpVersionFromString(httpVersion)
     modelService.headers = headers.asJava
     modelService
   }

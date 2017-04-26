@@ -19,6 +19,7 @@ import com.bwsw.tstreams.agents.consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer}
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
+import org.eclipse.jetty.http.HttpVersion
 import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder
 
@@ -53,7 +54,7 @@ object DataFactory {
     "header1" -> "value1",
     "header2" -> "value2"
   ).asJava
-  val restHttpVersion = RestLiterals.http_1_1
+  val restHttpVersion = HttpVersion.HTTP_1_1
 
   val zookeeperServiceName: String = "output-zookeeper-test-service"
   val testNamespace = "test_namespace"

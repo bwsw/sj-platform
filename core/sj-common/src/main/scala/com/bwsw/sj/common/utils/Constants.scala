@@ -144,10 +144,16 @@ object RestLiterals {
 
   final val httpVersions = Seq(http_1_0, http_1_1, http_2)
 
-  final val httpVersionMapping = Map(
+  final val httpVersionFromString = Map(
     http_1_0 -> HttpVersion.HTTP_1_0,
     http_1_1 -> HttpVersion.HTTP_1_1,
     http_2 -> HttpVersion.HTTP_2
+  )
+
+  final val httpVersionToString = Map(
+    HttpVersion.HTTP_1_0 -> http_1_0,
+    HttpVersion.HTTP_1_1 -> http_1_1,
+    HttpVersion.HTTP_2 -> http_2
   )
 }
 

@@ -3,7 +3,6 @@ package com.bwsw.sj.engine.output.processing
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.rest.RestClient
 import com.bwsw.sj.common.DAL.model.{RestService, SjStream}
-import com.bwsw.sj.common.utils.RestLiterals
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.Entity
 import com.bwsw.sj.engine.output.task.OutputTaskManager
@@ -27,7 +26,7 @@ class RestOutputProcessor[T <: AnyRef](
   private val client = new RestClient(
     service.provider.hosts.toSet,
     service.basePath + "/" + outputStream.name,
-    RestLiterals.httpVersionMapping(service.httpVersion),
+    service.httpVersion,
     Map(service.headers.asScala.toList: _*),
     Option(service.provider.name),
     Option(service.provider.password)
