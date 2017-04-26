@@ -31,6 +31,8 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   private lazy val restAddress = new URI(s"http://$restHost:$restPort").toString
   private val frameworkName = getFrameworkName(instance)
 
+  private var leaderLatch: LeaderLatch = _
+
   def run() = {
     try {
       logger.info(s"Instance: '${instance.name}'. Launch an instance.")
@@ -42,6 +44,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
       case e: Exception =>
         logger.error(s"Instance: '${instance.name}'. Instance is failed during the start process.", e)
         updateInstanceStatus(instance, failed)
+        if (leaderLatch != null) leaderLatch.close()
         close()
     }
   }
@@ -50,7 +53,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
     val marathonInfo = getMarathonInfo()
     if (isStatusOK(marathonInfo)) {
       val marathonMaster = getMarathonMaster(marathonInfo)
-      val leaderLatch = createLeaderLatch(marathonMaster)
+      leaderLatch = createLeaderLatch(marathonMaster)
       updateFrameworkStage(instance, starting)
       startFramework(marathonMaster)
       leaderLatch.close()
@@ -171,7 +174,9 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
       logger.debug(s"Instance: '${instance.name}'. Waiting until a framework: '$frameworkName' is launched.")
       val frameworkApplicationInfo = getApplicationInfo(frameworkName)
       if (isStatusOK(frameworkApplicationInfo)) {
-        if (hasFrameworkStarted(frameworkApplicationInfo)) {
+        val applicationParsedEntity = getApplicationEntity(frameworkApplicationInfo)
+
+        if (hasFrameworkStarted(applicationParsedEntity)) {
           updateFrameworkStage(instance, started)
           updateInstanceStatus(instance, started)
           var fwRest = getRestAddress(getLeaderTask(getApplicationInfo(frameworkName)))
@@ -179,11 +184,10 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
           updateInstanceRestAddress(instance, fwRest)
           isStarted = true
         } else {
-          val mayBeTaskFailure = getTasksFailures(frameworkApplicationInfo)
-          if (mayBeTaskFailure.nonEmpty) {
+          if (applicationParsedEntity.app.lastTaskFailure != null) {
             destroyMarathonApplication(frameworkName)
             updateFrameworkStage(instance, failed)
-            throw new Exception(s"Framework has not started due to: ${mayBeTaskFailure.get};" +
+            throw new Exception(s"Framework has not started due to: ${applicationParsedEntity.app.lastTaskFailure.message}; " +
               s"Framework '$frameworkName' is marked as failed.")
           }
           updateFrameworkStage(instance, starting)
@@ -197,9 +201,5 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
     }
   }
 
-  private def hasFrameworkStarted(response: CloseableHttpResponse) = {
-    val tasksRunning = getNumberOfRunningTasks(response)
-
-    tasksRunning == 1
-  }
+  private def hasFrameworkStarted(applicationEntity: MarathonApplicationById) = applicationEntity.app.tasksRunning == 1
 }

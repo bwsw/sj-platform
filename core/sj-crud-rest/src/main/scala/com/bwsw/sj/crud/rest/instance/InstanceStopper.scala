@@ -54,7 +54,9 @@ class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable w
       logger.debug(s"Instance: '${instance.name}'. Waiting until a framework is stopped.")
       val frameworkApplicationInfo = getApplicationInfo(frameworkName)
       if (isStatusOK(frameworkApplicationInfo)) {
-        if (hasFrameworkStopped(frameworkApplicationInfo)) {
+        val applicationParsedEntity = getApplicationEntity(frameworkApplicationInfo)
+
+        if (hasFrameworkStopped(applicationParsedEntity)) {
           updateFrameworkStage(instance, stopped)
           hasStopped = true
         } else {
@@ -69,11 +71,7 @@ class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable w
     }
   }
 
-  private def hasFrameworkStopped(response: CloseableHttpResponse) = {
-    val tasksRunning = getNumberOfRunningTasks(response)
-
-    tasksRunning == 0
-  }
+  private def hasFrameworkStopped(applicationEntity: MarathonApplicationById) = applicationEntity.app.tasksRunning == 0
 
   private def markInstanceAsStopped() = {
     logger.debug(s"Instance: '${instance.name}'. Mark an instance as stopped.")
