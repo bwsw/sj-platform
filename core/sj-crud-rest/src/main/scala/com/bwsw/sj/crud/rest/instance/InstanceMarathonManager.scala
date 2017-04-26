@@ -33,6 +33,15 @@ trait InstanceMarathonManager {
     tasksRunning
   }
 
+  def getTasksFailures(response: CloseableHttpResponse): Option[String] = {
+    val entity = marathonEntitySerializer.deserialize[MarathonApplicationById](EntityUtils.toString(response.getEntity, "UTF-8"))
+    if (entity.app.lastTaskFailure != null) {
+      Some(entity.app.lastTaskFailure.message)
+    }
+
+    None
+  }
+
   def getMarathonMaster(marathonInfo: CloseableHttpResponse) = {
     logger.debug(s"Get a marathon master.")
     val entity = marathonEntitySerializer.deserialize[MarathonInfo](EntityUtils.toString(marathonInfo.getEntity, "UTF-8"))
@@ -107,6 +116,12 @@ trait InstanceMarathonManager {
     val marathonInfo = client.execute(httpGet)
 
     marathonInfo
+  }
+
+  def getMarathonLastTaskFailed(applicationID: String) = {
+    val url = new URI(s"$marathonConnect/v2/apps/$applicationID?embed=lastTaskFailure")
+    val httpGet = new HttpGet(url.toString)
+    client.execute(httpGet)
   }
 
   def destroyMarathonApplication(applicationID: String) = {

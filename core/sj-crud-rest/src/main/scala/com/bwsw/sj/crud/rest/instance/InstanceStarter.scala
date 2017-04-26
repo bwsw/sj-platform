@@ -179,6 +179,13 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
           updateInstanceRestAddress(instance, fwRest)
           isStarted = true
         } else {
+          val mayBeTaskFailure = getTasksFailures(frameworkApplicationInfo)
+          if (mayBeTaskFailure.nonEmpty) {
+            destroyMarathonApplication(frameworkName)
+            updateFrameworkStage(instance, failed)
+            throw new Exception(s"Framework has not started due to: ${mayBeTaskFailure.get};" +
+              s"Framework '$frameworkName' is marked as failed.")
+          }
           updateFrameworkStage(instance, starting)
           Thread.sleep(delay)
         }
