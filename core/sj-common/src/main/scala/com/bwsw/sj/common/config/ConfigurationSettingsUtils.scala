@@ -66,11 +66,11 @@ object ConfigurationSettingsUtils {
     getIntConfigSetting(lowWatermark)
   }
 
-  def getJdbcDriverFile = getStringConfigSetting(jdbcDriverFile)
+  def getJdbcDriverFileName(driverName: String) = getStringConfigSetting(s"$jdbcDriver.$driverName")
 
-  def getJdbcDriverClass = getStringConfigSetting(jdbcDriverClass)
+  def getJdbcDriverClass(driverName: String) = getStringConfigSetting(s"$jdbcDriver.$driverName.class")
 
-  def getJdbcDriverPrefix = getStringConfigSetting(jdbcDriverPrefix)
+  def getJdbcDriverPrefix(driverName: String) = getStringConfigSetting(s"$jdbcDriver.$driverName.prefix")
 
   private def getIntConfigSetting(name: String) = {
     getConfigSettings(name).toInt

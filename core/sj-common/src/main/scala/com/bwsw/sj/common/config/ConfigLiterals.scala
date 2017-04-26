@@ -16,9 +16,7 @@ object ConfigLiterals {
   val lowWatermark = s"$systemDomain.low-watermark"
 
   val jdbcTimeoutTag = s"$jdbcDomain.timeout"
-  val jdbcDriverFile = s"$jdbcDomain.driver-file"
-  val jdbcDriverClass = s"$jdbcDomain.driver-class"
-  val jdbcDriverPrefix = s"$jdbcDomain.driver-prefix"
+  val jdbcDriver = s"$jdbcDomain.driver"
 
   val kafkaSubscriberTimeoutTag = s"$systemDomain.subscriber-timeout"
   val geoIpAsNum = s"$systemDomain.geo-ip-as-num"
