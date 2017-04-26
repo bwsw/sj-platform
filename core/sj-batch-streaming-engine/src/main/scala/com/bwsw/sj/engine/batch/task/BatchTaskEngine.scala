@@ -88,7 +88,7 @@ class BatchTaskEngine(batchCollector: BatchCollector,
             onWindow()
           }
 
-        case None => println("None") //todo
+        case None =>
       }
     })
   }
