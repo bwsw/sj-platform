@@ -51,8 +51,10 @@ trait IJdbcClient {
         jdbcCCD.driverPrefix match {
           case JdbcLiterals.oracleDriverPrefix =>
             try {
-              val result = connection.prepareStatement(s"SELECT COUNT(*) FROM ${jdbcCCD.table}").execute()
-              result
+              val statement = connection.prepareStatement(s"SELECT COUNT(*) FROM ${jdbcCCD.table}")
+              statement.execute()
+              statement.close()
+              true
             } catch {
               case _: SQLException => false
             }
@@ -63,6 +65,7 @@ trait IJdbcClient {
             while (dbResult.next) {
               if (dbResult.getString(3).nonEmpty) result = true
             }
+            dbResult.close()
 
             result
         }
@@ -83,11 +86,15 @@ trait IJdbcClient {
     _connection match {
       case Some(connection) =>
         val stmt = connection.createStatement()
-        try stmt.executeUpdate(sql) catch {
+        val result = try {
+          stmt.executeUpdate(sql)
+        } catch {
           case e: Exception =>
             logger.error(s"Sql request execution has failed: ${e.getMessage}.")
             throw new SQLException(e.getMessage)
         }
+        stmt.close()
+        result
       case None => throw new IllegalStateException("Jdbc client is not started. Start it first.")
     }
   }
