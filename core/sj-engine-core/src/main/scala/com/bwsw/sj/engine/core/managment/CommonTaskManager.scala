@@ -1,13 +1,11 @@
 package com.bwsw.sj.engine.core.managment
 
 import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.common.DAL.model.module.{RegularInstance, BatchInstance}
+import com.bwsw.sj.common.DAL.model.module.{BatchInstance, RegularInstance}
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.common.utils.StreamLiterals
-import com.bwsw.sj.engine.core.environment.{EnvironmentManager, ModuleEnvironmentManager}
 import com.bwsw.sj.engine.core.batch.{BatchCollector, BatchStreamingPerformanceMetrics}
-import com.bwsw.tstreams.agents.consumer.Consumer
-import com.bwsw.tstreams.agents.consumer.Offset.IOffset
+import com.bwsw.sj.engine.core.environment.{EnvironmentManager, ModuleEnvironmentManager}
 
 import scala.collection.mutable
 
@@ -54,26 +52,6 @@ class CommonTaskManager() extends TaskManager {
         logger.error("A batch collector exists only for batch engine.")
         throw new RuntimeException("A batch collector exists only for batch engine.")
     }
-  }
-
-  /**
-    * Creates a t-stream consumer
-    *
-    * @param stream     SjStream from which massages are consumed
-    * @param partitions Range of stream partition
-    * @param offset     Offset policy that describes where a consumer starts
-    * @return T-stream consumer
-    */
-  def createConsumer(stream: TStreamSjStream, partitions: List[Int], offset: IOffset): Consumer = {
-    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
-      s"Create consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head}).")
-
-    setStreamOptions(stream)
-
-    tstreamFactory.getConsumer(
-      "consumer_for_" + taskName + "_" + stream.name,
-      (0 until stream.partitions).toSet,
-      offset)
   }
 
   private def getExecutionPlan() = {

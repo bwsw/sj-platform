@@ -1,5 +1,6 @@
 package com.bwsw.sj.engine.core.engine.input
 
+
 import java.util.concurrent.ArrayBlockingQueue
 
 import com.bwsw.sj.common.DAL.model.module.RegularInstance
@@ -46,11 +47,7 @@ class CallableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: Common
     while (true) {
       logger.debug(s"Task: ${manager.taskName}. Waiting for records that consumed from kafka for $kafkaSubscriberTimeout milliseconds.")
       val records = kafkaConsumer.poll(kafkaSubscriberTimeout)
-      records.asScala.foreach(x => {
-        val envelope = consumerRecordToEnvelope(x)
-        setConsumerOffset(envelope)
-        blockingQueue.put(envelope)
-      })
+      records.asScala.foreach(x => blockingQueue.put(consumerRecordToEnvelope(x)))
     }
   }
 
@@ -66,8 +63,9 @@ class CallableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: Common
     envelope
   }
 
-  override def doCheckpoint() = {
-    logger.debug(s"Task: ${manager.taskName}. Send a transaction containing kafka consumer offsets for all streams.")
+  override def setConsumerOffsetToLastEnvelope() = {
+    logger.debug(s"Task: ${manager.taskName}. Set a consumer offset to last envelope for all streams.")
+    super.setConsumerOffsetToLastEnvelope()
     offsetProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
       .send(offsetSerializer.serialize(kafkaOffsetsStorage))
   }

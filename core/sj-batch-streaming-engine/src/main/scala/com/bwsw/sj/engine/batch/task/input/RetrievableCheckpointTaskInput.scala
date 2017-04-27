@@ -7,39 +7,13 @@ import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import org.slf4j.LoggerFactory
 
-import scala.collection.mutable
-
 /**
  * Class is responsible for handling an input streams of specific type(types),
  * i.e. for consuming, processing and sending the input envelopes
  *
  * @author Kseniya Mikhaleva
  */
-abstract class RetrievableCheckpointTaskInput[T <: Envelope](val inputs: scala.collection.mutable.Map[SjStream, Array[Int]]) extends CheckpointTaskInput() {
-  private val lastEnvelopesByStreams: mutable.Map[(String, Int), Envelope] = createStorageOfLastEnvelopes()
-
-  private def createStorageOfLastEnvelopes() = {
-    inputs.flatMap(x => x._2.map(y => ((x._1.name, y), new Envelope())))
-  }
-
-  def registerEnvelope(envelope: T) = {
-    lastEnvelopesByStreams((envelope.stream, envelope.partition)) = envelope
-  }
-
-  def setConsumerOffsetToLastEnvelope() = {
-    lastEnvelopesByStreams.values.filterNot(_.isEmpty()).foreach(envelope => {
-      setConsumerOffset(envelope.asInstanceOf[T])
-    })
-    lastEnvelopesByStreams.clear()
-  }
-
-  protected def setConsumerOffset(envelope: T)
-
-  override def doCheckpoint(): Unit = {
-    setConsumerOffsetToLastEnvelope()
-    super.doCheckpoint()
-  }
-
+abstract class RetrievableCheckpointTaskInput[T <: Envelope](val inputs: scala.collection.mutable.Map[SjStream, Array[Int]]) extends CheckpointTaskInput[T](inputs) {
   def get(): Iterable[T]
 }
 
