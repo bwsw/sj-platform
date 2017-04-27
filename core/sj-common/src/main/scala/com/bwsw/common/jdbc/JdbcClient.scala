@@ -20,10 +20,8 @@ protected class JdbcClient(override val jdbcCCD: JdbcClientConnectionData) exten
   createConnection()
 
   private def createConnection(): Unit = {
-    val url = Array(
-      jdbcCCD.driverPrefix,
-      jdbcCCD.hosts.mkString("://", ",", "/"), jdbcCCD.database).mkString
-    logger.info(s"Create a connection to a jdbc database via url: ${url.toString}.")
+    val url = jdbcCCD.url
+    logger.info(s"Create a connection to a jdbc database via url: $url.")
     java.util.Locale.setDefault(java.util.Locale.ENGLISH)
 
     val driverFileName = jdbcCCD.driverFileName
