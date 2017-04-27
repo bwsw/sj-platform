@@ -103,6 +103,10 @@ case class ProviderData(name: String,
         errors += createMessage("entity.error.wrong.host", host)
       }
 
+      if (uri.getPort == -1) {
+        errors += createMessage("entity.error.host.must.contains.port", host)
+      }
+
       val path = uri.getPath
 
       if (path.length > 0)
