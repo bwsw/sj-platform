@@ -13,6 +13,7 @@ import com.bwsw.sj.common.rest.entities.module.ExecutionPlan
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.StreamLiterals._
 import com.bwsw.sj.engine.core.environment.EnvironmentManager
+import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
 import com.bwsw.tstreams.agents.consumer.subscriber.Callback
 import com.bwsw.tstreams.common.StorageClient
@@ -244,6 +245,30 @@ abstract class TaskManager() {
       "subscribing_consumer_for_" + taskName + "_" + stream.name,
       partitionRange,
       callback,
+      offset)
+  }
+
+  /**
+    * Creates a t-stream consumer
+    *
+    * @param stream     SjStream from which massages are consumed
+    * @param partitions Range of stream partition
+    * @param offset     Offset policy that describes where a consumer starts
+    * @return T-stream consumer
+    */
+  def createConsumer(stream: TStreamSjStream, partitions: List[Int], offset: IOffset, name: Option[String] = None): Consumer = {
+    logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
+      s"Create consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head}).")
+    val consumerName = name match {
+      case Some(_name) => _name
+      case None => "consumer_for_" + taskName + "_" + stream.name
+    }
+
+    setStreamOptions(stream)
+
+    tstreamFactory.getConsumer(
+      consumerName,
+      (0 until stream.partitions).toSet,
       offset)
   }
 

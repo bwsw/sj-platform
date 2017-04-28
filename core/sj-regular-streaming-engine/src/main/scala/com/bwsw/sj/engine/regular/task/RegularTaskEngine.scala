@@ -90,6 +90,7 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
 
   private def registerEnvelope(envelope: Envelope) = {
     afterReceivingEnvelope()
+    taskInputService.registerEnvelope(envelope)
     performanceMetrics.addEnvelopeToInputStream(envelope)
   }
 
