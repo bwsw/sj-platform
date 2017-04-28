@@ -43,9 +43,11 @@ class JdbcOutputProcessor[T <: AnyRef](outputStream: SjStream,
     val existPreparedStatement = jdbcCommandBuilder.exists(inputEnvelope.id)
     val resultSet = existPreparedStatement.executeQuery()
     val recordExists = resultSet.next()
+    existPreparedStatement.close()
     if (recordExists) {
       val deletePreparedStatement = jdbcCommandBuilder.buildDelete(inputEnvelope.id)
       deletePreparedStatement.executeUpdate()
+      deletePreparedStatement.close()
     }
   }
 
@@ -54,6 +56,7 @@ class JdbcOutputProcessor[T <: AnyRef](outputStream: SjStream,
     if (jdbcClient.tableExists()) {
       val preparedStatement = jdbcCommandBuilder.buildInsert(inputEnvelope.id, envelope.getFieldsValue)
       preparedStatement.executeUpdate()
+      preparedStatement.close()
     } else throw new RuntimeException(s"A table: '${jdbcStream.name}' doesn't exist so it is impossible to write data.")
   }
 
