@@ -158,14 +158,10 @@ object RestLiterals {
 }
 
 object JdbcLiterals {
-  final val postgresqlDriverName = "postgresql"
-  final val oracleDriverName = "oracle"
-  final val mysqlDriverName = "mysql"
-  final val validDrivers = List(postgresqlDriverName, oracleDriverName, mysqlDriverName)
-
   final val postgresqlDriverPrefix = "jdbc:postgresql"
   final val oracleDriverPrefix = "jdbc:oracle:thin"
   final val mysqlDriverPrefix = "jdbc:mysql"
+  final val validPrefixes = List(postgresqlDriverPrefix, oracleDriverPrefix, mysqlDriverPrefix)
 }
 
 object FrameworkLiterals {

@@ -54,7 +54,7 @@ class JdbcClientConnectionData {
       url += s")(CONNECT_DATA = (SERVICE_NAME = $database)))"
 
       url
-    case _ => throw new IllegalStateException(s"Compatible drivers: $validDrivers")
+    case _ => throw new IllegalStateException(s"Incorrect JDBC prefix. Valid prefixes: $validPrefixes")
   }
 
   def this(hosts: Array[String], driver: String, username: String, password: String, database: String, table: String) = {

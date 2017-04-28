@@ -4,7 +4,7 @@ import com.bwsw.common.jdbc.JdbcClientBuilder
 import com.bwsw.sj.common.DAL.model.JDBCService
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
-import com.bwsw.sj.common.utils.ServiceLiterals
+import com.bwsw.sj.common.utils.{JdbcLiterals, ServiceLiterals}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -62,11 +62,14 @@ class JDBCServiceData() extends ServiceData() {
               errors += createMessage("entity.error.config.required", s"${ConfigLiterals.jdbcDriver}.$x.class")
           }
 
+          val prefixSettingName = s"${ConfigLiterals.jdbcDriver}.$x.prefix"
           try {
-            ConfigurationSettingsUtils.getJdbcDriverPrefix(x)
+            val prefix = ConfigurationSettingsUtils.getJdbcDriverPrefix(x)
+            if (!JdbcLiterals.validPrefixes.contains(prefix))
+              errors += createMessage("entity.error.jdbc.prefix.incorrect", prefix, prefixSettingName)
           } catch {
             case _: NoSuchFieldException =>
-              errors += createMessage("entity.error.config.required", s"${ConfigLiterals.jdbcDriver}.$x.prefix")
+              errors += createMessage("entity.error.config.required", prefixSettingName)
           }
         }
     }
