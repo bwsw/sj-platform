@@ -1,9 +1,9 @@
 package com.bwsw.sj.mesos.framework.task
 
-import java.util.Calendar
-import java.util.Date
+import java.util.{Calendar, Date}
 
 import com.bwsw.sj.common.DAL.model.module.{Task => InstanceTask}
+import com.bwsw.sj.common.rest.entities.FrameworkTask
 
 import scala.util.Properties
 
@@ -15,7 +15,7 @@ class Task(taskId: String) {
   var reason: String = ""
   var node: String = ""
   var lastNode: String = ""
-//  val description: InstanceTask = null
+  //  val description: InstanceTask = null
   var maxDirectories = Properties.envOrElse("MAX_SANDBOX_VIEW", "7").toInt
   var directories: Array[String] = Array()
   var host: Option[String] = None
@@ -39,15 +39,7 @@ class Task(taskId: String) {
 
   }
 
-  def toJson: Map[String, Any] = {
-    Map(("id", id),
-      ("state", state),
-      ("state-change", new Date(stateChanged).toString),
-      ("reason", reason),
-      ("node", node),
-      ("last-node", lastNode),
-      ("directories", directories)
-    )
+  def toFrameworkTask = {
+    FrameworkTask(id, state, new Date(stateChanged).toString, reason, node, lastNode, directories)
   }
-
 }

@@ -2,15 +2,15 @@ package com.bwsw.sj.mesos.framework
 
 import java.net.URI
 
+import com.bwsw.common.LeaderLatch
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.mesos.framework.rest.Rest
 import com.bwsw.sj.mesos.framework.schedule.FrameworkScheduler
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import org.apache.mesos.MesosSchedulerDriver
-import org.apache.mesos.Protos.FrameworkInfo
-import org.apache.mesos.Protos.Credential
+import org.apache.mesos.Protos.{Credential, FrameworkInfo}
+
 import scala.util.Properties
-import com.bwsw.common.LeaderLatch
 
 
 object StartFramework {
@@ -30,7 +30,7 @@ object StartFramework {
     */
   def main(args: Array[String]): Unit = {
     val port = if (args.nonEmpty) args(0).toInt else 8080
-    Rest.start(port)
+    val restThread = Rest.start(port)
 
     val frameworkInfo = FrameworkInfo.newBuilder.
       setName(frameworkName).
@@ -71,6 +71,7 @@ object StartFramework {
 
     driver.start()
     driver.join()
+    restThread.join()
 
     leader.close()
     System.exit(0)

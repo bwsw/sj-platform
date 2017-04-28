@@ -1,12 +1,13 @@
 package com.bwsw.sj.crud.rest.api
 
 import java.io.File
+import java.net.URI
 import java.nio.file.Paths
 
 import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Disposition`}
 import akka.http.scaladsl.model.{HttpEntity, HttpResponse, MediaTypes}
+import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
-import akka.http.scaladsl.server.{Directives, RequestContext}
 import akka.stream.scaladsl.FileIO
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.config.ConfigLiterals
@@ -16,10 +17,12 @@ import com.bwsw.sj.common.rest.entities.module._
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.crud.rest.RestLiterals
 import com.bwsw.sj.crud.rest.exceptions._
-import com.bwsw.sj.crud.rest.instance.{InstanceDestroyer, InstanceStarter, InstanceStopper}
+import com.bwsw.sj.crud.rest.instance.{HttpClient, InstanceDestroyer, InstanceStarter, InstanceStopper}
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.instance.InstanceValidator
 import org.apache.commons.io.FileUtils
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.util.EntityUtils
 
 import scala.collection.mutable.ListBuffer
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
@@ -75,6 +78,11 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                       path("stop") {
                         pathEndOrSingleSlash {
                           stoppingOfInstance(instance)
+                        }
+                      } ~
+                      pathPrefix("tasks") {
+                        pathEndOrSingleSlash {
+                          getTasksInfo(instance)
                         }
                       }
                   }
@@ -170,41 +178,43 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                                     moduleName: String,
                                     moduleVersion: String,
                                     specification: SpecificationData,
-                                    filename: String) => post { entity(as[String]) {entity =>
-    validateWithSchema(entity, "instanceSchema.json")
-    val instanceMetadata = deserializeOptions(entity, moduleType)
-    val errors = validateInstance(instanceMetadata, specification, moduleType)
-    val instancePassedValidation = validateInstance(specification, filename, instanceMetadata)
-    var response: RestResponse = BadRequestRestResponse(
-      MessageResponseEntity(createMessage("rest.modules.instances.instance.cannot.create", errors.mkString(";"))))
+                                    filename: String) => post {
+    entity(as[String]) { entity =>
+      validateWithSchema(entity, "instanceSchema.json")
+      val instanceMetadata = deserializeOptions(entity, moduleType)
+      val errors = validateInstance(instanceMetadata, specification, moduleType)
+      val instancePassedValidation = validateInstance(specification, filename, instanceMetadata)
+      var response: RestResponse = BadRequestRestResponse(
+        MessageResponseEntity(createMessage("rest.modules.instances.instance.cannot.create", errors.mkString(";"))))
 
-    if (errors.isEmpty) {
-      if (instancePassedValidation.result) {
-        instanceMetadata.prepareInstance(
-          moduleType,
-          moduleName,
-          moduleVersion,
-          specification.engineName,
-          specification.engineVersion
-        )
-        instanceMetadata.createStreams()
-        instanceDAO.save(instanceMetadata.asModelInstance())
+      if (errors.isEmpty) {
+        if (instancePassedValidation.result) {
+          instanceMetadata.prepareInstance(
+            moduleType,
+            moduleName,
+            moduleVersion,
+            specification.engineName,
+            specification.engineVersion
+          )
+          instanceMetadata.createStreams()
+          instanceDAO.save(instanceMetadata.asModelInstance())
 
-        response = CreatedRestResponse(MessageResponseEntity(createMessage(
-          "rest.modules.instances.instance.created",
-          instanceMetadata.name,
-          s"$moduleType-$moduleName-$moduleVersion"
-        )))
-      } else {
-        response = BadRequestRestResponse(MessageResponseEntity(createMessage(
-          "rest.modules.instances.instance.cannot.create.incorrect.parameters",
-          instancePassedValidation.errors.mkString(";")
-        )))
+          response = CreatedRestResponse(MessageResponseEntity(createMessage(
+            "rest.modules.instances.instance.created",
+            instanceMetadata.name,
+            s"$moduleType-$moduleName-$moduleVersion"
+          )))
+        } else {
+          response = BadRequestRestResponse(MessageResponseEntity(createMessage(
+            "rest.modules.instances.instance.cannot.create.incorrect.parameters",
+            instancePassedValidation.errors.mkString(";")
+          )))
+        }
       }
-    }
 
-    complete(restResponseToHttpResponse(response))
-  }}
+      complete(restResponseToHttpResponse(response))
+    }
+  }
 
   private val gettingModuleInstances = (moduleType: String,
                                         moduleName: String,
@@ -263,12 +273,29 @@ trait SjModulesApi extends Directives with SjCrudValidator {
   private val stoppingOfInstance = (instance: Instance) => get {
     val instanceName = instance.name
     var response: RestResponse = UnprocessableEntityRestResponse(MessageResponseEntity(
-      createMessage("rest.modules.instances.instance.cannot.stop", instanceName)))
+      getMessage("rest.modules.instances.instance.cannot.stop")))
 
     if (instance.status.equals(started)) {
       stopInstance(instance)
       response = OkRestResponse(MessageResponseEntity(
         createMessage("rest.modules.instances.instance.stopping", instanceName)))
+    }
+
+    complete(restResponseToHttpResponse(response))
+  }
+
+  private val getTasksInfo = (instance: Instance) => get {
+    var response: RestResponse = UnprocessableEntityRestResponse(MessageResponseEntity(
+      getMessage("rest.modules.instances.instance.cannot.get.tasks")))
+
+    if (instance.restAddress != "") {
+      val client = new HttpClient(3000).client
+      val url = new URI(instance.restAddress)
+      val httpGet = new HttpGet(url.toString)
+      val httpResponse = client.execute(httpGet)
+      response = OkRestResponse(
+        serializer.deserialize[FrameworkRestEntity](EntityUtils.toString(httpResponse.getEntity, "UTF-8")))
+      client.close()
     }
 
     complete(restResponseToHttpResponse(response))

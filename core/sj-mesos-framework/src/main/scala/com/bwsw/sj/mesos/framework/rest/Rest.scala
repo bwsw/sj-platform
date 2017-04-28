@@ -2,33 +2,35 @@ package com.bwsw.sj.mesos.framework.rest
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.mesos.framework.task.TasksList
-import unfiltered.request._
-import unfiltered.response._
+
+import org.eclipse.jetty.server.handler.AbstractHandler
+import org.eclipse.jetty.server.{Server, Request}
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+
+private class Handler extends AbstractHandler {
+  val serializer: JsonSerializer = new JsonSerializer()
+
+  override def handle(target: String,
+                      req: Request,
+                      httpReq: HttpServletRequest,
+                      httpRes: HttpServletResponse) = {
+    httpRes.setContentType("application/json")
+    httpRes.setStatus(HttpServletResponse.SC_OK)
+    httpRes.getWriter().println(serializer.serialize(TasksList.toFrameworkTask))
+    req.setHandled(true)
+  }
+}
 
 /**
   * Rest object used for show some information about framework tasks.
   */
 object Rest {
-  val serializer: JsonSerializer = new JsonSerializer()
-  var thread: Thread = null
 
-  val echo = unfiltered.filter.Planify{
-    case GET (Path("/")) => ResponseString(getResponse)
-  }
+  def start(port: Int) = {
+    val server = new Server(port)
+    server.setHandler(new Handler)
+    server.start
 
-  def rest(port:Int): java.lang.Thread = new Thread(new Runnable {
-    override def run(): Unit = {
-      unfiltered.jetty.Server.http(port).plan(echo).run()
-    }
-  })
-
-  def start(port:Int) = {
-    thread = rest(port)
-    thread.setDaemon(true)
-    thread.start()
-  }
-
-  def getResponse: String = {
-    serializer.serialize(TasksList.toJson)
+    server
   }
 }

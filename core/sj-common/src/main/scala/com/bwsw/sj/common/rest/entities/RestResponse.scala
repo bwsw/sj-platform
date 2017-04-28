@@ -29,6 +29,16 @@ case class InternalServerErrorRestResponse(var entity: ResponseEntity) extends R
 
 trait ResponseEntity
 
+case class FrameworkTask(id: String,
+                         state: String,
+                         stateChange: String,
+                         reason: String,
+                         node: String,
+                         lastNode: String,
+                         directories: Seq[String])
+
+case class FrameworkRestEntity(tasks: Seq[FrameworkTask]) extends ResponseEntity
+
 case class MessageResponseEntity(message: String) extends ResponseEntity
 
 case class KeyedMessageResponseEntity(message: String, key: String) extends ResponseEntity

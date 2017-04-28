@@ -3,6 +3,7 @@ package com.bwsw.sj.mesos.framework.task
 import com.bwsw.sj.common.DAL.ConnectionConstants
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.rest.entities.FrameworkRestEntity
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.mesos.framework.schedule.{FrameworkUtil, OffersHandler}
 import org.apache.log4j.Logger
@@ -66,8 +67,8 @@ object TasksList {
     launchedTasks = mutable.ListBuffer[String]()
   }
 
-  def toJson: Map[String, Any] = {
-    Map("entity" -> Map("tasks" -> listTasks.values.map(_.toJson), "message" -> message))
+  def toFrameworkTask = {
+    FrameworkRestEntity(listTasks.values.map(_.toFrameworkTask).toSeq)
   }
 
   def apply(taskId: String): Option[Task] = {

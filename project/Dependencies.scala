@@ -107,9 +107,7 @@ object Dependencies {
   lazy val sjFrameworkDependencies = Def.setting(Seq(
     "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
     "org.apache.mesos" % "mesos" % "0.28.1",
-    "ws.unfiltered" % "unfiltered-filter_2.12" % "0.9.0",
-    ("ws.unfiltered" % "unfiltered-jetty_2.12" % "0.9.0")
-      .exclude("javax.servlet", "javax.servlet-api"),
+    "org.eclipse.jetty" % "jetty-runner" % "9.4.3.v20170317",
     ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
       .exclude("commons-logging", "commons-logging")
   ))
