@@ -1,7 +1,6 @@
 package com.bwsw.sj.engine.core.environment
 
-import com.bwsw.sj.common.DAL.model.SjStream
-
+import com.bwsw.sj.common.DAL.model.stream.SjStream
 import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.core.state.StateStorage

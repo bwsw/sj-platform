@@ -57,6 +57,21 @@ class JdbcClientConnectionData {
     case _ => throw new IllegalStateException(s"Incorrect JDBC prefix. Valid prefixes: $validPrefixes")
   }
 
+  def urlWithoutDatabase: String = driverPrefix match {
+    case `mysqlDriverPrefix` | `postgresqlDriverPrefix` =>
+      s"$driverPrefix://${hosts.mkString(",")}"
+    case `oracleDriverPrefix` =>
+      var url = s"$driverPrefix:@(DESCRIPTION = (ADDRESS_LIST = "
+      hosts.foreach { address =>
+        val uri = new URI("dummy://" + address)
+        url += s"(ADDRESS = (PROTOCOL = TCP) (HOST = ${uri.getHost}) (PORT = ${uri.getPort}))"
+      }
+      url += s"))"
+
+      url
+    case _ => throw new IllegalStateException(s"Incorrect JDBC prefix. Valid prefixes: $validPrefixes")
+  }
+
   def this(hosts: Array[String], driver: String, username: String, password: String, database: String, table: String) = {
     this
     this.hosts = hosts

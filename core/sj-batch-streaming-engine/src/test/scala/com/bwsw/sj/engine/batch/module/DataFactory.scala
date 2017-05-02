@@ -7,7 +7,9 @@ import java.util.jar.JarFile
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.module.{BatchInstance, Instance, Task}
-import com.bwsw.sj.common.DAL.model.{Provider, Service, _}
+import com.bwsw.sj.common.DAL.model.provider.Provider
+import com.bwsw.sj.common.DAL.model.service.{KafkaService, Service, TStreamService, ZKService}
+import com.bwsw.sj.common.DAL.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.config.ConfigLiterals

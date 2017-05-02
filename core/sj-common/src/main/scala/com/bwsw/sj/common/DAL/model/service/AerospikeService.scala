@@ -1,11 +1,12 @@
-package com.bwsw.sj.common.DAL.model
+package com.bwsw.sj.common.DAL.model.service
 
-import com.bwsw.sj.common.rest.entities.service.{ServiceData, ZKCoordServiceData}
+import com.bwsw.sj.common.DAL.model.provider.Provider
+import com.bwsw.sj.common.rest.entities.service.{ArspkDBServiceData, ServiceData}
 import com.bwsw.sj.common.utils.ServiceLiterals
 import org.mongodb.morphia.annotations.Reference
 
-class ZKService() extends Service {
-  serviceType = ServiceLiterals.zookeeperType
+class AerospikeService() extends Service {
+  serviceType = ServiceLiterals.aerospikeType
   @Reference var provider: Provider = null
   var namespace: String = null
 
@@ -19,7 +20,7 @@ class ZKService() extends Service {
   }
 
   override def asProtocolService(): ServiceData = {
-    val protocolService = new ZKCoordServiceData()
+    val protocolService = new ArspkDBServiceData()
     super.fillProtocolService(protocolService)
 
     protocolService.namespace = this.namespace

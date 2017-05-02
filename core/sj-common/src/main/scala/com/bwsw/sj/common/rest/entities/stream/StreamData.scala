@@ -1,6 +1,7 @@
 package com.bwsw.sj.common.rest.entities.stream
 
 import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.model.stream.SjStream
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils
 import com.bwsw.sj.common.utils.{MessageResourceUtils, StreamLiterals}

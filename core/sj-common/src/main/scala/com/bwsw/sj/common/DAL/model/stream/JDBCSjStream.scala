@@ -1,5 +1,6 @@
-package com.bwsw.sj.common.DAL.model
+package com.bwsw.sj.common.DAL.model.stream
 
+import com.bwsw.sj.common.DAL.model.service.Service
 import com.bwsw.sj.common.rest.entities.stream.JDBCStreamData
 
 class JDBCSjStream() extends SjStream {

@@ -1,4 +1,4 @@
-package com.bwsw.sj.common.DAL.model
+package com.bwsw.sj.common.DAL.model.provider
 
 import java.net.{InetSocketAddress, URI}
 import java.nio.channels.ClosedChannelException
@@ -193,11 +193,7 @@ class Provider {
     errors
   }
 
-  private def checkJdbcConnection(address: String) = {
-    val errors = ArrayBuffer[String]()
-
-    errors
-  }
+  protected def checkJdbcConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
 
   private def checkHttpConnection(address: String) = {
     val errors = ArrayBuffer[String]()

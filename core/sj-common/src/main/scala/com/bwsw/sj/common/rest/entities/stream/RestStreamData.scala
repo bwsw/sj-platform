@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.rest.entities.stream
 
-import com.bwsw.sj.common.DAL.model.RestSjStream
+import com.bwsw.sj.common.DAL.model.stream.RestSjStream
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
 

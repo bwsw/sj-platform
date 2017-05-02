@@ -1,7 +1,8 @@
-package com.bwsw.sj.common.DAL.model
+package com.bwsw.sj.common.DAL.model.service
 
 import java.util
 
+import com.bwsw.sj.common.DAL.model.provider.Provider
 import com.bwsw.sj.common.rest.entities.service.RestServiceData
 import com.bwsw.sj.common.utils.{RestLiterals, ServiceLiterals}
 import org.eclipse.jetty.http.HttpVersion

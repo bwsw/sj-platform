@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.rest.entities.service
 
-import com.bwsw.sj.common.DAL.model.CassandraService
+import com.bwsw.sj.common.DAL.model.service.CassandraService
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.ServiceLiterals
 

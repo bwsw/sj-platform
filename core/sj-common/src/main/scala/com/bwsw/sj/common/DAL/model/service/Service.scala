@@ -1,4 +1,4 @@
-package com.bwsw.sj.common.DAL.model
+package com.bwsw.sj.common.DAL.model.service
 
 import com.bwsw.sj.common.rest.entities.service.ServiceData
 import org.mongodb.morphia.annotations.{Entity, Id, Property}

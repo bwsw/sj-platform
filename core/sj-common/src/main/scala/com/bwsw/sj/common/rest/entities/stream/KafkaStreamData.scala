@@ -2,7 +2,8 @@ package com.bwsw.sj.common.rest.entities.stream
 
 import java.util.Properties
 
-import com.bwsw.sj.common.DAL.model.{KafkaService, KafkaSjStream}
+import com.bwsw.sj.common.DAL.model.service.KafkaService
+import com.bwsw.sj.common.DAL.model.stream.KafkaSjStream
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}

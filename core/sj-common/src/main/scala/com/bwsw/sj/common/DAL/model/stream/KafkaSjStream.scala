@@ -1,6 +1,8 @@
-package com.bwsw.sj.common.DAL.model
+package com.bwsw.sj.common.DAL.model.stream
 
 import java.util.Properties
+
+import com.bwsw.sj.common.DAL.model.service.{KafkaService, Service}
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.rest.entities.stream.KafkaStreamData
 import kafka.admin.AdminUtils

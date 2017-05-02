@@ -2,6 +2,8 @@ package com.bwsw.sj.engine.output.benchmark
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.model.service.RestService
+import com.bwsw.sj.common.DAL.model.stream.{RestSjStream, SjStream, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.engine.output.benchmark.DataFactory._
