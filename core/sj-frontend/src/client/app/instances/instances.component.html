@@ -748,12 +748,10 @@
         </button>
         <h4 class="modal-title">Mesos framework tasks</h4>
       </div>
-      <div class="modal-body" *ngIf="!message">
+      <div class="modal-body" *ngIf="!tasks">
         <p>The rest-address is not available. Try later.</p>
       </div>
-
-      <div class="modal-body" *ngIf="message">
-        {{message}}
+      
       </div>
       <div class="modal-body" *ngIf="tasks">
         <ul *ngFor="let task of tasks">
