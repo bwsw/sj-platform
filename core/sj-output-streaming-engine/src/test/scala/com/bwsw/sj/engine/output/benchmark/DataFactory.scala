@@ -8,8 +8,11 @@ import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.common.jdbc.JdbcClientBuilder
 import com.bwsw.common.traits.Serializer
+import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.{OutputInstance, Task}
-import com.bwsw.sj.common.DAL.model.{ESService, _}
+import com.bwsw.sj.common.DAL.model.provider.{JDBCProvider, Provider}
+import com.bwsw.sj.common.DAL.model.service._
+import com.bwsw.sj.common.DAL.model.stream._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.rest.entities.module.ExecutionPlan
@@ -183,7 +186,7 @@ object DataFactory {
       setTable(outputStream.name).
       build()
 
-    (client, jdbcService)
+    client
   }
 
   def deleteIndex() = {
@@ -200,9 +203,10 @@ object DataFactory {
     if (streamService.get(jdbcStreamName).isDefined) {
       val stream = streamService.get(jdbcStreamName).get.asInstanceOf[JDBCSjStream]
       val client = openJdbcConnection(stream)
+      client.start()
       val sql = s"DROP TABLE $jdbcStreamName"
-      client._1.execute(sql)
-      client._1.close()
+      client.execute(sql)
+      client.close()
     }
   }
 
@@ -239,7 +243,7 @@ object DataFactory {
     "(id VARCHAR(255) not NULL, " +
     " value INTEGER, " +
     " string_value VARCHAR(255), " +
-    " txn BIGINT, " +
+    " txn BIGINT, " +   //use NUMBER(19) for oracle
     " PRIMARY KEY ( id ))"
   }
 
@@ -259,12 +263,13 @@ object DataFactory {
 
     providerService.save(zookeeperProvider)
 
-    val jdbcProvider = new Provider()
+    val jdbcProvider = new JDBCProvider()
     jdbcProvider.name = jdbcProviderName
     jdbcProvider.hosts = jdbcHosts
     jdbcProvider.providerType = ProviderLiterals.jdbcType
     jdbcProvider.login = "admin"
     jdbcProvider.password = "admin"
+    jdbcProvider.driver = jdbcDriver
     providerService.save(jdbcProvider)
 
     val restProvider = new Provider
@@ -298,10 +303,9 @@ object DataFactory {
     zkService.namespace = testNamespace
     serviceManager.save(zkService)
 
-    val jdbcProvider: Provider = providerService.get(jdbcProviderName).get
+    val jdbcProvider = providerService.get(jdbcProviderName).get.asInstanceOf[JDBCProvider]
     val jdbcService = new JDBCService()
     jdbcService.name = jdbcServiceName
-    jdbcService.driver = jdbcDriver
     jdbcService.description = "jdbc service for benchmark"
     jdbcService.provider = jdbcProvider
     jdbcService.database = databaseName
@@ -345,7 +349,8 @@ object DataFactory {
   def createTable() = {
     val stream = streamService.get(jdbcStreamName).get.asInstanceOf[JDBCSjStream]
     val client = openJdbcConnection(stream)
-    client._1.execute(create_table)
+    client.start()
+    client.execute(create_table)
   }
 
   def createStreams(partitions: Int) = {

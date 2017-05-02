@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.core.environment
 
-import com.bwsw.sj.common.DAL.model.SjStream
+import com.bwsw.sj.common.DAL.model.stream.SjStream
 import org.slf4j.LoggerFactory
 
 /**

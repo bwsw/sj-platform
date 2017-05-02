@@ -2,24 +2,29 @@ package com.bwsw.sj.common.rest.entities.provider
 
 import java.net.{URI, URISyntaxException}
 
-import com.bwsw.sj.common.DAL.model.Provider
+import com.bwsw.sj.common.DAL.model.provider.Provider
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils
-import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.common.utils.ProviderLiterals._
-import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty}
+import com.bwsw.sj.common.utils.{MessageResourceUtils, ProviderLiterals}
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type
+import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes, JsonTypeInfo}
 
 import scala.collection.mutable.ArrayBuffer
 
-case class ProviderData(name: String,
-                        login: String,
-                        password: String,
-                        @JsonProperty("type") providerType: String,
-                        hosts: Array[String],
-                        description: String = "No description"
-                       ) extends ValidationUtils with MessageResourceUtils {
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[ProviderData], visible = true)
+@JsonSubTypes(Array(
+  new Type(value = classOf[JDBCProviderData], name = ProviderLiterals.jdbcType)
+))
+class ProviderData(val name: String,
+                   val login: String,
+                   val password: String,
+                   @JsonProperty("type") val providerType: String,
+                   val hosts: Array[String],
+                   val description: String = "No description"
+                  ) extends ValidationUtils with MessageResourceUtils {
   @JsonIgnore
-  def asModelProvider() = {
+  def asModelProvider(): Provider = {
     val provider = new Provider(
       this.name,
       this.description,
@@ -33,7 +38,7 @@ case class ProviderData(name: String,
   }
 
   @JsonIgnore
-  def validate() = {
+  def validate(): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
     val providerDAO = ConnectionRepository.getProviderService
 

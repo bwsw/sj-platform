@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.output.benchmark
 
-import com.bwsw.sj.common.DAL.model.{ESSjStream, SjStream, TStreamSjStream}
+import com.bwsw.sj.common.DAL.model.stream.{ESSjStream, SjStream, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.engine.output.benchmark.DataFactory._

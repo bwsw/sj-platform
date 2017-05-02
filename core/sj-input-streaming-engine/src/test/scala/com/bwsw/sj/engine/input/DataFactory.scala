@@ -7,7 +7,9 @@ import java.util.jar.JarFile
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask, Instance}
-import com.bwsw.sj.common.DAL.model.{Service, _}
+import com.bwsw.sj.common.DAL.model.provider.Provider
+import com.bwsw.sj.common.DAL.model.service.{Service, TStreamService, ZKService}
+import com.bwsw.sj.common.DAL.model.stream.{SjStream, TStreamSjStream}
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.utils.{ProviderLiterals, _}
 import com.bwsw.sj.engine.core.testutils.TestStorageServer

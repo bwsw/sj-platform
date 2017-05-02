@@ -1,7 +1,6 @@
-package com.bwsw.sj.common.DAL.model
+package com.bwsw.sj.common.DAL.model.service
 
-import com.bwsw.common.es.ElasticsearchClient
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.DAL.model.provider.Provider
 import com.bwsw.sj.common.rest.entities.service.{EsServiceData, ServiceData}
 import com.bwsw.sj.common.utils.ServiceLiterals
 import org.mongodb.morphia.annotations.Reference

@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.output.benchmark
 
-import com.bwsw.sj.common.DAL.model.{JDBCSjStream, SjStream, TStreamSjStream}
+import com.bwsw.sj.common.DAL.model.stream.{JDBCSjStream, SjStream, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.engine.output.benchmark.DataFactory._
@@ -32,7 +32,8 @@ object JDBCDataChecker extends App {
 
   val jdbcStream: JDBCSjStream = streamService.get(jdbcStreamName).get.asInstanceOf[JDBCSjStream]
 
-  val (jdbcClient, jdbcService) = openJdbcConnection(jdbcStream)
+  val jdbcClient = openJdbcConnection(jdbcStream)
+  jdbcClient.start()
 
   val stmt = jdbcClient.createPreparedStatement(s"SELECT COUNT(1) FROM ${jdbcStream.name}")
   var jdbcOutputDataSize = 0
@@ -47,6 +48,7 @@ object JDBCDataChecker extends App {
 
   ConnectionRepository.close()
   inputConsumer.stop()
+  jdbcClient.close()
 
   println("DONE")
 }

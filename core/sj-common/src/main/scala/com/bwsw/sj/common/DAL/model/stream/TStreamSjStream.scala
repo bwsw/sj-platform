@@ -1,5 +1,6 @@
-package com.bwsw.sj.common.DAL.model
+package com.bwsw.sj.common.DAL.model.stream
 
+import com.bwsw.sj.common.DAL.model.service.{Service, TStreamService}
 import com.bwsw.sj.common.rest.entities.stream.TStreamStreamData
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.tstreams.common.StorageClient

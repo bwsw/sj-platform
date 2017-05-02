@@ -3,7 +3,7 @@ package com.bwsw.sj.common.DAL.model.module
 import java.util
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.DAL.model.ZKService
+import com.bwsw.sj.common.DAL.model.service.ZKService
 import com.bwsw.sj.common.rest.entities.module.InstanceMetadata
 import com.bwsw.sj.common.utils.EngineLiterals
 import org.mongodb.morphia.annotations.{Embedded, Entity, Id, Property}

@@ -1,6 +1,7 @@
-package com.bwsw.sj.common.DAL.model
+package com.bwsw.sj.common.DAL.model.stream
 
 import com.bwsw.common.es.ElasticsearchClient
+import com.bwsw.sj.common.DAL.model.service.{ESService, Service}
 import com.bwsw.sj.common.rest.entities.stream.ESStreamData
 
 class ESSjStream() extends SjStream {

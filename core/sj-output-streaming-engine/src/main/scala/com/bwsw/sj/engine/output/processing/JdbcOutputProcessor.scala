@@ -3,7 +3,8 @@ package com.bwsw.sj.engine.output.processing
 import java.sql.PreparedStatement
 
 import com.bwsw.common.jdbc.JdbcClientBuilder
-import com.bwsw.sj.common.DAL.model.{JDBCService, JDBCSjStream, SjStream}
+import com.bwsw.sj.common.DAL.model.service.JDBCService
+import com.bwsw.sj.common.DAL.model.stream.{JDBCSjStream, SjStream}
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import com.bwsw.sj.engine.core.output.Entity
@@ -18,16 +19,15 @@ class JdbcOutputProcessor[T <: AnyRef](outputStream: SjStream,
 
   private val jdbcStream = outputStream.asInstanceOf[JDBCSjStream]
   private val jdbcService = outputStream.service.asInstanceOf[JDBCService]
-  private val jdbcClient = openConnection()
+  private val jdbcClient = createClient()
   private val jdbcCommandBuilder = new JdbcCommandBuilder(jdbcClient, transactionFieldName, entity.asInstanceOf[Entity[(PreparedStatement, Int) => Unit]])
+  jdbcClient.start()
 
-  private def openConnection() = {
-    logger.info(s"Open a JDBC connection at address: '${jdbcService.provider.hosts}'.")
-    val hosts = jdbcService.provider.hosts
-
+  private def createClient() = {
+    logger.info(s"Open a JDBC connection at address: '${jdbcService.provider.hosts.mkString(", ")}'.")
     val client = JdbcClientBuilder.
-      setHosts(hosts).
-      setDriver(jdbcService.driver).
+      setHosts(jdbcService.provider.hosts).
+      setDriver(jdbcService.provider.driver).
       setUsername(jdbcService.provider.login).
       setPassword(jdbcService.provider.password).
       setTable(outputStream.name).

@@ -3,8 +3,9 @@ package com.bwsw.sj.common.rest.entities.module
 import java.util.Calendar
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.DAL.model.module.{Instance, FrameworkStage}
-import com.bwsw.sj.common.DAL.model.{KafkaSjStream, SjStream, TStreamSjStream, ZKService}
+import com.bwsw.sj.common.DAL.model.module.{FrameworkStage, Instance}
+import com.bwsw.sj.common.DAL.model.service.ZKService
+import com.bwsw.sj.common.DAL.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.utils.SjStreamUtils._

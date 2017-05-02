@@ -5,6 +5,8 @@ import java.net.URLClassLoader
 
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module._
+import com.bwsw.sj.common.DAL.model.service.TStreamService
+import com.bwsw.sj.common.DAL.model.stream.{SjStream, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._

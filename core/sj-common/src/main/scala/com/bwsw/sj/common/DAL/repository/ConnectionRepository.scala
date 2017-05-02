@@ -5,6 +5,9 @@ import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.sj.common.DAL.ConnectionConstants
 import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module.Instance
+import com.bwsw.sj.common.DAL.model.provider.Provider
+import com.bwsw.sj.common.DAL.model.service.Service
+import com.bwsw.sj.common.DAL.model.stream.SjStream
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.mongodb.MongoClient
 import org.mongodb.morphia.Morphia

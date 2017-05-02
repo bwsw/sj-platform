@@ -2,8 +2,8 @@ package com.bwsw.sj.engine.batch.task.input
 
 import java.util.Date
 
-import com.bwsw.sj.common.DAL.model.TStreamSjStream
 import com.bwsw.sj.common.DAL.model.module.BatchInstance
+import com.bwsw.sj.common.DAL.model.stream.TStreamSjStream
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.EnvelopeDataSerializer
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}

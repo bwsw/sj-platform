@@ -1,7 +1,7 @@
 package com.bwsw.sj.crud.rest.api
 
 import akka.http.scaladsl.server.{Directives, RequestContext}
-import com.bwsw.sj.common.DAL.model._
+import com.bwsw.sj.common.DAL.model.service._
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.provider.ProviderData
 import com.bwsw.sj.common.utils.ProviderLiterals

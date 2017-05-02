@@ -3,7 +3,7 @@ package com.bwsw.sj.module.input.regex
 import java.util.regex.Pattern
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.DAL.model.{KafkaSjStream, SjStream, TStreamSjStream}
+import com.bwsw.sj.common.DAL.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
 import com.bwsw.sj.common.utils.stream_distributor.{ByHash, SjStreamDistributor}
 import com.bwsw.sj.common.utils.{AvroUtils, StreamLiterals}
 import com.bwsw.sj.engine.core.entities.InputEnvelope
