@@ -59,7 +59,11 @@ export class InstancesService extends BaseService<InstanceModel> {
   }
 
   public getInstanceTasks(instance: InstanceModel): Observable<ITasksObject> {
-    return this.http.get('http://'+instance.restAddress)
+    let headers = new Headers();
+    headers.append('Content-Type', 'application/json');
+    let options = new RequestOptions({ headers: headers });
+    return this.http.get(this.requestUrl + '/' + instance.moduleType + '/' + instance.moduleName + '/' +
+      instance.moduleVersion + '/instance' + '/' + instance.name + '/tasks', options)
       .map(this.extractData)
       .catch(this.handleError);
   }
