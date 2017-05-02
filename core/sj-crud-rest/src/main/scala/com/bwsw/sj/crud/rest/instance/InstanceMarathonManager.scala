@@ -25,12 +25,11 @@ trait InstanceMarathonManager {
   private lazy val marathonTimeout = ConfigurationSettingsUtils.getMarathonTimeout()
   private lazy val client = new HttpClient(marathonTimeout).client
 
-  def getNumberOfRunningTasks(response: CloseableHttpResponse) = {
+  def getApplicationEntity(response: CloseableHttpResponse): MarathonApplicationById = {
     val entity = marathonEntitySerializer.deserialize[MarathonApplicationById](EntityUtils.toString(response.getEntity, "UTF-8"))
-    logger.debug(s"Get number of running tasks of application: '${entity.app.id}'.")
-    val tasksRunning = entity.app.tasksRunning
+    logger.debug(s"Get entity of application: '${entity.app.id}'.")
 
-    tasksRunning
+    entity
   }
 
   def getMarathonMaster(marathonInfo: CloseableHttpResponse) = {
@@ -111,6 +110,12 @@ trait InstanceMarathonManager {
     val marathonInfo = client.execute(httpGet)
 
     marathonInfo
+  }
+
+  def getMarathonLastTaskFailed(applicationID: String) = {
+    val url = new URI(s"$marathonConnect/v2/apps/$applicationID?embed=lastTaskFailure")
+    val httpGet = new HttpGet(url.toString)
+    client.execute(httpGet)
   }
 
   def destroyMarathonApplication(applicationID: String) = {

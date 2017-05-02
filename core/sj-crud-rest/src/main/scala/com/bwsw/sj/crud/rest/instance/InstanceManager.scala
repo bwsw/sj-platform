@@ -22,7 +22,7 @@ private[instance] trait InstanceManager extends InstanceMarathonManager {
 
   protected def getRestAddress(leaderTask: Option[MarathonTask]) = {
     var res: String = null
-    if (leaderTask.isDefined) res = s"${leaderTask.get.host}:${leaderTask.get.ports.asInstanceOf[List[String]].head}"
+    if (leaderTask.isDefined) res = s"http://${leaderTask.get.host}:${leaderTask.get.ports.asInstanceOf[List[String]].head}"
     res
   }
 

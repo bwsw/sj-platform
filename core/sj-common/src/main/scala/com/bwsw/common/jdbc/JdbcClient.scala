@@ -5,6 +5,7 @@ import java.sql.{Connection, Driver, PreparedStatement, SQLException}
 import java.util.Properties
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.utils.JdbcLiterals
 import org.slf4j.LoggerFactory
 
 
@@ -20,10 +21,8 @@ protected class JdbcClient(override val jdbcCCD: JdbcClientConnectionData) exten
   createConnection()
 
   private def createConnection(): Unit = {
-    val url = Array(
-      jdbcCCD.driverPrefix,
-      jdbcCCD.hosts.mkString("://", ",", "/"), jdbcCCD.database).mkString
-    logger.info(s"Create a connection to a jdbc database via url: ${url.toString}.")
+    val url = jdbcCCD.url
+    logger.info(s"Create a connection to a jdbc database via url: $url.")
     java.util.Locale.setDefault(java.util.Locale.ENGLISH)
 
     val driverFileName = jdbcCCD.driverFileName
@@ -49,13 +48,27 @@ trait IJdbcClient {
     _connection match {
       case Some(connection) =>
         logger.debug(s"Verify that the table '${jdbcCCD.table}' exists in a database.")
-        var result: Boolean = false
-        val dbResult = connection.getMetaData.getTables(null, null, jdbcCCD.table, null)
-        while (dbResult.next) {
-          if (dbResult.getString(3).nonEmpty) result = true
-        }
+        jdbcCCD.driverPrefix match {
+          case JdbcLiterals.oracleDriverPrefix =>
+            try {
+              val statement = connection.prepareStatement(s"SELECT COUNT(*) FROM ${jdbcCCD.table}")
+              statement.execute()
+              statement.close()
+              true
+            } catch {
+              case _: SQLException => false
+            }
 
-        result
+          case _ =>
+            var result: Boolean = false
+            val dbResult = connection.getMetaData.getTables(null, null, jdbcCCD.table, null)
+            while (dbResult.next) {
+              if (dbResult.getString(3).nonEmpty) result = true
+            }
+            dbResult.close()
+
+            result
+        }
       case None => throw new IllegalStateException("Jdbc client is not started. Start it first.")
     }
   }
@@ -73,11 +86,15 @@ trait IJdbcClient {
     _connection match {
       case Some(connection) =>
         val stmt = connection.createStatement()
-        try stmt.executeUpdate(sql) catch {
+        val result = try {
+          stmt.executeUpdate(sql)
+        } catch {
           case e: Exception =>
             logger.error(s"Sql request execution has failed: ${e.getMessage}.")
             throw new SQLException(e.getMessage)
         }
+        stmt.close()
+        result
       case None => throw new IllegalStateException("Jdbc client is not started. Start it first.")
     }
   }

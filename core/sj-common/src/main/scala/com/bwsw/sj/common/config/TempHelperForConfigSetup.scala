@@ -66,6 +66,7 @@ object TempHelperForConfigDestroy extends App {
   ConnectionRepository.getConfigService.delete(ConfigLiterals.lowWatermark)
   ConnectionRepository.getConfigService.delete(ConfigLiterals.geoIpAsNum)
   ConnectionRepository.getConfigService.delete(ConfigLiterals.geoIpAsNumv6)
+  ConnectionRepository.getConfigService.delete(ConfigLiterals.jdbcTimeoutTag)
   ConnectionRepository.getConfigService.delete(ConfigLiterals.restTimeoutTag)
 
   val driverName = "mysql"

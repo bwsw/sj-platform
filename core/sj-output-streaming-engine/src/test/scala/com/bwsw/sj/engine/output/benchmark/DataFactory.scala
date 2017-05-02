@@ -200,7 +200,7 @@ object DataFactory {
     if (streamService.get(jdbcStreamName).isDefined) {
       val stream = streamService.get(jdbcStreamName).get.asInstanceOf[JDBCSjStream]
       val client = openJdbcConnection(stream)
-      val sql = s"DROP TABLE `$jdbcStreamName`"
+      val sql = s"DROP TABLE $jdbcStreamName"
       client._1.execute(sql)
       client._1.close()
     }

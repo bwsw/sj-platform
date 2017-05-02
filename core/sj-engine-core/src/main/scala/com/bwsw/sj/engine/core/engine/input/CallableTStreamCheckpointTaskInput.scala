@@ -4,14 +4,17 @@ import java.util.Date
 import java.util.concurrent.ArrayBlockingQueue
 
 import com.bwsw.sj.common.DAL.model.TStreamSjStream
-import com.bwsw.sj.common.DAL.model.module.{OutputInstance, RegularInstance, BatchInstance}
+import com.bwsw.sj.common.DAL.model.module.{BatchInstance, OutputInstance, RegularInstance}
 import com.bwsw.sj.common.engine.EnvelopeDataSerializer
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.TaskManager
+import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Oldest}
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
+
+import scala.collection.mutable
 
 /**
   * Class is responsible for launching t-stream subscribing consumers
@@ -29,24 +32,30 @@ class CallableTStreamCheckpointTaskInput[T <: AnyRef](manager: TaskManager,
                                                       override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
   extends CallableCheckpointTaskInput[TStreamEnvelope[T]](manager.inputs) {
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val consumers = createSubscribingConsumers()
+  private val (subscribingConsumers, consumerClones) = createConsumers()
 
-  private def createSubscribingConsumers() = {
+  private def createConsumers() = {
     logger.debug(s"Task: ${manager.taskName}. Start creating subscribing consumers.")
+    val consumerClones = mutable.Map[String, Consumer]()
     val inputs = manager.inputs
     val offset = getOffset()
     val callback = new ConsumerCallback[T](manager.envelopeDataSerializer.asInstanceOf[EnvelopeDataSerializer[T]], blockingQueue)
 
     val consumers = inputs.filter(x => x._1.streamType == StreamLiterals.tstreamType)
       .map(x => (x._1.asInstanceOf[TStreamSjStream], x._2.toList))
-      .map(x => manager.createSubscribingConsumer(x._1, x._2, offset, callback))
-      .map(x => (x.name, x)).toMap
+      .map(x => {
+        val consumer = manager.createSubscribingConsumer(x._1, x._2, offset, callback)
+        val clone = manager.createConsumer(x._1, x._2, offset, Some(consumer.name))
+
+        consumerClones += (clone.name -> clone)
+        consumer
+      }).toSeq
     logger.debug(s"Task: ${manager.taskName}. Creation of subscribing consumers is finished.")
 
-    consumers
+    (consumers, consumerClones)
   }
 
-  private def getOffset() = {
+  private def getOffset(): IOffset = {
     logger.debug(s"Task: ${manager.taskName}. Get an offset parameter from instance.")
     val instance = manager.instance
     val offset = instance match {
@@ -77,24 +86,33 @@ class CallableTStreamCheckpointTaskInput[T <: AnyRef](manager: TaskManager,
     }
   }
 
-  def call() = {
-    addConsumersToCheckpointGroup()
+  def call(): Unit = {
+    addClonesToCheckpointGroup()
     launchConsumers()
   }
 
-  private def addConsumersToCheckpointGroup() = {
-    logger.debug(s"Task: ${manager.taskName}. Start adding subscribing consumers to checkpoint group.")
-    consumers.foreach(x => checkpointGroup.add(x._2.getConsumer()))
-    logger.debug(s"Task: ${manager.taskName}. Adding subscribing consumers to checkpoint group is finished.")
+  private def addClonesToCheckpointGroup(): Unit = {
+    logger.debug(s"Task: ${manager.taskName}. Start adding clones of subscribing consumers to checkpoint group.")
+    consumerClones.foreach(x => checkpointGroup.add(x._2))
+    logger.debug(s"Task: ${manager.taskName}. Adding clones of subscribing consumers to checkpoint group is finished.")
   }
 
-  private def launchConsumers() = {
-    logger.debug(s"Task: ${manager.taskName}. Launch subscribing consumers.")
-    consumers.foreach(_._2.start())
-    logger.debug(s"Task: ${manager.taskName}. Subscribing consumers are launched.")
+  private def launchConsumers(): Unit = {
+    logger.debug(s"Task: ${manager.taskName}. Launch subscribing consumers and their clones.")
+    subscribingConsumers.foreach(_.start())
+    consumerClones.foreach(_._2.start())
+    logger.debug(s"Task: ${manager.taskName}. Subscribing consumers and their clones are launched.")
+  }
+
+  override def setConsumerOffset(envelope: TStreamEnvelope[T]): Unit = {
+    logger.debug(s"Task: ${manager.taskName}. " +
+      s"Change local offset of consumer: ${envelope.consumerName} to txn: ${envelope.id}.")
+    consumerClones(envelope.consumerName).setStreamPartitionOffset(envelope.partition, envelope.id)
   }
 
   override def close(): Unit = {
-    consumers.foreach(_._2.stop())
+    subscribingConsumers.foreach(_.stop())
+    consumerClones.foreach(_._2.stop())
   }
 }
+

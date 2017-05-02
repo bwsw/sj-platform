@@ -31,7 +31,7 @@ class JdbcCommandBuilder(client: IJdbcClient, transactionFieldName: String, enti
   def insert: PreparedStatement = {
     val fields = entity.getFields.mkString(",") + "," + transactionFieldName
     val fieldsParams = List.fill(fields.split(",").length)("?").mkString(",")
-    val sqlInsert = s"INSERT INTO ${client.jdbcCCD.table} ($fields) VALUES ($fieldsParams);"
+    val sqlInsert = s"INSERT INTO ${client.jdbcCCD.table} ($fields) VALUES ($fieldsParams)"
     client.createPreparedStatement(sqlInsert)
   }
 
