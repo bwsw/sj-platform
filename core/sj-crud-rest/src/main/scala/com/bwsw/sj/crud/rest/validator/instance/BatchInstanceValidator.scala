@@ -39,6 +39,11 @@ class BatchInstanceValidator extends InstanceValidator {
       }
     }
 
+    // 'event-wait-idle-time' field
+    if (batchInstanceMetadata.eventWaitIdleTime <= 0) {
+      errors += createMessage("rest.validator.attribute.must.greater.than.zero", "eventWaitIdleTime")
+    }
+
     // 'window' field
     if (batchInstanceMetadata.window <= 0) {
       errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Window")
@@ -153,12 +158,14 @@ class BatchInstanceValidator extends InstanceValidator {
     val tStreamsServices = getStreamServices(allStreams.filter { s =>
       s.streamType.equals(tstreamType)
     })
-    if (tStreamsServices.size != 1) {
-      errors += createMessage("rest.validator.t_stream.same.service")
-    } else {
-      val service = serviceDAO.get(tStreamsServices.head)
-      if (!service.get.isInstanceOf[TStreamService]) {
-        errors += createMessage("rest.validator.service.must", "t-streams", "TstrQ")
+    if (tStreamsServices.nonEmpty) {
+      if (tStreamsServices.size > 1) {
+        errors += createMessage("rest.validator.t_stream.same.service")
+      } else {
+        val service = serviceDAO.get(tStreamsServices.head)
+        if (!service.get.isInstanceOf[TStreamService]) {
+          errors += createMessage("rest.validator.service.must", "t-streams", "TstrQ")
+        }
       }
     }
 
