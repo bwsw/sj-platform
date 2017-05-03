@@ -86,6 +86,7 @@
             </li>
             <li *ngIf="currentProvider.login">Login: {{currentProvider.login}}</li>
             <li *ngIf="currentProvider.password">Password: {{currentProvider.password}}</li>
+            <li *ngIf="currentProvider.type === 'JDBC'">Driver: {{currentProvider.driver}}</li>
           </ul>
         </div>
       </div>
