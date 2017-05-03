@@ -7,4 +7,5 @@ export class ProviderModel extends BaseModel {
   password: string;
   type: string;
   hosts: string[] = [''];
+  driver: string;
 }
