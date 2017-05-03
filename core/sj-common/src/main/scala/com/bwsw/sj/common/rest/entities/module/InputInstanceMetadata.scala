@@ -1,6 +1,8 @@
 package com.bwsw.sj.common.rest.entities.module
 
 import com.bwsw.sj.common.DAL.model.module.{InputInstance, InputTask}
+import com.bwsw.sj.common.DAL.model.service.ZKService
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 
 import scala.collection.JavaConverters._
@@ -19,9 +21,11 @@ class InputInstanceMetadata extends InstanceMetadata {
   var tasks: Map[String, InputTask] = Map()
 
   override def asModelInstance() = {
-    val modelInstance = new InputInstance()
+    val serviceDAO = ConnectionRepository.getServiceManager
+    val service = serviceDAO.get(this.coordinationService).get.asInstanceOf[ZKService]
+
+    val modelInstance = new InputInstance(name, moduleType, moduleName, moduleVersion, engine, service, checkpointMode)
     super.fillModelInstance(modelInstance)
-    modelInstance.checkpointMode = this.checkpointMode
     modelInstance.checkpointInterval = this.checkpointInterval
     modelInstance.outputs = this.outputs
     modelInstance.duplicateCheck = this.duplicateCheck

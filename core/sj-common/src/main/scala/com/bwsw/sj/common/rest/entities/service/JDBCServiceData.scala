@@ -15,10 +15,13 @@ class JDBCServiceData() extends ServiceData() {
 
   override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService
-    val modelService = new JDBCService()
-    super.fillModelService(modelService)
-    modelService.provider = providerDAO.get(this.provider).get.asInstanceOf[JDBCProvider]
-    modelService.database = this.database
+    val modelService = new JDBCService(
+      this.name,
+      this.description,
+      providerDAO.get(this.provider).get.asInstanceOf[JDBCProvider],
+      this.database
+    )
+
     modelService
   }
 

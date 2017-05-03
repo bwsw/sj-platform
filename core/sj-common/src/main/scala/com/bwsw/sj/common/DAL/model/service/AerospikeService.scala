@@ -1,23 +1,16 @@
 package com.bwsw.sj.common.DAL.model.service
 
 import com.bwsw.sj.common.DAL.model.provider.Provider
+import com.bwsw.sj.common.DAL.morphia.MorphiaAnnotations.ReferenceField
 import com.bwsw.sj.common.rest.entities.service.{ArspkDBServiceData, ServiceData}
 import com.bwsw.sj.common.utils.ServiceLiterals
-import org.mongodb.morphia.annotations.Reference
 
-class AerospikeService() extends Service {
-  serviceType = ServiceLiterals.aerospikeType
-  @Reference var provider: Provider = null
-  var namespace: String = null
-
-  def this(name: String, serviceType: String, description: String, provider: Provider, namespace: String) = {
-    this()
-    this.name =name
-    this.serviceType = serviceType
-    this.description = description
-    this.provider = provider
-    this.namespace = namespace
-  }
+class AerospikeService(override val name: String,
+                       override val description: String,
+                       @ReferenceField val provider: Provider,
+                       val namespace: String,
+                       override val serviceType: String = ServiceLiterals.aerospikeType)
+  extends Service(name, description, serviceType) {
 
   override def asProtocolService(): ServiceData = {
     val protocolService = new ArspkDBServiceData()

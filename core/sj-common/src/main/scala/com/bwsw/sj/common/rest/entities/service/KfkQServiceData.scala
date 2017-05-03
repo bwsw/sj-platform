@@ -14,11 +14,13 @@ class KfkQServiceData() extends ServiceData() {
 
   override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService
-    val modelService = new KafkaService()
-    super.fillModelService(modelService)
-    modelService.provider = providerDAO.get(this.provider).get
-    modelService.zkProvider = providerDAO.get(this.zkProvider).get
-    modelService.zkNamespace = this.zkNamespace
+    val modelService = new KafkaService(
+      this.name,
+      this.description,
+      providerDAO.get(this.provider).get,
+      providerDAO.get(this.zkProvider).get,
+      this.zkNamespace
+    )
 
     modelService
   }

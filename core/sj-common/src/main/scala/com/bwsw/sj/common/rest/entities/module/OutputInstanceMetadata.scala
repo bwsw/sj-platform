@@ -2,6 +2,8 @@ package com.bwsw.sj.common.rest.entities.module
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module.OutputInstance
+import com.bwsw.sj.common.DAL.model.service.ZKService
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
 
@@ -14,9 +16,11 @@ class OutputInstanceMetadata extends InstanceMetadata with AvroSchemaForInstance
   var output: String = null
 
   override def asModelInstance() = {
-    val modelInstance = new OutputInstance()
+    val serviceDAO = ConnectionRepository.getServiceManager
+    val service = serviceDAO.get(this.coordinationService).get.asInstanceOf[ZKService]
+
+    val modelInstance = new OutputInstance(name, moduleType, moduleName, moduleVersion, engine, service, checkpointMode)
     super.fillModelInstance(modelInstance)
-    modelInstance.checkpointMode = this.checkpointMode
     modelInstance.checkpointInterval = this.checkpointInterval
     modelInstance.inputs = Array(this.input)
     modelInstance.outputs = Array(this.output)

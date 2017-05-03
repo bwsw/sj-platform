@@ -2,6 +2,8 @@ package com.bwsw.sj.common.rest.entities.module
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module._
+import com.bwsw.sj.common.DAL.model.service.ZKService
+import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
 
@@ -17,9 +19,11 @@ class RegularInstanceMetadata extends InstanceMetadata with AvroSchemaForInstanc
   var eventWaitIdleTime: Long = 1000
 
   override def asModelInstance() = {
-    val modelInstance = new RegularInstance()
+    val serviceDAO = ConnectionRepository.getServiceManager
+    val service = serviceDAO.get(this.coordinationService).get.asInstanceOf[ZKService]
+
+    val modelInstance = new RegularInstance(name, moduleType, moduleName, moduleVersion, engine, service, checkpointMode)
     super.fillModelInstance(modelInstance)
-    modelInstance.checkpointMode = this.checkpointMode
     modelInstance.checkpointInterval = this.checkpointInterval
     modelInstance.stateManagement = this.stateManagement
     modelInstance.stateFullCheckpoint = this.stateFullCheckpoint

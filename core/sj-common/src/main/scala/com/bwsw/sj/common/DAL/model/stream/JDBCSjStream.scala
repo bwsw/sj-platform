@@ -1,24 +1,17 @@
 package com.bwsw.sj.common.DAL.model.stream
 
-import com.bwsw.sj.common.DAL.model.service.Service
+import com.bwsw.sj.common.DAL.model.service.JDBCService
 import com.bwsw.sj.common.rest.entities.stream.JDBCStreamData
+import com.bwsw.sj.common.utils.StreamLiterals
 
-class JDBCSjStream() extends SjStream {
-  var primary: String = _
-  def this(name: String,
-           id: String,
-           description: String,
-           service: Service,
-           streamType: String,
-           tags: Array[String]) = {
-    this()
-    this.name = name
-    this.primary = id
-    this.description = description
-    this.service = service
-    this.streamType = streamType
-    this.tags = tags
-  }
+class JDBCSjStream(override val name: String,
+                   override val description: String,
+                   override val service: JDBCService,
+                   override val tags: Array[String],
+                   override val force: Boolean,
+                   val primary: String,
+                   override val streamType: String = StreamLiterals.jdbcOutputType)
+  extends SjStream(name, description, service, tags, force, streamType) {
 
   override def asProtocolStream() = {
     val streamData = new JDBCStreamData

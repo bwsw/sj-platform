@@ -44,8 +44,14 @@ class ESStreamData() extends StreamData() {
   }
 
   override def asModelStream() = {
-    val modelStream = new ESSjStream()
-    super.fillModelStream(modelStream)
+    val serviceDAO = ConnectionRepository.getServiceManager
+    val modelStream = new ESSjStream(
+      this.name,
+      this.description,
+      serviceDAO.get(this.service).get.asInstanceOf[ESService],
+      this.tags,
+      this.force
+    )
 
     modelStream
   }

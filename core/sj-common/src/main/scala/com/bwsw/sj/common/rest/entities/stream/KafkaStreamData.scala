@@ -68,10 +68,16 @@ class KafkaStreamData() extends StreamData() {
   }
 
   override def asModelStream() = {
-    val modelStream = new KafkaSjStream()
-    super.fillModelStream(modelStream)
-    modelStream.partitions = this.partitions
-    modelStream.replicationFactor = this.replicationFactor
+    val serviceDAO = ConnectionRepository.getServiceManager
+    val modelStream = new KafkaSjStream(
+      this.name,
+      this.description,
+      serviceDAO.get(this.service).get.asInstanceOf[KafkaService],
+      this.tags,
+      this.force,
+      this.partitions,
+      this.replicationFactor
+    )
 
     modelStream
   }

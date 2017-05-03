@@ -1,6 +1,8 @@
 package com.bwsw.sj.common.DAL.model.module
 
 import com.bwsw.common.JsonSerializer
+import com.bwsw.sj.common.DAL.model.service.ZKService
+import com.bwsw.sj.common.DAL.morphia.MorphiaAnnotations.PropertyField
 import com.bwsw.sj.common.rest.entities.module.{ExecutionPlan, InstanceMetadata, RegularInstanceMetadata}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
@@ -11,9 +13,16 @@ import org.mongodb.morphia.annotations._
   *
   * @author Kseniya Tomskikh
   */
-class RegularInstance() extends Instance with AvroSchemaForInstance {
+class RegularInstance(override val name: String,
+                      override val moduleType: String,
+                      override val moduleName: String,
+                      override val moduleVersion: String,
+                      override val engine: String,
+                      override val coordinationService: ZKService,
+                      @PropertyField("checkpoint-mode") val checkpointMode: String)
+  extends Instance(name, moduleType, moduleName, moduleVersion, engine, coordinationService) with AvroSchemaForInstance {
+
   var inputs: Array[String] = Array()
-  @Property("checkpoint-mode") var checkpointMode: String = null
   @Property("checkpoint-interval") var checkpointInterval: Long = 0
   @Embedded("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan()
   @Property("start-from") var startFrom: String = EngineLiterals.newestStartMode

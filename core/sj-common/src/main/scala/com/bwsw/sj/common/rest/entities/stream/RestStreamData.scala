@@ -1,5 +1,6 @@
 package com.bwsw.sj.common.rest.entities.stream
 
+import com.bwsw.sj.common.DAL.model.service.RestService
 import com.bwsw.sj.common.DAL.model.stream.RestSjStream
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
@@ -46,8 +47,14 @@ class RestStreamData extends StreamData {
   }
 
   override def asModelStream() = {
-    val modelStream = new RestSjStream
-    fillModelStream(modelStream)
+    val serviceDAO = ConnectionRepository.getServiceManager
+    val modelStream = new RestSjStream(
+      this.name,
+      this.description,
+      serviceDAO.get(this.service).get.asInstanceOf[RestService],
+      this.tags,
+      this.force
+    )
 
     modelStream
   }

@@ -54,9 +54,15 @@ class TStreamStreamData() extends StreamData() {
   }
 
   override def asModelStream() = {
-    val modelStream = new TStreamSjStream()
-    super.fillModelStream(modelStream)
-    modelStream.partitions = this.partitions
+    val serviceDAO = ConnectionRepository.getServiceManager
+    val modelStream = new TStreamSjStream(
+      this.name,
+      this.description,
+      serviceDAO.get(this.service).get.asInstanceOf[TStreamService],
+      this.tags,
+      this.force,
+      this.partitions
+    )
 
     modelStream
   }

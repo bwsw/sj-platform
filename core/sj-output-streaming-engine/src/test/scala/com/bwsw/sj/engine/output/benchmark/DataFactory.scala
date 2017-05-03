@@ -16,7 +16,7 @@ import com.bwsw.sj.common.DAL.model.stream._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
 import com.bwsw.sj.common.rest.entities.module.ExecutionPlan
-import com.bwsw.sj.common.utils.{ProviderLiterals, ServiceLiterals, _}
+import com.bwsw.sj.common.utils.{ProviderLiterals, _}
 import com.bwsw.sj.engine.core.testutils.TestStorageServer
 import com.bwsw.tstreams.agents.consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
@@ -86,8 +86,7 @@ object DataFactory {
   private val zookeeperHosts = System.getenv("ZOOKEEPER_HOSTS").split(",").map(host => host.trim)
   private val zookeeperProvider = new Provider(zookeeperProviderName, zookeeperProviderName,
     zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
-  private val tstrqService = new TStreamService(tstreamServiceName, ServiceLiterals.tstreamsType,
-    tstreamServiceName, zookeeperProvider, TestStorageServer.prefix, TestStorageServer.token)
+  private val tstrqService = new TStreamService(tstreamServiceName, tstreamServiceName, zookeeperProvider, TestStorageServer.prefix, TestStorageServer.token)
   private val tstreamFactory = new TStreamsFactory()
 
   setTStreamFactoryProperties()
@@ -121,8 +120,13 @@ object DataFactory {
 
   def createData(countTxns: Int, countElements: Int) = {
     val tStream: TStreamSjStream = new TStreamSjStream(
-      tstreamInputName, "", 4, tstrqService,
-      StreamLiterals.tstreamType, Array("tag"))
+      tstreamInputName,
+      "",
+      tstrqService,
+      Array("tag"),
+      false,
+      4
+    ) //todo get rid of number
 
     val producer = createProducer(tStream)
     val s = System.currentTimeMillis()
@@ -240,11 +244,11 @@ object DataFactory {
 
   def create_table: String = {
     s"CREATE TABLE $jdbcStreamName " +
-    "(id VARCHAR(255) not NULL, " +
-    " value INTEGER, " +
-    " string_value VARCHAR(255), " +
-    " txn BIGINT, " +   //use NUMBER(19) for oracle
-    " PRIMARY KEY ( id ))"
+      "(id VARCHAR(255) not NULL, " +
+      " value INTEGER, " +
+      " string_value VARCHAR(255), " +
+      " txn BIGINT, " + //use NUMBER(19) for oracle
+      " PRIMARY KEY ( id ))"
   }
 
   def close() = {
@@ -253,84 +257,61 @@ object DataFactory {
 
 
   def createProviders() = {
-    val esProvider = new Provider()
-    esProvider.name = esProviderName
-    esProvider.hosts = esProviderHosts
-    esProvider.providerType = ProviderLiterals.elasticsearchType
-    esProvider.login = ""
-    esProvider.password = ""
-    providerService.save(esProvider)
-
-    providerService.save(zookeeperProvider)
-
-    val jdbcProvider = new JDBCProvider()
-    jdbcProvider.name = jdbcProviderName
-    jdbcProvider.hosts = jdbcHosts
-    jdbcProvider.providerType = ProviderLiterals.jdbcType
-    jdbcProvider.login = "admin"
-    jdbcProvider.password = "admin"
-    jdbcProvider.driver = jdbcDriver
-    providerService.save(jdbcProvider)
-
-    val restProvider = new Provider
-    restProvider.name = restProviderName
-    restProvider.hosts = restHosts
-    restProvider.providerType = ProviderLiterals.restType
-    restProvider.login = ""
-    restProvider.password = ""
-    providerService.save(restProvider)
+    //    val esProvider = new Provider()
+    //    esProvider.name = esProviderName
+    //    esProvider.hosts = esProviderHosts
+    //    esProvider.providerType = ProviderLiterals.elasticsearchType
+    //    esProvider.login = ""
+    //    esProvider.password = ""
+    //    providerService.save(esProvider)
+    //
+    //    providerService.save(zookeeperProvider)
+    //
+    //    val jdbcProvider = new JDBCProvider()
+    //    jdbcProvider.name = jdbcProviderName
+    //    jdbcProvider.hosts = jdbcHosts
+    //    jdbcProvider.providerType = ProviderLiterals.jdbcType
+    //    jdbcProvider.login = "admin"
+    //    jdbcProvider.password = "admin"
+    //    jdbcProvider.driver = jdbcDriver
+    //    providerService.save(jdbcProvider)
+    //
+    //    val restProvider = new Provider
+    //    restProvider.name = restProviderName
+    //    restProvider.hosts = restHosts
+    //    restProvider.providerType = ProviderLiterals.restType
+    //    restProvider.login = ""
+    //    restProvider.password = ""
+    //    providerService.save(restProvider)
   }
 
   def createServices() = {
     val esProv: Provider = providerService.get(esProviderName).get
-    val esService: ESService = new ESService()
-    esService.name = esServiceName
-    esService.serviceType = ServiceLiterals.elasticsearchType
-    esService.description = "es service for benchmarks"
-    esService.provider = esProv
-    esService.index = esIndex
-    esService.login = ""
-    esService.password = ""
+    val esService: ESService = new ESService(esServiceName, esServiceName, esProv, esIndex)
     serviceManager.save(esService)
 
     serviceManager.save(tstrqService)
 
-    val zkService = new ZKService()
-    zkService.name = zookeeperServiceName
-    zkService.serviceType = ServiceLiterals.zookeeperType
-    zkService.description = "zk service for benchmarks"
-    zkService.provider = zookeeperProvider
-    zkService.namespace = testNamespace
+    val zkService = new ZKService(zookeeperServiceName, zookeeperServiceName, zookeeperProvider, testNamespace)
     serviceManager.save(zkService)
 
     val jdbcProvider = providerService.get(jdbcProviderName).get.asInstanceOf[JDBCProvider]
-    val jdbcService = new JDBCService()
-    jdbcService.name = jdbcServiceName
-    jdbcService.description = "jdbc service for benchmark"
-    jdbcService.provider = jdbcProvider
-    jdbcService.database = databaseName
+    val jdbcService = new JDBCService(jdbcServiceName, jdbcServiceName, jdbcProvider, databaseName)
     serviceManager.save(jdbcService)
 
     val restProvider = providerService.get(restProviderName).get
-    val restService = new RestService
-    restService.name = restServiceName
-    restService.serviceType = ServiceLiterals.restType
-    restService.provider = restProvider
-    restService.headers = restHeaders
-    restService.basePath = restBasePath
-    restService.httpVersion = restHttpVersion
-    restService.description = "rest service for benchmark"
+    val restService = new RestService(restServiceName, restServiceName, restProvider, restBasePath, restHttpVersion, restHeaders)
     serviceManager.save(restService)
   }
 
   def mapping: XContentBuilder = jsonBuilder()
     .startObject()
-      .startObject("properties")
-        .startObject("txn").field("type", "long").endObject()
-        .startObject("test-date").field("type", "date").endObject()
-        .startObject("value").field("type", "integer").endObject()
-        .startObject("string-value").field("type", "string").endObject()
-      .endObject()
+    .startObject("properties")
+    .startObject("txn").field("type", "long").endObject()
+    .startObject("test-date").field("type", "date").endObject()
+    .startObject("value").field("type", "integer").endObject()
+    .startObject("string-value").field("type", "string").endObject()
+    .endObject()
     .endObject()
 
   def createIndex() = {
@@ -355,41 +336,19 @@ object DataFactory {
 
   def createStreams(partitions: Int) = {
     val esService = serviceManager.get(esServiceName).get.asInstanceOf[ESService]
-    val esStream: ESSjStream = new ESSjStream()
-    esStream.name = esStreamName
-    esStream.description = "es stream for benchmarks"
-    esStream.streamType = StreamLiterals.esOutputType
-    esStream.service = esService
-    esStream.tags = Array("tag1")
+    val esStream: ESSjStream = new ESSjStream(esStreamName, esStreamName, esService, Array("tag1"), false)
     streamService.save(esStream)
 
     val tService: TStreamService = serviceManager.get(tstreamServiceName).get.asInstanceOf[TStreamService]
-    val tStream: TStreamSjStream = new TStreamSjStream()
-    tStream.name = tstreamInputName
-    tStream.description = "t-stream for benchmarks"
-    tStream.streamType = StreamLiterals.tstreamType
-    tStream.service = tService
-    tStream.tags = Array("tag1")
-    tStream.partitions = partitions
+    val tStream: TStreamSjStream = new TStreamSjStream(tstreamInputName, tstreamInputName, tService, Array("tag1"), false, partitions)
     streamService.save(tStream)
 
     val jdbcService: JDBCService = serviceManager.get(jdbcServiceName).get.asInstanceOf[JDBCService]
-    val jdbcStream: JDBCSjStream = new JDBCSjStream()
-    jdbcStream.name = jdbcStreamName
-    jdbcStream.primary = "test"
-    jdbcStream.description = "jdbc stream for benchmarks"
-    jdbcStream.streamType = StreamLiterals.jdbcOutputType
-    jdbcStream.service = jdbcService
-    jdbcStream.tags = Array("tag1")
+    val jdbcStream: JDBCSjStream = new JDBCSjStream(jdbcStreamName, jdbcStreamName, jdbcService, Array("tag1"), false, "test")
     streamService.save(jdbcStream)
 
     val restService = serviceManager.get(restServiceName).get.asInstanceOf[RestService]
-    val restStream = new RestSjStream
-    restStream.name = restStreamName
-    restStream.description = "rest stream for benchmarks"
-    restStream.streamType = StreamLiterals.restOutputType
-    restStream.service = restService
-    restStream.tags = Array("tag1")
+    val restStream = new RestSjStream(restStreamName, restStreamName, restService, Array("tag1"), false)
     streamService.save(restStream)
 
     storageClient.createStream(
@@ -406,22 +365,18 @@ object DataFactory {
     task1.inputs = Map(tstreamInputName -> Array(0, 3)).asJava
     val executionPlan = new ExecutionPlan(Map(instanceName + "-task0" -> task1).asJava)
 
-    val instance = new OutputInstance()
-    instance.name = instanceName
-    instance.moduleType = EngineLiterals.outputStreamingType
-    instance.moduleName = moduleName
-    instance.moduleVersion = "1.0"
+    val instance = new OutputInstance(instanceName, EngineLiterals.outputStreamingType,
+      moduleName, "1.0", "com.bwsw.output.streaming.engine-1.0",
+      serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKService], checkpointMode
+    )
     instance.status = EngineLiterals.started
     instance.description = "some description of test instance"
     instance.inputs = Array(tstreamInputName)
     instance.outputs = Array(streamName)
-    instance.checkpointMode = checkpointMode
     instance.checkpointInterval = checkpointInterval
     instance.options = """{"hey": "hey"}"""
     instance.startFrom = EngineLiterals.oldestStartMode
     instance.executionPlan = executionPlan
-    instance.engine = "com.bwsw.output.streaming.engine-1.0"
-    instance.coordinationService = serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKService]
 
     instanceService.save(instance)
   }

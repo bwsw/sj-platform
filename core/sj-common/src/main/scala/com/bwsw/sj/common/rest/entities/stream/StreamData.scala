@@ -1,6 +1,5 @@
 package com.bwsw.sj.common.rest.entities.stream
 
-import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.stream.SjStream
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils
@@ -31,16 +30,6 @@ class StreamData() extends ValidationUtils with MessageResourceUtils {
 
   @JsonIgnore
   def asModelStream(): SjStream = ???
-
-  @JsonIgnore
-  protected def fillModelStream(stream: SjStream) = {
-    val serviceDAO = ConnectionRepository.getServiceManager
-    stream.name = this.name
-    stream.description = this.description
-    stream.service = serviceDAO.get(this.service).get
-    stream.tags = this.tags
-    stream.streamType = this.streamType
-  }
 
   @JsonIgnore
   def validate() = validateGeneralFields()

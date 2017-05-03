@@ -215,10 +215,10 @@ abstract class TaskManager() {
     new TStreamSjStream(
       name,
       description,
-      partitions,
       auxiliaryTStreamService,
-      tstreamType,
-      tags
+      tags,
+      false,
+      partitions
     )
   }
 

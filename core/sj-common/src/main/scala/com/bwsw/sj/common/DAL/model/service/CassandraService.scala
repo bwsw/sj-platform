@@ -1,23 +1,16 @@
 package com.bwsw.sj.common.DAL.model.service
 
 import com.bwsw.sj.common.DAL.model.provider.Provider
+import com.bwsw.sj.common.DAL.morphia.MorphiaAnnotations.ReferenceField
 import com.bwsw.sj.common.rest.entities.service.{CassDBServiceData, ServiceData}
 import com.bwsw.sj.common.utils.ServiceLiterals
-import org.mongodb.morphia.annotations.Reference
 
-class CassandraService() extends Service {
-  serviceType = ServiceLiterals.cassandraType
-  @Reference var provider: Provider = null
-  var keyspace: String = null
-
-  def this(name: String, serviceType: String, description: String, provider: Provider, keyspace: String) = {
-    this()
-    this.name = name
-    this.serviceType = serviceType
-    this.description = description
-    this.provider = provider
-    this.keyspace = keyspace
-  }
+class CassandraService(override val name: String,
+                       override val description: String,
+                       @ReferenceField val provider: Provider,
+                       val keyspace: String,
+                       override val serviceType: String = ServiceLiterals.cassandraType)
+  extends Service(name, description, serviceType) {
 
   override def asProtocolService(): ServiceData = {
     val protocolService = new CassDBServiceData()

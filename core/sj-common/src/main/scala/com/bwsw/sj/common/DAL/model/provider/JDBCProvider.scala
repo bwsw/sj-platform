@@ -8,20 +8,14 @@ import com.bwsw.sj.common.utils.ProviderLiterals
 
 import scala.collection.mutable.ArrayBuffer
 
-class JDBCProvider extends Provider {
-  providerType = ProviderLiterals.jdbcType
-  var driver: String = _
-
-  def this(name: String, description: String, hosts: Array[String], login: String, password: String, providerType: String, driver: String) = {
-    this()
-    this.name = name
-    this.description = description
-    this.hosts = hosts
-    this.login = login
-    this.password = password
-    this.providerType = providerType
-    this.driver = driver
-  }
+class JDBCProvider(override val name: String,
+                   override val description: String,
+                   override val hosts: Array[String],
+                   override val login: String,
+                   override val password: String,
+                   val driver: String,
+                   override val providerType: String = ProviderLiterals.jdbcType)
+  extends Provider(name, description, hosts, login, password, providerType) {
 
   override def asProtocolProvider(): JDBCProviderData = {
     val providerData = new JDBCProviderData(

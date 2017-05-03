@@ -53,8 +53,8 @@ object DataFactory {
   private val serializer = new JsonSerializer()
   private val objectSerializer = new ObjectSerializer()
   private val zookeeperProvider = new Provider(zookeeperProviderName, zookeeperProviderName, zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
-  private val tstrqService = new TStreamService(tstreamServiceName, ServiceLiterals.tstreamsType,
-    tstreamServiceName, zookeeperProvider, TestStorageServer.prefix, TestStorageServer.token)
+  private val tstrqService = new TStreamService(tstreamServiceName, tstreamServiceName, zookeeperProvider,
+    TestStorageServer.prefix, TestStorageServer.token)
   private val tstreamFactory = new TStreamsFactory()
   setTStreamFactoryProperties()
   private val storageClient = tstreamFactory.getStorageClient()
@@ -101,11 +101,11 @@ object DataFactory {
   }
 
   def createServices(serviceManager: GenericMongoService[Service], providerService: GenericMongoService[Provider]) = {
-    val zkService = new ZKService(zookeeperServiceName, ServiceLiterals.zookeeperType, zookeeperServiceName, zookeeperProvider, testNamespace)
+    val zkService = new ZKService(zookeeperServiceName, zookeeperServiceName, zookeeperProvider, testNamespace)
     serviceManager.save(zkService)
 
     val kafkaProv = providerService.get(kafkaProviderName).get
-    val kafkaService = new KafkaService(kafkaServiceName, ServiceLiterals.kafkaType, kafkaServiceName, kafkaProv, zookeeperProvider, testNamespace)
+    val kafkaService = new KafkaService(kafkaServiceName, kafkaServiceName, kafkaProv, zookeeperProvider, testNamespace)
     serviceManager.save(kafkaService)
 
     serviceManager.save(tstrqService)
@@ -181,14 +181,13 @@ object DataFactory {
   }
 
   private def createInputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
-    val tService = serviceManager.get(tstreamServiceName).get
-
     val s1 = new TStreamSjStream(tstreamInputNamePrefix + suffix,
       tstreamInputNamePrefix + suffix,
-      partitions,
-      tService,
-      StreamLiterals.tstreamType,
-      Array("input"))
+      tstrqService,
+      Array("input"),
+      false,
+      partitions
+    )
 
     sjStreamService.save(s1)
 
@@ -201,14 +200,13 @@ object DataFactory {
   }
 
   private def createOutputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
-    val tService = serviceManager.get(tstreamServiceName).get
-
     val s2 = new TStreamSjStream(tstreamOutputNamePrefix + suffix,
       tstreamOutputNamePrefix + suffix,
-      partitions,
-      tService,
-      StreamLiterals.tstreamType,
-      Array("output", "some tags"))
+      tstrqService,
+      Array("output", "some tags"),
+      false,
+      partitions
+    )
 
     sjStreamService.save(s2)
 
@@ -238,11 +236,12 @@ object DataFactory {
 
     val kafkaSjStream = new KafkaSjStream(kafkaInputNamePrefix + suffix,
       kafkaInputNamePrefix + suffix,
-      partitions,
       kService,
-      StreamLiterals.kafkaStreamType,
       Array(kafkaInputNamePrefix),
-      replicationFactor)
+      false,
+      partitions,
+      replicationFactor
+    )
 
     sjStreamService.save(kafkaSjStream)
 
@@ -275,22 +274,17 @@ object DataFactory {
                      stateFullCheckpoint: Int = 0) = {
     import scala.collection.JavaConverters._
 
-    val instance = new RegularInstance()
-    instance.name = instanceName
-    instance.moduleType = EngineLiterals.regularStreamingType
-    instance.moduleName = "regular-streaming-stub"
-    instance.moduleVersion = "1.0"
+    val instance = new RegularInstance(instanceName, EngineLiterals.regularStreamingType,
+      "regular-streaming-stub", "1.0", "com.bwsw.regular.streaming.engine-1.0",
+      serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKService], EngineLiterals.everyNthMode)
     instance.status = EngineLiterals.started
     instance.inputs = instanceInputs
     instance.outputs = instanceOutputs
-    instance.checkpointMode = EngineLiterals.everyNthMode
     instance.checkpointInterval = checkpointInterval
     instance.stateManagement = stateManagement
     instance.stateFullCheckpoint = stateFullCheckpoint
     instance.startFrom = EngineLiterals.oldestStartMode
     instance.executionPlan = new ExecutionPlan(Map(instanceName + "-task0" -> task, instanceName + "-task1" -> task).asJava)
-    instance.engine = "com.bwsw.regular.streaming.engine-1.0"
-    instance.coordinationService = serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKService]
 
     instanceService.save(instance)
   }

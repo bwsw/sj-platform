@@ -2,6 +2,8 @@ package com.bwsw.sj.common.DAL.model.module
 
 import java.util
 
+import com.bwsw.sj.common.DAL.model.service.ZKService
+import com.bwsw.sj.common.DAL.morphia.MorphiaAnnotations.PropertyField
 import com.bwsw.sj.common.rest.entities.module.{InputInstanceMetadata, InstanceMetadata}
 import com.bwsw.sj.common.utils.EngineLiterals
 import org.mongodb.morphia.annotations.Property
@@ -9,12 +11,19 @@ import org.mongodb.morphia.annotations.Property
 import scala.collection.JavaConverters._
 
 /**
- * Entity for input instance-json
- *
- * @author Kseniya Tomskikh
- */
-class InputInstance extends Instance {
-  @Property("checkpoint-mode") var checkpointMode: String = null
+  * Entity for input instance-json
+  *
+  * @author Kseniya Tomskikh
+  */
+class InputInstance(override val name: String,
+                    override val moduleType: String,
+                    override val moduleName: String,
+                    override val moduleVersion: String,
+                    override val engine: String,
+                    override val coordinationService: ZKService,
+                    @PropertyField("checkpoint-mode") val checkpointMode: String)
+  extends Instance(name, moduleType, moduleName, moduleVersion, engine, coordinationService) {
+
   @Property("checkpoint-interval") var checkpointInterval: Long = 0
   @Property("duplicate-check") var duplicateCheck: Boolean = false
   @Property("lookup-history") var lookupHistory: Int = 0
