@@ -163,12 +163,14 @@ class RegularInstanceValidator extends InstanceValidator {
     val tStreamsServices = getStreamServices(allStreams.filter { s =>
       s.streamType.equals(tstreamType)
     })
-    if (tStreamsServices.size != 1) {
-      errors += createMessage("rest.validator.t_stream.same.service")
-    } else {
-      val service = serviceDAO.get(tStreamsServices.head)
-      if (!service.get.isInstanceOf[TStreamService]) {
-        errors += createMessage("rest.validator.service.must", "t-streams", "TstrQ")
+    if (tStreamsServices.nonEmpty) {
+      if (tStreamsServices.size > 1) {
+        errors += createMessage("rest.validator.t_stream.same.service")
+      } else {
+        val service = serviceDAO.get(tStreamsServices.head)
+        if (!service.get.isInstanceOf[TStreamService]) {
+          errors += createMessage("rest.validator.service.must", "t-streams", "TstrQ")
+        }
       }
     }
 
