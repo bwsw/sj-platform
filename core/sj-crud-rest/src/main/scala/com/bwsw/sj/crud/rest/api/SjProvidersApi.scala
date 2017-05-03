@@ -1,11 +1,14 @@
 package com.bwsw.sj.crud.rest.api
 
 import akka.http.scaladsl.server.{Directives, RequestContext}
+import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.DAL.model.service._
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.provider.ProviderData
 import com.bwsw.sj.common.utils.ProviderLiterals
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
+
+import scala.collection.mutable.ArrayBuffer
 
 trait SjProvidersApi extends Directives with SjCrudValidator {
 
@@ -13,16 +16,26 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
     pathPrefix("providers") {
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>
-          validateContextWithSchema(ctx, "providerSchema.json")
-          val data = serializer.deserialize[ProviderData](getEntityFromContext(ctx))
-          val errors = data.validate()
-          var response: RestResponse = BadRequestRestResponse(MessageResponseEntity(
-            createMessage("rest.providers.provider.cannot.create", errors.mkString(";"))
-          ))
+          var response: RestResponse = null
+          val errors = new ArrayBuffer[String]
 
-          if (errors.isEmpty) {
-            providerDAO.save(data.asModelProvider())
-            response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.providers.provider.created", data.name)))
+          try {
+            val data = serializer.deserialize[ProviderData](getEntityFromContext(ctx))
+            errors ++= data.validate()
+
+            if (errors.isEmpty) {
+              providerDAO.save(data.asModelProvider())
+              response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.providers.provider.created", data.name)))
+            }
+          } catch {
+            case e: JsonDeserializationException =>
+              errors += JsonDeserializationErrorMessage(e)
+          }
+
+          if (errors.nonEmpty) {
+            response = BadRequestRestResponse(MessageResponseEntity(
+              createMessage("rest.providers.provider.cannot.create", errors.mkString(";"))
+            ))
           }
 
           ctx.complete(restResponseToHttpResponse(response))
