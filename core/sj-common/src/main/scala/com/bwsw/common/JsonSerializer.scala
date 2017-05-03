@@ -2,12 +2,17 @@ package com.bwsw.common
 
 import java.lang.reflect.{ParameterizedType, Type}
 
+import com.bwsw.common.exceptions.{JsonIncorrectValueException, JsonNotParsedException, JsonUnrecognizedPropertyException}
 import com.bwsw.common.traits.Serializer
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.core.`type`.TypeReference
-import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
+import com.fasterxml.jackson.databind.{DeserializationFeature, JsonMappingException, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import org.slf4j.LoggerFactory
+
+import scala.collection.JavaConverters._
 
 class JsonSerializer extends Serializer {
 
@@ -33,7 +38,30 @@ class JsonSerializer extends Serializer {
 
   def deserialize[T: Manifest](value: String): T = {
     logger.debug(s"Deserialize a value: '$value' to object.")
-    mapper.readValue(value, typeReference[T])
+    try {
+      mapper.readValue(value, typeReference[T])
+    } catch {
+      case e: UnrecognizedPropertyException =>
+        throw new JsonUnrecognizedPropertyException(getProblemProperty(e))
+      case e: JsonMappingException =>
+        throw new JsonIncorrectValueException(getProblemProperty(e))
+      case e: JsonParseException =>
+        val position = e.getLocation.getCharOffset.toInt
+        throw new JsonNotParsedException(value.substring(0, Math.min(position, value.length)))
+    }
+  }
+
+  private def getProblemProperty(exception: JsonMappingException) = {
+    exception.getPath.asScala.foldLeft("") { (s, ref) =>
+      val fieldName = ref.getFieldName
+      s + {
+        if (fieldName != null) {
+          if (s.isEmpty) ""
+          else "."
+        } + fieldName
+        else "(" + ref.getIndex + ")"
+      }
+    }
   }
 
   private def typeReference[T: Manifest] = new TypeReference[T] {
