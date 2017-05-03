@@ -66,6 +66,7 @@ protected class JdbcClient(override val jdbcCCD: JdbcClientConnectionData) exten
     credential.setProperty("user", jdbcCCD.username)
     credential.setProperty("password", jdbcCCD.password)
     credential.setProperty("useSSL", "false")
+    credential.setProperty("connectTimeout", "500")
 
     credential
   }
