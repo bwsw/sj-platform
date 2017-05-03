@@ -5,7 +5,6 @@ export class ServiceModel extends BaseModel {
   name: string;
   description: string;
   database: string;
-  driver: string;
   keyspace: string;
   namespace: string;
   provider: string;

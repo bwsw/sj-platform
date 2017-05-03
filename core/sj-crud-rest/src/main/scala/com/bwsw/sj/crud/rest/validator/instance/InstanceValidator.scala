@@ -161,11 +161,9 @@ abstract class InstanceValidator extends ValidationUtils with CompletionUtils wi
     errors
   }
 
-  def getStreamMode(name: String) = {
-    if (name.contains(s"/${EngineLiterals.fullStreamMode}")) {
-      EngineLiterals.fullStreamMode
-    } else {
-      EngineLiterals.splitStreamMode
-    }
+  def getStreamMode(name: String): String = {
+    val nameWithMode = name.split(s"/")
+      if (nameWithMode.length == 1) EngineLiterals.splitStreamMode
+      else nameWithMode(1)
   }
 }
