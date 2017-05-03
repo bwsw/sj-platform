@@ -1,10 +1,13 @@
 package com.bwsw.sj.crud.rest.api
 
 import akka.http.scaladsl.server.{Directives, RequestContext}
+import com.bwsw.common.exceptions._
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.service.ServiceData
 import com.bwsw.sj.common.utils.ServiceLiterals
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
+
+import scala.collection.mutable.ArrayBuffer
 
 trait SjServicesApi extends Directives with SjCrudValidator {
 
@@ -12,18 +15,27 @@ trait SjServicesApi extends Directives with SjCrudValidator {
     pathPrefix("services") {
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>
-          validateContextWithSchema(ctx, "serviceSchema.json")
-          val protocolService = serializer.deserialize[ServiceData](getEntityFromContext(ctx))
-          val errors = protocolService.validate()
-          var response: RestResponse = BadRequestRestResponse(MessageResponseEntity(
-            createMessage("rest.services.service.cannot.create", errors.mkString(";"))
-          ))
+          var response: RestResponse = null
+          val errors = new ArrayBuffer[String]
+          try {
+            val protocolService = serializer.deserialize[ServiceData](getEntityFromContext(ctx))
+            errors ++= protocolService.validate()
 
-          if (errors.isEmpty) {
-            val service = protocolService.asModelService()
-            service.prepare()
-            serviceDAO.save(service)
-            response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.services.service.created", service.name)))
+            if (errors.isEmpty) {
+              val service = protocolService.asModelService()
+              service.prepare()
+              serviceDAO.save(service)
+              response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.services.service.created", service.name)))
+            }
+          } catch {
+            case e: JsonDeserializationException =>
+              errors += JsonDeserializationErrorMessage(e)
+          }
+
+          if (errors.nonEmpty) {
+            response = BadRequestRestResponse(MessageResponseEntity(
+              createMessage("rest.services.service.cannot.create", errors.mkString(";"))
+            ))
           }
 
           ctx.complete(restResponseToHttpResponse(response))
