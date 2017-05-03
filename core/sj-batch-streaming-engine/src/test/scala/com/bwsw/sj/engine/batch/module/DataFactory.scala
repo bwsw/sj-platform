@@ -183,11 +183,11 @@ object DataFactory {
 
   private def createInputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
     val s1 = new TStreamSjStream(tstreamInputNamePrefix + suffix,
-      tstreamInputNamePrefix + suffix,
       tstrqService,
-      Array("input"),
+      partitions,
+      tstreamInputNamePrefix + suffix,
       false,
-      partitions
+      Array("input")
     )
 
     sjStreamService.save(s1)
@@ -202,11 +202,11 @@ object DataFactory {
 
   private def createOutputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
     val s2 = new TStreamSjStream(tstreamOutputNamePrefix + suffix,
-      tstreamOutputNamePrefix + suffix,
       tstrqService,
-      Array("output", "some tags"),
+      partitions,
+      tstreamOutputNamePrefix + suffix,
       false,
-      partitions
+      Array("output", "some tags")
     )
 
     sjStreamService.save(s2)
@@ -235,12 +235,12 @@ object DataFactory {
     val kService = serviceManager.get(kafkaServiceName).get.asInstanceOf[KafkaService]
 
     val kafkaSjStream = new KafkaSjStream(kafkaInputNamePrefix + suffix,
-      kafkaInputNamePrefix + suffix,
       kService,
-      Array(kafkaInputNamePrefix),
-      false,
       partitions,
-      replicationFactor
+      replicationFactor,
+      kafkaInputNamePrefix + suffix,
+      false,
+      Array(kafkaInputNamePrefix)
     )
 
     sjStreamService.save(kafkaSjStream)

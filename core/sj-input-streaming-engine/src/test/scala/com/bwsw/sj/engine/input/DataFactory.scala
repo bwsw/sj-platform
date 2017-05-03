@@ -91,11 +91,11 @@ object DataFactory {
   private def createOutputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
     val s2 = new TStreamSjStream(
       tstreamOutputNamePrefix + suffix,
-      tstreamOutputNamePrefix,
       tstrqService,
-      Array("output", "some tags"),
+      partitions,
+      tstreamOutputNamePrefix + suffix,
       false,
-      partitions
+      Array("output", "some tags")
     )
 
     sjStreamService.save(s2)

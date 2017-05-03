@@ -9,8 +9,8 @@ import org.mongodb.morphia.annotations._
 class SjStream(@IdField val name: String,
                val description: String,
                @ReferenceField val service: Service,
-               val tags: Array[String],
                val force: Boolean,
+               val tags: Array[String],
                @PropertyField("stream-type") val streamType: String) {
 
   def create(): Unit = ???

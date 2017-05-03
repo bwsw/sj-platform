@@ -10,12 +10,12 @@ import com.bwsw.sj.common.utils.StreamLiterals
   * @author Pavel Tomskikh
   */
 class RestSjStream(override val name: String,
-                   override val description: String,
                    override val service: RestService,
-                   override val tags: Array[String],
-                   override val force: Boolean,
+                   override val description: String = "No description",
+                   override val force: Boolean = false,
+                   override val tags: Array[String] = Array(),
                    override val streamType: String = StreamLiterals.restOutputType)
-  extends SjStream(name, description, service, tags, force, streamType) {
+  extends SjStream(name, description, service, force, tags, streamType) {
 
   override def asProtocolStream() = {
     val streamData = new RestStreamData

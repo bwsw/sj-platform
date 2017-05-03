@@ -7,13 +7,13 @@ import com.bwsw.tstreams.common.StorageClient
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 
 class TStreamSjStream(override val name: String,
-                      override val description: String,
                       override val service: TStreamService,
-                      override val tags: Array[String],
-                      override val force: Boolean,
                       val partitions: Int,
+                      override val description: String = "No description",
+                      override val force: Boolean = false,
+                      override val tags: Array[String] = Array(),
                       override val streamType: String = StreamLiterals.tstreamType)
-  extends SjStream(name, description, service, tags, force, streamType) {
+  extends SjStream(name, description, service, force, tags, streamType) {
 
   override def asProtocolStream() = {
     val streamData = new TStreamStreamData

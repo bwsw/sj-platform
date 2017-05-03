@@ -50,10 +50,10 @@ class RestStreamData extends StreamData {
     val serviceDAO = ConnectionRepository.getServiceManager
     val modelStream = new RestSjStream(
       this.name,
-      this.description,
       serviceDAO.get(this.service).get.asInstanceOf[RestService],
-      this.tags,
-      this.force
+      this.description,
+      this.force,
+      this.tags
     )
 
     modelStream

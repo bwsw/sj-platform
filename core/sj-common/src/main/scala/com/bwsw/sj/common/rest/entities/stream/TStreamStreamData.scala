@@ -57,11 +57,11 @@ class TStreamStreamData() extends StreamData() {
     val serviceDAO = ConnectionRepository.getServiceManager
     val modelStream = new TStreamSjStream(
       this.name,
-      this.description,
       serviceDAO.get(this.service).get.asInstanceOf[TStreamService],
-      this.tags,
+      this.partitions,
+      this.description,
       this.force,
-      this.partitions
+      this.tags
     )
 
     modelStream

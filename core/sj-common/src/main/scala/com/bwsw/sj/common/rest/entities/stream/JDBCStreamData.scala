@@ -47,11 +47,11 @@ class JDBCStreamData() extends StreamData() {
     val serviceDAO = ConnectionRepository.getServiceManager
     val modelStream = new JDBCSjStream(
       this.name,
-      this.description,
       serviceDAO.get(this.service).get.asInstanceOf[JDBCService],
-      this.tags,
+      this.primary,
+      this.description,
       this.force,
-      this.primary
+      this.tags
     )
 
     modelStream

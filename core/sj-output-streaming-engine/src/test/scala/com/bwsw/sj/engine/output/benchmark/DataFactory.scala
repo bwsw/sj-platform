@@ -121,10 +121,7 @@ object DataFactory {
   def createData(countTxns: Int, countElements: Int) = {
     val tStream: TStreamSjStream = new TStreamSjStream(
       tstreamInputName,
-      "",
       tstrqService,
-      Array("tag"),
-      false,
       4
     ) //todo get rid of number
 
@@ -336,26 +333,26 @@ object DataFactory {
 
   def createStreams(partitions: Int) = {
     val esService = serviceManager.get(esServiceName).get.asInstanceOf[ESService]
-    val esStream: ESSjStream = new ESSjStream(esStreamName, esStreamName, esService, Array("tag1"), false)
+    val esStream: ESSjStream = new ESSjStream(esStreamName, esService)
     streamService.save(esStream)
 
     val tService: TStreamService = serviceManager.get(tstreamServiceName).get.asInstanceOf[TStreamService]
-    val tStream: TStreamSjStream = new TStreamSjStream(tstreamInputName, tstreamInputName, tService, Array("tag1"), false, partitions)
+    val tStream: TStreamSjStream = new TStreamSjStream(tstreamInputName, tService, partitions)
     streamService.save(tStream)
 
     val jdbcService: JDBCService = serviceManager.get(jdbcServiceName).get.asInstanceOf[JDBCService]
-    val jdbcStream: JDBCSjStream = new JDBCSjStream(jdbcStreamName, jdbcStreamName, jdbcService, Array("tag1"), false, "test")
+    val jdbcStream: JDBCSjStream = new JDBCSjStream(jdbcStreamName, jdbcService, "test")
     streamService.save(jdbcStream)
 
     val restService = serviceManager.get(restServiceName).get.asInstanceOf[RestService]
-    val restStream = new RestSjStream(restStreamName, restStreamName, restService, Array("tag1"), false)
+    val restStream = new RestSjStream(restStreamName, restService)
     streamService.save(restStream)
 
     storageClient.createStream(
       tstreamInputName,
       partitions,
       60000,
-      "")
+      tstreamInputName)
   }
 
   def createInstance(instanceName: String, checkpointMode: String, checkpointInterval: Long,

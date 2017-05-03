@@ -3,7 +3,6 @@ package com.bwsw.sj.engine.core.managment
 import java.io.File
 import java.net.URLClassLoader
 
-import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.model.service.TStreamService
 import com.bwsw.sj.common.DAL.model.stream.{SjStream, TStreamSjStream}
@@ -212,14 +211,7 @@ abstract class TaskManager() {
   }
 
   def getSjStream(name: String, description: String, tags: Array[String], partitions: Int) = {
-    new TStreamSjStream(
-      name,
-      description,
-      auxiliaryTStreamService,
-      tags,
-      false,
-      partitions
-    )
+    new TStreamSjStream(name, auxiliaryTStreamService, partitions)
   }
 
   /**

@@ -6,12 +6,12 @@ import com.bwsw.sj.common.rest.entities.stream.ESStreamData
 import com.bwsw.sj.common.utils.StreamLiterals
 
 class ESSjStream(override val name: String,
-                 override val description: String,
                  override val service: ESService,
-                 override val tags: Array[String],
-                 override val force: Boolean,
+                 override val description: String = "No description",
+                 override val force: Boolean = false,
+                 override val tags: Array[String] = Array(),
                  override val streamType: String = StreamLiterals.esOutputType)
-  extends SjStream(name, description, service, tags, force, streamType) {
+  extends SjStream(name, description, service, force, tags, streamType) {
 
   override def asProtocolStream(): ESStreamData = {
     val streamData = new ESStreamData

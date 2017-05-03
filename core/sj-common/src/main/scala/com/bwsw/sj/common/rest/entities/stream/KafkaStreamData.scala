@@ -71,12 +71,12 @@ class KafkaStreamData() extends StreamData() {
     val serviceDAO = ConnectionRepository.getServiceManager
     val modelStream = new KafkaSjStream(
       this.name,
-      this.description,
       serviceDAO.get(this.service).get.asInstanceOf[KafkaService],
-      this.tags,
-      this.force,
       this.partitions,
-      this.replicationFactor
+      this.replicationFactor,
+      this.description,
+      this.force,
+      this.tags
     )
 
     modelStream

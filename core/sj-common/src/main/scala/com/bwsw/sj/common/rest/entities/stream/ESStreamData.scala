@@ -47,10 +47,10 @@ class ESStreamData() extends StreamData() {
     val serviceDAO = ConnectionRepository.getServiceManager
     val modelStream = new ESSjStream(
       this.name,
-      this.description,
       serviceDAO.get(this.service).get.asInstanceOf[ESService],
-      this.tags,
-      this.force
+      this.description,
+      this.force,
+      this.tags
     )
 
     modelStream
