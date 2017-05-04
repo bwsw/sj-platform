@@ -16,14 +16,14 @@ class ConfigurationSetting {
   var value: String = null
   var domain: String = null
 
-  def this(name: String, value: String, domain: String) = {
+  def this(name: String, value: String, domain: String): Unit = {
     this()
     this.name = name
     this.value = value
     this.domain = domain
   }
   
-  def asProtocolConfigurationSetting() = {
+  def asProtocolConfigurationSetting(): ConfigurationSettingData = {
     val configurationSettingData = new ConfigurationSettingData(
       clearConfigurationSettingName(domain, name),
       this.value,
