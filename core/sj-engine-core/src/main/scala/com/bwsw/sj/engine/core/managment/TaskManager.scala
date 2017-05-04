@@ -28,10 +28,11 @@ abstract class TaskManager() {
   protected val logger = LoggerFactory.getLogger(this.getClass)
   val streamDAO = ConnectionRepository.getStreamService
 
-  require(System.getenv("INSTANCE_NAME") != null &&
-    System.getenv("TASK_NAME") != null &&
-    System.getenv("AGENTS_HOST") != null &&
-    System.getenv("AGENTS_PORTS") != null,
+  require(
+    Option(System.getenv("INSTANCE_NAME")).isDefined &&
+      Option(System.getenv("TASK_NAME")).isDefined &&
+      Option(System.getenv("AGENTS_HOST")).isDefined &&
+      Option(System.getenv("AGENTS_PORTS")).isDefined,
     "No environment variables: INSTANCE_NAME, TASK_NAME, AGENTS_HOST, AGENTS_PORTS")
 
   val instanceName = System.getenv("INSTANCE_NAME")
@@ -64,17 +65,15 @@ abstract class TaskManager() {
 
   private def getInstance() = {
     val maybeInstance = ConnectionRepository.getInstanceService.get(instanceName)
-    var instance: Instance = null
     if (maybeInstance.isDefined) {
-      instance = maybeInstance.get
 
-      if (instance.status != started) {
-        throw new InterruptedException(s"Task cannot be started because of '${instance.status}' status of instance")
+      if (maybeInstance.get.status != started) {
+        throw new InterruptedException(s"Task cannot be started because of '${maybeInstance.get.status}' status of instance")
       }
     }
     else throw new NoSuchElementException(s"Instance is named '$instanceName' has not found")
 
-    instance
+    maybeInstance.orNull
   }
 
   private def getAuxiliaryTStream() = {
@@ -153,8 +152,8 @@ abstract class TaskManager() {
   @throws(classOf[Exception])
   protected def getInputs(executionPlan: ExecutionPlan) = {
     val task = executionPlan.tasks.get(taskName)
-    task match {
-      case null => throw new NullPointerException("There is no task with that name in the execution plan.")
+    Option(task) match {
+      case None => throw new NullPointerException("There is no task with that name in the execution plan.")
       case _ => task.inputs.asScala.map(x => (streamDAO.get(x._1).get, x._2))
     }
   }

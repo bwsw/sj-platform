@@ -9,14 +9,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore
  */
 
 class Envelope extends Serializable {
-  protected var streamType: String = null
-  var stream: String = null
+  protected var streamType: String = _
+  var stream: String = _
   var partition: Int = 0
   var tags: Array[String] = Array()
   var id: Long = 0
 
   @JsonIgnore()
-  def isEmpty() = {
-    streamType == null
-  }
+  def isEmpty() = Option(streamType).isEmpty
 }

@@ -140,12 +140,9 @@ class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGro
     */
   private def fillFullState(initialState: mutable.Map[String, Any], transaction: ConsumerTransaction) = {
     logger.debug(s"Fill full state.")
-    var value: Object = null
-    var variable: (String, Any) = null
-
     while (transaction.hasNext()) {
-      value = serializer.deserialize(transaction.next())
-      variable = value.asInstanceOf[(String, Any)]
+      val value = serializer.deserialize(transaction.next())
+      val variable = value.asInstanceOf[(String, Any)]
       initialState(variable._1) = variable._2
     }
   }
