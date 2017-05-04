@@ -19,7 +19,7 @@ class PartitionedOutput(producer: Producer,
   private val transactions = mutable.Map[Int, ProducerTransaction]()
   private val streamName = producer.stream.name
 
-  def put(data: AnyRef, partition: Int) = {
+  def put(data: AnyRef, partition: Int): Unit = {
     val bytes = objectSerializer.serialize(data)
     logger.debug(s"Send a portion of data to stream: '$streamName' partition with number: '$partition'.")
     if (transactions.contains(partition)) {
