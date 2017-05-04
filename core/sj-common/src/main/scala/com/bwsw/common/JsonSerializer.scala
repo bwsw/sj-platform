@@ -2,7 +2,7 @@ package com.bwsw.common
 
 import java.lang.reflect.{ParameterizedType, Type}
 
-import com.bwsw.common.exceptions.{JsonIncorrectValueException, JsonNotParsedException, JsonUnrecognizedPropertyException}
+import com.bwsw.common.exceptions._
 import com.bwsw.common.traits.Serializer
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.JsonParseException
@@ -44,10 +44,15 @@ class JsonSerializer extends Serializer {
       case e: UnrecognizedPropertyException =>
         throw new JsonUnrecognizedPropertyException(getProblemProperty(e))
       case e: JsonMappingException =>
-        throw new JsonIncorrectValueException(getProblemProperty(e))
+        if (e.getMessage.startsWith("No content"))
+          throw new JsonDeserializationException("Empty JSON")
+        else
+          throw new JsonIncorrectValueException(getProblemProperty(e))
       case e: JsonParseException =>
         val position = e.getLocation.getCharOffset.toInt
         throw new JsonNotParsedException(value.substring(0, Math.min(position, value.length)))
+      case _: NullPointerException =>
+        throw new JsonDeserializationException("JSON is null")
     }
   }
 
