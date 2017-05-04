@@ -11,7 +11,7 @@ class KafkaService() extends Service {
   @Reference(value = "zk-provider") var zkProvider: Provider = null
   @Property("zk-namespace") var zkNamespace: String = null
 
-  def this(name: String, serviceType: String, description: String, provider: Provider, zkProvider: Provider, zkNamespace: String) = {
+  def this(name: String, serviceType: String, description: String, provider: Provider, zkProvider: Provider, zkNamespace: String): Unit = {
     this()
     this.name =name
     this.serviceType = serviceType

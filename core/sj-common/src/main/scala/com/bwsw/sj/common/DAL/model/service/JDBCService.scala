@@ -15,7 +15,7 @@ class JDBCService() extends Service {
 
   var database: String = null
 
-  def this(name: String, serviceType: String, description: String, provider: JDBCProvider, database: String) = {
+  def this(name: String, serviceType: String, description: String, provider: JDBCProvider, database: String): Unit = {
     this
     this.name = name
     this.serviceType = serviceType

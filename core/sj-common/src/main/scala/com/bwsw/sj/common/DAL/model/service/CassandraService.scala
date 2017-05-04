@@ -10,7 +10,7 @@ class CassandraService() extends Service {
   @Reference var provider: Provider = null
   var keyspace: String = null
 
-  def this(name: String, serviceType: String, description: String, provider: Provider, keyspace: String) = {
+  def this(name: String, serviceType: String, description: String, provider: Provider, keyspace: String): Unit = {
     this()
     this.name = name
     this.serviceType = serviceType

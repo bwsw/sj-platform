@@ -29,7 +29,7 @@ class RestService extends Service {
       provider: Provider,
       basePath: String,
       httpVersion: HttpVersion,
-      headers: java.util.Map[String, String]) = {
+      headers: java.util.Map[String, String]): Unit = {
     this
     this.name = name
     this.serviceType = serviceType
@@ -40,7 +40,7 @@ class RestService extends Service {
     this.headers = headers
   }
 
-  override def asProtocolService = {
+  override def asProtocolService: RestServiceData = {
     val protocolService = new RestServiceData
     super.fillProtocolService(protocolService)
     protocolService.provider = provider.name
