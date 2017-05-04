@@ -45,7 +45,7 @@ class JDBCServiceData() extends ServiceData() {
       case Some(dbName) =>
         if (dbName.isEmpty) {
           errors += createMessage("entity.error.attribute.required", "Database")
-        } else {
+        } else if (errors.isEmpty) { //provider should exist in the following test
           val providerDAO = ConnectionRepository.getProviderService
           var database_exists: Boolean = false
           val provider = providerDAO.get(this.provider).get.asInstanceOf[JDBCProvider]
@@ -73,6 +73,7 @@ class JDBCServiceData() extends ServiceData() {
           }
         }
     }
+
     errors
   }
 }
