@@ -3,9 +3,9 @@ package com.bwsw.sj.engine.batch.task.input
 import com.bwsw.sj.common.DAL.model.stream.SjStream
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.engine.input.CheckpointTaskInput
-import com.bwsw.sj.engine.core.entities.Envelope
+import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 
 /**
  * Class is responsible for handling an input streams of specific type(types),
@@ -20,7 +20,7 @@ abstract class RetrievableCheckpointTaskInput[T <: Envelope](val inputs: scala.c
 object RetrievableCheckpointTaskInput {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  def apply[T <: AnyRef](manager: CommonTaskManager) = {
+  def apply[T <: AnyRef](manager: CommonTaskManager): RetrievableCheckpointTaskInput[_ <: Envelope] = {
     val isKafkaInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.kafkaStreamType)
     val isTstreamInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.tstreamType)
 
