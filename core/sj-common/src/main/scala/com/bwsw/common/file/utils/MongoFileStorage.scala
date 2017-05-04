@@ -24,7 +24,7 @@ class MongoFileStorage(mongoDB: MongoDB) extends FileStorage {
     }
   }
 
-  override def put(file: File, fileName: String, specification: Map[String, Any], filetype: String) = {
+  override def put(file: File, fileName: String, specification: Map[String, Any], filetype: String): Unit = {
     logger.debug(s"Try to put a file: '$fileName' with a specification in a mongo storage: ${mongoDB.name}.")
     logger.debug(s"Check whether a mongo storage already contains a file with name: '$fileName' or not.")
     if (gridFS.findOne(fileName).isEmpty) {
