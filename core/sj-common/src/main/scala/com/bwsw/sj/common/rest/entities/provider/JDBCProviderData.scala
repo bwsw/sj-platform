@@ -26,8 +26,8 @@ class JDBCProviderData(name: String,
       this.hosts,
       this.login,
       this.password,
-      this.providerType,
-      this.driver
+      this.driver,
+      this.providerType
     )
 
     provider
