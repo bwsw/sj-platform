@@ -8,7 +8,7 @@ import com.bwsw.sj.common.utils.MessageResourceUtils
   *
   * @author Pavel Tomskikh
   */
-object JsonDeserializationErrorMessage extends MessageResourceUtils {
+object JsonDeserializationErrorMessageCreator extends MessageResourceUtils {
 
   def apply(e: JsonDeserializationException) = {
     createMessage(e match {

@@ -30,7 +30,7 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
             }
           } catch {
             case e: JsonDeserializationException =>
-              errors += JsonDeserializationErrorMessage(e)
+              errors += JsonDeserializationErrorMessageCreator(e)
           }
 
           if (errors.nonEmpty) {
