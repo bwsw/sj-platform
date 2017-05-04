@@ -17,7 +17,7 @@ class RestServiceData extends ServiceData {
   var httpVersion: String = RestLiterals.http_1_1
   var headers: Map[String, String] = Map()
 
-  override def asModelService() = {
+  override def asModelService(): RestService = {
     val providerDAO = ConnectionRepository.getProviderService
     val modelService = new RestService
     super.fillModelService(modelService)
@@ -28,7 +28,7 @@ class RestServiceData extends ServiceData {
     modelService
   }
 
-  override def validate() = {
+  override def validate(): ArrayBuffer[String] = {
     val basePathAttributeName = "basePath"
     val httpVersionAttributeName = "httpVersion"
     val errors = new ArrayBuffer[String]()

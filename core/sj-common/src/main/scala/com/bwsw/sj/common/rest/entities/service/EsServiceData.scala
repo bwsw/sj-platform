@@ -13,7 +13,7 @@ class EsServiceData() extends ServiceData() {
   var login: String = null
   var password: String = null
 
-  override def asModelService() = {
+  override def asModelService(): ESService = {
     val providerDAO = ConnectionRepository.getProviderService
     val modelService = new ESService()
     super.fillModelService(modelService)
@@ -25,7 +25,7 @@ class EsServiceData() extends ServiceData() {
     modelService
   }
 
-  override def validate() = {
+  override def validate(): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
 
     errors ++= super.validateGeneralFields()

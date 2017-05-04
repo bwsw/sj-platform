@@ -32,7 +32,7 @@ class ServiceData() extends ValidationUtils with MessageResourceUtils {
   def asModelService(): Service = ???
 
   @JsonIgnore
-  protected def fillModelService(modelService: Service) = {
+  protected def fillModelService(modelService: Service): Unit = {
     modelService.serviceType = this.serviceType
     modelService.name = this.name
     modelService.description = this.description
@@ -42,7 +42,7 @@ class ServiceData() extends ValidationUtils with MessageResourceUtils {
   def validate() = validateGeneralFields()
 
   @JsonIgnore
-  protected def validateGeneralFields() = {
+  protected def validateGeneralFields(): ArrayBuffer[String] = {
     val serviceDAO = ConnectionRepository.getServiceManager
     val errors = new ArrayBuffer[String]()
 
