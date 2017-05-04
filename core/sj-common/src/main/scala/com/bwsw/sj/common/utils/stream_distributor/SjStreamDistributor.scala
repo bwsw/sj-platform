@@ -31,7 +31,7 @@ class SjStreamDistributor(
     case ByHash => positiveMod(AvroUtils.concatFields(fieldNames, record).hashCode, partitionCount)
   }
 
-  private def positiveMod(dividend: Int, divider: Int) = (dividend % divider + divider) % divider
+  private def positiveMod(dividend: Int, divider: Int): Int = (dividend % divider + divider) % divider
 }
 
 trait SjStreamDistributionPolicy
