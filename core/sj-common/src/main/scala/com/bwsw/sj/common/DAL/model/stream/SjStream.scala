@@ -16,7 +16,7 @@ class SjStream() {
            description: String,
            service: Service,
            streamType: String,
-           tags: Array[String]) = {
+           tags: Array[String]): Unit = {
     this()
     this.name = name
     this.description = description

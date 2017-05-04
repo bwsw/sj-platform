@@ -14,7 +14,7 @@ class RestSjStream extends SjStream {
       description: String,
       service: Service,
       streamType: String,
-      tags: Array[String]) = {
+      tags: Array[String]): Unit = {
     this()
     this.name = name
     this.description = description
@@ -23,12 +23,12 @@ class RestSjStream extends SjStream {
     this.tags = tags
   }
 
-  override def asProtocolStream() = {
+  override def asProtocolStream(): RestStreamData = {
     val streamData = new RestStreamData
     fillProtocolStream(streamData)
 
     streamData
   }
 
-  override def delete() = {}
+  override def delete(): Unit = {}
 }

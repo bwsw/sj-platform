@@ -9,7 +9,7 @@ class ESSjStream() extends SjStream {
            description: String,
            service: Service,
            streamType: String,
-           tags: Array[String]) = {
+           tags: Array[String]): Unit = {
     this()
     this.name = name
     this.description = description
@@ -18,14 +18,14 @@ class ESSjStream() extends SjStream {
     this.tags = tags
   }
 
-  override def asProtocolStream() = {
+  override def asProtocolStream(): ESStreamData = {
     val streamData = new ESStreamData
     super.fillProtocolStream(streamData)
 
     streamData
   }
 
-  override def delete() = {
+  override def delete(): Unit = {
     val service = this.service.asInstanceOf[ESService]
     val hosts = service.provider.hosts.map { host =>
       val parts = host.split(":")

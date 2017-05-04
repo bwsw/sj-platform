@@ -10,7 +10,7 @@ class JDBCSjStream() extends SjStream {
            description: String,
            service: Service,
            streamType: String,
-           tags: Array[String]) = {
+           tags: Array[String]): Unit = {
     this()
     this.name = name
     this.primary = id
@@ -20,7 +20,7 @@ class JDBCSjStream() extends SjStream {
     this.tags = tags
   }
 
-  override def asProtocolStream() = {
+  override def asProtocolStream(): JDBCStreamData = {
     val streamData = new JDBCStreamData
     super.fillProtocolStream(streamData)
 
