@@ -5,6 +5,7 @@ import com.bwsw.common.exceptions._
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.service.ServiceData
 import com.bwsw.sj.common.utils.ServiceLiterals
+import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
 import scala.collection.mutable.ArrayBuffer

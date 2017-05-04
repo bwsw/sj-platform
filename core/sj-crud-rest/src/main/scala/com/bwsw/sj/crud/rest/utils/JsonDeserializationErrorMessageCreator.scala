@@ -1,4 +1,4 @@
-package com.bwsw.sj.crud.rest.api
+package com.bwsw.sj.crud.rest.utils
 
 import com.bwsw.common.exceptions.{JsonDeserializationException, JsonIncorrectValueException, JsonNotParsedException, JsonUnrecognizedPropertyException}
 import com.bwsw.sj.common.utils.MessageResourceUtils

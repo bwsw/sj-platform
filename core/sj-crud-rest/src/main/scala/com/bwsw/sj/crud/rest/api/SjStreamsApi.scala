@@ -7,6 +7,7 @@ import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.stream.StreamData
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.StreamLiterals
+import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
 import scala.collection.mutable.ArrayBuffer

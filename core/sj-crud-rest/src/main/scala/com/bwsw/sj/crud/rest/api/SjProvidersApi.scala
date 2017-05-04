@@ -6,6 +6,7 @@ import com.bwsw.sj.common.DAL.model.service._
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.provider.ProviderData
 import com.bwsw.sj.common.utils.ProviderLiterals
+import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
 import scala.collection.mutable.ArrayBuffer
