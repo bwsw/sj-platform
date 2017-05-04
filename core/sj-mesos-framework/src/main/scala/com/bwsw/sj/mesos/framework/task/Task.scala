@@ -27,7 +27,7 @@ class Task(taskId: String) {
              node: String = node,
              lastNode: String = lastNode,
              directory: String = "",
-             host: String = if (this.host.isDefined) this.host.get else null) = {
+             host: String = if (this.host.isDefined) this.host.get else null): Unit = {
     this.state = state
     this.stateChanged = stateChanged
     this.reason = reason
@@ -39,7 +39,7 @@ class Task(taskId: String) {
 
   }
 
-  def toFrameworkTask = {
+  def toFrameworkTask: FrameworkTask = {
     FrameworkTask(id, state, new Date(stateChanged).toString, reason, node, lastNode, directories)
   }
 }
