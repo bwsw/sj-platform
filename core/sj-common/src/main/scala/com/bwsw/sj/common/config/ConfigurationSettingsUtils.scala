@@ -6,89 +6,89 @@ import com.bwsw.sj.common.config.ConfigLiterals._
 object ConfigurationSettingsUtils {
   private val configService = ConnectionRepository.getConfigService
 
-  def createConfigurationSettingName(domain: String, name: String) = {
+  def createConfigurationSettingName(domain: String, name: String): String = {
     domain + "." + name
   }
 
-  def clearConfigurationSettingName(domain: String, name: String) = {
+  def clearConfigurationSettingName(domain: String, name: String): String = {
     name.replaceFirst(domain + ".", "")
   }
 
-  def getGeoIpAsNumFileName() = {
+  def getGeoIpAsNumFileName(): String = {
     getStringConfigSetting(geoIpAsNum)
   }
 
-  def getGeoIpAsNumv6FileName() = {
+  def getGeoIpAsNumv6FileName(): String = {
     getStringConfigSetting(geoIpAsNumv6)
   }
 
-  def getKafkaSubscriberTimeout() = {
+  def getKafkaSubscriberTimeout(): Int = {
     getIntConfigSetting(kafkaSubscriberTimeoutTag)
   }
 
-  def getZkSessionTimeout() = {
+  def getZkSessionTimeout(): Int = {
     getIntConfigSetting(zkSessionTimeoutTag)
   }
 
-  def getFrameworkJarName() = {
+  def getFrameworkJarName(): String = {
     getStringConfigSetting(createConfigurationSettingName(ConfigLiterals.systemDomain, getStringConfigSetting(frameworkTag)))
   }
 
-  def getCrudRestHost() = {
+  def getCrudRestHost(): String = {
     getStringConfigSetting(hostOfCrudRestTag)
   }
 
-  def getCrudRestPort() = {
+  def getCrudRestPort(): Int = {
     getIntConfigSetting(portOfCrudRestTag)
   }
 
-  def getMarathonConnect() = {
+  def getMarathonConnect(): String = {
     getStringConfigSetting(marathonTag)
   }
 
-  def getMarathonTimeout() = {
+  def getMarathonTimeout(): Int = {
     getIntConfigSetting(marathonTimeoutTag)
   }
 
-  def getFrameworkBackoffSeconds() = {
+  def getFrameworkBackoffSeconds(): Int = {
     getIntConfigSetting(frameworkBackoffSeconds)
   }
 
-  def getFrameworkBackoffFactor() = {
+  def getFrameworkBackoffFactor(): Double = {
     getDoubleConfigSetting(frameworkBackoffFactor)
   }
 
-  def getFrameworkMaxLaunchDelaySeconds() = {
+  def getFrameworkMaxLaunchDelaySeconds(): Int = {
     getIntConfigSetting(frameworkMaxLaunchDelaySeconds)
   }
 
-  def getLowWatermark() = {
+  def getLowWatermark(): Int = {
     getIntConfigSetting(lowWatermark)
   }
 
-  def getJdbcDriverFileName(driverName: String) = getStringConfigSetting(s"$jdbcDriver.$driverName")
+  def getJdbcDriverFileName(driverName: String): String = getStringConfigSetting(s"$jdbcDriver.$driverName")
 
-  def getJdbcDriverClass(driverName: String) = getStringConfigSetting(s"$jdbcDriver.$driverName.class")
+  def getJdbcDriverClass(driverName: String): String = getStringConfigSetting(s"$jdbcDriver.$driverName.class")
 
-  def getJdbcDriverPrefix(driverName: String) = getStringConfigSetting(s"$jdbcDriver.$driverName.prefix")
+  def getJdbcDriverPrefix(driverName: String): String = getStringConfigSetting(s"$jdbcDriver.$driverName.prefix")
 
-  def getRestTimeout = {
+  def getRestTimeout: Int = {
     getIntConfigSetting(restTimeoutTag)
   }
 
-  private def getIntConfigSetting(name: String) = {
+  private def getIntConfigSetting(name: String): Int = {
     getConfigSettings(name).toInt
   }
 
-  private def getStringConfigSetting(name: String) = {
+  private def getStringConfigSetting(name: String): String = {
     getConfigSettings(name)
   }
 
-  private def getDoubleConfigSetting(name: String) = {
+  private def getDoubleConfigSetting(name: String): Double = {
     getConfigSettings(name).toDouble
   }
 
-  private def getConfigSettings(name: String) = {
+  private def getConfigSettings(name: String): String = {
     val maybeSetting = configService.get(name)
     if (maybeSetting.isEmpty)
       throw new NoSuchFieldException(s"Config setting is named '$name' has not found")
