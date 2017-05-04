@@ -1,6 +1,7 @@
 package com.bwsw.sj.engine.core.state
 
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
@@ -16,7 +17,7 @@ class StatelessCommonModuleService(manager: CommonTaskManager, checkpointGroup: 
   extends CommonModuleService(manager, checkpointGroup, performanceMetrics) {
   private val streamService = ConnectionRepository.getStreamService
 
-  val environmentManager = new ModuleEnvironmentManager(
+  val environmentManager: ModuleEnvironmentManager = new ModuleEnvironmentManager(
     instance.options,
     outputProducers,
     instance.outputs.flatMap(x => streamService.get(x)),
@@ -26,5 +27,5 @@ class StatelessCommonModuleService(manager: CommonTaskManager, checkpointGroup: 
     manager.moduleClassLoader
   )
 
-  val executor = manager.getExecutor(environmentManager)
+  val executor: StreamingExecutor = manager.getExecutor(environmentManager)
 }

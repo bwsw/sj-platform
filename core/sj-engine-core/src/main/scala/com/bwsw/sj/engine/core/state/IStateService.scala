@@ -41,12 +41,12 @@ trait IStateService {
   /**
    * Saves a partial state changes
    */
-  def savePartialState()
+  def savePartialState(): Unit
 
   /**
    * Saves a state
    */
-  def saveFullState()
+  def saveFullState(): Unit
 
   def getNumberOfVariables: Int
 }
