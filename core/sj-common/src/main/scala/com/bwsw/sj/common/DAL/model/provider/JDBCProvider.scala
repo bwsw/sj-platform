@@ -3,7 +3,7 @@ package com.bwsw.sj.common.DAL.model.provider
 import java.sql.SQLException
 
 import com.bwsw.common.jdbc.JdbcClientBuilder
-import com.bwsw.sj.common.rest.entities.provider.JDBCProviderData
+import com.bwsw.sj.common.rest.DTO.provider.JDBCProviderData
 import com.bwsw.sj.common.utils.ProviderLiterals
 
 import scala.collection.mutable.ArrayBuffer

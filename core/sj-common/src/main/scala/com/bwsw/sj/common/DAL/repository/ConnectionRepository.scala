@@ -8,7 +8,7 @@ import com.bwsw.sj.common.DAL.model.provider.Provider
 import com.bwsw.sj.common.DAL.model.service.Service
 import com.bwsw.sj.common.DAL.model.stream.SjStream
 import com.bwsw.sj.common.DAL.morphia.CustomMorphiaObjectFactory
-import com.bwsw.sj.common.DAL.service.GenericMongoService
+import com.bwsw.sj.common.DAL.service.GenericMongoRepository
 import com.mongodb.MongoClient
 import org.mongodb.morphia.Morphia
 import org.mongodb.morphia.dao.BasicDAO
@@ -38,17 +38,17 @@ object ConnectionRepository {
 
   private lazy val fileStorage: MongoFileStorage = new MongoFileStorage(mongoConnection(databaseName))
 
-  private lazy val fileMetadataService = new GenericMongoService[FileMetadata]()
+  private lazy val fileMetadataService = new GenericMongoRepository[FileMetadata]()
 
-  private lazy val instanceService = new GenericMongoService[Instance]()
+  private lazy val instanceService = new GenericMongoRepository[Instance]()
 
-  private lazy val streamService = new GenericMongoService[SjStream]()
+  private lazy val streamService = new GenericMongoRepository[SjStream]()
 
-  private lazy val serviceManager = new GenericMongoService[Service]()
+  private lazy val serviceManager = new GenericMongoRepository[Service]()
 
-  private lazy val providerService = new GenericMongoService[Provider]()
+  private lazy val providerService = new GenericMongoRepository[Provider]()
 
-  private lazy val configService = new GenericMongoService[ConfigurationSetting]()
+  private lazy val configService = new GenericMongoRepository[ConfigurationSetting]()
 
   def getFileMetadataService = {
     fileMetadataService

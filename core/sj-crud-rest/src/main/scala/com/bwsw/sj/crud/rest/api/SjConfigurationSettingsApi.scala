@@ -4,8 +4,9 @@ import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
-import com.bwsw.sj.common.rest.entities._
-import com.bwsw.sj.common.rest.entities.config.ConfigurationSettingData
+import com.bwsw.sj.common.rest.DTO._
+import com.bwsw.sj.common.rest.DTO.config.ConfigurationSettingData
+import com.bwsw.sj.common.rest._
 import com.bwsw.sj.crud.rest.exceptions.UnknownConfigSettingDomain
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator

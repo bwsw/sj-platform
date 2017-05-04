@@ -3,7 +3,7 @@ package com.bwsw.sj.crud.rest.validator.instance
 import com.bwsw.sj.common.DAL.model.service.TStreamService
 import com.bwsw.sj.common.DAL.model.stream.{SjStream, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.rest.entities.module.{InstanceData, OutputInstanceData, SpecificationData}
+import com.bwsw.sj.common.rest.DTO.module.{InstanceData, OutputInstanceData, SpecificationData}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.SjStreamUtils._

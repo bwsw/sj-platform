@@ -10,7 +10,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.engine.{EnvelopeDataSerializer, ExtendedEnvelopeDataSerializer, StreamingExecutor}
-import com.bwsw.sj.common.rest.entities.module.ExecutionPlan
+import com.bwsw.sj.common.rest.DTO.module.ExecutionPlan
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.StreamLiterals._
 import com.bwsw.sj.engine.core.environment.EnvironmentManager

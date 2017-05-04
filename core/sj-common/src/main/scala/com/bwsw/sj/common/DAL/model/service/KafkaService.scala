@@ -2,7 +2,7 @@ package com.bwsw.sj.common.DAL.model.service
 
 import com.bwsw.sj.common.DAL.model.provider.Provider
 import com.bwsw.sj.common.DAL.morphia.MorphiaAnnotations.{PropertyField, ReferenceField}
-import com.bwsw.sj.common.rest.entities.service.{KfkQServiceData, ServiceData}
+import com.bwsw.sj.common.rest.DTO.service.{KfkQServiceData, ServiceData}
 import com.bwsw.sj.common.utils.ServiceLiterals
 
 class KafkaService(override val name: String,

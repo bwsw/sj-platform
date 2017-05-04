@@ -2,7 +2,7 @@ package com.bwsw.sj.common.DAL.model.stream
 
 import com.bwsw.sj.common.DAL.model.service.Service
 import com.bwsw.sj.common.DAL.morphia.MorphiaAnnotations.{IdField, PropertyField, ReferenceField}
-import com.bwsw.sj.common.rest.entities.stream.StreamData
+import com.bwsw.sj.common.rest.DTO.stream.StreamData
 import org.mongodb.morphia.annotations._
 
 @Entity("streams")

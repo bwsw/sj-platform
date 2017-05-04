@@ -4,8 +4,8 @@ import java.net.URI
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
-import com.bwsw.sj.common.rest.entities.MarathonRequest
 import com.bwsw.sj.common.utils.FrameworkLiterals._
+import com.bwsw.sj.crud.rest.marathon.{MarathonApplicationById, MarathonInfo, MarathonRequest, MarathonTask}
 import org.apache.http.HttpStatus
 import org.apache.http.client.methods._
 import org.apache.http.entity.StringEntity

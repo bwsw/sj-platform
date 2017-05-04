@@ -5,7 +5,7 @@ import java.util
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.service.ZKService
 import com.bwsw.sj.common.DAL.morphia.MorphiaAnnotations.{EmbeddedField, IdField, PropertyField}
-import com.bwsw.sj.common.rest.entities.module.InstanceData
+import com.bwsw.sj.common.rest.DTO.module.InstanceData
 import com.bwsw.sj.common.utils.EngineLiterals
 import org.mongodb.morphia.annotations.Entity
 

@@ -4,7 +4,7 @@ import java.util.Properties
 
 import com.bwsw.sj.common.DAL.model.service.KafkaService
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
-import com.bwsw.sj.common.rest.entities.stream.KafkaStreamData
+import com.bwsw.sj.common.rest.DTO.stream.KafkaStreamData
 import com.bwsw.sj.common.utils.StreamLiterals
 import kafka.admin.AdminUtils
 import kafka.common.TopicAlreadyMarkedForDeletionException

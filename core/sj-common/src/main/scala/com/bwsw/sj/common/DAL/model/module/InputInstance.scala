@@ -4,7 +4,7 @@ import java.util
 
 import com.bwsw.sj.common.DAL.model.service.ZKService
 import com.bwsw.sj.common.DAL.morphia.MorphiaAnnotations.PropertyField
-import com.bwsw.sj.common.rest.entities.module.{InputInstanceData, InstanceData}
+import com.bwsw.sj.common.rest.DTO.module.{InputInstanceData, InstanceData}
 import com.bwsw.sj.common.utils.EngineLiterals
 import org.mongodb.morphia.annotations.Property
 

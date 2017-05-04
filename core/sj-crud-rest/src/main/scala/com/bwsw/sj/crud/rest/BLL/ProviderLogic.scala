@@ -4,16 +4,16 @@ import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.DAL.model.provider.Provider
 import com.bwsw.sj.common.DAL.model.service._
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.rest.entities._
-import com.bwsw.sj.common.rest.entities.provider.ProviderData
+import com.bwsw.sj.common.DAL.service.GenericMongoRepository
+import com.bwsw.sj.common.rest.DTO.provider.ProviderData
+import com.bwsw.sj.common.rest._
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 class ProviderLogic extends Logic[Provider] {
-  override protected val entityDAO: GenericMongoService[Provider] = ConnectionRepository.getProviderService
+  override protected val entityRepository: GenericMongoRepository[Provider] = ConnectionRepository.getProviderService
   private def serviceDAO = ConnectionRepository.getServiceManager
 
   override def process(serializedEntity: String): RestResponse = {
@@ -26,7 +26,7 @@ class ProviderLogic extends Logic[Provider] {
       errors ++= data.validate()
 
       if (errors.isEmpty) {
-        entityDAO.save(data.asModelProvider())
+        entityRepository.save(data.asModelProvider())
         response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.providers.provider.created", data.name)))
       }
     } catch {
@@ -44,7 +44,7 @@ class ProviderLogic extends Logic[Provider] {
   }
 
   override def getAll(): RestResponse = {
-    val providers = entityDAO.getAll
+    val providers = entityRepository.getAll
     val response = OkRestResponse(ProvidersResponseEntity())
     if (providers.nonEmpty) {
       response.entity = ProvidersResponseEntity(providers.map(p => p.asProtocolProvider()))
@@ -54,7 +54,7 @@ class ProviderLogic extends Logic[Provider] {
   }
 
   override def get(name: String): RestResponse = {
-    val provider = entityDAO.get(name)
+    val provider = entityRepository.get(name)
     var response: RestResponse = NotFoundRestResponse(MessageResponseEntity(
       createMessage("rest.providers.provider.notfound", name)))
 
@@ -73,11 +73,11 @@ class ProviderLogic extends Logic[Provider] {
     val services = getRelatedServices(name)
 
     if (services.isEmpty) {
-      val provider = entityDAO.get(name)
+      val provider = entityRepository.get(name)
 
       provider match {
         case Some(_) =>
-          entityDAO.delete(name)
+          entityRepository.delete(name)
           response = OkRestResponse(MessageResponseEntity(
             createMessage("rest.providers.provider.deleted", name)))
         case None =>
@@ -90,7 +90,7 @@ class ProviderLogic extends Logic[Provider] {
   }
 
   def checkConnection(name: String): RestResponse = {
-    val provider = entityDAO.get(name)
+    val provider = entityRepository.get(name)
     var response: RestResponse = NotFoundRestResponse(
       MessageResponseEntity(createMessage("rest.providers.provider.notfound", name)))
 
@@ -110,7 +110,7 @@ class ProviderLogic extends Logic[Provider] {
   }
 
   def getRelated(name: String): RestResponse = {
-    val provider = entityDAO.get(name)
+    val provider = entityRepository.get(name)
     var response: RestResponse = NotFoundRestResponse(
       MessageResponseEntity(createMessage("rest.providers.provider.notfound", name)))
 

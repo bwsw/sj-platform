@@ -2,7 +2,7 @@ package com.bwsw.sj.common.DAL.model.module
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.service.ZKService
-import com.bwsw.sj.common.rest.entities.module.{BatchInstanceData, ExecutionPlan, InstanceData}
+import com.bwsw.sj.common.rest.DTO.module.{BatchInstanceData, ExecutionPlan, InstanceData}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
 import org.mongodb.morphia.annotations.{Embedded, Property}

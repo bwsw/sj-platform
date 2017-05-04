@@ -13,7 +13,8 @@ import akka.util.ByteString
 import com.bwsw.sj.common.DAL.model.ConfigurationSetting
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
-import com.bwsw.sj.common.rest.entities._
+import com.bwsw.sj.common.rest.DTO._
+import com.bwsw.sj.common.rest._
 import com.bwsw.sj.crud.rest.RestLiterals
 import com.bwsw.sj.crud.rest.exceptions.CustomJarNotFound
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator

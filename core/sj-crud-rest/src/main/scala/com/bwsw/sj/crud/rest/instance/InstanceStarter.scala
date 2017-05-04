@@ -6,11 +6,10 @@ import com.bwsw.common.LeaderLatch
 import com.bwsw.sj.common.DAL.ConnectionConstants
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
-import com.bwsw.sj.common.rest.entities.MarathonRequest
 import com.bwsw.sj.common.utils.FrameworkLiterals._
 import com.bwsw.sj.common.utils._
 import com.bwsw.sj.crud.rest.RestLiterals
-import org.apache.http.client.methods.CloseableHttpResponse
+import com.bwsw.sj.crud.rest.marathon.{MarathonApplicationById, MarathonRequest}
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._

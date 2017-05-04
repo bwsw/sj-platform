@@ -6,8 +6,8 @@ import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.model.service.{Service, ZKService}
 import com.bwsw.sj.common.DAL.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.rest.entities.module.{InstanceData, SpecificationData}
+import com.bwsw.sj.common.DAL.service.GenericMongoRepository
+import com.bwsw.sj.common.rest.DTO.module.{InstanceData, SpecificationData}
 import com.bwsw.sj.common.rest.utils.ValidationUtils
 import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils, StreamLiterals}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
@@ -24,8 +24,8 @@ import scala.collection.mutable.ArrayBuffer
  */
 abstract class InstanceValidator extends ValidationUtils with CompletionUtils with MessageResourceUtils {
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
-  var serviceDAO: GenericMongoService[Service] = ConnectionRepository.getServiceManager
-  var instanceDAO: GenericMongoService[Instance] = ConnectionRepository.getInstanceService
+  var serviceDAO: GenericMongoRepository[Service] = ConnectionRepository.getServiceManager
+  var instanceDAO: GenericMongoRepository[Instance] = ConnectionRepository.getInstanceService
   val serializer: Serializer = new JsonSerializer
 
   /**

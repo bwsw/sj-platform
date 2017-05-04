@@ -1,7 +1,7 @@
 package com.bwsw.sj.common.DAL.model.stream
 
 import com.bwsw.sj.common.DAL.model.service.RestService
-import com.bwsw.sj.common.rest.entities.stream.RestStreamData
+import com.bwsw.sj.common.rest.DTO.stream.RestStreamData
 import com.bwsw.sj.common.utils.StreamLiterals
 
 /**

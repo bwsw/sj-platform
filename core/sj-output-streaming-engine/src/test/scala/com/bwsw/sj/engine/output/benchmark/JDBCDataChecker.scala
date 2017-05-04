@@ -2,14 +2,14 @@ package com.bwsw.sj.engine.output.benchmark
 
 import com.bwsw.sj.common.DAL.model.stream.{JDBCSjStream, SjStream, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.DAL.service.GenericMongoService
+import com.bwsw.sj.common.DAL.service.GenericMongoRepository
 import com.bwsw.sj.engine.output.benchmark.DataFactory._
 
 import scala.collection.mutable.ArrayBuffer
 
 object JDBCDataChecker extends App {
 
-  val streamService: GenericMongoService[SjStream] = ConnectionRepository.getStreamService
+  val streamService: GenericMongoRepository[SjStream] = ConnectionRepository.getStreamService
   val tStream: TStreamSjStream = streamService.get(tstreamInputName).get.asInstanceOf[TStreamSjStream]
   val inputConsumer = createConsumer(tStream)
   inputConsumer.start()

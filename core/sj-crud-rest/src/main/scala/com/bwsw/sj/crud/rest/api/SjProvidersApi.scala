@@ -1,7 +1,7 @@
 package com.bwsw.sj.crud.rest.api
 
 import akka.http.scaladsl.server.{Directives, RequestContext}
-import com.bwsw.sj.common.rest.entities._
+import com.bwsw.sj.common.rest.{OkRestResponse, TypesResponseEntity}
 import com.bwsw.sj.common.utils.ProviderLiterals
 import com.bwsw.sj.crud.rest.BLL.ProviderLogic
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator

@@ -13,8 +13,9 @@ import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.engine.{StreamingValidator, ValidationInfo}
-import com.bwsw.sj.common.rest.entities._
-import com.bwsw.sj.common.rest.entities.module._
+import com.bwsw.sj.common.rest.DTO._
+import com.bwsw.sj.common.rest.DTO.module._
+import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.crud.rest.RestLiterals
 import com.bwsw.sj.crud.rest.exceptions._

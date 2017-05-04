@@ -2,7 +2,7 @@ package com.bwsw.sj.common.DAL.model.service
 
 import com.bwsw.sj.common.DAL.model.provider.Provider
 import com.bwsw.sj.common.DAL.morphia.MorphiaAnnotations.{PropertyField, ReferenceField}
-import com.bwsw.sj.common.rest.entities.service.RestServiceData
+import com.bwsw.sj.common.rest.DTO.service.RestServiceData
 import com.bwsw.sj.common.utils.{RestLiterals, ServiceLiterals}
 import org.eclipse.jetty.http.HttpVersion
 

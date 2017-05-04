@@ -3,7 +3,7 @@ package com.bwsw.sj.common.DAL.model.module
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.service.ZKService
 import com.bwsw.sj.common.DAL.morphia.MorphiaAnnotations.PropertyField
-import com.bwsw.sj.common.rest.entities.module.{ExecutionPlan, InstanceData, OutputInstanceData}
+import com.bwsw.sj.common.rest.DTO.module.{ExecutionPlan, InstanceData, OutputInstanceData}
 import com.bwsw.sj.common.utils.SjStreamUtils._
 import org.mongodb.morphia.annotations.{Embedded, Property}
 

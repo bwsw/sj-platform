@@ -2,7 +2,7 @@ package com.bwsw.sj.common.DAL.model.module
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.morphia.MorphiaAnnotations.PropertyField
-import com.bwsw.sj.common.rest.entities.module.SpecificationData
+import com.bwsw.sj.common.rest.DTO.module.SpecificationData
 
 /**
   * Entity for specification-json of module

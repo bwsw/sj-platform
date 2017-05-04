@@ -2,8 +2,9 @@ package com.bwsw.sj.crud.rest.api
 
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.common.exceptions._
-import com.bwsw.sj.common.rest.entities._
-import com.bwsw.sj.common.rest.entities.service.ServiceData
+import com.bwsw.sj.common.rest.DTO._
+import com.bwsw.sj.common.rest.DTO.service.ServiceData
+import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.utils.ServiceLiterals
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator

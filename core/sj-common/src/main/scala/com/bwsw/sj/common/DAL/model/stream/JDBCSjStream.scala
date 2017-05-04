@@ -1,7 +1,7 @@
 package com.bwsw.sj.common.DAL.model.stream
 
 import com.bwsw.sj.common.DAL.model.service.JDBCService
-import com.bwsw.sj.common.rest.entities.stream.JDBCStreamData
+import com.bwsw.sj.common.rest.DTO.stream.JDBCStreamData
 import com.bwsw.sj.common.utils.StreamLiterals
 
 class JDBCSjStream(override val name: String,

@@ -3,8 +3,9 @@ package com.bwsw.sj.crud.rest.api
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.DAL.model.module.Instance
-import com.bwsw.sj.common.rest.entities._
-import com.bwsw.sj.common.rest.entities.stream.StreamData
+import com.bwsw.sj.common.rest.DTO._
+import com.bwsw.sj.common.rest.DTO.stream.StreamData
+import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator

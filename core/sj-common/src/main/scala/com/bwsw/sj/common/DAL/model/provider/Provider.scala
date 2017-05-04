@@ -10,7 +10,7 @@ import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.sj.common.DAL.morphia.MorphiaAnnotations.{IdField, PropertyField}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals
-import com.bwsw.sj.common.rest.entities.provider.ProviderData
+import com.bwsw.sj.common.rest.DTO.provider.ProviderData
 import com.bwsw.sj.common.utils.ProviderLiterals
 import com.datastax.driver.core.Cluster
 import com.datastax.driver.core.exceptions.NoHostAvailableException

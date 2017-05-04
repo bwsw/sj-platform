@@ -16,7 +16,7 @@ import com.bwsw.sj.common.DAL.model.module.{FileMetadata, Instance}
 import com.bwsw.sj.common.DAL.model.service.Service
 import com.bwsw.sj.common.DAL.model.stream.SjStream
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.DAL.service.GenericMongoService
+import com.bwsw.sj.common.DAL.service.GenericMongoRepository
 import com.bwsw.sj.common.engine.StreamingValidator
 import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils, StreamLiterals}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
@@ -38,12 +38,12 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageRes
   implicit def executor: ExecutionContextExecutor
 
   val serializer: Serializer
-  val fileMetadataDAO: GenericMongoService[FileMetadata]
+  val fileMetadataDAO: GenericMongoRepository[FileMetadata]
   val storage: FileStorage
-  val instanceDAO: GenericMongoService[Instance]
-  val serviceDAO: GenericMongoService[Service]
-  val streamDAO: GenericMongoService[SjStream]
-  val configService: GenericMongoService[ConfigurationSetting]
+  val instanceDAO: GenericMongoRepository[Instance]
+  val serviceDAO: GenericMongoRepository[Service]
+  val streamDAO: GenericMongoRepository[SjStream]
+  val configService: GenericMongoRepository[ConfigurationSetting]
   val restHost: String
   val restPort: Int
 

@@ -2,7 +2,7 @@ package com.bwsw.sj.common.DAL.model.stream
 
 import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.sj.common.DAL.model.service.ESService
-import com.bwsw.sj.common.rest.entities.stream.ESStreamData
+import com.bwsw.sj.common.rest.DTO.stream.ESStreamData
 import com.bwsw.sj.common.utils.StreamLiterals
 
 class ESSjStream(override val name: String,

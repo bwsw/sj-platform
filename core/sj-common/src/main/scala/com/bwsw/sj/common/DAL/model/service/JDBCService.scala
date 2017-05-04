@@ -2,7 +2,7 @@ package com.bwsw.sj.common.DAL.model.service
 
 import com.bwsw.sj.common.DAL.model.provider.JDBCProvider
 import com.bwsw.sj.common.DAL.morphia.MorphiaAnnotations.ReferenceField
-import com.bwsw.sj.common.rest.entities.service.{JDBCServiceData, ServiceData}
+import com.bwsw.sj.common.rest.DTO.service.{JDBCServiceData, ServiceData}
 import com.bwsw.sj.common.utils.ServiceLiterals
 
 /**

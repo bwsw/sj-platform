@@ -2,7 +2,7 @@ package com.bwsw.sj.common.DAL.model
 
 import com.bwsw.sj.common.DAL.morphia.MorphiaAnnotations.IdField
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
-import com.bwsw.sj.common.rest.entities.config.ConfigurationSettingData
+import com.bwsw.sj.common.rest.DTO.config.ConfigurationSettingData
 import org.mongodb.morphia.annotations.Entity
 
 /**

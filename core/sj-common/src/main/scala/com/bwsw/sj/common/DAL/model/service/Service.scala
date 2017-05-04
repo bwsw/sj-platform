@@ -1,7 +1,7 @@
 package com.bwsw.sj.common.DAL.model.service
 
 import com.bwsw.sj.common.DAL.morphia.MorphiaAnnotations.{IdField, PropertyField}
-import com.bwsw.sj.common.rest.entities.service.ServiceData
+import com.bwsw.sj.common.rest.DTO.service.ServiceData
 import org.mongodb.morphia.annotations.Entity
 
 @Entity("services")
