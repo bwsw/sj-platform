@@ -4,8 +4,8 @@ import java.io.{File, FileOutputStream}
 import java.nio.file.Paths
 
 import akka.http.scaladsl.model.Multipart.FormData.BodyPart
-import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Disposition`}
 import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Disposition`}
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.stream.scaladsl.FileIO
@@ -13,7 +13,6 @@ import akka.util.ByteString
 import com.bwsw.sj.common.DAL.model.ConfigurationSetting
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
-import com.bwsw.sj.common.rest.DTO._
 import com.bwsw.sj.common.rest._
 import com.bwsw.sj.crud.rest.RestLiterals
 import com.bwsw.sj.crud.rest.exceptions.CustomJarNotFound
@@ -212,23 +211,28 @@ trait SjCustomApi extends Directives with SjCrudValidator {
 
                 onComplete(parts) {
                   case Success(allParts) =>
-                    val file = allParts("file").asInstanceOf[File]
-                    val description = if (allParts.isDefinedAt("description")) {
-                      allParts("description").asInstanceOf[String]
-                    } else ""
-                    var response: RestResponse = ConflictRestResponse(MessageResponseEntity(
-                      createMessage("rest.custom.files.file.exists", filename.get)))
+                    var response: RestResponse = BadRequestRestResponse(MessageResponseEntity(
+                      getMessage("rest.custom.files.file.missing")))
 
-                    if (!storage.exists(filename.get)) {
-                      val uploadingFile = new File(filename.get)
-                      FileUtils.copyFile(file, uploadingFile)
-                      storage.put(uploadingFile, filename.get, Map("description" -> description), "custom-file")
-                      uploadingFile.delete()
+                    if (filename.isDefined) {
+                      val file = allParts("file").asInstanceOf[File]
+                      val description = if (allParts.isDefinedAt("description")) {
+                        allParts("description").asInstanceOf[String]
+                      } else ""
+                      response = ConflictRestResponse(MessageResponseEntity(
+                        createMessage("rest.custom.files.file.exists", filename.get)))
 
-                      response = OkRestResponse(MessageResponseEntity(
-                        createMessage("rest.custom.files.file.uploaded", filename.get)))
+                      if (!storage.exists(filename.get)) {
+                        val uploadingFile = new File(filename.get)
+                        FileUtils.copyFile(file, uploadingFile)
+                        storage.put(uploadingFile, filename.get, Map("description" -> description), "custom-file")
+                        uploadingFile.delete()
+
+                        response = OkRestResponse(MessageResponseEntity(
+                          createMessage("rest.custom.files.file.uploaded", filename.get)))
+                      }
+                      file.delete()
                     }
-                    file.delete()
 
                     complete(restResponseToHttpResponse(response))
 
