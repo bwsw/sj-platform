@@ -13,7 +13,7 @@ import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.DAL.model.stream.TStreamSjStream
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.TaskManager
-import com.bwsw.tstreams.agents.producer.NewTransactionProducerPolicy
+import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer}
 import org.slf4j.LoggerFactory
 
 import scala.collection._
@@ -63,9 +63,10 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
 
   /**
    * Create t-stream producer for stream for reporting
-   * @return Producer for reporting performance metrics
+    *
+    * @return Producer for reporting performance metrics
    */
-  private def createReportProducer() = {
+  private def createReportProducer(): Producer = {
     logger.debug(s"Task: $taskName. Start creating a t-stream producer to record performance reports.")
     val reportProducer = manager.createProducer(reportStream)
     logger.debug(s"Task: $taskName. Creation of t-stream producer is finished.")
@@ -73,7 +74,7 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
     reportProducer
   }
 
-  private def fillStaticPerformanceMetrics() = {
+  private def fillStaticPerformanceMetrics(): Unit = {
     report.taskId = taskName
     report.host = manager.agentsHost
   }
@@ -95,7 +96,7 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
     }
   }
 
-  protected def addEnvelopeToInputStream(name: String, elementsSize: List[Int]) = {
+  protected def addEnvelopeToInputStream(name: String, elementsSize: List[Int]): Unit = {
     mutex.lock()
     logger.debug(s"Indicate that a new envelope is received from input stream: $name.")
     if (inputEnvelopesPerStream.contains(name)) {
@@ -109,11 +110,12 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
 
   /**
    * Invokes when a new element is sent to txn of some output stream
-   * @param name Stream name
+    *
+    * @param name Stream name
    * @param envelopeID Id of envelope of output stream
    * @param elementSize Size of appended element
    */
-  def addElementToOutputEnvelope(name: String, envelopeID: String, elementSize: Int) = {
+  def addElementToOutputEnvelope(name: String, envelopeID: String, elementSize: Int): Unit = {
     mutex.lock()
     logger.debug(s"Indicate that a new element is sent to txn: $envelopeID of output stream: $name.")
     if (outputEnvelopesPerStream.contains(name)) {
@@ -133,7 +135,7 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
   /**
    * It is in charge of running of input module
    */
-  override def call() = {
+  override def call(): Unit = {
     logger.debug(s"Task: $taskName. Launch a new thread to report performance metrics .")
     val currentThread = Thread.currentThread()
     currentThread.setName(s"report-task-$taskName")
@@ -151,11 +153,12 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
 
   /**
    * Constructs a report of performance metrics of task work
-   * @return Constructed performance report
+    *
+    * @return Constructed performance report
    */
   def getReport(): String
 
-  private def sendReport(report: String) = {
+  private def sendReport(report: String): Unit = {
     val reportSerializerForTxn = new ObjectSerializer()
     val taskNumber = taskName.replace(s"${manager.instanceName}-task", "").toInt
     logger.debug(s"Task: $taskName. Create a new txn for sending performance metrics.")
@@ -164,11 +167,11 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
     reportTxn.send(reportSerializerForTxn.serialize(report))
   }
 
-  protected def createStorageForInputEnvelopes(inputStreamNames: Array[String]) = {
+  protected def createStorageForInputEnvelopes(inputStreamNames: Array[String]): mutable.Map[String, ListBuffer[List[Int]]] = {
     mutable.Map(inputStreamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
   }
 
-  protected def createStorageForOutputEnvelopes(outputStreamNames: Array[String]) = {
+  protected def createStorageForOutputEnvelopes(outputStreamNames: Array[String]): mutable.Map[String, mutable.Map[String, ListBuffer[Int]]] = {
     mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
   }
 }
