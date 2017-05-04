@@ -7,15 +7,13 @@ import com.bwsw.sj.common.DAL.model.module.{FrameworkStage, Instance}
 import com.bwsw.sj.common.DAL.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.rest.entities.Data
 import com.bwsw.sj.common.utils.SjStreamUtils._
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonIgnore
 
 import scala.collection.JavaConverters._
-import scala.collection.mutable.ArrayBuffer
 
-class InstanceData extends Data {
+class InstanceData {
   var moduleName: String = null
   var moduleVersion: String = null
   var moduleType: String = null
@@ -150,6 +148,4 @@ class InstanceData extends Data {
   private def createTaskName(taskPrefix: String, taskNumber: Int) = {
     taskPrefix + "-task" + taskNumber
   }
-
-  override def validate(): ArrayBuffer[String] = ??? //todo
 }

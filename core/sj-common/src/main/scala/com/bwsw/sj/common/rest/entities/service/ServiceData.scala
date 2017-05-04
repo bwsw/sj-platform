@@ -2,7 +2,6 @@ package com.bwsw.sj.common.rest.entities.service
 
 import com.bwsw.sj.common.DAL.model.service.Service
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.rest.entities.Data
 import com.bwsw.sj.common.rest.utils.ValidationUtils
 import com.bwsw.sj.common.utils.ServiceLiterals._
 import com.bwsw.sj.common.utils.{MessageResourceUtils, ServiceLiterals}
@@ -23,7 +22,7 @@ import scala.collection.mutable.ArrayBuffer
   new Type(value = classOf[JDBCServiceData], name = ServiceLiterals.jdbcType),
   new Type(value = classOf[RestServiceData], name = ServiceLiterals.restType)
 ))
-class ServiceData() extends Data with ValidationUtils with MessageResourceUtils {
+class ServiceData() extends ValidationUtils with MessageResourceUtils {
   @JsonProperty("type") var serviceType: String = _
   var name: String = _
   var description: String = "No description"
