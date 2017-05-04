@@ -1,12 +1,16 @@
 package com.bwsw.sj.crud.rest.api
 
 import akka.http.scaladsl.server.{Directives, RequestContext}
+import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.config.ConfigurationSettingData
 import com.bwsw.sj.crud.rest.exceptions.UnknownConfigSettingDomain
+import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
+
+import scala.collection.mutable.ArrayBuffer
 
 trait SjConfigurationSettingsApi extends Directives with SjCrudValidator {
 
@@ -69,16 +73,26 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator {
           } ~
           pathEndOrSingleSlash {
             post { (ctx: RequestContext) =>
-              validateContextWithSchema(ctx, "configSchema.json")
-              val data = serializer.deserialize[ConfigurationSettingData](getEntityFromContext(ctx))
-              val errors = data.validate()
-              var response: RestResponse = BadRequestRestResponse(MessageResponseEntity(
-                createMessage("rest.config.setting.cannot.create", errors.mkString("\n"))
-              ))
+              var response: RestResponse = null
+              val errors = new ArrayBuffer[String]
 
-              if (errors.isEmpty) {
-                configService.save(data.asModelConfigurationSetting)
-                response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.config.setting.created", data.domain, data.name)))
+              try {
+                val data = serializer.deserialize[ConfigurationSettingData](getEntityFromContext(ctx))
+                errors ++= data.validate()
+
+                if (errors.isEmpty) {
+                  configService.save(data.asModelConfigurationSetting)
+                  response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.config.setting.created", data.domain, data.name)))
+                }
+              } catch {
+                case e: JsonDeserializationException =>
+                  errors += JsonDeserializationErrorMessageCreator(e)
+              }
+
+              if (errors.nonEmpty) {
+                response = BadRequestRestResponse(MessageResponseEntity(
+                  createMessage("rest.config.setting.cannot.create", errors.mkString("\n"))
+                ))
               }
 
               ctx.complete(restResponseToHttpResponse(response))
