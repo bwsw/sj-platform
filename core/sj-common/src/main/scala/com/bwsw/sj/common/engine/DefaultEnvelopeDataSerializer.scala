@@ -7,7 +7,7 @@ class DefaultEnvelopeDataSerializer(classLoader: ClassLoader) extends EnvelopeDa
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val serializer = new ObjectSerializer(classLoader)
 
-  override def deserialize(bytes: Array[Byte]) = {
+  override def deserialize(bytes: Array[Byte]): Object = {
     logger.debug("Deserialize a byte array to an object.")
 
     serializer.deserialize(bytes)
