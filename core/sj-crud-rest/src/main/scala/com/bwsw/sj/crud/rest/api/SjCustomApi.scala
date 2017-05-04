@@ -149,9 +149,8 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                       createMessage("rest.custom.jars.file.exists", metadata.fileName)))
 
                     if (!storage.exists(metadata.fileName)) {
-                      response = BadRequestRestResponse(MessageResponseEntity(getMessage("rest.errors.invalid.specification")))
-
-                      if (checkCustomFileSpecification(file)) {
+                      val errors = validateCustomFileSpecification(file)
+                      if (errors.isEmpty) {
                         val specification = getSpecification(file)
                         response = ConflictRestResponse(MessageResponseEntity(
                           createMessage("rest.custom.jars.exists", metadata.fileName)))
@@ -170,6 +169,9 @@ trait SjCustomApi extends Directives with SjCrudValidator {
                           response = OkRestResponse(MessageResponseEntity(
                             createMessage("rest.custom.jars.file.uploaded", metadata.fileName)))
                         }
+                      } else {
+                        response = BadRequestRestResponse(
+                          MessageResponseEntity(createMessage("rest.errors.invalid.specification", errors.mkString(";"))))
                       }
                     }
 

@@ -9,6 +9,7 @@ import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.server.RequestContext
 import akka.stream.Materializer
+import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.DAL.model._
@@ -18,10 +19,12 @@ import com.bwsw.sj.common.DAL.model.service.Service
 import com.bwsw.sj.common.DAL.model.stream.SjStream
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.engine.{IBatchCollector, StreamingValidator}
+import com.bwsw.sj.common.engine.StreamingValidator
 import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils, StreamLiterals}
+import com.bwsw.sj.crud.rest.api.JsonDeserializationErrorMessageCreator
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 
+import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.{Await, ExecutionContextExecutor}
 
 /**
@@ -246,16 +249,77 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageRes
     * Check specification of uploading custom jar file
     *
     * @param jarFile - input jar file
-    * @return - content of specification.json
+    * @return - set of errors
     */
-  def checkCustomFileSpecification(jarFile: File): Boolean = {
+  def validateCustomFileSpecification(jarFile: File): ArrayBuffer[String] = {
     logger.debug(s"Validate a custom jar specification.")
     val json = getSpecificationFromJar(jarFile)
-    if (isEmptyOrNullString(json)) {
-      return false
+    val errors = new ArrayBuffer[String]()
+
+    try {
+      val specification = serializer.deserialize[Map[String, Any]](json)
+
+      val stringType = "String"
+      val nameAttribute = "name"
+      specification.get(nameAttribute) match {
+        case Some(s: String) =>
+          if (isEmptyOrNullString(s))
+            errors += createMessage("entity.error.attribute.required", nameAttribute)
+        case None =>
+          errors += createMessage("entity.error.attribute.required", nameAttribute)
+        case _ =>
+          errors += createMessage("rest.validator.parameter.unknown.type", nameAttribute, stringType)
+      }
+
+      val versionAttribute = "version"
+      specification.get(versionAttribute) match {
+        case Some(s: String) =>
+          if (isEmptyOrNullString(s))
+            errors += createMessage("entity.error.attribute.required", versionAttribute)
+        case None =>
+          errors += createMessage("entity.error.attribute.required", versionAttribute)
+        case _ =>
+          errors += createMessage("rest.validator.parameter.unknown.type", versionAttribute, stringType)
+      }
+
+      val descriptionAttribute = "description"
+      specification.get(descriptionAttribute) match {
+        case Some(_: String) | None =>
+        case _ =>
+          errors += createMessage("rest.validator.parameter.unknown.type", descriptionAttribute, stringType)
+      }
+
+      val authorAttribute = "author"
+      specification.get(authorAttribute) match {
+        case Some(_: String) | None =>
+        case _ =>
+          errors += createMessage("rest.validator.parameter.unknown.type", authorAttribute, stringType)
+      }
+
+      val licenseAttribute = "license"
+      specification.get(licenseAttribute) match {
+        case Some(_: String) | None =>
+        case _ =>
+          errors += createMessage("rest.validator.parameter.unknown.type", licenseAttribute, stringType)
+      }
+
+      val mapType = "Map[String, Any]"
+      val optionsAttribute = "options"
+      specification.get(optionsAttribute) match {
+        case None =>
+        case Some(m: Map[_, _]) =>
+          if (!m.keySet.forall(_.isInstanceOf[String]))
+            errors += createMessage("rest.validator.parameter.unknown.type", optionsAttribute, mapType)
+        case _ =>
+          errors += createMessage("rest.validator.parameter.unknown.type", optionsAttribute, mapType)
+      }
+
+    } catch {
+      case e: JsonDeserializationException =>
+        errors += JsonDeserializationErrorMessageCreator(e)
     }
 
-    validateWithSchema(json, "customschema.json")
+    errors
   }
 
   def getSpecification(jarFile: File) = {
