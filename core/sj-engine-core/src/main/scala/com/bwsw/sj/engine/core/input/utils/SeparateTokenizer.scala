@@ -16,7 +16,7 @@ class SeparateTokenizer(separator: String, encoding: String) {
   private val byteProcessor = new ByteProcessor {
     private var bytes: Array[Byte] = Array.empty
 
-    override def process(value: Byte) = {
+    override def process(value: Byte): Boolean = {
       bytes = bytes :+ value
       val line = Source.fromBytes(bytes, encoding).mkString
       !line.endsWith(separator)
