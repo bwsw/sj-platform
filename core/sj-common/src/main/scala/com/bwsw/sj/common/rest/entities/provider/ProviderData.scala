@@ -4,6 +4,7 @@ import java.net.{URI, URISyntaxException}
 
 import com.bwsw.sj.common.DAL.model.provider.Provider
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.rest.entities.Data
 import com.bwsw.sj.common.rest.utils.ValidationUtils
 import com.bwsw.sj.common.utils.ProviderLiterals._
 import com.bwsw.sj.common.utils.{MessageResourceUtils, ProviderLiterals}
@@ -22,7 +23,7 @@ class ProviderData(val name: String,
                    @JsonProperty("type") val providerType: String,
                    val hosts: Array[String],
                    val description: String = "No description"
-                  ) extends ValidationUtils with MessageResourceUtils {
+                  ) extends Data with ValidationUtils with MessageResourceUtils {
   @JsonIgnore
   def asModelProvider(): Provider = {
     val provider = new Provider(

@@ -5,7 +5,7 @@ import java.util
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.service.ZKService
 import com.bwsw.sj.common.DAL.morphia.MorphiaAnnotations.{EmbeddedField, IdField, PropertyField}
-import com.bwsw.sj.common.rest.entities.module.InstanceMetadata
+import com.bwsw.sj.common.rest.entities.module.InstanceData
 import com.bwsw.sj.common.utils.EngineLiterals
 import org.mongodb.morphia.annotations.Entity
 
@@ -39,9 +39,9 @@ class Instance(@IdField val name: String,
                @PropertyField("framework-id") val frameworkId: String = System.currentTimeMillis().toString
               ) {
 
-  def asProtocolInstance(): InstanceMetadata = ???
+  def asProtocolInstance(): InstanceData = ???
 
-  protected def fillProtocolInstance(protocolInstance: InstanceMetadata): Unit = {
+  protected def fillProtocolInstance(protocolInstance: InstanceData): Unit = {
     val serializer = new JsonSerializer()
 
     protocolInstance.status = this.status

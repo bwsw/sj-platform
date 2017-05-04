@@ -1,17 +1,17 @@
 package com.bwsw.sj.common.rest.entities.module
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.DAL.model.module.BatchInstance
+import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.DAL.model.service.ZKService
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
 
-class BatchInstanceMetadata extends InstanceMetadata with AvroSchemaForInstanceMetadata {
+class RegularInstanceData extends InstanceData with AvroSchemaForInstanceMetadata {
   var inputs: Array[String] = Array()
-  var window: Int = 1
-  var slidingInterval: Int = 1
   var outputs: Array[String] = Array()
+  var checkpointMode: String = null
+  var checkpointInterval: Long = Long.MinValue
   var executionPlan: ExecutionPlan = new ExecutionPlan()
   var startFrom: String = EngineLiterals.newestStartMode
   var stateManagement: String = EngineLiterals.noneStateMode
@@ -22,14 +22,13 @@ class BatchInstanceMetadata extends InstanceMetadata with AvroSchemaForInstanceM
     val serviceDAO = ConnectionRepository.getServiceManager
     val service = serviceDAO.get(this.coordinationService).get.asInstanceOf[ZKService]
 
-    val modelInstance = new BatchInstance(name, moduleType, moduleName, moduleVersion, engine, service)
+    val modelInstance = new RegularInstance(name, moduleType, moduleName, moduleVersion, engine, service, checkpointMode)
     super.fillModelInstance(modelInstance)
-    modelInstance.inputs = this.inputs
-    modelInstance.window = this.window
-    modelInstance.slidingInterval = this.slidingInterval
-    modelInstance.eventWaitIdleTime = this.eventWaitIdleTime
+    modelInstance.checkpointInterval = this.checkpointInterval
     modelInstance.stateManagement = this.stateManagement
     modelInstance.stateFullCheckpoint = this.stateFullCheckpoint
+    modelInstance.eventWaitIdleTime = this.eventWaitIdleTime
+    modelInstance.inputs = this.inputs
     modelInstance.outputs = this.outputs
     modelInstance.startFrom = this.startFrom
     modelInstance.executionPlan = this.executionPlan

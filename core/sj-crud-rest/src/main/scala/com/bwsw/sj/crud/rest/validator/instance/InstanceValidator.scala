@@ -7,7 +7,7 @@ import com.bwsw.sj.common.DAL.model.service.{Service, ZKService}
 import com.bwsw.sj.common.DAL.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, SpecificationData}
+import com.bwsw.sj.common.rest.entities.module.{InstanceData, SpecificationData}
 import com.bwsw.sj.common.rest.utils.ValidationUtils
 import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils, StreamLiterals}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
@@ -34,7 +34,7 @@ abstract class InstanceValidator extends ValidationUtils with CompletionUtils wi
    * @param parameters - input parameters for running module
    * @return - List of errors
    */
-  def validate(parameters: InstanceMetadata, specification: SpecificationData): ArrayBuffer[String]
+  def validate(parameters: InstanceData, specification: SpecificationData): ArrayBuffer[String]
 
   /**
    * Validation base instance options
@@ -42,7 +42,7 @@ abstract class InstanceValidator extends ValidationUtils with CompletionUtils wi
    * @param parameters - Instance parameters
    * @return - List of errors
    */
-  protected def validateGeneralOptions(parameters: InstanceMetadata) = {
+  protected def validateGeneralOptions(parameters: InstanceData) = {
     logger.debug(s"Instance: ${parameters.name}. General options validation.")
     val errors = new ArrayBuffer[String]()
 

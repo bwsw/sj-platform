@@ -3,7 +3,7 @@ package com.bwsw.sj.common.DAL.model.module
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.service.ZKService
 import com.bwsw.sj.common.DAL.morphia.MorphiaAnnotations.PropertyField
-import com.bwsw.sj.common.rest.entities.module.{ExecutionPlan, InstanceMetadata, OutputInstanceMetadata}
+import com.bwsw.sj.common.rest.entities.module.{ExecutionPlan, InstanceData, OutputInstanceData}
 import com.bwsw.sj.common.utils.SjStreamUtils._
 import org.mongodb.morphia.annotations.{Embedded, Property}
 
@@ -26,8 +26,8 @@ class OutputInstance(override val name: String,
   @Embedded("execution-plan") var executionPlan: ExecutionPlan = new ExecutionPlan()
   @Property("start-from") var startFrom: String = "newest"
 
-  override def asProtocolInstance(): InstanceMetadata = {
-    val protocolInstance = new OutputInstanceMetadata()
+  override def asProtocolInstance(): InstanceData = {
+    val protocolInstance = new OutputInstanceData()
     super.fillProtocolInstance(protocolInstance)
     protocolInstance.checkpointMode = this.checkpointMode
     protocolInstance.checkpointInterval = this.checkpointInterval

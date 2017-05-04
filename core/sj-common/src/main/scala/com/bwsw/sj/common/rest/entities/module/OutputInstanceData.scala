@@ -7,7 +7,7 @@ import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
 
-class OutputInstanceMetadata extends InstanceMetadata with AvroSchemaForInstanceMetadata{
+class OutputInstanceData extends InstanceData with AvroSchemaForInstanceMetadata{
   var checkpointMode: String = null
   var checkpointInterval: Long = Long.MinValue
   var executionPlan: ExecutionPlan = new ExecutionPlan()

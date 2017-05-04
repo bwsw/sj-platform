@@ -2,7 +2,7 @@ package com.bwsw.sj.crud.rest.validator.instance
 
 import com.bwsw.sj.common.DAL.model.service.{KafkaService, TStreamService}
 import com.bwsw.sj.common.DAL.model.stream.KafkaSjStream
-import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, RegularInstanceMetadata, SpecificationData}
+import com.bwsw.sj.common.rest.entities.module.{InstanceData, RegularInstanceData, SpecificationData}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.SjStreamUtils._
@@ -20,11 +20,11 @@ class RegularInstanceValidator extends InstanceValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
-  override def validate(parameters: InstanceMetadata, specification: SpecificationData) = {
+  override def validate(parameters: InstanceData, specification: SpecificationData) = {
     logger.debug(s"Instance: ${parameters.name}. Start a validation of instance of regular-streaming type.")
     val errors = new ArrayBuffer[String]()
     errors ++= super.validateGeneralOptions(parameters)
-    val regularInstanceMetadata = parameters.asInstanceOf[RegularInstanceMetadata]
+    val regularInstanceMetadata = parameters.asInstanceOf[RegularInstanceData]
 
     // 'checkpoint-mode' field
     Option(regularInstanceMetadata.checkpointMode) match {
@@ -74,7 +74,7 @@ class RegularInstanceValidator extends InstanceValidator {
     errors ++= validateStreamOptions(regularInstanceMetadata, specification)
   }
 
-  private def validateStreamOptions(instance: RegularInstanceMetadata,
+  private def validateStreamOptions(instance: RegularInstanceData,
                                     specification: SpecificationData) = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     val errors = new ArrayBuffer[String]()

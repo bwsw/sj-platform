@@ -10,7 +10,7 @@ import com.bwsw.sj.common.utils.MessageResourceUtils
   */
 object JsonDeserializationErrorMessageCreator extends MessageResourceUtils {
 
-  def apply(e: JsonDeserializationException) = {
+  def apply(e: JsonDeserializationException): String = {
     createMessage(e match {
       case _: JsonUnrecognizedPropertyException => "json.deserialization.error.unrecognized.property"
       case _: JsonIncorrectValueException => "json.deserialization.error.incorrect.value"

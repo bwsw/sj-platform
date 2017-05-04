@@ -43,7 +43,6 @@ object SjCrudRestService extends App with SjCrudInterface {
   val fileMetadataDAO = ConnectionRepository.getFileMetadataService
   val instanceDAO = ConnectionRepository.getInstanceService
   val serviceDAO = ConnectionRepository.getServiceManager
-  val providerDAO = ConnectionRepository.getProviderService
   val streamDAO = ConnectionRepository.getStreamService
   val configService = ConnectionRepository.getConfigService
   val routeLogged = logRequestResult(Logging.InfoLevel, route())

@@ -1,52 +1,25 @@
 package com.bwsw.sj.crud.rest.api
 
 import akka.http.scaladsl.server.{Directives, RequestContext}
-import com.bwsw.common.exceptions.JsonDeserializationException
-import com.bwsw.sj.common.DAL.model.service._
 import com.bwsw.sj.common.rest.entities._
-import com.bwsw.sj.common.rest.entities.provider.ProviderData
 import com.bwsw.sj.common.utils.ProviderLiterals
-import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
+import com.bwsw.sj.crud.rest.BLL.ProviderLogic
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
-import scala.collection.mutable.ArrayBuffer
-
 trait SjProvidersApi extends Directives with SjCrudValidator {
+  private val providerLogic = new ProviderLogic()
 
   val providersApi = {
     pathPrefix("providers") {
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>
-          var response: RestResponse = null
-          val errors = new ArrayBuffer[String]
-
-          try {
-            val data = serializer.deserialize[ProviderData](getEntityFromContext(ctx))
-            errors ++= data.validate()
-
-            if (errors.isEmpty) {
-              providerDAO.save(data.asModelProvider())
-              response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.providers.provider.created", data.name)))
-            }
-          } catch {
-            case e: JsonDeserializationException =>
-              errors += JsonDeserializationErrorMessageCreator(e)
-          }
-
-          if (errors.nonEmpty) {
-            response = BadRequestRestResponse(MessageResponseEntity(
-              createMessage("rest.providers.provider.cannot.create", errors.mkString(";"))
-            ))
-          }
+          val entity = getEntityFromContext(ctx)
+          val response = providerLogic.process(entity)
 
           ctx.complete(restResponseToHttpResponse(response))
         } ~
           get {
-            val providers = providerDAO.getAll
-            val response = OkRestResponse(ProvidersResponseEntity())
-            if (providers.nonEmpty) {
-              response.entity = ProvidersResponseEntity(providers.map(p => p.asProtocolProvider()))
-            }
+            val response = providerLogic.getAll()
 
             complete(restResponseToHttpResponse(response))
           }
@@ -63,33 +36,12 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
         pathPrefix(Segment) { (providerName: String) =>
           pathEndOrSingleSlash {
             get {
-              val provider = providerDAO.get(providerName)
-              var response: RestResponse = NotFoundRestResponse(MessageResponseEntity(
-                createMessage("rest.providers.provider.notfound", providerName)))
-              provider match {
-                case Some(x) =>
-                  response = OkRestResponse(ProviderResponseEntity(x.asProtocolProvider()))
-                case None =>
-              }
+              val response = providerLogic.get(providerName)
 
               complete(restResponseToHttpResponse(response))
             } ~
               delete {
-                var response: RestResponse = UnprocessableEntityRestResponse(MessageResponseEntity(
-                  createMessage("rest.providers.provider.cannot.delete", providerName)))
-                val providers = getRelatedServices(providerName)
-                if (providers.isEmpty) {
-                  val provider = providerDAO.get(providerName)
-                  provider match {
-                    case Some(_) =>
-                      providerDAO.delete(providerName)
-                      response = OkRestResponse(MessageResponseEntity(
-                        createMessage("rest.providers.provider.deleted", providerName)))
-                    case None =>
-                      response = NotFoundRestResponse(MessageResponseEntity(
-                        createMessage("rest.providers.provider.notfound", providerName)))
-                  }
-                }
+                val response = providerLogic.delete(providerName)
 
                 complete(restResponseToHttpResponse(response))
               }
@@ -97,21 +49,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
             pathPrefix("connection") {
               pathEndOrSingleSlash {
                 get {
-                  val provider = providerDAO.get(providerName)
-                  var response: RestResponse = NotFoundRestResponse(
-                    MessageResponseEntity(createMessage("rest.providers.provider.notfound", providerName)))
-
-                  provider match {
-                    case Some(x) =>
-                      val errors = x.checkConnection()
-                      if (errors.isEmpty) {
-                        response = OkRestResponse(ConnectionResponseEntity())
-                      }
-                      else {
-                        response = ConflictRestResponse(TestConnectionResponseEntity(connection = false, errors.mkString(";")))
-                      }
-                    case None =>
-                  }
+                  val response = providerLogic.checkConnection(providerName)
 
                   complete(restResponseToHttpResponse(response))
                 }
@@ -120,15 +58,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
             pathPrefix("related") {
               pathEndOrSingleSlash {
                 get {
-                  val provider = providerDAO.get(providerName)
-                  var response: RestResponse = NotFoundRestResponse(
-                    MessageResponseEntity(createMessage("rest.providers.provider.notfound", providerName)))
-
-                  provider match {
-                    case Some(x) =>
-                      response = OkRestResponse(RelatedToProviderResponseEntity(getRelatedServices(providerName)))
-                    case None =>
-                  }
+                  val response = providerLogic.getRelated(providerName)
 
                   complete(restResponseToHttpResponse(response))
                 }
@@ -136,26 +66,5 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
             }
         }
     }
-  }
-
-  private def getRelatedServices(providerName: String) = {
-    serviceDAO.getAll.filter {
-      case esService: ESService =>
-        esService.provider.name.equals(providerName)
-      case zkService: ZKService =>
-        zkService.provider.name.equals(providerName)
-      case aeroService: AerospikeService =>
-        aeroService.provider.name.equals(providerName)
-      case cassService: CassandraService =>
-        cassService.provider.name.equals(providerName)
-      case kfkService: KafkaService =>
-        kfkService.provider.name.equals(providerName) || kfkService.zkProvider.name.equals(providerName)
-      case tService: TStreamService =>
-        tService.provider.name.equals(providerName)
-      case jdbcService: JDBCService =>
-        jdbcService.provider.name.equals(providerName)
-      case restService: RestService =>
-        restService.provider.name.equals(providerName)
-    }.map(_.name)
   }
 }

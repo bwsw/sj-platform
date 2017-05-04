@@ -2,7 +2,7 @@ package com.bwsw.sj.common.rest.entities
 
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.rest.entities.config.ConfigurationSettingData
-import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, SpecificationData}
+import com.bwsw.sj.common.rest.entities.module.{InstanceData, SpecificationData}
 import com.bwsw.sj.common.rest.entities.provider.ProviderData
 import com.bwsw.sj.common.rest.entities.service.ServiceData
 import com.bwsw.sj.common.rest.entities.stream.StreamData
@@ -90,9 +90,9 @@ case class SpecificationResponseEntity(specification: SpecificationData) extends
 
 case class ShortInstancesResponseEntity(instances: mutable.Buffer[ShortInstance] = mutable.Buffer()) extends ResponseEntity
 
-case class InstanceResponseEntity(instance: InstanceMetadata) extends ResponseEntity
+case class InstanceResponseEntity(instance: InstanceData) extends ResponseEntity
 
-case class InstancesResponseEntity(instances: mutable.Buffer[InstanceMetadata] = mutable.Buffer()) extends ResponseEntity
+case class InstancesResponseEntity(instances: mutable.Buffer[InstanceData] = mutable.Buffer()) extends ResponseEntity
 
 case class ShortInstance(name: String, moduleType: String, moduleName: String, moduleVersion: String,
                          description: String, status: String, restAddress: String)

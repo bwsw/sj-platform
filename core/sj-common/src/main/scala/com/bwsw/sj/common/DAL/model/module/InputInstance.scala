@@ -4,7 +4,7 @@ import java.util
 
 import com.bwsw.sj.common.DAL.model.service.ZKService
 import com.bwsw.sj.common.DAL.morphia.MorphiaAnnotations.PropertyField
-import com.bwsw.sj.common.rest.entities.module.{InputInstanceMetadata, InstanceMetadata}
+import com.bwsw.sj.common.rest.entities.module.{InputInstanceData, InstanceData}
 import com.bwsw.sj.common.utils.EngineLiterals
 import org.mongodb.morphia.annotations.Property
 
@@ -34,8 +34,8 @@ class InputInstance(override val name: String,
   @Property("async-backup-count") var asyncBackupCount: Int = 0
   var tasks: java.util.Map[String, InputTask] = new util.HashMap()
 
-  override def asProtocolInstance(): InstanceMetadata = {
-    val protocolInstance = new InputInstanceMetadata()
+  override def asProtocolInstance(): InstanceData = {
+    val protocolInstance = new InputInstanceData()
     super.fillProtocolInstance(protocolInstance)
 
     protocolInstance.outputs = this.outputs

@@ -7,7 +7,7 @@ import com.bwsw.sj.common.utils.EngineLiterals
 
 import scala.collection.JavaConverters._
 
-class InputInstanceMetadata extends InstanceMetadata {
+class InputInstanceData extends InstanceData {
   var outputs: Array[String] = Array()
   var checkpointMode: String = _
   var checkpointInterval: Long = Long.MinValue

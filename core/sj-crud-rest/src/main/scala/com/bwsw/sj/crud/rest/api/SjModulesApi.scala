@@ -455,15 +455,15 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     */
   private def deserializeOptions(options: String, moduleType: String) = {
     if (moduleType.equals(batchStreamingType)) {
-      serializer.deserialize[BatchInstanceMetadata](options)
+      serializer.deserialize[BatchInstanceData](options)
     } else if (moduleType.equals(regularStreamingType)) {
-      serializer.deserialize[RegularInstanceMetadata](options)
+      serializer.deserialize[RegularInstanceData](options)
     } else if (moduleType.equals(outputStreamingType)) {
-      serializer.deserialize[OutputInstanceMetadata](options)
+      serializer.deserialize[OutputInstanceData](options)
     } else if (moduleType.equals(inputStreamingType)) {
-      serializer.deserialize[InputInstanceMetadata](options)
+      serializer.deserialize[InputInstanceData](options)
     } else {
-      serializer.deserialize[InstanceMetadata](options)
+      serializer.deserialize[InstanceData](options)
     }
   }
 
@@ -474,7 +474,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     * @param moduleType - type name of module
     * @return - list of errors
     */
-  private def validateInstance(options: InstanceMetadata, specification: SpecificationData, moduleType: String) = {
+  private def validateInstance(options: InstanceData, specification: SpecificationData, moduleType: String) = {
     val validatorClassName = configService.get(s"system.$moduleType-validator-class") match {
       case Some(configurationSetting) => configurationSetting.value
       case None => throw new ConfigSettingNotFound(
@@ -485,7 +485,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
     validator.validate(options, specification)
   }
 
-  private def validateInstance(specification: SpecificationData, filename: String, instanceMetadata: InstanceMetadata): ValidationInfo = {
+  private def validateInstance(specification: SpecificationData, filename: String, instanceMetadata: InstanceData): ValidationInfo = {
     val validatorClassName = specification.validateClass
     val file = storage.get(filename, s"tmp/$filename")
     val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)

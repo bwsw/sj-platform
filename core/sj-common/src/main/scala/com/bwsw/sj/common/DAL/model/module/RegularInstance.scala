@@ -3,7 +3,7 @@ package com.bwsw.sj.common.DAL.model.module
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.service.ZKService
 import com.bwsw.sj.common.DAL.morphia.MorphiaAnnotations.PropertyField
-import com.bwsw.sj.common.rest.entities.module.{ExecutionPlan, InstanceMetadata, RegularInstanceMetadata}
+import com.bwsw.sj.common.rest.entities.module.{ExecutionPlan, InstanceData, RegularInstanceData}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
 import org.mongodb.morphia.annotations._
@@ -30,8 +30,8 @@ class RegularInstance(override val name: String,
   @Property("state-full-checkpoint") var stateFullCheckpoint: Int = 100
   @Property("event-wait-idle-time") var eventWaitIdleTime: Long = 1000
 
-  override def asProtocolInstance(): InstanceMetadata = {
-    val protocolInstance = new RegularInstanceMetadata()
+  override def asProtocolInstance(): InstanceData = {
+    val protocolInstance = new RegularInstanceData()
     super.fillProtocolInstance(protocolInstance)
     protocolInstance.checkpointMode = this.checkpointMode
     protocolInstance.checkpointInterval = this.checkpointInterval
