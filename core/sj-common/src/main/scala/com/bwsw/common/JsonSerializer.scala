@@ -60,12 +60,12 @@ class JsonSerializer extends Serializer {
 
   private def getProblemProperty(exception: JsonMappingException) = {
     exception.getPath.asScala.foldLeft("") { (s, ref) =>
-      val fieldName = ref.getFieldName
+      val fieldName = Option(ref.getFieldName)
       s + {
-        if (fieldName != null) {
+        if (fieldName.isDefined) {
           if (s.isEmpty) ""
           else "."
-        } + fieldName
+        } + fieldName.get
         else "(" + ref.getIndex + ")"
       }
     }

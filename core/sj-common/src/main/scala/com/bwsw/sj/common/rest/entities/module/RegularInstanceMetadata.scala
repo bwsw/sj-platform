@@ -10,7 +10,7 @@ import com.bwsw.sj.common.utils.SjStreamUtils._
 class RegularInstanceMetadata extends InstanceMetadata with AvroSchemaForInstanceMetadata {
   var inputs: Array[String] = Array()
   var outputs: Array[String] = Array()
-  var checkpointMode: String = null
+  var checkpointMode: String = _
   var checkpointInterval: Long = Long.MinValue
   var executionPlan: ExecutionPlan = new ExecutionPlan()
   var startFrom: String = EngineLiterals.newestStartMode

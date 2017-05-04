@@ -10,8 +10,8 @@ import scala.collection.mutable.ArrayBuffer
 
 class JDBCServiceData() extends ServiceData() {
   serviceType = ServiceLiterals.jdbcType
-  var provider: String = null
-  var database: String = null
+  var provider: String = _
+  var database: String = _
 
   override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService

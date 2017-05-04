@@ -8,8 +8,8 @@ import scala.collection.mutable.ArrayBuffer
 
 class ArspkDBServiceData() extends ServiceData() {
   serviceType = ServiceLiterals.aerospikeType
-  var namespace: String = null
-  var provider: String = null
+  var namespace: String = _
+  var provider: String = _
 
   override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService

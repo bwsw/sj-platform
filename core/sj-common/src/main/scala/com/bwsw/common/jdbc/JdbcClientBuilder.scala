@@ -10,28 +10,28 @@ object JdbcClientBuilder {
   private var jdbcClientConnectionData = new JdbcClientConnectionData()
 
   def buildCheck() = {
-    jdbcClientConnectionData.driver match {
-      case "" | null => throw new RuntimeException("Driver field must be declared.")
-      case _: String =>
-    }
-    jdbcClientConnectionData.database match {
-      case "" | null => logger.warn("Database is not declared. It can lead to errors in the following.")
+    Option(jdbcClientConnectionData.driver) match {
+      case Some("") | None => throw new RuntimeException("Driver field must be declared.")
       case _ =>
     }
-    jdbcClientConnectionData.table match {
-      case "" | null => logger.warn("Table is not declared. It can lead to errors in the following.")
+    Option(jdbcClientConnectionData.database) match {
+      case Some("") | None => logger.warn("Database is not declared. It can lead to errors in the following.")
       case _ =>
     }
-    jdbcClientConnectionData.username match {
-      case "" | null => throw new RuntimeException("Username field must be declared.")
-      case _: String =>
+    Option(jdbcClientConnectionData.table) match {
+      case Some("") | None => logger.warn("Table is not declared. It can lead to errors in the following.")
+      case _ =>
     }
-    jdbcClientConnectionData.password match {
-      case "" | null => throw new RuntimeException("Password field must be declared.")
-      case _: String =>
+    Option(jdbcClientConnectionData.username) match {
+      case Some("") | None => throw new RuntimeException("Username field must be declared.")
+      case _ =>
     }
-    jdbcClientConnectionData.hosts match {
-      case null => throw new RuntimeException("Hosts field must be declared.")
+    Option(jdbcClientConnectionData.password) match {
+      case Some("") | None => throw new RuntimeException("Password field must be declared.")
+      case _ =>
+    }
+    Option(jdbcClientConnectionData.hosts) match {
+      case None => throw new RuntimeException("Hosts field must be declared.")
       case _ =>
     }
   }

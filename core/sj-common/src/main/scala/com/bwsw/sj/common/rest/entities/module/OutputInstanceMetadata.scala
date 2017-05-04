@@ -8,12 +8,12 @@ import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
 
 class OutputInstanceMetadata extends InstanceMetadata with AvroSchemaForInstanceMetadata{
-  var checkpointMode: String = null
+  var checkpointMode: String = _
   var checkpointInterval: Long = Long.MinValue
   var executionPlan: ExecutionPlan = new ExecutionPlan()
   var startFrom: String = EngineLiterals.newestStartMode
-  var input: String = null
-  var output: String = null
+  var input: String = _
+  var output: String = _
 
   override def asModelInstance() = {
     val serviceDAO = ConnectionRepository.getServiceManager

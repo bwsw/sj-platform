@@ -18,10 +18,10 @@ import scala.collection.mutable.ArrayBuffer
   new Type(value = classOf[RestStreamData], name = StreamLiterals.restOutputType)
 ))
 class StreamData() extends ValidationUtils with MessageResourceUtils {
-  @JsonProperty("type") var streamType: String = null
-  var name: String = null
+  @JsonProperty("type") var streamType: String = _
+  var name: String = _
   var description: String = "No description"
-  var service: String = null
+  var service: String = _
   var tags: Array[String] = Array()
   var force: Boolean = false
 

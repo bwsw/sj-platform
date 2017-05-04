@@ -8,9 +8,9 @@ import scala.collection.mutable.ArrayBuffer
 
 class KfkQServiceData() extends ServiceData() {
   serviceType = ServiceLiterals.kafkaType
-  var provider: String = null
-  var zkProvider: String = null
-  var zkNamespace: String = null
+  var provider: String = _
+  var zkProvider: String = _
+  var zkNamespace: String = _
 
   override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService

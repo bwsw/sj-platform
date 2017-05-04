@@ -102,9 +102,9 @@ class ProviderData(val name: String,
     val errors = new ArrayBuffer[String]()
     try {
       val uri = new URI(s"dummy://${normalizeName(host)}")
-      val hostname = uri.getHost
+      val hostname = Option(uri.getHost)
 
-      if (hostname == null) {
+      if (hostname.isEmpty) {
         errors += createMessage("entity.error.wrong.host", host)
       }
 

@@ -8,8 +8,8 @@ import scala.collection.mutable.ArrayBuffer
 
 class EsServiceData() extends ServiceData() {
   serviceType = ServiceLiterals.elasticsearchType
-  var provider: String = null
-  var index: String = null
+  var provider: String = _
+  var index: String = _
 
   override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService

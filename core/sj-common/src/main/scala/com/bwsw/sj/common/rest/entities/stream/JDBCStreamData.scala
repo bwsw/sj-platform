@@ -9,7 +9,7 @@ import scala.collection.mutable.ArrayBuffer
 
 class JDBCStreamData() extends StreamData() {
   streamType = StreamLiterals.jdbcOutputType
-  var primary: String = null
+  var primary: String = _
 
   override def validate() = {
     val serviceDAO = ConnectionRepository.getServiceManager

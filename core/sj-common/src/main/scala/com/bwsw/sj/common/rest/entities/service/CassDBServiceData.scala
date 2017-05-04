@@ -8,8 +8,8 @@ import scala.collection.mutable.ArrayBuffer
 
 class CassDBServiceData() extends ServiceData() {
   serviceType = ServiceLiterals.cassandraType
-  var provider: String = null
-  var keyspace: String = null
+  var provider: String = _
+  var keyspace: String = _
 
   override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService

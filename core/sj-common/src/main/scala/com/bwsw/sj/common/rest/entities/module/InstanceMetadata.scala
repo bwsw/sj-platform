@@ -14,12 +14,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import scala.collection.JavaConverters._
 
 class InstanceMetadata {
-  var moduleName: String = null
-  var moduleVersion: String = null
-  var moduleType: String = null
+  var moduleName: String = _
+  var moduleVersion: String = _
+  var moduleType: String = _
   var stage = FrameworkStage(EngineLiterals.toHandle, Calendar.getInstance().getTime)
   var status: String = EngineLiterals.ready
-  var name: String = null
+  var name: String = _
   var description: String = "No description"
   var parallelism: Any = 1
   var options: Map[String, Any] = Map()
@@ -27,11 +27,11 @@ class InstanceMetadata {
   var perTaskRam: Int = 1024
   var jvmOptions: Map[String, String] = Map()
   var nodeAttributes: Map[String, String] = Map()
-  var coordinationService: String = null
+  var coordinationService: String = _
   var environmentVariables: Map[String, String] = Map()
   var performanceReportingInterval: Long = 60000
-  var engine: String = null
-  var restAddress: String = null
+  var engine: String = _
+  var restAddress: String = _
 
   @JsonIgnore
   def asModelInstance(): Instance = ???

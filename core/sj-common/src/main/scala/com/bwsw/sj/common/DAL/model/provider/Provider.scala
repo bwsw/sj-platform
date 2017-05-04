@@ -129,13 +129,13 @@ class Provider(@IdField val name: String,
   private def checkZookeeperConnection(address: String) = {
     val errors = ArrayBuffer[String]()
     val zkTimeout = ConnectionRepository.getConfigService.get(ConfigLiterals.zkSessionTimeoutTag).get.value.toInt
-    var client: ZooKeeper = null
+    var client: Option[ZooKeeper] = None
     try {
-      client = new ZooKeeper(address, zkTimeout, null)
+      client = Some(new ZooKeeper(address, zkTimeout, null))
       val deadline = 1.seconds.fromNow
       var connected: Boolean = false
       while (!connected && deadline.hasTimeLeft) {
-        connected = client.getState.isConnected
+        connected = client.get.getState.isConnected
       }
       if (!connected) {
         errors += s"Can gain an access to Zookeeper on '$address'"
@@ -145,8 +145,8 @@ class Provider(@IdField val name: String,
       case ex: Throwable =>
         errors += s"Wrong host '$address'"
     }
-    if (Option(client).isDefined) {
-      client.close()
+    if (client.isDefined) {
+      client.get.close()
     }
 
     errors
