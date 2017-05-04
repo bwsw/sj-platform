@@ -18,7 +18,7 @@ class InputInstanceMetadata extends InstanceMetadata {
   var asyncBackupCount: Int = 0
   var tasks: Map[String, InputTask] = Map()
 
-  override def asModelInstance() = {
+  override def asModelInstance(): InputInstance = {
     val modelInstance = new InputInstance()
     super.fillModelInstance(modelInstance)
     modelInstance.checkpointMode = this.checkpointMode
@@ -40,12 +40,12 @@ class InputInstanceMetadata extends InstanceMetadata {
                             moduleName: String,
                             moduleVersion: String,
                             engineName: String,
-                            engineVersion: String) = {
+                            engineVersion: String): Unit = {
     super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion)
     fillTasks()
   }
 
-  override def createStreams() = {
+  override def createStreams(): Unit = {
     val sjStreams = getStreams(this.outputs)
     sjStreams.foreach(_.create())
   }

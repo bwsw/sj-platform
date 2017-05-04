@@ -21,7 +21,7 @@ class ExecutionPlan {
   }
 
   @JsonIgnore
-  def fillTasks(taskStreams: Array[TaskStream], taskNames: Set[String]) = {
+  def fillTasks(taskStreams: Array[TaskStream], taskNames: Set[String]): ExecutionPlan = {
     var notProcessedTasks = taskNames.size
 
     taskNames.foreach(taskName => {
@@ -33,7 +33,7 @@ class ExecutionPlan {
     this
   }
 
-  private def createTask(taskStreams: Array[TaskStream], notProcessedTasks: Int) = {
+  private def createTask(taskStreams: Array[TaskStream], notProcessedTasks: Int): Task = {
     val task= new Task()
     taskStreams.foreach(taskStream => {
       task.addInput(taskStream.name, createPartitionsInterval(taskStream, notProcessedTasks))
@@ -42,7 +42,7 @@ class ExecutionPlan {
     task
   }
 
-  private def createPartitionsInterval(taskStream: TaskStream, notProcessedTasks: Int) = {
+  private def createPartitionsInterval(taskStream: TaskStream, notProcessedTasks: Int): Array[Int] = {
     val startPartition = taskStream.currentPartition
     val endPartition = getEndPartition(taskStream, notProcessedTasks)
     val interval = Array(startPartition, endPartition - 1)
@@ -50,7 +50,7 @@ class ExecutionPlan {
     interval
   }
 
-  private def getEndPartition(taskStream: TaskStream, notProcessedTasks: Int) = {
+  private def getEndPartition(taskStream: TaskStream, notProcessedTasks: Int): Int = {
     val availablePartitionsCount = taskStream.availablePartitionsCount
     val startPartition = taskStream.currentPartition
     var endPartition = startPartition + availablePartitionsCount

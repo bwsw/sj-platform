@@ -16,7 +16,7 @@ class BatchInstanceMetadata extends InstanceMetadata with AvroSchemaForInstanceM
   var stateFullCheckpoint: Int = 100
   var eventWaitIdleTime: Long = 1000
 
-  override def asModelInstance() = {
+  override def asModelInstance(): BatchInstance = {
     val modelInstance = new BatchInstance()
     super.fillModelInstance(modelInstance)
     modelInstance.inputs = this.inputs
@@ -39,17 +39,17 @@ class BatchInstanceMetadata extends InstanceMetadata with AvroSchemaForInstanceM
                                moduleName: String,
                                moduleVersion: String,
                                engineName: String,
-                               engineVersion: String) = {
+                               engineVersion: String): Unit = {
     val clearInputs = this.inputs.map(clearStreamFromMode)
     super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion)
     castParallelismToNumber(getStreamsPartitions(clearInputs))
     this.executionPlan.fillTasks(createTaskStreams(), createTaskNames(this.parallelism.asInstanceOf[Int], this.name))
   }
 
-  override def createStreams() = {
+  override def createStreams(): Unit = {
     val sjStreams = getStreams(this.inputs.map(clearStreamFromMode) ++ this.outputs)
     sjStreams.foreach(_.create())
   }
 
-  override def inputsOrEmptyList() = this.inputs
+  override def inputsOrEmptyList(): Array[String] = this.inputs
 }

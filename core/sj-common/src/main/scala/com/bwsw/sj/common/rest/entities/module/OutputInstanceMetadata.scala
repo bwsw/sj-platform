@@ -13,7 +13,7 @@ class OutputInstanceMetadata extends InstanceMetadata with AvroSchemaForInstance
   var input: String = null
   var output: String = null
 
-  override def asModelInstance() = {
+  override def asModelInstance(): OutputInstance = {
     val modelInstance = new OutputInstance()
     super.fillModelInstance(modelInstance)
     modelInstance.checkpointMode = this.checkpointMode
@@ -33,17 +33,17 @@ class OutputInstanceMetadata extends InstanceMetadata with AvroSchemaForInstance
                                moduleName: String,
                                moduleVersion: String,
                                engineName: String,
-                               engineVersion: String) = {
+                               engineVersion: String): Unit = {
     val clearInputs = Array(clearStreamFromMode(this.input))
     super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion)
     castParallelismToNumber(getStreamsPartitions(clearInputs))
     this.executionPlan.fillTasks(createTaskStreams(), createTaskNames(this.parallelism.asInstanceOf[Int], this.name))
   }
 
-  override def createStreams() = {
+  override def createStreams(): Unit = {
     val sjStreams = getStreams(Array(clearStreamFromMode(this.input)))
     sjStreams.foreach(_.create())
   }
 
-  override def inputsOrEmptyList() = Array(this.input)
+  override def inputsOrEmptyList(): Array[String] = Array(this.input)
 }
