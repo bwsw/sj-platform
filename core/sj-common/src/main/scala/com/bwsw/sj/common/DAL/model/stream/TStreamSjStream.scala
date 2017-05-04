@@ -14,7 +14,7 @@ class TStreamSjStream() extends SjStream {
            partitions: Int,
            service: Service,
            streamType: String,
-           tags: Array[String]): Unit = {
+           tags: Array[String]) = {
     this()
     this.name = name
     this.description = description

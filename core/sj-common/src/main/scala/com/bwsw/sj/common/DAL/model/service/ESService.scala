@@ -12,7 +12,7 @@ class ESService() extends Service {
   var login: String = null
   var password: String = null
 
-  def this(name: String, serviceType: String, description: String, provider: Provider, index: String, login: String, password: String): Unit = {
+  def this(name: String, serviceType: String, description: String, provider: Provider, index: String, login: String, password: String) = {
     this()
     this.name = name
     this.serviceType = serviceType

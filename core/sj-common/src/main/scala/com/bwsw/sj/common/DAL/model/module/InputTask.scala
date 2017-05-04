@@ -10,7 +10,7 @@ class InputTask() {
   var host: String = ""
   var port: Int = 0
 
-  def this(host: String, port: Int): Unit = {
+  def this(host: String, port: Int) = {
     this()
     this.host = host
     this.port = port

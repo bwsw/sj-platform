@@ -14,7 +14,7 @@ class RestSjStream extends SjStream {
       description: String,
       service: Service,
       streamType: String,
-      tags: Array[String]): Unit = {
+      tags: Array[String]) = {
     this()
     this.name = name
     this.description = description

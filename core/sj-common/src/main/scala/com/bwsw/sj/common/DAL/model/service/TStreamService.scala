@@ -16,7 +16,7 @@ class TStreamService() extends Service {
            description: String,
            provider: Provider,
            prefix: String,
-           token: String): Unit = {
+           token: String) = {
     this()
     this.name = name
     this.serviceType = serviceType

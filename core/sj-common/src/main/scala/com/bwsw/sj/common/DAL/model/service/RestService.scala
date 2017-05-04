@@ -29,7 +29,7 @@ class RestService extends Service {
       provider: Provider,
       basePath: String,
       httpVersion: HttpVersion,
-      headers: java.util.Map[String, String]): Unit = {
+      headers: java.util.Map[String, String]) = {
     this
     this.name = name
     this.serviceType = serviceType

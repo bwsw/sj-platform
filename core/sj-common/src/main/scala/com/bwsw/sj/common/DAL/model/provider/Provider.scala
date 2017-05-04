@@ -31,7 +31,7 @@ class Provider {
   var password: String = null
   @Property("provider-type") var providerType: String = null
 
-  def this(name: String, description: String, hosts: Array[String], login: String, password: String, providerType: String): Unit = {
+  def this(name: String, description: String, hosts: Array[String], login: String, password: String, providerType: String) = {
     this()
     this.name = name
     this.description = description

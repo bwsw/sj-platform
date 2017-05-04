@@ -9,7 +9,7 @@ class Service() {
   @Property("type") var serviceType: String = null
   var description: String = null
 
-  def this(name: String, serviceType: String, description: String): Unit = {
+  def this(name: String, serviceType: String, description: String) = {
     this()
     this.name = name
     this.serviceType = serviceType

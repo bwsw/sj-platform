@@ -16,7 +16,7 @@ class ConfigurationSetting {
   var value: String = null
   var domain: String = null
 
-  def this(name: String, value: String, domain: String): Unit = {
+  def this(name: String, value: String, domain: String) = {
     this()
     this.name = name
     this.value = value

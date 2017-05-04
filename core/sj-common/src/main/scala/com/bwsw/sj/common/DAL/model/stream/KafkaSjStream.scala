@@ -21,7 +21,7 @@ class KafkaSjStream() extends SjStream {
            service: Service,
            streamType: String,
            tags: Array[String],
-           replicationFactor: Int): Unit = {
+           replicationFactor: Int) = {
     this()
     this.name = name
     this.description = description

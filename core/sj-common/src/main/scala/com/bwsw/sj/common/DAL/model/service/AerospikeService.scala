@@ -10,7 +10,7 @@ class AerospikeService() extends Service {
   @Reference var provider: Provider = null
   var namespace: String = null
 
-  def this(name: String, serviceType: String, description: String, provider: Provider, namespace: String): Unit = {
+  def this(name: String, serviceType: String, description: String, provider: Provider, namespace: String) = {
     this()
     this.name =name
     this.serviceType = serviceType
