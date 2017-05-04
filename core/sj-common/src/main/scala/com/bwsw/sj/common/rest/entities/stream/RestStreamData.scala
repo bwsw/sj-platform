@@ -13,7 +13,7 @@ class RestStreamData extends StreamData {
 
   streamType = StreamLiterals.restOutputType
 
-  override def validate() = {
+  override def validate(): ArrayBuffer[String] = {
     val serviceDAO = ConnectionRepository.getServiceManager
     val errors = new ArrayBuffer[String]()
 
@@ -45,7 +45,7 @@ class RestStreamData extends StreamData {
     errors
   }
 
-  override def asModelStream() = {
+  override def asModelStream(): RestSjStream = {
     val modelStream = new RestSjStream
     fillModelStream(modelStream)
 

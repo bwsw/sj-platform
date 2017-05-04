@@ -10,7 +10,7 @@ class JDBCStreamData() extends StreamData() {
   streamType = StreamLiterals.jdbcOutputType
   var primary: String = null
 
-  override def validate() = {
+  override def validate(): ArrayBuffer[String] = {
     val serviceDAO = ConnectionRepository.getServiceManager
     val errors = new ArrayBuffer[String]()
 
@@ -42,7 +42,7 @@ class JDBCStreamData() extends StreamData() {
     errors
   }
 
-   override def asModelStream() = {
+   override def asModelStream(): JDBCSjStream = {
     val modelStream = new JDBCSjStream()
     super.fillModelStream(modelStream)
      modelStream.primary = this.primary

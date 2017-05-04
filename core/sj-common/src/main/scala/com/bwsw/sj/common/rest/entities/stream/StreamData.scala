@@ -33,7 +33,7 @@ class StreamData() extends ValidationUtils with MessageResourceUtils {
   def asModelStream(): SjStream = ???
 
   @JsonIgnore
-  protected def fillModelStream(stream: SjStream) = {
+  protected def fillModelStream(stream: SjStream): Unit = {
     val serviceDAO = ConnectionRepository.getServiceManager
     stream.name = this.name
     stream.description = this.description
@@ -43,10 +43,10 @@ class StreamData() extends ValidationUtils with MessageResourceUtils {
   }
 
   @JsonIgnore
-  def validate() = validateGeneralFields()
+  def validate(): ArrayBuffer[String] = validateGeneralFields()
 
   @JsonIgnore
-  protected def validateGeneralFields() = {
+  protected def validateGeneralFields(): ArrayBuffer[String] = {
     val streamDAO = ConnectionRepository.getStreamService
     val errors = new ArrayBuffer[String]()
 
