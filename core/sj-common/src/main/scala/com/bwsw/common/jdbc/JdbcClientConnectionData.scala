@@ -72,7 +72,7 @@ class JdbcClientConnectionData {
     case _ => throw new IllegalStateException(s"Incorrect JDBC prefix. Valid prefixes: $validPrefixes")
   }
 
-  def this(hosts: Array[String], driver: String, username: String, password: String, database: String, table: String) = {
+  def this(hosts: Array[String], driver: String, username: String, password: String, database: String, table: String): Unit = {
     this
     this.hosts = hosts
     this.driver = driver
