@@ -25,7 +25,7 @@ trait TimeCheckpointTaskEngine {
     }
   }
 
-  private def setTimer() = {
+  private def setTimer(): Unit = {
     checkpointTimer.get.set(checkpointInterval)
   }
 
