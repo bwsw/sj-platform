@@ -16,7 +16,7 @@ trait DatabaseService[T] {
    * Allows adding new element or updating an element
    * @param entity Specific element of T type
    */
-  def save(entity: T)
+  def save(entity: T): Unit
 
   /**
    * Allows retrieving an element by name (id)
@@ -42,10 +42,10 @@ trait DatabaseService[T] {
    * Allows deleting an element by name (id)
    * @param name Id of element
    */
-  def delete(name: String)
+  def delete(name: String): Unit
 
   /**
    * Allows deleting all elements from collection
    */
-  def deleteAll()
+  def deleteAll(): Unit
 }
