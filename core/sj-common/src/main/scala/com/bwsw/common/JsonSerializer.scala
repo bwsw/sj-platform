@@ -49,8 +49,10 @@ class JsonSerializer extends Serializer {
         else
           throw new JsonIncorrectValueException(getProblemProperty(e))
       case e: JsonParseException =>
-        val position = e.getLocation.getCharOffset.toInt
-        throw new JsonNotParsedException(value.substring(0, Math.min(position, value.length)))
+        val position = e.getProcessor.getTokenLocation.getCharOffset.toInt
+        val leftBound = Math.max(0, position - 16)
+        val rightBound = Math.min(position + 16, value.length)
+        throw new JsonNotParsedException(value.substring(leftBound, rightBound))
       case _: NullPointerException =>
         throw new JsonDeserializationException("JSON is null")
     }
