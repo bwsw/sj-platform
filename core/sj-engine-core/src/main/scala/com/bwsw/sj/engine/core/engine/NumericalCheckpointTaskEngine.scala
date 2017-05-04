@@ -16,20 +16,20 @@ trait NumericalCheckpointTaskEngine {
     isNotOnlyCustomCheckpoint && countOfEnvelopes == checkpointInterval || isCheckpointInitiated
   }
 
-  def afterReceivingEnvelope() = {
+  def afterReceivingEnvelope(): Unit = {
     increaseCounter()
   }
 
-  private def increaseCounter() = {
+  private def increaseCounter(): Unit = {
     countOfEnvelopes += 1
     logger.debug(s"Increase count of envelopes to: $countOfEnvelopes.")
   }
 
-  def prepareForNextCheckpoint() = {
+  def prepareForNextCheckpoint(): Unit = {
     resetCounter()
   }
 
-  private def resetCounter() = {
+  private def resetCounter(): Unit = {
     logger.debug(s"Reset a counter of envelopes to 0.")
     countOfEnvelopes = 0
   }

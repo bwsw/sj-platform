@@ -31,7 +31,7 @@ class CallableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: Common
   currentThread.setName(s"regular-task-${manager.taskName}-kafka-consumer")
   private val envelopeDataSerializer = manager.envelopeDataSerializer.asInstanceOf[EnvelopeDataSerializer[T]]
 
-  def chooseOffset() = {
+  def chooseOffset(): String = {
     logger.debug(s"Task: ${manager.taskName}. Get a start-from parameter from instance.")
     val instance = manager.instance.asInstanceOf[RegularInstance]
     instance.startFrom match {
@@ -40,7 +40,7 @@ class CallableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: Common
     }
   }
 
-  override def call() = {
+  override def call(): Unit = {
     logger.info(s"Task name: ${manager.taskName}. " +
       s"Run a kafka consumer for regular task in a separate thread of execution service.")
 
@@ -51,7 +51,7 @@ class CallableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: Common
     }
   }
 
-  private def consumerRecordToEnvelope(consumerRecord: ConsumerRecord[Array[Byte], Array[Byte]]) = {
+  private def consumerRecordToEnvelope(consumerRecord: ConsumerRecord[Array[Byte], Array[Byte]]): KafkaEnvelope[T] = {
     logger.debug(s"Task name: ${manager.taskName}. Convert a consumed kafka record to kafka envelope.")
     val data = envelopeDataSerializer.deserialize(consumerRecord.value())
     val envelope = new KafkaEnvelope(data)
@@ -63,7 +63,7 @@ class CallableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: Common
     envelope
   }
 
-  override def setConsumerOffsetToLastEnvelope() = {
+  override def setConsumerOffsetToLastEnvelope(): Unit = {
     logger.debug(s"Task: ${manager.taskName}. Set a consumer offset to last envelope for all streams.")
     super.setConsumerOffsetToLastEnvelope()
     offsetProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)

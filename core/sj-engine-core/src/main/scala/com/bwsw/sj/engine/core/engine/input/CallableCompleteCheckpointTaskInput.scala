@@ -23,7 +23,7 @@ class CallableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskManage
   private val kafkaCheckpointTaskInput = new CallableKafkaCheckpointTaskInput[T](manager, blockingQueue, checkpointGroup)
   private val tStreamCheckpointTaskInput = new CallableTStreamCheckpointTaskInput[T](manager, blockingQueue, checkpointGroup)
 
-  override def registerEnvelope(envelope: Envelope) = {
+  override def registerEnvelope(envelope: Envelope): Unit = {
     logger.debug(s"Register an envelope: ${envelope.toString}")
     envelope match {
       case tstreamEnvelope: TStreamEnvelope[T] =>
@@ -36,17 +36,17 @@ class CallableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskManage
     }
   }
 
-  def call() = {
+  def call(): Unit = {
     tStreamCheckpointTaskInput.call()
     kafkaCheckpointTaskInput.call()
   }
 
-  override def setConsumerOffsetToLastEnvelope() = {
+  override def setConsumerOffsetToLastEnvelope(): Unit = {
     tStreamCheckpointTaskInput.setConsumerOffsetToLastEnvelope()
     kafkaCheckpointTaskInput.setConsumerOffsetToLastEnvelope()
   }
 
-  override def setConsumerOffset(envelope: Envelope) = {
+  override def setConsumerOffset(envelope: Envelope): Unit = {
     envelope match {
       case tstreamEnvelope: TStreamEnvelope[T] =>
         tStreamCheckpointTaskInput.setConsumerOffset(tstreamEnvelope)
