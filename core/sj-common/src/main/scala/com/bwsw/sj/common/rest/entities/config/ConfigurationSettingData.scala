@@ -13,7 +13,7 @@ import scala.collection.mutable.ArrayBuffer
 
 case class ConfigurationSettingData(name: String, value: String, domain:String) extends ValidationUtils with MessageResourceUtils {
   @JsonIgnore
-  def asModelConfigurationSetting = {
+  def asModelConfigurationSetting: ConfigurationSetting = {
     val configurationSetting = new ConfigurationSetting(
       createConfigurationSettingName(this.domain, this.name),
       this.value,
@@ -24,7 +24,7 @@ case class ConfigurationSettingData(name: String, value: String, domain:String) 
   }
 
   @JsonIgnore
-  def validate() = {
+  def validate(): ArrayBuffer[String] = {
     val configService = ConnectionRepository.getConfigService
     val errors = new ArrayBuffer[String]()
 
