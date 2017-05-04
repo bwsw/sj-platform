@@ -41,5 +41,5 @@ class BatchInstance() extends Instance with AvroSchemaForInstance {
     protocolInstance
   }
 
-  override def getInputsWithoutStreamMode() = this.inputs.map(clearStreamFromMode)
+  override def getInputsWithoutStreamMode(): Array[String] = this.inputs.map(clearStreamFromMode)
 }

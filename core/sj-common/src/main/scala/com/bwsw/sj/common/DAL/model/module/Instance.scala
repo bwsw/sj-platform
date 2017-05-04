@@ -40,7 +40,7 @@ class Instance {
 
   def asProtocolInstance(): InstanceMetadata = ???
 
-  protected def fillProtocolInstance(protocolInstance: InstanceMetadata) = {
+  protected def fillProtocolInstance(protocolInstance: InstanceMetadata): Unit = {
     val serializer = new JsonSerializer()
 
     protocolInstance.status = this.status

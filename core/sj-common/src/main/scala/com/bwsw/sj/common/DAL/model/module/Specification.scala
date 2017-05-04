@@ -25,7 +25,7 @@ class Specification {
   @Property("executor-class") val executorClass: String = null
   @Property("batch-collector-class") val batchCollectorClass: String = null
 
-  def asSpecificationData() = {
+  def asSpecificationData(): SpecificationData = {
     val serializer = new JsonSerializer
     SpecificationData(this.name,
       this.description,
