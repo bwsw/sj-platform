@@ -3,11 +3,16 @@ package com.bwsw.common.es
 import java.net.InetAddress
 import java.util.UUID
 
+import org.elasticsearch.action.admin.indices.create.CreateIndexResponse
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse
+import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse
+import org.elasticsearch.action.index.IndexResponse
+import org.elasticsearch.client.transport.TransportClient
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.InetSocketTransportAddress
 import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilder, QueryBuilders}
-import org.elasticsearch.index.reindex.DeleteByQueryAction
+import org.elasticsearch.index.reindex.{BulkIndexByScrollResponse, DeleteByQueryAction}
 import org.elasticsearch.search.SearchHits
 import org.elasticsearch.transport.client.PreBuiltTransportClient
 import org.slf4j.LoggerFactory
@@ -20,25 +25,25 @@ class ElasticsearchClient(hosts: Set[(String, Int)]) {
   hosts.foreach(x => setTransportAddressToClient(x._1, x._2))
   private val deleteByQueryAction = DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
 
-  private def setTransportAddressToClient(host: String, port: Int) = {
+  private def setTransportAddressToClient(host: String, port: Int): TransportClient = {
     logger.debug(s"Add a new transport address: '$host:$port' to an elasticsearch client.")
     val transportAddress = new InetSocketTransportAddress(InetAddress.getByName(host), port)
     client.addTransportAddress(transportAddress)
   }
 
-  def doesIndexExist(index: String) = {
+  def doesIndexExist(index: String): Boolean = {
     logger.debug(s"Verify the existence of an elasticsearch index: '$index'.")
     val indicesExistsResponse = client.admin().indices().prepareExists(index).execute().actionGet()
 
     indicesExistsResponse.isExists
   }
 
-  def createIndex(index: String) = {
+  def createIndex(index: String): CreateIndexResponse = {
     logger.info(s"Create a new index: '$index' in Elasticsearch.")
     client.admin().indices().prepareCreate(index).execute().actionGet()
   }
 
-  def deleteDocuments(index: String, documentType: String, query: QueryBuilder = QueryBuilders.matchAllQuery()) = {
+  def deleteDocuments(index: String, documentType: String, query: QueryBuilder = QueryBuilders.matchAllQuery()): BulkIndexByScrollResponse = {
     val queryWithType = new BoolQueryBuilder().must(query).must(QueryBuilders.matchQuery(typeName, documentType))
 
     deleteByQueryAction
@@ -47,12 +52,12 @@ class ElasticsearchClient(hosts: Set[(String, Int)]) {
       .get()
   }
 
-  def deleteIndex(index: String) = {
+  def deleteIndex(index: String): DeleteIndexResponse = {
     logger.info(s"Delete an index: '$index' from Elasticsearch.")
     client.admin().indices().prepareDelete(index).execute().actionGet()
   }
 
-  def createMapping(index: String, mappingType: String, mappingSource: XContentBuilder) = {
+  def createMapping(index: String, mappingType: String, mappingSource: XContentBuilder): PutMappingResponse = {
     logger.debug(s"Create a new index: '$index' in Elasticsearch.")
     client.admin().indices()
       .preparePutMapping(index)
@@ -73,7 +78,7 @@ class ElasticsearchClient(hosts: Set[(String, Int)]) {
       .getHits
   }
 
-  def write(data: String, index: String, documentType: String, documentId: String = UUID.randomUUID().toString) = {
+  def write(data: String, index: String, documentType: String, documentId: String = UUID.randomUUID().toString): IndexResponse = {
     logger.debug(s"Write a data: '$data' to an elasticsearch index: '$index'.")
     client
       .prepareIndex(index, documentType, documentId)
@@ -82,12 +87,12 @@ class ElasticsearchClient(hosts: Set[(String, Int)]) {
       .actionGet()
   }
 
-  def isConnected() = {
+  def isConnected: Boolean = {
     logger.debug(s"Check a connection to an elasticsearch database.")
     client.connectedNodes().size() > 0
   }
 
-  def close() = {
+  def close(): Unit = {
     logger.info(s"Close an elasticsearch database connection.")
     client.close()
   }
