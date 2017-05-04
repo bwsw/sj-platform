@@ -12,7 +12,7 @@ class JDBCProvider extends Provider {
   providerType = ProviderLiterals.jdbcType
   var driver: String = _
 
-  def this(name: String, description: String, hosts: Array[String], login: String, password: String, providerType: String, driver: String) = {
+  def this(name: String, description: String, hosts: Array[String], login: String, password: String, providerType: String, driver: String): Unit = {
     this()
     this.name = name
     this.description = description
