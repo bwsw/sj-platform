@@ -20,7 +20,7 @@ class EnvelopeFetcher(taskInput: RetrievableCheckpointTaskInput[Envelope]) {
 
   scheduledExecutor.scheduleWithFixedDelay(fillQueue(), 0, EngineLiterals.eventWaitTimeout, java.util.concurrent.TimeUnit.MILLISECONDS)
 
-  def get(stream: String) = {
+  def get(stream: String): Option[Envelope] = {
     logger.debug(s"Get an envelope from queue of stream: $stream.")
     synchronized {
       if (envelopesByStream(stream).isEmpty) None
@@ -49,7 +49,7 @@ class EnvelopeFetcher(taskInput: RetrievableCheckpointTaskInput[Envelope]) {
 }
 
 object EnvelopeFetcher {
-  def apply(manager: CommonTaskManager) = {
+  def apply(manager: CommonTaskManager): EnvelopeFetcher = {
     val taskInput = RetrievableCheckpointTaskInput[AnyRef](manager).asInstanceOf[RetrievableCheckpointTaskInput[Envelope]]
 
     new EnvelopeFetcher(taskInput)
