@@ -16,11 +16,11 @@ import scala.util.Properties
 
 
 object FrameworkUtil {
-  var master: MasterInfo = null
-  var frameworkId: String = null
-  var driver: SchedulerDriver = null
-  var jarName: String = null
-  var instance: Instance = null
+  var master: MasterInfo = _
+  var frameworkId: String = _
+  var driver: SchedulerDriver = _
+  var jarName: String = _
+  var instance: Instance = _
   val configFileService = ConnectionRepository.getConfigService
   private val logger = Logger.getLogger(this.getClass)
   var params = immutable.Map[String, String]()
