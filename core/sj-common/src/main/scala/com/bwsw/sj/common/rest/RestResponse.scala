@@ -1,16 +1,15 @@
 package com.bwsw.sj.common.rest
 
 import com.bwsw.sj.common.config.ConfigLiterals
-import com.bwsw.sj.common.rest.DTO.config.ConfigurationSettingData
-import com.bwsw.sj.common.rest.DTO.module.{InstanceData, SpecificationData}
-import com.bwsw.sj.common.rest.DTO.provider.ProviderData
-import com.bwsw.sj.common.rest.DTO.service.ServiceData
-import com.bwsw.sj.common.rest.DTO.stream.StreamData
+import com.bwsw.sj.common.rest.model.config.ConfigurationSettingData
+import com.bwsw.sj.common.rest.model.module.{InstanceData, SpecificationData}
+import com.bwsw.sj.common.rest.model.service.ServiceData
+import com.bwsw.sj.common.rest.model.stream.StreamData
 import com.fasterxml.jackson.annotation.JsonProperty
 
 import scala.collection.mutable
 
-class RestResponse(@JsonProperty("status-code") var statusCode: Int, entity: ResponseEntity)
+class RestResponse(@JsonProperty("status-code") var statusCode: Int = 0, entity: ResponseEntity = new ResponseEntity {})
 
 case class OkRestResponse(var entity: ResponseEntity) extends RestResponse(200, entity)
 
@@ -42,17 +41,6 @@ case class FrameworkRestEntity(tasks: Seq[FrameworkTask]) extends ResponseEntity
 case class MessageResponseEntity(message: String) extends ResponseEntity
 
 case class KeyedMessageResponseEntity(message: String, key: String) extends ResponseEntity
-
-
-case class ConnectionResponseEntity(connection: Boolean = true) extends ResponseEntity
-
-case class TestConnectionResponseEntity(connection: Boolean, errors: String) extends ResponseEntity
-
-case class ProviderResponseEntity(provider: ProviderData) extends ResponseEntity
-
-case class ProvidersResponseEntity(providers: mutable.Buffer[ProviderData] = mutable.Buffer()) extends ResponseEntity
-
-case class RelatedToProviderResponseEntity(services: mutable.Buffer[String] = mutable.Buffer()) extends ResponseEntity
 
 
 case class TypesResponseEntity(types: Seq[String]) extends ResponseEntity

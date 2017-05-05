@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.engine
 
-import com.bwsw.sj.common.rest.DTO.module.InstanceData
+import com.bwsw.sj.common.rest.model.module.InstanceData
 
 /**
  * Trait for validating a launch parameters of a module of a specific type

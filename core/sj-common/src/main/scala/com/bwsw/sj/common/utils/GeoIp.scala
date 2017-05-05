@@ -2,7 +2,7 @@ package com.bwsw.sj.common.utils
 
 import java.net.{Inet4Address, Inet6Address, InetAddress}
 
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common._dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.maxmind.geoip.LookupService
 import org.slf4j.LoggerFactory

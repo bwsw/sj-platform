@@ -1,8 +1,8 @@
 package com.bwsw.sj.engine.core.managment
 
-import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.common.DAL.model.module.{BatchInstance, RegularInstance}
-import com.bwsw.sj.common.DAL.model.stream.SjStream
+import com.bwsw.sj.common._dal.model._
+import com.bwsw.sj.common._dal.model.module.{BatchInstance, RegularInstance}
+import com.bwsw.sj.common._dal.model.stream.SjStream
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.batch.{BatchCollector, BatchStreamingPerformanceMetrics}

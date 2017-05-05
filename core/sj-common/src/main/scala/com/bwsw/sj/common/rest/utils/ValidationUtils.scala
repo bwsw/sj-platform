@@ -1,14 +1,14 @@
 package com.bwsw.sj.common.rest.utils
 
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.MessageResourceUtils
+import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.ServiceLiterals._
 import org.apache.curator.utils.PathUtils
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
 
-trait ValidationUtils extends MessageResourceUtils {
+object ValidationUtils {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val providerDAO = ConnectionRepository.getProviderService
 

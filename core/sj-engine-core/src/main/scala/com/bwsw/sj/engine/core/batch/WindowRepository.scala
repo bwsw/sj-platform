@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.core.batch
 
-import com.bwsw.sj.common.DAL.model.module.BatchInstance
+import com.bwsw.sj.common._dal.model.module.BatchInstance
 import com.bwsw.sj.engine.core.entities.Window
 import org.slf4j.LoggerFactory
 

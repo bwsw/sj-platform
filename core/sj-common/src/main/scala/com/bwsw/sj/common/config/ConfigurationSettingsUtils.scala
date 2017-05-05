@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.config
 
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common._dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals._
 
 object ConfigurationSettingsUtils {

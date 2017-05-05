@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.batch
 
-import com.bwsw.sj.common.DAL.model.module.BatchInstance
+import com.bwsw.sj.common._dal.model.module.BatchInstance
 import com.bwsw.sj.engine.core.engine.{InstanceStatusObserver, TaskRunner}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.state.CommonModuleService

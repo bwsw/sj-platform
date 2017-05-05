@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.core.engine.input
 
-import com.bwsw.sj.common.DAL.model.stream.SjStream
+import com.bwsw.sj.common._dal.model.stream.SjStream
 import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 

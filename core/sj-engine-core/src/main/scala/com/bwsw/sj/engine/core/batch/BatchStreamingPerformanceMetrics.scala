@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.core.batch
 
 import java.util.Calendar
 
-import com.bwsw.sj.common.DAL.model.module.BatchInstance
+import com.bwsw.sj.common._dal.model.module.BatchInstance
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics

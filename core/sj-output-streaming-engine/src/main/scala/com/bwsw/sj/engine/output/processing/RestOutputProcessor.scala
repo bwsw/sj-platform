@@ -2,8 +2,8 @@ package com.bwsw.sj.engine.output.processing
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.rest.RestClient
-import com.bwsw.sj.common.DAL.model.service.RestService
-import com.bwsw.sj.common.DAL.model.stream.SjStream
+import com.bwsw.sj.common._dal.model.service.RestService
+import com.bwsw.sj.common._dal.model.stream.SjStream
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.Entity
 import com.bwsw.sj.engine.output.task.OutputTaskManager

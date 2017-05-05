@@ -2,14 +2,15 @@ package com.bwsw.sj.crud.rest.validator.instance
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.traits.Serializer
-import com.bwsw.sj.common.DAL.model.module._
-import com.bwsw.sj.common.DAL.model.service.{Service, ZKService}
-import com.bwsw.sj.common.DAL.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.DAL.service.GenericMongoRepository
-import com.bwsw.sj.common.rest.DTO.module.{InstanceData, SpecificationData}
-import com.bwsw.sj.common.rest.utils.ValidationUtils
-import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils, StreamLiterals}
+import com.bwsw.sj.common._dal.model.module._
+import com.bwsw.sj.common._dal.model.service.{Service, ZKService}
+import com.bwsw.sj.common._dal.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
+import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common._dal.service.GenericMongoRepository
+import com.bwsw.sj.common.rest.model.module.{InstanceData, SpecificationData}
+import com.bwsw.sj.common.rest.utils.ValidationUtils._
+import com.bwsw.sj.common.utils.MessageResourceUtils._
+import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -22,7 +23,7 @@ import scala.collection.mutable.ArrayBuffer
  *
  * @author Kseniya Tomskikh
  */
-abstract class InstanceValidator extends ValidationUtils with CompletionUtils with MessageResourceUtils {
+abstract class InstanceValidator extends CompletionUtils {
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
   var serviceDAO: GenericMongoRepository[Service] = ConnectionRepository.getServiceManager
   var instanceDAO: GenericMongoRepository[Instance] = ConnectionRepository.getInstanceService

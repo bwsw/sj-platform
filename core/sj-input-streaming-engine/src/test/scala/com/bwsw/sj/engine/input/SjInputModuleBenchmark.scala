@@ -4,7 +4,7 @@ import java.io.{File, PrintStream}
 import java.net.Socket
 import java.util.logging.LogManager
 
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common._dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.engine.input.DataFactory._
 import com.bwsw.sj.engine.input.SjInputServices._

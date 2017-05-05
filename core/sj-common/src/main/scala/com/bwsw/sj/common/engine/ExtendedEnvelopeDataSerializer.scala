@@ -1,7 +1,7 @@
 package com.bwsw.sj.common.engine
 
 import com.bwsw.common.AvroSerializer
-import com.bwsw.sj.common.DAL.model.module.{AvroSchemaForInstance, Instance}
+import com.bwsw.sj.common._dal.model.module.{AvroSchemaForInstance, Instance}
 import org.apache.avro.generic.GenericRecord
 import org.slf4j.LoggerFactory
 

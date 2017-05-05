@@ -6,14 +6,14 @@ import java.util.jar.JarFile
 
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.common.DAL.model.module.{Instance, RegularInstance, Task}
-import com.bwsw.sj.common.DAL.model.provider.Provider
-import com.bwsw.sj.common.DAL.model.service.{KafkaService, Service, TStreamService, ZKService}
-import com.bwsw.sj.common.DAL.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.DAL.service.GenericMongoRepository
+import com.bwsw.sj.common._dal.model.module.{Instance, RegularInstance, Task}
+import com.bwsw.sj.common._dal.model.provider.Provider
+import com.bwsw.sj.common._dal.model.service.{KafkaService, Service, TStreamService, ZKService}
+import com.bwsw.sj.common._dal.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
+import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common._dal.service.GenericMongoRepository
 import com.bwsw.sj.common.config.ConfigLiterals
-import com.bwsw.sj.common.rest.DTO.module.ExecutionPlan
+import com.bwsw.sj.common.rest.model.module.ExecutionPlan
 import com.bwsw.sj.common.utils._
 import com.bwsw.sj.engine.core.testutils.TestStorageServer
 import com.bwsw.tstreams.agents.consumer.Consumer

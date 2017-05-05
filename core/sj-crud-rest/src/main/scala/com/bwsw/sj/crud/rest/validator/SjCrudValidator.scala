@@ -1,5 +1,6 @@
 package com.bwsw.sj.crud.rest.validator
 
+
 import java.io._
 import java.net.URLClassLoader
 import java.util.jar.JarFile
@@ -11,25 +12,25 @@ import akka.http.scaladsl.server.RequestContext
 import akka.stream.Materializer
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.traits.Serializer
-import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.common.DAL.model.module.{FileMetadata, Instance}
-import com.bwsw.sj.common.DAL.model.service.Service
-import com.bwsw.sj.common.DAL.model.stream.SjStream
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.DAL.service.GenericMongoRepository
+import com.bwsw.sj.common._dal.model._
+import com.bwsw.sj.common._dal.model.module.{FileMetadata, Instance}
+import com.bwsw.sj.common._dal.model.service.Service
+import com.bwsw.sj.common._dal.model.stream.SjStream
+import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common._dal.service.GenericMongoRepository
 import com.bwsw.sj.common.engine.StreamingValidator
-import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils, StreamLiterals}
+import com.bwsw.sj.common.utils.MessageResourceUtils._
+import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 
 import scala.concurrent.{Await, ExecutionContextExecutor}
-
 /**
   * Trait for validation of crud-rest-api
   * and contains common methods for routes
   *
   * @author Kseniya Tomskikh
   */
-trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageResourceUtils {
+trait SjCrudValidator extends CompletionUtils with JsonValidator {
   val logger: LoggingAdapter
 
   implicit val materializer: Materializer

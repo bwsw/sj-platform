@@ -1,10 +1,10 @@
 package com.bwsw.sj.crud.rest.validator
 
-import com.bwsw.sj.common.utils.MessageResourceUtils
+import com.bwsw.sj.common.utils.MessageResourceUtils._
 import org.everit.json.schema.loader.SchemaLoader
 import org.json.{JSONException, JSONObject, JSONTokener}
 
-trait JsonValidator extends MessageResourceUtils {
+trait JsonValidator {
 
   def isEmptyOrNullString(value: String): Boolean = value == null || value.isEmpty
 

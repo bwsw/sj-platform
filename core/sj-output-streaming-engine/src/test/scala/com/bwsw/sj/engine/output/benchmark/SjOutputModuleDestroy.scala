@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.output.benchmark
 
 import java.io.File
 
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common._dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.TempHelperForConfigDestroy
 import com.bwsw.sj.engine.output.benchmark.DataFactory._
 
