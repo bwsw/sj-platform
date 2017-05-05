@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
   * @author Kseniya Tomskikh
   */
 class StubEsData extends OutputEnvelope {
-  @JsonProperty("test-date") var testDate: Date = null
+  @JsonProperty("test-date") var testDate: Date = _
   var value: Int = 0
   var stringValue = ""
 
