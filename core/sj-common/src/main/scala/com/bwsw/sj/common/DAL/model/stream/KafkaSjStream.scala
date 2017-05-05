@@ -21,15 +21,14 @@ class KafkaSjStream(override val name: String,
                     override val streamType: String = StreamLiterals.kafkaStreamType)
   extends SjStream(name, description, service, force, tags, streamType) {
 
-  override def asProtocolStream() = {
-    val streamData = new KafkaStreamData
-    super.fillProtocolStream(streamData)
-
-    streamData.partitions = this.partitions
-    streamData.replicationFactor = this.replicationFactor
-
-    streamData
-  }
+  override def asProtocolStream() = new KafkaStreamData(
+    name,
+    service.name,
+    tags,
+    force,
+    description,
+    partitions,
+    replicationFactor)
 
   override def create() = {
     try {

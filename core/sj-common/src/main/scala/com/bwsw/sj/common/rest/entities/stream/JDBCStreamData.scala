@@ -7,9 +7,14 @@ import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
 
 import scala.collection.mutable.ArrayBuffer
 
-class JDBCStreamData() extends StreamData() {
-  streamType = StreamLiterals.jdbcOutputType
-  var primary: String = _
+class JDBCStreamData(
+                      val primary: String,
+                      override val name: String,
+                      override val service: String,
+                      override val tags: Array[String] = Array(),
+                      override val force: Boolean = false,
+                      override val description: String = ServiceLiterals.defaultDescription)
+  extends StreamData(StreamLiterals.jdbcOutputType, name, service, tags, force, description) {
 
   override def validate() = {
     val serviceDAO = ConnectionRepository.getServiceManager

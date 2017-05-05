@@ -9,9 +9,14 @@ import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 
 import scala.collection.mutable.ArrayBuffer
 
-class TStreamStreamData() extends StreamData() {
-  streamType = StreamLiterals.tstreamType
-  var partitions: Int = Int.MinValue
+class TStreamStreamData(
+                         override val name: String,
+                         override val service: String,
+                         override val tags: Array[String] = Array(),
+                         override val force: Boolean = false,
+                         override val description: String = ServiceLiterals.defaultDescription,
+                         val partitions: Int = Int.MinValue)
+  extends StreamData(StreamLiterals.esOutputType, name, service, tags, force, description) {
 
   override def validate() = {
     val serviceDAO = ConnectionRepository.getServiceManager

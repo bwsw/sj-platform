@@ -15,10 +15,15 @@ import org.apache.kafka.common.errors.TopicExistsException
 
 import scala.collection.mutable.ArrayBuffer
 
-class KafkaStreamData() extends StreamData() {
-  streamType = StreamLiterals.kafkaStreamType
-  var partitions: Int = Int.MinValue
-  var replicationFactor: Int = Int.MinValue
+class KafkaStreamData(
+                       override val name: String,
+                       override val service: String,
+                       override val tags: Array[String] = Array(),
+                       override val force: Boolean = false,
+                       override val description: String = ServiceLiterals.defaultDescription,
+                       val partitions: Int = Int.MinValue,
+                       val replicationFactor: Int = Int.MinValue)
+  extends StreamData(StreamLiterals.esOutputType, name, service, tags, force, description) {
 
   override def validate() = {
     val serviceDAO = ConnectionRepository.getServiceManager

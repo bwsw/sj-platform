@@ -8,8 +8,13 @@ import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
 
 import scala.collection.mutable.ArrayBuffer
 
-class ESStreamData() extends StreamData() {
-  streamType = StreamLiterals.esOutputType
+class ESStreamData(
+                    override val name: String,
+                    override val service: String,
+                    override val tags: Array[String] = Array(),
+                    override val force: Boolean = false,
+                    override val description: String = ServiceLiterals.defaultDescription)
+  extends StreamData(StreamLiterals.esOutputType, name, service, tags, force, description) {
 
   override def validate() = {
     val serviceDAO = ConnectionRepository.getServiceManager

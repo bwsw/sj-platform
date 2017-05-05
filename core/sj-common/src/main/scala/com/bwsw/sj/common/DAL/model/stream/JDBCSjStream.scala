@@ -13,14 +13,13 @@ class JDBCSjStream(override val name: String,
                    override val streamType: String = StreamLiterals.jdbcOutputType)
   extends SjStream(name, description, service, force, tags, streamType) {
 
-  override def asProtocolStream() = {
-    val streamData = new JDBCStreamData
-    super.fillProtocolStream(streamData)
-
-    streamData.primary = this.primary
-
-    streamData
-  }
+  override def asProtocolStream() = new JDBCStreamData(
+    primary,
+    name,
+    service.name,
+    tags,
+    force,
+    description)
 
   override def delete(): Unit = {}
 }

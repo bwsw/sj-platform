@@ -3,7 +3,7 @@ package com.bwsw.sj.common.rest.entities.stream
 import com.bwsw.sj.common.DAL.model.stream.SjStream
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils
-import com.bwsw.sj.common.utils.{MessageResourceUtils, StreamLiterals}
+import com.bwsw.sj.common.utils.{MessageResourceUtils, ServiceLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes, JsonTypeInfo}
 
@@ -17,13 +17,14 @@ import scala.collection.mutable.ArrayBuffer
   new Type(value = classOf[JDBCStreamData], name = StreamLiterals.jdbcOutputType),
   new Type(value = classOf[RestStreamData], name = StreamLiterals.restOutputType)
 ))
-class StreamData() extends ValidationUtils with MessageResourceUtils {
-  @JsonProperty("type") var streamType: String = _
-  var name: String = _
-  var description: String = "No description"
-  var service: String = _
-  var tags: Array[String] = Array()
-  var force: Boolean = false
+class StreamData(
+                  @JsonProperty("type") val streamType: String,
+                  val name: String,
+                  val service: String,
+                  val tags: Array[String] = Array(),
+                  val force: Boolean = false,
+                  val description: String = ServiceLiterals.defaultDescription)
+  extends ValidationUtils with MessageResourceUtils {
 
   @JsonIgnore
   def create(): Unit = {}

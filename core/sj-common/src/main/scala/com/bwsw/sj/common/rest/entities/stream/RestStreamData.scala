@@ -10,9 +10,13 @@ import scala.collection.mutable.ArrayBuffer
 /**
   * @author Pavel Tomskikh
   */
-class RestStreamData extends StreamData {
-
-  streamType = StreamLiterals.restOutputType
+class RestStreamData(
+                      override val name: String,
+                      override val service: String,
+                      override val tags: Array[String] = Array(),
+                      override val force: Boolean = false,
+                      override val description: String = ServiceLiterals.defaultDescription)
+  extends StreamData(StreamLiterals.esOutputType, name, service, tags, force, description) {
 
   override def validate() = {
     val serviceDAO = ConnectionRepository.getServiceManager

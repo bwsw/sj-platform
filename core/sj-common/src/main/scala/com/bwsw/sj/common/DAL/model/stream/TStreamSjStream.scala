@@ -15,14 +15,13 @@ class TStreamSjStream(override val name: String,
                       override val streamType: String = StreamLiterals.tstreamType)
   extends SjStream(name, description, service, force, tags, streamType) {
 
-  override def asProtocolStream() = {
-    val streamData = new TStreamStreamData
-    super.fillProtocolStream(streamData)
-
-    streamData.partitions = this.partitions
-
-    streamData
-  }
+  override def asProtocolStream() = new TStreamStreamData(
+    name,
+    service.name,
+    tags,
+    force,
+    description,
+    partitions)
 
   override def create() = {
     val factory = new TStreamsFactory()

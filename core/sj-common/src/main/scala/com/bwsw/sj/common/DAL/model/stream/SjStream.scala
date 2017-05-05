@@ -18,13 +18,4 @@ class SjStream(@IdField val name: String,
   def delete(): Unit = ???
 
   def asProtocolStream(): StreamData = ???
-
-  protected def fillProtocolStream(stream: StreamData) = {
-    stream.name = this.name
-    stream.description = this.description
-    stream.service = this.service.name
-    stream.streamType = this.streamType
-    stream.tags = this.tags
-    stream.force = this.force
-  }
 }

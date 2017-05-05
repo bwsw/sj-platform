@@ -13,12 +13,12 @@ class ESSjStream(override val name: String,
                  override val streamType: String = StreamLiterals.esOutputType)
   extends SjStream(name, description, service, force, tags, streamType) {
 
-  override def asProtocolStream(): ESStreamData = {
-    val streamData = new ESStreamData
-    super.fillProtocolStream(streamData)
-
-    streamData
-  }
+  override def asProtocolStream() = new ESStreamData(
+    name,
+    service.name,
+    tags,
+    force,
+    description)
 
   override def delete(): Unit = {
     val hosts = this.service.provider.hosts.map { host =>
