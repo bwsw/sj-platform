@@ -35,7 +35,7 @@ class ServiceData() {
   def validate() = validateGeneralFields()
 
   @JsonIgnore
-  protected def validateGeneralFields() = {
+  protected def validateGeneralFields(): ArrayBuffer[String] = {
     val serviceDAO = ConnectionRepository.getServiceManager
     val errors = new ArrayBuffer[String]()
 

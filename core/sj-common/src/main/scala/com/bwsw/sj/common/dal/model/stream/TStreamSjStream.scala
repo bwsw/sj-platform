@@ -15,7 +15,7 @@ class TStreamSjStream(override val name: String,
                       override val streamType: String = StreamLiterals.tstreamType)
   extends SjStream(name, description, service, force, tags, streamType) {
 
-  override def asProtocolStream() = {
+  override def asProtocolStream(): TStreamStreamData = {
     val streamData = new TStreamStreamData
     super.fillProtocolStream(streamData)
 
@@ -24,7 +24,7 @@ class TStreamSjStream(override val name: String,
     streamData
   }
 
-  override def create() = {
+  override def create(): Unit = {
     val factory = new TStreamsFactory()
     factory.setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, this.service.prefix)
       .setProperty(ConfigurationOptions.Coordination.endpoints, this.service.provider.hosts.mkString(","))
@@ -44,7 +44,7 @@ class TStreamSjStream(override val name: String,
     storageClient.shutdown()
   }
 
-  override def delete() = {
+  override def delete(): Unit = {
     val factory = new TStreamsFactory()
     factory.setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, this.service.prefix)
       .setProperty(ConfigurationOptions.Coordination.endpoints, this.service.provider.hosts.mkString(","))

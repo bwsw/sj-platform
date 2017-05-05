@@ -1,4 +1,4 @@
-package com.bwsw.sj.common.bll
+package com.bwsw.sj.common.service
 
 import com.bwsw.sj.common.dal.model.provider.Provider
 import com.bwsw.sj.common.dal.model.service._

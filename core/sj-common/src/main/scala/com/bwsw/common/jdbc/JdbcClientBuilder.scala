@@ -9,7 +9,7 @@ object JdbcClientBuilder {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private var jdbcClientConnectionData = new JdbcClientConnectionData()
 
-  def buildCheck() = {
+  def buildCheck(): Unit = {
     jdbcClientConnectionData.driver match {
       case "" | null => throw new RuntimeException("Driver field must be declared.")
       case _: String =>
@@ -41,32 +41,32 @@ object JdbcClientBuilder {
     new JdbcClient(jdbcClientConnectionData)
   }
 
-  def setHosts(hosts: Array[String]) = {
+  def setHosts(hosts: Array[String]): JdbcClientBuilder.type = {
     jdbcClientConnectionData.hosts = hosts
     this
   }
 
-  def setDriver(driver: String) = {
+  def setDriver(driver: String): JdbcClientBuilder.type = {
     jdbcClientConnectionData.driver = driver
     this
   }
 
-  def setUsername(username: String) = {
+  def setUsername(username: String): JdbcClientBuilder.type = {
     jdbcClientConnectionData.username = username
     this
   }
 
-  def setPassword(password: String) = {
+  def setPassword(password: String): JdbcClientBuilder.type = {
     jdbcClientConnectionData.password = password
     this
   }
 
-  def setDatabase(database: String) = {
+  def setDatabase(database: String): JdbcClientBuilder.type = {
     jdbcClientConnectionData.database = database
     this
   }
 
-  def setTable(table: String) = {
+  def setTable(table: String): JdbcClientBuilder.type = {
     jdbcClientConnectionData.table = table
     this
   }
@@ -77,7 +77,7 @@ object JdbcClientBuilder {
     * @param jdbcClientConnectionData : JdbcClientConnectionData
     * @return this
     */
-  def setJdbcClientConnectionData(jdbcClientConnectionData: JdbcClientConnectionData) = {
+  def setJdbcClientConnectionData(jdbcClientConnectionData: JdbcClientConnectionData): JdbcClientBuilder.type = {
     this.jdbcClientConnectionData = jdbcClientConnectionData
     this
   }

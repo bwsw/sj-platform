@@ -50,35 +50,35 @@ object ConnectionRepository {
 
   private lazy val configService = new GenericMongoRepository[ConfigurationSetting]()
 
-  def getFileMetadataService = {
+  def getFileMetadataService: GenericMongoRepository[FileMetadata] = {
     fileMetadataService
   }
 
-  def getConfigService = {
+  def getConfigService: GenericMongoRepository[ConfigurationSetting] = {
     configService
   }
 
-  def getInstanceService = {
+  def getInstanceService: GenericMongoRepository[Instance] = {
     instanceService
   }
 
-  def getFileStorage = {
+  def getFileStorage: MongoFileStorage = {
     fileStorage
   }
 
-  def getStreamService = {
+  def getStreamService: GenericMongoRepository[SjStream] = {
     streamService
   }
 
-  def getServiceManager = {
+  def getServiceManager: GenericMongoRepository[Service] = {
     serviceManager
   }
 
-  def getProviderService = {
+  def getProviderService: GenericMongoRepository[Provider] = {
     providerService
   }
 
-  def close() = {
+  def close(): Unit = {
     logger.debug("Close a repository of connection.")
     mongoConnection.close()
     mongoClient.close()
@@ -100,13 +100,13 @@ object ConnectionRepository {
     }
   }
 
-  private def setMapperOptions(morphia: Morphia) = {
+  private def setMapperOptions(morphia: Morphia): Unit = {
     val mapper = morphia.getMapper
     mapper.getOptions.setObjectFactory(new CustomMorphiaObjectFactory())
     mapper.getOptions.setStoreEmpties(true)
   }
 
-  private[dal] def getGenericDAO[T: ClassTag] = {
+  private[dal] def getGenericDAO[T: ClassTag]: BasicDAO[T, String] = {
     import scala.reflect.classTag
 
     logger.debug(s"Create a basic DAO for a mongo collection of type: '${classTag[T].toString()}'.")

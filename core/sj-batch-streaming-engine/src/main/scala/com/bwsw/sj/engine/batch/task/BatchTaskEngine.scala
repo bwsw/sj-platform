@@ -7,14 +7,15 @@ import com.bwsw.sj.common.dal.model.module.BatchInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.state.CommonModuleService
-import com.bwsw.sj.engine.core.batch.{BatchCollector, WindowRepository, BatchStreamingExecutor, BatchStreamingPerformanceMetrics}
+import com.bwsw.sj.engine.core.batch.{BatchCollector, BatchStreamingExecutor, BatchStreamingPerformanceMetrics, WindowRepository}
 import com.bwsw.sj.engine.batch.task.input.EnvelopeFetcher
-import org.apache.curator.framework.CuratorFrameworkFactory
+import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.framework.recipes.barriers.DistributedDoubleBarrier
 import org.apache.curator.retry.ExponentialBackoffRetry
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 
 class BatchTaskEngine(batchCollector: BatchCollector,
                       instance: BatchInstance,
@@ -41,15 +42,15 @@ class BatchTaskEngine(batchCollector: BatchCollector,
   private val leaderLatch = new LeaderLatch(zkHosts, leaderMasterNode)
   leaderLatch.start()
 
-  private def createCountersOfBatches() = {
+  private def createCountersOfBatches(): mutable.Map[String, Int] = {
     mutable.Map(inputs.map(x => (x, 0)): _*)
   }
 
-  private def createStorageOfWindows() = {
+  private def createStorageOfWindows(): mutable.Map[String, Window] = {
     mutable.Map(inputs.map(x => (x, new Window(x))): _*)
   }
 
-  private def createCuratorClient() = {
+  private def createCuratorClient(): CuratorFramework = {
     val curatorClient = CuratorFrameworkFactory.newClient(zkHosts.mkString(","), new ExponentialBackoffRetry(1000, 3))
     curatorClient.start()
     curatorClient.getZookeeperClient.blockUntilConnectedOrTimedOut()
@@ -76,7 +77,7 @@ class BatchTaskEngine(batchCollector: BatchCollector,
     }
   }
 
-  private def retrieveAndProcessEnvelopes() = {
+  private def retrieveAndProcessEnvelopes(): Unit = {
     retrievableStreams.foreach(stream => {
       logger.debug(s"Retrieve an available envelope from '$stream' stream.")
       inputService.get(stream) match {
@@ -93,7 +94,7 @@ class BatchTaskEngine(batchCollector: BatchCollector,
     })
   }
 
-  private def processBatches() = {
+  private def processBatches(): Unit = {
     logger.debug(s"Check whether there are batches to collect or not.")
     val batches = batchCollector.getBatchesToCollect.map(batchCollector.collectBatch)
     if (batches.isEmpty) {
@@ -110,23 +111,23 @@ class BatchTaskEngine(batchCollector: BatchCollector,
     }
   }
 
-  private def onIdle() = {
+  private def onIdle(): Unit = {
     logger.debug(s"An envelope has been received but no batches have been collected.")
     performanceMetrics.increaseTotalIdleTime(instance.eventWaitIdleTime)
     executor.onIdle()
   }
 
-  private def registerBatch(batch: Batch) = {
+  private def registerBatch(batch: Batch): ListBuffer[Int] = {
     addBatchToWindow(batch)
     performanceMetrics.addBatch(batch)
   }
 
-  private def addBatchToWindow(batch: Batch) = {
+  private def addBatchToWindow(batch: Batch): Unit = {
     currentWindowPerStream(batch.stream).batches += batch
     increaseBatchCounter(batch.stream)
   }
 
-  private def increaseBatchCounter(stream: String) = {
+  private def increaseBatchCounter(stream: String): Unit = {
     counterOfBatchesPerStream(stream) += 1
     logger.debug(s"Increase count of batches of stream: $stream to: ${counterOfBatchesPerStream(stream)}.")
   }
@@ -135,7 +136,7 @@ class BatchTaskEngine(batchCollector: BatchCollector,
     counterOfBatchesPerStream(stream) == instance.window
   }
 
-  private def collectWindow(stream: String) = {
+  private def collectWindow(stream: String): Unit = {
     logger.info(s"It's time to collect a window (stream: $stream).")
     val collectedWindow = currentWindowPerStream(stream)
     collectedWindowPerStream(stream) = collectedWindow.copy()
@@ -143,26 +144,26 @@ class BatchTaskEngine(batchCollector: BatchCollector,
     slideCurrentWindow(stream)
   }
 
-  private def allWindowsCollected = {
+  private def allWindowsCollected: Boolean = {
     inputs.forall(stream => collectedWindowPerStream.isDefinedAt(stream))
   }
 
-  private def slideCurrentWindow(stream: String) = {
+  private def slideCurrentWindow(stream: String): Unit = {
     deleteBatches(stream)
     resetCounter(stream)
   }
 
-  private def deleteBatches(stream: String) = {
+  private def deleteBatches(stream: String): Unit = {
     logger.debug(s"Delete batches from windows (for each stream) than shouldn't be repeated (from 0 to ${instance.slidingInterval}).")
     currentWindowPerStream(stream).batches.remove(0, instance.slidingInterval)
   }
 
-  private def resetCounter(stream: String) = {
+  private def resetCounter(stream: String): Unit = {
     logger.debug(s"Reset a counter of batches for each window.")
     counterOfBatchesPerStream(stream) -= instance.slidingInterval
   }
 
-  private def onWindow() = {
+  private def onWindow(): Unit = {
     logger.info(s"Windows have been collected (for streams: ${inputs.mkString(", ")}). Process them.")
     prepareCollectedWindows()
     executor.onWindow(windowRepository)
@@ -176,7 +177,7 @@ class BatchTaskEngine(batchCollector: BatchCollector,
     doCheckpoint()
   }
 
-  private def prepareCollectedWindows() = {
+  private def prepareCollectedWindows(): Unit = {
     logger.debug(s"Fill a window repository for executor. Clear a collection with collected windows.")
     collectedWindowPerStream.foreach(x => {
       registerBatches(x._2)
@@ -186,7 +187,7 @@ class BatchTaskEngine(batchCollector: BatchCollector,
     collectedWindowPerStream.clear()
   }
 
-  private def registerBatches(window: Window) = {
+  private def registerBatches(window: Window): Unit = {
     window.batches.slice(0, instance.slidingInterval)
       .foreach(x => x.envelopes.foreach(x => inputService.registerEnvelope(x)))
   }
@@ -194,7 +195,7 @@ class BatchTaskEngine(batchCollector: BatchCollector,
   /**
     * Does group checkpoint of t-streams consumers/producers
     */
-  private def doCheckpoint() = {
+  private def doCheckpoint(): Unit = {
     logger.info(s"It's time to checkpoint.")
     logger.debug(s"Invoke onBeforeCheckpoint() handler.")
     executor.onBeforeCheckpoint()

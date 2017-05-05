@@ -12,7 +12,7 @@ import scala.collection.mutable.ArrayBuffer
 class ESStreamData() extends StreamData() {
   streamType = StreamLiterals.esOutputType
 
-  override def validate() = {
+  override def validate(): ArrayBuffer[String] = {
     val serviceDAO = ConnectionRepository.getServiceManager
     val errors = new ArrayBuffer[String]()
 
@@ -44,7 +44,7 @@ class ESStreamData() extends StreamData() {
     errors
   }
 
-  override def asModelStream() = {
+  override def asModelStream(): ESSjStream = {
     val serviceDAO = ConnectionRepository.getServiceManager
     val modelStream = new ESSjStream(
       this.name,
@@ -57,17 +57,17 @@ class ESStreamData() extends StreamData() {
     modelStream
   }
 
-  override def create() = {
+  override def create(): Unit = {
     if (doesStreamHaveForcedCreation()) {
       clearEsStream()
     }
   }
 
-  private def doesStreamHaveForcedCreation() = {
+  private def doesStreamHaveForcedCreation(): Boolean = {
     this.force
   }
 
-  private def clearEsStream() = {
+  private def clearEsStream(): Unit = {
     val serviceDAO = ConnectionRepository.getServiceManager
     val service = serviceDAO.get(this.service).get.asInstanceOf[ESService]
     val hosts = service.provider.hosts.map { host =>

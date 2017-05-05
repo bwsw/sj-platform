@@ -1,6 +1,7 @@
 package com.bwsw.sj.engine.core.state
 
 import com.bwsw.common.ObjectSerializer
+import com.bwsw.sj.common.dal.model.stream.TStreamSjStream
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.consumer.ConsumerTransaction
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
@@ -59,7 +60,7 @@ class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGro
   /**
     * Creates SJStream to keep a module state
     */
-  private def createStateStream() = {
+  private def createStateStream(): TStreamSjStream = {
     logger.debug(s"Task name: ${manager.taskName} " +
       s"Get stream for keeping state of module.")
 
@@ -74,7 +75,7 @@ class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGro
   /**
     * Adds a state producer and a state consumer to checkpoint group
     */
-  private def addAgentsToCheckpointGroup() = {
+  private def addAgentsToCheckpointGroup(): Unit = {
     logger.debug(s"Task: ${manager.taskName}. Start adding state consumer and producer to checkpoint group.")
     checkpointGroup.add(stateConsumer)
     checkpointGroup.add(stateProducer)
@@ -138,7 +139,7 @@ class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGro
     * @param initialState State from which to need start
     * @param transaction  Transaction containing a state
     */
-  private def fillFullState(initialState: mutable.Map[String, Any], transaction: ConsumerTransaction) = {
+  private def fillFullState(initialState: mutable.Map[String, Any], transaction: ConsumerTransaction): Unit = {
     logger.debug(s"Fill full state.")
     var value: Object = null
     var variable: (String, Any) = null
@@ -156,7 +157,7 @@ class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGro
     * @param fullState    Last state that has been saved
     * @param partialState Partial changes of state
     */
-  private def applyPartialChanges(fullState: mutable.Map[String, Any], partialState: mutable.Map[String, (String, Any)]) = {
+  private def applyPartialChanges(fullState: mutable.Map[String, Any], partialState: mutable.Map[String, (String, Any)]): Unit = {
     logger.debug(s"Apply partial changes to state sequentially.")
     partialState.foreach {
       case (key, ("set", value)) => fullState(key) = value
@@ -261,7 +262,7 @@ class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGro
     * @param state State variables
     * @return ID of transaction
     */
-  private def sendState(state: mutable.Map[String, Any]) = {
+  private def sendState(state: mutable.Map[String, Any]): Long = {
     logger.debug(s"Save a full state in t-stream intended for storing/restoring a state.")
     val transaction = stateProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
     state.foreach((x: (String, Any)) => transaction.send(serializer.serialize(x)))

@@ -7,6 +7,7 @@ import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils._
 import com.bwsw.tstreams.common.StorageClient
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
+import com.bwsw.tstreams.streams.Stream
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -14,7 +15,7 @@ class TStreamStreamData() extends StreamData() {
   streamType = StreamLiterals.tstreamType
   var partitions: Int = Int.MinValue
 
-  override def validate() = {
+  override def validate(): ArrayBuffer[String] = {
     val serviceDAO = ConnectionRepository.getServiceManager
     val errors = new ArrayBuffer[String]()
 
@@ -54,7 +55,7 @@ class TStreamStreamData() extends StreamData() {
     errors
   }
 
-  override def asModelStream() = {
+  override def asModelStream(): TStreamSjStream = {
     val serviceDAO = ConnectionRepository.getServiceManager
     val modelStream = new TStreamSjStream(
       this.name,
@@ -68,7 +69,7 @@ class TStreamStreamData() extends StreamData() {
     modelStream
   }
 
-  private def checkStreamPartitionsOnConsistency(service: TStreamService) = {
+  private def checkStreamPartitionsOnConsistency(service: TStreamService): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
     val tstreamFactory = new TStreamsFactory()
     tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Auth.key, service.token)
@@ -90,7 +91,7 @@ class TStreamStreamData() extends StreamData() {
     errors
   }
 
-  override def create() = {
+  override def create(): Unit = {
     val serviceDAO = ConnectionRepository.getServiceManager
     val service = serviceDAO.get(this.service).get.asInstanceOf[TStreamService]
     val tstreamFactory = new TStreamsFactory()
@@ -110,15 +111,15 @@ class TStreamStreamData() extends StreamData() {
     storageClient.shutdown()
   }
 
-  private def doesStreamHaveForcedCreation(storageClient: StorageClient) = {
+  private def doesStreamHaveForcedCreation(storageClient: StorageClient): Boolean = {
     doesTopicExist(storageClient) && this.force
   }
 
-  private def doesTopicExist(storageClient: StorageClient) = {
+  private def doesTopicExist(storageClient: StorageClient): Boolean = {
     storageClient.checkStreamExists(this.name)
   }
 
-  private def createTStream(storageClient: StorageClient) = {
+  private def createTStream(storageClient: StorageClient): Stream = {
     storageClient.createStream(
       this.name,
       this.partitions,

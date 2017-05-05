@@ -22,7 +22,7 @@ class OutputStreamingPerformanceMetrics(manager: OutputTaskManager)
   override protected var inputEnvelopesPerStream = createStorageForInputEnvelopes(inputStreamNames)
   override protected var outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
 
-  override def getReport() = {
+  override def getReport(): String = {
     logger.info(s"Start preparing a report of performance for task: $taskName of output module.")
     mutex.lock()
     val bytesOfInputEnvelopes = inputEnvelopesPerStream.map(x => (x._1, x._2.map(_.sum).sum)).head._2
@@ -60,7 +60,7 @@ class OutputStreamingPerformanceMetrics(manager: OutputTaskManager)
     reportSerializer.serialize(report)
   }
 
-  override def clear() = {
+  override def clear(): Unit = {
     logger.debug(s"Reset variables for performance report for next reporting.")
     inputEnvelopesPerStream = mutable.Map(inputStreamNames.head -> mutable.ListBuffer[List[Int]]())
     outputEnvelopesPerStream = mutable.Map(outputStreamNames.head -> mutable.Map[String, mutable.ListBuffer[Int]]())

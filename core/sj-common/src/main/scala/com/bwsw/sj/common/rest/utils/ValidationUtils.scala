@@ -12,17 +12,17 @@ object ValidationUtils {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val providerDAO = ConnectionRepository.getProviderService
 
-  def validateName(name: String) = {
+  def validateName(name: String): Boolean = {
     logger.debug(s"Validate a name: '$name'.")
     name.matches( """^([a-z][a-z0-9-]*)$""")
   }
 
-  def validateConfigSettingName(name: String) = {
+  def validateConfigSettingName(name: String): Boolean = {
     logger.debug(s"Validate a configuration name: '$name'.")
     name.matches( """^([a-z][a-z0-9-\.]*)$""")
   }
 
-  def validateProvider(provider: String, serviceType: String) = {
+  def validateProvider(provider: String, serviceType: String): ArrayBuffer[String] = {
     logger.debug(s"Validate a provider: '$provider' of service: '$serviceType'.")
     val errors = new ArrayBuffer[String]()
 
@@ -46,17 +46,17 @@ object ValidationUtils {
     errors
   }
 
-  def validateNamespace(namespace: String) = {
+  def validateNamespace(namespace: String): Boolean = {
     logger.debug(s"Validate a namespace: '$namespace'.")
     namespace.matches( """^([a-z][a-z0-9_]*)$""")
   }
 
-  def normalizeName(name: String) = {
+  def normalizeName(name: String): String = {
     logger.debug(s"Normalize a name: '$name'.")
     name.replace('\\', '/')
   }
 
-  def validatePrefix(prefix: String) = {
+  def validatePrefix(prefix: String): Boolean = {
     try {
       PathUtils.validatePath(prefix)
 
@@ -68,7 +68,7 @@ object ValidationUtils {
     }
   }
 
-  def validateToken(token: String) = {
+  def validateToken(token: String): Boolean = {
     token.length <= 32
   }
 }

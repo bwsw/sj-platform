@@ -13,7 +13,7 @@ class ArspkDBServiceData() extends ServiceData() {
   var namespace: String = null
   var provider: String = null
 
-  override def asModelService() = {
+  override def asModelService(): AerospikeService = {
     val providerDAO = ConnectionRepository.getProviderService
     val modelService = new AerospikeService(
       this.name,
@@ -25,7 +25,7 @@ class ArspkDBServiceData() extends ServiceData() {
     modelService
   }
 
-  override def validate() = {
+  override def validate(): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
 
     errors ++= super.validateGeneralFields()

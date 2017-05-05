@@ -22,7 +22,7 @@ abstract class BatchCollector(protected val instance: BatchInstance,
   private val inputs = instance.getInputsWithoutStreamMode().map(x => streamDAO.get(x).get)
   private val currentBatchPerStream: Map[String, Batch] = createStorageOfBatches()
 
-  private def createStorageOfBatches() = {
+  private def createStorageOfBatches(): Map[String, Batch] = {
     inputs.map(x => (x.name, new Batch(x.name, x.tags))).toMap
   }
 
@@ -32,13 +32,13 @@ abstract class BatchCollector(protected val instance: BatchInstance,
     afterReceivingEnvelope(envelope)
   }
 
-  private def registerEnvelope(envelope: Envelope) = {
+  private def registerEnvelope(envelope: Envelope): Unit = {
     logger.debug(s"Register an envelope: ${envelope.toString}.")
     currentBatchPerStream(envelope.stream).envelopes += envelope
     performanceMetrics.addEnvelopeToInputStream(envelope)
   }
 
-  def collectBatch(streamName: String) = {
+  def collectBatch(streamName: String): Batch = {
     logger.info(s"It's time to collect batch (stream: $streamName)\n")
     val batch = currentBatchPerStream(streamName).copy()
     currentBatchPerStream(streamName).envelopes.clear()
@@ -47,11 +47,11 @@ abstract class BatchCollector(protected val instance: BatchInstance,
     batch
   }
 
-  protected def afterReceivingEnvelope(envelope: Envelope)
+  protected def afterReceivingEnvelope(envelope: Envelope): Unit
 
   def getBatchesToCollect(): Seq[String]
 
-  protected def prepareForNextCollecting(streamName: String)
+  protected def prepareForNextCollecting(streamName: String): Unit
 }
 
 

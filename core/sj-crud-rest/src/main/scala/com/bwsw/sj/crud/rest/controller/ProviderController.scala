@@ -2,7 +2,7 @@ package com.bwsw.sj.crud.rest.controller
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.exceptions.JsonDeserializationException
-import com.bwsw.sj.common.bll.ProviderService
+import com.bwsw.sj.common.service.ProviderService
 import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.crud.rest._
@@ -13,7 +13,7 @@ class ProviderController extends Controller {
   private val serializer = new JsonSerializer()
   override val service = new ProviderService()
 
-  def post(serializedEntity: String): RestResponse = {
+  def create(serializedEntity: String): RestResponse = {
     var response: RestResponse = new RestResponse()
 
     try {

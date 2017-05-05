@@ -32,7 +32,7 @@ class ModuleEnvironmentManager(options: String,
     * @param streamName Name of output stream
     * @return Partitioned output that wrapping output stream
     */
-  def getPartitionedOutput(streamName: String) = {
+  def getPartitionedOutput(streamName: String): PartitionedOutput = {
     logger.info(s"Get partitioned output for stream: $streamName\n")
     if (producers.contains(streamName)) {
       if (producerPolicyByOutput.contains(streamName)) {
@@ -60,7 +60,7 @@ class ModuleEnvironmentManager(options: String,
     * @param streamName Name of output stream
     * @return Round-robin output that wrapping output stream
     */
-  def getRoundRobinOutput(streamName: String) = {
+  def getRoundRobinOutput(streamName: String): RoundRobinOutput = {
     logger.info(s"Get round-robin output for stream: $streamName\n")
     if (producers.contains(streamName)) {
       if (producerPolicyByOutput.contains(streamName)) {
@@ -87,7 +87,7 @@ class ModuleEnvironmentManager(options: String,
     *
     * @param delay Time after which the handler will call (in milliseconds)
     */
-  def setTimer(delay: Long) = moduleTimer.set(delay)
+  def setTimer(delay: Long): Unit = moduleTimer.set(delay)
 
   /**
     * Provides a default method for getting state of module. Must be overridden in stateful module

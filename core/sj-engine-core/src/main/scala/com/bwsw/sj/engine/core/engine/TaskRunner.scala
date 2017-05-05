@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.core.engine
 
-import java.util.concurrent.{ExecutorCompletionService, ExecutorService, Executors}
+import java.util.concurrent.{ExecutorCompletionService, ExecutorService, Executors, ThreadFactory}
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import org.slf4j.LoggerFactory
@@ -22,28 +22,28 @@ trait TaskRunner {
   private val threadPool: ExecutorService = createThreadPool(threadName)
   protected val executorService = new ExecutorCompletionService[Unit](threadPool)
 
-  private def createThreadPool(factoryName: String) = {
+  private def createThreadPool(factoryName: String): ExecutorService = {
     logger.debug(s"Create a thread pool with $countOfThreads threads for task.")
     val threadFactory = createThreadFactory(factoryName)
 
     Executors.newFixedThreadPool(countOfThreads, threadFactory)
   }
 
-  private def createThreadFactory(name: String) = {
+  private def createThreadFactory(name: String): ThreadFactory = {
     logger.debug("Create a thread factory.")
     new ThreadFactoryBuilder()
       .setNameFormat(name)
       .build()
   }
 
-  private def handleException(exception: Throwable) = {
+  private def handleException(exception: Throwable): Unit = {
     logger.error("Runtime exception", exception)
     exception.printStackTrace()
     threadPool.shutdownNow()
     System.exit(-1)
   }
 
-  def waitForCompletion() = {
+  def waitForCompletion(): Unit = {
     var i = 0
     try {
       while (i < countOfThreads) {

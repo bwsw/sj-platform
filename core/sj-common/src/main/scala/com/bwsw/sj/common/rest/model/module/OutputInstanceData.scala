@@ -15,7 +15,7 @@ class OutputInstanceData extends InstanceData with AvroSchemaForInstanceMetadata
   var input: String = null
   var output: String = null
 
-  override def asModelInstance() = {
+  override def asModelInstance(): OutputInstance = {
     val serviceDAO = ConnectionRepository.getServiceManager
     val service = serviceDAO.get(this.coordinationService).get.asInstanceOf[ZKService]
 
@@ -37,17 +37,17 @@ class OutputInstanceData extends InstanceData with AvroSchemaForInstanceMetadata
                                moduleName: String,
                                moduleVersion: String,
                                engineName: String,
-                               engineVersion: String) = {
+                               engineVersion: String): Unit = {
     val clearInputs = Array(clearStreamFromMode(this.input))
     super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion)
     castParallelismToNumber(getStreamsPartitions(clearInputs))
     this.executionPlan.fillTasks(createTaskStreams(), createTaskNames(this.parallelism.asInstanceOf[Int], this.name))
   }
 
-  override def createStreams() = {
+  override def createStreams(): Unit = {
     val sjStreams = getStreams(Array(clearStreamFromMode(this.input)))
     sjStreams.foreach(_.create())
   }
 
-  override def inputsOrEmptyList() = Array(this.input)
+  override def inputsOrEmptyList(): Array[String] = Array(this.input)
 }

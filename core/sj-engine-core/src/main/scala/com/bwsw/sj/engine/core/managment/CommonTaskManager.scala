@@ -1,9 +1,9 @@
 package com.bwsw.sj.engine.core.managment
 
-import com.bwsw.sj.common.dal.model._
 import com.bwsw.sj.common.dal.model.module.{BatchInstance, RegularInstance}
 import com.bwsw.sj.common.dal.model.stream.SjStream
 import com.bwsw.sj.common.engine.StreamingExecutor
+import com.bwsw.sj.common.rest.model.module.ExecutionPlan
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.batch.{BatchCollector, BatchStreamingPerformanceMetrics}
 import com.bwsw.sj.engine.core.environment.{EnvironmentManager, ModuleEnvironmentManager}
@@ -55,7 +55,7 @@ class CommonTaskManager() extends TaskManager {
     }
   }
 
-  private def getExecutionPlan() = {
+  private def getExecutionPlan(): ExecutionPlan = {
     logger.debug("Get an execution plan of instance.")
     instance match {
       case regularInstance: RegularInstance =>

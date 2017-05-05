@@ -26,7 +26,7 @@ class InputStreamingPerformanceMetrics(manager: InputTaskManager)
   /**
    * Invokes when a new envelope from the input stream is received
    */
-  override def addEnvelopeToInputStream(envelope: Envelope) = {
+  override def addEnvelopeToInputStream(envelope: Envelope): Unit = {
     val inputEnvelope = envelope.asInstanceOf[InputEnvelope[AnyRef]]
     super.addEnvelopeToInputStream(inputStreamName, List(inputEnvelope.data.toString.length)) //todo придумать другой способ извлечения информации
   }
@@ -77,7 +77,7 @@ class InputStreamingPerformanceMetrics(manager: InputTaskManager)
     reportSerializer.serialize(report)
   }
 
-  override def clear() = {
+  override def clear(): Unit = {
     logger.debug(s"Reset variables of performance report for next reporting.")
     inputEnvelopesPerStream = mutable.Map(inputStreamName -> mutable.ListBuffer[List[Int]]())
     outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)

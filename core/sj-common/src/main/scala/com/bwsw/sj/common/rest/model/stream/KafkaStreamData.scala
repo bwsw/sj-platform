@@ -21,7 +21,7 @@ class KafkaStreamData() extends StreamData() {
   var partitions: Int = Int.MinValue
   var replicationFactor: Int = Int.MinValue
 
-  override def validate() = {
+  override def validate(): ArrayBuffer[String] = {
     val serviceDAO = ConnectionRepository.getServiceManager
     val errors = new ArrayBuffer[String]()
 
@@ -68,7 +68,7 @@ class KafkaStreamData() extends StreamData() {
     errors
   }
 
-  override def asModelStream() = {
+  override def asModelStream(): KafkaSjStream = {
     val serviceDAO = ConnectionRepository.getServiceManager
     val modelStream = new KafkaSjStream(
       this.name,
@@ -83,7 +83,7 @@ class KafkaStreamData() extends StreamData() {
     modelStream
   }
 
-  private def checkStreamPartitionsOnConsistency(service: KafkaService) = {
+  private def checkStreamPartitionsOnConsistency(service: KafkaService): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
     val zkUtils = createZkUtils()
     val topicMetadata = AdminUtils.fetchTopicMetadataFromZk(this.name, zkUtils)
@@ -94,7 +94,7 @@ class KafkaStreamData() extends StreamData() {
     errors
   }
 
-  override def create() = {
+  override def create(): Unit = {
     try {
       val zkUtils = createZkUtils()
       if (doesStreamHaveForcedCreation(zkUtils)) {
@@ -111,7 +111,7 @@ class KafkaStreamData() extends StreamData() {
     }
   }
 
-  private def createZkUtils() = {
+  private def createZkUtils(): ZkUtils = {
     val serviceDAO = ConnectionRepository.getServiceManager
     val service = serviceDAO.get(this.service).get.asInstanceOf[KafkaService]
     val zkHost = service.zkProvider.hosts
@@ -123,18 +123,18 @@ class KafkaStreamData() extends StreamData() {
     zkUtils
   }
 
-  private def doesStreamHaveForcedCreation(zkUtils: ZkUtils) = {
+  private def doesStreamHaveForcedCreation(zkUtils: ZkUtils): Boolean = {
     doesTopicExist(zkUtils) && this.force
   }
 
-  private def doesTopicExist(zkUtils: ZkUtils) = {
+  private def doesTopicExist(zkUtils: ZkUtils): Boolean = {
     AdminUtils.topicExists(zkUtils, this.name)
   }
 
-  private def deleteTopic(zkUtils: ZkUtils) = AdminUtils.deleteTopic(zkUtils, this.name)
+  private def deleteTopic(zkUtils: ZkUtils): Unit = AdminUtils.deleteTopic(zkUtils, this.name)
 
 
-  private def createTopic(zkUtils: ZkUtils) = {
+  private def createTopic(zkUtils: ZkUtils): Unit = {
     AdminUtils.createTopic(zkUtils, this.name, this.partitions, this.replicationFactor, new Properties())
   }
 }

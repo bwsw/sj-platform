@@ -30,21 +30,21 @@ object GeoIp {
     }
   }
 
-  private def getAsLookupServiceIpv4 = {
+  private def getAsLookupServiceIpv4: LookupService = {
     logger.debug("Create a geo ip lookup service of ipv4")
     val geoIpFileName = ConfigurationSettingsUtils.getGeoIpAsNumFileName()
 
     createLookupService(geoIpFileName)
   }
 
-  private def getAsLookupServiceIpv6 = {
+  private def getAsLookupServiceIpv6: LookupService = {
     logger.debug("Create a geo ip lookup service of ipv6")
     val geoIpFileName = ConfigurationSettingsUtils.getGeoIpAsNumv6FileName()
 
     createLookupService(geoIpFileName)
   }
 
-  private def createLookupService(filename: String) = {
+  private def createLookupService(filename: String): LookupService = {
     val databaseFile = fileStorage.get(filename, filename)
 
     new LookupService(databaseFile)

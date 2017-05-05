@@ -27,10 +27,11 @@ object FrameworkUtil {
 
   /**
    * Count how much ports must be for current task.
-   * @param instance current launched task
+    *
+    * @param instance current launched task
    * @return ports count for current task
    */
-  def getCountPorts(instance: Instance) = {
+  def getCountPorts(instance: Instance): Int = {
     instance match {
       case _: OutputInstance => 2
       case regularInstance: RegularInstance => regularInstance.inputs.length + regularInstance.outputs.length + 4
@@ -42,7 +43,7 @@ object FrameworkUtil {
   /**
    * Handler for Scheduler Exception
    */
-  def handleSchedulerException(e: Exception, logger: Logger) = {
+  def handleSchedulerException(e: Exception, logger: Logger): Unit = {
     val sw = new StringWriter
     e.printStackTrace(new PrintWriter(sw))
     TasksList.setMessage(e.getMessage)
@@ -51,7 +52,7 @@ object FrameworkUtil {
     System.exit(1)
   }
 
-  def getEnvParams = {
+  def getEnvParams: Map[String, String] = {
     Map(
       "instanceId" -> Properties.envOrElse("INSTANCE_ID", "00000000-0000-0000-0000-000000000000"),
       "mongodbHosts" -> Properties.envOrElse("MONGO_HOSTS", "127.0.0.1:27017")
@@ -60,7 +61,8 @@ object FrameworkUtil {
 
   /**
    * Get jar URI for framework
-   * @param instance:Instance
+    *
+    * @param instance:Instance
    * @return String
    */
   def getModuleUrl(instance: Instance): String = {
@@ -77,7 +79,7 @@ object FrameworkUtil {
     instance.status == "started"
   }
 
-  def killAllLaunchedTasks() = {
+  def killAllLaunchedTasks(): Unit = {
     TasksList.getLaunchedTasks.foreach(taskId => {
       TasksList.killTask(taskId)
     })
@@ -86,7 +88,7 @@ object FrameworkUtil {
   /**
     * Teardown framework, do it if instance not started.
     */
-  def teardown() = {
+  def teardown(): Unit = {
     logger.info(s"Kill all launched tasks: ${TasksList.getLaunchedTasks}")
     killAllLaunchedTasks()
   }
@@ -94,7 +96,7 @@ object FrameworkUtil {
   /**
     * Selecting which tasks would be launched
     */
-  def prepareTasksToLaunch() = {
+  def prepareTasksToLaunch(): Unit = {
     TasksList.getList.foreach(task => {
       if (!TasksList.getLaunchedTasks.contains(task.id)) TasksList.addToLaunch(task.id)
     })
@@ -102,7 +104,7 @@ object FrameworkUtil {
   }
 
 
-  def updateInstance() = {
+  def updateInstance(): Any = {
     val optionInstance = ConnectionRepository.getInstanceService.get(FrameworkUtil.params("instanceId"))
 
     if (optionInstance.isEmpty) {

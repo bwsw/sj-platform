@@ -67,7 +67,7 @@ class LocalStorage(pathToLocalStorage: String) extends FileStorage {
     Directory.apply(Path(pathToLocalStorage).toAbsolute).files.map(_.name).toSeq
   }
 
-  override def put(file: File, fileName: String, specification: Map[String, Any], filetype: String) = {
+  override def put(file: File, fileName: String, specification: Map[String, Any], filetype: String): Unit = {
     throw new NotImplementedError("Local storage hasn't an opportunity to save file with specification yet.")
   }
 

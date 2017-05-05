@@ -18,7 +18,7 @@ class RetrievableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMan
   private val retrievableKafkaTaskInput = new RetrievableKafkaCheckpointTaskInput[T](manager, checkpointGroup)
   private val retrievableTStreamTaskInput = new RetrievableTStreamCheckpointTaskInput[T](manager, checkpointGroup)
 
-  override def registerEnvelope(envelope: Envelope) = {
+  override def registerEnvelope(envelope: Envelope): Unit = {
     envelope match {
       case tstreamEnvelope: TStreamEnvelope[T] =>
         retrievableTStreamTaskInput.registerEnvelope(tstreamEnvelope)
@@ -30,11 +30,11 @@ class RetrievableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMan
     }
   }
 
-  override def get() = {
+  override def get(): Iterable[Envelope] = {
     retrievableKafkaTaskInput.get() ++ retrievableTStreamTaskInput.get()
   }
 
-  override def setConsumerOffset(envelope: Envelope) = {
+  override def setConsumerOffset(envelope: Envelope): Unit = {
     envelope match {
       case tstreamEnvelope: TStreamEnvelope[T] =>
         retrievableTStreamTaskInput.setConsumerOffset(tstreamEnvelope)

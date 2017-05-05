@@ -21,7 +21,7 @@ class KafkaSjStream(override val name: String,
                     override val streamType: String = StreamLiterals.kafkaStreamType)
   extends SjStream(name, description, service, force, tags, streamType) {
 
-  override def asProtocolStream() = {
+  override def asProtocolStream(): KafkaStreamData = {
     val streamData = new KafkaStreamData
     super.fillProtocolStream(streamData)
 
@@ -31,7 +31,7 @@ class KafkaSjStream(override val name: String,
     streamData
   }
 
-  override def create() = {
+  override def create(): Unit = {
     try {
       val zkUtils = createZkUtils()
       if (!AdminUtils.topicExists(zkUtils, this.name)) {
@@ -43,7 +43,7 @@ class KafkaSjStream(override val name: String,
     }
   }
 
-  override def delete() = {
+  override def delete(): Unit = {
     try {
       val zkUtils = createZkUtils()
       if (AdminUtils.topicExists(zkUtils, this.name)) {
@@ -55,7 +55,7 @@ class KafkaSjStream(override val name: String,
     }
   }
 
-  private def createZkUtils() = {
+  private def createZkUtils(): ZkUtils = {
     val zkHost = this.service.zkProvider.hosts
     val zkConnect = new ZkConnection(zkHost.mkString(";"))
     val zkTimeout = ConfigurationSettingsUtils.getZkSessionTimeout()

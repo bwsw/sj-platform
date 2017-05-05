@@ -14,7 +14,7 @@ class TstrQServiceData() extends ServiceData() {
   var prefix: String = null
   var token: String = null
 
-  override def asModelService() = {
+  override def asModelService(): TStreamService = {
     val providerDAO = ConnectionRepository.getProviderService
     val modelService = new TStreamService(
       this.name,
@@ -27,7 +27,7 @@ class TstrQServiceData() extends ServiceData() {
     modelService
   }
 
-  override def validate() = {
+  override def validate(): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
     val providerDAO = ConnectionRepository.getProviderService
 

@@ -35,7 +35,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private val environmentManager = createModuleEnvironmentManager()
   private val executor = manager.getExecutor(environmentManager)
   private val entity: Entity[_] = executor.getOutputEntity
-  val taskInputService = new CallableTStreamCheckpointTaskInput[AnyRef](manager, blockingQueue)
+  val taskInputService: CallableTStreamCheckpointTaskInput[AnyRef] = new CallableTStreamCheckpointTaskInput[AnyRef](manager, blockingQueue)
   private val outputProcessor = OutputProcessor[AnyRef](outputStream, performanceMetrics, manager, entity)
   private var wasFirstCheckpoint = false
   protected val checkpointInterval = instance.checkpointInterval
@@ -45,7 +45,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     instance.outputs.flatMap(x => streamService.get(x)).head
   }
 
-  private def createModuleEnvironmentManager() = {
+  private def createModuleEnvironmentManager(): OutputEnvironmentManager = {
     val streamService = ConnectionRepository.getStreamService
     val outputs = instance.outputs
       .flatMap(x => streamService.get(x))
@@ -82,7 +82,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   /**
     * Handler for sending data to storage.
     */
-  private def processOutputEnvelope(envelope: Envelope) = {
+  private def processOutputEnvelope(envelope: Envelope): Unit = {
     afterReceivingEnvelope()
     val inputEnvelope = envelope.asInstanceOf[TStreamEnvelope[AnyRef]]
     registerInputEnvelope(inputEnvelope)
@@ -96,7 +96,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
     *
     * @param envelope : received data
     */
-  private def registerInputEnvelope(envelope: TStreamEnvelope[AnyRef]) = {
+  private def registerInputEnvelope(envelope: TStreamEnvelope[AnyRef]): Unit = {
     taskInputService.registerEnvelope(envelope)
     performanceMetrics.addEnvelopeToInputStream(envelope)
   }
@@ -109,7 +109,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   /**
     * Does group checkpoint of t-streams consumers/producers
     */
-  protected def doCheckpoint() = {
+  protected def doCheckpoint(): Unit = {
     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint.")
     taskInputService.doCheckpoint()
     logger.debug(s"Task: ${manager.taskName}. Do group checkpoint.")

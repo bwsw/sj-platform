@@ -1,4 +1,4 @@
-package com.bwsw.sj.common.bll
+package com.bwsw.sj.common.service
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.service.GenericMongoRepository

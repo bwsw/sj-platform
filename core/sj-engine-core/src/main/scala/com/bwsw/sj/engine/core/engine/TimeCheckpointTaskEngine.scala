@@ -15,7 +15,7 @@ trait TimeCheckpointTaskEngine {
 
   if (isNotOnlyCustomCheckpoint) setTimer()
 
-  private def createTimer() = {
+  private def createTimer(): Option[SjTimer] = {
     if (checkpointInterval > 0) {
       logger.debug(s"Create a checkpoint timer.")
       Some(new SjTimer())
@@ -25,7 +25,7 @@ trait TimeCheckpointTaskEngine {
     }
   }
 
-  private def setTimer() = {
+  private def setTimer(): Unit = {
     checkpointTimer.get.set(checkpointInterval)
   }
 
@@ -33,11 +33,11 @@ trait TimeCheckpointTaskEngine {
     isNotOnlyCustomCheckpoint && checkpointTimer.get.isTime || isCheckpointInitiated
   }
 
-  def prepareForNextCheckpoint() = {
+  def prepareForNextCheckpoint(): Unit = {
     resetTimer()
   }
 
-  private def resetTimer() = {
+  private def resetTimer(): Unit = {
     if (isNotOnlyCustomCheckpoint) {
       logger.debug(s"Prepare a checkpoint timer for next cycle.")
       checkpointTimer.get.reset()

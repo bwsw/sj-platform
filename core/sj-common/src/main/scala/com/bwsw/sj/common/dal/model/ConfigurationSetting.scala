@@ -13,7 +13,7 @@ import org.mongodb.morphia.annotations.Entity
 @Entity("config")
 class ConfigurationSetting(@IdField val name: String, val value: String, val domain: String) {
 
-  def asProtocolConfigurationSetting() = {
+  def asProtocolConfigurationSetting(): ConfigurationSettingData = {
     val configurationSettingData = new ConfigurationSettingData(
       clearConfigurationSettingName(domain, name),
       this.value,

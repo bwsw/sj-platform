@@ -14,7 +14,7 @@ trait SjProvidersRoute extends Directives with SjCrudValidator {
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>
           val entity = getEntityFromContext(ctx)
-          val response = providerController.post(entity)
+          val response = providerController.create(entity)
 
           ctx.complete(restResponseToHttpResponse(response))
         } ~

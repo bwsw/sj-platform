@@ -14,7 +14,7 @@ class KfkQServiceData() extends ServiceData() {
   var zkProvider: String = null
   var zkNamespace: String = null
 
-  override def asModelService() = {
+  override def asModelService(): KafkaService = {
     val providerDAO = ConnectionRepository.getProviderService
     val modelService = new KafkaService(
       this.name,
@@ -27,7 +27,7 @@ class KfkQServiceData() extends ServiceData() {
     modelService
   }
 
-  override def validate() = {
+  override def validate(): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
     val providerDAO = ConnectionRepository.getProviderService
 
