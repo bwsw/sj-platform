@@ -127,16 +127,14 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
   }
 
   private def getChannelContext() = {
-    var channelContext = channelContextQueue.poll(EngineLiterals.eventWaitTimeout, TimeUnit.MILLISECONDS)
-    if (channelContext == null) channelContext = getCtxOfNonEmptyBuffer()
+    var channelContext = Option(channelContextQueue.poll(EngineLiterals.eventWaitTimeout, TimeUnit.MILLISECONDS))
+    if (channelContext.isEmpty) channelContext = getCtxOfNonEmptyBuffer
 
-    Option(channelContext)
+    channelContext
   }
 
-  private def getCtxOfNonEmptyBuffer() = {
-    val maybeCtx = bufferForEachContext.find(x => x._2.readableBytes() > 0)
-    if (maybeCtx.isDefined) maybeCtx.get._1 else null
-  }
+  private def getCtxOfNonEmptyBuffer =
+    bufferForEachContext.find(x => x._2.readableBytes() > 0).map(_._1)
 
   private def tryToRead(channelContext: ChannelHandlerContext, interval: Interval) = {
     val buffer = bufferForEachContext(channelContext)
