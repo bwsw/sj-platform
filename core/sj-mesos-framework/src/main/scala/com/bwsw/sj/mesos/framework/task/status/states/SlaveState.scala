@@ -1,59 +1,57 @@
 package com.bwsw.sj.mesos.framework.task.status.states
 
-class SlaveState() {
-  var start_time:Any = _
-  var hostname:Any = _
-  var master_hostname:Any = _
-  var git_tag:Any = _
-  var flags:Any = _
-  var log_dir:Any = _
-  var frameworks:Array[Framework] = _
-  var git_sha:Any = _
-  var build_date:Any = _
-  var attributes:Any = _
-  var completed_frameworks:Any = _
-  var version:Any = _
-  var id:String = _
-  var pid:String = _
-  var build_user:Any = _
-  var resources:Any = _
-  var build_time:Any = _
-}
+class SlaveState(
+                  var start_time: Any,
+                  var hostname: Any,
+                  var master_hostname: Any,
+                  var git_tag: Any,
+                  var flags: Any,
+                  var log_dir: Any,
+                  var frameworks: Array[Framework],
+                  var git_sha: Any,
+                  var build_date: Any,
+                  var attributes: Any,
+                  var completed_frameworks: Any,
+                  var version: Any,
+                  var id: String,
+                  var pid: String,
+                  var build_user: Any,
+                  var resources: Any,
+                  var build_time: Any)
 
-class Framework() {
-  var capabilities:Array[Any] = _
-  var name:String = _
-  var completed_executors:Array[Map[String, Any]] = _
-  var hostname:String = _
-  var role:String = _
-  var registered_time:Double = _
-  var unregistered_time:Double = _
-  var executors:Array[Executor] = _
-  var completed_tasks:Array[Any] = _
-  var offered_resources:Map[String,Any] = _
-  var id:String = _
-  var offers:Array[Any] = _
-  var tasks:Array[Map[String,Any]] = _
-  var pid:String = _
-  var failover_timeout:Double = _
-  var principal:String = _
-  var checkpoint:Boolean = _
-  var resources:Map[String,Any] = _
-  var used_resources:Map[String,Any] = _
-  var webui_url:String = _
-  var user:String = _
-  var active:Boolean = _
-  var reregistered_time:Double = _
-}
+class Framework(
+                 var capabilities: Array[Any],
+                 var name: String,
+                 var completed_executors: Array[Map[String, Any]],
+                 var hostname: String,
+                 var role: String,
+                 var registered_time: Double,
+                 var unregistered_time: Double,
+                 var executors: Array[Executor],
+                 var completed_tasks: Array[Any],
+                 var offered_resources: Map[String, Any],
+                 var id: String,
+                 var offers: Array[Any],
+                 var tasks: Array[Map[String, Any]],
+                 var pid: String,
+                 var failover_timeout: Double,
+                 var principal: String,
+                 var checkpoint: Boolean,
+                 var resources: Map[String, Any],
+                 var used_resources: Map[String, Any],
+                 var webui_url: String,
+                 var user: String,
+                 var active: Boolean,
+                 var reregistered_time: Double
+               )
 
-class Executor() {
-  var name:String = _
-  var source:String = _
-  var container:String = _
-  var completed_tasks:Array[Map[String, Any]] = _
-  var id:String = _
-  var tasks:Array[Map[String, Any]] = _
-  var resources:Map[String, Any] = _
-  var queued_tasks:Array[Map[String, Any]] = _
-  var directory:String = _
-}
+class Executor(
+                var name: String,
+                var source: String,
+                var container: String,
+                var completed_tasks: Array[Map[String, Any]],
+                var id: String,
+                var tasks: Array[Map[String, Any]],
+                var resources: Map[String, Any],
+                var queued_tasks: Array[Map[String, Any]],
+                var directory: String)

@@ -16,11 +16,11 @@ import scala.util.Properties
 
 
 object FrameworkUtil {
-  var master: MasterInfo = _
-  var frameworkId: String = _
-  var driver: SchedulerDriver = _
-  var jarName: String = _
-  var instance: Instance = _
+  var master: Option[MasterInfo] = None
+  var frameworkId: Option[String] = None
+  var driver: Option[SchedulerDriver] = None
+  var jarName: Option[String] = None
+  var instance: Option[Instance] = None
   val configFileService = ConnectionRepository.getConfigService
   private val logger = Logger.getLogger(this.getClass)
   var params = immutable.Map[String, String]()
@@ -47,7 +47,7 @@ object FrameworkUtil {
     e.printStackTrace(new PrintWriter(sw))
     TasksList.setMessage(e.getMessage)
     logger.error(s"Framework error: ${sw.toString}")
-    driver.stop()
+    driver.foreach(_.stop())
     System.exit(1)
   }
 
@@ -64,17 +64,17 @@ object FrameworkUtil {
    * @return String
    */
   def getModuleUrl(instance: Instance): String = {
-    jarName = configFileService.get("system." + instance.engine).get.value
+    jarName = configFileService.get("system." + instance.engine).map(_.asInstanceOf)
     val restHost = configFileService.get(ConfigLiterals.hostOfCrudRestTag).get.value
     val restPort = configFileService.get(ConfigLiterals.portOfCrudRestTag).get.value.toInt
-    val restAddress = new URI(s"http://$restHost:$restPort/v1/custom/jars/$jarName").toString
+    val restAddress = new URI(s"http://$restHost:$restPort/v1/custom/jars/${jarName.get}").toString
     logger.debug(s"Engine downloading URL: $restAddress.")
     restAddress
   }
 
   def isInstanceStarted: Boolean = {
     updateInstance()
-    instance.status == "started"
+    instance.exists(_.status == "started")
   }
 
   def killAllLaunchedTasks() = {
@@ -108,9 +108,9 @@ object FrameworkUtil {
     if (optionInstance.isEmpty) {
       logger.error(s"Not found instance")
       TasksList.setMessage("Framework shut down: not found instance.")
-      driver.stop()
+      driver.foreach(_.stop())
     } else {
-      FrameworkUtil.instance = optionInstance.get
+      FrameworkUtil.instance = optionInstance
     }
   }
 }

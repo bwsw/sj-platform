@@ -11,7 +11,7 @@ object SuccessHandler {
   def process(status: TaskStatus) = {
     val currentSlave = getCurrentSlave(status.getSlaveId)
     val dir = extractSandbox(currentSlave, status.getTaskId)
-    val dirUrl = s"http://${FrameworkUtil.master.getHostname}:${FrameworkUtil.master.getPort}/#/slaves/${currentSlave.id}/browse?path=$dir"
+    val dirUrl = s"http://${FrameworkUtil.master.get.getHostname}:${FrameworkUtil.master.get.getPort}/#/slaves/${currentSlave.id}/browse?path=$dir"
 
     TasksList(status.getTaskId.getValue).foreach(task => task.update(
       directory = dirUrl
@@ -20,7 +20,7 @@ object SuccessHandler {
   }
 
   def getCurrentSlave(slaveId: SlaveID) = {
-    val masterStateUrl = s"http://${FrameworkUtil.master.getHostname}:${FrameworkUtil.master.getPort}/state.json"
+    val masterStateUrl = s"http://${FrameworkUtil.master.get.getHostname}:${FrameworkUtil.master.get.getPort}/state.json"
     val masterResponse = scala.io.Source.fromURL(masterStateUrl).mkString
     val masterObj = StatusHandler.serializer.deserialize[MasterState](masterResponse)
     masterObj.slaves.filter(slave => slave.id == slaveId.getValue).head
@@ -31,7 +31,7 @@ object SuccessHandler {
     val slaveStateUrl = s"http://$slaveHost/state.json"
     val slaveResponse = scala.io.Source.fromURL(slaveStateUrl).mkString
     val obj = StatusHandler.serializer.deserialize[SlaveState](slaveResponse)
-    val framework = obj.frameworks.filter(framework => framework.id == FrameworkUtil.frameworkId).head
+    val framework = obj.frameworks.filter(framework => FrameworkUtil.frameworkId.contains(framework.id)).head
     framework.executors.filter(executor => executor.id == taskId.getValue).head.directory
   }
 }
