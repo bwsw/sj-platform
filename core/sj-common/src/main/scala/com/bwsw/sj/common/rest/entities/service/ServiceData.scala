@@ -22,10 +22,11 @@ import scala.collection.mutable.ArrayBuffer
   new Type(value = classOf[JDBCServiceData], name = ServiceLiterals.jdbcType),
   new Type(value = classOf[RestServiceData], name = ServiceLiterals.restType)
 ))
-class ServiceData() extends ValidationUtils with MessageResourceUtils {
-  @JsonProperty("type") var serviceType: String = _
-  var name: String = _
-  var description: String = "No description"
+class ServiceData(
+                   @JsonProperty("type") val serviceType: String,
+                   val name: String,
+                   val description: String = ServiceLiterals.defaultDescription)
+  extends ValidationUtils with MessageResourceUtils {
 
   @JsonIgnore
   def asModelService(): Service = ???

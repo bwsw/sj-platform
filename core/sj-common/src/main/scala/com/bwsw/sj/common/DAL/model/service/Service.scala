@@ -14,10 +14,4 @@ class Service(@IdField val name: String,
   def destroy(): Unit = {}
 
   def asProtocolService(): ServiceData = ???
-
-  protected def fillProtocolService(protocolService: ServiceData) = {
-    protocolService.name = this.name
-    protocolService.description = this.description
-    protocolService.serviceType = this.serviceType
-  }
 }

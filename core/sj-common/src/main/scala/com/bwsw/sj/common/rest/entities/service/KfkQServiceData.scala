@@ -6,11 +6,13 @@ import com.bwsw.sj.common.utils.{ProviderLiterals, ServiceLiterals}
 
 import scala.collection.mutable.ArrayBuffer
 
-class KfkQServiceData() extends ServiceData() {
-  serviceType = ServiceLiterals.kafkaType
-  var provider: String = _
-  var zkProvider: String = _
-  var zkNamespace: String = _
+class KfkQServiceData(
+                       override val name: String,
+                       val provider: String,
+                       val zkProvider: String,
+                       val zkNamespace: String,
+                       override val description: String = ServiceLiterals.defaultDescription)
+  extends ServiceData(ServiceLiterals.kafkaType, name, description) {
 
   override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService

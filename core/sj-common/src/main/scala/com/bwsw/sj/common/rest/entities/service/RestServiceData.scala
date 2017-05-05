@@ -10,12 +10,14 @@ import scala.collection.JavaConverters._
 /**
   * @author Pavel Tomskikh
   */
-class RestServiceData extends ServiceData {
-  serviceType = ServiceLiterals.restType
-  var provider: String = _
-  var basePath: String = "/"
-  var httpVersion: String = RestLiterals.http_1_1
-  var headers: Map[String, String] = Map()
+class RestServiceData(
+                       override val name: String,
+                       val provider: String,
+                       val basePath: String = "/",
+                       val httpVersion: String = RestLiterals.http_1_1,
+                       val headers: Map[String, String] = Map(),
+                       override val description: String = ServiceLiterals.defaultDescription)
+  extends ServiceData(ServiceLiterals.restType, name, description) {
 
   override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService

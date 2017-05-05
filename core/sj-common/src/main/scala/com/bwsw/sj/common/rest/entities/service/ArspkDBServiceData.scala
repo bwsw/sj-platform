@@ -6,10 +6,12 @@ import com.bwsw.sj.common.utils.ServiceLiterals
 
 import scala.collection.mutable.ArrayBuffer
 
-class ArspkDBServiceData() extends ServiceData() {
-  serviceType = ServiceLiterals.aerospikeType
-  var namespace: String = _
-  var provider: String = _
+class ArspkDBServiceData(
+                          override val name: String,
+                          val namespace: String,
+                          val provider: String,
+                          override val description: String = ServiceLiterals.defaultDescription)
+  extends ServiceData(ServiceLiterals.aerospikeType, name, description) {
 
   override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService

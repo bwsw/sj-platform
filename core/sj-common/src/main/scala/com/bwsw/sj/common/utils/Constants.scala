@@ -115,6 +115,8 @@ object ServiceLiterals {
     restType -> ProviderLiterals.restType,
     tstreamsType -> ProviderLiterals.zookeeperType
   )
+
+  final val defaultDescription = "No description"
 }
 
 object ProviderLiterals {

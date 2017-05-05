@@ -12,13 +12,6 @@ class ESService(override val name: String,
                 override val serviceType: String = ServiceLiterals.elasticsearchType)
   extends Service(name, description, serviceType) {
 
-  override def asProtocolService(): ServiceData = {
-    val protocolService = new EsServiceData()
-    super.fillProtocolService(protocolService)
-
-    protocolService.index = this.index
-    protocolService.provider = this.provider.name
-
-    protocolService
-  }
+  override def asProtocolService(): ServiceData =
+    new EsServiceData(name, provider.name, index, description)
 }

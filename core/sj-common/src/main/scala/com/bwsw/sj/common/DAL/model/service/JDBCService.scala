@@ -16,11 +16,6 @@ class JDBCService(override val name: String,
                   override val serviceType: String = ServiceLiterals.jdbcType)
   extends Service(name, description, serviceType) {
 
-  override def asProtocolService(): ServiceData = {
-    val protocolService = new JDBCServiceData()
-    super.fillProtocolService(protocolService)
-    protocolService.provider = this.provider.name
-    protocolService.database = this.database
-    protocolService
-  }
+  override def asProtocolService(): ServiceData =
+    new JDBCServiceData(name, provider.name, database, description)
 }

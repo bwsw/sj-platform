@@ -13,14 +13,6 @@ class KafkaService(override val name: String,
                    override val serviceType: String = ServiceLiterals.kafkaType)
   extends Service(name, description, serviceType) {
 
-  override def asProtocolService(): ServiceData = {
-    val protocolService = new KfkQServiceData()
-    super.fillProtocolService(protocolService)
-
-    protocolService.provider = this.provider.name
-    protocolService.zkProvider = this.zkProvider.name
-    protocolService.zkNamespace = this.zkNamespace
-
-    protocolService
-  }
+  override def asProtocolService(): ServiceData =
+    new KfkQServiceData(name, provider.name, zkProvider.name, zkNamespace, description)
 }

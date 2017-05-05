@@ -22,14 +22,11 @@ class RestService(override val name: String,
                   override val serviceType: String = ServiceLiterals.restType)
   extends Service(name, description, serviceType) {
 
-  override def asProtocolService = {
-    val protocolService = new RestServiceData
-    super.fillProtocolService(protocolService)
-    protocolService.provider = provider.name
-    protocolService.basePath = basePath
-    protocolService.httpVersion = RestLiterals.httpVersionToString(httpVersion)
-    protocolService.headers = Map(headers.asScala.toList: _*)
-
-    protocolService
-  }
+  override def asProtocolService() = new RestServiceData(
+    name,
+    provider.name,
+    basePath,
+    RestLiterals.httpVersionToString(httpVersion),
+    Map(headers.asScala.toList: _*),
+    description)
 }

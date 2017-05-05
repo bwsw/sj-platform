@@ -6,11 +6,13 @@ import com.bwsw.sj.common.utils.ServiceLiterals
 
 import scala.collection.mutable.ArrayBuffer
 
-class TstrQServiceData() extends ServiceData() {
-  serviceType = ServiceLiterals.tstreamsType
-  var provider: String = _
-  var prefix: String = _
-  var token: String = _
+class TstrQServiceData(
+                        override val name: String,
+                        val provider: String,
+                        val prefix: String,
+                        val token: String,
+                        override val description: String = ServiceLiterals.defaultDescription)
+  extends ServiceData(ServiceLiterals.tstreamsType, name, description) {
 
   override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService

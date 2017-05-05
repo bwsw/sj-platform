@@ -12,13 +12,6 @@ class AerospikeService(override val name: String,
                        override val serviceType: String = ServiceLiterals.aerospikeType)
   extends Service(name, description, serviceType) {
 
-  override def asProtocolService(): ServiceData = {
-    val protocolService = new ArspkDBServiceData()
-    super.fillProtocolService(protocolService)
-
-    protocolService.namespace = this.namespace
-    protocolService.provider = this.provider.name
-
-    protocolService
-  }
+  override def asProtocolService(): ServiceData =
+    new ArspkDBServiceData(name, namespace, provider.name, description)
 }

@@ -6,10 +6,12 @@ import com.bwsw.sj.common.utils.ServiceLiterals
 
 import scala.collection.mutable.ArrayBuffer
 
-class ZKCoordServiceData() extends ServiceData() {
-  serviceType = ServiceLiterals.zookeeperType
-  var namespace: String = _
-  var provider: String = _
+class ZKCoordServiceData(
+                          override val name: String,
+                          val namespace: String,
+                          val provider: String,
+                          override val description: String = ServiceLiterals.defaultDescription)
+  extends ServiceData(ServiceLiterals.zookeeperType, name, description) {
 
   override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService

@@ -6,10 +6,12 @@ import com.bwsw.sj.common.utils.ServiceLiterals
 
 import scala.collection.mutable.ArrayBuffer
 
-class EsServiceData() extends ServiceData() {
-  serviceType = ServiceLiterals.elasticsearchType
-  var provider: String = _
-  var index: String = _
+class EsServiceData(
+                     override val name: String,
+                     val provider: String,
+                     val index: String,
+                     override val description: String = ServiceLiterals.defaultDescription)
+  extends ServiceData(ServiceLiterals.elasticsearchType, name, description) {
 
   override def asModelService() = {
     val providerDAO = ConnectionRepository.getProviderService

@@ -13,14 +13,6 @@ class TStreamService(override val name: String,
                      override val serviceType: String = ServiceLiterals.tstreamsType)
   extends Service(name, description, serviceType) {
 
-  override def asProtocolService(): ServiceData = {
-    val protocolService = new TstrQServiceData()
-    super.fillProtocolService(protocolService)
-
-    protocolService.provider = this.provider.name
-    protocolService.prefix = this.prefix
-    protocolService.token = this.token
-
-    protocolService
-  }
+  override def asProtocolService(): ServiceData =
+    new TstrQServiceData(name, provider.name, prefix, token, description)
 }

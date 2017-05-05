@@ -12,13 +12,6 @@ class ZKService(override val name: String,
                 override val serviceType: String = ServiceLiterals.zookeeperType)
   extends Service(name, description, serviceType) {
 
-  override def asProtocolService(): ServiceData = {
-    val protocolService = new ZKCoordServiceData()
-    super.fillProtocolService(protocolService)
-
-    protocolService.namespace = this.namespace
-    protocolService.provider = this.provider.name
-
-    protocolService
-  }
+  override def asProtocolService(): ServiceData =
+    new ZKCoordServiceData(name, namespace, provider.name, description)
 }

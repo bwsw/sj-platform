@@ -12,13 +12,6 @@ class CassandraService(override val name: String,
                        override val serviceType: String = ServiceLiterals.cassandraType)
   extends Service(name, description, serviceType) {
 
-  override def asProtocolService(): ServiceData = {
-    val protocolService = new CassDBServiceData()
-    super.fillProtocolService(protocolService)
-
-    protocolService.keyspace = this.keyspace
-    protocolService.provider = this.provider.name
-
-    protocolService
-  }
+  override def asProtocolService(): ServiceData =
+    new CassDBServiceData(name, provider.name, keyspace, description)
 }
