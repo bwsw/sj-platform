@@ -2,12 +2,17 @@ package com.bwsw.common
 
 import java.lang.reflect.{ParameterizedType, Type}
 
+import com.bwsw.common.exceptions._
 import com.bwsw.common.traits.Serializer
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.core.`type`.TypeReference
-import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
+import com.fasterxml.jackson.databind.{DeserializationFeature, JsonMappingException, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import org.slf4j.LoggerFactory
+
+import scala.collection.JavaConverters._
 
 class JsonSerializer extends Serializer {
 
@@ -33,7 +38,37 @@ class JsonSerializer extends Serializer {
 
   def deserialize[T: Manifest](value: String): T = {
     logger.debug(s"Deserialize a value: '$value' to object.")
-    mapper.readValue(value, typeReference[T])
+    try {
+      mapper.readValue(value, typeReference[T])
+    } catch {
+      case e: UnrecognizedPropertyException =>
+        throw new JsonUnrecognizedPropertyException(getProblemProperty(e))
+      case e: JsonMappingException =>
+        if (e.getMessage.startsWith("No content"))
+          throw new JsonDeserializationException("Empty JSON")
+        else
+          throw new JsonIncorrectValueException(getProblemProperty(e))
+      case e: JsonParseException =>
+        val position = e.getProcessor.getTokenLocation.getCharOffset.toInt
+        val leftBound = Math.max(0, position - 16)
+        val rightBound = Math.min(position + 16, value.length)
+        throw new JsonNotParsedException(value.substring(leftBound, rightBound))
+      case _: NullPointerException =>
+        throw new JsonDeserializationException("JSON is null")
+    }
+  }
+
+  private def getProblemProperty(exception: JsonMappingException) = {
+    exception.getPath.asScala.foldLeft("") { (s, ref) =>
+      val fieldName = ref.getFieldName
+      s + {
+        if (fieldName != null) {
+          if (s.isEmpty) ""
+          else "."
+        } + fieldName
+        else "(" + ref.getIndex + ")"
+      }
+    }
   }
 
   private def typeReference[T: Manifest]: TypeReference[T] = new TypeReference[T] {

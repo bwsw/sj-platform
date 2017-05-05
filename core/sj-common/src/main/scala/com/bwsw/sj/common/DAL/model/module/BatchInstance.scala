@@ -1,6 +1,7 @@
 package com.bwsw.sj.common.DAL.model.module
 
 import com.bwsw.common.JsonSerializer
+import com.bwsw.sj.common.DAL.model.service.ZKService
 import com.bwsw.sj.common.rest.entities.module.{BatchInstanceMetadata, ExecutionPlan, InstanceMetadata}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
@@ -11,7 +12,14 @@ import org.mongodb.morphia.annotations.{Embedded, Property}
   *
   * @author Kseniya Tomskikh
   */
-class BatchInstance() extends Instance with AvroSchemaForInstance {
+class BatchInstance(override val name: String,
+                    override val moduleType: String,
+                    override val moduleName: String,
+                    override val moduleVersion: String,
+                    override val engine: String,
+                    override val coordinationService: ZKService)
+  extends Instance(name, moduleType, moduleName, moduleVersion, engine, coordinationService) with AvroSchemaForInstance {
+
   var inputs: Array[String] = Array()
   var window: Int = 1
   @Property("sliding-interval") var slidingInterval: Int = 1

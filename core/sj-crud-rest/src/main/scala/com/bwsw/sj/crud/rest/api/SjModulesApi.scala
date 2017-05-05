@@ -9,6 +9,7 @@ import akka.http.scaladsl.model.{HttpEntity, HttpResponse, MediaTypes}
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.stream.scaladsl.FileIO
+import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.DAL.model.module._
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.engine.{StreamingValidator, ValidationInfo}
@@ -18,13 +19,14 @@ import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.crud.rest.RestLiterals
 import com.bwsw.sj.crud.rest.exceptions._
 import com.bwsw.sj.crud.rest.instance.{HttpClient, InstanceDestroyer, InstanceStarter, InstanceStopper}
+import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.instance.InstanceValidator
 import org.apache.commons.io.FileUtils
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.util.EntityUtils
 
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 trait SjModulesApi extends Directives with SjCrudValidator {
@@ -180,36 +182,46 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                                     specification: SpecificationData,
                                     filename: String) => post {
     entity(as[String]) { entity =>
-      validateWithSchema(entity, "instanceSchema.json")
-      val instanceMetadata = deserializeOptions(entity, moduleType)
-      val errors = validateInstance(instanceMetadata, specification, moduleType)
-      val instancePassedValidation = validateInstance(specification, filename, instanceMetadata)
-      var response: RestResponse = BadRequestRestResponse(
-        MessageResponseEntity(createMessage("rest.modules.instances.instance.cannot.create", errors.mkString(";"))))
+      var response: RestResponse = null
+      val errors = new ArrayBuffer[String]
+      try {
+        val instanceMetadata = deserializeOptions(entity, moduleType)
+        errors ++= validateInstance(instanceMetadata, specification, moduleType)
+        val instancePassedValidation = validateInstance(specification, filename, instanceMetadata)
 
-      if (errors.isEmpty) {
-        if (instancePassedValidation.result) {
-          instanceMetadata.prepareInstance(
-            moduleType,
-            moduleName,
-            moduleVersion,
-            specification.engineName,
-            specification.engineVersion
-          )
-          instanceMetadata.createStreams()
-          instanceDAO.save(instanceMetadata.asModelInstance())
+        if (errors.isEmpty) {
+          if (instancePassedValidation.result) {
+            instanceMetadata.prepareInstance(
+              moduleType,
+              moduleName,
+              moduleVersion,
+              specification.engineName,
+              specification.engineVersion
+            )
+            instanceMetadata.createStreams()
+            instanceDAO.save(instanceMetadata.asModelInstance())
 
-          response = CreatedRestResponse(MessageResponseEntity(createMessage(
-            "rest.modules.instances.instance.created",
-            instanceMetadata.name,
-            s"$moduleType-$moduleName-$moduleVersion"
-          )))
-        } else {
-          response = BadRequestRestResponse(MessageResponseEntity(createMessage(
-            "rest.modules.instances.instance.cannot.create.incorrect.parameters",
-            instancePassedValidation.errors.mkString(";")
-          )))
+            response = CreatedRestResponse(MessageResponseEntity(createMessage(
+              "rest.modules.instances.instance.created",
+              instanceMetadata.name,
+              s"$moduleType-$moduleName-$moduleVersion"
+            )))
+          } else {
+            response = BadRequestRestResponse(MessageResponseEntity(createMessage(
+              "rest.modules.instances.instance.cannot.create.incorrect.parameters",
+              instancePassedValidation.errors.mkString(";")
+            )))
+          }
         }
+
+      } catch {
+        case e: JsonDeserializationException =>
+          errors += JsonDeserializationErrorMessageCreator(e)
+      }
+
+      if (errors.nonEmpty) {
+        response = BadRequestRestResponse(
+          MessageResponseEntity(createMessage("rest.modules.instances.instance.cannot.create", errors.mkString(";"))))
       }
 
       complete(restResponseToHttpResponse(response))

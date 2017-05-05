@@ -2,35 +2,24 @@ package com.bwsw.sj.common.DAL.model.stream
 
 import java.util.Properties
 
-import com.bwsw.sj.common.DAL.model.service.{KafkaService, Service}
+import com.bwsw.sj.common.DAL.model.service.KafkaService
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.rest.entities.stream.KafkaStreamData
+import com.bwsw.sj.common.utils.StreamLiterals
 import kafka.admin.AdminUtils
 import kafka.common.TopicAlreadyMarkedForDeletionException
 import kafka.utils.ZkUtils
 import org.I0Itec.zkclient.ZkConnection
 
-class KafkaSjStream() extends SjStream {
-
-  var partitions: Int = 0
-  var replicationFactor: Int = 0
-
-  def this(name: String,
-           description: String,
-           partitions: Int,
-           service: Service,
-           streamType: String,
-           tags: Array[String],
-           replicationFactor: Int) = {
-    this()
-    this.name = name
-    this.description = description
-    this.partitions = partitions
-    this.service = service
-    this.streamType = streamType
-    this.tags = tags
-    this.replicationFactor = replicationFactor
-  }
+class KafkaSjStream(override val name: String,
+                    override val service: KafkaService,
+                    val partitions: Int,
+                    val replicationFactor: Int,
+                    override val description: String = "No description",
+                    override val force: Boolean = false,
+                    override val tags: Array[String] = Array(),
+                    override val streamType: String = StreamLiterals.kafkaStreamType)
+  extends SjStream(name, description, service, force, tags, streamType) {
 
   override def asProtocolStream(): KafkaStreamData = {
     val streamData = new KafkaStreamData
@@ -67,8 +56,7 @@ class KafkaSjStream() extends SjStream {
   }
 
   private def createZkUtils(): ZkUtils = {
-    val service = this.service.asInstanceOf[KafkaService]
-    val zkHost = service.zkProvider.hosts
+    val zkHost = this.service.zkProvider.hosts
     val zkConnect = new ZkConnection(zkHost.mkString(";"))
     val zkTimeout = ConfigurationSettingsUtils.getZkSessionTimeout()
     val zkClient = ZkUtils.createZkClient(zkHost.mkString(";"), zkTimeout, zkTimeout)

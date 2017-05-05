@@ -19,12 +19,15 @@ class RestServiceData extends ServiceData {
 
   override def asModelService(): RestService = {
     val providerDAO = ConnectionRepository.getProviderService
-    val modelService = new RestService
-    super.fillModelService(modelService)
-    modelService.provider = providerDAO.get(provider).get
-    modelService.basePath = basePath
-    modelService.httpVersion = RestLiterals.httpVersionFromString(httpVersion)
-    modelService.headers = headers.asJava
+    val modelService = new RestService(
+      this.name,
+      this.description,
+      providerDAO.get(this.provider).get,
+      this.basePath,
+      RestLiterals.httpVersionFromString(this.httpVersion),
+      this.headers.asJava
+    )
+
     modelService
   }
 

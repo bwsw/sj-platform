@@ -4,7 +4,6 @@ import java.util.Calendar
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.DAL.model.module.{FrameworkStage, Instance}
-import com.bwsw.sj.common.DAL.model.service.ZKService
 import com.bwsw.sj.common.DAL.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.DAL.service.GenericMongoService
@@ -15,10 +14,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import scala.collection.JavaConverters._
 
 class InstanceMetadata {
-  private var moduleName: String = null
-  private var moduleVersion: String = null
-  private var moduleType: String = null
-  var stage: FrameworkStage = new FrameworkStage(EngineLiterals.toHandle, Calendar.getInstance().getTime)
+  var moduleName: String = null
+  var moduleVersion: String = null
+  var moduleType: String = null
+  var stage: FrameworkStage = FrameworkStage(EngineLiterals.toHandle, Calendar.getInstance().getTime)
   var status: String = EngineLiterals.ready
   var name: String = null
   var description: String = "No description"
@@ -40,30 +39,19 @@ class InstanceMetadata {
   @JsonIgnore
   protected def fillModelInstance(modelInstance: Instance): Unit = {
     val serializer = new JsonSerializer()
-    val serviceDAO = ConnectionRepository.getServiceManager
 
     modelInstance.status = this.status
-    modelInstance.moduleName = this.moduleName
-    modelInstance.moduleType = this.moduleType
-    modelInstance.moduleVersion = this.moduleVersion
-    modelInstance.name = this.name
     modelInstance.description = this.description
     modelInstance.parallelism = this.parallelism.asInstanceOf[Int]
     modelInstance.perTaskCores = this.perTaskCores
     modelInstance.perTaskRam = this.perTaskRam
     modelInstance.performanceReportingInterval = this.performanceReportingInterval
-    modelInstance.engine = this.engine
     modelInstance.options = serializer.serialize(this.options)
     modelInstance.jvmOptions = this.jvmOptions.asJava
     modelInstance.nodeAttributes = this.nodeAttributes.asJava
     modelInstance.environmentVariables = this.environmentVariables.asJava
     modelInstance.stage = this.stage
     modelInstance.restAddress = this.restAddress
-
-    val service = serviceDAO.get(this.coordinationService)
-    if (service.isDefined && service.get.isInstanceOf[ZKService]) {
-      modelInstance.coordinationService = service.get.asInstanceOf[ZKService]
-    }
   }
 
   @JsonIgnore

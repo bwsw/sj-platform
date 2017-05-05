@@ -1,23 +1,16 @@
 package com.bwsw.sj.common.DAL.model.service
 
 import com.bwsw.sj.common.DAL.model.provider.Provider
+import com.bwsw.sj.common.DAL.morphia.MorphiaAnnotations.ReferenceField
 import com.bwsw.sj.common.rest.entities.service.{ServiceData, ZKCoordServiceData}
 import com.bwsw.sj.common.utils.ServiceLiterals
-import org.mongodb.morphia.annotations.Reference
 
-class ZKService() extends Service {
-  serviceType = ServiceLiterals.zookeeperType
-  @Reference var provider: Provider = null
-  var namespace: String = null
-
-  def this(name: String, serviceType: String, description: String, provider: Provider, namespace: String) = {
-    this()
-    this.name =name
-    this.serviceType = serviceType
-    this.description = description
-    this.provider = provider
-    this.namespace = namespace
-  }
+class ZKService(override val name: String,
+                override val description: String,
+                @ReferenceField val provider: Provider,
+                val namespace: String,
+                override val serviceType: String = ServiceLiterals.zookeeperType)
+  extends Service(name, description, serviceType) {
 
   override def asProtocolService(): ServiceData = {
     val protocolService = new ZKCoordServiceData()

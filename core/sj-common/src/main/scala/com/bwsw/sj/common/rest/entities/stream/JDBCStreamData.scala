@@ -1,5 +1,6 @@
 package com.bwsw.sj.common.rest.entities.stream
 
+import com.bwsw.sj.common.DAL.model.service.JDBCService
 import com.bwsw.sj.common.DAL.model.stream.JDBCSjStream
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
@@ -42,10 +43,16 @@ class JDBCStreamData() extends StreamData() {
     errors
   }
 
-   override def asModelStream(): JDBCSjStream = {
-    val modelStream = new JDBCSjStream()
-    super.fillModelStream(modelStream)
-     modelStream.primary = this.primary
+  override def asModelStream(): JDBCSjStream = {
+    val serviceDAO = ConnectionRepository.getServiceManager
+    val modelStream = new JDBCSjStream(
+      this.name,
+      serviceDAO.get(this.service).get.asInstanceOf[JDBCService],
+      this.primary,
+      this.description,
+      this.force,
+      this.tags
+    )
 
     modelStream
   }

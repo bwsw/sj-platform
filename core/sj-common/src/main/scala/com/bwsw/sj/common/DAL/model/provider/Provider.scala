@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit
 
 import com.aerospike.client.{AerospikeClient, AerospikeException}
 import com.bwsw.common.es.ElasticsearchClient
+import com.bwsw.sj.common.DAL.morphia.MorphiaAnnotations.{IdField, PropertyField}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.rest.entities.provider.ProviderData
@@ -17,29 +18,18 @@ import kafka.javaapi.TopicMetadataRequest
 import kafka.javaapi.consumer.SimpleConsumer
 import org.apache.zookeeper.ZooKeeper
 import org.eclipse.jetty.client.HttpClient
-import org.mongodb.morphia.annotations.{Entity, Id, Property}
+import org.mongodb.morphia.annotations.Entity
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration._
 
 @Entity("providers")
-class Provider {
-  @Id var name: String = null
-  var description: String = null
-  var hosts: Array[String] = Array()
-  var login: String = null
-  var password: String = null
-  @Property("provider-type") var providerType: String = null
-
-  def this(name: String, description: String, hosts: Array[String], login: String, password: String, providerType: String) = {
-    this()
-    this.name = name
-    this.description = description
-    this.hosts = hosts
-    this.login = login
-    this.password = password
-    this.providerType = providerType
-  }
+class Provider(@IdField val name: String,
+               val description: String,
+               val hosts: Array[String],
+               val login: String,
+               val password: String,
+               @PropertyField("provider-type") val providerType: String) {
 
   override def equals(obj: scala.Any): Boolean = obj match {
     case that: Provider => that.name.equals(this.name) && that.providerType.equals(this.providerType)

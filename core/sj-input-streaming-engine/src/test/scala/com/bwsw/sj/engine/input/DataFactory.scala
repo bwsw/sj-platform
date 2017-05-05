@@ -31,8 +31,7 @@ object DataFactory {
   private val partitions = 1
   private val serializer = new JsonSerializer()
   private val zookeeperProvider = new Provider(zookeeperProviderName, zookeeperProviderName, zookeeperHosts.split(","), "", "", ProviderLiterals.zookeeperType)
-  private val tstrqService = new TStreamService(tstreamServiceName, ServiceLiterals.tstreamsType,
-    tstreamServiceName, zookeeperProvider, TestStorageServer.prefix, TestStorageServer.token)
+  private val tstrqService = new TStreamService(tstreamServiceName, tstreamServiceName, zookeeperProvider, TestStorageServer.prefix, TestStorageServer.token)
   private val tstreamFactory = new TStreamsFactory()
   setTStreamFactoryProperties()
   val storageClient = tstreamFactory.getStorageClient()
@@ -67,7 +66,7 @@ object DataFactory {
   }
 
   def createServices(serviceManager: GenericMongoService[Service], providerService: GenericMongoService[Provider]) = {
-    val zkService = new ZKService(zookeeperServiceName, ServiceLiterals.zookeeperType, zookeeperServiceName, zookeeperProvider, testNamespace)
+    val zkService = new ZKService(zookeeperServiceName, zookeeperServiceName, zookeeperProvider, testNamespace)
     serviceManager.save(zkService)
 
     serviceManager.save(tstrqService)
@@ -92,11 +91,12 @@ object DataFactory {
   private def createOutputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
     val s2 = new TStreamSjStream(
       tstreamOutputNamePrefix + suffix,
-      tstreamOutputNamePrefix,
-      partitions,
       tstrqService,
-      StreamLiterals.tstreamType,
-      Array("output", "some tags"))
+      partitions,
+      tstreamOutputNamePrefix + suffix,
+      false,
+      Array("output", "some tags")
+    )
 
     sjStreamService.save(s2)
 
@@ -118,18 +118,14 @@ object DataFactory {
                      checkpointInterval: Int
                     ) = {
 
-    val instance = new InputInstance()
-    instance.name = instanceName
-    instance.moduleType = EngineLiterals.inputStreamingType
-    instance.moduleName = "input-streaming-stub"
-    instance.moduleVersion = "1.0"
+    val instance = new InputInstance(instanceName, EngineLiterals.inputStreamingType,
+      "input-streaming-stub", "1.0", "com.bwsw.input.streaming.engine-1.0",
+      serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKService], EngineLiterals.everyNthMode
+    )
     instance.status = EngineLiterals.started
     instance.description = "some description of test instance"
     instance.outputs = instanceOutputs
-    instance.checkpointMode = EngineLiterals.everyNthMode
     instance.checkpointInterval = checkpointInterval
-    instance.engine = "com.bwsw.input.streaming.engine-1.0"
-    instance.coordinationService = serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKService]
     instance.duplicateCheck = false
     instance.lookupHistory = 100
     instance.queueMaxSize = 500

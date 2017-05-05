@@ -10,17 +10,15 @@ class EsServiceData() extends ServiceData() {
   serviceType = ServiceLiterals.elasticsearchType
   var provider: String = null
   var index: String = null
-  var login: String = null
-  var password: String = null
 
   override def asModelService(): ESService = {
     val providerDAO = ConnectionRepository.getProviderService
-    val modelService = new ESService()
-    super.fillModelService(modelService)
-    modelService.provider = providerDAO.get(this.provider).get
-    modelService.index = this.index
-    modelService.login = this.login
-    modelService.password = this.password
+    val modelService = new ESService(
+      this.name,
+      this.description,
+      providerDAO.get(this.provider).get,
+      this.index
+    )
 
     modelService
   }

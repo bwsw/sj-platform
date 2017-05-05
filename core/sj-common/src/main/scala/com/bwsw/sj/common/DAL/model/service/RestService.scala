@@ -1,12 +1,10 @@
 package com.bwsw.sj.common.DAL.model.service
 
-import java.util
-
 import com.bwsw.sj.common.DAL.model.provider.Provider
+import com.bwsw.sj.common.DAL.morphia.MorphiaAnnotations.{PropertyField, ReferenceField}
 import com.bwsw.sj.common.rest.entities.service.RestServiceData
 import com.bwsw.sj.common.utils.{RestLiterals, ServiceLiterals}
 import org.eclipse.jetty.http.HttpVersion
-import org.mongodb.morphia.annotations.Reference
 
 import scala.collection.JavaConverters._
 
@@ -15,30 +13,14 @@ import scala.collection.JavaConverters._
   *
   * @author Pavel Tomskikh
   */
-class RestService extends Service {
-  serviceType = ServiceLiterals.restType
-  @Reference var provider: Provider = _
-  var basePath: String = _
-  var httpVersion: HttpVersion = _
-  var headers: java.util.Map[String, String] = new util.HashMap[String, String]()
-
-  def this(
-      name: String,
-      serviceType: String,
-      description: String,
-      provider: Provider,
-      basePath: String,
-      httpVersion: HttpVersion,
-      headers: java.util.Map[String, String]) = {
-    this
-    this.name = name
-    this.serviceType = serviceType
-    this.description = description
-    this.provider = provider
-    this.basePath = basePath
-    this.httpVersion = httpVersion
-    this.headers = headers
-  }
+class RestService(override val name: String,
+                  override val description: String,
+                  @ReferenceField val provider: Provider,
+                  @PropertyField("base-path") val basePath: String,
+                  @PropertyField("http-version") val httpVersion: HttpVersion,
+                  val headers: java.util.Map[String, String],
+                  override val serviceType: String = ServiceLiterals.restType)
+  extends Service(name, description, serviceType) {
 
   override def asProtocolService: RestServiceData = {
     val protocolService = new RestServiceData

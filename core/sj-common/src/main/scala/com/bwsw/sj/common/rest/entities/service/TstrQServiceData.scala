@@ -14,11 +14,13 @@ class TstrQServiceData() extends ServiceData() {
 
   override def asModelService(): TStreamService = {
     val providerDAO = ConnectionRepository.getProviderService
-    val modelService = new TStreamService()
-    super.fillModelService(modelService)
-    modelService.provider = providerDAO.get(this.provider).get
-    modelService.prefix = this.prefix
-    modelService.token = this.token
+    val modelService = new TStreamService(
+      this.name,
+      this.description,
+      providerDAO.get(this.provider).get,
+      this.prefix,
+      this.token
+    )
 
     modelService
   }

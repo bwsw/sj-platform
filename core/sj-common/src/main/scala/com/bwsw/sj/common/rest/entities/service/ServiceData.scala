@@ -1,11 +1,10 @@
 package com.bwsw.sj.common.rest.entities.service
 
-import com.bwsw.sj.common.DAL.model._
 import com.bwsw.sj.common.DAL.model.service.Service
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils
-import com.bwsw.sj.common.utils.{MessageResourceUtils, ServiceLiterals}
 import com.bwsw.sj.common.utils.ServiceLiterals._
+import com.bwsw.sj.common.utils.{MessageResourceUtils, ServiceLiterals}
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes, JsonTypeInfo}
 
@@ -30,13 +29,6 @@ class ServiceData() extends ValidationUtils with MessageResourceUtils {
 
   @JsonIgnore
   def asModelService(): Service = ???
-
-  @JsonIgnore
-  protected def fillModelService(modelService: Service): Unit = {
-    modelService.serviceType = this.serviceType
-    modelService.name = this.name
-    modelService.description = this.description
-  }
 
   @JsonIgnore
   def validate() = validateGeneralFields()

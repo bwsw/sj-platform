@@ -1,12 +1,16 @@
 package com.bwsw.sj.crud.rest.api
 
 import akka.http.scaladsl.server.{Directives, RequestContext}
+import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.DAL.model.module.Instance
 import com.bwsw.sj.common.rest.entities._
 import com.bwsw.sj.common.rest.entities.stream.StreamData
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.StreamLiterals
+import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
+
+import scala.collection.mutable.ArrayBuffer
 
 trait SjStreamsApi extends Directives with SjCrudValidator {
 
@@ -14,17 +18,26 @@ trait SjStreamsApi extends Directives with SjCrudValidator {
     pathPrefix("streams") {
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>
-          validateContextWithSchema(ctx, "streamSchema.json")
-          val streamData = serializer.deserialize[StreamData](getEntityFromContext(ctx))
-          val errors = streamData.validate()
-          var response: RestResponse = BadRequestRestResponse(MessageResponseEntity(
-            createMessage("rest.streams.stream.cannot.create", errors.mkString(";"))
-          ))
+          var response: RestResponse = null
+          val errors = new ArrayBuffer[String]
+          try {
+            val streamData = serializer.deserialize[StreamData](getEntityFromContext(ctx))
+            errors ++= streamData.validate()
 
-          if (errors.isEmpty) {
-            streamData.create()
-            streamDAO.save(streamData.asModelStream())
-            response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.streams.stream.created", streamData.name)))
+            if (errors.isEmpty) {
+              streamData.create()
+              streamDAO.save(streamData.asModelStream())
+              response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.streams.stream.created", streamData.name)))
+            }
+          } catch {
+            case e: JsonDeserializationException =>
+              errors += JsonDeserializationErrorMessageCreator(e)
+          }
+
+          if (errors.nonEmpty) {
+            response = BadRequestRestResponse(MessageResponseEntity(
+              createMessage("rest.streams.stream.cannot.create", errors.mkString(";"))
+            ))
           }
 
           ctx.complete(restResponseToHttpResponse(response))

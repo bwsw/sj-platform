@@ -1,28 +1,19 @@
 package com.bwsw.sj.common.DAL.model.stream
 
-import com.bwsw.sj.common.DAL.model.service.{Service, TStreamService}
+import com.bwsw.sj.common.DAL.model.service.TStreamService
 import com.bwsw.sj.common.rest.entities.stream.TStreamStreamData
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.tstreams.common.StorageClient
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 
-class TStreamSjStream() extends SjStream {
-  var partitions: Int = 0
-
-  def this(name: String,
-           description: String,
-           partitions: Int,
-           service: Service,
-           streamType: String,
-           tags: Array[String]) = {
-    this()
-    this.name = name
-    this.description = description
-    this.partitions = partitions
-    this.service = service
-    this.streamType = streamType
-    this.tags = tags
-  }
+class TStreamSjStream(override val name: String,
+                      override val service: TStreamService,
+                      val partitions: Int,
+                      override val description: String = "No description",
+                      override val force: Boolean = false,
+                      override val tags: Array[String] = Array(),
+                      override val streamType: String = StreamLiterals.tstreamType)
+  extends SjStream(name, description, service, force, tags, streamType) {
 
   override def asProtocolStream(): TStreamStreamData = {
     val streamData = new TStreamStreamData
@@ -34,12 +25,11 @@ class TStreamSjStream() extends SjStream {
   }
 
   override def create(): Unit = {
-    val tStreamService = this.service.asInstanceOf[TStreamService]
     val factory = new TStreamsFactory()
-    factory.setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, tStreamService.prefix)
-      .setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.hosts.mkString(","))
-      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, tStreamService.provider.hosts.mkString(","))
-      .setProperty(ConfigurationOptions.StorageClient.Auth.key, tStreamService.token)
+    factory.setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, this.service.prefix)
+      .setProperty(ConfigurationOptions.Coordination.endpoints, this.service.provider.hosts.mkString(","))
+      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, this.service.provider.hosts.mkString(","))
+      .setProperty(ConfigurationOptions.StorageClient.Auth.key, this.service.token)
     val storageClient: StorageClient = factory.getStorageClient()
 
     if (!storageClient.checkStreamExists(this.name)) {
@@ -55,12 +45,11 @@ class TStreamSjStream() extends SjStream {
   }
 
   override def delete(): Unit = {
-    val tStreamService = this.service.asInstanceOf[TStreamService]
     val factory = new TStreamsFactory()
-    factory.setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, tStreamService.prefix)
-      .setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.hosts.mkString(","))
-      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, tStreamService.provider.hosts.mkString(","))
-      .setProperty(ConfigurationOptions.StorageClient.Auth.key, tStreamService.token)
+    factory.setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, this.service.prefix)
+      .setProperty(ConfigurationOptions.Coordination.endpoints, this.service.provider.hosts.mkString(","))
+      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, this.service.provider.hosts.mkString(","))
+      .setProperty(ConfigurationOptions.StorageClient.Auth.key, this.service.token)
     val storageClient = factory.getStorageClient()
 
     if (storageClient.checkStreamExists(this.name)) {

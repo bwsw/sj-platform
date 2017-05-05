@@ -17,7 +17,7 @@ object Dependencies {
       .exclude("org.scalatest", "scalatest_2.12"),
     ("org.mongodb" %% "casbah" % "3.1.1")
       .exclude("org.slf4j", "slf4j-api"),
-    "org.mongodb.morphia" % "morphia" % "1.3.0",
+    "org.mongodb.morphia" % "morphia" % "1.3.2",
     "org.apache.commons" % "commons-io" % "1.3.2",
     "com.typesafe" % "config" % "1.3.0",
     ("org.apache.kafka" % "kafka_2.12" % "0.10.1.1")

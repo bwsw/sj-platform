@@ -1,20 +1,13 @@
 package com.bwsw.sj.common.DAL.model.service
 
+import com.bwsw.sj.common.DAL.morphia.MorphiaAnnotations.{IdField, PropertyField}
 import com.bwsw.sj.common.rest.entities.service.ServiceData
-import org.mongodb.morphia.annotations.{Entity, Id, Property}
+import org.mongodb.morphia.annotations.Entity
 
 @Entity("services")
-class Service() {
-  @Id var name: String = null
-  @Property("type") var serviceType: String = null
-  var description: String = null
-
-  def this(name: String, serviceType: String, description: String) = {
-    this()
-    this.name = name
-    this.serviceType = serviceType
-    this.description = description
-  }
+class Service(@IdField val name: String,
+              val description: String,
+              @PropertyField("type") val serviceType: String)  {
 
   def prepare(): Unit = {}
   

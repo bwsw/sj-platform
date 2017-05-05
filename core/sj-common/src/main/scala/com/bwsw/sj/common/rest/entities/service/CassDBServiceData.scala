@@ -13,10 +13,12 @@ class CassDBServiceData() extends ServiceData() {
 
   override def asModelService(): CassandraService = {
     val providerDAO = ConnectionRepository.getProviderService
-    val modelService = new CassandraService()
-    super.fillModelService(modelService)
-    modelService.provider = providerDAO.get(this.provider).get
-    modelService.keyspace = this.keyspace
+    val modelService = new CassandraService(
+      this.name,
+      this.description,
+      providerDAO.get(this.provider).get,
+      this.keyspace
+    )
 
     modelService
   }
