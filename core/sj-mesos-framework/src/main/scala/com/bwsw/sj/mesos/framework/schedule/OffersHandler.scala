@@ -143,7 +143,7 @@ object OffersHandler {
     * @param task:String
     * @return Resource
     */
-  def getPorts(offer: Offer, task: String): Resource = {
+  def getPortsResource(offer: Offer, task: String): Resource = {
     val portsResource = OffersHandler.getResource(offer, "ports")
     for (range <- portsResource.getRanges.getRangeList.asScala) {
       TasksList.getAvailablePorts ++= (range.getBegin to range.getEnd).to[mutable.ListBuffer]
@@ -162,5 +162,21 @@ object OffersHandler {
       .setType(Value.Type.RANGES)
       .setRanges(ranges)
       .build()
+  }
+
+  def getCpusResource: Resource = {
+    Resource.newBuilder
+      .setType(Value.Type.SCALAR)
+      .setName("cpus")
+      .setScalar(Value.Scalar.newBuilder.setValue(TasksList.perTaskCores))
+      .build
+  }
+
+  def getMemResource: Resource = {
+    Resource.newBuilder
+      .setType(org.apache.mesos.Protos.Value.Type.SCALAR)
+      .setName("mem")
+      .setScalar(org.apache.mesos.Protos.Value.Scalar.newBuilder.setValue(TasksList.perTaskMem))
+      .build
   }
 }

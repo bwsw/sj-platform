@@ -122,88 +122,63 @@ object TasksList {
     tasks.foreach(task => newTask(task))
   }
 
-
   def createTaskToLaunch(task: String, offer: Offer): TaskInfo = {
-    // Task Resources
-    val cpus = Resource.newBuilder
-      .setType(Value.Type.SCALAR)
-      .setName("cpus")
-      .setScalar(Value.Scalar.newBuilder.setValue(TasksList.perTaskCores))
-      .build
-    val mem = Resource.newBuilder
-      .setType(org.apache.mesos.Protos.Value.Type.SCALAR)
-      .setName("mem")
-      .setScalar(org.apache.mesos.Protos.Value.
-        Scalar.newBuilder.setValue(TasksList.perTaskMem)
-      ).build
-    val ports = OffersHandler.getPorts(offer, task)
-
-    var agentPorts: String = ""
-    var taskPort: String = ""
-
-    var availablePorts = ports.getRanges.getRangeList.asScala.map(_.getBegin.toString)
-
-    val host = OffersHandler.getOfferIp(offer)
-    TasksList(task).foreach(task => task.update(host=host))
-    if (FrameworkUtil.instance.moduleType.equals(EngineLiterals.inputStreamingType)) {
-      taskPort = availablePorts.head
-      availablePorts = availablePorts.tail
-      val inputInstance = FrameworkUtil.instance.asInstanceOf[InputInstance]
-      inputInstance.tasks.put(task, new InputTask(host, taskPort.toInt))
-      ConnectionRepository.getInstanceService.save(FrameworkUtil.instance)
-    }
-
-    agentPorts = availablePorts.mkString(",")
-    agentPorts.dropRight(1)
-
-    logger.debug(s"Task: $task. Ports for task: ${availablePorts.mkString(",")}.")
-
-    val cmd = CommandInfo.newBuilder()
-    val hosts: collection.mutable.ListBuffer[String] = collection.mutable.ListBuffer()
-    TasksList.toLaunch.foreach(task =>
-      if (TasksList.getTask(task).host.nonEmpty) hosts.append(TasksList.getTask(task).host.get)
-    )
-
-    var environmentVariables = List(
-//      Environment.Variable.newBuilder.setName("MONGO_HOSTS").setValue(FrameworkUtil.params {"mongodbHosts"}),
-      Environment.Variable.newBuilder.setName("INSTANCE_NAME").setValue(FrameworkUtil.params {"instanceId"}),
-      Environment.Variable.newBuilder.setName("TASK_NAME").setValue(task),
-      Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(OffersHandler.getOfferIp(offer)),
-      Environment.Variable.newBuilder.setName("AGENTS_PORTS").setValue(agentPorts),
-      Environment.Variable.newBuilder.setName("INSTANCE_HOSTS").setValue(hosts.mkString(","))
-    )
-    ConnectionConstants.mongoEnvironment.foreach(variable =>
-      environmentVariables = environmentVariables :+ Environment.Variable.newBuilder.setName(variable._1).setValue(variable._2)
-    )
-
-    try {
-      val environments = Environment.newBuilder
-      environmentVariables.foreach(variable => environments.addVariables(variable))
-
-      val jvmOptions = FrameworkUtil.instance.jvmOptions.asScala
-        .foldLeft("")((acc, option) => s"$acc ${option._1}${option._2}")
-      cmd
-        .addUris(CommandInfo.URI.newBuilder.setValue(FrameworkUtil.getModuleUrl(FrameworkUtil.instance)))
-        .setValue("java " + jvmOptions + " -jar " + FrameworkUtil.jarName)
-        .setEnvironment(environments)
-    } catch {
-      case e: Exception => FrameworkUtil.handleSchedulerException(e, logger)
-    }
-    logger.info(s"Task: $task => Slave: ${offer.getSlaveId.getValue}")
-
     TaskInfo.newBuilder
-      .setCommand(cmd)
+      .setCommand(getCommand(task, offer))
       .setName(task)
-      .setTaskId(TaskID.newBuilder.setValue(task))
-      .addResources(cpus)
-      .addResources(mem)
-      .addResources(ports)
+      .setTaskId(TaskID.newBuilder.setValue(task).build())
+      .addResources(OffersHandler.getCpusResource)
+      .addResources(OffersHandler.getMemResource)
+      .addResources(OffersHandler.getPortsResource(offer, task))
       .setSlaveId(offer.getSlaveId)
       .build()
   }
 
+  def getCommand(task: String, offer: Offer): CommandInfo = {
+    def getAgentPorts: String = {
+      var agentPorts: String = ""
+      var taskPort: String = ""
+      val ports = OffersHandler.getPortsResource(offer, task)
 
+      var availablePorts = ports.getRanges.getRangeList.asScala.map(_.getBegin.toString)
 
+      val host = OffersHandler.getOfferIp(offer)
+      TasksList(task).foreach(task => task.update(host=host))
+      if (FrameworkUtil.instance.moduleType.equals(EngineLiterals.inputStreamingType)) {
+        taskPort = availablePorts.head
+        availablePorts = availablePorts.tail
+        val inputInstance = FrameworkUtil.instance.asInstanceOf[InputInstance]
+        inputInstance.tasks.put(task, new InputTask(host, taskPort.toInt))
+        ConnectionRepository.getInstanceService.save(FrameworkUtil.instance)
+      }
+
+      agentPorts = availablePorts.mkString(",")
+      agentPorts.dropRight(1)
+    }
+
+    def getInstanceHosts: String = {
+      val hosts: collection.mutable.ListBuffer[String] = collection.mutable.ListBuffer()
+      TasksList.toLaunch.foreach(task =>
+        if (TasksList.getTask(task).host.nonEmpty) hosts.append(TasksList.getTask(task).host.get)
+      )
+      hosts.mkString(",")
+    }
+
+    def getEnvironments: Environment = {
+      Environment.newBuilder
+        .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_NAME").setValue(FrameworkUtil.params {"instanceId"}))
+        .addVariables(Environment.Variable.newBuilder.setName("TASK_NAME").setValue(task))
+        .addVariables(Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(OffersHandler.getOfferIp(offer)))
+        .addVariables(Environment.Variable.newBuilder.setName("AGENTS_PORTS").setValue(getAgentPorts))
+        .addVariables(Environment.Variable.newBuilder.setName("INSTANCE_HOSTS").setValue(getInstanceHosts))
+        .build()
+    }
+
+    CommandInfo.newBuilder
+      .addUris(CommandInfo.URI.newBuilder.setValue(FrameworkUtil.getModuleUrl(FrameworkUtil.instance)))
+      .setValue("java " + FrameworkUtil.getJvmOptions + " -jar " + FrameworkUtil.jarName)
+      .setEnvironment(getEnvironments).build()
+  }
 
 
   def addTaskToSlave(task: TaskInfo, offer: (Offer, Int)) = {

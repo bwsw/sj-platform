@@ -13,6 +13,7 @@ import org.apache.mesos.SchedulerDriver
 
 import scala.collection.immutable
 import scala.util.Properties
+import scala.collection.JavaConverters._
 
 
 object FrameworkUtil {
@@ -114,5 +115,9 @@ object FrameworkUtil {
     } else {
       FrameworkUtil.instance = optionInstance.get
     }
+  }
+
+  def getJvmOptions: String = {
+    instance.jvmOptions.asScala.foldLeft("")((acc, option) => s"$acc ${option._1}${option._2}")
   }
 }
