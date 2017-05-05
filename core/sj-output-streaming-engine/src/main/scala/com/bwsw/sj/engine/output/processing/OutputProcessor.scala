@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.output.processing
 
-import com.bwsw.sj.common._dal.model.stream.SjStream
+import com.bwsw.sj.common.dal.model.stream.SjStream
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.Entity

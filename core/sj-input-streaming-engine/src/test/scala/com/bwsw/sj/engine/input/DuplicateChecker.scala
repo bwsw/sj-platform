@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.input
 
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.engine.input.DataFactory._
 
 object DuplicateChecker extends App {

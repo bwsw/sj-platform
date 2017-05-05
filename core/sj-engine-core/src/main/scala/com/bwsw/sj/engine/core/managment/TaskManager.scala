@@ -3,10 +3,10 @@ package com.bwsw.sj.engine.core.managment
 import java.io.File
 import java.net.URLClassLoader
 
-import com.bwsw.sj.common._dal.model.module._
-import com.bwsw.sj.common._dal.model.service.TStreamService
-import com.bwsw.sj.common._dal.model.stream.{SjStream, TStreamSjStream}
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.model.module._
+import com.bwsw.sj.common.dal.model.service.TStreamService
+import com.bwsw.sj.common.dal.model.stream.{SjStream, TStreamSjStream}
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.engine.{EnvelopeDataSerializer, ExtendedEnvelopeDataSerializer, StreamingExecutor}

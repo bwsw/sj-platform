@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.batch.task.input
 
-import com.bwsw.sj.common._dal.model.stream.SjStream
+import com.bwsw.sj.common.dal.model.stream.SjStream
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.engine.input.CheckpointTaskInput
 import com.bwsw.sj.engine.core.entities.Envelope

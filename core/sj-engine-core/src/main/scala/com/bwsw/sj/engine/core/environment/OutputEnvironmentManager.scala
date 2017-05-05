@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.core.environment
 
-import com.bwsw.sj.common._dal.model.stream.SjStream
+import com.bwsw.sj.common.dal.model.stream.SjStream
 
 /**
  * Provides for user methods that can be used in an output module

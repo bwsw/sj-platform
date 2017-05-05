@@ -1,8 +1,8 @@
 package com.bwsw.sj.common.rest.model.stream
 
-import com.bwsw.sj.common._dal.model.service.TStreamService
-import com.bwsw.sj.common._dal.model.stream.TStreamSjStream
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.model.service.TStreamService
+import com.bwsw.sj.common.dal.model.stream.TStreamSjStream
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils._
 import com.bwsw.tstreams.common.StorageClient

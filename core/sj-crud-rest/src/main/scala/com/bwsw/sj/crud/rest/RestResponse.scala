@@ -1,7 +1,7 @@
 package com.bwsw.sj.crud.rest
 
 import com.bwsw.sj.common.rest.ResponseEntity
-import com.bwsw.sj.crud.rest.dto.provider.ProviderData
+import com.bwsw.sj.crud.rest.model.provider.ProviderData
 
 import scala.collection.mutable
 

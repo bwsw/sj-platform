@@ -2,7 +2,7 @@ package com.bwsw.sj.crud.rest.routes
 
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.common.exceptions.JsonDeserializationException
-import com.bwsw.sj.common._dal.model.module.Instance
+import com.bwsw.sj.common.dal.model.module.Instance
 import com.bwsw.sj.common.rest.model._
 import com.bwsw.sj.common.rest.model.stream.StreamData
 import com.bwsw.sj.common.rest._

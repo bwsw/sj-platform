@@ -2,9 +2,9 @@ package com.bwsw.sj.engine.output.task
 
 import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
 
-import com.bwsw.sj.common._dal.model.module.OutputInstance
-import com.bwsw.sj.common._dal.model.stream.SjStream
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.model.module.OutputInstance
+import com.bwsw.sj.common.dal.model.stream.SjStream
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.NumericalCheckpointTaskEngine
 import com.bwsw.sj.engine.core.engine.input.CallableTStreamCheckpointTaskInput

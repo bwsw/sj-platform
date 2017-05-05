@@ -1,8 +1,8 @@
 package com.bwsw.sj.common.rest.model.module
 
-import com.bwsw.sj.common._dal.model.module.{InputInstance, InputTask}
-import com.bwsw.sj.common._dal.model.service.ZKService
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.model.module.{InputInstance, InputTask}
+import com.bwsw.sj.common.dal.model.service.ZKService
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 
 import scala.collection.JavaConverters._

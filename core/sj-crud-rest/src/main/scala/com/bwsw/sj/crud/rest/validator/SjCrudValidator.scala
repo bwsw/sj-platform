@@ -12,12 +12,12 @@ import akka.http.scaladsl.server.RequestContext
 import akka.stream.Materializer
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.traits.Serializer
-import com.bwsw.sj.common._dal.model._
-import com.bwsw.sj.common._dal.model.module.{FileMetadata, Instance}
-import com.bwsw.sj.common._dal.model.service.Service
-import com.bwsw.sj.common._dal.model.stream.SjStream
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
-import com.bwsw.sj.common._dal.service.GenericMongoRepository
+import com.bwsw.sj.common.dal.model._
+import com.bwsw.sj.common.dal.model.module.{FileMetadata, Instance}
+import com.bwsw.sj.common.dal.model.service.Service
+import com.bwsw.sj.common.dal.model.stream.SjStream
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.service.GenericMongoRepository
 import com.bwsw.sj.common.engine.StreamingValidator
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}

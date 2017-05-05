@@ -1,8 +1,8 @@
 package com.bwsw.sj.common.rest.model.stream
 
-import com.bwsw.sj.common._dal.model.service.RestService
-import com.bwsw.sj.common._dal.model.stream.RestSjStream
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.model.service.RestService
+import com.bwsw.sj.common.dal.model.stream.RestSjStream
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
 

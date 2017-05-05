@@ -1,8 +1,8 @@
 package com.bwsw.sj.mesos.framework.task
 
-import com.bwsw.sj.common._dal.ConnectionConstants
-import com.bwsw.sj.common._dal.model.module._
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.ConnectionConstants
+import com.bwsw.sj.common.dal.model.module._
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.FrameworkRestEntity
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.mesos.framework.schedule.{FrameworkUtil, OffersHandler}

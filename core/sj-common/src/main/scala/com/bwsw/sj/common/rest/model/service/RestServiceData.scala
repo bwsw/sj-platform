@@ -1,7 +1,7 @@
 package com.bwsw.sj.common.rest.model.service
 
-import com.bwsw.sj.common._dal.model.service.RestService
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.model.service.RestService
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.{RestLiterals, ServiceLiterals}
 
 import scala.collection.mutable.ArrayBuffer

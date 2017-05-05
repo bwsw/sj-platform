@@ -10,7 +10,7 @@ import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.stream.scaladsl.FileIO
 import com.bwsw.common.exceptions.JsonDeserializationException
-import com.bwsw.sj.common._dal.model.module._
+import com.bwsw.sj.common.dal.model.module._
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.engine.{StreamingValidator, ValidationInfo}
 import com.bwsw.sj.common.rest.model.module._

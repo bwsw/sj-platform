@@ -1,9 +1,9 @@
 package com.bwsw.sj.common.rest.model.service
 
 import com.bwsw.common.jdbc.JdbcClientBuilder
-import com.bwsw.sj.common._dal.model.provider.JDBCProvider
-import com.bwsw.sj.common._dal.model.service.JDBCService
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.model.provider.JDBCProvider
+import com.bwsw.sj.common.dal.model.service.JDBCService
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.ServiceLiterals
 
 import scala.collection.mutable.ArrayBuffer

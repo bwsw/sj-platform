@@ -3,7 +3,7 @@ package com.bwsw.sj.mesos.framework
 import java.net.URI
 
 import com.bwsw.common.LeaderLatch
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.mesos.framework.rest.Rest
 import com.bwsw.sj.mesos.framework.schedule.FrameworkScheduler

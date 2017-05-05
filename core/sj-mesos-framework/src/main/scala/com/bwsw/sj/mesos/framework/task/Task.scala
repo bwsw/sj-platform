@@ -2,7 +2,7 @@ package com.bwsw.sj.mesos.framework.task
 
 import java.util.{Calendar, Date}
 
-import com.bwsw.sj.common._dal.model.module.{Task => InstanceTask}
+import com.bwsw.sj.common.dal.model.module.{Task => InstanceTask}
 import com.bwsw.sj.common.rest.FrameworkTask
 
 import scala.util.Properties

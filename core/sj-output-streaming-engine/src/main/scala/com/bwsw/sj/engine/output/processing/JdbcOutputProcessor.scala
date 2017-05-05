@@ -3,8 +3,8 @@ package com.bwsw.sj.engine.output.processing
 import java.sql.PreparedStatement
 
 import com.bwsw.common.jdbc.JdbcClientBuilder
-import com.bwsw.sj.common._dal.model.service.JDBCService
-import com.bwsw.sj.common._dal.model.stream.{JDBCSjStream, SjStream}
+import com.bwsw.sj.common.dal.model.service.JDBCService
+import com.bwsw.sj.common.dal.model.stream.{JDBCSjStream, SjStream}
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import com.bwsw.sj.engine.core.output.Entity

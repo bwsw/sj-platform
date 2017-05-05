@@ -1,7 +1,7 @@
 package com.bwsw.sj.crud.rest.validator.instance
 
-import com.bwsw.sj.common._dal.model.service.{KafkaService, TStreamService}
-import com.bwsw.sj.common._dal.model.stream.KafkaSjStream
+import com.bwsw.sj.common.dal.model.service.{KafkaService, TStreamService}
+import com.bwsw.sj.common.dal.model.stream.KafkaSjStream
 import com.bwsw.sj.common.rest.model.module.{BatchInstanceData, InstanceData, SpecificationData}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._

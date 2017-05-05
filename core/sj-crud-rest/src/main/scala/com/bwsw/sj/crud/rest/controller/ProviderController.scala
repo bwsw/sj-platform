@@ -6,7 +6,7 @@ import com.bwsw.sj.common.bll.ProviderService
 import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.crud.rest._
-import com.bwsw.sj.crud.rest.dto.provider.ProviderData
+import com.bwsw.sj.crud.rest.model.provider.ProviderData
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 
 class ProviderController extends Controller {

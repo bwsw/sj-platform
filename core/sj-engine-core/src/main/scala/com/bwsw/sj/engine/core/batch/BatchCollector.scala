@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.core.batch
 
-import com.bwsw.sj.common._dal.model.module.BatchInstance
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.model.module.BatchInstance
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.IBatchCollector
 import com.bwsw.sj.engine.core.entities.{Batch, Envelope}
 import org.slf4j.LoggerFactory

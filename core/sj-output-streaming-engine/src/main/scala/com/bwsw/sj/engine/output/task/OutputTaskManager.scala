@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.output.task
 
-import com.bwsw.sj.common._dal.model.module.OutputInstance
+import com.bwsw.sj.common.dal.model.module.OutputInstance
 import com.bwsw.sj.engine.core.environment.{EnvironmentManager, OutputEnvironmentManager}
 import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor

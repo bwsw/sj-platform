@@ -3,8 +3,8 @@ package com.bwsw.sj.engine.core.engine.input
 import java.util.Date
 import java.util.concurrent.ArrayBlockingQueue
 
-import com.bwsw.sj.common._dal.model.module.{BatchInstance, OutputInstance, RegularInstance}
-import com.bwsw.sj.common._dal.model.stream.TStreamSjStream
+import com.bwsw.sj.common.dal.model.module.{BatchInstance, OutputInstance, RegularInstance}
+import com.bwsw.sj.common.dal.model.stream.TStreamSjStream
 import com.bwsw.sj.common.engine.EnvelopeDataSerializer
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}

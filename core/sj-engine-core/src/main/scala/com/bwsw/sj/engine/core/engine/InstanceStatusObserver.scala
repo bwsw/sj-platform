@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.core.engine
 
 import java.util.concurrent.Callable
 
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import org.slf4j.LoggerFactory
 

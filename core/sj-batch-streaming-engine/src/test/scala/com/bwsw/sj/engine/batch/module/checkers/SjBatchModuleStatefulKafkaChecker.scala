@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.batch.module.checkers
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.engine.core.entities.{TStreamEnvelope, Batch, KafkaEnvelope}
 import com.bwsw.sj.engine.batch.module.DataFactory._
 import com.bwsw.sj.engine.batch.utils.StateHelper

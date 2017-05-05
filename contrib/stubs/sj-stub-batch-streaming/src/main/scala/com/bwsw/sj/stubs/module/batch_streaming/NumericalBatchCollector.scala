@@ -1,6 +1,6 @@
 package com.bwsw.sj.stubs.module.batch_streaming
 
-import com.bwsw.sj.common._dal.model.module.BatchInstance
+import com.bwsw.sj.common.dal.model.module.BatchInstance
 import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.sj.engine.core.batch.{BatchCollector, BatchStreamingPerformanceMetrics}
 import org.slf4j.LoggerFactory

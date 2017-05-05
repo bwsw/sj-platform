@@ -1,7 +1,7 @@
 package com.bwsw.sj.common.bll
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common._dal.service.GenericMongoRepository
+import com.bwsw.sj.common.dal.service.GenericMongoRepository
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer

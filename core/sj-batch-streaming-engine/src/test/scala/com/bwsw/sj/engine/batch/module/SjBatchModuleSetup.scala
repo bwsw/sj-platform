@@ -3,7 +3,7 @@ package com.bwsw.sj.engine.batch.module
 import java.io.File
 import java.util.logging.LogManager
 
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.engine.batch.module.DataFactory._
 

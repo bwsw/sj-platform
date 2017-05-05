@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.batch.task.input
 
-import com.bwsw.sj.common._dal.model.module.BatchInstance
+import com.bwsw.sj.common.dal.model.module.BatchInstance
 import com.bwsw.sj.common.engine.EnvelopeDataSerializer
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.input.KafkaTaskInput

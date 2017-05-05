@@ -2,8 +2,8 @@ package com.bwsw.sj.engine.input.task
 
 import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
 
-import com.bwsw.sj.common._dal.model.module.InputInstance
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.model.module.InputInstance
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
 import com.bwsw.sj.engine.core.entities.InputEnvelope

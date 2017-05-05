@@ -3,8 +3,8 @@ package com.bwsw.sj.common.config
 import java.io.File
 import java.net.URL
 
-import com.bwsw.sj.common._dal.model.ConfigurationSetting
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.model.ConfigurationSetting
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import org.apache.commons.io.FileUtils
 

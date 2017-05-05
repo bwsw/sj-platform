@@ -2,7 +2,7 @@ package com.bwsw.sj.common.rest.model.module
 
 import java.util
 
-import com.bwsw.sj.common._dal.model.module.Task
+import com.bwsw.sj.common.dal.model.module.Task
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.fasterxml.jackson.annotation.JsonIgnore
 

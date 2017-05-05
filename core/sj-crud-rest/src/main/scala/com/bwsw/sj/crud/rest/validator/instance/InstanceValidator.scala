@@ -2,11 +2,11 @@ package com.bwsw.sj.crud.rest.validator.instance
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.traits.Serializer
-import com.bwsw.sj.common._dal.model.module._
-import com.bwsw.sj.common._dal.model.service.{Service, ZKService}
-import com.bwsw.sj.common._dal.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
-import com.bwsw.sj.common._dal.service.GenericMongoRepository
+import com.bwsw.sj.common.dal.model.module._
+import com.bwsw.sj.common.dal.model.service.{Service, ZKService}
+import com.bwsw.sj.common.dal.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.service.GenericMongoRepository
 import com.bwsw.sj.common.rest.model.module.{InstanceData, SpecificationData}
 import com.bwsw.sj.common.rest.utils.ValidationUtils._
 import com.bwsw.sj.common.utils.MessageResourceUtils._

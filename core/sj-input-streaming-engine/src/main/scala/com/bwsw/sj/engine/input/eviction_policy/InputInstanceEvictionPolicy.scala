@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.input.eviction_policy
 
-import com.bwsw.sj.common._dal.model.module.InputInstance
+import com.bwsw.sj.common.dal.model.module.InputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 
 import scala.collection.JavaConverters._

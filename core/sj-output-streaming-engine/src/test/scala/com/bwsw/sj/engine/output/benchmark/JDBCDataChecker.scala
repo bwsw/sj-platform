@@ -1,8 +1,8 @@
 package com.bwsw.sj.engine.output.benchmark
 
-import com.bwsw.sj.common._dal.model.stream.{JDBCSjStream, SjStream, TStreamSjStream}
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
-import com.bwsw.sj.common._dal.service.GenericMongoRepository
+import com.bwsw.sj.common.dal.model.stream.{JDBCSjStream, SjStream, TStreamSjStream}
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.service.GenericMongoRepository
 import com.bwsw.sj.engine.output.benchmark.DataFactory._
 
 import scala.collection.mutable.ArrayBuffer

@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.regular.module.checkers
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.engine.regular.module.DataFactory._
 import scala.collection.JavaConverters._
 

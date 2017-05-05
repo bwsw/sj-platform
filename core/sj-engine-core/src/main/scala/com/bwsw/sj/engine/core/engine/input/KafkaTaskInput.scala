@@ -3,9 +3,9 @@ package com.bwsw.sj.engine.core.engine.input
 import java.util.Properties
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.common._dal.model.service.KafkaService
-import com.bwsw.sj.common._dal.model.stream.SjStream
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.model.service.KafkaService
+import com.bwsw.sj.common.dal.model.stream.SjStream
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
 import com.bwsw.sj.common.utils.StreamLiterals

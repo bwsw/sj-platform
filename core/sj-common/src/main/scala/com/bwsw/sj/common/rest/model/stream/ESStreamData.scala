@@ -1,9 +1,9 @@
 package com.bwsw.sj.common.rest.model.stream
 
 import com.bwsw.common.es.ElasticsearchClient
-import com.bwsw.sj.common._dal.model.service.ESService
-import com.bwsw.sj.common._dal.model.stream.ESSjStream
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.model.service.ESService
+import com.bwsw.sj.common.dal.model.stream.ESSjStream
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
 

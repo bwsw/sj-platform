@@ -2,9 +2,9 @@ package com.bwsw.sj.common.rest.model.stream
 
 import java.util.Properties
 
-import com.bwsw.sj.common._dal.model.service.KafkaService
-import com.bwsw.sj.common._dal.model.stream.KafkaSjStream
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.model.service.KafkaService
+import com.bwsw.sj.common.dal.model.stream.KafkaSjStream
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}

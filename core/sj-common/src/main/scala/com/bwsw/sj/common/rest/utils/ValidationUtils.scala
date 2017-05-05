@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.rest.utils
 
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.ServiceLiterals._
 import org.apache.curator.utils.PathUtils

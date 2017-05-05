@@ -1,7 +1,7 @@
 package com.bwsw.sj.common.rest.model.config
 
-import com.bwsw.sj.common._dal.model.ConfigurationSetting
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.model.ConfigurationSetting
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.rest.utils.ValidationUtils

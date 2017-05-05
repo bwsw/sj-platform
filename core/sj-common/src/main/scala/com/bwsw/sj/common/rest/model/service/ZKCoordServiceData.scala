@@ -1,7 +1,7 @@
 package com.bwsw.sj.common.rest.model.service
 
-import com.bwsw.sj.common._dal.model.service.ZKService
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.model.service.ZKService
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.ServiceLiterals
 
 import scala.collection.mutable.ArrayBuffer

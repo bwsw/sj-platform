@@ -3,10 +3,10 @@ package com.bwsw.sj.common.rest.model.module
 import java.util.Calendar
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common._dal.model.module.{FrameworkStage, Instance}
-import com.bwsw.sj.common._dal.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
-import com.bwsw.sj.common._dal.service.GenericMongoRepository
+import com.bwsw.sj.common.dal.model.module.{FrameworkStage, Instance}
+import com.bwsw.sj.common.dal.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.service.GenericMongoRepository
 import com.bwsw.sj.common.utils.SjStreamUtils._
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonIgnore

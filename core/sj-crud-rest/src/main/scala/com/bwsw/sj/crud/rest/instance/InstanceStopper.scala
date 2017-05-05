@@ -1,6 +1,6 @@
 package com.bwsw.sj.crud.rest.instance
 
-import com.bwsw.sj.common._dal.model.module.{InputInstance, Instance}
+import com.bwsw.sj.common.dal.model.module.{InputInstance, Instance}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.crud.rest.marathon.MarathonApplicationById
 import org.apache.http.client.methods.CloseableHttpResponse

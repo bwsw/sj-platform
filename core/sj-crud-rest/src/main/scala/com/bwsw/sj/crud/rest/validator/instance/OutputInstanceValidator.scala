@@ -1,8 +1,8 @@
 package com.bwsw.sj.crud.rest.validator.instance
 
-import com.bwsw.sj.common._dal.model.service.TStreamService
-import com.bwsw.sj.common._dal.model.stream.{SjStream, TStreamSjStream}
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.model.service.TStreamService
+import com.bwsw.sj.common.dal.model.stream.{SjStream, TStreamSjStream}
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.model.module.{InstanceData, OutputInstanceData, SpecificationData}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._

@@ -1,9 +1,9 @@
 package com.bwsw.sj.common.bll
 
-import com.bwsw.sj.common._dal.model.provider.Provider
-import com.bwsw.sj.common._dal.model.service._
-import com.bwsw.sj.common._dal.repository.ConnectionRepository
-import com.bwsw.sj.common._dal.service.GenericMongoRepository
+import com.bwsw.sj.common.dal.model.provider.Provider
+import com.bwsw.sj.common.dal.model.service._
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.service.GenericMongoRepository
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 
 import scala.collection.mutable
