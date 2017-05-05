@@ -9,31 +9,24 @@ import com.bwsw.sj.engine.core.output.types.es._
 import com.bwsw.sj.stubs.module.output.data.StubEsData
 
 /**
- * Handler for work with t-stream envelopes
- * Executor trait for output-streaming module
- *
- * @author Kseniya Tomskikh
- */
+  * Handler for work with t-stream envelopes
+  * Executor trait for output-streaming module
+  *
+  * @author Kseniya Tomskikh
+  */
 class StubOutputExecutor(manager: OutputEnvironmentManager) extends OutputStreamingExecutor[(Integer, String)](manager) {
 
   /**
-   * Transform t-stream transaction to output entities
-   *
-   * @param envelope Input T-Stream envelope
-   * @return List of output envelopes
-   */
+    * Transform t-stream transaction to output entities
+    *
+    * @param envelope Input T-Stream envelope
+    * @return List of output envelopes
+    */
   override def onMessage(envelope: TStreamEnvelope[(Integer, String)]): Seq[OutputEnvelope] = {
     println("Processed: " + envelope.data.size + " elements")
 
     val list = envelope.data.dequeueAll(_ => true).map {
-      case (i, s) =>
-
-      val data: StubEsData = new StubEsData
-      data.value = i
-        data.stringValue = s
-      data.testDate = Calendar.getInstance().getTime
-
-      data
+      case (i, s) => new StubEsData(Calendar.getInstance().getTime, i, s)
     }
 
     list
