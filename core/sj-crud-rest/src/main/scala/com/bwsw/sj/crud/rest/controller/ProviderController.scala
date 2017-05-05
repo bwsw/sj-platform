@@ -9,6 +9,8 @@ import com.bwsw.sj.crud.rest._
 import com.bwsw.sj.crud.rest.model.provider.ProviderData
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 
+import scala.util.{Failure, Try, Success}
+
 class ProviderController extends Controller {
   private val serializer = new JsonSerializer()
   override val service = new ProviderService()
@@ -16,22 +18,25 @@ class ProviderController extends Controller {
   def create(serializedEntity: String): RestResponse = {
     var response: RestResponse = new RestResponse()
 
-    try {
-      val data = serializer.deserialize[ProviderData](serializedEntity)
-      val isCreated = service.process(data.asModelProvider())
+    val triedProviderData = Try(serializer.deserialize[ProviderData](serializedEntity))
+    triedProviderData match {
+      case Success(providerData) =>
 
-      response = isCreated match {
-        case Right(_) =>
-          CreatedRestResponse(MessageResponseEntity(createMessage("rest.providers.provider.created", data.name)))
-        case Left(errors) => BadRequestRestResponse(MessageResponseEntity(
-          createMessage("rest.providers.provider.cannot.create", errors.mkString(";"))
-        ))
-      }
-    } catch {
-      case e: JsonDeserializationException =>
-        val error = JsonDeserializationErrorMessageCreator(e)
+        val isCreated = service.process(providerData.asModelProvider())
+
+        response = isCreated match {
+          case Right(_) =>
+            CreatedRestResponse(MessageResponseEntity(createMessage("rest.providers.provider.created", providerData.name)))
+          case Left(errors) => BadRequestRestResponse(MessageResponseEntity(
+            createMessage("rest.providers.provider.cannot.create", errors.mkString(";"))
+          ))
+        }
+      case Failure(exception: JsonDeserializationException) =>
+        val error = JsonDeserializationErrorMessageCreator(exception)
         response = BadRequestRestResponse(MessageResponseEntity(
           createMessage("rest.providers.provider.cannot.create", error)))
+
+      case Failure(exception) => throw exception
     }
 
     response
