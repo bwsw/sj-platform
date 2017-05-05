@@ -33,8 +33,10 @@ class RegularInstanceMetadata extends InstanceMetadata with AvroSchemaForInstanc
     modelInstance.startFrom = this.startFrom
     modelInstance.executionPlan = this.executionPlan
 
-    val serializer = new JsonSerializer()
-    modelInstance.inputAvroSchema = serializer.serialize(this.inputAvroSchema)
+    modelInstance.inputAvroSchema = this.inputAvroSchema.map { s =>
+      val serializer = new JsonSerializer()
+      serializer.serialize(s)
+    }
 
     modelInstance
   }

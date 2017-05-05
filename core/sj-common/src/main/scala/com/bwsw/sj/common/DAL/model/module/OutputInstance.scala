@@ -36,8 +36,10 @@ class OutputInstance(override val name: String,
     protocolInstance.output = this.outputs.head
     protocolInstance.startFrom = this.startFrom
 
-    val serializer = new JsonSerializer()
-    protocolInstance.inputAvroSchema = serializer.deserialize[Map[String, Any]](this.inputAvroSchema)
+    protocolInstance.inputAvroSchema = this.inputAvroSchema.map { s =>
+      val serializer = new JsonSerializer()
+      serializer.deserialize[Map[String, Any]](s)
+    }
 
     protocolInstance
   }
