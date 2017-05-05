@@ -31,7 +31,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   private lazy val restAddress = new URI(s"http://$restHost:$restPort").toString
   private val frameworkName = getFrameworkName(instance)
 
-  private var leaderLatch: LeaderLatch = _
+  private var leaderLatch: Option[LeaderLatch] = None
 
   def run() = {
     try {
@@ -44,7 +44,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
       case e: Exception =>
         logger.error(s"Instance: '${instance.name}'. Instance is failed during the start process.", e)
         updateInstanceStatus(instance, failed)
-        if (leaderLatch != null) leaderLatch.close()
+        leaderLatch.foreach(_.close())
         close()
     }
   }
@@ -53,10 +53,10 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
     val marathonInfo = getMarathonInfo()
     if (isStatusOK(marathonInfo)) {
       val marathonMaster = getMarathonMaster(marathonInfo)
-      leaderLatch = createLeaderLatch(marathonMaster)
+      leaderLatch = Option(createLeaderLatch(marathonMaster))
       updateFrameworkStage(instance, starting)
       startFramework(marathonMaster)
-      leaderLatch.close()
+      leaderLatch.foreach(_.close())
     } else {
       updateInstanceStatus(instance, failed)
     }
@@ -75,10 +75,10 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   private def getZooKeeperServers(marathonMaster: String) = {
     logger.debug(s"Instance: '${instance.name}'. Getting a zookeeper address.")
     var zooKeeperServers = ""
-    val zkHost = System.getenv("ZOOKEEPER_HOST")
-    val zkPort = System.getenv("ZOOKEEPER_PORT")
-    if (zkHost != null && zkPort != null) {
-      zooKeeperServers = zkHost + ":" + zkPort
+    val zkHost = Option(System.getenv("ZOOKEEPER_HOST"))
+    val zkPort = Option(System.getenv("ZOOKEEPER_PORT"))
+    if (zkHost.isDefined && zkPort.isDefined) {
+      zooKeeperServers = zkHost.get + ":" + zkPort.get
       logger.debug(s"Instance: '${instance.name}'. Get a zookeeper address: '$zooKeeperServers' from environment variables.")
     } else {
       val marathonMasterUrl = new URI(marathonMaster)
@@ -180,15 +180,17 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
           updateFrameworkStage(instance, started)
           updateInstanceStatus(instance, started)
           var fwRest = getRestAddress(getLeaderTask(getApplicationInfo(frameworkName)))
-          while (fwRest == null) fwRest = getRestAddress(getLeaderTask(getApplicationInfo(frameworkName)))
-          updateInstanceRestAddress(instance, fwRest)
+          while (fwRest.isEmpty) fwRest = getRestAddress(getLeaderTask(getApplicationInfo(frameworkName)))
+          updateInstanceRestAddress(instance, fwRest.get)
           isStarted = true
         } else {
-          if (applicationParsedEntity.app.lastTaskFailure != null) {
-            destroyMarathonApplication(frameworkName)
-            updateFrameworkStage(instance, failed)
-            throw new Exception(s"Framework has not started due to: ${applicationParsedEntity.app.lastTaskFailure.message}; " +
-              s"Framework '$frameworkName' is marked as failed.")
+          Option(applicationParsedEntity.app.lastTaskFailure) match {
+            case Some(x) =>
+              destroyMarathonApplication(frameworkName)
+              updateFrameworkStage(instance, failed)
+              throw new Exception(s"Framework has not started due to: ${x.message}; " +
+                s"Framework '$frameworkName' is marked as failed.")
+            case _ =>
           }
           updateFrameworkStage(instance, starting)
           Thread.sleep(delay)

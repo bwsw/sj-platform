@@ -73,7 +73,7 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator {
           } ~
           pathEndOrSingleSlash {
             post { (ctx: RequestContext) =>
-              var response: RestResponse = null
+              var response: Option[RestResponse] = None
               val errors = new ArrayBuffer[String]
 
               try {
@@ -82,7 +82,10 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator {
 
                 if (errors.isEmpty) {
                   configService.save(data.asModelConfigurationSetting)
-                  response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.config.setting.created", data.domain, data.name)))
+                  response = Option(
+                    CreatedRestResponse(
+                      MessageResponseEntity(
+                        createMessage("rest.config.setting.created", data.domain, data.name))))
                 }
               } catch {
                 case e: JsonDeserializationException =>
@@ -90,12 +93,13 @@ trait SjConfigurationSettingsApi extends Directives with SjCrudValidator {
               }
 
               if (errors.nonEmpty) {
-                response = BadRequestRestResponse(MessageResponseEntity(
-                  createMessage("rest.config.setting.cannot.create", errors.mkString("\n"))
-                ))
+                response = Option(
+                  BadRequestRestResponse(
+                    MessageResponseEntity(
+                      createMessage("rest.config.setting.cannot.create", errors.mkString("\n")))))
               }
 
-              ctx.complete(restResponseToHttpResponse(response))
+              ctx.complete(restResponseToHttpResponse(response.get))
             } ~
               get {
                 val configElements = configService.getAll

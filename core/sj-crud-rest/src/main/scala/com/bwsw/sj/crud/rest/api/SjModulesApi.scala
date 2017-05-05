@@ -182,7 +182,7 @@ trait SjModulesApi extends Directives with SjCrudValidator {
                                     specification: SpecificationData,
                                     filename: String) => post {
     entity(as[String]) { entity =>
-      var response: RestResponse = null
+      var response: Option[RestResponse] = None
       val errors = new ArrayBuffer[String]
       try {
         val instanceMetadata = deserializeOptions(entity, moduleType)
@@ -201,16 +201,21 @@ trait SjModulesApi extends Directives with SjCrudValidator {
             instanceMetadata.createStreams()
             instanceDAO.save(instanceMetadata.asModelInstance())
 
-            response = CreatedRestResponse(MessageResponseEntity(createMessage(
-              "rest.modules.instances.instance.created",
-              instanceMetadata.name,
-              s"$moduleType-$moduleName-$moduleVersion"
-            )))
+            response = Option(
+              CreatedRestResponse(
+                MessageResponseEntity(
+                  createMessage(
+                    "rest.modules.instances.instance.created",
+                    instanceMetadata.name,
+                    s"$moduleType-$moduleName-$moduleVersion"
+                  ))))
           } else {
-            response = BadRequestRestResponse(MessageResponseEntity(createMessage(
-              "rest.modules.instances.instance.cannot.create.incorrect.parameters",
-              instancePassedValidation.errors.mkString(";")
-            )))
+            response = Option(
+              BadRequestRestResponse(
+                MessageResponseEntity(
+                  createMessage(
+                    "rest.modules.instances.instance.cannot.create.incorrect.parameters",
+                    instancePassedValidation.errors.mkString(";")))))
           }
         }
 
@@ -220,11 +225,13 @@ trait SjModulesApi extends Directives with SjCrudValidator {
       }
 
       if (errors.nonEmpty) {
-        response = BadRequestRestResponse(
-          MessageResponseEntity(createMessage("rest.modules.instances.instance.cannot.create", errors.mkString(";"))))
+        response = Option(
+          BadRequestRestResponse(
+            MessageResponseEntity(
+              createMessage("rest.modules.instances.instance.cannot.create", errors.mkString(";")))))
       }
 
-      complete(restResponseToHttpResponse(response))
+      complete(restResponseToHttpResponse(response.get))
     }
   }
 

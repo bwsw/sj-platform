@@ -17,7 +17,7 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
     pathPrefix("providers") {
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>
-          var response: RestResponse = null
+          var response: Option[RestResponse] = None
           val errors = new ArrayBuffer[String]
 
           try {
@@ -26,7 +26,10 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
 
             if (errors.isEmpty) {
               providerDAO.save(data.asModelProvider())
-              response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.providers.provider.created", data.name)))
+              response = Option(
+                CreatedRestResponse(
+                  MessageResponseEntity(
+                    createMessage("rest.providers.provider.created", data.name))))
             }
           } catch {
             case e: JsonDeserializationException =>
@@ -34,12 +37,13 @@ trait SjProvidersApi extends Directives with SjCrudValidator {
           }
 
           if (errors.nonEmpty) {
-            response = BadRequestRestResponse(MessageResponseEntity(
-              createMessage("rest.providers.provider.cannot.create", errors.mkString(";"))
-            ))
+            response = Option(
+              BadRequestRestResponse(
+                MessageResponseEntity(
+                  createMessage("rest.providers.provider.cannot.create", errors.mkString(";")))))
           }
 
-          ctx.complete(restResponseToHttpResponse(response))
+          ctx.complete(restResponseToHttpResponse(response.get))
         } ~
           get {
             val providers = providerDAO.getAll

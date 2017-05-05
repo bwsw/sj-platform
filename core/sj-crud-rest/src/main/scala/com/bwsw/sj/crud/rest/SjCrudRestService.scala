@@ -32,7 +32,7 @@ object SjCrudRestService extends App with SjCrudInterface {
   implicit val materializer = ActorMaterializer()
   implicit val executor = system.dispatcher
 
-  require(System.getenv("CRUD_REST_HOST") != null && System.getenv("CRUD_REST_PORT") != null,
+  require(Option(System.getenv("CRUD_REST_HOST")).isDefined && Option(System.getenv("CRUD_REST_PORT")).isDefined,
   "No environment variables: CRUD_REST_HOST, CRUD_REST_PORT")
 
   val restHost = System.getenv("CRUD_REST_HOST")

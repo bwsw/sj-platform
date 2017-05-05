@@ -178,11 +178,12 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageRes
         }
 
         if (moduleType == batchStreamingType) {
-          val batchCollectorClass = specification("batch-collector-class").asInstanceOf[String]
-
           //'batch-collector-class' field
-          if (batchCollectorClass == null || batchCollectorClass.isEmpty)
-            throw new Exception(createMessage("rest.validator.specification.batchcollector.should.defined", moduleType, "batch-collector-class"))
+          Option(specification("batch-collector-class").asInstanceOf[String]) match {
+            case Some("") | None =>
+              throw new Exception(createMessage("rest.validator.specification.batchcollector.should.defined", moduleType, "batch-collector-class"))
+            case _ =>
+          }
         }
     }
 
@@ -281,10 +282,10 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator with MessageRes
       if (entry.getName.equals("specification.json")) {
         val reader = new BufferedReader(new InputStreamReader(jar.getInputStream(entry), "UTF-8"))
         try {
-          var line = reader.readLine
-          while (line != null) {
+          var line = Option(reader.readLine)
+          while (line.isDefined) {
             builder.append(line + "\n")
-            line = reader.readLine
+            line = Option(reader.readLine)
           }
         } finally {
           reader.close()

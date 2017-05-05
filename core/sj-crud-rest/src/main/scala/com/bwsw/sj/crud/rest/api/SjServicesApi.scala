@@ -16,7 +16,7 @@ trait SjServicesApi extends Directives with SjCrudValidator {
     pathPrefix("services") {
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>
-          var response: RestResponse = null
+          var response: Option[RestResponse] = None
           val errors = new ArrayBuffer[String]
           try {
             val protocolService = serializer.deserialize[ServiceData](getEntityFromContext(ctx))
@@ -26,7 +26,10 @@ trait SjServicesApi extends Directives with SjCrudValidator {
               val service = protocolService.asModelService()
               service.prepare()
               serviceDAO.save(service)
-              response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.services.service.created", service.name)))
+              response = Option(
+                CreatedRestResponse(
+                  MessageResponseEntity(
+                    createMessage("rest.services.service.created", service.name))))
             }
           } catch {
             case e: JsonDeserializationException =>
@@ -34,12 +37,13 @@ trait SjServicesApi extends Directives with SjCrudValidator {
           }
 
           if (errors.nonEmpty) {
-            response = BadRequestRestResponse(MessageResponseEntity(
-              createMessage("rest.services.service.cannot.create", errors.mkString(";"))
-            ))
+            response = Option(
+              BadRequestRestResponse(
+                MessageResponseEntity(
+                  createMessage("rest.services.service.cannot.create", errors.mkString(";")))))
           }
 
-          ctx.complete(restResponseToHttpResponse(response))
+          ctx.complete(restResponseToHttpResponse(response.get))
         } ~
           get {
             val services = serviceDAO.getAll

@@ -42,11 +42,10 @@ trait InstanceMarathonManager {
 
   def getLeaderTask(marathonTasks: CloseableHttpResponse): Option[MarathonTask] = {
     val entity = marathonEntitySerializer.deserialize[MarathonApplicationById](EntityUtils.toString(marathonTasks.getEntity, "UTF-8"))
-    var leaderTask: Option[MarathonTask] = None
-    if (entity.app.tasks != null)
-      if (entity.app.tasks.nonEmpty) leaderTask = Some(entity.app.tasks.head)
-
-    leaderTask
+    Option(entity.app.tasks) match {
+      case Some(l) if l.nonEmpty => Option(entity.app.tasks.head)
+      case _ => None
+    }
   }
 
   def isStatusOK(response: CloseableHttpResponse) = {
