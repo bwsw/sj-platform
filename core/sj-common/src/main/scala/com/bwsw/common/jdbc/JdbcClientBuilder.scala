@@ -7,30 +7,36 @@ import org.slf4j.LoggerFactory
   */
 object JdbcClientBuilder {
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private var jdbcClientConnectionData = new JdbcClientConnectionData()
+
+  private var hosts: Option[Array[String]] = None
+  private var driver: Option[String] = None
+  private var username: Option[String] = None
+  private var password: Option[String] = None
+  private var database: Option[String] = None
+  private var table: Option[String] = None
 
   def buildCheck() = {
-    Option(jdbcClientConnectionData.driver) match {
+    driver match {
       case Some("") | None => throw new RuntimeException("Driver field must be declared.")
       case _ =>
     }
-    Option(jdbcClientConnectionData.database) match {
+    database match {
       case Some("") | None => logger.warn("Database is not declared. It can lead to errors in the following.")
       case _ =>
     }
-    Option(jdbcClientConnectionData.table) match {
+    table match {
       case Some("") | None => logger.warn("Table is not declared. It can lead to errors in the following.")
       case _ =>
     }
-    Option(jdbcClientConnectionData.username) match {
+    username match {
       case Some("") | None => throw new RuntimeException("Username field must be declared.")
       case _ =>
     }
-    Option(jdbcClientConnectionData.password) match {
+    password match {
       case Some("") | None => throw new RuntimeException("Password field must be declared.")
       case _ =>
     }
-    Option(jdbcClientConnectionData.hosts) match {
+    hosts match {
       case None => throw new RuntimeException("Hosts field must be declared.")
       case _ =>
     }
@@ -38,36 +44,43 @@ object JdbcClientBuilder {
 
   def build(): JdbcClient = {
     buildCheck()
+    val jdbcClientConnectionData = new JdbcClientConnectionData(
+      hosts.get,
+      driver.get,
+      username.get,
+      password.get,
+      database.get,
+      table.get)
     new JdbcClient(jdbcClientConnectionData)
   }
 
   def setHosts(hosts: Array[String]) = {
-    jdbcClientConnectionData.hosts = hosts
+    this.hosts = Option(hosts)
     this
   }
 
   def setDriver(driver: String) = {
-    jdbcClientConnectionData.driver = driver
+    this.driver = Option(driver)
     this
   }
 
   def setUsername(username: String) = {
-    jdbcClientConnectionData.username = username
+    this.username = Option(username)
     this
   }
 
   def setPassword(password: String) = {
-    jdbcClientConnectionData.password = password
+    this.password = Option(password)
     this
   }
 
   def setDatabase(database: String) = {
-    jdbcClientConnectionData.database = database
+    this.database = Option(database)
     this
   }
 
   def setTable(table: String) = {
-    jdbcClientConnectionData.table = table
+    this.table = Option(table)
     this
   }
 
@@ -78,7 +91,12 @@ object JdbcClientBuilder {
     * @return this
     */
   def setJdbcClientConnectionData(jdbcClientConnectionData: JdbcClientConnectionData) = {
-    this.jdbcClientConnectionData = jdbcClientConnectionData
+    hosts = Option(jdbcClientConnectionData.hosts)
+    driver = Option(jdbcClientConnectionData.driver)
+    username = Option(jdbcClientConnectionData.username)
+    password = Option(jdbcClientConnectionData.password)
+    database = Option(jdbcClientConnectionData.database)
+    table = Option(jdbcClientConnectionData.table)
     this
   }
 }
