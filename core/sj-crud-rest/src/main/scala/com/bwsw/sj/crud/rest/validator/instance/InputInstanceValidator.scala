@@ -1,8 +1,9 @@
 package com.bwsw.sj.crud.rest.validator.instance
 
-import com.bwsw.sj.common.DAL.model.service.TStreamService
-import com.bwsw.sj.common.rest.entities.module.{InputInstanceMetadata, InstanceMetadata, SpecificationData}
+import com.bwsw.sj.common.dal.model.service.TStreamService
+import com.bwsw.sj.common.rest.model.module.{InputInstanceData, InstanceData, SpecificationData}
 import com.bwsw.sj.common.utils.EngineLiterals._
+import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.StreamLiterals.tstreamType
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -23,12 +24,12 @@ class InputInstanceValidator extends InstanceValidator {
     * @param parameters - input parameters for running module
     * @return - List of errors
     */
-  override def validate(parameters: InstanceMetadata,
+  override def validate(parameters: InstanceData,
                         specification: SpecificationData) = {
     logger.debug(s"Instance: ${parameters.name}. Start a validation of instance of input-streaming type.")
     val errors = new ArrayBuffer[String]()
     errors ++= super.validateGeneralOptions(parameters)
-    val inputInstanceMetadata = parameters.asInstanceOf[InputInstanceMetadata]
+    val inputInstanceMetadata = parameters.asInstanceOf[InputInstanceData]
 
     // 'checkpoint-mode' field
     Option(inputInstanceMetadata.checkpointMode) match {
@@ -84,7 +85,7 @@ class InputInstanceValidator extends InstanceValidator {
     errors
   }
 
-  def validateStreamOptions(instance: InputInstanceMetadata,
+  def validateStreamOptions(instance: InputInstanceData,
                             specification: SpecificationData) = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     val errors = new ArrayBuffer[String]()
@@ -141,7 +142,7 @@ class InputInstanceValidator extends InstanceValidator {
     errors
   }
 
-  private def checkBackupNumber(parameters: InputInstanceMetadata, errors: ArrayBuffer[String]) = {
+  private def checkBackupNumber(parameters: InputInstanceData, errors: ArrayBuffer[String]) = {
     val parallelism = parameters.parallelism.asInstanceOf[Int]
     if (parallelism <= 0) {
       errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Parallelism")

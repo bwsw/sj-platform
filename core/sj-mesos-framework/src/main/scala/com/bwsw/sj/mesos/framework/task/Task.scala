@@ -2,8 +2,8 @@ package com.bwsw.sj.mesos.framework.task
 
 import java.util.{Calendar, Date}
 
-import com.bwsw.sj.common.DAL.model.module.{Task => InstanceTask}
-import com.bwsw.sj.common.rest.entities.FrameworkTask
+import com.bwsw.sj.common.dal.model.module.{Task => InstanceTask}
+import com.bwsw.sj.common.rest.FrameworkTask
 
 import scala.util.Properties
 
@@ -27,7 +27,7 @@ class Task(taskId: String) {
              node: String = node,
              lastNode: String = lastNode,
              directory: String = "",
-             host: String = this.host.orNull) = {
+             host: String = this.host.orNull): Unit = {
     this.state = state
     this.stateChanged = stateChanged
     this.reason = reason
@@ -39,7 +39,7 @@ class Task(taskId: String) {
 
   }
 
-  def toFrameworkTask = {
+  def toFrameworkTask: FrameworkTask = {
     FrameworkTask(id, state, new Date(stateChanged).toString, reason, node, lastNode, directories)
   }
 }

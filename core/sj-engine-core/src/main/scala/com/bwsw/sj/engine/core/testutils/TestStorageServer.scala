@@ -14,7 +14,7 @@ object TestStorageServer {
   val token = "token"
   val prefix = "/bench-prefix"
 
-  def start() = {
+  def start(): Unit = {
     val transactionServer = serverBuilder.withZookeeperOptions(new ZookeeperOptions(endpoints = System.getenv("ZOOKEEPER_HOSTS"), prefix))
       .withBootstrapOptions(new BootstrapOptions("192.168.1.174"))
       .withAuthOptions(new AuthOptions(token))

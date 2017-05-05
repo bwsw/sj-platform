@@ -1,11 +1,12 @@
 package com.bwsw.sj.crud.rest.validator.instance
 
-import com.bwsw.sj.common.DAL.model.service.TStreamService
-import com.bwsw.sj.common.DAL.model.stream.{SjStream, TStreamSjStream}
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, OutputInstanceMetadata, SpecificationData}
+import com.bwsw.sj.common.dal.model.service.TStreamService
+import com.bwsw.sj.common.dal.model.stream.{SjStream, TStreamSjStream}
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.rest.model.module.{InstanceData, OutputInstanceData, SpecificationData}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._
+import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.SjStreamUtils._
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -32,11 +33,11 @@ class OutputInstanceValidator extends InstanceValidator {
     * @param specification - specification of module
     * @return - List of errors
     */
-  override def validate(parameters: InstanceMetadata, specification: SpecificationData) = {
+  override def validate(parameters: InstanceData, specification: SpecificationData) = {
     logger.debug(s"Instance: ${parameters.name}. Start a validation of instance of output-streaming type.")
     val errors = new ArrayBuffer[String]()
     errors ++= super.validateGeneralOptions(parameters)
-    val outputInstanceMetadata = parameters.asInstanceOf[OutputInstanceMetadata]
+    val outputInstanceMetadata = parameters.asInstanceOf[OutputInstanceData]
 
     Option(outputInstanceMetadata.checkpointMode) match {
       case None =>
@@ -67,7 +68,7 @@ class OutputInstanceValidator extends InstanceValidator {
     errors ++= validateStreamOptions(outputInstanceMetadata, specification)
   }
 
-  private def validateStreamOptions(instance: OutputInstanceMetadata,
+  private def validateStreamOptions(instance: OutputInstanceData,
                                     specification: SpecificationData) = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     val errors = new ArrayBuffer[String]()

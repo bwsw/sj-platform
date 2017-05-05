@@ -29,7 +29,7 @@ class InputStreamingServer(host: String,
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  override def call() = {
+  override def call(): Unit = {
     logger.info(s"Launch an input-streaming server on: '$host:$port'.")
     val bossGroup: EventLoopGroup = new NioEventLoopGroup(1)
     val workerGroup = new NioEventLoopGroup()

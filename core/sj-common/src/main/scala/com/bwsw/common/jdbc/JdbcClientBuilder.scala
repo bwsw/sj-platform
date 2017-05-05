@@ -15,7 +15,7 @@ object JdbcClientBuilder {
   private var database: Option[String] = None
   private var table: Option[String] = None
 
-  def buildCheck() = {
+  def buildCheck(): Unit = {
     driver match {
       case Some("") | None => throw new RuntimeException("Driver field must be declared.")
       case _ =>
@@ -54,32 +54,32 @@ object JdbcClientBuilder {
     new JdbcClient(jdbcClientConnectionData)
   }
 
-  def setHosts(hosts: Array[String]) = {
+  def setHosts(hosts: Array[String]): JdbcClientBuilder.type = {
     this.hosts = Option(hosts)
     this
   }
 
-  def setDriver(driver: String) = {
+  def setDriver(driver: String): JdbcClientBuilder.type = {
     this.driver = Option(driver)
     this
   }
 
-  def setUsername(username: String) = {
+  def setUsername(username: String): JdbcClientBuilder.type = {
     this.username = Option(username)
     this
   }
 
-  def setPassword(password: String) = {
+  def setPassword(password: String): JdbcClientBuilder.type = {
     this.password = Option(password)
     this
   }
 
-  def setDatabase(database: String) = {
+  def setDatabase(database: String): JdbcClientBuilder.type = {
     this.database = Option(database)
     this
   }
 
-  def setTable(table: String) = {
+  def setTable(table: String): JdbcClientBuilder.type = {
     this.table = Option(table)
     this
   }
@@ -90,7 +90,7 @@ object JdbcClientBuilder {
     * @param jdbcClientConnectionData : JdbcClientConnectionData
     * @return this
     */
-  def setJdbcClientConnectionData(jdbcClientConnectionData: JdbcClientConnectionData) = {
+  def setJdbcClientConnectionData(jdbcClientConnectionData: JdbcClientConnectionData): JdbcClientBuilder.type = {
     hosts = Option(jdbcClientConnectionData.hosts)
     driver = Option(jdbcClientConnectionData.driver)
     username = Option(jdbcClientConnectionData.username)

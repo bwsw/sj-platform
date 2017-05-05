@@ -36,7 +36,7 @@ class SjStreamDistributor(
       throw new IllegalStateException("unknown distribution policy")
   }
 
-  private def positiveMod(dividend: Int, divider: Int) = (dividend % divider + divider) % divider
+  private def positiveMod(dividend: Int, divider: Int): Int = (dividend % divider + divider) % divider
 }
 
 trait SjStreamDistributionPolicy

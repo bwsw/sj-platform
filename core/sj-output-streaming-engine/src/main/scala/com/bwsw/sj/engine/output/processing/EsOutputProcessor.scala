@@ -1,8 +1,8 @@
 package com.bwsw.sj.engine.output.processing
 
 import com.bwsw.common.es.ElasticsearchClient
-import com.bwsw.sj.common.DAL.model.service.ESService
-import com.bwsw.sj.common.DAL.model.stream.SjStream
+import com.bwsw.sj.common.dal.model.service.ESService
+import com.bwsw.sj.common.dal.model.stream.SjStream
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.Entity
 import com.bwsw.sj.engine.core.output.types.es.ElasticsearchCommandBuilder
@@ -26,13 +26,13 @@ class EsOutputProcessor[T <: AnyRef](outputStream: SjStream,
     new ElasticsearchClient(hosts)
   }
 
-  private def splitHost(host: String) = {
+  private def splitHost(host: String): (String, Int) = {
     val parts = host.split(":")
 
     (parts(0), parts(1).toInt)
   }
 
-  def delete(envelope: TStreamEnvelope[T]) = {
+  def delete(envelope: TStreamEnvelope[T]): Unit = {
     val index = esService.index
     val streamName = outputStream.name
     logger.debug(s"Delete a transaction: '${envelope.id}' from elasticsearch stream.")
@@ -43,14 +43,14 @@ class EsOutputProcessor[T <: AnyRef](outputStream: SjStream,
   }
 
 
-  def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]) = {
+  def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit = {
     val esFieldsValue = envelope.getFieldsValue
     val data = esCommandBuilder.buildInsert(inputEnvelope.id, esFieldsValue)
     logger.debug(s"Task: ${manager.taskName}. Write an output envelope to elasticsearch stream.")
     esClient.write(data, esService.index, outputStream.name)
   }
 
-  override def close() = {
+  override def close(): Unit = {
     esClient.close()
   }
 }

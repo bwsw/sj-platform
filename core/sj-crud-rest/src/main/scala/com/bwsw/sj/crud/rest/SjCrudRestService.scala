@@ -12,8 +12,8 @@ import akka.http.scaladsl.server.directives.{DebuggingDirectives, LogEntry, Logg
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.DAL.model.ConfigurationSetting
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.model.ConfigurationSetting
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.utils.EngineLiterals
 import EngineLiterals._
@@ -43,7 +43,6 @@ object SjCrudRestService extends App with SjCrudInterface {
   val fileMetadataDAO = ConnectionRepository.getFileMetadataService
   val instanceDAO = ConnectionRepository.getInstanceService
   val serviceDAO = ConnectionRepository.getServiceManager
-  val providerDAO = ConnectionRepository.getProviderService
   val streamDAO = ConnectionRepository.getStreamService
   val configService = ConnectionRepository.getConfigService
   val routeLogged = logRequestResult(Logging.InfoLevel, route())

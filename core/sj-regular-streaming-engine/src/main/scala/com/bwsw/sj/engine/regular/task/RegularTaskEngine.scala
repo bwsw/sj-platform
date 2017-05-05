@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.regular.task
 
 import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
 
-import com.bwsw.sj.common.DAL.model.module.RegularInstance
+import com.bwsw.sj.common.dal.model.module.RegularInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.input.CallableCheckpointTaskInput
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
@@ -88,7 +88,7 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
     }
   }
 
-  private def registerEnvelope(envelope: Envelope) = {
+  private def registerEnvelope(envelope: Envelope): Unit = {
     afterReceivingEnvelope()
     taskInputService.registerEnvelope(envelope)
     performanceMetrics.addEnvelopeToInputStream(envelope)
@@ -106,7 +106,7 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
   /**
     * Does group checkpoint of t-streams consumers/producers
     */
-  private def doCheckpoint() = {
+  private def doCheckpoint(): Unit = {
     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint.")
     logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeCheckpoint() handler.")
     executor.onBeforeCheckpoint()

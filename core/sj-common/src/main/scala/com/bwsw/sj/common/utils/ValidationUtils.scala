@@ -7,11 +7,11 @@ package com.bwsw.sj.common.utils
   */
 object ValidationUtils {
 
-  def isOptionStringField(string: Option[String]) = string.isEmpty || string.get.nonEmpty
+  def isOptionStringField(string: Option[String]): Boolean = string.isEmpty || string.get.nonEmpty
 
-  def isRequiredStringField(string: Option[String]) = string.nonEmpty && string.get.nonEmpty
+  def isRequiredStringField(string: Option[String]): Boolean = string.nonEmpty && string.get.nonEmpty
 
-  def checkFields(fields: Option[List[String]], uniqueKey: Option[List[String]], distribution: Option[List[String]]) = {
+  def checkFields(fields: Option[List[String]], uniqueKey: Option[List[String]], distribution: Option[List[String]]): Boolean = {
     fields match {
       case Some(fieldNames: List[String]) =>
         fieldNames.nonEmpty &&

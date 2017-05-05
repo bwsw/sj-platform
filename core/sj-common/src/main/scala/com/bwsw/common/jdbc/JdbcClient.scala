@@ -4,7 +4,7 @@ import java.net.URLClassLoader
 import java.sql.{Connection, Driver, PreparedStatement, SQLException}
 import java.util.Properties
 
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.JdbcLiterals
 import org.slf4j.LoggerFactory
 

@@ -2,14 +2,15 @@ package com.bwsw.sj.crud.rest.validator.instance
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.traits.Serializer
-import com.bwsw.sj.common.DAL.model.module._
-import com.bwsw.sj.common.DAL.model.service.{Service, ZKService}
-import com.bwsw.sj.common.DAL.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.rest.entities.module.{InstanceMetadata, SpecificationData}
-import com.bwsw.sj.common.rest.utils.ValidationUtils
-import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils, StreamLiterals}
+import com.bwsw.sj.common.dal.model.module._
+import com.bwsw.sj.common.dal.model.service.{Service, ZKService}
+import com.bwsw.sj.common.dal.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.service.GenericMongoRepository
+import com.bwsw.sj.common.rest.model.module.{InstanceData, SpecificationData}
+import com.bwsw.sj.common.rest.utils.ValidationUtils._
+import com.bwsw.sj.common.utils.MessageResourceUtils._
+import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -22,10 +23,10 @@ import scala.collection.mutable.ArrayBuffer
  *
  * @author Kseniya Tomskikh
  */
-abstract class InstanceValidator extends ValidationUtils with CompletionUtils with MessageResourceUtils {
+abstract class InstanceValidator extends CompletionUtils {
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
-  var serviceDAO: GenericMongoService[Service] = ConnectionRepository.getServiceManager
-  var instanceDAO: GenericMongoService[Instance] = ConnectionRepository.getInstanceService
+  var serviceDAO: GenericMongoRepository[Service] = ConnectionRepository.getServiceManager
+  var instanceDAO: GenericMongoRepository[Instance] = ConnectionRepository.getInstanceService
   val serializer: Serializer = new JsonSerializer
 
   /**
@@ -34,7 +35,7 @@ abstract class InstanceValidator extends ValidationUtils with CompletionUtils wi
    * @param parameters - input parameters for running module
    * @return - List of errors
    */
-  def validate(parameters: InstanceMetadata, specification: SpecificationData): ArrayBuffer[String]
+  def validate(parameters: InstanceData, specification: SpecificationData): ArrayBuffer[String]
 
   /**
    * Validation base instance options
@@ -42,7 +43,7 @@ abstract class InstanceValidator extends ValidationUtils with CompletionUtils wi
    * @param parameters - Instance parameters
    * @return - List of errors
    */
-  protected def validateGeneralOptions(parameters: InstanceMetadata) = {
+  protected def validateGeneralOptions(parameters: InstanceData) = {
     logger.debug(s"Instance: ${parameters.name}. General options validation.")
     val errors = new ArrayBuffer[String]()
 

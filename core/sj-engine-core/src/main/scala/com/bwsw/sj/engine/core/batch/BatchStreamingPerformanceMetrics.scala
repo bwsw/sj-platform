@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.core.batch
 
 import java.util.Calendar
 
-import com.bwsw.sj.common.DAL.model.module.BatchInstance
+import com.bwsw.sj.common.dal.model.module.BatchInstance
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
@@ -36,7 +36,7 @@ class BatchStreamingPerformanceMetrics(manager: CommonTaskManager)
     *
     * @param idle How long waiting a new envelope was
     */
-  def increaseTotalIdleTime(idle: Long) = {
+  def increaseTotalIdleTime(idle: Long): Unit = {
     mutex.lock()
     totalIdleTime += idle
     mutex.unlock()
@@ -104,7 +104,7 @@ class BatchStreamingPerformanceMetrics(manager: CommonTaskManager)
     reportSerializer.serialize(report)
   }
 
-  override def clear() = {
+  override def clear(): Unit = {
     logger.debug(s"Reset variables for performance report for next reporting.")
     inputEnvelopesPerStream = mutable.Map(inputStreamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
     outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)
@@ -113,23 +113,23 @@ class BatchStreamingPerformanceMetrics(manager: CommonTaskManager)
     totalIdleTime = 0L
   }
 
-  def addBatch(batch: Batch) = {
+  def addBatch(batch: Batch): ListBuffer[Int] = {
     batchesPerStream(batch.stream) += batch.envelopes.size
   }
 
-  def addWindow(window: Window) = {
+  def addWindow(window: Window): Unit = {
     windowsPerStream(window.stream) += 1
   }
 
-  private def createStorageForBatches() = {
+  private def createStorageForBatches(): mutable.Map[String, ListBuffer[Int]] = {
     mutable.Map(inputStreamNames.map(x => (x, mutable.ListBuffer[Int]())): _*)
   }
 
-  private def createStorageForWindows() = {
+  private def createStorageForWindows(): mutable.Map[String, Int] = {
     mutable.Map(inputStreamNames.map(x => (x, 0)): _*)
   }
 
-  private def average(elements: ListBuffer[Int]) = {
+  private def average(elements: ListBuffer[Int]): Int = {
     val totalBatches = elements.size
     val sum = elements.sum
     if (totalBatches != 0) sum / totalBatches else 0

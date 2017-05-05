@@ -3,14 +3,15 @@ package com.bwsw.sj.engine.core.engine.input
 import java.util.Date
 import java.util.concurrent.ArrayBlockingQueue
 
-import com.bwsw.sj.common.DAL.model.module.{BatchInstance, OutputInstance, RegularInstance}
-import com.bwsw.sj.common.DAL.model.stream.TStreamSjStream
+import com.bwsw.sj.common.dal.model.module.{BatchInstance, OutputInstance, RegularInstance}
+import com.bwsw.sj.common.dal.model.stream.TStreamSjStream
 import com.bwsw.sj.common.engine.EnvelopeDataSerializer
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Oldest}
+import com.bwsw.tstreams.agents.consumer.subscriber.Subscriber
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
@@ -34,7 +35,7 @@ class CallableTStreamCheckpointTaskInput[T <: AnyRef](manager: TaskManager,
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val (subscribingConsumers, consumerClones) = createConsumers()
 
-  private def createConsumers() = {
+  private def createConsumers(): (Seq[Subscriber], mutable.Map[String, Consumer]) = {
     logger.debug(s"Task: ${manager.taskName}. Start creating subscribing consumers.")
     val consumerClones = mutable.Map[String, Consumer]()
     val inputs = manager.inputs

@@ -2,8 +2,8 @@ package com.bwsw.sj.engine.output.processing
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.rest.RestClient
-import com.bwsw.sj.common.DAL.model.service.RestService
-import com.bwsw.sj.common.DAL.model.stream.SjStream
+import com.bwsw.sj.common.dal.model.service.RestService
+import com.bwsw.sj.common.dal.model.stream.SjStream
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.Entity
 import com.bwsw.sj.engine.output.task.OutputTaskManager
@@ -33,7 +33,7 @@ class RestOutputProcessor[T <: AnyRef](
     Option(service.provider.password)
   )
 
-  override def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]) = {
+  override def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit = {
     logger.debug(createLogMessage("Write an output envelope to RESTful stream."))
     val entity = envelope.getFieldsValue + (transactionFieldName -> inputEnvelope.id)
     val data = jsonSerializer.serialize(entity)
@@ -47,14 +47,14 @@ class RestOutputProcessor[T <: AnyRef](
     }
   }
 
-  override def delete(envelope: TStreamEnvelope[T]) = {
+  override def delete(envelope: TStreamEnvelope[T]): Unit = {
     logger.debug(createLogMessage(s"Delete a transaction: '${envelope.id}' from RESTful stream."))
     val deleted = client.delete(transactionFieldName, envelope.id.toString)
     if (!deleted)
       logger.warn(createLogMessage(s"Transaction '${envelope.id}' not deleted."))
   }
 
-  override def close() = client.close()
+  override def close(): Unit = client.close()
 
   private def createLogMessage(message: String) = s"Task: '${manager.taskName}'. $message"
 }

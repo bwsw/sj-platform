@@ -16,5 +16,5 @@ class Envelope extends Serializable {
   var id: Long = 0
 
   @JsonIgnore()
-  def isEmpty() = Option(streamType).isEmpty
+  def isEmpty(): Boolean = Option(streamType).isEmpty
 }

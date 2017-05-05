@@ -3,7 +3,7 @@ package com.bwsw.sj.module.input.csv
 import java.io.IOException
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.DAL.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
+import com.bwsw.sj.common.dal.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
 import com.bwsw.sj.common.utils.stream_distributor.{ByHash, SjStreamDistributor}
 import com.bwsw.sj.common.utils.{AvroUtils, StreamLiterals}
 import com.bwsw.sj.engine.core.entities.InputEnvelope

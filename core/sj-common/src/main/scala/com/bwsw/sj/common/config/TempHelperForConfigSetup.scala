@@ -3,9 +3,10 @@ package com.bwsw.sj.common.config
 import java.io.File
 import java.net.URL
 
-import com.bwsw.sj.common.DAL.model.ConfigurationSetting
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.model.ConfigurationSetting
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
+import com.bwsw.sj.common.dal.service.GenericMongoRepository
 import org.apache.commons.io.FileUtils
 
 object TempHelperForConfigSetup extends App {
@@ -13,7 +14,7 @@ object TempHelperForConfigSetup extends App {
   //ConnectionRepository.getFileStorage.put(new File("GeoIPASNum.dat"), "GeoIPASNum.dat")
   //ConnectionRepository.getFileStorage.put(new File("GeoIPASNumv6.dat"), "GeoIPASNumv6.dat")
 
-  val configService = ConnectionRepository.getConfigService
+  val configService: GenericMongoRepository[ConfigurationSetting] = ConnectionRepository.getConfigService
 
   configService.save(new ConfigurationSetting(ConfigLiterals.frameworkTag, "com.bwsw.fw-1.0", ConfigLiterals.systemDomain))
 
@@ -41,8 +42,8 @@ object TempHelperForConfigSetup extends App {
   configService.save(new ConfigurationSetting(ConfigLiterals.geoIpAsNum, "GeoIPASNum.dat", ConfigLiterals.systemDomain))
   configService.save(new ConfigurationSetting(ConfigLiterals.geoIpAsNumv6, "GeoIPASNumv6.dat", ConfigLiterals.systemDomain))
 
-  val driverName = "mysql"
-  val driverFileName = s"$driverName.jar"
+  val driverName: String = "mysql"
+  val driverFileName: String = s"$driverName.jar"
   private val driver: File = new File(driverFileName)
   FileUtils.copyURLToFile(
     new URL("http://central.maven.org/maven2/mysql/mysql-connector-java/5.1.41/mysql-connector-java-5.1.41.jar"),
@@ -69,7 +70,7 @@ object TempHelperForConfigDestroy extends App {
   ConnectionRepository.getConfigService.delete(ConfigLiterals.jdbcTimeoutTag)
   ConnectionRepository.getConfigService.delete(ConfigLiterals.restTimeoutTag)
 
-  val driverName = "mysql"
+  val driverName: String = "mysql"
   ConnectionRepository.getConfigService.delete(s"${ConfigLiterals.jdbcDriver}.$driverName")
   ConnectionRepository.getConfigService.delete(s"${ConfigLiterals.jdbcDriver}.$driverName.class")
   ConnectionRepository.getConfigService.delete(s"${ConfigLiterals.jdbcDriver}.$driverName.prefix")

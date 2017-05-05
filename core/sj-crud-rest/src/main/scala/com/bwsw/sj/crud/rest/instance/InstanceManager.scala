@@ -2,8 +2,9 @@ package com.bwsw.sj.crud.rest.instance
 
 import java.util.Calendar
 
-import com.bwsw.sj.common.DAL.model.module.Instance
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.model.module.Instance
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.crud.rest.marathon.MarathonTask
 
 private[instance] trait InstanceManager extends InstanceMarathonManager {
   private val instanceDAO = ConnectionRepository.getInstanceService

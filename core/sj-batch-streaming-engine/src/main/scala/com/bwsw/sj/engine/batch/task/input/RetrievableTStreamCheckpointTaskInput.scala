@@ -2,9 +2,9 @@ package com.bwsw.sj.engine.batch.task.input
 
 import java.util.Date
 
-import com.bwsw.sj.common.DAL.model.module.BatchInstance
-import com.bwsw.sj.common.DAL.model.stream.TStreamSjStream
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.model.module.BatchInstance
+import com.bwsw.sj.common.dal.model.stream.TStreamSjStream
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.EnvelopeDataSerializer
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.entities.TStreamEnvelope
@@ -14,6 +14,7 @@ import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction}
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
+import scala.collection.immutable.Iterable
 import scala.collection.mutable
 
 /**
@@ -34,7 +35,7 @@ class RetrievableTStreamCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMana
   addConsumersToCheckpointGroup()
   launchConsumers()
 
-  private def createConsumers() = {
+  private def createConsumers(): Map[String, Consumer] = {
     logger.debug(s"Task: ${manager.taskName}. Start creating consumers.")
     val inputs = manager.inputs
     val offset = chooseOffset(instance.startFrom)
@@ -62,7 +63,7 @@ class RetrievableTStreamCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMana
     }
   }
 
-  override def get() = {
+  override def get(): Iterable[TStreamEnvelope[T]] = {
     consumers.flatMap(x => {
       val consumer = x._2
       val transactions = getAvailableTransactions(consumer)
@@ -70,7 +71,7 @@ class RetrievableTStreamCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMana
     })
   }
 
-  private def getAvailableTransactions(consumer: Consumer) = {
+  private def getAvailableTransactions(consumer: Consumer): Seq[ConsumerTransaction] = {
     consumer.getPartitions().toSeq.flatMap(partition => {
       val fromOffset = getFromOffset(consumer, partition)
       val lastTransaction = consumer.getLastTransaction(partition)
@@ -79,7 +80,7 @@ class RetrievableTStreamCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMana
     })
   }
 
-  private def transactionsToEnvelopes(transactions: Seq[ConsumerTransaction], consumer: Consumer) = {
+  private def transactionsToEnvelopes(transactions: Seq[ConsumerTransaction], consumer: Consumer): Seq[TStreamEnvelope[T]] = {
     val stream = ConnectionRepository.getStreamService.get(consumer.stream.name).get
     transactions.map((transaction: ConsumerTransaction) => {
       val tempTransaction = consumer.buildTransactionObject(transaction.getPartition(), transaction.getTransactionID(), transaction.getCount()).get //todo fix it next milestone TR1216
@@ -95,24 +96,24 @@ class RetrievableTStreamCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMana
     })
   }
 
-  private def getFromOffset(consumer: Consumer, partition: Int) = {
+  private def getFromOffset(consumer: Consumer, partition: Int): Long = {
     if (tstreamOffsetsStorage.isDefinedAt((consumer.name, partition))) tstreamOffsetsStorage((consumer.name, partition))
     else consumer.getCurrentOffset(partition)
   }
 
-  private def addConsumersToCheckpointGroup() = {
+  private def addConsumersToCheckpointGroup(): Unit = {
     logger.debug(s"Task: ${manager.taskName}. Start adding subscribing consumers to checkpoint group.")
     consumers.foreach(x => checkpointGroup.add(x._2))
     logger.debug(s"Task: ${manager.taskName}. Adding subscribing consumers to checkpoint group is finished.")
   }
 
-  private def launchConsumers() = {
+  private def launchConsumers(): Unit = {
     logger.debug(s"Task: ${manager.taskName}. Launch subscribing consumers.")
     consumers.foreach(_._2.start())
     logger.debug(s"Task: ${manager.taskName}. Subscribing consumers are launched.")
   }
 
-  override def setConsumerOffset(envelope: TStreamEnvelope[T]) = {
+  override def setConsumerOffset(envelope: TStreamEnvelope[T]): Unit = {
     logger.debug(s"Task: ${manager.taskName}. " +
       s"Change local offset of consumer: ${envelope.consumerName} to txn: ${envelope.id}.")
     consumers(envelope.consumerName).setStreamPartitionOffset(envelope.partition, envelope.id)

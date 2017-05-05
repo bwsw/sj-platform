@@ -1,10 +1,11 @@
 package com.bwsw.sj.crud.rest.validator.instance
 
-import com.bwsw.sj.common.DAL.model.service.{KafkaService, TStreamService}
-import com.bwsw.sj.common.DAL.model.stream.KafkaSjStream
-import com.bwsw.sj.common.rest.entities.module.{BatchInstanceMetadata, InstanceMetadata, SpecificationData}
+import com.bwsw.sj.common.dal.model.service.{KafkaService, TStreamService}
+import com.bwsw.sj.common.dal.model.stream.KafkaSjStream
+import com.bwsw.sj.common.rest.model.module.{BatchInstanceData, InstanceData, SpecificationData}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._
+import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.SjStreamUtils._
 import com.bwsw.sj.common.utils.StreamLiterals._
 import org.slf4j.{Logger, LoggerFactory}
@@ -20,11 +21,11 @@ class BatchInstanceValidator extends InstanceValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
-  override def validate(parameters: InstanceMetadata, specification: SpecificationData) = {
+  override def validate(parameters: InstanceData, specification: SpecificationData) = {
     logger.debug(s"Instance: ${parameters.name}. Start a validation of instance of batch-streaming type.")
     val errors = new ArrayBuffer[String]()
     errors ++= super.validateGeneralOptions(parameters)
-    val batchInstanceMetadata = parameters.asInstanceOf[BatchInstanceMetadata]
+    val batchInstanceMetadata = parameters.asInstanceOf[BatchInstanceData]
 
     // 'state-management' field
     if (!stateManagementModes.contains(batchInstanceMetadata.stateManagement)) {
@@ -68,7 +69,7 @@ class BatchInstanceValidator extends InstanceValidator {
     errors
   }
 
-  def validateStreamOptions(instance: BatchInstanceMetadata,
+  def validateStreamOptions(instance: BatchInstanceData,
                             specification: SpecificationData): ArrayBuffer[String] = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     val errors = new ArrayBuffer[String]()

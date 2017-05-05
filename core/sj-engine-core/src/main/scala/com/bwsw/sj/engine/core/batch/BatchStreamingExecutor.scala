@@ -48,11 +48,11 @@ class BatchStreamingExecutor[T <: AnyRef](manager: ModuleEnvironmentManager) ext
    */
   def onIdle(): Unit = {}
 
-  def onEnter() = {}
+  def onEnter(): Unit = {}
 
-  def onLeaderEnter() = {}
+  def onLeaderEnter(): Unit = {}
 
-  def onLeave() = {}
+  def onLeave(): Unit = {}
 
-  def onLeaderLeave() = {}
+  def onLeaderLeave(): Unit = {}
 }

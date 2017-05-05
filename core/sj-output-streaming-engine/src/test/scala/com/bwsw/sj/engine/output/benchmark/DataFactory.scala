@@ -8,14 +8,14 @@ import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.common.jdbc.JdbcClientBuilder
 import com.bwsw.common.traits.Serializer
-import com.bwsw.sj.common.DAL.model._
-import com.bwsw.sj.common.DAL.model.module.{OutputInstance, Task}
-import com.bwsw.sj.common.DAL.model.provider.{JDBCProvider, Provider}
-import com.bwsw.sj.common.DAL.model.service._
-import com.bwsw.sj.common.DAL.model.stream._
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.DAL.service.GenericMongoService
-import com.bwsw.sj.common.rest.entities.module.ExecutionPlan
+import com.bwsw.sj.common.dal.model._
+import com.bwsw.sj.common.dal.model.module.{OutputInstance, Task}
+import com.bwsw.sj.common.dal.model.provider.{JDBCProvider, Provider}
+import com.bwsw.sj.common.dal.model.service._
+import com.bwsw.sj.common.dal.model.stream._
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.service.GenericMongoRepository
+import com.bwsw.sj.common.rest.model.module.ExecutionPlan
 import com.bwsw.sj.common.utils.{ProviderLiterals, _}
 import com.bwsw.sj.engine.core.testutils.TestStorageServer
 import com.bwsw.tstreams.agents.consumer
@@ -71,7 +71,7 @@ object DataFactory {
   val providerService = ConnectionRepository.getProviderService
   val instanceService = ConnectionRepository.getInstanceService
   val fileStorage: MongoFileStorage = ConnectionRepository.getFileStorage
-  val configService: GenericMongoService[ConfigurationSetting] = ConnectionRepository.getConfigService
+  val configService: GenericMongoRepository[ConfigurationSetting] = ConnectionRepository.getConfigService
 
   val esInstanceName: String = "test-es-instance-for-output-engine"
   val jdbcInstanceName: String = "test-jdbc-instance-for-output-engine"

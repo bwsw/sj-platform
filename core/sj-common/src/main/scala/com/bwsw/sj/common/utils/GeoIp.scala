@@ -2,7 +2,7 @@ package com.bwsw.sj.common.utils
 
 import java.net.{Inet4Address, Inet6Address, InetAddress}
 
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.maxmind.geoip.LookupService
 import org.slf4j.LoggerFactory
@@ -30,21 +30,21 @@ object GeoIp {
     }
   }
 
-  private def getAsLookupServiceIpv4 = {
+  private def getAsLookupServiceIpv4: LookupService = {
     logger.debug("Create a geo ip lookup service of ipv4")
     val geoIpFileName = ConfigurationSettingsUtils.getGeoIpAsNumFileName()
 
     createLookupService(geoIpFileName)
   }
 
-  private def getAsLookupServiceIpv6 = {
+  private def getAsLookupServiceIpv6: LookupService = {
     logger.debug("Create a geo ip lookup service of ipv6")
     val geoIpFileName = ConfigurationSettingsUtils.getGeoIpAsNumv6FileName()
 
     createLookupService(geoIpFileName)
   }
 
-  private def createLookupService(filename: String) = {
+  private def createLookupService(filename: String): LookupService = {
     val databaseFile = fileStorage.get(filename, filename)
 
     new LookupService(databaseFile)

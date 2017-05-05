@@ -1,9 +1,9 @@
 package com.bwsw.sj.mesos.framework.task
 
-import com.bwsw.sj.common.DAL.ConnectionConstants
-import com.bwsw.sj.common.DAL.model.module._
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.rest.entities.FrameworkRestEntity
+import com.bwsw.sj.common.dal.ConnectionConstants
+import com.bwsw.sj.common.dal.model.module._
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.rest.FrameworkRestEntity
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.mesos.framework.schedule.{FrameworkUtil, OffersHandler}
 import org.apache.log4j.Logger
@@ -11,7 +11,7 @@ import org.apache.mesos.Protos.{TaskID, TaskInfo, _}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 object TasksList {
   private val logger = Logger.getLogger(this.getClass)
@@ -33,7 +33,7 @@ object TasksList {
 //    tasksToLaunch += taskId
   }
 
-  def getList = {
+  def getList: Iterable[Task] = {
     listTasks.values
   }
 
@@ -49,25 +49,25 @@ object TasksList {
     tasksToLaunch
   }
 
-  def launched(taskId: String) = {
+  def launched(taskId: String): ListBuffer[String] = {
     tasksToLaunch -= taskId
     launchedTasks += taskId
   }
 
-  def stopped(taskId: String) = {
+  def stopped(taskId: String): ListBuffer[String] = {
     launchedTasks -= taskId
   }
 
-  def killTask(taskId: String) = {
+  def killTask(taskId: String): ListBuffer[String] = {
     FrameworkUtil.driver.get.killTask(TaskID.newBuilder().setValue(taskId).build)
     stopped(taskId)
   }
 
-  def clearLaunchedTasks() = {
+  def clearLaunchedTasks(): Unit = {
     launchedTasks = mutable.ListBuffer[String]()
   }
 
-  def toFrameworkTask = {
+  def toFrameworkTask: FrameworkRestEntity = {
     FrameworkRestEntity(listTasks.values.map(_.toFrameworkTask).toSeq)
   }
 
@@ -75,35 +75,35 @@ object TasksList {
     listTasks.get(taskId)
   }
 
-  def clearAvailablePorts() = {
+  def clearAvailablePorts(): Unit = {
     availablePorts.remove(0, availablePorts.length)
   }
 
-  def getAvailablePorts = {
+  def getAvailablePorts: ListBuffer[Long] = {
     availablePorts
   }
 
-  def count = {
+  def count: Int = {
     toLaunch.size
   }
 
-  def getLaunchedOffers = {
+  def getLaunchedOffers: Map[OfferID, ArrayBuffer[TaskInfo]] = {
     launchedOffers
   }
 
-  def getLaunchedTasks = {
+  def getLaunchedTasks: ListBuffer[String] = {
     launchedTasks
   }
 
-  def clearLaunchedOffers() = {
+  def clearLaunchedOffers(): Unit = {
     launchedOffers = Map[OfferID, ArrayBuffer[TaskInfo]]()
   }
 
-  def setMessage(message: String) = {
+  def setMessage(message: String): Unit = {
     this.message = message
   }
 
-  def prepare(instance: Instance) = {
+  def prepare(instance: Instance): Unit = {
     perTaskCores = FrameworkUtil.instance.get.perTaskCores
     perTaskMem = FrameworkUtil.instance.get.perTaskRam
     perTaskPortsCount = FrameworkUtil.getCountPorts(FrameworkUtil.instance.get)

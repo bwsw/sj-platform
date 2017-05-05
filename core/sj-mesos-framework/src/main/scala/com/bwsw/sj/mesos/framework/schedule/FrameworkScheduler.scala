@@ -9,6 +9,7 @@ import org.apache.mesos.{Scheduler, SchedulerDriver}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 
 /**
  * Mesos scheduler implementation
@@ -19,7 +20,7 @@ class FrameworkScheduler extends Scheduler {
   var uniqueHosts = false
 
 
-  def error(driver: SchedulerDriver, message: String) {
+  def error(driver: SchedulerDriver, message: String): Unit = {
     logger.error(s"Got error message: $message")
     TasksList.setMessage(s"Got error message: $message")
   }
@@ -39,7 +40,7 @@ class FrameworkScheduler extends Scheduler {
     TasksList.setMessage(s"Framework disconnected.")
   }
 
-  def frameworkMessage(driver: SchedulerDriver, executorId: ExecutorID, slaveId: SlaveID, data: Array[Byte]) {
+  def frameworkMessage(driver: SchedulerDriver, executorId: ExecutorID, slaveId: SlaveID, data: Array[Byte]): Unit = {
     logger.debug(s"Got framework message: $data.")
     TasksList.setMessage(s"Got framework message: $data")
   }
@@ -51,7 +52,7 @@ class FrameworkScheduler extends Scheduler {
     * @param driver scheduler driver
    * @param status received status from master
    */
-  def statusUpdate(driver: SchedulerDriver, status: TaskStatus) {
+  def statusUpdate(driver: SchedulerDriver, status: TaskStatus): Unit = {
     logger.info(s"GOT STATUS UPDATE")
     StatusHandler.handle(status)
   }
@@ -119,7 +120,7 @@ class FrameworkScheduler extends Scheduler {
     logger.info(s"Launched tasks: ${TasksList.getLaunchedTasks}")
   }
 
-  private def declineOffers(message: String, offers: mutable.Buffer[Offer]) = {
+  private def declineOffers(message: String, offers: mutable.Buffer[Offer]): Unit = {
     logger.info(message)
     TasksList.setMessage(message)
     offers.foreach(offer => FrameworkUtil.driver.get.declineOffer(offer.getId))
@@ -133,7 +134,7 @@ class FrameworkScheduler extends Scheduler {
     * @param tasksCountOnSlaves
     * @return
     */
-  private def createTaskToLaunch(taskName: String, tasksCountOnSlaves: mutable.ListBuffer[(Offer, Int)]) = {
+  private def createTaskToLaunch(taskName: String, tasksCountOnSlaves: mutable.ListBuffer[(Offer, Int)]): ListBuffer[String] = {
     val currentOffer = OffersHandler.getNextOffer(tasksCountOnSlaves)
     val task = TasksList.createTaskToLaunch(taskName, currentOffer._1)
 
@@ -149,7 +150,7 @@ class FrameworkScheduler extends Scheduler {
     *
     * @param driver
     */
-  private def launchTasks(driver: SchedulerDriver) = {
+  private def launchTasks(driver: SchedulerDriver): Unit = {
     for (task <- TasksList.getLaunchedOffers) {
       driver.launchTasks(List(task._1).asJava, task._2.asJava)
     }
@@ -158,7 +159,7 @@ class FrameworkScheduler extends Scheduler {
   /**
    * Perform a reregistration of framework after master disconnected.
    */
-  def reregistered(driver: SchedulerDriver, masterInfo: MasterInfo) {
+  def reregistered(driver: SchedulerDriver, masterInfo: MasterInfo): Unit = {
     logger.debug(s"New master $masterInfo.")
     TasksList.setMessage(s"New master $masterInfo")
   }
@@ -167,7 +168,7 @@ class FrameworkScheduler extends Scheduler {
   /**
    * Registering framework.
    */
-  def registered(driver: SchedulerDriver, frameworkId: FrameworkID, masterInfo: MasterInfo) {
+  def registered(driver: SchedulerDriver, frameworkId: FrameworkID, masterInfo: MasterInfo): Unit = {
     logger.info(s"Registered framework as: ${frameworkId.getValue}.")
 
     FrameworkUtil.driver = Option(driver)

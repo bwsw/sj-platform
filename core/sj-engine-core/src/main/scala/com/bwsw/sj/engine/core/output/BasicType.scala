@@ -10,7 +10,7 @@ trait TransformableType[T] {
 }
 
 abstract class NamedType[T](name: String, default: AnyRef) extends TransformableType[T] {
-  def getName = name
+  def getName: String = name
 
   def getDefaultValue: AnyRef = default
 }

@@ -6,8 +6,8 @@ package com.bwsw.sj.engine.core.output
 
 
 class Entity[T] (m: Map[String, NamedType[T]]) {
-  def getField(name: String) = m(name)
-  def getFields = m.keys
+  def getField(name: String): NamedType[T] = m(name)
+  def getFields: Iterable[String] = m.keys
 }
 
 class EntityBuilder[T] (m: Map[String, NamedType[T]] = Map[String, NamedType[T]]()) {

@@ -8,7 +8,7 @@ import com.bwsw.sj.mesos.framework.task.status.states.{MasterState, Slave, Slave
 
 object SuccessHandler {
 
-  def process(status: TaskStatus) = {
+  def process(status: TaskStatus): Unit = {
     val currentSlave = getCurrentSlave(status.getSlaveId)
     val dir = extractSandbox(currentSlave, status.getTaskId)
     val dirUrl = s"http://${FrameworkUtil.master.get.getHostname}:${FrameworkUtil.master.get.getPort}/#/slaves/${currentSlave.id}/browse?path=$dir"
@@ -19,7 +19,7 @@ object SuccessHandler {
     StatusHandler.logger.debug(s"Running task: ${status.getTaskId.getValue}.")
   }
 
-  def getCurrentSlave(slaveId: SlaveID) = {
+  def getCurrentSlave(slaveId: SlaveID): Slave = {
     val masterStateUrl = s"http://${FrameworkUtil.master.get.getHostname}:${FrameworkUtil.master.get.getPort}/state.json"
     val masterResponse = scala.io.Source.fromURL(masterStateUrl).mkString
     val masterObj = StatusHandler.serializer.deserialize[MasterState](masterResponse)

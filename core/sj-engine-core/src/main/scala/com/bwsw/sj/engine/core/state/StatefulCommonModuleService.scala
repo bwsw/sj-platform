@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.core.state
 
-import com.bwsw.sj.common.DAL.model.module.{RegularInstance, BatchInstance}
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.model.module.{RegularInstance, BatchInstance}
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.StateHandlers
 import com.bwsw.sj.engine.core.environment.StatefulModuleEnvironmentManager
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
@@ -40,7 +40,7 @@ class StatefulCommonModuleService(manager: CommonTaskManager, checkpointGroup: C
   /**
    * Does group checkpoint of t-streams state consumers/producers
    */
-  override def doCheckpoint() = {
+  override def doCheckpoint(): Unit = {
     if (countOfCheckpoints != getStateFullCheckpoint()) {
       doCheckpointOfPartOfState()
     } else {
@@ -52,7 +52,7 @@ class StatefulCommonModuleService(manager: CommonTaskManager, checkpointGroup: C
   /**
    * Saves a partial state changes
    */
-  private def doCheckpointOfPartOfState() = {
+  private def doCheckpointOfPartOfState(): Unit = {
     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint of a part of state.")
     logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeStateSave() handler.")
     statefulExecutor.onBeforeStateSave(false)
@@ -65,7 +65,7 @@ class StatefulCommonModuleService(manager: CommonTaskManager, checkpointGroup: C
    /**
    * Saves a state
    */
-  private def doCheckpointOfFullState() = {
+  private def doCheckpointOfFullState(): Unit = {
     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint of full state.")
     logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeStateSave() handler.")
      statefulExecutor.onBeforeStateSave(true)
@@ -75,7 +75,7 @@ class StatefulCommonModuleService(manager: CommonTaskManager, checkpointGroup: C
     countOfCheckpoints = 1
   }
 
-  private def getStateFullCheckpoint() = {
+  private def getStateFullCheckpoint(): Int = {
     instance match {
       case regularInstance: RegularInstance =>  regularInstance.stateFullCheckpoint
       case batchInstance: BatchInstance =>  batchInstance.stateFullCheckpoint

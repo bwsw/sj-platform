@@ -1,6 +1,6 @@
 package com.bwsw.common
 
-import org.apache.curator.framework.CuratorFrameworkFactory
+import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.framework.recipes.leader
 import org.apache.curator.retry.ExponentialBackoffRetry
 import org.apache.zookeeper.KeeperException
@@ -16,7 +16,7 @@ class LeaderLatch(zkServers: Set[String], masterNode: String, id: String = "") {
   private val leaderLatch = new leader.LeaderLatch(curatorClient, masterNode, id)
   private var isStarted = false
 
-  private def createCuratorClient() = {
+  private def createCuratorClient(): CuratorFramework = {
     logger.debug(s"Create a curator client (connection: $servers).")
     val curatorClient = CuratorFrameworkFactory.newClient(servers, new ExponentialBackoffRetry(1000, 3))
     curatorClient.start()
@@ -24,19 +24,19 @@ class LeaderLatch(zkServers: Set[String], masterNode: String, id: String = "") {
     curatorClient
   }
 
-  private def createMasterNode() = {
+  private def createMasterNode(): Any = {
     logger.debug(s"Create a master node: $masterNode if it doesn't exist.")
     val doesPathExist = Option(curatorClient.checkExists().forPath(masterNode))
     if (doesPathExist.isEmpty) curatorClient.create.creatingParentsIfNeeded().forPath(masterNode)
   }
 
-  def start() = {
+  def start(): Unit = {
     logger.info("Start a leader latch.")
     leaderLatch.start()
     isStarted = true
   }
 
-  def takeLeadership(delay: Long) = {
+  def takeLeadership(delay: Long): Unit = {
     logger.debug("Try to start a leader latch.")
     while (!hasLeadership) {
       logger.debug("Waiting until the leader latch takes a leadership.")
@@ -44,7 +44,7 @@ class LeaderLatch(zkServers: Set[String], masterNode: String, id: String = "") {
     }
   }
 
-  def getLeaderInfo() = {
+  def getLeaderInfo(): String = {
     logger.debug("Get info of a leader.")
     var leaderInfo = getLeaderId()
     while (leaderInfo == "") {
@@ -69,11 +69,11 @@ class LeaderLatch(zkServers: Set[String], masterNode: String, id: String = "") {
     }
   }
 
-  def hasLeadership() = {
+  def hasLeadership(): Boolean = {
     leaderLatch.hasLeadership
   }
 
-  def close() = {
+  def close(): Unit = {
     logger.info("Close a leader latch if it's started.")
     if (isStarted) leaderLatch.close()
     curatorClient.close()

@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.core.environment
 
-import com.bwsw.sj.common.DAL.model.stream.SjStream
+import com.bwsw.sj.common.dal.model.stream.SjStream
 import org.slf4j.LoggerFactory
 
 /**
@@ -18,7 +18,7 @@ class EnvironmentManager(val options: String, val outputs: Array[SjStream]) {
 
   var isCheckpointInitiated: Boolean = false
 
-  def initiateCheckpoint() = {
+  def initiateCheckpoint(): Unit = {
     logger.debug("Initiate a checkpoint manually.")
     isCheckpointInitiated = true
   }
@@ -26,7 +26,7 @@ class EnvironmentManager(val options: String, val outputs: Array[SjStream]) {
   /**
    * Returns a set of names of the output streams according to the set of tags
    */
-  def getStreamsByTags(tags: Array[String]) = {
+  def getStreamsByTags(tags: Array[String]): Array[String] = {
     logger.info(s"Get names of the streams that have set of tags: ${tags.mkString(",")}\n")
     outputs.filter(x => tags.forall(x.tags.contains)).map(_.name)
   }

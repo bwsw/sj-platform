@@ -6,14 +6,14 @@ import java.util.jar.JarFile
 
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.common.DAL.model.module.{Instance, RegularInstance, Task}
-import com.bwsw.sj.common.DAL.model.provider.Provider
-import com.bwsw.sj.common.DAL.model.service.{KafkaService, Service, TStreamService, ZKService}
-import com.bwsw.sj.common.DAL.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
-import com.bwsw.sj.common.DAL.repository.ConnectionRepository
-import com.bwsw.sj.common.DAL.service.GenericMongoService
+import com.bwsw.sj.common.dal.model.module.{Instance, RegularInstance, Task}
+import com.bwsw.sj.common.dal.model.provider.Provider
+import com.bwsw.sj.common.dal.model.service.{KafkaService, Service, TStreamService, ZKService}
+import com.bwsw.sj.common.dal.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.service.GenericMongoRepository
 import com.bwsw.sj.common.config.ConfigLiterals
-import com.bwsw.sj.common.rest.entities.module.ExecutionPlan
+import com.bwsw.sj.common.rest.model.module.ExecutionPlan
 import com.bwsw.sj.common.utils._
 import com.bwsw.sj.engine.core.testutils.TestStorageServer
 import com.bwsw.tstreams.agents.consumer.Consumer
@@ -88,19 +88,19 @@ object DataFactory {
     tstreamFactory.setProperty(ConfigurationOptions.Consumer.Subscriber.bindHost, agentsHost)
   }
 
-  def createProviders(providerService: GenericMongoService[Provider]) = {
+  def createProviders(providerService: GenericMongoRepository[Provider]) = {
     val kafkaProvider = new Provider(kafkaProviderName, kafkaProviderName, kafkaHosts.split(","), "", "", ProviderLiterals.kafkaType)
     providerService.save(kafkaProvider)
 
     providerService.save(zookeeperProvider)
   }
 
-  def deleteProviders(providerService: GenericMongoService[Provider]) = {
+  def deleteProviders(providerService: GenericMongoRepository[Provider]) = {
     providerService.delete(kafkaProviderName)
     providerService.delete(zookeeperProviderName)
   }
 
-  def createServices(serviceManager: GenericMongoService[Service], providerService: GenericMongoService[Provider]) = {
+  def createServices(serviceManager: GenericMongoRepository[Service], providerService: GenericMongoRepository[Provider]) = {
     val zkService = new ZKService(zookeeperServiceName, zookeeperServiceName, zookeeperProvider, testNamespace)
     serviceManager.save(zkService)
 
@@ -111,13 +111,13 @@ object DataFactory {
     serviceManager.save(tstrqService)
   }
 
-  def deleteServices(serviceManager: GenericMongoService[Service]) = {
+  def deleteServices(serviceManager: GenericMongoRepository[Service]) = {
     serviceManager.delete(kafkaServiceName)
     serviceManager.delete(zookeeperServiceName)
     serviceManager.delete(tstreamServiceName)
   }
 
-  def createStreams(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service],
+  def createStreams(sjStreamService: GenericMongoRepository[SjStream], serviceManager: GenericMongoRepository[Service],
                     partitions: Int, _type: String, inputCount: Int, outputCount: Int) = {
     _type match {
       case `tstreamMode` =>
@@ -158,9 +158,9 @@ object DataFactory {
     }
   }
 
-  def deleteStreams(streamService: GenericMongoService[SjStream],
+  def deleteStreams(streamService: GenericMongoRepository[SjStream],
                     _type: String,
-                    serviceManager: GenericMongoService[Service],
+                    serviceManager: GenericMongoRepository[Service],
                     inputCount: Int,
                     outputCount: Int) = {
     _type match {
@@ -180,7 +180,7 @@ object DataFactory {
     }
   }
 
-  private def createInputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
+  private def createInputTStream(sjStreamService: GenericMongoRepository[SjStream], serviceManager: GenericMongoRepository[Service], partitions: Int, suffix: String) = {
     val s1 = new TStreamSjStream(tstreamInputNamePrefix + suffix,
       tstrqService,
       partitions,
@@ -199,7 +199,7 @@ object DataFactory {
     )
   }
 
-  private def createOutputTStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
+  private def createOutputTStream(sjStreamService: GenericMongoRepository[SjStream], serviceManager: GenericMongoRepository[Service], partitions: Int, suffix: String) = {
     val s2 = new TStreamSjStream(tstreamOutputNamePrefix + suffix,
       tstrqService,
       partitions,
@@ -218,20 +218,20 @@ object DataFactory {
     )
   }
 
-  private def deleteInputTStream(streamService: GenericMongoService[SjStream], suffix: String) = {
+  private def deleteInputTStream(streamService: GenericMongoRepository[SjStream], suffix: String) = {
     streamService.delete(tstreamInputNamePrefix + suffix)
 
     storageClient.deleteStream(tstreamInputNamePrefix + suffix)
   }
 
-  private def deleteOutputTStream(streamService: GenericMongoService[SjStream], suffix: String) = {
+  private def deleteOutputTStream(streamService: GenericMongoRepository[SjStream], suffix: String) = {
     streamService.delete(tstreamOutputNamePrefix + suffix)
 
     storageClient.deleteStream(tstreamOutputNamePrefix + suffix)
 
   }
 
-  private def createKafkaStream(sjStreamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], partitions: Int, suffix: String) = {
+  private def createKafkaStream(sjStreamService: GenericMongoRepository[SjStream], serviceManager: GenericMongoRepository[Service], partitions: Int, suffix: String) = {
     val kService = serviceManager.get(kafkaServiceName).get.asInstanceOf[KafkaService]
 
     val kafkaSjStream = new KafkaSjStream(kafkaInputNamePrefix + suffix,
@@ -254,7 +254,7 @@ object DataFactory {
     AdminUtils.createTopic(zkUtils, kafkaSjStream.name, partitions, replicationFactor)
   }
 
-  private def deleteKafkaStream(streamService: GenericMongoService[SjStream], serviceManager: GenericMongoService[Service], suffix: String) = {
+  private def deleteKafkaStream(streamService: GenericMongoRepository[SjStream], serviceManager: GenericMongoRepository[Service], suffix: String) = {
     val kService = serviceManager.get(kafkaServiceName).get.asInstanceOf[KafkaService]
     val zkHost = kService.zkProvider.hosts
     val zkConnect = new ZkConnection(zkHost.mkString(";"))
@@ -267,8 +267,8 @@ object DataFactory {
   }
 
 
-  def createInstance(serviceManager: GenericMongoService[Service],
-                     instanceService: GenericMongoService[Instance],
+  def createInstance(serviceManager: GenericMongoRepository[Service],
+                     instanceService: GenericMongoRepository[Instance],
                      checkpointInterval: Int,
                      stateManagement: String = EngineLiterals.noneStateMode,
                      stateFullCheckpoint: Int = 0) = {
@@ -289,7 +289,7 @@ object DataFactory {
     instanceService.save(instance)
   }
 
-  def deleteInstance(instanceService: GenericMongoService[Instance]) = {
+  def deleteInstance(instanceService: GenericMongoRepository[Instance]) = {
     instanceService.delete(instanceName)
   }
 
@@ -380,7 +380,7 @@ object DataFactory {
     createConsumer(tstreamInputNamePrefix + suffix, partitions)
   }
 
-  def createStateConsumer(streamService: GenericMongoService[SjStream]) = {
+  def createStateConsumer(streamService: GenericMongoRepository[SjStream]) = {
     val name = instanceName + "-task0" + "_state"
     val partitions = 1
 

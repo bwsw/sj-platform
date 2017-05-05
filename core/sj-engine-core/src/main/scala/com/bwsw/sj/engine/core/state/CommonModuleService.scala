@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.core.state
 
-import com.bwsw.sj.common.DAL.model.module.{RegularInstance, BatchInstance}
+import com.bwsw.sj.common.dal.model.module.{RegularInstance, BatchInstance}
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.common.utils.{EngineLiterals, SjTimer}
 import com.bwsw.sj.engine.core.environment.{ModuleEnvironmentManager, ModuleOutput}
@@ -23,7 +23,7 @@ abstract class CommonModuleService(manager: CommonTaskManager, checkpointGroup: 
   protected val logger = LoggerFactory.getLogger(this.getClass)
   protected val instance = manager.instance
   protected val outputProducers = manager.outputProducers
-  val moduleTimer = new SjTimer()
+  val moduleTimer: SjTimer = new SjTimer()
   protected val producerPolicyByOutput = mutable.Map[String, (String, ModuleOutput)]()
 
   addProducersToCheckpointGroup()
@@ -31,7 +31,7 @@ abstract class CommonModuleService(manager: CommonTaskManager, checkpointGroup: 
   protected val environmentManager: ModuleEnvironmentManager
   val executor: StreamingExecutor
 
-  private def addProducersToCheckpointGroup() = {
+  private def addProducersToCheckpointGroup(): Unit = {
     logger.debug(s"Task: ${manager.taskName}. Start adding t-stream producers to checkpoint group.")
     outputProducers.foreach(x => checkpointGroup.add(x._2))
     logger.debug(s"Task: ${manager.taskName}. The t-stream producers are added to checkpoint group.")
@@ -41,7 +41,7 @@ abstract class CommonModuleService(manager: CommonTaskManager, checkpointGroup: 
     producerPolicyByOutput.clear()
   }
 
-  def isCheckpointInitiated = environmentManager.isCheckpointInitiated
+  def isCheckpointInitiated: Boolean = environmentManager.isCheckpointInitiated
 }
 
 object CommonModuleService {
@@ -49,7 +49,7 @@ object CommonModuleService {
 
   def apply(manager: CommonTaskManager,
             checkpointGroup: CheckpointGroup,
-            performanceMetrics: PerformanceMetrics) = {
+            performanceMetrics: PerformanceMetrics): CommonModuleService = {
 
     val stateManagement = manager.instance match {
       case regularInstance: RegularInstance =>
