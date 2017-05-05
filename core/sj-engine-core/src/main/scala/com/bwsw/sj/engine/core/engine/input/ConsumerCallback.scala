@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory
 class ConsumerCallback[T <: AnyRef](envelopeDataSerializer: EnvelopeDataSerializer[T], blockingQueue: ArrayBlockingQueue[Envelope]) extends Callback {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  override def onTransaction(operator: TransactionOperator, transaction: ConsumerTransaction) = {
+  override def onTransaction(operator: TransactionOperator, transaction: ConsumerTransaction): Unit = {
     val consumer = operator.asInstanceOf[Consumer]
     logger.debug(s"onTransaction handler was invoked by subscriber: ${consumer.name}.")
     val stream = ConnectionRepository.getStreamService.get(consumer.stream.name).get

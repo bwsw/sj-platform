@@ -8,7 +8,7 @@ import org.apache.mesos.Protos.TaskStatus
   */
 object LostHandler {
 
-  def process(status: TaskStatus) = {
+  def process(status: TaskStatus): Unit = {
     TasksList(status.getTaskId.getValue).foreach(task => task.update(node = "", reason = status.getMessage))
     StatusHandler.logger.error(s"Killed: ${status.getMessage}")
 

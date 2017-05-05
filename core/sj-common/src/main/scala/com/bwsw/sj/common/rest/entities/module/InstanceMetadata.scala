@@ -17,7 +17,7 @@ class InstanceMetadata {
   var moduleName: String = null
   var moduleVersion: String = null
   var moduleType: String = null
-  var stage = FrameworkStage(EngineLiterals.toHandle, Calendar.getInstance().getTime)
+  var stage: FrameworkStage = FrameworkStage(EngineLiterals.toHandle, Calendar.getInstance().getTime)
   var status: String = EngineLiterals.ready
   var name: String = null
   var description: String = "No description"
@@ -111,7 +111,7 @@ class InstanceMetadata {
   @JsonIgnore
   protected def inputsOrEmptyList(): Array[String] = Array()
 
-  private def splitStreamsAndModes(streamsWithModes: Array[String]) = {
+  private def splitStreamsAndModes(streamsWithModes: Array[String]): Array[StreamWithMode] = {
     streamsWithModes.map(x => {
       val name = clearStreamFromMode(x)
       val mode = getStreamMode(name)
@@ -120,7 +120,7 @@ class InstanceMetadata {
     })
   }
 
-  private def getPartitions(streamName: String, streamDAO: GenericMongoService[SjStream]) = {
+  private def getPartitions(streamName: String, streamDAO: GenericMongoService[SjStream]): Int = {
     val stream = streamDAO.get(streamName).get
     val partitions = stream.streamType match {
       case StreamLiterals.`tstreamType` =>
@@ -132,7 +132,7 @@ class InstanceMetadata {
     partitions
   }
 
-  private def getStreamMode(name: String) = {
+  private def getStreamMode(name: String): String = {
     if (name.contains(s"/${EngineLiterals.fullStreamMode}")) {
       EngineLiterals.fullStreamMode
     } else {
@@ -145,7 +145,7 @@ class InstanceMetadata {
     (0 until parallelism).map(x => createTaskName(taskPrefix, x)).toSet
   }
 
-  private def createTaskName(taskPrefix: String, taskNumber: Int) = {
+  private def createTaskName(taskPrefix: String, taskNumber: Int): String = {
     taskPrefix + "-task" + taskNumber
   }
 }

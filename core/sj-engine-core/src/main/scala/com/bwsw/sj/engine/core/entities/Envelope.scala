@@ -16,7 +16,7 @@ class Envelope extends Serializable {
   var id: Long = 0
 
   @JsonIgnore()
-  def isEmpty() = {
+  def isEmpty(): Boolean = {
     streamType == null
   }
 }

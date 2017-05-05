@@ -1,5 +1,6 @@
 package com.bwsw.sj.engine.core.testutils
 
+import com.bwsw.tstreamstransactionserver.netty.server.Server
 import com.bwsw.tstreamstransactionserver.options.CommonOptions.ZookeeperOptions
 import com.bwsw.tstreamstransactionserver.options.ServerBuilder
 import com.bwsw.tstreamstransactionserver.options.ServerOptions.{AuthOptions, BootstrapOptions, CommitLogOptions, StorageOptions}
@@ -14,8 +15,8 @@ object TestStorageServer {
   val token = "token"
   val prefix = "/bench-prefix"
 
-  def start() = {
-    val transactionServer = serverBuilder.withZookeeperOptions(new ZookeeperOptions(endpoints = System.getenv("ZOOKEEPER_HOSTS"), prefix))
+  def start(): Unit = {
+    val transactionServer: Server = serverBuilder.withZookeeperOptions(new ZookeeperOptions(endpoints = System.getenv("ZOOKEEPER_HOSTS"), prefix))
       .withBootstrapOptions(new BootstrapOptions("192.168.1.174"))
       .withAuthOptions(new AuthOptions(token))
       .withServerStorageOptions(new StorageOptions(path = getTmpDir()))

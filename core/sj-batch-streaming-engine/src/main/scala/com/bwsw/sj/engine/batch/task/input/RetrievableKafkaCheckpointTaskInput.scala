@@ -26,7 +26,7 @@ class RetrievableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: Com
 
   private val envelopeDataSerializer = manager.envelopeDataSerializer.asInstanceOf[EnvelopeDataSerializer[T]]
 
-  override def chooseOffset() = {
+  override def chooseOffset(): String = {
     val instance = manager.instance.asInstanceOf[BatchInstance]
     instance.startFrom match {
       case EngineLiterals.oldestStartMode => "earliest"
@@ -34,13 +34,13 @@ class RetrievableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: Com
     }
   }
 
-  override def get() = {
+  override def get(): Iterable[KafkaEnvelope[T]] = {
     logger.debug(s"Task: ${manager.taskName}. Waiting for records that consumed from kafka for $kafkaSubscriberTimeout milliseconds.")
     val records = kafkaConsumer.poll(kafkaSubscriberTimeout)
     records.asScala.map(consumerRecordToEnvelope)
   }
 
-  private def consumerRecordToEnvelope(consumerRecord: ConsumerRecord[Array[Byte], Array[Byte]]) = {
+  private def consumerRecordToEnvelope(consumerRecord: ConsumerRecord[Array[Byte], Array[Byte]]): KafkaEnvelope[T] = {
     logger.debug(s"Task name: ${manager.taskName}. Convert a consumed kafka record to kafka envelope.")
     val data = envelopeDataSerializer.deserialize(consumerRecord.value())
     val envelope = new KafkaEnvelope(data)

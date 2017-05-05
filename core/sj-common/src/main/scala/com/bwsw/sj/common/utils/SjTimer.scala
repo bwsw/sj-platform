@@ -24,13 +24,14 @@ class SjTimer {
    * Time when timer went out. Needed for computing lag between a real response time
    * and an invoke of time handler
    */
-  var responseTime = 0L
+  var responseTime: Long = 0L
 
   /**
    * Sets a timer handler that changes flag on true value when time is went out
-   * @param delay delay in milliseconds before timer task is to be executed
+    *
+    * @param delay delay in milliseconds before timer task is to be executed
    */
-  def set(delay: Long) = {
+  def set(delay: Long): Unit = {
     logger.info(s"Set a timer to $delay.")
     timer.schedule(new TimerTask {
       def run() {
@@ -42,6 +43,7 @@ class SjTimer {
 
   /**
    * Allows checking a timer has went out or not
+ *
    * @return The result of checking
    */
   def isTime: Boolean = {
@@ -49,7 +51,7 @@ class SjTimer {
     isTimerWentOut
   }
 
-  def reset() = {
+  def reset(): Unit = {
     logger.debug(s"Reset a timer.")
     isTimerWentOut = false
     responseTime = 0

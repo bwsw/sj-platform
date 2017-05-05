@@ -22,7 +22,7 @@ class RestService(override val name: String,
                   override val serviceType: String = ServiceLiterals.restType)
   extends Service(name, description, serviceType) {
 
-  override def asProtocolService = {
+  override def asProtocolService: RestServiceData = {
     val protocolService = new RestServiceData
     super.fillProtocolService(protocolService)
     protocolService.provider = provider.name

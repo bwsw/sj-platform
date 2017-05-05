@@ -27,7 +27,7 @@ object OffersHandler {
    * @param filters:util.Map[String, String]
    * @return util.List[Offer]
    */
-  def filter(filters: util.Map[String, String]) = {
+  def filter(filters: util.Map[String, String]): Unit = {
     logger.info(s"Filtering resource offers")
     var result: mutable.Buffer[Offer] = mutable.Buffer()
     if (!filters.isEmpty) {

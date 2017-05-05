@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.output.processing
 
 import java.sql.PreparedStatement
 
-import com.bwsw.common.jdbc.JdbcClientBuilder
+import com.bwsw.common.jdbc.{JdbcClient, JdbcClientBuilder}
 import com.bwsw.sj.common.DAL.model.service.JDBCService
 import com.bwsw.sj.common.DAL.model.stream.{JDBCSjStream, SjStream}
 import com.bwsw.sj.engine.core.entities._
@@ -23,7 +23,7 @@ class JdbcOutputProcessor[T <: AnyRef](outputStream: SjStream,
   private val jdbcCommandBuilder = new JdbcCommandBuilder(jdbcClient, transactionFieldName, entity.asInstanceOf[Entity[(PreparedStatement, Int) => Unit]])
   jdbcClient.start()
 
-  private def createClient() = {
+  private def createClient(): JdbcClient = {
     logger.info(s"Open a JDBC connection at address: '${jdbcService.provider.hosts.mkString(", ")}'.")
     val client = JdbcClientBuilder.
       setHosts(jdbcService.provider.hosts).

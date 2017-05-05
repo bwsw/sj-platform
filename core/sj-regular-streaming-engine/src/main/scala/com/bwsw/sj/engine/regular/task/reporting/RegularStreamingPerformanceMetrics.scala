@@ -83,7 +83,7 @@ class RegularStreamingPerformanceMetrics(manager: CommonTaskManager)
     reportSerializer.serialize(report)
   }
 
-  override def clear() = {
+  override def clear(): Unit = {
     logger.debug(s"Reset variables for performance report for next reporting.")
     inputEnvelopesPerStream = mutable.Map(inputStreamNames.map(x => (x, mutable.ListBuffer[List[Int]]())): _*)
     outputEnvelopesPerStream = mutable.Map(outputStreamNames.map(x => (x, mutable.Map[String, mutable.ListBuffer[Int]]())): _*)

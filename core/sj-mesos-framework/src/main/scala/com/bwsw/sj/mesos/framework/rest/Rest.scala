@@ -13,7 +13,7 @@ private class Handler extends AbstractHandler {
   override def handle(target: String,
                       req: Request,
                       httpReq: HttpServletRequest,
-                      httpRes: HttpServletResponse) = {
+                      httpRes: HttpServletResponse): Unit = {
     httpRes.setContentType("application/json")
     httpRes.setStatus(HttpServletResponse.SC_OK)
     httpRes.getWriter().println(serializer.serialize(TasksList.toFrameworkTask))
@@ -26,7 +26,7 @@ private class Handler extends AbstractHandler {
   */
 object Rest {
 
-  def start(port: Int) = {
+  def start(port: Int): Server = {
     val server = new Server(port)
     server.setHandler(new Handler)
     server.start

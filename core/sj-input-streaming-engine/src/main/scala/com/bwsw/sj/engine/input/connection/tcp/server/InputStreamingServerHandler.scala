@@ -22,7 +22,7 @@ class InputStreamingServerHandler(channelContextQueue: ArrayBlockingQueue[Channe
                                   bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf])
   extends ChannelInboundHandlerAdapter {
 
-  override def channelRead(ctx: ChannelHandlerContext, msg: Any) = {
+  override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = {
     try {
       val message = msg.asInstanceOf[ByteBuf]
 
@@ -40,10 +40,11 @@ class InputStreamingServerHandler(channelContextQueue: ArrayBlockingQueue[Channe
 
   /**
    * Exception handler that print stack trace and than close the connection when an exception is raised.
+ *
    * @param ctx Channel handler context
    * @param cause What has caused an exception
    */
-  override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) = {
+  override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable): Unit = {
     cause.printStackTrace()
     ctx.close()
   }

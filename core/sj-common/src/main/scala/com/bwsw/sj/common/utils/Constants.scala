@@ -18,31 +18,31 @@ object EngineLiterals {
   final val outputStreamingType = "output-streaming"
   final val batchStreamingType = "batch-streaming"
   final val regularStreamingType = "regular-streaming"
-  val moduleTypes = Seq(batchStreamingType, regularStreamingType, outputStreamingType, inputStreamingType)
+  val moduleTypes: Seq[String] = Seq(batchStreamingType, regularStreamingType, outputStreamingType, inputStreamingType)
 
   final val everyNthMode = "every-nth"
   final val timeIntervalMode = "time-interval"
   final val transactionIntervalMode = "transaction-interval"
-  val checkpointModes = Seq(everyNthMode, timeIntervalMode)
-  val batchFillTypes = Seq(everyNthMode, timeIntervalMode, transactionIntervalMode)
+  val checkpointModes: Seq[String] = Seq(everyNthMode, timeIntervalMode)
+  val batchFillTypes: Seq[String] = Seq(everyNthMode, timeIntervalMode, transactionIntervalMode)
 
   final val noneStateMode = "none"
   final val ramStateMode = "ram"
   final val rocksStateMode = "rocks"
-  val stateManagementModes = Seq(noneStateMode, ramStateMode, rocksStateMode)
+  val stateManagementModes: Seq[String] = Seq(noneStateMode, ramStateMode, rocksStateMode)
 
   final val oldestStartMode = "oldest"
   final val newestStartMode = "newest"
-  val startFromModes = Seq(oldestStartMode, newestStartMode)
+  val startFromModes: Seq[String] = Seq(oldestStartMode, newestStartMode)
 
   final val noneDefaultEvictionPolicy = "NONE"
   final val lruDefaultEvictionPolicy = "LRU"
   final val lfuDefaultEvictionPolicy = "LFU"
-  val defaultEvictionPolicies = Seq(lruDefaultEvictionPolicy, lfuDefaultEvictionPolicy, noneDefaultEvictionPolicy)
+  val defaultEvictionPolicies: Seq[String] = Seq(lruDefaultEvictionPolicy, lfuDefaultEvictionPolicy, noneDefaultEvictionPolicy)
 
   final val fixTimeEvictionPolicy = "fix-time"
   final val expandedTimeEvictionPolicy = "expanded-time"
-  val evictionPolicies = Seq(fixTimeEvictionPolicy, expandedTimeEvictionPolicy)
+  val evictionPolicies: Seq[String] = Seq(fixTimeEvictionPolicy, expandedTimeEvictionPolicy)
 
   final val ready = "ready"
   final val starting = "starting"
@@ -53,7 +53,7 @@ object EngineLiterals {
   final val deleted = "deleted"
   final val failed = "failed"
   final val error = "error"
-  val instanceStatusModes = Seq(starting,
+  val instanceStatusModes: Seq[String] = Seq(starting,
     started,
     stopping,
     stopped,
@@ -68,7 +68,7 @@ object EngineLiterals {
 
   final val splitStreamMode = "split"
   final val fullStreamMode = "full"
-  val streamModes = Array(splitStreamMode, fullStreamMode)
+  val streamModes: Array[String] = Array(splitStreamMode, fullStreamMode)
 }
 
 object StreamLiterals {
@@ -78,10 +78,10 @@ object StreamLiterals {
   final val esOutputType = "elasticsearch-output"
   final val jdbcOutputType = "jdbc-output"
   final val restOutputType = "rest-output"
-  val types = Seq(tstreamType, kafkaStreamType, jdbcOutputType, esOutputType, restOutputType)
+  val types: Seq[String] = Seq(tstreamType, kafkaStreamType, jdbcOutputType, esOutputType, restOutputType)
 
   private val tstreamFactory = new TStreamsFactory()
-  final val ttl = tstreamFactory.getProperty(ConfigurationOptions.Stream.ttlSec).asInstanceOf[Int]
+  final val ttl: Int = tstreamFactory.getProperty(ConfigurationOptions.Stream.ttlSec).asInstanceOf[Int]
 }
 
 object ServiceLiterals {
@@ -94,7 +94,7 @@ object ServiceLiterals {
   final val jdbcType = "JDBC"
   final val restType = "REST"
 
-  val types = Seq(
+  val types: Seq[String] = Seq(
     cassandraType,
     elasticsearchType,
     kafkaType,
@@ -105,7 +105,7 @@ object ServiceLiterals {
     restType
   )
 
-  val typeToProviderType = Map(
+  val typeToProviderType: Map[String, String] = Map(
     cassandraType -> ProviderLiterals.cassandraType,
     elasticsearchType -> ProviderLiterals.elasticsearchType,
     kafkaType -> ProviderLiterals.kafkaType,
@@ -126,7 +126,7 @@ object ProviderLiterals {
   final val jdbcType = "JDBC"
   final val restType = "REST"
 
-  val types = Seq(
+  val types: Seq[String] = Seq(
     cassandraType,
     aerospikeType,
     zookeeperType,
@@ -142,15 +142,15 @@ object RestLiterals {
   final val http_1_1 = "1.1"
   final val http_2 = "2"
 
-  final val httpVersions = Seq(http_1_0, http_1_1, http_2)
+  final val httpVersions: Seq[String] = Seq(http_1_0, http_1_1, http_2)
 
-  final val httpVersionFromString = Map(
+  final val httpVersionFromString: Map[String, HttpVersion] = Map(
     http_1_0 -> HttpVersion.HTTP_1_0,
     http_1_1 -> HttpVersion.HTTP_1_1,
     http_2 -> HttpVersion.HTTP_2
   )
 
-  final val httpVersionToString = Map(
+  final val httpVersionToString: Map[HttpVersion, String] = Map(
     HttpVersion.HTTP_1_0 -> http_1_0,
     HttpVersion.HTTP_1_1 -> http_1_1,
     HttpVersion.HTTP_2 -> http_2
@@ -161,7 +161,7 @@ object JdbcLiterals {
   final val postgresqlDriverPrefix = "jdbc:postgresql"
   final val oracleDriverPrefix = "jdbc:oracle:thin"
   final val mysqlDriverPrefix = "jdbc:mysql"
-  final val validPrefixes = List(postgresqlDriverPrefix, oracleDriverPrefix, mysqlDriverPrefix)
+  final val validPrefixes: List[String] = List(postgresqlDriverPrefix, oracleDriverPrefix, mysqlDriverPrefix)
 }
 
 object FrameworkLiterals {

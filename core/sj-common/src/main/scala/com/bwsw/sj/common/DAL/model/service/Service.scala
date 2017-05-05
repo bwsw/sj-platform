@@ -15,7 +15,7 @@ class Service(@IdField val name: String,
 
   def asProtocolService(): ServiceData = ???
 
-  protected def fillProtocolService(protocolService: ServiceData) = {
+  protected def fillProtocolService(protocolService: ServiceData): Unit = {
     protocolService.name = this.name
     protocolService.description = this.description
     protocolService.serviceType = this.serviceType

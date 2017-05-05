@@ -11,7 +11,7 @@ class CassDBServiceData() extends ServiceData() {
   var provider: String = null
   var keyspace: String = null
 
-  override def asModelService() = {
+  override def asModelService(): CassandraService = {
     val providerDAO = ConnectionRepository.getProviderService
     val modelService = new CassandraService(
       this.name,
@@ -23,7 +23,7 @@ class CassDBServiceData() extends ServiceData() {
     modelService
   }
 
-  override def validate() = {
+  override def validate(): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
 
     errors ++= super.validateGeneralFields()

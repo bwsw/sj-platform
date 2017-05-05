@@ -13,7 +13,7 @@ class JDBCServiceData() extends ServiceData() {
   var provider: String = null
   var database: String = null
 
-  override def asModelService() = {
+  override def asModelService(): JDBCService = {
     val providerDAO = ConnectionRepository.getProviderService
     val modelService = new JDBCService(
       this.name,
@@ -25,7 +25,7 @@ class JDBCServiceData() extends ServiceData() {
     modelService
   }
 
-  override def validate() = {
+  override def validate(): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
 
     errors ++= super.validateGeneralFields()

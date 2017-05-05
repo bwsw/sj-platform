@@ -19,7 +19,7 @@ class InputStreamingChannelInitializer(channelContextQueue: ArrayBlockingQueue[C
                                        bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf])
   extends ChannelInitializer[SocketChannel] {
 
-  def initChannel(channel: SocketChannel) = {
+  def initChannel(channel: SocketChannel): Unit = {
     channel.config().setTcpNoDelay(true)
     channel.config().setKeepAlive(true)
     channel.config().setTrafficClass(0x10)

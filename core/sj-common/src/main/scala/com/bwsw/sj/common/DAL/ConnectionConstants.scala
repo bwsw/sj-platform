@@ -20,7 +20,7 @@ object ConnectionConstants {
 
   var authEnable: Boolean = isAuthRequired
 
-  var mongoEnvironment = Map[String, String]("MONGO_HOSTS" -> System.getenv("MONGO_HOSTS"))
+  var mongoEnvironment: Map[String, String] = Map[String, String]("MONGO_HOSTS" -> System.getenv("MONGO_HOSTS"))
   if (authEnable) {
     if ((mongoUser.nonEmpty && mongoPassword.nonEmpty) && isCorrectCredentials)
     mongoEnvironment = mongoEnvironment ++ Map[String, String](
@@ -29,7 +29,7 @@ object ConnectionConstants {
     )
   }
 
-  lazy val mongoCredential = List(MongoCredential.createCredential(mongoUser.getOrElse(""), databaseName, mongoPassword.getOrElse("").toCharArray))
+  lazy val mongoCredential: List[MongoCredential] = List(MongoCredential.createCredential(mongoUser.getOrElse(""), databaseName, mongoPassword.getOrElse("").toCharArray))
 
   def isAuthRequired: Boolean = {
     val client = com.mongodb.casbah.MongoClient(replicaSetSeeds = mongoHosts)
@@ -41,7 +41,7 @@ object ConnectionConstants {
     !checkConnection(client)
   }
 
-  def checkConnection(client:com.mongodb.casbah.MongoClient):Boolean = {
+  def checkConnection(client:com.mongodb.casbah.MongoClient): Boolean = {
     try {
       client(databaseName).collectionNames()
       false

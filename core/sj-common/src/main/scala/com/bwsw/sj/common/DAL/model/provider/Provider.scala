@@ -36,7 +36,7 @@ class Provider(@IdField val name: String,
     case _ => false
   }
 
-  def getHosts() = {
+  def getHosts(): Set[(String, Int)] = {
     val inetSocketAddresses = this.hosts.map { host =>
       val parts = host.split(":")
       (parts(0), parts(1).toInt)
@@ -45,7 +45,7 @@ class Provider(@IdField val name: String,
     inetSocketAddresses
   }
 
-  def asProtocolProvider() = {
+  def asProtocolProvider(): ProviderData = {
     val providerData = new ProviderData(
       this.name,
       this.login,
@@ -58,7 +58,7 @@ class Provider(@IdField val name: String,
     providerData
   }
 
-  def checkConnection() = {
+  def checkConnection(): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
     for (host <- this.hosts) {
       errors ++= checkProviderConnectionByType(host, this.providerType)
@@ -67,7 +67,7 @@ class Provider(@IdField val name: String,
     errors
   }
 
-  private def checkProviderConnectionByType(host: String, providerType: String) = {
+  private def checkProviderConnectionByType(host: String, providerType: String): ArrayBuffer[String] = {
     providerType match {
       case ProviderLiterals.cassandraType =>
         checkCassandraConnection(host)
@@ -88,7 +88,7 @@ class Provider(@IdField val name: String,
     }
   }
 
-  private def checkCassandraConnection(address: String) = {
+  private def checkCassandraConnection(address: String): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
     try {
       val (host, port) = getHostAndPort(address)
@@ -108,7 +108,7 @@ class Provider(@IdField val name: String,
     errors
   }
 
-  private def checkAerospikeConnection(address: String) = {
+  private def checkAerospikeConnection(address: String): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
     val (host, port) = getHostAndPort(address)
 
@@ -126,7 +126,7 @@ class Provider(@IdField val name: String,
     errors
   }
 
-  private def checkZookeeperConnection(address: String) = {
+  private def checkZookeeperConnection(address: String): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
     val zkTimeout = ConnectionRepository.getConfigService.get(ConfigLiterals.zkSessionTimeoutTag).get.value.toInt
     var client: ZooKeeper = null
@@ -152,7 +152,7 @@ class Provider(@IdField val name: String,
     errors
   }
 
-  private def checkKafkaConnection(address: String) = {
+  private def checkKafkaConnection(address: String): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
     val (host, port) = getHostAndPort(address)
     val consumer = new SimpleConsumer(host, port, 500, 64 * 1024, "connectionTest")
@@ -172,7 +172,7 @@ class Provider(@IdField val name: String,
     errors
   }
 
-  private def checkESConnection(address: String) = {
+  private def checkESConnection(address: String): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
     val client = new ElasticsearchClient(Set(getHostAndPort(address)))
     if (!client.isConnected()) {
@@ -185,7 +185,7 @@ class Provider(@IdField val name: String,
 
   protected def checkJdbcConnection(address: String): ArrayBuffer[String] = ArrayBuffer()
 
-  private def checkHttpConnection(address: String) = {
+  private def checkHttpConnection(address: String): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
     val uri = new URI("http://" + address)
     val client = new HttpClient()
@@ -205,7 +205,7 @@ class Provider(@IdField val name: String,
     errors
   }
 
-  private def getHostAndPort(address: String) = {
+  private def getHostAndPort(address: String): (String, Int) = {
     val uri = new URI("dummy://" + address)
     val host = uri.getHost()
     val port = uri.getPort()

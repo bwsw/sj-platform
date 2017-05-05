@@ -49,5 +49,5 @@ class BatchInstance(override val name: String,
     protocolInstance
   }
 
-  override def getInputsWithoutStreamMode() = this.inputs.map(clearStreamFromMode)
+  override def getInputsWithoutStreamMode(): Array[String] = this.inputs.map(clearStreamFromMode)
 }

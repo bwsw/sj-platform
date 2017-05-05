@@ -32,10 +32,10 @@ class StreamData() extends ValidationUtils with MessageResourceUtils {
   def asModelStream(): SjStream = ???
 
   @JsonIgnore
-  def validate() = validateGeneralFields()
+  def validate(): ArrayBuffer[String] = validateGeneralFields()
 
   @JsonIgnore
-  protected def validateGeneralFields() = {
+  protected def validateGeneralFields(): ArrayBuffer[String] = {
     val streamDAO = ConnectionRepository.getStreamService
     val errors = new ArrayBuffer[String]()
 

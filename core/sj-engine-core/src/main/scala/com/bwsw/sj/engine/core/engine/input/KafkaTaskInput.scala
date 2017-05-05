@@ -4,7 +4,7 @@ import java.util.Properties
 
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.DAL.model.service.KafkaService
-import com.bwsw.sj.common.DAL.model.stream.SjStream
+import com.bwsw.sj.common.DAL.model.stream.{SjStream, TStreamSjStream}
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
@@ -13,6 +13,7 @@ import com.bwsw.sj.engine.core.entities.KafkaEnvelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.group.CheckpointGroup
+import com.bwsw.tstreams.agents.producer.Producer
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.TopicPartition
 import org.slf4j.LoggerFactory
@@ -53,7 +54,7 @@ trait KafkaTaskInput[T <: AnyRef] {
     * @return SJStream is responsible for committing the offsets of last messages
     *         that has successfully processed for each topic for each partition
     */
-  protected def createOffsetStream() = {
+  protected def createOffsetStream(): TStreamSjStream = {
     logger.debug(s"Task name: ${manager.taskName}. Get stream for keeping kafka offsets.")
     val description = "store kafka offsets of input streams"
     val tags = Array("offsets")
@@ -65,7 +66,7 @@ trait KafkaTaskInput[T <: AnyRef] {
   }
 
 
-  protected def createOffsetProducer() = {
+  protected def createOffsetProducer(): Producer = {
     logger.debug(s"Task: ${manager.taskName}. Start creating a t-stream producer to record kafka offsets.")
     val streamForOffsets = offsetStream
     val offsetProducer = manager.createProducer(streamForOffsets)
@@ -74,7 +75,7 @@ trait KafkaTaskInput[T <: AnyRef] {
     offsetProducer
   }
 
-  protected def addOffsetProducerToCheckpointGroup() = {
+  protected def addOffsetProducerToCheckpointGroup(): Unit = {
     logger.debug(s"Task: ${manager.taskName}. Start adding the t-stream producer to checkpoint group.")
     checkpointGroup.add(offsetProducer)
     logger.debug(s"Task: ${manager.taskName}. The t-stream producer is added to checkpoint group.")
@@ -90,7 +91,7 @@ trait KafkaTaskInput[T <: AnyRef] {
     * @param offset Default policy for kafka consumer (earliest/latest)
     * @return Kafka consumer subscribed to topics
     */
-  protected def createSubscribingKafkaConsumer(topics: List[(String, List[Int])], hosts: List[String], offset: String) = {
+  protected def createSubscribingKafkaConsumer(topics: List[(String, List[Int])], hosts: List[String], offset: String): KafkaConsumer[Array[Byte], Array[Byte]] = {
     logger.debug(s"Task name: ${manager.taskName}. Create kafka consumer for topics (with their partitions): " +
       s"${topics.map(x => s"topic name: ${x._1}, " + s"partitions: ${x._2.mkString(",")}").mkString(",")}.")
     val consumer = createKafkaConsumer(hosts, offset)

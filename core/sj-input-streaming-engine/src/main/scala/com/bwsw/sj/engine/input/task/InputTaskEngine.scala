@@ -14,7 +14,7 @@ import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer, ProducerTransaction}
 import io.netty.buffer.ByteBuf
-import io.netty.channel.ChannelHandlerContext
+import io.netty.channel.{ChannelFuture, ChannelHandlerContext}
 import org.slf4j.LoggerFactory
 
 import scala.collection._
@@ -50,15 +50,16 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
    * Set of channel contexts related with the input envelopes to send a message about an event
    * that a checkpoint has been initiated,
    */
-  private val setOfContexts = collection.mutable.Set[ChannelHandlerContext]()
+  private val setOfContexts: mutable.Set[ChannelHandlerContext] = collection.mutable.Set[ChannelHandlerContext]()
 
   addProducersToCheckpointGroup()
 
   /**
    * Creates a manager of environment of input streaming module
-   * @return Manager of environment of input streaming module
+    *
+    * @return Manager of environment of input streaming module
    */
-  private def createModuleEnvironmentManager() = {
+  private def createModuleEnvironmentManager(): InputEnvironmentManager = {
     val streamService = ConnectionRepository.getStreamService
     val taggedOutputs = instance.outputs
       .flatMap(x => streamService.get(x))
@@ -66,7 +67,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
     new InputEnvironmentManager(instance.options, taggedOutputs)
   }
 
-  private def addProducersToCheckpointGroup() = {
+  private def addProducersToCheckpointGroup(): Unit = {
     logger.debug(s"Task: ${manager.taskName}. Start adding t-stream producers to checkpoint group.")
     producers.foreach(x => checkpointGroup.add(x._2))
     logger.debug(s"Task: ${manager.taskName}. The t-stream producers are added to checkpoint group.")
@@ -75,7 +76,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
   /**
    * Sends an input envelope data to output steam
    */
-  private def sendData(stream: String, partition: Int, data: AnyRef) = {
+  private def sendData(stream: String, partition: Int, data: AnyRef): Unit = {
     logger.info(s"Task name: ${manager.taskName}. Send envelope to each output stream..")
     val maybeTransaction = getTransaction(stream, partition)
     val bytes = manager.envelopeDataSerializer.serialize(data)
@@ -126,19 +127,19 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
     }
   }
 
-  private def getChannelContext() = {
+  private def getChannelContext(): Option[ChannelHandlerContext] = {
     var channelContext = channelContextQueue.poll(EngineLiterals.eventWaitTimeout, TimeUnit.MILLISECONDS)
     if (channelContext == null) channelContext = getCtxOfNonEmptyBuffer()
 
     Option(channelContext)
   }
 
-  private def getCtxOfNonEmptyBuffer() = {
+  private def getCtxOfNonEmptyBuffer(): ChannelHandlerContext = {
     val maybeCtx = bufferForEachContext.find(x => x._2.readableBytes() > 0)
     if (maybeCtx.isDefined) maybeCtx.get._1 else null
   }
 
-  private def tryToRead(channelContext: ChannelHandlerContext, interval: Interval) = {
+  private def tryToRead(channelContext: ChannelHandlerContext, interval: Interval): ChannelFuture = {
     val buffer = bufferForEachContext(channelContext)
     if (buffer.isReadable(interval.finalValue)) {
       logger.debug(s"Task name: ${manager.taskName}. The end index of interval is valid.")
@@ -159,10 +160,11 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
 
   /**
    * Removes the read bytes of the byte buffer
-   * @param buffer A buffer for keeping incoming bytes
+    *
+    * @param buffer A buffer for keeping incoming bytes
    * @param endReadingIndex Index that was last at reading
    */
-  private def clearBufferAfterParse(buffer: ByteBuf, endReadingIndex: Int) = {
+  private def clearBufferAfterParse(buffer: ByteBuf, endReadingIndex: Int): ByteBuf = {
     buffer.readerIndex(endReadingIndex + 1)
     buffer.discardReadBytes()
   }
@@ -171,7 +173,8 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
    * It is responsible for processing of envelope:
    * 1) checks whether an input envelope is defined and isn't duplicate or not
    * 2) if (1) is true an input envelope is sent to output stream(s)
-   * @param envelope May be input envelope
+    *
+    * @param envelope May be input envelope
    * @return True if a processed envelope is processed, e.i. it is not duplicate or empty, and false in other case
    */
   private def processEnvelope(envelope: Option[InputEnvelope[AnyRef]]): Boolean = {
@@ -193,7 +196,8 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
 
   /**
    * Checks whether a key is duplicate or not if it's necessary
-   * @param key Key for checking
+    *
+    * @param key Key for checking
    * @param duplicateCheck Flag points a key has to be checked or not.
    * @return True if a processed envelope is not duplicate and false in other case
    */
@@ -212,12 +216,13 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
 
   /**
    * It is responsible for sending an answer to client about the fact that an envelope is processed
-   * @param envelope Input envelope
+    *
+    * @param envelope Input envelope
    * @param isNotEmptyOrDuplicate Flag points whether a processed envelope is empty or duplicate  or not.
    *                              If it is true it means a processed envelope is duplicate or empty and false in other case
    * @param ctx Channel context related with this input envelope to send a message about this event
    */
-  private def sendClientResponse(envelope: Option[InputEnvelope[AnyRef]], isNotEmptyOrDuplicate: Boolean, ctx: ChannelHandlerContext) = {
+  private def sendClientResponse(envelope: Option[InputEnvelope[AnyRef]], isNotEmptyOrDuplicate: Boolean, ctx: ChannelHandlerContext): ChannelFuture = {
     val inputStreamingResponse = executor.createProcessedMessageResponse(envelope, isNotEmptyOrDuplicate)
     if (inputStreamingResponse.isBuffered) ctx.write(inputStreamingResponse.message)
     else ctx.writeAndFlush(inputStreamingResponse.message)
@@ -239,7 +244,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
    * It is responsible for sending a response to client about the fact that a checkpoint has been done
    * It will be invoked after commit of checkpoint group
    */
-  private def checkpointInitiated() = {
+  private def checkpointInitiated(): Unit = {
     val inputStreamingResponse = executor.createCheckpointResponse()
     if (inputStreamingResponse.isBuffered) setOfContexts.foreach(x => x.write(inputStreamingResponse.message))
     else setOfContexts.foreach(x => x.writeAndFlush(inputStreamingResponse.message))
@@ -249,17 +254,19 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
 
   /**
    * Check whether a group checkpoint of t-streams consumers/producers have to be done or not
-   * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside input module (not on the schedule) or not.
+    *
+    * @param isCheckpointInitiated Flag points whether checkpoint was initiated inside input module (not on the schedule) or not.
    */
   protected def isItTimeToCheckpoint(isCheckpointInitiated: Boolean): Boolean
 
   /**
    * Retrieves a txn for specific stream and partition
-   * @param stream Output stream name
+    *
+    * @param stream Output stream name
    * @param partition Partition of stream
    * @return Current open transaction
    */
-  private def getTransaction(stream: String, partition: Int) = {
+  private def getTransaction(stream: String, partition: Int): Option[ProducerTransaction] = {
     logger.debug(s"Task name: ${manager.taskName}. " +
       s"Try to get txn by stream: $stream, partition: $partition.")
     if (transactionsByStreamPartitions(stream).isDefinedAt(partition)) {
@@ -269,11 +276,12 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
 
   /**
    * Retrieves a txn for specific stream and partition
-   * @param stream Output stream name
+    *
+    * @param stream Output stream name
    * @param partition Partition of stream
    * @return Current open transaction
    */
-  private def putTxn(stream: String, partition: Int, transaction: ProducerTransaction) = {
+  private def putTxn(stream: String, partition: Int, transaction: ProducerTransaction): mutable.Map[Int, ProducerTransaction] = {
     logger.debug(s"Task name: ${manager.taskName}. " +
       s"Put txn for stream: $stream, partition: $partition.")
     transactionsByStreamPartitions(stream) += (partition -> transaction)
@@ -281,7 +289,8 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
 
   /**
    * Creates a map that keeps current open txn for each partition of output stream
-   * @return Map where a key is output stream name, a value is a map
+    *
+    * @return Map where a key is output stream name, a value is a map
    *         in which key is a number of partition and value is a txn
    */
   private def createTxnsStorage() = {
@@ -297,12 +306,13 @@ object InputTaskEngine {
 
   /**
    * Creates InputTaskEngine is in charge of a basic execution logic of task of input module
+ *
    * @return Engine of input task
    */
   def apply(manager: InputTaskManager,
             performanceMetrics: InputStreamingPerformanceMetrics,
             channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
-            bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf]) = {
+            bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf]): InputTaskEngine = {
 
     manager.inputInstance.checkpointMode match {
       case EngineLiterals.`timeIntervalMode` =>

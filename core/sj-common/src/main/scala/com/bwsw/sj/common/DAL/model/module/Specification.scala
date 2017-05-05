@@ -25,7 +25,7 @@ class Specification(val name: String,
                     val options: String = "{}"
                    ) {
 
-  def asSpecificationData() = {
+  def asSpecificationData(): SpecificationData = {
     val serializer = new JsonSerializer
     SpecificationData(this.name,
       this.description,

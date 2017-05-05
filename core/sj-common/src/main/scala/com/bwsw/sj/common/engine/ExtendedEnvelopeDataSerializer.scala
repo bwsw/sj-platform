@@ -30,7 +30,7 @@ class ExtendedEnvelopeDataSerializer(classLoader: ClassLoader, instance: Instanc
     }
   }
 
-  override def deserialize(bytes: Array[Byte]) = {
+  override def deserialize(bytes: Array[Byte]): Object = {
     logger.debug("Deserialize a byte array to an object.")
 
     if (schema.nonEmpty) avroSerializer.deserialize(bytes)

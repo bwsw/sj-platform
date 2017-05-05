@@ -19,7 +19,7 @@ class StateStorage(stateService: IStateService) {
     stateService.get(key)
   }
 
-  def getAll = {
+  def getAll: Map[String, Any] = {
     stateService.getAll
   }
 

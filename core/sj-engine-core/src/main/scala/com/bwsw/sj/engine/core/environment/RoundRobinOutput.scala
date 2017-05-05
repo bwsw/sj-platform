@@ -18,7 +18,7 @@ class RoundRobinOutput(producer: Producer,
   private var maybeTransaction: Option[ProducerTransaction] = None
   private val streamName = producer.stream.name
 
-  def put(data: AnyRef) = {
+  def put(data: AnyRef): Unit = {
     val bytes = objectSerializer.serialize(data)
     logger.debug(s"Send a portion of data to stream: '$streamName'.")
     if (maybeTransaction.isDefined) {

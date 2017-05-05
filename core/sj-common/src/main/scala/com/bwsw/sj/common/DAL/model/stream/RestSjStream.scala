@@ -17,12 +17,12 @@ class RestSjStream(override val name: String,
                    override val streamType: String = StreamLiterals.restOutputType)
   extends SjStream(name, description, service, force, tags, streamType) {
 
-  override def asProtocolStream() = {
+  override def asProtocolStream(): RestStreamData = {
     val streamData = new RestStreamData
     fillProtocolStream(streamData)
 
     streamData
   }
 
-  override def delete() = {}
+  override def delete(): Unit = {}
 }

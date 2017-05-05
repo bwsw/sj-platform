@@ -3,6 +3,7 @@ package com.bwsw.sj.common.DAL.service
 import com.bwsw.sj.common.DAL.repository.ConnectionRepository
 import com.mongodb.BasicDBObject
 
+import scala.collection.mutable
 import scala.reflect.ClassTag
 
 /**
@@ -20,34 +21,34 @@ class GenericMongoService[T: ClassTag] extends DatabaseService[T] {
   private val genericDAO = ConnectionRepository.getGenericDAO[T]
   private val emptyQuery = new BasicDBObject()
 
-  def save(entity: T) = {
+  def save(entity: T): Unit = {
     logger.debug(s"Save an entity to a mongo database.")
     genericDAO.save(entity)
   }
 
-  def get(name: String) = {
+  def get(name: String): Option[T] = {
     logger.debug(s"Retrieve an entity with name: '$name' from a mongo database.")
     Option(genericDAO.get(name))
   }
 
-  def getByParameters(parameters: Map[String, Any]) = {
+  def getByParameters(parameters: Map[String, Any]): mutable.Buffer[T] = {
     logger.debug(s"Retrieve an entity from a mongo database by parameters: ${parameters.mkString(", ")}.")
     val query = genericDAO.createQuery()
     query.and(parameters.map(x => query.criteria(x._1).equal(x._2)).toSeq: _*)
     query.asList().asScala
   }
 
-  def getAll = {
+  def getAll: mutable.Buffer[T] = {
     logger.debug(s"Retrieve all entities from a mongo database.")
     genericDAO.find().asList().asScala
   }
 
-  def delete(name: String) = {
+  def delete(name: String): Unit = {
     logger.debug(s"Remove an entity with name: '$name' from a mongo database.")
     genericDAO.deleteById(name)
   }
 
-  def deleteAll() = {
+  def deleteAll(): Unit = {
     logger.debug(s"Remove all entities from a mongo database.")
     genericDAO.getCollection.remove(emptyQuery)
   }

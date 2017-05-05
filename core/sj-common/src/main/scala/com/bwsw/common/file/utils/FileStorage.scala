@@ -8,9 +8,9 @@ trait FileStorage {
 
   protected val logger = LoggerFactory.getLogger(this.getClass)
 
-  def put(file: File, fileName: String)
+  def put(file: File, fileName: String): Unit
 
-  def put(file: File, fileName: String, specification: Map[String, Any], filetype: String)
+  def put(file: File, fileName: String, specification: Map[String, Any], filetype: String): Unit
 
   def get(fileName: String, newFileName: String): File
 

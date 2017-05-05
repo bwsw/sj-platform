@@ -24,15 +24,15 @@ abstract class OutputProcessor[T <: AnyRef](outputStream: SjStream,
     * @param inputEnvelope      : received envelope
     * @param wasFirstCheckpoint : boolean
     */
-  def process(envelopes: Seq[OutputEnvelope], inputEnvelope: TStreamEnvelope[T], wasFirstCheckpoint: Boolean) = {
+  def process(envelopes: Seq[OutputEnvelope], inputEnvelope: TStreamEnvelope[T], wasFirstCheckpoint: Boolean): Unit = {
     logger.debug("Process a set of envelopes that should be sent to output of specific type.")
     if (!wasFirstCheckpoint) delete(inputEnvelope)
     envelopes.foreach(envelope => registerAndSendEnvelope(envelope, inputEnvelope))
   }
 
-  def delete(envelope: TStreamEnvelope[T])
+  def delete(envelope: TStreamEnvelope[T]): Unit
 
-  def close()
+  def close(): Unit
 
   /**
     * Registration envelope in performance metrics, and then sending to storage
