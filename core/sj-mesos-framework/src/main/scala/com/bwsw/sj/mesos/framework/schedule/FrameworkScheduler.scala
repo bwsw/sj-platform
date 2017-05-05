@@ -72,11 +72,7 @@ class FrameworkScheduler extends Scheduler {
   override def resourceOffers(driver: SchedulerDriver, offers: util.List[Offer]): Unit = {
     logger.info(s"GOT RESOURCE OFFERS")
 
-    val started = FrameworkUtil.isInstanceStarted
-    logger.info(s"Check is instance status 'started': $started")
-    if (started) FrameworkUtil.prepareTasksToLaunch()
-    else FrameworkUtil.teardown()
-
+    FrameworkUtil.checkInstanceStarted()
     TasksList.clearAvailablePorts()
     OffersHandler.setOffers(offers.asScala)
 
@@ -86,37 +82,16 @@ class FrameworkScheduler extends Scheduler {
       return
     }
 
-    logger.debug("Selected resource offers: ")
-    OffersHandler.filteredOffers.foreach(offer => {
-      logger.debug(s"Offer ID: ${offer.getId.getValue}.")
-      logger.debug(s"Slave ID: ${offer.getSlaveId.getValue}.")
-    })
-
-    var tasksCountOnSlaves: mutable.ListBuffer[(Offer, Int)] = OffersHandler.getOffersForSlave
-    var overTasks = tasksCountOnSlaves.foldLeft(0)(_ + _._2)
-    if (uniqueHosts && tasksCountOnSlaves.length < overTasks) overTasks = tasksCountOnSlaves.length
-
-    logger.debug(s"Can be launched: $overTasks tasks.")
-    logger.debug(s"Must be launched: ${TasksList.count} tasks.")
+    val overTasks = getAvailableNumberOfTasks
 
     if (TasksList.count > overTasks) {
       declineOffers("Can not launch tasks: insufficient resources", OffersHandler.getOffers)
       return
     }
 
-
-    logger.info(s"Distribute tasks to resource offers")
-    OffersHandler.offerNumber = 0
-    if (FrameworkUtil.isInstanceStarted) {
-      for (currTask <- TasksList.toLaunch) {
-        createTaskToLaunch(currTask, tasksCountOnSlaves)
-        tasksCountOnSlaves = OffersHandler.updateOfferNumber(tasksCountOnSlaves)
-      }
-    }
+    OffersHandler.distributeTasksOnSlaves()
     logger.info(s"Launch tasks")
     launchTasks(driver)
-    TasksList.clearLaunchedOffers()
-    declineOffers("Tasks have been launched", OffersHandler.getOffers)
     logger.info(s"Launched tasks: ${TasksList.getLaunchedTasks}")
   }
 
@@ -126,23 +101,18 @@ class FrameworkScheduler extends Scheduler {
     offers.foreach(offer => FrameworkUtil.driver.declineOffer(offer.getId))
   }
 
-
-  /**
-    * Create task to launch.
-    *
-    * @param taskName
-    * @param tasksCountOnSlaves
-    * @return
-    */
-  private def createTaskToLaunch(taskName: String, tasksCountOnSlaves: mutable.ListBuffer[(Offer, Int)]): ListBuffer[String] = {
-    val currentOffer = OffersHandler.getNextOffer(tasksCountOnSlaves)
-    val task = TasksList.createTaskToLaunch(taskName, currentOffer._1)
-
-    TasksList.addTaskToSlave(task, currentOffer)
-
-    // update how much tasks we can run on slave when launch current task
-    tasksCountOnSlaves.update(tasksCountOnSlaves.indexOf(currentOffer), Tuple2(currentOffer._1, currentOffer._2 - 1))
-    TasksList.launched(taskName)
+  def getAvailableNumberOfTasks: Int = {
+    logger.debug("Selected resource offers: ")
+    OffersHandler.filteredOffers.foreach(offer => {
+      logger.debug(s"Offer ID: ${offer.getId.getValue}.")
+      logger.debug(s"Slave ID: ${offer.getSlaveId.getValue}.")
+    })
+    var overTasks: Int = OffersHandler.tasksCountOnSlaves.foldLeft(0)(_ + _._2)
+    if (uniqueHosts && OffersHandler.tasksCountOnSlaves.length < overTasks) overTasks =
+      OffersHandler.tasksCountOnSlaves.length
+    logger.debug(s"Can be launched: $overTasks tasks.")
+    logger.debug(s"Must be launched: ${TasksList.count} tasks.")
+    overTasks
   }
 
   /**
@@ -154,6 +124,8 @@ class FrameworkScheduler extends Scheduler {
     for (task <- TasksList.getLaunchedOffers) {
       driver.launchTasks(List(task._1).asJava, task._2.asJava)
     }
+    TasksList.clearLaunchedOffers()
+    declineOffers("Tasks have been launched", OffersHandler.getOffers)
   }
 
   /**
@@ -163,7 +135,6 @@ class FrameworkScheduler extends Scheduler {
     logger.debug(s"New master $masterInfo.")
     TasksList.setMessage(s"New master $masterInfo")
   }
-
 
   /**
    * Registering framework.

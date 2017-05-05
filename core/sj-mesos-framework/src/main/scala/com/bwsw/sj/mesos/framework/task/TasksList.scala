@@ -14,6 +14,10 @@ import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 object TasksList {
+  /***
+    * availablePorts - ports that can be used for current task. This parameter update after new offer come.
+    */
+
   private val logger = Logger.getLogger(this.getClass)
   private val tasksToLaunch = mutable.ListBuffer[String]()
   private val listTasks = mutable.Map[String, Task]()
