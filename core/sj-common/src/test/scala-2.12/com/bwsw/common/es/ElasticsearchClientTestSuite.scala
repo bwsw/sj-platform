@@ -9,15 +9,15 @@ import scala.util.Random
 
 class ElasticsearchClientTestSuite extends FlatSpec with Matchers with BeforeAndAfterEach {
   val hosts = Set(("localhost", 9300))
-  var embeddedElasticsearch: EmbeddedElasticsearch = _
+  var embeddedElasticsearch: Option[EmbeddedElasticsearch] = None
 
   override protected def beforeEach(): Unit = {
-    embeddedElasticsearch = new EmbeddedElasticsearch()
-    embeddedElasticsearch.start()
+    embeddedElasticsearch = Option(new EmbeddedElasticsearch())
+    embeddedElasticsearch.foreach(_.start())
   }
 
   override protected def afterEach(): Unit = {
-    embeddedElasticsearch.stop()
+    embeddedElasticsearch.foreach(_.stop())
   }
 
   "isConnected" should "return true if client has connected to ES" in {
@@ -31,7 +31,7 @@ class ElasticsearchClientTestSuite extends FlatSpec with Matchers with BeforeAnd
   "isConnected" should "return false if client has connected to ES but the node has been shutdown" in {
     //arrange and act
     val client = new ElasticsearchClient(hosts)
-    embeddedElasticsearch.stop()
+    embeddedElasticsearch.foreach(_.stop())
     //wait for closing a connection between server and client
     Thread.sleep(5000)
 
