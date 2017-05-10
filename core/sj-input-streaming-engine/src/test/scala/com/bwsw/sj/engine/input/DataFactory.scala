@@ -17,6 +17,8 @@ import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 
+import scala.util.{Failure, Success, Try}
+
 object DataFactory {
   private val zookeeperHosts = System.getenv("ZOOKEEPER_HOSTS")
   private val testNamespace = "test_namespace_for_input_engine"
@@ -148,14 +150,17 @@ object DataFactory {
       val entry = enu.nextElement
       if (entry.getName.equals("specification.json")) {
         val reader = new BufferedReader(new InputStreamReader(jar.getInputStream(entry), "UTF-8"))
-        try {
+        val result = Try {
           var line = reader.readLine
           while (line != null) {
             builder.append(line + "\n")
             line = reader.readLine
           }
-        } finally {
-          reader.close()
+        }
+        reader.close()
+        result match {
+          case Success(_) =>
+          case Failure(e) => throw e
         }
       }
     }

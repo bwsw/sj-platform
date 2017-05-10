@@ -8,6 +8,7 @@ import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
 import io.netty.util.ReferenceCountUtil
 
 import scala.collection.concurrent
+import scala.util.{Failure, Success, Try}
 
 /**
  * Handles a server-side channel.
@@ -23,7 +24,7 @@ class InputStreamingServerHandler(channelContextQueue: ArrayBlockingQueue[Channe
   extends ChannelInboundHandlerAdapter {
 
   override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = {
-    try {
+    val result = Try {
       val message = msg.asInstanceOf[ByteBuf]
 
       if (bufferForEachContext.contains(ctx)) {
@@ -33,8 +34,11 @@ class InputStreamingServerHandler(channelContextQueue: ArrayBlockingQueue[Channe
       }
 
       channelContextQueue.add(ctx)
-    } finally {
-      ReferenceCountUtil.release(msg)
+    }
+    ReferenceCountUtil.release(msg)
+    result match {
+      case Success(_) =>
+      case Failure(e) => throw e
     }
   }
 

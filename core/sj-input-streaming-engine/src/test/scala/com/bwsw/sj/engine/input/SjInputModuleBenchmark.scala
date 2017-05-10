@@ -9,6 +9,8 @@ import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.engine.input.DataFactory._
 import com.bwsw.sj.engine.input.SjInputServices._
 
+import scala.util.{Failure, Success, Try}
+
 object SjInputServices {
   val streamService = ConnectionRepository.getStreamService
   val serviceManager = ConnectionRepository.getServiceManager
@@ -48,7 +50,7 @@ object SjInputModuleDataWriter extends App {
   writeData(totalInputElements, numberOfDuplicates)
 
   private def writeData(totalInputElements: Int, numberOfDuplicates: Int) = {
-    try {
+    Try {
       val socket = new Socket(host, port)
       var amountOfDuplicates = -1
       var amountOfElements = 0
@@ -71,9 +73,9 @@ object SjInputModuleDataWriter extends App {
       }
 
       socket.close()
-    }
-    catch {
-      case e: Exception =>
+    } match {
+      case Success(_) =>
+      case Failure(e) =>
         System.out.println("init error: " + e)
     }
   }
