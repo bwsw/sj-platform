@@ -24,6 +24,8 @@ import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 
 import scala.concurrent.{Await, ExecutionContextExecutor}
+import scala.util.{Failure, Success, Try}
+
 /**
   * Trait for validation of crud-rest-api
   * and contains common methods for routes
@@ -218,26 +220,28 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator {
 
   private def getValidatorClassInterfaces(className: String, classLoader: URLClassLoader) = {
     logger.debug("Try to load a validator class from jar that is indicated on specification.")
-    try {
-      classLoader.loadClass(className).getAnnotatedInterfaces.map(x => x.getType)
-    } catch {
-      case _: ClassNotFoundException =>
+    Try(classLoader.loadClass(className).getAnnotatedInterfaces.map(x => x.getType)) match {
+      case Success(x) => x
+      case Failure(_: ClassNotFoundException) =>
         logger.error(s"Specification.json for module has got the invalid 'validator-class' param: " +
           s"class '$className' indicated in the specification isn't found.")
         throw new Exception(createMessage("rest.validator.specification.class.not.found", "validator-class", className))
+      case Failure(e) => throw e
     }
   }
 
   private def getBatchCollectorClassInterfaces(className: String, classLoader: URLClassLoader) = {
     logger.debug("Try to load a batch collector class from jar that is indicated on specification.")
-    try {
+    Try {
       classLoader.loadClass(className).getAnnotatedSuperclass.getType.asInstanceOf[Class[Object]]
         .getAnnotatedInterfaces.map(x => x.getType)
-    } catch {
-      case _: ClassNotFoundException =>
+    } match {
+      case Success(x) => x
+      case Failure(_: ClassNotFoundException) =>
         logger.error(s"Specification.json for module has got the invalid 'batch-collector-class' param: " +
           s"class '$className' indicated in the specification isn't found.")
         throw new Exception(createMessage("rest.validator.specification.class.not.found", "batch-collector", className))
+      case Failure(e) => throw e
     }
   }
 
@@ -279,15 +283,17 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator {
       val entry = enu.nextElement
       if (entry.getName.equals("specification.json")) {
         val reader = new BufferedReader(new InputStreamReader(jar.getInputStream(entry), "UTF-8"))
-        try {
+        Try {
           var line = reader.readLine
           while (line != null) {
             builder.append(line + "\n")
             line = reader.readLine
           }
-        } finally {
-          reader.close()
+        } match {
+          case Success(_) =>
+          case Failure(e) => throw e
         }
+        reader.close()
       }
     }
     builder.toString()

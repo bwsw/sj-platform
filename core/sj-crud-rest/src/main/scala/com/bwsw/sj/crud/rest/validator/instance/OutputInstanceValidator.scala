@@ -11,6 +11,7 @@ import com.bwsw.sj.common.utils.SjStreamUtils._
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable.ArrayBuffer
+import scala.util.{Failure, Success, Try}
 
 /**
   *
@@ -135,11 +136,11 @@ class OutputInstanceValidator extends InstanceValidator {
     // 'start-from' field
     val startFrom = instance.startFrom
     if (!startFromModes.contains(startFrom)) {
-      try {
-        startFrom.toLong
-      } catch {
-        case ex: NumberFormatException =>
+      Try(startFrom.toLong) match {
+        case Success(_) =>
+        case Failure(_: NumberFormatException) =>
           errors += createMessage("rest.validator.attribute.must.one_of", "startFrom", s"${startFromModes.mkString("[", ", ", "]")} or timestamp")
+        case Failure(e) => throw e
       }
     }
 

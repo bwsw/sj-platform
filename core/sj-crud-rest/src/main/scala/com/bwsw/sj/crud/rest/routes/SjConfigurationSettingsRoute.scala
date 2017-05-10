@@ -12,6 +12,7 @@ import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
 import scala.collection.mutable.ArrayBuffer
+import scala.util.{Failure, Success, Try}
 
 trait SjConfigurationSettingsRoute extends Directives with SjCrudValidator {
 
@@ -77,17 +78,16 @@ trait SjConfigurationSettingsRoute extends Directives with SjCrudValidator {
               var response: RestResponse = null
               val errors = new ArrayBuffer[String]
 
-              try {
-                val data = serializer.deserialize[ConfigurationSettingData](getEntityFromContext(ctx))
-                errors ++= data.validate()
-
-                if (errors.isEmpty) {
-                  configService.save(data.asModelConfigurationSetting)
-                  response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.config.setting.created", data.domain, data.name)))
-                }
-              } catch {
-                case e: JsonDeserializationException =>
+              Try(serializer.deserialize[ConfigurationSettingData](getEntityFromContext(ctx))) match {
+                case Success(data) =>
+                  errors ++= data.validate()
+                  if (errors.isEmpty) {
+                    configService.save(data.asModelConfigurationSetting)
+                    response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.config.setting.created", data.domain, data.name)))
+                  }
+                case Failure(e: JsonDeserializationException) =>
                   errors += JsonDeserializationErrorMessageCreator(e)
+                case Failure(e) => throw e
               }
 
               if (errors.nonEmpty) {

@@ -3,17 +3,16 @@ package com.bwsw.sj.crud.rest.routes
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.dal.model.module.Instance
-import com.bwsw.sj.common.rest.model._
-import com.bwsw.sj.common.rest.model.stream.StreamData
 import com.bwsw.sj.common.rest._
+import com.bwsw.sj.common.rest.model.stream.StreamData
 import com.bwsw.sj.common.utils.EngineLiterals._
+import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
 import scala.collection.mutable.ArrayBuffer
-import com.bwsw.sj.common.rest.utils.ValidationUtils._
-import com.bwsw.sj.common.utils.MessageResourceUtils._
+import scala.util.{Failure, Success, Try}
 
 trait SjStreamsRoute extends Directives with SjCrudValidator {
 
@@ -23,8 +22,8 @@ trait SjStreamsRoute extends Directives with SjCrudValidator {
         post { (ctx: RequestContext) =>
           var response: RestResponse = null
           val errors = new ArrayBuffer[String]
-          try {
-            val streamData = serializer.deserialize[StreamData](getEntityFromContext(ctx))
+          Try (serializer.deserialize[StreamData](getEntityFromContext(ctx))) match {
+            case Success(streamData) =>
             errors ++= streamData.validate()
 
             if (errors.isEmpty) {
@@ -32,9 +31,9 @@ trait SjStreamsRoute extends Directives with SjCrudValidator {
               streamDAO.save(streamData.asModelStream())
               response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.streams.stream.created", streamData.name)))
             }
-          } catch {
-            case e: JsonDeserializationException =>
+            case Failure(e: JsonDeserializationException) =>
               errors += JsonDeserializationErrorMessageCreator(e)
+            case Failure(e) => throw e
           }
 
           if (errors.nonEmpty) {

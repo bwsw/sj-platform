@@ -11,6 +11,7 @@ import com.bwsw.sj.common.utils.StreamLiterals._
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable.ArrayBuffer
+import scala.util.{Failure, Success, Try}
 
 /**
   * Validator for Stream-processing regular module type
@@ -124,11 +125,11 @@ class RegularInstanceValidator extends InstanceValidator {
       }
     } else {
       if (!startFromModes.contains(startFrom)) {
-        try {
-          startFrom.toLong
-        } catch {
-          case ex: NumberFormatException =>
+        Try(startFrom.toLong) match {
+          case Success(_) =>
+          case Failure(_: NumberFormatException) =>
             errors += createMessage("rest.validator.attribute.must.one_of", "startFrom", s"${startFromModes.mkString("[", ", ", "]")} or timestamp")
+          case Failure(e) => throw e
         }
       }
     }

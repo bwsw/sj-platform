@@ -13,6 +13,7 @@ import com.bwsw.sj.crud.rest.marathon.{MarathonApplicationById, MarathonRequest}
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
+import scala.util.{Failure, Success, Try}
 
 /**
   * One-thread starting object for instance
@@ -33,14 +34,15 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   private var leaderLatch: LeaderLatch = _
 
   def run() = {
-    try {
+    Try {
       logger.info(s"Instance: '${instance.name}'. Launch an instance.")
       updateInstanceStatus(instance, starting)
       startInstance()
       close()
-      logger.info(s"Instance: '${instance.name}' has been launched.")
-    } catch {
-      case e: Exception =>
+    } match {
+      case Success(_) =>
+        logger.info(s"Instance: '${instance.name}' has been launched.")
+      case Failure(e) =>
         logger.error(s"Instance: '${instance.name}'. Instance is failed during the start process.", e)
         updateInstanceStatus(instance, failed)
         if (leaderLatch != null) leaderLatch.close()
@@ -87,7 +89,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
 
     zooKeeperServers
   }
-  
+
   private def startFramework(marathonMaster: String) = {
     logger.debug(s"Instance: '${instance.name}'. Try to launch or create a framework: '$frameworkName'.")
     val frameworkApplicationInfo = getApplicationInfo(frameworkName)
@@ -155,14 +157,20 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
   }
 
   private def getBackoffSettings(): (Int, Double, Int) = {
-    val backoffSeconds = try ConfigurationSettingsUtils.getFrameworkBackoffSeconds() catch {
-      case e: NoSuchFieldException => 7
+    val backoffSeconds = Try(ConfigurationSettingsUtils.getFrameworkBackoffSeconds()) match {
+      case Success(x) => x
+      case Failure(_: NoSuchFieldException) => 7
+      case Failure(e) => throw e
     }
-    val backoffFactor = try ConfigurationSettingsUtils.getFrameworkBackoffFactor() catch {
-      case e: NoSuchFieldException => 7
+    val backoffFactor = Try(ConfigurationSettingsUtils.getFrameworkBackoffFactor()) match {
+      case Success(x) => x
+      case Failure(_: NoSuchFieldException) => 7.0
+      case Failure(e) => throw e
     }
-    val maxLaunchDelaySeconds = try ConfigurationSettingsUtils.getFrameworkMaxLaunchDelaySeconds() catch {
-      case e: NoSuchFieldException => 600
+    val maxLaunchDelaySeconds = Try(ConfigurationSettingsUtils.getFrameworkMaxLaunchDelaySeconds()) match {
+      case Success(x) => x
+      case Failure(_: NoSuchFieldException) => 600
+      case Failure(e) => throw e
     }
     (backoffSeconds, backoffFactor, maxLaunchDelaySeconds)
   }

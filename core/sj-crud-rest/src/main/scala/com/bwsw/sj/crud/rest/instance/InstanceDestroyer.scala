@@ -5,6 +5,8 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import org.slf4j.LoggerFactory
 
+import scala.util.{Failure, Success, Try}
+
 /**
   * One-thread deleting object for instance
   * using synchronous apache http client
@@ -19,15 +21,16 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
   import EngineLiterals._
 
   def run() = {
-    try {
+    Try {
       logger.info(s"Instance: '${instance.name}'. Destroy an instance.")
       updateInstanceStatus(instance, deleting)
       deleteFramework()
       deleteInstance()
       close()
-      logger.info(s"Instance: '${instance.name}' has been destroyed.")
-    } catch {
-      case e: Exception =>
+    } match {
+      case Success(_) =>
+        logger.info(s"Instance: '${instance.name}' has been destroyed.")
+      case Failure(e) =>
         logger.error(s"Instance: '${instance.name}'. Instance is failed during the destroying process.", e)
         updateInstanceStatus(instance, error)
         close()

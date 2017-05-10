@@ -31,6 +31,8 @@ import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 import com.bwsw.sj.common.rest.utils.ValidationUtils._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 
+import scala.util.{Failure, Success, Try}
+
 trait SjModulesRoute extends Directives with SjCrudValidator {
 
   private val previousFilesNames: ListBuffer[String] = ListBuffer[String]()
@@ -116,7 +118,7 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
   private val creationOfModule = post {
     uploadedFile("jar") {
       case (metadata: FileInfo, file: File) =>
-        try {
+        val result = Try {
           var response: RestResponse = BadRequestRestResponse(
             MessageResponseEntity(createMessage("rest.modules.modules.extension.unknown", metadata.fileName)))
 
@@ -138,9 +140,12 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
               }
             }
           }
-          complete(restResponseToHttpResponse(response))
-        } finally {
-          file.delete()
+          response
+        }
+        file.delete()
+        result match {
+          case Success(response) => complete(restResponseToHttpResponse(response))
+          case Failure(e) => throw e
         }
     }
   }
@@ -186,39 +191,38 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
     entity(as[String]) { entity =>
       var response: RestResponse = null
       val errors = new ArrayBuffer[String]
-      try {
-        val instanceMetadata = deserializeOptions(entity, moduleType)
-        errors ++= validateInstance(instanceMetadata, specification, moduleType)
-        val instancePassedValidation = validateInstance(specification, filename, instanceMetadata)
+      Try(deserializeOptions(entity, moduleType)) match {
+        case Success(instanceMetadata) =>
+          errors ++= validateInstance(instanceMetadata, specification, moduleType)
+          val instancePassedValidation = validateInstance(specification, filename, instanceMetadata)
 
-        if (errors.isEmpty) {
-          if (instancePassedValidation.result) {
-            instanceMetadata.prepareInstance(
-              moduleType,
-              moduleName,
-              moduleVersion,
-              specification.engineName,
-              specification.engineVersion
-            )
-            instanceMetadata.createStreams()
-            instanceDAO.save(instanceMetadata.asModelInstance())
+          if (errors.isEmpty) {
+            if (instancePassedValidation.result) {
+              instanceMetadata.prepareInstance(
+                moduleType,
+                moduleName,
+                moduleVersion,
+                specification.engineName,
+                specification.engineVersion
+              )
+              instanceMetadata.createStreams()
+              instanceDAO.save(instanceMetadata.asModelInstance())
 
-            response = CreatedRestResponse(MessageResponseEntity(createMessage(
-              "rest.modules.instances.instance.created",
-              instanceMetadata.name,
-              s"$moduleType-$moduleName-$moduleVersion"
-            )))
-          } else {
-            response = BadRequestRestResponse(MessageResponseEntity(createMessage(
-              "rest.modules.instances.instance.cannot.create.incorrect.parameters",
-              instancePassedValidation.errors.mkString(";")
-            )))
+              response = CreatedRestResponse(MessageResponseEntity(createMessage(
+                "rest.modules.instances.instance.created",
+                instanceMetadata.name,
+                s"$moduleType-$moduleName-$moduleVersion"
+              )))
+            } else {
+              response = BadRequestRestResponse(MessageResponseEntity(createMessage(
+                "rest.modules.instances.instance.cannot.create.incorrect.parameters",
+                instancePassedValidation.errors.mkString(";")
+              )))
+            }
           }
-        }
-
-      } catch {
-        case e: JsonDeserializationException =>
+        case Failure(e: JsonDeserializationException) =>
           errors += JsonDeserializationErrorMessageCreator(e)
+        case Failure(e) => throw e
       }
 
       if (errors.nonEmpty) {

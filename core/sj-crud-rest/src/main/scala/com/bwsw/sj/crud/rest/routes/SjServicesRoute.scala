@@ -10,6 +10,7 @@ import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
 import scala.collection.mutable.ArrayBuffer
+import scala.util.{Failure, Success, Try}
 
 trait SjServicesRoute extends Directives with SjCrudValidator {
 
@@ -19,19 +20,19 @@ trait SjServicesRoute extends Directives with SjCrudValidator {
         post { (ctx: RequestContext) =>
           var response: RestResponse = null
           val errors = new ArrayBuffer[String]
-          try {
-            val protocolService = serializer.deserialize[ServiceData](getEntityFromContext(ctx))
-            errors ++= protocolService.validate()
+          Try(serializer.deserialize[ServiceData](getEntityFromContext(ctx))) match {
+            case Success(protocolService) =>
+              errors ++= protocolService.validate()
 
-            if (errors.isEmpty) {
-              val service = protocolService.asModelService()
-              service.prepare()
-              serviceDAO.save(service)
-              response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.services.service.created", service.name)))
-            }
-          } catch {
-            case e: JsonDeserializationException =>
+              if (errors.isEmpty) {
+                val service = protocolService.asModelService()
+                service.prepare()
+                serviceDAO.save(service)
+                response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.services.service.created", service.name)))
+              }
+            case Failure(e: JsonDeserializationException) =>
               errors += JsonDeserializationErrorMessageCreator(e)
+            case Failure(e) => throw e
           }
 
           if (errors.nonEmpty) {
