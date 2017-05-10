@@ -8,14 +8,13 @@ import com.bwsw.sj.common.utils.JdbcLiterals._
 /**
   * This class provide data for connection to database, required for initialize JDBC client object
   */
-class JdbcClientConnectionData {
-  var hosts: Array[String] = _
-  var driver: String = _
-  var username: String = _
-  var password: String = _
-  var database: String = _
-  var table: String = _
-
+class JdbcClientConnectionData(
+                                val hosts: Array[String],
+                                val driver: String,
+                                val username: String,
+                                val password: String,
+                                val database: Option[String],
+                                val table: Option[String]) {
   /**
     * This method return driver class name, related to driver name provided in service
     *
@@ -42,19 +41,22 @@ class JdbcClientConnectionData {
     *
     * @return String: server URL
     */
-  def url: String = driverPrefix match {
-    case `mysqlDriverPrefix` | `postgresqlDriverPrefix` =>
-      s"$driverPrefix://${hosts.mkString(",")}/$database"
-    case `oracleDriverPrefix` =>
-      var url = s"$driverPrefix:@(DESCRIPTION = (ADDRESS_LIST = "
-      hosts.foreach { address =>
-        val uri = new URI("dummy://" + address)
-        url += s"(ADDRESS = (PROTOCOL = TCP) (HOST = ${uri.getHost}) (PORT = ${uri.getPort}))"
-      }
-      url += s")(CONNECT_DATA = (SERVICE_NAME = $database)))"
+  def url: String = database match {
+    case Some(database) => driverPrefix match {
+      case `mysqlDriverPrefix` | `postgresqlDriverPrefix` =>
+        s"$driverPrefix://${hosts.mkString(",")}/$database"
+      case `oracleDriverPrefix` =>
+        var url = s"$driverPrefix:@(DESCRIPTION = (ADDRESS_LIST = "
+        hosts.foreach { address =>
+          val uri = new URI("dummy://" + address)
+          url += s"(ADDRESS = (PROTOCOL = TCP) (HOST = ${uri.getHost}) (PORT = ${uri.getPort}))"
+        }
+        url += s")(CONNECT_DATA = (SERVICE_NAME = $database)))"
 
-      url
-    case _ => throw new IllegalStateException(s"Incorrect JDBC prefix. Valid prefixes: $validPrefixes")
+        url
+      case _ => throw new IllegalStateException(s"Incorrect JDBC prefix. Valid prefixes: $validPrefixes")
+    }
+    case None => throw new IllegalStateException("Database not defined")
   }
 
   def urlWithoutDatabase: String = driverPrefix match {
@@ -70,15 +72,5 @@ class JdbcClientConnectionData {
 
       url
     case _ => throw new IllegalStateException(s"Incorrect JDBC prefix. Valid prefixes: $validPrefixes")
-  }
-
-  def this(hosts: Array[String], driver: String, username: String, password: String, database: String, table: String) = {
-    this
-    this.hosts = hosts
-    this.driver = driver
-    this.username = username
-    this.password = password
-    this.database = database
-    this.table = table
   }
 }

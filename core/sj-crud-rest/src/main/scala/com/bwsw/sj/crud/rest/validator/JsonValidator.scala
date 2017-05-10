@@ -6,7 +6,10 @@ import org.json.{JSONException, JSONObject, JSONTokener}
 
 trait JsonValidator {
 
-  def isEmptyOrNullString(value: String): Boolean = value == null || value.isEmpty
+  def isEmptyOrNullString(value: String): Boolean = Option(value) match {
+    case Some("") | None => true
+    case _ => false
+  }
 
   def isJSONValid(json: String): Boolean = {
     try {
@@ -18,15 +21,15 @@ trait JsonValidator {
   }
 
   def validateWithSchema(json: String, schema: String): Boolean = {
-    val schemaStream = getClass.getClassLoader.getResourceAsStream(schema)
-    if (schemaStream != null) {
-      val rawSchema = new JSONObject(new JSONTokener(schemaStream))
-      val schema = SchemaLoader.load(rawSchema)
-      val specification = new JSONObject(json)
-      schema.validate(specification)
-      true
-    } else {
-      throw new Exception(createMessage("json.schema.not.found"))
+    Option(getClass.getClassLoader.getResourceAsStream(schema)) match {
+      case Some(schemaStream) =>
+        val rawSchema = new JSONObject(new JSONTokener(schemaStream))
+        val schema = SchemaLoader.load(rawSchema)
+        val specification = new JSONObject(json)
+        schema.validate(specification)
+        true
+      case None =>
+        throw new Exception(createMessage("json.schema.not.found"))
     }
   }
 }

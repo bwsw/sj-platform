@@ -4,13 +4,18 @@ import com.bwsw.sj.common.dal.model.service.JDBCServiceDomain
 import com.bwsw.sj.common.dal.model.stream.JDBCStreamDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.MessageResourceUtils._
-import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
+import com.bwsw.sj.common.utils.{RestLiterals, ServiceLiterals, StreamLiterals}
+import com.fasterxml.jackson.annotation.JsonProperty
 
 import scala.collection.mutable.ArrayBuffer
 
-class JDBCStreamApi() extends StreamApi() {
-  streamType = StreamLiterals.jdbcOutputType
-  var primary: String = null
+class JDBCStreamApi(val primary: String,
+                    override val name: String,
+                    override val service: String,
+                    override val tags: Array[String] = Array(),
+                    override val force: Boolean = false,
+                    override val description: String = RestLiterals.defaultDescription)
+  extends StreamApi(StreamLiterals.jdbcOutputType, name, service, tags, force, description) {
 
   override def validate(): ArrayBuffer[String] = {
     val serviceDAO = ConnectionRepository.getServiceRepository

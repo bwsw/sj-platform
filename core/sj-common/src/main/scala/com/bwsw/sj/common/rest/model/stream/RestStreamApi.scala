@@ -4,16 +4,19 @@ import com.bwsw.sj.common.dal.model.service.RestServiceDomain
 import com.bwsw.sj.common.dal.model.stream.RestStreamDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.MessageResourceUtils._
-import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
+import com.bwsw.sj.common.utils.{RestLiterals, ServiceLiterals, StreamLiterals}
 
 import scala.collection.mutable.ArrayBuffer
 
 /**
   * @author Pavel Tomskikh
   */
-class RestStreamApi extends StreamApi {
-
-  streamType = StreamLiterals.restOutputType
+class RestStreamApi(override val name: String,
+                    override val service: String,
+                    override val tags: Array[String] = Array(),
+                    override val force: Boolean = false,
+                    override val description: String = RestLiterals.defaultDescription)
+  extends StreamApi(StreamLiterals.restOutputType, name, service, tags, force, description) {
 
   override def validate(): ArrayBuffer[String] = {
     val serviceDAO = ConnectionRepository.getServiceRepository

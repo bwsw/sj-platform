@@ -12,8 +12,8 @@ class OutputInstanceApi extends InstanceApi with AvroSchemaForInstanceMetadata{
   var checkpointInterval: Long = Long.MinValue
   var executionPlan: ExecutionPlan = new ExecutionPlan()
   var startFrom: String = EngineLiterals.newestStartMode
-  var input: String = null
-  var output: String = null
+  var input: String = _
+  var output: String = _
 
   override def asModelInstance(): OutputInstanceDomain = {
     val serviceRepository = ConnectionRepository.getServiceRepository
@@ -27,8 +27,10 @@ class OutputInstanceApi extends InstanceApi with AvroSchemaForInstanceMetadata{
     modelInstance.startFrom = this.startFrom
     modelInstance.executionPlan = this.executionPlan
 
-    val serializer = new JsonSerializer()
-    modelInstance.inputAvroSchema = serializer.serialize(this.inputAvroSchema)
+    modelInstance.inputAvroSchema = this.inputAvroSchema.map { s =>
+      val serializer = new JsonSerializer()
+      serializer.serialize(s)
+    }
 
     modelInstance
   }

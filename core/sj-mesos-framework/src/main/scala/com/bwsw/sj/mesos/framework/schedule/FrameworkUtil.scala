@@ -4,8 +4,9 @@ import java.io.{PrintWriter, StringWriter}
 import java.net.URI
 
 import com.bwsw.sj.common.dal.model.module._
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.config.ConfigLiterals
+import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.mesos.framework.task.TasksList
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos.MasterInfo
@@ -16,14 +17,14 @@ import scala.util.Properties
 
 
 object FrameworkUtil {
-  var master: MasterInfo = null
-  var frameworkId: String = null
-  var driver: SchedulerDriver = null
-  var jarName: String = null
-  var instance: InstanceDomain = null
-  val configFileService = ConnectionRepository.getConfigRepository
+  var master: Option[MasterInfo] = None
+  var frameworkId: Option[String] = None
+  var driver: Option[SchedulerDriver] = None
+  var jarName: Option[String] = None
+  var instance: Option[InstanceDomain] = None
+  val configRepository: GenericMongoRepository[ConfigurationSettingDomain] = ConnectionRepository.getConfigRepository
   private val logger = Logger.getLogger(this.getClass)
-  var params = immutable.Map[String, String]()
+  var params: Map[String, String] = immutable.Map[String, String]()
 
   /**
    * Count how much ports must be for current task.
@@ -48,7 +49,7 @@ object FrameworkUtil {
     e.printStackTrace(new PrintWriter(sw))
     TasksList.setMessage(e.getMessage)
     logger.error(s"Framework error: ${sw.toString}")
-    driver.stop()
+    driver.foreach(_.stop())
     System.exit(1)
   }
 
@@ -66,17 +67,17 @@ object FrameworkUtil {
    * @return String
    */
   def getModuleUrl(instance: InstanceDomain): String = {
-    jarName = configFileService.get("system." + instance.engine).get.value
-    val restHost = configFileService.get(ConfigLiterals.hostOfCrudRestTag).get.value
-    val restPort = configFileService.get(ConfigLiterals.portOfCrudRestTag).get.value.toInt
-    val restAddress = new URI(s"http://$restHost:$restPort/v1/custom/jars/$jarName").toString
+    jarName = configRepository.get("system." + instance.engine).map(_.value)
+    val restHost = configRepository.get(ConfigLiterals.hostOfCrudRestTag).get.value
+    val restPort = configRepository.get(ConfigLiterals.portOfCrudRestTag).get.value.toInt
+    val restAddress = new URI(s"http://$restHost:$restPort/v1/custom/jars/${jarName.get}").toString
     logger.debug(s"Engine downloading URL: $restAddress.")
     restAddress
   }
 
   def isInstanceStarted: Boolean = {
     updateInstance()
-    instance.status == "started"
+    instance.exists(_.status == "started")
   }
 
   def killAllLaunchedTasks(): Unit = {
@@ -110,9 +111,9 @@ object FrameworkUtil {
     if (optionInstance.isEmpty) {
       logger.error(s"Not found instance")
       TasksList.setMessage("Framework shut down: not found instance.")
-      driver.stop()
+      driver.foreach(_.stop())
     } else {
-      FrameworkUtil.instance = optionInstance.get
+      FrameworkUtil.instance = optionInstance
     }
   }
 }

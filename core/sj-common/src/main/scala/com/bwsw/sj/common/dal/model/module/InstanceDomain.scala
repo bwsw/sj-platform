@@ -6,7 +6,7 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.{EmbeddedField, IdField, PropertyField}
 import com.bwsw.sj.common.rest.model.module.InstanceApi
-import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 import org.mongodb.morphia.annotations.Entity
 
 import scala.collection.JavaConverters._
@@ -25,7 +25,7 @@ class InstanceDomain(@IdField val name: String,
                      @EmbeddedField("coordination-service") val coordinationService: ZKServiceDomain,
                      var status: String = EngineLiterals.ready,
                      @PropertyField("rest-address") var restAddress: String = "",
-                     var description: String = "No description",
+                     var description: String = RestLiterals.defaultDescription,
                      var outputs: Array[String] = Array(),
                      var parallelism: Int = 1,
                      var options: String = "{}",

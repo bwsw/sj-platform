@@ -5,12 +5,18 @@ import com.bwsw.sj.common.dal.model.service.ESServiceDomain
 import com.bwsw.sj.common.dal.model.stream.ESStreamDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.MessageResourceUtils._
-import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
+import com.bwsw.sj.common.utils.{RestLiterals, ServiceLiterals, StreamLiterals}
+import com.fasterxml.jackson.annotation.JsonProperty
 
 import scala.collection.mutable.ArrayBuffer
 
-class ESStreamApi() extends StreamApi() {
-  streamType = StreamLiterals.esOutputType
+class ESStreamApi(override val name: String,
+                  override val service: String,
+                  override val tags: Array[String] = Array(),
+                  override val force: Boolean = false,
+                  override val description: String = RestLiterals.defaultDescription)
+  extends StreamApi(StreamLiterals.esOutputType, name, service, tags, force, description) {
+
 
   override def validate(): ArrayBuffer[String] = {
     val serviceDAO = ConnectionRepository.getServiceRepository

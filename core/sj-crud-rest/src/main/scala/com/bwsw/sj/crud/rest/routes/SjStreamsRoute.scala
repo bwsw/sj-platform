@@ -21,7 +21,7 @@ trait SjStreamsRoute extends Directives with SjCrudValidator {
     pathPrefix("streams") {
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>
-          var response: RestResponse = null
+          var response: Option[RestResponse] = None
           val errors = new ArrayBuffer[String]
           try {
             val streamData = serializer.deserialize[StreamApi](getEntityFromContext(ctx))
@@ -30,7 +30,10 @@ trait SjStreamsRoute extends Directives with SjCrudValidator {
             if (errors.isEmpty) {
               streamData.create()
               streamDAO.save(streamData.asModelStream())
-              response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.streams.stream.created", streamData.name)))
+              response = Option(
+                CreatedRestResponse(
+                  MessageResponseEntity(
+                    createMessage("rest.streams.stream.created", streamData.name))))
             }
           } catch {
             case e: JsonDeserializationException =>
@@ -38,12 +41,13 @@ trait SjStreamsRoute extends Directives with SjCrudValidator {
           }
 
           if (errors.nonEmpty) {
-            response = BadRequestRestResponse(MessageResponseEntity(
-              createMessage("rest.streams.stream.cannot.create", errors.mkString(";"))
-            ))
+            response = Option(
+              BadRequestRestResponse(
+                MessageResponseEntity(
+                  createMessage("rest.streams.stream.cannot.create", errors.mkString(";")))))
           }
 
-          ctx.complete(restResponseToHttpResponse(response))
+          ctx.complete(restResponseToHttpResponse(response.get))
         } ~
           get {
             val streams = streamDAO.getAll

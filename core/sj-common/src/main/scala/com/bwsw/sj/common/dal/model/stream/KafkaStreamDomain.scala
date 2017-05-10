@@ -5,7 +5,7 @@ import java.util.Properties
 import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.rest.model.stream.KafkaStreamApi
-import com.bwsw.sj.common.utils.StreamLiterals
+import com.bwsw.sj.common.utils.{RestLiterals, StreamLiterals}
 import kafka.admin.AdminUtils
 import kafka.common.TopicAlreadyMarkedForDeletionException
 import kafka.utils.ZkUtils
@@ -15,21 +15,22 @@ class KafkaStreamDomain(override val name: String,
                         override val service: KafkaServiceDomain,
                         val partitions: Int,
                         val replicationFactor: Int,
-                        override val description: String = "No description",
+                        override val description: String = RestLiterals.defaultDescription,
                         override val force: Boolean = false,
                         override val tags: Array[String] = Array(),
                         override val streamType: String = StreamLiterals.kafkaStreamType)
   extends StreamDomain(name, description, service, force, tags, streamType) {
 
-  override def asProtocolStream(): KafkaStreamApi = {
-    val streamData = new KafkaStreamApi
-    super.fillProtocolStream(streamData)
-
-    streamData.partitions = this.partitions
-    streamData.replicationFactor = this.replicationFactor
-
-    streamData
-  }
+  override def asProtocolStream(): KafkaStreamApi =
+    new KafkaStreamApi(
+      name = name,
+      service = service.name,
+      tags = tags,
+      force = force,
+      description = description,
+      partitions = partitions,
+      replicationFactor = replicationFactor
+    )
 
   override def create(): Unit = {
     try {

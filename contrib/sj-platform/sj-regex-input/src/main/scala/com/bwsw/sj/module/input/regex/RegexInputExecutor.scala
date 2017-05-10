@@ -134,7 +134,7 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
 
     Some(new InputEnvelope(
       s"${rule.outputStream}$key",
-      Array((rule.outputStream, outputDistributors(rule).getNextPartition(record))),
+      Array((rule.outputStream, outputDistributors(rule).getNextPartition(Some(record)))),
       true,
       record))
   }

@@ -24,11 +24,16 @@ class SjStreamDistributor(
 
   private var currentPartition = -1
 
-  def getNextPartition(record: Record = null): Int = policy match {
+  def getNextPartition(record: Option[Record] = None): Int = policy match {
     case RoundRobin =>
       currentPartition = (currentPartition + 1) % partitionCount
       currentPartition
-    case ByHash => positiveMod(AvroUtils.concatFields(fieldNames, record).hashCode, partitionCount)
+    case ByHash if record.isDefined => positiveMod(
+      AvroUtils.concatFields(fieldNames, record.get).hashCode, partitionCount)
+    case ByHash =>
+      throw new IllegalArgumentException("record must be defined")
+    case _ =>
+      throw new IllegalStateException("unknown distribution policy")
   }
 
   private def positiveMod(dividend: Int, divider: Int): Int = (dividend % divider + divider) % divider

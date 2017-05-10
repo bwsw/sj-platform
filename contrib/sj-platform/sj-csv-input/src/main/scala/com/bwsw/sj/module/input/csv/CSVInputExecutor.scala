@@ -79,7 +79,7 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
 
         Some(new InputEnvelope(
           s"${csvInputOptions.outputStream}$key",
-          Array((csvInputOptions.outputStream, distributor.getNextPartition(record))),
+          Array((csvInputOptions.outputStream, distributor.getNextPartition(Some(record)))),
           true,
           record))
       } else {

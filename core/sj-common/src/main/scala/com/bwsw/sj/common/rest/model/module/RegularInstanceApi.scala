@@ -10,7 +10,7 @@ import com.bwsw.sj.common.utils.SjStreamUtils._
 class RegularInstanceApi extends InstanceApi with AvroSchemaForInstanceMetadata {
   var inputs: Array[String] = Array()
   var outputs: Array[String] = Array()
-  var checkpointMode: String = null
+  var checkpointMode: String = _
   var checkpointInterval: Long = Long.MinValue
   var executionPlan: ExecutionPlan = new ExecutionPlan()
   var startFrom: String = EngineLiterals.newestStartMode
@@ -33,8 +33,10 @@ class RegularInstanceApi extends InstanceApi with AvroSchemaForInstanceMetadata 
     modelInstance.startFrom = this.startFrom
     modelInstance.executionPlan = this.executionPlan
 
-    val serializer = new JsonSerializer()
-    modelInstance.inputAvroSchema = serializer.serialize(this.inputAvroSchema)
+    modelInstance.inputAvroSchema = this.inputAvroSchema.map { s =>
+      val serializer = new JsonSerializer()
+      serializer.serialize(s)
+    }
 
     modelInstance
   }

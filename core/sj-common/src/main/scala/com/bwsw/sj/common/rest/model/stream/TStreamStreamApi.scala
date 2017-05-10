@@ -11,9 +11,13 @@ import com.bwsw.tstreams.streams.Stream
 
 import scala.collection.mutable.ArrayBuffer
 
-class TStreamStreamApi() extends StreamApi() {
-  streamType = StreamLiterals.tstreamType
-  var partitions: Int = Int.MinValue
+class TStreamStreamApi(override val name: String,
+                       override val service: String,
+                       override val tags: Array[String] = Array(),
+                       override val force: Boolean = false,
+                       override val description: String = RestLiterals.defaultDescription,
+                       val partitions: Int = Int.MinValue)
+  extends StreamApi(StreamLiterals.tstreamType, name, service, tags, force, description) {
 
   override def validate(): ArrayBuffer[String] = {
     val serviceDAO = ConnectionRepository.getServiceRepository

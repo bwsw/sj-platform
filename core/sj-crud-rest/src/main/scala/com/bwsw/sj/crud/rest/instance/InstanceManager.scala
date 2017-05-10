@@ -21,11 +21,8 @@ private[instance] trait InstanceManager extends InstanceMarathonManager {
     instanceRepository.save(instance)
   }
 
-  protected def getRestAddress(leaderTask: Option[MarathonTask]) = {
-    var res: String = null
-    if (leaderTask.isDefined) res = s"http://${leaderTask.get.host}:${leaderTask.get.ports.asInstanceOf[List[String]].head}"
-    res
-  }
+  protected def getRestAddress(leaderTask: Option[MarathonTask]) =
+    leaderTask.map(t => s"http://${t.host}:${t.ports.asInstanceOf[List[String]].head}")
 
   protected def updateFrameworkStage(instance: InstanceDomain, status: String) = {
     if (instance.stage.state.equals(status)) {

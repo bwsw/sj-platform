@@ -82,27 +82,32 @@ trait IJdbcClient {
   def tableExists(): Boolean = {
     _connection match {
       case Some(connection) =>
-        logger.debug(s"Verify that the table '${jdbcCCD.table}' exists in a database.")
-        jdbcCCD.driverPrefix match {
-          case JdbcLiterals.oracleDriverPrefix =>
-            try {
-              val statement = connection.prepareStatement(s"SELECT COUNT(*) FROM ${jdbcCCD.table}")
-              statement.execute()
-              statement.close()
-              true
-            } catch {
-              case _: SQLException => false
-            }
+        jdbcCCD.table match {
+          case Some(table) =>
+            logger.debug(s"Verify that the table '$table' exists in a database.")
+            jdbcCCD.driverPrefix match {
+              case JdbcLiterals.oracleDriverPrefix =>
+                try {
+                  val statement = connection.prepareStatement(s"SELECT COUNT(*) FROM $table")
+                  statement.execute()
+                  statement.close()
+                  true
+                } catch {
+                  case _: SQLException => false
+                }
 
-          case _ =>
-            var result: Boolean = false
-            val dbResult = connection.getMetaData.getTables(null, null, jdbcCCD.table, null)
-            while (dbResult.next) {
-              if (dbResult.getString(3).nonEmpty) result = true
-            }
-            dbResult.close()
+              case _ =>
+                var result: Boolean = false
+                val dbResult = connection.getMetaData.getTables(null, null, table, null)
+                while (dbResult.next) {
+                  if (dbResult.getString(3).nonEmpty) result = true
+                }
+                dbResult.close()
 
-            result
+                result
+            }
+          case None =>
+            throw new IllegalStateException("Jdbc table not defined")
         }
       case None => throw new IllegalStateException("Jdbc client is not started. Start it first.")
     }

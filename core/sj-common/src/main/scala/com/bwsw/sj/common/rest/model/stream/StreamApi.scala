@@ -4,11 +4,12 @@ import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
-import com.bwsw.sj.common.utils.StreamLiterals
+import com.bwsw.sj.common.utils.{RestLiterals, ServiceLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes, JsonTypeInfo}
 
 import scala.collection.mutable.ArrayBuffer
+
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[StreamApi], visible = true)
 @JsonSubTypes(Array(
   new Type(value = classOf[TStreamStreamApi], name = StreamLiterals.tstreamType),
@@ -17,13 +18,13 @@ import scala.collection.mutable.ArrayBuffer
   new Type(value = classOf[JDBCStreamApi], name = StreamLiterals.jdbcOutputType),
   new Type(value = classOf[RestStreamApi], name = StreamLiterals.restOutputType)
 ))
-class StreamApi() {
-  @JsonProperty("type") var streamType: String = null
-  var name: String = null
-  var description: String = "No description"
-  var service: String = null
-  var tags: Array[String] = Array()
-  var force: Boolean = false
+class StreamApi(@JsonProperty("type") val streamType: String,
+                val name: String,
+                val service: String,
+                val tags: Array[String] = Array(),
+                val force: Boolean = false,
+                val description: String = RestLiterals.defaultDescription) {
+
 
   @JsonIgnore
   def create(): Unit = {}

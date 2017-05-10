@@ -9,6 +9,9 @@ import com.bwsw.sj.common.utils.RestLiterals
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.JavaConverters._
 
+/**
+  * @author Pavel Tomskikh
+  */
 class RestService(name: String,
                   val provider: String,
                   val basePath: String,

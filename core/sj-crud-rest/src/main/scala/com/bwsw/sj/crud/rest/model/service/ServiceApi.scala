@@ -1,7 +1,7 @@
 package com.bwsw.sj.crud.rest.model.service
 
 import com.bwsw.sj.common.si.model.service._
-import com.bwsw.sj.common.utils.ServiceLiterals
+import com.bwsw.sj.common.utils.{RestLiterals, ServiceLiterals}
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes, JsonTypeInfo}
 
@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes,
 ))
 class ServiceApi(@JsonProperty("type") val serviceType: String,
                  val name: String,
-                 val description: String = "No description") {
+                 val description: String = RestLiterals.defaultDescription) {
 
   @JsonIgnore
   def asService(): Service = ???

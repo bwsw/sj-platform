@@ -418,7 +418,7 @@ object DataFactory {
         val reader = new BufferedReader(new InputStreamReader(jar.getInputStream(entry), "UTF-8"))
         try {
           var line = reader.readLine
-          while (line != null) {
+          while (Option(line).isDefined) {
             builder.append(line + "\n")
             line = reader.readLine
           }

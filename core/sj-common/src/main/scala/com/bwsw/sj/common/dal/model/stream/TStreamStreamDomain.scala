@@ -2,27 +2,29 @@ package com.bwsw.sj.common.dal.model.stream
 
 import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
 import com.bwsw.sj.common.rest.model.stream.TStreamStreamApi
-import com.bwsw.sj.common.utils.StreamLiterals
+import com.bwsw.sj.common.utils.{RestLiterals, StreamLiterals}
 import com.bwsw.tstreams.common.StorageClient
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
+
 
 class TStreamStreamDomain(override val name: String,
                           override val service: TStreamServiceDomain,
                           val partitions: Int,
-                          override val description: String = "No description",
+                          override val description: String = RestLiterals.defaultDescription,
                           override val force: Boolean = false,
                           override val tags: Array[String] = Array(),
                           override val streamType: String = StreamLiterals.tstreamType)
   extends StreamDomain(name, description, service, force, tags, streamType) {
 
-  override def asProtocolStream(): TStreamStreamApi = {
-    val streamData = new TStreamStreamApi
-    super.fillProtocolStream(streamData)
-
-    streamData.partitions = this.partitions
-
-    streamData
-  }
+  override def asProtocolStream(): TStreamStreamApi =
+    new TStreamStreamApi(
+      name = name,
+      service = service.name,
+      tags = tags,
+      force = force,
+      description = description,
+      partitions = partitions
+    )
 
   override def create(): Unit = {
     val factory = new TStreamsFactory()
