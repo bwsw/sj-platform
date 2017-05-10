@@ -255,32 +255,16 @@ object DataFactory {
 
 
   def createProviders() = {
-    //    val esProvider = new Provider()
-    //    esProvider.name = esProviderName
-    //    esProvider.hosts = esProviderHosts
-    //    esProvider.providerType = ProviderLiterals.elasticsearchType
-    //    esProvider.login = ""
-    //    esProvider.password = ""
-    //    providerService.save(esProvider)
-    //
-    //    providerService.save(zookeeperProvider)
-    //
-    //    val jdbcProvider = new JDBCProvider()
-    //    jdbcProvider.name = jdbcProviderName
-    //    jdbcProvider.hosts = jdbcHosts
-    //    jdbcProvider.providerType = ProviderLiterals.jdbcType
-    //    jdbcProvider.login = "admin"
-    //    jdbcProvider.password = "admin"
-    //    jdbcProvider.driver = jdbcDriver
-    //    providerService.save(jdbcProvider)
-    //
-    //    val restProvider = new Provider
-    //    restProvider.name = restProviderName
-    //    restProvider.hosts = restHosts
-    //    restProvider.providerType = ProviderLiterals.restType
-    //    restProvider.login = ""
-    //    restProvider.password = ""
-    //    providerService.save(restProvider)
+    val esProvider = new Provider(esProviderName, "", esProviderHosts, "", "", ProviderLiterals.elasticsearchType)
+    providerService.save(esProvider)
+
+    providerService.save(zookeeperProvider)
+
+    val jdbcProvider = new JDBCProvider(jdbcProviderName, "", jdbcHosts, "admin", "admin", jdbcDriver)
+    providerService.save(jdbcProvider)
+
+    val restProvider = new Provider(restProviderName, "", restHosts, "", "", ProviderLiterals.restType)
+    providerService.save(restProvider)
   }
 
   def createServices() = {
