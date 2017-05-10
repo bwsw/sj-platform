@@ -39,8 +39,8 @@ class JsonSerializer extends Serializer {
 
   def deserialize[T: Manifest](value: String): T = {
     logger.debug(s"Deserialize a value: '$value' to object.")
-    Try[T] {
-      mapper.readValue(value, typeReference[T])
+    Try {
+      mapper.readValue[T](value, typeReference[T])
     } match {
       case Success(entity) => entity
       case Failure(e: UnrecognizedPropertyException) =>
