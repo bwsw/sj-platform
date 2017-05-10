@@ -8,6 +8,8 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.JdbcLiterals
 import org.slf4j.LoggerFactory
 
+import scala.util.{Failure, Success, Try}
+
 
 // todo: Add multiple connection to databases.
 /**
@@ -85,14 +87,11 @@ trait IJdbcClient {
         logger.debug(s"Verify that the table '${jdbcCCD.table}' exists in a database.")
         jdbcCCD.driverPrefix match {
           case JdbcLiterals.oracleDriverPrefix =>
-            try {
+            Try {
               val statement = connection.prepareStatement(s"SELECT COUNT(*) FROM ${jdbcCCD.table}")
               statement.execute()
               statement.close()
-              true
-            } catch {
-              case _: SQLException => false
-            }
+            }.isSuccess
 
           case _ =>
             var result: Boolean = false
@@ -121,10 +120,9 @@ trait IJdbcClient {
     _connection match {
       case Some(connection) =>
         val stmt = connection.createStatement()
-        val result = try {
-          stmt.executeUpdate(sql)
-        } catch {
-          case e: Exception =>
+        val result = Try(stmt.executeUpdate(sql)) match {
+          case Success(i) => i
+          case Failure(e) =>
             logger.error(s"Sql request execution has failed: ${e.getMessage}.")
             throw new SQLException(e.getMessage)
         }

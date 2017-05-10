@@ -10,6 +10,8 @@ import scala.collection.mutable.ArrayBuffer
 import com.bwsw.sj.common.rest.utils.ValidationUtils._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 
+import scala.util.{Failure, Success, Try}
+
 class JDBCServiceData() extends ServiceData() {
   serviceType = ServiceLiterals.jdbcType
   var provider: String = null
@@ -51,7 +53,7 @@ class JDBCServiceData() extends ServiceData() {
           val providerDAO = ConnectionRepository.getProviderService
           var database_exists: Boolean = false
           val provider = providerDAO.get(this.provider).get.asInstanceOf[JDBCProvider]
-          try {
+          Try {
             val client = JdbcClientBuilder.
               setDriver(provider.driver).
               setDatabase(dbName).
@@ -63,11 +65,12 @@ class JDBCServiceData() extends ServiceData() {
             client.start()
             database_exists = true
             client.close()
-          } catch {
-            case e: Exception =>
-              e.printStackTrace()
-            case e: RuntimeException =>
+          } match {
+            case Success(_) =>
+            case Failure(e: RuntimeException) =>
               errors += createMessage("jdbc.error.cannot.create.client", e.getMessage)
+            case Failure(e) =>
+              e.printStackTrace()
           }
 
           if (!database_exists) {

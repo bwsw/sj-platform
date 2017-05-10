@@ -2,6 +2,8 @@ package com.bwsw.sj.common.dal
 
 import com.mongodb._
 
+import scala.util.{Failure, Success, Try}
+
 object ConnectionConstants {
   require(System.getenv("MONGO_HOSTS") != null,
     "No environment variables: MONGO_HOSTS")
@@ -42,16 +44,18 @@ object ConnectionConstants {
   }
 
   def checkConnection(client:com.mongodb.casbah.MongoClient): Boolean = {
-    try {
+    val result = Try {
       client(databaseName).collectionNames()
-      false
-    } catch {
-      case e: com.mongodb.MongoCommandException => true
-      case e: MongoTimeoutException => throw new MongoClientException(s"Something went wrong: timeout exception caught. " +
+    } match {
+      case Success(_) => false
+      case Failure(_: com.mongodb.MongoCommandException) => true
+      case Failure(_: MongoTimeoutException) => throw new MongoClientException(s"Something went wrong: timeout exception caught. " +
         s"Check connection setting: hosts and credentials.")
-      case e: MongoException => throw new Exception(s"Unexpected exception: ${e.getMessage}, ${e.getClass}")
-    } finally {
-      client.close()
+      case Failure(e: MongoException) => throw new Exception(s"Unexpected exception: ${e.getMessage}, ${e.getClass}")
+      case Failure(e) => throw e
     }
+    client.close()
+
+    result
   }
 }

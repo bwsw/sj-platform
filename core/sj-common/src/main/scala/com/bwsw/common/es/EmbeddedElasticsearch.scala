@@ -11,6 +11,7 @@ import org.elasticsearch.node.internal.InternalSettingsPreparer
 import org.elasticsearch.transport.Netty4Plugin
 
 import scala.collection.JavaConverters._
+import scala.util.Try
 
 class EmbeddedElasticsearch {
   private val clusterName = "elasticsearch"
@@ -31,12 +32,7 @@ class EmbeddedElasticsearch {
 
   def stop(): Unit = {
     node.close()
-
-    try {
-      FileUtils.forceDelete(dataDir)
-    } catch {
-      case e: Exception =>
-    }
+    Try(FileUtils.forceDelete(dataDir))
   }
 }
 

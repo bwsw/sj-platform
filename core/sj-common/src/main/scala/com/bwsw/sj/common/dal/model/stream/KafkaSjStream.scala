@@ -11,6 +11,8 @@ import kafka.common.TopicAlreadyMarkedForDeletionException
 import kafka.utils.ZkUtils
 import org.I0Itec.zkclient.ZkConnection
 
+import scala.util.{Failure, Success, Try}
+
 class KafkaSjStream(override val name: String,
                     override val service: KafkaService,
                     val partitions: Int,
@@ -32,26 +34,30 @@ class KafkaSjStream(override val name: String,
   }
 
   override def create(): Unit = {
-    try {
+    Try {
       val zkUtils = createZkUtils()
       if (!AdminUtils.topicExists(zkUtils, this.name)) {
         AdminUtils.createTopic(zkUtils, this.name, this.partitions, this.replicationFactor, new Properties())
       }
-    } catch {
-      case ex: TopicAlreadyMarkedForDeletionException =>
+    } match {
+      case Success(_) =>
+      case Failure(_: TopicAlreadyMarkedForDeletionException) =>
         throw new Exception(s"Cannot create a kafka topic ${this.name}. Topic is marked for deletion. It means that kafka doesn't support deletion")
+      case Failure(e) => throw e
     }
   }
 
   override def delete(): Unit = {
-    try {
+    Try {
       val zkUtils = createZkUtils()
       if (AdminUtils.topicExists(zkUtils, this.name)) {
         AdminUtils.deleteTopic(zkUtils, this.name)
       }
-    } catch {
-      case ex: TopicAlreadyMarkedForDeletionException =>
+    } match {
+      case Success(_) =>
+      case Failure(_: TopicAlreadyMarkedForDeletionException) =>
         throw new Exception(s"Cannot delete a kafka topic '${this.name}'. Topic is already marked for deletion. It means that kafka doesn't support deletion")
+      case Failure(e) => throw e
     }
   }
 

@@ -10,6 +10,8 @@ import org.eclipse.jetty.client.util.{BasicAuthentication, StringContentProvider
 import org.eclipse.jetty.http.{HttpMethod, HttpVersion}
 import org.slf4j.LoggerFactory
 
+import scala.util.{Failure, Success, Try}
+
 /**
   * Client for RESTful service.
   *
@@ -67,12 +69,12 @@ class RestClient(
         .path(path)
       headers.foreach { header => request.header(header._1, header._2) }
 
-      try {
+      Try {
         val response = requestModification(request).send()
-        val status = response.getStatus
-        status >= 200 && status < 300
-      } catch {
-        case _: Throwable => false
+        response.getStatus
+      } match {
+        case Success(status) => status >= 200 && status < 300
+        case Failure(_) => false
       }
     }
   }

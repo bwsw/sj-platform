@@ -6,37 +6,39 @@ import com.bwsw.common.JsonSerializer
 import org.mongodb.morphia.mapping.{DefaultCreator, MappingException}
 import sun.reflect.ReflectionFactory
 
+import scala.util.{Failure, Success, Try}
+
 class CustomMorphiaObjectFactory extends DefaultCreator {
 
-  override def createInstance[T](clazz: Class[T]): T = {
-    try {
-      val constructor = getNoArgsConstructor(clazz)
+  override def createInstance[T](clazz: Class[T]): T = Try(getNoArgsConstructor(clazz)) match {
+    case Success(constructor) =>
       if (constructor != null) {
         return clazz.cast(constructor.newInstance())
       }
-      try {
+      Try {
         val instance = ReflectionFactory.getReflectionFactory
           .newConstructorForSerialization(clazz, classOf[AnyRef].getDeclaredConstructor())
           .newInstance()
 
         clazz.cast(instance)
-      } catch {
-        case e: Exception => throw new MappingException("Failed to instantiate " + clazz.getName, e);
+      } match {
+        case Success(instance) => instance
+        case Failure(e) => throw new MappingException("Failed to instantiate " + clazz.getName, e);
       }
-    } catch {
-      case e: Exception => throw new RuntimeException(e);
-    }
+    case Failure(e) => throw new RuntimeException(e);
   }
 
+
   private def getNoArgsConstructor(constructorType: Class[_]): Constructor[_] =
-    try {
+    Try {
       val constructor = constructorType.getDeclaredConstructor()
       constructor.setAccessible(true)
 
       constructor
-    } catch {
-      case e: NoSuchMethodException => null
-
+    } match {
+      case Success(constructor) => constructor
+      case Failure(_: NoSuchMethodException) => null
+      case Failure(e) => throw e
     }
 
   /**

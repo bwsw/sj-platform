@@ -7,6 +7,7 @@ import org.apache.curator.utils.PathUtils
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
+import scala.util.{Failure, Success, Try}
 
 object ValidationUtils {
   private val logger = LoggerFactory.getLogger(this.getClass)
@@ -56,17 +57,9 @@ object ValidationUtils {
     name.replace('\\', '/')
   }
 
-  def validatePrefix(prefix: String): Boolean = {
-    try {
-      PathUtils.validatePath(prefix)
-
-      true
-    } catch {
-      case _: java.lang.IllegalArgumentException =>
-        //todo think about using, maybe this is going to be more correct to return a reason to a user
-        false
-    }
-  }
+  //todo think about using, maybe this is going to be more correct to return a reason to a user
+  def validatePrefix(prefix: String): Boolean =
+    Try(PathUtils.validatePath(prefix)).isSuccess
 
   def validateToken(token: String): Boolean = {
     token.length <= 32

@@ -3,6 +3,8 @@ package com.bwsw.sj.common.rest.model.module
 import com.bwsw.common.JsonSerializer
 import org.apache.avro.Schema
 
+import scala.util.Try
+
 /**
   * @author Pavel Tomskikh
   */
@@ -12,13 +14,7 @@ trait AvroSchemaForInstanceMetadata {
   def validateAvroSchema: Boolean = {
     val schemaParser = new Schema.Parser()
     val serializer = new JsonSerializer()
-    inputAvroSchema == Map.empty || {
-      try {
-        schemaParser.parse(serializer.serialize(inputAvroSchema))
-        true
-      } catch {
-        case _: Throwable => false
-      }
-    }
+    inputAvroSchema == Map.empty ||
+      Try(schemaParser.parse(serializer.serialize(inputAvroSchema))).isSuccess
   }
 }

@@ -9,6 +9,7 @@ import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.{JdbcLiterals, ProviderLiterals}
 
 import scala.collection.mutable.ArrayBuffer
+import scala.util.{Failure, Success, Try}
 
 class JDBCProvider(override val name: String,
                    override val description: String,
@@ -31,30 +32,30 @@ class JDBCProvider(override val name: String,
           errors += createMessage("entity.error.attribute.required", "Driver")
         }
         else {
-          try {
-            val driverFileName = ConfigurationSettingsUtils.getJdbcDriverFileName(x)
-            if (!ConnectionRepository.getFileStorage.exists(driverFileName))
-              errors += createMessage("entity.error.file.required", driverFileName)
-          } catch {
-            case _: NoSuchFieldException =>
+          Try(ConfigurationSettingsUtils.getJdbcDriverFileName(x)) match {
+            case Success(driverFileName) =>
+              if (!ConnectionRepository.getFileStorage.exists(driverFileName))
+                errors += createMessage("entity.error.file.required", driverFileName)
+            case Failure(_: NoSuchFieldException) =>
               errors += createMessage("entity.error.config.required", s"${ConfigLiterals.jdbcDriver}.$x")
+            case Failure(e) => throw e
           }
 
-          try {
-            ConfigurationSettingsUtils.getJdbcDriverClass(x)
-          } catch {
-            case _: NoSuchFieldException =>
+          Try(ConfigurationSettingsUtils.getJdbcDriverClass(x)) match {
+            case Success(_) =>
+            case Failure(_: NoSuchFieldException) =>
               errors += createMessage("entity.error.config.required", s"${ConfigLiterals.jdbcDriver}.$x.class")
+            case Failure(e) => throw e
           }
 
           val prefixSettingName = s"${ConfigLiterals.jdbcDriver}.$x.prefix"
-          try {
-            val prefix = ConfigurationSettingsUtils.getJdbcDriverPrefix(x)
-            if (!JdbcLiterals.validPrefixes.contains(prefix))
-              errors += createMessage("entity.error.jdbc.prefix.incorrect", prefix, prefixSettingName)
-          } catch {
-            case _: NoSuchFieldException =>
+          Try(ConfigurationSettingsUtils.getJdbcDriverPrefix(x)) match {
+            case Success(prefix) =>
+              if (!JdbcLiterals.validPrefixes.contains(prefix))
+                errors += createMessage("entity.error.jdbc.prefix.incorrect", prefix, prefixSettingName)
+            case Failure(_: NoSuchFieldException) =>
               errors += createMessage("entity.error.config.required", prefixSettingName)
+            case Failure(e) => throw e
           }
         }
     }
@@ -64,7 +65,7 @@ class JDBCProvider(override val name: String,
 
   override def checkJdbcConnection(address: String): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
-    try {
+    Try {
       val client = JdbcClientBuilder.
         setHosts(hosts).
         setDriver(driver).
@@ -73,10 +74,12 @@ class JDBCProvider(override val name: String,
         build()
 
       client.checkConnectionToDatabase()
-    } catch {
-      case ex: SQLException =>
+    } match {
+      case Success(_) =>
+      case Failure(ex: SQLException) =>
         ex.printStackTrace()
         errors += s"Cannot gain an access to JDBC on '$address'"
+      case Failure(e) => throw e
     }
 
     errors

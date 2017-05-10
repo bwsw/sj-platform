@@ -13,6 +13,7 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
+import scala.util.{Failure, Success, Try}
 
 class JsonSerializer extends Serializer {
 
@@ -38,23 +39,25 @@ class JsonSerializer extends Serializer {
 
   def deserialize[T: Manifest](value: String): T = {
     logger.debug(s"Deserialize a value: '$value' to object.")
-    try {
+    Try[T] {
       mapper.readValue(value, typeReference[T])
-    } catch {
-      case e: UnrecognizedPropertyException =>
+    } match {
+      case Success(entity) => entity
+      case Failure(e: UnrecognizedPropertyException) =>
         throw new JsonUnrecognizedPropertyException(getProblemProperty(e))
-      case e: JsonMappingException =>
+      case Failure(e: JsonMappingException) =>
         if (e.getMessage.startsWith("No content"))
           throw new JsonDeserializationException("Empty JSON")
         else
           throw new JsonIncorrectValueException(getProblemProperty(e))
-      case e: JsonParseException =>
+      case Failure(e: JsonParseException) =>
         val position = e.getProcessor.getTokenLocation.getCharOffset.toInt
         val leftBound = Math.max(0, position - 16)
         val rightBound = Math.min(position + 16, value.length)
         throw new JsonNotParsedException(value.substring(leftBound, rightBound))
-      case _: NullPointerException =>
+      case Failure(_: NullPointerException) =>
         throw new JsonDeserializationException("JSON is null")
+      case Failure(e) => throw e
     }
   }
 

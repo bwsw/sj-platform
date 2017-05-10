@@ -15,6 +15,7 @@ import org.I0Itec.zkclient.ZkConnection
 import org.apache.kafka.common.errors.TopicExistsException
 
 import scala.collection.mutable.ArrayBuffer
+import scala.util.{Failure, Success, Try}
 
 class KafkaStreamData() extends StreamData() {
   streamType = StreamLiterals.kafkaStreamType
@@ -95,7 +96,7 @@ class KafkaStreamData() extends StreamData() {
   }
 
   override def create(): Unit = {
-    try {
+    Try {
       val zkUtils = createZkUtils()
       if (doesStreamHaveForcedCreation(zkUtils)) {
         deleteTopic(zkUtils)
@@ -103,11 +104,13 @@ class KafkaStreamData() extends StreamData() {
       } else {
         if (!doesTopicExist(zkUtils)) createTopic(zkUtils)
       }
-    } catch {
-      case ex: TopicAlreadyMarkedForDeletionException =>
+    } match {
+      case Success(_) =>
+      case Failure(_: TopicAlreadyMarkedForDeletionException) =>
         throw new Exception(s"Cannot delete a kafka topic '${this.name}'. Topic is already marked for deletion. It means that kafka doesn't support deletion")
-      case e: TopicExistsException =>
+      case Failure(_: TopicExistsException) =>
         throw new Exception(s"Cannot create a kafka topic '${this.name}'. Topic is marked for deletion. It means that kafka doesn't support deletion")
+      case Failure(e) => throw e
     }
   }
 
