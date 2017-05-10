@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.core.state
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.common.dal.model.stream.TStreamSjStream
+import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.consumer.ConsumerTransaction
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
@@ -60,7 +60,7 @@ class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGro
   /**
     * Creates SJStream to keep a module state
     */
-  private def createStateStream(): TStreamSjStream = {
+  private def createStateStream(): TStreamStreamDomain = {
     logger.debug(s"Task name: ${manager.taskName} " +
       s"Get stream for keeping state of module.")
 

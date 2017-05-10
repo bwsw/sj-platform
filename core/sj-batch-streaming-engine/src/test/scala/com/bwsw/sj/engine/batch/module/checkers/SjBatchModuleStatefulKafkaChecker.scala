@@ -9,7 +9,7 @@ import com.bwsw.sj.engine.batch.utils.StateHelper
 import scala.collection.JavaConverters._
 
 object SjBatchModuleStatefulKafkaChecker extends App {
-  val streamService = ConnectionRepository.getStreamService
+  val streamService = ConnectionRepository.getStreamRepository
   val objectSerializer = new ObjectSerializer()
 
   val inputConsumer = createInputKafkaConsumer(inputCount, partitions)

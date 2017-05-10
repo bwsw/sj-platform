@@ -5,7 +5,7 @@ import com.bwsw.sj.engine.input.DataFactory._
 
 object DuplicateChecker extends App {
 
-  val streamService = ConnectionRepository.getStreamService
+  val streamService = ConnectionRepository.getStreamRepository
 
   val outputConsumers = (1 to outputCount).map(x => createOutputConsumer(streamService, x.toString))
   outputConsumers.foreach(x => x.start())

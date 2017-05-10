@@ -10,7 +10,7 @@ import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.stream.scaladsl.FileIO
 import akka.util.ByteString
-import com.bwsw.sj.common.dal.model.ConfigurationSetting
+import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.rest._
@@ -64,7 +64,7 @@ trait SjCustomRoute extends Directives with SjCrudValidator {
       )).nonEmpty
   }
 
-  val customApi = {
+  val customRoute = {
     pathPrefix("custom") {
       pathPrefix("jars") {
         pathPrefix(Segment) { (name: String) =>
@@ -163,7 +163,7 @@ trait SjCustomRoute extends Directives with SjCrudValidator {
                           FileUtils.copyFile(file, uploadingFile)
                           storage.put(uploadingFile, metadata.fileName, specification, "custom")
                           val name = specification("name").toString + "-" + specification("version").toString
-                          val customJarConfigElement = new ConfigurationSetting(
+                          val customJarConfigElement = new ConfigurationSettingDomain(
                             createConfigurationSettingName(ConfigLiterals.systemDomain, name),
                             metadata.fileName,
                             ConfigLiterals.systemDomain

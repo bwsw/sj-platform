@@ -3,7 +3,7 @@ package com.bwsw.sj.engine.core.engine.input
 
 import java.util.concurrent.ArrayBlockingQueue
 
-import com.bwsw.sj.common.dal.model.module.RegularInstance
+import com.bwsw.sj.common.dal.model.module.RegularInstanceDomain
 import com.bwsw.sj.common.engine.EnvelopeDataSerializer
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope}
@@ -33,7 +33,7 @@ class CallableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: Common
 
   def chooseOffset(): String = {
     logger.debug(s"Task: ${manager.taskName}. Get a start-from parameter from instance.")
-    val instance = manager.instance.asInstanceOf[RegularInstance]
+    val instance = manager.instance.asInstanceOf[RegularInstanceDomain]
     instance.startFrom match {
       case EngineLiterals.oldestStartMode => "earliest"
       case _ => "latest"

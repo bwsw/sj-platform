@@ -4,7 +4,7 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals._
 
 object ConfigurationSettingsUtils {
-  private val configService = ConnectionRepository.getConfigService
+  private val configService = ConnectionRepository.getConfigRepository
 
   def createConfigurationSettingName(domain: String, name: String): String = {
     domain + "." + name

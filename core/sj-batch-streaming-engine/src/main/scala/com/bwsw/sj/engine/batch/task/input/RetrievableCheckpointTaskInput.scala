@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.batch.task.input
 
-import com.bwsw.sj.common.dal.model.stream.SjStream
+import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.engine.input.CheckpointTaskInput
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
@@ -13,7 +13,7 @@ import org.slf4j.{Logger, LoggerFactory}
  *
  * @author Kseniya Mikhaleva
  */
-abstract class RetrievableCheckpointTaskInput[T <: Envelope](val inputs: scala.collection.mutable.Map[SjStream, Array[Int]]) extends CheckpointTaskInput[T](inputs) {
+abstract class RetrievableCheckpointTaskInput[T <: Envelope](val inputs: scala.collection.mutable.Map[StreamDomain, Array[Int]]) extends CheckpointTaskInput[T](inputs) {
   def get(): Iterable[T]
 }
 

@@ -1,6 +1,6 @@
 package com.bwsw.sj.crud.rest.instance
 
-import com.bwsw.sj.common.dal.model.module.Instance
+import com.bwsw.sj.common.dal.model.module.InstanceDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import org.slf4j.LoggerFactory
@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory
   *
   * @author Kseniya Tomskikh
   */
-class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable with InstanceManager {
+class InstanceDestroyer(instance: InstanceDomain, delay: Long = 1000) extends Runnable with InstanceManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
-  private val instanceDAO = ConnectionRepository.getInstanceService
+  private val instanceRepository = ConnectionRepository.getInstanceRepository
   private val frameworkName = getFrameworkName(instance)
 
   import EngineLiterals._
@@ -67,6 +67,6 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
   }
 
   private def deleteInstance() = {
-    instanceDAO.delete(instance.name)
+    instanceRepository.delete(instance.name)
   }
 }

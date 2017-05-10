@@ -7,7 +7,7 @@ import com.bwsw.sj.engine.batch.module.DataFactory._
 import com.bwsw.sj.engine.batch.utils.StateHelper
 
 object SjBatchModuleStatefulTstreamChecker extends App {
-  val streamService = ConnectionRepository.getStreamService
+  val streamService = ConnectionRepository.getStreamRepository
   val objectSerializer = new ObjectSerializer()
 
   val inputTstreamConsumers = (1 to inputCount).map(x => createInputTstreamConsumer(partitions, x.toString))

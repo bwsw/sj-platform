@@ -37,7 +37,7 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
 
   import EngineLiterals._
 
-  val modulesApi =
+  val modulesRoute =
     pathPrefix("modules") {
       pathEndOrSingleSlash {
         creationOfModule ~
@@ -181,7 +181,7 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
   private val creationOfInstance = (moduleType: String,
                                     moduleName: String,
                                     moduleVersion: String,
-                                    specification: SpecificationData,
+                                    specification: SpecificationApi,
                                     filename: String) => post {
     entity(as[String]) { entity =>
       var response: RestResponse = null
@@ -246,12 +246,12 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
     complete(restResponseToHttpResponse(response))
   }
 
-  private val gettingInstance = (instance: Instance) => get {
+  private val gettingInstance = (instance: InstanceDomain) => get {
     val response = OkRestResponse(InstanceResponseEntity(instance.asProtocolInstance()))
     complete(restResponseToHttpResponse(response))
   }
 
-  private val deletingInstance = (instance: Instance) => delete {
+  private val deletingInstance = (instance: InstanceDomain) => delete {
     val instanceName = instance.name
     var response: RestResponse = UnprocessableEntityRestResponse(MessageResponseEntity(
       createMessage("rest.modules.instances.instance.cannot.delete", instanceName)))
@@ -269,7 +269,7 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
     complete(restResponseToHttpResponse(response))
   }
 
-  private val launchingOfInstance = (instance: Instance) => get {
+  private val launchingOfInstance = (instance: InstanceDomain) => get {
     val instanceName = instance.name
     var response: RestResponse = UnprocessableEntityRestResponse(MessageResponseEntity(
       createMessage("rest.modules.instances.instance.cannot.start", instanceName)))
@@ -284,7 +284,7 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
     complete(restResponseToHttpResponse(response))
   }
 
-  private val stoppingOfInstance = (instance: Instance) => get {
+  private val stoppingOfInstance = (instance: InstanceDomain) => get {
     val instanceName = instance.name
     var response: RestResponse = UnprocessableEntityRestResponse(MessageResponseEntity(
       getMessage("rest.modules.instances.instance.cannot.stop")))
@@ -298,7 +298,7 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
     complete(restResponseToHttpResponse(response))
   }
 
-  private val getTasksInfo = (instance: Instance) => get {
+  private val getTasksInfo = (instance: InstanceDomain) => get {
     var response: RestResponse = UnprocessableEntityRestResponse(MessageResponseEntity(
       getMessage("rest.modules.instances.instance.cannot.get.tasks")))
 
@@ -315,7 +315,7 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
     complete(restResponseToHttpResponse(response))
   }
 
-  private val gettingSpecification = (specification: SpecificationData) => get {
+  private val gettingSpecification = (specification: SpecificationApi) => get {
     val response = OkRestResponse(SpecificationResponseEntity(specification))
     complete(restResponseToHttpResponse(response))
   }
@@ -423,7 +423,7 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
     val fileMetadata = filesMetadata.head
     val fileSpecification = fileMetadata.specification
 
-    fileSpecification.asSpecificationData()
+    fileSpecification.asSpecification()
   }
 
 
@@ -457,15 +457,15 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
     */
   private def deserializeOptions(options: String, moduleType: String) = {
     if (moduleType.equals(batchStreamingType)) {
-      serializer.deserialize[BatchInstanceData](options)
+      serializer.deserialize[BatchInstanceApi](options)
     } else if (moduleType.equals(regularStreamingType)) {
-      serializer.deserialize[RegularInstanceData](options)
+      serializer.deserialize[RegularInstanceApi](options)
     } else if (moduleType.equals(outputStreamingType)) {
-      serializer.deserialize[OutputInstanceData](options)
+      serializer.deserialize[OutputInstanceApi](options)
     } else if (moduleType.equals(inputStreamingType)) {
-      serializer.deserialize[InputInstanceData](options)
+      serializer.deserialize[InputInstanceApi](options)
     } else {
-      serializer.deserialize[InstanceData](options)
+      serializer.deserialize[InstanceApi](options)
     }
   }
 
@@ -476,7 +476,7 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
     * @param moduleType - type name of module
     * @return - list of errors
     */
-  private def validateInstance(options: InstanceData, specification: SpecificationData, moduleType: String) = {
+  private def validateInstance(options: InstanceApi, specification: SpecificationApi, moduleType: String) = {
     val validatorClassName = configService.get(s"system.$moduleType-validator-class") match {
       case Some(configurationSetting) => configurationSetting.value
       case None => throw new ConfigSettingNotFound(
@@ -487,7 +487,7 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
     validator.validate(options, specification)
   }
 
-  private def validateInstance(specification: SpecificationData, filename: String, instanceMetadata: InstanceData): ValidationInfo = {
+  private def validateInstance(specification: SpecificationApi, filename: String, instanceMetadata: InstanceApi): ValidationInfo = {
     val validatorClassName = specification.validateClass
     val file = storage.get(filename, s"tmp/$filename")
     val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
@@ -508,7 +508,7 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
     * @param instance - Starting instance
     * @return
     */
-  private def startInstance(instance: Instance) = {
+  private def startInstance(instance: InstanceDomain) = {
     logger.debug(s"Starting application of instance ${instance.name}.")
     new Thread(new InstanceStarter(instance)).start()
   }
@@ -519,7 +519,7 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
     * @param instance - Instance for stopping
     * @return - Message about successful stopping
     */
-  private def stopInstance(instance: Instance) = {
+  private def stopInstance(instance: InstanceDomain) = {
     logger.debug(s"Stopping application of instance ${instance.name}.")
     new Thread(new InstanceStopper(instance)).start()
   }
@@ -530,7 +530,7 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
     * @param instance - Instance for destroying
     * @return - Message of destroying instance
     */
-  private def destroyInstance(instance: Instance) = {
+  private def destroyInstance(instance: InstanceDomain) = {
     logger.debug(s"Destroying application of instance ${instance.name}.")
     new Thread(new InstanceDestroyer(instance)).start()
   }

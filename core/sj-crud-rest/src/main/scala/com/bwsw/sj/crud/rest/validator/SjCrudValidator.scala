@@ -13,11 +13,9 @@ import akka.stream.Materializer
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.dal.model._
-import com.bwsw.sj.common.dal.model.module.{FileMetadata, Instance}
-import com.bwsw.sj.common.dal.model.service.Service
-import com.bwsw.sj.common.dal.model.stream.SjStream
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.dal.service.GenericMongoRepository
+import com.bwsw.sj.common.dal.model.module.{FileMetadata, InstanceDomain}
+import com.bwsw.sj.common.dal.model.stream.StreamDomain
+import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.engine.StreamingValidator
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
@@ -41,10 +39,9 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator {
   val serializer: Serializer
   val fileMetadataDAO: GenericMongoRepository[FileMetadata]
   val storage: FileStorage
-  val instanceDAO: GenericMongoRepository[Instance]
-  val serviceDAO: GenericMongoRepository[Service]
-  val streamDAO: GenericMongoRepository[SjStream]
-  val configService: GenericMongoRepository[ConfigurationSetting]
+  val instanceDAO: GenericMongoRepository[InstanceDomain]
+  val streamDAO: GenericMongoRepository[StreamDomain]
+  val configService: GenericMongoRepository[ConfigurationSettingDomain]
   val restHost: String
   val restPort: Int
 
@@ -97,7 +94,7 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator {
     */
   def validateSpecification(jarFile: File) = {
     logger.debug(s"Start a validation of module specification.")
-    val configService = ConnectionRepository.getConfigService
+    val configService = ConnectionRepository.getConfigRepository
     val classLoader = new URLClassLoader(Array(jarFile.toURI.toURL), ClassLoader.getSystemClassLoader)
     val specificationJson = getSpecificationFromJar(jarFile)
     validateSerializedSpecification(specificationJson)

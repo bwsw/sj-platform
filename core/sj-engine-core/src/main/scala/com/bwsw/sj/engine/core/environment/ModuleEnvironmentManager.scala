@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.core.environment
 
-import com.bwsw.sj.common.dal.model.stream.SjStream
+import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.utils.SjTimer
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.core.state.StateStorage
@@ -21,7 +21,7 @@ import scala.collection._
 
 class ModuleEnvironmentManager(options: String,
                                producers: Map[String, Producer],
-                               outputs: Array[SjStream],
+                               outputs: Array[StreamDomain],
                                producerPolicyByOutput: mutable.Map[String, (String, ModuleOutput)],
                                moduleTimer: SjTimer,
                                performanceMetrics: PerformanceMetrics,

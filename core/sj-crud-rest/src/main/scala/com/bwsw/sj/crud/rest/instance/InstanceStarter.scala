@@ -4,7 +4,7 @@ import java.net.URI
 
 import com.bwsw.common.LeaderLatch
 import com.bwsw.sj.common.dal.ConnectionConstants
-import com.bwsw.sj.common.dal.model.module.Instance
+import com.bwsw.sj.common.dal.model.module.InstanceDomain
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.utils.FrameworkLiterals._
 import com.bwsw.sj.common.utils._
@@ -20,7 +20,7 @@ import scala.collection.JavaConverters._
   *
   * @author Kseniya Tomskikh
   */
-class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable with InstanceManager {
+class InstanceStarter(instance: InstanceDomain, delay: Long = 1000) extends Runnable with InstanceManager {
 
   import EngineLiterals._
 

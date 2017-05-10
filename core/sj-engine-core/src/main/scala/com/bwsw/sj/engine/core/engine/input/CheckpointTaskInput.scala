@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.core.engine.input
 
-import com.bwsw.sj.common.dal.model.stream.SjStream
+import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 
@@ -11,7 +11,7 @@ import scala.collection.mutable
   *
   * @author Kseniya Mikhaleva
   */
-abstract class CheckpointTaskInput[E <: Envelope](inputs: scala.collection.mutable.Map[SjStream, Array[Int]]){
+abstract class CheckpointTaskInput[E <: Envelope](inputs: scala.collection.mutable.Map[StreamDomain, Array[Int]]){
   private val lastEnvelopesByStreams: mutable.Map[(String, Int), Envelope] = createStorageOfLastEnvelopes()
   val checkpointGroup: CheckpointGroup
 

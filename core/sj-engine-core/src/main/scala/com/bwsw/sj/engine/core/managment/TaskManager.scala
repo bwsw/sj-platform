@@ -4,12 +4,11 @@ import java.io.File
 import java.net.URLClassLoader
 
 import com.bwsw.sj.common.dal.model.module._
-import com.bwsw.sj.common.dal.model.service.TStreamService
-import com.bwsw.sj.common.dal.model.stream.{SjStream, TStreamSjStream}
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
+import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
+import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
-import com.bwsw.sj.common.dal.service.GenericMongoRepository
 import com.bwsw.sj.common.engine.{EnvelopeDataSerializer, ExtendedEnvelopeDataSerializer, StreamingExecutor}
 import com.bwsw.sj.common.rest.model.module.ExecutionPlan
 import com.bwsw.sj.common.utils.EngineLiterals._
@@ -28,7 +27,7 @@ import scala.collection.mutable
 
 abstract class TaskManager() {
   protected val logger = LoggerFactory.getLogger(this.getClass)
-  val streamDAO: GenericMongoRepository[SjStream] = ConnectionRepository.getStreamService
+  val streamRepository: GenericMongoRepository[StreamDomain] = ConnectionRepository.getStreamRepository
 
   require(System.getenv("INSTANCE_NAME") != null &&
     System.getenv("TASK_NAME") != null &&
@@ -41,7 +40,7 @@ abstract class TaskManager() {
   private val agentsPorts = System.getenv("AGENTS_PORTS").split(",").map(_.toInt)
   protected val numberOfAgentsPorts = agentsPorts.length
   val taskName: String = System.getenv("TASK_NAME")
-  val instance: Instance = getInstance()
+  val instance: InstanceDomain = getInstance()
   protected val auxiliarySJTStream = getAuxiliaryTStream()
   protected val auxiliaryTStreamService = getAuxiliaryTStreamService()
   protected val tstreamFactory = new TStreamsFactory()
@@ -50,7 +49,7 @@ abstract class TaskManager() {
   protected var currentPortNumber = 0
   private val storage = ConnectionRepository.getFileStorage
 
-  protected val fileMetadata: FileMetadata = ConnectionRepository.getFileMetadataService.getByParameters(
+  protected val fileMetadata: FileMetadata = ConnectionRepository.getFileMetadataRepository.getByParameters(
     Map("specification.name" -> instance.moduleName,
       "specification.module-type" -> instance.moduleType,
       "specification.version" -> instance.moduleVersion)
@@ -62,11 +61,11 @@ abstract class TaskManager() {
 
   val envelopeDataSerializer: EnvelopeDataSerializer[AnyRef] =
     new ExtendedEnvelopeDataSerializer(moduleClassLoader, instance)
-  val inputs: mutable.Map[SjStream, Array[Int]]
+  val inputs: mutable.Map[StreamDomain, Array[Int]]
 
-  private def getInstance(): Instance = {
-    val maybeInstance = ConnectionRepository.getInstanceService.get(instanceName)
-    var instance: Instance = null
+  private def getInstance(): InstanceDomain = {
+    val maybeInstance = ConnectionRepository.getInstanceRepository.get(instanceName)
+    var instance: InstanceDomain = null
     if (maybeInstance.isDefined) {
       instance = maybeInstance.get
 
@@ -79,16 +78,16 @@ abstract class TaskManager() {
     instance
   }
 
-  private def getAuxiliaryTStream(): SjStream = {
+  private def getAuxiliaryTStream(): StreamDomain = {
     val inputs = instance.getInputsWithoutStreamMode()
     val streams = inputs.union(instance.outputs)
-    val sjStream = streams.flatMap(s => streamDAO.get(s)).filter(s => s.streamType.equals(tstreamType)).head
+    val sjStream = streams.flatMap(s => streamRepository.get(s)).filter(s => s.streamType.equals(tstreamType)).head
 
     sjStream
   }
 
-  private def getAuxiliaryTStreamService(): TStreamService = {
-    auxiliarySJTStream.service.asInstanceOf[TStreamService]
+  private def getAuxiliaryTStreamService(): TStreamServiceDomain = {
+    auxiliarySJTStream.service.asInstanceOf[TStreamServiceDomain]
   }
 
   private def setTStreamFactoryProperties(): Unit = {
@@ -100,11 +99,11 @@ abstract class TaskManager() {
     applyConfigurationSettings()
   }
 
-  private def setAuthOptions(tStreamService: TStreamService): TStreamsFactory = {
+  private def setAuthOptions(tStreamService: TStreamServiceDomain): TStreamsFactory = {
     tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Auth.key, tStreamService.token)
   }
 
-  private def setStorageOptions(tStreamService: TStreamService): TStreamsFactory = {
+  private def setStorageOptions(tStreamService: TStreamServiceDomain): TStreamsFactory = {
     logger.debug(s"Task name: $taskName. Set properties of storage " +
       s"(zookeeper endpoints: ${tStreamService.provider.hosts.mkString(",")}, prefix: ${tStreamService.prefix}) " +
       s"of t-stream factory\n")
@@ -112,7 +111,7 @@ abstract class TaskManager() {
       .setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, tStreamService.prefix)
   }
 
-  private def setCoordinationOptions(tStreamService: TStreamService): TStreamsFactory = {
+  private def setCoordinationOptions(tStreamService: TStreamServiceDomain): TStreamsFactory = {
     tstreamFactory.setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.hosts.mkString(","))
   }
 
@@ -126,7 +125,7 @@ abstract class TaskManager() {
   }
 
   private def applyConfigurationSettings(): Unit = {
-    val configService = ConnectionRepository.getConfigService
+    val configService = ConnectionRepository.getConfigRepository
 
     val tstreamsSettings = configService.getByParameters(Map("domain" -> ConfigLiterals.tstreamsDomain))
     tstreamsSettings.foreach(x => tstreamFactory.setProperty(clearConfigurationSettingName(x.domain, x.name), x.value))
@@ -153,11 +152,11 @@ abstract class TaskManager() {
   }
 
   @throws(classOf[Exception])
-  protected def getInputs(executionPlan: ExecutionPlan): mutable.Map[SjStream, Array[Int]] = {
+  protected def getInputs(executionPlan: ExecutionPlan): mutable.Map[StreamDomain, Array[Int]] = {
     val task = executionPlan.tasks.get(taskName)
     task match {
       case null => throw new NullPointerException("There is no task with that name in the execution plan.")
-      case _ => task.inputs.asScala.map(x => (streamDAO.get(x._1).get, x._2))
+      case _ => task.inputs.asScala.map(x => (streamRepository.get(x._1).get, x._2))
     }
   }
 
@@ -173,11 +172,11 @@ abstract class TaskManager() {
     tstreamFactory.setProperty(ConfigurationOptions.Producer.Transaction.batchSize, 20)
 
     instance.outputs
-      .map(x => (x, streamDAO.get(x).get))
-      .map(x => (x._1, createProducer(x._2.asInstanceOf[TStreamSjStream]))).toMap
+      .map(x => (x, streamRepository.get(x).get))
+      .map(x => (x._1, createProducer(x._2.asInstanceOf[TStreamStreamDomain]))).toMap
   }
 
-  def createProducer(stream: TStreamSjStream): Producer = {
+  def createProducer(stream: TStreamStreamDomain): Producer = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create producer for stream: ${stream.name}.")
 
@@ -212,8 +211,8 @@ abstract class TaskManager() {
     storageClient.shutdown()
   }
 
-  def getSjStream(name: String, description: String, tags: Array[String], partitions: Int): TStreamSjStream = {
-    new TStreamSjStream(name, auxiliaryTStreamService, partitions)
+  def getSjStream(name: String, description: String, tags: Array[String], partitions: Int): TStreamStreamDomain = {
+    new TStreamStreamDomain(name, auxiliaryTStreamService, partitions)
   }
 
   /**
@@ -225,7 +224,7 @@ abstract class TaskManager() {
     * @param callback   Subscriber callback for t-stream consumer
     * @return T-stream subscribing consumer
     */
-  def createSubscribingConsumer(stream: TStreamSjStream,
+  def createSubscribingConsumer(stream: TStreamStreamDomain,
                                 partitions: List[Int],
                                 offset: IOffset,
                                 callback: Callback): Subscriber = {
@@ -252,7 +251,7 @@ abstract class TaskManager() {
     * @param offset     Offset policy that describes where a consumer starts
     * @return T-stream consumer
     */
-  def createConsumer(stream: TStreamSjStream, partitions: List[Int], offset: IOffset, name: Option[String] = None): Consumer = {
+  def createConsumer(stream: TStreamStreamDomain, partitions: List[Int], offset: IOffset, name: Option[String] = None): Consumer = {
     logger.debug(s"Instance name: $instanceName, task name: $taskName. " +
       s"Create consumer for stream: ${stream.name} (partitions from ${partitions.head} to ${partitions.tail.head}).")
     val consumerName = name match {
@@ -268,7 +267,7 @@ abstract class TaskManager() {
       offset)
   }
 
-  protected def setStreamOptions(stream: TStreamSjStream): TStreamsFactory = {
+  protected def setStreamOptions(stream: TStreamStreamDomain): TStreamsFactory = {
     tstreamFactory.setProperty(ConfigurationOptions.Stream.name, stream.name)
     tstreamFactory.setProperty(ConfigurationOptions.Stream.partitionsCount, stream.partitions)
     tstreamFactory.setProperty(ConfigurationOptions.Stream.description, stream.description)

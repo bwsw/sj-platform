@@ -2,23 +2,23 @@ package com.bwsw.sj.crud.rest.instance
 
 import java.util.Calendar
 
-import com.bwsw.sj.common.dal.model.module.Instance
+import com.bwsw.sj.common.dal.model.module.InstanceDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.crud.rest.marathon.MarathonTask
 
 private[instance] trait InstanceManager extends InstanceMarathonManager {
-  private val instanceDAO = ConnectionRepository.getInstanceService
+  private val instanceRepository = ConnectionRepository.getInstanceRepository
 
-  def getFrameworkName(instance: Instance) = s"${instance.name}-${instance.frameworkId}"
+  def getFrameworkName(instance: InstanceDomain) = s"${instance.name}-${instance.frameworkId}"
 
-  protected def updateInstanceStatus(instance: Instance, status: String) = {
+  protected def updateInstanceStatus(instance: InstanceDomain, status: String) = {
     instance.status = status
-    instanceDAO.save(instance)
+    instanceRepository.save(instance)
   }
 
-  protected def updateInstanceRestAddress(instance: Instance, restAddress: String) = {
+  protected def updateInstanceRestAddress(instance: InstanceDomain, restAddress: String) = {
     instance.restAddress = restAddress
-    instanceDAO.save(instance)
+    instanceRepository.save(instance)
   }
 
   protected def getRestAddress(leaderTask: Option[MarathonTask]) = {
@@ -27,7 +27,7 @@ private[instance] trait InstanceManager extends InstanceMarathonManager {
     res
   }
 
-  protected def updateFrameworkStage(instance: Instance, status: String) = {
+  protected def updateFrameworkStage(instance: InstanceDomain, status: String) = {
     if (instance.stage.state.equals(status)) {
       instance.stage.duration = Calendar.getInstance().getTime.getTime - instance.stage.datetime.getTime
     } else {
@@ -36,6 +36,6 @@ private[instance] trait InstanceManager extends InstanceMarathonManager {
       instance.stage.duration = 0
     }
 
-    instanceDAO.save(instance)
+    instanceRepository.save(instance)
   }
 }

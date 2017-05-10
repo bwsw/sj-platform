@@ -5,7 +5,7 @@ import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.rest._
-import com.bwsw.sj.common.rest.model.config.ConfigurationSettingData
+import com.bwsw.sj.common.rest.model.config.ConfigurationSettingApi
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.crud.rest.exceptions.UnknownConfigSettingDomain
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
@@ -15,7 +15,7 @@ import scala.collection.mutable.ArrayBuffer
 
 trait SjConfigurationSettingsRoute extends Directives with SjCrudValidator {
 
-  val configSettingsApi = {
+  val configSettingsRoute = {
     pathPrefix("config") {
       pathPrefix("settings") {
         pathPrefix("domains") {
@@ -78,7 +78,7 @@ trait SjConfigurationSettingsRoute extends Directives with SjCrudValidator {
               val errors = new ArrayBuffer[String]
 
               try {
-                val data = serializer.deserialize[ConfigurationSettingData](getEntityFromContext(ctx))
+                val data = serializer.deserialize[ConfigurationSettingApi](getEntityFromContext(ctx))
                 errors ++= data.validate()
 
                 if (errors.isEmpty) {

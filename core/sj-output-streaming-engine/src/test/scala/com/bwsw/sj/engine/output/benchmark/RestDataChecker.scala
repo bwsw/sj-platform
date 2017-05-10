@@ -2,10 +2,9 @@ package com.bwsw.sj.engine.output.benchmark
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model._
-import com.bwsw.sj.common.dal.model.service.RestService
-import com.bwsw.sj.common.dal.model.stream.{RestSjStream, SjStream, TStreamSjStream}
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.dal.service.GenericMongoRepository
+import com.bwsw.sj.common.dal.model.service.RestServiceDomain
+import com.bwsw.sj.common.dal.model.stream.{RestStreamDomain, StreamDomain, TStreamStreamDomain}
+import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.engine.output.benchmark.DataFactory._
 import com.bwsw.sj.engine.output.benchmark.OutputTestRestServer.Entity
 import org.eclipse.jetty.client.HttpClient
@@ -14,8 +13,8 @@ import scala.collection.mutable.ArrayBuffer
 
 object RestDataChecker extends App {
 
-  val streamService: GenericMongoRepository[SjStream] = ConnectionRepository.getStreamService
-  val tStream: TStreamSjStream = streamService.get(tstreamInputName).get.asInstanceOf[TStreamSjStream]
+  val streamService: GenericMongoRepository[StreamDomain] = ConnectionRepository.getStreamRepository
+  val tStream: TStreamStreamDomain = streamService.get(tstreamInputName).get.asInstanceOf[TStreamStreamDomain]
   val inputConsumer = createConsumer(tStream)
   inputConsumer.start()
 
@@ -35,11 +34,11 @@ object RestDataChecker extends App {
     }
   }
 
-  val restStream: RestSjStream = streamService.get(restStreamName).get.asInstanceOf[RestSjStream]
+  val restStream: RestStreamDomain = streamService.get(restStreamName).get.asInstanceOf[RestStreamDomain]
 
   val jsonSerializer = new JsonSerializer()
 
-  val hosts = restStream.service.asInstanceOf[RestService].provider.hosts
+  val hosts = restStream.service.asInstanceOf[RestServiceDomain].provider.hosts
   val urls = hosts.map("http://" + _)
   var outputElements = Seq[(Int, String)]()
   val client = new HttpClient()

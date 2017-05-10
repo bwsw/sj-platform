@@ -6,7 +6,7 @@ import com.bwsw.sj.engine.regular.module.DataFactory._
 import com.bwsw.sj.engine.regular.utils.StateHelper
 
 object SjRegularModuleStatefulTstreamChecker extends App {
-  val streamService = ConnectionRepository.getStreamService
+  val streamService = ConnectionRepository.getStreamRepository
   val objectSerializer = new ObjectSerializer()
 
   val inputTstreamConsumers = (1 to inputCount).map(x => createInputTstreamConsumer(partitions, x.toString))

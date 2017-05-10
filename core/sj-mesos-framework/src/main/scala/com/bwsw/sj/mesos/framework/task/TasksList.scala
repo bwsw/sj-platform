@@ -103,7 +103,7 @@ object TasksList {
     this.message = message
   }
 
-  def prepare(instance: Instance): Unit = {
+  def prepare(instance: InstanceDomain): Unit = {
     perTaskCores = FrameworkUtil.instance.perTaskCores
     perTaskMem = FrameworkUtil.instance.perTaskRam
     perTaskPortsCount = FrameworkUtil.getCountPorts(FrameworkUtil.instance)
@@ -113,9 +113,9 @@ object TasksList {
         (0 until FrameworkUtil.instance.parallelism).map(tn => FrameworkUtil.instance.name + "-task" + tn)
       case _ =>
         val executionPlan = FrameworkUtil.instance match {
-          case regularInstance: RegularInstance => regularInstance.executionPlan
-          case outputInstance: OutputInstance => outputInstance.executionPlan
-          case batchInstance: BatchInstance => batchInstance.executionPlan
+          case regularInstance: RegularInstanceDomain => regularInstance.executionPlan
+          case outputInstance: OutputInstanceDomain => outputInstance.executionPlan
+          case batchInstance: BatchInstanceDomain => batchInstance.executionPlan
         }
         executionPlan.tasks.asScala.keys
     }
@@ -148,9 +148,9 @@ object TasksList {
     if (FrameworkUtil.instance.moduleType.equals(EngineLiterals.inputStreamingType)) {
       taskPort = availablePorts.head
       availablePorts = availablePorts.tail
-      val inputInstance = FrameworkUtil.instance.asInstanceOf[InputInstance]
+      val inputInstance = FrameworkUtil.instance.asInstanceOf[InputInstanceDomain]
       inputInstance.tasks.put(task, new InputTask(host, taskPort.toInt))
-      ConnectionRepository.getInstanceService.save(FrameworkUtil.instance)
+      ConnectionRepository.getInstanceRepository.save(FrameworkUtil.instance)
     }
 
     agentPorts = availablePorts.mkString(",")

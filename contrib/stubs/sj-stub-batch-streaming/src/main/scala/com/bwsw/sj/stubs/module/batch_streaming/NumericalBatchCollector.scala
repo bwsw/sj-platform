@@ -1,13 +1,13 @@
 package com.bwsw.sj.stubs.module.batch_streaming
 
-import com.bwsw.sj.common.dal.model.module.BatchInstance
+import com.bwsw.sj.common.dal.model.module.BatchInstanceDomain
 import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.sj.engine.core.batch.{BatchCollector, BatchStreamingPerformanceMetrics}
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
 
-class NumericalBatchCollector(instance: BatchInstance,
+class NumericalBatchCollector(instance: BatchInstanceDomain,
                               performanceMetrics: BatchStreamingPerformanceMetrics) extends BatchCollector(instance, performanceMetrics) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)

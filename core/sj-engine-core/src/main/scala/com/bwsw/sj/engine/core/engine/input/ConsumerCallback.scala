@@ -22,7 +22,7 @@ class ConsumerCallback[T <: AnyRef](envelopeDataSerializer: EnvelopeDataSerializ
   override def onTransaction(operator: TransactionOperator, transaction: ConsumerTransaction): Unit = {
     val consumer = operator.asInstanceOf[Consumer]
     logger.debug(s"onTransaction handler was invoked by subscriber: ${consumer.name}.")
-    val stream = ConnectionRepository.getStreamService.get(consumer.stream.name).get
+    val stream = ConnectionRepository.getStreamRepository.get(consumer.stream.name).get
 
     val data = transaction.getAll().map(envelopeDataSerializer.deserialize)
     val envelope = new TStreamEnvelope(data, consumer.name)

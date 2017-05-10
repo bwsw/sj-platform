@@ -10,7 +10,7 @@ import scala.collection.mutable.ArrayBuffer
 
 object ValidationUtils {
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val providerDAO = ConnectionRepository.getProviderService
+  private val providerDAO = ConnectionRepository.getProviderRepository
 
   def validateName(name: String): Boolean = {
     logger.debug(s"Validate a name: '$name'.")

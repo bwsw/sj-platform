@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.core.managment
 
-import com.bwsw.sj.common.dal.model.module.{BatchInstance, RegularInstance}
-import com.bwsw.sj.common.dal.model.stream.SjStream
+import com.bwsw.sj.common.dal.model.module.{BatchInstanceDomain, RegularInstanceDomain}
+import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.common.rest.model.module.ExecutionPlan
 import com.bwsw.sj.common.utils.StreamLiterals
@@ -16,7 +16,7 @@ import scala.collection.mutable
   * @author Kseniya Mikhaleva
   */
 class CommonTaskManager() extends TaskManager {
-  val inputs: mutable.Map[SjStream, Array[Int]] = getInputs(getExecutionPlan)
+  val inputs: mutable.Map[StreamDomain, Array[Int]] = getInputs(getExecutionPlan)
   val outputProducers = createOutputProducers()
 
   require(numberOfAgentsPorts >=
@@ -35,16 +35,16 @@ class CommonTaskManager() extends TaskManager {
     executor
   }
 
-  def getBatchCollector(instance: BatchInstance,
+  def getBatchCollector(instance: BatchInstanceDomain,
                         performanceMetrics: BatchStreamingPerformanceMetrics): BatchCollector = {
     instance match {
-      case _: BatchInstance =>
+      case _: BatchInstanceDomain =>
         logger.info(s"Task: $taskName. Getting a batch collector class from jar of file: " +
           instance.moduleType + "-" + instance.moduleName + "-" + instance.moduleVersion + ".")
         val batchCollectorClassName = fileMetadata.specification.batchCollectorClass
         val batchCollector = moduleClassLoader
           .loadClass(batchCollectorClassName)
-          .getConstructor(classOf[BatchInstance], classOf[BatchStreamingPerformanceMetrics])
+          .getConstructor(classOf[BatchInstanceDomain], classOf[BatchStreamingPerformanceMetrics])
           .newInstance(instance, performanceMetrics)
           .asInstanceOf[BatchCollector]
 
@@ -58,9 +58,9 @@ class CommonTaskManager() extends TaskManager {
   private def getExecutionPlan(): ExecutionPlan = {
     logger.debug("Get an execution plan of instance.")
     instance match {
-      case regularInstance: RegularInstance =>
+      case regularInstance: RegularInstanceDomain =>
         regularInstance.executionPlan
-      case batchInstance: BatchInstance =>
+      case batchInstance: BatchInstanceDomain =>
         batchInstance.executionPlan
       case _ =>
         logger.error("CommonTaskManager can be used only for regular or batch engine.")
