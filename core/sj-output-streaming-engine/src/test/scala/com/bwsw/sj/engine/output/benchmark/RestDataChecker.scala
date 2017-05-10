@@ -1,7 +1,6 @@
 package com.bwsw.sj.engine.output.benchmark
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.dal.model._
 import com.bwsw.sj.common.dal.model.service.RestService
 import com.bwsw.sj.common.dal.model.stream.{RestSjStream, SjStream, TStreamSjStream}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
@@ -11,6 +10,7 @@ import com.bwsw.sj.engine.output.benchmark.OutputTestRestServer.Entity
 import org.eclipse.jetty.client.HttpClient
 
 import scala.collection.mutable.ArrayBuffer
+import scala.util.Try
 
 object RestDataChecker extends App {
 
@@ -45,13 +45,11 @@ object RestDataChecker extends App {
   val client = new HttpClient()
   client.start()
   urls.foreach { url =>
-    try {
+    Try {
       val response = client.GET(url)
       val data = response.getContentAsString
       val list = jsonSerializer.deserialize[Iterable[Entity]](data)
       outputElements = list.map(e => (e.value, e.stringValue)).toSeq
-    } catch {
-      case _: Throwable =>
     }
   }
   client.stop()
