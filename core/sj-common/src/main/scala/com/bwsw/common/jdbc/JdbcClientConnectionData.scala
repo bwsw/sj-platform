@@ -13,8 +13,8 @@ class JdbcClientConnectionData(
                                 val driver: String,
                                 val username: String,
                                 val password: String,
-                                val database: String,
-                                val table: String) {
+                                val database: Option[String],
+                                val table: Option[String]) {
   /**
     * This method return driver class name, related to driver name provided in service
     *
@@ -41,19 +41,22 @@ class JdbcClientConnectionData(
     *
     * @return String: server URL
     */
-  def url: String = driverPrefix match {
-    case `mysqlDriverPrefix` | `postgresqlDriverPrefix` =>
-      s"$driverPrefix://${hosts.mkString(",")}/$database"
-    case `oracleDriverPrefix` =>
-      var url = s"$driverPrefix:@(DESCRIPTION = (ADDRESS_LIST = "
-      hosts.foreach { address =>
-        val uri = new URI("dummy://" + address)
-        url += s"(ADDRESS = (PROTOCOL = TCP) (HOST = ${uri.getHost}) (PORT = ${uri.getPort}))"
-      }
-      url += s")(CONNECT_DATA = (SERVICE_NAME = $database)))"
+  def url: String = database match {
+    case Some(database) => driverPrefix match {
+      case `mysqlDriverPrefix` | `postgresqlDriverPrefix` =>
+        s"$driverPrefix://${hosts.mkString(",")}/$database"
+      case `oracleDriverPrefix` =>
+        var url = s"$driverPrefix:@(DESCRIPTION = (ADDRESS_LIST = "
+        hosts.foreach { address =>
+          val uri = new URI("dummy://" + address)
+          url += s"(ADDRESS = (PROTOCOL = TCP) (HOST = ${uri.getHost}) (PORT = ${uri.getPort}))"
+        }
+        url += s")(CONNECT_DATA = (SERVICE_NAME = $database)))"
 
-      url
-    case _ => throw new IllegalStateException(s"Incorrect JDBC prefix. Valid prefixes: $validPrefixes")
+        url
+      case _ => throw new IllegalStateException(s"Incorrect JDBC prefix. Valid prefixes: $validPrefixes")
+    }
+    case None => throw new IllegalStateException("Database not defined")
   }
 
   def urlWithoutDatabase: String = driverPrefix match {

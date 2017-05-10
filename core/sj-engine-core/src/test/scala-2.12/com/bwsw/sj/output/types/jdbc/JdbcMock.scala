@@ -7,5 +7,5 @@ import com.mockrunner.jdbc.BasicJDBCTestCaseAdapter
 
 class JdbcMock extends BasicJDBCTestCaseAdapter with IJdbcClient {
   override protected var _connection: Option[Connection] = Some(getJDBCMockObjectFactory.getMockConnection)
-  override val jdbcCCD: JdbcClientConnectionData = new JdbcClientConnectionData(Array("localhost"), "mysql", "login", "password", "database", "table")
+  override val jdbcCCD: JdbcClientConnectionData = new JdbcClientConnectionData(Array("localhost"), "mysql", "login", "password", Option("database"), Option("table"))
 }

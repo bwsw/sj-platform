@@ -49,8 +49,8 @@ object JdbcClientBuilder {
       driver.get,
       username.get,
       password.get,
-      database.get,
-      table.get)
+      database,
+      table)
     new JdbcClient(jdbcClientConnectionData)
   }
 
@@ -95,8 +95,8 @@ object JdbcClientBuilder {
     driver = Option(jdbcClientConnectionData.driver)
     username = Option(jdbcClientConnectionData.username)
     password = Option(jdbcClientConnectionData.password)
-    database = Option(jdbcClientConnectionData.database)
-    table = Option(jdbcClientConnectionData.table)
+    database = jdbcClientConnectionData.database
+    table = jdbcClientConnectionData.table
     this
   }
 }
