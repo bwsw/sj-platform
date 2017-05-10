@@ -46,7 +46,9 @@ object ConnectionConstants {
   def checkConnection(client:com.mongodb.casbah.MongoClient): Boolean = {
     val result = Try {
       client(databaseName).collectionNames()
-    } match {
+    }
+    client.close()
+    result match {
       case Success(_) => false
       case Failure(_: com.mongodb.MongoCommandException) => true
       case Failure(_: MongoTimeoutException) => throw new MongoClientException(s"Something went wrong: timeout exception caught. " +
@@ -54,8 +56,5 @@ object ConnectionConstants {
       case Failure(e: MongoException) => throw new Exception(s"Unexpected exception: ${e.getMessage}, ${e.getClass}")
       case Failure(e) => throw e
     }
-    client.close()
-
-    result
   }
 }
