@@ -205,25 +205,29 @@ class Provider(@IdField val name: String,
 
   private def checkZookeeperConnection(address: String): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
-    val zkTimeout = ConnectionRepository.getConfigService.get(ConfigLiterals.zkSessionTimeoutTag).get.value.toInt
-    var client: Option[ZooKeeper] = None
-    try {
-      client = Some(new ZooKeeper(address, zkTimeout, null))
-      val deadline = 1.seconds.fromNow
-      var connected: Boolean = false
-      while (!connected && deadline.hasTimeLeft) {
-        connected = client.get.getState.isConnected
-      }
-      if (!connected) {
-        errors += s"Can gain an access to Zookeeper on '$address'"
-      }
+    ConnectionRepository.getConfigService.get(ConfigLiterals.zkSessionTimeoutTag) match {
+      case Some(config) =>
+        val zkTimeout = config.value.toInt
+        var client: Option[ZooKeeper] = None
+        try {
+          client = Some(new ZooKeeper(address, zkTimeout, null))
+          val deadline = 1.seconds.fromNow
+          var connected: Boolean = false
+          while (!connected && deadline.hasTimeLeft) {
+            connected = client.get.getState.isConnected
+          }
+          if (!connected) {
+            errors += s"Can gain an access to Zookeeper on '$address'"
+          }
 
-    } catch {
-      case ex: Throwable =>
-        errors += s"Wrong host '$address'"
-    }
-    if (client.isDefined) {
-      client.get.close()
+        } catch {
+          case ex: Throwable =>
+            errors += s"Wrong host '$address'"
+        }
+        if (client.isDefined) {
+          client.get.close()
+        }
+      case None => errors += createMessage("entity.error.config.required", ConfigLiterals.zkSessionTimeoutTag)
     }
 
     errors
