@@ -1,7 +1,5 @@
 package com.bwsw.sj.module.input.csv
 
-import java.io.IOException
-
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
 import com.bwsw.sj.common.utils.stream_distributor.{ByHash, SjStreamDistributor}
@@ -16,6 +14,7 @@ import org.apache.avro.SchemaBuilder
 import org.apache.avro.generic.GenericData.Record
 
 import scala.io.Source
+import scala.util.{Failure, Success, Try}
 
 /**
   * Executor for work with csv.
@@ -69,24 +68,22 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
     dataBuffer.getBytes(0, data)
     buffer.readerIndex(interval.finalValue + 1)
     val line = Source.fromBytes(data, csvInputOptions.encoding).mkString
-    try {
-      val values = csvParser.parseLine(line)
+    Try(csvParser.parseLine(line)) match {
+      case Success(values) =>
+        if (values.length == fieldsNumber) {
+          val record = new Record(schema)
+          csvInputOptions.fields.zip(values).foreach { case (field, value) => record.put(field, value) }
+          val key = AvroUtils.concatFields(csvInputOptions.uniqueKey, record)
 
-      if (values.length == fieldsNumber) {
-        val record = new Record(schema)
-        csvInputOptions.fields.zip(values).foreach { case (field, value) => record.put(field, value) }
-        val key = AvroUtils.concatFields(csvInputOptions.uniqueKey, record)
-
-        Some(new InputEnvelope(
-          s"${csvInputOptions.outputStream}$key",
-          Array((csvInputOptions.outputStream, distributor.getNextPartition(record))),
-          true,
-          record))
-      } else {
-        buildFallbackEnvelope(line)
-      }
-    } catch {
-      case _: IOException => buildFallbackEnvelope(line)
+          Some(new InputEnvelope(
+            s"${csvInputOptions.outputStream}$key",
+            Array((csvInputOptions.outputStream, distributor.getNextPartition(record))),
+            true,
+            record))
+        } else {
+          buildFallbackEnvelope(line)
+        }
+      case Failure(_) => buildFallbackEnvelope(line)
     }
   }
 
