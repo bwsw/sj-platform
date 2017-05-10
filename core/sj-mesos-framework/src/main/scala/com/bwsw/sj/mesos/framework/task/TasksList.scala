@@ -12,6 +12,7 @@ import org.apache.mesos.Protos.{TaskID, TaskInfo, _}
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+import scala.util.{Failure, Success, Try}
 
 object TasksList {
   private val logger = Logger.getLogger(this.getClass)
@@ -176,7 +177,7 @@ object TasksList {
       environmentVariables = environmentVariables :+ Environment.Variable.newBuilder.setName(variable._1).setValue(variable._2)
     )
 
-    try {
+    Try {
       val environments = Environment.newBuilder
       environmentVariables.foreach(variable => environments.addVariables(variable))
 
@@ -186,8 +187,10 @@ object TasksList {
         .addUris(CommandInfo.URI.newBuilder.setValue(FrameworkUtil.getModuleUrl(FrameworkUtil.instance)))
         .setValue("java " + jvmOptions + " -jar " + FrameworkUtil.jarName)
         .setEnvironment(environments)
-    } catch {
-      case e: Exception => FrameworkUtil.handleSchedulerException(e, logger)
+    } match {
+      case Success(_) =>
+      case Failure(e: Exception) => FrameworkUtil.handleSchedulerException(e, logger)
+      case Failure(e) => throw e
     }
     logger.info(s"Task: $task => Slave: ${offer.getSlaveId.getValue}")
 
