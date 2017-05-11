@@ -2,7 +2,7 @@ package com.bwsw.sj.crud.rest.instance
 
 import java.util.Calendar
 
-import com.bwsw.sj.common.dal.model.module.InstanceDomain
+import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.crud.rest.marathon.MarathonTask
 

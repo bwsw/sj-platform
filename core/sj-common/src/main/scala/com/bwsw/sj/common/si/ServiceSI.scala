@@ -14,13 +14,13 @@ class ServiceSI extends ServiceInterface[Service, ServiceDomain] {
   private val streamRepository = ConnectionRepository.getStreamRepository
   private val instanceRepository = ConnectionRepository.getInstanceRepository
 
-  override def process(entity: Service): Either[ArrayBuffer[String], Boolean] = {
+  override def create(entity: Service): Either[ArrayBuffer[String], Boolean] = {
     val errors = new ArrayBuffer[String]
 
     errors ++= entity.validate()
 
     if (errors.isEmpty) {
-      entityRepository.save(entity.asService())
+      entityRepository.save(entity.to())
 
       Right(true)
     } else {
@@ -29,11 +29,11 @@ class ServiceSI extends ServiceInterface[Service, ServiceDomain] {
   }
 
   def getAll(): mutable.Buffer[Service] = {
-    entityRepository.getAll.map(x => Service.fromService(x))
+    entityRepository.getAll.map(x => Service.from(x))
   }
 
   def get(name: String): Option[Service] = {
-    entityRepository.get(name).map(Service.fromService)
+    entityRepository.get(name).map(Service.from)
   }
 
   override def delete(name: String): Either[String, Boolean] = {
@@ -69,13 +69,13 @@ class ServiceSI extends ServiceInterface[Service, ServiceDomain] {
     }
   }
 
-  private def getRelatedStreams(serviceName: String) = {
+  private def getRelatedStreams(serviceName: String): mutable.Buffer[String] = {
     streamRepository.getAll.filter(
       s => s.service.name.equals(serviceName)
     ).map(_.name)
   }
 
-  private def getRelatedInstances(serviceName: String) = {
+  private def getRelatedInstances(serviceName: String): mutable.Buffer[String] = {
     instanceRepository.getAll.filter(
       s => s.coordinationService.name.equals(serviceName)
     ).map(_.name)

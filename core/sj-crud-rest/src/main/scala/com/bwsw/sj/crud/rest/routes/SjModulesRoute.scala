@@ -12,6 +12,7 @@ import akka.stream.scaladsl.FileIO
 import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.dal.model.module._
 import com.bwsw.sj.common.config.ConfigLiterals
+import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.engine.{StreamingValidator, ValidationInfo}
 import com.bwsw.sj.common.rest.model.module._
 import com.bwsw.sj.common.rest._

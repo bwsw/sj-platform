@@ -3,7 +3,7 @@ package com.bwsw.sj.engine.batch.task
 import java.util.concurrent.Callable
 
 import com.bwsw.common.LeaderLatch
-import com.bwsw.sj.common.dal.model.module.BatchInstanceDomain
+import com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.state.CommonModuleService

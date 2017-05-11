@@ -14,7 +14,7 @@ class AerospikeService(name: String,
                        serviceType: String)
   extends Service(serviceType, name, description) {
 
-  override def asService(): AerospikeServiceDomain = {
+  override def to(): AerospikeServiceDomain = {
     val providerRepository = ConnectionRepository.getProviderRepository
 
     val modelService =

@@ -1,7 +1,7 @@
 package com.bwsw.sj.common.engine
 
 import com.bwsw.common.AvroSerializer
-import com.bwsw.sj.common.dal.model.module.{AvroSchemaForInstance, InstanceDomain}
+import com.bwsw.sj.common.dal.model.instance.{InputAvroSchema, InstanceDomain}
 import org.apache.avro.generic.GenericRecord
 import org.slf4j.LoggerFactory
 
@@ -15,7 +15,7 @@ class ExtendedEnvelopeDataSerializer(classLoader: ClassLoader, instance: Instanc
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val schema = instance match {
-    case i: AvroSchemaForInstance => i.getInputAvroSchema
+    case i: InputAvroSchema => i.getInputAvroSchema
     case _ => None
   }
 

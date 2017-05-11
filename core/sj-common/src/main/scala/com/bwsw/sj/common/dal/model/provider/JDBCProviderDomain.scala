@@ -13,9 +13,8 @@ class JDBCProviderDomain(override val name: String,
                          override val hosts: Array[String],
                          override val login: String,
                          override val password: String,
-                         val driver: String,
-                         override val providerType: String = ProviderLiterals.jdbcType)
-  extends ProviderDomain(name, description, hosts, login, password, providerType) {
+                         val driver: String)
+  extends ProviderDomain(name, description, hosts, login, password, ProviderLiterals.jdbcType) {
 
   override def checkJdbcConnection(address: String): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
@@ -39,3 +38,4 @@ class JDBCProviderDomain(override val name: String,
     errors
   }
 }
+

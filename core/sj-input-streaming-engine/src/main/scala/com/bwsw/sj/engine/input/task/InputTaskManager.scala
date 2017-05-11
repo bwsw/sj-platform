@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.input.task
 
-import com.bwsw.sj.common.dal.model.module.InputInstanceDomain
+import com.bwsw.sj.common.dal.model.instance.InputInstanceDomain
 import com.bwsw.sj.engine.core.environment.{EnvironmentManager, InputEnvironmentManager}
 import com.bwsw.sj.engine.core.input.InputStreamingExecutor
 import com.bwsw.sj.engine.core.managment.TaskManager

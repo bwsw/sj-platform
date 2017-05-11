@@ -8,8 +8,7 @@ class TStreamServiceDomain(override val name: String,
                            override val description: String,
                            @ReferenceField val provider: ProviderDomain,
                            val prefix: String,
-                           val token: String,
-                           override val serviceType: String = ServiceLiterals.tstreamsType)
-  extends ServiceDomain(name, description, serviceType) {
+                           val token: String)
+  extends ServiceDomain(name, description, ServiceLiterals.tstreamsType) {
 
 }

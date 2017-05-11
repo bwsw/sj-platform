@@ -1,7 +1,7 @@
 package com.bwsw.sj.crud.rest.model.provider
 
 import com.bwsw.sj.common.si.model.provider.{JDBCProvider, Provider}
-import com.bwsw.sj.common.utils.ProviderLiterals
+import com.bwsw.sj.common.utils.{ProviderLiterals, RestLiterals}
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes, JsonTypeInfo}
 
@@ -14,9 +14,9 @@ class ProviderApi(val name: String,
                   val password: String,
                   @JsonProperty("type") val providerType: String,
                   val hosts: Array[String],
-                  val description: String = "No description") {
+                  val description: String = RestLiterals.defaultDescription) {
   @JsonIgnore
-  def asProvider(): Provider = {
+  def to(): Provider = {
     val provider =
       new Provider(
         name = this.name,
@@ -32,7 +32,7 @@ class ProviderApi(val name: String,
 }
 
 object ProviderApi {
-  def fromProvider(provider: Provider): ProviderApi = {
+  def from(provider: Provider): ProviderApi = {
     provider.providerType match {
       case ProviderLiterals.jdbcType =>
         val jdbcProviderMid = provider.asInstanceOf[JDBCProvider]

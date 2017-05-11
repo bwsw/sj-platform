@@ -14,7 +14,7 @@ class ZKService(name: String,
                 serviceType: String)
   extends Service(serviceType, name, description) {
 
-  override def asService(): ZKServiceDomain = {
+  override def to(): ZKServiceDomain = {
     val providerRepository = ConnectionRepository.getProviderRepository
 
     val modelService =

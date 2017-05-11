@@ -9,11 +9,11 @@ import com.bwsw.sj.common.utils.{RestLiterals, ServiceLiterals}
 
 import scala.collection.mutable.ArrayBuffer
 
-abstract class Service(val serviceType: String,
-                       val name: String,
-                       val description: String) {
+class Service(val serviceType: String,
+              val name: String,
+              val description: String) {
 
-  def asService(): ServiceDomain
+  def to(): ServiceDomain = ???
 
   def validate(): ArrayBuffer[String] = validateGeneralFields()
 
@@ -62,10 +62,10 @@ object Service {
 
   import scala.collection.JavaConverters._
 
-  def fromService(service: ServiceDomain): Service = {
-    service.serviceType match {
+  def from(serviceDomain: ServiceDomain): Service = {
+    serviceDomain.serviceType match {
       case ServiceLiterals.aerospikeType =>
-        val aerospikeService = service.asInstanceOf[AerospikeServiceDomain]
+        val aerospikeService = serviceDomain.asInstanceOf[AerospikeServiceDomain]
 
         new AerospikeService(
           name = aerospikeService.name,
@@ -76,7 +76,7 @@ object Service {
         )
 
       case ServiceLiterals.cassandraType =>
-        val cassandraService = service.asInstanceOf[CassandraServiceDomain]
+        val cassandraService = serviceDomain.asInstanceOf[CassandraServiceDomain]
 
         new CassandraService(
           name = cassandraService.name,
@@ -87,7 +87,7 @@ object Service {
         )
 
       case ServiceLiterals.elasticsearchType =>
-        val esService = service.asInstanceOf[ESServiceDomain]
+        val esService = serviceDomain.asInstanceOf[ESServiceDomain]
 
         new ESService(
           name = esService.name,
@@ -98,7 +98,7 @@ object Service {
         )
 
       case ServiceLiterals.jdbcType =>
-        val jdbcService = service.asInstanceOf[JDBCServiceDomain]
+        val jdbcService = serviceDomain.asInstanceOf[JDBCServiceDomain]
 
         new JDBCService(
           name = jdbcService.name,
@@ -109,7 +109,7 @@ object Service {
         )
 
       case ServiceLiterals.kafkaType =>
-        val kafkaService = service.asInstanceOf[KafkaServiceDomain]
+        val kafkaService = serviceDomain.asInstanceOf[KafkaServiceDomain]
 
         new KafkaService(
           name = kafkaService.name,
@@ -121,7 +121,7 @@ object Service {
         )
 
       case ServiceLiterals.restType =>
-        val restService = service.asInstanceOf[RestServiceDomain]
+        val restService = serviceDomain.asInstanceOf[RestServiceDomain]
 
         new RestService(
           name = restService.name,
@@ -134,7 +134,7 @@ object Service {
         )
 
       case ServiceLiterals.tstreamsType =>
-        val tStreamService = service.asInstanceOf[TStreamServiceDomain]
+        val tStreamService = serviceDomain.asInstanceOf[TStreamServiceDomain]
 
         new TStreamService(
           name = tStreamService.name,
@@ -146,7 +146,7 @@ object Service {
         )
 
       case ServiceLiterals.zookeeperType =>
-        val zkService = service.asInstanceOf[ZKServiceDomain]
+        val zkService = serviceDomain.asInstanceOf[ZKServiceDomain]
 
         new ZKService(
           name = zkService.name,

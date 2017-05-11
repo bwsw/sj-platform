@@ -10,7 +10,7 @@ trait ServiceInterface[M, T] {
   protected val serializer = new JsonSerializer()
   protected val entityRepository: GenericMongoRepository[T]
 
-  def process(entity: M): Either[ArrayBuffer[String], Boolean]
+  def create(entity: M): Either[ArrayBuffer[String], Boolean]
 
   def getAll(): mutable.Buffer[M]
 

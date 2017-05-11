@@ -1,4 +1,4 @@
-package com.bwsw.sj.common.dal.model.module
+package com.bwsw.sj.common.dal.model.instance
 
 import org.apache.avro.Schema
 import org.mongodb.morphia.annotations.Property
@@ -6,7 +6,7 @@ import org.mongodb.morphia.annotations.Property
 /**
   * @author Pavel Tomskikh
   */
-trait AvroSchemaForInstance {
+trait InputAvroSchema {
   @Property("input-avro-schema") var inputAvroSchema: Option[String] = None
 
   def getInputAvroSchema: Option[Schema] = {

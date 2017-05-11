@@ -19,9 +19,8 @@ class KafkaStreamDomain(override val name: String,
                         val replicationFactor: Int,
                         override val description: String = RestLiterals.defaultDescription,
                         override val force: Boolean = false,
-                        override val tags: Array[String] = Array(),
-                        override val streamType: String = StreamLiterals.kafkaStreamType)
-  extends StreamDomain(name, description, service, force, tags, streamType) {
+                        override val tags: Array[String] = Array())
+  extends StreamDomain(name, description, service, force, tags, StreamLiterals.kafkaStreamType) {
 
   override def asProtocolStream(): KafkaStreamApi =
     new KafkaStreamApi(

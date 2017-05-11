@@ -3,7 +3,8 @@ package com.bwsw.sj.common.dal.repository
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.sj.common.dal.ConnectionConstants
 import com.bwsw.sj.common.dal.model._
-import com.bwsw.sj.common.dal.model.module.{FileMetadata, InstanceDomain}
+import com.bwsw.sj.common.dal.model.instance.InstanceDomain
+import com.bwsw.sj.common.dal.model.module.FileMetadata
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service.ServiceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain

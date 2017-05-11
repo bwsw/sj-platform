@@ -9,9 +9,8 @@ class JDBCStreamDomain(override val name: String,
                    val primary: String,
                    override val description: String = RestLiterals.defaultDescription,
                    override val force: Boolean = false,
-                   override val tags: Array[String] = Array(),
-                   override val streamType: String = StreamLiterals.jdbcOutputType)
-  extends StreamDomain(name, description, service, force, tags, streamType) {
+                   override val tags: Array[String] = Array())
+  extends StreamDomain(name, description, service, force, tags, StreamLiterals.jdbcOutputType) {
 
   override def asProtocolStream(): JDBCStreamApi =
     new JDBCStreamApi(

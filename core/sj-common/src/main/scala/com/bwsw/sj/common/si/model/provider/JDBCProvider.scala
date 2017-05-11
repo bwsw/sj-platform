@@ -18,7 +18,7 @@ class JDBCProvider(name: String,
                    providerType: String)
   extends Provider(name, login, password, providerType, hosts, description) {
 
-  override def asProvider(): JDBCProviderDomain = {
+  override def to(): JDBCProviderDomain = {
     val provider =
       new JDBCProviderDomain(
         name = this.name,
@@ -26,8 +26,7 @@ class JDBCProvider(name: String,
         hosts = this.hosts,
         login = this.login,
         password = this.password,
-        driver = this.driver,
-        providerType = this.providerType
+        driver = this.driver
       )
 
     provider

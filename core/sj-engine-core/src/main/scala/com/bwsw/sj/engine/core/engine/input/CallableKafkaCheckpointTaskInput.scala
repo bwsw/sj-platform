@@ -3,7 +3,7 @@ package com.bwsw.sj.engine.core.engine.input
 
 import java.util.concurrent.ArrayBlockingQueue
 
-import com.bwsw.sj.common.dal.model.module.RegularInstanceDomain
+import com.bwsw.sj.common.dal.model.instance.RegularInstanceDomain
 import com.bwsw.sj.common.engine.EnvelopeDataSerializer
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope}

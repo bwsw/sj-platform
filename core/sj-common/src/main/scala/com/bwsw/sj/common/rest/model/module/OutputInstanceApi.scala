@@ -1,7 +1,7 @@
 package com.bwsw.sj.common.rest.model.module
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.dal.model.module.OutputInstanceDomain
+import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, OutputInstanceDomain}
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals

@@ -1,6 +1,6 @@
 package com.bwsw.sj.crud.rest.instance
 
-import com.bwsw.sj.common.dal.model.module.{InputInstanceDomain, InstanceDomain}
+import com.bwsw.sj.common.dal.model.instance.{InputInstanceDomain, InstanceDomain}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.crud.rest.marathon.MarathonApplicationById
 import org.slf4j.LoggerFactory

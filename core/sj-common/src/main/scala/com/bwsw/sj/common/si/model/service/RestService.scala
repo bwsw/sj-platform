@@ -21,7 +21,7 @@ class RestService(name: String,
                   serviceType: String)
   extends Service(serviceType, name, description) {
 
-  override def asService(): RestServiceDomain = {
+  override def to(): RestServiceDomain = {
     val providerRepository = ConnectionRepository.getProviderRepository
 
     val modelService =

@@ -14,7 +14,7 @@ class ESService(name: String,
                 serviceType: String)
   extends Service(serviceType, name, description) {
 
-  override def asService(): ESServiceDomain = {
+  override def to(): ESServiceDomain = {
     val providerRepository = ConnectionRepository.getProviderRepository
 
     val modelService =

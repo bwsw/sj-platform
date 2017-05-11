@@ -16,7 +16,7 @@ class KafkaService(name: String,
                    serviceType: String)
   extends Service(serviceType, name, description) {
 
-  override def asService(): KafkaServiceDomain = {
+  override def to(): KafkaServiceDomain = {
     val providerRepository = ConnectionRepository.getProviderRepository
 
     val modelService =

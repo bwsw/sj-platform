@@ -12,9 +12,8 @@ class TStreamStreamDomain(override val name: String,
                           val partitions: Int,
                           override val description: String = RestLiterals.defaultDescription,
                           override val force: Boolean = false,
-                          override val tags: Array[String] = Array(),
-                          override val streamType: String = StreamLiterals.tstreamType)
-  extends StreamDomain(name, description, service, force, tags, streamType) {
+                          override val tags: Array[String] = Array())
+  extends StreamDomain(name, description, service, force, tags, StreamLiterals.tstreamType) {
 
   override def asProtocolStream(): TStreamStreamApi =
     new TStreamStreamApi(
