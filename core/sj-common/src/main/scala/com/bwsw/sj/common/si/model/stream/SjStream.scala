@@ -54,5 +54,18 @@ class SjStream(val streamType: String,
 
 object SjStream {
 
-  def from(streamDomain: StreamDomain): SjStream = ???
+  def from(streamDomain: StreamDomain): SjStream = streamDomain.streamType match {
+    case StreamLiterals.tstreamType =>
+      val tStreamStream = streamDomain.asInstanceOf[TStreamStreamDomain]
+
+      new TStreamStream(
+        tStreamStream.name,
+        tStreamStream.service.name,
+        tStreamStream.partitions,
+        tStreamStream.tags,
+        tStreamStream.force,
+        tStreamStream.streamType,
+        tStreamStream.description
+      )
+  }
 }
