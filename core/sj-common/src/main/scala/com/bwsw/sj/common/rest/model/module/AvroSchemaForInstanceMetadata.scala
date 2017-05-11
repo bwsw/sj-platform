@@ -9,13 +9,15 @@ import scala.util.Try
   * @author Pavel Tomskikh
   */
 trait AvroSchemaForInstanceMetadata {
-  var inputAvroSchema: Option[Map[String, Any]] = None
+  var inputAvroSchema: Map[String, Any] = Map()
 
   def validateAvroSchema: Boolean = {
     val schemaParser = new Schema.Parser()
     val serializer = new JsonSerializer()
-    inputAvroSchema.forall { s =>
-      Try(schemaParser.parse(serializer.serialize(s))).isSuccess
+    Option(inputAvroSchema) match {
+      case Some(s) if s.nonEmpty =>
+        Try(schemaParser.parse(serializer.serialize(s))).isSuccess
+      case _ => true
     }
   }
 }

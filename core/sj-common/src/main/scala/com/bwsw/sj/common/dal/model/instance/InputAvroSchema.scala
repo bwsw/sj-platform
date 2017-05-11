@@ -7,10 +7,13 @@ import org.mongodb.morphia.annotations.Property
   * @author Pavel Tomskikh
   */
 trait InputAvroSchema {
-  @Property("input-avro-schema") var inputAvroSchema: Option[String] = None
+  @Property("input-avro-schema") var inputAvroSchema: String = "{}"
 
   def getInputAvroSchema: Option[Schema] = {
     val schemaParser = new Schema.Parser()
-    inputAvroSchema.map(s => schemaParser.parse(s))
+    Option(inputAvroSchema) match {
+      case Some("{}") | None => None
+      case Some(s) => Option(schemaParser.parse(s))
+    }
   }
 }
