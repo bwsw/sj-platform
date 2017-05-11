@@ -97,7 +97,7 @@ class Provider(val name: String,
     val errors = new ArrayBuffer[String]()
     Try(new URI(s"dummy://${normalizeName(host)}")) match {
       case Success(uri) =>
-        if (Option(uri.getHost).isDefined) {
+        if (Option(uri.getHost).isEmpty) {
           errors += createMessage("entity.error.wrong.host", host)
         }
 
