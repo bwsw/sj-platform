@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.si.model.stream
 
-import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, RestStreamDomain, StreamDomain, TStreamStreamDomain}
+import com.bwsw.sj.common.dal.model.stream._
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils.validateName
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
@@ -82,7 +82,7 @@ object SjStream {
 
     case StreamLiterals.kafkaStreamType =>
       val kafkaStream = streamDomain.asInstanceOf[KafkaStreamDomain]
-      
+
       new KafkaStream(
         kafkaStream.name,
         kafkaStream.service.name,
@@ -92,6 +92,19 @@ object SjStream {
         kafkaStream.force,
         kafkaStream.streamType,
         kafkaStream.description
+      )
+
+    case StreamLiterals.jdbcOutputType =>
+      val jdbcStream = streamDomain.asInstanceOf[JDBCStreamDomain]
+
+      new JDBCStream(
+        jdbcStream.name,
+        jdbcStream.service.name,
+        jdbcStream.primary,
+        jdbcStream.tags,
+        jdbcStream.force,
+        jdbcStream.streamType,
+        jdbcStream.description
       )
   }
 }
