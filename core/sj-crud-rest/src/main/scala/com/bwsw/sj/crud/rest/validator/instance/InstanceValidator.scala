@@ -3,11 +3,10 @@ package com.bwsw.sj.crud.rest.validator.instance
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.dal.model.module._
-import com.bwsw.sj.common.dal.model.service.{Service, ZKService}
-import com.bwsw.sj.common.dal.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.dal.service.GenericMongoRepository
-import com.bwsw.sj.common.rest.model.module.{InstanceData, SpecificationData}
+import com.bwsw.sj.common.dal.model.service.{ServiceDomain, ZKServiceDomain}
+import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, StreamDomain, TStreamStreamDomain}
+import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
+import com.bwsw.sj.common.rest.model.module.{InstanceApi, SpecificationApi}
 import com.bwsw.sj.common.rest.utils.ValidationUtils._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
@@ -25,8 +24,8 @@ import scala.collection.mutable.ArrayBuffer
  */
 abstract class InstanceValidator extends CompletionUtils {
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
-  var serviceDAO: GenericMongoRepository[Service] = ConnectionRepository.getServiceManager
-  var instanceDAO: GenericMongoRepository[Instance] = ConnectionRepository.getInstanceService
+  var serviceRepository: GenericMongoRepository[ServiceDomain] = ConnectionRepository.getServiceRepository
+  var instanceRepository: GenericMongoRepository[InstanceDomain] = ConnectionRepository.getInstanceRepository
   val serializer: Serializer = new JsonSerializer
 
   /**
@@ -35,7 +34,7 @@ abstract class InstanceValidator extends CompletionUtils {
    * @param parameters - input parameters for running module
    * @return - List of errors
    */
-  def validate(parameters: InstanceData, specification: SpecificationData): ArrayBuffer[String]
+  def validate(parameters: InstanceApi, specification: SpecificationApi): ArrayBuffer[String]
 
   /**
    * Validation base instance options
@@ -43,7 +42,7 @@ abstract class InstanceValidator extends CompletionUtils {
    * @param parameters - Instance parameters
    * @return - List of errors
    */
-  protected def validateGeneralOptions(parameters: InstanceData) = {
+  protected def validateGeneralOptions(parameters: InstanceApi) = {
     logger.debug(s"Instance: ${parameters.name}. General options validation.")
     val errors = new ArrayBuffer[String]()
 
@@ -56,7 +55,7 @@ abstract class InstanceValidator extends CompletionUtils {
           errors += createMessage("rest.validator.attribute.required", "Name")
         }
         else {
-          if (instanceDAO.get(x).isDefined) {
+          if (instanceRepository.get(x).isDefined) {
             errors += createMessage("rest.modules.instances.instance.exists", x)
           }
 
@@ -90,9 +89,9 @@ abstract class InstanceValidator extends CompletionUtils {
           errors += createMessage("rest.validator.attribute.required", "coordinationService")
         }
         else {
-          val coordService = serviceDAO.get(x)
+          val coordService = serviceRepository.get(x)
           if (coordService.isDefined) {
-            if (!coordService.get.isInstanceOf[ZKService]) {
+            if (!coordService.get.isInstanceOf[ZKServiceDomain]) {
               errors += createMessage("rest.validator.attribute.not", "coordinationService", "ZKCoord")
             }
           } else {
@@ -108,8 +107,8 @@ abstract class InstanceValidator extends CompletionUtils {
     list.map(x => (x, 1)).groupBy(_._1).map(x => x._2.reduce { (a, b) => (a._1, a._2 + b._2) }).exists(x => x._2 > 1)
   }
 
-  protected def getStreams(streamNames: Array[String]): mutable.Buffer[SjStream] = {
-    val streamsDAO = ConnectionRepository.getStreamService
+  protected def getStreams(streamNames: Array[String]): mutable.Buffer[StreamDomain] = {
+    val streamsDAO = ConnectionRepository.getStreamRepository
     streamsDAO.getAll.filter(s => streamNames.contains(s.name))
   }
 
@@ -119,17 +118,17 @@ abstract class InstanceValidator extends CompletionUtils {
    * @param streams All streams
    * @return List of service-names
    */
-  def getStreamServices(streams: Seq[SjStream]): List[String] = {
+  def getStreamServices(streams: Seq[StreamDomain]): List[String] = {
     streams.map(s => (s.service.name, 1)).groupBy(_._1).keys.toList
   }
 
-  protected def getStreamsPartitions(streams: Seq[SjStream]) = {
+  protected def getStreamsPartitions(streams: Seq[StreamDomain]) = {
     streams.map { stream =>
       stream.streamType match {
         case StreamLiterals.`tstreamType` =>
-          stream.asInstanceOf[TStreamSjStream].partitions
+          stream.asInstanceOf[TStreamStreamDomain].partitions
         case StreamLiterals.`kafkaStreamType` =>
-          stream.asInstanceOf[KafkaSjStream].partitions
+          stream.asInstanceOf[KafkaStreamDomain].partitions
         case _ => 0
       }
     }

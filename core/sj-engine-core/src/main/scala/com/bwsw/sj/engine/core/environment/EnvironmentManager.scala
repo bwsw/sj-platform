@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.core.environment
 
-import com.bwsw.sj.common.dal.model.stream.SjStream
+import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import org.slf4j.LoggerFactory
 
 /**
@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
  * @param outputs Set of output streams of instance parameters
  */
 
-class EnvironmentManager(val options: String, val outputs: Array[SjStream]) {
+class EnvironmentManager(val options: String, val outputs: Array[StreamDomain]) {
 
   protected val logger = LoggerFactory.getLogger(this.getClass)
 

@@ -12,8 +12,8 @@ class CustomMorphiaObjectFactory extends DefaultCreator {
 
   override def createInstance[T](clazz: Class[T]): T = Try(getNoArgsConstructor(clazz)) match {
     case Success(constructor) =>
-      if (constructor != null) {
-        return clazz.cast(constructor.newInstance())
+      if (constructor.isDefined) {
+        return clazz.cast(constructor.get.newInstance())
       }
       Try {
         val instance = ReflectionFactory.getReflectionFactory
@@ -28,16 +28,15 @@ class CustomMorphiaObjectFactory extends DefaultCreator {
     case Failure(e) => throw new RuntimeException(e);
   }
 
-
-  private def getNoArgsConstructor(constructorType: Class[_]): Constructor[_] =
+  private def getNoArgsConstructor(constructorType: Class[_]): Option[Constructor[_]] =
     Try {
       val constructor = constructorType.getDeclaredConstructor()
       constructor.setAccessible(true)
 
       constructor
     } match {
-      case Success(constructor) => constructor
-      case Failure(_: NoSuchMethodException) => null
+      case Success(constructor) => Some(constructor)
+      case Failure(_: NoSuchMethodException) => None
       case Failure(e) => throw e
     }
 

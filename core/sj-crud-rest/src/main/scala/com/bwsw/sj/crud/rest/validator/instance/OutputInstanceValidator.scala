@@ -1,9 +1,9 @@
 package com.bwsw.sj.crud.rest.validator.instance
 
-import com.bwsw.sj.common.dal.model.service.TStreamService
-import com.bwsw.sj.common.dal.model.stream.{SjStream, TStreamSjStream}
+import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
+import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.rest.model.module.{InstanceData, OutputInstanceData, SpecificationData}
+import com.bwsw.sj.common.rest.model.module.{InstanceApi, OutputInstanceApi, SpecificationApi}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
@@ -21,7 +21,7 @@ import scala.util.{Failure, Success, Try}
 class OutputInstanceValidator extends InstanceValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
-  private val streamsDAO = ConnectionRepository.getStreamService
+  private val streamsDAO = ConnectionRepository.getStreamRepository
 
   private def getStream(streamName: String) = {
     streamsDAO.get(streamName)
@@ -34,11 +34,11 @@ class OutputInstanceValidator extends InstanceValidator {
     * @param specification - specification of module
     * @return - List of errors
     */
-  override def validate(parameters: InstanceData, specification: SpecificationData) = {
+  override def validate(parameters: InstanceApi, specification: SpecificationApi) = {
     logger.debug(s"Instance: ${parameters.name}. Start a validation of instance of output-streaming type.")
     val errors = new ArrayBuffer[String]()
     errors ++= super.validateGeneralOptions(parameters)
-    val outputInstanceMetadata = parameters.asInstanceOf[OutputInstanceData]
+    val outputInstanceMetadata = parameters.asInstanceOf[OutputInstanceApi]
 
     Option(outputInstanceMetadata.checkpointMode) match {
       case None =>
@@ -69,13 +69,13 @@ class OutputInstanceValidator extends InstanceValidator {
     errors ++= validateStreamOptions(outputInstanceMetadata, specification)
   }
 
-  private def validateStreamOptions(instance: OutputInstanceData,
-                                    specification: SpecificationData) = {
+  private def validateStreamOptions(instance: OutputInstanceApi,
+                                    specification: SpecificationApi) = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     val errors = new ArrayBuffer[String]()
 
     // 'input' field
-    var inputStream: Option[SjStream] = None
+    var inputStream: Option[StreamDomain] = None
     Option(instance.input) match {
       case None =>
         errors += createMessage("rest.validator.attribute.required", "Input")
@@ -99,9 +99,9 @@ class OutputInstanceValidator extends InstanceValidator {
               if (!inputTypes.contains(stream.streamType)) {
                 errors += createMessage("rest.validator.attribute.must.one_of", "Input stream", inputTypes.mkString("[", ", ", "]"))
               } else {
-                val input = stream.asInstanceOf[TStreamSjStream]
+                val input = stream.asInstanceOf[TStreamStreamDomain]
                 val service = input.service
-                if (!service.isInstanceOf[TStreamService]) {
+                if (!service.isInstanceOf[TStreamServiceDomain]) {
                   errors += createMessage("rest.validator.service.must", "t-streams", "TstrQ")
                 }
 

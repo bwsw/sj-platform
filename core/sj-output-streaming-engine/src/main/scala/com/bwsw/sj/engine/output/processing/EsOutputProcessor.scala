@@ -1,8 +1,8 @@
 package com.bwsw.sj.engine.output.processing
 
 import com.bwsw.common.es.ElasticsearchClient
-import com.bwsw.sj.common.dal.model.service.ESService
-import com.bwsw.sj.common.dal.model.stream.SjStream
+import com.bwsw.sj.common.dal.model.service.ESServiceDomain
+import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.Entity
 import com.bwsw.sj.engine.core.output.types.es.ElasticsearchCommandBuilder
@@ -10,13 +10,13 @@ import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 
 
-class EsOutputProcessor[T <: AnyRef](outputStream: SjStream,
+class EsOutputProcessor[T <: AnyRef](outputStream: StreamDomain,
                                      performanceMetrics: OutputStreamingPerformanceMetrics,
                                      manager: OutputTaskManager,
                                      entity: Entity[_])
   extends OutputProcessor[T](outputStream, performanceMetrics) {
 
-  private val esService = outputStream.service.asInstanceOf[ESService]
+  private val esService = outputStream.service.asInstanceOf[ESServiceDomain]
   private val esClient = openConnection()
   private val esCommandBuilder = new ElasticsearchCommandBuilder(transactionFieldName, entity.asInstanceOf[Entity[String]])
 

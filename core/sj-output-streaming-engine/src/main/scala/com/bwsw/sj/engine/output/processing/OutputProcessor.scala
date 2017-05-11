@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.output.processing
 
-import com.bwsw.sj.common.dal.model.stream.SjStream
+import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.Entity
@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
   * This class used in OutputTaskEngine for sending data to different storage.
   * Create concrete handler and realize remove() and send() methods.
   */
-abstract class OutputProcessor[T <: AnyRef](outputStream: SjStream,
+abstract class OutputProcessor[T <: AnyRef](outputStream: StreamDomain,
                                             performanceMetrics: OutputStreamingPerformanceMetrics) {
   protected val logger = LoggerFactory.getLogger(this.getClass)
   protected def transactionFieldName = "txn"
@@ -64,7 +64,7 @@ abstract class OutputProcessor[T <: AnyRef](outputStream: SjStream,
 }
 
 object OutputProcessor {
-  def apply[T <: AnyRef](outputStream: SjStream, performanceMetrics: OutputStreamingPerformanceMetrics, manager: OutputTaskManager, entity: Entity[_]) = {
+  def apply[T <: AnyRef](outputStream: StreamDomain, performanceMetrics: OutputStreamingPerformanceMetrics, manager: OutputTaskManager, entity: Entity[_]) = {
     outputStream.streamType match {
       case StreamLiterals.esOutputType =>
         new EsOutputProcessor[T](outputStream, performanceMetrics, manager, entity)

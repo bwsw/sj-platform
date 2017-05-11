@@ -1,10 +1,12 @@
 package com.bwsw.sj.crud.rest.controller
 
-import com.bwsw.sj.common.service.Service
+import com.bwsw.common.JsonSerializer
+import com.bwsw.sj.common.si.ServiceInterface
 import com.bwsw.sj.common.rest.RestResponse
 
 trait Controller {
-  protected val service: Service[_]
+  protected val serializer = new JsonSerializer()
+  protected val serviceSI: ServiceInterface[_,_]
 
   def create(serializedEntity: String): RestResponse
 

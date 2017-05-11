@@ -9,12 +9,11 @@ import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.common.jdbc.JdbcClientBuilder
 import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.dal.model._
-import com.bwsw.sj.common.dal.model.module.{OutputInstance, Task}
-import com.bwsw.sj.common.dal.model.provider.{JDBCProvider, Provider}
+import com.bwsw.sj.common.dal.model.module.{OutputInstanceDomain, Task}
+import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain}
 import com.bwsw.sj.common.dal.model.service._
 import com.bwsw.sj.common.dal.model.stream._
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.dal.service.GenericMongoRepository
+import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.rest.model.module.ExecutionPlan
 import com.bwsw.sj.common.utils.{ProviderLiterals, _}
 import com.bwsw.sj.engine.core.testutils.TestStorageServer
@@ -67,12 +66,12 @@ object DataFactory {
   val databaseName: String = "test_database_for_output_engine"
   val restBasePath = "/test/base_path/for/output_engine"
 
-  val streamService = ConnectionRepository.getStreamService
-  val serviceManager = ConnectionRepository.getServiceManager
-  val providerService = ConnectionRepository.getProviderService
-  val instanceService = ConnectionRepository.getInstanceService
+  val streamService = ConnectionRepository.getStreamRepository
+  val serviceManager = ConnectionRepository.getServiceRepository
+  val providerService = ConnectionRepository.getProviderRepository
+  val instanceService = ConnectionRepository.getInstanceRepository
   val fileStorage: MongoFileStorage = ConnectionRepository.getFileStorage
-  val configService: GenericMongoRepository[ConfigurationSetting] = ConnectionRepository.getConfigService
+  val configService: GenericMongoRepository[ConfigurationSettingDomain] = ConnectionRepository.getConfigRepository
 
   val esInstanceName: String = "test-es-instance-for-output-engine"
   val jdbcInstanceName: String = "test-jdbc-instance-for-output-engine"
@@ -85,9 +84,9 @@ object DataFactory {
   private val jdbcHosts = System.getenv("JDBC_HOSTS").split(",").map(host => host.trim)
   private val restHosts = System.getenv("RESTFUL_HOSTS").split(",").map(host => host.trim)
   private val zookeeperHosts = System.getenv("ZOOKEEPER_HOSTS").split(",").map(host => host.trim)
-  private val zookeeperProvider = new Provider(zookeeperProviderName, zookeeperProviderName,
+  private val zookeeperProvider = new ProviderDomain(zookeeperProviderName, zookeeperProviderName,
     zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
-  private val tstrqService = new TStreamService(tstreamServiceName, tstreamServiceName, zookeeperProvider, TestStorageServer.prefix, TestStorageServer.token)
+  private val tstrqService = new TStreamServiceDomain(tstreamServiceName, tstreamServiceName, zookeeperProvider, TestStorageServer.prefix, TestStorageServer.token)
   private val tstreamFactory = new TStreamsFactory()
 
   setTStreamFactoryProperties()
@@ -101,16 +100,16 @@ object DataFactory {
     setBindHostForAgents()
   }
 
-  private def setAuthOptions(tStreamService: TStreamService) = {
+  private def setAuthOptions(tStreamService: TStreamServiceDomain) = {
     tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Auth.key, tStreamService.token)
   }
 
-  private def setStorageOptions(tStreamService: TStreamService) = {
+  private def setStorageOptions(tStreamService: TStreamServiceDomain) = {
     tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, tStreamService.provider.hosts.mkString(","))
       .setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, tStreamService.prefix)
   }
 
-  private def setCoordinationOptions(tStreamService: TStreamService) = {
+  private def setCoordinationOptions(tStreamService: TStreamServiceDomain) = {
     tstreamFactory.setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.hosts.mkString(","))
   }
 
@@ -120,7 +119,7 @@ object DataFactory {
   }
 
   def createData(countTxns: Int, countElements: Int) = {
-    val tStream: TStreamSjStream = new TStreamSjStream(
+    val tStream: TStreamStreamDomain = new TStreamStreamDomain(
       tstreamInputName,
       tstrqService,
       4
@@ -166,8 +165,8 @@ object DataFactory {
     }
   }
 
-  def openEsConnection(outputStream: SjStream) = {
-    val esService: ESService = outputStream.service.asInstanceOf[ESService]
+  def openEsConnection(outputStream: StreamDomain) = {
+    val esService: ESServiceDomain = outputStream.service.asInstanceOf[ESServiceDomain]
     val hosts = esService.provider.hosts.map { host =>
       val parts = host.split(":")
       (parts(0), parts(1).toInt)
@@ -177,8 +176,8 @@ object DataFactory {
     (client, esService)
   }
 
-  def openJdbcConnection(outputStream: SjStream) = {
-    val jdbcService: JDBCService = outputStream.service.asInstanceOf[JDBCService]
+  def openJdbcConnection(outputStream: StreamDomain) = {
+    val jdbcService: JDBCServiceDomain = outputStream.service.asInstanceOf[JDBCServiceDomain]
     val client = JdbcClientBuilder.
       setHosts(jdbcService.provider.hosts).
       setDriver(jdbcDriver).
@@ -193,7 +192,7 @@ object DataFactory {
 
   def deleteIndex() = {
     if (streamService.get(esStreamName).isDefined) {
-      val stream = streamService.get(esStreamName).get.asInstanceOf[ESSjStream]
+      val stream = streamService.get(esStreamName).get.asInstanceOf[ESStreamDomain]
       val (client, _) = openEsConnection(stream)
       client.deleteIndex(esIndex)
 
@@ -203,7 +202,7 @@ object DataFactory {
 
   def clearDatabase() = {
     if (streamService.get(jdbcStreamName).isDefined) {
-      val stream = streamService.get(jdbcStreamName).get.asInstanceOf[JDBCSjStream]
+      val stream = streamService.get(jdbcStreamName).get.asInstanceOf[JDBCStreamDomain]
       val client = openJdbcConnection(stream)
       client.start()
       val sql = s"DROP TABLE $jdbcStreamName"
@@ -212,7 +211,7 @@ object DataFactory {
     }
   }
 
-  def createProducer(stream: TStreamSjStream) = {
+  def createProducer(stream: TStreamStreamDomain) = {
     setProducerBindPort()
     setStreamOptions(stream)
 
@@ -225,7 +224,7 @@ object DataFactory {
     tstreamFactory.setProperty(ConfigurationOptions.Producer.bindPort, 8030)
   }
 
-  def createConsumer(stream: TStreamSjStream): consumer.Consumer = {
+  def createConsumer(stream: TStreamStreamDomain): consumer.Consumer = {
     setStreamOptions(stream)
 
     tstreamFactory.getConsumer(
@@ -234,7 +233,7 @@ object DataFactory {
       Oldest)
   }
 
-  protected def setStreamOptions(stream: TStreamSjStream) = {
+  protected def setStreamOptions(stream: TStreamStreamDomain) = {
     tstreamFactory.setProperty(ConfigurationOptions.Stream.name, stream.name)
     tstreamFactory.setProperty(ConfigurationOptions.Stream.partitionsCount, stream.partitions)
     tstreamFactory.setProperty(ConfigurationOptions.Stream.description, stream.description)
@@ -255,34 +254,34 @@ object DataFactory {
 
 
   def createProviders() = {
-    val esProvider = new Provider(esProviderName, "", esProviderHosts, "", "", ProviderLiterals.elasticsearchType)
+    val esProvider = new ProviderDomain(esProviderName, "", esProviderHosts, "", "", ProviderLiterals.elasticsearchType)
     providerService.save(esProvider)
 
     providerService.save(zookeeperProvider)
 
-    val jdbcProvider = new JDBCProvider(jdbcProviderName, "", jdbcHosts, "admin", "admin", jdbcDriver)
+    val jdbcProvider = new JDBCProviderDomain(jdbcProviderName, "", jdbcHosts, "admin", "admin", jdbcDriver)
     providerService.save(jdbcProvider)
 
-    val restProvider = new Provider(restProviderName, "", restHosts, "", "", ProviderLiterals.restType)
+    val restProvider = new ProviderDomain(restProviderName, "", restHosts, "", "", ProviderLiterals.restType)
     providerService.save(restProvider)
   }
 
   def createServices() = {
-    val esProv: Provider = providerService.get(esProviderName).get
-    val esService: ESService = new ESService(esServiceName, esServiceName, esProv, esIndex)
+    val esProv: ProviderDomain = providerService.get(esProviderName).get
+    val esService: ESServiceDomain = new ESServiceDomain(esServiceName, esServiceName, esProv, esIndex)
     serviceManager.save(esService)
 
     serviceManager.save(tstrqService)
 
-    val zkService = new ZKService(zookeeperServiceName, zookeeperServiceName, zookeeperProvider, testNamespace)
+    val zkService = new ZKServiceDomain(zookeeperServiceName, zookeeperServiceName, zookeeperProvider, testNamespace)
     serviceManager.save(zkService)
 
-    val jdbcProvider = providerService.get(jdbcProviderName).get.asInstanceOf[JDBCProvider]
-    val jdbcService = new JDBCService(jdbcServiceName, jdbcServiceName, jdbcProvider, databaseName)
+    val jdbcProvider = providerService.get(jdbcProviderName).get.asInstanceOf[JDBCProviderDomain]
+    val jdbcService = new JDBCServiceDomain(jdbcServiceName, jdbcServiceName, jdbcProvider, databaseName)
     serviceManager.save(jdbcService)
 
     val restProvider = providerService.get(restProviderName).get
-    val restService = new RestService(restServiceName, restServiceName, restProvider, restBasePath, restHttpVersion, restHeaders)
+    val restService = new RestServiceDomain(restServiceName, restServiceName, restProvider, restBasePath, restHttpVersion, restHeaders)
     serviceManager.save(restService)
   }
 
@@ -297,40 +296,40 @@ object DataFactory {
     .endObject()
 
   def createIndex() = {
-    val stream = streamService.get(esStreamName).get.asInstanceOf[ESSjStream]
+    val stream = streamService.get(esStreamName).get.asInstanceOf[ESStreamDomain]
     val esClient = openEsConnection(stream)
     esClient._1.createIndex(esIndex)
     createIndexMapping(mapping)
   }
 
   def createIndexMapping(mapping: XContentBuilder) = {
-    val stream = streamService.get(esStreamName).get.asInstanceOf[ESSjStream]
+    val stream = streamService.get(esStreamName).get.asInstanceOf[ESStreamDomain]
     val esClient = openEsConnection(stream)
     esClient._1.createMapping(esIndex, esStreamName, mapping)
   }
 
   def createTable() = {
-    val stream = streamService.get(jdbcStreamName).get.asInstanceOf[JDBCSjStream]
+    val stream = streamService.get(jdbcStreamName).get.asInstanceOf[JDBCStreamDomain]
     val client = openJdbcConnection(stream)
     client.start()
     client.execute(create_table)
   }
 
   def createStreams(partitions: Int) = {
-    val esService = serviceManager.get(esServiceName).get.asInstanceOf[ESService]
-    val esStream: ESSjStream = new ESSjStream(esStreamName, esService)
+    val esService = serviceManager.get(esServiceName).get.asInstanceOf[ESServiceDomain]
+    val esStream: ESStreamDomain = new ESStreamDomain(esStreamName, esService)
     streamService.save(esStream)
 
-    val tService: TStreamService = serviceManager.get(tstreamServiceName).get.asInstanceOf[TStreamService]
-    val tStream: TStreamSjStream = new TStreamSjStream(tstreamInputName, tService, partitions)
+    val tService: TStreamServiceDomain = serviceManager.get(tstreamServiceName).get.asInstanceOf[TStreamServiceDomain]
+    val tStream: TStreamStreamDomain = new TStreamStreamDomain(tstreamInputName, tService, partitions)
     streamService.save(tStream)
 
-    val jdbcService: JDBCService = serviceManager.get(jdbcServiceName).get.asInstanceOf[JDBCService]
-    val jdbcStream: JDBCSjStream = new JDBCSjStream(jdbcStreamName, jdbcService, "test")
+    val jdbcService: JDBCServiceDomain = serviceManager.get(jdbcServiceName).get.asInstanceOf[JDBCServiceDomain]
+    val jdbcStream: JDBCStreamDomain = new JDBCStreamDomain(jdbcStreamName, jdbcService, "test")
     streamService.save(jdbcStream)
 
-    val restService = serviceManager.get(restServiceName).get.asInstanceOf[RestService]
-    val restStream = new RestSjStream(restStreamName, restService)
+    val restService = serviceManager.get(restServiceName).get.asInstanceOf[RestServiceDomain]
+    val restStream = new RestStreamDomain(restStreamName, restService)
     streamService.save(restStream)
 
     storageClient.createStream(
@@ -347,9 +346,9 @@ object DataFactory {
     task1.inputs = Map(tstreamInputName -> Array(0, 3)).asJava
     val executionPlan = new ExecutionPlan(Map(instanceName + "-task0" -> task1).asJava)
 
-    val instance = new OutputInstance(instanceName, EngineLiterals.outputStreamingType,
+    val instance = new OutputInstanceDomain(instanceName, EngineLiterals.outputStreamingType,
       moduleName, "1.0", "com.bwsw.output.streaming.engine-1.0",
-      serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKService], checkpointMode
+      serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKServiceDomain], checkpointMode
     )
     instance.status = EngineLiterals.started
     instance.description = "some description of test instance"
@@ -404,7 +403,7 @@ object DataFactory {
         val reader = new BufferedReader(new InputStreamReader(jar.getInputStream(entry), "UTF-8"))
         val result = Try {
           var line = reader.readLine
-          while (line != null) {
+          while (Option(line).isDefined) {
             builder.append(line + "\n")
             line = reader.readLine
           }

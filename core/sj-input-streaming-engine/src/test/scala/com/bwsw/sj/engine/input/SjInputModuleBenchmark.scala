@@ -12,10 +12,10 @@ import com.bwsw.sj.engine.input.SjInputServices._
 import scala.util.{Failure, Success, Try}
 
 object SjInputServices {
-  val streamService = ConnectionRepository.getStreamService
-  val serviceManager = ConnectionRepository.getServiceManager
-  val providerService = ConnectionRepository.getProviderService
-  val instanceService = ConnectionRepository.getInstanceService
+  val streamService = ConnectionRepository.getStreamRepository
+  val serviceManager = ConnectionRepository.getServiceRepository
+  val providerService = ConnectionRepository.getProviderRepository
+  val instanceService = ConnectionRepository.getInstanceRepository
   val fileStorage = ConnectionRepository.getFileStorage
 
   val host = "localhost"
@@ -94,7 +94,7 @@ object SjInputModuleDestroy extends App {
   deleteInstance(SjInputServices.instanceService)
   deleteModule(SjInputServices.fileStorage, SjInputServices.inputModule.getName)
 
-  ConnectionRepository.getConfigService.deleteAll()
+  ConnectionRepository.getConfigRepository.deleteAll()
   ConnectionRepository.close()
 
   println("DONE")

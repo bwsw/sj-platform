@@ -6,11 +6,11 @@ import java.util.jar.JarFile
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.FileStorage
-import com.bwsw.sj.common.dal.model.module.{InputInstance, InputTask, Instance}
-import com.bwsw.sj.common.dal.model.provider.Provider
-import com.bwsw.sj.common.dal.model.service.{Service, TStreamService, ZKService}
-import com.bwsw.sj.common.dal.model.stream.{SjStream, TStreamSjStream}
-import com.bwsw.sj.common.dal.service.GenericMongoRepository
+import com.bwsw.sj.common.dal.model.module.{InputInstanceDomain, InputTask, InstanceDomain}
+import com.bwsw.sj.common.dal.model.provider.ProviderDomain
+import com.bwsw.sj.common.dal.model.service.{ServiceDomain, TStreamServiceDomain, ZKServiceDomain}
+import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
+import com.bwsw.sj.common.dal.repository.GenericMongoRepository
 import com.bwsw.sj.common.utils.{ProviderLiterals, _}
 import com.bwsw.sj.engine.core.testutils.TestStorageServer
 import com.bwsw.tstreams.agents.consumer.Consumer
@@ -32,8 +32,8 @@ object DataFactory {
   tasks.put(s"$instanceName-task0", new InputTask(SjInputServices.host, SjInputServices.port))
   private val partitions = 1
   private val serializer = new JsonSerializer()
-  private val zookeeperProvider = new Provider(zookeeperProviderName, zookeeperProviderName, zookeeperHosts.split(","), "", "", ProviderLiterals.zookeeperType)
-  private val tstrqService = new TStreamService(tstreamServiceName, tstreamServiceName, zookeeperProvider, TestStorageServer.prefix, TestStorageServer.token)
+  private val zookeeperProvider = new ProviderDomain(zookeeperProviderName, zookeeperProviderName, zookeeperHosts.split(","), "", "", ProviderLiterals.zookeeperType)
+  private val tstrqService = new TStreamServiceDomain(tstreamServiceName, tstreamServiceName, zookeeperProvider, TestStorageServer.prefix, TestStorageServer.token)
   private val tstreamFactory = new TStreamsFactory()
   setTStreamFactoryProperties()
   val storageClient = tstreamFactory.getStorageClient()
@@ -46,52 +46,52 @@ object DataFactory {
     setCoordinationOptions(tstrqService)
   }
 
-  private def setAuthOptions(tStreamService: TStreamService) = {
+  private def setAuthOptions(tStreamService: TStreamServiceDomain) = {
     tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Auth.key, tStreamService.token)
   }
 
-  private def setStorageOptions(tStreamService: TStreamService) = {
+  private def setStorageOptions(tStreamService: TStreamServiceDomain) = {
     tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, tStreamService.provider.hosts.mkString(","))
       .setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, tStreamService.prefix)
   }
 
-  private def setCoordinationOptions(tStreamService: TStreamService) = {
+  private def setCoordinationOptions(tStreamService: TStreamServiceDomain) = {
     tstreamFactory.setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.hosts.mkString(","))
   }
 
-  def createProviders(providerService: GenericMongoRepository[Provider]) = {
+  def createProviders(providerService: GenericMongoRepository[ProviderDomain]) = {
     providerService.save(zookeeperProvider)
   }
 
-  def deleteProviders(providerService: GenericMongoRepository[Provider]) = {
+  def deleteProviders(providerService: GenericMongoRepository[ProviderDomain]) = {
     providerService.delete(zookeeperProviderName)
   }
 
-  def createServices(serviceManager: GenericMongoRepository[Service], providerService: GenericMongoRepository[Provider]) = {
-    val zkService = new ZKService(zookeeperServiceName, zookeeperServiceName, zookeeperProvider, testNamespace)
+  def createServices(serviceManager: GenericMongoRepository[ServiceDomain], providerService: GenericMongoRepository[ProviderDomain]) = {
+    val zkService = new ZKServiceDomain(zookeeperServiceName, zookeeperServiceName, zookeeperProvider, testNamespace)
     serviceManager.save(zkService)
 
     serviceManager.save(tstrqService)
   }
 
-  def deleteServices(serviceManager: GenericMongoRepository[Service]) = {
+  def deleteServices(serviceManager: GenericMongoRepository[ServiceDomain]) = {
     serviceManager.delete(zookeeperServiceName)
     serviceManager.delete(tstreamServiceName)
   }
 
-  def createStreams(sjStreamService: GenericMongoRepository[SjStream], serviceManager: GenericMongoRepository[Service], outputCount: Int) = {
+  def createStreams(sjStreamService: GenericMongoRepository[StreamDomain], serviceManager: GenericMongoRepository[ServiceDomain], outputCount: Int) = {
     (1 to outputCount).foreach(x => {
       createOutputTStream(sjStreamService, serviceManager, partitions, x.toString)
       instanceOutputs = instanceOutputs :+ (tstreamOutputNamePrefix + x)
     })
   }
 
-  def deleteStreams(streamService: GenericMongoRepository[SjStream], outputCount: Int) = {
+  def deleteStreams(streamService: GenericMongoRepository[StreamDomain], outputCount: Int) = {
     (1 to outputCount).foreach(x => deleteOutputTStream(streamService, x.toString))
   }
 
-  private def createOutputTStream(sjStreamService: GenericMongoRepository[SjStream], serviceManager: GenericMongoRepository[Service], partitions: Int, suffix: String) = {
-    val s2 = new TStreamSjStream(
+  private def createOutputTStream(sjStreamService: GenericMongoRepository[StreamDomain], serviceManager: GenericMongoRepository[ServiceDomain], partitions: Int, suffix: String) = {
+    val s2 = new TStreamStreamDomain(
       tstreamOutputNamePrefix + suffix,
       tstrqService,
       partitions,
@@ -109,20 +109,20 @@ object DataFactory {
       "description of test output tstream")
   }
 
-  private def deleteOutputTStream(streamService: GenericMongoRepository[SjStream], suffix: String) = {
+  private def deleteOutputTStream(streamService: GenericMongoRepository[StreamDomain], suffix: String) = {
     streamService.delete(tstreamOutputNamePrefix + suffix)
 
     storageClient.deleteStream(tstreamOutputNamePrefix + suffix)
   }
 
-  def createInstance(serviceManager: GenericMongoRepository[Service],
-                     instanceService: GenericMongoRepository[Instance],
+  def createInstance(serviceManager: GenericMongoRepository[ServiceDomain],
+                     instanceService: GenericMongoRepository[InstanceDomain],
                      checkpointInterval: Int
                     ) = {
 
-    val instance = new InputInstance(instanceName, EngineLiterals.inputStreamingType,
+    val instance = new InputInstanceDomain(instanceName, EngineLiterals.inputStreamingType,
       "input-streaming-stub", "1.0", "com.bwsw.input.streaming.engine-1.0",
-      serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKService], EngineLiterals.everyNthMode
+      serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKServiceDomain], EngineLiterals.everyNthMode
     )
     instance.status = EngineLiterals.started
     instance.description = "some description of test instance"
@@ -138,7 +138,7 @@ object DataFactory {
     instanceService.save(instance)
   }
 
-  def deleteInstance(instanceService: GenericMongoRepository[Instance]) = {
+  def deleteInstance(instanceService: GenericMongoRepository[InstanceDomain]) = {
     instanceService.delete(instanceName)
   }
 
@@ -152,7 +152,7 @@ object DataFactory {
         val reader = new BufferedReader(new InputStreamReader(jar.getInputStream(entry), "UTF-8"))
         val result = Try {
           var line = reader.readLine
-          while (line != null) {
+          while (Option(line).isDefined) {
             builder.append(line + "\n")
             line = reader.readLine
           }
@@ -174,12 +174,12 @@ object DataFactory {
     storage.delete(filename)
   }
 
-  def createOutputConsumer(streamService: GenericMongoRepository[SjStream], suffix: String) = {
+  def createOutputConsumer(streamService: GenericMongoRepository[StreamDomain], suffix: String) = {
     createConsumer(tstreamOutputNamePrefix + suffix, streamService)
   }
 
-  private def createConsumer(streamName: String, streamService: GenericMongoRepository[SjStream]): Consumer = {
-    val stream = streamService.get(streamName).get.asInstanceOf[TStreamSjStream]
+  private def createConsumer(streamName: String, streamService: GenericMongoRepository[StreamDomain]): Consumer = {
+    val stream = streamService.get(streamName).get.asInstanceOf[TStreamStreamDomain]
 
     setStreamOptions(stream)
 
@@ -189,7 +189,7 @@ object DataFactory {
       Oldest)
   }
 
-  protected def setStreamOptions(stream: TStreamSjStream) = {
+  protected def setStreamOptions(stream: TStreamStreamDomain) = {
     tstreamFactory.setProperty(ConfigurationOptions.Stream.name, stream.name)
     tstreamFactory.setProperty(ConfigurationOptions.Stream.partitionsCount, stream.partitions)
     tstreamFactory.setProperty(ConfigurationOptions.Stream.description, stream.description)

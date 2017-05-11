@@ -4,8 +4,9 @@ import java.io.{PrintWriter, StringWriter}
 import java.net.URI
 
 import com.bwsw.sj.common.dal.model.module._
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.config.ConfigLiterals
+import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.mesos.framework.task.TasksList
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos.MasterInfo
@@ -16,14 +17,14 @@ import scala.util.Properties
 
 
 object FrameworkUtil {
-  var master: MasterInfo = null
-  var frameworkId: String = null
-  var driver: SchedulerDriver = null
-  var jarName: String = null
-  var instance: Instance = null
-  val configFileService = ConnectionRepository.getConfigService
+  var master: Option[MasterInfo] = None
+  var frameworkId: Option[String] = None
+  var driver: Option[SchedulerDriver] = None
+  var jarName: Option[String] = None
+  var instance: Option[InstanceDomain] = None
+  val configRepository: GenericMongoRepository[ConfigurationSettingDomain] = ConnectionRepository.getConfigRepository
   private val logger = Logger.getLogger(this.getClass)
-  var params = immutable.Map[String, String]()
+  var params: Map[String, String] = immutable.Map[String, String]()
 
   /**
    * Count how much ports must be for current task.
@@ -31,12 +32,12 @@ object FrameworkUtil {
     * @param instance current launched task
    * @return ports count for current task
    */
-  def getCountPorts(instance: Instance): Int = {
+  def getCountPorts(instance: InstanceDomain): Int = {
     instance match {
-      case _: OutputInstance => 2
-      case regularInstance: RegularInstance => regularInstance.inputs.length + regularInstance.outputs.length + 4
-      case _: InputInstance => instance.outputs.length + 2
-      case batchInstance: BatchInstance => batchInstance.inputs.length + batchInstance.outputs.length + 4
+      case _: OutputInstanceDomain => 2
+      case regularInstance: RegularInstanceDomain => regularInstance.inputs.length + regularInstance.outputs.length + 4
+      case _: InputInstanceDomain => instance.outputs.length + 2
+      case batchInstance: BatchInstanceDomain => batchInstance.inputs.length + batchInstance.outputs.length + 4
     }
   }
 
@@ -48,7 +49,7 @@ object FrameworkUtil {
     e.printStackTrace(new PrintWriter(sw))
     TasksList.setMessage(e.getMessage)
     logger.error(s"Framework error: ${sw.toString}")
-    driver.stop()
+    driver.foreach(_.stop())
     System.exit(1)
   }
 
@@ -65,18 +66,18 @@ object FrameworkUtil {
     * @param instance:Instance
    * @return String
    */
-  def getModuleUrl(instance: Instance): String = {
-    jarName = configFileService.get("system." + instance.engine).get.value
-    val restHost = configFileService.get(ConfigLiterals.hostOfCrudRestTag).get.value
-    val restPort = configFileService.get(ConfigLiterals.portOfCrudRestTag).get.value.toInt
-    val restAddress = new URI(s"http://$restHost:$restPort/v1/custom/jars/$jarName").toString
+  def getModuleUrl(instance: InstanceDomain): String = {
+    jarName = configRepository.get("system." + instance.engine).map(_.value)
+    val restHost = configRepository.get(ConfigLiterals.hostOfCrudRestTag).get.value
+    val restPort = configRepository.get(ConfigLiterals.portOfCrudRestTag).get.value.toInt
+    val restAddress = new URI(s"http://$restHost:$restPort/v1/custom/jars/${jarName.get}").toString
     logger.debug(s"Engine downloading URL: $restAddress.")
     restAddress
   }
 
   def isInstanceStarted: Boolean = {
     updateInstance()
-    instance.status == "started"
+    instance.exists(_.status == "started")
   }
 
   def killAllLaunchedTasks(): Unit = {
@@ -105,14 +106,14 @@ object FrameworkUtil {
 
 
   def updateInstance(): Any = {
-    val optionInstance = ConnectionRepository.getInstanceService.get(FrameworkUtil.params("instanceId"))
+    val optionInstance = ConnectionRepository.getInstanceRepository.get(FrameworkUtil.params("instanceId"))
 
     if (optionInstance.isEmpty) {
       logger.error(s"Not found instance")
       TasksList.setMessage("Framework shut down: not found instance.")
-      driver.stop()
+      driver.foreach(_.stop())
     } else {
-      FrameworkUtil.instance = optionInstance.get
+      FrameworkUtil.instance = optionInstance
     }
   }
 }

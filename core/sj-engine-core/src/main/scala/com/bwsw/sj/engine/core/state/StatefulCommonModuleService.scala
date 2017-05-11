@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.core.state
 
-import com.bwsw.sj.common.dal.model.module.{RegularInstance, BatchInstance}
+import com.bwsw.sj.common.dal.model.module.{RegularInstanceDomain, BatchInstanceDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.StateHandlers
 import com.bwsw.sj.engine.core.environment.StatefulModuleEnvironmentManager
@@ -19,7 +19,7 @@ import com.bwsw.tstreams.agents.group.CheckpointGroup
 class StatefulCommonModuleService(manager: CommonTaskManager, checkpointGroup: CheckpointGroup, performanceMetrics: PerformanceMetrics)
   extends CommonModuleService(manager, checkpointGroup, performanceMetrics) {
 
-  private val streamService = ConnectionRepository.getStreamService
+  private val streamService = ConnectionRepository.getStreamRepository
   private var countOfCheckpoints = 1
   private val stateService = new RAMStateService(manager, checkpointGroup)
 
@@ -77,8 +77,8 @@ class StatefulCommonModuleService(manager: CommonTaskManager, checkpointGroup: C
 
   private def getStateFullCheckpoint(): Int = {
     instance match {
-      case regularInstance: RegularInstance =>  regularInstance.stateFullCheckpoint
-      case batchInstance: BatchInstance =>  batchInstance.stateFullCheckpoint
+      case regularInstance: RegularInstanceDomain =>  regularInstance.stateFullCheckpoint
+      case batchInstance: BatchInstanceDomain =>  batchInstance.stateFullCheckpoint
     }
   }
 }

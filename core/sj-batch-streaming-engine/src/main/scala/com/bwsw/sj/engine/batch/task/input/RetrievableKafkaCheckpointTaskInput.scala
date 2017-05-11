@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.batch.task.input
 
-import com.bwsw.sj.common.dal.model.module.BatchInstance
+import com.bwsw.sj.common.dal.model.module.BatchInstanceDomain
 import com.bwsw.sj.common.engine.EnvelopeDataSerializer
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.input.KafkaTaskInput
@@ -27,7 +27,7 @@ class RetrievableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: Com
   private val envelopeDataSerializer = manager.envelopeDataSerializer.asInstanceOf[EnvelopeDataSerializer[T]]
 
   override def chooseOffset(): String = {
-    val instance = manager.instance.asInstanceOf[BatchInstance]
+    val instance = manager.instance.asInstanceOf[BatchInstanceDomain]
     instance.startFrom match {
       case EngineLiterals.oldestStartMode => "earliest"
       case _ => "latest"

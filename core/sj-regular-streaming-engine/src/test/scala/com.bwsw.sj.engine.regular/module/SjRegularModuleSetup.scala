@@ -10,10 +10,10 @@ import DataFactory._
 object SjRegularModuleSetup extends App {
   LogManager.getLogManager.reset()
   TempHelperForConfigSetup.main(Array())
-  val streamService = ConnectionRepository.getStreamService
-  val serviceManager = ConnectionRepository.getServiceManager
-  val providerService = ConnectionRepository.getProviderService
-  val instanceService = ConnectionRepository.getInstanceService
+  val streamService = ConnectionRepository.getStreamRepository
+  val serviceManager = ConnectionRepository.getServiceRepository
+  val providerService = ConnectionRepository.getProviderRepository
+  val instanceService = ConnectionRepository.getInstanceRepository
   val fileStorage = ConnectionRepository.getFileStorage
   val checkpointInterval = 2
   val stateManagement = "ram"

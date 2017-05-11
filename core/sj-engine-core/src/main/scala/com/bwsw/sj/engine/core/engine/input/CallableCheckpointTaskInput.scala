@@ -2,14 +2,14 @@ package com.bwsw.sj.engine.core.engine.input
 
 import java.util.concurrent.{ArrayBlockingQueue, Callable}
 
-import com.bwsw.sj.common.dal.model.stream.SjStream
+import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
-abstract class CallableCheckpointTaskInput[T <: Envelope](inputs: scala.collection.mutable.Map[SjStream, Array[Int]]) extends CheckpointTaskInput[T](inputs) with Callable[Unit] {
+abstract class CallableCheckpointTaskInput[T <: Envelope](inputs: scala.collection.mutable.Map[StreamDomain, Array[Int]]) extends CheckpointTaskInput[T](inputs) with Callable[Unit] {
    def close()
 }
 

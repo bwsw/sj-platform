@@ -9,10 +9,10 @@ import com.bwsw.sj.engine.batch.module.DataFactory._
 
 object SjBatchModuleDestroy extends App {
   LogManager.getLogManager.reset()
-  val streamService = ConnectionRepository.getStreamService
-  val serviceManager = ConnectionRepository.getServiceManager
-  val providerService = ConnectionRepository.getProviderService
-  val instanceService = ConnectionRepository.getInstanceService
+  val streamService = ConnectionRepository.getStreamRepository
+  val serviceManager = ConnectionRepository.getServiceRepository
+  val providerService = ConnectionRepository.getProviderRepository
+  val instanceService = ConnectionRepository.getInstanceRepository
   val fileStorage = ConnectionRepository.getFileStorage
   val _type = commonMode
 

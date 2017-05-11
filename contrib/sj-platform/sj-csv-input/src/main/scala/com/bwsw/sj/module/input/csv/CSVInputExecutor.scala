@@ -1,7 +1,7 @@
 package com.bwsw.sj.module.input.csv
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.dal.model.stream.{KafkaSjStream, SjStream, TStreamSjStream}
+import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.utils.stream_distributor.{ByHash, SjStreamDistributor}
 import com.bwsw.sj.common.utils.{AvroUtils, StreamLiterals}
 import com.bwsw.sj.engine.core.entities.InputEnvelope
@@ -77,7 +77,7 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
 
           Some(new InputEnvelope(
             s"${csvInputOptions.outputStream}$key",
-            Array((csvInputOptions.outputStream, distributor.getNextPartition(record))),
+            Array((csvInputOptions.outputStream, distributor.getNextPartition(Some(record)))),
             true,
             record))
         } else {
@@ -97,10 +97,10 @@ class CSVInputExecutor(manager: InputEnvironmentManager) extends InputStreamingE
       record))
   }
 
-  private def getPartitionCount(sjStream: SjStream) = {
+  private def getPartitionCount(sjStream: StreamDomain) = {
     sjStream match {
-      case s: TStreamSjStream => s.partitions
-      case s: KafkaSjStream => s.partitions
+      case s: TStreamStreamDomain => s.partitions
+      case s: KafkaStreamDomain => s.partitions
       case _ => throw new IllegalArgumentException(s"stream type must be ${StreamLiterals.tstreamType} or " +
         s"${StreamLiterals.kafkaStreamType}")
     }

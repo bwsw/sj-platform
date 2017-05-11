@@ -16,7 +16,7 @@ import com.bwsw.tstreams.agents.group.CheckpointGroup
   */
 class StatelessCommonModuleService(manager: CommonTaskManager, checkpointGroup: CheckpointGroup, performanceMetrics: PerformanceMetrics)
   extends CommonModuleService(manager, checkpointGroup, performanceMetrics) {
-  private val streamService = ConnectionRepository.getStreamService
+  private val streamService = ConnectionRepository.getStreamRepository
 
   val environmentManager: ModuleEnvironmentManager = new ModuleEnvironmentManager(
     instance.options,
