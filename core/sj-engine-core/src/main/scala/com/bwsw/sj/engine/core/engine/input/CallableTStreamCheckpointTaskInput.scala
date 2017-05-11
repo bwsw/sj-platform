@@ -4,7 +4,6 @@ import java.util.Date
 import java.util.concurrent.ArrayBlockingQueue
 
 import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, OutputInstanceDomain, RegularInstanceDomain}
-import com.bwsw.sj.common.dal.model.module.{BatchInstanceDomain, OutputInstanceDomain, RegularInstanceDomain}
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
 import com.bwsw.sj.common.engine.EnvelopeDataSerializer
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}

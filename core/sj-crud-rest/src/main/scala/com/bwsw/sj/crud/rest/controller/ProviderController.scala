@@ -20,9 +20,9 @@ class ProviderController extends Controller {
     val triedProviderData = Try(serializer.deserialize[ProviderApi](serializedEntity))
     triedProviderData match {
       case Success(providerData) =>
-        val isCreated = serviceInterface.create(providerData.to())
+        val created = serviceInterface.create(providerData.to())
 
-        response = isCreated match {
+        response = created match {
           case Right(_) =>
             CreatedRestResponse(MessageResponseEntity(createMessage("rest.providers.provider.created", providerData.name)))
           case Left(errors) => BadRequestRestResponse(MessageResponseEntity(

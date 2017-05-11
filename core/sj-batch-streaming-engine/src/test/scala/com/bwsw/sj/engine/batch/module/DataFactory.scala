@@ -6,7 +6,6 @@ import java.util.jar.JarFile
 
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.common.dal.model.module.{BatchInstanceDomain, InstanceDomain}
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service.{KafkaServiceDomain, ServiceDomain, TStreamServiceDomain, ZKServiceDomain}
 import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, StreamDomain, TStreamStreamDomain}

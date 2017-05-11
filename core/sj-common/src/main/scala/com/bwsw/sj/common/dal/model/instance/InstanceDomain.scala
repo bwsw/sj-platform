@@ -3,7 +3,6 @@ package com.bwsw.sj.common.dal.model.instance
 import java.util
 
 import com.bwsw.common.JsonSerializer
-import FrameworkStage
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.{EmbeddedField, IdField, PropertyField}
 import com.bwsw.sj.common.rest.model.module.InstanceApi

@@ -2,7 +2,6 @@ package com.bwsw.sj.common.engine
 
 import com.bwsw.common.AvroSerializer
 import com.bwsw.sj.common.dal.model.instance.{InputAvroSchema, InstanceDomain}
-import com.bwsw.sj.common.dal.model.module.InstanceDomain
 import org.apache.avro.generic.GenericRecord
 import org.slf4j.LoggerFactory
 

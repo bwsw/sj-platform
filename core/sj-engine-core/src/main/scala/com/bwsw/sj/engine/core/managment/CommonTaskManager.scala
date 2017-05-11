@@ -1,7 +1,6 @@
 package com.bwsw.sj.engine.core.managment
 
 import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, ExecutionPlan, RegularInstanceDomain}
-import com.bwsw.sj.common.dal.model.module.{BatchInstanceDomain, RegularInstanceDomain}
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.common.utils.StreamLiterals

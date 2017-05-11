@@ -20,9 +20,9 @@ class ServiceController extends Controller {
     val triedServiceData = Try(serializer.deserialize[ServiceApi](serializedEntity))
     triedServiceData match {
       case Success(serviceData) =>
-        val isCreated = serviceInterface.create(serviceData.to())
+        val created = serviceInterface.create(serviceData.to())
 
-        response = isCreated match {
+        response = created match {
           case Right(_) =>
             CreatedRestResponse(MessageResponseEntity(createMessage("rest.services.service.created", serviceData.name)))
           case Left(errors) => BadRequestRestResponse(MessageResponseEntity(

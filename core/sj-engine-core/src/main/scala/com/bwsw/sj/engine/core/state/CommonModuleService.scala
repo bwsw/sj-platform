@@ -1,7 +1,6 @@
 package com.bwsw.sj.engine.core.state
 
 import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, RegularInstanceDomain}
-import com.bwsw.sj.common.dal.model.module.RegularInstanceDomain
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.common.utils.{EngineLiterals, SjTimer}
 import com.bwsw.sj.engine.core.environment.{ModuleEnvironmentManager, ModuleOutput}
