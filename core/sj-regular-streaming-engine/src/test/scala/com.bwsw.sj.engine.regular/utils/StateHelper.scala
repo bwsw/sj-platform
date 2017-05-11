@@ -46,12 +46,9 @@ object StateHelper {
   }
 
   def fillFullState(initialState: mutable.Map[String, Any], transaction: ConsumerTransaction, objectSerializer: ObjectSerializer) = {
-    var value: Object = null
-    var variable: (String, Any) = null
-
     while (transaction.hasNext()) {
-      value = objectSerializer.deserialize(transaction.next())
-      variable = value.asInstanceOf[(String, Any)]
+      val value = objectSerializer.deserialize(transaction.next())
+      val variable = value.asInstanceOf[(String, Any)]
       initialState(variable._1) = variable._2
     }
   }

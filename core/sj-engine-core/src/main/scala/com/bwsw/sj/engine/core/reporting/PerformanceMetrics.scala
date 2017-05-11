@@ -10,7 +10,7 @@ import java.util.concurrent.locks.ReentrantLock
 import java.util.concurrent.{Callable, TimeUnit}
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.common.dal.model.stream.TStreamSjStream
+import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer}
@@ -44,7 +44,7 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
    *
    * @return SjStream used for keeping the reports of module performance
    */
-  private def getReportStream(): TStreamSjStream = {
+  private def getReportStream(): TStreamStreamDomain = {
     logger.debug(s"Task name: $taskName. " +
       s"Get stream for performance metrics.")
     val tags = Array("report", "performance")

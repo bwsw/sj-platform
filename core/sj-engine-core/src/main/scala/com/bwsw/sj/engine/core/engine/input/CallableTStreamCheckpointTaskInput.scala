@@ -3,8 +3,8 @@ package com.bwsw.sj.engine.core.engine.input
 import java.util.Date
 import java.util.concurrent.ArrayBlockingQueue
 
-import com.bwsw.sj.common.dal.model.module.{BatchInstance, OutputInstance, RegularInstance}
-import com.bwsw.sj.common.dal.model.stream.TStreamSjStream
+import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, OutputInstanceDomain, RegularInstanceDomain}
+import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
 import com.bwsw.sj.common.engine.EnvelopeDataSerializer
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
@@ -43,7 +43,7 @@ class CallableTStreamCheckpointTaskInput[T <: AnyRef](manager: TaskManager,
     val callback = new ConsumerCallback[T](manager.envelopeDataSerializer.asInstanceOf[EnvelopeDataSerializer[T]], blockingQueue)
 
     val consumers = inputs.filter(x => x._1.streamType == StreamLiterals.tstreamType)
-      .map(x => (x._1.asInstanceOf[TStreamSjStream], x._2.toList))
+      .map(x => (x._1.asInstanceOf[TStreamStreamDomain], x._2.toList))
       .map(x => {
         val consumer = manager.createSubscribingConsumer(x._1, x._2, offset, callback)
         val clone = manager.createConsumer(x._1, x._2, offset, Some(consumer.name))
@@ -60,9 +60,9 @@ class CallableTStreamCheckpointTaskInput[T <: AnyRef](manager: TaskManager,
     logger.debug(s"Task: ${manager.taskName}. Get an offset parameter from instance.")
     val instance = manager.instance
     val offset = instance match {
-      case instance: RegularInstance => instance.startFrom
-      case instance: BatchInstance => instance.startFrom
-      case instance: OutputInstance => instance.startFrom
+      case instance: RegularInstanceDomain => instance.startFrom
+      case instance: BatchInstanceDomain => instance.startFrom
+      case instance: OutputInstanceDomain => instance.startFrom
       case badInstance =>
         logger.error(s"Task: ${manager.taskName}. Instance type isn't supported.")
         throw new TypeNotPresentException(badInstance.getClass.getName,

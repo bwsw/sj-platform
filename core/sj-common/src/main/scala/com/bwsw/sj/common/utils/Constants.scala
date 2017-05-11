@@ -155,6 +155,8 @@ object RestLiterals {
     HttpVersion.HTTP_1_1 -> http_1_1,
     HttpVersion.HTTP_2 -> http_2
   )
+
+  final val defaultDescription = "No description"
 }
 
 object JdbcLiterals {

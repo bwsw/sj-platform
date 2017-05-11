@@ -8,6 +8,8 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.JdbcLiterals
 import org.slf4j.LoggerFactory
 
+import scala.util.{Failure, Success, Try}
+
 
 // todo: Add multiple connection to databases.
 /**
@@ -82,27 +84,29 @@ trait IJdbcClient {
   def tableExists(): Boolean = {
     _connection match {
       case Some(connection) =>
-        logger.debug(s"Verify that the table '${jdbcCCD.table}' exists in a database.")
-        jdbcCCD.driverPrefix match {
-          case JdbcLiterals.oracleDriverPrefix =>
-            try {
-              val statement = connection.prepareStatement(s"SELECT COUNT(*) FROM ${jdbcCCD.table}")
-              statement.execute()
-              statement.close()
-              true
-            } catch {
-              case _: SQLException => false
-            }
+        jdbcCCD.table match {
+          case Some(table) =>
+            logger.debug(s"Verify that the table '$table' exists in a database.")
+            jdbcCCD.driverPrefix match {
+              case JdbcLiterals.oracleDriverPrefix =>
+                Try {
+                  val statement = connection.prepareStatement(s"SELECT COUNT(*) FROM $table")
+                  statement.execute()
+                  statement.close()
+                }.isSuccess
 
-          case _ =>
-            var result: Boolean = false
-            val dbResult = connection.getMetaData.getTables(null, null, jdbcCCD.table, null)
-            while (dbResult.next) {
-              if (dbResult.getString(3).nonEmpty) result = true
-            }
-            dbResult.close()
+              case _ =>
+                var result: Boolean = false
+                val dbResult = connection.getMetaData.getTables(null, null, table, null)
+                while (dbResult.next) {
+                  if (dbResult.getString(3).nonEmpty) result = true
+                }
+                dbResult.close()
 
-            result
+                result
+            }
+          case None =>
+            throw new IllegalStateException("Jdbc table not defined")
         }
       case None => throw new IllegalStateException("Jdbc client is not started. Start it first.")
     }
@@ -121,10 +125,9 @@ trait IJdbcClient {
     _connection match {
       case Some(connection) =>
         val stmt = connection.createStatement()
-        val result = try {
-          stmt.executeUpdate(sql)
-        } catch {
-          case e: Exception =>
+        val result = Try(stmt.executeUpdate(sql)) match {
+          case Success(i) => i
+          case Failure(e) =>
             logger.error(s"Sql request execution has failed: ${e.getMessage}.")
             throw new SQLException(e.getMessage)
         }
@@ -135,7 +138,7 @@ trait IJdbcClient {
   }
 
   def close(): Unit = {
-    logger.info(s"Close a connection to a jdbc database: '${jdbcCCD.database}'.")
+    logger.info(s"Close a connection to a jdbc database: '${jdbcCCD.database.get}'.")
     _connection match {
       case Some(connection) => connection.close()
       case None => throw new IllegalStateException("Jdbc client is not started. Start it first.")

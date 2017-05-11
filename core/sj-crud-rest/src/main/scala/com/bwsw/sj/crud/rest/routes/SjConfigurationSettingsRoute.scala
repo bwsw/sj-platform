@@ -5,17 +5,18 @@ import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.rest._
-import com.bwsw.sj.common.rest.model.config.ConfigurationSettingData
+import com.bwsw.sj.common.rest.model.config.ConfigurationSettingApi
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.crud.rest.exceptions.UnknownConfigSettingDomain
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
 import scala.collection.mutable.ArrayBuffer
+import scala.util.{Failure, Success, Try}
 
 trait SjConfigurationSettingsRoute extends Directives with SjCrudValidator {
 
-  val configSettingsApi = {
+  val configSettingsRoute = {
     pathPrefix("config") {
       pathPrefix("settings") {
         pathPrefix("domains") {
@@ -74,29 +75,33 @@ trait SjConfigurationSettingsRoute extends Directives with SjCrudValidator {
           } ~
           pathEndOrSingleSlash {
             post { (ctx: RequestContext) =>
-              var response: RestResponse = null
+              var response: Option[RestResponse] = None
               val errors = new ArrayBuffer[String]
 
-              try {
-                val data = serializer.deserialize[ConfigurationSettingData](getEntityFromContext(ctx))
-                errors ++= data.validate()
+              Try(serializer.deserialize[ConfigurationSettingApi](getEntityFromContext(ctx))) match {
+                case Success(data) =>
+                  errors ++= data.validate()
 
-                if (errors.isEmpty) {
-                  configService.save(data.asModelConfigurationSetting)
-                  response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.config.setting.created", data.domain, data.name)))
-                }
-              } catch {
-                case e: JsonDeserializationException =>
+                  if (errors.isEmpty) {
+                    configService.save(data.asModelConfigurationSetting)
+                    response = Option(
+                      CreatedRestResponse(
+                        MessageResponseEntity(
+                          createMessage("rest.config.setting.created", data.domain, data.name))))
+                  }
+                case Failure(e: JsonDeserializationException) =>
                   errors += JsonDeserializationErrorMessageCreator(e)
+                case Failure(e) => throw e
               }
 
               if (errors.nonEmpty) {
-                response = BadRequestRestResponse(MessageResponseEntity(
-                  createMessage("rest.config.setting.cannot.create", errors.mkString("\n"))
-                ))
+                response = Option(
+                  BadRequestRestResponse(
+                    MessageResponseEntity(
+                      createMessage("rest.config.setting.cannot.create", errors.mkString("\n")))))
               }
 
-              ctx.complete(restResponseToHttpResponse(response))
+              ctx.complete(restResponseToHttpResponse(response.get))
             } ~
               get {
                 val configElements = configService.getAll

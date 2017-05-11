@@ -12,7 +12,7 @@ class InstanceStatusObserver(instanceName: String) extends Callable[Unit] {
   override def call(): Unit = {
     while (true) {
       logger.debug("Check an instance status in case of an instance failure to stop a work of task.")
-      ConnectionRepository.getInstanceService.get(instanceName) match {
+      ConnectionRepository.getInstanceRepository.get(instanceName) match {
         case Some(instance) =>
           if (instance.status != EngineLiterals.started) {
             logger.error(s"Task cannot continue to work because of '${instance.status}' status of instance")

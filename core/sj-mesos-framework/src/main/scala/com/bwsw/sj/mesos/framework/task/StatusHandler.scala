@@ -19,7 +19,7 @@ object StatusHandler {
     */
   def handle(status: TaskStatus): Unit = {
 
-    if (status != null) {
+    if (Option(status).isDefined) {
 
       TasksList(status.getTaskId.getValue).foreach(task => task.update(
         state = status.getState.toString,

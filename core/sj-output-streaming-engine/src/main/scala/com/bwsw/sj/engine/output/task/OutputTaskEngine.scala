@@ -2,8 +2,8 @@ package com.bwsw.sj.engine.output.task
 
 import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
 
-import com.bwsw.sj.common.dal.model.module.OutputInstance
-import com.bwsw.sj.common.dal.model.stream.SjStream
+import com.bwsw.sj.common.dal.model.instance.OutputInstanceDomain
+import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.NumericalCheckpointTaskEngine
@@ -30,7 +30,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   currentThread.setName(s"output-task-${manager.taskName}-engine")
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val blockingQueue = new ArrayBlockingQueue[Envelope](EngineLiterals.queueSize)
-  private val instance = manager.instance.asInstanceOf[OutputInstance]
+  private val instance = manager.instance.asInstanceOf[OutputInstanceDomain]
   private val outputStream = getOutputStream
   private val environmentManager = createModuleEnvironmentManager()
   private val executor = manager.getExecutor(environmentManager)
@@ -40,13 +40,13 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private var wasFirstCheckpoint = false
   protected val checkpointInterval = instance.checkpointInterval
 
-  private def getOutputStream: SjStream = {
-    val streamService = ConnectionRepository.getStreamService
+  private def getOutputStream: StreamDomain = {
+    val streamService = ConnectionRepository.getStreamRepository
     instance.outputs.flatMap(x => streamService.get(x)).head
   }
 
   private def createModuleEnvironmentManager(): OutputEnvironmentManager = {
-    val streamService = ConnectionRepository.getStreamService
+    val streamService = ConnectionRepository.getStreamRepository
     val outputs = instance.outputs
       .flatMap(x => streamService.get(x))
     val options = instance.options

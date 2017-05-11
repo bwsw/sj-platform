@@ -1,8 +1,7 @@
 package com.bwsw.sj.engine.output.benchmark
 
-import com.bwsw.sj.common.dal.model.stream.{ESSjStream, SjStream, TStreamSjStream}
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.dal.service.GenericMongoRepository
+import com.bwsw.sj.common.dal.model.stream.{ESStreamDomain, StreamDomain, TStreamStreamDomain}
+import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.engine.output.benchmark.DataFactory._
 
 import scala.collection.JavaConverters._
@@ -15,8 +14,8 @@ import scala.collection.mutable.ArrayBuffer
   */
 object ESDataChecker extends App {
 
-  val streamService: GenericMongoRepository[SjStream] = ConnectionRepository.getStreamService
-  val tStream: TStreamSjStream = streamService.get(tstreamInputName).get.asInstanceOf[TStreamSjStream]
+  val streamService: GenericMongoRepository[StreamDomain] = ConnectionRepository.getStreamRepository
+  val tStream: TStreamStreamDomain = streamService.get(tstreamInputName).get.asInstanceOf[TStreamStreamDomain]
   val inputConsumer = createConsumer(tStream)
   inputConsumer.start()
 
@@ -36,7 +35,7 @@ object ESDataChecker extends App {
     }
   }
 
-  val esStream: ESSjStream = streamService.get(esStreamName).get.asInstanceOf[ESSjStream]
+  val esStream: ESStreamDomain = streamService.get(esStreamName).get.asInstanceOf[ESStreamDomain]
 
   val (esClient, esService) = openEsConnection(esStream)
 

@@ -1,8 +1,8 @@
 package com.bwsw.sj.crud.rest.validator.instance
 
-import com.bwsw.sj.common.dal.model.service.{KafkaService, TStreamService}
-import com.bwsw.sj.common.dal.model.stream.KafkaSjStream
-import com.bwsw.sj.common.rest.model.module.{InstanceData, RegularInstanceData, SpecificationData}
+import com.bwsw.sj.common.dal.model.service.{KafkaServiceDomain, TStreamServiceDomain}
+import com.bwsw.sj.common.dal.model.stream.KafkaStreamDomain
+import com.bwsw.sj.common.rest.model.module.{InstanceApi, RegularInstanceApi, SpecificationApi}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
@@ -11,6 +11,7 @@ import com.bwsw.sj.common.utils.StreamLiterals._
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable.ArrayBuffer
+import scala.util.{Failure, Success, Try}
 
 /**
   * Validator for Stream-processing regular module type
@@ -21,11 +22,11 @@ class RegularInstanceValidator extends InstanceValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
-  override def validate(parameters: InstanceData, specification: SpecificationData) = {
+  override def validate(parameters: InstanceApi, specification: SpecificationApi) = {
     logger.debug(s"Instance: ${parameters.name}. Start a validation of instance of regular-streaming type.")
     val errors = new ArrayBuffer[String]()
     errors ++= super.validateGeneralOptions(parameters)
-    val regularInstanceMetadata = parameters.asInstanceOf[RegularInstanceData]
+    val regularInstanceMetadata = parameters.asInstanceOf[RegularInstanceApi]
 
     // 'checkpoint-mode' field
     Option(regularInstanceMetadata.checkpointMode) match {
@@ -75,8 +76,8 @@ class RegularInstanceValidator extends InstanceValidator {
     errors ++= validateStreamOptions(regularInstanceMetadata, specification)
   }
 
-  private def validateStreamOptions(instance: RegularInstanceData,
-                                    specification: SpecificationData) = {
+  private def validateStreamOptions(instance: RegularInstanceApi,
+                                    specification: SpecificationApi) = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     val errors = new ArrayBuffer[String]()
 
@@ -109,9 +110,9 @@ class RegularInstanceValidator extends InstanceValidator {
       errors += createMessage("rest.validator.source_stream.must.one.of", "Input", inputTypes.mkString("[", ", ", "]"))
     }
 
-    val kafkaStreams = inputStreams.filter(s => s.streamType.equals(kafkaStreamType)).map(_.asInstanceOf[KafkaSjStream])
+    val kafkaStreams = inputStreams.filter(s => s.streamType.equals(kafkaStreamType)).map(_.asInstanceOf[KafkaStreamDomain])
     if (kafkaStreams.nonEmpty) {
-      if (kafkaStreams.exists(s => !s.service.isInstanceOf[KafkaService])) {
+      if (kafkaStreams.exists(s => !s.service.isInstanceOf[KafkaServiceDomain])) {
         errors += createMessage("rest.validator.service.must", "kafka streams", "KfkQ")
       }
     }
@@ -124,11 +125,11 @@ class RegularInstanceValidator extends InstanceValidator {
       }
     } else {
       if (!startFromModes.contains(startFrom)) {
-        try {
-          startFrom.toLong
-        } catch {
-          case ex: NumberFormatException =>
+        Try(startFrom.toLong) match {
+          case Success(_) =>
+          case Failure(_: NumberFormatException) =>
             errors += createMessage("rest.validator.attribute.must.one_of", "startFrom", s"${startFromModes.mkString("[", ", ", "]")} or timestamp")
+          case Failure(e) => throw e
         }
       }
     }
@@ -168,8 +169,8 @@ class RegularInstanceValidator extends InstanceValidator {
       if (tStreamsServices.size > 1) {
         errors += createMessage("rest.validator.t_stream.same.service")
       } else {
-        val service = serviceDAO.get(tStreamsServices.head)
-        if (!service.get.isInstanceOf[TStreamService]) {
+        val service = serviceRepository.get(tStreamsServices.head)
+        if (!service.get.isInstanceOf[TStreamServiceDomain]) {
           errors += createMessage("rest.validator.service.must", "t-streams", "TstrQ")
         }
       }

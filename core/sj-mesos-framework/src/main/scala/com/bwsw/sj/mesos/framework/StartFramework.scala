@@ -5,7 +5,7 @@ import java.net.URI
 import com.bwsw.common.LeaderLatch
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals
-import com.bwsw.sj.common.dal.model.ConfigurationSetting
+import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.mesos.framework.rest.Rest
 import com.bwsw.sj.mesos.framework.schedule.FrameworkScheduler
 import org.apache.mesos.MesosSchedulerDriver
@@ -44,8 +44,8 @@ object StartFramework {
 
     val scheduler = new FrameworkScheduler
 
-    val frameworkPrincipal: Option[ConfigurationSetting] = ConnectionRepository.getConfigService.get(ConfigLiterals.frameworkPrincipalTag)
-    val frameworkSecret: Option[ConfigurationSetting] = ConnectionRepository.getConfigService.get(ConfigLiterals.frameworkSecretTag)
+    val frameworkPrincipal: Option[ConfigurationSettingDomain] = ConnectionRepository.getConfigRepository.get(ConfigLiterals.frameworkPrincipalTag)
+    val frameworkSecret: Option[ConfigurationSettingDomain] = ConnectionRepository.getConfigRepository.get(ConfigLiterals.frameworkSecretTag)
     var credential: Option[Credential] = None
 
     if (frameworkPrincipal.isDefined && frameworkSecret.isDefined) {

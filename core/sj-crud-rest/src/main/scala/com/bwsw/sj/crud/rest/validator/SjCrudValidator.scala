@@ -13,17 +13,18 @@ import akka.stream.Materializer
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.dal.model._
-import com.bwsw.sj.common.dal.model.module.{FileMetadata, Instance}
-import com.bwsw.sj.common.dal.model.service.Service
-import com.bwsw.sj.common.dal.model.stream.SjStream
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.dal.service.GenericMongoRepository
+import com.bwsw.sj.common.dal.model.instance.InstanceDomain
+import com.bwsw.sj.common.dal.model.module.FileMetadata
+import com.bwsw.sj.common.dal.model.stream.StreamDomain
+import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.engine.StreamingValidator
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 
 import scala.concurrent.{Await, ExecutionContextExecutor}
+import scala.util.{Failure, Success, Try}
+
 /**
   * Trait for validation of crud-rest-api
   * and contains common methods for routes
@@ -41,10 +42,9 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator {
   val serializer: Serializer
   val fileMetadataDAO: GenericMongoRepository[FileMetadata]
   val storage: FileStorage
-  val instanceDAO: GenericMongoRepository[Instance]
-  val serviceDAO: GenericMongoRepository[Service]
-  val streamDAO: GenericMongoRepository[SjStream]
-  val configService: GenericMongoRepository[ConfigurationSetting]
+  val instanceDAO: GenericMongoRepository[InstanceDomain]
+  val streamDAO: GenericMongoRepository[StreamDomain]
+  val configService: GenericMongoRepository[ConfigurationSettingDomain]
   val restHost: String
   val restPort: Int
 
@@ -97,7 +97,7 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator {
     */
   def validateSpecification(jarFile: File) = {
     logger.debug(s"Start a validation of module specification.")
-    val configService = ConnectionRepository.getConfigService
+    val configService = ConnectionRepository.getConfigRepository
     val classLoader = new URLClassLoader(Array(jarFile.toURI.toURL), ClassLoader.getSystemClassLoader)
     val specificationJson = getSpecificationFromJar(jarFile)
     validateSerializedSpecification(specificationJson)
@@ -177,11 +177,12 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator {
         }
 
         if (moduleType == batchStreamingType) {
-          val batchCollectorClass = specification("batch-collector-class").asInstanceOf[String]
-
           //'batch-collector-class' field
-          if (batchCollectorClass == null || batchCollectorClass.isEmpty)
-            throw new Exception(createMessage("rest.validator.specification.batchcollector.should.defined", moduleType, "batch-collector-class"))
+          Option(specification("batch-collector-class").asInstanceOf[String]) match {
+            case Some("") | None =>
+              throw new Exception(createMessage("rest.validator.specification.batchcollector.should.defined", moduleType, "batch-collector-class"))
+            case _ =>
+          }
         }
     }
 
@@ -218,26 +219,28 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator {
 
   private def getValidatorClassInterfaces(className: String, classLoader: URLClassLoader) = {
     logger.debug("Try to load a validator class from jar that is indicated on specification.")
-    try {
-      classLoader.loadClass(className).getAnnotatedInterfaces.map(x => x.getType)
-    } catch {
-      case _: ClassNotFoundException =>
+    Try(classLoader.loadClass(className).getAnnotatedInterfaces.map(x => x.getType)) match {
+      case Success(x) => x
+      case Failure(_: ClassNotFoundException) =>
         logger.error(s"Specification.json for module has got the invalid 'validator-class' param: " +
           s"class '$className' indicated in the specification isn't found.")
         throw new Exception(createMessage("rest.validator.specification.class.not.found", "validator-class", className))
+      case Failure(e) => throw e
     }
   }
 
   private def getBatchCollectorClassInterfaces(className: String, classLoader: URLClassLoader) = {
     logger.debug("Try to load a batch collector class from jar that is indicated on specification.")
-    try {
+    Try {
       classLoader.loadClass(className).getAnnotatedSuperclass.getType.asInstanceOf[Class[Object]]
         .getAnnotatedInterfaces.map(x => x.getType)
-    } catch {
-      case _: ClassNotFoundException =>
+    } match {
+      case Success(x) => x
+      case Failure(_: ClassNotFoundException) =>
         logger.error(s"Specification.json for module has got the invalid 'batch-collector-class' param: " +
           s"class '$className' indicated in the specification isn't found.")
         throw new Exception(createMessage("rest.validator.specification.class.not.found", "batch-collector", className))
+      case Failure(e) => throw e
     }
   }
 
@@ -279,14 +282,17 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator {
       val entry = enu.nextElement
       if (entry.getName.equals("specification.json")) {
         val reader = new BufferedReader(new InputStreamReader(jar.getInputStream(entry), "UTF-8"))
-        try {
-          var line = reader.readLine
-          while (line != null) {
+        val result = Try {
+          var line = Option(reader.readLine)
+          while (line.isDefined) {
             builder.append(line + "\n")
-            line = reader.readLine
+            line = Option(reader.readLine)
           }
-        } finally {
-          reader.close()
+        }
+        reader.close()
+        result match {
+          case Success(_) =>
+          case Failure(e) => throw e
         }
       }
     }

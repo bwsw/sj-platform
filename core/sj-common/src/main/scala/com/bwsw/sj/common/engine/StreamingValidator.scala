@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.engine
 
-import com.bwsw.sj.common.rest.model.module.InstanceData
+import com.bwsw.sj.common.rest.model.module.InstanceApi
 
 /**
  * Trait for validating a launch parameters of a module of a specific type
@@ -20,7 +20,7 @@ trait StreamingValidator {
     ValidationInfo()
   }
 
-  def validate(instance: InstanceData): ValidationInfo = {
+  def validate(instance: InstanceApi): ValidationInfo = {
     ValidationInfo()
   }
 }

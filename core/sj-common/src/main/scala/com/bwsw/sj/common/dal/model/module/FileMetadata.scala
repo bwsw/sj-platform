@@ -13,5 +13,5 @@ case class FileMetadata(@IdField _id: ObjectId,
                         filetype: String,
                         uploadDate: Date,
                         length: Long,
-                        specification: Specification
+                        specification: SpecificationDomain
                        )

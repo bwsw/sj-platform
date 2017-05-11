@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.input.eviction_policy
 
-import com.bwsw.sj.common.dal.model.module.InputInstance
+import com.bwsw.sj.common.dal.model.instance.InputInstanceDomain
 import com.bwsw.sj.common.utils.EngineLiterals
 
 import scala.collection.JavaConverters._
@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory
  * @author Kseniya Mikhaleva
  */
 
-abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
+abstract class InputInstanceEvictionPolicy(instance: InputInstanceDomain) {
   protected val logger = LoggerFactory.getLogger(this.getClass)
   protected val stubValue = "stub"
   private val hazelcastMapName = instance.name + "-" + "inputEngine"
@@ -108,7 +108,7 @@ object InputInstanceEvictionPolicy {
  *
    * @return Eviction policy of duplicate envelopes
    */
-  def apply(instance: InputInstance): InputInstanceEvictionPolicy = {
+  def apply(instance: InputInstanceDomain): InputInstanceEvictionPolicy = {
     instance.evictionPolicy match {
       case EngineLiterals.fixTimeEvictionPolicy => new FixTimeEvictionPolicy(instance)
       case EngineLiterals.expandedTimeEvictionPolicy => new ExpandedTimeEvictionPolicy(instance)

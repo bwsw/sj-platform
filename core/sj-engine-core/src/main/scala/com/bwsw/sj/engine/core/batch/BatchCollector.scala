@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.core.batch
 
-import com.bwsw.sj.common.dal.model.module.BatchInstance
+import com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.IBatchCollector
 import com.bwsw.sj.engine.core.entities.{Batch, Envelope}
@@ -14,12 +14,12 @@ import scala.collection.Map
   * @param performanceMetrics Set of metrics that characterize performance of a batch streaming module
   * @author Kseniya Mikhaleva
   */
-abstract class BatchCollector(protected val instance: BatchInstance,
+abstract class BatchCollector(protected val instance: BatchInstanceDomain,
                               performanceMetrics: BatchStreamingPerformanceMetrics) extends IBatchCollector {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val streamDAO = ConnectionRepository.getStreamService
-  private val inputs = instance.getInputsWithoutStreamMode().map(x => streamDAO.get(x).get)
+  private val streamRepository = ConnectionRepository.getStreamRepository
+  private val inputs = instance.getInputsWithoutStreamMode().map(x => streamRepository.get(x).get)
   private val currentBatchPerStream: Map[String, Batch] = createStorageOfBatches()
 
   private def createStorageOfBatches(): Map[String, Batch] = {

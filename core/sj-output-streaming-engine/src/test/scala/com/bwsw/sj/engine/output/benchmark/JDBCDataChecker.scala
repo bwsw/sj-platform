@@ -1,16 +1,15 @@
 package com.bwsw.sj.engine.output.benchmark
 
-import com.bwsw.sj.common.dal.model.stream.{JDBCSjStream, SjStream, TStreamSjStream}
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.dal.service.GenericMongoRepository
+import com.bwsw.sj.common.dal.model.stream.{JDBCStreamDomain, StreamDomain, TStreamStreamDomain}
+import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.engine.output.benchmark.DataFactory._
 
 import scala.collection.mutable.ArrayBuffer
 
 object JDBCDataChecker extends App {
 
-  val streamService: GenericMongoRepository[SjStream] = ConnectionRepository.getStreamService
-  val tStream: TStreamSjStream = streamService.get(tstreamInputName).get.asInstanceOf[TStreamSjStream]
+  val streamService: GenericMongoRepository[StreamDomain] = ConnectionRepository.getStreamRepository
+  val tStream: TStreamStreamDomain = streamService.get(tstreamInputName).get.asInstanceOf[TStreamStreamDomain]
   val inputConsumer = createConsumer(tStream)
   inputConsumer.start()
 
@@ -30,7 +29,7 @@ object JDBCDataChecker extends App {
     }
   }
 
-  val jdbcStream: JDBCSjStream = streamService.get(jdbcStreamName).get.asInstanceOf[JDBCSjStream]
+  val jdbcStream: JDBCStreamDomain = streamService.get(jdbcStreamName).get.asInstanceOf[JDBCStreamDomain]
 
   val jdbcClient = openJdbcConnection(jdbcStream)
   jdbcClient.start()

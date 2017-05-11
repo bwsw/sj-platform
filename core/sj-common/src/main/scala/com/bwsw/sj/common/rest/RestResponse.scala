@@ -1,10 +1,9 @@
 package com.bwsw.sj.common.rest
 
 import com.bwsw.sj.common.config.ConfigLiterals
-import com.bwsw.sj.common.rest.model.config.ConfigurationSettingData
-import com.bwsw.sj.common.rest.model.module.{InstanceData, SpecificationData}
-import com.bwsw.sj.common.rest.model.service.ServiceData
-import com.bwsw.sj.common.rest.model.stream.StreamData
+import com.bwsw.sj.common.rest.model.config.ConfigurationSettingApi
+import com.bwsw.sj.common.rest.model.module.{InstanceApi, SpecificationApi}
+import com.bwsw.sj.common.rest.model.stream.StreamApi
 import com.fasterxml.jackson.annotation.JsonProperty
 
 import scala.collection.mutable
@@ -46,24 +45,16 @@ case class KeyedMessageResponseEntity(message: String, key: String) extends Resp
 case class TypesResponseEntity(types: Seq[String]) extends ResponseEntity
 
 
-case class ServiceResponseEntity(service: ServiceData) extends ResponseEntity
+case class StreamResponseEntity(stream: StreamApi) extends ResponseEntity
 
-case class ServicesResponseEntity(services: mutable.Buffer[ServiceData] = mutable.Buffer()) extends ResponseEntity
-
-case class RelatedToServiceResponseEntity(streams: mutable.Buffer[String] = mutable.Buffer(),
-                                          instances: mutable.Buffer[String] = mutable.Buffer()) extends ResponseEntity
-
-
-case class StreamResponseEntity(stream: StreamData) extends ResponseEntity
-
-case class StreamsResponseEntity(streams: mutable.Buffer[StreamData] = mutable.Buffer()) extends ResponseEntity
+case class StreamsResponseEntity(streams: mutable.Buffer[StreamApi] = mutable.Buffer()) extends ResponseEntity
 
 case class RelatedToStreamResponseEntity(instances: mutable.Buffer[String] = mutable.Buffer()) extends ResponseEntity
 
 
-case class ConfigSettingsResponseEntity(configSettings: mutable.Buffer[ConfigurationSettingData] = mutable.Buffer()) extends ResponseEntity
+case class ConfigSettingsResponseEntity(configSettings: mutable.Buffer[ConfigurationSettingApi] = mutable.Buffer()) extends ResponseEntity
 
-case class ConfigSettingResponseEntity(configSetting: ConfigurationSettingData) extends ResponseEntity
+case class ConfigSettingResponseEntity(configSetting: ConfigurationSettingApi) extends ResponseEntity
 
 case class DomainsResponseEntity(domains: Seq[String] = ConfigLiterals.domains) extends ResponseEntity
 
@@ -74,13 +65,13 @@ case class ModulesResponseEntity(modules: mutable.Buffer[ModuleInfo] = mutable.B
 
 case class RelatedToModuleResponseEntity(instances: mutable.Buffer[String] = mutable.Buffer()) extends ResponseEntity
 
-case class SpecificationResponseEntity(specification: SpecificationData) extends ResponseEntity
+case class SpecificationResponseEntity(specification: SpecificationApi) extends ResponseEntity
 
 case class ShortInstancesResponseEntity(instances: mutable.Buffer[ShortInstance] = mutable.Buffer()) extends ResponseEntity
 
-case class InstanceResponseEntity(instance: InstanceData) extends ResponseEntity
+case class InstanceResponseEntity(instance: InstanceApi) extends ResponseEntity
 
-case class InstancesResponseEntity(instances: mutable.Buffer[InstanceData] = mutable.Buffer()) extends ResponseEntity
+case class InstancesResponseEntity(instances: mutable.Buffer[InstanceApi] = mutable.Buffer()) extends ResponseEntity
 
 case class ShortInstance(name: String, moduleType: String, moduleName: String, moduleVersion: String,
                          description: String, status: String, restAddress: String)

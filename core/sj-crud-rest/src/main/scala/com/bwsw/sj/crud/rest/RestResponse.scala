@@ -1,7 +1,8 @@
 package com.bwsw.sj.crud.rest
 
 import com.bwsw.sj.common.rest.ResponseEntity
-import com.bwsw.sj.crud.rest.model.provider.ProviderData
+import com.bwsw.sj.crud.rest.model.provider.ProviderApi
+import com.bwsw.sj.crud.rest.model.service.ServiceApi
 
 import scala.collection.mutable
 
@@ -9,9 +10,16 @@ case class ConnectionResponseEntity(connection: Boolean = true) extends Response
 
 case class TestConnectionResponseEntity(connection: Boolean, errors: String) extends ResponseEntity
 
-case class ProviderResponseEntity(provider: ProviderData) extends ResponseEntity
+case class ProviderResponseEntity(provider: ProviderApi) extends ResponseEntity
 
-case class ProvidersResponseEntity(providers: mutable.Buffer[ProviderData] = mutable.Buffer()) extends ResponseEntity
+case class ProvidersResponseEntity(providers: mutable.Buffer[ProviderApi] = mutable.Buffer()) extends ResponseEntity
 
 case class RelatedToProviderResponseEntity(services: mutable.Buffer[String] = mutable.Buffer()) extends ResponseEntity
 
+
+case class ServiceResponseEntity(service: ServiceApi) extends ResponseEntity
+
+case class ServicesResponseEntity(services: mutable.Buffer[ServiceApi] = mutable.Buffer()) extends ResponseEntity
+
+case class RelatedToServiceResponseEntity(streams: mutable.Buffer[String] = mutable.Buffer(),
+                                          instances: mutable.Buffer[String] = mutable.Buffer()) extends ResponseEntity

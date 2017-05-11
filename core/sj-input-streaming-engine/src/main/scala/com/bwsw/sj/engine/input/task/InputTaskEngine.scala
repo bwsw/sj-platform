@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.input.task
 
 import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
 
-import com.bwsw.sj.common.dal.model.module.InputInstance
+import com.bwsw.sj.common.dal.model.instance.InputInstanceDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
@@ -40,7 +40,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
   private val producers: Map[String, Producer] = manager.outputProducers
   private var transactionsByStreamPartitions = createTxnsStorage()
   private val checkpointGroup = new CheckpointGroup()
-  private val instance = manager.instance.asInstanceOf[InputInstance]
+  private val instance = manager.instance.asInstanceOf[InputInstanceDomain]
   private val environmentManager = createModuleEnvironmentManager()
   private val executor = manager.getExecutor(environmentManager)
   private val evictionPolicy = InputInstanceEvictionPolicy(instance)
@@ -60,7 +60,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
     * @return Manager of environment of input streaming module
    */
   private def createModuleEnvironmentManager(): InputEnvironmentManager = {
-    val streamService = ConnectionRepository.getStreamService
+    val streamService = ConnectionRepository.getStreamRepository
     val taggedOutputs = instance.outputs
       .flatMap(x => streamService.get(x))
 
@@ -128,16 +128,14 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
   }
 
   private def getChannelContext(): Option[ChannelHandlerContext] = {
-    var channelContext = channelContextQueue.poll(EngineLiterals.eventWaitTimeout, TimeUnit.MILLISECONDS)
-    if (channelContext == null) channelContext = getCtxOfNonEmptyBuffer()
+    var channelContext = Option(channelContextQueue.poll(EngineLiterals.eventWaitTimeout, TimeUnit.MILLISECONDS))
+    if (channelContext.isEmpty) channelContext = getCtxOfNonEmptyBuffer
 
-    Option(channelContext)
+    channelContext
   }
 
-  private def getCtxOfNonEmptyBuffer(): ChannelHandlerContext = {
-    val maybeCtx = bufferForEachContext.find(x => x._2.readableBytes() > 0)
-    if (maybeCtx.isDefined) maybeCtx.get._1 else null
-  }
+  private def getCtxOfNonEmptyBuffer: Option[ChannelHandlerContext] =
+    bufferForEachContext.find(x => x._2.readableBytes() > 0).map(_._1)
 
   private def tryToRead(channelContext: ChannelHandlerContext, interval: Interval): ChannelFuture = {
     val buffer = bufferForEachContext(channelContext)

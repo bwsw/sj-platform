@@ -3,7 +3,7 @@ package com.bwsw.sj.engine.batch.task
 import java.util.concurrent.Callable
 
 import com.bwsw.common.LeaderLatch
-import com.bwsw.sj.common.dal.model.module.BatchInstance
+import com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.state.CommonModuleService
@@ -18,7 +18,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 class BatchTaskEngine(batchCollector: BatchCollector,
-                      instance: BatchInstance,
+                      instance: BatchInstanceDomain,
                       moduleService: CommonModuleService,
                       inputService: EnvelopeFetcher,
                       performanceMetrics: BatchStreamingPerformanceMetrics) extends Callable[Unit] {

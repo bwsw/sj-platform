@@ -76,7 +76,7 @@ class FrameworkScheduler extends Scheduler {
     TasksList.clearAvailablePorts()
     OffersHandler.setOffers(offers.asScala)
 
-    OffersHandler.filter(FrameworkUtil.instance.nodeAttributes)
+    OffersHandler.filter(FrameworkUtil.instance.get.nodeAttributes)
     if (OffersHandler.filteredOffers.isEmpty) {
       declineOffers("No one node selected", OffersHandler.getOffers)
       return
@@ -98,7 +98,7 @@ class FrameworkScheduler extends Scheduler {
   private def declineOffers(message: String, offers: mutable.Buffer[Offer]): Unit = {
     logger.info(message)
     TasksList.setMessage(message)
-    offers.foreach(offer => FrameworkUtil.driver.declineOffer(offer.getId))
+    offers.foreach(offer => FrameworkUtil.driver.get.declineOffer(offer.getId))
   }
 
   def getAvailableNumberOfTasks: Int = {
@@ -142,17 +142,17 @@ class FrameworkScheduler extends Scheduler {
   def registered(driver: SchedulerDriver, frameworkId: FrameworkID, masterInfo: MasterInfo): Unit = {
     logger.info(s"Registered framework as: ${frameworkId.getValue}.")
 
-    FrameworkUtil.driver = driver
-    FrameworkUtil.frameworkId = frameworkId.getValue
-    FrameworkUtil.master = masterInfo
+    FrameworkUtil.driver = Option(driver)
+    FrameworkUtil.frameworkId = Option(frameworkId.getValue)
+    FrameworkUtil.master = Option(masterInfo)
 
     FrameworkUtil.params = FrameworkUtil.getEnvParams
     logger.debug(s"Got environment variable: ${FrameworkUtil.params}.")
 
     FrameworkUtil.updateInstance()
-    logger.debug(s"Got instance ${FrameworkUtil.instance.name}.")
+    logger.debug(s"Got instance ${FrameworkUtil.instance.get.name}.")
 
-    TasksList.prepare(FrameworkUtil.instance)
+    TasksList.prepare(FrameworkUtil.instance.get)
     logger.debug(s"Got tasks: $TasksList.")
 
     uniqueHosts = scala.util.Try(System.getenv("UNIQUE_HOSTS").toBoolean).getOrElse(false)

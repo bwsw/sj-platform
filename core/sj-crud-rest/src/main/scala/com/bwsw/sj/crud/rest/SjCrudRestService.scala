@@ -12,7 +12,7 @@ import akka.http.scaladsl.server.directives.{DebuggingDirectives, LogEntry, Logg
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.dal.model.ConfigurationSetting
+import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.utils.EngineLiterals
@@ -32,7 +32,7 @@ object SjCrudRestService extends App with SjCrudInterface {
   implicit val materializer = ActorMaterializer()
   implicit val executor = system.dispatcher
 
-  require(System.getenv("CRUD_REST_HOST") != null && System.getenv("CRUD_REST_PORT") != null,
+  require(Option(System.getenv("CRUD_REST_HOST")).isDefined && Option(System.getenv("CRUD_REST_PORT")).isDefined,
   "No environment variables: CRUD_REST_HOST, CRUD_REST_PORT")
 
   val restHost = System.getenv("CRUD_REST_HOST")
@@ -40,11 +40,10 @@ object SjCrudRestService extends App with SjCrudInterface {
   val serializer = new JsonSerializer()
   serializer.setIgnoreUnknown(true)
   val storage = ConnectionRepository.getFileStorage
-  val fileMetadataDAO = ConnectionRepository.getFileMetadataService
-  val instanceDAO = ConnectionRepository.getInstanceService
-  val serviceDAO = ConnectionRepository.getServiceManager
-  val streamDAO = ConnectionRepository.getStreamService
-  val configService = ConnectionRepository.getConfigService
+  val fileMetadataDAO = ConnectionRepository.getFileMetadataRepository
+  val instanceDAO = ConnectionRepository.getInstanceRepository
+  val streamDAO = ConnectionRepository.getStreamRepository
+  val configService = ConnectionRepository.getConfigRepository
   val routeLogged = logRequestResult(Logging.InfoLevel, route())
   val logger = Logging(system, getClass)
 
@@ -76,8 +75,8 @@ object SjCrudRestService extends App with SjCrudInterface {
   }
 
   private def putRestSettingsToConfigFile() = {
-    configService.save(new ConfigurationSetting(ConfigLiterals.hostOfCrudRestTag, restHost, ConfigLiterals.systemDomain))
-    configService.save(new ConfigurationSetting(ConfigLiterals.portOfCrudRestTag, restPort.toString, ConfigLiterals.systemDomain))
+    configService.save(new ConfigurationSettingDomain(ConfigLiterals.hostOfCrudRestTag, restHost, ConfigLiterals.systemDomain))
+    configService.save(new ConfigurationSettingDomain(ConfigLiterals.portOfCrudRestTag, restPort.toString, ConfigLiterals.systemDomain))
   }
 
   /**

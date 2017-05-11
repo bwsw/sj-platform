@@ -7,6 +7,7 @@ import org.apache.zookeeper.KeeperException
 import org.slf4j.LoggerFactory
 
 import scala.annotation.tailrec
+import scala.util.{Failure, Success, Try}
 
 class LeaderLatch(zkServers: Set[String], masterNode: String, id: String = "") {
   private val logger = LoggerFactory.getLogger(this.getClass)
@@ -59,13 +60,13 @@ class LeaderLatch(zkServers: Set[String], masterNode: String, id: String = "") {
   @tailrec
   private def getLeaderId(): String = {
     logger.debug("Try to get a leader id.")
-    try {
-      leaderLatch.getLeader.getId
-    } catch {
-      case e: KeeperException =>
+    Try(leaderLatch.getLeader.getId) match {
+      case Success(leaderId) => leaderId
+      case Failure(_: KeeperException) =>
         logger.debug("Waiting until the leader latch gets a leader id.")
         Thread.sleep(50)
         getLeaderId()
+      case Failure(e) => throw e
     }
   }
 

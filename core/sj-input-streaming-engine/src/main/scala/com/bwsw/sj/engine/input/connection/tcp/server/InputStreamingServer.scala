@@ -11,6 +11,7 @@ import io.netty.handler.logging.{LogLevel, LoggingHandler}
 import org.slf4j.LoggerFactory
 
 import scala.collection.concurrent
+import scala.util.{Failure, Success, Try}
 
 
 /**
@@ -33,7 +34,7 @@ class InputStreamingServer(host: String,
     logger.info(s"Launch an input-streaming server on: '$host:$port'.")
     val bossGroup: EventLoopGroup = new NioEventLoopGroup(1)
     val workerGroup = new NioEventLoopGroup()
-    try {
+    val result = Try {
       val bootstrapServer = new ServerBootstrap()
       bootstrapServer.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
       bootstrapServer.group(bossGroup, workerGroup)
@@ -42,10 +43,13 @@ class InputStreamingServer(host: String,
         .childHandler(new InputStreamingChannelInitializer(channelContextQueue, bufferForEachContext))
 
       bootstrapServer.bind(host, port).sync().channel().closeFuture().sync()
-    } finally {
-      logger.info(s"Shutdown an input-streaming server (address: '$host:$port').")
-      workerGroup.shutdownGracefully()
-      bossGroup.shutdownGracefully()
+    }
+    logger.info(s"Shutdown an input-streaming server (address: '$host:$port').")
+    workerGroup.shutdownGracefully()
+    bossGroup.shutdownGracefully()
+    result match {
+      case Success(_) =>
+      case Failure(e) => throw e
     }
   }
 }

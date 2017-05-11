@@ -1,12 +1,12 @@
 package com.bwsw.sj.engine.core.batch
 
-import com.bwsw.sj.common.dal.model.module.BatchInstance
+import com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain
 import com.bwsw.sj.engine.core.entities.Window
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
 
-class WindowRepository(instance: BatchInstance) {
+class WindowRepository(instance: BatchInstanceDomain) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val windowPerStream: mutable.Map[String, Window] = createStorageOfWindows()
   val window = instance.window

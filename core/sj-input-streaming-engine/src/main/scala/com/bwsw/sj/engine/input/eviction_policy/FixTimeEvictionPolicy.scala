@@ -1,13 +1,13 @@
 package com.bwsw.sj.engine.input.eviction_policy
 
-import com.bwsw.sj.common.dal.model.module.InputInstance
+import com.bwsw.sj.common.dal.model.instance.InputInstanceDomain
 
 /**
  * Provides methods are responsible for a fix time eviction policy of input envelope duplicates.
  * In this case a specific key will be kept within fix time
  */
 
-class FixTimeEvictionPolicy(instance: InputInstance) extends InputInstanceEvictionPolicy(instance) {
+class FixTimeEvictionPolicy(instance: InputInstanceDomain) extends InputInstanceEvictionPolicy(instance) {
 
   /**
    * Checks whether a specific key is duplicate or not

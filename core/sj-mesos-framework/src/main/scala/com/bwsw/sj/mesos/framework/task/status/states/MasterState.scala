@@ -1,43 +1,40 @@
 package com.bwsw.sj.mesos.framework.task.status.states
 
-class MasterState {
-  var start_time:Double = _
-  var hostname:String = _
-  var git_tag:String = _
-  var flags:Map[String,Any] = _
-  var elected_time:Double = _
-  var unregistered_frameworks:Array[String] = _
-  var frameworks:Array[Framework] = _
-  var deactivated_slaves:Double = _
-  var git_sha:String = _
-  var build_date:String = _
-  var orphan_tasks:Array[Map[String,Any]] = _
-  var leader:String = _
-  var completed_frameworks:Array[Framework] = _
-  var version:String = _
-  var id:String = _
-  var pid:String = _
-  var build_user:String = _
-  var build_time:Double = _
-  var activated_slaves:Double = _
-  var slaves:Array[Slave] = _
-  var cluster:String = _
-  var log_dir:String = _
-}
+class MasterState(
+                   var start_time: Double,
+                   var hostname: String,
+                   var git_tag: String,
+                   var flags: Map[String, Any],
+                   var elected_time: Double,
+                   var unregistered_frameworks: Array[String],
+                   var frameworks: Array[Framework],
+                   var deactivated_slaves: Double,
+                   var git_sha: String,
+                   var build_date: String,
+                   var orphan_tasks: Array[Map[String, Any]],
+                   var leader: String,
+                   var completed_frameworks: Array[Framework],
+                   var version: String,
+                   var id: String,
+                   var pid: String,
+                   var build_user: String,
+                   var build_time: Double,
+                   var activated_slaves: Double,
+                   var slaves: Array[Slave],
+                   var cluster: String,
+                   var log_dir: String)
 
-
-class Slave {
-  var hostname:String = _
-  var registered_time:Double = _
-  var offered_resources:Map[String,Any] = _
-  var attributes:Map[String,Any] = _
-  var version:String = _
-  var id:String = _
-  var pid:String = _
-  var reserved_resources:Map[String,Any] = _
-  var unreserved_resources:Map[String,Any] = _
-  var resources:Map[String,Any] = _
-  var used_resources:Map[String,Any] = _
-  var reregistered_time:Double = _
-  var active:Boolean = _
-}
+class Slave(
+             var hostname: String,
+             var registered_time: Double,
+             var offered_resources: Map[String, Any],
+             var attributes: Map[String, Any],
+             var version: String,
+             var id: String,
+             var pid: String,
+             var reserved_resources: Map[String, Any],
+             var unreserved_resources: Map[String, Any],
+             var resources: Map[String, Any],
+             var used_resources: Map[String, Any],
+             var reregistered_time: Double,
+             var active: Boolean)

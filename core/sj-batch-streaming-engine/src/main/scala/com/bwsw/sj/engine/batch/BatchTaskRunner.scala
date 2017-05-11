@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.batch
 
-import com.bwsw.sj.common.dal.model.module.BatchInstance
+import com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain
 import com.bwsw.sj.engine.core.engine.{InstanceStatusObserver, TaskRunner}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.state.CommonModuleService
@@ -17,7 +17,7 @@ object BatchTaskRunner extends {
 
   def main(args: Array[String]) {
     val manager = new CommonTaskManager()
-    val instance = manager.instance.asInstanceOf[BatchInstance]
+    val instance = manager.instance.asInstanceOf[BatchInstanceDomain]
 
     logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for batch module\n")
 

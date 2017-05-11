@@ -2,48 +2,52 @@ package com.bwsw.sj.crud.rest.routes
 
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.common.exceptions.JsonDeserializationException
-import com.bwsw.sj.common.dal.model.module.Instance
+import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.rest.model._
-import com.bwsw.sj.common.rest.model.stream.StreamData
+import com.bwsw.sj.common.rest.model.stream.StreamApi
 import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.utils.EngineLiterals._
+import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
 import scala.collection.mutable.ArrayBuffer
-import com.bwsw.sj.common.rest.utils.ValidationUtils._
-import com.bwsw.sj.common.utils.MessageResourceUtils._
+import scala.util.{Failure, Success, Try}
 
 trait SjStreamsRoute extends Directives with SjCrudValidator {
 
-  val streamsApi = {
+  val streamsRoute = {
     pathPrefix("streams") {
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>
-          var response: RestResponse = null
+          var response: Option[RestResponse] = None
           val errors = new ArrayBuffer[String]
-          try {
-            val streamData = serializer.deserialize[StreamData](getEntityFromContext(ctx))
-            errors ++= streamData.validate()
+          Try (serializer.deserialize[StreamApi](getEntityFromContext(ctx))) match {
+            case Success(streamData) =>
+              errors ++= streamData.validate()
 
-            if (errors.isEmpty) {
-              streamData.create()
-              streamDAO.save(streamData.asModelStream())
-              response = CreatedRestResponse(MessageResponseEntity(createMessage("rest.streams.stream.created", streamData.name)))
+              if (errors.isEmpty) {
+                streamData.create()
+                streamDAO.save(streamData.asModelStream())
+                response = Option(
+                  CreatedRestResponse(
+                    MessageResponseEntity(
+                      createMessage("rest.streams.stream.created", streamData.name))))
+              }
+              case Failure(e: JsonDeserializationException) =>
+                errors += JsonDeserializationErrorMessageCreator(e)
+              case Failure(e) => throw e
             }
-          } catch {
-            case e: JsonDeserializationException =>
-              errors += JsonDeserializationErrorMessageCreator(e)
-          }
 
           if (errors.nonEmpty) {
-            response = BadRequestRestResponse(MessageResponseEntity(
-              createMessage("rest.streams.stream.cannot.create", errors.mkString(";"))
-            ))
+            response = Option(
+              BadRequestRestResponse(
+                MessageResponseEntity(
+                  createMessage("rest.streams.stream.cannot.create", errors.mkString(";")))))
           }
 
-          ctx.complete(restResponseToHttpResponse(response))
+          ctx.complete(restResponseToHttpResponse(response.get))
         } ~
           get {
             val streams = streamDAO.getAll
@@ -127,7 +131,7 @@ trait SjStreamsRoute extends Directives with SjCrudValidator {
 
   private def getRelatedInstances(streamName: String) = {
     instanceDAO.getAll.filter {
-      (instance: Instance) =>
+      (instance: InstanceDomain) =>
         if (!instance.moduleType.equals(inputStreamingType)) {
           instance.getInputsWithoutStreamMode().contains(streamName) || instance.outputs.contains(streamName)
         } else {

@@ -6,7 +6,7 @@ import com.bwsw.sj.engine.regular.module.DataFactory._
 import scala.collection.JavaConverters._
 
 object SjRegularModuleStatelessKafkaChecker extends App {
-  val streamService = ConnectionRepository.getStreamService
+  val streamService = ConnectionRepository.getStreamRepository
   val objectSerializer = new ObjectSerializer()
 
   val inputConsumer = createInputKafkaConsumer(inputCount, partitions)

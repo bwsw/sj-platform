@@ -3,15 +3,14 @@ package com.bwsw.sj.crud.rest
 import akka.http.scaladsl.model.EntityStreamSizeException
 import akka.http.scaladsl.server.{Directives, ExceptionHandler, Route}
 import com.bwsw.sj.common.rest.{InternalServerErrorRestResponse, KeyedMessageResponseEntity, MessageResponseEntity, NotFoundRestResponse}
-import com.bwsw.sj.crud.rest.routes._
+import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.crud.rest.cors.CorsSupport
 import com.bwsw.sj.crud.rest.exceptions._
+import com.bwsw.sj.crud.rest.routes._
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
 import org.everit.json.schema.ValidationException
 
 import scala.concurrent.duration._
-import com.bwsw.sj.common.rest.utils.ValidationUtils._
-import com.bwsw.sj.common.utils.MessageResourceUtils._
 
 /**
  * Route for CRUD Rest-API
@@ -66,12 +65,12 @@ with SjConfigurationSettingsRoute {
       corsHandler {
         pathPrefix("v1") {
           withRequestTimeout(30.seconds) {
-            modulesApi ~
-              customApi ~
-              streamsApi ~
-              servicesApi ~
-              providersApi ~
-              configSettingsApi
+            modulesRoute ~
+              customRoute ~
+              streamsRoute ~
+              servicesRoute ~
+              providersRoute ~
+              configSettingsRoute
           }
         }
       }

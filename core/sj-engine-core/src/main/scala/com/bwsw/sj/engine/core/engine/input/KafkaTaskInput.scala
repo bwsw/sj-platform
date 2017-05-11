@@ -3,8 +3,8 @@ package com.bwsw.sj.engine.core.engine.input
 import java.util.Properties
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.common.dal.model.service.KafkaService
-import com.bwsw.sj.common.dal.model.stream.{SjStream, TStreamSjStream}
+import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
+import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
@@ -39,11 +39,11 @@ trait KafkaTaskInput[T <: AnyRef] {
 
   protected val kafkaConsumer = createSubscribingKafkaConsumer(
     kafkaInputs.map(x => (x._1.name, x._2.toList)).toList,
-    kafkaInputs.flatMap(_._1.service.asInstanceOf[KafkaService].provider.hosts).toList,
+    kafkaInputs.flatMap(_._1.service.asInstanceOf[KafkaServiceDomain].provider.hosts).toList,
     chooseOffset()
   )
 
-  protected def getKafkaInputs(): mutable.Map[SjStream, Array[Int]] = {
+  protected def getKafkaInputs(): mutable.Map[StreamDomain, Array[Int]] = {
     manager.inputs.filter(x => x._1.streamType == StreamLiterals.kafkaStreamType)
   }
 
@@ -54,7 +54,7 @@ trait KafkaTaskInput[T <: AnyRef] {
     * @return SJStream is responsible for committing the offsets of last messages
     *         that has successfully processed for each topic for each partition
     */
-  protected def createOffsetStream(): TStreamSjStream = {
+  protected def createOffsetStream(): TStreamStreamDomain = {
     logger.debug(s"Task name: ${manager.taskName}. Get stream for keeping kafka offsets.")
     val description = "store kafka offsets of input streams"
     val tags = Array("offsets")
@@ -158,7 +158,7 @@ trait KafkaTaskInput[T <: AnyRef] {
 
   protected def applyConfigurationSettings(properties: Properties) = {
     logger.debug(s"Task name: ${manager.taskName}. Get setting (using a config service) for kafka consumer and apply them.")
-    val configService = ConnectionRepository.getConfigService
+    val configService = ConnectionRepository.getConfigRepository
 
     val kafkaSettings = configService.getByParameters(Map("domain" -> ConfigLiterals.kafkaDomain))
     kafkaSettings.foreach(x => properties.put(clearConfigurationSettingName(x.domain, x.name), x.value))

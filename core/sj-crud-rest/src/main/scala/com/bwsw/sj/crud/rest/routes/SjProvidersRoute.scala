@@ -1,15 +1,13 @@
 package com.bwsw.sj.crud.rest.routes
 
 import akka.http.scaladsl.server.{Directives, RequestContext}
-import com.bwsw.sj.common.rest._
-import com.bwsw.sj.common.utils.ProviderLiterals
 import com.bwsw.sj.crud.rest.controller.ProviderController
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
 trait SjProvidersRoute extends Directives with SjCrudValidator {
   private val providerController = new ProviderController()
 
-  val providersApi = {
+  val providersRoute = {
     pathPrefix("providers") {
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>
@@ -25,9 +23,7 @@ trait SjProvidersRoute extends Directives with SjCrudValidator {
         pathPrefix("_types") {
           pathEndOrSingleSlash {
             get {
-              val response = OkRestResponse(TypesResponseEntity(ProviderLiterals.types))
-
-              complete(restResponseToHttpResponse(response))
+              complete(restResponseToHttpResponse(providerController.getTypes()))
             }
           }
         } ~

@@ -1,6 +1,7 @@
 package com.bwsw.sj.mesos.framework.task
 
 import com.bwsw.sj.common.dal.ConnectionConstants
+import com.bwsw.sj.common.dal.model.instance._
 import com.bwsw.sj.common.dal.model.module._
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.FrameworkRestEntity
@@ -12,6 +13,7 @@ import org.apache.mesos.Protos.{TaskID, TaskInfo, _}
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+import scala.util.{Failure, Success, Try}
 
 object TasksList {
   /***
@@ -63,7 +65,7 @@ object TasksList {
   }
 
   def killTask(taskId: String): ListBuffer[String] = {
-    FrameworkUtil.driver.killTask(TaskID.newBuilder().setValue(taskId).build)
+    FrameworkUtil.driver.get.killTask(TaskID.newBuilder().setValue(taskId).build)
     stopped(taskId)
   }
 
@@ -107,19 +109,19 @@ object TasksList {
     this.message = message
   }
 
-  def prepare(instance: Instance): Unit = {
-    perTaskCores = FrameworkUtil.instance.perTaskCores
-    perTaskMem = FrameworkUtil.instance.perTaskRam
-    perTaskPortsCount = FrameworkUtil.getCountPorts(FrameworkUtil.instance)
+  def prepare(instance: InstanceDomain): Unit = {
+    perTaskCores = FrameworkUtil.instance.get.perTaskCores
+    perTaskMem = FrameworkUtil.instance.get.perTaskRam
+    perTaskPortsCount = FrameworkUtil.getCountPorts(FrameworkUtil.instance.get)
 
-    val tasks = FrameworkUtil.instance.moduleType match {
+    val tasks = FrameworkUtil.instance.get.moduleType match {
       case EngineLiterals.inputStreamingType =>
-        (0 until FrameworkUtil.instance.parallelism).map(tn => FrameworkUtil.instance.name + "-task" + tn)
+        (0 until FrameworkUtil.instance.get.parallelism).map(tn => FrameworkUtil.instance.get.name + "-task" + tn)
       case _ =>
-        val executionPlan = FrameworkUtil.instance match {
-          case regularInstance: RegularInstance => regularInstance.executionPlan
-          case outputInstance: OutputInstance => outputInstance.executionPlan
-          case batchInstance: BatchInstance => batchInstance.executionPlan
+        val executionPlan = FrameworkUtil.instance.get match {
+          case regularInstance: RegularInstanceDomain => regularInstance.executionPlan
+          case outputInstance: OutputInstanceDomain => outputInstance.executionPlan
+          case batchInstance: BatchInstanceDomain => batchInstance.executionPlan
         }
         executionPlan.tasks.asScala.keys
     }
@@ -146,19 +148,54 @@ object TasksList {
 
       var availablePorts = ports.getRanges.getRangeList.asScala.map(_.getBegin.toString)
 
-      val host = OffersHandler.getOfferIp(offer)
-      TasksList(task).foreach(task => task.update(host=host))
-      if (FrameworkUtil.instance.moduleType.equals(EngineLiterals.inputStreamingType)) {
-        taskPort = availablePorts.head
-        availablePorts = availablePorts.tail
-        val inputInstance = FrameworkUtil.instance.asInstanceOf[InputInstance]
-        inputInstance.tasks.put(task, new InputTask(host, taskPort.toInt))
-        ConnectionRepository.getInstanceService.save(FrameworkUtil.instance)
-      }
+    val host = OffersHandler.getOfferIp(offer)
+    TasksList(task).foreach(task => task.update(host=host))
+    if (FrameworkUtil.instance.get.moduleType.equals(EngineLiterals.inputStreamingType)) {
+      taskPort = availablePorts.head
+      availablePorts = availablePorts.tail
+      val inputInstance = FrameworkUtil.instance.get.asInstanceOf[InputInstanceDomain]
+      inputInstance.tasks.put(task, new InputTask(host, taskPort.toInt))
+      ConnectionRepository.getInstanceRepository.save(FrameworkUtil.instance.get)
+    }
 
       agentPorts = availablePorts.mkString(",")
       agentPorts.dropRight(1)
     }
+
+    logger.debug(s"Task: $task. Ports for task: ${availablePorts.mkString(",")}.")
+
+    val cmd = CommandInfo.newBuilder()
+    val hosts: collection.mutable.ListBuffer[String] = collection.mutable.ListBuffer()
+    TasksList.toLaunch.foreach(task =>
+      if (TasksList.getTask(task).host.nonEmpty) hosts.append(TasksList.getTask(task).host.get)
+    )
+
+    var environmentVariables = List(
+//      Environment.Variable.newBuilder.setName("MONGO_HOSTS").setValue(FrameworkUtil.params {"mongodbHosts"}),
+      Environment.Variable.newBuilder.setName("INSTANCE_NAME").setValue(FrameworkUtil.params {"instanceId"}),
+      Environment.Variable.newBuilder.setName("TASK_NAME").setValue(task),
+      Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(OffersHandler.getOfferIp(offer)),
+      Environment.Variable.newBuilder.setName("AGENTS_PORTS").setValue(agentPorts),
+      Environment.Variable.newBuilder.setName("INSTANCE_HOSTS").setValue(hosts.mkString(","))
+    )
+    ConnectionConstants.mongoEnvironment.foreach(variable =>
+      environmentVariables = environmentVariables :+ Environment.Variable.newBuilder.setName(variable._1).setValue(variable._2)
+    )
+
+    Try {
+      val environments = Environment.newBuilder
+      environmentVariables.foreach(variable => environments.addVariables(variable))
+
+      val jvmOptions = FrameworkUtil.instance.get.jvmOptions.asScala
+        .foldLeft("")((acc, option) => s"$acc ${option._1}${option._2}")
+      cmd
+        .addUris(CommandInfo.URI.newBuilder.setValue(FrameworkUtil.getModuleUrl(FrameworkUtil.instance.get)))
+        .setValue("java " + jvmOptions + " -jar " + FrameworkUtil.jarName.get)
+        .setEnvironment(environments)
+    } match {
+      case Success(_) =>
+      case Failure(e: Exception) => FrameworkUtil.handleSchedulerException(e, logger)
+      case Failure(e) => throw e
 
     def getInstanceHosts: String = {
       val hosts: collection.mutable.ListBuffer[String] = collection.mutable.ListBuffer()

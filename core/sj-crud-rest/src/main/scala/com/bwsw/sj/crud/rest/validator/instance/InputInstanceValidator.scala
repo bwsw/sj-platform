@@ -1,7 +1,7 @@
 package com.bwsw.sj.crud.rest.validator.instance
 
-import com.bwsw.sj.common.dal.model.service.TStreamService
-import com.bwsw.sj.common.rest.model.module.{InputInstanceData, InstanceData, SpecificationData}
+import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
+import com.bwsw.sj.common.rest.model.module.{InputInstanceApi, InstanceApi, SpecificationApi}
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.StreamLiterals.tstreamType
@@ -24,12 +24,12 @@ class InputInstanceValidator extends InstanceValidator {
     * @param parameters - input parameters for running module
     * @return - List of errors
     */
-  override def validate(parameters: InstanceData,
-                        specification: SpecificationData) = {
+  override def validate(parameters: InstanceApi,
+                        specification: SpecificationApi) = {
     logger.debug(s"Instance: ${parameters.name}. Start a validation of instance of input-streaming type.")
     val errors = new ArrayBuffer[String]()
     errors ++= super.validateGeneralOptions(parameters)
-    val inputInstanceMetadata = parameters.asInstanceOf[InputInstanceData]
+    val inputInstanceMetadata = parameters.asInstanceOf[InputInstanceApi]
 
     // 'checkpoint-mode' field
     Option(inputInstanceMetadata.checkpointMode) match {
@@ -85,8 +85,8 @@ class InputInstanceValidator extends InstanceValidator {
     errors
   }
 
-  def validateStreamOptions(instance: InputInstanceData,
-                            specification: SpecificationData) = {
+  def validateStreamOptions(instance: InputInstanceApi,
+                            specification: SpecificationApi) = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     val errors = new ArrayBuffer[String]()
 
@@ -119,8 +119,8 @@ class InputInstanceValidator extends InstanceValidator {
       if (tStreamsServices.size > 1) {
         errors += createMessage("rest.validator.t_stream.same.service")
       } else {
-        val service = serviceDAO.get(tStreamsServices.head)
-        if (!service.get.isInstanceOf[TStreamService]) {
+        val service = serviceRepository.get(tStreamsServices.head)
+        if (!service.get.isInstanceOf[TStreamServiceDomain]) {
           errors += createMessage("rest.validator.service.must", "t-streams", "TstrQ")
         }
       }
@@ -142,7 +142,7 @@ class InputInstanceValidator extends InstanceValidator {
     errors
   }
 
-  private def checkBackupNumber(parameters: InputInstanceData, errors: ArrayBuffer[String]) = {
+  private def checkBackupNumber(parameters: InputInstanceApi, errors: ArrayBuffer[String]) = {
     val parallelism = parameters.parallelism.asInstanceOf[Int]
     if (parallelism <= 0) {
       errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Parallelism")

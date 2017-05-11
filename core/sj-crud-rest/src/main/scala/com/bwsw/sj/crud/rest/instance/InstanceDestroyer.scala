@@ -1,9 +1,11 @@
 package com.bwsw.sj.crud.rest.instance
 
-import com.bwsw.sj.common.dal.model.module.Instance
+import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import org.slf4j.LoggerFactory
+
+import scala.util.{Failure, Success, Try}
 
 /**
   * One-thread deleting object for instance
@@ -11,23 +13,24 @@ import org.slf4j.LoggerFactory
   *
   * @author Kseniya Tomskikh
   */
-class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable with InstanceManager {
+class InstanceDestroyer(instance: InstanceDomain, delay: Long = 1000) extends Runnable with InstanceManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
-  private val instanceDAO = ConnectionRepository.getInstanceService
+  private val instanceRepository = ConnectionRepository.getInstanceRepository
   private val frameworkName = getFrameworkName(instance)
 
   import EngineLiterals._
 
   def run() = {
-    try {
+    Try {
       logger.info(s"Instance: '${instance.name}'. Destroy an instance.")
       updateInstanceStatus(instance, deleting)
       deleteFramework()
       deleteInstance()
       close()
-      logger.info(s"Instance: '${instance.name}' has been destroyed.")
-    } catch {
-      case e: Exception =>
+    } match {
+      case Success(_) =>
+        logger.info(s"Instance: '${instance.name}' has been destroyed.")
+      case Failure(e) =>
         logger.error(s"Instance: '${instance.name}'. Instance is failed during the destroying process.", e)
         updateInstanceStatus(instance, error)
         close()
@@ -67,6 +70,6 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable
   }
 
   private def deleteInstance() = {
-    instanceDAO.delete(instance.name)
+    instanceRepository.delete(instance.name)
   }
 }

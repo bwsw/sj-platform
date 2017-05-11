@@ -13,9 +13,9 @@ import com.fasterxml.jackson.annotation.JsonProperty
   */
 class PerformanceMetrics extends OutputEnvelope {
   val jsonSerializer = new JsonSerializer()
-  @JsonProperty("pm-datetime") var pmDatetime: Date = null
-  @JsonProperty("task-id") var taskId: String= null
-  var host: String = null
+  @JsonProperty("pm-datetime") var pmDatetime: Date = _
+  @JsonProperty("task-id") var taskId: String= _
+  var host: String = _
   @JsonProperty("total-input-envelopes") var totalInputEnvelopes: Int = 0
   @JsonProperty("total-input-elements") var totalInputElements: Int = 0
   @JsonProperty("total-input-bytes") var totalInputBytes: Int = 0
@@ -41,8 +41,8 @@ class PerformanceMetrics extends OutputEnvelope {
   @JsonProperty("output-bytes-per-stream") var outputBytesPerStream: Map[String, Any] = Map()
   @JsonProperty("state-variables-number") var stateVariablesNumber: Int = 0
 
-  @JsonProperty("input-stream-name") var inputStreamName: String = null
-  @JsonProperty("output-stream-name") var outputStreamName:  String = null
+  @JsonProperty("input-stream-name") var inputStreamName: String = _
+  @JsonProperty("output-stream-name") var outputStreamName:  String = _
 
   def getFieldsValue: Map[String, Any] = {
     Map(

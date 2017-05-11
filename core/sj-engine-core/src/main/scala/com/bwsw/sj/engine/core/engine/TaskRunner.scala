@@ -5,6 +5,8 @@ import java.util.concurrent.{ExecutorCompletionService, ExecutorService, Executo
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import org.slf4j.LoggerFactory
 
+import scala.util.{Failure, Success, Try}
+
 /**
   * Prepare a thread factory,
   * an executor service (for launching a task engine of specific type, a performance metrics and a specific input service for consuming incoming messages)
@@ -45,7 +47,7 @@ trait TaskRunner {
 
   def waitForCompletion(): Unit = {
     var i = 0
-    try {
+    Try {
       while (i < countOfThreads) {
         executorService.take().get()
         i += 1
@@ -53,9 +55,10 @@ trait TaskRunner {
 
       threadPool.shutdownNow()
       System.exit(-1)
-    } catch {
-      case requiringError: IllegalArgumentException => handleException(requiringError)
-      case exception: Exception => handleException(exception)
+    } match {
+      case Success(_) =>
+      case Failure(requiringError: IllegalArgumentException) => handleException(requiringError)
+      case Failure(exception) => handleException(exception)
     }
   }
 }

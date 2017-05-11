@@ -3,22 +3,22 @@ package com.bwsw.sj.engine.output.processing
 import java.sql.PreparedStatement
 
 import com.bwsw.common.jdbc.JdbcClientBuilder
-import com.bwsw.sj.common.dal.model.service.JDBCService
-import com.bwsw.sj.common.dal.model.stream.{JDBCSjStream, SjStream}
+import com.bwsw.sj.common.dal.model.service.JDBCServiceDomain
+import com.bwsw.sj.common.dal.model.stream.{JDBCStreamDomain, StreamDomain}
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.output.Entity
 import com.bwsw.sj.engine.core.output.types.jdbc.JdbcCommandBuilder
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 
-class JdbcOutputProcessor[T <: AnyRef](outputStream: SjStream,
+class JdbcOutputProcessor[T <: AnyRef](outputStream: StreamDomain,
                                        performanceMetrics: OutputStreamingPerformanceMetrics,
                                        manager: OutputTaskManager,
                                        entity: Entity[_])
   extends OutputProcessor[T](outputStream, performanceMetrics) {
 
-  private val jdbcStream = outputStream.asInstanceOf[JDBCSjStream]
-  private val jdbcService = outputStream.service.asInstanceOf[JDBCService]
+  private val jdbcStream = outputStream.asInstanceOf[JDBCStreamDomain]
+  private val jdbcService = outputStream.service.asInstanceOf[JDBCServiceDomain]
   private val jdbcClient = createClient()
   private val jdbcCommandBuilder = new JdbcCommandBuilder(jdbcClient, transactionFieldName, entity.asInstanceOf[Entity[(PreparedStatement, Int) => Unit]])
   jdbcClient.start()

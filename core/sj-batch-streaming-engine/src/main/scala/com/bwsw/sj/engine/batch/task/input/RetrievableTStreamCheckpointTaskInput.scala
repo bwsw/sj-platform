@@ -2,8 +2,8 @@ package com.bwsw.sj.engine.batch.task.input
 
 import java.util.Date
 
-import com.bwsw.sj.common.dal.model.module.BatchInstance
-import com.bwsw.sj.common.dal.model.stream.TStreamSjStream
+import com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain
+import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.EnvelopeDataSerializer
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
@@ -28,7 +28,7 @@ class RetrievableTStreamCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMana
                                                          override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
   extends RetrievableCheckpointTaskInput[TStreamEnvelope[T]](manager.inputs) {
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val instance = manager.instance.asInstanceOf[BatchInstance]
+  private val instance = manager.instance.asInstanceOf[BatchInstanceDomain]
   private val tstreamOffsetsStorage = mutable.Map[(String, Int), Long]()
   private val envelopeDataSerializer = manager.envelopeDataSerializer.asInstanceOf[EnvelopeDataSerializer[T]]
   private val consumers = createConsumers()
@@ -41,7 +41,7 @@ class RetrievableTStreamCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMana
     val offset = chooseOffset(instance.startFrom)
 
     val consumers = inputs.filter(x => x._1.streamType == StreamLiterals.tstreamType)
-      .map(x => (x._1.asInstanceOf[TStreamSjStream], x._2.toList))
+      .map(x => (x._1.asInstanceOf[TStreamStreamDomain], x._2.toList))
       .map(x => manager.createConsumer(x._1, x._2, offset))
       .map(x => (x.name, x)).toMap
     logger.debug(s"Task: ${manager.taskName}. Creation of consumers is finished.")
@@ -81,7 +81,7 @@ class RetrievableTStreamCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMana
   }
 
   private def transactionsToEnvelopes(transactions: Seq[ConsumerTransaction], consumer: Consumer): Seq[TStreamEnvelope[T]] = {
-    val stream = ConnectionRepository.getStreamService.get(consumer.stream.name).get
+    val stream = ConnectionRepository.getStreamRepository.get(consumer.stream.name).get
     transactions.map((transaction: ConsumerTransaction) => {
       val tempTransaction = consumer.buildTransactionObject(transaction.getPartition(), transaction.getTransactionID(), transaction.getCount()).get //todo fix it next milestone TR1216
       tstreamOffsetsStorage((consumer.name, tempTransaction.getPartition())) = tempTransaction.getTransactionID()

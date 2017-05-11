@@ -3,12 +3,12 @@ package com.bwsw.sj.common.dal.repository
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.sj.common.dal.ConnectionConstants
 import com.bwsw.sj.common.dal.model._
-import com.bwsw.sj.common.dal.model.module.{FileMetadata, Instance}
-import com.bwsw.sj.common.dal.model.provider.Provider
-import com.bwsw.sj.common.dal.model.service.Service
-import com.bwsw.sj.common.dal.model.stream.SjStream
+import com.bwsw.sj.common.dal.model.instance.InstanceDomain
+import com.bwsw.sj.common.dal.model.module.FileMetadata
+import com.bwsw.sj.common.dal.model.provider.ProviderDomain
+import com.bwsw.sj.common.dal.model.service.ServiceDomain
+import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.morphia.CustomMorphiaObjectFactory
-import com.bwsw.sj.common.dal.service.GenericMongoRepository
 import com.mongodb.MongoClient
 import org.mongodb.morphia.Morphia
 import org.mongodb.morphia.dao.BasicDAO
@@ -38,44 +38,44 @@ object ConnectionRepository {
 
   private lazy val fileStorage: MongoFileStorage = new MongoFileStorage(mongoConnection(databaseName))
 
-  private lazy val fileMetadataService = new GenericMongoRepository[FileMetadata]()
+  private lazy val fileMetadataRepository = new GenericMongoRepository[FileMetadata]()
 
-  private lazy val instanceService = new GenericMongoRepository[Instance]()
+  private lazy val instanceRepository = new GenericMongoRepository[InstanceDomain]()
 
-  private lazy val streamService = new GenericMongoRepository[SjStream]()
+  private lazy val streamRepository = new GenericMongoRepository[StreamDomain]()
 
-  private lazy val serviceManager = new GenericMongoRepository[Service]()
+  private lazy val serviceRepository = new GenericMongoRepository[ServiceDomain]()
 
-  private lazy val providerService = new GenericMongoRepository[Provider]()
+  private lazy val providerRepository = new GenericMongoRepository[ProviderDomain]()
 
-  private lazy val configService = new GenericMongoRepository[ConfigurationSetting]()
+  private lazy val configRepository = new GenericMongoRepository[ConfigurationSettingDomain]()
 
-  def getFileMetadataService: GenericMongoRepository[FileMetadata] = {
-    fileMetadataService
+  def getFileMetadataRepository: GenericMongoRepository[FileMetadata] = {
+    fileMetadataRepository
   }
 
-  def getConfigService: GenericMongoRepository[ConfigurationSetting] = {
-    configService
+  def getConfigRepository: GenericMongoRepository[ConfigurationSettingDomain] = {
+    configRepository
   }
 
-  def getInstanceService: GenericMongoRepository[Instance] = {
-    instanceService
+  def getInstanceRepository: GenericMongoRepository[InstanceDomain] = {
+    instanceRepository
   }
 
   def getFileStorage: MongoFileStorage = {
     fileStorage
   }
 
-  def getStreamService: GenericMongoRepository[SjStream] = {
-    streamService
+  def getStreamRepository: GenericMongoRepository[StreamDomain] = {
+    streamRepository
   }
 
-  def getServiceManager: GenericMongoRepository[Service] = {
-    serviceManager
+  def getServiceRepository: GenericMongoRepository[ServiceDomain] = {
+    serviceRepository
   }
 
-  def getProviderService: GenericMongoRepository[Provider] = {
-    providerService
+  def getProviderRepository: GenericMongoRepository[ProviderDomain] = {
+    providerRepository
   }
 
   def close(): Unit = {

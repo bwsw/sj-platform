@@ -13,7 +13,7 @@ class JdbcCommandBuilder(client: IJdbcClient, transactionFieldName: String, enti
     * Create a select prepared statement according to txn field
     */
   def select: PreparedStatement = {
-    val sqlSelect = s"SELECT * FROM ${client.jdbcCCD.table} WHERE $transactionFieldName = ?"
+    val sqlSelect = s"SELECT * FROM ${client.jdbcCCD.table.get} WHERE $transactionFieldName = ?"
     client.createPreparedStatement(sqlSelect)
   }
 
@@ -21,7 +21,7 @@ class JdbcCommandBuilder(client: IJdbcClient, transactionFieldName: String, enti
     * Create a remove prepared statement according to txn field
     */
   def delete: PreparedStatement = {
-    val sqlRemove = s"DELETE FROM ${client.jdbcCCD.table} WHERE $transactionFieldName = ?"
+    val sqlRemove = s"DELETE FROM ${client.jdbcCCD.table.get} WHERE $transactionFieldName = ?"
     client.createPreparedStatement(sqlRemove)
   }
 
@@ -31,7 +31,7 @@ class JdbcCommandBuilder(client: IJdbcClient, transactionFieldName: String, enti
   def insert: PreparedStatement = {
     val fields = entity.getFields.mkString(",") + "," + transactionFieldName
     val fieldsParams = List.fill(fields.split(",").length)("?").mkString(",")
-    val sqlInsert = s"INSERT INTO ${client.jdbcCCD.table} ($fields) VALUES ($fieldsParams)"
+    val sqlInsert = s"INSERT INTO ${client.jdbcCCD.table.get} ($fields) VALUES ($fieldsParams)"
     client.createPreparedStatement(sqlInsert)
   }
 

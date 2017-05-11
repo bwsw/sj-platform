@@ -10,10 +10,11 @@ import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.stream.scaladsl.FileIO
 import akka.util.ByteString
-import com.bwsw.sj.common.dal.model.ConfigurationSetting
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
+import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.rest._
+import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.crud.rest.RestLiterals
 import com.bwsw.sj.crud.rest.exceptions.CustomJarNotFound
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
@@ -22,9 +23,7 @@ import org.apache.commons.io.FileUtils
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import scala.util.{Failure, Success}
-import com.bwsw.sj.common.rest.utils.ValidationUtils._
-import com.bwsw.sj.common.utils.MessageResourceUtils._
+import scala.util.{Failure, Success, Try}
 
 /**
   * Rest-api for sj-platform executive units and custom files
@@ -64,7 +63,7 @@ trait SjCustomRoute extends Directives with SjCrudValidator {
       )).nonEmpty
   }
 
-  val customApi = {
+  val customRoute = {
     pathPrefix("custom") {
       pathPrefix("jars") {
         pathPrefix(Segment) { (name: String) =>
@@ -146,7 +145,7 @@ trait SjCustomRoute extends Directives with SjCrudValidator {
             post {
               uploadedFile("jar") {
                 case (metadata: FileInfo, file: File) =>
-                  try {
+                  val result = Try {
                     var response: RestResponse = ConflictRestResponse(MessageResponseEntity(
                       createMessage("rest.custom.jars.file.exists", metadata.fileName)))
 
@@ -163,7 +162,7 @@ trait SjCustomRoute extends Directives with SjCrudValidator {
                           FileUtils.copyFile(file, uploadingFile)
                           storage.put(uploadingFile, metadata.fileName, specification, "custom")
                           val name = specification("name").toString + "-" + specification("version").toString
-                          val customJarConfigElement = new ConfigurationSetting(
+                          val customJarConfigElement = new ConfigurationSettingDomain(
                             createConfigurationSettingName(ConfigLiterals.systemDomain, name),
                             metadata.fileName,
                             ConfigLiterals.systemDomain
@@ -175,9 +174,12 @@ trait SjCustomRoute extends Directives with SjCrudValidator {
                       }
                     }
 
-                    complete(restResponseToHttpResponse(response))
-                  } finally {
-                    file.delete()
+                    response
+                  }
+                  file.delete()
+                  result match {
+                    case Success(response) => complete(restResponseToHttpResponse(response))
+                    case Failure(e) => throw e
                   }
               }
             } ~

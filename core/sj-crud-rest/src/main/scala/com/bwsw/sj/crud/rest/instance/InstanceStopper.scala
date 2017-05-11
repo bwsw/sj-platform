@@ -1,12 +1,12 @@
 package com.bwsw.sj.crud.rest.instance
 
-import com.bwsw.sj.common.dal.model.module.{InputInstance, Instance}
+import com.bwsw.sj.common.dal.model.instance.{InputInstanceDomain, InstanceDomain}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.crud.rest.marathon.MarathonApplicationById
-import org.apache.http.client.methods.CloseableHttpResponse
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
+import scala.util.{Failure, Success, Try}
 
 /**
   * One-thread stopper object for instance
@@ -14,22 +14,22 @@ import scala.collection.JavaConverters._
   *
   * @author Kseniya Tomskikh
   */
-class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable with InstanceManager {
+class InstanceStopper(instance: InstanceDomain, delay: Long = 1000) extends Runnable with InstanceManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
   private val frameworkName = getFrameworkName(instance)
 
   import EngineLiterals._
 
   def run() = {
-    try {
+    Try {
       logger.info(s"Instance: '${instance.name}'. Stop an instance.")
       updateInstanceStatus(instance, stopping)
       stopFramework()
       markInstanceAsStopped()
       close()
-      logger.info(s"Instance: '${instance.name}' has been stopped.")
-    } catch {
-      case e: Exception =>
+    } match {
+      case Success(_) => logger.info(s"Instance: '${instance.name}' has been stopped.")
+      case Failure(e) =>
         logger.error(s"Instance: '${instance.name}'. Instance is failed during the stopping process.", e)
         updateInstanceStatus(instance, error)
         close()
@@ -89,6 +89,6 @@ class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable w
 
   private def clearTasks() = {
     logger.debug(s"Instance: '${instance.name}'. Clear the input instance tasks.")
-    instance.asInstanceOf[InputInstance].tasks.asScala.foreach(x => x._2.clear())
+    instance.asInstanceOf[InputInstanceDomain].tasks.asScala.foreach(x => x._2.clear())
   }
 }
