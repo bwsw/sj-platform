@@ -1,5 +1,6 @@
 package com.bwsw.sj.common.si.model.stream
 
+import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.sj.common.dal.model.service.ESServiceDomain
 import com.bwsw.sj.common.dal.model.stream.ESStreamDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
@@ -27,6 +28,9 @@ class ESStream(name: String,
       tags)
   }
 
+  override def create(): Unit =
+    if (force) clearEsStream()
+
   override def validate(): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
     errors ++= super.validateGeneralFields()
@@ -51,5 +55,18 @@ class ESStream(name: String,
     }
 
     errors
+  }
+
+  private def clearEsStream(): Unit = {
+    val serviceDAO = ConnectionRepository.getServiceRepository
+    val service = serviceDAO.get(this.service).get.asInstanceOf[ESServiceDomain]
+    val hosts = service.provider.hosts.map { host =>
+      val parts = host.split(":")
+      (parts(0), parts(1).toInt)
+    }.toSet
+    val client = new ElasticsearchClient(hosts)
+    client.deleteDocuments(service.index, this.name)
+
+    client.close()
   }
 }

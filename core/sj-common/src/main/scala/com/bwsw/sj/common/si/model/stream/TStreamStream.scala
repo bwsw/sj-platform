@@ -5,7 +5,9 @@ import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
+import com.bwsw.tstreams.common.StorageClient
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
+import com.bwsw.tstreams.streams.Stream
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -28,6 +30,26 @@ class TStreamStream(name: String,
       description,
       force,
       tags)
+  }
+
+  override def create(): Unit = {
+    val serviceDAO = ConnectionRepository.getServiceRepository
+    val service = serviceDAO.get(this.service).get.asInstanceOf[TStreamServiceDomain]
+    val tstreamFactory = new TStreamsFactory()
+    tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Auth.key, service.token)
+      .setProperty(ConfigurationOptions.Coordination.endpoints, service.provider.hosts.mkString(","))
+      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, service.provider.hosts.mkString(","))
+      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, service.prefix)
+
+    val storageClient = tstreamFactory.getStorageClient()
+    if (doesStreamHaveForcedCreation(storageClient)) {
+      storageClient.deleteStream(name)
+      createTStream(storageClient)
+    } else {
+      if (!doesTopicExist(storageClient)) createTStream(storageClient)
+    }
+
+    storageClient.shutdown()
   }
 
   override def validate(): ArrayBuffer[String] = {
@@ -86,4 +108,13 @@ class TStreamStream(name: String,
 
     errors
   }
+
+  private def doesStreamHaveForcedCreation(storageClient: StorageClient): Boolean =
+    doesTopicExist(storageClient) && force
+
+  private def doesTopicExist(storageClient: StorageClient): Boolean =
+    storageClient.checkStreamExists(name)
+
+  private def createTStream(storageClient: StorageClient): Stream =
+    storageClient.createStream(name, partitions, StreamLiterals.ttl, description)
 }

@@ -1,5 +1,7 @@
 package com.bwsw.sj.common.si.model.stream
 
+import java.util.Properties
+
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import com.bwsw.sj.common.dal.model.stream.KafkaStreamDomain
@@ -7,10 +9,13 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
 import kafka.admin.AdminUtils
+import kafka.common.TopicAlreadyMarkedForDeletionException
 import kafka.utils.ZkUtils
 import org.I0Itec.zkclient.ZkConnection
+import org.apache.kafka.common.errors.TopicExistsException
 
 import scala.collection.mutable.ArrayBuffer
+import scala.util.{Failure, Success, Try}
 
 class KafkaStream(name: String,
                   service: String,
@@ -33,6 +38,25 @@ class KafkaStream(name: String,
       description,
       force,
       tags)
+  }
+
+  override def create(): Unit = {
+    Try {
+      val zkUtils = createZkUtils()
+      if (doesStreamHaveForcedCreation(zkUtils)) {
+        deleteTopic(zkUtils)
+        createTopic(zkUtils)
+      } else {
+        if (!doesTopicExist(zkUtils)) createTopic(zkUtils)
+      }
+    } match {
+      case Success(_) =>
+      case Failure(_: TopicAlreadyMarkedForDeletionException) =>
+        throw new Exception(s"Cannot delete a kafka topic '$name'. Topic is already marked for deletion. It means that kafka doesn't support deletion")
+      case Failure(_: TopicExistsException) =>
+        throw new Exception(s"Cannot create a kafka topic '$name'. Topic is marked for deletion. It means that kafka doesn't support deletion")
+      case Failure(e) => throw e
+    }
   }
 
   override def validate(): ArrayBuffer[String] = {
@@ -93,4 +117,16 @@ class KafkaStream(name: String,
 
     zkUtils
   }
+
+  private def doesStreamHaveForcedCreation(zkUtils: ZkUtils): Boolean =
+    doesTopicExist(zkUtils) && force
+
+  private def doesTopicExist(zkUtils: ZkUtils): Boolean =
+    AdminUtils.topicExists(zkUtils, name)
+
+  private def deleteTopic(zkUtils: ZkUtils): Unit =
+    AdminUtils.deleteTopic(zkUtils, this.name)
+
+  private def createTopic(zkUtils: ZkUtils): Unit =
+    AdminUtils.createTopic(zkUtils, name, partitions, replicationFactor, new Properties())
 }
