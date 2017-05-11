@@ -7,19 +7,19 @@ import org.apache.avro.Schema
   * @author Pavel Tomskikh
   */
 trait AvroSchemaForInstanceMetadata {
-  var inputAvroSchema: Option[Map[String, Any]] = None
+  var inputAvroSchema: Map[String, Any] = Map()
 
   def validateAvroSchema: Boolean = {
     val schemaParser = new Schema.Parser()
     val serializer = new JsonSerializer()
-    inputAvroSchema match {
-      case Some(s) => try {
+    Option(inputAvroSchema) match {
+      case Some(s) if s.nonEmpty => try {
         schemaParser.parse(serializer.serialize(s))
         true
       } catch {
         case _: Throwable => false
       }
-      case None => true
+      case _ => true
     }
   }
 }

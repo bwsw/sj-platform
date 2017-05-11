@@ -27,10 +27,8 @@ class OutputInstanceApi extends InstanceApi with AvroSchemaForInstanceMetadata{
     modelInstance.startFrom = this.startFrom
     modelInstance.executionPlan = this.executionPlan
 
-    modelInstance.inputAvroSchema = this.inputAvroSchema.map { s =>
-      val serializer = new JsonSerializer()
-      serializer.serialize(s)
-    }
+    val serializer = new JsonSerializer()
+    modelInstance.inputAvroSchema = serializer.serialize(this.inputAvroSchema)
 
     modelInstance
   }

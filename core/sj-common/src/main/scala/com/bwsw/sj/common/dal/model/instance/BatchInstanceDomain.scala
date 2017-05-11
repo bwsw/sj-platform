@@ -43,10 +43,8 @@ class BatchInstanceDomain(override val name: String,
     protocolInstance.outputs = this.outputs
     protocolInstance.startFrom = this.startFrom
 
-    protocolInstance.inputAvroSchema = this.inputAvroSchema.map { s =>
-      val serializer = new JsonSerializer()
-      serializer.deserialize[Map[String, Any]](s)
-    }
+    val serializer = new JsonSerializer()
+    protocolInstance.inputAvroSchema = serializer.deserialize[Map[String, Any]](this.inputAvroSchema)
 
     protocolInstance
   }
