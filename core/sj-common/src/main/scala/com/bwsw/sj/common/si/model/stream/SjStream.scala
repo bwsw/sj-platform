@@ -106,5 +106,17 @@ object SjStream {
         jdbcStream.streamType,
         jdbcStream.description
       )
+
+    case StreamLiterals.esOutputType =>
+      val esStream = streamDomain.asInstanceOf[ESStreamDomain]
+
+      new ESStream(
+        esStream.name,
+        esStream.service.name,
+        esStream.tags,
+        esStream.force,
+        esStream.streamType,
+        esStream.description
+      )
   }
 }
