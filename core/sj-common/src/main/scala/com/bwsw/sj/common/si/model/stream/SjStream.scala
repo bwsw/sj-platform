@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.si.model.stream
 
-import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
+import com.bwsw.sj.common.dal.model.stream.{RestStreamDomain, StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils.validateName
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
@@ -66,6 +66,18 @@ object SjStream {
         tStreamStream.force,
         tStreamStream.streamType,
         tStreamStream.description
+      )
+
+    case StreamLiterals.restOutputType =>
+      val restStream = streamDomain.asInstanceOf[RestStreamDomain]
+
+      new RestStream(
+        restStream.name,
+        restStream.service.name,
+        restStream.tags,
+        restStream.force,
+        restStream.streamType,
+        restStream.description
       )
   }
 }
