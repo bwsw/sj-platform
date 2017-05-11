@@ -162,40 +162,40 @@ object TasksList {
       agentPorts.dropRight(1)
     }
 
-    logger.debug(s"Task: $task. Ports for task: ${availablePorts.mkString(",")}.")
-
-    val cmd = CommandInfo.newBuilder()
-    val hosts: collection.mutable.ListBuffer[String] = collection.mutable.ListBuffer()
-    TasksList.toLaunch.foreach(task =>
-      if (TasksList.getTask(task).host.nonEmpty) hosts.append(TasksList.getTask(task).host.get)
-    )
-
-    var environmentVariables = List(
-//      Environment.Variable.newBuilder.setName("MONGO_HOSTS").setValue(FrameworkUtil.params {"mongodbHosts"}),
-      Environment.Variable.newBuilder.setName("INSTANCE_NAME").setValue(FrameworkUtil.params {"instanceId"}),
-      Environment.Variable.newBuilder.setName("TASK_NAME").setValue(task),
-      Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(OffersHandler.getOfferIp(offer)),
-      Environment.Variable.newBuilder.setName("AGENTS_PORTS").setValue(agentPorts),
-      Environment.Variable.newBuilder.setName("INSTANCE_HOSTS").setValue(hosts.mkString(","))
-    )
-    ConnectionConstants.mongoEnvironment.foreach(variable =>
-      environmentVariables = environmentVariables :+ Environment.Variable.newBuilder.setName(variable._1).setValue(variable._2)
-    )
-
-    Try {
-      val environments = Environment.newBuilder
-      environmentVariables.foreach(variable => environments.addVariables(variable))
-
-      val jvmOptions = FrameworkUtil.instance.get.jvmOptions.asScala
-        .foldLeft("")((acc, option) => s"$acc ${option._1}${option._2}")
-      cmd
-        .addUris(CommandInfo.URI.newBuilder.setValue(FrameworkUtil.getModuleUrl(FrameworkUtil.instance.get)))
-        .setValue("java " + jvmOptions + " -jar " + FrameworkUtil.jarName.get)
-        .setEnvironment(environments)
-    } match {
-      case Success(_) =>
-      case Failure(e: Exception) => FrameworkUtil.handleSchedulerException(e, logger)
-      case Failure(e) => throw e
+//    logger.debug(s"Task: $task. Ports for task: ${availablePorts.mkString(",")}.")
+//
+//    val cmd = CommandInfo.newBuilder()
+//    val hosts: collection.mutable.ListBuffer[String] = collection.mutable.ListBuffer()
+//    TasksList.toLaunch.foreach(task =>
+//      if (TasksList.getTask(task).host.nonEmpty) hosts.append(TasksList.getTask(task).host.get)
+//    )
+//
+//    var environmentVariables = List(
+////      Environment.Variable.newBuilder.setName("MONGO_HOSTS").setValue(FrameworkUtil.params {"mongodbHosts"}),
+//      Environment.Variable.newBuilder.setName("INSTANCE_NAME").setValue(FrameworkUtil.params {"instanceId"}),
+//      Environment.Variable.newBuilder.setName("TASK_NAME").setValue(task),
+//      Environment.Variable.newBuilder.setName("AGENTS_HOST").setValue(OffersHandler.getOfferIp(offer)),
+//      Environment.Variable.newBuilder.setName("AGENTS_PORTS").setValue(agentPorts),
+//      Environment.Variable.newBuilder.setName("INSTANCE_HOSTS").setValue(hosts.mkString(","))
+//    )
+//    ConnectionConstants.mongoEnvironment.foreach(variable =>
+//      environmentVariables = environmentVariables :+ Environment.Variable.newBuilder.setName(variable._1).setValue(variable._2)
+//    )
+//
+//    Try {
+//      val environments = Environment.newBuilder
+//      environmentVariables.foreach(variable => environments.addVariables(variable))
+//
+//      val jvmOptions = FrameworkUtil.instance.get.jvmOptions.asScala
+//        .foldLeft("")((acc, option) => s"$acc ${option._1}${option._2}")
+//      cmd
+//        .addUris(CommandInfo.URI.newBuilder.setValue(FrameworkUtil.getModuleUrl(FrameworkUtil.instance.get)))
+//        .setValue("java " + jvmOptions + " -jar " + FrameworkUtil.jarName.get)
+//        .setEnvironment(environments)
+//    } match {
+//      case Success(_) =>
+//      case Failure(e: Exception) => FrameworkUtil.handleSchedulerException(e, logger)
+//      case Failure(e) => throw e
 
     def getInstanceHosts: String = {
       val hosts: collection.mutable.ListBuffer[String] = collection.mutable.ListBuffer()
@@ -216,7 +216,7 @@ object TasksList {
     }
 
     CommandInfo.newBuilder
-      .addUris(CommandInfo.URI.newBuilder.setValue(FrameworkUtil.getModuleUrl(FrameworkUtil.instance)))
+      .addUris(CommandInfo.URI.newBuilder.setValue(FrameworkUtil.getModuleUrl(FrameworkUtil.instance.get)))
       .setValue("java " + FrameworkUtil.getJvmOptions + " -jar " + FrameworkUtil.jarName)
       .setEnvironment(getEnvironments).build()
   }
