@@ -138,7 +138,7 @@ trait IJdbcClient {
   }
 
   def close(): Unit = {
-    logger.info(s"Close a connection to a jdbc database: '${jdbcCCD.database}'.")
+    logger.info(s"Close a connection to a jdbc database: '${jdbcCCD.database.get}'.")
     _connection match {
       case Some(connection) => connection.close()
       case None => throw new IllegalStateException("Jdbc client is not started. Start it first.")
