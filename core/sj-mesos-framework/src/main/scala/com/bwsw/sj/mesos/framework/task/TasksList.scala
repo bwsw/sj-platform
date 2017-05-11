@@ -1,6 +1,7 @@
 package com.bwsw.sj.mesos.framework.task
 
 import com.bwsw.sj.common.dal.ConnectionConstants
+import com.bwsw.sj.common.dal.model.instance._
 import com.bwsw.sj.common.dal.model.module._
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.FrameworkRestEntity

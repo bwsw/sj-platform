@@ -14,7 +14,7 @@ class CassandraService(name: String,
                        serviceType: String)
   extends Service(serviceType, name, description) {
 
-  override def asService(): CassandraServiceDomain = {
+  override def to(): CassandraServiceDomain = {
     val providerRepository = ConnectionRepository.getProviderRepository
 
     val modelService =

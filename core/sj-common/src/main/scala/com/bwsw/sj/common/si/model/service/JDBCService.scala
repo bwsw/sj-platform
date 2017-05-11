@@ -16,7 +16,7 @@ class JDBCService(name: String,
                   serviceType: String)
   extends Service(serviceType, name, description) {
 
-  override def asService(): JDBCServiceDomain = {
+  override def to(): JDBCServiceDomain = {
     val providerRepository = ConnectionRepository.getProviderRepository
     val provider = providerRepository.get(this.provider).get.asInstanceOf[JDBCProviderDomain]
 

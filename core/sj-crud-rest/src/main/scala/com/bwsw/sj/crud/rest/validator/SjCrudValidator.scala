@@ -13,7 +13,8 @@ import akka.stream.Materializer
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.dal.model._
-import com.bwsw.sj.common.dal.model.module.{FileMetadata, InstanceDomain}
+import com.bwsw.sj.common.dal.model.instance.InstanceDomain
+import com.bwsw.sj.common.dal.model.module.FileMetadata
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.engine.StreamingValidator

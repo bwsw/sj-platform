@@ -14,13 +14,13 @@ class ProviderSI extends ServiceInterface[Provider, ProviderDomain] {
 
   private val serviceRepository = ConnectionRepository.getServiceRepository
 
-  override def process(entity: Provider): Either[ArrayBuffer[String], Boolean] = {
+  override def create(entity: Provider): Either[ArrayBuffer[String], Boolean] = {
     val errors = new ArrayBuffer[String]
 
     errors ++= entity.validate()
 
     if (errors.isEmpty) {
-      entityRepository.save(entity.asProvider())
+      entityRepository.save(entity.to())
 
       Right(true)
     } else {
@@ -29,11 +29,11 @@ class ProviderSI extends ServiceInterface[Provider, ProviderDomain] {
   }
 
   def getAll(): mutable.Buffer[Provider] = {
-    entityRepository.getAll.map(x => Provider.fromProvider(x))
+    entityRepository.getAll.map(x => Provider.from(x))
   }
 
   def get(name: String): Option[Provider] = {
-    entityRepository.get(name).map(Provider.fromProvider)
+    entityRepository.get(name).map(Provider.from)
   }
 
   override def delete(name: String): Either[String, Boolean] = {

@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.core.batch
 
-import com.bwsw.sj.common.dal.model.module.BatchInstanceDomain
+import com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.IBatchCollector
 import com.bwsw.sj.engine.core.entities.{Batch, Envelope}

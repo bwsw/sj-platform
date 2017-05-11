@@ -22,12 +22,17 @@ class ServiceApi(@JsonProperty("type") val serviceType: String,
                  val description: String = RestLiterals.defaultDescription) {
 
   @JsonIgnore
-  def asService(): Service = ???
+  def to(): Service =
+    new Service(
+      serviceType = this.serviceType,
+      name = this.name,
+      description = this.description
+    )
 }
 
 object ServiceApi {
 
-  def fromService(service: Service): ServiceApi = {
+  def from(service: Service): ServiceApi = {
     service.serviceType match {
       case ServiceLiterals.aerospikeType =>
         val aerospikeService = service.asInstanceOf[AerospikeService]

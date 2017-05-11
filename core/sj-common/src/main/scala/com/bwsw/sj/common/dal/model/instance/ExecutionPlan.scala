@@ -1,8 +1,8 @@
-package com.bwsw.sj.common.rest.model.module
+package com.bwsw.sj.common.dal.model.instance
 
 import java.util
 
-import com.bwsw.sj.common.dal.model.module.Task
+import com.bwsw.sj.common.rest.model.module.TaskStream
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.fasterxml.jackson.annotation.JsonIgnore
 

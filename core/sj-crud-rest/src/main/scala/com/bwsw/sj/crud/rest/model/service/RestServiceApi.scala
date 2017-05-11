@@ -12,11 +12,11 @@ class RestServiceApi(name: String,
                      val basePath: String = "/",
                      val httpVersion: String = RestLiterals.http_1_1,
                      val headers: Map[String, String] = Map(),
-                     description: String = "No description",
+                     description: String = RestLiterals.defaultDescription,
                      @JsonProperty("type") serviceType: String = ServiceLiterals.restType)
   extends ServiceApi(serviceType, name, description) {
 
-  override def asService(): RestService = {
+  override def to(): RestService = {
     val modelService =
       new RestService(
         name = this.name,

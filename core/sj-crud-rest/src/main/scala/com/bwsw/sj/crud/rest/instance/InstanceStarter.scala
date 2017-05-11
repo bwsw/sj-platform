@@ -4,8 +4,8 @@ import java.net.URI
 
 import com.bwsw.common.LeaderLatch
 import com.bwsw.sj.common.dal.ConnectionConstants
-import com.bwsw.sj.common.dal.model.module.InstanceDomain
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
+import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.utils.FrameworkLiterals._
 import com.bwsw.sj.common.utils._
 import com.bwsw.sj.crud.rest.RestLiterals

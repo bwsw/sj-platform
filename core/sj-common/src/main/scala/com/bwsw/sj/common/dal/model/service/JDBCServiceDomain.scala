@@ -11,8 +11,7 @@ import com.bwsw.sj.common.utils.ServiceLiterals
 class JDBCServiceDomain(override val name: String,
                         override val description: String,
                         @ReferenceField val provider: JDBCProviderDomain,
-                        val database: String,
-                        override val serviceType: String = ServiceLiterals.jdbcType)
-  extends ServiceDomain(name, description, serviceType) {
+                        val database: String)
+  extends ServiceDomain(name, description, ServiceLiterals.jdbcType) {
 
 }

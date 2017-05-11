@@ -11,7 +11,7 @@ class ArspkDBServiceApi(name: String,
                         @JsonProperty("type") serviceType: String = ServiceLiterals.aerospikeType)
   extends ServiceApi(serviceType, name, description) {
 
-  override def asService(): AerospikeService = {
+  override def to(): AerospikeService = {
     val modelService =
       new AerospikeService(
         name = this.name,

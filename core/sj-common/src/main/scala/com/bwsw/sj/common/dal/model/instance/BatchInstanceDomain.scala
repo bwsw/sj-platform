@@ -1,8 +1,8 @@
-package com.bwsw.sj.common.dal.model.module
+package com.bwsw.sj.common.dal.model.instance
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
-import com.bwsw.sj.common.rest.model.module.{BatchInstanceApi, ExecutionPlan, InstanceApi}
+import com.bwsw.sj.common.rest.model.module.{BatchInstanceApi, InstanceApi}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
 import org.mongodb.morphia.annotations.{Embedded, Property}
@@ -18,7 +18,7 @@ class BatchInstanceDomain(override val name: String,
                           override val moduleVersion: String,
                           override val engine: String,
                           override val coordinationService: ZKServiceDomain)
-  extends InstanceDomain(name, moduleType, moduleName, moduleVersion, engine, coordinationService) with AvroSchemaForInstance {
+  extends InstanceDomain(name, moduleType, moduleName, moduleVersion, engine, coordinationService) with InputAvroSchema {
 
   var inputs: Array[String] = Array()
   var window: Int = 1

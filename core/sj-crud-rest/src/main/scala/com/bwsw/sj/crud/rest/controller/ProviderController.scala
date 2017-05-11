@@ -12,7 +12,7 @@ import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import scala.util.{Failure, Success, Try}
 
 class ProviderController extends Controller {
-  override val serviceSI = new ProviderSI()
+  override val serviceInterface = new ProviderSI()
 
   def create(serializedEntity: String): RestResponse = {
     var response: RestResponse = new RestResponse()
@@ -20,7 +20,7 @@ class ProviderController extends Controller {
     val triedProviderData = Try(serializer.deserialize[ProviderApi](serializedEntity))
     triedProviderData match {
       case Success(providerData) =>
-        val isCreated = serviceSI.process(providerData.asProvider())
+        val isCreated = serviceInterface.create(providerData.to())
 
         response = isCreated match {
           case Right(_) =>
@@ -42,20 +42,20 @@ class ProviderController extends Controller {
 
   def getAll(): RestResponse = {
     val response = OkRestResponse(ProvidersResponseEntity())
-    val providers = serviceSI.getAll()
+    val providers = serviceInterface.getAll()
     if (providers.nonEmpty) {
-      response.entity = ProvidersResponseEntity(providers.map(p => ProviderApi.fromProvider(p)))
+      response.entity = ProvidersResponseEntity(providers.map(p => ProviderApi.from(p)))
     }
 
     response
   }
 
   def get(name: String): RestResponse = {
-    val provider = serviceSI.get(name)
+    val provider = serviceInterface.get(name)
 
     val response = provider match {
       case Some(x) =>
-        OkRestResponse(ProviderResponseEntity(ProviderApi.fromProvider(x)))
+        OkRestResponse(ProviderResponseEntity(ProviderApi.from(x)))
       case None =>
         NotFoundRestResponse(MessageResponseEntity(createMessage("rest.providers.provider.notfound", name)))
     }
@@ -64,7 +64,7 @@ class ProviderController extends Controller {
   }
 
   def delete(name: String): RestResponse = {
-    val deleteResponse = serviceSI.delete(name)
+    val deleteResponse = serviceInterface.delete(name)
     val response: RestResponse = deleteResponse match {
       case Right(isDeleted) =>
         if (isDeleted)
@@ -79,7 +79,7 @@ class ProviderController extends Controller {
   }
 
   def checkConnection(name: String): RestResponse = {
-    val connectionResponse = serviceSI.checkConnection(name)
+    val connectionResponse = serviceInterface.checkConnection(name)
 
     val response = connectionResponse match {
       case Right(isFound) =>
@@ -98,7 +98,7 @@ class ProviderController extends Controller {
   }
 
   def getRelated(name: String): RestResponse = {
-    val relatedServices = serviceSI.getRelated(name)
+    val relatedServices = serviceInterface.getRelated(name)
     val response = relatedServices match {
       case Right(services) =>
         OkRestResponse(RelatedToProviderResponseEntity(services))

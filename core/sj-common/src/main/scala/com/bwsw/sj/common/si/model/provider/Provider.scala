@@ -18,7 +18,7 @@ class Provider(val name: String,
                val hosts: Array[String],
                val description: String) {
 
-  def asProvider(): ProviderDomain = {
+  def to(): ProviderDomain = {
     val provider =
       new ProviderDomain(
         name = this.name,
@@ -121,10 +121,10 @@ class Provider(val name: String,
 }
 
 object Provider {
-  def fromProvider(provider: ProviderDomain): Provider = {
-    provider.providerType match {
+  def from(providerDomain: ProviderDomain): Provider = {
+    providerDomain.providerType match {
       case ProviderLiterals.jdbcType =>
-        val jdbcProvider = provider.asInstanceOf[JDBCProviderDomain]
+        val jdbcProvider = providerDomain.asInstanceOf[JDBCProviderDomain]
 
         new JDBCProvider(
           name = jdbcProvider.name,
@@ -137,12 +137,12 @@ object Provider {
         )
       case _ =>
         new Provider(
-          name = provider.name,
-          login = provider.login,
-          password = provider.password,
-          providerType = provider.providerType,
-          hosts = provider.hosts,
-          description = provider.description
+          name = providerDomain.name,
+          login = providerDomain.login,
+          password = providerDomain.password,
+          providerType = providerDomain.providerType,
+          hosts = providerDomain.hosts,
+          description = providerDomain.description
         )
     }
   }

@@ -1,6 +1,7 @@
 package com.bwsw.sj.engine.core.state
 
-import com.bwsw.sj.common.dal.model.module.{RegularInstanceDomain, BatchInstanceDomain}
+import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, RegularInstanceDomain}
+import com.bwsw.sj.common.dal.model.module.{BatchInstanceDomain, RegularInstanceDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.StateHandlers
 import com.bwsw.sj.engine.core.environment.StatefulModuleEnvironmentManager

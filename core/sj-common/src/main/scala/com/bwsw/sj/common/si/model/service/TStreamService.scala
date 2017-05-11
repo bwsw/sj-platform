@@ -15,7 +15,7 @@ class TStreamService(name: String,
                      serviceType: String)
   extends Service(serviceType, name, description) {
 
-  override def asService(): TStreamServiceDomain = {
+  override def to(): TStreamServiceDomain = {
     val providerRepository = ConnectionRepository.getProviderRepository
 
     val modelService =

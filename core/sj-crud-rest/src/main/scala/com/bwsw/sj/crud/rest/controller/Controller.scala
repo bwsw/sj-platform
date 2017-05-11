@@ -5,8 +5,8 @@ import com.bwsw.sj.common.si.ServiceInterface
 import com.bwsw.sj.common.rest.RestResponse
 
 trait Controller {
-  protected val serializer = new JsonSerializer()
-  protected val serviceSI: ServiceInterface[_,_]
+  protected val serializer: JsonSerializer = new JsonSerializer(true)
+  protected val serviceInterface: ServiceInterface[_,_]
 
   def create(serializedEntity: String): RestResponse
 

@@ -7,7 +7,6 @@ import com.bwsw.sj.common.utils.ServiceLiterals
 class ZKServiceDomain(override val name: String,
                       override val description: String,
                       @ReferenceField val provider: ProviderDomain,
-                      val namespace: String,
-                      override val serviceType: String = ServiceLiterals.zookeeperType)
-  extends ServiceDomain(name, description, serviceType) {
+                      val namespace: String)
+  extends ServiceDomain(name, description, ServiceLiterals.zookeeperType) {
 }

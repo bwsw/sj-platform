@@ -1,6 +1,7 @@
 package com.bwsw.sj.engine.input.eviction_policy
 
-import com.bwsw.sj.common.dal.model.module.InputInstanceDomain
+import com.bwsw.sj.common.dal.model.instance.InputInstanceDomain
+
 /**
  * Provides methods are responsible for an expanded time eviction policy of input envelope duplicates
  * In this case time, within which a specific key is kept, will increase if a duplicate appears

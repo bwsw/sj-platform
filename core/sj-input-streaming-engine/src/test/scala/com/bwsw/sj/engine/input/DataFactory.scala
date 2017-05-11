@@ -6,7 +6,8 @@ import java.util.jar.JarFile
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.FileStorage
-import com.bwsw.sj.common.dal.model.module.{InputInstanceDomain, InputTask, InstanceDomain}
+import com.bwsw.sj.common.dal.model.instance.{InputInstanceDomain, InputTask, InstanceDomain}
+import com.bwsw.sj.common.dal.model.module.{InputInstanceDomain, InstanceDomain}
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service.{ServiceDomain, TStreamServiceDomain, ZKServiceDomain}
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}

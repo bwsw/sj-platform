@@ -8,8 +8,7 @@ class KafkaServiceDomain(override val name: String,
                          override val description: String,
                          @ReferenceField val provider: ProviderDomain,
                          @ReferenceField(value = "zk-provider") val zkProvider: ProviderDomain,
-                         @PropertyField("zk-namespace") val zkNamespace: String,
-                         override val serviceType: String = ServiceLiterals.kafkaType)
-  extends ServiceDomain(name, description, serviceType) {
+                         @PropertyField("zk-namespace") val zkNamespace: String)
+  extends ServiceDomain(name, description, ServiceLiterals.kafkaType) {
 
 }

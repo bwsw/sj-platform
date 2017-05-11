@@ -1,9 +1,9 @@
-package com.bwsw.sj.common.dal.model.module
+package com.bwsw.sj.common.dal.model.instance
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.PropertyField
-import com.bwsw.sj.common.rest.model.module.{ExecutionPlan, InstanceApi, RegularInstanceApi}
+import com.bwsw.sj.common.rest.model.module.{InstanceApi, RegularInstanceApi}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
 import org.mongodb.morphia.annotations._
@@ -20,7 +20,7 @@ class RegularInstanceDomain(override val name: String,
                             override val engine: String,
                             override val coordinationService: ZKServiceDomain,
                             @PropertyField("checkpoint-mode") val checkpointMode: String)
-  extends InstanceDomain(name, moduleType, moduleName, moduleVersion, engine, coordinationService) with AvroSchemaForInstance {
+  extends InstanceDomain(name, moduleType, moduleName, moduleVersion, engine, coordinationService) with InputAvroSchema {
 
   var inputs: Array[String] = Array()
   @Property("checkpoint-interval") var checkpointInterval: Long = 0

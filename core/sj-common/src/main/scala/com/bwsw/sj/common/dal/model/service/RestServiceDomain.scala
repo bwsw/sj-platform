@@ -15,7 +15,6 @@ class RestServiceDomain(override val name: String,
                         @ReferenceField val provider: ProviderDomain,
                         @PropertyField("base-path") val basePath: String,
                         @PropertyField("http-version") val httpVersion: HttpVersion,
-                        val headers: java.util.Map[String, String],
-                        override val serviceType: String = ServiceLiterals.restType)
-  extends ServiceDomain(name, description, serviceType) {
+                        val headers: java.util.Map[String, String])
+  extends ServiceDomain(name, description, ServiceLiterals.restType) {
 }

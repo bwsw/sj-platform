@@ -1,7 +1,6 @@
 package com.bwsw.sj.engine.output.task
 
-
-import com.bwsw.sj.common.dal.model.module.OutputInstanceDomain
+import com.bwsw.sj.common.dal.model.instance.OutputInstanceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.engine.core.environment.{EnvironmentManager, OutputEnvironmentManager}
 import com.bwsw.sj.engine.core.managment.TaskManager

@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.rest.model.module
 
-import com.bwsw.sj.common.dal.model.module.{InputInstanceDomain, InputTask}
+import com.bwsw.sj.common.dal.model.instance.{InputInstanceDomain, InputTask}
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals

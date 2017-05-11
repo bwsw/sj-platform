@@ -3,11 +3,11 @@ package com.bwsw.sj.common.rest.model.module
 import java.util.Calendar
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.dal.model.module.{FrameworkStage, InstanceDomain}
+import com.bwsw.sj.common.dal.model.instance.{FrameworkStage, InstanceDomain}
 import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.utils.SjStreamUtils._
-import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
+import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonIgnore
 
 import scala.collection.JavaConverters._
@@ -19,7 +19,7 @@ class InstanceApi {
   var stage: FrameworkStage = FrameworkStage(EngineLiterals.toHandle, Calendar.getInstance().getTime)
   var status: String = EngineLiterals.ready
   var name: String = _
-  var description: String = "No description"
+  var description: String = RestLiterals.defaultDescription
   var parallelism: Any = 1
   var options: Map[String, Any] = Map()
   var perTaskCores: Double = 1.0
