@@ -4,7 +4,7 @@ import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.rest._
 import com.bwsw.sj.crud.rest.model.stream.StreamApi
 import com.bwsw.sj.common.si.StreamSI
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
+import com.bwsw.sj.common.utils.MessageResourceUtils.{createMessage, createMessageWithErrors}
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.crud.rest.{RelatedToStreamResponseEntity, StreamResponseEntity, StreamsResponseEntity}
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
@@ -26,7 +26,7 @@ class StreamController extends Controller {
           case Left(errors) =>
             BadRequestRestResponse(
               MessageResponseEntity(
-                createMessage("rest.streams.stream.cannot.create", errors.mkString(";"))))
+                createMessageWithErrors("rest.streams.stream.cannot.create", errors)))
         }
 
       case Failure(exception: JsonDeserializationException) =>

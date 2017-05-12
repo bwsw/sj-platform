@@ -26,7 +26,7 @@ class ProviderController extends Controller {
           case Right(_) =>
             CreatedRestResponse(MessageResponseEntity(createMessage("rest.providers.provider.created", providerData.name)))
           case Left(errors) => BadRequestRestResponse(MessageResponseEntity(
-            createMessage("rest.providers.provider.cannot.create", errors.mkString(";"))
+            createMessageWithErrors("rest.providers.provider.cannot.create", errors)
           ))
         }
       case Failure(exception: JsonDeserializationException) =>

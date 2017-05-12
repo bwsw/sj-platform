@@ -221,9 +221,9 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
             response = Option(
               BadRequestRestResponse(
                 MessageResponseEntity(
-                  createMessage(
+                  createMessageWithErrors(
                     "rest.modules.instances.instance.cannot.create.incorrect.parameters",
-                    instancePassedValidation.errors.mkString(";")))))
+                    instancePassedValidation.errors))))
           }
         }
 
@@ -236,7 +236,7 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
         response = Option(
           BadRequestRestResponse(
             MessageResponseEntity(
-              createMessage("rest.modules.instances.instance.cannot.create", errors.mkString(";")))))
+              createMessageWithErrors("rest.modules.instances.instance.cannot.create", errors))))
       }
 
       complete(restResponseToHttpResponse(response.get))

@@ -98,7 +98,7 @@ trait SjConfigurationSettingsRoute extends Directives with SjCrudValidator {
                 response = Option(
                   BadRequestRestResponse(
                     MessageResponseEntity(
-                      createMessage("rest.config.setting.cannot.create", errors.mkString("\n")))))
+                      createMessageWithErrors("rest.config.setting.cannot.create", errors))))
               }
 
               ctx.complete(restResponseToHttpResponse(response.get))

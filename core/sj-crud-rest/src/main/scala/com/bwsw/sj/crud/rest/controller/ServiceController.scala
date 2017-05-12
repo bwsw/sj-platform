@@ -26,7 +26,7 @@ class ServiceController extends Controller {
           case Right(_) =>
             CreatedRestResponse(MessageResponseEntity(createMessage("rest.services.service.created", serviceData.name)))
           case Left(errors) => BadRequestRestResponse(MessageResponseEntity(
-            createMessage("rest.services.service.cannot.create", errors.mkString(";"))
+            createMessageWithErrors("rest.services.service.cannot.create", errors)
           ))
         }
       case Failure(exception: JsonDeserializationException) =>
