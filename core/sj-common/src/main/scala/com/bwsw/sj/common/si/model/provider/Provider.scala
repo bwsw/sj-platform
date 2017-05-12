@@ -20,7 +20,6 @@ class Provider(val name: String,
                val description: String) {
 
   def to(): ProviderDomain = {
-    val provider =
       new ProviderDomain(
         name = this.name,
         description = this.description,
@@ -29,8 +28,6 @@ class Provider(val name: String,
         password = this.password,
         providerType = this.providerType
       )
-
-    provider
   }
 
   def validate(): ArrayBuffer[String] = {

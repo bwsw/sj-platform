@@ -1,6 +1,7 @@
 package com.bwsw.sj.crud.rest
 
 import com.bwsw.sj.common.rest.ResponseEntity
+import com.bwsw.sj.crud.rest.model.config.ConfigurationSettingApi
 import com.bwsw.sj.crud.rest.model.stream.StreamApi
 import com.bwsw.sj.crud.rest.model.provider.ProviderApi
 import com.bwsw.sj.crud.rest.model.service.ServiceApi
@@ -31,3 +32,7 @@ case class StreamResponseEntity(stream: StreamApi) extends ResponseEntity
 case class StreamsResponseEntity(streams: mutable.Buffer[StreamApi] = mutable.Buffer()) extends ResponseEntity
 
 case class RelatedToStreamResponseEntity(instances: mutable.Buffer[String] = mutable.Buffer()) extends ResponseEntity
+
+case class ConfigSettingsResponseEntity(configSettings: mutable.Buffer[ConfigurationSettingApi] = mutable.Buffer()) extends ResponseEntity
+
+case class ConfigSettingResponseEntity(configSetting: ConfigurationSettingApi) extends ResponseEntity
