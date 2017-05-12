@@ -46,7 +46,10 @@ class StreamSI extends ServiceInterface[SjStream, StreamDomain] {
     }
   }
 
-  def getRelatedInstances(streamName: String): mutable.Buffer[String] =
+  def getRelated(name: String): Option[mutable.Buffer[String]] =
+    entityRepository.get(name).map(_ => getRelatedInstances(name))
+
+  private def getRelatedInstances(streamName: String): mutable.Buffer[String] =
     instanceRepository.getAll.filter(related(streamName)).map(_.name)
 
   private def related(streamName: String)(instance: InstanceDomain): Boolean = {
