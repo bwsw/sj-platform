@@ -6,6 +6,7 @@ import com.bwsw.sj.common.rest.model.stream.StreamApi
 import com.bwsw.sj.common.si.StreamSI
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import com.bwsw.sj.common.utils.StreamLiterals
+import com.bwsw.sj.crud.rest.{RelatedToStreamResponseEntity, StreamResponseEntity, StreamsResponseEntity}
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 
 import scala.util.{Failure, Success, Try}

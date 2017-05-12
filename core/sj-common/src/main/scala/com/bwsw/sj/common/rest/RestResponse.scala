@@ -3,7 +3,6 @@ package com.bwsw.sj.common.rest
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.rest.model.config.ConfigurationSettingApi
 import com.bwsw.sj.common.rest.model.module.{InstanceApi, SpecificationApi}
-import com.bwsw.sj.common.rest.model.stream.StreamApi
 import com.fasterxml.jackson.annotation.JsonProperty
 
 import scala.collection.mutable
@@ -43,13 +42,6 @@ case class KeyedMessageResponseEntity(message: String, key: String) extends Resp
 
 
 case class TypesResponseEntity(types: Seq[String]) extends ResponseEntity
-
-
-case class StreamResponseEntity(stream: StreamApi) extends ResponseEntity
-
-case class StreamsResponseEntity(streams: mutable.Buffer[StreamApi] = mutable.Buffer()) extends ResponseEntity
-
-case class RelatedToStreamResponseEntity(instances: mutable.Buffer[String] = mutable.Buffer()) extends ResponseEntity
 
 
 case class ConfigSettingsResponseEntity(configSettings: mutable.Buffer[ConfigurationSettingApi] = mutable.Buffer()) extends ResponseEntity

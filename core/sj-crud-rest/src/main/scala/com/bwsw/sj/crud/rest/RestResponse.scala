@@ -1,6 +1,7 @@
 package com.bwsw.sj.crud.rest
 
 import com.bwsw.sj.common.rest.ResponseEntity
+import com.bwsw.sj.common.rest.model.stream.StreamApi
 import com.bwsw.sj.crud.rest.model.provider.ProviderApi
 import com.bwsw.sj.crud.rest.model.service.ServiceApi
 
@@ -23,3 +24,10 @@ case class ServicesResponseEntity(services: mutable.Buffer[ServiceApi] = mutable
 
 case class RelatedToServiceResponseEntity(streams: mutable.Buffer[String] = mutable.Buffer(),
                                           instances: mutable.Buffer[String] = mutable.Buffer()) extends ResponseEntity
+
+
+case class StreamResponseEntity(stream: StreamApi) extends ResponseEntity
+
+case class StreamsResponseEntity(streams: mutable.Buffer[StreamApi] = mutable.Buffer()) extends ResponseEntity
+
+case class RelatedToStreamResponseEntity(instances: mutable.Buffer[String] = mutable.Buffer()) extends ResponseEntity
