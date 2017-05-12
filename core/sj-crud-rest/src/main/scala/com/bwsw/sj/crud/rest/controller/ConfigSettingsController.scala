@@ -1,11 +1,7 @@
 package com.bwsw.sj.crud.rest.controller
 
-import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
-import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
-import com.bwsw.sj.common.dal.repository.GenericMongoRepository
 import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
-import com.bwsw.sj.crud.rest.model.service.ServiceApi
 import com.bwsw.sj.common.si.ConfigSettingsSI
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.common.exceptions.JsonDeserializationException
