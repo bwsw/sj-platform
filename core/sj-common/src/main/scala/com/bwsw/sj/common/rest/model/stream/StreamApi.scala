@@ -3,7 +3,7 @@ package com.bwsw.sj.common.rest.model.stream
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils._
-import com.bwsw.sj.common.si.model.stream.SjStream
+import com.bwsw.sj.common.si.model.stream._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.{RestLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
@@ -78,6 +78,70 @@ class StreamApi(@JsonProperty("type") val streamType: String,
     }
 
     errors
+  }
+}
+
+object StreamApi {
+
+  def from(stream: SjStream): StreamApi = stream.streamType match {
+    case StreamLiterals.tstreamType =>
+      val tStreamStream = stream.asInstanceOf[TStreamStream]
+
+      new TStreamStreamApi(
+        tStreamStream.name,
+        tStreamStream.service,
+        tStreamStream.tags,
+        tStreamStream.force,
+        tStreamStream.description,
+        tStreamStream.partitions
+      )
+
+    case StreamLiterals.kafkaStreamType =>
+      val kafkaStream = stream.asInstanceOf[KafkaStream]
+
+      new KafkaStreamApi(
+        kafkaStream.name,
+        kafkaStream.service,
+        kafkaStream.tags,
+        kafkaStream.force,
+        kafkaStream.description,
+        kafkaStream.partitions,
+        kafkaStream.replicationFactor
+      )
+
+    case StreamLiterals.esOutputType =>
+      val esStream = stream.asInstanceOf[ESStream]
+
+      new ESStreamApi(
+        esStream.name,
+        esStream.service,
+        esStream.tags,
+        esStream.force,
+        esStream.description
+      )
+
+    case StreamLiterals.restOutputType =>
+      val restStream = stream.asInstanceOf[RestStream]
+
+      new RestStreamApi(
+        restStream.name,
+        restStream.service,
+        restStream.tags,
+        restStream.force,
+        restStream.description
+      )
+
+    case StreamLiterals.jdbcOutputType =>
+      val jdbcStream = stream.asInstanceOf[JDBCStream]
+
+      new JDBCStreamApi(
+        jdbcStream.primary,
+        jdbcStream.name,
+        jdbcStream.service,
+        jdbcStream.tags,
+        jdbcStream.force,
+        jdbcStream.description
+      )
   }
 }
 
