@@ -43,11 +43,6 @@ case class KeyedMessageResponseEntity(message: String, key: String) extends Resp
 
 case class TypesResponseEntity(types: Seq[String]) extends ResponseEntity
 
-
-case class StreamResponseEntity(stream: StreamApi) extends ResponseEntity
-
-case class StreamsResponseEntity(streams: mutable.Buffer[StreamApi] = mutable.Buffer()) extends ResponseEntity
-
 case class RelatedToStreamResponseEntity(instances: mutable.Buffer[String] = mutable.Buffer()) extends ResponseEntity
 
 
