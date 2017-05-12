@@ -1,7 +1,7 @@
 package com.bwsw.sj.crud.rest
 
 import com.bwsw.sj.common.rest.ResponseEntity
-import com.bwsw.sj.common.rest.model.stream.StreamApi
+import com.bwsw.sj.crud.rest.model.stream.StreamApi
 import com.bwsw.sj.crud.rest.model.provider.ProviderApi
 import com.bwsw.sj.crud.rest.model.service.ServiceApi
 

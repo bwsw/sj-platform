@@ -1,4 +1,4 @@
-package com.bwsw.sj.common.rest.model.stream
+package com.bwsw.sj.crud.rest.model.stream
 
 import com.bwsw.sj.common.si.model.stream.KafkaStream
 import com.bwsw.sj.common.utils.{RestLiterals, StreamLiterals}

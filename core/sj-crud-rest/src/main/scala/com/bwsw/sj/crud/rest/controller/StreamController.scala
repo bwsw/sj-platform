@@ -2,7 +2,7 @@ package com.bwsw.sj.crud.rest.controller
 
 import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.rest._
-import com.bwsw.sj.common.rest.model.stream.StreamApi
+import com.bwsw.sj.crud.rest.model.stream.StreamApi
 import com.bwsw.sj.common.si.StreamSI
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import com.bwsw.sj.common.utils.StreamLiterals
