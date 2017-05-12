@@ -52,9 +52,9 @@ case class StreamsResponseEntity(streams: mutable.Buffer[StreamApi] = mutable.Bu
 case class RelatedToStreamResponseEntity(instances: mutable.Buffer[String] = mutable.Buffer()) extends ResponseEntity
 
 
-case class ConfigSettingsResponseEntity(configSettings: mutable.Buffer[ConfigurationSettingApi] = mutable.Buffer()) extends ResponseEntity
-
-case class ConfigSettingResponseEntity(configSetting: ConfigurationSettingApi) extends ResponseEntity
+//case class ConfigSettingsResponseEntity(configSettings: mutable.Buffer[ConfigurationSettingApi] = mutable.Buffer()) extends ResponseEntity
+//
+//case class ConfigSettingResponseEntity(configSetting: ConfigurationSettingApi) extends ResponseEntity
 
 case class DomainsResponseEntity(domains: Seq[String] = ConfigLiterals.domains) extends ResponseEntity
 
