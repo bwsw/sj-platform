@@ -78,11 +78,17 @@ class KafkaStream(name: String,
     errors ++= super.validateGeneralFields()
 
     //partitions
-    if (this.partitions <= 0)
+    if (partitions <= 0)
       errors += createMessage("entity.error.attribute.required", "Partitions") + ". " +
         createMessage("entity.error.attribute.must.be.positive.integer", "Partitions")
 
-    Option(this.service) match {
+    //replicationFactor
+    if (replicationFactor <= 0) {
+      errors += createMessage("entity.error.attribute.required", "replicationFactor") + ". " +
+        createMessage("entity.error.attribute.must.be.positive.integer", "replicationFactor")
+    }
+
+    Option(service) match {
       case Some("") | None =>
         errors += createMessage("entity.error.attribute.required", "Service")
 
