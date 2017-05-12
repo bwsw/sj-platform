@@ -3,8 +3,9 @@ package com.bwsw.sj.common.rest.model.stream
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils._
+import com.bwsw.sj.common.si.model.stream.SjStream
 import com.bwsw.sj.common.utils.MessageResourceUtils._
-import com.bwsw.sj.common.utils.{RestLiterals, ServiceLiterals, StreamLiterals}
+import com.bwsw.sj.common.utils.{RestLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes, JsonTypeInfo}
 
@@ -25,6 +26,9 @@ class StreamApi(@JsonProperty("type") val streamType: String,
                 val force: Boolean = false,
                 val description: String = RestLiterals.defaultDescription) {
 
+  @JsonIgnore
+  def to: SjStream =
+    new SjStream(streamType, name, service, tags, force, description)
 
   @JsonIgnore
   def create(): Unit = {}

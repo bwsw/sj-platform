@@ -3,6 +3,7 @@ package com.bwsw.sj.common.rest.model.stream
 import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.si.model.stream.TStreamStream
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils._
 import com.bwsw.tstreams.common.StorageClient
@@ -18,6 +19,9 @@ class TStreamStreamApi(override val name: String,
                        override val description: String = RestLiterals.defaultDescription,
                        val partitions: Int = Int.MinValue)
   extends StreamApi(StreamLiterals.tstreamType, name, service, tags, force, description) {
+
+  override def to: TStreamStream =
+    new TStreamStream(name, service, partitions, tags, force, streamType, description)
 
   override def validate(): ArrayBuffer[String] = {
     val serviceDAO = ConnectionRepository.getServiceRepository

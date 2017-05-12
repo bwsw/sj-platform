@@ -6,6 +6,7 @@ import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import com.bwsw.sj.common.dal.model.stream.KafkaStreamDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
+import com.bwsw.sj.common.si.model.stream.KafkaStream
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.{RestLiterals, ServiceLiterals, StreamLiterals}
 import kafka.admin.AdminUtils
@@ -26,6 +27,15 @@ class KafkaStreamApi(override val name: String,
                      val replicationFactor: Int = Int.MinValue)
   extends StreamApi(StreamLiterals.kafkaStreamType, name, service, tags, force, description) {
 
+  override def to: KafkaStream = new KafkaStream(
+    name,
+    service,
+    partitions,
+    replicationFactor,
+    tags,
+    force,
+    streamType,
+    description)
 
   override def validate(): ArrayBuffer[String] = {
     val serviceDAO = ConnectionRepository.getServiceRepository
