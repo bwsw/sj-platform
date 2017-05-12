@@ -31,6 +31,8 @@ class ESStream(name: String,
   override def create(): Unit =
     if (force) clearEsStream()
 
+  override def delete(): Unit = clearEsStream()
+
   override def validate(): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
     errors ++= super.validateGeneralFields()

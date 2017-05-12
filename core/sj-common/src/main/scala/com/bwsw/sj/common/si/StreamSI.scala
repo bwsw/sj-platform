@@ -37,7 +37,8 @@ class StreamSI extends ServiceInterface[SjStream, StreamDomain] {
     if (hasRelatedInstances(name))
       Left(createMessage("rest.streams.stream.cannot.delete", name))
     else entityRepository.get(name) match {
-      case Some(_) =>
+      case Some(entity) =>
+        SjStream.from(entity).delete()
         entityRepository.delete(name)
         Right(true)
       case None =>

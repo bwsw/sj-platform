@@ -33,23 +33,35 @@ class TStreamStream(name: String,
   }
 
   override def create(): Unit = {
+    val storageClient = getStorageClient
+    if (doesStreamHaveForcedCreation(storageClient)) {
+      storageClient.deleteStream(name)
+      createTStream(storageClient)
+    } else if (!doesTopicExist(storageClient)) {
+      createTStream(storageClient)
+    }
+
+    storageClient.shutdown()
+  }
+
+  override def delete(): Unit = {
+    val storageClient = getStorageClient
+    if (storageClient.checkStreamExists(name))
+      storageClient.deleteStream(name)
+
+    storageClient.shutdown()
+  }
+
+  private def getStorageClient: StorageClient = {
     val serviceDAO = ConnectionRepository.getServiceRepository
     val service = serviceDAO.get(this.service).get.asInstanceOf[TStreamServiceDomain]
-    val tstreamFactory = new TStreamsFactory()
-    tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Auth.key, service.token)
+    val factory = new TStreamsFactory()
+    factory.setProperty(ConfigurationOptions.StorageClient.Auth.key, service.token)
       .setProperty(ConfigurationOptions.Coordination.endpoints, service.provider.hosts.mkString(","))
       .setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, service.provider.hosts.mkString(","))
       .setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, service.prefix)
 
-    val storageClient = tstreamFactory.getStorageClient()
-    if (doesStreamHaveForcedCreation(storageClient)) {
-      storageClient.deleteStream(name)
-      createTStream(storageClient)
-    } else {
-      if (!doesTopicExist(storageClient)) createTStream(storageClient)
-    }
-
-    storageClient.shutdown()
+    factory.getStorageClient()
   }
 
   override def validate(): ArrayBuffer[String] = {

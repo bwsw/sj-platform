@@ -21,6 +21,8 @@ class SjStream(val streamType: String,
 
   def create(): Unit = {}
 
+  def delete(): Unit = {}
+
   protected def validateGeneralFields(): ArrayBuffer[String] = {
     val streamDAO = ConnectionRepository.getStreamRepository
     val errors = new ArrayBuffer[String]()

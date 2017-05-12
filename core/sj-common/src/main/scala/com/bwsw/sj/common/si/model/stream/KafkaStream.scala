@@ -59,6 +59,20 @@ class KafkaStream(name: String,
     }
   }
 
+  override def delete(): Unit = {
+    Try {
+      val zkUtils = createZkUtils()
+      if (doesTopicExist(zkUtils)) {
+        deleteTopic(zkUtils)
+      }
+    } match {
+      case Success(_) =>
+      case Failure(_: TopicAlreadyMarkedForDeletionException) =>
+        throw new Exception(s"Cannot delete a kafka topic '$name'. Topic is already marked for deletion. It means that kafka doesn't support deletion")
+      case Failure(e) => throw e
+    }
+  }
+
   override def validate(): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
     errors ++= super.validateGeneralFields()
@@ -67,7 +81,6 @@ class KafkaStream(name: String,
     if (this.partitions <= 0)
       errors += createMessage("entity.error.attribute.required", "Partitions") + ". " +
         createMessage("entity.error.attribute.must.be.positive.integer", "Partitions")
-
 
     Option(this.service) match {
       case Some("") | None =>
@@ -125,7 +138,7 @@ class KafkaStream(name: String,
     AdminUtils.topicExists(zkUtils, name)
 
   private def deleteTopic(zkUtils: ZkUtils): Unit =
-    AdminUtils.deleteTopic(zkUtils, this.name)
+    AdminUtils.deleteTopic(zkUtils, name)
 
   private def createTopic(zkUtils: ZkUtils): Unit =
     AdminUtils.createTopic(zkUtils, name, partitions, replicationFactor, new Properties())
