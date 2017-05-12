@@ -10,14 +10,14 @@ import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.stream.scaladsl.FileIO
 import com.bwsw.common.exceptions.JsonDeserializationException
-import com.bwsw.sj.common.dal.model.module._
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.engine.{StreamingValidator, ValidationInfo}
-import com.bwsw.sj.common.rest.model.module._
 import com.bwsw.sj.common.rest._
+import com.bwsw.sj.common.rest.model.module._
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.crud.rest.RestLiterals
+import com.bwsw.sj.common.utils.MessageResourceUtils._
+import com.bwsw.sj.crud.rest._
 import com.bwsw.sj.crud.rest.exceptions._
 import com.bwsw.sj.crud.rest.instance.{HttpClient, InstanceDestroyer, InstanceStarter, InstanceStopper}
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
@@ -29,9 +29,6 @@ import org.apache.http.util.EntityUtils
 
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
-import com.bwsw.sj.common.rest.utils.ValidationUtils._
-import com.bwsw.sj.common.utils.MessageResourceUtils._
-
 import scala.util.{Failure, Success, Try}
 
 trait SjModulesRoute extends Directives with SjCrudValidator {
