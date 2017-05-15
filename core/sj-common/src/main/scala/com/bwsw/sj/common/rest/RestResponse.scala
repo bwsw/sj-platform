@@ -42,10 +42,7 @@ case class KeyedMessageResponseEntity(message: String, key: String) extends Resp
 
 case class TypesResponseEntity(types: Seq[String]) extends ResponseEntity
 
-
-case class ConfigSettingsResponseEntity(configSettings: mutable.Buffer[ConfigurationSettingApi] = mutable.Buffer()) extends ResponseEntity
-
-case class ConfigSettingResponseEntity(configSetting: ConfigurationSettingApi) extends ResponseEntity
+case class RelatedToStreamResponseEntity(instances: mutable.Buffer[String] = mutable.Buffer()) extends ResponseEntity
 
 case class DomainsResponseEntity(domains: Seq[String] = ConfigLiterals.domains) extends ResponseEntity
 
