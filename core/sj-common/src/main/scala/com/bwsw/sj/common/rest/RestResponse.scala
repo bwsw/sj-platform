@@ -1,7 +1,6 @@
 package com.bwsw.sj.common.rest
 
 import com.bwsw.sj.common.config.ConfigLiterals
-import com.bwsw.sj.common.rest.model.config.ConfigurationSettingApi
 import com.bwsw.sj.common.rest.model.module.{InstanceApi, SpecificationApi}
 import com.fasterxml.jackson.annotation.JsonProperty
 
