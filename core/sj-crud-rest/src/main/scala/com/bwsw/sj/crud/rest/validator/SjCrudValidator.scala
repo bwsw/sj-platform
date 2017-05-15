@@ -281,10 +281,10 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator {
       if (entry.getName.equals("specification.json")) {
         val reader = new BufferedReader(new InputStreamReader(jar.getInputStream(entry), "UTF-8"))
         val result = Try {
-          var line = Option(reader.readLine)
-          while (line.isDefined) {
+          var line = reader.readLine
+          while (Option(line).isDefined) {
             builder.append(line + "\n")
-            line = Option(reader.readLine)
+            line = reader.readLine
           }
         }
         reader.close()
