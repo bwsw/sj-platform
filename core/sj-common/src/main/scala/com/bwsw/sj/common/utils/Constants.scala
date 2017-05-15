@@ -79,6 +79,8 @@ object StreamLiterals {
   final val jdbcOutputType = "jdbc-output"
   final val restOutputType = "rest-output"
   val types: Seq[String] = Seq(tstreamType, kafkaStreamType, jdbcOutputType, esOutputType, restOutputType)
+  val outputTypes: Seq[String] = Seq(jdbcOutputType, esOutputType, restOutputType)
+  val internalTypes: Seq[String] = Seq(tstreamType, kafkaStreamType)
 
   private val tstreamFactory = new TStreamsFactory()
   final val ttl: Int = tstreamFactory.getProperty(ConfigurationOptions.Stream.ttlSec).asInstanceOf[Int]
