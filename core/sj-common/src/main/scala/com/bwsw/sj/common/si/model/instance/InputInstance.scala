@@ -1,0 +1,55 @@
+package com.bwsw.sj.common.si.model.instance
+
+import com.bwsw.sj.common.dal.model.instance.{FrameworkStage, InputTask}
+import com.bwsw.sj.common.utils.EngineLiterals
+
+class InputInstance(name: String,
+                    description: String,
+                    parallelism: Any,
+                    options: Map[String, Any],
+                    perTaskCores: Double,
+                    perTaskRam: Int,
+                    jvmOptions: Map[String, String],
+                    nodeAttributes: Map[String, String],
+                    coordinationService: String,
+                    environmentVariables: Map[String, String],
+                    performanceReportingInterval: Long,
+                    moduleName: String,
+                    moduleVersion: String,
+                    moduleType: String,
+                    engine: String,
+                    val checkpointMode: String,
+                    val checkpointInterval: Long,
+                    val outputs: Array[String],
+                    val lookupHistory: Int,
+                    val queueMaxSize: Int,
+                    val duplicateCheck: Boolean,
+                    val defaultEvictionPolicy: String,
+                    val evictionPolicy: String,
+                    val backupCount: Int,
+                    val asyncBackupCount: Int,
+                    var tasks: Map[String, InputTask] = Map(),
+                    restAddress: Option[String] = None,
+                    stage: FrameworkStage = FrameworkStage(),
+                    status: String = EngineLiterals.ready)
+  extends Instance(
+    name,
+    description,
+    parallelism,
+    options,
+    perTaskCores,
+    perTaskRam,
+    jvmOptions,
+    nodeAttributes,
+    coordinationService,
+    environmentVariables,
+    performanceReportingInterval,
+    moduleName,
+    moduleVersion,
+    moduleType,
+    engine,
+    restAddress,
+    stage,
+    status) {
+
+}
