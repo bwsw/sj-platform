@@ -1,7 +1,6 @@
 package com.bwsw.sj.common.si.model.config
 
 import com.bwsw.sj.common.config.ConfigLiterals
-import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils._
@@ -28,7 +27,7 @@ class ConfigurationSetting(val name: String,
           errors += createMessage("entity.error.attribute.required", "Name")
         }
         else {
-          val modelConfigName = createConfigurationSettingName(this.domain, this.name)
+          val modelConfigName = ConfigurationSetting.createConfigurationSettingName(this.domain, this.name)
           if (configService.get(modelConfigName).isDefined) {
             errors += createMessage("entity.error.already.exists", "Config setting", x)
           }
@@ -76,17 +75,24 @@ class ConfigurationSetting(val name: String,
   }
 
   def to(): ConfigurationSettingDomain = {
-    new ConfigurationSettingDomain(name, value, domain)
+    new ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(domain, name), value, domain)
   }
 }
-
 
 object ConfigurationSetting {
   def from(configSettingDomain: ConfigurationSettingDomain): ConfigurationSetting = {
     new ConfigurationSetting(
-      configSettingDomain.name,
+      clearConfigurationSettingName(configSettingDomain.domain, configSettingDomain.name),
       configSettingDomain.value,
       configSettingDomain.domain
     )
+  }
+
+  def createConfigurationSettingName(domain: String, name: String): String = {
+    domain + "." + name
+  }
+
+  def clearConfigurationSettingName(domain: String, name: String): String = {
+    name.replaceFirst(domain + ".", "")
   }
 }

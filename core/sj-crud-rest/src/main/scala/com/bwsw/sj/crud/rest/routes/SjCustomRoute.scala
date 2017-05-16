@@ -14,6 +14,7 @@ import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.rest._
+import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.crud.rest.RestLiterals
 import com.bwsw.sj.crud.rest.exceptions.CustomJarNotFound
@@ -95,7 +96,7 @@ trait SjCustomRoute extends Directives with SjCrudValidator {
                 )
 
                 if (storage.delete(name)) {
-                  configService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, fileMetadata.specification.name + "-" + fileMetadata.specification.version))
+                  configService.delete(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, fileMetadata.specification.name + "-" + fileMetadata.specification.version))
                   response = OkRestResponse(
                     MessageResponseEntity(createMessage("rest.custom.jars.file.deleted.by.filename", name))
                   )
@@ -130,7 +131,7 @@ trait SjCustomRoute extends Directives with SjCrudValidator {
                     )
 
                     if (storage.delete(filename)) {
-                      configService.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, name + "-" + version))
+                      configService.delete(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, name + "-" + version))
                       response = OkRestResponse(
                         MessageResponseEntity(createMessage("rest.custom.jars.file.deleted", name, version))
                       )
@@ -163,7 +164,7 @@ trait SjCustomRoute extends Directives with SjCrudValidator {
                           storage.put(uploadingFile, metadata.fileName, specification, "custom")
                           val name = specification("name").toString + "-" + specification("version").toString
                           val customJarConfigElement = new ConfigurationSettingDomain(
-                            createConfigurationSettingName(ConfigLiterals.systemDomain, name),
+                            ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, name),
                             metadata.fileName,
                             ConfigLiterals.systemDomain
                           )

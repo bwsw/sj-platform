@@ -5,16 +5,15 @@ import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.si.ConfigSettingsSI
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.common.exceptions.JsonDeserializationException
+import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.crud.rest.model.config.ConfigurationSettingApi
 import com.bwsw.sj.crud.rest._
+import com.bwsw.sj.crud.rest.exceptions.UnknownConfigSettingDomain
 
 import scala.util.{Failure, Success, Try}
 
-/**
-  * Created by diryavkin_dn on 11.05.17.
-  */
 class ConfigSettingsController extends Controller {
-  val serviceInterface = new ConfigSettingsSI
+  val serviceInterface = new ConfigSettingsSI()
 
   def get(name: String): RestResponse = {
     val configSetting = serviceInterface.get(name)
@@ -25,6 +24,7 @@ class ConfigSettingsController extends Controller {
       case None =>
         NotFoundRestResponse(MessageResponseEntity(createMessage("rest.config.setting.notfound", name)))
     }
+
     response
   }
 
@@ -34,6 +34,7 @@ class ConfigSettingsController extends Controller {
     if (configElements.nonEmpty) {
       response.entity = ConfigSettingsResponseEntity(configElements.map(cs => ConfigurationSettingApi.from(cs)))
     }
+
     response
   }
 
@@ -58,6 +59,7 @@ class ConfigSettingsController extends Controller {
 
       case Failure(exception) => throw exception
     }
+
     response
   }
 
@@ -72,6 +74,7 @@ class ConfigSettingsController extends Controller {
       case Left(message) =>
         UnprocessableEntityRestResponse(MessageResponseEntity(message))
     }
+
     response
   }
 
@@ -81,6 +84,15 @@ class ConfigSettingsController extends Controller {
     if (configElements.nonEmpty) {
       response.entity = ConfigSettingsResponseEntity(configElements.map(cs => ConfigurationSettingApi.from(cs)))
     }
+
     response
+  }
+
+  def checkDomain(domain: String): Unit = {
+    if (!ConfigLiterals.domains.contains(domain))
+      throw UnknownConfigSettingDomain(
+        createMessage("rest.config.setting.domain.unknown", ConfigLiterals.domains.mkString(", ")),
+        domain
+      )
   }
 }

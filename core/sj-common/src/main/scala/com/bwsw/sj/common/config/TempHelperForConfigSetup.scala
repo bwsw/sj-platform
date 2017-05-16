@@ -5,7 +5,7 @@ import java.net.URL
 
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
+import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import org.apache.commons.io.FileUtils
 
 object TempHelperForConfigSetup extends App {
@@ -17,13 +17,13 @@ object TempHelperForConfigSetup extends App {
 
   configService.save(new ConfigurationSettingDomain(ConfigLiterals.frameworkTag, "com.bwsw.fw-1.0", ConfigLiterals.systemDomain))
 
-  configService.save(new ConfigurationSettingDomain(createConfigurationSettingName(ConfigLiterals.systemDomain, "regular-streaming-validator-class"),
+  configService.save(new ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, "regular-streaming-validator-class"),
     "com.bwsw.sj.crud.rest.validator.instance.RegularInstanceValidator", ConfigLiterals.systemDomain))
-  configService.save(new ConfigurationSettingDomain(createConfigurationSettingName(ConfigLiterals.systemDomain, "batch-streaming-validator-class"),
+  configService.save(new ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, "batch-streaming-validator-class"),
     "com.bwsw.sj.crud.rest.validator.instance.BatchInstanceValidator", ConfigLiterals.systemDomain))
-  configService.save(new ConfigurationSettingDomain(createConfigurationSettingName(ConfigLiterals.systemDomain, "output-streaming-validator-class"),
+  configService.save(new ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, "output-streaming-validator-class"),
     "com.bwsw.sj.crud.rest.validator.instance.OutputInstanceValidator", ConfigLiterals.systemDomain))
-  configService.save(new ConfigurationSettingDomain(createConfigurationSettingName(ConfigLiterals.systemDomain, "input-streaming-validator-class"),
+  configService.save(new ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, "input-streaming-validator-class"),
     "com.bwsw.sj.crud.rest.validator.instance.InputInstanceValidator", ConfigLiterals.systemDomain))
 
   configService.save(new ConfigurationSettingDomain(ConfigLiterals.marathonTag, "http://stream-juggler.z1.netpoint-dc.com:8080", ConfigLiterals.systemDomain))
@@ -55,10 +55,10 @@ object TempHelperForConfigSetup extends App {
 
 object TempHelperForConfigDestroy extends App {
   ConnectionRepository.getConfigRepository.delete(ConfigLiterals.frameworkTag)
-  ConnectionRepository.getConfigRepository.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, "regular-streaming-validator-class"))
-  ConnectionRepository.getConfigRepository.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, "batch-streaming-validator-class"))
-  ConnectionRepository.getConfigRepository.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, "output-streaming-validator-class"))
-  ConnectionRepository.getConfigRepository.delete(createConfigurationSettingName(ConfigLiterals.systemDomain, "input-streaming-validator-class"))
+  ConnectionRepository.getConfigRepository.delete(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, "regular-streaming-validator-class"))
+  ConnectionRepository.getConfigRepository.delete(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, "batch-streaming-validator-class"))
+  ConnectionRepository.getConfigRepository.delete(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, "output-streaming-validator-class"))
+  ConnectionRepository.getConfigRepository.delete(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, "input-streaming-validator-class"))
   ConnectionRepository.getConfigRepository.delete(ConfigLiterals.marathonTag)
   ConnectionRepository.getConfigRepository.delete(ConfigLiterals.marathonTimeoutTag)
   ConnectionRepository.getConfigRepository.delete(ConfigLiterals.zkSessionTimeoutTag)
