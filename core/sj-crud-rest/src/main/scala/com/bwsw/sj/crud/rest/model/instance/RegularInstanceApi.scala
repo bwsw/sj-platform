@@ -1,6 +1,7 @@
 package com.bwsw.sj.crud.rest.model.instance
 
-import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
+import com.bwsw.sj.common.si.model.instance.RegularInstance
+import com.bwsw.sj.common.utils.{AvroUtils, EngineLiterals, RestLiterals}
 
 class RegularInstanceApi(name: String,
                          coordinationService: String,
@@ -35,5 +36,31 @@ class RegularInstanceApi(name: String,
     environmentVariables,
     performanceReportingInterval) {
 
+  override def to(moduleType: String, moduleName: String, moduleVersion: String): RegularInstance = {
+    new RegularInstance(
+      name,
+      description,
+      parallelism,
+      options,
+      perTaskCores,
+      perTaskRam,
+      jvmOptions,
+      nodeAttributes,
+      coordinationService,
+      environmentVariables,
+      performanceReportingInterval,
+      moduleName,
+      moduleVersion,
+      moduleType,
+      getEngine(moduleType, moduleName, moduleVersion),
+      inputs,
+      outputs,
+      checkpointMode,
+      checkpointInterval,
+      startFrom,
+      stateManagement,
+      stateFullCheckpoint,
+      eventWaitIdleTime,
+      AvroUtils.mapToSchema(inputAvroSchema))
+  }
 }
-

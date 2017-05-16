@@ -1,5 +1,6 @@
 package com.bwsw.sj.crud.rest.model.instance
 
+import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 
 class InputInstanceApi(name: String,
@@ -36,6 +37,34 @@ class InputInstanceApi(name: String,
     environmentVariables,
     performanceReportingInterval) {
 
+  override def to(moduleType: String, moduleName: String, moduleVersion: String): InputInstance = {
+    new InputInstance(
+      name,
+      description,
+      parallelism,
+      options,
+      perTaskCores,
+      perTaskRam,
+      jvmOptions,
+      nodeAttributes,
+      coordinationService,
+      environmentVariables,
+      performanceReportingInterval,
+      moduleName,
+      moduleVersion,
+      moduleType,
+      getEngine(moduleType, moduleName, moduleVersion),
+      checkpointMode,
+      checkpointInterval,
+      outputs,
+      lookupHistory,
+      queueMaxSize,
+      duplicateCheck,
+      defaultEvictionPolicy,
+      evictionPolicy,
+      backupCount,
+      asyncBackupCount)
+  }
 }
 
 

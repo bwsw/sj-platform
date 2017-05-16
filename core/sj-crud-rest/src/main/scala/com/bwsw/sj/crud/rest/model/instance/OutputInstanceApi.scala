@@ -1,6 +1,7 @@
 package com.bwsw.sj.crud.rest.model.instance
 
-import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
+import com.bwsw.sj.common.si.model.instance.OutputInstance
+import com.bwsw.sj.common.utils.{AvroUtils, EngineLiterals, RestLiterals}
 
 class OutputInstanceApi(name: String,
                         coordinationService: String,
@@ -32,4 +33,28 @@ class OutputInstanceApi(name: String,
     environmentVariables,
     performanceReportingInterval) {
 
+  override def to(moduleType: String, moduleName: String, moduleVersion: String): OutputInstance = {
+    new OutputInstance(
+      name,
+      description,
+      parallelism,
+      options,
+      perTaskCores,
+      perTaskRam,
+      jvmOptions,
+      nodeAttributes,
+      coordinationService,
+      environmentVariables,
+      performanceReportingInterval,
+      moduleName,
+      moduleVersion,
+      moduleType,
+      getEngine(moduleType, moduleName, moduleVersion),
+      checkpointMode,
+      checkpointInterval,
+      input,
+      output,
+      startFrom,
+      AvroUtils.mapToSchema(inputAvroSchema))
+  }
 }

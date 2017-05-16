@@ -1,6 +1,7 @@
 package com.bwsw.sj.crud.rest.model.instance
 
-import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
+import com.bwsw.sj.common.si.model.instance.BatchInstance
+import com.bwsw.sj.common.utils.{AvroUtils, EngineLiterals, RestLiterals}
 
 class BatchInstanceApi(name: String,
                        coordinationService: String,
@@ -35,5 +36,31 @@ class BatchInstanceApi(name: String,
     environmentVariables,
     performanceReportingInterval) {
 
+  override def to(moduleType: String, moduleName: String, moduleVersion: String): BatchInstance = {
+    new BatchInstance(
+      name,
+      description,
+      parallelism,
+      options,
+      perTaskCores,
+      perTaskRam,
+      jvmOptions,
+      nodeAttributes,
+      coordinationService,
+      environmentVariables,
+      performanceReportingInterval,
+      moduleName,
+      moduleVersion,
+      moduleType,
+      getEngine(moduleType, moduleName, moduleVersion),
+      inputs,
+      outputs,
+      window,
+      slidingInterval,
+      startFrom,
+      stateManagement,
+      stateFullCheckpoint,
+      eventWaitTime,
+      AvroUtils.mapToSchema(inputAvroSchema))
+  }
 }
-
