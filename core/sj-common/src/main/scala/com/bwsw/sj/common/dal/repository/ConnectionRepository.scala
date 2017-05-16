@@ -4,7 +4,7 @@ import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.sj.common.dal.ConnectionConstants
 import com.bwsw.sj.common.dal.model._
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
-import com.bwsw.sj.common.dal.model.module.FileMetadata
+import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service.ServiceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
@@ -38,7 +38,7 @@ object ConnectionRepository {
 
   private lazy val fileStorage: MongoFileStorage = new MongoFileStorage(mongoConnection(databaseName))
 
-  private lazy val fileMetadataRepository = new GenericMongoRepository[FileMetadata]()
+  private lazy val fileMetadataRepository = new GenericMongoRepository[FileMetadataDomain]()
 
   private lazy val instanceRepository = new GenericMongoRepository[InstanceDomain]()
 
@@ -50,7 +50,7 @@ object ConnectionRepository {
 
   private lazy val configRepository = new GenericMongoRepository[ConfigurationSettingDomain]()
 
-  def getFileMetadataRepository: GenericMongoRepository[FileMetadata] = {
+  def getFileMetadataRepository: GenericMongoRepository[FileMetadataDomain] = {
     fileMetadataRepository
   }
 

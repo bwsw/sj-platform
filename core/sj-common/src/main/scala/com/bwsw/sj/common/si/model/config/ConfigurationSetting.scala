@@ -6,7 +6,6 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.tstreams.env.ConfigurationOptions
-import com.fasterxml.jackson.annotation.JsonIgnore
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -15,7 +14,7 @@ class ConfigurationSetting(val name: String,
                            val value: String,
                            val domain: String) {
   def validate(): ArrayBuffer[String] = {
-    val configService = ConnectionRepository.getConfigRepository
+    val configRepository = ConnectionRepository.getConfigRepository
     val errors = new ArrayBuffer[String]()
 
     // 'name' field
@@ -28,7 +27,7 @@ class ConfigurationSetting(val name: String,
         }
         else {
           val modelConfigName = ConfigurationSetting.createConfigurationSettingName(this.domain, this.name)
-          if (configService.get(modelConfigName).isDefined) {
+          if (configRepository.get(modelConfigName).isDefined) {
             errors += createMessage("entity.error.already.exists", "Config setting", x)
           }
 
@@ -69,13 +68,12 @@ class ConfigurationSetting(val name: String,
     errors
   }
 
-  @JsonIgnore
   private def validateTstreamProperty(): Boolean = {
     this.name.contains("producer") || this.name.contains("consumer") || this.name == ConfigurationOptions.Producer.Transaction.distributionPolicy
   }
 
   def to(): ConfigurationSettingDomain = {
-    new ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(domain, name), value, domain)
+    ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(domain, name), value, domain)
   }
 }
 

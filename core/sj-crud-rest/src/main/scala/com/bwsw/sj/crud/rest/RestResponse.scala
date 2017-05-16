@@ -1,6 +1,7 @@
 package com.bwsw.sj.crud.rest
 
-import com.bwsw.sj.common.rest.ResponseEntity
+import akka.stream.scaladsl.Source
+import com.bwsw.sj.common.rest.{ResponseEntity, RestResponse}
 import com.bwsw.sj.crud.rest.model.config.ConfigurationSettingApi
 import com.bwsw.sj.crud.rest.model.stream.StreamApi
 import com.bwsw.sj.crud.rest.model.provider.ProviderApi
@@ -36,3 +37,9 @@ case class RelatedToStreamResponseEntity(instances: mutable.Buffer[String] = mut
 case class ConfigSettingsResponseEntity(configSettings: mutable.Buffer[ConfigurationSettingApi] = mutable.Buffer()) extends ResponseEntity
 
 case class ConfigSettingResponseEntity(configSetting: ConfigurationSettingApi) extends ResponseEntity
+
+case class CustomJar(filename: String, source: Source[akka.util.ByteString, scala.Any]) extends RestResponse
+
+case class CustomJarInfo(name: String, version: String, size: Long)
+
+case class CustomJarsResponseEntity(customJars: mutable.Buffer[CustomJarInfo] = mutable.Buffer()) extends ResponseEntity

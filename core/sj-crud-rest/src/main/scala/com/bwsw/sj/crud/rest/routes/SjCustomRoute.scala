@@ -11,20 +11,19 @@ import akka.http.scaladsl.server.directives.FileInfo
 import akka.stream.scaladsl.FileIO
 import akka.util.ByteString
 import com.bwsw.sj.common.config.ConfigLiterals
-import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
-import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import com.bwsw.sj.common.utils.MessageResourceUtils._
-import com.bwsw.sj.crud.rest.RestLiterals
+import com.bwsw.sj.crud.rest.controller.CustomJarsController
 import com.bwsw.sj.crud.rest.exceptions.CustomJarNotFound
+import com.bwsw.sj.crud.rest.model.FileMetadataApi
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import org.apache.commons.io.FileUtils
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
 /**
   * Rest-api for sj-platform executive units and custom files
@@ -32,6 +31,7 @@ import scala.util.{Failure, Success, Try}
   * @author Kseniya Tomskikh
   */
 trait SjCustomRoute extends Directives with SjCrudValidator {
+  private val customJarsController = new CustomJarsController()
   private val previousFilesNames: ListBuffer[String] = ListBuffer[String]()
 
   private def fileUpload(filename: String, part: BodyPart) = {
@@ -56,55 +56,18 @@ trait SjCustomRoute extends Directives with SjCrudValidator {
     })
   }
 
-  private def doesCustomJarExist(specification: Map[String, Any]) = {
-    fileMetadataDAO.getByParameters(
-      Map("filetype" -> "custom",
-        "specification.name" -> specification("name").asInstanceOf[String],
-        "specification.version" -> specification("version").asInstanceOf[String]
-      )).nonEmpty
-  }
-
   val customRoute = {
     pathPrefix("custom") {
       pathPrefix("jars") {
         pathPrefix(Segment) { (name: String) =>
           pathEndOrSingleSlash {
             get {
-              if (storage.exists(name)) {
-                deletePreviousFiles()
-                val jarFile = storage.get(name, RestLiterals.tmpDirectory + name)
-                previousFilesNames.append(jarFile.getAbsolutePath)
-                val source = FileIO.fromPath(Paths.get(jarFile.getAbsolutePath))
-                complete(HttpResponse(
-                  headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> name))),
-                  entity = HttpEntity.Chunked.fromData(MediaTypes.`application/java-archive`, source)
-                ))
-              } else {
-                val response = NotFoundRestResponse(MessageResponseEntity(createMessage("rest.custom.jars.file.notfound", name)))
-                complete(restResponseToHttpResponse(response))
-              }
-            } ~
-              delete {
-                val fileMetadatas = fileMetadataDAO.getByParameters(Map("filetype" -> "custom", "filename" -> name))
-                if (fileMetadatas.isEmpty) {
-                  throw CustomJarNotFound(createMessage("rest.custom.jars.file.notfound", s"$name"), s"$name")
-                }
-                val fileMetadata = fileMetadatas.head
-
-                var response: RestResponse = InternalServerErrorRestResponse(
-                  MessageResponseEntity(s"Can't delete jar '$name' for some reason. It needs to be debugged")
-                )
-
-                if (storage.delete(name)) {
-                  configService.delete(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, fileMetadata.specification.name + "-" + fileMetadata.specification.version))
-                  response = OkRestResponse(
-                    MessageResponseEntity(createMessage("rest.custom.jars.file.deleted.by.filename", name))
-                  )
-                }
-
-                complete(restResponseToHttpResponse(response))
-              }
+              complete(restResponseToHttpResponse(customJarsController.get(name)))
+            }
           } ~
+            delete {
+              complete(restResponseToHttpResponse(customJarsController.delete(name)))
+            } ~
             pathSuffix(Segment) { (version: String) =>
               pathEndOrSingleSlash {
                 val fileMetadatas = fileMetadataDAO.getByParameters(Map("filetype" -> "custom",
@@ -117,7 +80,7 @@ trait SjCustomRoute extends Directives with SjCrudValidator {
                 val filename = fileMetadatas.head.filename
                 get {
                   deletePreviousFiles()
-                  val jarFile = storage.get(filename, RestLiterals.tmpDirectory + filename)
+                  val jarFile = storage.get(filename, "/tmp/" + filename)
                   previousFilesNames.append(jarFile.getAbsolutePath)
                   val source = FileIO.fromPath(Paths.get(jarFile.getAbsolutePath))
                   complete(HttpResponse(
@@ -127,7 +90,7 @@ trait SjCustomRoute extends Directives with SjCrudValidator {
                 } ~
                   delete {
                     var response: RestResponse = InternalServerErrorRestResponse(
-                      MessageResponseEntity(s"Can't delete jar '${filename}' for some reason. It needs to be debuged")
+                      MessageResponseEntity(s"Can't delete jar '$filename' for some reason. It needs to be debugged")
                     )
 
                     if (storage.delete(filename)) {
@@ -146,54 +109,12 @@ trait SjCustomRoute extends Directives with SjCrudValidator {
             post {
               uploadedFile("jar") {
                 case (metadata: FileInfo, file: File) =>
-                  val result = Try {
-                    var response: RestResponse = ConflictRestResponse(MessageResponseEntity(
-                      createMessage("rest.custom.jars.file.exists", metadata.fileName)))
-
-                    if (!storage.exists(metadata.fileName)) {
-                      response = BadRequestRestResponse(MessageResponseEntity(getMessage("rest.errors.invalid.specification")))
-
-                      if (checkCustomFileSpecification(file)) {
-                        val specification = getSpecification(file)
-                        response = ConflictRestResponse(MessageResponseEntity(
-                          createMessage("rest.custom.jars.exists", metadata.fileName)))
-
-                        if (!doesCustomJarExist(specification)) {
-                          val uploadingFile = new File(metadata.fileName)
-                          FileUtils.copyFile(file, uploadingFile)
-                          storage.put(uploadingFile, metadata.fileName, specification, "custom")
-                          val name = specification("name").toString + "-" + specification("version").toString
-                          val customJarConfigElement = new ConfigurationSettingDomain(
-                            ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, name),
-                            metadata.fileName,
-                            ConfigLiterals.systemDomain
-                          )
-                          configService.save(customJarConfigElement)
-                          response = OkRestResponse(MessageResponseEntity(
-                            createMessage("rest.custom.jars.file.uploaded", metadata.fileName)))
-                        }
-                      }
-                    }
-
-                    response
-                  }
-                  file.delete()
-                  result match {
-                    case Success(response) => complete(restResponseToHttpResponse(response))
-                    case Failure(e) => throw e
-                  }
+                  val fileMetadataApi = new FileMetadataApi(metadata.fileName, Some(file))
+                  complete(restResponseToHttpResponse(customJarsController.create(fileMetadataApi)))
               }
             } ~
               get {
-                val files = fileMetadataDAO.getByParameters(Map("filetype" -> "custom"))
-                val response = OkRestResponse(CustomJarsResponseEntity())
-                if (files.nonEmpty) {
-                  val jarsInfo = files.map(metadata =>
-                    CustomJarInfo(metadata.specification.name, metadata.specification.version, metadata.length))
-                  response.entity = CustomJarsResponseEntity(jarsInfo)
-                }
-
-                complete(restResponseToHttpResponse(response))
+                complete(restResponseToHttpResponse(customJarsController.getAll()))
               }
           }
       } ~
@@ -264,7 +185,7 @@ trait SjCustomRoute extends Directives with SjCrudValidator {
                 get {
                   if (storage.exists(filename)) {
                     deletePreviousFiles()
-                    val jarFile = storage.get(filename, RestLiterals.tmpDirectory + filename)
+                    val jarFile = storage.get(filename, "/tmp/" + filename)
                     previousFilesNames.append(jarFile.getAbsolutePath)
                     val source = FileIO.fromPath(Paths.get(jarFile.getAbsolutePath))
                     complete(HttpResponse(

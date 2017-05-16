@@ -41,8 +41,8 @@ class ConfigSettingsController extends Controller {
   def create(serializedEntity: String): RestResponse = {
     var response: RestResponse = new RestResponse()
 
-    val triedConfigData = Try(serializer.deserialize[ConfigurationSettingApi](serializedEntity))
-    triedConfigData match  {
+    val triedSettingApi = Try(serializer.deserialize[ConfigurationSettingApi](serializedEntity))
+    triedSettingApi match  {
       case Success(configData) =>
         val created = serviceInterface.create(configData.to())
         response = created match {

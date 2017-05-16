@@ -17,8 +17,8 @@ class ProviderController extends Controller {
   def create(serializedEntity: String): RestResponse = {
     var response: RestResponse = new RestResponse()
 
-    val triedProviderData = Try(serializer.deserialize[ProviderApi](serializedEntity))
-    triedProviderData match {
+    val triedProviderApi = Try(serializer.deserialize[ProviderApi](serializedEntity))
+    triedProviderApi match {
       case Success(providerData) =>
         val created = serviceInterface.create(providerData.to())
 

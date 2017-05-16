@@ -9,5 +9,4 @@ import org.mongodb.morphia.annotations.Entity
   * collection element is one configuration setting.
   */
 @Entity("config")
-class ConfigurationSettingDomain(@IdField val name: String, val value: String, val domain: String) {
-}
+case class ConfigurationSettingDomain(@IdField name: String, value: String, domain: String)

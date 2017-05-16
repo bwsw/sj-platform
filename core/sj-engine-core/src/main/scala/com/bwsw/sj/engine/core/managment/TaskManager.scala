@@ -50,7 +50,7 @@ abstract class TaskManager() {
   protected var currentPortNumber = 0
   private val storage = ConnectionRepository.getFileStorage
 
-  protected val fileMetadata: FileMetadata = ConnectionRepository.getFileMetadataRepository.getByParameters(
+  protected val fileMetadata: FileMetadataDomain = ConnectionRepository.getFileMetadataRepository.getByParameters(
     Map("specification.name" -> instance.moduleName,
       "specification.module-type" -> instance.moduleType,
       "specification.version" -> instance.moduleVersion)
