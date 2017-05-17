@@ -21,7 +21,7 @@ class CustomJarsController extends Controller {
       val response = created match {
         case Right(_) =>
           OkRestResponse(MessageResponseEntity(
-            createMessage("rest.custom.jars.file.uploaded", entity.filename)))
+            createMessage("rest.custom.jars.file.uploaded", entity.filename.get)))
         case Left(errors) => BadRequestRestResponse(MessageResponseEntity(
           createMessageWithErrors("rest.custom.jars.cannot.upload", errors)
         ))

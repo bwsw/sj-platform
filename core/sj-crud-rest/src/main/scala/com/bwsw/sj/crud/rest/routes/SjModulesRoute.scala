@@ -1,7 +1,8 @@
 package com.bwsw.sj.crud.rest.routes
 
-import java.io.File
-import java.net.URI
+import java.io.{File, FileNotFoundException}
+import java.lang.reflect.Type
+import java.net.{URI, URLClassLoader}
 import java.nio.file.Paths
 
 import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Disposition`}
@@ -10,14 +11,17 @@ import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.stream.scaladsl.FileIO
 import com.bwsw.common.exceptions.JsonDeserializationException
-import com.bwsw.sj.common.dal.model.module._
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.{StreamingValidator, ValidationInfo}
-import com.bwsw.sj.common.rest.model.module._
 import com.bwsw.sj.common.rest._
+import com.bwsw.sj.common.rest.model.module._
+import com.bwsw.sj.common.si.JsonValidator
+import com.bwsw.sj.common.si.model.FileMetadata
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.crud.rest.RestLiterals
+import com.bwsw.sj.common.utils.MessageResourceUtils._
+import com.bwsw.sj.common.utils.StreamLiterals._
 import com.bwsw.sj.crud.rest.exceptions._
 import com.bwsw.sj.crud.rest.instance.{HttpClient, InstanceDestroyer, InstanceStarter, InstanceStopper}
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
@@ -26,15 +30,12 @@ import com.bwsw.sj.crud.rest.validator.instance.InstanceValidator
 import org.apache.commons.io.FileUtils
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.util.EntityUtils
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
-import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
-import com.bwsw.sj.common.rest.utils.ValidationUtils._
-import com.bwsw.sj.common.utils.MessageResourceUtils._
-
 import scala.util.{Failure, Success, Try}
 
-trait SjModulesRoute extends Directives with SjCrudValidator {
+trait SjModulesRoute extends Directives with SjCrudValidator with JsonValidator {
 
   private val previousFilesNames: ListBuffer[String] = ListBuffer[String]()
 
@@ -124,7 +125,7 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
             MessageResponseEntity(createMessage("rest.modules.modules.extension.unknown", metadata.fileName)))
 
           if (metadata.fileName.endsWith(".jar")) {
-            val specification: Map[String, Any] = null //validateSpecification(file)
+            val specification: Map[String, Any] = validateSpecification(file)
             response = ConflictRestResponse(MessageResponseEntity(
               createMessage("rest.modules.module.exists", metadata.fileName)))
 
@@ -492,7 +493,7 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
   private def validateInstance(options: InstanceApi, specification: SpecificationApi, moduleType: String) = {
     val validatorClassName = configService.get(s"system.$moduleType-validator-class") match {
       case Some(configurationSetting) => configurationSetting.value
-      case None => throw new ConfigSettingNotFound(
+      case None => throw ConfigSettingNotFound(
         createMessage("rest.config.setting.notfound", ConfigLiterals.systemDomain, s"$moduleType-validator-class"))
     }
     val validatorClass = Class.forName(validatorClassName)
@@ -501,6 +502,8 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
   }
 
   private def validateInstance(specification: SpecificationApi, filename: String, instanceMetadata: InstanceApi): ValidationInfo = {
+    import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
+
     val validatorClassName = specification.validateClass
     val file = storage.get(filename, s"tmp/$filename")
     val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
@@ -546,5 +549,160 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
   private def destroyInstance(instance: InstanceDomain) = {
     logger.debug(s"Destroying application of instance ${instance.name}.")
     new Thread(new InstanceDestroyer(instance)).start()
+  }
+
+  /**
+    * Check specification of uploading jar file
+    *
+    * @param jarFile - input jar file
+    * @return - content of specification.json
+    */
+  def validateSpecification(jarFile: File): Map[String, Any] = {
+    val configService = ConnectionRepository.getConfigRepository
+    val classLoader = new URLClassLoader(Array(jarFile.toURI.toURL), ClassLoader.getSystemClassLoader)
+    val serializedSpecification = FileMetadata.getSpecificationFromJar(jarFile)
+    validateSerializedSpecification(serializedSpecification)
+    validateWithSchema(serializedSpecification, "schema.json")
+    val specification = serializer.deserialize[Map[String, Any]](serializedSpecification)
+    val moduleType = specification("module-type").asInstanceOf[String]
+    val inputs = specification("inputs").asInstanceOf[Map[String, Any]]
+    val inputCardinality = inputs("cardinality").asInstanceOf[List[Int]]
+    val inputTypes = inputs("types").asInstanceOf[List[String]]
+    val outputs = specification("outputs").asInstanceOf[Map[String, Any]]
+    val outputCardinality = outputs("cardinality").asInstanceOf[List[Int]]
+    val outputTypes = outputs("types").asInstanceOf[List[String]]
+    val validatorClass = specification("validator-class").asInstanceOf[String]
+    moduleType match {
+      case `inputStreamingType` =>
+        //'inputs.cardinality' field
+        if (!isZeroCardinality(inputCardinality)) {
+          throw new Exception(createMessage("rest.validator.specification.both.input.cardinality", moduleType, "zero"))
+        }
+
+        //'inputs.types' field
+        if (inputTypes.length != 1 || !inputTypes.contains(inputDummy)) {
+          throw new Exception(createMessage("rest.validator.specification.input.type", moduleType, "input"))
+        }
+
+        //'outputs.cardinality' field
+        if (!isNonZeroCardinality(outputCardinality)) {
+          throw new Exception(createMessage("rest.validator.specification.cardinality.left.bound.greater.zero", moduleType, "outputs"))
+        }
+
+        //'outputs.types' field
+        if (outputTypes.length != 1 || !doesSourceTypesConsistOf(outputTypes, Set(tstreamType))) {
+          throw new Exception(createMessage("rest.validator.specification.sources.must.t-stream", moduleType, "outputs"))
+        }
+
+      case `outputStreamingType` =>
+        //'inputs.cardinality' field
+        if (!isSingleCardinality(inputCardinality)) {
+          throw new Exception(createMessage("rest.validator.specification.both.input.cardinality", moduleType, "1"))
+        }
+
+        //'inputs.types' field
+        if (inputTypes.length != 1 || !doesSourceTypesConsistOf(inputTypes, Set(tstreamType))) {
+          throw new Exception(createMessage("rest.validator.specification.sources.must.t-stream", moduleType, "inputs"))
+        }
+
+        //'outputs.cardinality' field
+        if (!isSingleCardinality(outputCardinality)) {
+          throw new Exception(createMessage("rest.validator.specification.both.input.cardinality", moduleType, "1"))
+        }
+
+        //'outputs.types' field
+        if (outputTypes.isEmpty || !doesSourceTypesConsistOf(outputTypes, Set(esOutputType, jdbcOutputType, restOutputType))) {
+          throw new Exception(createMessage("rest.validator.specification.sources.es.jdbc.rest", moduleType, "outputs"))
+        }
+
+
+      case _ =>
+        //'inputs.cardinality' field
+        if (!isNonZeroCardinality(inputCardinality)) {
+          throw new Exception(createMessage("rest.validator.specification.cardinality.left.bound.greater.zero", moduleType, "inputs"))
+        }
+
+        //'inputs.types' field
+        if (inputTypes.isEmpty || !doesSourceTypesConsistOf(inputTypes, Set(tstreamType, kafkaStreamType))) {
+          throw new Exception(createMessage("rest.validator.specification.sources.t-stream.kafka", moduleType, "inputs"))
+        }
+
+        //'outputs.cardinality' field
+        if (!isNonZeroCardinality(outputCardinality)) {
+          throw new Exception(createMessage("rest.validator.specification.cardinality.left.bound.greater.zero", moduleType, "outputs"))
+        }
+
+        //'outputs.types' field
+        if (outputTypes.length != 1 || !doesSourceTypesConsistOf(outputTypes, Set(tstreamType))) {
+          throw new Exception(createMessage("rest.validator.specification.sources.must.t-stream", moduleType, "outputs"))
+        }
+
+        if (moduleType == EngineLiterals.batchStreamingType) {
+          //'batch-collector-class' field
+          Option(specification("batch-collector-class").asInstanceOf[String]) match {
+            case Some("") | None =>
+              throw new Exception(createMessage("rest.validator.specification.batchcollector.should.defined", moduleType, "batch-collector-class"))
+            case _ =>
+          }
+        }
+    }
+
+    //'validator-class' field
+    val validatorClassInterfaces = getValidatorClassInterfaces(validatorClass, classLoader)
+    if (!validatorClassInterfaces.exists(x => x.equals(classOf[StreamingValidator]))) {
+      throw new Exception(createMessage("rest.validator.specification.class.should.implement", moduleType, "validator-class", "StreamingValidator"))
+    }
+
+    //'engine-name' and 'engine-version' fields
+    val engine = specification("engine-name").asInstanceOf[String] + "-" + specification("engine-version").asInstanceOf[String]
+    if (configService.get("system." + engine).isEmpty) {
+      throw new Exception(createMessage("rest.validator.specification.invalid.engine.params", moduleType))
+    }
+
+    specification
+  }
+
+  private def isZeroCardinality(cardinality: List[Int]): Boolean = {
+    cardinality.head == 0 && cardinality.last == 0
+  }
+
+  private def doesSourceTypesConsistOf(sourceTypes: List[String], types: Set[String]): Boolean = {
+    sourceTypes.forall(_type => types.contains(_type))
+  }
+
+  private def isNonZeroCardinality(cardinality: List[Int]): Boolean = {
+    cardinality.head > 0 && (cardinality.last >= cardinality.head)
+  }
+
+  private def isSingleCardinality(cardinality: List[Int]): Boolean = {
+    cardinality.head == 1 && cardinality.last == 1
+  }
+
+  private def getValidatorClassInterfaces(className: String, classLoader: URLClassLoader): Array[Type] = {
+    logger.debug("Try to load a validator class from jar that is indicated on specification.")
+    Try(classLoader.loadClass(className).getAnnotatedInterfaces.map(x => x.getType)) match {
+      case Success(x) => x
+      case Failure(_: ClassNotFoundException) =>
+        logger.error(s"Specification.json for module has got the invalid 'validator-class' param: " +
+          s"class '$className' indicated in the specification isn't found.")
+        throw new Exception(createMessage("rest.validator.specification.class.not.found", "validator-class", className))
+      case Failure(e) => throw e
+    }
+  }
+
+  private def validateSerializedSpecification(specificationJson: String): Unit = {
+    logger.debug(s"Validate a serialized specification.")
+    if (isEmptyOrNullString(specificationJson)) {
+      logger.error(s"Specification.json is not found in module jar.")
+      val message = createMessage("rest.modules.specification.json.not.found")
+      logger.error(message)
+      throw new FileNotFoundException(message)
+    }
+    if (!isJSONValid(specificationJson)) {
+      logger.error(s"Specification.json of module is an invalid json.")
+      val message = createMessage("rest.modules.specification.json.invalid")
+      logger.error(message)
+      throw new FileNotFoundException(message)
+    }
   }
 }
