@@ -42,7 +42,9 @@ object Dependencies {
     "com.datastax.cassandra" % "cassandra-driver-core" % "3.2.0",
     "org.scalatest" % "scalatest_2.12" % "3.0.1" % "test",
     "org.eclipse.jetty" % "jetty-client" % "9.4.3.v20170317",
-    "com.fasterxml.jackson.module" % "jackson-module-scala_2.12" % "2.8.8"
+    "com.fasterxml.jackson.module" % "jackson-module-scala_2.12" % "2.8.8",
+    ("org.everit.json" % "org.everit.json.schema" % "1.4.1")
+      .exclude("commons-logging", "commons-logging")
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(
@@ -62,8 +64,6 @@ object Dependencies {
   lazy val sjRestDependencies = Def.setting(Seq(
     "org.slf4j" % "slf4j-log4j12" % "1.7.22" % "provided",
     "com.typesafe.akka" %% "akka-http" % "10.0.3",
-    ("org.everit.json" % "org.everit.json.schema" % "1.4.1")
-      .exclude("commons-logging", "commons-logging"),
     ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
       .exclude("commons-logging", "commons-logging"),
     "com.typesafe.akka" %% "akka-slf4j" % "2.4.16"

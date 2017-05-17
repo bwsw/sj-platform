@@ -38,8 +38,16 @@ case class ConfigSettingsResponseEntity(configSettings: mutable.Buffer[Configura
 
 case class ConfigSettingResponseEntity(configSetting: ConfigurationSettingApi) extends ResponseEntity
 
+
 case class CustomJar(filename: String, source: Source[akka.util.ByteString, scala.Any]) extends RestResponse
 
 case class CustomJarInfo(name: String, version: String, size: Long)
 
 case class CustomJarsResponseEntity(customJars: mutable.Buffer[CustomJarInfo] = mutable.Buffer()) extends ResponseEntity
+
+
+case class CustomFile(filename: String, source: Source[akka.util.ByteString, scala.Any]) extends RestResponse
+
+case class CustomFileInfo(name: String, description: String, uploadDate: String, size: Long) extends ResponseEntity
+
+case class CustomFilesResponseEntity(customFiles: mutable.Buffer[CustomFileInfo] = mutable.Buffer()) extends ResponseEntity

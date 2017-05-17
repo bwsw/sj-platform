@@ -124,7 +124,7 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
             MessageResponseEntity(createMessage("rest.modules.modules.extension.unknown", metadata.fileName)))
 
           if (metadata.fileName.endsWith(".jar")) {
-            val specification = validateSpecification(file)
+            val specification: Map[String, Any] = null //validateSpecification(file)
             response = ConflictRestResponse(MessageResponseEntity(
               createMessage("rest.modules.module.exists", metadata.fileName)))
 
@@ -335,7 +335,7 @@ trait SjModulesRoute extends Directives with SjCrudValidator {
 
   private val gettingModule = (filename: String) => get {
     deletePreviousFiles()
-    val jarFile = storage.get(filename, RestLiterals.tmpDirectory + filename)
+    val jarFile = storage.get(filename, "/tmp/" + filename)
     previousFilesNames.append(jarFile.getAbsolutePath)
     val source = FileIO.fromPath(Paths.get(jarFile.getAbsolutePath))
     complete(HttpResponse(

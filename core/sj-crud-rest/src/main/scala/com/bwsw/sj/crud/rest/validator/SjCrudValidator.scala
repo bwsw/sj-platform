@@ -5,13 +5,14 @@ import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.server.RequestContext
-import akka.stream.Materializer
+import akka.stream.ActorMaterializer
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.dal.model._
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
 import com.bwsw.sj.common.dal.repository.GenericMongoRepository
+import com.bwsw.sj.common.si.JsonValidator
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 
@@ -26,10 +27,9 @@ import scala.concurrent.{Await, ExecutionContextExecutor}
 trait SjCrudValidator extends CompletionUtils with JsonValidator {
   val logger: LoggingAdapter
 
-  implicit val materializer: Materializer
-  implicit val system: ActorSystem
-
-  implicit def executor: ExecutionContextExecutor
+  implicit val system = ActorSystem("sj-crud-rest-server")
+  implicit val materializer: ActorMaterializer = ActorMaterializer()
+  implicit val executor: ExecutionContextExecutor = system.dispatcher
 
   val serializer: Serializer
   val fileMetadataDAO: GenericMongoRepository[FileMetadataDomain]

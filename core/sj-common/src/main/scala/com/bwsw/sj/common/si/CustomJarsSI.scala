@@ -37,7 +37,7 @@ class CustomJarsSI extends ServiceInterface[FileMetadata, FileMetadataDomain] {
       val specification = FileMetadata.getSpecification(entity.file.get)
       val uploadingFile = new File(entity.filename)
       FileUtils.copyFile(entity.file.get, uploadingFile)
-      fileStorage.put(uploadingFile, entity.filename, specification, "custom")
+      fileStorage.put(uploadingFile, entity.filename, specification, FileMetadata.customJarType)
       val name = specification("name").toString + "-" + specification("version").toString
       val customJarConfig = ConfigurationSettingDomain(
         ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, name),
@@ -53,43 +53,76 @@ class CustomJarsSI extends ServiceInterface[FileMetadata, FileMetadataDomain] {
   }
 
   override def getAll(): mutable.Buffer[FileMetadata] = {
-    entityRepository.getByParameters(Map("filetype" -> "custom")).map(x => FileMetadata.from(x))
+    entityRepository.getByParameters(Map("filetype" -> FileMetadata.customJarType)).map(x => FileMetadata.from(x))
   }
 
-  override def get(name: String): Option[File] = {
+  override def get(name: String): Option[FileMetadata] = {
     if (fileStorage.exists(name)) {
       deletePreviousFiles()
       val jarFile = fileStorage.get(name, tmpDirectory + name)
       previousFilesNames.append(jarFile.getAbsolutePath)
 
-      Some(jarFile)
+      Some(new FileMetadata(name, Some(jarFile)))
     } else {
       None
     }
   }
 
-//  override def delete(name: String): Either[String, Boolean] = {
-//    var response: Either[String, Boolean] = Left(createMessage("rest.services.service.cannot.delete.due.to.streams", name))
-//    val streams = getRelatedStreams(name)
-//
-//    if (streams.isEmpty) {
-//      response = Left(createMessage("rest.services.service.cannot.delete.due.to.instances", name))
-//      val instances = getRelatedInstances(name)
-//
-//      if (instances.isEmpty) {
-//        val provider = entityRepository.get(name)
-//
-//        provider match {
-//          case Some(_) =>
-//            entityRepository.delete(name)
-//            response = Right(true)
-//          case None =>
-//            response = Right(false)
-//        }
-//      }
-//    }
-//
-//    response
-//  }
-  override def delete(name: String): Either[String, Boolean] = ???
+  override def delete(name: String): Either[String, Boolean] = {
+    val fileMetadatas = entityRepository.getByParameters(Map("filetype" -> FileMetadata.customJarType, "filename" -> name))
+    var response: Either[String, Boolean] = Right(false)
+
+    if (fileMetadatas.nonEmpty) {
+      val fileMetadata = fileMetadatas.head
+
+      if (fileStorage.delete(name)) {
+        configRepository.delete(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain,
+          fileMetadata.specification.name + "-" + fileMetadata.specification.version))
+        response = Right(true)
+      } else {
+        response = Left(s"Can't delete jar '$name' for some reason. It needs to be debugged.")
+      }
+    }
+
+    response
+  }
+
+  def getBy(name: String, version: String): Option[FileMetadata] = {
+    val fileMetadatas = entityRepository.getByParameters(Map("filetype" -> FileMetadata.customJarType,
+      "specification.name" -> name,
+      "specification.version" -> version)
+    )
+
+    if (fileMetadatas.nonEmpty) {
+      val filename = fileMetadatas.head.filename
+      deletePreviousFiles()
+      val jarFile = fileStorage.get(filename, tmpDirectory + filename)
+      previousFilesNames.append(jarFile.getAbsolutePath)
+
+      Some(new FileMetadata(name, Some(jarFile)))
+    } else {
+      None
+    }
+  }
+
+  def deleteBy(name: String, version: String): Either[String, Boolean] = {
+    val fileMetadatas = entityRepository.getByParameters(Map("filetype" -> FileMetadata.customJarType,
+      "specification.name" -> name,
+      "specification.version" -> version)
+    )
+    var response: Either[String, Boolean] = Right(false)
+
+    if (fileMetadatas.nonEmpty) {
+      val filename = fileMetadatas.head.filename
+
+      if (fileStorage.delete(filename)) {
+        configRepository.delete(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, s"$name-$version"))
+        response = Right(true)
+      } else {
+        response = Left(s"Can't delete jar '$filename' for some reason. It needs to be debugged.")
+      }
+    }
+
+    response
+  }
 }

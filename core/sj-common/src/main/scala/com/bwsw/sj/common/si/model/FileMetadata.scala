@@ -1,6 +1,7 @@
 package com.bwsw.sj.common.si.model
 
 import java.io.{BufferedReader, File, FileNotFoundException, InputStreamReader}
+import java.lang.reflect.Type
 import java.net.URLClassLoader
 import java.util.jar.JarFile
 
@@ -8,11 +9,11 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.StreamingValidator
+import com.bwsw.sj.common.si.JsonValidator
 import com.bwsw.sj.common.utils.EngineLiterals.{inputStreamingType, outputStreamingType}
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.StreamLiterals._
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.crud.rest.validator.JsonValidator
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable.ArrayBuffer
@@ -22,7 +23,9 @@ class FileMetadata(val filename: String,
                    val file: Option[File] = None,
                    val name: Option[String] = None,
                    val version: Option[String] = None,
-                   val length: Option[Long] = None)
+                   val length: Option[Long] = None,
+                   val description: Option[String] = None,
+                   val uploadDate: Option[String] = None)
   extends JsonValidator {
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
   private val fileStorage = ConnectionRepository.getFileStorage
@@ -171,7 +174,7 @@ class FileMetadata(val filename: String,
     cardinality.head == 0 && cardinality.last == 0
   }
 
-  private def doesSourceTypesConsistOf(sourceTypes: List[String], types: Set[String]) = {
+  private def doesSourceTypesConsistOf(sourceTypes: List[String], types: Set[String]): Boolean = {
     sourceTypes.forall(_type => types.contains(_type))
   }
 
@@ -183,7 +186,7 @@ class FileMetadata(val filename: String,
     cardinality.head == 1 && cardinality.last == 1
   }
 
-  private def getValidatorClassInterfaces(className: String, classLoader: URLClassLoader) = {
+  private def getValidatorClassInterfaces(className: String, classLoader: URLClassLoader): Array[Type] = {
     logger.debug("Try to load a validator class from jar that is indicated on specification.")
     Try(classLoader.loadClass(className).getAnnotatedInterfaces.map(x => x.getType)) match {
       case Success(x) => x
@@ -195,7 +198,7 @@ class FileMetadata(val filename: String,
     }
   }
 
-  private def validateSerializedSpecification(specificationJson: String) = {
+  private def validateSerializedSpecification(specificationJson: String): Unit = {
     logger.debug(s"Validate a serialized specification.")
     if (isEmptyOrNullString(specificationJson)) {
       logger.error(s"Specification.json is not found in module jar.")
@@ -213,7 +216,7 @@ class FileMetadata(val filename: String,
 
   private def doesCustomJarExist(specification: Map[String, Any]) = {
     fileMetadataRepository.getByParameters(
-      Map("filetype" -> "custom",
+      Map("filetype" -> FileMetadata.customJarType,
         "specification.name" -> specification("name").asInstanceOf[String],
         "specification.version" -> specification("version").asInstanceOf[String]
       )).nonEmpty
@@ -225,13 +228,18 @@ object FileMetadata {
   private val serializer = new JsonSerializer()
   private var maybeSpecification: Option[String] = None
 
+  val customJarType: String = "custom"
+  val customFileType: String = "custom-file"
+
   def from(fileMetadataDomain: FileMetadataDomain): FileMetadata = {
     new FileMetadata(
       fileMetadataDomain.filename,
       None,
-      Some(fileMetadataDomain.specification.engineName),
-      Some(fileMetadataDomain.specification.engineVersion),
-      Some(fileMetadataDomain.length)
+      Some(fileMetadataDomain.specification.name),
+      Some(fileMetadataDomain.specification.version),
+      Some(fileMetadataDomain.length),
+      Some(fileMetadataDomain.specification.description),
+      Some(fileMetadataDomain.uploadDate.toString)
     )
   }
 

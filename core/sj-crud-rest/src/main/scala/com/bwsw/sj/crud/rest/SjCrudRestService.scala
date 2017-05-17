@@ -28,10 +28,6 @@ import scala.concurrent.Future
  * @author Kseniya Tomskikh
  */
 object SjCrudRestService extends App with SjCrudInterface {
-  implicit val system = ActorSystem("sj-crud-rest-server")
-  implicit val materializer = ActorMaterializer()
-  implicit val executor = system.dispatcher
-
   require(Option(System.getenv("CRUD_REST_HOST")).isDefined && Option(System.getenv("CRUD_REST_PORT")).isDefined,
   "No environment variables: CRUD_REST_HOST, CRUD_REST_PORT")
 

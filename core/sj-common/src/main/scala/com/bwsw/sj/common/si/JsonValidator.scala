@@ -1,4 +1,4 @@
-package com.bwsw.sj.crud.rest.validator
+package com.bwsw.sj.common.si
 
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import org.everit.json.schema.loader.SchemaLoader

@@ -4,9 +4,10 @@ import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.rest.model.module.{InstanceApi, SpecificationApi}
 import com.fasterxml.jackson.annotation.JsonProperty
 
+import scala.annotation.meta.field
 import scala.collection.mutable
 
-class RestResponse(@JsonProperty("status-code") var statusCode: Int = 0, entity: ResponseEntity = new ResponseEntity {})
+class RestResponse(@(JsonProperty @field)("status-code") val statusCode: Int = 0, entity: ResponseEntity = new ResponseEntity {})
 
 case class OkRestResponse(var entity: ResponseEntity) extends RestResponse(200, entity)
 
@@ -63,8 +64,3 @@ case class InstancesResponseEntity(instances: mutable.Buffer[InstanceApi] = muta
 
 case class ShortInstance(name: String, moduleType: String, moduleName: String, moduleVersion: String,
                          description: String, status: String, restAddress: String)
-
-
-case class CustomFileInfo(name: String, description: String, uploadDate: String, size: Long) extends ResponseEntity
-
-case class CustomFilesResponseEntity(customFiles: mutable.Buffer[CustomFileInfo] = mutable.Buffer()) extends ResponseEntity

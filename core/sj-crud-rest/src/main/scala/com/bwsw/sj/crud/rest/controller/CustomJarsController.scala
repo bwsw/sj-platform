@@ -42,7 +42,7 @@ class CustomJarsController extends Controller {
     val response = OkRestResponse(CustomJarsResponseEntity())
     val fileMetadata = serviceInterface.getAll()
     if (fileMetadata.nonEmpty) {
-      response.entity = CustomJarsResponseEntity(fileMetadata.map(m => FileMetadataApi.from(m)))
+      response.entity = CustomJarsResponseEntity(fileMetadata.map(m => FileMetadataApi.toCustomJarInfo(m)))
     }
 
     response
@@ -53,7 +53,7 @@ class CustomJarsController extends Controller {
 
     val response = service match {
       case Some(x) =>
-        val source = FileIO.fromPath(Paths.get(x.getAbsolutePath))
+        val source = FileIO.fromPath(Paths.get(x.file.get.getAbsolutePath))
 
         CustomJar(name, source)
       case None =>
@@ -63,69 +63,50 @@ class CustomJarsController extends Controller {
     response
   }
 
-//  override def delete(name: String): RestResponse = {
-//    val fileMetadatas = fileMetadataDAO.getByParameters(Map("filetype" -> "custom", "filename" -> name))
-//    if (fileMetadatas.isEmpty) {
-//      throw CustomJarNotFound(createMessage("rest.custom.jars.file.notfound", s"$name"), s"$name")
-//    }
-//    val fileMetadata = fileMetadatas.head
-//
-//    var response: RestResponse = InternalServerErrorRestResponse(
-//      MessageResponseEntity(s"Can't delete jar '$name' for some reason. It needs to be debugged")
-//    )
-//
-//    if (storage.delete(name)) {
-//      configService.delete(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, fileMetadata.specification.name + "-" + fileMetadata.specification.version))
-//      response = OkRestResponse(
-//        MessageResponseEntity(createMessage("rest.custom.jars.file.deleted.by.filename", name))
-//      )
-//    }
-//
-//
-//
-//
-//    val deleteResponse = serviceInterface.delete(name)
-//    val response: RestResponse = deleteResponse match {
-//      case Right(isDeleted) =>
-//        if (isDeleted)
-//          OkRestResponse(MessageResponseEntity(createMessage("rest.services.service.deleted", name)))
-//        else
-//          NotFoundRestResponse(MessageResponseEntity(createMessage("rest.services.service.notfound", name)))
-//      case Left(message) =>
-//        UnprocessableEntityRestResponse(MessageResponseEntity(message))
-//    }
-//
-//    response
-//  }
-//
-//  def getBy(name: String, version: String): RestResponse = {
-//    val service = serviceInterface.get(name, version)
-//
-//    val response = service match {
-//      case Some(x) =>
-//        OkRestResponse(ServiceResponseEntity(ServiceApi.from(x)))
-//      case None =>
-//        NotFoundRestResponse(MessageResponseEntity(createMessage("rest.services.service.notfound", name)))
-//    }
-//
-//    response
-//  }
-//
-//  def deleteBy(name: String, version: String): RestResponse = {
-//    val deleteResponse = serviceInterface.delete(name, version)
-//    val response: RestResponse = deleteResponse match {
-//      case Right(isDeleted) =>
-//        if (isDeleted)
-//          OkRestResponse(MessageResponseEntity(createMessage("rest.services.service.deleted", name)))
-//        else
-//          NotFoundRestResponse(MessageResponseEntity(createMessage("rest.services.service.notfound", name)))
-//      case Left(message) =>
-//        UnprocessableEntityRestResponse(MessageResponseEntity(message))
-//    }
-//
-//    response
-//  }
-  override def create(serializedEntity: String): RestResponse = ???
+  override def delete(name: String): RestResponse = {
+    val deleteResponse = serviceInterface.delete(name)
+    val response: RestResponse = deleteResponse match {
+      case Right(isDeleted) =>
+        if (isDeleted)
+          OkRestResponse(MessageResponseEntity(createMessage("rest.custom.jars.file.deleted.by.filename", name)))
+        else
+          NotFoundRestResponse(MessageResponseEntity(createMessage("rest.custom.jars.file.notfound", name)))
+      case Left(message) =>
+        UnprocessableEntityRestResponse(MessageResponseEntity(message))
+    }
 
-  override def delete(name: String): RestResponse = ???
+    response
+  }
+
+  def getBy(name: String, version: String): RestResponse = {
+    val service = serviceInterface.getBy(name, version)
+
+    val response = service match {
+      case Some(x) =>
+        val source = FileIO.fromPath(Paths.get(x.file.get.getAbsolutePath))
+
+        CustomJar(name, source)
+      case None =>
+        NotFoundRestResponse(MessageResponseEntity(createMessage("rest.custom.jars.file.notfound", s"$name-$version")))
+    }
+
+    response
+  }
+
+  def deleteBy(name: String, version: String): RestResponse = {
+    val deleteResponse = serviceInterface.deleteBy(name, version)
+    val response: RestResponse = deleteResponse match {
+      case Right(isDeleted) =>
+        if (isDeleted)
+          OkRestResponse(MessageResponseEntity(createMessage("rest.custom.jars.file.deleted", name, version)))
+        else
+          NotFoundRestResponse(MessageResponseEntity(createMessage("rest.custom.jars.file.notfound", s"$name-$version")))
+      case Left(message) =>
+        UnprocessableEntityRestResponse(MessageResponseEntity(message))
+    }
+
+    response
+  }
+
+  override def create(serializedEntity: String): RestResponse = ???
 }
