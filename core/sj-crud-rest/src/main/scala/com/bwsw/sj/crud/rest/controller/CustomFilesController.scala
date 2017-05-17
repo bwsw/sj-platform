@@ -36,6 +36,7 @@ class CustomFilesController(implicit val materializer: ActorMaterializer, implic
       }
       file.delete()
     }
+    entity.file.get.delete()
 
     response
   }

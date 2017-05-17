@@ -32,9 +32,9 @@ trait SjCustomRoute extends Directives with SjCrudValidator {
             get {
               complete(restResponseToHttpResponse(customJarsController.get(name)))
             } ~
-            delete {
-              complete(restResponseToHttpResponse(customJarsController.delete(name)))
-            }
+              delete {
+                complete(restResponseToHttpResponse(customJarsController.delete(name)))
+              }
           } ~
             pathSuffix(Segment) { (version: String) =>
               pathEndOrSingleSlash {
@@ -79,7 +79,7 @@ trait SjCustomRoute extends Directives with SjCrudValidator {
 
                 onComplete(parts) {
                   case Success(allParts) =>
-                    val fileMetadataApi = new FileMetadataApi(filename = filename, customFileParts = allParts)
+                    val fileMetadataApi = new FileMetadataApi(filename = filename, customFileParts = allParts, file = Some(file))
 
                     complete(restResponseToHttpResponse(customFilesController.create(fileMetadataApi)))
                   case Failure(throwable) =>
