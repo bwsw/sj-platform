@@ -5,7 +5,7 @@ import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Dispo
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse, MediaTypes}
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.rest.RestResponse
-import com.bwsw.sj.crud.rest.{CustomFile, CustomJar}
+import com.bwsw.sj.crud.rest.{CustomFile, CustomJar, ModuleJar}
 
 /**
   * Provides methods for completion of sj-api response
@@ -25,6 +25,12 @@ trait CompletionUtils {
         HttpResponse(
           headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> customFile.filename))),
           entity = HttpEntity.Chunked.fromData(ContentTypes.`application/octet-stream`, customFile.source)
+        )
+
+      case moduleJar: ModuleJar =>
+        HttpResponse(
+          headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> moduleJar.filename))),
+          entity = HttpEntity.Chunked.fromData(MediaTypes.`application/java-archive`, moduleJar.source)
         )
 
       case _ =>

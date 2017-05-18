@@ -20,7 +20,7 @@ class FileMetadata(val filename: String,
                    val description: Option[String] = None,
                    val uploadDate: Option[String] = None)
   extends JsonValidator {
-  private val fileStorage = ConnectionRepository.getFileStorage
+  protected val fileStorage = ConnectionRepository.getFileStorage
   private val fileMetadataRepository = ConnectionRepository.getFileMetadataRepository
 
   def validate(): ArrayBuffer[String] = {
@@ -70,6 +70,7 @@ object FileMetadata {
 
   val customJarType: String = "custom"
   val customFileType: String = "custom-file"
+  val moduleType: String = "module"
 
   def from(fileMetadataDomain: FileMetadataDomain): FileMetadata = {
     new FileMetadata(

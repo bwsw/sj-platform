@@ -1,10 +1,18 @@
 package com.bwsw.sj.crud.rest.model.module
 
+import java.io.{BufferedReader, File, InputStreamReader}
+import java.util.jar.JarFile
+
+import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.module.IOstream
 import com.bwsw.sj.common.si.model.module._
 import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.common.utils.MessageResourceUtils.getMessage
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes, JsonTypeInfo}
+
+import scala.collection.JavaConverters._
+import scala.util.Try
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "module-type", defaultImpl = classOf[SpecificationApi], visible = true)
 @JsonSubTypes(Array(
@@ -42,6 +50,8 @@ class SpecificationApi(val name: String,
 }
 
 object SpecificationApi {
+  private val serializer = new JsonSerializer()
+
   def from(specification: Specification): SpecificationApi = {
     specification.moduleType match {
       case EngineLiterals.inputStreamingType =>
@@ -120,6 +130,23 @@ object SpecificationApi {
           specification.engineVersion,
           specification.validatorClass,
           specification.executorClass)
+    }
+  }
+
+  def from(file: File): SpecificationApi = {
+    val jar = new JarFile(file)
+    val enu = jar.entries().asScala
+    enu.find(_.getName == "specification.json") match {
+      case Some(entry) =>
+        val reader = new BufferedReader(new InputStreamReader(jar.getInputStream(entry), "UTF-8"))
+        val result = Try {
+          val json = reader.lines().toArray.mkString("")
+          serializer.deserialize[SpecificationApi](json)
+        }
+        reader.close()
+        result.get
+      case None =>
+        throw new NoSuchElementException(getMessage("rest.modules.specification.json.not.found"))
     }
   }
 }

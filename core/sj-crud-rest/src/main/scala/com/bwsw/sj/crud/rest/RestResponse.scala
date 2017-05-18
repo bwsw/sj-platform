@@ -40,6 +40,8 @@ case class ConfigSettingsResponseEntity(configSettings: mutable.Buffer[Configura
 case class ConfigSettingResponseEntity(configSetting: ConfigurationSettingApi) extends ResponseEntity
 
 
+case class ModuleJar(filename: String, source: Source[akka.util.ByteString, scala.Any]) extends RestResponse
+
 case class ModuleInfo(moduleType: String, moduleName: String, moduleVersion: String, size: Long)
 
 case class ModulesResponseEntity(modules: mutable.Buffer[ModuleInfo] = mutable.Buffer()) extends ResponseEntity
