@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.core.environment
 
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
-import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer, ProducerTransaction}
+import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer, ProducerTransaction}
 
 import scala.collection._
 
@@ -26,14 +26,14 @@ class PartitionedOutput(producer: Producer,
       transactions(partition).send(bytes)
     }
     else {
-      transactions(partition) = producer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened, partition)
+      transactions(partition) = producer.newTransaction(NewProducerTransactionPolicy.ErrorIfOpened, partition)
       transactions(partition).send(bytes)
     }
 
     logger.debug(s"Add an element to output envelope of output stream:  '$streamName'.")
     performanceMetrics.addElementToOutputEnvelope(
       streamName,
-      transactions(partition).getTransactionID().toString,
+      transactions(partition).getTransactionID.toString,
       bytes.length
     )
   }

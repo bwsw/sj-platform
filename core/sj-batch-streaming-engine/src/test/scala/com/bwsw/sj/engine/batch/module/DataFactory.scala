@@ -328,7 +328,7 @@ object DataFactory {
 
   def createData(countTxns: Int, countElements: Int, streamService: GenericMongoRepository[StreamDomain], _type: String, count: Int) = {
     var number = 0
-    val policy = producer.NewTransactionProducerPolicy.ErrorIfOpened
+    val policy = producer.NewProducerTransactionPolicy.ErrorIfOpened
 
     def createTstreamData(countTxns: Int, countElements: Int, suffix: String) = {
       val producer = createProducer(tstreamInputNamePrefix + suffix, partitions)

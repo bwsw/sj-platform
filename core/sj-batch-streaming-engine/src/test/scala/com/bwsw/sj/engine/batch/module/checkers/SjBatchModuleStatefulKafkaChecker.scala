@@ -33,16 +33,16 @@ object SjBatchModuleStatefulKafkaChecker extends App {
   })
 
   outputConsumers.foreach(outputConsumer => {
-    val partitions = outputConsumer.getPartitions().toIterator
+    val partitions = outputConsumer.getPartitions.toIterator
 
     while (partitions.hasNext) {
-      val currentPartition = partitions.next()
+      val currentPartition = partitions.next
       var maybeTxn = outputConsumer.getTransaction(currentPartition)
 
       while (maybeTxn.isDefined) {
         val transaction = maybeTxn.get
-        while (transaction.hasNext()) {
-          val batch = objectSerializer.deserialize(transaction.next()).asInstanceOf[Batch]
+        while (transaction.hasNext) {
+          val batch = objectSerializer.deserialize(transaction.next).asInstanceOf[Batch]
           batch.envelopes.foreach {
             case tstreamEnvelope: TStreamEnvelope[Int @unchecked] => tstreamEnvelope.data.foreach(x => {
               outputElements.+=(x)

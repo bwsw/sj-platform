@@ -2,6 +2,7 @@ package com.bwsw.sj.engine.core.engine
 
 import java.util.concurrent.{ExecutorCompletionService, ExecutorService, Executors, ThreadFactory}
 
+import com.bwsw.sj.engine.core.engine.input.CheckpointTaskInput
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import org.slf4j.LoggerFactory
 
@@ -45,7 +46,7 @@ trait TaskRunner {
     System.exit(-1)
   }
 
-  def waitForCompletion(): Unit = {
+  def waitForCompletion(checkointedTaskInput: Option[CheckpointTaskInput[_]] = None): Unit = {
     var i = 0
     Try {
       while (i < countOfThreads) {
@@ -53,6 +54,7 @@ trait TaskRunner {
         i += 1
       }
 
+      checkointedTaskInput.foreach(_.close())
       threadPool.shutdownNow()
       System.exit(-1)
     } match {

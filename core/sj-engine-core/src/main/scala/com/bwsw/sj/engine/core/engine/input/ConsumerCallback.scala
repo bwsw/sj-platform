@@ -24,12 +24,12 @@ class ConsumerCallback[T <: AnyRef](envelopeDataSerializer: EnvelopeDataSerializ
     logger.debug(s"onTransaction handler was invoked by subscriber: ${consumer.name}.")
     val stream = ConnectionRepository.getStreamRepository.get(consumer.stream.name).get
 
-    val data = transaction.getAll().map(envelopeDataSerializer.deserialize)
+    val data = transaction.getAll.map(envelopeDataSerializer.deserialize)
     val envelope = new TStreamEnvelope(data, consumer.name)
     envelope.stream = stream.name
-    envelope.partition = transaction.getPartition()
+    envelope.partition = transaction.getPartition
     envelope.tags = stream.tags
-    envelope.id = transaction.getTransactionID()
+    envelope.id = transaction.getTransactionID
 
     blockingQueue.put(envelope)
   }

@@ -24,14 +24,14 @@ object SjBatchModuleStatelessChecker extends App {
   var outputElements = scala.collection.mutable.ArrayBuffer[Int]()
 
   inputTstreamConsumers.foreach(inputTstreamConsumer => {
-    val partitions = inputTstreamConsumer.getPartitions().toIterator
+    val partitions = inputTstreamConsumer.getPartitions.toIterator
 
     while (partitions.hasNext) {
-      val currentPartition = partitions.next()
+      val currentPartition = partitions.next
       var maybeTxn = inputTstreamConsumer.getTransaction(currentPartition)
       while (maybeTxn.isDefined) {
         val transaction = maybeTxn.get
-        while (transaction.hasNext()) {
+        while (transaction.hasNext) {
           val element = objectSerializer.deserialize(transaction.next()).asInstanceOf[Int]
           inputElements.+=(element)
           totalInputElements += 1
@@ -50,15 +50,15 @@ object SjBatchModuleStatelessChecker extends App {
   })
 
   outputConsumers.foreach(outputConsumer => {
-    val partitions = outputConsumer.getPartitions().toIterator
+    val partitions = outputConsumer.getPartitions.toIterator
 
     while (partitions.hasNext) {
-      val currentPartition = partitions.next()
+      val currentPartition = partitions.next
       var maybeTxn = outputConsumer.getTransaction(currentPartition)
 
       while (maybeTxn.isDefined) {
         val transaction = maybeTxn.get
-        while (transaction.hasNext()) {
+        while (transaction.hasNext) {
           val batch = objectSerializer.deserialize(transaction.next()).asInstanceOf[Batch]
           batch.envelopes.foreach {
             case tstreamEnvelope: TStreamEnvelope[Int @unchecked] => tstreamEnvelope.data.foreach(x => {

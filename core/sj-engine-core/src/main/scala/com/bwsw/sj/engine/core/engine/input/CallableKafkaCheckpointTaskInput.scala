@@ -9,7 +9,7 @@ import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
-import com.bwsw.tstreams.agents.producer.NewTransactionProducerPolicy
+import com.bwsw.tstreams.agents.producer.NewProducerTransactionPolicy
 import org.apache.kafka.clients.consumer.ConsumerRecord
 
 import scala.collection.JavaConverters._
@@ -66,7 +66,7 @@ class CallableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: Common
   override def setConsumerOffsetToLastEnvelope(): Unit = {
     logger.debug(s"Task: ${manager.taskName}. Set a consumer offset to last envelope for all streams.")
     super.setConsumerOffsetToLastEnvelope()
-    offsetProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
+    offsetProducer.newTransaction(NewProducerTransactionPolicy.ErrorIfOpened)
       .send(offsetSerializer.serialize(kafkaOffsetsStorage))
   }
 

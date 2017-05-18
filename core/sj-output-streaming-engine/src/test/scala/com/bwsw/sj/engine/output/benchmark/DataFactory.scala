@@ -18,7 +18,7 @@ import com.bwsw.sj.common.utils.{ProviderLiterals, _}
 import com.bwsw.sj.engine.core.testutils.TestStorageServer
 import com.bwsw.tstreams.agents.consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
-import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer}
+import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer}
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 import org.eclipse.jetty.http.HttpVersion
 import org.elasticsearch.common.xcontent.XContentBuilder
@@ -139,7 +139,7 @@ object DataFactory {
     var number = 0
     var string = "abc"
     (0 until countTxns) foreach { (x: Int) =>
-      val transaction = producer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened)
+      val transaction = producer.newTransaction(NewProducerTransactionPolicy.ErrorIfOpened)
       (0 until countElements) foreach { (y: Int) =>
         number += 1
         number % 8 match {

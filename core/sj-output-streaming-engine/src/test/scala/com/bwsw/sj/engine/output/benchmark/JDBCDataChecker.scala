@@ -14,15 +14,15 @@ object JDBCDataChecker extends App {
   inputConsumer.start()
 
   val inputElements = new ArrayBuffer[(Int, String)]()
-  val partitions = inputConsumer.getPartitions().toIterator
+  val partitions = inputConsumer.getPartitions.toIterator
 
   while (partitions.hasNext) {
-    val currentPartition = partitions.next()
+    val currentPartition = partitions.next
     var maybeTxn = inputConsumer.getTransaction(currentPartition)
     while (maybeTxn.isDefined) {
       val transaction = maybeTxn.get
-      while (transaction.hasNext()) {
-        val element = objectSerializer.deserialize(transaction.next()).asInstanceOf[(Int, String)]
+      while (transaction.hasNext) {
+        val element = objectSerializer.deserialize(transaction.next).asInstanceOf[(Int, String)]
         inputElements.append(element)
       }
       maybeTxn = inputConsumer.getTransaction(currentPartition)
