@@ -25,7 +25,7 @@ class OutputInstance(name: String,
                      val output: String,
                      val startFrom: String,
                      val inputAvroSchema: Option[Schema] = None,
-                     executionPlan: ExecutionPlan = new ExecutionPlan(),
+                     val executionPlan: ExecutionPlan = new ExecutionPlan(),
                      restAddress: Option[String] = None,
                      stage: FrameworkStage = FrameworkStage(),
                      status: String = EngineLiterals.ready)
