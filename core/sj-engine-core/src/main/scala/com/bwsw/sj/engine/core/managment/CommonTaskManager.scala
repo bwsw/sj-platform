@@ -1,6 +1,7 @@
 package com.bwsw.sj.engine.core.managment
 
 import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, ExecutionPlan, RegularInstanceDomain}
+import com.bwsw.sj.common.dal.model.module.BatchSpecificationDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.common.utils.StreamLiterals
@@ -40,7 +41,7 @@ class CommonTaskManager() extends TaskManager {
       case _: BatchInstanceDomain =>
         logger.info(s"Task: $taskName. Getting a batch collector class from jar of file: " +
           instance.moduleType + "-" + instance.moduleName + "-" + instance.moduleVersion + ".")
-        val batchCollectorClassName = fileMetadata.specification.batchCollectorClass
+        val batchCollectorClassName = fileMetadata.specification.asInstanceOf[BatchSpecificationDomain].batchCollectorClass
         val batchCollector = moduleClassLoader
           .loadClass(batchCollectorClassName)
           .getConstructor(classOf[BatchInstanceDomain], classOf[BatchStreamingPerformanceMetrics])

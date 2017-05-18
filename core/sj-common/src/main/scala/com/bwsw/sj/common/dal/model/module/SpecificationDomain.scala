@@ -1,6 +1,5 @@
 package com.bwsw.sj.common.dal.model.module
 
-import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.PropertyField
 import com.bwsw.sj.common.rest.model.module.SpecificationApi
 
@@ -20,11 +19,9 @@ class SpecificationDomain(val name: String,
                           @PropertyField("engine-name") var engineName: String,
                           @PropertyField("engine-version") var engineVersion: String,
                           @PropertyField("validator-class") val validateClass: String,
-                          @PropertyField("executor-class") val executorClass: String,
-                          @PropertyField("batch-collector-class") val batchCollectorClass: String) {
+                          @PropertyField("executor-class") val executorClass: String) {
 
   def asSpecification(): SpecificationApi = {
-    val serializer = new JsonSerializer
     SpecificationApi(this.name,
       this.description,
       this.version,

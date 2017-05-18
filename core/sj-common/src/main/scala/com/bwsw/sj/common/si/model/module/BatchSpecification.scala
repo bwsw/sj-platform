@@ -1,6 +1,6 @@
 package com.bwsw.sj.common.si.model.module
 
-import com.bwsw.sj.common.dal.model.module.IOstream
+import com.bwsw.sj.common.dal.model.module.{BatchSpecificationDomain, IOstream}
 import com.bwsw.sj.common.utils.EngineLiterals
 
 class BatchSpecification(name: String,
@@ -29,6 +29,22 @@ class BatchSpecification(name: String,
     validatorClass,
     executorClass) {
 
+  override def to: BatchSpecificationDomain = {
+    new BatchSpecificationDomain(
+      name,
+      description,
+      version,
+      author,
+      license,
+      inputs,
+      outputs,
+      moduleType,
+      engineName,
+      engineVersion,
+      validatorClass,
+      executorClass,
+      batchCollectorClass)
+  }
 }
 
 

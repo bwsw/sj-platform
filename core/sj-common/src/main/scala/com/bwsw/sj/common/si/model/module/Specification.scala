@@ -1,7 +1,8 @@
 package com.bwsw.sj.common.si.model.module
 
 import com.bwsw.sj.common.config.ConfigLiterals
-import com.bwsw.sj.common.dal.model.module.{IOstream, SpecificationDomain}
+import com.bwsw.sj.common.dal.model.module.{BatchSpecificationDomain, IOstream, SpecificationDomain}
+import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.PropertyField
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
@@ -21,7 +22,21 @@ class Specification(val name: String,
                     val validatorClass: String,
                     val executorClass: String) {
 
-  def to: SpecificationDomain = ???
+  def to: SpecificationDomain = {
+    new SpecificationDomain(
+      name,
+      description,
+      version,
+      author,
+      license,
+      inputs,
+      outputs,
+      moduleType,
+      engineName,
+      engineVersion,
+      validatorClass,
+      executorClass)
+  }
 
   def validate: ArrayBuffer[String] = validateGeneralFields
 
@@ -148,5 +163,44 @@ class Specification(val name: String,
     }
 
     errors
+  }
+}
+
+object Specification {
+  def from(specificationDomain: SpecificationDomain): Specification = {
+    specificationDomain.moduleType match {
+      case EngineLiterals.batchStreamingType =>
+        val batchSpecificationDomain = specificationDomain.asInstanceOf[BatchSpecificationDomain]
+
+        new BatchSpecification(
+          batchSpecificationDomain.name,
+          batchSpecificationDomain.description,
+          batchSpecificationDomain.version,
+          batchSpecificationDomain.author,
+          batchSpecificationDomain.license,
+          batchSpecificationDomain.inputs,
+          batchSpecificationDomain.outputs,
+          batchSpecificationDomain.engineName,
+          batchSpecificationDomain.engineVersion,
+          batchSpecificationDomain.validateClass,
+          batchSpecificationDomain.executorClass,
+          batchSpecificationDomain.batchCollectorClass)
+
+      case _ =>
+
+        new Specification(
+          specificationDomain.name,
+          specificationDomain.description,
+          specificationDomain.version,
+          specificationDomain.author,
+          specificationDomain.license,
+          specificationDomain.inputs,
+          specificationDomain.outputs,
+          specificationDomain.moduleType,
+          specificationDomain.engineName,
+          specificationDomain.engineVersion,
+          specificationDomain.validateClass,
+          specificationDomain.executorClass)
+    }
   }
 }
