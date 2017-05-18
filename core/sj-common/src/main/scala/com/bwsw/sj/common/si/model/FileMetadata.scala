@@ -4,7 +4,7 @@ import java.io.{BufferedReader, File, InputStreamReader}
 import java.util.jar.JarFile
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
+import com.bwsw.sj.common.dal.model.module.{FileMetadataDomain, SpecificationDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.JsonValidator
 import com.bwsw.sj.common.utils.MessageResourceUtils._
@@ -29,7 +29,7 @@ class FileMetadata(val filename: String,
     if (!fileStorage.exists(filename)) {
       if (checkCustomFileSpecification(file.get)) {
         val specification = FileMetadata.getSpecification(file.get)
-        if (doesCustomJarExist(specification)) errors += getMessage("rest.custom.jars.exists") //todo add name and version to response
+        if (doesCustomJarExist(specification)) errors += createMessage("rest.custom.jars.exists", specification.name, specification.version)
       } else errors += getMessage("rest.errors.invalid.specification")
     } else errors += createMessage("rest.custom.jars.file.exists", filename)
 
@@ -54,11 +54,11 @@ class FileMetadata(val filename: String,
     }
   }
 
-  private def doesCustomJarExist(specification: Map[String, Any]) = {
+  private def doesCustomJarExist(specification: SpecificationDomain) = {
     fileMetadataRepository.getByParameters(
       Map("filetype" -> FileMetadata.customJarType,
-        "specification.name" -> specification("name").asInstanceOf[String],
-        "specification.version" -> specification("version").asInstanceOf[String]
+        "specification.name" -> specification.name,
+        "specification.version" -> specification.version
       )).nonEmpty
   }
 
@@ -66,7 +66,7 @@ class FileMetadata(val filename: String,
 
 object FileMetadata {
   private val serializer = new JsonSerializer()
-  private var maybeSpecification: Option[String] = None
+  private var maybeSpecification: Option[SpecificationDomain] = None
 
   val customJarType: String = "custom"
   val customFileType: String = "custom-file"
@@ -83,16 +83,16 @@ object FileMetadata {
     )
   }
 
-  def getSpecification(jarFile: File): Map[String, Any] = {
-    val serializedSpecification = maybeSpecification match {
-      case Some(_serializedSpecification) =>
-        maybeSpecification = Some(_serializedSpecification)
+  def getSpecification(jarFile: File): SpecificationDomain = {
+    maybeSpecification match {
+      case Some(specification) =>
 
-        _serializedSpecification
-      case None => getSpecificationFromJar(jarFile)
+        specification
+      case None =>
+        val serializedSpecification = getSpecificationFromJar(jarFile)
+
+        serializer.deserialize[SpecificationDomain](serializedSpecification)
     }
-
-    serializer.deserialize[Map[String, Any]](serializedSpecification)
   }
 
   /**

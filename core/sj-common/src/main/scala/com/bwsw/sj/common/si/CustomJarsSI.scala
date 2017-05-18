@@ -37,8 +37,9 @@ class CustomJarsSI extends ServiceInterface[FileMetadata, FileMetadataDomain] {
       val specification = FileMetadata.getSpecification(entity.file.get)
       val uploadingFile = new File(entity.filename)
       FileUtils.copyFile(entity.file.get, uploadingFile)
-      fileStorage.put(uploadingFile, entity.filename, specification, FileMetadata.customJarType)
-      val name = specification("name").toString + "-" + specification("version").toString
+      val specificationMap = serializer.deserialize[Map[String, Any]](serializer.serialize(specification))
+      fileStorage.put(uploadingFile, entity.filename, specificationMap, FileMetadata.customJarType)
+      val name = specification.name + "-" + specification.version
       val customJarConfig = ConfigurationSettingDomain(
         ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, name),
         entity.filename,
