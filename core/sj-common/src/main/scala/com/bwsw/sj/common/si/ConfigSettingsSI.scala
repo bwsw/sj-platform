@@ -8,9 +8,6 @@ import com.bwsw.sj.common.utils.MessageResourceUtils._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-/**
-  * Created by diryavkin_dn on 11.05.17.
-  */
 class ConfigSettingsSI extends ServiceInterface[ConfigurationSetting, ConfigurationSettingDomain] {
   override protected val entityRepository: GenericMongoRepository[ConfigurationSettingDomain] = ConnectionRepository.getConfigRepository
 
@@ -45,11 +42,11 @@ class ConfigSettingsSI extends ServiceInterface[ConfigurationSetting, Configurat
       case None =>
         response = Right(false)
     }
+
     response
   }
 
   def getDomain(parameters: Map[String, Any]): mutable.Buffer[ConfigurationSetting] = {
     entityRepository.getByParameters(parameters).map(ConfigurationSetting.from)
   }
-
 }

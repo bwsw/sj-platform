@@ -2,17 +2,10 @@ package com.bwsw.sj.common.config
 
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals._
+import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 
 object ConfigurationSettingsUtils {
   private val configService = ConnectionRepository.getConfigRepository
-
-  def createConfigurationSettingName(domain: String, name: String): String = {
-    domain + "." + name
-  }
-
-  def clearConfigurationSettingName(domain: String, name: String): String = {
-    name.replaceFirst(domain + ".", "")
-  }
 
   def getGeoIpAsNumFileName(): String = {
     getStringConfigSetting(geoIpAsNum)
@@ -31,7 +24,12 @@ object ConfigurationSettingsUtils {
   }
 
   def getFrameworkJarName(): String = {
-    getStringConfigSetting(createConfigurationSettingName(ConfigLiterals.systemDomain, getStringConfigSetting(frameworkTag)))
+    getStringConfigSetting(
+      ConfigurationSetting.createConfigurationSettingName(
+        ConfigLiterals.systemDomain,
+        getStringConfigSetting(frameworkTag)
+      )
+    )
   }
 
   def getCrudRestHost(): String = {

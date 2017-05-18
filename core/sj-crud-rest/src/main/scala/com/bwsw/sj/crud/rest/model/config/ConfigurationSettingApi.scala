@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.{JsonIgnore, JsonSubTypes, JsonTypeInfo}
 ))
 class ConfigurationSettingApi(val name: String,
                               val value: String,
-                              val domain:String) {
+                              val domain: String) {
   @JsonIgnore
   def to(): ConfigurationSetting = {
     new ConfigurationSetting(name, value, domain)
@@ -23,6 +23,10 @@ class ConfigurationSettingApi(val name: String,
 
 object ConfigurationSettingApi {
   def from(configSettings: ConfigurationSetting): ConfigurationSettingApi = {
-    new ConfigurationSettingApi(configSettings.name, configSettings.value, configSettings.domain)
+    new ConfigurationSettingApi(
+      configSettings.name,
+      configSettings.value,
+      configSettings.domain
+    )
   }
 }

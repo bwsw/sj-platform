@@ -17,8 +17,8 @@ class ServiceController extends Controller {
   override def create(serializedEntity: String): RestResponse = {
     var response: RestResponse = new RestResponse()
 
-    val triedServiceData = Try(serializer.deserialize[ServiceApi](serializedEntity))
-    triedServiceData match {
+    val triedServiceApi = Try(serializer.deserialize[ServiceApi](serializedEntity))
+    triedServiceApi match {
       case Success(serviceData) =>
         val created = serviceInterface.create(serviceData.to())
 

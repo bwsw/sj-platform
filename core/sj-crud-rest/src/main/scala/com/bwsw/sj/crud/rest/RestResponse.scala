@@ -1,7 +1,8 @@
 package com.bwsw.sj.crud.rest
 
-import com.bwsw.sj.common.rest.ResponseEntity
+import akka.stream.scaladsl.Source
 import com.bwsw.sj.common.rest.model.module.{InstanceApi, SpecificationApi}
+import com.bwsw.sj.common.rest.{ResponseEntity, RestResponse}
 import com.bwsw.sj.crud.rest.model.config.ConfigurationSettingApi
 import com.bwsw.sj.crud.rest.model.provider.ProviderApi
 import com.bwsw.sj.crud.rest.model.service.ServiceApi
@@ -55,3 +56,16 @@ case class InstancesResponseEntity(instances: mutable.Buffer[InstanceApi] = muta
 
 case class ShortInstance(name: String, moduleType: String, moduleName: String, moduleVersion: String,
                          description: String, status: String, restAddress: String)
+
+case class CustomJar(filename: String, source: Source[akka.util.ByteString, scala.Any]) extends RestResponse
+
+case class CustomJarInfo(name: String, version: String, size: Long)
+
+case class CustomJarsResponseEntity(customJars: mutable.Buffer[CustomJarInfo] = mutable.Buffer()) extends ResponseEntity
+
+
+case class CustomFile(filename: String, source: Source[akka.util.ByteString, scala.Any]) extends RestResponse
+
+case class CustomFileInfo(name: String, description: String, uploadDate: String, size: Long) extends ResponseEntity
+
+case class CustomFilesResponseEntity(customFiles: mutable.Buffer[CustomFileInfo] = mutable.Buffer()) extends ResponseEntity

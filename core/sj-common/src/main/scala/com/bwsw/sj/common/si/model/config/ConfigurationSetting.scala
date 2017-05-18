@@ -1,13 +1,11 @@
 package com.bwsw.sj.common.si.model.config
 
 import com.bwsw.sj.common.config.ConfigLiterals
-import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.tstreams.env.ConfigurationOptions
-import com.fasterxml.jackson.annotation.JsonIgnore
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -16,7 +14,7 @@ class ConfigurationSetting(val name: String,
                            val value: String,
                            val domain: String) {
   def validate(): ArrayBuffer[String] = {
-    val configService = ConnectionRepository.getConfigRepository
+    val configRepository = ConnectionRepository.getConfigRepository
     val errors = new ArrayBuffer[String]()
 
     // 'name' field
@@ -28,8 +26,8 @@ class ConfigurationSetting(val name: String,
           errors += createMessage("entity.error.attribute.required", "Name")
         }
         else {
-          val modelConfigName = createConfigurationSettingName(this.domain, this.name)
-          if (configService.get(modelConfigName).isDefined) {
+          val modelConfigName = ConfigurationSetting.createConfigurationSettingName(this.domain, this.name)
+          if (configRepository.get(modelConfigName).isDefined) {
             errors += createMessage("entity.error.already.exists", "Config setting", x)
           }
 
@@ -70,23 +68,29 @@ class ConfigurationSetting(val name: String,
     errors
   }
 
-  @JsonIgnore
   private def validateTstreamProperty(): Boolean = {
     this.name.contains("producer") || this.name.contains("consumer") || this.name == ConfigurationOptions.Producer.Transaction.distributionPolicy
   }
 
   def to(): ConfigurationSettingDomain = {
-    new ConfigurationSettingDomain(name, value, domain)
+    ConfigurationSettingDomain(ConfigurationSetting.createConfigurationSettingName(domain, name), value, domain)
   }
 }
-
 
 object ConfigurationSetting {
   def from(configSettingDomain: ConfigurationSettingDomain): ConfigurationSetting = {
     new ConfigurationSetting(
-      configSettingDomain.name,
+      clearConfigurationSettingName(configSettingDomain.domain, configSettingDomain.name),
       configSettingDomain.value,
       configSettingDomain.domain
     )
+  }
+
+  def createConfigurationSettingName(domain: String, name: String): String = {
+    domain + "." + name
+  }
+
+  def clearConfigurationSettingName(domain: String, name: String): String = {
+    name.replaceFirst(domain + ".", "")
   }
 }

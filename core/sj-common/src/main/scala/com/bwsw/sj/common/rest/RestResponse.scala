@@ -1,12 +1,12 @@
 package com.bwsw.sj.common.rest
 
 import com.bwsw.sj.common.config.ConfigLiterals
-import com.bwsw.sj.common.rest.model.config.ConfigurationSettingApi
 import com.fasterxml.jackson.annotation.JsonProperty
 
+import scala.annotation.meta.field
 import scala.collection.mutable
 
-class RestResponse(@JsonProperty("status-code") var statusCode: Int = 0, entity: ResponseEntity = new ResponseEntity {})
+class RestResponse(@(JsonProperty @field)("status-code") val statusCode: Int = 0, entity: ResponseEntity = new ResponseEntity {})
 
 case class OkRestResponse(var entity: ResponseEntity) extends RestResponse(200, entity)
 
@@ -45,12 +45,3 @@ case class TypesResponseEntity(types: Seq[String]) extends ResponseEntity
 case class RelatedToStreamResponseEntity(instances: mutable.Buffer[String] = mutable.Buffer()) extends ResponseEntity
 
 case class DomainsResponseEntity(domains: Seq[String] = ConfigLiterals.domains) extends ResponseEntity
-
-
-case class CustomJarInfo(name: String, version: String, size: Long)
-
-case class CustomJarsResponseEntity(customJars: mutable.Buffer[CustomJarInfo] = mutable.Buffer()) extends ResponseEntity
-
-case class CustomFileInfo(name: String, description: String, uploadDate: String, size: Long) extends ResponseEntity
-
-case class CustomFilesResponseEntity(customFiles: mutable.Buffer[CustomFileInfo] = mutable.Buffer()) extends ResponseEntity

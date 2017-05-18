@@ -3,11 +3,11 @@ package com.bwsw.sj.engine.core.engine.input
 import java.util.Properties
 
 import com.bwsw.common.ObjectSerializer
+import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
 import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.config.ConfigurationSettingsUtils._
-import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
+import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.entities.KafkaEnvelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
@@ -161,7 +161,7 @@ trait KafkaTaskInput[T <: AnyRef] {
     val configService = ConnectionRepository.getConfigRepository
 
     val kafkaSettings = configService.getByParameters(Map("domain" -> ConfigLiterals.kafkaDomain))
-    kafkaSettings.foreach(x => properties.put(clearConfigurationSettingName(x.domain, x.name), x.value))
+    kafkaSettings.foreach(x => properties.put(ConfigurationSetting.clearConfigurationSettingName(x.domain, x.name), x.value))
   }
 
   def setConsumerOffset(envelope: KafkaEnvelope[T]) = {
