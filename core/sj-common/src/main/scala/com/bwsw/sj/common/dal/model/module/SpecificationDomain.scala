@@ -21,9 +21,7 @@ class SpecificationDomain(val name: String,
                           @PropertyField("engine-version") var engineVersion: String,
                           @PropertyField("validator-class") val validateClass: String,
                           @PropertyField("executor-class") val executorClass: String,
-                          @PropertyField("batch-collector-class") val batchCollectorClass: String,
-                          val options: String = "{}"
-                   ) {
+                          @PropertyField("batch-collector-class") val batchCollectorClass: String) {
 
   def asSpecification(): SpecificationApi = {
     val serializer = new JsonSerializer
@@ -39,7 +37,6 @@ class SpecificationDomain(val name: String,
       this.moduleType,
       this.engineName,
       this.engineVersion,
-      serializer.deserialize[Map[String, Any]](this.options),
       this.validateClass,
       this.executorClass)
   }

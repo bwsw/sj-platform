@@ -10,6 +10,5 @@ case class SpecificationApi(var name: String,
                             var moduleType: String,
                             var engineName: String,
                             var engineVersion: String,
-                            options: Map[String, Any],
                             var validateClass: String,
                             executorClass: String)
