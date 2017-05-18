@@ -12,7 +12,6 @@ class OutputSpecification(name: String,
                           outputs: IOstream,
                           engineName: String,
                           engineVersion: String,
-                          options: Map[String, Any],
                           validatorClass: String,
                           executorClass: String,
                           val entityClass: String)
@@ -27,7 +26,6 @@ class OutputSpecification(name: String,
     EngineLiterals.outputStreamingType,
     engineName,
     engineVersion,
-    options,
     validatorClass,
     executorClass) {
 

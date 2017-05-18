@@ -12,7 +12,6 @@ class RegularSpecification(name: String,
                            outputs: IOstream,
                            engineName: String,
                            engineVersion: String,
-                           options: Map[String, Any],
                            validatorClass: String,
                            executorClass: String)
   extends Specification(
@@ -26,7 +25,6 @@ class RegularSpecification(name: String,
     EngineLiterals.regularStreamingType,
     engineName,
     engineVersion,
-    options,
     validatorClass,
     executorClass) {
 

@@ -22,7 +22,6 @@ class SpecificationApi(val name: String,
                        @JsonProperty("module-type") val moduleType: String,
                        @JsonProperty("engine-name") val engineName: String,
                        @JsonProperty("engine-version") val engineVersion: String,
-                       val options: Map[String, Any],
                        @JsonProperty("validator-class") val validatorClass: String,
                        @JsonProperty("executor-class") val executorClass: String) {
 
@@ -38,7 +37,6 @@ class SpecificationApi(val name: String,
     moduleType,
     engineName,
     engineVersion,
-    options,
     validatorClass,
     executorClass)
 }
@@ -58,7 +56,6 @@ object SpecificationApi {
           inputSpecification.outputs,
           inputSpecification.engineName,
           inputSpecification.engineVersion,
-          inputSpecification.options,
           inputSpecification.validatorClass,
           inputSpecification.executorClass)
 
@@ -74,7 +71,6 @@ object SpecificationApi {
           regularSpecification.outputs,
           regularSpecification.engineName,
           regularSpecification.engineVersion,
-          regularSpecification.options,
           regularSpecification.validatorClass,
           regularSpecification.executorClass)
 
@@ -90,7 +86,6 @@ object SpecificationApi {
           batchSpecification.outputs,
           batchSpecification.engineName,
           batchSpecification.engineVersion,
-          batchSpecification.options,
           batchSpecification.validatorClass,
           batchSpecification.executorClass,
           batchSpecification.batchCollectorClass)
@@ -107,7 +102,6 @@ object SpecificationApi {
           outputSpecification.outputs,
           outputSpecification.engineName,
           outputSpecification.engineVersion,
-          outputSpecification.options,
           outputSpecification.validatorClass,
           outputSpecification.executorClass,
           outputSpecification.entityClass)
@@ -124,7 +118,6 @@ object SpecificationApi {
           specification.moduleType,
           specification.engineName,
           specification.engineVersion,
-          specification.options,
           specification.validatorClass,
           specification.executorClass)
     }

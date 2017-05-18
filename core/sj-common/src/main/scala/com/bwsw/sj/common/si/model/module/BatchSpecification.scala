@@ -12,7 +12,6 @@ class BatchSpecification(name: String,
                          outputs: IOstream,
                          engineName: String,
                          engineVersion: String,
-                         options: Map[String, Any],
                          validatorClass: String,
                          executorClass: String,
                          val batchCollectorClass: String)
@@ -27,7 +26,6 @@ class BatchSpecification(name: String,
     EngineLiterals.batchStreamingType,
     engineName,
     engineVersion,
-    options,
     validatorClass,
     executorClass) {
 

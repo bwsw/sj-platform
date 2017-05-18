@@ -14,7 +14,6 @@ class RegularSpecificationApi(name: String,
                               outputs: IOstream,
                               @JsonProperty("engine-name") engineName: String,
                               @JsonProperty("engine-version") engineVersion: String,
-                              options: Map[String, Any],
                               @JsonProperty("validator-class") validatorClass: String,
                               @JsonProperty("executor-class") executorClass: String,
                               @JsonProperty("module-type") moduleType: String = EngineLiterals.regularStreamingType)
@@ -29,7 +28,6 @@ class RegularSpecificationApi(name: String,
     moduleType,
     engineName,
     engineVersion,
-    options,
     validatorClass,
     executorClass) {
 
@@ -43,7 +41,6 @@ class RegularSpecificationApi(name: String,
     outputs,
     engineName,
     engineVersion,
-    options,
     validatorClass,
     executorClass)
 }

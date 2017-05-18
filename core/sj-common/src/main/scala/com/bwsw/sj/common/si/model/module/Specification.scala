@@ -18,7 +18,6 @@ class Specification(val name: String,
                     val moduleType: String,
                     val engineName: String,
                     val engineVersion: String,
-                    val options: Map[String, Any],
                     val validatorClass: String,
                     val executorClass: String) {
 
