@@ -3,13 +3,9 @@ package com.bwsw.sj.crud.rest.routes
 import java.io.{File, FileNotFoundException}
 import java.lang.reflect.Type
 import java.net.{URI, URLClassLoader}
-import java.nio.file.Paths
 
-import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Disposition`}
-import akka.http.scaladsl.model.{HttpEntity, HttpResponse, MediaTypes}
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
-import akka.stream.scaladsl.FileIO
 import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
@@ -23,29 +19,38 @@ import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.StreamLiterals._
 import com.bwsw.sj.crud.rest._
+import com.bwsw.sj.crud.rest.controller.ModuleController
 import com.bwsw.sj.crud.rest.exceptions._
 import com.bwsw.sj.crud.rest.instance.{HttpClient, InstanceDestroyer, InstanceStarter, InstanceStopper}
+import com.bwsw.sj.crud.rest.model.module.ModuleMetadataApi
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 import com.bwsw.sj.crud.rest.validator.instance.InstanceValidator
-import org.apache.commons.io.FileUtils
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.util.EntityUtils
 
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
 trait SjModulesRoute extends Directives with SjCrudValidator with JsonValidator {
 
-  private val previousFilesNames: ListBuffer[String] = ListBuffer[String]()
+  private val moduleController = new ModuleController
 
   import EngineLiterals._
 
   val modulesRoute =
     pathPrefix("modules") {
       pathEndOrSingleSlash {
-        creationOfModule ~
-          gettingListOfAllModules
+        post {
+          uploadedFile("jar") {
+            case (metadata: FileInfo, file: File) =>
+              val moduleMetadataApi = new ModuleMetadataApi(metadata.fileName, file)
+              complete(restResponseToHttpResponse(moduleController.create(moduleMetadataApi)))
+          }
+        } ~
+          get {
+            complete(restResponseToHttpResponse(moduleController.getAll))
+          }
       } ~
         pathPrefix("instances") {
           gettingAllInstances
@@ -53,9 +58,7 @@ trait SjModulesRoute extends Directives with SjCrudValidator with JsonValidator 
         pathPrefix("_types") {
           pathEndOrSingleSlash {
             get {
-              val response = OkRestResponse(TypesResponseEntity(EngineLiterals.moduleTypes))
-
-              complete(restResponseToHttpResponse(response))
+              complete(restResponseToHttpResponse(moduleController.getAllTypes))
             }
           }
         } ~
@@ -97,72 +100,43 @@ trait SjModulesRoute extends Directives with SjCrudValidator with JsonValidator 
               } ~
                 pathPrefix("specification") {
                   pathEndOrSingleSlash {
-                    gettingSpecification(specification)
+                    get {
+                      complete(
+                        restResponseToHttpResponse(
+                          moduleController.getSpecification(moduleType, moduleName, moduleVersion)))
+                    }
                   }
                 } ~
                 pathEndOrSingleSlash {
-                  gettingModule(filename) ~
-                    deletingModule(moduleType, moduleName, moduleVersion, filename)
+                  get {
+                    complete(
+                      restResponseToHttpResponse(
+                        moduleController.get(moduleType, moduleName, moduleVersion)))
+                  } ~
+                    delete {
+                      complete(
+                        restResponseToHttpResponse(
+                          moduleController.delete(moduleType, moduleName, moduleVersion)))
+                    }
                 } ~
                 pathPrefix("related") {
                   pathEndOrSingleSlash {
-                    gettingRelatedInstances(moduleType, moduleName, moduleVersion)
+                    get {
+                      complete(
+                        restResponseToHttpResponse(
+                          moduleController.getRelated(moduleType, moduleName, moduleVersion)))
+                    }
                   }
                 }
             }
           } ~
             pathEndOrSingleSlash {
-              gettingModulesByType(moduleType)
-            }
-        }
-    }
-
-  private val creationOfModule = post {
-    uploadedFile("jar") {
-      case (metadata: FileInfo, file: File) =>
-        val result = Try {
-          var response: RestResponse = BadRequestRestResponse(
-            MessageResponseEntity(createMessage("rest.modules.modules.extension.unknown", metadata.fileName)))
-
-          if (metadata.fileName.endsWith(".jar")) {
-            val specification: Map[String, Any] = validateSpecification(file)
-            response = ConflictRestResponse(MessageResponseEntity(
-              createMessage("rest.modules.module.exists", metadata.fileName)))
-
-            if (!doesModuleExist(specification)) {
-              response = ConflictRestResponse(MessageResponseEntity(
-                createMessage("rest.modules.module.file.exists", metadata.fileName)))
-
-              if (!storage.exists(metadata.fileName)) {
-                val uploadingFile = new File(metadata.fileName)
-                FileUtils.copyFile(file, uploadingFile)
-                storage.put(uploadingFile, metadata.fileName, specification, "module")
-                response = OkRestResponse(MessageResponseEntity(
-                  createMessage("rest.modules.module.uploaded", metadata.fileName)))
+              get {
+                complete(restResponseToHttpResponse(moduleController.getByType(moduleType)))
               }
             }
-          }
-          response
-        }
-        file.delete()
-        result match {
-          case Success(response) => complete(restResponseToHttpResponse(response))
-          case Failure(e) => throw e
         }
     }
-  }
-
-  private val gettingListOfAllModules = get {
-    val files = fileMetadataDAO.getByParameters(Map("filetype" -> "module"))
-    val response = OkRestResponse(ModulesResponseEntity())
-
-    if (files.nonEmpty) {
-      val modulesInfo = files.map(f => ModuleInfo(f.specification.moduleType, f.specification.name, f.specification.version, f.length))
-      response.entity = ModulesResponseEntity(modulesInfo)
-    }
-
-    complete(restResponseToHttpResponse(response))
-  }
 
   private val gettingAllInstances = pathEndOrSingleSlash {
     get {
@@ -210,23 +184,23 @@ trait SjModulesRoute extends Directives with SjCrudValidator with JsonValidator 
               instanceMetadata.createStreams()
               instanceDAO.save(instanceMetadata.asModelInstance())
 
-            response = Option(
-              CreatedRestResponse(
-                MessageResponseEntity(
-                  createMessage(
-                    "rest.modules.instances.instance.created",
-                    instanceMetadata.name,
-                    s"$moduleType-$moduleName-$moduleVersion"
-                  ))))
-          } else {
-            response = Option(
-              BadRequestRestResponse(
-                MessageResponseEntity(
-                  createMessageWithErrors(
-                    "rest.modules.instances.instance.cannot.create.incorrect.parameters",
-                    instancePassedValidation.errors))))
+              response = Option(
+                CreatedRestResponse(
+                  MessageResponseEntity(
+                    createMessage(
+                      "rest.modules.instances.instance.created",
+                      instanceMetadata.name,
+                      s"$moduleType-$moduleName-$moduleVersion"
+                    ))))
+            } else {
+              response = Option(
+                BadRequestRestResponse(
+                  MessageResponseEntity(
+                    createMessageWithErrors(
+                      "rest.modules.instances.instance.cannot.create.incorrect.parameters",
+                      instancePassedValidation.errors))))
+            }
           }
-        }
 
         case Failure(e: JsonDeserializationException) =>
           errors += JsonDeserializationErrorMessageCreator(e)
@@ -327,82 +301,6 @@ trait SjModulesRoute extends Directives with SjCrudValidator with JsonValidator 
     }
 
     complete(restResponseToHttpResponse(response))
-  }
-
-  private val gettingSpecification = (specification: SpecificationApi) => get {
-    val response = OkRestResponse(SpecificationResponseEntity(specification))
-    complete(restResponseToHttpResponse(response))
-  }
-
-  private val gettingModule = (filename: String) => get {
-    deletePreviousFiles()
-    val jarFile = storage.get(filename, "/tmp/" + filename)
-    previousFilesNames.append(jarFile.getAbsolutePath)
-    val source = FileIO.fromPath(Paths.get(jarFile.getAbsolutePath))
-    complete(HttpResponse(
-      headers = List(`Content-Disposition`(ContentDispositionTypes.attachment, Map("filename" -> filename))),
-      entity = HttpEntity.Chunked.fromData(MediaTypes.`application/java-archive`, source)
-    ))
-  }
-
-  private def deletePreviousFiles() = {
-    previousFilesNames.foreach(filename => {
-      val file = new File(filename)
-      if (file.exists()) file.delete()
-    })
-  }
-
-  private val deletingModule = (moduleType: String,
-                                moduleName: String,
-                                moduleVersion: String,
-                                filename: String) => delete {
-    var response: RestResponse = UnprocessableEntityRestResponse(MessageResponseEntity(
-      createMessage("rest.modules.module.cannot.delete", s"$moduleType-$moduleName-$moduleVersion")))
-
-    val instances = getRelatedInstances(moduleType, moduleName, moduleVersion)
-
-    if (instances.isEmpty) {
-      storage.delete(filename)
-      response = OkRestResponse(MessageResponseEntity(
-        createMessage("rest.modules.module.deleted", s"$moduleType-$moduleName-$moduleVersion"))
-      )
-    }
-
-    complete(restResponseToHttpResponse(response))
-  }
-
-  private val gettingRelatedInstances = (moduleType: String,
-                                         moduleName: String,
-                                         moduleVersion: String) => get {
-    val response = OkRestResponse(RelatedToModuleResponseEntity(getRelatedInstances(moduleType, moduleName, moduleVersion)))
-
-    complete(restResponseToHttpResponse(response))
-  }
-
-  private def getRelatedInstances(moduleType: String, moduleName: String, moduleVersion: String) = {
-    instanceDAO.getByParameters(Map(
-      "module-name" -> moduleName,
-      "module-type" -> moduleType,
-      "module-version" -> moduleVersion)
-    ).map(_.name)
-  }
-
-  private val gettingModulesByType = (moduleType: String) => get {
-    val files = fileMetadataDAO.getByParameters(Map("filetype" -> "module", "specification.module-type" -> moduleType))
-    val response = OkRestResponse(ModulesResponseEntity())
-    if (files.nonEmpty) {
-      val modulesInfo = files.map(f => ModuleInfo(f.specification.moduleType, f.specification.name, f.specification.version, f.length))
-      response.entity = ModulesResponseEntity(modulesInfo)
-    }
-
-    complete(restResponseToHttpResponse(response))
-  }
-
-  private def doesModuleExist(specification: Map[String, Any]) = {
-    getFilesMetadata(specification("module-type").asInstanceOf[String],
-      specification("name").asInstanceOf[String],
-      specification("version").asInstanceOf[String]
-    ).nonEmpty
   }
 
   private def checkModuleType(moduleType: String) = {

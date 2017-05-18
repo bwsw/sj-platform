@@ -1,9 +1,10 @@
 package com.bwsw.sj.crud.rest
 
 import akka.stream.scaladsl.Source
-import com.bwsw.sj.common.rest.model.module.{InstanceApi, SpecificationApi}
+import com.bwsw.sj.common.rest.model.module.InstanceApi
 import com.bwsw.sj.common.rest.{ResponseEntity, RestResponse}
 import com.bwsw.sj.crud.rest.model.config.ConfigurationSettingApi
+import com.bwsw.sj.crud.rest.model.module.SpecificationApi
 import com.bwsw.sj.crud.rest.model.provider.ProviderApi
 import com.bwsw.sj.crud.rest.model.service.ServiceApi
 import com.bwsw.sj.crud.rest.model.stream.StreamApi
