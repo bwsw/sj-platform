@@ -52,4 +52,6 @@ class BatchInstance(name: String,
     stage,
     status) {
 
+  override def inputsOrEmptyList: Array[String] = inputs
+
 }

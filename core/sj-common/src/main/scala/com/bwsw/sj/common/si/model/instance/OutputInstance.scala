@@ -49,6 +49,7 @@ class OutputInstance(name: String,
     stage,
     status) {
 
+  override def inputsOrEmptyList: Array[String] = Array(input)
 }
 
 

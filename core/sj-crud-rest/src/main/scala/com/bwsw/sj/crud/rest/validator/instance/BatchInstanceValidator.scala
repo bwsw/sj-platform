@@ -2,7 +2,8 @@ package com.bwsw.sj.crud.rest.validator.instance
 
 import com.bwsw.sj.common.dal.model.service.{KafkaServiceDomain, TStreamServiceDomain}
 import com.bwsw.sj.common.dal.model.stream.KafkaStreamDomain
-import com.bwsw.sj.common.rest.model.module.{BatchInstanceApi, InstanceApi, SpecificationApi}
+import com.bwsw.sj.common.si.model.instance.{BatchInstance, Instance}
+import com.bwsw.sj.common.si.model.module.Specification
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
@@ -22,11 +23,11 @@ class BatchInstanceValidator extends InstanceValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
-  override def validate(parameters: InstanceApi, specification: SpecificationApi) = {
+  override def validate(parameters: Instance, specification: Specification) = {
     logger.debug(s"Instance: ${parameters.name}. Start a validation of instance of batch-streaming type.")
     val errors = new ArrayBuffer[String]()
     errors ++= super.validateGeneralOptions(parameters)
-    val batchInstanceMetadata = parameters.asInstanceOf[BatchInstanceApi]
+    val batchInstanceMetadata = parameters.asInstanceOf[BatchInstance]
 
     // 'state-management' field
     if (!stateManagementModes.contains(batchInstanceMetadata.stateManagement)) {
@@ -42,7 +43,7 @@ class BatchInstanceValidator extends InstanceValidator {
     }
 
     // 'event-wait-idle-time' field
-    if (batchInstanceMetadata.eventWaitIdleTime <= 0) {
+    if (batchInstanceMetadata.eventWaitTime <= 0) {
       errors += createMessage("rest.validator.attribute.must.greater.than.zero", "eventWaitIdleTime")
     }
 
@@ -60,28 +61,22 @@ class BatchInstanceValidator extends InstanceValidator {
       errors += createMessage("rest.validator.attribute.must.greater.or.equal", "Window", "slidingInterval")
     }
 
-    // 'inputAvroSchema' field
-    if (!batchInstanceMetadata.validateAvroSchema) {
-      errors += createMessage("rest.validator.attribute.not", "inputAvroSchema", "Avro Schema")
-    }
-
     errors ++= validateStreamOptions(batchInstanceMetadata, specification)
 
     errors
   }
 
-  def validateStreamOptions(instance: BatchInstanceApi,
-                            specification: SpecificationApi): ArrayBuffer[String] = {
+  def validateStreamOptions(instance: BatchInstance, specification: Specification): ArrayBuffer[String] = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     val errors = new ArrayBuffer[String]()
-    val inputs = instance.inputsOrEmptyList()
+    val inputs = instance.inputsOrEmptyList
 
     // 'inputs' field
     val inputModes = inputs.map(i => getStreamMode(i))
     if (inputModes.exists(m => !streamModes.contains(m))) {
       errors += createMessage("rest.validator.unknown.stream.mode", streamModes.mkString("[", ", ", "]"))
     }
-    val inputsCardinality = specification.inputs("cardinality").asInstanceOf[Array[Int]]
+    val inputsCardinality = specification.inputs.cardinality
     if (inputs.length < inputsCardinality(0)) {
       errors += createMessage("rest.validator.cardinality.cannot.less", "inputs", s"${inputsCardinality(0)}")
     }
@@ -100,7 +95,7 @@ class BatchInstanceValidator extends InstanceValidator {
       }
     }
 
-    val inputTypes = specification.inputs("types").asInstanceOf[Array[String]]
+    val inputTypes = specification.inputs.types
     if (inputStreams.exists(s => !inputTypes.contains(s.streamType))) {
       errors += createMessage("rest.validator.source_stream.must.one.of", "Input", inputTypes.mkString("[", ", ", "]"))
     }
@@ -130,7 +125,7 @@ class BatchInstanceValidator extends InstanceValidator {
     }
 
     // 'outputs' field
-    val outputsCardinality = specification.outputs("cardinality").asInstanceOf[Array[Int]]
+    val outputsCardinality = specification.outputs.cardinality
     if (instance.outputs.length < outputsCardinality(0)) {
       errors += createMessage("rest.validator.cardinality.cannot.less", "outputs", s"${outputsCardinality(0)}")
     }
@@ -146,7 +141,7 @@ class BatchInstanceValidator extends InstanceValidator {
         errors += createMessage("rest.validator.source_stream.not.exist", "Output", streamName)
       }
     }
-    val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
+    val outputTypes = specification.outputs.types
     if (outputStreams.exists(s => !outputTypes.contains(s.streamType))) {
       errors += createMessage("rest.validator.source_stream.must.one.of", "Output", outputTypes.mkString("[", ", ", "]"))
     }

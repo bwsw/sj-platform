@@ -3,7 +3,8 @@ package com.bwsw.sj.crud.rest.validator.instance
 import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.rest.model.module.{InstanceApi, OutputInstanceApi, SpecificationApi}
+import com.bwsw.sj.common.si.model.instance.{Instance, OutputInstance}
+import com.bwsw.sj.common.si.model.module.Specification
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
@@ -30,15 +31,15 @@ class OutputInstanceValidator extends InstanceValidator {
   /**
     * Validating input parameters for 'output-streaming' module
     *
-    * @param parameters    - input parameters for running module
+    * @param instance      - input parameters for running module
     * @param specification - specification of module
     * @return - List of errors
     */
-  override def validate(parameters: InstanceApi, specification: SpecificationApi) = {
-    logger.debug(s"Instance: ${parameters.name}. Start a validation of instance of output-streaming type.")
+  override def validate(instance: Instance, specification: Specification) = {
+    logger.debug(s"Instance: ${instance.name}. Start a validation of instance of output-streaming type.")
     val errors = new ArrayBuffer[String]()
-    errors ++= super.validateGeneralOptions(parameters)
-    val outputInstanceMetadata = parameters.asInstanceOf[OutputInstanceApi]
+    errors ++= super.validateGeneralOptions(instance)
+    val outputInstanceMetadata = instance.asInstanceOf[OutputInstance]
 
     Option(outputInstanceMetadata.checkpointMode) match {
       case None =>
@@ -55,11 +56,6 @@ class OutputInstanceValidator extends InstanceValidator {
         }
     }
 
-    // 'inputAvroSchema' field
-    if (!outputInstanceMetadata.validateAvroSchema) {
-      errors += createMessage("rest.validator.attribute.not", "inputAvroSchema", "Avro Schema")
-    }
-
     // 'checkpoint-interval' field
     if (outputInstanceMetadata.checkpointInterval <= 0) {
       errors += createMessage("rest.validator.attribute.required", "checkpointInterval") + ". " +
@@ -69,8 +65,7 @@ class OutputInstanceValidator extends InstanceValidator {
     errors ++= validateStreamOptions(outputInstanceMetadata, specification)
   }
 
-  private def validateStreamOptions(instance: OutputInstanceApi,
-                                    specification: SpecificationApi) = {
+  private def validateStreamOptions(instance: OutputInstance, specification: Specification) = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     val errors = new ArrayBuffer[String]()
 
@@ -95,7 +90,7 @@ class OutputInstanceValidator extends InstanceValidator {
             case None =>
               errors += createMessage("rest.validator.not.exist", s"Input stream '$inputStreamName'")
             case Some(stream) =>
-              val inputTypes = specification.inputs("types").asInstanceOf[Array[String]]
+              val inputTypes = specification.inputs.types
               if (!inputTypes.contains(stream.streamType)) {
                 errors += createMessage("rest.validator.attribute.must.one_of", "Input stream", inputTypes.mkString("[", ", ", "]"))
               } else {
@@ -125,7 +120,7 @@ class OutputInstanceValidator extends InstanceValidator {
             case None =>
               errors += createMessage("rest.validator.not.exist", s"Output stream '$x'")
             case Some(stream) =>
-              val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
+              val outputTypes = specification.outputs.types
               if (!outputTypes.contains(stream.streamType)) {
                 errors += createMessage("rest.validator.attribute.must.one_of", "Output stream", outputTypes.mkString("[", ", ", "]"))
               }
