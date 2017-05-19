@@ -120,10 +120,15 @@ object DataFactory {
                      checkpointInterval: Int
                     ) = {
 
-    val instance = new InputInstanceDomain(instanceName, EngineLiterals.inputStreamingType,
-      "input-streaming-stub", "1.0", "com.bwsw.input.streaming.engine-1.0",
-      serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKServiceDomain], EngineLiterals.everyNthMode
-    )
+    val instance = new InputInstanceDomain(
+      instanceName,
+      EngineLiterals.inputStreamingType,
+      "input-streaming-stub",
+      "1.0",
+      "com.bwsw.input.streaming.engine-1.0",
+      serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKServiceDomain],
+      checkpointMode = EngineLiterals.everyNthMode)
+
     instance.status = EngineLiterals.started
     instance.description = "some description of test instance"
     instance.outputs = instanceOutputs

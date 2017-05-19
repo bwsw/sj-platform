@@ -1,7 +1,12 @@
 package com.bwsw.sj.common.si.model.instance
 
-import com.bwsw.sj.common.dal.model.instance.{FrameworkStage, InputTask}
+import com.bwsw.common.JsonSerializer
+import com.bwsw.sj.common.dal.model.instance.{FrameworkStage, InputInstanceDomain, InputTask}
+import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
+
+import scala.collection.JavaConverters._
 
 class InputInstance(name: String,
                     description: String,
@@ -31,7 +36,8 @@ class InputInstance(name: String,
                     var tasks: Map[String, InputTask] = Map(),
                     restAddress: Option[String] = None,
                     stage: FrameworkStage = FrameworkStage(),
-                    status: String = EngineLiterals.ready)
+                    status: String = EngineLiterals.ready,
+                    frameworkId: String = System.currentTimeMillis().toString)
   extends Instance(
     name,
     description,
@@ -50,6 +56,44 @@ class InputInstance(name: String,
     engine,
     restAddress,
     stage,
-    status) {
+    status,
+    frameworkId) {
 
+  override def to: InputInstanceDomain = {
+    val serializer = new JsonSerializer
+    val serviceRepository = ConnectionRepository.getServiceRepository
+
+    new InputInstanceDomain(
+      name,
+      moduleType,
+      moduleName,
+      moduleVersion,
+      engine,
+      serviceRepository.get(coordinationService).asInstanceOf[ZKServiceDomain],
+      status,
+      restAddress.getOrElse(""),
+      description,
+      countParallelism,
+      serializer.serialize(options),
+      perTaskCores,
+      perTaskRam,
+      jvmOptions.asJava,
+      nodeAttributes.asJava,
+      environmentVariables.asJava,
+      stage,
+      performanceReportingInterval,
+      frameworkId,
+
+      outputs,
+      checkpointMode,
+      checkpointInterval,
+      duplicateCheck,
+      lookupHistory,
+      queueMaxSize,
+      defaultEvictionPolicy,
+      evictionPolicy,
+      backupCount,
+      asyncBackupCount,
+      tasks.asJava)
+  }
 }

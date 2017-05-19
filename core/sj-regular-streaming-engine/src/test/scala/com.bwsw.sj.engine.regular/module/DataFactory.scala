@@ -273,9 +273,15 @@ object DataFactory {
                      stateFullCheckpoint: Int = 0) = {
     import scala.collection.JavaConverters._
 
-    val instance = new RegularInstanceDomain(instanceName, EngineLiterals.regularStreamingType,
-      "regular-streaming-stub", "1.0", "com.bwsw.regular.streaming.engine-1.0",
-      serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKServiceDomain], EngineLiterals.everyNthMode)
+    val instance = new RegularInstanceDomain(
+      instanceName,
+      EngineLiterals.regularStreamingType,
+      "regular-streaming-stub",
+      "1.0",
+      "com.bwsw.regular.streaming.engine-1.0",
+      serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKServiceDomain],
+      checkpointMode = EngineLiterals.everyNthMode)
+    
     instance.status = EngineLiterals.started
     instance.inputs = instanceInputs
     instance.outputs = instanceOutputs

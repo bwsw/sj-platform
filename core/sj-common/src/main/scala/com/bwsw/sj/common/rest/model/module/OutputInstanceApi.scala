@@ -19,7 +19,7 @@ class OutputInstanceApi extends InstanceApi with AvroSchemaForInstanceMetadata{
     val serviceRepository = ConnectionRepository.getServiceRepository
     val service = serviceRepository.get(this.coordinationService).get.asInstanceOf[ZKServiceDomain]
 
-    val modelInstance = new OutputInstanceDomain(name, moduleType, moduleName, moduleVersion, engine, service, checkpointMode)
+    val modelInstance = new OutputInstanceDomain(name, moduleType, moduleName, moduleVersion, engine, service, checkpointMode = checkpointMode)
     super.fillModelInstance(modelInstance)
     modelInstance.checkpointInterval = this.checkpointInterval
     modelInstance.inputs = Array(this.input)

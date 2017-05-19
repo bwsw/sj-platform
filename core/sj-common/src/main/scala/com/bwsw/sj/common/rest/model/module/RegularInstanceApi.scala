@@ -23,7 +23,7 @@ class RegularInstanceApi extends InstanceApi with AvroSchemaForInstanceMetadata 
     val serviceRepository = ConnectionRepository.getServiceRepository
     val service = serviceRepository.get(this.coordinationService).get.asInstanceOf[ZKServiceDomain]
 
-    val modelInstance = new RegularInstanceDomain(name, moduleType, moduleName, moduleVersion, engine, service, checkpointMode)
+    val modelInstance = new RegularInstanceDomain(name, moduleType, moduleName, moduleVersion, engine, service, checkpointMode = checkpointMode)
     super.fillModelInstance(modelInstance)
     modelInstance.checkpointInterval = this.checkpointInterval
     modelInstance.stateManagement = this.stateManagement

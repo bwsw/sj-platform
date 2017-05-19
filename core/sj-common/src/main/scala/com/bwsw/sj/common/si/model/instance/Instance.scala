@@ -1,13 +1,13 @@
 package com.bwsw.sj.common.si.model.instance
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.dal.model.instance.{FrameworkStage, InstanceDomain}
+import com.bwsw.sj.common.dal.model.instance._
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.rest.model.module.{StreamWithMode, TaskStream}
 import com.bwsw.sj.common.utils.SjStreamUtils.clearStreamFromMode
-import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
+import com.bwsw.sj.common.utils.{AvroUtils, EngineLiterals, StreamLiterals}
 
 import scala.collection.JavaConverters._
 
@@ -28,7 +28,9 @@ class Instance(val name: String,
                val engine: String,
                val restAddress: Option[String] = None,
                val stage: FrameworkStage = FrameworkStage(),
-               val status: String = EngineLiterals.ready) {
+               val status: String = EngineLiterals.ready,
+               val frameworkId: String = System.currentTimeMillis().toString) {
+
   def to: InstanceDomain = {
     val serializer = new JsonSerializer
     val serviceRepository = ConnectionRepository.getServiceRepository
@@ -51,7 +53,8 @@ class Instance(val name: String,
       nodeAttributes = nodeAttributes.asJava,
       environmentVariables = environmentVariables.asJava,
       stage = stage,
-      performanceReportingInterval = performanceReportingInterval
+      performanceReportingInterval = performanceReportingInterval,
+      frameworkId = frameworkId
     )
   }
 
@@ -136,29 +139,171 @@ class Instance(val name: String,
 }
 
 object Instance {
-  def from(instanceDomain: InstanceDomain): Instance = {
+  def from(instance: InstanceDomain): Instance = {
     val serializer = new JsonSerializer
-    instanceDomain.moduleType match {
+    instance.moduleType match {
+      case EngineLiterals.inputStreamingType =>
+        val inputInstance = instance.asInstanceOf[InputInstanceDomain]
+
+        new InputInstance(
+          inputInstance.name,
+          inputInstance.description,
+          inputInstance.parallelism,
+          serializer.deserialize[Map[String, Any]](inputInstance.options),
+          inputInstance.perTaskCores,
+          inputInstance.perTaskRam,
+          Map(inputInstance.jvmOptions.asScala.toList: _*),
+          Map(inputInstance.nodeAttributes.asScala.toList: _*),
+          inputInstance.coordinationService.name,
+          Map(inputInstance.environmentVariables.asScala.toList: _*),
+          inputInstance.performanceReportingInterval,
+          inputInstance.moduleName,
+          inputInstance.moduleVersion,
+          inputInstance.moduleType,
+          inputInstance.engine,
+
+          inputInstance.checkpointMode,
+          inputInstance.checkpointInterval,
+          inputInstance.outputs,
+          inputInstance.lookupHistory,
+          inputInstance.queueMaxSize,
+          inputInstance.duplicateCheck,
+          inputInstance.defaultEvictionPolicy,
+          inputInstance.evictionPolicy,
+          inputInstance.backupCount,
+          inputInstance.asyncBackupCount,
+          Map(inputInstance.tasks.asScala.toList: _*),
+
+          Option(inputInstance.restAddress),
+          inputInstance.stage,
+          inputInstance.status,
+          inputInstance.frameworkId)
+
+      case EngineLiterals.batchStreamingType =>
+        val x = instance.asInstanceOf[BatchInstanceDomain]
+
+        new BatchInstance(
+          x.name,
+          x.description,
+          x.parallelism,
+          serializer.deserialize[Map[String, Any]](x.options),
+          x.perTaskCores,
+          x.perTaskRam,
+          Map(x.jvmOptions.asScala.toList: _*),
+          Map(x.nodeAttributes.asScala.toList: _*),
+          x.coordinationService.name,
+          Map(x.environmentVariables.asScala.toList: _*),
+          x.performanceReportingInterval,
+          x.moduleName,
+          x.moduleVersion,
+          x.moduleType,
+          x.engine,
+
+          x.inputs,
+          x.outputs,
+          x.window,
+          x.slidingInterval,
+          x.startFrom,
+          x.stateManagement,
+          x.stateFullCheckpoint,
+          x.eventWaitIdleTime,
+          AvroUtils.jsonToSchema(x.inputAvroSchema),
+          x.executionPlan,
+
+          Option(x.restAddress),
+          x.stage,
+          x.status,
+          x.frameworkId)
+
+      case EngineLiterals.regularStreamingType =>
+        val x = instance.asInstanceOf[RegularInstanceDomain]
+
+        new RegularInstance(
+          x.name,
+          x.description,
+          x.parallelism,
+          serializer.deserialize[Map[String, Any]](x.options),
+          x.perTaskCores,
+          x.perTaskRam,
+          Map(x.jvmOptions.asScala.toList: _*),
+          Map(x.nodeAttributes.asScala.toList: _*),
+          x.coordinationService.name,
+          Map(x.environmentVariables.asScala.toList: _*),
+          x.performanceReportingInterval,
+          x.moduleName,
+          x.moduleVersion,
+          x.moduleType,
+          x.engine,
+
+          x.inputs,
+          x.outputs,
+          x.checkpointMode,
+          x.checkpointInterval,
+          x.startFrom,
+          x.stateManagement,
+          x.stateFullCheckpoint,
+          x.eventWaitIdleTime,
+          AvroUtils.jsonToSchema(x.inputAvroSchema),
+          x.executionPlan,
+
+          Option(x.restAddress),
+          x.stage,
+          x.status,
+          x.frameworkId)
+
+      case EngineLiterals.outputStreamingType =>
+        val x = instance.asInstanceOf[OutputInstanceDomain]
+
+        new OutputInstance(
+          x.name,
+          x.description,
+          x.parallelism,
+          serializer.deserialize[Map[String, Any]](x.options),
+          x.perTaskCores,
+          x.perTaskRam,
+          Map(x.jvmOptions.asScala.toList: _*),
+          Map(x.nodeAttributes.asScala.toList: _*),
+          x.coordinationService.name,
+          Map(x.environmentVariables.asScala.toList: _*),
+          x.performanceReportingInterval,
+          x.moduleName,
+          x.moduleVersion,
+          x.moduleType,
+          x.engine,
+
+          x.checkpointMode,
+          x.checkpointInterval,
+          x.inputs.head,
+          x.outputs.head,
+          x.startFrom,
+          AvroUtils.jsonToSchema(x.inputAvroSchema),
+          x.executionPlan,
+
+          Option(x.restAddress),
+          x.stage,
+          x.status,
+          x.frameworkId)
+
       case _ =>
         new Instance(
-          instanceDomain.name,
-          instanceDomain.description,
-          instanceDomain.parallelism,
-          serializer.deserialize[Map[String, Any]](instanceDomain.options),
-          instanceDomain.perTaskCores,
-          instanceDomain.perTaskRam,
-          Map(instanceDomain.jvmOptions.asScala.toList: _*),
-          Map(instanceDomain.nodeAttributes.asScala.toList: _*),
-          instanceDomain.coordinationService.name,
-          Map(instanceDomain.environmentVariables.asScala.toList: _*),
-          instanceDomain.performanceReportingInterval,
-          instanceDomain.moduleName,
-          instanceDomain.moduleVersion,
-          instanceDomain.moduleType,
-          instanceDomain.engine,
-          Option(instanceDomain.restAddress),
-          instanceDomain.stage,
-          instanceDomain.status)
+          instance.name,
+          instance.description,
+          instance.parallelism,
+          serializer.deserialize[Map[String, Any]](instance.options),
+          instance.perTaskCores,
+          instance.perTaskRam,
+          Map(instance.jvmOptions.asScala.toList: _*),
+          Map(instance.nodeAttributes.asScala.toList: _*),
+          instance.coordinationService.name,
+          Map(instance.environmentVariables.asScala.toList: _*),
+          instance.performanceReportingInterval,
+          instance.moduleName,
+          instance.moduleVersion,
+          instance.moduleType,
+          instance.engine,
+          Option(instance.restAddress),
+          instance.stage,
+          instance.status)
     }
   }
 }

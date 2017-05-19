@@ -345,10 +345,15 @@ object DataFactory {
     task1.inputs = Map(tstreamInputName -> Array(0, 3)).asJava
     val executionPlan = new ExecutionPlan(Map(instanceName + "-task0" -> task1).asJava)
 
-    val instance = new OutputInstanceDomain(instanceName, EngineLiterals.outputStreamingType,
-      moduleName, "1.0", "com.bwsw.output.streaming.engine-1.0",
-      serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKServiceDomain], checkpointMode
-    )
+    val instance = new OutputInstanceDomain(
+      instanceName,
+      EngineLiterals.outputStreamingType,
+      moduleName,
+      "1.0",
+      "com.bwsw.output.streaming.engine-1.0",
+      serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKServiceDomain],
+      checkpointMode = checkpointMode)
+
     instance.status = EngineLiterals.started
     instance.description = "some description of test instance"
     instance.inputs = Array(tstreamInputName)

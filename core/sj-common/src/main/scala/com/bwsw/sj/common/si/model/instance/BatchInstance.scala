@@ -1,8 +1,13 @@
 package com.bwsw.sj.common.si.model.instance
 
-import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, FrameworkStage}
-import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.common.JsonSerializer
+import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, ExecutionPlan, FrameworkStage}
+import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.utils.{AvroUtils, EngineLiterals}
 import org.apache.avro.Schema
+
+import scala.collection.JavaConverters._
 
 class BatchInstance(name: String,
                     description: String,
@@ -31,7 +36,8 @@ class BatchInstance(name: String,
                     val executionPlan: ExecutionPlan = new ExecutionPlan(),
                     restAddress: Option[String] = None,
                     stage: FrameworkStage = FrameworkStage(),
-                    status: String = EngineLiterals.ready)
+                    status: String = EngineLiterals.ready,
+                    frameworkId: String = System.currentTimeMillis().toString)
   extends Instance(
     name,
     description,
@@ -50,7 +56,44 @@ class BatchInstance(name: String,
     engine,
     restAddress,
     stage,
-    status) {
+    status,
+    frameworkId) {
+
+  override def to: BatchInstanceDomain = {
+    val serializer = new JsonSerializer
+    val serviceRepository = ConnectionRepository.getServiceRepository
+
+    new BatchInstanceDomain(
+      name,
+      moduleType,
+      moduleName,
+      moduleVersion,
+      engine,
+      serviceRepository.get(coordinationService).asInstanceOf[ZKServiceDomain],
+      status,
+      restAddress.getOrElse(""),
+      description,
+      countParallelism,
+      serializer.serialize(options),
+      perTaskCores,
+      perTaskRam,
+      jvmOptions.asJava,
+      nodeAttributes.asJava,
+      environmentVariables.asJava,
+      stage,
+      performanceReportingInterval,
+      frameworkId,
+      inputs,
+      outputs,
+      window,
+      slidingInterval,
+      executionPlan,
+      startFrom,
+      stateManagement,
+      stateFullCheckpoint,
+      eventWaitTime,
+      AvroUtils.schemaToJson(inputAvroSchema))
+  }
 
   override def inputsOrEmptyList: Array[String] = inputs
 
