@@ -1,5 +1,6 @@
 package com.bwsw.sj.crud.rest.model.instance
 
+import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.si.model.instance.OutputInstance
 import com.bwsw.sj.common.utils.{AvroUtils, EngineLiterals, RestLiterals}
 
@@ -34,11 +35,13 @@ class OutputInstanceApi(name: String,
     performanceReportingInterval) {
 
   override def to(moduleType: String, moduleName: String, moduleVersion: String): OutputInstance = {
+    val serializer = new JsonSerializer()
+
     new OutputInstance(
       name,
       description,
       parallelism,
-      options,
+      serializer.serialize(options),
       perTaskCores,
       perTaskRam,
       jvmOptions,

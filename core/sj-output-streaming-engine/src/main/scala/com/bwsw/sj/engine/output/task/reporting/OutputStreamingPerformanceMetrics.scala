@@ -16,7 +16,7 @@ class OutputStreamingPerformanceMetrics(manager: OutputTaskManager)
   extends PerformanceMetrics(manager) {
 
   currentThread.setName(s"output-task-${manager.taskName}-performance-metrics")
-  private val inputStreamNames = instance.getInputsWithoutStreamMode()
+  private val inputStreamNames = instance.getInputsWithoutStreamMode
   private val outputStreamNames = instance.outputs
 
   override protected var inputEnvelopesPerStream = createStorageForInputEnvelopes(inputStreamNames)

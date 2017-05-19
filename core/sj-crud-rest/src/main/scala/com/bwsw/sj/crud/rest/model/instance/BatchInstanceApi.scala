@@ -1,5 +1,6 @@
 package com.bwsw.sj.crud.rest.model.instance
 
+import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.si.model.instance.BatchInstance
 import com.bwsw.sj.common.utils.{AvroUtils, EngineLiterals, RestLiterals}
 
@@ -37,11 +38,13 @@ class BatchInstanceApi(name: String,
     performanceReportingInterval) {
 
   override def to(moduleType: String, moduleName: String, moduleVersion: String): BatchInstance = {
+    val serializer = new JsonSerializer()
+
     new BatchInstance(
       name,
       description,
       parallelism,
-      options,
+      serializer.serialize(options),
       perTaskCores,
       perTaskRam,
       jvmOptions,

@@ -1,6 +1,5 @@
 package com.bwsw.sj.common.si
 
-import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.engine.{StreamingValidator, ValidationInfo}
@@ -14,7 +13,6 @@ import scala.collection.mutable.ArrayBuffer
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 class InstanceSI {
-  private val serializer = new JsonSerializer(true)
   private val entityRepository: GenericMongoRepository[InstanceDomain] = ConnectionRepository.getInstanceRepository
   private val storage = ConnectionRepository.getFileStorage
 
@@ -72,7 +70,7 @@ class InstanceSI {
     val clazz = loader.loadClass(validatorClassName)
     val validator = clazz.newInstance().asInstanceOf[StreamingValidator]
     val optionsValidationInfo = validator.validate(instance)
-    val instanceValidationInfo = validator.validate(serializer.serialize(instance.options))
+    val instanceValidationInfo = validator.validate(instance.options)
 
     ValidationInfo(
       optionsValidationInfo.result && instanceValidationInfo.result,

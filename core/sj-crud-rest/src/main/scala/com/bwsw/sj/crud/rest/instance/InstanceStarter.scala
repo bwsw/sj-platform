@@ -3,16 +3,15 @@ package com.bwsw.sj.crud.rest.instance
 import java.net.URI
 
 import com.bwsw.common.LeaderLatch
-import com.bwsw.sj.common.dal.ConnectionConstants
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
-import com.bwsw.sj.common.dal.model.instance.InstanceDomain
+import com.bwsw.sj.common.dal.ConnectionConstants
+import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.utils.FrameworkLiterals._
 import com.bwsw.sj.common.utils._
 import com.bwsw.sj.crud.rest.RestLiterals
 import com.bwsw.sj.crud.rest.marathon.{MarathonApplicationById, MarathonRequest}
 import org.slf4j.LoggerFactory
 
-import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -21,7 +20,7 @@ import scala.util.{Failure, Success, Try}
   *
   * @author Kseniya Tomskikh
   */
-class InstanceStarter(instance: InstanceDomain, delay: Long = 1000) extends Runnable with InstanceManager {
+class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable with InstanceManager {
 
   import EngineLiterals._
 
@@ -151,7 +150,7 @@ class InstanceStarter(instance: InstanceDomain, delay: Long = 1000) extends Runn
       frameworkIdLabel -> frameworkName
     )
     environmentVariables = environmentVariables ++ ConnectionConstants.mongoEnvironment
-    environmentVariables = environmentVariables ++ instance.environmentVariables.asScala
+    environmentVariables = environmentVariables ++ instance.environmentVariables
 
     environmentVariables
   }

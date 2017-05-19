@@ -6,12 +6,13 @@ import java.util.jar.JarFile
 
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
+import com.bwsw.sj.common.config.ConfigLiterals
+import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, InstanceDomain, Task}
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service.{KafkaServiceDomain, ServiceDomain, TStreamServiceDomain, ZKServiceDomain}
 import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.config.ConfigLiterals
-import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, ExecutionPlan, InstanceDomain, Task}
+import com.bwsw.sj.common.si.model.instance.BatchInstance
 import com.bwsw.sj.common.utils._
 import com.bwsw.sj.engine.core.testutils.TestStorageServer
 import com.bwsw.tstreams.agents.consumer.Consumer
@@ -274,20 +275,26 @@ object DataFactory {
                      stateFullCheckpoint: Int = 0) = {
     import scala.collection.JavaConverters._
 
-    val instance = new BatchInstanceDomain(instanceName, EngineLiterals.batchStreamingType, "batch-streaming-stub", "1.0",
-      "com.bwsw.batch.streaming.engine-1.0", serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKServiceDomain])
-    instance.status = EngineLiterals.started
-    instance.inputs = instanceInputs
-    instance.window = window
-    instance.slidingInterval = slidingInterval
-    instance.outputs = instanceOutputs
-    instance.stateManagement = stateManagement
-    instance.stateFullCheckpoint = stateFullCheckpoint
-    instance.startFrom = EngineLiterals.oldestStartMode
-    //instance.executionPlan = new ExecutionPlan(Map((instanceName + "-task0", task), (instanceName + "-task1", task)).asJava) //for barriers test
-    instance.executionPlan = new ExecutionPlan(Map(instanceName + "-task0" -> task).asJava)
+    val instance = new BatchInstance(
+      name = instanceName,
+      moduleType = EngineLiterals.batchStreamingType,
+      moduleName = "batch-streaming-stub",
+      moduleVersion = "1.0",
+      engine = "com.bwsw.batch.streaming.engine-1.0",
+      coordinationService = zookeeperServiceName,
+      status = EngineLiterals.started,
+      inputs = instanceInputs,
+      window = window,
+      slidingInterval = slidingInterval,
+      outputs = instanceOutputs,
+      stateManagement = stateManagement,
+      stateFullCheckpoint = stateFullCheckpoint,
+      startFrom = EngineLiterals.oldestStartMode,
+      //executionPlan = new ExecutionPlan(Map((instanceName + "-task0", task), (instanceName + "-task1", task)).asJava) //for barriers test,
+      executionPlan = new ExecutionPlan(Map(instanceName + "-task0" -> task).asJava)
+    )
 
-    instanceService.save(instance)
+    instanceService.save(instance.to)
   }
 
   def deleteInstance(instanceService: GenericMongoRepository[InstanceDomain]) = {

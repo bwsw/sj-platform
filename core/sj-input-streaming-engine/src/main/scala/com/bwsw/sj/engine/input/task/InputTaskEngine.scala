@@ -2,8 +2,8 @@ package com.bwsw.sj.engine.input.task
 
 import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
 
-import com.bwsw.sj.common.dal.model.instance.InputInstanceDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
 import com.bwsw.sj.engine.core.entities.InputEnvelope
@@ -40,7 +40,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
   private val producers: Map[String, Producer] = manager.outputProducers
   private var transactionsByStreamPartitions = createTxnsStorage()
   private val checkpointGroup = new CheckpointGroup()
-  private val instance = manager.instance.asInstanceOf[InputInstanceDomain]
+  private val instance = manager.instance.asInstanceOf[InputInstance]
   private val environmentManager = createModuleEnvironmentManager()
   private val executor = manager.getExecutor(environmentManager)
   private val evictionPolicy = InputInstanceEvictionPolicy(instance)

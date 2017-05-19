@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.input.task
 
-import com.bwsw.sj.common.dal.model.instance.InputInstanceDomain
+import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.engine.core.environment.{EnvironmentManager, InputEnvironmentManager}
 import com.bwsw.sj.engine.core.input.InputStreamingExecutor
 import com.bwsw.sj.engine.core.managment.TaskManager
@@ -20,7 +20,7 @@ class InputTaskManager() extends TaskManager {
       s"and it's impossible to retrieve inputs.")
   }
 
-  val inputInstance: InputInstanceDomain = instance.asInstanceOf[InputInstanceDomain]
+  val inputInstance = instance.asInstanceOf[InputInstance]
   val entryPort: Int = getEntryPort()
   val outputProducers: Map[String, Producer] = createOutputProducers()
 
@@ -31,7 +31,7 @@ class InputTaskManager() extends TaskManager {
   def getEntryPort(): Int = {
     if (System.getenv().containsKey("ENTRY_PORT"))
       System.getenv("ENTRY_PORT").toInt
-    else inputInstance.tasks.get(taskName).port
+    else inputInstance.tasks(taskName).port
   }
 
   def getExecutor(environmentManager: EnvironmentManager): InputStreamingExecutor[AnyRef] = {

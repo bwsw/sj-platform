@@ -4,13 +4,14 @@ import java.io.File
 import java.net.URLClassLoader
 
 import com.bwsw.sj.common.config.ConfigLiterals
-import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, InstanceDomain}
+import com.bwsw.sj.common.dal.model.instance.ExecutionPlan
 import com.bwsw.sj.common.dal.model.module._
 import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.engine.{EnvelopeDataSerializer, ExtendedEnvelopeDataSerializer, StreamingExecutor}
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
+import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.StreamLiterals._
 import com.bwsw.sj.engine.core.environment.EnvironmentManager
@@ -41,7 +42,7 @@ abstract class TaskManager() {
   private val agentsPorts = System.getenv("AGENTS_PORTS").split(",").map(_.toInt)
   protected val numberOfAgentsPorts = agentsPorts.length
   val taskName: String = System.getenv("TASK_NAME")
-  val instance: InstanceDomain = getInstance()
+  val instance: Instance = getInstance()
   protected val auxiliarySJTStream = getAuxiliaryTStream()
   protected val auxiliaryTStreamService = getAuxiliaryTStreamService()
   protected val tstreamFactory = new TStreamsFactory()
@@ -65,8 +66,8 @@ abstract class TaskManager() {
   val inputs: mutable.Map[StreamDomain, Array[Int]]
 
 
-  private def getInstance(): InstanceDomain = {
-    val maybeInstance = ConnectionRepository.getInstanceRepository.get(instanceName)
+  private def getInstance(): Instance = {
+    val maybeInstance = ConnectionRepository.getInstanceRepository.get(instanceName).map(Instance.from)
     if (maybeInstance.isDefined) {
 
       if (maybeInstance.get.status != started) {
@@ -78,13 +79,8 @@ abstract class TaskManager() {
     maybeInstance.orNull
   }
 
-  private def getAuxiliaryTStream(): StreamDomain = {
-    val inputs = instance.getInputsWithoutStreamMode()
-    val streams = inputs.union(instance.outputs)
-    val sjStream = streams.flatMap(s => streamRepository.get(s)).filter(s => s.streamType.equals(tstreamType)).head
-
-    sjStream
-  }
+  private def getAuxiliaryTStream(): StreamDomain =
+    instance.streams.flatMap(streamRepository.get).filter(_.streamType == tstreamType).head
 
   private def getAuxiliaryTStreamService(): TStreamServiceDomain = {
     auxiliarySJTStream.service.asInstanceOf[TStreamServiceDomain]

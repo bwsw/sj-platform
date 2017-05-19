@@ -1,6 +1,5 @@
 package com.bwsw.sj.crud.rest
 
-import akka.actor.ActorSystem
 import akka.event.Logging.LogLevel
 import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.Http
@@ -9,33 +8,30 @@ import akka.http.scaladsl.model.{HttpEntity, HttpRequest}
 import akka.http.scaladsl.server.RouteResult.Complete
 import akka.http.scaladsl.server._
 import akka.http.scaladsl.server.directives.{DebuggingDirectives, LogEntry, LoggingMagnet}
-import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import com.bwsw.common.JsonSerializer
+import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.config.ConfigLiterals
-import com.bwsw.sj.common.utils.EngineLiterals
-import EngineLiterals._
+import com.bwsw.sj.common.si.model.instance.Instance
+import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.crud.rest.instance.InstanceStopper
 
 import scala.concurrent.Future
 
 /**
- * Run object of CRUD Rest-API
- *
- *
- * @author Kseniya Tomskikh
- */
+  * Run object of CRUD Rest-API
+  *
+  * @author Kseniya Tomskikh
+  */
 object SjCrudRestService extends App with SjCrudInterface {
   require(Option(System.getenv("CRUD_REST_HOST")).isDefined && Option(System.getenv("CRUD_REST_PORT")).isDefined,
-  "No environment variables: CRUD_REST_HOST, CRUD_REST_PORT")
+    "No environment variables: CRUD_REST_HOST, CRUD_REST_PORT")
 
   val restHost = System.getenv("CRUD_REST_HOST")
   val restPort = System.getenv("CRUD_REST_PORT").toInt
   val serializer = new JsonSerializer()
   serializer.setIgnoreUnknown(true)
-  val storage = ConnectionRepository.getFileStorage
   val fileMetadataDAO = ConnectionRepository.getFileMetadataRepository
   val instanceDAO = ConnectionRepository.getInstanceRepository
   val configService = ConnectionRepository.getConfigRepository
@@ -44,7 +40,7 @@ object SjCrudRestService extends App with SjCrudInterface {
 
   //putRestSettingsToConfigFile()
 
-//  stopInstances()
+  stopInstances()
 
   val serverBinding: Future[ServerBinding] = Http().bindAndHandle(routeLogged, interface = restHost, port = restPort)
   serverBinding.failed.foreach(_ => logger.error("Failed to bind to {}:{}!", restHost, restPort))
@@ -60,6 +56,7 @@ object SjCrudRestService extends App with SjCrudInterface {
       }
       entry.map(_.logTo(logger))
     }
+
     DebuggingDirectives.logRequestResult(LoggingMagnet(log => getRequestEntityAsString(log)))(route)
   }
 
@@ -75,16 +72,16 @@ object SjCrudRestService extends App with SjCrudInterface {
   }
 
   /**
-   * If instance has status "starting", "stopping" or "deleting"
-   * instance will be stopped
-   */
+    * If instance has status "starting", "stopping" or "deleting"
+    * instance will be stopped
+    */
   private def stopInstances() = {
     logger.info("Running of crud-rest. Stop instances which have status \"starting\", \"stopping\" or \"deleting\".")
     val instances = instanceDAO.getAll.filter { instance =>
       instance.status.equals(starting) ||
         instance.status.equals(stopping) ||
         instance.status.equals(deleting)
-    }
+    }.map(Instance.from)
 
     instances.foreach { instance =>
       new Thread(new InstanceStopper(instance, 1000)).start()

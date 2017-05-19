@@ -30,7 +30,7 @@ class InputInstanceApiResponse(moduleName: String,
                                val evictionPolicy: String,
                                val backupCount: Int,
                                val asyncBackupCount: Int,
-                               var tasks: Map[String, InputTask])
+                               val tasks: Map[String, InputTask])
   extends InstanceApiResponse(
     moduleName,
     moduleVersion,

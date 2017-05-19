@@ -1,39 +1,39 @@
 package com.bwsw.sj.common.si.model.instance
 
-import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.instance.{FrameworkStage, InputInstanceDomain, InputTask}
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 class InputInstance(name: String,
-                    description: String,
-                    parallelism: Any,
-                    options: Map[String, Any],
-                    perTaskCores: Double,
-                    perTaskRam: Int,
-                    jvmOptions: Map[String, String],
-                    nodeAttributes: Map[String, String],
+                    description: String = RestLiterals.defaultDescription,
+                    parallelism: Any = 1,
+                    options: String = "{}",
+                    perTaskCores: Double = 1,
+                    perTaskRam: Int = 1024,
+                    jvmOptions: Map[String, String] = Map(),
+                    nodeAttributes: Map[String, String] = Map(),
                     coordinationService: String,
-                    environmentVariables: Map[String, String],
-                    performanceReportingInterval: Long,
+                    environmentVariables: Map[String, String] = Map(),
+                    performanceReportingInterval: Long = 60000,
                     moduleName: String,
                     moduleVersion: String,
                     moduleType: String,
                     engine: String,
                     val checkpointMode: String,
                     val checkpointInterval: Long,
-                    val outputs: Array[String],
+                    outputs: Array[String],
                     val lookupHistory: Int,
                     val queueMaxSize: Int,
-                    val duplicateCheck: Boolean,
-                    val defaultEvictionPolicy: String,
-                    val evictionPolicy: String,
-                    val backupCount: Int,
-                    val asyncBackupCount: Int,
-                    var tasks: Map[String, InputTask] = Map(),
+                    val duplicateCheck: Boolean = false,
+                    val defaultEvictionPolicy: String = EngineLiterals.noneDefaultEvictionPolicy,
+                    val evictionPolicy: String = EngineLiterals.fixTimeEvictionPolicy,
+                    val backupCount: Int = 0,
+                    val asyncBackupCount: Int = 0,
+                    var tasks: mutable.Map[String, InputTask] = mutable.Map(),
                     restAddress: Option[String] = None,
                     stage: FrameworkStage = FrameworkStage(),
                     status: String = EngineLiterals.ready,
@@ -57,10 +57,10 @@ class InputInstance(name: String,
     restAddress,
     stage,
     status,
-    frameworkId) {
+    frameworkId,
+    outputs) {
 
   override def to: InputInstanceDomain = {
-    val serializer = new JsonSerializer
     val serviceRepository = ConnectionRepository.getServiceRepository
 
     new InputInstanceDomain(
@@ -74,7 +74,7 @@ class InputInstance(name: String,
       restAddress.getOrElse(""),
       description,
       countParallelism,
-      serializer.serialize(options),
+      options,
       perTaskCores,
       perTaskRam,
       jvmOptions.asJava,
@@ -109,4 +109,6 @@ class InputInstance(name: String,
 
   override def countParallelism: Int =
     castParallelismToNumber(getStreamsPartitions(outputs))
+
+  override val streams: Array[String] = outputs
 }

@@ -1,5 +1,6 @@
 package com.bwsw.sj.crud.rest.model.instance.response
 
+import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.instance.FrameworkStage
 import com.bwsw.sj.common.si.model.instance._
 import com.bwsw.sj.common.utils.{AvroUtils, EngineLiterals}
@@ -25,6 +26,7 @@ class InstanceApiResponse(val moduleName: String,
 
 object InstanceApiResponse {
   def from(instance: Instance): InstanceApiResponse = {
+    val serializer = new JsonSerializer()
     instance.moduleType match {
       case EngineLiterals.inputStreamingType =>
         val inputInstance = instance.asInstanceOf[InputInstance]
@@ -38,7 +40,7 @@ object InstanceApiResponse {
           inputInstance.name,
           inputInstance.description,
           inputInstance.parallelism,
-          inputInstance.options,
+          serializer.deserialize[Map[String, Any]](inputInstance.options),
           inputInstance.perTaskCores,
           inputInstance.perTaskRam,
           inputInstance.jvmOptions,
@@ -58,7 +60,7 @@ object InstanceApiResponse {
           inputInstance.evictionPolicy,
           inputInstance.backupCount,
           inputInstance.asyncBackupCount,
-          inputInstance.tasks)
+          inputInstance.tasks.toMap)
 
       case EngineLiterals.regularStreamingType =>
         val regularInstance = instance.asInstanceOf[RegularInstance]
@@ -72,7 +74,7 @@ object InstanceApiResponse {
           regularInstance.name,
           regularInstance.description,
           regularInstance.parallelism,
-          regularInstance.options,
+          serializer.deserialize[Map[String, Any]](regularInstance.options),
           regularInstance.perTaskCores,
           regularInstance.perTaskRam,
           regularInstance.jvmOptions,
@@ -105,7 +107,7 @@ object InstanceApiResponse {
           batchInstance.name,
           batchInstance.description,
           batchInstance.parallelism,
-          batchInstance.options,
+          serializer.deserialize[Map[String, Any]](batchInstance.options),
           batchInstance.perTaskCores,
           batchInstance.perTaskRam,
           batchInstance.jvmOptions,
@@ -138,7 +140,7 @@ object InstanceApiResponse {
           outputInstance.name,
           outputInstance.description,
           outputInstance.parallelism,
-          outputInstance.options,
+          serializer.deserialize[Map[String, Any]](outputInstance.options),
           outputInstance.perTaskCores,
           outputInstance.perTaskRam,
           outputInstance.jvmOptions,

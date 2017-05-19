@@ -6,12 +6,13 @@ import java.util.jar.JarFile
 
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
+import com.bwsw.sj.common.config.ConfigLiterals
+import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, InstanceDomain, Task}
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service.{KafkaServiceDomain, ServiceDomain, TStreamServiceDomain, ZKServiceDomain}
 import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.config.ConfigLiterals
-import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, InstanceDomain, RegularInstanceDomain, Task}
+import com.bwsw.sj.common.si.model.instance.RegularInstance
 import com.bwsw.sj.common.utils._
 import com.bwsw.sj.engine.core.testutils.TestStorageServer
 import com.bwsw.tstreams.agents.consumer.Consumer
@@ -273,25 +274,24 @@ object DataFactory {
                      stateFullCheckpoint: Int = 0) = {
     import scala.collection.JavaConverters._
 
-    val instance = new RegularInstanceDomain(
-      instanceName,
-      EngineLiterals.regularStreamingType,
-      "regular-streaming-stub",
-      "1.0",
-      "com.bwsw.regular.streaming.engine-1.0",
-      serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKServiceDomain],
-      checkpointMode = EngineLiterals.everyNthMode)
-    
-    instance.status = EngineLiterals.started
-    instance.inputs = instanceInputs
-    instance.outputs = instanceOutputs
-    instance.checkpointInterval = checkpointInterval
-    instance.stateManagement = stateManagement
-    instance.stateFullCheckpoint = stateFullCheckpoint
-    instance.startFrom = EngineLiterals.oldestStartMode
-    instance.executionPlan = new ExecutionPlan(Map(instanceName + "-task0" -> task, instanceName + "-task1" -> task).asJava)
+    val instance = new RegularInstance(
+      name = instanceName,
+      moduleType = EngineLiterals.regularStreamingType,
+      moduleName = "regular-streaming-stub",
+      moduleVersion = "1.0",
+      engine = "com.bwsw.regular.streaming.engine-1.0",
+      coordinationService = zookeeperServiceName,
+      checkpointMode = EngineLiterals.everyNthMode,
+      inputs = instanceInputs,
+      outputs = instanceOutputs,
+      checkpointInterval = checkpointInterval,
+      stateManagement = stateManagement,
+      stateFullCheckpoint = stateFullCheckpoint,
+      startFrom = EngineLiterals.oldestStartMode,
+      executionPlan = new ExecutionPlan(Map(instanceName + "-task0" -> task, instanceName + "-task1" -> task).asJava),
+      status = EngineLiterals.started)
 
-    instanceService.save(instance)
+    instanceService.save(instance.to)
   }
 
   def deleteInstance(instanceService: GenericMongoRepository[InstanceDomain]) = {

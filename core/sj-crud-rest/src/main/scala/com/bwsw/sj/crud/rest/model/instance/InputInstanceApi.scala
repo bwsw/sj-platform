@@ -1,5 +1,6 @@
 package com.bwsw.sj.crud.rest.model.instance
 
+import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 
@@ -38,11 +39,13 @@ class InputInstanceApi(name: String,
     performanceReportingInterval) {
 
   override def to(moduleType: String, moduleName: String, moduleVersion: String): InputInstance = {
+    val serializer = new JsonSerializer()
+
     new InputInstance(
       name,
       description,
       parallelism,
-      options,
+      serializer.serialize(options),
       perTaskCores,
       perTaskRam,
       jvmOptions,

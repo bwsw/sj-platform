@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.core.state
 
-import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, RegularInstanceDomain}
 import com.bwsw.sj.common.engine.StreamingExecutor
+import com.bwsw.sj.common.si.model.instance.{BatchInstance, RegularInstance}
 import com.bwsw.sj.common.utils.{EngineLiterals, SjTimer}
 import com.bwsw.sj.engine.core.environment.{ModuleEnvironmentManager, ModuleOutput}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
@@ -52,9 +52,9 @@ object CommonModuleService {
             performanceMetrics: PerformanceMetrics): CommonModuleService = {
 
     val stateManagement = manager.instance match {
-      case regularInstance: RegularInstanceDomain =>
+      case regularInstance: RegularInstance =>
         regularInstance.stateManagement
-      case batchInstance: BatchInstanceDomain =>
+      case batchInstance: BatchInstance =>
         batchInstance.stateManagement
       case _ =>
         logger.error("CommonModuleService can be used only for regular or batch engine.")

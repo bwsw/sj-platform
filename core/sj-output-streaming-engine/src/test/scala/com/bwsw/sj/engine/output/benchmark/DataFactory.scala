@@ -9,11 +9,12 @@ import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.common.jdbc.JdbcClientBuilder
 import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.dal.model._
-import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, OutputInstanceDomain, Task}
+import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, Task}
 import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain}
 import com.bwsw.sj.common.dal.model.service._
 import com.bwsw.sj.common.dal.model.stream._
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
+import com.bwsw.sj.common.si.model.instance.OutputInstance
 import com.bwsw.sj.common.utils.{ProviderLiterals, _}
 import com.bwsw.sj.engine.core.testutils.TestStorageServer
 import com.bwsw.tstreams.agents.consumer
@@ -345,25 +346,25 @@ object DataFactory {
     task1.inputs = Map(tstreamInputName -> Array(0, 3)).asJava
     val executionPlan = new ExecutionPlan(Map(instanceName + "-task0" -> task1).asJava)
 
-    val instance = new OutputInstanceDomain(
-      instanceName,
-      EngineLiterals.outputStreamingType,
-      moduleName,
-      "1.0",
-      "com.bwsw.output.streaming.engine-1.0",
-      serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKServiceDomain],
+    val instance = new OutputInstance(
+      name = instanceName,
+      moduleType = EngineLiterals.outputStreamingType,
+      moduleName = moduleName,
+      moduleVersion = "1.0",
+      engine = "com.bwsw.output.streaming.engine-1.0",
+      coordinationService = zookeeperServiceName,
+      status = EngineLiterals.started,
+      description = "some description of test instance",
+      input = tstreamInputName,
+      output = streamName,
+      checkpointInterval = checkpointInterval,
+      options = """{"hey": "hey"}""",
+      startFrom = EngineLiterals.oldestStartMode,
+      executionPlan = executionPlan,
       checkpointMode = checkpointMode)
 
-    instance.status = EngineLiterals.started
-    instance.description = "some description of test instance"
-    instance.inputs = Array(tstreamInputName)
-    instance.outputs = Array(streamName)
-    instance.checkpointInterval = checkpointInterval
-    instance.options = """{"hey": "hey"}"""
-    instance.startFrom = EngineLiterals.oldestStartMode
-    instance.executionPlan = executionPlan
 
-    instanceService.save(instance)
+    instanceService.save(instance.to)
   }
 
   def deleteInstance(instanceName: String) = {

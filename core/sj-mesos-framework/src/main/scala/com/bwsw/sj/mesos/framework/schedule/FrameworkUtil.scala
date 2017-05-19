@@ -3,11 +3,11 @@ package com.bwsw.sj.mesos.framework.schedule
 import java.io.{PrintWriter, StringWriter}
 import java.net.URI
 
-import com.bwsw.sj.common.dal.model.module._
-import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.model.instance._
+import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
+import com.bwsw.sj.common.si.model.instance._
 import com.bwsw.sj.mesos.framework.task.TasksList
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos.MasterInfo
@@ -22,29 +22,29 @@ object FrameworkUtil {
   var frameworkId: Option[String] = None
   var driver: Option[SchedulerDriver] = None
   var jarName: Option[String] = None
-  var instance: Option[InstanceDomain] = None
+  var instance: Option[Instance] = None
   val configRepository: GenericMongoRepository[ConfigurationSettingDomain] = ConnectionRepository.getConfigRepository
   private val logger = Logger.getLogger(this.getClass)
   var params: Map[String, String] = immutable.Map[String, String]()
 
   /**
-   * Count how much ports must be for current task.
+    * Count how much ports must be for current task.
     *
     * @param instance current launched task
-   * @return ports count for current task
-   */
-  def getCountPorts(instance: InstanceDomain): Int = {
+    * @return ports count for current task
+    */
+  def getCountPorts(instance: Instance): Int = {
     instance match {
-      case _: OutputInstanceDomain => 2
-      case regularInstance: RegularInstanceDomain => regularInstance.inputs.length + regularInstance.outputs.length + 4
-      case _: InputInstanceDomain => instance.outputs.length + 2
-      case batchInstance: BatchInstanceDomain => batchInstance.inputs.length + batchInstance.outputs.length + 4
+      case _: OutputInstance => 2
+      case regularInstance: RegularInstance => regularInstance.inputs.length + regularInstance.outputs.length + 4
+      case inputInstance: InputInstance => inputInstance.outputs.length + 2
+      case batchInstance: BatchInstance => batchInstance.inputs.length + batchInstance.outputs.length + 4
     }
   }
 
   /**
-   * Handler for Scheduler Exception
-   */
+    * Handler for Scheduler Exception
+    */
   def handleSchedulerException(e: Exception, logger: Logger): Unit = {
     val sw = new StringWriter
     e.printStackTrace(new PrintWriter(sw))
@@ -62,12 +62,12 @@ object FrameworkUtil {
   }
 
   /**
-   * Get jar URI for framework
+    * Get jar URI for framework
     *
-    * @param instance:Instance
-   * @return String
-   */
-  def getModuleUrl(instance: InstanceDomain): String = {
+    * @param instance :Instance
+    * @return String
+    */
+  def getModuleUrl(instance: Instance): String = {
     jarName = configRepository.get("system." + instance.engine).map(_.value)
     val restHost = configRepository.get(ConfigLiterals.hostOfCrudRestTag).get.value
     val restPort = configRepository.get(ConfigLiterals.portOfCrudRestTag).get.value.toInt
@@ -108,6 +108,7 @@ object FrameworkUtil {
 
   def updateInstance(): Any = {
     val optionInstance = ConnectionRepository.getInstanceRepository.get(FrameworkUtil.params("instanceId"))
+      .map(Instance.from)
 
     if (optionInstance.isEmpty) {
       logger.error(s"Not found instance")

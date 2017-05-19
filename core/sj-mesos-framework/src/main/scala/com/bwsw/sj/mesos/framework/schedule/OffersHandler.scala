@@ -1,7 +1,5 @@
 package com.bwsw.sj.mesos.framework.schedule
 
-import java.util
-
 import com.bwsw.sj.mesos.framework.task.TasksList
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos._
@@ -27,11 +25,11 @@ object OffersHandler {
    * @param filters:util.Map[String, String]
    * @return util.List[Offer]
    */
-  def filter(filters: util.Map[String, String]): Unit = {
+  def filter(filters: Map[String, String]): Unit = {
     logger.info(s"Filtering resource offers")
     var result: mutable.Buffer[Offer] = mutable.Buffer()
-    if (!filters.isEmpty) {
-      for (filter <- filters.asScala) {
+    if (filters.nonEmpty) {
+      for (filter <- filters) {
         for (offer <- offers) {
           if (filter._1.matches( """\+.+""")) {
             for (attribute <- offer.getAttributesList.asScala) {

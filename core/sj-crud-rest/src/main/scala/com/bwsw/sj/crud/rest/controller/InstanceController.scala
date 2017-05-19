@@ -200,17 +200,17 @@ class InstanceController {
 
   private def startInstance(instance: Instance) = {
     logger.debug(s"Starting application of instance ${instance.name}.")
-    new Thread(new InstanceStarter(instance.to)).start()
+    new Thread(new InstanceStarter(instance)).start()
   }
 
   private def stopInstance(instance: Instance) = {
     logger.debug(s"Stopping application of instance ${instance.name}.")
-    new Thread(new InstanceStopper(instance.to)).start()
+    new Thread(new InstanceStopper(instance)).start()
   }
 
   private def destroyInstance(instance: Instance) = {
     logger.debug(s"Destroying application of instance ${instance.name}.")
-    new Thread(new InstanceDestroyer(instance.to)).start()
+    new Thread(new InstanceDestroyer(instance)).start()
   }
 
   private def deserializeInstanceApi(serialized: String, moduleType: String): InstanceApi = moduleType match {

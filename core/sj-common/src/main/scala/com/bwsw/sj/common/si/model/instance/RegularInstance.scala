@@ -1,39 +1,38 @@
 package com.bwsw.sj.common.si.model.instance
 
-import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, FrameworkStage, RegularInstanceDomain}
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.SjStreamUtils.clearStreamFromMode
-import com.bwsw.sj.common.utils.{AvroUtils, EngineLiterals}
+import com.bwsw.sj.common.utils.{AvroUtils, EngineLiterals, RestLiterals}
 import org.apache.avro.Schema
 
 import scala.collection.JavaConverters._
 
 class RegularInstance(name: String,
-                      description: String,
-                      parallelism: Any,
-                      options: Map[String, Any],
-                      perTaskCores: Double,
-                      perTaskRam: Int,
-                      jvmOptions: Map[String, String],
-                      nodeAttributes: Map[String, String],
+                      description: String = RestLiterals.defaultDescription,
+                      parallelism: Any = 1,
+                      options: String = "{}",
+                      perTaskCores: Double = 1,
+                      perTaskRam: Int = 1024,
+                      jvmOptions: Map[String, String] = Map(),
+                      nodeAttributes: Map[String, String] = Map(),
                       coordinationService: String,
-                      environmentVariables: Map[String, String],
-                      performanceReportingInterval: Long,
+                      environmentVariables: Map[String, String] = Map(),
+                      performanceReportingInterval: Long = 60000,
                       moduleName: String,
                       moduleVersion: String,
                       moduleType: String,
                       engine: String,
                       val inputs: Array[String],
-                      val outputs: Array[String],
+                      outputs: Array[String],
                       val checkpointMode: String,
                       val checkpointInterval: Long,
-                      val startFrom: String,
-                      val stateManagement: String,
-                      val stateFullCheckpoint: Int,
-                      val eventWaitIdleTime: Long,
-                      val inputAvroSchema: Option[Schema],
+                      val startFrom: String = EngineLiterals.newestStartMode,
+                      val stateManagement: String = EngineLiterals.noneStateMode,
+                      val stateFullCheckpoint: Int = 100,
+                      val eventWaitIdleTime: Long = 1000,
+                      val inputAvroSchema: Option[Schema] = None,
                       val executionPlan: ExecutionPlan = new ExecutionPlan(),
                       restAddress: Option[String] = None,
                       stage: FrameworkStage = FrameworkStage(),
@@ -58,10 +57,10 @@ class RegularInstance(name: String,
     restAddress,
     stage,
     status,
-    frameworkId) {
+    frameworkId,
+    outputs) {
 
   override def to: RegularInstanceDomain = {
-    val serializer = new JsonSerializer
     val serviceRepository = ConnectionRepository.getServiceRepository
 
     new RegularInstanceDomain(
@@ -75,7 +74,7 @@ class RegularInstance(name: String,
       restAddress.getOrElse(""),
       description,
       countParallelism,
-      serializer.serialize(options),
+      options,
       perTaskCores,
       perTaskRam,
       jvmOptions.asJava,
@@ -107,5 +106,5 @@ class RegularInstance(name: String,
   override def createStreams(): Unit =
     getStreams(streams).foreach(_.create())
 
-  private lazy val streams = inputs.map(clearStreamFromMode) ++ outputs
+  override val streams = inputs.map(clearStreamFromMode) ++ outputs
 }

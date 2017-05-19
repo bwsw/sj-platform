@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.core.batch
 
 import java.util.Calendar
 
-import com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain
+import com.bwsw.sj.common.si.model.instance.BatchInstance
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
@@ -21,7 +21,7 @@ class BatchStreamingPerformanceMetrics(manager: CommonTaskManager)
 
   currentThread.setName(s"batch-task-${manager.taskName}-performance-metrics")
   private var totalIdleTime = 0L
-  private val batchInstance = manager.instance.asInstanceOf[BatchInstanceDomain]
+  private val batchInstance = manager.instance.asInstanceOf[BatchInstance]
   private val inputStreamNames = manager.inputs.map(_._1.name).toArray
   private val outputStreamNames = batchInstance.outputs
 

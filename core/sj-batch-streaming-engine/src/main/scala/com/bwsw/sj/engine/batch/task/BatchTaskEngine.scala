@@ -3,14 +3,16 @@ package com.bwsw.sj.engine.batch.task
 import java.util.concurrent.Callable
 
 import com.bwsw.common.LeaderLatch
-import com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain
+import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.si.model.instance.BatchInstance
 import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.engine.batch.task.input.EnvelopeFetcher
+import com.bwsw.sj.engine.core.batch.{BatchCollector, BatchStreamingExecutor, BatchStreamingPerformanceMetrics, WindowRepository}
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.state.CommonModuleService
-import com.bwsw.sj.engine.core.batch.{BatchCollector, BatchStreamingExecutor, BatchStreamingPerformanceMetrics, WindowRepository}
-import com.bwsw.sj.engine.batch.task.input.EnvelopeFetcher
-import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.framework.recipes.barriers.DistributedDoubleBarrier
+import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.retry.ExponentialBackoffRetry
 import org.slf4j.LoggerFactory
 
@@ -18,7 +20,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 class BatchTaskEngine(batchCollector: BatchCollector,
-                      instance: BatchInstanceDomain,
+                      instance: BatchInstance,
                       moduleService: CommonModuleService,
                       inputService: EnvelopeFetcher,
                       performanceMetrics: BatchStreamingPerformanceMetrics) extends Callable[Unit] {
@@ -26,17 +28,21 @@ class BatchTaskEngine(batchCollector: BatchCollector,
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"batch-task-engine")
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val inputs = instance.getInputsWithoutStreamMode()
+  private val inputs = instance.getInputsWithoutStreamMode
   private val executor = moduleService.executor.asInstanceOf[BatchStreamingExecutor[AnyRef]]
   private val moduleTimer = moduleService.moduleTimer
-  private var retrievableStreams = instance.getInputsWithoutStreamMode()
+  private var retrievableStreams = instance.getInputsWithoutStreamMode
   private var counterOfBatchesPerStream = createCountersOfBatches()
   private val currentWindowPerStream = createStorageOfWindows()
   private val collectedWindowPerStream = mutable.Map[String, Window]()
   private val windowRepository = new WindowRepository(instance)
   private val barrierMasterNode = EngineLiterals.batchInstanceBarrierPrefix + instance.name
   private val leaderMasterNode = EngineLiterals.batchInstanceLeaderPrefix + instance.name
-  private val zkHosts = instance.coordinationService.provider.hosts.toSet
+  private val zkHosts = ConnectionRepository.getServiceRepository
+    .get(instance.coordinationService)
+    .get
+    .asInstanceOf[ZKServiceDomain]
+    .provider.hosts.toSet
   private val curatorClient = createCuratorClient()
   private val barrier = new DistributedDoubleBarrier(curatorClient, barrierMasterNode, instance.executionPlan.tasks.size())
   private val leaderLatch = new LeaderLatch(zkHosts, leaderMasterNode)
@@ -113,7 +119,7 @@ class BatchTaskEngine(batchCollector: BatchCollector,
 
   private def onIdle(): Unit = {
     logger.debug(s"An envelope has been received but no batches have been collected.")
-    performanceMetrics.increaseTotalIdleTime(instance.eventWaitIdleTime)
+    performanceMetrics.increaseTotalIdleTime(instance.eventWaitTime)
     executor.onIdle()
   }
 

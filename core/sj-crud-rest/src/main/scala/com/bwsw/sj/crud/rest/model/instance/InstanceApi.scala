@@ -1,5 +1,6 @@
 package com.bwsw.sj.crud.rest.model.instance
 
+import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.model.instance._
 import com.bwsw.sj.common.si.model.module.Specification
@@ -19,11 +20,13 @@ class InstanceApi(val name: String,
 
 
   def to(moduleType: String, moduleName: String, moduleVersion: String): Instance = {
+    val serializer = new JsonSerializer()
+
     new Instance(
       name,
       description,
       parallelism,
-      options,
+      serializer.serialize(options),
       perTaskCores,
       perTaskRam,
       jvmOptions,

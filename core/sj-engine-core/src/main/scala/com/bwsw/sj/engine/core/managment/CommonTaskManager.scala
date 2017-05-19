@@ -1,9 +1,10 @@
 package com.bwsw.sj.engine.core.managment
 
-import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, ExecutionPlan, RegularInstanceDomain}
+import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, ExecutionPlan}
 import com.bwsw.sj.common.dal.model.module.BatchSpecificationDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.engine.StreamingExecutor
+import com.bwsw.sj.common.si.model.instance.{BatchInstance, RegularInstance}
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.engine.core.batch.{BatchCollector, BatchStreamingPerformanceMetrics}
 import com.bwsw.sj.engine.core.environment.{EnvironmentManager, ModuleEnvironmentManager}
@@ -58,9 +59,9 @@ class CommonTaskManager() extends TaskManager {
   private def getExecutionPlan(): ExecutionPlan = {
     logger.debug("Get an execution plan of instance.")
     instance match {
-      case regularInstance: RegularInstanceDomain =>
+      case regularInstance: RegularInstance =>
         regularInstance.executionPlan
-      case batchInstance: BatchInstanceDomain =>
+      case batchInstance: BatchInstance =>
         batchInstance.executionPlan
       case _ =>
         logger.error("CommonTaskManager can be used only for regular or batch engine.")

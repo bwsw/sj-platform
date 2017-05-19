@@ -49,7 +49,7 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
       s"Get stream for performance metrics.")
     val tags = Array("report", "performance")
     val description = "store reports of performance metrics"
-    val partitions = instance.parallelism
+    val partitions = instance.countParallelism
 
     manager.createTStreamOnCluster(reportStreamName, description, partitions)
 

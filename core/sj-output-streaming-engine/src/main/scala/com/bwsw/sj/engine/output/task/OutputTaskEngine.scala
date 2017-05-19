@@ -2,9 +2,9 @@ package com.bwsw.sj.engine.output.task
 
 import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
 
-import com.bwsw.sj.common.dal.model.instance.OutputInstanceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.si.model.instance.OutputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.NumericalCheckpointTaskEngine
 import com.bwsw.sj.engine.core.engine.input.CallableTStreamCheckpointTaskInput
@@ -30,7 +30,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   currentThread.setName(s"output-task-${manager.taskName}-engine")
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val blockingQueue = new ArrayBlockingQueue[Envelope](EngineLiterals.queueSize)
-  private val instance = manager.instance.asInstanceOf[OutputInstanceDomain]
+  private val instance = manager.instance.asInstanceOf[OutputInstance]
   private val outputStream = getOutputStream
   private val environmentManager = createModuleEnvironmentManager()
   private val executor = manager.getExecutor(environmentManager)
