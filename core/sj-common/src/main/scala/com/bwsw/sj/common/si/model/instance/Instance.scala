@@ -62,6 +62,8 @@ class Instance(val name: String,
 
   def createStreams(): Unit = {}
 
+  def prepareInstance(): Unit = {}
+
   protected def castParallelismToNumber(partitions: Array[Int]): Int = parallelism match {
     case "max" => partitions.min
     case x: Int => x
@@ -78,6 +80,7 @@ class Instance(val name: String,
           stream.asInstanceOf[TStreamStreamDomain].partitions
         case StreamLiterals.`kafkaStreamType` =>
           stream.asInstanceOf[KafkaStreamDomain].partitions
+        case _ => 1
       }
     }: _*)
   }

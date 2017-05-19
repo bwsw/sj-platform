@@ -5,6 +5,7 @@ import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, FrameworkStage, Out
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.{AvroUtils, EngineLiterals}
+import com.bwsw.sj.common.utils.SjStreamUtils.clearStreamFromMode
 import org.apache.avro.Schema
 
 import scala.collection.JavaConverters._
@@ -90,4 +91,15 @@ class OutputInstance(name: String,
   }
 
   override def inputsOrEmptyList: Array[String] = Array(input)
+
+  override def prepareInstance(): Unit =
+    executionPlan.fillTasks(createTaskStreams(), createTaskNames(countParallelism, name))
+
+  override def countParallelism: Int =
+    castParallelismToNumber(getStreamsPartitions(streams))
+
+  override def createStreams(): Unit =
+    getStreams(Array(input)).foreach(_.create())
+
+  private lazy val streams = Array(clearStreamFromMode(input), output)
 }

@@ -71,7 +71,7 @@ class InstanceSI {
     val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
     val clazz = loader.loadClass(validatorClassName)
     val validator = clazz.newInstance().asInstanceOf[StreamingValidator]
-    val optionsValidationInfo = validator.validate(instance.to.asProtocolInstance())
+    val optionsValidationInfo = validator.validate(instance)
     val instanceValidationInfo = validator.validate(serializer.serialize(instance.options))
 
     ValidationInfo(

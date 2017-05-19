@@ -2,12 +2,10 @@ package com.bwsw.sj.common.dal.model.instance
 
 import java.util
 
-import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.PropertyField
-import com.bwsw.sj.common.rest.model.module.{InstanceApi, RegularInstanceApi}
-import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 import com.bwsw.sj.common.utils.SjStreamUtils._
+import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 import org.mongodb.morphia.annotations._
 
 /**
@@ -66,25 +64,6 @@ class RegularInstanceDomain(override val name: String,
     stage,
     performanceReportingInterval,
     frameworkId) {
-
-  override def asProtocolInstance(): InstanceApi = {
-    val protocolInstance = new RegularInstanceApi()
-    super.fillProtocolInstance(protocolInstance)
-    protocolInstance.checkpointMode = this.checkpointMode
-    protocolInstance.checkpointInterval = this.checkpointInterval
-    protocolInstance.executionPlan = this.executionPlan
-    protocolInstance.startFrom = this.startFrom
-    protocolInstance.stateManagement = this.stateManagement
-    protocolInstance.stateFullCheckpoint = this.stateFullCheckpoint
-    protocolInstance.eventWaitIdleTime = this.eventWaitIdleTime
-    protocolInstance.inputs = this.inputs
-    protocolInstance.outputs = this.outputs
-
-    val serializer = new JsonSerializer()
-    protocolInstance.inputAvroSchema = serializer.deserialize[Map[String, Any]](this.inputAvroSchema)
-
-    protocolInstance
-  }
 
   override def getInputsWithoutStreamMode(): Array[String] = this.inputs.map(clearStreamFromMode)
 }

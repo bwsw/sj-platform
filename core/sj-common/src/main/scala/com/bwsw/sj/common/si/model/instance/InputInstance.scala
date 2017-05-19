@@ -96,4 +96,17 @@ class InputInstance(name: String,
       asyncBackupCount,
       tasks.asJava)
   }
+
+  override def prepareInstance(): Unit = {
+    Range(0, countParallelism).foreach { i =>
+      val task = new InputTask()
+      tasks += (s"$name-task$i" -> task)
+    }
+  }
+
+  override def createStreams(): Unit =
+    getStreams(outputs).foreach(_.create())
+
+  override def countParallelism: Int =
+    castParallelismToNumber(getStreamsPartitions(outputs))
 }

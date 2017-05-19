@@ -2,11 +2,9 @@ package com.bwsw.sj.common.dal.model.instance
 
 import java.util
 
-import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
-import com.bwsw.sj.common.rest.model.module.{BatchInstanceApi, InstanceApi}
-import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 import com.bwsw.sj.common.utils.SjStreamUtils._
+import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 import org.mongodb.morphia.annotations.{Embedded, Property}
 
 /**
@@ -64,26 +62,6 @@ class BatchInstanceDomain(override val name: String,
     stage,
     performanceReportingInterval,
     frameworkId) {
-
-  override def asProtocolInstance(): InstanceApi = {
-    val protocolInstance = new BatchInstanceApi()
-    super.fillProtocolInstance(protocolInstance)
-
-    protocolInstance.inputs = this.inputs
-    protocolInstance.window = this.window
-    protocolInstance.slidingInterval = this.slidingInterval
-    protocolInstance.eventWaitIdleTime = this.eventWaitIdleTime
-    protocolInstance.executionPlan = this.executionPlan
-    protocolInstance.stateManagement = this.stateManagement
-    protocolInstance.stateFullCheckpoint = this.stateFullCheckpoint
-    protocolInstance.outputs = this.outputs
-    protocolInstance.startFrom = this.startFrom
-
-    val serializer = new JsonSerializer()
-    protocolInstance.inputAvroSchema = serializer.deserialize[Map[String, Any]](this.inputAvroSchema)
-
-    protocolInstance
-  }
 
   override def getInputsWithoutStreamMode(): Array[String] = this.inputs.map(clearStreamFromMode)
 }

@@ -4,11 +4,8 @@ import java.util
 
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.PropertyField
-import com.bwsw.sj.common.rest.model.module.{InputInstanceApi, InstanceApi}
 import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 import org.mongodb.morphia.annotations.Property
-
-import scala.collection.JavaConverters._
 
 /**
   * Entity for input instance-json
@@ -65,24 +62,4 @@ class InputInstanceDomain(override val name: String,
     environmentVariables,
     stage,
     performanceReportingInterval,
-    frameworkId) {
-
-  override def asProtocolInstance(): InstanceApi = {
-    val protocolInstance = new InputInstanceApi()
-    super.fillProtocolInstance(protocolInstance)
-
-    protocolInstance.outputs = this.outputs
-    protocolInstance.checkpointMode = this.checkpointMode
-    protocolInstance.checkpointInterval = this.checkpointInterval
-    protocolInstance.duplicateCheck = this.duplicateCheck
-    protocolInstance.lookupHistory = this.lookupHistory
-    protocolInstance.queueMaxSize = this.queueMaxSize
-    protocolInstance.defaultEvictionPolicy = this.defaultEvictionPolicy
-    protocolInstance.evictionPolicy = this.evictionPolicy
-    protocolInstance.backupCount = this.backupCount
-    protocolInstance.asyncBackupCount = this.asyncBackupCount
-    protocolInstance.tasks = Map(this.tasks.asScala.toList: _*)
-
-    protocolInstance
-  }
-}
+    frameworkId)
