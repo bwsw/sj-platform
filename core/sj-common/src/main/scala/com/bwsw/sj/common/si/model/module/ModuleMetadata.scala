@@ -3,10 +3,13 @@ package com.bwsw.sj.common.si.model.module
 import java.io.File
 
 import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
+import com.bwsw.sj.common.engine.StreamingValidator
 import com.bwsw.sj.common.si.model.FileMetadata
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 
 import scala.collection.mutable.ArrayBuffer
+import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
+import scala.util.{Failure, Success, Try}
 
 class ModuleMetadata(filename: String,
                      val specification: Specification,
@@ -35,6 +38,47 @@ class ModuleMetadata(filename: String,
       errors += createMessage("rest.modules.module.file.exists", filename)
 
     errors ++= specification.validate
+
+    val implementations = List(
+      ("validator-class", specification.validatorClass, classOf[StreamingValidator]))
+
+    errors ++= validateImplementations(implementations)
+
+    errors
+  }
+
+  /**
+    * Validates implementations of interfaces.
+    *
+    * @param implementations list of (property name, class name, interface)
+    */
+  def validateImplementations(implementations: List[(String, String, Class[_])]) = {
+    val errors = new ArrayBuffer[String]
+    if (file.isDefined) {
+      Try {
+        new URLClassLoader(Array(file.get.toURI.toURL), ClassLoader.getSystemClassLoader)
+      } match {
+        case Success(classLoader) =>
+          implementations.foreach {
+            case (property, className, interface) =>
+              Try(classLoader.loadClass(className)) match {
+                case Success(implementation) if !interface.isAssignableFrom(implementation) =>
+                  errors += createMessage(
+                    "rest.validator.specification.class.should.implement",
+                    specification.moduleType,
+                    property,
+                    implementation.getName,
+                    interface.getName)
+                case Success(_) =>
+                case Failure(_) =>
+                  errors += createMessage("rest.validator.specification.class.not.found", property, className)
+              }
+          }
+
+        case Failure(_) =>
+          errors += createMessage("rest.modules.module.classloader.error", filename)
+      }
+    }
 
     errors
   }
