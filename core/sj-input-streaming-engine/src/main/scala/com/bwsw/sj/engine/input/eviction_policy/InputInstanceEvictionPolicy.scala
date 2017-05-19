@@ -5,39 +5,41 @@ import com.bwsw.sj.common.utils.EngineLiterals
 
 import scala.collection.JavaConverters._
 import com.hazelcast.config._
-import com.hazelcast.core.{Hazelcast, IMap}
-import org.slf4j.LoggerFactory
+import com.hazelcast.core.{Hazelcast, HazelcastInstance, IMap}
+import org.slf4j.{Logger, LoggerFactory}
 
 /**
- * Provides methods are responsible for an eviction policy of input envelope duplicates
- *
- *
- * @param instance Input instance contains a settings of an eviction policy
- *                 (message TTL, a default eviction policy, a maximum size of message queue,
- *                 async and sync backup count)
- * @author Kseniya Mikhaleva
- */
+  * Provides methods are responsible for an eviction policy of input envelope duplicates
+  *
+  * @param instance Input instance contains a settings of an eviction policy
+  *                 (message TTL [[InputInstanceDomain.lookupHistory]],
+  *                 a default eviction policy [[InputInstanceDomain.defaultEvictionPolicy]],
+  *                 a maximum size of message queue [[InputInstanceDomain.queueMaxSize]],
+  *                 async and sync backup count [[InputInstanceDomain.asyncBackupCount]] [[InputInstanceDomain.backupCount]])
+  * @author Kseniya Mikhaleva
+  */
 
 abstract class InputInstanceEvictionPolicy(instance: InputInstanceDomain) {
-  protected val logger = LoggerFactory.getLogger(this.getClass)
-  protected val stubValue = "stub"
-  private val hazelcastMapName = instance.name + "-" + "inputEngine"
-  private val config = createHazelcastConfig()
-  private val hazelcastInstance = Hazelcast.newHazelcastInstance(config)
-  protected val uniqueEnvelopes = getUniqueEnvelopes
+  protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  protected val stubValue: String = "stub"
+  private val hazelcastMapName: String = instance.name + "-" + "inputEngine"
+  private val config: Config = createHazelcastConfig()
+  private val hazelcastInstance: HazelcastInstance = Hazelcast.newHazelcastInstance(config)
+  protected val uniqueEnvelopes: IMap[String, String] = getUniqueEnvelopes
 
   /**
-   * Checks whether a specific key is duplicate or not
-   * @param key Key that will be checked
-   * @return True if the key is not duplicate and false in other case
-   */
+    * Checks whether a specific key is duplicate or not
+    *
+    * @param key Key that will be checked
+    * @return True if the key is not duplicate and false in other case
+    */
   def checkForDuplication(key: String): Boolean
 
   /**
-   * Returns a keys storage (Hazelcast map) for checking of there are duplicates (input envelopes) or not
-   *
-   * @return Storage of keys (Hazelcast map)
-   */
+    * Returns a keys storage (Hazelcast map) for checking of there are duplicates (input envelopes) or not
+    *
+    * @return Storage of keys (Hazelcast map)
+    */
   def getUniqueEnvelopes: IMap[String, String] = {
     logger.debug(s"Get a hazelcast map for checking of there are duplicates (input envelopes) or not.")
     hazelcastInstance.getMap[String, String](hazelcastMapName)
@@ -91,10 +93,10 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstanceDomain) {
   }
 
   /**
-   * Creates a config that defines a max size of Hazelcast map
-   *
-   * @return Configuration for map's capacity.
-   */
+    * Creates a config that defines a max size of Hazelcast map
+    *
+    * @return Configuration for map's capacity.
+    */
   private def createMaxSizeConfig(): MaxSizeConfig = {
     logger.debug(s"Create a hazelcast max size config.")
     new MaxSizeConfig()
@@ -104,10 +106,10 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstanceDomain) {
 
 object InputInstanceEvictionPolicy {
   /**
-   * Creates an eviction policy that defines a way of eviction of duplicate envelope
- *
-   * @return Eviction policy of duplicate envelopes
-   */
+    * Creates an eviction policy that defines a way of eviction of duplicate envelope
+    *
+    * @return Eviction policy of duplicate envelopes
+    */
   def apply(instance: InputInstanceDomain): InputInstanceEvictionPolicy = {
     instance.evictionPolicy match {
       case EngineLiterals.fixTimeEvictionPolicy => new FixTimeEvictionPolicy(instance)

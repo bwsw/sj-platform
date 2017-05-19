@@ -11,9 +11,9 @@ import scala.util.{Failure, Success, Try}
 /**
   * Prepare a thread factory,
   * an executor service (for launching a task engine of specific type, a performance metrics and a specific input service for consuming incoming messages)
-  * and a blocking queue (for keeping incoming messages excluding the input task runner) for a task runner
+  * for a task runner
   *
-  * Provides methods that can be used to handle exceptions
+  * Provides method that can be used to wait until some task will fail
   *
   * @author Kseniya Mikhaleva
   */
@@ -23,7 +23,7 @@ trait TaskRunner {
   protected val threadName: String
   private val countOfThreads = 4
   private val threadPool: ExecutorService = createThreadPool(threadName)
-  protected val executorService = new ExecutorCompletionService[Unit](threadPool)
+  protected val executorService: ExecutorCompletionService[Unit] = new ExecutorCompletionService[Unit](threadPool)
 
   private def createThreadPool(factoryName: String): ExecutorService = {
     logger.debug(s"Create a thread pool with $countOfThreads threads for task.")
@@ -46,7 +46,7 @@ trait TaskRunner {
     System.exit(-1)
   }
 
-  def waitForCompletion(checkointedTaskInput: Option[CheckpointTaskInput[_]] = None): Unit = {
+  def waitForCompletion(checkpointedTaskInput: Option[CheckpointTaskInput[_]] = None): Unit = {
     var i = 0
     Try {
       while (i < countOfThreads) {
@@ -54,7 +54,7 @@ trait TaskRunner {
         i += 1
       }
 
-      checkointedTaskInput.foreach(_.close())
+      checkpointedTaskInput.foreach(_.close())
       threadPool.shutdownNow()
       System.exit(-1)
     } match {

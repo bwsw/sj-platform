@@ -1,22 +1,27 @@
 package com.bwsw.sj.engine.core.environment
 
+import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.utils.SjTimer
+import com.bwsw.sj.engine.core.entities.{KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.core.state.StateStorage
 import com.bwsw.tstreams.agents.producer.Producer
 
 import scala.collection._
-
+import com.bwsw.sj.common.utils.EngineLiterals
 /**
-  * Provides for user methods that can be used in a module
+  * Provides for user methods that can be used in [[EngineLiterals.regularStreamingType]] or [[EngineLiterals.batchStreamingType]] module
   *
+  * @param producers              t-streams producers for each output stream from instance [[InstanceDomain.outputs]]
+  * @param options                user defined options from instance [[InstanceDomain.options]]
+  * @param outputs                set of output streams [[StreamDomain]] from instance [[InstanceDomain.outputs]]
+  * @param producerPolicyByOutput keeps a tag (partitioned or round-robin output) corresponding to the output for each output stream
+  * @param moduleTimer            provides a possibility to set a timer inside a module
+  * @param performanceMetrics     set of metrics that characterize performance of [[EngineLiterals.regularStreamingType]] or [[EngineLiterals.batchStreamingType]] module
+  * @param classLoader            it is needed for loading some custom classes from module jar to serialize/deserialize envelope data
+  *                               (ref. [[TStreamEnvelope.data]] or [[KafkaEnvelope.data]])
   * @author Kseniya Mikhaleva
-  * @param options                User defined options from instance parameters
-  * @param producers              T-streams producers for each output stream of instance parameters
-  * @param outputs                Set of output streams of instance parameters that have tags
-  * @param producerPolicyByOutput Keeps a tag (partitioned or round-robin output) corresponding to the output for each output stream
-  * @param moduleTimer            Provides a possibility to set a timer inside a module
   */
 
 class ModuleEnvironmentManager(options: String,

@@ -12,7 +12,7 @@ import org.mongodb.morphia.annotations.Entity
 import scala.collection.JavaConverters._
 
 /**
-  * Entity for base instance-json
+  * Domain entity for instance
   *
   * @author Kseniya Tomskikh
   */

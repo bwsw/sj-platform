@@ -5,7 +5,7 @@ import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, ExecutionPlan
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.common.utils.SjStreamUtils._
+import com.bwsw.sj.common.utils.StreamUtils._
 
 class BatchInstanceApi extends InstanceApi with AvroSchemaForInstanceMetadata {
   var inputs: Array[String] = Array()

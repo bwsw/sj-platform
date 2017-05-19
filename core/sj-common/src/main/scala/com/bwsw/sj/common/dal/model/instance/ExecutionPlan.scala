@@ -7,11 +7,12 @@ import com.bwsw.sj.common.utils.EngineLiterals
 import com.fasterxml.jackson.annotation.JsonIgnore
 
 /**
- * Entity for execution plan of module instance
- *
- *
- * @author Kseniya Tomskikh
- */
+  * Entity for execution plan of [[InstanceDomain]] and auxilary methods to fill it
+  * [[ExecutionPlan]] doesn't exist in [[InputInstanceDomain]]. It contains [[InputInstanceDomain.tasks]] instead
+  *
+  * @author Kseniya Tomskikh
+  */
+//todo описать правила составления плана, точно пригодится в документации
 class ExecutionPlan {
   var tasks: java.util.Map[String, Task] = new util.HashMap()
 
@@ -34,7 +35,7 @@ class ExecutionPlan {
   }
 
   private def createTask(taskStreams: Array[TaskStream], notProcessedTasks: Int): Task = {
-    val task= new Task()
+    val task = new Task()
     taskStreams.foreach(taskStream => {
       task.addInput(taskStream.name, createPartitionsInterval(taskStream, notProcessedTasks))
     })

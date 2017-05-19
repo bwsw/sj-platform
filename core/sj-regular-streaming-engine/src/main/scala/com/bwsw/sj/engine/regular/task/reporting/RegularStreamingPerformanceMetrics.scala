@@ -4,38 +4,42 @@ import java.util.Calendar
 
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
+
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 
 /**
- * Class represents a set of metrics that characterize performance of a regular streaming module
- *
- * @author Kseniya Mikhaleva
- */
+  * Class represents a set of metrics that characterize performance of a regular streaming module
+  *
+  * @param manager allows to manage an environment of regular streaming task
+  * @author Kseniya Mikhaleva
+  */
 
 class RegularStreamingPerformanceMetrics(manager: CommonTaskManager)
   extends PerformanceMetrics(manager) {
 
   currentThread.setName(s"regular-task-${manager.taskName}-performance-metrics")
-  private var totalIdleTime = 0L
-  private val inputStreamNames =  manager.inputs.map(_._1.name).toArray
-  private val outputStreamNames = manager.instance.outputs
+  private var totalIdleTime: Long = 0L
+  private val inputStreamNames: Array[String] = manager.inputs.map(_._1.name).toArray
+  private val outputStreamNames: Array[String] = manager.instance.outputs
 
-  override protected var inputEnvelopesPerStream = createStorageForInputEnvelopes(inputStreamNames)
-  override protected var outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
+  override protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Int]]] = createStorageForInputEnvelopes(inputStreamNames)
+  override protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Int]]] = createStorageForOutputEnvelopes(outputStreamNames)
+
   /**
-   * Increases time when there are no messages (envelopes)
-   * @param idle How long waiting a new envelope was
-   */
-  def increaseTotalIdleTime(idle: Long) = {
+    * Increases time when there are no messages (envelopes)
+    *
+    * @param idle How long waiting for a new envelope was
+    */
+  def increaseTotalIdleTime(idle: Long): Unit = {
     mutex.lock()
     totalIdleTime += idle
     mutex.unlock()
   }
 
   /**
-   * Constructs a report of performance metrics of task's work
-   * @return Constructed performance report
-   */
+    * Constructs a report of performance metrics of task work (one module could have multiple tasks)
+    */
   override def getReport(): String = {
     logger.info(s"Start preparing a report of performance for task: ${manager.taskName} of regular module.")
     mutex.lock()

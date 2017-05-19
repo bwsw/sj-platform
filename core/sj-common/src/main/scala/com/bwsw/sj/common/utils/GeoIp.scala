@@ -9,6 +9,20 @@ import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
 
+/**
+  * Wrapper for geoip repository that are contained in files with .dat extension (e.g. GeoIPASNum.dat, "GeoIPASNumv6.dat)
+  * This files should be uploaded in MongoDB (with any file name)
+  * but you should also create config settings to indicate what file associated with ipv4AsNumLookupService and ipv6AsNumLookupService
+  *
+  * {{{
+  *     val configService: GenericMongoRepository[ConfigurationSettingDomain] = ConnectionRepository.getConfigRepository
+  *     ConnectionRepository.getFileStorage.put(new File("GeoIPASNum.dat"), "<file_name>")
+  *     ConnectionRepository.getFileStorage.put(new File("GeoIPASNumv6.dat"), "GeoIPASNumv6.dat")
+  *
+  *     configService.save(ConfigurationSettingDomain(ConfigLiterals.geoIpAsNum, "<file_name>", ConfigLiterals.systemDomain))
+  *     configService.save(ConfigurationSettingDomain(ConfigLiterals.geoIpAsNumv6, "GeoIPASNumv6.dat", ConfigLiterals.systemDomain))
+  * }}}
+  */
 object GeoIp {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val fileStorage = ConnectionRepository.getFileStorage

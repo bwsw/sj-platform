@@ -13,11 +13,13 @@ import org.slf4j.LoggerFactory
 import scala.collection.JavaConverters._
 
 /**
-  * Object is responsible for running a task of job that launches input module
+  * Class is responsible for launching input engine execution logic.
+  * First, there are created all services needed to start engine. All of those services implement Callable interface
+  * Next, each service are launched as a separate task using [[ExecutorCompletionService]]
+  * Finally, handle a case if some task will fail and stop the execution. In other case the execution will go on indefinitely
   *
   * @author Kseniya Mikhaleva
   */
-
 object InputTaskRunner extends {
   override val threadName = "InputTaskRunner-%d"
 } with TaskRunner {

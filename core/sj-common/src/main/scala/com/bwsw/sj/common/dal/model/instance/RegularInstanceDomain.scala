@@ -5,11 +5,11 @@ import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.PropertyField
 import com.bwsw.sj.common.rest.model.module.{InstanceApi, RegularInstanceApi}
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.common.utils.SjStreamUtils._
+import com.bwsw.sj.common.utils.StreamUtils._
 import org.mongodb.morphia.annotations._
 
 /**
-  * Entity for regular instance-json
+  * Domain entity for [[EngineLiterals.regularStreamingType]] instance
   *
   * @author Kseniya Tomskikh
   */

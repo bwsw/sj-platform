@@ -4,8 +4,8 @@ import java.util.regex.Pattern
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, StreamDomain, TStreamStreamDomain}
-import com.bwsw.sj.common.utils.stream_distributor.{ByHash, SjStreamDistributor}
-import com.bwsw.sj.common.utils.{AvroUtils, StreamLiterals}
+import com.bwsw.sj.common.utils.stream_distributor.{ByHash, StreamDistributor}
+import com.bwsw.sj.common.utils.{AvroRecordUtils, StreamLiterals}
 import com.bwsw.sj.engine.core.entities.InputEnvelope
 import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.engine.core.input.utils.SeparateTokenizer
@@ -38,7 +38,7 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
     .name(RegexInputOptionsNames.fallbackFieldName).`type`().stringType().noDefault().endRecord()
 
   private val fallbackPartitionCount = getPartitionCount(manager.outputs.find(_.name == regexInputOptions.fallbackStream).get)
-  private val fallbackDistributor = new SjStreamDistributor(fallbackPartitionCount)
+  private val fallbackDistributor = new StreamDistributor(fallbackPartitionCount)
 
   private val tokenizer = new SeparateTokenizer(regexInputOptions.lineSeparator, regexInputOptions.encoding)
 
@@ -130,7 +130,7 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
 
     logger.debug(s"Created Avro record from data: $record")
 
-    val key = AvroUtils.concatFields(uniqueKey, record)
+    val key = AvroRecordUtils.concatFields(uniqueKey, record)
 
     Some(new InputEnvelope(
       s"${rule.outputStream}$key",
@@ -151,8 +151,8 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
       record))
   }
 
-  private def getPartitionCount(sjStream: StreamDomain) = {
-    sjStream match {
+  private def getPartitionCount(streamDomain: StreamDomain) = {
+    streamDomain match {
       case s: TStreamStreamDomain => s.partitions
       case s: KafkaStreamDomain => s.partitions
       case _ => throw new IllegalArgumentException(s"stream type must be ${StreamLiterals.tstreamType} or " +
@@ -175,7 +175,7 @@ class RegexInputExecutor(manager: InputEnvironmentManager) extends InputStreamin
   private def createOutputDistributor(rule: Rule) = {
     val outputPartitionCount = getPartitionCount(manager.outputs.find(_.name == rule.outputStream).get)
 
-    if (rule.distribution.isEmpty) new SjStreamDistributor(outputPartitionCount)
-    else new SjStreamDistributor(outputPartitionCount, ByHash, rule.distribution)
+    if (rule.distribution.isEmpty) new StreamDistributor(outputPartitionCount)
+    else new StreamDistributor(outputPartitionCount, ByHash, rule.distribution)
   }
 }

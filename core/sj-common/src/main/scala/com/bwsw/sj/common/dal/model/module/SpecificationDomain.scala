@@ -5,7 +5,7 @@ import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.PropertyField
 import com.bwsw.sj.common.rest.model.module.SpecificationApi
 
 /**
-  * Entity for specification-json of module
+  * Domain entity for specification of module
   *
   * @author Kseniya Tomskikh
   */
@@ -44,3 +44,5 @@ class SpecificationDomain(val name: String,
       this.executorClass)
   }
 }
+
+case class IOstream(cardinality: Array[Int], types: Array[String])

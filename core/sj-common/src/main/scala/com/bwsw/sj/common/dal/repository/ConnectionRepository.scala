@@ -18,7 +18,7 @@ import scala.collection.JavaConverters._
 import scala.reflect.ClassTag
 
 /**
-  * Repository for connection to MongoDB and file storage (GridFS)
+  * Repository for connection to MongoDB and file storage [[com.mongodb.casbah.gridfs.GridFS]]
   */
 
 object ConnectionRepository {

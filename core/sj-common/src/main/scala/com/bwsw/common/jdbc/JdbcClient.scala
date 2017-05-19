@@ -9,7 +9,7 @@ import com.bwsw.sj.common.utils.JdbcLiterals
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
-
+import com.bwsw.sj.common.dal.model.provider.JDBCProviderDomain
 
 // todo: Add multiple connection to databases.
 /**
@@ -19,12 +19,13 @@ import scala.util.{Failure, Success, Try}
   * 2) driver.<driver_name>.class - name of class of the driver (e.g. "com.mysql.jdbc.Driver")
   * 3) driver.<driver_name>.prefix - prefix of server url: (prefix)://(host:port)/(database), one of [jdbc:mysql, jdbc:postgresql, jdbc:oracle:thin]
   *
-  * driver_name is used in JDBC provider ('driver' field)
+  * driver_name is used in [[JDBCProviderDomain.driver]]
   *
   * Also allows manipulating with elements of the specific table (only one table)
   *
-  * @param jdbcCCD : connection data provider
+  * @param jdbcCCD connection data
   */
+
 protected class JdbcClient(override val jdbcCCD: JdbcClientConnectionData) extends IJdbcClient {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val driver = createDriver()

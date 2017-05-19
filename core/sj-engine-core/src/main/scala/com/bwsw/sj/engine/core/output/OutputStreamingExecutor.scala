@@ -6,8 +6,9 @@ import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
 
 /**
   *
-  * It is responsible for output module execution logic. Module uses a specific instance to personalize its work.
-  * Executor provides the methods, which don't do anything by default so you should define their implementation by yourself.
+  * It is responsible for output module execution logic.
+  * Module uses a specific instance to configure its work.
+  * Executor provides the following methods, which don't do anything by default so you should define their implementation by yourself.
   *
   * @author Kseniya Tomskikh
   */
@@ -22,7 +23,7 @@ abstract class OutputStreamingExecutor[T <: AnyRef](manager: OutputEnvironmentMa
     List()
   }
 
-  /***
+  /** *
     * This method return current working entity.
     * Must be implemented.
     * For example:
@@ -34,6 +35,7 @@ abstract class OutputStreamingExecutor[T <: AnyRef](manager: OutputEnvironmentMa
     *     .build()
     *   return entity
     * }}}
+    *
     * @return Current working Entity.
     */
   def getOutputEntity: Entity[_]

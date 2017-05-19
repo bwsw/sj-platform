@@ -1,12 +1,17 @@
 package com.bwsw.sj.engine.output
 
+import java.util.concurrent.ExecutorCompletionService
+
 import com.bwsw.sj.engine.core.engine.{InstanceStatusObserver, TaskRunner}
 import com.bwsw.sj.engine.output.task.{OutputTaskEngine, OutputTaskManager}
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import org.slf4j.LoggerFactory
 
 /**
-  * Runner object for engine of output-streaming module
+  * Class is responsible for launching output engine execution logic.
+  * First, there are created all services needed to start engine. All of those services implement Callable interface
+  * Next, each service are launched as a separate task using [[ExecutorCompletionService]]
+  * Finally, handle a case if some task will fail and stop the execution. In other case the execution will go on indefinitely
   *
   * @author Kseniya Tomskikh
   */

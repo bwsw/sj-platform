@@ -1,25 +1,26 @@
 package com.bwsw.sj.engine.core.batch
 
 import com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.engine.IBatchCollector
+import com.bwsw.sj.common.dal.model.stream.StreamDomain
+import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.engine.core.entities.{Batch, Envelope}
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.Map
 
 /**
-  * Provides methods are responsible for a basic execution logic of task of batch module
+  * Provides methods to gather batches that consist of envelopes
   *
-  * @param performanceMetrics Set of metrics that characterize performance of a batch streaming module
+  * @param instance           set of settings of a batch streaming module
+  * @param performanceMetrics set of metrics that characterize performance of a batch streaming module
   * @author Kseniya Mikhaleva
   */
 abstract class BatchCollector(protected val instance: BatchInstanceDomain,
-                              performanceMetrics: BatchStreamingPerformanceMetrics) extends IBatchCollector {
+                              performanceMetrics: BatchStreamingPerformanceMetrics) {
 
-  private val logger = LoggerFactory.getLogger(this.getClass)
-  private val streamRepository = ConnectionRepository.getStreamRepository
-  private val inputs = instance.getInputsWithoutStreamMode().map(x => streamRepository.get(x).get)
+  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  private val streamRepository: GenericMongoRepository[StreamDomain] = ConnectionRepository.getStreamRepository
+  private val inputs: Array[StreamDomain] = instance.getInputsWithoutStreamMode().map(x => streamRepository.get(x).get)
   private val currentBatchPerStream: Map[String, Batch] = createStorageOfBatches()
 
   private def createStorageOfBatches(): Map[String, Batch] = {

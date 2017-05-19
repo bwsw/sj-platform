@@ -14,9 +14,11 @@ import scala.collection.JavaConverters._
 
 /**
   * Class is responsible for launching kafka consumers
-  * that allow to fetching messages, which are wrapped in envelope
-  * and handling producers to save offsets for further recovering after fails
+  * that allow to fetch messages, which are wrapped in envelopes
+  * and handle producers to save offsets for further recovering after fails
   *
+  * @param manager         allows to manage an environment of batch streaming task
+  * @param checkpointGroup group of t-stream agents that have to make a checkpoint at the same time
   * @author Kseniya Mikhaleva
   */
 class RetrievableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: CommonTaskManager,

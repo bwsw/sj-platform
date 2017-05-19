@@ -8,7 +8,7 @@ object ConnectionConstants {
   require(Option(System.getenv("MONGO_HOSTS")).isDefined,
     "No environment variables: MONGO_HOSTS")
 
-  val mongoHosts = System.getenv("MONGO_HOSTS").split(",").toList.map(host => new ServerAddress(host.trim.split(":")(0), host.trim.split(":")(1).toInt))
+  val mongoHosts: List[ServerAddress] = System.getenv("MONGO_HOSTS").split(",").toList.map(host => new ServerAddress(host.trim.split(":")(0), host.trim.split(":")(1).toInt))
 
   val databaseName = "stream_juggler"
   lazy val fileMetadataCollection = "fs.files"

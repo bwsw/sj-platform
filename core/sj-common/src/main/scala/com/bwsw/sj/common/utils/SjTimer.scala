@@ -5,7 +5,7 @@ import java.util.{Timer, TimerTask}
 import org.slf4j.LoggerFactory
 
 /**
- * Class representing a wrapper for java.util.Timer
+ * Class representing a wrapper for [[Timer]]
  *
  * @author Kseniya Mikhaleva
  */

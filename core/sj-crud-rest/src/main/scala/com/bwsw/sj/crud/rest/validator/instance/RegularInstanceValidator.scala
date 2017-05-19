@@ -6,7 +6,7 @@ import com.bwsw.sj.common.rest.model.module.{InstanceApi, RegularInstanceApi, Sp
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
-import com.bwsw.sj.common.utils.SjStreamUtils._
+import com.bwsw.sj.common.utils.StreamUtils._
 import com.bwsw.sj.common.utils.StreamLiterals._
 import org.slf4j.{Logger, LoggerFactory}
 

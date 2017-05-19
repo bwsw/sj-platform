@@ -6,8 +6,8 @@ import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 
 /**
  * Class is responsible for regular module execution logic.
- * Module uses a specific instance, to personalize its work.
- * Executor provides following methods, which don't do anything by default so you should define their implementation by yourself
+ * Module uses a specific instance to configure its work.
+ * Executor provides the following methods, which don't do anything by default so you should define their implementation by yourself
  *
  * @author Kseniya Mikhaleva
  */

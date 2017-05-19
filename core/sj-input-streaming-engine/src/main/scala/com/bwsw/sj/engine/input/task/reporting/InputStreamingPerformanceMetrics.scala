@@ -5,36 +5,38 @@ import java.util.Calendar
 import com.bwsw.sj.engine.core.entities.{Envelope, InputEnvelope}
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.input.task.InputTaskManager
+
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 
 /**
- * Class represents a set of metrics that characterize performance of a input streaming module
- *
- * @author Kseniya Mikhaleva
- */
+  * Class represents a set of metrics that characterize performance of an input streaming module
+  *
+  * @param manager allows to manage an environment of input streaming task
+  * @author Kseniya Mikhaleva
+  */
 
 class InputStreamingPerformanceMetrics(manager: InputTaskManager)
   extends PerformanceMetrics(manager) {
 
   currentThread.setName(s"input-task-${manager.taskName}-performance-metrics")
-  private val inputStreamName = manager.agentsHost + ":" + manager.entryPort
-  private val outputStreamNames = instance.outputs
+  private val inputStreamName: String = manager.agentsHost + ":" + manager.entryPort
+  private val outputStreamNames: Array[String] = instance.outputs
 
-  override protected var inputEnvelopesPerStream = createStorageForInputEnvelopes(Array(inputStreamName))
-  override protected var outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
+  override protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Int]]] = createStorageForInputEnvelopes(Array(inputStreamName))
+  override protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Int]]] = createStorageForOutputEnvelopes(outputStreamNames)
 
   /**
-   * Invokes when a new envelope from the input stream is received
-   */
+    * Invokes when a new envelope from the input stream is received
+    */
   override def addEnvelopeToInputStream(envelope: Envelope): Unit = {
     val inputEnvelope = envelope.asInstanceOf[InputEnvelope[AnyRef]]
     super.addEnvelopeToInputStream(inputStreamName, List(inputEnvelope.data.toString.length)) //todo придумать другой способ извлечения информации
   }
 
   /**
-   * Constructs a report of performance metrics of task's work
-   * @return Constructed performance report
-   */
+    * Constructs a report of performance metrics of task work (one module could have multiple tasks)
+    */
   override def getReport(): String = {
     logger.info(s"Start preparing a report of performance for task: $taskName of an input module.")
     mutex.lock()

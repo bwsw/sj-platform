@@ -4,8 +4,13 @@ import com.bwsw.sj.engine.core.output.Entity
 import org.elasticsearch.index.query.{MatchQueryBuilder, QueryBuilders}
 
 /**
-  * Created by Ivan Kudryavtsev on 05.03.2017.
+  * Provides methods for building es query to CRUD data
+  *
+  * @param transactionFieldName name of transaction field to check data on duplicate
+  * @param entity               data
+  * @author Ivan Kudryavtsev
   */
+
 class ElasticsearchCommandBuilder(transactionFieldName: String, entity: Entity[String]) {
 
   def buildInsert(transaction: Long, values: Map[String, Any]): String = {

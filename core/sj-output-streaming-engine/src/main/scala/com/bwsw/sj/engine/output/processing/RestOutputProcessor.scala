@@ -2,8 +2,7 @@ package com.bwsw.sj.engine.output.processing
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.rest.RestClient
-import com.bwsw.sj.common.dal.model.service.RestServiceDomain
-import com.bwsw.sj.common.dal.model.stream.StreamDomain
+import com.bwsw.sj.common.dal.model.stream.RestStreamDomain
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.Entity
 import com.bwsw.sj.engine.output.task.OutputTaskManager
@@ -13,20 +12,20 @@ import org.apache.http.entity.ContentType
 import scala.collection.JavaConverters._
 
 /**
+  * ref. [[OutputProcessor]] object
   * @author Pavel Tomskikh
   */
-class RestOutputProcessor[T <: AnyRef](
-                                        outputStream: StreamDomain,
-                                        performanceMetrics: OutputStreamingPerformanceMetrics,
-                                        manager: OutputTaskManager,
-                                        entity: Entity[_])
-  extends OutputProcessor[T](outputStream, performanceMetrics) {
+class RestOutputProcessor[T <: AnyRef](restOutputStream: RestStreamDomain,
+                                       performanceMetrics: OutputStreamingPerformanceMetrics,
+                                       manager: OutputTaskManager,
+                                       entity: Entity[_])
+  extends OutputProcessor[T](restOutputStream, performanceMetrics) {
 
   private val jsonSerializer = new JsonSerializer
-  private val service = outputStream.service.asInstanceOf[RestServiceDomain]
+  private val service = restOutputStream.service
   private val client = new RestClient(
     service.provider.hosts.toSet,
-    service.basePath + "/" + outputStream.name,
+    service.basePath + "/" + restOutputStream.name,
     service.httpVersion,
     Map(service.headers.asScala.toList: _*),
     Option(service.provider.name),

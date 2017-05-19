@@ -18,7 +18,7 @@ class NumericalBatchCollector(instance: BatchInstanceDomain,
     countOfEnvelopesPerStream.filter(x => x._2 == everyNthCount).keys.toSeq
   }
 
-  def afterReceivingEnvelope(envelope: Envelope) = {
+  def afterReceivingEnvelope(envelope: Envelope): Unit = {
     increaseCounter(envelope)
   }
 
@@ -27,7 +27,7 @@ class NumericalBatchCollector(instance: BatchInstanceDomain,
     logger.debug(s"Increase count of envelopes of stream: ${envelope.stream} to: ${countOfEnvelopesPerStream(envelope.stream)}.")
   }
 
-  def prepareForNextCollecting(streamName: String) = {
+  def prepareForNextCollecting(streamName: String): Unit = {
     resetCounter(streamName)
   }
 

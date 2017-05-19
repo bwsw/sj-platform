@@ -4,11 +4,11 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.rest.model.module.{BatchInstanceApi, InstanceApi}
 import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.common.utils.SjStreamUtils._
+import com.bwsw.sj.common.utils.StreamUtils._
 import org.mongodb.morphia.annotations.{Embedded, Property}
 
 /**
-  * Entity for batch instance-json
+  * Domain entity for [[EngineLiterals.batchStreamingType]] instance
   *
   * @author Kseniya Tomskikh
   */

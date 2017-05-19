@@ -1,11 +1,10 @@
 package com.bwsw.sj.engine.core.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-
-
+import com.bwsw.sj.common.utils.StreamLiterals
 /**
  * Represents a message envelope that is received by an Executor for each message
- * that is received from a partition of a specific input (kafka, t-stream, elasticsearch, jdbc)
+ * that is received from a partition of a specific input stream [[StreamLiterals.types]]
  */
 
 class Envelope extends Serializable {

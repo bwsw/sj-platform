@@ -3,8 +3,9 @@ package com.bwsw.common.jdbc
 import org.slf4j.LoggerFactory
 
 /**
-  * Builder class for JDBC client
+  * Build [[JdbcClient]]. You can not create [[JdbcClient]] directly
   */
+
 object JdbcClientBuilder {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -84,12 +85,6 @@ object JdbcClientBuilder {
     this
   }
 
-  /**
-    * Use this method if you have JDBC connection data provider
-    *
-    * @param jdbcClientConnectionData : JdbcClientConnectionData
-    * @return this
-    */
   def setJdbcClientConnectionData(jdbcClientConnectionData: JdbcClientConnectionData): JdbcClientBuilder.type = {
     hosts = Option(jdbcClientConnectionData.hosts)
     driver = Option(jdbcClientConnectionData.driver)

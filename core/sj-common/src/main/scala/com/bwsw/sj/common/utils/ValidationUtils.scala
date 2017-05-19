@@ -1,7 +1,9 @@
 package com.bwsw.sj.common.utils
 
+import com.bwsw.sj.common.engine.StreamingValidator
+
 /**
-  * Useful methods for [[com.bwsw.sj.common.engine.StreamingValidator StreamingValidator]].
+  * Provides useful methods for [[StreamingValidator]] implementation
   *
   * @author Pavel Tomskikh
   */

@@ -17,7 +17,11 @@ import org.elasticsearch.search.SearchHits
 import org.elasticsearch.transport.client.PreBuiltTransportClient
 import org.slf4j.LoggerFactory
 
-
+/**
+  * Wrapper for [[TransportClient]]
+  *
+  * @param hosts es address
+  */
 class ElasticsearchClient(hosts: Set[(String, Int)]) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val typeName = "_type"

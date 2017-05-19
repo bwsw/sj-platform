@@ -8,7 +8,19 @@ import org.slf4j.LoggerFactory
 
 import scala.annotation.tailrec
 import scala.util.{Failure, Success, Try}
+import com.bwsw.sj.common.dal.model.instance.InstanceDomain
+import com.bwsw.sj.common.utils.EngineLiterals
 
+/**
+  * Wrapper for [[leader.LeaderLatch]]
+  * Used to:
+  * 1) start only one module ([[InstanceDomain]]) at the time
+  * 2) in [[EngineLiterals.batchStreamingType]] engine to wait for all instance tasks until they finish (as a barrier)
+  *
+  * @param zkServers  zk address
+  * @param masterNode zk math that will be latched
+  * @param id         unique id
+  */
 class LeaderLatch(zkServers: Set[String], masterNode: String, id: String = "") {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val servers = zkServers.mkString(",")

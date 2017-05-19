@@ -11,12 +11,13 @@ import scala.collection.concurrent
 import scala.util.{Failure, Success, Try}
 
 /**
- * Handles a server-side channel.
- * It receives a new portion of bytes from the server and puts it in an auxiliary buffer
- * because of a handler should not contain an execution logic of incoming data
- * @param channelContextQueue Queue for keeping a channel context to process messages (byte buffer) in their turn
- * @param bufferForEachContext Map for keeping a buffer containing incoming bytes with the appropriate channel context
- */
+  * Handles a server-side channel.
+  * It receives a new portion of bytes from the server and puts it in an auxiliary buffer
+  * because of a handler should not contain an execution logic of incoming data to avoid locks
+  *
+  * @param channelContextQueue  queue for keeping a channel context [[ChannelHandlerContext]] to process messages ([[ByteBuf]]) in their turn
+  * @param bufferForEachContext map for keeping a buffer containing incoming bytes [[ByteBuf]] with the appropriate channel context [[ChannelHandlerContext]]
+  */
 
 @Sharable
 class InputStreamingServerHandler(channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
@@ -43,11 +44,11 @@ class InputStreamingServerHandler(channelContextQueue: ArrayBlockingQueue[Channe
   }
 
   /**
-   * Exception handler that print stack trace and than close the connection when an exception is raised.
- *
-   * @param ctx Channel handler context
-   * @param cause What has caused an exception
-   */
+    * Exception handler that print stack trace and than close the connection when an exception is raised.
+    *
+    * @param ctx   channel handler context
+    * @param cause what has caused an exception
+    */
   override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable): Unit = {
     cause.printStackTrace()
     ctx.close()

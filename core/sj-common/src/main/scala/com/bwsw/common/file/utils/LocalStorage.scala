@@ -1,12 +1,15 @@
 package com.bwsw.common.file.utils
 
-import java.io.{FileInputStream, File, FileNotFoundException, InputStream}
+import java.io.{File, FileInputStream, FileNotFoundException, InputStream}
 import java.nio.file.FileAlreadyExistsException
 
 import org.apache.commons.io.FileUtils
 
-import scala.reflect.io.{Directory, Path}
-
+/**
+  * Provides methods to CRUD files using a specific local path
+  *
+  * @param pathToLocalStorage a specific local path where files will be stored
+  */
 class LocalStorage(pathToLocalStorage: String) extends FileStorage {
   override def put(file: File, fileName: String): Unit = {
     logger.debug(s"Try to put a file: '$fileName' in a local storage (path to local storage: $pathToLocalStorage).")
@@ -37,6 +40,9 @@ class LocalStorage(pathToLocalStorage: String) extends FileStorage {
     }
   }
 
+  /**
+    * Retrieve file as [[InputStream]]
+    */
   override def getStream(fileName: String): InputStream = {
     logger.debug(s"Try to get a file: '$fileName' from a local storage (path to local storage: $pathToLocalStorage).")
     val storageFile = new File(pathToLocalStorage + fileName)
@@ -60,11 +66,6 @@ class LocalStorage(pathToLocalStorage: String) extends FileStorage {
       logger.debug(s"Local storage doesn't contain a file with name: '$fileName'.")
       false
     }
-  }
-
-  override def getContent(): Seq[String] = {
-    logger.debug(s"Get a list of contents of a local storage directory.")
-    Directory.apply(Path(pathToLocalStorage).toAbsolute).files.map(_.name).toSeq
   }
 
   override def put(file: File, fileName: String, specification: Map[String, Any], filetype: String): Unit = {

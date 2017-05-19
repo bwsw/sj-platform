@@ -6,7 +6,7 @@ import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 import org.eclipse.jetty.http.HttpVersion
 
 object EngineLiterals {
-  val persistentQueuePath = UUID.randomUUID().toString
+  val persistentQueuePath: String = UUID.randomUUID().toString
 
   final val queueSize = 1000
   final val persistentBlockingQueue = "persistentBlockingQueue"

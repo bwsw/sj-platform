@@ -11,7 +11,7 @@ import org.mongodb.morphia.annotations.Property
 import scala.collection.JavaConverters._
 
 /**
-  * Entity for input instance-json
+  * Domain entity for [[EngineLiterals.inputStreamingType]] instance
   *
   * @author Kseniya Tomskikh
   */

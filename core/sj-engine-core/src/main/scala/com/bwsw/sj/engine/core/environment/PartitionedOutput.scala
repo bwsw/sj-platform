@@ -1,5 +1,7 @@
 package com.bwsw.sj.engine.core.environment
 
+import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.engine.core.entities.{KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer, ProducerTransaction}
 
@@ -8,13 +10,17 @@ import scala.collection._
 /**
   * Provides an output stream that defined for each partition
   *
+  * @param producer           producer of specific output
+  * @param performanceMetrics set of metrics that characterize performance of [[EngineLiterals.regularStreamingType]] or [[EngineLiterals.batchStreamingType]] module
+  * @param classLoader        it is needed for loading some custom classes from module jar to serialize/deserialize envelope data
+  *                           (ref. [[TStreamEnvelope.data]] or [[KafkaEnvelope.data]])
   * @author Kseniya Mikhaleva
-  * @param producer Producer for specific output of stream
   */
 
 class PartitionedOutput(producer: Producer,
                         performanceMetrics: PerformanceMetrics,
-                        classLoader: ClassLoader) extends ModuleOutput(performanceMetrics, classLoader) {
+                        classLoader: ClassLoader)
+  extends ModuleOutput(performanceMetrics, classLoader) {
 
   private val transactions = mutable.Map[Int, ProducerTransaction]()
   private val streamName = producer.stream.name

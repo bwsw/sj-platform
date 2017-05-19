@@ -7,7 +7,6 @@ import com.bwsw.common._
 import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.common.jdbc.JdbcClientBuilder
-import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.dal.model._
 import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, OutputInstanceDomain, Task}
 import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain}
@@ -77,7 +76,7 @@ object DataFactory {
   val restInstanceName: String = "test-rest-instance-for-output-engine"
 
   val objectSerializer = new ObjectSerializer()
-  private val serializer: Serializer = new JsonSerializer
+  private val serializer = new JsonSerializer
 
   private val esProviderHosts = System.getenv("ES_HOSTS").split(",").map(host => host.trim)
   private val jdbcHosts = System.getenv("JDBC_HOSTS").split(",").map(host => host.trim)

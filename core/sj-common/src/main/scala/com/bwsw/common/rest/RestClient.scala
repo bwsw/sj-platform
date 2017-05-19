@@ -7,53 +7,59 @@ import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import org.eclipse.jetty.client.HttpClient
 import org.eclipse.jetty.client.api.Request
 import org.eclipse.jetty.client.util.{BasicAuthentication, StringContentProvider}
-import org.eclipse.jetty.http.{HttpMethod, HttpVersion}
+import org.eclipse.jetty.http.{HttpMethod, HttpVersion, HttpStatus}
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
+import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
+
 
 /**
-  * Client for RESTful service.
+  * Client for [[EngineLiterals.outputStreamingType]] that has got [[StreamLiterals.restOutputType]] output.
   *
   * @param hosts       set of services hosts
   * @param path        path to entities
   * @param httpVersion version of HTTP
   * @param headers     set of headers
-  * @param username
-  * @param password
+  * @param username    username to authenticate
+  * @param password    password to authenticate
   * @author Pavel Tomskikh
   */
-class RestClient(
-    hosts: Set[String],
-    path: String,
-    httpVersion: HttpVersion,
-    headers: Map[String, String],
-    username: Option[String] = None,
-    password: Option[String] = None) {
+class RestClient(hosts: Set[String],
+                 path: String,
+                 httpVersion: HttpVersion,
+                 headers: Map[String, String],
+                 username: Option[String] = None,
+                 password: Option[String] = None) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val urls = hosts.map { host => new URI("http://" + host) }
   private val client = new HttpClient
-  if (username.getOrElse("").nonEmpty && password.getOrElse("").nonEmpty)
-    urls.foreach(addAuthentication)
-
+  setAuthenticationParameters()
   client.start()
 
   def post(data: String, contentType: String): Boolean = {
     logger.debug(s"Post '$data' with contentType '$contentType' to REST service")
     trySendRequest(_
       .method(HttpMethod.POST)
-      .content(new StringContentProvider(data), contentType))
+      .content(new StringContentProvider(data), contentType)
+    )
   }
 
   def delete(field: String, value: String): Boolean = {
     logger.debug(s"Delete entity with '$field' = '$value' fro REST service")
     trySendRequest(_
       .method(HttpMethod.DELETE)
-      .param(field, value))
+      .param(field, value)
+    )
   }
 
   def close(): Unit = client.stop()
+
+  private def setAuthenticationParameters() = {
+    if (username.getOrElse("").nonEmpty && password.getOrElse("").nonEmpty)
+      urls.foreach(addAuthentication)
+  }
 
   private def addAuthentication(url: URI): Unit = {
     val authenticationStore = client.getAuthenticationStore
@@ -71,9 +77,10 @@ class RestClient(
 
       Try {
         val response = requestModification(request).send()
+
         response.getStatus
       } match {
-        case Success(status) => status >= 200 && status < 300
+        case Success(status) => status >= HttpStatus.OK_200 && status < HttpStatus.MULTIPLE_CHOICES_300
         case Failure(_) => false
       }
     }

@@ -6,17 +6,18 @@ import scala.collection.mutable
 import scala.reflect.ClassTag
 
 /**
- * Provides a service for access to elements of mongo database collection
- * @tparam T Type of collection elements
- */
+  * Provides a service for access to elements of mongo database collection
+  *
+  * @tparam T type of collection elements
+  */
 
 class GenericMongoRepository[T: ClassTag] extends Repository[T] {
 
   import scala.collection.JavaConverters._
 
   /**
-   * Allows manipulating with elements of mongo database collection
-   */
+    * Allows manipulating with elements of mongo database collection
+    */
   private val genericDAO = ConnectionRepository.getGenericDAO[T]
   private val emptyQuery = new BasicDBObject()
 

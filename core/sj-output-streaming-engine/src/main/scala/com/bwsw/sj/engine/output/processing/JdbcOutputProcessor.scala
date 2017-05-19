@@ -11,6 +11,9 @@ import com.bwsw.sj.engine.core.output.types.jdbc.JdbcCommandBuilder
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 
+/**
+  * ref. [[OutputProcessor]] object
+  */
 class JdbcOutputProcessor[T <: AnyRef](outputStream: StreamDomain,
                                        performanceMetrics: OutputStreamingPerformanceMetrics,
                                        manager: OutputTaskManager,
@@ -37,7 +40,7 @@ class JdbcOutputProcessor[T <: AnyRef](outputStream: StreamDomain,
     client
   }
 
-  def delete(inputEnvelope: TStreamEnvelope[T]) = {
+  def delete(inputEnvelope: TStreamEnvelope[T]): Unit = {
     logger.debug(s"Delete an envelope: '${inputEnvelope.id}' from JDBC.")
 
     val existPreparedStatement = jdbcCommandBuilder.exists(inputEnvelope.id)
@@ -51,7 +54,7 @@ class JdbcOutputProcessor[T <: AnyRef](outputStream: StreamDomain,
     }
   }
 
-  def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]) = {
+  def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit = {
     logger.debug(s"Send an envelope: '${inputEnvelope.id}' to a JDBC stream: '${jdbcStream.name}'.")
     if (jdbcClient.tableExists()) {
       val preparedStatement = jdbcCommandBuilder.buildInsert(inputEnvelope.id, envelope.getFieldsValue)

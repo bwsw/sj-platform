@@ -4,11 +4,12 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.PropertyField
 import com.bwsw.sj.common.rest.model.module.{InstanceApi, OutputInstanceApi}
-import com.bwsw.sj.common.utils.SjStreamUtils._
+import com.bwsw.sj.common.utils.StreamUtils._
 import org.mongodb.morphia.annotations.{Embedded, Property}
+import com.bwsw.sj.common.utils.EngineLiterals
 
 /**
-  * Entity for output-streaming instance-json
+  * Domain entity for [[EngineLiterals.outputStreamingType]] instance
   *
   * @author Kseniya Tomskikh
   */
@@ -42,5 +43,5 @@ class OutputInstanceDomain(override val name: String,
     protocolInstance
   }
 
-  override def getInputsWithoutStreamMode() = this.inputs.map(clearStreamFromMode)
+  override def getInputsWithoutStreamMode(): Array[String] = this.inputs.map(clearStreamFromMode)
 }

@@ -14,12 +14,14 @@ import scala.collection.mutable
 
 /**
   * Class is in charge of creating a specific ModuleEnvironmentManager (and executor)
-  * depending on an instance parameter 'state-management' and performing the appropriate actions related with checkpoint
+  * depending on an instance parameter [[BatchInstanceDomain.stateManagement]] and performing the appropriate actions related with checkpoint
   *
-  * @param manager            Manager of environment of task of regular module
-  * @param performanceMetrics Set of metrics that characterize performance of a regular streaming module
+  * @param manager            manager of environment of task of [[EngineLiterals.regularStreamingType]] or [[EngineLiterals.batchStreamingType]] module
+  * @param performanceMetrics set of metrics that characterize performance of a regular or batch streaming module
   */
-abstract class CommonModuleService(manager: CommonTaskManager, checkpointGroup: CheckpointGroup, performanceMetrics: PerformanceMetrics) {
+abstract class CommonModuleService(manager: CommonTaskManager,
+                                   checkpointGroup: CheckpointGroup,
+                                   performanceMetrics: PerformanceMetrics) {
 
   protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
   protected val instance: InstanceDomain = manager.instance
@@ -58,8 +60,8 @@ object CommonModuleService {
       case batchInstance: BatchInstanceDomain =>
         batchInstance.stateManagement
       case _ =>
-        logger.error("CommonModuleService can be used only for regular or batch engine.")
-        throw new RuntimeException("CommonModuleService can be used only for regular or batch engine.")
+        logger.error("CommonModuleService can be used only for ${EngineLiterals.regularStreamingType} or ${EngineLiterals.batchStreamingType} engine.")
+        throw new RuntimeException("CommonModuleService can be used only for ${EngineLiterals.regularStreamingType} or ${EngineLiterals.batchStreamingType} engine.")
     }
 
     stateManagement match {

@@ -15,14 +15,15 @@ import scala.util.{Failure, Success, Try}
 
 
 /**
- * Input streaming server that sets up a server listening the specific host and port.
- * Bind and start to accept incoming connections.
- * Than wait until the server socket is closed gracefully shut down the server.
- * @param host Host of server
- * @param port Port of server
- * @param channelContextQueue Queue for keeping a channel context to process messages (byte buffer) in their turn
- * @param bufferForEachContext Map for keeping a buffer containing incoming bytes with the appropriate channel context
- */
+  * Input streaming server that sets up a server listening the specific host and port.
+  * Bind and start to accept incoming connections.
+  * Than wait until the server socket is closed gracefully shut down the server.
+  *
+  * @param host                 host of server
+  * @param port                 port of server
+  * @param channelContextQueue  queue for keeping a channel context [[ChannelHandlerContext]] to process messages ([[ByteBuf]]) in their turn
+  * @param bufferForEachContext map for keeping a buffer containing incoming bytes [[ByteBuf]] with the appropriate channel context [[ChannelHandlerContext]]
+  */
 class InputStreamingServer(host: String,
                            port: Int,
                            channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
@@ -44,9 +45,11 @@ class InputStreamingServer(host: String,
 
       bootstrapServer.bind(host, port).sync().channel().closeFuture().sync()
     }
+
     logger.info(s"Shutdown an input-streaming server (address: '$host:$port').")
     workerGroup.shutdownGracefully()
     bossGroup.shutdownGracefully()
+
     result match {
       case Success(_) =>
       case Failure(e) => throw e

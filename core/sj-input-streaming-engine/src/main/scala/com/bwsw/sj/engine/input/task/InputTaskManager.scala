@@ -7,7 +7,7 @@ import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.tstreams.agents.producer.Producer
 
 /**
-  * Class allowing to manage an environment of input streaming task
+  * Class allows to manage an environment of input streaming task
   *
   * @author Kseniya Mikhaleva
   */

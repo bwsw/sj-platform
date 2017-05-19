@@ -6,7 +6,7 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.instance.{FrameworkStage, InstanceDomain}
 import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.utils.SjStreamUtils._
+import com.bwsw.sj.common.utils.StreamUtils._
 import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonIgnore
 

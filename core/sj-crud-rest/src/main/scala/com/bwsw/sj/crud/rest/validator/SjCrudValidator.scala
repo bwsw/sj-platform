@@ -6,8 +6,8 @@ import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.server.RequestContext
 import akka.stream.ActorMaterializer
+import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.FileStorage
-import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.dal.model._
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
@@ -31,7 +31,7 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator {
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   implicit val executor: ExecutionContextExecutor = system.dispatcher
 
-  val serializer: Serializer
+  val serializer: JsonSerializer
   val fileMetadataDAO: GenericMongoRepository[FileMetadataDomain]
   val storage: FileStorage
   val instanceDAO: GenericMongoRepository[InstanceDomain]

@@ -1,12 +1,15 @@
 package com.bwsw.common.file.utils
 
-import java.io.{InputStream, File}
+import java.io.{File, InputStream}
 
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 
+/**
+  * Provides methods to CRUD files using a specific storage
+  */
 trait FileStorage {
 
-  protected val logger = LoggerFactory.getLogger(this.getClass)
+  protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
   def put(file: File, fileName: String): Unit
 
@@ -14,11 +17,12 @@ trait FileStorage {
 
   def get(fileName: String, newFileName: String): File
 
+  /**
+    * Retrieve file as [[InputStream]]
+    */
   def getStream(fileName: String): InputStream
 
   def delete(fileName: String): Boolean
-
-  def getContent(): Seq[String]
 
   def exists(fileName: String): Boolean
 

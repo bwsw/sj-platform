@@ -6,8 +6,11 @@ import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 
 /**
-  * Class is responsible for handling kafka input and t-stream input
+  * Class is responsible for handling kafka and t-stream input
+  * (i.e. retrieving and checkpointing kafka and t-stream messages)
+  * for batch streaming engine
   *
+  * @param manager allows to manage an environment of batch streaming task
   * @author Kseniya Mikhaleva
   */
 class RetrievableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskManager) extends {

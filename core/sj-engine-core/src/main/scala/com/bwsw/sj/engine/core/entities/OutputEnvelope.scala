@@ -1,8 +1,11 @@
 package com.bwsw.sj.engine.core.entities
 
+import com.bwsw.sj.common.utils.EngineLiterals
+
 /**
-  * Created by diryavkin_dn on 15.03.17.
+  * Provides a wrapper for message that is formed by [[EngineLiterals.outputStreamingType]] engine.
   */
+
 abstract class OutputEnvelope {
   def getFieldsValue: Map[String, Any]
 }
