@@ -16,10 +16,7 @@ import scala.util.Try
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "module-type", defaultImpl = classOf[SpecificationApi], visible = true)
 @JsonSubTypes(Array(
-  new Type(value = classOf[InputSpecificationApi], name = EngineLiterals.inputStreamingType),
-  new Type(value = classOf[RegularSpecificationApi], name = EngineLiterals.regularStreamingType),
-  new Type(value = classOf[BatchSpecificationApi], name = EngineLiterals.batchStreamingType),
-  new Type(value = classOf[OutputSpecificationApi], name = EngineLiterals.outputStreamingType)))
+  new Type(value = classOf[BatchSpecificationApi], name = EngineLiterals.batchStreamingType)))
 class SpecificationApi(val name: String,
                        val description: String,
                        val version: String,
@@ -54,36 +51,6 @@ object SpecificationApi {
 
   def from(specification: Specification): SpecificationApi = {
     specification.moduleType match {
-      case EngineLiterals.inputStreamingType =>
-        val inputSpecification = specification.asInstanceOf[InputSpecification]
-        new InputSpecificationApi(
-          inputSpecification.name,
-          inputSpecification.description,
-          inputSpecification.version,
-          inputSpecification.author,
-          inputSpecification.license,
-          inputSpecification.inputs,
-          inputSpecification.outputs,
-          inputSpecification.engineName,
-          inputSpecification.engineVersion,
-          inputSpecification.validatorClass,
-          inputSpecification.executorClass)
-
-      case EngineLiterals.regularStreamingType =>
-        val regularSpecification = specification.asInstanceOf[RegularSpecification]
-        new RegularSpecificationApi(
-          regularSpecification.name,
-          regularSpecification.description,
-          regularSpecification.version,
-          regularSpecification.author,
-          regularSpecification.license,
-          regularSpecification.inputs,
-          regularSpecification.outputs,
-          regularSpecification.engineName,
-          regularSpecification.engineVersion,
-          regularSpecification.validatorClass,
-          regularSpecification.executorClass)
-
       case EngineLiterals.batchStreamingType =>
         val batchSpecification = specification.asInstanceOf[BatchSpecification]
         new BatchSpecificationApi(
@@ -99,22 +66,6 @@ object SpecificationApi {
           batchSpecification.validatorClass,
           batchSpecification.executorClass,
           batchSpecification.batchCollectorClass)
-
-      case EngineLiterals.outputStreamingType =>
-        val outputSpecification = specification.asInstanceOf[OutputSpecification]
-        new OutputSpecificationApi(
-          outputSpecification.name,
-          outputSpecification.description,
-          outputSpecification.version,
-          outputSpecification.author,
-          outputSpecification.license,
-          outputSpecification.inputs,
-          outputSpecification.outputs,
-          outputSpecification.engineName,
-          outputSpecification.engineVersion,
-          outputSpecification.validatorClass,
-          outputSpecification.executorClass,
-          outputSpecification.entityClass)
 
       case _ =>
         new SpecificationApi(

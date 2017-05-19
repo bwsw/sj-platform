@@ -2,10 +2,9 @@ package com.bwsw.sj.common.si.model.module
 
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.module.{BatchSpecificationDomain, IOstream, SpecificationDomain}
-import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.PropertyField
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
+import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -187,7 +186,6 @@ object Specification {
           batchSpecificationDomain.batchCollectorClass)
 
       case _ =>
-
         new Specification(
           specificationDomain.name,
           specificationDomain.description,
