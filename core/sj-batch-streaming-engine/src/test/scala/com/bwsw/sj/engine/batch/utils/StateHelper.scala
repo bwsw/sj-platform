@@ -13,7 +13,7 @@ object StateHelper {
 
     val initialState = mutable.Map[String, Any]()
     val tempTransaction = consumer.getLastTransaction(0).get
-    val lastTxn = consumer.buildTransactionObject(tempTransaction.getPartition(), tempTransaction.getTransactionID(), tempTransaction.getCount()).get //todo fix it next milestone TR1216
+    val lastTxn = consumer.buildTransactionObject(tempTransaction.getPartition, tempTransaction.getTransactionID, tempTransaction.getState, tempTransaction.getCount).get //todo fix it next milestone TR1216
     var value = objectSerializer.deserialize(lastTxn.next())
     value match {
       case variable: (Any, Any) =>
@@ -31,7 +31,7 @@ object StateHelper {
           val partialStateTxn = maybeTxn.get
 
           partialStateTxn.next()
-          while (partialStateTxn.hasNext()) {
+          while (partialStateTxn.hasNext) {
             value = objectSerializer.deserialize(partialStateTxn.next())
             val variable = value.asInstanceOf[(String, (String, Any))]
             partialState(variable._1) = variable._2
@@ -45,7 +45,7 @@ object StateHelper {
   }
 
   def fillFullState(initialState: mutable.Map[String, Any], transaction: ConsumerTransaction, objectSerializer: ObjectSerializer) = {
-    while (transaction.hasNext()) {
+    while (transaction.hasNext) {
       val value = objectSerializer.deserialize(transaction.next())
       val variable = value.asInstanceOf[(String, Any)]
       initialState(variable._1) = variable._2

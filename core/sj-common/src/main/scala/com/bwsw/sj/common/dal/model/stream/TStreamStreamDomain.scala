@@ -2,8 +2,8 @@ package com.bwsw.sj.common.dal.model.stream
 
 import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
 import com.bwsw.sj.common.utils.{RestLiterals, StreamLiterals}
-import com.bwsw.tstreams.common.StorageClient
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
+import com.bwsw.tstreams.storage.StorageClient
 
 
 class TStreamStreamDomain(override val name: String,

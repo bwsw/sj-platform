@@ -5,7 +5,6 @@ import java.util.concurrent.Executors
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.entities.Envelope
-import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import org.slf4j.LoggerFactory
@@ -46,12 +45,6 @@ class EnvelopeFetcher(taskInput: RetrievableCheckpointTaskInput[Envelope]) {
   def doCheckpoint(): Unit = taskInput.doCheckpoint()
 
   def checkpointGroup: CheckpointGroup = taskInput.checkpointGroup
-}
 
-object EnvelopeFetcher {
-  def apply(manager: CommonTaskManager): EnvelopeFetcher = {
-    val taskInput = RetrievableCheckpointTaskInput[AnyRef](manager).asInstanceOf[RetrievableCheckpointTaskInput[Envelope]]
-
-    new EnvelopeFetcher(taskInput)
-  }
+  def close(): Unit = taskInput.close()
 }

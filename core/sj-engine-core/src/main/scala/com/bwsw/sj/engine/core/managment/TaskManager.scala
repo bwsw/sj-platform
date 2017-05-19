@@ -19,7 +19,7 @@ import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
 import com.bwsw.tstreams.agents.consumer.subscriber.{Callback, Subscriber}
 import com.bwsw.tstreams.agents.producer.Producer
-import com.bwsw.tstreams.common.StorageClient
+import com.bwsw.tstreams.storage.StorageClient
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 import org.slf4j.LoggerFactory
 

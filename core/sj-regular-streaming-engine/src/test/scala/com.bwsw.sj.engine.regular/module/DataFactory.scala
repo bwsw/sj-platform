@@ -331,7 +331,7 @@ object DataFactory {
   }
 
   def createData(countTxns: Int, countElements: Int, partitions: Int, _type: String, count: Int) = {
-    val policy = producer.NewTransactionProducerPolicy.ErrorIfOpened
+    val policy = producer.NewProducerTransactionPolicy.ErrorIfOpened
     val props = new Properties()
     props.put("bootstrap.servers", kafkaHosts)
     props.put("key.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")

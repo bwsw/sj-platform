@@ -15,15 +15,15 @@ object DuplicateChecker extends App {
   var totalOutputElements = 0
 
   outputConsumers.foreach(outputConsumer => {
-    val partitions = outputConsumer.getPartitions().toIterator
+    val partitions = outputConsumer.getPartitions.toIterator
 
     while (partitions.hasNext) {
-      val currentPartition = partitions.next()
+      val currentPartition = partitions.next
       var maybeTxn = outputConsumer.getTransaction(currentPartition)
 
       while (maybeTxn.isDefined) {
         val transaction = maybeTxn.get
-        while (transaction.hasNext()) {
+        while (transaction.hasNext) {
           transaction.next()
           totalOutputElements += 1
         }

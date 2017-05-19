@@ -13,7 +13,7 @@ import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.TaskManager
-import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer}
+import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer}
 import org.slf4j.LoggerFactory
 
 import scala.collection._
@@ -162,7 +162,7 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
     val reportSerializerForTxn = new ObjectSerializer()
     val taskNumber = taskName.replace(s"${manager.instanceName}-task", "").toInt
     logger.debug(s"Task: $taskName. Create a new txn for sending performance metrics.")
-    val reportTxn = reportProducer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened, taskNumber)
+    val reportTxn = reportProducer.newTransaction(NewProducerTransactionPolicy.ErrorIfOpened, taskNumber)
     logger.debug(s"Task: $taskName. Send performance metrics.")
     reportTxn.send(reportSerializerForTxn.serialize(report))
   }

@@ -12,7 +12,7 @@ import com.bwsw.sj.engine.core.input.Interval
 import com.bwsw.sj.engine.input.eviction_policy.InputInstanceEvictionPolicy
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
-import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer, ProducerTransaction}
+import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer, ProducerTransaction}
 import io.netty.buffer.ByteBuf
 import io.netty.channel.{ChannelFuture, ChannelHandlerContext}
 import org.slf4j.LoggerFactory
@@ -89,7 +89,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
       case None =>
         logger.debug(s"Task name: ${manager.taskName}. Txn for stream/partition: '$stream/$partition' is not defined " +
           s"so create new txn.")
-        val transaction = producers(stream).newTransaction(NewTransactionProducerPolicy.ErrorIfOpened, partition)
+        val transaction = producers(stream).newTransaction(NewProducerTransactionPolicy.ErrorIfOpened, partition)
         transaction.send(bytes)
         putTxn(stream, partition, transaction)
 
@@ -99,7 +99,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
     logger.debug(s"Task name: ${manager.taskName}. Add envelope to output stream in performance metrics .")
     performanceMetrics.addElementToOutputEnvelope(
       stream,
-      producerTransaction.getTransactionID().toString,
+      producerTransaction.getTransactionID.toString,
       bytes.length
     )
   }

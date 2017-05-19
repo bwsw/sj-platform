@@ -38,6 +38,6 @@ object RegularTaskRunner extends {
     executorService.submit(performanceMetrics)
     executorService.submit(instanceStatusObserver)
 
-    waitForCompletion()
+    waitForCompletion(Some(regularTaskInputService))
   }
 }

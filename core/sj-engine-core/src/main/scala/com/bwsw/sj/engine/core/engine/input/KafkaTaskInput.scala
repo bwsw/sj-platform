@@ -16,7 +16,7 @@ import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.Producer
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.TopicPartition
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -24,20 +24,20 @@ import scala.collection.mutable
 trait KafkaTaskInput[T <: AnyRef] {
   protected val manager: CommonTaskManager
   protected val checkpointGroup: CheckpointGroup
-  protected val currentThread = Thread.currentThread()
-  protected val logger = LoggerFactory.getLogger(this.getClass)
+  protected val currentThread: Thread = Thread.currentThread()
+  protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
   protected val offsetSerializer = new ObjectSerializer()
-  protected val kafkaSubscriberTimeout = ConfigurationSettingsUtils.getKafkaSubscriberTimeout()
-  protected val kafkaInputs = getKafkaInputs()
-  protected val streamNamesToTags = kafkaInputs.map(x => (x._1.name, x._1.tags)).toMap
-  protected var kafkaOffsetsStorage = mutable.Map[(String, Int), Long]()
-  protected val kafkaOffsetsStream = manager.taskName + "_kafka_offsets"
-  protected val offsetStream = createOffsetStream()
+  protected val kafkaSubscriberTimeout: Int = ConfigurationSettingsUtils.getKafkaSubscriberTimeout()
+  protected val kafkaInputs: mutable.Map[StreamDomain, Array[Int]] = getKafkaInputs()
+  protected val streamNamesToTags: Map[String, Array[String]] = kafkaInputs.map(x => (x._1.name, x._1.tags)).toMap
+  protected var kafkaOffsetsStorage: mutable.Map[(String, Int), Long] = mutable.Map[(String, Int), Long]()
+  protected val kafkaOffsetsStream: String = manager.taskName + "_kafka_offsets"
+  protected val offsetStream: TStreamStreamDomain = createOffsetStream()
 
-  protected val offsetProducer = createOffsetProducer()
+  protected val offsetProducer: Producer = createOffsetProducer()
   addOffsetProducerToCheckpointGroup()
 
-  protected val kafkaConsumer = createSubscribingKafkaConsumer(
+  protected val kafkaConsumer: KafkaConsumer[Array[Byte], Array[Byte]] = createSubscribingKafkaConsumer(
     kafkaInputs.map(x => (x._1.name, x._2.toList)).toList,
     kafkaInputs.flatMap(_._1.service.asInstanceOf[KafkaServiceDomain].provider.hosts).toList,
     chooseOffset()
@@ -105,7 +105,7 @@ trait KafkaTaskInput[T <: AnyRef] {
 
   protected def chooseOffset(): String
 
-  protected def createKafkaConsumer(hosts: List[String], offset: String) = {
+  protected def createKafkaConsumer(hosts: List[String], offset: String): KafkaConsumer[Array[Byte], Array[Byte]] = {
     logger.debug(s"Task: ${manager.taskName}. Create a kafka consumer.")
     val properties = new Properties()
     properties.put("bootstrap.servers", hosts.mkString(","))
@@ -120,7 +120,7 @@ trait KafkaTaskInput[T <: AnyRef] {
     consumer
   }
 
-  protected def assignKafkaConsumerOnTopics(consumer: KafkaConsumer[Array[Byte], Array[Byte]], topics: List[(String, List[Int])]) = {
+  protected def assignKafkaConsumerOnTopics(consumer: KafkaConsumer[Array[Byte], Array[Byte]], topics: List[(String, List[Int])]): Unit = {
     logger.debug(s"Task: ${manager.taskName}. Assign a kafka consumer to particular topics.")
     val topicPartitions = topics
       .flatMap(x => (x._2.head to x._2.tail.head)
@@ -129,7 +129,7 @@ trait KafkaTaskInput[T <: AnyRef] {
     consumer.assign(topicPartitions)
   }
 
-  protected def seekKafkaConsumerOffsets(consumer: KafkaConsumer[Array[Byte], Array[Byte]]) = {
+  protected def seekKafkaConsumerOffsets(consumer: KafkaConsumer[Array[Byte], Array[Byte]]): Unit = {
     logger.debug(s"Task: ${manager.taskName}. Seek a kafka consumer offset.")
     val partition = 0
     val partitionsRange = List(partition, partition)
@@ -147,16 +147,15 @@ trait KafkaTaskInput[T <: AnyRef] {
     if (maybeTxn.isDefined) {
       val tempTransaction = maybeTxn.get
       logger.debug(s"Task name: ${manager.taskName}. Get saved offsets for kafka consumer and apply them.")
-      val lastTxn = offsetConsumer.buildTransactionObject(tempTransaction.getPartition(), tempTransaction.getTransactionID(), tempTransaction.getCount()).get //todo fix it next milestone TR1216
+      val lastTxn = offsetConsumer.buildTransactionObject(tempTransaction.getPartition, tempTransaction.getTransactionID, tempTransaction.getState, tempTransaction.getCount).get //todo fix it next milestone TR1216
       kafkaOffsetsStorage = offsetSerializer.deserialize(lastTxn.next()).asInstanceOf[mutable.Map[(String, Int), Long]]
-//      kafkaOffsetsStorage = offsetSerializer.deserialize(lastTxn.getAll().dequeue()).asInstanceOf[mutable.Map[(String, Int), Long]]
       kafkaOffsetsStorage.foreach(x => consumer.seek(new TopicPartition(x._1._1, x._1._2), x._2 + 1))
     }
 
     offsetConsumer.stop()
   }
 
-  protected def applyConfigurationSettings(properties: Properties) = {
+  protected def applyConfigurationSettings(properties: Properties): Unit = {
     logger.debug(s"Task name: ${manager.taskName}. Get setting (using a config service) for kafka consumer and apply them.")
     val configService = ConnectionRepository.getConfigRepository
 
@@ -164,9 +163,13 @@ trait KafkaTaskInput[T <: AnyRef] {
     kafkaSettings.foreach(x => properties.put(ConfigurationSetting.clearConfigurationSettingName(x.domain, x.name), x.value))
   }
 
-  def setConsumerOffset(envelope: KafkaEnvelope[T]) = {
+  def setConsumerOffset(envelope: KafkaEnvelope[T]): Unit = {
     logger.debug(s"Task: ${manager.taskName}. Change offset for stream: ${envelope.stream} " +
       s"for partition: ${envelope.partition} to ${envelope.id}.")
     kafkaOffsetsStorage((envelope.stream, envelope.partition)) = envelope.id
+  }
+
+  def close(): Unit = {
+    kafkaConsumer.close()
   }
 }

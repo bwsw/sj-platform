@@ -36,4 +36,6 @@ abstract class CheckpointTaskInput[E <: Envelope](inputs: scala.collection.mutab
     setConsumerOffsetToLastEnvelope()
     checkpointGroup.checkpoint()
   }
+
+  def close(): Unit
 }

@@ -1,7 +1,6 @@
 package com.bwsw.sj.engine.output.benchmark
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.dal.model._
 import com.bwsw.sj.common.dal.model.service.RestServiceDomain
 import com.bwsw.sj.common.dal.model.stream.{RestStreamDomain, StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
@@ -20,15 +19,15 @@ object RestDataChecker extends App {
   inputConsumer.start()
 
   val inputElements = new ArrayBuffer[(Int, String)]()
-  val partitions = inputConsumer.getPartitions().toIterator
+  val partitions = inputConsumer.getPartitions.toIterator
 
   while (partitions.hasNext) {
-    val currentPartition = partitions.next()
+    val currentPartition = partitions.next
     var maybeTxn = inputConsumer.getTransaction(currentPartition)
     while (maybeTxn.isDefined) {
       val transaction = maybeTxn.get
-      while (transaction.hasNext()) {
-        val element = objectSerializer.deserialize(transaction.next()).asInstanceOf[(Int, String)]
+      while (transaction.hasNext) {
+        val element = objectSerializer.deserialize(transaction.next).asInstanceOf[(Int, String)]
         inputElements.append(element)
       }
       maybeTxn = inputConsumer.getTransaction(currentPartition)

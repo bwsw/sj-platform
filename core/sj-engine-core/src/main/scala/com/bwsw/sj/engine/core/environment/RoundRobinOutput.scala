@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.core.environment
 
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
-import com.bwsw.tstreams.agents.producer.{NewTransactionProducerPolicy, Producer, ProducerTransaction}
+import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer, ProducerTransaction}
 
 /**
   * Provides an output stream that defined for stream in whole.
@@ -25,14 +25,14 @@ class RoundRobinOutput(producer: Producer,
       maybeTransaction.get.send(bytes)
     }
     else {
-      maybeTransaction = Some(producer.newTransaction(NewTransactionProducerPolicy.ErrorIfOpened))
+      maybeTransaction = Some(producer.newTransaction(NewProducerTransactionPolicy.ErrorIfOpened))
       maybeTransaction.get.send(bytes)
     }
 
     logger.debug(s"Add an element to output envelope of output stream:  '$streamName'.")
     performanceMetrics.addElementToOutputEnvelope(
       streamName,
-      maybeTransaction.get.getTransactionID().toString,
+      maybeTransaction.get.getTransactionID.toString,
       bytes.length
     )
   }

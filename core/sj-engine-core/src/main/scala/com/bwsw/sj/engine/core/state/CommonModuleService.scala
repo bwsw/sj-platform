@@ -1,13 +1,14 @@
 package com.bwsw.sj.engine.core.state
 
 import com.bwsw.sj.common.engine.StreamingExecutor
-import com.bwsw.sj.common.si.model.instance.{BatchInstance, RegularInstance}
+import com.bwsw.sj.common.si.model.instance.{BatchInstance, Instance, RegularInstance}
 import com.bwsw.sj.common.utils.{EngineLiterals, SjTimer}
 import com.bwsw.sj.engine.core.environment.{ModuleEnvironmentManager, ModuleOutput}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
-import org.slf4j.LoggerFactory
+import com.bwsw.tstreams.agents.producer.Producer
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable
 
@@ -20,11 +21,11 @@ import scala.collection.mutable
   */
 abstract class CommonModuleService(manager: CommonTaskManager, checkpointGroup: CheckpointGroup, performanceMetrics: PerformanceMetrics) {
 
-  protected val logger = LoggerFactory.getLogger(this.getClass)
-  protected val instance = manager.instance
-  protected val outputProducers = manager.outputProducers
+  protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  protected val instance: Instance = manager.instance
+  protected val outputProducers: Map[String, Producer] = manager.outputProducers
   val moduleTimer: SjTimer = new SjTimer()
-  protected val producerPolicyByOutput = mutable.Map[String, (String, ModuleOutput)]()
+  protected val producerPolicyByOutput: mutable.Map[String, (String, ModuleOutput)] = mutable.Map[String, (String, ModuleOutput)]()
 
   addProducersToCheckpointGroup()
 
