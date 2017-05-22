@@ -112,8 +112,10 @@ class ModuleController {
   }
 
   def getRelated(moduleType: String, moduleName: String, moduleVersion: String): RestResponse = {
-    OkRestResponse(
-      RelatedToModuleResponseEntity(
-        serviceInterface.getRelatedInstances(moduleType, moduleName, moduleVersion)))
+    processModuleWithoutFile(moduleType, moduleName, moduleVersion) { metadata =>
+      OkRestResponse(
+        RelatedToModuleResponseEntity(
+          serviceInterface.getRelatedInstances(metadata)))
+    }
   }
 }

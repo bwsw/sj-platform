@@ -81,16 +81,16 @@ class ModuleSI extends JsonValidator {
       Left(createMessage("rest.modules.type.unknown", moduleType))
   }
 
-  def getRelatedInstances(moduleType: String, moduleName: String, moduleVersion: String): mutable.Buffer[String] = {
+  def getRelatedInstances(metadata: ModuleMetadata): mutable.Buffer[String] = {
     instanceRepository.getByParameters(Map(
-      "module-name" -> moduleName,
-      "module-type" -> moduleType,
-      "module-version" -> moduleVersion)
+      "module-name" -> metadata.specification.name,
+      "module-type" -> metadata.specification.moduleType,
+      "module-version" -> metadata.specification.version)
     ).map(_.name)
   }
 
   def delete(metadata: ModuleMetadata): Either[String, Boolean] = {
-    if (metadata.map(getRelatedInstances).isEmpty) {
+    if (getRelatedInstances(metadata).nonEmpty) {
       Left(createMessage(
         "rest.modules.module.cannot.delete",
         metadata.signature))
