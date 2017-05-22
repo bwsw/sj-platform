@@ -90,7 +90,7 @@ class ModuleController {
               createMessage("rest.modules.module.deleted", metadata.signature)))
 
         case Left(error) =>
-          BadRequestRestResponse(MessageResponseEntity(error))
+          UnprocessableEntityRestResponse(MessageResponseEntity(error))
       }
     }
   }
@@ -99,7 +99,7 @@ class ModuleController {
                            (f: ModuleMetadata => RestResponse): RestResponse = {
     serviceInterface.get(moduleType, moduleName, moduleVersion) match {
       case Right(moduleMetadata) => f(moduleMetadata)
-      case Left(error) => BadRequestRestResponse(MessageResponseEntity(error))
+      case Left(error) => NotFoundRestResponse(MessageResponseEntity(error))
     }
   }
 

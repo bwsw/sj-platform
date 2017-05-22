@@ -181,7 +181,7 @@ class InstanceController {
       case Right(moduleMetadata) =>
         f(ModuleMetadata.from(moduleMetadata))
       case Left(error) =>
-        BadRequestRestResponse(MessageResponseEntity(error))
+        NotFoundRestResponse(MessageResponseEntity(error))
     }
   }
 
