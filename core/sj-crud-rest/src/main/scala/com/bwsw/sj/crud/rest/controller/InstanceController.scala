@@ -215,13 +215,13 @@ class InstanceController {
 
   private def deserializeInstanceApi(serialized: String, moduleType: String): InstanceApi = moduleType match {
     case EngineLiterals.inputStreamingType =>
-      serializer.deserialize[BatchInstanceApi](serialized)
+      serializer.deserialize[InputInstanceApi](serialized)
     case EngineLiterals.regularStreamingType =>
       serializer.deserialize[RegularInstanceApi](serialized)
     case EngineLiterals.batchStreamingType =>
-      serializer.deserialize[OutputInstanceApi](serialized)
+      serializer.deserialize[BatchInstanceApi](serialized)
     case EngineLiterals.outputStreamingType =>
-      serializer.deserialize[InputInstanceApi](serialized)
+      serializer.deserialize[OutputInstanceApi](serialized)
     case _ =>
       serializer.deserialize[InstanceApi](serialized)
   }
@@ -231,7 +231,7 @@ class InstanceController {
     val validatorClassName = configService.get(s"${ConfigLiterals.systemDomain}.$validatorClassConfig") match {
       case Some(configurationSetting) => configurationSetting.value
       case None => throw ConfigSettingNotFound(
-        createMessage("rest.config.setting.notfound", ConfigLiterals.systemDomain, validatorClassConfig))
+        createMessage("rest.config.setting.notfound", s"${ConfigLiterals.systemDomain}.$validatorClassConfig"))
     }
     val validatorClass = Class.forName(validatorClassName)
     val validator = validatorClass.newInstance().asInstanceOf[InstanceValidator]
