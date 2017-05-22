@@ -100,5 +100,7 @@ class OutputInstance(name: String,
   override def createStreams(): Unit =
     getStreams(Array(input)).foreach(_.create())
 
-  override val streams = Array(clearStreamFromMode(input), output)
+  override def getInputsWithoutStreamMode: Array[String] = Array(clearStreamFromMode(input))
+
+  override val streams = getInputsWithoutStreamMode ++ outputs
 }

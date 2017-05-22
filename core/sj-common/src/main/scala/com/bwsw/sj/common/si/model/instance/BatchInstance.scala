@@ -106,5 +106,7 @@ class BatchInstance(name: String,
   override def createStreams(): Unit =
     getStreams(streams).foreach(_.create())
 
-  override val streams = inputs.map(clearStreamFromMode) ++ outputs
+  override def getInputsWithoutStreamMode: Array[String] = inputs.map(clearStreamFromMode)
+
+  override val streams = getInputsWithoutStreamMode ++ outputs
 }
