@@ -36,7 +36,7 @@ class ModuleSI extends JsonValidator {
       if (errors.isEmpty) {
         val uploadingFile = new File(entity.filename)
         FileUtils.copyFile(entity.file.get, uploadingFile)
-        fileStorage.put(uploadingFile, entity.filename, entity.specification, FileMetadata.moduleType)
+        fileStorage.put(uploadingFile, entity.filename, entity.specification.to, FileMetadata.moduleType)
 
         Right(true)
       } else {

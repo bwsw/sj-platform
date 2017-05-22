@@ -1,8 +1,9 @@
 package com.bwsw.common.file.utils
 
-import java.io.{FileInputStream, File, FileNotFoundException, InputStream}
+import java.io.{File, FileInputStream, FileNotFoundException, InputStream}
 import java.nio.file.FileAlreadyExistsException
 
+import com.bwsw.sj.common.dal.model.module.SpecificationDomain
 import org.apache.commons.io.FileUtils
 
 import scala.reflect.io.{Directory, Path}
@@ -68,6 +69,10 @@ class LocalStorage(pathToLocalStorage: String) extends FileStorage {
   }
 
   override def put(file: File, fileName: String, specification: Map[String, Any], filetype: String): Unit = {
+    throw new NotImplementedError("Local storage hasn't an opportunity to save file with specification yet.")
+  }
+
+  override def put(file: File, fileName: String, specification: SpecificationDomain, filetype: String): Unit = {
     throw new NotImplementedError("Local storage hasn't an opportunity to save file with specification yet.")
   }
 

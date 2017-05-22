@@ -1,9 +1,8 @@
 package com.bwsw.common.file.utils
 
-import java.io.{InputStream, File}
+import java.io.{File, InputStream}
 
-import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.si.model.module.Specification
+import com.bwsw.sj.common.dal.model.module.SpecificationDomain
 import org.slf4j.LoggerFactory
 
 trait FileStorage {
@@ -14,13 +13,7 @@ trait FileStorage {
 
   def put(file: File, fileName: String, specification: Map[String, Any], filetype: String): Unit
 
-  def put(file: File, fileName: String, specification: Specification, filetype: String): Unit = {
-    val serializer = new JsonSerializer()
-    val json = serializer.serialize(specification)
-    val map = serializer.deserialize[Map[String, Any]](json)
-
-    put(file, fileName, map, filetype)
-  }
+  def put(file: File, fileName: String, specification: SpecificationDomain, filetype: String): Unit
 
   def get(fileName: String, newFileName: String): File
 

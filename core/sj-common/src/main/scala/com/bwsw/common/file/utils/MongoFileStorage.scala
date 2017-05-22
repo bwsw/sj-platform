@@ -1,10 +1,12 @@
 package com.bwsw.common.file.utils
 
-import java.io.{InputStream, File, FileNotFoundException}
+import java.io.{File, FileNotFoundException, InputStream}
 import java.nio.file.FileAlreadyExistsException
 
+import com.bwsw.sj.common.dal.model.module.SpecificationDomain
 import com.mongodb.casbah.MongoDB
 import com.mongodb.casbah.gridfs.Imports._
+import org.mongodb.morphia.mapping.Mapper
 
 class MongoFileStorage(mongoDB: MongoDB) extends FileStorage {
 
@@ -32,6 +34,26 @@ class MongoFileStorage(mongoDB: MongoDB) extends FileStorage {
       val gridFsFile = gridFS.createFile(file)
       logger.debug(s"Add a specification to file: '$fileName'.")
       gridFsFile.put("specification", specification)
+      logger.debug(s"Add a file type to file: '$fileName'.")
+      gridFsFile.put("filetype", filetype)
+      gridFsFile.save()
+      //gridFsFile.validate() sometimes mongodb can't get executor for query and fail as no md5 returned from server
+    } else {
+      logger.error(s"File with name: '$fileName' already exists in a mongo storage.")
+      throw new FileAlreadyExistsException(s"$fileName already exists")
+    }
+  }
+
+  override def put(file: File, fileName: String, specification: SpecificationDomain, filetype: String): Unit = {
+    logger.debug(s"Try to put a file: '$fileName' with a specification in a mongo storage: ${mongoDB.name}.")
+    logger.debug(s"Check whether a mongo storage already contains a file with name: '$fileName' or not.")
+    if (gridFS.findOne(fileName).isEmpty) {
+      logger.debug(s"Create file in a mongo storage: '$fileName'.")
+      val gridFsFile = gridFS.createFile(file)
+      logger.debug(s"Add a specification to file: '$fileName'.")
+      val mapper = new Mapper()
+      val mappedSpecification = mapper.toDBObject(specification).toMap
+      gridFsFile.put("specification", mappedSpecification)
       logger.debug(s"Add a file type to file: '$fileName'.")
       gridFsFile.put("filetype", filetype)
       gridFsFile.save()
