@@ -47,7 +47,7 @@ class SpecificationApi(val name: String,
 }
 
 object SpecificationApi {
-  private val serializer = new JsonSerializer()
+  private val serializer = new JsonSerializer(true)
 
   def from(specification: Specification): SpecificationApi = {
     specification.moduleType match {
