@@ -8,6 +8,7 @@ import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, InstanceDomain, Task}
+import com.bwsw.sj.common.dal.model.module.BatchSpecificationDomain
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service.{KafkaServiceDomain, ServiceDomain, TStreamServiceDomain, ZKServiceDomain}
 import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, StreamDomain, TStreamStreamDomain}
@@ -324,7 +325,8 @@ object DataFactory {
       }
     }
 
-    val specification = serializer.deserialize[Map[String, Any]](builder.toString())
+    val specification = serializer.deserialize[Map[String, Any]](builder.toString()) +
+      ("className" -> classOf[BatchSpecificationDomain].getName)
 
     storage.put(file, file.getName, specification, "module")
   }
