@@ -7,18 +7,18 @@ import com.fasterxml.jackson.annotation.JsonProperty
 class JDBCServiceApi(name: String,
                      val database: String,
                      val provider: String,
-                     description: String = RestLiterals.defaultDescription,
-                     @JsonProperty("type") serviceType: String = ServiceLiterals.jdbcType)
-  extends ServiceApi(serviceType, name, description) {
+                     description: Option[String] = Some(RestLiterals.defaultDescription),
+                     @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.jdbcType))
+  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.jdbcType), name, description) {
 
   override def to(): JDBCService = {
     val modelService =
       new JDBCService(
         name = this.name,
-        description = this.description,
+        description = this.description.getOrElse(RestLiterals.defaultDescription),
         provider = this.provider,
         database = this.database,
-        serviceType = this.serviceType
+        serviceType = this.serviceType.getOrElse(ServiceLiterals.jdbcType)
       )
 
     modelService

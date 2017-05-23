@@ -10,3 +10,5 @@ class JsonIncorrectValueException(msg: String) extends JsonDeserializationExcept
 class JsonUnrecognizedPropertyException(msg: String) extends JsonDeserializationException(msg)
 
 class JsonNotParsedException(msg: String) extends JsonDeserializationException(msg)
+
+class JsonMissedPropertyException(msg: String) extends JsonDeserializationException(msg)

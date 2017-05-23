@@ -7,18 +7,18 @@ import com.fasterxml.jackson.annotation.JsonProperty
 class ArspkDBServiceApi(name: String,
                         val namespace: String,
                         val provider: String,
-                        description: String = RestLiterals.defaultDescription,
-                        @JsonProperty("type") serviceType: String = ServiceLiterals.aerospikeType)
-  extends ServiceApi(serviceType, name, description) {
+                        description: Option[String] = Some(RestLiterals.defaultDescription),
+                        @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.aerospikeType))
+  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.aerospikeType), name, description) {
 
   override def to(): AerospikeService = {
     val modelService =
       new AerospikeService(
         name = this.name,
-        description = this.description,
+        description = this.description.getOrElse(RestLiterals.defaultDescription),
         provider = this.provider,
         namespace = this.namespace,
-        serviceType = this.serviceType
+        serviceType = this.serviceType.getOrElse(ServiceLiterals.aerospikeType)
       )
 
     modelService

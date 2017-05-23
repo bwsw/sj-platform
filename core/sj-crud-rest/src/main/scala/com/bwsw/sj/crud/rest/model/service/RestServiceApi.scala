@@ -9,23 +9,23 @@ import com.fasterxml.jackson.annotation.JsonProperty
   */
 class RestServiceApi(name: String,
                      val provider: String,
-                     val basePath: String = "/",
-                     val httpVersion: String = RestLiterals.http_1_1,
-                     val headers: Map[String, String] = Map(),
-                     description: String = RestLiterals.defaultDescription,
-                     @JsonProperty("type") serviceType: String = ServiceLiterals.restType)
-  extends ServiceApi(serviceType, name, description) {
+                     val basePath: Option[String] = Some("/"),
+                     val httpVersion: Option[String] = Some(RestLiterals.http_1_1),
+                     val headers: Option[Map[String, String]] = Some(Map()),
+                     description: Option[String] = Some(RestLiterals.defaultDescription),
+                     @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.restType))
+  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.restType), name, description) {
 
   override def to(): RestService = {
     val modelService =
       new RestService(
         name = this.name,
-        description = this.description,
+        description = this.description.getOrElse(RestLiterals.defaultDescription),
         provider = this.provider,
-        basePath = this.basePath,
-        httpVersion = this.httpVersion,
-        headers = this.headers,
-        serviceType = this.serviceType
+        basePath = this.basePath.getOrElse("/"),
+        httpVersion = this.httpVersion.getOrElse(RestLiterals.http_1_1),
+        headers = this.headers.getOrElse(Map()),
+        serviceType = this.serviceType.getOrElse(ServiceLiterals.restType)
       )
 
     modelService

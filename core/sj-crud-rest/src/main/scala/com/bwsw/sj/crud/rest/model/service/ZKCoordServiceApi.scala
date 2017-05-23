@@ -7,9 +7,9 @@ import com.fasterxml.jackson.annotation.JsonProperty
 class ZKCoordServiceApi(name: String,
                         val provider: String,
                         val namespace: String,
-                        description: String = RestLiterals.defaultDescription,
-                        @JsonProperty("type") serviceType: String = ServiceLiterals.zookeeperType)
-  extends ServiceApi(serviceType, name, description) {
+                        description: Option[String] = Some(RestLiterals.defaultDescription),
+                        @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.zookeeperType))
+  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.zookeeperType), name, description) {
 
   override def to(): ZKService = {
     val modelService =
@@ -17,8 +17,8 @@ class ZKCoordServiceApi(name: String,
         name = this.name,
         provider = this.provider,
         namespace = this.namespace,
-        description = this.description,
-        serviceType = this.serviceType
+        description = this.description.getOrElse(RestLiterals.defaultDescription),
+        serviceType = this.serviceType.getOrElse(ServiceLiterals.zookeeperType)
       )
 
     modelService

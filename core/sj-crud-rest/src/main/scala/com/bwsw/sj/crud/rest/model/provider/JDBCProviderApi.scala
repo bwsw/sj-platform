@@ -10,21 +10,21 @@ class JDBCProviderApi(name: String,
                       password: String,
                       hosts: Array[String],
                       val driver: String,
-                      description: String = RestLiterals.defaultDescription,
-                      @JsonProperty("type") providerType: String = ProviderLiterals.jdbcType)
-  extends ProviderApi(name, login, password, providerType, hosts, description) {
+                      description: Option[String] = Some(RestLiterals.defaultDescription),
+                      @JsonProperty("type") providerType: Option[String] = Some(ProviderLiterals.jdbcType))
+  extends ProviderApi(name, login, password, providerType.getOrElse(ProviderLiterals.jdbcType), hosts, description) {
 
   @JsonIgnore
   override def to(): JDBCProvider = {
     val provider =
       new JDBCProvider(
         name = this.name,
-        description = this.description,
+        description = this.description.getOrElse(RestLiterals.defaultDescription),
         hosts = this.hosts,
         login = this.login,
         password = this.password,
         driver = this.driver,
-        providerType = this.providerType
+        providerType = this.providerType.getOrElse(ProviderLiterals.jdbcType)
       )
 
     provider

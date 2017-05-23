@@ -14,13 +14,13 @@ class ProviderApi(val name: String,
                   val password: String,
                   @JsonProperty("type") val providerType: String,
                   val hosts: Array[String],
-                  val description: String = RestLiterals.defaultDescription) {
+                  val description: Option[String] = Some(RestLiterals.defaultDescription)) {
   @JsonIgnore
   def to(): Provider = {
     val provider =
       new Provider(
         name = this.name,
-        description = this.description,
+        description = this.description.getOrElse(RestLiterals.defaultDescription),
         hosts = this.hosts,
         login = this.login,
         password = this.password,
@@ -43,7 +43,7 @@ object ProviderApi {
           password = jdbcProviderMid.password,
           hosts = jdbcProviderMid.hosts,
           driver = jdbcProviderMid.driver,
-          description = jdbcProviderMid.description
+          description = Some(jdbcProviderMid.description)
         )
 
       case _ =>
@@ -53,7 +53,7 @@ object ProviderApi {
           password = provider.password,
           providerType = provider.providerType,
           hosts = provider.hosts,
-          description = provider.description
+          description = Some(provider.description)
         )
     }
   }
