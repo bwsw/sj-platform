@@ -112,8 +112,6 @@ class Specification(val name: String,
     val errors = validateSourceDefined(inputs, "inputs") ++ validateSourceDefined(outputs, "outputs")
 
     if (errors.isEmpty) {
-      if (outputs.cardinality(0) <= 0 || outputs.cardinality(1) < outputs.cardinality(0))
-        errors += createMessage("rest.validator.specification.cardinality.left.bound.greater.zero", moduleType, "outputs")
       moduleType match {
         case EngineLiterals.inputStreamingType =>
           if (inputs.cardinality.exists(_ != 0))
@@ -121,13 +119,15 @@ class Specification(val name: String,
           if (inputs.types.length != 1 || !inputs.types.contains(StreamLiterals.inputDummy))
             errors += createMessage("rest.validator.specification.input.type", moduleType, "input")
           if (outputs.types.isEmpty || !outputs.types.forall(StreamLiterals.internalTypes.contains))
-            errors += createMessage("rest.validator.specification.sources.must.t-stream.kafka", moduleType, "outputs")
+            errors += createMessage("rest.validator.specification.sources.t-stream.kafka", moduleType, "outputs")
+          if (outputs.cardinality(0) <= 0 || outputs.cardinality(1) < outputs.cardinality(0))
+            errors += createMessage("rest.validator.specification.cardinality.left.bound.greater.zero", moduleType, "outputs")
 
         case EngineLiterals.outputStreamingType =>
           if (inputs.cardinality.exists(_ != 1))
             errors += createMessage("rest.validator.specification.both.input.cardinality", moduleType, "1")
           if (inputs.types.isEmpty || !inputs.types.forall(StreamLiterals.internalTypes.contains))
-            errors += createMessage("rest.validator.specification.sources.must.t-stream.kafka", moduleType, "inputs")
+            errors += createMessage("rest.validator.specification.sources.t-stream.kafka", moduleType, "inputs")
           if (outputs.cardinality.exists(_ != 1))
             errors += createMessage("rest.validator.specification.both.output.cardinality", moduleType, "1")
           if (outputs.types.isEmpty || !outputs.types.forall(StreamLiterals.outputTypes.contains))
@@ -137,9 +137,11 @@ class Specification(val name: String,
           if (inputs.cardinality(0) <= 0 || inputs.cardinality(1) < inputs.cardinality(0))
             errors += createMessage("rest.validator.specification.cardinality.left.bound.greater.zero", moduleType, "inputs")
           if (inputs.types.isEmpty || !inputs.types.forall(StreamLiterals.internalTypes.contains))
-            errors += createMessage("rest.validator.specification.sources.must.t-stream.kafka", moduleType, "inputs")
+            errors += createMessage("rest.validator.specification.sources.t-stream.kafka", moduleType, "inputs")
           if (outputs.types.isEmpty || !outputs.types.forall(StreamLiterals.internalTypes.contains))
-            errors += createMessage("rest.validator.specification.sources.must.t-stream.kafka", moduleType, "outputs")
+            errors += createMessage("rest.validator.specification.sources.t-stream.kafka", moduleType, "outputs")
+          if (outputs.cardinality(0) <= 0 || outputs.cardinality(1) < outputs.cardinality(0))
+            errors += createMessage("rest.validator.specification.cardinality.left.bound.greater.zero", moduleType, "outputs")
       }
     }
 
