@@ -4,6 +4,7 @@ import com.bwsw.sj.common.si.model.stream._
 import com.bwsw.sj.common.utils.{RestLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes, JsonTypeInfo}
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[StreamApi], visible = true)
 @JsonSubTypes(Array(
@@ -16,13 +17,19 @@ import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes,
 class StreamApi(@JsonProperty("type") val streamType: String,
                 val name: String,
                 val service: String,
-                val tags: Array[String] = Array(),
-                val force: Boolean = false,
-                val description: String = RestLiterals.defaultDescription) {
+                val tags: Option[Array[String]] = Some(Array()),
+                @JsonDeserialize(contentAs = classOf[Boolean]) val force: Option[Boolean] = Some(false),
+                val description: Option[String] = Some(RestLiterals.defaultDescription)) {
 
   @JsonIgnore
   def to: SjStream =
-    new SjStream(streamType, name, service, tags, force, description)
+    new SjStream(
+      streamType,
+      name,
+      service,
+      tags.getOrElse(Array()),
+      force.getOrElse(false),
+      description.getOrElse(RestLiterals.defaultDescription))
 }
 
 object StreamApi {
@@ -34,10 +41,10 @@ object StreamApi {
       new TStreamStreamApi(
         tStreamStream.name,
         tStreamStream.service,
-        tStreamStream.tags,
-        tStreamStream.force,
-        tStreamStream.description,
-        tStreamStream.partitions
+        Option(tStreamStream.tags),
+        Option(tStreamStream.force),
+        Option(tStreamStream.description),
+        Option(tStreamStream.partitions)
       )
 
     case StreamLiterals.kafkaStreamType =>
@@ -46,11 +53,11 @@ object StreamApi {
       new KafkaStreamApi(
         kafkaStream.name,
         kafkaStream.service,
-        kafkaStream.tags,
-        kafkaStream.force,
-        kafkaStream.description,
-        kafkaStream.partitions,
-        kafkaStream.replicationFactor
+        Option(kafkaStream.tags),
+        Option(kafkaStream.force),
+        Option(kafkaStream.description),
+        Option(kafkaStream.partitions),
+        Option(kafkaStream.replicationFactor)
       )
 
     case StreamLiterals.esOutputType =>
@@ -59,9 +66,9 @@ object StreamApi {
       new ESStreamApi(
         esStream.name,
         esStream.service,
-        esStream.tags,
-        esStream.force,
-        esStream.description
+        Option(esStream.tags),
+        Option(esStream.force),
+        Option(esStream.description)
       )
 
     case StreamLiterals.restOutputType =>
@@ -70,9 +77,9 @@ object StreamApi {
       new RestStreamApi(
         restStream.name,
         restStream.service,
-        restStream.tags,
-        restStream.force,
-        restStream.description
+        Option(restStream.tags),
+        Option(restStream.force),
+        Option(restStream.description)
       )
 
     case StreamLiterals.jdbcOutputType =>
@@ -82,9 +89,9 @@ object StreamApi {
         jdbcStream.primary,
         jdbcStream.name,
         jdbcStream.service,
-        jdbcStream.tags,
-        jdbcStream.force,
-        jdbcStream.description
+        Option(jdbcStream.tags),
+        Option(jdbcStream.force),
+        Option(jdbcStream.description)
       )
   }
 }
