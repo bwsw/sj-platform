@@ -8,19 +8,19 @@ class KfkQServiceApi(name: String,
                      val provider: String,
                      val zkProvider: String,
                      val zkNamespace: String,
-                     description: String = RestLiterals.defaultDescription,
-                     @JsonProperty("type") serviceType: String = ServiceLiterals.kafkaType)
-  extends ServiceApi(serviceType, name, description) {
+                     description: Option[String] = Some(RestLiterals.defaultDescription),
+                     @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.kafkaType))
+  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.kafkaType), name, description) {
 
   override def to(): KafkaService = {
     val modelService =
       new KafkaService(
         name = this.name,
-        description = this.description,
+        description = this.description.getOrElse(RestLiterals.defaultDescription),
         provider = this.provider,
         zkProvider = this.zkProvider,
         zkNamespace = this.zkNamespace,
-        serviceType = this.serviceType
+        serviceType = this.serviceType.getOrElse(ServiceLiterals.kafkaType)
       )
 
     modelService

@@ -19,14 +19,14 @@ import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes,
 ))
 class ServiceApi(@JsonProperty("type") val serviceType: String,
                  val name: String,
-                 val description: String = RestLiterals.defaultDescription) {
+                 val description: Option[String] = Some(RestLiterals.defaultDescription)) {
 
   @JsonIgnore
   def to(): Service =
     new Service(
       serviceType = this.serviceType,
       name = this.name,
-      description = this.description
+      description = this.description.getOrElse(RestLiterals.defaultDescription)
     )
 }
 
@@ -41,7 +41,7 @@ object ServiceApi {
           name = aerospikeService.name,
           namespace = aerospikeService.namespace,
           provider = aerospikeService.provider,
-          description = aerospikeService.description
+          description = Option(aerospikeService.description)
         )
 
       case ServiceLiterals.cassandraType =>
@@ -51,7 +51,7 @@ object ServiceApi {
           name = cassandraService.name,
           keyspace = cassandraService.keyspace,
           provider = cassandraService.provider,
-          description = cassandraService.description
+          description = Option(cassandraService.description)
         )
 
       case ServiceLiterals.elasticsearchType =>
@@ -61,7 +61,7 @@ object ServiceApi {
           name = esService.name,
           index = esService.index,
           provider = esService.provider,
-          description = esService.description
+          description = Option(esService.description)
         )
 
       case ServiceLiterals.jdbcType =>
@@ -71,7 +71,7 @@ object ServiceApi {
           name = jdbcService.name,
           database = jdbcService.database,
           provider = jdbcService.provider,
-          description = jdbcService.description
+          description = Option(jdbcService.description)
         )
 
       case ServiceLiterals.kafkaType =>
@@ -82,7 +82,7 @@ object ServiceApi {
           zkProvider = kafkaService.zkProvider,
           zkNamespace = kafkaService.zkNamespace,
           provider = kafkaService.provider,
-          description = kafkaService.description
+          description = Option(kafkaService.description)
         )
 
       case ServiceLiterals.restType =>
@@ -90,11 +90,11 @@ object ServiceApi {
 
         new RestServiceApi(
           name = restService.name,
-          basePath = restService.basePath,
-          httpVersion = restService.httpVersion,
-          headers = restService.headers,
+          basePath = Option(restService.basePath),
+          httpVersion = Option(restService.httpVersion),
+          headers = Option(restService.headers),
           provider = restService.provider,
-          description = restService.description
+          description = Option(restService.description)
         )
 
       case ServiceLiterals.tstreamsType =>
@@ -105,7 +105,7 @@ object ServiceApi {
           prefix = tStreamService.prefix,
           token = tStreamService.token,
           provider = tStreamService.provider,
-          description = tStreamService.description
+          description = Option(tStreamService.description)
         )
 
       case ServiceLiterals.zookeeperType =>
@@ -115,7 +115,7 @@ object ServiceApi {
           name = zkService.name,
           namespace = zkService.namespace,
           provider = zkService.provider,
-          description = zkService.description
+          description = Option(zkService.description)
         )
     }
   }
