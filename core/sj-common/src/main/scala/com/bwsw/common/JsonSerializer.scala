@@ -48,6 +48,8 @@ class JsonSerializer extends Serializer {
       case Failure(e: JsonMappingException) =>
         if (e.getMessage.startsWith("No content"))
           throw new JsonDeserializationException("Empty JSON")
+        else if (e.getMessage.startsWith("Missing required creator property"))
+          throw new JsonMissedPropertyException(getMissedProperty(e))
         else
           throw new JsonIncorrectValueException(getProblemProperty(e))
       case Failure(e: JsonParseException) =>
@@ -73,6 +75,9 @@ class JsonSerializer extends Serializer {
       }
     }
   }
+
+  private def getMissedProperty(exception: JsonMappingException): String =
+    exception.getMessage.replaceFirst("Missing required creator property\\s*'(.*?)'.*", "!$1!")
 
   private def typeReference[T: Manifest]: TypeReference[T] = new TypeReference[T] {
     override def getType: Type = typeFromManifest(manifest[T])
