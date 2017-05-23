@@ -17,9 +17,10 @@ import scala.util.{Failure, Success, Try}
 
 class JsonSerializer extends Serializer {
 
-  def this(ignore: Boolean) = {
+  def this(ignore: Boolean, failOnNullPrimitives: Boolean = false) = {
     this()
     this.setIgnoreUnknown(ignore)
+    mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, failOnNullPrimitives)
   }
 
   private val logger = LoggerFactory.getLogger(this.getClass)
