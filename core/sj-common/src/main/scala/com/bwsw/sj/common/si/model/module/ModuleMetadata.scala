@@ -31,9 +31,6 @@ class ModuleMetadata(filename: String,
   override def validate(): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]
 
-    if (!filename.endsWith(".jar"))
-      errors += createMessage("rest.modules.modules.extension.unknown", filename)
-
     if (fileStorage.exists(filename))
       errors += createMessage("rest.modules.module.file.exists", filename)
 

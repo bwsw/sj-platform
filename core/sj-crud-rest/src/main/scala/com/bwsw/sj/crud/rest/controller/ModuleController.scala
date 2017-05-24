@@ -20,29 +20,37 @@ class ModuleController {
   private val serviceInterface = new ModuleSI
 
   def create(entity: ModuleMetadataApi): RestResponse = {
-    Try(entity.to()) match {
-      case Success(moduleMetadata) =>
-        serviceInterface.create(moduleMetadata) match {
-          case Right(_) =>
-            OkRestResponse(
-              MessageResponseEntity(
-                createMessage("rest.modules.module.uploaded", moduleMetadata.filename)))
-          case Left(errors) =>
-            BadRequestRestResponse(
-              MessageResponseEntity(
-                createMessage("rest.modules.module.cannot.upload", moduleMetadata.filename, errors.mkString(";"))))
-        }
+    val apiErrors = entity.validate
+    if (apiErrors.isEmpty) {
+      Try(entity.to()) match {
+        case Success(moduleMetadata) =>
+          serviceInterface.create(moduleMetadata) match {
+            case Right(_) =>
+              OkRestResponse(
+                MessageResponseEntity(
+                  createMessage("rest.modules.module.uploaded", moduleMetadata.filename)))
+            case Left(errors) =>
+              BadRequestRestResponse(
+                MessageResponseEntity(
+                  createMessage("rest.modules.module.cannot.upload", moduleMetadata.filename, errors.mkString(";"))))
+          }
 
-      case Failure(exception: JsonDeserializationException) =>
-        val error = JsonDeserializationErrorMessageCreator(exception)
-        BadRequestRestResponse(
-          MessageResponseEntity(
-            createMessage("rest.modules.module.cannot.upload", entity.filename.get, error)))
+        case Failure(exception: JsonDeserializationException) =>
+          val error = JsonDeserializationErrorMessageCreator(exception)
+          BadRequestRestResponse(
+            MessageResponseEntity(
+              createMessage("rest.modules.module.cannot.upload", entity.filename.get, error)))
 
-      case Failure(exception: Throwable) =>
-        BadRequestRestResponse(
-          MessageResponseEntity(
-            createMessage("rest.modules.module.cannot.upload", entity.filename.get, exception.getMessage)))
+        case Failure(exception: Throwable) =>
+          BadRequestRestResponse(
+            MessageResponseEntity(
+              createMessage("rest.modules.module.cannot.upload", entity.filename.get, exception.getMessage)))
+      }
+
+    } else {
+      BadRequestRestResponse(
+        MessageResponseEntity(
+          createMessage("rest.modules.module.cannot.upload", entity.filename.get, apiErrors.mkString(";"))))
     }
   }
 
