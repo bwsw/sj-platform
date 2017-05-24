@@ -101,14 +101,18 @@ class ModuleSI extends JsonValidator {
   }
 
   def exists(moduleType: String, moduleName: String, moduleVersion: String): Either[String, FileMetadataDomain] = {
-    val moduleSignature = ModuleMetadata.getModuleSignature(moduleType, moduleName, moduleVersion)
-    val filesMetadata = getFilesMetadata(moduleType, moduleName, moduleVersion)
-    if (filesMetadata.isEmpty)
-      Left(createMessage("rest.modules.module.notfound", moduleSignature))
-    else if (!fileStorage.exists(filesMetadata.head.filename))
-      Left(createMessage("rest.modules.module.jar.notfound", moduleSignature))
-    else
-      Right(filesMetadata.head)
+    if (EngineLiterals.moduleTypes.contains(moduleType)) {
+      val moduleSignature = ModuleMetadata.getModuleSignature(moduleType, moduleName, moduleVersion)
+      val filesMetadata = getFilesMetadata(moduleType, moduleName, moduleVersion)
+      if (filesMetadata.isEmpty)
+        Left(createMessage("rest.modules.module.notfound", moduleSignature))
+      else if (!fileStorage.exists(filesMetadata.head.filename))
+        Left(createMessage("rest.modules.module.jar.notfound", moduleSignature))
+      else
+        Right(filesMetadata.head)
+    } else {
+      Left(createMessage("rest.modules.type.unknown", moduleType))
+    }
   }
 
   private def getFilesMetadata(moduleType: String, moduleName: String, moduleVersion: String) = {
