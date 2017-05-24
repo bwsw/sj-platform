@@ -62,13 +62,12 @@ class ModuleMetadata(filename: String,
                 case Success(implementation) if !interface.isAssignableFrom(implementation) =>
                   errors += createMessage(
                     "rest.validator.specification.class.should.implement",
-                    specification.moduleType,
                     property,
                     implementation.getName,
                     interface.getName)
                 case Success(_) =>
                 case Failure(_) =>
-                  errors += createMessage("rest.validator.specification.class.not.found", property, className)
+                  errors += createMessage("rest.validator.specification.class.not.found", className, property)
               }
           }
 

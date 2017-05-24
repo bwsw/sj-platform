@@ -2,6 +2,9 @@ package com.bwsw.sj.common.si.model.module
 
 import com.bwsw.sj.common.dal.model.module.{BatchSpecificationDomain, IOstream}
 import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
+
+import scala.collection.mutable.ArrayBuffer
 
 class BatchSpecification(name: String,
                          description: String,
@@ -44,6 +47,18 @@ class BatchSpecification(name: String,
       validatorClass,
       executorClass,
       batchCollectorClass)
+  }
+
+  override def validate: ArrayBuffer[String] = {
+    val errors = validateGeneralFields
+
+    Option(batchCollectorClass) match {
+      case None | Some("") =>
+        errors += createMessage("rest.validator.specification.attribute.required", "batch-collector-class")
+      case _ =>
+    }
+
+    errors
   }
 }
 
