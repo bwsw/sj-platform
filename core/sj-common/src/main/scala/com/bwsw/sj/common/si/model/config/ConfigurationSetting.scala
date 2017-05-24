@@ -13,6 +13,12 @@ import scala.collection.mutable.ArrayBuffer
 class ConfigurationSetting(val name: String,
                            val value: String,
                            val domain: String) {
+
+  /**
+    * Validates configuration setting
+    *
+    * @return empty array if configuration setting is correct, validation errors otherwise
+    */
   def validate(): ArrayBuffer[String] = {
     val configRepository = ConnectionRepository.getConfigRepository
     val errors = new ArrayBuffer[String]()
@@ -90,6 +96,12 @@ object ConfigurationSetting {
     domain + "." + name
   }
 
+  /**
+    * Removes domain from configuration setting name
+    *
+    * @param domain
+    * @param name configuration setting name with domain
+    */
   def clearConfigurationSettingName(domain: String, name: String): String = {
     name.replaceFirst(domain + ".", "")
   }

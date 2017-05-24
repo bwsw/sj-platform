@@ -23,6 +23,11 @@ class FileMetadata(val filename: String,
   private val fileStorage = ConnectionRepository.getFileStorage
   private val fileMetadataRepository = ConnectionRepository.getFileMetadataRepository
 
+  /**
+    * Validates file metadata
+    *
+    * @return empty array if file metadata is correct, validation errors otherwise
+    */
   def validate(): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]
 
@@ -37,10 +42,9 @@ class FileMetadata(val filename: String,
   }
 
   /**
-    * Check specification of uploading custom jar file
+    * Indicates that specification of uploading custom jar file is valid
     *
-    * @param jarFile - input jar file
-    * @return - content of specification.json
+    * @param jarFile uploading jar file
     */
   private def checkCustomFileSpecification(jarFile: File): Boolean = {
     val json = FileMetadata.getSpecificationFromJar(jarFile)
@@ -83,6 +87,12 @@ object FileMetadata {
     )
   }
 
+  /**
+    * Retrieves [[SpecificationDomain]] from jar file
+    *
+    * @param jarFile
+    * @return specification
+    */
   def getSpecification(jarFile: File): SpecificationDomain = {
     maybeSpecification match {
       case Some(specification) =>
@@ -96,10 +106,10 @@ object FileMetadata {
   }
 
   /**
-    * Return content of specification.json file from root of jar
+    * Retrieves content of specification.json file from root of jar
     *
-    * @param file - Input jar file
-    * @return - json-string from specification.json
+    * @param file jar file
+    * @return content of specification.json
     */
   def getSpecificationFromJar(file: File): String = {
     val builder = new StringBuilder

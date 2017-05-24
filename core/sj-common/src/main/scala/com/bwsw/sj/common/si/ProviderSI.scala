@@ -9,6 +9,9 @@ import com.bwsw.sj.common.utils.MessageResourceUtils._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
+/**
+  * Provides methods to access [[Provider]]s in [[GenericMongoRepository]]
+  */
 class ProviderSI extends ServiceInterface[Provider, ProviderDomain] {
   override protected val entityRepository: GenericMongoRepository[ProviderDomain] = ConnectionRepository.getProviderRepository
 
@@ -55,6 +58,13 @@ class ProviderSI extends ServiceInterface[Provider, ProviderDomain] {
     response
   }
 
+  /**
+    * Establishes connection to [[Provider.hosts]]
+    *
+    * @param name name of provider
+    * @return Right(true) if connection established, Right(false) if provider not found in [[entityRepository]],
+    *         Left(errors) if some errors happened
+    */
   def checkConnection(name: String): Either[ArrayBuffer[String], Boolean] = {
     val provider = entityRepository.get(name)
 
@@ -71,6 +81,12 @@ class ProviderSI extends ServiceInterface[Provider, ProviderDomain] {
     }
   }
 
+  /**
+    * Returns [[com.bwsw.sj.common.si.model.service.Service Service]]s related with [[Provider]]
+    *
+    * @param name name of provider
+    * @return Right(services) if provider exists, Left(false) otherwise
+    */
   def getRelated(name: String): Either[Boolean, mutable.Buffer[String]] = {
     val provider = entityRepository.get(name)
 
