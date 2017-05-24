@@ -7,8 +7,8 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.SjStreamUtils._
 
-class OutputInstanceApi extends InstanceApi with AvroSchemaForInstanceMetadata{
-  var checkpointMode: String = null
+class OutputInstanceApi extends InstanceApi with AvroSchemaForInstanceMetadata {
+  var checkpointMode: String = _
   var checkpointInterval: Long = Long.MinValue
   var executionPlan: ExecutionPlan = new ExecutionPlan()
   var startFrom: String = EngineLiterals.newestStartMode
