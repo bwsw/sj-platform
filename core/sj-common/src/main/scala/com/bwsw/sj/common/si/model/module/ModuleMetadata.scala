@@ -36,20 +36,28 @@ class ModuleMetadata(filename: String,
 
     errors ++= specification.validate
 
-    val implementations = List(
-      ("validator-class", specification.validatorClass, classOf[StreamingValidator]))
+    val implementations = List(("validator-class", specification.validatorClass, classOf[StreamingValidator]))
 
-    errors ++= validateImplementations(implementations)
+    val definitions = specification match {
+      case (s: BatchSpecification) =>
+        List(
+          ("executor-class", s.executorClass),
+          ("batch-collector-class", s.batchCollectorClass))
+      case _ => List(("executor-class", specification.executorClass))
+    }
+
+    errors ++= validateClasses(implementations, definitions)
 
     errors
   }
 
   /**
-    * Validates implementations of interfaces.
+    * Validates implementations of interfaces and existence classes in module.
     *
     * @param implementations list of (property name, class name, interface)
+    * @param definitions     list of (property name, class name), if cannot validate implementation
     */
-  def validateImplementations(implementations: List[(String, String, Class[_])]) = {
+  def validateClasses(implementations: List[(String, String, Class[_])], definitions: List[(String, String)]) = {
     val errors = new ArrayBuffer[String]
     if (file.isDefined) {
       Try {
@@ -69,6 +77,12 @@ class ModuleMetadata(filename: String,
                 case Failure(_) =>
                   errors += createMessage("rest.validator.specification.class.not.found", className, property)
               }
+          }
+
+          definitions.foreach {
+            case (property, className) =>
+              if (Try(classLoader.loadClass(className)).isFailure)
+                errors += createMessage("rest.validator.specification.class.not.found", className, property)
           }
 
         case Failure(_) =>
