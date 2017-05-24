@@ -61,23 +61,33 @@ trait SjModulesRoute extends Directives with SjCrudValidator with JsonValidator 
                   pathPrefix(Segment) { (instanceName: String) =>
                     pathEndOrSingleSlash {
                       get {
-                        complete(restResponseToHttpResponse(instanceController.get(instanceName)))
+                        complete(
+                          restResponseToHttpResponse(
+                            instanceController.get(moduleType, moduleName, moduleVersion, instanceName)))
                       } ~
-                        complete(restResponseToHttpResponse(instanceController.delete(instanceName)))
+                        complete(
+                          restResponseToHttpResponse(
+                            instanceController.delete(moduleType, moduleName, moduleVersion, instanceName)))
                     } ~
                       path("start") {
                         pathEndOrSingleSlash {
-                          complete(restResponseToHttpResponse(instanceController.start(instanceName)))
+                          complete(
+                            restResponseToHttpResponse(
+                              instanceController.start(moduleType, moduleName, moduleVersion, instanceName)))
                         }
                       } ~
                       path("stop") {
                         pathEndOrSingleSlash {
-                          complete(restResponseToHttpResponse(instanceController.stop(instanceName)))
+                          complete(
+                            restResponseToHttpResponse(
+                              instanceController.stop(moduleType, moduleName, moduleVersion, instanceName)))
                         }
                       } ~
                       pathPrefix("tasks") {
                         pathEndOrSingleSlash {
-                          complete(restResponseToHttpResponse(instanceController.tasks(instanceName)))
+                          complete(
+                            restResponseToHttpResponse(
+                              instanceController.tasks(moduleType, moduleName, moduleVersion, instanceName)))
                         }
                       }
                   }

@@ -72,14 +72,9 @@ class InstanceController {
     }
   }
 
-  def get(name: String): RestResponse = {
-    serviceInterface.get(name) match {
-      case Some(instance) =>
-        OkRestResponse(InstanceResponseEntity(InstanceApiResponse.from(instance)))
-      case None =>
-        NotFoundRestResponse(
-          MessageResponseEntity(
-            createMessage("rest.modules.module.instances.instance.notfound", name)))
+  def get(moduleType: String, moduleName: String, moduleVersion: String, name: String): RestResponse = {
+    processInstance(moduleType, moduleName, moduleVersion, name) { instance =>
+      OkRestResponse(InstanceResponseEntity(InstanceApiResponse.from(instance)))
     }
   }
 
@@ -106,8 +101,8 @@ class InstanceController {
     }
   }
 
-  def delete(name: String): RestResponse = {
-    processInstance(name) { instance =>
+  def delete(moduleType: String, moduleName: String, moduleVersion: String, name: String): RestResponse = {
+    processInstance(moduleType, moduleName, moduleVersion, name) { instance =>
       serviceInterface.delete(name) match {
         case Right(true) =>
           OkRestResponse(
@@ -126,8 +121,8 @@ class InstanceController {
     }
   }
 
-  def start(name: String): RestResponse = {
-    processInstance(name) { instance =>
+  def start(moduleType: String, moduleName: String, moduleVersion: String, name: String): RestResponse = {
+    processInstance(moduleType, moduleName, moduleVersion, name) { instance =>
       if (serviceInterface.canStart(instance)) {
         startInstance(instance)
         OkRestResponse(
@@ -141,8 +136,8 @@ class InstanceController {
     }
   }
 
-  def stop(name: String): RestResponse = {
-    processInstance(name) { instance =>
+  def stop(moduleType: String, moduleName: String, moduleVersion: String, name: String): RestResponse = {
+    processInstance(moduleType, moduleName, moduleVersion, name) { instance =>
       if (serviceInterface.canStop(instance)) {
         stopInstance(instance)
         OkRestResponse(
@@ -156,8 +151,8 @@ class InstanceController {
     }
   }
 
-  def tasks(name: String): RestResponse = {
-    processInstance(name) { instance =>
+  def tasks(moduleType: String, moduleName: String, moduleVersion: String, name: String): RestResponse = {
+    processInstance(moduleType, moduleName, moduleVersion, name) { instance =>
       var response: RestResponse = UnprocessableEntityRestResponse(MessageResponseEntity(
         getMessage("rest.modules.instances.instance.cannot.get.tasks")))
 
@@ -185,16 +180,16 @@ class InstanceController {
     }
   }
 
-  private def processInstance(name: String)(f: Instance => RestResponse): RestResponse = {
-    serviceInterface.get(name) match {
-      case Some(instance) =>
-        ifModuleExists(instance.moduleType, instance.moduleName, instance.moduleVersion) { _ =>
-          f(instance)
-        }
-      case None =>
-        BadRequestRestResponse(
-          MessageResponseEntity(
-            createMessage("rest.modules.module.instances.instance.notfound", name)))
+  private def processInstance(moduleType: String, moduleName: String, moduleVersion: String, name: String)
+                             (f: Instance => RestResponse): RestResponse = {
+    ifModuleExists(moduleType, moduleName, moduleVersion) { _ =>
+      serviceInterface.get(name) match {
+        case Some(instance) => f(instance)
+        case None =>
+          BadRequestRestResponse(
+            MessageResponseEntity(
+              createMessage("rest.modules.module.instances.instance.notfound", name)))
+      }
     }
   }
 
