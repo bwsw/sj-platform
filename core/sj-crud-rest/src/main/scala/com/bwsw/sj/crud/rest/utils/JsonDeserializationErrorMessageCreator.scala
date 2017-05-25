@@ -1,6 +1,6 @@
 package com.bwsw.sj.crud.rest.utils
 
-import com.bwsw.common.exceptions.{JsonDeserializationException, JsonIncorrectValueException, JsonNotParsedException, JsonUnrecognizedPropertyException}
+import com.bwsw.common.exceptions._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 
 /**
@@ -10,12 +10,14 @@ import com.bwsw.sj.common.utils.MessageResourceUtils._
   */
 object JsonDeserializationErrorMessageCreator {
 
-  def apply(e: JsonDeserializationException): String = {
-    createMessage(e match {
+  def apply(exception: JsonDeserializationException,
+            attributeRequiredMessage: String = "entity.error.attribute.required"): String = {
+    createMessage(exception match {
       case _: JsonUnrecognizedPropertyException => "json.deserialization.error.unrecognized.property"
       case _: JsonIncorrectValueException => "json.deserialization.error.incorrect.value"
       case _: JsonNotParsedException => "json.deserialization.error.not.parsed"
+      case _: JsonMissedPropertyException => attributeRequiredMessage
       case _ => "json.deserialization.error"
-    }, e.getMessage)
+    }, exception.getMessage)
   }
 }

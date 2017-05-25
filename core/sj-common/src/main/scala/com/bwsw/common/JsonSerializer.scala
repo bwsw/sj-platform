@@ -20,9 +20,10 @@ import scala.util.{Failure, Success, Try}
   */
 class JsonSerializer {
 
-  def this(ignore: Boolean) = {
+  def this(ignore: Boolean, failOnNullPrimitives: Boolean = false) = {
     this()
     this.setIgnoreUnknown(ignore)
+    mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, failOnNullPrimitives)
   }
 
   private val logger = LoggerFactory.getLogger(this.getClass)
@@ -51,6 +52,8 @@ class JsonSerializer {
       case Failure(e: JsonMappingException) =>
         if (e.getMessage.startsWith("No content"))
           throw new JsonDeserializationException("Empty JSON")
+        else if (e.getMessage.startsWith("Missing required creator property"))
+          throw new JsonMissedPropertyException(getMissedProperty(e))
         else
           throw new JsonIncorrectValueException(getProblemProperty(e))
       case Failure(e: JsonParseException) =>
@@ -76,6 +79,9 @@ class JsonSerializer {
       }
     }
   }
+
+  private def getMissedProperty(exception: JsonMappingException): String =
+    exception.getMessage.replaceFirst("Missing required creator property\\s*'(.*?)'.*", "!$1!")
 
   private def typeReference[T: Manifest]: TypeReference[T] = new TypeReference[T] {
     override def getType: Type = typeFromManifest(manifest[T])

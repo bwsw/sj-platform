@@ -7,18 +7,18 @@ import com.fasterxml.jackson.annotation.JsonProperty
 class EsServiceApi(name: String,
                    val index: String,
                    val provider: String,
-                   description: String = RestLiterals.defaultDescription,
-                   @JsonProperty("type") serviceType: String = ServiceLiterals.elasticsearchType)
-  extends ServiceApi(serviceType, name, description) {
+                   description: Option[String] = Some(RestLiterals.defaultDescription),
+                   @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.elasticsearchType))
+  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.elasticsearchType), name, description) {
 
   override def to(): ESService = {
     val modelService =
       new ESService(
         name = this.name,
-        description = this.description,
+        description = this.description.getOrElse(RestLiterals.defaultDescription),
         provider = this.provider,
         index = this.index,
-        serviceType = this.serviceType
+        serviceType = this.serviceType.getOrElse(ServiceLiterals.elasticsearchType)
       )
 
     modelService
