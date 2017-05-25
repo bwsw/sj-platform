@@ -3,6 +3,7 @@ package com.bwsw.sj.engine.output.benchmark
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 import com.bwsw.common.JsonSerializer
+import com.typesafe.config.ConfigFactory
 import org.eclipse.jetty.server.handler.AbstractHandler
 import org.eclipse.jetty.server.{Request, Server}
 
@@ -18,7 +19,8 @@ object OutputTestRestServer extends App {
 
   case class Entity(value: Int, stringValue: String, txn: Long) extends Serializable
 
-  val httpPort = System.getenv("HTTP_PORT").toInt
+  private val config = ConfigFactory.load()
+  val httpPort = config.getInt("test.output.rest.port")
   val jsonSerializer = new JsonSerializer
   val storage = new ListBuffer[Entity]()
 

@@ -18,6 +18,7 @@ import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.producer
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
+import com.typesafe.config.ConfigFactory
 import kafka.admin.AdminUtils
 import kafka.utils.ZkUtils
 import org.I0Itec.zkclient.ZkConnection
@@ -29,8 +30,9 @@ import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
 object DataFactory {
-  private val zookeeperHosts = System.getenv("ZOOKEEPER_HOSTS").split(",")
-  private val kafkaHosts = System.getenv("KAFKA_HOSTS")
+  private val config = ConfigFactory.load()
+  private val zookeeperHosts = config.getString("test.zookeeper.hosts").split(",")
+  private val kafkaHosts = config.getString("test.kafka.hosts")
   val kafkaMode = "kafka"
   val tstreamMode = "tstream"
   val commonMode = "both"

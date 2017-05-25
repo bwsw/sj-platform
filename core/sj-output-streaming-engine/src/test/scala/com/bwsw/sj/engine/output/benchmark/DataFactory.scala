@@ -19,6 +19,7 @@ import com.bwsw.tstreams.agents.consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer}
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
+import com.typesafe.config.ConfigFactory
 import org.eclipse.jetty.http.HttpVersion
 import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder
@@ -32,6 +33,7 @@ import scala.util.{Failure, Success, Try}
   * @author Kseniya Tomskikh
   */
 object DataFactory {
+  private val config = ConfigFactory.load()
   private val agentsHost = "localhost"
   val zookeeperProviderName: String = "output-zookeeper-test-provider"
   val tstreamServiceName = "output-tstream-test-service"
@@ -78,10 +80,10 @@ object DataFactory {
   val objectSerializer = new ObjectSerializer()
   private val serializer = new JsonSerializer
 
-  private val esProviderHosts = System.getenv("ES_HOSTS").split(",").map(host => host.trim)
-  private val jdbcHosts = System.getenv("JDBC_HOSTS").split(",").map(host => host.trim)
-  private val restHosts = System.getenv("RESTFUL_HOSTS").split(",").map(host => host.trim)
-  private val zookeeperHosts = System.getenv("ZOOKEEPER_HOSTS").split(",").map(host => host.trim)
+  private val esProviderHosts = config.getString("test.es.hosts").split(",").map(host => host.trim)
+  private val jdbcHosts = config.getString("test.jdbc.hosts").split(",").map(host => host.trim)
+  private val restHosts = config.getString("test.restful.hosts").split(",").map(host => host.trim)
+  private val zookeeperHosts = config.getString("test.zookeeper.hosts").split(",").map(host => host.trim)
   private val zookeeperProvider = new ProviderDomain(zookeeperProviderName, zookeeperProviderName,
     zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
   private val tstrqService = new TStreamServiceDomain(tstreamServiceName, tstreamServiceName, zookeeperProvider, TestStorageServer.prefix, TestStorageServer.token)
