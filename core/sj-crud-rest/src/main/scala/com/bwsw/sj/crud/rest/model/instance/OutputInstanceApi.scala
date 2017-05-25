@@ -3,6 +3,7 @@ package com.bwsw.sj.crud.rest.model.instance
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.si.model.instance.OutputInstance
 import com.bwsw.sj.common.utils.{AvroUtils, EngineLiterals, RestLiterals}
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 
 class OutputInstanceApi(name: String,
                         coordinationService: String,
@@ -13,12 +14,12 @@ class OutputInstanceApi(name: String,
                         description: String = RestLiterals.defaultDescription,
                         parallelism: Any = 1,
                         options: Map[String, Any] = Map(),
-                        perTaskCores: Double = 1,
-                        perTaskRam: Int = 1024,
+                        @JsonDeserialize(contentAs = classOf[Double]) perTaskCores: Option[Double] = Some(1),
+                        @JsonDeserialize(contentAs = classOf[Int]) perTaskRam: Option[Int] = Some(1024),
                         jvmOptions: Map[String, String] = Map(),
                         nodeAttributes: Map[String, String] = Map(),
                         environmentVariables: Map[String, String] = Map(),
-                        performanceReportingInterval: Long = 60000,
+                        @JsonDeserialize(contentAs = classOf[Long]) performanceReportingInterval: Option[Long] = Some(60000),
                         val startFrom: String = EngineLiterals.newestStartMode,
                         val inputAvroSchema: Map[String, Any] = Map())
   extends InstanceApi(
@@ -39,16 +40,16 @@ class OutputInstanceApi(name: String,
 
     new OutputInstance(
       name,
-      description,
-      parallelism,
-      serializer.serialize(options),
-      perTaskCores,
-      perTaskRam,
-      jvmOptions,
-      nodeAttributes,
+      Option(description).getOrElse(RestLiterals.defaultDescription),
+      Option(parallelism).getOrElse(1),
+      serializer.serialize(Option(options).getOrElse(Map())),
+      perTaskCores.getOrElse(1),
+      perTaskRam.getOrElse(1024),
+      Option(jvmOptions).getOrElse(Map()),
+      Option(nodeAttributes).getOrElse(Map()),
       coordinationService,
-      environmentVariables,
-      performanceReportingInterval,
+      Option(environmentVariables).getOrElse(Map()),
+      performanceReportingInterval.getOrElse(60000l),
       moduleName,
       moduleVersion,
       moduleType,
@@ -57,7 +58,7 @@ class OutputInstanceApi(name: String,
       checkpointInterval,
       input,
       output,
-      startFrom,
-      AvroUtils.mapToSchema(inputAvroSchema))
+      Option(startFrom).getOrElse(EngineLiterals.newestStartMode),
+      AvroUtils.mapToSchema(Option(inputAvroSchema).getOrElse(Map())))
   }
 }

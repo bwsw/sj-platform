@@ -5,41 +5,40 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.model.instance._
 import com.bwsw.sj.common.si.model.module.Specification
 import com.bwsw.sj.common.utils.RestLiterals
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 
 class InstanceApi(val name: String,
                   val coordinationService: String,
                   val description: String = RestLiterals.defaultDescription,
                   val parallelism: Any = 1,
                   val options: Map[String, Any] = Map(),
-                  val perTaskCores: Double = 1,
-                  val perTaskRam: Int = 1024,
+                  @JsonDeserialize(contentAs = classOf[Double]) val perTaskCores: Option[Double] = Some(1),
+                  @JsonDeserialize(contentAs = classOf[Int]) val perTaskRam: Option[Int] = Some(1024),
                   val jvmOptions: Map[String, String] = Map(),
                   val nodeAttributes: Map[String, String] = Map(),
                   val environmentVariables: Map[String, String] = Map(),
-                  val performanceReportingInterval: Long = 60000) {
-
+                  @JsonDeserialize(contentAs = classOf[Long]) val performanceReportingInterval: Option[Long] = Some(60000l)) {
 
   def to(moduleType: String, moduleName: String, moduleVersion: String): Instance = {
     val serializer = new JsonSerializer()
 
     new Instance(
       name,
-      description,
-      parallelism,
-      serializer.serialize(options),
-      perTaskCores,
-      perTaskRam,
-      jvmOptions,
-      nodeAttributes,
+      Option(description).getOrElse(RestLiterals.defaultDescription),
+      Option(parallelism).getOrElse(1),
+      serializer.serialize(Option(options).getOrElse(Map())),
+      perTaskCores.getOrElse(1),
+      perTaskRam.getOrElse(1024),
+      Option(jvmOptions).getOrElse(Map()),
+      Option(nodeAttributes).getOrElse(Map()),
       coordinationService,
-      environmentVariables,
-      performanceReportingInterval,
+      Option(environmentVariables).getOrElse(Map()),
+      performanceReportingInterval.getOrElse(60000l),
       moduleName,
       moduleVersion,
       moduleType,
       getEngine(moduleType, moduleName, moduleVersion))
   }
-
 
   protected def getFilesMetadata(moduleType: String, moduleName: String, moduleVersion: String) = {
     val fileMetadataDAO = ConnectionRepository.getFileMetadataRepository

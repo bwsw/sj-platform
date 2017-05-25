@@ -3,6 +3,7 @@ package com.bwsw.sj.crud.rest.model.instance
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.si.model.instance.RegularInstance
 import com.bwsw.sj.common.utils.{AvroUtils, EngineLiterals, RestLiterals}
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 
 class RegularInstanceApi(name: String,
                          coordinationService: String,
@@ -13,16 +14,16 @@ class RegularInstanceApi(name: String,
                          description: String = RestLiterals.defaultDescription,
                          parallelism: Any = 1,
                          options: Map[String, Any] = Map(),
-                         perTaskCores: Double = 1,
-                         perTaskRam: Int = 1024,
+                         @JsonDeserialize(contentAs = classOf[Double]) perTaskCores: Option[Double] = Some(1),
+                         @JsonDeserialize(contentAs = classOf[Int]) perTaskRam: Option[Int] = Some(1024),
                          jvmOptions: Map[String, String] = Map(),
                          nodeAttributes: Map[String, String] = Map(),
                          environmentVariables: Map[String, String] = Map(),
-                         performanceReportingInterval: Long = 60000,
+                         @JsonDeserialize(contentAs = classOf[Long]) performanceReportingInterval: Option[Long] = Some(60000),
                          val startFrom: String = EngineLiterals.newestStartMode,
                          val stateManagement: String = EngineLiterals.noneStateMode,
-                         val stateFullCheckpoint: Int = 100,
-                         val eventWaitIdleTime: Long = 1000,
+                         @JsonDeserialize(contentAs = classOf[Int]) val stateFullCheckpoint: Option[Int] = Some(100),
+                         @JsonDeserialize(contentAs = classOf[Long]) val eventWaitIdleTime: Option[Long] = Some(1000),
                          val inputAvroSchema: Map[String, Any] = Map())
   extends InstanceApi(
     name,
@@ -42,16 +43,16 @@ class RegularInstanceApi(name: String,
 
     new RegularInstance(
       name,
-      description,
-      parallelism,
-      serializer.serialize(options),
-      perTaskCores,
-      perTaskRam,
-      jvmOptions,
-      nodeAttributes,
+      Option(description).getOrElse(RestLiterals.defaultDescription),
+      Option(parallelism).getOrElse(1),
+      serializer.serialize(Option(options).getOrElse(Map())),
+      perTaskCores.getOrElse(1),
+      perTaskRam.getOrElse(1024),
+      Option(jvmOptions).getOrElse(Map()),
+      Option(nodeAttributes).getOrElse(Map()),
       coordinationService,
-      environmentVariables,
-      performanceReportingInterval,
+      Option(environmentVariables).getOrElse(Map()),
+      performanceReportingInterval.getOrElse(60000l),
       moduleName,
       moduleVersion,
       moduleType,
@@ -60,10 +61,10 @@ class RegularInstanceApi(name: String,
       outputs,
       checkpointMode,
       checkpointInterval,
-      startFrom,
-      stateManagement,
-      stateFullCheckpoint,
-      eventWaitIdleTime,
-      AvroUtils.mapToSchema(inputAvroSchema))
+      Option(startFrom).getOrElse(EngineLiterals.newestStartMode),
+      Option(stateManagement).getOrElse(EngineLiterals.noneStateMode),
+      stateFullCheckpoint.getOrElse(100),
+      eventWaitIdleTime.getOrElse(1000l),
+      AvroUtils.mapToSchema(Option(inputAvroSchema).getOrElse(Map())))
   }
 }
