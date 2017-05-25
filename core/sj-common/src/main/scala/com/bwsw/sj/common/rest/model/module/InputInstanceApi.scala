@@ -7,6 +7,9 @@ import com.bwsw.sj.common.utils.EngineLiterals
 
 import scala.collection.JavaConverters._
 
+/**
+  * API entity for [[EngineLiterals.inputStreamingType]] instance
+  */
 class InputInstanceApi extends InstanceApi {
   var outputs: Array[String] = Array()
   var checkpointMode: String = _
@@ -41,10 +44,10 @@ class InputInstanceApi extends InstanceApi {
   }
 
   override def prepareInstance(moduleType: String,
-                            moduleName: String,
-                            moduleVersion: String,
-                            engineName: String,
-                            engineVersion: String): Unit = {
+                               moduleName: String,
+                               moduleVersion: String,
+                               engineName: String,
+                               engineVersion: String): Unit = {
     super.prepareInstance(moduleType, moduleName, moduleVersion, engineName, engineVersion)
     fillTasks()
   }

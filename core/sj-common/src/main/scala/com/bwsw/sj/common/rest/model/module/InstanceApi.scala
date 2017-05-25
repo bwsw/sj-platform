@@ -12,6 +12,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 
 import scala.collection.JavaConverters._
 
+/**
+  * API entity for instance
+  */
 class InstanceApi {
   var moduleName: String = _
   var moduleVersion: String = _
@@ -65,6 +68,9 @@ class InstanceApi {
     this.moduleType = moduleType
   }
 
+  /**
+    * Creates streams after instance creating
+    */
   @JsonIgnore
   def createStreams(): Unit = {}
 
@@ -119,7 +125,8 @@ class InstanceApi {
     })
   }
 
-  private def getPartitions(streamName: String, streamRepository: GenericMongoRepository[StreamDomain]): Int = { //todo get rid of useless parameter streamRepository
+  private def getPartitions(streamName: String, streamRepository: GenericMongoRepository[StreamDomain]): Int = {
+    //todo get rid of useless parameter streamRepository
     val stream = streamRepository.get(streamName).get
     val partitions = stream.streamType match {
       case StreamLiterals.`tstreamType` =>

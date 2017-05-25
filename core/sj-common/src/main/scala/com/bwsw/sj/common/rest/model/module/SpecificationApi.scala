@@ -1,5 +1,8 @@
 package com.bwsw.sj.common.rest.model.module
 
+/**
+  * API entity for instance specification
+  */
 case class SpecificationApi(var name: String,
                             var description: String,
                             var version: String,

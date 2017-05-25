@@ -7,6 +7,9 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.StreamUtils._
 
+/**
+  * API entity for [[EngineLiterals.outputStreamingType]] instance
+  */
 class OutputInstanceApi extends InstanceApi with AvroSchemaForInstanceMetadata {
   var checkpointMode: String = _
   var checkpointInterval: Long = Long.MinValue

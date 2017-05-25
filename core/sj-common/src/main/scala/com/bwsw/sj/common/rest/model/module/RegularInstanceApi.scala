@@ -7,6 +7,9 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.StreamUtils._
 
+/**
+  * API entity for [[EngineLiterals.regularStreamingType]] instance
+  */
 class RegularInstanceApi extends InstanceApi with AvroSchemaForInstanceMetadata {
   var inputs: Array[String] = Array()
   var outputs: Array[String] = Array()

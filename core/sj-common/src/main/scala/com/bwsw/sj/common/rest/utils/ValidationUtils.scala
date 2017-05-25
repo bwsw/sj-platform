@@ -9,6 +9,9 @@ import org.slf4j.LoggerFactory
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
+/**
+  * Provides helping methods for validation some fields of entities
+  */
 object ValidationUtils {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val providerDAO = ConnectionRepository.getProviderRepository
@@ -23,6 +26,13 @@ object ValidationUtils {
     name.matches( """^([a-z][a-z0-9-\.]*)$""")
   }
 
+  /**
+    * Checks that provider exists and type of service corresponds to provider
+    *
+    * @param provider
+    * @param serviceType
+    * @return empty array if validation passed, collection of errors otherwise
+    */
   def validateProvider(provider: String, serviceType: String): ArrayBuffer[String] = {
     logger.debug(s"Validate a provider: '$provider' of service: '$serviceType'.")
     val errors = new ArrayBuffer[String]()
