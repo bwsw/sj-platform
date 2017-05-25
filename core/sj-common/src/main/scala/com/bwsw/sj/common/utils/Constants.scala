@@ -170,4 +170,27 @@ object FrameworkLiterals {
   val instanceIdLabel = "INSTANCE_ID"
   val frameworkIdLabel = "FRAMEWORK_ID"
   val mesosMasterLabel = "MESOS_MASTER"
+
+  val framework = "mesos-framework"
+  val frameworkId = framework + ".id"
+  val instance = framework + ".instance"
+  val instanceId = instance + ".id"
+  val mesosMaster = framework + ".mesos.master"
+}
+
+/**
+  * Names of configurations for application config
+  */
+object CommonAppConfigNames {
+  val sjCommon = "sj-common"
+
+  val mongo = sjCommon + ".mongo"
+  val mongoHosts = mongo + ".hosts"
+  val mongoUser = mongo + ".user"
+  val mongoPassword = mongo + ".password"
+  val mongoDbName = mongo + ".database-name"
+
+  val zookeeper = sjCommon + ".zookeeper"
+  val zooKeeperHost = zookeeper + ".host"
+  val zooKeeperPort = zookeeper + ".port"
 }

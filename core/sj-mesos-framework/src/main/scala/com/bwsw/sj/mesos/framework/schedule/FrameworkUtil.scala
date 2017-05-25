@@ -3,18 +3,19 @@ package com.bwsw.sj.mesos.framework.schedule
 import java.io.{PrintWriter, StringWriter}
 import java.net.URI
 
-import com.bwsw.sj.common.dal.model.module._
-import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.model.instance._
+import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
+import com.bwsw.sj.common.utils.{CommonAppConfigNames, FrameworkLiterals}
 import com.bwsw.sj.mesos.framework.task.TasksList
+import com.typesafe.config.ConfigFactory
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos.MasterInfo
 import org.apache.mesos.SchedulerDriver
 
 import scala.collection.immutable
-import scala.util.Properties
+import scala.util.Try
 
 
 object FrameworkUtil {
@@ -28,11 +29,11 @@ object FrameworkUtil {
   var params: Map[String, String] = immutable.Map[String, String]()
 
   /**
-   * Count how much ports must be for current task.
+    * Count how much ports must be for current task.
     *
     * @param instance current launched task
-   * @return ports count for current task
-   */
+    * @return ports count for current task
+    */
   def getCountPorts(instance: InstanceDomain): Int = {
     instance match {
       case _: OutputInstanceDomain => 2
@@ -43,8 +44,8 @@ object FrameworkUtil {
   }
 
   /**
-   * Handler for Scheduler Exception
-   */
+    * Handler for Scheduler Exception
+    */
   def handleSchedulerException(e: Exception, logger: Logger): Unit = {
     val sw = new StringWriter
     e.printStackTrace(new PrintWriter(sw))
@@ -55,18 +56,21 @@ object FrameworkUtil {
   }
 
   def getEnvParams: Map[String, String] = {
+    val config = ConfigFactory.load()
+
     Map(
-      "instanceId" -> Properties.envOrElse("INSTANCE_ID", "00000000-0000-0000-0000-000000000000"),
-      "mongodbHosts" -> Properties.envOrElse("MONGO_HOSTS", "127.0.0.1:27017")
+      "instanceId" ->
+        Try(config.getString(FrameworkLiterals.instanceId)).getOrElse("00000000-0000-0000-0000-000000000000"),
+      "mongodbHosts" -> Try(config.getString(CommonAppConfigNames.mongoHosts)).getOrElse("127.0.0.1:27017")
     )
   }
 
   /**
-   * Get jar URI for framework
+    * Get jar URI for framework
     *
-    * @param instance:Instance
-   * @return String
-   */
+    * @param instance :Instance
+    * @return String
+    */
   def getModuleUrl(instance: InstanceDomain): String = {
     jarName = configRepository.get("system." + instance.engine).map(_.value)
     val restHost = configRepository.get(ConfigLiterals.hostOfCrudRestTag).get.value

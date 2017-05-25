@@ -4,6 +4,7 @@ import com.bwsw.tstreamstransactionserver.options.CommonOptions.ZookeeperOptions
 import com.bwsw.tstreamstransactionserver.options.ServerBuilder
 import com.bwsw.tstreamstransactionserver.options.ServerOptions.{AuthOptions, BootstrapOptions, CommitLogOptions, StorageOptions}
 import com.google.common.io.Files
+import com.typesafe.config.ConfigFactory
 
 /**
   * TTS server to launch benchmarks
@@ -16,10 +17,17 @@ object TestStorageServer {
 
   val token = "token"
   val prefix = "/bench-prefix"
+  val rootConfig = "test-storage-server"
+  val zkHostsConfig = rootConfig + ".zookeeper.hosts"
+  val hostConfig = rootConfig + ".host"
 
   def start(): Unit = {
-    val transactionServer = serverBuilder.withZookeeperOptions(ZookeeperOptions(endpoints = System.getenv("ZOOKEEPER_HOSTS"), prefix))
-      .withBootstrapOptions(BootstrapOptions("192.168.1.174"))
+    val config = ConfigFactory.load()
+    val zkHosts = config.getString(zkHostsConfig)
+    val host = config.getString(hostConfig)
+
+    val transactionServer = serverBuilder.withZookeeperOptions(ZookeeperOptions(endpoints = zkHosts, prefix))
+      .withBootstrapOptions(BootstrapOptions(host))
       .withAuthOptions(AuthOptions(token))
       .withServerStorageOptions(StorageOptions(path = getTmpDir()))
       .withCommitLogOptions(CommitLogOptions(commitLogCloseDelayMs = 100))

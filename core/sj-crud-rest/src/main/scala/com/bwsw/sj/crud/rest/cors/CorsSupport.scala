@@ -5,6 +5,7 @@ import akka.http.scaladsl.model.HttpResponse
 import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Directive0, Route}
+import com.bwsw.sj.crud.rest.RestLiterals
 import com.typesafe.config.ConfigFactory
 
 /**
@@ -13,7 +14,7 @@ import com.typesafe.config.ConfigFactory
 trait CorsSupport {
   lazy val allowedOriginHeader = {
     val config = ConfigFactory.load()
-    val sAllowedOrigin = config.getString("cors.allowed-origin")
+    val sAllowedOrigin = config.getString(RestLiterals.corsAllowedOriginConfig)
     if (sAllowedOrigin == "*")
       `Access-Control-Allow-Origin`.*
     else

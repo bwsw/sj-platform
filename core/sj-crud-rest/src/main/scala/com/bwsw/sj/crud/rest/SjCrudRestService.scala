@@ -18,21 +18,19 @@ import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.utils.EngineLiterals
 import EngineLiterals._
 import com.bwsw.sj.crud.rest.instance.InstanceStopper
+import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.Future
 
 /**
- * Run object of CRUD Rest-API
- *
- *
- * @author Kseniya Tomskikh
- */
+  * Run object of CRUD Rest-API
+  *
+  * @author Kseniya Tomskikh
+  */
 object SjCrudRestService extends App with SjCrudInterface {
-  require(Option(System.getenv("CRUD_REST_HOST")).isDefined && Option(System.getenv("CRUD_REST_PORT")).isDefined,
-  "No environment variables: CRUD_REST_HOST, CRUD_REST_PORT")
-
-  val restHost = System.getenv("CRUD_REST_HOST")
-  val restPort = System.getenv("CRUD_REST_PORT").toInt
+  val config = ConfigFactory.load()
+  val restHost = config.getString(RestLiterals.hostConfig)
+  val restPort = config.getInt(RestLiterals.portConfig)
   val serializer = new JsonSerializer()
   serializer.setIgnoreUnknown(true)
   val storage = ConnectionRepository.getFileStorage
@@ -60,6 +58,7 @@ object SjCrudRestService extends App with SjCrudInterface {
       }
       entry.map(_.logTo(logger))
     }
+
     DebuggingDirectives.logRequestResult(LoggingMagnet(log => getRequestEntityAsString(log)))(route)
   }
 
@@ -75,9 +74,9 @@ object SjCrudRestService extends App with SjCrudInterface {
   }
 
   /**
-   * If instance has status "starting", "stopping" or "deleting"
-   * instance will be stopped
-   */
+    * If instance has status "starting", "stopping" or "deleting"
+    * instance will be stopped
+    */
   private def stopInstances() = {
     logger.info("Running of crud-rest. Stop instances which have status \"starting\", \"stopping\" or \"deleting\".")
     val instances = instanceDAO.getAll.filter { instance =>

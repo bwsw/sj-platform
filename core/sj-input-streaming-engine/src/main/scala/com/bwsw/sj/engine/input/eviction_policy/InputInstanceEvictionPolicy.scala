@@ -2,11 +2,13 @@ package com.bwsw.sj.engine.input.eviction_policy
 
 import com.bwsw.sj.common.dal.model.instance.InputInstanceDomain
 import com.bwsw.sj.common.utils.EngineLiterals
-
-import scala.collection.JavaConverters._
+import com.bwsw.sj.engine.input.config.InputEngineConfigNames
 import com.hazelcast.config._
 import com.hazelcast.core.{Hazelcast, HazelcastInstance, IMap}
+import com.typesafe.config.ConfigFactory
 import org.slf4j.{Logger, LoggerFactory}
+
+import scala.collection.JavaConverters._
 
 /**
   * Provides methods are responsible for an eviction policy of input envelope duplicates
@@ -88,7 +90,8 @@ abstract class InputInstanceEvictionPolicy(instance: InputInstanceDomain) {
   private def createTcpIpConfig(): TcpIpConfig = {
     logger.debug(s"Create a hazelcast tcp/ip config.")
     val tcpIpConfig = new TcpIpConfig()
-    val hosts = System.getenv("INSTANCE_HOSTS").split(",").toList.asJava
+    val config = ConfigFactory.load()
+    val hosts = config.getString(InputEngineConfigNames.hosts).split(",").toList.asJava
     tcpIpConfig.setMembers(hosts).setEnabled(true)
   }
 

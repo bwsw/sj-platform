@@ -14,6 +14,7 @@ import com.bwsw.sj.common.engine.{EnvelopeDataSerializer, ExtendedEnvelopeDataSe
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.StreamLiterals._
+import com.bwsw.sj.engine.core.config.EngineConfigNames
 import com.bwsw.sj.engine.core.environment.EnvironmentManager
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
@@ -21,6 +22,7 @@ import com.bwsw.tstreams.agents.consumer.subscriber.{Callback, Subscriber}
 import com.bwsw.tstreams.agents.producer.Producer
 import com.bwsw.tstreams.storage.StorageClient
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
+import com.typesafe.config.ConfigFactory
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.JavaConverters._
@@ -38,18 +40,13 @@ abstract class TaskManager() {
   protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
   val streamRepository: GenericMongoRepository[StreamDomain] = ConnectionRepository.getStreamRepository
 
-  require(
-    Option(System.getenv("INSTANCE_NAME")).isDefined &&
-      Option(System.getenv("TASK_NAME")).isDefined &&
-      Option(System.getenv("AGENTS_HOST")).isDefined &&
-      Option(System.getenv("AGENTS_PORTS")).isDefined,
-    "No environment variables: INSTANCE_NAME, TASK_NAME, AGENTS_HOST, AGENTS_PORTS")
+  private val config = ConfigFactory.load()
 
-  val instanceName: String = System.getenv("INSTANCE_NAME")
-  val agentsHost: String = System.getenv("AGENTS_HOST")
-  private val agentsPorts = System.getenv("AGENTS_PORTS").split(",").map(_.toInt)
+  val instanceName: String = config.getString(EngineConfigNames.instanceName)
+  val agentsHost: String = config.getString(EngineConfigNames.agentsHost)
+  private val agentsPorts = config.getString(EngineConfigNames.agentsPorts).split(",").map(_.toInt)
   protected val numberOfAgentsPorts: Int = agentsPorts.length
-  val taskName: String = System.getenv("TASK_NAME")
+  val taskName: String = config.getString(EngineConfigNames.taskName)
   val instance: InstanceDomain = getInstance()
   protected val auxiliarySJTStream: StreamDomain = getAuxiliaryTStream()
   protected val auxiliaryTStreamService: TStreamServiceDomain = getAuxiliaryTStreamService()

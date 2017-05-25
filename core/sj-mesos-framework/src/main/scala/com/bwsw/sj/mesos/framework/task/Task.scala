@@ -1,12 +1,17 @@
 package com.bwsw.sj.mesos.framework.task
 
 import java.util.{Calendar, Date}
-import com.bwsw.sj.common.rest.FrameworkTask
 
-import scala.util.Properties
+import com.bwsw.sj.common.rest.FrameworkTask
+import com.bwsw.sj.mesos.framework.config.FrameworkConfigNames
+import com.typesafe.config.ConfigFactory
+
+import scala.util.Try
 
 
 class Task(taskId: String) {
+  private val config = ConfigFactory.load()
+
   val id: String = taskId
   var state: String = "TASK_STAGING"
   var stateChanged: Long = Calendar.getInstance().getTime.getTime
@@ -14,7 +19,7 @@ class Task(taskId: String) {
   var node: String = ""
   var lastNode: String = ""
   //  var description: InstanceTask = _
-  var maxDirectories = Properties.envOrElse("MAX_SANDBOX_VIEW", "7").toInt
+  var maxDirectories = Try(config.getInt(FrameworkConfigNames.maxSandboxView)).getOrElse(7)
   var directories: Array[String] = Array()
   var host: Option[String] = None
 

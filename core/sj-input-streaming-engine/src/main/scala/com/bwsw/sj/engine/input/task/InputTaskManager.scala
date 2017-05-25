@@ -4,7 +4,11 @@ import com.bwsw.sj.common.dal.model.instance.InputInstanceDomain
 import com.bwsw.sj.engine.core.environment.{EnvironmentManager, InputEnvironmentManager}
 import com.bwsw.sj.engine.core.input.InputStreamingExecutor
 import com.bwsw.sj.engine.core.managment.TaskManager
+import com.bwsw.sj.engine.input.config.InputEngineConfigNames
 import com.bwsw.tstreams.agents.producer.Producer
+import com.typesafe.config.ConfigFactory
+
+import scala.util.Try
 
 /**
   * Class allows to manage an environment of input streaming task
@@ -29,9 +33,9 @@ class InputTaskManager() extends TaskManager {
     "Not enough ports for t-stream consumers/producers")
 
   def getEntryPort(): Int = {
-    if (System.getenv().containsKey("ENTRY_PORT"))
-      System.getenv("ENTRY_PORT").toInt
-    else inputInstance.tasks.get(taskName).port
+    val config = ConfigFactory.load()
+    Try(config.getInt(InputEngineConfigNames.entryPort))
+      .getOrElse(inputInstance.tasks.get(taskName).port)
   }
 
   def getExecutor(environmentManager: EnvironmentManager): InputStreamingExecutor[AnyRef] = {
