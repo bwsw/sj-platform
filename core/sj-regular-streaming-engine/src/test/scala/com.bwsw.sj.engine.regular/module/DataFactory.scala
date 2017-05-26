@@ -19,6 +19,7 @@ import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.producer
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
+import com.typesafe.config.ConfigFactory
 import kafka.admin.AdminUtils
 import kafka.utils.ZkUtils
 import org.I0Itec.zkclient.ZkConnection
@@ -30,8 +31,9 @@ import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
 object DataFactory {
-  private val zookeeperHosts = System.getenv("ZOOKEEPER_HOSTS").split(",")
-  private val kafkaHosts = System.getenv("KAFKA_HOSTS")
+  private val config = ConfigFactory.load()
+  private val zookeeperHosts = config.getString("test.zookeeper.hosts").split(",")
+  private val kafkaHosts = config.getString("test.kafka.hosts")
   val kafkaMode = "kafka"
   val tstreamMode = "tstream"
   val commonMode = "both"
@@ -117,41 +119,41 @@ object DataFactory {
     serviceManager.delete(tstreamServiceName)
   }
 
-  def createStreams(sjStreamService: GenericMongoRepository[StreamDomain], serviceManager: GenericMongoRepository[ServiceDomain],
+  def createStreams(streamService: GenericMongoRepository[StreamDomain], serviceManager: GenericMongoRepository[ServiceDomain],
                     partitions: Int, _type: String, inputCount: Int, outputCount: Int) = {
     _type match {
       case `tstreamMode` =>
         (1 to inputCount).foreach(x => {
-          createInputTStream(sjStreamService, serviceManager, partitions, x.toString)
+          createInputTStream(streamService, serviceManager, partitions, x.toString)
           instanceInputs = instanceInputs :+ s"$tstreamInputNamePrefix$x/split"
           task.inputs.put(tstreamInputNamePrefix + x, Array(0, if (partitions > 1) partitions - 1 else 0))
         })
         (1 to outputCount).foreach(x => {
-          createOutputTStream(sjStreamService, serviceManager, partitions, x.toString)
+          createOutputTStream(streamService, serviceManager, partitions, x.toString)
           instanceOutputs = instanceOutputs :+ (tstreamOutputNamePrefix + x)
         })
       case `kafkaMode` =>
         (1 to inputCount).foreach(x => {
-          createKafkaStream(sjStreamService, serviceManager, partitions, x.toString)
+          createKafkaStream(streamService, serviceManager, partitions, x.toString)
           instanceInputs = instanceInputs :+ s"$kafkaInputNamePrefix$x/split"
           task.inputs.put(kafkaInputNamePrefix + x, Array(0, if (partitions > 1) partitions - 1 else 0))
         })
         (1 to outputCount).foreach(x => {
-          createOutputTStream(sjStreamService, serviceManager, partitions, x.toString)
+          createOutputTStream(streamService, serviceManager, partitions, x.toString)
           instanceOutputs = instanceOutputs :+ (tstreamOutputNamePrefix + x)
         })
       case `commonMode` =>
         (1 to inputCount).foreach(x => {
-          createInputTStream(sjStreamService, serviceManager, partitions, x.toString)
+          createInputTStream(streamService, serviceManager, partitions, x.toString)
           instanceInputs = instanceInputs :+ s"$tstreamInputNamePrefix$x/split"
           task.inputs.put(tstreamInputNamePrefix + x, Array(0, if (partitions > 1) partitions - 1 else 0))
 
-          createKafkaStream(sjStreamService, serviceManager, partitions, x.toString)
+          createKafkaStream(streamService, serviceManager, partitions, x.toString)
           instanceInputs = instanceInputs :+ s"$kafkaInputNamePrefix$x/split"
           task.inputs.put(kafkaInputNamePrefix + x, Array(0, if (partitions > 1) partitions - 1 else 0))
         })
         (1 to outputCount).foreach(x => {
-          createOutputTStream(sjStreamService, serviceManager, partitions, x.toString)
+          createOutputTStream(streamService, serviceManager, partitions, x.toString)
           instanceOutputs = instanceOutputs :+ (tstreamOutputNamePrefix + x)
         })
       case _ => throw new Exception(s"Unknown type : ${_type}. Can be only: $tstreamMode, $kafkaMode, $commonMode")
@@ -180,7 +182,7 @@ object DataFactory {
     }
   }
 
-  private def createInputTStream(sjStreamService: GenericMongoRepository[StreamDomain], serviceManager: GenericMongoRepository[ServiceDomain], partitions: Int, suffix: String) = {
+  private def createInputTStream(streamService: GenericMongoRepository[StreamDomain], serviceManager: GenericMongoRepository[ServiceDomain], partitions: Int, suffix: String) = {
     val s1 = new TStreamStreamDomain(tstreamInputNamePrefix + suffix,
       tstrqService,
       partitions,
@@ -189,7 +191,7 @@ object DataFactory {
       Array("input")
     )
 
-    sjStreamService.save(s1)
+    streamService.save(s1)
 
     storageClient.createStream(
       tstreamInputNamePrefix + suffix,
@@ -199,7 +201,7 @@ object DataFactory {
     )
   }
 
-  private def createOutputTStream(sjStreamService: GenericMongoRepository[StreamDomain], serviceManager: GenericMongoRepository[ServiceDomain], partitions: Int, suffix: String) = {
+  private def createOutputTStream(streamRepository: GenericMongoRepository[StreamDomain], serviceManager: GenericMongoRepository[ServiceDomain], partitions: Int, suffix: String) = {
     val s2 = new TStreamStreamDomain(tstreamOutputNamePrefix + suffix,
       tstrqService,
       partitions,
@@ -208,7 +210,7 @@ object DataFactory {
       Array("output", "some tags")
     )
 
-    sjStreamService.save(s2)
+    streamRepository.save(s2)
 
     storageClient.createStream(
       tstreamOutputNamePrefix + suffix,
@@ -231,10 +233,10 @@ object DataFactory {
 
   }
 
-  private def createKafkaStream(sjStreamService: GenericMongoRepository[StreamDomain], serviceManager: GenericMongoRepository[ServiceDomain], partitions: Int, suffix: String) = {
+  private def createKafkaStream(repository: GenericMongoRepository[StreamDomain], serviceManager: GenericMongoRepository[ServiceDomain], partitions: Int, suffix: String) = {
     val kService = serviceManager.get(kafkaServiceName).get.asInstanceOf[KafkaServiceDomain]
 
-    val kafkaSjStream = new KafkaStreamDomain(kafkaInputNamePrefix + suffix,
+    val kafkaStreamDomain = new KafkaStreamDomain(kafkaInputNamePrefix + suffix,
       kService,
       partitions,
       replicationFactor,
@@ -243,7 +245,7 @@ object DataFactory {
       Array(kafkaInputNamePrefix)
     )
 
-    sjStreamService.save(kafkaSjStream)
+    repository.save(kafkaStreamDomain)
 
     val zkHost = kService.zkProvider.hosts
     val zkConnect = new ZkConnection(zkHost.mkString(";"))
@@ -251,7 +253,7 @@ object DataFactory {
     val zkClient = ZkUtils.createZkClient(zkHost.mkString(";"), zkTimeout, zkTimeout)
     val zkUtils = new ZkUtils(zkClient, zkConnect, false)
 
-    AdminUtils.createTopic(zkUtils, kafkaSjStream.name, partitions, replicationFactor)
+    AdminUtils.createTopic(zkUtils, kafkaStreamDomain.name, partitions, replicationFactor)
   }
 
   private def deleteKafkaStream(streamService: GenericMongoRepository[StreamDomain], serviceManager: GenericMongoRepository[ServiceDomain], suffix: String) = {

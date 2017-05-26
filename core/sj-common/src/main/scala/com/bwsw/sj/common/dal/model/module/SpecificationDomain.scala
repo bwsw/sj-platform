@@ -3,7 +3,7 @@ package com.bwsw.sj.common.dal.model.module
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.PropertyField
 
 /**
-  * Entity for specification-json of module
+  * Domain entity for specification of module
   *
   * @author Kseniya Tomskikh
   */

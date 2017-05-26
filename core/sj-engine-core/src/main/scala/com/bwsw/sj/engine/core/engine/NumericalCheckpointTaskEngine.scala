@@ -3,8 +3,9 @@ package com.bwsw.sj.engine.core.engine
 import org.slf4j.LoggerFactory
 
 /**
- * Provides methods for a basic execution logic of task engine that has an every-nth checkpoint mode
- */
+  * Provides methods for a basic execution logic of task engine
+  * that has a checkpoint based on the number of messages (envelopes) [[com.bwsw.sj.common.utils.EngineLiterals.everyNthMode]]
+  */
 
 trait NumericalCheckpointTaskEngine {
   private val logger = LoggerFactory.getLogger(this.getClass)

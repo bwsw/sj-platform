@@ -17,12 +17,28 @@ class SjStream(val streamType: String,
 
   def to(): StreamDomain = ???
 
+  /**
+    * Validates stream
+    *
+    * @return empty array if stream is correct, validation errors otherwise
+    */
   def validate(): ArrayBuffer[String] = validateGeneralFields()
 
+  /**
+    * Creates structure in storage, used by stream
+    */
   def create(): Unit = {}
 
+  /**
+    * Deletes structure in storage, used by stream
+    */
   def delete(): Unit = {}
 
+  /**
+    * Validates fields which common for all types of stream
+    *
+    * @return empty array if fields is correct, validation errors otherwise
+    */
   protected def validateGeneralFields(): ArrayBuffer[String] = {
     val streamDAO = ConnectionRepository.getStreamRepository
     val errors = new ArrayBuffer[String]()

@@ -30,6 +30,11 @@ class Provider(val name: String,
       )
   }
 
+  /**
+    * Validates provider
+    *
+    * @return empty array if provider is correct, validation errors otherwise
+    */
   def validate(): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
     val providerRepository = ConnectionRepository.getProviderRepository

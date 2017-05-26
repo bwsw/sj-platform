@@ -13,6 +13,9 @@ import org.apache.commons.io.FileUtils
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
+/**
+  * Provides methods to access custom jar files represented by [[FileMetadata]] in [[GenericMongoRepository]]
+  */
 class CustomJarsSI extends ServiceInterface[FileMetadata, FileMetadataDomain] {
   override protected val entityRepository: GenericMongoRepository[FileMetadataDomain] = ConnectionRepository.getFileMetadataRepository
 
@@ -88,6 +91,12 @@ class CustomJarsSI extends ServiceInterface[FileMetadata, FileMetadataDomain] {
     response
   }
 
+  /**
+    * Returns custom jar file with this name and version from [[entityRepository]]
+    *
+    * @param name
+    * @param version
+    */
   def getBy(name: String, version: String): Option[FileMetadata] = {
     val fileMetadatas = entityRepository.getByParameters(Map("filetype" -> FileMetadata.customJarType,
       "specification.name" -> name,
@@ -106,6 +115,14 @@ class CustomJarsSI extends ServiceInterface[FileMetadata, FileMetadataDomain] {
     }
   }
 
+  /**
+    * Deletes custom jar file with this name and version from [[entityRepository]]
+    *
+    * @param name
+    * @param version
+    * @return Right(true) if custom jar file deleted, Right(false) if custom jar file not found in [[entityRepository]],
+    *         Left(error) if some error happened
+    */
   def deleteBy(name: String, version: String): Either[String, Boolean] = {
     val fileMetadatas = entityRepository.getByParameters(Map("filetype" -> FileMetadata.customJarType,
       "specification.name" -> name,

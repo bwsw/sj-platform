@@ -2,15 +2,21 @@ package com.bwsw.sj.engine.core.batch
 
 import com.bwsw.sj.common.si.model.instance.BatchInstance
 import com.bwsw.sj.engine.core.entities.Window
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable
 
+/**
+  * Provides methods to keep windows that consist of batches
+  * Use it in [[BatchStreamingExecutor.onWindow()]] to retrieve
+  *
+  * @param instance set of settings of a batch streaming module
+  */
 class WindowRepository(instance: BatchInstance) {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
   private val windowPerStream: mutable.Map[String, Window] = createStorageOfWindows()
-  val window = instance.window
-  val slidingInterval = instance.slidingInterval
+  val window: Int = instance.window
+  val slidingInterval: Int = instance.slidingInterval
 
   private def createStorageOfWindows(): mutable.Map[String, Window] = {
     logger.debug("Create a storage to keep windows.")
@@ -22,7 +28,7 @@ class WindowRepository(instance: BatchInstance) {
     windowPerStream(stream)
   }
 
-  def put(stream: String, window: Window): Unit = {
+  private[engine] def put(stream: String, window: Window): Unit = {
     logger.debug(s"Put a window for stream: '$stream'.")
     windowPerStream(stream) = window
   }

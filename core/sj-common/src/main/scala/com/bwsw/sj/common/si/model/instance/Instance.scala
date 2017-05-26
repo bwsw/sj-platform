@@ -5,8 +5,8 @@ import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.rest.model.module.{StreamWithMode, TaskStream}
-import com.bwsw.sj.common.utils.SjStreamUtils.clearStreamFromMode
-import com.bwsw.sj.common.utils.{AvroUtils, EngineLiterals, RestLiterals, StreamLiterals}
+import com.bwsw.sj.common.utils.StreamUtils.clearStreamFromMode
+import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals, RestLiterals, StreamLiterals}
 
 import scala.collection.JavaConverters._
 
@@ -59,6 +59,9 @@ class Instance(val name: String,
 
   def countParallelism: Int = castParallelismToNumber(Array(1))
 
+  /**
+    * Creates streams after instance creating
+    */
   def createStreams(): Unit = {}
 
   def prepareInstance(): Unit = {}
@@ -212,7 +215,7 @@ object Instance {
           batchInstance.stateManagement,
           batchInstance.stateFullCheckpoint,
           batchInstance.eventWaitIdleTime,
-          AvroUtils.jsonToSchema(batchInstance.inputAvroSchema),
+          AvroRecordUtils.jsonToSchema(batchInstance.inputAvroSchema),
           batchInstance.executionPlan,
 
           Option(batchInstance.restAddress),
@@ -248,7 +251,7 @@ object Instance {
           regularInstance.stateManagement,
           regularInstance.stateFullCheckpoint,
           regularInstance.eventWaitIdleTime,
-          AvroUtils.jsonToSchema(regularInstance.inputAvroSchema),
+          AvroRecordUtils.jsonToSchema(regularInstance.inputAvroSchema),
           regularInstance.executionPlan,
 
           Option(regularInstance.restAddress),
@@ -281,7 +284,7 @@ object Instance {
           outputInstance.inputs.head,
           outputInstance.outputs.head,
           outputInstance.startFrom,
-          AvroUtils.jsonToSchema(outputInstance.inputAvroSchema),
+          AvroRecordUtils.jsonToSchema(outputInstance.inputAvroSchema),
           outputInstance.executionPlan,
 
           Option(outputInstance.restAddress),

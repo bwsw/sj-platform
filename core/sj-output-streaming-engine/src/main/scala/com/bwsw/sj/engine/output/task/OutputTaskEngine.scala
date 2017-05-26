@@ -10,35 +10,36 @@ import com.bwsw.sj.engine.core.engine.NumericalCheckpointTaskEngine
 import com.bwsw.sj.engine.core.engine.input.CallableTStreamCheckpointTaskInput
 import com.bwsw.sj.engine.core.entities._
 import com.bwsw.sj.engine.core.environment.OutputEnvironmentManager
-import com.bwsw.sj.engine.core.output.Entity
+import com.bwsw.sj.engine.core.output.{Entity, OutputStreamingExecutor}
 import com.bwsw.sj.engine.output.processing.OutputProcessor
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 
 
 /**
-  * Provided methods are responsible for a basic execution logic of task of output module
+  * Class contains methods for running output module
   *
-  * @param manager            Manager of environment of task of output module
-  * @param performanceMetrics Set of metrics that characterize performance of a output streaming module
+  * @param manager            allows to manage an environment of output streaming task
+  * @param performanceMetrics set of metrics that characterize performance of an output streaming module
   * @author Kseniya Mikhaleva
   */
 abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
                                 performanceMetrics: OutputStreamingPerformanceMetrics) extends Callable[Unit] {
 
-  private val currentThread = Thread.currentThread()
+  import OutputTaskEngine.logger
+
+  private val currentThread: Thread = Thread.currentThread()
   currentThread.setName(s"output-task-${manager.taskName}-engine")
-  private val logger = LoggerFactory.getLogger(this.getClass)
-  private val blockingQueue = new ArrayBlockingQueue[Envelope](EngineLiterals.queueSize)
-  private val instance = manager.instance.asInstanceOf[OutputInstance]
-  private val outputStream = getOutputStream
-  private val environmentManager = createModuleEnvironmentManager()
-  private val executor = manager.getExecutor(environmentManager)
+  private val blockingQueue: ArrayBlockingQueue[Envelope] = new ArrayBlockingQueue[Envelope](EngineLiterals.queueSize)
+  private val instance: OutputInstance = manager.instance.asInstanceOf[OutputInstance]
+  private val outputStream: StreamDomain = getOutputStream
+  private val environmentManager: OutputEnvironmentManager = createModuleEnvironmentManager()
+  private val executor: OutputStreamingExecutor[AnyRef] = manager.getExecutor(environmentManager)
   private val entity: Entity[_] = executor.getOutputEntity
   val taskInputService: CallableTStreamCheckpointTaskInput[AnyRef] = new CallableTStreamCheckpointTaskInput[AnyRef](manager, blockingQueue)
-  private val outputProcessor = OutputProcessor[AnyRef](outputStream, performanceMetrics, manager, entity)
-  private var wasFirstCheckpoint = false
-  protected val checkpointInterval = instance.checkpointInterval
+  private val outputProcessor: OutputProcessor[AnyRef] = OutputProcessor[AnyRef](outputStream, performanceMetrics, manager, entity)
+  private var wasFirstCheckpoint: Boolean = false
+  protected val checkpointInterval: Long = instance.checkpointInterval
 
   private def getOutputStream: StreamDomain = {
     val streamService = ConnectionRepository.getStreamRepository
@@ -102,7 +103,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   }
 
   /**
-    * Doing smth after catch envelope.
+    * Doing smth after process envelope.
     */
   protected def afterReceivingEnvelope(): Unit
 
@@ -119,18 +120,16 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
 
   protected def prepareForNextCheckpoint(): Unit
 
-  def close() = {
+  def close(): Unit = {
     outputProcessor.close()
   }
 }
 
 object OutputTaskEngine {
-  protected val logger = LoggerFactory.getLogger(this.getClass)
+  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
   /**
     * Creates OutputTaskEngine is in charge of a basic execution logic of task of output module
-    *
-    * @return Engine of output task
     */
   def apply(manager: OutputTaskManager,
             performanceMetrics: OutputStreamingPerformanceMetrics): OutputTaskEngine = {

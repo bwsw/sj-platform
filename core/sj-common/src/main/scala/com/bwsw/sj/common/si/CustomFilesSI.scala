@@ -10,6 +10,9 @@ import org.apache.commons.io.FileUtils
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
+/**
+  * Provides methods to access custom files represented by [[FileMetadata]] in [[GenericMongoRepository]]
+  */
 class CustomFilesSI extends ServiceInterface[FileMetadata, FileMetadataDomain] {
   override protected val entityRepository: GenericMongoRepository[FileMetadataDomain] = ConnectionRepository.getFileMetadataRepository
 

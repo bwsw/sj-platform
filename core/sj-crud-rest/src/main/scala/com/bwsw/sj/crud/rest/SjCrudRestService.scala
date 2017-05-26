@@ -16,6 +16,7 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.crud.rest.instance.InstanceStopper
+import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.Future
 
@@ -25,11 +26,9 @@ import scala.concurrent.Future
   * @author Kseniya Tomskikh
   */
 object SjCrudRestService extends App with SjCrudInterface {
-  require(Option(System.getenv("CRUD_REST_HOST")).isDefined && Option(System.getenv("CRUD_REST_PORT")).isDefined,
-    "No environment variables: CRUD_REST_HOST, CRUD_REST_PORT")
-
-  val restHost = System.getenv("CRUD_REST_HOST")
-  val restPort = System.getenv("CRUD_REST_PORT").toInt
+  val config = ConfigFactory.load()
+  val restHost = config.getString(RestLiterals.hostConfig)
+  val restPort = config.getInt(RestLiterals.portConfig)
   val serializer = new JsonSerializer()
   serializer.setIgnoreUnknown(true)
   val fileMetadataDAO = ConnectionRepository.getFileMetadataRepository

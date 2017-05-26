@@ -1,7 +1,6 @@
 package com.bwsw.sj.crud.rest.validator.instance
 
 import com.bwsw.common.JsonSerializer
-import com.bwsw.common.traits.Serializer
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.model.service.{ServiceDomain, ZKServiceDomain}
 import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, StreamDomain, TStreamStreamDomain}
@@ -27,7 +26,7 @@ abstract class InstanceValidator extends CompletionUtils {
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
   var serviceRepository: GenericMongoRepository[ServiceDomain] = ConnectionRepository.getServiceRepository
   var instanceRepository: GenericMongoRepository[InstanceDomain] = ConnectionRepository.getInstanceRepository
-  val serializer: Serializer = new JsonSerializer
+  val serializer: JsonSerializer = new JsonSerializer
 
   /**
    * Validating input parameters for streaming module

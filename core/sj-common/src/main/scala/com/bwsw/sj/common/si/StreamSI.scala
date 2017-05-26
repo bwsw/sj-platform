@@ -9,6 +9,9 @@ import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
+/**
+  * Provides methods to access [[SjStream]]s in [[GenericMongoRepository]]
+  */
 class StreamSI extends ServiceInterface[SjStream, StreamDomain] {
   override protected val entityRepository: GenericMongoRepository[StreamDomain] = ConnectionRepository.getStreamRepository
 
@@ -45,6 +48,12 @@ class StreamSI extends ServiceInterface[SjStream, StreamDomain] {
     }
   }
 
+  /**
+    * Returns [[com.bwsw.sj.common.dal.model.instance.InstanceDomain InstanceDomain]]s related with [[SjStream]]
+    *
+    * @param name name of stream
+    * @return Some(instances) if stream exists, None otherwise
+    */
   def getRelated(name: String): Option[mutable.Buffer[String]] =
     entityRepository.get(name).map(_ => getRelatedInstances(name))
 

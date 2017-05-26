@@ -5,16 +5,17 @@ import java.net.URI
 
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
-import com.bwsw.sj.common.dal.model.instance._
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.instance._
+import com.bwsw.sj.common.utils.{CommonAppConfigNames, FrameworkLiterals}
 import com.bwsw.sj.mesos.framework.task.TasksList
+import com.typesafe.config.ConfigFactory
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos.MasterInfo
 import org.apache.mesos.SchedulerDriver
 
 import scala.collection.immutable
-import scala.util.Properties
+import scala.util.Try
 
 
 object FrameworkUtil {
@@ -55,9 +56,12 @@ object FrameworkUtil {
   }
 
   def getEnvParams: Map[String, String] = {
+    val config = ConfigFactory.load()
+
     Map(
-      "instanceId" -> Properties.envOrElse("INSTANCE_ID", "00000000-0000-0000-0000-000000000000"),
-      "mongodbHosts" -> Properties.envOrElse("MONGO_HOSTS", "127.0.0.1:27017")
+      "instanceId" ->
+        Try(config.getString(FrameworkLiterals.instanceId)).getOrElse("00000000-0000-0000-0000-000000000000"),
+      "mongodbHosts" -> Try(config.getString(CommonAppConfigNames.mongoHosts)).getOrElse("127.0.0.1:27017")
     )
   }
 

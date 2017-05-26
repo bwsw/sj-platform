@@ -5,6 +5,11 @@ import java.util.Date
 import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.annotation.{JsonInclude, JsonProperty}
 
+/**
+  * Class represents a set of metrics that characterize performance of module.
+  *
+  * @author Kseniya Mikhaleva
+  */
 class PerformanceMetricsMetadata {
   @JsonProperty("pm-datetime") var pmDatetime: Date = _
   @JsonProperty("task-id") var taskId: String = _

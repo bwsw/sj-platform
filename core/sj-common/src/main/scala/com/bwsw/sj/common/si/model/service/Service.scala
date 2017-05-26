@@ -15,8 +15,18 @@ class Service(val serviceType: String,
 
   def to(): ServiceDomain = ???
 
+  /**
+    * Validates service
+    *
+    * @return empty array if service is correct, validation errors otherwise
+    */
   def validate(): ArrayBuffer[String] = validateGeneralFields()
 
+  /**
+    * Validates fields which common for all types of service
+    *
+    * @return empty array if fields is correct, validation errors otherwise
+    */
   protected def validateGeneralFields(): ArrayBuffer[String] = {
     val serviceRepository = ConnectionRepository.getServiceRepository
     val errors = new ArrayBuffer[String]()
@@ -158,18 +168,3 @@ object Service {
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

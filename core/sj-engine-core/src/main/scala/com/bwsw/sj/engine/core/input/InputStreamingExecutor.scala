@@ -6,8 +6,9 @@ import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
 import io.netty.buffer.ByteBuf
 
 /**
-  * It is responsible for input module execution logic. Module uses a specific instance to personalize its work.
-  * Executor provides the methods, which has default implementation but you can override these methods if it's needed.
+  * It is responsible for input module execution logic.
+  * Module uses a specific instance to configure its work.
+  * Executor provides the following methods, which has default implementation but you can override these methods if it's needed.
   *
   * @author Kseniya Mikhaleva
   */

@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 /**
   * Serializer from [[org.apache.avro.generic.GenericRecord GenericRecord]] and vice versa.
   *
-  * @param schema avro schema for deserialization
+  * @param schema avro schema for serialization/deserialization
   * @author Pavel Tomskikh
   */
 class AvroSerializer(schema: Option[Schema] = None) {

@@ -10,6 +10,7 @@ import com.bwsw.sj.common.utils.FrameworkLiterals._
 import com.bwsw.sj.common.utils._
 import com.bwsw.sj.crud.rest.RestLiterals
 import com.bwsw.sj.crud.rest.marathon.{MarathonApplicationById, MarathonRequest}
+import com.typesafe.config.ConfigFactory
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
@@ -74,19 +75,22 @@ class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable w
 
   private def getZooKeeperServers(marathonMaster: String) = {
     logger.debug(s"Instance: '${instance.name}'. Getting a zookeeper address.")
-    var zooKeeperServers = ""
-    val zkHost = Option(System.getenv("ZOOKEEPER_HOST"))
-    val zkPort = Option(System.getenv("ZOOKEEPER_PORT"))
-    if (zkHost.isDefined && zkPort.isDefined) {
-      zooKeeperServers = zkHost.get + ":" + zkPort.get
-      logger.debug(s"Instance: '${instance.name}'. Get a zookeeper address: '$zooKeeperServers' from environment variables.")
-    } else {
-      val marathonMasterUrl = new URI(marathonMaster)
-      zooKeeperServers = marathonMasterUrl.getHost + ":" + marathonMasterUrl.getPort
-      logger.debug(s"Instance: '${instance.name}'. Get a zookeeper address: '$zooKeeperServers' from marathon.")
-    }
+    Try {
+      val config = ConfigFactory.load()
+      (config.getString(CommonAppConfigNames.zooKeeperHost),
+        config.getInt(CommonAppConfigNames.zooKeeperPort))
+    } match {
+      case Success((zkHost, zkPort)) =>
+        val zooKeeperServers = s"$zkHost:$zkPort"
+        logger.debug(s"Instance: '${instance.name}'. Get a zookeeper address: '$zooKeeperServers' from application configuration.")
+        zooKeeperServers
 
-    zooKeeperServers
+      case Failure(_) =>
+        val marathonMasterUrl = new URI(marathonMaster)
+        val zooKeeperServers = marathonMasterUrl.getHost + ":" + marathonMasterUrl.getPort
+        logger.debug(s"Instance: '${instance.name}'. Get a zookeeper address: '$zooKeeperServers' from marathon.")
+        zooKeeperServers
+    }
   }
 
   private def startFramework(marathonMaster: String) = {

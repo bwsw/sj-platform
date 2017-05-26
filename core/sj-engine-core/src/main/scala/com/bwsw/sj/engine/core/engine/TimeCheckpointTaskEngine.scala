@@ -4,8 +4,10 @@ import com.bwsw.sj.common.utils.SjTimer
 import org.slf4j.LoggerFactory
 
 /**
- * Provides methods for a basic execution logic of task engine that has a checkpoint based on time
- */
+  * Provides methods for a basic execution logic of task engine
+  * that has a checkpoint based on time [[com.bwsw.sj.common.utils.EngineLiterals.timeIntervalMode]]
+  */
+
 trait TimeCheckpointTaskEngine {
   private val logger = LoggerFactory.getLogger(this.getClass)
   protected val checkpointInterval: Long

@@ -5,6 +5,10 @@ import java.util.ResourceBundle
 
 import scala.collection.mutable.ArrayBuffer
 
+/**
+  * Wrapper for [[ResourceBundle]] of rest messages
+  */
+
 object MessageResourceUtils {
   private val messages = ResourceBundle.getBundle("messages")
 

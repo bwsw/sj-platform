@@ -3,30 +3,35 @@ package com.bwsw.sj.mesos.framework
 import java.net.URI
 
 import com.bwsw.common.LeaderLatch
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.utils.FrameworkLiterals
+import com.bwsw.sj.mesos.framework.config.FrameworkConfigNames
 import com.bwsw.sj.mesos.framework.rest.Rest
 import com.bwsw.sj.mesos.framework.schedule.FrameworkScheduler
+import com.typesafe.config.ConfigFactory
 import org.apache.mesos.MesosSchedulerDriver
 import org.apache.mesos.Protos.{Credential, FrameworkInfo}
 
-import scala.util.Properties
+import scala.util.Try
 
 
 object StartFramework {
 
+  private val config = ConfigFactory.load()
   val frameworkName = "JugglerFramework"
-  val frameworkUser =  Properties.envOrElse("FRAMEWORK_USER", "root")
+  val frameworkUser = Try(config.getString(FrameworkConfigNames.user)).getOrElse("root")
   val frameworkCheckpoint = false
   val frameworkFailoverTimeout = 0.0d
   val frameworkRole = "*"
 
-  val master_path = Properties.envOrElse("MESOS_MASTER", "zk://127.0.0.1:2181/mesos")
-  val frameworkTaskId = Properties.envOrElse("FRAMEWORK_ID", "broken")
+  val master_path = Try(config.getString(FrameworkLiterals.mesosMaster)).getOrElse("zk://127.0.0.1:2181/mesos")
+  val frameworkTaskId = Try(config.getString(FrameworkLiterals.frameworkId)).getOrElse("broken")
 
   /**
     * Main function to start rest and framework.
+    *
     * @param args exposed port for rest service
     */
   def main(args: Array[String]): Unit = {
@@ -55,14 +60,10 @@ object StartFramework {
         build())
     }
 
-
-
     val driver: MesosSchedulerDriver = {
       if (credential.isDefined) new MesosSchedulerDriver(scheduler, frameworkInfo, master_path, credential.get)
       else new MesosSchedulerDriver(scheduler, frameworkInfo, master_path)
     }
-
-
 
     val zkServers: String = getZooKeeperServers(master_path)
     val leader: LeaderLatch = new LeaderLatch(Set(zkServers), s"/framework/$frameworkTaskId/lock")

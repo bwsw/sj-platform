@@ -19,11 +19,15 @@ import scala.collection.immutable.Iterable
 import scala.collection.mutable
 
 /**
-  * Class is responsible for launching t-stream consumers
-  * that allow to fetching messages, which are wrapped in envelope
+  * Class is responsible for handling t-stream input
+  * (i.e. retrieving and checkpointing kafka and t-stream messages)
+  * for batch streaming engine.
+  * It launches t-stream consumers allowing to fetch messages, which are wrapped in envelopes,
+  * and checkpoint processed messages
   *
+  * @param manager         allows to manage an environment of batch streaming task
+  * @param checkpointGroup group of t-stream agents that have to make a checkpoint at the same time
   * @author Kseniya Mikhaleva
-  *
   */
 class RetrievableTStreamCheckpointTaskInput[T <: AnyRef](manager: CommonTaskManager,
                                                          override val checkpointGroup: CheckpointGroup = new CheckpointGroup())

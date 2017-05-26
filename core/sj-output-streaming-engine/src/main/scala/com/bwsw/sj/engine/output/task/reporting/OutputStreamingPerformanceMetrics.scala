@@ -4,24 +4,30 @@ import java.util.Calendar
 
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.output.task.OutputTaskManager
+
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 
 /**
- * Class represents a set of metrics that characterize performance of an output streaming module
- *
- * @author Kseniya Mikhaleva
- */
+  * Class represents a set of metrics that characterize performance of an output streaming module
+  *
+  * @param manager allows to manage an environment of output streaming task
+  * @author Kseniya Mikhaleva
+  */
 
 class OutputStreamingPerformanceMetrics(manager: OutputTaskManager)
   extends PerformanceMetrics(manager) {
 
   currentThread.setName(s"output-task-${manager.taskName}-performance-metrics")
-  private val inputStreamNames = instance.getInputsWithoutStreamMode
-  private val outputStreamNames = instance.outputs
+  private val inputStreamNames: Array[String] = instance.getInputsWithoutStreamMode
+  private val outputStreamNames: Array[String] = instance.outputs
 
-  override protected var inputEnvelopesPerStream = createStorageForInputEnvelopes(inputStreamNames)
-  override protected var outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
+  override protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Int]]] = createStorageForInputEnvelopes(inputStreamNames)
+  override protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Int]]] = createStorageForOutputEnvelopes(outputStreamNames)
 
+  /**
+    * Constructs a report of performance metrics of task work (one module could have multiple tasks)
+    */
   override def getReport(): String = {
     logger.info(s"Start preparing a report of performance for task: $taskName of output module.")
     mutex.lock()

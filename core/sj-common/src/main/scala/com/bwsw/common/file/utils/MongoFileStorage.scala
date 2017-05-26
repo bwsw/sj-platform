@@ -8,6 +8,11 @@ import com.mongodb.casbah.MongoDB
 import com.mongodb.casbah.gridfs.Imports._
 import org.mongodb.morphia.mapping.Mapper
 
+/**
+  * Provides methods to CRUD files using MongoDB as storage
+  *
+  * @param mongoDB a mongo db client
+  */
 class MongoFileStorage(mongoDB: MongoDB) extends FileStorage {
 
   private val gridFS: GridFS = GridFS(mongoDB)
@@ -92,11 +97,6 @@ class MongoFileStorage(mongoDB: MongoDB) extends FileStorage {
       logger.error(s"File with name: '$fileName' doesn't exist in a mongo storage.")
       throw new FileNotFoundException(s"$fileName doesn't exist")
     }
-  }
-
-  override def getContent(): Seq[String] = {
-    logger.debug(s"Get a list of contents of a mongo storage directory.")
-    gridFS.iterator.toList.map(_.filename.get).toSeq
   }
 
   override def delete(fileName: String): Boolean = {

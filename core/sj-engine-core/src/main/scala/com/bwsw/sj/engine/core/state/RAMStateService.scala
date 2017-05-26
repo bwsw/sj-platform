@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 import scala.collection.mutable
 
 /**
-  * Class representing a service for managing by a storage for default state that is kept in RAM and use t-stream for checkpoints
+  * Class representing a service for managing by a storage for default state that is kept in RAM and use t-stream for checkpoint
   *
   * @author Kseniya Mikhaleva
   * @param manager         Manager of environment of regular module task
@@ -58,7 +58,7 @@ class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGro
   private val stateVariables: mutable.Map[String, Any] = loadLastState()
 
   /**
-    * Creates SJStream to keep a module state
+    * Creates [[TStreamStreamDomain]] to keep a module state
     */
   private def createStateStream(): TStreamStreamDomain = {
     logger.debug(s"Task name: ${manager.taskName} " +
@@ -68,8 +68,8 @@ class RAMStateService(manager: CommonTaskManager, checkpointGroup: CheckpointGro
     val tags = Array("state")
     val partitions = 1
 
-    manager.createTStreamOnCluster(stateStreamName, description, partitions)
-    manager.getSjStream(stateStreamName, description, tags, partitions)
+    manager.createStorageStream(stateStreamName, description, partitions)
+    manager.getStream(stateStreamName, description, tags, partitions)
   }
 
   /**

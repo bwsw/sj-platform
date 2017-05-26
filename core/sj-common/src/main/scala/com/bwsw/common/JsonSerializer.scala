@@ -3,7 +3,6 @@ package com.bwsw.common
 import java.lang.reflect.{ParameterizedType, Type}
 
 import com.bwsw.common.exceptions._
-import com.bwsw.common.traits.Serializer
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.core.`type`.TypeReference
@@ -15,7 +14,11 @@ import org.slf4j.LoggerFactory
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
-class JsonSerializer extends Serializer {
+/**
+  * Class based on jackson for json serialization.
+  * Most commonly used in REST to serialize/deserialize api entities
+  */
+class JsonSerializer {
 
   def this(ignore: Boolean, failOnNullPrimitives: Boolean = false) = {
     this()
@@ -97,7 +100,7 @@ class JsonSerializer extends Serializer {
     }
   }
 
-  override def setIgnoreUnknown(ignore: Boolean): Unit = {
+  def setIgnoreUnknown(ignore: Boolean): Unit = {
     logger.debug(s"Set a value of flag: FAIL_ON_UNKNOWN_PROPERTIES to '$ignore'.")
     if (ignore) {
       mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -106,7 +109,7 @@ class JsonSerializer extends Serializer {
     }
   }
 
-  override def getIgnoreUnknown(): Boolean = {
+  def getIgnoreUnknown(): Boolean = {
     logger.debug(s"Retrieve a value of flag: FAIL_ON_UNKNOWN_PROPERTIES.")
     !((mapper.getDeserializationConfig.getDeserializationFeatures & DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES.getMask) == DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES.getMask)
   }

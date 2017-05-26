@@ -1,22 +1,23 @@
 package com.bwsw.sj.engine.output.processing
 
 import com.bwsw.common.es.ElasticsearchClient
-import com.bwsw.sj.common.dal.model.service.ESServiceDomain
-import com.bwsw.sj.common.dal.model.stream.StreamDomain
+import com.bwsw.sj.common.dal.model.stream.ESStreamDomain
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.Entity
 import com.bwsw.sj.engine.core.output.types.es.ElasticsearchCommandBuilder
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 
-
-class EsOutputProcessor[T <: AnyRef](outputStream: StreamDomain,
+/**
+  * ref. [[OutputProcessor]] object
+  */
+class EsOutputProcessor[T <: AnyRef](esStream: ESStreamDomain,
                                      performanceMetrics: OutputStreamingPerformanceMetrics,
                                      manager: OutputTaskManager,
                                      entity: Entity[_])
-  extends OutputProcessor[T](outputStream, performanceMetrics) {
+  extends OutputProcessor[T](esStream, performanceMetrics) {
 
-  private val esService = outputStream.service.asInstanceOf[ESServiceDomain]
+  private val esService = esStream.service
   private val esClient = openConnection()
   private val esCommandBuilder = new ElasticsearchCommandBuilder(transactionFieldName, entity.asInstanceOf[Entity[String]])
 
@@ -34,7 +35,7 @@ class EsOutputProcessor[T <: AnyRef](outputStream: StreamDomain,
 
   def delete(envelope: TStreamEnvelope[T]): Unit = {
     val index = esService.index
-    val streamName = outputStream.name
+    val streamName = esStream.name
     logger.debug(s"Delete a transaction: '${envelope.id}' from elasticsearch stream.")
     if (esClient.doesIndexExist(index)) {
       val query = esCommandBuilder.buildDelete(envelope.id)
@@ -47,7 +48,7 @@ class EsOutputProcessor[T <: AnyRef](outputStream: StreamDomain,
     val esFieldsValue = envelope.getFieldsValue
     val data = esCommandBuilder.buildInsert(inputEnvelope.id, esFieldsValue)
     logger.debug(s"Task: ${manager.taskName}. Write an output envelope to elasticsearch stream.")
-    esClient.write(data, esService.index, outputStream.name)
+    esClient.write(data, esService.index, esStream.name)
   }
 
   override def close(): Unit = {

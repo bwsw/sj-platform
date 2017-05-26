@@ -48,11 +48,8 @@ trait KafkaTaskInput[T <: AnyRef] {
   }
 
   /**
-    * Creates SJStream is responsible for committing the offsets of last messages
+    * Creates [[com.bwsw.sj.common.dal.model.stream.KafkaStreamDomain]] is responsible for committing the offsets of last messages
     * that has successfully processed for each topic for each partition
-    *
-    * @return SJStream is responsible for committing the offsets of last messages
-    *         that has successfully processed for each topic for each partition
     */
   protected def createOffsetStream(): TStreamStreamDomain = {
     logger.debug(s"Task name: ${manager.taskName}. Get stream for keeping kafka offsets.")
@@ -60,9 +57,9 @@ trait KafkaTaskInput[T <: AnyRef] {
     val tags = Array("offsets")
     val partitions = 1
 
-    manager.createTStreamOnCluster(kafkaOffsetsStream, description, partitions)
+    manager.createStorageStream(kafkaOffsetsStream, description, partitions)
 
-    manager.getSjStream(kafkaOffsetsStream, description, tags, partitions)
+    manager.getStream(kafkaOffsetsStream, description, tags, partitions)
   }
 
 
@@ -86,12 +83,13 @@ trait KafkaTaskInput[T <: AnyRef] {
     * If there was a checkpoint with offsets of last consumed messages for each topic/partition
     * then consumer will fetch from this offsets otherwise in accordance with offset parameter
     *
-    * @param topics Set of kafka topic names and range of partitions relatively
-    * @param hosts  Addresses of kafka brokers in host:port format
-    * @param offset Default policy for kafka consumer (earliest/latest)
-    * @return Kafka consumer subscribed to topics
+    * @param topics set of kafka topic names and range of partitions relatively
+    * @param hosts  addresses of kafka brokers in host:port format
+    * @param offset default policy for kafka consumer (earliest/latest)
     */
-  protected def createSubscribingKafkaConsumer(topics: List[(String, List[Int])], hosts: List[String], offset: String): KafkaConsumer[Array[Byte], Array[Byte]] = {
+  protected def createSubscribingKafkaConsumer(topics: List[(String, List[Int])],
+                                               hosts: List[String],
+                                               offset: String): KafkaConsumer[Array[Byte], Array[Byte]] = {
     logger.debug(s"Task name: ${manager.taskName}. Create kafka consumer for topics (with their partitions): " +
       s"${topics.map(x => s"topic name: ${x._1}, " + s"partitions: ${x._2.mkString(",")}").mkString(",")}.")
     val consumer = createKafkaConsumer(hosts, offset)

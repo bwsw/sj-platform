@@ -13,6 +13,7 @@ import scala.collection.mutable.ListBuffer
 /**
   * Class represents a set of metrics that characterize performance of a batch streaming module
   *
+  * @param manager allows to manage an environment of batch streaming task
   * @author Kseniya Mikhaleva
   */
 
@@ -20,21 +21,21 @@ class BatchStreamingPerformanceMetrics(manager: CommonTaskManager)
   extends PerformanceMetrics(manager) {
 
   currentThread.setName(s"batch-task-${manager.taskName}-performance-metrics")
-  private var totalIdleTime = 0L
-  private val batchInstance = manager.instance.asInstanceOf[BatchInstance]
-  private val inputStreamNames = manager.inputs.map(_._1.name).toArray
-  private val outputStreamNames = batchInstance.outputs
+  private var totalIdleTime: Long = 0L
+  private val batchInstance: BatchInstance = manager.instance.asInstanceOf[BatchInstance]
+  private val inputStreamNames: Array[String] = manager.inputs.map(_._1.name).toArray
+  private val outputStreamNames: Array[String] = batchInstance.outputs
 
-  override protected var inputEnvelopesPerStream = createStorageForInputEnvelopes(inputStreamNames)
-  override protected var outputEnvelopesPerStream = createStorageForOutputEnvelopes(outputStreamNames)
+  override protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Int]]] = createStorageForInputEnvelopes(inputStreamNames)
+  override protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Int]]] = createStorageForOutputEnvelopes(outputStreamNames)
 
-  private var batchesPerStream = createStorageForBatches()
-  private var windowsPerStream = createStorageForWindows()
+  private var batchesPerStream: mutable.Map[String, ListBuffer[Int]] = createStorageForBatches()
+  private var windowsPerStream: mutable.Map[String, Int] = createStorageForWindows()
 
   /**
     * Increases time when there are no messages (envelopes)
     *
-    * @param idle How long waiting a new envelope was
+    * @param idle How long waiting for a new envelope was
     */
   def increaseTotalIdleTime(idle: Long): Unit = {
     mutex.lock()
@@ -43,9 +44,7 @@ class BatchStreamingPerformanceMetrics(manager: CommonTaskManager)
   }
 
   /**
-    * Constructs a report of performance metrics of task's work
-    *
-    * @return Constructed performance report
+    * Constructs a report of performance metrics of task work (one module could have multiple tasks)
     */
   override def getReport(): String = {
     logger.info(s"Start preparing a report of performance for task: ${manager.taskName} of batch module.")

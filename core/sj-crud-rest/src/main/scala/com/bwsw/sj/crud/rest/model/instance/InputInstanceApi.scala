@@ -5,6 +5,9 @@ import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 
+/**
+  * API entity for [[EngineLiterals.inputStreamingType]] instance
+  */
 class InputInstanceApi(name: String,
                        coordinationService: String,
                        val checkpointMode: String,

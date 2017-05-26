@@ -6,7 +6,7 @@ import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.server.RequestContext
 import akka.stream.ActorMaterializer
-import com.bwsw.common.traits.Serializer
+import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.si.JsonValidator
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
@@ -26,7 +26,7 @@ trait SjCrudValidator extends CompletionUtils with JsonValidator {
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   implicit val executor: ExecutionContextExecutor = system.dispatcher
 
-  val serializer: Serializer
+  val serializer: JsonSerializer
   val restHost: String
   val restPort: Int
 

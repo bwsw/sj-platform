@@ -6,7 +6,7 @@ import org.apache.avro.generic.GenericRecord
 import org.slf4j.LoggerFactory
 
 /**
-  * Serializer that extend the default functionality for [[org.apache.avro.generic.GenericRecord GenericRecord]]
+  * Serializer that extends the default functionality for [[org.apache.avro.generic.GenericRecord]]
   *
   * @author Pavel Tomskikh
   */

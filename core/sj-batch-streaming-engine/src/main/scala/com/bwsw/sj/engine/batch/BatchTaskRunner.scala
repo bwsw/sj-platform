@@ -1,5 +1,7 @@
 package com.bwsw.sj.engine.batch
 
+import java.util.concurrent.ExecutorCompletionService
+
 import com.bwsw.sj.common.si.model.instance.BatchInstance
 import com.bwsw.sj.engine.batch.task.BatchTaskEngine
 import com.bwsw.sj.engine.batch.task.input.{EnvelopeFetcher, RetrievableCheckpointTaskInput}
@@ -10,6 +12,14 @@ import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.state.CommonModuleService
 import org.slf4j.LoggerFactory
 
+/**
+  * Class is responsible for launching batch engine execution logic.
+  * First, there are created all services needed to start engine. All of those services implement Callable interface
+  * Next, each service are launched as a separate task using [[ExecutorCompletionService]]
+  * Finally, handle a case if some task will fail and stop the execution. In other case the execution will go on indefinitely
+  *
+  * @author Kseniya Mikhaleva
+  */
 object BatchTaskRunner extends {
   override val threadName = "BatchTaskRunner-%d"
 } with TaskRunner {

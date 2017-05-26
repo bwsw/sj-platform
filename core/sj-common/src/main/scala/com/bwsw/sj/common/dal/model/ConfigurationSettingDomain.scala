@@ -2,11 +2,12 @@ package com.bwsw.sj.common.dal.model
 
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.IdField
 import org.mongodb.morphia.annotations.Entity
+import com.bwsw.sj.common.config.ConfigLiterals
 
 /**
-  * Entity for one element from configuration settings.
-  * Configuration settings is a whole collection in mongo,
-  * collection element is one configuration setting.
+  * Domain entity for config.
+  * Domain can be one of the: [[ConfigLiterals.domains]]
   */
+
 @Entity("config")
 case class ConfigurationSettingDomain(@IdField name: String, value: String, domain: String)

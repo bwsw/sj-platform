@@ -19,6 +19,15 @@ import org.slf4j.LoggerFactory
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
+/**
+  * Class contains methods for running batch module
+  *
+  * @param batchCollector gathering batches that consist of envelopes
+  * @param instance set of settings of a batch streaming module
+  * @param moduleService provides an executor of batch streaming module and a method to perform checkpoint
+  * @param inputService accesses to incoming envelopes
+  * @param performanceMetrics set of metrics that characterize performance of a batch streaming module
+  */
 class BatchTaskEngine(batchCollector: BatchCollector,
                       instance: BatchInstance,
                       moduleService: CommonModuleService,
@@ -102,7 +111,7 @@ class BatchTaskEngine(batchCollector: BatchCollector,
 
   private def processBatches(): Unit = {
     logger.debug(s"Check whether there are batches to collect or not.")
-    val batches = batchCollector.getBatchesToCollect.map(batchCollector.collectBatch)
+    val batches = batchCollector.getBatchesToCollect().map(batchCollector.collectBatch)
     if (batches.isEmpty) {
       onIdle()
     } else {

@@ -8,7 +8,7 @@ import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 import org.mongodb.morphia.annotations.Property
 
 /**
-  * Entity for input instance-json
+  * Domain entity for [[EngineLiterals.inputStreamingType]] instance
   *
   * @author Kseniya Tomskikh
   */

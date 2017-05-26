@@ -5,20 +5,21 @@ import com.bwsw.sj.common.dal.model.module.BatchSpecificationDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.common.si.model.instance.{BatchInstance, RegularInstance}
-import com.bwsw.sj.common.utils.StreamLiterals
+import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.batch.{BatchCollector, BatchStreamingPerformanceMetrics}
 import com.bwsw.sj.engine.core.environment.{EnvironmentManager, ModuleEnvironmentManager}
+import com.bwsw.tstreams.agents.producer.Producer
 
 import scala.collection.mutable
 
 /**
-  * Class allowing to manage an environment of regular streaming task
+  * Class allows to manage an environment of [[EngineLiterals.regularStreamingType]] or [[EngineLiterals.batchStreamingType]] task
   *
   * @author Kseniya Mikhaleva
   */
 class CommonTaskManager() extends TaskManager {
-  val inputs: mutable.Map[StreamDomain, Array[Int]] = getInputs(getExecutionPlan)
-  val outputProducers = createOutputProducers()
+  val inputs: mutable.Map[StreamDomain, Array[Int]] = getInputs(getExecutionPlan())
+  val outputProducers: Map[String, Producer] = createOutputProducers()
 
   require(numberOfAgentsPorts >=
     (inputs.count(x => x._1.streamType == StreamLiterals.tstreamType) + instance.outputs.length + 3),
@@ -64,8 +65,8 @@ class CommonTaskManager() extends TaskManager {
       case batchInstance: BatchInstance =>
         batchInstance.executionPlan
       case _ =>
-        logger.error("CommonTaskManager can be used only for regular or batch engine.")
-        throw new RuntimeException("CommonTaskManager can be used only for regular or batch engine.")
+        logger.error(s"CommonTaskManager can be used only for ${EngineLiterals.regularStreamingType} or ${EngineLiterals.batchStreamingType} engine.")
+        throw new RuntimeException("CommonTaskManager can be used only for ${EngineLiterals.regularStreamingType} or ${EngineLiterals.batchStreamingType} engine.")
     }
   }
 }

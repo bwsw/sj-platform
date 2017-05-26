@@ -1,27 +1,31 @@
 package com.bwsw.sj.engine.core.state
 
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.engine.StateHandlers
+import com.bwsw.sj.common.dal.model.stream.StreamDomain
+import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
+import com.bwsw.sj.common.engine.{StateHandlers, StreamingExecutor}
 import com.bwsw.sj.common.si.model.instance.{BatchInstance, RegularInstance}
+import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.environment.StatefulModuleEnvironmentManager
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 
 /**
- * Class is in charge of creating a StatefulModuleEnvironmentManager (and executor)
- * and performing a saving of state
- *
- * @param manager Manager of environment of task of regular module
- * @param checkpointGroup Group of t-stream agents that have to make a checkpoint at the same time
- * @param performanceMetrics Set of metrics that characterize performance of a regular streaming module
- */
-class StatefulCommonModuleService(manager: CommonTaskManager, checkpointGroup: CheckpointGroup, performanceMetrics: PerformanceMetrics)
+  * Class is in charge of creating [[StatefulModuleEnvironmentManager]] (and executor [[StreamingExecutor]] with [[StateHandlers]])
+  * and saving of state
+  *
+  * @param manager            manager of environment of task of [[EngineLiterals.regularStreamingType]] or [[EngineLiterals.batchStreamingType]] module
+  * @param checkpointGroup    group of t-stream agents that have to make a checkpoint at the same time
+  * @param performanceMetrics set of metrics that characterize performance of [[EngineLiterals.regularStreamingType]] or [[EngineLiterals.batchStreamingType]] module
+  */
+class StatefulCommonModuleService(manager: CommonTaskManager,
+                                  checkpointGroup: CheckpointGroup,
+                                  performanceMetrics: PerformanceMetrics)
   extends CommonModuleService(manager, checkpointGroup, performanceMetrics) {
 
-  private val streamService = ConnectionRepository.getStreamRepository
-  private var countOfCheckpoints = 1
-  private val stateService = new RAMStateService(manager, checkpointGroup)
+  private val streamService: GenericMongoRepository[StreamDomain] = ConnectionRepository.getStreamRepository
+  private var countOfCheckpoints: Int = 1
+  private val stateService: RAMStateService = new RAMStateService(manager, checkpointGroup)
 
   val environmentManager = new StatefulModuleEnvironmentManager(
     new StateStorage(stateService),
@@ -34,12 +38,13 @@ class StatefulCommonModuleService(manager: CommonTaskManager, checkpointGroup: C
     manager.moduleClassLoader
   )
 
-  val executor = manager.getExecutor(environmentManager)
+  val executor: StreamingExecutor = manager.getExecutor(environmentManager)
 
-  private val statefulExecutor = executor.asInstanceOf[StateHandlers]
+  private val statefulExecutor: StateHandlers = executor.asInstanceOf[StateHandlers]
+
   /**
-   * Does group checkpoint of t-streams state consumers/producers
-   */
+    * Does group checkpoint of t-streams state consumers/producers
+    */
   override def doCheckpoint(): Unit = {
     if (countOfCheckpoints != getStateFullCheckpoint()) {
       doCheckpointOfPartOfState()
@@ -50,8 +55,8 @@ class StatefulCommonModuleService(manager: CommonTaskManager, checkpointGroup: C
   }
 
   /**
-   * Saves a partial state changes
-   */
+    * Saves a partial state changes
+    */
   private def doCheckpointOfPartOfState(): Unit = {
     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint of a part of state.")
     logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeStateSave() handler.")
@@ -62,23 +67,23 @@ class StatefulCommonModuleService(manager: CommonTaskManager, checkpointGroup: C
     countOfCheckpoints += 1
   }
 
-   /**
-   * Saves a state
-   */
+  /**
+    * Saves a state
+    */
   private def doCheckpointOfFullState(): Unit = {
     logger.info(s"Task: ${manager.taskName}. It's time to checkpoint of full state.")
     logger.debug(s"Task: ${manager.taskName}. Invoke onBeforeStateSave() handler.")
-     statefulExecutor.onBeforeStateSave(true)
+    statefulExecutor.onBeforeStateSave(true)
     stateService.saveFullState()
     logger.debug(s"Task: ${manager.taskName}. Invoke onAfterStateSave() handler.")
-     statefulExecutor.onAfterStateSave(true)
+    statefulExecutor.onAfterStateSave(true)
     countOfCheckpoints = 1
   }
 
   private def getStateFullCheckpoint(): Int = {
     instance match {
-      case regularInstance: RegularInstance =>  regularInstance.stateFullCheckpoint
-      case batchInstance: BatchInstance =>  batchInstance.stateFullCheckpoint
+      case regularInstance: RegularInstance => regularInstance.stateFullCheckpoint
+      case batchInstance: BatchInstance => batchInstance.stateFullCheckpoint
     }
   }
 }

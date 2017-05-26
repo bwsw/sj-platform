@@ -3,6 +3,10 @@ package com.bwsw.sj.common.engine
 import com.bwsw.common.ObjectSerializer
 import org.slf4j.LoggerFactory
 
+/**
+  * Provides default implementation of methods to serialize/deserialize envelope data
+  */
+
 class DefaultEnvelopeDataSerializer(classLoader: ClassLoader) extends EnvelopeDataSerializer[AnyRef] {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val serializer = new ObjectSerializer(classLoader)

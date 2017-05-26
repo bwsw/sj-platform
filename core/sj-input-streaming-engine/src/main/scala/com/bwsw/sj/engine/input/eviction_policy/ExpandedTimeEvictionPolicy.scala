@@ -3,16 +3,23 @@ package com.bwsw.sj.engine.input.eviction_policy
 import com.bwsw.sj.common.si.model.instance.InputInstance
 
 /**
- * Provides methods are responsible for an expanded time eviction policy of input envelope duplicates
- * In this case time, within which a specific key is kept, will increase if a duplicate appears
- */
+  * Provides methods are responsible for an expanded time eviction policy of input envelope duplicates
+  * In this case time, within which a specific key is kept, will increase if a duplicate appears
+  *
+  * @param instance Input instance contains a settings of an eviction policy
+  *                 (message TTL [[InputInstanceDomain.lookupHistory]],
+  *                 a default eviction policy [[InputInstanceDomain.defaultEvictionPolicy]],
+  *                 a maximum size of message queue [[InputInstanceDomain.queueMaxSize]],
+  *                 async and sync backup count [[InputInstanceDomain.asyncBackupCount]] [[InputInstanceDomain.backupCount]])
+  */
 
 class ExpandedTimeEvictionPolicy(instance: InputInstance) extends InputInstanceEvictionPolicy(instance) {
   /**
-   * Checks whether a specific key is duplicate or not and if it is update a value by the key
-   * @param key Key that will be checked
-   * @return True if the key is not duplicate and false in other case
-   */
+    * Checks whether a specific key is duplicate or not and if it is update a value by the key
+    *
+    * @param key Key that will be checked
+    * @return True if the key is not duplicate and false in other case
+    */
   def checkForDuplication(key: String): Boolean = {
     logger.debug(s"Check for duplicate a key: $key.")
     if (!uniqueEnvelopes.containsKey(key)) {

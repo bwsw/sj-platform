@@ -2,9 +2,12 @@ package com.bwsw.sj.crud.rest.model.instance
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.si.model.instance.RegularInstance
-import com.bwsw.sj.common.utils.{AvroUtils, EngineLiterals, RestLiterals}
+import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals, RestLiterals}
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 
+/**
+  * API entity for [[EngineLiterals.regularStreamingType]] instance
+  */
 class RegularInstanceApi(name: String,
                          coordinationService: String,
                          val checkpointMode: String,
@@ -65,6 +68,6 @@ class RegularInstanceApi(name: String,
       Option(stateManagement).getOrElse(EngineLiterals.noneStateMode),
       stateFullCheckpoint.getOrElse(100),
       eventWaitIdleTime.getOrElse(1000l),
-      AvroUtils.mapToSchema(Option(inputAvroSchema).getOrElse(Map())))
+      AvroRecordUtils.mapToSchema(Option(inputAvroSchema).getOrElse(Map())))
   }
 }

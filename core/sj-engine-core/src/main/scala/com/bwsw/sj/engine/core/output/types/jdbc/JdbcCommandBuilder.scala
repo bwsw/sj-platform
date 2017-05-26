@@ -6,8 +6,13 @@ import com.bwsw.common.jdbc.IJdbcClient
 import com.bwsw.sj.engine.core.output.Entity
 
 /**
-  * Created by diryavkin_dn on 07.03.17.
+  * Provides methods for building jdbc [[PreparedStatement]] to CRUD data
+  *
+  * @param transactionFieldName name of transaction field to check data on duplicate
+  * @param entity               data
+  * @author Ivan Kudryavtsev
   */
+
 class JdbcCommandBuilder(client: IJdbcClient, transactionFieldName: String, entity: Entity[(PreparedStatement, Int) => Unit]) {
   /**
     * Create a select prepared statement according to txn field

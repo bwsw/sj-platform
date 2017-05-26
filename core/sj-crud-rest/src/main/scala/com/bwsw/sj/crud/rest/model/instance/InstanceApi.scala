@@ -7,6 +7,9 @@ import com.bwsw.sj.common.si.model.module.Specification
 import com.bwsw.sj.common.utils.RestLiterals
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 
+/**
+  * API entity for instance
+  */
 class InstanceApi(val name: String,
                   val coordinationService: String,
                   val description: String = RestLiterals.defaultDescription,

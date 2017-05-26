@@ -6,6 +6,12 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import org.slf4j.LoggerFactory
 
+/**
+  * Class is responsible for keeping under surveillance an instance status to be [[EngineLiterals.started]].
+  * The status can be changed [[EngineLiterals.instanceStatusModes]] and in this case an engine have to be stopped
+  *
+  * @param instanceName name of instance that contains the running task name
+  */
 class InstanceStatusObserver(instanceName: String) extends Callable[Unit] {
   private val logger = LoggerFactory.getLogger(this.getClass)
 

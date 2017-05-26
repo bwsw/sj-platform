@@ -8,6 +8,9 @@ import com.bwsw.sj.common.utils.MessageResourceUtils._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
+/**
+  * Provides methods to access [[ConfigurationSetting]]s in [[GenericMongoRepository]]
+  */
 class ConfigSettingsSI extends ServiceInterface[ConfigurationSetting, ConfigurationSettingDomain] {
   override protected val entityRepository: GenericMongoRepository[ConfigurationSettingDomain] = ConnectionRepository.getConfigRepository
 
@@ -46,6 +49,11 @@ class ConfigSettingsSI extends ServiceInterface[ConfigurationSetting, Configurat
     response
   }
 
+  /**
+    * Returns [[ConfigurationSetting]]s from [[entityRepository]] by parameters
+    *
+    * @param parameters
+    */
   def getDomain(parameters: Map[String, Any]): mutable.Buffer[ConfigurationSetting] = {
     entityRepository.getByParameters(parameters).map(ConfigurationSetting.from)
   }

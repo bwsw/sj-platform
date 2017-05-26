@@ -9,7 +9,7 @@ import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
 import scala.collection.mutable
 
 /**
-  * Task manager for working with streams of output-streaming module
+  * Class allows to manage an environment of output streaming task
   *
   * @author Kseniya Tomskikh
   */

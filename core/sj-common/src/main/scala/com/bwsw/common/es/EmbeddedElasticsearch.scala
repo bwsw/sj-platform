@@ -13,6 +13,9 @@ import org.elasticsearch.transport.Netty4Plugin
 import scala.collection.JavaConverters._
 import scala.util.Try
 
+/**
+  * Used for testing purposes only. Single node es cluster
+  */
 class EmbeddedElasticsearch {
   private val clusterName = "elasticsearch"
   private val dataDir = Files.createTempDirectory("elasticsearch_data_").toFile

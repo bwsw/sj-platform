@@ -1,49 +1,48 @@
 package com.bwsw.sj.engine.core.reporting
 
-/**
- * Class represents a set of metrics that characterize performance of module
- *
- * @author Kseniya Mikhaleva
- */
-
 import java.util.concurrent.locks.ReentrantLock
 import java.util.concurrent.{Callable, TimeUnit}
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
+import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer}
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection._
 import scala.collection.mutable.ListBuffer
 
+
+/**
+  * Class is responsible for collecting performance metrics and save their via t-streams on every checkpoint
+  *
+  * @author Kseniya Mikhaleva
+  */
 abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
 
-  protected val currentThread = Thread.currentThread()
-  protected val logger = LoggerFactory.getLogger(this.getClass)
+  protected val currentThread: Thread = Thread.currentThread()
+  protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
   protected val mutex: ReentrantLock = new ReentrantLock(true)
-  protected val reportSerializer = new JsonSerializer()
-  protected val startTime = System.currentTimeMillis()
+  protected val reportSerializer: JsonSerializer = new JsonSerializer()
+  protected val startTime: Long = System.currentTimeMillis()
   protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Int]]]
   protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Int]]]
-  protected val taskName = manager.taskName
-  protected val instance = manager.instance
-  private val reportingInterval = instance.performanceReportingInterval
-  protected val report = new PerformanceMetricsMetadata()
-  private val reportStreamName = instance.name + "_report"
-  private val reportStream = getReportStream()
-  private val reportProducer = createReportProducer()
+  protected val taskName: String = manager.taskName
+  protected val instance: Instance = manager.instance
+  private val reportingInterval: Long = instance.performanceReportingInterval
+  protected val report: PerformanceMetricsMetadata = new PerformanceMetricsMetadata()
+  private val reportStreamName: String = instance.name + "_report"
+  private val reportStream: TStreamStreamDomain = getReportStream()
+  private val reportProducer: Producer = createReportProducer()
 
   fillStaticPerformanceMetrics()
 
   /**
-   * Creates a SjStream to keep the reports of module performance.
-   * For each task there is specific partition (task number = partition number).
-   *
-   * @return SjStream used for keeping the reports of module performance
-   */
+    * Creates [[TStreamStreamDomain]] to keep the reports of module performance.
+    * For each task there is specific partition (task number = partition number)
+    */
   private def getReportStream(): TStreamStreamDomain = {
     logger.debug(s"Task name: $taskName. " +
       s"Get stream for performance metrics.")
@@ -51,9 +50,9 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
     val description = "store reports of performance metrics"
     val partitions = instance.countParallelism
 
-    manager.createTStreamOnCluster(reportStreamName, description, partitions)
+    manager.createStorageStream(reportStreamName, description, partitions)
 
-    manager.getSjStream(
+    manager.getStream(
       reportStreamName,
       description,
       tags,
@@ -62,10 +61,8 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
   }
 
   /**
-   * Create t-stream producer for stream for reporting
-    *
-    * @return Producer for reporting performance metrics
-   */
+    * Create t-stream producer for stream for reporting
+    */
   private def createReportProducer(): Producer = {
     logger.debug(s"Task: $taskName. Start creating a t-stream producer to record performance reports.")
     val reportProducer = manager.createProducer(reportStream)
@@ -80,8 +77,8 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
   }
 
   /**
-   * It's in charge of cleaning a report of performance metrics for next time
-   */
+    * It's in charge of cleaning a report of performance metrics for next time
+    */
   protected def clear(): Unit
 
   def addEnvelopeToInputStream(envelope: Envelope): Unit = {
@@ -109,12 +106,12 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
   }
 
   /**
-   * Invokes when a new element is sent to txn of some output stream
+    * Invokes when a new element is sent to txn of some output stream
     *
-    * @param name Stream name
-   * @param envelopeID Id of envelope of output stream
-   * @param elementSize Size of appended element
-   */
+    * @param name        stream name
+    * @param envelopeID  id of envelope of output stream
+    * @param elementSize size of appended element
+    */
   def addElementToOutputEnvelope(name: String, envelopeID: String, elementSize: Int): Unit = {
     mutex.lock()
     logger.debug(s"Indicate that a new element is sent to txn: $envelopeID of output stream: $name.")
@@ -133,8 +130,8 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
   }
 
   /**
-   * It is in charge of running of input module
-   */
+    * It is in charge of running of input module
+    */
   override def call(): Unit = {
     logger.debug(s"Task: $taskName. Launch a new thread to report performance metrics .")
     val currentThread = Thread.currentThread()
@@ -152,10 +149,8 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
   }
 
   /**
-   * Constructs a report of performance metrics of task work
-    *
-    * @return Constructed performance report
-   */
+    * Constructs a report of performance metrics of task work (one module could have multiple tasks)
+    */
   def getReport(): String
 
   private def sendReport(report: String): Unit = {

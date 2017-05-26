@@ -16,12 +16,14 @@ import com.bwsw.sj.engine.core.testutils.TestStorageServer
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
+import com.typesafe.config.ConfigFactory
 
 import scala.collection.mutable
 import scala.util.{Failure, Success, Try}
 
 object DataFactory {
-  private val zookeeperHosts = System.getenv("ZOOKEEPER_HOSTS")
+  private val config = ConfigFactory.load()
+  private val zookeeperHosts = config.getString("test.zookeeper.hosts")
   private val testNamespace = "test_namespace_for_input_engine"
   private val instanceName = "test-instance-for-input-engine"
   private val zookeeperProviderName = "zookeeper-test-provider"

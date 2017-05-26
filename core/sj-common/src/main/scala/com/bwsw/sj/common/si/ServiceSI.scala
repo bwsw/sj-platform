@@ -8,6 +8,9 @@ import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
+/**
+  * Provides methods to access [[Service]]s in [[GenericMongoRepository]]
+  */
 class ServiceSI extends ServiceInterface[Service, ServiceDomain] {
   override protected val entityRepository: GenericMongoRepository[ServiceDomain] = ConnectionRepository.getServiceRepository
 
@@ -60,6 +63,13 @@ class ServiceSI extends ServiceInterface[Service, ServiceDomain] {
     response
   }
 
+  /**
+    * Returns [[com.bwsw.sj.common.si.model.stream.SjStream SjStream]]s and
+    * [[com.bwsw.sj.common.dal.model.instance.InstanceDomain InstanceDomain]]s related with [[Service]]
+    *
+    * @param name name of service
+    * @return Right((streams, instances)) if service exists, Left(false) otherwise
+    */
   def getRelated(name: String): Either[Boolean, (mutable.Buffer[String], mutable.Buffer[String])] = {
     val service = entityRepository.get(name)
 

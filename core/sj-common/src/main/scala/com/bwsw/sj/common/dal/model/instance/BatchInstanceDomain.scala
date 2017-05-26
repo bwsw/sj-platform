@@ -3,12 +3,12 @@ package com.bwsw.sj.common.dal.model.instance
 import java.util
 
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
-import com.bwsw.sj.common.utils.SjStreamUtils.clearStreamFromMode
 import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
+import com.bwsw.sj.common.utils.StreamUtils._
 import org.mongodb.morphia.annotations.{Embedded, Property}
 
 /**
-  * Entity for batch instance-json
+  * Domain entity for [[EngineLiterals.batchStreamingType]] instance
   *
   * @author Kseniya Tomskikh
   */

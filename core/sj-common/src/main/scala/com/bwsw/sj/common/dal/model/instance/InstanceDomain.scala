@@ -8,7 +8,7 @@ import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 import org.mongodb.morphia.annotations.Entity
 
 /**
-  * Entity for base instance-json
+  * Domain entity for instance
   *
   * @author Kseniya Tomskikh
   */
