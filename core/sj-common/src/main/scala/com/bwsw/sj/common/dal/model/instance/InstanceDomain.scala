@@ -32,4 +32,7 @@ class InstanceDomain(@IdField val name: String,
                      @PropertyField("environment-variables") val environmentVariables: java.util.Map[String, String] = new util.HashMap[String, String](),
                      val stage: FrameworkStage = FrameworkStage(),
                      @PropertyField("performance-reporting-interval") val performanceReportingInterval: Long = 60000,
-                     @PropertyField("framework-id") val frameworkId: String = System.currentTimeMillis().toString)
+                     @PropertyField("framework-id") val frameworkId: String = System.currentTimeMillis().toString) {
+
+  def getInputsWithoutStreamMode: Array[String] = Array()
+}

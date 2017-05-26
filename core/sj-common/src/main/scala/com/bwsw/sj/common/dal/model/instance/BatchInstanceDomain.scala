@@ -3,6 +3,7 @@ package com.bwsw.sj.common.dal.model.instance
 import java.util
 
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
+import com.bwsw.sj.common.utils.SjStreamUtils.clearStreamFromMode
 import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 import org.mongodb.morphia.annotations.{Embedded, Property}
 
@@ -60,4 +61,7 @@ class BatchInstanceDomain(override val name: String,
     environmentVariables,
     stage,
     performanceReportingInterval,
-    frameworkId)
+    frameworkId) {
+
+  override def getInputsWithoutStreamMode: Array[String] = inputs.map(clearStreamFromMode)
+}

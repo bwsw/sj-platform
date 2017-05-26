@@ -20,7 +20,7 @@ abstract class BatchCollector(protected val instance: BatchInstanceDomain,
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val streamRepository = ConnectionRepository.getStreamRepository
-  private val inputs = Instance.from(instance).getInputsWithoutStreamMode.map(x => streamRepository.get(x).get)
+  private val inputs = instance.getInputsWithoutStreamMode.map(x => streamRepository.get(x).get)
   private val currentBatchPerStream: Map[String, Batch] = createStorageOfBatches()
 
   private def createStorageOfBatches(): Map[String, Batch] = {
