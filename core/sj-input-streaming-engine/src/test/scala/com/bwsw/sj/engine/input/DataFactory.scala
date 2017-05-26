@@ -6,6 +6,7 @@ import java.util.jar.JarFile
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.FileStorage
+import com.bwsw.sj.common.config.BenchmarkConfigNames
 import com.bwsw.sj.common.dal.model.instance.{InputInstanceDomain, InputTask, InstanceDomain}
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service.{ServiceDomain, TStreamServiceDomain, ZKServiceDomain}
@@ -22,7 +23,7 @@ import scala.util.{Failure, Success, Try}
 
 object DataFactory {
   private val config = ConfigFactory.load()
-  private val zookeeperHosts = config.getString("test.zookeeper.hosts")
+  private val zookeeperHosts = config.getString(BenchmarkConfigNames.zkHosts)
   private val testNamespace = "test_namespace_for_input_engine"
   private val instanceName = "test-instance-for-input-engine"
   private val zookeeperProviderName = "zookeeper-test-provider"

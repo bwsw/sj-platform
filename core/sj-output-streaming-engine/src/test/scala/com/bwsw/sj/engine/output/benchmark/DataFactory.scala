@@ -7,6 +7,7 @@ import com.bwsw.common._
 import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.common.jdbc.JdbcClientBuilder
+import com.bwsw.sj.common.config.BenchmarkConfigNames
 import com.bwsw.sj.common.dal.model._
 import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, OutputInstanceDomain, Task}
 import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain}
@@ -80,10 +81,10 @@ object DataFactory {
   val objectSerializer = new ObjectSerializer()
   private val serializer = new JsonSerializer
 
-  private val esProviderHosts = config.getString("test.es.hosts").split(",").map(host => host.trim)
-  private val jdbcHosts = config.getString("test.jdbc.hosts").split(",").map(host => host.trim)
-  private val restHosts = config.getString("test.restful.hosts").split(",").map(host => host.trim)
-  private val zookeeperHosts = config.getString("test.zookeeper.hosts").split(",").map(host => host.trim)
+  private val esProviderHosts = config.getString(OutputBenchmarkConfigNames.esHosts).split(",").map(host => host.trim)
+  private val jdbcHosts = config.getString(OutputBenchmarkConfigNames.jdbcHosts).split(",").map(host => host.trim)
+  private val restHosts = config.getString(OutputBenchmarkConfigNames.restHosts).split(",").map(host => host.trim)
+  private val zookeeperHosts = config.getString(BenchmarkConfigNames.zkHosts).split(",").map(host => host.trim)
   private val zookeeperProvider = new ProviderDomain(zookeeperProviderName, zookeeperProviderName,
     zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
   private val tstrqService = new TStreamServiceDomain(tstreamServiceName, tstreamServiceName, zookeeperProvider, TestStorageServer.prefix, TestStorageServer.token)

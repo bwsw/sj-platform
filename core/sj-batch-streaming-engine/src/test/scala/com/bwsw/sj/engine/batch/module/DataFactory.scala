@@ -10,7 +10,7 @@ import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service.{KafkaServiceDomain, ServiceDomain, TStreamServiceDomain, ZKServiceDomain}
 import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.config.ConfigLiterals
+import com.bwsw.sj.common.config.{BenchmarkConfigNames, ConfigLiterals}
 import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, ExecutionPlan, InstanceDomain, Task}
 import com.bwsw.sj.common.utils._
 import com.bwsw.sj.engine.core.testutils.TestStorageServer
@@ -32,8 +32,8 @@ import scala.util.{Failure, Success, Try}
 object DataFactory {
 
   private val config = ConfigFactory.load()
-  private val zookeeperHosts = config.getString("test.zookeeper.hosts").split(",")
-  private val kafkaHosts = config.getString("test.kafka.hosts")
+  private val zookeeperHosts = config.getString(BenchmarkConfigNames.zkHosts).split(",")
+  private val kafkaHosts = config.getString(BenchmarkConfigNames.kafkaHosts)
   val kafkaMode = "kafka"
   val tstreamMode = "tstream"
   val commonMode = "both"

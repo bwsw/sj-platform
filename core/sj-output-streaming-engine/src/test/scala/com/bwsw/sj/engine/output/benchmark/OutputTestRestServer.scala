@@ -20,7 +20,7 @@ object OutputTestRestServer extends App {
   case class Entity(value: Int, stringValue: String, txn: Long) extends Serializable
 
   private val config = ConfigFactory.load()
-  val httpPort = config.getInt("test.output.rest.port")
+  val httpPort = config.getInt(OutputBenchmarkConfigNames.restPort)
   val jsonSerializer = new JsonSerializer
   val storage = new ListBuffer[Entity]()
 
