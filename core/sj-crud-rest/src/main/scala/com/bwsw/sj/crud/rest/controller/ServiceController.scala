@@ -2,6 +2,7 @@ package com.bwsw.sj.crud.rest.controller
 
 import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.rest._
+import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.crud.rest.model.service.ServiceApi
 import com.bwsw.sj.common.si.ServiceSI
 import com.bwsw.sj.common.utils.MessageResourceUtils._
@@ -14,6 +15,9 @@ import scala.util.{Failure, Success, Try}
 class ServiceController extends Controller {
   override val serviceInterface = new ServiceSI()
 
+  protected val entityDeletedMessage: String = "rest.services.service.deleted"
+  protected val entityNotFoundMessage: String = "rest.services.service.notfound"
+
   override def create(serializedEntity: String): RestResponse = {
     var response: RestResponse = new RestResponse()
 
@@ -23,9 +27,9 @@ class ServiceController extends Controller {
         val created = serviceInterface.create(serviceData.to())
 
         response = created match {
-          case Right(_) =>
+          case Created =>
             CreatedRestResponse(MessageResponseEntity(createMessage("rest.services.service.created", serviceData.name)))
-          case Left(errors) => BadRequestRestResponse(MessageResponseEntity(
+          case NotCreated(errors) => BadRequestRestResponse(MessageResponseEntity(
             createMessageWithErrors("rest.services.service.cannot.create", errors)
           ))
         }
@@ -57,22 +61,7 @@ class ServiceController extends Controller {
       case Some(x) =>
         OkRestResponse(ServiceResponseEntity(ServiceApi.from(x)))
       case None =>
-        NotFoundRestResponse(MessageResponseEntity(createMessage("rest.services.service.notfound", name)))
-    }
-
-    response
-  }
-
-  override def delete(name: String): RestResponse = {
-    val deleteResponse = serviceInterface.delete(name)
-    val response: RestResponse = deleteResponse match {
-      case Right(isDeleted) =>
-        if (isDeleted)
-          OkRestResponse(MessageResponseEntity(createMessage("rest.services.service.deleted", name)))
-        else
-          NotFoundRestResponse(MessageResponseEntity(createMessage("rest.services.service.notfound", name)))
-      case Left(message) =>
-        UnprocessableEntityRestResponse(MessageResponseEntity(message))
+        NotFoundRestResponse(MessageResponseEntity(createMessage(entityNotFoundMessage, name)))
     }
 
     response
@@ -84,7 +73,7 @@ class ServiceController extends Controller {
       case Right(servicesAndInstances) =>
         OkRestResponse(RelatedToServiceResponseEntity(servicesAndInstances._1, servicesAndInstances._2))
       case Left(_) =>
-        NotFoundRestResponse(MessageResponseEntity(createMessage("rest.services.service.notfound", name)))
+        NotFoundRestResponse(MessageResponseEntity(createMessage(entityNotFoundMessage, name)))
     }
 
     response

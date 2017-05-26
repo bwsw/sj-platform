@@ -6,6 +6,7 @@ import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.FileMetadata
 import com.bwsw.sj.common.si.model.module.ModuleMetadata
+import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import org.apache.commons.io.FileUtils
@@ -22,25 +23,24 @@ class ModuleSI extends JsonValidator {
   private val tmpDirectory = "/tmp/"
   private val previousFilesNames: ListBuffer[String] = ListBuffer[String]()
 
-  def create(entity: ModuleMetadata): Either[ArrayBuffer[String], Boolean] = {
+  def create(entity: ModuleMetadata): CreationResult = {
     val modules = entity.map(getFilesMetadata)
 
     if (modules.nonEmpty) {
-      Left(
+      NotCreated(
         ArrayBuffer[String](
           createMessage("rest.modules.module.exists", entity.signature)))
     } else {
-      val errors = new ArrayBuffer[String]
-      errors ++= entity.validate()
+      val errors = entity.validate()
 
       if (errors.isEmpty) {
         val uploadingFile = new File(entity.filename)
         FileUtils.copyFile(entity.file.get, uploadingFile)
         fileStorage.put(uploadingFile, entity.filename, entity.specification.to, FileMetadata.moduleType)
 
-        Right(true)
+        Created
       } else {
-        Left(errors)
+        NotCreated(errors)
       }
     }
   }
@@ -89,15 +89,15 @@ class ModuleSI extends JsonValidator {
     ).map(_.name)
   }
 
-  def delete(metadata: ModuleMetadata): Either[String, Boolean] = {
+  def delete(metadata: ModuleMetadata): DeletingResult = {
     if (getRelatedInstances(metadata).nonEmpty) {
-      Left(createMessage(
+      DeletingError(createMessage(
         "rest.modules.module.cannot.delete",
         metadata.signature))
     } else if (fileStorage.delete(metadata.filename))
-      Right(true)
+      Deleted
     else
-      Left(createMessage("rest.cannot.delete.file", metadata.filename))
+      DeletingError(createMessage("rest.cannot.delete.file", metadata.filename))
   }
 
   def exists(moduleType: String, moduleName: String, moduleVersion: String): Either[String, FileMetadataDomain] = {

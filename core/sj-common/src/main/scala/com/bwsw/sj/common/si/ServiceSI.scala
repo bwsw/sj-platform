@@ -3,10 +3,10 @@ package com.bwsw.sj.common.si
 import com.bwsw.sj.common.dal.model.service.ServiceDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.service.Service
+import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 
 /**
   * Provides methods to access [[Service]]s in [[GenericMongoRepository]]
@@ -17,17 +17,15 @@ class ServiceSI extends ServiceInterface[Service, ServiceDomain] {
   private val streamRepository = ConnectionRepository.getStreamRepository
   private val instanceRepository = ConnectionRepository.getInstanceRepository
 
-  override def create(entity: Service): Either[ArrayBuffer[String], Boolean] = {
-    val errors = new ArrayBuffer[String]
-
-    errors ++= entity.validate()
+  override def create(entity: Service): CreationResult = {
+    val errors = entity.validate()
 
     if (errors.isEmpty) {
       entityRepository.save(entity.to())
 
-      Right(true)
+      Created
     } else {
-      Left(errors)
+      NotCreated(errors)
     }
   }
 
@@ -39,28 +37,20 @@ class ServiceSI extends ServiceInterface[Service, ServiceDomain] {
     entityRepository.get(name).map(Service.from)
   }
 
-  override def delete(name: String): Either[String, Boolean] = {
-    var response: Either[String, Boolean] = Left(createMessage("rest.services.service.cannot.delete.due.to.streams", name))
-    val streams = getRelatedStreams(name)
-
-    if (streams.isEmpty) {
-      response = Left(createMessage("rest.services.service.cannot.delete.due.to.instances", name))
-      val instances = getRelatedInstances(name)
-
-      if (instances.isEmpty) {
-        val provider = entityRepository.get(name)
-
-        provider match {
-          case Some(_) =>
-            entityRepository.delete(name)
-            response = Right(true)
-          case None =>
-            response = Right(false)
-        }
+  override def delete(name: String): DeletingResult = {
+    if (getRelatedStreams(name).nonEmpty)
+      DeletingError(createMessage("rest.services.service.cannot.delete.due.to.streams", name))
+    else if (getRelatedInstances(name).nonEmpty)
+      DeletingError(createMessage("rest.services.service.cannot.delete.due.to.instances", name))
+    else {
+      entityRepository.get(name) match {
+        case Some(_) =>
+          entityRepository.delete(name)
+          Deleted
+        case None =>
+          EntityNotFound
       }
     }
-
-    response
   }
 
   /**

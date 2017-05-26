@@ -5,8 +5,9 @@ import java.nio.file.Paths
 import akka.stream.scaladsl.FileIO
 import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.rest._
-import com.bwsw.sj.common.si.ModuleSI
+import com.bwsw.sj.common.si._
 import com.bwsw.sj.common.si.model.module.ModuleMetadata
+import com.bwsw.sj.common.si.result.{Created, Deleted, DeletingError, NotCreated}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import com.bwsw.sj.crud.rest.model.module.{ModuleMetadataApi, SpecificationApi}
@@ -25,11 +26,11 @@ class ModuleController {
       Try(entity.to()) match {
         case Success(moduleMetadata) =>
           serviceInterface.create(moduleMetadata) match {
-            case Right(_) =>
+            case Created =>
               OkRestResponse(
                 MessageResponseEntity(
                   createMessage("rest.modules.module.uploaded", moduleMetadata.filename)))
-            case Left(errors) =>
+            case NotCreated(errors) =>
               BadRequestRestResponse(
                 MessageResponseEntity(
                   createMessage("rest.modules.module.cannot.upload", moduleMetadata.filename, errors.mkString(";"))))
@@ -92,12 +93,12 @@ class ModuleController {
   def delete(moduleType: String, moduleName: String, moduleVersion: String): RestResponse = {
     processModule(moduleType, moduleName, moduleVersion) { metadata =>
       serviceInterface.delete(metadata) match {
-        case Right(_) =>
+        case Deleted =>
           OkRestResponse(
             MessageResponseEntity(
               createMessage("rest.modules.module.deleted", metadata.signature)))
 
-        case Left(error) =>
+        case DeletingError(error) =>
           UnprocessableEntityRestResponse(MessageResponseEntity(error))
       }
     }

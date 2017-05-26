@@ -3,10 +3,9 @@ package com.bwsw.sj.common.si
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
-import com.bwsw.sj.common.utils.MessageResourceUtils._
+import com.bwsw.sj.common.si.result._
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 
 /**
   * Provides methods to access [[ConfigurationSetting]]s in [[GenericMongoRepository]]
@@ -14,16 +13,15 @@ import scala.collection.mutable.ArrayBuffer
 class ConfigSettingsSI extends ServiceInterface[ConfigurationSetting, ConfigurationSettingDomain] {
   override protected val entityRepository: GenericMongoRepository[ConfigurationSettingDomain] = ConnectionRepository.getConfigRepository
 
-  def create(entity: ConfigurationSetting): Either[ArrayBuffer[String], Boolean] = {
-    val errors = new ArrayBuffer[String]
-    errors ++= entity.validate()
+  def create(entity: ConfigurationSetting): CreationResult = {
+    val errors = entity.validate()
 
     if (errors.isEmpty) {
       entityRepository.save(entity.to())
 
-      Right(true)
+      Created
     } else {
-      Left(errors)
+      NotCreated(errors)
     }
   }
 
@@ -35,18 +33,14 @@ class ConfigSettingsSI extends ServiceInterface[ConfigurationSetting, Configurat
     entityRepository.get(name).map(ConfigurationSetting.from)
   }
 
-  def delete(name: String): Either[String, Boolean] = {
-    var response: Either[String, Boolean] = Left(createMessage("rest.providers.provider.cannot.delete", name))
-    val configSetting = entityRepository.get(name)
-    configSetting match {
+  def delete(name: String): DeletingResult = {
+    entityRepository.get(name) match {
       case Some(_) =>
         entityRepository.delete(name)
-        response = Right(true)
+        Deleted
       case None =>
-        response = Right(false)
+        EntityNotFound
     }
-
-    response
   }
 
   /**

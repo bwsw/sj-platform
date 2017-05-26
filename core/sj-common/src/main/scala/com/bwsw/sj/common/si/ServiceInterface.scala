@@ -2,9 +2,9 @@ package com.bwsw.sj.common.si
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.repository.GenericMongoRepository
+import com.bwsw.sj.common.si.result.{CreationResult, DeletingResult}
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 
 /**
   * Provides methods to access entities in [[GenericMongoRepository]]
@@ -20,9 +20,8 @@ trait ServiceInterface[M, T] {
     * Saves entity to [[entityRepository]]
     *
     * @param entity
-    * @return Right(true) if entity saved, Right(false) or Left(errors) if some errors happened
     */
-  def create(entity: M): Either[ArrayBuffer[String], Boolean]
+  def create(entity: M): CreationResult
 
   def getAll(): mutable.Buffer[M]
 
@@ -32,8 +31,6 @@ trait ServiceInterface[M, T] {
     * Deletes entity from [[entityRepository]] by name
     *
     * @param name name of entity
-    * @return Right(true) if entity deleted, Right(false) if entity not found in [[entityRepository]],
-    *         Left(error) if some error happened
     */
-  def delete(name: String): Either[String, Boolean]
+  def delete(name: String): DeletingResult
 }

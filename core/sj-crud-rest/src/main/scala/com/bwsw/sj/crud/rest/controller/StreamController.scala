@@ -2,6 +2,7 @@ package com.bwsw.sj.crud.rest.controller
 
 import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.rest._
+import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.crud.rest.model.stream.StreamApi
 import com.bwsw.sj.common.si.StreamSI
 import com.bwsw.sj.common.utils.MessageResourceUtils.{createMessage, createMessageWithErrors}
@@ -12,18 +13,20 @@ import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import scala.util.{Failure, Success, Try}
 
 class StreamController extends Controller {
-
   override val serviceInterface = new StreamSI
+
+  protected val entityNotFoundMessage: String = "rest.streams.stream.notfound"
+  protected val entityDeletedMessage: String = "rest.streams.stream.deleted"
 
   override def create(serializedEntity: String): RestResponse = {
     Try(serializer.deserialize[StreamApi](serializedEntity)) match {
       case Success(streamData) =>
         serviceInterface.create(streamData.to) match {
-          case Right(_) =>
+          case Created =>
             CreatedRestResponse(
               MessageResponseEntity(
                 createMessage("rest.streams.stream.created", streamData.name)))
-          case Left(errors) =>
+          case NotCreated(errors) =>
             BadRequestRestResponse(
               MessageResponseEntity(
                 createMessageWithErrors("rest.streams.stream.cannot.create", errors)))
@@ -46,7 +49,7 @@ class StreamController extends Controller {
       case None =>
         NotFoundRestResponse(
           MessageResponseEntity(
-            createMessage("rest.streams.stream.notfound", name)))
+            createMessage(entityNotFoundMessage, name)))
     }
   }
 
@@ -66,22 +69,7 @@ class StreamController extends Controller {
       case None =>
         NotFoundRestResponse(
           MessageResponseEntity(
-            createMessage("rest.streams.stream.notfound", name)))
-    }
-  }
-
-  override def delete(name: String): RestResponse = {
-    serviceInterface.delete(name) match {
-      case Right(true) =>
-        OkRestResponse(
-          MessageResponseEntity(
-            createMessage("rest.streams.stream.deleted", name)))
-      case Right(false) =>
-        NotFoundRestResponse(
-          MessageResponseEntity(
-            createMessage("rest.streams.stream.notfound", name)))
-      case Left(message) =>
-        UnprocessableEntityRestResponse(MessageResponseEntity(message))
+            createMessage(entityNotFoundMessage, name)))
     }
   }
 }

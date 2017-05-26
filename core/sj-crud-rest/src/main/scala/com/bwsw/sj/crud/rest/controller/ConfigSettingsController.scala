@@ -6,6 +6,7 @@ import com.bwsw.sj.common.si.ConfigSettingsSI
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.config.ConfigLiterals
+import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.crud.rest.model.config.ConfigurationSettingApi
 import com.bwsw.sj.crud.rest._
 import com.bwsw.sj.crud.rest.exceptions.UnknownConfigSettingDomain
@@ -15,6 +16,9 @@ import scala.util.{Failure, Success, Try}
 class ConfigSettingsController extends Controller {
   val serviceInterface = new ConfigSettingsSI()
 
+  override protected val entityDeletedMessage: String = "rest.config.setting.deleted"
+  override protected val entityNotFoundMessage: String = "rest.config.setting.notfound"
+
   def get(name: String): RestResponse = {
     val configSetting = serviceInterface.get(name)
 
@@ -22,7 +26,7 @@ class ConfigSettingsController extends Controller {
       case Some(x) =>
         OkRestResponse(ConfigSettingResponseEntity(ConfigurationSettingApi.from(x)))
       case None =>
-        NotFoundRestResponse(MessageResponseEntity(createMessage("rest.config.setting.notfound", name)))
+        NotFoundRestResponse(MessageResponseEntity(createMessage(entityNotFoundMessage, name)))
     }
 
     response
@@ -42,14 +46,14 @@ class ConfigSettingsController extends Controller {
     var response: RestResponse = new RestResponse()
 
     val triedSettingApi = Try(serializer.deserialize[ConfigurationSettingApi](serializedEntity))
-    triedSettingApi match  {
+    triedSettingApi match {
       case Success(configData) =>
         val created = serviceInterface.create(configData.to())
         response = created match {
-          case Right(_) =>
+          case Created =>
             CreatedRestResponse(MessageResponseEntity(createMessage("rest.config.setting.created", configData.name)))
-          case Left(errors) => BadRequestRestResponse(MessageResponseEntity(
-            createMessage("rest.config.setting.cannot.create", errors.mkString(";"))
+          case NotCreated(errors) => BadRequestRestResponse(MessageResponseEntity(
+            createMessageWithErrors("rest.config.setting.cannot.create", errors)
           ))
         }
       case Failure(exception: JsonDeserializationException) =>
@@ -58,21 +62,6 @@ class ConfigSettingsController extends Controller {
           createMessage("rest.config.setting.cannot.create", error)))
 
       case Failure(exception) => throw exception
-    }
-
-    response
-  }
-
-  def delete(name: String): RestResponse = {
-    val deleteResponse = serviceInterface.delete(name)
-    val response: RestResponse = deleteResponse match {
-      case Right(isDeleted) =>
-        if (isDeleted)
-          OkRestResponse(MessageResponseEntity(createMessage("rest.config.setting.deleted", name)))
-        else
-          NotFoundRestResponse(MessageResponseEntity(createMessage("rest.config.setting.notfound", name)))
-      case Left(message) =>
-        UnprocessableEntityRestResponse(MessageResponseEntity(message))
     }
 
     response

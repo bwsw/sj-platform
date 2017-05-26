@@ -2,6 +2,7 @@ package com.bwsw.sj.crud.rest.controller
 
 import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.rest._
+import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.common.si.ProviderSI
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.ProviderLiterals
@@ -14,6 +15,9 @@ import scala.util.{Failure, Success, Try}
 class ProviderController extends Controller {
   override val serviceInterface = new ProviderSI()
 
+  override protected val entityDeletedMessage: String = "rest.providers.provider.deleted"
+  override protected val entityNotFoundMessage: String = "rest.providers.provider.notfound"
+
   def create(serializedEntity: String): RestResponse = {
     var response: RestResponse = new RestResponse()
 
@@ -23,11 +27,11 @@ class ProviderController extends Controller {
         val created = serviceInterface.create(providerData.to())
 
         response = created match {
-          case Right(_) =>
+          case Created =>
             CreatedRestResponse(MessageResponseEntity(createMessage("rest.providers.provider.created", providerData.name)))
-          case Left(errors) => BadRequestRestResponse(MessageResponseEntity(
-            createMessageWithErrors("rest.providers.provider.cannot.create", errors)
-          ))
+          case NotCreated(errors) =>
+            BadRequestRestResponse(MessageResponseEntity(
+              createMessageWithErrors("rest.providers.provider.cannot.create", errors)))
         }
       case Failure(exception: JsonDeserializationException) =>
         val error = JsonDeserializationErrorMessageCreator(exception)
@@ -57,22 +61,7 @@ class ProviderController extends Controller {
       case Some(x) =>
         OkRestResponse(ProviderResponseEntity(ProviderApi.from(x)))
       case None =>
-        NotFoundRestResponse(MessageResponseEntity(createMessage("rest.providers.provider.notfound", name)))
-    }
-
-    response
-  }
-
-  def delete(name: String): RestResponse = {
-    val deleteResponse = serviceInterface.delete(name)
-    val response: RestResponse = deleteResponse match {
-      case Right(isDeleted) =>
-        if (isDeleted)
-          OkRestResponse(MessageResponseEntity(createMessage("rest.providers.provider.deleted", name)))
-        else
-          NotFoundRestResponse(MessageResponseEntity(createMessage("rest.providers.provider.notfound", name)))
-      case Left(message) =>
-        UnprocessableEntityRestResponse(MessageResponseEntity(message))
+        NotFoundRestResponse(MessageResponseEntity(createMessage(entityNotFoundMessage, name)))
     }
 
     response
@@ -88,7 +77,7 @@ class ProviderController extends Controller {
         }
         else {
           NotFoundRestResponse(
-            MessageResponseEntity(createMessage("rest.providers.provider.notfound", name)))
+            MessageResponseEntity(createMessage(entityNotFoundMessage, name)))
         }
       case Left(message) =>
         ConflictRestResponse(TestConnectionResponseEntity(connection = false, message.mkString(";")))
@@ -103,7 +92,7 @@ class ProviderController extends Controller {
       case Right(services) =>
         OkRestResponse(RelatedToProviderResponseEntity(services))
       case Left(_) =>
-        NotFoundRestResponse(MessageResponseEntity(createMessage("rest.providers.provider.notfound", name)))
+        NotFoundRestResponse(MessageResponseEntity(createMessage(entityNotFoundMessage, name)))
     }
 
     response

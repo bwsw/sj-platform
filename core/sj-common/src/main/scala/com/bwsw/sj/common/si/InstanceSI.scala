@@ -5,26 +5,26 @@ import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepo
 import com.bwsw.sj.common.engine.{StreamingValidator, ValidationInfo}
 import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.si.model.module.{ModuleMetadata, Specification}
+import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 class InstanceSI {
   private val entityRepository: GenericMongoRepository[InstanceDomain] = ConnectionRepository.getInstanceRepository
   private val storage = ConnectionRepository.getFileStorage
 
-  def create(instance: Instance, moduleMetadata: ModuleMetadata): Either[ArrayBuffer[String], Boolean] = {
+  def create(instance: Instance, moduleMetadata: ModuleMetadata): CreationResult = {
     val instancePassedValidation = validateInstance(moduleMetadata.specification, moduleMetadata.filename, instance)
 
     if (instancePassedValidation.result) {
       instance.createStreams()
       entityRepository.save(instance.to)
-      Right(true)
+      Created
     } else {
-      Left(instancePassedValidation.errors)
+      NotCreated(instancePassedValidation.errors)
     }
   }
 
@@ -43,16 +43,21 @@ class InstanceSI {
   def get(name: String): Option[Instance] =
     entityRepository.get(name).map(Instance.from)
 
-  def delete(name: String): Either[String, Boolean] = {
-    val instance = get(name).get
-    instance.status match {
-      case `ready` =>
-        entityRepository.delete(name: String)
-        Right(true)
-      case `stopped` | `failed` | `error` =>
-        Right(false)
-      case _ =>
-        Left(createMessage("rest.modules.instances.instance.cannot.delete", name))
+  def delete(name: String): DeletingResult = {
+    entityRepository.get(name) match {
+      case Some(instance) =>
+        instance.status match {
+          case `ready` =>
+            entityRepository.delete(name: String)
+            Deleted
+          case `stopped` | `failed` | `error` =>
+            WillBeDeleted(Instance.from(instance))
+          case _ =>
+            DeletingError(createMessage("rest.modules.instances.instance.cannot.delete", name))
+        }
+
+      case None =>
+        EntityNotFound
     }
   }
 
@@ -77,3 +82,5 @@ class InstanceSI {
       optionsValidationInfo.errors ++= instanceValidationInfo.errors)
   }
 }
+
+case class WillBeDeleted(instance: Instance) extends DeletingResult

@@ -4,6 +4,7 @@ import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service._
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.provider.Provider
+import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 
 import scala.collection.mutable
@@ -17,17 +18,15 @@ class ProviderSI extends ServiceInterface[Provider, ProviderDomain] {
 
   private val serviceRepository = ConnectionRepository.getServiceRepository
 
-  override def create(entity: Provider): Either[ArrayBuffer[String], Boolean] = {
-    val errors = new ArrayBuffer[String]
-
-    errors ++= entity.validate()
+  override def create(entity: Provider): CreationResult = {
+    val errors = entity.validate()
 
     if (errors.isEmpty) {
       entityRepository.save(entity.to())
 
-      Right(true)
+      Created
     } else {
-      Left(errors)
+      NotCreated(errors)
     }
   }
 
@@ -39,23 +38,18 @@ class ProviderSI extends ServiceInterface[Provider, ProviderDomain] {
     entityRepository.get(name).map(Provider.from)
   }
 
-  override def delete(name: String): Either[String, Boolean] = {
-    var response: Either[String, Boolean] = Left(createMessage("rest.providers.provider.cannot.delete", name))
-    val services = getRelatedServices(name)
-
-    if (services.isEmpty) {
-      val provider = entityRepository.get(name)
-
-      provider match {
+  override def delete(name: String): DeletingResult = {
+    if (getRelatedServices(name).nonEmpty)
+      DeletingError(createMessage("rest.providers.provider.cannot.delete", name))
+    else {
+      entityRepository.get(name) match {
         case Some(_) =>
           entityRepository.delete(name)
-          response = Right(true)
+          Deleted
         case None =>
-          response = Right(false)
+          EntityNotFound
       }
     }
-
-    response
   }
 
   /**

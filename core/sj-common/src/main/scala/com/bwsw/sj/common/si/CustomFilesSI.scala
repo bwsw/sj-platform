@@ -5,10 +5,11 @@ import java.io.File
 import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.FileMetadata
+import com.bwsw.sj.common.si.result._
 import org.apache.commons.io.FileUtils
 
 import scala.collection.mutable
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+import scala.collection.mutable.ListBuffer
 
 /**
   * Provides methods to access custom files represented by [[FileMetadata]] in [[GenericMongoRepository]]
@@ -27,16 +28,16 @@ class CustomFilesSI extends ServiceInterface[FileMetadata, FileMetadataDomain] {
     })
   }
 
-  override def create(entity: FileMetadata): Either[ArrayBuffer[String], Boolean] = {
+  override def create(entity: FileMetadata): CreationResult = {
     if (!fileStorage.exists(entity.filename)) {
       val uploadingFile = new File(entity.filename)
       FileUtils.copyFile(entity.file.get, uploadingFile)
       fileStorage.put(uploadingFile, entity.filename, Map("description" -> entity.description), FileMetadata.customFileType)
       uploadingFile.delete()
 
-      Right(true)
+      Created
     } else {
-      Left(ArrayBuffer())
+      NotCreated()
     }
   }
 
@@ -56,19 +57,15 @@ class CustomFilesSI extends ServiceInterface[FileMetadata, FileMetadataDomain] {
     }
   }
 
-  override def delete(name: String): Either[String, Boolean] = {
+  override def delete(name: String): DeletingResult = {
     val fileMetadatas = entityRepository.getByParameters(Map("filename" -> name))
-    var response: Either[String, Boolean] = Right(false)
 
-    if (fileMetadatas.nonEmpty) {
-      if (fileStorage.delete(name)) {
-        response = Right(true)
-      } else {
-        response = Left(s"Can't delete jar '$name' for some reason. It needs to be debugged.")
-      }
-    }
-
-    response
+    if (fileMetadatas.isEmpty)
+      EntityNotFound
+    else if (fileStorage.delete(name))
+      Deleted
+    else
+      DeletingError(s"Can't delete jar '$name' for some reason. It needs to be debugged.")
   }
 }
 

@@ -9,7 +9,8 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.si.model.module.{ModuleMetadata, Specification}
-import com.bwsw.sj.common.si.{InstanceSI, ModuleSI}
+import com.bwsw.sj.common.si._
+import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.MessageResourceUtils.{createMessage, createMessageWithErrors, getMessage}
 import com.bwsw.sj.crud.rest.exceptions.ConfigSettingNotFound
@@ -43,12 +44,12 @@ class InstanceController {
           errors ++= validateInstance(instance, module.specification)
           if (errors.isEmpty) {
             serviceInterface.create(instance, module) match {
-              case Right(_) =>
+              case Created =>
                 OkRestResponse(
                   MessageResponseEntity(
                     createMessage("rest.modules.instances.instance.created", instance.name, module.signature)))
 
-              case Left(validationErrors) =>
+              case NotCreated(validationErrors) =>
                 BadRequestRestResponse(
                   MessageResponseEntity(
                     createMessageWithErrors(
@@ -102,21 +103,26 @@ class InstanceController {
   }
 
   def delete(moduleType: String, moduleName: String, moduleVersion: String, name: String): RestResponse = {
-    processInstance(moduleType, moduleName, moduleVersion, name) { instance =>
+    ifModuleExists(moduleType, moduleName, moduleVersion) { _ =>
       serviceInterface.delete(name) match {
-        case Right(true) =>
+        case Deleted =>
           OkRestResponse(
             MessageResponseEntity(
               createMessage("rest.modules.instances.instance.deleted", name)))
 
-        case Right(false) =>
+        case WillBeDeleted(instance) =>
           destroyInstance(instance)
           OkRestResponse(
             MessageResponseEntity(
               createMessage("rest.modules.instances.instance.deleting", name)))
 
-        case Left(error) =>
+        case DeletingError(error) =>
           UnprocessableEntityRestResponse(MessageResponseEntity(error))
+
+        case EntityNotFound =>
+          NotFoundRestResponse(
+            MessageResponseEntity(
+              createMessage("rest.modules.module.instances.instance.notfound", name)))
       }
     }
   }
@@ -186,7 +192,7 @@ class InstanceController {
       serviceInterface.get(name) match {
         case Some(instance) => f(instance)
         case None =>
-          BadRequestRestResponse(
+          NotFoundRestResponse(
             MessageResponseEntity(
               createMessage("rest.modules.module.instances.instance.notfound", name)))
       }

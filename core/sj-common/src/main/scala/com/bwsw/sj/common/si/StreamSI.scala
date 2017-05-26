@@ -4,10 +4,10 @@ import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.si.model.stream.SjStream
+import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 
 /**
   * Provides methods to access [[SjStream]]s in [[GenericMongoRepository]]
@@ -17,15 +17,15 @@ class StreamSI extends ServiceInterface[SjStream, StreamDomain] {
 
   private val instanceRepository = ConnectionRepository.getInstanceRepository
 
-  override def create(entity: SjStream): Either[ArrayBuffer[String], Boolean] = {
+  override def create(entity: SjStream): CreationResult = {
     val errors = entity.validate()
 
     if (errors.isEmpty) {
       entity.create()
       entityRepository.save(entity.to())
-      Right(true)
+      Created
     } else {
-      Left(errors)
+      NotCreated(errors)
     }
   }
 
@@ -35,16 +35,16 @@ class StreamSI extends ServiceInterface[SjStream, StreamDomain] {
   override def getAll(): mutable.Buffer[SjStream] =
     entityRepository.getAll.map(SjStream.from)
 
-  override def delete(name: String): Either[String, Boolean] = {
+  override def delete(name: String): DeletingResult = {
     if (hasRelatedInstances(name))
-      Left(createMessage("rest.streams.stream.cannot.delete", name))
+      DeletingError(createMessage("rest.streams.stream.cannot.delete", name))
     else entityRepository.get(name) match {
       case Some(entity) =>
         SjStream.from(entity).delete()
         entityRepository.delete(name)
-        Right(true)
+        Deleted
       case None =>
-        Right(false)
+        EntityNotFound
     }
   }
 

@@ -8,10 +8,11 @@ import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.FileMetadata
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
+import com.bwsw.sj.common.si.result._
 import org.apache.commons.io.FileUtils
 
 import scala.collection.mutable
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+import scala.collection.mutable.ListBuffer
 
 /**
   * Provides methods to access custom jar files represented by [[FileMetadata]] in [[GenericMongoRepository]]
@@ -31,10 +32,8 @@ class CustomJarsSI extends ServiceInterface[FileMetadata, FileMetadataDomain] {
     })
   }
 
-  override def create(entity: FileMetadata): Either[ArrayBuffer[String], Boolean] = {
-    val errors = new ArrayBuffer[String]
-
-    errors ++= entity.validate()
+  override def create(entity: FileMetadata): CreationResult = {
+    val errors = entity.validate()
 
     if (errors.isEmpty) {
       val specification = FileMetadata.getSpecification(entity.file.get)
@@ -50,9 +49,9 @@ class CustomJarsSI extends ServiceInterface[FileMetadata, FileMetadataDomain] {
       )
       configRepository.save(customJarConfig)
 
-      Right(true)
+      Created
     } else {
-      Left(errors)
+      NotCreated(errors)
     }
   }
 
@@ -72,23 +71,18 @@ class CustomJarsSI extends ServiceInterface[FileMetadata, FileMetadataDomain] {
     }
   }
 
-  override def delete(name: String): Either[String, Boolean] = {
+  override def delete(name: String): DeletingResult = {
     val fileMetadatas = entityRepository.getByParameters(Map("filetype" -> FileMetadata.customJarType, "filename" -> name))
-    var response: Either[String, Boolean] = Right(false)
 
-    if (fileMetadatas.nonEmpty) {
+    if (fileMetadatas.isEmpty)
+      EntityNotFound
+    else if (fileStorage.delete(name)) {
       val fileMetadata = fileMetadatas.head
-
-      if (fileStorage.delete(name)) {
-        configRepository.delete(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain,
-          fileMetadata.specification.name + "-" + fileMetadata.specification.version))
-        response = Right(true)
-      } else {
-        response = Left(s"Can't delete jar '$name' for some reason. It needs to be debugged.")
-      }
-    }
-
-    response
+      configRepository.delete(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain,
+        fileMetadata.specification.name + "-" + fileMetadata.specification.version))
+      Deleted
+    } else
+      DeletingError(s"Can't delete jar '$name' for some reason. It needs to be debugged.")
   }
 
   /**
@@ -123,24 +117,23 @@ class CustomJarsSI extends ServiceInterface[FileMetadata, FileMetadataDomain] {
     * @return Right(true) if custom jar file deleted, Right(false) if custom jar file not found in [[entityRepository]],
     *         Left(error) if some error happened
     */
-  def deleteBy(name: String, version: String): Either[String, Boolean] = {
+  def deleteBy(name: String, version: String): DeletingResult = {
     val fileMetadatas = entityRepository.getByParameters(Map("filetype" -> FileMetadata.customJarType,
       "specification.name" -> name,
       "specification.version" -> version)
     )
-    var response: Either[String, Boolean] = Right(false)
 
     if (fileMetadatas.nonEmpty) {
       val filename = fileMetadatas.head.filename
 
       if (fileStorage.delete(filename)) {
         configRepository.delete(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, s"$name-$version"))
-        response = Right(true)
+        Deleted
       } else {
-        response = Left(s"Can't delete jar '$filename' for some reason. It needs to be debugged.")
+        DeletingError(s"Can't delete jar '$filename' for some reason. It needs to be debugged.")
       }
+    } else {
+      EntityNotFound
     }
-
-    response
   }
 }
