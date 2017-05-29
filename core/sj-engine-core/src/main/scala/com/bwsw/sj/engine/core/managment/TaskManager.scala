@@ -35,7 +35,7 @@ import scala.collection.mutable
   * 1) create stream in storage (kind of storage depends on t-stream implementation)
   * 2) get an executor created via reflection
   * 3) create t-stream consumers/subscribers and producers
-  * for this purposes firstly [[TStreamsFactory]] is configured using [[InstanceDomain]]
+  * for this purposes firstly [[TStreamsFactory]] is configured using [[com.bwsw.sj.common.dal.model.instance.InstanceDomain]]
   */
 abstract class TaskManager() {
   protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
