@@ -89,7 +89,7 @@ class ConfigSettingsController extends Controller {
     if (!ConfigLiterals.domains.contains(domain))
       BadRequestRestResponse(
         MessageResponseEntity(
-          createMessage("rest.config.setting.domain.unknown", ConfigLiterals.domains.mkString(", "))))
+          createMessage("rest.config.setting.domain.unknown", domain, ConfigLiterals.domains.mkString(", "))))
     else f
   }
 }
