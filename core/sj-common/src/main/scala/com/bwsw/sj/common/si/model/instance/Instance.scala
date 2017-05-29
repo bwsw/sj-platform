@@ -31,6 +31,8 @@ class Instance(val name: String,
                val frameworkId: String = System.currentTimeMillis().toString,
                val outputs: Array[String] = Array()) {
 
+  protected val streamRepository: GenericMongoRepository[StreamDomain] = ConnectionRepository.getStreamRepository
+
   def to: InstanceDomain = {
     val serviceRepository = ConnectionRepository.getServiceRepository
 
@@ -78,7 +80,6 @@ class Instance(val name: String,
   }
 
   protected def getStreamsPartitions(streamNames: Array[String]): Array[Int] = {
-    val streamRepository = ConnectionRepository.getStreamRepository
     val streams = streamRepository.getAll.filter(s => streamNames.contains(s.name))
     Array(streams.map { stream =>
       stream.streamType match {
@@ -91,16 +92,13 @@ class Instance(val name: String,
     }: _*)
   }
 
-  protected def getStreams(streamNames: Array[String]): Array[StreamDomain] = {
-    val streamRepository = ConnectionRepository.getStreamRepository
+  protected def getStreams(streamNames: Array[String]): Array[StreamDomain] =
     streamNames.flatMap(streamRepository.get)
-  }
 
   protected def createTaskStreams(): Array[TaskStream] = {
-    val streamRepository = ConnectionRepository.getStreamRepository
     val inputStreamsWithModes = splitStreamsAndModes(inputsOrEmptyList)
     inputStreamsWithModes.map(streamWithMode => {
-      val partitions = getPartitions(streamWithMode.streamName, streamRepository)
+      val partitions = getPartitions(streamWithMode.streamName)
       TaskStream(streamWithMode.streamName, streamWithMode.mode, partitions)
     })
   }
@@ -116,8 +114,7 @@ class Instance(val name: String,
     })
   }
 
-  private def getPartitions(streamName: String, streamRepository: GenericMongoRepository[StreamDomain]): Int = {
-    //todo get rid of useless parameter streamRepository
+  private def getPartitions(streamName: String): Int = {
     val stream = streamRepository.get(streamName).get
     val partitions = stream.streamType match {
       case StreamLiterals.`tstreamType` =>
