@@ -2,7 +2,6 @@ package com.bwsw.sj.crud.rest.routes
 
 import akka.http.scaladsl.server.{Directives, RequestContext}
 import com.bwsw.sj.common.rest._
-import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import com.bwsw.sj.crud.rest.controller.ConfigSettingsController
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
@@ -21,8 +20,6 @@ trait SjConfigurationSettingsRoute extends Directives with SjCrudValidator {
           }
         } ~
           pathPrefix(Segment) { (domain: String) =>
-            configSettingsController.checkDomain(domain)
-
             pathEndOrSingleSlash {
               get {
                 val response = configSettingsController.getByDomain(domain)
@@ -32,11 +29,11 @@ trait SjConfigurationSettingsRoute extends Directives with SjCrudValidator {
               pathPrefix(Segment) { (name: String) =>
                 pathEndOrSingleSlash {
                   get {
-                    val response = configSettingsController.get(ConfigurationSetting.createConfigurationSettingName(domain, name))
+                    val response = configSettingsController.get(domain, name)
                     complete(restResponseToHttpResponse(response))
                   } ~
                     delete {
-                      val response = configSettingsController.delete(ConfigurationSetting.createConfigurationSettingName(domain, name))
+                      val response = configSettingsController.delete(domain, name)
                       complete(restResponseToHttpResponse(response))
                     }
                 }
@@ -57,4 +54,3 @@ trait SjConfigurationSettingsRoute extends Directives with SjCrudValidator {
     }
   }
 }
-

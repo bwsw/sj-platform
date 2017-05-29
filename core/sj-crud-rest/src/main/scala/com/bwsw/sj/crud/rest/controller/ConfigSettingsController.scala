@@ -6,10 +6,10 @@ import com.bwsw.sj.common.si.ConfigSettingsSI
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.config.ConfigLiterals
+import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.crud.rest.model.config.ConfigurationSettingApi
 import com.bwsw.sj.crud.rest._
-import com.bwsw.sj.crud.rest.exceptions.UnknownConfigSettingDomain
 
 import scala.util.{Failure, Success, Try}
 
@@ -31,6 +31,9 @@ class ConfigSettingsController extends Controller {
 
     response
   }
+
+  def get(domain: String, name: String): RestResponse =
+    ifDomainCorrect(domain)(get(ConfigurationSetting.createConfigurationSettingName(domain, name)))
 
   def getAll(): RestResponse = {
     val response = OkRestResponse(ConfigSettingsResponseEntity())
@@ -68,21 +71,25 @@ class ConfigSettingsController extends Controller {
   }
 
   def getByDomain(domain: String): RestResponse = {
-    val configElements = serviceInterface.getBy(domain)
-    val response = OkRestResponse(ConfigSettingsResponseEntity())
-    if (configElements.nonEmpty) {
-      response.entity = ConfigSettingsResponseEntity(configElements.map(cs => ConfigurationSettingApi.from(cs)))
-    }
+    ifDomainCorrect(domain) {
+      val configElements = serviceInterface.getBy(domain)
+      val response = OkRestResponse(ConfigSettingsResponseEntity())
+      if (configElements.nonEmpty) {
+        response.entity = ConfigSettingsResponseEntity(configElements.map(cs => ConfigurationSettingApi.from(cs)))
+      }
 
-    response
+      response
+    }
   }
 
-  //todo return an error instead of throw an exception
-  def checkDomain(domain: String): Unit = {
+  def delete(domain: String, name: String): RestResponse =
+    ifDomainCorrect(domain)(delete(ConfigurationSetting.createConfigurationSettingName(domain, name)))
+
+  private def ifDomainCorrect(domain: String)(f: => RestResponse): RestResponse = {
     if (!ConfigLiterals.domains.contains(domain))
-      throw UnknownConfigSettingDomain(
-        createMessage("rest.config.setting.domain.unknown", ConfigLiterals.domains.mkString(", ")),
-        domain
-      )
+      BadRequestRestResponse(
+        MessageResponseEntity(
+          createMessage("rest.config.setting.domain.unknown", ConfigLiterals.domains.mkString(", "))))
+    else f
   }
 }
