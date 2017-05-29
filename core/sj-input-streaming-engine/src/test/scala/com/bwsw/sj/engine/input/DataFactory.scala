@@ -1,17 +1,17 @@
 package com.bwsw.sj.engine.input
 
 import java.io.{BufferedReader, File, InputStreamReader}
-import java.util
 import java.util.jar.JarFile
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.sj.common.config.BenchmarkConfigNames
-import com.bwsw.sj.common.dal.model.instance.{InputInstanceDomain, InputTask, InstanceDomain}
+import com.bwsw.sj.common.dal.model.instance.{InputTask, InstanceDomain}
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service.{ServiceDomain, TStreamServiceDomain, ZKServiceDomain}
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.GenericMongoRepository
+import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.common.utils.{ProviderLiterals, _}
 import com.bwsw.sj.engine.core.testutils.TestStorageServer
 import com.bwsw.tstreams.agents.consumer.Consumer
@@ -19,6 +19,7 @@ import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 import com.typesafe.config.ConfigFactory
 
+import scala.collection.mutable
 import scala.util.{Failure, Success, Try}
 
 object DataFactory {
@@ -31,7 +32,7 @@ object DataFactory {
   private val zookeeperServiceName = "zookeeper-test-service"
   private val tstreamOutputNamePrefix = "tstream-output"
   private var instanceOutputs: Array[String] = Array()
-  private val tasks = new util.HashMap[String, InputTask]()
+  private val tasks = mutable.Map[String, InputTask]()
   tasks.put(s"$instanceName-task0", new InputTask(SjInputServices.host, SjInputServices.port))
   private val partitions = 1
   private val serializer = new JsonSerializer()
@@ -123,22 +124,26 @@ object DataFactory {
                      checkpointInterval: Int
                     ) = {
 
-    val instance = new InputInstanceDomain(instanceName, EngineLiterals.inputStreamingType,
-      "input-streaming-stub", "1.0", "com.bwsw.input.streaming.engine-1.0",
-      serviceManager.get(zookeeperServiceName).get.asInstanceOf[ZKServiceDomain], EngineLiterals.everyNthMode
-    )
-    instance.status = EngineLiterals.started
-    instance.description = "some description of test instance"
-    instance.outputs = instanceOutputs
-    instance.checkpointInterval = checkpointInterval
-    instance.duplicateCheck = false
-    instance.lookupHistory = 100
-    instance.queueMaxSize = 500
-    instance.defaultEvictionPolicy = EngineLiterals.lruDefaultEvictionPolicy
-    instance.evictionPolicy = "expanded-time"
-    instance.tasks = tasks
+    val instance = new InputInstance(
+      name = instanceName,
+      moduleType = EngineLiterals.inputStreamingType,
+      moduleName = "input-streaming-stub",
+      moduleVersion = "1.0",
+      engine = "com.bwsw.input.streaming.engine-1.0",
+      coordinationService = zookeeperServiceName,
+      checkpointMode = EngineLiterals.everyNthMode,
+      status = EngineLiterals.started,
+      description = "some description of test instance",
+      outputs = instanceOutputs,
+      checkpointInterval = checkpointInterval,
+      duplicateCheck = false,
+      lookupHistory = 100,
+      queueMaxSize = 500,
+      defaultEvictionPolicy = EngineLiterals.lruDefaultEvictionPolicy,
+      evictionPolicy = "expanded-time",
+      tasks = tasks)
 
-    instanceService.save(instance)
+    instanceService.save(instance.to)
   }
 
   def deleteInstance(instanceService: GenericMongoRepository[InstanceDomain]) = {

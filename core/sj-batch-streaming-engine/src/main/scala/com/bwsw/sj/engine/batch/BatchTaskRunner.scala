@@ -2,14 +2,14 @@ package com.bwsw.sj.engine.batch
 
 import java.util.concurrent.ExecutorCompletionService
 
-import com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain
-import com.bwsw.sj.engine.core.engine.{InstanceStatusObserver, TaskRunner}
-import com.bwsw.sj.engine.core.managment.CommonTaskManager
-import com.bwsw.sj.engine.core.state.CommonModuleService
-import com.bwsw.sj.engine.core.batch.BatchStreamingPerformanceMetrics
+import com.bwsw.sj.common.si.model.instance.BatchInstance
 import com.bwsw.sj.engine.batch.task.BatchTaskEngine
 import com.bwsw.sj.engine.batch.task.input.{EnvelopeFetcher, RetrievableCheckpointTaskInput}
+import com.bwsw.sj.engine.core.batch.BatchStreamingPerformanceMetrics
+import com.bwsw.sj.engine.core.engine.{InstanceStatusObserver, TaskRunner}
 import com.bwsw.sj.engine.core.entities.Envelope
+import com.bwsw.sj.engine.core.managment.CommonTaskManager
+import com.bwsw.sj.engine.core.state.CommonModuleService
 import org.slf4j.LoggerFactory
 
 /**
@@ -28,7 +28,7 @@ object BatchTaskRunner extends {
 
   def main(args: Array[String]) {
     val manager = new CommonTaskManager()
-    val instance = manager.instance.asInstanceOf[BatchInstanceDomain]
+    val instance = manager.instance.asInstanceOf[BatchInstance]
 
     logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for batch module\n")
 
@@ -36,7 +36,7 @@ object BatchTaskRunner extends {
     val envelopeFetcher = new EnvelopeFetcher(taskInput)
     val performanceMetrics = new BatchStreamingPerformanceMetrics(manager)
     val moduleService = CommonModuleService(manager, envelopeFetcher.checkpointGroup, performanceMetrics)
-    val batchCollector = manager.getBatchCollector(instance, performanceMetrics)
+    val batchCollector = manager.getBatchCollector(instance.to, performanceMetrics)
 
     val batchTaskEngine = new BatchTaskEngine(batchCollector, instance, moduleService, envelopeFetcher, performanceMetrics)
 

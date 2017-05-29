@@ -1,8 +1,10 @@
 package com.bwsw.sj.engine.core.managment
 
-import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, ExecutionPlan, RegularInstanceDomain}
+import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, ExecutionPlan}
+import com.bwsw.sj.common.dal.model.module.BatchSpecificationDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.engine.StreamingExecutor
+import com.bwsw.sj.common.si.model.instance.{BatchInstance, RegularInstance}
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.batch.{BatchCollector, BatchStreamingPerformanceMetrics}
 import com.bwsw.sj.engine.core.environment.{EnvironmentManager, ModuleEnvironmentManager}
@@ -41,7 +43,7 @@ class CommonTaskManager() extends TaskManager {
       case _: BatchInstanceDomain =>
         logger.info(s"Task: $taskName. Getting a batch collector class from jar of file: " +
           instance.moduleType + "-" + instance.moduleName + "-" + instance.moduleVersion + ".")
-        val batchCollectorClassName = fileMetadata.specification.batchCollectorClass
+        val batchCollectorClassName = fileMetadata.specification.asInstanceOf[BatchSpecificationDomain].batchCollectorClass
         val batchCollector = moduleClassLoader
           .loadClass(batchCollectorClassName)
           .getConstructor(classOf[BatchInstanceDomain], classOf[BatchStreamingPerformanceMetrics])
@@ -58,9 +60,9 @@ class CommonTaskManager() extends TaskManager {
   private def getExecutionPlan(): ExecutionPlan = {
     logger.debug("Get an execution plan of instance.")
     instance match {
-      case regularInstance: RegularInstanceDomain =>
+      case regularInstance: RegularInstance =>
         regularInstance.executionPlan
-      case batchInstance: BatchInstanceDomain =>
+      case batchInstance: BatchInstance =>
         batchInstance.executionPlan
       case _ =>
         logger.error(s"CommonTaskManager can be used only for ${EngineLiterals.regularStreamingType} or ${EngineLiterals.batchStreamingType} engine.")

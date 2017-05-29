@@ -2,7 +2,7 @@ package com.bwsw.sj.engine.regular.task
 
 import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
 
-import com.bwsw.sj.common.dal.model.instance.RegularInstanceDomain
+import com.bwsw.sj.common.si.model.instance.RegularInstance
 import com.bwsw.sj.common.utils.{EngineLiterals, SjTimer}
 import com.bwsw.sj.engine.core.engine.input.CallableCheckpointTaskInput
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
@@ -29,7 +29,7 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
   private val currentThread: Thread = Thread.currentThread()
   currentThread.setName(s"regular-task-${manager.taskName}-engine")
   private val blockingQueue: ArrayBlockingQueue[Envelope] = new ArrayBlockingQueue[Envelope](EngineLiterals.queueSize)
-  private val instance: RegularInstanceDomain = manager.instance.asInstanceOf[RegularInstanceDomain]
+  private val instance: RegularInstance = manager.instance.asInstanceOf[RegularInstance]
   private val checkpointGroup: CheckpointGroup = new CheckpointGroup()
   private val moduleService: CommonModuleService = createRegularModuleService()
   private val executor: RegularStreamingExecutor[AnyRef] = moduleService.executor.asInstanceOf[RegularStreamingExecutor[AnyRef]]
@@ -131,7 +131,7 @@ object RegularTaskEngine {
     */
   def apply(manager: CommonTaskManager,
             performanceMetrics: RegularStreamingPerformanceMetrics): RegularTaskEngine = {
-    val regularInstance = manager.instance.asInstanceOf[RegularInstanceDomain]
+    val regularInstance = manager.instance.asInstanceOf[RegularInstance]
 
     regularInstance.checkpointMode match {
       case EngineLiterals.`timeIntervalMode` =>

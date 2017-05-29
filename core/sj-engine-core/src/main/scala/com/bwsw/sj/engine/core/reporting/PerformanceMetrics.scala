@@ -4,8 +4,8 @@ import java.util.concurrent.locks.ReentrantLock
 import java.util.concurrent.{Callable, TimeUnit}
 
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
+import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer}
@@ -30,7 +30,7 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
   protected var inputEnvelopesPerStream: mutable.Map[String, ListBuffer[List[Int]]]
   protected var outputEnvelopesPerStream: mutable.Map[String, mutable.Map[String, ListBuffer[Int]]]
   protected val taskName: String = manager.taskName
-  protected val instance: InstanceDomain = manager.instance
+  protected val instance: Instance = manager.instance
   private val reportingInterval: Long = instance.performanceReportingInterval
   protected val report: PerformanceMetricsMetadata = new PerformanceMetricsMetadata()
   private val reportStreamName: String = instance.name + "_report"
@@ -48,7 +48,7 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
       s"Get stream for performance metrics.")
     val tags = Array("report", "performance")
     val description = "store reports of performance metrics"
-    val partitions = instance.parallelism
+    val partitions = instance.countParallelism
 
     manager.createStorageStream(reportStreamName, description, partitions)
 

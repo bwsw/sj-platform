@@ -1,11 +1,10 @@
 package com.bwsw.sj.crud.rest.instance
 
-import com.bwsw.sj.common.dal.model.instance.{InputInstanceDomain, InstanceDomain}
+import com.bwsw.sj.common.si.model.instance.{InputInstance, Instance}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.crud.rest.marathon.MarathonApplicationById
 import org.slf4j.LoggerFactory
 
-import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -14,7 +13,7 @@ import scala.util.{Failure, Success, Try}
   *
   * @author Kseniya Tomskikh
   */
-class InstanceStopper(instance: InstanceDomain, delay: Long = 1000) extends Runnable with InstanceManager {
+class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable with InstanceManager {
   private val logger = LoggerFactory.getLogger(getClass.getName)
   private val frameworkName = getFrameworkName(instance)
 
@@ -89,6 +88,6 @@ class InstanceStopper(instance: InstanceDomain, delay: Long = 1000) extends Runn
 
   private def clearTasks() = {
     logger.debug(s"Instance: '${instance.name}'. Clear the input instance tasks.")
-    instance.asInstanceOf[InputInstanceDomain].tasks.asScala.foreach(x => x._2.clear())
+    instance.asInstanceOf[InputInstance].tasks.foreach(_._2.clear())
   }
 }

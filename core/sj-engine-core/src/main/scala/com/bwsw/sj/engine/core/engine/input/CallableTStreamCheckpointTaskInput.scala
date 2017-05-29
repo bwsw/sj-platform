@@ -3,9 +3,9 @@ package com.bwsw.sj.engine.core.engine.input
 import java.util.Date
 import java.util.concurrent.ArrayBlockingQueue
 
-import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, OutputInstanceDomain, RegularInstanceDomain}
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
 import com.bwsw.sj.common.engine.EnvelopeDataSerializer
+import com.bwsw.sj.common.si.model.instance.{BatchInstance, OutputInstance, RegularInstance}
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.managment.TaskManager
@@ -60,9 +60,9 @@ class CallableTStreamCheckpointTaskInput[T <: AnyRef](manager: TaskManager,
     logger.debug(s"Task: ${manager.taskName}. Get an offset parameter from instance.")
     val instance = manager.instance
     val offset = instance match {
-      case instance: RegularInstanceDomain => instance.startFrom
-      case instance: BatchInstanceDomain => instance.startFrom
-      case instance: OutputInstanceDomain => instance.startFrom
+      case instance: RegularInstance => instance.startFrom
+      case instance: BatchInstance => instance.startFrom
+      case instance: OutputInstance => instance.startFrom
       case badInstance =>
         logger.error(s"Task: ${manager.taskName}. Instance type isn't supported.")
         throw new TypeNotPresentException(badInstance.getClass.getName,

@@ -1,6 +1,6 @@
 package com.bwsw.sj.engine.input.eviction_policy
 
-import com.bwsw.sj.common.dal.model.instance.InputInstanceDomain
+import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.input.config.InputEngineConfigNames
 import com.hazelcast.config._
@@ -14,14 +14,14 @@ import scala.collection.JavaConverters._
   * Provides methods are responsible for an eviction policy of input envelope duplicates
   *
   * @param instance Input instance contains a settings of an eviction policy
-  *                 (message TTL [[InputInstanceDomain.lookupHistory]],
-  *                 a default eviction policy [[InputInstanceDomain.defaultEvictionPolicy]],
-  *                 a maximum size of message queue [[InputInstanceDomain.queueMaxSize]],
-  *                 async and sync backup count [[InputInstanceDomain.asyncBackupCount]] [[InputInstanceDomain.backupCount]])
+  *                 (message TTL [[InputInstance.lookupHistory]],
+  *                 a default eviction policy [[InputInstance.defaultEvictionPolicy]],
+  *                 a maximum size of message queue [[InputInstance.queueMaxSize]],
+  *                 async and sync backup count [[InputInstance.asyncBackupCount]] [[InputInstance.backupCount]])
   * @author Kseniya Mikhaleva
   */
 
-abstract class InputInstanceEvictionPolicy(instance: InputInstanceDomain) {
+abstract class InputInstanceEvictionPolicy(instance: InputInstance) {
   protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
   protected val stubValue: String = "stub"
   private val hazelcastMapName: String = instance.name + "-" + "inputEngine"
@@ -113,7 +113,7 @@ object InputInstanceEvictionPolicy {
     *
     * @return Eviction policy of duplicate envelopes
     */
-  def apply(instance: InputInstanceDomain): InputInstanceEvictionPolicy = {
+  def apply(instance: InputInstance): InputInstanceEvictionPolicy = {
     instance.evictionPolicy match {
       case EngineLiterals.fixTimeEvictionPolicy => new FixTimeEvictionPolicy(instance)
       case EngineLiterals.expandedTimeEvictionPolicy => new ExpandedTimeEvictionPolicy(instance)

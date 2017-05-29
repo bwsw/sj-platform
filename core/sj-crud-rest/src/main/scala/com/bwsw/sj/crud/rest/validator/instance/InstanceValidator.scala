@@ -5,8 +5,9 @@ import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.model.service.{ServiceDomain, ZKServiceDomain}
 import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.rest.model.module.{InstanceApi, SpecificationApi}
 import com.bwsw.sj.common.rest.utils.ValidationUtils._
+import com.bwsw.sj.common.si.model.instance.Instance
+import com.bwsw.sj.common.si.model.module.Specification
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
@@ -30,23 +31,23 @@ abstract class InstanceValidator extends CompletionUtils {
   /**
    * Validating input parameters for streaming module
    *
-   * @param parameters - input parameters for running module
+   * @param instance - input parameters for running module
    * @return - List of errors
    */
-  def validate(parameters: InstanceApi, specification: SpecificationApi): ArrayBuffer[String]
+  def validate(instance: Instance, specification: Specification): ArrayBuffer[String]
 
   /**
    * Validation base instance options
    *
-   * @param parameters - Instance parameters
+   * @param instance - Instance parameters
    * @return - List of errors
    */
-  protected def validateGeneralOptions(parameters: InstanceApi) = {
-    logger.debug(s"Instance: ${parameters.name}. General options validation.")
+  protected def validateGeneralOptions(instance: Instance) = {
+    logger.debug(s"Instance: ${instance.name}. General options validation.")
     val errors = new ArrayBuffer[String]()
 
     // 'name' field
-    Option(parameters.name) match {
+    Option(instance.name) match {
       case None =>
         errors += createMessage("rest.validator.attribute.required", "Name")
       case Some(x) =>
@@ -65,22 +66,22 @@ abstract class InstanceValidator extends CompletionUtils {
     }
 
     // 'per-task-cores' field
-    if (parameters.perTaskCores <= 0) {
+    if (instance.perTaskCores <= 0) {
       errors += createMessage("rest.validator.attribute.must.greater.than.zero", "perTaskCores")
     }
 
     // 'per-task-ram' field
-    if (parameters.perTaskRam <= 0) {
+    if (instance.perTaskRam <= 0) {
       errors += createMessage("rest.validator.attribute.must.greater.than.zero", "perTaskRam")
     }
 
     // 'performance-reporting-interval' field
-    if (parameters.performanceReportingInterval <= 0) {
+    if (instance.performanceReportingInterval <= 0) {
       errors += createMessage("rest.validator.attribute.must.greater.than.zero", "performanceReportingInterval")
     }
 
     // 'coordination-service' field
-    Option(parameters.coordinationService) match {
+    Option(instance.coordinationService) match {
       case None =>
         errors += createMessage("rest.validator.attribute.required", "coordinationService")
       case Some(x) =>

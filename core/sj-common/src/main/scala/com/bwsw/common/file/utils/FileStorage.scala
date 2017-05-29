@@ -2,6 +2,7 @@ package com.bwsw.common.file.utils
 
 import java.io.{File, InputStream}
 
+import com.bwsw.sj.common.dal.model.module.SpecificationDomain
 import org.slf4j.{Logger, LoggerFactory}
 
 /**
@@ -14,6 +15,8 @@ trait FileStorage {
   def put(file: File, fileName: String): Unit
 
   def put(file: File, fileName: String, specification: Map[String, Any], filetype: String): Unit
+
+  def put(file: File, fileName: String, specification: SpecificationDomain, filetype: String): Unit
 
   def get(fileName: String, newFileName: String): File
 

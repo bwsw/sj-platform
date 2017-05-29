@@ -67,9 +67,18 @@ object ValidationUtils {
     name.replace('\\', '/')
   }
 
-  //todo think about using, maybe this is going to be more correct to return a reason to a user
-  def validatePrefix(prefix: String): Boolean =
-    Try(PathUtils.validatePath(prefix)).isSuccess
+  /**
+    * Validates prefix in [[com.bwsw.sj.common.si.model.service.TStreamService TStreamService]]
+    *
+    * @param prefix
+    * @return None if prefix is valid, Some(error) otherwise
+    */
+  def validatePrefix(prefix: String): Option[String] = {
+    Try(PathUtils.validatePath(prefix)) match {
+      case Success(_) => None
+      case Failure(exception: Throwable) => Some(exception.getMessage)
+    }
+  }
 
   def validateToken(token: String): Boolean = {
     token.length <= 32

@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.core.state
 
-import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, InstanceDomain, RegularInstanceDomain}
 import com.bwsw.sj.common.engine.StreamingExecutor
+import com.bwsw.sj.common.si.model.instance.{BatchInstance, Instance, RegularInstance}
 import com.bwsw.sj.common.utils.{EngineLiterals, SjTimer}
 import com.bwsw.sj.engine.core.environment.{ModuleEnvironmentManager, ModuleOutput}
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
@@ -24,7 +24,7 @@ abstract class CommonModuleService(manager: CommonTaskManager,
                                    performanceMetrics: PerformanceMetrics) {
 
   protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
-  protected val instance: InstanceDomain = manager.instance
+  protected val instance: Instance = manager.instance
   protected val outputProducers: Map[String, Producer] = manager.outputProducers
   val moduleTimer: SjTimer = new SjTimer()
   protected val producerPolicyByOutput: mutable.Map[String, (String, ModuleOutput)] = mutable.Map[String, (String, ModuleOutput)]()
@@ -55,9 +55,9 @@ object CommonModuleService {
             performanceMetrics: PerformanceMetrics): CommonModuleService = {
 
     val stateManagement = manager.instance match {
-      case regularInstance: RegularInstanceDomain =>
+      case regularInstance: RegularInstance =>
         regularInstance.stateManagement
-      case batchInstance: BatchInstanceDomain =>
+      case batchInstance: BatchInstance =>
         batchInstance.stateManagement
       case _ =>
         logger.error("CommonModuleService can be used only for ${EngineLiterals.regularStreamingType} or ${EngineLiterals.batchStreamingType} engine.")

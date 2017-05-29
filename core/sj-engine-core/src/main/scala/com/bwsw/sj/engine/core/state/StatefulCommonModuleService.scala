@@ -1,9 +1,9 @@
 package com.bwsw.sj.engine.core.state
 
-import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, RegularInstanceDomain}
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.engine.{StateHandlers, StreamingExecutor}
+import com.bwsw.sj.common.si.model.instance.{BatchInstance, RegularInstance}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.environment.StatefulModuleEnvironmentManager
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
@@ -82,8 +82,8 @@ class StatefulCommonModuleService(manager: CommonTaskManager,
 
   private def getStateFullCheckpoint(): Int = {
     instance match {
-      case regularInstance: RegularInstanceDomain => regularInstance.stateFullCheckpoint
-      case batchInstance: BatchInstanceDomain => batchInstance.stateFullCheckpoint
+      case regularInstance: RegularInstance => regularInstance.stateFullCheckpoint
+      case batchInstance: BatchInstance => batchInstance.stateFullCheckpoint
     }
   }
 }

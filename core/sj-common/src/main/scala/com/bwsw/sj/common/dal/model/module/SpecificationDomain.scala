@@ -1,8 +1,6 @@
 package com.bwsw.sj.common.dal.model.module
 
-import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.PropertyField
-import com.bwsw.sj.common.rest.model.module.SpecificationApi
 
 /**
   * Domain entity for specification of module
@@ -20,29 +18,4 @@ class SpecificationDomain(val name: String,
                           @PropertyField("engine-name") var engineName: String,
                           @PropertyField("engine-version") var engineVersion: String,
                           @PropertyField("validator-class") val validateClass: String,
-                          @PropertyField("executor-class") val executorClass: String,
-                          @PropertyField("batch-collector-class") val batchCollectorClass: String,
-                          val options: String = "{}"
-                   ) {
-
-  def asSpecification(): SpecificationApi = {
-    val serializer = new JsonSerializer
-    SpecificationApi(this.name,
-      this.description,
-      this.version,
-      this.author,
-      this.license,
-      Map("cardinality" -> this.inputs.cardinality,
-        "types" -> this.inputs.types),
-      Map("cardinality" -> this.outputs.cardinality,
-        "types" -> this.outputs.types),
-      this.moduleType,
-      this.engineName,
-      this.engineVersion,
-      serializer.deserialize[Map[String, Any]](this.options),
-      this.validateClass,
-      this.executorClass)
-  }
-}
-
-case class IOstream(cardinality: Array[Int], types: Array[String])
+                          @PropertyField("executor-class") val executorClass: String)

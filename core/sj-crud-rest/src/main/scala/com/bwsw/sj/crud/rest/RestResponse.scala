@@ -3,9 +3,11 @@ package com.bwsw.sj.crud.rest
 import akka.stream.scaladsl.Source
 import com.bwsw.sj.common.rest.{ResponseEntity, RestResponse}
 import com.bwsw.sj.crud.rest.model.config.ConfigurationSettingApi
-import com.bwsw.sj.crud.rest.model.stream.StreamApi
+import com.bwsw.sj.crud.rest.model.instance.response.InstanceApiResponse
+import com.bwsw.sj.crud.rest.model.module.SpecificationApi
 import com.bwsw.sj.crud.rest.model.provider.ProviderApi
 import com.bwsw.sj.crud.rest.model.service.ServiceApi
+import com.bwsw.sj.crud.rest.model.stream.StreamApi
 
 import scala.collection.mutable
 
@@ -38,6 +40,30 @@ case class ConfigSettingsResponseEntity(configSettings: mutable.Buffer[Configura
 
 case class ConfigSettingResponseEntity(configSetting: ConfigurationSettingApi) extends ResponseEntity
 
+
+case class ModuleJar(filename: String, source: Source[akka.util.ByteString, scala.Any]) extends RestResponse
+
+case class ModuleInfo(moduleType: String, moduleName: String, moduleVersion: String, size: Long)
+
+case class ModulesResponseEntity(modules: mutable.Buffer[ModuleInfo] = mutable.Buffer()) extends ResponseEntity
+
+case class RelatedToModuleResponseEntity(instances: mutable.Buffer[String] = mutable.Buffer()) extends ResponseEntity
+
+case class SpecificationResponseEntity(specification: SpecificationApi) extends ResponseEntity
+
+case class ShortInstancesResponseEntity(instances: mutable.Buffer[ShortInstance] = mutable.Buffer()) extends ResponseEntity
+
+case class InstanceResponseEntity(instance: InstanceApiResponse) extends ResponseEntity
+
+case class InstancesResponseEntity(instances: mutable.Buffer[InstanceApiResponse] = mutable.Buffer()) extends ResponseEntity
+
+case class ShortInstance(name: String,
+                         moduleType: String,
+                         moduleName: String,
+                         moduleVersion: String,
+                         description: String,
+                         status: String,
+                         restAddress: String)
 
 case class CustomJar(filename: String, source: Source[akka.util.ByteString, scala.Any]) extends RestResponse
 

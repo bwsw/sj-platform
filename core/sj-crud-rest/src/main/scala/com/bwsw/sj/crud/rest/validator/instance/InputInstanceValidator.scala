@@ -1,7 +1,8 @@
 package com.bwsw.sj.crud.rest.validator.instance
 
 import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
-import com.bwsw.sj.common.rest.model.module.{InputInstanceApi, InstanceApi, SpecificationApi}
+import com.bwsw.sj.common.si.model.instance.{InputInstance, Instance}
+import com.bwsw.sj.common.si.model.module.Specification
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.StreamLiterals.tstreamType
@@ -21,15 +22,14 @@ class InputInstanceValidator extends InstanceValidator {
   /**
     * Validating input parameters for input-streaming module
     *
-    * @param parameters - input parameters for running module
+    * @param instance - input parameters for running module
     * @return - List of errors
     */
-  override def validate(parameters: InstanceApi,
-                        specification: SpecificationApi) = {
-    logger.debug(s"Instance: ${parameters.name}. Start a validation of instance of input-streaming type.")
+  override def validate(instance: Instance, specification: Specification) = {
+    logger.debug(s"Instance: ${instance.name}. Start a validation of instance of input-streaming type.")
     val errors = new ArrayBuffer[String]()
-    errors ++= super.validateGeneralOptions(parameters)
-    val inputInstanceMetadata = parameters.asInstanceOf[InputInstanceApi]
+    errors ++= super.validateGeneralOptions(instance)
+    val inputInstanceMetadata = instance.asInstanceOf[InputInstance]
 
     // 'checkpoint-mode' field
     Option(inputInstanceMetadata.checkpointMode) match {
@@ -85,13 +85,12 @@ class InputInstanceValidator extends InstanceValidator {
     errors
   }
 
-  def validateStreamOptions(instance: InputInstanceApi,
-                            specification: SpecificationApi) = {
+  def validateStreamOptions(instance: InputInstance, specification: Specification) = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     val errors = new ArrayBuffer[String]()
 
     // 'outputs' field
-    val outputsCardinality = specification.outputs("cardinality").asInstanceOf[Array[Int]]
+    val outputsCardinality = specification.outputs.cardinality
     if (instance.outputs.length < outputsCardinality(0)) {
       errors += createMessage("rest.validator.cardinality.cannot.less", "outputs", s"${outputsCardinality(0)}")
     }
@@ -107,7 +106,7 @@ class InputInstanceValidator extends InstanceValidator {
         errors += createMessage("rest.validator.source_stream.not.exist", "Output", streamName)
       }
     }
-    val outputTypes = specification.outputs("types").asInstanceOf[Array[String]]
+    val outputTypes = specification.outputs.types
     if (outputStreams.exists(s => !outputTypes.contains(s.streamType))) {
       errors += createMessage("rest.validator.source_stream.must.one.of", "Output", outputTypes.mkString("[", ", ", "]"))
     }
@@ -132,7 +131,7 @@ class InputInstanceValidator extends InstanceValidator {
         errors += createMessage("rest.validator.attribute.required", "Parallelism")
       case Some(x) =>
         x match {
-          case dig: Int =>
+          case _: Int =>
             checkBackupNumber(instance, errors)
           case _ =>
             errors += createMessage("rest.validator.parameter.unknown.type", "parallelism", "digit")
@@ -142,7 +141,7 @@ class InputInstanceValidator extends InstanceValidator {
     errors
   }
 
-  private def checkBackupNumber(parameters: InputInstanceApi, errors: ArrayBuffer[String]) = {
+  private def checkBackupNumber(parameters: InputInstance, errors: ArrayBuffer[String]) = {
     val parallelism = parameters.parallelism.asInstanceOf[Int]
     if (parallelism <= 0) {
       errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Parallelism")

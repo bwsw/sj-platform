@@ -1,7 +1,6 @@
 package com.bwsw.sj.common.rest
 
 import com.bwsw.sj.common.config.ConfigLiterals
-import com.bwsw.sj.common.rest.model.module.{InstanceApi, SpecificationApi}
 import com.fasterxml.jackson.annotation.JsonProperty
 
 import scala.annotation.meta.field
@@ -46,21 +45,3 @@ case class TypesResponseEntity(types: Seq[String]) extends ResponseEntity
 case class RelatedToStreamResponseEntity(instances: mutable.Buffer[String] = mutable.Buffer()) extends ResponseEntity
 
 case class DomainsResponseEntity(domains: Seq[String] = ConfigLiterals.domains) extends ResponseEntity
-
-
-case class ModuleInfo(moduleType: String, moduleName: String, moduleVersion: String, size: Long)
-
-case class ModulesResponseEntity(modules: mutable.Buffer[ModuleInfo] = mutable.Buffer()) extends ResponseEntity
-
-case class RelatedToModuleResponseEntity(instances: mutable.Buffer[String] = mutable.Buffer()) extends ResponseEntity
-
-case class SpecificationResponseEntity(specification: SpecificationApi) extends ResponseEntity
-
-case class ShortInstancesResponseEntity(instances: mutable.Buffer[ShortInstance] = mutable.Buffer()) extends ResponseEntity
-
-case class InstanceResponseEntity(instance: InstanceApi) extends ResponseEntity
-
-case class InstancesResponseEntity(instances: mutable.Buffer[InstanceApi] = mutable.Buffer()) extends ResponseEntity
-
-case class ShortInstance(name: String, moduleType: String, moduleName: String, moduleVersion: String,
-                         description: String, status: String, restAddress: String)

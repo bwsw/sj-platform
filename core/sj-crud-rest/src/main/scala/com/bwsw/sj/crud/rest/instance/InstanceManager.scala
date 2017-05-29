@@ -2,29 +2,29 @@ package com.bwsw.sj.crud.rest.instance
 
 import java.util.Calendar
 
-import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.crud.rest.marathon.MarathonTask
 
 private[instance] trait InstanceManager extends InstanceMarathonManager {
   private val instanceRepository = ConnectionRepository.getInstanceRepository
 
-  def getFrameworkName(instance: InstanceDomain) = s"${instance.name}-${instance.frameworkId}"
+  def getFrameworkName(instance: Instance) = s"${instance.name}-${instance.frameworkId}"
 
-  protected def updateInstanceStatus(instance: InstanceDomain, status: String) = {
+  protected def updateInstanceStatus(instance: Instance, status: String) = {
     instance.status = status
-    instanceRepository.save(instance)
+    instanceRepository.save(instance.to)
   }
 
-  protected def updateInstanceRestAddress(instance: InstanceDomain, restAddress: String) = {
-    instance.restAddress = restAddress
-    instanceRepository.save(instance)
+  protected def updateInstanceRestAddress(instance: Instance, restAddress: String) = {
+    instance.restAddress = Option(restAddress)
+    instanceRepository.save(instance.to)
   }
 
   protected def getRestAddress(leaderTask: Option[MarathonTask]) =
     leaderTask.map(t => s"http://${t.host}:${t.ports.asInstanceOf[List[String]].head}")
 
-  protected def updateFrameworkStage(instance: InstanceDomain, status: String) = {
+  protected def updateFrameworkStage(instance: Instance, status: String) = {
     if (instance.stage.state.equals(status)) {
       instance.stage.duration = Calendar.getInstance().getTime.getTime - instance.stage.datetime.getTime
     } else {
@@ -33,6 +33,6 @@ private[instance] trait InstanceManager extends InstanceMarathonManager {
       instance.stage.duration = 0
     }
 
-    instanceRepository.save(instance)
+    instanceRepository.save(instance.to)
   }
 }

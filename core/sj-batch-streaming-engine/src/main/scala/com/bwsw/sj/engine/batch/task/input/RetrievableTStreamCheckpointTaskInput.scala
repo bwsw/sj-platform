@@ -2,10 +2,10 @@ package com.bwsw.sj.engine.batch.task.input
 
 import java.util.Date
 
-import com.bwsw.sj.common.dal.model.instance.BatchInstanceDomain
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.engine.EnvelopeDataSerializer
+import com.bwsw.sj.common.si.model.instance.BatchInstance
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.entities.TStreamEnvelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
@@ -33,7 +33,7 @@ class RetrievableTStreamCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMana
                                                          override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
   extends RetrievableCheckpointTaskInput[TStreamEnvelope[T]](manager.inputs) {
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val instance = manager.instance.asInstanceOf[BatchInstanceDomain]
+  private val instance = manager.instance.asInstanceOf[BatchInstance]
   private val tstreamOffsetsStorage = mutable.Map[(String, Int), Long]()
   private val envelopeDataSerializer = manager.envelopeDataSerializer.asInstanceOf[EnvelopeDataSerializer[T]]
   private val consumers = createConsumers()
