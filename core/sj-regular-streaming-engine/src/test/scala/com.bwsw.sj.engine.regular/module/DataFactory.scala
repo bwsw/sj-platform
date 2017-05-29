@@ -291,7 +291,7 @@ object DataFactory {
       stateFullCheckpoint = stateFullCheckpoint,
       startFrom = EngineLiterals.oldestStartMode,
       executionPlan = new ExecutionPlan(Map(instanceName + "-task0" -> task, instanceName + "-task1" -> task).asJava),
-      status = EngineLiterals.started)
+      _status = EngineLiterals.started)
 
     instanceService.save(instance.to)
   }

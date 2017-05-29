@@ -36,7 +36,7 @@ class BatchInstance(name: String,
                     val executionPlan: ExecutionPlan = new ExecutionPlan(),
                     restAddress: Option[String] = None,
                     stage: FrameworkStage = FrameworkStage(),
-                    status: String = EngineLiterals.ready,
+                    private val _status: String = EngineLiterals.ready,
                     frameworkId: String = System.currentTimeMillis().toString)
   extends Instance(
     name,
@@ -56,7 +56,7 @@ class BatchInstance(name: String,
     engine,
     restAddress,
     stage,
-    status,
+    _status,
     frameworkId,
     outputs) {
 
@@ -108,5 +108,5 @@ class BatchInstance(name: String,
 
   override def getInputsWithoutStreamMode: Array[String] = inputs.map(clearStreamFromMode)
 
-  override val streams = getInputsWithoutStreamMode ++ outputs
+  override val streams: Array[String] = getInputsWithoutStreamMode ++ outputs
 }
