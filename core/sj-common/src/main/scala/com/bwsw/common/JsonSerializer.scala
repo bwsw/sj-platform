@@ -81,7 +81,7 @@ class JsonSerializer {
   }
 
   private def getMissedProperty(exception: JsonMappingException): String =
-    exception.getMessage.replaceFirst("Missing required creator property\\s*'(.*?)'.*", "!$1!")
+    exception.getOriginalMessage.replaceFirst("Missing required creator property\\s*'(.*?)'.*", "$1")
 
   private def typeReference[T: Manifest]: TypeReference[T] = new TypeReference[T] {
     override def getType: Type = typeFromManifest(manifest[T])

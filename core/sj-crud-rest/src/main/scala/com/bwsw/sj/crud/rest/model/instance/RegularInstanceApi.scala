@@ -3,6 +3,7 @@ package com.bwsw.sj.crud.rest.model.instance
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.si.model.instance.RegularInstance
 import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals, RestLiterals}
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 
 /**
@@ -11,7 +12,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 class RegularInstanceApi(name: String,
                          coordinationService: String,
                          val checkpointMode: String,
-                         val checkpointInterval: Long,
+                         @JsonProperty(required = true) val checkpointInterval: Long,
                          val inputs: Array[String],
                          val outputs: Array[String],
                          description: String = RestLiterals.defaultDescription,

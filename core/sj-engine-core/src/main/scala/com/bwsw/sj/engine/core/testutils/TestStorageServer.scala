@@ -15,8 +15,8 @@ object TestStorageServer {
 
   private def getTmpDir(): String = Files.createTempDir().toString
 
-  val token = "token"
-  val prefix = "/bench-prefix"
+  val token = "12345678910111213141516171819202"
+  val prefix = "/path"
   val rootConfig = "test-storage-server"
   val zkHostsConfig = rootConfig + ".zookeeper.hosts"
   val hostConfig = rootConfig + ".host"

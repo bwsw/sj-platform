@@ -3,6 +3,7 @@ package com.bwsw.sj.crud.rest.model.instance
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 
 /**
@@ -11,10 +12,10 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 class InputInstanceApi(name: String,
                        coordinationService: String,
                        val checkpointMode: String,
-                       val checkpointInterval: Long,
+                       @JsonProperty(required = true) val checkpointInterval: Long,
                        val outputs: Array[String],
-                       val lookupHistory: Int,
-                       val queueMaxSize: Int,
+                       @JsonProperty(required = true) val lookupHistory: Int,
+                       @JsonProperty(required = true) val queueMaxSize: Int,
                        description: String = RestLiterals.defaultDescription,
                        parallelism: Any = 1,
                        options: Map[String, Any] = Map(),

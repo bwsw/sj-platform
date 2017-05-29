@@ -30,7 +30,7 @@ import scala.util.{Failure, Success, Try}
 class InstanceController {
 
   private val logger = LoggerFactory.getLogger(getClass)
-  private val serializer = new JsonSerializer(true)
+  private val serializer = new JsonSerializer(true, true)
   private val serviceInterface = new InstanceSI
   private val moduleSI = new ModuleSI
   private val configService = ConnectionRepository.getConfigRepository

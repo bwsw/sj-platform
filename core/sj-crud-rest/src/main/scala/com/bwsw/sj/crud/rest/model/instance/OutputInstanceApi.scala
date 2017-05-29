@@ -3,6 +3,7 @@ package com.bwsw.sj.crud.rest.model.instance
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.si.model.instance.OutputInstance
 import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals, RestLiterals}
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 
 /**
@@ -11,7 +12,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 class OutputInstanceApi(name: String,
                         coordinationService: String,
                         val checkpointMode: String,
-                        val checkpointInterval: Long,
+                        @JsonProperty(required = true) val checkpointInterval: Long,
                         val input: String,
                         val output: String,
                         description: String = RestLiterals.defaultDescription,
