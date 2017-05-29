@@ -67,8 +67,8 @@ class ConfigSettingsController extends Controller {
     response
   }
 
-  def getDomain(domain: String): RestResponse = {
-    val configElements = serviceInterface.getDomain(Map("domain" -> domain))
+  def getByDomain(domain: String): RestResponse = {
+    val configElements = serviceInterface.getBy(domain)
     val response = OkRestResponse(ConfigSettingsResponseEntity())
     if (configElements.nonEmpty) {
       response.entity = ConfigSettingsResponseEntity(configElements.map(cs => ConfigurationSettingApi.from(cs)))
@@ -77,6 +77,7 @@ class ConfigSettingsController extends Controller {
     response
   }
 
+  //todo return an error instead of throw an exception
   def checkDomain(domain: String): Unit = {
     if (!ConfigLiterals.domains.contains(domain))
       throw UnknownConfigSettingDomain(

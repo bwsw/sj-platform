@@ -37,18 +37,21 @@ class ServiceSI extends ServiceInterface[Service, ServiceDomain] {
     entityRepository.get(name).map(Service.from)
   }
 
-  override def delete(name: String): DeletingResult = {
+  override def delete(name: String): DeletionResult = {
     if (getRelatedStreams(name).nonEmpty)
-      DeletingError(createMessage("rest.services.service.cannot.delete.due.to.streams", name))
-    else if (getRelatedInstances(name).nonEmpty)
-      DeletingError(createMessage("rest.services.service.cannot.delete.due.to.instances", name))
+      DeletionError(createMessage("rest.services.service.cannot.delete.due.to.streams", name))
     else {
-      entityRepository.get(name) match {
-        case Some(_) =>
-          entityRepository.delete(name)
-          Deleted
-        case None =>
-          EntityNotFound
+      if (getRelatedInstances(name).nonEmpty)
+        DeletionError(createMessage("rest.services.service.cannot.delete.due.to.instances", name))
+      else {
+        entityRepository.get(name) match {
+          case Some(_) =>
+            entityRepository.delete(name)
+
+            Deleted
+          case None =>
+            EntityNotFound
+        }
       }
     }
   }

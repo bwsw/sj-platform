@@ -57,15 +57,17 @@ class CustomFilesSI extends ServiceInterface[FileMetadata, FileMetadataDomain] {
     }
   }
 
-  override def delete(name: String): DeletingResult = {
+  override def delete(name: String): DeletionResult = {
     val fileMetadatas = entityRepository.getByParameters(Map("filename" -> name))
 
     if (fileMetadatas.isEmpty)
       EntityNotFound
-    else if (fileStorage.delete(name))
-      Deleted
-    else
-      DeletingError(s"Can't delete jar '$name' for some reason. It needs to be debugged.")
+    else {
+      if (fileStorage.delete(name))
+        Deleted
+      else
+        DeletionError(s"Can't delete jar '$name' for some reason. It needs to be debugged.")
+    }
   }
 }
 

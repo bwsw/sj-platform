@@ -7,7 +7,7 @@ import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.si._
 import com.bwsw.sj.common.si.model.module.ModuleMetadata
-import com.bwsw.sj.common.si.result.{Created, Deleted, DeletingError, NotCreated}
+import com.bwsw.sj.common.si.result.{Created, Deleted, DeletionError, NotCreated}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import com.bwsw.sj.crud.rest.model.module.{ModuleMetadataApi, SpecificationApi}
@@ -98,7 +98,7 @@ class ModuleController {
             MessageResponseEntity(
               createMessage("rest.modules.module.deleted", metadata.signature)))
 
-        case DeletingError(error) =>
+        case DeletionError(error) =>
           UnprocessableEntityRestResponse(MessageResponseEntity(error))
       }
     }

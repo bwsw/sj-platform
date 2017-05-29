@@ -25,7 +25,7 @@ trait SjConfigurationSettingsRoute extends Directives with SjCrudValidator {
 
             pathEndOrSingleSlash {
               get {
-                val response = configSettingsController.getDomain(domain)
+                val response = configSettingsController.getByDomain(domain)
                 complete(restResponseToHttpResponse(response))
               }
             } ~

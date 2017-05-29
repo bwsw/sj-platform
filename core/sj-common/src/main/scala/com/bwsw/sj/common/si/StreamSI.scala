@@ -23,6 +23,7 @@ class StreamSI extends ServiceInterface[SjStream, StreamDomain] {
     if (errors.isEmpty) {
       entity.create()
       entityRepository.save(entity.to())
+
       Created
     } else {
       NotCreated(errors)
@@ -35,13 +36,14 @@ class StreamSI extends ServiceInterface[SjStream, StreamDomain] {
   override def getAll(): mutable.Buffer[SjStream] =
     entityRepository.getAll.map(SjStream.from)
 
-  override def delete(name: String): DeletingResult = {
+  override def delete(name: String): DeletionResult = {
     if (hasRelatedInstances(name))
-      DeletingError(createMessage("rest.streams.stream.cannot.delete", name))
+      DeletionError(createMessage("rest.streams.stream.cannot.delete", name))
     else entityRepository.get(name) match {
       case Some(entity) =>
         SjStream.from(entity).delete()
         entityRepository.delete(name)
+
         Deleted
       case None =>
         EntityNotFound

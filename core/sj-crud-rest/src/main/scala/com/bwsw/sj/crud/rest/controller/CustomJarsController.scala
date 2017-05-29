@@ -85,7 +85,7 @@ class CustomJarsController extends Controller {
         OkRestResponse(MessageResponseEntity(createMessage("rest.custom.jars.file.deleted", name, version)))
       case EntityNotFound =>
         NotFoundRestResponse(MessageResponseEntity(createMessage(entityNotFoundMessage, s"$name-$version")))
-      case DeletingError(message) =>
+      case DeletionError(message) =>
         UnprocessableEntityRestResponse(MessageResponseEntity(message))
     }
   }

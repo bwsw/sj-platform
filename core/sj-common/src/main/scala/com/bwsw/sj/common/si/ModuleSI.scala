@@ -89,15 +89,17 @@ class ModuleSI extends JsonValidator {
     ).map(_.name)
   }
 
-  def delete(metadata: ModuleMetadata): DeletingResult = {
+  def delete(metadata: ModuleMetadata): DeletionResult = {
     if (getRelatedInstances(metadata).nonEmpty) {
-      DeletingError(createMessage(
+      DeletionError(createMessage(
         "rest.modules.module.cannot.delete",
         metadata.signature))
-    } else if (fileStorage.delete(metadata.filename))
-      Deleted
-    else
-      DeletingError(createMessage("rest.cannot.delete.file", metadata.filename))
+    } else {
+      if (fileStorage.delete(metadata.filename))
+        Deleted
+      else
+        DeletionError(createMessage("rest.cannot.delete.file", metadata.filename))
+    }
   }
 
   def exists(moduleType: String, moduleName: String, moduleVersion: String): Either[String, FileMetadataDomain] = {
@@ -106,10 +108,12 @@ class ModuleSI extends JsonValidator {
       val filesMetadata = getFilesMetadata(moduleType, moduleName, moduleVersion)
       if (filesMetadata.isEmpty)
         Left(createMessage("rest.modules.module.notfound", moduleSignature))
-      else if (!fileStorage.exists(filesMetadata.head.filename))
-        Left(createMessage("rest.modules.module.jar.notfound", moduleSignature))
-      else
-        Right(filesMetadata.head)
+      else {
+        if (!fileStorage.exists(filesMetadata.head.filename))
+          Left(createMessage("rest.modules.module.jar.notfound", moduleSignature))
+        else
+          Right(filesMetadata.head)
+      }
     } else {
       Left(createMessage("rest.modules.type.unknown", moduleType))
     }

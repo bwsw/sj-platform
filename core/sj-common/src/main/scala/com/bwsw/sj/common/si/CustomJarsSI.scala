@@ -50,9 +50,7 @@ class CustomJarsSI extends ServiceInterface[FileMetadata, FileMetadataDomain] {
       configRepository.save(customJarConfig)
 
       Created
-    } else {
-      NotCreated(errors)
-    }
+    } else NotCreated(errors)
   }
 
   override def getAll(): mutable.Buffer[FileMetadata] = {
@@ -71,25 +69,27 @@ class CustomJarsSI extends ServiceInterface[FileMetadata, FileMetadataDomain] {
     }
   }
 
-  override def delete(name: String): DeletingResult = {
+  override def delete(name: String): DeletionResult = {
     val fileMetadatas = entityRepository.getByParameters(Map("filetype" -> FileMetadata.customJarType, "filename" -> name))
 
     if (fileMetadatas.isEmpty)
       EntityNotFound
-    else if (fileStorage.delete(name)) {
-      val fileMetadata = fileMetadatas.head
-      configRepository.delete(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain,
-        fileMetadata.specification.name + "-" + fileMetadata.specification.version))
-      Deleted
-    } else
-      DeletingError(s"Can't delete jar '$name' for some reason. It needs to be debugged.")
+    else {
+      if (fileStorage.delete(name)) {
+        val fileMetadata = fileMetadatas.head
+        configRepository.delete(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain,
+          fileMetadata.specification.name + "-" + fileMetadata.specification.version))
+
+        Deleted
+      } else DeletionError(s"Can't delete jar '$name' for some reason. It needs to be debugged.")
+    }
   }
 
   /**
     * Returns custom jar file with this name and version from [[entityRepository]]
     *
-    * @param name
-    * @param version
+    * @param name    name of custom jar file from [[com.bwsw.sj.common.si.model.module.Specification]]
+    * @param version version of custom jar file from [[com.bwsw.sj.common.si.model.module.Specification]]
     */
   def getBy(name: String, version: String): Option[FileMetadata] = {
     val fileMetadatas = entityRepository.getByParameters(Map("filetype" -> FileMetadata.customJarType,
@@ -112,12 +112,12 @@ class CustomJarsSI extends ServiceInterface[FileMetadata, FileMetadataDomain] {
   /**
     * Deletes custom jar file with this name and version from [[entityRepository]]
     *
-    * @param name
-    * @param version
+    * @param name    name of custom jar file from [[com.bwsw.sj.common.si.model.module.Specification]]
+    * @param version version of custom jar file from [[com.bwsw.sj.common.si.model.module.Specification]]
     * @return Right(true) if custom jar file deleted, Right(false) if custom jar file not found in [[entityRepository]],
     *         Left(error) if some error happened
     */
-  def deleteBy(name: String, version: String): DeletingResult = {
+  def deleteBy(name: String, version: String): DeletionResult = {
     val fileMetadatas = entityRepository.getByParameters(Map("filetype" -> FileMetadata.customJarType,
       "specification.name" -> name,
       "specification.version" -> version)
@@ -129,11 +129,7 @@ class CustomJarsSI extends ServiceInterface[FileMetadata, FileMetadataDomain] {
       if (fileStorage.delete(filename)) {
         configRepository.delete(ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, s"$name-$version"))
         Deleted
-      } else {
-        DeletingError(s"Can't delete jar '$filename' for some reason. It needs to be debugged.")
-      }
-    } else {
-      EntityNotFound
-    }
+      } else DeletionError(s"Can't delete jar '$filename' for some reason. It needs to be debugged.")
+    } else EntityNotFound
   }
 }

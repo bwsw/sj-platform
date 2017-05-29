@@ -3,7 +3,7 @@ package com.bwsw.sj.crud.rest.controller
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.si.ServiceInterface
 import com.bwsw.sj.common.rest._
-import com.bwsw.sj.common.si.result.{Deleted, DeletingError, EntityNotFound}
+import com.bwsw.sj.common.si.result.{Deleted, DeletionError, EntityNotFound}
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 
 trait Controller {
@@ -25,7 +25,7 @@ trait Controller {
         OkRestResponse(MessageResponseEntity(createMessage(entityDeletedMessage, name)))
       case EntityNotFound =>
         NotFoundRestResponse(MessageResponseEntity(createMessage(entityNotFoundMessage, name)))
-      case DeletingError(message) =>
+      case DeletionError(message) =>
         UnprocessableEntityRestResponse(MessageResponseEntity(message))
     }
   }

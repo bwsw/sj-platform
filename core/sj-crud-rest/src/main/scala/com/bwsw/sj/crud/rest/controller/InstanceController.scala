@@ -116,7 +116,7 @@ class InstanceController {
             MessageResponseEntity(
               createMessage("rest.modules.instances.instance.deleting", name)))
 
-        case DeletingError(error) =>
+        case DeletionError(error) =>
           UnprocessableEntityRestResponse(MessageResponseEntity(error))
 
         case EntityNotFound =>

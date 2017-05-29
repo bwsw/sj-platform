@@ -2,7 +2,7 @@ package com.bwsw.sj.common.si
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.repository.GenericMongoRepository
-import com.bwsw.sj.common.si.result.{CreationResult, DeletingResult}
+import com.bwsw.sj.common.si.result.{CreationResult, DeletionResult}
 
 import scala.collection.mutable
 
@@ -32,5 +32,5 @@ trait ServiceInterface[M, T] {
     *
     * @param name name of entity
     */
-  def delete(name: String): DeletingResult
+  def delete(name: String): DeletionResult
 }

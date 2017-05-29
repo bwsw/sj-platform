@@ -33,22 +33,18 @@ class ConfigSettingsSI extends ServiceInterface[ConfigurationSetting, Configurat
     entityRepository.get(name).map(ConfigurationSetting.from)
   }
 
-  def delete(name: String): DeletingResult = {
+  def delete(name: String): DeletionResult = {
     entityRepository.get(name) match {
       case Some(_) =>
         entityRepository.delete(name)
+
         Deleted
       case None =>
         EntityNotFound
     }
   }
 
-  /**
-    * Returns [[ConfigurationSetting]]s from [[entityRepository]] by parameters
-    *
-    * @param parameters
-    */
-  def getDomain(parameters: Map[String, Any]): mutable.Buffer[ConfigurationSetting] = {
-    entityRepository.getByParameters(parameters).map(ConfigurationSetting.from)
+  def getBy(domain: String): mutable.Buffer[ConfigurationSetting] = {
+    entityRepository.getByParameters(Map("domain" -> domain)).map(ConfigurationSetting.from)
   }
 }

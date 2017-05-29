@@ -22,6 +22,7 @@ class InstanceSI {
     if (instancePassedValidation.result) {
       instance.createStreams()
       entityRepository.save(instance.to)
+
       Created
     } else {
       NotCreated(instancePassedValidation.errors)
@@ -43,17 +44,18 @@ class InstanceSI {
   def get(name: String): Option[Instance] =
     entityRepository.get(name).map(Instance.from)
 
-  def delete(name: String): DeletingResult = {
+  def delete(name: String): DeletionResult = {
     entityRepository.get(name) match {
       case Some(instance) =>
         instance.status match {
           case `ready` =>
             entityRepository.delete(name: String)
+
             Deleted
           case `stopped` | `failed` | `error` =>
             WillBeDeleted(Instance.from(instance))
           case _ =>
-            DeletingError(createMessage("rest.modules.instances.instance.cannot.delete", name))
+            DeletionError(createMessage("rest.modules.instances.instance.cannot.delete", name))
         }
 
       case None =>
@@ -83,4 +85,4 @@ class InstanceSI {
   }
 }
 
-case class WillBeDeleted(instance: Instance) extends DeletingResult
+case class WillBeDeleted(instance: Instance) extends DeletionResult

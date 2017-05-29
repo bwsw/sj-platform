@@ -38,13 +38,14 @@ class ProviderSI extends ServiceInterface[Provider, ProviderDomain] {
     entityRepository.get(name).map(Provider.from)
   }
 
-  override def delete(name: String): DeletingResult = {
+  override def delete(name: String): DeletionResult = {
     if (getRelatedServices(name).nonEmpty)
-      DeletingError(createMessage("rest.providers.provider.cannot.delete", name))
+      DeletionError(createMessage("rest.providers.provider.cannot.delete", name))
     else {
       entityRepository.get(name) match {
         case Some(_) =>
           entityRepository.delete(name)
+
           Deleted
         case None =>
           EntityNotFound
@@ -65,12 +66,10 @@ class ProviderSI extends ServiceInterface[Provider, ProviderDomain] {
     provider match {
       case Some(x) =>
         val errors = x.checkConnection()
-        if (errors.isEmpty) {
+        if (errors.isEmpty)
           Right(true)
-        }
-        else {
+        else
           Left(errors)
-        }
       case None => Right(false)
     }
   }
