@@ -7,6 +7,7 @@ import com.bwsw.common._
 import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.common.jdbc.JdbcClientBuilder
+import com.bwsw.sj.common.config.BenchmarkConfigNames
 import com.bwsw.sj.common.dal.model._
 import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, Task}
 import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain}
@@ -78,13 +79,26 @@ object DataFactory {
   val jdbcInstanceName: String = "test-jdbc-instance-for-output-engine"
   val restInstanceName: String = "test-rest-instance-for-output-engine"
 
+  val tstreamPartitions: Int = 4
+  val tstreamTtl: Long = 60000l
+  val producerPort: Int = 8030
+
+  val inputData = Array(
+    "abc",
+    "a'b",
+    """a"b""",
+    """a\b""",
+    """a
+      |b
+    """.stripMargin)
+
   val objectSerializer = new ObjectSerializer()
   private val serializer = new JsonSerializer
 
-  private val esProviderHosts = config.getString("test.es.hosts").split(",").map(host => host.trim)
-  private val jdbcHosts = config.getString("test.jdbc.hosts").split(",").map(host => host.trim)
-  private val restHosts = config.getString("test.restful.hosts").split(",").map(host => host.trim)
-  private val zookeeperHosts = config.getString("test.zookeeper.hosts").split(",").map(host => host.trim)
+  private val esProviderHosts = config.getString(OutputBenchmarkConfigNames.esHosts).split(",").map(host => host.trim)
+  private val jdbcHosts = config.getString(OutputBenchmarkConfigNames.jdbcHosts).split(",").map(host => host.trim)
+  private val restHosts = config.getString(OutputBenchmarkConfigNames.restHosts).split(",").map(host => host.trim)
+  private val zookeeperHosts = config.getString(BenchmarkConfigNames.zkHosts).split(",").map(host => host.trim)
   private val zookeeperProvider = new ProviderDomain(zookeeperProviderName, zookeeperProviderName,
     zookeeperHosts, "", "", ProviderLiterals.zookeeperType)
   private val tstrqService = new TStreamServiceDomain(tstreamServiceName, tstreamServiceName, zookeeperProvider, TestStorageServer.prefix, TestStorageServer.token)
@@ -123,8 +137,7 @@ object DataFactory {
     val tStream: TStreamStreamDomain = new TStreamStreamDomain(
       tstreamInputName,
       tstrqService,
-      4
-    ) //todo get rid of number
+      tstreamPartitions)
 
     val producer = createProducer(tStream)
     val s = System.currentTimeMillis()
@@ -139,24 +152,11 @@ object DataFactory {
                         countElements: Int,
                         producer: Producer) = {
     var number = 0
-    var string = "abc"
     (0 until countTxns) foreach { (x: Int) =>
       val transaction = producer.newTransaction(NewProducerTransactionPolicy.ErrorIfOpened)
       (0 until countElements) foreach { (y: Int) =>
         number += 1
-        number % 8 match {
-          case 0 => string = "abc"
-          case 1 => string = "a'b"
-          case 2 => string = "a\\"
-          case 3 => string = "a\nc"
-          case 4 => string = "a\""
-          case 5 => string = """r"t"""
-          case 6 => string = """r\t"""
-          case 7 => string =
-            """r
-              |t
-            """.stripMargin
-        }
+        val string = inputData(number % inputData.length)
         println(s"write data $number, |$string|")
         val msg = objectSerializer.serialize((number, string).asInstanceOf[Object])
         transaction.send(msg)
@@ -222,7 +222,7 @@ object DataFactory {
   }
 
   private def setProducerBindPort() = {
-    tstreamFactory.setProperty(ConfigurationOptions.Producer.bindPort, 8030)
+    tstreamFactory.setProperty(ConfigurationOptions.Producer.bindPort, producerPort)
   }
 
   def createConsumer(stream: TStreamStreamDomain): consumer.Consumer = {
@@ -336,7 +336,7 @@ object DataFactory {
     storageClient.createStream(
       tstreamInputName,
       partitions,
-      60000,
+      tstreamTtl,
       tstreamInputName)
   }
 
@@ -344,7 +344,7 @@ object DataFactory {
                      streamName: String, moduleName: String) = {
 
     val task1 = new Task()
-    task1.inputs = Map(tstreamInputName -> Array(0, 3)).asJava
+    task1.inputs = Map(tstreamInputName -> Array(0, tstreamPartitions - 1)).asJava
     val executionPlan = new ExecutionPlan(Map(instanceName + "-task0" -> task1).asJava)
 
     val instance = new OutputInstance(

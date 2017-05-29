@@ -49,9 +49,7 @@ class TStreamService(name: String,
           errors += createMessage("entity.error.attribute.required", "Prefix")
         }
         else {
-          if (!validatePrefix(x)) {
-            errors += createMessage("entity.error.incorrect.service.prefix", x)
-          }
+          validatePrefix(x).foreach(error => errors += createMessage("entity.error.incorrect.service.prefix", x, error))
         }
     }
 
