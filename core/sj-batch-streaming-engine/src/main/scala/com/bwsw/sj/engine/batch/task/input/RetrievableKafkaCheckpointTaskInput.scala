@@ -22,7 +22,7 @@ import scala.collection.JavaConverters._
   * @author Kseniya Mikhaleva
   */
 class RetrievableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: CommonTaskManager,
-                                                       override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
+                                                       override val checkpointGroup: CheckpointGroup)
   extends RetrievableCheckpointTaskInput[KafkaEnvelope[T]](manager.inputs) with KafkaTaskInput[T] {
   currentThread.setName(s"batch-task-${manager.taskName}-kafka-consumer")
 

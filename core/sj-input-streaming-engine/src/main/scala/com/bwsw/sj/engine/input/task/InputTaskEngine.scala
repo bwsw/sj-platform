@@ -11,7 +11,6 @@ import com.bwsw.sj.engine.core.environment.InputEnvironmentManager
 import com.bwsw.sj.engine.core.input.{InputStreamingExecutor, Interval}
 import com.bwsw.sj.engine.input.eviction_policy.InputInstanceEvictionPolicy
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
-import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, ProducerTransaction}
 import io.netty.buffer.ByteBuf
 import io.netty.channel.{ChannelFuture, ChannelHandlerContext}
@@ -38,7 +37,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
   currentThread.setName(s"input-task-${manager.taskName}-engine")
   private val producers = manager.outputProducers
   private var transactionsByStreamPartitions = createTransactionsStorage()
-  private val checkpointGroup = new CheckpointGroup()
+  private val checkpointGroup = manager.createCheckpointGroup()
   private val instance = manager.instance.asInstanceOf[InputInstance]
   private val environmentManager = createModuleEnvironmentManager()
   private val executor: InputStreamingExecutor[AnyRef] = manager.getExecutor(environmentManager)

@@ -67,18 +67,12 @@ object DataFactory {
 
   private def setTStreamFactoryProperties() = {
     setAuthOptions(tstrqService)
-    setStorageOptions(tstrqService)
     setCoordinationOptions(tstrqService)
     setBindHostForAgents()
   }
 
   private def setAuthOptions(tStreamService: TStreamServiceDomain) = {
-    tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Auth.key, tStreamService.token)
-  }
-
-  private def setStorageOptions(tStreamService: TStreamServiceDomain) = {
-    tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, tStreamService.provider.hosts.mkString(","))
-      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, tStreamService.prefix)
+    tstreamFactory.setProperty(ConfigurationOptions.Common.authenticationKey, tStreamService.token)
   }
 
   private def setCoordinationOptions(tStreamService: TStreamServiceDomain) = {

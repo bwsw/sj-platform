@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory
   */
 class CallableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskManager,
                                                        blockingQueue: ArrayBlockingQueue[Envelope],
-                                                       override val checkpointGroup: CheckpointGroup =  new CheckpointGroup()) extends CallableCheckpointTaskInput[Envelope](manager.inputs) {
+                                                       override val checkpointGroup: CheckpointGroup) extends CallableCheckpointTaskInput[Envelope](manager.inputs) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val kafkaCheckpointTaskInput = new CallableKafkaCheckpointTaskInput[T](manager, blockingQueue, checkpointGroup)

@@ -56,10 +56,9 @@ class TStreamStream(name: String,
     val serviceDAO = ConnectionRepository.getServiceRepository
     val service = serviceDAO.get(this.service).get.asInstanceOf[TStreamServiceDomain]
     val factory = new TStreamsFactory()
-    factory.setProperty(ConfigurationOptions.StorageClient.Auth.key, service.token)
+    factory.setProperty(ConfigurationOptions.Common.authenticationKey, service.token)
       .setProperty(ConfigurationOptions.Coordination.endpoints, service.provider.hosts.mkString(","))
-      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, service.provider.hosts.mkString(","))
-      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, service.prefix)
+      .setProperty(ConfigurationOptions.Coordination.path, service.prefix)
 
     factory.getStorageClient()
   }
@@ -102,10 +101,9 @@ class TStreamStream(name: String,
   private def checkStreamPartitionsOnConsistency(service: TStreamServiceDomain): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
     val tstreamFactory = new TStreamsFactory()
-    tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Auth.key, service.token)
+    tstreamFactory.setProperty(ConfigurationOptions.Common.authenticationKey, service.token)
       .setProperty(ConfigurationOptions.Coordination.endpoints, service.provider.hosts.mkString(","))
-      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, service.provider.hosts.mkString(","))
-      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, service.prefix)
+      .setProperty(ConfigurationOptions.Coordination.path, service.prefix)
 
     val storageClient = tstreamFactory.getStorageClient()
 

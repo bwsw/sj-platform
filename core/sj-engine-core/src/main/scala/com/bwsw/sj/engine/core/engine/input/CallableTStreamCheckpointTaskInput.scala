@@ -30,7 +30,7 @@ import scala.collection.mutable
   */
 class CallableTStreamCheckpointTaskInput[T <: AnyRef](manager: TaskManager,
                                                       blockingQueue: ArrayBlockingQueue[Envelope],
-                                                      override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
+                                                      override val checkpointGroup: CheckpointGroup)
   extends CallableCheckpointTaskInput[TStreamEnvelope[T]](manager.inputs) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val (subscribingConsumers, consumerClones) = createConsumers()

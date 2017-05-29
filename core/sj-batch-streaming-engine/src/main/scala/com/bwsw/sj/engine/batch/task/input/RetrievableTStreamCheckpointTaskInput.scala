@@ -30,7 +30,7 @@ import scala.collection.mutable
   * @author Kseniya Mikhaleva
   */
 class RetrievableTStreamCheckpointTaskInput[T <: AnyRef](manager: CommonTaskManager,
-                                                         override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
+                                                         override val checkpointGroup: CheckpointGroup)
   extends RetrievableCheckpointTaskInput[TStreamEnvelope[T]](manager.inputs) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val instance = manager.instance.asInstanceOf[BatchInstance]

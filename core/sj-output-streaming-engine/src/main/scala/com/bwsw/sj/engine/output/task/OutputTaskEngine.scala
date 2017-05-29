@@ -36,7 +36,7 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private val environmentManager: OutputEnvironmentManager = createModuleEnvironmentManager()
   private val executor: OutputStreamingExecutor[AnyRef] = manager.getExecutor(environmentManager)
   private val entity: Entity[_] = executor.getOutputEntity
-  val taskInputService: CallableTStreamCheckpointTaskInput[AnyRef] = new CallableTStreamCheckpointTaskInput[AnyRef](manager, blockingQueue)
+  val taskInputService: CallableTStreamCheckpointTaskInput[AnyRef] = new CallableTStreamCheckpointTaskInput[AnyRef](manager, blockingQueue, manager.createCheckpointGroup())
   private val outputProcessor: OutputProcessor[AnyRef] = OutputProcessor[AnyRef](outputStream, performanceMetrics, manager, entity)
   private var wasFirstCheckpoint: Boolean = false
   protected val checkpointInterval: Long = instance.checkpointInterval
