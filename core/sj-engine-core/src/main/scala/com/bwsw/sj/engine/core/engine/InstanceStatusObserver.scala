@@ -5,6 +5,8 @@ import java.util.concurrent.Callable
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.EngineLiterals
 import org.slf4j.LoggerFactory
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 /**
   * Class is responsible for keeping under surveillance an instance status to be [[EngineLiterals.started]].
@@ -12,13 +14,13 @@ import org.slf4j.LoggerFactory
   *
   * @param instanceName name of instance that contains the running task name
   */
-class InstanceStatusObserver(instanceName: String) extends Callable[Unit] {
+class InstanceStatusObserver(instanceName: String)(implicit injector: Injector) extends Callable[Unit] {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   override def call(): Unit = {
     while (true) {
       logger.debug("Check an instance status in case of an instance failure to stop a work of task.")
-      ConnectionRepository.getInstanceRepository.get(instanceName) match {
+      inject[ConnectionRepository].getInstanceRepository.get(instanceName) match {
         case Some(instance) =>
           if (instance.status != EngineLiterals.started) {
             logger.error(s"Task cannot continue to work because of '${instance.status}' status of instance")

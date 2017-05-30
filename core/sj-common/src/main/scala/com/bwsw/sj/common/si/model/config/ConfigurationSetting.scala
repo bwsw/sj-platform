@@ -6,6 +6,8 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.tstreams.env.ConfigurationOptions
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -19,8 +21,8 @@ class ConfigurationSetting(val name: String,
     *
     * @return empty array if configuration setting is correct, validation errors otherwise
     */
-  def validate(): ArrayBuffer[String] = {
-    val configRepository = ConnectionRepository.getConfigRepository
+  def validate()(implicit injector: Injector): ArrayBuffer[String] = {
+    val configRepository = inject[ConnectionRepository].getConfigRepository
     val errors = new ArrayBuffer[String]()
 
     // 'name' field

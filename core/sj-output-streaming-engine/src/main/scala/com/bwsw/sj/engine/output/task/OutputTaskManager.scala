@@ -5,6 +5,7 @@ import com.bwsw.sj.common.si.model.instance.OutputInstance
 import com.bwsw.sj.engine.core.environment.{EnvironmentManager, OutputEnvironmentManager}
 import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.sj.engine.core.output.OutputStreamingExecutor
+import scaldi.Injector
 
 import scala.collection.mutable
 
@@ -13,7 +14,7 @@ import scala.collection.mutable
   *
   * @author Kseniya Tomskikh
   */
-class OutputTaskManager() extends TaskManager {
+class OutputTaskManager(implicit injector: Injector) extends TaskManager {
   val outputInstance = instance.asInstanceOf[OutputInstance]
   val inputs: mutable.Map[StreamDomain, Array[Int]] = getInputs(outputInstance.executionPlan)
 

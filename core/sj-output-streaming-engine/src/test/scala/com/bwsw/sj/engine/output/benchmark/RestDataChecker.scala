@@ -3,7 +3,7 @@ package com.bwsw.sj.engine.output.benchmark
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.service.RestServiceDomain
 import com.bwsw.sj.common.dal.model.stream.{RestStreamDomain, StreamDomain, TStreamStreamDomain}
-import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
+import com.bwsw.sj.common.dal.repository.GenericMongoRepository
 import com.bwsw.sj.engine.output.benchmark.DataFactory._
 import com.bwsw.sj.engine.output.benchmark.OutputTestRestServer.Entity
 import org.eclipse.jetty.client.HttpClient
@@ -13,7 +13,7 @@ import scala.util.Try
 
 object RestDataChecker extends App {
 
-  val streamService: GenericMongoRepository[StreamDomain] = ConnectionRepository.getStreamRepository
+  val streamService: GenericMongoRepository[StreamDomain] = connectionRepository.getStreamRepository
   val tStream: TStreamStreamDomain = streamService.get(tstreamInputName).get.asInstanceOf[TStreamStreamDomain]
   val inputConsumer = createConsumer(tStream)
   inputConsumer.start()
@@ -61,7 +61,7 @@ object RestDataChecker extends App {
     "All txns elements that are consumed from output stream should equals all txns elements that are consumed from input stream")
 
 
-  ConnectionRepository.close()
+  connectionRepository.close()
   inputConsumer.stop()
 
   println("DONE")

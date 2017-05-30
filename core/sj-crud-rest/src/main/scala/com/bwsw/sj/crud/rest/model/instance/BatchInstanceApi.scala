@@ -4,6 +4,7 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.si.model.instance.BatchInstance
 import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals, RestLiterals}
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import scaldi.Injector
 
 /**
   * API entity for [[EngineLiterals.batchStreamingType]] instance
@@ -41,7 +42,8 @@ class BatchInstanceApi(name: String,
     environmentVariables,
     performanceReportingInterval) {
 
-  override def to(moduleType: String, moduleName: String, moduleVersion: String): BatchInstance = {
+  override def to(moduleType: String, moduleName: String, moduleVersion: String)
+                 (implicit injector: Injector): BatchInstance = {
     val serializer = new JsonSerializer()
 
     new BatchInstance(

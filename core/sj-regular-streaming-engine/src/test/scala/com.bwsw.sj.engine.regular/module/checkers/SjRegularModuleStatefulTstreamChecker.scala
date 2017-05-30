@@ -1,12 +1,11 @@
 package com.bwsw.sj.engine.regular.module.checkers
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.engine.regular.module.DataFactory._
 import com.bwsw.sj.engine.regular.utils.StateHelper
 
 object SjRegularModuleStatefulTstreamChecker extends App {
-  val streamService = ConnectionRepository.getStreamRepository
+  val streamService = connectionRepository.getStreamRepository
   val objectSerializer = new ObjectSerializer()
 
   val inputTstreamConsumers = (1 to inputCount).map(x => createInputTstreamConsumer(partitions, x.toString))
@@ -74,7 +73,7 @@ object SjRegularModuleStatefulTstreamChecker extends App {
   consumer.stop()
   inputTstreamConsumers.foreach(x => x.stop())
   outputConsumers.foreach(x => x.stop())
-  ConnectionRepository.close()
+  connectionRepository.close()
 
   println("DONE")
 }

@@ -1,7 +1,7 @@
 package com.bwsw.sj.engine.output.benchmark
 
 import com.bwsw.sj.common.dal.model.stream.{ESStreamDomain, StreamDomain, TStreamStreamDomain}
-import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
+import com.bwsw.sj.common.dal.repository.GenericMongoRepository
 import com.bwsw.sj.engine.output.benchmark.DataFactory._
 
 import scala.collection.JavaConverters._
@@ -14,7 +14,7 @@ import scala.collection.mutable.ArrayBuffer
   */
 object ESDataChecker extends App {
 
-  val streamService: GenericMongoRepository[StreamDomain] = ConnectionRepository.getStreamRepository
+  val streamService: GenericMongoRepository[StreamDomain] = connectionRepository.getStreamRepository
   val tStream: TStreamStreamDomain = streamService.get(tstreamInputName).get.asInstanceOf[TStreamStreamDomain]
   val inputConsumer = createConsumer(tStream)
   inputConsumer.start()
@@ -56,7 +56,7 @@ object ESDataChecker extends App {
     "All txns elements that are consumed from output stream should equals all txns elements that are consumed from input stream")
 
   esClient.close()
-  ConnectionRepository.close()
+  connectionRepository.close()
   inputConsumer.stop()
 
   println("DONE")

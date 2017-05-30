@@ -5,12 +5,13 @@ import java.util.jar.JarFile
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.FileStorage
+import com.bwsw.sj.common.SjModule
 import com.bwsw.sj.common.config.BenchmarkConfigNames
 import com.bwsw.sj.common.dal.model.instance.{InputTask, InstanceDomain}
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service.{ServiceDomain, TStreamServiceDomain, ZKServiceDomain}
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
-import com.bwsw.sj.common.dal.repository.GenericMongoRepository
+import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.common.utils.{ProviderLiterals, _}
 import com.bwsw.sj.engine.core.testutils.TestStorageServer
@@ -18,11 +19,17 @@ import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 import com.typesafe.config.ConfigFactory
+import scaldi.Injectable.inject
+import scaldi.{Injector, Module}
 
 import scala.collection.mutable
 import scala.util.{Failure, Success, Try}
 
 object DataFactory {
+
+  import com.bwsw.sj.common.SjModule._
+
+  val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
   private val config = ConfigFactory.load()
   private val zookeeperHosts = config.getString(BenchmarkConfigNames.zkHosts)
   private val testNamespace = "test_namespace_for_input_engine"

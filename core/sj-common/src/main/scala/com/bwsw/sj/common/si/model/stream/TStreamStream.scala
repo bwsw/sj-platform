@@ -2,12 +2,12 @@ package com.bwsw.sj.common.si.model.stream
 
 import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 import com.bwsw.tstreams.storage.StorageClient
 import com.bwsw.tstreams.streams.Stream
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -18,10 +18,11 @@ class TStreamStream(name: String,
                     force: Boolean,
                     streamType: String,
                     description: String)
+                   (implicit injector: Injector)
   extends SjStream(streamType, name, service, tags, force, description) {
 
   override def to(): TStreamStreamDomain = {
-    val serviceRepository = ConnectionRepository.getServiceRepository
+    val serviceRepository = connectionRepository.getServiceRepository
 
     new TStreamStreamDomain(
       name,
@@ -53,7 +54,7 @@ class TStreamStream(name: String,
   }
 
   private def getStorageClient: StorageClient = {
-    val serviceDAO = ConnectionRepository.getServiceRepository
+    val serviceDAO = connectionRepository.getServiceRepository
     val service = serviceDAO.get(this.service).get.asInstanceOf[TStreamServiceDomain]
     val factory = new TStreamsFactory()
     factory.setProperty(ConfigurationOptions.StorageClient.Auth.key, service.token)
@@ -77,7 +78,7 @@ class TStreamStream(name: String,
       case Some("") | None =>
         errors += createMessage("entity.error.attribute.required", "Service")
       case Some(x) =>
-        val serviceDAO = ConnectionRepository.getServiceRepository
+        val serviceDAO = connectionRepository.getServiceRepository
         val serviceObj = serviceDAO.get(x)
         serviceObj match {
           case None =>

@@ -9,10 +9,11 @@ import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils.{createMessage, createMessageWithErrors}
 import com.bwsw.sj.crud.rest.model.FileMetadataApi
 import com.bwsw.sj.crud.rest.{CustomJar, CustomJarsResponseEntity}
+import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
 
-class CustomJarsController extends Controller {
+class CustomJarsController(implicit injector: Injector) extends Controller {
   override val serviceInterface = new CustomJarsSI()
 
   protected val entityDeletedMessage: String = "rest.custom.jars.file.deleted.by.filename"

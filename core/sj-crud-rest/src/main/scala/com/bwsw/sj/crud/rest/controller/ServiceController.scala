@@ -9,10 +9,11 @@ import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.ServiceLiterals
 import com.bwsw.sj.crud.rest.{RelatedToServiceResponseEntity, ServiceResponseEntity, ServicesResponseEntity}
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
+import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
 
-class ServiceController extends Controller {
+class ServiceController(implicit injector: Injector) extends Controller {
   override val serviceInterface = new ServiceSI()
 
   protected val entityDeletedMessage: String = "rest.services.service.deleted"

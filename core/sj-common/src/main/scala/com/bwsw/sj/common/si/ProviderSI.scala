@@ -6,6 +6,8 @@ import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepo
 import com.bwsw.sj.common.si.model.provider.Provider
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -13,10 +15,12 @@ import scala.collection.mutable.ArrayBuffer
 /**
   * Provides methods to access [[Provider]]s in [[GenericMongoRepository]]
   */
-class ProviderSI extends ServiceInterface[Provider, ProviderDomain] {
-  override protected val entityRepository: GenericMongoRepository[ProviderDomain] = ConnectionRepository.getProviderRepository
+class ProviderSI(implicit injector: Injector) extends ServiceInterface[Provider, ProviderDomain] {
 
-  private val serviceRepository = ConnectionRepository.getServiceRepository
+  private val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
+  override protected val entityRepository: GenericMongoRepository[ProviderDomain] = connectionRepository.getProviderRepository
+
+  private val serviceRepository = connectionRepository.getServiceRepository
 
   override def create(entity: Provider): CreationResult = {
     val errors = entity.validate()

@@ -7,6 +7,7 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.stream.scaladsl.FileIO
+import com.bwsw.sj.common.SjInjector
 import com.bwsw.sj.crud.rest.controller.{CustomFilesController, CustomJarsController}
 import com.bwsw.sj.crud.rest.model.FileMetadataApi
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
@@ -20,7 +21,7 @@ import scala.util.{Failure, Success}
   *
   * @author Kseniya Tomskikh
   */
-trait SjCustomRoute extends Directives with SjCrudValidator {
+trait SjCustomRoute extends Directives with SjCrudValidator with SjInjector {
   private val customJarsController = new CustomJarsController()
   private val customFilesController = new CustomFilesController()
 

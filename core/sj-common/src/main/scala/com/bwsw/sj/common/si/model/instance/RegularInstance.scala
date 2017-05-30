@@ -2,10 +2,10 @@ package com.bwsw.sj.common.si.model.instance
 
 import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, FrameworkStage, RegularInstanceDomain}
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.StreamUtils.clearStreamFromMode
 import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals, RestLiterals}
 import org.apache.avro.Schema
+import scaldi.Injector
 
 import scala.collection.JavaConverters._
 
@@ -38,6 +38,7 @@ class RegularInstance(name: String,
                       stage: FrameworkStage = FrameworkStage(),
                       status: String = EngineLiterals.ready,
                       frameworkId: String = System.currentTimeMillis().toString)
+                     (implicit injector: Injector)
   extends Instance(
     name,
     description,
@@ -61,7 +62,7 @@ class RegularInstance(name: String,
     outputs) {
 
   override def to: RegularInstanceDomain = {
-    val serviceRepository = ConnectionRepository.getServiceRepository
+    val serviceRepository = connectionRepository.getServiceRepository
 
     new RegularInstanceDomain(
       name,

@@ -1,6 +1,8 @@
 package com.bwsw.sj.common.dal.repository
 
 import com.mongodb.BasicDBObject
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.mutable
 import scala.reflect.ClassTag
@@ -11,14 +13,14 @@ import scala.reflect.ClassTag
   * @tparam T type of collection elements
   */
 
-class GenericMongoRepository[T: ClassTag] extends Repository[T] {
+class GenericMongoRepository[T: ClassTag](implicit injector: Injector) extends Repository[T] {
 
   import scala.collection.JavaConverters._
 
   /**
     * Allows manipulating with elements of mongo database collection
     */
-  private val genericDAO = ConnectionRepository.getGenericDAO[T]
+  private val genericDAO = inject[ConnectionRepository].getGenericDAO[T]
   private val emptyQuery = new BasicDBObject()
 
   def save(entity: T): Unit = {

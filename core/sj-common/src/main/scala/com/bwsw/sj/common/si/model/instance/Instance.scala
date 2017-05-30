@@ -7,6 +7,8 @@ import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepo
 import com.bwsw.sj.common.rest.model.module.{StreamWithMode, TaskStream}
 import com.bwsw.sj.common.utils.StreamUtils.clearStreamFromMode
 import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals, RestLiterals, StreamLiterals}
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.JavaConverters._
 
@@ -29,12 +31,14 @@ class Instance(val name: String,
                val stage: FrameworkStage = FrameworkStage(),
                var status: String = EngineLiterals.ready,
                val frameworkId: String = System.currentTimeMillis().toString,
-               val outputs: Array[String] = Array()) {
+               val outputs: Array[String] = Array())
+              (implicit injector: Injector) {
 
-  protected val streamRepository: GenericMongoRepository[StreamDomain] = ConnectionRepository.getStreamRepository
+  protected val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
+  protected val streamRepository: GenericMongoRepository[StreamDomain] = connectionRepository.getStreamRepository
 
   def to: InstanceDomain = {
-    val serviceRepository = ConnectionRepository.getServiceRepository
+    val serviceRepository = connectionRepository.getServiceRepository
 
     new InstanceDomain(
       name = name,
@@ -145,7 +149,7 @@ class Instance(val name: String,
 }
 
 object Instance {
-  def from(instance: InstanceDomain): Instance = {
+  def from(instance: InstanceDomain)(implicit injector: Injector): Instance = {
     instance.moduleType match {
       case EngineLiterals.inputStreamingType =>
         val inputInstance = instance.asInstanceOf[InputInstanceDomain]

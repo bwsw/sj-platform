@@ -25,6 +25,8 @@ import com.bwsw.tstreams.storage.StorageClient
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 import com.typesafe.config.ConfigFactory
 import org.slf4j.{Logger, LoggerFactory}
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -37,9 +39,10 @@ import scala.collection.mutable
   * 3) create t-stream consumers/subscribers and producers
   * for this purposes firstly [[TStreamsFactory]] is configured using [[com.bwsw.sj.common.dal.model.instance.InstanceDomain]]
   */
-abstract class TaskManager() {
+abstract class TaskManager(implicit injector: Injector) {
+  protected val connectionRepository = inject[ConnectionRepository]
   protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
-  val streamRepository: GenericMongoRepository[StreamDomain] = ConnectionRepository.getStreamRepository
+  val streamRepository: GenericMongoRepository[StreamDomain] = connectionRepository.getStreamRepository
 
   private val config = ConfigFactory.load()
 
@@ -55,9 +58,9 @@ abstract class TaskManager() {
   setTStreamFactoryProperties()
 
   protected var currentPortNumber: Int = 0
-  private val storage: MongoFileStorage = ConnectionRepository.getFileStorage
+  private val storage: MongoFileStorage = connectionRepository.getFileStorage
 
-  protected val fileMetadata: FileMetadataDomain = ConnectionRepository.getFileMetadataRepository.getByParameters(
+  protected val fileMetadata: FileMetadataDomain = connectionRepository.getFileMetadataRepository.getByParameters(
     Map("specification.name" -> instance.moduleName,
       "specification.module-type" -> instance.moduleType,
       "specification.version" -> instance.moduleVersion)
@@ -73,7 +76,7 @@ abstract class TaskManager() {
 
 
   private def getInstance(): Instance = {
-    val maybeInstance = ConnectionRepository.getInstanceRepository.get(instanceName).map(Instance.from)
+    val maybeInstance = connectionRepository.getInstanceRepository.get(instanceName).map(Instance.from)
     if (maybeInstance.isDefined) {
 
       if (maybeInstance.get.status != started) {
@@ -127,7 +130,7 @@ abstract class TaskManager() {
   }
 
   private def applyConfigurationSettings(): Unit = {
-    val configService = ConnectionRepository.getConfigRepository
+    val configService = connectionRepository.getConfigRepository
 
     val tstreamsSettings = configService.getByParameters(Map("domain" -> ConfigLiterals.tstreamsDomain))
     tstreamsSettings.foreach(x => tstreamFactory.setProperty(ConfigurationSetting.clearConfigurationSettingName(x.domain, x.name), x.value))

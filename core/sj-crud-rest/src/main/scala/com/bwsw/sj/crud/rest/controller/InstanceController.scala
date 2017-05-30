@@ -23,17 +23,19 @@ import com.bwsw.sj.crud.rest.{InstanceResponseEntity, InstancesResponseEntity, S
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.util.EntityUtils
 import org.slf4j.LoggerFactory
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
-class InstanceController {
+class InstanceController(implicit injector: Injector) {
 
   private val logger = LoggerFactory.getLogger(getClass)
   private val serializer = new JsonSerializer(true, true)
   private val serviceInterface = new InstanceSI
   private val moduleSI = new ModuleSI
-  private val configService = ConnectionRepository.getConfigRepository
+  private val configService = inject[ConnectionRepository].getConfigRepository
 
   def create(serializedEntity: String, moduleType: String, moduleName: String, moduleVersion: String): RestResponse = {
     ifModuleExists(moduleType, moduleName, moduleVersion) { module =>

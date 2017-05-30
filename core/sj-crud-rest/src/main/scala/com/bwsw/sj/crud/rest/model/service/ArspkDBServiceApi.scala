@@ -3,6 +3,7 @@ package com.bwsw.sj.crud.rest.model.service
 import com.bwsw.sj.common.si.model.service.AerospikeService
 import com.bwsw.sj.common.utils.{RestLiterals, ServiceLiterals}
 import com.fasterxml.jackson.annotation.JsonProperty
+import scaldi.Injector
 
 class ArspkDBServiceApi(name: String,
                         val namespace: String,
@@ -11,7 +12,7 @@ class ArspkDBServiceApi(name: String,
                         @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.aerospikeType))
   extends ServiceApi(serviceType.getOrElse(ServiceLiterals.aerospikeType), name, description) {
 
-  override def to(): AerospikeService = {
+  override def to()(implicit injector: Injector): AerospikeService = {
     val modelService =
       new AerospikeService(
         name = this.name,

@@ -4,7 +4,7 @@ import com.bwsw.sj.common.si.model.service._
 import com.bwsw.sj.common.utils.{RestLiterals, ServiceLiterals}
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes, JsonTypeInfo}
-
+import scaldi.Injector
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[ServiceApi], visible = true)
 @JsonSubTypes(Array(
@@ -22,7 +22,7 @@ class ServiceApi(@JsonProperty("type") val serviceType: String,
                  val description: Option[String] = Some(RestLiterals.defaultDescription)) {
 
   @JsonIgnore
-  def to(): Service =
+  def to()(implicit injector: Injector): Service =
     new Service(
       serviceType = this.serviceType,
       name = this.name,

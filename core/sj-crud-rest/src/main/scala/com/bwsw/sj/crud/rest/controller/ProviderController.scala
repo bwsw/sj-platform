@@ -9,10 +9,11 @@ import com.bwsw.sj.common.utils.ProviderLiterals
 import com.bwsw.sj.crud.rest._
 import com.bwsw.sj.crud.rest.model.provider.ProviderApi
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
+import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
 
-class ProviderController extends Controller {
+class ProviderController(implicit injector: Injector) extends Controller {
   override val serviceInterface = new ProviderSI()
 
   override protected val entityDeletedMessage: String = "rest.providers.provider.deleted"

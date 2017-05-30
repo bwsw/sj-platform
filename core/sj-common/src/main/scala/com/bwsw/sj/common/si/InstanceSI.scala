@@ -8,13 +8,16 @@ import com.bwsw.sj.common.si.model.module.{ModuleMetadata, Specification}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.mutable
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
-class InstanceSI {
-  private val entityRepository: GenericMongoRepository[InstanceDomain] = ConnectionRepository.getInstanceRepository
-  private val storage = ConnectionRepository.getFileStorage
+class InstanceSI(implicit injector: Injector) {
+  private val connectionRepository = inject[ConnectionRepository]
+  private val entityRepository: GenericMongoRepository[InstanceDomain] = connectionRepository.getInstanceRepository
+  private val storage = connectionRepository.getFileStorage
 
   def create(instance: Instance, moduleMetadata: ModuleMetadata): CreationResult = {
     val instancePassedValidation = validateInstance(moduleMetadata.specification, moduleMetadata.filename, instance)

@@ -16,6 +16,8 @@ import com.bwsw.tstreams.agents.producer.{NewProducerTransactionPolicy, Producer
 import io.netty.buffer.ByteBuf
 import io.netty.channel.{ChannelFuture, ChannelHandlerContext}
 import org.slf4j.{Logger, LoggerFactory}
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 
 /**
@@ -30,7 +32,8 @@ import org.slf4j.{Logger, LoggerFactory}
 abstract class InputTaskEngine(protected val manager: InputTaskManager,
                                performanceMetrics: InputStreamingPerformanceMetrics,
                                channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
-                               bufferForEachContext: scala.collection.concurrent.Map[ChannelHandlerContext, ByteBuf]) extends Callable[Unit] {
+                               bufferForEachContext: scala.collection.concurrent.Map[ChannelHandlerContext, ByteBuf])
+                              (implicit injector: Injector) extends Callable[Unit] {
 
   import InputTaskEngine.logger
 
@@ -54,7 +57,7 @@ abstract class InputTaskEngine(protected val manager: InputTaskManager,
   addProducersToCheckpointGroup()
 
   private def createModuleEnvironmentManager(): InputEnvironmentManager = {
-    val streamService = ConnectionRepository.getStreamRepository
+    val streamService = inject[ConnectionRepository].getStreamRepository
     val taggedOutputs = instance.outputs.flatMap(x => streamService.get(x))
 
     new InputEnvironmentManager(instance.options, taggedOutputs)
@@ -296,7 +299,8 @@ object InputTaskEngine {
   def apply(manager: InputTaskManager,
             performanceMetrics: InputStreamingPerformanceMetrics,
             channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
-            bufferForEachContext: scala.collection.concurrent.Map[ChannelHandlerContext, ByteBuf]): InputTaskEngine = {
+            bufferForEachContext: scala.collection.concurrent.Map[ChannelHandlerContext, ByteBuf])
+           (implicit injector: Injector): InputTaskEngine = {
 
     manager.inputInstance.checkpointMode match {
       case EngineLiterals.`timeIntervalMode` =>

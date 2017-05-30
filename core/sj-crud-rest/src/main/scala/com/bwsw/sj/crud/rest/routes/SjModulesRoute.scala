@@ -4,12 +4,13 @@ import java.io.File
 
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
+import com.bwsw.sj.common.SjInjector
 import com.bwsw.sj.common.si.JsonValidator
 import com.bwsw.sj.crud.rest.controller.{InstanceController, ModuleController}
 import com.bwsw.sj.crud.rest.model.module.ModuleMetadataApi
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
-trait SjModulesRoute extends Directives with SjCrudValidator with JsonValidator {
+trait SjModulesRoute extends Directives with SjCrudValidator with JsonValidator with SjInjector {
 
   private val moduleController = new ModuleController
   private val instanceController = new InstanceController

@@ -5,6 +5,8 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils.validateName
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import com.bwsw.sj.common.utils.StreamLiterals
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -13,7 +15,10 @@ class SjStream(val streamType: String,
                val service: String,
                val tags: Array[String],
                val force: Boolean,
-               val description: String) {
+               val description: String)
+              (implicit injector: Injector) {
+
+  protected val connectionRepository = inject[ConnectionRepository]
 
   def to(): StreamDomain = ???
 
@@ -40,7 +45,7 @@ class SjStream(val streamType: String,
     * @return empty array if fields is correct, validation errors otherwise
     */
   protected def validateGeneralFields(): ArrayBuffer[String] = {
-    val streamDAO = ConnectionRepository.getStreamRepository
+    val streamDAO = connectionRepository.getStreamRepository
     val errors = new ArrayBuffer[String]()
 
     // 'name' field
@@ -74,7 +79,7 @@ class SjStream(val streamType: String,
 
 object SjStream {
 
-  def from(streamDomain: StreamDomain): SjStream = streamDomain.streamType match {
+  def from(streamDomain: StreamDomain)(implicit injector: Injector): SjStream = streamDomain.streamType match {
     case StreamLiterals.tstreamType =>
       val tStreamStream = streamDomain.asInstanceOf[TStreamStreamDomain]
 

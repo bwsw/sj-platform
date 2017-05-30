@@ -19,9 +19,11 @@ import org.apache.zookeeper.ZooKeeper
 import org.eclipse.jetty.client.HttpClient
 import org.mongodb.morphia.annotations.Entity
 import com.bwsw.sj.common.utils.MessageResourceUtils._
+import scaldi.Injectable.inject
+import scaldi.Injector
+
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration._
-
 import scala.util.{Failure, Success, Try}
 
 @Entity("providers")
@@ -37,7 +39,7 @@ class ProviderDomain(@IdField val name: String,
     case _ => false
   }
 
-  def checkConnection(): ArrayBuffer[String] = {
+  def checkConnection()(implicit injector: Injector): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
     for (host <- this.hosts) {
       errors ++= checkProviderConnectionByType(host, this.providerType)
@@ -46,7 +48,8 @@ class ProviderDomain(@IdField val name: String,
     errors
   }
 
-  private def checkProviderConnectionByType(host: String, providerType: String): ArrayBuffer[String] = {
+  private def checkProviderConnectionByType(host: String, providerType: String)
+                                           (implicit injector: Injector): ArrayBuffer[String] = {
     providerType match {
       case ProviderLiterals.cassandraType =>
         checkCassandraConnection(host)
@@ -106,9 +109,11 @@ class ProviderDomain(@IdField val name: String,
     errors
   }
 
-  private def checkZookeeperConnection(address: String): ArrayBuffer[String] = {
+  private def checkZookeeperConnection(address: String)
+                                      (implicit injector: Injector): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
-    ConnectionRepository.getConfigRepository.get(ConfigLiterals.zkSessionTimeoutTag) match {
+    val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
+    connectionRepository.getConfigRepository.get(ConfigLiterals.zkSessionTimeoutTag) match {
       case Some(config) =>
         val zkTimeout = config.value.toInt
         Try(new ZooKeeper(address, zkTimeout, null)) match {

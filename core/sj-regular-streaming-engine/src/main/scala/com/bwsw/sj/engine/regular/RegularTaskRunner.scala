@@ -20,6 +20,8 @@ object RegularTaskRunner extends {
   override val threadName = "RegularTaskRunner-%d"
 } with TaskRunner {
 
+  import com.bwsw.sj.common.SjModule._
+
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   def main(args: Array[String]) {

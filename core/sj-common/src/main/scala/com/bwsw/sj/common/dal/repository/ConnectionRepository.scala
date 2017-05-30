@@ -13,6 +13,7 @@ import com.mongodb.MongoClient
 import org.mongodb.morphia.Morphia
 import org.mongodb.morphia.dao.BasicDAO
 import org.slf4j.LoggerFactory
+import scaldi.Injector
 
 import scala.collection.JavaConverters._
 import scala.reflect.ClassTag
@@ -20,8 +21,7 @@ import scala.reflect.ClassTag
 /**
   * Repository for connection to MongoDB and file storage [[com.mongodb.casbah.gridfs.GridFS]]
   */
-
-object ConnectionRepository {
+class ConnectionRepository(implicit injector: Injector) {
 
   import ConnectionConstants._
 

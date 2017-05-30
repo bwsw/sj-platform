@@ -4,6 +4,7 @@ import com.bwsw.sj.common.si.model.stream.ESStream
 import com.bwsw.sj.common.utils.{RestLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import scaldi.Injector
 
 class ESStreamApi(name: String,
                   service: String,
@@ -13,7 +14,7 @@ class ESStreamApi(name: String,
                   @JsonProperty("type") streamType: Option[String] = Some(StreamLiterals.esOutputType))
   extends StreamApi(streamType.getOrElse(StreamLiterals.esOutputType), name, service, tags, force, description) {
 
-  override def to: ESStream =
+  override def to(implicit injector: Injector): ESStream =
     new ESStream(
       name,
       service,

@@ -4,6 +4,7 @@ import com.bwsw.sj.common.si.model.instance.{InputInstance, Instance}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.crud.rest.marathon.MarathonApplicationById
 import org.slf4j.LoggerFactory
+import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
 
@@ -13,7 +14,10 @@ import scala.util.{Failure, Success, Try}
   *
   * @author Kseniya Tomskikh
   */
-class InstanceStopper(instance: Instance, delay: Long = 1000) extends Runnable with InstanceManager {
+class InstanceStopper(instance: Instance, delay: Long = 1000)
+                     (override implicit val injector: Injector)
+  extends Runnable with InstanceManager {
+
   private val logger = LoggerFactory.getLogger(getClass.getName)
   private val frameworkName = getFrameworkName(instance)
 

@@ -9,6 +9,7 @@ import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.Producer
 import org.slf4j.{Logger, LoggerFactory}
+import scaldi.Injector
 
 import scala.collection.mutable
 
@@ -52,7 +53,8 @@ object CommonModuleService {
 
   def apply(manager: CommonTaskManager,
             checkpointGroup: CheckpointGroup,
-            performanceMetrics: PerformanceMetrics): CommonModuleService = {
+            performanceMetrics: PerformanceMetrics)
+           (implicit injector: Injector): CommonModuleService = {
 
     val stateManagement = manager.instance match {
       case regularInstance: RegularInstance =>

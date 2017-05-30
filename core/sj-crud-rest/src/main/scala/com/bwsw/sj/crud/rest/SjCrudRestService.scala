@@ -10,6 +10,7 @@ import akka.http.scaladsl.server._
 import akka.http.scaladsl.server.directives.{DebuggingDirectives, LogEntry, LoggingMagnet}
 import akka.stream.scaladsl.Sink
 import com.bwsw.common.JsonSerializer
+import com.bwsw.sj.common.SjModule
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
@@ -17,6 +18,8 @@ import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.crud.rest.instance.InstanceStopper
 import com.typesafe.config.ConfigFactory
+import scaldi.Injectable.inject
+import scaldi.{Injector, Module}
 
 import scala.concurrent.Future
 
@@ -25,15 +28,20 @@ import scala.concurrent.Future
   *
   * @author Kseniya Tomskikh
   */
-object SjCrudRestService extends App with SjCrudInterface {
+object SjCrudRestService extends {
+  implicit val module: Module = SjModule.module
+  override implicit val injector: Injector = SjModule.injector
+} with App with SjCrudInterface {
+
+  val connectionRepository = inject[ConnectionRepository]
   val config = ConfigFactory.load()
   val restHost = config.getString(RestLiterals.hostConfig)
   val restPort = config.getInt(RestLiterals.portConfig)
   val serializer = new JsonSerializer()
   serializer.setIgnoreUnknown(true)
-  val fileMetadataDAO = ConnectionRepository.getFileMetadataRepository
-  val instanceDAO = ConnectionRepository.getInstanceRepository
-  val configService = ConnectionRepository.getConfigRepository
+  val fileMetadataDAO = connectionRepository.getFileMetadataRepository
+  val instanceDAO = connectionRepository.getInstanceRepository
+  val configService = connectionRepository.getConfigRepository
   val routeLogged = logRequestResult(Logging.InfoLevel, route())
   val logger = Logging(system, getClass)
 

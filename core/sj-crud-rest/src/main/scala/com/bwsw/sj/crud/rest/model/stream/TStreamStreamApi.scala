@@ -4,6 +4,7 @@ import com.bwsw.sj.common.si.model.stream.TStreamStream
 import com.bwsw.sj.common.utils.{RestLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import scaldi.Injector
 
 class TStreamStreamApi(name: String,
                        service: String,
@@ -14,7 +15,7 @@ class TStreamStreamApi(name: String,
                        @JsonProperty("type") streamType: Option[String] = Some(StreamLiterals.tstreamType))
   extends StreamApi(streamType.getOrElse(StreamLiterals.tstreamType), name, service, tags, force, description) {
 
-  override def to: TStreamStream =
+  override def to(implicit injector: Injector): TStreamStream =
     new TStreamStream(
       name,
       service,

@@ -3,6 +3,7 @@ package com.bwsw.sj.common.si.model.module
 import com.bwsw.sj.common.dal.model.module.{BatchSpecificationDomain, IOstream}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -49,7 +50,7 @@ class BatchSpecification(name: String,
       batchCollectorClass)
   }
 
-  override def validate: ArrayBuffer[String] = {
+  override def validate(implicit injector: Injector): ArrayBuffer[String] = {
     val errors = validateGeneralFields
 
     Option(batchCollectorClass) match {

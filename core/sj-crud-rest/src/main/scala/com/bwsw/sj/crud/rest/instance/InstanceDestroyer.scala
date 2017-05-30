@@ -1,9 +1,9 @@
 package com.bwsw.sj.crud.rest.instance
 
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.utils.EngineLiterals
 import org.slf4j.LoggerFactory
+import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
 
@@ -13,9 +13,11 @@ import scala.util.{Failure, Success, Try}
   *
   * @author Kseniya Tomskikh
   */
-class InstanceDestroyer(instance: Instance, delay: Long = 1000) extends Runnable with InstanceManager {
+class InstanceDestroyer(instance: Instance, delay: Long = 1000)
+                       (override implicit val injector: Injector)
+  extends Runnable with InstanceManager {
+
   private val logger = LoggerFactory.getLogger(getClass.getName)
-  private val instanceRepository = ConnectionRepository.getInstanceRepository
   private val frameworkName = getFrameworkName(instance)
 
   import EngineLiterals._

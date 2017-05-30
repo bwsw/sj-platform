@@ -4,7 +4,6 @@ import java.io.{File, PrintStream}
 import java.net.Socket
 import java.util.logging.LogManager
 
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.engine.input.DataFactory._
 import com.bwsw.sj.engine.input.SjInputServices._
@@ -12,11 +11,11 @@ import com.bwsw.sj.engine.input.SjInputServices._
 import scala.util.{Failure, Success, Try}
 
 object SjInputServices {
-  val streamService = ConnectionRepository.getStreamRepository
-  val serviceManager = ConnectionRepository.getServiceRepository
-  val providerService = ConnectionRepository.getProviderRepository
-  val instanceService = ConnectionRepository.getInstanceRepository
-  val fileStorage = ConnectionRepository.getFileStorage
+  val streamService = connectionRepository.getStreamRepository
+  val serviceManager = connectionRepository.getServiceRepository
+  val providerService = connectionRepository.getProviderRepository
+  val instanceService = connectionRepository.getInstanceRepository
+  val fileStorage = connectionRepository.getFileStorage
 
   val host = "localhost"
   val port = 8888
@@ -36,7 +35,7 @@ object SjInputModuleSetup extends App {
   createStreams(SjInputServices.streamService, SjInputServices.serviceManager, outputCount)
   createInstance(SjInputServices.serviceManager, SjInputServices.instanceService, checkpointInterval)
 
-  ConnectionRepository.close()
+  connectionRepository.close()
 
   println("DONE")
 }
@@ -94,8 +93,8 @@ object SjInputModuleDestroy extends App {
   deleteInstance(SjInputServices.instanceService)
   deleteModule(SjInputServices.fileStorage, SjInputServices.inputModule.getName)
 
-  ConnectionRepository.getConfigRepository.deleteAll()
-  ConnectionRepository.close()
+  connectionRepository.getConfigRepository.deleteAll()
+  connectionRepository.close()
 
   println("DONE")
 }

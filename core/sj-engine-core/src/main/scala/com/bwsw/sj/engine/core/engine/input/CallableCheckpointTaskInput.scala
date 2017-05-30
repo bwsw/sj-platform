@@ -4,10 +4,11 @@ import java.util.concurrent.{ArrayBlockingQueue, Callable}
 
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.utils.StreamLiterals
-import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
+import scaldi.Injector
 
 abstract class CallableCheckpointTaskInput[T <: Envelope](inputs: scala.collection.mutable.Map[StreamDomain, Array[Int]]) extends CheckpointTaskInput[T](inputs) with Callable[Unit] {
    def close()
@@ -16,7 +17,10 @@ abstract class CallableCheckpointTaskInput[T <: Envelope](inputs: scala.collecti
 object CallableCheckpointTaskInput {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  def apply[T <: AnyRef](manager: CommonTaskManager, blockingQueue: ArrayBlockingQueue[Envelope], checkpointGroup: CheckpointGroup): CallableCheckpointTaskInput[_ <: Envelope] = {
+  def apply[T <: AnyRef](manager: CommonTaskManager,
+                         blockingQueue: ArrayBlockingQueue[Envelope],
+                         checkpointGroup: CheckpointGroup)
+                        (implicit injector: Injector): CallableCheckpointTaskInput[_ <: Envelope] = {
     val isKafkaInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.kafkaStreamType)
     val isTstreamInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.tstreamType)
 

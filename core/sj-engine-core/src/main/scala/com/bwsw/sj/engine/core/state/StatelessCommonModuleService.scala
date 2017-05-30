@@ -8,6 +8,8 @@ import com.bwsw.sj.engine.core.environment.ModuleEnvironmentManager
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 /**
   * Class is in charge of creating [[ModuleEnvironmentManager]] (and executor [[StreamingExecutor]])
@@ -18,8 +20,9 @@ import com.bwsw.tstreams.agents.group.CheckpointGroup
 class StatelessCommonModuleService(manager: CommonTaskManager,
                                    checkpointGroup: CheckpointGroup,
                                    performanceMetrics: PerformanceMetrics)
+                                  (implicit injector: Injector)
   extends CommonModuleService(manager, checkpointGroup, performanceMetrics) {
-  private val streamService = ConnectionRepository.getStreamRepository
+  private val streamService = inject[ConnectionRepository].getStreamRepository
 
   val environmentManager: ModuleEnvironmentManager = new ModuleEnvironmentManager(
     instance.options,

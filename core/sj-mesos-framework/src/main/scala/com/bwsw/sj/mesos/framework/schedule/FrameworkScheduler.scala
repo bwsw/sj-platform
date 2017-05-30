@@ -8,6 +8,7 @@ import com.typesafe.config.ConfigFactory
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos._
 import org.apache.mesos.{Scheduler, SchedulerDriver}
+import scaldi.Injector
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -17,7 +18,7 @@ import scala.util.Try
 /**
   * Mesos scheduler implementation
   */
-class FrameworkScheduler extends Scheduler {
+class FrameworkScheduler(implicit injector: Injector) extends Scheduler {
 
   private val logger = Logger.getLogger(this.getClass)
   var uniqueHosts = false

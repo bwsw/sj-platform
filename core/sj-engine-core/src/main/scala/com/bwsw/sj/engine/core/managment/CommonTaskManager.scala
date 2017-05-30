@@ -3,12 +3,14 @@ package com.bwsw.sj.engine.core.managment
 import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, ExecutionPlan}
 import com.bwsw.sj.common.dal.model.module.BatchSpecificationDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
+import com.bwsw.sj.common.dal.repository.Repository
 import com.bwsw.sj.common.engine.StreamingExecutor
 import com.bwsw.sj.common.si.model.instance.{BatchInstance, RegularInstance}
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.engine.core.batch.{BatchCollector, BatchStreamingPerformanceMetrics}
 import com.bwsw.sj.engine.core.environment.{EnvironmentManager, ModuleEnvironmentManager}
 import com.bwsw.tstreams.agents.producer.Producer
+import scaldi.Injector
 
 import scala.collection.mutable
 
@@ -17,7 +19,7 @@ import scala.collection.mutable
   *
   * @author Kseniya Mikhaleva
   */
-class CommonTaskManager() extends TaskManager {
+class CommonTaskManager(implicit injector: Injector) extends TaskManager {
   val inputs: mutable.Map[StreamDomain, Array[Int]] = getInputs(getExecutionPlan())
   val outputProducers: Map[String, Producer] = createOutputProducers()
 
@@ -38,7 +40,8 @@ class CommonTaskManager() extends TaskManager {
   }
 
   def getBatchCollector(instance: BatchInstanceDomain,
-                        performanceMetrics: BatchStreamingPerformanceMetrics): BatchCollector = {
+                        performanceMetrics: BatchStreamingPerformanceMetrics,
+                        streamRepository: Repository[StreamDomain]): BatchCollector = {
     instance match {
       case _: BatchInstanceDomain =>
         logger.info(s"Task: $taskName. Getting a batch collector class from jar of file: " +
@@ -46,8 +49,11 @@ class CommonTaskManager() extends TaskManager {
         val batchCollectorClassName = fileMetadata.specification.asInstanceOf[BatchSpecificationDomain].batchCollectorClass
         val batchCollector = moduleClassLoader
           .loadClass(batchCollectorClassName)
-          .getConstructor(classOf[BatchInstanceDomain], classOf[BatchStreamingPerformanceMetrics])
-          .newInstance(instance, performanceMetrics)
+          .getConstructor(
+            classOf[BatchInstanceDomain],
+            classOf[BatchStreamingPerformanceMetrics],
+            classOf[Repository[StreamDomain]])
+          .newInstance(instance, performanceMetrics, streamRepository)
           .asInstanceOf[BatchCollector]
 
         batchCollector

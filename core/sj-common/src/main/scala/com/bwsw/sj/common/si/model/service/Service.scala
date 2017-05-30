@@ -6,12 +6,17 @@ import com.bwsw.sj.common.rest.utils.ValidationUtils.validateName
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import com.bwsw.sj.common.utils.ServiceLiterals.types
 import com.bwsw.sj.common.utils.{RestLiterals, ServiceLiterals}
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 
 class Service(val serviceType: String,
               val name: String,
-              val description: String) {
+              val description: String)
+             (implicit injector: Injector) {
+
+  protected val connectionRepository = inject[ConnectionRepository]
 
   def to(): ServiceDomain = ???
 
@@ -28,7 +33,7 @@ class Service(val serviceType: String,
     * @return empty array if fields is correct, validation errors otherwise
     */
   protected def validateGeneralFields(): ArrayBuffer[String] = {
-    val serviceRepository = ConnectionRepository.getServiceRepository
+    val serviceRepository = connectionRepository.getServiceRepository
     val errors = new ArrayBuffer[String]()
 
     // 'serviceType field
@@ -72,7 +77,7 @@ object Service {
 
   import scala.collection.JavaConverters._
 
-  def from(serviceDomain: ServiceDomain): Service = {
+  def from(serviceDomain: ServiceDomain)(implicit injector: Injector): Service = {
     serviceDomain.serviceType match {
       case ServiceLiterals.aerospikeType =>
         val aerospikeService = serviceDomain.asInstanceOf[AerospikeServiceDomain]

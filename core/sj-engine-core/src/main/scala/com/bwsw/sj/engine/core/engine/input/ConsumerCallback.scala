@@ -8,21 +8,25 @@ import com.bwsw.sj.engine.core.entities.{Envelope, TStreamEnvelope}
 import com.bwsw.tstreams.agents.consumer.subscriber.Callback
 import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction, TransactionOperator}
 import org.slf4j.LoggerFactory
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 /**
- * Provides a handler for sub. consumer that puts a t-stream envelope in a persistent blocking queue
- *
- * @author Kseniya Mikhaleva
- * @param blockingQueue Persistent blocking queue for storing transactions
- */
+  * Provides a handler for sub. consumer that puts a t-stream envelope in a persistent blocking queue
+  *
+  * @author Kseniya Mikhaleva
+  * @param blockingQueue Persistent blocking queue for storing transactions
+  */
 
-class ConsumerCallback[T <: AnyRef](envelopeDataSerializer: EnvelopeDataSerializer[T], blockingQueue: ArrayBlockingQueue[Envelope]) extends Callback {
+class ConsumerCallback[T <: AnyRef](envelopeDataSerializer: EnvelopeDataSerializer[T],
+                                    blockingQueue: ArrayBlockingQueue[Envelope])
+                                   (implicit injector: Injector) extends Callback {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   override def onTransaction(operator: TransactionOperator, transaction: ConsumerTransaction): Unit = {
     val consumer = operator.asInstanceOf[Consumer]
     logger.debug(s"onTransaction handler was invoked by subscriber: ${consumer.name}.")
-    val stream = ConnectionRepository.getStreamRepository.get(consumer.stream.name).get
+    val stream = inject[ConnectionRepository].getStreamRepository.get(consumer.stream.name).get
 
     val data = transaction.getAll.map(envelopeDataSerializer.deserialize)
     val envelope = new TStreamEnvelope(data, consumer.name)

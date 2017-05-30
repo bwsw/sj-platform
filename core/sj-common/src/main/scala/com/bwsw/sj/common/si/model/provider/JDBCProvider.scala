@@ -2,9 +2,9 @@ package com.bwsw.sj.common.si.model.provider
 
 import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
 import com.bwsw.sj.common.dal.model.provider.JDBCProviderDomain
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.JdbcLiterals
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
@@ -16,6 +16,7 @@ class JDBCProvider(name: String,
                    val driver: String,
                    description: String,
                    providerType: String)
+                  (implicit injector: Injector)
   extends Provider(name, login, password, providerType, hosts, description) {
 
   override def to(): JDBCProviderDomain = {
@@ -46,7 +47,7 @@ class JDBCProvider(name: String,
         else {
           Try(ConfigurationSettingsUtils.getJdbcDriverFileName(x)) match {
             case Success(driverFileName) =>
-              if (!ConnectionRepository.getFileStorage.exists(driverFileName))
+              if (!connectionRepository.getFileStorage.exists(driverFileName))
                 errors += createMessage("entity.error.file.required", driverFileName)
             case Failure(_: NoSuchFieldException) =>
               errors += createMessage("entity.error.config.required", s"${ConfigLiterals.jdbcDriver}.$x")

@@ -6,16 +6,20 @@ import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.si.model.stream.SjStream
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.mutable
 
 /**
   * Provides methods to access [[SjStream]]s in [[GenericMongoRepository]]
   */
-class StreamSI extends ServiceInterface[SjStream, StreamDomain] {
-  override protected val entityRepository: GenericMongoRepository[StreamDomain] = ConnectionRepository.getStreamRepository
+class StreamSI(implicit injector: Injector) extends ServiceInterface[SjStream, StreamDomain] {
+  private val connectionRepository = inject[ConnectionRepository]
 
-  private val instanceRepository = ConnectionRepository.getInstanceRepository
+  override protected val entityRepository: GenericMongoRepository[StreamDomain] = connectionRepository.getStreamRepository
+
+  private val instanceRepository = connectionRepository.getInstanceRepository
 
   override def create(entity: SjStream): CreationResult = {
     val errors = entity.validate()

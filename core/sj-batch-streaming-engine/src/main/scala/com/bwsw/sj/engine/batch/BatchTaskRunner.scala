@@ -2,6 +2,7 @@ package com.bwsw.sj.engine.batch
 
 import java.util.concurrent.ExecutorCompletionService
 
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.model.instance.BatchInstance
 import com.bwsw.sj.engine.batch.task.BatchTaskEngine
 import com.bwsw.sj.engine.batch.task.input.{EnvelopeFetcher, RetrievableCheckpointTaskInput}
@@ -11,6 +12,7 @@ import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.state.CommonModuleService
 import org.slf4j.LoggerFactory
+import scaldi.Injectable.inject
 
 /**
   * Class is responsible for launching batch engine execution logic.
@@ -24,6 +26,8 @@ object BatchTaskRunner extends {
   override val threadName = "BatchTaskRunner-%d"
 } with TaskRunner {
 
+  import com.bwsw.sj.common.SjModule._
+
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   def main(args: Array[String]) {
@@ -36,7 +40,8 @@ object BatchTaskRunner extends {
     val envelopeFetcher = new EnvelopeFetcher(taskInput)
     val performanceMetrics = new BatchStreamingPerformanceMetrics(manager)
     val moduleService = CommonModuleService(manager, envelopeFetcher.checkpointGroup, performanceMetrics)
-    val batchCollector = manager.getBatchCollector(instance.to, performanceMetrics)
+    val streamRepository = inject[ConnectionRepository].getStreamRepository
+    val batchCollector = manager.getBatchCollector(instance.to, performanceMetrics, streamRepository)
 
     val batchTaskEngine = new BatchTaskEngine(batchCollector, instance, moduleService, envelopeFetcher, performanceMetrics)
 

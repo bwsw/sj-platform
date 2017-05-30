@@ -1,11 +1,16 @@
 package com.bwsw.sj.crud.rest.model.instance
 
 import com.bwsw.common.JsonSerializer
+import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.model.instance._
 import com.bwsw.sj.common.si.model.module.Specification
 import com.bwsw.sj.common.utils.RestLiterals
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import scaldi.Injectable.inject
+import scaldi.Injector
+
+import scala.collection.mutable
 
 /**
   * API entity for instance
@@ -22,7 +27,8 @@ class InstanceApi(val name: String,
                   val environmentVariables: Map[String, String] = Map(),
                   @JsonDeserialize(contentAs = classOf[Long]) val performanceReportingInterval: Option[Long] = Some(60000l)) {
 
-  def to(moduleType: String, moduleName: String, moduleVersion: String): Instance = {
+  def to(moduleType: String, moduleName: String, moduleVersion: String)
+        (implicit injector: Injector): Instance = {
     val serializer = new JsonSerializer()
 
     new Instance(
@@ -43,8 +49,9 @@ class InstanceApi(val name: String,
       getEngine(moduleType, moduleName, moduleVersion))
   }
 
-  protected def getFilesMetadata(moduleType: String, moduleName: String, moduleVersion: String) = {
-    val fileMetadataDAO = ConnectionRepository.getFileMetadataRepository
+  protected def getFilesMetadata(moduleType: String, moduleName: String, moduleVersion: String)
+                                (implicit injector: Injector): mutable.Buffer[FileMetadataDomain] = {
+    val fileMetadataDAO = inject[ConnectionRepository].getFileMetadataRepository
     fileMetadataDAO.getByParameters(Map("filetype" -> "module",
       "specification.name" -> moduleName,
       "specification.module-type" -> moduleType,
@@ -52,7 +59,8 @@ class InstanceApi(val name: String,
     )
   }
 
-  protected def getEngine(moduleType: String, moduleName: String, moduleVersion: String): String = {
+  protected def getEngine(moduleType: String, moduleName: String, moduleVersion: String)
+                         (implicit injector: Injector): String = {
     val filesMetadata = getFilesMetadata(moduleType, moduleName, moduleVersion)
     val fileMetadata = filesMetadata.head
     val specification = Specification.from(fileMetadata.specification)

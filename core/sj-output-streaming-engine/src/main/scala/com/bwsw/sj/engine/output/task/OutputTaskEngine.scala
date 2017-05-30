@@ -14,6 +14,8 @@ import com.bwsw.sj.engine.core.output.{Entity, OutputStreamingExecutor}
 import com.bwsw.sj.engine.output.processing.OutputProcessor
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import org.slf4j.{Logger, LoggerFactory}
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 
 /**
@@ -24,7 +26,8 @@ import org.slf4j.{Logger, LoggerFactory}
   * @author Kseniya Mikhaleva
   */
 abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
-                                performanceMetrics: OutputStreamingPerformanceMetrics) extends Callable[Unit] {
+                                performanceMetrics: OutputStreamingPerformanceMetrics)
+                               (implicit injector: Injector) extends Callable[Unit] {
 
   import OutputTaskEngine.logger
 
@@ -41,13 +44,12 @@ abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
   private var wasFirstCheckpoint: Boolean = false
   protected val checkpointInterval: Long = instance.checkpointInterval
 
-  private def getOutputStream: StreamDomain = {
-    val streamService = ConnectionRepository.getStreamRepository
+  private val streamService = inject[ConnectionRepository].getStreamRepository
+
+  private def getOutputStream: StreamDomain =
     instance.outputs.flatMap(x => streamService.get(x)).head
-  }
 
   private def createModuleEnvironmentManager(): OutputEnvironmentManager = {
-    val streamService = ConnectionRepository.getStreamRepository
     val outputs = instance.outputs
       .flatMap(x => streamService.get(x))
     val options = instance.options
@@ -132,7 +134,8 @@ object OutputTaskEngine {
     * Creates OutputTaskEngine is in charge of a basic execution logic of task of output module
     */
   def apply(manager: OutputTaskManager,
-            performanceMetrics: OutputStreamingPerformanceMetrics): OutputTaskEngine = {
+            performanceMetrics: OutputStreamingPerformanceMetrics)
+           (implicit injector: Injector): OutputTaskEngine = {
     manager.outputInstance.checkpointMode match {
       case EngineLiterals.`timeIntervalMode` =>
         logger.error(s"Task: ${manager.taskName}. Output module can't have a '${EngineLiterals.timeIntervalMode}' checkpoint mode.")

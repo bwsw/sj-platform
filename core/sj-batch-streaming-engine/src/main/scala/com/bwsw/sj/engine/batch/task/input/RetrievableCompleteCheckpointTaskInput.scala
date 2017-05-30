@@ -4,6 +4,7 @@ import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelop
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
+import scaldi.Injector
 
 /**
   * Class is responsible for handling kafka and t-stream input
@@ -13,7 +14,8 @@ import org.slf4j.LoggerFactory
   * @param manager allows to manage an environment of batch streaming task
   * @author Kseniya Mikhaleva
   */
-class RetrievableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskManager) extends {
+class RetrievableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskManager)
+                                                         (implicit injector: Injector) extends {
   override val checkpointGroup = new CheckpointGroup()
 } with RetrievableCheckpointTaskInput[Envelope](manager.inputs) {
 

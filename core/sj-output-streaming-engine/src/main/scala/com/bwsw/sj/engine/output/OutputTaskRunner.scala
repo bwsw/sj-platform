@@ -19,6 +19,8 @@ object OutputTaskRunner extends {
   override val threadName = "OutputTaskRunner-%d"
 } with TaskRunner {
 
+  import com.bwsw.sj.common.SjModule._
+
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   def main(args: Array[String]) {

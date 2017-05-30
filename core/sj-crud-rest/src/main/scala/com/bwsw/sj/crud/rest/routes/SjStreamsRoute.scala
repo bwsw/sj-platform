@@ -1,10 +1,11 @@
 package com.bwsw.sj.crud.rest.routes
 
 import akka.http.scaladsl.server.{Directives, RequestContext}
+import com.bwsw.sj.common.SjInjector
 import com.bwsw.sj.crud.rest.controller.StreamController
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
-trait SjStreamsRoute extends Directives with SjCrudValidator {
+trait SjStreamsRoute extends Directives with SjCrudValidator with SjInjector {
 
   private val streamController = new StreamController
 

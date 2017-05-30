@@ -5,17 +5,21 @@ import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepo
 import com.bwsw.sj.common.si.model.service.Service
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.mutable
 
 /**
   * Provides methods to access [[Service]]s in [[GenericMongoRepository]]
   */
-class ServiceSI extends ServiceInterface[Service, ServiceDomain] {
-  override protected val entityRepository: GenericMongoRepository[ServiceDomain] = ConnectionRepository.getServiceRepository
+class ServiceSI(implicit injector: Injector) extends ServiceInterface[Service, ServiceDomain] {
+  private val connectionRepository = inject[ConnectionRepository]
 
-  private val streamRepository = ConnectionRepository.getStreamRepository
-  private val instanceRepository = ConnectionRepository.getInstanceRepository
+  override protected val entityRepository: GenericMongoRepository[ServiceDomain] = connectionRepository.getServiceRepository
+
+  private val streamRepository = connectionRepository.getStreamRepository
+  private val instanceRepository = connectionRepository.getInstanceRepository
 
   override def create(entity: Service): CreationResult = {
     val errors = entity.validate()

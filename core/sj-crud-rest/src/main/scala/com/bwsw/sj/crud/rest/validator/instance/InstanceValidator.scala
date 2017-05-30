@@ -12,36 +12,39 @@ import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import org.slf4j.{Logger, LoggerFactory}
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 /**
- * Trait of validator for modules
- *
- *
- * @author Kseniya Tomskikh
- */
-abstract class InstanceValidator extends CompletionUtils {
+  * Trait of validator for modules
+  *
+  * @author Kseniya Tomskikh
+  */
+abstract class InstanceValidator(implicit injector: Injector) extends CompletionUtils {
+
+  protected val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
-  var serviceRepository: GenericMongoRepository[ServiceDomain] = ConnectionRepository.getServiceRepository
-  var instanceRepository: GenericMongoRepository[InstanceDomain] = ConnectionRepository.getInstanceRepository
+  var serviceRepository: GenericMongoRepository[ServiceDomain] = connectionRepository.getServiceRepository
+  var instanceRepository: GenericMongoRepository[InstanceDomain] = connectionRepository.getInstanceRepository
   val serializer: JsonSerializer = new JsonSerializer
 
   /**
-   * Validating input parameters for streaming module
-   *
-   * @param instance - input parameters for running module
-   * @return - List of errors
-   */
+    * Validating input parameters for streaming module
+    *
+    * @param instance - input parameters for running module
+    * @return - List of errors
+    */
   def validate(instance: Instance, specification: Specification): ArrayBuffer[String]
 
   /**
-   * Validation base instance options
-   *
-   * @param instance - Instance parameters
-   * @return - List of errors
-   */
+    * Validation base instance options
+    *
+    * @param instance - Instance parameters
+    * @return - List of errors
+    */
   protected def validateGeneralOptions(instance: Instance) = {
     logger.debug(s"Instance: ${instance.name}. General options validation.")
     val errors = new ArrayBuffer[String]()
@@ -108,16 +111,16 @@ abstract class InstanceValidator extends CompletionUtils {
   }
 
   protected def getStreams(streamNames: Array[String]): mutable.Buffer[StreamDomain] = {
-    val streamsDAO = ConnectionRepository.getStreamRepository
+    val streamsDAO = connectionRepository.getStreamRepository
     streamsDAO.getAll.filter(s => streamNames.contains(s.name))
   }
 
   /**
-   * Getting service names for all streams (must be one element in list)
-   *
-   * @param streams All streams
-   * @return List of service-names
-   */
+    * Getting service names for all streams (must be one element in list)
+    *
+    * @param streams All streams
+    * @return List of service-names
+    */
   def getStreamServices(streams: Seq[StreamDomain]): List[String] = {
     streams.map(s => (s.service.name, 1)).groupBy(_._1).keys.toList
   }
@@ -163,7 +166,7 @@ abstract class InstanceValidator extends CompletionUtils {
 
   def getStreamMode(name: String): String = {
     val nameWithMode = name.split(s"/")
-      if (nameWithMode.length == 1) EngineLiterals.splitStreamMode
-      else nameWithMode(1)
+    if (nameWithMode.length == 1) EngineLiterals.splitStreamMode
+    else nameWithMode(1)
   }
 }

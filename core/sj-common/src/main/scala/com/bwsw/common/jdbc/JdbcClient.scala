@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
 import com.bwsw.sj.common.dal.model.provider.JDBCProviderDomain
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 // todo: Add multiple connection to databases.
 /**
@@ -26,7 +28,8 @@ import com.bwsw.sj.common.dal.model.provider.JDBCProviderDomain
   * @param jdbcCCD connection data
   */
 
-protected class JdbcClient(override val jdbcCCD: JdbcClientConnectionData) extends IJdbcClient {
+protected class JdbcClient(override val jdbcCCD: JdbcClientConnectionData)
+                          (implicit injector: Injector) extends IJdbcClient {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val driver = createDriver()
   private val credential = createCredential()
@@ -37,7 +40,7 @@ protected class JdbcClient(override val jdbcCCD: JdbcClientConnectionData) exten
     java.util.Locale.setDefault(java.util.Locale.ENGLISH)
 
     val driverFileName = jdbcCCD.driverFileName
-    val jarFile = ConnectionRepository.getFileStorage.get(driverFileName, s"tmp/$driverFileName")
+    val jarFile = inject[ConnectionRepository].getFileStorage.get(driverFileName, s"tmp/$driverFileName")
     val classLoader = new URLClassLoader(Array(jarFile.toURI.toURL), ClassLoader.getSystemClassLoader)
     val driver = classLoader.loadClass(jdbcCCD.driverClass).newInstance().asInstanceOf[Driver]
 

@@ -4,6 +4,7 @@ import com.bwsw.sj.common.si.model.provider.{JDBCProvider, Provider}
 import com.bwsw.sj.common.utils.{ProviderLiterals, RestLiterals}
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes, JsonTypeInfo}
+import scaldi.Injector
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[ProviderApi], visible = true)
 @JsonSubTypes(Array(
@@ -16,7 +17,7 @@ class ProviderApi(val name: String,
                   val hosts: Array[String],
                   val description: Option[String] = Some(RestLiterals.defaultDescription)) {
   @JsonIgnore
-  def to(): Provider = {
+  def to()(implicit injector: Injector): Provider = {
     val provider =
       new Provider(
         name = this.name,

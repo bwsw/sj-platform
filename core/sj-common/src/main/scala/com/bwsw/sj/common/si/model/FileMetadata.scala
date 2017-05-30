@@ -8,6 +8,8 @@ import com.bwsw.sj.common.dal.model.module.{FileMetadataDomain, SpecificationDom
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.JsonValidator
 import com.bwsw.sj.common.utils.MessageResourceUtils._
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
@@ -19,9 +21,12 @@ class FileMetadata(val filename: String,
                    val length: Option[Long] = None,
                    val description: Option[String] = None,
                    val uploadDate: Option[String] = None)
+                  (implicit injector: Injector)
   extends JsonValidator {
-  protected val fileStorage = ConnectionRepository.getFileStorage
-  private val fileMetadataRepository = ConnectionRepository.getFileMetadataRepository
+
+  protected val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
+  protected val fileStorage = connectionRepository.getFileStorage
+  private val fileMetadataRepository = connectionRepository.getFileMetadataRepository
 
   /**
     * Validates file metadata
@@ -76,7 +81,7 @@ object FileMetadata {
   val customFileType: String = "custom-file"
   val moduleType: String = "module"
 
-  def from(fileMetadataDomain: FileMetadataDomain): FileMetadata = {
+  def from(fileMetadataDomain: FileMetadataDomain)(implicit injector: Injector): FileMetadata = {
     new FileMetadata(
       fileMetadataDomain.filename,
       None,

@@ -2,9 +2,9 @@ package com.bwsw.sj.common.si.model.stream
 
 import com.bwsw.sj.common.dal.model.service.JDBCServiceDomain
 import com.bwsw.sj.common.dal.model.stream.JDBCStreamDomain
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -15,10 +15,11 @@ class JDBCStream(name: String,
                  force: Boolean,
                  streamType: String,
                  description: String)
+                (implicit injector: Injector)
   extends SjStream(streamType, name, service, tags, force, description) {
 
   override def to(): JDBCStreamDomain = {
-    val serviceRepository = ConnectionRepository.getServiceRepository
+    val serviceRepository = connectionRepository.getServiceRepository
 
     new JDBCStreamDomain(
       name,
@@ -37,7 +38,7 @@ class JDBCStream(name: String,
       case Some("") | None =>
         errors += createMessage("entity.error.attribute.required", "Service")
       case Some(x) =>
-        val serviceDAO = ConnectionRepository.getServiceRepository
+        val serviceDAO = connectionRepository.getServiceRepository
         val serviceObj = serviceDAO.get(x)
         serviceObj match {
           case None =>

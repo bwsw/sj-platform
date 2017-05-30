@@ -6,13 +6,14 @@ import com.bwsw.sj.engine.core.engine.input.CheckpointTaskInput
 import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import org.slf4j.LoggerFactory
+import scaldi.Injector
 
 /**
- * Class is responsible for handling an input streams of specific type,
- * i.e. for consuming and processing the incoming envelopes
- *
- * @author Kseniya Mikhaleva
- */
+  * Class is responsible for handling an input streams of specific type,
+  * i.e. for consuming and processing the incoming envelopes
+  *
+  * @author Kseniya Mikhaleva
+  */
 abstract class RetrievableCheckpointTaskInput[T <: Envelope](val inputs: scala.collection.mutable.Map[StreamDomain, Array[Int]]) extends CheckpointTaskInput[T](inputs) {
   def get(): Iterable[T]
 }
@@ -20,7 +21,7 @@ abstract class RetrievableCheckpointTaskInput[T <: Envelope](val inputs: scala.c
 object RetrievableCheckpointTaskInput {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  def apply[T <: AnyRef](manager: CommonTaskManager): RetrievableCheckpointTaskInput[_ <: Envelope] = {
+  def apply[T <: AnyRef](manager: CommonTaskManager)(implicit injector: Injector): RetrievableCheckpointTaskInput[_ <: Envelope] = {
     val isKafkaInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.kafkaStreamType)
     val isTstreamInputExist = manager.inputs.exists(x => x._1.streamType == StreamLiterals.tstreamType)
 

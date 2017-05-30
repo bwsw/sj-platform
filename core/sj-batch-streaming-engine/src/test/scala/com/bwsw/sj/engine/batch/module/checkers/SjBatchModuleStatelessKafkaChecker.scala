@@ -1,13 +1,12 @@
 package com.bwsw.sj.engine.batch.module.checkers
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.engine.core.entities.{KafkaEnvelope, TStreamEnvelope, Batch}
 import com.bwsw.sj.engine.batch.module.DataFactory._
 import scala.collection.JavaConverters._
 
 object SjBatchModuleStatelessKafkaChecker extends App {
-  val streamService = ConnectionRepository.getStreamRepository
+  val streamService = connectionRepository.getStreamRepository
   val objectSerializer = new ObjectSerializer()
 
   val inputConsumer = createInputKafkaConsumer(inputCount, partitions)
@@ -63,7 +62,7 @@ object SjBatchModuleStatelessKafkaChecker extends App {
     "All txns elements that are consumed from output stream should equals all txns elements that are consumed from input stream")
 
   outputConsumers.foreach(x => x.stop())
-  ConnectionRepository.close()
+  connectionRepository.close()
 
   println("DONE")
 }

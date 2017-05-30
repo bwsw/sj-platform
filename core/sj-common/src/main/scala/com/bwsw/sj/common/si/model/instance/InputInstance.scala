@@ -2,8 +2,8 @@ package com.bwsw.sj.common.si.model.instance
 
 import com.bwsw.sj.common.dal.model.instance.{FrameworkStage, InputInstanceDomain, InputTask}
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
+import scaldi.Injector
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -38,6 +38,7 @@ class InputInstance(name: String,
                     stage: FrameworkStage = FrameworkStage(),
                     status: String = EngineLiterals.ready,
                     frameworkId: String = System.currentTimeMillis().toString)
+                   (implicit injector: Injector)
   extends Instance(
     name,
     description,
@@ -61,7 +62,7 @@ class InputInstance(name: String,
     outputs) {
 
   override def to: InputInstanceDomain = {
-    val serviceRepository = ConnectionRepository.getServiceRepository
+    val serviceRepository = connectionRepository.getServiceRepository
 
     new InputInstanceDomain(
       name,

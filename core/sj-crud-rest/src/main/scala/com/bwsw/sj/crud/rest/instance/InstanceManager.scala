@@ -2,12 +2,14 @@ package com.bwsw.sj.crud.rest.instance
 
 import java.util.Calendar
 
+import com.bwsw.sj.common.SjInjector
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.crud.rest.marathon.MarathonTask
+import scaldi.Injectable.inject
 
-private[instance] trait InstanceManager extends InstanceMarathonManager {
-  private val instanceRepository = ConnectionRepository.getInstanceRepository
+private[instance] trait InstanceManager extends InstanceMarathonManager with SjInjector {
+  protected val instanceRepository = inject[ConnectionRepository].getInstanceRepository
 
   def getFrameworkName(instance: Instance) = s"${instance.name}-${instance.frameworkId}"
 

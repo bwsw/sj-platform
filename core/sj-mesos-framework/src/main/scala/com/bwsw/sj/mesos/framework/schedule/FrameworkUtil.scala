@@ -13,18 +13,23 @@ import com.typesafe.config.ConfigFactory
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos.MasterInfo
 import org.apache.mesos.SchedulerDriver
+import scaldi.Injectable.inject
 
 import scala.collection.immutable
 import scala.util.Try
 
 
 object FrameworkUtil {
+
+  import com.bwsw.sj.common.SjModule._
+
   var master: Option[MasterInfo] = None
   var frameworkId: Option[String] = None
   var driver: Option[SchedulerDriver] = None
   var jarName: Option[String] = None
   var instance: Option[Instance] = None
-  val configRepository: GenericMongoRepository[ConfigurationSettingDomain] = ConnectionRepository.getConfigRepository
+  val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
+  val configRepository: GenericMongoRepository[ConfigurationSettingDomain] = connectionRepository.getConfigRepository
   private val logger = Logger.getLogger(this.getClass)
   var params: Map[String, String] = immutable.Map[String, String]()
 
@@ -111,7 +116,7 @@ object FrameworkUtil {
 
 
   def updateInstance(): Any = {
-    val optionInstance = ConnectionRepository.getInstanceRepository.get(FrameworkUtil.params("instanceId"))
+    val optionInstance = connectionRepository.getInstanceRepository.get(FrameworkUtil.params("instanceId"))
       .map(Instance.from)
 
     if (optionInstance.isEmpty) {

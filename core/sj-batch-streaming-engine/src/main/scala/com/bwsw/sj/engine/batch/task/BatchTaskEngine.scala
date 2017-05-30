@@ -15,6 +15,8 @@ import org.apache.curator.framework.recipes.barriers.DistributedDoubleBarrier
 import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.retry.ExponentialBackoffRetry
 import org.slf4j.LoggerFactory
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -22,17 +24,19 @@ import scala.collection.mutable.ListBuffer
 /**
   * Class contains methods for running batch module
   *
-  * @param batchCollector gathering batches that consist of envelopes
-  * @param instance set of settings of a batch streaming module
-  * @param moduleService provides an executor of batch streaming module and a method to perform checkpoint
-  * @param inputService accesses to incoming envelopes
+  * @param batchCollector     gathering batches that consist of envelopes
+  * @param instance           set of settings of a batch streaming module
+  * @param moduleService      provides an executor of batch streaming module and a method to perform checkpoint
+  * @param inputService       accesses to incoming envelopes
   * @param performanceMetrics set of metrics that characterize performance of a batch streaming module
   */
 class BatchTaskEngine(batchCollector: BatchCollector,
                       instance: BatchInstance,
                       moduleService: CommonModuleService,
                       inputService: EnvelopeFetcher,
-                      performanceMetrics: BatchStreamingPerformanceMetrics) extends Callable[Unit] {
+                      performanceMetrics: BatchStreamingPerformanceMetrics)
+                     (implicit injector: Injector)
+  extends Callable[Unit] {
 
   private val currentThread = Thread.currentThread()
   currentThread.setName(s"batch-task-engine")
@@ -47,7 +51,7 @@ class BatchTaskEngine(batchCollector: BatchCollector,
   private val windowRepository = new WindowRepository(instance)
   private val barrierMasterNode = EngineLiterals.batchInstanceBarrierPrefix + instance.name
   private val leaderMasterNode = EngineLiterals.batchInstanceLeaderPrefix + instance.name
-  private val zkHosts = ConnectionRepository.getServiceRepository
+  private val zkHosts = inject[ConnectionRepository].getServiceRepository
     .get(instance.coordinationService)
     .get
     .asInstanceOf[ZKServiceDomain]

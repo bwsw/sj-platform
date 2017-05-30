@@ -8,6 +8,8 @@ import com.bwsw.sj.common.rest.utils.ValidationUtils.{normalizeName, validateNam
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import com.bwsw.sj.common.utils.ProviderLiterals
 import com.bwsw.sj.common.utils.ProviderLiterals.types
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
@@ -17,17 +19,20 @@ class Provider(val name: String,
                val password: String,
                val providerType: String,
                val hosts: Array[String],
-               val description: String) {
+               val description: String)
+              (implicit injector: Injector) {
+
+  protected val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
 
   def to(): ProviderDomain = {
-      new ProviderDomain(
-        name = this.name,
-        description = this.description,
-        hosts = this.hosts,
-        login = this.login,
-        password = this.password,
-        providerType = this.providerType
-      )
+    new ProviderDomain(
+      name = this.name,
+      description = this.description,
+      hosts = this.hosts,
+      login = this.login,
+      password = this.password,
+      providerType = this.providerType
+    )
   }
 
   /**
@@ -37,7 +42,7 @@ class Provider(val name: String,
     */
   def validate(): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
-    val providerRepository = ConnectionRepository.getProviderRepository
+    val providerRepository = connectionRepository.getProviderRepository
 
     // 'name' field
     Option(this.name) match {
@@ -123,7 +128,7 @@ class Provider(val name: String,
 }
 
 object Provider {
-  def from(providerDomain: ProviderDomain): Provider = {
+  def from(providerDomain: ProviderDomain)(implicit injector: Injector): Provider = {
     providerDomain.providerType match {
       case ProviderLiterals.jdbcType =>
         val jdbcProvider = providerDomain.asInstanceOf[JDBCProviderDomain]

@@ -9,10 +9,11 @@ import com.bwsw.sj.common.utils.MessageResourceUtils.{createMessage, createMessa
 import com.bwsw.sj.common.utils.StreamLiterals
 import com.bwsw.sj.crud.rest.{RelatedToStreamResponseEntity, StreamResponseEntity, StreamsResponseEntity}
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
+import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
 
-class StreamController extends Controller {
+class StreamController(implicit injector: Injector) extends Controller {
   override val serviceInterface = new StreamSI
 
   protected val entityNotFoundMessage: String = "rest.streams.stream.notfound"

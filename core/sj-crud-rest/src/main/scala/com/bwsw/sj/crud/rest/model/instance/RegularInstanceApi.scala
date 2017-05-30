@@ -5,6 +5,7 @@ import com.bwsw.sj.common.si.model.instance.RegularInstance
 import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals, RestLiterals}
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import scaldi.Injector
 
 /**
   * API entity for [[EngineLiterals.regularStreamingType]] instance
@@ -42,7 +43,8 @@ class RegularInstanceApi(name: String,
     environmentVariables,
     performanceReportingInterval) {
 
-  override def to(moduleType: String, moduleName: String, moduleVersion: String): RegularInstance = {
+  override def to(moduleType: String, moduleName: String, moduleVersion: String)
+                 (implicit injector: Injector): RegularInstance = {
     val serializer = new JsonSerializer()
 
     new RegularInstance(

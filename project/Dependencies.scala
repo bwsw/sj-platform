@@ -44,7 +44,8 @@ object Dependencies {
     "org.eclipse.jetty" % "jetty-client" % "9.4.3.v20170317",
     "com.fasterxml.jackson.module" % "jackson-module-scala_2.12" % "2.8.8",
     ("org.everit.json" % "org.everit.json.schema" % "1.4.1")
-      .exclude("commons-logging", "commons-logging")
+      .exclude("commons-logging", "commons-logging"),
+    "org.scaldi" %% "scaldi" % "0.5.8"
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(

@@ -3,6 +3,7 @@ package com.bwsw.sj.crud.rest.model.service
 import com.bwsw.sj.common.si.model.service.RestService
 import com.bwsw.sj.common.utils.{RestLiterals, ServiceLiterals}
 import com.fasterxml.jackson.annotation.JsonProperty
+import scaldi.Injector
 
 /**
   * @author Pavel Tomskikh
@@ -16,7 +17,7 @@ class RestServiceApi(name: String,
                      @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.restType))
   extends ServiceApi(serviceType.getOrElse(ServiceLiterals.restType), name, description) {
 
-  override def to(): RestService = {
+  override def to()(implicit injector: Injector): RestService = {
     val modelService =
       new RestService(
         name = this.name,

@@ -1,10 +1,12 @@
 package com.bwsw.sj.common.rest.utils
 
+import com.bwsw.sj.common.SjModule
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.ServiceLiterals._
 import org.apache.curator.utils.PathUtils
 import org.slf4j.LoggerFactory
+import scaldi.Injectable.inject
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
@@ -13,8 +15,11 @@ import scala.util.{Failure, Success, Try}
   * Provides helping methods for validation some fields of entities
   */
 object ValidationUtils {
+
+  import SjModule._
+
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val providerDAO = ConnectionRepository.getProviderRepository
+  private val providerDAO = inject[ConnectionRepository].getProviderRepository
 
   def validateName(name: String): Boolean = {
     logger.debug(s"Validate a name: '$name'.")

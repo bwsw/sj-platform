@@ -1,14 +1,14 @@
 package com.bwsw.sj.engine.output.benchmark
 
 import com.bwsw.sj.common.dal.model.stream.{JDBCStreamDomain, StreamDomain, TStreamStreamDomain}
-import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
+import com.bwsw.sj.common.dal.repository.GenericMongoRepository
 import com.bwsw.sj.engine.output.benchmark.DataFactory._
 
 import scala.collection.mutable.ArrayBuffer
 
 object JDBCDataChecker extends App {
 
-  val streamService: GenericMongoRepository[StreamDomain] = ConnectionRepository.getStreamRepository
+  val streamService: GenericMongoRepository[StreamDomain] = connectionRepository.getStreamRepository
   val tStream: TStreamStreamDomain = streamService.get(tstreamInputName).get.asInstanceOf[TStreamStreamDomain]
   val inputConsumer = createConsumer(tStream)
   inputConsumer.start()
@@ -45,7 +45,7 @@ object JDBCDataChecker extends App {
     s"Count of all txns elements that are consumed from output stream ($jdbcOutputDataSize) " +
       s"should equals count of all txns elements that are consumed from input stream (${inputElements.size})")
 
-  ConnectionRepository.close()
+  connectionRepository.close()
   inputConsumer.stop()
   jdbcClient.close()
 

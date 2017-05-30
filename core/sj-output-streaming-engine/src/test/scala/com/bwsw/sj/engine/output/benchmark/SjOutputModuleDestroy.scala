@@ -2,7 +2,6 @@ package com.bwsw.sj.engine.output.benchmark
 
 import java.io.File
 
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.TempHelperForConfigDestroy
 import com.bwsw.sj.engine.output.benchmark.DataFactory._
 
@@ -32,7 +31,7 @@ object SjESOutputModuleDestroy extends App {
   deleteModule(module.getName)
   close()
   TempHelperForConfigDestroy.main(Array())
-  ConnectionRepository.close()
+  connectionRepository.close()
 
   println("DONE")
 }
@@ -49,7 +48,7 @@ object SjJDBCOutputModuleDestroy extends App {
 
   close()
   TempHelperForConfigDestroy.main(Array())
-  ConnectionRepository.close()
+  connectionRepository.close()
 
   println("DONE")
 }
@@ -65,7 +64,7 @@ object SjRestOutputModuleDestroy extends App {
 
   close()
   TempHelperForConfigDestroy.main(Array())
-  ConnectionRepository.close()
+  connectionRepository.close()
 
   println("DONE")
 }

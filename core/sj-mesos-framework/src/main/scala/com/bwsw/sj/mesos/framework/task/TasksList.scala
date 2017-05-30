@@ -9,6 +9,8 @@ import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.mesos.framework.schedule.{FrameworkUtil, OffersHandler}
 import org.apache.log4j.Logger
 import org.apache.mesos.Protos.{TaskID, TaskInfo, _}
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -125,7 +127,7 @@ object TasksList {
   }
 
 
-  def createTaskToLaunch(task: String, offer: Offer): TaskInfo = {
+  def createTaskToLaunch(task: String, offer: Offer)(implicit injector: Injector): TaskInfo = {
     // Task Resources
     val cpus = Resource.newBuilder
       .setType(Value.Type.SCALAR)
@@ -152,7 +154,7 @@ object TasksList {
       availablePorts = availablePorts.tail
       val inputInstance = FrameworkUtil.instance.get.asInstanceOf[InputInstance]
       inputInstance.tasks.put(task, new InputTask(host, taskPort.toInt))
-      ConnectionRepository.getInstanceRepository.save(FrameworkUtil.instance.get.to)
+      inject[ConnectionRepository].getInstanceRepository.save(FrameworkUtil.instance.get.to)
     }
 
     agentPorts = availablePorts.mkString(",")

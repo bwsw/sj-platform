@@ -6,6 +6,7 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.maxmind.geoip.LookupService
 import org.slf4j.LoggerFactory
+import scaldi.Injectable.inject
 
 import scala.util.{Failure, Success, Try}
 
@@ -24,8 +25,11 @@ import scala.util.{Failure, Success, Try}
   * }}}
   */
 object GeoIp {
+
+  import com.bwsw.sj.common.SjModule._
+
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val fileStorage = ConnectionRepository.getFileStorage
+  private val fileStorage = inject[ConnectionRepository].getFileStorage
   private lazy val ipv4AsNumLookup = getAsLookupServiceIpv4
   private lazy val ipv6AsNumLookup = getAsLookupServiceIpv6
 

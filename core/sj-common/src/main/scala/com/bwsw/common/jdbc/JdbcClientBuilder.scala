@@ -1,5 +1,6 @@
 package com.bwsw.common.jdbc
 
+import com.bwsw.sj.common.SjModule
 import org.slf4j.LoggerFactory
 
 /**
@@ -52,7 +53,7 @@ object JdbcClientBuilder {
       password.get,
       database,
       table)
-    new JdbcClient(jdbcClientConnectionData)
+    new JdbcClient(jdbcClientConnectionData)(SjModule.injector)
   }
 
   def setHosts(hosts: Array[String]): JdbcClientBuilder.type = {

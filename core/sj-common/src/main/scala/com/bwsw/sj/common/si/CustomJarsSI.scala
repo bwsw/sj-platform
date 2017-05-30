@@ -10,6 +10,8 @@ import com.bwsw.sj.common.si.model.FileMetadata
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import com.bwsw.sj.common.si.result._
 import org.apache.commons.io.FileUtils
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -17,11 +19,12 @@ import scala.collection.mutable.ListBuffer
 /**
   * Provides methods to access custom jar files represented by [[FileMetadata]] in [[GenericMongoRepository]]
   */
-class CustomJarsSI extends ServiceInterface[FileMetadata, FileMetadataDomain] {
-  override protected val entityRepository: GenericMongoRepository[FileMetadataDomain] = ConnectionRepository.getFileMetadataRepository
+class CustomJarsSI(implicit injector: Injector) extends ServiceInterface[FileMetadata, FileMetadataDomain] {
+  private val connectionRepository = inject[ConnectionRepository]
+  override protected val entityRepository: GenericMongoRepository[FileMetadataDomain] = connectionRepository.getFileMetadataRepository
 
-  private val fileStorage = ConnectionRepository.getFileStorage
-  private val configRepository = ConnectionRepository.getConfigRepository
+  private val fileStorage = connectionRepository.getFileStorage
+  private val configRepository = connectionRepository.getConfigRepository
   private val tmpDirectory = "/tmp/"
   private val previousFilesNames: ListBuffer[String] = ListBuffer[String]()
 

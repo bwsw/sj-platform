@@ -4,6 +4,7 @@ import com.bwsw.sj.common.si.model.stream.JDBCStream
 import com.bwsw.sj.common.utils.{RestLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import scaldi.Injector
 
 class JDBCStreamApi(val primary: String,
                     name: String,
@@ -14,7 +15,7 @@ class JDBCStreamApi(val primary: String,
                     @JsonProperty("type") streamType: Option[String] = Some(StreamLiterals.jdbcOutputType))
   extends StreamApi(streamType.getOrElse(StreamLiterals.jdbcOutputType), name, service, tags, force, description) {
 
-  override def to: JDBCStream =
+  override def to(implicit injector: Injector): JDBCStream =
     new JDBCStream(
       name,
       service,

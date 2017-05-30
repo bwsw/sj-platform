@@ -4,6 +4,7 @@ import com.bwsw.sj.common.si.model.stream.RestStream
 import com.bwsw.sj.common.utils.{RestLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import scaldi.Injector
 
 class RestStreamApi(name: String,
                     service: String,
@@ -13,7 +14,7 @@ class RestStreamApi(name: String,
                     @JsonProperty("type") streamType: Option[String] = Some(StreamLiterals.restOutputType))
   extends StreamApi(streamType.getOrElse(StreamLiterals.restOutputType), name, service, tags, force, description) {
 
-  override def to: RestStream =
+  override def to(implicit injector: Injector): RestStream =
     new RestStream(
       name,
       service,

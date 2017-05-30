@@ -14,6 +14,7 @@ import com.bwsw.tstreams.agents.consumer.Offset.{DateTime, IOffset, Newest, Olde
 import com.bwsw.tstreams.agents.consumer.subscriber.Subscriber
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
+import scaldi.Injector
 
 import scala.collection.mutable
 
@@ -31,7 +32,9 @@ import scala.collection.mutable
 class CallableTStreamCheckpointTaskInput[T <: AnyRef](manager: TaskManager,
                                                       blockingQueue: ArrayBlockingQueue[Envelope],
                                                       override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
+                                                     (implicit injector: Injector)
   extends CallableCheckpointTaskInput[TStreamEnvelope[T]](manager.inputs) {
+
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val (subscribingConsumers, consumerClones) = createConsumers()
 

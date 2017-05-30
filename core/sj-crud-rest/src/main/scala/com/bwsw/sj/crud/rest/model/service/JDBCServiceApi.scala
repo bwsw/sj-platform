@@ -3,6 +3,7 @@ package com.bwsw.sj.crud.rest.model.service
 import com.bwsw.sj.common.si.model.service.JDBCService
 import com.bwsw.sj.common.utils.{RestLiterals, ServiceLiterals}
 import com.fasterxml.jackson.annotation.JsonProperty
+import scaldi.Injector
 
 class JDBCServiceApi(name: String,
                      val database: String,
@@ -11,7 +12,7 @@ class JDBCServiceApi(name: String,
                      @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.jdbcType))
   extends ServiceApi(serviceType.getOrElse(ServiceLiterals.jdbcType), name, description) {
 
-  override def to(): JDBCService = {
+  override def to()(implicit injector: Injector): JDBCService = {
     val modelService =
       new JDBCService(
         name = this.name,

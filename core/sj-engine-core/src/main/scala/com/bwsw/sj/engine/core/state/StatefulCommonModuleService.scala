@@ -9,6 +9,8 @@ import com.bwsw.sj.engine.core.environment.StatefulModuleEnvironmentManager
 import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 /**
   * Class is in charge of creating [[StatefulModuleEnvironmentManager]] (and executor [[StreamingExecutor]] with [[StateHandlers]])
@@ -21,9 +23,10 @@ import com.bwsw.tstreams.agents.group.CheckpointGroup
 class StatefulCommonModuleService(manager: CommonTaskManager,
                                   checkpointGroup: CheckpointGroup,
                                   performanceMetrics: PerformanceMetrics)
+                                 (implicit injector: Injector)
   extends CommonModuleService(manager, checkpointGroup, performanceMetrics) {
 
-  private val streamService: GenericMongoRepository[StreamDomain] = ConnectionRepository.getStreamRepository
+  private val streamService: GenericMongoRepository[StreamDomain] = inject[ConnectionRepository].getStreamRepository
   private var countOfCheckpoints: Int = 1
   private val stateService: RAMStateService = new RAMStateService(manager, checkpointGroup)
 

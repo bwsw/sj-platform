@@ -11,10 +11,15 @@ import com.bwsw.sj.common.si.CustomFilesSI
 import com.bwsw.sj.common.utils.MessageResourceUtils.{createMessage, getMessage}
 import com.bwsw.sj.crud.rest.model.FileMetadataApi
 import com.bwsw.sj.crud.rest.{CustomFile, CustomFilesResponseEntity}
+import scaldi.Injector
 
 import scala.concurrent.ExecutionContextExecutor
 
-class CustomFilesController(implicit val materializer: ActorMaterializer, implicit val executor: ExecutionContextExecutor) extends Controller {
+class CustomFilesController(implicit injector: Injector,
+                            implicit val materializer: ActorMaterializer,
+                            implicit val executor: ExecutionContextExecutor)
+  extends Controller {
+
   override val serviceInterface = new CustomFilesSI()
 
   protected val entityDeletedMessage: String = "rest.custom.files.file.deleted"

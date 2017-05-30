@@ -3,6 +3,7 @@ package com.bwsw.sj.engine.core.engine.input
 import java.util.Properties
 
 import com.bwsw.common.ObjectSerializer
+import com.bwsw.sj.common.SjInjector
 import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
 import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
@@ -17,11 +18,12 @@ import com.bwsw.tstreams.agents.producer.Producer
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.TopicPartition
 import org.slf4j.{Logger, LoggerFactory}
+import scaldi.Injectable.inject
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
-trait KafkaTaskInput[T <: AnyRef] {
+trait KafkaTaskInput[T <: AnyRef] extends SjInjector {
   protected val manager: CommonTaskManager
   protected val checkpointGroup: CheckpointGroup
   protected val currentThread: Thread = Thread.currentThread()
@@ -155,7 +157,7 @@ trait KafkaTaskInput[T <: AnyRef] {
 
   protected def applyConfigurationSettings(properties: Properties): Unit = {
     logger.debug(s"Task name: ${manager.taskName}. Get setting (using a config service) for kafka consumer and apply them.")
-    val configService = ConnectionRepository.getConfigRepository
+    val configService = inject[ConnectionRepository].getConfigRepository
 
     val kafkaSettings = configService.getByParameters(Map("domain" -> ConfigLiterals.kafkaDomain))
     kafkaSettings.foreach(x => properties.put(ConfigurationSetting.clearConfigurationSettingName(x.domain, x.name), x.value))

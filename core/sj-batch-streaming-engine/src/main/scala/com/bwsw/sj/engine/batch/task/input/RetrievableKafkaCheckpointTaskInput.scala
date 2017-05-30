@@ -9,6 +9,7 @@ import com.bwsw.sj.engine.core.managment.CommonTaskManager
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.NewProducerTransactionPolicy
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import scaldi.Injector
 
 import scala.collection.JavaConverters._
 
@@ -23,6 +24,7 @@ import scala.collection.JavaConverters._
   */
 class RetrievableKafkaCheckpointTaskInput[T <: AnyRef](override val manager: CommonTaskManager,
                                                        override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
+                                                      (override implicit val injector: Injector)
   extends RetrievableCheckpointTaskInput[KafkaEnvelope[T]](manager.inputs) with KafkaTaskInput[T] {
   currentThread.setName(s"batch-task-${manager.taskName}-kafka-consumer")
 

@@ -3,6 +3,7 @@ package com.bwsw.sj.crud.rest.model.service
 import com.bwsw.sj.common.si.model.service.ZKService
 import com.bwsw.sj.common.utils.{RestLiterals, ServiceLiterals}
 import com.fasterxml.jackson.annotation.JsonProperty
+import scaldi.Injector
 
 class ZKCoordServiceApi(name: String,
                         val provider: String,
@@ -11,7 +12,7 @@ class ZKCoordServiceApi(name: String,
                         @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.zookeeperType))
   extends ServiceApi(serviceType.getOrElse(ServiceLiterals.zookeeperType), name, description) {
 
-  override def to(): ZKService = {
+  override def to()(implicit injector: Injector): ZKService = {
     val modelService =
       new ZKService(
         name = this.name,

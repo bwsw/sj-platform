@@ -1,11 +1,12 @@
 package com.bwsw.sj.crud.rest.routes
 
 import akka.http.scaladsl.server.{Directives, RequestContext}
+import com.bwsw.sj.common.SjInjector
 import com.bwsw.sj.common.rest._
 import com.bwsw.sj.crud.rest.controller.ConfigSettingsController
 import com.bwsw.sj.crud.rest.validator.SjCrudValidator
 
-trait SjConfigurationSettingsRoute extends Directives with SjCrudValidator {
+trait SjConfigurationSettingsRoute extends Directives with SjCrudValidator with SjInjector {
   val configSettingsController = new ConfigSettingsController
 
   val configSettingsRoute = {

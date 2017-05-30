@@ -5,7 +5,6 @@ import java.util.Properties
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import com.bwsw.sj.common.dal.model.stream.KafkaStreamDomain
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
 import kafka.admin.AdminUtils
@@ -13,6 +12,7 @@ import kafka.common.TopicAlreadyMarkedForDeletionException
 import kafka.utils.ZkUtils
 import org.I0Itec.zkclient.ZkConnection
 import org.apache.kafka.common.errors.TopicExistsException
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
@@ -25,10 +25,11 @@ class KafkaStream(name: String,
                   force: Boolean,
                   streamType: String,
                   description: String)
+                 (implicit injector: Injector)
   extends SjStream(streamType, name, service, tags, force, description) {
 
   override def to(): KafkaStreamDomain = {
-    val serviceRepository = ConnectionRepository.getServiceRepository
+    val serviceRepository = connectionRepository.getServiceRepository
 
     new KafkaStreamDomain(
       name,
@@ -93,7 +94,7 @@ class KafkaStream(name: String,
         errors += createMessage("entity.error.attribute.required", "Service")
 
       case Some(x) =>
-        val serviceDAO = ConnectionRepository.getServiceRepository
+        val serviceDAO = connectionRepository.getServiceRepository
         val serviceObj = serviceDAO.get(x)
         serviceObj match {
           case None =>
@@ -126,7 +127,7 @@ class KafkaStream(name: String,
   }
 
   private def createZkUtils(): ZkUtils = {
-    val serviceDAO = ConnectionRepository.getServiceRepository
+    val serviceDAO = connectionRepository.getServiceRepository
     val service = serviceDAO.get(this.service).get.asInstanceOf[KafkaServiceDomain]
     val zkHost = service.zkProvider.hosts
     val zkConnect = new ZkConnection(zkHost.mkString(";"))

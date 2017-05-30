@@ -6,6 +6,7 @@ import java.util.jar.JarFile
 
 import com.bwsw.common.file.utils.FileStorage
 import com.bwsw.common.{JsonSerializer, ObjectSerializer}
+import com.bwsw.sj.common.SjModule
 import com.bwsw.sj.common.config.{BenchmarkConfigNames, ConfigLiterals}
 import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, InstanceDomain, Task}
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
@@ -26,11 +27,17 @@ import org.I0Itec.zkclient.ZkConnection
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import org.apache.kafka.common.TopicPartition
+import scaldi.Injectable.inject
+import scaldi.{Injector, Module}
 
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
 object DataFactory {
+
+  import com.bwsw.sj.common.SjModule._
+
+  val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
   private val config = ConfigFactory.load()
   private val zookeeperHosts = config.getString(BenchmarkConfigNames.zkHosts).split(",")
   private val kafkaHosts = config.getString(BenchmarkConfigNames.kafkaHosts)
@@ -249,7 +256,7 @@ object DataFactory {
 
     val zkHost = kService.zkProvider.hosts
     val zkConnect = new ZkConnection(zkHost.mkString(";"))
-    val zkTimeout = ConnectionRepository.getConfigRepository.get(ConfigLiterals.zkSessionTimeoutTag).get.value.toInt
+    val zkTimeout = connectionRepository.getConfigRepository.get(ConfigLiterals.zkSessionTimeoutTag).get.value.toInt
     val zkClient = ZkUtils.createZkClient(zkHost.mkString(";"), zkTimeout, zkTimeout)
     val zkUtils = new ZkUtils(zkClient, zkConnect, false)
 
@@ -260,7 +267,7 @@ object DataFactory {
     val kService = serviceManager.get(kafkaServiceName).get.asInstanceOf[KafkaServiceDomain]
     val zkHost = kService.zkProvider.hosts
     val zkConnect = new ZkConnection(zkHost.mkString(";"))
-    val zkTimeout = ConnectionRepository.getConfigRepository.get(ConfigLiterals.zkSessionTimeoutTag).get.value.toInt
+    val zkTimeout = connectionRepository.getConfigRepository.get(ConfigLiterals.zkSessionTimeoutTag).get.value.toInt
     val zkClient = ZkUtils.createZkClient(zkHost.mkString(";"), zkTimeout, zkTimeout)
     val zkUtils = new ZkUtils(zkClient, zkConnect, false)
 

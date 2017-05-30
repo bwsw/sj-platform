@@ -2,7 +2,6 @@ package com.bwsw.sj.engine.output.benchmark
 
 import java.io.File
 
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.output.benchmark.DataFactory._
@@ -51,7 +50,7 @@ object SjESOutputModuleSetup extends App {
 
   println("close connections")
   close()
-  ConnectionRepository.close()
+  connectionRepository.close()
 
   println("DONE")
 
@@ -87,7 +86,7 @@ object SjJDBCOutputModuleSetup extends App {
 
   println("close connections")
   close()
-  ConnectionRepository.close()
+  connectionRepository.close()
 
   println("DONE")
 
@@ -120,7 +119,7 @@ object SjRestOutputModuleSetup extends App {
 
   println("close connections")
   close()
-  ConnectionRepository.close()
+  connectionRepository.close()
 
   println("DONE")
 }

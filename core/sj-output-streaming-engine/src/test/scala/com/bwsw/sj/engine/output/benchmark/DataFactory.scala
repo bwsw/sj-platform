@@ -7,6 +7,7 @@ import com.bwsw.common._
 import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.common.jdbc.JdbcClientBuilder
+import com.bwsw.sj.common.SjModule
 import com.bwsw.sj.common.config.BenchmarkConfigNames
 import com.bwsw.sj.common.dal.model._
 import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, Task}
@@ -25,6 +26,8 @@ import com.typesafe.config.ConfigFactory
 import org.eclipse.jetty.http.HttpVersion
 import org.elasticsearch.common.xcontent.XContentBuilder
 import org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder
+import scaldi.Injectable.inject
+import scaldi.{Injector, Module}
 
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
@@ -35,6 +38,10 @@ import scala.util.{Failure, Success, Try}
   * @author Kseniya Tomskikh
   */
 object DataFactory {
+
+  import com.bwsw.sj.common.SjModule._
+
+  val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
   private val config = ConfigFactory.load()
   private val agentsHost = "localhost"
   val zookeeperProviderName: String = "output-zookeeper-test-provider"
@@ -68,12 +75,12 @@ object DataFactory {
   val databaseName: String = "test_database_for_output_engine"
   val restBasePath = "/test/base_path/for/output_engine"
 
-  val streamService = ConnectionRepository.getStreamRepository
-  val serviceManager = ConnectionRepository.getServiceRepository
-  val providerService = ConnectionRepository.getProviderRepository
-  val instanceService = ConnectionRepository.getInstanceRepository
-  val fileStorage: MongoFileStorage = ConnectionRepository.getFileStorage
-  val configService: GenericMongoRepository[ConfigurationSettingDomain] = ConnectionRepository.getConfigRepository
+  val streamService = connectionRepository.getStreamRepository
+  val serviceManager = connectionRepository.getServiceRepository
+  val providerService = connectionRepository.getProviderRepository
+  val instanceService = connectionRepository.getInstanceRepository
+  val fileStorage: MongoFileStorage = connectionRepository.getFileStorage
+  val configService: GenericMongoRepository[ConfigurationSettingDomain] = connectionRepository.getConfigRepository
 
   val esInstanceName: String = "test-es-instance-for-output-engine"
   val jdbcInstanceName: String = "test-jdbc-instance-for-output-engine"

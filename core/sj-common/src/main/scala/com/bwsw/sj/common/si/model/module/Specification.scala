@@ -5,6 +5,8 @@ import com.bwsw.sj.common.dal.model.module.{BatchSpecificationDomain, IOstream, 
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -37,9 +39,9 @@ class Specification(val name: String,
       executorClass)
   }
 
-  def validate: ArrayBuffer[String] = validateGeneralFields
+  def validate(implicit injector: Injector): ArrayBuffer[String] = validateGeneralFields
 
-  protected def validateGeneralFields: ArrayBuffer[String] = {
+  protected def validateGeneralFields(implicit injector: Injector): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
 
     Option(name) match {
@@ -87,7 +89,7 @@ class Specification(val name: String,
           errors += createMessage("rest.validator.specification.attribute.required", "engine-version")
         case _ =>
           val engine = engineName + "-" + engineVersion
-          val configService = ConnectionRepository.getConfigRepository
+          val configService = inject[ConnectionRepository].getConfigRepository
           if (configService.get(ConfigLiterals.systemDomain + "." + engine).isEmpty)
             errors += createMessage("rest.validator.specification.invalid.engine.params")
       }

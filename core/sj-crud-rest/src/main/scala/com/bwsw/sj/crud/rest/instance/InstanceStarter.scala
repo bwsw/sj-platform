@@ -12,6 +12,7 @@ import com.bwsw.sj.crud.rest.RestLiterals
 import com.bwsw.sj.crud.rest.marathon.{MarathonApplicationById, MarathonRequest}
 import com.typesafe.config.ConfigFactory
 import org.slf4j.LoggerFactory
+import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
 
@@ -21,7 +22,9 @@ import scala.util.{Failure, Success, Try}
   *
   * @author Kseniya Tomskikh
   */
-class InstanceStarter(instance: Instance, delay: Long = 1000) extends Runnable with InstanceManager {
+class InstanceStarter(instance: Instance, delay: Long = 1000)
+                     (override implicit val injector: Injector)
+  extends Runnable with InstanceManager {
 
   import EngineLiterals._
 

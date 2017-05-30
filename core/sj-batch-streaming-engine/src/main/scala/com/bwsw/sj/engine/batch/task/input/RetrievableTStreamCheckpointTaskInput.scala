@@ -14,6 +14,8 @@ import com.bwsw.tstreams.agents.consumer.{Consumer, ConsumerTransaction}
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreamstransactionserver.rpc.TransactionStates
 import org.slf4j.LoggerFactory
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.immutable.Iterable
 import scala.collection.mutable
@@ -31,7 +33,9 @@ import scala.collection.mutable
   */
 class RetrievableTStreamCheckpointTaskInput[T <: AnyRef](manager: CommonTaskManager,
                                                          override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
+                                                        (implicit injector: Injector)
   extends RetrievableCheckpointTaskInput[TStreamEnvelope[T]](manager.inputs) {
+
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val instance = manager.instance.asInstanceOf[BatchInstance]
   private val tstreamOffsetsStorage = mutable.Map[(String, Int), Long]()
@@ -86,7 +90,7 @@ class RetrievableTStreamCheckpointTaskInput[T <: AnyRef](manager: CommonTaskMana
   }
 
   private def transactionsToEnvelopes(transactions: Seq[ConsumerTransaction], consumer: Consumer): Seq[TStreamEnvelope[T]] = {
-    val stream: StreamDomain = ConnectionRepository.getStreamRepository.get(consumer.stream.name).get
+    val stream: StreamDomain = inject[ConnectionRepository].getStreamRepository.get(consumer.stream.name).get
     transactions.map(transaction => buildTransactionObject(transaction, consumer))
       .filter(_.getState != TransactionStates.Invalid)
       .map(transaction => createEnvelope(transaction, consumer.name, stream))

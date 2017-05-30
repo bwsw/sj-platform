@@ -24,6 +24,8 @@ object InputTaskRunner extends {
   override val threadName = "InputTaskRunner-%d"
 } with TaskRunner {
 
+  import com.bwsw.sj.common.SjModule._
+
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val queueSize = 1000
 

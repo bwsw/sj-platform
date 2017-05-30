@@ -7,6 +7,7 @@ import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.StreamLiterals.tstreamType
 import org.slf4j.{Logger, LoggerFactory}
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -15,7 +16,7 @@ import scala.collection.mutable.ArrayBuffer
   *
   * @author Kseniya Tomskikh
   */
-class InputInstanceValidator extends InstanceValidator {
+class InputInstanceValidator(implicit injector: Injector) extends InstanceValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 

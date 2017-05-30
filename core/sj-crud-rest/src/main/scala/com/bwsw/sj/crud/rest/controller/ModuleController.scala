@@ -13,10 +13,11 @@ import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import com.bwsw.sj.crud.rest.model.module.{ModuleMetadataApi, SpecificationApi}
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.sj.crud.rest.{ModuleJar, ModulesResponseEntity, RelatedToModuleResponseEntity, SpecificationResponseEntity}
+import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
 
-class ModuleController {
+class ModuleController(implicit injector: Injector) {
 
   private val serviceInterface = new ModuleSI
 

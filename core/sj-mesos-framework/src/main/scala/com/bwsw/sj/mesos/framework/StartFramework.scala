@@ -13,11 +13,14 @@ import com.bwsw.sj.mesos.framework.schedule.FrameworkScheduler
 import com.typesafe.config.ConfigFactory
 import org.apache.mesos.MesosSchedulerDriver
 import org.apache.mesos.Protos.{Credential, FrameworkInfo}
+import scaldi.Injectable.inject
 
 import scala.util.Try
 
 
 object StartFramework {
+
+  import com.bwsw.sj.common.SjModule._
 
   private val config = ConfigFactory.load()
   val frameworkName = "JugglerFramework"
@@ -28,6 +31,8 @@ object StartFramework {
 
   val master_path = Try(config.getString(FrameworkLiterals.mesosMaster)).getOrElse("zk://127.0.0.1:2181/mesos")
   val frameworkTaskId = Try(config.getString(FrameworkLiterals.frameworkId)).getOrElse("broken")
+
+  val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
 
   /**
     * Main function to start rest and framework.
@@ -49,8 +54,8 @@ object StartFramework {
 
     val scheduler = new FrameworkScheduler
 
-    val frameworkPrincipal: Option[ConfigurationSettingDomain] = ConnectionRepository.getConfigRepository.get(ConfigLiterals.frameworkPrincipalTag)
-    val frameworkSecret: Option[ConfigurationSettingDomain] = ConnectionRepository.getConfigRepository.get(ConfigLiterals.frameworkSecretTag)
+    val frameworkPrincipal: Option[ConfigurationSettingDomain] = connectionRepository.getConfigRepository.get(ConfigLiterals.frameworkPrincipalTag)
+    val frameworkSecret: Option[ConfigurationSettingDomain] = connectionRepository.getConfigRepository.get(ConfigLiterals.frameworkSecretTag)
     var credential: Option[Credential] = None
 
     if (frameworkPrincipal.isDefined && frameworkSecret.isDefined) {

@@ -3,6 +3,7 @@ package com.bwsw.sj.crud.rest.model.service
 import com.bwsw.sj.common.si.model.service.CassandraService
 import com.bwsw.sj.common.utils.{RestLiterals, ServiceLiterals}
 import com.fasterxml.jackson.annotation.JsonProperty
+import scaldi.Injector
 
 class CassDBServiceApi(name: String,
                        val keyspace: String,
@@ -11,7 +12,7 @@ class CassDBServiceApi(name: String,
                        @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.cassandraType))
   extends ServiceApi(serviceType.getOrElse(ServiceLiterals.cassandraType), name, description) {
 
-  override def to(): CassandraService = {
+  override def to()(implicit injector: Injector): CassandraService = {
     val modelService =
       new CassandraService(
         name = this.name,

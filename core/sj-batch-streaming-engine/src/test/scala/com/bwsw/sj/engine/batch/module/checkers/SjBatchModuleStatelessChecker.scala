@@ -1,13 +1,12 @@
 package com.bwsw.sj.engine.batch.module.checkers
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.engine.core.entities.{KafkaEnvelope, TStreamEnvelope, Batch}
 import com.bwsw.sj.engine.batch.module.DataFactory._
 import scala.collection.JavaConverters._
 
 object SjBatchModuleStatelessChecker extends App {
-  val streamService = ConnectionRepository.getStreamRepository
+  val streamService = connectionRepository.getStreamRepository
   val objectSerializer = new ObjectSerializer()
 
   val inputTstreamConsumers = (1 to inputCount).map(x => createInputTstreamConsumer(partitions, x.toString))
@@ -61,11 +60,11 @@ object SjBatchModuleStatelessChecker extends App {
         while (transaction.hasNext) {
           val batch = objectSerializer.deserialize(transaction.next()).asInstanceOf[Batch]
           batch.envelopes.foreach {
-            case tstreamEnvelope: TStreamEnvelope[Int @unchecked] => tstreamEnvelope.data.foreach(x => {
+            case tstreamEnvelope: TStreamEnvelope[Int@unchecked] => tstreamEnvelope.data.foreach(x => {
               outputElements.+=(x)
               totalOutputElements += 1
             })
-            case kafkaEnvelope: KafkaEnvelope[Int @unchecked] =>
+            case kafkaEnvelope: KafkaEnvelope[Int@unchecked] =>
               outputElements.+=(kafkaEnvelope.data)
               totalOutputElements += 1
           }
@@ -83,7 +82,7 @@ object SjBatchModuleStatelessChecker extends App {
 
   inputTstreamConsumers.foreach(x => x.stop())
   outputConsumers.foreach(x => x.stop())
-  ConnectionRepository.close()
+  connectionRepository.close()
 
   println("DONE")
 }

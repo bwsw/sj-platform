@@ -10,16 +10,19 @@ import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import org.apache.commons.io.FileUtils
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
-class ModuleSI extends JsonValidator {
+class ModuleSI(implicit injector: Injector) extends JsonValidator {
 
-  private val fileStorage = ConnectionRepository.getFileStorage
-  private val fileMetadataRepository = ConnectionRepository.getFileMetadataRepository
-  private val instanceRepository = ConnectionRepository.getInstanceRepository
-  private val entityRepository: GenericMongoRepository[FileMetadataDomain] = ConnectionRepository.getFileMetadataRepository
+  private val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
+  private val fileStorage = connectionRepository.getFileStorage
+  private val fileMetadataRepository = connectionRepository.getFileMetadataRepository
+  private val instanceRepository = connectionRepository.getInstanceRepository
+  private val entityRepository: GenericMongoRepository[FileMetadataDomain] = connectionRepository.getFileMetadataRepository
   private val tmpDirectory = "/tmp/"
   private val previousFilesNames: ListBuffer[String] = ListBuffer[String]()
 

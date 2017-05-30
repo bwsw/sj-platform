@@ -13,6 +13,7 @@ import com.bwsw.sj.engine.core.state.{CommonModuleService, StatefulCommonModuleS
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
 import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.{Logger, LoggerFactory}
+import scaldi.Injector
 
 /**
   * Class contains methods for running regular module
@@ -22,7 +23,8 @@ import org.slf4j.{Logger, LoggerFactory}
   * @author Kseniya Mikhaleva
   */
 abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
-                                 performanceMetrics: RegularStreamingPerformanceMetrics) extends Callable[Unit] {
+                                 performanceMetrics: RegularStreamingPerformanceMetrics)
+                                (implicit injector: Injector) extends Callable[Unit] {
 
   import RegularTaskEngine.logger
 
@@ -130,7 +132,8 @@ object RegularTaskEngine {
     * @return Engine of regular task
     */
   def apply(manager: CommonTaskManager,
-            performanceMetrics: RegularStreamingPerformanceMetrics): RegularTaskEngine = {
+            performanceMetrics: RegularStreamingPerformanceMetrics)
+           (implicit injector: Injector): RegularTaskEngine = {
     val regularInstance = manager.instance.asInstanceOf[RegularInstance]
 
     regularInstance.checkpointMode match {

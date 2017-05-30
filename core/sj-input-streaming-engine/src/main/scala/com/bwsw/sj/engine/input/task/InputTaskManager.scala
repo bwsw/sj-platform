@@ -7,6 +7,7 @@ import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.sj.engine.input.config.InputEngineConfigNames
 import com.bwsw.tstreams.agents.producer.Producer
 import com.typesafe.config.ConfigFactory
+import scaldi.Injector
 
 import scala.util.Try
 
@@ -15,7 +16,7 @@ import scala.util.Try
   *
   * @author Kseniya Mikhaleva
   */
-class InputTaskManager() extends TaskManager {
+class InputTaskManager(implicit injector: Injector) extends TaskManager {
 
   lazy val inputs: Nothing = {
     logger.error(s"Instance of Input module hasn't got execution plan " +

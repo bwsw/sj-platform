@@ -1,7 +1,6 @@
 package com.bwsw.sj.engine.batch.module.checkers
 
 import com.bwsw.common.ObjectSerializer
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.engine.core.entities.{TStreamEnvelope, Batch, KafkaEnvelope}
 import com.bwsw.sj.engine.batch.module.DataFactory._
 import com.bwsw.sj.engine.batch.utils.StateHelper
@@ -9,7 +8,7 @@ import com.bwsw.sj.engine.batch.utils.StateHelper
 import scala.collection.JavaConverters._
 
 object SjBatchModuleStatefulKafkaChecker extends App {
-  val streamService = ConnectionRepository.getStreamRepository
+  val streamService = connectionRepository.getStreamRepository
   val objectSerializer = new ObjectSerializer()
 
   val inputConsumer = createInputKafkaConsumer(inputCount, partitions)
@@ -44,11 +43,11 @@ object SjBatchModuleStatefulKafkaChecker extends App {
         while (transaction.hasNext) {
           val batch = objectSerializer.deserialize(transaction.next).asInstanceOf[Batch]
           batch.envelopes.foreach {
-            case tstreamEnvelope: TStreamEnvelope[Int @unchecked] => tstreamEnvelope.data.foreach(x => {
+            case tstreamEnvelope: TStreamEnvelope[Int@unchecked] => tstreamEnvelope.data.foreach(x => {
               outputElements.+=(x)
               totalOutputElements += 1
             })
-            case kafkaEnvelope: KafkaEnvelope[Int @unchecked] =>
+            case kafkaEnvelope: KafkaEnvelope[Int@unchecked] =>
               outputElements.+=(kafkaEnvelope.data)
               totalOutputElements += 1
           }
@@ -73,7 +72,7 @@ object SjBatchModuleStatefulKafkaChecker extends App {
 
   consumer.stop()
   outputConsumers.foreach(x => x.stop())
-  ConnectionRepository.close()
+  connectionRepository.close()
 
   println("DONE")
 }

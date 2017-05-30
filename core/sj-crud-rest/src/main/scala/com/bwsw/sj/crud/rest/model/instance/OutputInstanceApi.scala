@@ -5,6 +5,7 @@ import com.bwsw.sj.common.si.model.instance.OutputInstance
 import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals, RestLiterals}
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import scaldi.Injector
 
 /**
   * API entity for [[EngineLiterals.outputStreamingType]] instance
@@ -39,7 +40,8 @@ class OutputInstanceApi(name: String,
     environmentVariables,
     performanceReportingInterval) {
 
-  override def to(moduleType: String, moduleName: String, moduleVersion: String): OutputInstance = {
+  override def to(moduleType: String, moduleName: String, moduleVersion: String)
+                 (implicit injector: Injector): OutputInstance = {
     val serializer = new JsonSerializer()
 
     new OutputInstance(

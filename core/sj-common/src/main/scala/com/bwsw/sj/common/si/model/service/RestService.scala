@@ -1,13 +1,13 @@
 package com.bwsw.sj.common.si.model.service
 
 import com.bwsw.sj.common.dal.model.service.RestServiceDomain
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils.validateProvider
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import com.bwsw.sj.common.utils.RestLiterals
+import scaldi.Injector
 
-import scala.collection.mutable.ArrayBuffer
 import scala.collection.JavaConverters._
+import scala.collection.mutable.ArrayBuffer
 
 /**
   * @author Pavel Tomskikh
@@ -19,10 +19,11 @@ class RestService(name: String,
                   val headers: Map[String, String],
                   description: String,
                   serviceType: String)
+                 (implicit injector: Injector)
   extends Service(serviceType, name, description) {
 
   override def to(): RestServiceDomain = {
-    val providerRepository = ConnectionRepository.getProviderRepository
+    val providerRepository = connectionRepository.getProviderRepository
 
     val modelService =
       new RestServiceDomain(

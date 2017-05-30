@@ -8,6 +8,7 @@ import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import com.bwsw.sj.common.utils.RestLiterals
 import com.bwsw.sj.crud.rest.ModuleInfo
 import com.bwsw.sj.crud.rest.model.FileMetadataApi
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
@@ -22,7 +23,7 @@ class ModuleMetadataApi(filename: String,
     description,
     customFileParts) {
 
-  override def to(): ModuleMetadata =
+  override def to()(implicit injector: Injector): ModuleMetadata =
     new ModuleMetadata(filename, SpecificationApi.from(file).to, Option(file))
 
   def validate: ArrayBuffer[String] = {

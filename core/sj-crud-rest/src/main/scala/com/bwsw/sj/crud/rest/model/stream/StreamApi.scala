@@ -5,6 +5,7 @@ import com.bwsw.sj.common.utils.{RestLiterals, StreamLiterals}
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes, JsonTypeInfo}
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import scaldi.Injector
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = classOf[StreamApi], visible = true)
 @JsonSubTypes(Array(
@@ -22,7 +23,7 @@ class StreamApi(@JsonProperty("type") val streamType: String,
                 val description: Option[String] = Some(RestLiterals.defaultDescription)) {
 
   @JsonIgnore
-  def to: SjStream =
+  def to(implicit injector: Injector): SjStream =
     new SjStream(
       streamType,
       name,

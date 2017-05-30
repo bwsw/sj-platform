@@ -6,6 +6,7 @@ import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
 import com.bwsw.sj.common.engine.StreamingValidator
 import com.bwsw.sj.common.si.model.FileMetadata
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
+import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
@@ -19,6 +20,7 @@ class ModuleMetadata(filename: String,
                      length: Option[Long] = None,
                      description: Option[String] = None,
                      uploadDate: Option[String] = None)
+                    (implicit injector: Injector)
   extends FileMetadata(
     filename,
     file,
@@ -104,7 +106,8 @@ class ModuleMetadata(filename: String,
 }
 
 object ModuleMetadata {
-  def from(fileMetadata: FileMetadataDomain, file: Option[File] = None): ModuleMetadata = {
+  def from(fileMetadata: FileMetadataDomain, file: Option[File] = None)
+          (implicit injector: Injector): ModuleMetadata = {
     val specification = Specification.from(fileMetadata.specification)
 
     new ModuleMetadata(
