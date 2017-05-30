@@ -3,9 +3,9 @@ package com.bwsw.sj.engine.regular.module
 import java.io.File
 import java.util.logging.LogManager
 
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.TempHelperForConfigSetup
-import DataFactory._
+import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.engine.regular.module.DataFactory._
 
 object SjRegularModuleSetup extends App {
   LogManager.getLogManager.reset()

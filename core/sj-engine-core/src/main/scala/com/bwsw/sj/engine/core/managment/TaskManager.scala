@@ -105,7 +105,8 @@ abstract class TaskManager() {
   }
 
   private def setCoordinationOptions(tStreamService: TStreamServiceDomain): TStreamsFactory = {
-    tstreamFactory.setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.hosts.mkString(","))
+    tstreamFactory.setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.getConcatenatedHosts())
+    tstreamFactory.setProperty(ConfigurationOptions.Coordination.path, tStreamService.prefix)
   }
 
   private def setBindHostForAgents(): TStreamsFactory = {

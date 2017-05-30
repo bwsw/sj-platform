@@ -37,6 +37,10 @@ class ProviderDomain(@IdField val name: String,
     case _ => false
   }
 
+  def getConcatenatedHosts(separator: String = ","): String = {
+    hosts.mkString(separator)
+  }
+
   def checkConnection(): ArrayBuffer[String] = {
     val errors = ArrayBuffer[String]()
     for (host <- this.hosts) {

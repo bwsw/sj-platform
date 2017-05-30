@@ -54,7 +54,8 @@ object DataFactory {
   }
 
   private def setCoordinationOptions(tStreamService: TStreamServiceDomain) = {
-    tstreamFactory.setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.hosts.mkString(","))
+    tstreamFactory.setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.getConcatenatedHosts())
+    tstreamFactory.setProperty(ConfigurationOptions.Coordination.path, tStreamService.prefix)
   }
 
   def createProviders(providerService: GenericMongoRepository[ProviderDomain]) = {
