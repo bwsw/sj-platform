@@ -20,6 +20,7 @@ class InstanceSI {
     val instancePassedValidation = validateInstance(moduleMetadata.specification, moduleMetadata.filename, instance)
 
     if (instancePassedValidation.result) {
+      instance.prepareInstance()
       instance.createStreams()
       entityRepository.save(instance.to)
 
