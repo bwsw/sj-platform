@@ -8,8 +8,8 @@ import com.bwsw.sj.common.dal.ConnectionConstants
 import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.utils.FrameworkLiterals._
 import com.bwsw.sj.common.utils._
-import com.bwsw.sj.crud.rest.RestLiterals
 import com.bwsw.sj.crud.rest.marathon.{MarathonApplicationById, MarathonRequest}
+import com.bwsw.sj.crud.rest.utils.RestLiterals
 import com.typesafe.config.ConfigFactory
 import org.slf4j.LoggerFactory
 

@@ -1,14 +1,15 @@
 package com.bwsw.sj.crud.rest.routes
 
-import akka.http.scaladsl.server.{Directives, RequestContext}
+import akka.http.scaladsl.server.{Directives, RequestContext, Route}
+import com.bwsw.sj.crud.rest.SjCrudRestServer
 import com.bwsw.sj.crud.rest.controller.StreamController
-import com.bwsw.sj.crud.rest.validator.SjCrudValidator
+import com.bwsw.sj.crud.rest.utils.CompletionUtils
 
-trait SjStreamsRoute extends Directives with SjCrudValidator {
+trait SjStreamsRoute extends Directives with SjCrudRestServer with CompletionUtils {
 
   private val streamController = new StreamController
 
-  val streamsRoute = {
+  val streamsRoute: Route = {
     pathPrefix("streams") {
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>
