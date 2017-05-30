@@ -28,8 +28,8 @@ class InputInstanceApi(name: String,
                        @JsonDeserialize(contentAs = classOf[Boolean]) val duplicateCheck: Option[Boolean] = Some(false),
                        val defaultEvictionPolicy: String = EngineLiterals.noneDefaultEvictionPolicy,
                        val evictionPolicy: String = EngineLiterals.fixTimeEvictionPolicy,
-                       val backupCount: Int = 0,
-                       val asyncBackupCount: Int = 0)
+                       @JsonDeserialize(contentAs = classOf[Int]) val backupCount: Option[Int] = Some(0),
+                       @JsonDeserialize(contentAs = classOf[Int]) val asyncBackupCount: Option[Int] = Some(0))
   extends InstanceApi(
     name,
     coordinationService,
@@ -70,8 +70,8 @@ class InputInstanceApi(name: String,
       duplicateCheck.getOrElse(false),
       Option(defaultEvictionPolicy).getOrElse(EngineLiterals.noneDefaultEvictionPolicy),
       Option(evictionPolicy).getOrElse(EngineLiterals.fixTimeEvictionPolicy),
-      backupCount,
-      asyncBackupCount)
+      backupCount.getOrElse(0),
+      asyncBackupCount.getOrElse(0))
   }
 }
 
