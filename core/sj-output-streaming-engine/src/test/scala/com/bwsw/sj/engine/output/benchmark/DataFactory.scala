@@ -354,7 +354,7 @@ object DataFactory {
       moduleVersion = "1.0",
       engine = "com.bwsw.output.streaming.engine-1.0",
       coordinationService = zookeeperServiceName,
-      status = EngineLiterals.started,
+      _status = EngineLiterals.started,
       description = "some description of test instance",
       input = tstreamInputName,
       output = streamName,

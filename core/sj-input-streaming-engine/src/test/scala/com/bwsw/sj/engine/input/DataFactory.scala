@@ -132,7 +132,7 @@ object DataFactory {
       engine = "com.bwsw.input.streaming.engine-1.0",
       coordinationService = zookeeperServiceName,
       checkpointMode = EngineLiterals.everyNthMode,
-      status = EngineLiterals.started,
+      _status = EngineLiterals.started,
       description = "some description of test instance",
       outputs = instanceOutputs,
       checkpointInterval = checkpointInterval,

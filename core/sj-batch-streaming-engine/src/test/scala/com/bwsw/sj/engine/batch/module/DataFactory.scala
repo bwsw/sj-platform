@@ -285,7 +285,7 @@ object DataFactory {
       moduleVersion = "1.0",
       engine = "com.bwsw.batch.streaming.engine-1.0",
       coordinationService = zookeeperServiceName,
-      status = EngineLiterals.started,
+      _status = EngineLiterals.started,
       inputs = instanceInputs,
       window = window,
       slidingInterval = slidingInterval,

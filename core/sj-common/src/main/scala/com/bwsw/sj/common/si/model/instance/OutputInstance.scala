@@ -33,7 +33,7 @@ class OutputInstance(name: String,
                      val executionPlan: ExecutionPlan = new ExecutionPlan(),
                      restAddress: Option[String] = None,
                      stage: FrameworkStage = FrameworkStage(),
-                     status: String = EngineLiterals.ready,
+                     private val _status: String = EngineLiterals.ready,
                      frameworkId: String = System.currentTimeMillis().toString)
   extends Instance(
     name,
@@ -53,7 +53,7 @@ class OutputInstance(name: String,
     engine,
     restAddress,
     stage,
-    status,
+    _status,
     frameworkId,
     Array(output)) {
 
@@ -102,5 +102,5 @@ class OutputInstance(name: String,
 
   override def getInputsWithoutStreamMode: Array[String] = Array(clearStreamFromMode(input))
 
-  override val streams = getInputsWithoutStreamMode ++ outputs
+  override val streams: Array[String] = getInputsWithoutStreamMode ++ outputs
 }
