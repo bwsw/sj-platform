@@ -13,19 +13,19 @@ import org.everit.json.schema.ValidationException
 import scala.concurrent.duration._
 
 /**
- * Route for CRUD Rest-API
- *
- *
- * @author Kseniya Tomskikh
- */
-trait SjCrudInterface extends Directives
-with CorsSupport
-with SjModulesRoute
-with SjCustomRoute
-with SjStreamsRoute
-with SjServicesRoute
-with SjProvidersRoute
-with SjConfigurationSettingsRoute {
+  * Route for CRUD Rest-API
+  *
+  * @author Kseniya Tomskikh
+  */
+trait SjCrudRestApi extends Directives
+  with CorsSupport
+  with SjModulesRoute
+  with SjCustomRoute
+  with SjStreamsRoute
+  with SjServicesRoute
+  with SjProvidersRoute
+  with SjConfigurationSettingsRoute {
+
   val exceptionHandler = ExceptionHandler {
     case InstanceNotFound(msg, key) =>
       val response = NotFoundRestResponse(KeyedMessageResponseEntity(msg, key))
@@ -49,7 +49,7 @@ with SjConfigurationSettingsRoute {
       val response = InternalServerErrorRestResponse(MessageResponseEntity(
         createMessage("rest.errors.unrecognized_property", ex.getPropertyName, ex.getKnownPropertyIds.toArray.mkString(", "))))
       complete(restResponseToHttpResponse(response))
-    case jsonSchemaValidationException:ValidationException =>
+    case jsonSchemaValidationException: ValidationException =>
       val response = InternalServerErrorRestResponse(MessageResponseEntity(
         createMessage("rest.errors.entity.json.schema.failed", s"${jsonSchemaValidationException.getMessage}")))
       complete(restResponseToHttpResponse(response))

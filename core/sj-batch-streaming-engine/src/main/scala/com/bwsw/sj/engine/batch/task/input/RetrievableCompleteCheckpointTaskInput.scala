@@ -14,10 +14,10 @@ import scaldi.Injector
   * @param manager allows to manage an environment of batch streaming task
   * @author Kseniya Mikhaleva
   */
-class RetrievableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskManager)
-                                                         (implicit injector: Injector) extends {
-  override val checkpointGroup = new CheckpointGroup()
-} with RetrievableCheckpointTaskInput[Envelope](manager.inputs) {
+class RetrievableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskManager,
+                                                          override val checkpointGroup: CheckpointGroup)
+                                                         (implicit injector: Injector)
+  extends RetrievableCheckpointTaskInput[Envelope](manager.inputs) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val retrievableKafkaTaskInput = new RetrievableKafkaCheckpointTaskInput[T](manager, checkpointGroup)

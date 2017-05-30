@@ -15,8 +15,9 @@ object TestStorageServer {
 
   private def getTmpDir(): String = Files.createTempDir().toString
 
-  val token = "12345678910111213141516171819202"
-  val prefix = "/path"
+  val token = "token"
+  val prefix = "/bench-prefix/master"
+  val streamPath = "/bench-prefix/streams"
   val rootConfig = "test-storage-server"
   val zkHostsConfig = rootConfig + ".zookeeper.hosts"
   val hostConfig = rootConfig + ".host"
@@ -29,7 +30,7 @@ object TestStorageServer {
     val transactionServer = serverBuilder.withZookeeperOptions(ZookeeperOptions(endpoints = zkHosts, prefix))
       .withBootstrapOptions(BootstrapOptions(host))
       .withAuthOptions(AuthOptions(token))
-      .withServerStorageOptions(StorageOptions(path = getTmpDir()))
+      .withServerStorageOptions(StorageOptions(path = getTmpDir(), streamPath))
       .withCommitLogOptions(CommitLogOptions(commitLogCloseDelayMs = 100))
       .build()
 

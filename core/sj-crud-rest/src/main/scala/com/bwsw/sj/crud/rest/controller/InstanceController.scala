@@ -47,7 +47,7 @@ class InstanceController(implicit injector: Injector) {
           if (errors.isEmpty) {
             serviceInterface.create(instance, module) match {
               case Created =>
-                OkRestResponse(
+                CreatedRestResponse(
                   MessageResponseEntity(
                     createMessage("rest.modules.instances.instance.created", instance.name, module.signature)))
 

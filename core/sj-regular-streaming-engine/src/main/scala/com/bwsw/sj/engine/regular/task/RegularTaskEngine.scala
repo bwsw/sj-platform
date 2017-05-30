@@ -32,7 +32,7 @@ abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
   currentThread.setName(s"regular-task-${manager.taskName}-engine")
   private val blockingQueue: ArrayBlockingQueue[Envelope] = new ArrayBlockingQueue[Envelope](EngineLiterals.queueSize)
   private val instance: RegularInstance = manager.instance.asInstanceOf[RegularInstance]
-  private val checkpointGroup: CheckpointGroup = new CheckpointGroup()
+  private val checkpointGroup: CheckpointGroup = manager.createCheckpointGroup()
   private val moduleService: CommonModuleService = createRegularModuleService()
   private val executor: RegularStreamingExecutor[AnyRef] = moduleService.executor.asInstanceOf[RegularStreamingExecutor[AnyRef]]
   val taskInputService: CallableCheckpointTaskInput[Envelope] = CallableCheckpointTaskInput[AnyRef](manager, blockingQueue, checkpointGroup).asInstanceOf[CallableCheckpointTaskInput[Envelope]]

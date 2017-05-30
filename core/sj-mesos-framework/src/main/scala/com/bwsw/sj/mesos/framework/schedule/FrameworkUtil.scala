@@ -23,6 +23,11 @@ object FrameworkUtil {
 
   import com.bwsw.sj.common.SjModule._
 
+  // Java threads created from JNI code in a non-java thread have null ContextClassloader unless the creator explicitly sets it.
+  // Also in such context Thread.currentThread().getContextClassLoader() returns null.
+  private val classLoader = ClassLoader.getSystemClassLoader
+  Thread.currentThread().setContextClassLoader(classLoader)
+
   var master: Option[MasterInfo] = None
   var frameworkId: Option[String] = None
   var driver: Option[SchedulerDriver] = None

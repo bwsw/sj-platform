@@ -74,22 +74,17 @@ object DataFactory {
 
   private def setTStreamFactoryProperties() = {
     setAuthOptions(tstrqService)
-    setStorageOptions(tstrqService)
     setCoordinationOptions(tstrqService)
     setBindHostForAgents()
   }
 
   private def setAuthOptions(tStreamService: TStreamServiceDomain) = {
-    tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Auth.key, tStreamService.token)
-  }
-
-  private def setStorageOptions(tStreamService: TStreamServiceDomain) = {
-    tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, tStreamService.provider.hosts.mkString(","))
-      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, tStreamService.prefix)
+    tstreamFactory.setProperty(ConfigurationOptions.Common.authenticationKey, tStreamService.token)
   }
 
   private def setCoordinationOptions(tStreamService: TStreamServiceDomain) = {
-    tstreamFactory.setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.hosts.mkString(","))
+    tstreamFactory.setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.getConcatenatedHosts())
+    tstreamFactory.setProperty(ConfigurationOptions.Coordination.path, tStreamService.prefix)
   }
 
   private def setBindHostForAgents() = {
@@ -298,7 +293,7 @@ object DataFactory {
       stateFullCheckpoint = stateFullCheckpoint,
       startFrom = EngineLiterals.oldestStartMode,
       executionPlan = new ExecutionPlan(Map(instanceName + "-task0" -> task, instanceName + "-task1" -> task).asJava),
-      status = EngineLiterals.started)
+      _status = EngineLiterals.started)
 
     instanceService.save(instance.to)
   }

@@ -36,7 +36,7 @@ object BatchTaskRunner extends {
 
     logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for batch module\n")
 
-    val taskInput = RetrievableCheckpointTaskInput[AnyRef](manager).asInstanceOf[RetrievableCheckpointTaskInput[Envelope]]
+    val taskInput = RetrievableCheckpointTaskInput[AnyRef](manager, manager.createCheckpointGroup()).asInstanceOf[RetrievableCheckpointTaskInput[Envelope]]
     val envelopeFetcher = new EnvelopeFetcher(taskInput)
     val performanceMetrics = new BatchStreamingPerformanceMetrics(manager)
     val moduleService = CommonModuleService(manager, envelopeFetcher.checkpointGroup, performanceMetrics)
@@ -47,7 +47,7 @@ object BatchTaskRunner extends {
 
     val instanceStatusObserver = new InstanceStatusObserver(manager.instanceName)
 
-    logger.info(s"Task: ${manager.taskName}. The preparation finished. Launch task\n")
+    logger.info(s"Task: ${manager.taskName}. The preparation finished. Launch a task\n")
 
     executorService.submit(batchTaskEngine)
     executorService.submit(performanceMetrics)

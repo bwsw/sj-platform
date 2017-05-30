@@ -4,13 +4,14 @@ import java.io.File
 
 import akka.http.scaladsl.model.Multipart.FormData.BodyPart
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.FileInfo
+import akka.http.scaladsl.server.{Directives, Route}
 import akka.stream.scaladsl.FileIO
 import com.bwsw.sj.common.SjInjector
+import com.bwsw.sj.crud.rest.SjCrudRestServer
 import com.bwsw.sj.crud.rest.controller.{CustomFilesController, CustomJarsController}
 import com.bwsw.sj.crud.rest.model.FileMetadataApi
-import com.bwsw.sj.crud.rest.validator.SjCrudValidator
+import com.bwsw.sj.crud.rest.utils.CompletionUtils
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -21,11 +22,11 @@ import scala.util.{Failure, Success}
   *
   * @author Kseniya Tomskikh
   */
-trait SjCustomRoute extends Directives with SjCrudValidator with SjInjector {
+trait SjCustomRoute extends Directives with SjCrudRestServer with CompletionUtils with SjInjector {
   private val customJarsController = new CustomJarsController()
   private val customFilesController = new CustomFilesController()
 
-  val customRoute = {
+  val customRoute: Route = {
     pathPrefix("custom") {
       pathPrefix("jars") {
         pathPrefix(Segment) { (name: String) =>

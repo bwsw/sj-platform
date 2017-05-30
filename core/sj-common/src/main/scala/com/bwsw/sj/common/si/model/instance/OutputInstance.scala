@@ -3,8 +3,7 @@ package com.bwsw.sj.common.si.model.instance
 import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, FrameworkStage, OutputInstanceDomain}
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.utils.StreamUtils.clearStreamFromMode
-import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals, RestLiterals}
-import org.apache.avro.Schema
+import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 import scaldi.Injector
 
 import scala.collection.JavaConverters._
@@ -29,11 +28,11 @@ class OutputInstance(name: String,
                      val input: String,
                      val output: String,
                      val startFrom: String = EngineLiterals.newestStartMode,
-                     val inputAvroSchema: Option[Schema] = None,
+                     val inputAvroSchema: String = "{}",
                      val executionPlan: ExecutionPlan = new ExecutionPlan(),
                      restAddress: Option[String] = None,
                      stage: FrameworkStage = FrameworkStage(),
-                     status: String = EngineLiterals.ready,
+                     private val _status: String = EngineLiterals.ready,
                      frameworkId: String = System.currentTimeMillis().toString)
                     (implicit injector: Injector)
   extends Instance(
@@ -54,7 +53,7 @@ class OutputInstance(name: String,
     engine,
     restAddress,
     stage,
-    status,
+    _status,
     frameworkId,
     Array(output)) {
 
@@ -87,7 +86,7 @@ class OutputInstance(name: String,
       checkpointInterval,
       executionPlan,
       startFrom,
-      AvroRecordUtils.schemaToJson(inputAvroSchema))
+      inputAvroSchema)
   }
 
   override def inputsOrEmptyList: Array[String] = Array(input)
@@ -103,5 +102,5 @@ class OutputInstance(name: String,
 
   override def getInputsWithoutStreamMode: Array[String] = Array(clearStreamFromMode(input))
 
-  override val streams = getInputsWithoutStreamMode ++ outputs
+  override val streams: Array[String] = getInputsWithoutStreamMode ++ outputs
 }

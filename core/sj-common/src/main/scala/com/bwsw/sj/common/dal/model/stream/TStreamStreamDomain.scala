@@ -16,10 +16,9 @@ class TStreamStreamDomain(override val name: String,
 
   override def create(): Unit = {
     val factory = new TStreamsFactory()
-    factory.setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, this.service.prefix)
-      .setProperty(ConfigurationOptions.Coordination.endpoints, this.service.provider.hosts.mkString(","))
-      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, this.service.provider.hosts.mkString(","))
-      .setProperty(ConfigurationOptions.StorageClient.Auth.key, this.service.token)
+    factory.setProperty(ConfigurationOptions.Coordination.path, this.service.prefix)
+      .setProperty(ConfigurationOptions.Coordination.endpoints, this.service.provider.getConcatenatedHosts())
+      .setProperty(ConfigurationOptions.Common.authenticationKey, this.service.token)
     val storageClient: StorageClient = factory.getStorageClient()
 
     if (!storageClient.checkStreamExists(this.name)) {

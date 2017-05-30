@@ -36,7 +36,7 @@ class InputInstance(name: String,
                     var tasks: mutable.Map[String, InputTask] = mutable.Map(),
                     restAddress: Option[String] = None,
                     stage: FrameworkStage = FrameworkStage(),
-                    status: String = EngineLiterals.ready,
+                    private val _status: String = EngineLiterals.ready,
                     frameworkId: String = System.currentTimeMillis().toString)
                    (implicit injector: Injector)
   extends Instance(
@@ -57,7 +57,7 @@ class InputInstance(name: String,
     engine,
     restAddress,
     stage,
-    status,
+    _status,
     frameworkId,
     outputs) {
 

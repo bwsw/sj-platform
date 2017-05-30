@@ -49,7 +49,7 @@ object InputTaskRunner extends {
 
     val instanceStatusObserver = new InstanceStatusObserver(manager.instanceName)
 
-    logger.info(s"Task: ${manager.taskName}. The preparation finished. Launch task.")
+    logger.info(s"Task: ${manager.taskName}. The preparation finished. Launch a task.")
 
     executorService.submit(inputTaskEngine)
     executorService.submit(performanceMetrics)

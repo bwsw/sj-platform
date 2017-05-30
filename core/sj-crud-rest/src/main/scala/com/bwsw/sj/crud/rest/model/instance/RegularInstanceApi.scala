@@ -2,7 +2,7 @@ package com.bwsw.sj.crud.rest.model.instance
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.si.model.instance.RegularInstance
-import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals, RestLiterals}
+import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import scaldi.Injector
@@ -63,14 +63,14 @@ class RegularInstanceApi(name: String,
       moduleVersion,
       moduleType,
       getEngine(moduleType, moduleName, moduleVersion),
-      inputs,
-      outputs,
+      Option(inputs).getOrElse(Array()),
+      Option(outputs).getOrElse(Array()),
       checkpointMode,
       checkpointInterval,
       Option(startFrom).getOrElse(EngineLiterals.newestStartMode),
       Option(stateManagement).getOrElse(EngineLiterals.noneStateMode),
       stateFullCheckpoint.getOrElse(100),
       eventWaitIdleTime.getOrElse(1000l),
-      AvroRecordUtils.mapToSchema(Option(inputAvroSchema).getOrElse(Map())))
+      serializer.serialize(Option(inputAvroSchema).getOrElse(Map())))
   }
 }

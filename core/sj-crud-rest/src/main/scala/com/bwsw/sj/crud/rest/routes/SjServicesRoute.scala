@@ -1,14 +1,15 @@
 package com.bwsw.sj.crud.rest.routes
 
-import akka.http.scaladsl.server.{Directives, RequestContext}
+import akka.http.scaladsl.server.{Directives, RequestContext, Route}
 import com.bwsw.sj.common.SjInjector
+import com.bwsw.sj.crud.rest.SjCrudRestServer
 import com.bwsw.sj.crud.rest.controller.ServiceController
-import com.bwsw.sj.crud.rest.validator.SjCrudValidator
+import com.bwsw.sj.crud.rest.utils.CompletionUtils
 
-trait SjServicesRoute extends Directives with SjCrudValidator with SjInjector {
+trait SjServicesRoute extends Directives with SjCrudRestServer with CompletionUtils with SjInjector {
   private val serviceController = new ServiceController()
 
-  val servicesRoute = {
+  val servicesRoute: Route = {
     pathPrefix("services") {
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>

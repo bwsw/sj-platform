@@ -18,7 +18,7 @@ import scaldi.Injector
   */
 class CallableCompleteCheckpointTaskInput[T <: AnyRef](manager: CommonTaskManager,
                                                        blockingQueue: ArrayBlockingQueue[Envelope],
-                                                       override val checkpointGroup: CheckpointGroup = new CheckpointGroup())
+                                                       override val checkpointGroup: CheckpointGroup)
                                                       (implicit injector: Injector)
   extends CallableCheckpointTaskInput[Envelope](manager.inputs) {
 

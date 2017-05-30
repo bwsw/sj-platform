@@ -20,6 +20,7 @@ import com.bwsw.sj.engine.core.environment.EnvironmentManager
 import com.bwsw.tstreams.agents.consumer.Consumer
 import com.bwsw.tstreams.agents.consumer.Offset.IOffset
 import com.bwsw.tstreams.agents.consumer.subscriber.{Callback, Subscriber}
+import com.bwsw.tstreams.agents.group.CheckpointGroup
 import com.bwsw.tstreams.agents.producer.Producer
 import com.bwsw.tstreams.storage.StorageClient
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
@@ -97,36 +98,23 @@ abstract class TaskManager(implicit injector: Injector) {
 
   private def setTStreamFactoryProperties(): Unit = {
     setAuthOptions(auxiliaryTStreamService)
-    setStorageOptions(auxiliaryTStreamService)
     setCoordinationOptions(auxiliaryTStreamService)
     setBindHostForAgents()
-    setPersistentQueuePath()
     applyConfigurationSettings()
   }
 
   private def setAuthOptions(tStreamService: TStreamServiceDomain): TStreamsFactory = {
-    tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Auth.key, tStreamService.token)
-  }
-
-  private def setStorageOptions(tStreamService: TStreamServiceDomain): TStreamsFactory = {
-    logger.debug(s"Task name: $taskName. Set properties of storage " +
-      s"(zookeeper endpoints: ${tStreamService.provider.hosts.mkString(",")}, prefix: ${tStreamService.prefix}) " +
-      s"of t-stream factory\n")
-    tstreamFactory.setProperty(ConfigurationOptions.StorageClient.Zookeeper.endpoints, tStreamService.provider.hosts.mkString(","))
-      .setProperty(ConfigurationOptions.StorageClient.Zookeeper.prefix, tStreamService.prefix)
+    tstreamFactory.setProperty(ConfigurationOptions.Common.authenticationKey, tStreamService.token)
   }
 
   private def setCoordinationOptions(tStreamService: TStreamServiceDomain): TStreamsFactory = {
-    tstreamFactory.setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.hosts.mkString(","))
+    tstreamFactory.setProperty(ConfigurationOptions.Coordination.endpoints, tStreamService.provider.getConcatenatedHosts())
+    tstreamFactory.setProperty(ConfigurationOptions.Coordination.path, tStreamService.prefix)
   }
 
   private def setBindHostForAgents(): TStreamsFactory = {
     tstreamFactory.setProperty(ConfigurationOptions.Producer.bindPort, agentsHost)
     tstreamFactory.setProperty(ConfigurationOptions.Consumer.Subscriber.bindHost, agentsHost)
-  }
-
-  private def setPersistentQueuePath(): TStreamsFactory = {
-    tstreamFactory.setProperty(ConfigurationOptions.Consumer.Subscriber.persistentQueuePath, "/tmp/" + persistentQueuePath)
   }
 
   private def applyConfigurationSettings(): Unit = {
@@ -271,6 +259,10 @@ abstract class TaskManager(implicit injector: Injector) {
       consumerName,
       (0 until stream.partitions).toSet,
       offset)
+  }
+
+  def createCheckpointGroup(): CheckpointGroup = {
+    tstreamFactory.getCheckpointGroup()
   }
 
   protected def setStreamOptions(stream: TStreamStreamDomain): TStreamsFactory = {

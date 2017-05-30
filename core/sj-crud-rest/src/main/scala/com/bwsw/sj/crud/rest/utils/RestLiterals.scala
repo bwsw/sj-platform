@@ -1,4 +1,4 @@
-package com.bwsw.sj.crud.rest
+package com.bwsw.sj.crud.rest.utils
 
 object RestLiterals {
   final val masterNode = "/rest/instance/lock"

@@ -4,7 +4,7 @@ import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.si.model.instance.{Instance, OutputInstance}
 import com.bwsw.sj.common.si.model.module.Specification
-import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals}
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.StreamUtils._
@@ -61,6 +61,9 @@ class OutputInstanceValidator(implicit injector: Injector) extends InstanceValid
       errors += createMessage("rest.validator.attribute.required", "checkpointInterval") + ". " +
         createMessage("rest.validator.attribute.must.greater.than.zero", "checkpointInterval")
     }
+
+    if (Try(AvroRecordUtils.jsonToSchema(outputInstanceMetadata.inputAvroSchema)).isFailure)
+      errors += createMessage("rest.validator.attribute.not", "inputAvroSchema", "Avro Schema")
 
     errors ++= validateStreamOptions(outputInstanceMetadata, specification)
   }

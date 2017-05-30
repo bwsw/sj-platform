@@ -2,7 +2,7 @@ package com.bwsw.sj.crud.rest.model.instance
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.si.model.instance.BatchInstance
-import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals, RestLiterals}
+import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import scaldi.Injector
 
@@ -27,7 +27,7 @@ class BatchInstanceApi(name: String,
                        val startFrom: String = EngineLiterals.newestStartMode,
                        val stateManagement: String = EngineLiterals.noneStateMode,
                        @JsonDeserialize(contentAs = classOf[Int]) val stateFullCheckpoint: Option[Int] = Some(100),
-                       @JsonDeserialize(contentAs = classOf[Long]) val eventWaitTime: Option[Long] = Some(1000),
+                       @JsonDeserialize(contentAs = classOf[Long]) val eventWaitIdleTime: Option[Long] = Some(1000),
                        val inputAvroSchema: Map[String, Any] = Map())
   extends InstanceApi(
     name,
@@ -62,14 +62,14 @@ class BatchInstanceApi(name: String,
       moduleVersion,
       moduleType,
       getEngine(moduleType, moduleName, moduleVersion),
-      inputs,
-      outputs,
+      Option(inputs).getOrElse(Array()),
+      Option(outputs).getOrElse(Array()),
       window.getOrElse(1),
       slidingInterval.getOrElse(1),
       Option(startFrom).getOrElse(EngineLiterals.newestStartMode),
       Option(stateManagement).getOrElse(EngineLiterals.noneStateMode),
       stateFullCheckpoint.getOrElse(100),
-      eventWaitTime.getOrElse(1000l),
-      AvroRecordUtils.mapToSchema(Option(inputAvroSchema).getOrElse(Map())))
+      eventWaitIdleTime.getOrElse(1000l),
+      serializer.serialize(Option(inputAvroSchema).getOrElse(Map())))
   }
 }

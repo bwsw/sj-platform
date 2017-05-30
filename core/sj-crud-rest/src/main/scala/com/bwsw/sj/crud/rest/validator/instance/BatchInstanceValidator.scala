@@ -4,7 +4,7 @@ import com.bwsw.sj.common.dal.model.service.{KafkaServiceDomain, TStreamServiceD
 import com.bwsw.sj.common.dal.model.stream.KafkaStreamDomain
 import com.bwsw.sj.common.si.model.instance.{BatchInstance, Instance}
 import com.bwsw.sj.common.si.model.module.Specification
-import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals}
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.StreamUtils._
@@ -44,7 +44,7 @@ class BatchInstanceValidator(implicit injector: Injector) extends InstanceValida
     }
 
     // 'event-wait-idle-time' field
-    if (batchInstanceMetadata.eventWaitTime <= 0) {
+    if (batchInstanceMetadata.eventWaitIdleTime <= 0) {
       errors += createMessage("rest.validator.attribute.must.greater.than.zero", "eventWaitIdleTime")
     }
 
@@ -61,6 +61,10 @@ class BatchInstanceValidator(implicit injector: Injector) extends InstanceValida
     if (batchInstanceMetadata.slidingInterval > batchInstanceMetadata.window) {
       errors += createMessage("rest.validator.attribute.must.greater.or.equal", "Window", "slidingInterval")
     }
+
+    if (Try(AvroRecordUtils.jsonToSchema(batchInstanceMetadata.inputAvroSchema)).isFailure)
+      errors += createMessage("rest.validator.attribute.not", "inputAvroSchema", "Avro Schema")
+
 
     errors ++= validateStreamOptions(batchInstanceMetadata, specification)
 

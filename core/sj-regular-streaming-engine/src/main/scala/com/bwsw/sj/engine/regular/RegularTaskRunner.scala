@@ -37,7 +37,7 @@ object RegularTaskRunner extends {
 
     val instanceStatusObserver = new InstanceStatusObserver(manager.instanceName)
 
-    logger.info(s"Task: ${manager.taskName}. The preparation finished. Launch task\n")
+    logger.info(s"Task: ${manager.taskName}. The preparation finished. Launch a task\n")
 
     executorService.submit(regularTaskInputService)
     executorService.submit(regularTaskEngine)

@@ -8,7 +8,7 @@ object Dependencies {
 
   lazy val sjCommonDependencies = Def.setting(Seq(
     "org.slf4j" % "slf4j-log4j12" % "1.7.22",
-    ("com.bwsw" % "t-streams_2.12" % "2.3.1-SNAPSHOT")
+    ("com.bwsw" % "t-streams_2.12" % "2.6.1-SNAPSHOT")
       .exclude("org.slf4j", "slf4j-simple")
       .exclude("org.slf4j", "slf4j-api")
       .exclude("log4j", "log4j")

@@ -3,8 +3,7 @@ package com.bwsw.sj.common.si.model.instance
 import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, FrameworkStage, RegularInstanceDomain}
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.utils.StreamUtils.clearStreamFromMode
-import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals, RestLiterals}
-import org.apache.avro.Schema
+import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 import scaldi.Injector
 
 import scala.collection.JavaConverters._
@@ -32,11 +31,11 @@ class RegularInstance(name: String,
                       val stateManagement: String = EngineLiterals.noneStateMode,
                       val stateFullCheckpoint: Int = 100,
                       val eventWaitIdleTime: Long = 1000,
-                      val inputAvroSchema: Option[Schema] = None,
+                      val inputAvroSchema: String = "{}",
                       val executionPlan: ExecutionPlan = new ExecutionPlan(),
                       restAddress: Option[String] = None,
                       stage: FrameworkStage = FrameworkStage(),
-                      status: String = EngineLiterals.ready,
+                      private val _status: String = EngineLiterals.ready,
                       frameworkId: String = System.currentTimeMillis().toString)
                      (implicit injector: Injector)
   extends Instance(
@@ -57,7 +56,7 @@ class RegularInstance(name: String,
     engine,
     restAddress,
     stage,
-    status,
+    _status,
     frameworkId,
     outputs) {
 
@@ -93,7 +92,7 @@ class RegularInstance(name: String,
       stateManagement,
       stateFullCheckpoint,
       eventWaitIdleTime,
-      AvroRecordUtils.schemaToJson(inputAvroSchema))
+      inputAvroSchema)
   }
 
   override def inputsOrEmptyList: Array[String] = inputs

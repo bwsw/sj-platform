@@ -4,6 +4,7 @@ import java.io.{BufferedReader, File, InputStreamReader}
 import java.util.jar.JarFile
 
 import com.bwsw.common.JsonSerializer
+import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.sj.common.dal.model.module.{FileMetadataDomain, SpecificationDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.JsonValidator
@@ -25,7 +26,7 @@ class FileMetadata(val filename: String,
   extends JsonValidator {
 
   protected val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
-  protected val fileStorage = connectionRepository.getFileStorage
+  protected val fileStorage: MongoFileStorage = connectionRepository.getFileStorage
   private val fileMetadataRepository = connectionRepository.getFileMetadataRepository
 
   /**
