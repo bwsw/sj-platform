@@ -3,7 +3,7 @@ package com.bwsw.sj.crud.rest.model.instance.response
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.instance.FrameworkStage
 import com.bwsw.sj.common.si.model.instance._
-import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals}
+import com.bwsw.sj.common.utils.EngineLiterals
 
 class InstanceApiResponse(val moduleName: String,
                           val moduleVersion: String,
@@ -93,7 +93,7 @@ object InstanceApiResponse {
           regularInstance.stateManagement,
           regularInstance.stateFullCheckpoint,
           regularInstance.eventWaitIdleTime,
-          AvroRecordUtils.schemaToMap(regularInstance.inputAvroSchema))
+          serializer.deserialize[Map[String, Any]](regularInstance.inputAvroSchema))
 
       case EngineLiterals.batchStreamingType =>
         val batchInstance = instance.asInstanceOf[BatchInstance]
@@ -125,8 +125,8 @@ object InstanceApiResponse {
           batchInstance.startFrom,
           batchInstance.stateManagement,
           batchInstance.stateFullCheckpoint,
-          batchInstance.eventWaitTime,
-          AvroRecordUtils.schemaToMap(batchInstance.inputAvroSchema))
+          batchInstance.eventWaitIdleTime,
+          serializer.deserialize[Map[String, Any]](batchInstance.inputAvroSchema))
 
       case EngineLiterals.outputStreamingType =>
         val outputInstance = instance.asInstanceOf[OutputInstance]
@@ -156,7 +156,7 @@ object InstanceApiResponse {
           outputInstance.startFrom,
           outputInstance.input,
           outputInstance.output,
-          AvroRecordUtils.schemaToMap(outputInstance.inputAvroSchema))
+          serializer.deserialize[Map[String, Any]](outputInstance.inputAvroSchema))
     }
   }
 }

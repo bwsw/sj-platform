@@ -4,8 +4,7 @@ import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, FrameworkStage, Out
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.StreamUtils.clearStreamFromMode
-import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals, RestLiterals}
-import org.apache.avro.Schema
+import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 
 import scala.collection.JavaConverters._
 
@@ -29,7 +28,7 @@ class OutputInstance(name: String,
                      val input: String,
                      val output: String,
                      val startFrom: String = EngineLiterals.newestStartMode,
-                     val inputAvroSchema: Option[Schema] = None,
+                     val inputAvroSchema: String = "{}",
                      val executionPlan: ExecutionPlan = new ExecutionPlan(),
                      restAddress: Option[String] = None,
                      stage: FrameworkStage = FrameworkStage(),
@@ -86,7 +85,7 @@ class OutputInstance(name: String,
       checkpointInterval,
       executionPlan,
       startFrom,
-      AvroRecordUtils.schemaToJson(inputAvroSchema))
+      inputAvroSchema)
   }
 
   override def inputsOrEmptyList: Array[String] = Array(input)

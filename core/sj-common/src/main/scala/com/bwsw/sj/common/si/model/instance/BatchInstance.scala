@@ -4,8 +4,7 @@ import com.bwsw.sj.common.dal.model.instance.{BatchInstanceDomain, ExecutionPlan
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.utils.StreamUtils.clearStreamFromMode
-import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals, RestLiterals}
-import org.apache.avro.Schema
+import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 
 import scala.collection.JavaConverters._
 
@@ -31,8 +30,8 @@ class BatchInstance(name: String,
                     val startFrom: String = EngineLiterals.newestStartMode,
                     val stateManagement: String = EngineLiterals.noneStateMode,
                     val stateFullCheckpoint: Int = 100,
-                    val eventWaitTime: Long = 1000,
-                    val inputAvroSchema: Option[Schema] = None,
+                    val eventWaitIdleTime: Long = 1000,
+                    val inputAvroSchema: String = "{}",
                     val executionPlan: ExecutionPlan = new ExecutionPlan(),
                     restAddress: Option[String] = None,
                     stage: FrameworkStage = FrameworkStage(),
@@ -91,8 +90,8 @@ class BatchInstance(name: String,
       startFrom,
       stateManagement,
       stateFullCheckpoint,
-      eventWaitTime,
-      AvroRecordUtils.schemaToJson(inputAvroSchema))
+      eventWaitIdleTime,
+      inputAvroSchema)
   }
 
   override def inputsOrEmptyList: Array[String] = inputs

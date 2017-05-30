@@ -4,7 +4,7 @@ import com.bwsw.sj.common.dal.model.service.{KafkaServiceDomain, TStreamServiceD
 import com.bwsw.sj.common.dal.model.stream.KafkaStreamDomain
 import com.bwsw.sj.common.si.model.instance.{Instance, RegularInstance}
 import com.bwsw.sj.common.si.model.module.Specification
-import com.bwsw.sj.common.utils.EngineLiterals
+import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals}
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.StreamUtils._
@@ -68,6 +68,9 @@ class RegularInstanceValidator extends InstanceValidator {
         }
       }
     }
+
+    if (Try(AvroRecordUtils.jsonToSchema(regularInstanceMetadata.inputAvroSchema)).isFailure)
+      errors += createMessage("rest.validator.attribute.not", "inputAvroSchema", "Avro Schema")
 
     errors ++= validateStreamOptions(regularInstanceMetadata, specification)
   }

@@ -2,6 +2,7 @@ package com.bwsw.sj.common.engine
 
 import com.bwsw.common.AvroSerializer
 import com.bwsw.sj.common.si.model.instance.{BatchInstance, Instance, OutputInstance, RegularInstance}
+import com.bwsw.sj.common.utils.AvroRecordUtils
 import org.apache.avro.generic.GenericRecord
 import org.slf4j.LoggerFactory
 
@@ -14,11 +15,13 @@ class ExtendedEnvelopeDataSerializer(classLoader: ClassLoader, instance: Instanc
   extends DefaultEnvelopeDataSerializer(classLoader) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
-  private val schema = instance match {
-    case batchInstance: BatchInstance => batchInstance.inputAvroSchema
-    case regularInstance: RegularInstance => regularInstance.inputAvroSchema
-    case outputInstance: OutputInstance => outputInstance.inputAvroSchema
-    case _ => None
+  private val schema = AvroRecordUtils.jsonToSchema {
+    instance match {
+      case batchInstance: BatchInstance => batchInstance.inputAvroSchema
+      case regularInstance: RegularInstance => regularInstance.inputAvroSchema
+      case outputInstance: OutputInstance => outputInstance.inputAvroSchema
+      case _ => "{}"
+    }
   }
 
   private val avroSerializer = new AvroSerializer(schema)

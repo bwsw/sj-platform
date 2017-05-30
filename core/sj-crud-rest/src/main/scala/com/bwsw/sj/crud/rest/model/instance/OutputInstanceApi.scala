@@ -2,7 +2,7 @@ package com.bwsw.sj.crud.rest.model.instance
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.si.model.instance.OutputInstance
-import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals, RestLiterals}
+import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals}
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 
@@ -63,6 +63,6 @@ class OutputInstanceApi(name: String,
       input,
       output,
       Option(startFrom).getOrElse(EngineLiterals.newestStartMode),
-      AvroRecordUtils.mapToSchema(Option(inputAvroSchema).getOrElse(Map())))
+      serializer.serialize(Option(inputAvroSchema).getOrElse(Map())))
   }
 }

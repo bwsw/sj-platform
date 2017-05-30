@@ -6,7 +6,7 @@ import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, StreamDomain, TSt
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.rest.model.module.{StreamWithMode, TaskStream}
 import com.bwsw.sj.common.utils.StreamUtils.clearStreamFromMode
-import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals, RestLiterals, StreamLiterals}
+import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals, StreamLiterals}
 
 import scala.collection.JavaConverters._
 
@@ -212,7 +212,7 @@ object Instance {
           batchInstance.stateManagement,
           batchInstance.stateFullCheckpoint,
           batchInstance.eventWaitIdleTime,
-          AvroRecordUtils.jsonToSchema(batchInstance.inputAvroSchema),
+          batchInstance.inputAvroSchema,
           batchInstance.executionPlan,
 
           Option(batchInstance.restAddress),
@@ -248,7 +248,7 @@ object Instance {
           regularInstance.stateManagement,
           regularInstance.stateFullCheckpoint,
           regularInstance.eventWaitIdleTime,
-          AvroRecordUtils.jsonToSchema(regularInstance.inputAvroSchema),
+          regularInstance.inputAvroSchema,
           regularInstance.executionPlan,
 
           Option(regularInstance.restAddress),
@@ -281,7 +281,7 @@ object Instance {
           outputInstance.inputs.head,
           outputInstance.outputs.head,
           outputInstance.startFrom,
-          AvroRecordUtils.jsonToSchema(outputInstance.inputAvroSchema),
+          outputInstance.inputAvroSchema,
           outputInstance.executionPlan,
 
           Option(outputInstance.restAddress),
