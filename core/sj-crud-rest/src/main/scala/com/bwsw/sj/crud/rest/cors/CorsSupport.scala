@@ -5,7 +5,7 @@ import akka.http.scaladsl.model.HttpResponse
 import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Directive0, Route}
-import com.bwsw.sj.crud.rest.RestLiterals
+import com.bwsw.sj.crud.rest.utils.RestLiterals
 import com.typesafe.config.ConfigFactory
 
 /**

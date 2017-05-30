@@ -1,13 +1,14 @@
 package com.bwsw.sj.crud.rest.routes
 
-import akka.http.scaladsl.server.{Directives, RequestContext}
+import akka.http.scaladsl.server.{Directives, RequestContext, Route}
+import com.bwsw.sj.crud.rest.SjCrudRestServer
 import com.bwsw.sj.crud.rest.controller.ProviderController
-import com.bwsw.sj.crud.rest.validator.SjCrudValidator
+import com.bwsw.sj.crud.rest.utils.CompletionUtils
 
-trait SjProvidersRoute extends Directives with SjCrudValidator {
+trait SjProvidersRoute extends Directives with SjCrudRestServer with CompletionUtils {
   private val providerController = new ProviderController()
 
-  val providersRoute = {
+  val providersRoute: Route = {
     pathPrefix("providers") {
       pathEndOrSingleSlash {
         post { (ctx: RequestContext) =>
