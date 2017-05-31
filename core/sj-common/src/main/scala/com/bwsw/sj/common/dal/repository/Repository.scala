@@ -34,7 +34,7 @@ trait Repository[T] {
     * @param parameters set of fields of element (name of element field -> value of element field)
     * @return set of elements matching the parameters
     */
-  def getByParameters(parameters: Map[String, Any]): mutable.Buffer[T]
+  def getByParameters(parameters: Map[String, Any]): Seq[T]
 
   /**
     * Allows retrieving all elements from collection

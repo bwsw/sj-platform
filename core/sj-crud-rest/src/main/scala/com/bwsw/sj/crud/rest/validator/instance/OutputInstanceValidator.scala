@@ -35,7 +35,7 @@ class OutputInstanceValidator(implicit injector: Injector) extends InstanceValid
     * @param specification - specification of module
     * @return - List of errors
     */
-  override def validate(instance: Instance, specification: Specification) = {
+  override def validate(instance: Instance, specification: Specification): ArrayBuffer[String] = {
     logger.debug(s"Instance: ${instance.name}. Start a validation of instance of output-streaming type.")
     val errors = new ArrayBuffer[String]()
     errors ++= super.validateGeneralOptions(instance)

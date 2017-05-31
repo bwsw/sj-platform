@@ -10,7 +10,6 @@ import org.apache.commons.io.FileUtils
 import scaldi.Injectable.inject
 import scaldi.Injector
 
-import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 /**
@@ -44,7 +43,7 @@ class CustomFilesSI(implicit injector: Injector) extends ServiceInterface[FileMe
     }
   }
 
-  override def getAll(): mutable.Buffer[FileMetadata] = {
+  override def getAll(): Seq[FileMetadata] = {
     entityRepository.getByParameters(Map("filetype" -> FileMetadata.customFileType)).map(x => FileMetadata.from(x))
   }
 

@@ -47,7 +47,7 @@ class ConfigSettingsSI(implicit injector: Injector) extends ServiceInterface[Con
     }
   }
 
-  def getBy(domain: String): mutable.Buffer[ConfigurationSetting] = {
+  def getBy(domain: String): Seq[ConfigurationSetting] = {
     entityRepository.getByParameters(Map("domain" -> domain)).map(ConfigurationSetting.from)
   }
 }

@@ -100,7 +100,12 @@ class OutputInstance(name: String,
   override def createStreams(): Unit =
     getStreams(Array(input)).foreach(_.create())
 
-  override def getInputsWithoutStreamMode: Array[String] = Array(clearStreamFromMode(input))
+  override def getInputsWithoutStreamMode: Array[String] = {
+    Option(input) match {
+      case Some(_input) => Array(clearStreamFromMode(_input))
+      case None => super.getInputsWithoutStreamMode
+    }
+  }
 
   override val streams: Array[String] = getInputsWithoutStreamMode ++ outputs
 }

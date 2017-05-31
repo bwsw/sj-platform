@@ -50,7 +50,7 @@ class InstanceApi(val name: String,
   }
 
   protected def getFilesMetadata(moduleType: String, moduleName: String, moduleVersion: String)
-                                (implicit injector: Injector): mutable.Buffer[FileMetadataDomain] = {
+                                (implicit injector: Injector) = {
     val fileMetadataDAO = inject[ConnectionRepository].getFileMetadataRepository
     fileMetadataDAO.getByParameters(Map("filetype" -> "module",
       "specification.name" -> moduleName,

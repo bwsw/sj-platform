@@ -24,7 +24,7 @@ class BatchInstanceValidator(implicit injector: Injector) extends InstanceValida
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
-  override def validate(parameters: Instance, specification: Specification) = {
+  override def validate(parameters: Instance, specification: Specification): ArrayBuffer[String] = {
     logger.debug(s"Instance: ${parameters.name}. Start a validation of instance of batch-streaming type.")
     val errors = new ArrayBuffer[String]()
     errors ++= super.validateGeneralOptions(parameters)

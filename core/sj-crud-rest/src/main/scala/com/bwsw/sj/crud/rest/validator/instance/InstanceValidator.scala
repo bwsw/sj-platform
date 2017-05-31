@@ -15,11 +15,10 @@ import org.slf4j.{Logger, LoggerFactory}
 import scaldi.Injectable.inject
 import scaldi.Injector
 
-import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 /**
-  * Trait of validator for modules
+  * Trait provides common methods for [[Instance]] validation
   *
   * @author Kseniya Tomskikh
   */
@@ -45,7 +44,7 @@ abstract class InstanceValidator(implicit injector: Injector) extends Completion
     * @param instance - Instance parameters
     * @return - List of errors
     */
-  protected def validateGeneralOptions(instance: Instance) = {
+  protected def validateGeneralOptions(instance: Instance): ArrayBuffer[String] = {
     logger.debug(s"Instance: ${instance.name}. General options validation.")
     val errors = new ArrayBuffer[String]()
 
@@ -110,9 +109,9 @@ abstract class InstanceValidator(implicit injector: Injector) extends Completion
     list.map(x => (x, 1)).groupBy(_._1).map(x => x._2.reduce { (a, b) => (a._1, a._2 + b._2) }).exists(x => x._2 > 1)
   }
 
-  protected def getStreams(streamNames: Array[String]): mutable.Buffer[StreamDomain] = {
-    val streamsDAO = connectionRepository.getStreamRepository
-    streamsDAO.getAll.filter(s => streamNames.contains(s.name))
+  protected def getStreams(streamNames: Array[String]): Array[StreamDomain] = {
+    val streamRepository = connectionRepository.getStreamRepository
+    streamNames.flatMap(x => streamRepository.get(x))
   }
 
   /**
@@ -125,7 +124,7 @@ abstract class InstanceValidator(implicit injector: Injector) extends Completion
     streams.map(s => (s.service.name, 1)).groupBy(_._1).keys.toList
   }
 
-  protected def getStreamsPartitions(streams: Seq[StreamDomain]) = {
+  protected def getStreamsPartitions(streams: Seq[StreamDomain]): Seq[Int] = {
     streams.map { stream =>
       stream.streamType match {
         case StreamLiterals.`tstreamType` =>
@@ -137,7 +136,7 @@ abstract class InstanceValidator(implicit injector: Injector) extends Completion
     }
   }
 
-  protected def validateParallelism(parallelism: Any, minimumNumberOfPartitions: Int) = {
+  protected def validateParallelism(parallelism: Any, minimumNumberOfPartitions: Int): ArrayBuffer[String] = {
     logger.debug(s"Validate a parallelism parameter.")
     val errors = new ArrayBuffer[String]()
     Option(parallelism) match {

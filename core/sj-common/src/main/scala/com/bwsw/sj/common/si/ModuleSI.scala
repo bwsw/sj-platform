@@ -13,7 +13,6 @@ import org.apache.commons.io.FileUtils
 import scaldi.Injectable.inject
 import scaldi.Injector
 
-import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 class ModuleSI(implicit injector: Injector) extends JsonValidator {
@@ -58,7 +57,7 @@ class ModuleSI(implicit injector: Injector) extends JsonValidator {
     }
   }
 
-  def getAll: mutable.Buffer[ModuleMetadata] = {
+  def getAll: Seq[ModuleMetadata] = {
     entityRepository
       .getByParameters(Map("filetype" -> FileMetadata.moduleType))
       .map(ModuleMetadata.from(_))
@@ -73,7 +72,7 @@ class ModuleSI(implicit injector: Injector) extends JsonValidator {
     filesMetadata.head.filename
   }
 
-  def getByType(moduleType: String): Either[String, mutable.Buffer[ModuleMetadata]] = {
+  def getByType(moduleType: String): Either[String, Seq[ModuleMetadata]] = {
     if (EngineLiterals.moduleTypes.contains(moduleType)) {
       val modules = fileMetadataRepository.getByParameters(
         Map("filetype" -> "module", "specification.module-type" -> moduleType))
@@ -84,7 +83,7 @@ class ModuleSI(implicit injector: Injector) extends JsonValidator {
       Left(createMessage("rest.modules.type.unknown", moduleType))
   }
 
-  def getRelatedInstances(metadata: ModuleMetadata): mutable.Buffer[String] = {
+  def getRelatedInstances(metadata: ModuleMetadata): Seq[String] = {
     instanceRepository.getByParameters(Map(
       "module-name" -> metadata.specification.name,
       "module-type" -> metadata.specification.moduleType,

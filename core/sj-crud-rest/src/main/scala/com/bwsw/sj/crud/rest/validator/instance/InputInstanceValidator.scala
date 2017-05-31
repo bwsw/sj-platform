@@ -26,7 +26,7 @@ class InputInstanceValidator(implicit injector: Injector) extends InstanceValida
     * @param instance - input parameters for running module
     * @return - List of errors
     */
-  override def validate(instance: Instance, specification: Specification) = {
+  override def validate(instance: Instance, specification: Specification): ArrayBuffer[String] = {
     logger.debug(s"Instance: ${instance.name}. Start a validation of instance of input-streaming type.")
     val errors = new ArrayBuffer[String]()
     errors ++= super.validateGeneralOptions(instance)
@@ -86,7 +86,7 @@ class InputInstanceValidator(implicit injector: Injector) extends InstanceValida
     errors
   }
 
-  def validateStreamOptions(instance: InputInstance, specification: Specification) = {
+  def validateStreamOptions(instance: InputInstance, specification: Specification): ArrayBuffer[String] = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     val errors = new ArrayBuffer[String]()
 
