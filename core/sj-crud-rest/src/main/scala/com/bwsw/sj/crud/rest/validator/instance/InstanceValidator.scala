@@ -8,8 +8,7 @@ import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepo
 import com.bwsw.sj.common.rest.utils.ValidationUtils._
 import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.si.model.module.Specification
-import com.bwsw.sj.common.utils.MessageResourceUtils._
-import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
+import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils, StreamLiterals}
 import com.bwsw.sj.crud.rest.utils.CompletionUtils
 import org.slf4j.{Logger, LoggerFactory}
 import scaldi.Injectable.inject
@@ -23,6 +22,10 @@ import scala.collection.mutable.ArrayBuffer
   * @author Kseniya Tomskikh
   */
 abstract class InstanceValidator(implicit injector: Injector) extends CompletionUtils {
+
+  protected val messageResourceUtils = inject[MessageResourceUtils]
+
+  import messageResourceUtils.createMessage
 
   protected val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)

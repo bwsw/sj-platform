@@ -4,10 +4,10 @@ import java.io.File
 import java.util.jar.JarFile
 
 import com.bwsw.sj.common.si.model.module.ModuleMetadata
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
-import com.bwsw.sj.common.utils.RestLiterals
+import com.bwsw.sj.common.utils.{MessageResourceUtils, RestLiterals}
 import com.bwsw.sj.crud.rest.ModuleInfo
 import com.bwsw.sj.crud.rest.model.FileMetadataApi
+import scaldi.Injectable.inject
 import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
@@ -26,7 +26,10 @@ class ModuleMetadataApi(filename: String,
   override def to()(implicit injector: Injector): ModuleMetadata =
     new ModuleMetadata(filename, SpecificationApi.from(file).to, Option(file))
 
-  def validate: ArrayBuffer[String] = {
+  def validate(implicit injector: Injector): ArrayBuffer[String] = {
+    val messageResourceUtils = inject[MessageResourceUtils]
+    import messageResourceUtils.createMessage
+
     val errors = new ArrayBuffer[String]
 
     if (!filename.endsWith(".jar"))

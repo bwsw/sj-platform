@@ -3,8 +3,7 @@ package com.bwsw.sj.common.si.model.module
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.module.{BatchSpecificationDomain, IOstream, SpecificationDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
-import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
+import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils, StreamLiterals}
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -21,7 +20,12 @@ class Specification(val name: String,
                     val engineName: String,
                     val engineVersion: String,
                     val validatorClass: String,
-                    val executorClass: String) {
+                    val executorClass: String)
+                   (implicit injector: Injector) {
+
+  protected val messageResourceUtils = inject[MessageResourceUtils]
+
+  import messageResourceUtils.createMessage
 
   def to: SpecificationDomain = {
     new SpecificationDomain(
@@ -39,9 +43,9 @@ class Specification(val name: String,
       executorClass)
   }
 
-  def validate(implicit injector: Injector): ArrayBuffer[String] = validateGeneralFields
+  def validate: ArrayBuffer[String] = validateGeneralFields
 
-  protected def validateGeneralFields(implicit injector: Injector): ArrayBuffer[String] = {
+  protected def validateGeneralFields: ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
 
     Option(name) match {
@@ -174,7 +178,7 @@ class Specification(val name: String,
 }
 
 object Specification {
-  def from(specificationDomain: SpecificationDomain): Specification = {
+  def from(specificationDomain: SpecificationDomain)(implicit injector: Injector): Specification = {
     specificationDomain.moduleType match {
       case EngineLiterals.batchStreamingType =>
         val batchSpecificationDomain = specificationDomain.asInstanceOf[BatchSpecificationDomain]

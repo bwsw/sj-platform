@@ -1,8 +1,10 @@
 package com.bwsw.sj.common.si
 
-import com.bwsw.sj.common.utils.MessageResourceUtils._
+import com.bwsw.sj.common.utils.MessageResourceUtils
 import org.everit.json.schema.loader.SchemaLoader
 import org.json.{JSONObject, JSONTokener}
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.util.Try
 
@@ -30,7 +32,10 @@ trait JsonValidator {
     * @param json   JSON-formatted string
     * @param schema JSON-schema
     */
-  def validateWithSchema(json: String, schema: String): Boolean = {
+  def validateWithSchema(json: String, schema: String)(implicit injector: Injector): Boolean = {
+    val messageResourceUtils = inject[MessageResourceUtils]
+    import messageResourceUtils.createMessage
+
     Option(getClass.getClassLoader.getResourceAsStream(schema)) match {
       case Some(schemaStream) =>
         val rawSchema = new JSONObject(new JSONTokener(schemaStream))

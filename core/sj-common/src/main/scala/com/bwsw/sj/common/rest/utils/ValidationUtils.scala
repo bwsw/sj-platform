@@ -2,7 +2,7 @@ package com.bwsw.sj.common.rest.utils
 
 import com.bwsw.sj.common.SjModule
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.MessageResourceUtils._
+import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.common.utils.ServiceLiterals._
 import org.apache.curator.utils.PathUtils
 import org.slf4j.LoggerFactory
@@ -17,6 +17,10 @@ import scala.util.{Failure, Success, Try}
 object ValidationUtils {
 
   import SjModule._
+
+  private val messageResourceUtils = inject[MessageResourceUtils]
+
+  import messageResourceUtils.createMessage
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val providerDAO = inject[ConnectionRepository].getProviderRepository

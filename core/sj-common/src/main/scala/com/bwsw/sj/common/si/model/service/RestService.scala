@@ -2,7 +2,6 @@ package com.bwsw.sj.common.si.model.service
 
 import com.bwsw.sj.common.dal.model.service.RestServiceDomain
 import com.bwsw.sj.common.rest.utils.ValidationUtils.validateProvider
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import com.bwsw.sj.common.utils.RestLiterals
 import scaldi.Injector
 
@@ -21,6 +20,8 @@ class RestService(name: String,
                   serviceType: String)
                  (implicit injector: Injector)
   extends Service(serviceType, name, description) {
+
+  import messageResourceUtils.createMessage
 
   override def to(): RestServiceDomain = {
     val providerRepository = connectionRepository.getProviderRepository

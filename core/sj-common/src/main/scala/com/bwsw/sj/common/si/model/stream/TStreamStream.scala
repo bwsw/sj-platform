@@ -2,7 +2,6 @@ package com.bwsw.sj.common.si.model.stream
 
 import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 import com.bwsw.tstreams.storage.StorageClient
@@ -20,6 +19,8 @@ class TStreamStream(name: String,
                     description: String)
                    (implicit injector: Injector)
   extends SjStream(streamType, name, service, tags, force, description) {
+
+  import messageResourceUtils.createMessage
 
   override def to(): TStreamStreamDomain = {
     val serviceRepository = connectionRepository.getServiceRepository

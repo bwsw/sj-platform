@@ -8,16 +8,20 @@ import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.si._
 import com.bwsw.sj.common.si.model.module.ModuleMetadata
 import com.bwsw.sj.common.si.result.{Created, Deleted, DeletionError, NotCreated}
-import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
+import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils}
 import com.bwsw.sj.crud.rest.model.module.{ModuleMetadataApi, SpecificationApi}
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.sj.crud.rest.{ModuleJar, ModulesResponseEntity, RelatedToModuleResponseEntity, SpecificationResponseEntity}
+import scaldi.Injectable.inject
 import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
 
 class ModuleController(implicit injector: Injector) {
+
+  private val messageResourceUtils = inject[MessageResourceUtils]
+
+  import messageResourceUtils.createMessage
 
   private val serviceInterface = new ModuleSI
 

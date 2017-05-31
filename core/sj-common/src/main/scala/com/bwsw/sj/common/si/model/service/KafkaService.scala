@@ -2,7 +2,6 @@ package com.bwsw.sj.common.si.model.service
 
 import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import com.bwsw.sj.common.rest.utils.ValidationUtils.{validateNamespace, validateProvider}
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import com.bwsw.sj.common.utils.ProviderLiterals
 import scaldi.Injector
 
@@ -16,6 +15,8 @@ class KafkaService(name: String,
                    serviceType: String)
                   (implicit injector: Injector)
   extends Service(serviceType, name, description) {
+
+  import messageResourceUtils.createMessage
 
   override def to(): KafkaServiceDomain = {
     val providerRepository = connectionRepository.getProviderRepository

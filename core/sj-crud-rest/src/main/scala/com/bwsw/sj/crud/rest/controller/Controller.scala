@@ -4,9 +4,12 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.si.ServiceInterface
 import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.si.result.{Deleted, DeletionError, EntityNotFound}
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
+import com.bwsw.sj.common.utils.MessageResourceUtils
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 trait Controller {
+  protected implicit val injector: Injector
   protected val serializer: JsonSerializer = new JsonSerializer(true, true)
   protected val serviceInterface: ServiceInterface[_, _]
 
@@ -20,6 +23,9 @@ trait Controller {
   def get(name: String): RestResponse
 
   def delete(name: String): RestResponse = {
+    val messageResourceUtils = inject[MessageResourceUtils]
+    import messageResourceUtils.createMessage
+
     serviceInterface.delete(name) match {
       case Deleted =>
         OkRestResponse(MessageResponseEntity(createMessage(entityDeletedMessage, name)))

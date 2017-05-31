@@ -9,7 +9,7 @@ import scala.collection.mutable.ArrayBuffer
   * Wrapper for [[ResourceBundle]] of rest messages
   */
 
-object MessageResourceUtils {
+class MessageResourceUtils {
   private val messages = ResourceBundle.getBundle("messages")
 
   def createMessage(name: String, params: String*): String =
