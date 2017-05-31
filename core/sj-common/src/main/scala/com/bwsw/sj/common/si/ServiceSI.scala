@@ -4,7 +4,7 @@ import com.bwsw.sj.common.dal.model.service.ServiceDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.service.Service
 import com.bwsw.sj.common.si.result._
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
+import com.bwsw.sj.common.utils.MessageResourceUtils
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -14,6 +14,10 @@ import scala.collection.mutable
   * Provides methods to access [[Service]]s in [[GenericMongoRepository]]
   */
 class ServiceSI(implicit injector: Injector) extends ServiceInterface[Service, ServiceDomain] {
+  private val messageResourceUtils = inject[MessageResourceUtils]
+
+  import messageResourceUtils.createMessage
+
   private val connectionRepository = inject[ConnectionRepository]
 
   override protected val entityRepository: GenericMongoRepository[ServiceDomain] = connectionRepository.getServiceRepository

@@ -5,7 +5,6 @@ import java.io.File
 import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
 import com.bwsw.sj.common.engine.StreamingValidator
 import com.bwsw.sj.common.si.model.FileMetadata
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
@@ -29,6 +28,8 @@ class ModuleMetadata(filename: String,
     length,
     description,
     uploadDate) {
+
+  import messageResourceUtils.createMessage
 
   override def validate(): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]

@@ -2,7 +2,6 @@ package com.bwsw.sj.common.si.model.service
 
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.rest.utils.ValidationUtils.{validateNamespace, validateProvider}
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
@@ -14,6 +13,8 @@ class ZKService(name: String,
                 serviceType: String)
                (implicit injector: Injector)
   extends Service(serviceType, name, description) {
+
+  import messageResourceUtils.createMessage
 
   override def to(): ZKServiceDomain = {
     val providerRepository = connectionRepository.getProviderRepository

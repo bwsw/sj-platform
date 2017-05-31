@@ -3,8 +3,7 @@ package com.bwsw.sj.common.si.model.stream
 import com.bwsw.sj.common.dal.model.stream._
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils.validateName
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
-import com.bwsw.sj.common.utils.StreamLiterals
+import com.bwsw.sj.common.utils.{MessageResourceUtils, StreamLiterals}
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -17,6 +16,10 @@ class SjStream(val streamType: String,
                val force: Boolean,
                val description: String)
               (implicit injector: Injector) {
+
+  protected val messageResourceUtils = inject[MessageResourceUtils]
+
+  import messageResourceUtils.createMessage
 
   protected val connectionRepository = inject[ConnectionRepository]
 

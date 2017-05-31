@@ -5,7 +5,7 @@ import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepo
 import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.si.model.stream.SjStream
 import com.bwsw.sj.common.si.result._
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
+import com.bwsw.sj.common.utils.MessageResourceUtils
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -15,6 +15,10 @@ import scala.collection.mutable
   * Provides methods to access [[SjStream]]s in [[GenericMongoRepository]]
   */
 class StreamSI(implicit injector: Injector) extends ServiceInterface[SjStream, StreamDomain] {
+  private val messageResourceUtils = inject[MessageResourceUtils]
+
+  import messageResourceUtils.createMessage
+
   private val connectionRepository = inject[ConnectionRepository]
 
   override protected val entityRepository: GenericMongoRepository[StreamDomain] = connectionRepository.getStreamRepository

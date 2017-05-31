@@ -8,17 +8,22 @@ import akka.stream.scaladsl.FileIO
 import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.common.si.CustomFilesSI
-import com.bwsw.sj.common.utils.MessageResourceUtils.{createMessage, getMessage}
+import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.crud.rest.model.FileMetadataApi
 import com.bwsw.sj.crud.rest.{CustomFile, CustomFilesResponseEntity}
+import scaldi.Injectable.inject
 import scaldi.Injector
 
 import scala.concurrent.ExecutionContextExecutor
 
-class CustomFilesController(implicit injector: Injector,
+class CustomFilesController(implicit protected val injector: Injector,
                             implicit val materializer: ActorMaterializer,
                             implicit val executor: ExecutionContextExecutor)
   extends Controller {
+
+  private val messageResourceUtils = inject[MessageResourceUtils]
+
+  import messageResourceUtils._
 
   override val serviceInterface = new CustomFilesSI()
 

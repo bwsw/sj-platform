@@ -4,7 +4,6 @@ import com.bwsw.common.jdbc.JdbcClientBuilder
 import com.bwsw.sj.common.dal.model.provider.JDBCProviderDomain
 import com.bwsw.sj.common.dal.model.service.JDBCServiceDomain
 import com.bwsw.sj.common.rest.utils.ValidationUtils.validateProvider
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
@@ -17,6 +16,8 @@ class JDBCService(name: String,
                   serviceType: String)
                  (implicit injector: Injector)
   extends Service(serviceType, name, description) {
+
+  import messageResourceUtils.createMessage
 
   override def to(): JDBCServiceDomain = {
     val providerRepository = connectionRepository.getProviderRepository
@@ -54,7 +55,7 @@ class JDBCService(name: String,
         if (dbName.isEmpty) {
           errors += createMessage("entity.error.attribute.required", "Database")
         } else if (errors.isEmpty) { //provider should exist in the following test
-        val providerRepository = connectionRepository.getProviderRepository
+          val providerRepository = connectionRepository.getProviderRepository
           var database_exists: Boolean = false
           val provider = providerRepository.get(this.provider).get.asInstanceOf[JDBCProviderDomain]
           Try {

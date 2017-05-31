@@ -11,8 +11,7 @@ import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.si.model.module.{ModuleMetadata, Specification}
 import com.bwsw.sj.common.si._
 import com.bwsw.sj.common.si.result._
-import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.common.utils.MessageResourceUtils.{createMessage, createMessageWithErrors, getMessage}
+import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils}
 import com.bwsw.sj.crud.rest.exceptions.ConfigSettingNotFound
 import com.bwsw.sj.crud.rest.instance.{HttpClient, InstanceDestroyer, InstanceStarter, InstanceStopper}
 import com.bwsw.sj.crud.rest.model.instance._
@@ -30,6 +29,9 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
 class InstanceController(implicit injector: Injector) {
+  private val messageResourceUtils = inject[MessageResourceUtils]
+
+  import messageResourceUtils._
 
   private val logger = LoggerFactory.getLogger(getClass)
   private val serializer = new JsonSerializer(true, true)
