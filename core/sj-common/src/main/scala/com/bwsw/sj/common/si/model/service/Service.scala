@@ -73,7 +73,7 @@ class Service(val serviceType: String,
   }
 }
 
-object Service {
+class ServiceConversion {
 
   import scala.collection.JavaConverters._
 
