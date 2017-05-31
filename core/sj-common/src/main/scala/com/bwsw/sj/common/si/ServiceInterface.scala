@@ -4,8 +4,6 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.repository.GenericMongoRepository
 import com.bwsw.sj.common.si.result.{CreationResult, DeletionResult}
 
-import scala.collection.mutable
-
 /**
   * Provides methods to access entities in [[GenericMongoRepository]]
   *
@@ -23,7 +21,7 @@ trait ServiceInterface[M, T] {
     */
   def create(entity: M): CreationResult
 
-  def getAll(): mutable.Buffer[M]
+  def getAll(): Seq[M]
 
   def get(name: String): Option[M]
 

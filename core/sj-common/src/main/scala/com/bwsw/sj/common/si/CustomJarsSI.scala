@@ -11,7 +11,6 @@ import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import com.bwsw.sj.common.si.result._
 import org.apache.commons.io.FileUtils
 
-import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 /**
@@ -53,7 +52,7 @@ class CustomJarsSI extends ServiceInterface[FileMetadata, FileMetadataDomain] {
     } else NotCreated(errors)
   }
 
-  override def getAll(): mutable.Buffer[FileMetadata] = {
+  override def getAll(): Seq[FileMetadata] = {
     entityRepository.getByParameters(Map("filetype" -> FileMetadata.customJarType)).map(x => FileMetadata.from(x))
   }
 

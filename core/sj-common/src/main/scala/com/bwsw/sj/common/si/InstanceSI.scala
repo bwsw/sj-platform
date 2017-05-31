@@ -33,7 +33,7 @@ class InstanceSI {
   def getAll: mutable.Buffer[Instance] =
     entityRepository.getAll.map(Instance.from)
 
-  def getByModule(moduleType: String, moduleName: String, moduleVersion: String): mutable.Buffer[Instance] = {
+  def getByModule(moduleType: String, moduleName: String, moduleVersion: String): Seq[Instance] = {
     entityRepository.getByParameters(
       Map(
         "module-name" -> moduleName,

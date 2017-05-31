@@ -31,11 +31,11 @@ class GenericMongoRepository[T: ClassTag] extends Repository[T] {
     Option(genericDAO.get(name))
   }
 
-  def getByParameters(parameters: Map[String, Any]): mutable.Buffer[T] = {
+  def getByParameters(parameters: Map[String, Any]): Seq[T] = {
     logger.debug(s"Retrieve an entity from a mongo database by parameters: ${parameters.mkString(", ")}.")
-    val query = genericDAO.createQuery()
+    val query = genericDAO.createQuery().disableValidation()
     query.and(parameters.map(x => query.criteria(x._1).equal(x._2)).toSeq: _*)
-    query.asList().asScala
+    genericDAO.find(query).iterator().asScala.toSeq
   }
 
   def getAll: mutable.Buffer[T] = {

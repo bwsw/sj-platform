@@ -44,7 +44,7 @@ class ConfigSettingsSI extends ServiceInterface[ConfigurationSetting, Configurat
     }
   }
 
-  def getBy(domain: String): mutable.Buffer[ConfigurationSetting] = {
+  def getBy(domain: String): Seq[ConfigurationSetting] = {
     entityRepository.getByParameters(Map("domain" -> domain)).map(ConfigurationSetting.from)
   }
 }

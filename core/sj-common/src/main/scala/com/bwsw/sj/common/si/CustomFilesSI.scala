@@ -8,7 +8,6 @@ import com.bwsw.sj.common.si.model.FileMetadata
 import com.bwsw.sj.common.si.result._
 import org.apache.commons.io.FileUtils
 
-import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 /**
@@ -41,7 +40,7 @@ class CustomFilesSI extends ServiceInterface[FileMetadata, FileMetadataDomain] {
     }
   }
 
-  override def getAll(): mutable.Buffer[FileMetadata] = {
+  override def getAll(): Seq[FileMetadata] = {
     entityRepository.getByParameters(Map("filetype" -> FileMetadata.customFileType)).map(x => FileMetadata.from(x))
   }
 

@@ -80,16 +80,18 @@ class Instance(val name: String,
   }
 
   protected def getStreamsPartitions(streamNames: Array[String]): Array[Int] = {
-    val streams = streamRepository.getAll.filter(s => streamNames.contains(s.name))
-    Array(streams.map { stream =>
-      stream.streamType match {
-        case StreamLiterals.`tstreamType` =>
-          stream.asInstanceOf[TStreamStreamDomain].partitions
-        case StreamLiterals.`kafkaStreamType` =>
-          stream.asInstanceOf[KafkaStreamDomain].partitions
-        case _ => 1
-      }
-    }: _*)
+    val streams = streamNames.flatMap(x => streamRepository.get(x))
+    streams.map(getPartitions)
+  }
+
+  private def getPartitions(stream: StreamDomain): Int = {
+    stream.streamType match {
+      case StreamLiterals.`tstreamType` =>
+        stream.asInstanceOf[TStreamStreamDomain].partitions
+      case StreamLiterals.`kafkaStreamType` =>
+        stream.asInstanceOf[KafkaStreamDomain].partitions
+      case _ => 1
+    }
   }
 
   protected def getStreams(streamNames: Array[String]): Array[StreamDomain] =

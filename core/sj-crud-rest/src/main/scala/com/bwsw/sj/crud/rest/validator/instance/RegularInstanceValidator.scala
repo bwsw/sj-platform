@@ -23,7 +23,7 @@ class RegularInstanceValidator extends InstanceValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
-  override def validate(instance: Instance, specification: Specification) = {
+  override def validate(instance: Instance, specification: Specification): ArrayBuffer[String] = {
     logger.debug(s"Instance: ${instance.name}. Start a validation of instance of regular-streaming type.")
     val errors = new ArrayBuffer[String]()
     errors ++= super.validateGeneralOptions(instance)

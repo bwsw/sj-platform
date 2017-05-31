@@ -11,7 +11,6 @@ import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import org.apache.commons.io.FileUtils
 
-import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 class ModuleSI extends JsonValidator {
@@ -55,7 +54,7 @@ class ModuleSI extends JsonValidator {
     }
   }
 
-  def getAll: mutable.Buffer[ModuleMetadata] = {
+  def getAll: Seq[ModuleMetadata] = {
     entityRepository
       .getByParameters(Map("filetype" -> FileMetadata.moduleType))
       .map(ModuleMetadata.from(_))
@@ -70,7 +69,7 @@ class ModuleSI extends JsonValidator {
     filesMetadata.head.filename
   }
 
-  def getByType(moduleType: String): Either[String, mutable.Buffer[ModuleMetadata]] = {
+  def getByType(moduleType: String): Either[String, Seq[ModuleMetadata]] = {
     if (EngineLiterals.moduleTypes.contains(moduleType)) {
       val modules = fileMetadataRepository.getByParameters(
         Map("filetype" -> "module", "specification.module-type" -> moduleType))
@@ -81,7 +80,7 @@ class ModuleSI extends JsonValidator {
       Left(createMessage("rest.modules.type.unknown", moduleType))
   }
 
-  def getRelatedInstances(metadata: ModuleMetadata): mutable.Buffer[String] = {
+  def getRelatedInstances(metadata: ModuleMetadata): Seq[String] = {
     instanceRepository.getByParameters(Map(
       "module-name" -> metadata.specification.name,
       "module-type" -> metadata.specification.moduleType,
