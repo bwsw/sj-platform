@@ -5,14 +5,14 @@ import java.util.UUID
 import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain}
 import com.bwsw.sj.common.dal.model.service._
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.si.model.provider.Provider
+import com.bwsw.sj.common.si.model.provider.{Provider, ProviderConversion}
 import com.bwsw.sj.common.si.result._
 import org.mockito.ArgumentMatchers.{any, anyString}
 import org.mockito.Mockito.when
 import org.mockito.invocation.InvocationOnMock
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FlatSpec, Matchers}
-import scaldi.Module
+import scaldi.{Injector, Module}
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -46,39 +46,39 @@ class ProviderSiTests extends FlatSpec with Matchers {
     providerStorage.toSet shouldBe initProviderStorage
   }
 
-  it should "return related services if provider has them" in new ProviderMocksWithServices {
+  it should "give related services when provider has them" in new ProviderMocksWithServices {
     val related = providerSI.getRelated(providerWithServicesName)
     related.map(_.toSet) shouldBe Right(relatedServices)
   }
 
-  it should "return empty array if provider does not have related services" in new ProviderMocksWithServices {
+  it should "give empty array when provider does not have related services" in new ProviderMocksWithServices {
     val related = providerSI.getRelated(providerWithoutServicesName)
     related shouldBe Right(mutable.Buffer.empty[String])
   }
 
-  it should "return Left(false) if provider does not exists" in new ProviderMocksWithServices {
+  it should "tell that provider does not exists in getRelated()" in new ProviderMocksWithServices {
     val related = providerSI.getRelated(notExistsProviderName)
     related shouldBe Left(false)
   }
 
-  it should "delete provider if it does not have related services" in new ProviderMocksWithServices {
+  it should "delete provider when it does not have related services" in new ProviderMocksWithServices {
     providerSI.delete(providerWithoutServicesName) shouldBe Deleted
     providerStorage.toSet shouldBe (initProviderStorage - providerWithoutServicesDomain)
   }
 
-  it should "not delete provider if it does not exists" in new ProviderMocksWithServices {
+  it should "not delete provider when it does not exists" in new ProviderMocksWithServices {
     providerSI.delete(notExistsProviderName) shouldBe EntityNotFound
     providerStorage.toSet shouldBe initProviderStorage
   }
 
-  it should "not delete provider if it have related services" in new ProviderMocksWithServices {
+  it should "not delete provider when it have related services" in new ProviderMocksWithServices {
     val deletionError = s"Cannot delete provider '$providerWithServicesName'. Provider is used in services."
 
     providerSI.delete(providerWithServicesName) shouldBe DeletionError(deletionError)
     providerStorage.toSet shouldBe initProviderStorage
   }
 
-  it should "return Right(true) if provider can connect" in new ProviderMocks {
+  it should "tell that provider can connect" in new ProviderMocks {
     val successConnectionProviderName = "success-connection-provider"
     val successConnectionProviderDomain = mock[ProviderDomain]
     when(successConnectionProviderDomain.name).thenReturn(successConnectionProviderName)
@@ -88,7 +88,7 @@ class ProviderSiTests extends FlatSpec with Matchers {
     providerSI.checkConnection(successConnectionProviderName) shouldBe Right(true)
   }
 
-  it should "return Left(errors) if provider cannot connect" in new ProviderMocks {
+  it should "give errors when provider cannot connect" in new ProviderMocks {
     val errors = ArrayBuffer("Conection error")
     val failedConnectionProviderName = "failed-connection-provider"
     val failedConnectionProviderDomain = mock[ProviderDomain]
@@ -99,8 +99,28 @@ class ProviderSiTests extends FlatSpec with Matchers {
     providerSI.checkConnection(failedConnectionProviderName) shouldBe Left(errors)
   }
 
-  it should "return Right(false) if provider does not exists" in new ProviderMocks {
+  it should "tell that provider does not exists" in new ProviderMocks {
     providerSI.checkConnection(notExistsProviderName) shouldBe Right(false)
+  }
+
+  it should "give provider when it exists" in new ProviderMocks {
+    val providerName = "some-provider"
+    val providerDomain = mock[ProviderDomain]
+    when(providerDomain.name).thenReturn(providerName)
+    val provider = mock[Provider]
+    when(provider.name).thenReturn(providerName)
+    providerStorage += providerDomain
+    providers += provider
+
+    providerSI.get(providerName) shouldBe Some(provider)
+  }
+
+  it should "not give provider when it does not exists" in new ProviderMocks {
+    providerSI.get(notExistsProviderName) shouldBe empty
+  }
+
+  it should "give all providers" in new ProviderMocks {
+    providerSI.getAll().toSet shouldBe providers.toSet
   }
 }
 
@@ -109,11 +129,18 @@ trait ProviderMocks extends MockitoSugar {
 
   val initProviderStorageSize = 10
   val providerStorage: mutable.Buffer[ProviderDomain] = Range(0, initProviderStorageSize).map { _ =>
-    val p = mock[ProviderDomain]
-    when(p.name).thenReturn(UUID.randomUUID().toString)
-    p
+    val providerDomain = mock[ProviderDomain]
+    when(providerDomain.name).thenReturn(UUID.randomUUID().toString)
+    providerDomain
   }.toBuffer
   val initProviderStorage: Set[ProviderDomain] = providerStorage.toSet
+
+  val providers = providerStorage.map { providerDomain =>
+    val provider = mock[Provider]
+    val providerName = providerDomain.name
+    when(provider.name).thenReturn(providerName)
+    provider
+  }
 
   val providerRepository = mock[GenericMongoRepository[ProviderDomain]]
   when(providerRepository.getAll).thenReturn({
@@ -139,8 +166,16 @@ trait ProviderMocks extends MockitoSugar {
   val connectionRepository = mock[ConnectionRepository]
   when(connectionRepository.getProviderRepository).thenReturn(providerRepository)
 
+  val providerConversion = mock[ProviderConversion]
+  when(providerConversion.from(any[ProviderDomain])(any[Injector]))
+    .thenAnswer((invocationOnMock: InvocationOnMock) => {
+      val providerDomain = invocationOnMock.getArgument[ProviderDomain](0)
+      providers.find(_.name == providerDomain.name).get
+    })
+
   val module = new Module {
     bind[ConnectionRepository] to connectionRepository
+    bind[ProviderConversion] to providerConversion
   }
   val injector = module.injector
   val providerSI = new ProviderSI()(injector)
