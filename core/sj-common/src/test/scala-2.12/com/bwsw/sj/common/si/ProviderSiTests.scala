@@ -7,6 +7,8 @@ import com.bwsw.sj.common.dal.model.service._
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.provider.{Provider, ProviderConversion}
 import com.bwsw.sj.common.si.result._
+import com.bwsw.sj.common.utils.MessageResourceUtils
+import com.bwsw.sj.common.utils.MessageResourceUtilsMock.messageResourceUtils
 import org.mockito.ArgumentMatchers.{any, anyString}
 import org.mockito.Mockito.when
 import org.mockito.invocation.InvocationOnMock
@@ -72,7 +74,7 @@ class ProviderSiTests extends FlatSpec with Matchers {
   }
 
   it should "not delete provider when it have related services" in new ProviderMocksWithServices {
-    val deletionError = s"Cannot delete provider '$providerWithServicesName'. Provider is used in services."
+    val deletionError = s"rest.providers.provider.cannot.delete:$providerWithServicesName"
 
     providerSI.delete(providerWithServicesName) shouldBe DeletionError(deletionError)
     providerStorage.toSet shouldBe initProviderStorage
@@ -175,6 +177,7 @@ trait ProviderMocks extends MockitoSugar {
 
   val module = new Module {
     bind[ConnectionRepository] to connectionRepository
+    bind[MessageResourceUtils] to messageResourceUtils
     bind[ProviderConversion] to providerConversion
   }
   val injector = module.injector
