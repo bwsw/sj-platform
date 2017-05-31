@@ -45,7 +45,8 @@ object Dependencies {
     "com.fasterxml.jackson.module" % "jackson-module-scala_2.12" % "2.8.8",
     ("org.everit.json" % "org.everit.json.schema" % "1.4.1")
       .exclude("commons-logging", "commons-logging"),
-    "org.scaldi" %% "scaldi" % "0.5.8"
+    "org.scaldi" %% "scaldi" % "0.5.8",
+    "org.mockito" % "mockito-core" % "2.8.9" % "test"
   ))
 
   lazy val sjEngineCoreDependencies = Def.setting(Seq(
