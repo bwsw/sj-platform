@@ -2,7 +2,6 @@ package com.bwsw.sj.common.si.model.stream
 
 import com.bwsw.sj.common.dal.model.service.RestServiceDomain
 import com.bwsw.sj.common.dal.model.stream.RestStreamDomain
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
 import scaldi.Injector
 
@@ -16,6 +15,8 @@ class RestStream(name: String,
                  description: String)
                 (implicit injector: Injector)
   extends SjStream(streamType, name, service, tags, force, description) {
+
+  import messageResourceUtils.createMessage
 
   override def to(): RestStreamDomain = {
     val serviceRepository = connectionRepository.getServiceRepository

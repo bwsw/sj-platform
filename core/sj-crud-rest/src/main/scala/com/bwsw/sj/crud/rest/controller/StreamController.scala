@@ -5,15 +5,19 @@ import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.crud.rest.model.stream.StreamApi
 import com.bwsw.sj.common.si.StreamSI
-import com.bwsw.sj.common.utils.MessageResourceUtils.{createMessage, createMessageWithErrors}
-import com.bwsw.sj.common.utils.StreamLiterals
+import com.bwsw.sj.common.utils.{MessageResourceUtils, StreamLiterals}
 import com.bwsw.sj.crud.rest.{RelatedToStreamResponseEntity, StreamResponseEntity, StreamsResponseEntity}
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
+import scaldi.Injectable.inject
 import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
 
-class StreamController(implicit injector: Injector) extends Controller {
+class StreamController(implicit protected val injector: Injector) extends Controller {
+  private val messageResourceUtils = inject[MessageResourceUtils]
+
+  import messageResourceUtils._
+
   override val serviceInterface = new StreamSI
 
   protected val entityNotFoundMessage: String = "rest.streams.stream.notfound"

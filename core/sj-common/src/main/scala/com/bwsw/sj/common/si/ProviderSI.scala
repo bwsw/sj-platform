@@ -5,7 +5,7 @@ import com.bwsw.sj.common.dal.model.service._
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.provider.{Provider, ProviderConversion}
 import com.bwsw.sj.common.si.result._
-import com.bwsw.sj.common.utils.MessageResourceUtils._
+import com.bwsw.sj.common.utils.MessageResourceUtils
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -16,6 +16,9 @@ import scala.collection.mutable.ArrayBuffer
   * Provides methods to access [[Provider]]s in [[GenericMongoRepository]]
   */
 class ProviderSI(implicit injector: Injector) extends ServiceInterface[Provider, ProviderDomain] {
+  private val messageResourceUtils = inject[MessageResourceUtils]
+
+  import messageResourceUtils.createMessage
 
   private val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
   override protected val entityRepository: GenericMongoRepository[ProviderDomain] = connectionRepository.getProviderRepository

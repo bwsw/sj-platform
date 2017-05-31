@@ -2,7 +2,6 @@ package com.bwsw.sj.common.si.model.stream
 
 import com.bwsw.sj.common.dal.model.service.JDBCServiceDomain
 import com.bwsw.sj.common.dal.model.stream.JDBCStreamDomain
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
 import scaldi.Injector
 
@@ -17,6 +16,8 @@ class JDBCStream(name: String,
                  description: String)
                 (implicit injector: Injector)
   extends SjStream(streamType, name, service, tags, force, description) {
+
+  import messageResourceUtils.createMessage
 
   override def to(): JDBCStreamDomain = {
     val serviceRepository = connectionRepository.getServiceRepository

@@ -2,18 +2,22 @@ package com.bwsw.sj.crud.rest.controller
 
 import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.rest._
-import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.common.si.ProviderSI
-import com.bwsw.sj.common.utils.MessageResourceUtils._
-import com.bwsw.sj.common.utils.ProviderLiterals
+import com.bwsw.sj.common.si.result.{Created, NotCreated}
+import com.bwsw.sj.common.utils.{MessageResourceUtils, ProviderLiterals}
 import com.bwsw.sj.crud.rest._
 import com.bwsw.sj.crud.rest.model.provider.ProviderApi
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
+import scaldi.Injectable.inject
 import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
 
-class ProviderController(implicit injector: Injector) extends Controller {
+class ProviderController(implicit protected val injector: Injector) extends Controller {
+  private val messageResourceUtils = inject[MessageResourceUtils]
+
+  import messageResourceUtils._
+
   override val serviceInterface = new ProviderSI()
 
   override protected val entityDeletedMessage: String = "rest.providers.provider.deleted"

@@ -10,7 +10,7 @@ import com.bwsw.common.es.ElasticsearchClient
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.morphia.MorphiaAnnotations.{IdField, PropertyField}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.utils.ProviderLiterals
+import com.bwsw.sj.common.utils.{MessageResourceUtils, ProviderLiterals}
 import com.datastax.driver.core.Cluster
 import com.datastax.driver.core.exceptions.NoHostAvailableException
 import kafka.javaapi.TopicMetadataRequest
@@ -18,7 +18,6 @@ import kafka.javaapi.consumer.SimpleConsumer
 import org.apache.zookeeper.ZooKeeper
 import org.eclipse.jetty.client.HttpClient
 import org.mongodb.morphia.annotations.Entity
-import com.bwsw.sj.common.utils.MessageResourceUtils._
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -115,6 +114,9 @@ class ProviderDomain(@IdField val name: String,
 
   private def checkZookeeperConnection(address: String)
                                       (implicit injector: Injector): ArrayBuffer[String] = {
+    val messageResourceUtils = inject[MessageResourceUtils]
+    import messageResourceUtils.createMessage
+
     val errors = ArrayBuffer[String]()
     val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
     connectionRepository.getConfigRepository.get(ConfigLiterals.zkSessionTimeoutTag) match {

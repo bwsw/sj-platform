@@ -1,20 +1,25 @@
 package com.bwsw.sj.crud.rest.controller
 
-import com.bwsw.sj.common.rest._
-import com.bwsw.sj.common.utils.MessageResourceUtils._
-import com.bwsw.sj.common.si.ConfigSettingsSI
-import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.config.ConfigLiterals
+import com.bwsw.sj.common.rest._
+import com.bwsw.sj.common.si.ConfigSettingsSI
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import com.bwsw.sj.common.si.result.{Created, NotCreated}
-import com.bwsw.sj.crud.rest.model.config.ConfigurationSettingApi
+import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.crud.rest._
+import com.bwsw.sj.crud.rest.model.config.ConfigurationSettingApi
+import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
+import scaldi.Injectable.inject
 import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
 
-class ConfigSettingsController(implicit injector: Injector) extends Controller {
+class ConfigSettingsController(implicit protected val injector: Injector) extends Controller {
+  private val messageResourceUtils = inject[MessageResourceUtils]
+
+  import messageResourceUtils._
+
   val serviceInterface = new ConfigSettingsSI()
 
   override protected val entityDeletedMessage: String = "rest.config.setting.deleted"

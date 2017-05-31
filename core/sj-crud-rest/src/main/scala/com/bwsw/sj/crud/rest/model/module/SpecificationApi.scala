@@ -6,10 +6,11 @@ import java.util.jar.JarFile
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.module.IOstream
 import com.bwsw.sj.common.si.model.module._
-import com.bwsw.sj.common.utils.EngineLiterals
-import com.bwsw.sj.common.utils.MessageResourceUtils.getMessage
+import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils}
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty, JsonSubTypes, JsonTypeInfo}
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 import scala.collection.JavaConverters._
 import scala.util.Try
@@ -31,7 +32,7 @@ class SpecificationApi(val name: String,
                        @JsonProperty("executor-class") val executorClass: String) {
 
   @JsonIgnore
-  def to: Specification = new Specification(
+  def to(implicit injector: Injector): Specification = new Specification(
     name,
     description,
     version,
@@ -84,7 +85,10 @@ object SpecificationApi {
     }
   }
 
-  def from(file: File): SpecificationApi = {
+  def from(file: File)(implicit injector: Injector): SpecificationApi = {
+    val messageResourceUtils = inject[MessageResourceUtils]
+    import messageResourceUtils.getMessage
+
     val jar = new JarFile(file)
     val enu = jar.entries().asScala
     enu.find(_.getName == "specification.json") match {

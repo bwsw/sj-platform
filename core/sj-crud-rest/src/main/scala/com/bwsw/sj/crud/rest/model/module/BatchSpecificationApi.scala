@@ -4,6 +4,7 @@ import com.bwsw.sj.common.dal.model.module.IOstream
 import com.bwsw.sj.common.si.model.module.BatchSpecification
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.fasterxml.jackson.annotation.JsonProperty
+import scaldi.Injector
 
 class BatchSpecificationApi(name: String,
                             description: String,
@@ -32,7 +33,7 @@ class BatchSpecificationApi(name: String,
     validatorClass,
     executorClass) {
 
-  override def to: BatchSpecification = new BatchSpecification(
+  override def to(implicit injector: Injector): BatchSpecification = new BatchSpecification(
     name,
     description,
     version,
