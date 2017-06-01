@@ -22,8 +22,9 @@ import scala.collection.mutable.ArrayBuffer
   *
   * @author Kseniya Tomskikh
   */
-abstract class InstanceValidator(implicit injector: Injector) extends CompletionUtils {
+abstract class InstanceValidator(implicit val injector: Injector) extends CompletionUtils {
 
+  type T <: Instance
   protected val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
   var serviceRepository: GenericMongoRepository[ServiceDomain] = connectionRepository.getServiceRepository
@@ -36,15 +37,15 @@ abstract class InstanceValidator(implicit injector: Injector) extends Completion
     * @param instance - input parameters for running module
     * @return - List of errors
     */
-  def validate(instance: Instance, specification: Specification): ArrayBuffer[String]
+  def validate(instance: T, specification: Specification): Seq[String] = {
+    validateGeneralOptions(instance) ++ validateStreamOptions(instance, specification)
+  }
 
   /**
-    * Validation base instance options
+    * Validation of base instance parameters
     *
-    * @param instance - Instance parameters
-    * @return - List of errors
     */
-  protected def validateGeneralOptions(instance: Instance): ArrayBuffer[String] = {
+  private def validateGeneralOptions(instance: Instance): ArrayBuffer[String] = {
     logger.debug(s"Instance: ${instance.name}. General options validation.")
     val errors = new ArrayBuffer[String]()
 
@@ -105,7 +106,13 @@ abstract class InstanceValidator(implicit injector: Injector) extends Completion
     errors
   }
 
-  protected def doesContainDoubles(list: Array[String]): Boolean = {
+  /**
+    * Validation of instance streams parameters and related parameters
+    *
+    */
+  protected def validateStreamOptions(instance: T, specification: Specification): Seq[String] = Seq()
+
+  protected def doesContainDuplicates(list: Array[String]): Boolean = {
     list.map(x => (x, 1)).groupBy(_._1).map(x => x._2.reduce { (a, b) => (a._1, a._2 + b._2) }).exists(x => x._2 > 1)
   }
 
@@ -115,7 +122,7 @@ abstract class InstanceValidator(implicit injector: Injector) extends Completion
   }
 
   /**
-    * Getting service names for all streams (must be one element in list)
+    * Getting service names for all streams
     *
     * @param streams All streams
     * @return List of service-names
@@ -166,6 +173,6 @@ abstract class InstanceValidator(implicit injector: Injector) extends Completion
   def getStreamMode(name: String): String = {
     val nameWithMode = name.split(s"/")
     if (nameWithMode.length == 1) EngineLiterals.splitStreamMode
-    else nameWithMode(1)
+    else nameWithMode(0)
   }
 }

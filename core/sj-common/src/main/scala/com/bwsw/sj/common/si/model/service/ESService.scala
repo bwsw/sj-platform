@@ -1,7 +1,7 @@
 package com.bwsw.sj.common.si.model.service
 
 import com.bwsw.sj.common.dal.model.service.ESServiceDomain
-import com.bwsw.sj.common.rest.utils.ValidationUtils.{validateNamespace, validateProvider}
+import com.bwsw.sj.common.rest.utils.ValidationUtils.validateNamespace
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import scaldi.Injector
 
@@ -9,11 +9,11 @@ import scala.collection.mutable.ArrayBuffer
 
 class ESService(name: String,
                 val index: String,
-                val provider: String,
+                provider: String,
                 description: String,
                 serviceType: String)
                (implicit injector: Injector)
-  extends Service(serviceType, name, description) {
+  extends Service(serviceType, name, provider, description) {
 
   override def to(): ESServiceDomain = {
     val providerRepository = connectionRepository.getProviderRepository
@@ -35,7 +35,7 @@ class ESService(name: String,
     errors ++= super.validateGeneralFields()
 
     // 'provider' field
-    errors ++= validateProvider(this.provider, this.serviceType)
+    errors ++= validateProvider()
 
     // 'index' field
     Option(this.index) match {

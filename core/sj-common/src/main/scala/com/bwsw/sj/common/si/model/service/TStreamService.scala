@@ -1,20 +1,20 @@
 package com.bwsw.sj.common.si.model.service
 
 import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
-import com.bwsw.sj.common.rest.utils.ValidationUtils.{validatePrefix, validateProvider, validateToken}
+import com.bwsw.sj.common.rest.utils.ValidationUtils.{validatePrefix, validateToken}
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 
 class TStreamService(name: String,
-                     val provider: String,
+                     provider: String,
                      val prefix: String,
                      val token: String,
                      description: String,
                      serviceType: String)
                     (implicit injector: Injector)
-  extends Service(serviceType, name, description) {
+  extends Service(serviceType, name, provider, description) {
 
   override def to(): TStreamServiceDomain = {
     val providerRepository = connectionRepository.getProviderRepository
@@ -38,7 +38,7 @@ class TStreamService(name: String,
     errors ++= super.validateGeneralFields()
 
     // 'provider' field
-    errors ++= validateProvider(this.provider, this.serviceType)
+    errors ++= validateProvider()
 
     // 'prefix' field
     Option(this.prefix) match {

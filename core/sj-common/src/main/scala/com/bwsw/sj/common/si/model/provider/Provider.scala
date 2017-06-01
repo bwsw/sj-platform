@@ -23,6 +23,7 @@ class Provider(val name: String,
               (implicit injector: Injector) {
 
   protected val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
+  private val providerRepository = connectionRepository.getProviderRepository
 
   def to(): ProviderDomain = {
     new ProviderDomain(
@@ -42,7 +43,6 @@ class Provider(val name: String,
     */
   def validate(): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]()
-    val providerRepository = connectionRepository.getProviderRepository
 
     // 'name' field
     Option(this.name) match {

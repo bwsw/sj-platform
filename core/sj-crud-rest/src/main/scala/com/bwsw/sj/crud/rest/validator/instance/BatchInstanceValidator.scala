@@ -2,13 +2,13 @@ package com.bwsw.sj.crud.rest.validator.instance
 
 import com.bwsw.sj.common.dal.model.service.{KafkaServiceDomain, TStreamServiceDomain}
 import com.bwsw.sj.common.dal.model.stream.KafkaStreamDomain
-import com.bwsw.sj.common.si.model.instance.{BatchInstance, Instance}
+import com.bwsw.sj.common.si.model.instance.BatchInstance
 import com.bwsw.sj.common.si.model.module.Specification
-import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals}
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
-import com.bwsw.sj.common.utils.StreamUtils._
 import com.bwsw.sj.common.utils.StreamLiterals._
+import com.bwsw.sj.common.utils.StreamUtils._
+import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals}
 import org.slf4j.{Logger, LoggerFactory}
 import scaldi.Injector
 
@@ -23,55 +23,53 @@ import scala.util.{Failure, Success, Try}
 class BatchInstanceValidator(implicit injector: Injector) extends InstanceValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
+  override type T = BatchInstance
 
-  override def validate(parameters: Instance, specification: Specification): ArrayBuffer[String] = {
-    logger.debug(s"Instance: ${parameters.name}. Start a validation of instance of batch-streaming type.")
+  override def validate(instance: T, specification: Specification): Seq[String] = {
+    logger.debug(s"Instance: ${instance.name}. Start a validation of instance of batch-streaming type.")
     val errors = new ArrayBuffer[String]()
-    errors ++= super.validateGeneralOptions(parameters)
-    val batchInstanceMetadata = parameters.asInstanceOf[BatchInstance]
+    errors ++= super.validate(instance, specification)
 
     // 'state-management' field
-    if (!stateManagementModes.contains(batchInstanceMetadata.stateManagement)) {
-      errors += createMessage("rest.validator.attribute.unknown.value", "stateManagement", batchInstanceMetadata.stateManagement) + ". " +
+    if (!stateManagementModes.contains(instance.stateManagement)) {
+      errors += createMessage("rest.validator.attribute.unknown.value", "stateManagement", instance.stateManagement) + ". " +
         createMessage("rest.validator.attribute.must.one_of", "stateManagement", stateManagementModes.mkString("[", ", ", "]"))
     } else {
-      if (batchInstanceMetadata.stateManagement != EngineLiterals.noneStateMode) {
+      if (instance.stateManagement != EngineLiterals.noneStateMode) {
         // 'state-full-checkpoint' field
-        if (batchInstanceMetadata.stateFullCheckpoint <= 0) {
+        if (instance.stateFullCheckpoint <= 0) {
           errors += createMessage("rest.validator.attribute.must.greater.than.zero", "stateFullCheckpoint")
         }
       }
     }
 
     // 'event-wait-idle-time' field
-    if (batchInstanceMetadata.eventWaitIdleTime <= 0) {
+    if (instance.eventWaitIdleTime <= 0) {
       errors += createMessage("rest.validator.attribute.must.greater.than.zero", "eventWaitIdleTime")
     }
 
     // 'window' field
-    if (batchInstanceMetadata.window <= 0) {
+    if (instance.window <= 0) {
       errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Window")
     }
 
     // 'sliding-interval' field
-    if (batchInstanceMetadata.slidingInterval <= 0) {
+    if (instance.slidingInterval <= 0) {
       errors += createMessage("rest.validator.attribute.must.greater.than.zero", "slidingInterval")
     }
 
-    if (batchInstanceMetadata.slidingInterval > batchInstanceMetadata.window) {
+    if (instance.slidingInterval > instance.window) {
       errors += createMessage("rest.validator.attribute.must.greater.or.equal", "Window", "slidingInterval")
     }
 
-    if (Try(AvroRecordUtils.jsonToSchema(batchInstanceMetadata.inputAvroSchema)).isFailure)
+    if (Try(AvroRecordUtils.jsonToSchema(instance.inputAvroSchema)).isFailure)
       errors += createMessage("rest.validator.attribute.not", "inputAvroSchema", "Avro Schema")
 
-
-    errors ++= validateStreamOptions(batchInstanceMetadata, specification)
 
     errors
   }
 
-  def validateStreamOptions(instance: BatchInstance, specification: Specification): ArrayBuffer[String] = {
+  override protected def validateStreamOptions(instance: T, specification: Specification): Seq[String] = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     val errors = new ArrayBuffer[String]()
     val inputs = instance.inputsOrEmptyList
@@ -90,7 +88,7 @@ class BatchInstanceValidator(implicit injector: Injector) extends InstanceValida
     }
 
     val clearInputs = inputs.map(clearStreamFromMode)
-    if (doesContainDoubles(clearInputs)) {
+    if (doesContainDuplicates(clearInputs)) {
       errors += createMessage("rest.validator.sources.not.unique", "Inputs")
     }
     val inputStreams = getStreams(clearInputs)
@@ -137,7 +135,7 @@ class BatchInstanceValidator(implicit injector: Injector) extends InstanceValida
     if (instance.outputs.length > outputsCardinality(1)) {
       errors += createMessage("rest.validator.cardinality.cannot.more", "outputs", s"${outputsCardinality(1)}")
     }
-    if (doesContainDoubles(instance.outputs)) {
+    if (doesContainDuplicates(instance.outputs)) {
       errors += createMessage("rest.validator.sources.not.unique", "Outputs")
     }
     val outputStreams = getStreams(instance.outputs)
