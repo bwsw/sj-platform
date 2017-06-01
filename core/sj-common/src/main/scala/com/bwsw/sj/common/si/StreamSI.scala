@@ -1,8 +1,8 @@
 package com.bwsw.sj.common.si
 
+import com.bwsw.sj.common.dal.model.instance.{InputInstanceDomain, InstanceDomain}
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.si.model.stream.{SjStream, StreamConversion}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils
@@ -69,14 +69,17 @@ class StreamSI(implicit injector: Injector) extends ServiceInterface[SjStream, S
     entityRepository.get(name).map(_ => getRelatedInstances(name))
 
   private def getRelatedInstances(streamName: String): mutable.Buffer[String] =
-    getAllInstances.filter(related(streamName)).map(_.name)
+    instanceRepository.getAll.filter(related(streamName)).map(_.name)
 
-  private def related(streamName: String)(instance: Instance): Boolean =
-    instance.streams.contains(streamName)
+  private def related(streamName: String)(instance: InstanceDomain): Boolean = {
+    instance match {
+      case (_: InputInstanceDomain) =>
+        instance.outputs.contains(streamName)
+      case _ =>
+        instance.outputs.contains(streamName) || instance.getInputsWithoutStreamMode.contains(streamName)
+    }
+  }
 
   private def hasRelatedInstances(streamName: String): Boolean =
-    getAllInstances.exists(related(streamName))
-
-  private def getAllInstances =
-    instanceRepository.getAll.map(Instance.from)
+    instanceRepository.getAll.exists(related(streamName))
 }
