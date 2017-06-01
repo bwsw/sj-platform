@@ -22,12 +22,12 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000)
 
   import EngineLiterals._
 
-  def run() = {
+  def run(): Unit = {
     Try {
       logger.info(s"Instance: '${instance.name}'. Destroy an instance.")
       updateInstanceStatus(instance, deleting)
       deleteFramework()
-      deleteInstance()
+      deleteInstance(instance.name)
       close()
     } match {
       case Success(_) =>
@@ -69,9 +69,5 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000)
         hasDeleted = true
       }
     } //todo will see about it, maybe get stuck implicitly
-  }
-
-  private def deleteInstance() = {
-    instanceRepository.delete(instance.name)
   }
 }
