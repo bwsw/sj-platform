@@ -9,6 +9,7 @@ import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepo
 import com.bwsw.sj.common.si.model.FileMetadata
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import com.bwsw.sj.common.si.result._
+import com.bwsw.sj.common.utils.SpecificationUtils
 import org.apache.commons.io.FileUtils
 import scaldi.Injectable.inject
 import scaldi.Injector
@@ -38,7 +39,7 @@ class CustomJarsSI(implicit injector: Injector) extends ServiceInterface[FileMet
     val errors = entity.validate()
 
     if (errors.isEmpty) {
-      val specification = FileMetadata.getSpecification(entity.file.get)
+      val specification = inject[SpecificationUtils].getSpecification(entity.file.get)
       val uploadingFile = new File(entity.filename)
       FileUtils.copyFile(entity.file.get, uploadingFile)
       val specificationMap = serializer.deserialize[Map[String, Any]](serializer.serialize(specification))
