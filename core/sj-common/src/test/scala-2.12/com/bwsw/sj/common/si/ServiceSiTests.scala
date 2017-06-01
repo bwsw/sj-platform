@@ -7,7 +7,8 @@ import com.bwsw.sj.common.dal.model.service.{ServiceDomain, ZKServiceDomain}
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.service.{Service, ServiceConversion}
-import com.bwsw.sj.common.si.result.{Created, NotCreated}
+import com.bwsw.sj.common.si.result._
+import com.bwsw.sj.common.utils.{MessageResourceUtils, MessageResourceUtilsMock}
 import org.mockito.ArgumentMatchers.{any, anyString}
 import org.mockito.Mockito.when
 import org.mockito.invocation.InvocationOnMock
@@ -81,6 +82,37 @@ class ServiceSiTests extends FlatSpec with Matchers {
     serviceSI.getRelated(nonExistsServiceName) shouldBe Left(false)
   }
 
+  it should "delete service when it does not have related streams and instances" in new ServiceMocksWithRelated {
+    serviceSI.delete(serviceWithoutRelatedName) shouldBe Deleted
+    serviceStorage.toSet shouldBe (initServiceStorage - serviceWithoutRelatedDomain)
+  }
+
+  it should "not delete service when it does not exists" in new ServiceMocksWithRelated {
+    serviceSI.delete(nonExistsServiceName) shouldBe EntityNotFound
+    serviceStorage.toSet shouldBe initServiceStorage
+  }
+
+  it should "not delete service when it have related streams" in new ServiceMocksWithRelated {
+    val deletionError = s"rest.services.service.cannot.delete.due.to.streams:$serviceWithRelatedOnlyStreamsName"
+
+    serviceSI.delete(serviceWithRelatedOnlyStreamsName) shouldBe DeletionError(deletionError)
+    serviceStorage.toSet shouldBe initServiceStorage
+  }
+
+  it should "not delete service when it have related instances" in new ServiceMocksWithRelated {
+    val deletionError = s"rest.services.service.cannot.delete.due.to.instances:$serviceWithRelatedOnlyInstancesName"
+
+    serviceSI.delete(serviceWithRelatedOnlyInstancesName) shouldBe DeletionError(deletionError)
+    serviceStorage.toSet shouldBe initServiceStorage
+  }
+
+  it should "not delete service when it have related streams and instances" in new ServiceMocksWithRelated {
+    val deletionError = s"rest.services.service.cannot.delete.due.to.streams:$serviceWithRelatedBothName"
+
+    serviceSI.delete(serviceWithRelatedBothName) shouldBe DeletionError(deletionError)
+    serviceStorage.toSet shouldBe initServiceStorage
+  }
+
   trait ServiceMocks extends MockitoSugar {
     val nonExistsServiceName = "non-exist-service"
 
@@ -136,6 +168,7 @@ class ServiceSiTests extends FlatSpec with Matchers {
 
     val module = new Module {
       bind[ConnectionRepository] to connectionRepository
+      bind[MessageResourceUtils] to MessageResourceUtilsMock.messageResourceUtils
       bind[ServiceConversion] to serviceConversion
     }
     val injector = module.injector
