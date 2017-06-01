@@ -3,7 +3,6 @@ package com.bwsw.sj.common.si.model.service
 import com.bwsw.common.jdbc.JdbcClientBuilder
 import com.bwsw.sj.common.dal.model.provider.JDBCProviderDomain
 import com.bwsw.sj.common.dal.model.service.JDBCServiceDomain
-import com.bwsw.sj.common.rest.utils.ValidationUtils.validateProvider
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import scaldi.Injector
 
@@ -12,11 +11,11 @@ import scala.util.{Failure, Success, Try}
 
 class JDBCService(name: String,
                   val database: String,
-                  val provider: String,
+                  provider: String,
                   description: String,
                   serviceType: String)
                  (implicit injector: Injector)
-  extends Service(serviceType, name, description) {
+  extends Service(serviceType, name, provider, description) {
 
   override def to(): JDBCServiceDomain = {
     val providerRepository = connectionRepository.getProviderRepository
@@ -39,7 +38,7 @@ class JDBCService(name: String,
     errors ++= super.validateGeneralFields()
 
     // 'provider' field
-    errors ++= validateProvider(this.provider, this.serviceType)
+    errors ++= validateProvider()
 
     // 'name' field
     val charSequence: CharSequence = "-"

@@ -68,7 +68,9 @@ object Dependencies {
     "com.typesafe.akka" %% "akka-http" % "10.0.3",
     ("org.apache.httpcomponents" % "httpclient" % "4.5.2")
       .exclude("commons-logging", "commons-logging"),
-    "com.typesafe.akka" %% "akka-slf4j" % "2.4.16"
+    "com.typesafe.akka" %% "akka-slf4j" % "2.4.16",
+    "org.scalatest" % "scalatest_2.12" % "3.0.1" % "provided",
+    "org.mockito" % "mockito-core" % "2.8.9" % "provided"
   ))
 
   lazy val sjInputEngineDependencies = Def.setting(Seq(

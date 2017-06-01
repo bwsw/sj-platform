@@ -2,13 +2,13 @@ package com.bwsw.sj.crud.rest.validator.instance
 
 import com.bwsw.sj.common.dal.model.service.{KafkaServiceDomain, TStreamServiceDomain}
 import com.bwsw.sj.common.dal.model.stream.KafkaStreamDomain
-import com.bwsw.sj.common.si.model.instance.{Instance, RegularInstance}
+import com.bwsw.sj.common.si.model.instance.RegularInstance
 import com.bwsw.sj.common.si.model.module.Specification
-import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals}
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
-import com.bwsw.sj.common.utils.StreamUtils._
 import com.bwsw.sj.common.utils.StreamLiterals._
+import com.bwsw.sj.common.utils.StreamUtils._
+import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals}
 import org.slf4j.{Logger, LoggerFactory}
 import scaldi.Injector
 
@@ -23,15 +23,16 @@ import scala.util.{Failure, Success, Try}
 class RegularInstanceValidator(implicit injector: Injector) extends InstanceValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
+  override type T = RegularInstance
 
-  override def validate(instance: Instance, specification: Specification): ArrayBuffer[String] = {
+  override def validate(instance: T, specification: Specification): ArrayBuffer[String] = {
     logger.debug(s"Instance: ${instance.name}. Start a validation of instance of regular-streaming type.")
     val errors = new ArrayBuffer[String]()
-    errors ++= super.validateGeneralOptions(instance)
-    val regularInstanceMetadata = instance.asInstanceOf[RegularInstance]
+    errors ++= super.validate(instance, specification
+    )
 
     // 'checkpoint-mode' field
-    Option(regularInstanceMetadata.checkpointMode) match {
+    Option(instance.checkpointMode) match {
       case None =>
         errors += createMessage("rest.validator.attribute.required", "checkpointMode")
       case Some(x) =>
@@ -47,36 +48,36 @@ class RegularInstanceValidator(implicit injector: Injector) extends InstanceVali
     }
 
     // 'checkpoint-interval' field
-    if (regularInstanceMetadata.checkpointInterval <= 0) {
+    if (instance.checkpointInterval <= 0) {
       errors += createMessage("rest.validator.attribute.required", "checkpointInterval") + ". " +
         createMessage("rest.validator.attribute.must.greater.than.zero", "checkpointInterval")
     }
 
     // 'event-wait-idle-time' field
-    if (regularInstanceMetadata.eventWaitIdleTime <= 0) {
+    if (instance.eventWaitIdleTime <= 0) {
       errors += createMessage("rest.validator.attribute.must.greater.than.zero", "eventWaitIdleTime")
     }
 
     // 'state-management' field
-    if (!stateManagementModes.contains(regularInstanceMetadata.stateManagement)) {
-      errors += createMessage("rest.validator.attribute.unknown.value", "stateManagement", regularInstanceMetadata.stateManagement) + ". " +
+    if (!stateManagementModes.contains(instance.stateManagement)) {
+      errors += createMessage("rest.validator.attribute.unknown.value", "stateManagement", instance.stateManagement) + ". " +
         createMessage("rest.validator.attribute.must.one_of", "stateManagement", stateManagementModes.mkString("[", ", ", "]"))
     } else {
-      if (regularInstanceMetadata.stateManagement != EngineLiterals.noneStateMode) {
+      if (instance.stateManagement != EngineLiterals.noneStateMode) {
         // 'state-full-checkpoint' field
-        if (regularInstanceMetadata.stateFullCheckpoint <= 0) {
+        if (instance.stateFullCheckpoint <= 0) {
           errors += createMessage("rest.validator.attribute.must.greater.than.zero", "stateFullCheckpoint")
         }
       }
     }
 
-    if (Try(AvroRecordUtils.jsonToSchema(regularInstanceMetadata.inputAvroSchema)).isFailure)
+    if (Try(AvroRecordUtils.jsonToSchema(instance.inputAvroSchema)).isFailure)
       errors += createMessage("rest.validator.attribute.not", "inputAvroSchema", "Avro Schema")
 
-    errors ++= validateStreamOptions(regularInstanceMetadata, specification)
+    errors
   }
 
-  private def validateStreamOptions(instance: RegularInstance, specification: Specification) = {
+  override protected def validateStreamOptions(instance: RegularInstance, specification: Specification): Seq[String] = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     val errors = new ArrayBuffer[String]()
 
@@ -94,7 +95,7 @@ class RegularInstanceValidator(implicit injector: Injector) extends InstanceVali
     }
 
     val clearInputs = instance.inputs.map(clearStreamFromMode)
-    if (doesContainDoubles(clearInputs)) {
+    if (doesContainDuplicates(clearInputs)) {
       errors += createMessage("rest.validator.sources.not.unique", "Inputs")
     }
     val inputStreams = getStreams(clearInputs)
@@ -141,7 +142,7 @@ class RegularInstanceValidator(implicit injector: Injector) extends InstanceVali
     if (instance.outputs.length > outputsCardinality(1)) {
       errors += createMessage("rest.validator.cardinality.cannot.more", "outputs", s"${outputsCardinality(1)}")
     }
-    if (doesContainDoubles(instance.outputs)) {
+    if (doesContainDuplicates(instance.outputs)) {
       errors += createMessage("rest.validator.sources.not.unique", "Outputs")
     }
     val outputStreams = getStreams(instance.outputs)

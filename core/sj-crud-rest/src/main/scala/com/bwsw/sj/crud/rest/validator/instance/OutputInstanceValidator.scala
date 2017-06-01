@@ -2,12 +2,12 @@ package com.bwsw.sj.crud.rest.validator.instance
 
 import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
-import com.bwsw.sj.common.si.model.instance.{Instance, OutputInstance}
+import com.bwsw.sj.common.si.model.instance.OutputInstance
 import com.bwsw.sj.common.si.model.module.Specification
-import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals}
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.StreamUtils._
+import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals}
 import org.slf4j.{Logger, LoggerFactory}
 import scaldi.Injector
 
@@ -22,10 +22,11 @@ import scala.util.{Failure, Success, Try}
 class OutputInstanceValidator(implicit injector: Injector) extends InstanceValidator {
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
-  private val streamsDAO = connectionRepository.getStreamRepository
+  private val streamRepository = connectionRepository.getStreamRepository
+  override type T = OutputInstance
 
   private def getStream(streamName: String) = {
-    streamsDAO.get(streamName)
+    streamRepository.get(streamName)
   }
 
   /**
@@ -35,10 +36,10 @@ class OutputInstanceValidator(implicit injector: Injector) extends InstanceValid
     * @param specification - specification of module
     * @return - List of errors
     */
-  override def validate(instance: Instance, specification: Specification): ArrayBuffer[String] = {
+  override def validate(instance: T, specification: Specification): Seq[String] = {
     logger.debug(s"Instance: ${instance.name}. Start a validation of instance of output-streaming type.")
     val errors = new ArrayBuffer[String]()
-    errors ++= super.validateGeneralOptions(instance)
+    errors ++= super.validate(instance, specification)
     val outputInstanceMetadata = instance.asInstanceOf[OutputInstance]
 
     Option(outputInstanceMetadata.checkpointMode) match {
@@ -65,10 +66,10 @@ class OutputInstanceValidator(implicit injector: Injector) extends InstanceValid
     if (Try(AvroRecordUtils.jsonToSchema(outputInstanceMetadata.inputAvroSchema)).isFailure)
       errors += createMessage("rest.validator.attribute.not", "inputAvroSchema", "Avro Schema")
 
-    errors ++= validateStreamOptions(outputInstanceMetadata, specification)
+    errors
   }
 
-  private def validateStreamOptions(instance: OutputInstance, specification: Specification) = {
+  override protected def validateStreamOptions(instance: OutputInstance, specification: Specification): Seq[String] = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     val errors = new ArrayBuffer[String]()
 
