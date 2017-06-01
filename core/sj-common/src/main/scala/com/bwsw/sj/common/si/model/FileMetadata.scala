@@ -65,7 +65,7 @@ class FileMetadata(val filename: String,
 
   private def doesCustomJarExist(specification: SpecificationDomain) = {
     fileMetadataRepository.getByParameters(
-      Map("filetype" -> FileMetadata.customJarType,
+      Map("filetype" -> FileMetadataLiterals.customJarType,
         "specification.name" -> specification.name,
         "specification.version" -> specification.version
       )).nonEmpty
@@ -73,11 +73,13 @@ class FileMetadata(val filename: String,
 
 }
 
-object FileMetadata {
+object FileMetadataLiterals {
   val customJarType: String = "custom"
   val customFileType: String = "custom-file"
   val moduleType: String = "module"
+}
 
+class FileMetadataConversion {
   def from(fileMetadataDomain: FileMetadataDomain)(implicit injector: Injector): FileMetadata = {
     new FileMetadata(
       fileMetadataDomain.filename,

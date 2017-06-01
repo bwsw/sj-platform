@@ -6,7 +6,7 @@ import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.si.model.FileMetadata
+import com.bwsw.sj.common.si.model.{FileMetadata, FileMetadataConversion, FileMetadataLiterals}
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.SpecificationUtils
@@ -43,7 +43,7 @@ class CustomJarsSI(implicit injector: Injector) extends ServiceInterface[FileMet
       val uploadingFile = new File(entity.filename)
       FileUtils.copyFile(entity.file.get, uploadingFile)
       val specificationMap = serializer.deserialize[Map[String, Any]](serializer.serialize(specification))
-      fileStorage.put(uploadingFile, entity.filename, specificationMap, FileMetadata.customJarType)
+      fileStorage.put(uploadingFile, entity.filename, specificationMap, FileMetadataLiterals.customJarType)
       val name = specification.name + "-" + specification.version
       val customJarConfig = ConfigurationSettingDomain(
         ConfigurationSetting.createConfigurationSettingName(ConfigLiterals.systemDomain, name),
@@ -57,7 +57,8 @@ class CustomJarsSI(implicit injector: Injector) extends ServiceInterface[FileMet
   }
 
   override def getAll(): Seq[FileMetadata] = {
-    entityRepository.getByParameters(Map("filetype" -> FileMetadata.customJarType)).map(x => FileMetadata.from(x))
+    entityRepository.getByParameters(Map("filetype" -> FileMetadataLiterals.customJarType))
+      .map(x => inject[FileMetadataConversion].from(x))
   }
 
   override def get(name: String): Option[FileMetadata] = {
@@ -73,7 +74,7 @@ class CustomJarsSI(implicit injector: Injector) extends ServiceInterface[FileMet
   }
 
   override def delete(name: String): DeletionResult = {
-    val fileMetadatas = entityRepository.getByParameters(Map("filetype" -> FileMetadata.customJarType, "filename" -> name))
+    val fileMetadatas = entityRepository.getByParameters(Map("filetype" -> FileMetadataLiterals.customJarType, "filename" -> name))
 
     if (fileMetadatas.isEmpty)
       EntityNotFound
@@ -95,7 +96,7 @@ class CustomJarsSI(implicit injector: Injector) extends ServiceInterface[FileMet
     * @param version version of custom jar file from [[com.bwsw.sj.common.si.model.module.Specification]]
     */
   def getBy(name: String, version: String): Option[FileMetadata] = {
-    val fileMetadatas = entityRepository.getByParameters(Map("filetype" -> FileMetadata.customJarType,
+    val fileMetadatas = entityRepository.getByParameters(Map("filetype" -> FileMetadataLiterals.customJarType,
       "specification.name" -> name,
       "specification.version" -> version)
     )
@@ -121,7 +122,7 @@ class CustomJarsSI(implicit injector: Injector) extends ServiceInterface[FileMet
     *         Left(error) if some error happened
     */
   def deleteBy(name: String, version: String): DeletionResult = {
-    val fileMetadatas = entityRepository.getByParameters(Map("filetype" -> FileMetadata.customJarType,
+    val fileMetadatas = entityRepository.getByParameters(Map("filetype" -> FileMetadataLiterals.customJarType,
       "specification.name" -> name,
       "specification.version" -> version)
     )

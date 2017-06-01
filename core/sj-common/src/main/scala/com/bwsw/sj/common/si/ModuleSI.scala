@@ -4,7 +4,7 @@ import java.io.File
 
 import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.si.model.FileMetadata
+import com.bwsw.sj.common.si.model.FileMetadataLiterals
 import com.bwsw.sj.common.si.model.module.ModuleMetadata
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.EngineLiterals
@@ -38,7 +38,7 @@ class ModuleSI(implicit injector: Injector) extends JsonValidator {
       if (errors.isEmpty) {
         val uploadingFile = new File(entity.filename)
         FileUtils.copyFile(entity.file.get, uploadingFile)
-        fileStorage.put(uploadingFile, entity.filename, entity.specification.to, FileMetadata.moduleType)
+        fileStorage.put(uploadingFile, entity.filename, entity.specification.to, FileMetadataLiterals.moduleType)
 
         Created
       } else {
@@ -59,7 +59,7 @@ class ModuleSI(implicit injector: Injector) extends JsonValidator {
 
   def getAll: Seq[ModuleMetadata] = {
     entityRepository
-      .getByParameters(Map("filetype" -> FileMetadata.moduleType))
+      .getByParameters(Map("filetype" -> FileMetadataLiterals.moduleType))
       .map(ModuleMetadata.from(_))
   }
 

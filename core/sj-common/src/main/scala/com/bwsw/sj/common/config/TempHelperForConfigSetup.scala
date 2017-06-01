@@ -6,7 +6,7 @@ import java.net.URL
 import com.bwsw.sj.common.SjModule
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.si.model.FileMetadata
+import com.bwsw.sj.common.si.model.FileMetadataLiterals
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import com.bwsw.sj.common.utils.RestLiterals
 import org.apache.commons.io.FileUtils
@@ -55,7 +55,7 @@ object TempHelperForConfigSetup extends App {
   FileUtils.copyURLToFile(
     new URL("http://central.maven.org/maven2/mysql/mysql-connector-java/5.1.41/mysql-connector-java-5.1.41.jar"),
     driver)
-  connectionRepository.getFileStorage.put(driver, driverFileName, Map("description" -> RestLiterals.defaultDescription), FileMetadata.customFileType)
+  connectionRepository.getFileStorage.put(driver, driverFileName, Map("description" -> RestLiterals.defaultDescription), FileMetadataLiterals.customFileType)
   configService.save(ConfigurationSettingDomain(s"${ConfigLiterals.jdbcDriver}.$driverName", driverFileName, ConfigLiterals.jdbcDomain))
   configService.save(ConfigurationSettingDomain(s"${ConfigLiterals.jdbcDriver}.$driverName.class", "com.mysql.jdbc.Driver", ConfigLiterals.jdbcDomain))
   configService.save(ConfigurationSettingDomain(s"${ConfigLiterals.jdbcDriver}.$driverName.prefix", "jdbc:mysql", ConfigLiterals.jdbcDomain))
