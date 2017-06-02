@@ -5,7 +5,6 @@ import java.util.Properties
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import com.bwsw.sj.common.dal.model.stream.KafkaStreamDomain
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
 import kafka.admin.AdminUtils
 import kafka.common.TopicAlreadyMarkedForDeletionException
@@ -27,6 +26,8 @@ class KafkaStream(name: String,
                   description: String)
                  (implicit injector: Injector)
   extends SjStream(streamType, name, service, tags, force, description) {
+
+  import messageResourceUtils.createMessage
 
   override def to(): KafkaStreamDomain = {
     val serviceRepository = connectionRepository.getServiceRepository

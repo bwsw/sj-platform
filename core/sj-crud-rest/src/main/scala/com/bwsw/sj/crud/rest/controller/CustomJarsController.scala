@@ -6,14 +6,19 @@ import akka.stream.scaladsl.FileIO
 import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.si._
 import com.bwsw.sj.common.si.result._
-import com.bwsw.sj.common.utils.MessageResourceUtils.{createMessage, createMessageWithErrors}
+import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.crud.rest.model.FileMetadataApi
 import com.bwsw.sj.crud.rest.{CustomJar, CustomJarsResponseEntity}
+import scaldi.Injectable.inject
 import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
 
-class CustomJarsController(implicit injector: Injector) extends Controller {
+class CustomJarsController(implicit protected val injector: Injector) extends Controller {
+  private val messageResourceUtils = inject[MessageResourceUtils]
+
+  import messageResourceUtils._
+
   override val serviceInterface = new CustomJarsSI()
 
   protected val entityDeletedMessage: String = "rest.custom.jars.file.deleted.by.filename"

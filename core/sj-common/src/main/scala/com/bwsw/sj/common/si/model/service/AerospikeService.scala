@@ -1,8 +1,7 @@
 package com.bwsw.sj.common.si.model.service
 
 import com.bwsw.sj.common.dal.model.service.AerospikeServiceDomain
-import com.bwsw.sj.common.rest.utils.ValidationUtils.{validateNamespace}
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
+import com.bwsw.sj.common.rest.utils.ValidationUtils.validateNamespace
 import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
@@ -14,6 +13,8 @@ class AerospikeService(name: String,
                        serviceType: String)
                       (implicit injector: Injector)
   extends Service(serviceType, name, provider, description) {
+
+  import messageResourceUtils.createMessage
 
   override def to(): AerospikeServiceDomain = {
     val providerRepository = connectionRepository.getProviderRepository

@@ -7,6 +7,8 @@ import com.bwsw.sj.common.dal.model.service._
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.provider.{Provider, ProviderConversion}
 import com.bwsw.sj.common.si.result._
+import com.bwsw.sj.common.utils.MessageResourceUtils
+import com.bwsw.sj.common.utils.MessageResourceUtilsMock.messageResourceUtils
 import org.mockito.ArgumentMatchers.{any, anyString}
 import org.mockito.Mockito.when
 import org.mockito.invocation.InvocationOnMock
@@ -72,7 +74,7 @@ class ProviderSiTests extends FlatSpec with Matchers {
   }
 
   it should "not delete provider when it have related services" in new ProviderMocksWithServices {
-    val deletionError = s"Cannot delete provider '$providerWithServicesName'. Provider is used in services."
+    val deletionError = s"rest.providers.provider.cannot.delete:$providerWithServicesName"
 
     providerSI.delete(providerWithServicesName) shouldBe DeletionError(deletionError)
     providerStorage.toSet shouldBe initProviderStorage
@@ -122,132 +124,134 @@ class ProviderSiTests extends FlatSpec with Matchers {
   it should "give all providers" in new ProviderMocks {
     providerSI.getAll().toSet shouldBe providers.toSet
   }
-}
 
-trait ProviderMocks extends MockitoSugar {
-  val notExistsProviderName = "not-exist-provider"
+  trait ProviderMocks extends MockitoSugar {
+    val notExistsProviderName = "not-exist-provider"
 
-  val initProviderStorageSize = 10
-  val providerStorage: mutable.Buffer[ProviderDomain] = Range(0, initProviderStorageSize).map { _ =>
-    val providerDomain = mock[ProviderDomain]
-    when(providerDomain.name).thenReturn(UUID.randomUUID().toString)
-    providerDomain
-  }.toBuffer
-  val initProviderStorage: Set[ProviderDomain] = providerStorage.toSet
+    val initProviderStorageSize = 10
+    val providerStorage: mutable.Buffer[ProviderDomain] = Range(0, initProviderStorageSize).map { _ =>
+      val providerDomain = mock[ProviderDomain]
+      when(providerDomain.name).thenReturn(UUID.randomUUID().toString)
+      providerDomain
+    }.toBuffer
+    val initProviderStorage: Set[ProviderDomain] = providerStorage.toSet
 
-  val providers = providerStorage.map { providerDomain =>
-    val provider = mock[Provider]
-    val providerName = providerDomain.name
-    when(provider.name).thenReturn(providerName)
-    provider
+    val providers = providerStorage.map { providerDomain =>
+      val provider = mock[Provider]
+      val providerName = providerDomain.name
+      when(provider.name).thenReturn(providerName)
+      provider
+    }
+
+    val providerRepository = mock[GenericMongoRepository[ProviderDomain]]
+    when(providerRepository.getAll).thenReturn({
+      providerStorage
+    })
+    when(providerRepository.save(any[ProviderDomain]()))
+      .thenAnswer((invocationOnMock: InvocationOnMock) => {
+        val providerDomain = invocationOnMock.getArgument[ProviderDomain](0)
+        providerStorage += providerDomain
+      })
+    when(providerRepository.delete(anyString()))
+      .thenAnswer((invocationOnMock: InvocationOnMock) => {
+        val providerName = invocationOnMock.getArgument[String](0)
+        val providerDomain = providerStorage.find(_.name == providerName).get
+        providerStorage -= providerDomain
+      })
+    when(providerRepository.get(anyString()))
+      .thenAnswer((invocationOnMock: InvocationOnMock) => {
+        val providerName = invocationOnMock.getArgument[String](0)
+        providerStorage.find(_.name == providerName)
+      })
+
+    val connectionRepository = mock[ConnectionRepository]
+    when(connectionRepository.getProviderRepository).thenReturn(providerRepository)
+
+    val providerConversion = mock[ProviderConversion]
+    when(providerConversion.from(any[ProviderDomain])(any[Injector]))
+      .thenAnswer((invocationOnMock: InvocationOnMock) => {
+        val providerDomain = invocationOnMock.getArgument[ProviderDomain](0)
+        providers.find(_.name == providerDomain.name).get
+      })
+
+    val module = new Module {
+      bind[ConnectionRepository] to connectionRepository
+      bind[MessageResourceUtils] to messageResourceUtils
+      bind[ProviderConversion] to providerConversion
+    }
+    val injector = module.injector
+    val providerSI = new ProviderSI()(injector)
   }
 
-  val providerRepository = mock[GenericMongoRepository[ProviderDomain]]
-  when(providerRepository.getAll).thenReturn({
-    providerStorage
-  })
-  when(providerRepository.save(any[ProviderDomain]()))
-    .thenAnswer((invocationOnMock: InvocationOnMock) => {
-      val providerDomain = invocationOnMock.getArgument[ProviderDomain](0)
-      providerStorage += providerDomain
-    })
-  when(providerRepository.delete(anyString()))
-    .thenAnswer((invocationOnMock: InvocationOnMock) => {
-      val providerName = invocationOnMock.getArgument[String](0)
-      val providerDomain = providerStorage.find(_.name == providerName).get
-      providerStorage -= providerDomain
-    })
-  when(providerRepository.get(anyString()))
-    .thenAnswer((invocationOnMock: InvocationOnMock) => {
-      val providerName = invocationOnMock.getArgument[String](0)
-      providerStorage.find(_.name == providerName)
-    })
+  trait ProviderMocksWithServices extends ProviderMocks {
+    val providerWithoutServicesName = "provider-without-services"
+    val providerWithoutServicesDomain = mock[ProviderDomain]
+    when(providerWithoutServicesDomain.name).thenReturn(providerWithoutServicesName)
 
-  val connectionRepository = mock[ConnectionRepository]
-  when(connectionRepository.getProviderRepository).thenReturn(providerRepository)
+    val providerWithServicesName = "provider-with-services"
+    val providerWithServicesDomain = mock[ProviderDomain]
+    when(providerWithServicesDomain.name).thenReturn(providerWithServicesName)
 
-  val providerConversion = mock[ProviderConversion]
-  when(providerConversion.from(any[ProviderDomain])(any[Injector]))
-    .thenAnswer((invocationOnMock: InvocationOnMock) => {
-      val providerDomain = invocationOnMock.getArgument[ProviderDomain](0)
-      providers.find(_.name == providerDomain.name).get
-    })
+    val otherProviderName = "other-provider"
+    val otherProviderDomain = mock[ProviderDomain]
+    when(otherProviderDomain.name).thenReturn(otherProviderName)
 
-  val module = new Module {
-    bind[ConnectionRepository] to connectionRepository
-    bind[ProviderConversion] to providerConversion
+    val jdbcProviderName = "jdbc-provider"
+    val jdbcProviderDomain = mock[JDBCProviderDomain]
+    when(jdbcProviderDomain.name).thenReturn(jdbcProviderName)
+
+    providerStorage ++= mutable.Buffer(
+      providerWithServicesDomain,
+      providerWithoutServicesDomain,
+      otherProviderDomain,
+      jdbcProviderDomain)
+
+    val esServiceRelatedName = "esServiceRelated"
+    val esServiceRelated = mock[ESServiceDomain]
+    when(esServiceRelated.name).thenReturn(esServiceRelatedName)
+    when(esServiceRelated.provider).thenReturn(providerWithServicesDomain)
+    val zkServiceRelatedName = "zkServiceRelated"
+    val zkServiceRelated = mock[ZKServiceDomain]
+    when(zkServiceRelated.name).thenReturn(zkServiceRelatedName)
+    when(zkServiceRelated.provider).thenReturn(providerWithServicesDomain)
+    val kfkServiceRelatedName = "kfkServiceRelated"
+    val kfkServiceRelated = mock[KafkaServiceDomain]
+    when(kfkServiceRelated.name).thenReturn(kfkServiceRelatedName)
+    when(kfkServiceRelated.provider).thenReturn(providerWithServicesDomain)
+    when(kfkServiceRelated.zkProvider).thenReturn(otherProviderDomain)
+
+    val relatedServices = Set(esServiceRelatedName, zkServiceRelatedName, kfkServiceRelatedName)
+
+    val restServiceNotRelatedName = "restServiceNotRelated"
+    val restServiceNotRelated = mock[RestServiceDomain]
+    when(restServiceNotRelated.name).thenReturn(restServiceNotRelatedName)
+    when(restServiceNotRelated.provider).thenReturn(otherProviderDomain)
+    val tServiceNotRelatedName = "tServiceNotRelated"
+    val tServiceNotRelated = mock[TStreamServiceDomain]
+    when(tServiceNotRelated.name).thenReturn(tServiceNotRelatedName)
+    when(tServiceNotRelated.provider).thenReturn(otherProviderDomain)
+    val jdbcServiceNotRelatedName = "jdbcServiceNotRelated"
+    val jdbcServiceNotRelated = mock[JDBCServiceDomain]
+    when(jdbcServiceNotRelated.name).thenReturn(jdbcServiceNotRelatedName)
+    when(jdbcServiceNotRelated.provider).thenReturn(jdbcProviderDomain)
+
+    val notRelatedServices = Set(restServiceNotRelatedName, tServiceNotRelatedName, jdbcServiceNotRelatedName)
+
+    val serviceStorage = mutable.Buffer[ServiceDomain](
+      esServiceRelated,
+      zkServiceRelated,
+      kfkServiceRelated,
+      restServiceNotRelated,
+      tServiceNotRelated,
+      jdbcServiceNotRelated)
+
+    val serviceRepository = mock[GenericMongoRepository[ServiceDomain]]
+    when(serviceRepository.getAll).thenReturn(serviceStorage)
+
+    when(connectionRepository.getServiceRepository).thenReturn(serviceRepository)
+
+    override val initProviderStorage: Set[ProviderDomain] = providerStorage.toSet
+    override val providerSI = new ProviderSI()(injector)
   }
-  val injector = module.injector
-  val providerSI = new ProviderSI()(injector)
-}
 
-trait ProviderMocksWithServices extends ProviderMocks {
-  val providerWithoutServicesName = "provider-without-services"
-  val providerWithoutServicesDomain = mock[ProviderDomain]
-  when(providerWithoutServicesDomain.name).thenReturn(providerWithoutServicesName)
-
-  val providerWithServicesName = "provider-with-services"
-  val providerWithServicesDomain = mock[ProviderDomain]
-  when(providerWithServicesDomain.name).thenReturn(providerWithServicesName)
-
-  val otherProviderName = "other-provider"
-  val otherProviderDomain = mock[ProviderDomain]
-  when(otherProviderDomain.name).thenReturn(otherProviderName)
-
-  val jdbcProviderName = "jdbc-provider"
-  val jdbcProviderDomain = mock[JDBCProviderDomain]
-  when(jdbcProviderDomain.name).thenReturn(jdbcProviderName)
-
-  providerStorage ++= mutable.Buffer(
-    providerWithServicesDomain,
-    providerWithoutServicesDomain,
-    otherProviderDomain,
-    jdbcProviderDomain)
-
-  val esServiceRelatedName = "esServiceRelated"
-  val esServiceRelated = mock[ESServiceDomain]
-  when(esServiceRelated.name).thenReturn(esServiceRelatedName)
-  when(esServiceRelated.provider).thenReturn(providerWithServicesDomain)
-  val zkServiceRelatedName = "zkServiceRelated"
-  val zkServiceRelated = mock[ZKServiceDomain]
-  when(zkServiceRelated.name).thenReturn(zkServiceRelatedName)
-  when(zkServiceRelated.provider).thenReturn(providerWithServicesDomain)
-  val kfkServiceRelatedName = "kfkServiceRelated"
-  val kfkServiceRelated = mock[KafkaServiceDomain]
-  when(kfkServiceRelated.name).thenReturn(kfkServiceRelatedName)
-  when(kfkServiceRelated.provider).thenReturn(providerWithServicesDomain)
-  when(kfkServiceRelated.zkProvider).thenReturn(otherProviderDomain)
-
-  val relatedServices = Set(esServiceRelatedName, zkServiceRelatedName, kfkServiceRelatedName)
-
-  val restServiceNotRelatedName = "restServiceNotRelated"
-  val restServiceNotRelated = mock[RestServiceDomain]
-  when(restServiceNotRelated.name).thenReturn(restServiceNotRelatedName)
-  when(restServiceNotRelated.provider).thenReturn(otherProviderDomain)
-  val tServiceNotRelatedName = "tServiceNotRelated"
-  val tServiceNotRelated = mock[TStreamServiceDomain]
-  when(tServiceNotRelated.name).thenReturn(tServiceNotRelatedName)
-  when(tServiceNotRelated.provider).thenReturn(otherProviderDomain)
-  val jdbcServiceNotRelatedName = "jdbcServiceNotRelated"
-  val jdbcServiceNotRelated = mock[JDBCServiceDomain]
-  when(jdbcServiceNotRelated.name).thenReturn(jdbcServiceNotRelatedName)
-  when(jdbcServiceNotRelated.provider).thenReturn(jdbcProviderDomain)
-
-  val notRelatedServices = Set(restServiceNotRelatedName, tServiceNotRelatedName, jdbcServiceNotRelatedName)
-
-  val serviceStorage = mutable.Buffer[ServiceDomain](
-    esServiceRelated,
-    zkServiceRelated,
-    kfkServiceRelated,
-    restServiceNotRelated,
-    tServiceNotRelated,
-    jdbcServiceNotRelated)
-
-  val serviceRepository = mock[GenericMongoRepository[ServiceDomain]]
-  when(serviceRepository.getAll).thenReturn(serviceStorage)
-
-  when(connectionRepository.getServiceRepository).thenReturn(serviceRepository)
-
-  override val initProviderStorage: Set[ProviderDomain] = providerStorage.toSet
-  override val providerSI = new ProviderSI()(injector)
 }

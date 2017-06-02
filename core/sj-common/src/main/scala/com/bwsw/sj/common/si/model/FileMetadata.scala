@@ -6,8 +6,7 @@ import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.sj.common.dal.model.module.{FileMetadataDomain, SpecificationDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.JsonValidator
-import com.bwsw.sj.common.utils.MessageResourceUtils._
-import com.bwsw.sj.common.utils.SpecificationUtils
+import com.bwsw.sj.common.utils.{MessageResourceUtils, SpecificationUtils}
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -23,6 +22,10 @@ class FileMetadata(val filename: String,
                    val uploadDate: Option[String] = None)
                   (implicit injector: Injector)
   extends JsonValidator {
+
+  protected val messageResourceUtils = inject[MessageResourceUtils]
+
+  import messageResourceUtils._
 
   protected val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
   protected val fileStorage: MongoFileStorage = connectionRepository.getFileStorage

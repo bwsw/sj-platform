@@ -3,6 +3,7 @@ package com.bwsw.sj.crud.rest.validator.instance
 import com.bwsw.sj.common.dal.model.service.ServiceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
+import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.crud.rest.common.{InstanceRepositoryMock, ProviderRepositoryMock, ServiceRepositoryMock, StreamRepositoryMock}
 import org.scalatest.mockito.MockitoSugar
 import scaldi.{Injector, Module}
@@ -22,6 +23,7 @@ trait InstanceValidatorMocks extends MockitoSugar {
 
   private val module = new Module {
     bind[ConnectionRepository] to connectionRepository
+    bind[MessageResourceUtils] to new MessageResourceUtils()
   }
   protected val injector: Injector = module.injector
 

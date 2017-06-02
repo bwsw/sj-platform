@@ -2,7 +2,6 @@ package com.bwsw.sj.common.si.model.service
 
 import com.bwsw.sj.common.dal.model.service.ESServiceDomain
 import com.bwsw.sj.common.rest.utils.ValidationUtils.validateNamespace
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
@@ -14,6 +13,8 @@ class ESService(name: String,
                 serviceType: String)
                (implicit injector: Injector)
   extends Service(serviceType, name, provider, description) {
+
+  import messageResourceUtils.createMessage
 
   override def to(): ESServiceDomain = {
     val providerRepository = connectionRepository.getProviderRepository

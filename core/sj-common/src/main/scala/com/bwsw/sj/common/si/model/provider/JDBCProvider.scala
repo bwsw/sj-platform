@@ -3,7 +3,6 @@ package com.bwsw.sj.common.si.model.provider
 import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
 import com.bwsw.sj.common.dal.model.provider.JDBCProviderDomain
 import com.bwsw.sj.common.utils.JdbcLiterals
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
 import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
@@ -18,6 +17,8 @@ class JDBCProvider(name: String,
                    providerType: String)
                   (implicit injector: Injector)
   extends Provider(name, login, password, providerType, hosts, description) {
+
+  import messageResourceUtils.createMessage
 
   override def to(): JDBCProviderDomain = {
     val provider =

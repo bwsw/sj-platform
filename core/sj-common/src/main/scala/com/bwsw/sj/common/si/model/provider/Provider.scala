@@ -5,8 +5,7 @@ import java.net.{URI, URISyntaxException}
 import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils.{normalizeName, validateName}
-import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
-import com.bwsw.sj.common.utils.ProviderLiterals
+import com.bwsw.sj.common.utils.{MessageResourceUtils, ProviderLiterals}
 import com.bwsw.sj.common.utils.ProviderLiterals.types
 import scaldi.Injectable.inject
 import scaldi.Injector
@@ -21,6 +20,10 @@ class Provider(val name: String,
                val hosts: Array[String],
                val description: String)
               (implicit injector: Injector) {
+
+  protected val messageResourceUtils = inject[MessageResourceUtils]
+
+  import messageResourceUtils.createMessage
 
   protected val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
   private val providerRepository = connectionRepository.getProviderRepository

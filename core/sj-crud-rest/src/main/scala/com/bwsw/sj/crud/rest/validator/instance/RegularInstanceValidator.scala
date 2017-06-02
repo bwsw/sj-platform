@@ -5,7 +5,6 @@ import com.bwsw.sj.common.dal.model.stream.KafkaStreamDomain
 import com.bwsw.sj.common.si.model.instance.RegularInstance
 import com.bwsw.sj.common.si.model.module.Specification
 import com.bwsw.sj.common.utils.EngineLiterals._
-import com.bwsw.sj.common.utils.MessageResourceUtils._
 import com.bwsw.sj.common.utils.StreamLiterals._
 import com.bwsw.sj.common.utils.StreamUtils._
 import com.bwsw.sj.common.utils.{AvroRecordUtils, EngineLiterals}
@@ -21,6 +20,8 @@ import scala.util.{Failure, Success, Try}
   * @author Kseniya Tomskikh
   */
 class RegularInstanceValidator(implicit injector: Injector) extends InstanceValidator {
+
+  import messageResourceUtils.createMessage
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
   override type T = RegularInstance
