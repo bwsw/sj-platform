@@ -239,7 +239,7 @@ class InstanceController(implicit injector: Injector) {
         createMessage("rest.config.setting.notfound", s"${ConfigLiterals.systemDomain}.$validatorClassConfig"))
     }
     val validatorClass = Class.forName(validatorClassName)
-    val validator = validatorClass.newInstance().asInstanceOf[InstanceValidator]
-    validator.validate(instance, specification)
+    val validator = validatorClass.getConstructor(classOf[Injector]).newInstance(injector).asInstanceOf[InstanceValidator]
+    validator.validate(instance.asInstanceOf[validator.T], specification)
   }
 }

@@ -19,6 +19,7 @@ import scaldi.Injector
 ))
 class ServiceApi(@JsonProperty("type") val serviceType: String,
                  val name: String,
+                 val provider: String,
                  val description: Option[String] = Some(RestLiterals.defaultDescription)) {
 
   @JsonIgnore
@@ -26,6 +27,7 @@ class ServiceApi(@JsonProperty("type") val serviceType: String,
     new Service(
       serviceType = this.serviceType,
       name = this.name,
+      provider = this.provider,
       description = this.description.getOrElse(RestLiterals.defaultDescription)
     )
 }

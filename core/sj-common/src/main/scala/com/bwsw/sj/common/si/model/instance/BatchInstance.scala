@@ -95,7 +95,7 @@ class BatchInstance(name: String,
       inputAvroSchema)
   }
 
-  override def inputsOrEmptyList: Array[String] = inputs
+  override protected def inputsOrEmptyList: Array[String] = inputs
 
   override def prepareInstance(): Unit =
     executionPlan.fillTasks(createTaskStreams(), createTaskNames(countParallelism, name))

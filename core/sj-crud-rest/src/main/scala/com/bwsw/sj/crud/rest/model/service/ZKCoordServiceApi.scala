@@ -6,11 +6,11 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import scaldi.Injector
 
 class ZKCoordServiceApi(name: String,
-                        val provider: String,
+                        provider: String,
                         val namespace: String,
                         description: Option[String] = Some(RestLiterals.defaultDescription),
                         @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.zookeeperType))
-  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.zookeeperType), name, description) {
+  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.zookeeperType), name, provider, description) {
 
   override def to()(implicit injector: Injector): ZKService = {
     val modelService =

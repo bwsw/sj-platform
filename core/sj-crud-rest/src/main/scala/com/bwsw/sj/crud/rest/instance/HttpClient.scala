@@ -27,7 +27,7 @@ class HttpClient(timeout: Int) {
     builder.build()
   }
 
-  def close() = {
+  def close(): Unit = {
     logger.debug("Close an http client.")
     client.close()
   }

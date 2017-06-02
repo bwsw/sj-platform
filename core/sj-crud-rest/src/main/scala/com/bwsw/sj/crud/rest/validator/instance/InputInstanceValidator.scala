@@ -1,7 +1,7 @@
 package com.bwsw.sj.crud.rest.validator.instance
 
 import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
-import com.bwsw.sj.common.si.model.instance.{InputInstance, Instance}
+import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.common.si.model.module.Specification
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.StreamLiterals.tstreamType
@@ -20,6 +20,7 @@ class InputInstanceValidator(implicit injector: Injector) extends InstanceValida
   import messageResourceUtils.createMessage
 
   private val logger: Logger = LoggerFactory.getLogger(getClass.getName)
+  override type T = InputInstance
 
   /**
     * Validating input parameters for input-streaming module
@@ -27,14 +28,13 @@ class InputInstanceValidator(implicit injector: Injector) extends InstanceValida
     * @param instance - input parameters for running module
     * @return - List of errors
     */
-  override def validate(instance: Instance, specification: Specification): ArrayBuffer[String] = {
+  override def validate(instance: T, specification: Specification): Seq[String] = {
     logger.debug(s"Instance: ${instance.name}. Start a validation of instance of input-streaming type.")
     val errors = new ArrayBuffer[String]()
-    errors ++= super.validateGeneralOptions(instance)
-    val inputInstanceMetadata = instance.asInstanceOf[InputInstance]
+    errors ++= super.validate(instance, specification)
 
     // 'checkpoint-mode' field
-    Option(inputInstanceMetadata.checkpointMode) match {
+    Option(instance.checkpointMode) match {
       case None =>
         errors += createMessage("rest.validator.attribute.required", "checkpointMode")
       case Some(x) =>
@@ -50,44 +50,42 @@ class InputInstanceValidator(implicit injector: Injector) extends InstanceValida
     }
 
     // 'checkpoint-interval' field
-    if (inputInstanceMetadata.checkpointInterval <= 0) {
+    if (instance.checkpointInterval <= 0) {
       errors += createMessage("rest.validator.attribute.required", "checkpointInterval") + ". " +
         createMessage("rest.validator.attribute.must.greater.than.zero", "checkpointInterval")
     }
 
-    if (inputInstanceMetadata.lookupHistory < 0) {
+    if (instance.lookupHistory < 0) {
       errors += createMessage("rest.validator.attribute.required", "lookupHistory") + ". " +
         createMessage("rest.validator.attribute.must.greater.or.equal.zero", "lookupHistory")
     }
 
-    if (inputInstanceMetadata.queueMaxSize < 271) {
+    if (instance.queueMaxSize < 271) {
       errors += createMessage("rest.validator.attribute.required", "queueMaxSize") + ". " +
         createMessage("rest.validator.attribute.must.greater.or.equal", "queueMaxSize", "271")
     }
 
-    if (!defaultEvictionPolicies.contains(inputInstanceMetadata.defaultEvictionPolicy)) {
-      errors += createMessage("rest.validator.attribute.unknown.value", "defaultEvictionPolicy", inputInstanceMetadata.defaultEvictionPolicy) + ". " +
+    if (!defaultEvictionPolicies.contains(instance.defaultEvictionPolicy)) {
+      errors += createMessage("rest.validator.attribute.unknown.value", "defaultEvictionPolicy", instance.defaultEvictionPolicy) + ". " +
         createMessage("rest.validator.attribute.must.one_of", "defaultEvictionPolicy", defaultEvictionPolicies.mkString("[", ", ", "]"))
     }
 
-    if (!evictionPolicies.contains(inputInstanceMetadata.evictionPolicy)) {
-      errors += createMessage("rest.validator.attribute.unknown.value", "evictionPolicy", inputInstanceMetadata.evictionPolicy) + ". " +
+    if (!evictionPolicies.contains(instance.evictionPolicy)) {
+      errors += createMessage("rest.validator.attribute.unknown.value", "evictionPolicy", instance.evictionPolicy) + ". " +
         createMessage("rest.validator.attribute.must.one_of", "evictionPolicy", evictionPolicies.mkString("[", ", ", "]"))
     }
 
-    if (inputInstanceMetadata.backupCount < 0 || inputInstanceMetadata.backupCount > 6)
+    if (instance.backupCount < 0 || instance.backupCount > 6)
       errors += createMessage("rest.validator.attribute.must.from.to", "backupCount", "0", "6")
 
-    if (inputInstanceMetadata.asyncBackupCount < 0) {
+    if (instance.asyncBackupCount < 0) {
       errors += createMessage("rest.validator.attribute.must.greater.or.equal.zero", "asyncBackupCount")
     }
-
-    errors ++= validateStreamOptions(inputInstanceMetadata, specification)
 
     errors
   }
 
-  def validateStreamOptions(instance: InputInstance, specification: Specification): ArrayBuffer[String] = {
+  override protected def validateStreamOptions(instance: T, specification: Specification): Seq[String] = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     val errors = new ArrayBuffer[String]()
 
@@ -99,7 +97,7 @@ class InputInstanceValidator(implicit injector: Injector) extends InstanceValida
     if (instance.outputs.length > outputsCardinality(1)) {
       errors += createMessage("rest.validator.cardinality.cannot.more", "outputs", s"${outputsCardinality(1)}")
     }
-    if (doesContainDoubles(instance.outputs)) {
+    if (doesContainDuplicates(instance.outputs)) {
       errors += createMessage("rest.validator.sources.not.unique", "Outputs")
     }
     val outputStreams = getStreams(instance.outputs)
@@ -143,7 +141,7 @@ class InputInstanceValidator(implicit injector: Injector) extends InstanceValida
     errors
   }
 
-  private def checkBackupNumber(parameters: InputInstance, errors: ArrayBuffer[String]) = {
+  private def checkBackupNumber(parameters: T, errors: ArrayBuffer[String]) = {
     val parallelism = parameters.parallelism.asInstanceOf[Int]
     if (parallelism <= 0) {
       errors += createMessage("rest.validator.attribute.must.greater.than.zero", "Parallelism")

@@ -7,10 +7,10 @@ import scaldi.Injector
 
 class JDBCServiceApi(name: String,
                      val database: String,
-                     val provider: String,
+                     provider: String,
                      description: Option[String] = Some(RestLiterals.defaultDescription),
                      @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.jdbcType))
-  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.jdbcType), name, description) {
+  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.jdbcType), name, provider, description) {
 
   override def to()(implicit injector: Injector): JDBCService = {
     val modelService =

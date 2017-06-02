@@ -1,7 +1,6 @@
 package com.bwsw.sj.common.si.model.service
 
 import com.bwsw.sj.common.dal.model.service.RestServiceDomain
-import com.bwsw.sj.common.rest.utils.ValidationUtils.validateProvider
 import com.bwsw.sj.common.utils.RestLiterals
 import scaldi.Injector
 
@@ -12,14 +11,14 @@ import scala.collection.mutable.ArrayBuffer
   * @author Pavel Tomskikh
   */
 class RestService(name: String,
-                  val provider: String,
+                  provider: String,
                   val basePath: String,
                   val httpVersion: String,
                   val headers: Map[String, String],
                   description: String,
                   serviceType: String)
                  (implicit injector: Injector)
-  extends Service(serviceType, name, description) {
+  extends Service(serviceType, name, provider, description) {
 
   import messageResourceUtils.createMessage
 
@@ -46,7 +45,7 @@ class RestService(name: String,
     errors ++= super.validate()
 
     // 'provider' field
-    errors ++= validateProvider(provider, serviceType)
+    errors ++= validateProvider()
 
     // 'basePath' field
     Option(basePath) match {
