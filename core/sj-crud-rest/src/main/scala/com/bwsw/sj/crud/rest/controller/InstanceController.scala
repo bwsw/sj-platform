@@ -4,6 +4,7 @@ import java.net.URI
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.exceptions.JsonDeserializationException
+import com.bwsw.common.http.HttpClient
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest._
@@ -13,11 +14,11 @@ import com.bwsw.sj.common.si._
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils}
 import com.bwsw.sj.crud.rest.exceptions.ConfigSettingNotFound
-import com.bwsw.sj.crud.rest.instance.{HttpClient, InstanceDestroyer, InstanceStarter, InstanceStopper}
+import com.bwsw.sj.crud.rest.instance.validator.InstanceValidator
+import com.bwsw.sj.crud.rest.instance.{InstanceDestroyer, InstanceStarter, InstanceStopper}
 import com.bwsw.sj.crud.rest.model.instance._
 import com.bwsw.sj.crud.rest.model.instance.response.InstanceApiResponse
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
-import com.bwsw.sj.crud.rest.validator.instance.InstanceValidator
 import com.bwsw.sj.crud.rest.{InstanceResponseEntity, InstancesResponseEntity, ShortInstance, ShortInstancesResponseEntity}
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.util.EntityUtils
@@ -167,7 +168,7 @@ class InstanceController(implicit injector: Injector) {
         getMessage("rest.modules.instances.instance.cannot.get.tasks")))
 
       if (instance.restAddress.isDefined) {
-        val client = new HttpClient(3000).client
+        val client = new HttpClient(3000)
         val url = new URI(instance.restAddress.get)
         val httpGet = new HttpGet(url.toString)
         val httpResponse = client.execute(httpGet)

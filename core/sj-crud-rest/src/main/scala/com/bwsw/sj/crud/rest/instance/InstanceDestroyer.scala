@@ -1,11 +1,15 @@
 package com.bwsw.sj.crud.rest.instance
 
+import com.bwsw.common.http.HttpClient
+import com.bwsw.common.marathon.MarathonApi
+import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.utils.EngineLiterals
 import org.slf4j.LoggerFactory
 import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
+import com.bwsw.common.http.HttpStatusChecker._
 
 /**
   * One-thread deleting object for instance
@@ -13,43 +17,45 @@ import scala.util.{Failure, Success, Try}
   *
   * @author Kseniya Tomskikh
   */
-class InstanceDestroyer(instance: Instance, delay: Long = 1000)
-                       (override implicit val injector: Injector)
-  extends Runnable with InstanceManager {
+class InstanceDestroyer(instance: Instance, delay: Long = 1000)(implicit val injector: Injector) extends Runnable {
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
-  private val frameworkName = getFrameworkName(instance)
+  private val instanceManager = new InstanceDomainRenewer()
+  private val marathonTimeout = ConfigurationSettingsUtils.getMarathonTimeout()
+  private val client = new HttpClient(marathonTimeout)
+  private val marathonManager = new MarathonApi(client)
+  private val frameworkName = InstanceAdditionalFieldCreator.getFrameworkName(instance)
 
   import EngineLiterals._
 
   def run(): Unit = {
     Try {
       logger.info(s"Instance: '${instance.name}'. Destroy an instance.")
-      updateInstanceStatus(instance, deleting)
+      instanceManager.updateInstanceStatus(instance, deleting)
       deleteFramework()
-      deleteInstance(instance.name)
-      close()
+      instanceManager.deleteInstance(instance.name)
+      marathonManager.close()
     } match {
       case Success(_) =>
         logger.info(s"Instance: '${instance.name}' has been destroyed.")
       case Failure(e) =>
         logger.error(s"Instance: '${instance.name}'. Instance is failed during the destroying process.", e)
-        updateInstanceStatus(instance, error)
-        close()
+        instanceManager.updateInstanceStatus(instance, error)
+        marathonManager.close()
     }
   }
 
   private def deleteFramework() = {
     logger.debug(s"Instance: '${instance.name}'. Deleting a framework.")
-    val response = destroyMarathonApplication(frameworkName)
+    val response = marathonManager.destroyMarathonApplication(frameworkName)
     if (isStatusOK(response)) {
-      updateFrameworkStage(instance, deleting)
+      instanceManager.updateFrameworkStage(instance, deleting)
       waitForFrameworkToDelete()
     } else {
       if (isStatusNotFound(response)) {
-        updateFrameworkStage(instance, deleting)
+        instanceManager.updateFrameworkStage(instance, deleting)
       } else {
-        updateFrameworkStage(instance, error)
+        instanceManager.updateFrameworkStage(instance, error)
         throw new Exception(s"Marathon returns status code: $response " +
           s"during the destroying process of framework. Framework '$frameworkName' is marked as error.")
       }
@@ -60,12 +66,12 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000)
     var hasDeleted = false
     while (!hasDeleted) {
       logger.debug(s"Instance: '${instance.name}'. Waiting until a framework is deleted.")
-      val frameworkApplicationInfo = getApplicationInfo(frameworkName)
+      val frameworkApplicationInfo = marathonManager.getApplicationInfo(frameworkName)
       if (!isStatusNotFound(frameworkApplicationInfo)) {
-        updateFrameworkStage(instance, deleting)
+        instanceManager.updateFrameworkStage(instance, deleting)
         Thread.sleep(delay)
       } else {
-        updateFrameworkStage(instance, deleted)
+        instanceManager.updateFrameworkStage(instance, deleted)
         hasDeleted = true
       }
     } //todo will see about it, maybe get stuck implicitly

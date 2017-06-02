@@ -12,9 +12,9 @@ import org.eclipse.jetty.http.HttpVersion
   */
 class RestServiceDomain(override val name: String,
                         override val description: String,
-                        @ReferenceField val provider: ProviderDomain,
+                        @ReferenceField override val provider: ProviderDomain,
                         @PropertyField("base-path") val basePath: String,
                         @PropertyField("http-version") val httpVersion: HttpVersion,
                         val headers: java.util.Map[String, String])
-  extends ServiceDomain(name, description, ServiceLiterals.restType) {
+  extends ServiceDomain(name, description, provider, ServiceLiterals.restType) {
 }
