@@ -6,12 +6,12 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import scaldi.Injector
 
 class TstrQServiceApi(name: String,
-                      val provider: String,
+                      provider: String,
                       val prefix: String,
                       val token: String,
                       description: Option[String] = Some(RestLiterals.defaultDescription),
                       @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.tstreamsType))
-  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.tstreamsType), name, description) {
+  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.tstreamsType), name, provider, description) {
 
   override def to()(implicit injector: Injector): TStreamService = {
     val modelService =

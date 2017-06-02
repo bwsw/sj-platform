@@ -36,7 +36,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000)
 
   private var leaderLatch: Option[LeaderLatch] = None
 
-  def run() = {
+  def run(): Unit = {
     Try {
       logger.info(s"Instance: '${instance.name}'. Launch an instance.")
       updateInstanceStatus(instance, starting)

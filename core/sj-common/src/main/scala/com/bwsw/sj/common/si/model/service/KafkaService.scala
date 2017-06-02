@@ -1,20 +1,20 @@
 package com.bwsw.sj.common.si.model.service
 
 import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
-import com.bwsw.sj.common.rest.utils.ValidationUtils.{validateNamespace, validateProvider}
+import com.bwsw.sj.common.rest.utils.ValidationUtils.validateNamespace
 import com.bwsw.sj.common.utils.ProviderLiterals
 import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 
 class KafkaService(name: String,
-                   val provider: String,
+                   provider: String,
                    val zkProvider: String,
                    val zkNamespace: String,
                    description: String,
                    serviceType: String)
                   (implicit injector: Injector)
-  extends Service(serviceType, name, description) {
+  extends Service(serviceType, name, provider, description) {
 
   import messageResourceUtils.createMessage
 
@@ -40,7 +40,7 @@ class KafkaService(name: String,
     errors ++= super.validateGeneralFields()
 
     // 'provider' field
-    errors ++= validateProvider(this.provider, this.serviceType)
+    errors ++= validateProvider()
 
     // 'zkProvider' field
     Option(this.zkProvider) match {

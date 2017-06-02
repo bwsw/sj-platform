@@ -109,7 +109,7 @@ class Instance(val name: String,
     })
   }
 
-  def inputsOrEmptyList: Array[String] = Array()
+  protected def inputsOrEmptyList: Array[String] = Array()
 
   private def splitStreamsAndModes(streamsWithModes: Array[String]): Array[StreamWithMode] = {
     streamsWithModes.map(x => {

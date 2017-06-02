@@ -7,10 +7,10 @@ import scaldi.Injector
 
 class ArspkDBServiceApi(name: String,
                         val namespace: String,
-                        val provider: String,
+                        provider: String,
                         description: Option[String] = Some(RestLiterals.defaultDescription),
                         @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.aerospikeType))
-  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.aerospikeType), name, description) {
+  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.aerospikeType), name, provider, description) {
 
   override def to()(implicit injector: Injector): AerospikeService = {
     val modelService =

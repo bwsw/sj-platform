@@ -1,18 +1,18 @@
 package com.bwsw.sj.common.si.model.service
 
 import com.bwsw.sj.common.dal.model.service.CassandraServiceDomain
-import com.bwsw.sj.common.rest.utils.ValidationUtils.{validateNamespace, validateProvider}
+import com.bwsw.sj.common.rest.utils.ValidationUtils.validateNamespace
 import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
 
 class CassandraService(name: String,
                        val keyspace: String,
-                       val provider: String,
+                       provider: String,
                        description: String,
                        serviceType: String)
                       (implicit injector: Injector)
-  extends Service(serviceType, name, description) {
+  extends Service(serviceType, name, provider, description) {
 
   import messageResourceUtils.createMessage
 
@@ -36,7 +36,7 @@ class CassandraService(name: String,
     errors ++= super.validateGeneralFields()
 
     // 'provider' field
-    errors ++= validateProvider(this.provider, this.serviceType)
+    errors ++= validateProvider()
 
     // 'keyspace' field
     Option(this.keyspace) match {
