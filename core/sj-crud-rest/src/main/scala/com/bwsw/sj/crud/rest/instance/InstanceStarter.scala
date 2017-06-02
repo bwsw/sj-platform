@@ -45,7 +45,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000)(implicit val injec
       logger.info(s"Instance: '${instance.name}'. Launch an instance.")
       instanceManager.updateInstanceStatus(instance, starting)
       startInstance()
-      marathonManager.close()
+      client.close()
     } match {
       case Success(_) =>
         logger.info(s"Instance: '${instance.name}' has been launched.")
@@ -53,7 +53,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000)(implicit val injec
         logger.error(s"Instance: '${instance.name}'. Instance is failed during the start process.", e)
         instanceManager.updateInstanceStatus(instance, failed)
         leaderLatch.foreach(_.close())
-        marathonManager.close()
+        client.close()
     }
   }
 

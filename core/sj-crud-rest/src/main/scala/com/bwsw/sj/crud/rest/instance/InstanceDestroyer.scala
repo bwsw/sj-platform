@@ -34,14 +34,14 @@ class InstanceDestroyer(instance: Instance, delay: Long = 1000)(implicit val inj
       instanceManager.updateInstanceStatus(instance, deleting)
       deleteFramework()
       instanceManager.deleteInstance(instance.name)
-      marathonManager.close()
+      client.close()
     } match {
       case Success(_) =>
         logger.info(s"Instance: '${instance.name}' has been destroyed.")
       case Failure(e) =>
         logger.error(s"Instance: '${instance.name}'. Instance is failed during the destroying process.", e)
         instanceManager.updateInstanceStatus(instance, error)
-        marathonManager.close()
+        client.close()
     }
   }
 

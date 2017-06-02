@@ -124,8 +124,4 @@ class MarathonApi(val client: HttpClient) {
   private def discardEntity(response: CloseableHttpResponse) = {
     EntityUtils.consumeQuietly(response.getEntity)
   }
-
-  def close(): Unit = {
-    client.close()
-  }
 }

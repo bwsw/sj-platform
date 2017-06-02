@@ -34,13 +34,13 @@ class InstanceStopper(instance: Instance, delay: Long = 1000)(implicit val injec
       instanceManager.updateInstanceStatus(instance, stopping)
       stopFramework()
       markInstanceAsStopped()
-      marathonManager.close()
+      client.close()
     } match {
       case Success(_) => logger.info(s"Instance: '${instance.name}' has been stopped.")
       case Failure(e) =>
         logger.error(s"Instance: '${instance.name}'. Instance is failed during the stopping process.", e)
         instanceManager.updateInstanceStatus(instance, error)
-        marathonManager.close()
+        client.close()
     }
   }
 
