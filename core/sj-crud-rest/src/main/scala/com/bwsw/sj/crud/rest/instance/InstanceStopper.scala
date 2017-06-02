@@ -23,7 +23,7 @@ class InstanceStopper(instance: Instance, delay: Long = 1000)
 
   import EngineLiterals._
 
-  def run() = {
+  def run(): Unit = {
     Try {
       logger.info(s"Instance: '${instance.name}'. Stop an instance.")
       updateInstanceStatus(instance, stopping)
@@ -79,14 +79,14 @@ class InstanceStopper(instance: Instance, delay: Long = 1000)
 
   private def markInstanceAsStopped() = {
     logger.debug(s"Instance: '${instance.name}'. Mark an instance as stopped.")
-    if (isInputInstance()) {
+    if (isInputInstance) {
       clearTasks()
     }
     updateInstanceStatus(instance, stopped)
     updateInstanceRestAddress(instance, "")
   }
 
-  private def isInputInstance() = {
+  private def isInputInstance = {
     instance.moduleType.equals(inputStreamingType)
   }
 

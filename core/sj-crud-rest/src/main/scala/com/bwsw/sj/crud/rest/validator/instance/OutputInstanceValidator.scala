@@ -25,7 +25,7 @@ class OutputInstanceValidator(implicit injector: Injector) extends InstanceValid
   private val streamRepository = connectionRepository.getStreamRepository
   override type T = OutputInstance
 
-  private def getStream(streamName: String) = {
+  private def getStream(streamName: String): Option[StreamDomain] = {
     streamRepository.get(streamName)
   }
 

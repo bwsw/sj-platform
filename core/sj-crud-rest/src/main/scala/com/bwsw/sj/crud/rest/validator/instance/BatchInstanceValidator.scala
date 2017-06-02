@@ -72,22 +72,21 @@ class BatchInstanceValidator(implicit injector: Injector) extends InstanceValida
   override protected def validateStreamOptions(instance: T, specification: Specification): Seq[String] = {
     logger.debug(s"Instance: ${instance.name}. Stream options validation.")
     val errors = new ArrayBuffer[String]()
-    val inputs = instance.inputsOrEmptyList
 
     // 'inputs' field
-    val inputModes = inputs.map(i => getStreamMode(i))
+    val inputModes = instance.inputs.map(i => getStreamMode(i))
     if (inputModes.exists(m => !streamModes.contains(m))) {
       errors += createMessage("rest.validator.unknown.stream.mode", streamModes.mkString("[", ", ", "]"))
     }
     val inputsCardinality = specification.inputs.cardinality
-    if (inputs.length < inputsCardinality(0)) {
+    if (instance.inputs.length < inputsCardinality(0)) {
       errors += createMessage("rest.validator.cardinality.cannot.less", "inputs", s"${inputsCardinality(0)}")
     }
-    if (inputs.length > inputsCardinality(1)) {
+    if (instance.inputs.length > inputsCardinality(1)) {
       errors += createMessage("rest.validator.cardinality.cannot.more", "inputs", s"${inputsCardinality(1)}")
     }
 
-    val clearInputs = inputs.map(clearStreamFromMode)
+    val clearInputs = instance.inputs.map(clearStreamFromMode)
     if (doesContainDuplicates(clearInputs)) {
       errors += createMessage("rest.validator.sources.not.unique", "Inputs")
     }

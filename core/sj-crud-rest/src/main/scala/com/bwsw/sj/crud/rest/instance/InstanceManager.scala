@@ -9,24 +9,24 @@ import com.bwsw.sj.crud.rest.marathon.MarathonTask
 import scaldi.Injectable.inject
 
 private[instance] trait InstanceManager extends InstanceMarathonManager with SjInjector {
-  protected val instanceRepository = inject[ConnectionRepository].getInstanceRepository
+  private val instanceRepository = inject[ConnectionRepository].getInstanceRepository
 
   def getFrameworkName(instance: Instance) = s"${instance.name}-${instance.frameworkId}"
 
-  protected def updateInstanceStatus(instance: Instance, status: String) = {
+  def updateInstanceStatus(instance: Instance, status: String): Unit = {
     instance.status = status
     instanceRepository.save(instance.to)
   }
 
-  protected def updateInstanceRestAddress(instance: Instance, restAddress: String) = {
+  def updateInstanceRestAddress(instance: Instance, restAddress: String): Unit = {
     instance.restAddress = Option(restAddress)
     instanceRepository.save(instance.to)
   }
 
-  protected def getRestAddress(leaderTask: Option[MarathonTask]) =
+  def getRestAddress(leaderTask: Option[MarathonTask]): Option[String] =
     leaderTask.map(t => s"http://${t.host}:${t.ports.asInstanceOf[List[String]].head}")
 
-  protected def updateFrameworkStage(instance: Instance, status: String) = {
+  def updateFrameworkStage(instance: Instance, status: String): Unit = {
     if (instance.stage.state.equals(status)) {
       instance.stage.duration = Calendar.getInstance().getTime.getTime - instance.stage.datetime.getTime
     } else {
@@ -37,4 +37,6 @@ private[instance] trait InstanceManager extends InstanceMarathonManager with SjI
 
     instanceRepository.save(instance.to)
   }
+
+  def deleteInstance(name: String): Unit = instanceRepository.delete(name)
 }
