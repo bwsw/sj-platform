@@ -109,8 +109,6 @@ class CustomJarsSI(implicit injector: Injector) extends ServiceInterface[FileMet
     *
     * @param name    name of custom jar file from [[com.bwsw.sj.common.si.model.module.Specification]]
     * @param version version of custom jar file from [[com.bwsw.sj.common.si.model.module.Specification]]
-    * @return Right(true) if custom jar file deleted, Right(false) if custom jar file not found in [[entityRepository]],
-    *         Left(error) if some error happened
     */
   def deleteBy(name: String, version: String): DeletionResult = {
     val fileMetadatas = entityRepository.getByParameters(Map("filetype" -> FileMetadataLiterals.customJarType,

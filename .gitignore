@@ -41,3 +41,6 @@ project/plugins/project/
 # Scala-IDE specific
 .scala_dependencies
 .worksheet
+
+# Test resuorces
+!/core/sj-common/src/test/resources/com/bwsw/sj/common/si/*
