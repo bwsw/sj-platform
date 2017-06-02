@@ -10,8 +10,6 @@ import org.apache.commons.io.FileUtils
 import scaldi.Injectable.inject
 import scaldi.Injector
 
-import scala.collection.mutable.ListBuffer
-
 /**
   * Provides methods to access custom files represented by [[FileMetadata]] in [[GenericMongoRepository]]
   */
@@ -21,14 +19,7 @@ class CustomFilesSI(implicit injector: Injector) extends ServiceInterface[FileMe
 
   private val fileStorage = connectionRepository.getFileStorage
   private val tmpDirectory = "/tmp/"
-  private val previousFilesNames: ListBuffer[String] = ListBuffer[String]()
-
-  private def deletePreviousFiles() = {
-    previousFilesNames.foreach(filename => {
-      val file = new File(filename)
-      if (file.exists()) file.delete()
-    })
-  }
+  private val fileBuffer = inject[FileBuffer]
 
   override def create(entity: FileMetadata): CreationResult = {
     if (!fileStorage.exists(entity.filename)) {
@@ -50,9 +41,9 @@ class CustomFilesSI(implicit injector: Injector) extends ServiceInterface[FileMe
 
   override def get(name: String): Option[FileMetadata] = {
     if (fileStorage.exists(name)) {
-      deletePreviousFiles()
+      fileBuffer.clear()
       val jarFile = fileStorage.get(name, tmpDirectory + name)
-      previousFilesNames.append(jarFile.getAbsolutePath)
+      fileBuffer.append(jarFile)
 
       Some(new FileMetadata(name, Some(jarFile)))
     } else {
@@ -73,4 +64,3 @@ class CustomFilesSI(implicit injector: Injector) extends ServiceInterface[FileMe
     }
   }
 }
-

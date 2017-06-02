@@ -7,13 +7,13 @@ import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepo
 import com.bwsw.sj.common.si.model.FileMetadataLiterals
 import com.bwsw.sj.common.si.model.module.ModuleMetadata
 import com.bwsw.sj.common.si.result._
-import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.common.utils.MessageResourceUtils.createMessage
+import com.bwsw.sj.common.utils.EngineLiterals
 import org.apache.commons.io.FileUtils
 import scaldi.Injectable.inject
 import scaldi.Injector
 
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+import scala.collection.mutable.ArrayBuffer
 
 class ModuleSI(implicit injector: Injector) extends JsonValidator {
 
@@ -23,7 +23,7 @@ class ModuleSI(implicit injector: Injector) extends JsonValidator {
   private val instanceRepository = connectionRepository.getInstanceRepository
   private val entityRepository: GenericMongoRepository[FileMetadataDomain] = connectionRepository.getFileMetadataRepository
   private val tmpDirectory = "/tmp/"
-  private val previousFilesNames: ListBuffer[String] = ListBuffer[String]()
+  private val fileBuffer = inject[FileBuffer]
 
   def create(entity: ModuleMetadata): CreationResult = {
     val modules = entity.map(getFilesMetadata)
@@ -49,9 +49,9 @@ class ModuleSI(implicit injector: Injector) extends JsonValidator {
 
   def get(moduleType: String, moduleName: String, moduleVersion: String): Either[String, ModuleMetadata] = {
     exists(moduleType, moduleName, moduleVersion).map { metadata =>
-      deletePreviousFiles()
+      fileBuffer.clear()
       val file = fileStorage.get(metadata.filename, tmpDirectory + metadata.filename)
-      previousFilesNames.append(file.getAbsolutePath)
+      fileBuffer.append(file)
 
       ModuleMetadata.from(metadata, Option(file))
     }
@@ -127,12 +127,5 @@ class ModuleSI(implicit injector: Injector) extends JsonValidator {
       "specification.module-type" -> moduleType,
       "specification.version" -> moduleVersion)
     )
-  }
-
-  private def deletePreviousFiles() = {
-    previousFilesNames.foreach(filename => {
-      val file = new File(filename)
-      if (file.exists()) file.delete()
-    })
   }
 }

@@ -6,15 +6,13 @@ import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.si.model.{FileMetadata, FileMetadataConversion, FileMetadataLiterals}
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
+import com.bwsw.sj.common.si.model.{FileMetadata, FileMetadataConversion, FileMetadataLiterals}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.SpecificationUtils
 import org.apache.commons.io.FileUtils
 import scaldi.Injectable.inject
 import scaldi.Injector
-
-import scala.collection.mutable.ListBuffer
 
 /**
   * Provides methods to access custom jar files represented by [[FileMetadata]] in [[GenericMongoRepository]]
@@ -26,14 +24,7 @@ class CustomJarsSI(implicit injector: Injector) extends ServiceInterface[FileMet
   private val fileStorage = connectionRepository.getFileStorage
   private val configRepository = connectionRepository.getConfigRepository
   private val tmpDirectory = "/tmp/"
-  private val previousFilesNames: ListBuffer[String] = ListBuffer[String]()
-
-  private def deletePreviousFiles() = {
-    previousFilesNames.foreach(filename => {
-      val file = new File(filename)
-      if (file.exists()) file.delete()
-    })
-  }
+  private val fileBuffer = inject[FileBuffer]
 
   override def create(entity: FileMetadata): CreationResult = {
     val errors = entity.validate()
@@ -63,9 +54,9 @@ class CustomJarsSI(implicit injector: Injector) extends ServiceInterface[FileMet
 
   override def get(name: String): Option[FileMetadata] = {
     if (fileStorage.exists(name)) {
-      deletePreviousFiles()
+      fileBuffer.clear()
       val jarFile = fileStorage.get(name, tmpDirectory + name)
-      previousFilesNames.append(jarFile.getAbsolutePath)
+      fileBuffer.append(jarFile)
 
       Some(new FileMetadata(name, Some(jarFile)))
     } else {
@@ -103,9 +94,9 @@ class CustomJarsSI(implicit injector: Injector) extends ServiceInterface[FileMet
 
     if (fileMetadatas.nonEmpty) {
       val filename = fileMetadatas.head.filename
-      deletePreviousFiles()
+      fileBuffer.clear()
       val jarFile = fileStorage.get(filename, tmpDirectory + filename)
-      previousFilesNames.append(jarFile.getAbsolutePath)
+      fileBuffer.append(jarFile)
 
       Some(new FileMetadata(name, Some(jarFile)))
     } else {
