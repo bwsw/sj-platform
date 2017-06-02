@@ -32,7 +32,7 @@ trait InstanceMarathonManager {
     entity
   }
 
-  def getMarathonMaster(marathonInfo: CloseableHttpResponse) = {
+  def getMarathonMaster(marathonInfo: CloseableHttpResponse): String = {
     logger.debug(s"Get a marathon master.")
     val entity = marathonEntitySerializer.deserialize[MarathonInfo](EntityUtils.toString(marathonInfo.getEntity, "UTF-8"))
     val master = entity.marathonConfig.master
@@ -48,38 +48,38 @@ trait InstanceMarathonManager {
     }
   }
 
-  def isStatusOK(response: CloseableHttpResponse) = {
+  def isStatusOK(response: CloseableHttpResponse): Boolean = {
     getStatusCode(response) == HttpStatus.SC_OK
   }
 
-  def isStatusOK(statusCode: Int) = {
+  def isStatusOK(statusCode: Int): Boolean = {
     statusCode == HttpStatus.SC_OK
   }
 
-  def isStatusCreated(statusCode: Int) = {
+  def isStatusCreated(statusCode: Int): Boolean = {
     statusCode == HttpStatus.SC_CREATED
   }
 
-  def isStatusNotFound(response: CloseableHttpResponse) = {
+  def isStatusNotFound(response: CloseableHttpResponse): Boolean = {
     getStatusCode(response) == HttpStatus.SC_NOT_FOUND
   }
 
-  def isStatusNotFound(statusCode: Int) = {
+  def isStatusNotFound(statusCode: Int): Boolean = {
     statusCode == HttpStatus.SC_NOT_FOUND
   }
 
-  def getStatusCode(response: CloseableHttpResponse) = {
+  def getStatusCode(response: CloseableHttpResponse): Int = {
     response.getStatusLine.getStatusCode
   }
 
-  def getFrameworkID(marathonInfo: CloseableHttpResponse) = {
+  def getFrameworkID(marathonInfo: CloseableHttpResponse): Option[String] = {
     val entity = marathonEntitySerializer.deserialize[MarathonApplicationById](EntityUtils.toString(marathonInfo.getEntity, "UTF-8"))
     val id = entity.app.env.get(frameworkIdLabel)
 
     id
   }
 
-  def getMarathonInfo() = {
+  def getMarathonInfo(): CloseableHttpResponse = {
     logger.debug(s"Get info about the marathon.")
     val url = new URI(s"$marathonConnect/v2/info")
     val httpGet = new HttpGet(url.toString)
@@ -88,7 +88,7 @@ trait InstanceMarathonManager {
     marathonInfo
   }
 
-  def startMarathonApplication(request: MarathonRequest) = {
+  def startMarathonApplication(request: MarathonRequest): Int = {
     logger.debug(s"Start an application on marathon. Request: ${marathonEntitySerializer.serialize(request)}.")
     val url = new URI(s"$marathonConnect/v2/apps")
     val httpPost = new HttpPost(url.toString)
@@ -102,7 +102,7 @@ trait InstanceMarathonManager {
     statusCode
   }
 
-  def getApplicationInfo(applicationID: String) = {
+  def getApplicationInfo(applicationID: String): CloseableHttpResponse = {
     logger.debug(s"Get an application info: '$applicationID'.")
     val url = new URI(s"$marathonConnect/v2/apps/$applicationID?force=true")
     val httpGet = new HttpGet(url.toString)
@@ -111,13 +111,13 @@ trait InstanceMarathonManager {
     marathonInfo
   }
 
-  def getMarathonLastTaskFailed(applicationID: String) = {
+  def getMarathonLastTaskFailed(applicationID: String): CloseableHttpResponse = {
     val url = new URI(s"$marathonConnect/v2/apps/$applicationID?embed=lastTaskFailure")
     val httpGet = new HttpGet(url.toString)
     client.execute(httpGet)
   }
 
-  def destroyMarathonApplication(applicationID: String) = {
+  def destroyMarathonApplication(applicationID: String): Int = {
     logger.debug(s"Destroy an application: '$applicationID'.")
     val url = new URI(s"$marathonConnect/v2/apps/$applicationID")
     val httpDelete = new HttpDelete(url.toString)
@@ -128,12 +128,12 @@ trait InstanceMarathonManager {
     statusCode
   }
 
-  def stopMarathonApplication(applicationID: String) = {
+  def stopMarathonApplication(applicationID: String): Int = {
     logger.debug(s"Stop an application: '$applicationID'.")
     scaleMarathonApplication(applicationID, 0)
   }
 
-  def scaleMarathonApplication(applicationID: String, countOfInstances: Int) = {
+  def scaleMarathonApplication(applicationID: String, countOfInstances: Int): Int = {
     logger.debug(s"Scale an application: '$applicationID' to count: '$countOfInstances'.")
     val url = new URI(s"$marathonConnect/v2/apps/$applicationID?force=true")
     val httpPut = new HttpPut(url.toString)
@@ -151,7 +151,7 @@ trait InstanceMarathonManager {
     EntityUtils.consumeQuietly(response.getEntity)
   }
 
-  def close() = {
+  def close(): Unit = {
     client.close()
   }
 }

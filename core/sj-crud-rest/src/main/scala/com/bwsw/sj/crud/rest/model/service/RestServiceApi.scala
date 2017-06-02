@@ -9,13 +9,13 @@ import scaldi.Injector
   * @author Pavel Tomskikh
   */
 class RestServiceApi(name: String,
-                     val provider: String,
+                     provider: String,
                      val basePath: Option[String] = Some("/"),
                      val httpVersion: Option[String] = Some(RestLiterals.http_1_1),
                      val headers: Option[Map[String, String]] = Some(Map()),
                      description: Option[String] = Some(RestLiterals.defaultDescription),
                      @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.restType))
-  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.restType), name, description) {
+  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.restType), name, provider, description) {
 
   override def to()(implicit injector: Injector): RestService = {
     val modelService =

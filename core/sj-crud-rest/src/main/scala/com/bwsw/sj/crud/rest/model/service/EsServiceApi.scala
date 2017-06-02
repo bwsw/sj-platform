@@ -7,10 +7,10 @@ import scaldi.Injector
 
 class EsServiceApi(name: String,
                    val index: String,
-                   val provider: String,
+                   provider: String,
                    description: Option[String] = Some(RestLiterals.defaultDescription),
                    @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.elasticsearchType))
-  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.elasticsearchType), name, description) {
+  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.elasticsearchType), name, provider, description) {
 
   override def to()(implicit injector: Injector): ESService = {
     val modelService =

@@ -6,12 +6,12 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import scaldi.Injector
 
 class KfkQServiceApi(name: String,
-                     val provider: String,
+                     provider: String,
                      val zkProvider: String,
                      val zkNamespace: String,
                      description: Option[String] = Some(RestLiterals.defaultDescription),
                      @JsonProperty("type") serviceType: Option[String] = Some(ServiceLiterals.kafkaType))
-  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.kafkaType), name, description) {
+  extends ServiceApi(serviceType.getOrElse(ServiceLiterals.kafkaType), name, provider, description) {
 
   override def to()(implicit injector: Injector): KafkaService = {
     val modelService =

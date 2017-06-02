@@ -3,7 +3,7 @@ package com.bwsw.sj.common.si.model.service
 import com.bwsw.sj.common.dal.model.service._
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.utils.ValidationUtils.validateName
-import com.bwsw.sj.common.utils.ServiceLiterals.types
+import com.bwsw.sj.common.utils.ServiceLiterals.{typeToProviderType, types}
 import com.bwsw.sj.common.utils.{MessageResourceUtils, RestLiterals, ServiceLiterals}
 import scaldi.Injectable.inject
 import scaldi.Injector
@@ -12,6 +12,7 @@ import scala.collection.mutable.ArrayBuffer
 
 class Service(val serviceType: String,
               val name: String,
+              val provider: String,
               val description: String)
              (implicit injector: Injector) {
 
@@ -20,6 +21,8 @@ class Service(val serviceType: String,
   import messageResourceUtils.createMessage
 
   protected val connectionRepository = inject[ConnectionRepository]
+  private val serviceRepository = connectionRepository.getServiceRepository
+  private val providerRepository = connectionRepository.getProviderRepository
 
   def to(): ServiceDomain = ???
 
@@ -36,7 +39,7 @@ class Service(val serviceType: String,
     * @return empty array if fields is correct, validation errors otherwise
     */
   protected def validateGeneralFields(): ArrayBuffer[String] = {
-    val serviceRepository = connectionRepository.getServiceRepository
+
     val errors = new ArrayBuffer[String]()
 
     // 'serviceType field
@@ -74,9 +77,37 @@ class Service(val serviceType: String,
 
     errors
   }
+
+  /**
+    * Checks that provider exists and type of service corresponds to provider
+    *
+    * @return empty array if validation passed, collection of errors otherwise
+    */
+  protected def validateProvider(): ArrayBuffer[String] = {
+    val errors = new ArrayBuffer[String]()
+
+    Option(this.provider) match {
+      case None =>
+        errors += createMessage("rest.validator.attribute.required", "Provider")
+      case Some(x) =>
+        if (x.isEmpty) {
+          errors += createMessage("rest.validator.attribute.required", "Provider")
+        }
+        else {
+          val providerObj = providerRepository.get(x)
+          if (providerObj.isEmpty) {
+            errors += createMessage("entity.error.doesnot.exist", "Provider", x)
+          } else if (providerObj.get.providerType != typeToProviderType(this.serviceType)) {
+            errors += createMessage("entity.error.must.one.type.other.given", "Provider", typeToProviderType(this.serviceType), providerObj.get.providerType)
+          }
+        }
+    }
+
+    errors
+  }
 }
 
-object Service {
+class ServiceConversion {
 
   import scala.collection.JavaConverters._
 
