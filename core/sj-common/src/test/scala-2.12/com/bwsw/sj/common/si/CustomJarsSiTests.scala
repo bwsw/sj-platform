@@ -52,6 +52,10 @@ class CustomJarsSiTests extends FlatSpec with Matchers with MockitoSugar {
     case (name, version, file) =>
       createJarMetadataDomain(name, version, file, jarInStorageDescription)
   }
+  val jarsInStorageConfigNames = jarsInStorage.map {
+    case (name, version, _) =>
+      s"${ConfigLiterals.systemDomain}.$name-$version"
+  }
 
   val jarNotInStorageName = "jar-not-in-storage"
   val jarNotInStorageFilename = jarNotInStorageName + ".jar"
@@ -164,8 +168,53 @@ class CustomJarsSiTests extends FlatSpec with Matchers with MockitoSugar {
     customJarsSI.get(jarNotInStorageFilename) shouldBe empty
   }
 
+  it should "give custom jar by name and version if it exists in storage" in new Mocks {
+    jarsInStorage.foreach {
+      case (name, version, file) =>
+        val metadata = customJarsSI.getBy(name, version)
+        metadata shouldBe defined
+        metadata.get.filename shouldBe file.getName
+        metadata.get.file shouldBe Some(file)
+    }
+  }
 
-  private def createJarMetadataDomain(name: String, version: String, jarFile: File, description: String) = {
+  it should "not give custom jar by name and version if it does not exists in storage" in new Mocks {
+    customJarsSI.getBy(jarNotInStorageName, jarNotInStorageVersion) shouldBe empty
+  }
+
+  it should "delete custom jar by filename if it exists in storage" in new Mocks {
+    jarsInStorage.zip(jarsInStorageConfigNames).foreach {
+      case ((_, _, file), configName) =>
+        customJarsSI.delete(file.getName) shouldBe Deleted
+        verify(configRepository).delete(configName)
+    }
+  }
+
+  it should "not delete custom jar by filename if it does not exists in storage" in new Mocks {
+    customJarsSI.delete(jarNotInStorageFilename) shouldBe EntityNotFound
+    verify(configRepository, never()).delete(anyString())
+    verify(fileStorage, never()).delete(anyString())
+  }
+
+  it should "delete custom jar by name and version if it exists in storage" in new Mocks {
+    jarsInStorage.zip(jarsInStorageConfigNames).foreach {
+      case ((name, version, _), configName) =>
+        customJarsSI.deleteBy(name, version) shouldBe Deleted
+        verify(configRepository).delete(configName)
+    }
+  }
+
+  it should "not delete custom jar by name and version if it does not exists in storage" in new Mocks {
+    customJarsSI.deleteBy(jarNotInStorageName, jarNotInStorageVersion) shouldBe EntityNotFound
+    verify(configRepository, never()).delete(anyString())
+    verify(fileStorage, never()).delete(anyString())
+  }
+
+
+  private def createJarMetadataDomain(name: String,
+                                      version: String,
+                                      jarFile: File,
+                                      description: String): FileMetadataDomain = {
     FileMetadataDomain(
       new ObjectId(),
       name,
@@ -177,7 +226,7 @@ class CustomJarsSiTests extends FlatSpec with Matchers with MockitoSugar {
         name, description, version, null, null, null, null, null, null, null, null, null))
   }
 
-  private def createJarMetadataMock(name: String, version: String, file: File, description: String) = {
+  private def createJarMetadataMock(name: String, version: String, file: File, description: String): FileMetadata = {
     val jarMetadata = mock[FileMetadata]
     when(jarMetadata.name).thenReturn(Some(name))
     when(jarMetadata.version).thenReturn(Some(version))

@@ -100,7 +100,7 @@ class CustomJarsSI(implicit injector: Injector) extends ServiceInterface[FileMet
       val jarFile = fileStorage.get(filename, tmpDirectory + filename)
       fileBuffer.append(jarFile)
 
-      Some(new FileMetadata(name, Some(jarFile)))
+      Some(new FileMetadata(filename, Some(jarFile)))
     } else {
       None
     }
