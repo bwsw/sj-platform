@@ -29,7 +29,7 @@ class FileMetadata(val filename: String,
 
   protected val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
   protected val fileStorage: MongoFileStorage = connectionRepository.getFileStorage
-  private val fileMetadataRepository = connectionRepository.getFileMetadataRepository
+  protected val fileMetadataRepository = connectionRepository.getFileMetadataRepository
 
   /**
     * Validates file metadata

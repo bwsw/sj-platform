@@ -34,6 +34,9 @@ class ModuleMetadata(filename: String,
   override def validate(): ArrayBuffer[String] = {
     val errors = new ArrayBuffer[String]
 
+    if (existsInStorage)
+      errors += createMessage("rest.modules.module.exists", signature)
+
     if (fileStorage.exists(filename))
       errors += createMessage("rest.modules.module.file.exists", filename)
 
@@ -96,14 +99,16 @@ class ModuleMetadata(filename: String,
     errors
   }
 
-  /**
-    * Apply method f(moduleType, moduleName, moduleVersion) to this.
-    */
-  def map[T](f: (String, String, String) => T): T =
-    f(specification.moduleType, specification.name, specification.version)
-
   lazy val signature: String =
     ModuleMetadata.getModuleSignature(specification.moduleType, specification.name, specification.version)
+
+  private def existsInStorage: Boolean = {
+    fileMetadataRepository.getByParameters(Map("filetype" -> "module",
+      "specification.name" -> specification.name,
+      "specification.module-type" -> specification.moduleType,
+      "specification.version" -> specification.version))
+      .nonEmpty
+  }
 }
 
 object ModuleMetadata {

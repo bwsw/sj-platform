@@ -12,8 +12,6 @@ import org.apache.commons.io.FileUtils
 import scaldi.Injectable.inject
 import scaldi.Injector
 
-import scala.collection.mutable.ArrayBuffer
-
 class ModuleSI(implicit injector: Injector) extends JsonValidator {
   private val messageResourceUtils = inject[MessageResourceUtils]
 
@@ -28,24 +26,16 @@ class ModuleSI(implicit injector: Injector) extends JsonValidator {
   private val fileBuffer = inject[FileBuffer]
 
   def create(entity: ModuleMetadata): CreationResult = {
-    val modules = entity.map(getFilesMetadata)
+    val errors = entity.validate()
 
-    if (modules.nonEmpty) {
-      NotCreated(
-        ArrayBuffer[String](
-          createMessage("rest.modules.module.exists", entity.signature)))
+    if (errors.isEmpty) {
+      val uploadingFile = new File(entity.filename)
+      FileUtils.copyFile(entity.file.get, uploadingFile)
+      fileStorage.put(uploadingFile, entity.filename, entity.specification.to, FileMetadataLiterals.moduleType)
+
+      Created
     } else {
-      val errors = entity.validate()
-
-      if (errors.isEmpty) {
-        val uploadingFile = new File(entity.filename)
-        FileUtils.copyFile(entity.file.get, uploadingFile)
-        fileStorage.put(uploadingFile, entity.filename, entity.specification.to, FileMetadataLiterals.moduleType)
-
-        Created
-      } else {
-        NotCreated(errors)
-      }
+      NotCreated(errors)
     }
   }
 
