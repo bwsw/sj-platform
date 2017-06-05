@@ -88,15 +88,17 @@ class ConfigurationSetting(val name: String,
   }
 }
 
-object ConfigurationSetting {
+class ConfigurationSettingConversion {
   def from(configSettingDomain: ConfigurationSettingDomain): ConfigurationSetting = {
     new ConfigurationSetting(
-      clearConfigurationSettingName(configSettingDomain.domain, configSettingDomain.name),
+      ConfigurationSetting.clearConfigurationSettingName(configSettingDomain.domain, configSettingDomain.name),
       configSettingDomain.value,
       configSettingDomain.domain
     )
   }
+}
 
+object ConfigurationSetting {
   def createConfigurationSettingName(domain: String, name: String): String = {
     domain + "." + name
   }

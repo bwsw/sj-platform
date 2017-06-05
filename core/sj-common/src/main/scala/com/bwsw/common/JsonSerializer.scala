@@ -20,10 +20,10 @@ import scala.util.{Failure, Success, Try}
   */
 class JsonSerializer {
 
-  def this(ignore: Boolean, failOnNullPrimitives: Boolean = false) = {
+  def this(ignore: Boolean, disableNullForPrimitives: Boolean = false) = {
     this()
     this.setIgnoreUnknown(ignore)
-    mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, failOnNullPrimitives)
+    this.disableNullForPrimitives(disableNullForPrimitives)
   }
 
   private val logger = LoggerFactory.getLogger(this.getClass)
@@ -112,5 +112,15 @@ class JsonSerializer {
   def getIgnoreUnknown(): Boolean = {
     logger.debug(s"Retrieve a value of flag: FAIL_ON_UNKNOWN_PROPERTIES.")
     !((mapper.getDeserializationConfig.getDeserializationFeatures & DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES.getMask) == DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES.getMask)
+  }
+
+  def disableNullForPrimitives(disable: Boolean): Unit = {
+    logger.debug(s"Set a value of flag: FAIL_ON_NULL_FOR_PRIMITIVES to '$disable'.")
+    mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, disable)
+  }
+
+  def nullForPrimitivesIsDisabled(): Boolean = {
+    logger.debug(s"Retrieve a value of flag: FAIL_ON_NULL_FOR_PRIMITIVES.")
+    mapper.isEnabled(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
   }
 }

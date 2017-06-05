@@ -4,7 +4,7 @@ import java.io.File
 
 import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.si.model.FileMetadata
+import com.bwsw.sj.common.si.model.FileMetadataLiterals
 import com.bwsw.sj.common.si.model.module.ModuleMetadata
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils}
@@ -12,7 +12,7 @@ import org.apache.commons.io.FileUtils
 import scaldi.Injectable.inject
 import scaldi.Injector
 
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+import scala.collection.mutable.ArrayBuffer
 
 class ModuleSI(implicit injector: Injector) extends JsonValidator {
   private val messageResourceUtils = inject[MessageResourceUtils]
@@ -25,7 +25,7 @@ class ModuleSI(implicit injector: Injector) extends JsonValidator {
   private val instanceRepository = connectionRepository.getInstanceRepository
   private val entityRepository: GenericMongoRepository[FileMetadataDomain] = connectionRepository.getFileMetadataRepository
   private val tmpDirectory = "/tmp/"
-  private val previousFilesNames: ListBuffer[String] = ListBuffer[String]()
+  private val fileBuffer = inject[FileBuffer]
 
   def create(entity: ModuleMetadata): CreationResult = {
     val modules = entity.map(getFilesMetadata)
@@ -40,7 +40,7 @@ class ModuleSI(implicit injector: Injector) extends JsonValidator {
       if (errors.isEmpty) {
         val uploadingFile = new File(entity.filename)
         FileUtils.copyFile(entity.file.get, uploadingFile)
-        fileStorage.put(uploadingFile, entity.filename, entity.specification.to, FileMetadata.moduleType)
+        fileStorage.put(uploadingFile, entity.filename, entity.specification.to, FileMetadataLiterals.moduleType)
 
         Created
       } else {
@@ -51,9 +51,9 @@ class ModuleSI(implicit injector: Injector) extends JsonValidator {
 
   def get(moduleType: String, moduleName: String, moduleVersion: String): Either[String, ModuleMetadata] = {
     exists(moduleType, moduleName, moduleVersion).map { metadata =>
-      deletePreviousFiles()
+      fileBuffer.clear()
       val file = fileStorage.get(metadata.filename, tmpDirectory + metadata.filename)
-      previousFilesNames.append(file.getAbsolutePath)
+      fileBuffer.append(file)
 
       ModuleMetadata.from(metadata, Option(file))
     }
@@ -61,7 +61,7 @@ class ModuleSI(implicit injector: Injector) extends JsonValidator {
 
   def getAll: Seq[ModuleMetadata] = {
     entityRepository
-      .getByParameters(Map("filetype" -> FileMetadata.moduleType))
+      .getByParameters(Map("filetype" -> FileMetadataLiterals.moduleType))
       .map(ModuleMetadata.from(_))
   }
 
@@ -129,12 +129,5 @@ class ModuleSI(implicit injector: Injector) extends JsonValidator {
       "specification.module-type" -> moduleType,
       "specification.version" -> moduleVersion)
     )
-  }
-
-  private def deletePreviousFiles() = {
-    previousFilesNames.foreach(filename => {
-      val file = new File(filename)
-      if (file.exists()) file.delete()
-    })
   }
 }
