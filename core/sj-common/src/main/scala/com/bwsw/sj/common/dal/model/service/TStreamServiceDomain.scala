@@ -6,9 +6,9 @@ import com.bwsw.sj.common.utils.ServiceLiterals
 
 class TStreamServiceDomain(override val name: String,
                            override val description: String,
-                           @ReferenceField val provider: ProviderDomain,
+                           @ReferenceField override val provider: ProviderDomain,
                            val prefix: String,
                            val token: String)
-  extends ServiceDomain(name, description, ServiceLiterals.tstreamsType) {
+  extends ServiceDomain(name, description, provider, ServiceLiterals.tstreamsType) {
 
 }

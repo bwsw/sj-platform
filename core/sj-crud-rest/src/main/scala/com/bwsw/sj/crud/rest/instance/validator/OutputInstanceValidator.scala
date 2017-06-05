@@ -1,4 +1,4 @@
-package com.bwsw.sj.crud.rest.validator.instance
+package com.bwsw.sj.crud.rest.instance.validator
 
 import com.bwsw.sj.common.dal.model.service.TStreamServiceDomain
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}

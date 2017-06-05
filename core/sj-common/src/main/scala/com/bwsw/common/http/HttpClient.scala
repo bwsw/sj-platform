@@ -1,6 +1,7 @@
-package com.bwsw.sj.crud.rest.instance
+package com.bwsw.common.http
 
 import org.apache.http.client.config.RequestConfig
+import org.apache.http.client.methods.{CloseableHttpResponse, HttpUriRequest}
 import org.apache.http.impl.client.{CloseableHttpClient, HttpClientBuilder}
 import org.slf4j.LoggerFactory
 
@@ -22,9 +23,13 @@ class HttpClient(timeout: Int) {
       .create()
       .setDefaultRequestConfig(requestBuilder.build())
 
-  val client: CloseableHttpClient = {
+  private val client: CloseableHttpClient = {
     logger.debug("Create an http client.")
     builder.build()
+  }
+
+  def execute(request: HttpUriRequest): CloseableHttpResponse = {
+    client.execute(request)
   }
 
   def close(): Unit = {

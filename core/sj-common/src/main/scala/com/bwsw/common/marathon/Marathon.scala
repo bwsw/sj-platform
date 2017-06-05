@@ -1,4 +1,4 @@
-package com.bwsw.sj.crud.rest.marathon
+package com.bwsw.common.marathon
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
@@ -10,3 +10,12 @@ case class MarathonTaskFailure(host: String, message: String, state: String, tim
 
 case class MarathonInfo(@JsonProperty("marathon_config") marathonConfig: MarathonConfig)
 case class MarathonConfig(master: String)
+
+case class MarathonRequest(id: String,
+                           cmd: String,
+                           instances: Int,
+                           env: Map[String, String],
+                           uris: List[String],
+                           backoffSeconds: Int = 1,
+                           backoffFactor: Double = 1.15,
+                           maxLaunchDelaySeconds: Int = 3600)

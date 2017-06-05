@@ -1,20 +1,20 @@
-package com.bwsw.sj.crud.rest.validator.instance
+package com.bwsw.sj.crud.rest.instance.validator
 
 import com.bwsw.sj.common.dal.model.service.{TStreamServiceDomain, ZKServiceDomain}
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
-import com.bwsw.sj.common.si.model.instance.OutputInstance
+import com.bwsw.sj.common.si.model.instance.BatchInstance
 import com.bwsw.sj.common.utils.{EngineLiterals, ServiceLiterals, StreamLiterals}
 import com.bwsw.sj.crud.rest.common.SpecificationWithRandomFieldsMock
 import org.mockito.Mockito.when
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FlatSpec, Matchers}
 
-class OutputInstanceValidatorTestSuit extends FlatSpec with Matchers with InstanceValidatorMocks {
-  private val instanceValidator = new OutputInstanceValidator()(injector)
+class BatchInstanceValidatorTestSuit extends FlatSpec with Matchers with InstanceValidatorMocks {
+  private val instanceValidator = new BatchInstanceValidator()(injector)
 
   it should "validate() method returns non empty set of errors if instance and specification is blank" in {
     //arrange
-    val instance = new OutputInstanceWithDefaultFieldsMock().instance
+    val instance = new BatchInstanceWithDefaultFieldsMock().instance
     val specification = new SpecificationWithRandomFieldsMock().specification
 
     //act
@@ -44,10 +44,10 @@ class OutputInstanceValidatorTestSuit extends FlatSpec with Matchers with Instan
     when(stream.service).thenReturn(tstrService)
     getStreamStorage.save(stream)
 
-    val instance = new OutputInstanceWithDefaultFieldsMock().instance
+    val instance = new BatchInstanceWithDefaultFieldsMock().instance
     when(instance.coordinationService).thenReturn(zkServiceName)
-    when(instance.output).thenReturn(streamName)
-    when(instance.input).thenReturn(streamName)
+    when(instance.outputs).thenReturn(Array(streamName))
+    when(instance.inputs).thenReturn(Array(streamName))
 
     val specification = new SpecificationWithRandomFieldsMock().specification
 
@@ -59,14 +59,18 @@ class OutputInstanceValidatorTestSuit extends FlatSpec with Matchers with Instan
   }
 }
 
-class OutputInstanceWithDefaultFieldsMock() extends MockitoSugar {
-  val instance = mock[OutputInstance]
+class BatchInstanceWithDefaultFieldsMock() extends MockitoSugar {
+  val instance = mock[BatchInstance]
   when(instance.name).thenReturn("correct-name")
   when(instance.perTaskCores).thenReturn(1)
   when(instance.perTaskRam).thenReturn(1024)
   when(instance.performanceReportingInterval).thenReturn(60000)
   when(instance.parallelism).thenReturn(1, Nil: _*)
-  when(instance.checkpointMode).thenReturn(EngineLiterals.everyNthMode)
-  when(instance.checkpointInterval).thenReturn(1)
   when(instance.startFrom).thenReturn(EngineLiterals.newestStartMode)
+  when(instance.outputs).thenReturn(Array[String]())
+  when(instance.inputs).thenReturn(Array[String]())
+  when(instance.stateManagement).thenReturn(EngineLiterals.noneStateMode)
+  when(instance.eventWaitIdleTime).thenReturn(1000)
+  when(instance.window).thenReturn(1)
+  when(instance.slidingInterval).thenReturn(1)
 }

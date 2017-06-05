@@ -1,4 +1,4 @@
-package com.bwsw.sj.crud.rest.validator.instance
+package com.bwsw.sj.crud.rest.instance.validator
 
 import com.bwsw.sj.common.dal.model.service.ZKServiceDomain
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
@@ -98,9 +98,6 @@ class InstanceValidatorTestSuit extends FlatSpec with Matchers with InstanceVali
     services should contain theSameElementsAs streamServices
   }
 }
-
-
-
 
 
 

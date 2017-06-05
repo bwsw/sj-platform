@@ -1,29 +1,27 @@
-package com.bwsw.sj.crud.rest.instance
+package com.bwsw.common.marathon
 
 import java.net.URI
 
 import com.bwsw.common.JsonSerializer
+import com.bwsw.common.http.HttpClient
+import com.bwsw.common.http.HttpStatusChecker._
 import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.utils.FrameworkLiterals._
-import com.bwsw.sj.crud.rest.marathon.{MarathonApplicationById, MarathonInfo, MarathonRequest, MarathonTask}
-import org.apache.http.HttpStatus
 import org.apache.http.client.methods._
 import org.apache.http.entity.StringEntity
 import org.apache.http.util.EntityUtils
 import org.slf4j.LoggerFactory
 
 /**
-  * Instance methods for starting/stopping/scaling/destroying
-  * application on marathon
+  * Instance methods provide marathon api
+  * in general for starting/stopping/scaling/destroying application on marathon
   *
   * @author Kseniya Tomskikh
   */
-trait InstanceMarathonManager {
+class MarathonApi(val client: HttpClient) {
   private val logger = LoggerFactory.getLogger(getClass.getName)
   private val marathonEntitySerializer = new JsonSerializer(true)
   private lazy val marathonConnect = ConfigurationSettingsUtils.getMarathonConnect()
-  private lazy val marathonTimeout = ConfigurationSettingsUtils.getMarathonTimeout()
-  private lazy val client = new HttpClient(marathonTimeout).client
 
   def getApplicationEntity(response: CloseableHttpResponse): MarathonApplicationById = {
     val entity = marathonEntitySerializer.deserialize[MarathonApplicationById](EntityUtils.toString(response.getEntity, "UTF-8"))
@@ -46,30 +44,6 @@ trait InstanceMarathonManager {
       case Some(l) if l.nonEmpty => Option(entity.app.tasks.head)
       case _ => None
     }
-  }
-
-  def isStatusOK(response: CloseableHttpResponse): Boolean = {
-    getStatusCode(response) == HttpStatus.SC_OK
-  }
-
-  def isStatusOK(statusCode: Int): Boolean = {
-    statusCode == HttpStatus.SC_OK
-  }
-
-  def isStatusCreated(statusCode: Int): Boolean = {
-    statusCode == HttpStatus.SC_CREATED
-  }
-
-  def isStatusNotFound(response: CloseableHttpResponse): Boolean = {
-    getStatusCode(response) == HttpStatus.SC_NOT_FOUND
-  }
-
-  def isStatusNotFound(statusCode: Int): Boolean = {
-    statusCode == HttpStatus.SC_NOT_FOUND
-  }
-
-  def getStatusCode(response: CloseableHttpResponse): Int = {
-    response.getStatusLine.getStatusCode
   }
 
   def getFrameworkID(marathonInfo: CloseableHttpResponse): Option[String] = {
@@ -149,9 +123,5 @@ trait InstanceMarathonManager {
 
   private def discardEntity(response: CloseableHttpResponse) = {
     EntityUtils.consumeQuietly(response.getEntity)
-  }
-
-  def close(): Unit = {
-    client.close()
   }
 }

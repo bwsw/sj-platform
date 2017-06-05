@@ -99,22 +99,10 @@ class ProviderSI(implicit injector: Injector) extends ServiceInterface[Provider,
 
   private def getRelatedServices(providerName: String): mutable.Buffer[String] = {
     serviceRepository.getAll.filter {
-      case esService: ESServiceDomain =>
-        esService.provider.name.equals(providerName)
-      case zkService: ZKServiceDomain =>
-        zkService.provider.name.equals(providerName)
-      case aeroService: AerospikeServiceDomain =>
-        aeroService.provider.name.equals(providerName)
-      case cassService: CassandraServiceDomain =>
-        cassService.provider.name.equals(providerName)
       case kfkService: KafkaServiceDomain =>
         kfkService.provider.name.equals(providerName) || kfkService.zkProvider.name.equals(providerName)
-      case tService: TStreamServiceDomain =>
-        tService.provider.name.equals(providerName)
-      case jdbcService: JDBCServiceDomain =>
-        jdbcService.provider.name.equals(providerName)
-      case restService: RestServiceDomain =>
-        restService.provider.name.equals(providerName)
+      case serviceDomain: ServiceDomain =>
+        serviceDomain.provider.name.equals(providerName)
     }.map(_.name)
   }
 }

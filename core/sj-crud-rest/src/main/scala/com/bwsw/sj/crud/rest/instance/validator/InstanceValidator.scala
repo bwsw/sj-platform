@@ -1,4 +1,4 @@
-package com.bwsw.sj.crud.rest.validator.instance
+package com.bwsw.sj.crud.rest.instance.validator
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
@@ -23,7 +23,7 @@ import scala.collection.mutable.ArrayBuffer
   */
 abstract class InstanceValidator(implicit val injector: Injector) extends CompletionUtils {
 
-  protected val messageResourceUtils = inject[MessageResourceUtils]
+  protected val messageResourceUtils: MessageResourceUtils = inject[MessageResourceUtils]
 
   import messageResourceUtils.createMessage
 

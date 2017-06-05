@@ -5,8 +5,8 @@ import org.eclipse.jetty.http.HttpVersion
 
 object EngineLiterals {
 
+  final val httpPrefix = "http://"
   final val queueSize = 1000
-  final val persistentBlockingQueue = "persistentBlockingQueue"
   final val batchInstanceBarrierPrefix = "/instance/barriers/"
   final val batchInstanceLeaderPrefix = "/instance/leaders/"
   final val eventWaitTimeout = 1000

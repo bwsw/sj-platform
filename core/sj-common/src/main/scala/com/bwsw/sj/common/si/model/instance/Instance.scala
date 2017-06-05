@@ -37,7 +37,7 @@ class Instance(val name: String,
   protected val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
   protected val streamRepository: GenericMongoRepository[StreamDomain] = connectionRepository.getStreamRepository
 
-  def to: InstanceDomain = {
+  def to(): InstanceDomain = {
     val serviceRepository = connectionRepository.getServiceRepository
 
     new InstanceDomain(
