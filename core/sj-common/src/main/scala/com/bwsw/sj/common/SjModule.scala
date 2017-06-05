@@ -4,6 +4,7 @@ import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.FileBuffer
 import com.bwsw.sj.common.si.model.FileMetadataConversion
+import com.bwsw.sj.common.si.model.config.ConfigurationSettingConversion
 import com.bwsw.sj.common.si.model.provider.ProviderConversion
 import com.bwsw.sj.common.utils.SpecificationUtils
 import com.bwsw.sj.common.si.model.service.ServiceConversion
@@ -20,6 +21,7 @@ class SjModule extends Module {
   bind[ServiceConversion] to new ServiceConversion()
   bind[StreamConversion] to new StreamConversion()
   bind[FileMetadataConversion] to new FileMetadataConversion()
+  bind[ConfigurationSettingConversion] to new ConfigurationSettingConversion()
 
   bind[FileBuffer] toProvider new FileBuffer()
   bind[JsonSerializer] toProvider new JsonSerializer(ignore = true)
