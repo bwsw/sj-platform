@@ -1,6 +1,5 @@
 package com.bwsw.sj.common.si
 
-import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.repository.GenericMongoRepository
 import com.bwsw.sj.common.si.result.{CreationResult, DeletionResult}
 
@@ -11,7 +10,6 @@ import com.bwsw.sj.common.si.result.{CreationResult, DeletionResult}
   * @tparam T type of domain entities, storing in [[GenericMongoRepository]]
   */
 trait ServiceInterface[M, T] {
-  protected val serializer = new JsonSerializer()
   protected val entityRepository: GenericMongoRepository[T]
 
   /**

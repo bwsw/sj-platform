@@ -2,6 +2,7 @@ package com.bwsw.sj.common.si
 
 import java.io._
 
+import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
@@ -18,6 +19,7 @@ import scaldi.Injector
   * Provides methods to access custom jar files represented by [[FileMetadata]] in [[GenericMongoRepository]]
   */
 class CustomJarsSI(implicit injector: Injector) extends ServiceInterface[FileMetadata, FileMetadataDomain] {
+  private val serializer = inject[JsonSerializer]
   private val connectionRepository = inject[ConnectionRepository]
   override protected val entityRepository: GenericMongoRepository[FileMetadataDomain] = connectionRepository.getFileMetadataRepository
 

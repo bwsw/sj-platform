@@ -1,5 +1,6 @@
 package com.bwsw.sj.common
 
+import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.FileBuffer
 import com.bwsw.sj.common.si.model.FileMetadataConversion
@@ -21,6 +22,7 @@ class SjModule extends Module {
   bind[FileMetadataConversion] to new FileMetadataConversion()
 
   bind[FileBuffer] toProvider new FileBuffer()
+  bind[JsonSerializer] toProvider new JsonSerializer(ignore = true)
 }
 
 object SjModule {

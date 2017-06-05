@@ -3,6 +3,7 @@ package com.bwsw.sj.common.si
 import java.io.{File, FileNotFoundException}
 import java.util.Date
 
+import com.bwsw.common.JsonSerializer
 import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
@@ -71,8 +72,25 @@ class CustomJarsSiTests extends FlatSpec with Matchers with MockitoSugar {
     s"${ConfigLiterals.systemDomain}.$jarNotInStorageName-$jarNotInStorageVersion",
     jarNotInStorageFilename,
     ConfigLiterals.systemDomain)
+  val jarNotInStorageSpecification = jarNotInStorageMetadataDomain.specification
+  val jarNotInStorageSpecificationString =
+    s"""{
+       |"name": "$jarNotInStorageName",
+       |"version": "$jarNotInStorageVersion",
+       |"description": "$jarNotInStorageDescription"
+       |}""".stripMargin
+  val jarNotInStorageSpecificationMap: Map[String, Any] = Map(
+    "name" -> jarNotInStorageName,
+    "version" -> jarNotInStorageVersion,
+    "description" -> jarNotInStorageDescription)
+
   val specificationUtils = mock[SpecificationUtils]
   when(specificationUtils.getSpecification(jarNotInStorage)).thenReturn(jarNotInStorageMetadataDomain.specification)
+
+  val serializer = mock[JsonSerializer]
+  when(serializer.serialize(jarNotInStorageSpecification)).thenReturn(jarNotInStorageSpecificationString)
+  when(serializer.deserialize[Map[String, Any]](jarNotInStorageSpecificationString))
+    .thenReturn(jarNotInStorageSpecificationMap)
 
   val fileMetadataConversion = mock[FileMetadataConversion]
   jarsInStorageMetadatas.zip(jarsInStorageMetadataDomains).foreach {
@@ -108,9 +126,9 @@ class CustomJarsSiTests extends FlatSpec with Matchers with MockitoSugar {
       .put(
         new File(jarNotInStorageFilename),
         jarNotInStorageFilename,
-        Map("description" -> Some(jarNotInStorageDescription)),
+        jarNotInStorageSpecificationMap,
         customJarType)
-    verify(configRepository.save(jarNotInStorageConfig))
+    verify(configRepository).save(jarNotInStorageConfig)
   }
 
   it should "not create incorrect custom jar" in new Mocks {
@@ -201,6 +219,7 @@ class CustomJarsSiTests extends FlatSpec with Matchers with MockitoSugar {
       bind[FileMetadataConversion] to fileMetadataConversion
       bind[MessageResourceUtils] to mock[MessageResourceUtils]
       bind[SpecificationUtils] to specificationUtils
+      bind[JsonSerializer] to serializer
     }
     implicit val injector = module.injector
     val customJarsSI = new CustomJarsSI()(injector)
