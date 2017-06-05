@@ -100,7 +100,7 @@ class ModuleMetadata(filename: String,
   }
 
   lazy val signature: String =
-    ModuleMetadata.getModuleSignature(specification.moduleType, specification.name, specification.version)
+    ModuleMetadata.createModuleSignature(specification.moduleType, specification.name, specification.version)
 
   private def existsInStorage: Boolean = {
     fileMetadataRepository.getByParameters(Map("filetype" -> "module",
@@ -111,7 +111,7 @@ class ModuleMetadata(filename: String,
   }
 }
 
-object ModuleMetadata {
+class ModuleMetadataConversion {
   def from(fileMetadata: FileMetadataDomain, file: Option[File] = None)
           (implicit injector: Injector): ModuleMetadata = {
     val specification = Specification.from(fileMetadata.specification)
@@ -126,7 +126,9 @@ object ModuleMetadata {
       description = Option(specification.description),
       uploadDate = Option(fileMetadata.uploadDate.toString))
   }
+}
 
-  def getModuleSignature(moduleType: String, moduleName: String, moduleVersion: String): String =
+object ModuleMetadata {
+  def createModuleSignature(moduleType: String, moduleName: String, moduleVersion: String): String =
     moduleType + "-" + moduleName + "-" + moduleVersion
 }

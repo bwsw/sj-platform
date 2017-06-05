@@ -8,9 +8,9 @@ import com.bwsw.common.http.HttpClient
 import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest._
-import com.bwsw.sj.common.si.model.instance.Instance
-import com.bwsw.sj.common.si.model.module.{ModuleMetadata, Specification}
 import com.bwsw.sj.common.si._
+import com.bwsw.sj.common.si.model.instance.Instance
+import com.bwsw.sj.common.si.model.module.{ModuleMetadata, ModuleMetadataConversion, Specification}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils}
 import com.bwsw.sj.crud.rest.exceptions.ConfigSettingNotFound
@@ -39,6 +39,7 @@ class InstanceController(implicit injector: Injector) {
   private val serviceInterface = new InstanceSI
   private val moduleSI = new ModuleSI
   private val configService = inject[ConnectionRepository].getConfigRepository
+  private val moduleMetadataConversion = inject[ModuleMetadataConversion]
 
   def create(serializedEntity: String, moduleType: String, moduleName: String, moduleVersion: String): RestResponse = {
     ifModuleExists(moduleType, moduleName, moduleVersion) { module =>
@@ -185,7 +186,7 @@ class InstanceController(implicit injector: Injector) {
                             (f: ModuleMetadata => RestResponse): RestResponse = {
     moduleSI.exists(moduleType, moduleName, moduleVersion) match {
       case Right(moduleMetadata) =>
-        f(ModuleMetadata.from(moduleMetadata))
+        f(moduleMetadataConversion.from(moduleMetadata))
       case Left(error) =>
         NotFoundRestResponse(MessageResponseEntity(error))
     }
