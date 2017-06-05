@@ -33,6 +33,7 @@ class ModuleSI(implicit injector: Injector) extends JsonValidator {
       val uploadingFile = new File(entity.filename)
       FileUtils.copyFile(entity.file.get, uploadingFile)
       fileStorage.put(uploadingFile, entity.filename, entity.specification.to, FileMetadataLiterals.moduleType)
+      uploadingFile.delete()
 
       Created
     } else {

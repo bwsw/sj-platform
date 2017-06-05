@@ -44,6 +44,7 @@ class CustomJarsSI(implicit injector: Injector) extends ServiceInterface[FileMet
         ConfigLiterals.systemDomain
       )
       configRepository.save(customJarConfig)
+      uploadingFile.delete()
 
       Created
     } else NotCreated(errors)
