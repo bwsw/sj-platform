@@ -2,7 +2,6 @@ package com.bwsw.sj.engine.batch.task.input
 
 import java.util.concurrent.{Executors, ScheduledExecutorService}
 
-import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.entities.Envelope
 import com.bwsw.tstreams.agents.group.CheckpointGroup
@@ -17,10 +16,9 @@ import scala.collection.mutable
   *
   * @param taskInput handling an input streams of specific type(types)
   */
-class EnvelopeFetcher(taskInput: RetrievableCheckpointTaskInput[Envelope]) {
+class EnvelopeFetcher(taskInput: RetrievableCheckpointTaskInput[Envelope], lowWatermark: Int) {
   private val logger: Logger = LoggerFactory.getLogger(this.getClass)
   private val scheduledExecutor: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("EnvelopeFetcher-%d").build())
-  private val lowWatermark: Int = ConfigurationSettingsUtils.getLowWatermark()
   private val envelopesByStream: mutable.Map[String, mutable.Queue[Envelope]] = taskInput.inputs.map(x => (x._1.name, new mutable.Queue[Envelope]()))
 
   scheduledExecutor.scheduleWithFixedDelay(fillQueue(), 0, EngineLiterals.eventWaitTimeout, java.util.concurrent.TimeUnit.MILLISECONDS)

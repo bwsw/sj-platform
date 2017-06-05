@@ -3,15 +3,14 @@ package com.bwsw.common.rest
 import java.net.URI
 import java.util.concurrent.TimeUnit
 
-import com.bwsw.sj.common.config.ConfigurationSettingsUtils
+import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 import org.eclipse.jetty.client.HttpClient
 import org.eclipse.jetty.client.api.Request
 import org.eclipse.jetty.client.util.{BasicAuthentication, StringContentProvider}
-import org.eclipse.jetty.http.{HttpMethod, HttpVersion, HttpStatus}
+import org.eclipse.jetty.http.{HttpMethod, HttpStatus, HttpVersion}
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
-import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
 
 
 /**
@@ -21,6 +20,7 @@ import com.bwsw.sj.common.utils.{EngineLiterals, StreamLiterals}
   * @param path        path to entities
   * @param httpVersion version of HTTP
   * @param headers     set of headers
+  * @param timeout     the total timeout for the request/response conversation (in milliseconds)
   * @param username    username to authenticate
   * @param password    password to authenticate
   * @author Pavel Tomskikh
@@ -30,7 +30,8 @@ class RestClient(hosts: Set[String],
                  httpVersion: HttpVersion,
                  headers: Map[String, String],
                  username: Option[String] = None,
-                 password: Option[String] = None) {
+                 password: Option[String] = None,
+                 timeout: Long = 5000) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val urls = hosts.map { host => new URI("http://" + host) }
@@ -71,7 +72,7 @@ class RestClient(hosts: Set[String],
     urls.exists { url =>
       val request = client.newRequest(url)
         .version(httpVersion)
-        .timeout(ConfigurationSettingsUtils.getRestTimeout, TimeUnit.MILLISECONDS)
+        .timeout(timeout, TimeUnit.MILLISECONDS)
         .path(path)
       headers.foreach { header => request.header(header._1, header._2) }
 

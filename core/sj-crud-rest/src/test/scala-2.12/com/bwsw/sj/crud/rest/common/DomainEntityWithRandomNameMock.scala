@@ -27,6 +27,6 @@ class StreamDomainWithRandomNameMock() extends MockitoSugar {
 }
 
 class ProviderDomainWithRandomNameMock() extends MockitoSugar {
-  val providerDomain = mock[ProviderDomain]
+  val providerDomain: ProviderDomain = mock[ProviderDomain]
   when(providerDomain.name).thenReturn(UUID.randomUUID().toString)
 }

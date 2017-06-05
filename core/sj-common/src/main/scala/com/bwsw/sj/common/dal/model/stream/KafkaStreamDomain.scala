@@ -2,7 +2,6 @@ package com.bwsw.sj.common.dal.model.stream
 
 import java.util.Properties
 
-import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import com.bwsw.sj.common.utils.{RestLiterals, StreamLiterals}
 import kafka.admin.AdminUtils
@@ -18,7 +17,8 @@ class KafkaStreamDomain(override val name: String,
                         val replicationFactor: Int,
                         override val description: String = RestLiterals.defaultDescription,
                         override val force: Boolean = false,
-                        override val tags: Array[String] = Array())
+                        override val tags: Array[String] = Array(),
+                        private val zkSessionTimeout: Int = 7000)
   extends StreamDomain(name, description, service, force, tags, StreamLiterals.kafkaStreamType) {
 
   override def create(): Unit = {
@@ -38,8 +38,7 @@ class KafkaStreamDomain(override val name: String,
   private def createZkUtils(): ZkUtils = {
     val zkHost = this.service.zkProvider.hosts
     val zkConnect = new ZkConnection(zkHost.mkString(";"))
-    val zkTimeout = ConfigurationSettingsUtils.getZkSessionTimeout()
-    val zkClient = ZkUtils.createZkClient(zkHost.mkString(";"), zkTimeout, zkTimeout)
+    val zkClient = ZkUtils.createZkClient(zkHost.mkString(";"), zkSessionTimeout, zkSessionTimeout)
     val zkUtils = new ZkUtils(zkClient, zkConnect, false)
 
     zkUtils

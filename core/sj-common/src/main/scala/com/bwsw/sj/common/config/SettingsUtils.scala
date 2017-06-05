@@ -4,11 +4,9 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals._
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import scaldi.Injectable.inject
+import scaldi.Injector
 
-object ConfigurationSettingsUtils {
-
-  import com.bwsw.sj.common.SjModule._
-
+class SettingsUtils(implicit val injector: Injector) {
   private val configService = inject[ConnectionRepository].getConfigRepository
 
   def getGeoIpAsNumFileName(): String = {

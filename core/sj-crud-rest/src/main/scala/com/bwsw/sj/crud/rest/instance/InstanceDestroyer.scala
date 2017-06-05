@@ -1,15 +1,14 @@
 package com.bwsw.sj.crud.rest.instance
 
 import com.bwsw.common.http.HttpClient
+import com.bwsw.common.http.HttpStatusChecker._
 import com.bwsw.common.marathon.MarathonApi
-import com.bwsw.sj.common.config.ConfigurationSettingsUtils
 import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.utils.EngineLiterals
 import org.slf4j.LoggerFactory
 import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
-import com.bwsw.common.http.HttpStatusChecker._
 
 /**
   * One-thread deleting object for instance
@@ -17,13 +16,12 @@ import com.bwsw.common.http.HttpStatusChecker._
   *
   * @author Kseniya Tomskikh
   */
-class InstanceDestroyer(instance: Instance, delay: Long = 1000)(implicit val injector: Injector) extends Runnable {
+class InstanceDestroyer(instance: Instance, marathonAddress: String, delay: Long = 1000, marathonTimeout: Int = 60000)(implicit val injector: Injector) extends Runnable {
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
   private val instanceManager = new InstanceDomainRenewer()
-  private val marathonTimeout = ConfigurationSettingsUtils.getMarathonTimeout()
   private val client = new HttpClient(marathonTimeout)
-  private val marathonManager = new MarathonApi(client)
+  private val marathonManager = new MarathonApi(client, marathonAddress)
   private val frameworkName = InstanceAdditionalFieldCreator.getFrameworkName(instance)
 
   import EngineLiterals._

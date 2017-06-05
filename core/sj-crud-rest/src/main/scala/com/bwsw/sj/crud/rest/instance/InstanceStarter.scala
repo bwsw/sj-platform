@@ -4,8 +4,8 @@ import java.net.URI
 
 import com.bwsw.common.LeaderLatch
 import com.bwsw.common.http.HttpClient
-import com.bwsw.common.marathon.{MarathonApi, MarathonApplicationById, MarathonRequest}
-import com.bwsw.sj.common.config.ConfigurationSettingsUtils
+import com.bwsw.common.marathon.{MarathonApi, MarathonApplication, MarathonRequest}
+import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.sj.common.dal.ConnectionConstants
 import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.utils.FrameworkLiterals._
@@ -17,6 +17,7 @@ import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
 import com.bwsw.common.http.HttpStatusChecker._
+import scaldi.Injectable.inject
 
 /**
   * One-thread starting object for instance
@@ -24,18 +25,18 @@ import com.bwsw.common.http.HttpStatusChecker._
   *
   * @author Kseniya Tomskikh
   */
-class InstanceStarter(instance: Instance, delay: Long = 1000)(implicit val injector: Injector) extends Runnable {
+class InstanceStarter(instance: Instance, marathonAddress: String, delay: Long = 1000, marathonTimeout: Int = 60000)(implicit val injector: Injector) extends Runnable {
 
   import EngineLiterals._
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
-  private lazy val restHost = ConfigurationSettingsUtils.getCrudRestHost()
-  private lazy val restPort = ConfigurationSettingsUtils.getCrudRestPort()
+  private val settingsUtils = inject[SettingsUtils]
+  private lazy val restHost = settingsUtils.getCrudRestHost()
+  private lazy val restPort = settingsUtils.getCrudRestPort()
   private lazy val restAddress = new URI(s"http://$restHost:$restPort").toString
   private val instanceManager = new InstanceDomainRenewer()
-  private val marathonTimeout = ConfigurationSettingsUtils.getMarathonTimeout()
   private val client = new HttpClient(marathonTimeout)
-  private val marathonManager = new MarathonApi(client)
+  private val marathonManager = new MarathonApi(client, marathonAddress)
   private val frameworkName = InstanceAdditionalFieldCreator.getFrameworkName(instance)
 
   private var leaderLatch: Option[LeaderLatch] = None
@@ -136,7 +137,7 @@ class InstanceStarter(instance: Instance, delay: Long = 1000)(implicit val injec
   }
 
   private def createRequestForFrameworkCreation(marathonMaster: String) = {
-    val frameworkJarName = ConfigurationSettingsUtils.getFrameworkJarName()
+    val frameworkJarName = settingsUtils.getFrameworkJarName()
     val command = "java -jar " + frameworkJarName + " $PORT"
     val restUrl = new URI(s"$restAddress/v1/custom/jars/$frameworkJarName")
     val environmentVariables = getFrameworkEnvironmentVariables(marathonMaster)
@@ -167,17 +168,17 @@ class InstanceStarter(instance: Instance, delay: Long = 1000)(implicit val injec
   }
 
   private def getBackoffSettings(): (Int, Double, Int) = {
-    val backoffSeconds = Try(ConfigurationSettingsUtils.getFrameworkBackoffSeconds()) match {
+    val backoffSeconds = Try(settingsUtils.getFrameworkBackoffSeconds()) match {
       case Success(x) => x
       case Failure(_: NoSuchFieldException) => 7
       case Failure(e) => throw e
     }
-    val backoffFactor = Try(ConfigurationSettingsUtils.getFrameworkBackoffFactor()) match {
+    val backoffFactor = Try(settingsUtils.getFrameworkBackoffFactor()) match {
       case Success(x) => x
       case Failure(_: NoSuchFieldException) => 7.0
       case Failure(e) => throw e
     }
-    val maxLaunchDelaySeconds = Try(ConfigurationSettingsUtils.getFrameworkMaxLaunchDelaySeconds()) match {
+    val maxLaunchDelaySeconds = Try(settingsUtils.getFrameworkMaxLaunchDelaySeconds()) match {
       case Success(x) => x
       case Failure(_: NoSuchFieldException) => 600
       case Failure(e) => throw e
@@ -220,5 +221,5 @@ class InstanceStarter(instance: Instance, delay: Long = 1000)(implicit val injec
     }
   }
 
-  private def hasFrameworkStarted(applicationEntity: MarathonApplicationById) = applicationEntity.app.tasksRunning == 1
+  private def hasFrameworkStarted(applicationEntity: MarathonApplication) = applicationEntity.app.tasksRunning == 1
 }

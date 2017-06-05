@@ -1,5 +1,6 @@
 package com.bwsw.sj.common
 
+import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.model.provider.ProviderConversion
 import com.bwsw.sj.common.si.model.service.ServiceConversion
@@ -13,6 +14,7 @@ class SjModule extends Module {
   bind[ProviderConversion] to new ProviderConversion()
   bind[ServiceConversion] to new ServiceConversion()
   bind[StreamConversion] to new StreamConversion()
+  bind[SettingsUtils] to new SettingsUtils()
 }
 
 object SjModule {

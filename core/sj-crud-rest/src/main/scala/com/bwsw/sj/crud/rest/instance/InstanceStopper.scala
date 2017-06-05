@@ -1,15 +1,14 @@
 package com.bwsw.sj.crud.rest.instance
 
 import com.bwsw.common.http.HttpClient
-import com.bwsw.common.marathon.{MarathonApi, MarathonApplicationById}
-import com.bwsw.sj.common.config.ConfigurationSettingsUtils
+import com.bwsw.common.http.HttpStatusChecker._
+import com.bwsw.common.marathon.{MarathonApi, MarathonApplication}
 import com.bwsw.sj.common.si.model.instance.{InputInstance, Instance}
 import com.bwsw.sj.common.utils.EngineLiterals
 import org.slf4j.LoggerFactory
 import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
-import com.bwsw.common.http.HttpStatusChecker._
 
 /**
   * One-thread stopper object for instance
@@ -17,13 +16,12 @@ import com.bwsw.common.http.HttpStatusChecker._
   *
   * @author Kseniya Tomskikh
   */
-class InstanceStopper(instance: Instance, delay: Long = 1000)(implicit val injector: Injector) extends Runnable {
+class InstanceStopper(instance: Instance, marathonAddress: String, delay: Long = 1000, marathonTimeout: Int = 60000)(implicit val injector: Injector) extends Runnable {
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
   private val instanceManager = new InstanceDomainRenewer()
-  private val marathonTimeout = ConfigurationSettingsUtils.getMarathonTimeout()
   private val client = new HttpClient(marathonTimeout)
-  private val marathonManager = new MarathonApi(client)
+  private val marathonManager = new MarathonApi(client, marathonAddress)
   private val frameworkName = InstanceAdditionalFieldCreator.getFrameworkName(instance)
 
   import EngineLiterals._
@@ -80,7 +78,7 @@ class InstanceStopper(instance: Instance, delay: Long = 1000)(implicit val injec
     }
   }
 
-  private def hasFrameworkStopped(applicationEntity: MarathonApplicationById) = applicationEntity.app.tasksRunning == 0
+  private def hasFrameworkStopped(applicationEntity: MarathonApplication) = applicationEntity.app.tasksRunning == 0
 
   private def markInstanceAsStopped() = {
     logger.debug(s"Instance: '${instance.name}'. Mark an instance as stopped.")
