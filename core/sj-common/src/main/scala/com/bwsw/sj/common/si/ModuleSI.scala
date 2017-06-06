@@ -19,7 +19,6 @@ class ModuleSI(implicit injector: Injector) extends JsonValidator {
 
   private val connectionRepository: ConnectionRepository = inject[ConnectionRepository]
   private val fileStorage = connectionRepository.getFileStorage
-  private val fileMetadataRepository = connectionRepository.getFileMetadataRepository
   private val instanceRepository = connectionRepository.getInstanceRepository
   private val entityRepository: GenericMongoRepository[FileMetadataDomain] = connectionRepository.getFileMetadataRepository
   private val tmpDirectory = "/tmp/"
@@ -60,16 +59,10 @@ class ModuleSI(implicit injector: Injector) extends JsonValidator {
   def getMetadataWithoutFile(moduleType: String, moduleName: String, moduleVersion: String): Either[String, ModuleMetadata] =
     exists(moduleType, moduleName, moduleVersion).map(moduleMetadataConversion.from(_))
 
-  def getFileName(moduleType: String, moduleName: String, moduleVersion: String) = {
-    val filesMetadata = getFilesMetadata(moduleType, moduleName, moduleVersion)
-
-    filesMetadata.head.filename
-  }
-
   def getByType(moduleType: String): Either[String, Seq[ModuleMetadata]] = {
     if (EngineLiterals.moduleTypes.contains(moduleType)) {
-      val modules = fileMetadataRepository.getByParameters(
-        Map("filetype" -> "module", "specification.module-type" -> moduleType))
+      val modules = entityRepository.getByParameters(
+        Map("filetype" -> FileMetadataLiterals.moduleType, "specification.module-type" -> moduleType))
         .map(moduleMetadataConversion.from(_))
 
       Right(modules)
@@ -90,12 +83,10 @@ class ModuleSI(implicit injector: Injector) extends JsonValidator {
       DeletionError(createMessage(
         "rest.modules.module.cannot.delete",
         metadata.signature))
-    } else {
-      if (fileStorage.delete(metadata.filename))
-        Deleted
-      else
-        DeletionError(createMessage("rest.cannot.delete.file", metadata.filename))
-    }
+    } else if (fileStorage.delete(metadata.filename))
+      Deleted
+    else
+      DeletionError(createMessage("rest.cannot.delete.file", metadata.filename))
   }
 
   def exists(moduleType: String, moduleName: String, moduleVersion: String): Either[String, FileMetadataDomain] = {
@@ -116,7 +107,7 @@ class ModuleSI(implicit injector: Injector) extends JsonValidator {
   }
 
   private def getFilesMetadata(moduleType: String, moduleName: String, moduleVersion: String) = {
-    fileMetadataRepository.getByParameters(Map("filetype" -> "module",
+    entityRepository.getByParameters(Map("filetype" -> FileMetadataLiterals.moduleType,
       "specification.name" -> moduleName,
       "specification.module-type" -> moduleType,
       "specification.version" -> moduleVersion)
