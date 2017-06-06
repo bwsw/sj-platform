@@ -52,7 +52,7 @@ object JdbcClientBuilder {
       username.get,
       password.get,
       database,
-      table)
+      table)(SjModule.injector)
     new JdbcClient(jdbcClientConnectionData)(SjModule.injector)
   }
 

@@ -60,7 +60,8 @@ object Dependencies {
     ("com.mockrunner" % "mockrunner-jdbc" % "1.1.2" % "test")
       .exclude("jakarta-regexp", "jakarta-regexp")
       .exclude("xerces", "xerces"),
-    "org.scalatest" % "scalatest_2.12" % "3.0.1" % "provided"
+    "org.scalatest" % "scalatest_2.12" % "3.0.1" % "provided",
+    "org.mockito" % "mockito-core" % "2.8.9" % "provided"
   ))
 
   lazy val sjRestDependencies = Def.setting(Seq(

@@ -10,6 +10,7 @@ import akka.http.scaladsl.server._
 import akka.http.scaladsl.server.directives.{DebuggingDirectives, LogEntry, LoggingMagnet}
 import akka.stream.scaladsl.Sink
 import com.bwsw.sj.common.SjModule
+import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.utils.EngineLiterals._
@@ -31,7 +32,8 @@ object SjCrudRestService extends {
   override implicit val injector: Injector = SjModule.injector
 } with App with SjCrudRestApi {
 
-  val connectionRepository = inject[ConnectionRepository]
+  private val connectionRepository = inject[ConnectionRepository]
+  private val settingsUtils = inject[SettingsUtils]
   private val config = ConfigFactory.load()
   private val restHost = config.getString(RestLiterals.hostConfig)
   private val restPort = config.getInt(RestLiterals.portConfig)
@@ -78,7 +80,7 @@ object SjCrudRestService extends {
     }.map(Instance.from)
 
     instances.foreach { instance =>
-      new Thread(new InstanceStopper(instance, 1000)).start()
+      new Thread(new InstanceStopper(instance, settingsUtils.getMarathonConnect())).start()
     }
   }
 }

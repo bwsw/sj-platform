@@ -2,9 +2,11 @@ package com.bwsw.common.jdbc
 
 import java.net.URI
 
-import com.bwsw.sj.common.config.ConfigurationSettingsUtils
+import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.sj.common.utils.JdbcLiterals._
 import com.bwsw.sj.common.dal.model.provider.JDBCProviderDomain
+import scaldi.Injectable.inject
+import scaldi.Injector
 
 /**
   * This class provide data for connection to database, required for initialize [[JdbcClient]]
@@ -15,27 +17,30 @@ class JdbcClientConnectionData(val hosts: Array[String],
                                val username: String,
                                val password: String,
                                val database: Option[String],
-                               val table: Option[String]) {
+                               val table: Option[String])
+                              (implicit val injector: Injector) {
+  private val settingsUtils = inject[SettingsUtils]
+
   /**
     * This method returns a driver class name related to driver name provided in [[JDBCProviderDomain.driver]]
     *
     * @return String: name of class of using driver
     */
-  def driverClass: String = ConfigurationSettingsUtils.getJdbcDriverClass(driver)
+  def driverClass: String = settingsUtils.getJdbcDriverClass(driver)
 
   /**
     * This method returns a prefix of server url: (prefix)://(host:port)/(database)
     *
     * @return String: prefix of server url
     */
-  def driverPrefix: String = ConfigurationSettingsUtils.getJdbcDriverPrefix(driver)
+  def driverPrefix: String = settingsUtils.getJdbcDriverPrefix(driver)
 
   /**
     * This method returns a name of file with jdbc driver
     *
     * @return String: name of file with jdbc driver
     */
-  def driverFileName: String = ConfigurationSettingsUtils.getJdbcDriverFileName(driver)
+  def driverFileName: String = settingsUtils.getJdbcDriverFileName(driver)
 
   /**
     * This method returns a server URL

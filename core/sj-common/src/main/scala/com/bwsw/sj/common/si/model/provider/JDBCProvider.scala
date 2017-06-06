@@ -1,8 +1,9 @@
 package com.bwsw.sj.common.si.model.provider
 
-import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
+import com.bwsw.sj.common.config.{ConfigLiterals, SettingsUtils}
 import com.bwsw.sj.common.dal.model.provider.JDBCProviderDomain
 import com.bwsw.sj.common.utils.JdbcLiterals
+import scaldi.Injectable.inject
 import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
@@ -19,6 +20,8 @@ class JDBCProvider(name: String,
   extends Provider(name, login, password, providerType, hosts, description) {
 
   import messageResourceUtils.createMessage
+
+  private val settingsUtils = inject[SettingsUtils]
 
   override def to(): JDBCProviderDomain = {
     val provider =
@@ -46,7 +49,7 @@ class JDBCProvider(name: String,
           errors += createMessage("entity.error.attribute.required", "Driver")
         }
         else {
-          Try(ConfigurationSettingsUtils.getJdbcDriverFileName(x)) match {
+          Try(settingsUtils.getJdbcDriverFileName(x)) match {
             case Success(driverFileName) =>
               if (!connectionRepository.getFileStorage.exists(driverFileName))
                 errors += createMessage("entity.error.file.required", driverFileName)
@@ -55,7 +58,7 @@ class JDBCProvider(name: String,
             case Failure(e) => throw e
           }
 
-          Try(ConfigurationSettingsUtils.getJdbcDriverClass(x)) match {
+          Try(settingsUtils.getJdbcDriverClass(x)) match {
             case Success(_) =>
             case Failure(_: NoSuchFieldException) =>
               errors += createMessage("entity.error.config.required", s"${ConfigLiterals.jdbcDriver}.$x.class")
@@ -63,7 +66,7 @@ class JDBCProvider(name: String,
           }
 
           val prefixSettingName = s"${ConfigLiterals.jdbcDriver}.$x.prefix"
-          Try(ConfigurationSettingsUtils.getJdbcDriverPrefix(x)) match {
+          Try(settingsUtils.getJdbcDriverPrefix(x)) match {
             case Success(prefix) =>
               if (!JdbcLiterals.validPrefixes.contains(prefix))
                 errors += createMessage("entity.error.jdbc.prefix.incorrect", prefix, prefixSettingName)

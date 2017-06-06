@@ -1,5 +1,7 @@
 package com.bwsw.sj.common
 
+
+import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.FileBuffer
@@ -17,6 +19,7 @@ class SjModule extends Module {
   bind[ConnectionRepository] to new ConnectionRepository()
   bind[MessageResourceUtils] to new MessageResourceUtils()
   bind[SpecificationUtils] to new SpecificationUtils()
+  bind[SettingsUtils] to new SettingsUtils()
 
   bind[ProviderConversion] to new ProviderConversion()
   bind[ServiceConversion] to new ServiceConversion()

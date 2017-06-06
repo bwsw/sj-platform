@@ -2,7 +2,7 @@ package com.bwsw.sj.common.si.model.stream
 
 import java.util.Properties
 
-import com.bwsw.sj.common.config.ConfigurationSettingsUtils
+import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import com.bwsw.sj.common.dal.model.stream.KafkaStreamDomain
 import com.bwsw.sj.common.utils.{ServiceLiterals, StreamLiterals}
@@ -11,6 +11,7 @@ import kafka.common.TopicAlreadyMarkedForDeletionException
 import kafka.utils.ZkUtils
 import org.I0Itec.zkclient.ZkConnection
 import org.apache.kafka.common.errors.TopicExistsException
+import scaldi.Injectable.inject
 import scaldi.Injector
 
 import scala.collection.mutable.ArrayBuffer
@@ -28,6 +29,8 @@ class KafkaStream(name: String,
   extends SjStream(streamType, name, service, tags, force, description) {
 
   import messageResourceUtils.createMessage
+
+  private val settingsUtils = inject[SettingsUtils]
 
   override def to(): KafkaStreamDomain = {
     val serviceRepository = connectionRepository.getServiceRepository
@@ -132,7 +135,7 @@ class KafkaStream(name: String,
     val service = serviceDAO.get(this.service).get.asInstanceOf[KafkaServiceDomain]
     val zkHost = service.zkProvider.hosts
     val zkConnect = new ZkConnection(zkHost.mkString(";"))
-    val zkTimeout = ConfigurationSettingsUtils.getZkSessionTimeout()
+    val zkTimeout = settingsUtils.getZkSessionTimeout()
     val zkClient = ZkUtils.createZkClient(zkHost.mkString(";"), zkTimeout, zkTimeout)
     val zkUtils = new ZkUtils(zkClient, zkConnect, false)
 

@@ -2,6 +2,7 @@ package com.bwsw.sj.engine.batch
 
 import java.util.concurrent.ExecutorCompletionService
 
+import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.model.instance.BatchInstance
 import com.bwsw.sj.engine.batch.task.BatchTaskEngine
@@ -31,13 +32,14 @@ object BatchTaskRunner extends {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   def main(args: Array[String]) {
+    val settingsUtils = inject[SettingsUtils]
     val manager = new CommonTaskManager()
     val instance = manager.instance.asInstanceOf[BatchInstance]
 
     logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for batch module\n")
 
     val taskInput = RetrievableCheckpointTaskInput[AnyRef](manager, manager.createCheckpointGroup()).asInstanceOf[RetrievableCheckpointTaskInput[Envelope]]
-    val envelopeFetcher = new EnvelopeFetcher(taskInput)
+    val envelopeFetcher = new EnvelopeFetcher(taskInput, settingsUtils.getLowWatermark())
     val performanceMetrics = new BatchStreamingPerformanceMetrics(manager)
     val moduleService = CommonModuleService(manager, envelopeFetcher.checkpointGroup, performanceMetrics)
     val streamRepository = inject[ConnectionRepository].getStreamRepository

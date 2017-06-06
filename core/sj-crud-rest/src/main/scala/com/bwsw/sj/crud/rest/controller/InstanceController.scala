@@ -5,7 +5,7 @@ import java.net.URI
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.common.http.HttpClient
-import com.bwsw.sj.common.config.ConfigLiterals
+import com.bwsw.sj.common.config.{ConfigLiterals, SettingsUtils}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.si._
@@ -31,6 +31,7 @@ import scala.util.{Failure, Success, Try}
 
 class InstanceController(implicit injector: Injector) {
   private val messageResourceUtils = inject[MessageResourceUtils]
+  private val settingsUtils = inject[SettingsUtils]
 
   import messageResourceUtils._
 
@@ -207,17 +208,17 @@ class InstanceController(implicit injector: Injector) {
 
   private def startInstance(instance: Instance) = {
     logger.debug(s"Starting application of instance ${instance.name}.")
-    new Thread(new InstanceStarter(instance)).start()
+    new Thread(new InstanceStarter(instance, settingsUtils.getMarathonConnect())).start()
   }
 
   private def stopInstance(instance: Instance) = {
     logger.debug(s"Stopping application of instance ${instance.name}.")
-    new Thread(new InstanceStopper(instance)).start()
+    new Thread(new InstanceStopper(instance, settingsUtils.getMarathonConnect())).start()
   }
 
   private def destroyInstance(instance: Instance) = {
     logger.debug(s"Destroying application of instance ${instance.name}.")
-    new Thread(new InstanceDestroyer(instance)).start()
+    new Thread(new InstanceDestroyer(instance, settingsUtils.getMarathonConnect())).start()
   }
 
   private def deserializeInstanceApi(serialized: String, moduleType: String): InstanceApi = moduleType match {

@@ -2,7 +2,7 @@ package com.bwsw.common.marathon
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-case class MarathonApplicationById(app: MarathonApplicationInfo)
+case class MarathonApplication(app: MarathonApplicationInfo)
 case class MarathonApplicationInfo(id: String, env: Map[String, String], tasksRunning: Int,
                                    tasks: List[MarathonTask], lastTaskFailure: MarathonTaskFailure)
 case class MarathonTask(id: String, host: String, ports: List[Int])
@@ -19,3 +19,5 @@ case class MarathonRequest(id: String,
                            backoffSeconds: Int = 1,
                            backoffFactor: Double = 1.15,
                            maxLaunchDelaySeconds: Int = 3600)
+
+case class MarathonApplicationInstances(instances: Int)

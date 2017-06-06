@@ -3,7 +3,7 @@ package com.bwsw.sj.common.utils
 import java.net.{Inet4Address, Inet6Address, InetAddress}
 
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.config.ConfigurationSettingsUtils
+import com.bwsw.sj.common.config.SettingsUtils
 import com.maxmind.geoip.LookupService
 import org.slf4j.LoggerFactory
 import scaldi.Injectable.inject
@@ -30,6 +30,7 @@ object GeoIp {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val fileStorage = inject[ConnectionRepository].getFileStorage
+  private val settingsUtils = inject[SettingsUtils]
   private lazy val ipv4AsNumLookup = getAsLookupServiceIpv4
   private lazy val ipv6AsNumLookup = getAsLookupServiceIpv6
 
@@ -53,14 +54,14 @@ object GeoIp {
 
   private def getAsLookupServiceIpv4: LookupService = {
     logger.debug("Create a geo ip lookup service of ipv4")
-    val geoIpFileName = ConfigurationSettingsUtils.getGeoIpAsNumFileName()
+    val geoIpFileName = settingsUtils.getGeoIpAsNumFileName()
 
     createLookupService(geoIpFileName)
   }
 
   private def getAsLookupServiceIpv6: LookupService = {
     logger.debug("Create a geo ip lookup service of ipv6")
-    val geoIpFileName = ConfigurationSettingsUtils.getGeoIpAsNumv6FileName()
+    val geoIpFileName = settingsUtils.getGeoIpAsNumv6FileName()
 
     createLookupService(geoIpFileName)
   }

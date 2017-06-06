@@ -4,7 +4,7 @@ import java.util.Properties
 
 import com.bwsw.common.ObjectSerializer
 import com.bwsw.sj.common.SjInjector
-import com.bwsw.sj.common.config.{ConfigLiterals, ConfigurationSettingsUtils}
+import com.bwsw.sj.common.config.{ConfigLiterals, SettingsUtils}
 import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
@@ -29,7 +29,8 @@ trait KafkaTaskInput[T <: AnyRef] extends SjInjector {
   protected val currentThread: Thread = Thread.currentThread()
   protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
   protected val offsetSerializer = new ObjectSerializer()
-  protected val kafkaSubscriberTimeout: Int = ConfigurationSettingsUtils.getKafkaSubscriberTimeout()
+  protected val settingsUtils: SettingsUtils = inject[SettingsUtils]
+  protected val kafkaSubscriberTimeout: Int = settingsUtils.getKafkaSubscriberTimeout()
   protected val kafkaInputs: mutable.Map[StreamDomain, Array[Int]] = getKafkaInputs()
   protected val streamNamesToTags: Map[String, Array[String]] = kafkaInputs.map(x => (x._1.name, x._1.tags)).toMap
   protected var kafkaOffsetsStorage: mutable.Map[(String, Int), Long] = mutable.Map[(String, Int), Long]()
