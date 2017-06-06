@@ -12,7 +12,7 @@ import akka.stream.scaladsl.Sink
 import com.bwsw.sj.common.SjModule
 import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.si.model.instance.Instance
+import com.bwsw.sj.common.si.model.instance.{Instance, InstanceConversion}
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.crud.rest.instance.InstanceStopper
 import com.bwsw.sj.crud.rest.utils.RestLiterals
@@ -77,7 +77,7 @@ object SjCrudRestService extends {
       instance.status.equals(starting) ||
         instance.status.equals(stopping) ||
         instance.status.equals(deleting)
-    }.map(Instance.from)
+    }.map(inject[InstanceConversion].from)
 
     instances.foreach { instance =>
       new Thread(new InstanceStopper(instance, settingsUtils.getMarathonConnect())).start()

@@ -12,7 +12,7 @@ import com.bwsw.sj.common.dal.model.stream.{StreamDomain, TStreamStreamDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.engine.{EnvelopeDataSerializer, ExtendedEnvelopeDataSerializer, StreamingExecutor}
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
-import com.bwsw.sj.common.si.model.instance.Instance
+import com.bwsw.sj.common.si.model.instance.{Instance, InstanceConversion}
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.StreamLiterals._
 import com.bwsw.sj.engine.core.config.EngineConfigNames
@@ -77,7 +77,7 @@ abstract class TaskManager(implicit injector: Injector) {
 
 
   private def getInstance(): Instance = {
-    val maybeInstance = connectionRepository.getInstanceRepository.get(instanceName).map(Instance.from)
+    val maybeInstance = connectionRepository.getInstanceRepository.get(instanceName).map(inject[InstanceConversion].from)
     if (maybeInstance.isDefined) {
 
       if (maybeInstance.get.status != started) {

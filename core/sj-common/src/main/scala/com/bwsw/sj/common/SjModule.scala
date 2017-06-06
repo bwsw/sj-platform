@@ -1,12 +1,12 @@
 package com.bwsw.sj.common
 
-
 import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.FileBuffer
 import com.bwsw.sj.common.si.model.FileMetadataConversion
 import com.bwsw.sj.common.si.model.config.ConfigurationSettingConversion
+import com.bwsw.sj.common.si.model.instance.InstanceConversion
 import com.bwsw.sj.common.si.model.module.ModuleMetadataConversion
 import com.bwsw.sj.common.si.model.provider.ProviderConversion
 import com.bwsw.sj.common.utils.SpecificationUtils
@@ -26,6 +26,7 @@ class SjModule extends Module {
   bind[StreamConversion] to new StreamConversion()
   bind[FileMetadataConversion] to new FileMetadataConversion()
   bind[ModuleMetadataConversion] to new ModuleMetadataConversion()
+  bind[InstanceConversion] to new InstanceConversion()
   bind[ConfigurationSettingConversion] to new ConfigurationSettingConversion()
 
   bind[FileBuffer] toProvider new FileBuffer()
