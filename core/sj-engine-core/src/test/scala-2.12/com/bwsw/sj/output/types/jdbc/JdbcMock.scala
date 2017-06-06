@@ -12,7 +12,7 @@ import org.scalatest.mockito.MockitoSugar
 import scaldi.{Injector, Module}
 
 class JdbcMock extends BasicJDBCTestCaseAdapter with IJdbcClient {
-  private val settingsUtilsMock = new SettingsUtilsMock()
+  private val settingsUtilsMock = new JdbcSettingsUtilsMock()
 
   override protected var _connection: Option[Connection] = Some(getJDBCMockObjectFactory.getMockConnection)
   override val jdbcCCD: JdbcClientConnectionData = new JdbcClientConnectionData(
@@ -25,7 +25,7 @@ class JdbcMock extends BasicJDBCTestCaseAdapter with IJdbcClient {
   )(settingsUtilsMock.injector)
 }
 
-class SettingsUtilsMock extends MockitoSugar {
+class JdbcSettingsUtilsMock extends MockitoSugar {
   private val settingsUtils = mock[SettingsUtils]
 
   when(settingsUtils.getJdbcDriverFileName(anyString())).thenReturn(s"$jdbcDriver.driver-name")
