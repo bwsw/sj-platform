@@ -20,6 +20,7 @@ import scala.util.{Failure, Success, Try}
 class ModuleController(implicit injector: Injector) {
 
   private val messageResourceUtils = inject[MessageResourceUtils]
+  private val jsonDeserializationErrorMessageCreator = inject[JsonDeserializationErrorMessageCreator]
 
   import messageResourceUtils.createMessage
 
@@ -42,7 +43,7 @@ class ModuleController(implicit injector: Injector) {
           }
 
         case Failure(exception: JsonDeserializationException) =>
-          val error = JsonDeserializationErrorMessageCreator(exception)
+          val error = jsonDeserializationErrorMessageCreator(exception)
           BadRequestRestResponse(
             MessageResponseEntity(
               createMessage("rest.modules.module.cannot.upload", entity.filename.get, error)))

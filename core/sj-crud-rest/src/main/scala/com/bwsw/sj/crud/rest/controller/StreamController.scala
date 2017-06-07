@@ -2,12 +2,11 @@ package com.bwsw.sj.crud.rest.controller
 
 import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.rest._
-import com.bwsw.sj.common.si.result.{Created, NotCreated}
-import com.bwsw.sj.crud.rest.model.stream.StreamApi
 import com.bwsw.sj.common.si.StreamSI
+import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.common.utils.{MessageResourceUtils, StreamLiterals}
+import com.bwsw.sj.crud.rest.model.stream.StreamApi
 import com.bwsw.sj.crud.rest.{RelatedToStreamResponseEntity, StreamResponseEntity, StreamsResponseEntity}
-import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -38,7 +37,7 @@ class StreamController(implicit protected val injector: Injector) extends Contro
         }
 
       case Failure(exception: JsonDeserializationException) =>
-        val error = JsonDeserializationErrorMessageCreator(exception)
+        val error = jsonDeserializationErrorMessageCreator(exception)
         BadRequestRestResponse(
           MessageResponseEntity(
             createMessage("rest.streams.stream.cannot.create", error)))

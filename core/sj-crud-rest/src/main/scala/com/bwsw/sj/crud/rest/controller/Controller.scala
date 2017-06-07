@@ -5,12 +5,15 @@ import com.bwsw.sj.common.si.ServiceInterface
 import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.si.result.{Deleted, DeletionError, EntityNotFound}
 import com.bwsw.sj.common.utils.MessageResourceUtils
+import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import scaldi.Injectable.inject
 import scaldi.Injector
 
 trait Controller {
   protected implicit val injector: Injector
-  protected val serializer: JsonSerializer = new JsonSerializer(true, true)
+  protected val serializer: JsonSerializer = inject[JsonSerializer]
+  serializer.disableNullForPrimitives(true)
+  protected val jsonDeserializationErrorMessageCreator = inject[JsonDeserializationErrorMessageCreator]
   protected val serviceInterface: ServiceInterface[_, _]
 
   protected val entityDeletedMessage: String

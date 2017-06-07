@@ -9,10 +9,9 @@ import akka.http.scaladsl.server.RouteResult.Complete
 import akka.http.scaladsl.server._
 import akka.http.scaladsl.server.directives.{DebuggingDirectives, LogEntry, LoggingMagnet}
 import akka.stream.scaladsl.Sink
-import com.bwsw.sj.common.SjModule
 import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.si.model.instance.{Instance, InstanceConversion}
+import com.bwsw.sj.common.si.model.instance.InstanceConversion
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.crud.rest.instance.InstanceStopper
 import com.bwsw.sj.crud.rest.utils.RestLiterals
@@ -28,8 +27,8 @@ import scala.concurrent.Future
   * @author Kseniya Tomskikh
   */
 object SjCrudRestService extends {
-  implicit val module: Module = SjModule.module
-  override implicit val injector: Injector = SjModule.injector
+  implicit val module: Module = CrudRestModule.module
+  override implicit val injector: Injector = CrudRestModule.injector
 } with App with SjCrudRestApi {
 
   private val connectionRepository = inject[ConnectionRepository]

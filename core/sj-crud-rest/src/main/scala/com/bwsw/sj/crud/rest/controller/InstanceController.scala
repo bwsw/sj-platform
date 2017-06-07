@@ -38,7 +38,9 @@ class InstanceController(implicit injector: Injector) {
 
   private val logger = LoggerFactory.getLogger(getClass)
   private val (zkHost, zkPort) = getZkProperties()
-  private val serializer = new JsonSerializer(true, true)
+  private val serializer = inject[JsonSerializer]
+  serializer.disableNullForPrimitives(true)
+  private val jsonDeserializationErrorMessageCreator = inject[JsonDeserializationErrorMessageCreator]
   private val serviceInterface = new InstanceSI
   private val moduleSI = new ModuleSI
   private val configService = inject[ConnectionRepository].getConfigRepository
@@ -72,7 +74,7 @@ class InstanceController(implicit injector: Injector) {
           }
 
         case Failure(exception: JsonDeserializationException) =>
-          val error = JsonDeserializationErrorMessageCreator(exception)
+          val error = jsonDeserializationErrorMessageCreator(exception)
           BadRequestRestResponse(
             MessageResponseEntity(
               createMessage("rest.modules.instances.instance.cannot.create", error)))

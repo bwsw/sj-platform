@@ -6,7 +6,6 @@ import com.bwsw.sj.common.si.ServiceSI
 import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.common.utils.{MessageResourceUtils, ServiceLiterals}
 import com.bwsw.sj.crud.rest.model.service.ServiceApi
-import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.sj.crud.rest.{RelatedToServiceResponseEntity, ServiceResponseEntity, ServicesResponseEntity}
 import scaldi.Injectable.inject
 import scaldi.Injector
@@ -39,7 +38,7 @@ class ServiceController(implicit protected val injector: Injector) extends Contr
           ))
         }
       case Failure(exception: JsonDeserializationException) =>
-        val error = JsonDeserializationErrorMessageCreator(exception)
+        val error = jsonDeserializationErrorMessageCreator(exception)
         response = BadRequestRestResponse(MessageResponseEntity(
           createMessage("rest.services.service.cannot.create", error)))
 

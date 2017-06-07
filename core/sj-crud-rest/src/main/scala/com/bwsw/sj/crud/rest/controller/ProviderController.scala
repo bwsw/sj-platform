@@ -7,7 +7,6 @@ import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.common.utils.{MessageResourceUtils, ProviderLiterals}
 import com.bwsw.sj.crud.rest._
 import com.bwsw.sj.crud.rest.model.provider.ProviderApi
-import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -39,7 +38,7 @@ class ProviderController(implicit protected val injector: Injector) extends Cont
               createMessageWithErrors("rest.providers.provider.cannot.create", errors)))
         }
       case Failure(exception: JsonDeserializationException) =>
-        val error = JsonDeserializationErrorMessageCreator(exception)
+        val error = jsonDeserializationErrorMessageCreator(exception)
         response = BadRequestRestResponse(MessageResponseEntity(
           createMessage("rest.providers.provider.cannot.create", error)))
 

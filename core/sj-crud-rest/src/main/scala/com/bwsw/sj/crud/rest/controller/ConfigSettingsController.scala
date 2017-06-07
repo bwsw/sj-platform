@@ -9,7 +9,6 @@ import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.crud.rest._
 import com.bwsw.sj.crud.rest.model.config.ConfigurationSettingApi
-import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -66,7 +65,7 @@ class ConfigSettingsController(implicit protected val injector: Injector) extend
           ))
         }
       case Failure(exception: JsonDeserializationException) =>
-        val error = JsonDeserializationErrorMessageCreator(exception)
+        val error = jsonDeserializationErrorMessageCreator(exception)
         response = BadRequestRestResponse(MessageResponseEntity(
           createMessage("rest.config.setting.cannot.create", error)))
 

@@ -10,11 +10,10 @@ import scaldi.Injector
   *
   * @author Pavel Tomskikh
   */
-object JsonDeserializationErrorMessageCreator {
+class JsonDeserializationErrorMessageCreator(implicit injector: Injector) {
 
   def apply(exception: JsonDeserializationException,
-            attributeRequiredMessage: String = "entity.error.attribute.required")
-           (implicit injector: Injector): String = {
+            attributeRequiredMessage: String = "entity.error.attribute.required"): String = {
     val messageResourceUtils = inject[MessageResourceUtils]
     import messageResourceUtils.createMessage
 
