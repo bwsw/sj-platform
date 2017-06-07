@@ -9,10 +9,9 @@ import com.bwsw.sj.common.si.model.config.ConfigurationSettingConversion
 import com.bwsw.sj.common.si.model.instance.InstanceConversion
 import com.bwsw.sj.common.si.model.module.ModuleMetadataConversion
 import com.bwsw.sj.common.si.model.provider.ProviderConversion
-import com.bwsw.sj.common.utils.SpecificationUtils
+import com.bwsw.sj.common.utils.{FileClassLoader, MessageResourceUtils, SpecificationUtils}
 import com.bwsw.sj.common.si.model.service.ServiceConversion
 import com.bwsw.sj.common.si.model.stream.StreamConversion
-import com.bwsw.sj.common.utils.MessageResourceUtils
 import scaldi.Module
 
 class SjModule extends Module {
@@ -20,6 +19,7 @@ class SjModule extends Module {
   bind[MessageResourceUtils] to new MessageResourceUtils()
   bind[SpecificationUtils] to new SpecificationUtils()
   bind[SettingsUtils] to new SettingsUtils()
+  bind[FileClassLoader] to new FileClassLoader()
 
   bind[ProviderConversion] to new ProviderConversion()
   bind[ServiceConversion] to new ServiceConversion()

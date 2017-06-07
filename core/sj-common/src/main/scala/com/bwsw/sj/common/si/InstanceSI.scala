@@ -7,12 +7,11 @@ import com.bwsw.sj.common.si.model.instance.{Instance, InstanceConversion}
 import com.bwsw.sj.common.si.model.module.{ModuleMetadata, Specification}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.EngineLiterals._
-import com.bwsw.sj.common.utils.MessageResourceUtils
+import com.bwsw.sj.common.utils.{FileClassLoader, MessageResourceUtils}
 import scaldi.Injectable.inject
 import scaldi.Injector
 
 import scala.collection.mutable
-import scala.reflect.internal.util.ScalaClassLoader.URLClassLoader
 
 class InstanceSI(implicit injector: Injector) {
   private val messageResourceUtils = inject[MessageResourceUtils]
@@ -21,9 +20,8 @@ class InstanceSI(implicit injector: Injector) {
 
   private val connectionRepository = inject[ConnectionRepository]
   private val entityRepository: GenericMongoRepository[InstanceDomain] = connectionRepository.getInstanceRepository
-  private val storage = connectionRepository.getFileStorage
   private val instanceConversion = inject[InstanceConversion]
-  private val tmpDirectory = "tmp/"
+  private val tmpDirectory = "/tmp/"
 
   def create(instance: Instance, moduleMetadata: ModuleMetadata): CreationResult = {
     val instancePassedValidation = validateInstance(moduleMetadata.specification, moduleMetadata.filename, instance)
@@ -81,9 +79,7 @@ class InstanceSI(implicit injector: Injector) {
 
   private def validateInstance(specification: Specification, filename: String, instance: Instance): ValidationInfo = {
     val validatorClassName = specification.validatorClass
-    val file = storage.get(filename, tmpDirectory + filename)
-    val loader = new URLClassLoader(Seq(file.toURI.toURL), ClassLoader.getSystemClassLoader)
-    val clazz = loader.loadClass(validatorClassName)
+    val clazz = inject[FileClassLoader].loadClass(validatorClassName, filename, tmpDirectory)
     val validator = clazz.newInstance().asInstanceOf[StreamingValidator]
     val optionsValidationInfo = validator.validate(instance)
     val instanceValidationInfo = validator.validate(instance.options)
