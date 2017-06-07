@@ -16,8 +16,8 @@ private[instance] class InstanceDomainRenewer(implicit val injector: Injector) {
     instanceRepository.save(instance.to())
   }
 
-  def updateInstanceRestAddress(instance: Instance, restAddress: String): Unit = {
-    instance.restAddress = Option(restAddress)
+  def updateInstanceRestAddress(instance: Instance, restAddress: Option[String]): Unit = {
+    instance.restAddress = restAddress
     instanceRepository.save(instance.to())
   }
 

@@ -86,7 +86,7 @@ class InstanceStopper(instance: Instance, marathonAddress: String, delay: Long =
       clearTasks()
     }
     instanceManager.updateInstanceStatus(instance, stopped)
-    instanceManager.updateInstanceRestAddress(instance, "")
+    instanceManager.updateInstanceRestAddress(instance, None)
   }
 
   private def isInputInstance = {

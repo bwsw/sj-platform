@@ -14,7 +14,7 @@ class InstanceStarterMock(_marathonManager: MarathonApi,
                           marathonAddress: String,
                           zookeeperHost: Option[String] = None,
                           zookeeperPort: Option[Int] = None)(implicit override val injector: Injector)
-  extends InstanceStarter(instance, marathonAddress, zookeeperHost, zookeeperPort) with MockitoSugar {
+  extends InstanceStarter(instance, marathonAddress, zookeeperHost, zookeeperPort, 100) with MockitoSugar {
 
   override protected val instanceManager: InstanceDomainRenewer = _instanceManager
   override protected val client: HttpClient = mock[HttpClient]
@@ -23,4 +23,12 @@ class InstanceStarterMock(_marathonManager: MarathonApi,
   override def createLeaderLatch(marathonMaster: String): LeaderLatch = mock[LeaderLatch]
 
   override def startInstance(): Unit = super.startInstance()
+
+  override def startFramework(marathonMaster: String): Unit = super.startFramework(marathonMaster)
+
+  override def launchFramework(): Unit = super.launchFramework()
+
+  override protected def createFramework(marathonMaster: String): Unit = super.createFramework(marathonMaster)
+
+  override protected def waitForFrameworkToStart(): Unit = super.waitForFrameworkToStart()
 }

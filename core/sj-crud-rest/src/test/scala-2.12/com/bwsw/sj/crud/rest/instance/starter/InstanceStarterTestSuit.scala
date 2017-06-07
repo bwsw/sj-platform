@@ -18,14 +18,13 @@ import com.bwsw.sj.crud.rest.utils.RestLiterals
 import org.apache.http.{HttpEntity, HttpStatus, StatusLine}
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
-import org.mockito.Mockito.{verify, times}
+import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FlatSpec, Matchers, PrivateMethodTester}
 import scaldi.{Injector, Module}
 
-class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodTester {
-  it should "hasFrameworkStarted() method returns true if count of running tasks is equal 1" in new InstanceStarterMocks {
+class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodTester with InstanceStarterMocks {
+  it should "hasFrameworkStarted() method returns true if count of running tasks is equal 1" in {
     //arrange
     val emptyMarathonApplicationStub = MarathonApplication(MarathonApplicationInfo(null, Map(), 1, List(), null))
     val hasFrameworkStarted = PrivateMethod[Boolean]('hasFrameworkStarted)
@@ -37,7 +36,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     frameworkStarted shouldBe true
   }
 
-  it should "hasFrameworkStarted() method returns false if count of running tasks isn't equal 1" in new InstanceStarterMocks {
+  it should "hasFrameworkStarted() method returns false if count of running tasks isn't equal 1" in {
     //arrange
     val emptyMarathonApplicationStub = MarathonApplication(MarathonApplicationInfo(null, Map(), 5, List(), null))
     val hasFrameworkStarted = PrivateMethod[Boolean]('hasFrameworkStarted)
@@ -51,7 +50,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
 
   it should "getFrameworkEnvironmentVariables() method returns a set of environment variables containing " +
     s"${FrameworkLiterals.instanceIdLabel}, ${FrameworkLiterals.frameworkIdLabel}, ${FrameworkLiterals.mesosMasterLabel}, " +
-    s"mongo envs and envs from instance" in new InstanceStarterMocks {
+    s"mongo envs and envs from instance" in {
     //arrange
     val getFrameworkEnvironmentVariables = PrivateMethod[Map[String, String]]('getFrameworkEnvironmentVariables)
 
@@ -64,7 +63,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
       FrameworkLiterals.mesosMasterLabel -> master) ++ mongoEnv ++ instanceEnv
   }
 
-  it should "getZooKeeperServers() method returns a zookeeper address that has been passed to InstanceStarter" in new InstanceStarterMocks {
+  it should "getZooKeeperServers() method returns a zookeeper address that has been passed to InstanceStarter" in {
     //arrange
     val zkHost = "localhost"
     val zkPort = "2181"
@@ -80,7 +79,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
   }
 
   it should "getZooKeeperServers() method returns a zookeeper address extracted from passed value (marathon master address) " +
-    s"if there are no zookeeper settings" in new InstanceStarterMocks {
+    s"if there are no zookeeper settings" in {
     //arrange
     val expectedZkHost = "host"
     val expectedZkPort = "2181"
@@ -94,7 +93,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     zkServers shouldBe (expectedZkHost + ":" + expectedZkPort)
   }
 
-  it should "createRequestForFrameworkCreation() method returns a proper marathon request to launch framework" in new InstanceStarterMocks {
+  it should "createRequestForFrameworkCreation() method returns a proper marathon request to launch framework" in {
     //arrange
     val zkHost = "host"
     val zkPort = "2181"
@@ -120,19 +119,17 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     )
   }
 
-  it should "startInstance() method works properly if framework has been run without any exceptions" in new InstanceStarterMocks {
+  it should "startInstance() method works properly if framework has been run without any exceptions" in {
     //arrange
-    val zkHost = "host"
-    val zkPort = "2181"
-    val marathonMaster = s"zk://$zkHost:$zkPort/mesos"
     val startInstance = PrivateMethod('startInstance)
+    val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
 
     val okMarathonResponse = getClosableHttpResponseMock(marathonInfoStub, HttpStatus.SC_OK)
     val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
     val marathonManager = mock[MarathonApi]
     when(marathonManager.getMarathonInfo()).thenReturn(okMarathonResponse)
     when(marathonManager.getMarathonMaster(any())).thenReturn(master)
-    when(marathonManager.getApplicationInfo(any())).thenReturn(okFrameworkResponse)
+    when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
     when(marathonManager.getApplicationEntity(any())).thenReturn(marathonApplicationStub)
     when(marathonManager.scaleMarathonApplication(any(), any())).thenReturn(HttpStatus.SC_OK)
     when(marathonManager.getLeaderTask(any())).thenReturn(Some(marathonTasksStub))
@@ -141,31 +138,310 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
 
     //act and assert
     instanceStarterMock(marathonManager, instanceManager) invokePrivate startInstance()
+
+    //assert
     verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.starting)
     verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.started)
+    verify(instanceManager, times(1)).updateInstanceStatus(instanceMock, EngineLiterals.started)
+    verify(instanceManager, times(1)).updateInstanceRestAddress(instanceMock, restAddress)
   }
 
-  it should "startInstance() method fails if framework hasn't been run" in new InstanceStarterMocks {
+  it should s"startInstance() method doesn't start an instance (set '${EngineLiterals.failed}' status) if marathon has got some problems" in {
     //arrange
-    val zkHost = "host"
-    val zkPort = "2181"
-    val marathonMaster = s"zk://$zkHost:$zkPort/mesos"
     val startInstance = PrivateMethod('startInstance)
 
-    val okMarathonResponse = getClosableHttpResponseMock(marathonInfoStub, HttpStatus.SC_OK)
-    val okFrameworkResponse = getClosableHttpResponseMock(failedMarathonApplicationStub, HttpStatus.SC_OK)
+    val notOkMarathonResponse = getClosableHttpResponseMock(marathonInfoStub, errorStatus)
     val marathonManager = mock[MarathonApi]
-    when(marathonManager.getMarathonInfo()).thenReturn(okMarathonResponse)
-    when(marathonManager.getMarathonMaster(any())).thenReturn(master)
-    when(marathonManager.getApplicationInfo(any())).thenReturn(okFrameworkResponse)
-    when(marathonManager.getApplicationEntity(any())).thenReturn(failedMarathonApplicationStub)
+    when(marathonManager.getMarathonInfo()).thenReturn(notOkMarathonResponse)
+
+    val instanceManager = mock[InstanceDomainRenewer]
+
+    //act
+    instanceStarterMock(marathonManager, instanceManager) invokePrivate startInstance()
+
+    //assert
+    verify(instanceManager, times(1)).updateInstanceStatus(instanceMock, EngineLiterals.failed)
+  }
+
+  it should "startFramework() method launches the existent marathon app if framework has been created earlier" in {
+    //arrange
+    val startFramework = PrivateMethod[String]('startFramework)
+    val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
+
+
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val marathonManager = mock[MarathonApi]
+    when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
+    when(marathonManager.getApplicationEntity(any())).thenReturn(marathonApplicationStub)
     when(marathonManager.scaleMarathonApplication(any(), any())).thenReturn(HttpStatus.SC_OK)
     when(marathonManager.getLeaderTask(any())).thenReturn(Some(marathonTasksStub))
 
     val instanceManager = mock[InstanceDomainRenewer]
 
+    //act
+    instanceStarterMock(marathonManager, instanceManager) invokePrivate startFramework(master)
+
+    //assert
+    verify(marathonManager, times(1)).scaleMarathonApplication(frameworkName, 1)
+    verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.started)
+    verify(instanceManager, times(1)).updateInstanceStatus(instanceMock, EngineLiterals.started)
+    verify(instanceManager, times(1)).updateInstanceRestAddress(instanceMock, restAddress)
+  }
+
+  it should "startFramework() method creates a new marathon app if framework hasn't been created earlier" in {
+    //arrange
+    val startFramework = PrivateMethod[String]('startFramework)
+    val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
+
+    val notOkFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, errorStatus)
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val marathonManager = mock[MarathonApi]
+    when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(notOkFrameworkResponse, okFrameworkResponse)
+    when(marathonManager.getApplicationEntity(any())).thenReturn(marathonApplicationStub)
+    when(marathonManager.startMarathonApplication(any())).thenReturn(HttpStatus.SC_CREATED)
+    when(marathonManager.getLeaderTask(any())).thenReturn(Some(marathonTasksStub))
+
+    val instanceManager = mock[InstanceDomainRenewer]
+
+    //act
+    instanceStarterMock(marathonManager, instanceManager) invokePrivate startFramework(master)
+
+    //assert
+    verify(marathonManager, times(1)).startMarathonApplication(any())
+    verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.started)
+    verify(instanceManager, times(1)).updateInstanceStatus(instanceMock, EngineLiterals.started)
+    verify(instanceManager, times(1)).updateInstanceRestAddress(instanceMock, restAddress)
+  }
+
+  it should "launchFramework() method launches the existent marathon app" in {
+    //arrange
+    val launchFramework = PrivateMethod('launchFramework)
+    val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
+
+
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val marathonManager = mock[MarathonApi]
+    when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
+    when(marathonManager.getApplicationEntity(any())).thenReturn(marathonApplicationStub)
+    when(marathonManager.scaleMarathonApplication(any(), any())).thenReturn(HttpStatus.SC_OK)
+    when(marathonManager.getLeaderTask(any())).thenReturn(Some(marathonTasksStub))
+
+    val instanceManager = mock[InstanceDomainRenewer]
+
+    //act
+    instanceStarterMock(marathonManager, instanceManager) invokePrivate launchFramework()
+
+    //assert
+    verify(marathonManager, times(1)).scaleMarathonApplication(frameworkName, 1)
+    verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.started)
+    verify(instanceManager, times(1)).updateInstanceStatus(instanceMock, EngineLiterals.started)
+    verify(instanceManager, times(1)).updateInstanceRestAddress(instanceMock, restAddress)
+  }
+
+  it should "launchFramework() method doesn't launch the existent marathon app " +
+    "if marathon has got some problems with scaling of app" in {
+    //arrange
+    val launchFramework = PrivateMethod('launchFramework)
+
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val marathonManager = mock[MarathonApi]
+    when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
+    when(marathonManager.getApplicationEntity(any())).thenReturn(marathonApplicationStub)
+    when(marathonManager.scaleMarathonApplication(any(), any())).thenReturn(errorStatus)
+    when(marathonManager.getLeaderTask(any())).thenReturn(Some(marathonTasksStub))
+
+    val instanceManager = mock[InstanceDomainRenewer]
+
+    //act
+    instanceStarterMock(marathonManager, instanceManager) invokePrivate launchFramework()
+
+    //assert
+    verify(marathonManager, times(1)).scaleMarathonApplication(frameworkName, 1)
+    verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.failed)
+    verify(instanceManager, times(1)).updateInstanceStatus(instanceMock, EngineLiterals.failed)
+    verify(instanceManager, times(1)).updateInstanceRestAddress(instanceMock, None)
+  }
+
+  it should "createFramework() method creates a new marathon app" in {
+    //arrange
+    val createFramework = PrivateMethod[String]('createFramework)
+    val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
+
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val marathonManager = mock[MarathonApi]
+    when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
+    when(marathonManager.getApplicationEntity(any())).thenReturn(marathonApplicationStub)
+    when(marathonManager.startMarathonApplication(any())).thenReturn(HttpStatus.SC_CREATED)
+    when(marathonManager.getLeaderTask(any())).thenReturn(Some(marathonTasksStub))
+
+    val instanceManager = mock[InstanceDomainRenewer]
+
+    //act
+    instanceStarterMock(marathonManager, instanceManager) invokePrivate createFramework(master)
+
+    //assert
+    verify(marathonManager, times(1)).startMarathonApplication(any())
+    verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.started)
+    verify(instanceManager, times(1)).updateInstanceStatus(instanceMock, EngineLiterals.started)
+    verify(instanceManager, times(1)).updateInstanceRestAddress(instanceMock, restAddress)
+  }
+
+  it should "createFramework() method doesn't create a new marathon app " +
+    "if marathon has got some problems with creation process of app" in {
+    //arrange
+    val createFramework = PrivateMethod[String]('createFramework)
+
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val marathonManager = mock[MarathonApi]
+    when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
+    when(marathonManager.getApplicationEntity(any())).thenReturn(marathonApplicationStub)
+    when(marathonManager.startMarathonApplication(any())).thenReturn(errorStatus)
+    when(marathonManager.getLeaderTask(any())).thenReturn(Some(marathonTasksStub))
+
+    val instanceManager = mock[InstanceDomainRenewer]
+
+    //act
+    instanceStarterMock(marathonManager, instanceManager) invokePrivate createFramework(master)
+
+    //assert
+    verify(marathonManager, times(1)).startMarathonApplication(any())
+    verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.failed)
+    verify(instanceManager, times(1)).updateInstanceStatus(instanceMock, EngineLiterals.failed)
+    verify(instanceManager, times(1)).updateInstanceRestAddress(instanceMock, None)
+  }
+
+  it should "waitForFrameworkToStart() method works properly if there are no errors" in {
+    //arrange
+    val waitForFrameworkToStart = PrivateMethod('waitForFrameworkToStart)
+    val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
+
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val marathonManager = mock[MarathonApi]
+    when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
+    when(marathonManager.getApplicationEntity(any())).thenReturn(marathonApplicationStub)
+    when(marathonManager.getLeaderTask(any())).thenReturn(Some(marathonTasksStub))
+
+    val instanceManager = mock[InstanceDomainRenewer]
+
+    //act
+    instanceStarterMock(marathonManager, instanceManager) invokePrivate waitForFrameworkToStart()
+
+    //assert
+    verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.started)
+    verify(instanceManager, times(1)).updateInstanceStatus(instanceMock, EngineLiterals.started)
+    verify(instanceManager, times(1)).updateInstanceRestAddress(instanceMock, restAddress)
+  }
+
+  it should "waitForFrameworkToStart() method do multiple tries to wait until all tasks start if app tasks don't start the first time" in {
+    //arrange
+    val numberOfTries = 5
+    val notStartedMarathonApps = Array.fill(numberOfTries - 1)(notStartedMarathonApplicationStub).toList
+    val waitForFrameworkToStart = PrivateMethod('waitForFrameworkToStart)
+    val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
+
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val marathonManager = mock[MarathonApi]
+    when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
+    when(marathonManager.getApplicationEntity(any()))
+      .thenReturn(notStartedMarathonApplicationStub, notStartedMarathonApps.:+(marathonApplicationStub): _*)
+    when(marathonManager.getLeaderTask(any())).thenReturn(Some(marathonTasksStub))
+
+    val instanceManager = mock[InstanceDomainRenewer]
+
+    //act
+    instanceStarterMock(marathonManager, instanceManager) invokePrivate waitForFrameworkToStart()
+
+    //assert
+    verify(instanceManager, times(numberOfTries)).updateFrameworkStage(instanceMock, EngineLiterals.starting)
+    verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.started)
+    verify(instanceManager, times(1)).updateInstanceStatus(instanceMock, EngineLiterals.started)
+    verify(instanceManager, times(1)).updateInstanceRestAddress(instanceMock, restAddress)
+  }
+
+  it should s"waitForFrameworkToStart() method set an instance status to '${EngineLiterals.failed}' and throws exception" +
+    "if there has been some problems with creation/launching process of app" in {
+    //arrange
+    val waitForFrameworkToStart = PrivateMethod('waitForFrameworkToStart)
+
+    val notOkFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, errorStatus)
+    val marathonManager = mock[MarathonApi]
+    when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(notOkFrameworkResponse)
+    when(marathonManager.getApplicationEntity(any())).thenReturn(marathonApplicationStub)
+    when(marathonManager.getLeaderTask(any())).thenReturn(Some(marathonTasksStub))
+
+    val instanceManager = mock[InstanceDomainRenewer]
+
     //act and assert
-    assertThrows[InterruptedException](instanceStarterMock(marathonManager, instanceManager) invokePrivate startInstance())
+    assertThrows[Exception](instanceStarterMock(marathonManager, instanceManager) invokePrivate waitForFrameworkToStart())
+    verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.failed)
+    verify(instanceManager, times(1)).updateInstanceRestAddress(instanceMock, None)
+  }
+
+  it should s"waitForFrameworkToStart() method throws exception, " +
+    s"but first destroys a marathon app and set an instance status to '${EngineLiterals.failed}'" +
+    "if there has been some problems with launching process of app tasks" in {
+    //arrange
+    val waitForFrameworkToStart = PrivateMethod('waitForFrameworkToStart)
+
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val marathonManager = mock[MarathonApi]
+    when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
+    when(marathonManager.getApplicationEntity(any())).thenReturn(failedMarathonApplicationStub)
+    when(marathonManager.getLeaderTask(any())).thenReturn(Some(marathonTasksStub))
+
+    val instanceManager = mock[InstanceDomainRenewer]
+
+    //act and assert
+    assertThrows[InterruptedException](instanceStarterMock(marathonManager, instanceManager) invokePrivate waitForFrameworkToStart())
+    verify(marathonManager, times(1)).destroyMarathonApplication(frameworkName)
+    verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.failed)
+    verify(instanceManager, times(1)).updateInstanceRestAddress(instanceMock, None)
+  }
+
+  it should "run() method works properly if framework has been run without any exceptions" in {
+    //arrange
+    val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
+    val okMarathonResponse = getClosableHttpResponseMock(marathonInfoStub, HttpStatus.SC_OK)
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val marathonManager = mock[MarathonApi]
+    when(marathonManager.getMarathonInfo()).thenReturn(okMarathonResponse)
+    when(marathonManager.getMarathonMaster(any())).thenReturn(master)
+    when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
+    when(marathonManager.getApplicationEntity(any())).thenReturn(marathonApplicationStub)
+    when(marathonManager.scaleMarathonApplication(any(), any())).thenReturn(HttpStatus.SC_OK)
+    when(marathonManager.getLeaderTask(any())).thenReturn(Some(marathonTasksStub))
+
+    val instanceManager = mock[InstanceDomainRenewer]
+
+    //act
+    instanceStarterMock(marathonManager, instanceManager).run()
+
+    //assert
+    verify(instanceManager, times(1)).updateInstanceStatus(instanceMock, EngineLiterals.starting)
+    verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.starting)
+    verify(instanceManager, times(1)).updateFrameworkStage(instanceMock, EngineLiterals.started)
+    verify(instanceManager, times(1)).updateInstanceStatus(instanceMock, EngineLiterals.started)
+    verify(instanceManager, times(1)).updateInstanceRestAddress(instanceMock, restAddress)
+  }
+
+  it should s"run() method doesn't start an instance (set '${EngineLiterals.failed}' status) if there are some exceptions during start process" in {
+    //arrange
+    val okMarathonResponse = getClosableHttpResponseMock(marathonInfoStub, HttpStatus.SC_OK)
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val notOkFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, errorStatus)
+    val marathonManager = mock[MarathonApi]
+    when(marathonManager.getMarathonInfo()).thenReturn(okMarathonResponse)
+    when(marathonManager.getMarathonMaster(any())).thenReturn(master)
+    when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse, notOkFrameworkResponse)
+    when(marathonManager.scaleMarathonApplication(any(), any())).thenReturn(HttpStatus.SC_OK)
+
+    val instanceManager = mock[InstanceDomainRenewer]
+
+    //act
+    instanceStarterMock(marathonManager, instanceManager).run()
+
+    //assert
+    verify(instanceManager, times(1)).updateInstanceStatus(instanceMock, EngineLiterals.failed)
   }
 }
 
@@ -204,8 +480,10 @@ trait InstanceStarterMocks extends MockitoSugar {
   private val marathonTaskFailureStub = MarathonTaskFailure("127.0.0.1", "Abnormal executor termination", "TASK_FAILED", "2014-09-12T23:23:41.711Z")
   private val marathonApplicationInfoStub = MarathonApplicationInfo("id", Map(FrameworkLiterals.frameworkIdLabel -> frameworkIdStub), 1, List(marathonTasksStub), null)
   private val failedMarathonApplicationInfoStub = MarathonApplicationInfo("id", Map(FrameworkLiterals.frameworkIdLabel -> frameworkIdStub), 0, List(marathonTasksStub), marathonTaskFailureStub)
+  private val notStartedMarathonApplicationInfoStub = MarathonApplicationInfo("id", Map(FrameworkLiterals.frameworkIdLabel -> frameworkIdStub), 0, List(marathonTasksStub), null)
   val marathonApplicationStub = MarathonApplication(marathonApplicationInfoStub)
   val failedMarathonApplicationStub = MarathonApplication(failedMarathonApplicationInfoStub)
+  val notStartedMarathonApplicationStub = MarathonApplication(notStartedMarathonApplicationInfoStub)
 
   def getClosableHttpResponseMock(content: Serializable, status: Int): CloseableHttpResponse = {
     val statusLineMock = mock[StatusLine]
@@ -240,6 +518,8 @@ trait InstanceStarterMocks extends MockitoSugar {
   def getSettingsUtils: SettingsUtils = settingsUtilsMock.settingsUtils
 
   val frameworkName: String = InstanceAdditionalFieldCreator.getFrameworkName(instanceMock)
+
+  val errorStatus = HttpStatus.SC_INTERNAL_SERVER_ERROR
 }
 
 class InstanceSettingsUtilsMock extends MockitoSugar {
