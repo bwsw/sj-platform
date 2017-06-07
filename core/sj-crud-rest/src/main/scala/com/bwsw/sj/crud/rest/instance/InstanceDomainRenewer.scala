@@ -4,6 +4,7 @@ import java.util.Calendar
 
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.si.model.instance.Instance
+import com.bwsw.sj.common.utils.FrameworkLiterals
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -27,7 +28,7 @@ private[instance] class InstanceDomainRenewer(implicit val injector: Injector) {
     } else {
       instance.stage.state = status
       instance.stage.datetime = Calendar.getInstance().getTime
-      instance.stage.duration = 0
+      instance.stage.duration = FrameworkLiterals.initialStageDuration
     }
 
     instanceRepository.save(instance.to())

@@ -183,6 +183,8 @@ object FrameworkLiterals {
   def createCommandToLaunch(frameworkJarName: String) = {
     "java -jar " + frameworkJarName + " $PORT"
   }
+
+  val initialStageDuration = 0
 }
 
 /**
