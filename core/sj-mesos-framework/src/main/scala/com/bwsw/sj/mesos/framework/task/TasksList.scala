@@ -1,6 +1,5 @@
 package com.bwsw.sj.mesos.framework.task
 
-import com.bwsw.sj.common.dal.ConnectionConstants
 import com.bwsw.sj.common.dal.model.instance.InputTask
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest.FrameworkRestEntity
@@ -176,7 +175,7 @@ object TasksList {
       Environment.Variable.newBuilder.setName("AGENTS_PORTS").setValue(agentPorts),
       Environment.Variable.newBuilder.setName("INSTANCE_HOSTS").setValue(hosts.mkString(","))
     )
-    ConnectionConstants.mongoEnvironment.foreach(variable =>
+    inject[ConnectionRepository].mongoEnvironment.foreach(variable =>
       environmentVariables = environmentVariables :+ Environment.Variable.newBuilder.setName(variable._1).setValue(variable._2)
     )
 

@@ -3,8 +3,11 @@ package com.bwsw.sj.common.config
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.config.ConfigLiterals._
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
+import com.bwsw.sj.common.utils.FrameworkLiterals
 import scaldi.Injectable.inject
 import scaldi.Injector
+
+import scala.util.{Failure, Success, Try}
 
 class SettingsUtils(implicit val injector: Injector) {
   private val configService = inject[ConnectionRepository].getConfigRepository
@@ -74,6 +77,25 @@ class SettingsUtils(implicit val injector: Injector) {
 
   def getRestTimeout: Int = {
     getIntConfigSetting(restTimeoutTag)
+  }
+
+  def getBackoffSettings(): (Int, Double, Int) = {
+    val backoffSeconds = Try(getFrameworkBackoffSeconds()) match {
+      case Success(x) => x
+      case Failure(_: NoSuchFieldException) => FrameworkLiterals.defaultBackoffSeconds
+      case Failure(e) => throw e
+    }
+    val backoffFactor = Try(getFrameworkBackoffFactor()) match {
+      case Success(x) => x
+      case Failure(_: NoSuchFieldException) => FrameworkLiterals.defaultBackoffFactor
+      case Failure(e) => throw e
+    }
+    val maxLaunchDelaySeconds = Try(getFrameworkMaxLaunchDelaySeconds()) match {
+      case Success(x) => x
+      case Failure(_: NoSuchFieldException) => FrameworkLiterals.defaultMaxLaunchDelaySeconds
+      case Failure(e) => throw e
+    }
+    (backoffSeconds, backoffFactor, maxLaunchDelaySeconds)
   }
 
   private def getIntConfigSetting(name: String): Int = {

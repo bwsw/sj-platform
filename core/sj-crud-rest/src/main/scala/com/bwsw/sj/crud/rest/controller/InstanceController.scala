@@ -12,7 +12,7 @@ import com.bwsw.sj.common.si._
 import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.common.si.model.module.{ModuleMetadata, ModuleMetadataConversion, Specification}
 import com.bwsw.sj.common.si.result._
-import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils}
+import com.bwsw.sj.common.utils.{CommonAppConfigNames, EngineLiterals, MessageResourceUtils}
 import com.bwsw.sj.crud.rest.exceptions.ConfigSettingNotFound
 import com.bwsw.sj.crud.rest.instance.validator.InstanceValidator
 import com.bwsw.sj.crud.rest.instance.{InstanceDestroyer, InstanceStarter, InstanceStopper}
@@ -20,6 +20,7 @@ import com.bwsw.sj.crud.rest.model.instance._
 import com.bwsw.sj.crud.rest.model.instance.response.InstanceApiResponse
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.sj.crud.rest.{InstanceResponseEntity, InstancesResponseEntity, ShortInstance, ShortInstancesResponseEntity}
+import com.typesafe.config.ConfigFactory
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.util.EntityUtils
 import org.slf4j.LoggerFactory
@@ -36,6 +37,7 @@ class InstanceController(implicit injector: Injector) {
   import messageResourceUtils._
 
   private val logger = LoggerFactory.getLogger(getClass)
+  private val (zkHost, zkPort) = getZkProperties()
   private val serializer = new JsonSerializer(true, true)
   private val serviceInterface = new InstanceSI
   private val moduleSI = new ModuleSI
@@ -208,7 +210,8 @@ class InstanceController(implicit injector: Injector) {
 
   private def startInstance(instance: Instance) = {
     logger.debug(s"Starting application of instance ${instance.name}.")
-    new Thread(new InstanceStarter(instance, settingsUtils.getMarathonConnect())).start()
+
+    new Thread(new InstanceStarter(instance, settingsUtils.getMarathonConnect(), zkHost, zkPort)).start()
   }
 
   private def stopInstance(instance: Instance) = {
@@ -244,5 +247,21 @@ class InstanceController(implicit injector: Injector) {
     val validatorClass = Class.forName(validatorClassName)
     val validator = validatorClass.getConstructor(classOf[Injector]).newInstance(injector).asInstanceOf[InstanceValidator]
     validator.validate(instance.asInstanceOf[validator.T], specification)
+  }
+
+  private def getZkProperties(): (Option[String], Option[Int]) = {
+    val config = ConfigFactory.load()
+    val (zkHost, zkPort) = Try {
+      (config.getString(CommonAppConfigNames.zooKeeperHost),
+        config.getInt(CommonAppConfigNames.zooKeeperPort))
+    } match {
+      case Success((_zkHost, _zkPort)) =>
+        (Some(_zkHost), Some(_zkPort.toInt))
+
+      case Failure(_) =>
+        (None, None)
+    }
+
+    (zkHost, zkPort)
   }
 }

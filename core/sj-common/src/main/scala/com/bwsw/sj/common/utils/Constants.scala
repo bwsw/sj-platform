@@ -175,6 +175,14 @@ object FrameworkLiterals {
   val instance = framework + ".instance"
   val instanceId = instance + ".id"
   val mesosMaster = framework + ".mesos.master"
+
+  val defaultBackoffSeconds = 7
+  val defaultBackoffFactor = 7.0
+  val defaultMaxLaunchDelaySeconds = 600
+
+  def createCommandToLaunch(frameworkJarName: String) = {
+    "java -jar " + frameworkJarName + " $PORT"
+  }
 }
 
 /**
