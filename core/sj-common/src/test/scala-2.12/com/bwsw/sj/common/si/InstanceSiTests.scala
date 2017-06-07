@@ -1,25 +1,25 @@
 package com.bwsw.sj.common.si
 
-import com.bwsw.common.file.utils.MongoFileStorage
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
+import com.bwsw.sj.common.engine.{StreamingValidator, ValidationInfo}
 import com.bwsw.sj.common.si.model.instance.{Instance, InstanceConversion}
 import com.bwsw.sj.common.si.model.module.{ModuleMetadata, Specification}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.EngineLiterals._
-import com.bwsw.sj.common.utils.{MessageResourceUtils, MessageResourceUtilsMock}
+import com.bwsw.sj.common.utils.{FileClassLoader, MessageResourceUtils, MessageResourceUtilsMock}
 import org.mockito.ArgumentMatchers.{any, anyString, eq => argEq}
 import org.mockito.Mockito.{never, reset, verify, when}
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterEach, FlatSpec, Matchers}
 import scaldi.{Injector, Module}
 
-class InstanceSiTests extends FlatSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
-  val tmpDirectory = "tmp/"
+import scala.collection.mutable.ArrayBuffer
 
-  val instanceConversion = mock[InstanceConversion]
+class InstanceSiTests extends FlatSpec with Matchers with BeforeAndAfterEach with MockitoSugar {
 
-  val module1 = createModule(regularStreamingType, "module-1", "v1")
+  import InstanceSiTests._
+
   val readyInstance = createInstance(module1, "ready-instance", ready)
   val startedInstance = createInstance(module1, "started-instance", started)
   val failedInstance = createInstance(module1, "failed-instance", failed)
@@ -37,26 +37,29 @@ class InstanceSiTests extends FlatSpec with Matchers with MockitoSugar with Befo
   val moduleToInstances = Map(module1 -> module1Instances, module2 -> module2Instances)
 
   val instanceRepository = mock[GenericMongoRepository[InstanceDomain]]
-  val fileStorage = mock[MongoFileStorage]
-
   val connectionRepository = mock[ConnectionRepository]
-  when(connectionRepository.getFileStorage).thenReturn(fileStorage)
   when(connectionRepository.getInstanceRepository).thenReturn(instanceRepository)
+
+  val fileClassLoader = mock[FileClassLoader]
+  Seq[Class[_]](
+    classOf[AllValid],
+    classOf[InstanceNotValid],
+    classOf[OptionsNotValid],
+    classOf[InstanceAndOptionsNotValid]).foreach { clazz =>
+    when(fileClassLoader.loadClass(argEq(clazz.getName), argEq(moduleFilename), anyString())(any[Injector]()))
+      .thenAnswer(_ => clazz)
+  }
 
   val injector = new Module {
     bind[ConnectionRepository] to connectionRepository
     bind[MessageResourceUtils] to MessageResourceUtilsMock.messageResourceUtils
     bind[InstanceConversion] to instanceConversion
+    bind[FileClassLoader] to fileClassLoader
   }.injector
 
   val instanceSI = new InstanceSI()(injector)
 
   override def beforeEach(): Unit = {
-    reset(fileStorage)
-
-    when(fileStorage.exists(anyString())).thenReturn(false)
-    when(fileStorage.delete(anyString())).thenReturn(false)
-
     reset(instanceRepository)
 
     when(instanceRepository.getByParameters(any[Map[String, Any]]())).thenReturn(Seq.empty)
@@ -77,8 +80,49 @@ class InstanceSiTests extends FlatSpec with Matchers with MockitoSugar with Befo
     }
   }
 
+
+  // create
+  "InstanceSI" should "create valid instance" in {
+    notStoredInstance match {
+      case InstanceInfo(instance, _, module) =>
+        when(module.specification.validatorClass).thenReturn(classOf[AllValid].getName)
+
+        instanceSI.create(instance, module) shouldBe Created
+    }
+  }
+
+  it should "not create instance if options not valid" in {
+    notStoredInstance match {
+      case InstanceInfo(instance, _, module) =>
+        when(module.specification.validatorClass).thenReturn(classOf[OptionsNotValid].getName)
+
+        instanceSI.create(instance, module) shouldBe NotCreated(ArrayBuffer(optionsNotValidError))
+    }
+  }
+
+  it should "not create instance if it not valid" in {
+    notStoredInstance match {
+      case InstanceInfo(instance, _, module) =>
+        when(module.specification.validatorClass).thenReturn(classOf[InstanceNotValid].getName)
+
+        instanceSI.create(instance, module) shouldBe NotCreated(ArrayBuffer(instanceNotValidError))
+    }
+  }
+
+  it should "not create valid instance if it and options not valid" in {
+    notStoredInstance match {
+      case InstanceInfo(instance, _, module) =>
+        when(module.specification.validatorClass).thenReturn(classOf[InstanceAndOptionsNotValid].getName)
+
+        val response = instanceSI.create(instance, module)
+        response shouldBe a[NotCreated]
+        val errors = response.asInstanceOf[NotCreated].errors
+        errors.toSet shouldBe Set(optionsNotValidError, instanceNotValidError)
+    }
+  }
+
   // getAll
-  "InstanceSI" should "give all instances from storage" in {
+  it should "give all instances from storage" in {
     instanceSI.getAll.toSet shouldBe storedInstances.map(_.instance).toSet
   }
 
@@ -163,9 +207,20 @@ class InstanceSiTests extends FlatSpec with Matchers with MockitoSugar with Befo
         instanceSI.canStop(instance) shouldBe false
     }
   }
+}
 
+object InstanceSiTests extends MockitoSugar {
 
-  private def createModule(moduleType: String, name: String, version: String) = {
+  val instanceConversion = mock[InstanceConversion]
+
+  val moduleFilename = "module.jar"
+  val module1 = createModule(regularStreamingType, "module-1", "v1")
+
+  val notStoredInstance = createInstance(module1, "not-stored-instance", ready)
+  val instanceNotValidError = "instance not valid"
+  val optionsNotValidError = "options not valid"
+
+  def createModule(moduleType: String, name: String, version: String) = {
     val specification = mock[Specification]
     when(specification.name).thenReturn(name)
     when(specification.version).thenReturn(version)
@@ -175,11 +230,12 @@ class InstanceSiTests extends FlatSpec with Matchers with MockitoSugar with Befo
     when(module.specification).thenReturn(specification)
     when(module.name).thenReturn(Some(name))
     when(module.version).thenReturn(Some(version))
+    when(module.filename).thenReturn(moduleFilename)
 
     module
   }
 
-  private def createInstance(module: ModuleMetadata, name: String, status: String) = {
+  def createInstance(module: ModuleMetadata, name: String, status: String) = {
     val instanceDomain = mock[InstanceDomain]
 
     val moduleType = module.specification.moduleType
@@ -198,6 +254,7 @@ class InstanceSiTests extends FlatSpec with Matchers with MockitoSugar with Befo
     when(instance.moduleVersion).thenReturn(moduleVersion)
     when(instance.name).thenReturn(name)
     when(instance.status).thenReturn(status)
+    when(instance.options).thenReturn(s"""{"name": $name}""")
     when(instance.to()).thenReturn(instanceDomain)
 
     when(instanceConversion.from(argEq(instanceDomain))(any[Injector]())).thenReturn(instance)
@@ -208,5 +265,53 @@ class InstanceSiTests extends FlatSpec with Matchers with MockitoSugar with Befo
   case class InstanceInfo(instance: Instance,
                           instanceDomain: InstanceDomain,
                           module: ModuleMetadata)
+
+  def notValid(instance: Instance) = {
+    if (instance == notStoredInstance.instance)
+      ValidationInfo(result = false, ArrayBuffer(instanceNotValidError))
+    else ValidationInfo()
+  }
+
+  def valid(instance: Instance) = {
+    if (instance != notStoredInstance.instance)
+      ValidationInfo(result = false, ArrayBuffer(instanceNotValidError))
+    else ValidationInfo()
+  }
+
+  def notValid(options: String) = {
+    if (options == notStoredInstance.instance.options)
+      ValidationInfo(result = false, ArrayBuffer(optionsNotValidError))
+    else ValidationInfo()
+  }
+
+  def valid(options: String) = {
+    if (options != notStoredInstance.instance.options)
+      ValidationInfo(result = false, ArrayBuffer(optionsNotValidError))
+    else ValidationInfo()
+  }
+
+  class AllValid extends StreamingValidator {
+    override def validate(instance: Instance) = valid(instance)
+
+    override def validate(options: String) = valid(options)
+  }
+
+  class InstanceNotValid extends StreamingValidator {
+    override def validate(instance: Instance) = notValid(instance)
+
+    override def validate(options: String) = valid(options)
+  }
+
+  class OptionsNotValid extends StreamingValidator {
+    override def validate(instance: Instance) = valid(instance)
+
+    override def validate(options: String) = notValid(options)
+  }
+
+  class InstanceAndOptionsNotValid extends StreamingValidator {
+    override def validate(instance: Instance) = notValid(instance)
+
+    override def validate(options: String) = notValid(options)
+  }
 
 }
