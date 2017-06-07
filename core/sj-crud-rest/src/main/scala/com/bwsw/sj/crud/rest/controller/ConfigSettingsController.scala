@@ -19,7 +19,7 @@ class ConfigSettingsController(implicit protected val injector: Injector) extend
 
   import messageResourceUtils._
 
-  val serviceInterface = new ConfigSettingsSI()
+  val serviceInterface = inject[ConfigSettingsSI]
 
   override protected val entityDeletedMessage: String = "rest.config.setting.deleted"
   override protected val entityNotFoundMessage: String = "rest.config.setting.notfound"

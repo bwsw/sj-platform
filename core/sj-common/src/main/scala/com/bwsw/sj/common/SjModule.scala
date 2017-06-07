@@ -3,7 +3,7 @@ package com.bwsw.sj.common
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.si.FileBuffer
+import com.bwsw.sj.common.si.{ConfigSettingsSI, FileBuffer}
 import com.bwsw.sj.common.si.model.FileMetadataConversion
 import com.bwsw.sj.common.si.model.config.ConfigurationSettingConversion
 import com.bwsw.sj.common.si.model.instance.InstanceConversion
@@ -30,6 +30,8 @@ class SjModule extends Module {
   bind[ModuleMetadataConversion] to new ModuleMetadataConversion()
   bind[InstanceConversion] to new InstanceConversion()
   bind[ConfigurationSettingConversion] to new ConfigurationSettingConversion()
+
+  bind[ConfigSettingsSI] to new ConfigSettingsSI()
 
   bind[FileBuffer] toProvider new FileBuffer()
   bind[JsonSerializer] toProvider new JsonSerializer(ignore = true)
