@@ -130,7 +130,7 @@ class Provider(val name: String,
   }
 }
 
-class ProviderConversion {
+class CreateProvider {
   def from(providerDomain: ProviderDomain)(implicit injector: Injector): Provider = {
     providerDomain.providerType match {
       case ProviderLiterals.jdbcType =>

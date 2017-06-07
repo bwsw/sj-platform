@@ -8,7 +8,7 @@ import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.config.ConfigurationSetting
-import com.bwsw.sj.common.si.model.{FileMetadata, FileMetadataConversion, FileMetadataLiterals}
+import com.bwsw.sj.common.si.model.{FileMetadata, CreateFileMetadata, FileMetadataLiterals}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.SpecificationUtils
 import org.apache.commons.io.FileUtils
@@ -52,7 +52,7 @@ class CustomJarsSI(implicit injector: Injector) extends ServiceInterface[FileMet
 
   override def getAll(): Seq[FileMetadata] = {
     entityRepository.getByParameters(Map("filetype" -> FileMetadataLiterals.customJarType))
-      .map(x => inject[FileMetadataConversion].from(x))
+      .map(x => inject[CreateFileMetadata].from(x))
   }
 
   override def get(name: String): Option[FileMetadata] = {

@@ -4,7 +4,7 @@ import java.io.File
 
 import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.si.model.{FileMetadata, FileMetadataConversion, FileMetadataLiterals}
+import com.bwsw.sj.common.si.model.{FileMetadata, CreateFileMetadata, FileMetadataLiterals}
 import com.bwsw.sj.common.si.result._
 import org.apache.commons.io.FileUtils
 import scaldi.Injectable.inject
@@ -36,7 +36,7 @@ class CustomFilesSI(implicit injector: Injector) extends ServiceInterface[FileMe
 
   override def getAll(): Seq[FileMetadata] = {
     entityRepository.getByParameters(Map("filetype" -> FileMetadataLiterals.customFileType))
-      .map(x => inject[FileMetadataConversion].from(x))
+      .map(x => inject[CreateFileMetadata].from(x))
   }
 
   override def get(name: String): Option[FileMetadata] = {

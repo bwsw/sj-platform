@@ -3,7 +3,7 @@ package com.bwsw.sj.common.si
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service._
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.si.model.provider.{Provider, ProviderConversion}
+import com.bwsw.sj.common.si.model.provider.{Provider, CreateProvider}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import scaldi.Injectable.inject
@@ -24,7 +24,7 @@ class ProviderSI(implicit injector: Injector) extends ServiceInterface[Provider,
   override protected val entityRepository: GenericMongoRepository[ProviderDomain] = connectionRepository.getProviderRepository
 
   private val serviceRepository = connectionRepository.getServiceRepository
-  private val providerConversion = inject[ProviderConversion]
+  private val createProvider = inject[CreateProvider]
 
   override def create(entity: Provider): CreationResult = {
     val errors = entity.validate()
@@ -39,11 +39,11 @@ class ProviderSI(implicit injector: Injector) extends ServiceInterface[Provider,
   }
 
   def getAll(): mutable.Buffer[Provider] = {
-    entityRepository.getAll.map(x => providerConversion.from(x))
+    entityRepository.getAll.map(x => createProvider.from(x))
   }
 
   def get(name: String): Option[Provider] = {
-    entityRepository.get(name).map(providerConversion.from)
+    entityRepository.get(name).map(createProvider.from)
   }
 
   override def delete(name: String): DeletionResult = {

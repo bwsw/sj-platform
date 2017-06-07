@@ -80,7 +80,7 @@ class SjStream(val streamType: String,
   }
 }
 
-class StreamConversion {
+class CreateStream {
 
   def from(streamDomain: StreamDomain)(implicit injector: Injector): SjStream = streamDomain.streamType match {
     case StreamLiterals.tstreamType =>

@@ -150,7 +150,7 @@ class Instance(val name: String,
 
 }
 
-class InstanceConversion {
+class CreateInstance {
   def from(instance: InstanceDomain)(implicit injector: Injector): Instance = {
     instance.moduleType match {
       case EngineLiterals.inputStreamingType =>

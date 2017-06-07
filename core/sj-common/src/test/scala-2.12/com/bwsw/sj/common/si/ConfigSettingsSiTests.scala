@@ -3,7 +3,7 @@ package com.bwsw.sj.common.si
 import com.bwsw.sj.common.config.ConfigLiterals.{domains, systemDomain}
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.si.model.config.{ConfigurationSetting, ConfigurationSettingConversion}
+import com.bwsw.sj.common.si.model.config.{ConfigurationSetting, CreateConfigurationSetting}
 import com.bwsw.sj.common.si.result._
 import org.mockito.ArgumentMatchers.{any, anyString}
 import org.mockito.Mockito.{never, reset, verify, when}
@@ -14,7 +14,7 @@ import scaldi.{Injector, Module}
 import scala.collection.mutable.ArrayBuffer
 
 class ConfigSettingsSiTests extends FlatSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
-  val configurationSettingConversion = mock[ConfigurationSettingConversion]
+  val createConfigurationSetting = mock[CreateConfigurationSetting]
 
   val configPerDomainCount = 3
 
@@ -30,7 +30,7 @@ class ConfigSettingsSiTests extends FlatSpec with Matchers with MockitoSugar wit
       when(configurationSetting.value).thenReturn(configValue)
       when(configurationSetting.to()).thenReturn(configurationSettingDomain)
 
-      when(configurationSettingConversion.from(configurationSettingDomain)).thenReturn(configurationSetting)
+      when(createConfigurationSetting.from(configurationSettingDomain)).thenReturn(configurationSetting)
 
       (configurationSetting, configurationSettingDomain)
     }
@@ -61,7 +61,7 @@ class ConfigSettingsSiTests extends FlatSpec with Matchers with MockitoSugar wit
 
   val module = new Module {
     bind[ConnectionRepository] to connectionRepository
-    bind[ConfigurationSettingConversion] to configurationSettingConversion
+    bind[CreateConfigurationSetting] to createConfigurationSetting
   }
   implicit val injector = module.injector
 
