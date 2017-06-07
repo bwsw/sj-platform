@@ -3,7 +3,7 @@ package com.bwsw.sj.common.si
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.engine.{StreamingValidator, ValidationInfo}
-import com.bwsw.sj.common.si.model.instance.{Instance, InstanceConversion}
+import com.bwsw.sj.common.si.model.instance.{Instance, CreateInstance}
 import com.bwsw.sj.common.si.model.module.{ModuleMetadata, Specification}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.EngineLiterals._
@@ -20,7 +20,7 @@ class InstanceSI(implicit injector: Injector) {
 
   private val connectionRepository = inject[ConnectionRepository]
   private val entityRepository: GenericMongoRepository[InstanceDomain] = connectionRepository.getInstanceRepository
-  private val instanceConversion = inject[InstanceConversion]
+  private val createInstance = inject[CreateInstance]
   private val tmpDirectory = "/tmp/"
 
   def create(instance: Instance, moduleMetadata: ModuleMetadata): CreationResult = {
@@ -38,7 +38,7 @@ class InstanceSI(implicit injector: Injector) {
   }
 
   def getAll: mutable.Buffer[Instance] =
-    entityRepository.getAll.map(instanceConversion.from)
+    entityRepository.getAll.map(createInstance.from)
 
   def getByModule(moduleType: String, moduleName: String, moduleVersion: String): Seq[Instance] = {
     entityRepository.getByParameters(
@@ -46,11 +46,11 @@ class InstanceSI(implicit injector: Injector) {
         "module-name" -> moduleName,
         "module-type" -> moduleType,
         "module-version" -> moduleVersion))
-      .map(instanceConversion.from)
+      .map(createInstance.from)
   }
 
   def get(name: String): Option[Instance] =
-    entityRepository.get(name).map(instanceConversion.from)
+    entityRepository.get(name).map(createInstance.from)
 
   def delete(name: String): DeletionResult = {
     entityRepository.get(name) match {
@@ -61,7 +61,7 @@ class InstanceSI(implicit injector: Injector) {
 
             Deleted
           case `stopped` | `failed` | `error` =>
-            WillBeDeleted(instanceConversion.from(instance))
+            WillBeDeleted(createInstance.from(instance))
           case _ =>
             DeletionError(createMessage("rest.modules.instances.instance.cannot.delete", name))
         }

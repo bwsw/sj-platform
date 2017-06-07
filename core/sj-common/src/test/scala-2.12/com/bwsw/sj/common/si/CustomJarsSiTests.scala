@@ -10,7 +10,7 @@ import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.model.module.{FileMetadataDomain, SpecificationDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.FileMetadataLiterals.customJarType
-import com.bwsw.sj.common.si.model.{FileMetadata, FileMetadataConversion}
+import com.bwsw.sj.common.si.model.{FileMetadata, CreateFileMetadata}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.{MessageResourceUtils, SpecificationUtils}
 import org.bson.types.ObjectId
@@ -96,10 +96,10 @@ class CustomJarsSiTests extends FlatSpec with Matchers with MockitoSugar {
   when(serializer.deserialize[Map[String, Any]](jarNotInStorageSpecificationString))
     .thenReturn(jarNotInStorageSpecificationMap)
 
-  val fileMetadataConversion = mock[FileMetadataConversion]
+  val createFileMetadata = mock[CreateFileMetadata]
   jarsInStorageMetadatas.zip(jarsInStorageMetadataDomains).foreach {
     case (metadata, domain) =>
-      when(fileMetadataConversion.from(mockitoEq(domain))(any[Injector]())).thenReturn(metadata)
+      when(createFileMetadata.from(mockitoEq(domain))(any[Injector]())).thenReturn(metadata)
   }
 
   val jarMetadataRepository = mock[GenericMongoRepository[FileMetadataDomain]]
@@ -265,7 +265,7 @@ class CustomJarsSiTests extends FlatSpec with Matchers with MockitoSugar {
     val module = new Module {
       bind[ConnectionRepository] to connectionRepository
       bind[FileBuffer] to fileBuffer
-      bind[FileMetadataConversion] to fileMetadataConversion
+      bind[CreateFileMetadata] to createFileMetadata
       bind[MessageResourceUtils] to mock[MessageResourceUtils]
       bind[SpecificationUtils] to specificationUtils
       bind[JsonSerializer] to serializer

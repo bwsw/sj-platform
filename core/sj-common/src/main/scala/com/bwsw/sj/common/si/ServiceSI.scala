@@ -2,7 +2,7 @@ package com.bwsw.sj.common.si
 
 import com.bwsw.sj.common.dal.model.service.ServiceDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.si.model.service.{Service, ServiceConversion}
+import com.bwsw.sj.common.si.model.service.{Service, CreateService}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import scaldi.Injectable.inject
@@ -24,7 +24,7 @@ class ServiceSI(implicit injector: Injector) extends ServiceInterface[Service, S
 
   private val streamRepository = connectionRepository.getStreamRepository
   private val instanceRepository = connectionRepository.getInstanceRepository
-  private val serviceConversion = inject[ServiceConversion]
+  private val createService = inject[CreateService]
 
   override def create(entity: Service): CreationResult = {
     val errors = entity.validate()
@@ -39,11 +39,11 @@ class ServiceSI(implicit injector: Injector) extends ServiceInterface[Service, S
   }
 
   def getAll(): mutable.Buffer[Service] = {
-    entityRepository.getAll.map(x => serviceConversion.from(x))
+    entityRepository.getAll.map(x => createService.from(x))
   }
 
   def get(name: String): Option[Service] = {
-    entityRepository.get(name).map(serviceConversion.from)
+    entityRepository.get(name).map(createService.from)
   }
 
   override def delete(name: String): DeletionResult = {

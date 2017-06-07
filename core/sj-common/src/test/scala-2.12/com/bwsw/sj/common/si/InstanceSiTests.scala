@@ -3,7 +3,7 @@ package com.bwsw.sj.common.si
 import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.engine.{StreamingValidator, ValidationInfo}
-import com.bwsw.sj.common.si.model.instance.{Instance, InstanceConversion}
+import com.bwsw.sj.common.si.model.instance.{Instance, CreateInstance}
 import com.bwsw.sj.common.si.model.module.{ModuleMetadata, Specification}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.EngineLiterals._
@@ -20,15 +20,15 @@ class InstanceSiTests extends FlatSpec with Matchers with BeforeAndAfterEach wit
 
   import InstanceSiTests._
 
-  val readyInstance = createInstance(module1, "ready-instance", ready)
-  val startedInstance = createInstance(module1, "started-instance", started)
-  val failedInstance = createInstance(module1, "failed-instance", failed)
+  val readyInstance = createInstanceInfo(module1, "ready-instance", ready)
+  val startedInstance = createInstanceInfo(module1, "started-instance", started)
+  val failedInstance = createInstanceInfo(module1, "failed-instance", failed)
   val module1Instances = Seq(readyInstance, startedInstance, failedInstance)
 
   val module2 = createModule(inputStreamingType, "module-2", "v2")
-  val stoppedInstance = createInstance(module2, "stopped-instance", stopped)
-  val deletedInstance = createInstance(module2, "deleted-instance", deleted)
-  val errorInstance = createInstance(module2, "error-instance", error)
+  val stoppedInstance = createInstanceInfo(module2, "stopped-instance", stopped)
+  val deletedInstance = createInstanceInfo(module2, "deleted-instance", deleted)
+  val errorInstance = createInstanceInfo(module2, "error-instance", error)
   val module2Instances = Seq(deletedInstance, stoppedInstance, errorInstance)
 
   val storedInstances = module1Instances ++ module2Instances
@@ -53,7 +53,7 @@ class InstanceSiTests extends FlatSpec with Matchers with BeforeAndAfterEach wit
   val injector = new Module {
     bind[ConnectionRepository] to connectionRepository
     bind[MessageResourceUtils] to MessageResourceUtilsMock.messageResourceUtils
-    bind[InstanceConversion] to instanceConversion
+    bind[CreateInstance] to createInstance
     bind[FileClassLoader] to fileClassLoader
   }.injector
 
@@ -211,12 +211,12 @@ class InstanceSiTests extends FlatSpec with Matchers with BeforeAndAfterEach wit
 
 object InstanceSiTests extends MockitoSugar {
 
-  val instanceConversion = mock[InstanceConversion]
+  val createInstance = mock[CreateInstance]
 
   val moduleFilename = "module.jar"
   val module1 = createModule(regularStreamingType, "module-1", "v1")
 
-  val notStoredInstance = createInstance(module1, "not-stored-instance", ready)
+  val notStoredInstance = createInstanceInfo(module1, "not-stored-instance", ready)
   val instanceNotValidError = "instance not valid"
   val optionsNotValidError = "options not valid"
 
@@ -235,7 +235,7 @@ object InstanceSiTests extends MockitoSugar {
     module
   }
 
-  def createInstance(module: ModuleMetadata, name: String, status: String) = {
+  def createInstanceInfo(module: ModuleMetadata, name: String, status: String) = {
     val instanceDomain = mock[InstanceDomain]
 
     val moduleType = module.specification.moduleType
@@ -257,7 +257,7 @@ object InstanceSiTests extends MockitoSugar {
     when(instance.options).thenReturn(s"""{"name": $name}""")
     when(instance.to()).thenReturn(instanceDomain)
 
-    when(instanceConversion.from(argEq(instanceDomain))(any[Injector]())).thenReturn(instance)
+    when(createInstance.from(argEq(instanceDomain))(any[Injector]())).thenReturn(instance)
 
     InstanceInfo(instance, instanceDomain, module)
   }

@@ -8,7 +8,7 @@ import com.bwsw.sj.common.dal.model.instance.InstanceDomain
 import com.bwsw.sj.common.dal.model.module.{FileMetadataDomain, IOstream, SpecificationDomain}
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.FileMetadataLiterals
-import com.bwsw.sj.common.si.model.module.{ModuleMetadata, ModuleMetadataConversion, Specification}
+import com.bwsw.sj.common.si.model.module.{ModuleMetadata, CreateModuleMetadata, Specification}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.EngineLiterals.{batchStreamingType, inputStreamingType, outputStreamingType, regularStreamingType}
 import com.bwsw.sj.common.utils.{MessageResourceUtils, MessageResourceUtilsMock}
@@ -24,7 +24,7 @@ import scala.collection.mutable.ArrayBuffer
 class ModuleSiTests extends FlatSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
   val tmpDirectory = "/tmp/"
 
-  val moduleMetadataConversion = mock[ModuleMetadataConversion]
+  val createModuleMetadata = mock[CreateModuleMetadata]
 
   val notStoredModule = createModule("not-stored-module", "v1", regularStreamingType)
 
@@ -103,7 +103,7 @@ class ModuleSiTests extends FlatSpec with Matchers with MockitoSugar with Before
     bind[ConnectionRepository] to connectionRepository
     bind[MessageResourceUtils] to MessageResourceUtilsMock.messageResourceUtils
     bind[FileBuffer] to mock[FileBuffer]
-    bind[ModuleMetadataConversion] to moduleMetadataConversion
+    bind[CreateModuleMetadata] to createModuleMetadata
   }.injector
 
   val moduleSI = new ModuleSI()(injector)
@@ -339,9 +339,9 @@ class ModuleSiTests extends FlatSpec with Matchers with MockitoSugar with Before
       0,
       specificationDomain)
 
-    when(moduleMetadataConversion.from(argEq(metadataDomain), any[Option[File]]())(any[Injector]()))
+    when(createModuleMetadata.from(argEq(metadataDomain), any[Option[File]]())(any[Injector]()))
       .thenReturn(metadataWithoutFile)
-    when(moduleMetadataConversion.from(argEq(metadataDomain), argEq(file))(any[Injector]()))
+    when(createModuleMetadata.from(argEq(metadataDomain), argEq(file))(any[Injector]()))
       .thenReturn(metadata)
 
     ModuleInfo(

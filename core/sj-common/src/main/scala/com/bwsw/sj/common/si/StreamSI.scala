@@ -3,7 +3,7 @@ package com.bwsw.sj.common.si
 import com.bwsw.sj.common.dal.model.instance.{InputInstanceDomain, InstanceDomain}
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.si.model.stream.{SjStream, StreamConversion}
+import com.bwsw.sj.common.si.model.stream.{SjStream, CreateStream}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import scaldi.Injectable.inject
@@ -24,7 +24,7 @@ class StreamSI(implicit injector: Injector) extends ServiceInterface[SjStream, S
   override protected val entityRepository: GenericMongoRepository[StreamDomain] = connectionRepository.getStreamRepository
 
   private val instanceRepository = connectionRepository.getInstanceRepository
-  private val streamConversion = inject[StreamConversion]
+  private val createStream = inject[CreateStream]
 
   override def create(entity: SjStream): CreationResult = {
     val errors = entity.validate()
@@ -40,17 +40,17 @@ class StreamSI(implicit injector: Injector) extends ServiceInterface[SjStream, S
   }
 
   override def get(name: String): Option[SjStream] =
-    entityRepository.get(name).map(streamConversion.from)
+    entityRepository.get(name).map(createStream.from)
 
   override def getAll(): mutable.Buffer[SjStream] =
-    entityRepository.getAll.map(streamConversion.from)
+    entityRepository.getAll.map(createStream.from)
 
   override def delete(name: String): DeletionResult = {
     if (hasRelatedInstances(name))
       DeletionError(createMessage("rest.streams.stream.cannot.delete", name))
     else entityRepository.get(name) match {
       case Some(entity) =>
-        streamConversion.from(entity).delete()
+        createStream.from(entity).delete()
         entityRepository.delete(name)
 
         Deleted

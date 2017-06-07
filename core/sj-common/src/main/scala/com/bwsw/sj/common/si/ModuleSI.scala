@@ -5,7 +5,7 @@ import java.io.File
 import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.si.model.FileMetadataLiterals
-import com.bwsw.sj.common.si.model.module.{ModuleMetadata, ModuleMetadataConversion}
+import com.bwsw.sj.common.si.model.module.{ModuleMetadata, CreateModuleMetadata}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils}
 import org.apache.commons.io.FileUtils
@@ -23,7 +23,7 @@ class ModuleSI(implicit injector: Injector) extends JsonValidator {
   private val entityRepository: GenericMongoRepository[FileMetadataDomain] = connectionRepository.getFileMetadataRepository
   private val tmpDirectory = "/tmp/"
   private val fileBuffer = inject[FileBuffer]
-  private val moduleMetadataConversion = inject[ModuleMetadataConversion]
+  private val createModuleMetadata = inject[CreateModuleMetadata]
 
   def create(entity: ModuleMetadata): CreationResult = {
     val errors = entity.validate()
@@ -46,24 +46,24 @@ class ModuleSI(implicit injector: Injector) extends JsonValidator {
       val file = fileStorage.get(metadata.filename, tmpDirectory + metadata.filename)
       fileBuffer.append(file)
 
-      moduleMetadataConversion.from(metadata, Option(file))
+      createModuleMetadata.from(metadata, Option(file))
     }
   }
 
   def getAll: Seq[ModuleMetadata] = {
     entityRepository
       .getByParameters(Map("filetype" -> FileMetadataLiterals.moduleType))
-      .map(moduleMetadataConversion.from(_))
+      .map(createModuleMetadata.from(_))
   }
 
   def getMetadataWithoutFile(moduleType: String, moduleName: String, moduleVersion: String): Either[String, ModuleMetadata] =
-    exists(moduleType, moduleName, moduleVersion).map(moduleMetadataConversion.from(_))
+    exists(moduleType, moduleName, moduleVersion).map(createModuleMetadata.from(_))
 
   def getByType(moduleType: String): Either[String, Seq[ModuleMetadata]] = {
     if (EngineLiterals.moduleTypes.contains(moduleType)) {
       val modules = entityRepository.getByParameters(
         Map("filetype" -> FileMetadataLiterals.moduleType, "specification.module-type" -> moduleType))
-        .map(moduleMetadataConversion.from(_))
+        .map(createModuleMetadata.from(_))
 
       Right(modules)
     } else
