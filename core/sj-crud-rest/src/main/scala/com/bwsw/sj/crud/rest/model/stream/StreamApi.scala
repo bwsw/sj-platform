@@ -33,7 +33,7 @@ class StreamApi(@JsonProperty("type") val streamType: String,
       description.getOrElse(RestLiterals.defaultDescription))
 }
 
-object StreamApi {
+class CreateStreamApi {
 
   def from(stream: SjStream): StreamApi = stream.streamType match {
     case StreamLiterals.tstreamType =>

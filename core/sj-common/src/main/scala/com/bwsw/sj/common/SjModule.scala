@@ -10,7 +10,7 @@ import com.bwsw.sj.common.si.model.module.CreateModuleMetadata
 import com.bwsw.sj.common.si.model.provider.CreateProvider
 import com.bwsw.sj.common.si.model.service.CreateService
 import com.bwsw.sj.common.si.model.stream.CreateStream
-import com.bwsw.sj.common.si.{ConfigSettingsSI, FileBuffer, ProviderSI, ServiceSI}
+import com.bwsw.sj.common.si._
 import com.bwsw.sj.common.utils.{FileClassLoader, MessageResourceUtils, SpecificationUtils}
 import scaldi.Module
 
@@ -34,6 +34,7 @@ class SjModule extends Module {
   bind[ConfigSettingsSI] to new ConfigSettingsSI()
   bind[ProviderSI] to new ProviderSI()
   bind[ServiceSI] to new ServiceSI()
+  bind[StreamSI] to new StreamSI()
 
   bind[FileBuffer] toProvider new FileBuffer()
   bind[JsonSerializer] toProvider new JsonSerializer(ignore = true)

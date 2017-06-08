@@ -5,7 +5,7 @@ import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.si.StreamSI
 import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.common.utils.{MessageResourceUtils, StreamLiterals}
-import com.bwsw.sj.crud.rest.model.stream.StreamApi
+import com.bwsw.sj.crud.rest.model.stream.{CreateStreamApi, StreamApi}
 import com.bwsw.sj.crud.rest.{RelatedToStreamResponseEntity, StreamResponseEntity, StreamsResponseEntity}
 import scaldi.Injectable.inject
 import scaldi.Injector
@@ -17,10 +17,11 @@ class StreamController(implicit protected val injector: Injector) extends Contro
 
   import messageResourceUtils._
 
-  override val serviceInterface = new StreamSI
+  override val serviceInterface = inject[StreamSI]
 
   protected val entityNotFoundMessage: String = "rest.streams.stream.notfound"
   protected val entityDeletedMessage: String = "rest.streams.stream.deleted"
+  private val createStreamApi = inject[CreateStreamApi]
 
   override def create(serializedEntity: String): RestResponse = {
     Try(serializer.deserialize[StreamApi](serializedEntity)) match {
@@ -49,7 +50,7 @@ class StreamController(implicit protected val injector: Injector) extends Contro
   override def get(name: String): RestResponse = {
     serviceInterface.get(name) match {
       case Some(stream) =>
-        OkRestResponse(StreamResponseEntity(StreamApi.from(stream)))
+        OkRestResponse(StreamResponseEntity(createStreamApi.from(stream)))
       case None =>
         NotFoundRestResponse(
           MessageResponseEntity(
@@ -59,7 +60,7 @@ class StreamController(implicit protected val injector: Injector) extends Contro
 
   override def getAll(): RestResponse = {
     val streams = serviceInterface.getAll()
-    val responseEntity = StreamsResponseEntity(streams.map(StreamApi.from))
+    val responseEntity = StreamsResponseEntity(streams.map(createStreamApi.from))
     OkRestResponse(responseEntity)
   }
 
