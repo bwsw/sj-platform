@@ -14,14 +14,16 @@ import scala.util.{Failure, Success, Try}
   * One-thread deleting object for instance
   * using synchronous apache http client
   *
+  * protected methods and variables need for testing purposes
+  *
   * @author Kseniya Tomskikh
   */
 class InstanceDestroyer(instance: Instance, marathonAddress: String, delay: Long = 1000, marathonTimeout: Int = 60000)(implicit val injector: Injector) extends Runnable {
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
-  private val instanceManager = new InstanceDomainRenewer()
-  private val client = new HttpClient(marathonTimeout)
-  private val marathonManager = new MarathonApi(client, marathonAddress)
+  protected val instanceManager = new InstanceDomainRenewer()
+  protected val client = new HttpClient(marathonTimeout)
+  protected val marathonManager = new MarathonApi(client, marathonAddress)
   private val frameworkName = InstanceAdditionalFieldCreator.getFrameworkName(instance)
 
   import EngineLiterals._
@@ -43,7 +45,7 @@ class InstanceDestroyer(instance: Instance, marathonAddress: String, delay: Long
     }
   }
 
-  private def deleteFramework() = {
+  protected def deleteFramework(): Unit = {
     logger.debug(s"Instance: '${instance.name}'. Deleting a framework.")
     val response = marathonManager.destroyMarathonApplication(frameworkName)
     if (isStatusOK(response)) {
@@ -51,7 +53,7 @@ class InstanceDestroyer(instance: Instance, marathonAddress: String, delay: Long
       waitForFrameworkToDelete()
     } else {
       if (isStatusNotFound(response)) {
-        instanceManager.updateFrameworkStage(instance, deleting)
+        instanceManager.updateFrameworkStage(instance, deleted)
       } else {
         instanceManager.updateFrameworkStage(instance, error)
         throw new Exception(s"Marathon returns status code: $response " +
@@ -60,7 +62,7 @@ class InstanceDestroyer(instance: Instance, marathonAddress: String, delay: Long
     }
   }
 
-  private def waitForFrameworkToDelete() = {
+  protected def waitForFrameworkToDelete(): Unit = {
     var hasDeleted = false
     while (!hasDeleted) {
       logger.debug(s"Instance: '${instance.name}'. Waiting until a framework is deleted.")
@@ -72,6 +74,6 @@ class InstanceDestroyer(instance: Instance, marathonAddress: String, delay: Long
         instanceManager.updateFrameworkStage(instance, deleted)
         hasDeleted = true
       }
-    } //todo will see about it, maybe get stuck implicitly
+    } //todo will see about it, maybe get stuck implicitly if getApplicationInfo() returns some marathon error statuses
   }
 }
