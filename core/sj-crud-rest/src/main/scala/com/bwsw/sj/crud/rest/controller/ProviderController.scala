@@ -68,14 +68,14 @@ class ProviderController(implicit protected val injector: Injector) extends Cont
     connectionResponse match {
       case Right(isFound) =>
         if (isFound) {
-          OkRestResponse(ConnectionResponseEntity())
+          OkRestResponse(ConnectionSuccessResponseEntity)
         }
         else {
           NotFoundRestResponse(
             MessageResponseEntity(createMessage(entityNotFoundMessage, name)))
         }
       case Left(message) =>
-        ConflictRestResponse(TestConnectionResponseEntity(connection = false, message.mkString(";")))
+        ConflictRestResponse(ConnectionFailedResponseEntity(message.mkString(";")))
     }
   }
 
