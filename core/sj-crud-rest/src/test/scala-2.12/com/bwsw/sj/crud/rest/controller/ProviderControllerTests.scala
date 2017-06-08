@@ -201,6 +201,12 @@ class ProviderControllerTests extends FlatSpec with Matchers with MockitoSugar {
     controller.delete(notDeletedProviderName) shouldBe expected
   }
 
+  // getTypes
+  it should "get all provider types" in {
+    val expected = OkRestResponse(TypesResponseEntity(types))
+    controller.getTypes() shouldBe expected
+  }
+
 
   def createProvider(name: String) = {
     val providerType = zookeeperType
