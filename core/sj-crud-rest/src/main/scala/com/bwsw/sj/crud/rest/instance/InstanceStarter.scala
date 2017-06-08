@@ -121,7 +121,7 @@ class InstanceStarter(instance: Instance,
     } else {
       instanceManager.updateFrameworkStage(instance, failed)
       instanceManager.updateInstanceStatus(instance, failed)
-      instanceManager.updateInstanceRestAddress(instance, "")
+      instanceManager.updateInstanceRestAddress(instance, None)
     }
   }
 
@@ -134,7 +134,7 @@ class InstanceStarter(instance: Instance,
     } else {
       instanceManager.updateFrameworkStage(instance, failed)
       instanceManager.updateInstanceStatus(instance, failed)
-      instanceManager.updateInstanceRestAddress(instance, "")
+      instanceManager.updateInstanceRestAddress(instance, None)
     }
   }
 
@@ -182,13 +182,14 @@ class InstanceStarter(instance: Instance,
           instanceManager.updateInstanceStatus(instance, started)
           var fwRest = InstanceAdditionalFieldCreator.getRestAddress(marathonManager.getLeaderTask(marathonManager.getApplicationInfo(frameworkName)))
           while (fwRest.isEmpty) fwRest = InstanceAdditionalFieldCreator.getRestAddress(marathonManager.getLeaderTask(marathonManager.getApplicationInfo(frameworkName)))
-          instanceManager.updateInstanceRestAddress(instance, fwRest.get)
+          instanceManager.updateInstanceRestAddress(instance, fwRest)
           isStarted = true
         } else {
           Option(applicationParsedEntity.app.lastTaskFailure) match {
             case Some(x) =>
               marathonManager.destroyMarathonApplication(frameworkName)
               instanceManager.updateFrameworkStage(instance, failed)
+              instanceManager.updateInstanceRestAddress(instance, None)
               throw new InterruptedException(s"Framework has not started due to: ${x.message}; " +
                 s"Framework '$frameworkName' is marked as failed.")
             case _ =>
@@ -198,6 +199,7 @@ class InstanceStarter(instance: Instance,
         }
       } else {
         instanceManager.updateFrameworkStage(instance, failed)
+        instanceManager.updateInstanceRestAddress(instance, None)
         throw new Exception(s"Marathon returns status code: ${getStatusCode(frameworkApplicationInfo)} " +
           s"during the start process of framework. Framework '$frameworkName' is marked as failed.")
       }

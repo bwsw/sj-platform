@@ -14,14 +14,16 @@ import scala.util.{Failure, Success, Try}
   * One-thread stopper object for instance
   * using synchronous apache http client
   *
+  * protected methods and variables need for testing purposes
+  *
   * @author Kseniya Tomskikh
   */
 class InstanceStopper(instance: Instance, marathonAddress: String, delay: Long = 1000, marathonTimeout: Int = 60000)(implicit val injector: Injector) extends Runnable {
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
-  private val instanceManager = new InstanceDomainRenewer()
-  private val client = new HttpClient(marathonTimeout)
-  private val marathonManager = new MarathonApi(client, marathonAddress)
+  protected val instanceManager = new InstanceDomainRenewer()
+  protected val client = new HttpClient(marathonTimeout)
+  protected val marathonManager = new MarathonApi(client, marathonAddress)
   private val frameworkName = InstanceAdditionalFieldCreator.getFrameworkName(instance)
 
   import EngineLiterals._
@@ -38,11 +40,12 @@ class InstanceStopper(instance: Instance, marathonAddress: String, delay: Long =
       case Failure(e) =>
         logger.error(s"Instance: '${instance.name}'. Instance is failed during the stopping process.", e)
         instanceManager.updateInstanceStatus(instance, error)
+        instanceManager.updateInstanceRestAddress(instance, None)
         client.close()
     }
   }
 
-  private def stopFramework() = {
+  protected def stopFramework(): Unit = {
     logger.debug(s"Instance: '${instance.name}'. Stopping a framework.")
     val response = marathonManager.stopMarathonApplication(frameworkName)
     if (isStatusOK(response)) {
@@ -55,7 +58,7 @@ class InstanceStopper(instance: Instance, marathonAddress: String, delay: Long =
     }
   }
 
-  private def waitForFrameworkToStop() = {
+  protected def waitForFrameworkToStop(): Unit = {
     var hasStopped = false
     while (!hasStopped) {
       logger.debug(s"Instance: '${instance.name}'. Waiting until a framework is stopped.")
@@ -78,22 +81,22 @@ class InstanceStopper(instance: Instance, marathonAddress: String, delay: Long =
     }
   }
 
-  private def hasFrameworkStopped(applicationEntity: MarathonApplication) = applicationEntity.app.tasksRunning == 0
+  private def hasFrameworkStopped(applicationEntity: MarathonApplication): Boolean = applicationEntity.app.tasksRunning == 0
 
-  private def markInstanceAsStopped() = {
+  protected def markInstanceAsStopped(): Unit = {
     logger.debug(s"Instance: '${instance.name}'. Mark an instance as stopped.")
     if (isInputInstance) {
       clearTasks()
     }
     instanceManager.updateInstanceStatus(instance, stopped)
-    instanceManager.updateInstanceRestAddress(instance, "")
+    instanceManager.updateInstanceRestAddress(instance, None)
   }
 
-  private def isInputInstance = {
+  private def isInputInstance: Boolean = {
     instance.moduleType.equals(inputStreamingType)
   }
 
-  private def clearTasks() = {
+  private def clearTasks(): Unit = {
     logger.debug(s"Instance: '${instance.name}'. Clear the input instance tasks.")
     instance.asInstanceOf[InputInstance].tasks.foreach(_._2.clear())
   }
