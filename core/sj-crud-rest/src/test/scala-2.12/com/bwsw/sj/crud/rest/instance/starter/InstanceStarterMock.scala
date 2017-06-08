@@ -11,10 +11,8 @@ import scaldi.Injector
 class InstanceStarterMock(_marathonManager: MarathonApi,
                           _instanceManager: InstanceDomainRenewer,
                           instance: Instance,
-                          marathonAddress: String,
-                          zookeeperHost: Option[String] = None,
-                          zookeeperPort: Option[Int] = None)(implicit override val injector: Injector)
-  extends InstanceStarter(instance, marathonAddress, zookeeperHost, zookeeperPort, 100) with MockitoSugar {
+                          marathonAddress: String)(implicit override val injector: Injector)
+  extends InstanceStarter(instance, marathonAddress, delay = 100) with MockitoSugar {
 
   override protected val instanceManager: InstanceDomainRenewer = _instanceManager
   override protected val client: HttpClient = mock[HttpClient]

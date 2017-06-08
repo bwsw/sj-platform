@@ -154,7 +154,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
 
   it should "startFramework() method launches the existent marathon app if framework has been created earlier" in {
     //arrange
-    val startFramework = PrivateMethod[String]('startFramework)
+    val startFramework = PrivateMethod('startFramework)
     val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
 
 
@@ -179,7 +179,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
 
   it should "startFramework() method creates a new marathon app if framework hasn't been created earlier" in {
     //arrange
-    val startFramework = PrivateMethod[String]('startFramework)
+    val startFramework = PrivateMethod('startFramework)
     val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
 
     val notOkFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, errorStatus)
@@ -253,7 +253,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
 
   it should "createFramework() method creates a new marathon app" in {
     //arrange
-    val createFramework = PrivateMethod[String]('createFramework)
+    val createFramework = PrivateMethod('createFramework)
     val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
 
     val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
@@ -278,7 +278,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
   it should "createFramework() method doesn't create a new marathon app " +
     "if marathon has got some problems with creation process of app" in {
     //arrange
-    val createFramework = PrivateMethod[String]('createFramework)
+    val createFramework = PrivateMethod('createFramework)
 
     val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
     val marathonManager = mock[MarathonApi]
