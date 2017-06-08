@@ -26,39 +26,27 @@ class ConfigSettingsController(implicit protected val injector: Injector) extend
   override protected val entityNotFoundMessage: String = "rest.config.setting.notfound"
 
   def get(name: String): RestResponse = {
-    val configSetting = serviceInterface.get(name)
-
-    val response = configSetting match {
+    serviceInterface.get(name) match {
       case Some(x) =>
         OkRestResponse(ConfigSettingResponseEntity(createConfigurationSettingApi.from(x)))
       case None =>
         NotFoundRestResponse(MessageResponseEntity(createMessage(entityNotFoundMessage, name)))
     }
-
-    response
   }
 
   def get(domain: String, name: String): RestResponse =
     ifDomainCorrect(domain)(get(ConfigurationSetting.createConfigurationSettingName(domain, name)))
 
   def getAll(): RestResponse = {
-    val response = OkRestResponse(ConfigSettingsResponseEntity())
-    val configElements = serviceInterface.getAll()
-    if (configElements.nonEmpty) {
-      response.entity = ConfigSettingsResponseEntity(configElements.map(createConfigurationSettingApi.from))
-    }
-
-    response
+    val configElements = serviceInterface.getAll().map(createConfigurationSettingApi.from)
+    OkRestResponse(ConfigSettingsResponseEntity(configElements))
   }
 
   def create(serializedEntity: String): RestResponse = {
-    var response: RestResponse = new RestResponse()
-
-    val triedSettingApi = Try(serializer.deserialize[ConfigurationSettingApi](serializedEntity))
-    triedSettingApi match {
+    Try(serializer.deserialize[ConfigurationSettingApi](serializedEntity)) match {
       case Success(configData) =>
         val created = serviceInterface.create(configData.to())
-        response = created match {
+        created match {
           case Created =>
             CreatedRestResponse(MessageResponseEntity(createMessage("rest.config.setting.created", configData.name)))
           case NotCreated(errors) => BadRequestRestResponse(MessageResponseEntity(
@@ -67,24 +55,17 @@ class ConfigSettingsController(implicit protected val injector: Injector) extend
         }
       case Failure(exception: JsonDeserializationException) =>
         val error = jsonDeserializationErrorMessageCreator(exception)
-        response = BadRequestRestResponse(MessageResponseEntity(
+        BadRequestRestResponse(MessageResponseEntity(
           createMessage("rest.config.setting.cannot.create", error)))
 
       case Failure(exception) => throw exception
     }
-
-    response
   }
 
   def getByDomain(domain: String): RestResponse = {
     ifDomainCorrect(domain) {
-      val configElements = serviceInterface.getBy(domain)
-      val response = OkRestResponse(ConfigSettingsResponseEntity())
-      if (configElements.nonEmpty) {
-        response.entity = ConfigSettingsResponseEntity(configElements.map(createConfigurationSettingApi.from))
-      }
-
-      response
+      val configElements = serviceInterface.getBy(domain).map(createConfigurationSettingApi.from)
+      OkRestResponse(ConfigSettingsResponseEntity(configElements))
     }
   }
 
