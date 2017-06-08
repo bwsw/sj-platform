@@ -6,7 +6,7 @@ import com.bwsw.sj.common.si.ProviderSI
 import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.common.utils.{MessageResourceUtils, ProviderLiterals}
 import com.bwsw.sj.crud.rest._
-import com.bwsw.sj.crud.rest.model.provider.ProviderApi
+import com.bwsw.sj.crud.rest.model.provider.{CreateProviderApi, ProviderApi}
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -21,6 +21,8 @@ class ProviderController(implicit protected val injector: Injector) extends Cont
 
   override protected val entityDeletedMessage: String = "rest.providers.provider.deleted"
   override protected val entityNotFoundMessage: String = "rest.providers.provider.notfound"
+
+  private val createProviderApi = inject[CreateProviderApi]
 
   def create(serializedEntity: String): RestResponse = {
     var response: RestResponse = new RestResponse()
@@ -52,7 +54,7 @@ class ProviderController(implicit protected val injector: Injector) extends Cont
     val response = OkRestResponse(ProvidersResponseEntity())
     val providers = serviceInterface.getAll()
     if (providers.nonEmpty) {
-      response.entity = ProvidersResponseEntity(providers.map(p => ProviderApi.from(p)))
+      response.entity = ProvidersResponseEntity(providers.map(createProviderApi.from))
     }
 
     response
@@ -63,7 +65,7 @@ class ProviderController(implicit protected val injector: Injector) extends Cont
 
     val response = provider match {
       case Some(x) =>
-        OkRestResponse(ProviderResponseEntity(ProviderApi.from(x)))
+        OkRestResponse(ProviderResponseEntity(createProviderApi.from(x)))
       case None =>
         NotFoundRestResponse(MessageResponseEntity(createMessage(entityNotFoundMessage, name)))
     }
