@@ -25,7 +25,7 @@ class CustomFilesController(implicit protected val injector: Injector,
 
   import messageResourceUtils._
 
-  override val serviceInterface = new CustomFilesSI()
+  override val serviceInterface = inject[CustomFilesSI]
 
   protected val entityDeletedMessage: String = "rest.custom.files.file.deleted"
   protected val entityNotFoundMessage: String = "rest.custom.files.file.notfound"
@@ -57,19 +57,15 @@ class CustomFilesController(implicit protected val injector: Injector,
   }
 
   override def getAll(): RestResponse = {
-    val response = OkRestResponse(CustomFilesResponseEntity())
-    val fileMetadata = serviceInterface.getAll()
-    if (fileMetadata.nonEmpty) {
-      response.entity = CustomFilesResponseEntity(fileMetadata.map(m => FileMetadataApi.toCustomFileInfo(m)))
-    }
+    val fileMetadata = serviceInterface.getAll().map(FileMetadataApi.toCustomFileInfo)
 
-    response
+    OkRestResponse(CustomFilesResponseEntity(fileMetadata))
   }
 
   override def get(name: String): RestResponse = {
-    val service = serviceInterface.get(name)
+    val fileMetadata = serviceInterface.get(name)
 
-    val response = service match {
+    fileMetadata match {
       case Some(x) =>
         val source = FileIO.fromPath(Paths.get(x.file.get.getAbsolutePath))
 
@@ -77,8 +73,6 @@ class CustomFilesController(implicit protected val injector: Injector,
       case None =>
         NotFoundRestResponse(MessageResponseEntity(createMessage(entityNotFoundMessage, name)))
     }
-
-    response
   }
 
   override def create(serializedEntity: String): RestResponse = ???
