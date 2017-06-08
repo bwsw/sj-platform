@@ -1,9 +1,10 @@
 package com.bwsw.sj.engine.output.task
 
-import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
+import java.util.concurrent.{ArrayBlockingQueue, TimeUnit}
 
 import com.bwsw.sj.common.dal.model.stream.StreamDomain
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.si.model.instance.OutputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.NumericalCheckpointTaskEngine
@@ -25,9 +26,9 @@ import scaldi.Injector
   * @param performanceMetrics set of metrics that characterize performance of an output streaming module
   * @author Kseniya Mikhaleva
   */
-abstract class OutputTaskEngine(protected val manager: OutputTaskManager,
+abstract class OutputTaskEngine(manager: OutputTaskManager,
                                 performanceMetrics: OutputStreamingPerformanceMetrics)
-                               (implicit injector: Injector) extends Callable[Unit] {
+                               (implicit injector: Injector) extends TaskEngine {
 
   import OutputTaskEngine.logger
 

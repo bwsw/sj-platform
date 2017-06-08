@@ -10,9 +10,8 @@ import com.bwsw.tstreams.agents.group.CheckpointGroup
 import org.slf4j.LoggerFactory
 import scaldi.Injector
 
-abstract class CallableCheckpointTaskInput[T <: Envelope](inputs: scala.collection.mutable.Map[StreamDomain, Array[Int]]) extends CheckpointTaskInput[T](inputs) with Callable[Unit] {
-   def close()
-}
+abstract class CallableCheckpointTaskInput[T <: Envelope](inputs: scala.collection.mutable.Map[StreamDomain, Array[Int]])
+  extends CheckpointTaskInput[T](inputs) with Callable[Unit]
 
 object CallableCheckpointTaskInput {
   private val logger = LoggerFactory.getLogger(this.getClass)
