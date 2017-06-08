@@ -11,9 +11,9 @@ import com.bwsw.sj.crud.rest.model.stream.StreamApi
 
 import scala.collection.mutable
 
-case class ConnectionResponseEntity(connection: Boolean = true) extends ResponseEntity
+case object ConnectionSuccessResponseEntity extends ResponseEntity
 
-case class TestConnectionResponseEntity(connection: Boolean, errors: String) extends ResponseEntity
+case class ConnectionFailedResponseEntity(errors: String) extends ResponseEntity
 
 case class ProviderResponseEntity(provider: ProviderApi) extends ResponseEntity
 

@@ -32,7 +32,7 @@ class ProviderApi(val name: String,
   }
 }
 
-object ProviderApi {
+class CreateProviderApi {
   def from(provider: Provider): ProviderApi = {
     provider.providerType match {
       case ProviderLiterals.jdbcType =>
