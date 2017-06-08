@@ -74,5 +74,6 @@ trait InstanceStopperMocks extends MockitoSugar {
 
   val frameworkName: String = InstanceAdditionalFieldCreator.getFrameworkName(instanceMock)
 
+  val okStatus = HttpStatus.SC_OK
   val errorStatus = HttpStatus.SC_INTERNAL_SERVER_ERROR
 }

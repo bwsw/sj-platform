@@ -5,7 +5,6 @@ import com.bwsw.sj.common.dal.model.instance.InputTask
 import com.bwsw.sj.common.si.model.instance.{InputInstance, Instance}
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.crud.rest.instance.InstanceDomainRenewer
-import org.apache.http.HttpStatus
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.{FlatSpec, Matchers, PrivateMethodTester}
@@ -118,11 +117,11 @@ class InstanceStopperTestSuit extends FlatSpec with Matchers with PrivateMethodT
     val stopFramework = PrivateMethod[String]('stopFramework)
 
 
-    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
     when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
     when(marathonManager.getApplicationEntity(any())).thenReturn(notStartedMarathonApplicationStub)
-    when(marathonManager.stopMarathonApplication(frameworkName)).thenReturn(HttpStatus.SC_OK)
+    when(marathonManager.stopMarathonApplication(frameworkName)).thenReturn(okStatus)
 
     val instanceManager = mock[InstanceDomainRenewer]
     val instanceStopper = instanceStopperMock(instanceManager = instanceManager, marathonManager = marathonManager)
@@ -159,7 +158,7 @@ class InstanceStopperTestSuit extends FlatSpec with Matchers with PrivateMethodT
     //arrange
     val waitForFrameworkToStop = PrivateMethod('waitForFrameworkToStop)
 
-    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
     when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
     when(marathonManager.getApplicationEntity(any())).thenReturn(notStartedMarathonApplicationStub)
@@ -180,7 +179,7 @@ class InstanceStopperTestSuit extends FlatSpec with Matchers with PrivateMethodT
     val startedMarathonApps = Array.fill(numberOfTries - 1)(marathonApplicationStub).toList
     val waitForFrameworkToStop = PrivateMethod('waitForFrameworkToStop)
 
-    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
     when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
     when(marathonManager.getApplicationEntity(any()))
@@ -218,11 +217,11 @@ class InstanceStopperTestSuit extends FlatSpec with Matchers with PrivateMethodT
 
   it should "run() method works properly if framework has been stopped without any exceptions" in {
     //arrange
-    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
     when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
     when(marathonManager.getApplicationEntity(any())).thenReturn(notStartedMarathonApplicationStub)
-    when(marathonManager.stopMarathonApplication(frameworkName)).thenReturn(HttpStatus.SC_OK)
+    when(marathonManager.stopMarathonApplication(frameworkName)).thenReturn(okStatus)
 
     val instanceManager = mock[InstanceDomainRenewer]
     val instanceStopper = instanceStopperMock(instanceManager = instanceManager, marathonManager = marathonManager)

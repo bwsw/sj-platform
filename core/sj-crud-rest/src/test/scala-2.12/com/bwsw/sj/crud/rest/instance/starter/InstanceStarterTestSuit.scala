@@ -113,14 +113,14 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     val startInstance = PrivateMethod('startInstance)
     val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
 
-    val okMarathonResponse = getClosableHttpResponseMock(marathonInfoStub, HttpStatus.SC_OK)
-    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val okMarathonResponse = getClosableHttpResponseMock(marathonInfoStub, okStatus)
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
     when(marathonManager.getMarathonInfo()).thenReturn(okMarathonResponse)
     when(marathonManager.getMarathonMaster(any())).thenReturn(master)
     when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
     when(marathonManager.getApplicationEntity(any())).thenReturn(marathonApplicationStub)
-    when(marathonManager.scaleMarathonApplication(any(), any())).thenReturn(HttpStatus.SC_OK)
+    when(marathonManager.scaleMarathonApplication(any(), any())).thenReturn(okStatus)
     when(marathonManager.getLeaderTask(any())).thenReturn(Some(marathonTasksStub))
 
     val instanceManager = mock[InstanceDomainRenewer]
@@ -158,11 +158,11 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
 
 
-    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
     when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
     when(marathonManager.getApplicationEntity(any())).thenReturn(marathonApplicationStub)
-    when(marathonManager.scaleMarathonApplication(any(), any())).thenReturn(HttpStatus.SC_OK)
+    when(marathonManager.scaleMarathonApplication(any(), any())).thenReturn(okStatus)
     when(marathonManager.getLeaderTask(any())).thenReturn(Some(marathonTasksStub))
 
     val instanceManager = mock[InstanceDomainRenewer]
@@ -183,7 +183,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
 
     val notOkFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, errorStatus)
-    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
     when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(notOkFrameworkResponse, okFrameworkResponse)
     when(marathonManager.getApplicationEntity(any())).thenReturn(marathonApplicationStub)
@@ -208,11 +208,11 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
 
 
-    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
     when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
     when(marathonManager.getApplicationEntity(any())).thenReturn(marathonApplicationStub)
-    when(marathonManager.scaleMarathonApplication(any(), any())).thenReturn(HttpStatus.SC_OK)
+    when(marathonManager.scaleMarathonApplication(any(), any())).thenReturn(okStatus)
     when(marathonManager.getLeaderTask(any())).thenReturn(Some(marathonTasksStub))
 
     val instanceManager = mock[InstanceDomainRenewer]
@@ -232,7 +232,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     //arrange
     val launchFramework = PrivateMethod('launchFramework)
 
-    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
     when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
     when(marathonManager.getApplicationEntity(any())).thenReturn(marathonApplicationStub)
@@ -256,7 +256,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     val createFramework = PrivateMethod('createFramework)
     val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
 
-    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
     when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
     when(marathonManager.getApplicationEntity(any())).thenReturn(marathonApplicationStub)
@@ -280,7 +280,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     //arrange
     val createFramework = PrivateMethod('createFramework)
 
-    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
     when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
     when(marathonManager.getApplicationEntity(any())).thenReturn(marathonApplicationStub)
@@ -304,7 +304,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     val waitForFrameworkToStart = PrivateMethod('waitForFrameworkToStart)
     val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
 
-    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
     when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
     when(marathonManager.getApplicationEntity(any())).thenReturn(marathonApplicationStub)
@@ -328,7 +328,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     val waitForFrameworkToStart = PrivateMethod('waitForFrameworkToStart)
     val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
 
-    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
     when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
     when(marathonManager.getApplicationEntity(any()))
@@ -372,7 +372,7 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
     //arrange
     val waitForFrameworkToStart = PrivateMethod('waitForFrameworkToStart)
 
-    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
     when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
     when(marathonManager.getApplicationEntity(any())).thenReturn(failedMarathonApplicationStub)
@@ -390,14 +390,14 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
   it should "run() method works properly if framework has been run without any exceptions" in {
     //arrange
     val restAddress = InstanceAdditionalFieldCreator.getRestAddress(Some(marathonTasksStub))
-    val okMarathonResponse = getClosableHttpResponseMock(marathonInfoStub, HttpStatus.SC_OK)
-    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val okMarathonResponse = getClosableHttpResponseMock(marathonInfoStub, okStatus)
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val marathonManager = mock[MarathonApi]
     when(marathonManager.getMarathonInfo()).thenReturn(okMarathonResponse)
     when(marathonManager.getMarathonMaster(any())).thenReturn(master)
     when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse)
     when(marathonManager.getApplicationEntity(any())).thenReturn(marathonApplicationStub)
-    when(marathonManager.scaleMarathonApplication(any(), any())).thenReturn(HttpStatus.SC_OK)
+    when(marathonManager.scaleMarathonApplication(any(), any())).thenReturn(okStatus)
     when(marathonManager.getLeaderTask(any())).thenReturn(Some(marathonTasksStub))
 
     val instanceManager = mock[InstanceDomainRenewer]
@@ -415,14 +415,14 @@ class InstanceStarterTestSuit extends FlatSpec with Matchers with PrivateMethodT
 
   it should s"run() method doesn't start an instance (set '${EngineLiterals.failed}' status) if there are some exceptions during start process" in {
     //arrange
-    val okMarathonResponse = getClosableHttpResponseMock(marathonInfoStub, HttpStatus.SC_OK)
-    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, HttpStatus.SC_OK)
+    val okMarathonResponse = getClosableHttpResponseMock(marathonInfoStub, okStatus)
+    val okFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, okStatus)
     val notOkFrameworkResponse = getClosableHttpResponseMock(marathonApplicationStub, errorStatus)
     val marathonManager = mock[MarathonApi]
     when(marathonManager.getMarathonInfo()).thenReturn(okMarathonResponse)
     when(marathonManager.getMarathonMaster(any())).thenReturn(master)
     when(marathonManager.getApplicationInfo(frameworkName)).thenReturn(okFrameworkResponse, notOkFrameworkResponse)
-    when(marathonManager.scaleMarathonApplication(any(), any())).thenReturn(HttpStatus.SC_OK)
+    when(marathonManager.scaleMarathonApplication(any(), any())).thenReturn(okStatus)
 
     val instanceManager = mock[InstanceDomainRenewer]
 
