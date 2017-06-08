@@ -8,7 +8,7 @@ import com.bwsw.sj.common.si.model.config.ConfigurationSetting
 import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.crud.rest._
-import com.bwsw.sj.crud.rest.model.config.ConfigurationSettingApi
+import com.bwsw.sj.crud.rest.model.config.{ConfigurationSettingApi, CreateConfigurationSettingApi}
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -20,6 +20,7 @@ class ConfigSettingsController(implicit protected val injector: Injector) extend
   import messageResourceUtils._
 
   val serviceInterface = inject[ConfigSettingsSI]
+  private val createConfigurationSettingApi = inject[CreateConfigurationSettingApi]
 
   override protected val entityDeletedMessage: String = "rest.config.setting.deleted"
   override protected val entityNotFoundMessage: String = "rest.config.setting.notfound"
@@ -29,7 +30,7 @@ class ConfigSettingsController(implicit protected val injector: Injector) extend
 
     val response = configSetting match {
       case Some(x) =>
-        OkRestResponse(ConfigSettingResponseEntity(ConfigurationSettingApi.from(x)))
+        OkRestResponse(ConfigSettingResponseEntity(createConfigurationSettingApi.from(x)))
       case None =>
         NotFoundRestResponse(MessageResponseEntity(createMessage(entityNotFoundMessage, name)))
     }
@@ -44,7 +45,7 @@ class ConfigSettingsController(implicit protected val injector: Injector) extend
     val response = OkRestResponse(ConfigSettingsResponseEntity())
     val configElements = serviceInterface.getAll()
     if (configElements.nonEmpty) {
-      response.entity = ConfigSettingsResponseEntity(configElements.map(cs => ConfigurationSettingApi.from(cs)))
+      response.entity = ConfigSettingsResponseEntity(configElements.map(createConfigurationSettingApi.from))
     }
 
     response
@@ -80,7 +81,7 @@ class ConfigSettingsController(implicit protected val injector: Injector) extend
       val configElements = serviceInterface.getBy(domain)
       val response = OkRestResponse(ConfigSettingsResponseEntity())
       if (configElements.nonEmpty) {
-        response.entity = ConfigSettingsResponseEntity(configElements.map(cs => ConfigurationSettingApi.from(cs)))
+        response.entity = ConfigSettingsResponseEntity(configElements.map(createConfigurationSettingApi.from))
       }
 
       response

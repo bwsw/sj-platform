@@ -21,12 +21,11 @@ class ConfigurationSettingApi(val name: String,
 
 }
 
-object ConfigurationSettingApi {
+class CreateConfigurationSettingApi {
   def from(configSettings: ConfigurationSetting): ConfigurationSettingApi = {
     new ConfigurationSettingApi(
       configSettings.name,
       configSettings.value,
-      configSettings.domain
-    )
+      configSettings.domain)
   }
 }
