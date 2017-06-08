@@ -32,7 +32,7 @@ class ServiceApi(@JsonProperty("type") val serviceType: String,
     )
 }
 
-object ServiceApi {
+class CreateServiceApi {
 
   def from(service: Service): ServiceApi = {
     service.serviceType match {
@@ -122,5 +122,3 @@ object ServiceApi {
     }
   }
 }
-
-
