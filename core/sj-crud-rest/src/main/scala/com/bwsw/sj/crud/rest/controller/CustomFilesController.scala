@@ -10,6 +10,7 @@ import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.common.si.CustomFilesSI
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.crud.rest.model.FileMetadataApi
+import com.bwsw.sj.crud.rest.utils.FileMetadataUtils
 import com.bwsw.sj.crud.rest.{CustomFile, CustomFilesResponseEntity}
 import scaldi.Injectable.inject
 import scaldi.Injector
@@ -57,7 +58,7 @@ class CustomFilesController(implicit protected val injector: Injector,
   }
 
   override def getAll(): RestResponse = {
-    val fileMetadata = serviceInterface.getAll().map(FileMetadataApi.toCustomFileInfo)
+    val fileMetadata = serviceInterface.getAll().map(FileMetadataUtils.toCustomFileInfo)
 
     OkRestResponse(CustomFilesResponseEntity(fileMetadata))
   }

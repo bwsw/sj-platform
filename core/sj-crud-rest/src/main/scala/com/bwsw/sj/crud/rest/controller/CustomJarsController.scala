@@ -8,6 +8,7 @@ import com.bwsw.sj.common.si._
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.crud.rest.model.FileMetadataApi
+import com.bwsw.sj.crud.rest.utils.FileMetadataUtils
 import com.bwsw.sj.crud.rest.{CustomJar, CustomJarsResponseEntity}
 import scaldi.Injectable.inject
 import scaldi.Injector
@@ -49,7 +50,7 @@ class CustomJarsController(implicit protected val injector: Injector) extends Co
   }
 
   override def getAll(): RestResponse = {
-    val fileMetadata = serviceInterface.getAll().map(FileMetadataApi.toCustomJarInfo)
+    val fileMetadata = serviceInterface.getAll().map(FileMetadataUtils.toCustomJarInfo)
 
     OkRestResponse(CustomJarsResponseEntity(fileMetadata))
   }
