@@ -30,4 +30,6 @@ object ConfigLiterals {
   val frameworkBackoffSeconds = s"$systemDomain.framework-backoff-seconds"
   val frameworkBackoffFactor = s"$systemDomain.framework-backoff-factor"
   val frameworkMaxLaunchDelaySeconds = s"$systemDomain.framework-max-launch-delay-seconds"
+
+  val zkSessionTimeoutDefault = 3000
 }
