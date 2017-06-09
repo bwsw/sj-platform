@@ -24,7 +24,7 @@ class ModuleMetadataApi(filename: String,
     customFileParts) {
 
   override def to(): ModuleMetadata =
-    new ModuleMetadata(filename, SpecificationApi.from(file).to, Option(file))
+    new ModuleMetadata(filename, inject[CreateSpecificationApi].from(file).to, Option(file))
 
   def validate: ArrayBuffer[String] = {
     val messageResourceUtils = inject[MessageResourceUtils]
