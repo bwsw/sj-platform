@@ -1,13 +1,10 @@
 package com.bwsw.sj.crud.rest.controller
 
 import java.io.File
-import java.nio.file.Paths
 
-import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.FileIO
 import com.bwsw.sj.common.rest._
-import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.common.si.CustomFilesSI
+import com.bwsw.sj.common.si.result.{Created, NotCreated}
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.crud.rest.model.FileMetadataApi
 import com.bwsw.sj.crud.rest.utils.FileMetadataUtils
@@ -15,14 +12,9 @@ import com.bwsw.sj.crud.rest.{CustomFile, CustomFilesResponseEntity}
 import scaldi.Injectable.inject
 import scaldi.Injector
 
-import scala.concurrent.ExecutionContextExecutor
-
-class CustomFilesController(implicit protected val injector: Injector,
-                            implicit val materializer: ActorMaterializer,
-                            implicit val executor: ExecutionContextExecutor)
-  extends Controller {
-
+class CustomFilesController(implicit protected val injector: Injector) extends Controller {
   private val messageResourceUtils = inject[MessageResourceUtils]
+  private val fileMetadataUtils = inject[FileMetadataUtils]
 
   import messageResourceUtils._
 
@@ -38,7 +30,10 @@ class CustomFilesController(implicit protected val injector: Injector,
     if (entity.filename.isDefined) {
       val file = entity.customFileParts("file").asInstanceOf[File]
       entity.file = Some(file)
-      if (entity.customFileParts.isDefinedAt("description")) entity.description = entity.customFileParts("description").asInstanceOf[String]
+
+      entity.customFileParts.get("description").foreach { description =>
+        entity.description = description.asInstanceOf[String]
+      }
 
       val created = serviceInterface.create(entity.to())
 
@@ -52,13 +47,13 @@ class CustomFilesController(implicit protected val injector: Injector,
       }
       file.delete()
     }
-    entity.file.get.delete()
+    entity.file.foreach(_.delete())
 
     response
   }
 
   override def getAll(): RestResponse = {
-    val fileMetadata = serviceInterface.getAll().map(FileMetadataUtils.toCustomFileInfo)
+    val fileMetadata = serviceInterface.getAll().map(fileMetadataUtils.toCustomFileInfo)
 
     OkRestResponse(CustomFilesResponseEntity(fileMetadata))
   }
@@ -68,7 +63,7 @@ class CustomFilesController(implicit protected val injector: Injector,
 
     fileMetadata match {
       case Some(x) =>
-        val source = FileIO.fromPath(Paths.get(x.file.get.getAbsolutePath))
+        val source = fileMetadataUtils.fileToSource(x.file.get)
 
         CustomFile(name, source)
       case None =>

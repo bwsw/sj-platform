@@ -11,6 +11,9 @@ class FileMetadataApi(var filename: Option[String] = None,
                       var description: String = RestLiterals.defaultDescription,
                       var customFileParts: Map[String, Any] = Map()) {
   def to()(implicit injector: Injector): FileMetadata = {
-    new FileMetadata(filename.get, file)
+    new FileMetadata(
+      filename = filename.get,
+      file = file,
+      description = Some(description))
   }
 }
