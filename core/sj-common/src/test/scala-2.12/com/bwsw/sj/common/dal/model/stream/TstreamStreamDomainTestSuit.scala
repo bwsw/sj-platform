@@ -6,9 +6,9 @@ import com.bwsw.sj.common.utils.{RestLiterals, StreamLiterals}
 import com.bwsw.tstreams.storage.StorageClient
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FlatSpec, Matchers, PrivateMethodTester}
+import org.scalatest.{FlatSpec, Matchers}
 
-class TstreamStreamDomainTestSuit extends FlatSpec with Matchers with PrivateMethodTester with TstreamStreamDomainMocks {
+class TstreamStreamDomainTestSuit extends FlatSpec with Matchers with TstreamStreamDomainMocks {
   it should "create() method creates a new topic if the topic doesn't exist" in {
     //arrange
     val storageClient = mock[StorageClient]

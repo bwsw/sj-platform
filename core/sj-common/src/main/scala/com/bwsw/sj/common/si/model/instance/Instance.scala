@@ -6,7 +6,7 @@ import com.bwsw.sj.common.dal.model.stream.{KafkaStreamDomain, StreamDomain, TSt
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.rest.model.module.{StreamWithMode, TaskStream}
 import com.bwsw.sj.common.utils.StreamUtils.clearStreamFromMode
-import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals, StreamLiterals}
+import com.bwsw.sj.common.utils.{EngineLiterals, RestLiterals, StreamLiterals, StreamUtils}
 import scaldi.Injectable.inject
 import scaldi.Injector
 
@@ -114,7 +114,7 @@ class Instance(val name: String,
   private def splitStreamsAndModes(streamsWithModes: Array[String]): Array[StreamWithMode] = {
     streamsWithModes.map(x => {
       val name = clearStreamFromMode(x)
-      val mode = getStreamMode(name)
+      val mode = StreamUtils.getStreamMode(name)
 
       StreamWithMode(name, mode)
     })
@@ -130,14 +130,6 @@ class Instance(val name: String,
     }
 
     partitions
-  }
-
-  private def getStreamMode(name: String): String = {
-    if (name.contains(s"/${EngineLiterals.fullStreamMode}")) {
-      EngineLiterals.fullStreamMode
-    } else {
-      EngineLiterals.splitStreamMode
-    }
   }
 
   protected def createTaskNames(parallelism: Int, taskPrefix: String): Set[String] = {

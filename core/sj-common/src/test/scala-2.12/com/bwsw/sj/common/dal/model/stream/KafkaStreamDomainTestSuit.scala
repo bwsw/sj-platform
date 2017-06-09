@@ -5,9 +5,9 @@ import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service.KafkaServiceDomain
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FlatSpec, Matchers, PrivateMethodTester}
+import org.scalatest.{FlatSpec, Matchers}
 
-class KafkaStreamDomainTestSuit extends FlatSpec with Matchers with PrivateMethodTester with KafkaStreamDomainMocks {
+class KafkaStreamDomainTestSuit extends FlatSpec with Matchers with KafkaStreamDomainMocks {
   it should "create() method creates a new topic if the topic doesn't exist" in {
     //arrange
     val kafkaClient = mock[KafkaClient]

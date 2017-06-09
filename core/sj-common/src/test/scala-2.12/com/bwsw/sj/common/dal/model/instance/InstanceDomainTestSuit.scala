@@ -4,9 +4,9 @@ package com.bwsw.sj.common.dal.model.instance
 import com.bwsw.sj.common.utils.EngineLiterals
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FlatSpec, Matchers, PrivateMethodTester}
+import org.scalatest.{FlatSpec, Matchers}
 
-class InstanceDomainTestSuit extends FlatSpec with Matchers with PrivateMethodTester with MockitoSugar {
+class InstanceDomainTestSuit extends FlatSpec with Matchers with MockitoSugar {
   it should s"getInputsWithoutStreamMode() method returns empty list for '${EngineLiterals.inputStreamingType}' instance" in {
     //arrange
     val inputInstanceDomain = mock[InputInstanceDomain]
@@ -39,7 +39,7 @@ class InstanceDomainTestSuit extends FlatSpec with Matchers with PrivateMethodTe
     //arrange
     val numberOfInputs = 5
     val expectedInputs = Array.fill(numberOfInputs)("input")
-    val inputsWithMode = expectedInputs.map(_ + "/" + EngineLiterals.splitStreamMode)
+    val inputsWithMode = expectedInputs.map(_ + "/" + EngineLiterals.fullStreamMode)
     val batchInstanceDomain = mock[BatchInstanceDomain]
     when(batchInstanceDomain.getInputsWithoutStreamMode).thenCallRealMethod()
     when(batchInstanceDomain.inputs).thenReturn(inputsWithMode)
