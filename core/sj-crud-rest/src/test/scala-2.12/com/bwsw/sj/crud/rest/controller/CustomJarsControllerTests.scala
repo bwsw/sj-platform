@@ -208,7 +208,7 @@ class CustomJarsControllerTests extends FlatSpec with Matchers with MockitoSugar
     val api = mock[FileMetadataApi]
     when(api.filename).thenReturn(Some(filename))
     when(api.file).thenReturn(Some(jar))
-    when(api.to()(any[Injector]())).thenReturn(metadata)
+    when(api.to()).thenReturn(metadata)
 
     JarInfo(api, metadata, name, version, jar)
   }

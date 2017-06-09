@@ -17,16 +17,17 @@ class ModuleMetadataApi(filename: String,
                         file: File,
                         description: String = RestLiterals.defaultDescription,
                         customFileParts: Map[String, Any] = Map())
+                       (implicit injector: Injector)
   extends FileMetadataApi(
     Option(filename),
     Option(file),
     description,
     customFileParts) {
 
-  override def to()(implicit injector: Injector): ModuleMetadata =
+  override def to(): ModuleMetadata =
     new ModuleMetadata(filename, SpecificationApi.from(file).to, Option(file))
 
-  def validate(implicit injector: Injector): ArrayBuffer[String] = {
+  def validate: ArrayBuffer[String] = {
     val messageResourceUtils = inject[MessageResourceUtils]
     import messageResourceUtils.createMessage
 
