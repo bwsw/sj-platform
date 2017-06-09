@@ -37,6 +37,7 @@ class SjModule extends Module {
   bind[StreamSI] to new StreamSI
   bind[CustomFilesSI] to new CustomFilesSI
   bind[CustomJarsSI] to new CustomJarsSI
+  bind[ModuleSI] to new ModuleSI
 
   bind[FileBuffer] toProvider new FileBuffer
   bind[JsonSerializer] toProvider new JsonSerializer(ignore = true)

@@ -24,7 +24,7 @@ class ModuleController(implicit injector: Injector) {
 
   import messageResourceUtils.createMessage
 
-  private val serviceInterface = new ModuleSI
+  private val serviceInterface = inject[ModuleSI]
 
   def create(entity: ModuleMetadataApi): RestResponse = {
     val apiErrors = entity.validate
