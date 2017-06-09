@@ -5,7 +5,6 @@ import java.util.jar.JarFile
 
 import com.bwsw.sj.common.si.model.module.ModuleMetadata
 import com.bwsw.sj.common.utils.{MessageResourceUtils, RestLiterals}
-import com.bwsw.sj.crud.rest.ModuleInfo
 import com.bwsw.sj.crud.rest.model.FileMetadataApi
 import scaldi.Injectable.inject
 import scaldi.Injector
