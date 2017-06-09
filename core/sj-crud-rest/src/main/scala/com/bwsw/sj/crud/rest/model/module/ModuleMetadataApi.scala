@@ -42,13 +42,3 @@ class ModuleMetadataApi(filename: String,
     errors
   }
 }
-
-object ModuleMetadataApi {
-  def toModuleInfo(moduleMetadata: ModuleMetadata): ModuleInfo = {
-    ModuleInfo(
-      moduleMetadata.specification.moduleType,
-      moduleMetadata.specification.name,
-      moduleMetadata.specification.version,
-      moduleMetadata.length.get)
-  }
-}

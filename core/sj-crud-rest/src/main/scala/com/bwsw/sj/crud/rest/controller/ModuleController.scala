@@ -1,8 +1,5 @@
 package com.bwsw.sj.crud.rest.controller
 
-import java.nio.file.Paths
-
-import akka.stream.scaladsl.FileIO
 import com.bwsw.common.exceptions.JsonDeserializationException
 import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.si._
@@ -10,7 +7,7 @@ import com.bwsw.sj.common.si.model.module.ModuleMetadata
 import com.bwsw.sj.common.si.result.{Created, Deleted, DeletionError, NotCreated}
 import com.bwsw.sj.common.utils.{EngineLiterals, MessageResourceUtils}
 import com.bwsw.sj.crud.rest.model.module.{ModuleMetadataApi, SpecificationApi}
-import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
+import com.bwsw.sj.crud.rest.utils.{FileMetadataUtils, JsonDeserializationErrorMessageCreator}
 import com.bwsw.sj.crud.rest.{ModuleJar, ModulesResponseEntity, RelatedToModuleResponseEntity, SpecificationResponseEntity}
 import scaldi.Injectable.inject
 import scaldi.Injector
@@ -21,6 +18,7 @@ class ModuleController(implicit injector: Injector) {
 
   private val messageResourceUtils = inject[MessageResourceUtils]
   private val jsonDeserializationErrorMessageCreator = inject[JsonDeserializationErrorMessageCreator]
+  private val fileMetadataUtils = inject[FileMetadataUtils]
 
   import messageResourceUtils.createMessage
 
@@ -63,7 +61,7 @@ class ModuleController(implicit injector: Injector) {
 
   def get(moduleType: String, moduleName: String, moduleVersion: String): RestResponse = {
     processModule(moduleType, moduleName, moduleVersion) { moduleMetadata =>
-      val source = FileIO.fromPath(Paths.get(moduleMetadata.file.get.getAbsolutePath))
+      val source = fileMetadataUtils.fileToSource(moduleMetadata.file.get)
       ModuleJar(moduleMetadata.filename, source)
     }
   }
@@ -71,7 +69,7 @@ class ModuleController(implicit injector: Injector) {
   def getAll: RestResponse = {
     OkRestResponse(
       ModulesResponseEntity(
-        serviceInterface.getAll.map(ModuleMetadataApi.toModuleInfo)))
+        serviceInterface.getAll.map(fileMetadataUtils.toModuleInfo)))
   }
 
   def getByType(moduleType: String): RestResponse = {
@@ -79,7 +77,7 @@ class ModuleController(implicit injector: Injector) {
       case Right(modules) =>
         OkRestResponse(
           ModulesResponseEntity(
-            modules.map(ModuleMetadataApi.toModuleInfo)))
+            modules.map(fileMetadataUtils.toModuleInfo)))
       case Left(error) =>
         BadRequestRestResponse(MessageResponseEntity(error))
     }
