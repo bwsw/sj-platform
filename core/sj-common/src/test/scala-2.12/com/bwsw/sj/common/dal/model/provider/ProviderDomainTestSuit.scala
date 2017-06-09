@@ -129,7 +129,7 @@ class ProviderDomainTestSuit extends FlatSpec with Matchers with PrivateMethodTe
     verify(provider, times(numberOfChecks)).checkKafkaConnection(any())
   }
 
-    it should s"checkConnection() method checks http connection for each host " +
+  it should s"checkConnection() method checks http connection for each host " +
     s"if provider has got '${ProviderLiterals.restType}' type" in {
     //arrange
     val numberOfChecks = 4
@@ -147,7 +147,7 @@ class ProviderDomainTestSuit extends FlatSpec with Matchers with PrivateMethodTe
     verify(provider, times(numberOfChecks)).checkHttpConnection(any())
   }
 
-      it should s"checkConnection() method checks zookeeper connection for each host " +
+  it should s"checkConnection() method checks zookeeper connection for each host " +
     s"if provider has got '${ProviderLiterals.zookeeperType}' type" in {
     //arrange
     val numberOfChecks = 4
@@ -167,7 +167,7 @@ class ProviderDomainTestSuit extends FlatSpec with Matchers with PrivateMethodTe
 }
 
 trait ProviderDomainMocks extends MockitoSugar {
-  val name = "provider"
+  private val name = "provider"
 
   def providerDomain(setOfHosts: Array[String] = Array()) =
     new ProviderDomain(null, null, setOfHosts, null, null, null)
