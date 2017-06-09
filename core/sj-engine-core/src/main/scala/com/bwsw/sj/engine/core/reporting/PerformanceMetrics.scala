@@ -3,7 +3,7 @@ package com.bwsw.sj.engine.core.reporting
 import java.util.concurrent.locks.ReentrantLock
 import java.util.concurrent.{Callable, TimeUnit}
 
-import com.bwsw.common.{JsonSerializer, ObjectSerializer}
+import com.bwsw.common.{JsonSerializer, ObjectSerializer, ObjectSizeFetcher}
 import com.bwsw.sj.common.dal.model.stream.TStreamStreamDomain
 import com.bwsw.sj.common.si.model.instance.Instance
 import com.bwsw.sj.engine.core.entities.{Envelope, KafkaEnvelope, TStreamEnvelope}
@@ -84,9 +84,9 @@ abstract class PerformanceMetrics(manager: TaskManager) extends Callable[Unit] {
   def addEnvelopeToInputStream(envelope: Envelope): Unit = {
     envelope match {
       case tStreamEnvelope: TStreamEnvelope[_] =>
-        addEnvelopeToInputStream(tStreamEnvelope.stream, tStreamEnvelope.data.map(_.toString.length).toList) //todo придумать другой способ извлечения информации
+        addEnvelopeToInputStream(tStreamEnvelope.stream, tStreamEnvelope.data.map(ObjectSizeFetcher.getObjectSize).toList)
       case kafkaEnvelope: KafkaEnvelope[_] =>
-        addEnvelopeToInputStream(kafkaEnvelope.stream, List(kafkaEnvelope.data.toString.length)) //todo придумать другой способ извлечения информации
+        addEnvelopeToInputStream(kafkaEnvelope.stream, List(ObjectSizeFetcher.getObjectSize(kafkaEnvelope.data)))
       case wrongEnvelope =>
         logger.error(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined")
         throw new Exception(s"Incoming envelope with type: ${wrongEnvelope.getClass} is not defined")

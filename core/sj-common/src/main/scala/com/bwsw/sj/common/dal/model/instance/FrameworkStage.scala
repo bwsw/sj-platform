@@ -13,5 +13,4 @@ import com.bwsw.sj.common.utils.EngineLiterals
   * @param duration how long an instance has got current state
   * @author Kseniya Tomskikh
   */
-//todo описать связь фреймворка и инстанса, точно пригодится в документации
 case class FrameworkStage(var state: String = toHandle, var datetime: Date = new Date(), var duration: Long = 0)
