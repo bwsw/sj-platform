@@ -1,4 +1,4 @@
-package com.bwsw.sj.output.types.es
+package com.bwsw.sj.engine.core.output.types.es
 
 import com.bwsw.sj.engine.core.output.types.es.ElasticsearchEntityBuilder
 import com.bwsw.sj.engine.core.output.types.es._

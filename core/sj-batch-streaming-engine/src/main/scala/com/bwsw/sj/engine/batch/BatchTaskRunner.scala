@@ -1,19 +1,14 @@
 package com.bwsw.sj.engine.batch
 
+import java.io.Closeable
 import java.util.concurrent.ExecutorCompletionService
 
-import com.bwsw.sj.common.config.SettingsUtils
-import com.bwsw.sj.common.dal.repository.ConnectionRepository
-import com.bwsw.sj.common.si.model.instance.BatchInstance
+import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.engine.batch.task.BatchTaskEngine
-import com.bwsw.sj.engine.batch.task.input.{EnvelopeFetcher, RetrievableCheckpointTaskInput}
 import com.bwsw.sj.engine.core.batch.BatchStreamingPerformanceMetrics
-import com.bwsw.sj.engine.core.engine.{InstanceStatusObserver, TaskRunner}
-import com.bwsw.sj.engine.core.entities.Envelope
-import com.bwsw.sj.engine.core.managment.CommonTaskManager
-import com.bwsw.sj.engine.core.state.CommonModuleService
-import org.slf4j.LoggerFactory
-import scaldi.Injectable.inject
+import com.bwsw.sj.engine.core.engine.TaskRunner
+import com.bwsw.sj.engine.core.managment.{CommonTaskManager, TaskManager}
+import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 
 /**
   * Class is responsible for launching batch engine execution logic.
@@ -27,34 +22,17 @@ object BatchTaskRunner extends {
   override val threadName = "BatchTaskRunner-%d"
 } with TaskRunner {
 
-  import com.bwsw.sj.common.SjModule._
+  override protected def createTaskManager(): TaskManager = new CommonTaskManager()
 
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  override protected def createPerformanceMetrics(manager: TaskManager): PerformanceMetrics = {
+    new BatchStreamingPerformanceMetrics(manager.asInstanceOf[CommonTaskManager])
+  }
 
-  def main(args: Array[String]) {
-    val settingsUtils = inject[SettingsUtils]
-    val manager = new CommonTaskManager()
-    val instance = manager.instance.asInstanceOf[BatchInstance]
+  override protected def createTaskEngine(manager: TaskManager, performanceMetrics: PerformanceMetrics): TaskEngine = {
+    new BatchTaskEngine(manager.asInstanceOf[CommonTaskManager], performanceMetrics.asInstanceOf[BatchStreamingPerformanceMetrics])
+  }
 
-    logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for batch module\n")
-
-    val taskInput = RetrievableCheckpointTaskInput[AnyRef](manager, manager.createCheckpointGroup()).asInstanceOf[RetrievableCheckpointTaskInput[Envelope]]
-    val envelopeFetcher = new EnvelopeFetcher(taskInput, settingsUtils.getLowWatermark())
-    val performanceMetrics = new BatchStreamingPerformanceMetrics(manager)
-    val moduleService = CommonModuleService(manager, envelopeFetcher.checkpointGroup, performanceMetrics)
-    val streamRepository = inject[ConnectionRepository].getStreamRepository
-    val batchCollector = manager.getBatchCollector(instance.to, performanceMetrics, streamRepository)
-
-    val batchTaskEngine = new BatchTaskEngine(batchCollector, instance, moduleService, envelopeFetcher, performanceMetrics)
-
-    val instanceStatusObserver = new InstanceStatusObserver(manager.instanceName)
-
-    logger.info(s"Task: ${manager.taskName}. The preparation finished. Launch a task\n")
-
-    executorService.submit(batchTaskEngine)
-    executorService.submit(performanceMetrics)
-    executorService.submit(instanceStatusObserver)
-
-    waitForCompletion(Some(taskInput))
+  override protected def createTaskInputService(manager: TaskManager, taskEngine: TaskEngine): Closeable = {
+    taskEngine.asInstanceOf[BatchTaskEngine].taskInputService
   }
 }

@@ -1,7 +1,8 @@
 package com.bwsw.sj.engine.regular.task
 
-import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
+import java.util.concurrent.{ArrayBlockingQueue, TimeUnit}
 
+import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.si.model.instance.RegularInstance
 import com.bwsw.sj.common.utils.{EngineLiterals, SjTimer}
 import com.bwsw.sj.engine.core.engine.input.CallableCheckpointTaskInput
@@ -22,9 +23,9 @@ import scaldi.Injector
   * @param performanceMetrics set of metrics that characterize performance of a regular streaming module
   * @author Kseniya Mikhaleva
   */
-abstract class RegularTaskEngine(protected val manager: CommonTaskManager,
+abstract class RegularTaskEngine(manager: CommonTaskManager,
                                  performanceMetrics: RegularStreamingPerformanceMetrics)
-                                (implicit injector: Injector) extends Callable[Unit] {
+                                (implicit injector: Injector) extends TaskEngine {
 
   import RegularTaskEngine.logger
 
