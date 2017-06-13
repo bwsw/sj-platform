@@ -4,7 +4,7 @@ import java.net.URI
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.common.exceptions.JsonDeserializationException
-import com.bwsw.common.http.HttpClient
+import com.bwsw.common.http.HttpClientBuilder
 import com.bwsw.sj.common.config.{ConfigLiterals, SettingsUtils}
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest._
@@ -15,7 +15,7 @@ import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.{CommonAppConfigNames, EngineLiterals, MessageResourceUtils}
 import com.bwsw.sj.crud.rest.exceptions.ConfigSettingNotFound
 import com.bwsw.sj.crud.rest.instance.validator.InstanceValidator
-import com.bwsw.sj.crud.rest.instance.{InstanceDestroyer, InstanceStarter, InstanceStopper}
+import com.bwsw.sj.crud.rest.instance._
 import com.bwsw.sj.crud.rest.model.instance._
 import com.bwsw.sj.crud.rest.model.instance.response.CreateInstanceApiResponse
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
@@ -175,7 +175,7 @@ class InstanceController(implicit injector: Injector) {
         getMessage("rest.modules.instances.instance.cannot.get.tasks")))
 
       if (instance.restAddress.isDefined) {
-        val client = new HttpClient(3000)
+        val client = inject[HttpClientBuilder].apply(3000)
         val url = new URI(instance.restAddress.get)
         val httpGet = new HttpGet(url.toString)
         val httpResponse = client.execute(httpGet)
@@ -214,17 +214,23 @@ class InstanceController(implicit injector: Injector) {
   private def startInstance(instance: Instance) = {
     logger.debug(s"Starting application of instance ${instance.name}.")
 
-    new Thread(new InstanceStarter(instance, settingsUtils.getMarathonConnect(), zkHost, zkPort)).start()
+    val instanceStarter = inject[InstanceStarterBuilder]
+      .apply(instance, settingsUtils.getMarathonConnect(), zkHost, zkPort)
+    new Thread(instanceStarter).start()
   }
 
   private def stopInstance(instance: Instance) = {
     logger.debug(s"Stopping application of instance ${instance.name}.")
-    new Thread(new InstanceStopper(instance, settingsUtils.getMarathonConnect())).start()
+
+    val instanceStopper = inject[InstanceStopperBuilder].apply(instance, settingsUtils.getMarathonConnect())
+    new Thread(instanceStopper).start()
   }
 
   private def destroyInstance(instance: Instance) = {
     logger.debug(s"Destroying application of instance ${instance.name}.")
-    new Thread(new InstanceDestroyer(instance, settingsUtils.getMarathonConnect())).start()
+
+    val instanceDestroyer = inject[InstanceDestroyerBuilder].apply(instance, settingsUtils.getMarathonConnect())
+    new Thread(instanceDestroyer).start()
   }
 
   private def deserializeInstanceApi(serialized: String, moduleType: String): InstanceApi = moduleType match {

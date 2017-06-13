@@ -18,7 +18,11 @@ import scala.util.{Failure, Success, Try}
   *
   * @author Kseniya Tomskikh
   */
-class InstanceDestroyer(instance: Instance, marathonAddress: String, delay: Long = 1000, marathonTimeout: Int = 60000)(implicit val injector: Injector) extends Runnable {
+class InstanceDestroyer(instance: Instance,
+                        marathonAddress: String,
+                        delay: Long = 1000,
+                        marathonTimeout: Int = 60000)
+                       (implicit val injector: Injector) extends Runnable {
 
   private val logger = LoggerFactory.getLogger(getClass.getName)
   protected val instanceManager = new InstanceDomainRenewer()
@@ -76,4 +80,12 @@ class InstanceDestroyer(instance: Instance, marathonAddress: String, delay: Long
       }
     } //todo will see about it, maybe get stuck implicitly if getApplicationInfo() returns some marathon error statuses
   }
+}
+
+class InstanceDestroyerBuilder(implicit val injector: Injector) {
+  def apply(instance: Instance,
+            marathonAddress: String,
+            delay: Long = 1000,
+            marathonTimeout: Int = 60000): InstanceDestroyer =
+    new InstanceDestroyer(instance, marathonAddress, delay, marathonTimeout)
 }

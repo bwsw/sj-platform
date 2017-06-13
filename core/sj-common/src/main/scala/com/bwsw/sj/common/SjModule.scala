@@ -1,8 +1,10 @@
 package com.bwsw.sj.common
 
 import com.bwsw.common.JsonSerializer
+import com.bwsw.common.http.HttpClientBuilder
 import com.bwsw.sj.common.config.SettingsUtils
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.si._
 import com.bwsw.sj.common.si.model.CreateFileMetadata
 import com.bwsw.sj.common.si.model.config.CreateConfigurationSetting
 import com.bwsw.sj.common.si.model.instance.CreateInstance
@@ -10,7 +12,6 @@ import com.bwsw.sj.common.si.model.module.CreateModuleMetadata
 import com.bwsw.sj.common.si.model.provider.CreateProvider
 import com.bwsw.sj.common.si.model.service.CreateService
 import com.bwsw.sj.common.si.model.stream.CreateStream
-import com.bwsw.sj.common.si._
 import com.bwsw.sj.common.utils.{FileClassLoader, MessageResourceUtils, SpecificationUtils}
 import scaldi.Module
 
@@ -42,6 +43,8 @@ class SjModule extends Module {
 
   bind[FileBuffer] toProvider new FileBuffer
   bind[JsonSerializer] toProvider new JsonSerializer(ignore = true)
+
+  bind[HttpClientBuilder] to new HttpClientBuilder
 }
 
 object SjModule {
