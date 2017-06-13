@@ -1,39 +1,16 @@
-package com.bwsw.sj.output.types.jdbc
-
-import java.math.BigDecimal
-import java.sql.PreparedStatement
+package com.bwsw.sj.engine.core.output.types.es
 
 import com.bwsw.sj.engine.core.output.IncompatibleTypeException
-import com.bwsw.sj.engine.core.output.types.jdbc._
-import com.mockrunner.jdbc.BasicJDBCTestCaseAdapter
-import com.mockrunner.mock.jdbc.MockPreparedStatement
+import com.bwsw.sj.engine.core.output.types.es._
 import org.scalatest.{FlatSpec, Matchers}
 
-
 /**
-  * Created by diryavkin_dn on 06.03.17.
+  * Created by Ivan Kudryavtsev on 04.03.2017.
   */
-
-class JdbcTypesTests extends FlatSpec with Matchers {
-  object jdbcMock extends BasicJDBCTestCaseAdapter {
-    val connection = getJDBCMockObjectFactory.getMockConnection
-    val stmt = connection.prepareStatement("")
-    var index: Int = 0
-    def check[T](value: T) = {
-      stmt.asInstanceOf[MockPreparedStatement].getParameter(index) shouldBe value
-    }
-    def apply(func: (PreparedStatement, Int) => Unit, index: Int = 0) = {
-      this.index = index
-      func(stmt, index)
-    }
-  }
-
-
+class ElasticSearchTypesTests extends FlatSpec with Matchers {
   "IntField" should "return proper values" in {
     val field = new IntegerField("field")
-
-    jdbcMock.apply(field.transform(new java.lang.Integer(0)))
-    jdbcMock.check[java.lang.Integer](0)
+    field.transform(new java.lang.Integer(0)) shouldBe "0"
 
     field.getName shouldBe "field"
     field.getDefaultValue shouldBe 0
@@ -49,8 +26,7 @@ class JdbcTypesTests extends FlatSpec with Matchers {
 
   "LongField" should "return proper values" in {
     val field = new LongField("field")
-    jdbcMock.apply(field.transform(new java.lang.Long(0)))
-    jdbcMock.check[java.lang.Long](0L)
+    field.transform(new java.lang.Long(0)) shouldBe "0"
 
     field.getName shouldBe "field"
     field.getDefaultValue shouldBe 0
@@ -66,8 +42,7 @@ class JdbcTypesTests extends FlatSpec with Matchers {
 
   "FloatField" should "return proper values" in {
     val field = new FloatField("field")
-    jdbcMock.apply(field.transform(new java.lang.Float(0.0f)))
-    jdbcMock.check[java.lang.Float](0.0f)
+    field.transform(new java.lang.Float(0.0f)) shouldBe "0.0"
 
     field.getName shouldBe "field"
     field.getDefaultValue shouldBe 0.0f
@@ -83,8 +58,7 @@ class JdbcTypesTests extends FlatSpec with Matchers {
 
   "DoubleField" should "return proper values" in {
     val field = new DoubleField("field")
-    jdbcMock.apply(field.transform(new java.lang.Double(0.0)))
-    jdbcMock.check[java.lang.Double](0.0)
+    field.transform(new java.lang.Double(0.0)) shouldBe "0.0"
 
     field.getName shouldBe "field"
     field.getDefaultValue shouldBe 0.0
@@ -100,8 +74,7 @@ class JdbcTypesTests extends FlatSpec with Matchers {
 
   "ByteField" should "return proper values" in {
     val field = new ByteField("field")
-    jdbcMock.apply(field.transform(new java.lang.Byte('a'.toByte)))
-    jdbcMock.check[java.lang.Byte]('a'.toByte)
+    field.transform(new java.lang.Byte('a'.toByte)) shouldBe "97"
 
     field.getName shouldBe "field"
     field.getDefaultValue shouldBe 0
@@ -117,8 +90,7 @@ class JdbcTypesTests extends FlatSpec with Matchers {
 
   "CharField" should "return proper values" in {
     val field = new CharField("field")
-    jdbcMock.apply(field.transform(new java.lang.Character('a')))
-    jdbcMock.check[java.lang.String]("a")
+    field.transform(new java.lang.Character('a')) shouldBe "a"
 
     field.getName shouldBe "field"
     field.getDefaultValue shouldBe 0
@@ -134,8 +106,7 @@ class JdbcTypesTests extends FlatSpec with Matchers {
 
   "ShortField" should "return proper values" in {
     val field = new ShortField("field")
-    jdbcMock.apply(field.transform(new java.lang.Short(java.lang.Short.MIN_VALUE)))
-    jdbcMock.check[java.lang.Short](java.lang.Short.MIN_VALUE)
+    field.transform(new java.lang.Short(java.lang.Short.MIN_VALUE)) shouldBe s"${java.lang.Short.MIN_VALUE}"
 
     field.getName shouldBe "field"
     field.getDefaultValue shouldBe 0
@@ -151,8 +122,7 @@ class JdbcTypesTests extends FlatSpec with Matchers {
 
   "BooleanField" should "return proper values" in {
     val field = new BooleanField("field")
-    jdbcMock.apply(field.transform(new java.lang.Boolean(true)))
-    jdbcMock.check[java.lang.Boolean](true)
+    field.transform(new java.lang.Boolean(true)) shouldBe s"true"
 
     field.getName shouldBe "field"
     field.getDefaultValue shouldBe true
@@ -168,17 +138,11 @@ class JdbcTypesTests extends FlatSpec with Matchers {
 
   "DateField" should "return proper values" in {
     val field = new DateField("field")
-    jdbcMock.apply(field.transform(new java.sql.Date(0L)), 0)
-    jdbcMock.check[java.sql.Date](new java.sql.Date(0L))
-
-//    jdbcMock.apply(field.transform("0000-00-00"), 1)
-//    jdbcMock.check[java.sql.Date](new java.sql.Date(0L))
-
-    jdbcMock.apply(field.transform(new java.lang.Long(0L)), 2)
-    jdbcMock.check[java.sql.Date](new java.sql.Date(0L))
+    field.transform("0000-00-00") shouldBe s""""0000-00-00""""
+    field.transform(new java.lang.Long(0l)) shouldBe s"0"
 
     field.getName shouldBe "field"
-    field.getDefaultValue shouldBe new java.sql.Date(0L)
+    field.getDefaultValue shouldBe "0000-00-00"
 
     intercept[IncompatibleTypeException] {
       field.transform(new java.lang.Integer(0))
@@ -187,8 +151,7 @@ class JdbcTypesTests extends FlatSpec with Matchers {
 
   "BinaryField" should "return proper values" in {
     val field = new BinaryField("field")
-    jdbcMock.apply(field.transform(Array[Byte](0, 1, 2)))
-    jdbcMock.check[Array[Byte]](Array[Byte](0, 1, 2))
+    field.transform(Array[Byte](0, 1, 2)) shouldBe s"AAEC"
 
     field.getName shouldBe "field"
     field.getDefaultValue.isInstanceOf[Array[Byte]] shouldBe true
@@ -200,41 +163,59 @@ class JdbcTypesTests extends FlatSpec with Matchers {
 
   "JavaStringField" should "return proper values" in {
     val field = new JavaStringField("field")
-    jdbcMock.apply(field.transform("""John "Smith"""), 0)
-    var parameterString = jdbcMock.stmt.asInstanceOf[MockPreparedStatement].getParameter(0).asInstanceOf[java.lang.String]
-    parameterString.length - """John "Smith""".length shouldBe 0
-
-    jdbcMock.apply(field.transform(new java.lang.Integer(0)), 1)
-    parameterString = jdbcMock.stmt.asInstanceOf[MockPreparedStatement].getParameter(1).asInstanceOf[java.lang.String]
-    parameterString.length shouldBe 1
+    field.transform("""John "Smith""").size - """John "Smith""".size shouldBe 3
 
     field.getName shouldBe "field"
     field.getDefaultValue shouldBe ""
+
+    field.transform(new java.lang.Integer(0)) shouldBe """"0""""
   }
 
   "HTMLStringField" should "return proper values" in {
     val field = new HTMLStringField("field")
-    jdbcMock.apply(field.transform("""John<br/>Smith"""), 0)
-    jdbcMock.check[java.lang.String]("""John&lt;br/&gt;Smith""")
+    field.transform("""John<br/>Smith""") shouldBe """"John&lt;br/&gt;Smith""""
 
-    jdbcMock.apply(field.transform(new java.lang.Integer(0)), 1)
-    val parameterString = jdbcMock.stmt.asInstanceOf[MockPreparedStatement].getParameter(1).asInstanceOf[java.lang.String]
-    parameterString.length shouldBe 1
+    field.getName shouldBe "field"
+    field.getDefaultValue shouldBe ""
+
+    field.transform(new java.lang.Integer(0)) shouldBe """"0""""
+  }
+
+  "RangeField" should "return proper values" in {
+    val field = new RangeField("field")
+    field.transform((new java.lang.Integer(1),new java.lang.Integer(10))) shouldBe """{"gte": 1, "lte": 10}"""
+    field.transform((new java.lang.Long(1),new java.lang.Long(10))) shouldBe """{"gte": 1, "lte": 10}"""
+    field.transform((new java.lang.Float(1.1),new java.lang.Float(10.1))) shouldBe """{"gte": 1.1, "lte": 10.1}"""
+    field.transform((new java.lang.Double(1.1),new java.lang.Double(10.1))) shouldBe """{"gte": 1.1, "lte": 10.1}"""
+    field.transform(("2000-01-01","2010-01-01")) shouldBe """{"gte": "2000-01-01", "lte": "2010-01-01"}"""
 
     field.getName shouldBe "field"
     field.getDefaultValue shouldBe ""
   }
 
-  "DecimalField" should "return proper values" in {
-    val field = new DecimalField("field")
-    jdbcMock.apply(field.transform(BigDecimal.TEN), 0)
-    jdbcMock.check[BigDecimal](BigDecimal.TEN)
+  "ArrayField" should "return proper values" in {
+    val field = new ArrayField("field")
+    field.transform("[1, 2, 3]") shouldBe """[1, 2, 3]"""
+
+    intercept[IncompatibleTypeException] {
+      field.transform("""{"a": 1, "b": 2}""")
+    }
 
     field.getName shouldBe "field"
-    field.getDefaultValue shouldBe BigDecimal.ZERO
+    field.getDefaultValue shouldBe "[]"
   }
 
+  "ObjectField" should "return proper values" in {
+    val field = new ObjectField("field")
+    field.transform("""{"a": 1, "b": 2}""") shouldBe """{"a": 1, "b": 2}"""
+
+    intercept[IncompatibleTypeException] {
+      field.transform("[]")
+    }
+
+    field.getName shouldBe "field"
+    field.getDefaultValue shouldBe "{}"
+  }
+
+
 }
-
-
-

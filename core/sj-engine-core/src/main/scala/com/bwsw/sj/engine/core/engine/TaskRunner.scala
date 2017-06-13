@@ -7,7 +7,7 @@ import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.engine.core.managment.TaskManager
 import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.google.common.util.concurrent.ThreadFactoryBuilder
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
@@ -21,13 +21,12 @@ import scala.util.{Failure, Success, Try}
   *
   * @author Kseniya Mikhaleva
   */
-trait TaskRunner {
-  implicit val injector: Injector = com.bwsw.sj.common.SjModule.injector
-  private val logger = LoggerFactory.getLogger(this.getClass)
+abstract class TaskRunner(implicit val injector: Injector = com.bwsw.sj.common.SjModule.injector) {
+  protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
   protected val threadName: String
   private val countOfThreads = 4
   private val threadPool: ExecutorService = createThreadPool(threadName)
-  private val executorService: ExecutorCompletionService[Unit] = new ExecutorCompletionService[Unit](threadPool)
+  protected val executorService: ExecutorCompletionService[Unit] = new ExecutorCompletionService[Unit](threadPool)
 
   private def createThreadPool(factoryName: String): ExecutorService = {
     logger.debug(s"Create a thread pool with $countOfThreads threads for task.")
@@ -50,7 +49,7 @@ trait TaskRunner {
     System.exit(-1)
   }
 
-  private def waitForCompletion(closeableTaskInput: Closeable): Unit = {
+  protected def waitForCompletion(closeableTaskInput: Closeable): Unit = {
     var i = 0
     Try {
       while (i < countOfThreads) {
@@ -84,7 +83,9 @@ trait TaskRunner {
     logger.info(s"Task: ${manager.taskName}. The preparation finished. Launch a task\n")
 
     taskInputService match {
-      case callable: Callable[Unit@unchecked] => executorService.submit(callable)
+      case callable: Callable[Unit@unchecked] => {
+        executorService.submit(callable)
+      }
       case _ =>
     }
     executorService.submit(taskEngine)

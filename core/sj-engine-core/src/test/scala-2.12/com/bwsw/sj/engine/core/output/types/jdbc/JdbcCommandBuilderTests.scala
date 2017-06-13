@@ -1,4 +1,4 @@
-package com.bwsw.sj.output.types.jdbc
+package com.bwsw.sj.engine.core.output.types.jdbc
 
 import java.sql.PreparedStatement
 
