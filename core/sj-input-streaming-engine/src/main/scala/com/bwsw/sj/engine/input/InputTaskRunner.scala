@@ -1,14 +1,17 @@
 package com.bwsw.sj.engine.input
 
+import java.io.Closeable
 import java.util.concurrent._
 
-import com.bwsw.sj.engine.core.engine.{InstanceStatusObserver, TaskRunner}
+import com.bwsw.sj.common.engine.TaskEngine
+import com.bwsw.sj.engine.core.engine.TaskRunner
+import com.bwsw.sj.engine.core.managment.TaskManager
+import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.input.connection.tcp.server.InputStreamingServer
 import com.bwsw.sj.engine.input.task.{InputTaskEngine, InputTaskManager}
 import com.bwsw.sj.engine.input.task.reporting.InputStreamingPerformanceMetrics
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
-import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
 
@@ -24,38 +27,31 @@ object InputTaskRunner extends {
   override val threadName = "InputTaskRunner-%d"
 } with TaskRunner {
 
-  import com.bwsw.sj.common.SjModule._
-
-  private val logger = LoggerFactory.getLogger(this.getClass)
   private val queueSize = 1000
+  private val bufferForEachContext = new ConcurrentHashMap[ChannelHandlerContext, ByteBuf]().asScala
+  private val channelContextQueue = new ArrayBlockingQueue[ChannelHandlerContext](queueSize)
 
-  def main(args: Array[String]) {
-    val bufferForEachContext = new ConcurrentHashMap[ChannelHandlerContext, ByteBuf]().asScala
-    val channelContextQueue = new ArrayBlockingQueue[ChannelHandlerContext](queueSize)
+  override protected def createTaskManager(): TaskManager = new InputTaskManager()
 
-    val manager: InputTaskManager = new InputTaskManager()
-    logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for an input module.")
+  override protected def createPerformanceMetrics(manager: TaskManager): PerformanceMetrics = {
+    new InputStreamingPerformanceMetrics(manager.asInstanceOf[InputTaskManager])
+  }
 
-    val performanceMetrics = new InputStreamingPerformanceMetrics(manager)
-
-    val inputTaskEngine = InputTaskEngine(manager, performanceMetrics, channelContextQueue, bufferForEachContext)
-
-    val inputStreamingServer = new InputStreamingServer(
-      manager.agentsHost,
-      manager.entryPort,
+  override protected def createTaskEngine(manager: TaskManager, performanceMetrics: PerformanceMetrics): TaskEngine = {
+    InputTaskEngine(
+      manager.asInstanceOf[InputTaskManager],
+      performanceMetrics.asInstanceOf[InputStreamingPerformanceMetrics],
       channelContextQueue,
       bufferForEachContext
     )
+  }
 
-    val instanceStatusObserver = new InstanceStatusObserver(manager.instanceName)
-
-    logger.info(s"Task: ${manager.taskName}. The preparation finished. Launch a task.")
-
-    executorService.submit(inputTaskEngine)
-    executorService.submit(performanceMetrics)
-    executorService.submit(inputStreamingServer)
-    executorService.submit(instanceStatusObserver)
-
-    waitForCompletion()
+  override protected def createTaskInputService(manager: TaskManager, taskEngine: TaskEngine): Closeable = {
+    new InputStreamingServer(
+      manager.agentsHost,
+      manager.asInstanceOf[InputTaskManager].entryPort,
+      channelContextQueue,
+      bufferForEachContext
+    )
   }
 }

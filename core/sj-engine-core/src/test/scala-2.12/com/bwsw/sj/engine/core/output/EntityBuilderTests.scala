@@ -1,16 +1,15 @@
-package com.bwsw.sj.output.types.es
+package com.bwsw.sj.engine.core.output
 
-import com.bwsw.sj.engine.core.output.types.es.ElasticsearchEntityBuilder
-import com.bwsw.sj.engine.core.output.types.es._
+import com.bwsw.sj.engine.core.output.types.es.{BooleanField, IntegerField, JavaStringField, LongField}
+import com.bwsw.sj.engine.core.output.EntityBuilder
 import org.scalatest.{FlatSpec, Matchers}
-
 
 /**
   * Created by Ivan Kudryavtsev on 05.03.2017.
   */
-class ElasticsearchEntityBuilderTests extends FlatSpec with Matchers {
+class EntityBuilderTests extends FlatSpec with Matchers {
   it should "work properly" in {
-    val eb = new ElasticsearchEntityBuilder()
+    val eb = new EntityBuilder[String]()
 
     val id = new LongField("id")
     val name = new JavaStringField("name")

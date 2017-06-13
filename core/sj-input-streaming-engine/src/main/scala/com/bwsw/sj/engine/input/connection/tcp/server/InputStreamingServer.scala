@@ -1,5 +1,6 @@
 package com.bwsw.sj.engine.input.connection.tcp.server
 
+import java.io.Closeable
 import java.util.concurrent.{ArrayBlockingQueue, Callable}
 
 import io.netty.bootstrap.ServerBootstrap
@@ -27,14 +28,15 @@ import scala.util.{Failure, Success, Try}
 class InputStreamingServer(host: String,
                            port: Int,
                            channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
-                           bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf]) extends Callable[Unit] {
+                           bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf]) extends Callable[Unit] with Closeable {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
+  private val bossGroup: EventLoopGroup = new NioEventLoopGroup(1)
+  private val workerGroup = new NioEventLoopGroup()
 
   override def call(): Unit = {
     logger.info(s"Launch an input-streaming server on: '$host:$port'.")
-    val bossGroup: EventLoopGroup = new NioEventLoopGroup(1)
-    val workerGroup = new NioEventLoopGroup()
+
     val result = Try {
       val bootstrapServer = new ServerBootstrap()
       bootstrapServer.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
@@ -46,13 +48,17 @@ class InputStreamingServer(host: String,
       bootstrapServer.bind(host, port).sync().channel().closeFuture().sync()
     }
 
+    result match {
+      case Success(_) =>
+      case Failure(e) =>
+        close()
+        throw e
+    }
+  }
+
+  override def close(): Unit = {
     logger.info(s"Shutdown an input-streaming server (address: '$host:$port').")
     workerGroup.shutdownGracefully()
     bossGroup.shutdownGracefully()
-
-    result match {
-      case Success(_) =>
-      case Failure(e) => throw e
-    }
   }
 }

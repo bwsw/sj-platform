@@ -1,10 +1,14 @@
 package com.bwsw.sj.engine.core.engine
 
-import java.util.concurrent.{ExecutorCompletionService, ExecutorService, Executors, ThreadFactory}
+import java.io.Closeable
+import java.util.concurrent._
 
-import com.bwsw.sj.engine.core.engine.input.CheckpointTaskInput
+import com.bwsw.sj.common.engine.TaskEngine
+import com.bwsw.sj.engine.core.managment.TaskManager
+import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.google.common.util.concurrent.ThreadFactoryBuilder
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
+import scaldi.Injector
 
 import scala.util.{Failure, Success, Try}
 
@@ -17,9 +21,8 @@ import scala.util.{Failure, Success, Try}
   *
   * @author Kseniya Mikhaleva
   */
-trait TaskRunner {
-
-  private val logger = LoggerFactory.getLogger(this.getClass)
+abstract class TaskRunner(implicit val injector: Injector = com.bwsw.sj.common.SjModule.injector) {
+  protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
   protected val threadName: String
   private val countOfThreads = 4
   private val threadPool: ExecutorService = createThreadPool(threadName)
@@ -46,7 +49,7 @@ trait TaskRunner {
     System.exit(-1)
   }
 
-  def waitForCompletion(checkpointedTaskInput: Option[CheckpointTaskInput[_]] = None): Unit = {
+  protected def waitForCompletion(closeableTaskInput: Closeable): Unit = {
     var i = 0
     Try {
       while (i < countOfThreads) {
@@ -54,7 +57,7 @@ trait TaskRunner {
         i += 1
       }
 
-      checkpointedTaskInput.foreach(_.close())
+      closeableTaskInput.close()
       threadPool.shutdownNow()
       System.exit(-1)
     } match {
@@ -63,4 +66,40 @@ trait TaskRunner {
       case Failure(exception) => handleException(exception)
     }
   }
+
+  def main(args: Array[String]): Unit = {
+    val manager = createTaskManager()
+
+    logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for '${manager.instance.moduleType}' module\n")
+
+    val performanceMetrics = createPerformanceMetrics(manager)
+
+    val taskEngine = createTaskEngine(manager, performanceMetrics)
+
+    val taskInputService = createTaskInputService(manager, taskEngine)
+
+    val instanceStatusObserver = new InstanceStatusObserver(manager.instanceName)
+
+    logger.info(s"Task: ${manager.taskName}. The preparation finished. Launch a task\n")
+
+    taskInputService match {
+      case callable: Callable[Unit@unchecked] => {
+        executorService.submit(callable)
+      }
+      case _ =>
+    }
+    executorService.submit(taskEngine)
+    executorService.submit(performanceMetrics)
+    executorService.submit(instanceStatusObserver)
+
+    waitForCompletion(taskInputService)
+  }
+
+  protected def createTaskManager(): TaskManager
+
+  protected def createPerformanceMetrics(manager: TaskManager): PerformanceMetrics
+
+  protected def createTaskEngine(manager: TaskManager, performanceMetrics: PerformanceMetrics): TaskEngine
+
+  protected def createTaskInputService(manager: TaskManager, taskEngine: TaskEngine): Closeable
 }

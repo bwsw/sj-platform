@@ -1,8 +1,9 @@
 package com.bwsw.sj.engine.input.task
 
-import java.util.concurrent.{ArrayBlockingQueue, Callable, TimeUnit}
+import java.util.concurrent.{ArrayBlockingQueue, TimeUnit}
 
 import com.bwsw.sj.common.dal.repository.ConnectionRepository
+import com.bwsw.sj.common.engine.TaskEngine
 import com.bwsw.sj.common.si.model.instance.InputInstance
 import com.bwsw.sj.common.utils.EngineLiterals
 import com.bwsw.sj.engine.core.engine.{NumericalCheckpointTaskEngine, TimeCheckpointTaskEngine}
@@ -28,11 +29,11 @@ import scaldi.Injector
   * @param bufferForEachContext map for keeping a buffer containing incoming bytes [[ByteBuf]] with the appropriate channel context [[ChannelHandlerContext]]
   * @author Kseniya Mikhaleva
   */
-abstract class InputTaskEngine(protected val manager: InputTaskManager,
+abstract class InputTaskEngine(manager: InputTaskManager,
                                performanceMetrics: InputStreamingPerformanceMetrics,
                                channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
                                bufferForEachContext: scala.collection.concurrent.Map[ChannelHandlerContext, ByteBuf])
-                              (implicit injector: Injector) extends Callable[Unit] {
+                              (implicit injector: Injector) extends TaskEngine {
 
   import InputTaskEngine.logger
 
