@@ -5,10 +5,11 @@ import com.bwsw.sj.crud.rest.model.config.CreateConfigurationSettingApi
 import com.bwsw.sj.crud.rest.model.provider.CreateProviderApi
 import com.bwsw.sj.crud.rest.model.service.CreateServiceApi
 import com.bwsw.sj.crud.rest.model.stream.CreateStreamApi
-import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
+import com.bwsw.sj.crud.rest.utils.{FileMetadataUtils, JsonDeserializationErrorMessageCreator}
 
 class CrudRestModule extends SjModule {
   bind[JsonDeserializationErrorMessageCreator] to new JsonDeserializationErrorMessageCreator()
+  bind[FileMetadataUtils] to new FileMetadataUtils
 
   bind[CreateConfigurationSettingApi] to new CreateConfigurationSettingApi
   bind[CreateProviderApi] to new CreateProviderApi
