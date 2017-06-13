@@ -2,10 +2,11 @@ package com.bwsw.sj.common.si
 
 import java.util.UUID
 
+import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.model.provider.{JDBCProviderDomain, ProviderDomain}
 import com.bwsw.sj.common.dal.model.service._
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.si.model.provider.{Provider, CreateProvider}
+import com.bwsw.sj.common.si.model.provider.{CreateProvider, Provider}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.common.utils.MessageResourceUtilsMock.messageResourceUtils
@@ -84,18 +85,18 @@ class ProviderSiTests extends FlatSpec with Matchers {
     val successConnectionProviderName = "success-connection-provider"
     val successConnectionProviderDomain = mock[ProviderDomain]
     when(successConnectionProviderDomain.name).thenReturn(successConnectionProviderName)
-    when(successConnectionProviderDomain.checkConnection()(injector)).thenReturn(ArrayBuffer[String]())
+    when(successConnectionProviderDomain.checkConnection(any())).thenReturn(ArrayBuffer[String]())
     providerStorage += successConnectionProviderDomain
 
     providerSI.checkConnection(successConnectionProviderName) shouldBe Right(true)
   }
 
   it should "give errors when provider cannot connect" in new ProviderMocks {
-    val errors = ArrayBuffer("Conection error")
+    val errors = ArrayBuffer("Connection error")
     val failedConnectionProviderName = "failed-connection-provider"
     val failedConnectionProviderDomain = mock[ProviderDomain]
     when(failedConnectionProviderDomain.name).thenReturn(failedConnectionProviderName)
-    when(failedConnectionProviderDomain.checkConnection()(injector)).thenReturn(errors)
+    when(failedConnectionProviderDomain.checkConnection(any())).thenReturn(errors)
     providerStorage += failedConnectionProviderDomain
 
     providerSI.checkConnection(failedConnectionProviderName) shouldBe Left(errors)
@@ -164,8 +165,12 @@ class ProviderSiTests extends FlatSpec with Matchers {
         providerStorage.find(_.name == providerName)
       })
 
+    private val configRepository = mock[GenericMongoRepository[ConfigurationSettingDomain]]
+    when(configRepository.get(anyString())).thenReturn(None)
+
     val connectionRepository = mock[ConnectionRepository]
     when(connectionRepository.getProviderRepository).thenReturn(providerRepository)
+    when(connectionRepository.getConfigRepository).thenReturn(configRepository)
 
     val createProvider = mock[CreateProvider]
     when(createProvider.from(any[ProviderDomain])(any[Injector]))

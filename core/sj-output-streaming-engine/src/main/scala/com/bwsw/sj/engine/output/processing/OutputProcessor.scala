@@ -1,5 +1,6 @@
 package com.bwsw.sj.engine.output.processing
 
+import com.bwsw.common.ObjectSizeFetcher
 import com.bwsw.sj.common.dal.model.stream.{ESStreamDomain, JDBCStreamDomain, RestStreamDomain, StreamDomain}
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.Entity
@@ -61,7 +62,7 @@ abstract class OutputProcessor[T <: AnyRef](outputStream: StreamDomain,
     */
   private def registerOutputEnvelope(envelopeID: String, data: OutputEnvelope): Unit = {
     logger.debug(s"Register an output envelope: '$envelopeID'.")
-    val elementSize = data.toString.length //todo придумать другой способ извлечения информации
+    val elementSize = ObjectSizeFetcher.getObjectSize(data)
     performanceMetrics.addElementToOutputEnvelope(outputStream.name, envelopeID, elementSize)
   }
 

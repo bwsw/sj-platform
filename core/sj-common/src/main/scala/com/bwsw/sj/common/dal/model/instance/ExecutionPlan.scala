@@ -12,7 +12,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore
   *
   * @author Kseniya Tomskikh
   */
-//todo описать правила составления плана, точно пригодится в документации
 class ExecutionPlan {
   var tasks: java.util.Map[String, Task] = new util.HashMap()
 

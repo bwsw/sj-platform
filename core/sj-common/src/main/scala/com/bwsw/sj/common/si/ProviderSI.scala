@@ -1,9 +1,10 @@
 package com.bwsw.sj.common.si
 
+import com.bwsw.sj.common.config.ConfigLiterals
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service._
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
-import com.bwsw.sj.common.si.model.provider.{Provider, CreateProvider}
+import com.bwsw.sj.common.si.model.provider.{CreateProvider, Provider}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import scaldi.Injectable.inject
@@ -70,10 +71,14 @@ class ProviderSI(implicit injector: Injector) extends ServiceInterface[Provider,
     */
   def checkConnection(name: String): Either[ArrayBuffer[String], Boolean] = {
     val provider = entityRepository.get(name)
+    val zkSessionTimeout = connectionRepository.getConfigRepository
+      .get(ConfigLiterals.zkSessionTimeoutTag)
+      .map(_.value.toInt)
+      .getOrElse(ConfigLiterals.zkSessionTimeoutDefault)
 
     provider match {
       case Some(x) =>
-        val errors = x.checkConnection()
+        val errors = x.checkConnection(zkSessionTimeout)
         if (errors.isEmpty)
           Right(true)
         else
