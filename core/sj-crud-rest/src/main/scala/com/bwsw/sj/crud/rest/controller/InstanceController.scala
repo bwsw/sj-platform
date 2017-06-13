@@ -10,14 +10,14 @@ import com.bwsw.sj.common.dal.repository.ConnectionRepository
 import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.si._
 import com.bwsw.sj.common.si.model.instance.Instance
-import com.bwsw.sj.common.si.model.module.{ModuleMetadata, CreateModuleMetadata, Specification}
+import com.bwsw.sj.common.si.model.module.{CreateModuleMetadata, ModuleMetadata, Specification}
 import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.utils.{CommonAppConfigNames, EngineLiterals, MessageResourceUtils}
 import com.bwsw.sj.crud.rest.exceptions.ConfigSettingNotFound
 import com.bwsw.sj.crud.rest.instance.validator.InstanceValidator
 import com.bwsw.sj.crud.rest.instance.{InstanceDestroyer, InstanceStarter, InstanceStopper}
 import com.bwsw.sj.crud.rest.model.instance._
-import com.bwsw.sj.crud.rest.model.instance.response.InstanceApiResponse
+import com.bwsw.sj.crud.rest.model.instance.response.CreateInstanceApiResponse
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import com.bwsw.sj.crud.rest.{InstanceResponseEntity, InstancesResponseEntity, ShortInstance, ShortInstancesResponseEntity}
 import com.typesafe.config.ConfigFactory
@@ -41,10 +41,11 @@ class InstanceController(implicit injector: Injector) {
   private val serializer = inject[JsonSerializer]
   serializer.disableNullForPrimitives(true)
   private val jsonDeserializationErrorMessageCreator = inject[JsonDeserializationErrorMessageCreator]
-  private val serviceInterface = new InstanceSI
-  private val moduleSI = new ModuleSI
+  private val serviceInterface = inject[InstanceSI]
+  private val moduleSI = inject[ModuleSI]
   private val configService = inject[ConnectionRepository].getConfigRepository
   private val createModuleMetadata = inject[CreateModuleMetadata]
+  private val createInstanceApiResponse = inject[CreateInstanceApiResponse]
 
   def create(serializedEntity: String, moduleType: String, moduleName: String, moduleVersion: String): RestResponse = {
     ifModuleExists(moduleType, moduleName, moduleVersion) { module =>
@@ -86,7 +87,7 @@ class InstanceController(implicit injector: Injector) {
 
   def get(moduleType: String, moduleName: String, moduleVersion: String, name: String): RestResponse = {
     processInstance(moduleType, moduleName, moduleVersion, name) { instance =>
-      OkRestResponse(InstanceResponseEntity(InstanceApiResponse.from(instance)))
+      OkRestResponse(InstanceResponseEntity(createInstanceApiResponse.from(instance)))
     }
   }
 
@@ -108,7 +109,7 @@ class InstanceController(implicit injector: Injector) {
   def getByModule(moduleType: String, moduleName: String, moduleVersion: String): RestResponse = {
     ifModuleExists(moduleType, moduleName, moduleVersion) { _ =>
       val instances = serviceInterface.getByModule(moduleType, moduleName, moduleVersion)
-        .map(InstanceApiResponse.from)
+        .map(createInstanceApiResponse.from)
       OkRestResponse(InstancesResponseEntity(instances))
     }
   }
@@ -240,11 +241,11 @@ class InstanceController(implicit injector: Injector) {
   }
 
   private def validateInstance(instance: Instance, specification: Specification) = {
-    val validatorClassConfig = s"${instance.moduleType}-validator-class"
-    val validatorClassName = configService.get(s"${ConfigLiterals.systemDomain}.$validatorClassConfig") match {
+    val validatorClassConfig = s"${ConfigLiterals.systemDomain}.${instance.moduleType}-validator-class"
+    val validatorClassName = configService.get(validatorClassConfig) match {
       case Some(configurationSetting) => configurationSetting.value
       case None => throw ConfigSettingNotFound(
-        createMessage("rest.config.setting.notfound", s"${ConfigLiterals.systemDomain}.$validatorClassConfig"))
+        createMessage("rest.config.setting.notfound", validatorClassConfig))
     }
     val validatorClass = Class.forName(validatorClassName)
     val validator = validatorClass.getConstructor(classOf[Injector]).newInstance(injector).asInstanceOf[InstanceValidator]
