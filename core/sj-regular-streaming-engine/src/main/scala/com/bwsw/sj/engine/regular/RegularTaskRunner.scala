@@ -1,12 +1,32 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.engine.regular
 
-import java.util.concurrent.ExecutorCompletionService
+import java.io.Closeable
+import java.util.concurrent.{Callable, ExecutorCompletionService}
 
-import com.bwsw.sj.engine.core.engine.{InstanceStatusObserver, TaskRunner}
-import com.bwsw.sj.engine.core.managment.CommonTaskManager
+import com.bwsw.sj.common.engine.TaskEngine
+import com.bwsw.sj.engine.core.engine.TaskRunner
+import com.bwsw.sj.engine.core.managment.{CommonTaskManager, TaskManager}
+import com.bwsw.sj.engine.core.reporting.PerformanceMetrics
 import com.bwsw.sj.engine.regular.task.RegularTaskEngine
 import com.bwsw.sj.engine.regular.task.reporting.RegularStreamingPerformanceMetrics
-import org.slf4j.LoggerFactory
 
 /**
   * Class is responsible for launching regular engine execution logic.
@@ -20,30 +40,16 @@ object RegularTaskRunner extends {
   override val threadName = "RegularTaskRunner-%d"
 } with TaskRunner {
 
-  import com.bwsw.sj.common.SjModule._
+  override protected def createTaskManager(): TaskManager = new CommonTaskManager()
 
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  override protected def createPerformanceMetrics(manager: TaskManager): PerformanceMetrics = {
+    new RegularStreamingPerformanceMetrics(manager.asInstanceOf[CommonTaskManager])
+  }
 
-  def main(args: Array[String]) {
-    val manager = new CommonTaskManager()
+  override protected def createTaskEngine(manager: TaskManager, performanceMetrics: PerformanceMetrics): TaskEngine =
+    RegularTaskEngine(manager.asInstanceOf[CommonTaskManager], performanceMetrics.asInstanceOf[RegularStreamingPerformanceMetrics])
 
-    logger.info(s"Task: ${manager.taskName}. Start preparing of task runner for regular module\n")
-
-    val performanceMetrics = new RegularStreamingPerformanceMetrics(manager)
-
-    val regularTaskEngine = RegularTaskEngine(manager, performanceMetrics)
-
-    val regularTaskInputService = regularTaskEngine.taskInputService
-
-    val instanceStatusObserver = new InstanceStatusObserver(manager.instanceName)
-
-    logger.info(s"Task: ${manager.taskName}. The preparation finished. Launch a task\n")
-
-    executorService.submit(regularTaskInputService)
-    executorService.submit(regularTaskEngine)
-    executorService.submit(performanceMetrics)
-    executorService.submit(instanceStatusObserver)
-
-    waitForCompletion(Some(regularTaskInputService))
+  override protected def createTaskInputService(manager: TaskManager, taskEngine: TaskEngine): Callable[Unit] with Closeable = {
+    taskEngine.asInstanceOf[RegularTaskEngine].taskInputService
   }
 }

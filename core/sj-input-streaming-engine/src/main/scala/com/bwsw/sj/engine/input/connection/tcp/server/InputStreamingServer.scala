@@ -1,5 +1,24 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.engine.input.connection.tcp.server
 
+import java.io.Closeable
 import java.util.concurrent.{ArrayBlockingQueue, Callable}
 
 import io.netty.bootstrap.ServerBootstrap
@@ -27,14 +46,15 @@ import scala.util.{Failure, Success, Try}
 class InputStreamingServer(host: String,
                            port: Int,
                            channelContextQueue: ArrayBlockingQueue[ChannelHandlerContext],
-                           bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf]) extends Callable[Unit] {
+                           bufferForEachContext: concurrent.Map[ChannelHandlerContext, ByteBuf]) extends Callable[Unit] with Closeable {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
+  private val bossGroup: EventLoopGroup = new NioEventLoopGroup(1)
+  private val workerGroup = new NioEventLoopGroup()
 
   override def call(): Unit = {
     logger.info(s"Launch an input-streaming server on: '$host:$port'.")
-    val bossGroup: EventLoopGroup = new NioEventLoopGroup(1)
-    val workerGroup = new NioEventLoopGroup()
+
     val result = Try {
       val bootstrapServer = new ServerBootstrap()
       bootstrapServer.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
@@ -46,13 +66,17 @@ class InputStreamingServer(host: String,
       bootstrapServer.bind(host, port).sync().channel().closeFuture().sync()
     }
 
+    result match {
+      case Success(_) =>
+      case Failure(e) =>
+        close()
+        throw e
+    }
+  }
+
+  override def close(): Unit = {
     logger.info(s"Shutdown an input-streaming server (address: '$host:$port').")
     workerGroup.shutdownGracefully()
     bossGroup.shutdownGracefully()
-
-    result match {
-      case Success(_) =>
-      case Failure(e) => throw e
-    }
   }
 }

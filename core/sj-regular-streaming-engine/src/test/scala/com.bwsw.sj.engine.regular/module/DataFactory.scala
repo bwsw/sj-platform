@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.engine.regular.module
 
 import java.io.{BufferedReader, File, InputStreamReader}
@@ -5,9 +23,8 @@ import java.util.Properties
 import java.util.jar.JarFile
 
 import com.bwsw.common.file.utils.FileStorage
-import com.bwsw.common.{JsonSerializer, ObjectSerializer}
-import com.bwsw.sj.common.SjModule
-import com.bwsw.sj.common.config.{BenchmarkConfigNames, ConfigLiterals}
+import com.bwsw.common.{JsonSerializer, KafkaClient, ObjectSerializer}
+import com.bwsw.sj.common.config.BenchmarkConfigNames
 import com.bwsw.sj.common.dal.model.instance.{ExecutionPlan, InstanceDomain, Task}
 import com.bwsw.sj.common.dal.model.provider.ProviderDomain
 import com.bwsw.sj.common.dal.model.service.{KafkaServiceDomain, ServiceDomain, TStreamServiceDomain, ZKServiceDomain}
@@ -21,14 +38,10 @@ import com.bwsw.tstreams.agents.consumer.Offset.Oldest
 import com.bwsw.tstreams.agents.producer
 import com.bwsw.tstreams.env.{ConfigurationOptions, TStreamsFactory}
 import com.typesafe.config.ConfigFactory
-import kafka.admin.AdminUtils
-import kafka.utils.ZkUtils
-import org.I0Itec.zkclient.ZkConnection
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import org.apache.kafka.common.TopicPartition
 import scaldi.Injectable.inject
-import scaldi.{Injector, Module}
 
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
@@ -249,24 +262,20 @@ object DataFactory {
 
     repository.save(kafkaStreamDomain)
 
-    val zkHost = kService.zkProvider.hosts
-    val zkConnect = new ZkConnection(zkHost.mkString(";"))
-    val zkTimeout = connectionRepository.getConfigRepository.get(ConfigLiterals.zkSessionTimeoutTag).get.value.toInt
-    val zkClient = ZkUtils.createZkClient(zkHost.mkString(";"), zkTimeout, zkTimeout)
-    val zkUtils = new ZkUtils(zkClient, zkConnect, false)
+    val zkServers = kService.zkProvider.hosts
+    val kafkaClient = new KafkaClient(zkServers)
 
-    AdminUtils.createTopic(zkUtils, kafkaStreamDomain.name, partitions, replicationFactor)
+    kafkaClient.createTopic(kafkaStreamDomain.name, partitions, replicationFactor)
+    kafkaClient.close()
   }
 
   private def deleteKafkaStream(streamService: GenericMongoRepository[StreamDomain], serviceManager: GenericMongoRepository[ServiceDomain], suffix: String) = {
     val kService = serviceManager.get(kafkaServiceName).get.asInstanceOf[KafkaServiceDomain]
-    val zkHost = kService.zkProvider.hosts
-    val zkConnect = new ZkConnection(zkHost.mkString(";"))
-    val zkTimeout = connectionRepository.getConfigRepository.get(ConfigLiterals.zkSessionTimeoutTag).get.value.toInt
-    val zkClient = ZkUtils.createZkClient(zkHost.mkString(";"), zkTimeout, zkTimeout)
-    val zkUtils = new ZkUtils(zkClient, zkConnect, false)
+    val zkServers = kService.zkProvider.hosts
+    val kafkaClient = new KafkaClient(zkServers)
+    kafkaClient.deleteTopic(kafkaInputNamePrefix + suffix)
+    kafkaClient.close()
 
-    AdminUtils.deleteTopic(zkUtils, kafkaInputNamePrefix + suffix)
     streamService.delete(kafkaInputNamePrefix + suffix)
   }
 

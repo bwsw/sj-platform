@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.bwsw.sj.common.dal.model.provider
 
 import com.bwsw.sj.common.config.ConfigLiterals
@@ -129,7 +147,7 @@ class ProviderDomainTestSuit extends FlatSpec with Matchers with PrivateMethodTe
     verify(provider, times(numberOfChecks)).checkKafkaConnection(any())
   }
 
-    it should s"checkConnection() method checks http connection for each host " +
+  it should s"checkConnection() method checks http connection for each host " +
     s"if provider has got '${ProviderLiterals.restType}' type" in {
     //arrange
     val numberOfChecks = 4
@@ -147,7 +165,7 @@ class ProviderDomainTestSuit extends FlatSpec with Matchers with PrivateMethodTe
     verify(provider, times(numberOfChecks)).checkHttpConnection(any())
   }
 
-      it should s"checkConnection() method checks zookeeper connection for each host " +
+  it should s"checkConnection() method checks zookeeper connection for each host " +
     s"if provider has got '${ProviderLiterals.zookeeperType}' type" in {
     //arrange
     val numberOfChecks = 4
@@ -167,7 +185,7 @@ class ProviderDomainTestSuit extends FlatSpec with Matchers with PrivateMethodTe
 }
 
 trait ProviderDomainMocks extends MockitoSugar {
-  val name = "provider"
+  private val name = "provider"
 
   def providerDomain(setOfHosts: Array[String] = Array()) =
     new ProviderDomain(null, null, setOfHosts, null, null, null)
