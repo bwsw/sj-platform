@@ -38,13 +38,13 @@ import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.crud.rest._
 import com.bwsw.sj.crud.rest.instance._
 import com.bwsw.sj.crud.rest.instance.validator.InstanceValidator
-import com.bwsw.sj.crud.rest.model.instance.{BatchInstanceApi, InputInstanceApi, OutputInstanceApi, RegularInstanceApi}
 import com.bwsw.sj.crud.rest.model.instance.response.{CreateInstanceApiResponse, InstanceApiResponse}
+import com.bwsw.sj.crud.rest.model.instance.{BatchInstanceApi, InputInstanceApi, OutputInstanceApi, RegularInstanceApi}
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
 import org.apache.http._
 import org.apache.http.client.methods.{CloseableHttpResponse, HttpGet}
 import org.mockito.ArgumentMatchers.{any, anyInt, argThat, eq => argEq}
-import org.mockito.Mockito.{reset, when}
+import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterEach, FlatSpec, Matchers}
 import scaldi.{Injector, Module}
@@ -101,6 +101,8 @@ class InstanceControllerTests extends FlatSpec with Matchers with MockitoSugar w
   // defined in application.conf
   val zkHost: Option[String] = Some("zookeeper.host")
   val zkPort: Option[Int] = Some(12345)
+
+  val threadSleepingTimeout = 200
 
   val injector = new Module {
     bind[MessageResourceUtils] to messageResourceUtils
@@ -251,8 +253,8 @@ class InstanceControllerTests extends FlatSpec with Matchers with MockitoSugar w
       existingInstanceName)
 
     response shouldBe expectedResponse
-    //    Thread.sleep(100)
-    //    verify(instanceDestroyer).run()
+    Thread.sleep(threadSleepingTimeout)
+    verify(instanceDestroyer).run()
   }
 
   it should "tell that instance could not been deleted" in {
@@ -305,8 +307,8 @@ class InstanceControllerTests extends FlatSpec with Matchers with MockitoSugar w
       existingInstanceName)
 
     response shouldBe expectedResponse
-    //    Thread.sleep(100)
-    //    verify(instanceStarter).run()
+    Thread.sleep(threadSleepingTimeout)
+    verify(instanceStarter).run()
   }
 
   it should "not start module if it couldn't be started" in {
@@ -360,8 +362,8 @@ class InstanceControllerTests extends FlatSpec with Matchers with MockitoSugar w
       existingInstanceName)
 
     response shouldBe expectedResponse
-    //    Thread.sleep(100)
-    //    verify(instanceStopper).run()
+    Thread.sleep(threadSleepingTimeout)
+    verify(instanceStopper).run()
   }
 
   it should "not stop module if it couldn't be stopped" in {
