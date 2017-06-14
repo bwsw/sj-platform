@@ -18,29 +18,42 @@
  */
 package com.bwsw.sj.crud.rest.controller
 
+import java.io.{ByteArrayInputStream, File}
+import java.net.URI
+
 import com.bwsw.common.JsonSerializer
-import com.bwsw.sj.common.config.SettingsUtils
+import com.bwsw.common.exceptions.JsonDeserializationException
+import com.bwsw.common.http.{HttpClient, HttpClientBuilder}
+import com.bwsw.sj.common.config.{ConfigLiterals, SettingsUtils}
 import com.bwsw.sj.common.dal.model.ConfigurationSettingDomain
 import com.bwsw.sj.common.dal.model.module.FileMetadataDomain
 import com.bwsw.sj.common.dal.repository.{ConnectionRepository, GenericMongoRepository}
 import com.bwsw.sj.common.rest._
 import com.bwsw.sj.common.si.model.instance._
-import com.bwsw.sj.common.si.model.module.{CreateModuleMetadata, ModuleMetadata}
-import com.bwsw.sj.common.si.result.{Deleted, DeletionError, EntityNotFound, WillBeDeleted}
+import com.bwsw.sj.common.si.model.module.{CreateModuleMetadata, ModuleMetadata, Specification}
+import com.bwsw.sj.common.si.result._
 import com.bwsw.sj.common.si.{InstanceSI, ModuleSI}
 import com.bwsw.sj.common.utils.EngineLiterals._
 import com.bwsw.sj.common.utils.MessageResourceUtils
 import com.bwsw.sj.crud.rest._
 import com.bwsw.sj.crud.rest.instance._
+import com.bwsw.sj.crud.rest.instance.validator.InstanceValidator
+import com.bwsw.sj.crud.rest.model.instance.{BatchInstanceApi, InputInstanceApi, OutputInstanceApi, RegularInstanceApi}
 import com.bwsw.sj.crud.rest.model.instance.response.{CreateInstanceApiResponse, InstanceApiResponse}
 import com.bwsw.sj.crud.rest.utils.JsonDeserializationErrorMessageCreator
-import org.mockito.ArgumentMatchers.{any, eq => argEq}
-import org.mockito.Mockito.{reset, verify, when}
+import org.apache.http._
+import org.apache.http.client.methods.{CloseableHttpResponse, HttpGet}
+import org.mockito.ArgumentMatchers.{any, anyInt, argThat, eq => argEq}
+import org.mockito.Mockito.{reset, when}
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterEach, FlatSpec, Matchers}
 import scaldi.{Injector, Module}
 
+import scala.collection.mutable.ArrayBuffer
+
 class InstanceControllerTests extends FlatSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
+
+  import InstanceControllerTests._
 
   val messageResourceUtils = mock[MessageResourceUtils]
   val marathonAddress = "marathon.address:1234"
@@ -61,31 +74,28 @@ class InstanceControllerTests extends FlatSpec with Matchers with MockitoSugar w
   val instanceStarterBuilder = mock[InstanceStarterBuilder]
   val instanceStopperBuilder = mock[InstanceStopperBuilder]
   val instanceDestroyerBuilder = mock[InstanceDestroyerBuilder]
+  val httpClientBuilder = mock[HttpClientBuilder]
 
   val existingModuleType = batchStreamingType
-  val existingModuleName = "existing-module-name"
-  val existingModuleVersion = "existing-module-version"
   val moduleDomain = mock[FileMetadataDomain]
   val module = mock[ModuleMetadata]
-  when(createModuleMetadata.from(argEq(moduleDomain), argEq(None))(any[Injector]())).thenReturn(module)
-  when(moduleSI.exists(existingModuleType, existingModuleName, existingModuleVersion))
-    .thenReturn(Right(moduleDomain))
+  when(createModuleMetadata.from(argEq(moduleDomain), any[Option[File]])(any[Injector]())).thenReturn(module)
 
   val existingInstanceName = "existing-instance-name"
   val existingInstance = mock[Instance]
+  moduleTypes.foreach { moduleType =>
+    when(moduleSI.exists(moduleType, existingModuleName, existingModuleVersion)).thenReturn(Right(moduleDomain))
+  }
 
   val wrongModuleType = "wrong-module-type"
   val wrongModuleName = "wrong-module-name"
   val wrongModuleVersion = "wrong-module-version"
   val moduleNotFoundError = "module not found"
-  when(moduleSI.exists(wrongModuleType, wrongModuleName, wrongModuleVersion)).thenReturn(Left(moduleNotFoundError))
   val moduleNotFoundResponse = NotFoundRestResponse(MessageResponseEntity(moduleNotFoundError))
 
   val wrongInstanceName = "wrong-instance"
   val instanceNotFoundMessageName = "rest.modules.module.instances.instance.notfound"
   val instanceNotFoundMessage = instanceNotFoundMessageName + "," + wrongInstanceName
-  when(messageResourceUtils.createMessage(instanceNotFoundMessageName, wrongInstanceName))
-    .thenReturn(instanceNotFoundMessage)
   val instanceNotFoundResponse = NotFoundRestResponse(MessageResponseEntity(instanceNotFoundMessage))
 
   // defined in application.conf
@@ -105,6 +115,7 @@ class InstanceControllerTests extends FlatSpec with Matchers with MockitoSugar w
     bind[InstanceStarterBuilder] to instanceStarterBuilder
     bind[InstanceStopperBuilder] to instanceStopperBuilder
     bind[InstanceDestroyerBuilder] to instanceDestroyerBuilder
+    bind[HttpClientBuilder] to httpClientBuilder
   }
 
   val controller = new InstanceController()(injector)
@@ -112,10 +123,29 @@ class InstanceControllerTests extends FlatSpec with Matchers with MockitoSugar w
   override def beforeEach(): Unit = {
     when(instanceSI.get(wrongInstanceName)).thenReturn(None)
     when(instanceSI.get(existingInstanceName)).thenReturn(Some(existingInstance))
+
+    when(moduleSI.exists(existingModuleType, existingModuleName, existingModuleVersion))
+      .thenReturn(Right(moduleDomain))
+    when(moduleSI.exists(wrongModuleType, wrongModuleName, wrongModuleVersion)).thenReturn(Left(moduleNotFoundError))
+
+    when(messageResourceUtils.createMessage(instanceNotFoundMessageName, wrongInstanceName))
+      .thenReturn(instanceNotFoundMessage)
   }
 
   override def afterEach(): Unit = {
-    reset(instanceSI)
+    reset(
+      messageResourceUtils,
+      serializer,
+      jsonDeserializationErrorMessageCreator,
+      instanceSI,
+      createInstanceApiResponse,
+      instanceStarterBuilder,
+      instanceStopperBuilder,
+      instanceDestroyerBuilder,
+      httpClientBuilder,
+      moduleDomain,
+      module,
+      existingInstance)
   }
 
   // get
@@ -366,6 +396,180 @@ class InstanceControllerTests extends FlatSpec with Matchers with MockitoSugar w
     response shouldBe moduleNotFoundResponse
   }
 
+  // tasks
+  it should "give all tasks of the instance" in {
+    val restAddress = "rest.address:4321"
+    when(existingInstance.restAddress).thenReturn(Some(restAddress))
+
+    val tasksCount = 4
+    val tasks = Range(0, tasksCount).map { i =>
+      val task = FrameworkTask(i.toString, null, null, null, null, null, Seq.empty)
+      val serialized = s"""{"id":"$i"}"""
+      (task, serialized)
+    }
+
+    val frameworkRestEntity = FrameworkRestEntity(tasks.map(_._1))
+    val serializedEntity = tasks.map(_._2).mkString("""{"tasks":[""", ",", "]}")
+    when(serializer.deserialize[FrameworkRestEntity](serializedEntity)).thenReturn(frameworkRestEntity)
+
+    val responseEntity = mock[HttpEntity]
+    when(responseEntity.getContent).thenReturn(new ByteArrayInputStream(serializedEntity.getBytes))
+
+    val httpResponse = mock[CloseableHttpResponse]
+    when(httpResponse.getEntity).thenReturn(responseEntity)
+
+    val httpClient = mock[HttpClient]
+    when(httpClient.execute(argThat[HttpGet](
+      (argument: HttpGet) => argument.getURI == new URI(restAddress)))).thenReturn(httpResponse)
+    when(httpClientBuilder.apply(anyInt())).thenReturn(httpClient)
+
+    val expectedResponse = OkRestResponse(frameworkRestEntity)
+    val response = controller.tasks(
+      existingModuleType,
+      existingModuleName,
+      existingModuleVersion,
+      existingInstanceName)
+
+    response shouldBe expectedResponse
+  }
+
+  it should "tell that instance does not have framework info" in {
+    when(existingInstance.restAddress).thenReturn(None)
+
+    val message = "rest.modules.instances.instance.cannot.get.tasks"
+    when(messageResourceUtils.getMessage(message)).thenReturn(message)
+    val expectedResponse = UnprocessableEntityRestResponse(MessageResponseEntity(message))
+
+    val response = controller.tasks(
+      existingModuleType,
+      existingModuleName,
+      existingModuleVersion,
+      existingInstanceName)
+
+    response shouldBe expectedResponse
+  }
+
+  it should "tell that instance does not exists (tasks)" in {
+    val response = controller.tasks(
+      existingModuleType,
+      existingModuleName,
+      existingModuleVersion,
+      wrongInstanceName)
+
+    response shouldBe instanceNotFoundResponse
+  }
+
+  it should "tell that module does not exists (tasks)" in {
+    val response = controller.tasks(wrongModuleType, wrongModuleName, wrongModuleVersion, existingInstanceName)
+    response shouldBe moduleNotFoundResponse
+  }
+
+  // create
+  it should "create valid instance" in new InstanceCreation {
+    val messageName = "rest.modules.instances.instance.created"
+    when(module.specification).thenReturn(specificationForValidInstance)
+
+    instancesInfo.foreach {
+      case (moduleType, _, instance, _) =>
+        when(instance.name).thenReturn(instanceName)
+        val moduleSignature = s"$moduleType-$existingModuleName-$existingModuleVersion"
+        when(module.signature).thenReturn(moduleSignature)
+        when(instanceSI.create(instance, module)).thenReturn(Created)
+
+        val message = messageName + "," + instanceName + "," + moduleSignature
+        when(messageResourceUtils.createMessage(messageName, instanceName, moduleSignature)).thenReturn(message)
+        val expectedResponse = CreatedRestResponse(MessageResponseEntity(message))
+        val response = controller.create(serializedInstance, moduleType, existingModuleName, existingModuleVersion)
+
+        response shouldBe expectedResponse
+    }
+  }
+
+  it should "not create incorrect instance (error from InstanceSI.create())" in new InstanceCreation {
+    val messageName = "rest.modules.instances.instance.cannot.create.incorrect.parameters"
+    when(module.specification).thenReturn(specificationForValidInstance)
+    val error = "instance is incorrect"
+    val message = messageName + "," + error
+    when(messageResourceUtils.createMessageWithErrors(messageName, ArrayBuffer(error))).thenReturn(message)
+    val expectedResponse = BadRequestRestResponse(MessageResponseEntity(message))
+
+    instancesInfo.foreach {
+      case (moduleType, _, instance, _) =>
+        when(instanceSI.create(instance, module)).thenReturn(NotCreated(ArrayBuffer(error)))
+        val response = controller.create(serializedInstance, moduleType, existingModuleName, existingModuleVersion)
+
+        response shouldBe expectedResponse
+    }
+  }
+
+  it should "not create incorrect instance (error from InstanceValidator.validate())" in new InstanceCreation {
+    val messageName = "rest.modules.instances.instance.cannot.create"
+    when(module.specification).thenReturn(specificationForNotValidInstance)
+    val message = messageName + "," + validationError
+    when(messageResourceUtils.createMessageWithErrors(messageName, ArrayBuffer(validationError))).thenReturn(message)
+    val expectedResponse = BadRequestRestResponse(MessageResponseEntity(message))
+
+    instancesInfo.foreach {
+      case (moduleType, _, _, _) =>
+        val response = controller.create(serializedInstance, moduleType, existingModuleName, existingModuleVersion)
+
+        response shouldBe expectedResponse
+    }
+  }
+
+
+  it should "not create instance if json is incorrect" in {
+    val serialized = "{not a json"
+    val error = "json is incorrect"
+    val exception = new JsonDeserializationException(error)
+    when(jsonDeserializationErrorMessageCreator.apply(exception)).thenReturn(error)
+    when(serializer.deserialize[InputInstanceApi](serialized)).thenAnswer(_ => throw exception)
+    when(serializer.deserialize[BatchInstanceApi](serialized)).thenAnswer(_ => throw exception)
+    when(serializer.deserialize[RegularInstanceApi](serialized)).thenAnswer(_ => throw exception)
+    when(serializer.deserialize[OutputInstanceApi](serialized)).thenAnswer(_ => throw exception)
+
+    val messageName = "rest.modules.instances.instance.cannot.create"
+    val message = messageName + "," + error
+    when(messageResourceUtils.createMessage(messageName, error)).thenReturn(message)
+    val expectedResponse = BadRequestRestResponse(MessageResponseEntity(message))
+
+    moduleTypes.foreach { moduleType =>
+      val response = controller.create(
+        serialized,
+        moduleType,
+        existingModuleName,
+        existingModuleVersion)
+
+      response shouldBe expectedResponse
+    }
+  }
+
+  it should "tell that module does not exists (create)" in {
+    val serialized = """{"name":"instance"}"""
+    val response = controller.create(serialized, wrongModuleType, wrongModuleName, wrongModuleVersion)
+    response shouldBe moduleNotFoundResponse
+  }
+
+  trait InstanceCreation {
+    val instanceName = "new-instance"
+    val serializedInstance = s"""{"name":"$instanceName"}"""
+    when(serializer.deserialize[InputInstanceApi](serializedInstance)).thenReturn(inputInstanceApi)
+    when(serializer.deserialize[RegularInstanceApi](serializedInstance)).thenReturn(regularInstanceApi)
+    when(serializer.deserialize[BatchInstanceApi](serializedInstance)).thenReturn(batchInstanceApi)
+    when(serializer.deserialize[OutputInstanceApi](serializedInstance)).thenReturn(outputInstanceApi)
+
+    instancesInfo.foreach {
+      case (moduleType, _, instance, validatorClass) =>
+        val validatorClassConfigName = s"${ConfigLiterals.systemDomain}.$moduleType-validator-class"
+        val validatorClassName = validatorClass.getName
+        val validatorClassConfig = ConfigurationSettingDomain(
+          validatorClassConfigName, validatorClassName, ConfigLiterals.systemDomain)
+
+        when(configRepository.get(validatorClassConfigName)).thenReturn(Some(validatorClassConfig))
+        when(instance.moduleType).thenReturn(moduleType)
+    }
+  }
+
   def createInstance(moduleType: String, moduleName: String, moduleVersion: String, name: String): InstanceInfo = {
     val description = "description"
     val status = ready
@@ -396,5 +600,86 @@ class InstanceControllerTests extends FlatSpec with Matchers with MockitoSugar w
   }
 
   case class InstanceInfo(instance: Instance, short: ShortInstance, api: InstanceApiResponse)
+
+}
+
+object InstanceControllerTests extends MockitoSugar {
+  val existingModuleName = "existing-module-name"
+  val existingModuleVersion = "existing-module-version"
+
+  val inputInstance = mock[InputInstance]
+  val inputInstanceApi = mock[InputInstanceApi]
+  when(inputInstanceApi
+    .to(argEq(inputStreamingType), argEq(existingModuleName), argEq(existingModuleVersion))(any[Injector]()))
+    .thenReturn(inputInstance)
+
+  val batchInstance = mock[BatchInstance]
+  val batchInstanceApi = mock[BatchInstanceApi]
+  when(batchInstanceApi
+    .to(argEq(batchStreamingType), argEq(existingModuleName), argEq(existingModuleVersion))(any[Injector]()))
+    .thenReturn(batchInstance)
+
+  val regularInstance = mock[RegularInstance]
+  val regularInstanceApi = mock[RegularInstanceApi]
+  when(regularInstanceApi
+    .to(argEq(regularStreamingType), argEq(existingModuleName), argEq(existingModuleVersion))(any[Injector]()))
+    .thenReturn(regularInstance)
+
+  val outputInstance = mock[OutputInstance]
+  val outputInstanceApi = mock[OutputInstanceApi]
+  when(outputInstanceApi
+    .to(argEq(outputStreamingType), argEq(existingModuleName), argEq(existingModuleVersion))(any[Injector]()))
+    .thenReturn(outputInstance)
+
+  val instancesInfo = Seq(
+    (inputStreamingType, inputInstanceApi, inputInstance, classOf[InputInstanceValidator]),
+    (batchStreamingType, batchInstanceApi, batchInstance, classOf[BatchInstanceValidator]),
+    (regularStreamingType, regularInstanceApi, regularInstance, classOf[RegularInstanceValidator]),
+    (outputStreamingType, outputInstanceApi, outputInstance, classOf[OutputInstanceValidator]))
+
+  val specificationForValidInstance = mock[Specification]
+  val specificationForNotValidInstance = mock[Specification]
+  val validationError = "instance not valid"
+
+  def validateInstance(instance: Instance, specification: Specification): Seq[String] = {
+    if (Seq(inputInstance, batchInstance, regularInstance, outputInstance).contains(instance)) {
+      if (specification == specificationForValidInstance)
+        Seq.empty
+      else if (specification == specificationForNotValidInstance)
+        Seq(validationError)
+      else
+        Seq("unknown specification")
+    } else {
+      Seq("unknown instance")
+    }
+  }
+
+  class InputInstanceValidator(implicit injector: Injector) extends InstanceValidator {
+    override type T = InputInstance
+
+    override def validate(instance: InputInstance, specification: Specification): Seq[String] =
+      validateInstance(instance, specification)
+  }
+
+  class BatchInstanceValidator(implicit injector: Injector) extends InstanceValidator {
+    override type T = BatchInstance
+
+    override def validate(instance: BatchInstance, specification: Specification): Seq[String] =
+      validateInstance(instance, specification)
+  }
+
+  class RegularInstanceValidator(implicit injector: Injector) extends InstanceValidator {
+    override type T = RegularInstance
+
+    override def validate(instance: RegularInstance, specification: Specification): Seq[String] =
+      validateInstance(instance, specification)
+  }
+
+  class OutputInstanceValidator(implicit injector: Injector) extends InstanceValidator {
+    override type T = OutputInstance
+
+    override def validate(instance: OutputInstance, specification: Specification): Seq[String] =
+      validateInstance(instance, specification)
+  }
 
 }
