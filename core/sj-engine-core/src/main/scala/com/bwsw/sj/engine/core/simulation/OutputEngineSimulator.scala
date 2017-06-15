@@ -27,6 +27,18 @@ import scala.collection.mutable
   * Simulates behavior of [[com.bwsw.sj.common.engine.TaskEngine TaskEngine]] for testing of
   * [[OutputStreamingExecutor]].
   *
+  * Usage example:
+  * {{{
+  * val executor: OutputStreamingExecutor[(Integer, String)]
+  *
+  * val simulator = new OutputEngineSimulator[(Integer, String)](executor)
+  * simulator.send(Seq((11, "a"), (24, "b")))
+  * simulator.send(Seq((63, "c"), (31, "d")))
+  * val requestBuilder = new RestRequestBuilder
+  * val requests: Seq[String] = simulator.process(requestBuilder)
+  * println(requests)
+  * }}}
+  *
   * @param executor testable [[OutputStreamingExecutor]]
   * @tparam DT type of incoming data
   * @author Pavel Tomskikh
