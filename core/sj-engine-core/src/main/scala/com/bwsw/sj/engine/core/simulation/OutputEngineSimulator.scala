@@ -23,21 +23,20 @@ import com.bwsw.sj.engine.core.output.{Entity, OutputStreamingExecutor}
 
 import scala.collection.mutable
 
-//todo: add usage example
 /**
   * Simulates behavior of [[com.bwsw.sj.common.engine.TaskEngine TaskEngine]] for testing of
   * [[OutputStreamingExecutor]].
   *
   * @param executor testable [[OutputStreamingExecutor]]
-  * @tparam T type of incoming data
+  * @tparam DT type of incoming data
   * @author Pavel Tomskikh
   */
-class OutputEngineSimulator[T <: AnyRef](executor: OutputStreamingExecutor[T]) {
+class OutputEngineSimulator[DT <: AnyRef](executor: OutputStreamingExecutor[DT]) {
 
   import OutputEngineSimulator.defaultConsumerName
 
-  private val inputEnvelopes: mutable.Buffer[TStreamEnvelope[T]] = mutable.Buffer.empty
-  private val outputEntity: Entity[_] = executor.getOutputEntity
+  private val inputEnvelopes: mutable.Buffer[TStreamEnvelope[DT]] = mutable.Buffer.empty
+  private var envelopeId: Long = 0
 
   /**
     * Creates [[TStreamEnvelope]] and saves it in a local buffer
@@ -45,10 +44,13 @@ class OutputEngineSimulator[T <: AnyRef](executor: OutputStreamingExecutor[T]) {
     * @param entities     incoming data
     * @param consumerName name of consumer
     */
-  def send(entities: Seq[T], consumerName: String = defaultConsumerName): Unit = {
+  def send(entities: Seq[DT], consumerName: String = defaultConsumerName): Unit = {
     val queue = mutable.Queue(entities: _*)
+    val envelope = new TStreamEnvelope[DT](queue, consumerName)
+    envelope.id = envelopeId
+    envelopeId += 1
 
-    inputEnvelopes += new TStreamEnvelope[T](queue, consumerName)
+    inputEnvelopes += envelope
   }
 
   /**
@@ -57,12 +59,14 @@ class OutputEngineSimulator[T <: AnyRef](executor: OutputStreamingExecutor[T]) {
     *
     * @param outputRequestBuilder builder of requests for output service
     * @param clearBuffer          indicates that local buffer must be cleared
-    * @return
+    * @tparam ET type of data elements in [[Entity]]
+    * @return collection of requests
     */
-  def process(outputRequestBuilder: OutputRequestBuilder, clearBuffer: Boolean = true): Seq[String] = {
+  def process[ET](outputRequestBuilder: OutputRequestBuilder[ET], clearBuffer: Boolean = true): Seq[String] = {
+    val outputEntity: Entity[ET] = executor.getOutputEntity.asInstanceOf[Entity[ET]]
     val requests = inputEnvelopes.flatMap { envelope =>
       val outputEnvelopes = executor.onMessage(envelope)
-      outputEnvelopes.map(outputRequestBuilder.build(outputEntity))
+      outputEnvelopes.map(outputRequestBuilder.build(_, envelope, outputEntity))
     }
 
     if (clearBuffer) clear()
