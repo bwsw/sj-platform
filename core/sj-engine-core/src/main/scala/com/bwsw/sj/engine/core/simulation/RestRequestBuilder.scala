@@ -23,10 +23,8 @@ import java.net.URI
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.types.rest.RestCommandBuilder
 import org.eclipse.jetty.client.HttpClient
-import org.eclipse.jetty.client.util.StringContentProvider
+import org.eclipse.jetty.client.api.Request
 import org.eclipse.jetty.http.HttpVersion
-
-import scala.collection.JavaConverters._
 
 /**
   * Provides method for building HTTP POST request from [[OutputEnvelope]].
@@ -37,7 +35,7 @@ import scala.collection.JavaConverters._
   */
 class RestRequestBuilder(url: URI = RestRequestBuilder.defaultUrl,
                          httpVersion: HttpVersion = RestRequestBuilder.defaultHttpVersion)
-  extends OutputRequestBuilder {
+  extends OutputRequestBuilder[Request] {
 
   override protected val commandBuilder = new RestCommandBuilder(transactionFieldName)
   private val client = new HttpClient
@@ -45,20 +43,8 @@ class RestRequestBuilder(url: URI = RestRequestBuilder.defaultUrl,
   /**
     * @inheritdoc
     */
-  override def build(outputEnvelope: OutputEnvelope,
-                     inputEnvelope: TStreamEnvelope[_]): String = {
-    val request = commandBuilder.buildInsert(inputEnvelope.id, outputEnvelope.getFieldsValue)(client.newRequest(url))
-    val content = request.getContent.asInstanceOf[StringContentProvider]
-    val contentIterator = content.iterator().asScala
-    val data = contentIterator.map(byteBuffer => new String(byteBuffer.array())).mkString("")
-
-    s"""POST ${request.getPath} ${request.getVersion}
-       |Host: ${request.getHost}
-       |Content-Type: ${content.getContentType}
-       |Content-Length: ${content.getLength}
-       |
-       |$data""".stripMargin
-  }
+  override def buildInsert(outputEnvelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[_]): Request =
+    commandBuilder.buildInsert(inputEnvelope.id, outputEnvelope.getFieldsValue)(client.newRequest(url))
 }
 
 object RestRequestBuilder {

@@ -18,8 +18,6 @@
  */
 package com.bwsw.sj.engine.core.simulation
 
-import java.util.UUID
-
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.Entity
 import com.bwsw.sj.engine.core.output.types.es.ElasticsearchCommandBuilder
@@ -36,7 +34,7 @@ import com.bwsw.sj.engine.core.output.types.es.ElasticsearchCommandBuilder
 class EsRequestBuilder(outputEntity: Entity[String],
                        index: String = EsRequestBuilder.defaultIndex,
                        documentType: String = EsRequestBuilder.defaultDocumentType)
-  extends OutputRequestBuilder {
+  extends OutputRequestBuilder[String] {
 
   override protected val commandBuilder: ElasticsearchCommandBuilder =
     new ElasticsearchCommandBuilder(transactionFieldName, outputEntity)
@@ -44,14 +42,8 @@ class EsRequestBuilder(outputEntity: Entity[String],
   /**
     * @inheritdoc
     */
-  override def build(outputEnvelope: OutputEnvelope,
-                     inputEnvelope: TStreamEnvelope[_]): String = {
-    val data = commandBuilder.buildInsert(inputEnvelope.id, outputEnvelope.getFieldsValue)
-    val documentId = UUID.randomUUID().toString
-
-    s"""PUT /$index/$documentType/$documentId
-       |$data""".stripMargin
-  }
+  override def buildInsert(outputEnvelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[_]): String =
+    commandBuilder.buildInsert(inputEnvelope.id, outputEnvelope.getFieldsValue)
 }
 
 object EsRequestBuilder {

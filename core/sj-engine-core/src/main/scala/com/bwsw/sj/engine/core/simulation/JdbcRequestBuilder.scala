@@ -35,7 +35,7 @@ import com.bwsw.sj.engine.core.simulation.mock.jdbc.{JdbcClientMock, PreparedSta
   */
 class JdbcRequestBuilder(outputEntity: Entity[(PreparedStatement, Int) => Unit],
                          table: String = JdbcRequestBuilder.defaultTable)
-  extends OutputRequestBuilder {
+  extends OutputRequestBuilder[PreparedStatementMock] {
 
   private val client = new JdbcClientMock(table)
   override protected val commandBuilder: JdbcCommandBuilder =
@@ -44,11 +44,8 @@ class JdbcRequestBuilder(outputEntity: Entity[(PreparedStatement, Int) => Unit],
   /**
     * @inheritdoc
     */
-  override def build(outputEnvelope: OutputEnvelope,
-                     inputEnvelope: TStreamEnvelope[_]): String = {
-    commandBuilder.buildInsert(inputEnvelope.id, outputEnvelope.getFieldsValue)
-      .asInstanceOf[PreparedStatementMock].getQuery
-  }
+  override def buildInsert(outputEnvelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[_]): PreparedStatementMock =
+    commandBuilder.buildInsert(inputEnvelope.id, outputEnvelope.getFieldsValue).asInstanceOf[PreparedStatementMock]
 }
 
 object JdbcRequestBuilder {

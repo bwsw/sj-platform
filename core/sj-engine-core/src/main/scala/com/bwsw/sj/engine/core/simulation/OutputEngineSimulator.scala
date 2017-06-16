@@ -41,15 +41,16 @@ import scala.collection.mutable
   *
   * @param executor             class under test [[OutputStreamingExecutor]]
   * @param outputRequestBuilder builder of requests for output service
-  * @tparam T type of incoming data
+  * @tparam IT  type of incoming data
+  * @tparam OT type of requests for output service
   * @author Pavel Tomskikh
   */
-class OutputEngineSimulator[T <: AnyRef](executor: OutputStreamingExecutor[T],
-                                         outputRequestBuilder: OutputRequestBuilder) {
+class OutputEngineSimulator[IT <: AnyRef, OT](executor: OutputStreamingExecutor[IT],
+                                             outputRequestBuilder: OutputRequestBuilder[OT]) {
 
   import OutputEngineSimulator.defaultConsumerName
 
-  private val inputEnvelopes: mutable.Buffer[TStreamEnvelope[T]] = mutable.Buffer.empty
+  private val inputEnvelopes: mutable.Buffer[TStreamEnvelope[IT]] = mutable.Buffer.empty
   private var transactionId: Long = 0
 
   /**
@@ -58,9 +59,9 @@ class OutputEngineSimulator[T <: AnyRef](executor: OutputStreamingExecutor[T],
     * @param entities     incoming data
     * @param consumerName name of consumer
     */
-  def prepare(entities: Seq[T], consumerName: String = defaultConsumerName): Unit = {
+  def prepare(entities: Seq[IT], consumerName: String = defaultConsumerName): Unit = {
     val queue = mutable.Queue(entities: _*)
-    val envelope = new TStreamEnvelope[T](queue, consumerName)
+    val envelope = new TStreamEnvelope[IT](queue, consumerName)
     envelope.id = transactionId
     transactionId += 1
 
@@ -74,10 +75,10 @@ class OutputEngineSimulator[T <: AnyRef](executor: OutputStreamingExecutor[T],
     * @param clearBuffer indicates that local buffer must be cleared
     * @return collection of requests
     */
-  def process(clearBuffer: Boolean = true): Seq[String] = {
+  def process(clearBuffer: Boolean = true): Seq[OT] = {
     val requests = inputEnvelopes.flatMap { envelope =>
       val outputEnvelopes = executor.onMessage(envelope)
-      outputEnvelopes.map(outputRequestBuilder.build(_, envelope))
+      outputEnvelopes.map(outputRequestBuilder.buildInsert(_, envelope))
     }
 
     if (clearBuffer) clear()

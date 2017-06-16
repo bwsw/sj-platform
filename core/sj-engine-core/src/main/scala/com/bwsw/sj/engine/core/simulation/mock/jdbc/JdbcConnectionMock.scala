@@ -15,7 +15,7 @@ import com.bwsw.sj.engine.core.simulation.JdbcRequestBuilder
 class JdbcConnectionMock extends Connection {
   override def isValid(timeout: Int): Boolean = true
 
-  override def prepareStatement(sql: String): PreparedStatementMock = new PreparedStatementMock(sql + ";")
+  override def prepareStatement(sql: String): PreparedStatementMock = new PreparedStatementMock(sql)
 
   override def commit(): Unit = ???
 

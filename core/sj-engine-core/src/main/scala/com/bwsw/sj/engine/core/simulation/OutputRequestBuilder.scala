@@ -24,15 +24,16 @@ import com.bwsw.sj.engine.core.output.types.CommandBuilder
 /**
   * Provides method for building request for output service from [[OutputEnvelope]].
   *
+  * @tparam T type of built request
   * @author Pavel Tomskikh
   */
-trait OutputRequestBuilder {
+trait OutputRequestBuilder[T] {
 
   protected val transactionFieldName: String = "txn"
   protected val commandBuilder: CommandBuilder[_]
 
   /**
-    * Builds request for output service
+    * Builds insert request for output service
     *
     * @param outputEnvelope envelope that outgoing from
     *                       [[com.bwsw.sj.engine.core.output.OutputStreamingExecutor OutputStreamingExecutor]]
@@ -40,5 +41,5 @@ trait OutputRequestBuilder {
     *                       [[com.bwsw.sj.engine.core.output.OutputStreamingExecutor OutputStreamingExecutor]]
     * @return constructed request
     */
-  def build(outputEnvelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[_]): String
+  def buildInsert(outputEnvelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[_]): T
 }
