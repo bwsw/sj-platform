@@ -27,14 +27,9 @@ import com.bwsw.sj.engine.core.output.types.es.ElasticsearchCommandBuilder
   *
   * @param outputEntity working entity gotten from
   *                     [[com.bwsw.sj.engine.core.output.OutputStreamingExecutor OutputStreamingExecutor]]
-  * @param index        elasticsearch index name
-  * @param documentType elasticsearch document type
   * @author Pavel Tomskikh
   */
-class EsRequestBuilder(outputEntity: Entity[String],
-                       index: String = EsRequestBuilder.defaultIndex,
-                       documentType: String = EsRequestBuilder.defaultDocumentType)
-  extends OutputRequestBuilder[String] {
+class EsRequestBuilder(outputEntity: Entity[String]) extends OutputRequestBuilder[String] {
 
   override protected val commandBuilder: ElasticsearchCommandBuilder =
     new ElasticsearchCommandBuilder(transactionFieldName, outputEntity)
@@ -50,9 +45,4 @@ class EsRequestBuilder(outputEntity: Entity[String],
     */
   override def buildDelete(inputEnvelope: TStreamEnvelope[_]): String =
     commandBuilder.buildDelete(inputEnvelope.id)
-}
-
-object EsRequestBuilder {
-  val defaultIndex = "index"
-  val defaultDocumentType = "entity"
 }
