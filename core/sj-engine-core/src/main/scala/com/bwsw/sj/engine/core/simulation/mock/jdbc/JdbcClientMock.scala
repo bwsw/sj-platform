@@ -1,8 +1,9 @@
-package com.bwsw.sj.engine.core.simulation
+package com.bwsw.sj.engine.core.simulation.mock.jdbc
 
 import java.sql.Connection
 
 import com.bwsw.common.jdbc.{IJdbcClient, JdbcClientConnectionData}
+import com.bwsw.sj.engine.core.simulation.JdbcRequestBuilder
 import org.mockito.Mockito.{mock, when}
 
 /**
