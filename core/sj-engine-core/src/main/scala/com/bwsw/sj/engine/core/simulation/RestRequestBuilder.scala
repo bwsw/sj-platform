@@ -22,7 +22,6 @@ import java.net.URI
 
 import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
-import com.bwsw.sj.engine.core.output.Entity
 import org.apache.http.entity.ContentType
 import org.eclipse.jetty.http.HttpVersion
 
@@ -35,7 +34,7 @@ import org.eclipse.jetty.http.HttpVersion
   */
 class RestRequestBuilder(url: URI = RestRequestBuilder.defaultUrl,
                          httpVersion: HttpVersion = RestRequestBuilder.defaultHttpVersion)
-  extends OutputRequestBuilder[Any] {
+  extends OutputRequestBuilder {
 
   private val serializer = new JsonSerializer
   private val contentType = ContentType.APPLICATION_JSON.toString
@@ -44,8 +43,7 @@ class RestRequestBuilder(url: URI = RestRequestBuilder.defaultUrl,
     * @inheritdoc
     */
   override def build(outputEnvelope: OutputEnvelope,
-                     inputEnvelope: TStreamEnvelope[_],
-                     outputEntity: Entity[Any]): String = {
+                     inputEnvelope: TStreamEnvelope[_]): String = {
     val data = outputEnvelope.getFieldsValue + (transactionFieldName -> inputEnvelope.id)
     val serialized = serializer.serialize(data)
 

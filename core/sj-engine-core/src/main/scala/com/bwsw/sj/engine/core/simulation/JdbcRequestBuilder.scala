@@ -26,18 +26,20 @@ import com.bwsw.sj.engine.core.output.Entity
 /**
   * Provides method for building SQL query from [[OutputEnvelope]].
   *
-  * @param table name of SQL-table
+  * @param outputEntity working entity gotten from
+  *                     [[com.bwsw.sj.engine.core.output.OutputStreamingExecutor OutputStreamingExecutor]]
+  * @param table        name of SQL-table
   * @author Pavel Tomskikh
   */
-class JdbcRequestBuilder(table: String = JdbcRequestBuilder.defaultTable)
-  extends OutputRequestBuilder[(PreparedStatement, Int) => Unit] {
+class JdbcRequestBuilder(outputEntity: Entity[(PreparedStatement, Int) => Unit],
+                         table: String = JdbcRequestBuilder.defaultTable)
+  extends OutputRequestBuilder {
 
   /**
     * @inheritdoc
     */
   override def build(outputEnvelope: OutputEnvelope,
-                     inputEnvelope: TStreamEnvelope[_],
-                     outputEntity: Entity[(PreparedStatement, Int) => Unit]): String = {
+                     inputEnvelope: TStreamEnvelope[_]): String = {
     val fields = outputEntity.getFields.toSeq :+ transactionFieldName
     val fieldsParams = List.fill(fields.length)("?").mkString(",")
 

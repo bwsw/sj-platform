@@ -26,20 +26,22 @@ import com.bwsw.sj.engine.core.output.Entity
 /**
   * Provides method for building Elasticasearch query from [[OutputEnvelope]].
   *
+  * @param outputEntity working entity gotten from
+  *                     [[com.bwsw.sj.engine.core.output.OutputStreamingExecutor OutputStreamingExecutor]]
   * @param index        elasticsearch index name
   * @param documentType elasticsearch document type
   * @author Pavel Tomskikh
   */
-class EsRequestBuilder(index: String = EsRequestBuilder.defaultIndex,
+class EsRequestBuilder(outputEntity: Entity[String],
+                       index: String = EsRequestBuilder.defaultIndex,
                        documentType: String = EsRequestBuilder.defaultDocumentType)
-  extends OutputRequestBuilder[String] {
+  extends OutputRequestBuilder {
 
   /**
     * @inheritdoc
     */
   override def build(outputEnvelope: OutputEnvelope,
-                     inputEnvelope: TStreamEnvelope[_],
-                     outputEntity: Entity[String]): String = {
+                     inputEnvelope: TStreamEnvelope[_]): String = {
     val fields = outputEntity.getFields.map { fieldName =>
       val field = outputEntity.getField(fieldName)
       fieldName -> field.transform {

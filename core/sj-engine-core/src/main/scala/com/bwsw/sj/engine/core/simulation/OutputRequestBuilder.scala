@@ -19,15 +19,13 @@
 package com.bwsw.sj.engine.core.simulation
 
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
-import com.bwsw.sj.engine.core.output.Entity
 
 /**
   * Provides method for building request for output service from [[OutputEnvelope]].
   *
-  * @tparam T type of data elements in [[Entity]]
   * @author Pavel Tomskikh
   */
-trait OutputRequestBuilder[T] {
+trait OutputRequestBuilder {
 
   protected val transactionFieldName: String = "txn"
 
@@ -38,9 +36,7 @@ trait OutputRequestBuilder[T] {
     *                       [[com.bwsw.sj.engine.core.output.OutputStreamingExecutor OutputStreamingExecutor]]
     * @param inputEnvelope  envelope that incoming to
     *                       [[com.bwsw.sj.engine.core.output.OutputStreamingExecutor OutputStreamingExecutor]]
-    * @param outputEntity   working entity gotten from
-    *                       [[com.bwsw.sj.engine.core.output.OutputStreamingExecutor OutputStreamingExecutor]]
     * @return constructed request
     */
-  def build(outputEnvelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[_], outputEntity: Entity[T]): String
+  def build(outputEnvelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[_]): String
 }
