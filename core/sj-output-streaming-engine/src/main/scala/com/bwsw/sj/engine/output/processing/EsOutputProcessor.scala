@@ -37,7 +37,8 @@ class EsOutputProcessor[T <: AnyRef](esStream: ESStreamDomain,
 
   private val esService = esStream.service
   private val esClient = openConnection()
-  private val esCommandBuilder = new ElasticsearchCommandBuilder(transactionFieldName, entity.asInstanceOf[Entity[String]])
+  override protected val commandBuilder: ElasticsearchCommandBuilder =
+    new ElasticsearchCommandBuilder(transactionFieldName, entity.asInstanceOf[Entity[String]])
 
   private def openConnection(): ElasticsearchClient = {
     logger.info(s"Open a connection to elasticsearch at address: '${esService.provider.hosts}'.")
@@ -56,7 +57,7 @@ class EsOutputProcessor[T <: AnyRef](esStream: ESStreamDomain,
     val streamName = esStream.name
     logger.debug(s"Delete a transaction: '${envelope.id}' from elasticsearch stream.")
     if (esClient.doesIndexExist(index)) {
-      val query = esCommandBuilder.buildDelete(envelope.id)
+      val query = commandBuilder.buildDelete(envelope.id)
       esClient.deleteDocuments(index, streamName, query)
     }
   }
@@ -64,7 +65,7 @@ class EsOutputProcessor[T <: AnyRef](esStream: ESStreamDomain,
 
   def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit = {
     val esFieldsValue = envelope.getFieldsValue
-    val data = esCommandBuilder.buildInsert(inputEnvelope.id, esFieldsValue)
+    val data = commandBuilder.buildInsert(inputEnvelope.id, esFieldsValue)
     logger.debug(s"Task: ${manager.taskName}. Write an output envelope to elasticsearch stream.")
     esClient.write(data, esService.index, esStream.name)
   }

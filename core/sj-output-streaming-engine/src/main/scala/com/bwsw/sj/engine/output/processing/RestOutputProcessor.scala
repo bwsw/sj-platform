@@ -38,7 +38,7 @@ class RestOutputProcessor[T <: AnyRef](restOutputStream: RestStreamDomain,
                                        entity: Entity[_])
   extends OutputProcessor[T](restOutputStream, performanceMetrics) {
 
-  private val commandBuilder = new RestCommandBuilder(transactionFieldName)
+  override protected val commandBuilder: RestCommandBuilder = new RestCommandBuilder(transactionFieldName)
 
   private val service = restOutputStream.service
   private val client = new RestClient(
