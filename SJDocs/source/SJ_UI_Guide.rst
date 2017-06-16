@@ -239,9 +239,13 @@ Streams
 
 The next step is to create a data stream. A stream is a sequence of events happening randomly at irregular intervals.
 
-There are two kinds of streams in SJ-Platform
-An input stream It is a stream which provides new events. There are two different input stream types in the SJ platform: Kafka and T-Stream
-An output stream It is a stream which is a destination point for results. There is one output stream type in the SJ platform: T-Stream
+There are two kinds of streams in SJ-Platform:
+
+An input stream 
+      It is a stream which provides new events. There are two different input stream types in the SJ platform: Kafka and T-Stream
+
+An output stream 
+           It is a stream which is a destination point for results. There is one output stream type in the SJ platform: T-Stream
 
 Under the Streams section of the main navigation bar you will find the list of streams.
 
