@@ -32,7 +32,7 @@ import scala.collection.mutable
   * val executor: OutputStreamingExecutor[(Integer, String)]
   *
   * val requestBuilder = new RestRequestBuilder
-  * val simulator = new OutputEngineSimulator[(Integer, String)](executor, requestBuilder)
+  * val simulator = new OutputEngineSimulator(executor, requestBuilder)
   * simulator.send(Seq((11, "a"), (24, "b")))
   * simulator.send(Seq((63, "c"), (31, "d")))
   * val requests = simulator.process()
