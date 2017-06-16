@@ -22,6 +22,7 @@ import java.sql.PreparedStatement
 
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.Entity
+import com.bwsw.sj.engine.core.output.types.jdbc.JdbcCommandBuilder
 
 /**
   * Provides method for building SQL query from [[OutputEnvelope]].
@@ -35,34 +36,17 @@ class JdbcRequestBuilder(outputEntity: Entity[(PreparedStatement, Int) => Unit],
                          table: String = JdbcRequestBuilder.defaultTable)
   extends OutputRequestBuilder {
 
+  private val client = new JdbcClientMock(table)
+  override protected val commandBuilder: JdbcCommandBuilder =
+    new JdbcCommandBuilder(client, transactionFieldName, outputEntity)
+
   /**
     * @inheritdoc
     */
   override def build(outputEnvelope: OutputEnvelope,
                      inputEnvelope: TStreamEnvelope[_]): String = {
-    val fields = outputEntity.getFields.toSeq :+ transactionFieldName
-    val fieldsParams = List.fill(fields.length)("?").mkString(",")
-
-    val sql = s"INSERT INTO $table (${fields.mkString(",")}) VALUES ($fieldsParams);"
-
-    var parameterIndex = 0
-    val data = outputEntity.getFields.map { fieldName =>
-      parameterIndex += 1
-      val field = outputEntity.getField(fieldName)
-      parameterIndex -> field.transform(
-        outputEnvelope.getFieldsValue.getOrElse(fieldName, field.getDefaultValue))
-    }
-
-    val preparedStatement: PreparedStatementMock = new PreparedStatementMock(sql)
-    data.foreach {
-      case (key: Int, value: ((PreparedStatement, Int) => Unit)) =>
-        value(preparedStatement, key)
-    }
-
-    parameterIndex += 1
-    preparedStatement.setLong(parameterIndex, inputEnvelope.id)
-
-    preparedStatement.getQuery
+    commandBuilder.buildInsert(inputEnvelope.id, outputEnvelope.getFieldsValue)
+      .asInstanceOf[PreparedStatementMock].getQuery
   }
 }
 

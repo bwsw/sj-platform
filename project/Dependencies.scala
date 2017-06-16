@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import sbt._
 
 object Dependencies {
@@ -79,7 +80,7 @@ object Dependencies {
       .exclude("jakarta-regexp", "jakarta-regexp")
       .exclude("xerces", "xerces"),
     "org.scalatest" % "scalatest_2.12" % "3.0.1" % "provided",
-    "org.mockito" % "mockito-core" % "2.8.9" % "provided"
+    "org.mockito" % "mockito-core" % "2.8.9"
   ))
 
   lazy val sjRestDependencies = Def.setting(Seq(

@@ -20,10 +20,13 @@ package com.bwsw.sj.engine.core.simulation
 
 import java.net.URI
 
-import com.bwsw.common.JsonSerializer
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
-import org.apache.http.entity.ContentType
+import com.bwsw.sj.engine.core.output.types.rest.RestCommandBuilder
+import org.eclipse.jetty.client.HttpClient
+import org.eclipse.jetty.client.util.StringContentProvider
 import org.eclipse.jetty.http.HttpVersion
+
+import scala.collection.JavaConverters._
 
 /**
   * Provides method for building HTTP POST request from [[OutputEnvelope]].
@@ -36,23 +39,25 @@ class RestRequestBuilder(url: URI = RestRequestBuilder.defaultUrl,
                          httpVersion: HttpVersion = RestRequestBuilder.defaultHttpVersion)
   extends OutputRequestBuilder {
 
-  private val serializer = new JsonSerializer
-  private val contentType = ContentType.APPLICATION_JSON.toString
+  override protected val commandBuilder = new RestCommandBuilder(transactionFieldName)
+  private val client = new HttpClient
 
   /**
     * @inheritdoc
     */
   override def build(outputEnvelope: OutputEnvelope,
                      inputEnvelope: TStreamEnvelope[_]): String = {
-    val data = outputEnvelope.getFieldsValue + (transactionFieldName -> inputEnvelope.id)
-    val serialized = serializer.serialize(data)
+    val request = commandBuilder.buildInsert(inputEnvelope.id, outputEnvelope.getFieldsValue)(client.newRequest(url))
+    val content = request.getContent.asInstanceOf[StringContentProvider]
+    val contentIterator = content.iterator().asScala
+    val data = contentIterator.map(byteBuffer => new String(byteBuffer.array())).mkString("")
 
-    s"""POST ${url.getPath} $httpVersion
-       |Host: ${url.getHost}
-       |Content-Type: $contentType
-       |Content-Length: ${serialized.length}
+    s"""POST ${request.getPath} ${request.getVersion}
+       |Host: ${request.getHost}
+       |Content-Type: ${content.getContentType}
+       |Content-Length: ${content.getLength}
        |
-       |$serialized""".stripMargin
+       |$data""".stripMargin
   }
 }
 

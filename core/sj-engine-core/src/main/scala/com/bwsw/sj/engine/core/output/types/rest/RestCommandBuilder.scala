@@ -38,16 +38,13 @@ class RestCommandBuilder(transactionFieldName: String,
 
   private val serializer = new JsonSerializer
 
-  def buildInsert(transaction: Long, values: Map[String, Any]): (Request) => Request = {
+  def buildInsert(transaction: Long, values: Map[String, Any])(request: Request): Request = {
     val entity = values + (transactionFieldName -> transaction)
     val data = serializer.serialize(entity)
 
-    (request: Request) =>
-      request.method(HttpMethod.POST).content(new StringContentProvider(data), contentType)
+    request.method(HttpMethod.POST).content(new StringContentProvider(data), contentType)
   }
 
-  def buildDelete(transaction: Long) = {
-    (request: Request) =>
-      request.method(HttpMethod.DELETE).param(transactionFieldName, transaction.toString)
-  }
+  def buildDelete(transaction: Long)(request: Request): Request =
+    request.method(HttpMethod.DELETE).param(transactionFieldName, transaction.toString)
 }

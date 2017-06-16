@@ -22,6 +22,7 @@ import java.util.UUID
 
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.Entity
+import com.bwsw.sj.engine.core.output.types.es.ElasticsearchCommandBuilder
 
 /**
   * Provides method for building Elasticasearch query from [[OutputEnvelope]].
@@ -37,25 +38,19 @@ class EsRequestBuilder(outputEntity: Entity[String],
                        documentType: String = EsRequestBuilder.defaultDocumentType)
   extends OutputRequestBuilder {
 
+  override protected val commandBuilder: ElasticsearchCommandBuilder =
+    new ElasticsearchCommandBuilder(transactionFieldName, outputEntity)
+
   /**
     * @inheritdoc
     */
   override def build(outputEnvelope: OutputEnvelope,
                      inputEnvelope: TStreamEnvelope[_]): String = {
-    val fields = outputEntity.getFields.map { fieldName =>
-      val field = outputEntity.getField(fieldName)
-      fieldName -> field.transform {
-        outputEnvelope.getFieldsValue.getOrElse(fieldName, field.getDefaultValue)
-      }
-    }
-
+    val data = commandBuilder.buildInsert(inputEnvelope.id, outputEnvelope.getFieldsValue)
     val documentId = UUID.randomUUID().toString
 
     s"""PUT /$index/$documentType/$documentId
-       |{
-       |  "$transactionFieldName": ${inputEnvelope.id},
-       |  ${fields.map({ case (k: String, v: String) => s""""$k": $v""" }).mkString(",\n  ")}
-       |}""".stripMargin
+       |$data""".stripMargin
   }
 }
 

@@ -19,6 +19,7 @@
 package com.bwsw.sj.engine.core.simulation
 
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
+import com.bwsw.sj.engine.core.output.types.CommandBuilder
 
 /**
   * Provides method for building request for output service from [[OutputEnvelope]].
@@ -28,6 +29,7 @@ import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 trait OutputRequestBuilder {
 
   protected val transactionFieldName: String = "txn"
+  protected val commandBuilder: CommandBuilder
 
   /**
     * Builds request for output service
