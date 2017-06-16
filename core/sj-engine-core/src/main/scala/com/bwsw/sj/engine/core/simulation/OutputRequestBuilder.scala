@@ -29,7 +29,7 @@ import com.bwsw.sj.engine.core.output.types.CommandBuilder
 trait OutputRequestBuilder {
 
   protected val transactionFieldName: String = "txn"
-  protected val commandBuilder: CommandBuilder
+  protected val commandBuilder: CommandBuilder[_]
 
   /**
     * Builds request for output service

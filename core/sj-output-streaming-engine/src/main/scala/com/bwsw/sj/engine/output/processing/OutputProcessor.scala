@@ -37,7 +37,7 @@ import org.slf4j.{Logger, LoggerFactory}
 abstract class OutputProcessor[T <: AnyRef](outputStream: StreamDomain,
                                             performanceMetrics: OutputStreamingPerformanceMetrics) {
   protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
-  protected val commandBuilder: CommandBuilder
+  protected val commandBuilder: CommandBuilder[_]
 
   protected def transactionFieldName: String = "txn"
 

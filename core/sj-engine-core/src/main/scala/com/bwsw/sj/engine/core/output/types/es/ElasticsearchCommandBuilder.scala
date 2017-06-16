@@ -20,7 +20,7 @@ package com.bwsw.sj.engine.core.output.types.es
 
 import com.bwsw.sj.engine.core.output.Entity
 import com.bwsw.sj.engine.core.output.types.CommandBuilder
-import org.elasticsearch.index.query.{MatchQueryBuilder, QueryBuilders}
+import org.elasticsearch.index.query.QueryBuilders
 
 /**
   * Provides methods for building es query to CRUD data
@@ -30,9 +30,12 @@ import org.elasticsearch.index.query.{MatchQueryBuilder, QueryBuilders}
   * @author Ivan Kudryavtsev
   */
 
-class ElasticsearchCommandBuilder(transactionFieldName: String, entity: Entity[String]) extends CommandBuilder {
+class ElasticsearchCommandBuilder(transactionFieldName: String, entity: Entity[String]) extends CommandBuilder[String] {
 
-  def buildInsert(transaction: Long, values: Map[String, Any]): String = {
+  /**
+    * @inheritdoc
+    */
+  override def buildInsert(transaction: Long, values: Map[String, Any]): String = {
     val mv = entity.getFields.map(f => if (values.contains(f))
       f -> entity.getField(f).transform(values(f))
     else
@@ -41,5 +44,8 @@ class ElasticsearchCommandBuilder(transactionFieldName: String, entity: Entity[S
     s"""{"$transactionFieldName": $transaction, """ + mv.map({ case (k: String, v: String) => s""""$k": $v""" }).mkString(", ") + "}"
   }
 
-  def buildDelete(transaction: Long): MatchQueryBuilder = QueryBuilders.matchQuery(transactionFieldName, transaction)
+  /**
+    * @inheritdoc
+    */
+  override def buildDelete(transaction: Long): String = QueryBuilders.matchQuery(transactionFieldName, transaction).toString
 }

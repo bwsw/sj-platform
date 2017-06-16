@@ -35,7 +35,7 @@ import com.bwsw.sj.engine.core.output.types.CommandBuilder
 class JdbcCommandBuilder(client: IJdbcClient,
                          transactionFieldName: String,
                          entity: Entity[(PreparedStatement, Int) => Unit])
-  extends CommandBuilder {
+  extends CommandBuilder[PreparedStatement] {
   /**
     * Create a select prepared statement according to txn field
     */
@@ -62,7 +62,10 @@ class JdbcCommandBuilder(client: IJdbcClient,
     client.createPreparedStatement(sqlInsert)
   }
 
-  def buildInsert(transaction: Long, fields: Map[String, Any]): PreparedStatement = {
+  /**
+    * @inheritdoc
+    */
+  override def buildInsert(transaction: Long, fields: Map[String, Any]): PreparedStatement = {
     val insertPreparedStatement = insert
     var t = 0
     val mv = entity.getFields.map(f => if (fields.contains(f)) {
@@ -79,7 +82,10 @@ class JdbcCommandBuilder(client: IJdbcClient,
     insertPreparedStatement
   }
 
-  def buildDelete(transaction: Long): PreparedStatement = {
+  /**
+    * @inheritdoc
+    */
+  override def buildDelete(transaction: Long): PreparedStatement = {
     val deletePreparedStatement = delete
     deletePreparedStatement.setLong(1, transaction)
 

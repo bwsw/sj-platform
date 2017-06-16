@@ -197,7 +197,7 @@ class ElasticsearchClientTestSuite extends FlatSpec with Matchers with BeforeAnd
 
     //act
     val s = testField + Random.nextInt(numberOfDocuments)
-    client.deleteDocuments(index, documentType, QueryBuilders.matchQuery(s, testValue))
+    client.deleteDocuments(index, documentType, QueryBuilders.matchQuery(s, testValue).toString)
     //wait for a delete operation completed
     Thread.sleep(1000)
 

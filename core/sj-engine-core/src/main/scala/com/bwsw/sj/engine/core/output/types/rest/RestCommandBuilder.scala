@@ -34,17 +34,25 @@ import org.eclipse.jetty.http.HttpMethod
   */
 class RestCommandBuilder(transactionFieldName: String,
                          contentType: String = ContentType.APPLICATION_JSON.toString)
-  extends CommandBuilder {
+  extends CommandBuilder[(Request) => Request] {
 
   private val serializer = new JsonSerializer
 
-  def buildInsert(transaction: Long, values: Map[String, Any])(request: Request): Request = {
+  /**
+    * @inheritdoc
+    */
+  override def buildInsert(transaction: Long, values: Map[String, Any]): (Request) => Request = {
     val entity = values + (transactionFieldName -> transaction)
     val data = serializer.serialize(entity)
 
-    request.method(HttpMethod.POST).content(new StringContentProvider(data), contentType)
+    (request: Request) =>
+      request.method(HttpMethod.POST).content(new StringContentProvider(data), contentType)
   }
 
-  def buildDelete(transaction: Long)(request: Request): Request =
+  /**
+    * @inheritdoc
+    */
+  override def buildDelete(transaction: Long): (Request) => Request = { (request: Request) =>
     request.method(HttpMethod.DELETE).param(transactionFieldName, transaction.toString)
+  }
 }
