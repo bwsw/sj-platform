@@ -19,6 +19,7 @@
 package com.bwsw.sj.engine.core.output.types.es
 
 import com.bwsw.sj.engine.core.output.Entity
+import com.bwsw.sj.engine.core.output.types.CommandBuilder
 import org.elasticsearch.index.query.{MatchQueryBuilder, QueryBuilders}
 
 /**
@@ -29,7 +30,7 @@ import org.elasticsearch.index.query.{MatchQueryBuilder, QueryBuilders}
   * @author Ivan Kudryavtsev
   */
 
-class ElasticsearchCommandBuilder(transactionFieldName: String, entity: Entity[String]) {
+class ElasticsearchCommandBuilder(transactionFieldName: String, entity: Entity[String]) extends CommandBuilder {
 
   def buildInsert(transaction: Long, values: Map[String, Any]): String = {
     val mv = entity.getFields.map(f => if (values.contains(f))
