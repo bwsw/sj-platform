@@ -44,6 +44,12 @@ class EsRequestBuilder(outputEntity: Entity[String],
     */
   override def buildInsert(outputEnvelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[_]): String =
     commandBuilder.buildInsert(inputEnvelope.id, outputEnvelope.getFieldsValue)
+
+  /**
+    * @inheritdoc
+    */
+  override def buildDelete(inputEnvelope: TStreamEnvelope[_]): String =
+    commandBuilder.buildDelete(inputEnvelope.id)
 }
 
 object EsRequestBuilder {

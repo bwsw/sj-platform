@@ -42,4 +42,13 @@ trait OutputRequestBuilder[T] {
     * @return constructed request
     */
   def buildInsert(outputEnvelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[_]): T
+
+  /**
+    * Builds delete request for output service
+    *
+    * @param inputEnvelope envelope that incoming to
+    *                      [[com.bwsw.sj.engine.core.output.OutputStreamingExecutor OutputStreamingExecutor]]
+    * @return constructed request
+    */
+  def buildDelete(inputEnvelope: TStreamEnvelope[_]): T
 }

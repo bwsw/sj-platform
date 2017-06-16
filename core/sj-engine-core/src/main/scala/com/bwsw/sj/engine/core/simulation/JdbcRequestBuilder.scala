@@ -46,6 +46,12 @@ class JdbcRequestBuilder(outputEntity: Entity[(PreparedStatement, Int) => Unit],
     */
   override def buildInsert(outputEnvelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[_]): PreparedStatementMock =
     commandBuilder.buildInsert(inputEnvelope.id, outputEnvelope.getFieldsValue).asInstanceOf[PreparedStatementMock]
+
+  /**
+    * @inheritdoc
+    */
+  override def buildDelete(inputEnvelope: TStreamEnvelope[_]): PreparedStatementMock =
+    commandBuilder.buildDelete(inputEnvelope.id).asInstanceOf[PreparedStatementMock]
 }
 
 object JdbcRequestBuilder {

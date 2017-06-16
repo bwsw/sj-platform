@@ -45,6 +45,12 @@ class RestRequestBuilder(url: URI = RestRequestBuilder.defaultUrl,
     */
   override def buildInsert(outputEnvelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[_]): Request =
     commandBuilder.buildInsert(inputEnvelope.id, outputEnvelope.getFieldsValue)(client.newRequest(url))
+
+  /**
+    * @inheritdoc
+    */
+  override def buildDelete(inputEnvelope: TStreamEnvelope[_]): Request =
+    commandBuilder.buildDelete(inputEnvelope.id)(client.newRequest(url))
 }
 
 object RestRequestBuilder {
