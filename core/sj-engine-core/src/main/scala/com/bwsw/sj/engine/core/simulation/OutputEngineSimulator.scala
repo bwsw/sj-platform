@@ -50,7 +50,7 @@ class OutputEngineSimulator[T <: AnyRef](executor: OutputStreamingExecutor[T],
   import OutputEngineSimulator.defaultConsumerName
 
   private val inputEnvelopes: mutable.Buffer[TStreamEnvelope[T]] = mutable.Buffer.empty
-  private var envelopeId: Long = 0
+  private var transactionId: Long = 0
 
   /**
     * Creates [[TStreamEnvelope]] and saves it in a local buffer
@@ -58,11 +58,11 @@ class OutputEngineSimulator[T <: AnyRef](executor: OutputStreamingExecutor[T],
     * @param entities     incoming data
     * @param consumerName name of consumer
     */
-  def send(entities: Seq[T], consumerName: String = defaultConsumerName): Unit = {
+  def prepare(entities: Seq[T], consumerName: String = defaultConsumerName): Unit = {
     val queue = mutable.Queue(entities: _*)
     val envelope = new TStreamEnvelope[T](queue, consumerName)
-    envelope.id = envelopeId
-    envelopeId += 1
+    envelope.id = transactionId
+    transactionId += 1
 
     inputEnvelopes += envelope
   }
