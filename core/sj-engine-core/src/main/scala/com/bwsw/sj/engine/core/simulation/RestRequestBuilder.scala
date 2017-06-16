@@ -24,18 +24,14 @@ import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.types.rest.RestCommandBuilder
 import org.eclipse.jetty.client.HttpClient
 import org.eclipse.jetty.client.api.Request
-import org.eclipse.jetty.http.HttpVersion
 
 /**
   * Provides method for building HTTP POST request from [[OutputEnvelope]].
   *
-  * @param url         destination URL
-  * @param httpVersion version of HTTP
+  * @param url destination URL
   * @author Pavel Tomskikh
   */
-class RestRequestBuilder(url: URI = RestRequestBuilder.defaultUrl,
-                         httpVersion: HttpVersion = RestRequestBuilder.defaultHttpVersion)
-  extends OutputRequestBuilder[Request] {
+class RestRequestBuilder(url: URI = RestRequestBuilder.defaultUrl) extends OutputRequestBuilder[Request] {
 
   override protected val commandBuilder = new RestCommandBuilder(transactionFieldName)
   private val client = new HttpClient
@@ -55,5 +51,4 @@ class RestRequestBuilder(url: URI = RestRequestBuilder.defaultUrl,
 
 object RestRequestBuilder {
   val defaultUrl: URI = new URI("http://localhost/entity/")
-  val defaultHttpVersion: HttpVersion = HttpVersion.HTTP_1_1
 }
