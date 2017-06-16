@@ -18,19 +18,18 @@
  */
 package com.bwsw.sj.engine.output.processing
 
-import com.bwsw.common.JsonSerializer
 import com.bwsw.common.rest.RestClient
 import com.bwsw.sj.common.dal.model.stream.RestStreamDomain
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.Entity
+import com.bwsw.sj.engine.core.output.types.rest.RestCommandBuilder
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
-import org.apache.http.entity.ContentType
 
 import scala.collection.JavaConverters._
 
 /**
-  * ref. [[OutputProcessor]] object
+  * @inheritdoc
   * @author Pavel Tomskikh
   */
 class RestOutputProcessor[T <: AnyRef](restOutputStream: RestStreamDomain,
@@ -39,7 +38,8 @@ class RestOutputProcessor[T <: AnyRef](restOutputStream: RestStreamDomain,
                                        entity: Entity[_])
   extends OutputProcessor[T](restOutputStream, performanceMetrics) {
 
-  private val jsonSerializer = new JsonSerializer
+  private val commandBuilder = new RestCommandBuilder(transactionFieldName)
+
   private val service = restOutputStream.service
   private val client = new RestClient(
     service.provider.hosts.toSet,
@@ -52,10 +52,8 @@ class RestOutputProcessor[T <: AnyRef](restOutputStream: RestStreamDomain,
 
   override def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit = {
     logger.debug(createLogMessage("Write an output envelope to RESTful stream."))
-    val entity = envelope.getFieldsValue + (transactionFieldName -> inputEnvelope.id)
-    val data = jsonSerializer.serialize(entity)
-    val posted = client.post(data, ContentType.APPLICATION_JSON.toString)
 
+    val posted = client.execute(commandBuilder.buildInsert(inputEnvelope.id, envelope.getFieldsValue))
     if (!posted) {
       val errorMessage = createLogMessage(s"Cannot send envelope '${inputEnvelope.id}'.")
       logger.error(errorMessage)
@@ -66,7 +64,7 @@ class RestOutputProcessor[T <: AnyRef](restOutputStream: RestStreamDomain,
 
   override def delete(envelope: TStreamEnvelope[T]): Unit = {
     logger.debug(createLogMessage(s"Delete a transaction: '${envelope.id}' from RESTful stream."))
-    val deleted = client.delete(transactionFieldName, envelope.id.toString)
+    val deleted = client.execute(commandBuilder.buildDelete(envelope.id))
     if (!deleted)
       logger.warn(createLogMessage(s"Transaction '${envelope.id}' not deleted."))
   }
