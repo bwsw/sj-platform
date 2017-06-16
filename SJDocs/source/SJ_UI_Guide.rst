@@ -217,7 +217,7 @@ Please, enter a database name for the services here.
 
 .. note:: Required fields are marked with an asterisk (*)
 
-Click «Create» at the bottom and see the servces are in the list of providers now. Details of the node are displayed to the right when clicking the services in the list. 
+Click «Create» at the bottom and see the servces are in the list of services now. Details of the node are displayed to the right when clicking the services in the list. 
 
 .. figure:: _static/ServicesList.png
 
@@ -315,7 +315,21 @@ This field is an available one for *jdbc-output* stream type. The field is optio
 
 .. note:: Required fields are marked with an asterisk (*)
 
+Click «Create» at the bottom and see the stream is in the list of streams now. Details of the node are displayed to the right when clicking at the stream in the list. 
 
+.. figure:: _static/StreamsList.png
+
+In the list of services the following actions can be performed:
+
+1. **View** a stream name and its description
+
+2. **View** a service for the stream and get the services` information in a popup window by clicking at the active service`s name in the «Service» column.
+
+.. figure:: _static/StreamsList_ServiceInfo.png
+
+3. **Delete** a stream clicking at the corresponding icon in the Action block near the name of the stream you want to delete
+
+The list of stream can be filtered by its type and/or a name using the search tool above the list.
 
 Modules
 -------
