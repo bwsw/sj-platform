@@ -65,8 +65,12 @@ class ElasticsearchClient(hosts: Set[(String, Int)]) {
     client.admin().indices().prepareCreate(index).execute().actionGet()
   }
 
-  def deleteDocuments(index: String, documentType: String, query: QueryBuilder = QueryBuilders.matchAllQuery()): BulkIndexByScrollResponse = {
-    val queryWithType = new BoolQueryBuilder().must(query).must(QueryBuilders.matchQuery(typeName, documentType))
+  def deleteDocuments(index: String,
+                      documentType: String,
+                      query: String = QueryBuilders.matchAllQuery().toString): BulkIndexByScrollResponse = {
+    val queryWithType = new BoolQueryBuilder()
+      .must(QueryBuilders.queryStringQuery(query))
+      .must(QueryBuilders.matchQuery(typeName, documentType))
 
     deleteByQueryAction
       .filter(queryWithType)

@@ -22,6 +22,7 @@ import com.bwsw.common.ObjectSizeFetcher
 import com.bwsw.sj.common.dal.model.stream.{ESStreamDomain, JDBCStreamDomain, RestStreamDomain, StreamDomain}
 import com.bwsw.sj.engine.core.entities.{OutputEnvelope, TStreamEnvelope}
 import com.bwsw.sj.engine.core.output.Entity
+import com.bwsw.sj.engine.core.output.types.CommandBuilder
 import com.bwsw.sj.engine.output.task.OutputTaskManager
 import com.bwsw.sj.engine.output.task.reporting.OutputStreamingPerformanceMetrics
 import org.slf4j.{Logger, LoggerFactory}
@@ -36,6 +37,7 @@ import org.slf4j.{Logger, LoggerFactory}
 abstract class OutputProcessor[T <: AnyRef](outputStream: StreamDomain,
                                             performanceMetrics: OutputStreamingPerformanceMetrics) {
   protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  protected val commandBuilder: CommandBuilder[_]
 
   protected def transactionFieldName: String = "txn"
 

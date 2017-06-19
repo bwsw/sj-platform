@@ -41,7 +41,8 @@ class JdbcOutputProcessor[T <: AnyRef](outputStream: StreamDomain,
   private val jdbcStream = outputStream.asInstanceOf[JDBCStreamDomain]
   private val jdbcService = outputStream.service.asInstanceOf[JDBCServiceDomain]
   private val jdbcClient = createClient()
-  private val jdbcCommandBuilder = new JdbcCommandBuilder(jdbcClient, transactionFieldName, entity.asInstanceOf[Entity[(PreparedStatement, Int) => Unit]])
+  override protected val commandBuilder: JdbcCommandBuilder = new JdbcCommandBuilder(
+    jdbcClient, transactionFieldName, entity.asInstanceOf[Entity[(PreparedStatement, Int) => Unit]])
   jdbcClient.start()
 
   private def createClient() = {
@@ -61,12 +62,12 @@ class JdbcOutputProcessor[T <: AnyRef](outputStream: StreamDomain,
   def delete(inputEnvelope: TStreamEnvelope[T]): Unit = {
     logger.debug(s"Delete an envelope: '${inputEnvelope.id}' from JDBC.")
 
-    val existPreparedStatement = jdbcCommandBuilder.exists(inputEnvelope.id)
+    val existPreparedStatement = commandBuilder.exists(inputEnvelope.id)
     val resultSet = existPreparedStatement.executeQuery()
     val recordExists = resultSet.next()
     existPreparedStatement.close()
     if (recordExists) {
-      val deletePreparedStatement = jdbcCommandBuilder.buildDelete(inputEnvelope.id)
+      val deletePreparedStatement = commandBuilder.buildDelete(inputEnvelope.id)
       deletePreparedStatement.executeUpdate()
       deletePreparedStatement.close()
     }
@@ -75,7 +76,7 @@ class JdbcOutputProcessor[T <: AnyRef](outputStream: StreamDomain,
   def send(envelope: OutputEnvelope, inputEnvelope: TStreamEnvelope[T]): Unit = {
     logger.debug(s"Send an envelope: '${inputEnvelope.id}' to a JDBC stream: '${jdbcStream.name}'.")
     if (jdbcClient.tableExists()) {
-      val preparedStatement = jdbcCommandBuilder.buildInsert(inputEnvelope.id, envelope.getFieldsValue)
+      val preparedStatement = commandBuilder.buildInsert(inputEnvelope.id, envelope.getFieldsValue)
       preparedStatement.executeUpdate()
       preparedStatement.close()
     } else throw new RuntimeException(s"A table: '${jdbcStream.name}' doesn't exist so it is impossible to write data.")
